@@ -31,25 +31,12 @@ If names are not unique, entities must be addressed by index. Furthermore, some 
 
 
 
-### C++ API
+### API summary
 
 See the RobotWorld class (Klampt/Modeling/World.h)
 
-### Python API
 
-A world is implemented in the WorldModel class.
 
-The key functions are:
-- ```world = WorldModel()```: constructor
-- ```world.readFile([world file])```: reads from XML doc
-- ```world.loadElement([robot, object or terrain file])```: adds an element to the World. Accepts .rob, .urdf, .obj, .env, or geometry files
-- ```world.num[Robots,RigidObjects,Terrains]()```: returns the number of elements of the given type
-- ``` world.[robot,rigidObject,terrain](index)```: returns a reference to the index'th element of the given type
-- ```world.[robot,rigidObject,terrain](name)```: returns a reference to the element of the given type with name name (name must be a str)
-- ```world.numIDs()```: returns the number of elements. Unique IDs run from 0 to ```numIDs()```-1.
-- ```world.geometry(id)```: returns the Geometry3D of the element with the given unique ID
-- ```world.appearance(id)```: returns the Appearance of the element with the given unique ID
-- ```world.drawGL()```: renders the world in OpenGL
 
 ## Robot Models
 
@@ -76,7 +63,7 @@ For now, we will discuss only the kinematics of a Robot Model, saving [discussio
 
 Klamp't works with arbitrary tree-structured articulated robots. Parallel mechanisms are not directly supported.  
 
-### C++ API
+### API summary
 
 The Robot Model in the C++ API is implemented by the `Robot` class in [Klampt/Modeling/Robot.h](../Modeling/Robot.h).  This structure is based heavily on the KrisLibrary/robotics package for defining articulated robot kinematics and dynamics. `Robot` has the following class hierarchy:
 
@@ -94,24 +81,6 @@ A `Robot` configuration is defined by a `Config` class (which is simply a typede
 
 
 
-### Python API
-
-The following lsits the key kinematic operations of RobotModel class.   
-
-- ```robot = world.robot([name or index])```: access RobotModel reference by name or index
-- ```robot.getID()```:  gets the unique ID of the RobotModel in its WorldModel
-- ```robot.num[Links/Drivers]()```: returns the number of links or drivers (joints are abstracted away in the Python API)
-- ```robot.get[Link/Driver](index)```: returns a reference to the index'th RobotModelLink / RobotModelDriver
-- ```robot.get[Link/Driver](name)```: returns a reference to the RobotModelLink / RobotModelDriver with the given name (name must have type str)
-- ```robot.get[Config/Velocity]()```: returns the model's Configuration/Velocity as a list of floats with length ```numLinks()```
-- ```robot.setConfig(q)```: sets the model's Configuration to q given as a list/tuple of floats with length ```numLinks()```. Also, updates the forward kinematics of all Robot Links.
-- ```robot.setVelocity(dq)```: sets the model's Velocity to dq given as a list/tuple of floats with length ```numLinks()```
-- ```robot.get[Joint/Velocity/Acceleration]Limits()```: returns minimum/maximum of model's Configuration/Velocity/acceleration as a pair of lists of floats with length ```numLinks()```
-- ```robot.set[Joint/Velocity/Acceleration]Limits(vmin,vmax)```: sets minimum/maximum Configuration/Velocity/acceleration given two lists of floats with length ```numLinks()```
-- ```robot.drawGL()```: renders the robot in OpenGL
-
-The configuration and velocity of a robot are a list of floats.  A `Config` object is simply a list of floating point numbers, and the robot model's configuration is retrieved / set using `RobotModel.setConfig(q)`/ `RobotModel.getConfig()`. Note: unlike the C++ API, upon calling `setConfig()` the link transforms and geometries are automatically updated using forward kinematics.
-
 
 ## Robot Link Models
 
@@ -127,80 +96,15 @@ The current transformation of a link is calculated via forward kinematics, and d
 
 ![Link illustration](images/modeling-link-frame.png)
 
-### C++ API
+### API summary
 
 Links are stored in the `Robot.links` member, which is an array of `RobotLink3D`s. The parent index of each link is stored in the `Robot.parents` member, which is a list of `int`s. The link type is stored in `RobotLink3D.type` and its axis is stored in `RobotLink3D.w`. `RobotLink3D` also contains mass parameters (`mass`, `inertia`, `com`), the reference transformation to its parent (`T0_Parent`), and the link's current transformation `T_World`.
 
 Link geometries are stored in the `Robot.geometry` list, but to take advantage of the cache the `Robot.geomManagers` variable should be used for saving/loading/modifying the geometry. _Note: The transform of each collision geometry is only updated to the current link transform after `robot.UpdateGeometry()` is called_.
 
 
-### Python API
-
-The link functionality is given in the `RobotModelLink`. Changing from revolute to prismatic types is not supported at the moment.  Note: unlike the C++ API, geometry current transforms are updated automatically after `RobotModel.setConfig(q)`.
-
-Configuration-independent functions that define the kinematic structure of the robot:
-- ```link = robot.link([name or index])```: access RobotModelLink reference
-- ```link.getID()```:  gets the unique ID of this link in the WorldModel
-- ```link.getName()```: returns a string naming this link
-- ```link.getRobot()```: returns a RobotModel to which this link belongs
-- ```link.getIndex()```: returns the link index on the RobotModel for this link
-- ```link.getParent()```: returns the index of the link's parent (-1 for no parent)
-- ```link.setParent(p)```: sets the index of the link's parent (-1 for no parent)
-- ```link.getAxis()```: returns a 3-tuple of the link's rotation/translation axis in local coordinates
-- ```link.setAxis(axis)```: sets the link's rotation/translation axis to the given 3-tuple, specifying its local coordinates
-- ```link.getParentTransform()```: returns a pair (R,t) defining the reference coordinate transform of this link with respect to its parent (see klampt.so3 for the format of R)
-- ```link.setParentTransform(R,t)```: sets the reference coordinate transform of this link with respect to its parent (see klampt.so3 for the format of R)
-- ```link.geometry()```: returns a reference to the Geometry3D attached to this link
-- ```link.appearance()```: returns a reference to the Appearance attached to this link
-- ```link.getMass()```: returns the link's Mass structure
-- ```link.setMass(mass)```: sets the link's Mass structure
-- ```link.drawLocalGL()```: renders the link's geometry in OpenGL in local coordinates
-
-Configuration-dependent functions that describe the physical layout of the robot in its current configuration:
-- ```link.getTransform()```: returns a pair (R,t) defining the coordinate transform of this link with respect to the world frame (see klampt.so3 for the format of R)
-- ```link.setTransform(R,t)```: sets the coordinate transform of this link with respect to the world frame. Note```: this does NOT perform inverse kinematics or change the transforms of any other links. The transform is overwritten when the robot's setConfig() method is called. (see klampt.so3 for the format of R)
-- ```link.getWorldPosition(pLocal)```: given a 3-tuple specifying the local coordinates of a point P, returns a 3-tuple giving the world coordinates of P.  Equivalent to se3.apply(- ```link.getTransform(),pLocal).
-- ```link.getLocalPosition(pWorld)```: given a 3-tuple specifying the local coordinates of a point P, returns a 3-tuple giving the world coordinates of P.  Equivalent to se3.apply(se3.inv(link.getTransform()),pWorld).
-- ```link.getWorldDirection(dLocal)```: given a 3-tuple specifying the local coordinates of a direction D, returns a 3-tuple giving the world coordinates of D.  Equivalent to so3.- ```apply(link.getTransform()[0],dLocal).
-- ```link.getLocalDirection(dWorld)```: given a 3-tuple specifying the local coordinates of a point P, returns a 3-tuple giving the world coordinates of P.  Equivalent to so3.apply(so3.inv(link.getTransform()[0]),dWorld).
-- ```link.getOrientationJacobian()```: returns a 3xNL matrix of the orientation Jacobian of this link
-- ```link.getPositionJacobian()```: given a 3-tuple specifying the local coordinates of a point P, returns a 3xNL matrix of the position Jacobian of this point
-- ```link.getJacobian(p)```: given a 3-tuple specifying the local coordinates of a point P, returns a 6xNL matrix of the orientation Jacobian stacked on the position Jacobian
-- ```link.drawWorldGL()```: renders the link's geometry in OpenGL in world coordinates
 
 
-
-
-## Kinematics Example
-
-Load a planar 3R robot model and figure out where its end effector would lie at the configuration [0,pi/4,pi/4].
-
-```python
->>> from klampt import *
->>> import math
->>> world = WorldModel()
->>> world.loadElement("data/robots/planar3R.rob")
-Reading robot file robots/planar3R.rob...
-   Parsing robot file, 3 links read...
-Loaded geometries in time 0.000598229s, 36 total primitive elements
-Initialized robot collision data structures in time 0.00084037s
-Done loading robot file robots/planar3R.rob.
-0
->>> robot= world.robot(0)
->>> robot.setConfig([0,math.pi/4,math.pi/4])
->>> link = robot.link(2)
->>> link.getWorldPosition([1,0,0])
-[1.7071067811865477, 0.0, 1.7071067811865475]
-```
-
-To get the Jacobian matrix corresponding to this configuration, all that is needed is
-
-```python
->>> link.getPositionJacobian([1,0,0])
-[[-1.7071067811865475, -1.7071067811865475, -1.0], [0.0, 0.0, 0.0], [1.7071067811865477, 0.7071067811865477, 1.5701957963021318e-16]]
-```
-
-(The second row is all zeroes because the robot moves in the X-Z plane.)
 
 ## Robot Joints and Drivers
 
@@ -219,7 +123,7 @@ The DOFs of a robot are considered as generic variables that define the extents 
 - `Closed` joints, which indicate a closed kinematic loop. _Note: this is simply a placeholder for potential future capabilities; these are not yet handled in Klamp't._
 
 
-In C++ the joint type is referred to in CamelCase, while in files and in python the joint type is referred to in lowercase.
+In C++ the joint type is referred to in CamelCase, while in files the joint type is referred to in lowercase.
 
 **Drivers.** Although many robots are driven by motors that transmit torques directly to single DOFs, the `Robot` class can represent other drive systems that apply forces to multiple DOFs. For example, a cable-driven finger may have a single cable actuating three links, a mobile base may only be able to move forward and turn, and a satellite may have thrusters. Free-floating bases may have no drive systems whatsoever.
 
@@ -232,9 +136,10 @@ A robot is set up with a list of Drivers available to produce torques.
 
 To represent free-floating bases, you should use a set of 5 massless _virtual links_ and 1 physical link that represent the x, y, and z translations and rotations around the z, y, and x axes (roll-pitch-yaw convention). Likewise, a mobile robot may be represented by 2 virtual links + 1 physical link: two for x, y translations connected by prismatic joints, and the last for &theta;, connected to its parent by a revolute joint. A ball-and-socket joint may be represented by 2 virtual links + 1 physical link.
 
-**C++ API**. See `RobotKinematics3D.InitializeRigidObject` for an example of how to set up a floating base.
+#### API summary
 
-**Python API**. See `klampt.model.floatingbase.py` for utility functions for setting up a floating base.
+See `RobotKinematics3D.InitializeRigidObject` for an example of how to set up a floating base.
+
 
 
 ## Rigid Object Models
@@ -242,20 +147,14 @@ To represent free-floating bases, you should use a set of 5 massless _virtual li
 
 A Rigid Object Model is a Collision Geometry associated with a `RigidTransform` and other dynamic parameters. `Rigid Object`s may be loaded from `.obj` files or raw geometry files. In the latter case, the dynamic parameters are set to default values (e.g., `mass = 1`).
 
-### C++ API
+### API summary
 See Klampt/Modeling/RigidObject.h.
-
-### Python API
-See the RigidObjectModel class.
 
 
 ## Terrain Models
 
 A Terrain Model  is defined very simply as a Collision Geometry annotated with friction coefficients. They may be loaded from .env files or raw geometry files. In the latter case, some default friction value is assigned (set to 0.5).
 
-### C++ API
+### API summary
 See Klampt/Modeling/Terrain.h.
-
-### Python API
-See the TerrainModel class.
 

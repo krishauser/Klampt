@@ -14,34 +14,17 @@ Planning, control, and simulation are related by the use of (largely) common mod
 
 
 
-## C++ API file structure
+## API file structure
 
-- **Modeling** : `Klampt/{Modeling, Contact}/`, which depends heavily on `KrisLibrary/robotics` for basic robot kinematics and dynamics, and `KrisLibrary/{math3d, geometry, meshing}/` for 3-D geometry
-- **Planning** : `Klampt/Planning/`, which depends heavily on `KrisLibrary/{planning, optimization}/`
-- **Control** : `Klampt/Control/`
-- **Simulation** : `Klampt/Simulation/`
-- **Visualization:** `Klampt/View/`
-- **User interface:** `Klampt/Interface/`
-- **I/O:** native I/O is mostly embedded into models. Import/export to XML world files, ROS, and other external formats are found in `Klampt/IO/`.
-- **Apps:** `Klampt/Main/`
-- **Examples:** `Klampt/Examples`
-
-
-## Python API file structure
-
-The Klamp't Python API is primarily given in the `klampt` module found in `Klampt/Python`.  This module contains functionality in its sub-modules for modeling, simulation, planning, and visualization.  Control is handled in a separate module.
-
-- `Klampt/Python/klampt`: the main Klamp't module, and includes robot kinematics, dynamics, simulation, and geometry representations. Also includes low-level IK solving and motion planning modules.
-- `Klampt/Python/klampt/math`: basic 3D geometry.
-- `Klampt/Python/klampt/modeling`: other modeling, including IK, trajectories, Cartesian interpolation, and sub-robot indexing. Setting and getting &quot;configurations&quot; for many objects.
-- `Klampt/Python/klampt/plan`: motion planning for robots.
-- `Klampt/Python/klampt/sim`: more advanced simulation functionality, such as logging and custom actuator and sensor emulation.
-- `Klampt/Python/klampt/io`: Unified I/O for all types of Klamp't objects. Supports JSON formats for some objects as well. Resource loading, saving, and visual editing.
-- `Klampt/Python/klampt/vis`: Visualization.
-- `Klampt/Python/control`: custom control modules.
-- `Klampt/Python/demos`: demonstrations about how to use various aspects of the Python klampt API.
-- `Klampt/Python/exercises`: exercises for implementing basic concepts in Klamp't.
-- `Klampt/Python/utils`: utility programs.
+- **Modeling** : `Klampt/Cpp/{Modeling, Contact}/`, which depends heavily on `KrisLibrary/robotics` for basic robot kinematics and dynamics, and `KrisLibrary/{math3d, geometry, meshing}/` for 3-D geometry
+- **Planning** : `Klampt/Cpp/Planning/`, which depends heavily on `KrisLibrary/{planning, optimization}/`
+- **Control** : `Klampt/Cpp/Control/`
+- **Simulation** : `Klampt/Cpp/Simulation/`
+- **Visualization:** `Klampt/Cpp/View/`
+- **User interface:** `Klampt/Cpp/Interface/`
+- **I/O:** native I/O is mostly embedded into models. Import/export to XML world files, ROS, and other external formats are found in `Klampt/Cpp/IO/`.
+- **Apps:** `Klampt/Cpp/Main/`
+- **Examples:** `Klampt-examples/Cpp/Examples`
 
 ## Apps
 - `RobotTest`, `RobotPose`, `SimTest`, `SimUtil`: the main useful apps

@@ -27,7 +27,7 @@ _Note: to properly handle a robot's rotational joints, milestones should be inte
 
 Especially for legged robots, the preferred path type is `MultiPath`, which allows storing both untimed paths and timed trajectories. It can also store multiple path sections with inverse kinematics constraints on each section.  More details on the `MultiPath` type [are given below](#multipaths).
 
-### C++ API
+### API summary
 
 Piecewise linear trajectories are, with a historical misnomer, given in the `LinearPath` class of Klampt/Modeling/Paths.h (C++).  
 Members include a `times` array of reals listing points in time along with a `milestones` list of associated `Config` milestones reached at each of those times.
@@ -42,16 +42,6 @@ Time-scaled cubic splines are found in the `TimeScaledBezierCurve` class in Klam
 Conversions between most path types are supported in Klampt/Modeling/Paths.h (C++).
 
 
-
-### Python API 
-
-Piecewise linear trajectories are given in the `Trajectory`, `SO3Trajectory`, `SE3Trajectory`, and `RobotTrajectory` classes of [klampt.model.trajectory](http://motion.pratt.duke.edu/klampt/pyklampt_docs/namespaceklampt_1_1model_1_1trajectory.html). Members include a `times` array of reals listing points in time along with a `milestones` list of associated `Config` milestones reached at each of those times.
-
-Hermite spline interpolation is available in the `HermiteTrajectory` class in [klampt.model.trajectory](http://motion.pratt.duke.edu/klampt/pyklampt_docs/namespaceklampt_1_1model_1_1trajectory.html).
-
-DynamicPath structures are currently not implemented in Python.
-
-Conversions between path types are found in [klampt.model.trajectory](http://motion.pratt.duke.edu/klampt/pyklampt_docs/namespaceklampt_1_1model_1_1trajectory.html), in particular the `path_to_trajectory` method.
 
 
 
@@ -69,17 +59,10 @@ Each `MultiPath` section maintains a list of IK constraints in the `ikObjectives
 
 Sections may also have custom settings. No common settings have yet been defined for sections, these are all application-dependent.
 
-### C++ API
+### API summary
 Details can be found in Klampt/Modeling/MultiPath.h.
 
-### Python API
-Details can be found in [klampt.model.multipath](http://motion.pratt.duke.edu/klampt/pyklampt_docs/namespaceklampt_1_1model_1_1multipath.html).  The [klampt/model/multipath.py](../Python/klampt/model/multipath.py) file can also be run as a script to perform various simple transformations on `MultiPath`s.
-See the utility scripts in [Python/utils/multipath_to_path.py](../Python/utils/multipath_to_path.py) and [Python/utils/multipath_to_timed_path.py](../Python/utils/multipath_to_timed_path.py)  for examples.
 
-
-## Cartesian Trajectories
-
-TODO: see [cartesian_trajectory.py](http://motion.pratt.duke.edu/klampt/pyklampt_docs/namespaceklampt_1_1model_1_1cartesian__trajectory.html)
 
 
 ## Trajectory Execution

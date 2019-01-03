@@ -58,9 +58,9 @@ High-level kinematic motion planning generates collision-free paths for robots. 
 You are allowed to do some additional modifications, like adding constraints.
 
 
-### C++ API
+### API summary
 
-Example code is given in Examples/plandemo.cpp (the application can be created via the command `make PlanDemo`).
+Example code is given in Klampt-examples/Cpp/plandemo.cpp (the application can be created via the command `make PlanDemo`).
 
 The general way to plan a path connecting configurations `qstart` and `qgoal` is as follows:
 
@@ -74,7 +74,7 @@ The general way to plan a path connecting configurations `qstart` and `qgoal` is
 Example code is as follows.
 
 ```cpp
-#include "Planning/RobotCSpace.h"
+#include <Klampt/Planning/RobotCSpace.h>
 #include <KrisLibrary/planning/AnyMotionPlanner.h>
 
 //TODO: setup world
@@ -108,42 +108,9 @@ To plan for part of a robot (e.g., the arm of a legged robot), the `SingleRobotC
 
 Note: although RobotCSpace.h contains multi-robot planning classes, they are not yet well-tested. Use at your own risk.
 
-### Python API
 
-At the highest level, the klampt.robotplanning module offers convenience functions (`planTo*`) to set up plans to generate collision-free plans for a robot to different types of targets. Planning options can be configured and extra constraints fed into the planner using these functions. SubRobotModels are also supported to plan for selected parts of a robot.
 
-The `planTo*` functions generate an instance of a `MotionPlan class, defined in klampt.plan.cspace.
 
-For even greater control, you should create an appropriate C-space for your problem and then call a planner manually. Several robot-level C-spaces are available for you in klampt.plan.robotcspace.
-
-- `RobotCSpace`: avoids collisions with other objects in the world.
-- `ContactCSpace`: avoids collisions, maintains IK constraints.
-- `StanceCSpace`: same as `ContactCSpace`, but also enforces balance under gravity given known points of contact.
-
-Once you create one of these `CSpace`s yourself, you should then create a `MotionPlan` object given your C-space object as the argument to its constructor, and then set its start and goal conditions via `MotionPlan.setEndpoints`.  You may then plan as usual.
-
-These instances require you to provide as input a robot and a robotcollide.WorldCollider instance, as follows:
-
-```
-from klampt import *
-from klampt.plan.robotcspace import RobotCSpace
-from klampt.plan import cspace
-from klampt.model import collide
-world = WorldModel()
-... set up world ...
-robot = world.robot(0)
-space = RobotCSpace(robot,robotcollide.WorldCollider(world))
-# (Can also create it without the collider to ignore all self-and environment collisions)
-#Optionally:
-#Call space.addFeasibilityTest(func,name=None) on the space with as many additional feasibility tests as you want
-qinit = robot.getConfig()
-qgoal = robot.getConfig()
-qgoal[3] += 2.0       #move 2 radians on joint 3
-space.setEndpoints(qinit,qgoal)
-
-planner = cspace.MotionPlan(space,type="rrt*")
-#now the planner is ready to use...
-```
 
 ## Motion Planners
 
@@ -184,44 +151,18 @@ planner = cspace.MotionPlan(space,type="rrt*")
 These can also be specified in JSON format. [Examples are found in this directory](../Examples/PlanDemo).
 For a complete description of the accepted options, see the `setPlanSetting` documentation in the Python/klampt/src/motionplanning.h file.
 
-### C++ API
+### API summary
 Configuring a motion planner is done by a `MotionPlannerFactory` (KrisLibrary/planning/AnyMotionPlanner.h) should be initialized with your desired planning algorithm. The "any" setting will choose an algorithm automatically.
 4. Construct a `MotionPlanningInterface*` with the `Create()` method. Call `AddConfig(qstart)` and `AddConfig(qgoal)` on this object.
 
-### Python API
-The `MotionPlan` class supports various options that are accepted upon construction of a planner, including:
-  - 'type': the planning algorithm type.
-  - 'knn': k-nearest neighbors parameter.
-  - 'connectionThreshold': maximum distance over which a connection between two configurations is attempted.
-  - 'perturbationRadius': maximum expansion radius for RRT and SBL.
-  - Any other key-value attribute pair [as described above](#planner-attributes)
-
-Then, run the planning algorithm, call `MotionPlan.planMore(N)` with the desired number of iterations. Continue calling it until `MotionPlan.getPath()` returns a non-empty list, or `MotionPlan.getPathEndpoints()` returns non-None.
 
 
-```
-...
-planner = cspace.MotionPlan(space,type="sbl",connectionThreshold=0.2,shortcut=1)  #accepts keyword arguments
-planner.setEndpoints(qstart,qgoal)
-increment = 100                #there is a little overhead for each planMore call, so it is best not to set the increment too low
-t0 = time.time()
-while time.time() - t0 < 20:   #max 20 seconds of planning
-    planner.planMore(increment)
-    path = planner.getPath()
-    if len(path) > 0:
-        print "Solved, path has",len(path),"milestones"
-        print "Took time",time.time()-t0
-        break
-planner.close()   #frees a little memory... this is only really necessary if you are creating lots of planners
-```
-
-To debug or inspect the results of a planner, the `MotionPlan.getRoadmap()` or `MotionPlan.planner.getStats()` methods can be used.
 
 ## Randomized kinematic planning with closed-chain constraints
 
 Klamp't has utilities to plan for collision-free motions that satisfy closed chain constraints (e.g., that a robot's hands and feet touch a support surface).  For the most part, once the CSpace has been set up, planning is identical to a standard CSpace.  However, the planner will construct a path whose milestones satisfy the constraints, but the _straight line path in C-Space between milestones will violate constraints_.  This is because the feasible motion lies on a lower-dimensional, nonlinear constraint manifold in configuration space. Rather, the path should be discretized finely on the constraint manifold before sending it to any function that assumes a configuration-space path, like a controller.
 
-### C++ API
+### API summary
 
 The `ContactCSpace` class (Klampt/Planning/ContactCSpace.h) should be used in the place of `SingleRobotCSpace`. Fill out the `contactIK` member, optionally using the `Add*()` convenience routines. The kinematic planning approach can then be used as usual. Example code is given in Examples/contactplan.cpp (the application can be created via the command `make ContactPlan`).
 
@@ -231,9 +172,6 @@ To discretize a path into a interpolating piecewise-linear path on the manifold,
 
    To use `RobotConstrainedInterpolator`, construct an instance with the robot and its IK constraints. Then, calling `RobotConstrainedInterpolator.Make()` with two consecutive configurations will produce a list of finely-discretized milestones up to the tolerance `RobotConstrainedInterpolator.xtol`. Alternatively, the `RobotSmoothConstrainedInterpolator` class and the `MultiSmoothInterpolate` function can be used to construct a smoothed cubic path.
 
-### Python API
-
-The `planTo*` functions in klampt.plan.robotplanning accept arbitrary inverse kinematics constraints using the `equalityConstraints` keyword argument.  Internally, these functions use the `ContactCSpace` class defined in `klampt.plan.robotcspace`. In order to cast a milestone path to a piecewise linear path that satisfies contact constraints, the `space.discretizePath(path,epsilon=1e-2)` convenience function is provided.
 
 
 
@@ -255,26 +193,11 @@ At the configuration-space-level interface, there is no notion of even a robot, 
 The feasibility test is an _authoritative_ representation of C-space obstacles, and will be called thousands of times during planning. For sampling-based planners to work well, this must be fast (ideally, microseconds).
 
 
-### C++ API
+### API summary
 Each C-space is a subclass of the configuration space interface class `CSpace` defined in KrisLibrary/planning/CSpace.h. Please see the documentation
 
-### Python API
-Each C-space is a subclass of the configuration space interface `CSpace` defined in klampt.plan.cspace. At a minimum, the subclass should set up the following:
-
-- `bound`: a list of pairs `[(a1,b1),...,(an,bn)]` giving an n-dimensional bounding box containing the free space
-- `eps`: a visibility collision checking tolerance, which defines the resolution to which motions are checked for collision.
-- `feasible(x)`: returns true if the vector `x` is in the feasible space. (an alternative to overriding `feasible` is to call `addFeasibilityTest(func,name)` for each constraint test in the contructor.)
 
 
-To implement non-Euclidean spaces, users may optionally override:
-
-- sample(): returns a new vector x from a superset of the feasible space. If this is not overridden, then subclasses should set bound to be a list of pairs defining an axis-aligned bounding box.
-- sampleneighborhood(c,r): returns a new vector x from a neighborhood of c with radius r
-- visible(a,b): returns true if the path between a and b is feasible. If this is not overridden, then paths are checked by subdivision, with the collision tolerance eps.
-- distance(a,b): return a distance between a and b
-- interpolate(a,b,u): interpolate between a, b with parameter u
-
-Setting up and invoking motion planners is the same as in the robot-level interface.
 
 ## Dynamic Trajectory Generation
 

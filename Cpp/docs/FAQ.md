@@ -7,14 +7,12 @@ This is mostly a matter of preference. Python tends to be cleaner, easier to use
 
 ## How do I set up sensors in the simulator and read them?
 
-Sensors are set up in the `property sensors` line of the robot file or world XML file. See Sections  Error: Reference source not found and Error: Reference source not found for more details, and see [data/robots/huboplus/huboplus\_col.rob](../robots/huboplus/huboplus_col.rob) and [data/simulation\_test\_worlds/sensortest.xml](../data/simulation_test_worlds/sensortest.xml) for some examples. Sensors can be debugged and drawn in RobotTest.
+Sensors are set up in the `property sensors` line of the robot file or world XML file. See [data/robots/huboplus/huboplus\_col.rob](../robots/huboplus/huboplus_col.rob) and [data/simulation\_test\_worlds/sensortest.xml](../data/simulation_test_worlds/sensortest.xml) for some examples. Sensors can be debugged and drawn in RobotTest.
 
-_C++ API_. To read sensor data declare a variable `vector<double> measurements` and call
+To read sensor data declare a variable `vector<double> measurements` and call
 ```cpp
 WorldSimulation.controlSimulators[robotIndex].sensors.GetNamedSensor(sensorName)->GetMeasurements(measurements);
 ```
-
-_Python API_. To read sensors in Python, call `Simulator.controller(robotIndex).sensor(sensorName).getMeasurements()`.
 
 
 ## My simulator goes unstable and/or crashes. Help!
@@ -43,5 +41,5 @@ Many engineers and students tend to approach robotics from a &quot;scripting&quo
 
 To implement a behavior script in Klamp't, the script should be launched in a separate thread from the execution thread. It can then monitor the state of the execution thread (e.g., waiting for a movement to finish) and react accordingly. For those new to threading, please see the C++ `<thread>` module or the Python threading module for more information.
 
-To implement a state machine, a controller should manually maintain and simulate its behavior in its feedback loop. A framework for such controllers the `StateMachineController` class in [Python/control/controller.py](../Python/control/controller.py).
+To implement a state machine, a controller should manually maintain and simulate its behavior in its feedback loop.
 

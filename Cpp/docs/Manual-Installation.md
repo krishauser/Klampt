@@ -2,34 +2,10 @@
 
 ## Python-only install
 
-If you only need the Python API, you can install using pip.  Simply open up a command line window and call
-
-> pip install klampt
-
-As of writing, pip packages are available for Linux (Python 2.7, 3.5, 3.6, 3.7), Windows (Python 2.7, 3.5, 3.6, and 3.7, 32- and 64-bit), and Mac OSX 10.9 and higher (Python 2.7, 3.5, 3.6, and 3.7).  These are built with Assimp (mesh loading) and GLEW (OpenGL supported rendering of camera images).  They **do not** have ROS or OMPL support, and if you want those you will need to build from source.
-
-You should also obtain:
-- PyOpenGL for visualization.  Try `pip install PyOpenGL` ( [https://pypi.python.org/pypi/PyOpenGL/3.0.2](https://pypi.python.org/pypi/PyOpenGL/3.0.2)).
-- PyQt5 is highly recommended for resource editing and improved visualization.  Try `pip install PyQt5`. (PyQt4 is also supported for now, but at some point the package will be deprecated.)
-- Python Imaging Library (PIL) is required for saving screenshots to disk.
-
-You will also want to get the Klampt-examples repository to test your install, e.g.,:
-
-```sh
-git clone https://github.com/krishauser/Klampt-examples
-cd Klampt-examples/Python/demos
-python kbdrive.py ../../data/tx90roll.xml
-```
-
-### Troubleshooting
-
-Python 2.7 Windows users will want to install the [correct PyQt4 binaries from here](https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyqt4)
-
-You may get errors importing the \_robotsim module when calling `import klampt`.  This usually means some dependency DLL is missing on your system.  If this occurs, [please file an issue report](https://github.com/krishauser/Klampt/issues) and we will get on it.  If you are using Windows, please use the [Dependencies](https://github.com/lucasg/Dependencies) program to open the `_robotsim.pyd` file, and report which DLLs are missing.
+If you only need the Python API, please consult the [Python API documentation](http://motion.pratt.duke.edu/klampt/0.8/pyklampt_docs/Manual-Installation.html) for install instructions.
 
 
-
-## Building from source, and C++ builds
+## Building from source
 
 Klamp't C++ source code is available via the git repository at [https://github.com/krishauser/Klampt/](https://github.com/krishauser/Klampt/). The command
 ```sh
