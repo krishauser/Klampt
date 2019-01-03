@@ -1,0 +1,24 @@
+<world>
+    <terrain file="/home/motion/Klampt-examples/data/terrains/plane.off" translation="0 0 0"/>
+    <robot name="tx90" file="/home/motion/Klampt-examples/data/robots/tx90ball.rob">
+        <sensors>
+            <JointPositionSensor name="encoders"/>
+            <JointVelocitySensor name="dencoders"/>
+            <!-- <ContactSensor name="contact" link="6" Tsensor="1 0 0 0 1 0 0 0 1 0 0 0.03" patchMin="-0.01 -0.01" patchMax="0.01 0.01" patchTolerance="0.005" hasForce="0 0 1"/>
+            <ForceTorqueSensor name="f/t" link="6" hasForce="1 1 1" hasTorque="1 1 1"/>
+            <Accelerometer name="accelerometer" link="6" hasAxis="1 1 1"/>
+            <IMUSensor name="imu" link="6" hasAxis="1 1 1" hasAngAccel="1" hasAngVel="1"/>
+            <LaserRangeSensor name="lidar" link="6" Tsensor="0 1 0 -1 0 0 0 0 1 0 0 0" depthMaximum="4.0" depthMinimum="0.1" depthResolution="0.01" depthVarianceLinear="0.0001"/> -->
+            <CameraSensor name="rgbd_camera" link="6" Tsensor="0 1 0 -1 0 0 0 0 1 0 0.1 0" xres="256" yres="128" xfov="1.05" yfov="0.6" zmin="0.4" zresolution="0.01" zvarianceLinear="0.00001"/>
+        </sensors>
+    </robot>
+    <rigidObject name="sphere" position="2 0 1.00000">
+        <geometry mesh="/home/motion/Klampt-examples/data/objects/sphere.geom" scale="0.1"/>
+        <physics mass="1.000000" automass="1" kRestitution="1" kFriction="0.500000" kStiffness="inf" kDamping="inf"/>
+    </rigidObject>
+    <simulation>
+        <terrain index="0">
+            <geometry kRestitution="0.500000" kFriction="0.500000" kStiffness="inf" kDamping="inf" padding="0.001" preshink="1"/>
+        </terrain>
+    </simulation>
+</world>
