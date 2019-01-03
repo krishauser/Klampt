@@ -12,7 +12,7 @@ root_py_folder = "klampt"
 if sys.version_info[0] == 3:
     root_py_folder = "python3_version/klampt"
     scripts_folder = "python3_version/bin"
-script_files = [os.path.join(scripts_folder,f) for f in ['klampt_sim','klampt_browser','klampt_thumbnails']]
+script_files = [os.path.join(scripts_folder,f) for f in ['klampt_sim','klampt_browser','klampt_path','klampt_thumbnails']]
 
 #Parse settings from CMake
 includeDirs = """${KLAMPT_INCLUDE_DIRS}""".split(';')
