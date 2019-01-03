@@ -1,31 +1,37 @@
 # Klamp't Manual: Running Klamp't apps
 
+In the following, [KLAMPT_BIN_DIR] can be empty if you have run 
+`make install`, but otherwise it should point to you `Klampt/bin/` folder.
+It also assumes that you have installed the
+[Klampt-examples Github project](https://github.com/krishauser/Klampt-examples)
+project, and your console is in the `Klampt-examples` directory.
+
 `RobotTest` helps inspect/debug robot files and is run from the command line as follows:
 
 ```sh
-./RobotTest robot_file
+[KLAMPT_BIN_DIR]/RobotTest robot_file
 ```
 
 ![RobotTest screenshot](images/running-robottest.png)
-<center>Above is the RobotTest GUI, showing inverse kinematics posing.  `./RobotTest data/robots/athlete.rob`</center>
+<center>Above is the RobotTest GUI, showing inverse kinematics posing.  `RobotTest data/robots/athlete.rob`</center>
 
 `SimTest` performs physics / control simulation and is run from the command line as follows:
 
 ```sh
-./SimTest [world, robot, environment, or object files]
+[KLAMPT_BIN_DIR]/SimTest [world, robot, environment, or object files]
 ```
 
 ![SimTest screenshot](images/running-simtest.png)
 <center>Above is the SimTest GUI.  The transparent
-yellow robot is the “poser”. Contact forces are drawn in orange.  `./SimTest data/tx90cups.xml`</center>
+yellow robot is the “poser”. Contact forces are drawn in orange.  `SimTest data/tx90cups.xml`</center>
 
-(e.g., `./SimTest data/robots/athlete.rob data/terrains/plane.env` or `./SimTest data/hubo_plane.xml`)
+(e.g., `[KLAMPT_BIN_DIR]/SimTest data/robots/athlete.rob data/terrains/plane.env` or `./SimTest data/hubo_plane.xml`)
 
 `RobotPose` helps a human designer create configurations, constraints, and motions, and is run similarly to SimTest.
 
 ![RobotPose screenshot](images/running-robotpose.png)
 <center>Above is the RobotPose GUI.  The 3D coordinate frames are "widgets" for posing links of the robot in Cartesian space.
-`./RobotPose data/hubo_plane.xml`. </center>
+`RobotPose data/hubo_plane.xml`. </center>
 
 
 ## Interacting with 3D worlds
@@ -97,14 +103,14 @@ _Note_: when simulating a path, Klamp't will only issue a &quot;discontinuous ju
 
 ## Example files
 
-World files for different robots and problem setups are available in the Klampt/data subdirectory:
+World files for different robots and problem setups are available in the Klampt-examples/data subdirectory:
 
 - `hubo\*.xml`: the KAIST Hubo humanoid.
 - `puma\*.xml`: the Puma 760 industrial robot.
 - `tx90\*.xml`: the Staubli TX90L industrial robot.
 - `baxter\*.xml`: the Rethink Robotics Baxter robot.
 
-Other test robots, objects, and environments are available in the `Klampt/data/{robots,objects,terrains}` subdirectories. Some files of interest may include:
+Other test robots, objects, and environments are available in the `Klampt-examples/data/{robots,objects,terrains}` subdirectories. Some files of interest may include:
 
 - athlete.rob: the NASA ATHLETE hexapod (incomplete, missing wheel geometry).
 - atlas.rob: the Boston Dynamics ATLAS robot.
@@ -121,11 +127,11 @@ Other test robots, objects, and environments are available in the `Klampt/data/{
 - block.obj: a 40cm block
 - block\_small.obj: an 8cm block
 
-Test motions are available in the `Klampt/data/motions` directory. Simulation examples can be run via:
+Test motions are available in the `Klampt-examples/data/motions` directory. Simulation examples can be run via:
 
-- `./SimTest data/robots/athlete.rob data/terrains/plane.env -config data/motions/athlete_start.config -path data/motions/athlete_flex.xml`
-- `./SimTest data/hubo_table.xml -path data/motions/hubo_table_path_opt.xml`
-- `./SimTest data/hubo_stair_rail.xml -path data/motions/hubo_stair_rail_traj.xml`
+- `SimTest data/robots/athlete.rob data/terrains/plane.env -config data/motions/athlete_start.config -path data/motions/athlete_flex.xml`
+- `SimTest data/hubo_table.xml -path data/motions/hubo_table_path_opt.xml`
+- `SimTest data/hubo_stair_rail.xml -path data/motions/hubo_stair_rail_traj.xml`
 
 ## Klamp't Utilities
 
@@ -160,7 +166,7 @@ To use it, first run it without arguments to generate a blank settings file. Edi
 An example optimization is given by running
 
 ```
-./MotorCalibrate Examples/motorcalibrate_baxter.settings.
+MotorCalibrate Cpp/motorcalibrate_baxter.settings.
 ````
 
 Multiple runs of this process, possibly with different initial conditions, should generate better matches to the sensed data.
@@ -168,7 +174,7 @@ Multiple runs of this process, possibly with different initial conditions, shoul
 
 ## Example C++ programs
 
-Klamp't also contains several example applications in `Klampt/Examples`:
+Example C++ applications are located in `Klampt-examples/Cpp` and can be built using `cmake .; make`:
 
 - `Cartpole` demonstrates generation of optimal control tables for two toy dynamic systems - a pendulum swing-up and a cart-pole balancing task.
 - `PlanDemo` is a command line kinematic motion planner for collision-free motion between configurations.

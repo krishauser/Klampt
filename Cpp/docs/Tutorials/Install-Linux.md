@@ -16,9 +16,7 @@ For Python 2.7, 3.4, 3.5, 3.6, and 3.7, you should be able to simply run
 
 - `pip install klampt`
 
-The current Klampt version is 0.8.0.
-
-To run a visualization, you will need PyOpenGL and PyQt5:
+To run a visualization, you will need PyOpenGL and PyQt5, as well as some example programs:
 - `pip install PyOpenGL`
 - `pip install PyQt5`
 - `git clone http://github.com/krishauser/Klampt-examples` (this is needed to run example programs)

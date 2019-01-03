@@ -52,7 +52,7 @@ width="50%" height="50%">
 
 Extension: What happen if instead of animating traj2, you animate traj? If you would like to explore this tutorial further, please consult the Klampt/Python/demos/trajectorytest.py file.
 
-[Run a simulation](Documentation/Tutorials/Run-a-simulation-Python.mdl)  also provides a good tutorial on how to simulate a robot by playing back a saved trajectory. Alternatively, you can send a controller a trajectory that is a collection of either piecewise-linear milestones or just linear milestones. Linear milestones are typically sent time-independent. A simulation just attempts to traverse the trajectory while satisfying its constraints. Piecewise-linear milestone paths, on the other hand, tend to enforce some sort of time constraints for getting from one configuration to another.
+[Run a simulation](Documentation/Tutorials/Run-a-simulation-Python.md)  also provides a good tutorial on how to simulate a robot by playing back a saved trajectory. Alternatively, you can send a controller a trajectory that is a collection of either piecewise-linear milestones or just linear milestones. Linear milestones are typically sent time-independent. A simulation just attempts to traverse the trajectory while satisfying its constraints. Piecewise-linear milestone paths, on the other hand, tend to enforce some sort of time constraints for getting from one configuration to another.
 
 Additionally, the script Klampt/Python/utils/multipath_to_timed_multipath.py will convert an untimed MultiPath into a timed one, given a certain number of milestones per second. The speed variable at the top of the script will control the speed of the path.
 

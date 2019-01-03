@@ -142,10 +142,10 @@ ADD_SUBDIRECTORY(Cpp/Main)
 ####### Klamp't Documentation #########
 FIND_PACKAGE(Doxygen)
 IF(DOXYGEN_FOUND)
-  configure_file(${CMAKE_SOURCE_DIR}/Documentation/doxygen.conf.in ${CMAKE_SOURCE_DIR}/Documentation/doxygen.conf @ONLY)
-  ADD_CUSTOM_TARGET(docs ${DOXYGEN_EXECUTABLE} ${CMAKE_SOURCE_DIR}/Documentation/doxygen.conf
+  configure_file(${CMAKE_SOURCE_DIR}/Cpp/docs/doxygen.conf.in ${CMAKE_SOURCE_DIR}/Cpp/docs/doxygen.conf @ONLY)
+  ADD_CUSTOM_TARGET(docs ${DOXYGEN_EXECUTABLE} ${CMAKE_SOURCE_DIR}/Cpp/docs/doxygen.conf
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    COMMENT "Generating documentation (Doxygen) at location ${CMAKE_CURRENT_BINARY_DIR}/doc/html/")
+    COMMENT "Generating documentation (Doxygen) at location ${CMAKE_SOURCE_DIR}/Cpp/docs/html/")
 ENDIF(DOXYGEN_FOUND)
 
 # Python API directory
