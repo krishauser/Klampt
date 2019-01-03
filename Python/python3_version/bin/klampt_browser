@@ -10,8 +10,9 @@ from klampt import vis
 from klampt.vis.qtbackend import QtGLWindow
 from klampt.vis.glcommon import GLMultiViewportProgram
 import sys,os,time
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtCore
+from PyQt5 import QtWidgets
 
 world_item_extensions = set(['.obj','.rob','.urdf','.env'])
 robot_override_types = ['Config','Configs']
@@ -86,17 +87,17 @@ class ResourceItem:
         self.program = None
         self.animationBuddy = None
 
-class ResourceBrowser(QtGui.QMainWindow):
+class ResourceBrowser(QtWidgets.QMainWindow):
     def __init__(self,glwindow=None,parent=None):
-        QtGui.QMainWindow.__init__(self,parent)
+        QtWidgets.QMainWindow.__init__(self,parent)
          # Splitter to show 2 views in same widget easily.
-        self.splitter = QtGui.QSplitter()
+        self.splitter = QtWidgets.QSplitter()
         # The model.
-        self.model = QtGui.QFileSystemModel()
+        self.model = QtWidgets.QFileSystemModel()
         # You can setRootPath to any path.
         self.model.setRootPath(QtCore.QDir.rootPath())
         # Add filters
-        filters = QtCore.QStringList();
+        filters = []
         print("ALLOWABLE FILE EXTENSIONS")
         for k,v in resource.extensionToType.items():
             filters.append("*"+k)
@@ -111,7 +112,7 @@ class ResourceBrowser(QtGui.QMainWindow):
         self.model.setNameFilters(filters)
 
         # Create the view in the splitter.
-        self.view = QtGui.QTreeView()
+        self.view = QtWidgets.QTreeView()
         # Set the model of the view.
         self.view.setModel(self.model)
         #nicer size for columns
@@ -122,7 +123,7 @@ class ResourceBrowser(QtGui.QMainWindow):
         # Set the root index of the view as the user's home directory.
         #self.view.setRootIndex(self.model.index(QtCore.QDir.homePath()))
         self.view.setRootIndex(self.model.index(os.getcwd()))
-        self.view.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
+        self.view.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
 
         self.world = WorldModel()
         self.tempWorld = WorldModel()
@@ -134,21 +135,21 @@ class ResourceBrowser(QtGui.QMainWindow):
         self.visCache = []
         self.modified = set()
         
-        self.left = QtGui.QFrame()
-        self.right = QtGui.QFrame()
-        self.leftLayout = QtGui.QVBoxLayout()
+        self.left = QtWidgets.QFrame()
+        self.right = QtWidgets.QFrame()
+        self.leftLayout = QtWidgets.QVBoxLayout()
         self.left.setLayout(self.leftLayout)
 
-        self.upButton = QtGui.QPushButton("Up")
+        self.upButton = QtWidgets.QPushButton("Up")
         self.leftLayout.addWidget(self.upButton)
         self.leftLayout.addWidget(self.view)
         #visualization configuration
-        vbuttonLayout = QtGui.QHBoxLayout()
-        self.autoFitCameraButton = QtGui.QCheckBox("Auto-fit cameras")
-        self.lockCameraCheck = QtGui.QCheckBox("Lock cameras")
-        #self.overlayCheck = QtGui.QCheckBox("Overlay")
-        self.maxGridItemsLabel = QtGui.QLabel("Grid width")
-        self.maxGridItems = QtGui.QSpinBox()
+        vbuttonLayout = QtWidgets.QHBoxLayout()
+        self.autoFitCameraButton = QtWidgets.QCheckBox("Auto-fit cameras")
+        self.lockCameraCheck = QtWidgets.QCheckBox("Lock cameras")
+        #self.overlayCheck = QtWidgets.QCheckBox("Overlay")
+        self.maxGridItemsLabel = QtWidgets.QLabel("Grid width")
+        self.maxGridItems = QtWidgets.QSpinBox()
         self.maxGridItems.setRange(3,15)
         self.autoFitCameraButton.setToolTip("If checked, the camera is automatically fit the the items in the scene")
         self.lockCameraCheck.setToolTip("If checked, all cameras are navigated simultaneously")
@@ -162,18 +163,18 @@ class ResourceBrowser(QtGui.QMainWindow):
         self.leftLayout.addLayout(vbuttonLayout)
 
         #playback
-        self.timeDriver = QtGui.QSlider()
+        self.timeDriver = QtWidgets.QSlider()
         self.timeDriver.setOrientation(QtCore.Qt.Horizontal)
         self.timeDriver.setRange(0,1000)
         #self.timeDriver.setSizeHint()
-        self.playButton = QtGui.QPushButton("Play")
+        self.playButton = QtWidgets.QPushButton("Play")
         self.playButton.setCheckable(True)
-        self.stopButton = QtGui.QPushButton("Stop")
+        self.stopButton = QtWidgets.QPushButton("Stop")
         self.playButton.setToolTip("Starts/pauses playing any selected animations")
         self.stopButton.setToolTip("Stops playing any selected animations")
-        label = QtGui.QLabel("Time")
+        label = QtWidgets.QLabel("Time")
         label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        vbuttonLayout = QtGui.QHBoxLayout()
+        vbuttonLayout = QtWidgets.QHBoxLayout()
         vbuttonLayout.addWidget(label)
         vbuttonLayout.addWidget(self.timeDriver)
         vbuttonLayout.addWidget(self.playButton)
@@ -181,13 +182,13 @@ class ResourceBrowser(QtGui.QMainWindow):
         self.leftLayout.addLayout(vbuttonLayout)
 
         #editing
-        vbuttonLayout = QtGui.QHBoxLayout()
-        self.editButton = QtGui.QPushButton("Edit item")
-        self.saveButton = QtGui.QPushButton("Save item")
+        vbuttonLayout = QtWidgets.QHBoxLayout()
+        self.editButton = QtWidgets.QPushButton("Edit item")
+        self.saveButton = QtWidgets.QPushButton("Save item")
         self.editButton.setToolTip("Pops up a dialog to edit the selected item, if available")
         self.saveButton.setToolTip("Saves changes to edited items")
         self.saveButton.setEnabled(False)
-        self.createComboBox = QtGui.QComboBox()
+        self.createComboBox = QtWidgets.QComboBox()
         self.createComboBox.addItem("Create new item...")
         for n in create_types:
             self.createComboBox.addItem(n)
@@ -197,9 +198,9 @@ class ResourceBrowser(QtGui.QMainWindow):
         self.leftLayout.addLayout(vbuttonLayout)
 
         #world configuration
-        vbuttonLayout = QtGui.QHBoxLayout()
-        self.addButton = QtGui.QPushButton("Add to world")
-        self.clearButton = QtGui.QPushButton("Clear world")
+        vbuttonLayout = QtWidgets.QHBoxLayout()
+        self.addButton = QtWidgets.QPushButton("Add to world")
+        self.clearButton = QtWidgets.QPushButton("Clear world")
         self.addButton.setToolTip("Adds the selected item(s) to the reference world")
         self.clearButton.setToolTip("Clears the reference world")
         vbuttonLayout.addWidget(self.addButton)
@@ -210,7 +211,7 @@ class ResourceBrowser(QtGui.QMainWindow):
         self.splitter.setHandleWidth(7)
         self.setCentralWidget(self.splitter)
 
-        self.rightLayout = QtGui.QVBoxLayout()
+        self.rightLayout = QtWidgets.QVBoxLayout()
         self.right.setLayout(self.rightLayout)
         if glwindow is None:
             self.glwidget = QtGLWindow("viewport")
@@ -224,15 +225,13 @@ class ResourceBrowser(QtGui.QMainWindow):
         self.glviewportManager.addView(self.emptyVisPlugin)
         self.glviewportManager.items = self.active
         self.emptyVisProgram = self.glviewportManager.views[-1]
-        self.glwidget.setFixedSize(QtGui.QWIDGETSIZE_MAX,QtGui.QWIDGETSIZE_MAX)
-        self.glwidget.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Expanding))
+        self.glwidget.setFixedSize(QtWidgets.QWIDGETSIZE_MAX,QtWidgets.QWIDGETSIZE_MAX)
+        self.glwidget.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding,QtWidgets.QSizePolicy.Expanding))
         self.glwidget.adjustSize()
         self.glwidget.refresh()
 
         self.upButton.clicked.connect(self.onUpClicked)
-        self.view.connect(self.view.selectionModel(),  
-                 QtCore.SIGNAL("selectionChanged(QItemSelection, QItemSelection)"),  
-                 self.selection_changed) 
+        self.view.selectionModel().selectionChanged.connect(self.selection_changed) 
         self.view.doubleClicked.connect(self.onViewDoubleClick)
         self.autoFitCameraButton.clicked.connect(self.onAutoFitCamera)
         self.maxGridItems.valueChanged.connect(self.maxGridItemsChanged)
@@ -248,9 +247,9 @@ class ResourceBrowser(QtGui.QMainWindow):
 
     def closeEvent(self,event):
         if len(self.modified) > 0:
-            reply = QtGui.QMessageBox.question(self, "Unsaved changes", "Would you like to save changes to " ', '.join(self.modified)+ "?",
-                                    QtGui.QMessageBox.Yes|QtGui.QMessageBox.No);
-            if reply == QtGui.QMessageBox.Yes:
+            reply = QtWidgets.QMessageBox.question(self, "Unsaved changes", "Would you like to save changes to " ', '.join(self.modified)+ "?",
+                                    QtWidgets.QMessageBox.Yes|QtWidgets.QMessageBox.No);
+            if reply == QtWidgets.QMessageBox.Yes:
                 self.onSaveClicked()
         vis.show(False)
 
@@ -347,7 +346,7 @@ class ResourceBrowser(QtGui.QMainWindow):
 
     def onEditClicked(self):
         if len(self.active) == 0:
-            QtGui.QMessageBox.warning(self.splitter,"Invalid item","No item selected, can't edit")
+            QtWidgets.QMessageBox.warning(self.splitter,"Invalid item","No item selected, can't edit")
             return
         fn = sorted(self.active.keys())[0]
         def doedit():
@@ -356,7 +355,7 @@ class ResourceBrowser(QtGui.QMainWindow):
                 obj = resource.edit(name=fn,value=self.active[fn].obj,world=self.world)
             except ValueError as e:
                 print("Exception raised during resource.edit:",e)
-                QtGui.QMessageBox.warning(self.splitter,"Editing not available","Unable to edit item of type "+self.active[fn].obj.__class__.__name__)
+                QtWidgets.QMessageBox.warning(self.splitter,"Editing not available","Unable to edit item of type "+self.active[fn].obj.__class__.__name__)
                 return
             if obj is not None:
                 self.active[fn].obj = obj
@@ -412,11 +411,11 @@ class ResourceBrowser(QtGui.QMainWindow):
                     item.plugin.add("world",self.world)
                 todel.append(name)
             elif isinstance(s,(TriangleMesh,PointCloud,GeometricPrimitive)):
-                t = self.world.makeTerrain(fn)
+                t = self.world.makeTerrain(name)
                 t.geometry().set(Geometry3D(s))
                 todel.append(name)
             elif isinstance(s,Geometry3D):
-                t = self.world.makeTerrain(fn)
+                t = self.world.makeTerrain(name)
                 t.geometry().set(s.clone())
                 todel.append(name)
         for name in todel:
@@ -461,10 +460,10 @@ class ResourceBrowser(QtGui.QMainWindow):
                 try:
                     worldid = self.tempWorld.loadElement(fn)
                 except Exception:
-                    QtGui.QMessageBox.warning(self.splitter,"Invalid item","Could not load "+fn+" as a Klamp't world element")
+                    QtWidgets.QMessageBox.warning(self.splitter,"Invalid item","Could not load "+fn+" as a Klamp't world element")
                     return False
                 if worldid < 0:
-                    QtGui.QMessageBox.warning(self.splitter,"Invalid item","Could not load "+fn+" as a Klamp't world element")
+                    QtWidgets.QMessageBox.warning(self.splitter,"Invalid item","Could not load "+fn+" as a Klamp't world element")
                     return False
                 obj = None
                 for i in range(self.tempWorld.numRobots()):
@@ -483,7 +482,7 @@ class ResourceBrowser(QtGui.QMainWindow):
                 self.loadedItem(fn,obj)
                 return True
             else:
-                QtGui.QMessageBox.warning(self.splitter,"Invalid item","Could not load file "+fn+" as a known Klamp't type")
+                QtWidgets.QMessageBox.warning(self.splitter,"Invalid item","Could not load file "+fn+" as a known Klamp't type")
                 return False
         if type == 'xml':
             #try loading a world
@@ -497,12 +496,12 @@ class ResourceBrowser(QtGui.QMainWindow):
                         print("Trying MultiPath load, got exception",e)
                         import traceback
                         traceback.print_exc()
-                        QtGui.QMessageBox.warning(self.splitter,"Invalid WorldModel","Could not load "+fn+" as a world XML file")
+                        QtWidgets.QMessageBox.warning(self.splitter,"Invalid WorldModel","Could not load "+fn+" as a world XML file")
                         return False
                     self.loadedItem(fn,obj)
                     return True
             except IOError:
-                QtGui.QMessageBox.warning(self.splitter,"Invalid WorldModel","Could not load "+fn+" as a world XML file")
+                QtWidgets.QMessageBox.warning(self.splitter,"Invalid WorldModel","Could not load "+fn+" as a world XML file")
                 return False
             self.loadedItem(fn,world)
             return
@@ -513,13 +512,13 @@ class ResourceBrowser(QtGui.QMainWindow):
             try:
                 obj = loader.fromJson(jsonobj)
             except Exception:
-                QtGui.QMessageBox.warning(self.splitter,"Invalid JSON","Could not recognize "+fn+" as a known Klamp't type")
+                QtWidgets.QMessageBox.warning(self.splitter,"Invalid JSON","Could not recognize "+fn+" as a known Klamp't type")
                 return False
         else:
             try:
                 obj = loader.load(type,fn)
             except Exception as e:
-                QtGui.QMessageBox.warning(self.splitter,"Invalid item","Error while loading file "+fn+": "+str(e))
+                QtWidgets.QMessageBox.warning(self.splitter,"Invalid item","Error while loading file "+fn+": "+str(e))
                 return False
         self.loadedItem(fn,obj)
         return True
@@ -573,9 +572,9 @@ class ResourceBrowser(QtGui.QMainWindow):
         if fn not in self.active:
             return
         if fn in self.modified:
-            reply = QtGui.QMessageBox.question(self, "Unsaved changes", "Would you like to save changes to " ', '.join(self.modified)+ "?",
-                                    QtGui.QMessageBox.Yes|QtGui.QMessageBox.No);
-            if reply == QtGui.QMessageBox.Yes:
+            reply = QtWidgets.QMessageBox.question(self, "Unsaved changes", "Would you like to save changes to " ', '.join(self.modified)+ "?",
+                                    QtWidgets.QMessageBox.Yes|QtWidgets.QMessageBox.No);
+            if reply == QtWidgets.QMessageBox.Yes:
                 save(self.active[fn],fn)
                 self.modified.remove(fn)
         s = self.active[fn]
@@ -634,29 +633,33 @@ if __name__ == '__main__':
 ===============================================================================
 A program to quickly browse Klamp't objects. 
 
-USAGE: python resource_browser.py [item1 item2 ...]
+USAGE: klampt_browser [item1 item2 ...]
 
 where the given items are world, robot, terrain, object, or geometry files. Run
-it with
+it without arguments
 
-   python resource_browser.py
+   klampt_browser
 
 for an empty reference world. You may add items to the reference world using
 the `Add to World` button.  If you know what items to use in the reference
 world, run it with
 
-   python resource_browser.py world.xml
+   klampt_browser world.xml
 
 or 
 
-   python resource_browser.py item1 item2 ...
+   klampt_browser item1 item2 ...
 
 where the items are world, robot, terrain, object, or geometry files.
 ===============================================================================
 """)
+    #must be explicitly deleted for some reason in PyQt5...
+    g_browser = None
     def makefunc(gl_backend):
+        global g_browser
         browser = ResourceBrowser(gl_backend)
-        dw = QtGui.QDesktopWidget()
+        g_browser = browser
+        dw = QtWidgets.QDesktopWidget()
         x=dw.width()*0.8
         y=dw.height()*0.8
         browser.setFixedSize(x,y)
@@ -675,10 +678,11 @@ where the items are world, robot, terrain, object, or geometry files.
     vis.setWindowTitle("Klamp't Resource Browser")
     vis.spin(float('inf'))
     vis.kill()
+    del g_browser
     exit(0)
 
     #this code below is incorrect...
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     browser = ResourceBrowser()
     for fn in sys.argv[1:]:
         res = browser.world.readFile(fn)
@@ -689,7 +693,7 @@ where the items are world, robot, terrain, object, or geometry files.
         print("Added",fn,"to world")
     if len(sys.argv) > 1:
         browser.emptyVisPlugin.add("world",browser.world)
-    dw = QtGui.QDesktopWidget()
+    dw = QtWidgets.QDesktopWidget()
     x=dw.width()*0.8
     y=dw.height()*0.8
     browser.setFixedSize(x,y)

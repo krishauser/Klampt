@@ -14,11 +14,11 @@ class GeneralizedPath:
             self.type = 'MultiPath'
             self.data = MultiPath()
             self.data.load(fn)
-        elif fn.endswith('path'):
+        elif fn.endswith('path') or fn.endswith('traj'):
             self.type = 'Trajectory'
             self.data = Trajectory()
             self.data.load(fn)
-        elif fn.endswith('configs'):
+        elif fn.endswith('configs') or fn.endswith('milestones'):
             self.type = 'Configs'
             self.data = Trajectory()
             self.data.configs = loader.load('Configs',fn)
@@ -110,6 +110,12 @@ class GeneralizedPath:
             self.data.concat(other.data)
         else:
             self.data.concat(other.data,relative=True)
+    def discretize(self,dt):
+        if self.type == 'MultiPath':
+            print "Warning, MultiPath discretize is not supported yet"
+        else:
+            self.data = self.data.discretize(dt)
+
     def __str__(self):
         if self.type == 'MultiPath':
             ndofs = 0
@@ -142,12 +148,12 @@ def _main():
     parser.add_option("--timescale", dest="timescale",default=None, help="Scale timing")
     parser.add_option("--timeshift", dest="timeshift",default=None, help="Shift timing")
     parser.add_option("--reverse", action="store_true",dest="reverse",default=False, help="Reverse path")
+    parser.add_option("-d","--discretize", dest="discretize",metavar="DT", help="Discretize the time domain by spacing DT")
     parser.add_option("-o","--output", dest="output",metavar="FILE", help="Output to FILE")
     (options,args) = parser.parse_args()
     
     if len(args) < 1:
-        print "Not enough arguments"
-        parser.print_help()
+        parser.error("Not enough arguments")
         exit(1)
 
     paths = [GeneralizedPath() for arg in args]
@@ -177,6 +183,10 @@ def _main():
             paths[0].concat(paths[i])
         if not options.output:
             print "Warning: concatenated path not saved, --output needs to be specified"
+    if options.discretize:
+        paths[0].discretize(float(options.discretize))
+        if not options.output:
+            print "Warning: discretized path not saved, --output needs to be specified"
     if options.output:
         print "Saving to",options.output
         if paths[0].type == 'MultiPath':

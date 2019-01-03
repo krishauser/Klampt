@@ -52,7 +52,7 @@ if __name__ == '__main__':
 
     if len(args) == 0 or len(args) > 2:
         parser.error("Must provide 1 or 2 arguments")
-        exit(0)
+        exit(1)
 
     world = None
     if parser.world:
