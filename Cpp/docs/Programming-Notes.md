@@ -66,7 +66,7 @@ Missing features include:
 ### Getting started
 The core modeling and simulation Klamp't functionality is found in the `klampt` module, which automatically imports several classes that wrap C++ functionality via SWIG. Users will typically load a `WorldModel`, construct a `Simulator`, and implement a robot controller by interacting with the `SimRobotController`. They may also wish to use the `RobotModel` to compute forward kinematics and dynamics.
 
-It should be noted that the documentation of these basic classes are found under the [klampt.robotsim](http://klampt.org/pyklampt_docs/namespaceklampt_1_1robotsim.html) submodule. Their online documentation may also look somewhat strange for Python users, having been converted from C++ comments via SWIG.  
+It should be noted that the documentation of these basic classes are found under the [klampt.robotsim](http://motion.pratt.duke.edu/klampt/pyklampt_docs/namespaceklampt_1_1robotsim.html) submodule. Their online documentation may also look somewhat strange for Python users, having been converted from C++ comments via SWIG.  
 
 Other native Python modules exist for a whole host of other functions, such as computing IK solutions via the `klampt.model.ik` module, or do other kinds of planning tasks via the [klampt.plan.robotplanning](http://motion.pratt.duke.edu/klampt/pyklampt_docs/namespaceklampt_1_1plan_1_1robotplanning.html) module.
 

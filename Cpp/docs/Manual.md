@@ -24,7 +24,8 @@ This manual documents the following main components of the Klampt C++ API:
 Other documentation includes:
 - [FAQ](FAQ.md)
 - [Programming notes](Programming-Notes.md)
-- [Python API documentation](http://klampt.org/0.8/pyklampt_docs)
+- [C++ API documentation](http://cppdocs.klampt.org/)
+- [Python Manual and API documentation](http://pythondocs.klampt.org/)
 
 
 Tutorials are available in the [Tutorials folder](Tutorials).
