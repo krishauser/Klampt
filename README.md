@@ -64,14 +64,13 @@ Installation instructions are also available for
 
 ## Documentation
 
-[Python Manual and API Documentation](http://motion.pratt.duke.edu/klampt/0.8/pyklampt_docs/)
+[Python Manual and API Documentation](http://pythondocs.klampt.org/)
 
 [C++ Manual](Cpp/docs/Manual.md)
 
 API documentation is available here
-- [Klamp't C++ API](http://klampt.org/klampt_docs)
-- [KrisLibrary C++ API](http://klampt.org/krislibrary_docs)
-- [Klamp't Python bindings API](http://klampt.org/pyklampt_docs/klampt.html)
+- [Klamp't C++ API](http://cppdocs.klampt.org)
+- [KrisLibrary C++ API](http://motion.pratt.duke.edu//krislibrary_docs)
 
 
 ## Version history
