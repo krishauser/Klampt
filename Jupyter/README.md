@@ -30,6 +30,7 @@ Run:
 And then launch Jupyter:
 
 > cd Klampt-examples/Jupyter
+
 > jupyter notebook
 
 The Jupyter frontend widget can be created by a `KlamptWidget`, which is defined in the `klampt.vis.ipython` module. 
