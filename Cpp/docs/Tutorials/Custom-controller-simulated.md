@@ -52,7 +52,7 @@ SetPIDCommand(qcmd,vcmd); //convenience function in RobotController
 ```
 Note that, internally, the GetSensedX and SetPIDCommand convenience functions read from and write to the sensors and command structures, respectively. If you wish to use more complex sensors, e.g. force sensors, gyroscopes, etc., then you will need to read them out of the RobotController's sensors' member. See the documentation of the [Robot Sensors](http://motion.pratt.duke.edu/klampt/klampt_docs/classRobotSensors.html) class and the Klampt/Control/Sensors.h file for more information.
 
-Let's now switch to main.cpp. We could run a command-line simulation like in the [Klamp't simulation tutorial]([Apps](Documentation/Tutorials/Run-a-simulation-Apps.md), [C++](Documentation/Tutorials/Run-a-simulation-Cpp.md),[Python](Documentation/Tutorials/Run-a-simulation-Python.md)), but let's make things more interesting by making a GUI. The plan is to implement a new version of the SimTest program that will allow us to use this controller. For simplicity we'll copy our main.cpp file from the GLUI version of SimTest, given in Main/simtest.cpp:
+Let's now switch to main.cpp. We could run a command-line simulation like in the [Klamp't simulation tutorial](Run-a-simulation-Cpp.md), but let's make things more interesting by making a GUI. The plan is to implement a new version of the SimTest program that will allow us to use this controller. For simplicity we'll copy our main.cpp file from the GLUI version of SimTest, given in Main/simtest.cpp:
 ```
 #include "Interface/SimTestGUI.h"
 #include 

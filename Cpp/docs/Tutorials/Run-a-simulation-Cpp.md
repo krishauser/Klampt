@@ -1,5 +1,6 @@
 # Klamp't Tutorial: Run a simulation with C++ API
-In this tutorial we learn how to run a simulation, interact with the simulated robot via the poser, and to simulate paths and trajectories. It is assumed that you have already successfully Install Klampt ([Linux](Documentation/Tutorials/Install-Linux.md),  [Windows](Documentation/Tutorials/Install-Windows.md),  [Mac](Documentation/Tutorials/Install-Mac.md))
+
+In this tutorial we learn how to run a simulation, interact with the simulated robot via the poser, and to simulate paths and trajectories. It is assumed that you have already successfully installed Klampt.
 
 Difficulty: easy
 
@@ -13,7 +14,7 @@ To make your first app that compiles with Klamp't, first create a folder with tw
 
 This very basic main.cpp runs a simulation for 5 seconds (simulation time) from the command line:
 
-```
+```cpp
 #include <Interface/SimulationGUI.h>
 
 int main(int argc,const char** argv) {
@@ -94,12 +95,12 @@ If you would like to visualize the path that the robot took, you may save it to 
 ```
 Clicking on the test_state resource and pressing play, you will see the simulation state of the robot sliding partway down the hill.
 
-Note: an alternate way of visualizing the simulation would be to use a GUI system. The simplest way of doing this would be to use GLUI and duplicate the structure of Klampt/Main/simtest.cpp. To implement user-chosen forces or a custom control loop, you should create a subclass of SimTestGUI and overload the virtual function SimTestGUI::OnCommand(const string& cmd,const string& args). When you get a cmd called "advance", implement your control loop and then call return SimTestGUI::OnCommand("advance",args). You can also see  [Custom controller tutorial](Documentation/Tutorials/Custom-controller.md) for more details.
+Note: an alternate way of visualizing the simulation would be to use a GUI system. The simplest way of doing this would be to use GLUI and duplicate the structure of Klampt/Main/simtest.cpp. To implement user-chosen forces or a custom control loop, you should create a subclass of SimTestGUI and overload the virtual function SimTestGUI::OnCommand(const string& cmd,const string& args). When you get a cmd called "advance", implement your control loop and then call return SimTestGUI::OnCommand("advance",args). You can also see  [Custom controller tutorial](Custom-controller.md) for more details.
 
 ### Sending milestones to the controller
 
 By default, a robot is set up with a polynomial trajectory controller, which stores and executes a smooth interpolating path between keyframes. (See the documentation of PolynomialPathController in Klampt/Control/PathController.h for details). The preferred, most extensible way of communicating with a robot's controller is with the SendCommand() function, which defines a string-based interface for accepting commands. For example, we can make the robot move its leg pitch (link 7) up after 2 seconds by adding the following lines at the location marked by  ** add control code here **:
-```
+```cpp
 if(sim.time >= 2.0 && sim.time-dt < 2.0) {
   //move link 7 (hip pitch) 1 radian up
   Config q;
@@ -125,7 +126,7 @@ Observe the path again using RobotPose. Notice that the path produces a smooth i
 ### Sending milestones to the controller
 
 Now we will send a trajectory. Replace the previous added lines with the following, which sends a Linear Path piecewise linear trajectory:
-```
+```cpp
 if(sim.time >= 2.0 && sim.time-dt < 2.0) {
   //move link 6 (hip pitch) 1 radian up
   Config q;
@@ -152,13 +153,13 @@ Another convenient way to send a path from disk is by calling backend.LoadLinear
 The robot controller is not able to apply arbitrary forces to its body or the world. This encapsulation is deliberate, because a robot cannot "play God" -- it can only affect its body or the world via its actuators. But it is often useful to generate simulation scenarios by "playing God," and to do so, you must access the underlying rigid bodies in the Open Dynamics Engine (ODE) simulator.
 
 The first step in doing so is to access the ODERigidObject or ODERobot out of the WorldSimulator. To do so, you would call something like this:
-```
+```cpp
 ODERobot* simrobot = sim.odesim.robot(my_robot_index);
 //or...
 ODERigidObject* simobject = sim.odesim.object(my_object_index);
 ```
 To apply forces, you may use ODE’s API. The way to do this is as follows.
-```
+```cpp
 dBodyAddForceAtPos(simrobot->body(my_link_index),fx,fy,fz,px,py,pz);
 //or...
 dBodyAddForceAtPos(simobject->body(),fx,fy,fz,px,py,pz);
@@ -186,7 +187,7 @@ int objectid = world.RigidObjectID(object_index);
 int linkid = world.RobotLinkID(robot_index,int link_index);
 ```
 IDs are constant throughout the life of the simulation. (NOTE: IDs will change if you add or remove elements from the world -- this is not yet supported in simulation.) IDs are assigned contiguously, and hence it is possible to just loop through integers ranging from 0 to world.NumIDs()-1 to enable all contact pairs. So we will do this before our simulation loop to allow us to observe all contact pairs:
-```
+```cpp
 for (int i=0;i<world.NumIDs();i++)
   for (int j=i+1;j<world.NumIDs();j++)
     sim.EnableContactFeedback(i,j);
@@ -197,7 +198,7 @@ for (size_t i=0;i<world.robots[0].robot->links.size();i++)
   sim.EnableContactFeedback(terrainid,world.RobotLinkID(robot_index,i));
 ```
 But let's assume we just enabled all of them. Then, during the simulation loop, we can use the following code to see what objects are in contact. We can also print out the average contact force/torque:
-```
+```cpp
 bool contacted=false;
 for (int i=0;i<world.NumIDs();i++)
   for (int j=i+1;j<world.NumIDs();j++) {
@@ -211,7 +212,7 @@ for (int i=0;i<world.NumIDs();i++)
   }
 ```
 If you don't want to get mean contact force/torque, there are other methods of WorldSimulator you can use to retrieve other types of feedback. For example, you can get detailed contact point information using the  [ContactFeedbackInfo](http://motion.pratt.duke.edu/klampt/klampt_docs/structContactFeedbackInfo.html)  structure:
-```
+```cpp
 ContactFeedbackInfo* info = sim.GetContactFeedback(i,j); 
 ```
-Please consult the detailed API documentation for more information
+Please consult the [detailed API documentation for the Simulation module](http://motion.pratt.duke.edu/klampt/klampt_docs/group__Simulation.html) for more information

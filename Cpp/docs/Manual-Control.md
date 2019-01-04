@@ -134,39 +134,39 @@ Settings are:
 
 #### `LaserRangeSensor`
 
-Details can be found in [Control/VisualSensors.h](../Control/VisualSensors.h).
+See the [C++ API documentation](http://motion.pratt.duke.edu/klampt/klampt_docs/classLaserRangeSensor.html) for attributes.
 
 #### `DriverTorqueSensor`
 
-Details can be found in [Control/ForceSensors.h](../Control/JointSensors.h). 
+See the [C++ API documentation](http://motion.pratt.duke.edu/klampt/klampt_docs/classDriverTorqueSensor.html) for attributes.
 
 #### `ContactSensor`
 
-Details can be found in [Control/ForceSensors.h](../Control/ForceSensors.h).
+See the [C++ API documentation](http://motion.pratt.duke.edu/klampt/klampt_docs/classContactSensorSensor.html) for attributes.
 
 #### `ForceTorqueSensor`
 
-Details can be found in [Control/ForceSensors.h](../Control/ForceSensors.h).
+See the [C++ API documentation](http://motion.pratt.duke.edu/klampt/klampt_docs/classForceTorqueSensor.html) for attributes.
 
 #### `Accelerometer`
 
-Details can be found in [Control/InertialSensors.h](../Control/InertialSensors.h).
+See the [C++ API documentation](http://motion.pratt.duke.edu/klampt/klampt_docs/classAccelerometer.html) for attributes.
 
 #### `TiltSensor`
 
-Details can be found in [Control/InertialSensors.h](../Control/InertialSensors.h).
+See the [C++ API documentation](http://motion.pratt.duke.edu/klampt/klampt_docs/classTiltSensor.html) for attributes.
 
 #### `GyroSensor`
 
-Details can be found in [Control/InertialSensors.h](../Control/InertialSensors.h).
+See the [C++ API documentation](http://motion.pratt.duke.edu/klampt/klampt_docs/classGyroSensor.html) for attributes.
 
 #### `IMUSensor`
 
-Details can be found in [Control/InertialSensors.h](../Control/InertialSensors.h).
+See the [C++ API documentation](http://motion.pratt.duke.edu/klampt/klampt_docs/classIMUSensor.html) for attributes.
 
 #### `FilteredSensor`
 
-Details can be found in [Control/OtherSensors.h](../Control/OtherSensors.h).
+See the [C++ API documentation](http://motion.pratt.duke.edu/klampt/klampt_docs/classFilteredSensor.html) for attributes.
 
 
 ## State estimation

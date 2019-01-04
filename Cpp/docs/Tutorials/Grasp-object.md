@@ -33,7 +33,7 @@ Note that in motion 1, the planner must perform collision detection with the obj
 
 In the C++ API tutorial, we'll also demonstrate some of the dynamic planning tools in Klamp't. After planning a path, we'll dynamically smooth it, while maintaining feasibility, before executing it in simulation.
 
-You may download  [the code for this example here](http://motion.pratt.duke.edu/klampt/tutorials/grasptutorial_cpp.zip). Throughout, we will assume that your code is placed in a directory that shares the same parent as Klamp't. We also assume you have learned how to build applications that link to Klamp't using CMake, e.g. by completing the  [simulation tutorial](Documentation/Tutorials/Run-a-simulation-Cpp.md).
+You may download  [the code for this example here](http://motion.pratt.duke.edu/klampt/0.7/tutorials/grasptutorial_cpp.zip). Throughout, we will assume that your code is placed in a directory that shares the same parent as Klamp't. We also assume you have learned how to build applications that link to Klamp't using CMake, e.g. by completing the  [simulation tutorial](Run-a-simulation-Cpp.md).
 
 In the tutorial code we provide a framework for setting up the environment in pickandplace.h. Browse through the documentation of this file to understand the key members of the environment (robot, object, grasp, pregrasp, freeSpace). The Setup function loads a world file and some predefined Grasp resources from disk into a PickAndPlaceEnvironment structure. With this file you'll be able to set up the tutorial environment using the following skeleton code (in main.cpp):
 ```
@@ -49,11 +49,13 @@ int main(int argc,const char** argv)
   return 0;
 }
 ```
-Specifically, we'll be using Klampt/data/tx90cylinder.xml as the world file, and the grasps in Klampt/data/resources/tx90pr2/ as grasp files.
+Specifically, we'll be using Klampt-examples/data/tx90cylinder.xml as the world file, and the grasps in Klampt-examples/data/resources/tx90pr2/ as grasp files.
+
+
 ### Sampling grasp configurations
 
 We'll start by calculating the grasp and pregrasp configurations. In main.cpp, we'll put this functionality in a function whose prototype is:
-```
+```cpp
 bool GraspPlan(PickAndPlaceEnvironment& env,int& maxIters,vector<Config>& result)
 ```
 which returns the list of configurations from the start, to pregrasp, to grasp configurations. The following main code will call the function and output the configurations to disk.
@@ -69,7 +71,7 @@ which returns the list of configurations from the start, to pregrasp, to grasp c
     out<<result[i]<<endl;
 ```
 Now let's begin to fill out that functionality. First, let's define a method for sampling the grasp configuration given an object transformation:
-```
+```cpp
 bool SampleGraspConfiguration(PickAndPlaceEnvironment& env,
 			      const RigidTransform& Tobject,
 			      int& maxIters,
@@ -128,10 +130,10 @@ make PickAndPlaceTutorial
 ```
 The output spend a few seconds loading files and doing some calculations, and should display a success message. To see the sampled configurations, run:
 ```
-../Klampt/RobotPose ../Klampt/data/tx90cylinder.xml grasp.configs
+../Klampt/RobotPose ../Klampt-examples/data/tx90cylinder.xml grasp.configs
 ```
 One issue that this code hasn't addressed is that the configuration produced by the sampler may collide with obstacles in the world. To restrict ourselves to feasible configurations, we will need to add feasibility checking. You can do this manually yourself, or you can use the functionality in ContactCSpace for checking collisions. To do this we'll have to add feasibility tests into our SampleGraspConfiguration function:
-```
+```cpp
   //now, try solving IK from the given configuration
   if(!out.empty()) {
     env.robot->q = out;
@@ -152,7 +154,7 @@ One issue that this code hasn't addressed is that the configuration produced by 
 Notice that cspace.IsFeasible() is checked for each candidate configuration. If you compile and run, however, you'll get a failure message: "Failed to sample grasp configuration". What's going on?
 
 We can start to debug by temporarily inserting calls to the cspace.PrintInfeasibleNames() method:
-```
+```cpp
   if(!out.empty()) {
     env.robot->q = out;
     if(cspace.SolveContact()) {
@@ -187,7 +189,7 @@ coll[TX90L-pr2[pr2gripper:Link 4],target]
 which tells us which constraints are violated. The "coll[x,y]" constraint indicates a collision between item x and item y. Since "TX90L-pr2[pr2gripper:Link X]" is the X'th link of the pr2 gripper at the end of the robot, and "target" is the name of the object it looks like the gripper fingers are colliding with the grabbed object! This is a relatively common situation with grasps -- you typically set them up so that the robot's fingers are slightly touching the object.
 
 What we can do is ignore certain collision tests in the cspace.IsFeasible() method. To do so, add the following lines before the comment line "//all set up":
-```
+```cpp
   int objectID = env.world->RigidObjectID(env.iobject);
   for(size_t i=0;i<worldGrasp.constraints.size();i++) {
     int k=worldGrasp.constraints[i].link;
@@ -203,7 +205,7 @@ The first for loop ignores contact between the object and the hand link, and the
 Now, if we try to plan a collision free path in the robot's free space to the grasp configuration, it will fail, because the endpoint is infeasible: the fingers are still colliding! This is precisely why we need a pregrasp configuration.
 
 To compute the pregrasp configuration, we'll simply want to open the gripper's finger degrees of freedom to those specified in the pregrasp. To do so, we can add the following lines to the GraspPlan function after the //done comment:
-```
+```cpp
   Config qpregrasp = qgrasp;
   for(size_t i=0;i<env.pregrasp.fixedDofs.size();i++)
     qpregrasp[env.pregrasp.fixedDofs[i]] = env.pregrasp.fixedValues[i];
@@ -214,7 +216,7 @@ That's it! If you open up graspsample.cpp, you'll see everything that we did, pl
 ### Motion planning
 
 The first plan we'll run will connect the start configuration to the pregrasp configuration. Let's start by changing some of the framework code to produce paths. We'll change GraspPlan to produce a MultiPath result, with the following code going into main.cpp:
-```
+```cpp
   //do the planning, save the result
   int maxIters = 100;
   int numRemainingIters = maxIters;
@@ -234,7 +236,7 @@ The new prototype for GraspPlan will be
 bool GraspPlan(PickAndPlaceEnvironment& env,int& maxIters,MultiPath& result)
 ```
 Now we'll have to plan the path and put the path into the result, rather than simply returning a list of configurations. In GraspPlan, we'll add the following code after the grasp configuration is sampled:
-```
+```cpp
   //2. perform motion planning
   printf("Beginning motion planning for grasp path...\n");
   env.object->T = env.objectStartTransform;
@@ -246,7 +248,7 @@ Now we'll have to plan the path and put the path into the result, rather than si
   }
 ```
 And add the following code to the end of the function to assemble the output into MultiPath format
-```
+```cpp
   //3. assemble the path start->...->pregrasp->grasp
   result.settings["robot"] = env.world->robots[env.irobot].name;
   result.sections.resize(2);
@@ -259,7 +261,7 @@ And add the following code to the end of the function to assemble the output int
   result.sections[1].milestones.push_back(qgrasp);
 ```
 To perform a point-to-point plan in a given configuration space from A to B, we'll define the following utility function somewhere in our file:
-```
+```cpp
 //a utility function that will do a point-to-point plan and count down
 //the number of iterations spent
 bool Plan(CSpace* space,const Config& a, const Config& b,
@@ -281,7 +283,7 @@ bool Plan(CSpace* space,const Config& a, const Config& b,
 ```
 If you then compile your project and run it, you will see it produce the grasp and pregrasp configuration, then spend a few iterations planning the grasp path. To see the output, run:
 ```
-../Klampt/SimTest ../Klampt/data/tx90cylinder.xml -path grasppath.xml
+SimTest ../Klampt-examples/data/tx90cylinder.xml -path grasppath.xml
 ```
 You will see the robot grasping the cylinder! However, it does it in a somewhat jerky fashion. Don't worry, we'll fix that later!
 
@@ -291,13 +293,13 @@ The code for this example is found in grasp.cpp, except with a bit more debuggin
 
 Coming soon. Code for this example is found in pickandplace.cpp. You can run the planner by building and running PickAndPlaceTutorial3. To see the output, run:
 ```
-../Klampt/SimTest ../Klampt/data/tx90cylinder.xml -path pickandplacepath.xml
+SimTest ../Klampt-examples/data/tx90cylinder.xml -path pickandplacepath.xml
 ```
 You will see the robot grasping, placing, and ungrasping the cylinder.
 
 ### Dynamic optimization
 Coming soon. Code for this example is found in pickandplace_optimized.cpp. You can run the planner by building and running PickAndPlaceTutorial2. To see the output, run:
 ```
-../Klampt/SimTest ../Klampt/data/tx90cylinder.xml -path pickandplacepath_smoothed.xml
+SimTest ../Klampt-examples/data/tx90cylinder.xml -path pickandplacepath_smoothed.xml
 ```
 You will see the robot grasping, placing, and ungrasping the cylinder with smooth motions.
