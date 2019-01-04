@@ -30,15 +30,15 @@ Other documentation includes:
 Tutorials are available in the [Tutorials folder](Tutorials).
 
 - Install Klampt ([Linux](Tutorials/Install-Linux.md), [Windows](Tutorials/Install-Windows.md), [Mac](Tutorials/Install-Mac.md))
-- Build and edit a world file(Tutorials/Build-and-edit-world.md)
+- Build and edit a world file([C++](Tutorials/Build-and-edit-world.md))
 - Generate a path/trajectory from keyframes ([Apps](Tutorials/Path-generation-Apps.md))
 - Animate a video of a path/trajectory ([Apps](Tutorials/Animation-generation-Apps.md))
-- Simulate the execution of a keyframe path ([Apps](Tutorials/Run-a-simulation-Apps.md), [C++](Tutorials/Run-a-simulation-Cpp.md))
-- Implement a custom controller for a simulated robot (Tutorials/Custom-controller-simulated.md)
-- Process clicks on the robot or world (Tutorials/Click-on-robot.md)
+- Simulate the execution of a keyframe path ([Apps](Tutorials/Run-a-simulation-Apps.md), [C++](Tutorials/Run-a-simulation-C++.md))
+- Implement a custom controller for a simulated robot ([C++](Tutorials/Custom-controller-simulated.md))
+- Process clicks on the robot or world ([C++](Tutorials/Click-on-robot.md))
 - Set up a simulated camera sensor and save frames to disk ([Apps](Tutorials/Simulated-sensor-Apps.md))
 - Import and calibrate a URDF robot ([Apps](Tutorials/Import-and-calibrate-urdf.md))
-- Solve an inverse kinematics problem (Tutorials/Inverse-kinematics.md)
-- Grasp an Object (Tutorials/Grasp-object.md)
+- Solve an inverse kinematics problem ([C++](Tutorials/Inverse-kinematics.md))
+- Grasp an Object ([C++](Tutorials/Grasp-object.md))
 
 
