@@ -33,7 +33,7 @@ Tutorials are available in the [Tutorials folder](Tutorials).
 - Build and edit a world file([C++](Tutorials/Build-and-edit-world.md))
 - Generate a path/trajectory from keyframes ([Apps](Tutorials/Path-generation-Apps.md))
 - Animate a video of a path/trajectory ([Apps](Tutorials/Animation-generation-Apps.md))
-- Simulate the execution of a keyframe path ([Apps](Tutorials/Run-a-simulation-Apps.md), [C++](Tutorials/Run-a-simulation-C++.md))
+- Simulate the execution of a keyframe path ([Apps](Tutorials/Run-a-simulation-Apps.md), [C++](Tutorials/Run-a-simulation-Cpp.md))
 - Implement a custom controller for a simulated robot ([C++](Tutorials/Custom-controller-simulated.md))
 - Process clicks on the robot or world ([C++](Tutorials/Click-on-robot.md))
 - Set up a simulated camera sensor and save frames to disk ([Apps](Tutorials/Simulated-sensor-Apps.md))
