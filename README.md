@@ -63,9 +63,9 @@ To run a visualization:
 Installation tutorials are also available for
 - [Linux](Tutorials/Install-Linux.md)
 - [Windows](Tutorials/Install-Windows.md)
-- [Mac OSX](Tutorials/Install-Mac.md).
+- [Mac OSX](Tutorials/Install-Mac.md)
 - [Jupyter notebook](Jupyter/README.md)
-- [Docker](Install-Docker.md).
+- [Docker](Tutorials/Install-Docker.md)
 
 
 ## Documentation
@@ -82,7 +82,12 @@ API documentation is available here
 
 ## Version history
 
-**0.8 Latest version** (12/17/2018)
+**0.8.1 Latest version** (1/3/2018)
+-   Cleaned up documentation, separating C++ and Python docs.  Sphinx is now used for Python docs.
+-   Added klampt_path utility to Python API.
+-   Added rootfind Python C++ extension back.
+
+**0.8.0 ** (12/17/2018)
 -	Cleaner file structure, with C++ files in the Cpp directory.
 -	Improved build system for Python, allowing easy installation via pip install python.
 -	Integration with Jupyter Notebook 
