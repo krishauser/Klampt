@@ -53,7 +53,7 @@ or, if you have not installed the Klampt apps:
 ```
 we should see something like this:
 
-![Simple world image](myworld1.png)
+![Simple world image](images/myworld1.png)
 
 Now let's make this a bit more interesting.  Let's put together a table using several blocks.  To do so we will use the cube.off file, which is a unit cube with its origin at its lower corner.  We can scale and translate this cube to make our table.  The following XML file has 5 blocks making up a table. We also would like to change the color of the table, so the \<display\> tag is used to set a brownish RGB color.  It also adds a \<rigidObject\> tag which places a mug hovering over the table.
 
@@ -87,7 +87,7 @@ Now let's make this a bit more interesting.  Let's put together a table using se
 
 Launching this again in RobotPose, we get this:
 
-![Simple world image](myworld2.png)
+![Simple world image](images/myworld2.png)
 
 
 

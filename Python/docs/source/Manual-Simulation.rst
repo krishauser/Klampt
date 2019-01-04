@@ -87,7 +87,9 @@ applied directly to the links. ODE then handles the friction terms.
 
 In PID mode, the torque applied by the actuator is
 
-   :math:`\tau=k_P(\theta_D - \theta_A+k_D(\dot{\theta}_D - \dot{theta_A})+k_I I 
+.. math::
+
+   \tau=k_P(\theta_D - \theta_A)+k_D(\dot{\theta}_D - \dot{theta_A})+k_I I 
 
 where
 
@@ -100,7 +102,9 @@ The friction forces resist the motion of the joint, and Klamp't uses a
 simple stick-slip friction model where the sticking mode breaking
 force is equal to :\math:`\mu_D` and the sliding mode friction force is
 
-   :math:`-sgn(\dot{\theta}_A)(\mu_D+\mu_V|\dot{\theta}_A|). 
+.. math::
+
+   -sgn(\dot{\theta}_A)(\mu_D+\mu_V|\dot{\theta}_A|)
 
 where :math:`\mu_V` is the viscous friction force. *Note: passive damping should be
 handled via the friction terms rather than the PID gain kD*.

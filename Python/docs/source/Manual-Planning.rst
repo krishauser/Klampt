@@ -628,8 +628,6 @@ Up to now, we have not used the optimal motion planning algorithm. This part we 
         MotionPlan.setOptions(type="rrt*")
         self.optimizingPlanner = True
 
-::
-
 Run this python script again. Press "p" continuously, you will find the the algorithm connects the new generated path which to make the final path towards a smooth path.
 
 .. image:: _static/images/motion_planning4.jpg

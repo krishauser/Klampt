@@ -57,7 +57,7 @@ routes:
 #. Low-level `simulation <Manual-Simulation.html>`__ and
    `control <Manual-Control.html>`__ functionality
 #. Medium-level `trajectory representation <Manual-Paths.html>`__, execution
-   tools (:meth:`klampt.model.trajectory.pathToTrajectory`, :meth:`klampt.model.trajectory.executeTrajectory`)
+   tools (:meth:`klampt.model.trajectory.path_to_trajectory`, :meth:`klampt.model.trajectory.execute_trajectory`)
    and `inverse kinematics <Manual-IK.html>`__ and `Cartesian path execution <klampt.model.cartesian_path.html>`__.
 #. High-level `motion planning <Manual-Planning.html>` tools.
 
