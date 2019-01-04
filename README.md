@@ -1,12 +1,12 @@
 # Klamp't [![Build Status](https://travis-ci.org/krishauser/Klampt.svg?branch=master)](https://travis-ci.org/krishauser/Klampt)
 
-![Klamp't image](images/klampt-image.jpg)
+![Klamp't image](Cpp/docs/images/klampt-image.jpg)
 
 
 
 Klamp't (Kris' Locomotion and Manipulation Planning Toolbox) is an open-source, cross-platform software package for robot modeling, simulating, planning, optimization, and visualization. It aims to provide an accessible, wide range of programming tools for learning robotics, analyzing robots, developing algorithms, and prototyping intelligent behaviors. It has particular strengths in robot manipulation and locomotion.
 
-Historically, it began development at Indiana University since 2009 primarily as a research platform. Beginning in 2013 it has been used in education at Indiana University and Duke University. Since then, it has been adopted by other labs around the world, such as Stanford, University of Pisa, and Worcester Polytechnic Institute. It has been used in several real-world projects, including the DARPA Robotics Challenge, Amazon Picking Challenge (2015-2016), the IROS 2016 Robot Grasping and Manipulation Challenge, and Stanford's SimGrasp toolbox.
+Historically, it began development at Indiana University since 2009 primarily as a research platform. Beginning in 2013 it has been used in education at Indiana University and Duke University. Since then, it has been adopted by other labs around the world.
 
 More information can be found on the Klamp't website (http://klampt.org)
 
