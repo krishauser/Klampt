@@ -2,12 +2,14 @@
 
 This folder contains the [Jupyter notebook](http://jupyter.org) extension for [Klamp't](https://github.com/krishauser/Klampt).
 
+*If you installed Klamp't Python API from pip*, you may prefer to install from [the standalone Jupyter extension project](https://github.com/krishauser/Klampt-jupyter-extension) because it is much lighter weight than downloading the full Klamp't source.
+
 ## Installation
 
 To make any use of this extension, you will need to install:
 
 - [Jupyter notebook](http://jupyter.org) 
-- Klamp't Python API (try `pip install klampt`)
+- Klamp't 0.8.x Python API: try `pip install klampt`, or follow the [installation instructions here](http://motion.pratt.duke.edu/klampt/pyklampt_docs/Manual-Installation.html).
 
 To install the extension, you can simply enter
 
@@ -40,17 +42,19 @@ Auto-generated [documentation for the klampt.vis.ipython module can be found her
 
 ## Version history
 
-0.1.0: first release
+0.2.0: matching to Klampt 0.8.0 release (12/31/2018)
+ - Python interface is now in Klampt, not this module.
+ - Widget state can be saved a bit more reliably.
+ - API is closer to the klampt.vis module.
 
+0.1.0: first release
 
 ## Wish list
 
-- Saving widget state to HTML.
 - Saving standalone animations in HTML.
 - Camera resetting in the GUI.
 - More control over background color, lighting, textures.
 - Live editing in the visualization.
-- Closer interface to the klampt.vis module.
 
 ## Contact
 
