@@ -11,11 +11,12 @@ Historically, it began development at Indiana University since 2009 primarily as
 More information can be found on the Klamp't website (http://klampt.org)
 
 - [Features](#features)
-- [Comparison to related packages](#comparison-to-related-packages)
 - [Installation](#installation)
 - [Documentation](#documentation)
 - [Tutorials](#tutorials)
 - [Version history](#version-history)
+- [Who uses Klamp't?](#who-uses-klampt)
+- [Comparison to related packages](#comparison-to-related-packages)
 - [Contributors](#contributors)
 
 
@@ -40,13 +41,6 @@ More information can be found on the Klamp't website (http://klampt.org)
     
 (Please let us know if you are able to compile on other platforms in order to help us support them in the future.)
 
-## Comparison to related packages
-
-- **ROS (Robot Operating System)** is a middleware system designed for distributed control of physical robots, and Klamp't is designed to be interoperable with it. Various ROS software packages can replicate many of the functions of Klamp't when used together (Gazebo, KDE, Rviz, MoveIt!), but this approach is difficult since these tools are not as tightly integrated as they are in Klamp't. ROS has limited support for legged robots, and is poorly suited for prototyping high-rate feedback control systems. ROS is heavy-weight, has a steep learning curve especially for non-CS students, and is also not completely cross-platform (only Ubuntu is fully supported).
-- **OpenRAVE (Robotics and Animation Virtual Environment)** is similar to Klamp't and was developed concurrently by a similar group at CMU. OpenRAVE has more sophisticated manipulation planning functionality. Does not support planning for legged robots, but simulation is possible with some effort. Simulation models are often conflated with planning models whereas in Klamp't they are fully decoupled. OpenRAVE is no longer actively supported.
-- **Gazebo, Webots, V-REP, etc** are robot simulation packages built off of the same class of rigid body simulations as Klamp't. They have more sophisticated sensor simulation capabilities, cleaner APIs, and nicer visualizations but are typically built for mobile robots and have limited functionality for modeling, planning, and optimization. Klamp't also has improved mesh-mesh collision handling that makes collision handling much more stable.
-
-
 
 ## Installation
 
@@ -60,7 +54,7 @@ To run a visualization:
 - `cd Klampt-examples/Python/demos`
 - `python gl_vis.py`
 
-Installation tutorials are also available for
+Installation instructions are also available for
 - [Linux](Tutorials/Install-Linux.md)
 - [Windows](Tutorials/Install-Windows.md)
 - [Mac OSX](Tutorials/Install-Mac.md)
@@ -168,6 +162,13 @@ API documentation is available here
 * Research labs at Brown, RPI, Columbia, and IIT Pisa
 
 * [IROS 2016 Manipulation Challenge, Simulation Track](https://github.com/krishauser/IROS2016ManipulationChallenge)
+
+
+## Comparison to related packages
+
+- **ROS (Robot Operating System)** is a middleware system designed for distributed control of physical robots, and Klamp't is designed to be interoperable with it. Various ROS software packages can replicate many of the functions of Klamp't when used together (Gazebo, KDE, Rviz, MoveIt!), but this approach is difficult since these tools are not as tightly integrated as they are in Klamp't. ROS has limited support for legged robots, and is poorly suited for prototyping high-rate feedback control systems. ROS is heavy-weight, has a steep learning curve especially for non-CS students, and is also not completely cross-platform (only Ubuntu is fully supported).
+- **OpenRAVE (Robotics and Animation Virtual Environment)** is similar to Klamp't and was developed concurrently by a similar group at CMU. OpenRAVE has more sophisticated manipulation planning functionality. Does not support planning for legged robots, but simulation is possible with some effort. Simulation models are often conflated with planning models whereas in Klamp't they are fully decoupled. OpenRAVE is no longer actively supported.
+- **Gazebo, Webots, V-REP, etc** are robot simulation packages built off of the same class of rigid body simulations as Klamp't. They have more sophisticated sensor simulation capabilities, cleaner APIs, and nicer visualizations but are typically built for mobile robots and have limited functionality for modeling, planning, and optimization. Klamp't also has improved mesh-mesh collision handling that makes collision handling much more stable.
 
 
 
