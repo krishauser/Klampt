@@ -35,10 +35,9 @@ And then launch Jupyter:
 
 > jupyter notebook
 
-The Jupyter frontend widget can be created by a `KlamptWidget`, which is defined in the `klampt.vis.ipython` module. 
-Try typing `help(klampt.vis.ipython.KlamptWidget)` for more help.  The `klampt.vis.ipython` module also contains useful helper widgets for editing robot configurations and points.
+The Jupyter frontend widget can be created by a `KlamptWidget`, which is defined in the `klampt.vis.ipython` module. The module also contains useful helper widgets for editing robot configurations and points.
 
-Auto-generated [documentation for the klampt.vis.ipython module can be found here](http://motion.pratt.duke.edu/klampt/pyklampt_docs/ipython_8py.html).
+[API documentation can be found found here](http://motion.pratt.duke.edu/klampt/pyklampt_docs/klampt.vis.ipython.html).
 
 ## Version history
 
