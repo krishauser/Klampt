@@ -17,17 +17,22 @@ import time
 class GLViewport:
     """
     A class describing an OpenGL camera view.
-        - x,y: upper left hand corner of the view in the OpenGL canvas, in pixels
-        - w,h: width and height of the view, in pixels
-        - orthogonal: if true, does an orthogonal projection. (Not supported)
-        - camera: an orbit camera (see :class:`orbit`)
-        - fov: the camera field of view in x direction
-        - clippingplanes: a pair containing the near and far clipping planes
+
+    Attributes:
+        x,y (int): upper left hand corner of the view in the OpenGL canvas, in screen pixels
+        w,h (int): width and height of the view, in screen pixels
+        screenDeviceScale (float): if not 1, multiply screen pixel coordinates by this to get
+            openGL pixel coordinates (usually Mac Retina displays)
+        orthogonal (bool): if true, does an orthogonal projection. (Not supported)
+        camera: an orbit camera (see :class:`orbit`)
+        fov (float): the camera field of view in x direction, in degrees
+        clippingplanes (pair of floats): a pair containing the near and far clipping planes
     """
     def __init__(self):
         self.orthogonal = False
         self.x,self.y = 0,0
         self.w,self.h = 640,480
+        self.screenDeviceScale = 1
         self.camera = camera.orbit()
         self.camera.dist = 6.0
         #x field of view in degrees
@@ -140,14 +145,15 @@ class GLProgram:
     Assumes that glinit.py has been imported to define _GLBackend.
 
     Attributes:
-        - name: title of the window (only has an effect before calling
-          run())
-        - window: the QtBackend or GLUTBackend instance
-        - view: GLViewport instance.  If this is provided to an empty _GLBackend
-          window, the w,h gives a hint to the size of the window.  It is then updated
-          by the user and setting the viewport size has no effect on the window.
-        - clearColor: the RGBA floating point values of the background color.
-        - glutInitialized: true if GLUT has been initialized
+        name (str): title of the window (only has an effect before calling
+            run())
+        window: the QtBackend or GLUTBackend instance
+        view (GLViewport): describes the OpenGL viewport.  If this is provided to an
+            empty _GLBackend window, the w,h gives a hint to the size of the window. 
+            It is then updated by the user and setting the viewport size has no effect on the window.
+        clearColor (list of 4 floats): the RGBA floating point values of the background color.
+        actions (list of GLProgramAction): the list of actions.  Must be populated using
+            add_action before init().
     """
     def __init__(self,name="OpenGL Program"):
         global _GLBackend
@@ -167,6 +173,7 @@ class GLProgram:
         Note: might not return, in the case of GLUT.
         """
         import visualization
+        visualization.setWindowTitle(self.name)
         visualization.run(self)
 
     def initialize(self):
@@ -251,7 +258,8 @@ class GLProgram:
         return True
         
     def idlefunc(self):
-        """Called on idle.  May be overridden."""
+        """Called on idle.  Default value stops all additional idle calls.  Must be
+        overridden if you want to do something in the idle loop."""
         #print "Sleeping idle from",self.__class__.__name__
         self.idlesleep()
 
@@ -266,11 +274,11 @@ class GLProgram:
         # Viewport
         view = self.view
         ydevice = (self.window.height - view.y - view.h)
-        glViewport(view.x,ydevice,view.w,view.h)
+        glViewport(view.x*view.screenDeviceScale,ydevice*view.screenDeviceScale,view.w*view.screenDeviceScale,view.h*view.screenDeviceScale)
         
         # Initialize
         glClearColor(*self.clearColor)
-        glScissor(view.x,ydevice,view.w,view.h)
+        glScissor(view.x*view.screenDeviceScale,ydevice*view.screenDeviceScale,view.w*view.screenDeviceScale,view.h*view.screenDeviceScale)
         glEnable(GL_SCISSOR_TEST);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST)
@@ -283,7 +291,7 @@ class GLProgram:
         """
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-        glOrtho(0,self.view.w,self.view.h,0,-1,1);
+        glOrtho(0,self.view.w*self.view.screenDeviceScale,self.view.h*self.view.screenDeviceScale,0,-1,1);
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
        
@@ -312,8 +320,9 @@ class GLProgram:
         if hasattr(self.window,'makeCurrent'):
             self.window.makeCurrent()
         glReadBuffer(GL_FRONT);
-        screenshot = glReadPixels( self.view.x, self.view.y, self.view.w, self.view.h, GL_RGBA, GL_UNSIGNED_BYTE)
-        im = Image.frombuffer("RGBA", (self.view.w, self.view.h), screenshot, "raw", "RGBA", 0, 0)
+        x,y,w,h = self.view.x*self.view.screenDeviceScale,self.view.y*self.view.screenDeviceScale,self.view.w*self.view.screenDeviceScale,self.view.h*self.view.screenDeviceScale
+        screenshot = glReadPixels( x, y, w, h, GL_RGBA, GL_UNSIGNED_BYTE)
+        im = Image.frombuffer("RGBA", (w, h), screenshot, "raw", "RGBA", 0, 0)
         print "Saving screen to",fn
         if not multithreaded:
             im.save(fn)
@@ -400,17 +409,17 @@ class GLRealtimeProgram(GLNavigationProgram):
     """A GLNavigationProgram that refreshes the screen at a given frame rate.
 
     Attributes:
-        - ttotal: total elapsed time assuming a constant frame rate
-        - fps: the frame rate in Hz
-        - dt: 1.0/fps
-        - counter: a frame counter
+        ttotal (float): total elapsed time assuming a constant frame rate
+        fps (float): the frame rate in Hz
+        dt (float): 1.0/fps
+        counter (int): a frame counter
+        lasttime (float): time.time() value on the last frame.
     """
     def __init__(self,name):        
         GLNavigationProgram.__init__(self,name)
         self.ttotal = 0.0
         self.fps = 50
         self.dt = 1.0/self.fps
-        self.running = True
         self.counter = 0
         self.lasttime = time.time()
 
@@ -438,7 +447,7 @@ class GLRealtimeProgram(GLNavigationProgram):
 
 class GLPluginProgram(GLRealtimeProgram):
     """This base class should be used with a GLPluginBase object to handle the
-    GUI functionality (see glcommon.py.  Call setPlugin() on this object to set
+    GUI functionality (see glcommon.py).  Call setPlugin() on this object to set
     the currently used plugin.  pushPlugin()/popPlugin() can also be used to
     set a hierarchy of plugins."""
     def __init__(self,name="GLWidget"):

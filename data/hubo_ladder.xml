@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<world>
-	<robot name="huboplus" file="robots/huboplus/huboplus_col.rob" />
-	<terrain file="terrains/block.off" />
-	<terrain file="terrains/drc_ladder.off" scale="1 1 1" translation = "0.219615 0.32 0" rotateZ = "3.14159"/>
-</world>

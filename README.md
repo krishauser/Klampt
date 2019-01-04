@@ -1,6 +1,6 @@
-# Klamp't [![Build Status](https://travis-ci.org/krishauser/Klampt.svg?branch=master)](https://travis-ci.org/arocchi/Klampt)
+# Klamp't [![Build Status](https://travis-ci.org/krishauser/Klampt.svg?branch=master)](https://travis-ci.org/krishauser/Klampt)
 
-![Klamp't image](Documentation/images/klampt-image.jpg)
+![Klamp't image](images/klampt-image.jpg)
 
 
 
@@ -50,70 +50,54 @@ More information can be found on the Klamp't website (http://klampt.org)
 
 ## Installation
 
-An installation tutorial is available for
-- [Linux](Documentation/Tutorials/Install-Linux.md)
-- [Windows](Documentation/Tutorials/Install-Windows.md)
-- [Mac OSX](Documentation/Tutorials/Install-Mac.md).
+Quick start (Python API only):
+- `pip install klampt`
 
-You can also use Docker [as described here](Documentation/Install-Docker.md).
+To run a visualization:
+- `pip install PyOpenGL`
+- `pip install PyQt5`
+- `git clone http://github.com/krishauser/Klampt-examples` (this is needed to run example programs)
+- `cd Klampt-examples/Python/demos`
+- `python gl_vis.py`
+
+Installation tutorials are also available for
+- [Linux](Tutorials/Install-Linux.md)
+- [Windows](Tutorials/Install-Windows.md)
+- [Mac OSX](Tutorials/Install-Mac.md).
+- [Jupyter notebook](Jupyter/README.md)
+- [Docker](Install-Docker.md).
 
 
 ## Documentation
 
-A more detailed manual of the library's components is available here:
-- [Installation](Documentation/Manual-Installation.md)
-- [Organization](Documentation/Manual-Organization.md)
-- [Running apps](Documentation/Manual-Apps.md)
-- [Math](Documentation/Manual-Math.md) 
-- [Kinematic modeling](Documentation/Manual-Modeling.md)
-- [Inverse kinematics](Documentation/Manual-IK.md)
-- [Geometry and appearance](Documentation/Manual-Geometry.md)
-- [Paths and trajectories](Documentation/Manual-Paths.md)
-- [Motion planning](Documentation/Manual-Planning.md)
-- [Simulation](Documentation/Manual-Simulation.md)
-- [Dynamics and contact mechanics](Documentation/Manual-Dynamics.md)
-- [Visualization](Documentation/Manual-Visualization.md)
-- [Control and sensing](Documentation/Manual-Control.md)
-- [System integration](Documentation/Manual-Systems.md)
-- [I/O](Documentation/Manual-IO.md)
-- [File types](Documentation/Manual-FileTypes.md)
-- [Resource management](Documentation/Manual-Resources.md) (incomplete)
+[Python Manual and API Documentation](http://motion.pratt.duke.edu/klampt/0.8/pyklampt_docs/)
+
+[C++ Manual](Cpp/docs/Manual.md)
 
 API documentation is available here
-- [Klamp't API](http://klampt.org/klampt_docs)
-- [Klamp't Python bindings API](http://klampt.org/pyklampt_docs)
-- [KrisLibrary API](http://klampt.org/krislibrary_docs)
-
-Other documentation includes:
-- [FAQ](Documentation/FAQ.md)
-- [Programming notes](Documentation/Programming-Notes.md)
-- [Notes about reading Python documentation](Documentation/Reading-Python-Docs.md), which can be a little confusing for some classes due to the Python binding generator (SWIG).
-
-
-## Tutorials 
-
-Tutorials are available in the [Tutorials folder](Documentation/Tutorials), with a more complete list on the [Klamp't website](http://klampt.org#tutorials). 
-
-- Install Klampt ([Linux](Documentation/Tutorials/Install-Linux.md), [Windows](Documentation/Tutorials/Install-Windows.md), [Mac](Documentation/Tutorials/Install-Mac.md))
-- Build and edit a world file([Python](Documentation/Tutorials/Build-and-edit-world.md))
-- Dynamically create a world using code ([Python](Documentation/Tutorials/Create-a-world-using-code.md))
-- Generate a path/trajectory from keyframes ([Apps](Documentation/Tutorials/Path-generation-using-Apps.md), [Python](Documentation/Tutorials/Path-generation-using-Python.md))
-- Animate a video of a path/trajectory ([Apps](Documentation/Tutorials/Animation-generation-using-Apps.md), [Python](Documentation/Tutorials/Animation-generation-using-Python.md))
-- Simulate the execution of a keyframe path ([Apps](Documentation/Tutorials/Run-a-simulation-Apps.md), [C++](Documentation/Tutorials/Run-a-simulation-Cpp.md),[Python](Documentation/Tutorials/Run-a-simulation-Python.md))
-- Implement a custom controller for a simulated robot ([C++](Documentation/Tutorials/Custom-controller-simulated-cpp.md), [Python](Documentation/Tutorials/Custom-controller-simulated-Python.md))
-- Process clicks on the robot or world ([C++](Documentation/Tutorials/Click-on-robot-cpp.md), [Python](Documentation/Tutorials/Click-on-robot-Python.md))
-- Run a motion planner and add a custom feasibility test to a motion planner([Python](Documentation/Tutorials/Motion-planning-Python.md))
-- Set up a simulated camera sensor and save frames to disk ([Apps](Documentation/Tutorials/Simulated-sensor-Apps.md), [Python](Documentation/Tutorials/Simulated-sensor-Python.md))
-- Display ROS point cloud messages ([Python](Documentation/Tutorials/Ros-point-cloud.md))
-- Import and calibrate a URDF robot ([Apps](Documentation/Tutorials/Import-and-calibrate-urdf.md))
-- Solve an inverse kinematics problem ([C++](Documentation/Tutorials/Inverse-kinematics-cpp.md), [Python](Documentation/Tutorials/Inverse-kinematics-Python.md))
-- Grasp and Object ([C++](Documentation/Tutorials/Grasp-object-cpp.md))
-- Run a batch simulation ([Python](Documentation/Tutorials/Batch-simulation-Python.md))
+- [Klamp't C++ API](http://klampt.org/klampt_docs)
+- [KrisLibrary C++ API](http://klampt.org/krislibrary_docs)
+- [Klamp't Python bindings API](http://klampt.org/pyklampt_docs/klampt.html)
 
 
 ## Version history
 
-**0.7 Latest version** (3/24/2017)
+**0.8 Latest version** (12/17/2018)
+-	Cleaner file structure, with C++ files in the Cpp directory.
+-	Improved build system for Python, allowing easy installation via pip install python.
+-	Integration with Jupyter Notebook 
+-	Added Python utility programs (klampt_browse, klampt_sim, klampt_thumbnail).
+-	Improvements support Python visualization on Mac.
+-	Upgraded to PyQt5.  PyQt4 is still supported for now.
+-	Geometry conversions exposed in Python via the convert function.
+-	Improved usage of some graphics card resources for streaming point clouds.
+-	Support for LOG4CXX logging.
+-	Removed dependencies on Boost and upgraded to C++11.
+-	Removed dependencies on GLUT and GLUI.  (Some examples still need to be upgraded to Qt.)
+-	Cleaned up some cruft in KrisLibrary.
+
+
+**0.7** (3/24/2017)
 
 - Improved simulation stability, including adaptive time stepping and instability detection/recovery.
 - The proprietary `.tri` geometry file format has been replaced with the Object File Format (OFF) for better compatibility with 3D modeling packages.
@@ -156,6 +140,31 @@ Tutorials are available in the [Tutorials folder](Documentation/Tutorials), with
 - Miscellaneous debugging throughout
 
 **0.5. Initial release** (11/17/2013)
+
+
+
+## Who uses Klamp't?
+
+(This is not an exhaustive list; if you are using Klampt and would like to be listed, let us know!)
+
+* [Intelligent Motion Laboratory (IML)](http://motion.pratt.duke.edu), on the Baxter, [TRINA](http://motion.pratt.duke.edu/nursing), [RoboSimian](http://motion.pratt.duke.edu/locomotion), and UR5 robots.
+
+* Multiple IML open-source projects, including:
+
+  * [Global Redundancy Resolution](https://github.com/krishauser/GlobalRedundancyResolution)
+  * [Semi-Infinite Optimization](https://github.com/krishauser/SemiInfiniteOptimization)
+  * [Inverse Kinematics Database (IKDB)](https://github.com/krishauser/ikdb)
+  * [Robotic Systems Open Textbook](https://github.com/krishauser/RoboticSystemsBook)
+
+* Duke courses (ECE 383, ECE 489)
+
+* [SimGrasp](https://web.stanford.edu/~shiquan/SimGrasp/sim-grasp-manual/about.html) at Stanford University
+
+* Research labs at Brown, RPI, Columbia, and IIT Pisa
+
+* [IROS 2016 Manipulation Challenge, Simulation Track](https://github.com/krishauser/IROS2016ManipulationChallenge)
+
+
 
 ## Contributors
 

@@ -1,22 +1,24 @@
 """Operations for rigid transformations in Klamp't.  All rigid
-transformations are specified in the form T=(R,t),
+transformations are specified in the form ``T=(R,t)``,
 where R is a 9-list specifying the entries of the rotation matrix in column
 major form, and t is a 3-list specifying the translation vector.
 
 Primarily, this form was chosen for interfacing with C++ code.  C++ methods
-on objects of the form T = X.getTransform() will return se3 element proper.
-Conversely, X.setTransform(*T) will set the rotation and translation of some
-transform.
+on objects of the form ``T = X.getTransform()`` will return se3 element proper.
+Conversely, ``X.setTransform(*T)`` will set the rotation and translation of
+some transform.
 
 Extracting the so3 portion of the transform is simply T[0].  Extracting
 the translation vector is simply T[1].
 
-Applying an se3 element to a point p is apply(T,p).  Applying it to a
-directional quantity d is either apply_rotation(T,d) or so3.apply(T[0],d).
+Applying an se3 element to a point p is ``apply(T,p)``.  Applying it to a
+directional quantity ``d`` is either ``apply_rotation(T,d)`` or
+``so3.apply(T[0],d)``.
 
-To flatten into a single array, use model.getConfig(T), which is equivalent
-to T[0] + T[1].  To read and write to disk in a way that is compatible with 
-other Klamp't IO routines, use io.loader.writeSe3() and io.loader.readSe3().
+To flatten into a single array, use ``klampt.model.getConfig(T)``, which is
+equivalent to ``T[0] + T[1]``.  To read and write to disk in a way that is
+compatible with  other Klamp't IO routines, use ``klampt.io.loader.writeSe3()``
+and ``klampt.io.loader.readSe3()``.
 """
 
 import vectorops

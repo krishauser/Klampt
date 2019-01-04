@@ -1,6 +1,19 @@
+"""Functions for visual editing.  Used by the klampt.io.resource module
+in ``resource.get(...)`` and ``resource.edit(...)``.
+
+A couple editors, SelectionEditor and WorldEditor, cannot be launched from
+the resource module.  To use these, call::
+
+    from klampt.vis import editors
+    ed = editors.SelectionEditor("Some links",[],"Select the links that you want to modify",world))
+    indices = editors.run(ed)
+
+"""
+
 import glcommon
 import glinit
 import visualization
+import time
 from ..math import vectorops,so3,se3
 from ..robotsim import WidgetSet,RobotPoser,ObjectPoser,TransformPoser,PointPoser,WorldModel,RobotModelLink,RigidObjectModel,IKObjective
 from ..model.subrobot import SubRobotModel
@@ -241,6 +254,7 @@ class TrajectoryEditor(VisualEditorBase):
         self.durationSpinBox = QDoubleSpinBox()
         self.durationSpinBox.setRange(0,10.0)
         self.durationSpinBox.setSingleStep(0.01)
+        self.durationSpinBox.setDecimals(4)
         self.insertButton = QPushButton("Insert")
         self.deleteButton = QPushButton("Delete")
         self.indexSpinBox.valueChanged.connect(self.indexChanged)
@@ -432,6 +446,17 @@ class TrajectoryEditor(VisualEditorBase):
                     self.world.robot(i).drawGL()
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
+
+        #draw animation, if available
+        if self.animTrajectoryTime is not None:
+            for j in xrange(self.robot.numLinks()):
+                self.robot.link(j).appearance().setColor(1.0,1.0,0,0.5)
+            q = self.animTrajectory.eval(self.animTrajectoryTime,'loop')
+            self.robot.setConfig(q)
+            self.robot.drawGL()
+            for j in xrange(self.robot.numLinks()):
+                self.robot.link(j).appearance().setColor(0.5,0.5,0.5,1)
+        
         #draw most opaque first
         order = []
         if self.editingIndex < 0:
@@ -455,16 +480,6 @@ class TrajectoryEditor(VisualEditorBase):
                 self.robot.drawGL()
         for j in xrange(self.robot.numLinks()):
             self.robot.link(j).appearance().setColor(0.5,0.5,0.5,1)
-
-        #draw animation, if available
-        if self.animTrajectoryTime is not None:
-            for j in xrange(self.robot.numLinks()):
-                self.robot.link(j).appearance().setColor(1.0,1.0,0,0.5)
-            q = self.animTrajectory.eval(self.animTrajectoryTime,'loop')
-            self.robot.setConfig(q)
-            self.robot.drawGL()
-            for j in xrange(self.robot.numLinks()):
-                self.robot.link(j).appearance().setColor(0.5,0.5,0.5,1)
         glDisable(GL_BLEND)
 
     def idle(self):
@@ -743,70 +758,80 @@ class ObjectTransformEditor(VisualEditorBase):
         return VisualEditorBase.mousefunc(self,button,state,x,y)
 
 class WorldEditor(VisualEditorBase):
-    """Note: need to call finalize in order to get terrain geometries updated"""
+    """Edits poses of robots, rigid objects, and terrains in a world.
+
+    Note: need to call ``finalize()`` in order to get terrain geometries updated.
+    """
     def __init__(self,name,value,description):
-        VisualEditorBase.__init__(self,name,value,description,None)
-        world = value.copy()
-        for i in range(value.numTerrains()):
-            tobj = world.makeRigidObject(value.terrain(i).getName())
-            tobj.geometry().set(value.terrain(i).geometry())
-            bmin,bmax = value.terrain(i).geometry().getBB()
-            shift = vectorops.interpolate(bmin,bmax,0.5)
-            tobj.geometry().transform(so3.identity(),vectorops.mul(shift,-1.0))
-            tobj.appearance().set(value.terrain(i).appearance())
-            tobj.setTransform(so3.identity(),shift)
-        for i in xrange(value.numTerrains()):
-            world.remove(world.terrain(0))
-        self._world = world
-        #self.world = world
+        VisualEditorBase.__init__(self,name,value,description,value)
+        world = value
+        self.world = value
         self.robotPosers = [RobotPoser(world.robot(i)) for i in range(world.numRobots())]
         self.objectPosers = [ObjectPoser(world.rigidObject(i)) for i in range(world.numRigidObjects())]
+        self.terrainPosers = [TransformPoser() for i in range(world.numTerrains())]
+        self.terrainGeometryCenters = []
+        for i in range(world.numTerrains()):
+            bmin,bmax=world.terrain(i).geometry().getBB()
+            gc = vectorops.interpolate(bmin,bmax,0.5)
+            T0 = world.terrain(i).geometry().getCurrentTransform()
+            self.terrainGeometryCenters.append(se3.apply(se3.inv(T0),gc))
+            #Tw.R = Tg.R
+            #Tw.t = gc = Tg.R*gcloc + Tg.t
+            self.terrainPosers[i].set(T0[0],gc)
         for r in self.robotPosers:
             self.addWidget(r)
         for r in self.objectPosers:
             self.addWidget(r)
-        self.drawn = False
+        for r in self.terrainPosers:
+            self.addWidget(r)
 
     def display(self):
-        for i in xrange(self._world.numTerrains()):
-            self._world.terrain(i).drawGL()
-        for i in xrange(self._world.numRigidObjects()):
-            self._world.rigidObject(i).drawGL()
+        #Override display handler since the widget draws the rigid objects and transforms
+        for i in xrange(self.world.numTerrains()):
+            #self.world.terrain(i).geometry().getCurrentTransform()
+            self.world.terrain(i).appearance().drawWorldGL(self.world.terrain(i).geometry())
         self.klamptwidgetmaster.drawGL(self.viewport())
-        return True
+        return False
 
     def finalize(self):
-        """Copies to the provided world."""
-        world = self._world
-        for i in xrange(self.value.numRobots()):
-            self.value.robot(i).setConfig(world.robot(i).getConfig())
-        for i in xrange(self.value.numRigidObjects()):
-            self.value.rigidObject(i).setTransform(*world.rigidObject(i).getTransform())
-        ofs = self.value.numRigidObjects()
-        for i in xrange(self.value.numTerrains()):
-            bmin,bmax = self.value.terrain(i).geometry().getBB()
-            shift = vectorops.interpolate(bmin,bmax,0.5)
-            Tc = world.rigidObject(i+ofs).getTransform()
-            self.value.terrain(i).geometry().transform(Tc[0],vectorops.sub(Tc[1],shift))
+        """Applies the transforms to all the terrain geometries."""
+        for i in xrange(self.world.numTerrains()):
+            T0 = self.world.terrain(i).geometry().getCurrentTransform()
+            self.world.terrain(i).geometry().setCurrentTransform(*se3.identity())
+            self.world.terrain(i).geometry().transform(*T0)
     
     def instructions(self):
         return 'Right-click and drag on the widgets to pose the world objects'
 
+    def motionfunc(self,button,state,x,y):
+        for i,r in enumerate(self.terrainPosers):
+            if r.hasFocus():
+                Tw = r.get()
+                gcloc = self.terrainGeometryCenters[i]
+                #Tw.t = Tw.R*gc + Tg.t
+                self.world.terrain(i).geometry().setCurrentTransform(Tw[0],vectorops.sub(Tw[1],so3.apply(Tw[0],gcloc)))
+        return VisualEditorBase.motionfunc(self,button,state,x,y)
+
 
 #Qt stuff
 if glinit._PyQtAvailable:
-    from PyQt4.QtCore import *
-    from PyQt4.QtGui import *
+    if glinit._PyQt5Available:
+        from PyQt5.QtCore import *
+        from PyQt5.QtGui import *
+        from PyQt5.QtWidgets import *
+    else:
+        from PyQt4.QtCore import *
+        from PyQt4.QtGui import *
+    global _vis_id,_my_dialog_res,_doexit
     _vis_id = None
     _my_dialog_res = None
-    _my_dialog_retval = None
     _doexit = False
 
     class _EditDialog(QDialog):
         def __init__(self,glwidget):
             QDialog.__init__(self)
             self.glwidget = glwidget
-            glwidget.setMinimumSize(glwidget.width,glwidget.height)
+            #glwidget.setMinimumSize(glwidget.width,glwidget.height)
             glwidget.setMaximumSize(4000,4000)
             glwidget.setSizePolicy(QSizePolicy(QSizePolicy.Maximum,QSizePolicy.Maximum))
             self.instructions = QLabel()
@@ -819,15 +844,27 @@ if glinit._PyQtAvailable:
             self.extraDialog = QFrame()
             self.extraDialog.setSizePolicy(QSizePolicy(QSizePolicy.Minimum,QSizePolicy.Minimum))
             self.topBoxLayout.addWidget(self.extraDialog)
-            self.layout = QVBoxLayout(self)
-            self.layout.addWidget(self.topBox)
+            self.layout = QVBoxLayout()
+            #self.layout.addWidget(self.topBox)
             self.layout.addWidget(glwidget)
             self.layout.addWidget(self.description2)
             self.layout.setStretchFactor(glwidget,10)
+            #self.layout.setStretchFactor(self.topBox,0)
             self.buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel,Qt.Horizontal, self)
             self.buttons.accepted.connect(self.accept)
             self.buttons.rejected.connect(self.reject)
             self.layout.addWidget(self.buttons)
+            self.splitter = QSplitter(Qt.Vertical)
+            top = QWidget(self)
+            bottom = QWidget(self)
+            top.setLayout(self.topBoxLayout)
+            bottom.setLayout(self.layout)
+            self.splitter.addWidget(top)
+            self.splitter.addWidget(bottom)
+            hbox = QHBoxLayout(self)
+            hbox.addWidget(self.splitter)
+            self.splitter.setSizes([self.topBoxLayout.sizeHint().height(),self.layout.sizeHint().height()])
+
 
         def setEditor(self,editorObject):
             self.editorObject = editorObject
@@ -853,29 +890,35 @@ if glinit._PyQtAvailable:
         def accept(self):
             global _my_dialog_res
             _my_dialog_res = True
-            print "Calling GLWidget.close"
-            self.glwidget.close()
             print "#########################################"
-            print "klampt.vis: Dialog accept"
+            print "klampt.vis: EditDialog accept"
             print "#########################################"
+            if hasattr(self,'finalize'):
+                self.finalize()
             return QDialog.accept(self)
         def reject(self):
             global _my_dialog_res
             _my_dialog_res = False
-            print "Calling GLWidget.close"
-            self.glwidget.close()
             print "#########################################"
-            print "klampt.vis: Dialog reject"
+            print "klampt.vis: EditDialog reject"
             print "#########################################"
             return QDialog.reject(self)
 
 
     def run(editorObject):
-        """Returns a pair (res,value) where res is True / False if OK / Cancel was pressed, respectively, 
-        and value is the return value of the editor object
         """
-        assert isinstance(editorObject,VisualEditorBase),"Must provide a VisualEditorBase instance to run()"
-        global _vis_id, _my_dialog_res, _my_dialog_retval
+        Args:
+            editorObject (VisualEditorBase): some subclass of VisualEditorBase
+
+        Returns:
+            (tuple): A pair (res,value) containing: 
+
+                * res (bool):True / False if OK / Cancel was pressed, respectively, 
+                * value: the return value of the editor object
+
+        """
+        assert isinstance(editorObject,VisualEditorBase),"Must provide a VisualEditorBase instance to vis.editors.run()"
+        global _vis_id, _my_dialog_res
 
         old_vis_window = visualization.getWindow()
         if _vis_id == None:
@@ -884,6 +927,7 @@ if glinit._PyQtAvailable:
             visualization.setWindow(_vis_id)
         visualization.setPlugin(editorObject)
         def makefunc(gl_backend):
+            assert gl_backend is not None
             res = _EditDialog(gl_backend)
             res.setEditor(editorObject)
             visualization._checkWindowCurrent(editorObject.world)
@@ -891,18 +935,29 @@ if glinit._PyQtAvailable:
         visualization.customUI(makefunc)
         visualization.dialog()
         res,retVal = _my_dialog_res,editorObject.value
+        assert res is not None,"vis.editors.run(): There may be something wrong with the vis module not catching the customUI, or terminating from a prior dialog?"
 
         if _doexit:
             visualization.kill()
             print "Exiting program."
             exit(0)
 
-        visualization.setWindow(old_vis_window)
         visualization.setPlugin(None)
         visualization.customUI(None)
+        visualization.setWindow(old_vis_window)
 
-        print "Result",res,"return value",retVal
+        print "vis.editors.run(): Result",res,"return value",retVal
         return res,retVal
 else:
     def run(editorObject):
+        """
+        Args:
+            editorObject (VisualEditorBase): some subclass of VisualEditorBase
+
+        Returns:
+            res,value (bool, value pair): 
+
+                * res is True / False if OK / Cancel was pressed, respectively, 
+                * value is the return value of the editor object
+        """
         raise ValueError("Unable to perform visual editing without PyQt")

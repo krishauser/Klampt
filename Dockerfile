@@ -11,8 +11,6 @@ RUN apt-get update && \
 	apt-get -y install g++ \
 	 cmake \
 	 git \
-	 libboost-system-dev \
-	 libboost-thread-dev \
 	 freeglut3 \
 	 freeglut3-dev \
 	 libglpk-dev \

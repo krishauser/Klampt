@@ -49,6 +49,7 @@ Documentation/build
 Documentation/html
 Documentation/latex
 Documentation/*.tags
+Documentation/doxygen.conf
 bin
 lib
 
@@ -82,25 +83,13 @@ _CPack*
 *.log
 *.csv
 
-#binary files
-CartPole
-ContactPlan
-DynamicPlanDemo
-Library/KrisLibrary/
-Library/glui*
-Library/glew*
-Library/ode*
-Merge
-MotorCalibrate
-Pack
-PlanDemo
-RealTimePlanning
-RobotPose
-RobotTest
-SafeSerialClient
-SimTest
-SimUtil
-TrajOpt
-URDFtoRob
-UserTrials
-UserTrialsSerial
+#include/ directory
+include/
+
+#binary files and dependencies
+bin/
+Cpp/Examples/bin
+Cpp/Dependencies/KrisLibrary/
+Cpp/Dependencies/glui*
+Cpp/Dependencies/glew*
+Cpp/Dependencies/ode*

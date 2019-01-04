@@ -15,7 +15,6 @@ from ..math import so3,vectorops
 from ..model.contact import ContactPoint, Hold
 from ..model.trajectory import Trajectory
 
-
 def writeVector(q):
     """Writes a vector to a string in the length-prepended format 'n v1 ... vn'"""
     return str(len(q))+'\t'+' '.join(str(v) for v in q)
@@ -138,36 +137,42 @@ def writeContactPoint(cp):
 def readIKObjective(text):
     """Reads an IKObjective from a string in the Klamp't native format
     
-    'link destLink posConstraintType [pos constraint items] ...
-    rotConstraintType [rot constraint items]'
+    ``link destLink posConstraintType [pos constraint items] ...
+    rotConstraintType [rot constraint items]``
     
     where link and destLink are integers, posConstraintType is one of
-    - N: no constraint
-    - P: position constrained to a plane
-    - L: position constrained to a line
-    - F: position constrained to a point
+
+    * N: no constraint
+    * P: position constrained to a plane
+    * L: position constrained to a line
+    * F: position constrained to a point
+
     and rotConstraintType is one of
-    - N: no constraint
-    - T: two-axis constraint (not supported)
-    - A: rotation constrained about axis 
-    - F: fixed rotation
+
+    * N: no constraint
+    * T: two-axis constraint (not supported)
+    * A: rotation constrained about axis 
+    * F: fixed rotation
 
     The [pos constraint items] contain a variable number of whitespace-
     separated items, dependending on posConstraintType:
-    - N: 0 items
-    - P: the local position xl yl zl, world position x y z on the plane, and
+
+    * N: 0 items
+    * P: the local position xl yl zl, world position x y z on the plane, and
       plane normal nx,ny,nz
-    - L: the local position xl yl zl, world position x y z on the line, and
+    * L: the local position xl yl zl, world position x y z on the line, and
       line axis direction nx,ny,nz
-    - F: the local position xl yl zl and world position x y z
+    * F: the local position xl yl zl and world position x y z
 
     The [rot constraint items] contain a variable number of whitespace-
     separated items, dependending on rotConstraintType:
-    - N: 0 items
-    - T: not supported
-    - A: the local axis xl yl zl and the world axis x y z
-    - F: the world rotation matrix, in moment (aka exponential map) form
-      mx my mz (see so3.from_moment()
+
+    * N: 0 items
+    * T: not supported
+    * A: the local axis xl yl zl and the world axis x y z
+    * F: the world rotation matrix, in moment (aka exponential map) form
+      mx my mz (see so3.from_moment())
+
     """
     items = text.split()
     if len(items) < 4:
@@ -378,9 +383,10 @@ readers = {'Config':readVector,
            'Vector3':readVectorRaw,
            'Matrix':readMatrix,
            'Matrix3':readMatrix3,
-           'RotationMatrix':readSo3,
+           'Rotation':readSo3,
            'RigidTransform':readSe3,
            'IKObjective':readIKObjective,
+           'IKGoal':readIKObjective,
            'Hold':readHold,
            'GeometricPrimitive':readGeometricPrimitive,
            'IntArray':readIntArray,
@@ -393,9 +399,10 @@ writers = {'Config':writeVector,
            'Vector3':writeVectorRaw,
            'Matrix':writeMatrix,
            'Matrix3':writeMatrix3,
-           'RotationMatrix':writeSo3,
+           'Rotation':writeSo3,
            'RigidTransform':writeSe3,
            'IKObjective':writeIKObjective,
+           'IKGoal':writeIKObjective,
            'Hold':writeHold,
            'GeometricPrimitive':writeGeometricPrimitive,
            'IntArray':writeVector,
@@ -415,6 +422,12 @@ def read(type,text):
         raise RuntimeError("Reading of objects of type "+type+" not supported")
     return readers[type](text)
 
+def loadWorldModel(fn):
+    w = WorldModel()
+    if not w.loadFile(fn):
+        raise RuntimeError("Error reading WorldModel from "+fn)
+    return w
+
 def loadGeometry3D(fn):
     g = Geometry3D()
     if not g.loadFile(fn):
@@ -422,11 +435,12 @@ def loadGeometry3D(fn):
     return g
 
 def loadTrajectory(fn):
-    value = trajectory.Trajectory()
+    value = Trajectory()
     value.load(fn)
     return value
 
 def loadMultiPath(fn):
+    from ..model import multipath
     value = multipath.MultiPath()
     value.load(fn)
     return value
@@ -435,12 +449,12 @@ loaders = {'Trajectory':loadTrajectory,
            'LinearPath':loadTrajectory,
            'MultiPath':loadMultiPath,
            'Geometry3D':loadGeometry3D,
+           'WorldModel':loadWorldModel,
            }
 
 savers = {'Trajectory':lambda x,fn:x.save(fn),
           'LinearPath':lambda x,fn:x.save(fn),
           'MultiPath':lambda x,fn:x.save(fn),
-          'Geometry3D':lambda x,fn:x.saveFile(fn),
           }
 
 def save(obj,type,fn):
@@ -452,13 +466,14 @@ def save(obj,type,fn):
         f.write(writers[type](obj)+'\n')
         f.close()
         return True
+    elif hasattr(obj,'saveFile'):
+        return obj.saveFile(fn)
     else:
         raise RuntimeError("Saving of type "+type+" is not supported")
 
 
 def load(type,fn):
     """General-purpose load"""
-    
     if type in loaders:
         return loaders[type](fn)
     elif type in readers:
@@ -496,16 +511,14 @@ def toJson(obj,type='auto'):
                         raise RuntimeError("Could not parse object "+str(obj))
         elif isinstance(obj,(bool,int,float,str,unicode)):
             type = 'Value'
-        elif isinstance(obj,ContactPoint):
-            type = 'ContactPoint'
-        elif isinstance(obj,IKObjective):
-            type = 'IKObjective'
-        elif isinstance(obj,Trajectory):
-            type = 'Trajectory'
+        elif obj.__class__.__name__ in ['ContactPoint','IKObjective','Trajectory','MultiPath']:
+            return obj.__class__.__name__
+        elif isinstance(obj,Trajectory):   #some subclasses of Trajectory may be used here too
+            return "Trajectory"
         else:
-            raise RuntimeError("Unknown object of type "+obj.__class__.__name)
+            raise RuntimeError("Unknown object of type "+obj.__class__.__name__)
 
-    if type in ['Config','Configs','Vector','Matrix','Matrix3','RotationMatrix','Value','IntArray','StringArray']:
+    if type in ['Config','Configs','Vector','Matrix','Vector2','Vector3','Matrix3','Point','Rotation','Value','IntArray','StringArray']:
         return obj
     elif type == 'RigidTransform':
         return obj
@@ -513,7 +526,7 @@ def toJson(obj,type='auto'):
         return {'x':obj.x,'n':obj.n,'kFriction':kFriction}
     elif type == 'Trajectory' or type == 'LinearPath':
         return {'times':obj.times,'milestones':obj.milestones}
-    elif type == 'IKObjective':
+    elif type == 'IKObjective' or type == 'IKGoal':
         res = {'type':type,'link':obj.link()}
         if obj.destLink() >= 0:
             res['destLink'] = obj.destLink()
@@ -570,7 +583,7 @@ def fromJson(jsonobj,type='auto'):
         else:
             raise RuntimeError("Unknown JSON object of type "+jsonobj.__class__.__name)
 
-    if type in ['Config','Configs','Vector','Matrix','Matrix3','RotationMatrix','Value','IntArray','StringArray']:
+    if type in ['Config','Configs','Vector','Matrix','Matrix3','Rotation','Value','IntArray','StringArray']:
         return jsonobj
     elif type == 'RigidTransform':
         return jsonobj
@@ -578,7 +591,7 @@ def fromJson(jsonobj,type='auto'):
         return ContactPoint(jsonobj['x'],jsonobj['n'],jsonobj['kFriction'])
     elif type == 'Trajectory' or type == 'LinearPath':
         return Trajectory(jsonobj['times'],jsonobj['milestones'])
-    elif type == 'IKObjective':
+    elif type == 'IKObjective' or type == 'IKGoal':
         link = jsonobj['link']
         destlink = jsonobj['destLink'] if 'destLink' in jsonobj else -1
         posConstraint = 'free'

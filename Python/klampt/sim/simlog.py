@@ -8,12 +8,14 @@ class SimLogger:
         Logs a simulation to a CSV file.
 
         Arguments:
-        - sim: the klampt.Simulator object you wish to use
-        - state_fn: the file that you want to save state to
-        - contact_fn: the file that you want to save contacts to (or None if you don't want them)
-        - colliding: either 'all' (default) or a list of all objects
-          / object ids that you want to check self collisions between
-        - saveheader: true if you want a CSV header giving the name of each value
+            sim (Simulator): the klampt.Simulator object you wish to use
+            state_fn (str): the file that you want to save state to
+            contact_fn (str, optional): the file that you want to save contacts to
+                (or None if you don't want them)
+            colliding (list, optional): either 'all' (default) or a list of all objects
+                and object ids that you want to check self collisions between
+            saveheader (bool, optional): true if you want a CSV header giving the name of
+                each value.  Default = True
         """
         self.saveSensors = False
         self.sim = sim
@@ -183,10 +185,11 @@ class SimLogPlayback:
         Loads from a CSV file.
 
         Arguments:
-        - sim: the klampt.Simulator object you wish to use.  This should be instantiated with 
-          all objects that you recorded from.
-        - state_fn: the state file that you want to load
-        - contact_fn: the contact file that you want to load
+            sim (Simulator): the klampt.Simulator object you wish to use.  This should be
+                instantiated with all objects that you recorded from.
+            state_fn (str): the state file that you want to load
+            contact_fn (str, optional): the contact file that you want to load
+        
         """
         import csv
         self.sim = sim

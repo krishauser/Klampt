@@ -1,13 +1,17 @@
 """A module to help manage coordinate frames and objects attached to them.
 Similar to the tf module in ROS.
 
-The coordinates module is set up with a default coordinate manager so that
-if you call coordinates.[X], where [X] is a method of Manager, such as
-setWorldModel(), addPoint(), addFrame(), etc., then the default Manager
+You may attach points / vectors to frames and determine relative or world
+coordinates in a straightforward, object-oriented way.
+
+The ``coordinates`` module is set up with a default coordinate manager so that
+if you call ``coordinates.[X]``, where ``[X]`` is a method of
+:class:`klampt.model.coordinates.Manager`, such as ``setWorldModel()``,
+``addPoint()``, ``addFrame()``, etc., then the default ``Manager``
 instance gets called.
 
-Power users might create their own Managers, or swap top-level managers
-in/out using setManager().
+Advanced users might create their own ``Manager``, or swap top-level managers
+in/out using :meth:`setManager`.
 """
 
 from ..math import so3,se3,vectorops
@@ -214,11 +218,11 @@ class Group:
     Subgroups can also be nested.
 
     Attributes:
-    - frames: a map from frame names to Frame objects
-    - childLists: a map from frame names to lists of children
-    - points: a map from point names to Point objects
-    - directions: a map from direction names to Direction objects
-    - subgroups: a map from subgroup names to Group objects
+        frames (dict): a map from frame names to Frame objects
+        childLists (dict): a map from frame names to lists of children
+        points (dict): a map from point names to Point objects
+        directions (dict): a map from direction names to Direction objects
+        subgroups (dict): a map from subgroup names to Group objects
     """
     def __init__(self):
         self._name = None
@@ -646,16 +650,16 @@ def ik_objective(obj,target):
     klampt.coordinates object 'obj' at given target object 'target'. 
 
     Arguments:
-     - obj: An instance of one of the
-       {Point,Direction,Transform,Frame} classes.
-     - target: If 'obj' is a Point, Direction, or  Frame objects, this
-       must be an object of the same type of 'obj' denoting the target to
-       which 'obj' should be fixed.  In other words, the local coordinates
-       of 'obj' relative to 'target's parent frame will be equal to 'target's
-       local coordinates.
-       If obj is a Transform object, this element is an se3 object.
-    Return value:
-     - An IK objective to be used with the klampt.ik module.
+        obj: An instance of one of the {Point,Direction,Transform,Frame} classes.
+        target: If 'obj' is a Point, Direction, or  Frame objects, this
+            must be an object of the same type of 'obj' denoting the target to
+            which 'obj' should be fixed.  In other words, the local coordinates
+            of 'obj' relative to 'target's parent frame will be equal to 'target's
+            local coordinates.
+            If obj is a Transform object, this element is an se3 object.
+
+    Returns:
+        (IKObjective): An IK objective to be used with the klampt.ik module.
 
     Since the klampt.ik module is not aware about custom frames, an
     ancestor of the object must be attached to a RobotModelLink or a
@@ -721,18 +725,17 @@ def ik_fixed_objective(obj,ref=None):
     relative to the reference frame ref.
 
     Arguments:
-     - obj: An instance of one of the
-       {Point,Direction,Transform,Frame} classes.
-     - ref: either None, or a Frame object denoting the reference frame
-       to which the object should be fixed.  (If obj is a Transform object,
-       its destination frame is used as the reference frame, and this argument
-       is ignored.)
-    Return value:
-     - An IK objective to be used with the klampt.ik module.  For
-       Point, Direction, and Frame objects this objective fixes the
-       object coordinates relative to the ref frame, or the world if None frame
-       is provided.  For Transform objects the source frame is fixed
-       relative to the destination frame.
+        obj: An instance of one of the {Point,Direction,Transform,Frame} classes.
+        ref (optional): either None, or a Frame object denoting the reference frame
+           to which the object should be fixed.  (If obj is a Transform object,
+           its destination frame is used as the reference frame, and this argument
+           is ignored.)
+    Returns:
+        (IKObjective): An IK objective to be used with the klampt.ik module.  For
+            Point, Direction, and Frame objects this objective fixes the
+            object coordinates relative to the ref frame, or the world if None frame
+            is provided.  For Transform objects the source frame is fixed
+            relative to the destination frame.
 
     Since the klampt.ik module is not aware about custom frames, an
     ancestor of the object must be attached to a RobotModelLink or a

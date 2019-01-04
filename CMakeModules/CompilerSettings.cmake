@@ -17,6 +17,7 @@ IF (CMAKE_COMPILER_IS_GNUCC)
   ADD_DEFINITIONS(-fPIC)
 ENDIF()
 
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 # Set full rpath http://www.paraview.org/Wiki/CMake_RPATH_handling
 # (good to have and required with ROS)

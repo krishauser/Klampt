@@ -1,9 +1,9 @@
 #!/bin/bash
 git pull
-cd Library/KrisLibrary
+cd Cpp/Dependencies/KrisLibrary
 git pull
 make
-cd ../../
+cd ../../..
 rm -rf Python/build
 make
 echo "If you wish to install the updated Klamp't, type sudo make install"

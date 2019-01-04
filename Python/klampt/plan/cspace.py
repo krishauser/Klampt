@@ -5,39 +5,37 @@ import motionplanning
 import random
 
 class CSpace:
-    """Used alongside MotionPlan to define a configuration space for
+    """Used alongside :class:`MotionPlan` to define a configuration space for
     motion planning.
 
     Attributes:
-    - eps: the collision tolerance used for checking edges, in the units
-      defined by the distance(a,b) method.  (by default, euclidean distance)
-    - bound: a list of lower and upper bounds on the space [(l1,u1),...,(ld,ud)]
-      where d is the dimension of the configuration space.
-    - properties: a map of properties that may be used by a planner.  See below
-      documentation for more detail. 
-    Internally used attributes:
-    - cspace: a motionplanning module CSpaceInterface object
-    - feasibilityTests: a list of one-argument functions that test feasibility
-      of this configuration space's constraints.  E.g.,
-      if you have a collision tester that returns True if a configuration is in
-      collision, and also want to check bounds, you can set this to a list:
-      [self.in_bounds,lambda x not self.collides(x)]
-      You should not write this directly but instead use addFeasibilityTest.
-    - feasibilityTestNames: a list of names of feasibility tests.  You should
-      not write this directly but instead use addFeasibilityTest.
+        eps (float): the collision tolerance used for checking edges, in the units
+            defined by the distance(a,b) method.  (by default, euclidean distance)
+        bound (float): a list of lower and upper bounds on the space [(l1,u1),...,(ld,ud)]
+            where d is the dimension of the configuration space.
+        properties (dict): a map of properties that may be used by a planner.  See
+            below documentation for more detail. 
+        cspace (CSpaceInterface, internal): a motionplanning module CSpaceInterface object
+        feasibilityTests (list of functions, internal): a list of one-argument functions that test
+            feasibility of this configuration space's constraints.  E.g.,
+            if you have a collision tester that returns True if a configuration is in
+            collision, and also want to check bounds, you can set this to a list:
+            [self.in_bounds,lambda x not self.collides(x)]
+            You should not write this directly but instead use addFeasibilityTest.
+        feasibilityTestNames (list of strs, internal): a list of names of feasibility
+            tests.  You should not write this directly but instead use addFeasibilityTest.
 
-    To define a custom CSpace, subclasses will need to override:
+    To define a custom CSpace, subclasses may optionally override:
         
-    - *feasible(x): returns true if the vector x is in the feasible space.  By
+    - feasible(x): returns true if the vector x is in the feasible space.  By
       default calls each function in self.feasibilityTests, which by default
       only tests bound constraints.
-    - *sample(): returns a new vector x from a superset of the feasible space
-    - *sampleneighborhood(c,r): returns a new vector x from a neighborhood of c
+    - sample(): returns a new vector x from a superset of the feasible space
+    - sampleneighborhood(c,r) (optional): returns a new vector x from a neighborhood of c
       with radius r
-    - *visible(a,b): returns true if the path between a and b is feasible
-    - *distance(a,b): return a distance between a and b
-    - *interpolate(a,b,u): interpolate between a, b with parameter u
-    (* indicates an optional override.)
+    - visible(a,b): returns true if the path between a and b is feasible
+    - distance(a,b): return a distance between a and b
+    - interpolate(a,b,u): interpolate between a, b with parameter u
 
     To avoid memory leaks, CSpace.close() or motionplanning.destroy() must
     be called when you are done.  (The latter deallocates all previously
@@ -119,17 +117,13 @@ class CSpace:
             if hasattr(self,'feasible'):
                 self.cspace.setFeasibility(getattr(self,'feasible'))
             else:
-                raise 'Need feasible method or addFeasibilityTests'
+                raise RuntimeError('CSpace needs feasible(q) method to be defined, or addFeasibilityTests to be called')
         if hasattr(self,'visible'):
             self.cspace.setVisibility(getattr(self,'visible'))
         else:
             self.cspace.setVisibilityEpsilon(self.eps)
-        if hasattr(self,'sample'):
-            self.cspace.setSampler(getattr(self,'sample'))
-        else:
-            raise 'Need sample method'
-        if hasattr(self,'sampleneighborhood'):
-            self.cspace.setNeighborhoodSampler(getattr(self,'sampleneighborhood'))
+        self.cspace.setSampler(self.sample)
+        self.cspace.setNeighborhoodSampler(self.sampleneighborhood)
         if hasattr(self,'distance'):
             self.cspace.setDistance(getattr(self,'distance'))
         if hasattr(self,'interpolate'):
@@ -215,7 +209,7 @@ class CSpace:
 
 class MotionPlan:
     """A motion planner instantiated on a space.  Currently supports
-    only kinematic, point-to-point plans.
+    only kinematic, point-to-point, or point-to-set plans.
 
     Multi-query roadmaps are supported for the PRM and SBLPRT algorithms.
     In multi-query mode, you may call addMilestone(q) to add a new milestone.
@@ -237,16 +231,18 @@ class MotionPlan:
         Optionally, planner options can be set via keyword arguments.
         
         Valid values for type are:
-            - prm: the Probabilistic Roadmap algorithm
-            - rrt: the Rapidly Exploring Random Trees algorithm
-            - sbl: the Single-Query Bidirectional Lazy planner
-            - sblprt: the probabilistic roadmap of trees (PRT) algorithm with SBL as the inter-root planner.
-            - rrt*: the RRT* algorithm for optimal motion planning 
-            - prm*: the PRM* algorithm for optimal motion planning
-            - lazyprm*: the Lazy-PRM* algorithm for optimal motion planning
-            - lazyrrg*: the Lazy-RRG* algorithm for optimal motion planning
-            - fmm: the fast marching method algorithm for resolution-complete optimal motion planning
-            - fmm*: an anytime fast marching method algorithm for optimal motion planning
+
+            * 'prm': the Probabilistic Roadmap algorithm
+            * 'rrt': the Rapidly Exploring Random Trees algorithm
+            * 'sbl': the Single-Query Bidirectional Lazy planner
+            * 'sblprt': the probabilistic roadmap of trees (PRT) algorithm with SBL as the inter-root planner.
+            * 'rrt*': the RRT* algorithm for optimal motion planning 
+            * 'prm*': the PRM* algorithm for optimal motion planning
+            * 'lazyprm*': the Lazy-PRM* algorithm for optimal motion planning
+            * 'lazyrrg*': the Lazy-RRG* algorithm for optimal motion planning
+            * 'fmm': the fast marching method algorithm for resolution-complete optimal motion planning
+            * 'fmm*': an anytime fast marching method algorithm for optimal motion planning
+
         (this list may be out-of-date; the most current documentation
         is listed in src/motionplanning.h)
         """
@@ -271,31 +267,34 @@ class MotionPlan:
         planner.  Arguments are specified by key-value pair.
         
         Valid keys are:
-            - "knn": k value for the k-nearest neighbor connection strategy
+
+            * "knn": k value for the k-nearest neighbor connection strategy
               (used in PRM)
-            - "connectionThreshold": a milestone connection threshold
-            - "perturbationRadius": (for RRT and SBL)
-            - "bidirectional": 1 if bidirectional planning is requested (used
+            * "connectionThreshold": a milestone connection threshold
+            * "perturbationRadius": (for RRT and SBL)
+            * "bidirectional": 1 if bidirectional planning is requested (used
               in RRT)
-            - "grid": 1 if a point selection grid should be used (used in SBL)
-            - "gridResolution": resolution for the grid, if the grid should
+            * "grid": 1 if a point selection grid should be used (used in SBL)
+            * "gridResolution": resolution for the grid, if the grid should
               be used (used in SBL with grid, FMM, FMM*)
-            - "suboptimalityFactor": allowable suboptimality (used in RRT*,
+            * "suboptimalityFactor": allowable suboptimality (used in RRT*,
               lazy PRM*, lazy RRG*)
-            - "randomizeFrequency": a grid randomization frequency (for SBL)
-            - "shortcut": nonzero if you wish to perform shortcutting to
+            * "randomizeFrequency": a grid randomization frequency (for SBL)
+            * "shortcut": nonzero if you wish to perform shortcutting to
               improve a path after a first plan is found.
-            - "restart": nonzero if you wish to restart the planner to
+            * "restart": nonzero if you wish to restart the planner to
               get progressively better paths with the remaining time.
-            - "pointLocation": a string designating a point location data
+            * "pointLocation": a string designating a point location data
               structure. "kdtree" is supported, optionally followed by a
               weight vector (used in PRM, RRT*, PRM*, LazyPRM*, LazyRRG*)
-            - "restartTermCond": used if the "restart" setting is true.
+            * "restartTermCond": used if the "restart" setting is true.
               This is a JSON string defining the termination condition
-              (default value:
-                "{foundSolution:1;maxIters:1000}")
+              (default value: "{foundSolution:1;maxIters:1000}")
+
         (this list may be out-of-date; the most current documentation
-        is listed in motionplanning.h)
+        is listed in Klampt/Python/klampt/src/motionplanning.h)
+
+        An exception may be thrown if an invalid setting is chosen.
         """
         for (a,b) in opts.items():
             if a=='type':
@@ -304,14 +303,23 @@ class MotionPlan:
                 motionplanning.setPlanSetting(a,b)
             else:
                 motionplanning.setPlanSetting(a,float(b))
-
     def setEndpoints(self,start,goal):
-        """Sets the start and goal configuration.  goal can also be a
-        *goal test*, which is a function taking one argument f(q) that
-        returns true if the configuration is at the goal and false
-        otherwise.  Another representation of a goal test is a pair
-        (f,s) where f() tests whether the configuration is at the goal,
-        and s() generates a new sample at the goal."""
+        """Sets the start and goal configuration or goal condition. 
+
+        Args:
+            start (list of floats): start configuration
+            goal (list of floats, function, or pair of functions): defines the
+                goal condition.  Can be:
+
+                - a configuration: performs point-to-point planning.
+                - a function: the goal is a set, and goal is a 1-argument
+                  function f(q) that returns true if the configuration q is at
+                  in the goal set and false otherwise. 
+                - a pair of functions (f,s): f(q) tests whether the
+                  configuration is at the goal, and s() generates a new
+                  sample in the goal set.
+
+        """
         if hasattr(goal,'__call__'):
             self.planner.setEndpointSet(start,goal)
         elif(len(goal) == 2 and hasattr(goal[0],'__call__')):
@@ -341,7 +349,8 @@ class MotionPlan:
 
     def getRoadmap(self):
         """Returns a graph (V,E) containing the planner's roadmap.
-        V is a list of configurations (each configuration is a Python list)
+
+        V is a list of configurations (each configuration is a list of floats)
         and E is a list of edges (each edge is a pair (i,j) indexing into V).
         """
         return self.planner.getRoadmap()

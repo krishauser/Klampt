@@ -1,4 +1,4 @@
-"""sensing.py: A collection of utility functions for dealing with sensors and sensor data.
+"""A collection of utility functions for dealing with sensors and sensor data.
 
 The get/set_sensor_xform functions are used to interface cleanly with the klampt se3 functions.
 
@@ -86,17 +86,32 @@ def set_sensor_xform(sensor,T,link=None):
 def camera_to_images(camera,image_format='numpy',color_format='channels'):
 	"""Given a SimRobotSensor that is a CameraSensor, returns either the RGB image, the depth image, or both.
 
-	If image_format='numpy' (default), returns numpy arrays.  Depending on the value of color_format, the RGB image
-	either has shape (h,w,3) and dtype uint8 or (h,w) and dtype uint32.  Depth images as numpy arrays with
-	shape (h,w).  Will fall back to 'native' if numpy is not available.
+	Args:
+		camera (SimRobotSensor): a sensor that is of 'CameraSensor' type
+		image_format (str): governs the return type.  Can be:
 
-	If image_format='native', returns list-of-lists arrays in the same format as above
+			* 'numpy' (default): returns numpy arrays.  Depending on the value of color_format,
+				the RGB image either has shape (h,w,3) and dtype uint8 or (h,w) and dtype uint32. 
+				Depth images as numpy arrays with shape (h,w).  Will fall back to 'native' if numpy
+				is not available.
+			* 'native': returns list-of-lists arrays in the same format as above
 
-	If color_format='channels' (default), the RGB result is a 3D array with 3 channels corresponding to R, G, B
-	values in the range [0,255].  If color_format='rgb' the result is a 2D array with a 32-bit integer channel
-	with R,G,B channels packed in order XRGB.  If color_format='bgr' the result is similar but with order XBGR.
+		color_format (str): governs how pixels in the RGB result are packed.  Can be:
+
+			* 'channels' (default): returns a 3D array with 3 channels corresponding to R, G, B
+				values in the range [0,255]. 
+			* 'rgb' returns a 2D array with a 32-bit integer channel, with R,G,B channels packed in
+				order XRGB.
+			* 'bgr': similar to 'rgb' but with order XBGR.
 
 	(Note that image_format='native' takes up a lot of extra memory, especially with color_format='channels')
+
+	Returns:
+		tuple: (rgb, depth), either numpy arrays or list-of-lists format as goverened by image_format.
+
+			* rgb: the RGB result (packed as goverend by color_format)
+			* depth: the depth result (floats)
+
 	"""
 	assert isinstance(camera,SimRobotSensor),"Must provide a SimRobotSensor instance"
 	assert camera.type() == 'CameraSensor',"Must provide a camera sensor instance"
@@ -162,26 +177,35 @@ def camera_to_images(camera,image_format='numpy',color_format='channels'):
 
 def camera_to_points(camera,points_format='numpy',all_points=False,color_format='channels'):
 	"""Given a SimRobotSensor that is a CameraSensor, returns a point cloud associated with the current measurements.
+
 	Points are triangulated with respect to the camera's intrinsic coordinates, and are returned in the camera local frame
-	(+z backward, +x toward the right, +y toward up).
-	The point cloud can be returned in several formats.  
+	(+z backward, +x toward the right, +y toward up). 
 
-	The points_format argument can take on several values:
-	- 'numpy' (default): either an Nx3, Nx4, or Nx6 numpy array, depending on whether color is requested
-	  (and its format).  Will fall back to 'native' if numpy is not available.
-	- 'native': same as numpy, but in list-of-lists format rather than numpy arrays.
-	- 'PointCloud': a Klampt PointCloud object
-	- 'Geometry3D': a Klampt Geometry3D point cloud object
+	The arguments 
 
-	If all_points=False (default), this strips out all pixels that don't have a good depth reading (i.e., the camera sensor's
-	maximum reading.)  Otherwise these pixels are all set to (0,0,0).
+	Args:
+		points_format (str, optional): configures the format of the return value. Can be:
 
-	If the sensor has an RGB component, then color channels are produced.  These are interpreted differently
-	depending on the color_format argument, which can take the following values:
-	- 'channels': produces individual R,G,B channels in the range [0,1]. (note this is different from the
-	  interpretation of camera_to_images)
-	- 'rgb': produces a single 32-bit integer channel packing the 8-bit color channels together (actually BGR)
-	- None: no color is produced.
+			* 'numpy' (default): either an Nx3, Nx4, or Nx6 numpy array, depending on whether color is requested
+	  			(and its format).  Will fall back to 'native' if numpy is not available.
+			* 'native': same as numpy, but in list-of-lists format rather than numpy arrays.
+			* 'PointCloud': a Klampt PointCloud object
+			* 'Geometry3D': a Klampt Geometry3D point cloud object
+
+		all_points (bool, optional): configures whether bad points should be stripped out.  If False (default), this
+			strips out all pixels that don't have a good depth reading (i.e., the camera sensor's maximum reading.) 
+			If True, these pixels are all set to (0,0,0).
+
+		color_format (str):  If the sensor has an RGB component, then color channels may be produced.  This value
+			configures the output format, and can take on the values:
+
+			* 'channels': produces individual R,G,B channels in the range [0,1]. (note this is different from the
+	  			interpretation of camera_to_images)
+			* 'rgb': produces a single 32-bit integer channel packing the 8-bit color channels together (actually BGR)
+			* None: no color is produced.
+
+	Returns:
+		object: the point cloud in the requested format.
 	"""
 	assert isinstance(camera,SimRobotSensor),"Must provide a SimRobotSensor instance"
 	assert camera.type() == 'CameraSensor',"Must provide a camera sensor instance"
@@ -270,7 +294,8 @@ def camera_to_points(camera,points_format='numpy',all_points=False,color_format=
 
 def camera_to_points_world(camera,robot,points_format='numpy',color_format='channels'):
 	"""Same as camera_to_points, but converts to the world coordinate system given the robot
-	to which the camera is attached.  Points that have no reading are stripped out. """
+	to which the camera is attached.  Points that have no reading are stripped out.
+	"""
 	assert isinstance(camera,SimRobotSensor),"Must provide a SimRobotSensor instance"
 	assert camera.type() == 'CameraSensor',"Must provide a camera sensor instance"
 	link = int(camera.getSetting('link'))
@@ -297,7 +322,11 @@ def camera_to_points_world(camera,robot,points_format='numpy',color_format='chan
 
 def camera_to_viewport(camera,robot):
 	"""Returns a GLViewport instance corresponding to the camera's view.  See klampt.vis.glprogram
-	and klampt.vis.visualization for information about how to use the object with the visualization."""
+	and klampt.vis.visualization for information about how to use the object with the visualization.
+
+	Returns:
+		GLViewport: the camera's current viewport.
+	"""
 	assert isinstance(camera,SimRobotSensor),"Must provide a SimRobotSensor instance"
 	assert camera.type() == 'CameraSensor',"Must provide a camera sensor instance"
 	from ..vis.glprogram import GLViewport

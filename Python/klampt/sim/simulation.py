@@ -65,9 +65,9 @@ class ActuatorEmulator:
         This may involve applying commands to the low-level motor emulator, 
         or applying forces to the simulator.
 
-        Arguments:
-        - commands: a dictionary of commands produced by the controller
-        - dt: the control time step (not the underlying simulation time step)
+        Args:
+            commands (dict): a dictionary of commands produced by the controller
+            dt (float): the control time step (not the underlying simulation time step)
 
         To play nicely with other actuators in a nested steup, once a command is processed, the class should
         remove it from the commands dictionary.
@@ -84,10 +84,12 @@ class ActuatorEmulator:
 
 class DefaultActuatorEmulator(ActuatorEmulator):
     """This default emulator can take the commands
+
     - torquecmd: torque comand
     - qcmd: position command
     - dqcmd: velocity command
     - tcmd: time for a dqcmd
+
     And will also pass any remaining commands to the low-level C controller.
 
     It can also simulate forces, etc. at a higher rate than the control loop rate.
@@ -128,8 +130,8 @@ class SimpleSimulator (Simulator):
     taken, and you will have no control over the forces applied except for the first time step.
     """
     def __init__(self,world):
-        """Arguments:
-        - world: a RobotWorld instance.
+        """Args:
+            world (WorldModel): the world that should be simulated.
         """
         Simulator.__init__(self,world)
         #these are functions automatically called at each time step
@@ -181,11 +183,11 @@ class SimpleSimulator (Simulator):
     def setController(self,robot,function):
         """Sets a robot's controller function.
 
-        Arguments:
-        - robot: either an index, string, or RobotModel.
-        - function: either be 1) a one-argument function that takes the
-          robot's SimRobotController instance, or 2) an instance of a
-          BaseController class (see Python/control/controller.py)
+        Args:
+            robot: either an index, string, or RobotModel.
+            function: either 1) a one-argument function that takes the
+                robot's SimRobotController instance, or 2) an instance of a
+                BaseController class (see Python/control/controller.py)
         """
         if isinstance(robot,int):
             index = robot
@@ -211,12 +213,25 @@ class SimpleSimulator (Simulator):
             raise ValueError("Invalid emulator type")
 
     def addHook(self,objects,function):
-        """For the world object or objects 'objects', applies a hook that gets called every
-        simulation loop.  The objects may be certain identifiers, WorldModel items or SimBodies. 
-        - Accepted names are: 'time', or any items in the world
-        - If they are individual bodies, the corresponding SimBody objects are passed to function. 
-        - If they are RobotModel's, the corresponding SimRobotController objects are passed to function.
-        - Otherwise they are passed directly to function.
+        """For the world object(s), applies a hook that gets called every
+        simulation loop. 
+
+        Args:
+            objects: may be an str identifier, a WorldModel entity, or a SimBody.
+                can also be a list of such objects. 
+
+                - str: 'time', or the name of any items in the world.  If 'time',
+                  the simulation time is passed to function.  Otherwise, the
+                  SimBody object named by this str is passed to function. 
+                - RobotModelLink, RigidObjectModel, TerrainModel: the corresponding
+                  SimBody object is passed to function. 
+                - RobotModel: the corresponding SimRobotController object is passed
+                  to function.
+                - Otherwise, object[i] is passed directly to function.
+
+            function (function): a function f(o1,o2,...,on) that is called every
+                substep with the given object(s) as arguments.
+
         """
         if not hasattr(objects,'__iter__'):
             objects = [objects]
@@ -271,8 +286,8 @@ class SimpleSimulator (Simulator):
         rate of the controller.  Simulation hooks and emulator substeps
         will be called at the rate of substep_dt.
 
-        Arguments:
-        - dt: control timestep
+        Args:
+            dt (float): control timestep
         """
         #Handle logging
         if self.logger: self.logger.saveStep()

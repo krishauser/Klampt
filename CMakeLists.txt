@@ -3,7 +3,7 @@ PROJECT( Klampt )
 
 # version (e.g. for packaging)
 set(KLAMPT_MAJOR_VERSION 0)
-set(KLAMPT_MINOR_VERSION 7)
+set(KLAMPT_MINOR_VERSION 8)
 set(KLAMPT_PATCH_VERSION 0)
 set(KLAMPT_VERSION ${KLAMPT_MAJOR_VERSION}.${KLAMPT_MINOR_VERSION}.${KLAMPT_PATCH_VERSION})
 if(COMMAND cmake_policy)
@@ -31,19 +31,19 @@ INCLUDE(CompilerSettings)
 SET( BASE_DIR ${CMAKE_BINARY_DIR} )
 SET( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${BASE_DIR}/lib )
 SET( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${BASE_DIR}/lib )
-SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BASE_DIR} )
+SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BASE_DIR}/bin )
 
-set(INCLUDE_DIRS "${PROJECT_SOURCE_DIR}")
+set(INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/Cpp")
 INCLUDE_DIRECTORIES(${INCLUDE_DIRS})
 
 LINK_DIRECTORIES(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 
 # define the Klamp't library subdirectories in the SUBDIRS variable
-SET(SUBDIRS Contact Control IO Interface Modeling Planning Simulation View)
+SET(SUBDIRS Contact Control IO Interface Modeling Planning Sensing Simulation View)
 
 # Get all compilation files in subdirectories
 foreach(s ${SUBDIRS})
-  file(GLOB SUBDIR_SRCS  ${PROJECT_SOURCE_DIR}/${s}/*.cpp )
+  file(GLOB SUBDIR_SRCS  ${PROJECT_SOURCE_DIR}/Cpp/${s}/*.cpp )
   SET(Klampt_SRCS ${Klampt_SRCS} ${SUBDIR_SRCS})
   SET(Klampt_${s}_SRCS ${SUBDIR_SRCS})
 endforeach(s)
@@ -60,6 +60,7 @@ SET(KLAMPT_ROOT ${PROJECT_SOURCE_DIR})
 INCLUDE(KlamptDependencies)
 #defines KLAMPT_INCLUDE_DIRS, KLAMPT_DEFINITIONS, KLAMPT_LIBRARIES
 ADD_DEFINITIONS(${KLAMPT_DEFINITIONS})
+SET(KLAMPT_INCLUDE_DIRS ${KLAMPT_INCLUDE_DIRS} ${CMAKE_BINARY_DIR}/include)
 INCLUDE_DIRECTORIES(${KLAMPT_INCLUDE_DIRS})
 
 #show in CMake cache
@@ -67,16 +68,49 @@ SET(KLAMPT_INCLUDE_DIRS ${KLAMPT_INCLUDE_DIRS} CACHE STRING "Klamp't include dir
 SET(KLAMPT_DEFINITIONS ${KLAMPT_DEFINITIONS} CACHE STRING "Klamp't compiler definitions" FORCE)
 SET(KLAMPT_LIBRARIES ${KLAMPT_LIBRARIES} CACHE STRING "Klamp't link libraries" FORCE)
 
-#add Klamp't onto KLAMPT_LIBRARIES
-SET(KLAMPT_LIBRARIES Klampt ${KLAMPT_LIBRARIES})
-SET(KLAMPT_INCLUDE_DIRS ${KLAMPT_INCLUDE_DIRS} ${KLAMPT_ROOT})
-
 #needed for python build
+if(WIN32)
+  SET(KLAMPT_ABSOLUTE_LIBRARIES ${CMAKE_BINARY_DIR}/lib/Release/Klampt.lib ${KLAMPT_LIBRARIES})
+else(WIN32)
+  SET(KLAMPT_ABSOLUTE_LIBRARIES "${CMAKE_BINARY_DIR}/lib/libKlampt.a" ${KLAMPT_LIBRARIES})
+endif(WIN32)
+
+#add Klamp't onto KLAMPT_LIBRARIES, add Klampt/include onto KLAMPT_INCLUDE_DIRS
+SET(KLAMPT_LIBRARIES Klampt ${KLAMPT_LIBRARIES})
+
+#helper function
+FUNCTION(PREPEND var prefix)
+   SET(listVar "")
+   FOREACH(f ${ARGN})
+      LIST(APPEND listVar "${prefix}/${f}")
+   ENDFOREACH(f)
+   SET(${var} "${listVar}" PARENT_SCOPE)
+   UNSET(listVar)
+ENDFUNCTION(PREPEND)
+
 IF(WIN32)
-  SET(KLAMPT_ABSOLUTE_LIBRARIES ${CMAKE_BINARY_DIR}/lib/libKlampt.a ${KLAMPT_LIBRARIES})
+	#need to install Assimp, GLPK, glew dlls
+  IF(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    SET(KLAMPT_EXTRA_DLLS Assimp64.dll glpk_4_61.dll glew32.dll)
+  ELSE()
+    SET(KLAMPT_EXTRA_DLLS Assimp32.dll glpk_4_61.dll glew32.dll)
+  ENDIF()
+  PREPEND(KLAMPT_EXTRA_DLLS_ABS ${KLAMPT_DEPENDENCY_LIB_DIR} ${KLAMPT_EXTRA_DLLS})
+  SET(KLAMPT_EXTRA_DLLS_ABS ${KLAMPT_EXTRA_DLLS_ABS} CACHE STRING "Extra DLLs for windows build")
+  install(FILES ${KLAMPT_EXTRA_DLLS_ABS} DESTINATION bin COMPONENT apps)
 ELSE(WIN32)
-  SET(KLAMPT_ABSOLUTE_LIBRARIES ${CMAKE_BINARY_DIR}/lib/libKlampt.lib ${KLAMPT_LIBRARIES})
+	#install to /opt/klampt-X.Y.Z
+    SET(CMAKE_INSTALL_PREFIX "/opt/klampt-${KLAMPT_MAJOR_VERSION}.${KLAMPT_MINOR_VERSION}.${KLAMPT_PATCH_VERSION}" CACHE INTERNAL "Prefix prepended to install directories" FORCE)
 ENDIF(WIN32)
+
+####### Copy headers from Cpp/* to include/Klampt/* #######
+MESSAGE("Copying C++ headers to include/Klampt/*")
+foreach(s ${SUBDIRS})
+  file(GLOB KLAMPT_SUBDIR_HEADERS
+    "${PROJECT_SOURCE_DIR}/Cpp/${s}/*.h"
+  )
+  file(COPY ${KLAMPT_SUBDIR_HEADERS} DESTINATION include/Klampt/${s}/)
+endforeach(s)
 
 ####### Klamp't Applications #########
 IF(NOT USE_QT5_APPS)
@@ -103,18 +137,15 @@ IF(NOT USE_QT5_APPS AND NOT USE_QT4_APPS)
   ENDIF(QT4_FOUND)
 ENDIF(NOT USE_QT5_APPS AND NOT USE_QT4_APPS)
 
-ADD_SUBDIRECTORY(Main)
-
-####### Klamp't Examples #########
-ADD_SUBDIRECTORY(Examples)
+ADD_SUBDIRECTORY(Cpp/Main)
 
 ####### Klamp't Documentation #########
 FIND_PACKAGE(Doxygen)
 IF(DOXYGEN_FOUND)
-  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doxygen.conf.in ${CMAKE_CURRENT_BINARY_DIR}/doxygen.conf @ONLY)
-  ADD_CUSTOM_TARGET(docs ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/doxygen.conf
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-    COMMENT "Generating documentation (Doxygen) at location ${PROJECT_SOURCE_DIR}/doc/html/")
+  configure_file(${CMAKE_SOURCE_DIR}/Cpp/docs/doxygen.conf.in ${CMAKE_SOURCE_DIR}/Cpp/docs/doxygen.conf @ONLY)
+  ADD_CUSTOM_TARGET(docs ${DOXYGEN_EXECUTABLE} ${CMAKE_SOURCE_DIR}/Cpp/docs/doxygen.conf
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    COMMENT "Generating documentation (Doxygen) at location ${CMAKE_SOURCE_DIR}/Cpp/docs/html/")
 ENDIF(DOXYGEN_FOUND)
 
 # Python API directory
@@ -138,44 +169,16 @@ install(TARGETS Klampt
   DESTINATION lib
   COMPONENT libraries)
 foreach(s ${SUBDIRS})
-  file(GLOB SUBDIRFILES  ${PROJECT_SOURCE_DIR}/${s}/*.h )
+  file(GLOB SUBDIRFILES  ${PROJECT_SOURCE_DIR}/Cpp/${s}/*.h )
   install(FILES ${SUBDIRFILES}
     DESTINATION include/Klampt/${s}
     COMPONENT headers)
 endforeach(s)
-install(DIRECTORY data
-    DESTINATION .
-    COMPONENT datafiles)
 install(DIRECTORY Documentation
     DESTINATION .
     COMPONENT documentation)
 
 #examples and apps already added
-
-IF(WIN32)
-	#need to install Assimp, GLPK, glut32 dlls
-	install(FILES Library/Assimp32.dll Library/glpk_4_61.dll Library/glut32.dll Library/glew32.dll
-		DESTINATION bin
-		COMPONENT apps)
-ELSE(WIN32)
-	#install to /opt/klampt-X.Y
-    SET(CMAKE_INSTALL_PREFIX "/opt/klampt-${KLAMPT_MAJOR_VERSION}.${KLAMPT_MINOR_VERSION}.${KLAMPT_PATCH_VERSION}" CACHE INTERNAL "Prefix prepended to install directories" FORCE)
-
-ENDIF(WIN32)
-
-#python demos
-install(DIRECTORY Python/demos
-    DESTINATION Python
-    COMPONENT pythonexamples)
-install(DIRECTORY Python/exercises
-    DESTINATION Python
-    COMPONENT pythonexamples)
-install(DIRECTORY Python/control
-    DESTINATION Python
-    COMPONENT pythonexamples)
-install(DIRECTORY Python/utils
-    DESTINATION Python
-    COMPONENT pythonexamples)
 
 if((NOT WIN32) AND KLAMPT_COMPILE_TESTS)
   enable_testing()
@@ -196,12 +199,9 @@ MESSAGE (STATUS "Compile everything using: make\n")
 MESSAGE (STATUS "Compile Klampt lib using: make Klampt\n")
 MESSAGE (STATUS "Compile apps using: make apps OR make [appname]")
 MESSAGE (STATUS "  Possible values for [appname]:")
-MESSAGE (STATUS "    RobotTest, SimTest, RobotPose, MotorCalibrate,")
-MESSAGE (STATUS "    URDFtoRob, SimUtil, TrajOpt, Merge, or Pack\n")
-MESSAGE (STATUS "Compile examples using: make examples OR make [examplename]")
-MESSAGE (STATUS "  Possible values for [examplename]:")
-MESSAGE (STATUS "    IKDemo, PlanDemo, DynamicPlanDemo, ContactPlan,")
-MESSAGE (STATUS "    UserTrials, or RealTimePlanning\n")
+FOREACH(app ${APPS})
+	MESSAGE (STATUS "    " ${app})
+ENDFOREACH()
 MESSAGE (STATUS "Compile Python API using: make python")
 MESSAGE (STATUS "Compile API-documentation using: make docs\n")
 MESSAGE (STATUS "Compile Python API-documentation using: make python-docs\n")

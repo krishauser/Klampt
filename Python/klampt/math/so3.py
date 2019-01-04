@@ -2,14 +2,17 @@
 represented by a 9-list specifying the entries of the rotation matrix
 in column major form.
 
-In other words, given a 3x3 matrix
-   [a11,a12,a13]
-   [a21,a22,a23]
-   [a31,a32,a33],
+In other words, given a 3x3 matrix::
+
+    [a11,a12,a13]
+    [a21,a22,a23]
+    [a31,a32,a33],
+
 Klamp't represents the matrix as a list [a11,a21,a31,a12,a22,a32,a13,a23,a33].
 
 The reasons for this representation are 1) simplicity, and 2) a more
 convenient interface with C code.
+
 """
 
 import math
@@ -114,8 +117,8 @@ def from_rpy(rollpitchyaw):
     Rx,Ry,Rz = from_axis_angle(((1,0,0),roll)),from_axis_angle(((0,1,0),pitch)),from_axis_angle(((0,0,1),yaw))
     return mul(Rz,mul(Ry,Rx))
 
-def moment(R):
-    """Returns the moment w (exponential map) representation of R such
+def rotation_vector(R):
+    """Returns the rotation vector w (exponential map) representation of R such
     that e^[w] = R.  Equivalent to axis-angle representation with
     w/||w||=axis, ||w||=angle."""
     theta = angle(R)
@@ -182,7 +185,7 @@ def moment(R):
 
 def axis_angle(R):
     """Returns the (axis,angle) pair representing R"""
-    m = moment(R)
+    m = rotation_vector(R)
     return (vectorops.unit(m),vectorops.norm(m))
 
 def from_axis_angle(aa):
@@ -190,11 +193,15 @@ def from_axis_angle(aa):
     matrix."""
     return rotation(aa[0],aa[1])
 
-def from_moment(w):
-    """Converts a moment representation w to a 3D rotation matrix."""
+def from_rotation_vector(w):
+    """Converts a rotation vector representation w to a 3D rotation matrix."""
     length = vectorops.norm(w)
     if length < 1e-7: return identity()
     return rotation(vectorops.mul(w,1.0/length),length)
+
+#aliases for rotation_vector and from_rotation_vector
+moment = rotation_vector
+from_moment = from_rotation_vector
 
 def from_quaternion(q):
     """Given a unit quaternion (w,x,y,z), produce the corresponding rotation
@@ -264,7 +271,8 @@ def distance(R1,R2):
 
 def error(R1,R2):
     """Returns a 3D "difference vector" that describes how far R1 is from R2.
-    More precisely, this is the Lie derivative."""
+    More precisely, this is the Lie derivative, which is the rotation vector
+    representation of R1*R2^T."""
     R = mul(R1,inv(R2))
     return moment(R)
 

@@ -95,19 +95,28 @@ def make_object_arrangement(world,container,objects,container_wall_thickness=0.0
     """For a given container and a list of objects in the world, places the objects inside the container with randomized x-y locations
     and z orientations so that they are initially collision free and on the bottom of the container.
 
-    Arguments:
-    - world: a WorldModel
-    - container: the container RigidObject / Terrain in world into which objects should be spawned.  Assumed axis-aligned.
-    - objects: a list of RigidObjects in the world, at arbitrary locations.  They are placed in order.
-    - container_wall_thickness: a margin subtracted from the container's outer dimensions into which the objects are spawned.
-    - max_iterations: the maximum number of iterations used for sampling object initial poses
-    - remove_failures: if True, then instead of returning None on failure, the objects that fail placement are removed from the world
+    Args:
+        world (WorldModel): the world containing the objects and obstacles
+        container: the container RigidObject / Terrain in world into which
+            objects should be spawned.  Assumed axis-aligned.
+        objects (list of RigidObject): a list of RigidObjects in the world,
+            at arbitrary locations.  They are placed in order.
+        container_wall_thickness (float, optional): a margin subtracted from
+            the container's outer dimensions into which the objects are spawned.
+        max_iterations (int, optional): the maximum number of iterations used
+            for sampling object initial poses
+        remove_failures (bool): if True, then instead of returning None on
+            failure, the objects that fail placement are removed from the world.
     
-    Return value:
-    - the positions of objects in world are modified and world is also returned. On failure, returns None.
+    Returns:
+        (WorldModel): if successful, the positions of objects in world are
+            modified and world is returned. On failure, None is returned.
 
-    Note: Since world is modified in-place, if you wish to make multiple worlds with piles of the same objects, you should use world.copy()
-    to store the configuration of the objects. You may also wish to randomize the object ordering using random.shuffle(objects) between instances.
+    Note:
+        Since world is modified in-place, if you wish to make multiple worlds with
+        piles of the same objects, you should use world.copy() to store the
+        configuration of the objects. You may also wish to randomize the object
+        ordering using random.shuffle(objects) between instances.
     """
     container_outer_bb = get_bound(container)
     container_inner_bb = (vectorops.add(container_outer_bb[0],[container_wall_thickness]*3),vectorops.sub(container_outer_bb[1],[container_wall_thickness]*3))
@@ -133,21 +142,35 @@ def make_object_arrangement(world,container,objects,container_wall_thickness=0.0
 def make_object_pile(world,container,objects,container_wall_thickness=0.01,randomize_orientation=True,visualize=False):
     """For a given container and a list of objects in the world, drops the objects inside the container and simulates until stable.
 
-    Arguments:
-    - world: a WorldModel
-    - container: the container RigidObject / Terrain in world over which objects should be spawned.  Assumed axis-aligned and with an open top.
-    - objects: a list of RigidObjects in the world, at arbitrary locations.  They are placed in order.
-    - container_wall_thickness: a margin subtracted from the container's outer dimensions into which the objects are spawned.
-    - randomize_orientation: if True, the orientation of the objects are completely randomized.  If 'z', only the z orientation is randomized.
-      If False or None, the orientation is unchanged
+    Args:
+        world (WorldModel): the world containing the objects and obstacles
+        container: the container RigidObject / Terrain in world into which
+            objects should be spawned.  Assumed axis-aligned.
+        objects (list of RigidObject): a list of RigidObjects in the world,
+            at arbitrary locations.  They are placed in order.
+        container_wall_thickness (float, optional): a margin subtracted from
+            the container's outer dimensions into which the objects are spawned.
+        randomize_orientation (bool or str, optional): if True, the orientation
+            of the objects are completely randomized.  If 'z', only the z
+            orientation is randomized.  If False or None, the orientation is
+            unchanged
+        visualize (bool, optional): if True, pops up a visualization window to
+            show the progress of the bile
     
     Side effect: the positions of objects in world are modified
-    Return value (world,sim):
-    - world: the original world
-    - sim: the Simulator instance at the state used to obtain the stable placement of the objects.
 
-    Note: Since world is modified in-place, if you wish to make multiple worlds with piles of the same objects, you should use world.copy()
-    to store the configuration of the objects. You may also wish to randomize the object ordering using random.shuffle(objects) between instances.
+    Returns:
+        (tuple): (world,sim), containing
+
+            - world (WorldModel): the original world
+            - sim (Simulator): the Simulator instance at the state used to obtain
+                the stable placement of the objects.
+
+    Note:
+        Since world is modified in-place, if you wish to make multiple worlds with
+        piles of the same objects, you should use world.copy() to store the
+        configuration of the objects. You may also wish to randomize the object
+        ordering using random.shuffle(objects) between instances.
     """
     container_outer_bb = get_bound(container)
     container_inner_bb = (vectorops.add(container_outer_bb[0],[container_wall_thickness]*3),vectorops.sub(container_outer_bb[1],[container_wall_thickness]*3))

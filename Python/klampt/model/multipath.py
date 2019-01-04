@@ -1,8 +1,5 @@
 """This module defines the MultiPath class, and methods for loading and
 saving multipaths from xml files.
-
-It can also be run in script mode to print stats about the path, to time-scale
-or reverse a path, and concatenate multiple MultiPaths together.
 """
 
 from ..model.contact import Hold
@@ -14,10 +11,7 @@ from xml.dom import minidom
 
 class MultiPath:
     """A sophisticated path representation that allows timed/untimed paths, attached
-    velocity information, as well as making and breaking contact.  It also has an
-    unstructured propery map 'settings' which can contain metadata about which robot
-    this path applies to, how the path was created, etc. See Klampt/Model/MultiPath.h
-    for more information about its structure.
+    velocity information, as well as making and breaking contact. 
 
     Primarily, a MultiPath consists of a list of Sections, each of which is a path or
     timed trajectory along a fixed stance.
@@ -25,6 +19,16 @@ class MultiPath:
     A Section can either contain the Holds defining its stance, or its stance could be
     defined by indices into the holdSet member of MultiPath.  If all Sections have the
     latter structure it is known as an "aggregated" MultiPath.
+
+    Attributes:
+        sections (list of Sections): the segments of the multipath, each operating over a
+            fixed stance.
+        settings (dict mapping str to str): an unstructured propery map 'settings' which
+            can contain metadata about which robot this path applies to, how the path
+            was created, etc.
+        holdSet (dict mapping int to Hold): a set of indexed Holds, which can be referred
+            to inside Section objects.
+
     """
     
     class Section:
@@ -33,6 +37,21 @@ class MultiPath:
         
         If the times member is set, this is time parameterized.  Otherwise,
         it is just a path.
+
+        Attributes:
+            settings (dict mapping str to str): an unstructured property map.
+            configs (list of lists of floats): a list of N configurations along the
+                path section.
+            velocities (list of lists of floats, optional): a list of N joint
+                velocities along the path section.
+            times (list of floats, optional) a list of N times for each configuration
+                along the path section.
+            holds (list of Holds, optional): the set of Holds that this section
+                is required to meet.
+            holdIndices (list of ints, optional): the set of Holds that this section
+                is required to meet, indexed into MultiPath.holdSet.
+            ikObjectives (list of IKObjectives, optional): the set of extra IKObjectives
+                that this section is required to meet.
         """
         def __init__(self):
             self.settings = {}
@@ -403,12 +422,17 @@ class MultiPath:
 
         if robot is not None and eps is not None:
             from ..plan.robotcspace import ClosedLoopRobotCSpace
+            hastiming = self.hasTiming()
             for i,s in enumerate(self.sections):
                 space = ClosedLoopRobotCSpace(robot,self.getIKProblem(i))
                 for j in xrange(len(s.configs)-1):
                     ikpath = space.interpolationPath(s.configs[j],s.configs[j+1],eps)
-                    t0 = len(res.milestones)
-                    t1 = t0 + 1
+                    if hastiming:
+                        t0 = s.times[j]
+                        t1 = s.times[j+1]
+                    else:
+                        t0 = len(res.milestones)
+                        t1 = t0 + 1
                     iktimes = [t0 + float(k)/float(len(ikpath)-1)*(t1-t0) for k in xrange(len(ikpath))]
                     res.milestones += ikpath[:-1]
                     res.times += iktimes[:-1]
@@ -460,85 +484,3 @@ def _prettify(elem,indent_level=0):
     return res
 
 
-def _main():
-    import sys
-    import optparse
-    usage = "Usage: %prog [options] filename(s)"
-    parser = optparse.OptionParser(usage=usage)
-    parser.add_option("-s", "--start", action="store_true",dest="start",default=False, help="Print start config")
-    parser.add_option("-g", "--goal", action="store_true",dest="goal",default=False, help="Print goal config")
-    parser.add_option("--duration", action="store_true",dest="duration",default=False, help="Print duration")
-    parser.add_option("--concat", dest="concat",metavar="FILE", help="Concatenate multiple files, output to FILE")
-    parser.add_option("--timescale", dest="timescale",default=None, help="Scale timing")
-    parser.add_option("--timeshift", dest="timeshift",default=None, help="Shift timing")
-    (options,args) = parser.parse_args()
-    
-    if len(args) < 1:
-        print "Not enough arguments"
-        parser.print_help()
-        exit(1)
-
-    paths = [MultiPath() for arg in args]
-    for p,arg in zip(paths,args):
-        p.load(arg)
-    scale = float(options.timescale) if options.timescale else 1
-    ofs = float(options.timeshift) if options.timeshift else 0
-    if scale != 1 or ofs != 0:
-        rev = (scale < 0)
-        if rev:
-            scale = -scale;
-            for p in paths:
-                if not p.hasTiming():
-                    print "Path does not have timing"
-                    continue
-                et = p.endTime()
-                for s in p.sections:
-                    s.times = [ofs+scale*(et-t) for t in s.times]
-                    s.times.reverse()
-                    s.configs.reverse()
-                    if s.velocities:
-                        s.velocities.reverse()
-                p.sections.reverse()
-        else:
-            for p in paths:
-                if not p.hasTiming():
-                    print "Path does not have timing"
-                    continue
-                for s in p.sections:
-                    s.times = [ofs+scale*t for t in s.times]
-        if not options.concat:
-            print "Warning: time scaling not saved, --concat needs to be specified"
-    if options.concat:
-        for i in range(1,len(paths)):
-            if paths[i-1].endConfig() != paths[i].startConfig():
-                print "Warning, path "+str(i)+" has incorrect start config"
-                print paths[i-1].endConfig()
-                print paths[i].startConfig()
-            paths[0].concat(paths[i])
-        paths[0].settings['program']=' '.join(sys.argv)
-        print "Saving to",options.concat
-        paths[0].save(options.concat)
-        exit(0)
-    for p in paths:
-        if options.start:
-            print writeVector(p.sections[0].configs[0])
-        if options.goal:
-            print writeVector(p.sections[-1].configs[-1])
-        if options.duration:
-            print p.endTime()
-        if not options.start and not options.goal and not options.duration:
-            print "Loaded MultiPath with",len(p.sections),"sections"
-            for i,s in enumerate(p.sections):
-                print "Section",i,":",
-                print len(s.configs),"milestones",
-                if s.times!=None:
-                    print "/ times",
-                if s.velocities!=None:
-                    print "/ velocities",
-                print len(p.getStance(i)),"holds",
-                print
-
-
-if __name__ == '__main__':
-    _main()
-    

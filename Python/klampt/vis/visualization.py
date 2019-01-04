@@ -1,11 +1,16 @@
-"""Klamp't visualization routines.  See Python/demos/vistemplate.py for an
-example of how to run this module.
+"""Klamp't visualization routines.  See
+`vistemplate.py in Klampt-examples <https://github.com/krishauser/Klampt-examples/Python/demos/vistemplate.py>`_
+for an example of how to run this module.
+
+OVERVIEW
+--------
 
 The visualization module lets you draw most Klamp't objects in a 3D world 
 using a simple interface.  It also lets you customize the GUI using Qt 
 widgets, OpenGL drawing, and keyboard/mouse intercept routines.  
 
 Main features include:
+
 - Simple interface to modify the visualization
 - Simple interface to animate and render trajectories
 - Simple interface to edit certain Klamp't objects (configurations, points,
@@ -19,218 +24,258 @@ Main features include:
 The resource editing functionality in the klampt.io.resource module (based on 
 klampt.vis.editors) use this module as well.
 
-Due to weird OpenGL and Qt behavior in multi-threaded programs, you should
-only run visualizations using the methods in this module.
+There are two primary modes of running the visualization: multi-threaded and single-threaded.
 
-There are two primary ways of setting up a visualization:
-- The first is by adding items to the visualization world and customizing them
-  using the vis.X routines that mirror the methods in VisualizationPlugin (like
-  add, setColor, animate, etc).  See Python/demos/vistemplate.py for more information.
-- The second is by creating a subclass of GLPluginInterface and doing
-  all the necessary drawing / interaction yourself inside its hooks.  In the
-  latter case, you will call vis.setPlugin(plugin) to override the default
-  visualization behavior before creating your window. See Python/demos/visplugin.py
-  for more information.
+- Multi-threaded mode pops up a window using show(), and the caller can then continue to interact
+  with the vis module.
+  IMPORTANT: multi-threaded mode is only supported on some systems (Linux, Windows using Qt).
+  Due to weird OpenGL and Qt behavior in multi-threaded programs, if you are using multithreaded mode,
+  you should only interact with OpenGL and the visualization using the methods in this module.
+- Single-threaded mode blocks the calling thread using loop().  To interact with the scene, the caller
+  will provide callbacks that can modify the visualization world, pop up windows etc.
+  Single-threaded mode is the most compatible, and is the only mode that works with GLUT and Mac OS.
 
-A third way of setting up a visualization is a hybrid of the two, where you can
-add functionality on top of default the visualization world. You can either use
-vis.pushPlugin(plugin) in which case your plugin adds additional functionality,
-or you can subclass the vis.VisualizationPlugin class, and selectively augment /
-override the default functionality.
+There are also some convenience functions that will work in both modes, such as run(), spin(), and
+dialog().
 
-Instructions:
+The biggest drawback of single-threaded operation is that you can only start blocking dialogs at the outer-
+most level, not inside loop().  So if you have a GUI that's running in real-time, in a multi-threaded
+visualization your code can pop up a dialog (like an editor) and the continue running with the returned
+value.  There are some workarounds in single-thread mode (providing a callback to the dialog function)
+but these are not nearly as convenient. 
 
-- To add things to the default visualization:
-  Call the VisualizationPlugin aliases (add, animate, setColor, etc)
+It is possible to start in single-threaded mode and convert to multi-threaded, but the converse is not
+possible.
 
-- To show the visualization and quit when the user closes the window:
-  vis.run()
+To set up and modify the visualization scene, there are three primary ways to do so:
 
-- To show the visualization and return when the user closes the window:
-  vis.dialog()
-  ... do stuff afterwards ... 
-  vis.kill()
+  - Default scene manager.  You can use the scene manager to add items to the visualization world and
+    then customize them using the vis.X routines in this module (like
+    add, setColor, animate, etc).  See Python/demos/vistemplate.py for more information.  
+    These just mirror the methods in VisualizationPlugin, which is how the default scene manager is
+    implemented.
+  - Custom GLPluginInterface.  The user creates a subclass of GLPluginInterface and performs
+    all the necessary OpenGL drawing / interaction inside its hooks.  In this case, you will call
+    vis.setPlugin(plugin) to override the default visualization behavior before creating your
+    window. See Python/demos/visplugin.py for more information.
+  - Hybrid visualization.  A GLPluginInterface subclass is created to add functionality on top of
+    default the visualization world.  To augment the default scene manager, call vis.pushPlugin(plugin).
+    Another option for hybrid visualization is to  subclass the vis.VisualizationPlugin class, and
+    selectively augment / override the default functionality.
 
-- To show the visualization and be able to run a script alongside it
-  until the user closes the window:
-  vis.show()
-  while vis.shown():
-      vis.lock()
-      ... do stuff ...
-      [to exit the loop call show(False)]
-      vis.unlock()
-      time.sleep(dt)
-  ... do stuff afterwards ...
-  vis.kill()
+INSTRUCTIONS
+------------
 
-- To run a window with a custom plugin (GLPluginInterface) and terminate on
-  closure: 
-  vis.run(plugin)
+  - To add things to the default visualization:
+    Call the VisualizationPlugin aliases (add, animate, setColor, etc)
 
-- To show a dialog or parallel window
-  vis.setPlugin(plugin)
-  ... then call  
-  vis.dialog()
-  ... or
-  vis.show()
-  ... do stuff afterwards ... 
-  vis.kill()
+  - To show the visualization and quit when the user closes the window::
+  
+        vis.run()
 
-- To add a GLPluginInterface that just customizes a few things on top of
-  the default visualization:
-  vis.pushPlugin(plugin)
-  vis.dialog()
-  vis.popPlugin()
+  - To show the visualization and return when the user closes the window::
 
-- To run plugins side-by-side in the same window:
-  vis.setPlugin(plugin1)
-  vis.addPlugin(plugin2)  #this creates a new split-screen
-  vis.dialog()
-  ... or
-  vis.show()
-  ... do stuff afterwards ... 
-  vis.kill()
+        vis.dialog()
+        ... do stuff afterwards ... 
+        vis.kill()
 
-- To run a custom dialog in a QtWindow
-  vis.setPlugin([desired plugin or None for visualization])
-  vis.setParent(qt_window)
-  vis.dialog()
-  ... or 
-  vis.show()
-  ... do stuff afterwards ... 
-  vis.kill()
+  - To show the visualization and run a script alongside it until the user
+    closes the window (multithreaded mode)::
+ 
+        vis.show()
+        while vis.shown():
+            vis.lock()
+            ... do stuff ...
+            [to exit the loop call vis.show(False)]
+            vis.unlock()
+            time.sleep(dt)
+        ... do stuff afterwards ...
+        vis.kill()
 
-- To launch a second window after the first is closed: just call whatever you
-  want again. Note: if show was previously called with a plugin and you wish to
-  revert to the default visualization, you should call setPlugin(None) first to 
-  restore the default.
+  - To show the visualization and run python commands until the user closes
+    the window (single-threaded mode)::
+ 
+        def callback():
+            ... do stuff ...
+            [to exit the loop manually call vis.show(False)]
+        vis.loop(setup=vis.show,callback=callback)
+        vis.kill()
 
-- To create a separate window with a given plugin:
-  w1 = vis.createWindow()  #w1=0
-  show()
-  w2 = vis.createWindow()  #w2=1
-  vis.setPlugin(plugin)
-  vis.dialog()
-  #to restore commands to the original window
-  vis.setWindow(w1)
-  while vis.shown():
-      ...
-  vis.kill()
+  - To run a window with a custom plugin (GLPluginInterface) and terminate on
+    closure::
+ 
+        vis.run(plugin)
+  
+  - To show a dialog or parallel window::
 
-Note: when changing the data shown by the window (e.g., modifying the
-configurations of robots in a WorldModel) you must call vis.lock() before
+        vis.setPlugin(plugin)
+        ... then call  
+        vis.dialog()
+        ... or
+        vis.show()
+        ... do stuff afterwards ... 
+        vis.kill()
+
+  - To add a GLPluginInterface that just customizes a few things on top of
+    the default visualization::
+
+        vis.pushPlugin(plugin)
+        vis.dialog()
+        vis.popPlugin()
+
+  - To run plugins side-by-side in the same window::
+
+        vis.setPlugin(plugin1)
+        vis.addPlugin(plugin2)  #this creates a new split-screen
+        vis.dialog()
+        ... or
+        vis.show()
+        ... do stuff afterwards ... 
+        vis.kill()
+
+  - To run a custom Qt window or dialog containing a visualization window::
+
+        vis.setPlugin([desired plugin or None for visualization])
+        def makeMyUI(qtglwidget):
+            return MyQtMainWindow(qtglwidget)
+        vis.setCustomUI(makeMyUI)
+        vis.dialog()
+        ... or 
+        vis.show()
+        ... do stuff afterwards ... 
+        vis.kill()
+
+  - To launch a second window after the first is closed: just call whatever you
+    want again. Note: if show was previously called with a plugin and you wish to
+    revert to the default visualization, you should call setPlugin(None) first to 
+    restore the default.
+
+  - To create a separate window with a given plugin::
+
+        w1 = vis.createWindow("Window 1")  #w1=0
+        show()
+        w2 = vis.createWindow("Window 2")  #w2=1
+        vis.setPlugin(plugin)
+        vis.dialog()
+        #to restore commands to the original window
+        vis.setWindow(w1)
+        while vis.shown():
+            ...
+        vis.kill()
+
+Note: in multithreaded mode, when changing the data shown by the window (e.g., modifying
+the configurations of robots in a WorldModel) you must call vis.lock() before
 accessing the data and then call vis.unlock() afterwards.
 
-The main interface is as follows:
+MAIN INTERFACE
+--------------
 
-def createWindow(title=None): creates a new visualization window and returns an
-    integer identifier.
-def setWindow(id): sets the active window for all subsequent calls.  ID 0 is
-    the default visualization window.
-def getWindow(): gets the active window ID.
-def setWindowTitle(title): sets the title of the visualization window.
-def getWindowTitle(): returns the title of the visualization window
-def setPlugin(plugin=None): sets the current plugin (a GLPluginInterface instance). 
-    This plugin will now capture input from the visualization and can override
-    any of the default behavior of the visualizer. Set plugin=None if you want to return
-    to the default visualization.
-def addPlugin(plugin): adds a second OpenGL viewport governed by the given plugin (a
-    GLPluginInterface instance).    
-def run([plugin]): pops up a dialog and then kills the program afterwards.
-def kill(): kills all previously launched visualizations.  Afterwards, you may not
-    be able to start new windows. Call this to cleanly quit.
-def dialog(): pops up a dialog box (does not return to calling
-    thread until closed).
-def show(hidden=False): shows/hides a visualization window run in parallel with the calling script.
-def spin(duration): shows the visualization window for the desired amount
-    of time before returning, or until the user closes the window.
-def shown(): returns true if the window is shown.
-def lock(): locks the visualization world for editing.  The visualization will
-    be paused until unlock() is called.
-def unlock(): unlocks the visualization world.  Must only be called once
-    after every lock().
-def customUI(make_func): launches a user-defined UI window by calling make_func(gl_backend)
-    in the visualization thread.  This can be used to build custom editors and windows that
-    are compatible with other visualization functionality.  Here gl_backend is an instance of
-    _GLBackend instantiated for the current plugin.
-def getViewport(): Returns the currently active viewport.
+- def createWindow(title): creates a new visualization window and returns an
+  integer identifier.
+- def setWindow(id): sets the active window for all subsequent calls.  ID 0 is
+  the default visualization window.
+- def getWindow(): gets the active window ID.
+- def setWindowTitle(title): sets the title of the visualization window.
+- def getWindowTitle(): returns the title of the visualization window
+- def setPlugin(plugin=None): sets the current plugin (a GLPluginInterface instance). 
+  This plugin will now capture input from the visualization and can override
+  any of the default behavior of the visualizer. Set plugin=None if you want to return
+  to the default visualization.
+- def addPlugin(plugin): adds a second OpenGL viewport governed by the given plugin (a
+  GLPluginInterface instance).  
+- def run([plugin]): pops up a dialog and then kills the program afterwards.
+- def kill(): kills all previously launched visualizations and terminates the visualization thread.
+  Afterwards, you may not be able to start new windows. Call this to cleanly quit.
+- def multithreaded(): returns true if multithreading is available.
+- def loop(setup=None,callback=None,cleanup=None): Runs the visualization thread inline with the main thread.
+  The setup() function is called at the start, the callback() function is run every time the event thread
+  is idle, and the cleanup() function is called on termination.
+
+  NOTE FOR MAC USERS: having the GUI in a separate thread is not supported on Mac, so the loop
+  function must be used rather than show/spin.
+
+  NOTE FOR GLUT USERS: this may only be run once.
+- def dialog(): pops up a dialog box (does not return to calling thread until closed).
+- def dialogInLoop(callback): for use inside loop(). Pops up a dialog box window, and returns
+  immediately to calling thread.
+  The callback function has signature callback(okPressed), where okPressed is True if the user
+  pressed the OK button, and False if Cancel or the close box was clicked.
+- def show(hidden=False): shows/hides a visualization window.  If not called from the visualization loop,
+  a new visualization thread is run in parallel with the calling script. 
+- def spin(duration): shows the visualization window for the desired amount
+  of time before returning, or until the user closes the window.
+- def shown(): returns true if the window is shown.
+- def lock(): locks the visualization world for editing.  The visualization will
+  be paused until unlock() is called.
+- def unlock(): unlocks the visualization world.  Must only be called once
+  after every lock().
+- def customUI(make_func): launches a user-defined UI window by calling make_func(gl_backend)
+  in the visualization thread.  This can be used to build custom editors and windows that
+  are compatible with other visualization functionality.  Here gl_backend is an instance of
+  _GLBackend instantiated for the current plugin, and make_func returns a QDialog for dialog()
+  constructed windows, or QMainWindow (or similar Qt object) for show() constructed windows.
+- def getViewport(): Returns the currently active viewport.
 
 The following VisualizationPlugin methods are also added to the klampt.vis namespace
 and operate on the default plugin.  If you are calling these methods from an external
 loop (as opposed to inside a plugin) be sure to lock/unlock the visualization before/after
 calling these methods.
 
-def add(name,item,keepAppearance=False): adds an item to the visualization.
-    name is a unique identifier.  If an item with the same name already exists,
-    it will no longer be shown.  If keepAppearance=True, then the prior item's
-    appearance will be kept, if a prior item exists.
-def clear(): clears the visualization world.
-def listItems(): prints out all names of visualization objects
-def listItems(name): prints out all names of visualization objects under the given name
-def dirty(item_name='all'): marks the given item as dirty and recreates the
-    OpenGL display lists.  You may need to call this if you modify an item's geometry,
-    for example.
-def remove(name): removes an item from the visualization.
-def setItemConfig(name,vector): sets the configuration of a named item.
-def getItemConfig(name): returns the configuration of a named item.
-def hide(name,hidden=True): hides/unhides an item.  The item is not removed,
-    it just becomes invisible.
-def edit(name,doedit=True): turns on/off visual editing of some item.  Only points,
-    transforms, coordinate.Point's, coordinate.Transform's, coordinate.Frame's,
-    robots, and objects are currently accepted.
-def hideLabel(name,hidden=True): hides/unhides an item's text label.
-def setAppearance(name,appearance): changes the Appearance of an item.
-def revertAppearance(name): restores the Appearance of an item
-def setAttribute(name,attribute,value): sets an attribute of the appearance
-    of an item.  Typical attributes are 'color', 'size', 'length', 'width'...
-    TODO: document all accepted attributes.
-def setColor(name,r,g,b,a=1.0): changes the color of an item.
-def setDrawFunc(name,func): sets a custom OpenGL drawing function for an item.
-    func is a one-argument function that takes the item data as input.  Set
-    func to None to revert to default drawing.
-def animate(name,animation,speed=1.0,endBehavior='loop'): Sends an animation to the
-    object. May be a Trajectory or a list of configurations.  Works with points,
-    so3 elements, se3 elements, rigid objects, or robots. 
-    - speed: a modulator on the animation speed.  If the animation is a list of
-      milestones, it is by default run at 1 milestone per second.
-    - endBehavior: either 'loop' (animation repeats forever) or 'halt' (plays once).
-def pauseAnimation(paused=True): Turns on/off animation.
-def stepAnimation(amount): Moves forward the animation time by the given amount
-    in seconds
-def animationTime(newtime=None): Gets/sets the current animation time
-    If newtime == None (default), this gets the animation time.
-    If newtime != None, this sets a new animation time.
-def addText(name,text,position=None): adds text.  You need to give an
-    identifier to all pieces of text, which will be used to access the text as any other
-    vis object.  If position is None, this is added as an on-screen display.  If position
-    is of length 2, it is the (x,y) position of the upper left corner of the text on the
-    screen.  Negative units anchor the text to the right or bottom of the window. 
-    If position is of length 3, the text is drawn in the world coordinates.  You can
-    then set the color, 'size' attribute, and 'position' attribute of the text using the
-    identifier given in 'name'.
-def clearText(): clears all previously added text.
-def addPlot(name): creates a new empty plot.
-def addPlotItem(name,itemname): adds a visualization item to a plot.
-def logPlot(name,itemname,value): logs a custom visualization item to a plot
-def logPlotEvent(name,eventname,color=None): logs an event on the plot.
-def hidePlotItem(name,itemname,hidden=True): hides an item in the plot.  To hide a
-    particular channel of a given item pass a pair (itemname,channelindex).  For example,
-    to hide configurations 0-5 of 'robot', call hidePlotItem('plot',('robot',0)), ...,
-    hidePlotItem('plot',('robot',5)).
-def setPlotDuration(name,time): sets the plot duration.
-def setPlotRange(name,vmin,vmax): sets the y range of a plot.
-def setPlotPosition(name,x,y): sets the upper left position of the plot on the screen.
-def setPlotSize(name,w,h): sets the width and height of the plot.
-def savePlot(name,fn): saves a plot to a CSV (extension .csv) or Trajectory (extension
-    .traj) file.
-def autoFitCamera(scale=1.0): Automatically fits the camera to all objects in the
-    visualization.  A scale > 1 magnifies the camera zoom.
+- def add(name,item,keepAppearance=False): adds an item to the visualization.
+  name is a unique identifier.  If an item with the same name already exists,
+  it will no longer be shown.  If keepAppearance=True, then the prior item's
+  appearance will be kept, if a prior item exists.
+- def clear(): clears the visualization world.
+- def listItems(): prints out all names of visualization objects
+- def listItems(name): prints out all names of visualization objects under the given name
+- def dirty(item_name='all'): marks the given item as dirty and recreates the
+  OpenGL display lists.  You may need to call this if you modify an item's geometry,
+  for example.
+- def remove(name): removes an item from the visualization.
+- def setItemConfig(name,vector): sets the configuration of a named item.
+- def getItemConfig(name): returns the configuration of a named item.
+- def hide(name,hidden=True): hides/unhides an item.  The item is not removed,
+  it just becomes invisible.
+- def edit(name,doedit=True): turns on/off visual editing of some item.  Only points,
+  transforms, coordinate.Point's, coordinate.Transform's, coordinate.Frame's,
+  robots, and objects are currently accepted.
+- def hideLabel(name,hidden=True): hides/unhides an item's text label.
+- def setAppearance(name,appearance): changes the Appearance of an item.
+- def revertAppearance(name): restores the Appearance of an item
+- def setAttribute(name,attribute,value): sets an attribute of the appearance
+  of an item.
+- def setColor(name,r,g,b,a=1.0): changes the color of an item.
+- def setDrawFunc(name,func): sets a custom OpenGL drawing function for an item.
+- def animate(name,animation,speed=1.0,endBehavior='loop'): Sends an animation to the
+  object. May be a Trajectory or a list of configurations.  Works with points,
+  so3 elements, se3 elements, rigid objects, or robots. 
+- def pauseAnimation(paused=True): Turns on/off animation.
+- def stepAnimation(amount): Moves forward the animation time by the given amount
+  in seconds
+- def animationTime(newtime=None): Gets/sets the current animation time
+- def addText(name,text,position=None): adds text to the visualizer.
+- def clearText(): clears all previously added text.
+- def addPlot(name): creates a new empty plot.
+- def addPlotItem(name,itemname): adds a visualization item to a plot.
+- def logPlot(name,itemname,value): logs a custom visualization item to a plot
+- def logPlotEvent(name,eventname,color=None): logs an event on the plot.
+- def hidePlotItem(name,itemname,hidden=True): hides an item in the plot. 
+- def setPlotDuration(name,time): sets the plot duration.
+- def setPlotRange(name,vmin,vmax): sets the y range of a plot.
+- def setPlotPosition(name,x,y): sets the upper left position of the plot on the screen.
+- def setPlotSize(name,w,h): sets the width and height of the plot.
+- def savePlot(name,fn): saves a plot to a CSV (extension .csv) or Trajectory (extension
+  .traj) file.
+- def autoFitCamera(scale=1.0): Automatically fits the camera to all objects in the
+  visualization.  A scale > 1 magnifies the camera zoom.
 
 Utility function:
-def autoFitViewport(viewport,objects): Automatically fits the viewport's camera to 
-    see all the given objects.
 
-NAMING CONVENTION:
+- def autoFitViewport(viewport,objects): Automatically fits the viewport's camera to 
+  see all the given objects.
+
+NAMING CONVENTION
+-----------------
 
 The world, if one exists, should be given the name 'world'.  Configurations and paths are drawn
 with reference to the first robot in the world.
@@ -245,23 +290,25 @@ link blue.
 
 
 from OpenGL.GL import *
-from threading import Thread,RLock
+import threading
 from ..robotsim import *
 from ..math import vectorops,so3,se3
 import gldraw
 from glinit import *
-from glinit import _GLBackend,_PyQtAvailable,_GLUTAvailable
+from glinit import _GLBackend,_PyQtAvailable,_PyQt5Available,_PyQt4Available,_GLUTAvailable
 from glinterface import GLPluginInterface
 from glprogram import GLPluginProgram
 import glcommon
 import time
 import signal
 import weakref
+import sys
 from ..model import types
 from ..model import config
 from ..model import coordinates
 from ..model.subrobot import SubRobotModel
 from ..model.trajectory import *
+from ..model.multipath import MultiPath
 from ..model.contact import ContactPoint,Hold
 
 class WindowInfo:
@@ -279,7 +326,7 @@ class WindowInfo:
         self.worlds = []
         self.active_worlds = []
 
-_globalLock = RLock()
+_globalLock = threading.RLock()
 #the VisualizationPlugin instance of the currently active window
 _vis = None
 #the GLPluginProgram of the currently active window.  Accepts _vis as plugin or other user-defined plugins as well
@@ -295,8 +342,12 @@ _windows = []
 #the index of the current window
 _current_window = None
 
-def createWindow(name):
-    """Creates a new window (and sets it active)."""
+def createWindow(title):
+    """Creates a new window (and sets it active).
+
+    Returns:
+        int: an identifier of the window (for use with :func:`setWindow`).
+    """
     global _globalLock,_frontend,_vis,_window_title,_current_worlds,_windows,_current_window
     _globalLock.acquire()
     if len(_windows) == 0:
@@ -305,7 +356,7 @@ def createWindow(name):
         _windows[-1].worlds = _current_worlds
         _windows[-1].active_worlds = _current_worlds[:]
     #make a new window
-    _window_title = name
+    _window_title = title
     _frontend = GLPluginProgram()
     _vis = VisualizationPlugin()
     _frontend.setPlugin(_vis)
@@ -317,7 +368,11 @@ def createWindow(name):
     return id
 
 def setWindow(id):
-    """Sets currently active window."""
+    """Sets currently active window. 
+
+    Note:
+        ID 0 is the default visualization window.
+    """
     global _globalLock,_frontend,_vis,_window_title,_windows,_current_window,_current_worlds
     if id == _current_window:
         return
@@ -350,7 +405,13 @@ def getWindow():
 
 def setPlugin(plugin):
     """Lets the user capture input via a glinterface.GLPluginInterface class.
-    Set plugin to None to disable plugins and return to the standard visualization"""
+    Set plugin to None to disable plugins and return to the standard visualization
+
+    Args:
+        plugin (GLPluginInterface): a plugin that will hereafter capture input
+            from the visualization and can override any of the default behavior of the
+            visualizer. Can be set to None if you want to return to the default visualization.
+    """
     global _globalLock,_frontend,_windows,_current_window
     _globalLock.acquire()
     if not isinstance(_frontend,GLPluginProgram):
@@ -360,7 +421,7 @@ def setPlugin(plugin):
                 _frontend.window = _windows[_current_window].glwindow
     if plugin == None:
         global _vis
-        if _vis==None:
+        if _vis is None:
             raise RuntimeError("Visualization disabled")
         _frontend.setPlugin(_vis)
     else:
@@ -371,13 +432,19 @@ def setPlugin(plugin):
     _globalLock.release()
 
 def pushPlugin(plugin):
-    """Adds a new glinterface.GLPluginInterface plugin on top of the old one."""
+    """Adds a new plugin on top of the old one.
+
+    Args:
+        plugin (GLPluginInterface): a plugin that will optionally intercept GUI callbacks.
+            Unhandled callbacks will be forwarded to the next plugin on the stack.
+
+    """
     global _globalLock,_frontend
     _globalLock.acquire()
     assert isinstance(_frontend,GLPluginProgram),"Can't push a plugin after addPlugin"
     if len(_frontend.plugins) == 0:
         global _vis
-        if _vis==None:
+        if _vis is None:
             raise RuntimeError("Visualization disabled")
         _frontend.setPlugin(_vis)
     _frontend.pushPlugin(plugin)
@@ -393,8 +460,12 @@ def popPlugin():
     _globalLock.release()
 
 def addPlugin(plugin):
-    """Adds a second OpenGL viewport in the same window, governed by the given plugin (a
-    glinterface.GLPluginInterface instance)."""
+    """Adds a second OpenGL viewport in the same window, governed by the given plugin
+
+    Args:
+        plugin (GLPluginInterface): the plugin used for the second viewport.
+
+    """
     global _frontend
     _globalLock.acquire()
     #create a multi-view widget
@@ -418,14 +489,35 @@ def addPlugin(plugin):
 
 def run(plugin=None):
     """A blocking call to start a single window and then kill the visualization
-    when closed.  If plugin == None, the default visualization is used. 
-    Otherwise, plugin is a glinterface.GLPluginInterface object, and it is used."""
+    once the user closes the window. 
+
+    Args:
+        plugin (GLPluginInterface, optional): If given, the plugin used to handle all
+            rendering and user input.  If plugin == None, the default visualization is
+            used. 
+
+    Note:
+        Works in both multi-threaded and single-threaded mode.
+    """
+    global _vis_thread_running
     setPlugin(plugin)
-    show()
-    while shown():
-        time.sleep(0.1)
+    if _vis_thread_running:
+        #already multithreaded, can't go back to single thread
+        show()
+        while shown():
+            time.sleep(0.1)
+    else:
+        #run in a single thread
+        loop(setup=show)
     setPlugin(None)
     kill()
+
+def multithreaded():
+    """Returns true if the current GUI system allows multithreading.  Useful for apps
+    that will work cross-platform with Macs and systems with only GLUT.
+    """
+    global _use_multithreaded
+    return _use_multithreaded
 
 def dialog():
     """A blocking call to start a single dialog window with the current plugin.  It is
@@ -445,13 +537,29 @@ def kill():
     """This should be called at the end of the calling program to cleanly terminate the
     visualization thread"""
     global _vis,_globalLock
-    if _vis==None:
+    if _vis is None:
         print "vis.kill() Visualization disabled"
         return
     _kill()
 
+def loop(setup=None,callback=None,cleanup=None):
+    """Runs the visualization thread inline with the main thread.
+    The setup() function is called at the start, the callback() function is run every time the event thread
+    is idle, and the cleanup() function is called on termination.
+
+    NOTE FOR MAC USERS: a multithreaded GUI is not supported on Mac, so the loop()
+    function must be used rather than "show and wait".
+
+    NOTE FOR GLUT USERS: this may only be run once.
+    """
+    _loop(setup,callback,cleanup)
+
+
 def show(display=True):
-    """Shows or hides the current window"""
+    """Shows or hides the current window.
+
+    NOTE FOR MAC USERS: due to a lack of support of multithreading on Mac, this will not work outside
+    of the setup / callback / cleanup functions given in a call to loop()."""
     _globalLock.acquire()
     if display:
         _show()
@@ -461,13 +569,26 @@ def show(display=True):
 
 def spin(duration):
     """Spin-shows a window for a certain duration or until the window is closed."""
-    show()
-    t = 0
-    while t < duration:
-        if not shown(): break
-        time.sleep(min(0.04,duration-t))
-        t += 0.04
-    show(False)
+    global _use_multithreaded,_in_vis_loop
+    if _in_vis_loop:
+        raise RuntimeError("spin() cannot be used inside loop()")
+    if _use_multithreaded:
+        #use existing thread
+        show()
+        t = 0
+        while t < duration:
+            if not shown(): break
+            time.sleep(min(0.04,duration-t))
+            t += 0.04
+        show(False)
+    else:
+        #use single thread
+        t0 = time.time()
+        def timed_break():
+            t1 = time.time()
+            if t1 - t0 >= duration:
+                show(False)
+        loop(callback=timed_break,setup=lambda:show())
     return
 
 def lock():
@@ -486,9 +607,9 @@ def unlock():
 
 def shown():
     """Returns true if a visualization window is currently shown."""
-    global _globalLock,_thread_running,_current_window
+    global _globalLock,_vis_thread_running,_current_window
     _globalLock.acquire()
-    res = (_thread_running and _current_window != None and _windows[_current_window].mode in ['shown','dialog'] or _windows[_current_window].guidata is not None)
+    res = (_vis_thread_running and _current_window != None and _windows[_current_window].mode in ['shown','dialog'] or _windows[_current_window].guidata is not None)
     _globalLock.release()
     return res
 
@@ -514,7 +635,7 @@ def setViewport(viewport):
 def clear():
     """Clears the visualization world."""
     global _vis
-    if _vis==None:
+    if _vis is None:
         return
     _vis.clear()
 
@@ -523,7 +644,7 @@ def add(name,item,keepAppearance=False):
     the same name already exists, it will no longer be shown.  If keepAppearance=True, then
     the prior item's appearance will be kept, if a prior item exists."""
     global _vis
-    if _vis==None:
+    if _vis is None:
         print "Visualization disabled"
         return
     _globalLock.acquire()
@@ -533,7 +654,7 @@ def add(name,item,keepAppearance=False):
 
 def listItems(name=None,indent=0):
     global _vis
-    if _vis==None:
+    if _vis is None:
         print "Visualization disabled"
         return
     _vis.listItems(name,indent)
@@ -543,7 +664,7 @@ def dirty(item_name='all'):
     to call this if you modify an item's geometry, for example.  If things start disappearing
     from your world when you create a new window, you may need to call this too."""
     global _vis
-    if _vis==None:
+    if _vis is None:
         print "Visualization disabled"
         return
     _vis.dirty(item_name)
@@ -553,109 +674,168 @@ def animate(name,animation,speed=1.0,endBehavior='loop'):
     Works with points, so3 elements, se3 elements, rigid objects, or robots, and may work
     with other objects as well.
 
-    Parameters:
-    - animation: may be a Trajectory or a list of configurations.
-    - speed: a modulator on the animation speed.  If the animation is a list of
-      milestones, it is by default run at 1 milestone per second.
-    - endBehavior: either 'loop' (animation repeats forever) or 'halt' (plays once).
+    Args:
+        animation: may be a Trajectory or a list of configurations.
+        speed (float, optional): a modulator on the animation speed.  If the animation
+            is a list of milestones, it is by default run at 1 milestone per second.
+        endBehavior (str, optional): either 'loop' (animation repeats forever) or 'halt'
+            (plays once).
+
     """
     global _vis
-    if _vis==None:
+    if _vis is None:
         print "Visualization disabled"
         return
     _vis.animate(name,animation,speed,endBehavior)
 
 def pauseAnimation(paused=True):
     global _vis
-    if _vis==None:
+    if _vis is None:
         print "Visualization disabled"
         return
     _vis.pauseAnimation(paused)
 
 def stepAnimation(amount):
     global _vis
-    if _vis==None:
+    if _vis is None:
         print "Visualization disabled"
         return
     _vis.stepAnimation(amount)
 
 def animationTime(newtime=None):
     """Gets/sets the current animation time
+
     If newtime == None (default), this gets the animation time.
+
     If newtime != None, this sets a new animation time.
     """
     global _vis
-    if _vis==None:
+    if _vis is None:
         print "Visualization disabled"
         return 0
     return _vis.animationTime(newtime)
 
 def remove(name):
+    """Removes an item from the visualization"""
     global _vis
-    if _vis==None:
+    if _vis is None:
         return
     return _vis.remove(name)
 
 def getItemConfig(name):
+    """Returns a configuration of an item from the visualization.  Useful for 
+    interacting with edited objects.
+
+    Returns:
+        list: a list of floats describing the item's current configuration.  Returns
+            None if name doesnt refer to an object."""
     global _vis
-    if _vis==None:
+    if _vis is None:
         return None
     return _vis.getItemConfig(name)
 
 def setItemConfig(name,value):
+    """Sets a configuration of an item from the visualization.
+
+    Args:
+        name (str): the item to set the configuration of.
+        value (list of floats): the item's configuration.  The number of items
+            depends on the object's type.  See the config module for more information.
+
+    """
     global _vis
-    if _vis==None:
+    if _vis is None:
         return
     return _vis.setItemConfig(name,value)
 
 def hideLabel(name,hidden=True):
+    """Hides or shows the label of an item in the visualization"""
     global _vis
-    if _vis==None:
+    if _vis is None:
         return
     return _vis.hideLabel(name,hidden)
 
 def hide(name,hidden=True):
+    """Hides an item in the visualization.  
+
+    Note: the opposite of hide() is not show(), it's hide(False).
+    """
     global _vis
-    if _vis==None:
+    if _vis is None:
         return
     _vis.hide(name,hidden)
 
 def edit(name,doedit=True):
-    """Turns on/off visual editing of some item.  Only points, transforms,
-    coordinate.Point's, coordinate.Transform's, coordinate.Frame's, robots,
-    and objects are currently accepted."""
+    """Turns on/off visual editing of some item. 
+
+    Only items of type point, transform, coordinate.Point, coordinate.Transform, coordinate.Frame, config,
+    robot, and rigid object are currently accepted.
+    """
     global _vis
-    if _vis==None:
+    if _vis is None:
         return
     _vis.edit(name,doedit)
 
 def setAppearance(name,appearance):
+    """Changes the Appearance of an item, for an item that uses the Appearance
+    item to draw (config, geometry, robots, rigid bodies).
+    """
     global _vis
-    if _vis==None:
+    if _vis is None:
         return
     _vis.setAppearance(name,appearance)
 
 def setAttribute(name,attr,value):
+    """Sets an attribute of the appearance
+    of an item. 
+
+    Args:
+        name (str): the name of the item
+        attr (str): the name of the attribute (see below)
+        value: the value (see below)
+
+    Accepted attributes are:
+
+    - 'color': the item's color (r,g,b) or (r,g,b,a)
+    - 'size': the size of the plot or text
+    - 'length': the length of axes in RigidTransform
+    - 'width': the width of axes and trajectory curves
+    - 'duration': the duration of a plot
+    - 'endeffectors': for a robot Trajectory, the list of end effectors to plot (default the last link).
+    - 'maxConfigs': for a Configs resource, the maximum number of drawn configurations (default 10)
+    - 'fancy': for RigidTransform objects, whether the axes are drawn with boxes or lines (default False)
+    - 'type': for ambiguous items, like a 3-item list when the robot has 3 links, specifies the type to be
+       used.  For example, 'Config' draws the item as a robot configuration, while 'Vector3' or 'Point'
+       draws it as a point.
+
+    """
     global _vis
-    if _vis==None:
+    if _vis is None:
         return
     _vis.setAttribute(name,attr,value)
 
 def revertAppearance(name):
     global _vis
-    if _vis==None:
+    if _vis is None:
         return
     _vis.revertAppearance(name)
 
 def setColor(name,r,g,b,a=1.0):
     global _vis
-    if _vis==None:
+    if _vis is None:
         return
     _vis.setColor(name,r,g,b,a)
 
 def setDrawFunc(name,func):
+    """Sets a custom OpenGL drawing function for an item.
+
+    Args:
+        name (str): the name of the item
+        func (function or None): a one-argument function draw(data) that takes the item data
+            as input.  Set func to None to revert to default drawing.
+    """
     global _vis
-    if _vis==None:
+    if _vis is None:
         return
     _vis.setDrawFunc(name,func)
 
@@ -701,7 +881,12 @@ def _getBounds(object):
             res += _getBounds(object.rigidObject(i))
         return res
     elif isinstance(object,RobotModel):
-        return sum([list(object.link(i).geometry().getBB()) for i in range(object.numLinks())],[])
+        res = []
+        for i in range(object.numLinks()):
+            bb = object.link(i).geometry().getBB()
+            if bb != None and not aabb_empty(bb):
+                res += list(bb)
+        return res
     elif isinstance(object,RigidObjectModel):
         return list(object.geometry().getBB())
     elif isinstance(object,Geometry3D):
@@ -804,79 +989,100 @@ def addText(name,text,pos=None):
     """Adds text to the visualizer.  You must give an identifier to all pieces of
     text, which will be used to access the text as any other vis object. 
 
-    Parameters:
-    - name: the text's unique identifier.
-    - text: the string to be drawn
-    - pos: the position of the string. If pos=None, this is added to the on-screen "console" display. 
-      If pos has length 2, it is the (x,y) position of the upper left corner of the text on the
-      screen.  Negative units anchor the text to the right or bottom of the window. 
-      If pos has length 3, the text is drawn in the world coordinates. 
+    Args:
+        name (str): the text's unique identifier.
+        text (str): the string to be drawn
+        pos (list, optional): the position of the string. If pos=None, this is added to the on-screen
+            "console" display.  If pos has length 2, it is the (x,y) position of the upper left corner
+            of the text on the screen.  Negative units anchor the text to the right or bottom of the
+            window.  If pos has length 3, the text is drawn in the world coordinates. 
 
     To customize the text appearance, you can set the color, 'size' attribute, and 'position'
     attribute of the text using the identifier given in 'name'.
     """
     global _vis
-    _vis.add(name,text,True)
-    if pos is not None:
-        _vis.setAttribute(name,'position',pos)
+    if _vis is None:
+        return
+    _vis.addText(name,text,pos)
 
 def clearText():
     """Clears all text in the visualization."""
     global _vis
-    if _vis==None:
+    if _vis is None:
         return
     _vis.clearText()
 
 def addPlot(name):
+    """Creates a new empty plot.."""
     add(name,VisPlot())
 
 def addPlotItem(name,itemname):
     global _vis
-    if _vis==None:
+    if _vis is None:
         return
     _vis.addPlotItem(name,itemname)
 
 def logPlot(name,itemname,value):
     """Logs a custom visualization item to a plot"""
     global _vis
-    if _vis==None:
+    if _vis is None:
         return
     _vis.logPlot(name,itemname,value)
 
 def logPlotEvent(name,eventname,color=None):
     """Logs an event on the plot."""
     global _vis
-    if _vis==None:
+    if _vis is None:
         return
     _vis.logPlotEvent(name,eventname,color)
 
 def hidePlotItem(name,itemname,hidden=True):
+    """Hides an item in the plot.  To hide a particular channel of a given item
+    pass a pair (itemname,channelindex). 
+
+    Examples:
+        To hide configurations 0-5 of 'robot', call::
+            hidePlotItem('plot',('robot',0))
+            ...
+            hidePlotItem('plot',('robot',5))
+
+    """
     global _vis
-    if _vis==None:
+    if _vis is None:
         return
     _vis.hidePlotItem(name,itemname,hidden)
 
 def setPlotDuration(name,time):
+    """Sets the plot duration."""
     setAttribute(name,'duration',time)
 
 def setPlotRange(name,vmin,vmax): 
+    """Sets the y range of a plot to [vmin,vmax]."""
     setAttribute(name,'range',(vmin,vmax))
 
 def setPlotPosition(name,x,y):
+    """Sets the upper left position of the plot on the screen."""
     setAttribute(name,'position',(x,y))
 
 def setPlotSize(name,w,h):
+    """sets the width and height of the plot, in pixels."""
     setAttribute(name,'size',(w,h))
 
 def savePlot(name,fn):
+    """Saves a plot to a CSV (extension .csv) or Trajectory (extension .traj) file."""
     global _vis
-    if _vis==None:
+    if _vis is None:
         return
     _vis.savePlot(name,fn)
 
 def autoFitCamera(scale=1):
+    """Automatically fits the camera to all items in the visualization. 
+
+    Args:
+        scale (float, optional): a scale > 1 magnifies the camera zoom.
+    """
     global _vis
-    if _vis==None:
+    if _vis is None:
         return
     print "klampt.vis: auto-fitting camera to scene."
     _vis.autoFitCamera(scale)
@@ -885,6 +1091,7 @@ def autoFitCamera(scale=1):
 
 
 def objectToVisType(item,world):
+    """Returns the default type for the given item in the current world"""
     itypes = types.objectToTypes(item,world)
     if isinstance(itypes,(list,tuple)):
         #ambiguous, still need to figure out what to draw
@@ -995,8 +1202,13 @@ class VisPlotItem:
                 else:
                     self.luminosity.append(random.uniform(0,1))
         trace = self.traces[i]
-        if len(trace) > 0 and trace[-1][0] == t:
-            trace[-1] = (t,v)
+        #trange = self.traceRanges[i][1] - self.traceRanges[i][0]
+        if len(trace) > 0 and trace[-1][0] >= t:
+            tsafe = trace[-1][0]+1e-8
+            if v != trace[-1][1]:
+                trace.append((tsafe,v))
+                return
+            trace[-1] = (tsafe,v)
             return
         if self.compressThreshold is None:
             trace.append((t,v))
@@ -1246,6 +1458,55 @@ class VisPlot:
             self.outfile.write(' '.join([str(v) for v in vals]))
             self.outfile.write('\n')
 
+def drawTrajectory(traj,width,color):
+    """Draws a trajectory of points or transforms"""
+    if isinstance(traj,list):
+        #R3 trajectory
+        glDisable(GL_LIGHTING)
+        glColor4f(*color)
+        if len(traj) == 1:
+            glPointSize(width)
+            glBegin(GL_POINTS)
+            glVertex3f(*traj[0])
+            glEnd()
+        if len(traj) >= 2:
+            glLineWidth(width)
+            glBegin(GL_LINE_STRIP)
+            for p in traj:
+                glVertex3f(*p)
+            glEnd()
+            glLineWidth(1.0)
+    elif isinstance(traj,SE3Trajectory):
+        pointTraj = []
+        for m in traj.milestones:
+            pointTraj.append(m[9:])
+        drawTrajectory(pointTraj,width,color)
+    else:
+        if len(traj.milestones[0]) == 3:
+            drawTrajectory(traj.milestones,width,color)
+        elif len(traj.milestones[0]) == 2:
+            #R2 trajectory
+            drawTrajectory([v + [0.0] for v in traj.milestones],width,color)
+
+
+def drawRobotTrajectory(traj,robot,ees,width=2,color=[1,0.5,0,1]):
+    """Draws trajectories for the robot's end effectors.  Note: no additional discretization is performed,
+    only the end effector points at the trajectory's milestones are shown.  If you want more accurate trajectories,
+    first call traj.discretize(eps)."""
+    for i,ee in enumerate(ees):
+        if ee < 0: ees[i] = robot.numLinks()-1
+    pointTrajectories = []
+    for ee in ees:
+        pointTrajectories.append([])
+    if isinstance(traj,Trajectory):
+        traj = traj.milestones
+    for m in traj:
+        robot.setConfig(m)
+        for ee,eetraj in zip(ees,pointTrajectories):
+            eetraj.append(robot.link(ee).getTransform()[1])
+    for ptraj in pointTrajectories:
+        drawTrajectory(ptraj,width,color)
+
 class VisAppearance:
     def __init__(self,item,name = None):
         self.name = name
@@ -1392,7 +1653,7 @@ class VisAppearance:
         name = self.name
         #set appearance
         if not self.useDefaultAppearance and hasattr(item,'appearance'):
-            print "Has custom appearance"
+            #print "Has custom appearance"
             if not hasattr(self,'oldAppearance'):
                 self.oldAppearance = item.appearance().clone()
             if self.customAppearance != None:
@@ -1420,11 +1681,12 @@ class VisAppearance:
         elif isinstance(item,Trajectory):
             doDraw = False
             centroid = None
-            if isinstance(item,RobotTrajectory):
+            robot = (world.robot(0) if world is not None and world.numRobots() > 0 else None)
+            treatAsRobotTrajectory = (item.__class__ == Trajectory and len(item.milestones) > 0 and robot and len(item.milestones[0]) == robot.numLinks())
+            if isinstance(item,RobotTrajectory) or treatAsRobotTrajectory:
                 ees = self.attributes.get("endeffectors",[-1])
                 if world:
                     doDraw = (len(ees) > 0)
-                    robot = world.robot(0)
                     for i,ee in enumerate(ees):
                         if ee < 0: ees[i] = robot.numLinks()-1
                     if doDraw:
@@ -1442,49 +1704,43 @@ class VisAppearance:
                     #R2 trajectory
                     doDraw = True
                     centroid = item.milestones[0]+[0.0]
+                else:
+                    #don't know how to interpret this trajectory
+                    pass
             if doDraw:
                 def drawRaw():
                     pointTrajectories = []
-                    if isinstance(item,RobotTrajectory):
-                        robot = world.robot(0)
+                    width = self.attributes.get("width",3)
+                    color = self.attributes.get("color",[1,0.5,0,1])
+                    if isinstance(item,RobotTrajectory) or treatAsRobotTrajectory:
                         ees = self.attributes.get("endeffectors",[-1])
-                        for i,ee in enumerate(ees):
-                            if ee < 0: ees[i] = robot.numLinks()-1
-                        if world:
-                            for ee in ees:
-                                pointTrajectories.append([])
-                            for m in item.milestones:
-                                robot.setConfig(m)
-                                for ee,eetraj in zip(ees,pointTrajectories):
-                                    eetraj.append(robot.link(ee).getTransform()[1])
-                    elif isinstance(item,SE3Trajectory):
-                        pointTrajectories.append([])
-                        for m in item.milestones:
-                            pointTrajectories[-1].append(m[9:])
+                        drawRobotTrajectory(item,robot,ees,width,color)                        
                     else:
-                        if len(item.milestones[0]) == 3:
-                            #R3 trajectory
-                            pointTrajectories.append(item.milestones)
-                        elif len(item.milestones[0]) == 2:
-                            #R2 trajectory
-                            pointTrajectories.append([v + [0.0] for v in item.milestones])
-                    glDisable(GL_LIGHTING)
-                    glLineWidth(self.attributes.get("width",3))
-                    glColor4f(*self.attributes.get("color",[1,0.5,0,1]))
-                    for traj in pointTrajectories:
-                        if len(traj) == 1:
-                            glBegin(GL_POINTS)
-                            glVertex3f(*traj[0])
-                            glEnd()
-                        if len(traj) >= 2:
-                            glBegin(GL_LINE_STRIP)
-                            for p in traj:
-                                glVertex3f(*p)
-                            glEnd()
-                    glLineWidth(1.0)
-                self.displayCache[0].draw(drawRaw,se3.identity())
+                        drawTrajectory(item,width,color)
+                self.displayCache[0].draw(drawRaw)
                 if name != None:
                     self.drawText(name,centroid)
+        elif isinstance(item,MultiPath):
+            robot = (world.robot(0) if world is not None and world.numRobots() > 0 else None)
+            if robot is not None and item.numSections() > 0:
+                if len(item.sections[0].configs[0]) == robot.numLinks():
+                    ees = self.attributes.get("endeffectors",[-1])
+                    if len(ees) > 0:
+                        for i,ee in enumerate(ees):
+                            if ee < 0: ees[i] = robot.numLinks()-1
+                        robot.setConfig(item.sections[0].configs[0])
+                        centroid = vectorops.div(vectorops.add(*[robot.link(ee).getTransform()[1] for ee in ees]),len(ees))
+                    width = self.attributes.get("width",3)
+                    color = self.attributes.get("color",[1,0.5,0,1])
+                    color2 = [1-c for c in color]
+                    color2[3] = color[3]
+                    def drawRaw():
+                        for i,s in enumerate(item.sections):
+                            drawRobotTrajectory(s.configs,robot,ees,width,(color if i%2 == 0 else color2))
+                    #draw it!
+                    self.displayCache[0].draw(drawRaw)
+                    if name != None:
+                        self.drawText(name,centroid)
         elif isinstance(item,coordinates.Point):
             def drawRaw():
                 glDisable(GL_LIGHTING)
@@ -1593,6 +1849,183 @@ class VisAppearance:
             self.displayCache[0].draw(drawRaw,[so3.canonical(item.n),item.x])
         elif isinstance(item,Hold):
             pass
+        elif isinstance(item,IKObjective):
+            if hasattr(item,'robot'):
+                #need this to be built with a robot element.
+                #Otherwise, can't determine the correct transforms
+                robot = item.robot
+            elif world:
+                if world is not None and world.numRobots() >= 1:
+                    robot = world.robot(0)
+                else:
+                    robot = None
+            else:
+                robot = None
+            if robot != None:
+                link = robot.link(item.link())
+                dest = robot.link(item.destLink()) if item.destLink()>=0 else None
+                while len(self.displayCache) < 3:
+                    self.displayCache.append(glcommon.CachedGLObject())
+                self.displayCache[1].name = self.name+" target position"
+                self.displayCache[2].name = self.name+" curve"
+                if item.numPosDims() != 0:
+                    lp,wp = item.getPosition()
+                    #set up parameters of connector
+                    p1 = se3.apply(link.getTransform(),lp)
+                    if dest != None:
+                        p2 = se3.apply(dest.getTransform(),wp)
+                    else:
+                        p2 = wp
+                    d = vectorops.distance(p1,p2)
+                    v1 = [0.0]*3
+                    v2 = [0.0]*3
+                    if item.numRotDims()==3: #full constraint
+                        R = item.getRotation()
+                        def drawRaw():
+                            gldraw.xform_widget(se3.identity(),self.attributes.get("length",0.1),self.attributes.get("width",0.01))
+                        t1 = se3.mul(link.getTransform(),(so3.identity(),lp))
+                        t2 = (R,wp) if dest==None else se3.mul(dest.getTransform(),(R,wp))
+                        self.displayCache[0].draw(drawRaw,transform=t1)
+                        self.displayCache[1].draw(drawRaw,transform=t2)
+                        vlen = d*0.1
+                        v1 = so3.apply(t1[0],[-vlen]*3)
+                        v2 = so3.apply(t2[0],[vlen]*3)
+                    elif item.numRotDims()==0: #point constraint
+                        def drawRaw():
+                            glDisable(GL_LIGHTING)
+                            glEnable(GL_POINT_SMOOTH)
+                            glPointSize(self.attributes.get("size",5.0))
+                            glColor4f(*self.attributes.get("color",[0,0,0,1]))
+                            glBegin(GL_POINTS)
+                            glVertex3f(0,0,0)
+                            glEnd()
+                        self.displayCache[0].draw(drawRaw,transform=(so3.identity(),p1))
+                        self.displayCache[1].draw(drawRaw,transform=(so3.identity(),p2))
+                        #set up the connecting curve
+                        vlen = d*0.5
+                        d = vectorops.sub(p2,p1)
+                        v1 = vectorops.mul(d,0.5)
+                        #curve in the destination
+                        v2 = vectorops.cross((0,0,0.5),d)
+                    else: #hinge constraint
+                        p = [0,0,0]
+                        d = [0,0,0]
+                        def drawRawLine():
+                            glDisable(GL_LIGHTING)
+                            glEnable(GL_POINT_SMOOTH)
+                            glPointSize(self.attributes.get("size",5.0))
+                            glColor4f(*self.attributes.get("color",[0,0,0,1]))
+                            glBegin(GL_POINTS)
+                            glVertex3f(*p)
+                            glEnd()
+                            glColor4f(*self.attributes.get("color",[0.5,0,0.5,1]))
+                            glLineWidth(self.attributes.get("width",3.0))
+                            glBegin(GL_LINES)
+                            glVertex3f(*p)
+                            glVertex3f(*vectorops.madd(p,d,self.attributes.get("length",0.1)))
+                            glEnd()
+                            glLineWidth(1.0)
+                        ld,wd = item.getRotationAxis()
+                        p = lp
+                        d = ld
+                        self.displayCache[0].draw(drawRawLine,transform=link.getTransform(),parameters=(p,d))
+                        p = wp
+                        d = wd
+                        self.displayCache[1].draw(drawRawLine,transform=dest.getTransform() if dest else se3.identity(),parameters=(p,d))
+                        #set up the connecting curve
+                        d = vectorops.sub(p2,p1)
+                        v1 = vectorops.mul(d,0.5)
+                        #curve in the destination
+                        v2 = vectorops.cross((0,0,0.5),d)
+                    def drawConnection():
+                        glDisable(GL_LIGHTING)
+                        glDisable(GL_DEPTH_TEST)
+                        glColor3f(1,0.5,0)
+                        gldraw.hermite_curve(p1,v1,p2,v2,0.03*max(0.1,vectorops.distance(p1,p2)))
+                        #glBegin(GL_LINES)
+                        #glVertex3f(*p1)
+                        #glVertex3f(*p2)
+                        #glEnd()
+                        glEnable(GL_DEPTH_TEST)
+                    #TEMP for some reason the cached version sometimes gives a GL error
+                    self.displayCache[2].draw(drawConnection,transform=None,parameters = (p1,v1,p2,v2))
+                    #drawConnection()
+                    if name != None:
+                        self.drawText(name,wp)
+                else:
+                    wp = link.getTransform()[1]
+                    if item.numRotDims()==3: #full constraint
+                        R = item.getRotation()
+                        def drawRaw():
+                            gldraw.xform_widget(se3.identity(),self.attributes.get("length",0.1),self.attributes.get("width",0.01))
+                        self.displayCache[0].draw(drawRaw,transform=link.getTransform())
+                        self.displayCache[1].draw(drawRaw,transform=se3.mul(link.getTransform(),(R,[0,0,0])))
+                    elif item.numRotDims() > 0:
+                        #axis constraint
+                        d = [0,0,0]
+                        def drawRawLine():
+                            glDisable(GL_LIGHTING)
+                            glColor4f(*self.attributes.get("color",[0.5,0,0.5,1]))
+                            glLineWidth(self.attributes.get("width",3.0))
+                            glBegin(GL_LINES)
+                            glVertex3f(0,0,0)
+                            glVertex3f(*vectorops.mul(d,self.attributes.get("length",0.1)))
+                            glEnd()
+                            glLineWidth(1.0)
+                        ld,wd = item.getRotationAxis()
+                        d = ld
+                        self.displayCache[0].draw(drawRawLine,transform=link.getTransform(),parameters=d)
+                        d = wd
+                        self.displayCache[1].draw(drawRawLine,transform=(dest.getTransform()[0] if dest else so3.identity(),wp),parameters=d)
+                    else:
+                        #no drawing
+                        pass
+                    if name != None:
+                        self.drawText(name,wp)
+        elif isinstance(item,(GeometricPrimitive,TriangleMesh,PointCloud,Geometry3D)):
+            if not hasattr(self,'appearance'):
+                self.appearance = Appearance()
+            c = self.attributes.get("color",[0.5,0.5,0.5,1])
+            self.appearance.setColor(*c)
+            s = self.attributes.get("size",None)
+            if s:
+                self.appearance.setPointSize(s)
+            wp = None
+            geometry = None
+            lighting = True
+            if isinstance(self.item,GeometricPrimitive):
+                if not hasattr(self,'geometry'):
+                    self.geometry = Geometry3D(self.item)
+                geometry = self.geometry
+                if self.item.type not in ['Sphere','AABB']:
+                    lighting = False
+            elif isinstance(self.item,PointCloud):
+                if not hasattr(self,'geometry'):
+                    self.geometry = Geometry3D(self.item)
+                lighting = False
+                geometry = self.geometry
+            elif isinstance(self.item,TriangleMesh):
+                if not hasattr(self,'geometry'):
+                    self.geometry = Geometry3D(self.item)
+                geometry = self.geometry
+            else:
+                assert isinstance(self.item,Geometry3D)
+                if self.item.type() == 'GeometricPrimitive':
+                    prim = self.item.getGeometricPrimitive()
+                    if prim.type not in ['Sphere','AABB']:
+                        lighting = False
+                elif self.item.type() == 'PointCloud':
+                    lighting = False
+                geometry = self.item
+            if lighting:
+                glEnable(GL_LIGHTING)
+            else:
+                glDisable(GL_LIGHTING)
+            self.appearance.drawWorldGL(geometry)
+            if name != None:
+                bmin,bmax = geometry.getBB()
+                wp = vectorops.mul(vectorops.add(bmin,bmax),0.5)
+                self.drawText(name,wp)
         else:
             try:
                 itypes = self.attributes['type']
@@ -1669,141 +2102,8 @@ class VisAppearance:
                 self.displayCache[0].draw(drawRaw,transform=item)
                 if name != None:
                     self.drawText(name,item[1])
-            elif itypes == 'IKGoal':
-                if hasattr(item,'robot'):
-                    #need this to be built with a robot element.
-                    #Otherwise, can't determine the correct transforms
-                    robot = item.robot
-                elif world:
-                    if world.numRobots() >= 1:
-                        robot = world.robot(0)
-                    else:
-                        robot = None
-                else:
-                    robot = None
-                if robot != None:
-                    link = robot.link(item.link())
-                    dest = robot.link(item.destLink()) if item.destLink()>=0 else None
-                    while len(self.displayCache) < 3:
-                        self.displayCache.append(glcommon.CachedGLObject())
-                    self.displayCache[1].name = self.name+" target position"
-                    self.displayCache[2].name = self.name+" curve"
-                    if item.numPosDims() != 0:
-                        lp,wp = item.getPosition()
-                        #set up parameters of connector
-                        p1 = se3.apply(link.getTransform(),lp)
-                        if dest != None:
-                            p2 = se3.apply(dest.getTransform(),wp)
-                        else:
-                            p2 = wp
-                        d = vectorops.distance(p1,p2)
-                        v1 = [0.0]*3
-                        v2 = [0.0]*3
-                        if item.numRotDims()==3: #full constraint
-                            R = item.getRotation()
-                            def drawRaw():
-                                gldraw.xform_widget(se3.identity(),self.attributes.get("length",0.1),self.attributes.get("width",0.01))
-                            t1 = se3.mul(link.getTransform(),(so3.identity(),lp))
-                            t2 = (R,wp) if dest==None else se3.mul(dest.getTransform(),(R,wp))
-                            self.displayCache[0].draw(drawRaw,transform=t1)
-                            self.displayCache[1].draw(drawRaw,transform=t2)
-                            vlen = d*0.1
-                            v1 = so3.apply(t1[0],[-vlen]*3)
-                            v2 = so3.apply(t2[0],[vlen]*3)
-                        elif item.numRotDims()==0: #point constraint
-                            def drawRaw():
-                                glDisable(GL_LIGHTING)
-                                glEnable(GL_POINT_SMOOTH)
-                                glPointSize(self.attributes.get("size",5.0))
-                                glColor4f(*self.attributes.get("color",[0,0,0,1]))
-                                glBegin(GL_POINTS)
-                                glVertex3f(0,0,0)
-                                glEnd()
-                            self.displayCache[0].draw(drawRaw,transform=(so3.identity(),p1))
-                            self.displayCache[1].draw(drawRaw,transform=(so3.identity(),p2))
-                            #set up the connecting curve
-                            vlen = d*0.5
-                            d = vectorops.sub(p2,p1)
-                            v1 = vectorops.mul(d,0.5)
-                            #curve in the destination
-                            v2 = vectorops.cross((0,0,0.5),d)
-                        else: #hinge constraint
-                            p = [0,0,0]
-                            d = [0,0,0]
-                            def drawRawLine():
-                                glDisable(GL_LIGHTING)
-                                glEnable(GL_POINT_SMOOTH)
-                                glPointSize(self.attributes.get("size",5.0))
-                                glColor4f(*self.attributes.get("color",[0,0,0,1]))
-                                glBegin(GL_POINTS)
-                                glVertex3f(*p)
-                                glEnd()
-                                glColor4f(*self.attributes.get("color",[0.5,0,0.5,1]))
-                                glLineWidth(self.attributes.get("width",3.0))
-                                glBegin(GL_LINES)
-                                glVertex3f(*p)
-                                glVertex3f(*vectorops.madd(p,d,self.attributes.get("length",0.1)))
-                                glEnd()
-                                glLineWidth(1.0)
-                            ld,wd = item.getRotationAxis()
-                            p = lp
-                            d = ld
-                            self.displayCache[0].draw(drawRawLine,transform=link.getTransform(),parameters=(p,d))
-                            p = wp
-                            d = wd
-                            self.displayCache[1].draw(drawRawLine,transform=dest.getTransform() if dest else se3.identity(),parameters=(p,d))
-                            #set up the connecting curve
-                            d = vectorops.sub(p2,p1)
-                            v1 = vectorops.mul(d,0.5)
-                            #curve in the destination
-                            v2 = vectorops.cross((0,0,0.5),d)
-                        def drawConnection():
-                            glDisable(GL_LIGHTING)
-                            glDisable(GL_DEPTH_TEST)
-                            glColor3f(1,0.5,0)
-                            gldraw.hermite_curve(p1,v1,p2,v2,0.03*max(0.1,vectorops.distance(p1,p2)))
-                            #glBegin(GL_LINES)
-                            #glVertex3f(*p1)
-                            #glVertex3f(*p2)
-                            #glEnd()
-                            glEnable(GL_DEPTH_TEST)
-                        #TEMP for some reason the cached version sometimes gives a GL error
-                        self.displayCache[2].draw(drawConnection,transform=None,parameters = (p1,v1,p2,v2))
-                        #drawConnection()
-                        if name != None:
-                            self.drawText(name,wp)
-                    else:
-                        wp = link.getTransform()[1]
-                        if item.numRotDims()==3: #full constraint
-                            R = item.getRotation()
-                            def drawRaw():
-                                gldraw.xform_widget(se3.identity(),self.attributes.get("length",0.1),self.attributes.get("width",0.01))
-                            self.displayCache[0].draw(drawRaw,transform=link.getTransform())
-                            self.displayCache[1].draw(drawRaw,transform=se3.mul(link.getTransform(),(R,[0,0,0])))
-                        elif item.numRotDims() > 0:
-                            #axis constraint
-                            d = [0,0,0]
-                            def drawRawLine():
-                                glDisable(GL_LIGHTING)
-                                glColor4f(*self.attributes.get("color",[0.5,0,0.5,1]))
-                                glLineWidth(self.attributes.get("width",3.0))
-                                glBegin(GL_LINES)
-                                glVertex3f(0,0,0)
-                                glVertex3f(*vectorops.mul(d,self.attributes.get("length",0.1)))
-                                glEnd()
-                                glLineWidth(1.0)
-                            ld,wd = item.getRotationAxis()
-                            d = ld
-                            self.displayCache[0].draw(drawRawLine,transform=link.getTransform(),parameters=d)
-                            d = wd
-                            self.displayCache[1].draw(drawRawLine,transform=(dest.getTransform()[0] if dest else so3.identity(),wp),parameters=d)
-                        else:
-                            #no drawing
-                            pass
-                        if name != None:
-                            self.drawText(name,wp)
             else:
-                print "Unable to draw item of type",itypes
+                print "Unable to draw item of type \"%s\""%(str(itypes),)
 
         #revert appearance
         if not self.useDefaultAppearance and hasattr(item,'appearance'):
@@ -1861,7 +2161,7 @@ class VisAppearance:
                     raise ValueError("Invalid sub-path specified "+str(path)+" at "+str(e))
         raise ValueError("Invalid sub-item specified "+path[0])
 
-    def make_editor(self):
+    def make_editor(self,world=None):
         if self.editor != None:
             return 
         item = self.item
@@ -1901,6 +2201,17 @@ class VisAppearance:
                 res.enableRotation(True)
                 res.enableTranslation(True)
                 res.set(*self.item)
+            elif itype == 'Config':
+                if world is not None and world.numRobots() > 0 and world.robot(0).numLinks() == len(item):
+                    #it's a valid configuration
+                    oldconfig = world.robot(0).getConfig()
+                    world.robot(0).setConfig(self.item)
+                    res = RobotPoser(world.robot(0))
+                    world.robot(0).setConfig(oldconfig)
+                    self.hidden = True
+                else:
+                    print "VisAppearance.make_editor(): Warning, editor for object of type",itype,"cannot be associated with a robot"
+                    return
             else:
                 print "VisAppearance.make_editor(): Warning, editor for object of type",itype,"not defined"
                 return
@@ -1934,6 +2245,8 @@ class VisAppearance:
                     self.editor.set(self.item)
                 elif itype == 'RigidTransform':
                     self.editor.set(*self.item)
+                elif itype == 'Config':
+                    self.editor.set(self.item)
             else:
                 raise RuntimeError("Uh... unsupported type with an editor?")
         else:
@@ -2148,7 +2461,7 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
             if len(components)==1: 
                 return self.getItem(components[0])
             if components[0] not in self.items:
-                raise ValueError("Invalid top-level item specified: "+item_name)
+                raise ValueError("Invalid top-level item specified: "+str(item_name))
             return self.items[components[0]].getSubItem(components[1:])
         if item_name in self.items:
             return self.items[item_name]
@@ -2218,6 +2531,12 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         _globalLock.release()
         #self.refresh()
 
+    def addText(self,name,text,pos=None):
+        self.add(name,text,True)
+        if pos is not None:
+            self.setAttribute(name,'position',pos)
+
+
     def animate(self,name,animation,speed=1.0,endBehavior='loop'):
         global _globalLock
         _globalLock.acquire()
@@ -2227,6 +2546,19 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
             animation = Trajectory(range(len(animation)),animation)
         if isinstance(animation,HermiteTrajectory):
             animation = animation.configTrajectory()
+        if isinstance(animation,MultiPath):
+            world = self.items.get('world',None)
+            if world != None:
+                world=world.item
+                if world.numRobots() > 0:
+                    #discretize multipath
+                    robot = world.robot(0)
+                    animation = animation.getTrajectory(robot,0.1)
+                else:
+                    animation = animation.getTrajectory()
+            else:
+                animation = animation.getTrajectory()
+        assert isinstance(animation,Trajectory) or animation is None,"Must animate() with a Trajectory object or list of milestones"
         item = self.getItem(name)
         item.animation = animation
         item.animationStartTime = self.currentAnimationTime
@@ -2306,7 +2638,10 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
             _globalLock.release()
             raise ValueError("Object "+name+" does not exist in visualization")
         if doedit:
-            obj.make_editor()
+            world = self.items.get('world',None)
+            if world != None:
+                world=world.item
+            obj.make_editor(world)
             if obj.editor:
                 self.klamptwidgetmaster.add(obj.editor)
         else:
@@ -2470,10 +2805,17 @@ _frontend.setPlugin(_vis)
 
 #signals to visualization thread
 _quit = False
-_thread_running = False
+_in_vis_loop = False
+_vis_thread_running = False
+_vis_thread = None
+_in_app_thread = False
+_use_multithreaded = (True if sys.platform != 'darwin' else False)
 
 if _PyQtAvailable:
-    from PyQt4 import QtGui
+    if _PyQt5Available:
+        from PyQt5.QtWidgets import QDialog,QInputDialog,QDialogButtonBox,QMainWindow,QApplication,QAction
+    else:
+        from PyQt4.QtGui import QDialog,QInputDialog,QDialogButtonBox,QMainWindow,QApplication,QAction
     #Qt specific startup
     #need to set up a QDialog and an QApplication
     class _MyDialog(QDialog):
@@ -2523,6 +2865,7 @@ if _PyQtAvailable:
             self.glwidget.setMaximumSize(4000,4000)
             self.glwidget.setSizePolicy(QSizePolicy(QSizePolicy.Maximum,QSizePolicy.Maximum))
             self.setCentralWidget(self.glwidget)
+            self.glwidget.setParent(self)
             self.setWindowTitle(windowinfo.name)
             self.glwidget.name = windowinfo.name
             self.saving_movie = False
@@ -2540,28 +2883,28 @@ if _PyQtAvailable:
             fileMenu = mainMenu.addMenu('&Actions')
             self.glwidget.actionMenu = fileMenu
             visMenu = mainMenu.addMenu('&Visualization')
-            a = QtGui.QAction('Save world...', self)
+            a = QAction('Save world...', self)
             a.setStatusTip('Saves world to xml file')
             a.triggered.connect(self.save_world)
             visMenu.addAction(a)
-            a = QtGui.QAction('Add to world...', self)
+            a = QAction('Add to world...', self)
             a.setStatusTip('Adds an item to the world')
             a.triggered.connect(self.add_to_world)
             visMenu.addAction(a)
-            a = QtGui.QAction('Save camera...', self)
+            a = QAction('Save camera...', self)
             a.setStatusTip('Saves camera settings')
             a.triggered.connect(self.save_camera)
             visMenu.addAction(a)
-            a = QtGui.QAction('Load camera...', self)
+            a = QAction('Load camera...', self)
             a.setStatusTip('Loads camera settings')
             a.triggered.connect(self.load_camera)
             visMenu.addAction(a)
-            a = QtGui.QAction('Start/stop movie output', self)
+            a = QAction('Start/stop movie output', self)
             a.setShortcut('Ctrl+M')
             a.setStatusTip('Starts / stops saving movie frames')
             a.triggered.connect(self.toggle_movie_mode)
             visMenu.addAction(a)
-            a = QtGui.QAction('Start/stop html output', self)
+            a = QAction('Start/stop html output', self)
             a.setShortcut('Ctrl+H')
             a.setStatusTip('Starts / stops saving animation to HTML file')
             a.triggered.connect(self.toggle_html_mode)
@@ -2591,7 +2934,7 @@ if _PyQtAvailable:
                 print "Program does not appear to have a camera"
                 return
             v = self.glwidget.program.get_view()
-            fn = QFileDialog.getSaveFileName(caption="Viewport file (*.txt)",filter="Viewport file (*.txt);;All files (*.*)")
+            fn = QFileDialog.getSaveFileName(caption="Viewport file (*.txt)",filter="Viewport file (*.txt);;All files (*.*)",options=QFileDialog.DontUseNativeDialog)
             if fn is None:
                 return
             f = open(str(fn),'w')
@@ -2603,7 +2946,7 @@ if _PyQtAvailable:
             scale = 1.0/(2.0*math.tan(rfov*0.5/aspect)*aspect)
             f.write("SCALE %f\n"%(scale,))
             f.write("NEARPLANE %f\n"%(v.clippingplanes[0],))
-            f.write("FARPLANE %f\n"%(v.clippingplanes[0],))
+            f.write("FARPLANE %f\n"%(v.clippingplanes[1],))
             f.write("CAMTRANSFORM ")
             mat = se3.homogeneous(v.camera.matrix())
             f.write(' '.join(str(v) for v in sum(mat,[])))
@@ -2611,7 +2954,57 @@ if _PyQtAvailable:
             f.write("ORBITDIST %f\n"%(v.camera.dist,))
             f.close()
         def load_camera(self):
-            print "TODO"
+            v = self.glwidget.program.get_view()
+            fn = QFileDialog.getOpenFileName(caption="Viewport file (*.txt)",filter="Viewport file (*.txt);;All files (*.*)",options=QFileDialog.DontUseNativeDialog)
+            if fn is None:
+                return
+            f = open(str(fn),'r')
+            read_viewport = False
+            mat = None
+            for line in f:
+                entries = line.split()
+                if len(entries) == 0:
+                    continue
+                kw = entries[0]
+                args = entries[1:]
+                if kw == 'VIEWPORT':
+                    read_viewport = True
+                    continue
+                else:
+                    if not read_viewport:
+                        print "File does not appear to be a valid viewport file, must start with VIEWPORT"
+                        break
+                if kw == 'FRAME':
+                    v.x,v.y,v.w,v.h = [int(x) for x in args]
+                elif kw == 'PERSPECTIVE':
+                    if args[0] != '1':
+                        print "WARNING: CANNOT CHANGE TO ORTHO MODE IN PYTHON VISUALIZATION"
+                elif kw == 'SCALE':
+                    scale = float(args[0])
+                    aspect = float(v.w)/float(v.h)
+                    #2.0*math.tan(rfov*0.5/aspect)*aspect = 1.0/scale
+                    #math.tan(rfov*0.5/aspect) = 0.5/(scale*aspect)
+                    #rfov*0.5/aspect = math.atan(0.5/(scale*aspect))
+                    #rfov = 2*aspect*math.atan(0.5/(scale*aspect))
+                    rfov = math.atan(0.5/(scale*aspect))*2*aspect
+                    v.fov = math.degrees(rfov)
+                elif kw == 'NEARPLANE':
+                    v.clippingplanes = (float(args[0]),v.clippingplanes[1])
+                elif kw == 'FARPLANE':
+                    v.clippingplanes = (v.clippingplanes[0],float(args[0]))
+                elif kw == 'CAMTRANSFORM':
+                    mat = [args[0:4],args[4:8],args[8:12],args[12:16]]
+                    for i,row in enumerate(mat):
+                        mat[i] = [float(x) for x in row]
+                elif kw == 'ORBITDIST':
+                    v.camera.dist = float(args[0])
+                else:
+                    raise RuntimeError("Invalid viewport keyword "+kw)
+            if mat != None:
+                v.camera.set_matrix(se3.from_homogeneous(mat))
+            self.glwidget.program.set_view(v)
+            f.close()
+
         def save_world(self):
             w = self.getWorld()
             if w is None:
@@ -2639,14 +3032,14 @@ if _PyQtAvailable:
                     self.movie_time_last = sim.getTime()
             else:
                 self.movie_timer.stop()
-                dlg =  QtGui.QInputDialog(self)                 
-                dlg.setInputMode( QtGui.QInputDialog.TextInput) 
+                dlg =  QInputDialog(self)                 
+                dlg.setInputMode( QInputDialog.TextInput) 
                 dlg.setLabelText("Command")
                 dlg.setTextValue('ffmpeg -y -f image2 -i image%04d.png klampt_record.mp4')
                 dlg.resize(500,100)                             
                 ok = dlg.exec_()                                
                 cmd = dlg.textValue()
-                #(cmd,ok) = QtGui.QInputDialog.getText(self,"Process with ffmpeg?","Command", text='ffmpeg -y -f image2 -i image%04d.png klampt_record.mp4')
+                #(cmd,ok) = QInputDialog.getText(self,"Process with ffmpeg?","Command", text='ffmpeg -y -f image2 -i image%04d.png klampt_record.mp4')
                 if ok:
                     import os,glob
                     os.system(str(cmd))
@@ -2703,14 +3096,31 @@ if _PyQtAvailable:
                 self.toggle_movie_mode()
             if self.saving_html:
                 self.toggle_html_mode()
+            #self.html_timer.deleteLater()
+            #self.movie_timer.deleteLater()
             print "#########################################"
             print "klampt.vis: Window close"
             print "#########################################"
             _globalLock.release()
+        def close(self):
+            """Called to clean up resources"""
+            self.html_timer.stop()
+            self.movie_timer.stop()
+            self.html_timer.deleteLater()
+            self.movie_timer.deleteLater()
+            self.movie_timer = None
+            self.html_timer = None
+        def detachGLWindow(self):
+            """Used for closing and restoring windows, while saving the OpenGL context"""
+            self.glwidget.setParent(None)
+        def attachGLWindow(self):
+            """Used for closing and restoring windows, while saving the OpenGL context"""
+            self.glwidget.setParent(self)
+            self.setCentralWidget(self.glwidget)
 
-    def _run_app_thread():
-        global _thread_running,_vis,_widget,_window,_quit,_showdialog,_showwindow,_globalLock
-        _thread_running = True
+    def _run_app_thread(callback=None):
+        global _vis_thread_running,_in_app_thread,_vis,_widget,_window,_quit,_showdialog,_showwindow,_globalLock
+        _vis_thread_running = True
 
         _GLBackend.initialize("Klamp't visualization")
         
@@ -2733,7 +3143,7 @@ if _PyQtAvailable:
                     if w.guidata:
                         w.guidata.setWindowTitle(w.name)
                         w.guidata.glwidget = w.glwindow
-                        w.guidata.setCentralWidget(w.glwindow)
+                        w.guidata.attachGLWindow()
                     w.doReload = False
                 if w.mode == 'dialog':
                     print "#########################################"
@@ -2748,9 +3158,6 @@ if _PyQtAvailable:
                     #here's the crash -- above line deleted the old dialog, which for some reason kills the widget
                     if dlg != None:
                         w.glwindow.show()
-                        w.glwindow.idlesleep(0)
-                        w.glwindow.refresh()
-                        w.glwindow.refresh()
                         _globalLock.release()
                         res = dlg.exec_()
                         _globalLock.acquire()
@@ -2759,7 +3166,6 @@ if _PyQtAvailable:
                     print "#########################################"
                     w.glwindow.hide()
                     w.glwindow.setParent(None)
-                    w.glwindow.idlesleep()
                     w.mode = 'hidden'
                 if w.mode == 'shown' and w.guidata == None:
                     print "#########################################"
@@ -2769,39 +3175,68 @@ if _PyQtAvailable:
                         w.guidata = _MyWindow(w)
                     else:
                         w.guidata = w.custom_ui(w.glwindow)
+                    w.guidata.setWindowTitle(w.name)
                     w.glwindow.show()
-                    w.glwindow.idlesleep(0)
+                    w.guidata.show()
+                    if w.glwindow.initialized:
+                        #boot it back up again
+                        w.glwindow.idlesleep(0)
                 if w.mode == 'shown' and not w.guidata.isVisible():
                     print "#########################################"
                     print "klampt.vis: Showing window",i
                     print "#########################################"
+                    if hasattr(w.guidata,'attachGLWindow'):
+                        w.guidata.attachGLWindow()
+                    else:
+                        w.glwindow.setParent(w.guidata)
                     w.glwindow.show()
-                    w.glwindow.setParent(w.guidata)
-                    w.glwindow.idlesleep(0)
                     w.guidata.show()
                 if w.mode == 'hidden' and w.guidata != None:
+                    #prevent deleting the GL window
+                    if hasattr(w.guidata,'detachGLWindow'):
+                        w.guidata.detachGLWindow()
+                    else:
+                        w.guidata.setParent(None)
                     if w.guidata.isVisible():
                         print "#########################################"
                         print "klampt.vis: Hiding window",i
                         print "#########################################"
-                        w.glwindow.setParent(None)
-                        w.glwindow.idlesleep()
                         w.glwindow.hide()
                         w.guidata.hide()
-                    #prevent deleting the GL window
-                    w.glwindow.setParent(None)
+                    w.guidata.close()
                     w.guidata = None
             _globalLock.release()
+            _in_app_thread = True
             _GLBackend.app.processEvents()
-            time.sleep(0.001)
-        print "Visualization thread closing..."
+            _in_app_thread = False
+            if callback:
+                callback()
+            else:
+                if not _in_vis_loop:
+                    #give other threads time to work
+                    time.sleep(0.001)
+            if _in_vis_loop and (len(_windows)==0 or all(w.mode == 'hidden' for w in _windows)):
+                print "klampt.vis: No windows shown, breaking out of vis loop"
+                _vis_thread_running = False
+                return
+        print "Visualization thread closing and cleaning up Qt..."
+        _cleanup()
+        _vis_thread_running = False
+        return res
+
+    def _cleanup():
         for w in _windows:
             w.vis.clear()
             if w.glwindow:
+                w.glwindow.setParent(None)
                 w.glwindow.close()
-        _thread_running = False
-        return res
+                #must be explicitly deleted for some reason in PyQt5...
+                del w.glwindow
+        _GLBackend.app.processEvents()
 
+        #must be explicitly deleted for some reason in PyQt5...
+        del _GLBackend.app
+        _GLBackend.app = None
 
 elif _GLUTAvailable:
     print "klampt.visualization: QT is not available, falling back to poorer"
@@ -2820,6 +3255,7 @@ elif _GLUTAvailable:
             self.frontend = windowinfo.frontend
             self.inDialog = False
             self.hidden = False
+            self.callback = None
         def initialize(self):
             self.frontend.window = self.window
             if not self.frontend.initialize(): return False
@@ -2874,7 +3310,7 @@ elif _GLUTAvailable:
             global _quit,_showdialog
             global _globalLock
             _globalLock.acquire()
-            if _quit:
+            if _quit or (_in_vis_loop and self.hidden):
                 if bool(glutLeaveMainLoop):
                     glutLeaveMainLoop()
                 else:
@@ -2894,33 +3330,51 @@ elif _GLUTAvailable:
                     glutShowWindow()
                     self.hidden = False
             _globalLock.release()
+            if self.callback:
+                self.callback()
             return self.frontend.idlefunc()
 
-    def _run_app_thread():
-        global _thread_running,_vis,_old_glut_window,_quit,_windows
+    def _run_app_thread(callback=None):
+        global _vis_thread_running,_vis,_old_glut_window,_quit,_windows
         import weakref
-        _thread_running = True
+        _vis_thread_running = True
         _GLBackend.initialize("Klamp't visualization")
         w = _GLBackend.createWindow("Klamp't visualization")
         hijacker = GLUTHijacker(_windows[0])
+        hijacker.callback = callback
         _windows[0].guidata = weakref.proxy(hijacker)
         w.setProgram(hijacker)
         _GLBackend.run()
         print "Visualization thread closing..."
+        _cleanup()
+        _vis_thread_running = False
+        return
+
+    def _cleanup():
         for w in _windows:
             w.vis.clear()
-        _thread_running = False
-        return
     
 def _kill():
-    global _quit
+    global _quit,_in_vis_loop,_vis_thread_running,_vis_thread,_cleanup
     _quit = True
-    while _thread_running:
-        time.sleep(0.01)
+    if _in_vis_loop:
+        #if the thread is running, _quit=True just signals to the vis loop to quit.
+        #otherwise, the program needs to be killed and cleaned up
+        if not _vis_thread_running:
+            #need to clean up Qt resources
+            _cleanup()
+        return
+    if _vis_thread_running:
+        _vis_thread.join()
+        assert _vis_thread_running == False
+
     _quit = False
 
 if _PyQtAvailable:
-    from PyQt4 import QtCore
+    if _PyQt5Available:
+        from PyQt5 import QtCore
+    else:
+        from PyQt4 import QtCore
     class MyQThread(QtCore.QThread):
         def __init__(self,func,*args):
             self.func = func
@@ -2929,63 +3383,146 @@ if _PyQtAvailable:
         def run(self):
             self.func(*self.args)
 
+def _loop(setup,callback,cleanup):
+    global _in_vis_loop,_vis_thread_running,_use_multithreaded,_quit
+    if _vis_thread_running or _in_vis_loop:
+        raise RuntimeError("Cannot call loop() after show(), inside dialog(), or inside loop() callbacks")
+    _in_vis_loop = True
+    try:
+        if setup is not None:
+            setup()
+        _quit = False
+        _run_app_thread(callback)
+        if cleanup is not None:
+            cleanup()
+    finally:
+        _in_vis_loop = False
+
+def _start_app_thread():
+    global _vis_thread
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+    if _PyQtAvailable and False:
+        #for some reason, QThread doesn't allow for mouse events to be posted?
+        _vis_thread = MyQThread(_run_app_thread)
+        _vis_thread.start()
+    else:
+        _vis_thread = threading.Thread(target=_run_app_thread)
+        _vis_thread.setDaemon(True)
+        _vis_thread.start()
+    time.sleep(0.1)
+
+
 def _show():
-    global _windows,_current_window,_thread_running
+    global _windows,_current_window,_in_vis_loop,_vis_thread_running,_vis_thread
     if len(_windows)==0:
         _windows.append(WindowInfo(_window_title,_frontend,_vis)) 
         _current_window = 0
     _windows[_current_window].mode = 'shown'
     _windows[_current_window].worlds = _current_worlds
     _windows[_current_window].active_worlds = _current_worlds[:]
-    if not _thread_running:
-        signal.signal(signal.SIGINT, signal.SIG_DFL)
-        if _PyQtAvailable and False:
-            #for some reason, QThread doesn't allow for mouse events to be posted?
-            thread = MyQThread(_run_app_thread)
-            thread.start()
-        else:
-            thread = Thread(target=_run_app_thread)
-            thread.setDaemon(True)
-            thread.start()
-        time.sleep(0.1)
+    if _in_vis_loop:
+        #this will be handled in the loop, no need to start it
+        return
+    if not _vis_thread_running:
+        _start_app_thread()
 
 def _hide():
-    global _windows,_current_window,_thread_running
+    global _windows,_current_window,_vis_thread_running
     if _current_window == None:
         return
     _windows[_current_window].mode = 'hidden'
 
 def _dialog():
-    global __windows,_current_window,_thread_running
+    global __windows,_current_window,_in_vis_loop,_vis_thread_running,_vis_thread
     if len(_windows)==0:
         _windows.append(WindowInfo(_window_title,_frontend,_vis,None))
         _current_window = 0
-    if not _thread_running:
-        signal.signal(signal.SIGINT, signal.SIG_DFL)
-        thread = Thread(target=_run_app_thread)
-        thread.setDaemon(True)
-        thread.start()
-        #time.sleep(0.1)
-    _globalLock.acquire()
-    assert _windows[_current_window].mode == 'hidden',"dialog() called inside dialog?"
-    _windows[_current_window].mode = 'dialog'
-    _windows[_current_window].worlds = _current_worlds
-    _windows[_current_window].active_worlds = _current_worlds[:]
-    _globalLock.release()
-    while _windows[_current_window].mode == 'dialog':
-        time.sleep(0.1)
-    return
+    if _vis_thread_running:
+        if _in_vis_loop:
+            #single threaded
+            raise RuntimeError("Can't call dialog() inside loop().  Try dialogInLoop() instead.")
+        #just show the dialog and let the thread take over
+        assert _windows[_current_window].mode == 'hidden',"dialog() called inside dialog?"
+        print "#########################################"
+        print "klampt.vis: Creating dialog on window",_current_window
+        print "#########################################"
+        _globalLock.acquire()
+        _windows[_current_window].mode = 'dialog'
+        _windows[_current_window].worlds = _current_worlds
+        _windows[_current_window].active_worlds = _current_worlds[:]
+        _globalLock.release()
+
+        if not _in_app_thread or threading.current_thread().__class__.__name__ == '_MainThread':
+            print "vis.dialog(): Waiting for dialog on window",_current_window,"to complete...."
+            while _windows[_current_window].mode == 'dialog':
+                time.sleep(0.1)
+            print "vis.dialog(): ... dialog done, status is now",_windows[_current_window].mode
+        else:
+            #called from another dialog or window!
+            print "vis: Creating a dialog from within another dialog or window"
+            _globalLock.acquire()
+            w = _windows[_current_window]
+            if w.glwindow == None:
+                print "vis: creating GL window"
+                w.glwindow = _GLBackend.createWindow(w.name)
+                w.glwindow.setProgram(w.frontend)
+                w.glwindow.setParent(None)
+                w.glwindow.refresh()
+            if w.custom_ui == None:
+                dlg = _MyDialog(w)
+            else:
+                dlg = w.custom_ui(w.glwindow)
+            print "#########################################"
+            print "klampt.vis: Dialog starting on window",_current_window
+            print "#########################################"
+            if dlg != None:
+                w.glwindow.show()
+                _globalLock.release()
+                res = dlg.exec_()
+                _globalLock.acquire()
+            print "#########################################"
+            print "klampt.vis: Dialog done on window",_current_window
+            print "#########################################"
+            w.glwindow.hide()
+            w.glwindow.setParent(None)
+            w.mode = 'hidden'
+            _globalLock.release()
+        return None
+    else:
+        _windows[_current_window].mode = 'dialog'
+        _windows[_current_window].worlds = _current_worlds
+        _windows[_current_window].active_worlds = _current_worlds[:]
+        if _use_multithreaded:
+            print "#########################################"
+            print "klampt.vis: Running multi-threaded dialog, waiting to complete..."
+            _start_app_thread()
+            while _windows[_current_window].mode == 'dialog':
+                time.sleep(0.1)
+            print "klampt.vis: ... dialog done."
+            print "#########################################"
+            return None
+        else:
+            print "#########################################"
+            print "klampt.vis: Running single-threaded dialog"
+            _in_vis_loop = True
+            res = _run_app_thread()
+            _in_vis_loop = False
+            print "klampt.vis: ... dialog done."
+            print "#########################################"
+            return res
 
 def _set_custom_ui(func):
-    global _windows,_current_window,_thread_running
+    global _windows,_current_window,_vis_thread_running
     if len(_windows)==0:
+        print "Making first window for custom ui"
         _windows.append(WindowInfo(_window_title,_frontend,_vis,None))
         _current_window = 0
     _windows[_current_window].custom_ui = func
+    print "setting custom ui on window",_current_window
     return
 
 def _onFrontendChange():
-    global _windows,_frontend,_window_title,_current_window,_thread_running
+    global _windows,_frontend,_window_title,_current_window,_vis_thread_running
     if _current_window == None:
         return
     w = _windows[_current_window]
@@ -3015,7 +3552,7 @@ def _refreshDisplayLists(item):
 def _checkWindowCurrent(item):
     global _windows,_current_window,_world_to_window,_current_worlds
     if isinstance(item,int):
-        if not all(w.index != item for w in _current_worlds):
+        if not all(w().index != item for w in _current_worlds):
             print "klampt.vis: item appears to be in a new world, but doesn't have a full WorldModel instance"
     if isinstance(item,WorldModel):
         #print "Worlds active in current window",_current_window,":",[w().index for w in _current_worlds]

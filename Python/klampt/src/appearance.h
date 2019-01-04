@@ -16,13 +16,13 @@
  * Appearances can be either references to appearances of objects in the world,
  * or they can be standalone. 
  *
- * Performance note: Avoid  buffer rebuilding (e.g., via refresh()) as 
+ * Performance note: Avoid rebuilding buffers (e.g., via :meth:`refresh` ()) as 
  * much as possible.
  */
 class Appearance
 {
  public:
-  ///Primitive types
+  ///Geometry feature types
   enum { ALL=0,VERTICES=1,EDGES=2,FACES=3};
 
   Appearance();
@@ -41,39 +41,64 @@ class Appearance
   bool isStandalone();
   ///Frees the data associated with this appearance, if standalone 
   void free();
-  ///Turns on/off visibility of the object
   void setDraw(bool draw);
-  ///Turns on/off visibility of the given primitive
-  void setDraw(int primitive,bool draw);
-  ///Returns whether this object is visible
+  ///Turns on/off visibility of the object or a feature
+  ///
+  ///If one argument is given, turns the object visibility on or off
+  ///
+  ///If two arguments are given, turns the feature (first int argument)
+  ///visibility on or off.  feature can be ALL, VERTICES, EDGES, or FACES.
+  void setDraw(int feature,bool draw);
   bool getDraw();
-  ///Returns whether this primitive is visible
-  bool getDraw(int primitive);
-  ///Sets color of the object
+  ///Returns whether this object or feature is visible.
+  ///
+  ///If no arguments are given, returns whether the object is visible.
+  ///
+  ///If one int argument is given, returns whether the given feature
+  ///is visible.  feature can be ALL, VERTICES, EDGES, or FACES.
+  bool getDraw(int feature);
   void setColor(float r,float g, float b,float a=1);
-  ///Sets color of the given primitive
-  void setColor(int primitive,float r,float g, float b,float a);
+  ///Sets color of the object or a feature
+  ///
+  ///If 3 or 4 arguments are given, changes the object color.
+  ///
+  ///If 5 arguments are given, changes the color of the given
+  ///feature.  feature can be ALL, VERTICES, EDGES, or FACES.
+  void setColor(int feature,float r,float g, float b,float a);
   void getColor(float out[4]);
-  void getColor(int primitive,float out[4]);
-  ///Sets per-element color for elements of the given primitive type.
-  ///If alpha=True, colors are assumed to be rgba values
-  ///Otherwise they are assumed to be rgb values
-  void setColors(int primitive,const std::vector<float>& colors,bool alpha=false);
+  void getColor(int feature,float out[4]);
+  ///Sets per-element color for elements of the given feature type.
+  ///
+  ///If alpha=True, colors are assumed to be 4*N rgba values, where N is the
+  ///number of features of that type.
+  ///
+  ///Otherwise they are assumed to be 3*N rgb values.  Only supports feature=VERTICES
+  ///and feature=FACES
+  void setColors(int feature,const std::vector<float>& colors,bool alpha=false);
+  ///Sets the per-element color for the given feature
+  void setElementColor(int feature,int element,float r,float g,float b,float a=1);
+  ///Gets the per-element color for the given feature
+  void getElementColor(int feature,int element,float out[4]);
   ///Sets a 1D texture of the given width.  Valid format strings are
+  ///
   /// - "": turn off texture mapping
   /// - rgb8: unsigned byte RGB colors with red in the most significant byte
   /// - argb8: unsigned byte RGBA colors with alpha in the most significant
   ///          byte
   /// - l8: unsigned byte grayscale colors
+  ///
   void setTexture1D(int w,const char* format,const std::vector<unsigned char>& bytes);
   ///Sets a 2D texture of the given width/height.  See setTexture1D for 
   ///valid format strings.
   void setTexture2D(int w,int h,const char* format,const std::vector<unsigned char>& bytes);
-  ///Sets per-vertex texture coordinates.  If the texture is 1D, uvs is an
-  ///array of length n containing 1D texture coordinates.  If the texture is
-  ///2D, uvs is an array of length 2n containing U-V coordinates u1, v1,
-  ///u2, v2, ..., un, vn.  If uvs is empty, turns off texture mapping
-  ///altogether.
+  ///Sets per-vertex texture coordinates. 
+  ///
+  ///If the texture is 1D, uvs is an array of length n containing 1D texture coordinates. 
+  ///
+  ///If the texture is 2D, uvs is an array of length 2n containing U-V coordinates u1, v1,
+  ///u2, v2, ..., un, vn. 
+  ///
+  ///You may also set uvs to be empty, which turns off texture mapping altogether.
   void setTexcoords(const std::vector<double>& uvs);
   ///For point clouds, sets the point size.
   void setPointSize(float size);

@@ -1,5 +1,6 @@
 import math
 import time
+from ..math import vectorops
 from cspace import CSpace
 
 def default_sampleneighborhood(c,r):
@@ -9,10 +10,10 @@ def default_visible(a,b):
     raise RuntimeError("Can't check visibility")
 
 def default_distance(a,b):
-    return math.sqrt(math.pow(ai-bi,2) for (ai,bi) in zip(a,b))
+    return vectorops.distance(a,b)
 
 def default_interpolate(a,b,u):
-    return [ai+u*(bi-ai) for (ai,bi) in zip(a,b)]
+    return vectorops.interpolate(a,b,u)
 
 def makedefault(space):
     """Helper: makes a space's callbacks perform the default Cartesian space
@@ -100,10 +101,11 @@ class EmbeddedCSpace(CSpace):
     of DOF indices of that ambient space.
     
     Attributes:
-    - ambientspace: the ambient configuration space
-    - mapping: the list of active indices into the ambient configuration
-      space
-    - xinit: the initial configuration in the ambient space (by default, 0)
+        ambientspace (CSpace): the ambient configuration space
+        mapping (list): the list of active indices into the ambient configuration
+            space
+        xinit (list, optional): the initial configuration in the ambient space
+            (by default, 0 vector)
     """
     def __init__(self,ambientspace,subset,xinit=None):
         CSpace.__init__(self)
@@ -124,7 +126,7 @@ class EmbeddedCSpace(CSpace):
         def distance(a,b):
             return self.ambientspace.distance(self.lift(a),self.lift(b))
         def interpolate(a,b,u):
-            return self.project(self.ambientspace.interpolate(self.lift(a)),self.lift(b))
+            return self.project(self.ambientspace.interpolate(self.lift(a),self.lift(b),u))
 
         if hasattr(ambientspace,'sampleneighborhood'):
             self.sampleneighborhood = sampleneighborhood
@@ -144,11 +146,14 @@ class EmbeddedCSpace(CSpace):
 
     def project(self,xamb):
         """Ambient space -> embedded space"""
-        print "EmbeddedCSpace.project"
+        if len(xamb) != len(self.xinit):
+            raise ValueError("Invalid length of ambient space vector: %d should be %d"%(len(xamb),len(self.xinit)))
         return [xamb[i] for i in self.mapping]
 
     def lift(self,xemb):
         """Embedded space -> ambient space"""
+        if len(xemb) != len(self.mapping):
+            raise ValueError("Invalid length of embedded space vector: %d should be %d"%(len(xemb),len(self.mapping)))
         xamb = self.xinit[:]
         for (i,j) in enumerate(self.mapping):
             xamb[j] = xemb[i]

@@ -1,3 +1,7 @@
+#if defined (__APPLE__) || defined (MACOSX)
+  #include "mac_fixes.h"
+#endif //Mac fixes 
+
 #include "motionplanning.h"
 #include <KrisLibrary/planning/AnyMotionPlanner.h>
 #include <KrisLibrary/planning/CSpaceHelpers.h>
@@ -14,6 +18,10 @@
 #include <vector>
 #include <map>
 using namespace std;
+
+#if PY_MAJOR_VERSION >= 3
+#define PyInt_Check PyLong_Check
+#endif //PY_MAJOR_VERSION >= 3
 
 void setRandomSeed(int seed)
 {
@@ -107,10 +115,10 @@ public:
     PyObject* result = PyObject_CallFunctionObjArgs(sample,NULL);
     if(!result) {
       if(!PyErr_Occurred()) {
-	throw PyException("Python sample method failed");
+        throw PyException("Python sample method failed");
       }
       else {
-	throw PyPyErrorException();
+        throw PyPyErrorException();
       }
     }
     bool res=PyListToConfig(result,x);
@@ -131,19 +139,19 @@ public:
       PyObject* pyr=PyFloat_FromDouble(r);
       PyObject* result = PyObject_CallFunctionObjArgs(sampleNeighborhood,pyc,pyr,NULL);
       if(!result) {
-	Py_DECREF(pyr);
-	if(!PyErr_Occurred()) {
-	  throw PyException("Python sampleneighborhood method failed");
-	}
-	else {
-	  throw PyPyErrorException();
-	}
+        Py_DECREF(pyr);
+        if(!PyErr_Occurred()) {
+          throw PyException("Python sampleneighborhood method failed");
+        }
+        else {
+          throw PyPyErrorException();
+        }
       }
       bool res=PyListToConfig(result,x);
       if(!res) {
-	Py_DECREF(pyr);
-	Py_DECREF(result);
-	throw PyException("Python sampleNeighborhood method did not return a list");
+        Py_DECREF(pyr);
+        Py_DECREF(result);
+        throw PyException("Python sampleNeighborhood method did not return a list");
       }
       Py_DECREF(pyr);
       Py_DECREF(result);
@@ -165,22 +173,16 @@ public:
   }
 
   virtual bool IsVisible(const Config& a,const Config& b) {
-    EdgePlanner* e = PathChecker(a,b);
-    bool res = e->IsVisible();
-    delete e;
-    return res;
+    return PathChecker(a,b)->IsVisible();
   }
 
   virtual bool IsVisible(const Config& a,const Config& b,int obstacle) {
-    EdgePlanner* e = PathChecker(a,b,obstacle);
-    bool res = e->IsVisible();
-    delete e;
-    return res;
+    return PathChecker(a,b,obstacle)->IsVisible();
   }
 
-  virtual EdgePlanner* PathChecker(const Config& a,const Config& b,int obstacle);
+  virtual EdgePlannerPtr PathChecker(const Config& a,const Config& b,int obstacle);
 
-  virtual EdgePlanner* PathChecker(const Config& a,const Config& b);
+  virtual EdgePlannerPtr PathChecker(const Config& a,const Config& b);
 
   virtual double Distance(const Config& x, const Config& y)
   {
@@ -192,16 +194,16 @@ public:
       PyObject* pyy = UpdateTempConfig2(y);
       PyObject* result = PyObject_CallFunctionObjArgs(distance,pyx,pyy,NULL);
       if(!result) {
-	if(!PyErr_Occurred()) {
-	  throw PyException("Python distance method failed");
-	}
-	else {
-	  throw PyPyErrorException();
-	}
+        if(!PyErr_Occurred()) {
+          throw PyException("Python distance method failed");
+        }
+        else {
+          throw PyPyErrorException();
+        }
       }
       if(!PyFloat_Check(result)) {
-	Py_DECREF(result);
-	throw PyException("Python distance didn't return float");
+        Py_DECREF(result);
+        throw PyException("Python distance didn't return float");
       }
       double res=PyFloat_AsDouble(result);
       Py_DECREF(result);
@@ -220,30 +222,30 @@ public:
       PyObject* result = PyObject_CallFunctionObjArgs(interpolate,pyx,pyy,pyu,NULL);
       Py_DECREF(pyu);
       if(!result) {
-	if(!PyErr_Occurred()) {
-	  throw PyException("Python interpolate method failed");
-	}
-	else {
-	  throw PyPyErrorException();
-	}
+        if(!PyErr_Occurred()) {
+          throw PyException("Python interpolate method failed");
+        }
+        else {
+          throw PyPyErrorException();
+        }
       }
       bool res=PyListToConfig(result,out);
       if(!res) {
-	Py_DECREF(result);
-	throw PyException("Python interpolate method did not return a list");
+        Py_DECREF(result);
+        throw PyException("Python interpolate method did not return a list");
       }
       Py_DECREF(result);
     }
   }
 
-  virtual void Properties(PropertyMap& props) const
+  virtual void Properties(PropertyMap& props)
   {
     props = properties;
     if(!distance) {
       props.set("euclidean",1);
       props.set("metric","euclidean");
       if(!interpolate)
-	props.set("geodesic",1);
+        props.set("geodesic",1);
     }
   }
 
@@ -266,7 +268,7 @@ class PyUpdateEdgePlanner : public PiggybackEdgePlanner
 {
 public:
   PyCSpace* space;
-  PyUpdateEdgePlanner(PyCSpace* _space,SmartPointer<EdgePlanner> e)
+  PyUpdateEdgePlanner(PyCSpace* _space,shared_ptr<EdgePlanner> e)
   :PiggybackEdgePlanner(e),space(_space)
   {}
   void UpdateCSpace(double time,bool visible) {
@@ -385,32 +387,32 @@ public:
   virtual const Config& Start() const { return a; }
   virtual const Config& End() const { return b; }
   virtual CSpace* Space() const { return space; }
-  virtual EdgePlanner* Copy() const {
-    return new PyEdgePlanner(space,a,b,obstacle); 
+  virtual EdgePlannerPtr Copy() const {
+    return make_shared<PyEdgePlanner>(space,a,b,obstacle); 
   }
-  virtual EdgePlanner* ReverseCopy() const {
-    return new PyEdgePlanner(space,b,a,obstacle);
+  virtual EdgePlannerPtr ReverseCopy() const {
+    return make_shared<PyEdgePlanner>(space,b,a,obstacle);
   }
 };
 
 
-EdgePlanner* PyCSpace::PathChecker(const Config& a,const Config& b)
+EdgePlannerPtr PyCSpace::PathChecker(const Config& a,const Config& b)
 {
   if(visibleTests.empty()) {
-    return new PyUpdateEdgePlanner(this,new BisectionEpsilonEdgePlanner(this,a,b,edgeResolution)); 
+    return make_shared<PyUpdateEdgePlanner>(this,make_shared<BisectionEpsilonEdgePlanner>(this,a,b,edgeResolution)); 
   }
   else {
-    return new PyUpdateEdgePlanner(this,new PyEdgePlanner(this,a,b));
+    return make_shared<PyUpdateEdgePlanner>(this,make_shared<PyEdgePlanner>(this,a,b));
   }
 }
 
-EdgePlanner* PyCSpace::PathChecker(const Config& a,const Config& b,int obstacle)
+EdgePlannerPtr PyCSpace::PathChecker(const Config& a,const Config& b,int obstacle)
 {
   if(visibleTests.empty()) {
-    return new PyUpdateEdgePlanner(this,MakeSingleConstraintBisectionPlanner(this,a,b,obstacle,edgeResolution)); 
+    return make_shared<PyUpdateEdgePlanner>(this,MakeSingleConstraintBisectionPlanner(this,a,b,obstacle,edgeResolution)); 
   }
   else {
-    return new PyUpdateEdgePlanner(this,new PyEdgePlanner(this,a,b,obstacle));
+    return make_shared<PyUpdateEdgePlanner>(this,make_shared<PyEdgePlanner>(this,a,b,obstacle));
   }
 }
 
@@ -492,12 +494,12 @@ public:
       //sample using python
       PyObject* result = PyObject_CallFunctionObjArgs(sampler,NULL);
       if(result == NULL) {
-	if(!PyErr_Occurred()) {
-	  throw PyException("Error calling goal sampler provided to setEndpoints, must accept 0 arguments");
-	}
-	else {
-	  throw PyPyErrorException();
-	}
+        if(!PyErr_Occurred()) {
+          throw PyException("Error calling goal sampler provided to setEndpoints, must accept 0 arguments");
+        }
+        else {
+          throw PyPyErrorException();
+        }
       }
       PyListToConfig(result,x);
       Py_DECREF(result);
@@ -510,10 +512,10 @@ public:
     Py_DECREF(pyq);
     if(result == NULL) {
       if(!PyErr_Occurred()) {
-	throw PyException("Error calling goal sampler provided to setEndpoints, must accept 1 argument");
+        throw PyException("Error calling goal sampler provided to setEndpoints, must accept 1 argument");
       }
       else {
-	throw PyPyErrorException();
+        throw PyPyErrorException();
       }
     }
     if(!PyBool_Check(result) && !PyInt_Check(result)) {
@@ -529,10 +531,10 @@ public:
 
 
 
-static vector<SmartPointer<PyCSpace> > spaces;
-static vector<SmartPointer<AdaptiveCSpace> > adaptiveSpaces;
-static vector<SmartPointer<MotionPlannerInterface> > plans;
-static vector<SmartPointer<PyGoalSet> > goalSets;
+static vector<shared_ptr<PyCSpace> > spaces;
+static vector<shared_ptr<AdaptiveCSpace> > adaptiveSpaces;
+static vector<shared_ptr<MotionPlannerInterface> > plans;
+static vector<shared_ptr<PyGoalSet> > goalSets;
 static MotionPlannerFactory factory;
 static list<int> spacesDeleteList;
 static list<int> plansDeleteList;
@@ -540,13 +542,13 @@ static list<int> plansDeleteList;
 int makeNewCSpace()
 {
   if(spacesDeleteList.empty()) {
-    spaces.push_back(new PyCSpace);
+    spaces.push_back(make_shared<PyCSpace>());
     return (int)(spaces.size()-1);
   }
   else {
     int index = spacesDeleteList.front();
     spacesDeleteList.erase(spacesDeleteList.begin());
-    spaces[index] = new PyCSpace;
+    spaces[index].reset(new PyCSpace);
     return index;
   }
 }
@@ -555,10 +557,10 @@ void destroyCSpace(int cspace)
 {
   if(cspace < 0 || cspace >= (int)spaces.size()) 
     throw PyException("Invalid cspace index");
-  spaces[cspace] = NULL;
+  spaces[cspace].reset();
   spacesDeleteList.push_back(cspace);
   if(cspace < (int)adaptiveSpaces.size())
-    adaptiveSpaces[cspace] = NULL;
+    adaptiveSpaces[cspace].reset();
 }
 
 CSpace* getPreferredSpace(int index)
@@ -566,8 +568,8 @@ CSpace* getPreferredSpace(int index)
   if(index < 0 || index >= (int)spaces.size() || spaces[index]==NULL) 
     throw PyException("Invalid cspace index");
   if(index < (int)adaptiveSpaces.size() && adaptiveSpaces[index] != NULL)
-    return adaptiveSpaces[index];
-  return spaces[index];
+    return adaptiveSpaces[index].get();
+  return spaces[index].get();
 }
 
 CSpaceInterface::CSpaceInterface()
@@ -601,7 +603,7 @@ void CSpaceInterface::setFeasibility(PyObject* pyFeas)
   spaces[index]->constraintNames.resize(1);
   spaces[index]->constraintNames[0] = "feasible";
   spaces[index]->constraints.resize(1);
-  spaces[index]->constraints[0] = new PyConstraintSet(pyFeas);
+  spaces[index]->constraints[0] = make_shared<PyConstraintSet>(pyFeas);
 }
 
 
@@ -610,13 +612,13 @@ void CSpaceInterface::addFeasibilityTest(const char* name,PyObject* pyFeas)
   if(index < 0 || index >= (int)spaces.size() || spaces[index]==NULL) 
     throw PyException("Invalid cspace index");
   int cindex = spaces[index]->ConstraintIndex(name);
-  spaces[index]->constraints.resize(spaces[index]->constraintNames.size(),NULL);
+  spaces[index]->constraints.resize(spaces[index]->constraintNames.size(),shared_ptr<PyConstraintSet>());
   if(cindex < 0) {
     spaces[index]->constraintNames.push_back(name);
-    spaces[index]->constraints.push_back(new PyConstraintSet(pyFeas));
+    spaces[index]->constraints.push_back(make_shared<PyConstraintSet>(pyFeas));
   }
   else {
-    spaces[index]->constraints[cindex] = new PyConstraintSet(pyFeas);
+    spaces[index]->constraints[cindex] = make_shared<PyConstraintSet>(pyFeas);
   }
 }
 
@@ -642,7 +644,7 @@ void CSpaceInterface::addVisibilityTest(const char* name,PyObject* pyVis)
     Py_XINCREF(pyVis);
     spaces[index]->visibleTests.push_back(pyVis);
     spaces[index]->constraintNames.push_back(name);
-    spaces[index]->constraints.push_back(NULL);
+    spaces[index]->constraints.push_back(std::shared_ptr<CSet>());
   }
   else {
     Py_DECREF(spaces[index]->visibleTests[cindex]);
@@ -736,10 +738,7 @@ bool CSpaceInterface::isVisible(PyObject* a,PyObject* b)
     throw PyException("Invalid configuration b (must be list)");
   }
   CSpace* s = getPreferredSpace(index);
-  EdgePlanner* e = s->PathChecker(va,vb);
-  bool res = e->IsVisible();
-  delete e;
-  return res;
+  return s->PathChecker(va,vb)->IsVisible();
 }
 
 bool CSpaceInterface::testFeasibility(const char* name,PyObject* q)
@@ -768,10 +767,7 @@ bool CSpaceInterface::testVisibility(const char* name,PyObject* a,PyObject* b)
   int cindex = spaces[index]->ConstraintIndex(name);
   if(cindex < 0)
      throw PyException("Invalid constraint name");
-  EdgePlanner* e = s->PathChecker(va,vb,cindex);
-  bool res = e->IsVisible();
-  delete e;
-  return res;
+  return s->PathChecker(va,vb,cindex)->IsVisible();
 }
 
 PyObject* CSpaceInterface::feasibilityFailures(PyObject* q)
@@ -850,7 +846,7 @@ void CSpaceInterface::enableAdaptiveQueries(bool enabled)
     throw PyException("Invalid cspace index");
   if(index >= (int)adaptiveSpaces.size()) adaptiveSpaces.resize(spaces.size());
   if(adaptiveSpaces[index] == NULL)
-    adaptiveSpaces[index] = new AdaptiveCSpace(spaces[index]);
+    adaptiveSpaces[index].reset(new AdaptiveCSpace(spaces[index].get()));
 }
 
 void CSpaceInterface::optimizeQueryOrder()
@@ -1034,7 +1030,13 @@ void setPlanSetting(const char* setting,double value)
   else if(0==strcmp(setting,"restart"))
     factory.restart = (value != 0);
   else {
-    throw PyException("Invalid setting");
+    stringstream ss;
+    ss<<"Invalid numeric setting \""<<setting<<"\""<<endl;
+    ss<<"Valid keys are:"<<endl;
+    ss<<"  knn, connectionThreshold, perturbationRadius, bidirectional,"<<endl;
+    ss<<"  grid, gridResolution, suboptimalityFactor, randomizeFrequency,"<<endl;
+    ss<<"  shortcut, restart"<<endl;
+    throw PyException(ss.str());
   }
 }
 
@@ -1045,7 +1047,11 @@ void setPlanSetting(const char* setting,const char* value)
   else if(0==strcmp(setting,"restartTermCond"))
     factory.restartTermCond = value;
   else {
-    throw PyException("Invalid setting");
+    stringstream ss;
+    ss<<"Invalid string-valued setting \""<<setting<<"\""<<endl;
+    ss<<"Valid keys are:"<<endl;
+    ss<<"  pointLocation, restartTermCond"<<endl;
+    throw PyException(ss.str());
   }
 }
 
@@ -1056,13 +1062,13 @@ int makeNewPlan(int cspace)
     throw PyException("Invalid cspace index");
   CSpace* klSpace = getPreferredSpace(cspace);
   if(plansDeleteList.empty()) {
-    plans.push_back(factory.Create(klSpace));
+    plans.push_back(shared_ptr<MotionPlannerInterface>(factory.Create(klSpace)));
     return (int)plans.size()-1;
   }
   else {
     int index = plansDeleteList.front();
     plansDeleteList.erase(plansDeleteList.begin());
-    plans[index] = factory.Create(klSpace);
+    plans[index].reset(factory.Create(klSpace));
     return index;
   }
 }
@@ -1071,9 +1077,9 @@ void destroyPlan(int plan)
 {
   if(plan < 0 || plan >= (int)plans.size() || plans[plan]==NULL) 
     throw PyException("Invalid plan index");
-  plans[plan] = NULL;
+  plans[plan].reset();
   if(plan < (int)goalSets.size())
-    goalSets[plan] = NULL;
+    goalSets[plan].reset();
   plansDeleteList.push_back(plan);
 }
 
@@ -1145,8 +1151,8 @@ bool PlannerInterface::setEndpointSet(PyObject* start,PyObject* goal,PyObject* g
     throw PyException("Goal test is not callable");
   }
   goalSets.resize(plans.size());
-  goalSets[index] = new PyGoalSet(goal,goalSample);
-  plans[index]=factory.Create(s,qstart,goalSets[index]);
+  goalSets[index].reset(new PyGoalSet(goal,goalSample));
+  plans[index].reset(factory.Create(s,qstart,goalSets[index].get()));
   return true;
 }
 
@@ -1277,7 +1283,7 @@ void PlannerInterface::dump(const char* fn)
 {
   if(index < 0 || index >= (int)plans.size() || plans[index]==NULL) 
     throw PyException("Invalid plan index");
-  DumpPlan(plans[index],fn);
+  DumpPlan(plans[index].get(),fn);
 }
 
 void destroy()

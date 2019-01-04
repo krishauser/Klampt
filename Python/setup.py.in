@@ -6,24 +6,64 @@ import os
 import glob
 import sys
 
+scripts_folder = "bin"
+src_folder = "klampt/src"
+root_py_folder = "klampt"
+if sys.version_info[0] == 3:
+    root_py_folder = "python3_version/klampt"
+    scripts_folder = "python3_version/bin"
+script_files = [os.path.join(scripts_folder,f) for f in ['klampt_sim','klampt_browser','klampt_path','klampt_thumbnails']]
+
 #Parse settings from CMake
 includeDirs = """${KLAMPT_INCLUDE_DIRS}""".split(';')
 libs = """${KLAMPT_ABSOLUTE_LIBRARIES}""".split(';')
 defs = """${KLAMPT_DEFINITIONS}""".split(';')
 
+extra_shared_libraries = []
+extra_compile_args = []
+extra_link_args = []
+if sys.platform == 'win32':
+    import shutil
+    extra_shared_libraries = """${KLAMPT_EXTRA_DLLS}""".split(';')
+    for fn in extra_shared_libraries:
+        shutil.copy(os.path.join("""${KLAMPT_DEPENDENCY_LIB_DIR}""",fn),os.path.join(root_py_folder,fn))
+else:
+    extra_compile_args = ['-std=c++11']
+    
 #Parse libraries
+if sys.platform == 'win32':
+    optlibs = []
+    skipone = False
+    for i,l in enumerate(libs):
+        if skipone: 
+            skipone = False
+            continue
+        skipone = False
+        if l == 'optimized':
+            optlibs.append(libs[i+1])
+            skipone = True
+        elif l == 'debug':
+            skipone = True
+        else:
+            optlibs.append(l)
+    libs = optlibs
 libdirs = []
 libnames = []
 for l in libs:
-	path,fn = os.path.split(l)
-	if len(path)>0 and path not in libdirs:
-		libdirs.append(path)
-	if fn.startswith('lib'):
-		name = fn.split('.')[0]
-		libnames.append(name[3:])
-	elif fn.endswith('lib'):
-		name = fn.split('.')[0]
-		libnames.append(name)
+    path,fn = os.path.split(l)
+    if len(path)>0 and path not in libdirs:
+        libdirs.append(path)
+    if fn.startswith('lib'):
+        name = fn.split('.')[0]
+        libnames.append(name[3:])
+    elif fn.endswith('lib'):
+        name = fn.split('.')[0]
+        libnames.append(name)
+    elif fn.endswith('framework'):
+        extra_link_args.append('-framework')
+        extra_link_args.append(fn.split('.')[0])
+    else:
+        libnames.append(fn)
 libs = libnames
 
 #Parse definitions
@@ -32,60 +72,76 @@ commondefines = []
 defs = sum([d.split() for d in defs],[])
 #parse -D or -I defines
 for d in defs:
-	if d.startswith("-I"):
-		includeDirs.append(d[2:])
-	elif d.startswith("-D"):
-		d = d[2:]
-		if d.find("=") >= 0:
-			commondefines.append(tuple(d.split("=")))
-		else:
-			commondefines.append((d,None))
-	else:
-		commondefines.append((d,None))
+    if d.startswith("-I"):
+        includeDirs.append(d[2:])
+    elif d.startswith("-D"):
+        d = d[2:]
+        if d.find("=") >= 0:
+            commondefines.append(tuple(d.split("=")))
+        else:
+            commondefines.append((d,None))
+    else:
+        commondefines.append((d,None))
 
 commonfiles = ['pyerr.cpp']
 rssourcefiles = commonfiles + ['robotsim.cpp','robotik.cpp','robotsim_wrap.cxx']
 mpsourcefiles = commonfiles + ['motionplanning.cpp','motionplanning_wrap.cxx']
 rfsourcefiles = commonfiles + ['rootfind.cpp','pyvectorfield.cpp','rootfind_wrap.cxx']
 
-extra_link_args = []
-if sys.platform == 'darwin':
-  extra_link_args = ['-framework', 'OpenGL']
 
 setup(name='Klampt',
       version='@KLAMPT_VERSION@',
-      description="PyKlamp't",
+      description="Python API to Klamp't, a package for robot modeling, simulating, planning, optimization, and visualization",
       author='Kris Hauser',
-      author_email='kris.hauser@duke.edu',
+      author_email='hauser.kris@gmail.com',
       url='https://github.com/krishauser/Klampt',
       ext_modules=[Extension('klampt._robotsim',
-                             [os.path.join('klampt/src',f) for f in rssourcefiles],
+                             [os.path.join(src_folder,f) for f in rssourcefiles],
                              include_dirs=includeDirs,
                              define_macros=commondefines,
                              library_dirs=libdirs,
                              libraries=libs,
                              extra_link_args=extra_link_args,
+                             extra_compile_args=extra_compile_args,
                              language='c++'),
                    Extension('klampt.plan._motionplanning',
-                             [os.path.join('klampt/src',f) for f in mpsourcefiles],
+                             [os.path.join(src_folder,f) for f in mpsourcefiles],
                              include_dirs=includeDirs,
                              define_macros=commondefines,
                              library_dirs=libdirs,
                              libraries=libs,
                              extra_link_args=extra_link_args,
+                             extra_compile_args=extra_compile_args,
                              language='c++'),
                    Extension('klampt.math._rootfind',
-                             [os.path.join('klampt/src',f) for f in rfsourcefiles],
+                             [os.path.join(src_folder,f) for f in rfsourcefiles],
                              include_dirs=includeDirs,
                              define_macros=commondefines,
                              library_dirs=libdirs,
                              libraries=libs,
                              extra_link_args=extra_link_args,
+                             extra_compile_args=extra_compile_args,
                              language='c++'),
                    ],
-      py_modules=['klampt.robotsim','klampt.plan.motionplanning','klampt.math.rootfind'],
-      packages=['klampt','klampt.io', 'klampt.math', 'klampt.model', 'klampt.model.create', 'klampt.plan', 'klampt.sim', 'klampt.vis'],
-      package_dir={'klampt': 'klampt'},
-      package_data={'klampt': ['data/*.html']}
+      #py_modules=['klampt.robotsim','klampt.plan.motionplanning','klampt.math.rootfind'],
+      py_modules=['klampt.robotsim','klampt.plan.motionplanning'],
+      packages=['klampt','klampt.io', 'klampt.math', 'klampt.model', 'klampt.model.create', 'klampt.plan', 'klampt.sim', 'klampt.vis', 'klampt.vis.ipython'],
+      package_dir={'klampt': root_py_folder},
+      package_data={'klampt': extra_shared_libraries + ['data/*.html']},
+      scripts=script_files,
+      classifiers=[
+        "Programming Language :: Python :: 2.7",
+        "Development Status :: 4 - Beta",
+        "License :: OSI Approved :: BSD License",
+        "Natural Language :: English",
+        "Operating System :: Microsoft :: Windows",
+        "Operating System :: MacOS",
+        "Operating System :: POSIX :: Linux",
+        "Topic :: Scientific/Engineering"
+      ],
      )
 
+if sys.platform == 'win32':
+    for fn in extra_shared_libraries:
+        print("Removing temporary file "+os.path.join(root_py_folder,fn))
+        os.remove(os.path.join(root_py_folder,fn))

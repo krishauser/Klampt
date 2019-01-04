@@ -1,7 +1,7 @@
 #include <ode/ode.h>
-#include <../Simulation/ODERigidObject.h>
-#include <../Simulation/ODECommon.h>
-#include <../Simulation/ODECustomGeometry.h>
+#include <Klampt/Simulation/ODERigidObject.h>
+#include <Klampt/Simulation/ODECommon.h>
+#include <Klampt/Simulation/ODECustomGeometry.h>
 #include <gtest/gtest.h>
 
 class testODERigidObject: public ::testing::Test
@@ -14,7 +14,7 @@ protected:
 
     testODERigidObject() : ode_r_obj(r_obj)
     {
-        r_obj.Load("data/objects/block.obj");
+        r_obj.Load("tests/objects/block.obj");
         Math3D::Vector3 com_position(0.023, 0.045, 0.061);
         r_obj.com.set(com_position);
 

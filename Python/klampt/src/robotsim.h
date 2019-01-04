@@ -23,28 +23,32 @@ class SimRobotController;
 class SimBody;
 class Simulator;
 
-/** @brief A sensor on a simulated robot.  Retreive this from the controller,
- * and use getMeasurements to get the currently simulated measurement vector.
+/** @brief A sensor on a simulated robot.  Retrieve this from the controller,
+ * using :meth:`SimRobotController.getSensor` (), and then use
+ * :meth:`getMeasurements` () to get the currently simulated measurement
+ * vector.
  *
- * Sensors are automatically updated through the sim.simulate call, and
- * getMeasurements() retrieves the previously updated values.  As a result,
- * you may get garbage measurements before the first sim.simulate call is made.
+ * Sensors are automatically updated through the :meth:`Simulator.simulate` () call,
+ * and :meth:`getMeasurements` () retrieves the updated values.  As a result,
+ * you may get garbage measurements before the first Simulator.simulate call is
+ * made.
  * 
- * There is also a new mode for doing kinematic simulation, which is supported
+ * There is also a mode for doing kinematic simulation, which is supported
  * (i.e., makes sensible measurements) for some types of sensors when just 
  * a robot / world model is given. This is similar to Simulation.fakeSimulate
- * but the entire controller structure is bypassed.  You can randomly set the
- * robot's position, call kinematicReset(), and then call kinematicSimulate().
- * Subsequent calls assume the robot is being driven along a trajectory until the
- * next kinematicReset() is called.
+ * but the entire controller structure is bypassed.  You can arbitrarily set the
+ * robot's position, call :meth:`kinematicReset` (), and then call
+ * :meth:`kinematicSimulate` ().  Subsequent calls assume the robot is being
+ * driven along a trajectory until the next :meth:`kinematicReset` () is called.
+ * 
  * LaserSensor, CameraSensor, TiltSensor, AccelerometerSensor, GyroSensor,
  * JointPositionSensor, JointVelocitySensor support kinematic simulation mode.
  * FilteredSensor and TimeDelayedSensor also work.  The force-related sensors 
  * (ContactSensor and ForceTorqueSensor) return 0's in kinematic simulation.
  *
  * To use get/setSetting, you will need to know the sensor attribute names
- * and types as described in Klampt/Control/*Sensor.h (same as in the world or
- * sensor XML file).
+ * and types as described in `the Klampt sensor documentation <https://github.com/krishauser/Klampt/blob/master/Documentation/Manual-Control.md#sensors>`_
+ * (same as in the world or sensor XML file).
  */
 class SimRobotSensor
 {
@@ -62,9 +66,13 @@ class SimRobotSensor
   std::string getSetting(const std::string& name);
   ///Sets the value of the named setting (you will need to manually cast an int/float/etc to a str)
   void setSetting(const std::string& name,const std::string& val);
-  ///Draws a sensor indicator using OpenGL
+  //note: only the last overload docstring is added to the documentation
+  ///Draws a sensor indicator using OpenGL.  If measurements are given, the indicator is drawn as though
+  ///these are the latest measurements, otherwise the last measurements are given
   void drawGL();
-  ///Draws a sensor indicator and its measurements using OpenGL.
+  //note: only the last overload docstring is added to the documentation
+  ///Draws a sensor indicator using OpenGL.  If measurements are given, the indicator is drawn as though
+  ///these are the latest measurements, otherwise the last measurements are given
   void drawGL(const std::vector<double>& measurements);
 
   ///simulates / advances the kinematic simulation
@@ -79,6 +87,7 @@ class SimRobotSensor
 /** @brief A controller for a simulated robot.
  *
  * By default a SimRobotController has three possible modes:
+ * 
  * - Motion queue + PID mode: the controller has an internal trajectory
  *   queue that may be added to and modified.  This queue supports
  *   piecewise linear interpolation, cubic interpolation, and time-optimal
@@ -130,9 +139,10 @@ class SimRobotController
   /// Returns the current "sensed" velocity from the simulator
   void getSensedVelocity(std::vector<double>& out);
 
-  /// Returns a sensor by index.  If out of bounds, a null sensor is returned
+  /// Returns a sensor by index or by name.  If out of bounds or unavailable, a null sensor is returned
   SimRobotSensor sensor(int index);
-  /// Returns a sensor by name.  If unavailable, a null sensor is returned
+  //note: only the last overload docstring is added to the documentation
+  /// Returns a sensor by index or by name.  If out of bounds or unavailable, a null sensor is returned
   SimRobotSensor sensor(const char* name);
   
   /// gets a command list
@@ -149,6 +159,7 @@ class SimRobotController
   /// desired milestone (with optional ending velocity).  This interpolant
   /// is time-optimal with respect to the velocity and acceleration bounds.
   void setMilestone(const std::vector<double>& q);
+  //note: only the last overload docstring is added to the documentation
   /// Uses a dynamic interpolant to get from the current state to the
   /// desired milestone (with optional ending velocity).  This interpolant
   /// is time-optimal with respect to the velocity and acceleration bounds.
@@ -156,6 +167,7 @@ class SimRobotController
   /// Same as setMilestone, but appends an interpolant onto an internal
   /// motion queue starting at the current queued end state.
   void addMilestone(const std::vector<double>& q);
+  //note: only the last overload docstring is added to the documentation
   /// Same as setMilestone, but appends an interpolant onto an internal
   /// motion queue starting at the current queued end state.
   void addMilestone(const std::vector<double>& q,const std::vector<double>& dq);
@@ -183,20 +195,23 @@ class SimRobotController
   void setTorque(const std::vector<double>& t);
   /// Sets a PID command controller
   void setPIDCommand(const std::vector<double>& qdes,const std::vector<double>& dqdes);
-  /// Sets a PID command controller.  If tfeedforward is used, it is the feedforward torque vector
+  //note: only the last overload docstring is added to the documentation
+  /// Sets a PID command controller.  If tfeedforward is provided, it is the feedforward torque vector
   void setPIDCommand(const std::vector<double>& qdes,const std::vector<double>& dqdes,const std::vector<double>& tfeedforward);
   /// Turns on/off manual mode, if either the setTorque or setPID command were
   /// previously set.
   void setManualMode(bool enabled);
 
-  /// Returns the control type for the active controller.
-  ///
-  /// Valid values are:
-  /// * unknown
-  /// * off
-  /// * torque
-  /// * PID
-  /// * locked_velocity
+  /** @brief Returns the control type for the active controller.
+   *
+   * Possible return values are:
+   *
+   * - unknown
+   * - off
+   * - torque
+   * - PID
+   * - locked_velocity
+   */
   std::string getControlType();
 
   /// Sets the PID gains
@@ -213,14 +228,17 @@ class SimRobotController
  * RigidObjectModel, TerrainModel, or a link of a RobotModel).
  *
  * Can use this class to directly apply forces to or control positions
- * / velocities of objects in the simulation.  However, note that the changes
- * are only applied in the current simulation substep, not the duration
- * provided to Simulation.simulate().  If you need fine-grained control,
- * make sure to call simulate() with time steps equal to the value provided
- * to Simulation.setSimStep() (this is 0.001s by default).
+ * / velocities of objects in the simulation.  
+ * 
+ * Note: 
+ *    All changes are applied in the current simulation substep, not the duration
+ *    provided to Simulation.simulate().  If you need fine-grained control,
+ *    make sure to call Simulation.simulate() with time steps equal to the value
+ *    provided to Simulation.setSimStep() (this is 0.001s by default).
  *
- * Important: the transform of the object is centered at the *object's center of mass*
- * rather than the reference frame given in the RobotModelLink or RigidObjectModel.
+ * Note: 
+ *    The transform of the object is centered at the *object's center of mass*
+ *    rather than the reference frame given in the RobotModelLink or RigidObjectModel.
  */
 class SimBody
 {
@@ -294,7 +312,7 @@ class SimBody
 class Simulator
 {
  public:
-  ///Status flags
+  ///Simulation status flags
   enum { STATUS_NORMAL=0, STATUS_ADAPTIVE_TIME_STEPPING=1, STATUS_CONTACT_UNRELIABLE=2,
     STATUS_UNSTABLE=3, STATUS_ERROR=4 };
 
@@ -358,11 +376,11 @@ class Simulator
   /// selectively.
   void enableContactFeedbackAll();
   /// Returns true if the objects (indexes returned by object.getID()) are in
-  /// contact on the current time step.  You can set bid=-1 to tell if object a
-  /// is in contact with any object. 
+  /// contact on the current time step.  You can set bid=-1 to tell if object 
+  /// ``a`` is in contact with any object. 
   bool inContact(int aid,int bid);
   /// Returns the list of contacts (x,n,kFriction) at the last time step.
-  /// Normals point into object a.  The contact point (x,n,kFriction) is 
+  /// Normals point into object ``a``.  The contact point (x,n,kFriction) is 
   /// represented as a 7-element vector
   void getContacts(int aid,int bid,std::vector<std::vector<double> >& out);
   /// Returns the list of contact forces on object a at the last time step
@@ -370,35 +388,40 @@ class Simulator
   /// Returns the contact force on object a at the last time step.  You can set
   /// bid to -1 to get the overall contact force on object a.
   void contactForce(int aid,int bid,double out[3]);
-  /// Returns the contact force on object a (about a's origin) at the last time step.
-  /// You can set bid to -1 to get the overall contact force on object a.
+  /// Returns the contact force on object ``a`` (about ``a``'s origin) at the last time step.
+  /// You can set ``bid`` to -1 to get the overall contact force on object ``a``.
   void contactTorque(int aid,int bid,double out[3]);
   /// Returns true if the objects had contact over the last simulate() call.  You
-  /// can set bid to -1 to determine if object a had contact with any other object.
+  /// can set ``bid`` to -1 to determine if object ``a`` had contact with any other object.
   bool hadContact(int aid,int bid);
   /// Returns true if the objects had ever separated during the last
-  /// simulate() call. You can set bid to -1 to determine if object a had no contact
-  /// with any other object.
+  /// simulate() call. You can set ``bid`` to -1 to determine if object ``a`` 
+  /// had no contact with any other object.
   bool hadSeparation(int aid,int bid);
   /// Returns true if the objects interpenetrated during the last simulate()
   /// call.  If so, the simulation may lead to very inaccurate results or
-  /// artifacts.  You can set bid to -1 to determine if object a penetrated
-  /// any object, or you can set aid=bid=-1 to determine whether any object
-  /// is penetrating any other (indicating that the simulation will not be
-  /// functioning properly in general).
+  /// artifacts. 
+  ///
+  /// You can set ``bid`` to -1 to determine if object ``a`` penetrated
+  /// any object, or you can set ```aid=bid=-1``` to determine whether any
+  /// object is penetrating any other (indicating that the simulation will
+  /// not be functioning properly in general).
   bool hadPenetration(int aid,int bid);
   /// Returns the average contact force on object a over the last simulate()
   /// call
   void meanContactForce(int aid,int bid,double out[3]);
 
-  /// Returns a controller for the indicated robot
+  /// Returns a controller for the indicated robot, either by index or by RobotModel
   SimRobotController controller(int robot);
+  //note: only the last overload docstring is added to the documentation
+  /// Returns a controller for the indicated robot, either by index or by RobotModel
   SimRobotController controller(const RobotModel& robot);
   ///Returns the SimBody corresponding to the given link
   SimBody body(const RobotModelLink& link);
   ///Returns the SimBody corresponding to the given object
   SimBody body(const RigidObjectModel& object);
-  ///Returns the SimBody corresponding to the given terrain
+  //note: only the last overload docstring is added to the documentation
+  ///Returns the SimBody corresponding to the given link, rigid object, or terrain
   SimBody body(const TerrainModel& terrain);
 
   /// Returns the joint force and torque local to the link, as would be read
@@ -410,14 +433,30 @@ class Simulator
   void setGravity(const double g[3]);
   /// Sets the internal simulation substep.  Values < 0.01 are recommended.
   void setSimStep(double dt);
-  /// Retrieves some simulation setting.  Valid names are gravity,
-  /// simStep, boundaryLayerCollisions, rigidObjectCollisions, robotSelfCollisions,
-  /// robotRobotCollisions, adaptiveTimeStepping, minimumAdaptiveTimeStep, maxContacts,
-  /// clusterNormalScale, errorReductionParameter, dampedLeastSquaresParameter,
-  /// instabilityConstantEnergyThreshold, instabilityLinearEnergyThreshold,
-  /// instabilityMaxEnergyThreshold, and instabilityPostCorrectionEnergy.
-  /// See Klampt/Simulation/ODESimulator.h for detailed descriptions of these
-  /// parameters.
+  /** @brief Retrieves some simulation setting. 
+   * 
+   * Valid names are:
+   * 
+   * - gravity
+   * - simStep
+   * - boundaryLayerCollisions
+   * - rigidObjectCollisions
+   * - robotSelfCollisions
+   * - robotRobotCollisions
+   * - adaptiveTimeStepping
+   * - minimumAdaptiveTimeStep
+   * - maxContacts
+   * - clusterNormalScale
+   * - errorReductionParameter
+   * - dampedLeastSquaresParameter
+   * - instabilityConstantEnergyThreshold
+   * - instabilityLinearEnergyThreshold
+   * - instabilityMaxEnergyThreshold
+   * - instabilityPostCorrectionEnergy
+   * 
+   * See `Klampt/Simulation/ODESimulator.h <https://github.com/krishauser/Klampt/blob/master/Simulation/ODESimulator.h>`_
+   * for detailed descriptions of these parameters.
+   */
   std::string getSetting(const std::string& name);
   /// Sets some simulation setting. Raises an exception if the name is
   /// unknown or the value is of improper format

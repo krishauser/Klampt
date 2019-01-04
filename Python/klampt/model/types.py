@@ -2,14 +2,23 @@ from ..model.contact import ContactPoint,Hold
 from ..model.trajectory import Trajectory,RobotTrajectory,SO3Trajectory,SE3Trajectory
 from ..model.multipath import MultiPath
 from ..math import vectorops,so3,se3
-from ..robotsim import WorldModel,RobotModel,RobotModelLink,RigidObjectModel,IKObjective
+from ..robotsim import WorldModel,RobotModel,RobotModelLink,RigidObjectModel,TerrainModel,IKObjective,Geometry3D,TriangleMesh,PointCloud,GeometricPrimitive
+
+_knownTypes = ['Value','Vector2','Vector3','Matrix3','Point','Rotation','RigidTransform','Vector','Config',
+                'IntArray','StringArray',
+                'Configs','Trajectory','LinearPath','MultiPath',
+                'IKGoal','ContactPoint','Hold',
+                'TriangleMesh','PointCloud','VolumeGrid','GeometricPrimitive',
+                'WorldModel','RobotModel','RigidObjectModel','TerrainModel']
+
+def knownTypes():
+    """Returns all known Klampt types"""
+    return _knownTypes[:]
 
 def objectToTypes(object,world=None):
     """Returns a string defining the type of the given Python Klamp't object.
     If multiple types could be associated with it, then it returns a list of all
     possible valid types."""
-    if hasattr(object,'type'):
-        return object.type
     if isinstance(object,ContactPoint):
         return 'ContactPoint'
     elif isinstance(object,Hold):
@@ -20,6 +29,20 @@ def objectToTypes(object,world=None):
         return 'Trajectory'
     elif isinstance(object,MultiPath):
         return 'MultiPath'
+    elif isinstance(object,GeometricPrimitive):
+        return 'GeometricPrimitive'
+    elif isinstance(object,WorldModel):
+        return 'WorldModel'
+    elif isinstance(object,RobotModel):
+        return 'RobotModel'
+    elif isinstance(object,RigidObjectModel):
+        return 'RigidObjectModel'
+    elif isinstance(object,TerrainModel):
+        return 'TerrainModel'
+    elif hasattr(object,'type'):
+        if callable(object.type):
+            return object.type()
+        return object.type
     elif hasattr(object,'__iter__'):
         if hasattr(object[0],'__iter__'):
             #list of lists or tuples
@@ -56,17 +79,18 @@ def objectToTypes(object,world=None):
                 return vtypes[0]
             return vtypes
     else:
-        raise ValueError("Unknown object passed to objectToTypes")
+        raise ValueError("Unknown object of type %s passed to objectToTypes"%(object.__class__.__name__,))
 
 def make(type,object=None):
-    """Makes a default instance of the given type..
+    """Makes a default instance of the given type.
 
-    Arguments:
-    - str: the name of the desired type type 
-    - object: If type is 'Config', 'Configs', or 'Trajectory', can provide the object for
-      which the new instance will be compatible.
-      """
-    if type == 'Config':
+    Args:
+        type (str): the name of the desired type 
+        object (optional): If ``type`` is 'Config', 'Configs', 'Vector', or
+            'Trajectory', can provide the object for which the new instance
+            will be compatible.
+    """
+    if type == 'Config' or type == 'Vector':
         if isinstance(object,RobotModel):
             return object.getConfig()
         else:
@@ -101,5 +125,22 @@ def make(type,object=None):
         return Trajectory()
     elif type == 'MultiPath':
         return MultiPath()
+    elif type == 'Value':
+        return 0
+    elif type == 'TriangleMesh':
+        return Geometry3D(TriangleMesh())
+    elif type == 'PointCloud':
+        return Geometry3D(PointCloud())
+    elif type == 'GeometricPrimitive':
+        p = GeometricPrimitive()
+        p.setPoint((0,0,0))
+        return Geometry3D(p)
+    elif type == 'VolumeGrid':
+        raise NotImplementedError("Can't create empty volume grid yet")
+    elif isinstance(object,WorldModel):
+        return WorldModel()
+    elif isinstance(object,(RobotModel,RigidObjectModel,TerrainModel)):
+        raise ValueError("Can't make an independent robot, rigid object, or terrain")
     else:
-        return None
+        raise ValueError("Can't make a Klamp't object of type %s"%(type,))
+    return None

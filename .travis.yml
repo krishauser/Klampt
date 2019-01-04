@@ -5,14 +5,14 @@ compiler:
   - clang
 
 sudo: required
-dist: trusty
+dist: xenial
 
 matrix:
   allow_failures:
     - compiler: clang
 
 install:
-  - sudo apt-get install cmake g++ git libboost-system-dev libboost-thread-dev freeglut3 freeglut3-dev libglpk-dev python-dev python-opengl libxmu-dev libxi-dev libqt4-dev libqt4-opengl-dev libassimp-dev libgtest-dev
+  - sudo apt-get install cmake g++ git liblog4cxx10-dev freeglut3 freeglut3-dev libglpk-dev python-dev python-opengl libxmu-dev libxi-dev libqt4-dev libqt4-opengl-dev libassimp-dev libgtest-dev
 
 before_script:
   - echo $LD_LIBRARY_PATH
@@ -21,13 +21,15 @@ before_script:
   #- cd Klampt
 
 script:
-  - cd Library && make unpack-deps
-  - make deps && cd ..
-  - cmake .
-  - make Klampt
+  - cd Cpp/Dependencies && make unpack-deps
+  - make deps && cd ../..
   - cmake . -DKLAMPT_COMPILE_TESTS:BOOL=True
-  - make
+  - make Klampt
+  - make apps
+  - make python
   - sudo make python-install
+  - make python3
+  - sudo make python3-install
   - env CTEST_OUTPUT_ON_FAILURE=1 make test
 
 

@@ -1,29 +1,34 @@
+#if defined (__APPLE__) || defined (MACOSX)
+  #include "mac_fixes.h"
+#endif //Mac fixes 
+
 #include <vector>
 #include <string>
 #include "robotsim.h"
 #include "widget.h"
-#include "Control/Command.h"
-#include "Control/PathController.h"
-#include "Control/FeedforwardController.h"
-#include "Control/LoggingController.h"
-#include "Planning/RobotCSpace.h"
-#include "Simulation/WorldSimulation.h"
-#include "Modeling/Interpolate.h"
-#include "Planning/RobotCSpace.h"
-#include "IO/XmlWorld.h"
-#include "IO/XmlODE.h"
-#include "IO/ROS.h"
-#include "IO/three.js.h" 
+#include <Klampt/Control/Command.h>
+#include <Klampt/Control/PathController.h>
+#include <Klampt/Control/FeedforwardController.h>
+#include <Klampt/Control/LoggingController.h>
+#include <Klampt/Planning/RobotCSpace.h>
+#include <Klampt/Simulation/WorldSimulation.h>
+#include <Klampt/Modeling/Interpolate.h>
+#include <Klampt/Planning/RobotCSpace.h>
+#include <Klampt/IO/XmlWorld.h>
+#include <Klampt/IO/XmlODE.h>
+#include <Klampt/IO/ROS.h>
+#include <Klampt/IO/three.js.h> 
 #include <KrisLibrary/robotics/NewtonEuler.h>
 #include <KrisLibrary/robotics/Stability.h>
 #include <KrisLibrary/robotics/TorqueSolver.h>
 #include <KrisLibrary/meshing/PointCloud.h>
+#include <KrisLibrary/meshing/VolumeGrid.h>
 #include <KrisLibrary/GLdraw/drawextra.h>
 #include <KrisLibrary/GLdraw/drawMesh.h>
 #include <KrisLibrary/GLdraw/Widget.h>
 #include <KrisLibrary/GLdraw/TransformWidget.h>
-#include "View/ObjectPoseWidget.h"
-#include "View/RobotPoseWidget.h"
+#include <Klampt/View/ObjectPoseWidget.h>
+#include <Klampt/View/RobotPoseWidget.h>
 #include <KrisLibrary/utils/AnyCollection.h>
 #include <KrisLibrary/utils/stringutils.h>
 #include <ode/ode.h>
@@ -56,15 +61,15 @@ struct SimData
 /// Internally used.
 struct WidgetData
 {
-  SmartPointer<GLDraw::Widget> widget;
+  shared_ptr<GLDraw::Widget> widget;
   int refCount;
 };
 
 
-static vector<SmartPointer<WorldData> > worlds;
+static vector<shared_ptr<WorldData> > worlds;
 static list<int> worldDeleteList;
 
-static vector<SmartPointer<SimData> > sims;
+static vector<shared_ptr<SimData> > sims;
 static list<int> simDeleteList;
 
 static vector<WidgetData> widgets;
@@ -77,7 +82,7 @@ static int gStabilityNumFCEdges = 4;
 int createWorld(RobotWorld* ptr=NULL)
 {
   if(worldDeleteList.empty()) {
-    worlds.push_back(new WorldData);
+    worlds.push_back(make_shared<WorldData>());
     if(ptr) {
       worlds.back()->world = ptr;
       worlds.back()->worldExternal = true;
@@ -92,7 +97,7 @@ int createWorld(RobotWorld* ptr=NULL)
   else {
     int index = worldDeleteList.front();
     worldDeleteList.erase(worldDeleteList.begin());
-    worlds[index] = new WorldData;
+    worlds[index] = make_shared<WorldData>();
     if(ptr) {
       worlds[index]->world = ptr;
       worlds[index]->worldExternal = true;
@@ -125,7 +130,7 @@ void derefWorld(int index)
     //printf("Deleting world %d\n",index);
     if(!worlds[index]->worldExternal)
       delete worlds[index]->world;
-    worlds[index] = NULL;
+    worlds[index].reset();
     worldDeleteList.push_back(index);
   }
 }
@@ -143,13 +148,13 @@ void refWorld(int index)
 int createSim()
 {
   if(simDeleteList.empty()) {
-    sims.push_back(new SimData);
+    sims.push_back(make_shared<SimData>());
     return (int)(sims.size()-1);
   }
   else {
     int index = simDeleteList.front();
     simDeleteList.erase(simDeleteList.begin());
-    sims[index] = new SimData;
+    sims[index] = make_shared<SimData>();
     return index;
   }
 }
@@ -165,7 +170,7 @@ void destroySim(int index)
   if(!sims[index])
     throw PyException("Invalid sim index");
 
-  sims[index] = NULL;
+  sims[index].reset();
   simDeleteList.push_back(index);
 }
 
@@ -180,7 +185,7 @@ int createWidget()
   else {
     int index = widgetDeleteList.front();
     widgetDeleteList.erase(widgetDeleteList.begin());
-    widgets[index].widget = NULL;
+    widgets[index].widget.reset();
     widgets[index].refCount = 1;
     //printf("Creating widget %d, ref count %d\n",index,1);
     return index;
@@ -198,7 +203,7 @@ void derefWidget(int index)
   //printf("Deref widget %d: count %d\n",index,widgets[index].refCount);
   if(widgets[index].refCount == 0) {
     //printf("Deleting widget %d\n",index);
-    widgets[index].widget = NULL;
+    widgets[index].widget.reset();
     widgetDeleteList.push_back(index);
   }
 }
@@ -215,9 +220,9 @@ void refWidget(int index)
 void destroy()
 {
   for(size_t i=0;i<sims.size();i++)
-    sims[i] = NULL;
+    sims[i].reset();
   for(size_t i=0;i<worlds.size();i++)
-    worlds[i] = NULL;
+    worlds[i].reset();
   simDeleteList.clear();
   worldDeleteList.clear();
   sims.resize(0);
@@ -257,7 +262,7 @@ ManagedGeometry& GetManagedGeometry(RobotWorld& world,int id)
 class ManualOverrideController : public RobotController
 {
  public:
-  ManualOverrideController(Robot& robot,const SmartPointer<RobotController>& _base)
+  ManualOverrideController(Robot& robot,const shared_ptr<RobotController>& _base)
     :RobotController(robot),base(_base),override(false)
   {}
   virtual const char* Type() const { return "ManualOverrideController"; }
@@ -274,7 +279,7 @@ class ManualOverrideController : public RobotController
   virtual vector<string> Commands() const { return base->Commands(); }
   virtual bool SendCommand(const string& name,const string& str) { return base->SendCommand(name,str); }
 
-  SmartPointer<RobotController> base;
+  shared_ptr<RobotController> base;
   bool override;
 };
 
@@ -309,10 +314,10 @@ void ManualOverrideController::Update(Real dt)
 
 
 typedef ManualOverrideController MyController;
-inline MyController* MakeController(Robot* robot)
+inline shared_ptr<MyController> MakeController(Robot* robot)
 {
   ManualOverrideController* lc=new ManualOverrideController(*robot,MakeDefaultController(robot));
-  return lc;
+  return shared_ptr<MyController>(lc);
 }
 inline PolynomialPathController* GetPathController(RobotController* controller)
 {
@@ -320,12 +325,12 @@ inline PolynomialPathController* GetPathController(RobotController* controller)
   if(!mc) {
     throw PyException("Not using the default manual override controller");
   }
-  LoggingController* lc=dynamic_cast<LoggingController*>((RobotController*)mc->base);
+  LoggingController* lc=dynamic_cast<LoggingController*>(mc->base.get());
   if(!lc) {
     throw PyException("Not using the default robot controller");
   }
-  FeedforwardController* ffc=dynamic_cast<FeedforwardController*>((RobotController*)lc->base);
-  PolynomialPathController* pc=dynamic_cast<PolynomialPathController*>((RobotController*)ffc->base);
+  FeedforwardController* ffc=dynamic_cast<FeedforwardController*>(lc->base.get());
+  PolynomialPathController* pc=dynamic_cast<PolynomialPathController*>(ffc->base.get());
   return pc;
 }
 inline PolynomialMotionQueue* GetMotionQueue(RobotController* controller)
@@ -371,11 +376,11 @@ void GetPointCloud(const Geometry::AnyCollisionGeometry3D& geom,PointCloud& pc)
   pc.vertices.resize(gpc.points.size()*3);
   pc.propertyNames = gpc.propertyNames;
   pc.properties.resize(gpc.points.size()*gpc.propertyNames.size());
-  for(size_t i=0;i<gpc.points.size();i++) {
+  for(size_t i=0;i<gpc.points.size();i++) 
     gpc.points[i].get(pc.vertices[i*3],pc.vertices[i*3+1],pc.vertices[i*3+2]);
-    if(!gpc.properties[i].empty()){
+  if(!gpc.propertyNames.empty()) {
+    for(size_t i=0;i<gpc.points.size();i++)
       gpc.properties[i].getCopy(&pc.properties[i*gpc.propertyNames.size()]);
-    }
   }
   pc.settings = gpc.settings;
 }
@@ -399,6 +404,46 @@ void GetPointCloud(const PointCloud& pc,Geometry::AnyCollisionGeometry3D& geom)
   geom = gpc;
   geom.ClearCollisionData();
 }
+
+void GetVolumeGrid(const Geometry::AnyCollisionGeometry3D& geom,VolumeGrid& grid)
+{
+  Assert(geom.type == Geometry::AnyGeometry3D::ImplicitSurface);
+  const Meshing::VolumeGrid& gvg = geom.AsImplicitSurface();
+  grid.dims.resize(3);
+  grid.dims[0] = gvg.value.m;
+  grid.dims[1] = gvg.value.n;
+  grid.dims[2] = gvg.value.p;
+  grid.bbox.resize(6);
+  grid.bbox[0] = gvg.bb.bmin.x;
+  grid.bbox[1] = gvg.bb.bmin.y;
+  grid.bbox[2] = gvg.bb.bmin.z;
+  grid.bbox[3] = gvg.bb.bmax.x;
+  grid.bbox[4] = gvg.bb.bmax.y;
+  grid.bbox[5] = gvg.bb.bmax.z;
+  grid.values.resize(gvg.value.m*gvg.value.n*gvg.value.p);
+  int k=0;
+  for(Array3D<Real>::iterator i=gvg.value.begin();i!=gvg.value.end();++i,k++) {
+    grid.values[k] = *i;
+  }
+}
+
+void GetVolumeGrid(const VolumeGrid& grid,Geometry::AnyCollisionGeometry3D& geom)
+{
+  Meshing::VolumeGrid gvg;
+  Assert(grid.dims.size()==3);
+  Assert(grid.bbox.size()==6);
+  gvg.Resize(grid.dims[0],grid.dims[1],grid.dims[2]);
+  gvg.bb.bmin.set(grid.bbox[0],grid.bbox[1],grid.bbox[2]);
+  gvg.bb.bmax.set(grid.bbox[3],grid.bbox[4],grid.bbox[5]);
+  Assert(grid.values.size() == grid.dims[0]*grid.dims[1]*grid.dims[2]);
+  int k=0;
+  for(Array3D<Real>::iterator i=gvg.value.begin();i!=gvg.value.end();++i,k++) {
+    *i = grid.values[k];
+  }
+  geom = gvg;
+  geom.ClearCollisionData();
+}
+
 
 void GeometricPrimitive::setPoint(const double pt[3])
 {
@@ -457,44 +502,51 @@ std::string GeometricPrimitive::saveString() const
 Geometry3D::Geometry3D()
   :world(-1),id(-1),geomPtr(NULL)
 {
-  geomPtr = new SmartPointer<AnyCollisionGeometry3D>();
+  geomPtr = new shared_ptr<AnyCollisionGeometry3D>();
 }
 
 Geometry3D::Geometry3D(const Geometry3D& rhs)
   :world(rhs.world),id(rhs.id),geomPtr(NULL)
 {
-  SmartPointer<AnyCollisionGeometry3D>* geom = reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(rhs.geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>* geom = reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(rhs.geomPtr);
   if(*geom != NULL)
-    geomPtr = new SmartPointer<AnyCollisionGeometry3D>(*geom);
+    geomPtr = new shared_ptr<AnyCollisionGeometry3D>(*geom);
   else
-    geomPtr = new SmartPointer<AnyCollisionGeometry3D>();
+    geomPtr = new shared_ptr<AnyCollisionGeometry3D>();
 }
 
 Geometry3D::Geometry3D(const GeometricPrimitive& rhs)
   :world(-1),id(-1),geomPtr(NULL)
 {
-  geomPtr = new SmartPointer<AnyCollisionGeometry3D>();
+  geomPtr = new shared_ptr<AnyCollisionGeometry3D>();
   setGeometricPrimitive(rhs);
 }
 
 Geometry3D::Geometry3D(const TriangleMesh& rhs)
   :world(-1),id(-1),geomPtr(NULL)
 {
-  geomPtr = new SmartPointer<AnyCollisionGeometry3D>();
+  geomPtr = new shared_ptr<AnyCollisionGeometry3D>();
   setTriangleMesh(rhs);
 }
 
 Geometry3D::Geometry3D(const PointCloud& rhs)
   :world(-1),id(-1),geomPtr(NULL)
 {
-  geomPtr = new SmartPointer<AnyCollisionGeometry3D>();
+  geomPtr = new shared_ptr<AnyCollisionGeometry3D>();
   setPointCloud(rhs);
+}
+
+Geometry3D::Geometry3D(const VolumeGrid& rhs)
+:world(-1),id(-1),geomPtr(NULL)
+{
+  geomPtr = new shared_ptr<AnyCollisionGeometry3D>();
+  setVolumeGrid(rhs);
 }
 
 Geometry3D::~Geometry3D()
 {
   free();
-  SmartPointer<AnyCollisionGeometry3D>* geom = reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>* geom = reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   delete geom;
 }
 
@@ -503,8 +555,8 @@ const Geometry3D& Geometry3D::operator = (const Geometry3D& rhs)
   free();
   world = rhs.world;
   id = rhs.id;
-  SmartPointer<AnyCollisionGeometry3D>* geom = reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
-  SmartPointer<AnyCollisionGeometry3D>* geom2 = reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(rhs.geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>* geom = reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>* geom2 = reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(rhs.geomPtr);
   *geom = *geom2;
   return *this;
 } 
@@ -517,18 +569,18 @@ bool Geometry3D::isStandalone()
 Geometry3D Geometry3D::clone()
 {
   Geometry3D res;
-  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
-  SmartPointer<AnyCollisionGeometry3D>& resgeom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(res.geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>& resgeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(res.geomPtr);
   if(geom != NULL) {
-    resgeom = new AnyCollisionGeometry3D(*geom);
+    resgeom = make_shared<AnyCollisionGeometry3D>(*geom);
   }
   return res;
 }
 
 void Geometry3D::set(const Geometry3D& g)
 {
-  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
-  const SmartPointer<AnyCollisionGeometry3D>& ggeom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(g.geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  const shared_ptr<AnyCollisionGeometry3D>& ggeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(g.geomPtr);
   ManagedGeometry* mgeom = NULL;
   if(!isStandalone()) {
     RobotWorld& world = *worlds[this->world]->world;
@@ -539,7 +591,7 @@ void Geometry3D::set(const Geometry3D& g)
       geom = mgeom->CreateEmpty();
     }
     else
-      geom = new AnyCollisionGeometry3D();
+      geom = make_shared<AnyCollisionGeometry3D>();
   }
   else
     Assert(&*geom == &*mgeom);
@@ -554,21 +606,21 @@ void Geometry3D::set(const Geometry3D& g)
 
 void Geometry3D::free()
 {
-  SmartPointer<AnyCollisionGeometry3D>* geom = reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);  
+  shared_ptr<AnyCollisionGeometry3D>* geom = reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);  
   if(isStandalone() && *geom) {
     //printf("Geometry3D(): Freeing standalone geometry\n");
-    *geom = NULL;
+    geom->reset();
   }
   world = -1;
   id = -1;
 
   delete geom;
-  geomPtr = new SmartPointer<AnyCollisionGeometry3D>;
+  geomPtr = new shared_ptr<AnyCollisionGeometry3D>;
 }
 
 string Geometry3D::type()
 {
-  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   if(!geom) return "";
   if(geom->Empty()) return "";
   string res = geom->TypeName();
@@ -578,7 +630,7 @@ string Geometry3D::type()
 
 bool Geometry3D::empty()
 {
-  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);  
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);  
   if(!geom) return true;
   if(geom->Empty()) return true;
   return false;
@@ -586,7 +638,7 @@ bool Geometry3D::empty()
 
 TriangleMesh Geometry3D::getTriangleMesh()
 {
-  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   TriangleMesh mesh;
   if(geom) {
     GetMesh(*geom,mesh);
@@ -597,7 +649,7 @@ TriangleMesh Geometry3D::getTriangleMesh()
 
 GeometricPrimitive Geometry3D::getGeometricPrimitive()
 {
-  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   if(!geom) return GeometricPrimitive();
   stringstream ss;
   ss<<geom->AsPrimitive();
@@ -612,7 +664,7 @@ GeometricPrimitive Geometry3D::getGeometricPrimitive()
 
 void Geometry3D::setTriangleMesh(const TriangleMesh& mesh)
 {
-  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   ManagedGeometry* mgeom = NULL;
   if(!isStandalone()) {
     RobotWorld& world = *worlds[this->world]->world;
@@ -622,7 +674,7 @@ void Geometry3D::setTriangleMesh(const TriangleMesh& mesh)
     if(mgeom) 
       geom = mgeom->CreateEmpty();
     else
-      geom = new AnyCollisionGeometry3D();
+      geom = make_shared<AnyCollisionGeometry3D>();
   }
   GetMesh(mesh,*geom);
   if(mgeom) {
@@ -634,7 +686,7 @@ void Geometry3D::setTriangleMesh(const TriangleMesh& mesh)
 
 void Geometry3D::setGroup()
 {
-  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   ManagedGeometry* mgeom = NULL;
   if(!isStandalone()) {
     RobotWorld& world = *worlds[this->world]->world;
@@ -644,7 +696,7 @@ void Geometry3D::setGroup()
     if(mgeom) 
       geom = mgeom->CreateEmpty();
     else
-      geom = new AnyCollisionGeometry3D();
+      geom = make_shared<AnyCollisionGeometry3D>();
   }
   *geom = AnyCollisionGeometry3D(vector<Geometry::AnyGeometry3D>());
   geom->ReinitCollisionData();
@@ -652,28 +704,51 @@ void Geometry3D::setGroup()
 
 Geometry3D Geometry3D::getElement(int element)
 {
-  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   if(!geom) 
     throw PyException("Geometry is empty");
-  if(geom->type != AnyCollisionGeometry3D::Group)
-    throw PyException("Not a group geometry");
-  vector<AnyCollisionGeometry3D>& data = geom->GroupCollisionData();
-  if(element < 0 || element >= (int)data.size())
-    throw PyException("Invalid element specified");
-  Geometry3D res;
-  SmartPointer<AnyCollisionGeometry3D>& rgeom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(res.geomPtr);
-  *rgeom = data[element];
-  return res;
+  if(geom->type == AnyCollisionGeometry3D::Group) {
+    vector<AnyCollisionGeometry3D>& data = geom->GroupCollisionData();
+    if(element < 0 || element >= (int)data.size())
+      throw PyException("Invalid element specified");
+    Geometry3D res;
+    shared_ptr<AnyCollisionGeometry3D>& rgeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(res.geomPtr);
+    *rgeom = data[element];
+    return res;
+  }
+  else if(geom->type == AnyCollisionGeometry3D::TriangleMesh) {
+    CollisionMesh& data = geom->TriangleMeshCollisionData();
+    if(element < 0 || element >= (int)data.tris.size())
+      throw PyException("Invalid element specified");
+    Math3D::Triangle3D tri;
+    data.GetTriangle(element,tri);
+    Geometry3D res;
+    shared_ptr<AnyCollisionGeometry3D>& rgeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(res.geomPtr);
+    rgeom = make_shared<AnyCollisionGeometry3D>(Math3D::GeometricPrimitive3D(tri));
+    return res;
+  }
+  else if(geom->type == AnyCollisionGeometry3D::TriangleMesh) {
+    Meshing::PointCloud3D& data = geom->AsPointCloud();
+    if(element < 0 || element >= (int)data.points.size())
+      throw PyException("Invalid element specified");
+    Geometry3D res;
+    shared_ptr<AnyCollisionGeometry3D>& rgeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(res.geomPtr);
+    rgeom = make_shared<AnyCollisionGeometry3D>(Math3D::GeometricPrimitive3D(data.points[element]));
+    return res;
+  }
+  else {
+    throw PyException("Geometry type does not have sub-elements");
+  }
 }
 
 void Geometry3D::setElement(int element,const Geometry3D& rhs)
 {
-  SmartPointer<AnyCollisionGeometry3D>& rgeom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(rhs.geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>& rgeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(rhs.geomPtr);
   if(rgeom == NULL) 
     throw PyException("Setting an element to an empty geometry?");
   rgeom->InitCollisionData();
 
-  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   if(!geom) 
     throw PyException("Geometry is empty");
   if(geom->type != AnyCollisionGeometry3D::Group)
@@ -696,19 +771,25 @@ void Geometry3D::setElement(int element,const Geometry3D& rhs)
 
 int Geometry3D::numElements()
 {
-  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   if(!geom) 
     throw PyException("Geometry is empty");
-  if(geom->type != AnyCollisionGeometry3D::Group)
-    throw PyException("Not a group geometry");
-  vector<AnyGeometry3D>& data = geom->AsGroup();
-  return (int)data.size();
+  switch(geom->type) {
+  case AnyCollisionGeometry3D::Group:
+    return (int)geom->AsGroup().size();
+  case AnyCollisionGeometry3D::PointCloud:
+    return (int)geom->AsPointCloud().points.size();
+  case AnyCollisionGeometry3D::TriangleMesh:
+    return (int)geom->AsTriangleMesh().tris.size();
+  default:
+    return 0;
+  }
 }
 
 
 PointCloud Geometry3D::getPointCloud()
 {
-  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   PointCloud pc;
   if(geom) {
     GetPointCloud(*geom,pc);
@@ -716,9 +797,19 @@ PointCloud Geometry3D::getPointCloud()
   return pc;
 }
 
+VolumeGrid Geometry3D::getVolumeGrid()
+{
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  VolumeGrid grid;
+  if(geom) {
+    GetVolumeGrid(*geom,grid);
+  }
+  return grid;
+}
+
 void Geometry3D::setPointCloud(const PointCloud& pc)
 {
-  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   ManagedGeometry* mgeom = NULL;
   if(!isStandalone()) {
     RobotWorld& world = *worlds[this->world]->world;
@@ -729,7 +820,7 @@ void Geometry3D::setPointCloud(const PointCloud& pc)
       geom = mgeom->CreateEmpty();
     }
     else
-      geom = new AnyCollisionGeometry3D();
+      geom = make_shared<AnyCollisionGeometry3D>();
   }
   GetPointCloud(pc,*geom);
   //this is already called
@@ -741,9 +832,9 @@ void Geometry3D::setPointCloud(const PointCloud& pc)
   }
 }
 
-void Geometry3D::setGeometricPrimitive(const GeometricPrimitive& prim)
+void Geometry3D::setVolumeGrid(const VolumeGrid& vg)
 {
-  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);  
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   ManagedGeometry* mgeom = NULL;
   if(!isStandalone()) {
     RobotWorld& world = *worlds[this->world]->world;
@@ -754,7 +845,32 @@ void Geometry3D::setGeometricPrimitive(const GeometricPrimitive& prim)
       geom = mgeom->CreateEmpty();
     }
     else
-      geom = new AnyCollisionGeometry3D();
+      geom = make_shared<AnyCollisionGeometry3D>();
+  }
+  GetVolumeGrid(vg,*geom);
+  //this is already called
+  //geom->ClearCollisionData();
+  if(mgeom) {
+    //update the display list / cache
+    mgeom->OnGeometryChange();
+    mgeom->RemoveFromCache();
+  }
+}
+
+void Geometry3D::setGeometricPrimitive(const GeometricPrimitive& prim)
+{
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);  
+  ManagedGeometry* mgeom = NULL;
+  if(!isStandalone()) {
+    RobotWorld& world = *worlds[this->world]->world;
+    mgeom = &GetManagedGeometry(world,id);
+  }
+  if(geom == NULL) {
+    if(mgeom) {
+      geom = mgeom->CreateEmpty();
+    }
+    else
+      geom = make_shared<AnyCollisionGeometry3D>();
   }
   stringstream ss(prim.saveString());
   GeometricPrimitive3D g;
@@ -774,10 +890,10 @@ void Geometry3D::setGeometricPrimitive(const GeometricPrimitive& prim)
 
 bool Geometry3D::loadFile(const char* fn)
 {
-  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   if(isStandalone()) {
     if(!geom) {
-      geom = new AnyCollisionGeometry3D();
+      geom = make_shared<AnyCollisionGeometry3D>();
     }
     if(!geom->Load(fn)) return false;
     return true;
@@ -790,7 +906,7 @@ bool Geometry3D::loadFile(const char* fn)
     ManagedGeometry* mgeom = NULL;
     mgeom = &GetManagedGeometry(world,id);
     if(mgeom->Load(fn)) {
-      geom = SmartPointer<Geometry::AnyCollisionGeometry3D>(*mgeom);
+      geom = shared_ptr<Geometry::AnyCollisionGeometry3D>(*mgeom);
       return true;
     }
     return false;
@@ -799,7 +915,7 @@ bool Geometry3D::loadFile(const char* fn)
 
 bool Geometry3D::saveFile(const char* fn)
 {
-  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   if(!geom) return false;
   return geom->Save(fn);
 }
@@ -807,7 +923,7 @@ bool Geometry3D::saveFile(const char* fn)
 
 void Geometry3D::setCurrentTransform(const double R[9],const double t[3])
 {
-  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   if(!geom) return;
   RigidTransform T;
   T.R.set(R);
@@ -818,7 +934,7 @@ void Geometry3D::setCurrentTransform(const double R[9],const double t[3])
 void Geometry3D::getCurrentTransform(double out[9],double out2[3])
 {
   RigidTransform T;
-  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   if(!geom) {
     T.setIdentity();
     return;
@@ -860,7 +976,7 @@ void Geometry3D::translate(const double t[3])
 
 void Geometry3D::transform(const double R[9],const double t[3])
 {
-  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   RigidTransform T;
   T.R.set(R);
   T.t.set(t);
@@ -878,21 +994,21 @@ void Geometry3D::transform(const double R[9],const double t[3])
 
 void Geometry3D::setCollisionMargin(double margin)
 {
-  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   if(!geom) return;
   geom->margin = margin;
 }
 
 double Geometry3D::getCollisionMargin()
 {
-  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   if(!geom) return 0;
   return geom->margin;
 }
 
 void Geometry3D::getBB(double out[3],double out2[3])
 {
-  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   if(!geom) {
     out[0] = out[1] = out[2] = Inf;
     out2[0] = out2[1] = out2[2] = -Inf;
@@ -905,7 +1021,7 @@ void Geometry3D::getBB(double out[3],double out2[3])
 
 void Geometry3D::getBBTight(double out[3],double out2[3])
 {
-  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   if(!geom) {
     out[0] = out[1] = out[2] = Inf;
     out2[0] = out2[1] = out2[2] = -Inf;
@@ -916,45 +1032,149 @@ void Geometry3D::getBBTight(double out[3],double out2[3])
   bb.bmax.get(out2);
 }
 
+Geometry3D Geometry3D::convert(const char* destype,double param)
+{
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  if(!geom) throw PyException("Geometry3D is empty, cannot convert");
+  AnyGeometry3D::Type srctype = geom->type;
+  AnyGeometry3D::Type destype2;
+  if(0==strcmp(destype,"TriangleMesh")) 
+    destype2 = AnyGeometry3D::TriangleMesh;
+  else if(0==strcmp(destype,"PointCloud")) 
+    destype2 = AnyGeometry3D::PointCloud;
+  else if(0==strcmp(destype,"VolumeGrid")) 
+    destype2 = AnyGeometry3D::ImplicitSurface;
+  else if(0==strcmp(destype,"GeometricPrimitive")) 
+    destype2 = AnyGeometry3D::Primitive;
+  else
+    throw PyException("Invalid desired type specified, must be TriangleMesh, PointCloud, or VolumeGrid");
+
+  if(srctype == destype2)
+    return *this;
+  if(param < 0) throw PyException("Invalid conversion parameter, must be nonnegative");
+
+  //do the conversion
+  geom->InitCollisionData();
+  if(geom->type == AnyGeometry3D::TriangleMesh) {
+    geom->TriangleMeshCollisionData().CalcTriNeighbors();
+  }
+  Geometry3D res;
+  shared_ptr<AnyCollisionGeometry3D>& resgeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(res.geomPtr);
+  resgeom = make_shared<AnyCollisionGeometry3D>();
+  if(!geom->Convert(destype2,*resgeom,param)) {
+    stringstream ss;
+    ss<<"Cannot perform the geometry conversion "<<geom->TypeName()<<" -> "<<destype;
+    throw PyException(ss.str().c_str());
+  }
+  return res;
+}
+
 bool Geometry3D::collides(const Geometry3D& other)
 {
-  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
-  SmartPointer<AnyCollisionGeometry3D>& geom2 = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(other.geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>& geom2 = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(other.geomPtr);
   if(!geom || !geom2) return false;
   return geom->Collides(*geom2);
 }
 
 bool Geometry3D::withinDistance(const Geometry3D& other,double tol)
 {
-  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
-  SmartPointer<AnyCollisionGeometry3D>& geom2 = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(other.geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>& geom2 = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(other.geomPtr);
   if(!geom || !geom2) return false;
   return geom->WithinDistance(*geom2,tol);
 }
 
-double Geometry3D::distance(const Geometry3D& other,double relErr,double absErr)
+double Geometry3D::distance_simple(const Geometry3D& other,double relErr,double absErr)
 {
-  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
-  SmartPointer<AnyCollisionGeometry3D>& geom2 = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(other.geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>& geom2 = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(other.geomPtr);
   if(!geom || !geom2) return 0;
   AnyCollisionQuery q(*geom,*geom2);
   return q.Distance(relErr,absErr);
 }
 
-bool Geometry3D::closestPoint(const double pt[3],double out[3])
+DistanceQuerySettings::DistanceQuerySettings()
+:relErr(0),absErr(0),upperBound(Inf)
+{}
+
+DistanceQueryResult Geometry3D::distance_point(const double pt[3])
 {
-  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
-  if(!geom) return false;
-  Vector3 vout;
-  Real d = geom->Distance(Vector3(pt),vout);
-  if(IsInf(d)) return false;
-  vout.get(out);
-  return true;
+  return distance_point_ext(pt,DistanceQuerySettings());
+}
+
+DistanceQueryResult Geometry3D::distance_point_ext(const double pt[3],const DistanceQuerySettings& settings)
+{
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  if(!geom) throw PyException("Geometry3D.distance_point: Geometry is empty");
+  AnyDistanceQuerySettings gsettings;
+  gsettings.relErr = settings.relErr;
+  gsettings.absErr = settings.absErr;
+  gsettings.upperBound = settings.upperBound;
+  AnyDistanceQueryResult gres = geom->Distance(Vector3(pt),gsettings);
+  if(IsInf(gres.d)) {
+    throw PyException("Distance queries not implemented yet for that type of geometry");
+  }
+  DistanceQueryResult result;
+  result.d = gres.d;
+  result.hasClosestPoints = gres.hasClosestPoints;
+  if(result.hasClosestPoints) {
+    result.cp1.resize(3);
+    result.cp2.resize(3);
+    gres.cp1.get(&result.cp1[0]);
+    gres.cp2.get(&result.cp2[0]);
+  }
+  result.hasGradients = gres.hasDirections;
+  if(result.hasGradients) {
+    result.grad1.resize(3);
+    result.grad2.resize(3);
+    gres.dir1.get(&result.grad2[0]);
+    gres.dir2.get(&result.grad1[0]);
+  }
+  return result;
+}
+
+DistanceQueryResult Geometry3D::distance(const Geometry3D& other)
+{
+  return distance_ext(other,DistanceQuerySettings());
+}
+
+DistanceQueryResult Geometry3D::distance_ext(const Geometry3D& other,const DistanceQuerySettings& settings)
+{
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>& geom2 = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(other.geomPtr);
+  if(!geom) throw PyException("Geometry3D.distance: Geometry is empty");
+  if(!geom2) throw PyException("Geometry3D.distance: Other geometry is empty");
+  AnyDistanceQuerySettings gsettings;
+  gsettings.relErr = settings.relErr;
+  gsettings.absErr = settings.absErr;
+  gsettings.upperBound = settings.upperBound;
+  AnyDistanceQueryResult gres = geom->Distance(*geom2,gsettings);
+  if(IsInf(gres.d)) {
+    throw PyException("Distance queries not implemented yet for those types of geometry");
+  }
+  DistanceQueryResult result;
+  result.d = gres.d;
+  result.hasClosestPoints = gres.hasClosestPoints;
+  if(result.hasClosestPoints) {
+    result.cp1.resize(3);
+    result.cp2.resize(3);
+    gres.cp1.get(&result.cp1[0]);
+    gres.cp2.get(&result.cp2[0]);
+  }
+  result.hasGradients = gres.hasDirections;
+  if(result.hasGradients) {
+    result.grad1.resize(3);
+    result.grad2.resize(3);
+    gres.dir1.get(&result.grad2[0]);
+    gres.dir2.get(&result.grad1[0]);
+  }
+  return result;
 }
 
 bool Geometry3D::rayCast(const double s[3],const double d[3],double out[3])
 {
-  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   if(!geom) return false;
   Ray3D r;
   r.source.set(s);
@@ -973,20 +1193,20 @@ bool Geometry3D::rayCast(const double s[3],const double d[3],double out[3])
 Appearance::Appearance()
   :world(-1),id(-1),appearancePtr(NULL)
 {
-  appearancePtr = new SmartPointer<GLDraw::GeometryAppearance>;
+  appearancePtr = new shared_ptr<GLDraw::GeometryAppearance>;
 }
 
 Appearance::Appearance(const Appearance& rhs)
   :world(rhs.world),id(rhs.id),appearancePtr(NULL)
 {
-  SmartPointer<GLDraw::GeometryAppearance>* geom = reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(rhs.appearancePtr);
-  appearancePtr = new SmartPointer<GLDraw::GeometryAppearance>(*geom);
+  shared_ptr<GLDraw::GeometryAppearance>* geom = reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(rhs.appearancePtr);
+  appearancePtr = new shared_ptr<GLDraw::GeometryAppearance>(*geom);
 }
 
 Appearance::~Appearance()
 {
   free();
-  SmartPointer<GLDraw::GeometryAppearance>* app = reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
+  shared_ptr<GLDraw::GeometryAppearance>* app = reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
   delete app;
 }
 
@@ -995,8 +1215,8 @@ const Appearance& Appearance::operator = (const Appearance& rhs)
   free();
   world = rhs.world;
   id = rhs.id;
-  SmartPointer<GLDraw::GeometryAppearance>* geom = reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
-  SmartPointer<GLDraw::GeometryAppearance>* geom2 = reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(rhs.appearancePtr);
+  shared_ptr<GLDraw::GeometryAppearance>* geom = reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  shared_ptr<GLDraw::GeometryAppearance>* geom2 = reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(rhs.appearancePtr);
   *geom = *geom2;
   return *this;
 } 
@@ -1004,7 +1224,7 @@ const Appearance& Appearance::operator = (const Appearance& rhs)
 
 void Appearance::refresh(bool deep)
 {
-  SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
   if(!app) return;
   if(!isStandalone()) {
     ManagedGeometry& geom = GetManagedGeometry(*worlds[this->world]->world,id);
@@ -1027,27 +1247,30 @@ bool Appearance::isStandalone()
 Appearance Appearance::clone()
 {
   Appearance res;
-  SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
-  SmartPointer<GLDraw::GeometryAppearance>& resapp = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(res.appearancePtr);
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  shared_ptr<GLDraw::GeometryAppearance>& resapp = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(res.appearancePtr);
   if(app != NULL) {
-    resapp = new GLDraw::GeometryAppearance(*app);
+    resapp = make_shared<GLDraw::GeometryAppearance>(*app);
   }
   return res;
 }
 
 void Appearance::set(const Appearance& g)
 {
-  SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
-  SmartPointer<GLDraw::GeometryAppearance>& gapp = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(g.appearancePtr);
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  shared_ptr<GLDraw::GeometryAppearance>& gapp = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(g.appearancePtr);
 
   if(!isStandalone()) {
     //need to detach from other geometries that might be sharing this appearance
     RobotWorld& world=*worlds[this->world]->world;
-    GetManagedGeometry(world,id).SetUniqueAppearance();
-    app = GetManagedGeometry(world,id).Appearance();
+    ManagedGeometry& geom = GetManagedGeometry(world,id);
+    if(geom.IsAppearanceShared()) {
+      geom.SetUniqueAppearance();
+      app = geom.Appearance();
+    }
   }
   if(app == NULL) {
-    app = new GLDraw::GeometryAppearance(*gapp);
+    app = make_shared<GLDraw::GeometryAppearance>(*gapp);
   }
   else {
     app->CopyMaterial(*gapp);
@@ -1056,11 +1279,11 @@ void Appearance::set(const Appearance& g)
 
 void Appearance::free()
 {
-  SmartPointer<GLDraw::GeometryAppearance>* app = reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
+  shared_ptr<GLDraw::GeometryAppearance>* app = reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
 
   if(isStandalone() && *app) {
     //printf("Appearance(): Freeing standalone appearance for %p\n",this);
-    *app = NULL;
+    app->reset();
   }
   else if(*app)
     //printf("Appearance(): Releasing reference to world appearance %d %d for %p\n",world,id,this);
@@ -1068,17 +1291,20 @@ void Appearance::free()
     
   world = -1;
   id = -1;
-  *app = NULL;
+  app->reset();
 }
 
 void Appearance::setDraw(bool draw)
 {
-  SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
   if(!app) return;
   if(!isStandalone()) {
     RobotWorld& world=*worlds[this->world]->world;
-    GetManagedGeometry(world,id).SetUniqueAppearance();
-    app = GetManagedGeometry(world,id).Appearance();
+    ManagedGeometry& geom = GetManagedGeometry(world,id);
+    if(geom.IsAppearanceShared()) {
+      geom.SetUniqueAppearance();
+      app = geom.Appearance();
+    }
   }
   if(draw) {
     app->drawFaces = true;
@@ -1091,16 +1317,19 @@ void Appearance::setDraw(bool draw)
     app->drawEdges = false;
   }
 }
-void Appearance::setDraw(int primitive,bool draw)
+void Appearance::setDraw(int feature,bool draw)
 {
-  SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
   if(!app) return;
   if(!isStandalone()) {
     RobotWorld& world=*worlds[this->world]->world;
-    GetManagedGeometry(world,id).SetUniqueAppearance();
-    app = GetManagedGeometry(world,id).Appearance();
+    ManagedGeometry& geom = GetManagedGeometry(world,id);
+    if(geom.IsAppearanceShared()) {
+      geom.SetUniqueAppearance();
+      app = geom.Appearance();
+    }
   }
-  switch(primitive) {
+  switch(feature) {
   case ALL: app->drawFaces = app->drawVertices = app->drawEdges = draw; break;
   case VERTICES: app->drawVertices = draw; break;
   case EDGES: app->drawEdges = draw; break;
@@ -1110,16 +1339,16 @@ void Appearance::setDraw(int primitive,bool draw)
 
 bool Appearance::getDraw()
 {
-  SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
   if(!app) return false;
   return app->drawFaces || app->drawVertices || app->drawEdges;
 }
 
-bool Appearance::getDraw(int primitive)
+bool Appearance::getDraw(int feature)
 {
-  SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
   if(!app) return false;
-  switch(primitive) {
+  switch(feature) {
   case ALL: return app->drawFaces || app->drawVertices || app->drawEdges;
   case VERTICES: return app->drawVertices;
   case EDGES: return app->drawEdges;
@@ -1130,26 +1359,33 @@ bool Appearance::getDraw(int primitive)
 
 void Appearance::setColor(float r,float g,float b,float a)
 {
-  SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
   if(!app) return;
   if(!isStandalone()) {
     RobotWorld& world=*worlds[this->world]->world;
-    GetManagedGeometry(world,id).SetUniqueAppearance();
-    app = GetManagedGeometry(world,id).Appearance();
+    ManagedGeometry& geom = GetManagedGeometry(world,id);
+    if(geom.IsAppearanceShared()) {
+      geom.SetUniqueAppearance();
+      app = geom.Appearance();
+    }
+
   }
   app->SetColor(r,g,b,a);
 }
 
-void Appearance::setColor(int primitive,float r,float g,float b,float a)
+void Appearance::setColor(int feature,float r,float g,float b,float a)
 {
-  SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
   if(!app) return;
   if(!isStandalone()) {
     RobotWorld& world=*worlds[this->world]->world;
-    GetManagedGeometry(world,id).SetUniqueAppearance();
-    app = GetManagedGeometry(world,id).Appearance();
+    ManagedGeometry& geom = GetManagedGeometry(world,id);
+    if(geom.IsAppearanceShared()) {
+      geom.SetUniqueAppearance();
+      app = geom.Appearance();
+    }
   }
-  switch(primitive) {
+  switch(feature) {
   case ALL:
     app->SetColor(r,g,b,a);
     break;
@@ -1175,16 +1411,16 @@ void Appearance::setColor(int primitive,float r,float g,float b,float a)
 
 void Appearance::getColor(float out[4])
 {
-  SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
   if(!app) throw PyException("Invalid appearance");
   for(int i=0;i<4;i++) out[i] = app->faceColor.rgba[i];
 }
-void Appearance::getColor(int primitive,float out[4])
+void Appearance::getColor(int feature,float out[4])
 {
-  SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
   if(!app) throw PyException("Invalid appearance");
   GLDraw::GLColor c;
-  switch(primitive) {
+  switch(feature) {
   case ALL:
   case FACES:
     c = app->faceColor;
@@ -1196,44 +1432,148 @@ void Appearance::getColor(int primitive,float out[4])
     c = app->edgeColor;
     break;
   default:
-    throw PyException("Invalid primitive");
+    throw PyException("Invalid feature");
   }
   for(int i=0;i<4;i++) out[i] = c.rgba[i];
 }
-void Appearance::setColors(int primitive,const std::vector<float>& colors,bool alpha)
+void Appearance::setColors(int feature,const std::vector<float>& colors,bool alpha)
 {
-  FatalError("Not implemented yet");
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) throw PyException("Invalid appearance");
+  size_t nchannels = 3;
+  if(alpha) nchannels = 4;
+  if(colors.size()%nchannels != 0) 
+    throw PyException("An invalid number of color channels is specified, must be a multiple of 3 or 4 (depending on value of alpha)");
+  size_t n = colors.size()/nchannels;
+  switch(feature) {
+  case VERTICES:
+    {
+      printf("SetColors VERTICES %d %d\n",(int)n,(int)nchannels);
+      app->vertexColors.resize(n,app->vertexColor);
+      for(size_t i=0;i<n;i++) {
+        for(size_t k=0;k<nchannels;k++)
+          app->vertexColors[i].rgba[k] = colors[i*nchannels+k];
+      }
+      printf("%f %f %f\n",app->vertexColors[100].rgba[0],app->vertexColors[100].rgba[1],app->vertexColors[100].rgba[2]);
+    }
+    break;
+  case FACES:
+    {
+      app->faceColors.resize(n,app->faceColor);
+      for(size_t i=0;i<n;i++) {
+        for(size_t k=0;k<nchannels;k++)
+          app->faceColors[i].rgba[k] = colors[i*nchannels+k];
+      }
+    }
+    break;
+  default:
+    throw PyException("Invalid feature, can only do per-element colors for VERTICES or FACES");
+  }
+}
+void Appearance::setElementColor(int feature,int element,float r,float g,float b,float a)
+{
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) throw PyException("Invalid appearance");
+  switch(feature) {
+  case VERTICES:
+    {
+      if(element >= app->vertexColors.size()) {
+        if(app->geom == NULL) {
+          app->vertexColors.resize(element+1,app->vertexColor);
+        }
+        else if(app->vertexColors.empty()) {
+          throw PyException("TODO: resize vertex colors to geometry size");
+        }
+        else {
+          throw PyException("Invalid element specified"); 
+        }
+      }
+      app->vertexColors[element].set(r,g,b,a);
+    }
+    break;
+  case FACES:
+    {
+      if(element >= app->faceColors.size()) {
+        if(app->geom == NULL) {
+          app->faceColors.resize(element+1,app->faceColor);
+        }
+        else if(app->faceColors.empty()) {
+          throw PyException("TODO: resize face colors to geometry size");
+        }
+        else {
+          throw PyException("Invalid element specified"); 
+        }
+      }
+      app->faceColors[element].set(r,g,b,a);
+    }
+    break;
+  default:
+    throw PyException("Invalid feature, can only do per-element colors for VERTICES or FACES");
+  }
+}
+
+void Appearance::getElementColor(int feature,int element,float out[4])
+{
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) throw PyException("Invalid appearance");
+  switch(feature) {
+  case VERTICES:
+    {
+      if(app->vertexColors.empty())
+        for(int i=0;i<4;i++) out[i] = app->vertexColor.rgba[i];
+      else {
+        if(element < 0 || element >= (int)app->vertexColors.size()) throw PyException("Invalid element specified");
+        for(int i=0;i<4;i++) out[i] = app->vertexColors[element].rgba[i];
+      }
+    }
+    break;
+  case FACES:
+    {
+      if(app->faceColors.empty())
+        for(int i=0;i<4;i++) out[i] = app->faceColor.rgba[i];
+      else {
+        if(element < 0 || element >= (int)app->faceColors.size()) throw PyException("Invalid element specified");
+        for(int i=0;i<4;i++) out[i] = app->faceColors[element].rgba[i];
+      }
+    }
+    break;
+  default:
+    throw PyException("Invalid feature, can only do per-element colors for VERTICES or FACES");
+  }
 }
 void Appearance::setTexture1D(int w,const char* format,const std::vector<unsigned char>& bytes)
 {
-  FatalError("Not implemented yet");
+  throw PyException("Python API for textures not implemented yet");
 }
 
 void Appearance::setTexture2D(int w,int h,const char* format,const std::vector<unsigned char>& bytes)
 {
-  FatalError("Not implemented yet");
+ throw PyException("Python API for textures not implemented yet");
 }
 
 void Appearance::setTexcoords(const std::vector<double>& uvs)
 {
-  FatalError("Not implemented yet");
+  throw PyException("Python API for textures not implemented yet");
 }
 
 void Appearance::setPointSize(float size)
 {
-  SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
   if(!app) return;
   if(!isStandalone()) {
     RobotWorld& world=*worlds[this->world]->world;
-    GetManagedGeometry(world,id).SetUniqueAppearance();
-    app = GetManagedGeometry(world,id).Appearance();
+    ManagedGeometry& geom = GetManagedGeometry(world,id);
+    if(geom.IsAppearanceShared()) {
+      geom.SetUniqueAppearance();
+      app = geom.Appearance();
+    }
   }
   app->vertexSize = size;
 }
 
 void Appearance::drawGL()
 {
-  SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
   if(!app) return;
   if(!app->geom) return;
   app->DrawGL();
@@ -1241,14 +1581,14 @@ void Appearance::drawGL()
 
 void Appearance::drawWorldGL(Geometry3D& g)
 {
-  SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
-  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(g.geomPtr);
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(g.geomPtr);
   if(!geom) return;
   if(!app) {
-    app = new GLDraw::GeometryAppearance();
+    app = make_shared<GLDraw::GeometryAppearance>();
   }
   if(app->geom) {
-    if(app->geom != geom) {
+    if(app->geom != geom.get()) {
       fprintf(stderr,"Appearance::drawGL(): performance warning, setting to a different geometry\n");
       app->Set(*geom);
     }
@@ -1265,14 +1605,14 @@ void Appearance::drawWorldGL(Geometry3D& g)
 
 void Appearance::drawGL(Geometry3D& g)
 {
-  SmartPointer<GLDraw::GeometryAppearance>& app = *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(appearancePtr);
-  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(g.geomPtr);
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(g.geomPtr);
   if(!geom) return;
   if(!app) {
-    app = new GLDraw::GeometryAppearance();
+    app = make_shared<GLDraw::GeometryAppearance>();
   }
   if(app->geom) {
-    if(app->geom != geom) {
+    if(app->geom != geom.get()) {
       fprintf(stderr,"Appearance::drawGL(): performance warning, setting to a different geometry\n");
       app->Set(*geom);
     }
@@ -1559,6 +1899,57 @@ void PointCloud::transform(const double R[9],const double t[3])
 }
 
 
+void VolumeGrid::setBounds(const double bmin[3],const double bmax[3])
+{
+  bbox.resize(6);
+  bbox[0] = bmin[0];
+  bbox[1] = bmin[1];
+  bbox[2] = bmin[2];
+  bbox[3] = bmax[0];
+  bbox[4] = bmax[1];
+  bbox[5] = bmax[2];
+}
+
+void VolumeGrid::resize(int sx,int sy,int sz)
+{
+  Assert(sx >= 0 && sy >= 0 && sz >= 0);
+  dims.resize(3);
+  dims[0] = sx;
+  dims[1] = sy;
+  dims[2] = sz;
+  values.resize(sx*sy*sz);
+}
+
+void VolumeGrid::set(double value)
+{
+  std::fill(values.begin(),values.end(),value);
+}
+
+void VolumeGrid::set(int i,int j,int k,double value)
+{
+  if(dims.empty()) throw PyException("VolumeGrid was not initialized yet");
+  if(i < 0 || i >= (int)dims[0]) throw PyException("First index out of range");
+  if(j < 0 || j >= (int)dims[1]) throw PyException("Second index out of range");
+  if(k < 0 || k >= (int)dims[2]) throw PyException("Third index out of range");
+  int ind = i*dims[1]*dims[2] + j*dims[2] + k;
+  values[ind] = value;
+}
+
+double VolumeGrid::get(int i,int j,int k)
+{
+  if(dims.empty()) throw PyException("VolumeGrid was not initialized yet");
+  if(i < 0 || i >= (int)dims[0]) throw PyException("First index out of range");
+  if(j < 0 || j >= (int)dims[1]) throw PyException("Second index out of range");
+  if(k < 0 || k >= (int)dims[2]) throw PyException("Third index out of range");
+  int ind = i*dims[1]*dims[2] + j*dims[2] + k;
+  return values[ind];
+}
+
+void VolumeGrid::shift(double dv)
+{
+  for(vector<double>::iterator i=values.begin();i!=values.end();i++)
+    *i += dv;
+}
 
 
 
@@ -1587,6 +1978,16 @@ WorldModel::WorldModel(int _index)
   refWorld(index);
 }
 */
+
+WorldModel::WorldModel(const char* fn)
+{
+  index = createWorld();
+  if(!loadFile(fn)) {
+    stringstream ss;
+    ss << "Error loading world XML file " << fn;
+    throw PyException(ss.str().c_str());
+  }
+}
 
 WorldModel::WorldModel(const WorldModel& w)
 {
@@ -1617,16 +2018,16 @@ WorldModel WorldModel::copy()
   otherworld = myworld;
   //world occupants -- copy everything but geometry
   for(size_t i=0;i<otherworld.robots.size();i++) {
-    otherworld.robots[i] = new Robot;
+    otherworld.robots[i] = make_shared<Robot>();
     *otherworld.robots[i] = *myworld.robots[i];
-    otherworld.robotViews[i].robot = otherworld.robots[i];
+    otherworld.robotViews[i].robot = otherworld.robots[i].get();
   }
   for(size_t i=0;i<otherworld.terrains.size();i++) {
-    otherworld.terrains[i] = new Terrain;
+    otherworld.terrains[i] = make_shared<Terrain>();
     *otherworld.terrains[i] = *myworld.terrains[i];
   }
   for(size_t i=0;i<otherworld.rigidObjects.size();i++) {
-    otherworld.rigidObjects[i] = new RigidObject;
+    otherworld.rigidObjects[i] = make_shared<RigidObject>();
     *otherworld.rigidObjects[i] = *myworld.rigidObjects[i];
   }
   return res;
@@ -1757,7 +2158,7 @@ RobotModel WorldModel::robot(int robot)
   RobotModel r;
   r.world = index;
   r.index = robot;
-  r.robot = worlds[index]->world->robots[robot];
+  r.robot = worlds[index]->world->robots[robot].get();
   return r;
 }
 
@@ -1769,7 +2170,7 @@ RobotModel WorldModel::robot(const char* robot)
   for(size_t i=0;i<world.robots.size();i++)
     if(world.robots[i]->name == robot) {
       r.index = (int)i;
-      r.robot = world.robots[i];
+      r.robot = world.robots[i].get();
       return r;
     }
   throw PyException("Invalid robot name");
@@ -1783,7 +2184,7 @@ RobotModelLink WorldModel::robotLink(int robot,int link)
   RobotModelLink r;
   r.world = index;
   r.robotIndex = robot;
-  r.robotPtr = worlds[index]->world->robots[robot];
+  r.robotPtr = worlds[index]->world->robots[robot].get();
   r.index = link;
   return r;
 }
@@ -1814,7 +2215,7 @@ RigidObjectModel WorldModel::rigidObject(int object)
   RigidObjectModel obj;
   obj.world = index;
   obj.index = object;
-  obj.object = worlds[index]->world->rigidObjects[object];
+  obj.object = worlds[index]->world->rigidObjects[object].get();
   return obj;
 }
 
@@ -1826,7 +2227,7 @@ RigidObjectModel WorldModel::rigidObject(const char* object)
   for(size_t i=0;i<world.rigidObjects.size();i++)
     if(world.rigidObjects[i]->name == object) {
       obj.index = (int)i;
-      obj.object = world.rigidObjects[i];
+      obj.object = world.rigidObjects[i].get();
       return obj;
     }
   throw PyException("Invalid rigid object name");
@@ -1841,7 +2242,7 @@ TerrainModel WorldModel::terrain(int terrain)
   TerrainModel t;
   t.world = index;
   t.index = terrain;
-  t.terrain = worlds[index]->world->terrains[terrain];
+  t.terrain = worlds[index]->world->terrains[terrain].get();
   return t;
 }
 
@@ -1853,7 +2254,7 @@ TerrainModel WorldModel::terrain(const char* terrain)
   for(size_t i=0;i<world.terrains.size();i++)
     if(world.terrains[i]->name == terrain) {
       t.index = (int)i;
-      t.terrain = world.terrains[i];
+      t.terrain = world.terrains[i].get();
       return t;
     }
   return t;
@@ -1866,7 +2267,7 @@ RobotModel WorldModel::makeRobot(const char* name)
   robot.world = index;
   robot.index = (int)world.robots.size();
   world.AddRobot(name,new Robot());
-  robot.robot = world.robots.back();
+  robot.robot = world.robots.back().get();
   return robot;
 }
 
@@ -1877,7 +2278,7 @@ RigidObjectModel WorldModel::makeRigidObject(const char* name)
   object.world = index;
   object.index = (int)world.rigidObjects.size();
   world.AddRigidObject(name,new RigidObject());
-  object.object = world.rigidObjects.back();
+  object.object = world.rigidObjects.back().get();
   object.object->geometry.CreateEmpty();
   return object;
 }
@@ -1889,7 +2290,7 @@ TerrainModel WorldModel::makeTerrain(const char* name)
   terrain.world = index;
   terrain.index = world.terrains.size();
   world.AddTerrain(name,new Terrain());
-  terrain.terrain = world.terrains.back();
+  terrain.terrain = world.terrains.back().get();
   terrain.terrain->geometry.CreateEmpty();
   return terrain;
 }
@@ -1902,7 +2303,7 @@ RobotModel WorldModel::loadRobot(const char* fn)
   RobotModel robot;
   robot.world = index;
   robot.index = oindex;
-  robot.robot = world.robots.back();
+  robot.robot = world.robots.back().get();
   if(gEnableCollisionInitialization) 
     world.robots.back()->InitCollisions();
   world.robots.back()->UpdateGeometry();
@@ -1917,7 +2318,7 @@ RigidObjectModel WorldModel::loadRigidObject(const char* fn)
   RigidObjectModel obj;
   obj.world = index;
   obj.index = oindex;
-  obj.object = world.rigidObjects.back();
+  obj.object = world.rigidObjects.back().get();
   if(gEnableCollisionInitialization) 
     world.rigidObjects.back()->InitCollisions();
   world.rigidObjects.back()->UpdateGeometry();
@@ -1932,7 +2333,7 @@ TerrainModel WorldModel::loadTerrain(const char* fn)
   TerrainModel obj;
   obj.world = index;
   obj.index = oindex;
-  obj.terrain = world.terrains.back();
+  obj.terrain = world.terrains.back().get();
   if(gEnableCollisionInitialization) world.terrains.back()->InitCollisions();
   return obj;
 }
@@ -2033,7 +2434,7 @@ Geometry3D WorldModel::geometry(int id)
     Geometry3D geom;
     geom.world = index;
     geom.id = id;
-    *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(geom.geomPtr) = world.GetGeometry(id);
+    *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geom.geomPtr) = world.GetGeometry(id);
     return geom;
   }
   Geometry3D geom;
@@ -2049,7 +2450,7 @@ Appearance WorldModel::appearance(int id)
     Appearance geom;
     geom.world = index;
     geom.id = id;
-    *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(geom.appearancePtr) = world.GetAppearance(id);
+    *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(geom.appearancePtr) = world.GetAppearance(id);
     return geom;
   }
   Appearance geom;
@@ -2142,7 +2543,7 @@ Geometry3D RobotModelLink::geometry()
   res.world = world;
   res.id = getID();
   assert(res.id >= 0);
-  *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(res.geomPtr) = worlds[world]->world->GetGeometry(res.id); 
+  *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(res.geomPtr) = worlds[world]->world->GetGeometry(res.id); 
   return res;
 }
 
@@ -2152,7 +2553,7 @@ Appearance RobotModelLink::appearance()
   res.world = world;
   res.id = getID();
   assert(res.id >= 0);
-  *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(res.appearancePtr) = worlds[world]->world->GetAppearance(res.id);
+  *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(res.appearancePtr) = worlds[world]->world->GetAppearance(res.id);
   return res;
 }
 
@@ -2733,7 +3134,7 @@ double RobotModel::distance(const std::vector<double>& a,const std::vector<doubl
   if(robot->links.size() != b.size()) 
     throw PyException("Invalid size of configuration");
   Vector va(a),vb(b);
-  return Distance(*robot,va,vb,Inf);
+  return Distance(*robot,va,vb,2);
 }
 
 void RobotModel::interpolateDeriv(const std::vector<double>& a,const std::vector<double>& b,std::vector<double>& dout)
@@ -2946,7 +3347,7 @@ Geometry3D RigidObjectModel::geometry()
   res.world = world;
   res.id = getID();
   assert(res.id >= 0);
-  *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(res.geomPtr) = worlds[world]->world->GetGeometry(res.id); 
+  *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(res.geomPtr) = worlds[world]->world->GetGeometry(res.id); 
   return res;
 }
 
@@ -2956,7 +3357,7 @@ Appearance RigidObjectModel::appearance()
   res.world = world;
   res.id = getID();
   assert(res.id >= 0);
-  *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(res.appearancePtr) = worlds[world]->world->GetAppearance(res.id);
+  *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(res.appearancePtr) = worlds[world]->world->GetAppearance(res.id);
   return res;
 }
 
@@ -3109,7 +3510,7 @@ Geometry3D TerrainModel::geometry()
   res.world = world;
   res.id = getID();
   assert(res.id >= 0);
-  *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(res.geomPtr) = worlds[world]->world->GetGeometry(res.id); 
+  *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(res.geomPtr) = worlds[world]->world->GetGeometry(res.id); 
   return res;
 }
 
@@ -3120,7 +3521,7 @@ Appearance TerrainModel::appearance()
   res.world = world;
   res.id = getID();
   assert(res.id >= 0);
-  *reinterpret_cast<SmartPointer<GLDraw::GeometryAppearance>*>(res.appearancePtr) = worlds[world]->world->GetAppearance(res.id);
+  *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(res.appearancePtr) = worlds[world]->world->GetAppearance(res.id);
   return res;
 }
 
@@ -3175,7 +3576,7 @@ Simulator::Simulator(const WorldModel& model)
   //setup controllers
   sim->robotControllers.resize(rworld.robots.size());
   for(size_t i=0;i<sim->robotControllers.size();i++) {
-    Robot* robot=rworld.robots[i];
+    Robot* robot=rworld.robots[i].get();
     sim->SetController(i,MakeController(robot));
 
     sim->controlSimulators[i].sensors.MakeDefault(robot);
@@ -3539,7 +3940,7 @@ bool SimBody::isDynamicsEnabled()
 void SimBody::applyWrench(const double f[3],const double t[3])
 {
   if(!body) return;
-  sim->sim->hooks.push_back(new WrenchHook(body,Vector3(f),Vector3(t)));
+  sim->sim->hooks.push_back(make_shared<WrenchHook>(body,Vector3(f),Vector3(t)));
   sim->sim->hooks.back()->autokill = true;
   //dBodyAddForce(body,f[0],f[1],f[2]);
   //dBodyAddTorque(body,t[0],t[1],t[2]);
@@ -3548,7 +3949,7 @@ void SimBody::applyWrench(const double f[3],const double t[3])
 void SimBody::applyForceAtPoint(const double f[3],const double pworld[3])
 {
   if(!body) return;
-  sim->sim->hooks.push_back(new ForceHook(body,Vector3(pworld),Vector3(f)));
+  sim->sim->hooks.push_back(make_shared<ForceHook>(body,Vector3(pworld),Vector3(f)));
   sim->sim->hooks.back()->autokill = true;
   //dBodyAddForceAtPos(body,f[0],f[1],f[2],pworld[0],pworld[1],pworld[2]);
 }
@@ -3556,7 +3957,7 @@ void SimBody::applyForceAtPoint(const double f[3],const double pworld[3])
 void SimBody::applyForceAtLocalPoint(const double f[3],const double plocal[3])
 {
   if(!body) return;
-  sim->sim->hooks.push_back(new LocalForceHook(body,Vector3(plocal),Vector3(f)));
+  sim->sim->hooks.push_back(make_shared<LocalForceHook>(body,Vector3(plocal),Vector3(f)));
   sim->sim->hooks.back()->autokill = true;
   //dBodyAddForceAtRelPos(body,f[0],f[1],f[2],plocal[0],plocal[1],plocal[2]);
 }
@@ -3867,17 +4268,17 @@ SimRobotSensor SimRobotController::sensor(int sensorIndex)
   RobotSensors& sensors = controller->sensors;
   if(sensorIndex < 0 || sensorIndex >= (int)sensors.sensors.size())
     return SimRobotSensor(NULL,NULL);
-  return SimRobotSensor(controller->robot,sensors.sensors[sensorIndex]);
+  return SimRobotSensor(controller->robot,sensors.sensors[sensorIndex].get());
 }
 
 SimRobotSensor SimRobotController::sensor(const char* name)
 {
   RobotSensors& sensors = controller->sensors;
-  SmartPointer<SensorBase> sensor = sensors.GetNamedSensor(name);
+  shared_ptr<SensorBase> sensor = sensors.GetNamedSensor(name);
   if(sensor==NULL) {
     fprintf(stderr,"Warning, sensor %s does not exist\n",name);
   }
-  return SimRobotSensor(controller->robot,sensor);
+  return SimRobotSensor(controller->robot,sensor.get());
 }
 
 std::vector<std::string> SimRobotController::commands()
@@ -3887,7 +4288,7 @@ std::vector<std::string> SimRobotController::commands()
 
 void SimRobotController::setManualMode(bool enabled)
 {
-  RobotController* c=sim->sim->robotControllers[index];
+  RobotController* c=sim->sim->robotControllers[index].get();
   MyController* mc=reinterpret_cast<MyController*>(c);
   if(mc)
     mc->override = enabled;
@@ -3969,7 +4370,7 @@ void SimRobotController::setMilestone(const vector<double>& q)
   if(controller->robot->links.size() != q.size()) {
     throw PyException("Invalid size of configuration");
   }
-  EnablePathControl(sim->sim->robotControllers[index]);
+  EnablePathControl(sim->sim->robotControllers[index].get());
   Config qv(controller->robot->links.size(),&q[0]);
   stringstream ss;
   ss<<qv;
@@ -3984,7 +4385,7 @@ void SimRobotController::setMilestone(const vector<double>& q,const vector<doubl
   if(controller->robot->links.size() != dq.size()) {
     throw PyException("Invalid size of velocity");
   }
-  EnablePathControl(sim->sim->robotControllers[index]);
+  EnablePathControl(sim->sim->robotControllers[index].get());
   Config qv(controller->robot->links.size(),&q[0]);
   Config dqv(controller->robot->links.size(),&dq[0]);
   stringstream ss;
@@ -3997,7 +4398,7 @@ void SimRobotController::addMilestone(const vector<double>& q)
   if(controller->robot->links.size() != q.size()) {
     throw PyException("Invalid size of configuration");
   }
-  EnablePathControl(sim->sim->robotControllers[index]);
+  EnablePathControl(sim->sim->robotControllers[index].get());
   Config qv(controller->robot->links.size(),&q[0]);
   stringstream ss;
   ss<<qv;
@@ -4009,7 +4410,7 @@ void SimRobotController::addMilestoneLinear(const vector<double>& q)
   if(controller->robot->links.size() != q.size()) {
     throw PyException("Invalid size of configuration");
   }
-  EnablePathControl(sim->sim->robotControllers[index]);
+  EnablePathControl(sim->sim->robotControllers[index].get());
   Config qv(controller->robot->links.size(),&q[0]);
   stringstream ss;
   ss<<qv;
@@ -4021,7 +4422,7 @@ void SimRobotController::setLinear(const std::vector<double>& q,double dt)
   if(controller->robot->links.size() != q.size()) {
     throw PyException("Invalid size of configuration");
   }
-  EnablePathControl(sim->sim->robotControllers[index]);
+  EnablePathControl(sim->sim->robotControllers[index].get());
   PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
   mq->Cut(0);
   mq->AppendLinear(q,dt);
@@ -4034,7 +4435,7 @@ void SimRobotController::setCubic(const std::vector<double>& q,const std::vector
   if(controller->robot->links.size() != v.size()) {
     throw PyException("Invalid size of velocity");
   }
-  EnablePathControl(sim->sim->robotControllers[index]);
+  EnablePathControl(sim->sim->robotControllers[index].get());
   PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
   mq->Cut(0);
   mq->AppendCubic(q,v,dt);
@@ -4044,7 +4445,7 @@ void SimRobotController::addLinear(const std::vector<double>& q,double dt)
   if(controller->robot->links.size() != q.size()) {
     throw PyException("Invalid size of configuration");
   }
-  EnablePathControl(sim->sim->robotControllers[index]);
+  EnablePathControl(sim->sim->robotControllers[index].get());
   PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
   mq->AppendLinear(q,dt);
 }
@@ -4057,7 +4458,7 @@ void SimRobotController::addCubic(const std::vector<double>& q,const std::vector
   if(controller->robot->links.size() != v.size()) {
     throw PyException("Invalid size of velocity");
   }
-  EnablePathControl(sim->sim->robotControllers[index]);
+  EnablePathControl(sim->sim->robotControllers[index].get());
   PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
   mq->AppendCubic(q,v,dt);
 }
@@ -4070,7 +4471,7 @@ void SimRobotController::addMilestone(const vector<double>& q,const vector<doubl
   if(controller->robot->links.size() != dq.size()) {
     throw PyException("Invalid size of velocity");
   }
-  EnablePathControl(sim->sim->robotControllers[index]);
+  EnablePathControl(sim->sim->robotControllers[index].get());
   Config qv(controller->robot->links.size(),&q[0]);
   Config dqv(controller->robot->links.size(),&dq[0]);
   stringstream ss;
@@ -4083,7 +4484,7 @@ void SimRobotController::setVelocity(const vector<double>& dq,double dt)
   if(controller->robot->links.size() != dq.size()) {
     throw PyException("Invalid size of velocity");
   }
-  EnablePathControl(sim->sim->robotControllers[index]);
+  EnablePathControl(sim->sim->robotControllers[index].get());
   Config qv(controller->robot->links.size(),&dq[0]);
   stringstream ss;
   ss<<dt<<"\t"<<qv;
@@ -4106,7 +4507,7 @@ void SimRobotController::setTorque(const std::vector<double>& t)
   for(size_t i=0;i<command.actuators.size();i++) {
     command.actuators[i].SetTorque(t[i]);
   }
-  RobotController* c=sim->sim->robotControllers[index];
+  RobotController* c=sim->sim->robotControllers[index].get();
   MyController* mc=dynamic_cast<MyController*>(c);
   if(!mc) {
     throw PyException("Not using the default manual override controller");
@@ -4134,7 +4535,7 @@ void SimRobotController::setPIDCommand(const std::vector<double>& qdes,const std
       command.actuators[i].SetPID(qdes[i],dqdes[i],command.actuators[i].iterm);
     }
   }
-  RobotController* c=sim->sim->robotControllers[index];
+  RobotController* c=sim->sim->robotControllers[index].get();
   MyController* mc=dynamic_cast<MyController*>(c);
   if(!mc) {
     throw PyException("Not using the default manual override controller");
@@ -4351,44 +4752,46 @@ bool Widget::hasFocus()
 WidgetSet::WidgetSet()
   :Widget()
 {
-  widgets[index].widget = new GLDraw::WidgetSet;
+  widgets[index].widget = make_shared<GLDraw::WidgetSet>();
 }
 
 void WidgetSet::add(const Widget& subwidget)
 {
-  GLDraw::WidgetSet* ws=dynamic_cast<GLDraw::WidgetSet*>(&*widgets[index].widget);
-  ws->widgets.push_back(widgets[subwidget.index].widget);
+  GLDraw::WidgetSet* ws=dynamic_cast<GLDraw::WidgetSet*>(widgets[index].widget.get());
+  ws->widgets.push_back(widgets[subwidget.index].widget.get());
   ws->widgetEnabled.push_back(true);
   refWidget(subwidget.index);
 }
 void WidgetSet::remove(const Widget& subwidget)
 {
-  GLDraw::WidgetSet* ws=dynamic_cast<GLDraw::WidgetSet*>(&*widgets[index].widget);
+  GLDraw::WidgetSet* ws=dynamic_cast<GLDraw::WidgetSet*>(widgets[index].widget.get());
+  GLDraw::Widget* subwidget_ptr = widgets[subwidget.index].widget.get();
   for(size_t i=0;i<ws->widgets.size();i++)
-    if(ws->widgets[i] == widgets[subwidget.index].widget) {
+    if(ws->widgets[i] == subwidget_ptr) {
       //delete it
       ws->widgets.erase(ws->widgets.begin()+i);
       ws->widgetEnabled.erase(ws->widgetEnabled.begin()+i);
-      if(ws->activeWidget == widgets[subwidget.index].widget)
-	ws->activeWidget = NULL;
-      if(ws->closestWidget == widgets[subwidget.index].widget)
-	ws->closestWidget = NULL;
+      if(ws->activeWidget == subwidget_ptr)
+        ws->activeWidget = NULL;
+      if(ws->closestWidget == subwidget_ptr)
+        ws->closestWidget = NULL;
       derefWidget(subwidget.index);
       if(widgets[subwidget.index].widget == NULL) 
-	return;
+        return;
       i--;
     }
 }
 
 void WidgetSet::enable(const Widget& subwidget,bool enabled)
 {
-  GLDraw::WidgetSet* ws=dynamic_cast<GLDraw::WidgetSet*>(&*widgets[index].widget);
+  GLDraw::WidgetSet* ws=dynamic_cast<GLDraw::WidgetSet*>(widgets[index].widget.get());
+  GLDraw::Widget* subwidget_ptr = widgets[subwidget.index].widget.get();
   for(size_t i=0;i<ws->widgets.size();i++)
-    if(ws->widgets[i] == widgets[subwidget.index].widget) {
-      if(ws->activeWidget == widgets[subwidget.index].widget)
-	ws->activeWidget = NULL;
-      if(ws->closestWidget == widgets[subwidget.index].widget)
-	ws->closestWidget = NULL;
+    if(ws->widgets[i] == subwidget_ptr) {
+      if(ws->activeWidget == subwidget_ptr)
+        ws->activeWidget = NULL;
+      if(ws->closestWidget == subwidget_ptr)
+        ws->closestWidget = NULL;
       ws->widgetEnabled[i] = enabled;
     }
 }
@@ -4396,27 +4799,27 @@ void WidgetSet::enable(const Widget& subwidget,bool enabled)
 PointPoser::PointPoser()
   :Widget()
 {
-  widgets[index].widget = new GLDraw::TransformWidget;
-  GLDraw::TransformWidget* tw=dynamic_cast<GLDraw::TransformWidget*>(&*widgets[index].widget);
+  widgets[index].widget = make_shared<GLDraw::TransformWidget>();
+  GLDraw::TransformWidget* tw=dynamic_cast<GLDraw::TransformWidget*>(widgets[index].widget.get());
   tw->enableRotation = false;
 }
 
 void PointPoser::set(const double t[3])
 {
-  GLDraw::TransformWidget* tw=dynamic_cast<GLDraw::TransformWidget*>(&*widgets[index].widget);
+  GLDraw::TransformWidget* tw=dynamic_cast<GLDraw::TransformWidget*>(widgets[index].widget.get());
   tw->T.t.set(t);
 }
 
 void PointPoser::get(double out[3])
 {
-  GLDraw::TransformWidget* tw=dynamic_cast<GLDraw::TransformWidget*>(&*widgets[index].widget);
+  GLDraw::TransformWidget* tw=dynamic_cast<GLDraw::TransformWidget*>(widgets[index].widget.get());
   tw->T.t.get(out);
 }
 
 
 void PointPoser::setAxes(const double R[9])
 {
-  GLDraw::TransformWidget* tw=dynamic_cast<GLDraw::TransformWidget*>(&*widgets[index].widget);
+  GLDraw::TransformWidget* tw=dynamic_cast<GLDraw::TransformWidget*>(widgets[index].widget.get());
   tw->T.R.set(R);
 }
 
@@ -4424,32 +4827,32 @@ void PointPoser::setAxes(const double R[9])
 TransformPoser::TransformPoser()
   :Widget()
 {
-  widgets[index].widget = new GLDraw::TransformWidget;
+  widgets[index].widget = make_shared<GLDraw::TransformWidget>();
 }
 
 void TransformPoser::set(const double R[9],const double t[3])
 {
-  GLDraw::TransformWidget* tw=dynamic_cast<GLDraw::TransformWidget*>(&*widgets[index].widget);
+  GLDraw::TransformWidget* tw=dynamic_cast<GLDraw::TransformWidget*>(widgets[index].widget.get());
   tw->T.R.set(R);
   tw->T.t.set(t);
 }
 
 void TransformPoser::get(double out[9],double out2[3])
 {
-  GLDraw::TransformWidget* tw=dynamic_cast<GLDraw::TransformWidget*>(&*widgets[index].widget);
+  GLDraw::TransformWidget* tw=dynamic_cast<GLDraw::TransformWidget*>(widgets[index].widget.get());
   tw->T.R.get(out);
   tw->T.t.get(out2);
 }
 
 void TransformPoser::enableTranslation(bool enable)
 {
-  GLDraw::TransformWidget* tw=dynamic_cast<GLDraw::TransformWidget*>(&*widgets[index].widget);
+  GLDraw::TransformWidget* tw=dynamic_cast<GLDraw::TransformWidget*>(widgets[index].widget.get());
   tw->enableTranslation = enable;
 }
 
 void TransformPoser::enableRotation(bool enable)
 {
-  GLDraw::TransformWidget* tw=dynamic_cast<GLDraw::TransformWidget*>(&*widgets[index].widget);
+  GLDraw::TransformWidget* tw=dynamic_cast<GLDraw::TransformWidget*>(widgets[index].widget.get());
   tw->enableRotation = enable;
 }
 
@@ -4457,13 +4860,13 @@ ObjectPoser::ObjectPoser(RigidObjectModel& object)
   :Widget()
 {
   RobotWorld& world = *worlds[object.world]->world;
-  RigidObject* obj = world.rigidObjects[object.index];
-  widgets[index].widget = new RigidObjectPoseWidget(obj);
+  RigidObject* obj = world.rigidObjects[object.index].get();
+  widgets[index].widget = make_shared<RigidObjectPoseWidget>(obj);
 }
 
 void ObjectPoser::set(const double R[9],const double t[3])
 {
-  RigidObjectPoseWidget* tw=dynamic_cast<RigidObjectPoseWidget*>(&*widgets[index].widget);
+  RigidObjectPoseWidget* tw=dynamic_cast<RigidObjectPoseWidget*>(widgets[index].widget.get());
   RigidTransform T;
   T.R.set(R);
   T.t.set(t);
@@ -4472,7 +4875,7 @@ void ObjectPoser::set(const double R[9],const double t[3])
 
 void ObjectPoser::get(double out[9],double out2[3])
 {
-  RigidObjectPoseWidget* tw=dynamic_cast<RigidObjectPoseWidget*>(&*widgets[index].widget);
+  RigidObjectPoseWidget* tw=dynamic_cast<RigidObjectPoseWidget*>(widgets[index].widget.get());
   RigidTransform T = tw->Pose();
   T.R.get(out);
   T.t.get(out2);
@@ -4483,42 +4886,42 @@ RobotPoser::RobotPoser(RobotModel& robot)
   Assert(worlds[robot.world]->world != NULL);
   RobotWorld& world = *worlds[robot.world]->world;
   Assert(robot.index >= 0 && robot.index < world.robots.size());
-  Robot* rob = world.robots[robot.index];
+  Robot* rob = world.robots[robot.index].get();
   ViewRobot* view = &world.robotViews[robot.index];
   Assert(rob != NULL);
   Assert(view != NULL);
-  widgets[index].widget = new RobotPoseWidget(rob,view);
+  widgets[index].widget = make_shared<RobotPoseWidget>(rob,view);
 }
 
 void RobotPoser::setActiveDofs(const std::vector<int>& dofs)
 {
-  RobotPoseWidget* tw=dynamic_cast<RobotPoseWidget*>(&*widgets[index].widget);
+  RobotPoseWidget* tw=dynamic_cast<RobotPoseWidget*>(widgets[index].widget.get());
   tw->SetActiveDofs(dofs);
 }
 
 void RobotPoser::set(const std::vector<double>& q)
 {
-  RobotPoseWidget* tw=dynamic_cast<RobotPoseWidget*>(&*widgets[index].widget);
+  RobotPoseWidget* tw=dynamic_cast<RobotPoseWidget*>(widgets[index].widget.get());
   tw->SetPose(Config(q));
 }
 
 void RobotPoser::get(std::vector<double>& out)
 {
-  RobotPoseWidget* tw=dynamic_cast<RobotPoseWidget*>(&*widgets[index].widget);
+  RobotPoseWidget* tw=dynamic_cast<RobotPoseWidget*>(widgets[index].widget.get());
   out.resize(tw->Pose().size());
   tw->Pose().getCopy(&out[0]);
 }
 
 void RobotPoser::getConditioned(const std::vector<double>& qref,std::vector<double>& out)
 {
-  RobotPoseWidget* tw=dynamic_cast<RobotPoseWidget*>(&*widgets[index].widget);
+  RobotPoseWidget* tw=dynamic_cast<RobotPoseWidget*>(widgets[index].widget.get());
   out.resize(tw->Pose().size());
   tw->Pose_Conditioned(Config(qref)).getCopy(&out[0]);
 }
 
 void RobotPoser::addIKConstraint(const IKObjective& obj)
 {
-  RobotPoseWidget* tw=dynamic_cast<RobotPoseWidget*>(&*widgets[index].widget);
+  RobotPoseWidget* tw=dynamic_cast<RobotPoseWidget*>(widgets[index].widget.get());
   tw->ikPoser.ClearLink(obj.goal.link);
   tw->ikPoser.Add(obj.goal);
   tw->ikPoser.Enable(&tw->ikPoser.poseWidgets.back(),false);
@@ -4526,7 +4929,7 @@ void RobotPoser::addIKConstraint(const IKObjective& obj)
 
 void RobotPoser::clearIKConstraints()
 {
-  RobotPoseWidget* tw=dynamic_cast<RobotPoseWidget*>(&*widgets[index].widget);
+  RobotPoseWidget* tw=dynamic_cast<RobotPoseWidget*>(widgets[index].widget.get());
   tw->ikPoser.poseGoals.clear();
   tw->ikPoser.poseWidgets.clear();
 }
@@ -4881,7 +5284,7 @@ PyObject* equilibriumTorques(const RobotModel& robot,const std::vector<std::vect
 
 bool SubscribeToStream(Geometry3D& g,const char* protocol,const char* name,const char* type)
 {
-  SmartPointer<AnyCollisionGeometry3D>& geom = *reinterpret_cast<SmartPointer<AnyCollisionGeometry3D>*>(g.geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(g.geomPtr);
   if(0==strcmp(protocol,"ros")) {
     if(0==strcmp(type,""))
       type = "PointCloud";
@@ -4894,18 +5297,18 @@ bool SubscribeToStream(Geometry3D& g,const char* protocol,const char* name,const
       printf("Warning, attaching to a ROS stream without a ManagedGeometry.\n");
       printf("You will not be able to automatically get updates from ROS.\n");
       if(!geom) 
-        geom = new AnyCollisionGeometry3D();
+        geom.reset(new AnyCollisionGeometry3D());
       (*geom) = AnyCollisionGeometry3D(Meshing::PointCloud3D());
       return ROSSubscribePointCloud(geom->AsPointCloud(),name);
       //TODO: update ROS, update the appearance every time the point cloud changes
     }
     else {
-      throw PyException("AttachToStream(Geometry3D): Unsupported type argument");
+      throw PyException("SubscribeToStream(Geometry3D): Unsupported type argument");
       return false;
     }
   }
   else {
-    throw PyException("AttachToStream(Geometry3D): Unsupported protocol argument");
+    throw PyException("SubscribeToStream(Geometry3D): Unsupported protocol argument");
     return false;
   }
 }

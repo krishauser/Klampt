@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<world> 
+    <!-- the robot --> 
+    <robot name="TX90L-pr2" file="../../../../Klampt-examples/data/robots/tx90pr2.rob" /> 
+    <!-- the ground plane --> 
+    <terrain file="../../../../Klampt-examples/data/terrains/block.off" /> 
+    <!-- the table --> 
+    <terrain file="../../../../Klampt-examples/data/terrains/cube.off" scale="0.05 0.05 0.6" translation="0.6 0.25 0.01"> 
+        <display color="0.4 0.3 0.2"/> 
+    </terrain> 
+    <terrain file="../../../../Klampt-examples/data/terrains/cube.off" scale="0.05 0.05 0.6" translation="0.6 -0.25 0.01"> 
+        <display color="0.4 0.3 0.2"/> 
+    </terrain> 
+    <terrain file="../../../../Klampt-examples/data/terrains/cube.off" scale="0.05 0.05 0.6" translation="1.1 0.25 0.01"> 
+        <display color="0.4 0.3 0.2"/> 
+    </terrain> 
+    <terrain file="../../../../Klampt-examples/data/terrains/cube.off" scale="0.05 0.05 0.6" translation="1.1 -0.25 0.01"> 
+        <display color="0.4 0.3 0.2"/> 
+    </terrain> 
+    <terrain file="../../../../Klampt-examples/data/terrains/cube.off" scale="0.6 0.6 0.02" translation="0.575 -0.275 0.615"> 
+        <display color="0.4 0.3 0.2"/> 
+    </terrain> 
+    <!-- a mug --> 
+    <rigidObject name="srimug" file="../../../../Klampt-examples/data/objects/srimugsmooth.obj" position="0.7 0.1 0.75" /> 
+</world>

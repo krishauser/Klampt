@@ -4,7 +4,7 @@ include(ExternalProject)
 set(PROJECTNAME tests)
 project(${PROJECTNAME})
 
-# compite GTest
+# compile GTest
 find_package(GTest)
 if (NOT GTEST_FOUND)
     set(gTestSource "/usr/src/gtest")
@@ -25,7 +25,6 @@ enable_testing()
 # gTests for Velocity constraints
 SET(TestLibs ${KLAMPT_LIBRARIES} ${GTEST_BOTH_LIBRARIES})
 
-
 ADD_EXECUTABLE(test_ODERigidObject test_ODERigidObject.cpp)
 TARGET_LINK_LIBRARIES(test_ODERigidObject ${TestLibs})
 add_dependencies(test_ODERigidObject GTest-ext Klampt python)
@@ -43,5 +42,5 @@ find_package(PythonInterp)
 if(PYTHONINTERP_FOUND)
 add_test(NAME run_python_tests
          WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-         COMMAND python -m unittest discover ${CMAKE_CURRENT_SOURCE_DIR})
+         COMMAND python -m unittest discover ${CMAKE_SOURCE_DIR})
 ENDIF(PYTHONINTERP_FOUND)
