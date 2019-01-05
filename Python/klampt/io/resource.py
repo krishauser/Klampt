@@ -428,11 +428,21 @@ class _ThumbnailPlugin(vis.VisualizationPlugin):
 def thumbnail(value,size,type='auto',world=None,frame=None):
     """Retrieves an image of the given item, resized to the given size.
 
-    Note: 
-        This can just take a snapshot of a world too.
+    Args:
+        value: a resource type.
+        size (pair of ints): the (width,height) of the thumbnail, in pixels.
+        type (str, optional): the type of value
+        world (WorldModel, optional): if given, the resource will be drawn with
+            this world in the background.  If the resource needs an associated
+            object (e.g., Config, Configs, Trajectory), the object will be drawn
+            with that given object.
+        frame (se3 element, optional): not supported yet.  Will eventually let
+            you draw Points or RigidTransforms relative to some reference
+            frame.
 
     Returns:
-        A PIL Image if PIL is available, or just a raw RGBA memory buffer otherwise.
+        (Image or bytes): A PIL Image if PIL is available, or just a raw RGBA
+            memory buffer otherwise.
 
     """
     global _thumbnail_window

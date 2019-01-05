@@ -411,13 +411,13 @@ writers = {'Config':writeVector,
 
 
 def write(obj,type):
-    """General-purpose write"""
+    """General-purpose write of an arbitrary Klampt object to a str."""
     if type not in writers:
         raise RuntimeError("Writing of objects of type "+type+" not supported")
     return writers[type](obj)
 
 def read(type,text):
-    """General-purpose read"""
+    """General-purpose read of an arbitrary Klampt object from a str."""
     if type not in readers:
         raise RuntimeError("Reading of objects of type "+type+" not supported")
     return readers[type](text)
@@ -458,7 +458,7 @@ savers = {'Trajectory':lambda x,fn:x.save(fn),
           }
 
 def save(obj,type,fn):
-    """General-purpose save"""
+    """General-purpose save of an arbitrary Klampt object to a file."""
     if type in savers:
         return savers[type](obj,fn)
     elif type in writers:
@@ -473,7 +473,7 @@ def save(obj,type,fn):
 
 
 def load(type,fn):
-    """General-purpose load"""
+    """General-purpose load of an arbitrary Klampt object from a file."""
     if type in loaders:
         return loaders[type](fn)
     elif type in readers:
@@ -487,9 +487,11 @@ def load(type,fn):
 
 
 def toJson(obj,type='auto'):
-    """Converts from a Klamp't object to a structure that can be converted
-    to a JSON string (e.g., from json.dumps()).  If 'type' is not provided,
-    this attempts  to infer the object type automatically.
+    """Converts from a Klamp't object to a JSON-compatible structure.
+    If 'type' is not provided, the type of the object is inferred
+    automatically.
+
+    The structure can be converted to a JSON string using json.dumps().
     
     Not all objects are supported yet.
     """
@@ -565,9 +567,12 @@ def toJson(obj,type='auto'):
 
 
 def fromJson(jsonobj,type='auto'):
-    """Converts from a JSON object (e.g., from json.loads()) to a Klamp't
-    object of the appropriate type.  If 'type' is not provided, this attempts
-    to infer the object type automatically."""
+    """Converts from a JSON structure to a Klamp't object of the appropriate
+    type.  If 'type' is not provided, the type of the object is inferred
+    automatically.
+
+    A JSON structure can be created from a JSON string using json.loads().
+    """
     if type == 'auto':
         if isinstance(jsonobj,(list,tuple)):
             return jsonobj
