@@ -27,7 +27,7 @@ class RigidObjectCSpace(CSpace):
                 collisions will be respected in the feasibility test.
             translationDomain (list of pairs, optional): a bounding box in
                 which the translation should be sampled.  If None (default),
-                the improper Jeffrey's prior is used to sample translations.
+                the improper logarithmic prior is used to sample translations.
             rotationDomain (pair, optional): If provided, must be a
                 (rotation0,rdomain) pair specifying a range in which the
                 rotation should be sampled. rotation0 must be an SO3 element.
