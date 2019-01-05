@@ -138,7 +138,7 @@ INSTRUCTIONS
         vis.setPlugin([desired plugin or None for visualization])
         def makeMyUI(qtglwidget):
             return MyQtMainWindow(qtglwidget)
-        vis.setCustomUI(makeMyUI)
+        vis.customUI(makeMyUI)
         vis.dialog()
         ... or 
         vis.show()
