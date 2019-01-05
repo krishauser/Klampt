@@ -1,5 +1,13 @@
 # Klamp't Manual: Paths and Trajectories
 
+* [Path and trajectory representations](#path-and-trajectory-representations)
+    + [API summary](#api-summary)
+* [Multipaths](#multipaths)
+    + [API summary](#api-summary-1)
+* [Trajectory Execution](#trajectory-execution)
+    + [Sending to a Klamp't simulated robot](#sending-to-a-klamp-t-simulated-robot)
+    + [Sending to a real robot](#sending-to-a-real-robot)
+
 Klamp't distinguishes between _paths_ and _trajectories_: paths are geometric, time-free curves, while trajectories are paths with an explicit time parameterization. Mathematically, paths are expressed as a continuous curve
 
 <center> <em> y(s):[0,1] -&gt; C </em> </center>
@@ -16,12 +24,12 @@ Classical motion planners compute paths, because time is essentially irrelevant 
 
 | Type | Continuity | Timed? | Description |
 |------|------------|--------|-------------|
-| `Milestone list` | C1 | No | The simplest path type: a list of `Config` _milestones_ that should be piecewise linearly interpolated.  _Output from classical motion planners_. |
-| `Piecewise linear` | C1 | Yes | Given by a list of `times` and `milestones` that should be piecewise linearly interpolated.  _The most compatible trajectory type_. |
-| `DynamicPath` | C2 | Yes | Piecewise parabolic curve, which are time-optimal bounded-acceleration trajectories that include configuration, velocity, and time. |
-| `Cubic spline` | C2 | Either | Piecewise cubic curve, with (Python) and without (C++) time. |
-| `Time-scaled cubic splines` | C2 | Yes | An untimed cubic spline associated with an optimized time-domain parameterization. |
-| `MultiPath` | C1 or C2 | Either | A rich container type for paths/trajectories annotated with changing contacts and IK constraints. |
+| `Milestone list` | C0 | No | The simplest path type: a list of `Config` _milestones_ that should be piecewise linearly interpolated.  _Output from classical motion planners_. |
+| `Piecewise linear` | C0 | Yes | Given by a list of `times` and `milestones` that should be piecewise linearly interpolated.  _The most compatible trajectory type_. |
+| `DynamicPath` | C0 | Yes | Piecewise parabolic curve, which are time-optimal bounded-acceleration trajectories that include configuration, velocity, and time. |
+| `Cubic spline` | C1 | Either | Piecewise cubic curve, with (Python) and without (C++) time. |
+| `Time-scaled cubic splines` | C1 | Yes | An untimed cubic spline associated with an optimized time-domain parameterization. |
+| `MultiPath` | C0 or C1 | Either | A rich container type for paths/trajectories annotated with changing contacts and IK constraints. |
 
 _Note: to properly handle a robot's rotational joints, milestones should be interpolated via robot-specific interpolation functions. Cartesian linear interpolation does not correctly handle floating and spin joints. See the functions in_ Klampt/Modeling/Interpolate.h (C++) _and_ `RobotModel.interpolate()` (Python) _to do so_.  The Python API provides the `RobotTrajectory` class to do this automatically.
 

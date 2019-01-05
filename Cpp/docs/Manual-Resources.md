@@ -1,5 +1,9 @@
 # Resource management
 
+* [Resource types](#resource-types)
+* [API summary](#api-summary)
+* [RobotPose](#robotpose)
+
 When building a large, complex robot system, you will typically encounter dozens or hundreds of robot configurations, transforms, inverse kinematics constraints, and paths.  Klamp't has many functions to help make managing these elements easier.
 
 _Visual editing_ is a sort of what-you-see-is-what-you-get (WYSIWYG) editing approach for robotics, and Klamp't tries to make visual editing part of the robot hacking workflow in as painless a manner as possible.

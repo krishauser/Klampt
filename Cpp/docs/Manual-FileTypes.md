@@ -1,5 +1,12 @@
 # Klamp't Manual: File types
 
+* [Primitive data file format](#primitive-data-file-format)
+* [Geometry file formats](#geometry-file-formats)
+* [World (.xml) file format](#world--xml--file-format)
+* [Robot (.rob) files](#robot--rob--files)
+* [URDF files (.urdf) with Klamp't-specific elements](#urdf-files--urdf--with-klamp-t-specific-elements)
+* [Piecewise Linear Path (.path) files](#piecewise-linear-path--path--files)
+
 Most of the object types in Klamp't can be saved and loaded from disk in a manner that is compatible with the RobotPose app, the I/O mechanisms, and resource managment mechanisms.  The following custom file types are used in Klamp't:
 
 - World files (.xml)

@@ -1,5 +1,11 @@
 # Klamp't Manual: Inverse Kinematics 
 
+* [IK Objective](#ik-objective)
+    + [Usual Objective Types](#usual-objective-types)
+    + [API summary](#api-summary)
+* [IK Solver](#ik-solver)
+    + [API summary](#api-summary-1)
+
 There are two components that need to be set up to solve inverse kinematics problems. 
 - First, an **[IK Objective](#ik-objective)** object must to be configure to define constraints on a constrained link.  
 - Next, the **[IK Solver](#ik-solver)** is set up and called to find a configuration so that the transformations satisfy the constraints specified by the objectives. 

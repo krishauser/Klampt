@@ -1,5 +1,20 @@
 # Klamp't Manual: Planning
 
+* [Robot-level kinematic motion planning](#robot-level-kinematic-motion-planning)
+    + [API summary](#api-summary)
+* [Motion Planners](#motion-planners)
+    + [Planner Attributes](#planner-attributes)
+    + [API summary](#api-summary-1)
+* [Randomized kinematic planning with closed-chain constraints](#randomized-kinematic-planning-with-closed-chain-constraints)
+    + [API summary](#api-summary-2)
+* [C-space-level kinematic motion planning](#c-space-level-kinematic-motion-planning)
+    + [API summary](#api-summary-3)
+* [Dynamic Trajectory Generation](#dynamic-trajectory-generation)
+    + [Time-optimal acceleration-bounded trajectories](#time-optimal-acceleration-bounded-trajectories)
+    + [Interpolation and time-optimization with closed-chain constraints](#interpolation-and-time-optimization-with-closed-chain-constraints)
+    + [Time-scaling optimization](#time-scaling-optimization)
+    + [Real-time motion planning](#real-time-motion-planning)
+
 Motion planning is the problem of connecting two configurations with a feasible kinematic path or dynamic trajectory under certain constraints. The output may also be required to satisfy some optimality criteria.  Klamp't has the ability to plan:
 
 - Collision-free kinematic paths in free space,
@@ -117,9 +132,6 @@ Note: although RobotCSpace.h contains multi-robot planning classes, they are not
 ### Planner Attributes
 - `type`: the overall planner type. Values include:
     - `prm`: the Probabilistic Roadmap algorithm
-    - `lazyprm`: the Lazy-PRM algorithm (interface not implemented yet)
-    - `perturbation`: the PerturbationTree algorithm (interface not implemented yet)
-    - `est`: the Expanding Space Trees algorithm (interface not implemented yet)
     - `rrt`: the Rapidly Exploring Random Trees algorithm
     - `sbl`: the Single-Query Bidirectional Lazy planner
     - `sblprt`: the probabilistic roadmap of trees (PRT) algorithm with SBL as the inter-root planner.
@@ -129,12 +141,21 @@ Note: although RobotCSpace.h contains multi-robot planning classes, they are not
     - `lazyrrg*`: the Lazy-RRG* algorithm for optimal motion planning
     - `fmm`: the fast marching method algorithm for resolution-complete optimal motion planning
     - `fmm*`: an anytime fast marching method algorithm for optimal motion planning
+
+    The code also contains implementations of the following algorithms, but the MotionPlannerFactory
+    does not yet support them:
+
+        - `lazyprm`: the Lazy-PRM algorithm (interface not implemented yet)
+        - `perturbation`: the PerturbationTree algorithm (interface not implemented yet)
+        - `est`: the Expanding Space Trees algorithm (interface not implemented yet)
     
     If KrisLibrary is built with OMPL support, you can also use the type specifier "ompl:`[X]`" where `[X]` is one of:
 
         - `prm`, `lazyprm`, `prm*`, `lazyprm*`, `spars`
         - `rrt`, `rrtconnect`, `birrt`, `lazyrrt`, `lbtrrt`, `rrt*`, `informedrrt*`
         - `est`, `fmt`, `sbl`, `stride`
+
+    (Note that OMPL's `lazyprm*` implementation performs much worse than the one in Klampt.)
 
 - `knn`: k-nearest neighbors parameter.  Default is 10 for most planners.
 - `connectionThreshold`: maximum distance over which a connection between two configurations is attempted.
@@ -187,7 +208,7 @@ At the configuration-space-level interface, there is no notion of even a robot, 
 - *Distance metric `d <- Distance(a,b)`
 - *Interpolation function `q <- Interpolate(a,b,u)`
 
-*: default implementation assumes Cartesian space
+*: default implementation provided, assuming Cartesian space
 
 
 The feasibility test is an _authoritative_ representation of C-space obstacles, and will be called thousands of times during planning. For sampling-based planners to work well, this must be fast (ideally, microseconds).
@@ -201,7 +222,7 @@ Each C-space is a subclass of the configuration space interface class `CSpace` d
 
 ## Dynamic Trajectory Generation
 
-### Time-optimal acceleration-bounded trajectories (C++ only)
+### Time-optimal acceleration-bounded trajectories
 
 The result of kinematic planning is a sequence of milestones, which ought to be converted to a time-parameterized trajectory to be executed. The standard [path controllers](Manual-Control.md) do accept milestone lists and will do this internally. Occasionally you may want to do this manually, for example, to perform path smoothing before execution.  The example program in Examples/dynamicplandemo.cpp demonstrates how to do this (the program can be built using the command `make DynamicPlanDemo`).
 
@@ -219,7 +240,7 @@ Warning: free-rotational joints (robots with free-floating bases) will not be in
 
 For more details, please see: _K. Hauser and V. Ng-Thow-Hing. Fast Smoothing of Manipulator Trajectories using Optimal Bounded-Acceleration Shortcuts. In proceedings of IEEE Int'l Conference on Robotics and Automation (ICRA), 2010._
 
-### Interpolation and time-optimization with closed-chain constraints (C++ only)
+### Interpolation and time-optimization with closed-chain constraints
 
 Several routines in Klampt/Planning/RobotTimeScaling.h are used to interpolate paths under closed chain constraints. There is also functionality for converting paths to minimum-time, dynamically-feasible trajectories using a time-scaling method. The TrajOpt program will do this from the command line.
 
@@ -229,11 +250,11 @@ Each method takes a resolution parameter that describes how finely the path shou
 
 See the following reference for more details: K. Hauser. _Fast Interpolation and Time-Optimization on Implicit Contact Submanifolds_. Robotics: Science and Systems, 2013.
 
-### Time-scaling optimization (C++ only)
+### Time-scaling optimization
 
 The `TimeOptimizePath` and `GenerateAndTimeOptimizeMultiPath` functions in Klampt/Planning/RobotTimeScaling.h perform time optimization with respect to a robot's velocity and acceleration bounds. `TimeOptimizePath` takes a piecewise linear trajectory as input, interpolates it via a cubic spline, and then generates keyframes of time-optimized trajectory. `GenerateAndTimeOptimizeMultiPath` does the same except that it takes a `MultiPath` as input and output, and the constraints of the multipath may be first interpolated at a finer resolution before time-optimization is performed.
 
-### Real-time motion planning (C++ only)
+### Real-time motion planning
 
 Real-time motion planning allows a robot to plan while executing a previously planned path. This allows the robot to avoid moving obstacles, improve path quality without large delays, and change its goals in real-time. It is critical to use a system architecture that tightly controls the synchronization between planning and execution; the planner must not spend more than a predetermined amount of time in computation before delivering the updated result, or else the path could change in an uncontrolled manner with catastrophic consequences. Moreover, such a method must be robust to unpredictable communication delays.
 

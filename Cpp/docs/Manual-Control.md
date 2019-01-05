@@ -1,5 +1,28 @@
 # Klamp't Manual: Control
 
+* [Controllers](#controllers)
++ [Default motion queue controller](#default-motion-queue-controller)
+  - [API summary](#api-summary)
++ [Custom controllers](#custom-controllers)
+  - [API summary](#api-summary-1)
+* [Actuators](#actuators)
++ [API summary](#api-summary-2)
+* [Sensors](#sensors)
++ [Sensor measurements and attributes](#sensor-measurements-and-attributes)
+  - [`JointVelocitySensor`](#-jointvelocitysensor-)
+  - [`CameraSensor`](#-camerasensor-)
+  - [`LaserRangeSensor`](#-laserrangesensor-)
+  - [`DriverTorqueSensor`](#-drivertorquesensor-)
+  - [`ContactSensor`](#-contactsensor-)
+  - [`ForceTorqueSensor`](#-forcetorquesensor-)
+  - [`Accelerometer`](#-accelerometer-)
+  - [`TiltSensor`](#-tiltsensor-)
+  - [`GyroSensor`](#-gyrosensor-)
+  - [`IMUSensor`](#-imusensor-)
+  - [`FilteredSensor`](#-filteredsensor-)
+* [State estimation](#state-estimation)
++ [Using state estimators](#using-state-estimators)
+
 Controllers provide the &quot;glue&quot; between the physical robot's actuators, sensors, and planners. They are very similar to planners in that they generate controls for the robot, but the main difference is that a controller is expected to work online and synchronously within a fixed, small time budget. As a result, they can only perform relatively light computations.
 
 ## Controllers

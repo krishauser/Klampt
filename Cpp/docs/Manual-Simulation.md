@@ -1,8 +1,13 @@
 # Klamp't Manual: Simulation
 
+* [Boundary-layer contact detection](#boundary-layer-contact-detection)
+* [Collision response](#collision-response)
+* [Actuator simulation](#actuator-simulation)
+
+
 Simulation functionality in Klamp't is built on top of the Open Dynamics Engine (ODE) rigid body simulation package, but adds emulators for robot sensors and actuators, and features a robust contact handling mechanism. When designing new robots and scenarios, it is important to understand a few details about how Klamp't works in order to achieve realistic simulations.
 
-## Boundary-layer contact detection.
+## Boundary-layer contact detection
 
 Other rigid body simulators tend to suffer from significant collision handling artifacts during mesh-mesh collision: objects will jitter rapidly, interpenetrate, or react to &quot;phantom&quot; collisions. The primary cause is that contact points, normals, and penetration depths are estimated incorrectly or inconsistently from step-to-step. Klamp't uses a new _boundary layer contact detection_ procedure that leads to accurate and consistent estimation of contact regions. Moreover, the boundary layer can simulate some limited compliance in the contact interface, such as soft rubber coatings or soft ground.
 
@@ -17,7 +22,7 @@ The first step of Klamp't's collision handling routine is to compute all contact
 
 For more details, please see: _K. Hauser. Robust Contact Generation for Robot Simulation with Unstructured Meshes. In proceedings of International Symposium of Robotics Research, 2013._
 
-## Collision response.
+## Collision response
 
 In addition to padding, each body also has coefficients of restitution, friction, stiffness, and damping (kRestitution, kFriction, kStiffness, and kDamping attributes in &lt;simulation&gt;{&lt;robot&gt;,&lt;object&gt;,&lt;terrain&gt;}&lt;geometry&gt; XML elements). The stiffness and damping coefficients can be set to non-infinite values to simulate softness in the boundary layer. When two bodies come into contact, their coefficients are blended using arithmetic mean for kRestitution, and harmonic means for kFriction, kStiffness, and kDamping.
 

@@ -1,6 +1,15 @@
 
 # Klamp't Manual: System Integration
 
+* [Connecting an external controller to a Klamp't simulated robot](#connecting-an-external-controller-to-a-klamp-t-simulated-robot)
+    + [Direct instantiation](#direct-instantiation)
+    + [Socket communication with controller](#socket-communication-with-controller)
+    + [ROS communication with controller](#ros-communication-with-controller)
+    + [Controller communication protocol (CCP)](#controller-communication-protocol--ccp-)
+* [Connecting a Klamp't controller to a physical robot](#connecting-a-klamp-t-controller-to-a-physical-robot)
+* [Connecting a Klamp't Planner to a Simulation Controller](#connecting-a-klamp-t-planner-to-a-simulation-controller)
+
+
 Klamp't supports a number of mechanisms for connecting controllers and simulated robots with external modules. An external controller can be connected to a Klamp't simulated robot, or a Klamp't controller can be connected to a physical robot.
 
 ## Connecting an external controller to a Klamp't simulated robot

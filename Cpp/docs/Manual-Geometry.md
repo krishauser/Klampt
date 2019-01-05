@@ -1,5 +1,11 @@
 # Klamp't Manual: Geometry and Appearance
 
+* [Geometries and collision geometries](#geometries-and-collision-geometries)
+    + [Geometric operation support](#geometric-operation-support)
+    + [Geometry caching](#geometry-caching)
+    + [API summary](#api-summary)
+* [Appearance](#appearance)
+
 Klamp't uses a variety of geometry types to define geometric primitives, triangulated meshes, and point clouds.  Each geometry may also be associated with an [Appearance](#appearance).
 
 ## Geometries and collision geometries

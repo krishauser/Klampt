@@ -1,5 +1,11 @@
 # Klamp't Manual: Math concepts
 
+* [API Summary](#api-summary)
+* [3D Points and Directions](#3d-points-and-directions)
+* [3D Rotations](#3d-rotations)
+* [Rigid Transformations](#rigid-transformations)
+* [Linear Algebra](#linear-algebra)
+
 Klamp't assumes basic familiarity with 3D geometry and linear algebra concepts. It heavily uses structures that representing vectors, matrices, 3D points, 3D rotations, and 3D transformations. These routines are heavily tested and fast.
 
 The main mathematical objects used in Klampt are as follows:
@@ -25,7 +31,7 @@ Users should become familiar with the definitions in the following files:
 
 The `Vector`, `Vector3`, and `RigidTransform` classes are the most widely used math classes in Klamp't. `Vector`s accept all the basic arithmetic operations as well as dot products, norms, and distances.  Applying a transformation (`Matrix3` or `RigidTransform`) to a point (`Vector3`) is expressed using the \* operator.
 
-### 3D Points and Directions
+## 3D Points and Directions
 
 Points and directions are represented using the Math3D::Vector3 class in KrisLibrary/math3d/primitives.h. This class has many convenience methods, including adding, subtracting, multiplying, and dividing using the standard operators +, -, *, and /. The individual elements of the vector are given by the x, y, and z members, or you may also use array access [0], [1], and [2].
 
@@ -49,7 +55,7 @@ int main(int argc,char** argv) {
 
 Please consult the [Vector3 documentation](http://motion.pratt.duke.edu/klampt/krislibrary_docs/classMath3D_1_1Vector3.html) for more details.
 
-### 3D Rotations
+## 3D Rotations
 
 The Klamp't C++ API typically represents 3D rotations as a [Math3D::Matrix3](http://motion.pratt.duke.edu/klampt/krislibrary_docs/classMath3D_1_1Matrix3.html) object, as found in the KrisLibrary/math3d/primitives.h file.
 
@@ -120,7 +126,7 @@ int main(int argc,char** argv) {
 }
 ```
 
-### Rigid Transformations
+## Rigid Transformations
 
 Rigid transformations are used throughout Klamp't, and represent an function y = R*x+t, where R is a 3x3 rotation matrix, t is a 3D translation vector, x is the input 3D point, and y is the 3D output point. The transform is represented via the [Math3D::RigidTransform](http://motion.pratt.duke.edu/klampt/krislibrary_docs/classMath3D_1_1RigidTransform.html) class. The object simply consists of members Matrix3 R and Vector3 t.
 
@@ -128,7 +134,7 @@ You may apply a transform T to a Vector3 x using T*x, or the function T.mul(x,y)
 
 Transforms may be composed using the RigidTransform.mul(A,B) function and inverted using the RigidTransform.setInverse(A) function.
 
-### Linear Algebra
+## Linear Algebra
 
 Klamp't comes with a large suite of linear algebra routines in the KrisLibrary library. The [Vector](http://motion.pratt.duke.edu/klampt/krislibrary_docs/classMath_1_1VectorTemplate.html) class in KrisLibrary/math/vector.h contains basic linear algebra routines on vectors (adding, subtracting, multiplying, interpolating). The [Matrix](http://motion.pratt.duke.edu/klampt/krislibrary_docs/classMath_1_1MatrixTemplate.html) class in KrisLibrary/math/matrix.h contains basic matrix-matrix and matrix-vector operations. There are also various sparse vector / sparse matrix structures available. Note that these are designed primarily for convenience, and are unlikely to be quite as fast as more specialized packages for basic operations (e.g., BLAS, ATLAS, Intel MKL).
 

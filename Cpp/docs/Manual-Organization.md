@@ -1,5 +1,9 @@
 # Klamp't Manual: Organization
 
+* [API file structure](#api-file-structure)
+* [Apps](#apps)
+* [Build and temporary files](#build-and-temporary-files)
+
 The main philosophy behind the Klamp't design is to decouple Modeling, Planning, Control, and Simulation modules. This division provides a clear logical structure for developing large software systems for operating complex intelligent robots.
 
 - _Modeling_ refers to the underlying knowledge representation available to the robot, e.g., limb lengths, physical parameters, environment, and other objects in its vicinity. The Modeling module contains methods for representing this knowledge. It also includes the ubiquitous mathematical models, such as kinematics and dynamics, trajectory representations (e.g., splines), and contact mechanics that required for planning and control.

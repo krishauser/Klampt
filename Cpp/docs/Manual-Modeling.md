@@ -1,5 +1,19 @@
 # Klamp't Manual: Kinematic modeling
 
+* [World Models](#world-models)
+    + [API summary](#api-summary)
+* [Robot Models](#robot-models)
+    + [API summary](#api-summary-1)
+* [Robot Link Models](#robot-link-models)
+    + [API summary](#api-summary-2)
+* [Robot Joints and Drivers](#robot-joints-and-drivers)
+    + [Floating bases and virtual links](#floating-bases-and-virtual-links)
+        - [API summary](#api-summary-3)
+* [Rigid Object Models](#rigid-object-models)
+    + [API summary](#api-summary-4)
+* [Terrain Models](#terrain-models)
+    + [API summary](#api-summary-5)
+
 Every physical object in Klamp't, whether real or imaginary, belongs to a World Model.  Specifically, a **[World Model](#world-models)** contains some number of entities, which can be of the types robot, robot link, rigid object, or terrain, as follows:
 - **[Robots](#robot-models)** are articulated and possibly actuated objects containing multiple robot links
 - **[Robot links](#robot-link-models)** are individual links of a robot

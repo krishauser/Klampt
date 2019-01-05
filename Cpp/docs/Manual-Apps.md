@@ -1,10 +1,22 @@
 # Klamp't Manual: Running Klamp't apps
 
+* [RobotTest](#robottest)
+* [SimTest](#simtest)
+* [RobotPose](#robotpose)
+* [Interacting with 3D worlds](#interacting-with-3d-worlds)
+* [Example files](#example-files)
+* [Klamp't Utilities](#klamp-t-utilities)
+  + [URDFtoRob](#urdftorob)
+  + [MotorCalibrate](#motorcalibrate)
+  + [Example C++ programs](#example-c---programs)
+
 In the following, [KLAMPT_BIN_DIR] can be empty if you have run 
 `make install`, but otherwise it should point to you `Klampt/bin/` folder.
 It also assumes that you have installed the
 [Klampt-examples Github project](https://github.com/krishauser/Klampt-examples)
 project, and your console is in the `Klampt-examples` directory.
+
+## RobotTest
 
 `RobotTest` helps inspect/debug robot files and is run from the command line as follows:
 
@@ -14,6 +26,12 @@ project, and your console is in the `Klampt-examples` directory.
 
 ![RobotTest screenshot](images/running-robottest.png)
 <center>Above is the RobotTest GUI, showing inverse kinematics posing.  `RobotTest data/robots/athlete.rob`</center>
+
+**Commands**:
+- 'h' prints the full help.
+- 'p' prints the posed configuration to the console.
+
+## SimTest
 
 `SimTest` performs physics / control simulation and is run from the command line as follows:
 
@@ -27,41 +45,7 @@ yellow robot is the “poser”. Contact forces are drawn in orange.  `SimTest d
 
 (e.g., `[KLAMPT_BIN_DIR]/SimTest data/robots/athlete.rob data/terrains/plane.env` or `./SimTest data/hubo_plane.xml`)
 
-`RobotPose` helps a human designer create configurations, constraints, and motions, and is run similarly to SimTest.
-
-![RobotPose screenshot](images/running-robotpose.png)
-<center>Above is the RobotPose GUI.  The 3D coordinate frames are "widgets" for posing links of the robot in Cartesian space.
-`RobotPose data/hubo_plane.xml`. </center>
-
-
-## Interacting with 3D worlds
-
-Each of the above apps follows a common camera navigation and robot posing interface.
-
-**Navigating**
-
-- Dragging with the left mouse button (left-drag) rotates the camera about a focal point.
-- Alt+left-drag zooms the camera.
-- Ctrl+left-drag pans the camera.
-- Shift+left-drag moves the camera toward and away from the focal point.
-
-**Posing robots**
-
-- Right-clicking on a robot link and dragging up and down will set its desired joint value.
-- The floating base of a robot is posed by right-dragging on the widget.
-- IK posing
-  - To switch to IK-posing mode, check the &quot;Pose by IK&quot; button.
-  - In this mode, clicking on a point on the robot will add a new IK point constraint.
-  - The widget can be right-dragged to move the robot around.
-  - Typing 'c' while hovering over a link will add a new fixed position and rotation constraint.
-  - Typing 'd' deletes an IK constraint.
-
-**RobotTest commands**
-
-- 'h' prints the full help.
-- 'p' prints the posed configuration to the console.
-
-**SimTest commands (GLUI version)**
+**Commands**
 
 - _Command line options_
   - -config [.config file] loads a robot start configuration from disk. If more than one robot exist in the world file, multiple -config options may be specified to give their start configurations.
@@ -77,7 +61,17 @@ Each of the above apps follows a common camera navigation and robot posing inter
 
 _Note_: when simulating a path, Klamp't will only issue a &quot;discontinuous jump requested&quot; warning if the path does not start from the robot's current configuration. If you wish to initialize the robot with the start of the path, either copy the start configuration into the world file, or provide the -config [file] command line argument. To easily extract a start configuration from a MultiPath file, use the script `python Python/multipath.py -s [path.xml] > temp.config`.
 
-**RobotPose commands**
+
+## RobotPose
+
+`RobotPose` helps a human designer create configurations, constraints, and motions, and is run similarly to SimTest.
+
+![RobotPose screenshot](images/running-robotpose.png)
+<center>Above is the RobotPose GUI.  The 3D coordinate frames are "widgets" for posing links of the robot in Cartesian space.
+`RobotPose data/hubo_plane.xml`. </center>
+
+
+**Commands**
 
 - _Command line options_
   - `-l [resource_library directory or XML file]` loads a resource library from disk. Multiple libraries can be loaded in this way.
@@ -101,9 +95,33 @@ _Note_: when simulating a path, Klamp't will only issue a &quot;discontinuous ju
   - &quot;Optimize Path&quot; generates and optimizes a trajectory along the currently selected resource, minimizing execution time under the robot's velocity and acceleration bounds. This works when Configs, Linear Path, or MultiPath resources are selected.
   - _Note:_ path editing is not particularly sophisticated due to the limitations of GLUI. The best way of generating a sophisticated path inside RobotPose is to generate keyframes into a Configs resource, and choose &quot;Create Path&quot; or &quot;Optimize Path&quot;.
 
+
+## Interacting with 3D worlds
+
+All of the above apps follows a common camera navigation and robot posing interface.
+
+**Navigating**
+
+- Dragging with the left mouse button (left-drag) rotates the camera about a focal point.
+- Alt+left-drag zooms the camera.
+- Ctrl+left-drag pans the camera.
+- Shift+left-drag moves the camera toward and away from the focal point.
+
+**Posing robots**
+
+- Right-clicking on a robot link and dragging up and down will set its desired joint value.
+- The floating base of a robot is posed by right-dragging on the widget.
+- IK posing
+  - To switch to IK-posing mode, check the &quot;Pose by IK&quot; button.
+  - In this mode, clicking on a point on the robot will add a new IK point constraint.
+  - The widget can be right-dragged to move the robot around.
+  - Typing 'c' while hovering over a link will add a new fixed position and rotation constraint.
+  - Typing 'd' deletes an IK constraint.
+
+
 ## Example files
 
-World files for different robots and problem setups are available in the Klampt-examples/data subdirectory:
+World files for different robots and problem setups are available in the [Klampt-examples/data](https://github.com/krishauser/Klampt-examples/tree/master/data) subdirectory:
 
 - `hubo\*.xml`: the KAIST Hubo humanoid.
 - `puma\*.xml`: the Puma 760 industrial robot.
@@ -148,7 +166,7 @@ Klamp't also comes with the following utility apps:
 
 - `SimUtil` is a command line interface to the simulator.
 
-## URDFtoRob
+### URDFtoRob
 
 `URDFtoRob` produces a Klamp't .rob file from a Unified Robot Description Format (URDF) file. Settings for geometry import/export can be changed by editing urdftorob.settings.
 
@@ -157,7 +175,7 @@ Klamp't also comes with the following utility apps:
 To clean up extraneous self-collision checks, the "Print Self Collisions" button of the RobotPose program can be used. The MotorCalibrate program may be run to fix up the servo gain and friction parameters.
 
 
-## MotorCalibrate
+### MotorCalibrate
 
 `MotorCalibrate` generates motor simulation parameters given example commanded and sensed trajectories.  It runs a quasi-Newton optimization with random restarts to match the simulated values to the sensed parameters as closely as possible.
 
@@ -172,9 +190,9 @@ MotorCalibrate Cpp/motorcalibrate_baxter.settings.
 Multiple runs of this process, possibly with different initial conditions, should generate better matches to the sensed data.
 
 
-## Example C++ programs
+### Example C++ programs
 
-Example C++ applications are located in `Klampt-examples/Cpp` and can be built using `cmake .; make`:
+Example C++ applications are located in `Klampt-examples/Cpp` and can be built using `cmake .; make` in the Klampt-examples directory:
 
 - `Cartpole` demonstrates generation of optimal control tables for two toy dynamic systems - a pendulum swing-up and a cart-pole balancing task.
 - `PlanDemo` is a command line kinematic motion planner for collision-free motion between configurations.

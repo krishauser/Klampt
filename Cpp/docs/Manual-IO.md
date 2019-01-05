@@ -1,5 +1,10 @@
 # Klamp't Manual: I/O
 
+* [Custom file formats in Klamp't](#custom-file-formats-in-klamp-t)
+    + [API summary](#api-summary)
+    + [Robot (.rob and .urdf) loading and saving](#robot--rob-and-urdf--loading-and-saving)
+* [ROS Communication](#ros-communication)
+
 Klamp't supports many types of I/O formats:
 - Custom file formats (old-style): Klamp't defines several formats for its custom types.  Compared to the JSON custom formats, these are older but are more compatible with C++ backend, especially the RobotPose app.
 - Custom file formats (JSON): We are beginning to use a newer JSON format that will be supported more heavily in the future. 
