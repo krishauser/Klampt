@@ -234,6 +234,14 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
    $1 = &temp;
 }
 
+%typemap(in, numinputs=0) std::vector<std::vector<double> >& out2 (std::vector<std::vector<double> > temp2) {
+   $1 = &temp2;
+}
+
+%typemap(in, numinputs=0) std::vector<std::vector<double> >& out3 (std::vector<std::vector<double> > temp3) {
+   $1 = &temp3;
+}
+
 %typemap(argout) float out[ANY] {
     PyObject *o, *o2, *o3;
     o = convert_farray_obj($1,$1_dim0);
@@ -274,25 +282,8 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
     }
 }
 
-%typemap(argout) double out2[ANY] {
-    PyObject *o, *o2, *o3;
-    o = convert_darray_obj($1,$1_dim0);
-    if ((!$result) || ($result == Py_None)) {
-        $result = o;
-    } else {
-        if (!PyTuple_Check($result)) {
-            PyObject *o2 = $result;
-            $result = PyTuple_New(1);
-            PyTuple_SetItem($result,0,o2);
-        }
-        o3 = PyTuple_New(1);
-        PyTuple_SetItem(o3,0,o);
-        o2 = $result;
-        $result = PySequence_Concat(o2,o3);
-        Py_DECREF(o2);
-        Py_DECREF(o3);
-    }
-}
+%apply double out[ANY] { double out2[ANY] };
+
 
 %typemap(argout) std::vector<int>& out {
     PyObject *o, *o2, *o3;
@@ -314,25 +305,7 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
     }
 }
 
-%typemap(argout) std::vector<int>& out2 {
-    PyObject *o, *o2, *o3;
-    o = convert_iarray_obj(&(*$1)[0],(int)$1->size());
-    if ((!$result) || ($result == Py_None)) {
-        $result = o;
-    } else {
-        if (!PyTuple_Check($result)) {
-            PyObject *o2 = $result;
-            $result = PyTuple_New(1);
-            PyTuple_SetItem($result,0,o2);
-        }
-        o3 = PyTuple_New(1);
-        PyTuple_SetItem(o3,0,o);
-        o2 = $result;
-        $result = PySequence_Concat(o2,o3);
-        Py_DECREF(o2);
-        Py_DECREF(o3);
-    }
-}
+%apply std::vector<int>& out { std::vector<int>& out2 };
 
 %typemap(argout) std::vector<float>& out {
     PyObject *o, *o2, *o3;
@@ -354,25 +327,7 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
     }
 }
 
-%typemap(argout) std::vector<float>& out2 {
-    PyObject *o, *o2, *o3;
-    o = convert_farray_obj(&(*$1)[0],(int)$1->size());
-    if ((!$result) || ($result == Py_None)) {
-        $result = o;
-    } else {
-        if (!PyTuple_Check($result)) {
-            PyObject *o2 = $result;
-            $result = PyTuple_New(1);
-            PyTuple_SetItem($result,0,o2);
-        }
-        o3 = PyTuple_New(1);
-        PyTuple_SetItem(o3,0,o);
-        o2 = $result;
-        $result = PySequence_Concat(o2,o3);
-        Py_DECREF(o2);
-        Py_DECREF(o3);
-    }
-}
+%apply std::vector<float>& out { std::vector<float>& out2 };
 
 %typemap(argout) std::vector<double>& out {
     PyObject *o, *o2, *o3;
@@ -394,25 +349,7 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
     }
 }
 
-%typemap(argout) std::vector<double>& out2 {
-    PyObject *o, *o2, *o3;
-    o = convert_darray_obj(&(*$1)[0],(int)$1->size());
-    if ((!$result) || ($result == Py_None)) {
-        $result = o;
-    } else {
-        if (!PyTuple_Check($result)) {
-            PyObject *o2 = $result;
-            $result = PyTuple_New(1);
-            PyTuple_SetItem($result,0,o2);
-        }
-        o3 = PyTuple_New(1);
-        PyTuple_SetItem(o3,0,o);
-        o2 = $result;
-        $result = PySequence_Concat(o2,o3);
-        Py_DECREF(o2);
-        Py_DECREF(o3);
-    }
-}
+%apply std::vector<double>& out { std::vector<double>& out2 };
 
 %apply std::vector<double>& out { std::vector<double>& kPout };
 
@@ -439,6 +376,10 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
         Py_DECREF(o3);
     }
 }
+
+%apply std::vector<std::vector<double> >& out { std::vector<std::vector<double> >& out2 };
+
+%apply std::vector<std::vector<double> >& out { std::vector<std::vector<double> >& out3 };
 
 %typemap(argout) std::vector<std::string> {
   int size = $1.size();

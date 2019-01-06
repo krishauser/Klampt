@@ -14,12 +14,12 @@ class WorldModel;
  * 
  * Args:
  * 
- *    g (Geometry3D): the geometry that will be updated
- *    protocol (str): only "ros" accepted for now.
- *    name (str): the name of the stream. E.g., ROS topic.
- *    type (str, optional): If provided, specifies the format of the data
- *        to be subscribed to. If not, tries to determine the type
- *        automatically.
+ *     g (Geometry3D): the geometry that will be updated
+ *     protocol (str): only "ros" accepted for now.
+ *     name (str): the name of the stream. E.g., ROS topic.
+ *     type (str, optional): If provided, specifies the format of the data
+ *         to be subscribed to. If not, tries to determine the type
+ *         automatically.
  *
  * Only ROS point clouds (PointCloud2) are supported for now.
  * Note that you can also call ``Geometry3D.loadFile("ros://[ROS_TOPIC]")``
@@ -27,7 +27,7 @@ class WorldModel;
  * to accomplish the same thing.
  *
  * Returns:
- *     success (bool): True on success.
+ *     (bool): True if successful.
  */
 bool SubscribeToStream(Geometry3D& g,const char* protocol,const char* name,const char* type="");
 
@@ -44,7 +44,7 @@ bool DetachFromStream(const char* protocol,const char* name);
  *         updating all subscribed streams
  * 
  * Returns:
- *     updated (bool): True if any stream was updated.
+ *     (bool): True if any stream was updated.
  */
 bool ProcessStreams(const char* protocol="all");
 
@@ -52,7 +52,7 @@ bool ProcessStreams(const char* protocol="all");
  * 
  * Return:
  * 
- *     success (bool): True if the stream was updated.
+ *     (bool): True if the stream was updated.
  */
 bool WaitForStream(const char* protocol,const char* name,double timeout);
 

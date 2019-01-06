@@ -1670,6 +1670,11 @@ outside must rather be enforced by the planner / simulator.
 C++ includes: robotmodel.h
 ";
 
+%feature("docstring") RobotModel::getLinearMomentum "
+
+Returns the 3D linear momentum vector.  
+";
+
 %feature("docstring") RobotModel::drawGL "
 
 Draws the robot geometry. If keepAppearance=true, the current appearance is
@@ -1681,6 +1686,11 @@ appearances is to set the link Appearance's directly.
 ";
 
 %feature("docstring") RobotModel::setName "
+";
+
+%feature("docstring") RobotModel::getKineticEnergy "
+
+Returns the kinetic energy at the current config / velocity.  
 ";
 
 %feature("docstring") RobotModel::getVelocityLimits "
@@ -1696,14 +1706,16 @@ Retrieves the current configuration of the robot model.
 
 %feature("docstring") RobotModel::getMassMatrix "
 
-Returns the nxn mass matrix B(q)  
+Returns the nxn mass matrix B(q). Takes O(n^2) time.  
 ";
 
 %feature("docstring") RobotModel::getGravityForces "
 
 Returns the generalized gravity vector G(q) for the given workspace gravity
-vector g (usually (0,0,-9.8)). (\"Forces\" is somewhat of a misnomer; the result
-is a joint torque vector)  
+vector g (usually (0,0,-9.8)).  
+
+Note: \"Forces\" is somewhat of a misnomer; the result is a vector of joint
+torques.  
 ";
 
 %feature("docstring") RobotModel::interpolate "
@@ -1737,8 +1749,10 @@ Enables/disables self collisions between two links (depending on value)
 
 %feature("docstring") RobotModel::accelFromTorques "
 
-Computes the foward dynamics (using Recursive Newton Euler solver) Note: does
-not include gravity term G(q)  
+Computes the foward dynamics (using Recursive Newton Euler solver)  
+
+Note: does not include gravity term G(q). getGravityForces(g) will need to be
+subtracted from the argument t.  
 ";
 
 %feature("docstring") RobotModel::getJointType "
@@ -1774,6 +1788,11 @@ also essentially a temporary variable.
 Sets the min/max joint limit vectors (must have length numLinks())  
 ";
 
+%feature("docstring") RobotModel::getTotalInertia "
+
+Calculates the 3x3 total inertia matrix of the robot.  
+";
+
 %feature("docstring") RobotModel::getName "
 ";
 
@@ -1795,14 +1814,20 @@ function computes forward kinematics each time it is called.
 
 %feature("docstring") RobotModel::getCoriolisForces "
 
-Returns the Coriolis forces C(q,dq)*dq for current config and velocity (faster
-than computing matrix and doing product). (\"Forces\" is somewhat of a misnomer;
-the result is a joint torque vector)  
+Returns the Coriolis forces C(q,dq)*dq for current config and velocity. Takes
+O(n) time, which is faster than computing matrix and doing product. (\"Forces\"
+is somewhat of a misnomer; the result is a joint torque vector)  
 ";
 
 %feature("docstring") RobotModel::selfCollisionEnabled "
 
 Queries whether self collisions between two links is enabled.  
+";
+
+%feature("docstring") RobotModel::getMassMatrixDeriv "
+
+Returns the derivative of the nxn mass matrix with respect to q_i. Takes O(n^3)
+time.  
 ";
 
 %feature("docstring") RobotModel::getTorqueLimits "
@@ -1848,19 +1873,28 @@ Returns the number of links = number of DOF's.
 
 %feature("docstring") RobotModel::torquesFromAccel "
 
-Computes the inverse dynamics (using Recursive Newton Euler solver). Note: does
-not include gravity term G(q)  
+Computes the inverse dynamics. Uses Recursive Newton Euler solver and takes O(n)
+time.  
+
+Note: does not include gravity term G(q). getGravityForces(g) will need to be
+added to the result.  
 ";
 
 %feature("docstring") RobotModel::getMassMatrixInv "
 
-Returns the inverse of the nxn mass matrix B(q)^-1 (faster than inverting result
-of getMassMatrix)  
+Returns the inverse of the nxn mass matrix B(q)^-1. Takes O(n^2) time, which is
+much faster than inverting the result of getMassMatrix.  
+";
+
+%feature("docstring") RobotModel::getAngularMomentum "
+
+Returns the 3D angular momentum vector.  
 ";
 
 %feature("docstring") RobotModel::getCoriolisForceMatrix "
 
-Returns the Coriolis force matrix C(q,dq) for current config and velocity.  
+Returns the Coriolis force matrix C(q,dq) for current config and velocity. Takes
+O(n^2) time.  
 ";
 
 %feature("docstring") RobotModel::setConfig "
@@ -1887,6 +1921,12 @@ Computes a distance between two configurations, properly taking into account
 nonstandard joints.  
 ";
 
+%feature("docstring") RobotModel::getMassMatrixTimeDeriv "
+
+Returns the derivative of the nxn mass matrix with respect to t, given the
+robot's current velocity. Takes O(n^4) time.  
+";
+
 %feature("docstring") RobotModel::setAccelerationLimits "
 
 Sets the acceleration limit vector amax, the constraint is :math:`|ddq[i]| \\leq
@@ -1897,6 +1937,11 @@ amax[i]`
 
 Returns the configuration derivative at a as you interpolate toward b at unit
 speed.  
+";
+
+%feature("docstring") RobotModel::getComVelocity "
+
+Returns the 3D velocity of the center of mass at the current config / velocity.  
 ";
 
 %feature("docstring") RobotModel::RobotModel "
@@ -2038,7 +2083,14 @@ C++ includes: robotmodel.h
 
 %feature("docstring") RobotModelLink::getOrientationJacobian "
 
-Returns the orientation jacobian of the link (row-major matrix)  
+Returns the 3xn orientation jacobian of the link (row-major matrix) w.r.t. the
+robot's configuration q.  
+";
+
+%feature("docstring") RobotModelLink::getPointAcceleration "
+
+Returns the acceleration of the point given the robot's current joint velocities
+and joint accelerations ddq.  
 ";
 
 %feature("docstring") RobotModelLink::getLocalDirection "
@@ -2066,7 +2118,8 @@ Converts direction from local to world coordinates.
 
 %feature("docstring") RobotModelLink::getPositionJacobian "
 
-Returns the jacobian of the local point p (row-major matrix)  
+Returns the 3xn jacobian of the local point p (row-major matrix) w.r.t. the
+robot's configuration q.  
 ";
 
 %feature("docstring") RobotModelLink::setParentTransform "
@@ -2117,7 +2170,8 @@ Sets the link's parent (must be on the same robot).
 
 %feature("docstring") RobotModelLink::getAngularVelocity "
 
-Returns the angular velocity given the robot's current velocity.  
+Returns the angular velocity of the link given the robot's current joint
+velocities.  
 ";
 
 %feature("docstring") RobotModelLink::appearance "
@@ -2148,9 +2202,22 @@ Converts point from local to world coordinates.
 Returns the ID of the robot link in its world (Note: not the same as getIndex())  
 ";
 
+%feature("docstring") RobotModelLink::getAngularAcceleration "
+
+Returns the angular acceleration of the link given the robot's current joint
+velocities and joint accelerations ddq.  
+";
+
 %feature("docstring") RobotModelLink::getName "
 
 Returns the name of the robot link.  
+";
+
+%feature("docstring") RobotModelLink::getPositionHessian "
+
+Returns the Hessians of each component of the position p w.r.t the robot's
+configuration q. The result is a triple of nxn matrices corresponding to the
+(x,y,z) components respectively.  
 ";
 
 %feature("docstring") RobotModelLink::setMass "
@@ -2166,8 +2233,10 @@ Sets the local rotational / translational axis.
 
 %feature("docstring") RobotModelLink::getJacobian "
 
-Returns the total jacobian of the local point p (row-major matrix) (orientation
-jacobian is stacked on position jacobian)  
+Returns the 6xn total jacobian of the local point p (row-major matrix) w.r.t.
+the robot's configuration q.  
+
+(the orientation jacobian is stacked on position jacobian)  
 ";
 
 %feature("docstring") RobotModelLink::getIndex "
@@ -2191,14 +2260,31 @@ Draws the link's geometry in the world frame. If keepAppearance=true, the
 current Appearance is honored. Otherwise, just the geometry is drawn.  
 ";
 
+%feature("docstring") RobotModelLink::getAcceleration "
+
+Returns the acceleration of the link origin given the robot's current joint
+velocities and joint accelerations ddq.  
+
+ddq can be empty, which calculates the acceleration with acceleration 0, and is
+a little faster than setting ddq to [0]*n  
+";
+
 %feature("docstring") RobotModelLink::setName "
 
 Sets the name of the robot link.  
 ";
 
+%feature("docstring") RobotModelLink::getOrientationHessian "
+
+Returns the Hessians of each orientation component of the link w.r.t the robot's
+configuration q. The result is a triple of nxn matrices corresponding to the
+(wx,wy,wz) components respectively.  
+";
+
 %feature("docstring") RobotModelLink::getVelocity "
 
-Returns the velocity of the origin given the robot's current velocity.  
+Returns the velocity of the link's origin given the robot's current joint
+velocities.  
 ";
 
 // File: classRobotPoser.xml
@@ -3511,7 +3597,7 @@ Args:
     protocol (str): either name the protocol to be updated, or \"all\" for
         updating all subscribed streams  
 
-Returns: updated (bool): True if any stream was updated.  
+Returns: (bool): True if any stream was updated.  
 ";
 
 %feature("docstring") DetachFromStream "
@@ -3531,17 +3617,19 @@ Subscribes a Geometry3D to a stream.
 
 Args:  
 
-g (Geometry3D): the geometry that will be updated protocol (str): only \"ros\"
-accepted for now. name (str): the name of the stream. E.g., ROS topic. type
-(str, optional): If provided, specifies the format of the data to be subscribed
-to. If not, tries to determine the type automatically.  
+    g (Geometry3D): the geometry that will be updated
+    protocol (str): only \"ros\" accepted for now.
+    name (str): the name of the stream. E.g., ROS topic.
+    type (str, optional): If provided, specifies the format of the data
+        to be subscribed to. If not, tries to determine the type
+        automatically.  
 
 Only ROS point clouds (PointCloud2) are supported for now. Note that you can
 also call `Geometry3D.loadFile(\"ros://[ROS_TOPIC]\")` or
 `Geometry3D.loadFile(\"ros:PointCloud2//[ROS_TOPIC]\")` to accomplish the same
 thing.  
 
-Returns: success (bool): True on success.  
+Returns: (bool): True if successful.  
 ";
 
 %feature("docstring") ThreeJSGetTransforms "
@@ -3555,7 +3643,7 @@ Waits up to timeout seconds for an update on the given stream.
 
 Return:  
 
-    success (bool): True if the stream was updated.  
+    (bool): True if the stream was updated.  
 ";
 
 // File: robotmodel_8h.xml
@@ -3694,8 +3782,10 @@ Args:
     (default) If 1, minimizes the l-1 norm. If 2, minimizes the l-2 norm
     (experimental, may not get good results)  
 
-Return value is a pair (t,f) giving the joint torques and frictional contact
-forces, if a solution exists, or None if no solution exists.  
+Returns:  
+
+    (tuple): a pair (t,f) giving the joint torques and frictional
+         contact forces, if a solution exists, or None if no solution exists.  
 ";
 
 %feature("docstring") equilibriumTorques "
@@ -3736,9 +3826,10 @@ Args:
 
 Returns:  
 
-    torque,force (pair of lists, optional): if a solution exists, gives valid
-        joint torques t and frictional contact forces (f1,...,fn).  None is
-        returned if no solution exists.  
+    (pair of lists, optional): a pair (torque,force) if a solution exists,
+         giving valid joint torques t and frictional contact forces (f1,...,fn).
+
+         None is returned if no solution exists.  
 ";
 
 %feature("docstring") supportPolygon2D "
@@ -3776,8 +3867,10 @@ Args:
          at the i'th contact. Each of the k 3-tuples is laid out sequentially
          per-contact.  
 
-Returns: suppInterval (2-tuple): gives the min/max extents of the support
-polygon. If the support interval is empty, (inf,inf) is returned.  
+Returns:  
+
+    (2-tuple): gives the min/max extents of the support polygon.
+        If the support interval is empty, (inf,inf) is returned.  
 ";
 
 %feature("docstring") setFrictionConeApproximationEdges "
@@ -3830,12 +3923,12 @@ Args:
 
 Returns:  
 
-    support (bool, None, or list): if com is given, and there are feasible
-         equilibrium forces, this returns a list of 2-tuples giving
-         equilibrium forces at each of the contacts. None is returned if
-         no such forces exist.
+    (bool, None, or list): if com is given, and there are feasible
+        equilibrium forces, this returns a list of 2-tuples giving
+        equilibrium forces at each of the contacts. None is returned if
+        no such forces exist.
 
-         If com = None, the result is True or False.  
+        If com = None, the result is True or False.  
 ";
 
 %feature("docstring") supportPolygon "
@@ -3880,7 +3973,7 @@ Args:
 
 Returns:  
 
-    suppPoly (list of 3-tuples): Gives the sorted plane boundaries of the
+    (list of 3-tuples): The sorted plane boundaries of the support
         polygon. The format of a plane is (nx,ny,ofs) where (nx,ny) are the
         outward facing normals, and ofs is the offset from 0.  In other words
         to test stability of a com with x-y coordinates [x,y], you can test
@@ -3973,12 +4066,12 @@ given contacts.
 
 Returns:  
 
-    support (bool, None, or list): if com is given, and there are feasible
-         equilibrium forces, this returns a list of 3 tuples giving
-         equilibrium forces at each of the contacts. None is returned if
-         no such forces exist.  
+    (bool, None, or list): if com is given, and there are feasible
+        equilibrium forces, this returns a list of 3 tuples giving
+        equilibrium forces at each of the contacts. None is returned if
+        no such forces exist.  
 
-         If com = None, the result is True or False.  
+        If com = None, the result is True or False.  
 ";
 
 // File: widget_8h.xml

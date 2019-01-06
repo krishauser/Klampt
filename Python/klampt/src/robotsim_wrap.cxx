@@ -21516,14 +21516,14 @@ SWIGINTERN PyObject *_wrap_Geometry3D_getCurrentTransform(PyObject *SWIGUNUSEDPA
   void *argp1 = 0 ;
   int res1 = 0 ;
   double temp2[9] ;
-  double temp23[3] ;
+  double temp3[3] ;
   PyObject * obj0 = 0 ;
   
   {
     arg2 = &temp2[0];
   }
   {
-    arg3 = &temp23[0];
+    arg3 = &temp3[0];
   }
   if (!PyArg_ParseTuple(args,(char *)"O:Geometry3D_getCurrentTransform",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
@@ -21974,14 +21974,14 @@ SWIGINTERN PyObject *_wrap_Geometry3D_getBB(PyObject *SWIGUNUSEDPARM(self), PyOb
   void *argp1 = 0 ;
   int res1 = 0 ;
   double temp2[3] ;
-  double temp23[3] ;
+  double temp3[3] ;
   PyObject * obj0 = 0 ;
   
   {
     arg2 = &temp2[0];
   }
   {
-    arg3 = &temp23[0];
+    arg3 = &temp3[0];
   }
   if (!PyArg_ParseTuple(args,(char *)"O:Geometry3D_getBB",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
@@ -22055,14 +22055,14 @@ SWIGINTERN PyObject *_wrap_Geometry3D_getBBTight(PyObject *SWIGUNUSEDPARM(self),
   void *argp1 = 0 ;
   int res1 = 0 ;
   double temp2[3] ;
-  double temp23[3] ;
+  double temp3[3] ;
   PyObject * obj0 = 0 ;
   
   {
     arg2 = &temp2[0];
   }
   {
-    arg3 = &temp23[0];
+    arg3 = &temp3[0];
   }
   if (!PyArg_ParseTuple(args,(char *)"O:Geometry3D_getBBTight",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
@@ -25518,14 +25518,14 @@ SWIGINTERN PyObject *_wrap_Viewport_getRigidTransform(PyObject *SWIGUNUSEDPARM(s
   void *argp1 = 0 ;
   int res1 = 0 ;
   double temp2[9] ;
-  double temp23[3] ;
+  double temp3[3] ;
   PyObject * obj0 = 0 ;
   
   {
     arg2 = &temp2[0];
   }
   {
-    arg3 = &temp23[0];
+    arg3 = &temp3[0];
   }
   if (!PyArg_ParseTuple(args,(char *)"O:Viewport_getRigidTransform",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Viewport, 0 |  0 );
@@ -27186,14 +27186,14 @@ SWIGINTERN PyObject *_wrap_TransformPoser_get(PyObject *SWIGUNUSEDPARM(self), Py
   void *argp1 = 0 ;
   int res1 = 0 ;
   double temp2[9] ;
-  double temp23[3] ;
+  double temp3[3] ;
   PyObject * obj0 = 0 ;
   
   {
     arg2 = &temp2[0];
   }
   {
-    arg3 = &temp23[0];
+    arg3 = &temp3[0];
   }
   if (!PyArg_ParseTuple(args,(char *)"O:TransformPoser_get",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_TransformPoser, 0 |  0 );
@@ -27479,14 +27479,14 @@ SWIGINTERN PyObject *_wrap_ObjectPoser_get(PyObject *SWIGUNUSEDPARM(self), PyObj
   void *argp1 = 0 ;
   int res1 = 0 ;
   double temp2[9] ;
-  double temp23[3] ;
+  double temp3[3] ;
   PyObject * obj0 = 0 ;
   
   {
     arg2 = &temp2[0];
   }
   {
-    arg3 = &temp23[0];
+    arg3 = &temp3[0];
   }
   if (!PyArg_ParseTuple(args,(char *)"O:ObjectPoser_get",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ObjectPoser, 0 |  0 );
@@ -29323,14 +29323,14 @@ SWIGINTERN PyObject *_wrap_RobotModelLink_getParentTransform(PyObject *SWIGUNUSE
   void *argp1 = 0 ;
   int res1 = 0 ;
   double temp2[9] ;
-  double temp23[3] ;
+  double temp3[3] ;
   PyObject * obj0 = 0 ;
   
   {
     arg2 = &temp2[0];
   }
   {
-    arg3 = &temp23[0];
+    arg3 = &temp3[0];
   }
   if (!PyArg_ParseTuple(args,(char *)"O:RobotModelLink_getParentTransform",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelLink, 0 |  0 );
@@ -29818,14 +29818,14 @@ SWIGINTERN PyObject *_wrap_RobotModelLink_getTransform(PyObject *SWIGUNUSEDPARM(
   void *argp1 = 0 ;
   int res1 = 0 ;
   double temp2[9] ;
-  double temp23[3] ;
+  double temp3[3] ;
   PyObject * obj0 = 0 ;
   
   {
     arg2 = &temp2[0];
   }
   {
-    arg3 = &temp23[0];
+    arg3 = &temp3[0];
   }
   if (!PyArg_ParseTuple(args,(char *)"O:RobotModelLink_getTransform",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelLink, 0 |  0 );
@@ -29936,6 +29936,186 @@ SWIGINTERN PyObject *_wrap_RobotModelLink_setTransform(PyObject *SWIGUNUSEDPARM(
     }
   }
   resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModelLink_getVelocity(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelLink *arg1 = (RobotModelLink *) 0 ;
+  double *arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  PyObject * obj0 = 0 ;
+  
+  {
+    arg2 = &temp2[0];
+  }
+  if (!PyArg_ParseTuple(args,(char *)"O:RobotModelLink_getVelocity",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelLink, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelLink_getVelocity" "', argument " "1"" of type '" "RobotModelLink *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelLink * >(argp1);
+  {
+    try {
+      (arg1)->getVelocity(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg2,3);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModelLink_getAngularVelocity(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelLink *arg1 = (RobotModelLink *) 0 ;
+  double *arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  PyObject * obj0 = 0 ;
+  
+  {
+    arg2 = &temp2[0];
+  }
+  if (!PyArg_ParseTuple(args,(char *)"O:RobotModelLink_getAngularVelocity",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelLink, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelLink_getAngularVelocity" "', argument " "1"" of type '" "RobotModelLink *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelLink * >(argp1);
+  {
+    try {
+      (arg1)->getAngularVelocity(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg2,3);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModelLink_getPointVelocity(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelLink *arg1 = (RobotModelLink *) 0 ;
+  double *arg2 ;
+  double *arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  double temp3[3] ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  {
+    arg3 = &temp3[0];
+  }
+  if (!PyArg_ParseTuple(args,(char *)"OO:RobotModelLink_getPointVelocity",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelLink, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelLink_getPointVelocity" "', argument " "1"" of type '" "RobotModelLink *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelLink * >(argp1);
+  {
+    if (!convert_darray(obj1,temp2,3)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    try {
+      (arg1)->getPointVelocity((double const (*))arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg3,3);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
   return resultobj;
 fail:
   return NULL;
@@ -30131,128 +30311,14 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_RobotModelLink_getVelocity(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_RobotModelLink_getAcceleration(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RobotModelLink *arg1 = (RobotModelLink *) 0 ;
-  double *arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  double temp2[3] ;
-  PyObject * obj0 = 0 ;
-  
-  {
-    arg2 = &temp2[0];
-  }
-  if (!PyArg_ParseTuple(args,(char *)"O:RobotModelLink_getVelocity",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelLink, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelLink_getVelocity" "', argument " "1"" of type '" "RobotModelLink *""'"); 
-  }
-  arg1 = reinterpret_cast< RobotModelLink * >(argp1);
-  {
-    try {
-      (arg1)->getVelocity(arg2);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_Py_Void();
-  {
-    PyObject *o, *o2, *o3;
-    o = convert_darray_obj(arg2,3);
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
-  }
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_RobotModelLink_getAngularVelocity(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  RobotModelLink *arg1 = (RobotModelLink *) 0 ;
-  double *arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  double temp2[3] ;
-  PyObject * obj0 = 0 ;
-  
-  {
-    arg2 = &temp2[0];
-  }
-  if (!PyArg_ParseTuple(args,(char *)"O:RobotModelLink_getAngularVelocity",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelLink, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelLink_getAngularVelocity" "', argument " "1"" of type '" "RobotModelLink *""'"); 
-  }
-  arg1 = reinterpret_cast< RobotModelLink * >(argp1);
-  {
-    try {
-      (arg1)->getAngularVelocity(arg2);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_Py_Void();
-  {
-    PyObject *o, *o2, *o3;
-    o = convert_darray_obj(arg2,3);
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
-  }
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_RobotModelLink_getPointVelocity(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  RobotModelLink *arg1 = (RobotModelLink *) 0 ;
-  double *arg2 ;
+  std::vector< double,std::allocator< double > > *arg2 = 0 ;
   double *arg3 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  double temp2[3] ;
+  int res2 = SWIG_OLDOBJ ;
   double temp3[3] ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
@@ -30260,21 +30326,26 @@ SWIGINTERN PyObject *_wrap_RobotModelLink_getPointVelocity(PyObject *SWIGUNUSEDP
   {
     arg3 = &temp3[0];
   }
-  if (!PyArg_ParseTuple(args,(char *)"OO:RobotModelLink_getPointVelocity",&obj0,&obj1)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"OO:RobotModelLink_getAcceleration",&obj0,&obj1)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelLink, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelLink_getPointVelocity" "', argument " "1"" of type '" "RobotModelLink *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelLink_getAcceleration" "', argument " "1"" of type '" "RobotModelLink *""'"); 
   }
   arg1 = reinterpret_cast< RobotModelLink * >(argp1);
   {
-    if (!convert_darray(obj1,temp2,3)) {
-      return NULL;
+    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
+    res2 = swig::asptr(obj1, &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "RobotModelLink_getAcceleration" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
-    arg2 = &temp2[0];
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "RobotModelLink_getAcceleration" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    arg2 = ptr;
   }
   {
     try {
-      (arg1)->getPointVelocity((double const (*))arg2,arg3);
+      (arg1)->getAcceleration((std::vector< double,std::allocator< double > > const &)*arg2,arg3);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -30289,6 +30360,382 @@ SWIGINTERN PyObject *_wrap_RobotModelLink_getPointVelocity(PyObject *SWIGUNUSEDP
   {
     PyObject *o, *o2, *o3;
     o = convert_darray_obj(arg3,3);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return resultobj;
+fail:
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModelLink_getPointAcceleration(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelLink *arg1 = (RobotModelLink *) 0 ;
+  double *arg2 ;
+  std::vector< double,std::allocator< double > > *arg3 = 0 ;
+  double *arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  int res3 = SWIG_OLDOBJ ;
+  double temp4[3] ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  {
+    arg4 = &temp4[0];
+  }
+  if (!PyArg_ParseTuple(args,(char *)"OOO:RobotModelLink_getPointAcceleration",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelLink, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelLink_getPointAcceleration" "', argument " "1"" of type '" "RobotModelLink *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelLink * >(argp1);
+  {
+    if (!convert_darray(obj1,temp2,3)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
+    res3 = swig::asptr(obj2, &ptr);
+    if (!SWIG_IsOK(res3)) {
+      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "RobotModelLink_getPointAcceleration" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "RobotModelLink_getPointAcceleration" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    arg3 = ptr;
+  }
+  {
+    try {
+      (arg1)->getPointAcceleration((double const (*))arg2,(std::vector< double,std::allocator< double > > const &)*arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg4,3);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  return resultobj;
+fail:
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModelLink_getAngularAcceleration(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelLink *arg1 = (RobotModelLink *) 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = 0 ;
+  double *arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  double temp3[3] ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  {
+    arg3 = &temp3[0];
+  }
+  if (!PyArg_ParseTuple(args,(char *)"OO:RobotModelLink_getAngularAcceleration",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelLink, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelLink_getAngularAcceleration" "', argument " "1"" of type '" "RobotModelLink *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelLink * >(argp1);
+  {
+    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
+    res2 = swig::asptr(obj1, &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "RobotModelLink_getAngularAcceleration" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "RobotModelLink_getAngularAcceleration" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    arg2 = ptr;
+  }
+  {
+    try {
+      (arg1)->getAngularAcceleration((std::vector< double,std::allocator< double > > const &)*arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg3,3);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return resultobj;
+fail:
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModelLink_getPositionHessian(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelLink *arg1 = (RobotModelLink *) 0 ;
+  double *arg2 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg3 = 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg4 = 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg5 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  std::vector< std::vector< double > > temp3 ;
+  std::vector< std::vector< double > > temp4 ;
+  std::vector< std::vector< double > > temp5 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  {
+    arg3 = &temp3;
+  }
+  {
+    arg4 = &temp4;
+  }
+  {
+    arg5 = &temp5;
+  }
+  if (!PyArg_ParseTuple(args,(char *)"OO:RobotModelLink_getPositionHessian",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelLink, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelLink_getPositionHessian" "', argument " "1"" of type '" "RobotModelLink *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelLink * >(argp1);
+  {
+    if (!convert_darray(obj1,temp2,3)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    try {
+      (arg1)->getPositionHessian((double const (*))arg2,*arg3,*arg4,*arg5);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_dmatrix_obj((*arg3));
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_dmatrix_obj((*arg4));
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_dmatrix_obj((*arg5));
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModelLink_getOrientationHessian(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelLink *arg1 = (RobotModelLink *) 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg2 = 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg3 = 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg4 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::vector< std::vector< double > > temp2 ;
+  std::vector< std::vector< double > > temp3 ;
+  std::vector< std::vector< double > > temp4 ;
+  PyObject * obj0 = 0 ;
+  
+  {
+    arg2 = &temp2;
+  }
+  {
+    arg3 = &temp3;
+  }
+  {
+    arg4 = &temp4;
+  }
+  if (!PyArg_ParseTuple(args,(char *)"O:RobotModelLink_getOrientationHessian",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelLink, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelLink_getOrientationHessian" "', argument " "1"" of type '" "RobotModelLink *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelLink * >(argp1);
+  {
+    try {
+      (arg1)->getOrientationHessian(*arg2,*arg3,*arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_dmatrix_obj((*arg2));
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_dmatrix_obj((*arg3));
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_dmatrix_obj((*arg4));
     if ((!resultobj) || (resultobj == Py_None)) {
       resultobj = o;
     } else {
@@ -32509,14 +32956,14 @@ SWIGINTERN PyObject *_wrap_RobotModel_getJointLimits(PyObject *SWIGUNUSEDPARM(se
   void *argp1 = 0 ;
   int res1 = 0 ;
   std::vector< double > temp2 ;
-  std::vector< double > temp23 ;
+  std::vector< double > temp3 ;
   PyObject * obj0 = 0 ;
   
   {
     arg2 = &temp2;
   }
   {
-    arg3 = &temp23;
+    arg3 = &temp3;
   }
   if (!PyArg_ParseTuple(args,(char *)"O:RobotModel_getJointLimits",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModel, 0 |  0 );
@@ -33328,6 +33775,63 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_RobotModel_getComVelocity(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModel *arg1 = (RobotModel *) 0 ;
+  double *arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  PyObject * obj0 = 0 ;
+  
+  {
+    arg2 = &temp2[0];
+  }
+  if (!PyArg_ParseTuple(args,(char *)"O:RobotModel_getComVelocity",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModel_getComVelocity" "', argument " "1"" of type '" "RobotModel *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModel * >(argp1);
+  {
+    try {
+      (arg1)->getComVelocity(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg2,3);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_RobotModel_getComJacobian(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RobotModel *arg1 = (RobotModel *) 0 ;
@@ -33349,6 +33853,211 @@ SWIGINTERN PyObject *_wrap_RobotModel_getComJacobian(PyObject *SWIGUNUSEDPARM(se
   {
     try {
       (arg1)->getComJacobian(*arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_dmatrix_obj((*arg2));
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModel_getLinearMomentum(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModel *arg1 = (RobotModel *) 0 ;
+  double *arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  PyObject * obj0 = 0 ;
+  
+  {
+    arg2 = &temp2[0];
+  }
+  if (!PyArg_ParseTuple(args,(char *)"O:RobotModel_getLinearMomentum",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModel_getLinearMomentum" "', argument " "1"" of type '" "RobotModel *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModel * >(argp1);
+  {
+    try {
+      (arg1)->getLinearMomentum(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg2,3);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModel_getAngularMomentum(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModel *arg1 = (RobotModel *) 0 ;
+  double *arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  PyObject * obj0 = 0 ;
+  
+  {
+    arg2 = &temp2[0];
+  }
+  if (!PyArg_ParseTuple(args,(char *)"O:RobotModel_getAngularMomentum",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModel_getAngularMomentum" "', argument " "1"" of type '" "RobotModel *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModel * >(argp1);
+  {
+    try {
+      (arg1)->getAngularMomentum(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg2,3);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModel_getKineticEnergy(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModel *arg1 = (RobotModel *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  double result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:RobotModel_getKineticEnergy",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModel_getKineticEnergy" "', argument " "1"" of type '" "RobotModel *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModel * >(argp1);
+  {
+    try {
+      result = (double)(arg1)->getKineticEnergy();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModel_getTotalInertia(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModel *arg1 = (RobotModel *) 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::vector< std::vector< double > > temp2 ;
+  PyObject * obj0 = 0 ;
+  
+  {
+    arg2 = &temp2;
+  }
+  if (!PyArg_ParseTuple(args,(char *)"O:RobotModel_getTotalInertia",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModel_getTotalInertia" "', argument " "1"" of type '" "RobotModel *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModel * >(argp1);
+  {
+    try {
+      (arg1)->getTotalInertia(*arg2);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -33463,6 +34172,129 @@ SWIGINTERN PyObject *_wrap_RobotModel_getMassMatrixInv(PyObject *SWIGUNUSEDPARM(
   {
     try {
       (arg1)->getMassMatrixInv(*arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_dmatrix_obj((*arg2));
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModel_getMassMatrixDeriv(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModel *arg1 = (RobotModel *) 0 ;
+  int arg2 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg3 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  std::vector< std::vector< double > > temp3 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  {
+    arg3 = &temp3;
+  }
+  if (!PyArg_ParseTuple(args,(char *)"OO:RobotModel_getMassMatrixDeriv",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModel_getMassMatrixDeriv" "', argument " "1"" of type '" "RobotModel *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModel * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "RobotModel_getMassMatrixDeriv" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  {
+    try {
+      (arg1)->getMassMatrixDeriv(arg2,*arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_dmatrix_obj((*arg3));
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModel_getMassMatrixTimeDeriv(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModel *arg1 = (RobotModel *) 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::vector< std::vector< double > > temp2 ;
+  PyObject * obj0 = 0 ;
+  
+  {
+    arg2 = &temp2;
+  }
+  if (!PyArg_ParseTuple(args,(char *)"O:RobotModel_getMassMatrixTimeDeriv",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModel_getMassMatrixTimeDeriv" "', argument " "1"" of type '" "RobotModel *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModel * >(argp1);
+  {
+    try {
+      (arg1)->getMassMatrixTimeDeriv(*arg2);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -34622,6 +35454,58 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_RobotModel_dirty_dynamics_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModel *arg1 = (RobotModel *) 0 ;
+  bool arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  bool val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:RobotModel_dirty_dynamics_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModel_dirty_dynamics_set" "', argument " "1"" of type '" "RobotModel *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModel * >(argp1);
+  ecode2 = SWIG_AsVal_bool(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "RobotModel_dirty_dynamics_set" "', argument " "2"" of type '" "bool""'");
+  } 
+  arg2 = static_cast< bool >(val2);
+  if (arg1) (arg1)->dirty_dynamics = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModel_dirty_dynamics_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModel *arg1 = (RobotModel *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:RobotModel_dirty_dynamics_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModel_dirty_dynamics_get" "', argument " "1"" of type '" "RobotModel *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModel * >(argp1);
+  result = (bool) ((arg1)->dirty_dynamics);
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_delete_RobotModel(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RobotModel *arg1 = (RobotModel *) 0 ;
@@ -35236,14 +36120,14 @@ SWIGINTERN PyObject *_wrap_RigidObjectModel_getTransform(PyObject *SWIGUNUSEDPAR
   void *argp1 = 0 ;
   int res1 = 0 ;
   double temp2[9] ;
-  double temp23[3] ;
+  double temp3[3] ;
   PyObject * obj0 = 0 ;
   
   {
     arg2 = &temp2[0];
   }
   {
-    arg3 = &temp23[0];
+    arg3 = &temp3[0];
   }
   if (!PyArg_ParseTuple(args,(char *)"O:RigidObjectModel_getTransform",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RigidObjectModel, 0 |  0 );
@@ -35368,14 +36252,14 @@ SWIGINTERN PyObject *_wrap_RigidObjectModel_getVelocity(PyObject *SWIGUNUSEDPARM
   void *argp1 = 0 ;
   int res1 = 0 ;
   double temp2[3] ;
-  double temp23[3] ;
+  double temp3[3] ;
   PyObject * obj0 = 0 ;
   
   {
     arg2 = &temp2[0];
   }
   {
-    arg3 = &temp23[0];
+    arg3 = &temp3[0];
   }
   if (!PyArg_ParseTuple(args,(char *)"O:RigidObjectModel_getVelocity",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RigidObjectModel, 0 |  0 );
@@ -40029,14 +40913,14 @@ SWIGINTERN PyObject *_wrap_IKObjective_getPosition(PyObject *SWIGUNUSEDPARM(self
   void *argp1 = 0 ;
   int res1 = 0 ;
   double temp2[3] ;
-  double temp23[3] ;
+  double temp3[3] ;
   PyObject * obj0 = 0 ;
   
   {
     arg2 = &temp2[0];
   }
   {
-    arg3 = &temp23[0];
+    arg3 = &temp3[0];
   }
   if (!PyArg_ParseTuple(args,(char *)"O:IKObjective_getPosition",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_IKObjective, 0 |  0 );
@@ -40224,14 +41108,14 @@ SWIGINTERN PyObject *_wrap_IKObjective_getRotationAxis(PyObject *SWIGUNUSEDPARM(
   void *argp1 = 0 ;
   int res1 = 0 ;
   double temp2[3] ;
-  double temp23[3] ;
+  double temp3[3] ;
   PyObject * obj0 = 0 ;
   
   {
     arg2 = &temp2[0];
   }
   {
-    arg3 = &temp23[0];
+    arg3 = &temp3[0];
   }
   if (!PyArg_ParseTuple(args,(char *)"O:IKObjective_getRotationAxis",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_IKObjective, 0 |  0 );
@@ -40305,14 +41189,14 @@ SWIGINTERN PyObject *_wrap_IKObjective_getTransform(PyObject *SWIGUNUSEDPARM(sel
   void *argp1 = 0 ;
   int res1 = 0 ;
   double temp2[9] ;
-  double temp23[3] ;
+  double temp3[3] ;
   PyObject * obj0 = 0 ;
   
   {
     arg2 = &temp2[0];
   }
   {
-    arg3 = &temp23[0];
+    arg3 = &temp3[0];
   }
   if (!PyArg_ParseTuple(args,(char *)"O:IKObjective_getTransform",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_IKObjective, 0 |  0 );
@@ -41320,14 +42204,14 @@ SWIGINTERN PyObject *_wrap_IKSolver_getJointLimits(PyObject *SWIGUNUSEDPARM(self
   void *argp1 = 0 ;
   int res1 = 0 ;
   std::vector< double > temp2 ;
-  std::vector< double > temp23 ;
+  std::vector< double > temp3 ;
   PyObject * obj0 = 0 ;
   
   {
     arg2 = &temp2;
   }
   {
-    arg3 = &temp23;
+    arg3 = &temp3;
   }
   if (!PyArg_ParseTuple(args,(char *)"O:IKSolver_getJointLimits",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_IKSolver, 0 |  0 );
@@ -44026,14 +44910,14 @@ SWIGINTERN PyObject *_wrap_SampleTransform__SWIG_0(PyObject *SWIGUNUSEDPARM(self
   void *argp1 = 0 ;
   int res1 = 0 ;
   double temp2[9] ;
-  double temp23[3] ;
+  double temp3[3] ;
   PyObject * obj0 = 0 ;
   
   {
     arg2 = &temp2[0];
   }
   {
-    arg3 = &temp23[0];
+    arg3 = &temp3[0];
   }
   if (!PyArg_ParseTuple(args,(char *)"O:SampleTransform",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_IKObjective,  0  | 0);
@@ -44110,14 +44994,14 @@ SWIGINTERN PyObject *_wrap_SampleTransform__SWIG_1(PyObject *SWIGUNUSEDPARM(self
   void *argp1 = 0 ;
   int res1 = 0 ;
   double temp2[9] ;
-  double temp23[3] ;
+  double temp3[3] ;
   PyObject * obj0 = 0 ;
   
   {
     arg2 = &temp2[0];
   }
   {
-    arg3 = &temp23[0];
+    arg3 = &temp3[0];
   }
   if (!PyArg_ParseTuple(args,(char *)"O:SampleTransform",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_GeneralizedIKObjective,  0  | 0);
@@ -47622,14 +48506,14 @@ SWIGINTERN PyObject *_wrap_SimBody_getTransform(PyObject *SWIGUNUSEDPARM(self), 
   void *argp1 = 0 ;
   int res1 = 0 ;
   double temp2[9] ;
-  double temp23[3] ;
+  double temp3[3] ;
   PyObject * obj0 = 0 ;
   
   {
     arg2 = &temp2[0];
   }
   {
-    arg3 = &temp23[0];
+    arg3 = &temp3[0];
   }
   if (!PyArg_ParseTuple(args,(char *)"O:SimBody_getTransform",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SimBody, 0 |  0 );
@@ -47754,14 +48638,14 @@ SWIGINTERN PyObject *_wrap_SimBody_getObjectTransform(PyObject *SWIGUNUSEDPARM(s
   void *argp1 = 0 ;
   int res1 = 0 ;
   double temp2[9] ;
-  double temp23[3] ;
+  double temp3[3] ;
   PyObject * obj0 = 0 ;
   
   {
     arg2 = &temp2[0];
   }
   {
-    arg3 = &temp23[0];
+    arg3 = &temp3[0];
   }
   if (!PyArg_ParseTuple(args,(char *)"O:SimBody_getObjectTransform",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SimBody, 0 |  0 );
@@ -47886,14 +48770,14 @@ SWIGINTERN PyObject *_wrap_SimBody_getVelocity(PyObject *SWIGUNUSEDPARM(self), P
   void *argp1 = 0 ;
   int res1 = 0 ;
   double temp2[3] ;
-  double temp23[3] ;
+  double temp3[3] ;
   PyObject * obj0 = 0 ;
   
   {
     arg2 = &temp2[0];
   }
   {
-    arg3 = &temp23[0];
+    arg3 = &temp3[0];
   }
   if (!PyArg_ParseTuple(args,(char *)"O:SimBody_getVelocity",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SimBody, 0 |  0 );
@@ -48776,14 +49660,14 @@ SWIGINTERN PyObject *_wrap_Simulator_checkObjectOverlap(PyObject *SWIGUNUSEDPARM
   void *argp1 = 0 ;
   int res1 = 0 ;
   std::vector< int > temp2 ;
-  std::vector< int > temp23 ;
+  std::vector< int > temp3 ;
   PyObject * obj0 = 0 ;
   
   {
     arg2 = &temp2;
   }
   {
-    arg3 = &temp23;
+    arg3 = &temp3;
   }
   if (!PyArg_ParseTuple(args,(char *)"O:Simulator_checkObjectOverlap",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Simulator, 0 |  0 );
@@ -54578,37 +55462,13 @@ static PyMethodDef SwigMethods[] = {
 		"method is called.  \n"
 		"\n"
 		""},
-	 { (char *)"RobotModelLink_getJacobian", _wrap_RobotModelLink_getJacobian, METH_VARARGS, (char *)"\n"
-		"RobotModelLink_getJacobian(RobotModelLink self, double const [3] p)\n"
-		"\n"
-		"\n"
-		"\n"
-		"Returns the total jacobian of the local point p (row-major matrix) (orientation\n"
-		"jacobian is stacked on position jacobian)  \n"
-		"\n"
-		""},
-	 { (char *)"RobotModelLink_getPositionJacobian", _wrap_RobotModelLink_getPositionJacobian, METH_VARARGS, (char *)"\n"
-		"RobotModelLink_getPositionJacobian(RobotModelLink self, double const [3] p)\n"
-		"\n"
-		"\n"
-		"\n"
-		"Returns the jacobian of the local point p (row-major matrix)  \n"
-		"\n"
-		""},
-	 { (char *)"RobotModelLink_getOrientationJacobian", _wrap_RobotModelLink_getOrientationJacobian, METH_VARARGS, (char *)"\n"
-		"RobotModelLink_getOrientationJacobian(RobotModelLink self)\n"
-		"\n"
-		"\n"
-		"\n"
-		"Returns the orientation jacobian of the link (row-major matrix)  \n"
-		"\n"
-		""},
 	 { (char *)"RobotModelLink_getVelocity", _wrap_RobotModelLink_getVelocity, METH_VARARGS, (char *)"\n"
 		"RobotModelLink_getVelocity(RobotModelLink self)\n"
 		"\n"
 		"\n"
 		"\n"
-		"Returns the velocity of the origin given the robot's current velocity.  \n"
+		"Returns the velocity of the link's origin given the robot's current joint\n"
+		"velocities.  \n"
 		"\n"
 		""},
 	 { (char *)"RobotModelLink_getAngularVelocity", _wrap_RobotModelLink_getAngularVelocity, METH_VARARGS, (char *)"\n"
@@ -54616,7 +55476,8 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Returns the angular velocity given the robot's current velocity.  \n"
+		"Returns the angular velocity of the link given the robot's current joint\n"
+		"velocities.  \n"
 		"\n"
 		""},
 	 { (char *)"RobotModelLink_getPointVelocity", _wrap_RobotModelLink_getPointVelocity, METH_VARARGS, (char *)"\n"
@@ -54625,6 +55486,85 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Returns the world velocity of the point given the robot's current velocity.  \n"
+		"\n"
+		""},
+	 { (char *)"RobotModelLink_getJacobian", _wrap_RobotModelLink_getJacobian, METH_VARARGS, (char *)"\n"
+		"RobotModelLink_getJacobian(RobotModelLink self, double const [3] p)\n"
+		"\n"
+		"\n"
+		"\n"
+		"Returns the 6xn total jacobian of the local point p (row-major matrix) w.r.t.\n"
+		"the robot's configuration q.  \n"
+		"\n"
+		"(the orientation jacobian is stacked on position jacobian)  \n"
+		"\n"
+		""},
+	 { (char *)"RobotModelLink_getPositionJacobian", _wrap_RobotModelLink_getPositionJacobian, METH_VARARGS, (char *)"\n"
+		"RobotModelLink_getPositionJacobian(RobotModelLink self, double const [3] p)\n"
+		"\n"
+		"\n"
+		"\n"
+		"Returns the 3xn jacobian of the local point p (row-major matrix) w.r.t. the\n"
+		"robot's configuration q.  \n"
+		"\n"
+		""},
+	 { (char *)"RobotModelLink_getOrientationJacobian", _wrap_RobotModelLink_getOrientationJacobian, METH_VARARGS, (char *)"\n"
+		"RobotModelLink_getOrientationJacobian(RobotModelLink self)\n"
+		"\n"
+		"\n"
+		"\n"
+		"Returns the 3xn orientation jacobian of the link (row-major matrix) w.r.t. the\n"
+		"robot's configuration q.  \n"
+		"\n"
+		""},
+	 { (char *)"RobotModelLink_getAcceleration", _wrap_RobotModelLink_getAcceleration, METH_VARARGS, (char *)"\n"
+		"RobotModelLink_getAcceleration(RobotModelLink self, doubleVector ddq)\n"
+		"\n"
+		"\n"
+		"\n"
+		"Returns the acceleration of the link origin given the robot's current joint\n"
+		"velocities and joint accelerations ddq.  \n"
+		"\n"
+		"ddq can be empty, which calculates the acceleration with acceleration 0, and is\n"
+		"a little faster than setting ddq to [0]*n  \n"
+		"\n"
+		""},
+	 { (char *)"RobotModelLink_getPointAcceleration", _wrap_RobotModelLink_getPointAcceleration, METH_VARARGS, (char *)"\n"
+		"RobotModelLink_getPointAcceleration(RobotModelLink self, double const [3] plocal, doubleVector ddq)\n"
+		"\n"
+		"\n"
+		"\n"
+		"Returns the acceleration of the point given the robot's current joint velocities\n"
+		"and joint accelerations ddq.  \n"
+		"\n"
+		""},
+	 { (char *)"RobotModelLink_getAngularAcceleration", _wrap_RobotModelLink_getAngularAcceleration, METH_VARARGS, (char *)"\n"
+		"RobotModelLink_getAngularAcceleration(RobotModelLink self, doubleVector ddq)\n"
+		"\n"
+		"\n"
+		"\n"
+		"Returns the angular acceleration of the link given the robot's current joint\n"
+		"velocities and joint accelerations ddq.  \n"
+		"\n"
+		""},
+	 { (char *)"RobotModelLink_getPositionHessian", _wrap_RobotModelLink_getPositionHessian, METH_VARARGS, (char *)"\n"
+		"RobotModelLink_getPositionHessian(RobotModelLink self, double const [3] p)\n"
+		"\n"
+		"\n"
+		"\n"
+		"Returns the Hessians of each component of the position p w.r.t the robot's\n"
+		"configuration q. The result is a triple of nxn matrices corresponding to the\n"
+		"(x,y,z) components respectively.  \n"
+		"\n"
+		""},
+	 { (char *)"RobotModelLink_getOrientationHessian", _wrap_RobotModelLink_getOrientationHessian, METH_VARARGS, (char *)"\n"
+		"RobotModelLink_getOrientationHessian(RobotModelLink self)\n"
+		"\n"
+		"\n"
+		"\n"
+		"Returns the Hessians of each orientation component of the link w.r.t the robot's\n"
+		"configuration q. The result is a triple of nxn matrices corresponding to the\n"
+		"(wx,wy,wz) components respectively.  \n"
 		"\n"
 		""},
 	 { (char *)"RobotModelLink_drawLocalGL", _wrap_RobotModelLink_drawLocalGL, METH_VARARGS, (char *)"\n"
@@ -54983,6 +55923,14 @@ static PyMethodDef SwigMethods[] = {
 		"Returns the 3D center of mass at the current config.  \n"
 		"\n"
 		""},
+	 { (char *)"RobotModel_getComVelocity", _wrap_RobotModel_getComVelocity, METH_VARARGS, (char *)"\n"
+		"RobotModel_getComVelocity(RobotModel self)\n"
+		"\n"
+		"\n"
+		"\n"
+		"Returns the 3D velocity of the center of mass at the current config / velocity.  \n"
+		"\n"
+		""},
 	 { (char *)"RobotModel_getComJacobian", _wrap_RobotModel_getComJacobian, METH_VARARGS, (char *)"\n"
 		"RobotModel_getComJacobian(RobotModel self)\n"
 		"\n"
@@ -54991,12 +55939,44 @@ static PyMethodDef SwigMethods[] = {
 		"Returns the 3xn Jacobian matrix of the current center of mass.  \n"
 		"\n"
 		""},
+	 { (char *)"RobotModel_getLinearMomentum", _wrap_RobotModel_getLinearMomentum, METH_VARARGS, (char *)"\n"
+		"RobotModel_getLinearMomentum(RobotModel self)\n"
+		"\n"
+		"\n"
+		"\n"
+		"Returns the 3D linear momentum vector.  \n"
+		"\n"
+		""},
+	 { (char *)"RobotModel_getAngularMomentum", _wrap_RobotModel_getAngularMomentum, METH_VARARGS, (char *)"\n"
+		"RobotModel_getAngularMomentum(RobotModel self)\n"
+		"\n"
+		"\n"
+		"\n"
+		"Returns the 3D angular momentum vector.  \n"
+		"\n"
+		""},
+	 { (char *)"RobotModel_getKineticEnergy", _wrap_RobotModel_getKineticEnergy, METH_VARARGS, (char *)"\n"
+		"RobotModel_getKineticEnergy(RobotModel self) -> double\n"
+		"\n"
+		"\n"
+		"\n"
+		"Returns the kinetic energy at the current config / velocity.  \n"
+		"\n"
+		""},
+	 { (char *)"RobotModel_getTotalInertia", _wrap_RobotModel_getTotalInertia, METH_VARARGS, (char *)"\n"
+		"RobotModel_getTotalInertia(RobotModel self)\n"
+		"\n"
+		"\n"
+		"\n"
+		"Calculates the 3x3 total inertia matrix of the robot.  \n"
+		"\n"
+		""},
 	 { (char *)"RobotModel_getMassMatrix", _wrap_RobotModel_getMassMatrix, METH_VARARGS, (char *)"\n"
 		"RobotModel_getMassMatrix(RobotModel self)\n"
 		"\n"
 		"\n"
 		"\n"
-		"Returns the nxn mass matrix B(q)  \n"
+		"Returns the nxn mass matrix B(q). Takes O(n^2) time.  \n"
 		"\n"
 		""},
 	 { (char *)"RobotModel_getMassMatrixInv", _wrap_RobotModel_getMassMatrixInv, METH_VARARGS, (char *)"\n"
@@ -55004,8 +55984,26 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Returns the inverse of the nxn mass matrix B(q)^-1 (faster than inverting result\n"
-		"of getMassMatrix)  \n"
+		"Returns the inverse of the nxn mass matrix B(q)^-1. Takes O(n^2) time, which is\n"
+		"much faster than inverting the result of getMassMatrix.  \n"
+		"\n"
+		""},
+	 { (char *)"RobotModel_getMassMatrixDeriv", _wrap_RobotModel_getMassMatrixDeriv, METH_VARARGS, (char *)"\n"
+		"RobotModel_getMassMatrixDeriv(RobotModel self, int i)\n"
+		"\n"
+		"\n"
+		"\n"
+		"Returns the derivative of the nxn mass matrix with respect to q_i. Takes O(n^3)\n"
+		"time.  \n"
+		"\n"
+		""},
+	 { (char *)"RobotModel_getMassMatrixTimeDeriv", _wrap_RobotModel_getMassMatrixTimeDeriv, METH_VARARGS, (char *)"\n"
+		"RobotModel_getMassMatrixTimeDeriv(RobotModel self)\n"
+		"\n"
+		"\n"
+		"\n"
+		"Returns the derivative of the nxn mass matrix with respect to t, given the\n"
+		"robot's current velocity. Takes O(n^4) time.  \n"
 		"\n"
 		""},
 	 { (char *)"RobotModel_getCoriolisForceMatrix", _wrap_RobotModel_getCoriolisForceMatrix, METH_VARARGS, (char *)"\n"
@@ -55013,7 +56011,8 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Returns the Coriolis force matrix C(q,dq) for current config and velocity.  \n"
+		"Returns the Coriolis force matrix C(q,dq) for current config and velocity. Takes\n"
+		"O(n^2) time.  \n"
 		"\n"
 		""},
 	 { (char *)"RobotModel_getCoriolisForces", _wrap_RobotModel_getCoriolisForces, METH_VARARGS, (char *)"\n"
@@ -55021,9 +56020,9 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Returns the Coriolis forces C(q,dq)*dq for current config and velocity (faster\n"
-		"than computing matrix and doing product). (\"Forces\" is somewhat of a misnomer;\n"
-		"the result is a joint torque vector)  \n"
+		"Returns the Coriolis forces C(q,dq)*dq for current config and velocity. Takes\n"
+		"O(n) time, which is faster than computing matrix and doing product. (\"Forces\"\n"
+		"is somewhat of a misnomer; the result is a joint torque vector)  \n"
 		"\n"
 		""},
 	 { (char *)"RobotModel_getGravityForces", _wrap_RobotModel_getGravityForces, METH_VARARGS, (char *)"\n"
@@ -55032,8 +56031,10 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Returns the generalized gravity vector G(q) for the given workspace gravity\n"
-		"vector g (usually (0,0,-9.8)). (\"Forces\" is somewhat of a misnomer; the result\n"
-		"is a joint torque vector)  \n"
+		"vector g (usually (0,0,-9.8)).  \n"
+		"\n"
+		"Note: \"Forces\" is somewhat of a misnomer; the result is a vector of joint\n"
+		"torques.  \n"
 		"\n"
 		""},
 	 { (char *)"RobotModel_torquesFromAccel", _wrap_RobotModel_torquesFromAccel, METH_VARARGS, (char *)"\n"
@@ -55041,8 +56042,11 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Computes the inverse dynamics (using Recursive Newton Euler solver). Note: does\n"
-		"not include gravity term G(q)  \n"
+		"Computes the inverse dynamics. Uses Recursive Newton Euler solver and takes O(n)\n"
+		"time.  \n"
+		"\n"
+		"Note: does not include gravity term G(q). getGravityForces(g) will need to be\n"
+		"added to the result.  \n"
 		"\n"
 		""},
 	 { (char *)"RobotModel_accelFromTorques", _wrap_RobotModel_accelFromTorques, METH_VARARGS, (char *)"\n"
@@ -55050,8 +56054,10 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Computes the foward dynamics (using Recursive Newton Euler solver) Note: does\n"
-		"not include gravity term G(q)  \n"
+		"Computes the foward dynamics (using Recursive Newton Euler solver)  \n"
+		"\n"
+		"Note: does not include gravity term G(q). getGravityForces(g) will need to be\n"
+		"subtracted from the argument t.  \n"
 		"\n"
 		""},
 	 { (char *)"RobotModel_interpolate", _wrap_RobotModel_interpolate, METH_VARARGS, (char *)"\n"
@@ -55137,6 +56143,8 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"RobotModel_index_get", _wrap_RobotModel_index_get, METH_VARARGS, (char *)"RobotModel_index_get(RobotModel self) -> int"},
 	 { (char *)"RobotModel_robot_set", _wrap_RobotModel_robot_set, METH_VARARGS, (char *)"RobotModel_robot_set(RobotModel self, Robot * robot)"},
 	 { (char *)"RobotModel_robot_get", _wrap_RobotModel_robot_get, METH_VARARGS, (char *)"RobotModel_robot_get(RobotModel self) -> Robot *"},
+	 { (char *)"RobotModel_dirty_dynamics_set", _wrap_RobotModel_dirty_dynamics_set, METH_VARARGS, (char *)"RobotModel_dirty_dynamics_set(RobotModel self, bool dirty_dynamics)"},
+	 { (char *)"RobotModel_dirty_dynamics_get", _wrap_RobotModel_dirty_dynamics_get, METH_VARARGS, (char *)"RobotModel_dirty_dynamics_get(RobotModel self) -> bool"},
 	 { (char *)"delete_RobotModel", _wrap_delete_RobotModel, METH_VARARGS, (char *)"delete_RobotModel(RobotModel self)"},
 	 { (char *)"RobotModel_swigregister", RobotModel_swigregister, METH_VARARGS, NULL},
 	 { (char *)"new_RigidObjectModel", _wrap_new_RigidObjectModel, METH_VARARGS, (char *)"\n"
@@ -57139,17 +58147,19 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Args:  \n"
 		"\n"
-		"g (Geometry3D): the geometry that will be updated protocol (str): only \"ros\"\n"
-		"accepted for now. name (str): the name of the stream. E.g., ROS topic. type\n"
-		"(str, optional): If provided, specifies the format of the data to be subscribed\n"
-		"to. If not, tries to determine the type automatically.  \n"
+		"    g (Geometry3D): the geometry that will be updated\n"
+		"    protocol (str): only \"ros\" accepted for now.\n"
+		"    name (str): the name of the stream. E.g., ROS topic.\n"
+		"    type (str, optional): If provided, specifies the format of the data\n"
+		"        to be subscribed to. If not, tries to determine the type\n"
+		"        automatically.  \n"
 		"\n"
 		"Only ROS point clouds (PointCloud2) are supported for now. Note that you can\n"
 		"also call `Geometry3D.loadFile(\"ros://[ROS_TOPIC]\")` or\n"
 		"`Geometry3D.loadFile(\"ros:PointCloud2//[ROS_TOPIC]\")` to accomplish the same\n"
 		"thing.  \n"
 		"\n"
-		"Returns: success (bool): True on success.  \n"
+		"Returns: (bool): True if successful.  \n"
 		"\n"
 		""},
 	 { (char *)"DetachFromStream", _wrap_DetachFromStream, METH_VARARGS, (char *)"\n"
@@ -57174,7 +58184,7 @@ static PyMethodDef SwigMethods[] = {
 		"    protocol (str): either name the protocol to be updated, or \"all\" for\n"
 		"        updating all subscribed streams  \n"
 		"\n"
-		"Returns: updated (bool): True if any stream was updated.  \n"
+		"Returns: (bool): True if any stream was updated.  \n"
 		"\n"
 		""},
 	 { (char *)"WaitForStream", _wrap_WaitForStream, METH_VARARGS, (char *)"\n"
@@ -57186,7 +58196,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Return:  \n"
 		"\n"
-		"    success (bool): True if the stream was updated.  \n"
+		"    (bool): True if the stream was updated.  \n"
 		"\n"
 		""},
 	 { (char *)"ThreeJSGetScene", _wrap_ThreeJSGetScene, METH_VARARGS, (char *)"\n"
@@ -57314,12 +58324,12 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    support (bool, None, or list): if com is given, and there are feasible\n"
-		"         equilibrium forces, this returns a list of 3 tuples giving\n"
-		"         equilibrium forces at each of the contacts. None is returned if\n"
-		"         no such forces exist.  \n"
+		"    (bool, None, or list): if com is given, and there are feasible\n"
+		"        equilibrium forces, this returns a list of 3 tuples giving\n"
+		"        equilibrium forces at each of the contacts. None is returned if\n"
+		"        no such forces exist.  \n"
 		"\n"
-		"         If com = None, the result is True or False.  \n"
+		"        If com = None, the result is True or False.  \n"
 		"\n"
 		""},
 	 { (char *)"comEquilibrium2D", _wrap_comEquilibrium2D, METH_VARARGS, (char *)"\n"
@@ -57357,12 +58367,12 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    support (bool, None, or list): if com is given, and there are feasible\n"
-		"         equilibrium forces, this returns a list of 2-tuples giving\n"
-		"         equilibrium forces at each of the contacts. None is returned if\n"
-		"         no such forces exist.\n"
+		"    (bool, None, or list): if com is given, and there are feasible\n"
+		"        equilibrium forces, this returns a list of 2-tuples giving\n"
+		"        equilibrium forces at each of the contacts. None is returned if\n"
+		"        no such forces exist.\n"
 		"\n"
-		"         If com = None, the result is True or False.  \n"
+		"        If com = None, the result is True or False.  \n"
 		"\n"
 		""},
 	 { (char *)"supportPolygon", _wrap_supportPolygon, METH_VARARGS, (char *)"\n"
@@ -57399,7 +58409,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    suppPoly (list of 3-tuples): Gives the sorted plane boundaries of the\n"
+		"    (list of 3-tuples): The sorted plane boundaries of the support\n"
 		"        polygon. The format of a plane is (nx,ny,ofs) where (nx,ny) are the\n"
 		"        outward facing normals, and ofs is the offset from 0.  In other words\n"
 		"        to test stability of a com with x-y coordinates [x,y], you can test\n"
@@ -57442,8 +58452,10 @@ static PyMethodDef SwigMethods[] = {
 		"         at the i'th contact. Each of the k 3-tuples is laid out sequentially\n"
 		"         per-contact.  \n"
 		"\n"
-		"Returns: suppInterval (2-tuple): gives the min/max extents of the support\n"
-		"polygon. If the support interval is empty, (inf,inf) is returned.  \n"
+		"Returns:  \n"
+		"\n"
+		"    (2-tuple): gives the min/max extents of the support polygon.\n"
+		"        If the support interval is empty, (inf,inf) is returned.  \n"
 		"\n"
 		""},
 	 { (char *)"equilibriumTorques", _wrap_equilibriumTorques, METH_VARARGS, (char *)"\n"
@@ -57490,9 +58502,10 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    torque,force (pair of lists, optional): if a solution exists, gives valid\n"
-		"        joint torques t and frictional contact forces (f1,...,fn).  None is\n"
-		"        returned if no solution exists.  \n"
+		"    (pair of lists, optional): a pair (torque,force) if a solution exists,\n"
+		"         giving valid joint torques t and frictional contact forces (f1,...,fn).\n"
+		"\n"
+		"         None is returned if no solution exists.  \n"
 		"\n"
 		""},
 	 { NULL, NULL, 0, NULL }

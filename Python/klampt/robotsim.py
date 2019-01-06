@@ -3049,7 +3049,7 @@ class RobotPoser(Widget):
     def setActiveDofs(self, dofs):
         """
         Args:
-            dofs (:obj:`intVector`)
+            dofs (:obj:`list of int`)
         """
         return _robotsim.RobotPoser_setActiveDofs(self, dofs)
 
@@ -3511,38 +3511,10 @@ class RobotModelLink(_object):
         return _robotsim.RobotModelLink_setTransform(self, R, t)
 
 
-    def getJacobian(self, p):
-        """
-        Returns the total jacobian of the local point p (row-major matrix) (orientation
-        jacobian is stacked on position jacobian)  
-
-        Args:
-            p (:obj:`list of 3 floats`)
-        """
-        return _robotsim.RobotModelLink_getJacobian(self, p)
-
-
-    def getPositionJacobian(self, p):
-        """
-        Returns the jacobian of the local point p (row-major matrix)  
-
-        Args:
-            p (:obj:`list of 3 floats`)
-        """
-        return _robotsim.RobotModelLink_getPositionJacobian(self, p)
-
-
-    def getOrientationJacobian(self):
-        """
-        Returns the orientation jacobian of the link (row-major matrix)  
-
-        """
-        return _robotsim.RobotModelLink_getOrientationJacobian(self)
-
-
     def getVelocity(self):
         """
-        Returns the velocity of the origin given the robot's current velocity.  
+        Returns the velocity of the link's origin given the robot's current joint
+        velocities.  
 
         """
         return _robotsim.RobotModelLink_getVelocity(self)
@@ -3550,7 +3522,8 @@ class RobotModelLink(_object):
 
     def getAngularVelocity(self):
         """
-        Returns the angular velocity given the robot's current velocity.  
+        Returns the angular velocity of the link given the robot's current joint
+        velocities.  
 
         """
         return _robotsim.RobotModelLink_getAngularVelocity(self)
@@ -3564,6 +3537,100 @@ class RobotModelLink(_object):
             plocal (:obj:`list of 3 floats`)
         """
         return _robotsim.RobotModelLink_getPointVelocity(self, plocal)
+
+
+    def getJacobian(self, p):
+        """
+        Returns the 6xn total jacobian of the local point p (row-major matrix) w.r.t.
+        the robot's configuration q.  
+
+        Args:
+            p (:obj:`list of 3 floats`)
+
+        (the orientation jacobian is stacked on position jacobian)  
+
+        """
+        return _robotsim.RobotModelLink_getJacobian(self, p)
+
+
+    def getPositionJacobian(self, p):
+        """
+        Returns the 3xn jacobian of the local point p (row-major matrix) w.r.t. the
+        robot's configuration q.  
+
+        Args:
+            p (:obj:`list of 3 floats`)
+        """
+        return _robotsim.RobotModelLink_getPositionJacobian(self, p)
+
+
+    def getOrientationJacobian(self):
+        """
+        Returns the 3xn orientation jacobian of the link (row-major matrix) w.r.t. the
+        robot's configuration q.  
+
+        """
+        return _robotsim.RobotModelLink_getOrientationJacobian(self)
+
+
+    def getAcceleration(self, ddq):
+        """
+        Returns the acceleration of the link origin given the robot's current joint
+        velocities and joint accelerations ddq.  
+
+        Args:
+            ddq (:obj:`list of floats`)
+
+        ddq can be empty, which calculates the acceleration with acceleration 0, and is
+        a little faster than setting ddq to [0]*n  
+
+        """
+        return _robotsim.RobotModelLink_getAcceleration(self, ddq)
+
+
+    def getPointAcceleration(self, plocal, ddq):
+        """
+        Returns the acceleration of the point given the robot's current joint velocities
+        and joint accelerations ddq.  
+
+        Args:
+            plocal (:obj:`list of 3 floats`)
+            ddq (:obj:`list of floats`)
+        """
+        return _robotsim.RobotModelLink_getPointAcceleration(self, plocal, ddq)
+
+
+    def getAngularAcceleration(self, ddq):
+        """
+        Returns the angular acceleration of the link given the robot's current joint
+        velocities and joint accelerations ddq.  
+
+        Args:
+            ddq (:obj:`list of floats`)
+        """
+        return _robotsim.RobotModelLink_getAngularAcceleration(self, ddq)
+
+
+    def getPositionHessian(self, p):
+        """
+        Returns the Hessians of each component of the position p w.r.t the robot's
+        configuration q. The result is a triple of nxn matrices corresponding to the
+        (x,y,z) components respectively.  
+
+        Args:
+            p (:obj:`list of 3 floats`)
+        """
+        return _robotsim.RobotModelLink_getPositionHessian(self, p)
+
+
+    def getOrientationHessian(self):
+        """
+        Returns the Hessians of each orientation component of the link w.r.t the robot's
+        configuration q. The result is a triple of nxn matrices corresponding to the
+        (wx,wy,wz) components respectively.  
+
+        """
+        return _robotsim.RobotModelLink_getOrientationHessian(self)
 
 
     def drawLocalGL(self, keepAppearance=True):
@@ -3695,7 +3762,7 @@ class RobotModelDriver(_object):
         Returns the driver's affected links.  
 
         Args:
-            links (:obj:`intVector`)
+            links (:obj:`list of int`)
         """
         return _robotsim.RobotModelDriver_getAffectedLinks(self, links)
 
@@ -4138,6 +4205,14 @@ class RobotModel(_object):
         return _robotsim.RobotModel_getCom(self)
 
 
+    def getComVelocity(self):
+        """
+        Returns the 3D velocity of the center of mass at the current config / velocity.  
+
+        """
+        return _robotsim.RobotModel_getComVelocity(self)
+
+
     def getComJacobian(self):
         """
         Returns the 3xn Jacobian matrix of the current center of mass.  
@@ -4146,9 +4221,43 @@ class RobotModel(_object):
         return _robotsim.RobotModel_getComJacobian(self)
 
 
+    def getLinearMomentum(self):
+        """
+        Returns the 3D linear momentum vector.  
+
+        """
+        return _robotsim.RobotModel_getLinearMomentum(self)
+
+
+    def getAngularMomentum(self):
+        """
+        Returns the 3D angular momentum vector.  
+
+        """
+        return _robotsim.RobotModel_getAngularMomentum(self)
+
+
+    def getKineticEnergy(self):
+        """
+        Returns the kinetic energy at the current config / velocity.  
+
+        Returns:
+            (float):
+        """
+        return _robotsim.RobotModel_getKineticEnergy(self)
+
+
+    def getTotalInertia(self):
+        """
+        Calculates the 3x3 total inertia matrix of the robot.  
+
+        """
+        return _robotsim.RobotModel_getTotalInertia(self)
+
+
     def getMassMatrix(self):
         """
-        Returns the nxn mass matrix B(q)  
+        Returns the nxn mass matrix B(q). Takes O(n^2) time.  
 
         """
         return _robotsim.RobotModel_getMassMatrix(self)
@@ -4156,16 +4265,37 @@ class RobotModel(_object):
 
     def getMassMatrixInv(self):
         """
-        Returns the inverse of the nxn mass matrix B(q)^-1 (faster than inverting result
-        of getMassMatrix)  
+        Returns the inverse of the nxn mass matrix B(q)^-1. Takes O(n^2) time, which is
+        much faster than inverting the result of getMassMatrix.  
 
         """
         return _robotsim.RobotModel_getMassMatrixInv(self)
 
 
+    def getMassMatrixDeriv(self, i):
+        """
+        Returns the derivative of the nxn mass matrix with respect to q_i. Takes O(n^3)
+        time.  
+
+        Args:
+            i (int)
+        """
+        return _robotsim.RobotModel_getMassMatrixDeriv(self, i)
+
+
+    def getMassMatrixTimeDeriv(self):
+        """
+        Returns the derivative of the nxn mass matrix with respect to t, given the
+        robot's current velocity. Takes O(n^4) time.  
+
+        """
+        return _robotsim.RobotModel_getMassMatrixTimeDeriv(self)
+
+
     def getCoriolisForceMatrix(self):
         """
-        Returns the Coriolis force matrix C(q,dq) for current config and velocity.  
+        Returns the Coriolis force matrix C(q,dq) for current config and velocity. Takes
+        O(n^2) time.  
 
         """
         return _robotsim.RobotModel_getCoriolisForceMatrix(self)
@@ -4173,9 +4303,9 @@ class RobotModel(_object):
 
     def getCoriolisForces(self):
         """
-        Returns the Coriolis forces C(q,dq)*dq for current config and velocity (faster
-        than computing matrix and doing product). ("Forces" is somewhat of a misnomer;
-        the result is a joint torque vector)  
+        Returns the Coriolis forces C(q,dq)*dq for current config and velocity. Takes
+        O(n) time, which is faster than computing matrix and doing product. ("Forces"
+        is somewhat of a misnomer; the result is a joint torque vector)  
 
         """
         return _robotsim.RobotModel_getCoriolisForces(self)
@@ -4184,33 +4314,43 @@ class RobotModel(_object):
     def getGravityForces(self, g):
         """
         Returns the generalized gravity vector G(q) for the given workspace gravity
-        vector g (usually (0,0,-9.8)). ("Forces" is somewhat of a misnomer; the result
-        is a joint torque vector)  
+        vector g (usually (0,0,-9.8)).  
 
         Args:
             g (:obj:`list of 3 floats`)
+
+        Note: "Forces" is somewhat of a misnomer; the result is a vector of joint
+        torques.  
+
         """
         return _robotsim.RobotModel_getGravityForces(self, g)
 
 
     def torquesFromAccel(self, ddq):
         """
-        Computes the inverse dynamics (using Recursive Newton Euler solver). Note: does
-        not include gravity term G(q)  
+        Computes the inverse dynamics. Uses Recursive Newton Euler solver and takes O(n)
+        time.  
 
         Args:
             ddq (:obj:`list of floats`)
+
+        Note: does not include gravity term G(q). getGravityForces(g) will need to be
+        added to the result.  
+
         """
         return _robotsim.RobotModel_torquesFromAccel(self, ddq)
 
 
     def accelFromTorques(self, t):
         """
-        Computes the foward dynamics (using Recursive Newton Euler solver) Note: does
-        not include gravity term G(q)  
+        Computes the foward dynamics (using Recursive Newton Euler solver)  
 
         Args:
             t (:obj:`list of floats`)
+
+        Note: does not include gravity term G(q). getGravityForces(g) will need to be
+        subtracted from the argument t.  
+
         """
         return _robotsim.RobotModel_accelFromTorques(self, t)
 
@@ -4339,6 +4479,10 @@ class RobotModel(_object):
     __swig_getmethods__["robot"] = _robotsim.RobotModel_robot_get
     if _newclass:
         robot = _swig_property(_robotsim.RobotModel_robot_get, _robotsim.RobotModel_robot_set)
+    __swig_setmethods__["dirty_dynamics"] = _robotsim.RobotModel_dirty_dynamics_set
+    __swig_getmethods__["dirty_dynamics"] = _robotsim.RobotModel_dirty_dynamics_get
+    if _newclass:
+        dirty_dynamics = _swig_property(_robotsim.RobotModel_dirty_dynamics_get, _robotsim.RobotModel_dirty_dynamics_set)
     __swig_destroy__ = _robotsim.delete_RobotModel
     __del__ = lambda self: None
 RobotModel_swigregister = _robotsim.RobotModel_swigregister
@@ -5681,7 +5825,7 @@ class IKSolver(_object):
         Sets the active degrees of freedom.  
 
         Args:
-            active (:obj:`intVector`)
+            active (:obj:`list of int`)
         """
         return _robotsim.IKSolver_setActiveDofs(self, active)
 
@@ -7439,17 +7583,19 @@ def SubscribeToStream(*args):
 
     Args:  
 
-    g (Geometry3D): the geometry that will be updated protocol (str): only "ros"
-    accepted for now. name (str): the name of the stream. E.g., ROS topic. type
-    (str, optional): If provided, specifies the format of the data to be subscribed
-    to. If not, tries to determine the type automatically.  
+        g (Geometry3D): the geometry that will be updated
+        protocol (str): only "ros" accepted for now.
+        name (str): the name of the stream. E.g., ROS topic.
+        type (str, optional): If provided, specifies the format of the data
+            to be subscribed to. If not, tries to determine the type
+            automatically.  
 
     Only ROS point clouds (PointCloud2) are supported for now. Note that you can
     also call `Geometry3D.loadFile("ros://[ROS_TOPIC]")` or
     `Geometry3D.loadFile("ros:PointCloud2//[ROS_TOPIC]")` to accomplish the same
     thing.  
 
-    Returns: success (bool): True on success.  
+    Returns: (bool): True if successful.  
 
     """
     return _robotsim.SubscribeToStream(*args)
@@ -7481,7 +7627,7 @@ def ProcessStreams(*args):
         protocol (str): either name the protocol to be updated, or "all" for
             updating all subscribed streams  
 
-    Returns: updated (bool): True if any stream was updated.  
+    Returns: (bool): True if any stream was updated.  
 
     """
     return _robotsim.ProcessStreams(*args)
@@ -7499,7 +7645,7 @@ def WaitForStream(protocol, name, timeout):
 
     Return:  
 
-        success (bool): True if the stream was updated.  
+        (bool): True if the stream was updated.  
 
     """
     return _robotsim.WaitForStream(protocol, name, timeout)
@@ -7649,12 +7795,12 @@ def comEquilibrium(*args):
 
     Returns:  
 
-        support (bool, None, or list): if com is given, and there are feasible
-             equilibrium forces, this returns a list of 3 tuples giving
-             equilibrium forces at each of the contacts. None is returned if
-             no such forces exist.  
+        (bool, None, or list): if com is given, and there are feasible
+            equilibrium forces, this returns a list of 3 tuples giving
+            equilibrium forces at each of the contacts. None is returned if
+            no such forces exist.  
 
-             If com = None, the result is True or False.  
+            If com = None, the result is True or False.  
 
     """
     return _robotsim.comEquilibrium(*args)
@@ -7695,12 +7841,12 @@ def comEquilibrium2D(*args):
 
     Returns:  
 
-        support (bool, None, or list): if com is given, and there are feasible
-             equilibrium forces, this returns a list of 2-tuples giving
-             equilibrium forces at each of the contacts. None is returned if
-             no such forces exist.
+        (bool, None, or list): if com is given, and there are feasible
+            equilibrium forces, this returns a list of 2-tuples giving
+            equilibrium forces at each of the contacts. None is returned if
+            no such forces exist.
 
-             If com = None, the result is True or False.  
+            If com = None, the result is True or False.  
 
     """
     return _robotsim.comEquilibrium2D(*args)
@@ -7740,7 +7886,7 @@ def supportPolygon(*args):
 
     Returns:  
 
-        suppPoly (list of 3-tuples): Gives the sorted plane boundaries of the
+        (list of 3-tuples): The sorted plane boundaries of the support
             polygon. The format of a plane is (nx,ny,ofs) where (nx,ny) are the
             outward facing normals, and ofs is the offset from 0.  In other words
             to test stability of a com with x-y coordinates [x,y], you can test
@@ -7786,8 +7932,10 @@ def supportPolygon2D(*args):
              at the i'th contact. Each of the k 3-tuples is laid out sequentially
              per-contact.  
 
-    Returns: suppInterval (2-tuple): gives the min/max extents of the support
-    polygon. If the support interval is empty, (inf,inf) is returned.  
+    Returns:  
+
+        (2-tuple): gives the min/max extents of the support polygon.
+            If the support interval is empty, (inf,inf) is returned.  
 
     """
     return _robotsim.supportPolygon2D(*args)
@@ -7839,9 +7987,10 @@ def equilibriumTorques(*args):
 
     Returns:  
 
-        torque,force (pair of lists, optional): if a solution exists, gives valid
-            joint torques t and frictional contact forces (f1,...,fn).  None is
-            returned if no solution exists.  
+        (pair of lists, optional): a pair (torque,force) if a solution exists,
+             giving valid joint torques t and frictional contact forces (f1,...,fn).
+
+             None is returned if no solution exists.  
 
     """
     return _robotsim.equilibriumTorques(*args)

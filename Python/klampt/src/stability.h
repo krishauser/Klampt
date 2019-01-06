@@ -123,12 +123,13 @@ PyObject* comEquilibrium(const std::vector<std::vector<double> >& contacts,const
  *
  * Returns:
  * 
- *     support (bool, None, or list): if com is given, and there are feasible
- *          equilibrium forces, this returns a list of 3 tuples giving
- *          equilibrium forces at each of the contacts. None is returned if
- *          no such forces exist.  
+ *     (bool, None, or list): if com is given, and there are feasible
+ *         equilibrium forces, this returns a list of 3 tuples giving
+ *         equilibrium forces at each of the contacts. None is returned if
+ *         no such forces exist.  
  *
- *          If com = None, the result is True or False.
+ *         If com = None, the result is True or False.
+ *
  */
 PyObject* comEquilibrium(const std::vector<std::vector<double> >& contactPositions,const std::vector<std::vector<double> >& frictionCones,const std::vector<double>& fext,PyObject* com);
 
@@ -174,12 +175,13 @@ PyObject* comEquilibrium2D(const std::vector<std::vector<double> >& contacts,con
  *
  * Returns:
  * 
- *     support (bool, None, or list): if com is given, and there are feasible
- *          equilibrium forces, this returns a list of 2-tuples giving
- *          equilibrium forces at each of the contacts. None is returned if
- *          no such forces exist. 
+ *     (bool, None, or list): if com is given, and there are feasible
+ *         equilibrium forces, this returns a list of 2-tuples giving
+ *         equilibrium forces at each of the contacts. None is returned if
+ *         no such forces exist. 
  *
- *          If com = None, the result is True or False.
+ *         If com = None, the result is True or False.
+ *
  */
 PyObject* comEquilibrium2D(const std::vector<std::vector<double> >& contactPositions,const std::vector<std::vector<double> >& frictionCones,const std::vector<double>& fext,PyObject* com);
 
@@ -221,7 +223,7 @@ PyObject* supportPolygon(const std::vector<std::vector<double> >& contacts);
  * 
  * Returns:
  * 
- *     suppPoly (list of 3-tuples): Gives the sorted plane boundaries of the
+ *     (list of 3-tuples): The sorted plane boundaries of the support 
  *         polygon. The format of a plane is (nx,ny,ofs) where (nx,ny) are the
  *         outward facing normals, and ofs is the offset from 0.  In other words
  *         to test stability of a com with x-y coordinates [x,y], you can test
@@ -233,6 +235,7 @@ PyObject* supportPolygon(const std::vector<std::vector<double> >& contacts);
  *             A=Ab[:,0:2]
  *             b=Ab[:,2]
  *             myComEquilibrium = lambda x: np.all(np.dot(A,x)<=b)
+ *
  */
 PyObject* supportPolygon(const std::vector<std::vector<double> >& contactPositions,const std::vector<std::vector<double> >& frictionCones);
 
@@ -269,26 +272,32 @@ PyObject* supportPolygon2D(const std::vector<std::vector<double> >& contacts);
  *          per-contact.
  *
  * Returns:
- *     suppInterval (2-tuple): gives the min/max extents of the support polygon. 
+ *
+ *     (2-tuple): gives the min/max extents of the support polygon. 
  *         If the support interval is empty, (inf,inf) is returned.
+ *
  */
 PyObject* supportPolygon2D(const std::vector<std::vector<double> >& contacts,const std::vector<std::vector<double> >& frictionCones);
 
 
-/// Solves for the torques / forces that keep the robot balanced against gravity
-/// 
-/// Args:
-///
-/// - robot: the robot model, posed in its current configuration
-/// - contacts: a list of contact points, given as 7-lists [x,y,z,nx,ny,nz,kFriction]
-/// - links: a list of the links on which those contact points lie
-/// - fext: the external force (e.g., gravity)
-/// - norm: the torque norm to minimize.  If 0, minimizes the l-infinity norm (default)
-///         If 1, minimizes the l-1 norm.  If 2, minimizes the l-2 norm (experimental,
-///          may not get good results)
-///
-/// Return value is a pair (t,f) giving the joint torques and frictional
-/// contact forces, if a solution exists, or None if no solution exists.
+/** @brief Solves for the torques / forces that keep the robot balanced against gravity
+ * 
+ * Args:
+ *
+ * - robot: the robot model, posed in its current configuration
+ * - contacts: a list of contact points, given as 7-lists [x,y,z,nx,ny,nz,kFriction]
+ * - links: a list of the links on which those contact points lie
+ * - fext: the external force (e.g., gravity)
+ * - norm: the torque norm to minimize.  If 0, minimizes the l-infinity norm (default)
+ *         If 1, minimizes the l-1 norm.  If 2, minimizes the l-2 norm (experimental,
+ *          may not get good results)
+ *
+ * Returns:
+ *
+ *     (tuple): a pair (t,f) giving the joint torques and frictional
+ *          contact forces, if a solution exists, or None if no solution exists.
+ *
+ */
 PyObject* equilibriumTorques(const RobotModel& robot,
 							const std::vector<std::vector<double> >& contacts,const std::vector<int>& links,
 							const std::vector<double>& fext,
@@ -329,9 +338,11 @@ PyObject* equilibriumTorques(const RobotModel& robot,
  *
  * Returns:
  * 
- *     torque,force (pair of lists, optional): if a solution exists, gives valid
- *         joint torques t and frictional contact forces (f1,...,fn).  None is
- *         returned if no solution exists.
+ *     (pair of lists, optional): a pair (torque,force) if a solution exists,
+ *          giving valid joint torques t and frictional contact forces (f1,...,fn). 
+ *
+ *          None is returned if no solution exists.
+ *
  */
 PyObject* equilibriumTorques(const RobotModel& robot,
 							const std::vector<std::vector<double> >& contacts,const std::vector<int>& links,

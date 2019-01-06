@@ -1474,10 +1474,11 @@ void Appearance::setElementColor(int feature,int element,float r,float g,float b
 {
   shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
   if(!app) throw PyException("Invalid appearance");
+  if(element < 0) throw PyException("Invalid negative element");
   switch(feature) {
   case VERTICES:
     {
-      if(element >= app->vertexColors.size()) {
+      if(element >= (int)app->vertexColors.size()) {
         if(app->geom == NULL) {
           app->vertexColors.resize(element+1,app->vertexColor);
         }
@@ -1493,7 +1494,7 @@ void Appearance::setElementColor(int feature,int element,float r,float g,float b
     break;
   case FACES:
     {
-      if(element >= app->faceColors.size()) {
+      if(element >= (int)app->faceColors.size()) {
         if(app->geom == NULL) {
           app->faceColors.resize(element+1,app->faceColor);
         }
@@ -2711,6 +2712,62 @@ void RobotModelLink::getPointVelocity(const double plocal[3],double out[3])
   v.get(out);
 }
 
+void RobotModelLink::getAcceleration(const std::vector<double>& ddq,double out[3])
+{
+  double zero[3] = {0.0,0.0,0.0};
+  getPointAcceleration(zero,ddq,out);
+}
+
+void RobotModelLink::getPointAcceleration(const double plocal[3],const std::vector<double>& ddq,double out[3])
+{
+  Vector3 dw,dv;
+  if(ddq.empty()) {
+    robotPtr->GetResidualAcceleration(Vector3(plocal),index,dw,dv);
+  }
+  else{
+    if((int)ddq.size() != robotPtr->q.n) 
+      throw PyException("Invalid size of ddq");
+    robotPtr->GetWorldAcceleration(Vector3(plocal),index,Vector((int)ddq.size(),&ddq[0]),dw,dv);
+  }
+  dv.get(out);
+}
+
+void RobotModelLink::getAngularAcceleration(const std::vector<double>& ddq,double out[3])
+{
+  Vector3 dw,dv;
+  if(ddq.empty()) {
+    robotPtr->GetResidualAcceleration(Vector3(0.0),index,dw,dv);
+  }
+  else{
+    if((int)ddq.size() != robotPtr->q.n) 
+      throw PyException("Invalid size of ddq");
+    robotPtr->GetWorldAcceleration(Vector3(0.0),index,Vector((int)ddq.size(),&ddq[0]),dw,dv);
+  }
+  dw.get(out);
+}
+
+void RobotModelLink::getPositionHessian(const double p[3],std::vector<std::vector<double> >& out,std::vector<std::vector<double> >& out2,std::vector<std::vector<double> >& out3)
+{
+  Matrix Hx,Hy,Hz;
+  Matrix* H[3] = {&Hx,&Hy,&Hz};
+  robotPtr->GetPositionHessian(Vector3(p),index,H);
+  copy(Hx,out);
+  copy(Hy,out2);
+  copy(Hz,out3);
+}
+
+void RobotModelLink::getOrientationHessian(std::vector<std::vector<double> >& out,std::vector<std::vector<double> >& out2,std::vector<std::vector<double> >& out3)
+{
+  Matrix Hx,Hy,Hz;
+  Matrix* H[3] = {&Hx,&Hy,&Hz};
+  Matrix Hwx,Hwy,Hwz;
+  Matrix* Hw[3] = {&Hwx,&Hwy,&Hwz};
+  robotPtr->GetJacobianDeriv(Vector3(0.0),index,Hw,H);
+  copy(Hwx,out);
+  copy(Hwy,out2);
+  copy(Hwz,out3);
+}
+
 void RobotModelLink::drawLocalGL(bool keepAppearance)
 {
   RobotWorld& world = *worlds[this->world]->world;
@@ -2819,7 +2876,7 @@ double RobotModelDriver::getVelocity()
 
 
 RobotModel::RobotModel()
-  :world(-1),index(-1),robot(NULL)
+  :world(-1),index(-1),robot(NULL),dirty_dynamics(true)
 {}
 
 bool RobotModel::loadFile(const char* fn)
@@ -2982,6 +3039,7 @@ void RobotModel::setConfig(const vector<double>& q)
   robot->q.copy(&q[0]);
   robot->UpdateFrames();
   robot->UpdateGeometry();
+  dirty_dynamics = true;
 }
 
 void RobotModel::setVelocity(const vector<double>& dq)
@@ -2990,6 +3048,7 @@ void RobotModel::setVelocity(const vector<double>& dq)
     throw PyException("Invalid size of velocity");
   }
   robot->dq.copy(&dq[0]);
+  dirty_dynamics = true;
 }
 
 void RobotModel::getJointLimits(vector<double>& qmin,vector<double>& qmax)
@@ -3216,6 +3275,13 @@ void RobotModel::getCom(double out[3])
   com.get(out);
 }
 
+void RobotModel::getComVelocity(double out[3])
+{
+  Vector3 h = robot->GetLinearMomentum();
+  Vector3 dcm = h / robot->GetTotalMass();
+  dcm.get(out);
+}
+
 void RobotModel::getComJacobian(std::vector<std::vector<double> >& out)
 {
   Matrix J;
@@ -3223,21 +3289,88 @@ void RobotModel::getComJacobian(std::vector<std::vector<double> >& out)
   copy(J,out);
 }
 
+void RobotModel::getLinearMomentum(double out[3])
+{
+  Vector3 h = robot->GetLinearMomentum();
+  h.get(out);
+}
+
+void RobotModel::getAngularMomentum(double out[3])
+{
+  Vector3 k = robot->GetAngularMomentum();
+  k.get(out);
+}
+
+double RobotModel::getKineticEnergy()
+{
+  return robot->GetKineticEnergy();
+}
+
+void RobotModel::getTotalInertia(std::vector<std::vector<double> >& out)
+{
+  Matrix3 H = robot->GetTotalInertia();
+  out.resize(3);
+  for(int i=0;i<3;i++) {
+    out[i].resize(3);
+    for(int j=0;j<3;j++) 
+      out[i][j] = H(i,j);
+  }
+}
+
 void RobotModel::getMassMatrix(std::vector<std::vector<double> >& B)
 {
   Matrix Bmat;
-  robot->UpdateDynamics();
+  /*
+  if(dirty_dynamics) {
+    robot->UpdateDynamics();
+    dirty_dynamics = false;
+  }
   robot->GetKineticEnergyMatrix(Bmat);
+  */
+  NewtonEulerSolver ne(*robot);
+  ne.CalcKineticEnergyMatrix(Bmat);
   copy(Bmat,B);
 }
 
 void RobotModel::getMassMatrixInv(std::vector<std::vector<double> >& Binv)
 {
+  Matrix Bmatinv;
+  /*
+  if(dirty_dynamics) {
+    robot->UpdateDynamics();
+    dirty_dynamics = false;
+  }
   Matrix Bmat;
-  //robot->UpdateDynamics();
+  robot->GetKineticEnergyMatrix(Bmat);
+  LDLDecomposition<Real> ldl;
+  ldl.set(Bmat);
+  ldl.getInverse(Bmatinv);
+  */
   NewtonEulerSolver ne(*robot);
-  ne.CalcKineticEnergyMatrixInverse(Bmat);
-  copy(Bmat,Binv);
+  ne.CalcKineticEnergyMatrixInverse(Bmatinv);
+  copy(Bmatinv,Binv);
+}
+
+void RobotModel::getMassMatrixDeriv(int i,std::vector<std::vector<double> >& out)
+{
+  Matrix Bmat;
+  if(dirty_dynamics) {
+    robot->UpdateDynamics();
+    dirty_dynamics = false;
+  }
+  robot->GetKineticEnergyMatrixDeriv(i,Bmat);
+  copy(Bmat,out);
+}
+
+void RobotModel::getMassMatrixTimeDeriv(std::vector<std::vector<double> >& out)
+{
+  Matrix Bmat;
+  if(dirty_dynamics) {
+    robot->UpdateDynamics();
+    dirty_dynamics = false;
+  }
+  robot->GetKineticEnergyMatrixTimeDeriv(Bmat);
+  copy(Bmat,out);
 }
 
 void RobotModel::getCoriolisForceMatrix(std::vector<std::vector<double> >& C)

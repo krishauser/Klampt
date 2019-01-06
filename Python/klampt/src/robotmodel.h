@@ -115,19 +115,45 @@ class RobotModelLink
   ///perform inverse kinematics.  The transform is overwritten when the
   ///robot's setConfig() method is called.
   void setTransform(const double R[9],const double t[3]);
-  ///Returns the total jacobian of the local point p (row-major matrix)
-  ///(orientation jacobian is stacked on position jacobian)
-  void getJacobian(const double p[3],std::vector<std::vector<double> >& out);
-  ///Returns the jacobian of the local point p (row-major matrix)
-  void getPositionJacobian(const double p[3],std::vector<std::vector<double> >& out);
-  ///Returns the orientation jacobian of the link (row-major matrix)
-  void getOrientationJacobian(std::vector<std::vector<double> >& out);
-  ///Returns the velocity of the origin given the robot's current velocity
+  ///Returns the velocity of the link's origin given the robot's current joint
+  ///velocities
   void getVelocity(double out[3]);
-  ///Returns the angular velocity given the robot's current velocity
+  ///Returns the angular velocity of the link given the robot's current joint
+  ///velocities
   void getAngularVelocity(double out[3]);
   ///Returns the world velocity of the point given the robot's current velocity
   void getPointVelocity(const double plocal[3],double out[3]);
+  ///Returns the 6xn total jacobian of the local point p (row-major matrix)
+  ///w.r.t. the robot's configuration q.
+  ///
+  ///(the orientation jacobian is stacked on position jacobian)
+  void getJacobian(const double p[3],std::vector<std::vector<double> >& out);
+  ///Returns the 3xn jacobian of the local point p (row-major matrix)
+  ///w.r.t. the robot's configuration q.
+  void getPositionJacobian(const double p[3],std::vector<std::vector<double> >& out);
+  ///Returns the 3xn orientation jacobian of the link (row-major matrix)
+  ///w.r.t. the robot's configuration q.
+  void getOrientationJacobian(std::vector<std::vector<double> >& out);
+  ///Returns the acceleration of the link origin given the robot's current
+  ///joint velocities and joint accelerations ddq.
+  ///
+  ///ddq can be empty, which calculates the acceleration with acceleration 0,
+  ///and is a little faster than setting ddq to [0]*n
+  void getAcceleration(const std::vector<double>& ddq,double out[3]);
+  ///Returns the acceleration of the point given the robot's current
+  ///joint velocities and joint accelerations ddq.
+  void getPointAcceleration(const double plocal[3],const std::vector<double>& ddq,double out[3]);
+  ///Returns the angular acceleration of the link given the robot's current
+  ///joint velocities and joint accelerations ddq.
+  void getAngularAcceleration(const std::vector<double>& ddq,double out[3]);
+  ///Returns the Hessians of each component of the position p w.r.t the
+  ///robot's configuration q.  The result is a triple of nxn matrices
+  ///corresponding to the (x,y,z) components respectively.
+  void getPositionHessian(const double p[3],std::vector<std::vector<double> >& out,std::vector<std::vector<double> >& out2,std::vector<std::vector<double> >& out3);
+  ///Returns the Hessians of each orientation component of the link w.r.t the
+  ///robot's configuration q.  The result is a triple of nxn matrices
+  ///corresponding to the (wx,wy,wz) components respectively.
+  void getOrientationHessian(std::vector<std::vector<double> >& out,std::vector<std::vector<double> >& out2,std::vector<std::vector<double> >& out3);
   ///Draws the link's geometry in its local frame.  If keepAppearance=true, the
   ///current Appearance is honored.  Otherwise, just the geometry is drawn.
   void drawLocalGL(bool keepAppearance=true);
@@ -291,27 +317,52 @@ class RobotModel
   //dynamics functions
   ///Returns the 3D center of mass at the current config
   void getCom(double out[3]);
+  ///Returns the 3D velocity of the center of mass at the current config / velocity
+  void getComVelocity(double out[3]);
   ///Returns the 3xn Jacobian matrix of the current center of mass
   void getComJacobian(std::vector<std::vector<double> >& out);
-  ///Returns the nxn mass matrix B(q)
+  ///Returns the 3D linear momentum vector
+  void getLinearMomentum(double out[3]);
+  ///Returns the 3D angular momentum vector
+  void getAngularMomentum(double out[3]);
+  ///Returns the kinetic energy at the current config / velocity
+  double getKineticEnergy();
+  ///Calculates the 3x3 total inertia matrix of the robot
+  void getTotalInertia(std::vector<std::vector<double> >& out);
+  ///Returns the nxn mass matrix B(q).  Takes O(n^2) time
   void getMassMatrix(std::vector<std::vector<double> >& out);
-  ///Returns the inverse of the nxn mass matrix B(q)^-1 (faster than inverting result of getMassMatrix)
+  ///Returns the inverse of the nxn mass matrix B(q)^-1. Takes O(n^2) time,
+  ///which is much faster than inverting the result of getMassMatrix
   void getMassMatrixInv(std::vector<std::vector<double> >& out);
-  ///Returns the Coriolis force matrix C(q,dq) for current config and velocity
+  ///Returns the derivative of the nxn mass matrix with respect to q_i. Takes
+  ///O(n^3) time
+  void getMassMatrixDeriv(int i,std::vector<std::vector<double> >& out);
+  ///Returns the derivative of the nxn mass matrix with respect to t, given the
+  ///robot's current velocity. Takes O(n^4) time
+  void getMassMatrixTimeDeriv(std::vector<std::vector<double> >& out);
+  ///Returns the Coriolis force matrix C(q,dq) for current config and velocity.
+  ///Takes O(n^2) time
   void getCoriolisForceMatrix(std::vector<std::vector<double> >& out);
-  ///Returns the Coriolis forces C(q,dq)*dq for current config and velocity
-  ///(faster than computing matrix and doing product). ("Forces" is somewhat
-  ///of a misnomer; the result is a joint torque vector)
+  ///Returns the Coriolis forces C(q,dq)*dq for current config and velocity.
+  ///Takes O(n) time, which is faster than computing matrix and doing product.
+  ///("Forces" is somewhat of a misnomer; the result is a joint torque vector)
   void getCoriolisForces(std::vector<double>& out);
   ///Returns the generalized gravity vector G(q) for the given workspace
-  ///gravity vector g (usually (0,0,-9.8)).  ("Forces" is somewhat of a
-  ///misnomer; the result is a joint torque vector)
+  ///gravity vector g (usually (0,0,-9.8)). 
+  ///
+  ///Note: "Forces" is somewhat of a misnomer; the result is a vector of joint
+  ///torques.
   void getGravityForces(const double g[3],std::vector<double>& out);
-  ///Computes the inverse dynamics (using Recursive Newton Euler solver).
-  ///Note: does not include gravity term G(q)
+  ///Computes the inverse dynamics.  Uses Recursive Newton Euler solver and
+  ///takes O(n) time.
+  ///
+  ///Note: does not include gravity term G(q).  getGravityForces(g) will need
+  ///to be added to the result.
   void torquesFromAccel(const std::vector<double>& ddq,std::vector<double>& out);
   ///Computes the foward dynamics (using Recursive Newton Euler solver)
-  ///Note: does not include gravity term G(q)
+  ///
+  ///Note: does not include gravity term G(q).  getGravityForces(g) will need
+  ///to be subtracted from the argument t.
   void accelFromTorques(const std::vector<double>& t,std::vector<double>& out);
 
   //interpolation functions
@@ -346,6 +397,7 @@ class RobotModel
   int world;
   int index;
   Robot* robot;
+  bool dirty_dynamics;
 };
 
 /** @brief A rigid movable object.
