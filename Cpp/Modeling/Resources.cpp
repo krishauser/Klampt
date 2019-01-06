@@ -7,19 +7,21 @@
 #include "IO/JSON.h"
 #include <sstream>
 
-template <> const char* BasicResource<Config>::className = "Config";
-template <> const char* BasicResource<Vector3>::className = "Vector3";
-template <> const char* BasicResource<Matrix3>::className = "Matrix3";
-template <> const char* BasicResource<Matrix>::className = "Matrix";
-template <> const char* BasicResource<RigidTransform>::className = "RigidTransform";
-template <> const char* BasicResource<Meshing::TriMesh>::className = "TriMesh";
-template <> const char* BasicResource<GeometricPrimitive3D>::className = "GeometricPrimitive3D";
-template <> const char* BasicResource<Hold>::className = "Hold";
-template <> const char* BasicResource<Camera::Viewport>::className = "Viewport";
+template <> const char* BasicResourceTypeName<Config>() { return "Config"; }
+template <> const char* BasicResourceTypeName<Vector3>() { return "Vector3"; }
+template <> const char* BasicResourceTypeName<Matrix3>() { return "Matrix3"; }
+template <> const char* BasicResourceTypeName<Matrix>() { return "Matrix"; }
+template <> const char* BasicResourceTypeName<RigidTransform>() { return "RigidTransform"; }
+template <> const char* BasicResourceTypeName<Meshing::TriMesh>() { return "TriMesh"; }
+template <> const char* BasicResourceTypeName<GeometricPrimitive3D>() { return "GeometricPrimitive3D"; }
+template <> const char* BasicResourceTypeName<Hold>() { return "Hold"; }
+template <> const char* BasicResourceTypeName<Camera::Viewport>() { return "Viewport"; }
 template class BasicResource<Config>;
 template class BasicResource<Vector3>;
 template class BasicResource<Matrix3>;
 template class BasicResource<Matrix>;
+template class BasicResource<Meshing::TriMesh>;
+template class BasicResource<GeometricPrimitive3D>;
 template class BasicResource<RigidTransform>;
 template class BasicResource<Hold>;
 

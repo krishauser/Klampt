@@ -23,6 +23,17 @@ typedef BasicResource<Matrix> MatrixResource;
 typedef BasicResource<RigidTransform> RigidTransformResource;
 typedef BasicResource<GeometricPrimitive3D> GeometricPrimitive3DResource;
 typedef BasicResource<Camera::Viewport> ViewportResource;
+//forward declarations needed before BasicResource<T> instantiation
+template <> const char* BasicResourceTypeName<Config>();
+template <> const char* BasicResourceTypeName<Vector3>();
+template <> const char* BasicResourceTypeName<Matrix3>();
+template <> const char* BasicResourceTypeName<Matrix>();
+template <> const char* BasicResourceTypeName<RigidTransform>();
+template <> const char* BasicResourceTypeName<Meshing::TriMesh>();
+template <> const char* BasicResourceTypeName<GeometricPrimitive3D>();
+template <> const char* BasicResourceTypeName<Hold>();
+template <> const char* BasicResourceTypeName<Camera::Viewport>();
+
 
 /** @ingroup Modeling
  * @brief Resource for multiple Config's.
