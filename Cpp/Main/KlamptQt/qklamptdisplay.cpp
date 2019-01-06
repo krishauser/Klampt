@@ -128,7 +128,7 @@ void QKlamptDisplay::keyReleaseEvent(QKeyEvent *e){
 
 void QKlamptDisplay::mouseMoveEvent(QMouseEvent *e){
   if(gui == NULL) return;
-  gui->SendMouseMove(e->x(),e->y());
+  gui->SendMouseMove(e->x()*devicePixelRatio(),e->y()*devicePixelRatio());
 }
 
 void QKlamptDisplay::mousePressEvent(QMouseEvent *e){
@@ -146,14 +146,14 @@ void QKlamptDisplay::mousePressEvent(QMouseEvent *e){
     gui->SendKeyDown("alt");
   else
     gui->SendKeyUp("alt");
-  gui->SendMouseClick(button,1,e->x(),e->y());
+  gui->SendMouseClick(button,1,e->x()*devicePixelRatio(),e->y()*devicePixelRatio());
 }
 
 void QKlamptDisplay::mouseReleaseEvent(QMouseEvent *e){
   if(gui == NULL) return;
   int button=e->button();
   if(button==1) button=0;
-  gui->SendMouseClick(button,0,e->x(),e->y());
+  gui->SendMouseClick(button,0,e->x()*devicePixelRatio(),e->y()*devicePixelRatio());
 }
 
 void QKlamptDisplay::wheelEvent(QWheelEvent *e){

@@ -15,8 +15,7 @@ public:
     virtual ~QKlamptGUIBase();
     QKlamptDisplay* display;
     QTimer idle_timer;
-    QTimer display_timer;
-
+    
     virtual bool OnRefresh();
     virtual bool OnPauseIdle(double secs);
     virtual bool OnDrawText(int x, int y, const std::string& str, int height);
@@ -24,7 +23,6 @@ public:
 
 public slots:
     void OnIdleTimer();
-    void OnDisplayTimer();
 };
 
 #endif // QKLAMPTGUIBASE_H

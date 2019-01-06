@@ -9,7 +9,6 @@ QKlamptGUIBase::QKlamptGUIBase(QKlamptDisplay* _display,GenericBackendBase *_bac
 
   connect(&idle_timer, SIGNAL(timeout()),this,SLOT(OnIdleTimer()));
   idle_timer.start(0);
-  connect(&display_timer, SIGNAL(timeout()),this,SLOT(OnDisplayTimer()));
 }
 
 void QKlamptGUIBase::OnIdleTimer()
@@ -18,11 +17,6 @@ void QKlamptGUIBase::OnIdleTimer()
   idle_timer.start(0);
 }
 
-void QKlamptGUIBase::OnDisplayTimer()
-{
-  display->updateGL();
-  display_timer.stop();
-}
 
 bool QKlamptGUIBase::OnPauseIdle(double secs) 
 {
@@ -35,9 +29,12 @@ bool QKlamptGUIBase::OnPauseIdle(double secs)
 
 bool QKlamptGUIBase::OnRefresh()
 {
-  if(!display->painted) return true;
+  if(!display->painted) {
+    printf("Skipping refresh, not painted yet\n");
+    return true;
+  }
   display->painted = false;
-  display_timer.start(0);
+  display->update();
   return true;
 }
 
