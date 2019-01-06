@@ -5,7 +5,9 @@
 :: (assumes zip and pscp command line tools are available.  See the GnuWin32 zip tool and PuTTy)
 
 :: configuration variables
-SET klamptversion=0.8.0
+SET klamptversion=0.8.1
+:: dependency libraries may be kept back to a prior version
+SET klamptdepversion=0.8.0
 ::    this is used for Python build (VS 2015)
 SET VS90COMNTOOLS=%VS140COMNTOOLS%
 SET PYTHON27_32=D:\Python27\python.exe
@@ -107,7 +109,7 @@ for %%P in (%PYTHON_64_VERSIONS%) do (
 
 :: zip dependency libraries
 ::   release
-set depfolder=Klampt-%klamptversion%.win32-deps-vs2015
+set depfolder=Klampt-%klamptdepversion%.win32-deps-vs2015
 mkdir %depfolder%
 cd Cpp\Dependencies
 for %%I in (assimp--3.0.1270-sdk\lib\assimp_release-dll_win32\* Assimp32.dll glpk_4_61.dll glpk_4_61.lib glew32.dll glew32.lib KrisLibrary.lib ode_double.lib tinyxml_STL.lib) do copy /Y %%I ..\..\%depfolder%
@@ -119,7 +121,7 @@ cd ..
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 ::   debug
-set depfolder=Klampt-%klamptversion%.win32-deps-vs2015d
+set depfolder=Klampt-%klamptdepversion%.win32-deps-vs2015d
 mkdir %depfolder%
 cd Cpp\Dependencies
 for %%I in (assimp--3.0.1270-sdk\lib\assimp_debug-dll_win32\* Assimp32d.dll  glpk_4_61.dll glpk_4_61.lib glew32.dll glew32.lib KrisLibraryd.lib ode_doubled.lib ode-0.14\lib\DebugDoubleLib\ode.pdb tinyxmld_STL.lib) do copy /Y %%I ..\..\%depfolder%
@@ -131,7 +133,7 @@ cd ..
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 ::   release x64
-set depfolder=Klampt-%klamptversion%.win64-deps-vs2015
+set depfolder=Klampt-%klamptdepversion%.win64-deps-vs2015
 mkdir %depfolder%
 cd Cpp\Dependencies
 for %%I in (assimp--3.0.1270-sdk\lib\assimp_release-dll_x64\* x64\Assimp64.dll glpk_4_61.dll glpk_4_61.lib glew32.dll glew32.lib x64\KrisLibrary.lib x64\ode_double.lib x64\tinyxml_STL.lib) do copy /Y %%I ..\..\%depfolder%
@@ -143,7 +145,7 @@ cd ..
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 ::   debug x64
-set depfolder=Klampt-%klamptversion%.win64-deps-vs2015d
+set depfolder=Klampt-%klamptdepversion%.win64-deps-vs2015d
 mkdir %depfolder%
 cd Cpp\Dependencies
 for %%I in (assimp--3.0.1270-sdk\lib\assimp_release-dll_x64\* x64\Assimp64d.dll glpk_4_61.dll glpk_4_61.lib glew32.dll glew32.lib x64\KrisLibraryd.lib x64\ode_doubled.lib x64\tinyxmld_STL.lib) do copy /Y %%I ..\..\%depfolder%
@@ -161,10 +163,10 @@ pscp msvc/Klampt-%klamptversion%-win32.msi hauser@motion.pratt.duke.edu:software
 :: Qt5 doesn't have a 64-bit version
 :: pscp msvc64/Klampt-%klamptversion%-win64.msi hauser@motion.pratt.duke.edu:software/
 if %errorlevel% neq 0 exit /b %errorlevel%
-pscp Klampt-%klamptversion%.win32-deps-vs2015.zip hauser@motion.pratt.duke.edu:software/
-pscp Klampt-%klamptversion%.win32-deps-vs2015d.zip hauser@motion.pratt.duke.edu:software/
-pscp Klampt-%klamptversion%.win64-deps-vs2015.zip hauser@motion.pratt.duke.edu:software/
-pscp Klampt-%klamptversion%.win64-deps-vs2015d.zip hauser@motion.pratt.duke.edu:software/
+pscp Klampt-%klamptdepversion%.win32-deps-vs2015.zip hauser@motion.pratt.duke.edu:software/
+pscp Klampt-%klamptdepversion%.win32-deps-vs2015d.zip hauser@motion.pratt.duke.edu:software/
+pscp Klampt-%klamptdepversion%.win64-deps-vs2015.zip hauser@motion.pratt.duke.edu:software/
+pscp Klampt-%klamptdepversion%.win64-deps-vs2015d.zip hauser@motion.pratt.duke.edu:software/
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 :: upload wheels to motion website
