@@ -40,7 +40,7 @@ _thumbnail_window = None
 
 import collections
 
-class LRUCache:
+class _LRUCache:
     def __init__(self, capacity):
         self.capacity = capacity
         self.cache = collections.OrderedDict()
@@ -60,7 +60,7 @@ class LRUCache:
             if len(self.cache) >= self.capacity:
                 self.cache.popitem(last=False)
         self.cache[key] = value
-_editTemporaryWorlds = LRUCache(10)
+_editTemporaryWorlds = _LRUCache(10)
 
 
 def getDirectory():
