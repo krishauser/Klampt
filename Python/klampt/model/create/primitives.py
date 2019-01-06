@@ -23,7 +23,7 @@ def box(width,depth,height,center=None,R=None,t=None,world=None,name=None,mass=f
 
     Returns:
         box: either a Geometry3D, RigidObjectModel, or TerrainModel.  In the latter
-            two cases, the box is added to the world.
+        two cases, the box is added to the world.
     """
     if center is None:
         center = [0,0,0]
@@ -80,7 +80,7 @@ def sphere(radius,center=None,R=None,t=None,world=None,name=None,mass=float('inf
 
     Returns:
         sphere: either a Geometry3D, RigidObjectModel, or TerrainModel.  In the latter
-            two cases, the sphere is added to the world.
+        two cases, the sphere is added to the world.
     """
     if center is None:
         center = [0,0,0]

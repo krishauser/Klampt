@@ -189,9 +189,10 @@ def _make_sympy_adaptor(func):
 class SympyFunction(Function):
     """Defines a Function from a Sympy expression.
 
-    Example:
-    x,y = sympy.symbols("x y")
-    twoxy = SympyFunction("twoxy",2*x*y)
+    Example::
+
+        x,y = sympy.symbols("x y")
+        twoxy = SympyFunction("twoxy",2*x*y)
     """
     def __init__(self,name,expr,symbol_order=None):
         """

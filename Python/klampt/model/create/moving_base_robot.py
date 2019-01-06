@@ -9,11 +9,20 @@ import os
 from klampt.math import so3
 
 
-def make_moving_base_robot(robotfile,world,tempname="temp.rob",debug=False):
+def make(robotfile,world,tempname="temp.rob",debug=False):
 	"""Converts the given fixed-base robot file into a moving base robot
 	and loads it into the given world.
 
-	If debug = True then the robot file named by tempname is not removed from disk.
+	Args:
+		robotfile (str): the name of a fixed-base robot file to load
+		world (WorldModel): a world that will contain the new robot
+		tempname (str, optional): a name of a temporary file containing
+			the moving-base robot
+		debug (bool, optional): if True, the robot file named by
+			``tempname`` is not removed from disk.
+
+	Returns:
+		(RobotModel): the loaded robot, stored in ``world``.
 	"""
 	_template_ = """### Boilerplate kinematics of a drivable floating (translating and rotating) cube with a robot hand mounted on it
 TParent 1 0 0   0 1 0   0 0 1   0 0 0  \
@@ -91,12 +100,12 @@ mount 5 "%s" 1 0 0   0 1 0   0 0 1   0 0 0 as "%s"
 	return robot
 
 
-def get_moving_base_xform(robot):
+def get_xform(robot):
 	"""For a moving base robot model, returns the current base rotation
 	matrix R and translation t."""
 	return robot.link(5).getTransform()
 
-def set_moving_base_xform(robot,R,t):
+def set_xform(robot,R,t):
 	"""For a moving base robot model, set the current base rotation
 	matrix R and translation t.  (Note: if you are controlling a robot
 	during simulation, use send_moving_base_xform_command)
@@ -110,7 +119,7 @@ def set_moving_base_xform(robot,R,t):
 	q[5]=roll
 	robot.setConfig(q)
 
-def send_moving_base_xform_linear(controller,R,t,dt):
+def send_xform_linear(controller,R,t,dt):
 	"""For a moving base robot model, send a command to move to the
 	rotation matrix R and translation t using linear interpolation
 	over the duration dt.
@@ -127,7 +136,7 @@ def send_moving_base_xform_linear(controller,R,t,dt):
 	q[5]=roll
 	controller.setLinear(q,dt)
 
-def send_moving_base_xform_PID(controller,R,t):
+def send_xform_PID(controller,R,t):
 	"""For a moving base robot model, send a command to move to the
 	rotation matrix R and translation t by setting the PID setpoint
 

@@ -455,6 +455,8 @@ loaders = {'Trajectory':loadTrajectory,
 savers = {'Trajectory':lambda x,fn:x.save(fn),
           'LinearPath':lambda x,fn:x.save(fn),
           'MultiPath':lambda x,fn:x.save(fn),
+          'Geometry3D':lambda x,fn:x.save(fn),
+          'WorldModel':lambda x,fn:x.writeFile(fn),
           }
 
 def save(obj,type,fn):
