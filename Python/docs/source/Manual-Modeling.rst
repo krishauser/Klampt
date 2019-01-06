@@ -101,7 +101,7 @@ Robot Models provide the following functions
 -  Loads and saves robot descriptions from disk.
 
 For now, we will discuss only the kinematics of a Robot Model, saving
-`discussion of dynamics <Manual-Dynamics.md>`__ for later. The basic
+`discussion of dynamics <Manual-Dynamics.html>`__ for later. The basic
 kinematic components are:
 
 -  Contains NL degrees of freedom (DOFs) and NL Robot Links.
@@ -275,7 +275,7 @@ lie at the configuration [0,pi/4,pi/4].
 
 .. code:: python
 
-    >>> from klampt import *
+    >>> from klampt import WorldModel
     >>> import math
     >>> world = WorldModel()
     >>> world.loadElement("Klampt-examples/data/robots/planar3R.rob")
@@ -285,7 +285,7 @@ lie at the configuration [0,pi/4,pi/4].
     Initialized robot collision data structures in time 0.00084037s
     Done loading robot file robots/planar3R.rob.
     0
-    >>> robot= world.robot(0)
+    >>> robot = world.robot(0)
     >>> robot.setConfig([0,math.pi/4,math.pi/4])
     >>> link = robot.link(2)
     >>> link.getWorldPosition([1,0,0])
@@ -371,7 +371,7 @@ links + 1 physical link.
 
 API summary
 ~~~~~~~~~~~
-See `klampt.model.create.moving_base_robot <klampt.model.create.moving_base_robot.html>`__ for a 
+See `klampt.model.create.moving_base_robot <klampt.model.create.html#module-klampt.model.create.moving_base_robot>`__ for a 
 utility function for setting up a floating base.
 
 Rigid Object Models
@@ -418,7 +418,7 @@ create a Python file named ``world_create_test.py`` with the following contents:
 
 .. code:: python
 
-    from klampt import *
+    from klampt import WorldModel
     from klampt import vis
 
     w = WorldModel()
@@ -493,7 +493,7 @@ after the world has been loaded, but before it is drawn.
 
 ::
 
-    from klampt import *
+    from klampt import WorldModel,Geometry3D
     from klampt import vis
 
     #you will need to change this to the absolute or relative path to Klampt-examples

@@ -144,9 +144,9 @@ geometries. All the standard Klamp't geometry types (geometric
 primitives, triangle meshes, point clouds) are supported.
 
 For convenience, the
-`klampt.model.collide <klampt.model.html#module-klampt.model.collide>`__
+`klampt.model.collide <klampt.model.collide.html>`__
 module provides utility functions for checking collision with sets of
-objects, as well as a :class:`WorldCollider` class that by checks collision
+objects, as well as a :class:`~klampt.model.collide.WorldCollider` class that by checks collision
 between any set of objects and any other set of objects. These methods
 return an iterator over collision pairs, which allows the user to either
 stop at the first collision or enumerate all collisions.
@@ -170,7 +170,8 @@ The :class:`~klampt.Geometry3D` methods may be used for performing collision det
 -  ``geom.rayCast(source,direction)``: casts a ray with a given source and direction.
 
 For more control over distance queries, you may use the following functions, which
-have the suffix ``_ext``: 
+have the suffix ``_ext`` and accept a :class:`~klampt.DistanceQuerySettings` object: 
+
 -  ``geom.distance_ext(geom2,settings)``
 -  ``geom.distance_point_ext(pt,settings)``
 

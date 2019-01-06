@@ -4,28 +4,37 @@ Frequently asked questions (FAQ)
 What are some examples of cool things that Klampt can do?
 ---------------------------------------------------------
 
-#. Install (nearly) all of the robotics basics in a single package. 
-   Visualization, kinematics, inverse kinematics, dynamics, collision
+#. *Collects (nearly) all of the robotics essentials in a single software
+   package*.  Visualization, kinematics, inverse kinematics, dynamics, collision
    detection, planning, and control are tightly integrated and easy to use. 
    The days of installing several packages just to solve an IK problem are
    over!
-#. Robust physics simulation without the pain. (Or at least, with less pain.)
+
+#. *Robust physics simulation without the pain*. (Or at least, with less pain.)
    Robots can be imported directly using their CAD models without having to
    define bounding volumes.
-#. Really simple visual debugging.  With only a couple lines of code, you can
+
+#. *Really simple visual debugging*.  With only a couple lines of code, you can
    see motions, configurations, geometries, and transforms, and even edit them.
-#. File I/O is also well-supported, as almost all Klampt objects can be saved
+
+#. *Well-supported file I/O*.  Almost all Klampt objects can be saved
    to disk, browsed visually, and loaded from disk in a single line of code.
-   This makes it super easy to share data between programs.
-#. Integrated handling of triangle meshes, point clouds, and implicit surfaces.
-   These objects can be used in collision detection, planning, and even
+   This makes it super easy to share data between programs, and to build large
+   software systems with points, transforms, configurations, and paths treated
+   as "assets".
+
+#. *Integrated handling of multiple geometry types*.  Klamp't handles triangle
+   meshes, point clouds, geometric primitives, and implicit surfaces.
+   They can be used in collision detection, planning, and even
    simulation without preprocessing.
-#. Deploy robotics code using Jupyter notebook.  The robot and world
+
+#. *Deploy robotics code using Jupyter notebook*.  The robot and world
    can be visualized, modified, and simulated in 3D (using WebGL) inside the
    notebook, and you can let collaborators modify parameters to rapidly see the
    results. 
-#. Make thousands of slightly different worlds, and simulate how your robot
-   behaves in them.  Copying Klamp't worlds is very cheap!  Moreover, you can
+
+#. *Make thousands of slightly different worlds, and simulate robot behavior in
+   all of them*.  Copying Klamp't worlds is very cheap!  Moreover, you can
    save all the simulation trajectories and browse them easily.
 
 
@@ -40,7 +49,7 @@ Where should I get started learning the Klampt API?
 ---------------------------------------------------
 
 The best place to start learning would be to get a sense of the `organization
-of the library <Manual-Organization.html>`, and then to learn the
+of the library <Manual-Organization.html>`__, and then to learn the
 `modeling functions <Manual-Modeling.html>`__.  You should be comfortable with
 the concepts of the WorldModel, RobotModel, RigidObjectModel, and TerrainModel
 classes, and their file structure. Browsing the ``data`` directory in the
@@ -48,7 +57,7 @@ classes, and their file structure. Browsing the ``data`` directory in the
 will help you become familiarized with what is possible.
 
 It is also essential to become comfortable with
-`visualization <Manual-Visualization.html>` to be able to visualize whether
+`visualization <Manual-Visualization.html>`__ to be able to visualize whether
 your programs are making sense.
 
 After this, depending on your interests, most people choose one of three
@@ -59,14 +68,14 @@ routes:
 #. Medium-level `trajectory representation <Manual-Paths.html>`__, execution
    tools (:meth:`klampt.model.trajectory.path_to_trajectory`, :meth:`klampt.model.trajectory.execute_trajectory`)
    and `inverse kinematics <Manual-IK.html>`__ and `Cartesian path execution <klampt.model.cartesian_path.html>`__.
-#. High-level `motion planning <Manual-Planning.html>` tools.
+#. High-level `motion planning <Manual-Planning.html>`__ tools.
 
 
 How do I import a URDF file properly?
 -------------------------------------
 
 Please see the
-`tutorial here <https://github.com/krishauser/Klampt/blob/master/Documentation/Tutorials/Import-and-calibrate-urdf.md>`__.
+`tutorial here <https://github.com/krishauser/Klampt/blob/master/Cpp/docs/Tutorials/Import-and-calibrate-urdf.md>`__.
 
 My simulator goes unstable and/or crashes. Help!
 ------------------------------------------------
@@ -101,7 +110,7 @@ detector". The simulator status will also return "unreliable."
 
 To avoid penetration, there are two remedies: 1) increase the thickness
 of the boundary layer, or 2) make the boundary layer stiffer. See the
-`Simulation section of the Klamp't Manual <Manual-Simulation.md>`__ for
+`Simulation section of the Klamp't Manual <Manual-Simulation.html>`__ for
 more details on how to implement these fixes.
 
 The simulator runs slowly. How can I make it faster?
@@ -143,7 +152,7 @@ Some tips include
 
 If you have built from source, and have data from your real robot,
 you can also use the `MotorCalibrate` program.see the
-`tutorial here <https://github.com/krishauser/Klampt/blob/master/Documentation/Tutorials/Import-and-calibrate-urdf.md>`__
+`tutorial here <https://github.com/krishauser/Klampt/blob/master/Cpp/docs/Tutorials/Import-and-calibrate-urdf.md>`__
 for instructions.
 
 
@@ -160,13 +169,15 @@ be rare in intelligent robots*. However, it is true that scripts / state
 machines are sometimes the easiest way to accomplish a given behavior
 with the current generation of robot AI tools.
 
-To implement a behavior script in Klamp't, the script should be launched
+To implement a behavior script in Klamp't, the script should be run
 in a separate thread from the execution thread. It can then monitor the
 state of the execution thread (e.g., waiting for a movement to finish)
-and react accordingly. For those new to threading, please see the C++
-``<thread>`` module or the Python threading module for more information.
+and react accordingly.
+The multithreaded visualization available in Linux and Windows is very
+convenient for this. See the `visualization documentation <Manual-Visualization.html#multithreaded-mode>`__
+for instructions and examples.  
 
 To implement a state machine, a controller should manually maintain and
 simulate its behavior in its feedback loop. A framework for such
-controllers the ``StateMachineController`` class in
+controllers is the ``StateMachineController`` class in
 `Python/control/controller.py <../Python/control/controller.py>`__.

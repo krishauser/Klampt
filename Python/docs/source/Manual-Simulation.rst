@@ -89,7 +89,7 @@ In PID mode, the torque applied by the actuator is
 
 .. math::
 
-   \tau=k_P(\theta_D - \theta_A)+k_D(\dot{\theta}_D - \dot{theta_A})+k_I I 
+   \tau=k_P(\theta_D - \theta_A)+k_D(\dot{\theta}_D - \dot{\theta_A})+k_I I 
 
 where
 
@@ -100,7 +100,7 @@ where
 
 The friction forces resist the motion of the joint, and Klamp't uses a
 simple stick-slip friction model where the sticking mode breaking
-force is equal to :\math:`\mu_D` and the sliding mode friction force is
+force is equal to :math:`\mu_D` and the sliding mode friction force is
 
 .. math::
 
@@ -421,11 +421,11 @@ defines the world. The world contains a one-link robot with an actuator.
 
 .. code:: python
 
-    from klampt import *
+    import klampt
     from klampt.sim import batch
     import random, math
 
-    world = WorldModel()
+    world = klampt.WorldModel()
     fn = "world1.xml"
     res = world.readFile(fn)
     if not res:

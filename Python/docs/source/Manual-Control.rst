@@ -99,10 +99,11 @@ API summary
 -  ``controller.setTorque(t)``: sets a constant torque command t, which
    is a list of n floats.
 
-| **Motion queue operations (wraps around a PID controller)**:
-| Convention: ``setX`` methods move immediately to the indicated
-  milestone, ``add/append`` creates a motion from the end of the motion
-  queue to the indicated milestone
+**Motion queue operations (wraps around a PID controller)**
+
+Convention: ``setX`` methods move immediately to the indicated
+milestone, ``add/append`` creates a motion from the end of the motion
+queue to the indicated milestone
 
 -  ``controller.remainingTime()``: returns the remaining time in the
    motion queue, in seconds.
@@ -217,7 +218,7 @@ control should be used:
 -  torquecmd: use torque control.
 
 Several existing controllers have been implemented in
-`Python/control/controller.py <https://github.com/krishauser/klampt/blob/master/Python/control/controller.py>`__  to make the design and composition
+`control/controller.py <https://github.com/krishauser/klampt/blob/master/Python/control/controller.py>`__  to make the design and composition
 of controllers a bit easier, e.g., finite state machines, switching
 controllers, linear controllers, etc.
 

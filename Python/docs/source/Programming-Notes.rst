@@ -102,7 +102,7 @@ detail in the manual.  You may wish to look these over.
    similar to the ROS ``tf`` module.
 -  `create <klampt.model.create.html>`__: helpers to create robots, geometric
    primitives, and piles of objects.
--  `map <klampt.model.map.html>`__: provides a more Pythonic way to access
+-  `access <klampt.model.access.html>`__: provides a more Pythonic way to access
    items in a world.
 -  `subrobot <klampt.model.subrobot.html>`__: defines :class:`~klampt.model.subrobot.SubRobotModel`,
    a class that is ``RobotModel``-like but only modifies selected degrees of

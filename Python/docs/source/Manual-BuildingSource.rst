@@ -2,13 +2,14 @@ Building from source
 =====================
 
 Klamp't source code is available via the git repository at
-https://github.com/krishauser/Klampt/. The command
+`https://github.com/krishauser/Klampt/ <https://github.com/krishauser/Klampt/>`__.
+The command
 
 .. code:: sh
 
     git clone https://github.com/krishauser/Klampt
 
-will download the repository.
+will download it to your machine.
 
 The Klampt Python API is built on a large C++ code base.  To build
 the Klampt C++ library and Python API, you will need to obtain
@@ -31,7 +32,7 @@ machine:
 Linux-like Environments
 -----------------------
 
-The `Installation Tutorial <https://github.com/krishauser/Klampt/blob/master/Documentation/Tutorials/Install-Linux.md>`_
+The `Installation Tutorial <https://github.com/krishauser/Klampt/blob/master/Cpp/docs/Tutorials/Install-Linux.md>`_
 has step by step instructions, but if you get stuck, perhaps the below
 instructions may help.
 

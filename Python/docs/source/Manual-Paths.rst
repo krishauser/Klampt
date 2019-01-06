@@ -19,9 +19,7 @@ Classical motion planners compute paths, because time is essentially
 irrelevant for fully actuated robots in static environments. However, a
 robot must ultimately execute trajectories, so a planner must somehow
 prescribe times to paths before executing them. Various methods are
-available in Klamp't to convert paths into trajectories. For example, to
-send a motion planner output to a controller in Python, call
-``klampt.model.trajectory.execute_trajectory``.
+available in Klamp't to convert paths into trajectories. 
 
 Path and trajectory representations
 -----------------------------------
@@ -29,26 +27,27 @@ Path and trajectory representations
 +-----------+---------------+-----------+-----------------------------------------------------------------+
 | Type      | Continuity    | Timed?    | Description                                                     |
 +===========+===============+===========+=================================================================+
-| Configs   | C1            | No        | The simplest path type: a  list of ``Config``  milestones*      |
+| Configs   | C0            | No        | The simplest path type: a  list of ``Config``  milestones*      |
 |           |               |           | that should be piecewise linearly interpolated.  *These are     |
 |           |               |           | outputted from kinematic motion planners*.                      |
 +-----------+---------------+-----------+-----------------------------------------------------------------+
-| Piecewise | C1            | Yes       | Given by a   list of  ``times`` and  ``milestones``             |
+| Piecewise | C0            | Yes       | Given by a   list of  ``times`` and  ``milestones``             |
 | linear    |               |           | that should be piecewise linearly interpolated.  *The most      |
 |           |               |           | compatible trajectory  type*.                                   |
 +-----------+---------------+-----------+-----------------------------------------------------------------+
-| Cubic     | C2            | Yes       | Piecewise cubic curve, with time.                               |
+| Cubic     | C1            | Yes       | Piecewise cubic curve, with time.                               |
 | spline    |               |           |                                                                 |
 +-----------+---------------+-----------+-----------------------------------------------------------------+
-| MultiPath | C1 or C2      | Either    | A rich container type for paths/trajectories annotated with     |
+| MultiPath | C0 or C1      | Either    | A rich container type for paths/trajectories annotated with     |
 |           |               |           | changing contacts and  IK constraints.                          |
 +-----------+---------------+-----------+-----------------------------------------------------------------+
 
-*Note: to properly handle a robot's rotational joints, milestones should
-be interpolated via robot-specific interpolation functions. Cartesian
-linear interpolation does not correctly handle floating and spin joints.
-See the functions in ``RobotModel.interpolate()`` *to do so*.  We also
-provide the ``RobotTrajectory`` class to do this automatically.
+.. note::
+    To properly handle a robot's rotational joints, milestones should
+    be interpolated via robot-specific interpolation functions. Cartesian
+    linear interpolation does not correctly handle floating and spin joints.
+    See the function ``RobotModel.interpolate()`` to do so.  We also
+    provide the ``RobotTrajectory`` class to do this automatically.
 
 Especially for legged robots, the preferred path type is ``MultiPath``,
 which allows storing both untimed paths and timed trajectories. It can
@@ -304,24 +303,22 @@ Details can be found in the :class:`~klampt.model.multipath.MultiPath` documenta
 
 
 The ``klampt_path`` script can also be run to perform various simple transformations
-on ``MultiPath``\ s.
+and conversions on ``MultiPath``\ s.
 
 
 Also, you may see the utility scripts in
 
-  ``Klampt-examples/Python/utils/multipath\_to\_path.py``
-
-and
-
   ``Klampt-examples/Python/utils/multipath\_to\_timed\_path.py``
 
-for examples.
+for an example of assigning times to a multipath
+.
 
 Cartesian Trajectories
 ----------------------
 
 TODO: see the
 `cartesian\_trajectory <klampt.model.cartesian_trajectory.html>`__ module.
+
 
 Trajectory Execution
 --------------------
@@ -330,8 +327,9 @@ Sending to a Klamp't simulated robot
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The simplest way to send a path to a :class:`~klampt.SimRobotController` is to use
-:meth:`~klampt.model.trajectory.execute_path` (untimed path) or
-:meth:`~klampt.model.trajectory.execute_trajectory` (timed trajectory).
+:meth:`~klampt.model.trajectory.execute_path` (untimed path).  You can also use
+:meth:`~klampt.model.trajectory.path_to_trajectory` to generate a timed trajectory,
+then :meth:`~klampt.model.trajectory.execute_trajectory`.
 
 For greater control, you may either run an ``eval(t)`` loop to send position
 commands, or use the `controller motion queuing process <Manual-Control.html#default-motion-queue-controller>`__.

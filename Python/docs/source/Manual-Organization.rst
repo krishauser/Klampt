@@ -75,24 +75,6 @@ for examples of how to run the Klampt Python API.  Python exampels are found in 
    concepts in Klamp't.
 -  ``utils``: utility programs.
 
-Jupyter notebook integration
-----------------------------
-
-The `Klampt-jupyter-extension <https://github.com/krishauser/Klampt-jupyter-extension>`__ project
-is a companion project that allows you to install Klamp't visualizations into Jupyter Notebook.
-Simply enter
-
-.. code:: sh
-
-      git pull https://github.com/krishauser/Klampt-jupyter-extension
-      cd Klampt-jupyter extension
-      sudo make install
-
-and the next time you run Jupyter notebooks, you can use the functionality of the
-`klampt.vis.ipython <klampt.vis.ipython.html>`__ module to display interactive 3D displays
-in your jupyter notebook.
-
-
 
 Klampt project source
 ----------------------

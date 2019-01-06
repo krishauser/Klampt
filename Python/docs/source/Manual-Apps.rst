@@ -27,15 +27,22 @@ and they will pop up in the scene.  Multiple items can be selected using Ctrl + 
 
 .. image:: _static/images/klampt_browser2.png
 
-The browser has a "reference world" that you will need to add elements to.  You can either
-configure the reference world on the command line, such as::
+The browser has a "reference world" that you will need to add elements to.  By default, it
+is empty. You can configure the reference world on the command line, such as::
 
     klampt_browser Klampt-examples/data/athlete_plane.xml
 
-or select the elements and click the "Add to World" button.  You may then observe items like 
-paths, as seen in the following picture.
+Or, you may select the elements you want in your world, like world XML files, robots,
+rigid objects, and static meshes, and click the "Add to World" button.
+
+Once you have a reference world, selecting resources like Config,
+Configs, Trajectory, and IKGoal will be displayed in context of the first
+robot in the reference world.  For example, now that the athlete\_plane.xml world
+has been set up as the reference world, selecting the
+``Klampt-examples/data/motions/athlete_flex.path`` file will show an animation:
 
 .. image:: _static/images/klampt_browser3.png
+
 
 klampt\_path
 ------------

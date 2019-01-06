@@ -110,9 +110,9 @@ As an example, you can run
 
 .. code:: python
 
-    from klampt import *
+    import klampt
     from klampt.vis import editors
-    world = WorldModel()
+    world = klampt.WorldModel()
     if not world.readFile("Klampt-examples/data/robots/baxter.rob"):
         raise RuntimeError("Can't read the Baxter file")
     links = editors.run(editors.SelectionEditor("active_ik_links",
@@ -130,29 +130,21 @@ scene or in the list to change the selected links:
 Resource browsing app
 ---------------------
 
-The Klamp't Python API comes with a script to quickly browse through
-resources, and even edit them. Running ``klampt_browser`` will allow you
-to browse through directories and select multiple objects and resources
-to display.
+The Klamp't Python API comes with the ``klampt_browser`` script to quickly
+browse through resources, and even edit them. It allows you to navigate
+a directory tree and select multiple objects and resources to display.
 
-``klampt_browser`` stores a "reference world", which is by default
-empty. You can select worlds, robots, rigid objects, and meshes and then
-add to the reference world using the "Add to world" button, or you can
-specify elements of the world as command line elements::
-
-    klampt_browser Klampt-examples/data/athlete_plane.xml
-
-Once you have a reference world, selecting resources like Config,
-Configs, Trajectory, and IKGoal will show up in context of the first
-robot in the reference world.
-
-For selected resources of any type that can be edited in the vis module
-(see list above), you can click the "Edit" button and then save the
+If you have selected resources of any type that can be edited in the ``vis``
+module (see list above), you can click the "Edit" button and then save the
 edited value to disk.
+
+See the `klampt\_browser <Manual-Apps.html#klampt-browser>`__ docs for more
+details.
+
 
 RobotPose
 ---------
 
 If you have built from source, the RobotPose app can also browse and
-edit resources.  See the `RobotPose documentation <https://github.com/krishauser/Klampt/blob/master/Documentation/Manual-Apps.md>`__
+edit resources.  See the `RobotPose documentation <https://github.com/krishauser/Klampt/blob/master/Cpp/docs/Manual-Apps.md#robotpose>`__
 for more details.

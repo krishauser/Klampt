@@ -19,43 +19,51 @@ The colon followed by a type descriptor, ``: Type``, gives the type of the retur
 Modeling robots and worlds
 --------------------------
 
+Imported into the main ``klampt`` package.
+
 .. autosummary::
-    ~klampt.WorldModel
-    ~klampt.RobotModel
-    ~klampt.RobotModelLink
-    ~klampt.RobotModelDriver
-    ~klampt.RigidObjectModel
-    ~klampt.TerrainModel
-    ~klampt.Mass
-    ~klampt.ContactParameters
-    ~klampt.setRandomSeed
-    ~klampt.destroy
+    ~klampt.robotsim.WorldModel
+    ~klampt.robotsim.RobotModel
+    ~klampt.robotsim.RobotModelLink
+    ~klampt.robotsim.RobotModelDriver
+    ~klampt.robotsim.RigidObjectModel
+    ~klampt.robotsim.TerrainModel
+    ~klampt.robotsim.Mass
+    ~klampt.robotsim.ContactParameters
+    ~klampt.robotsim.setRandomSeed
+    ~klampt.robotsim.destroy
 
 Modeling geometries
 -------------------
 
+Imported into the main ``klampt`` package.
+
 .. autosummary::
-    ~klampt.Geometry3D
-    ~klampt.Appearance
-    ~klampt.GeometricPrimitive
-    ~klampt.TriangleMesh
-    ~klampt.PointCloud
-    ~klampt.VolumeGrid
-    ~klampt.DistanceQuerySettings
-    ~klampt.DistanceQueryResult
+    ~klampt.robotsim.Geometry3D
+    ~klampt.robotsim.Appearance
+    ~klampt.robotsim.GeometricPrimitive
+    ~klampt.robotsim.TriangleMesh
+    ~klampt.robotsim.PointCloud
+    ~klampt.robotsim.VolumeGrid
+    ~klampt.robotsim.DistanceQuerySettings
+    ~klampt.robotsim.DistanceQueryResult
 
 Inverse kinematics
 -------------------
 
+Imported into the main ``klampt`` package.
+
 .. autosummary::
-    ~klampt.IKObjective
-    ~klampt.IKSolver
-    ~klampt.GeneralizedIKObjective
-    ~klampt.GeneralizedIKSolver
-    ~klampt.SampleTransform
+    ~klampt.robotsim.IKObjective
+    ~klampt.robotsim.IKSolver
+    ~klampt.robotsim.GeneralizedIKObjective
+    ~klampt.robotsim.GeneralizedIKSolver
+    ~klampt.robotsim.SampleTransform
 
 Simulation
 -------------------
+
+Imported into the main ``klampt`` package.
 
 .. autosummary::
     ~klampt.Simulator
@@ -66,33 +74,44 @@ Simulation
 Equilibrium testing
 -------------------
 
-.. autosummary::
-    ~klampt.comEquilibrium
-    ~klampt.comEquilibrium2D
-    ~klampt.equilibriumTorques
-    ~klampt.forceClosure
-    ~klampt.forceClosure2D
-    ~klampt.setFrictionConeApproximationEdges
-    ~klampt.supportPolygon
-    ~klampt.supportPolygon2D
-
-Input/Output and Visualization
-------------------------------
+See also the aliases in the `klampt.model.contact <klampt.model.contact.html>`__ module.
 
 .. autosummary::
-    ~klampt.SubscribeToStream
-    ~klampt.DetachFromStream
-    ~klampt.ProcessStreams
-    ~klampt.WaitForStream
-    ~klampt.ThreeJSGetScene
-    ~klampt.ThreeJSGetTransforms
-    ~klampt.Widget
-    ~klampt.WidgetSet
-    ~klampt.ObjectPoser
-    ~klampt.RobotPoser
-    ~klampt.PointPoser
-    ~klampt.TransformPoser
-    ~klampt.Viewport
+    ~klampt.robotsim.comEquilibrium
+    ~klampt.robotsim.comEquilibrium2D
+    ~klampt.robotsim.equilibriumTorques
+    ~klampt.robotsim.forceClosure
+    ~klampt.robotsim.forceClosure2D
+    ~klampt.robotsim.setFrictionConeApproximationEdges
+    ~klampt.robotsim.supportPolygon
+    ~klampt.robotsim.supportPolygon2D
+
+Input/Output
+-------------
+
+Imported into the ``klampt.io`` package
+
+.. autosummary::
+    ~klampt.io.SubscribeToStream
+    ~klampt.io.DetachFromStream
+    ~klampt.io.ProcessStreams
+    ~klampt.io.WaitForStream
+    ~klampt.io.ThreeJSGetScene
+    ~klampt.io.ThreeJSGetTransforms
+
+Visualization
+--------------
+
+For use in :class:`~klampt.vis.glcommon.GLWidgetProgram`.
+
+.. autosummary::
+    ~klampt.robotsim.Widget
+    ~klampt.robotsim.WidgetSet
+    ~klampt.robotsim.ObjectPoser
+    ~klampt.robotsim.RobotPoser
+    ~klampt.robotsim.PointPoser
+    ~klampt.robotsim.TransformPoser
+    ~klampt.robotsim.Viewport
 
 Module contents
 ----------------
@@ -101,4 +120,34 @@ Module contents
     :members:
     :undoc-members:
     :show-inheritance:
-    :exclude-members: doubleArray, floatArray, doubleVector, intArray, stringArray
+    :exclude-members: doubleArray, doubleVector, floatArray, floatVector, intArray, intVector, stringArray, stringVector, doubleMatrix
+
+.. autofunction:: klampt.robotsim.comEquilibrium
+
+.. autofunction:: klampt.robotsim.comEquilibrium2D
+
+.. autofunction:: klampt.robotsim.equilibriumTorques
+
+.. autofunction:: klampt.robotsim.forceClosure
+
+.. autofunction:: klampt.robotsim.forceClosure2D
+
+.. autofunction:: klampt.robotsim.setFrictionConeApproximationEdges
+
+.. autofunction:: klampt.robotsim.supportPolygon
+
+.. autofunction:: klampt.robotsim.supportPolygon2D
+
+.. autoclass:: klampt.robotsim.Widget
+
+.. autoclass:: klampt.robotsim.WidgetSet
+
+.. autoclass:: klampt.robotsim.ObjectPoser
+
+.. autoclass:: klampt.robotsim.RobotPoser
+
+.. autoclass:: klampt.robotsim.PointPoser
+
+.. autoclass:: klampt.robotsim.TransformPoser
+
+.. autoclass:: klampt.robotsim.Viewport

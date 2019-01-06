@@ -202,57 +202,47 @@ documentation <http://motion.pratt.duke.edu/klampt/klampt_docs/classCameraSensor
 ``LaserRangeSensor``
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Details can be found in
-`Control/VisualSensors.h <../Control/VisualSensors.h>`__.
+See the `C++ API documentation <http://motion.pratt.duke.edu/klampt/klampt_docs/classLaserRangeSensor.html>`__ for attributes.
 
 ``DriverTorqueSensor``
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Details can be found in
-`Control/ForceSensors.h <../Control/JointSensors.h>`__.
+See the `C++ API documentation <http://motion.pratt.duke.edu/klampt/klampt_docs/classDriverTorqueSensor.html>`__ for attributes.
 
 ``ContactSensor``
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Details can be found in
-`Control/ForceSensors.h <../Control/ForceSensors.h>`__.
+See the `C++ API documentation <http://motion.pratt.duke.edu/klampt/klampt_docs/classContactSensorSensor.html>`__ for attributes.
 
 ``ForceTorqueSensor``
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Details can be found in
-`Control/ForceSensors.h <../Control/ForceSensors.h>`__.
+See the `C++ API documentation <http://motion.pratt.duke.edu/klampt/klampt_docs/classForceTorqueSensor.html>`__ for attributes.
 
 ``Accelerometer``
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Details can be found in
-`Control/InertialSensors.h <../Control/InertialSensors.h>`__.
+See the `C++ API documentation <http://motion.pratt.duke.edu/klampt/klampt_docs/classAccelerometer.html>`__ for attributes.
 
 ``TiltSensor``
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Details can be found in
-`Control/InertialSensors.h <../Control/InertialSensors.h>`__.
+See the `C++ API documentation <http://motion.pratt.duke.edu/klampt/klampt_docs/classTiltSensor.html>`__ for attributes.
 
 ``GyroSensor``
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Details can be found in
-`Control/InertialSensors.h <../Control/InertialSensors.h>`__.
+See the `C++ API documentation <http://motion.pratt.duke.edu/klampt/klampt_docs/classGyroSensor.html>`__ for attributes.
 
 ``IMUSensor``
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Details can be found in
-`Control/InertialSensors.h <../Control/InertialSensors.h>`__.
+See the `C++ API documentation <http://motion.pratt.duke.edu/klampt/klampt_docs/classIMUSensor.html>`__ for attributes.
 
 ``FilteredSensor``
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Details can be found in
-`Control/OtherSensors.h <../Control/OtherSensors.h>`__.
-
+See the `C++ API documentation <http://motion.pratt.duke.edu/klampt/klampt_docs/classFilteredSensor.html>`__ for attributes.
 
 
 
@@ -334,10 +324,10 @@ Let's now create a new Python file with the following code.
 
 .. code:: python
 
+    import klampt
     from klampt import vis
-    from klampt import *
     from klampt.math import so3,se3,vectorops
-    from klampt.vis.glcommon import *
+    from klampt.vis.glinterface import GLPluginInterface
     import time
 
 The first part of the code initializes a world model and
@@ -350,13 +340,13 @@ sim.controller(0).sensor(0))
 
 .. code:: python
 
-    world = WorldModel()
+    world = klampt.WorldModel()
     world.readFile("sensortestworld.xml")
     robot = world.robot(0)
 
     vis.add("world",world)
 
-    sim = Simulator(world)
+    sim = klampt.Simulator(world)
     sensor = sim.controller(0).sensor("rgbd_camera")
 
 In the following lines, the ``getSetting`` method is used to query the link

@@ -89,7 +89,7 @@ constraints.
 API summary
 ~~~~~~~~~~~
 
-The highest level **convenience functions** in the `klampt.plan.robotplanning` module
+The highest level **convenience functions** in the ``klampt.plan.robotplanning`` module
 are the functions :meth:`~klampt.plan.robotplanning.planToConfig`,
 :meth:`~klampt.plan.robotplanning.planToCartesianObjective`, and
 :meth:`~klampt.plan.robotplanning.planToSet`.  These automatically set up planners
@@ -136,18 +136,18 @@ Alternatively, there are several robot-level C-spaces are available for you in
    but also enforces balance under gravity given known points of contact.
 
 These instances require you to provide as input a robot and a
-robotcollide.WorldCollider instance, as follows:
+:class:`klampt.model.collide.WorldCollider: instance, as follows:
 
 .. code:: python
 
-    from klampt import *
+    import klampt
     from klampt.plan.robotcspace import RobotCSpace
     from klampt.plan import cspace
     from klampt.model import collide
     world = WorldModel()
     ... set up world ...
     robot = world.robot(0)
-    space = RobotCSpace(robot,robotcollide.WorldCollider(world))
+    space = RobotCSpace(robot,collide.WorldCollider(world))
     # (Can also create it without the collider to ignore all self-and environment collisions)
     #Optionally:
     #Call space.addFeasibilityTest(func,name=None) on the space with as many additional feasibility tests as you want
@@ -175,13 +175,8 @@ Planner Attributes
 
 -  ``type``: the overall planner type. Values include:
 
+   -  ``any`` (default): equivalent to ``sbl``.
    -  ``prm``: the Probabilistic Roadmap algorithm
-   -  ``lazyprm``: the Lazy-PRM algorithm (interface not implemented
-      yet)
-   -  ``perturbation``: the PerturbationTree algorithm (interface not
-      implemented yet)
-   -  ``est``: the Expanding Space Trees algorithm (interface not
-      implemented yet)
    -  ``rrt``: the Rapidly Exploring Random Trees algorithm
    -  ``sbl``: the Single-Query Bidirectional Lazy planner
    -  ``sblprt``: the probabilistic roadmap of trees (PRT) algorithm
@@ -195,14 +190,22 @@ Planner Attributes
    -  ``fmm*``: an anytime fast marching method algorithm for optimal
       motion planning
 
+   The KrisLibrary C++ code also contains the following algorithms, but
+   the Python interface is not yet implemented.
+
+       -  ``lazyprm``: the Lazy-PRM algorithm
+       -  ``perturbation``: the PerturbationTree algorithm
+       -  ``est``: the Expanding Space Tree algorithm
+
    If KrisLibrary is built with OMPL support, you can also use the type
    specifier "ompl:``[X]``" where ``[X]`` is one of:
 
-   ::
+       - ``prm``, ``lazyprm``, ``prm*``, ``lazyprm*``, ``spars``
+       - ``rrt``, ``rrtconnect``, ``birrt``, ``lazyrrt``, ``lbtrrt``, ``rrt*``, ``informedrrt*``
+       - ``est``, ``fmt``, ``sbl``, ``stride``
 
-       - `prm`, `lazyprm`, `prm*`, `lazyprm*`, `spars`
-       - `rrt`, `rrtconnect`, `birrt`, `lazyrrt`, `lbtrrt`, `rrt*`, `informedrrt*`
-       - `est`, `fmt`, `sbl`, `stride`
+   (Note that OMPL's ``lazyprm*`` implementation performs much worse than
+   the one in Klampt.)
 
 -  ``knn``: k-nearest neighbors parameter. Default is 10 for most
    planners.
@@ -224,16 +227,18 @@ Planner Attributes
 -  ``ignoreConnectedComponents``: Used in PRM to connect nodes in the
    same connected component (default 0)
 -  ``gridResolution``: Used in FMM, FMM\*, SBL, SBLPRT
--  ``pointLocation``: Specifies the point location data structure.
+-  ``pointLocation``: Specifies the point location data structure used in
+   PRM, RRT, PRM\*, RRT\*, Lazy-RRG\*, .
    Accepted values are "" (brute force), "kdtree" (k-D tree), "random"
    (pick random point), "randombest [k]" (sample k points, pick closest)
 
-| These can also be specified in JSON format. Examples are found in
-  the ``.settings`` files in the Klampt-examples project
-  `Klampt-examples/Cpp/PlanDemo <https://github.com/krishauser/Klampt-examples/tree/master/Cpp/PlanDemo>`__.
-| For a complete description of the accepted options, see the
-  `setPlanSetting <klampt.plan.motionplanning#setPlanSetting>`__
-  documentation
+These can also be specified in JSON format. Examples are found in
+the ``.settings`` files in the Klampt-examples project
+`Klampt-examples/Cpp/PlanDemo <https://github.com/krishauser/Klampt-examples/tree/master/Cpp/PlanDemo>`__.
+
+For a complete description of the accepted options, see the
+`motionplanning.setPlanSetting <klampt.plan.motionplanning#setPlanSetting>`__
+documentation
 
 API summary
 ~~~~~~~~~~~
@@ -304,12 +309,12 @@ Open up a new Python file in a text editor, and enter in the following code:
 
 .. code:: python
     
-    from klampt import *
+    import klampt
     from klampt.plan import cspace,robotplanning
     from klampt.io import resource
     import time
 
-    world = WorldModel()
+    world = klampt.WorldModel()
     world.readFile("Klampt-examples/data/tx90cuptable.xml")
     robot = world.robot(0)
 
@@ -466,14 +471,15 @@ At the configuration-space-level interface, there is no notion of even a
 robot, just an abstract configuration space. Instead, you must manually
 implement the callbacks used by the planning algorithm:
 
--  Feasibility tester ``IsFeasible(q)``
--  Visibility tester ``IsVisible(a,b)``
--  Sampling strategy ``q <- SampleConfig()``
--  \*Perturbation sampling strategy ``q <- SampleNeighborhood(c,r)``
--  \*Distance metric ``d <- Distance(a,b)``
--  \*Interpolation function ``q <- Interpolate(a,b,u)``
+-  Feasibility tester ``feasible(q)``
+-  Visibility tester ``visible(a,b)``
+-  Sampling strategy ``q <- sample()``
+-  Perturbation sampling strategy ``q <- sampleneighborhood(c,r)``
+-  Distance metric ``d <- distance(a,b)``
+-  Interpolation function ``q <- interpolate(a,b,u)``
 
-\*: default implementation assumes Cartesian space
+The default implementation each callbacks assumes a Cartesian space
+without obstacles.
 
 The feasibility test is an *authoritative* representation of C-space
 obstacles, and will be called thousands of times during planning. For
@@ -498,16 +504,17 @@ should set up the following:
 
 To implement non-Euclidean spaces, users may optionally override:
 
--  sample(): returns a new vector x from a superset of the feasible
+-  ``sample()``: returns a new vector x from a superset of the feasible
    space. If this is not overridden, then subclasses should set bound to
    be a list of pairs defining an axis-aligned bounding box.
--  sampleneighborhood(c,r): returns a new vector x from a neighborhood
+-  ``sampleneighborhood(c,r)``: returns a new vector x from a neighborhood
    of c with radius r
--  visible(a,b): returns true if the path between a and b is feasible.
+-  ``visible(a,b)``: returns true if the path between a and b is feasible.
    If this is not overridden, then paths are checked by subdivision,
    with the collision tolerance eps.
--  distance(a,b): return a distance between a and b
--  interpolate(a,b,u): interpolate between a, b with parameter u
+-  ``distance(a,b)``: return a distance between a and b
+-  ``interpolate(a,b,u)``: interpolate between a, b with parameter u in the
+   range [0,1].
 
 Setting up and invoking motion planners is the same as in the
 robot-level interface.
@@ -632,4 +639,35 @@ Run this python script again. Press "p" continuously, you will find the the algo
 
 .. image:: _static/images/motion_planning4.jpg
 
-Other motion planning methods can also be uncommented for testing.
+There are several other motion planning methods in this file (Fast Marching Method*, Random-Restart RRT + shortcutting) that can also be uncommented for testing. 
+
+
+Choosing planners and tuning parameters
+---------------------------------------
+
+Klampt provides a large number of planners and parameter choices, and in order to understand them thoroughly you would to read the motion planning literature fairly extensively.  For most users, however, you will choose these for your problem scenario through empirical tuning.  Here are a few tips for the parameter tuning process:
+
+- ``eps`` governs the speed of edge collision checking, and while testing it helps to
+  set this this to a large value to speed up planning.  Later it should be shrunk to
+  ensure plans are valid. 
+- ``eps``, ``perturbationRadius``, ``connectionThreshold``, ``gridResolution`` should
+  be set proportional to the size of your configuration space.
+- Planners ``fmm`` and ``fmm*`` perform an entire grid search each iteration, so when
+  you run ``planMore(N)``, ``N`` should be much smaller than the sampling-based planners.
+- In unbounded C-spaces, the ``sbl``-based planners can be applied directly  because
+  they only use perturbations.  Care must be taken with ``prm``, ``rrt``, ``rrt*``,
+  ``lazyprm*``, and ``lazyrrg*`` in order to ensure that the ``sample`` function implements
+  a reasonable sampling distribution (such as a logarithmic prior). 
+  Planners ``fmm`` and``fmm*`` should *never* be used.  
+- Planners "lazyprm*", "lazyrrg*", and "sbl" are almost always faster than their
+  non-lazy variants (``prm*``, ``rrt*``, ``rrt``) when collision checks are expensive.
+- Do not combine ``restart`` and ``shortcut`` with the optimizing planners ``rrt*``,
+  ``lazyprm*``, and ``lazyrrg*``.  Do not combine ``restart`` with ``fmm`` and ``fmm*``.
+- In general, FMM-based planners work extremely well up to around 4D, the ``lazyprm*``
+  and ``lazyrrg*`` up to around 7D, and SBL / RRT + shortcutting work well up to
+  around 15-40D.  Usually, the optimality of these planners becomes worse as the
+  dimension of the C-space grows.
+
+The example ``.settings`` files in `Klampt-examples/Cpp/PlanDemo
+<https://github.com/krishauser/Klampt-examples/tree/master/Cpp/PlanDemo>`__
+are a good place to start.

@@ -5,6 +5,7 @@ klampt.model package
 
 .. toctree::
 
+    klampt.model.access
     klampt.model.cartesian_trajectory
     klampt.model.collide
     klampt.model.config
@@ -12,7 +13,6 @@ klampt.model package
     klampt.model.coordinates
     klampt.model.create
     klampt.model.ik
-    klampt.model.map
     klampt.model.multipath
     klampt.model.sensing
     klampt.model.subrobot

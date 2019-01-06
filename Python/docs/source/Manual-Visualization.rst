@@ -1,12 +1,13 @@
 Visualization
 =============================
 
-Klamp't supports two frameworks for producing interactive
-visualizations:
+Klamp't allows you to easily produce custom interactive visualizations
+with just a few lines of Python code.  This is extremely debug
 
--  Method 1: use the
-   `klampt.vis <klampt.vis.html>`__
-   scene manager.
+The `klampt.vis <klampt.vis.html>`__ module supports two frameworks for
+doing so:
+
+-  Method 1: use the builtin *scene manager*.
 -  Method 2: overload
    :class:`~klampt.vis.glinterface.GLPluginInterface`
    and customize the event handling and drawing routines.
@@ -14,54 +15,179 @@ visualizations:
 Method 1 is easier to set up, and is more intuitive for users who may be
 unfamiliar with the event-driven paradigm used in GUI programming.
 However, Method 2 is necessary to get control over the low-level GUI
-event loop. A hybrid of Method 1 and Method 2 is also available in
-``Klampt-examples/Python/demos/visplugin.py`` example script.
-This hybrid approach is primarily used to customize how the scene
+event loop. They can also be hybridized to customize how the scene
 manager responds to user input.
 
-Using klampt.vis
--------------------------
+Examples of these methods in action are available in the
+``Klampt-examples/Python/demos/vis_template.py`` script.
 
-Window and thread management
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. note::
+    `klampt.vis` is not imported when you run `import klampt`, because some
+    systems don't have the capability to run OpenGL.  You will need to run
+    `import klampt.vis` or `from klampt import vis`.
 
-By default, when ``klampt.vis`` is imported, it can be thought of as
+Visualization window management
+--------------------------------
+
+Window creation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When ``klampt.vis`` is imported, it can be thought of as
 having an existing hidden window which hosts the scene manager. You will
-then configure the window or scene manager, and then show it using one
+then configure the window or scene manager, and in the most cross-platform
+compatible mode of operation, you will show it using one
 of the following methods.
 
--  ``vis.show()``: shows the current window and returns immediately.
--  ``vis.shown()``: returns True if the window is shown and not closed
-   by the user.
 -  ``vis.spin(duration)``: shows the window until it is closed or
    ``duration`` seconds have elapsed.
--  ``vis.dialog()``: shows the current window in a dialog form, and does
-   not return until the user closes the window.
+-  ``vis.dialog()``: shows the current window in a dialog format, and does
+   not return until the user closes the window or presses the OK button.
+-  ``vis.run()``: shows the window, and once the user closes the window,
+   the visualization is killed.
 -  ``vis.kill()``: performs all cleanup of the vis module.
 
-The visualization in a separate thread from the main Python script. The
-visualization and Klamp't objects that it refers to can then be
+These methods block the calling thread until the window is closed.
+You can call ``spin`` and ``dialog`` multiple times in a row.  If you have PyQt
+installed, and want to customize the UI, you can use the method
+
+-  ``vis.customUI(makefunc)``: takes a 1-parameter function
+   makefunc(glwidget) that takes the Klampt QGLWidget as an argument,
+   creates a QWindow or QDialog to be shown, and returns it.
+
+Multithreaded mode
+~~~~~~~~~~~~~~~~~~~
+
+In Linux and Windows, a *multithreaded mode* is available which allows you
+to conveniently run visualizations in parallel with your main code.  This
+means you can very easily pop up a visualization window to observe a
+processing loop (such as a simulation or planner) in real-time.
+
+Suppose you had a loop like this:
+
+.. code:: python
+
+    import klampt
+    
+    world = klampt.WorldModel()
+    #...configure stuff...
+    while not done():
+      #...do stuff to world... 
+
+The corresponding live visualization of the loop would look like this:
+
+.. code:: python
+
+    import klampt
+    from klampt import vis
+
+    world = klampt.WorldModel()
+    vis.add("world",world)    #world is now referenced by the vis module and is shared between threads!
+    #...configure stuff...
+    vis.show()
+    while not done() and vis.shown():
+      vis.lock()
+      #...do stuff to world... #this code is executed at approximately 10 Hz due to the sleep call
+      vis.unlock()
+      time.sleep(0.1)
+    if done():
+      vis.show(False)         #hides the window if not closed by user
+
+Specifically, the multithreaded mode uses the following functions:
+
+-  ``vis.show()``: shows the current window and returns immediately to
+   the calling thread.
+-  ``vis.shown()``: returns True if the window is shown and not closed
+   by the user.
+-  ``vis.show(False)``: hides the current window.
+
+   .. note::
+
+      ``vis.hide()`` doesn't do the opposite of ``vis.show``.  It refers to
+      hiding items in the scene manager.
+
+When you call ``show`` the visualization is run in a separate thread from
+the main Python script. The visualization and Klamp't objects that it refers to can then be
 configured and modified by the main Python thread. However, some care is
 needed when directly modifying Klamp't objects that are referred to in
 the visualization. To prevent conflicts in threading which may cause the
 program to crash, all references to shared objects in the main thread
-should be placed between ``vis.lock()`` and ``vis.unlock()`` calls, like
-so:
+should be placed between ``vis.lock()`` and ``vis.unlock()`` calls, as shown
+in the above code.
+
+Multithreaded mode workaround on Mac
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For Mac users, multithreaded mode is not available.  You can mimic a
+multithreaded loop using the ``vis.loop()`` function, which takes several
+callback functions to be run inside the visualization loop.  This version
+is written as follows:
 
 .. code:: python
 
-    world = WorldModel()
-    vis.add("world",world)    #world is now referenced by the vis module and is shared between threads!
-    ...configure stuff...
-    vis.show()
-    while vis.shown():
-      vis.lock()
-      ...do stuff to world... #this code is executed at approximately 10 Hz due to the sleep call
-      vis.unlock()
+    world = klampt.WorldModel()
+    #...configure stuff...
+
+    vis.add("world",world)
+
+    def setup():
+      vis.show()
+
+    def callback():
+      #...do stuff to world... #this code is executed at approximately 10 Hz due to the sleep call
       time.sleep(0.1)
+      if done():
+        vis.show(False)         #hides the window if not closed by user
+
+    def cleanup():
+      #can perform optional cleanup code here
+      pass
+
+    vis.loop(setup=setup,callback=callback,cleanup=cleanup)
+
+Note that the ``loop`` function can also be run on Linux and Windows, so
+if you are writing cross-platform code, the main rule to remember is not to use
+``vis.show()`` outside of a loop setup callback.
+
+
+
+The plugin stack
+~~~~~~~~~~~~~~~~~
+
+The vis module lets you *override* or *stack* plugins together,
+even with the existing scene graph manager. In fact, the scene graph
+manager is itself a plugin. 
+
+Each window has a *plugin stack* with at least one plugin.
+The stack can be modified using the following functions:
+
+-  ``vis.setPlugin`` overrides the plugin stack used by the current
+   window.
+-  ``vis.pushPlugin`` and ``vis.popPlugin`` modify the plugin stack used
+   by the current window.
+
+
+Split screen and multiple windows
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To do split screen, call ``vis.addPlugin(plugin)`` with the root plugin
+for the new viewport.
+
+The vis module can handle multiple windows. The vis module stores an
+*active window*, which is the window to which subsequent vis calls will
+be passed. (not the window currently selected by the user). The relevant
+functions are:
+
+-  ``vis.createWindow()``: creates and returns the identifier for a new
+   window. If this is the first createWindow call, no new window is
+   created, and instead the ID of the hidden window is returned.
+-  ``vis.setWindow(id)``: changes the active window.
+-  ``vis.getWindow()``: returns the active window.
+
+
+
 
 klampt.vis Scene Manager
-~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------
 
 Using the scene manager, the main thread can easily add and remove items
 to be drawn. Simple functions are available to build multi-viewport
@@ -75,6 +201,11 @@ and the example code in
 -  ``vis.clear()``: clears all items.
 -  ``vis.remove(name)``: removes an existing item.
 -  ``vis.hide(name,hidden=True)``: hides/unhides an existing item.
+
+   .. note::
+      ``vis.show()`` doesn't do the opposite of ``vis.hide()``.  To
+      show an item, call ``vis.hide(False)``.
+
 -  ``vis.edit(name,doedit=True)``: turns on/off visual editing, if the
    item allows it.
 
@@ -83,7 +214,7 @@ Here are the accepted types in the scene manager.
 +-----------------------------+------------------------------------------+------------------------------------------+
 |    Type                     | Notes                                    | Attributes                               |
 +=============================+==========================================+==========================================+
-| ``str``                     | Draws a label                            | position\*                               |
+| ``str``                     | Draws a label                            | ``position``\*                           |
 +-----------------------------+------------------------------------------+------------------------------------------+
 | ``WorldModel``              |                                          |                                          |
 +-----------------------------+------------------------------------------+------------------------------------------+
@@ -95,35 +226,36 @@ Here are the accepted types in the scene manager.
 +-----------------------------+------------------------------------------+------------------------------------------+
 | ``Geometry3D``              |                                          |                                          |
 +-----------------------------+------------------------------------------+------------------------------------------+
-| ``Vector3``                 |                                          | size(5)                                  |
+| ``Vector3``                 |                                          | ``size`` (5)                             |
 +-----------------------------+------------------------------------------+------------------------------------------+
-| ``RigidTransform``          |                                          | fancy(False), length(0.1), width(0.01)   |
+| ``RigidTransform``          |                                          | ``fancy`` (False), ``length`` (0.1),     |
+|                             |                                          | ``width`` (0.01)                         |
 +-----------------------------+------------------------------------------+------------------------------------------+
 | ``Config``                  | Shows a ghost of the robot               |                                          |
 +-----------------------------+------------------------------------------+------------------------------------------+
-| ``Configs``                 |                                          | maxConfigs(20)                           |
+| ``Configs``                 |                                          | ``maxConfigs`` (20)                      |
 +-----------------------------+------------------------------------------+------------------------------------------+
-| ``Trajectory``              | Draws 3D, SE(3), or end-effector paths   | endeffectors                             |
+| ``Trajectory``              | Draws 3D, SE(3), or end-effector paths   | ``endeffectors`` (all terminal links)    |
 +-----------------------------+------------------------------------------+------------------------------------------+
-| ``IKGoal``                  |                                          | length(0.1), width(0.01)                 |
+| ``IKGoal``                  |                                          | ``length`` (0.1), ``width`` (0.01)       |
 +-----------------------------+------------------------------------------+------------------------------------------+
-| ``coordinates.Point``       |                                          | size(5)                                  |
+| ``coordinates.Point``       |                                          | ``size`` (5)                             |
 +-----------------------------+------------------------------------------+------------------------------------------+
-| ``coordinates.Direction``   |                                          | length(0.15)                             |
+| ``coordinates.Direction``   |                                          | ``length`` (0.15)                        |
 +-----------------------------+------------------------------------------+------------------------------------------+
-| ``coordinates.Frame``       |                                          | length(0.1), width(0.01)                 |
+| ``coordinates.Frame``       |                                          | ``length`` (0.1), ``width`` (0.01)       |
 +-----------------------------+------------------------------------------+------------------------------------------+
 | ``coordinates.Transform``   | Draws a curve between frames             |                                          |
 +-----------------------------+------------------------------------------+------------------------------------------+
-| ``ContactPoint``            |                                          | size(5), length(0.1)                     |
+| ``ContactPoint``            |                                          | ``size`` (5), ``length`` (0.1)           |
 +-----------------------------+------------------------------------------+------------------------------------------+
 
-\* denotes a mandatory attribute
+\* denotes a mandatory attribute.  Values in parentheses are defaults.
 
-Note: color is always an accepted attribute.
+Note: ``color`` is always an accepted attribute.
 
 Item path conventions and references
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  The world, if one exists, should be given the name ``'world'``.
 -  Configurations and paths are drawn with reference to the first robot
@@ -144,12 +276,12 @@ turn the robot green. If ``'link5'`` is the robot's 5th link, then
 link blue.
 
 Customizing item appearance
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 TODO: describe these functions
 
 Animations
-^^^^^^^^^^
+~~~~~~~~~~
 
 The scene manager accepts animations for certain types of items.
 Animations are currently supported for points, so3 elements, se3
@@ -174,26 +306,6 @@ elements, rigid objects, and robots.
    -  If newtime == None (default), this gets the animation time.
    -  If newtime != None, this sets a new animation time.
 
-Split screen and multiple windows
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-To do split screen, call ``vis.addPlugin(plugin)`` with the root plugin
-for the new viewport.
-
-The vis module can handle multiple windows. The vis module stores an
-*active window*, which is the window to which subsequent vis calls will
-be passed. (not the window currently selected by the user). The relevant
-functions are:
-
--  ``vis.createWindow()``: creates and returns the identifier for a new
-   window. If this is the first createWindow call, no new window is
-   created, and instead the ID of the hidden window is returned.
--  ``vis.setWindow(id)``: changes the active window.
--  ``vis.getWindow()``: returns the active window.
-
-To hide a window, call ``vis.show(False)``. *Note: ``vis.hide()``
-doesn't do the same thing at all, it refers to hiding items in the scene
-manager.*
 
 
 Making your own plugins
@@ -204,7 +316,7 @@ process mouse and keyboard input, etc. Users are also welcome to use
 Klamp't object OpenGL calls in their own frameworks. For more
 information, see the :class:`~klampt.vis.glinterface.GLPluginInterface` documentation 
 and the simple example file
-`Klampt-examples/Python/demos/gl_vis.py`.
+``Klampt-examples/Python/demos/gl_vis.py``.
 
 For each GUI event (display, mousefunc, etc), the event cascades through
 the plugin stack until one plugin's handler catches it by returning
@@ -259,21 +371,6 @@ especially during initialize())
 -  ``plugin.viewport()``: Retrieves the Viewport instance associated
    with the window.
 
-The plugin stack
-~~~~~~~~~~~~~~~~~~~~~
-
-The vis module allows users to *override* or *stack* plugins together,
-even with the existing scene graph manager. In fact, the scene graph
-manager is itself a ``GLPluginInterface`` object. Each window or
-viewport has a *plugin stack* with at least one GLPluginInterface.
-
-The stack of a window can be modified as follows:
-
--  ``vis.setPlugin`` overrides the plugin stack used by the current
-   window.
--  ``vis.pushPlugin`` and ``vis.popPlugin`` modify the plugin stack used
-   by the current window.
-
 Drawing your own world
 ~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -287,7 +384,7 @@ class, as well as the *mousefunc* and *motionfunc* callbacks to capture mouse cl
 
 .. code:: python
 
-    from klampt import *
+    import klampt
     from klampt import vis
     from klampt.vis.glrobotprogram import GLWorldPlugin
 
@@ -309,8 +406,7 @@ class, as well as the *mousefunc* and *motionfunc* callbacks to capture mouse cl
       def motionfunc(self,x,y,dx,dy):
         return GLWorldPlugin.motionfunc(self,x,y,dx,dy)
     
-    world = WorldModel()
-    world = WorldModel()
+    world = klampt.WorldModel()
     if not world.readFile("Klampt-examples/data/athlete_plane.xml"):
       raise RuntimeError("Couldn't load world")
     vis.run(MyPlugin(world))

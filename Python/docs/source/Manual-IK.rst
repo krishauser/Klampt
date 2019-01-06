@@ -16,11 +16,11 @@ several IK Objectives and passing these to the solver.
 IK Objective
 ------------
 
-| An IK Objective defines a target in Cartesian world space coordinates
-  that you want to achieve with a link of the robot.
-| Each IK Objective's constraint is specified to match some local
-  coordinates on the link to some target coordinates, and can include
-  both position and orientation.
+An **IK Objective** defines a target in Cartesian world space coordinates
+that you want to achieve with a link of the robot.
+Each IK Objective's constraint specifies "I desire that" some local
+coordinates on the link should be matched to some target coordinates.
+These coordinates may include both position and orientation.
 
 An objective contains:
 
@@ -38,8 +38,8 @@ robot, but these are used less frequently. The main use case for these
 objectives is to perform multi-handed manipulation of a single object.
 Relative objectives are specified by giving:
 
--  a destination link index. (By default -1, which means destination is
-   in the world frame.)
+-  an index of a destination link. (By default the destination link is
+   -1, which means the targets are specified in the world frame.)
 
 Usual Objective Types
 ~~~~~~~~~~~~~~~~~~~~~
@@ -78,7 +78,7 @@ module. The following assume that you have first run
 
 .. code:: python
 
-    from klampt import *
+    from klampt import IKObjective,IKSolver
     from klampt.model import ik
 
 Constructors
@@ -325,9 +325,9 @@ the point (1.5,0,1). Let us start doing this in a naive manner:
 
 .. code:: python
 
-    >>> from klampt import *
+    >>> import klampt
     >>> from klampt.model import ik
-    >>> world = WorldModel()
+    >>> world = klampt.WorldModel()
     >>> world.loadElement("data/robots/planar3R.rob")
     ...
     >>> robot= world.robot(0)

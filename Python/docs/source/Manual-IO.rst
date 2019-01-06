@@ -158,7 +158,7 @@ requiring a separate command line step with the xacro tool.
 The basic URDF file format does not specify some aspects of Klamp't
 robots. These can be added under the ``<klampt>`` XML tag. See the `file
 format documentation <Manual-FileTypes.html>`__ or the Klampt `import
-robot tutorial <https://github.com/krishauser/Klampt/blob/master/Documentation/Tutorials/Import-and-calibrate-urdf.md>`__
+robot tutorial <https://github.com/krishauser/Klampt/blob/master/Cpp/docs/Tutorials/Import-and-calibrate-urdf.md>`__
 for more details.
 
 For simulation purposes, Klamp't will need some motor parameters to be
@@ -169,9 +169,9 @@ be used for this purpose. An automatic solution is given by the
 ``MotorCalibrate`` program, which will optimize the constants to match a
 dataset of sensed and commanded joint angles that you record while
 exercising the physical robot. See `the apps
-documentation <https://github.com/krishauser/Klampt/blob/master/Documentation/Manual-Apps.md#motorcalibrate>`__ for more details.
+documentation <https://github.com/krishauser/Klampt/blob/master/Cpp/docs/Manual-Apps.md#motorcalibrate>`__ for more details.
 
-The `URDFtoRob <http://github.com/krishauser/Klampt/blob/master/Documentation/Manual-Apps.md#urdftorob>`__ program converts from .urdf to
+The `URDFtoRob <http://github.com/krishauser/Klampt/blob/master/Cpp/docs/Manual-Apps.md#urdftorob>`__ program converts from .urdf to
 .rob files. Geometric primitive link geometries will be converted to
 triangle meshes.
 
@@ -187,7 +187,7 @@ messages is planned in the future.
 
 Using :class:`~klampt.Geometry3D`, you can easily subscribe to a ROS topic containing
 ``PointCloud2`` messages.
-This is accomplished via the :meth:`~klampt.SubscribeToStream` method, which
+This is accomplished via the :meth:`~klampt.io.SubscribeToStream` method, which
 takes as arguments the protocol (currently only "ros" protocol is
 supported) and the name of the ROS topic to subscribe to. For an
 example, create a new file called "pointCloudFromROS.py" and copy the
@@ -196,7 +196,7 @@ following lines:
 .. code:: python
 
     import time
-    from klampt import SubscribeToStream, ProcessStreams, DetatchFromStream, PointCloud, Geometry3D, Appearance
+    from klampt import io,PointCloud, Geometry3D, Appearance
 
     #Create point cloud subscriber
     topic = "myROSTopic"  # ROS topic containing point cloud, change this
@@ -204,7 +204,7 @@ following lines:
     g = Geometry3D(PointCloud())    # make 3d geometry of type PointCloud
 
     #Subscribe to topic
-    if SubscribeToStream(g,"ros",topic):       #subscribe to myROSTopic
+    if io.SubscribeToStream(g,"ros",topic):       #subscribe to myROSTopic
         print "Subscribed!"
     else:
         print "Could not subscribe to", topic
@@ -212,14 +212,14 @@ following lines:
     numReceived = 0
     t0 = time.time()
     while True:
-        processed = ProcessStreams()
+        processed = io.ProcessStreams()
         if processed:
             print "Received a PointCloud on",topic,"with",g.getPointCloud().numPoints(),"points"
             numReceived += 1
         time.sleep(0.01)
     
     #Unsubscribe from topic -- not strictly necessary
-    DetachFromStream("ros",topic)    
+    io.DetachFromStream("ros",topic)    
 
 Now run the script via
 
