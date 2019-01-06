@@ -15,6 +15,11 @@ Use :meth:`~klampt.io.resource.getDirectory` and
 stored  Alternatively, the ``directory=[DIRNAME]`` keyword
 argument can be provided to get, set, load, and save.
 
+Warning:
+
+    Don't use ``from klampt.io.resource import *``, because this will
+    override the built-in set class.
+
 Example usage can be seen in Klampt-examples/Python/demos/resourcetest.py.
 """
 
@@ -40,7 +45,7 @@ _thumbnail_window = None
 
 import collections
 
-class LRUCache:
+class _LRUCache:
     def __init__(self, capacity):
         self.capacity = capacity
         self.cache = collections.OrderedDict()
@@ -60,7 +65,7 @@ class LRUCache:
             if len(self.cache) >= self.capacity:
                 self.cache.popitem(last=False)
         self.cache[key] = value
-_editTemporaryWorlds = LRUCache(10)
+_editTemporaryWorlds = _LRUCache(10)
 
 
 def getDirectory():
@@ -119,7 +124,7 @@ def knownExtensions():
 
 def knownTypes():
     """Returns all known types"""
-    return list(typeToExtension.keys())
+    return list(typeToExtension.keys())+['WorldModel','MultiPath','Point','Rotation','Matrix3','ContactPoint']
 
 def visualEditTypes():
     """Returns types that can be visually edited"""
@@ -140,21 +145,22 @@ def filenameToType(name):
 
 def get(name,type='auto',directory=None,default=None,doedit='auto',description=None,editor='visual',world=None,referenceObject=None,frame=None):
     """Retrieve a resource of the given name from the current resources
-    directory.  Resources may be of type Config, Configs, IKGoal, Hold,
-    Stance, MultiPath, Trajectory/LinearPath, etc. (see Klampt/Modeling/Resources.h for
-    a complete list; not all are supported in the Python API).  They can
-    also be edited using RobotPose.
-
-    If the resource does not already exist, an edit prompt will be
+    directory.  If the resource does not already exist, an edit prompt will be
     shown, and the result from the prompt will be saved to disk under the
     given name.
+
+    Resources may be of type Config, Configs, IKGoal, Hold,
+    Stance, MultiPath, Trajectory/LinearPath, and ContactPoint, or any of
+    the basic Klampt object types, geometry types, and math types.
+
+    Resources can also be edited using RobotPose.
 
     Args:
         name (str): the resource name.  If type='auto', this is assumed to have
             a suffix of a file of the desired type.  The name can also be
             nested of the form 'group/subgroup/name.type'.
         type (str): the resource type, or 'auto' to determine it automatically.
-        directory (:obj:`str`, optional): the search directory.  If None, uses the current
+        directory (str, optional): the search directory.  If None, uses the current
             resource directory.
         default (optional): the default value if the resource does not exist on disk.
             If None, some arbitrary default value will be inferred.
@@ -163,11 +169,11 @@ def get(name,type='auto',directory=None,default=None,doedit='auto',description=N
             raised if the resource does not exist on disk.  If True, the
             user will be given an edit prompt to optionally edit the resource
             before this call returns.
-        description (:obj:`str`, optional): an optional text description of the resource, for use
+        description (str, optional): an optional text description of the resource, for use
             in the edit prompt.
         editor (str): either 'visual' or 'console', determining whether to use the
             visual OpenGL or console editor.
-        world (:obj:`WorldModel`, optional): for a visual editor, this world will be shown along with
+        world (WorldModel, optional): for a visual editor, this world will be shown along with
             the item to edit.  If this is a string it points to a file
             that will be loaded for the world (e.g., a world XML file, or a
             robot file).
@@ -254,9 +260,26 @@ def get(name,type='auto',directory=None,default=None,doedit='auto',description=N
     return
 
 def set(name,value,type='auto',directory=None):
-    """Saves a resource to disk under the given name."""
+    """Saves a resource to disk under the given name.
+
+    Args:
+        name (str): the file name.  Please make sure to get the right file
+            extension.  .json files are also OK for many types.
+        value: a Klamp't resource (see list of compatible types in get())
+        type (str, optional): The resource type.  If 'auto', the type is
+            determined by the file extension.  If this fails, the type is
+            determined by the value.
+
+    Returns:
+        (bool): True on success
+    """
     if type == 'auto':
-        type = filenameToType(name)
+        try:
+            type = filenameToType(name)
+        except Exception:
+            type = types.objectToTypes(value)
+            if isinstance(type,(list,tuple)):
+                type = type[0]
     if directory==None:
         directory = getDirectory()    
     fn = os.path.join(directory,name)
@@ -316,11 +339,20 @@ class FileGetter:
             self.result = self.result[0]
 
 def load(type=None,directory=None):
-    """Asks the user to open a resource file of a given type.  If type is not given, all resource file types
-    are given as options.
+    """Pops up a dialog that asks the user to load a resource file of a
+    given type. 
+
+    Args:
+        type (str, optional): The Klampt type the user should open.
+            If not given, all resource file types are shown in the
+            dialog as options.
+        directory (str, optional): if given, overrides the current resources
+            directory.
 
     Returns:
-        A (filename,value) pair, or None if the operation was canceled"""
+        (tuple or None): a (filename,value) pair if OK is pressed, or
+            None if the operation was canceled
+    """
     
     fg = FileGetter('Open resource')
     fg.directory = directory
@@ -354,11 +386,19 @@ def load(type=None,directory=None):
     return fn,get(fn,('auto' if type is None else type),'',doedit=False)
 
 def save(value,type='auto',directory=None):
-    """Asks the user to save the given resource to a file of the correct type.  If type='auto', the type
-    is determined automatically. 
+    """Pops up a dialog that asks the user to save a resource to a
+    file of the correct type. 
+
+    Args:
+        value: a Klamp't object that has a resource type
+        type (str, optional): The Klampt type the user should open.
+            If 'auto', the type is auto-detected.
+        directory (str, optional): if given, overrides the current resources
+            directory.
 
     Returns:
-        The selected filename or None on cancellation.
+        (str or None): the file saved to, if OK is pressed, or
+            None if the operation was canceled.
     """
     fg = FileGetter('Save resource')
     fg.directory = directory
@@ -428,11 +468,21 @@ class _ThumbnailPlugin(vis.VisualizationPlugin):
 def thumbnail(value,size,type='auto',world=None,frame=None):
     """Retrieves an image of the given item, resized to the given size.
 
-    Note: 
-        This can just take a snapshot of a world too.
+    Args:
+        value: a resource type.
+        size (pair of ints): the (width,height) of the thumbnail, in pixels.
+        type (str, optional): the type of value
+        world (WorldModel, optional): if given, the resource will be drawn with
+            this world in the background.  If the resource needs an associated
+            object (e.g., Config, Configs, Trajectory), the object will be drawn
+            with that given object.
+        frame (se3 element, optional): not supported yet.  Will eventually let
+            you draw Points or RigidTransforms relative to some reference
+            frame.
 
     Returns:
-        A PIL Image if PIL is available, or just a raw RGBA memory buffer otherwise.
+        (Image or bytes): A PIL Image if PIL is available, or just a raw RGBA
+            memory buffer otherwise.
 
     """
     global _thumbnail_window
@@ -573,12 +623,12 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,refe
             must be specified and a default value is created.
         type (str): the type string of the value to be edited.  Usually can be
             auto-detected from value.
-        description (:obj:`str`, optional): a descriptive string, displayed to
+        description (str, optional): a descriptive string, displayed to
             the person editing.
         editor (str): either 'visual' or 'console'.  If 'visual', will display
             a GUI for visually editing the item.
             If 'console', the user will have to type in the value.
-        world (:obj:`WorldModel` or :obj:`str`, optional): either a WorldModel
+        world (WorldModel or str, optional): either a WorldModel
             instance or a string specifying a world file. This is necessary
             for visual editing.
         referenceObject (optional): a RobotModel or other object to which the
@@ -593,7 +643,7 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,refe
             named rigid element of the world.
 
     Returns:
-        save, result (tuple):
+        (tuple): A pair (save, result):
 
             * save (bool): True if the user pressed OK, False if Cancel or the
                 close box where chosen.

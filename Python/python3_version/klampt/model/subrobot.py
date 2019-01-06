@@ -24,6 +24,11 @@ class SubRobotModel:
     full robot.
     """
     def __init__(self,robot,links):
+        """
+        Args:
+            robot (RobotModel or SubRobotModel): the robot to base this on.
+            links (list of ints or strs): the links to use in this sub-robot.
+        """
         assert isinstance(robot,(RobotModel,SubRobotModel)),"SubRobotModel constructor must be given a RobotModel or SubRobotModel as first argument"
         self._robot = robot
         self._links = links[:]
@@ -41,7 +46,6 @@ class SubRobotModel:
         to the corresponding object of the full robot.  Returns the object for the full robot.
 
         Args:
-        
             object: an integer index, configuration, velocity, matrix, list of configurations,
                 or Trajectory.
             type (str, optional): describes how to interpret object:

@@ -9,16 +9,17 @@ from klampt.model import collide
 import random
 import math
 
-def get_bound(objects):
+def _get_bound(objects):
     """Obtains the tight outer bounds of the object(s) at their current transforms, in world coordinates."""
     if hasattr(objects,'__iter__'):
-        bbs = [get_bound(o) for o in objects]
+        bbs = [bound(o) for o in objects]
         if len(bbs) == 1:
             return bbs[0]
         print(bbs)
-        return collide.bb_union(*bbs)
+        return bb_union(*bbs)
     else:
         return objects.geometry().getBBTight()
+
 
 def xy_randomize(obj,bmin,bmax):
     """Randomizes the xy position and z orientation of an object inside of a bounding box bmin->bmax.
@@ -32,7 +33,8 @@ def xy_randomize(obj,bmin,bmax):
     t[1] = random.uniform(bmin[1]-obmin[1],bmax[1]-obmax[1])
     obj.setTransform(R,t)
 
-def xy_jiggle(world,objects,fixed_objects,bmin,bmax,iters,randomize = True):
+def xy_jiggle(world,objects,fixed_objects,bmin,bmax,iters,randomize=True,
+    verbose=0):
     """Jiggles the objects' x-y positions within the range bmin - bmax, and randomizes orientation about the z
     axis until the objects are collision free.  A list of fixed objects (fixed_objects) may be given as well.
 
@@ -55,7 +57,8 @@ def xy_jiggle(world,objects,fixed_objects,bmin,bmax,iters,randomize = True):
         if cmax == 0:
             #conflict free
             return
-        print(cmax,"conflicts with object",objects[amax].getName())
+        if verbose: 
+            print(cmax,"conflicts with object",objects[amax].getName())
         other_geoms = [o.geometry() for o in objects[:amax]+objects[amax+1:]+fixed_objects]
         for it in range(inner_iters):
             xy_randomize(objects[amax],bmin,bmax)
@@ -63,7 +66,8 @@ def xy_jiggle(world,objects,fixed_objects,bmin,bmax,iters,randomize = True):
             if nc < cmax:
                 break
             iters-=1
-        print("Now",nc,"conflicts with object",objects[amax].getName())
+        if verbose: 
+            print("Now",nc,"conflicts with object",objects[amax].getName())
 
     numConflicts = [0]*len(objects)
     for (i,j) in collide.self_collision_iter([o.geometry() for o in objects]):
@@ -75,7 +79,8 @@ def xy_jiggle(world,objects,fixed_objects,bmin,bmax,iters,randomize = True):
     while max(numConflicts) > 0:
         amax = max((c,i) for (i,c) in enumerate(numConflicts))[1]
         cmax = numConflicts[amax]
-        print("Unable to find conflict-free configuration for object",objects[amax].getName(),"with",cmax,"conflicts")
+        if verbose: 
+            print("Unable to find conflict-free configuration for object",objects[amax].getName(),"with",cmax,"conflicts")
         removed.append(amax)
 
         #revise # of conflicts -- this could be faster, but whatever...
@@ -110,7 +115,7 @@ def make_object_arrangement(world,container,objects,container_wall_thickness=0.0
     
     Returns:
         (WorldModel): if successful, the positions of objects in world are
-            modified and world is returned. On failure, None is returned.
+        modified and world is returned. On failure, None is returned.
 
     Note:
         Since world is modified in-place, if you wish to make multiple worlds with
@@ -118,12 +123,12 @@ def make_object_arrangement(world,container,objects,container_wall_thickness=0.0
         configuration of the objects. You may also wish to randomize the object
         ordering using random.shuffle(objects) between instances.
     """
-    container_outer_bb = get_bound(container)
+    container_outer_bb = _get_bound(container)
     container_inner_bb = (vectorops.add(container_outer_bb[0],[container_wall_thickness]*3),vectorops.sub(container_outer_bb[1],[container_wall_thickness]*3))
     collision_margin = 0.0025
     for object in objects:
         #make sure the bottom of the object touches the bottom of the container
-        obb = get_bound(object)
+        obb = _get_bound(object)
         zmin = obb[0][2]
         R,t = object.getTransform()
         t[2] = container_inner_bb[2] - zmin + collision_margin
@@ -139,7 +144,8 @@ def make_object_arrangement(world,container,objects,container_wall_thickness=0.0
             return None
     return world
 
-def make_object_pile(world,container,objects,container_wall_thickness=0.01,randomize_orientation=True,visualize=False):
+def make_object_pile(world,container,objects,container_wall_thickness=0.01,randomize_orientation=True,
+    visualize=False,verbose=0):
     """For a given container and a list of objects in the world, drops the objects inside the container and simulates until stable.
 
     Args:
@@ -155,7 +161,8 @@ def make_object_pile(world,container,objects,container_wall_thickness=0.01,rando
             orientation is randomized.  If False or None, the orientation is
             unchanged
         visualize (bool, optional): if True, pops up a visualization window to
-            show the progress of the bile
+            show the progress of the pile
+        verbose (int, optional): if > 0, prints progress of the pile.
     
     Side effect: the positions of objects in world are modified
 
@@ -164,7 +171,7 @@ def make_object_pile(world,container,objects,container_wall_thickness=0.01,rando
 
             - world (WorldModel): the original world
             - sim (Simulator): the Simulator instance at the state used to obtain
-                the stable placement of the objects.
+              the stable placement of the objects.
 
     Note:
         Since world is modified in-place, if you wish to make multiple worlds with
@@ -172,7 +179,7 @@ def make_object_pile(world,container,objects,container_wall_thickness=0.01,rando
         configuration of the objects. You may also wish to randomize the object
         ordering using random.shuffle(objects) between instances.
     """
-    container_outer_bb = get_bound(container)
+    container_outer_bb = _get_bound(container)
     container_inner_bb = (vectorops.add(container_outer_bb[0],[container_wall_thickness]*3),vectorops.sub(container_outer_bb[1],[container_wall_thickness]*3))
     spawn_area = (container_inner_bb[0][:],container_inner_bb[1][:])
     collision_margin = 0.0025
@@ -196,7 +203,8 @@ def make_object_pile(world,container,objects,container_wall_thickness=0.01,rando
         object.setTransform(R,Tfar[1])
         sim.body(object).setTransform(*Tfar)
         sim.body(object).enable(False)
-    print("Spawn area",spawn_area)
+    if verbose: 
+        print("Spawn area",spawn_area)
     if visualize:
         vis.lock()
         config.setConfig(visworld,config.getConfig(world))
@@ -204,13 +212,14 @@ def make_object_pile(world,container,objects,container_wall_thickness=0.01,rando
     for index in range(len(objects)):
         #always spawn above the current height of the pile 
         if index > 0:
-            objects_bound = get_bound(objects[:index])
-            print("Existing objects bound:",objects_bound)
+            objects_bound = _get_bound(objects[:index])
+            if verbose: 
+                print("Existing objects bound:",objects_bound)
             zshift = max(0.0,objects_bound[1][2] - spawn_area[0][2])
             spawn_area[0][2] += zshift
             spawn_area[1][2] += zshift
         object = objects[index]
-        obb = get_bound(object)
+        obb = _get_bound(object)
         zmin = obb[0][2]
         R0,t0 = object.getTransform()
         feasible = False
@@ -221,7 +230,8 @@ def make_object_pile(world,container,objects,container_wall_thickness=0.01,rando
             t[2] = spawn_area[1][2] - zmin + t0[2] + collision_margin
             object.setTransform(R,t)
             xy_randomize(object,spawn_area[0],spawn_area[1])
-            print("Sampled position of",object.getName(),object.getTransform()[1])
+            if verbose: 
+                print("Sampled position of",object.getName(),object.getTransform()[1])
             if not randomize_orientation:
                 _,t = object.getTransform()
                 object.setTransform(R,t)
@@ -239,14 +249,16 @@ def make_object_pile(world,container,objects,container_wall_thickness=0.01,rando
                     sobject.setTransform(R,vectorops.add(t,[0,0,-(lower+1)*0.01]))
                     res = sim.checkObjectOverlap()
                     if len(res[0]) != 0:
-                        print("Terminated lowering at",lower,"cm lower")
+                        if verbose: 
+                            print("Terminated lowering at",lower,"cm lower")
                         sobject.setTransform(R,vectorops.add(t,[0,0,-lower*0.01]))
                         res = sim.checkObjectOverlap()
                         break
                 sim.updateWorld()
                 break
         if not feasible:
-            print("Failed to place object",object.getName())
+            if verbose: 
+                print("Failed to place object",object.getName())
             return None
         if visualize:
             vis.lock()
@@ -254,7 +266,8 @@ def make_object_pile(world,container,objects,container_wall_thickness=0.01,rando
             vis.unlock()
             time.sleep(0.1)
     
-    print("Beginning to simulate")
+    if verbose: 
+        print("Beginning to simulate")
     #start letting everything  fall
     for firstfall in range(10):
         sim.simulate(0.01)

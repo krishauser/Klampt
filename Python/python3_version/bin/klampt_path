@@ -100,6 +100,38 @@ class GeneralizedPath:
             mpath.sections[0].configs = traj.milestones
             self.data = mpath
             self.type = 'MultiPath'
+    def toTrajectory(self):
+        if self.type == 'Trajectory':
+            return
+        elif self.type == 'Configs':
+            self.type = 'Trajectory'
+        else:
+            times = []
+            milestones = []
+            for i,s in enumerate(self.data.sections):
+                if i==0:
+                    if s.times is not None:
+                        times += s.times
+                    milestones += s.configs
+                else:
+                    if s.times is not None:
+                        times += s.times[1:]
+                    milestones += s.configs[1:]
+            if len(times)==0:
+                times = list(range(len(milestones)))
+            else:
+                assert len(times)==len(milestones)
+            self.data = Trajectory(times,milestones)
+            self.type = 'Trajectory'
+    def toConfigs(self):
+        if self.type == 'Trajectory':
+            self.type = 'Configs'
+        elif self.type == 'Configs':
+            return
+        else:
+            self.toTrajectory()
+            self.data.times = list(range(len(milestones)))
+            self.type = 'Configs'
     def concat(self,other):
         """Warning: destructive"""
         if self.type == 'MultiPath':
@@ -149,6 +181,7 @@ def _main():
     parser.add_option("--timeshift", dest="timeshift",default=None, help="Shift timing")
     parser.add_option("--reverse", action="store_true",dest="reverse",default=False, help="Reverse path")
     parser.add_option("-d","--discretize", dest="discretize",metavar="DT", help="Discretize the time domain by spacing DT")
+    parser.add_option("-c","--convert", dest="convert",metavar="TYPE", help="Converts to TYPE=Configs, Trajectory, or MultiPath")
     parser.add_option("-o","--output", dest="output",metavar="FILE", help="Output to FILE")
     (options,args) = parser.parse_args()
     
@@ -187,6 +220,16 @@ def _main():
         paths[0].discretize(float(options.discretize))
         if not options.output:
             print("Warning: discretized path not saved, --output needs to be specified")
+    if options.convert:
+        if options.convert.lower() == 'trajectory':
+            paths[0].toTrajectory()
+        elif options.convert.lower() == 'multipath':
+            paths[0].toMultipath()
+        elif options.convert.lower() == 'configs':
+            paths[0].toConfigs()
+        else:
+            parser.error("Invalid convert argument, must be Configs, Trajectory, or Multipath")
+            exit(1)
     if options.output:
         print("Saving to",options.output)
         if paths[0].type == 'MultiPath':

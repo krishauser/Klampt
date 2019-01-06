@@ -201,7 +201,7 @@ def exprToStr(expr,parseCompatible=True,expandSubexprs='auto'):
         expandSubexprs (str or bool, optional): whether to expand subexpressions. Can be:
 
             * 'auto': if parseCompatible, equivalent to False. 
-                if parseCompatible=False, equivalent to True.
+              if parseCompatible=False, equivalent to True.
             * True: expands all common subexpressions
             * False: does not expand common subexpressions.
             * 'show': Internally used.
@@ -621,7 +621,7 @@ def codegen(name_expr,language=None,**options):
             * A single (name, Expression) tuple: generates code for one function
             * A list of (name, Expression) tuples: generates code for multiple functions
             * one or more Function objects: generates code for one or more functions, as long
-                as the Function is defined via symbolic  Expressions rather than Python functions.
+              as the Function is defined via symbolic  Expressions rather than Python functions.
             * A list of (Variable == Expression) expressions.  Generates a function with multiple return values
 
         language (str, optional): any language accepted by Sympy.

@@ -137,7 +137,7 @@ class KlamptWidget(widgets.DOMWidget):
             name (str): the name of the item, which will be used to refer to it from now on
             item: the item data
             type (str, optional): either 'auto' (default) or a string describing the type of
-                :obj:`item`, which can help disambiguate some types like 'Config' vs 'Vector3'
+                ``item``, which can help disambiguate some types like 'Config' vs 'Vector3'
                 (see below)
         
         Supports items of type:
@@ -427,11 +427,11 @@ class KlamptWidget(widgets.DOMWidget):
         self._do_rpc({'type':'add_trilist','name':name,'verts':verts}) 
 
     def addBillboard(self,name="Billboard",image=[[]],format='auto',crange=[0,1],colormap='auto',filter='linear',size=(1,1)):
-        """Adds a 2D billboard to the world.  The image is a 2D array of values, which is
-        texure-mapped to a quad of size (w,h).  The format argument determines the format of the image
-        data and the colormap argument specifies how the image affects the billboard appearance.
+        """Adds a 2D billboard to the world.  The image is a 2D array of
+        values, which is texure-mapped to a quad. 
 
-        By default the billboard is centered at (0,0,0) and faces up.  To modify it, call set_transform.
+        By default, the billboard is centered at (0,0,0) and faces up. 
+        To modify its location or orientation, call ``setTransform`` on it.
 
         Args:
             name (str): the name used to refer to this item
@@ -443,11 +443,11 @@ class KlamptWidget(widgets.DOMWidget):
 
                 * 'auto': autodetect the type from the image. If the image contains values, the format is 'value'.
                 * 'value': the values are mapped through either 'opacity', 'rainbow', or gradient
-                    color mapping.
+                  color mapping.
                 * 'rgb': if the image contains values, they are interpreted as RGB values packed in 24 bit
-                    integers. Otherwise, the first 3 channels of the tuple are used.
+                  integers. Otherwise, the first 3 channels of the tuple are used.
                 * 'rgba': if the image contains values, they are interpreted as RGB values packed in 32 bit
-                    integers. Otherwise, they are assumed to be (r,g,b,a) tuples
+                  integers. Otherwise, they are assumed to be (r,g,b,a) tuples
 
             crange (pair of numbers, optional): the range of the given values / channels. By default [0,1], but if you are using uint8
                 encoding this should be set to [0,255].
@@ -455,7 +455,7 @@ class KlamptWidget(widgets.DOMWidget):
             colormap (optional): how the color of the billboard should be set based on the image.  Valid values are:
 
                 * 'auto': if the image contains values, the gradient ((0,0,0),(1,1,1)) is used.  Otherwise
-                    'replace' is used.
+                  'replace' is used.
                 * (color1,color2): interpolates between the two given (r,g,b) or (r,g,b,a) tuples.
                 * 'opacity': sets the alpha channel only.
                 * 'modulate': the value / rgb / rgba texture modulates the billboard color as set by setColor
@@ -531,11 +531,13 @@ class KlamptWidget(widgets.DOMWidget):
         addX or setX calls. 
 
         Usage::
+
             widget.beginRpc()
             widget.addX()
             ...
             widget.setX()
             widget.endRpc()  #this sends all the messages at once
+
         """
         if self._aggregating_rpc == 0:
             assert len(self._rpc_calls)==0
