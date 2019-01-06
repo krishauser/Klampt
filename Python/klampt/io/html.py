@@ -39,8 +39,7 @@ class HTMLSharePath:
     """
     
     def __init__(self,filename="path.html",name="Klamp't Three.js app",boilerplate='auto'):
-        """Initializes this to save to an HTML file
-
+        """
         Args:
             filename (str): the HTML file to generate
             name (str): the title of the HTML page
