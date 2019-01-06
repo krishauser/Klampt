@@ -78,6 +78,8 @@ API documentation is available here
 **0.8.1 Latest version** (1/3/2018)
 -   Cleaned up documentation, separating C++ and Python docs.  Sphinx is now used for Python docs.
 -   Added klampt_path utility to Python API.
+-   Added Python API bindings for higher order dynamics functions that were already in the C++
+    library (Cartesian accelerations, Hessians, derivatives of mass matrices).
 -   Added rootfind Python C++ extension back.
 
 **0.8.0 ** (12/17/2018)
