@@ -147,7 +147,7 @@ API documentation is available here
 
 (This is not an exhaustive list; if you are using Klampt and would like to be listed, let us know!)
 
-* [Intelligent Motion Laboratory (IML)](http://motion.pratt.duke.edu), on the Baxter, [TRINA](http://motion.pratt.duke.edu/nursing), [RoboSimian](http://motion.pratt.duke.edu/locomotion), and UR5 robots.
+* [Intelligent Motion Laboratory (IML)](http://motion.pratt.duke.edu), on the Baxter, [TRINA](http://motion.pratt.duke.edu/nursing), [RoboSimian](http://motion.pratt.duke.edu/locomotion/tactile.html), and UR5 robots.  Klamp't has also been used in dozens of academic papers.
 
 * Multiple IML open-source projects, including:
 
@@ -158,9 +158,13 @@ API documentation is available here
 
 * Duke courses (ECE 383, ECE 489)
 
+* Team Duke in the Amazon Picking Challenge 2016-2018.
+
 * [SimGrasp](https://web.stanford.edu/~shiquan/SimGrasp/sim-grasp-manual/about.html) at Stanford University
 
 * Research labs at Brown, RPI, Columbia, and IIT Pisa
+
+* TeamHubo in the DARPA Robotics Challenge
 
 * [IROS 2016 Manipulation Challenge, Simulation Track](https://github.com/krishauser/IROS2016ManipulationChallenge)
 
