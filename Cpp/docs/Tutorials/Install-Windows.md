@@ -33,7 +33,7 @@ python gltemplate.py ../../data/athlete_fractal_1.xml.
 To run apps and obtain the C++ include/static library files:
 
 1. First, install the *x86 version* of the [Visual Studio 2015 Runtime](https://www.microsoft.com/en-us/download/details.aspx?id=48145).
-2. Run the [Klamp't installer](http://motion.pratt.duke.edu/software/Klampt-0.8.0-win32.msi). 
+2. Run the [Klamp't installer](http://motion.pratt.duke.edu/software/Klampt-0.8.1-win32.msi). 
 3. Optionally, install [ffmpeg from this binary build](http://ffmpeg.zeranoe.com/builds/win32/static/ffmpeg-20140609-git-6d40849-win32-static.7z), which will help you compile animations into MPEG movies.
 
 
