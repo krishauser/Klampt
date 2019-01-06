@@ -3,20 +3,21 @@ interface.
 
 For example,::
 
-    map(world).robots[0].config
+    from klampt import access
+    access.map(world).robots[0].config
 
 retrieves the name of robot 0. This saves a little writing compared to world.robot(0).getConfig().
 
 You can also write::
 
-    map(world).robots[0].config = [q1,...,qn]
+    access.map(world).robots[0].config = [q1,...,qn]
 
 to set the configuration of robot 0, rather than world.robot(0).setConfig([q1,...,qn]).
 
 Conveniently, you can write expressions like::
 
-    print len(map(world).robots)
-    map(world).robots[0].config[4] = 3.5
+    print len(access.map(world).robots)
+    access.map(world).robots[0].config[4] = 3.5
 
 Which is a shortcut to::
 
