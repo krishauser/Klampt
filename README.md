@@ -55,11 +55,11 @@ To run a visualization:
 - `python gl_vis.py`
 
 Installation instructions are also available for
-- [Linux](Tutorials/Install-Linux.md)
-- [Windows](Tutorials/Install-Windows.md)
-- [Mac OSX](Tutorials/Install-Mac.md)
+- [Linux](Cpp/docs/Tutorials/Install-Linux.md)
+- [Windows](Cpp/docs/Tutorials/Install-Windows.md)
+- [Mac OSX](Cpp/docs/Tutorials/Install-Mac.md)
 - [Jupyter notebook](Jupyter/README.md)
-- [Docker](Tutorials/Install-Docker.md)
+- [Docker](Cpp/docs/Tutorials/Install-Docker.md)
 
 
 ## Documentation
