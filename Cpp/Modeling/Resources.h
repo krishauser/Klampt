@@ -10,6 +10,11 @@
 #include "Contact/Grasp.h"
 using namespace std;
 
+/** @file Resources.h
+ * @ingroup Modeling
+ * @brief Defines all Klampt Resource types, and packing / unpacking utilities.
+ */
+
 class AnyCollection;
 typedef BasicResource<Config> ConfigResource;
 typedef BasicResource<Vector3> Vector3Resource;

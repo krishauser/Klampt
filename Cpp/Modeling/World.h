@@ -9,6 +9,11 @@
 #include <KrisLibrary/camera/viewport.h>
 #include <KrisLibrary/GLdraw/GLLight.h>
 
+/** @file World.h
+ * @ingroup Modeling
+ * @brief Defines the RobotWorld class.
+ */
+
 /** @ingroup Modeling
  * @brief The main world class containing multiple robots, objects, and
  * static geometries (terrains).  Lights and other viewport information
@@ -90,6 +95,10 @@ class RobotWorld
   vector<ViewRobot> robotViews;
 };
 
+/** @ingroup Modeling
+ * @brief Performs a shallow copy of a RobotWorld.  Since it does not copy geometry,
+ * this operation is very fast.
+ */
 void CopyWorld(const RobotWorld& a,RobotWorld& b);
 
 #endif
