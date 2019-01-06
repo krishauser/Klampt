@@ -45,13 +45,6 @@ deps
 objs
 lib
 *.pyc
-Documentation/build
-Documentation/html
-Documentation/latex
-Documentation/*.tags
-Documentation/doxygen.conf
-bin
-lib
 
 # Cygwin stack dump files
 *.stackdump
