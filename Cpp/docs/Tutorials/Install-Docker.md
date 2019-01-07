@@ -51,7 +51,9 @@ This will take some time as it downloads the container.
 Afterwards, navigate to where you want the "Work" directory, and run
 
 > mkdir Work
+
 > git clone https://github.com/krishauser/Klampt-examples
+
 > mv Klampt-examples Work
 
 This will give you the Klampt-examples folder, which will contain some Jupyter Notebook examples.  Then, launch the Docker container with
@@ -65,7 +67,7 @@ and if it doesn't work, navigate to the top of your Docker console and make a no
 
 You should be able to run a Jupyter notebook containing Klamp't, which should look something like this:
 
-~[Jupyter image](../../../Python/docs/source/_static/images/jupyter.png)
+![Jupyter image](../../../Python/docs/source/_static/images/jupyter.png)
 
 ## Running the X11 Image (out of date)
 
