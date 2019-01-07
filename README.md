@@ -181,7 +181,7 @@ API documentation is available here
 
 [Kris Hauser](mailto:kris.hauser@duke.edu) has been the primary maintainer throughout the project. Other major contributors include Jordan Tritell, Jingru Luo, and Alessio Rocchi.
 
-Adam Konnecker, Cam Allen, Steve Kuznetsov have helped with the Mac build.
+Adam Konnecker, Cam Allen, and Steve Kuznetsov have helped with the Mac build.  Hayden Bader helped with the prebuilt Docker container.
 
 As an open-source project, we welcome contributions and suggestions from the community.
 

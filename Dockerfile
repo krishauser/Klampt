@@ -23,33 +23,20 @@ RUN apt-get update && \
 	 ffmpeg && \
 	apt-get clean
 
-# Copy Klamp't Data
+# Copy Klamp't files
 RUN mkdir /etc/Klampt
 COPY CMakeLists.txt /etc/Klampt/CMakeLists.txt
 COPY CMakeModules /etc/Klampt/CMakeModules/
-COPY Contact /etc/Klampt/Contact/
-COPY Control /etc/Klampt/Control/
+COPY Cpp /etc/Klampt/Cpp
 COPY data /etc/Klampt/data/
-COPY Documentation /etc/Klampt/Documentation/
-COPY doxygen.conf /etc/Klampt/doxygen.conf
-COPY doxygen.conf.in /etc/Klampt/doxygen.conf.in
-COPY Examples /etc/Klampt/Examples/
-COPY Interface /etc/Klampt/Interface/
-COPY IO /etc/Klampt/IO/
-COPY Library /etc/Klampt/Library/
 COPY LICENSE /etc/Klampt/LICENSE
-COPY Main /etc/Klampt/Main/
-COPY Modeling /etc/Klampt/Modeling/
-COPY Planning /etc/Klampt/Planning/
 COPY Python /etc/Klampt/Python/
-COPY Simulation /etc/Klampt/Simulation/
-COPY View /etc/Klampt/View/
 
 # Install Klamp't dependencies
-RUN cd /etc/Klampt/Library && \
+RUN cd /etc/Klampt/Cpp/Dependencies && \
 	make unpack-deps && \
 	make deps && \
-	echo "/etc/Klampt/Library/ode-0.14/ode/src/.libs/" >> /etc/ld.so.conf && \
+	echo "/etc/Klampt/Cpp/Dependencies/ode-0.14/ode/src/.libs/" >> /etc/ld.so.conf && \
 	ldconfig
 
 # Install Klamp't
@@ -60,5 +47,3 @@ RUN cd /etc/Klampt && \
 	make python && \
 	make python-install
 
-# Volume Mount User Data
-VOLUME /home/Klampt/data
