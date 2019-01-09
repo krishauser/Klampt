@@ -55,11 +55,11 @@ To run a visualization:
 - `python gl_vis.py`
 
 Installation instructions are also available for
-- [Linux](Tutorials/Install-Linux.md)
-- [Windows](Tutorials/Install-Windows.md)
-- [Mac OSX](Tutorials/Install-Mac.md)
+- [Linux](Cpp/docs/Tutorials/Install-Linux.md)
+- [Windows](Cpp/docs/Tutorials/Install-Windows.md)
+- [Mac OSX](Cpp/docs/Tutorials/Install-Mac.md)
 - [Jupyter notebook](Jupyter/README.md)
-- [Docker](Tutorials/Install-Docker.md)
+- [Docker](Cpp/docs/Tutorials/Install-Docker.md)
 
 
 ## Documentation
@@ -147,7 +147,7 @@ API documentation is available here
 
 (This is not an exhaustive list; if you are using Klampt and would like to be listed, let us know!)
 
-* [Intelligent Motion Laboratory (IML)](http://motion.pratt.duke.edu), on the Baxter, [TRINA](http://motion.pratt.duke.edu/nursing), [RoboSimian](http://motion.pratt.duke.edu/locomotion), and UR5 robots.
+* [Intelligent Motion Laboratory (IML)](http://motion.pratt.duke.edu), on the Baxter, [TRINA](http://motion.pratt.duke.edu/nursing), [RoboSimian](http://motion.pratt.duke.edu/locomotion/tactile.html), and UR5 robots.  Klamp't has also been used in dozens of academic papers.
 
 * Multiple IML open-source projects, including:
 
@@ -158,9 +158,13 @@ API documentation is available here
 
 * Duke courses (ECE 383, ECE 489)
 
+* Team Duke in the Amazon Picking Challenge 2016-2018.
+
 * [SimGrasp](https://web.stanford.edu/~shiquan/SimGrasp/sim-grasp-manual/about.html) at Stanford University
 
 * Research labs at Brown, RPI, Columbia, and IIT Pisa
+
+* TeamHubo in the DARPA Robotics Challenge
 
 * [IROS 2016 Manipulation Challenge, Simulation Track](https://github.com/krishauser/IROS2016ManipulationChallenge)
 
@@ -177,7 +181,7 @@ API documentation is available here
 
 [Kris Hauser](mailto:kris.hauser@duke.edu) has been the primary maintainer throughout the project. Other major contributors include Jordan Tritell, Jingru Luo, and Alessio Rocchi.
 
-Adam Konnecker, Cam Allen, Steve Kuznetsov have helped with the Mac build.
+Adam Konnecker, Cam Allen, and Steve Kuznetsov have helped with the Mac build.  Hayden Bader helped with the prebuilt Docker container.
 
 As an open-source project, we welcome contributions and suggestions from the community.
 
