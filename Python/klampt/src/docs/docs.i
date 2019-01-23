@@ -15,8 +15,8 @@ For more complex appearances, you will need to call your own OpenGL calls.
 Appearances can be either references to appearances of objects in the world, or
 they can be standalone.  
 
-Performance note: Avoid rebuilding buffers (e.g., via :meth:`refresh` ()) as
-much as possible.  
+Performance note: Avoid rebuilding buffers (e.g., via :meth:`refresh` as much as
+possible.  
 
 C++ includes: appearance.h
 ";
@@ -187,7 +187,7 @@ If 5 arguments are given, changes the color of the given feature. feature can be
 ALL, VERTICES, EDGES, or FACES.  
 ";
 
-// File: structContactParameters.xml
+// File: classContactParameters.xml
 
 
 %feature("docstring") ContactParameters "
@@ -195,7 +195,20 @@ ALL, VERTICES, EDGES, or FACES.
 Stores contact parameters for an entity. Currently only used for simulation, but
 could be used for contact mechanics in the future.  
 
+Attributes:  
+
+    kFriction (float): The coefficient of (Coulomb) friction, in range
+        [0,inf).
+    kRestitution (float): The coefficient of restitution, in range [0,1].
+    kStiffness (float): The stiffness of the material, in range (0,inf)
+        (default inf, perfectly rigid).
+    kDamping (float): The damping of the material, in range (0,inf)
+        (default inf, perfectly rigid).  
+
 C++ includes: robotmodel.h
+";
+
+%feature("docstring") ContactParameters::ContactParameters "
 ";
 
 // File: classCSpaceInterface.xml
@@ -398,7 +411,7 @@ gathering behavior.
 
 %feature("docstring") DistanceQueryResult "
 
-The result from a \"fancy\" distance query of :class::`~klampt.Geometry3D`.  
+The result from a \"fancy\" distance query of :class:`~klampt.Geometry3D`.  
 
 Attributes:  
 
@@ -424,7 +437,7 @@ C++ includes: geometry.h
 
 %feature("docstring") DistanceQuerySettings "
 
-Configures the _ext distance queries of :class::`~klampt.Geometry3D`.  
+Configures the _ext distance queries of :class:`~klampt.Geometry3D`.  
 
 The calculated result satisfies :math:`Dcalc \\leq D(1+relErr) + absErr` unless
 :math:`D \\geq upperBound`, in which case Dcalc=upperBound may be returned.  
@@ -1223,25 +1236,48 @@ Returns a vector describing the error of the objective at the current
 configuration.  
 ";
 
-// File: structMass.xml
+// File: classMass.xml
 
 
 %feature("docstring") Mass "
 
-Stores mass information for a rigid body or robot link. Note: you should use the
-set/get functions rather than changing the members directly due to strangeness
-in SWIG's handling of vectors.  
+Stores mass information for a rigid body or robot link.  
+
+Note:  
+
+    You should use the set/get functions rather than changing the members
+    directly due to strangeness in SWIG's handling of vectors.  
+
+Attributes:  
+
+    mass (float): the actual mass (typically in kg)
+    com (SWIG-based list of 3 floats): the center of mass position, in
+        local coordinates.  (Better to use setCom/getCom)
+    inertia (SWIG-based list of 3 floats or 9 floats): the inertia matrix
+        in local coordinates.  If 3 floats, this is a diagonal matrix.
+        If 9 floats, this gives all entries of the 3x3 inertia matrix
+        (in column major or row major order, it doesn't matter since
+        inertia matrices are symmetric)  
 
 C++ includes: robotmodel.h
 ";
 
 %feature("docstring") Mass::getInertia "
+
+Returns the inertia matrix as a list of 3 floats or 9 floats.  
+";
+
+%feature("docstring") Mass::Mass "
 ";
 
 %feature("docstring") Mass::setInertia "
+
+Sets an inertia matrix.  
 ";
 
 %feature("docstring") Mass::getCom "
+
+Returns the COM as a list of 3 floats.  
 ";
 
 %feature("docstring") Mass::getMass "
@@ -1563,30 +1599,40 @@ Sets the rotation / translation (R,t) of the rigid object.
 
 Returns a copy of the ContactParameters of this rigid object.  
 
-Note: to change the contact parameters, you should call
-`p=object.getContactParameters()`, change the desired properties in p, and then
-`object.setContactParameters(p)`  
+Note:  
+
+    To change the contact parameters, you should call
+    ``p=object.getContactParameters()``, change the desired properties in
+    p, and then call ``object.setContactParameters(p)``  
 ";
 
 %feature("docstring") RigidObjectModel::getID "
 
-Returns the ID of the rigid object in its world (Note: not the same as the rigid
-object index)  
+Returns the ID of the rigid object in its world.  
+
+Note: The world ID is not the same as the rigid object index.  
 ";
 
 %feature("docstring") RigidObjectModel::getVelocity "
 
 Retrieves the (angular velocity, velocity) of the rigid object.  
+
+Returns:  
+
+    (tuple): a pair of 3-lists (w,v) where w is the angular velocity
+    vector and v is the translational velocity vector (both in world
+    coordinates)  
 ";
 
 %feature("docstring") RigidObjectModel::loadFile "
 
-Loads the object from a file.  
+Loads the object from the file fn.  
 ";
 
 %feature("docstring") RigidObjectModel::saveFile "
 
-Saves the object. If geometryName is given, the geometry is saved to that file.  
+Saves the object to the file fn. If geometryName is given, the geometry is saved
+to that file.  
 ";
 
 %feature("docstring") RigidObjectModel::geometry "
@@ -1623,13 +1669,21 @@ Appearance directly.
 %feature("docstring") RigidObjectModel::getTransform "
 
 Retrieves the rotation / translation of the rigid object (R,t)  
+
+Returns:  
+
+    (se3 object): a pair (R,t), with R a 9-list and t a 3-list of floats,
+    giving the transform to world coordinates.  
 ";
 
 %feature("docstring") RigidObjectModel::getMass "
 
-Returns a copy of the Mass of this rigid object. Note: to change the mass
-properties, you should call m=object.getMass(), change the desired properties in
-m, and then object.setMass(m)  
+Returns a copy of the Mass of this rigid object.  
+
+Note:  
+
+    To change the mass properties, you should call ``m=object.getMass()``,
+    change the desired properties in m, and then ``object.setMass(m)``  
 ";
 
 // File: classRobotModel.xml
@@ -1714,32 +1768,53 @@ Returns the nxn mass matrix B(q). Takes O(n^2) time.
 Returns the generalized gravity vector G(q) for the given workspace gravity
 vector g (usually (0,0,-9.8)).  
 
-Note: \"Forces\" is somewhat of a misnomer; the result is a vector of joint
-torques.  
+Note:  
+
+    \"Forces\" is somewhat of a misnomer; the result is a vector of joint
+    torques.  
+
+Returns:  
+
+    (list of floats): the n-element generalized gravity vector at the
+    robot's current configuration.  
 ";
 
 %feature("docstring") RobotModel::interpolate "
 
 Interpolates smoothly between two configurations, properly taking into account
 nonstandard joints.  
+
+Returns:  
+
+    (list of n floats): The configuration that is u fraction of the way
+    from a to b  
 ";
 
 %feature("docstring") RobotModel::getComJacobian "
 
-Returns the 3xn Jacobian matrix of the current center of mass.  
+Returns the Jacobian matrix of the current center of mass.  
+
+Returns:  
+
+    (list of 3 lists): a 3xn matrix J such that np.dot(J,dq) gives the
+    COM velocity at the currene configuration  
 ";
 
 %feature("docstring") RobotModel::getID "
 
-Returns the ID of the robot in its world (Note: not the same as the robot index)  
+Returns the ID of the robot in its world.  
+
+Note: The world ID is not the same as the robot index.  
 ";
 
 %feature("docstring") RobotModel::saveFile "
 
-Saves the robot. If geometryPrefix == NULL, the geometry is not saved (default).
-Otherwise, the geometry of each link will be saved to files named
-geometryPrefix+name, where name is either the name of the geometry file that was
-loaded, or [link_name].off.  
+Saves the robot to the file fn.  
+
+If `geometryPrefix == None` (default), the geometry is not saved. Otherwise, the
+geometry of each link will be saved to files named `geometryPrefix+name`, where
+`name` is either the name of the geometry file that was loaded, or
+`[link_name].off`  
 ";
 
 %feature("docstring") RobotModel::enableSelfCollision "
@@ -1751,8 +1826,15 @@ Enables/disables self collisions between two links (depending on value)
 
 Computes the foward dynamics (using Recursive Newton Euler solver)  
 
-Note: does not include gravity term G(q). getGravityForces(g) will need to be
-subtracted from the argument t.  
+Note:  
+
+    Does not include gravity term G(q).  getGravityForces(g) will need
+    to be subtracted from the argument t.  
+
+Returns:  
+
+    (list of floats): the n-element joint acceleration vector that would
+    result from joint torques t in the absence of external forces.  
 ";
 
 %feature("docstring") RobotModel::getJointType "
@@ -1876,8 +1958,15 @@ Returns the number of links = number of DOF's.
 Computes the inverse dynamics. Uses Recursive Newton Euler solver and takes O(n)
 time.  
 
-Note: does not include gravity term G(q). getGravityForces(g) will need to be
-added to the result.  
+Note:  
+
+    Does not include gravity term G(q).  getGravityForces(g) will need
+    to be added to the result.  
+
+Returns:  
+
+    (list of floats): the n-element torque vector that would produce
+    the joint accelerations ddq in the absence of external forces.  
 ";
 
 %feature("docstring") RobotModel::getMassMatrixInv "
@@ -1912,7 +2001,7 @@ function call, you should call `q = robot.getConfig()` before the call, and then
 
 %feature("docstring") RobotModel::loadFile "
 
-Loads the robot from a file.  
+Loads the robot from the file fn.  
 ";
 
 %feature("docstring") RobotModel::distance "
@@ -2083,19 +2172,37 @@ C++ includes: robotmodel.h
 
 %feature("docstring") RobotModelLink::getOrientationJacobian "
 
-Returns the 3xn orientation jacobian of the link (row-major matrix) w.r.t. the
-robot's configuration q.  
+Returns the orientation jacobian of this link w.r.t. the robot's configuration
+q.  
+
+Returns:  
+
+    (list of 3 lists of floats): the 3xn orientation Jacobian matrix of
+    the link.  The matrix is row-major.
+
+    This matrix J gives the link's angular velocity (in world coordinates)
+    via np.dot(J,dq), where dq is the robot's joint velocities.  
 ";
 
 %feature("docstring") RobotModelLink::getPointAcceleration "
 
-Returns the acceleration of the point given the robot's current joint velocities
-and joint accelerations ddq.  
+Returns the acceleration of the point given the robot's current joint
+configuration and velocities, and the joint accelerations ddq.  
+
+Returns:  
+
+    (list of 3 floats): the acceleration of the point, in
+    world coordinates.  
 ";
 
 %feature("docstring") RobotModelLink::getLocalDirection "
 
 Converts direction from world to local coordinates.  
+
+Returns:  
+
+    (list of 3 floats): the local coordinates of the world direction
+    vworld  
 ";
 
 %feature("docstring") RobotModelLink::getMass "
@@ -2106,20 +2213,36 @@ origin at the link frame, not about the COM.)
 
 %feature("docstring") RobotModelLink::setTransform "
 
-Sets transformation (R,t) to the world frame. Note: this does NOT perform
-inverse kinematics. The transform is overwritten when the robot's setConfig()
-method is called.  
+Sets the link's current transformation (R,t) to the world frame.  
+
+Note:  
+
+    This does NOT perform inverse kinematics.  The transform is
+    overwritten when the robot's setConfig() method is called.  
 ";
 
 %feature("docstring") RobotModelLink::getWorldDirection "
 
 Converts direction from local to world coordinates.  
+
+Returns:  
+
+    (list of 3 floats): the world coordinates of the local direction
+    vlocal  
 ";
 
 %feature("docstring") RobotModelLink::getPositionJacobian "
 
-Returns the 3xn jacobian of the local point p (row-major matrix) w.r.t. the
-robot's configuration q.  
+Returns the position jacobian of a point on this link w.r.t. the robot's
+configuration q.  
+
+Returns:  
+
+    (list of 3 lists of floats): the 3xn Jacobian matrix of the
+    point given by local coordinates plocal.  The matrix is row-major.
+
+    This matrix J gives the point's velocity (in world coordinates) via
+    np.dot(J,dq), where dq is the robot's joint velocities.  
 ";
 
 %feature("docstring") RobotModelLink::setParentTransform "
@@ -2129,7 +2252,13 @@ Sets transformation (R,t) to the parent link.
 
 %feature("docstring") RobotModelLink::getPointVelocity "
 
-Returns the world velocity of the point given the robot's current velocity.  
+Returns the world velocity of a point attached to the link, given the robot's
+current joint configuration and velocities.  
+
+Returns:  
+
+    (list of 3 floats): the current velocity of the point, in
+    world coordinates.  
 ";
 
 %feature("docstring") RobotModelLink::geometry "
@@ -2139,7 +2268,11 @@ Returns a reference to the link's geometry.
 
 %feature("docstring") RobotModelLink::getTransform "
 
-Gets transformation (R,t) to the world frame.  
+Gets the link's current transformation (R,t) to the world frame.  
+
+Returns:  
+
+    (se3 object): a pair (R,t), with R a 9-list and t a 3-list of floats.  
 ";
 
 %feature("docstring") RobotModelLink::drawLocalGL "
@@ -2151,6 +2284,12 @@ current Appearance is honored. Otherwise, just the geometry is drawn.
 %feature("docstring") RobotModelLink::getParentTransform "
 
 Gets transformation (R,t) to the parent link.  
+
+Returns:  
+
+    (se3 object): a pair (R,t), with R a 9-list and t a 3-list of floats,
+    giving the local transform from this link to its parent, in the
+    reference (zero) configuration.  
 ";
 
 %feature("docstring") RobotModelLink::getParent "
@@ -2171,7 +2310,12 @@ Sets the link's parent (must be on the same robot).
 %feature("docstring") RobotModelLink::getAngularVelocity "
 
 Returns the angular velocity of the link given the robot's current joint
-velocities.  
+configuration and velocities.  
+
+Returns:  
+
+    (list of 3 floats): the current angular velocity of the link, in world
+    coordinates  
 ";
 
 %feature("docstring") RobotModelLink::appearance "
@@ -2187,6 +2331,10 @@ Returns a reference to the link's parent, or a NULL link if it has no parent.
 %feature("docstring") RobotModelLink::getLocalPosition "
 
 Converts point from world to local coordinates.  
+
+Returns:  
+
+    (list of 3 floats): the local coordinates of the world point pworld  
 ";
 
 %feature("docstring") RobotModelLink::RobotModelLink "
@@ -2195,17 +2343,28 @@ Converts point from world to local coordinates.
 %feature("docstring") RobotModelLink::getWorldPosition "
 
 Converts point from local to world coordinates.  
+
+Returns:  
+
+    (list of 3 floats): the world coordinates of the local point plocal  
 ";
 
 %feature("docstring") RobotModelLink::getID "
 
-Returns the ID of the robot link in its world (Note: not the same as getIndex())  
+Returns the ID of the robot link in its world.  
+
+Note: The world ID is not the same as the link's index, retrieved by getIndex.  
 ";
 
 %feature("docstring") RobotModelLink::getAngularAcceleration "
 
 Returns the angular acceleration of the link given the robot's current joint
-velocities and joint accelerations ddq.  
+configuration and velocities, and the joint accelerations ddq.  
+
+Returns:  
+
+    (list of 3 floats): the angular acceleration of the link, in
+    world coordinates.  
 ";
 
 %feature("docstring") RobotModelLink::getName "
@@ -2216,8 +2375,12 @@ Returns the name of the robot link.
 %feature("docstring") RobotModelLink::getPositionHessian "
 
 Returns the Hessians of each component of the position p w.r.t the robot's
-configuration q. The result is a triple of nxn matrices corresponding to the
-(x,y,z) components respectively.  
+configuration q.  
+
+Returns:  
+
+    (3-tuple): a triple (Hx,Hy,Hz) of of nxn matrices corresponding,
+    respectively, to the (x,y,z) components of the Hessian.  
 ";
 
 %feature("docstring") RobotModelLink::setMass "
@@ -2233,10 +2396,16 @@ Sets the local rotational / translational axis.
 
 %feature("docstring") RobotModelLink::getJacobian "
 
-Returns the 6xn total jacobian of the local point p (row-major matrix) w.r.t.
-the robot's configuration q.  
+Returns the total jacobian of a point on this link w.r.t. the robot's
+configuration q.  
 
-(the orientation jacobian is stacked on position jacobian)  
+Returns:  
+
+    (list of 6 lists of floats): the 6xn total Jacobian matrix of the
+    point given by local coordinates plocal.  The matrix is row-major.
+
+    The orientation jacobian is given in the first 3 rows, and is stacked
+    on the position jacobian, which is given in the last 3 rows.  
 ";
 
 %feature("docstring") RobotModelLink::getIndex "
@@ -2263,10 +2432,15 @@ current Appearance is honored. Otherwise, just the geometry is drawn.
 %feature("docstring") RobotModelLink::getAcceleration "
 
 Returns the acceleration of the link origin given the robot's current joint
-velocities and joint accelerations ddq.  
+configuration and velocities, and the joint accelerations ddq.  
 
 ddq can be empty, which calculates the acceleration with acceleration 0, and is
 a little faster than setting ddq to [0]*n  
+
+Returns:  
+
+    (list of 3 floats): the acceleration of the link's origin, in
+    world coordinates.  
 ";
 
 %feature("docstring") RobotModelLink::setName "
@@ -2277,14 +2451,23 @@ Sets the name of the robot link.
 %feature("docstring") RobotModelLink::getOrientationHessian "
 
 Returns the Hessians of each orientation component of the link w.r.t the robot's
-configuration q. The result is a triple of nxn matrices corresponding to the
-(wx,wy,wz) components respectively.  
+configuration q.  
+
+Returns:  
+
+    (3-tuple): a triple (Hx,Hy,Hz) of of nxn matrices corresponding,
+    respectively, to the (wx,wy,wz) components of the Hessian.  
 ";
 
 %feature("docstring") RobotModelLink::getVelocity "
 
 Returns the velocity of the link's origin given the robot's current joint
-velocities.  
+configuration and velocities. Equivalent to getPointVelocity([0,0,0]).  
+
+Returns:  
+
+    (list of 3 floats): the current velocity of the link's origin, in
+    world coordinates  
 ";
 
 // File: classRobotPoser.xml
@@ -2870,7 +3053,7 @@ Valid names are:
 *   instabilityPostCorrectionEnergy  
 
 See `Klampt/Simulation/ODESimulator.h
-<https://github.com/krishauser/Klampt/blob/master/Simulation/ODESimulator.h>`_
+<http://motion.pratt.duke.edu/klampt/klampt_docs/ODESimulator_8h_source.html>`_
 for detailed descriptions of these parameters.  
 ";
 
@@ -3023,7 +3206,8 @@ Changes the friction coefficient for this terrain.
 
 %feature("docstring") TerrainModel::saveFile "
 
-Saves the terrain. If geometryName is given, the geometry is saved to that file.  
+Saves the terrain to the file fn. If geometryName is given, the geometry is
+saved to that file.  
 ";
 
 %feature("docstring") TerrainModel::drawGL "
@@ -3054,13 +3238,14 @@ Returns a reference to the appearance associated with this object.
 
 %feature("docstring") TerrainModel::getID "
 
-Returns the ID of the terrain in its world (Note: not the same as the terrain
-index)  
+Returns the ID of the terrain in its world.  
+
+Note: The world ID is not the same as the terrain index.  
 ";
 
 %feature("docstring") TerrainModel::loadFile "
 
-Loads the terrain from a file.  
+Loads the terrain from the file fn.  
 ";
 
 // File: classTransformPoser.xml
@@ -3335,7 +3520,7 @@ from this WorldModel or another.
 %feature("docstring") WorldModel::copy "
 
 Creates a copy of the world model. Note that geometries and appearances are
-shared...  
+shared, so this is very quick.  
 ";
 
 %feature("docstring") WorldModel::numRigidObjects "
@@ -3369,8 +3554,10 @@ Draws the entire world using OpenGL.
 Removes a robot, rigid object, or terrain from the world. It must be in this
 world or an exception is raised.  
 
-IMPORTANT: all other RobotModel, RigidObjectModel, and TerrainModel references
-will be invalidated.  
+IMPORTANT:  
+
+    All other RobotModel, RigidObjectModel, and TerrainModel references will be
+invalidated.  
 ";
 
 %feature("docstring") WorldModel::remove "
@@ -3378,8 +3565,10 @@ will be invalidated.
 Removes a robot, rigid object, or terrain from the world. It must be in this
 world or an exception is raised.  
 
-IMPORTANT: all other RobotModel, RigidObjectModel, and TerrainModel references
-will be invalidated.  
+IMPORTANT:  
+
+    All other RobotModel, RigidObjectModel, and TerrainModel references will be
+invalidated.  
 ";
 
 %feature("docstring") WorldModel::remove "
@@ -3387,8 +3576,10 @@ will be invalidated.
 Removes a robot, rigid object, or terrain from the world. It must be in this
 world or an exception is raised.  
 
-IMPORTANT: all other RobotModel, RigidObjectModel, and TerrainModel references
-will be invalidated.  
+IMPORTANT:  
+
+    All other RobotModel, RigidObjectModel, and TerrainModel references will be
+invalidated.  
 ";
 
 %feature("docstring") WorldModel::loadElement "

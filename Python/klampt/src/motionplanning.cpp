@@ -1289,7 +1289,9 @@ void PlannerInterface::dump(const char* fn)
 void destroy()
 {
   spaces.resize(0);
+  adaptiveSpaces.resize(0);
   spacesDeleteList.resize(0);
+  goalSets.resize(0);
   plans.resize(0);
   plansDeleteList.resize(0);
 }

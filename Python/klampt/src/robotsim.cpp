@@ -2558,6 +2558,15 @@ Appearance RobotModelLink::appearance()
   return res;
 }
 
+
+Mass::Mass()
+: mass(1),com(3,0.0),inertia(3,1.0)
+{}
+
+ContactParameters::ContactParameters()
+: kFriction(0.5),kRestitution(0),kStiffness(Inf),kDamping(Inf)
+{}
+
 Mass RobotModelLink::getMass()
 {
   Mass mass;

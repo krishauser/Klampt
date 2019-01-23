@@ -27975,6 +27975,31 @@ SWIGINTERN PyObject *RobotPoser_swigregister(PyObject *SWIGUNUSEDPARM(self), PyO
   return SWIG_Py_Void();
 }
 
+SWIGINTERN PyObject *_wrap_new_Mass(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Mass *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)":new_Mass")) SWIG_fail;
+  {
+    try {
+      result = (Mass *)new Mass();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Mass, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_Mass_setMass(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Mass *arg1 = (Mass *) 0 ;
@@ -28419,31 +28444,6 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_new_Mass(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Mass *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)":new_Mass")) SWIG_fail;
-  {
-    try {
-      result = (Mass *)new Mass();
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Mass, SWIG_POINTER_NEW |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
 SWIGINTERN PyObject *_wrap_delete_Mass(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Mass *arg1 = (Mass *) 0 ;
@@ -28483,6 +28483,31 @@ SWIGINTERN PyObject *Mass_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject 
   SWIG_TypeNewClientData(SWIGTYPE_p_Mass, SWIG_NewClientData(obj));
   return SWIG_Py_Void();
 }
+
+SWIGINTERN PyObject *_wrap_new_ContactParameters(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ContactParameters *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)":new_ContactParameters")) SWIG_fail;
+  {
+    try {
+      result = (ContactParameters *)new ContactParameters();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_ContactParameters, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
 
 SWIGINTERN PyObject *_wrap_ContactParameters_kFriction_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
@@ -28686,31 +28711,6 @@ SWIGINTERN PyObject *_wrap_ContactParameters_kDamping_get(PyObject *SWIGUNUSEDPA
   arg1 = reinterpret_cast< ContactParameters * >(argp1);
   result = (double) ((arg1)->kDamping);
   resultobj = SWIG_From_double(static_cast< double >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_new_ContactParameters(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  ContactParameters *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)":new_ContactParameters")) SWIG_fail;
-  {
-    try {
-      result = (ContactParameters *)new ContactParameters();
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_ContactParameters, SWIG_POINTER_NEW |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -54282,7 +54282,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"The result from a \"fancy\" distance query of :class::`~klampt.Geometry3D`.  \n"
+		"The result from a \"fancy\" distance query of :class:`~klampt.Geometry3D`.  \n"
 		"\n"
 		"Attributes:  \n"
 		"\n"
@@ -55198,6 +55198,12 @@ static PyMethodDef SwigMethods[] = {
 		""},
 	 { (char *)"delete_RobotPoser", _wrap_delete_RobotPoser, METH_VARARGS, (char *)"delete_RobotPoser(RobotPoser self)"},
 	 { (char *)"RobotPoser_swigregister", RobotPoser_swigregister, METH_VARARGS, NULL},
+	 { (char *)"new_Mass", _wrap_new_Mass, METH_VARARGS, (char *)"\n"
+		"new_Mass() -> Mass\n"
+		"\n"
+		"\n"
+		"\n"
+		""},
 	 { (char *)"Mass_setMass", _wrap_Mass_setMass, METH_VARARGS, (char *)"\n"
 		"Mass_setMass(Mass self, double _mass)\n"
 		"\n"
@@ -55221,17 +55227,23 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
+		"Returns the COM as a list of 3 floats.  \n"
+		"\n"
 		""},
 	 { (char *)"Mass_setInertia", _wrap_Mass_setInertia, METH_VARARGS, (char *)"\n"
 		"Mass_setInertia(Mass self, doubleVector _inertia)\n"
 		"\n"
 		"\n"
 		"\n"
+		"Sets an inertia matrix.  \n"
+		"\n"
 		""},
 	 { (char *)"Mass_getInertia", _wrap_Mass_getInertia, METH_VARARGS, (char *)"\n"
 		"Mass_getInertia(Mass self)\n"
 		"\n"
 		"\n"
+		"\n"
+		"Returns the inertia matrix as a list of 3 floats or 9 floats.  \n"
 		"\n"
 		""},
 	 { (char *)"Mass_mass_set", _wrap_Mass_mass_set, METH_VARARGS, (char *)"Mass_mass_set(Mass self, double mass)"},
@@ -55240,20 +55252,14 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"Mass_com_get", _wrap_Mass_com_get, METH_VARARGS, (char *)"Mass_com_get(Mass self) -> doubleVector"},
 	 { (char *)"Mass_inertia_set", _wrap_Mass_inertia_set, METH_VARARGS, (char *)"Mass_inertia_set(Mass self, doubleVector inertia)"},
 	 { (char *)"Mass_inertia_get", _wrap_Mass_inertia_get, METH_VARARGS, (char *)"Mass_inertia_get(Mass self) -> doubleVector"},
-	 { (char *)"new_Mass", _wrap_new_Mass, METH_VARARGS, (char *)"\n"
-		"new_Mass() -> Mass\n"
-		"\n"
-		"\n"
-		"\n"
-		"Stores mass information for a rigid body or robot link. Note: you should use the\n"
-		"set/get functions rather than changing the members directly due to strangeness\n"
-		"in SWIG's handling of vectors.  \n"
-		"\n"
-		"C++ includes: robotmodel.h\n"
-		"\n"
-		""},
 	 { (char *)"delete_Mass", _wrap_delete_Mass, METH_VARARGS, (char *)"delete_Mass(Mass self)"},
 	 { (char *)"Mass_swigregister", Mass_swigregister, METH_VARARGS, NULL},
+	 { (char *)"new_ContactParameters", _wrap_new_ContactParameters, METH_VARARGS, (char *)"\n"
+		"new_ContactParameters() -> ContactParameters\n"
+		"\n"
+		"\n"
+		"\n"
+		""},
 	 { (char *)"ContactParameters_kFriction_set", _wrap_ContactParameters_kFriction_set, METH_VARARGS, (char *)"ContactParameters_kFriction_set(ContactParameters self, double kFriction)"},
 	 { (char *)"ContactParameters_kFriction_get", _wrap_ContactParameters_kFriction_get, METH_VARARGS, (char *)"ContactParameters_kFriction_get(ContactParameters self) -> double"},
 	 { (char *)"ContactParameters_kRestitution_set", _wrap_ContactParameters_kRestitution_set, METH_VARARGS, (char *)"ContactParameters_kRestitution_set(ContactParameters self, double kRestitution)"},
@@ -55262,17 +55268,6 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"ContactParameters_kStiffness_get", _wrap_ContactParameters_kStiffness_get, METH_VARARGS, (char *)"ContactParameters_kStiffness_get(ContactParameters self) -> double"},
 	 { (char *)"ContactParameters_kDamping_set", _wrap_ContactParameters_kDamping_set, METH_VARARGS, (char *)"ContactParameters_kDamping_set(ContactParameters self, double kDamping)"},
 	 { (char *)"ContactParameters_kDamping_get", _wrap_ContactParameters_kDamping_get, METH_VARARGS, (char *)"ContactParameters_kDamping_get(ContactParameters self) -> double"},
-	 { (char *)"new_ContactParameters", _wrap_new_ContactParameters, METH_VARARGS, (char *)"\n"
-		"new_ContactParameters() -> ContactParameters\n"
-		"\n"
-		"\n"
-		"\n"
-		"Stores contact parameters for an entity. Currently only used for simulation, but\n"
-		"could be used for contact mechanics in the future.  \n"
-		"\n"
-		"C++ includes: robotmodel.h\n"
-		"\n"
-		""},
 	 { (char *)"delete_ContactParameters", _wrap_delete_ContactParameters, METH_VARARGS, (char *)"delete_ContactParameters(ContactParameters self)"},
 	 { (char *)"ContactParameters_swigregister", ContactParameters_swigregister, METH_VARARGS, NULL},
 	 { (char *)"new_RobotModelLink", _wrap_new_RobotModelLink, METH_VARARGS, (char *)"\n"
@@ -55286,7 +55281,9 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Returns the ID of the robot link in its world (Note: not the same as getIndex())  \n"
+		"Returns the ID of the robot link in its world.  \n"
+		"\n"
+		"Note: The world ID is not the same as the link's index, retrieved by getIndex.  \n"
 		"\n"
 		""},
 	 { (char *)"RobotModelLink_getName", _wrap_RobotModelLink_getName, METH_VARARGS, (char *)"\n"
@@ -55387,6 +55384,12 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Gets transformation (R,t) to the parent link.  \n"
 		"\n"
+		"Returns:  \n"
+		"\n"
+		"    (se3 object): a pair (R,t), with R a 9-list and t a 3-list of floats,\n"
+		"    giving the local transform from this link to its parent, in the\n"
+		"    reference (zero) configuration.  \n"
+		"\n"
 		""},
 	 { (char *)"RobotModelLink_setParentTransform", _wrap_RobotModelLink_setParentTransform, METH_VARARGS, (char *)"\n"
 		"RobotModelLink_setParentTransform(RobotModelLink self, double const [9] R, double const [3] t)\n"
@@ -55419,6 +55422,10 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Converts point from local to world coordinates.  \n"
 		"\n"
+		"Returns:  \n"
+		"\n"
+		"    (list of 3 floats): the world coordinates of the local point plocal  \n"
+		"\n"
 		""},
 	 { (char *)"RobotModelLink_getWorldDirection", _wrap_RobotModelLink_getWorldDirection, METH_VARARGS, (char *)"\n"
 		"RobotModelLink_getWorldDirection(RobotModelLink self, double const [3] vlocal)\n"
@@ -55426,6 +55433,11 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Converts direction from local to world coordinates.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    (list of 3 floats): the world coordinates of the local direction\n"
+		"    vlocal  \n"
 		"\n"
 		""},
 	 { (char *)"RobotModelLink_getLocalPosition", _wrap_RobotModelLink_getLocalPosition, METH_VARARGS, (char *)"\n"
@@ -55435,6 +55447,10 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Converts point from world to local coordinates.  \n"
 		"\n"
+		"Returns:  \n"
+		"\n"
+		"    (list of 3 floats): the local coordinates of the world point pworld  \n"
+		"\n"
 		""},
 	 { (char *)"RobotModelLink_getLocalDirection", _wrap_RobotModelLink_getLocalDirection, METH_VARARGS, (char *)"\n"
 		"RobotModelLink_getLocalDirection(RobotModelLink self, double const [3] vworld)\n"
@@ -55443,13 +55459,22 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Converts direction from world to local coordinates.  \n"
 		"\n"
+		"Returns:  \n"
+		"\n"
+		"    (list of 3 floats): the local coordinates of the world direction\n"
+		"    vworld  \n"
+		"\n"
 		""},
 	 { (char *)"RobotModelLink_getTransform", _wrap_RobotModelLink_getTransform, METH_VARARGS, (char *)"\n"
 		"RobotModelLink_getTransform(RobotModelLink self)\n"
 		"\n"
 		"\n"
 		"\n"
-		"Gets transformation (R,t) to the world frame.  \n"
+		"Gets the link's current transformation (R,t) to the world frame.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    (se3 object): a pair (R,t), with R a 9-list and t a 3-list of floats.  \n"
 		"\n"
 		""},
 	 { (char *)"RobotModelLink_setTransform", _wrap_RobotModelLink_setTransform, METH_VARARGS, (char *)"\n"
@@ -55457,9 +55482,12 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Sets transformation (R,t) to the world frame. Note: this does NOT perform\n"
-		"inverse kinematics. The transform is overwritten when the robot's setConfig()\n"
-		"method is called.  \n"
+		"Sets the link's current transformation (R,t) to the world frame.  \n"
+		"\n"
+		"Note:  \n"
+		"\n"
+		"    This does NOT perform inverse kinematics.  The transform is\n"
+		"    overwritten when the robot's setConfig() method is called.  \n"
 		"\n"
 		""},
 	 { (char *)"RobotModelLink_getVelocity", _wrap_RobotModelLink_getVelocity, METH_VARARGS, (char *)"\n"
@@ -55468,7 +55496,12 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Returns the velocity of the link's origin given the robot's current joint\n"
-		"velocities.  \n"
+		"configuration and velocities. Equivalent to getPointVelocity([0,0,0]).  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    (list of 3 floats): the current velocity of the link's origin, in\n"
+		"    world coordinates  \n"
 		"\n"
 		""},
 	 { (char *)"RobotModelLink_getAngularVelocity", _wrap_RobotModelLink_getAngularVelocity, METH_VARARGS, (char *)"\n"
@@ -55477,7 +55510,12 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Returns the angular velocity of the link given the robot's current joint\n"
-		"velocities.  \n"
+		"configuration and velocities.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    (list of 3 floats): the current angular velocity of the link, in world\n"
+		"    coordinates  \n"
 		"\n"
 		""},
 	 { (char *)"RobotModelLink_getPointVelocity", _wrap_RobotModelLink_getPointVelocity, METH_VARARGS, (char *)"\n"
@@ -55485,18 +55523,30 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Returns the world velocity of the point given the robot's current velocity.  \n"
+		"Returns the world velocity of a point attached to the link, given the robot's\n"
+		"current joint configuration and velocities.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    (list of 3 floats): the current velocity of the point, in\n"
+		"    world coordinates.  \n"
 		"\n"
 		""},
 	 { (char *)"RobotModelLink_getJacobian", _wrap_RobotModelLink_getJacobian, METH_VARARGS, (char *)"\n"
-		"RobotModelLink_getJacobian(RobotModelLink self, double const [3] p)\n"
+		"RobotModelLink_getJacobian(RobotModelLink self, double const [3] plocal)\n"
 		"\n"
 		"\n"
 		"\n"
-		"Returns the 6xn total jacobian of the local point p (row-major matrix) w.r.t.\n"
-		"the robot's configuration q.  \n"
+		"Returns the total jacobian of a point on this link w.r.t. the robot's\n"
+		"configuration q.  \n"
 		"\n"
-		"(the orientation jacobian is stacked on position jacobian)  \n"
+		"Returns:  \n"
+		"\n"
+		"    (list of 6 lists of floats): the 6xn total Jacobian matrix of the\n"
+		"    point given by local coordinates plocal.  The matrix is row-major.\n"
+		"\n"
+		"    The orientation jacobian is given in the first 3 rows, and is stacked\n"
+		"    on the position jacobian, which is given in the last 3 rows.  \n"
 		"\n"
 		""},
 	 { (char *)"RobotModelLink_getPositionJacobian", _wrap_RobotModelLink_getPositionJacobian, METH_VARARGS, (char *)"\n"
@@ -55504,8 +55554,16 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Returns the 3xn jacobian of the local point p (row-major matrix) w.r.t. the\n"
-		"robot's configuration q.  \n"
+		"Returns the position jacobian of a point on this link w.r.t. the robot's\n"
+		"configuration q.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    (list of 3 lists of floats): the 3xn Jacobian matrix of the\n"
+		"    point given by local coordinates plocal.  The matrix is row-major.\n"
+		"\n"
+		"    This matrix J gives the point's velocity (in world coordinates) via\n"
+		"    np.dot(J,dq), where dq is the robot's joint velocities.  \n"
 		"\n"
 		""},
 	 { (char *)"RobotModelLink_getOrientationJacobian", _wrap_RobotModelLink_getOrientationJacobian, METH_VARARGS, (char *)"\n"
@@ -55513,8 +55571,16 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Returns the 3xn orientation jacobian of the link (row-major matrix) w.r.t. the\n"
-		"robot's configuration q.  \n"
+		"Returns the orientation jacobian of this link w.r.t. the robot's configuration\n"
+		"q.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    (list of 3 lists of floats): the 3xn orientation Jacobian matrix of\n"
+		"    the link.  The matrix is row-major.\n"
+		"\n"
+		"    This matrix J gives the link's angular velocity (in world coordinates)\n"
+		"    via np.dot(J,dq), where dq is the robot's joint velocities.  \n"
 		"\n"
 		""},
 	 { (char *)"RobotModelLink_getAcceleration", _wrap_RobotModelLink_getAcceleration, METH_VARARGS, (char *)"\n"
@@ -55523,10 +55589,15 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Returns the acceleration of the link origin given the robot's current joint\n"
-		"velocities and joint accelerations ddq.  \n"
+		"configuration and velocities, and the joint accelerations ddq.  \n"
 		"\n"
 		"ddq can be empty, which calculates the acceleration with acceleration 0, and is\n"
 		"a little faster than setting ddq to [0]*n  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    (list of 3 floats): the acceleration of the link's origin, in\n"
+		"    world coordinates.  \n"
 		"\n"
 		""},
 	 { (char *)"RobotModelLink_getPointAcceleration", _wrap_RobotModelLink_getPointAcceleration, METH_VARARGS, (char *)"\n"
@@ -55534,8 +55605,13 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Returns the acceleration of the point given the robot's current joint velocities\n"
-		"and joint accelerations ddq.  \n"
+		"Returns the acceleration of the point given the robot's current joint\n"
+		"configuration and velocities, and the joint accelerations ddq.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    (list of 3 floats): the acceleration of the point, in\n"
+		"    world coordinates.  \n"
 		"\n"
 		""},
 	 { (char *)"RobotModelLink_getAngularAcceleration", _wrap_RobotModelLink_getAngularAcceleration, METH_VARARGS, (char *)"\n"
@@ -55544,7 +55620,12 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Returns the angular acceleration of the link given the robot's current joint\n"
-		"velocities and joint accelerations ddq.  \n"
+		"configuration and velocities, and the joint accelerations ddq.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    (list of 3 floats): the angular acceleration of the link, in\n"
+		"    world coordinates.  \n"
 		"\n"
 		""},
 	 { (char *)"RobotModelLink_getPositionHessian", _wrap_RobotModelLink_getPositionHessian, METH_VARARGS, (char *)"\n"
@@ -55553,8 +55634,12 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Returns the Hessians of each component of the position p w.r.t the robot's\n"
-		"configuration q. The result is a triple of nxn matrices corresponding to the\n"
-		"(x,y,z) components respectively.  \n"
+		"configuration q.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    (3-tuple): a triple (Hx,Hy,Hz) of of nxn matrices corresponding,\n"
+		"    respectively, to the (x,y,z) components of the Hessian.  \n"
 		"\n"
 		""},
 	 { (char *)"RobotModelLink_getOrientationHessian", _wrap_RobotModelLink_getOrientationHessian, METH_VARARGS, (char *)"\n"
@@ -55563,8 +55648,12 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Returns the Hessians of each orientation component of the link w.r.t the robot's\n"
-		"configuration q. The result is a triple of nxn matrices corresponding to the\n"
-		"(wx,wy,wz) components respectively.  \n"
+		"configuration q.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    (3-tuple): a triple (Hx,Hy,Hz) of of nxn matrices corresponding,\n"
+		"    respectively, to the (wx,wy,wz) components of the Hessian.  \n"
 		"\n"
 		""},
 	 { (char *)"RobotModelLink_drawLocalGL", _wrap_RobotModelLink_drawLocalGL, METH_VARARGS, (char *)"\n"
@@ -55704,7 +55793,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Loads the robot from a file.  \n"
+		"Loads the robot from the file fn.  \n"
 		"\n"
 		""},
 	 { (char *)"RobotModel_saveFile", _wrap_RobotModel_saveFile, METH_VARARGS, (char *)"\n"
@@ -55713,10 +55802,12 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Saves the robot. If geometryPrefix == NULL, the geometry is not saved (default).\n"
-		"Otherwise, the geometry of each link will be saved to files named\n"
-		"geometryPrefix+name, where name is either the name of the geometry file that was\n"
-		"loaded, or [link_name].off.  \n"
+		"Saves the robot to the file fn.  \n"
+		"\n"
+		"If `geometryPrefix == None` (default), the geometry is not saved. Otherwise, the\n"
+		"geometry of each link will be saved to files named `geometryPrefix+name`, where\n"
+		"`name` is either the name of the geometry file that was loaded, or\n"
+		"`[link_name].off`  \n"
 		"\n"
 		""},
 	 { (char *)"RobotModel_getID", _wrap_RobotModel_getID, METH_VARARGS, (char *)"\n"
@@ -55724,7 +55815,9 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Returns the ID of the robot in its world (Note: not the same as the robot index)  \n"
+		"Returns the ID of the robot in its world.  \n"
+		"\n"
+		"Note: The world ID is not the same as the robot index.  \n"
 		"\n"
 		""},
 	 { (char *)"RobotModel_getName", _wrap_RobotModel_getName, METH_VARARGS, (char *)"\n"
@@ -55936,7 +56029,12 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Returns the 3xn Jacobian matrix of the current center of mass.  \n"
+		"Returns the Jacobian matrix of the current center of mass.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    (list of 3 lists): a 3xn matrix J such that np.dot(J,dq) gives the\n"
+		"    COM velocity at the currene configuration  \n"
 		"\n"
 		""},
 	 { (char *)"RobotModel_getLinearMomentum", _wrap_RobotModel_getLinearMomentum, METH_VARARGS, (char *)"\n"
@@ -56033,8 +56131,15 @@ static PyMethodDef SwigMethods[] = {
 		"Returns the generalized gravity vector G(q) for the given workspace gravity\n"
 		"vector g (usually (0,0,-9.8)).  \n"
 		"\n"
-		"Note: \"Forces\" is somewhat of a misnomer; the result is a vector of joint\n"
-		"torques.  \n"
+		"Note:  \n"
+		"\n"
+		"    \"Forces\" is somewhat of a misnomer; the result is a vector of joint\n"
+		"    torques.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    (list of floats): the n-element generalized gravity vector at the\n"
+		"    robot's current configuration.  \n"
 		"\n"
 		""},
 	 { (char *)"RobotModel_torquesFromAccel", _wrap_RobotModel_torquesFromAccel, METH_VARARGS, (char *)"\n"
@@ -56045,8 +56150,15 @@ static PyMethodDef SwigMethods[] = {
 		"Computes the inverse dynamics. Uses Recursive Newton Euler solver and takes O(n)\n"
 		"time.  \n"
 		"\n"
-		"Note: does not include gravity term G(q). getGravityForces(g) will need to be\n"
-		"added to the result.  \n"
+		"Note:  \n"
+		"\n"
+		"    Does not include gravity term G(q).  getGravityForces(g) will need\n"
+		"    to be added to the result.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    (list of floats): the n-element torque vector that would produce\n"
+		"    the joint accelerations ddq in the absence of external forces.  \n"
 		"\n"
 		""},
 	 { (char *)"RobotModel_accelFromTorques", _wrap_RobotModel_accelFromTorques, METH_VARARGS, (char *)"\n"
@@ -56056,8 +56168,15 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Computes the foward dynamics (using Recursive Newton Euler solver)  \n"
 		"\n"
-		"Note: does not include gravity term G(q). getGravityForces(g) will need to be\n"
-		"subtracted from the argument t.  \n"
+		"Note:  \n"
+		"\n"
+		"    Does not include gravity term G(q).  getGravityForces(g) will need\n"
+		"    to be subtracted from the argument t.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    (list of floats): the n-element joint acceleration vector that would\n"
+		"    result from joint torques t in the absence of external forces.  \n"
 		"\n"
 		""},
 	 { (char *)"RobotModel_interpolate", _wrap_RobotModel_interpolate, METH_VARARGS, (char *)"\n"
@@ -56067,6 +56186,11 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Interpolates smoothly between two configurations, properly taking into account\n"
 		"nonstandard joints.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    (list of n floats): The configuration that is u fraction of the way\n"
+		"    from a to b  \n"
 		"\n"
 		""},
 	 { (char *)"RobotModel_distance", _wrap_RobotModel_distance, METH_VARARGS, (char *)"\n"
@@ -56158,7 +56282,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Loads the object from a file.  \n"
+		"Loads the object from the file fn.  \n"
 		"\n"
 		""},
 	 { (char *)"RigidObjectModel_saveFile", _wrap_RigidObjectModel_saveFile, METH_VARARGS, (char *)"\n"
@@ -56167,7 +56291,8 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Saves the object. If geometryName is given, the geometry is saved to that file.  \n"
+		"Saves the object to the file fn. If geometryName is given, the geometry is saved\n"
+		"to that file.  \n"
 		"\n"
 		""},
 	 { (char *)"RigidObjectModel_getID", _wrap_RigidObjectModel_getID, METH_VARARGS, (char *)"\n"
@@ -56175,8 +56300,9 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Returns the ID of the rigid object in its world (Note: not the same as the rigid\n"
-		"object index)  \n"
+		"Returns the ID of the rigid object in its world.  \n"
+		"\n"
+		"Note: The world ID is not the same as the rigid object index.  \n"
 		"\n"
 		""},
 	 { (char *)"RigidObjectModel_getName", _wrap_RigidObjectModel_getName, METH_VARARGS, (char *)"\n"
@@ -56212,9 +56338,12 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Returns a copy of the Mass of this rigid object. Note: to change the mass\n"
-		"properties, you should call m=object.getMass(), change the desired properties in\n"
-		"m, and then object.setMass(m)  \n"
+		"Returns a copy of the Mass of this rigid object.  \n"
+		"\n"
+		"Note:  \n"
+		"\n"
+		"    To change the mass properties, you should call ``m=object.getMass()``,\n"
+		"    change the desired properties in m, and then ``object.setMass(m)``  \n"
 		"\n"
 		""},
 	 { (char *)"RigidObjectModel_setMass", _wrap_RigidObjectModel_setMass, METH_VARARGS, (char *)"\n"
@@ -56230,9 +56359,11 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns a copy of the ContactParameters of this rigid object.  \n"
 		"\n"
-		"Note: to change the contact parameters, you should call\n"
-		"`p=object.getContactParameters()`, change the desired properties in p, and then\n"
-		"`object.setContactParameters(p)`  \n"
+		"Note:  \n"
+		"\n"
+		"    To change the contact parameters, you should call\n"
+		"    ``p=object.getContactParameters()``, change the desired properties in\n"
+		"    p, and then call ``object.setContactParameters(p)``  \n"
 		"\n"
 		""},
 	 { (char *)"RigidObjectModel_setContactParameters", _wrap_RigidObjectModel_setContactParameters, METH_VARARGS, (char *)"\n"
@@ -56247,6 +56378,11 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Retrieves the rotation / translation of the rigid object (R,t)  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    (se3 object): a pair (R,t), with R a 9-list and t a 3-list of floats,\n"
+		"    giving the transform to world coordinates.  \n"
 		"\n"
 		""},
 	 { (char *)"RigidObjectModel_setTransform", _wrap_RigidObjectModel_setTransform, METH_VARARGS, (char *)"\n"
@@ -56263,6 +56399,12 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Retrieves the (angular velocity, velocity) of the rigid object.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    (tuple): a pair of 3-lists (w,v) where w is the angular velocity\n"
+		"    vector and v is the translational velocity vector (both in world\n"
+		"    coordinates)  \n"
 		"\n"
 		""},
 	 { (char *)"RigidObjectModel_setVelocity", _wrap_RigidObjectModel_setVelocity, METH_VARARGS, (char *)"\n"
@@ -56306,7 +56448,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Loads the terrain from a file.  \n"
+		"Loads the terrain from the file fn.  \n"
 		"\n"
 		""},
 	 { (char *)"TerrainModel_saveFile", _wrap_TerrainModel_saveFile, METH_VARARGS, (char *)"\n"
@@ -56315,7 +56457,8 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Saves the terrain. If geometryName is given, the geometry is saved to that file.  \n"
+		"Saves the terrain to the file fn. If geometryName is given, the geometry is\n"
+		"saved to that file.  \n"
 		"\n"
 		""},
 	 { (char *)"TerrainModel_getID", _wrap_TerrainModel_getID, METH_VARARGS, (char *)"\n"
@@ -56323,8 +56466,9 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Returns the ID of the terrain in its world (Note: not the same as the terrain\n"
-		"index)  \n"
+		"Returns the ID of the terrain in its world.  \n"
+		"\n"
+		"Note: The world ID is not the same as the terrain index.  \n"
 		"\n"
 		""},
 	 { (char *)"TerrainModel_getName", _wrap_TerrainModel_getName, METH_VARARGS, (char *)"\n"
@@ -56416,7 +56560,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Creates a copy of the world model. Note that geometries and appearances are\n"
-		"shared...  \n"
+		"shared, so this is very quick.  \n"
 		"\n"
 		""},
 	 { (char *)"WorldModel_readFile", _wrap_WorldModel_readFile, METH_VARARGS, (char *)"\n"
@@ -56594,8 +56738,10 @@ static PyMethodDef SwigMethods[] = {
 		"Removes a robot, rigid object, or terrain from the world. It must be in this\n"
 		"world or an exception is raised.  \n"
 		"\n"
-		"IMPORTANT: all other RobotModel, RigidObjectModel, and TerrainModel references\n"
-		"will be invalidated.  \n"
+		"IMPORTANT:  \n"
+		"\n"
+		"    All other RobotModel, RigidObjectModel, and TerrainModel references will be\n"
+		"invalidated.  \n"
 		"\n"
 		""},
 	 { (char *)"WorldModel_getName", _wrap_WorldModel_getName, METH_VARARGS, (char *)"\n"
@@ -58099,7 +58245,7 @@ static PyMethodDef SwigMethods[] = {
 		"*   instabilityPostCorrectionEnergy  \n"
 		"\n"
 		"See `Klampt/Simulation/ODESimulator.h\n"
-		"<https://github.com/krishauser/Klampt/blob/master/Simulation/ODESimulator.h>`_\n"
+		"<http://motion.pratt.duke.edu/klampt/klampt_docs/ODESimulator_8h_source.html>`_\n"
 		"for detailed descriptions of these parameters.  \n"
 		"\n"
 		""},
