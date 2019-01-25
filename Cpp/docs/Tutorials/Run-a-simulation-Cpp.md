@@ -15,7 +15,7 @@ To make your first app that compiles with Klamp't, first create a folder with tw
 This very basic main.cpp runs a simulation for 5 seconds (simulation time) from the command line:
 
 ```cpp
-#include <Interface/SimulationGUI.h>
+#include <Klampt/Interface/SimulationGUI.h>
 
 int main(int argc,const char** argv) {
   //create a world
