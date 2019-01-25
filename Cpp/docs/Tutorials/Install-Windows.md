@@ -25,7 +25,7 @@ You're done! As a test, run "cmd" from the start menu,
 ```sh
 git clone http://github.com/krishauser/Klampt-examples
 cd Klampt-examples/Python/demos
-python gltemplate.py ../../data/athlete_fractal_1.xml.
+python gl_vis.py
 ```
 
 # Windows, from binaries (recommended)
