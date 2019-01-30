@@ -454,7 +454,7 @@ class Simulator
    * - instabilityMaxEnergyThreshold
    * - instabilityPostCorrectionEnergy
    * 
-   * See `Klampt/Simulation/ODESimulator.h <https://github.com/krishauser/Klampt/blob/master/Simulation/ODESimulator.h>`_
+   * See `Klampt/Simulation/ODESimulator.h <http://motion.pratt.duke.edu/klampt/klampt_docs/ODESimulator_8h_source.html>`_
    * for detailed descriptions of these parameters.
    */
   std::string getSetting(const std::string& name);

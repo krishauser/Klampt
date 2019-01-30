@@ -20,16 +20,35 @@ class Terrain;
 class Robot;
 
 /** @brief Stores mass information for a rigid body or robot link.
- * Note: you should use the set/get functions rather than changing the members
- * directly due to strangeness in SWIG's handling of vectors.
-*/
-struct Mass
+ * 
+ * Note:
+ * 
+ *     You should use the set/get functions rather than changing the members
+ *     directly due to strangeness in SWIG's handling of vectors.
+ * 
+ * Attributes:
+ *
+ *     mass (float): the actual mass (typically in kg)
+ *     com (SWIG-based list of 3 floats): the center of mass position, in
+ *         local coordinates.  (Better to use setCom/getCom)
+ *     inertia (SWIG-based list of 3 floats or 9 floats): the inertia matrix
+ *         in local coordinates.  If 3 floats, this is a diagonal matrix.
+ *         If 9 floats, this gives all entries of the 3x3 inertia matrix
+ *         (in column major or row major order, it doesn't matter since
+ *         inertia matrices are symmetric)
+ */
+class Mass
 {
+public:
+  Mass();
   void setMass(double _mass) { mass=_mass; }
   double getMass() const { return mass; }
   void setCom(const std::vector<double>& _com) { com = _com; }
+  ///Returns the COM as a list of 3 floats
   void getCom(std::vector<double>& out) const { out = com; }
+  ///Sets an inertia matrix.
   void setInertia(const std::vector<double>& _inertia) { inertia = _inertia; }
+  ///Returns the inertia matrix as a list of 3 floats or 9 floats
   void getInertia(std::vector<double>& out) const { out=inertia; }
 
   double mass;        ///<mass
@@ -39,9 +58,22 @@ struct Mass
 
 /** @brief Stores contact parameters for an entity.  Currently only
  * used for simulation, but could be used for contact mechanics in the
- * future. */
-struct ContactParameters
+ * future.
+ *
+ * Attributes:
+ *
+ *     kFriction (float): The coefficient of (Coulomb) friction, in range
+ *         [0,inf).
+ *     kRestitution (float): The coefficient of restitution, in range [0,1].
+ *     kStiffness (float): The stiffness of the material, in range (0,inf)
+ *         (default inf, perfectly rigid).
+ *     kDamping (float): The damping of the material, in range (0,inf)
+ *         (default inf, perfectly rigid).
+ */
+class ContactParameters
 {
+public:
+  ContactParameters();
   double kFriction;
   double kRestitution;
   double kStiffness,kDamping;
@@ -52,9 +84,9 @@ struct ContactParameters
  * The link stores many mostly-constant items (id, name, parent, geometry, appearance, mass, joint
  * axes).  There are two exceptions:
 
- * * the link's current transform, which is affected by the RobotModel's
+ * - the link's current transform, which is affected by the RobotModel's
  *     current configuration, i.e., the last :meth:`RobotModel.setConfig` (q) call.
- * * The various Jacobians of points on the link, accessed by :meth:`RobotModelLink.getJacobian` ,
+ * - The various Jacobians of points on the link, accessed by :meth:`RobotModelLink.getJacobian` ,
  *     :meth:`RobotModelLink.getPositionJacobian` , and :meth:`RobotModelLink.getOrientationJacobian` ,
  *     which are configuration dependent.
  *
@@ -64,7 +96,11 @@ class RobotModelLink
 {
  public:
   RobotModelLink();
-  ///Returns the ID of the robot link in its world (Note: not the same as getIndex())
+  ///Returns the ID of the robot link in its world
+  ///
+  ///Note:
+  ///    The world ID is not the same as the link's index, retrieved by
+  ///    getIndex.
   int getID() const;
   ///Returns the name of the robot link
   const char* getName() const;
@@ -93,6 +129,12 @@ class RobotModelLink
   ///at the link frame, not about the COM.)
   void setMass(const Mass& mass);
   ///Gets transformation (R,t) to the parent link
+  ///
+  ///Returns:
+  ///
+  ///    (se3 object): a pair (R,t), with R a 9-list and t a 3-list of floats,
+  ///    giving the local transform from this link to its parent, in the
+  ///    reference (zero) configuration.
   void getParentTransform(double out[9],double out2[3]);
   ///Sets transformation (R,t) to the parent link
   void setParentTransform(const double R[9],const double t[3]);
@@ -102,57 +144,143 @@ class RobotModelLink
   void setAxis(const double axis[3]);
 
   ///Converts point from local to world coordinates 
+  ///
+  ///Returns:
+  ///
+  ///    (list of 3 floats): the world coordinates of the local point plocal
   void getWorldPosition(const double plocal[3],double out[3]);
   ///Converts direction from local to world coordinates 
+  ///
+  ///Returns:
+  ///
+  ///    (list of 3 floats): the world coordinates of the local direction
+  ///    vlocal
   void getWorldDirection(const double vlocal[3],double out[3]);
   ///Converts point from world to local coordinates 
+  ///
+  ///Returns:
+  ///
+  ///    (list of 3 floats): the local coordinates of the world point pworld
   void getLocalPosition(const double pworld[3],double out[3]);
   ///Converts direction from world to local coordinates 
+  ///
+  ///Returns:
+  ///
+  ///    (list of 3 floats): the local coordinates of the world direction
+  ///    vworld
   void getLocalDirection(const double vworld[3],double out[3]);
-  ///Gets transformation (R,t) to the world frame
+  ///Gets the link's current transformation (R,t) to the world frame
+  ///
+  ///Returns:
+  ///
+  ///    (se3 object): a pair (R,t), with R a 9-list and t a 3-list of floats.
   void getTransform(double out[9],double out2[3]);
-  ///Sets transformation (R,t) to the world frame.  Note: this does NOT
-  ///perform inverse kinematics.  The transform is overwritten when the
-  ///robot's setConfig() method is called.
+  ///Sets the link's current transformation (R,t) to the world frame. 
+  ///
+  ///Note:
+  ///
+  ///    This does NOT perform inverse kinematics.  The transform is
+  ///    overwritten when the robot's setConfig() method is called.
   void setTransform(const double R[9],const double t[3]);
   ///Returns the velocity of the link's origin given the robot's current joint
-  ///velocities
+  ///configuration and velocities.  Equivalent to getPointVelocity([0,0,0]).
+  ///
+  ///Returns: 
+  ///
+  ///    (list of 3 floats): the current velocity of the link's origin, in
+  ///    world coordinates
   void getVelocity(double out[3]);
   ///Returns the angular velocity of the link given the robot's current joint
-  ///velocities
-  void getAngularVelocity(double out[3]);
-  ///Returns the world velocity of the point given the robot's current velocity
-  void getPointVelocity(const double plocal[3],double out[3]);
-  ///Returns the 6xn total jacobian of the local point p (row-major matrix)
-  ///w.r.t. the robot's configuration q.
+  ///configuration and velocities
   ///
-  ///(the orientation jacobian is stacked on position jacobian)
-  void getJacobian(const double p[3],std::vector<std::vector<double> >& out);
-  ///Returns the 3xn jacobian of the local point p (row-major matrix)
-  ///w.r.t. the robot's configuration q.
+  ///Returns: 
+  ///
+  ///    (list of 3 floats): the current angular velocity of the link, in world
+  ///    coordinates
+  void getAngularVelocity(double out[3]);
+  ///Returns the world velocity of a point attached to the link, given the
+  ///robot's current joint configuration and velocities
+  ///
+  ///Returns:
+  ///
+  ///    (list of 3 floats): the current velocity of the point, in
+  ///    world coordinates.
+  void getPointVelocity(const double plocal[3],double out[3]);
+  ///Returns the total jacobian of a point on this link w.r.t. the robot's
+  ///configuration q.
+  ///
+  ///Returns:
+  ///
+  ///    (list of 6 lists of floats): the 6xn total Jacobian matrix of the
+  ///    point given by local coordinates plocal.  The matrix is row-major.
+  ///
+  ///    The orientation jacobian is given in the first 3 rows, and is stacked
+  ///    on the position jacobian, which is given in the last 3 rows.
+  void getJacobian(const double plocal[3],std::vector<std::vector<double> >& out);
+  ///Returns the position jacobian of a point on this link  w.r.t. the robot's
+  ///configuration q.
+  ///
+  ///Returns:
+  ///
+  ///    (list of 3 lists of floats): the 3xn Jacobian matrix of the
+  ///    point given by local coordinates plocal.  The matrix is row-major.
+  ///
+  ///    This matrix J gives the point's velocity (in world coordinates) via
+  ///    np.dot(J,dq), where dq is the robot's joint velocities.
   void getPositionJacobian(const double p[3],std::vector<std::vector<double> >& out);
-  ///Returns the 3xn orientation jacobian of the link (row-major matrix)
-  ///w.r.t. the robot's configuration q.
+  ///Returns the orientation jacobian of this link  w.r.t. the robot's
+  ///configuration q.
+  ///
+  ///Returns:
+  ///
+  ///    (list of 3 lists of floats): the 3xn orientation Jacobian matrix of 
+  ///    the link.  The matrix is row-major. 
+  ///
+  ///    This matrix J gives the link's angular velocity (in world coordinates)
+  ///    via np.dot(J,dq), where dq is the robot's joint velocities.
   void getOrientationJacobian(std::vector<std::vector<double> >& out);
   ///Returns the acceleration of the link origin given the robot's current
-  ///joint velocities and joint accelerations ddq.
+  ///joint configuration and velocities, and the joint accelerations ddq.
   ///
   ///ddq can be empty, which calculates the acceleration with acceleration 0,
   ///and is a little faster than setting ddq to [0]*n
+  ///
+  ///Returns:
+  ///
+  ///    (list of 3 floats): the acceleration of the link's origin, in
+  ///    world coordinates.
   void getAcceleration(const std::vector<double>& ddq,double out[3]);
   ///Returns the acceleration of the point given the robot's current
-  ///joint velocities and joint accelerations ddq.
+  ///joint configuration and velocities, and the joint accelerations ddq.
+  ///
+  ///Returns:
+  ///
+  ///    (list of 3 floats): the acceleration of the point, in
+  ///    world coordinates.
   void getPointAcceleration(const double plocal[3],const std::vector<double>& ddq,double out[3]);
   ///Returns the angular acceleration of the link given the robot's current
-  ///joint velocities and joint accelerations ddq.
+  ///joint configuration and velocities, and the joint accelerations ddq.
+  ///
+  ///Returns:
+  ///
+  ///    (list of 3 floats): the angular acceleration of the link, in
+  ///    world coordinates.
   void getAngularAcceleration(const std::vector<double>& ddq,double out[3]);
   ///Returns the Hessians of each component of the position p w.r.t the
-  ///robot's configuration q.  The result is a triple of nxn matrices
-  ///corresponding to the (x,y,z) components respectively.
+  ///robot's configuration q.
+  ///
+  ///Returns: 
+  ///
+  ///    (3-tuple): a triple (Hx,Hy,Hz) of of nxn matrices corresponding,
+  ///    respectively, to the (x,y,z) components of the Hessian.
   void getPositionHessian(const double p[3],std::vector<std::vector<double> >& out,std::vector<std::vector<double> >& out2,std::vector<std::vector<double> >& out3);
   ///Returns the Hessians of each orientation component of the link w.r.t the
-  ///robot's configuration q.  The result is a triple of nxn matrices
-  ///corresponding to the (wx,wy,wz) components respectively.
+  ///robot's configuration q.  
+  ///
+  ///Returns: 
+  ///
+  ///    (3-tuple): a triple (Hx,Hy,Hz) of of nxn matrices corresponding,
+  ///    respectively, to the (wx,wy,wz) components of the Hessian.
   void getOrientationHessian(std::vector<std::vector<double> >& out,std::vector<std::vector<double> >& out2,std::vector<std::vector<double> >& out3);
   ///Draws the link's geometry in its local frame.  If keepAppearance=true, the
   ///current Appearance is honored.  Otherwise, just the geometry is drawn.
@@ -239,13 +367,19 @@ class RobotModel
 {
  public:
   RobotModel();
-  ///Loads the robot from a file 
+  ///Loads the robot from the file fn
   bool loadFile(const char* fn);
-  ///Saves the robot.  If geometryPrefix == NULL, the geometry is not saved (default).  Otherwise, the geometry of each link
-  ///will be saved to files named geometryPrefix+name, where name is either the name of the geometry file that was loaded,
-  ///or [link_name].off
+  ///Saves the robot to the file fn.
+  ///
+  ///If ``geometryPrefix == None`` (default), the geometry is not saved. 
+  ///Otherwise, the geometry of each link will be saved to files named
+  ///``geometryPrefix+name``, where ``name`` is either the name of the
+  ///geometry file that was loaded, or ``[link_name].off``
   bool saveFile(const char* fn,const char* geometryPrefix=NULL);
-  ///Returns the ID of the robot in its world (Note: not the same as the robot index)
+  ///Returns the ID of the robot in its world
+  ///
+  ///Note:
+  ///    The world ID is not the same as the robot index.
   int getID() const;
   const char* getName() const;
   void setName(const char* name);
@@ -319,7 +453,12 @@ class RobotModel
   void getCom(double out[3]);
   ///Returns the 3D velocity of the center of mass at the current config / velocity
   void getComVelocity(double out[3]);
-  ///Returns the 3xn Jacobian matrix of the current center of mass
+  ///Returns the Jacobian matrix of the current center of mass
+  ///
+  ///Returns:
+  ///
+  ///    (list of 3 lists): a 3xn matrix J such that np.dot(J,dq) gives the
+  ///    COM velocity at the currene configuration
   void getComJacobian(std::vector<std::vector<double> >& out);
   ///Returns the 3D linear momentum vector
   void getLinearMomentum(double out[3]);
@@ -350,27 +489,53 @@ class RobotModel
   ///Returns the generalized gravity vector G(q) for the given workspace
   ///gravity vector g (usually (0,0,-9.8)). 
   ///
-  ///Note: "Forces" is somewhat of a misnomer; the result is a vector of joint
-  ///torques.
+  ///Note:
+  ///
+  ///    "Forces" is somewhat of a misnomer; the result is a vector of joint
+  ///    torques.
+  ///
+  ///Returns:
+  ///
+  ///    (list of floats): the n-element generalized gravity vector at the
+  ///    robot's current configuration.
   void getGravityForces(const double g[3],std::vector<double>& out);
   ///Computes the inverse dynamics.  Uses Recursive Newton Euler solver and
   ///takes O(n) time.
   ///
-  ///Note: does not include gravity term G(q).  getGravityForces(g) will need
-  ///to be added to the result.
+  ///Note: 
+  ///
+  ///    Does not include gravity term G(q).  getGravityForces(g) will need
+  ///    to be added to the result.
+  ///
+  ///Returns:
+  ///
+  ///    (list of floats): the n-element torque vector that would produce
+  ///    the joint accelerations ddq in the absence of external forces.
   void torquesFromAccel(const std::vector<double>& ddq,std::vector<double>& out);
   ///Computes the foward dynamics (using Recursive Newton Euler solver)
   ///
-  ///Note: does not include gravity term G(q).  getGravityForces(g) will need
-  ///to be subtracted from the argument t.
+  ///Note: 
+  ///
+  ///    Does not include gravity term G(q).  getGravityForces(g) will need
+  ///    to be subtracted from the argument t.
+  ///
+  ///Returns:
+  ///
+  ///    (list of floats): the n-element joint acceleration vector that would
+  ///    result from joint torques t in the absence of external forces.
   void accelFromTorques(const std::vector<double>& t,std::vector<double>& out);
 
-  //interpolation functions
   ///Interpolates smoothly between two configurations, properly taking into account nonstandard joints
+  ///
+  ///Returns:
+  ///
+  ///    (list of n floats): The configuration that is u fraction of the way
+  ///    from a to b
   void interpolate(const std::vector<double>& a,const std::vector<double>& b,double u,std::vector<double>& out);
   ///Computes a distance between two configurations, properly taking into account nonstandard joints
   double distance(const std::vector<double>& a,const std::vector<double>& b);
-  ///Returns the configuration derivative at a as you interpolate toward b at unit speed.
+  ///Returns the configuration derivative at a as you interpolate toward
+  ///b at unit speed.
   void interpolateDeriv(const std::vector<double>& a,const std::vector<double>& b,std::vector<double>& out);
 
   ///Samples a random configuration and updates the robot's pose.  Properly
@@ -411,11 +576,14 @@ class RigidObjectModel
 {
  public:
   RigidObjectModel();
-  ///Loads the object from a file 
+  ///Loads the object from the file fn
   bool loadFile(const char* fn);
-  ///Saves the object.  If geometryName is given, the geometry is saved to that file.
+  ///Saves the object to the file fn.  If geometryName is given, the geometry is saved to that file.
   bool saveFile(const char* fn,const char* geometryName=NULL);
-  ///Returns the ID of the rigid object in its world (Note: not the same as the rigid object index)
+  ///Returns the ID of the rigid object in its world 
+  ///
+  ///Note:
+  ///    The world ID is not the same as the rigid object index.
   int getID() const;
   const char* getName() const;
   void setName(const char* name);
@@ -423,22 +591,39 @@ class RigidObjectModel
   Geometry3D geometry();
   ///Returns a reference to the appearance associated with this object
   Appearance appearance();
-  ///Returns a copy of the Mass of this rigid object.  Note: to change the mass properties,
-  ///you should call m=object.getMass(), change the desired properties in m, and then object.setMass(m)
+  ///Returns a copy of the Mass of this rigid object. 
+  ///
+  ///Note: 
+  ///
+  ///    To change the mass properties, you should call ``m=object.getMass()``,
+  ///    change the desired properties in m, and then ``object.setMass(m)``
   Mass getMass();
   void setMass(const Mass& mass);
   ///Returns a copy of the ContactParameters of this rigid object.
   ///
-  ///Note: to change the contact parameters, you should call ``p=object.getContactParameters()``,
-  ///change the desired properties in p, and then
-  ///``object.setContactParameters(p)``
+  ///Note:
+  ///
+  ///    To change the contact parameters, you should call
+  ///    ``p=object.getContactParameters()``, change the desired properties in
+  ///    p, and then call ``object.setContactParameters(p)``
   ContactParameters getContactParameters();
   void setContactParameters(const ContactParameters& params);
   ///Retrieves the rotation / translation of the rigid object (R,t)
+  ///
+  ///Returns:
+  ///
+  ///    (se3 object): a pair (R,t), with R a 9-list and t a 3-list of floats,
+  ///    giving the transform to world coordinates.
   void getTransform(double out[9],double out2[3]);
   ///Sets the rotation / translation (R,t) of the rigid object
   void setTransform(const double R[9],const double t[3]);
   ///Retrieves the (angular velocity, velocity) of the rigid object.
+  ///
+  ///Returns:
+  ///
+  ///    (tuple): a pair of 3-lists (w,v) where w is the angular velocity
+  ///    vector and v is the translational velocity vector (both in world
+  ///    coordinates)
   void getVelocity(double out[3],double out2[3]);
   ///Sets the (angular velocity, velocity) of the rigid object.
   void setVelocity(const double angularVelocity[3],const double velocity[3]);
@@ -461,11 +646,14 @@ class TerrainModel
 {
  public:
   TerrainModel();
-  ///Loads the terrain from a file 
+  ///Loads the terrain from the file fn
   bool loadFile(const char* fn);
-  ///Saves the terrain.  If geometryName is given, the geometry is saved to that file.
+  ///Saves the terrain to the file fn.  If geometryName is given, the geometry is saved to that file.
   bool saveFile(const char* fn,const char* geometryName=NULL);
-  ///Returns the ID of the terrain in its world (Note: not the same as the terrain index)
+  ///Returns the ID of the terrain in its world
+  ///
+  ///Note:
+  ///    The world ID is not the same as the terrain index.
   int getID() const;
   const char* getName() const;
   void setName(const char* name);
@@ -514,6 +702,7 @@ class WorldModel
   WorldModel();
   WorldModel(void* ptrRobotWorld);
   WorldModel(const WorldModel& w);
+  //Note: only the last docstring is added
   ///Creates a WorldModel. 
   ///
   ///- Given no arguments, creates a new world. 
@@ -529,7 +718,7 @@ class WorldModel
   ///Sets this WorldModel to a reference to w
   const WorldModel& operator = (const WorldModel& w);
   ///Creates a copy of the world model.  Note that geometries and appearances
-  ///are shared...
+  ///are shared, so this is very quick.
   WorldModel copy();
   ///Reads from a world XML file.
   bool readFile(const char* fn);
@@ -591,18 +780,24 @@ class WorldModel
   ///Removes a robot, rigid object, or terrain from the world.  It must be in this world or an exception
   ///is raised.
   ///
-  ///IMPORTANT: all other RobotModel, RigidObjectModel, and TerrainModel references will be invalidated.
+  ///IMPORTANT:
+  ///
+  ///    All other RobotModel, RigidObjectModel, and TerrainModel references will be invalidated.
   void remove(const RobotModel& robot);
   ///Removes a robot, rigid object, or terrain from the world.  It must be in this world or an exception
   ///is raised.
   ///
-  ///IMPORTANT: all other RobotModel, RigidObjectModel, and TerrainModel references will be invalidated.
+  ///IMPORTANT:
+  ///
+  ///    All other RobotModel, RigidObjectModel, and TerrainModel references will be invalidated.
   void remove(const RigidObjectModel& object);
   //note: only the last overload docstring is added to the documentation
   ///Removes a robot, rigid object, or terrain from the world.  It must be in this world or an exception
   ///is raised.
   ///
-  ///IMPORTANT: all other RobotModel, RigidObjectModel, and TerrainModel references will be invalidated.
+  ///IMPORTANT:
+  ///
+  ///    All other RobotModel, RigidObjectModel, and TerrainModel references will be invalidated.
   void remove(const TerrainModel& terrain);
   ///Retrieves the name for a given element ID
   std::string getName(int id);

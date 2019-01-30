@@ -183,7 +183,7 @@ public:
 };
 
 /** @brief Configures the _ext distance queries of
- * :class::`~klampt.Geometry3D`.
+ * :class:`~klampt.Geometry3D`.
  *
  * The calculated result satisfies :math:`Dcalc \leq D(1+relErr) + absErr`
  * unless :math:`D \geq upperBound`, in which case Dcalc=upperBound may 
@@ -209,7 +209,7 @@ public:
 };
 
 /** @brief The result from a "fancy" distance query of 
- * :class::`~klampt.Geometry3D`.
+ * :class:`~klampt.Geometry3D`.
  *
  * Attributes:
  *
