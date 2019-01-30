@@ -2,10 +2,10 @@
 #define INTERFACE_SIM_TEST_GUI_H
 
 #include "SimulationGUI.h"
-#include "View/ViewPlot.h"
-#include "View/WorldDragWidget.h"
-#include "View/RobotPoseWidget.h"
-#include "View/ObjectPoseWidget.h"
+#include <Klampt/View/ViewPlot.h>
+#include <KlamptView/WorldDragWidget.h>
+#include <KlamptView/RobotPoseWidget.h>
+#include <KlamptView/ObjectPoseWidget.h>
 #include <KrisLibrary/utils/stringutils.h>
 #include <KrisLibrary/utils/apputils.h>
 #include <fstream>

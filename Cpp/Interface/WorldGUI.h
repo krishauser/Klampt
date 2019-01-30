@@ -1,7 +1,7 @@
 #ifndef INTERFACE_WORLD_VIEW_GUI_H
 #define INTERFACE_WORLD_VIEW_GUI_H
 
-#include "Modeling/World.h"
+#include <Klampt/Modeling/World.h>
 #include "NavigationGUI.h"
 #include <KrisLibrary/math3d/Ray3D.h>
 using namespace Math3D;

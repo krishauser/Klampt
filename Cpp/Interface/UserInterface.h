@@ -1,12 +1,12 @@
 #ifndef USER_INTERFACE_H
 #define USER_INTERFACE_H
 
-#include "Modeling/World.h"
-#include "Modeling/DynamicPath.h"
+#include <Klampt/Modeling/World.h>
+#include <Klampt/Modeling/DynamicPath.h>
 #include <KrisLibrary/camera/viewport.h>
-#include "Planning/RobotCSpace.h"
-#include "Planning/PlannerSettings.h"
-#include "Planning/RealTimePlanner.h"
+#include <Klampt/Planning/RobotCSpace.h>
+#include <Klampt/Planning/PlannerSettings.h>
+#include <Klampt/Planning/RealTimePlanner.h>
 #include "RobotInterface.h"
 #include "InputProcessor.h"
 #include <KrisLibrary/utils/threadutils.h>

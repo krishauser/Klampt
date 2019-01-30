@@ -2,7 +2,7 @@
 #define ROBOT_STANCE_CSPACE_H
 
 #include "ContactCSpace.h"
-#include "Contact/Stance.h"
+#include <Klampt/Contact/Stance.h>
 #include <KrisLibrary/robotics/Stability.h>
 #include <KrisLibrary/robotics/TorqueSolver.h>
 

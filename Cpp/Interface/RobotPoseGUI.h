@@ -2,9 +2,9 @@
 #define INTERFACE_ROBOTPOSEGUI_H
 
 #include "ResourceGUI.h"
-#include "View/RobotPoseWidget.h"
-#include "View/ObjectPoseWidget.h"
-#include "Sensing/Sensor.h"
+#include <Klampt/View/RobotPoseWidget.h>
+#include <Klampt/View/ObjectPoseWidget.h>
+#include <Klampt/Sensing/Sensor.h>
 #include <KrisLibrary/utils/apputils.h>
 #include <fstream>
 

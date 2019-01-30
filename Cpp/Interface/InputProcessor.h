@@ -1,8 +1,8 @@
 #ifndef INPUT_PROCESSOR_H
 #define INPUT_PROCESSOR_H
 
-#include "Modeling/World.h"
-#include "Planning/PlannerObjective.h"
+#include <Klampt/Modeling/World.h>
+#include <Klampt/Planning/PlannerObjective.h>
 #include <KrisLibrary/utils/AsyncIO.h>
 #include <KrisLibrary/Timer.h>
 

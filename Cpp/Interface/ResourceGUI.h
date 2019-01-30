@@ -2,8 +2,8 @@
 #define RESOURCE_GUI_H
 
 #include "WorldGUI.h"
-#include "Modeling/Resources.h"
-#include "View/ViewResource.h"
+#include <Klampt/Modeling/Resources.h>
+#include <Klampt/View/ViewResource.h>
 //#include "resourcemanager.h"
 #include "Main/RobotPoseQt/resourcemanager.h"
 #include <sstream>

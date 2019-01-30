@@ -1,9 +1,9 @@
 #ifndef ROBOT_INTERFACE_H
 #define ROBOT_INTERFACE_H
 
-#include "Modeling/Robot.h"
-#include "Modeling/DynamicPath.h"
-#include "Control/PathController.h"
+#include <Klampt/Modeling/Robot.h>
+#include <Klampt/Modeling/DynamicPath.h>
+#include <Klampt/Control/PathController.h>
 
 /** A unified interface to control either a simulated or real robot, which
  * operates in a motion queue mode.

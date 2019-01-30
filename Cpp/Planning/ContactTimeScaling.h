@@ -2,8 +2,8 @@
 #define CONTACT_TIME_SCALING_H
 
 #include "TimeScaling.h"
-#include "Modeling/MultiPath.h"
-#include "Modeling/Robot.h"
+#include <Klampt/Modeling/MultiPath.h>
+#include <Klampt/Modeling/Robot.h>
 #include "RobotCSpace.h"
 #include <KrisLibrary/math3d/Polygon2D.h>
 
