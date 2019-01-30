@@ -3,9 +3,9 @@
 
 #include "SimulationGUI.h"
 #include <Klampt/View/ViewPlot.h>
-#include <KlamptView/WorldDragWidget.h>
-#include <KlamptView/RobotPoseWidget.h>
-#include <KlamptView/ObjectPoseWidget.h>
+#include <Klampt/View/WorldDragWidget.h>
+#include <Klampt/View/RobotPoseWidget.h>
+#include <Klampt/View/ObjectPoseWidget.h>
 #include <KrisLibrary/utils/stringutils.h>
 #include <KrisLibrary/utils/apputils.h>
 #include <fstream>
