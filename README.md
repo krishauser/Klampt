@@ -75,14 +75,14 @@ API documentation is available here
 
 ## Version history
 
-**0.8.1 Latest version** (1/3/2018)
+**0.8.1 Latest version** (1/3/2019)
 -   Cleaned up documentation, separating C++ and Python docs.  Sphinx is now used for Python docs.
 -   Added klampt_path utility to Python API.
 -   Added Python API bindings for higher order dynamics functions that were already in the C++
     library (Cartesian accelerations, Hessians, derivatives of mass matrices).
 -   Added rootfind Python C++ extension back.
 
-**0.8.0 ** (12/17/2018)
+**0.8.0** (12/17/2018)
 -	Cleaner file structure, with C++ files in the Cpp directory.
 -	Improved build system for Python, allowing easy installation via pip install python.
 -	Integration with Jupyter Notebook 
@@ -126,7 +126,7 @@ API documentation is available here
 - The `MilestonePathController` class will be deprecated, use `PolynomialPathController` instead.
 - Minor bug fixes
 
-**0.6.** (7/4/2014)
+**0.6** (7/4/2014)
 
 - CMake build system makes it easier to build across multiple platforms
 - Easy connections with external controllers via ROS or a serial protocol
