@@ -1,5 +1,5 @@
 from ..robotsim import *
-from ..model import map
+from ..model import access
 from simulation import SimpleSimulator
 import time
 
@@ -28,7 +28,7 @@ def setWorldSimState(world,state):
     you must use the Simulator().getState()/saveState() methods.
     """
     for (k,v) in state.iteritems():
-        map.set_item(world,k,v)
+        access.set_item(world,k,v)
     return
 
 
@@ -41,37 +41,41 @@ def doSim(world,duration,initialCondition,
         world (WorldModel): the world
         duration (float): the maximum duration of simulation, in seconds
         initialCondition (dict): a dictionary mapping named items to values.
-            Each named item is specified by a path as used by the map module, e.g.
-            'robot[0].config[4]'.  See the documentation for map.get_item()/
-            map.set_item() for details.
+            Each named item is specified by a path as used by the access
+            module, e.g. 'robot[0].config[4]'.  See the documentation for
+            access.get_item()/
+            access.set_item() for details.
 
-            Special items include 'args' which is a tuple provided to each simInit,
-            simStep, and simTerm call.
-        returnItems (list of strs, optional): a list of named items to return in the final
-            state of the simulation.  By default returns everything that is
-            variable in the simulator (simulation time, robot and rigid object
-            configuration / velocity, robot commands, robot sensors).
+            Special items include 'args' which is a tuple provided to each
+            simInit, simStep, and simTerm call.
+        returnItems (list of strs, optional): a list of named items to return
+            in the final state of the simulation.  By default returns
+            everything that is variable in the simulator (simulation time, 
+            robot and rigid object configuration / velocity, robot commands,
+            robot sensors).
         trace (bool, optional): if True, returns the entire trace of
-            the items specified in returnItems rather than just the final state.
-        simDt (float, optional, default 0.01): the outer simulation loop (usually
-            corresponds to the control rate).
-        simInit (function, optional): a function f(sim) called on the simulator after its
-            initial conditions are set but before simulating. You may configure the
-            simulator with this function.
-        simStep (function, optional): a function f(sim) that is called on every outer
-            simulation loop (usually a controller function).
+            the items specified in returnItems rather than just the final
+            state.
+        simDt (float, optional, default 0.01): the outer simulation loop
+            (usually corresponds to the control rate).
+        simInit (function, optional): a function f(sim) called on the simulator
+            after its initial conditions are set but before simulating. You may
+            configure the simulator with this function.
+        simStep (function, optional): a function f(sim) that is called on every
+            outer simulation loop (usually a controller function).
         simTerm (function, optional): a function f(sim) that returns True if
             the simulation should terminate early.  Called on every outer
             simulation loop.
 
     Returns:
-        (dict): the final state of each returned item upon termination.  The dictionary
-            maps named items (specified by the returnItems argument) to their values. 
-            Additional returned items are:
+        (dict): the final state of each returned item upon termination.  The
+        dictionary maps named items (specified by the returnItems argument)
+        to their values.  Additional returned items are:
         
             * 'status', which gives the status string of the simulation
             * 'time', which gives the time of the simulation, in s
-            * 'wall_clock_time', which gives the time elapsed while computing the simulation, in s
+            * 'wall_clock_time', which gives the time elapsed while computing
+              the simulation, in s
     """
     if returnItems == None:
         #set up default return items
@@ -93,7 +97,7 @@ def doSim(world,duration,initialCondition,
     args = ()
     for k,v in initialCondition.iteritems():
         if k is not 'args':
-            map.set_item(world,k,v)
+            access.set_item(world,k,v)
         else:
             args = v
     sim = SimpleSimulator(world)
@@ -102,7 +106,7 @@ def doSim(world,duration,initialCondition,
     res = dict()
     if trace:
         for k in returnItems:
-            res[k] = [map.get_item(sim,k)]
+            res[k] = [access.get_item(sim,k)]
         res['status'] = [sim.getStatusString()]
     print "klampt.batch.doSim(): Running simulation for",duration,"s"
     t0 = time.time()
@@ -112,7 +116,7 @@ def doSim(world,duration,initialCondition,
         if simTerm and simTerm(sim,*args)==True:
             if not trace:
                 for k in returnItems:
-                    res[k] = map.get_item(sim,k)
+                    res[k] = access.get_item(sim,k)
                 res['status']=sim.getStatusString(worst_status)
                 res['time']=t
                 res['wall_clock_time']=time.time()-t0
@@ -126,7 +130,7 @@ def doSim(world,duration,initialCondition,
         worst_status = max(worst_status,sim.getStatus())
         if trace:
             for k in returnItems:
-                res[k].append(map.get_item(sim,k))
+                res[k].append(access.get_item(sim,k))
             res['status'].append(sim.getStatusString())
             res['time']=t
             res['wall_clock_time']=time.time()-t0
@@ -134,7 +138,7 @@ def doSim(world,duration,initialCondition,
     if not trace:
         #just get the terminal stats
         for k in returnItems:
-            res[k] = map.get_item(sim,k)
+            res[k] = access.get_item(sim,k)
         res['status']=sim.getStatusString(worst_status)
         res['time']=t
         res['wall_clock_time']=time.time()-t0
@@ -151,9 +155,10 @@ def batchSim(world,duration,initialConditions,returnItems,
     runs simulations for all initial conditions.
 
     Args:
-        world,duration,returnItems,simDt,simInit,simStep,simTerm: the same as in doSim()
-        initialConditions (dict or list): either a dict mapping named items to lists
-            of initial values, or a list of initial state dictionaries.
+        world,duration,returnItems,simDt,simInit,simStep,simTerm: the same as
+            in doSim()
+        initialConditions (dict or list): either a dict mapping named items to
+            lists of initial values, or a list of initial state dictionaries.
             In the former case, all entries must be of the same length.
     
     Returns:
@@ -202,8 +207,10 @@ def monteCarloSim(world,duration,initialConditionSamplers,N,returnItems,
         N (int): the number of Monte Carlo samples.
     
     Returns:
-        list: contains N pairs (initCond,returnVal) where initCond is the sampled
-            initial condition and returnVal is the return value from doSim().
+        list: contains N pairs (initCond,returnVal) containing each simulation
+        result:
+            * initCond: the sampled initial condition
+            * returnVal: the return value from doSim().
     """
     print "klampt.batch.monteCarloSim(): Running",N,"simulations..."
     res = []
@@ -226,7 +233,7 @@ def monteCarloSim(world,duration,initialConditionSamplers,N,returnItems,
 def saveStateHeaderCSV(state,f):
     """Given a state dictionary, saves the header CSV format to the given
     output stream f"""
-    vflat = [map.flatten(state[k]) for k in state]
+    vflat = [access.flatten(state[k]) for k in state]
     #write header
     itemNames = []
     for k,v in zip(state.keys(),vflat):
@@ -243,7 +250,7 @@ def saveStateCSV(state,f):
     """Given a state dictionary, saves it to CSV format to the given
     output stream f"""
     saveStateHeaderCSV(state,f)
-    f.write(','.join(str(v) for v in map.flatten(state)))
+    f.write(','.join(str(v) for v in access.flatten(state)))
     f.write('\n')
 
 def saveStatesCSV(states,f):
@@ -251,7 +258,7 @@ def saveStatesCSV(states,f):
     given output stream f"""
     saveStateHeaderCSV(states[0],f)
     for state in states:
-        f.write(','.join(str(v) for v in map.flatten(state)))
+        f.write(','.join(str(v) for v in access.flatten(state)))
         f.write('\n')
     return
 
@@ -268,6 +275,6 @@ def saveStateTrajectoryCSV(stateTraj,f):
         state0['iter'] = i
         for k in stateTraj.iterkeys():
             state0[k] = stateTraj[k][i]
-        f.write(','.join(str(v) for v in map.flatten(state0)))
+        f.write(','.join(str(v) for v in access.flatten(state0)))
         f.write('\n')
     return
