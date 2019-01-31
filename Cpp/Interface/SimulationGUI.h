@@ -1,7 +1,7 @@
 #ifndef SIMULATION_GUI_H
 #define SIMULATION_GUI_H
 
-#include "Simulation/WorldSimulation.h"
+#include <Klampt/Simulation/WorldSimulation.h>
 #include "WorldGUI.h"
 #include <set>
 
