@@ -795,10 +795,9 @@ bool Robot::LoadRob(const char* fn) {
     sizeErr = true;
   }
   if (!geomFn.empty() && n != geomFn.size()) {
-    fprintf(stderr, "   Wrong number of geometry files specified (%d)\n",
-        geomFn.size());
+    LOG4CXX_ERROR(GET_LOGGER(RobParser), "   Wrong number of geometry files specified ("<<geomFn.size()<<")");
     for (size_t i = 0; i < geomFn.size(); i++)
-      LOG4CXX_INFO(GET_LOGGER(RobParser),"     '"<< geomFn[i].c_str());
+      LOG4CXX_INFO(GET_LOGGER(RobParser),"     '"<< geomFn[i] << "'");
     LOG4CXX_INFO(GET_LOGGER(RobParser),"");
     sizeErr = true;
   }
@@ -812,9 +811,9 @@ bool Robot::LoadRob(const char* fn) {
   }
 
   if (sizeErr) {
-    printf("Votes:\n");
+    LOG4CXX_ERROR(GET_LOGGER(RobParser),"Size votes:");
     for(auto i=nvote.counts.begin();i!=nvote.counts.end();i++)
-      printf("%d: %d\n",i->first,i->second);
+      LOG4CXX_ERROR(GET_LOGGER(RobParser),i->first<<": "<<i->second);
     return false;
   }
 
@@ -831,7 +830,7 @@ bool Robot::LoadRob(const char* fn) {
     linkNames.resize(links.size());
     for (size_t i = 0; i < links.size(); i++) {
       char buf[64];
-      sprintf(buf, "Link %d", i);
+      sprintf(buf, "Link %d", (int)i);
       linkNames[i] = buf;
     }
   }
@@ -956,8 +955,7 @@ bool Robot::LoadRob(const char* fn) {
     geomFn[i] = path + geomFn[i];
     if(Robot::disableGeometryLoading) continue;
     if (!LoadGeometry(i, geomFn[i].c_str())) {
-      fprintf(stderr, "   Unable to load link %d geometry file %s\n", i,
-        geomFn[i].c_str());
+      LOG4CXX_ERROR(GET_LOGGER(RobParser),"   Unable to load link "<<i<<" geometry file "<<geomFn[i]);
       return false;
     }
     if (!geomscale.empty() && geomscale[i] != 1) {
@@ -975,7 +973,7 @@ bool Robot::LoadRob(const char* fn) {
   int numGeomElements = 0;
   for(size_t i=0;i<geometry.size();i++)
     numGeomElements += (geometry[i] ? geometry[i]->NumElements() : 0);
-  printf("Loaded geometries in time %gs, %d total primitive elements\n",timer.ElapsedTime(),numGeomElements);
+  LOG4CXX_INFO(GET_LOGGER(RobParser),"Loaded geometries in time "<<timer.ElapsedTime()<<"s, "<<numGeomElements<<" total primitive elements");
   timer.Reset();
 
   //process transformation of geometry shapes
@@ -1003,7 +1001,7 @@ bool Robot::LoadRob(const char* fn) {
   for (size_t i = 0; i < noCollision.size(); i++) {
     int link = LinkIndex(noCollision[i].c_str());
     if (link < 0 || link >= (int) links.size()) {
-      printf("   Error, invalid no-collision index %s\n", noCollision[i].c_str());
+      LOG4CXX_ERROR(GET_LOGGER(RobParser),"   Invalid no-collision index "<<noCollision[i]);
       return false;
     }
     FatalError("So far, no mechanism to turn off collisions");
@@ -1127,12 +1125,11 @@ bool Robot::LoadRob(const char* fn) {
     }
     else {
       string fn = path + mountFiles[i];
-      printf("   Mounting geometry file %s\n", mountFiles[i].c_str());
+      LOG4CXX_INFO(GET_LOGGER(RobParser),"   Mounting geometry file " << mountFiles[i]);
       //mount a triangle mesh on top of another triangle mesh
       ManagedGeometry loader;
       if(!loader.Load(fn.c_str())) {
-        fprintf(stderr, "   Error loading mount geometry file %s\n",
-          fn.c_str());
+        LOG4CXX_ERROR(GET_LOGGER(RobParser),"   Error loading mount geometry file " << fn);
         return false;
       }
       Mount(mountLinks[i], *loader, mountT[i]);
@@ -1214,11 +1211,10 @@ bool Robot::LoadRob(const char* fn) {
     const char* ext = FileExtension(mountFiles[i].c_str());
     if(ext && (0==strcmp(ext,"rob") || 0==strcmp(ext,"urdf"))) {
       string fn = path + mountFiles[i];
-      printf("   Mounting subchain file %s\n", mountFiles[i].c_str());
+      LOG4CXX_INFO(GET_LOGGER(RobParser),"   Mounting subchain file " << mountFiles[i]);
       Robot subchain;
       if (!subchain.Load(fn.c_str())) {
-        fprintf(stderr, "   Error reading subchain file %s\n",
-            fn.c_str());
+        LOG4CXX_ERROR(GET_LOGGER(RobParser),"   Error reading subchain file " << fn);
         return false;
       }
       const char* prefix = (mountNames[i].empty() ? NULL : mountNames[i].c_str());
@@ -1266,7 +1262,7 @@ bool Robot::LoadRob(const char* fn) {
     }
     SafeDelete(selfCollisions(link1,link2));
   }
-  printf("Done loading robot file %s.\n",fn);
+  LOG4CXX_INFO(GET_LOGGER(RobParser),"Done loading robot file "<<fn);
   return true;
 }
 
@@ -1275,7 +1271,7 @@ void Robot::InitStandardJoints() {
     linkNames.resize(links.size());
     for (size_t i = 0; i < links.size(); i++) {
       char buf[64];
-      sprintf(buf, "Link %d", i);
+      sprintf(buf, "Link %d", (int)i);
       linkNames[i] = buf;
     }
   }
@@ -1575,7 +1571,7 @@ bool Robot::Save(const char* fn) {
 bool Robot::CheckValid() const {
   for (size_t i = 0; i < parents.size(); i++)
     if (parents[i] < -1 || parents[i] >= (int) parents.size()) {
-      printf("Invalid parent[%d]=%d\n", i, parents[i]);
+      LOG4CXX_ERROR(GET_LOGGER(Robot),"Invalid parent["<<i<<"]=" << parents[i]);
       return false;
     }
   /*
@@ -1673,13 +1669,13 @@ bool Robot::CheckValid() const {
     }
       break;
     default:
-      printf("Can't yet handle joints of type %d\n", joints[i].type);
+      LOG4CXX_ERROR(GET_LOGGER(Robot),"Can't yet handle joints of type " << joints[i].type);
       return false;
     }
   }
   for (size_t i = 0; i < matchedLink.size(); i++) {
     if (matchedLink[i] < 0) {
-      printf("Link %d not matched by a joint\n", i);
+      LOG4CXX_ERROR(GET_LOGGER(Robot),"Link "<<i<<" not matched by a joint");
     }
   }
 
@@ -2638,12 +2634,12 @@ bool Robot::LoadURDF(const char* fn)
         stringstream ss1(e->Attribute("group1"));
         stringstream ss2(e->Attribute("group2"));
         while (SafeInputString(ss1,stemp))
-    group1.push_back(stemp);
+          group1.push_back(stemp);
         while (SafeInputString(ss2,stemp))
-    group2.push_back(stemp);
+          group2.push_back(stemp);
         for(size_t i=0;i<group1.size();i++) 
-    for(size_t j=0;j<group2.size();j++) 
-      noSelfCollision.push_back(pair<string,string>(group1[i],group2[j]));
+          for(size_t j=0;j<group2.size();j++) 
+            noSelfCollision.push_back(pair<string,string>(group1[i],group2[j]));
       }
       else {
         LOG4CXX_ERROR(GET_LOGGER(URDFParser),"Error, robot/klampt/noselfcollision does not contain pairs, or group1 and group2 attributes");
@@ -2665,8 +2661,22 @@ bool Robot::LoadURDF(const char* fn)
     //drivers_size: should be joints_size - 1 in ROB file
 
     if (joints_size != links_size - 5) {
-      LOG4CXX_INFO(GET_LOGGER(URDFParser), "joint size:" << joints_size << " and link size:" << links_size
+      LOG4CXX_ERROR(GET_LOGGER(URDFParser), "joint size:" << joints_size << " and link size:" << links_size
      << " do not match for floating-base robot!" );
+      for(auto i=parser->links_.begin();i!=parser->links_.end();i++)
+        if(!i->second->parent_joint) {
+          LOG4CXX_INFO(GET_LOGGER(URDFParser), "URDF link "<<i->second->name <<" is a root");
+        }
+      for(auto i=parser->joints_.begin();i!=parser->joints_.end();i++) {
+        if(parser->links_.count(i->second->child_link_name) == 0) {
+          LOG4CXX_INFO(GET_LOGGER(URDFParser), "URDF joint "<<i->first<<" child link "<<i->second->child_link_name <<" does not exist");
+        }
+        else {
+          auto c = parser->links_[i->second->child_link_name];
+          if(c->parent_joint != i->second)
+            LOG4CXX_INFO(GET_LOGGER(URDFParser), "URDF link "<<i->second->child_link_name <<" has multiple parents?");
+        }
+      }
       return false;
     }
 
@@ -2677,8 +2687,22 @@ bool Robot::LoadURDF(const char* fn)
     links_size = (int)parser->links_.size() - 1;
     joints_size = (int)parser->joints_.size();
     if(joints_size != links_size) {
-      LOG4CXX_INFO(GET_LOGGER(URDFParser), "joint size:" << joints_size << " and link size:" << links_size
+      LOG4CXX_ERROR(GET_LOGGER(URDFParser), "joint size:" << joints_size << " and link size:" << links_size
      << " do not match for fixed-base robot!" );
+      for(auto i=parser->links_.begin();i!=parser->links_.end();i++)
+        if(!i->second->parent_joint) {
+          LOG4CXX_INFO(GET_LOGGER(URDFParser), "URDF link "<<i->second->name <<" is a root");
+        }
+      for(auto i=parser->joints_.begin();i!=parser->joints_.end();i++) {
+        if(parser->links_.count(i->second->child_link_name) == 0) {
+          LOG4CXX_INFO(GET_LOGGER(URDFParser), "URDF joint "<<i->first<<" child link "<<i->second->child_link_name <<" does not exist");
+        }
+        else {
+          auto c = parser->links_[i->second->child_link_name];
+          if(c->parent_joint != i->second)
+            LOG4CXX_INFO(GET_LOGGER(URDFParser), "URDF link "<<i->second->child_link_name <<" has multiple parents?");
+        }
+      }
       return false;
     }
   }
@@ -3089,12 +3113,11 @@ void Robot::ComputeLipschitzMatrix() {
         }
       }
       lipschitzMatrix(j, i) = lipschitz;
-      printf("Lipschitz %d %d = %g\n", j, i, lipschitz);
+      LOG4CXX_INFO(GET_LOGGER(Robot),"Lipschitz "<<j<<" "<<i<<" = "<<lipschitz);
       j = parents[j];
     }
   }
-  printf("Done computing lipschitz constants, took %gs\n",
-      timer.ElapsedTime());
+  LOG4CXX_INFO(GET_LOGGER(Robot),"Done computing lipschitz constants, took "<<timer.ElapsedTime()<<"s");
 }
 
 
