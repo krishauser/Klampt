@@ -898,8 +898,6 @@ class TriangleMesh(_object):
         """
         A 3D indexed triangle mesh class.  
 
-        Returns:
-            (:class:`~klampt.TriangleMesh`):
 
         Attributes:  
 
@@ -1218,8 +1216,6 @@ class PointCloud(_object):
         """
         A 3D point cloud class.  
 
-        Returns:
-            (:class:`~klampt.PointCloud`):
 
         Attributes:  
 
@@ -1372,8 +1368,6 @@ class GeometricPrimitive(_object):
         A geometric primitive. So far only points, spheres, segments, and AABBs can be
         constructed manually in the Python API.  
 
-        Returns:
-            (:class:`~klampt.GeometricPrimitive`):
 
         C++ includes: geometry.h
 
@@ -1477,8 +1471,6 @@ class VolumeGrid(_object):
         An axis-aligned volumetric grid, typically a signed distance transform with > 0
         indicating outside and < 0 indicating inside. Can also store an occupancy grid.  
 
-        Returns:
-            (:class:`~klampt.VolumeGrid`):
 
         C++ includes: geometry.h
 
@@ -1497,7 +1489,7 @@ class DistanceQuerySettings(_object):
     """
 
 
-    Configures the _ext distance queries of :class::`~klampt.Geometry3D`.  
+    Configures the _ext distance queries of :class:`~klampt.Geometry3D`.  
 
     The calculated result satisfies :math:`Dcalc \leq D(1+relErr) + absErr` unless
     :math:`D \geq upperBound`, in which case Dcalc=upperBound may be returned.  
@@ -1523,8 +1515,6 @@ class DistanceQuerySettings(_object):
 
     def __init__(self):
         """
-        Returns:
-            (:class:`~klampt.DistanceQuerySettings`):
         """
         this = _robotsim.new_DistanceQuerySettings()
         try:
@@ -1552,7 +1542,7 @@ class DistanceQueryResult(_object):
     """
 
 
-    The result from a "fancy" distance query of :class::`~klampt.Geometry3D`.  
+    The result from a "fancy" distance query of :class:`~klampt.Geometry3D`.  
 
     Attributes:  
 
@@ -1610,10 +1600,8 @@ class DistanceQueryResult(_object):
 
     def __init__(self):
         """
-        The result from a "fancy" distance query of :class::`~klampt.Geometry3D`.  
+        The result from a "fancy" distance query of :class:`~klampt.Geometry3D`.  
 
-        Returns:
-            (:class:`~klampt.DistanceQueryResult`):
 
         Attributes:  
 
@@ -2230,8 +2218,8 @@ class Appearance(_object):
     Appearances can be either references to appearances of objects in the world, or
     they can be standalone.  
 
-    Performance note: Avoid rebuilding buffers (e.g., via :meth:`refresh` ()) as
-    much as possible.  
+    Performance note: Avoid rebuilding buffers (e.g., via :meth:`refresh` as much as
+    possible.  
 
     C++ includes: appearance.h
 
@@ -2666,8 +2654,6 @@ class Viewport(_object):
 
     def __init__(self):
         """
-        Returns:
-            (:obj:`Viewport`):
         """
         this = _robotsim.new_Viewport()
         try:
@@ -2693,8 +2679,6 @@ class Widget(_object):
 
     def __init__(self):
         """
-        Returns:
-            (:obj:`Widget`):
         """
         this = _robotsim.new_Widget()
         try:
@@ -2814,8 +2798,6 @@ class WidgetSet(Widget):
 
     def __init__(self):
         """
-        Returns:
-            (:obj:`WidgetSet`):
         """
         this = _robotsim.new_WidgetSet()
         try:
@@ -2870,8 +2852,6 @@ class PointPoser(Widget):
 
     def __init__(self):
         """
-        Returns:
-            (:obj:`PointPoser`):
         """
         this = _robotsim.new_PointPoser()
         try:
@@ -2925,8 +2905,6 @@ class TransformPoser(Widget):
 
     def __init__(self):
         """
-        Returns:
-            (:obj:`TransformPoser`):
         """
         this = _robotsim.new_TransformPoser()
         try:
@@ -2989,8 +2967,6 @@ class ObjectPoser(Widget):
         """
         Args:
             object (:class:`~klampt.RigidObjectModel`)
-        Returns:
-            (:obj:`ObjectPoser`):
         """
         this = _robotsim.new_ObjectPoser(object)
         try:
@@ -3037,8 +3013,6 @@ class RobotPoser(Widget):
         """
         Args:
             robot (:class:`~klampt.RobotModel`)
-        Returns:
-            (:obj:`RobotPoser`):
         """
         this = _robotsim.new_RobotPoser(robot)
         try:
@@ -3098,9 +3072,23 @@ class Mass(_object):
     """
 
 
-    Stores mass information for a rigid body or robot link. Note: you should use the
-    set/get functions rather than changing the members directly due to strangeness
-    in SWIG's handling of vectors.  
+    Stores mass information for a rigid body or robot link.  
+
+    Note:  
+
+        You should use the set/get functions rather than changing the members
+        directly due to strangeness in SWIG's handling of vectors.  
+
+    Attributes:  
+
+        mass (float): the actual mass (typically in kg)
+        com (SWIG-based list of 3 floats): the center of mass position, in
+            local coordinates.  (Better to use setCom/getCom)
+        inertia (SWIG-based list of 3 floats or 9 floats): the inertia matrix
+            in local coordinates.  If 3 floats, this is a diagonal matrix.
+            If 9 floats, this gives all entries of the 3x3 inertia matrix
+            (in column major or row major order, it doesn't matter since
+            inertia matrices are symmetric)  
 
     C++ includes: robotmodel.h
 
@@ -3111,6 +3099,15 @@ class Mass(_object):
     __swig_getmethods__ = {}
     __getattr__ = lambda self, name: _swig_getattr(self, Mass, name)
     __repr__ = _swig_repr
+
+    def __init__(self):
+        """
+        """
+        this = _robotsim.new_Mass()
+        try:
+            self.this.append(this)
+        except Exception:
+            self.this = this
 
     def setMass(self, _mass):
         """
@@ -3138,12 +3135,16 @@ class Mass(_object):
 
     def getCom(self):
         """
+        Returns the COM as a list of 3 floats.  
+
         """
         return _robotsim.Mass_getCom(self)
 
 
     def setInertia(self, _inertia):
         """
+        Sets an inertia matrix.  
+
         Args:
             _inertia (:obj:`list of floats`)
         """
@@ -3152,6 +3153,8 @@ class Mass(_object):
 
     def getInertia(self):
         """
+        Returns the inertia matrix as a list of 3 floats or 9 floats.  
+
         """
         return _robotsim.Mass_getInertia(self)
 
@@ -3167,24 +3170,6 @@ class Mass(_object):
     __swig_getmethods__["inertia"] = _robotsim.Mass_inertia_get
     if _newclass:
         inertia = _swig_property(_robotsim.Mass_inertia_get, _robotsim.Mass_inertia_set)
-
-    def __init__(self):
-        """
-        Stores mass information for a rigid body or robot link. Note: you should use the
-        set/get functions rather than changing the members directly due to strangeness
-        in SWIG's handling of vectors.  
-
-        Returns:
-            (:class:`~klampt.Mass`):
-
-        C++ includes: robotmodel.h
-
-        """
-        this = _robotsim.new_Mass()
-        try:
-            self.this.append(this)
-        except Exception:
-            self.this = this
     __swig_destroy__ = _robotsim.delete_Mass
     __del__ = lambda self: None
 Mass_swigregister = _robotsim.Mass_swigregister
@@ -3197,6 +3182,16 @@ class ContactParameters(_object):
     Stores contact parameters for an entity. Currently only used for simulation, but
     could be used for contact mechanics in the future.  
 
+    Attributes:  
+
+        kFriction (float): The coefficient of (Coulomb) friction, in range
+            [0,inf).
+        kRestitution (float): The coefficient of restitution, in range [0,1].
+        kStiffness (float): The stiffness of the material, in range (0,inf)
+            (default inf, perfectly rigid).
+        kDamping (float): The damping of the material, in range (0,inf)
+            (default inf, perfectly rigid).  
+
     C++ includes: robotmodel.h
 
     """
@@ -3206,6 +3201,15 @@ class ContactParameters(_object):
     __swig_getmethods__ = {}
     __getattr__ = lambda self, name: _swig_getattr(self, ContactParameters, name)
     __repr__ = _swig_repr
+
+    def __init__(self):
+        """
+        """
+        this = _robotsim.new_ContactParameters()
+        try:
+            self.this.append(this)
+        except Exception:
+            self.this = this
     __swig_setmethods__["kFriction"] = _robotsim.ContactParameters_kFriction_set
     __swig_getmethods__["kFriction"] = _robotsim.ContactParameters_kFriction_get
     if _newclass:
@@ -3222,23 +3226,6 @@ class ContactParameters(_object):
     __swig_getmethods__["kDamping"] = _robotsim.ContactParameters_kDamping_get
     if _newclass:
         kDamping = _swig_property(_robotsim.ContactParameters_kDamping_get, _robotsim.ContactParameters_kDamping_set)
-
-    def __init__(self):
-        """
-        Stores contact parameters for an entity. Currently only used for simulation, but
-        could be used for contact mechanics in the future.  
-
-        Returns:
-            (:class:`~klampt.ContactParameters`):
-
-        C++ includes: robotmodel.h
-
-        """
-        this = _robotsim.new_ContactParameters()
-        try:
-            self.this.append(this)
-        except Exception:
-            self.this = this
     __swig_destroy__ = _robotsim.delete_ContactParameters
     __del__ = lambda self: None
 ContactParameters_swigregister = _robotsim.ContactParameters_swigregister
@@ -3276,8 +3263,6 @@ class RobotModelLink(_object):
 
     def __init__(self):
         """
-        Returns:
-            (:class:`~klampt.RobotModelLink`):
         """
         this = _robotsim.new_RobotModelLink()
         try:
@@ -3287,10 +3272,13 @@ class RobotModelLink(_object):
 
     def getID(self):
         """
-        Returns the ID of the robot link in its world (Note: not the same as getIndex())  
+        Returns the ID of the robot link in its world.  
 
         Returns:
             (int):
+
+        Note: The world ID is not the same as the link's index, retrieved by getIndex.  
+
         """
         return _robotsim.RobotModelLink_getID(self)
 
@@ -3417,6 +3405,13 @@ class RobotModelLink(_object):
         """
         Gets transformation (R,t) to the parent link.  
 
+
+        Returns:  
+
+            (se3 object): a pair (R,t), with R a 9-list and t a 3-list of floats,
+            giving the local transform from this link to its parent, in the
+            reference (zero) configuration.  
+
         """
         return _robotsim.RobotModelLink_getParentTransform(self)
 
@@ -3456,6 +3451,11 @@ class RobotModelLink(_object):
 
         Args:
             plocal (:obj:`list of 3 floats`)
+
+        Returns:  
+
+            (list of 3 floats): the world coordinates of the local point plocal  
+
         """
         return _robotsim.RobotModelLink_getWorldPosition(self, plocal)
 
@@ -3466,6 +3466,12 @@ class RobotModelLink(_object):
 
         Args:
             vlocal (:obj:`list of 3 floats`)
+
+        Returns:  
+
+            (list of 3 floats): the world coordinates of the local direction
+            vlocal  
+
         """
         return _robotsim.RobotModelLink_getWorldDirection(self, vlocal)
 
@@ -3476,6 +3482,11 @@ class RobotModelLink(_object):
 
         Args:
             pworld (:obj:`list of 3 floats`)
+
+        Returns:  
+
+            (list of 3 floats): the local coordinates of the world point pworld  
+
         """
         return _robotsim.RobotModelLink_getLocalPosition(self, pworld)
 
@@ -3486,13 +3497,24 @@ class RobotModelLink(_object):
 
         Args:
             vworld (:obj:`list of 3 floats`)
+
+        Returns:  
+
+            (list of 3 floats): the local coordinates of the world direction
+            vworld  
+
         """
         return _robotsim.RobotModelLink_getLocalDirection(self, vworld)
 
 
     def getTransform(self):
         """
-        Gets transformation (R,t) to the world frame.  
+        Gets the link's current transformation (R,t) to the world frame.  
+
+
+        Returns:  
+
+            (se3 object): a pair (R,t), with R a 9-list and t a 3-list of floats.  
 
         """
         return _robotsim.RobotModelLink_getTransform(self)
@@ -3500,13 +3522,17 @@ class RobotModelLink(_object):
 
     def setTransform(self, R, t):
         """
-        Sets transformation (R,t) to the world frame. Note: this does NOT perform
-        inverse kinematics. The transform is overwritten when the robot's setConfig()
-        method is called.  
+        Sets the link's current transformation (R,t) to the world frame.  
 
         Args:
             R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
+
+        Note:  
+
+            This does NOT perform inverse kinematics.  The transform is
+            overwritten when the robot's setConfig() method is called.  
+
         """
         return _robotsim.RobotModelLink_setTransform(self, R, t)
 
@@ -3514,7 +3540,13 @@ class RobotModelLink(_object):
     def getVelocity(self):
         """
         Returns the velocity of the link's origin given the robot's current joint
-        velocities.  
+        configuration and velocities. Equivalent to getPointVelocity([0,0,0]).  
+
+
+        Returns:  
+
+            (list of 3 floats): the current velocity of the link's origin, in
+            world coordinates  
 
         """
         return _robotsim.RobotModelLink_getVelocity(self)
@@ -3523,7 +3555,13 @@ class RobotModelLink(_object):
     def getAngularVelocity(self):
         """
         Returns the angular velocity of the link given the robot's current joint
-        velocities.  
+        configuration and velocities.  
+
+
+        Returns:  
+
+            (list of 3 floats): the current angular velocity of the link, in world
+            coordinates  
 
         """
         return _robotsim.RobotModelLink_getAngularVelocity(self)
@@ -3531,43 +3569,74 @@ class RobotModelLink(_object):
 
     def getPointVelocity(self, plocal):
         """
-        Returns the world velocity of the point given the robot's current velocity.  
+        Returns the world velocity of a point attached to the link, given the robot's
+        current joint configuration and velocities.  
 
         Args:
             plocal (:obj:`list of 3 floats`)
+
+        Returns:  
+
+            (list of 3 floats): the current velocity of the point, in
+            world coordinates.  
+
         """
         return _robotsim.RobotModelLink_getPointVelocity(self, plocal)
 
 
-    def getJacobian(self, p):
+    def getJacobian(self, plocal):
         """
-        Returns the 6xn total jacobian of the local point p (row-major matrix) w.r.t.
-        the robot's configuration q.  
+        Returns the total jacobian of a point on this link w.r.t. the robot's
+        configuration q.  
 
         Args:
-            p (:obj:`list of 3 floats`)
+            plocal (:obj:`list of 3 floats`)
 
-        (the orientation jacobian is stacked on position jacobian)  
+        Returns:  
+
+            (list of 6 lists of floats): the 6xn total Jacobian matrix of the
+            point given by local coordinates plocal.  The matrix is row-major.
+
+            The orientation jacobian is given in the first 3 rows, and is stacked
+            on the position jacobian, which is given in the last 3 rows.  
 
         """
-        return _robotsim.RobotModelLink_getJacobian(self, p)
+        return _robotsim.RobotModelLink_getJacobian(self, plocal)
 
 
     def getPositionJacobian(self, p):
         """
-        Returns the 3xn jacobian of the local point p (row-major matrix) w.r.t. the
-        robot's configuration q.  
+        Returns the position jacobian of a point on this link w.r.t. the robot's
+        configuration q.  
 
         Args:
             p (:obj:`list of 3 floats`)
+
+        Returns:  
+
+            (list of 3 lists of floats): the 3xn Jacobian matrix of the
+            point given by local coordinates plocal.  The matrix is row-major.
+
+            This matrix J gives the point's velocity (in world coordinates) via
+            np.dot(J,dq), where dq is the robot's joint velocities.  
+
         """
         return _robotsim.RobotModelLink_getPositionJacobian(self, p)
 
 
     def getOrientationJacobian(self):
         """
-        Returns the 3xn orientation jacobian of the link (row-major matrix) w.r.t. the
-        robot's configuration q.  
+        Returns the orientation jacobian of this link w.r.t. the robot's configuration
+        q.  
+
+
+        Returns:  
+
+            (list of 3 lists of floats): the 3xn orientation Jacobian matrix of
+            the link.  The matrix is row-major.
+
+            This matrix J gives the link's angular velocity (in world coordinates)
+            via np.dot(J,dq), where dq is the robot's joint velocities.  
 
         """
         return _robotsim.RobotModelLink_getOrientationJacobian(self)
@@ -3576,7 +3645,7 @@ class RobotModelLink(_object):
     def getAcceleration(self, ddq):
         """
         Returns the acceleration of the link origin given the robot's current joint
-        velocities and joint accelerations ddq.  
+        configuration and velocities, and the joint accelerations ddq.  
 
         Args:
             ddq (:obj:`list of floats`)
@@ -3584,18 +3653,29 @@ class RobotModelLink(_object):
         ddq can be empty, which calculates the acceleration with acceleration 0, and is
         a little faster than setting ddq to [0]*n  
 
+        Returns:  
+
+            (list of 3 floats): the acceleration of the link's origin, in
+            world coordinates.  
+
         """
         return _robotsim.RobotModelLink_getAcceleration(self, ddq)
 
 
     def getPointAcceleration(self, plocal, ddq):
         """
-        Returns the acceleration of the point given the robot's current joint velocities
-        and joint accelerations ddq.  
+        Returns the acceleration of the point given the robot's current joint
+        configuration and velocities, and the joint accelerations ddq.  
 
         Args:
             plocal (:obj:`list of 3 floats`)
             ddq (:obj:`list of floats`)
+
+        Returns:  
+
+            (list of 3 floats): the acceleration of the point, in
+            world coordinates.  
+
         """
         return _robotsim.RobotModelLink_getPointAcceleration(self, plocal, ddq)
 
@@ -3603,10 +3683,16 @@ class RobotModelLink(_object):
     def getAngularAcceleration(self, ddq):
         """
         Returns the angular acceleration of the link given the robot's current joint
-        velocities and joint accelerations ddq.  
+        configuration and velocities, and the joint accelerations ddq.  
 
         Args:
             ddq (:obj:`list of floats`)
+
+        Returns:  
+
+            (list of 3 floats): the angular acceleration of the link, in
+            world coordinates.  
+
         """
         return _robotsim.RobotModelLink_getAngularAcceleration(self, ddq)
 
@@ -3614,11 +3700,16 @@ class RobotModelLink(_object):
     def getPositionHessian(self, p):
         """
         Returns the Hessians of each component of the position p w.r.t the robot's
-        configuration q. The result is a triple of nxn matrices corresponding to the
-        (x,y,z) components respectively.  
+        configuration q.  
 
         Args:
             p (:obj:`list of 3 floats`)
+
+        Returns:  
+
+            (3-tuple): a triple (Hx,Hy,Hz) of of nxn matrices corresponding,
+            respectively, to the (x,y,z) components of the Hessian.  
+
         """
         return _robotsim.RobotModelLink_getPositionHessian(self, p)
 
@@ -3626,8 +3717,13 @@ class RobotModelLink(_object):
     def getOrientationHessian(self):
         """
         Returns the Hessians of each orientation component of the link w.r.t the robot's
-        configuration q. The result is a triple of nxn matrices corresponding to the
-        (wx,wy,wz) components respectively.  
+        configuration q.  
+
+
+        Returns:  
+
+            (3-tuple): a triple (Hx,Hy,Hz) of of nxn matrices corresponding,
+            respectively, to the (wx,wy,wz) components of the Hessian.  
 
         """
         return _robotsim.RobotModelLink_getOrientationHessian(self)
@@ -3709,8 +3805,6 @@ class RobotModelDriver(_object):
 
     def __init__(self):
         """
-        Returns:
-            (:obj:`RobotModelDriver`):
         """
         this = _robotsim.new_RobotModelDriver()
         try:
@@ -3885,8 +3979,6 @@ class RobotModel(_object):
 
     def __init__(self):
         """
-        Returns:
-            (:class:`~klampt.RobotModel`):
         """
         this = _robotsim.new_RobotModel()
         try:
@@ -3896,7 +3988,7 @@ class RobotModel(_object):
 
     def loadFile(self, fn):
         """
-        Loads the robot from a file.  
+        Loads the robot from the file fn.  
 
         Args:
             fn (str)
@@ -3908,10 +4000,7 @@ class RobotModel(_object):
 
     def saveFile(self, fn, geometryPrefix=None):
         """
-        Saves the robot. If geometryPrefix == NULL, the geometry is not saved (default).
-        Otherwise, the geometry of each link will be saved to files named
-        geometryPrefix+name, where name is either the name of the geometry file that was
-        loaded, or [link_name].off.  
+        Saves the robot to the file fn.  
 
         saveFile (fn,geometryPrefix=None): bool
 
@@ -3924,16 +4013,25 @@ class RobotModel(_object):
 
         Returns:
             (bool):
+
+        If `geometryPrefix == None` (default), the geometry is not saved. Otherwise, the
+        geometry of each link will be saved to files named `geometryPrefix+name`, where
+        `name` is either the name of the geometry file that was loaded, or
+        `[link_name].off`  
+
         """
         return _robotsim.RobotModel_saveFile(self, fn, geometryPrefix)
 
 
     def getID(self):
         """
-        Returns the ID of the robot in its world (Note: not the same as the robot index)  
+        Returns the ID of the robot in its world.  
 
         Returns:
             (int):
+
+        Note: The world ID is not the same as the robot index.  
+
         """
         return _robotsim.RobotModel_getID(self)
 
@@ -4215,7 +4313,13 @@ class RobotModel(_object):
 
     def getComJacobian(self):
         """
-        Returns the 3xn Jacobian matrix of the current center of mass.  
+        Returns the Jacobian matrix of the current center of mass.  
+
+
+        Returns:  
+
+            (list of 3 lists): a 3xn matrix J such that np.dot(J,dq) gives the
+            COM velocity at the currene configuration  
 
         """
         return _robotsim.RobotModel_getComJacobian(self)
@@ -4319,8 +4423,15 @@ class RobotModel(_object):
         Args:
             g (:obj:`list of 3 floats`)
 
-        Note: "Forces" is somewhat of a misnomer; the result is a vector of joint
-        torques.  
+        Note:  
+
+            "Forces" is somewhat of a misnomer; the result is a vector of joint
+            torques.  
+
+        Returns:  
+
+            (list of floats): the n-element generalized gravity vector at the
+            robot's current configuration.  
 
         """
         return _robotsim.RobotModel_getGravityForces(self, g)
@@ -4334,8 +4445,15 @@ class RobotModel(_object):
         Args:
             ddq (:obj:`list of floats`)
 
-        Note: does not include gravity term G(q). getGravityForces(g) will need to be
-        added to the result.  
+        Note:  
+
+            Does not include gravity term G(q).  getGravityForces(g) will need
+            to be added to the result.  
+
+        Returns:  
+
+            (list of floats): the n-element torque vector that would produce
+            the joint accelerations ddq in the absence of external forces.  
 
         """
         return _robotsim.RobotModel_torquesFromAccel(self, ddq)
@@ -4348,8 +4466,15 @@ class RobotModel(_object):
         Args:
             t (:obj:`list of floats`)
 
-        Note: does not include gravity term G(q). getGravityForces(g) will need to be
-        subtracted from the argument t.  
+        Note:  
+
+            Does not include gravity term G(q).  getGravityForces(g) will need
+            to be subtracted from the argument t.  
+
+        Returns:  
+
+            (list of floats): the n-element joint acceleration vector that would
+            result from joint torques t in the absence of external forces.  
 
         """
         return _robotsim.RobotModel_accelFromTorques(self, t)
@@ -4364,6 +4489,12 @@ class RobotModel(_object):
             a (:obj:`list of floats`)
             b (:obj:`list of floats`)
             u (float)
+
+        Returns:  
+
+            (list of n floats): The configuration that is u fraction of the way
+            from a to b  
+
         """
         return _robotsim.RobotModel_interpolate(self, a, b, u)
 
@@ -4511,8 +4642,6 @@ class RigidObjectModel(_object):
 
     def __init__(self):
         """
-        Returns:
-            (:class:`~klampt.RigidObjectModel`):
         """
         this = _robotsim.new_RigidObjectModel()
         try:
@@ -4522,7 +4651,7 @@ class RigidObjectModel(_object):
 
     def loadFile(self, fn):
         """
-        Loads the object from a file.  
+        Loads the object from the file fn.  
 
         Args:
             fn (str)
@@ -4534,7 +4663,8 @@ class RigidObjectModel(_object):
 
     def saveFile(self, fn, geometryName=None):
         """
-        Saves the object. If geometryName is given, the geometry is saved to that file.  
+        Saves the object to the file fn. If geometryName is given, the geometry is saved
+        to that file.  
 
         saveFile (fn,geometryName=None): bool
 
@@ -4553,11 +4683,13 @@ class RigidObjectModel(_object):
 
     def getID(self):
         """
-        Returns the ID of the rigid object in its world (Note: not the same as the rigid
-        object index)  
+        Returns the ID of the rigid object in its world.  
 
         Returns:
             (int):
+
+        Note: The world ID is not the same as the rigid object index.  
+
         """
         return _robotsim.RigidObjectModel_getID(self)
 
@@ -4600,12 +4732,16 @@ class RigidObjectModel(_object):
 
     def getMass(self):
         """
-        Returns a copy of the Mass of this rigid object. Note: to change the mass
-        properties, you should call m=object.getMass(), change the desired properties in
-        m, and then object.setMass(m)  
+        Returns a copy of the Mass of this rigid object.  
 
         Returns:
             (:class:`~klampt.Mass`):
+
+        Note:  
+
+            To change the mass properties, you should call ``m=object.getMass()``,
+            change the desired properties in m, and then ``object.setMass(m)``  
+
         """
         return _robotsim.RigidObjectModel_getMass(self)
 
@@ -4625,9 +4761,11 @@ class RigidObjectModel(_object):
         Returns:
             (:class:`~klampt.ContactParameters`):
 
-        Note: to change the contact parameters, you should call
-        `p=object.getContactParameters()`, change the desired properties in p, and then
-        `object.setContactParameters(p)`  
+        Note:  
+
+            To change the contact parameters, you should call
+            ``p=object.getContactParameters()``, change the desired properties in
+            p, and then call ``object.setContactParameters(p)``  
 
         """
         return _robotsim.RigidObjectModel_getContactParameters(self)
@@ -4644,6 +4782,12 @@ class RigidObjectModel(_object):
     def getTransform(self):
         """
         Retrieves the rotation / translation of the rigid object (R,t)  
+
+
+        Returns:  
+
+            (se3 object): a pair (R,t), with R a 9-list and t a 3-list of floats,
+            giving the transform to world coordinates.  
 
         """
         return _robotsim.RigidObjectModel_getTransform(self)
@@ -4663,6 +4807,13 @@ class RigidObjectModel(_object):
     def getVelocity(self):
         """
         Retrieves the (angular velocity, velocity) of the rigid object.  
+
+
+        Returns:  
+
+            (tuple): a pair of 3-lists (w,v) where w is the angular velocity
+            vector and v is the translational velocity vector (both in world
+            coordinates)  
 
         """
         return _robotsim.RigidObjectModel_getVelocity(self)
@@ -4734,8 +4885,6 @@ class TerrainModel(_object):
 
     def __init__(self):
         """
-        Returns:
-            (:obj:`TerrainModel`):
         """
         this = _robotsim.new_TerrainModel()
         try:
@@ -4745,7 +4894,7 @@ class TerrainModel(_object):
 
     def loadFile(self, fn):
         """
-        Loads the terrain from a file.  
+        Loads the terrain from the file fn.  
 
         Args:
             fn (str)
@@ -4757,7 +4906,8 @@ class TerrainModel(_object):
 
     def saveFile(self, fn, geometryName=None):
         """
-        Saves the terrain. If geometryName is given, the geometry is saved to that file.  
+        Saves the terrain to the file fn. If geometryName is given, the geometry is
+        saved to that file.  
 
         saveFile (fn,geometryName=None): bool
 
@@ -4776,11 +4926,13 @@ class TerrainModel(_object):
 
     def getID(self):
         """
-        Returns the ID of the terrain in its world (Note: not the same as the terrain
-        index)  
+        Returns the ID of the terrain in its world.  
 
         Returns:
             (int):
+
+        Note: The world ID is not the same as the terrain index.  
+
         """
         return _robotsim.TerrainModel_getID(self)
 
@@ -4939,7 +5091,7 @@ class WorldModel(_object):
     def copy(self):
         """
         Creates a copy of the world model. Note that geometries and appearances are
-        shared...  
+        shared, so this is very quick.  
 
         Returns:
             (:class:`~klampt.WorldModel`):
@@ -5241,8 +5393,10 @@ class WorldModel(_object):
             object (:class:`~klampt.RigidObjectModel`, optional): 
             terrain (:obj:`TerrainModel`, optional): 
 
-        IMPORTANT: all other RobotModel, RigidObjectModel, and TerrainModel references
-        will be invalidated.  
+        IMPORTANT:  
+
+            All other RobotModel, RigidObjectModel, and TerrainModel references will be
+        invalidated.  
 
         """
         return _robotsim.WorldModel_remove(self, *args)
@@ -6123,8 +6277,6 @@ class GeneralizedIKSolver(_object):
         """
         Args:
             world (:class:`~klampt.WorldModel`)
-        Returns:
-            (:obj:`GeneralizedIKSolver`):
         """
         this = _robotsim.new_GeneralizedIKSolver(world)
         try:
@@ -6283,8 +6435,6 @@ class SimRobotSensor(_object):
         Args:
             robot (:obj:`Robot`)
             sensor (:obj:`SensorBase`)
-        Returns:
-            (:class:`~klampt.SimRobotSensor`):
         """
         this = _robotsim.new_SimRobotSensor(robot, sensor)
         try:
@@ -6451,8 +6601,6 @@ class SimRobotController(_object):
 
     def __init__(self):
         """
-        Returns:
-            (:class:`~klampt.SimRobotController`):
         """
         this = _robotsim.new_SimRobotController()
         try:
@@ -7065,8 +7213,6 @@ class SimBody(_object):
         A reference to a rigid body inside a Simulator (either a RigidObjectModel,
         TerrainModel, or a link of a RobotModel).  
 
-        Returns:
-            (:class:`~klampt.SimBody`):
 
         Can use this class to directly apply forces to or control positions / velocities
         of objects in the simulation.  
@@ -7120,8 +7266,6 @@ class Simulator(_object):
 
         Args:
             model (:class:`~klampt.WorldModel`)
-        Returns:
-            (:class:`~klampt.Simulator`):
         """
         this = _robotsim.new_Simulator(model)
         try:
@@ -7518,7 +7662,7 @@ class Simulator(_object):
         *   instabilityPostCorrectionEnergy  
 
         See `Klampt/Simulation/ODESimulator.h
-        <https://github.com/krishauser/Klampt/blob/master/Simulation/ODESimulator.h>`_
+        <http://motion.pratt.duke.edu/klampt/klampt_docs/ODESimulator_8h_source.html>`_
         for detailed descriptions of these parameters.  
 
         """
