@@ -3,4 +3,5 @@ import motionplanning
 import cspace
 import robotcspace
 import robotplanning
-
+import atexit
+atexit.register(motionplanning.destroy)
