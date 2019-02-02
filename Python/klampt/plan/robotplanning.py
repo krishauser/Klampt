@@ -305,7 +305,6 @@ def planToSet(world,robot,target,
     else:
       goal = target
     try:
-        print "a",target
         plan.setEndpoints([q0[s] for s in subset],goal)
     except RuntimeError:
         #the start configuration is infeasible, print it out
