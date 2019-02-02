@@ -149,15 +149,11 @@ Demos:
 Utility programs:
 
 -  ``make_planar_rob.py``: makes a canonical planar robot.
--  ``config\_to\_driver\_trajectory.py``: converts a linear path from
+-  ``config_to_driver_trajectory.py``: converts a linear path from
    configuration space (# of DOF) to driver space (# of actuators).
--  ``driver\_to\_config\_trajectory.py``: converts a linear path from
+-  ``driver_to_config_trajectory.py``: converts a linear path from
    driver space (# of actuators) to configuration space (# of DOF).
--  ``multipath\_to\_path.py``: simple script to convert a
-   :class:`~klampt.model.multipath.MultiPath` to
-   a timed milestone trajectory. Parameters at the top of the script
-   govern the speed of the trajectory.
--  ``multipath\_to\_timed\_multipath.py``: simple script to convert a
+-  ``multipath_to_timed_multipath.py``: simple script to convert a
    :class:`~klampt.model.multipath.MultiPath` to a timed MultiPath. Parameters at the top of the script
    govern the speed of the trajectory.
 -  ``tri2off.py``: converts old-style .tri files to .off files.

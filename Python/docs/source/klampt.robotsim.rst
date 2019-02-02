@@ -22,16 +22,16 @@ Modeling robots and worlds
 Imported into the main ``klampt`` package.
 
 .. autosummary::
-    ~klampt.robotsim.WorldModel
-    ~klampt.robotsim.RobotModel
-    ~klampt.robotsim.RobotModelLink
-    ~klampt.robotsim.RobotModelDriver
-    ~klampt.robotsim.RigidObjectModel
-    ~klampt.robotsim.TerrainModel
-    ~klampt.robotsim.Mass
-    ~klampt.robotsim.ContactParameters
-    ~klampt.robotsim.setRandomSeed
-    ~klampt.robotsim.destroy
+    ~klampt.WorldModel
+    ~klampt.RobotModel
+    ~klampt.RobotModelLink
+    ~klampt.RobotModelDriver
+    ~klampt.RigidObjectModel
+    ~klampt.TerrainModel
+    ~klampt.Mass
+    ~klampt.ContactParameters
+    ~klampt.setRandomSeed
+    ~klampt.destroy
 
 Modeling geometries
 -------------------
@@ -39,14 +39,14 @@ Modeling geometries
 Imported into the main ``klampt`` package.
 
 .. autosummary::
-    ~klampt.robotsim.Geometry3D
-    ~klampt.robotsim.Appearance
-    ~klampt.robotsim.GeometricPrimitive
-    ~klampt.robotsim.TriangleMesh
-    ~klampt.robotsim.PointCloud
-    ~klampt.robotsim.VolumeGrid
-    ~klampt.robotsim.DistanceQuerySettings
-    ~klampt.robotsim.DistanceQueryResult
+    ~klampt.Geometry3D
+    ~klampt.Appearance
+    ~klampt.GeometricPrimitive
+    ~klampt.TriangleMesh
+    ~klampt.PointCloud
+    ~klampt.VolumeGrid
+    ~klampt.DistanceQuerySettings
+    ~klampt.DistanceQueryResult
 
 Inverse kinematics
 -------------------
@@ -54,11 +54,11 @@ Inverse kinematics
 Imported into the main ``klampt`` package.
 
 .. autosummary::
-    ~klampt.robotsim.IKObjective
-    ~klampt.robotsim.IKSolver
-    ~klampt.robotsim.GeneralizedIKObjective
-    ~klampt.robotsim.GeneralizedIKSolver
-    ~klampt.robotsim.SampleTransform
+    ~klampt.IKObjective
+    ~klampt.IKSolver
+    ~klampt.GeneralizedIKObjective
+    ~klampt.GeneralizedIKSolver
+    ~klampt.SampleTransform
 
 Simulation
 -------------------
