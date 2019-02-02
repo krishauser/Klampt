@@ -31,10 +31,22 @@ class VisualEditorBase(glcommon.GLWidgetPlugin):
         self.world = world
     def instructions(self):
         return None
+    def loadable(self):
+        """Whether Load... should be shown"""
+        return True
+    def savable(self):
+        """Whether Save... should be shown"""
+        return True
     def display(self):
         if self.world: self.world.drawGL()
         self.klamptwidgetmaster.drawGL(self.viewport())
         return True
+    def updateGuiFromValue(self):
+        """Called when the value is externally changed (from Load...)"""
+        return
+    def updateValueFromGui(self):
+        """Called the value is requested (from Save... and OK)"""
+        return
     def addDialogItems(self,parent,ui='qt'):
         return
     def display_screen(self):
@@ -92,6 +104,11 @@ class ConfigEditor(VisualEditorBase):
         #this line will draw the robot
         self.klamptwidgetmaster.drawGL(self.viewport())
         return False
+
+    def updateGuiFromValue(self):
+        self.robotPoser.set(self.value)
+        self.refresh()
+
 
 class ConfigsEditor(VisualEditorBase):
     def __init__(self,name,value,description,world,robot=None):
@@ -219,6 +236,12 @@ class ConfigsEditor(VisualEditorBase):
         for j in xrange(self.robot.numLinks()):
             self.robot.link(j).appearance().setColor(0.5,0.5,0.5,1)
         glDisable(GL_BLEND)
+
+    def updateGuiFromValue(self):
+        if self.editingIndex >= len(self.value):
+            self.editingIndex = len(self.value)-1
+        self.indexEditBox.setValue(self.editingIndex)
+        self.indexChanged(self.editingIndex)
 
 class TrajectoryEditor(VisualEditorBase):
     def __init__(self,name,value,description,world,robot=None):
@@ -494,6 +517,17 @@ class TrajectoryEditor(VisualEditorBase):
         self.lastAnimTrajectoryTime = t
         return False
 
+    def updateGuiFromValue(self):
+        if self.editingIndex >= len(self.value):
+            self.editingIndex = len(self.value)-1
+        self.durations = []
+        if len(value.times) > 0:
+            self.durations.append(value.times[0])
+            for i in xrange(len(value.times)-1):
+                self.durations.append(value.times[i+1]-value.times[i])
+        self.indexEditBox.setValue(self.editingIndex)
+        self.indexChanged(self.editingIndex)
+        self.onDurationsChanged()
 
 
 class SelectionEditor(VisualEditorBase):
@@ -519,8 +553,7 @@ class SelectionEditor(VisualEditorBase):
         elif self.world != None:
             for i in xrange(self.world.numIDs()):
                 self.selectionList.addItem(self.world.getName(i))
-        for i in self.value:
-            self.selectionList.setCurrentItem(self.selectionList.item(i),QItemSelectionModel.Select)
+        self.updateGuiFromValue()
         layout.addWidget(self.clearButton)
         layout.addWidget(self.selectAllButton)
         layout.addWidget(self.selectionList)
@@ -668,6 +701,10 @@ class SelectionEditor(VisualEditorBase):
             apps[i].set(self.oldAppearances[i])
         glDisable(GL_BLEND)
 
+    def updateGuiFromValue(self):
+        self.selectionList.clearSelection()
+        for i in self.value:
+            self.selectionList.setCurrentItem(self.selectionList.item(i),QItemSelectionModel.Select)
 
 class PointEditor(VisualEditorBase):
     def __init__(self,name,value,description,world,frame=None):
@@ -685,6 +722,11 @@ class PointEditor(VisualEditorBase):
         if self.pointposer.hasFocus():
             self.value = se3.apply(se3.inv(self.frame),self.pointposer.get())
         return VisualEditorBase.mousefunc(self,button,state,x,y)
+
+    def updateGuiFromValue(self):
+        self.pointposer.set(se3.apply(self.frame,self.value))
+        self.refresh()
+
 
 class RigidTransformEditor(VisualEditorBase):
     def __init__(self,name,value,description,world,frame=None):
@@ -741,6 +783,10 @@ class RigidTransformEditor(VisualEditorBase):
         VisualEditorBase.display(self)
         return True
 
+    def updateGuiFromValue(self):
+        self.xformposer.set(*se3.mul(self.frame,self.value))
+        self.refresh()
+
 
 class ObjectTransformEditor(VisualEditorBase):
     def __init__(self,name,value,description,world,object):
@@ -757,10 +803,15 @@ class ObjectTransformEditor(VisualEditorBase):
             self.value = self.objposer.get()
         return VisualEditorBase.mousefunc(self,button,state,x,y)
 
+    def updateGuiFromValue(self):
+        self.objposer.set(*self.value)
+        self.refresh()
+
+
 class WorldEditor(VisualEditorBase):
     """Edits poses of robots, rigid objects, and terrains in a world.
 
-    Note: need to call ``finalize()`` in order to get terrain geometries updated.
+    Note: need to call ``updateValueFromGui()`` in order to get terrain geometries updated.
     """
     def __init__(self,name,value,description):
         VisualEditorBase.__init__(self,name,value,description,value)
@@ -785,6 +836,9 @@ class WorldEditor(VisualEditorBase):
         for r in self.terrainPosers:
             self.addWidget(r)
 
+    def loadable(self):
+        return False
+
     def display(self):
         #Override display handler since the widget draws the rigid objects and transforms
         for i in xrange(self.world.numTerrains()):
@@ -793,7 +847,7 @@ class WorldEditor(VisualEditorBase):
         self.klamptwidgetmaster.drawGL(self.viewport())
         return False
 
-    def finalize(self):
+    def updateValueFromGui(self):
         """Applies the transforms to all the terrain geometries."""
         for i in xrange(self.world.numTerrains()):
             T0 = self.world.terrain(i).geometry().getCurrentTransform()
@@ -811,6 +865,7 @@ class WorldEditor(VisualEditorBase):
                 #Tw.t = Tw.R*gc + Tg.t
                 self.world.terrain(i).geometry().setCurrentTransform(Tw[0],vectorops.sub(Tw[1],so3.apply(Tw[0],gcloc)))
         return VisualEditorBase.motionfunc(self,button,state,x,y)
+
 
 
 #Qt stuff
@@ -841,6 +896,13 @@ if glinit._PyQtAvailable:
             self.topBoxLayout = QVBoxLayout(self.topBox)
             self.topBoxLayout.addWidget(self.description)
             self.topBoxLayout.addWidget(self.instructions)
+
+            self.loadButton = QPushButton("Load...")
+            self.saveButton = QPushButton("Save...")
+            self.loadsave = QFrame()
+            self.loadButton.clicked.connect(self.load)
+            self.saveButton.clicked.connect(self.save)
+
             self.extraDialog = QFrame()
             self.extraDialog.setSizePolicy(QSizePolicy(QSizePolicy.Minimum,QSizePolicy.Minimum))
             self.topBoxLayout.addWidget(self.extraDialog)
@@ -874,6 +936,15 @@ if glinit._PyQtAvailable:
             else:
                 self.description.setText(editorObject.description)
             self.instructions.setText(editorObject.instructions())
+
+            loadsavelayout = QHBoxLayout(self.loadsave)
+            if editorObject.loadable():
+                loadsavelayout.addWidget(self.loadButton)
+            if editorObject.loadable():
+                loadsavelayout.addWidget(self.saveButton)
+            if editorObject.loadable() or editorObject.saveable():
+                self.topBoxLayout.addWidget(self.loadsave)
+
             editorObject.addDialogItems(self.extraDialog,ui='qt')
 
         def closeEvent(self,event):
@@ -893,9 +964,9 @@ if glinit._PyQtAvailable:
             print "#########################################"
             print "klampt.vis: EditDialog accept"
             print "#########################################"
-            if hasattr(self,'finalize'):
-                self.finalize()
+            self.editorObject.updateValueFromGui()
             return QDialog.accept(self)
+
         def reject(self):
             global _my_dialog_res
             _my_dialog_res = False
@@ -903,6 +974,24 @@ if glinit._PyQtAvailable:
             print "klampt.vis: EditDialog reject"
             print "#########################################"
             return QDialog.reject(self)
+
+        def load(self):
+            from ..io import resource
+            from ..model import types
+            type = types.objectToTypes(self.editorObject.value)
+            if isinstance(type,list):
+                type = type[0]
+            res = resource.load(type,'.')
+            if res is not None:
+                #TODO: check compatibility with world
+                self.editorObject.value = res[1]
+                self.editorObject.updateGuiFromValue()
+
+        def save(self):
+            from ..io import resource
+            self.editorObject.updateValueFromGui()
+            resource.save(self.editorObject.value,'auto','.')
+            
 
 
     def run(editorObject):
