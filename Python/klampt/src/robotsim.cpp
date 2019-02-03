@@ -10,6 +10,7 @@
 #include <Klampt/Control/PathController.h>
 #include <Klampt/Control/FeedforwardController.h>
 #include <Klampt/Control/LoggingController.h>
+#include <Klampt/Sensing/JointSensors.h>
 #include <Klampt/Planning/RobotCSpace.h>
 #include <Klampt/Simulation/WorldSimulation.h>
 #include <Klampt/Modeling/Interpolate.h>
@@ -2643,7 +2644,8 @@ void RobotModelLink::setTransform(const double R[9],const double t[3])
   RobotLink3D& link=robotPtr->links[index];
   link.T_World.R.set(R);
   link.T_World.t.set(t);
-  robotPtr->geometry[index]->SetTransform(link.T_World);
+  if (robotPtr->geometry[index])
+    robotPtr->geometry[index]->SetTransform(link.T_World);
 }
 
 void RobotModelLink::getParentTransform(double R[9],double t[3])
@@ -3831,11 +3833,21 @@ void Simulator::getActualVelocity(int robot,std::vector<double>& out)
   out = qv;
 }
 
-void Simulator::getActualTorques(int robot,std::vector<double>& out)
+void Simulator::getActualTorque(int robot,std::vector<double>& out)
 {
   Vector t;
   sim->controlSimulators[robot].GetActuatorTorques(t);
   out = t;
+}
+
+void Simulator::getActualTorques(int robot,std::vector<double>& out)
+{
+  static bool warned=false;
+  if(!warned) {
+    fprintf(stderr,"Warning: Simulator.getActualTorques will be deprecated. Use getActualTorque instead\n");
+    warned = true;
+  }
+  getActualTorque(robot,out);
 }
 
 bool Simulator::inContact(int aid,int bid)
@@ -4315,6 +4327,15 @@ void SimRobotController::getCommandedVelocity(vector<double>& dq)
   qv.getCopy(&dq[0]);
 }
 
+void SimRobotController::getCommandedTorque(std::vector<double>& t)
+{
+  RobotMotorCommand& command = controller->command;
+  //Robot* robot=sim->sim->controlSimulators[index];
+  t.resize(command.actuators.size());
+  for(size_t i=0;i<command.actuators.size();i++) 
+    t[i] = command.actuators[i].torque;
+}
+
 void SimRobotController::getSensedConfig(vector<double>& q)
 {
   Vector qv;
@@ -4332,6 +4353,25 @@ void SimRobotController::getSensedVelocity(vector<double>& dq)
   if(!qv.empty()) {
     dq.resize(qv.n);
     qv.getCopy(&dq[0]);
+  }
+}
+
+void SimRobotController::getSensedTorque(std::vector<double>& t)
+{
+  DriverTorqueSensor* s = controller->sensors.GetTypedSensor<DriverTorqueSensor>();
+  if(s==NULL){
+      throw PyException("Robot has no torque sensor");
+  }
+  else {
+    //resize to the correct size
+    if(s->indices.empty() || s->t.empty())
+      t = s->t;
+    else {
+      t.resize(controller->robot->q.n);
+      fill(t.begin(),t.end(),0.0);
+      for(size_t i=0;i<s->indices.size();i++)
+        t[s->indices[i]] = s->t[i];
+    }
   }
 }
 

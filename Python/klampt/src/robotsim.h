@@ -133,16 +133,23 @@ class SimRobotController
   void getCommandedConfig(std::vector<double>& out);
   /// Returns the current commanded velocity
   void getCommandedVelocity(std::vector<double>& out);
+  /// Returns the current commanded (feedforward) torque
+  void getCommandedTorque(std::vector<double>& out);
 
   /// Returns the current "sensed" configuration from the simulator
   void getSensedConfig(std::vector<double>& out);
   /// Returns the current "sensed" velocity from the simulator
   void getSensedVelocity(std::vector<double>& out);
+  /// Returns the current "sensed" (feedback) torque from the simulator.
+  /// Note: a default robot doesn't have a torque sensor, so this will be 0
+  void getSensedTorque(std::vector<double>& out);
 
-  /// Returns a sensor by index or by name.  If out of bounds or unavailable, a null sensor is returned
+  /// Returns a sensor by index or by name.  If out of bounds or unavailable,
+  /// a null sensor is returned
   SimRobotSensor sensor(int index);
   //note: only the last overload docstring is added to the documentation
-  /// Returns a sensor by index or by name.  If out of bounds or unavailable, a null sensor is returned
+  /// Returns a sensor by index or by name.  If out of bounds or unavailable,
+  /// a null sensor is returned
   SimRobotSensor sensor(const char* name);
   
   /// gets a command list
@@ -362,6 +369,9 @@ class Simulator
   void getActualVelocity(int robot,std::vector<double>& out);
   /// Returns the current actual torques on the robot's drivers
   /// from the simulator
+  void getActualTorque(int robot,std::vector<double>& out);
+  /// Deprecated: renamed to getActualTorque to be consistent with
+  /// SimRobotController methods
   void getActualTorques(int robot,std::vector<double>& out);
 
   /// Call this to enable contact feedback between the two objects

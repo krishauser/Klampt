@@ -31415,25 +31415,18 @@ SWIGINTERN PyObject *_wrap_RobotModelDriver_getAffectedLinks(PyObject *SWIGUNUSE
   std::vector< int,std::allocator< int > > *arg2 = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
+  std::vector< int > temp2 ;
   PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:RobotModelDriver_getAffectedLinks",&obj0,&obj1)) SWIG_fail;
+  {
+    arg2 = &temp2;
+  }
+  if (!PyArg_ParseTuple(args,(char *)"O:RobotModelDriver_getAffectedLinks",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelDriver, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelDriver_getAffectedLinks" "', argument " "1"" of type '" "RobotModelDriver *""'"); 
   }
   arg1 = reinterpret_cast< RobotModelDriver * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t,  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "RobotModelDriver_getAffectedLinks" "', argument " "2"" of type '" "std::vector< int,std::allocator< int > > &""'"); 
-  }
-  if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "RobotModelDriver_getAffectedLinks" "', argument " "2"" of type '" "std::vector< int,std::allocator< int > > &""'"); 
-  }
-  arg2 = reinterpret_cast< std::vector< int,std::allocator< int > > * >(argp2);
   {
     try {
       (arg1)->getAffectedLinks(*arg2);
@@ -31448,6 +31441,25 @@ SWIGINTERN PyObject *_wrap_RobotModelDriver_getAffectedLinks(PyObject *SWIGUNUSE
     }
   }
   resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_iarray_obj(&(*arg2)[0],(int)arg2->size());
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
   return resultobj;
 fail:
   return NULL;
@@ -31461,36 +31473,22 @@ SWIGINTERN PyObject *_wrap_RobotModelDriver_getAffineCoeffs(PyObject *SWIGUNUSED
   std::vector< double,std::allocator< double > > *arg3 = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
+  std::vector< double > temp2 ;
+  std::vector< double > temp3 ;
   PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OOO:RobotModelDriver_getAffineCoeffs",&obj0,&obj1,&obj2)) SWIG_fail;
+  {
+    arg2 = &temp2;
+  }
+  {
+    arg3 = &temp3;
+  }
+  if (!PyArg_ParseTuple(args,(char *)"O:RobotModelDriver_getAffineCoeffs",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelDriver, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelDriver_getAffineCoeffs" "', argument " "1"" of type '" "RobotModelDriver *""'"); 
   }
   arg1 = reinterpret_cast< RobotModelDriver * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t,  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "RobotModelDriver_getAffineCoeffs" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > &""'"); 
-  }
-  if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "RobotModelDriver_getAffineCoeffs" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > &""'"); 
-  }
-  arg2 = reinterpret_cast< std::vector< double,std::allocator< double > > * >(argp2);
-  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t,  0 );
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "RobotModelDriver_getAffineCoeffs" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > &""'"); 
-  }
-  if (!argp3) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "RobotModelDriver_getAffineCoeffs" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > &""'"); 
-  }
-  arg3 = reinterpret_cast< std::vector< double,std::allocator< double > > * >(argp3);
   {
     try {
       (arg1)->getAffineCoeffs(*arg2,*arg3);
@@ -31505,6 +31503,44 @@ SWIGINTERN PyObject *_wrap_RobotModelDriver_getAffineCoeffs(PyObject *SWIGUNUSED
     }
   }
   resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(&(*arg2)[0],(int)arg2->size());
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(&(*arg3)[0],(int)arg3->size());
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
   return resultobj;
 fail:
   return NULL;
@@ -46064,6 +46100,63 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_SimRobotController_getCommandedTorque(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SimRobotController *arg1 = (SimRobotController *) 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::vector< double > temp2 ;
+  PyObject * obj0 = 0 ;
+  
+  {
+    arg2 = &temp2;
+  }
+  if (!PyArg_ParseTuple(args,(char *)"O:SimRobotController_getCommandedTorque",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SimRobotController, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotController_getCommandedTorque" "', argument " "1"" of type '" "SimRobotController *""'"); 
+  }
+  arg1 = reinterpret_cast< SimRobotController * >(argp1);
+  {
+    try {
+      (arg1)->getCommandedTorque(*arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(&(*arg2)[0],(int)arg2->size());
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_SimRobotController_getSensedConfig(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   SimRobotController *arg1 = (SimRobotController *) 0 ;
@@ -46142,6 +46235,63 @@ SWIGINTERN PyObject *_wrap_SimRobotController_getSensedVelocity(PyObject *SWIGUN
   {
     try {
       (arg1)->getSensedVelocity(*arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(&(*arg2)[0],(int)arg2->size());
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SimRobotController_getSensedTorque(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SimRobotController *arg1 = (SimRobotController *) 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::vector< double > temp2 ;
+  PyObject * obj0 = 0 ;
+  
+  {
+    arg2 = &temp2;
+  }
+  if (!PyArg_ParseTuple(args,(char *)"O:SimRobotController_getSensedTorque",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SimRobotController, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotController_getSensedTorque" "', argument " "1"" of type '" "SimRobotController *""'"); 
+  }
+  arg1 = reinterpret_cast< SimRobotController * >(argp1);
+  {
+    try {
+      (arg1)->getSensedTorque(*arg2);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -50063,6 +50213,72 @@ SWIGINTERN PyObject *_wrap_Simulator_getActualVelocity(PyObject *SWIGUNUSEDPARM(
   {
     try {
       (arg1)->getActualVelocity(arg2,*arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(&(*arg3)[0],(int)arg3->size());
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Simulator_getActualTorque(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Simulator *arg1 = (Simulator *) 0 ;
+  int arg2 ;
+  std::vector< double,std::allocator< double > > *arg3 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  std::vector< double > temp3 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  {
+    arg3 = &temp3;
+  }
+  if (!PyArg_ParseTuple(args,(char *)"OO:Simulator_getActualTorque",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Simulator, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Simulator_getActualTorque" "', argument " "1"" of type '" "Simulator *""'"); 
+  }
+  arg1 = reinterpret_cast< Simulator * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Simulator_getActualTorque" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  {
+    try {
+      (arg1)->getActualTorque(arg2,*arg3);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -55724,20 +55940,22 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		""},
 	 { (char *)"RobotModelDriver_getAffectedLinks", _wrap_RobotModelDriver_getAffectedLinks, METH_VARARGS, (char *)"\n"
-		"RobotModelDriver_getAffectedLinks(RobotModelDriver self, intVector links)\n"
+		"RobotModelDriver_getAffectedLinks(RobotModelDriver self)\n"
 		"\n"
 		"\n"
 		"\n"
-		"Returns the driver's affected links.  \n"
+		"Returns the indices of the driver's affected links.  \n"
 		"\n"
 		""},
 	 { (char *)"RobotModelDriver_getAffineCoeffs", _wrap_RobotModelDriver_getAffineCoeffs, METH_VARARGS, (char *)"\n"
-		"RobotModelDriver_getAffineCoeffs(RobotModelDriver self, doubleVector scale, doubleVector offset)\n"
+		"RobotModelDriver_getAffineCoeffs(RobotModelDriver self)\n"
 		"\n"
 		"\n"
 		"\n"
 		"For \"affine\" links, returns the scale and offset of the driver value mapped to\n"
 		"the world.  \n"
+		"\n"
+		"Returns: tuple: a pair (scale,offset), each of length len(getAffectedLinks()).  \n"
 		"\n"
 		""},
 	 { (char *)"RobotModelDriver_setValue", _wrap_RobotModelDriver_setValue, METH_VARARGS, (char *)"\n"
@@ -57533,6 +57751,14 @@ static PyMethodDef SwigMethods[] = {
 		"Returns the current commanded velocity.  \n"
 		"\n"
 		""},
+	 { (char *)"SimRobotController_getCommandedTorque", _wrap_SimRobotController_getCommandedTorque, METH_VARARGS, (char *)"\n"
+		"SimRobotController_getCommandedTorque(SimRobotController self)\n"
+		"\n"
+		"\n"
+		"\n"
+		"Returns the current commanded (feedforward) torque.  \n"
+		"\n"
+		""},
 	 { (char *)"SimRobotController_getSensedConfig", _wrap_SimRobotController_getSensedConfig, METH_VARARGS, (char *)"\n"
 		"SimRobotController_getSensedConfig(SimRobotController self)\n"
 		"\n"
@@ -57547,6 +57773,15 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Returns the current \"sensed\" velocity from the simulator.  \n"
+		"\n"
+		""},
+	 { (char *)"SimRobotController_getSensedTorque", _wrap_SimRobotController_getSensedTorque, METH_VARARGS, (char *)"\n"
+		"SimRobotController_getSensedTorque(SimRobotController self)\n"
+		"\n"
+		"\n"
+		"\n"
+		"Returns the current \"sensed\" (feedback) torque from the simulator. Note: a\n"
+		"default robot doesn't have a torque sensor, so this will be 0.  \n"
 		"\n"
 		""},
 	 { (char *)"SimRobotController_sensor", _wrap_SimRobotController_sensor, METH_VARARGS, (char *)"\n"
@@ -58058,12 +58293,21 @@ static PyMethodDef SwigMethods[] = {
 		"Returns the current actual velocity of the robot from the simulator.  \n"
 		"\n"
 		""},
+	 { (char *)"Simulator_getActualTorque", _wrap_Simulator_getActualTorque, METH_VARARGS, (char *)"\n"
+		"Simulator_getActualTorque(Simulator self, int robot)\n"
+		"\n"
+		"\n"
+		"\n"
+		"Returns the current actual torques on the robot's drivers from the simulator.  \n"
+		"\n"
+		""},
 	 { (char *)"Simulator_getActualTorques", _wrap_Simulator_getActualTorques, METH_VARARGS, (char *)"\n"
 		"Simulator_getActualTorques(Simulator self, int robot)\n"
 		"\n"
 		"\n"
 		"\n"
-		"Returns the current actual torques on the robot's drivers from the simulator.  \n"
+		"Deprecated: renamed to getActualTorque to be consistent with SimRobotController\n"
+		"methods.  \n"
 		"\n"
 		""},
 	 { (char *)"Simulator_enableContactFeedback", _wrap_Simulator_enableContactFeedback, METH_VARARGS, (char *)"\n"
@@ -58295,7 +58539,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"    g (Geometry3D): the geometry that will be updated\n"
 		"    protocol (str): only \"ros\" accepted for now.\n"
-		"    name (str): the name of the stream. E.g., ROS topic.\n"
+		"    name (str): the name of the stream, i.e., ROS topic.\n"
 		"    type (str, optional): If provided, specifies the format of the data\n"
 		"        to be subscribed to. If not, tries to determine the type\n"
 		"        automatically.  \n"
@@ -58304,6 +58548,9 @@ static PyMethodDef SwigMethods[] = {
 		"also call `Geometry3D.loadFile(\"ros://[ROS_TOPIC]\")` or\n"
 		"`Geometry3D.loadFile(\"ros:PointCloud2//[ROS_TOPIC]\")` to accomplish the same\n"
 		"thing.  \n"
+		"\n"
+		"TODO: It has not yet been determined whether this interferes with Rospy, i.e.,\n"
+		"klampt.io.ros.  \n"
 		"\n"
 		"Returns: (bool): True if successful.  \n"
 		"\n"
