@@ -418,9 +418,9 @@ bool KlamptToROS(const Meshing::PointCloud3D& kpc,sensor_msgs::PointCloud2& pc)
   for(size_t i=0;i<kpc.propertyNames.size();i++)
     pc.fields[3+i].name = kpc.propertyNames[i];
   for(size_t i=0;i<pc.fields.size();i++) {
-    pc.fields[0].datatype = sensor_msgs::PointField::FLOAT32;
-    pc.fields[0].offset = i*4;
-    pc.fields[0].count = 1;
+    pc.fields[i].datatype = sensor_msgs::PointField::FLOAT32;
+    pc.fields[i].offset = i*4;
+    pc.fields[i].count = 1;
   }
   int ofs = 0;
   pc.data.resize(pc.row_step);
@@ -889,8 +889,8 @@ void KlamptToROSCameraInfo(const CameraSensor& cam,sensor_msgs::CameraInfo& msg)
   msg.distortion_model = "plumb_bob";
   msg.D.resize(5,0.0);
   Real fx = 0.5*cam.xres/Tan(cam.xfov*0.5);
-  Real fy = 0.5*cam.xres/Tan(cam.xfov*0.5);
-  Real cx = 0.5*cam.yres;
+  Real fy = 0.5*cam.yres/Tan(cam.yfov*0.5);
+  Real cx = 0.5*cam.xres;
   Real cy = 0.5*cam.yres;
   msg.K[0] = fx;
   msg.K[4] = fy;
