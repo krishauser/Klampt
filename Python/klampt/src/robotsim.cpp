@@ -4379,6 +4379,23 @@ SimRobotSensor::SimRobotSensor(Robot* _robot,SensorBase* _sensor)
   :robot(_robot),sensor(_sensor)
 {}
 
+SimRobotSensor::SimRobotSensor(SimRobotController& _controller,const char* name,const char* type)
+  :robot(NULL),sensor(NULL)
+{
+  robot = _controller.controller->robot;
+  shared_ptr<SensorBase> newsensor = _controller.controller->sensors.CreateByType(type);
+  if(!newsensor) {
+    throw PyException("Invalid sensor type specified");
+  }
+  if(_controller.controller->sensors.GetNamedSensor(name)) {
+    throw PyException("Sensor name already exists");
+  }
+  newsensor->name = name;
+  _controller.controller->sensors.sensors.push_back(newsensor);
+  _controller.controller->nextSenseTime.push_back(_controller.controller->curTime);
+  sensor = _controller.controller->sensors.sensors.back().get();
+}
+
 std::string SimRobotSensor::name()
 {
   if(!sensor) return std::string();
