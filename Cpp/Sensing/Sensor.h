@@ -120,6 +120,7 @@ class RobotSensors
   void GetTypedSensors(vector<T*>& sensors);
   template <class T>
   T* GetTypedSensor(int index=0);
+  shared_ptr<SensorBase> CreateByType(const char* type) const;
 
   vector<shared_ptr<SensorBase> > sensors;
 };

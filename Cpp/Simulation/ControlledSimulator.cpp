@@ -212,7 +212,7 @@ void ControlledRobotSimulator::Step(Real dt,WorldSimulation* sim)
   //necessarily.
   if(nextSenseTime.empty()) {
     //make sure the sensors get updated
-    nextSenseTime.resize(sensors.sensors.size(),0);
+    nextSenseTime.resize(sensors.sensors.size(),curTime);
   }
   for(size_t i=0;i<sensors.sensors.size();i++) {
     Real delay = 0;
