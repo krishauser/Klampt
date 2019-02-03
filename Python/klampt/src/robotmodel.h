@@ -313,10 +313,14 @@ class RobotModelDriver
   const char* getType();
   ///Returns the single affected link for "normal" links
   int getAffectedLink();
-  ///Returns the driver's affected links
-  void getAffectedLinks(std::vector<int>& links);
-  ///For "affine" links, returns the scale and offset of the driver value mapped to the world
-  void getAffineCoeffs(std::vector<double>& scale,std::vector<double>& offset);
+  ///Returns the indices of the driver's affected links
+  void getAffectedLinks(std::vector<int>& out);
+  ///For "affine" links, returns the scale and offset of the driver value mapped
+  ///to the world.
+  ///
+  ///Returns:
+  ///    tuple: a pair (scale,offset), each of length len(getAffectedLinks()).
+  void getAffineCoeffs(std::vector<double>& out,std::vector<double>& out2);
   ///Sets the robot's config to correspond to the given driver value 
   void setValue(double val);
   ///Gets the current driver value from the robot's config
