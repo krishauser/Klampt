@@ -77,9 +77,22 @@ bool IsFloatingBase(Robot& robot)
 
 void SetFloatingBase(Robot& robot,const RigidTransform& T)
 {
-  T.t.get(robot.q(0),robot.q(1),robot.q(2));
+  RigidTransform Tp,Tchain;
+  if(robot.joints[0].type == RobotJoint::Floating || robot.joints[0].type == RobotJoint::FloatingPlanar) {
+    Tp.mulInverseB(T,robot.links[robot.joints[0].linkIndex].T0_Parent);
+    Tchain.mulInverseA(robot.links[robot.joints[0].baseIndex+1].T0_Parent,Tp);
+    if(robot.joints[0].baseIndex >= 0) {
+      Tp.mulInverseA(robot.links[robot.parents[robot.joints[0].baseIndex]].T_World,Tchain);
+      Tchain = Tp;
+    }
+  }
+  else {
+    Tp.mulInverseB(T,robot.links[5].T0_Parent);
+    Tchain.mulInverseA(robot.links[0].T0_Parent,Tp);
+  }
+  Tchain.t.get(robot.q(0),robot.q(1),robot.q(2));
   EulerAngleRotation e;
-  e.setMatrixZYX(T.R);
+  e.setMatrixZYX(Tchain.R);
   e.get(robot.q(3),robot.q(4),robot.q(5));
 }
 
