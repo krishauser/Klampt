@@ -29,6 +29,30 @@ klampt.io.resource module
     :undoc-members:
     :show-inheritance:
 
+klampt.io.ros module
+-------------------------
+
+.. automodule:: klampt.io.ros
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+klampt.io.numpy_convert module
+-------------------------
+
+.. automodule:: klampt.io.numpy_convert
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+klampt.io.open3d_convert module
+-------------------------
+
+.. automodule:: klampt.io.open3d_convert
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 .. Module contents
 .. ---------------
