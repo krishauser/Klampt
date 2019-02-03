@@ -45144,7 +45144,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_new_SimRobotSensor(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_SimRobotSensor__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Robot *arg1 = (Robot *) 0 ;
   SensorBase *arg2 = (SensorBase *) 0 ;
@@ -45184,6 +45184,120 @@ SWIGINTERN PyObject *_wrap_new_SimRobotSensor(PyObject *SWIGUNUSEDPARM(self), Py
   return resultobj;
 fail:
   return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_SimRobotSensor__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SimRobotController *arg1 = 0 ;
+  char *arg2 = (char *) 0 ;
+  char *arg3 = (char *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  int res3 ;
+  char *buf3 = 0 ;
+  int alloc3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  SimRobotSensor *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:new_SimRobotSensor",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_SimRobotController,  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_SimRobotSensor" "', argument " "1"" of type '" "SimRobotController &""'"); 
+  }
+  if (!argp1) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_SimRobotSensor" "', argument " "1"" of type '" "SimRobotController &""'"); 
+  }
+  arg1 = reinterpret_cast< SimRobotController * >(argp1);
+  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "new_SimRobotSensor" "', argument " "2"" of type '" "char const *""'");
+  }
+  arg2 = reinterpret_cast< char * >(buf2);
+  res3 = SWIG_AsCharPtrAndSize(obj2, &buf3, NULL, &alloc3);
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "new_SimRobotSensor" "', argument " "3"" of type '" "char const *""'");
+  }
+  arg3 = reinterpret_cast< char * >(buf3);
+  {
+    try {
+      result = (SimRobotSensor *)new SimRobotSensor(*arg1,(char const *)arg2,(char const *)arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_SimRobotSensor, SWIG_POINTER_NEW |  0 );
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
+  return resultobj;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_SimRobotSensor(PyObject *self, PyObject *args) {
+  Py_ssize_t argc;
+  PyObject *argv[4] = {
+    0
+  };
+  Py_ssize_t ii;
+  
+  if (!PyTuple_Check(args)) SWIG_fail;
+  argc = args ? PyObject_Length(args) : 0;
+  for (ii = 0; (ii < 3) && (ii < argc); ii++) {
+    argv[ii] = PyTuple_GET_ITEM(args,ii);
+  }
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Robot, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      void *vptr = 0;
+      int res = SWIG_ConvertPtr(argv[1], &vptr, SWIGTYPE_p_SensorBase, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        return _wrap_new_SimRobotSensor__SWIG_0(self, args);
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_SimRobotController, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_AsCharPtrAndSize(argv[1], 0, NULL, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        int res = SWIG_AsCharPtrAndSize(argv[2], 0, NULL, 0);
+        _v = SWIG_CheckState(res);
+        if (_v) {
+          return _wrap_new_SimRobotSensor__SWIG_1(self, args);
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'new_SimRobotSensor'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    SimRobotSensor::SimRobotSensor(Robot *,SensorBase *)\n"
+    "    SimRobotSensor::SimRobotSensor(SimRobotController &,char const *,char const *)\n");
+  return 0;
 }
 
 
@@ -54156,6 +54270,16 @@ static PyMethodDef SwigMethods[] = {
 		"    m.vertices = [0,0,0]   #this is an error\n"
 		"    m.vertices += [1,2,3]   #this is also an error  \n"
 		"\n"
+		"To get all vertices as a numpy array:  \n"
+		"\n"
+		"    verts = np.array(m.vertices).reshape((len(m.vertices)//3,3))  \n"
+		"\n"
+		"To get all indices as a numpy array:  \n"
+		"\n"
+		"    inds = np.array(m.indices,dtype=np.int32).reshape((len(m.indices)//3,3))  \n"
+		"\n"
+		"(Or use the convenience functions in klampt.io.numpy)  \n"
+		"\n"
 		"C++ includes: geometry.h\n"
 		"\n"
 		""},
@@ -54335,6 +54459,8 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"*   version: version of the PCL file, typically \"0.7\"  \n"
 		"*   id: integer id  \n"
+		"*   width: the width of a structured point cloud  \n"
+		"*   height: the height of a structured point cloud  \n"
 		"*   viewpoint: \"ox oy oz qw qx qy qz\"  \n"
 		"\n"
 		"Examples::  \n"
@@ -54356,6 +54482,16 @@ static PyMethodDef SwigMethods[] = {
 		"    print len(pc.properties.size())\n"
 		"    #this prints 0; this is the default value added when addPoint is called\n"
 		"    print pc.getProperty(1,0)  \n"
+		"\n"
+		"To get all points as an n x 3 numpy array:  \n"
+		"\n"
+		"    points = np.array(pc.vertices).reshape((pc.numPoints(),3))  \n"
+		"\n"
+		"To get all properties as a n x k numpy array:  \n"
+		"\n"
+		"properties = np.array(pc.properties).reshape((p.numPoints(),p.numProperties()))  \n"
+		"\n"
+		"(Or use the convenience functions in klampt.io.numpy)  \n"
 		"\n"
 		"C++ includes: geometry.h\n"
 		"\n"
@@ -54458,7 +54594,18 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"An axis-aligned volumetric grid, typically a signed distance transform with > 0\n"
-		"indicating outside and < 0 indicating inside. Can also store an occupancy grid.  \n"
+		"indicating outside and < 0 indicating inside. Can also store an occupancy grid\n"
+		"with 1 indicating inside and 0 indicating outside.  \n"
+		"\n"
+		"Attributes: bbox (SWIG vector of 6 doubles): contains min and max bounds\n"
+		"(xmin,ymin,zmin),(xmax,ymax,zmax) dims (SWIG vector of of 3 ints): size of grid\n"
+		"in each of 3 dimensions values (SWIG vector of doubles): contains a 3D array of\n"
+		"dims[0]*dims[1]*dims[1] values.  \n"
+		"\n"
+		"The cell index (i,j,k) is flattened to i*dims[1]*dims[2] + j*dims[2] + k.  \n"
+		"\n"
+		"The array index i is associated to cell index (i/(dims[1]*dims[2]), (i/dims[2])\n"
+		"% dims[1], idims[2])  \n"
 		"\n"
 		"C++ includes: geometry.h\n"
 		"\n"
@@ -54575,8 +54722,8 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Returns the type of geometry: TriangleMesh, PointCloud, VolumeGrid, or\n"
-		"GeometricPrimitive.  \n"
+		"Returns the type of geometry: TriangleMesh, PointCloud, VolumeGrid,\n"
+		"GeometricPrimitive, or Group.  \n"
 		"\n"
 		""},
 	 { (char *)"Geometry3D_empty", _wrap_Geometry3D_empty, METH_VARARGS, (char *)"\n"
@@ -57611,7 +57758,8 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		""},
 	 { (char *)"new_SimRobotSensor", _wrap_new_SimRobotSensor, METH_VARARGS, (char *)"\n"
-		"new_SimRobotSensor(Robot * robot, SensorBase * sensor) -> SimRobotSensor\n"
+		"SimRobotSensor(Robot * robot, SensorBase * sensor)\n"
+		"new_SimRobotSensor(SimRobotController robot, char const * name, char const * type) -> SimRobotSensor\n"
 		"\n"
 		"\n"
 		"\n"
