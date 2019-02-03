@@ -835,8 +835,8 @@ Returns the number of sub-elements in this geometry.
 
 %feature("docstring") Geometry3D::type "
 
-Returns the type of geometry: TriangleMesh, PointCloud, VolumeGrid, or
-GeometricPrimitive.  
+Returns the type of geometry: TriangleMesh, PointCloud, VolumeGrid,
+GeometricPrimitive, or Group.  
 ";
 
 %feature("docstring") Geometry3D::setPointCloud "
@@ -1424,6 +1424,8 @@ include:
 
 *   version: version of the PCL file, typically \"0.7\"  
 *   id: integer id  
+*   width: the width of a structured point cloud  
+*   height: the height of a structured point cloud  
 *   viewpoint: \"ox oy oz qw qx qy qz\"  
 
 Examples::  
@@ -1445,6 +1447,16 @@ Examples::
     print len(pc.properties.size())
     #this prints 0; this is the default value added when addPoint is called
     print pc.getProperty(1,0)  
+
+To get all points as an n x 3 numpy array:  
+
+    points = np.array(pc.vertices).reshape((pc.numPoints(),3))  
+
+To get all properties as a n x k numpy array:  
+
+properties = np.array(pc.properties).reshape((p.numPoints(),p.numProperties()))  
+
+(Or use the convenience functions in klampt.io.numpy)  
 
 C++ includes: geometry.h
 ";
@@ -2095,7 +2107,7 @@ C++ includes: robotmodel.h
 
 %feature("docstring") RobotModelDriver::getAffectedLinks "
 
-Returns the driver's affected links.  
+Returns the indices of the driver's affected links.  
 ";
 
 %feature("docstring") RobotModelDriver::setValue "
@@ -2130,6 +2142,8 @@ Returns a reference to the driver's robot.
 
 For \"affine\" links, returns the scale and offset of the driver value mapped to
 the world.  
+
+Returns: tuple: a pair (scale,offset), each of length len(getAffectedLinks()).  
 ";
 
 %feature("docstring") RobotModelDriver::getType "
@@ -2687,6 +2701,11 @@ sensor is returned.
 Returns the current \"sensed\" configuration from the simulator.  
 ";
 
+%feature("docstring") SimRobotController::getCommandedTorque "
+
+Returns the current commanded (feedforward) torque.  
+";
+
 %feature("docstring") SimRobotController::setTorque "
 
 Sets a torque command controller.  
@@ -2700,6 +2719,12 @@ Returns the remaining duration of the motion queue.
 %feature("docstring") SimRobotController::setPIDGains "
 
 Sets the PID gains.  
+";
+
+%feature("docstring") SimRobotController::getSensedTorque "
+
+Returns the current \"sensed\" (feedback) torque from the simulator. Note: a
+default robot doesn't have a torque sensor, so this will be 0.  
 ";
 
 %feature("docstring") SimRobotController::addMilestoneLinear "
@@ -2853,9 +2878,12 @@ starting at the current queued end state.
 
 %feature("docstring") SimRobotSensor "
 
-A sensor on a simulated robot. Retrieve this from the controller, using
-:meth:`SimRobotController.getSensor` (), and then use :meth:`getMeasurements` ()
-to get the currently simulated measurement vector.  
+A sensor on a simulated robot. Retrieve one from the controller using
+:meth:`SimRobotController.getSensor` (), or create a new one using
+SimRobotSensor(robotController,name,type)  
+
+Use :meth:`getMeasurements` () to get the currently simulated measurement
+vector.  
 
 Sensors are automatically updated through the :meth:`Simulator.simulate` ()
 call, and :meth:`getMeasurements` () retrieves the updated values. As a result,
@@ -2891,6 +2919,9 @@ Returns the value of the named setting (you will need to manually parse this)
 %feature("docstring") SimRobotSensor::type "
 
 Returns the type of the sensor.  
+";
+
+%feature("docstring") SimRobotSensor::SimRobotSensor "
 ";
 
 %feature("docstring") SimRobotSensor::SimRobotSensor "
@@ -2979,6 +3010,11 @@ Returns the average contact force on object a over the last simulate() call.
 %feature("docstring") Simulator::getActualVelocity "
 
 Returns the current actual velocity of the robot from the simulator.  
+";
+
+%feature("docstring") Simulator::getActualTorque "
+
+Returns the current actual torques on the robot's drivers from the simulator.  
 ";
 
 %feature("docstring") Simulator::getContacts "
@@ -3105,7 +3141,8 @@ Returns the contact force on object a at the last time step. You can set bid to
 
 %feature("docstring") Simulator::getActualTorques "
 
-Returns the current actual torques on the robot's drivers from the simulator.  
+Deprecated: renamed to getActualTorque to be consistent with SimRobotController
+methods.  
 ";
 
 %feature("docstring") Simulator::getTime "
@@ -3299,6 +3336,16 @@ Examples::
     m.vertices = [0,0,0]   #this is an error
     m.vertices += [1,2,3]   #this is also an error  
 
+To get all vertices as a numpy array:  
+
+    verts = np.array(m.vertices).reshape((len(m.vertices)//3,3))  
+
+To get all indices as a numpy array:  
+
+    inds = np.array(m.indices,dtype=np.int32).reshape((len(m.indices)//3,3))  
+
+(Or use the convenience functions in klampt.io.numpy)  
+
 C++ includes: geometry.h
 ";
 
@@ -3339,7 +3386,18 @@ Translates all the vertices by v=v+t.
 %feature("docstring") VolumeGrid "
 
 An axis-aligned volumetric grid, typically a signed distance transform with > 0
-indicating outside and < 0 indicating inside. Can also store an occupancy grid.  
+indicating outside and < 0 indicating inside. Can also store an occupancy grid
+with 1 indicating inside and 0 indicating outside.  
+
+Attributes: bbox (SWIG vector of 6 doubles): contains min and max bounds
+(xmin,ymin,zmin),(xmax,ymax,zmax) dims (SWIG vector of of 3 ints): size of grid
+in each of 3 dimensions values (SWIG vector of doubles): contains a 3D array of
+dims[0]*dims[1]*dims[1] values.  
+
+The cell index (i,j,k) is flattened to i*dims[1]*dims[2] + j*dims[2] + k.  
+
+The array index i is associated to cell index (i/(dims[1]*dims[2]), (i/dims[2])
+% dims[1], idims[2])  
 
 C++ includes: geometry.h
 ";
@@ -3810,7 +3868,7 @@ Args:
 
     g (Geometry3D): the geometry that will be updated
     protocol (str): only \"ros\" accepted for now.
-    name (str): the name of the stream. E.g., ROS topic.
+    name (str): the name of the stream, i.e., ROS topic.
     type (str, optional): If provided, specifies the format of the data
         to be subscribed to. If not, tries to determine the type
         automatically.  
@@ -3819,6 +3877,9 @@ Only ROS point clouds (PointCloud2) are supported for now. Note that you can
 also call `Geometry3D.loadFile(\"ros://[ROS_TOPIC]\")` or
 `Geometry3D.loadFile(\"ros:PointCloud2//[ROS_TOPIC]\")` to accomplish the same
 thing.  
+
+TODO: It has not yet been determined whether this interferes with Rospy, i.e.,
+klampt.io.ros.  
 
 Returns: (bool): True if successful.  
 ";

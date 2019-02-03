@@ -32,6 +32,15 @@
  *     m.vertices = [0,0,0]   #this is an error
  *     m.vertices += [1,2,3]   #this is also an error
  *
+ * To get all vertices as a numpy array:
+ * 
+ *     verts = np.array(m.vertices).reshape((len(m.vertices)//3,3))
+ *
+ * To get all indices as a numpy array:
+ * 
+ *     inds = np.array(m.indices,dtype=np.int32).reshape((len(m.indices)//3,3))
+ *
+ * (Or use the convenience functions in klampt.io.numpy)
  */
 struct TriangleMesh
 {
@@ -64,7 +73,8 @@ struct TriangleMesh
  * indexing via [] are useful. Some other methods like resize() are
  * also provided.  However, you CANNOT set these items via assignment. 
  *
- * Properties are usually lowercase but follow PCL naming convention, and often include:
+ * Properties are usually lowercase but follow PCL naming convention, and often
+ * include:
  *
  * - normal_x, normal_y, normal_z: the outward normal 
  * - rgb, rgba: integer encoding of RGB (24 bit int) or RGBA color (32 bit int) 
@@ -73,10 +83,13 @@ struct TriangleMesh
  * - r,g,b,a: color channels, in range [0,1]
  * - u,v: texture coordinate
  * 
- * Settings are usually lowercase but follow PCL naming convention, and often include:
+ * Settings are usually lowercase but follow PCL naming convention, and often
+ * include:
  *
  * - version: version of the PCL file, typically "0.7" 
  * - id: integer id
+ * - width: the width of a structured point cloud
+ * - height: the height of a structured point cloud
  * - viewpoint: "ox oy oz qw qx qy qz"
  *
  * Examples::
@@ -98,7 +111,16 @@ struct TriangleMesh
  *     print len(pc.properties.size())
  *     #this prints 0; this is the default value added when addPoint is called
  *     print pc.getProperty(1,0) 
+ *
+ * To get all points as an n x 3 numpy array:
+ *
+ *     points = np.array(pc.vertices).reshape((pc.numPoints(),3))
  * 
+ * To get all properties as a n x k numpy array:
+ *
+ *    properties = np.array(pc.properties).reshape((p.numPoints(),p.numProperties()))
+ *
+ * (Or use the convenience functions in klampt.io.numpy)
  */
 struct PointCloud
 {
@@ -164,8 +186,23 @@ struct GeometricPrimitive
   std::vector<double> properties;
 };
 
-/** @brief An axis-aligned volumetric grid, typically a signed distance transform with > 0 
- * indicating outside and < 0 indicating inside.  Can also store an occupancy grid.
+/** @brief An axis-aligned volumetric grid, typically a signed distance
+ * transform with > 0 indicating outside and < 0 indicating inside. 
+ * Can also store an occupancy grid with 1 indicating inside and 0
+ * indicating outside.
+ *
+ * Attributes:
+ *     bbox (SWIG vector of 6 doubles): contains min and max bounds
+ *         (xmin,ymin,zmin),(xmax,ymax,zmax)
+ *     dims (SWIG vector of  of 3 ints): size of grid in each of 3 dimensions
+ *     values (SWIG vector of doubles): contains a 3D array of
+ *          dims[0]*dims[1]*dims[1] values. 
+ * 
+ *          The cell index (i,j,k) is flattened to
+ *          i*dims[1]*dims[2] + j*dims[2] + k.
+ *
+ *          The array index i is associated to cell index
+ *          (i/(dims[1]*dims[2]), (i/dims[2]) % dims[1], i%dims[2])
  */
 class VolumeGrid
 {
@@ -177,9 +214,9 @@ public:
   double get(int i,int j,int k);
   void shift(double dv);
 
-  std::vector<double> bbox; //xmin,ymin,zmin,xmax,ymax,zmax
-  std::vector<int> dims; //size in each of 3 dimensions
-  std::vector<double> values;  //triple index (i,j,k) is flattened to i*dims[1]*dims[2] + j*dims[2] + k
+  std::vector<double> bbox; 
+  std::vector<int> dims;
+  std::vector<double> values; 
 };
 
 /** @brief Configures the _ext distance queries of
@@ -292,8 +329,8 @@ class Geometry3D
   bool isStandalone();
   ///Frees the data associated with this geometry, if standalone 
   void free();
-  ///Returns the type of geometry: TriangleMesh, PointCloud, VolumeGrid, or
-  ///GeometricPrimitive
+  ///Returns the type of geometry: TriangleMesh, PointCloud, VolumeGrid, 
+  ///GeometricPrimitive, or Group
   std::string type();
   ///Returns true if this has no contents (not the same as numElements()==0)
   bool empty();
