@@ -70,7 +70,7 @@ def cartesian_interpolate_linear(robot,a,b,constraints,
 
             * int or str: the specified link's entire pose is constrained
             * IKObjective: the links, constraint types, local positions, and local axes are used as constraints.
-                The world space elements are considered temporary and will change to match the Cartesian trajectory.
+              The world space elements are considered temporary and will change to match the Cartesian trajectory.
             * list of int, list of str, or list of IKObjective: concatenates the specified constraints together
 
         startConfig (optional): either 'robot' (configuration taken from the robot), a configuration, or None (any configuration)
@@ -83,7 +83,7 @@ def cartesian_interpolate_linear(robot,a,b,constraints,
 
     Returns: 
         RobotTrajectory: a configuration space path that interpolates the Cartesian path, or None if no
-            solution can be found.
+        solution can be found.
 
     """
     assert delta > 0,"Spatial resolution must be positive"
@@ -207,7 +207,7 @@ def cartesian_interpolate_linear(robot,a,b,constraints,
             res.milestones[-1] = endConfig
     return res
 
-class BisectNode:
+class _BisectNode:
     def __init__(self,a,b,ua,ub,qa,qb):
         self.a,self.b = a,b
         self.ua,self.ub = ua,ub
@@ -232,7 +232,7 @@ def cartesian_interpolate_bisect(robot,a,b,constraints,
 
             * int or str: the specified link's entire pose is constrained
             * IKObjective: the links, constraint types, local positions, and local axes are used as constraints.
-                The world space elements are considered temporary and will change to match the Cartesian trajectory.
+              The world space elements are considered temporary and will change to match the Cartesian trajectory.
             * list of int, list of str, or list of IKObjective: concatenates the specified constraints together
 
         startConfig (optional): either 'robot' (configuration taken from the robot), a configuration, or None (any configuration)
@@ -246,7 +246,7 @@ def cartesian_interpolate_bisect(robot,a,b,constraints,
 
     Returns: 
         RobotTrajectory: a configuration space path that interpolates the Cartesian path, or None if no
-            solution can be found.
+        solution can be found.
 
     """
     assert delta > 0,"Spatial resolution must be positive"
@@ -283,7 +283,7 @@ def cartesian_interpolate_bisect(robot,a,b,constraints,
     if feasibilityTest is not None and not feasibilityTest(endConfig):
         print "cartesian_interpolate_bisect(): Error: final configuration is infeasible"
         return None
-    root = BisectNode(a,b,0,1,startConfig,endConfig)
+    root = _BisectNode(a,b,0,1,startConfig,endConfig)
     root.d = robot.distance(startConfig,endConfig)
     dtotal = root.d
     dorig = root.d
@@ -322,9 +322,9 @@ def cartesian_interpolate_bisect(robot,a,b,constraints,
         if feasibilityTest and not feasibilityTest(qm):
             print "cartesian_interpolate_bisect(): Violation of feasibility test","at point",um
             return None
-        n.left = BisectNode(n.a,m,n.ua,um,n.qa,qm)
+        n.left = _BisectNode(n.a,m,n.ua,um,n.qa,qm)
         n.left.d = d1
-        n.right = BisectNode(m,n.b,um,n.ub,qm,n.qb)
+        n.right = _BisectNode(m,n.b,um,n.ub,qm,n.qb)
         n.right.d = d2
         if d1 < d2:
             q.append(n.left)
@@ -367,7 +367,7 @@ def cartesian_path_interpolate(robot,path,constraints,
 
             * int or str: the specified link's entire pose is constrained
             * IKObjective: the links, constraint types, local positions, and local axes are used as constraints.
-                The world space elements are considered temporary and will change to match the Cartesian trajectory.
+              The world space elements are considered temporary and will change to match the Cartesian trajectory.
             * list of int, list of str, or list of IKObjective: concatenates the specified constraints together
 
         startConfig (optional): either 'robot' (configuration taken from the robot), a configuration, or None (any configuration)
@@ -382,7 +382,7 @@ def cartesian_path_interpolate(robot,path,constraints,
 
     Returns: 
         RobotTrajectory: a configuration space path that interpolates the Cartesian path, or None if no
-            solution can be found.
+        solution can be found.
 
     """
     assert delta > 0,"Spatial resolution must be positive"
@@ -702,7 +702,7 @@ def cartesian_bump(robot,js_path,constraints,bump_paths,
 
             * int or str: the specified link's entire pose is constrained
             * IKObjective: the links, constraint types, local positions, and local axes are used as constraints.
-                The world space elements are considered temporary and will change to match the Cartesian trajectory.
+              The world space elements are considered temporary and will change to match the Cartesian trajectory.
             * list of int, list of str, or list of IKObjective: concatenates the specified constraints together
 
         bump_paths: one or more transforms or transform paths specifying the world-space relative
@@ -870,11 +870,17 @@ def cartesian_move_to(robot,constraints,
     feasibilityTest=None,
     numSamples=1000,
     maximize=False):
-    """A convenience function that generates a path that performs a linear cartesian interpolation
-    starting from the robot's current configuration and ending at the desired IK constraints.
-    This is a bit more convenient than cartesian_interpolate_linear since you only need to pass in
-    the target objective, rather than the start and end Cartesian parameters as well. Typical calling
-    is path = cartesian_move_to(robot,goal). 
+    """A convenience function that generates a path that performs a linear
+    cartesian interpolation starting from the robot's current configuration
+    and ending at the desired IK constraints.
+
+    This is a bit more convenient than :meth:`cartesian_interpolate_linear`
+    since you only need to pass in the target objective, rather than the
+    start and end Cartesian parameters as well. 
+
+    Usage:
+
+        path = cartesian_move_to(robot,goal). 
 
     Other arguments are equivalent to those in cartesian_interpolate_linear.
     """
