@@ -574,28 +574,43 @@ def from_CameraInfo(ros_ci,klampt_obj):
         raise ValueError("Invalid object type: "+klampt_obj.__class__.__name__)
     return klampt_obj
 
-def to_SensorMsg(klampt_sensor,frame_prefix='klampt',stamp='now'):
-    """Converts a sensor's measurements to a ROS message.
+def to_SensorMsg(klampt_sensor,frame=None,frame_prefix='klampt',stamp='now'):
+    """Converts a sensor's measurements to a ROS message(s).
 
     Special types are CameraSensor and ForceTorqueSensor.
 
     * CameraSensor is converted to up to three messages: CameraInfo,
       Image (rgb, optional), and Image (depth, optional).
-    * ForceTorqueSensor is converted to a WrencStamped.
+    * ForceTorqueSensor is converted to a WrenchStamped.
 
     Generic sensors are converted to a Float32MultiArray.
+
+    Args:
+        klampt_sensor (SimRobotSensor): the sensor
+        frame (str, optional): if given, this is the frame_id used in the 
+            ROS message(s).  Otherwise, the id is determined automatically.
+        frame_prefix (str, optional): if frame is not given, this is the
+            prefix used in the automatic frame_id assignment (see below)
+        stamp (str, float, or rospy.Time, optional): can be 'now', a float,
+            or a rospy.Time.  Will be set in the ROS message header.
+
+    The ROS frame_id will be determined by `frame`, if given, or otherwise
+    it will be set to [frame_prefix]/[robot_name]/[sensor_name].  If
+    frame_prefix is None, then it will be set to [robot_name]/[sensor_name].
     """
+    if frame is None:
+        frame = ""
+        if frame_prefix is not None:
+            frame = frame_prefix + '/'
+        frame = frame + klampt_sensor.robot.getName()
+        link = int(klampt_sensor.getSetting("link"))
+        frame += '/' + klampt_sensor.robot.link(link).getName()
+
     if klampt_sensor.type() == 'CameraSensor':
         import numpy 
         import sys
 
         camera = klampt_sensor
-        frame = ""
-        if self.frame_prefix is not None:
-            frame = frame_prefix + '/'
-        frame = frame + camera.robot.getName()
-        link = int(camera.getSetting("link"))
-        frame += '/' + camera.robot.link(link).getName()
         
         ci = to_CameraInfo(camera)
         ci.frame_id = frame
@@ -633,13 +648,6 @@ def to_SensorMsg(klampt_sensor,frame_prefix='klampt',stamp='now'):
             msgs.append(msg)
         return msgs
     elif klampt_sensor.type() == 'ForceTorqueSensor':
-        frame = ""
-        if frame_prefix is not None:
-            frame = frame_prefix + '/'
-        frame = frame + klampt_sensor.robot.getName()
-        link = int(klampt_sensor.getSetting("link"))
-        frame += '/' + klampt_sensor.robot.link(link).getName()
-
         measurements = klampt_sensor.getMeasurements()
         if len(measurements)==0:
             measurements = [0.0]*6
@@ -732,10 +740,21 @@ def toMsg(klampt_obj,*args,**kwargs):
 
 class KlamptROSPublisher(rospy.Publisher):
     def __init__(self,converter,*args,**kwargs):
+        """You shouldn't need to use this explicitly. Use :meth:`publisher` or
+        :meth:`object_publisher` instead.
+        """
         self.converter=converter
         self.seq_no = 0
         rospy.Publisher.__init__(self,*args,**kwargs)
+
     def publish(self,klampt_obj,header=None):
+        """Publishes a Klamp't object to the advertised topic.
+
+        Args:
+            klampt_obj: A Klamp't object of the appropriate type
+            header (Header, optional): a ROS header that overrides the
+                default which stamps with the current time.
+        """
         self.seq_no += 1
         rosobj = self.converter(klampt_obj)
         if hasattr(rosobj,'header'):
@@ -745,12 +764,17 @@ class KlamptROSPublisher(rospy.Publisher):
                 now = rospy.Time.now()
                 rosobj.header.seq = self.seq_no
                 rosobj.header.stamp = now        
+                rosobj.header.frame_id = '0'
         rospy.Publisher.publish(self,rosobj)
 
 class KlamptROSCameraPublisher:
-    def __init__(self,topic,frame_prefix,*args,**kwargs):
+    def __init__(self,topic,frame_id,frame_prefix,*args,**kwargs):
+        """You shouldn't need to use this explicitly. Use 
+        :meth:`object_publisher` instead.
+        """
         self.topic = topic
         self.frame_prefix = frame_prefix
+        self.frame_id = frame_id
         self.rgbpubinfo = None
         self.rgbpub = None
         self.dpubinfo = None
@@ -760,8 +784,28 @@ class KlamptROSCameraPublisher:
         self.num_msgs = 0
 
     def publish(self,camera):
+        """Publishes a Klamp't camera data to the topics:
+
+        - [topic]/rgb/camera_info
+        - [topic]/rgb/image_rect_color
+        - [topic]/depth_registered/camera_info
+        - [topic]/depth_registered/image_rect
+
+        Args:
+            camera (SimRobotSensor): an updated sensor of 'CameraSensor' type.
+        """
+        
         assert camera.type() == 'CameraSensor'
-        msgs = to_SensorMsg(camera)
+        if self.frame_id is None:
+            frame = ""
+            if self.frame_prefix is not None:
+                frame = frame_prefix + '/'
+            frame = frame + camera.robot.getName()
+            link = int(camera.getSetting("link"))
+            frame += '/' + camera.robot.link(link).getName()
+            self.frame_id = frame
+
+        msgs = to_SensorMsg(camera,frame=self.frame_id)
         if len(msgs) <= 1:
             #no measurements
             return
@@ -788,10 +832,12 @@ class KlamptROSCameraPublisher:
 
 def publisher_SimRobotSensor(topic,klampt_sensor,convert_kwargs=None,**kwargs):
     if klampt_sensor.type() == 'CameraSensor':
+        frame_id = None
         frame_prefix = None
-        if convert_kwargs is not None and 'frame_prefix' in convert_kwargs:
-            frame_prefix = convert_kwargs['frame_prefix']
-        return KlamptROSCameraPublisher(topic,frame_prefix,**kwargs)
+        if convert_kwargs is not None:
+            frame_id = convert_kwargs.get('frame',None)  
+            frame_prefix = convert_kwargs.get('frame_prefix',None)
+        return KlamptROSCameraPublisher(topic,frame_id,frame_prefix,**kwargs)
     elif klampt_sensor.type() == 'ForceTorqueSensor':
         ros_type = 'WrenchStamped'
     else:
@@ -806,7 +852,6 @@ def publisher(topic,klampt_type,convert_kwargs=None,ros_type=None,**kwargs):
     Returns:
         KlamptROSPublisher
     """
-    from klampt.robotsim import SimRobotSensor
     if convert_kwargs is None:
         convert_kwargs = dict()
     if not isinstance(klampt_type,str):
@@ -830,7 +875,7 @@ def object_publisher(topic,klampt_object,convert_kwargs=None,**kwargs):
     compatible Klampt objects).
 
     SimRobotSensors (particularly, cameras) can be published to multiple
-    topics.
+    topics of the form [topic]/[subtopic].
 
     Returns:
         KlamptROSPublisher
