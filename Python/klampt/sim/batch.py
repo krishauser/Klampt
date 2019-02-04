@@ -209,8 +209,10 @@ def monteCarloSim(world,duration,initialConditionSamplers,N,returnItems,
     Returns:
         list: contains N pairs (initCond,returnVal) containing each simulation
         result:
+
             * initCond: the sampled initial condition
             * returnVal: the return value from doSim().
+            
     """
     print "klampt.batch.monteCarloSim(): Running",N,"simulations..."
     res = []
