@@ -202,6 +202,8 @@ class QtGLWindow(QGLWidget):
     def close(self):
         """Qt thread should call close() after this widget should be closed down to stop
         any existing Qt callbacks."""
+        if not self.initialized:
+            return
         print("######### QGLWidget close ###############")
         self.idleTimer.stop()
         self.idleTimer.deleteLater()

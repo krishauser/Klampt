@@ -855,6 +855,16 @@ class TriangleMesh(_object):
         m.vertices = [0,0,0]   #this is an error
         m.vertices += [1,2,3]   #this is also an error  
 
+    To get all vertices as a numpy array:  
+
+        verts = np.array(m.vertices).reshape((len(m.vertices)//3,3))  
+
+    To get all indices as a numpy array:  
+
+        inds = np.array(m.indices,dtype=np.int32).reshape((len(m.indices)//3,3))  
+
+    (Or use the convenience functions in klampt.io.numpy)  
+
     C++ includes: geometry.h
 
     """
@@ -928,6 +938,16 @@ class TriangleMesh(_object):
             m.vertices = [0,0,0]   #this is an error
             m.vertices += [1,2,3]   #this is also an error  
 
+        To get all vertices as a numpy array:  
+
+            verts = np.array(m.vertices).reshape((len(m.vertices)//3,3))  
+
+        To get all indices as a numpy array:  
+
+            inds = np.array(m.indices,dtype=np.int32).reshape((len(m.indices)//3,3))  
+
+        (Or use the convenience functions in klampt.io.numpy)  
+
         C++ includes: geometry.h
 
         """
@@ -980,6 +1000,8 @@ class PointCloud(_object):
 
     *   version: version of the PCL file, typically "0.7"  
     *   id: integer id  
+    *   width: the width of a structured point cloud  
+    *   height: the height of a structured point cloud  
     *   viewpoint: "ox oy oz qw qx qy qz"  
 
     Examples::  
@@ -1001,6 +1023,16 @@ class PointCloud(_object):
         print len(pc.properties.size())
         #this prints 0; this is the default value added when addPoint is called
         print pc.getProperty(1,0)  
+
+    To get all points as an n x 3 numpy array:  
+
+        points = np.array(pc.vertices).reshape((pc.numPoints(),3))  
+
+    To get all properties as a n x k numpy array:  
+
+    properties = np.array(pc.properties).reshape((p.numPoints(),p.numProperties()))  
+
+    (Or use the convenience functions in klampt.io.numpy)  
 
     C++ includes: geometry.h
 
@@ -1255,6 +1287,8 @@ class PointCloud(_object):
 
         *   version: version of the PCL file, typically "0.7"  
         *   id: integer id  
+        *   width: the width of a structured point cloud  
+        *   height: the height of a structured point cloud  
         *   viewpoint: "ox oy oz qw qx qy qz"  
 
         Examples::  
@@ -1276,6 +1310,16 @@ class PointCloud(_object):
             print len(pc.properties.size())
             #this prints 0; this is the default value added when addPoint is called
             print pc.getProperty(1,0)  
+
+        To get all points as an n x 3 numpy array:  
+
+            points = np.array(pc.vertices).reshape((pc.numPoints(),3))  
+
+        To get all properties as a n x k numpy array:  
+
+        properties = np.array(pc.properties).reshape((p.numPoints(),p.numProperties()))  
+
+        (Or use the convenience functions in klampt.io.numpy)  
 
         C++ includes: geometry.h
 
@@ -1402,7 +1446,18 @@ class VolumeGrid(_object):
 
 
     An axis-aligned volumetric grid, typically a signed distance transform with > 0
-    indicating outside and < 0 indicating inside. Can also store an occupancy grid.  
+    indicating outside and < 0 indicating inside. Can also store an occupancy grid
+    with 1 indicating inside and 0 indicating outside.  
+
+    Attributes: bbox (SWIG vector of 6 doubles): contains min and max bounds
+    (xmin,ymin,zmin),(xmax,ymax,zmax) dims (SWIG vector of of 3 ints): size of grid
+    in each of 3 dimensions values (SWIG vector of doubles): contains a 3D array of
+    dims[0]*dims[1]*dims[1] values.  
+
+    The cell index (i,j,k) is flattened to i*dims[1]*dims[2] + j*dims[2] + k.  
+
+    The array index i is associated to cell index (i/(dims[1]*dims[2]), (i/dims[2])
+    % dims[1], idims[2])  
 
     C++ includes: geometry.h
 
@@ -1484,7 +1539,18 @@ class VolumeGrid(_object):
 
 
         An axis-aligned volumetric grid, typically a signed distance transform with > 0
-        indicating outside and < 0 indicating inside. Can also store an occupancy grid.  
+        indicating outside and < 0 indicating inside. Can also store an occupancy grid
+        with 1 indicating inside and 0 indicating outside.  
+
+        Attributes: bbox (SWIG vector of 6 doubles): contains min and max bounds
+        (xmin,ymin,zmin),(xmax,ymax,zmax) dims (SWIG vector of of 3 ints): size of grid
+        in each of 3 dimensions values (SWIG vector of doubles): contains a 3D array of
+        dims[0]*dims[1]*dims[1] values.  
+
+        The cell index (i,j,k) is flattened to i*dims[1]*dims[2] + j*dims[2] + k.  
+
+        The array index i is associated to cell index (i/(dims[1]*dims[2]), (i/dims[2])
+        % dims[1], idims[2])  
 
         C++ includes: geometry.h
 
@@ -1774,8 +1840,8 @@ class Geometry3D(_object):
 
 
 
-        Returns the type of geometry: TriangleMesh, PointCloud, VolumeGrid, or
-        GeometricPrimitive.  
+        Returns the type of geometry: TriangleMesh, PointCloud, VolumeGrid,
+        GeometricPrimitive, or Group.  
 
         """
         return _robotsim.Geometry3D_type(self)
@@ -4057,29 +4123,31 @@ class RobotModelDriver(_object):
         return _robotsim.RobotModelDriver_getAffectedLink(self)
 
 
-    def getAffectedLinks(self, links):
+    def getAffectedLinks(self):
         """
-        getAffectedLinks(RobotModelDriver self, intVector links)
+        getAffectedLinks(RobotModelDriver self)
 
 
 
-        Returns the driver's affected links.  
+        Returns the indices of the driver's affected links.  
 
         """
-        return _robotsim.RobotModelDriver_getAffectedLinks(self, links)
+        return _robotsim.RobotModelDriver_getAffectedLinks(self)
 
 
-    def getAffineCoeffs(self, scale, offset):
+    def getAffineCoeffs(self):
         """
-        getAffineCoeffs(RobotModelDriver self, doubleVector scale, doubleVector offset)
+        getAffineCoeffs(RobotModelDriver self)
 
 
 
         For "affine" links, returns the scale and offset of the driver value mapped to
         the world.  
 
+        Returns: tuple: a pair (scale,offset), each of length len(getAffectedLinks()).  
+
         """
-        return _robotsim.RobotModelDriver_getAffineCoeffs(self, scale, offset)
+        return _robotsim.RobotModelDriver_getAffineCoeffs(self)
 
 
     def setValue(self, val):
@@ -6752,9 +6820,12 @@ class SimRobotSensor(_object):
     """
 
 
-    A sensor on a simulated robot. Retrieve this from the controller, using
-    :meth:`SimRobotController.getSensor` (), and then use :meth:`getMeasurements` ()
-    to get the currently simulated measurement vector.  
+    A sensor on a simulated robot. Retrieve one from the controller using
+    :meth:`SimRobotController.getSensor` (), or create a new one using
+    SimRobotSensor(robotController,name,type)  
+
+    Use :meth:`getMeasurements` () to get the currently simulated measurement
+    vector.  
 
     Sensors are automatically updated through the :meth:`Simulator.simulate` ()
     call, and :meth:`getMeasurements` () retrieves the updated values. As a result,
@@ -6789,14 +6860,15 @@ class SimRobotSensor(_object):
     __getattr__ = lambda self, name: _swig_getattr(self, SimRobotSensor, name)
     __repr__ = _swig_repr
 
-    def __init__(self, robot, sensor):
+    def __init__(self, *args):
         """
         __init__(SimRobotSensor self, Robot * robot, SensorBase * sensor) -> SimRobotSensor
+        __init__(SimRobotSensor self, SimRobotController robot, char const * name, char const * type) -> SimRobotSensor
 
 
 
         """
-        this = _robotsim.new_SimRobotSensor(robot, sensor)
+        this = _robotsim.new_SimRobotSensor(*args)
         try:
             self.this.append(this)
         except Exception:
@@ -7048,6 +7120,18 @@ class SimRobotController(_object):
         return _robotsim.SimRobotController_getCommandedVelocity(self)
 
 
+    def getCommandedTorque(self):
+        """
+        getCommandedTorque(SimRobotController self)
+
+
+
+        Returns the current commanded (feedforward) torque.  
+
+        """
+        return _robotsim.SimRobotController_getCommandedTorque(self)
+
+
     def getSensedConfig(self):
         """
         getSensedConfig(SimRobotController self)
@@ -7070,6 +7154,19 @@ class SimRobotController(_object):
 
         """
         return _robotsim.SimRobotController_getSensedVelocity(self)
+
+
+    def getSensedTorque(self):
+        """
+        getSensedTorque(SimRobotController self)
+
+
+
+        Returns the current "sensed" (feedback) torque from the simulator. Note: a
+        default robot doesn't have a torque sensor, so this will be 0.  
+
+        """
+        return _robotsim.SimRobotController_getSensedTorque(self)
 
 
     def sensor(self, *args):
@@ -7861,13 +7958,26 @@ class Simulator(_object):
         return _robotsim.Simulator_getActualVelocity(self, robot)
 
 
+    def getActualTorque(self, robot):
+        """
+        getActualTorque(Simulator self, int robot)
+
+
+
+        Returns the current actual torques on the robot's drivers from the simulator.  
+
+        """
+        return _robotsim.Simulator_getActualTorque(self, robot)
+
+
     def getActualTorques(self, robot):
         """
         getActualTorques(Simulator self, int robot)
 
 
 
-        Returns the current actual torques on the robot's drivers from the simulator.  
+        Deprecated: renamed to getActualTorque to be consistent with SimRobotController
+        methods.  
 
         """
         return _robotsim.Simulator_getActualTorques(self, robot)
@@ -8191,7 +8301,7 @@ def SubscribeToStream(*args):
 
         g (Geometry3D): the geometry that will be updated
         protocol (str): only "ros" accepted for now.
-        name (str): the name of the stream. E.g., ROS topic.
+        name (str): the name of the stream, i.e., ROS topic.
         type (str, optional): If provided, specifies the format of the data
             to be subscribed to. If not, tries to determine the type
             automatically.  
@@ -8200,6 +8310,9 @@ def SubscribeToStream(*args):
     also call `Geometry3D.loadFile("ros://[ROS_TOPIC]")` or
     `Geometry3D.loadFile("ros:PointCloud2//[ROS_TOPIC]")` to accomplish the same
     thing.  
+
+    TODO: It has not yet been determined whether this interferes with Rospy, i.e.,
+    klampt.io.ros.  
 
     Returns: (bool): True if successful.  
 

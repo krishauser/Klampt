@@ -2,19 +2,19 @@ from ..model.contact import ContactPoint,Hold
 from ..model.trajectory import Trajectory,RobotTrajectory,SO3Trajectory,SE3Trajectory
 from ..model.multipath import MultiPath
 from ..math import vectorops,so3,se3
-from ..robotsim import WorldModel,RobotModel,RobotModelLink,RigidObjectModel,TerrainModel,IKObjective,Geometry3D,TriangleMesh,PointCloud,GeometricPrimitive
-import collections
+from ..robotsim import WorldModel,RobotModel,RobotModelLink,RigidObjectModel,TerrainModel,IKObjective,Geometry3D,TriangleMesh,PointCloud,GeometricPrimitive,VolumeGrid
 
-_knownTypes = ['Value','Vector2','Vector3','Matrix3','Point','Rotation','RigidTransform','Vector','Config',
+_knownTypes = set(['Value','Vector2','Vector3','Matrix3','Point','Rotation','RigidTransform','Vector','Config',
                 'IntArray','StringArray',
                 'Configs','Trajectory','LinearPath','MultiPath',
                 'IKGoal','ContactPoint','Hold',
-                'TriangleMesh','PointCloud','VolumeGrid','GeometricPrimitive',
-                'WorldModel','RobotModel','RigidObjectModel','TerrainModel']
+                'TriangleMesh','PointCloud','VolumeGrid','GeometricPrimitive','Geometry3D',
+                'WorldModel','RobotModel','RigidObjectModel','TerrainModel'])
 
 def knownTypes():
-    """Returns all known Klampt types"""
-    return _knownTypes[:]
+    """Returns a set of all known Klampt types"""
+    global _knownTypes
+    return _knownTypes
 
 def objectToTypes(object,world=None):
     """Returns a string defining the type of the given Python Klamp't object.
@@ -32,6 +32,14 @@ def objectToTypes(object,world=None):
         return 'MultiPath'
     elif isinstance(object,GeometricPrimitive):
         return 'GeometricPrimitive'
+    elif isinstance(object,TriangleMesh):
+        return 'TriangleMesh'
+    elif isinstance(object,PointCloud):
+        return 'PointCloud'
+    elif isinstance(object,VolumeGrid):
+        return 'VolumeGrid'
+    elif isinstance(object,Geometry3D):
+        return ['Geometry3D',object.type()]
     elif isinstance(object,WorldModel):
         return 'WorldModel'
     elif isinstance(object,RobotModel):
@@ -40,10 +48,11 @@ def objectToTypes(object,world=None):
         return 'RigidObjectModel'
     elif isinstance(object,TerrainModel):
         return 'TerrainModel'
-    elif hasattr(object,'type'):
-        if isinstance(object.type, collections.Callable):
-            return object.type()
-        return object.type
+    #this was here for Geometry3D, but might be mistaken with a SimRobotSensor.
+    #elif hasattr(object,'type'):
+    #    if callable(object.type):
+    #        return object.type()
+    #    return object.type
     elif hasattr(object,'__iter__'):
         if hasattr(object[0],'__iter__'):
             #list of lists or tuples
@@ -128,16 +137,19 @@ def make(type,object=None):
         return MultiPath()
     elif type == 'Value':
         return 0
+    elif type == 'Geometry3D':
+        return Geometry3D()
     elif type == 'TriangleMesh':
-        return Geometry3D(TriangleMesh())
+        return TriangleMesh()
     elif type == 'PointCloud':
-        return Geometry3D(PointCloud())
+        return PointCloud()
     elif type == 'GeometricPrimitive':
         p = GeometricPrimitive()
         p.setPoint((0,0,0))
-        return Geometry3D(p)
+        return p
     elif type == 'VolumeGrid':
-        raise NotImplementedError("Can't create empty volume grid yet")
+        v = VolumeGrid()
+        return v
     elif isinstance(object,WorldModel):
         return WorldModel()
     elif isinstance(object,(RobotModel,RigidObjectModel,TerrainModel)):

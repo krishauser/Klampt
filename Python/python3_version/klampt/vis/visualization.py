@@ -332,7 +332,7 @@ _vis = None
 #the GLPluginProgram of the currently active window.  Accepts _vis as plugin or other user-defined plugins as well
 _frontend = GLPluginProgram()
 #the window title for the next created window
-_window_title = "Klamp't visualizer"
+_window_title = "Klamp't visualizer (%s)"%(sys.argv[0],)
 #a list of WorldModel's in the current window.  A world cannot be used in multiple simultaneous
 #windows in GLUT.  If a world is reused with a different window, its display lists will be refreshed.
 #Note: must be proxies to allow for deletion
@@ -3158,9 +3158,11 @@ if _PyQtAvailable:
                     #here's the crash -- above line deleted the old dialog, which for some reason kills the widget
                     if dlg != None:
                         w.glwindow.show()
+                        _in_app_thread = True
                         _globalLock.release()
                         res = dlg.exec_()
                         _globalLock.acquire()
+                        _in_app_thread = False
                     print("#########################################")
                     print("klampt.vis: Dialog done on window",i)
                     print("#########################################")

@@ -43,6 +43,37 @@ class GLViewport:
     def contains(self,x,y):
         return x >= self.x and y >= self.y and x < self.x + self.w and y < self.y + self.h
 
+    def setTransform(self,T,convention='standard'):
+        """Sets the pose of the camera, with T given in world coordinates.
+
+        If convention = 'openGL', the Z axis of T is the *backward* direction of
+        the camera, with X pointing *up* and Y pointing to the *right*.
+
+        If convention = 'standard', the Z axis of T is the *forward* direction of
+        the camera, with X pointing *down* and Y pointing to the *right*
+        """
+        if convention == 'openGL':
+            self.camera.set_matrix(T)
+        else:
+            xzflip = [-1,0,0,  0,1,0,  0,0,-1]
+            self.camera.set_matrix((so3.mul(T[0],xzflip),T[1]))
+
+    def getTransform(self,convention='standard'):
+        """Gets the pose of the camera, with T given in world coordinates.
+
+        If convention = 'openGL', the Z axis of T is the *backward* direction of
+        the camera, with X pointing *up* and Y pointing to the *right*.
+
+        If convention = 'standard', the Z axis of T is the *forward* direction of
+        the camera, with X pointing *down* and Y pointing to the *right*
+        """
+        if convention == 'openGL':
+            return self.camera.matrix()
+        else:
+            T = self.camera.matrix()
+            xzflip = [-1,0,0,  0,1,0,  0,0,-1]
+            return (so3.mul(T[0],xzflip),T[1])
+
     def fit(self,center,radius):
         """Fits the viewport to an object filling a sphere of a certain center
         and radius"""

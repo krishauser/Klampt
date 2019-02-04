@@ -97,51 +97,17 @@ def _get_world(world):
             return w
     return world
 
-extensionToType = {'.config':'Config',
-                   '.configs':'Configs',
-                   '.tri':'Geometry3D',
-                   '.off':'Geometry3D',
-                   '.stl':'Geometry3D',
-                   '.ply':'Geometry3D',
-                   '.wrl':'Geometry3D',
-                   '.dae':'Geometry3D',
-                   '.poly':'Geometry3D',
-                   '.geom':'Geometry3D',
-                   '.pcd':'Geometry3D',
-                   '.vector3':'Vector3',
-                   '.ikgoal':'IKGoal',
-                   '.xform':'RigidTransform',
-                   '.path':'Trajectory',
-                   '.hold':'Hold',
-                   '.stance':'Stance',
-                   '.grasp':'Grasp'}
-
-typeToExtension = dict((v,k) for (k,v) in list(extensionToType.items()))
-
 def knownExtensions():
-    """Returns all known file extensions"""
-    return list(extensionToType.keys())
+    """Returns all known resource file extensions"""
+    return list(loader.extensionToType.keys())
 
 def knownTypes():
-    """Returns all known types"""
-    return list(typeToExtension.keys())+['WorldModel','MultiPath','Point','Rotation','Matrix3','ContactPoint']
+    """Returns all known resource types"""
+    return list(loader.typeToExtension.keys())+['WorldModel','MultiPath','Point','Rotation','Matrix3','ContactPoint']
 
 def visualEditTypes():
     """Returns types that can be visually edited"""
     return ['Config','Configs','Trajectory','Vector3','Point','RigidTransform','Rotation','WorldModel']
-
-
-def filenameToType(name):
-    fileName, fileExtension = os.path.splitext(name)
-    if fileExtension in extensionToType:
-        return extensionToType[fileExtension]
-    elif fileExtension == '.xml':
-        return 'xml'  #dynamic loading
-    elif fileExtension == '.json':
-        return 'json'  #dynamic loading
-    else:
-        raise RuntimeError("Cannot determine type of resource from name "+name)
-
 
 def get(name,type='auto',directory=None,default=None,doedit='auto',description=None,editor='visual',world=None,referenceObject=None,frame=None):
     """Retrieve a resource of the given name from the current resources
@@ -200,26 +166,12 @@ def get(name,type='auto',directory=None,default=None,doedit='auto',description=N
     if directory==None:
         directory = getDirectory()
     if type == 'auto':
-        type = filenameToType(name)
+        type = loader.filenameToType(name)
     value = None
     try:
         fn = os.path.join(directory,name)
         try:
-            if type == 'xml':
-                value = WorldModel()
-                res = value.readFile(fn)
-                if not res:
-                    try:
-                        value = loader.load('MultiPath',fn)
-                    except Exception as e:
-                        raise
-            elif type == 'json':
-                f = open(fn,'r')
-                text = ''.join(f.readlines())
-                f.close()
-                value = loader.fromJson(text,type=type)
-            else:
-                value = loader.load(type,fn)
+            value = loader.load(type,fn)
         except IOError:
             raise
         except Exception as e:
@@ -275,7 +227,7 @@ def set(name,value,type='auto',directory=None):
     """
     if type == 'auto':
         try:
-            type = filenameToType(name)
+            type = loader.filenameToType(name)
         except Exception:
             type = types.objectToTypes(value)
             if isinstance(type,(list,tuple)):
@@ -285,15 +237,11 @@ def set(name,value,type='auto',directory=None):
     fn = os.path.join(directory,name)
     _ensure_dir(fn)
     if type == 'xml':
-        if hasattr(value,'saveFile'):
-            return value.saveFile(fn)
-        raise NotImplementedError("TODO: save other xml files from Python API")
-    elif type == 'json':
-        f = open(fn,'w')
-        f.write(loader.toJson(value,type=type))
-        f.write('\n')
-        f.close()
-        return True
+        #loader can now save some xml files
+        return loader.save(value,'auto',fn)
+        #if hasattr(value,'saveFile'):
+        #    return value.saveFile(fn)
+        #raise NotImplementedError("TODO: save other xml files from Python API")
     else:
         return loader.save(value,type,fn)
 
@@ -359,10 +307,7 @@ def load(type=None,directory=None):
     if directory==None:
         fg.directory = getDirectory()    
     if type is not None:
-        extensions=[]
-        for (k,v) in extensionToType.items():
-            if v == type:
-                extensions.append(k)
+        extensions=[v for v in loader.typeToExtensions[type]]
         extensions.append('.json')
         fg.filetypes.append((type,extensions))
 
@@ -406,13 +351,12 @@ def save(value,type='auto',directory=None):
         fg.directory = getDirectory()    
     if type == 'auto':
         typelist = types.objectToTypes(value)
+        if isinstance(typelist,str):
+            typelist = [typelist]
     else:
         typelist = [type] 
     for type in typelist:
-        extensions=[]
-        for (k,v) in extensionToType.items():
-            if v == type:
-                extensions.append(k)
+        extensions=[v for v in loader.typeToExtensions[type]]
         extensions.append('.json')
         print("Available extensions for objects of type",type,":",extensions)
         fg.filetypes.append((type,extensions))
