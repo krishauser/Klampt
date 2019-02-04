@@ -5,7 +5,7 @@
 :: (assumes zip and pscp command line tools are available.  See the GnuWin32 zip tool and PuTTy)
 
 :: configuration variables
-SET klamptversion=0.8.1
+SET klamptversion=0.8.2
 :: dependency libraries may be kept back to a prior version
 SET klamptdepversion=0.8.0
 ::    this is used for Python build (VS 2015)
