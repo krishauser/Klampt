@@ -38,7 +38,7 @@ klampt.io.ros module
     :show-inheritance:
 
 klampt.io.numpy_convert module
--------------------------
+------------------------------
 
 .. automodule:: klampt.io.numpy_convert
     :members:
@@ -46,7 +46,7 @@ klampt.io.numpy_convert module
     :show-inheritance:
 
 klampt.io.open3d_convert module
--------------------------
+-------------------------------
 
 .. automodule:: klampt.io.open3d_convert
     :members:
