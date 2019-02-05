@@ -13,6 +13,10 @@
 using namespace Math3D;
 using namespace std;
 
+//defined in XmlWorld.cpp
+string ResolveFileReference(const string& path,const string& fn);
+string MakeURLLocal(const string& url,const char* url_resolution_path="klampt_downloads");
+
 RigidObject::RigidObject()
 {
   T.setIdentity();
@@ -29,6 +33,7 @@ RigidObject::RigidObject()
 
 bool RigidObject::Load(const char* fn)
 {
+  string localpath = MakeURLLocal(fn);
   const char* ext=FileExtension(fn);
   if(ext && strcmp(ext,"obj")==0) {
     SimpleFile f;
@@ -47,14 +52,14 @@ bool RigidObject::Load(const char* fn)
     f.AllowItem("kStiffness");
     f.AllowItem("kDamping");
     f.AllowItem("autoMass");
-    if(!f.Load(fn)) return false;
+    if(!f.Load(localpath.c_str())) return false;
 
     if(!f.CheckSize("mesh",1,fn)) return false;
     if(!f.CheckType("mesh",PrimitiveValue::String,fn)) return false;
 
     string fnPath = GetFilePath(fn);
     geomFile = f["mesh"][0].AsString();
-    string geomfn = fnPath + geomFile;
+    string geomfn = ResolveFileReference(fnPath,geomFile);
     if(!LoadGeometry(geomfn.c_str()))
       return false;
     f.erase("mesh");
@@ -66,13 +71,13 @@ bool RigidObject::Load(const char* fn)
       vector<double> scale = f.AsDouble("geomscale");
       if(scale.size()==1) { geomT(0,0)=geomT(1,1)=geomT(2,2)=scale[0]; }
       else if(scale.size()==3) {
-	geomT(0,0)=scale[0];
-	geomT(1,1)=scale[1];
-	geomT(2,2)=scale[2];
+        geomT(0,0)=scale[0];
+        geomT(1,1)=scale[1];
+        geomT(2,2)=scale[2];
       }
       else {
-	fprintf(stderr,"Invalid number of geomscale components in %s\n",fn);
-	return false;
+        fprintf(stderr,"Invalid number of geomscale components in %s\n",fn);
+        return false;
       }
       f.erase("geomscale");
     }
@@ -93,22 +98,22 @@ bool RigidObject::Load(const char* fn)
       if(!f.CheckType("T",PrimitiveValue::Double,fn)) return false;
       vector<double> items = f.AsDouble("T");
       if(items.size()==12) { //read 4 columns of 3, row major then translation, just like RigidTransform
-	Vector3 x(items[0],items[3],items[6]);
-	Vector3 y(items[1],items[4],items[7]);
-	Vector3 z(items[2],items[5],items[8]);
-	Vector3 t(items[9],items[10],items[11]);
-	T.R.set(x,y,z); T.t=t;
+        Vector3 x(items[0],items[3],items[6]);
+        Vector3 y(items[1],items[4],items[7]);
+        Vector3 z(items[2],items[5],items[8]);
+        Vector3 t(items[9],items[10],items[11]);
+        T.R.set(x,y,z); T.t=t;
       }
       else if(items.size()==16) { //read 4 rows of a 4 x 4 transform matrix
-	Vector3 x(items[0],items[4],items[8]);
-	Vector3 y(items[1],items[5],items[9]);
-	Vector3 z(items[2],items[6],items[10]);
-	Vector3 t(items[3],items[7],items[11]);
-	T.R.set(x,y,z); T.t=t;
+        Vector3 x(items[0],items[4],items[8]);
+        Vector3 y(items[1],items[5],items[9]);
+        Vector3 z(items[2],items[6],items[10]);
+        Vector3 t(items[3],items[7],items[11]);
+        T.R.set(x,y,z); T.t=t;
       }
       else {
-	fprintf(stderr,"Invalid number of transformation components in %s\n",fn);
-	return false;
+        fprintf(stderr,"Invalid number of transformation components in %s\n",fn);
+        return false;
       }
       f.erase("T");
     }
@@ -155,13 +160,13 @@ bool RigidObject::Load(const char* fn)
       vector<double> items = f.AsDouble("inertia");
       if(items.size() == 3) inertia.setDiagonal(Vector3(items[0],items[1],items[2]));
       else if(items.size() == 9) {
-	inertia(0,0)=items[0]; 	inertia(0,1)=items[1]; 	inertia(0,2)=items[2];
-	inertia(1,0)=items[3]; 	inertia(1,1)=items[4]; 	inertia(1,2)=items[5];
-	inertia(2,0)=items[6]; 	inertia(2,1)=items[7]; 	inertia(2,2)=items[8];
+        inertia(0,0)=items[0];  inertia(0,1)=items[1];  inertia(0,2)=items[2];
+        inertia(1,0)=items[3];  inertia(1,1)=items[4];  inertia(1,2)=items[5];
+        inertia(2,0)=items[6];  inertia(2,1)=items[7];  inertia(2,2)=items[8];
       }
       else {
-	fprintf(stderr,"Invalid number of inertia matrix components in %s\n",fn);
-	return false;
+        fprintf(stderr,"Invalid number of inertia matrix components in %s\n",fn);
+        return false;
       }
       f.erase("inertia");
     }
@@ -195,14 +200,14 @@ bool RigidObject::Load(const char* fn)
     }
     if(f.count("autoMass")!=0) {
       if(hasCOM) //com specified, compute inertia about given com
-	inertia = Inertia(*geometry,com,mass);
+        inertia = Inertia(*geometry,com,mass);
       else
-	SetMassFromGeometry(mass);
+        SetMassFromGeometry(mass);
       f.erase("autoMass");
     }
     if(!f.empty()) {
       for(map<string,vector<PrimitiveValue> >::const_iterator i=f.entries.begin();i!=f.entries.end();i++)
-	fprintf(stderr,"Unknown entry %s in object file %s\n",i->first.c_str(),fn);
+        fprintf(stderr,"Unknown entry %s in object file %s\n",i->first.c_str(),fn);
     }
     return true;
   }

@@ -26,7 +26,12 @@ class RobotWorld
   typedef shared_ptr<GLDraw::GeometryAppearance> AppearancePtr;
 
   RobotWorld();
+  ///Loads from an XML file.  fn also be a URL if libcurl support is
+  ///enabled.
   bool LoadXML(const char* fn);
+  ///Saves into an XML file, and all referenced objects are placed in elementDir.
+  ///If elementDir==NULL, they will be saved to a folder that has the same base
+  ///name as fn.
   bool SaveXML(const char* fn,const char* elementDir=NULL);
   void InitCollisions();
   void UpdateGeometry();
@@ -75,8 +80,9 @@ class RobotWorld
   Robot* RayCastRobot(const Ray3D& r,int& body,Vector3& localpt);
   RigidObject* RayCastObject(const Ray3D& r,Vector3& localpt);
 
-  ///Loads an element from the file, using its extension to figure out what
-  ///type it is.
+  ///Loads an element from the file fn, using its extension to figure out
+  ///what type it is.  fn also be a URL if libcurl support is
+  ///enabled.
   int LoadElement(const string& fn);
   ///Returns true if the given extension is loadable as an element
   bool CanLoadElementExt(const char* ext) const;

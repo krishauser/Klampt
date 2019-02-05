@@ -25,6 +25,10 @@ DEFINE_LOGGER(Robot)
 DEFINE_LOGGER(RobParser)
 DEFINE_LOGGER(URDFParser)
 
+//defined in XmlWorld.cpp
+string ResolveFileReference(const string& path,const string& fn);
+string MakeURLLocal(const string& url,const char* url_resolution_path="klampt_downloads");
+
 template <class Val>
 class Voting
 {
@@ -175,21 +179,24 @@ bool Robot::Load(const char* fn) {
   bool res = false;
   const char* ext = FileExtension(fn);
   if(ext == NULL) {
-        LOG4CXX_ERROR(GET_LOGGER(Robot),"Robot::Load("<<fn <<"): no extension, file must have .rob or .urdf extension");
-   }
+    LOG4CXX_ERROR(GET_LOGGER(Robot),"Robot::Load("<<fn <<"): no extension, file must have .rob or .urdf extension");
+  }
   else if (0 == strcmp(ext, "rob")) {
     res = LoadRob(fn);
-  } else if (0 == strcmp(ext, "urdf")) {
+  }
+  else if (0 == strcmp(ext, "urdf")) {
     res = LoadURDF(fn);
   }
   else {
-        LOG4CXX_ERROR(GET_LOGGER(Robot),"Robot::Load("<<fn<<"): unknown extenion "<<ext <<", only .rob or .urdf supported");
-    }
+    LOG4CXX_ERROR(GET_LOGGER(Robot),"Robot::Load("<<fn<<"): unknown extenion "<<ext <<", only .rob or .urdf supported");
+  }
   return res;
 }
 
 bool Robot::LoadRob(const char* fn) {
   string path = GetFilePath(fn);
+  string localfile = MakeURLLocal(fn);
+  if(localfile.empty()) return false;
   links.resize(0);
   parents.resize(0);
   qMin.clear();
@@ -231,7 +238,7 @@ bool Robot::LoadRob(const char* fn) {
   vector<int> geomTransformIndex;
   vector<Matrix4> geomTransform;
 
-  ifstream in(fn, ios::in);
+  ifstream in(localfile.c_str(), ios::in);
   if (!in) {
     LOG4CXX_INFO(GET_LOGGER(RobParser),"Unable to read robot file "<< fn<<", file does not exist or is not available for reading");
     return false;
@@ -297,8 +304,7 @@ bool Robot::LoadRob(const char* fn) {
         else if (stemp == "p")
           jointType.push_back(RobotLink3D::Prismatic);
         else {
-          printf("Invalid joint type %s on line %d\n", stemp.c_str(),
-              lineno);
+          LOG4CXX_ERROR(GET_LOGGER(RobParser),"Invalid joint type "<<stemp<<" on line "<<lineno);
           return false;
         }
       }
@@ -457,7 +463,7 @@ bool Robot::LoadRob(const char* fn) {
         ss >> m(3,0) >> m(3,1) >> m(3,2) >> m(3,3);
         geomTransform.push_back(m);
       }else{
-        printf("Invalid geomTransform on line %d\n", lineno);
+        LOG4CXX_ERROR(GET_LOGGER(RobParser),"Invalid geomTransform on line "<<lineno);
       }
     }else if (name == "joint") {
       RobotJoint tempJoint;
@@ -545,7 +551,7 @@ bool Robot::LoadRob(const char* fn) {
           tempDriver.type = RobotJointDriver::Affine;
           ss >> itemp;
           if (itemp <= 0) {
-            printf("Invalid number of joint indices %d\n", itemp);
+            LOG4CXX_ERROR(GET_LOGGER(RobParser),"Invalid number of joint indices "<<itemp);
             return false;
           }
           tempDriver.linkIndices.resize(itemp);
@@ -590,14 +596,13 @@ bool Robot::LoadRob(const char* fn) {
       if (ss)
         drivers.push_back(tempDriver);
       else {
-        fprintf(stderr, "   Failure reading driver on line %d\n", lineno);
+        LOG4CXX_ERROR(GET_LOGGER(RobParser),"   Failure reading driver on line " << lineno);
         return false;
       }
     } else if (name == "mount") {
       ss >> itemp;
       if (!SafeInputString(ss, stemp)) {
-        fprintf(stderr, "   Error reading mount file name on line %d\n",
-            lineno);
+        LOG4CXX_ERROR(GET_LOGGER(RobParser),"   Error reading mount file name on line "<<lineno);
         return false;
       }
       mountLinks.push_back(itemp);
@@ -649,9 +654,13 @@ bool Robot::LoadRob(const char* fn) {
         const char* ext = FileExtension(file.c_str());
         if(ext && 0==strcmp(ext,"xml")) {
           //prepend the robot path
-          string fn = path + file;
+          string fn = ResolveFileReference(path,file);
+          fn = MakeURLLocal(fn);
+          if(fn.empty()) {
+            LOG4CXX_ERROR(GET_LOGGER(RobParser),"     error downloading "<<stemp<<" file");
+          }
           if(!GetFileContents(fn.c_str(),properties[stemp])) {
-            LOG4CXX_ERROR(GET_LOGGER(RobParser),"     Unable to read "<<stemp.c_str()<<" property from file "<<fn.c_str());
+            LOG4CXX_ERROR(GET_LOGGER(RobParser),"     Unable to read "<<stemp<<" property from file "<<fn);
             return false;
           }
       }
@@ -661,13 +670,13 @@ bool Robot::LoadRob(const char* fn) {
         TiXmlElement e(stemp.c_str());
         ss >> e;
         if(!ss) 
-          LOG4CXX_ERROR(GET_LOGGER(RobParser),"     Property "<<stemp.c_str()<<" is not valid XML");
+          LOG4CXX_ERROR(GET_LOGGER(RobParser),"     Property "<<stemp<<" is not valid XML");
       }
       }
       else 
         properties[stemp] = value; 
     } else {
-      LOG4CXX_ERROR(GET_LOGGER(RobParser), "   Invalid robot property "<<name.c_str()<<" on line "<<lineno<< "");
+      LOG4CXX_ERROR(GET_LOGGER(RobParser), "   Invalid robot property "<<name<<" on line "<<lineno<< "");
       return false;
     }
     if (ss.bad()) {
@@ -952,7 +961,7 @@ bool Robot::LoadRob(const char* fn) {
       continue;
     }
     geomFiles[i] = geomFn[i];
-    geomFn[i] = path + geomFn[i];
+    geomFn[i] = ResolveFileReference(path,geomFn[i]);
     if(Robot::disableGeometryLoading) continue;
     if (!LoadGeometry(i, geomFn[i].c_str())) {
       LOG4CXX_ERROR(GET_LOGGER(RobParser),"   Unable to load link "<<i<<" geometry file "<<geomFn[i]);
@@ -978,7 +987,7 @@ bool Robot::LoadRob(const char* fn) {
 
   //process transformation of geometry shapes
   if(geomTransformIndex.size() != geomTransform.size()){
-    printf("   Size of geomTransformIndex and geomTransform size not match!");
+    LOG4CXX_ERROR(GET_LOGGER(RobParser),"   Size of geomTransformIndex and geomTransform size not match!");
     return false;
   }
   for(size_t i = 0; i < geomTransformIndex.size(); i++){
@@ -1124,7 +1133,7 @@ bool Robot::LoadRob(const char* fn) {
       //its a robot, delay til later
     }
     else {
-      string fn = path + mountFiles[i];
+      string fn = ResolveFileReference(path,mountFiles[i]);
       LOG4CXX_INFO(GET_LOGGER(RobParser),"   Mounting geometry file " << mountFiles[i]);
       //mount a triangle mesh on top of another triangle mesh
       ManagedGeometry loader;
@@ -1210,7 +1219,7 @@ bool Robot::LoadRob(const char* fn) {
   for (size_t i = 0; i < mountLinks.size(); i++) {
     const char* ext = FileExtension(mountFiles[i].c_str());
     if(ext && (0==strcmp(ext,"rob") || 0==strcmp(ext,"urdf"))) {
-      string fn = path + mountFiles[i];
+      string fn = ResolveFileReference(path,mountFiles[i]);
       LOG4CXX_INFO(GET_LOGGER(RobParser),"   Mounting subchain file " << mountFiles[i]);
       Robot subchain;
       if (!subchain.Load(fn.c_str())) {
@@ -1881,7 +1890,7 @@ void Robot::Mount(int link, const Robot& subchain, const RigidTransform& T,const
       TiXmlElement e("sensors");
       ss >> e;
       if(!ss) {
-        printf("Robot::Mount: Warning, mounted robot sensors couldn't be loaded %s\n",i->second.c_str());
+        LOG4CXX_WARN(GET_LOGGER(Robot),"Robot::Mount: Warning, mounted robot sensors couldn't be loaded "<<i->second.c_str());
         continue;
       }
       //go through and modify all links
@@ -2411,11 +2420,12 @@ void Robot::GetDriverJacobian(int d, Vector& J) {
 
 bool Robot::LoadURDF(const char* fn)
 {
-  string s(fn);
-  string path = GetFilePath(s);
+  string localfile = MakeURLLocal(fn);
+  if(localfile.empty()) return false;
+  string path = GetFilePath(fn);
 
   //Get content from the Willow Garage parser
-  std::shared_ptr<urdf::ModelInterface> parser = urdf::parseURDF(s);
+  std::shared_ptr<urdf::ModelInterface> parser = urdf::parseURDF(localfile);
   if(!parser) {
         LOG4CXX_ERROR(GET_LOGGER(URDFParser),"Robot::LoadURDF: error parsing XML");
     return false;
@@ -2538,9 +2548,14 @@ bool Robot::LoadURDF(const char* fn)
         const char* ext = FileExtension(file.c_str());
         if(ext && 0==strcmp(ext,"xml")) {
           //prepend the robot path
-          string fn = path + file;
+          string fn = ResolveFileReference(path,file);
+          fn = MakeURLLocal(fn);
+          if(fn.empty()) {
+            LOG4CXX_ERROR(GET_LOGGER(URDFParser),"     Error loading file "<<prop<<" from file "<<fn);
+            return false;
+          }
           if(!GetFileContents(fn.c_str(),properties[prop])) {
-            fprintf(stderr,"     Unable to read %s property from file %s\n",prop,fn.c_str());
+            LOG4CXX_ERROR(GET_LOGGER(URDFParser),"     Unable to read "<<prop<<" property from file "<<fn);
             return false;
           }
       }
@@ -2953,30 +2968,39 @@ bool Robot::LoadURDF(const char* fn)
     if (!linkNode->geomName.empty() && !Robot::disableGeometryLoading) {
       string fn;
       geomFiles[link_index] = linkNode->geomName;
-      fn = path + linkNode->geomName;
+      fn = ResolveFileReference(path,linkNode->geomName);
       if(FileUtils::Exists(fn.c_str())) {
         if (!LoadGeometry(link_index, fn.c_str())) {
-          LOG4CXX_ERROR(GET_LOGGER(URDFParser), "Failed loading geometry " << linkNode->geomName
-          << " for link " << link_index << "");
-          //TEMP
+          LOG4CXX_ERROR(GET_LOGGER(URDFParser), "Failed loading geometry " << linkNode->geomName << " for link " << link_index << "");
+          //LOG4CXX_INFO
           LOG4CXX_ERROR(GET_LOGGER(URDFParser), "Temporarily ignoring error...");
           //return false;
         }
       }
       else if(FileUtils::Exists(geomFiles[link_index].c_str())) {
         if (!LoadGeometry(link_index, geomFiles[link_index].c_str())) {
-          LOG4CXX_ERROR(GET_LOGGER(URDFParser), "Failed loading geometry " << linkNode->geomName
-          << " for link " << link_index << "");
+          LOG4CXX_ERROR(GET_LOGGER(URDFParser), "Failed loading geometry " << linkNode->geomName  << " for link " << link_index << "");
           //TEMP
-          LOG4CXX_ERROR(GET_LOGGER(URDFParser), "Temporarily ignoring error...");
+          LOG4CXX_INFO(GET_LOGGER(URDFParser), "Temporarily ignoring error...");
           //return false;
         }
       }
       else {
-        LOG4CXX_ERROR(GET_LOGGER(URDFParser), "Could not load geometry " << linkNode->geomName <<", in relative or absolute paths");
-        //TEMP
-        LOG4CXX_ERROR(GET_LOGGER(URDFParser), "Temporarily ignoring error...");
-        //return false;
+        localfile = MakeURLLocal(fn);
+        if(localfile == fn) {
+          LOG4CXX_ERROR(GET_LOGGER(URDFParser), "Could not load geometry " << linkNode->geomName <<", in relative or absolute paths");
+          //TEMP
+          LOG4CXX_INFO(GET_LOGGER(URDFParser), "Temporarily ignoring error...");
+          //return false;
+        }
+        else {
+          //try loiading from url
+          if(!LoadGeometry(link_index,fn.c_str())) {
+            LOG4CXX_ERROR(GET_LOGGER(URDFParser), "Failed loading geometry " << linkNode->geomName << " for link " << link_index << "");
+            //TEMP
+            LOG4CXX_INFO(GET_LOGGER(URDFParser), "Temporarily ignoring error...");
+          }
+        }
       }
     }
     if(!linkNode->geomData.empty()) {
@@ -2986,7 +3010,7 @@ bool Robot::LoadURDF(const char* fn)
       if(!geom.Load(ss)) {
         LOG4CXX_ERROR(GET_LOGGER(URDFParser), "Could not load primitive geometry from data" << linkNode->geomData);
         //TEMP
-        LOG4CXX_ERROR(GET_LOGGER(URDFParser), "Temporarily ignoring error...");
+        LOG4CXX_INFO(GET_LOGGER(URDFParser), "Temporarily ignoring error...");
       }
       else {
         if(link_index >= (int)geomManagers.size())

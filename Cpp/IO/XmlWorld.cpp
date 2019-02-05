@@ -2,10 +2,83 @@
 #include "View/Texturizer.h"
 #include <KrisLibrary/utils/stringutils.h>
 #include <KrisLibrary/utils/fileutils.h>
+#include <KrisLibrary/utils/ioutils.h>
+#include <KrisLibrary/Logger.h>
 #include <fstream>
+
+DECLARE_LOGGER(XmlParser);
 
 ///defined in XmlODE.cpp
 int SafeQueryFloat(TiXmlElement* e,const char* attr,double& out);
+
+///returns a resolved path for a file referred to within another file.
+///path is the path containing the referencing file, and fn is an internal file reference
+string ResolveFileReference(const string& path,const string& fn)
+{
+  string res;
+  if(fn.empty()) return "";
+  if(fn[0]=='/') {
+    //root of filesystem
+    return fn; 
+  }
+  if(fn.find("://") != string::npos) {  //URL
+    return fn;
+  }
+  if(path.find("://") != string::npos) { //source is a URL
+    string relfile = ReducePath(JoinPath(path,fn));
+    return relfile;
+  }
+  string relpath = JoinPath(path,fn);
+  if(FileUtils::Exists(relpath.c_str())) return relpath;
+  return fn;
+}
+
+///Resolves URLs to a local file, if needed. "" is returned on failure.
+string MakeURLLocal(const string& url,const char* url_resolution_path="klampt_downloads")
+{
+  if(url.find("://") == string::npos) return url;
+  //use CURL and download to a local directory
+  string tempfile = GetFileName(url);
+  if(url_resolution_path) {
+    FileUtils::MakeDirectory(url_resolution_path);
+    tempfile = JoinPath(url_resolution_path,tempfile);
+  }
+  //LOG4CXX_INFO(GET_LOGGER(XmlParser),"Downloading "<<url<<" to "<<tempfile<<"...");
+  if(!GetURLDownload(url.c_str(),tempfile.c_str())) {
+    //LOG4CXX_INFO(GET_LOGGER(XmlParser),"Download of "<<url<<" failed.");
+    return "";
+  }
+  return tempfile;
+}
+
+template <class T>
+bool LoadObjectFile(T& obj,const string& path,const string& fn,const char* type)
+{
+  string sfn = ResolveFileReference(path,fn);
+  if(sfn.empty()) {
+    LOG4CXX_ERROR(GET_LOGGER(XmlParser),type<<": invalid file reference "<<fn);
+    return false;
+  }
+  if(obj.Load(sfn.c_str())) 
+    return true;
+  LOG4CXX_ERROR(GET_LOGGER(XmlParser),type<<": error loading from file "<<sfn[0]);
+  return false;
+}
+
+template <class T>
+bool LoadObjectGeometryFile(T& obj,const string& path,const string& fn,const char* type)
+{
+  string sfn = ResolveFileReference(path,fn);
+  if(sfn.empty()) {
+    LOG4CXX_ERROR(GET_LOGGER(XmlParser),type<<": invalid file reference "<<fn);
+    return false;
+  }
+  if(obj.LoadGeometry(sfn.c_str())) 
+    return true;
+  LOG4CXX_ERROR(GET_LOGGER(XmlParser),type<<": error loading from file "<<sfn[0]);
+  return false;
+}
+
 
 ///reads a transformation matrix from attributes of an XML element
 bool ReadTransform(TiXmlElement* e,RigidTransform& xform)
@@ -94,7 +167,7 @@ bool ReadTransform(TiXmlElement* e,Matrix4& xform)
   if(scale) {
     for(int i=0;i<3;i++)
       for(int j=0;j<3;j++)
-	xform(i,j)*=s[j];
+        xform(i,j)*=s[j];
     return true;
   }
   return transform;
@@ -109,40 +182,43 @@ bool XmlRobot::GetRobot(Robot& robot)
 {
   const char* fn = e->Attribute("file");
   if(!fn) {
-    fprintf(stderr,"XmlRobot: element does not contain file attribute\n");
+    LOG4CXX_ERROR(GET_LOGGER(XmlParser),"XmlRobot: element does not contain file attribute");
     return false;
   }
-  string sfn = path + string(fn);
-  if(!robot.Load(sfn.c_str())) {
-    fprintf(stderr,"XmlRobot: error loading %s, trying absolute path\n",sfn.c_str());
-    //try absolute path
-    if(!robot.Load(fn)) {
-      fprintf(stderr,"XmlRobot: error loading %s\n",sfn.c_str());
-      return false;
-    }
-    else
-      fprintf(stderr,"XmlRobot: absolute path succeeded\n");
-  }
+
+  if(!LoadObjectFile(robot,path,fn,"XmlRobot")) return false;
+
   Vector q;
   if(e->QueryValueAttribute("config",&q)==TIXML_SUCCESS) {
     if(q.n != robot.q.n) {
-      fprintf(stderr,"%d!=%d\n",q.n,robot.q.n);
-      fprintf(stderr,"XmlRobot: element's configuration doesnt match size with the robot\n");
+      LOG4CXX_ERROR(GET_LOGGER(XmlParser),"XmlRobot: element's configuration doesnt match size with the robot");
+      LOG4CXX_ERROR(GET_LOGGER(XmlParser),q.n<<"!="<<robot.q.n);
       return false;
     }
     robot.UpdateConfig(q);
   }
   if(e->Attribute("configfile")!= NULL) {
-    ifstream in (e->Attribute("configfile"),ios::in);
-    if(!in) {
-      fprintf(stderr,"XmlRobot: could not open robot config file %s\n",e->Attribute("configfile"));
+    const char* fn = e->Attribute("configfile");
+    Vector q;
+    auto str = ResolveFileReference(path,fn);
+    auto localfile = MakeURLLocal(str);
+    if(!localfile.empty()) {
+      ifstream in (localfile.c_str(),ios::in);
+      if(in) {
+        in >> q;
+      }
+      else {
+        LOG4CXX_ERROR(GET_LOGGER(XmlParser),"XmlRobot: could not open robot config file "<<fn);
+        return false;
+      }
+    }
+    else {
+      LOG4CXX_ERROR(GET_LOGGER(XmlParser),"XmlRobot: could not open robot config file "<<fn);
       return false;
     }
-    Vector q;
-    in >> q;
     if(q.n != robot.q.n) {
-      fprintf(stderr,"%d!=%d\n",q.n,robot.q.n);
-      fprintf(stderr,"XmlRobot: configuration file %s vector  doesnt match size with the robot\n",e->Attribute("configfile"));
+      LOG4CXX_ERROR(GET_LOGGER(XmlParser),"XmlRobot: configuration file "<<fn<<" vector doesnt match size with the robot");
+      LOG4CXX_ERROR(GET_LOGGER(XmlParser),q.n<<"!="<<robot.q.n);
       return false;
     }
     robot.UpdateConfig(q);
@@ -163,7 +239,7 @@ bool XmlRobot::GetRobot(Robot& robot)
   if(ReadTransform(e,T)) {
     for(size_t i=0;i<robot.links.size();i++)
       if(robot.parents[i] == -1) 
-	robot.links[i].T0_Parent = T*robot.links[i].T0_Parent;
+        robot.links[i].T0_Parent = T*robot.links[i].T0_Parent;
     robot.UpdateFrames();
   }
 
@@ -187,30 +263,15 @@ bool XmlRigidObject::GetRigidObject(RigidObject& obj)
   obj.kDamping=Inf;
 
   const char* fn = e->Attribute("file");
-  if(fn) {
-    string sfn = path + string(fn);
-    if(!obj.Load(sfn.c_str())) {
-      fprintf(stderr,"XmlRigidObject: error loading %s, trying absolute path\n",sfn.c_str());
-      if(!obj.Load(fn)) {
-	fprintf(stderr,"XmlRigidObject: error loading obj file %s\n",sfn.c_str());
-	return false;
-      }
-      else
-	fprintf(stderr,"XmlRigidObject: absolute path succeeded\n");
-    }
-  }
+  if(!LoadObjectFile(obj,path,fn,"XmlRigidObject")) return false;
+
   TiXmlElement* geom=e->FirstChildElement("geometry");
   if(geom) {
     const char* fn = geom->Attribute("file");
     if(!fn)
       fn = geom->Attribute("mesh");
     if(fn) {
-      obj.geomFile = fn;
-      string sfn = path + obj.geomFile;
-      if(!obj.LoadGeometry(sfn.c_str())) {
-        fprintf(stderr,"XmlRigidObject: error loading geometry from %s\n",sfn.c_str());
-        return false;
-      }
+      if(!LoadObjectGeometryFile(obj,path,fn,"XmlRigidObject")) return false;
     }
     Matrix4 xform;
     if(ReadTransform(geom,xform)) {
@@ -222,7 +283,7 @@ bool XmlRigidObject::GetRigidObject(RigidObject& obj)
     }
   }
   if(obj.geometry->Empty()) {
-    fprintf(stderr,"XmlRigidObject: element does not contain geometry attribute\n");
+    LOG4CXX_ERROR(GET_LOGGER(XmlParser),"XmlRigidObject: element does not contain geometry attribute");
     return false;
   }
 
@@ -270,19 +331,10 @@ bool XmlTerrain::GetTerrain(Terrain& env)
 {
   const char* fn = e->Attribute("file");
   if(!fn) {
-    fprintf(stderr,"XmlTerrain: element does not contain file attribute\n");
+    LOG4CXX_ERROR(GET_LOGGER(XmlParser),"XmlTerrain: element does not contain file attribute");
     return false;
   }
-  string sfn = path + string(fn);
-  if(!env.Load(sfn.c_str())) {
-    fprintf(stderr,"XmlTerrain: error loading %s, trying absolute path\n",sfn.c_str());
-    if(!env.Load(fn)) {
-      fprintf(stderr,"XmlTerrain: error loading %s\n",sfn.c_str());
-      return false;
-    }
-    else
-      fprintf(stderr,"XmlTerrain: absolute path succeeded\n");
-  }
+  if(!LoadObjectFile(env,path,fn,"XmlTerrain")) return false;
 
   Real kf;
   if(e->QueryValueAttribute("kFriction",&kf)==TIXML_SUCCESS) {
@@ -323,38 +375,38 @@ class XmlAppearance
     if(e->Attribute("texture")) {
       tex.texture = e->Attribute("texture");
       if(0==strcmp(e->Attribute("texture"),"checker")) {
-  tex.texCoords = Texturizer::XYTexCoords;
+        tex.texCoords = Texturizer::XYTexCoords;
       }
       else if(0==strcmp(e->Attribute("texture"),"noise")) {
-  tex.texCoords = Texturizer::XYTexCoords;
+        tex.texCoords = Texturizer::XYTexCoords;
       }
       else if(0==strcmp(e->Attribute("texture"),"gradient")) {
-  tex.texCoords = Texturizer::ZTexCoord;
-  tex.texCoordAutoScale = true;
-  geom.Appearance()->texWrap = false;
+        tex.texCoords = Texturizer::ZTexCoord;
+        tex.texCoordAutoScale = true;
+        geom.Appearance()->texWrap = false;
       }
       else if(0==strcmp(e->Attribute("texture"),"colorgradient")) {
-  tex.texCoords = Texturizer::ZTexCoord;
-  tex.texCoordAutoScale = true;
-  geom.Appearance()->texWrap = false;
+        tex.texCoords = Texturizer::ZTexCoord;
+        tex.texCoordAutoScale = true;
+        geom.Appearance()->texWrap = false;
       }
       else {
-  tex.texture = path+string(e->Attribute("texture"));
-  tex.texCoordAutoScale = true;
+        tex.texture = path+string(e->Attribute("texture"));
+        tex.texCoordAutoScale = true;
       }
       if(e->Attribute("texture_projection")) {
         if(0==strcmp(e->Attribute("texture_projection"),"z")) {
-    tex.texCoords = Texturizer::ZTexCoord;
+          tex.texCoords = Texturizer::ZTexCoord;
         }
         else if(0==strcmp(e->Attribute("texture_projection"),"xy")) {
-    tex.texCoords = Texturizer::XYTexCoords;
+          tex.texCoords = Texturizer::XYTexCoords;
         }
         else if(0==strcmp(e->Attribute("texture_projection"),"conformal")) {
-    tex.texCoords = Texturizer::ParameterizedTexCoord;
+          tex.texCoords = Texturizer::ParameterizedTexCoord;
         }
         else {
-    printf("Unsupported value for texture_projection: %s\n",e->Attribute("texture_projection"));
-    tex.texCoords = Texturizer::XYTexCoords;
+          LOG4CXX_WARN(GET_LOGGER(XmlParser),"Unsupported value for texture_projection: "<<e->Attribute("texture_projection"));
+          tex.texCoords = Texturizer::XYTexCoords;
         }
       }
       tex.Set(geom);
@@ -394,7 +446,9 @@ XmlWorld::XmlWorld()
 
 bool XmlWorld::Load(const string& fn)
 {
-  if(!doc.LoadFile(fn.c_str())) return false;
+  string localfile = MakeURLLocal(fn);
+  if(localfile.empty()) return false;
+  if(!doc.LoadFile(localfile.c_str())) return false;
   return Load(doc.RootElement(),GetFilePath(fn));
 }
 
@@ -430,9 +484,9 @@ bool XmlWorld::GetWorld(RobotWorld& world)
   e = GetElement(goal);
   goalCount = 0;
   while(e) {
-	  if(e->QueryValueAttribute("position",&goals[goalCount])==TIXML_SUCCESS)
-		  goalCount++;
-	  e=e->NextSiblingElement(goal);
+          if(e->QueryValueAttribute("position",&goals[goalCount])==TIXML_SUCCESS)
+                  goalCount++;
+          e=e->NextSiblingElement(goal);
   }
   //parse robots
   e = GetElement(robot);
@@ -442,7 +496,7 @@ bool XmlWorld::GetWorld(RobotWorld& world)
     if(name) sname=name;
     Robot* r = new Robot;
     if(!XmlRobot(e,path).GetRobot(*r)) {
-      printf("XmlWorld: Unable to load robot %s\n",sname.c_str());
+      LOG4CXX_ERROR(GET_LOGGER(XmlParser),"XmlWorld: Unable to load robot "<<sname);
       delete r;
       return false;
     }
@@ -457,7 +511,7 @@ bool XmlWorld::GetWorld(RobotWorld& world)
     if(name) sname=name;
     RigidObject* o = new RigidObject;
     if(!XmlRigidObject(e,path).GetRigidObject(*o)) {
-      printf("XmlWorld: Unable to load rigid object %s\n",sname.c_str());
+      LOG4CXX_ERROR(GET_LOGGER(XmlParser),"XmlWorld: Unable to load rigid object "<<sname);
       delete o;
       return false;
     }
@@ -466,7 +520,7 @@ bool XmlWorld::GetWorld(RobotWorld& world)
     if(!d) d = e->FirstChildElement(appearance);
     if(d) {
       if(!XmlAppearance(d,path).Get(world.rigidObjects[i]->geometry)) {
-	printf("XmlWorld: Warning, unable to load geometry appearance %s\n",sname.c_str());
+        LOG4CXX_ERROR(GET_LOGGER(XmlParser),"XmlWorld: Warning, unable to load geometry appearance "<<sname);
       }
     }
     e = e->NextSiblingElement(object);
@@ -478,7 +532,7 @@ bool XmlWorld::GetWorld(RobotWorld& world)
     string sname = "Terrain";
     Terrain* t = new Terrain;
     if(!XmlTerrain(e,path).GetTerrain(*t)) {
-      printf("XmlWorld: Unable to load terrain %s\n",sname.c_str());
+      LOG4CXX_WARN(GET_LOGGER(XmlParser),"XmlWorld: Unable to load terrain "<<sname);
       delete t;
       return false;
     }
@@ -493,7 +547,7 @@ bool XmlWorld::GetWorld(RobotWorld& world)
     if(!d) d = e->FirstChildElement(appearance);
     if(d) {
       if(!XmlAppearance(d,path).Get(*world.terrains[i])) {
-	printf("XmlWorld: Warning, unable to load terrain appearance %s\n",sname.c_str());
+        LOG4CXX_WARN(GET_LOGGER(XmlParser),"XmlWorld: Warning, unable to load terrain appearance "<<sname);
       }
     }
     e = e->NextSiblingElement(terrain);
@@ -573,10 +627,10 @@ bool XmlWorld::Save(RobotWorld& world,const string& fn,string itempath)
     StripExtension(relpath);
     relpath = relpath + "/";
   }
-  printf("World::Save(): Saving world item files to %s\n",itempath.c_str());
+  LOG4CXX_INFO(GET_LOGGER(XmlParser),"World::Save(): Saving world item files to "<<itempath);
   if(!FileUtils::IsDirectory(itempath.c_str())) {
     if(!FileUtils::MakeDirectoryRecursive(itempath.c_str())) {
-      printf("World::Save(): could not make directory %s for world items\n",itempath.c_str());
+      LOG4CXX_ERROR(GET_LOGGER(XmlParser),"World::Save(): could not make directory "<<itempath<<" for world items");
       return false;
     }
   }
@@ -643,7 +697,7 @@ bool XmlWorld::Save(RobotWorld& world,const string& fn,string itempath)
         if(!FileUtils::IsDirectory(((relpath)+geomdir).c_str()))
           FileUtils::MakeDirectory((relpath+geomdir).c_str());
         world.robots[i]->geomFiles[j] = geomdir + "/" + FileUtils::SafeFileName(world.robots[i]->linkNames[j]) + DefaultFileExtension(*world.robots[i]->geomManagers[j]);
-        printf("  Saving modified geometry for link %s to %s\n",world.robots[i]->linkNames[j].c_str(),(relpath + world.robots[i]->geomFiles[j]).c_str());
+        LOG4CXX_INFO(GET_LOGGER(XmlParser),"  Saving modified geometry for link "<<world.robots[i]->linkNames[j]<<" to "<<relpath + world.robots[i]->geomFiles[j]);
         world.robots[i]->geomManagers[j]->Save((relpath + world.robots[i]->geomFiles[j]).c_str());
       }
     }
@@ -663,7 +717,7 @@ bool XmlWorld::Save(RobotWorld& world,const string& fn,string itempath)
       if(!FileUtils::IsDirectory((relpath+geomdir).c_str()))
         FileUtils::MakeDirectory((relpath+geomdir).c_str());
       world.rigidObjects[i]->geomFile = geomdir + "/" + FileUtils::SafeFileName(world.rigidObjects[i]->name) + DefaultFileExtension(*world.rigidObjects[i]->geometry);
-      printf("  Saving modified geometry for rigid object %s to %s\n",world.rigidObjects[i]->name.c_str(),(relpath + world.rigidObjects[i]->geomFile).c_str());
+      LOG4CXX_INFO(GET_LOGGER(XmlParser),"  Saving modified geometry for rigid object "<<world.rigidObjects[i]->name<<" to "<<relpath + world.rigidObjects[i]->geomFile);
       world.rigidObjects[i]->geometry->Save((relpath + world.rigidObjects[i]->geomFile).c_str());
     }
   }
@@ -682,29 +736,29 @@ bool XmlWorld::Save(RobotWorld& world,const string& fn,string itempath)
       if(!FileUtils::IsDirectory((relpath+geomdir).c_str()))
         FileUtils::MakeDirectory((relpath+geomdir).c_str());
       world.terrains[i]->geomFile = geomdir + "/" + FileUtils::SafeFileName(world.terrains[i]->name) + DefaultFileExtension(*world.terrains[i]->geometry);
-      printf("  Saving modified geometry for terrain %s to %s\n",world.terrains[i]->name.c_str(),(relpath + world.terrains[i]->geomFile).c_str());
+      LOG4CXX_INFO(GET_LOGGER(XmlParser),"  Saving modified geometry for terrain "<<world.terrains[i]->name<<" to "<<relpath + world.terrains[i]->geomFile);
       world.terrains[i]->geometry->Save((relpath + world.terrains[i]->geomFile).c_str());
     }
   }
 
   for(size_t i=0;i<world.robots.size();i++) {
-    printf("  Saving robot to %s\n",(itempath+robotFileNames[i]).c_str());
+    LOG4CXX_INFO(GET_LOGGER(XmlParser),"  Saving robot to "<<itempath+robotFileNames[i]);
     if(!world.robots[i]->Save((itempath + robotFileNames[i]).c_str())) {
-      printf("  Robot saving failed.\n");
+      LOG4CXX_WARN(GET_LOGGER(XmlParser),"  Robot saving failed.");
       return false;
     }
   }
   for(size_t i=0;i<world.rigidObjects.size();i++) {
-    printf("  Saving rigid object to %s\n",(itempath+objectFileNames[i]).c_str());
+    LOG4CXX_INFO(GET_LOGGER(XmlParser),"  Saving rigid object to "<<itempath+objectFileNames[i]);
     if(!world.rigidObjects[i]->Save((itempath + objectFileNames[i]).c_str())) {
-      printf("  Rigid object saving failed.\n");
+      LOG4CXX_WARN(GET_LOGGER(XmlParser),"  Rigid object saving failed.");
       return false;
     }
   }
   for(size_t i=0;i<world.terrains.size();i++) {
-    printf("  Saving terrain to %s\n",(itempath+terrainFileNames[i]).c_str());
+    LOG4CXX_INFO(GET_LOGGER(XmlParser),"  Saving terrain to "<<itempath+terrainFileNames[i]);
     if(!world.terrains[i]->Save((itempath + terrainFileNames[i]).c_str())) {
-      printf("  Terrain saving failed.\n");
+      LOG4CXX_WARN(GET_LOGGER(XmlParser),"  Terrain saving failed.");
       return false;
     }
   }
@@ -734,6 +788,6 @@ bool XmlWorld::Save(RobotWorld& world,const string& fn,string itempath)
   fprintf(out,"</world>\n");
   fclose(out);
   if(geomErrors)
-    printf("World::Save(): warning: geometry files may not be saved properly\n");
+    LOG4CXX_WARN(GET_LOGGER(XmlParser),"World::Save(): warning: geometry files may not be saved properly");
   return true; 
 }

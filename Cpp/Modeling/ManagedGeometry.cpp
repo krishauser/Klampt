@@ -9,6 +9,10 @@ using namespace std;
 
 #define CACHE_DEBUG 0
 
+//defined in XmlWorld.cpp
+string ResolveFileReference(const string& path,const string& fn);
+string MakeURLLocal(const string& url,const char* url_resolution_path="klampt_downloads");
+
 GeometryManager::GeometryManager()
 {
 
@@ -125,7 +129,7 @@ bool ManagedGeometry::Load(const string& filename)
 
   if(LoadNoCache(filename)) {  
 #if CACHE_DEBUG
-    printf("ManagedGeometry: adding %s to cache.\n",filename.c_str());
+    LOG4CXX_INFO(KrisLibrary::logger(),"ManagedGeometry: adding "<<filename<<" to cache");
 #endif
     cacheKey = filename;
     manager.cache[filename].geoms.push_back(this);
@@ -172,7 +176,13 @@ bool ManagedGeometry::LoadNoCache(const string& filename)
     if(Geometry::AnyGeometry3D::CanLoadExt(ext)) {
       Timer timer;
       geometry = make_shared<Geometry::AnyCollisionGeometry3D>();
-      if(!geometry->Load(fn)) {
+      string localfile = MakeURLLocal(fn);
+      if(localfile.empty()) {
+        LOG4CXX_WARN(KrisLibrary::logger(),"ManagedGeometry: Error downloading geometry file "<<fn);
+        geometry = NULL;
+        return false;
+      }
+      if(!geometry->Load(localfile.c_str())) {
         LOG4CXX_WARN(KrisLibrary::logger(),"ManagedGeometry: Error loading geometry file "<<fn);
         geometry = NULL;
         return false;
