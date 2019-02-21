@@ -292,7 +292,7 @@ def planToSet(world,robot,target,
     plan = SubsetMotionPlan(space,subset,q0,**planOptions)
 
     if isinstance(target,CSpace):
-      if isinstance(target,EmbeddedCSpace):
+      if isinstance(space,EmbeddedCSpace):
         def goaltest(x):
           return target.feasible(space.lift(x))
         def goalsample():
