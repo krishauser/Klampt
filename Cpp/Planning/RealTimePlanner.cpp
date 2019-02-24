@@ -1240,7 +1240,7 @@ RRTPlanner::Node* DynamicRRTPlanner::TryIKExtend(RRTPlanner::Node* node,bool sea
   //add a node in the rrt tree
   State x=MakeState(qik);
   if(search) {
-    RRTPlanner::Node* closest = rrt->ClosestMilestone(x);
+    RRTPlanner::Node* closest = rrt->milestoneNodes[rrt->ClosestMilestone(x)];
     return ((TreeRoadmapPlanner*)(rrt.get()))->Extend(closest,x);
   }
   else
@@ -1400,7 +1400,7 @@ int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
     }
   }
   for(size_t i=0;i<rrt->milestones.size();i++) {
-    n = rrt->milestones[i];
+    n = rrt->milestoneNodes[i];
     if(n->getParent() != NULL) {
       assert(n->edgeFromParent()->End() == n->x);
       assert(n->edgeFromParent()->Start() == n->getParent()->x);
@@ -1433,7 +1433,7 @@ int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
     cspace->Sample(dest);
     x=MakeState(dest);
     //pick closest milestone, step in that direction
-    closest=rrt->ClosestMilestone(x);
+    closest=rrt->milestoneNodes[rrt->ClosestMilestone(x)];
     q.setRef(closest->x,0,1,dest.n);
     Real dist=cspace->Distance(q,dest);
     if(dist > delta) {
@@ -1506,7 +1506,7 @@ int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
   }
   //sanity check
   for(size_t i=0;i<rrt->milestones.size();i++) {
-    n = rrt->milestones[i];
+    n = rrt->milestoneNodes[i];
     if(n->getParent() != NULL) {
       assert(n->edgeFromParent()->End() == n->x);
       assert(n->edgeFromParent()->Start() == n->getParent()->x);
@@ -1531,10 +1531,10 @@ int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
       parent += 0;
       n = n->getParent();
     }
-    Assert(bestNode == rrt->milestones[0] || bestNode->hasAncestor(rrt->milestones[0]));
-    rrt->CreatePath(rrt->milestones[0],bestNode,rampPath);
+    Assert(bestNode == rrt->milestoneNodes[0] || bestNode->hasAncestor(rrt->milestoneNodes[0]));
+    rrt->CreatePath(rrt->milestoneNodes[0],bestNode,rampPath);
     Assert(!rampPath.edges.empty());
-    Assert(rampPath.edges.front()->Start() == rrt->milestones[0]->x);
+    Assert(rampPath.edges.front()->Start() == rrt->milestones[0]);
 
     /*
     //test feasibility of last state

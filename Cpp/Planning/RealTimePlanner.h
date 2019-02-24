@@ -5,7 +5,7 @@
 #include "PlannerSettings.h"
 #include "PlannerObjective.h"
 #include "RampCSpace.h"
-#include "Modeling/DynamicPath.h"
+#include <Klampt/Modeling/DynamicPath.h>
 #include <KrisLibrary/utils/StatCollector.h>
 #include <KrisLibrary/utils/threadutils.h>
 #include <KrisLibrary/Timer.h>
