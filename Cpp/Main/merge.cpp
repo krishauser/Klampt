@@ -1,4 +1,4 @@
-#include "WorldViewProgram.h"
+#include "Interface/WorldViewProgram.h"
 #include "Modeling/GeneralizedRobot.h"
 
 int main(int argc,const char** argv)
