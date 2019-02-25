@@ -130,16 +130,21 @@ class RobotSubsetCSpace(EmbeddedCSpace):
     This class will automatically disable all collisions for inactive robot links
     in the collider.
 
-    Note: to convert from start/goal robot configurations to the CSpace, call
-    the project(qrobot) method for the start and goal. (see :meth:`EmbeddedCSpace.project` ())
+    Note:
+        To convert from start/goal robot configurations to the CSpace, call
+        the `project(qrobot)` method for the start and goal.
+        (see :meth:`EmbeddedCSpace.project`)
 
-    Note: to convert from a planned path back to the robot's full configuration space,
-    you will need to call the lift(q) method for all configurations q in the planned
-    path. (see :meth:`EmbeddedCSpace.lift` ()) 
+    Note: 
+        To convert from a planned path back to the robot's full configuration space,
+        you will need to call the `lift(q)` method for all configurations q in the
+        planned path. (see :meth:`EmbeddedCSpace.lift`) 
 
-    Warning: if your robot has non-standard joints, like a free-
-    floating base or continuously rotating (spin) joints, you will need to
-    overload the :meth:`sample` () method."""
+    Warning:
+        If your robot has non-standard joints, like a free-floating base or
+        continuously rotating (spin) joints, you will need to overload the
+        :meth:`sample` method.
+    """
     def __init__(self,robot,subset,collider=None):
         EmbeddedCSpace.__init__(self,RobotCSpace(robot,collider),subset,xinit=robot.getConfig())
         self.collider = collider

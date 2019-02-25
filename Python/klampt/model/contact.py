@@ -163,9 +163,9 @@ def equilibriumTorques(robot,holdList,fext=(0,0,-9.8),internalTorques=None,norm=
             may not get good results)
 
     Returns:
-        (tuple): A pair (t,f) giving the joint torques and a list of frictional
-            contact forces, if a solution exists. Or, the return value may be None
-            if no solution exists.
+        tuple or None: A pair (t,f) giving the joint torques and a list of frictional
+        contact forces, if a solution exists. The return value may be None
+        if no solution exists.
     """
     links = sum([[h.link]*len(h.contacts) for h in holdList],[])
     if internalTorques is None:

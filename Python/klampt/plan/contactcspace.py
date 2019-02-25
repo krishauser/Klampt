@@ -35,6 +35,9 @@ class StanceCSpace(ClosedLoopRobotCSpace):
             raise NotImplementedError("Torque limit testing")
 
     def testSupportPolygon(self,q):
+        """Returns True if the robot's COM is in the support polygon at
+        configuration q.
+        """
         self.robot.setConfig(q)
         x = self.robot.getCom()
         for plane in self.sp:

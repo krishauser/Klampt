@@ -98,11 +98,14 @@ class SubRobotModel:
 
     def fromfull(self,object):
         """Converts the given index, configuration, velocity, or trajectory of a full robot
-        to the corresponding object of the sub-robot.  Returns the object for the sub-robot.
+        to the corresponding object of the sub-robot. 
 
         Args:
             object: an integer index, configuration, velocity, matrix, list of configurations,
                 or Trajectory.
+
+        Returns:
+            : The corresponding object mapped to the sub-robot.
 
         Note:
             For indices, this is an O(n) operation where n is the size of the sub-robot.
@@ -296,8 +299,9 @@ class SubRobotModel:
             self._robot.link(i).drawGL(keepAppearance)
 
 class SubRobotModelLink:
-    """A helper that lets you treat links of a subrobot just like a normal RobotModelLink.
-    Correctly implements jacobians and indices with respect to the sub-robot.
+    """A helper that lets you treat links of a subrobot just like a normal
+    RobotModelLink. Correctly implements jacobians and indices with respect
+    to the sub-robot.
     """
     def __init__(self,link,robot):
         self._link = link

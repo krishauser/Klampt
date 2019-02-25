@@ -223,7 +223,7 @@ def set(name,value,type='auto',directory=None):
             determined by the value.
 
     Returns:
-        (bool): True on success
+        (bool): True on success, False otherwise
     """
     if type == 'auto':
         try:
@@ -299,7 +299,7 @@ def load(type=None,directory=None):
 
     Returns:
         (tuple or None): a (filename,value) pair if OK is pressed, or
-            None if the operation was canceled
+        None if the operation was canceled
     """
     
     fg = FileGetter('Open resource')
@@ -343,7 +343,7 @@ def save(value,type='auto',directory=None):
 
     Returns:
         (str or None): the file saved to, if OK is pressed, or
-            None if the operation was canceled.
+        None if the operation was canceled.
     """
     fg = FileGetter('Save resource')
     fg.directory = directory
@@ -426,7 +426,7 @@ def thumbnail(value,size,type='auto',world=None,frame=None):
 
     Returns:
         (Image or bytes): A PIL Image if PIL is available, or just a raw RGBA
-            memory buffer otherwise.
+        memory buffer otherwise.
 
     """
     global _thumbnail_window
@@ -587,7 +587,7 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,refe
             named rigid element of the world.
 
     Returns:
-        (tuple): A pair (save, result):
+        (tuple): A pair (save, result) containing:
 
             * save (bool): True if the user pressed OK, False if Cancel or the
                 close box where chosen.

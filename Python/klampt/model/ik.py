@@ -65,18 +65,39 @@ from subrobot import SubRobotModel
 from coordinates import Point,Direction,Frame,Transform
 
 def objective(body,ref=None,local=None,world=None,R=None,t=None):
-    """Returns an IKObjective or GeneralizedIKObjective for a given body.
-    If ref is provided, there is a target body.
+    """Returns an IKObjective for a given body.
 
-    If local and world are provided (either as single 3D points, or a list of
-    3D points), then this objective will match the local point(s) to the
-    world point(s).
+    There are two modes in which this can be used:
 
-    If R and t are provided, then the objective is set to a relative
-    transformation between body and ref.
+    1. If `local` and `world` are provided, then this objective asks to match 
+       the local point (s) on the body to the world point(s).
+    2. If `R` and `t` are provided, then the objective is set to specify the
+       transform of the body.
+
+    If `ref` is given, then this is the target frame; otherwise it's the world
+    frame.  In mode 1, the world points are bound to this frame; in mode 2,
+    the transformation from body to ref is specified as (R,t).
+
+    Args:
+        body (RobotModelLink or RigidObjectModel): the link that should be
+            constrained.
+        ref (RobotModelLink or RigidObjectModel, optional): the link that
+            `body` should be constrained to, or None for the world frame.
+        local (3-vector, or a list of 3-vectors, optional): the local 
+            coordinates on `body` should be constrained to the corresponding
+            points in `world`
+        world (3-vector, or a list of 3-vectors, optional): the coordinates
+            to which the points in `local` should be constrained. These are
+            given in world coordinates (if `ref`=None) or in `ref`'s frame.
+        R (so3 element; list of 9 floats, optional): the rotation that the
+            link should take on.
+        t (3-vector, optional): the translation that the link's origin
+        should take on.
 
     Returns:
-        (IKObjective or GeneralizedIKObjective)
+        IKObjective or GeneralizedIKObjective: usually a plain IK objective
+        is returned, but if body and ref are not on the same robot, then a
+        GeneralizedIKObjective may be returned.
     """
     generalized = False
     if not hasattr(body,'robot'):
@@ -143,18 +164,29 @@ def fixed_objective(link,ref=None,local=None,world=None):
     """Convenience function for fixing the given link at the current position
     in space. 
 
-    If local and world are not provided, the entire link is
-    constrained. 
+    The arguments are interpreted as follows:
 
-    If only local is provided, these points are fixed
-    to their current positions in space.  
+    - If local and world are not provided, the entire link is
+      constrained. 
 
-    If only world is provided,
-    the points on the link with the given world position are constrained in
-    place.
+    - If only local is provided, these points are fixed
+      to their current positions in space.  
+
+    - If only world is provided,
+      the points on the link with the given world position are constrained in
+      place.
+
+    Args:
+        link (RobotModelLink): the link that should be constrained.
+        ref (RobotModelLink or RigidObjectModel, optional): the link that
+            `link` should be constrained to, or None for the world frame.
+        local (3-vector, or a list of 3-vectors, optional): the local 
+            coordinates on `body` should be constrained in place
+        world (3-vector, or a list of 3-vectors, optional): the world
+            coordinates on `body` should be constrained in place
 
     Returns:
-        (IKObjective or GeneralizedIKObjective)
+        IKObjective or GeneralizedIKObjective
     """
     refcoords = ref.getTransform() if ref is not None else se3.identity()
     Tw = link.getTransform()
@@ -181,20 +213,32 @@ def fixed_objective(link,ref=None,local=None,world=None):
         raise ValueError("ik.fixed_objective does not accept both local and world keyword arguments")
 
 def fixed_rotation_objective(link,ref=None,local_axis=None,world_axis=None):
-    """Convenience function for fixing the given link at its current orientation
-    in space. 
+    """Convenience function for fixing the given link at its current
+    orientation in space. 
 
-    If local_axis and world_axis are not provided, the entire link's orientation
-    is constrained.
+    The arguments are interpreted as follows:
 
-    If only local_axis is provided, the link is constrained
-    to rotate about this local axis. 
+    - If `local_axis` and `world_axis` are not provided, the entire link's
+      orientation is constrained.
 
-    If only world_axis is provided,
-    the link is constrained to rotate about this world-space axis.
+    - If only `local_axis` is provided, the link is constrained
+      to rotate about this local axis. 
+
+    - If only `world_axis` is provided,
+      the link is constrained to rotate about this world-space axis.
+
+
+    Args:
+        link (RobotModelLink): the link that should be constrained.
+        ref (RobotModelLink or RigidObjectModel, optional): the link that
+            `link` should be constrained to, or None for the world frame.
+        local_axis (3-vector, optional): the local direction on
+            on `body` that should be constrained in place.
+        world_axis (3-vector, optional): the world coordinates
+            of the direction that should be constrained.
 
     Returns:
-        (IKObjective or GeneralizedIKObjective)
+        IKObjective or GeneralizedIKObjective
     """
     refcoords = ref.getTransform()[0] if ref is not None else so3.identity()
     Rw = link.getTransform()
@@ -248,7 +292,7 @@ def solver(objectives,iters=None,tol=None):
             (1e-3) is used.
 
     Returns:
-        (:class:`IKSolver` or :class:`GeneralizedIKSolver`)
+        IKSolver or GeneralizedIKSolver
 
     Note:
         In rare cases, this may return a list of IKSolver's if you give
@@ -345,9 +389,9 @@ def solve(objectives,iters=1000,tol=1e-3,activeDofs=None):
 
     Returns:
         bool: True if a solution is successfully found to the given tolerance,
-            within the provided number of iterations.  The robot(s) are then set
-            to the solution configuration.  If a solution is not found, False is
-            returned and the robot(s) are set to the best found configuration.
+        within the provided number of iterations.  The robot(s) are then set
+        to the solution configuration.  If a solution is not found, False is
+        returned and the robot(s) are set to the best found configuration.
 
     This function will be smart about multiple objects / robots.  If the
     objectives are on disjoint robots then disjoint IK problems will be
@@ -398,7 +442,7 @@ def solve_global(objectives,iters=1000,tol=1e-3,activeDofs=None,numRestarts=100,
 
     Returns:
         bool: True if a feasible solution is successfully found to the given
-            tolerance, within the provided number of iterations.
+        tolerance, within the provided number of iterations.
     """
     if feasibilityCheck is None: feasibilityCheck=lambda : True
     s = solver(objectives,iters,tol)

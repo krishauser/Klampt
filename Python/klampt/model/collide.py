@@ -28,16 +28,21 @@ def bb_union(*bbs):
 
 
 def self_collision_iter(geomlist,pairs='all'):
-    """For a list of Geometry3D's, performs efficient self collision testing.
+    """Performs efficient self collision testing for a list of geometries.
 
-    If pairs == 'all', all pairs are tested.  If it's a function, it's
-    a 2-argument function taking geometry indices and returning true if 
-    they should be tested.  Otherwise it can be a list of collision indices.
+    Args:
+        geomlist (list of Geometry3D): the list of geometries
+        pairs: can be:
+
+            * 'all': all pairs are tested.  
+            * a function test(i,j) -> bool taking geometry indices and
+              returning true if they should be tested
+            * list of pairs (i,j) of collision indices.
 
     Uses a quick bounding box reject test.
 
     Returns:
-        (iterator over tuple): Iterator over colliding pairs (i,j) where i and
+        iterator over tuple: Iterator over colliding pairs (i,j) where i and
         j are indices into geomlist.
     """
     #bblist = [g.getBB() for g in geomlist]
@@ -68,14 +73,20 @@ def self_collision_iter(geomlist,pairs='all'):
 def group_collision_iter(geomlist1,geomlist2,pairs='all'):
     """Tests whether two sets of geometries collide.
 
-    If pairs == 'all', all pairs are tested.  If it's a function, it's
-    a 2-argument function taking geometry indices and returning true if 
-    they should be tested.  Otherwise it can be a list of collision indices.
+    Args:
+        geomlist1 (list of Geometry3D): set 1
+        geomlist2 (list of Geometry3D): set 2
+        pairs: can be:
+
+            * 'all': all pairs are tested.  
+            * a function test(i,j) -> bool, taking geomlist1 index i and
+              geomlist2 index j, and returning true if they should be tested
+            * list of pairs (i,j) of collision indices.
 
     Uses a quick bounding box reject test.
 
     Returns:
-        (iterator over tuple): Iterator over colliding pairs (i,j) where i is
+        iterator over tuple: Iterator over colliding pairs (i,j) where i is
         an index into geomlist1 and j is an index into geomlist.
     """
     if len(geomlist1) == 0 or len(geomlist2) == 0: return
@@ -111,15 +122,22 @@ def group_subset_collision_iter(geomlist,alist,blist,pairs='all'):
     """Tests whether two subsets of geometries collide.  Can be slightly faster
     than `group_collision_iter` if `alist` and `blist` overlap.
 
-    If pairs == 'all', all pairs are tested.  If it's a function, it's
-    a 2-argument function taking geometry indices and returning true if 
-    they should be tested.  Otherwise it can be a list of collision indices.
-    In this last case, alist and blist are ignored and can be set to None.
+    Args:
+        geomlist (list of Geometry3D): a list of all possible geometries
+        alist (list of int): collision set 1, containing indices into geomlist
+        blist (list of int): collision set 2, containing indices into geomlist
+        pairs: can be:
+
+            * 'all': all pairs are tested.  
+            * a function test(i,j) -> bool, taking geomlist1 index i and
+              geomlist2 index j, and returning true if they should be tested
+            * list of pairs (i,j) of collision indices.  In this case, `alist`
+              and `blist` are ignored and can be set to None.
 
     Uses a quick bounding box reject test.
 
     Returns:
-        (iterator over tuple): Iterator over colliding pairs (i,j) where i is
+        iterator over tuple: Iterator over colliding pairs (i,j) where i is
         an index into alist and j is an index into glist.
     """
     if len(alist) == 0 or len(blist) == 0: return
@@ -198,8 +216,10 @@ class WorldCollider:
     """
     
     def __init__(self,world,ignore=[]):
-        """Initializes the collision detection structure given a WorldModel
-        as input."""
+        """Args:
+            world (WorldModel): the world to use
+            ignore (list, optional): a list of items to pass to ignoreCollision
+        """
 
         world.enableInitCollisions(True)
         self.world = world
@@ -337,26 +357,29 @@ class WorldCollider:
         should be tested for collisions. 
 
         Usage:
-            To test collisions, you call
+            To test collisions, you call::
 
-            for i,j in worldCollider.collisionTests():
-                if i[1].collides(j[1]):
-                    print "Object",i[0].getName(),"collides with",j[0].getName()
+                for i,j in worldCollider.collisionTests():
+                    if i[1].collides(j[1]):
+                        print "Object",i[0].getName(),"collides with",j[0].getName()
                     
         (Note that for this purpose is easier to just call :meth:`collisions`;
         however you may want to use `collisionTests` to perform other queries
         like proximity detection.)
 
         Args:
-            filter1 (function, optional): See :meth:`collisions`
-            filter2 (function, optional): See :meth:`collisions`
+            filter1 (function, optional): has form f(object) -> bool
+            filter2 (function, optional): has form f(object) -> bool
             bb_reject (bool, optional): True if we should quick reject objects
                 whose bounding boxes are not overlapping (broad phase collision
                 detection).  If false, all non-ignored collision pairs are
                 returned.
 
+        See :meth:`collisions` for an explanation of how filter1 and filter2
+        are interpreted
+
         Returns:
-            (iterator of tuple): Iterates over
+            iterator of tuple: Iterates over
             ((object1,geom1),(object2,geom2)) pairs indicating which objects
             should be tested for collision. They have type:
 
@@ -403,8 +426,12 @@ class WorldCollider:
         optionally that satisfies the filter(s).
 
         Args:
-            filter1, filter2 (function, optional): predicates to allow
-            subsets of objects to collide. 
+            filter1 (function, optional): has form f(object) -> bool
+            filter2 (function, optional): has form f(object) -> bool
+
+        filter1 and filter2 are predicates to allow subsets of objects
+        to collide.  The argument can be a RobotModelLink, RigidObjectModel
+        or TerrainModel.
 
         If neither filter1 nor filter2 are provided, then all pairs are
         checked. 
@@ -430,7 +457,7 @@ class WorldCollider:
             collisions for that robot are tested
 
         Returns:
-            (iterator over tuple): Iterates over colliding
+            iterator over tuple: Iterates over colliding
             (RobotModelLink,RobotModelLink) pairs.
         """
         if isinstance(robot,RobotModel):
@@ -459,7 +486,7 @@ class WorldCollider:
                 test, or None to all objects.
 
         Returns:
-            (iterator over tuple): Iterates over colliding
+            iterator over tuple: Iterates over colliding
             (RobotModelLink,RigidObjectModel) pairs.
         """
         if isinstance(robot,RobotModel):
@@ -491,7 +518,7 @@ class WorldCollider:
                 test, or None to all terrains.
 
         Returns:
-            (iterator over tuple): Iterates over colliding
+            iterator over tuple: Iterates over colliding
             (RobotModelLink,TerrainModel) pairs.
         """
         if isinstance(robot,RobotModel):
@@ -523,7 +550,7 @@ class WorldCollider:
                 test, or None to all terrains.
 
         Returns:
-            (iterator over tuple): Iterates over colliding
+            iterator over tuple: Iterates over colliding
             (RigidObjectModel,TerrainModel) pairs.
         """
         if isinstance(object,RigidObjectModel):
@@ -554,7 +581,7 @@ class WorldCollider:
                 test, or None to all terrains.
 
         Returns:
-            (iterator over tuple): Iterates over colliding
+            iterator over tuple: Iterates over colliding
             (RigidObjectModel,TerrainModel) pairs.
         """
         if isinstance(object,RigidObjectModel):
