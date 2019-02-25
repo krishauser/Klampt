@@ -25,6 +25,7 @@ using namespace GLDraw;
   #if HAVE_GLUT
 
   #include <KrisLibrary/GLdraw/GLUTNavigationProgram.h>
+  #include <KrisLibrary/GLdraw/GLScreenshotProgram.h>
   #define BASE_PROGRAM GLUTNavigationProgram
 
   #endif //HAVE_GLUT
