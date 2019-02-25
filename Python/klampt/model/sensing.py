@@ -34,8 +34,17 @@ def _try_numpy_import():
 	return _has_numpy
 
 def get_sensor_xform(sensor,robot=None):
-	"""Returns the sensor transform in klampt.se3 format.  If robot!=None, returns the world coordinates
-	of the sensor.
+	"""Extracts the transform of a SimRobotSensor.  The sensor must be
+	of a link-mounted type, e.g., a CameraSensor or ForceSensor.
+
+	Args:
+		sensor (SimRobotSensor)
+		robot (RobotModel, optional): if provided, returns the world
+			coordinates of the sensor.  Otherwise, returns the local
+			coordinates on the link to which it is mounted.
+
+	Returns:
+		klampt.se3 object: the sensor transform  
 	"""
 	s = sensor.getSetting("Tsensor")
 	Tsensor = loader.readSe3(s)
@@ -47,17 +56,22 @@ def get_sensor_xform(sensor,robot=None):
 
 
 def set_sensor_xform(sensor,T,link=None):
-	"""Given a SimRobotSensor that has a certain pose on a robot, such as a CameraSensor or 
-	ForceSensor, sets the transform to the se3 element T, as local to the given link.
+	"""Given a link-mounted sensor (e.g., CameraSensor or ForceSensor), sets 
+	its link-local transform to T.
 
-	If link is given, then the link of the sensor is modified.  link can either be an integer
-	or a RobotModelLink.
+	Args:
+		sensor (SimRobotSensor)
+		T (se3 element or coordinates.Frame): desired local coordinates of the sensor
+			on its link.
+		link (int or RobotModelLink, optional): if provided, the link of the
+			sensor is modified. 
 
-	Another way to set a sensor is to give a coordinates.Frame object.  This frame must
-	either be associated with a RobotModelLink or its parent should be associated with 
-	one.
+	Another way to set a sensor is to give a coordinates.Frame object.  This
+	frame must either be associated with a RobotModelLink or its parent should
+	be associated with  one.
 
-	(the reason why you should use this is that the Tsensor attribute )
+	(the reason why you should use this is that the Tsensor attribute has a
+	particular format using the loader.writeSe3 function.)
 	"""
 	if isinstance(T,coordinates.Frame):
 		if isinstance(T._data,RobotModelLink):
@@ -107,9 +121,10 @@ def camera_to_images(camera,image_format='numpy',color_format='channels'):
 	(Note that image_format='native' takes up a lot of extra memory, especially with color_format='channels')
 
 	Returns:
-		tuple: (rgb, depth), either numpy arrays or list-of-lists format as goverened by image_format.
+		tuple: (rgb, depth), which are either numpy arrays or list-of-lists
+		format, as specified by image_format.
 
-			* rgb: the RGB result (packed as goverend by color_format)
+			* rgb: the RGB result (packed as specified by color_format)
 			* depth: the depth result (floats)
 
 	"""
@@ -293,8 +308,10 @@ def camera_to_points(camera,points_format='numpy',all_points=False,color_format=
 		raise NotImplementedError("Native format depth image processing not done yet")
 
 def camera_to_points_world(camera,robot,points_format='numpy',color_format='channels'):
-	"""Same as camera_to_points, but converts to the world coordinate system given the robot
-	to which the camera is attached.  Points that have no reading are stripped out.
+	"""Same as :meth:`camera_to_points`, but converts to the world coordinate
+	system given the robot to which the camera is attached.  
+
+	Points that have no reading are stripped out.
 	"""
 	assert isinstance(camera,SimRobotSensor),"Must provide a SimRobotSensor instance"
 	assert camera.type() == 'CameraSensor',"Must provide a camera sensor instance"
@@ -321,8 +338,10 @@ def camera_to_points_world(camera,robot,points_format='numpy',color_format='chan
 	return pts
 
 def camera_to_viewport(camera,robot):
-	"""Returns a GLViewport instance corresponding to the camera's view.  See klampt.vis.glprogram
-	and klampt.vis.visualization for information about how to use the object with the visualization.
+	"""Returns a GLViewport instance corresponding to the camera's view. 
+
+	See klampt.vis.glprogram and klampt.vis.visualization for information about how
+	to use the object with the visualization, e.g. `vis.setViewport(vp)`.
 
 	Returns:
 		GLViewport: the camera's current viewport.
