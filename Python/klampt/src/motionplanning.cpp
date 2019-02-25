@@ -934,14 +934,14 @@ void CSpaceInterface::enableAdaptiveQueries(bool enabled)
 
 void CSpaceInterface::optimizeQueryOrder()
 {
-  if(index < 0 || index >= (int)spaces.size() ||spaces[index].adaptiveSpace) 
+  if(index < 0 || index >= (int)spaces.size() || !spaces[index].adaptiveSpace) 
     throw PyException("adaptive queries not enabled for this space");
   spaces[index].adaptiveSpace->OptimizeQueryOrder();
 }
 
 void CSpaceInterface::setFeasibilityDependency(const char* name,const char* precedingTest)
 {
-  if(index < 0 || index >= (int)spaces.size() ||spaces[index].adaptiveSpace) 
+  if(index < 0 || index >= (int)spaces.size() || !spaces[index].adaptiveSpace) 
     throw PyException("adaptive queries not enabled for this space");
   if(!spaces[index].adaptiveSpace->AddFeasibleDependency(name,precedingTest))
     throw PyException("Invalid dependency");
@@ -949,7 +949,7 @@ void CSpaceInterface::setFeasibilityDependency(const char* name,const char* prec
 
 void CSpaceInterface::setFeasibilityPrior(const char* name,double costPrior,double feasibilityProbability,double evidenceStrength)
 {
-  if(index < 0 || index >= (int)spaces.size() ||spaces[index].adaptiveSpace) 
+  if(index < 0 || index >= (int)spaces.size() || !spaces[index].adaptiveSpace) 
     throw PyException("Invalid cspace index");
   int cindex = spaces[index].space->ConstraintIndex(name);
   AdaptiveCSpace::PredicateStats& stats = spaces[index].adaptiveSpace->feasibleStats[cindex];
@@ -960,7 +960,7 @@ void CSpaceInterface::setFeasibilityPrior(const char* name,double costPrior,doub
 
 void CSpaceInterface::setVisibilityDependency(const char* name,const char* precedingTest)
 {
-  if(index < 0 || index >= (int)spaces.size() ||spaces[index].adaptiveSpace) 
+  if(index < 0 || index >= (int)spaces.size() || !spaces[index].adaptiveSpace) 
     throw PyException("adaptive queries not enabled for this space");
   if(!spaces[index].adaptiveSpace->AddVisibleDependency(name,precedingTest))
     throw PyException("Invalid dependency");
@@ -968,7 +968,7 @@ void CSpaceInterface::setVisibilityDependency(const char* name,const char* prece
 
 void CSpaceInterface::setVisibilityPrior(const char* name,double costPrior,double visibilityProbability,double evidenceStrength)
 {
-  if(index < 0 || index >= (int)spaces.size() ||spaces[index].adaptiveSpace) 
+  if(index < 0 || index >= (int)spaces.size() || !spaces[index].adaptiveSpace) 
     throw PyException("adaptive queries not enabled for this space");
   int cindex = spaces[index].space->ConstraintIndex(name);
   if(cindex < 0)
@@ -981,7 +981,7 @@ void CSpaceInterface::setVisibilityPrior(const char* name,double costPrior,doubl
 
 double CSpaceInterface::feasibilityCost(const char* name)
 {
-  if(index < 0 || index >= (int)spaces.size() ||spaces[index].adaptiveSpace) 
+  if(index < 0 || index >= (int)spaces.size() || !spaces[index].adaptiveSpace) 
     throw PyException("adaptive queries not enabled for this space");
   int cindex = spaces[index].space->ConstraintIndex(name);
   if(cindex < 0)
@@ -991,7 +991,7 @@ double CSpaceInterface::feasibilityCost(const char* name)
 
 double CSpaceInterface::feasibilityProbability(const char* name)
 {
-  if(index < 0 || index >= (int)spaces.size() ||spaces[index].adaptiveSpace) 
+  if(index < 0 || index >= (int)spaces.size() || !spaces[index].adaptiveSpace) 
     throw PyException("adaptive queries not enabled for this space");
   int cindex = spaces[index].space->ConstraintIndex(name);
   if(cindex < 0)
@@ -1001,7 +1001,7 @@ double CSpaceInterface::feasibilityProbability(const char* name)
 
 double CSpaceInterface::visibilityCost(const char* name)
 {
-  if(index < 0 || index >= (int)spaces.size() ||spaces[index].adaptiveSpace) 
+  if(index < 0 || index >= (int)spaces.size() || !spaces[index].adaptiveSpace) 
     throw PyException("adaptive queries not enabled for this space");
   int cindex = spaces[index].space->ConstraintIndex(name);
   if(cindex < 0)
@@ -1011,7 +1011,7 @@ double CSpaceInterface::visibilityCost(const char* name)
 
 double CSpaceInterface::visibilityProbability(const char* name)
 {
-  if(index < 0 || index >= (int)spaces.size() ||spaces[index].adaptiveSpace) 
+  if(index < 0 || index >= (int)spaces.size() || !spaces[index].adaptiveSpace) 
     throw PyException("adaptive queries not enabled for this space");
   int cindex = spaces[index].space->ConstraintIndex(name);
   if(cindex < 0)
@@ -1021,7 +1021,7 @@ double CSpaceInterface::visibilityProbability(const char* name)
 
 PyObject* CSpaceInterface::feasibilityQueryOrder()
 {
-  if(index < 0 || index >= (int)spaces.size() ||spaces[index].adaptiveSpace) 
+  if(index < 0 || index >= (int)spaces.size() || !spaces[index].adaptiveSpace) 
     throw PyException("adaptive queries not enabled for this space");
   PyObject* res = PyList_New(spaces[index].space->constraints.size());
   for(size_t i=0;i<spaces[index].space->constraintNames.size();i++) {
@@ -1034,7 +1034,7 @@ PyObject* CSpaceInterface::feasibilityQueryOrder()
 
 PyObject* CSpaceInterface::visibilityQueryOrder()
 {
-  if(index < 0 || index >= (int)spaces.size() ||spaces[index].adaptiveSpace) 
+  if(index < 0 || index >= (int)spaces.size() || !spaces[index].adaptiveSpace) 
     throw PyException("adaptive queries not enabled for this space");
   PyObject* res = PyList_New(spaces[index].space->constraints.size());
   for(size_t i=0;i<spaces[index].space->constraintNames.size();i++) {
