@@ -92,6 +92,70 @@ except AttributeError:
     _newclass = 0
 
 
+class SwigPyIterator(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, SwigPyIterator, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, SwigPyIterator, name)
+
+    def __init__(self, *args, **kwargs):
+        raise AttributeError("No constructor defined - class is abstract")
+    __repr__ = _swig_repr
+    __swig_destroy__ = _motionplanning.delete_SwigPyIterator
+    __del__ = lambda self: None
+
+    def value(self):
+        return _motionplanning.SwigPyIterator_value(self)
+
+    def incr(self, n=1):
+        return _motionplanning.SwigPyIterator_incr(self, n)
+
+    def decr(self, n=1):
+        return _motionplanning.SwigPyIterator_decr(self, n)
+
+    def distance(self, x):
+        return _motionplanning.SwigPyIterator_distance(self, x)
+
+    def equal(self, x):
+        return _motionplanning.SwigPyIterator_equal(self, x)
+
+    def copy(self):
+        return _motionplanning.SwigPyIterator_copy(self)
+
+    def next(self):
+        return _motionplanning.SwigPyIterator_next(self)
+
+    def __next__(self):
+        return _motionplanning.SwigPyIterator___next__(self)
+
+    def previous(self):
+        return _motionplanning.SwigPyIterator_previous(self)
+
+    def advance(self, n):
+        return _motionplanning.SwigPyIterator_advance(self, n)
+
+    def __eq__(self, x):
+        return _motionplanning.SwigPyIterator___eq__(self, x)
+
+    def __ne__(self, x):
+        return _motionplanning.SwigPyIterator___ne__(self, x)
+
+    def __iadd__(self, n):
+        return _motionplanning.SwigPyIterator___iadd__(self, n)
+
+    def __isub__(self, n):
+        return _motionplanning.SwigPyIterator___isub__(self, n)
+
+    def __add__(self, n):
+        return _motionplanning.SwigPyIterator___add__(self, n)
+
+    def __sub__(self, *args):
+        return _motionplanning.SwigPyIterator___sub__(self, *args)
+    def __iter__(self):
+        return self
+SwigPyIterator_swigregister = _motionplanning.SwigPyIterator_swigregister
+SwigPyIterator_swigregister(SwigPyIterator)
+
 
 def setRandomSeed(seed):
     """
@@ -651,8 +715,8 @@ class PlannerInterface(_object):
     """
 
 
-    An interface for a motion planner. The :class:`MotionPlan` interface in
-    cspace.py is somewhat easier to use.  
+    An interface for a kinematic motion planner. The :class:`MotionPlan` interface
+    in cspace.py is somewhat easier to use.  
 
     On construction, uses the planner type specified by setPlanType and the settings
     currently specified by calls to setPlanSetting.  
@@ -669,13 +733,21 @@ class PlannerInterface(_object):
     superset of the goal. Ideally the goal sampler generates as many goals as
     possible.  
 
-    PRM can be used in either point-to-point or multi-query mode. In multi-query
-    mode, you may call addMilestone(q) to add a new milestone. addMilestone()
-    returns the index of that milestone, which can be used in later calls to
-    getPath().  
-
     To plan, call planMore(iters) until getPath(0,1) returns non-NULL. The return
     value is a list of configurations.  
+
+    Some planners can be used multi-query mode (such as PRM). In multi-query mode,
+    you may call addMilestone(q) to add a new milestone. addMilestone() returns the
+    index of that milestone, which can be used in later calls to getPath().  
+
+    In point-to-set mode, getSolutionPath will return the optimal path to any goal
+    milestone.  
+
+    All planners work with the standard path-length objective function. Some
+    planners can work with other cost functions, and you can use setCostFunction to
+    set the edge / terminal costs. Usually, the results will only be optimal on the
+    computed graph, and the graph is not specifically computed to optimize that
+    cost.  
 
     To get a roadmap (V,E), call getRoadmap(). V is a list of configurations (each
     configuration is a Python list) and E is a list of edges (each edge is a pair
@@ -742,6 +814,22 @@ class PlannerInterface(_object):
         return _motionplanning.PlannerInterface_setEndpointSet(self, start, goal, goalSample)
 
 
+    def setCostFunction(self, edgeCost=None, terminalCost=None):
+        """
+        setCostFunction (edgeCost=None,terminalCost=None)
+
+        setCostFunction (edgeCost=None)
+
+        setCostFunction ()
+
+
+        Args:
+            edgeCost (:obj:`object`, optional): default value None
+            terminalCost (:obj:`object`, optional): default value None
+        """
+        return _motionplanning.PlannerInterface_setCostFunction(self, edgeCost, terminalCost)
+
+
     def addMilestone(self, milestone):
         """
         Args:
@@ -752,6 +840,26 @@ class PlannerInterface(_object):
         return _motionplanning.PlannerInterface_addMilestone(self, milestone)
 
 
+    def getClosestMilestone(self, config):
+        """
+        Args:
+            config (:obj:`object`)
+        Returns:
+            (int):
+        """
+        return _motionplanning.PlannerInterface_getClosestMilestone(self, config)
+
+
+    def getMilestone(self, arg2):
+        """
+        Args:
+            arg2 (int)
+        Returns:
+            (:obj:`object`):
+        """
+        return _motionplanning.PlannerInterface_getMilestone(self, arg2)
+
+
     def planMore(self, iterations):
         """
         Args:
@@ -760,23 +868,31 @@ class PlannerInterface(_object):
         return _motionplanning.PlannerInterface_planMore(self, iterations)
 
 
-    def getPathEndpoints(self):
+    def getSolutionPath(self):
         """
         Returns:
             (:obj:`object`):
         """
-        return _motionplanning.PlannerInterface_getPathEndpoints(self)
+        return _motionplanning.PlannerInterface_getSolutionPath(self)
 
 
-    def getPath(self, milestone1, milestone2):
+    def getPath(self, *args):
         """
+        getPath (milestone1,milestone2): :obj:`object`
+
+        getPath (milestone1,int,goalMilestones): :obj:`object`
+
+
         Args:
-            milestone1 (int)
-            milestone2 (int)
+            milestone1 (int): 
+            milestone2 (int, optional): 
+            int (:obj:`std::vector<`, optional): 
+            goalMilestones (:obj:`std::allocator< int > >`, optional): 
+
         Returns:
             (:obj:`object`):
         """
-        return _motionplanning.PlannerInterface_getPath(self, milestone1, milestone2)
+        return _motionplanning.PlannerInterface_getPath(self, *args)
 
 
     def getData(self, setting):

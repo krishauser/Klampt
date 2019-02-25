@@ -420,6 +420,200 @@ class MotionPlan:
             c += sum(self.edgeCost(a,b) for (a,b) in zip(path[:-1],path[1:]))
         return c
 
+optimizingPlanners = set(['fmm*','rrt*','prm*','lazyprm*','lazyrrg*'])
+"""set: The set of natively optimizing planners. 
+
+Goal set planners, random-restart, and shortcut planners also support optimization
+"""
+
+costAcceptingPlanners = set(['prm','rrt','rrt*','prm*','lazyprm*','lazyrrg*'])
+"""set: The set of planners that natively accept costs.
+
+Goal set planners, random-restart, and shortcut planners also support costs.
+"""
+
+
+def configurePlanner(space,start,goal,edgeCost=None,terminalCost=None,optimizing=True,
+    type='auto',stepsize=None,knn=10,
+    shortcut='auto',restart='auto',restartIters=1000,pointLocation='auto',
+    **otherSettings):
+    """Automatically sets up a MotionPlan with reasonable options, double
+    checking if the options are compatible with the given inputs.
+
+    Args:
+        space (CSpace): the space you'd like to plan for.
+        start (list of floats): the start configuration
+        goal (list of floats or function or (function,function) tuple): the 
+            goal configuration or condition.  See
+            :meth:`MotionPlan.setEndpoints`.
+        edgeCost (function, optional): the edge cost. See
+            :meth:`MotionPlan.setCostFunction`.
+        terminalCost (function, optional): the terminal cost. See
+            :meth:`MotionPlan.setCostFunction`.
+        optimizing (bool, optional): whether you expect to be planning past
+            the first path found to obtain a better solution.
+        type (str, optional): the planner type string.  If 'auto', the planner
+            type is set automatically.
+        stepsize (float, optional): if given, sets the growth radius or
+            grid resolution of the planner.  If not, this is auto-determined
+            by the size of the space.
+        knn (int, optional): for prm planner, the number of nearest neighbors
+            to test.
+        shortcut (bool, optional): whether to shortcut the resulting path
+        restart (bool, optional): whether to do random-restarts 
+        restartIters (int, optional): how many iterations to run between
+            restarts
+        pointLocation (str, optional): what point location data structure to
+            use.  By default, either 'kdtree' or 'balltree' are selected,
+            depending on whether you space is assumed Cartesian or not.
+        otherSettings (keyword dict, optional): other MotionPlan keywords 
+            can be added to override any of the auto-determined settings.
+
+    Returns:
+        (MotionPlan,dict): a pair giving the MotionPlan object that can be
+        called to produce a plan, and a dictionary giving the relevant
+        settings.
+    """
+    global optimizingPlanners
+    global costAcceptingPlanners
+    import math
+
+    if type == 'auto':
+        type = "sbl"
+        if edgeCost is not None:
+            type = "prm"
+    
+    if stepsize is None:
+        #how far across the state space to connect / perturb
+        from ..math import vectorops
+        radius = vectorops.norm(a-b for (a,b) in space.bound if not math.isinf(a) and not math.isinf(b))
+        stepsize = 0.1 *radius
+    
+    if shortcut == 'auto':
+        shortcut = optimizing
+    if restart == 'auto':
+        restart = optimizing
+
+    cartesian = (not hasattr(space,'interpolate') or space.properties.get('euclidean',0) or space.properties.get('cartesian',0))
+    infinite = any(math.isinf(a) or math.isinf(b) for (a,b) in space.bound)
+
+    #ball trees are good default settings
+    if pointLocation == 'auto':
+        if not cartesian:
+            pointLocation = 'balltree'
+        else:
+            pointLocation = 'kdtree'
+    #pointLocation = ''
+    restartTermCond="{foundSolution:1,maxIters:%d}"%(restartIters,)
+
+    isgoalset = callable(goal) or callable(goal[0])
+    optimizingPlanner = (type in optimizingPlanners) or shortcut or restart or isgoalset
+    if optimizingPlanner != optimizing:
+        print "WARNING: returned planner is %soptimizing but requested a %soptimizing planner"%(('' if optimizingPlanner else 'not '),('' if optimizing else 'not '))
+    if edgeCost is not None or terminalCost is not None:
+        if not shortcut and not restart and type not in costAcceptingPlanners:
+            print "WARNING: planner",type,"does not accept cost functions"
+    if isgoalset:
+        if type in ['prm*','rrt*','lazyprm*','lazyrrg*']:
+            print "WARNING: planner",type,"is fairly inefficient when the goal is a set... have not implemented multi-goal versions"
+
+    args = { 'type':type }
+    #PRM planner
+    if type == "prm":
+        args['knn']=knn
+        args['connectionThreshold']=stepsize
+        args['pointLocation']=pointLocation
+        if edgeCost is not None:
+            #this helps with an objective function
+            args['ignoreConnectedComponents']=True
+    elif type == 'fmm*':
+        #FMM* planner
+        args['gridResolution']=stepsize
+        if not cartesian:
+            print "WARNING: planner",type,"does not support the topology of non-Cartesian spaces"
+        if infinite:
+            raise ValueError("Cannot use planner "+type+" with infinite spaces")
+    elif type == 'fmm':
+        #FMM planner
+        args['gridResolution']=stepsize
+        if not cartesian:
+            print "WARNING: planner",type,"does not support the topology of non-Cartesian spaces"
+        if infinite:
+            raise ValueError("Cannot use planner "+type+" with infinite spaces")
+    elif type == 'rrt':
+        #RRT planner: bidirectional except for goal sets
+        args['type'] = 'rrt'
+        args['bidirectional'] = True
+        args['perturbationRadius']=stepsize
+        args['pointLocation']=pointLocation
+        args['shortcut']=shortcut
+        args['restart']=restart
+        #can't do forward growing only yet
+        #if callable(goal):
+        #    args['bidirectional'] = False
+    elif type == 'sbl':
+        #SBL planner
+        args['perturbationRadius']=stepsize
+        args['gridResolution']=stepsize
+        args['shortcut']=shortcut
+        args['restart']=restart
+    elif type in ['rrt*','prm*','lazyprm*','lazyrrg*']:
+        #Lazy-RRG* planner
+        args['pointLocation'] = pointLocation
+    elif type.startswith('ompl:'):
+        #OMPL planners:
+        #Tested to work fine with OMPL's prm, lazyprm, prm*, lazyprm*, rrt, rrt*, rrtconnect, lazyrrt, lbtrrt, sbl, bitstar.
+        #Note that lbtrrt doesn't seem to continue after first iteration.
+        #Note that stride, pdst, and fmt do not work properly...
+        args['suboptimalityFactor']=0.0
+        args['knn']=knn
+        args['connectionThreshold']=stepsize
+    if 'restart' in args:
+        args['restartTermCond']=restartTermCond
+    args.update(otherSettings)
+
+    MotionPlan.setOptions(**args)
+    planner = MotionPlan(space)
+
+    #do some checking of the terminal conditions
+    if not space.isFeasible(start):
+        sfailures = space.cspace.feasibilityFailures(start)
+        print "WARNING: Start configuration fails constraints",sfailures
+
+    if hasattr(goal,'__iter__'):
+        if not callable(goal[0]):
+            if not space.isFeasible(goal):
+                gfailures = space.cspace.feasibilityFailures(goal)
+                print "WARNING: Goaconfiguration fails constraints",gfailures
+        else:
+            if not callable(goal[1]):
+                raise TypeError("goal sampler is not callable")
+            try:
+                goal[0](start)
+            except Exception:
+                print "WARNING: goal test doesn't seem to work properly"
+            try:
+                qg = goal[1]()
+                if len(qg) != len(start):
+                    print "WARNING: goal sampler doesn't seem to produce a properly-sized object"
+            except Exception:
+                print "WARNING: goal sampler doesn't seem to work properly"
+    else:
+        if not callable(goal):
+            raise TypeError("goal is not a configuration or callable")
+        try:
+            goal(start)
+        except Exception:
+            print "WARNING: goal test doesn't seem to work properly"
+        
+    planner.setEndpoints(start,goal)
+    if edgeCost or terminalCost:
+        print ("SETTING COST FUNCTION FROM PYTHON")
+        planner.setCostFunction(edgeCost,terminalCost)
+    return planner,args
+
+
+
 def _selfTest():
     c = CSpace()
     c.bound = [(-2,2),(-2,2)]
