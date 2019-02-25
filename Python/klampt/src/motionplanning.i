@@ -4,6 +4,9 @@
 	#include "pyerr.h"
 	#include "motionplanning.h"
 %}
+
+%include "std_string.i"
+%include "std_vector.i"
 	
 %exception {
 	try {

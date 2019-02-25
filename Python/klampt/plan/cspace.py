@@ -211,11 +211,6 @@ class MotionPlan:
     """A motion planner instantiated on a space.  Currently supports
     only kinematic, point-to-point, or point-to-set plans.
 
-    Multi-query roadmaps are supported for the PRM and SBLPRT algorithms.
-    In multi-query mode, you may call addMilestone(q) to add a new milestone.
-    addMilestone() returns the milestone's index, which can be used
-    in later calls to getPath().
-
     Planner parameters must be set by calling the static
     MotionPlan.setOptions(param1=value1,param2=value2,...) method BEFORE
     calling the MotionPlan(space,type) constructor.
@@ -225,6 +220,17 @@ class MotionPlan:
     
     Note that MotionPlan.close() or motionplanning.destroy() must be called
     to free memory after you are done.
+
+    Multi-query roadmaps are supported for the PRM and SBLPRT algorithms.
+    In multi-query mode, you may call addMilestone(q) to add a new milestone.
+    addMilestone() returns the milestone's index, which can be used
+    in later calls to getPath().
+
+    Cost functions are supported by any restart, shortcutting, or goal set
+    planners, as well as PRM, RRT. RRT*, PRM*, Lazy RRG*, Lazy PRM*. However,
+    be aware that the X* planners are internally trying to optimize path 
+    length, and the result may not be asymptotically optimal for other cost
+    functions.
     """
     def __init__(self,space,type=None,**options):
         """Initializes a plan with a given CSpace and a given type.
@@ -253,7 +259,10 @@ class MotionPlan:
         if len(options) > 0:
             MotionPlan.setOptions(**options)
         self.space = space
+        self.planOptions = motionplanning.getPlanJSONString()
         self.planner = motionplanning.PlannerInterface(space.cspace)
+        self.edgeCost=None
+        self.terminalCost=None
 
     def close(self):
         """This method must be called to free the memory associated with the
@@ -286,7 +295,7 @@ class MotionPlan:
               get progressively better paths with the remaining time.
             * "pointLocation": a string designating a point location data
               structure. "kdtree" is supported, optionally followed by a
-              weight vector (used in PRM, RRT*, PRM*, LazyPRM*, LazyRRG*)
+              weight vector (used in PRM, RRT, RRT*, PRM*, LazyPRM*, LazyRRG*)
             * "restartTermCond": used if the "restart" setting is true.
               This is a JSON string defining the termination condition
               (default value: "{foundSolution:1;maxIters:1000}")
@@ -303,6 +312,7 @@ class MotionPlan:
                 motionplanning.setPlanSetting(a,b)
             else:
                 motionplanning.setPlanSetting(a,float(b))
+
     def setEndpoints(self,start,goal):
         """Sets the start and goal configuration or goal condition. 
 
@@ -327,9 +337,35 @@ class MotionPlan:
         else:
             self.planner.setEndpoints(start,goal)
 
+    def setCostFunction(self,edgeCost=None,terminalCost=None):
+        """Sets a cost function to be used when retrieving a solution
+        path.  Some planners cannot accept objective functions.
+
+        The total cost of a path x0,x1,...,xn is:
+
+            edgeCost(x0,x1) + edgeCost(x1,x2) + ... + edgeCost(xn-1,xn) + terminalCost(xn)
+
+        Args:
+            edgeCost (function, optional): has signature f(a,b)->float where 
+                a,b are configurations.
+            terminalCost (function, optional): has signature f(q)->float where
+                q is a configuration.
+        """
+        if edgeCost is not None and not callable(edgeCost):
+            raise TypeError("Need to pass a function into setCostFunction")
+        if terminalCost is not None and not callable(terminalCost):
+            raise TypeError("Need to pass a function into setCostFunction")
+        self.edgeCost = edgeCost
+        self.terminalCost = terminalCost
+        self.planner.setCostFunction(edgeCost,terminalCost)
+
     def addMilestone(self,x):
-        """Manually adds a milestone and returns its index"""
-        return self.planner.addMilestone(x);
+        """Manually adds a milestone at configuration x and returns its index"""
+        return self.planner.addMilestone(x)
+
+    def getClosestMilestone(self,x):
+        """Returns the index of the closest milestone to configuration x"""
+        return self.planner.getClosestMilestone(x)
     
     def planMore(self,iterations):
         """Performs a given number of iterations of planning."""
@@ -337,13 +373,25 @@ class MotionPlan:
 
     def getPath(self,milestone1=None,milestone2=None):
         """Returns the path between the two milestones.  If no
-        arguments are provided, this returns the path between the
-        start and goal.
+        arguments are provided, this returns the optimal path between
+        the start and goal.
 
-        The path is a list of configurations (each configuration is a Python
-        list)."""
-        if milestone1==None and milestone2==None:
-            return self.planner.getPathEndpoints();
+        Args:
+            milestone1 (int, optional): the start milestone
+            milestone2 (int or list of int, optional): the goal milestone.
+                If this is a list, the optimal path to some goal milestone
+                in this list is returned.
+
+        Returns:
+            list of configurations: The result path, given as a list of
+            configurations.  Each configuration is a Python list.
+
+            Note that for non-euclidean spaces (e.g., closed loop, SE2,
+            or SE3 spaces) the CSpace's interpolate() function must be used
+            between milestones to properly interpolate along the path.
+        """
+        if milestone1 is None and milestone2 is None:
+            return self.planner.getSolutionPath();
         else:
             return self.planner.getPath(milestone1,milestone2)
 
@@ -359,6 +407,18 @@ class MotionPlan:
         """Returns a dictionary mapping statistic names to values.  Result is
         planner-dependent """
         return self.planner.getStats()
+
+    def pathCost(self,path):
+        """Helper function to calculate the cost of a path.  If no cost
+        function was previously set with setCostFunction, this is just the CSpace
+        length.
+        """
+        c = 0.0 if self.terminalCost is None else self.terminalCost(path[-1])
+        if self.edgeCost is None:
+            c += sum(self.space.cspace.distance(a,b) for (a,b) in zip(path[:-1],path[1:]))
+        else:
+            c += sum(self.edgeCost(a,b) for (a,b) in zip(path[:-1],path[1:]))
+        return c
 
 def _selfTest():
     c = CSpace()
