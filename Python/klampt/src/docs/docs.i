@@ -1309,8 +1309,8 @@ Returns the COM as a list of 3 floats.
 
 %feature("docstring") PlannerInterface "
 
-An interface for a motion planner. The :class:`MotionPlan` interface in
-cspace.py is somewhat easier to use.  
+An interface for a kinematic motion planner. The :class:`MotionPlan` interface
+in cspace.py is somewhat easier to use.  
 
 On construction, uses the planner type specified by setPlanType and the settings
 currently specified by calls to setPlanSetting.  
@@ -1327,13 +1327,21 @@ configuration is a goal, and the second returns a sampled configuration in a
 superset of the goal. Ideally the goal sampler generates as many goals as
 possible.  
 
-PRM can be used in either point-to-point or multi-query mode. In multi-query
-mode, you may call addMilestone(q) to add a new milestone. addMilestone()
-returns the index of that milestone, which can be used in later calls to
-getPath().  
-
 To plan, call planMore(iters) until getPath(0,1) returns non-NULL. The return
 value is a list of configurations.  
+
+Some planners can be used multi-query mode (such as PRM). In multi-query mode,
+you may call addMilestone(q) to add a new milestone. addMilestone() returns the
+index of that milestone, which can be used in later calls to getPath().  
+
+In point-to-set mode, getSolutionPath will return the optimal path to any goal
+milestone.  
+
+All planners work with the standard path-length objective function. Some
+planners can work with other cost functions, and you can use setCostFunction to
+set the edge / terminal costs. Usually, the results will only be optimal on the
+computed graph, and the graph is not specifically computed to optimize that
+cost.  
 
 To get a roadmap (V,E), call getRoadmap(). V is a list of configurations (each
 configuration is a Python list) and E is a list of edges (each edge is a pair
@@ -1351,13 +1359,16 @@ C++ includes: motionplanning.h
 %feature("docstring") PlannerInterface::PlannerInterface "
 ";
 
-%feature("docstring") PlannerInterface::dump "
+%feature("docstring") PlannerInterface::getMilestone "
 ";
 
-%feature("docstring") PlannerInterface::~PlannerInterface "
+%feature("docstring") PlannerInterface::setCostFunction "
 ";
 
 %feature("docstring") PlannerInterface::addMilestone "
+";
+
+%feature("docstring") PlannerInterface::~PlannerInterface "
 ";
 
 %feature("docstring") PlannerInterface::destroy "
@@ -1366,7 +1377,7 @@ C++ includes: motionplanning.h
 %feature("docstring") PlannerInterface::getStats "
 ";
 
-%feature("docstring") PlannerInterface::getPathEndpoints "
+%feature("docstring") PlannerInterface::getClosestMilestone "
 ";
 
 %feature("docstring") PlannerInterface::getRoadmap "
@@ -1375,10 +1386,19 @@ C++ includes: motionplanning.h
 %feature("docstring") PlannerInterface::planMore "
 ";
 
-%feature("docstring") PlannerInterface::getData "
+%feature("docstring") PlannerInterface::getSolutionPath "
+";
+
+%feature("docstring") PlannerInterface::dump "
 ";
 
 %feature("docstring") PlannerInterface::setEndpointSet "
+";
+
+%feature("docstring") PlannerInterface::getData "
+";
+
+%feature("docstring") PlannerInterface::getPath "
 ";
 
 %feature("docstring") PlannerInterface::getPath "
