@@ -15,21 +15,32 @@ int SafeQueryFloat(TiXmlElement* e,const char* attr,double& out);
 ///path is the path containing the referencing file, and fn is an internal file reference
 string ResolveFileReference(const string& path,const string& fn)
 {
+  //cout<<"Trying to resolve file "<<fn<<" in context of path "<<path<<endl;
   string res;
   if(fn.empty()) return "";
   if(fn[0]=='/') {
     //root of filesystem
+    //cout<<"  Root of filesystem"<<endl;
     return fn; 
   }
   if(fn.find("://") != string::npos) {  //URL
+    //cout<<"  File is URL"<<endl;
     return fn;
   }
   if(path.find("://") != string::npos) { //source is a URL
     string relfile = ReducePath(JoinPath(path,fn));
+    //cout<<"  Path is URL"<<endl;
     return relfile;
   }
   string relpath = JoinPath(path,fn);
-  if(FileUtils::Exists(relpath.c_str())) return relpath;
+  if(FileUtils::Exists(relpath.c_str())) {
+    //cout<<"  Relative path "<<relpath<<" exists"<<endl;
+    return relpath;
+  }
+  else {
+    //if(!FileUtils::Exists(fn.c_str())) 
+    //  cout<<"  Neither relative path "<<relpath<<" nor absolute path "<<fn<<" exist"<<endl;
+  }
   return fn;
 }
 
