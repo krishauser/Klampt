@@ -24,7 +24,7 @@ def save(obj,fn):
         return obj.saveFile(fn)
     if hasattr(obj,'save'):
         return obj.save(fn)
-    type = resource.filenameToType(fn)
+    type = loader.filenameToType(fn)
     return loader.save(obj,type,fn)
 
 MAX_VIS_ITEMS = 1000
@@ -99,7 +99,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
         # Add filters
         filters = []
         print "ALLOWABLE FILE EXTENSIONS"
-        for k,v in resource.extensionToType.iteritems():
+        for k,v in loader.extensionToTypes.iteritems():
             filters.append("*"+k)
             print " ",k
         filters.append("*.xml")
@@ -452,7 +452,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
             else:
                 return False
         try:
-            type = resource.filenameToType(fn)
+            type = loader.filenameToType(fn)
         except Exception:
             path,ext = os.path.splitext(fn)
             #print "Extension is",ext
