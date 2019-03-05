@@ -1240,7 +1240,7 @@ RRTPlanner::Node* DynamicRRTPlanner::TryIKExtend(RRTPlanner::Node* node,bool sea
   //add a node in the rrt tree
   State x=MakeState(qik);
   if(search) {
-    RRTPlanner::Node* closest = rrt->milestoneNodes[rrt->ClosestMilestone(x)];
+    RRTPlanner::Node* closest = rrt->ClosestMilestone(x);
     return ((TreeRoadmapPlanner*)(rrt.get()))->Extend(closest,x);
   }
   else
@@ -1433,7 +1433,7 @@ int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
     cspace->Sample(dest);
     x=MakeState(dest);
     //pick closest milestone, step in that direction
-    closest=rrt->milestoneNodes[rrt->ClosestMilestone(x)];
+    closest=rrt->ClosestMilestone(x);
     q.setRef(closest->x,0,1,dest.n);
     Real dist=cspace->Distance(q,dest);
     if(dist > delta) {
