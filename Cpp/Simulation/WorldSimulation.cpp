@@ -290,7 +290,7 @@ void WorldSimulation::OnAddModel()
 {
   for(size_t i=odesim.numTerrains();i<world->terrains.size();i++)
     odesim.AddTerrain(*world->terrains[i]);
-  for(size_t i=0;i<world->rigidObjects.size();i++) 
+  for(size_t i=odesim.numObjects();i<world->rigidObjects.size();i++) 
     odesim.AddObject(*world->rigidObjects[i]);
   for(size_t i=odesim.numRobots();i<world->robots.size();i++) {
     odesim.AddRobot(*world->robots[i]);
