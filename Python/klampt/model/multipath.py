@@ -283,7 +283,7 @@ class MultiPath:
 
     def saveXML(self):
         """Saves this multipath to a multipath xml tree (ElementTree)"""
-        import loader
+        from ..io import loader
         root = ET.Element("multipath")
         root.attrib = self.settings
         for sec in self.sections:
@@ -323,7 +323,7 @@ class MultiPath:
 
     def loadXML(self,tree):
         """Loads a multipath from a multipath xml tree (ElementTree)."""
-        import loader
+        from ..io import loader
         self.sections = []
         self.holdSet = dict()
         self.settings = dict()
