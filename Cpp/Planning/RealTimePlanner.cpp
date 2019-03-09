@@ -1400,7 +1400,7 @@ int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
     }
   }
   for(size_t i=0;i<rrt->milestones.size();i++) {
-    n = rrt->milestoneNodes[i];
+    n = rrt->milestones[i];
     if(n->getParent() != NULL) {
       assert(n->edgeFromParent()->End() == n->x);
       assert(n->edgeFromParent()->Start() == n->getParent()->x);
@@ -1506,7 +1506,7 @@ int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
   }
   //sanity check
   for(size_t i=0;i<rrt->milestones.size();i++) {
-    n = rrt->milestoneNodes[i];
+    n = rrt->milestones[i];
     if(n->getParent() != NULL) {
       assert(n->edgeFromParent()->End() == n->x);
       assert(n->edgeFromParent()->Start() == n->getParent()->x);
@@ -1531,8 +1531,8 @@ int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
       parent += 0;
       n = n->getParent();
     }
-    Assert(bestNode == rrt->milestoneNodes[0] || bestNode->hasAncestor(rrt->milestoneNodes[0]));
-    rrt->CreatePath(rrt->milestoneNodes[0],bestNode,rampPath);
+    Assert(bestNode == rrt->milestones[0] || bestNode->hasAncestor(rrt->milestones[0]));
+    rrt->CreatePath(rrt->milestones[0],bestNode,rampPath);
     Assert(!rampPath.edges.empty());
     Assert(rampPath.edges.front()->Start() == rrt->milestones[0]);
 
