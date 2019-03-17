@@ -72,6 +72,11 @@ API documentation is available here
 - [Klamp't C++ API](http://cppdocs.klampt.org)
 - [KrisLibrary C++ API](http://motion.pratt.duke.edu//krislibrary_docs)
 
+## Reporting bugs and getting help
+
+If you identify a programming bug or issue, please raise them on this Github site.
+If you have general questions installing or programming with Klamp't, please ask them on the Klamp't forum, which
+is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/krishauser/Klampt). 
 
 ## Version history
 
