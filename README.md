@@ -79,7 +79,9 @@ API documentation is available here
 -   Can now load almost all files from URLs!  Just use an http:// prefix to the filenames of worlds, robots,
     rigid objects, or geometries.  This also works for resources in Python.  (Resources in C++ are not done yet)
 -   Added ability to specify cost functions in kinematic planning.
--   Added much more ROS support in Python API ([klampt.io.ros](http://motion.pratt.duke.edu/klampt/pyklampt_docs/klampt.io.ros.html) module).
+-   Added conversions to Numpy objects in Python API ([klampt.io.numpy_convert](http://motion.pratt.duke.edu/klampt/pyklampt_docs/klampt.io.numpy_convert.html))
+-   Added much more [ROS](http://ros.org) support in Python API ([klampt.io.ros](http://motion.pratt.duke.edu/klampt/pyklampt_docs/klampt.io.ros.html) module).
+-   Added conversions to [Open3D](http://open3d.org) objects in Python API ([klampt.io.open3d_convert](http://motion.pratt.duke.edu/klampt/pyklampt_docs/klampt.io.open3d_convert.html))
 -   The Python loading API has changed to have a more complete list of types and file extensions.
 -   Fixed some bugs with editing in the `klampt_browser` Python program.
 -   Fixed some motion planning bugs (closed loop + moving subset spaces in Python, some planners in C++).
