@@ -600,7 +600,8 @@ class ResourceBrowser(QtWidgets.QMainWindow):
                 self.modified.remove(fn)
         s = self.active[fn]
         del self.active[fn]
-        copyCamera(s.program.view.camera,self.emptyVisProgram.view.camera)
+        if s.program is not None:
+            copyCamera(s.program.view.camera,self.emptyVisProgram.view.camera)
         print() 
         print("ADDING",fn,"TO CACHE")
         print() 

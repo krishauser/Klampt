@@ -436,7 +436,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
         self.emptyVisPlugin.add("world",self.world)
         self.refresh()
 
-    def add(self,fn,openDir=True):
+    def add(self,fn,openDir=True,warn=True):
         assert fn not in self.active
         for i,(cfn,citem) in enumerate(self.visCache):
             if cfn == fn:
@@ -449,10 +449,16 @@ class ResourceBrowser(QtWidgets.QMainWindow):
             return
         if os.path.isdir(fn):
             if openDir:
+                failures = []
+                successes = []
                 for f in os.listdir(fn):
-                    print "Listdir gave",f
                     if f not in ['.','..'] and os.path.splitext(f)[1] != '':
-                        self.add(os.path.join(fn,f),openDir=False)
+                        if not self.add(os.path.join(fn,f),openDir=False,warn=False):
+                            failures.append(f)
+                        else:
+                            successes.append(f)
+                if len(failures) != 0 and len(successes) != 0:
+                    QtWidgets.QMessageBox.warning(self.splitter,"Invalid items","Could not load files "+', '.join(failures)+" as Klamp't elements")
                 return True
             else:
                 return False
@@ -462,10 +468,12 @@ class ResourceBrowser(QtWidgets.QMainWindow):
             try:
                 worldid = self.tempWorld.loadElement(fn)
             except Exception:
-                QtWidgets.QMessageBox.warning(self.splitter,"Invalid item","Could not load "+fn+" as a Klamp't world element")
+                if warn:
+                    QtWidgets.QMessageBox.warning(self.splitter,"Invalid item","Could not load "+fn+" as a Klamp't world element")
                 return False
             if worldid < 0:
-                QtWidgets.QMessageBox.warning(self.splitter,"Invalid item","Could not load "+fn+" as a Klamp't world element")
+                if warn:
+                    QtWidgets.QMessageBox.warning(self.splitter,"Invalid item","Could not load "+fn+" as a Klamp't world element")
                 return False
             obj = None
             for i in xrange(self.tempWorld.numRobots()):
@@ -483,10 +491,12 @@ class ResourceBrowser(QtWidgets.QMainWindow):
             assert obj is not None,"Hmm... couldn't find world id %d in world?"%(worldid,)
             self.loadedItem(fn,obj)
             return True
-        else:
-            QtWidgets.QMessageBox.warning(self.splitter,"Invalid item","Could not load file "+fn+" as a known Klamp't type")
+        try:
+            type = loader.filenameToType(fn)
+        except RuntimeError:
+            if warn:
+                QtWidgets.QMessageBox.warning(self.splitter,"Invalid item","Could not load file "+fn+" as a known Klamp't type")
             return False
-        type = loader.filenameToType(fn)
         if type == 'xml':
             #try loading a world
             try:
@@ -496,15 +506,17 @@ class ResourceBrowser(QtWidgets.QMainWindow):
                     try:
                         obj = loader.load('MultiPath',fn)
                     except Exception as e:
-                        print "Trying MultiPath load, got exception",e
-                        import traceback
-                        traceback.print_exc()
-                        QtWidgets.QMessageBox.warning(self.splitter,"Invalid WorldModel","Could not load "+fn+" as a world XML file")
+                        if warn:
+                            print "Trying MultiPath load, got exception",e
+                            import traceback
+                            traceback.print_exc()
+                            QtWidgets.QMessageBox.warning(self.splitter,"Invalid WorldModel","Could not load "+fn+" as a world XML file")
                         return False
                     self.loadedItem(fn,obj)
                     return True
             except IOError:
-                QtWidgets.QMessageBox.warning(self.splitter,"Invalid WorldModel","Could not load "+fn+" as a world XML file")
+                if warn:
+                    QtWidgets.QMessageBox.warning(self.splitter,"Invalid WorldModel","Could not load "+fn+" as a world XML file")
                 return False
             self.loadedItem(fn,world)
             return
@@ -515,13 +527,15 @@ class ResourceBrowser(QtWidgets.QMainWindow):
             try:
                 obj = loader.fromJson(jsonobj)
             except Exception:
-                QtWidgets.QMessageBox.warning(self.splitter,"Invalid JSON","Could not recognize "+fn+" as a known Klamp't type")
+                if warn:
+                    QtWidgets.QMessageBox.warning(self.splitter,"Invalid JSON","Could not recognize "+fn+" as a known Klamp't type")
                 return False
         else:
             try:
                 obj = loader.load(type,fn)
             except Exception as e:
-                QtWidgets.QMessageBox.warning(self.splitter,"Invalid item","Error while loading file "+fn+": "+str(e))
+                if warn:
+                    QtWidgets.QMessageBox.warning(self.splitter,"Invalid item","Error while loading file "+fn+": "+str(e))
                 return False
         self.loadedItem(fn,obj)
         return True
@@ -564,8 +578,9 @@ class ResourceBrowser(QtWidgets.QMainWindow):
         except:
             type = 'unknown'
         if type in robot_override_types:
-            path = ('world',self.world.robot(0).getName())
-            item.plugin.hide(path)
+            if self.world.numRobots() > 0:
+                path = ('world',self.world.robot(0).getName())
+                item.plugin.hide(path)
         item.plugin.initialize()
 
     def remove(self,fn,openDir=True):
@@ -585,7 +600,8 @@ class ResourceBrowser(QtWidgets.QMainWindow):
                 self.modified.remove(fn)
         s = self.active[fn]
         del self.active[fn]
-        copyCamera(s.program.view.camera,self.emptyVisProgram.view.camera)
+        if s.program is not None:
+            copyCamera(s.program.view.camera,self.emptyVisProgram.view.camera)
         print 
         print "ADDING",fn,"TO CACHE"
         print 
