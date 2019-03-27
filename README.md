@@ -75,7 +75,17 @@ API documentation is available here
 
 ## Version history
 
-**0.8.1 Latest version** (1/3/2019)
+**0.8.2  Latest version** (4/1/2019)
+-   Can now load almost all files from URLs!  Just use an http:// prefix to the filenames of worlds, robots,
+    rigid objects, or geometries.  This also works for resources in Python.  (Resources in C++ are not done yet)
+-   Added ability to specify cost functions in kinematic planning.
+-   Added much more ROS support in Python API ([klampt.io.ros](http://motion.pratt.duke.edu/klampt/pyklampt_docs/klampt.io.ros.html) module).
+-   The Python loading API has changed to have a more complete list of types and file extensions.
+-   Fixed some bugs with editing in the `klampt_browser` Python program.
+-   Fixed some motion planning bugs (closed loop + moving subset spaces in Python, some planners in C++).
+-   Fixed a bizarre Python 2 to 3 conversion bug in se3.mul.
+
+**0.8.1** (1/3/2019)
 -   Cleaned up documentation, separating C++ and Python docs.  Sphinx is now used for Python docs.
 -   Added klampt_path utility to Python API.
 -   Added Python API bindings for higher order dynamics functions that were already in the C++
