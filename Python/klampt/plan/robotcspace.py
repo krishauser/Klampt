@@ -120,7 +120,6 @@ class RobotCSpace(CSpace):
         for q in path[1:]:
             controller.appendMilestoneLinear(q)
 
-                  
 class RobotSubsetCSpace(EmbeddedCSpace):
     """A basic robot cspace that allows collision free motion of a *subset*
     of joints.  The subset is given by the indices in the list "subset"
@@ -144,6 +143,9 @@ class RobotSubsetCSpace(EmbeddedCSpace):
         If your robot has non-standard joints, like a free-floating base or
         continuously rotating (spin) joints, you will need to overload the
         :meth:`sample` method.
+
+    Note: Considering deprecating this in favor of EmbeddedRobotCSpace, which
+    is adaptable to ClosedLoopRobotCSpace and ImplicitManifoldRobotCSpace.
     """
     def __init__(self,robot,subset,collider=None):
         EmbeddedCSpace.__init__(self,RobotCSpace(robot,collider),subset,xinit=robot.getConfig())
@@ -339,3 +341,109 @@ class ImplicitManifoldRobotCSpace(RobotCSpace):
         """Interpolates on the manifold.  Used by edge collision checking"""
         x = RobotCSpace.interpolate(self,a,b,u)
         return self.solveManifold(x)
+
+
+class EmbeddedRobotCSpace(EmbeddedCSpace):
+    """A basic robot cspace that allows collision free motion of a *subset*
+    of joints.  The subset is given by the indices in the list "subset"
+    provided to the constructor.  The configuration space is R^k where k
+    is the number of DOFs in the subset.
+
+    Args:
+        ambientspace (RobotCSpace): a RobotCSpace, ClosedLoopRobotCSpace, etc.
+        subset (list of ints): the indices of moving DOFs
+        xinit (configuration, optional): the reference configuration, or None
+            to use the robot's current configuration as the reference.
+    """
+    def __init__(self,ambientspace,subset,xinit=None):
+        self.robot = ambientspace.robot
+        if xinit is None:
+            xinit = self.robot.getConfig()
+        EmbeddedCSpace.__init__(self,ambientspace,subset,xinit)
+        #do monkey-patching needed to make the sampler work properly for closed-loop spaces
+        if isinstance(ambientspace,ImplicitManifoldRobotCSpace):
+            import rootfind
+            def subsetImplicitConstraint(x):
+                return self.ambientSpace.implicitConstraint(self.lift(x))
+            def solveManifold(x):
+                rootfind.setXTolerance(1e-8)
+                rootfind.setFTolerance(self.ambientspace.tol)
+                rootfind.setVectorField(subsetImplicitConstraint)
+                (res,x,val) = rootfind.findRootsBounded(x,self.bound)
+                return x
+            def sample():
+                return solveManifold(self.lift(CSpace.sample(self)))
+            def sampleneighborhood(c,r):
+                return solveManifold(self.lift(CSpace.sampleneighborhood(self,c,r)))
+            self.sample = sample
+            self.sampleneighborhood = sampleneighborhood
+        if isinstance(ambientspace,ClosedLoopRobotCSpace):
+            #sanity check
+            activedofs = ambientspace.solver.getActiveDofs()
+            if len(activedofs) > len(subset):
+                raise ValueError("ClosedLoopRobotCSpace IK solver must be configured with moving dofs that are within the subset of embedded dofs")
+            elif activedofs != subset:
+                ssubset = set(subset)
+                for i in activedofs:
+                    if i not in ssubset:
+                        raise ValueError("ClosedLoopRobotCSpace IK solver must be configured with moving dofs that are within the subset of embedded dofs")
+            def sample():
+                xseed = self.lift(CSpace.sample(self))
+                return self.project(self.ambientspace.solveConstraints(xseed))
+            def sampleneighborhood(c,r):
+                xseed = self.lift(CSpace.sampleneighborhood(self,c,r))
+                return self.project(self.ambientspace.solveConstraints(xseed))
+            self.sample = sample
+            self.sampleneighborhood = sampleneighborhood
+
+    def disableInactiveCollisions(self):
+        """This modifies the collider in ambientspace to only check collisions
+        between moving pairs.  Should be called before `setup()` in most cases.
+        """
+        robot = self.robot
+        collider = self.ambientspace.collider
+        subset = self.mapping
+
+        active = [False]*robot.numLinks()
+        for i in subset:
+            active[i] = True
+        for i in range(robot.numLinks()):
+            if active[robot.link(i).getParent()]:
+                active[i] = True
+        inactive = []
+        for i in range(robot.numLinks()):
+            if not active[i]:
+                inactive.append(i)
+        #disable self-collisions for inactive objects
+        for i in inactive:
+            rindices = collider.robots[robot.index]
+            rindex = rindices[i]
+            if rindex < 0:
+                continue
+            newmask = set()
+            for j in range(robot.numLinks()):
+                if rindices[j] in collider.mask[rindex] and active[j]:
+                    newmask.add(rindices[j])
+            collider.mask[rindex] = newmask
+
+    def discretizePath(self,path,epsilon=1e-2):
+        """Only useful for ClosedLoopRobotCSpace"""
+        if hasattr(self.ambientspace,'discretizePath'):
+            return self.ambientspace.discretizePath(self.liftPath(path),epsilon)
+        else:
+            return self.liftPath(path)
+
+    def sendPathToController(self,path,controller):
+        """Sends a planned path so that it is executed correctly by the
+        controller (assumes a fully actuated robot).
+
+        Args:
+            path (list of Configs): a path in the embedded space or the
+                ambient space, as returned by a planner.
+            controller (SimRobotController): the robot's controller
+        """
+        if len(path[0]) == len(self.mapping):
+            path = self.liftPath(path)
+        if hasattr(self.ambientspace,'discretizePath'):
+            path = self.discretizePath(path)
+        self.ambientspace.sendPathToController(path,controller)
