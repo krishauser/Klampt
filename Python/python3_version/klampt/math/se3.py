@@ -83,7 +83,7 @@ def mul(T1,T2):
     (R1,t1) = T1
     (R2,t2) = T2
     R = so3.mul(R1,R2)
-    t = T1(*t2)
+    t = apply(T1,t2)
     return (R,t)
 
 def distance(T1,T2,Rweight=1.0,tweight=1.0):
