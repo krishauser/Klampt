@@ -3021,7 +3021,7 @@ bool Robot::LoadURDF(const char* fn)
         geom.Convert(Geometry::AnyGeometry3D::TriangleMesh,meshGeom,0.01);
         geomManagers[link_index].CreateEmpty();
         *geomManagers[link_index] = meshGeom;
-        //make the default appearance be grey, so that loader may override it
+        //make the default appearance be grey
         geomManagers[link_index].Appearance()->faceColor.set(0.5,0.5,0.5);
         geometry[link_index] = geomManagers[link_index];
       }
@@ -3035,8 +3035,8 @@ bool Robot::LoadURDF(const char* fn)
         this->geomManagers[link_index].SetUniqueAppearance();
         this->geomManagers[link_index].Appearance()->SetColor(c.r,c.g,c.b,c.a);
       }
-        Matrix4 ident; ident.setIdentity();
-        if(!linkNode->geomScale.isEqual(ident)) {
+      Matrix4 ident; ident.setIdentity();
+      if(!linkNode->geomScale.isEqual(ident)) {
         this->geomManagers[link_index].TransformGeometry(linkNode->geomScale);
         this->geometry[link_index] = this->geomManagers[link_index];
       }
