@@ -659,7 +659,7 @@ def ik_objective(obj,target):
             If obj is a Transform object, this element is an se3 object.
 
     Returns:
-        (IKObjective): An IK objective to be used with the klampt.ik module.
+        IKObjective: An IK objective to be used with the klampt.ik module.
 
     Since the klampt.ik module is not aware about custom frames, an
     ancestor of the object must be attached to a RobotModelLink or a
@@ -731,11 +731,11 @@ def ik_fixed_objective(obj,ref=None):
            its destination frame is used as the reference frame, and this argument
            is ignored.)
     Returns:
-        (IKObjective): An IK objective to be used with the klampt.ik module.  For
-            Point, Direction, and Frame objects this objective fixes the
-            object coordinates relative to the ref frame, or the world if None frame
-            is provided.  For Transform objects the source frame is fixed
-            relative to the destination frame.
+        IKObjective: An IK objective to be used with the klampt.ik module.  For
+        Point, Direction, and Frame objects this objective fixes the
+        object coordinates relative to the ref frame, or the world if None frame
+        is provided.  For Transform objects the source frame is fixed
+        relative to the destination frame.
 
     Since the klampt.ik module is not aware about custom frames, an
     ancestor of the object must be attached to a RobotModelLink or a

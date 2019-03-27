@@ -58,12 +58,10 @@ class RigidObjectCSpace(CSpace):
             def terrCollide(o):
                 return any(True for _ in self.collider.objectTerrainCollisions(self.rigidObject.index,o))
             self.addFeasibilityTest(self.setConfig,"setconfig")
-            self.addFeasibilityTest((lambda x: not self.selfCollision()),"self collision",dependencies="setconfig")
-            #self.addFeasibilityTest((lambda x: not self.envCollision()),"env collision")
             for o in range(self.collider.world.numRobots()):
                 self.addFeasibilityTest((lambda x,o=o: not robCollide(o)),"robot collision "+str(o)+" "+self.collider.world.robot(o).getName(),dependencies="setconfig")
             for o in range(self.collider.world.numRigidObjects()):
-                if o != self.rigidObject:
+                if o != self.rigidObject.index:
                     self.addFeasibilityTest((lambda x,o=o: not objCollide(o)),"obj collision "+str(o)+" "+self.collider.world.rigidObject(o).getName(),dependencies="setconfig")
             for o in range(self.collider.world.numTerrains()):
                 self.addFeasibilityTest((lambda x,o=o: not terrCollide(o)),"terrain collision "+str(o)+" "+self.collider.world.terrain(o).getName(),dependencies="setconfig")

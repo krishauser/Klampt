@@ -796,6 +796,7 @@ def setAttribute(name,attr,value):
 
     Accepted attributes are:
 
+    - 'robot': the index of the robot associated with this (default 0)
     - 'color': the item's color (r,g,b) or (r,g,b,a)
     - 'size': the size of the plot or text
     - 'length': the length of axes in RigidTransform
@@ -1681,7 +1682,7 @@ class VisAppearance:
         elif isinstance(item,Trajectory):
             doDraw = False
             centroid = None
-            robot = (world.robot(0) if world is not None and world.numRobots() > 0 else None)
+            robot = (world.robot(self.attributes.get("robot",0)) if world is not None and world.numRobots() > 0 else None)
             treatAsRobotTrajectory = (item.__class__ == Trajectory and len(item.milestones) > 0 and robot and len(item.milestones[0]) == robot.numLinks())
             if isinstance(item,RobotTrajectory) or treatAsRobotTrajectory:
                 ees = self.attributes.get("endeffectors",[-1])
@@ -1721,7 +1722,7 @@ class VisAppearance:
                 if name != None:
                     self.drawText(name,centroid)
         elif isinstance(item,MultiPath):
-            robot = (world.robot(0) if world is not None and world.numRobots() > 0 else None)
+            robot = (world.robot(self.attributes.get("robot",0)) if world is not None and world.numRobots() > 0 else None)
             if robot is not None and item.numSections() > 0:
                 if len(item.sections[0].configs[0]) == robot.numLinks():
                     ees = self.attributes.get("endeffectors",[-1])
@@ -1855,8 +1856,8 @@ class VisAppearance:
                 #Otherwise, can't determine the correct transforms
                 robot = item.robot
             elif world:
-                if world is not None and world.numRobots() >= 1:
-                    robot = world.robot(0)
+                if world is not None and world.numRobots() > 0:
+                    robot = world.robot(self.attributes.get("robot",0))
                 else:
                     robot = None
             else:
@@ -2039,8 +2040,8 @@ class VisAppearance:
                 print("Unable to convert item",item,"to drawable")
                 return
             elif itypes == 'Config':
-                if world:
-                    robot = world.robot(0)
+                if world and world.numRobots() >= 1:
+                    robot = world.robot(self.attributes.get("robot",0))
                     if not self.useDefaultAppearance:
                         oldAppearance = [robot.link(i).appearance().clone() for i in range(robot.numLinks())]
                         for i in range(robot.numLinks()):
@@ -2057,11 +2058,11 @@ class VisAppearance:
                         for (i,app) in enumerate(oldAppearance):
                             robot.link(i).appearance().set(app)
                 else:
-                    print("Unable to draw Config items without a world")
+                    print("Unable to draw Config items without a world or robot")
             elif itypes == 'Configs':
-                if world:
+                if world and world.numRobots() >= 1:
                     maxConfigs = self.attributes.get("maxConfigs",min(10,len(item)))
-                    robot = world.robot(0)
+                    robot = world.robot(self.attributes.get("robot",0))
                     if not self.useDefaultAppearance:
                         oldAppearance = [robot.link(i).appearance().clone() for i in range(robot.numLinks())]
                         for i in range(robot.numLinks()):
@@ -2080,7 +2081,7 @@ class VisAppearance:
                         for (i,app) in enumerate(oldAppearance):
                             robot.link(i).appearance().set(app)
                 else:
-                    print("Unable to draw Configs items without a world")
+                    print("Unable to draw Configs items without a world or robot")
             elif itypes == 'Vector3':
                 def drawRaw():
                     glDisable(GL_LIGHTING)

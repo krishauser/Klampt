@@ -147,7 +147,11 @@ class GLViewport:
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
         aspect = float(self.w)/float(self.h)
-        gluPerspective (self.fov/aspect,aspect,self.clippingplanes[0],self.clippingplanes[1])
+        n,f = self.clippingplanes
+        if self.camera.dist*1.05 > f:
+            #allow super zoomed-out views to work without adjusting far plane
+            f = self.camera.dist*1.05
+        gluPerspective (self.fov/aspect,aspect,n,f)
 
         # Initialize ModelView matrix
         glMatrixMode(GL_MODELVIEW)

@@ -24,7 +24,7 @@ def save(obj,fn):
         return obj.saveFile(fn)
     if hasattr(obj,'save'):
         return obj.save(fn)
-    type = resource.filenameToType(fn)
+    type = loader.filenameToType(fn)
     return loader.save(obj,type,fn)
 
 MAX_VIS_ITEMS = 1000
@@ -99,7 +99,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
         # Add filters
         filters = []
         print("ALLOWABLE FILE EXTENSIONS")
-        for k,v in resource.extensionToType.items():
+        for k,v in loader.extensionToTypes.items():
             filters.append("*"+k)
             print(" ",k)
         filters.append("*.xml")
@@ -353,7 +353,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
             print("Launching resource.edit",fn,"...")
             try:
                 obj = resource.edit(name=fn,value=self.active[fn].obj,world=self.world)
-            except ValueError as e:
+            except Exception as e:
                 print("Exception raised during resource.edit:",e)
                 QtWidgets.QMessageBox.warning(self.splitter,"Editing not available","Unable to edit item of type "+self.active[fn].obj.__class__.__name__)
                 return
@@ -379,11 +379,16 @@ class ResourceBrowser(QtWidgets.QMainWindow):
         robot = None
         if self.world.numRobots() > 0:
             robot = self.world.robot(0)
-        obj = resource.edit("untitled",types.make(type,robot),type=type,world=self.world)
-        if obj is not None:
+        try:
+            (save,obj) = resource.edit("untitled",types.make(type,robot),type=type,world=self.world)
+        except Exception as e:
+            print("Exception raised during resource.edit():",e)
+            QtWidgets.QMessageBox.warning(self.splitter,"Creation not available","Unable to create item of type "+type+", did you remember to add items to the reference world?")
+            return
+        if obj is not None and save:
             fn = resource.save(obj,type,directory='')
             if fn is not None:
-                self.loadedItem(obj,fn)
+                self.loadedItem(fn,obj)
         self.createComboBox.setCurrentIndex(0)
 
     def onAddClicked(self):
@@ -431,7 +436,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
         self.emptyVisPlugin.add("world",self.world)
         self.refresh()
 
-    def add(self,fn,openDir=True):
+    def add(self,fn,openDir=True,warn=True):
         assert fn not in self.active
         for i,(cfn,citem) in enumerate(self.visCache):
             if cfn == fn:
@@ -444,46 +449,54 @@ class ResourceBrowser(QtWidgets.QMainWindow):
             return
         if os.path.isdir(fn):
             if openDir:
+                failures = []
+                successes = []
                 for f in os.listdir(fn):
-                    print("Listdir gave",f)
                     if f not in ['.','..'] and os.path.splitext(f)[1] != '':
-                        self.add(os.path.join(fn,f),openDir=False)
+                        if not self.add(os.path.join(fn,f),openDir=False,warn=False):
+                            failures.append(f)
+                        else:
+                            successes.append(f)
+                if len(failures) != 0 and len(successes) != 0:
+                    QtWidgets.QMessageBox.warning(self.splitter,"Invalid items","Could not load files "+', '.join(failures)+" as Klamp't elements")
                 return True
             else:
                 return False
+        path,ext = os.path.splitext(fn)
+        #print "Extension is",ext
+        if ext in world_item_extensions:
+            try:
+                worldid = self.tempWorld.loadElement(fn)
+            except Exception:
+                if warn:
+                    QtWidgets.QMessageBox.warning(self.splitter,"Invalid item","Could not load "+fn+" as a Klamp't world element")
+                return False
+            if worldid < 0:
+                if warn:
+                    QtWidgets.QMessageBox.warning(self.splitter,"Invalid item","Could not load "+fn+" as a Klamp't world element")
+                return False
+            obj = None
+            for i in range(self.tempWorld.numRobots()):
+                if self.tempWorld.robot(i).getID() == worldid:
+                    obj = self.tempWorld.robot(i)
+                    break
+            for i in range(self.tempWorld.numRigidObjects()):
+                if self.tempWorld.rigidObject(i).getID() == worldid:
+                    obj = self.tempWorld.rigidObject(i)
+                    break
+            for i in range(self.tempWorld.numTerrains()):
+                if self.tempWorld.terrain(i).getID() == worldid:
+                    obj = self.tempWorld.terrain(i)
+                    break
+            assert obj is not None,"Hmm... couldn't find world id %d in world?"%(worldid,)
+            self.loadedItem(fn,obj)
+            return True
         try:
-            type = resource.filenameToType(fn)
-        except Exception:
-            path,ext = os.path.splitext(fn)
-            #print "Extension is",ext
-            if ext in world_item_extensions:
-                try:
-                    worldid = self.tempWorld.loadElement(fn)
-                except Exception:
-                    QtWidgets.QMessageBox.warning(self.splitter,"Invalid item","Could not load "+fn+" as a Klamp't world element")
-                    return False
-                if worldid < 0:
-                    QtWidgets.QMessageBox.warning(self.splitter,"Invalid item","Could not load "+fn+" as a Klamp't world element")
-                    return False
-                obj = None
-                for i in range(self.tempWorld.numRobots()):
-                    if self.tempWorld.robot(i).getID() == worldid:
-                        obj = self.tempWorld.robot(i)
-                        break
-                for i in range(self.tempWorld.numRigidObjects()):
-                    if self.tempWorld.rigidObject(i).getID() == worldid:
-                        obj = self.tempWorld.rigidObject(i)
-                        break
-                for i in range(self.tempWorld.numTerrains()):
-                    if self.tempWorld.terrain(i).getID() == worldid:
-                        obj = self.tempWorld.terrain(i)
-                        break
-                assert obj is not None,"Hmm... couldn't find world id %d in world?"%(worldid,)
-                self.loadedItem(fn,obj)
-                return True
-            else:
+            type = loader.filenameToType(fn)
+        except RuntimeError:
+            if warn:
                 QtWidgets.QMessageBox.warning(self.splitter,"Invalid item","Could not load file "+fn+" as a known Klamp't type")
-                return False
+            return False
         if type == 'xml':
             #try loading a world
             try:
@@ -493,15 +506,17 @@ class ResourceBrowser(QtWidgets.QMainWindow):
                     try:
                         obj = loader.load('MultiPath',fn)
                     except Exception as e:
-                        print("Trying MultiPath load, got exception",e)
-                        import traceback
-                        traceback.print_exc()
-                        QtWidgets.QMessageBox.warning(self.splitter,"Invalid WorldModel","Could not load "+fn+" as a world XML file")
+                        if warn:
+                            print("Trying MultiPath load, got exception",e)
+                            import traceback
+                            traceback.print_exc()
+                            QtWidgets.QMessageBox.warning(self.splitter,"Invalid WorldModel","Could not load "+fn+" as a world XML file")
                         return False
                     self.loadedItem(fn,obj)
                     return True
             except IOError:
-                QtWidgets.QMessageBox.warning(self.splitter,"Invalid WorldModel","Could not load "+fn+" as a world XML file")
+                if warn:
+                    QtWidgets.QMessageBox.warning(self.splitter,"Invalid WorldModel","Could not load "+fn+" as a world XML file")
                 return False
             self.loadedItem(fn,world)
             return
@@ -512,18 +527,23 @@ class ResourceBrowser(QtWidgets.QMainWindow):
             try:
                 obj = loader.fromJson(jsonobj)
             except Exception:
-                QtWidgets.QMessageBox.warning(self.splitter,"Invalid JSON","Could not recognize "+fn+" as a known Klamp't type")
+                if warn:
+                    QtWidgets.QMessageBox.warning(self.splitter,"Invalid JSON","Could not recognize "+fn+" as a known Klamp't type")
                 return False
         else:
             try:
                 obj = loader.load(type,fn)
             except Exception as e:
-                QtWidgets.QMessageBox.warning(self.splitter,"Invalid item","Error while loading file "+fn+": "+str(e))
+                if warn:
+                    QtWidgets.QMessageBox.warning(self.splitter,"Invalid item","Error while loading file "+fn+": "+str(e))
                 return False
         self.loadedItem(fn,obj)
         return True
 
     def loadedItem(self,fn,obj):
+        if fn in self.active:
+            print("Re-loaded item",fn,"so I'm first removing it")
+            self.remove(fn)
         assert fn not in self.active
         item = ResourceItem(obj)
         self.active[fn] = item
@@ -558,8 +578,9 @@ class ResourceBrowser(QtWidgets.QMainWindow):
         except:
             type = 'unknown'
         if type in robot_override_types:
-            path = ('world',self.world.robot(0).getName())
-            item.plugin.hide(path)
+            if self.world.numRobots() > 0:
+                path = ('world',self.world.robot(0).getName())
+                item.plugin.hide(path)
         item.plugin.initialize()
 
     def remove(self,fn,openDir=True):

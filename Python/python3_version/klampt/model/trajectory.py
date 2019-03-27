@@ -38,9 +38,9 @@ class Trajectory:
         the lists have the same size, the times are non-decreasing, and the configs
         are equally-sized (you can call checkValid() for this).
         """
-        if milestones == None:
+        if milestones is None:
             milestones = []
-        if times == None:
+        if times is None:
             times = list(range(len(milestones)))
         self.times = times
         self.milestones = milestones
