@@ -115,6 +115,7 @@ As an example with an IK Objective:
         jsonobj2 = json.load(f)
     obj2 = loader.fromJson(jsonobj2)  #converts from a JSON-compatible data structure
 
+
 World loading and saving
 ------------------------
 
@@ -141,6 +142,7 @@ files will be preserved, unless the geometry has been modified.
 
 To save individual elements (robots, objects, or terrains), you can use the
 ``element.saveFile(fn)`` method.
+
 
 Robot (.rob and .urdf) loading and saving
 -----------------------------------------
@@ -175,17 +177,48 @@ The `URDFtoRob <http://github.com/krishauser/Klampt/blob/master/Cpp/docs/Manual-
 .rob files. Geometric primitive link geometries will be converted to
 triangle meshes.
 
+
 ROS Communication
 -----------------
 
 If you build from source with ROS installed on your system, Klamp't will support
 many ROS types, including Pose, PoseStamped, WrenchStamped,
-Float32MultiArray, JointState, PointCloud2, Image, CameraInfo, and
-JointTrajectory.  However, at the moment, the Python interface only
-provides a method to subscribe to point clouds.  Support for other
-messages is planned in the future.
+Float32MultiArray, JointState, PointCloud2, Image, CameraInfo,
+JointTrajectory, Path, and Mesh.  When you run `cmake .` for the first time in
+the `Klampt` directory, you should be able to see messages printed out stating
+that ROS has been detected.
 
-Using :class:`~klampt.Geometry3D`, you can easily subscribe to a ROS topic containing
+
+Basic message conversions
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The :meth:`~klampt.io.ros.toMsg` and :meth:`~klampt.io.ros.fromMsg` functions convert
+back and forth between ROS and Klampt types.  You can then pass data between your
+ROS subscribers to Klampt and from Klampt to your ROS publishers.
+
+
+Automatic interface
+~~~~~~~~~~~~~~~~~~~~~
+
+:meth:`~klampt.io.ros.publisher` and :meth:`~klampt.io.ros.object_publisher` create
+an object that publishes a Klampt object to an appropriate ROS topic.  For some
+objects, like camera sensors, multiple ROS subtopics will be published under the
+given topic.  (The only difference is that the first takes in a type string while the
+second takes in a Klampt object)
+
+:meth:`~klampt.io.ros.subscriber` and :meth:`~klampt.io.ros.object_subscriber` are
+similar, but they accept a callback that is called whenever the ROS subscriber receives
+a message.  This message is converted to an appropriate Klamp't type before passing to
+your callback function.
+
+:meth:`~klampt.io.ros.broadcast_tf` and :meth:`~klampt.io.ros.listen_tf` can be used to
+synchronize transforms between ROS and Klampt.
+
+
+Live ROS geometry updates
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Using :class:`~klampt.Geometry3D`, you can directly subscribe to a ROS topic containing
 ``PointCloud2`` messages.
 This is accomplished via the :meth:`~klampt.io.SubscribeToStream` method, which
 takes as arguments the protocol (currently only "ros" protocol is
