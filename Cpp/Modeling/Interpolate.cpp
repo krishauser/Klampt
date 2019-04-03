@@ -109,8 +109,8 @@ void InterpolateDerivative(Robot& robot,const Config& a,const Config& b,Vector& 
     else if(robot.joints[i].type == RobotJoint::Floating) {
       vector<int> indices;
       robot.GetJointIndices(i,indices);
-      Vector3 oldrot(a(indices[3]),a(indices[4]),a(indices[5]));
-      Vector3 newrot(b(indices[3]),b(indices[4]),b(indices[5]));
+      EulerAngleRotation oldrot(a(indices[3]),a(indices[4]),a(indices[5]));
+      EulerAngleRotation newrot(b(indices[3]),b(indices[4]),b(indices[5]));
       Vector3 dtheta;
       assert(robot.links[indices[3]].w == Vector3(0,0,1));
       assert(robot.links[indices[4]].w == Vector3(0,1,0));
@@ -126,8 +126,8 @@ void InterpolateDerivative(Robot& robot,const Config& a,const Config& b,Vector& 
     else if(robot.joints[i].type == RobotJoint::BallAndSocket) {
       vector<int> indices;
       robot.GetJointIndices(i,indices);
-      Vector3 oldrot(a(indices[0]),a(indices[1]),a(indices[2]));
-      Vector3 newrot(b(indices[0]),b(indices[1]),b(indices[2]));
+      EulerAngleRotation oldrot(a(indices[0]),a(indices[1]),a(indices[2]));
+      EulerAngleRotation newrot(b(indices[0]),b(indices[1]),b(indices[2]));
       Vector3 dtheta;
       assert(robot.links[indices[0]].w == Vector3(0,0,1));
       assert(robot.links[indices[1]].w == Vector3(0,1,0));
@@ -173,7 +173,7 @@ void Integrate(Robot& robot,const Config& q,const Vector& dq,Config& b)
     else if(robot.joints[i].type == RobotJoint::Floating) {
       vector<int> indices;
       robot.GetJointIndices(i,indices);
-      Vector3 rot(q(indices[3]),q(indices[4]),q(indices[5]));
+      EulerAngleRotation rot(q(indices[3]),q(indices[4]),q(indices[5]));
       Vector3 drot(dq(indices[3]),dq(indices[4]),dq(indices[5]));
       assert(robot.links[indices[3]].w == Vector3(0,0,1));
       assert(robot.links[indices[4]].w == Vector3(0,1,0));
@@ -190,7 +190,7 @@ void Integrate(Robot& robot,const Config& q,const Vector& dq,Config& b)
     else if(robot.joints[i].type == RobotJoint::BallAndSocket) {
       vector<int> indices;
       robot.GetJointIndices(i,indices);
-      Vector3 rot(q(indices[0]),q(indices[1]),q(indices[2]));
+      EulerAngleRotation rot(q(indices[0]),q(indices[1]),q(indices[2]));
       Vector3 drot(dq(indices[0]),dq(indices[1]),dq(indices[2]));
       assert(robot.links[indices[0]].w == Vector3(0,0,1));
       assert(robot.links[indices[1]].w == Vector3(0,1,0));

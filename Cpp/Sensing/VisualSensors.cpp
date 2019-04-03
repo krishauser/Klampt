@@ -345,9 +345,9 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
     Vector3 vfwd,dx,dy;
     vp.getClickSource(0,0,vsrc);
     vp.getViewVector(vfwd);
-    dx = vp.xDir();
+    dx = Vector3(vp.xDir());
     dx *= 1.0/(vp.w*vp.scale);
-    dy = vp.yDir();
+    dy = Vector3(vp.yDir());
     dy *= 1.0/(vp.w*vp.scale);
     measurements.resize(0);
     int dstart = 0;

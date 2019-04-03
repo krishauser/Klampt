@@ -1978,7 +1978,7 @@ bool TimeScaling::SolveMinTime(const Vector& vmin,const Vector& vmax,
     }
     //printf("Adding %d bounds...\n",Ai.size());
     int cprev = slp.lp.A.m;
-    bool res=slp.AddVel2Bounds(i,Ai,An,bi);
+    bool res=slp.AddVel2Bounds(i,Vector(Ai),Vector(An),Vector(bi));
     if(!res) {
       printf("LP was found to be infeasible on segment %d\n",(int)i);
       //printf("Infeasible LP!\n");

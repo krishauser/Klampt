@@ -88,9 +88,9 @@ class CSpaceFeasibilityChecker : public ParabolicRamp::FeasibilityCheckerBase
 {
 public:
   CSpaceFeasibilityChecker(CSpace* _space) : space(_space) {}
-    virtual bool ConfigFeasible(const ParabolicRamp::Vector& x) { return space->IsFeasible(x); }
+    virtual bool ConfigFeasible(const ParabolicRamp::Vector& x) { return space->IsFeasible(Vector(x)); }
   virtual bool SegmentFeasible(const ParabolicRamp::Vector& a,const ParabolicRamp::Vector& b) {
-    EdgePlannerPtr e=IsVisible(space,a,b);
+    EdgePlannerPtr e=IsVisible(space,Vector(a),Vector(b));
     if(e) return true; 
     else return false;
   }

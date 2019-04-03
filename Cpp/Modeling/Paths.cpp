@@ -467,11 +467,11 @@ void Discretize(const ParabolicRamp::DynamicPath& in,Real res,vector<Real>& time
   while(t < T) {
     times.push_back(t);
     in.Evaluate(t,x);
-    milestones.push_back(x);
+    milestones.push_back(Vector(x));
     t += res;
   }
   times.push_back(T);
-  milestones.push_back(in.ramps.back().x1);
+  milestones.push_back(Vector(in.ramps.back().x1));
 }
 
 void Discretize(const Spline::PiecewisePolynomialND& in,Real res,vector<Real>& times,vector<Config>& milestones)
@@ -484,11 +484,11 @@ void Discretize(const Spline::PiecewisePolynomialND& in,Real res,vector<Real>& t
   Real t = in.StartTime();
   while(t < in.EndTime()) {
     times.push_back(t);
-    milestones.push_back(in.Evaluate(t));
+    milestones.push_back(Vector(in.Evaluate(t)));
     t += res;
   }
   times.push_back(in.EndTime());
-  milestones.push_back(in.End());  
+  milestones.push_back(Vector(in.End()));  
 }
 
 ///Split up the path into keyframes at a given resolution
@@ -553,14 +553,14 @@ void Discretize(const ParabolicRamp::DynamicPath& in,Real res,vector<Real>& time
   while(t < T) {
     times.push_back(t);
     in.Evaluate(t,x);
-    milestones.push_back(x);
+    milestones.push_back(Vector(x));
     in.Derivative(t,x);
-    dmilestones.push_back(x);
+    dmilestones.push_back(Vector(x));
     t += res;
   }
   times.push_back(T);
-  milestones.push_back(in.ramps.back().x1);
-  dmilestones.push_back(in.ramps.back().dx1);
+  milestones.push_back(Vector(in.ramps.back().x1));
+  dmilestones.push_back(Vector(in.ramps.back().dx1));
 }
 
 void Discretize(const Spline::PiecewisePolynomialND& in,Real res,vector<Real>& times,vector<Config>& milestones,vector<Vector>& dmilestones)
@@ -574,12 +574,12 @@ void Discretize(const Spline::PiecewisePolynomialND& in,Real res,vector<Real>& t
   Real t = in.StartTime();
   while(t < in.EndTime()) {
     times.push_back(t);
-    milestones.push_back(in.Evaluate(t));
+    milestones.push_back(Vector(in.Evaluate(t)));
     t += res;
   }
   times.push_back(in.EndTime());
-  milestones.push_back(in.End());  
-  dmilestones.push_back(in.Derivative(in.EndTime()));
+  milestones.push_back(Vector(in.End()));  
+  dmilestones.push_back(Vector(in.Derivative(in.EndTime())));
 }
 
 

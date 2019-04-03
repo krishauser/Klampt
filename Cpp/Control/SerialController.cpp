@@ -131,10 +131,10 @@ void SerialController::Update(Real dt)
 
       //everything checks out -- now send the command
       if(torquecmd.empty()) {
-	SetPIDCommand(qcmd,dqcmd);
+	SetPIDCommand(Vector(qcmd),Vector(dqcmd));
       }
       else
-	SetFeedforwardPIDCommand(qcmd,dqcmd,torquecmd);
+	SetFeedforwardPIDCommand(Vector(qcmd),Vector(dqcmd),Vector(torquecmd));
     }
     else if(dqcmdptr) {
       if(tcmdptr == NULL) {
@@ -171,7 +171,7 @@ void SerialController::Update(Real dt)
 	return;
       }
 
-      SetTorqueCommand(torquecmd);
+      SetTorqueCommand(Vector(torquecmd));
     }
     else {
       fprintf(stderr,"SerialController: message doesn't contain proper command type (qcmd, dqcmd, or torquecmd)\n");
