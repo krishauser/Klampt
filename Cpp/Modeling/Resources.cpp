@@ -1297,7 +1297,7 @@ ResourcePtr CastResource(ResourcePtr& item,const char* type)
   else if(0==strcmp("vector<double>",item->Type())) {
     FloatArrayResource* ar = dynamic_cast<FloatArrayResource*>(item.get());
     if(0==strcmp(type,"Config")) {
-      return ResourcePtr(new ConfigResource(ar->data));
+      return ResourcePtr(new ConfigResource(Vector(ar->data)));
     }
   }
   fprintf(stderr,"CastResource: No conversion from %s to %s\n",item->Type(),type);

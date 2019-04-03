@@ -327,23 +327,23 @@ Real PolynomialMotionQueue::CurTime() const
 
 Config PolynomialMotionQueue::CurConfig() const
 {
-  return path.Evaluate(pathOffset);
+  return Vector(path.Evaluate(pathOffset));
 }
 
 Config PolynomialMotionQueue::CurVelocity() const
 {
-  return path.Derivative(pathOffset);
+  return Vector(path.Derivative(pathOffset));
 }
 
 Config PolynomialMotionQueue::Endpoint() const
 {
-  return path.End();
+  return Vector(path.End());
 }
 
 Vector PolynomialMotionQueue::EndpointVelocity() const
 {
   if(path.elements.empty()) return Vector();
-  return path.Derivative(path.EndTime());
+  return Vector(path.Derivative(path.EndTime()));
 }
 
 bool PolynomialMotionQueue::Done() const
@@ -404,7 +404,7 @@ void PolynomialPathController::Update(Real dt)
 
 void PolynomialPathController::Reset()
 {
-  PolynomialMotionQueue::SetConstant(path.Evaluate(pathOffset));
+  PolynomialMotionQueue::SetConstant(Vector(path.Evaluate(pathOffset)));
 }
 
 bool PolynomialPathController::ReadState(File& f)

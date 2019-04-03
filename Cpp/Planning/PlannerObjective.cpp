@@ -125,7 +125,7 @@ Real PlannerObjectiveBase::PathCost(const ParabolicRamp::DynamicPath& path,Real 
     c += IncrementalCost(t,path.ramps[i]);
     t += path.ramps[i].endTime;
   }
-  c += TerminalCost(t,path.ramps.back().x1,path.ramps.back().dx1);
+  c += TerminalCost(t,Vector(path.ramps.back().x1),Vector(path.ramps.back().dx1));
   return c;
 }
 
@@ -521,7 +521,7 @@ Real CartesianTrackingObjective::IntegrateSegment(int index,Real a,Real b,Real t
     Real t = (a+b)*0.5 + g5points[i]*(b-a)*0.5;
     vector<Real> qt;
     ramp.Evaluate(t-tstart,qt);
-    sum += g5weights[i] * DifferentialCost(t,qt,index);
+    sum += g5weights[i] * DifferentialCost(t,Vector(qt),index);
   }
   return sum*(b-a)*0.5;
 }

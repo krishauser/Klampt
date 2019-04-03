@@ -861,7 +861,7 @@ int DynamicMotionPlannerBase::SmartShortcut(Real tstart,ParabolicRamp::DynamicPa
     accumCosts[i+1] = accumCosts[i]+goal->IncrementalCost(startTimes[i],path.ramps[i]);
     startTimes[i+1] = startTimes[i]+path.ramps[i].endTime;
   }
-  Real terminalCost = goal->TerminalCost(startTimes.back(),path.ramps.back().x1,path.ramps.back().dx1);
+  Real terminalCost = goal->TerminalCost(startTimes.back(),Vector(path.ramps.back().x1),Vector(path.ramps.back().dx1));
 
   bool differentialTimeInvariant = goal->DifferentialTimeInvariant();
   bool terminalTimeInvariant = goal->TerminalTimeInvariant();
@@ -904,7 +904,7 @@ int DynamicMotionPlannerBase::SmartShortcut(Real tstart,ParabolicRamp::DynamicPa
 
     bool doShortcut = false;
     if(!terminalTimeInvariant) {  //then measure the new cost of the goal
-      newTerminalCost = goal->TerminalCost(startTimes.back()+deltat,path.ramps.back().x1,path.ramps.back().dx1);
+      newTerminalCost = goal->TerminalCost(startTimes.back()+deltat,Vector(path.ramps.back().x1),Vector(path.ramps.back().dx1));
     }
     if(differentialTimeInvariant) { //then it doesn't matter what happens after the intermediate segment
       //prior cost of intermediate segments
@@ -984,7 +984,7 @@ bool DynamicMotionPlannerBase::GetMilestoneRamp(const Config& q0,const Vector& d
 
 bool DynamicMotionPlannerBase::GetMilestoneRamp(const ParabolicRamp::DynamicPath& curPath,const Config& q,ParabolicRamp::DynamicPath& ramp) const
 {
-  return GetMilestoneRamp(curPath.StartConfig(),curPath.StartVelocity(),q,ramp);
+  return GetMilestoneRamp(Vector(curPath.StartConfig()),Vector(curPath.StartVelocity()),q,ramp);
 }
 
 //returns true if the ramp from the current config to q is collision free
@@ -1054,7 +1054,7 @@ int DynamicIKPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
   Real Cstart = EvaluatePathCost(path);
   if(Cstart < 1e-3) return Failure;
 
-  robot->UpdateConfig(path.EndConfig());
+  robot->UpdateConfig(Vector(path.EndConfig()));
   bool res=Optimize(goal,robot,10,1e-3);
   if(!res) { //optimization failed, do we do anything?
     fprintf(flog,"IK optimization failed\n");
@@ -1105,7 +1105,7 @@ int DynamicPerturbationPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real c
   iteration++;
   Config q;
   if(iteration < perturbLimit) 
-    cspace->SampleNeighborhood(path.EndConfig(),iteration*perturbationStep,q);
+    cspace->SampleNeighborhood(Vector(path.EndConfig()),iteration*perturbationStep,q);
   else
     cspace->Sample(q);
   Real cost=EvaluateDirectPathCost(path,q);
@@ -1120,7 +1120,7 @@ int DynamicPerturbationPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real c
     ParabolicRamp::Vector temp;
     path.Evaluate(0,temp);
     Config qmid;
-    cspace->Interpolate(temp,q,0.5,qmid);
+    cspace->Interpolate(Vector(temp),q,0.5,qmid);
     q = qmid;
   }
   return Failure;
@@ -1149,7 +1149,7 @@ int DynamicPerturbationIKPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real
   if(iteration > perturbLimit) 
     cspace->Sample(q);
   else
-    cspace->SampleNeighborhood(path.EndConfig(),iteration*perturbationStep,q);
+    cspace->SampleNeighborhood(Vector(path.EndConfig()),iteration*perturbationStep,q);
   robot->UpdateConfig(q);
   bool res=Optimize(goal,robot,1,1e-3);
   if(!res) { //IK failed, do we do anything
@@ -1170,7 +1170,7 @@ int DynamicPerturbationIKPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real
     ParabolicRamp::Vector temp;
     path.Evaluate(0,temp);
     Config qmid;
-    cspace->Interpolate(temp,q,0.5,qmid);
+    cspace->Interpolate(Vector(temp),q,0.5,qmid);
     q = qmid;
   }
   return Failure;
@@ -1301,16 +1301,16 @@ int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
   if (!goal) return Failure;
 
   if(stateSpace==NULL) {
-    stateSpace.reset(new RampCSpaceAdaptor(cspace,velMax,accMax));
-    stateSpace->qMin=qMin;
-    stateSpace->qMax=qMax;
+    stateSpace.reset(new RampCSpaceAdaptor(cspace,Vector(velMax),Vector(accMax)));
+    stateSpace->qMin=Vector(qMin);
+    stateSpace->qMax=Vector(qMax);
     stateSpace->visibilityTolerance = settings->robotSettings[0].collisionEpsilon;
   }
 
 
   Assert(path.IsValid());
   Timer timer;
-  if(goal->TerminalCost(tstart+path.GetTotalTime(),path.ramps.back().x1,path.ramps.back().dx1) < 1e-3) {
+  if(goal->TerminalCost(tstart+path.GetTotalTime(),Vector(path.ramps.back().x1),Vector(path.ramps.back().dx1)) < 1e-3) {
     fprintf(flog,"Already at solution, doing shortcutting...\n");
     Shortcut(path,cutoff);
     Assert(path.IsValid());
@@ -1319,7 +1319,7 @@ int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
 
   RRTPlanner::Node* bestNode=NULL;
   Real bestPathCost = EvaluatePathCost(path);
-  fprintf(flog,"*** Total cost %g, terminal cost %g ***\n",bestPathCost,goal->TerminalCost(0.0,path.ramps.back().x1,path.ramps.back().dx1));
+  fprintf(flog,"*** Total cost %g, terminal cost %g ***\n",bestPathCost,goal->TerminalCost(0.0,Vector(path.ramps.back().x1),Vector(path.ramps.back().dx1)));
 
   rrt = NULL;
   //create new RRT tree
@@ -1329,7 +1329,7 @@ int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
 
   //printf("Adding old path...\n");
   //initialize tree with existing path
-  RRTPlanner::Node* n=rrt->AddMilestone(MakeState(path.ramps[0].x0,path.ramps[0].dx0));
+  RRTPlanner::Node* n=rrt->AddMilestone(MakeState(Vector(path.ramps[0].x0),Vector(path.ramps[0].dx0)));
   if(!stateSpace->IsFeasible(n->x)) {
     fprintf(flog,"Warning, start state is infeasible!\n");
   }
@@ -1355,7 +1355,7 @@ int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
   }
   //extending path destinations
   for(size_t i=0;i<path.ramps.size();i++) {
-    n = ((TreeRoadmapPlanner*)rrt.get())->Extend(n,MakeState(path.ramps[i].x1,path.ramps[i].dx1));
+    n = ((TreeRoadmapPlanner*)rrt.get())->Extend(n,MakeState(Vector(path.ramps[i].x1),Vector(path.ramps[i].dx1)));
     //sometimes there's an error with SolveMinTime...
     ((RampEdgeChecker*)(n->edgeFromParent().get()))->path.ramps.resize(1,path.ramps[i]);
     Assert(path.ramps[i].IsValid());
@@ -1870,9 +1870,9 @@ DynamicHybridTreePlanner::Node* DynamicHybridTreePlanner::TryIKExtend(Node* node
     assert(IsFinite(f0));
     opt.bmin.resize(opt.x.n);
     opt.bmax.resize(opt.x.n);
-    opt.bmin.copySubVector(0,stateSpace->qMin);
+    opt.bmin.copySubVector(0,Vector(stateSpace->qMin));
     opt.bmin(robot->q.n) = 0.01;
-    opt.bmax.copySubVector(0,stateSpace->qMax);
+    opt.bmax.copySubVector(0,Vector(stateSpace->qMax));
     opt.bmax(robot->q.n) = 1.0;
     for(int i=0;i<opt.x.n;i++) {
       if(opt.x(i) < opt.bmin(i) || opt.x(i) > opt.bmax(i)) 
@@ -2093,7 +2093,7 @@ int DynamicHybridTreePlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cut
   if (!goal) return Failure;
 
   if(stateSpace==NULL) {
-    stateSpace.reset(new RampCSpaceAdaptor(cspace,velMax,accMax));
+    stateSpace.reset(new RampCSpaceAdaptor(cspace,Vector(velMax),Vector(accMax)));
     stateSpace->qMin = qMin;
     stateSpace->qMax = qMax;
     assert((int)path.velMax.size() == (int)robot->q.size());
@@ -2116,12 +2116,12 @@ int DynamicHybridTreePlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cut
 
   Node* bestNode=NULL;
   Real bestTotalCost = EvaluatePathCost(path,tstart);
-  fprintf(flog,"*** Current total cost %g, terminal cost %g *** \n",bestTotalCost,goal->TerminalCost(tstart+path.GetTotalTime(),path.ramps.back().x1,path.ramps.back().dx1));
+  fprintf(flog,"*** Current total cost %g, terminal cost %g *** \n",bestTotalCost,goal->TerminalCost(tstart+path.GetTotalTime(),Vector(path.ramps.back().x1),Vector(path.ramps.back().dx1)));
   if(bestTotalCost < 1e-5) return Success;
 
   //fprintf(flog,"Adding old path...\n");
   //initialize tree with existing path
-  if(!stateSpace->IsFeasible(path.ramps[0].x0,path.ramps[0].dx0)) {
+  if(!stateSpace->IsFeasible(Vector(path.ramps[0].x0),Vector(path.ramps[0].dx0))) {
     fprintf(flog,"Warning, start state is infeasible!\n");
   }
   root.reset(new Node());
@@ -2391,7 +2391,7 @@ int DynamicHybridTreePlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cut
 
   Assert(path.IsValid());
   if(cutoff > timer.ElapsedTime()) {
-    Vector xold = path.ramps.back().x1;
+    Vector xold = Vector(path.ramps.back().x1);
     fprintf(flog,"Devoting %g seconds to smoothing new path\n",cutoff-timer.ElapsedTime());
     SmartShortcut(tstart,path,cutoff-timer.ElapsedTime());
     assert(path.IsValid());

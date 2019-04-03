@@ -214,7 +214,8 @@ void OptimizeMDP(TabulatedController& controller,
   //if an actuator is turned off, don't consider it separately
   for(size_t i=0;i<robot.drivers.size();i++) 
     if(robot.drivers[i].tmax == robot.drivers[i].tmin) maxs[i]=1;
-  vector<int> index(robot.drivers.size(),0);
+  IntTuple index;
+  index.resize(robot.drivers.size(),0);
   do {
     for(size_t i=0;i<robot.drivers.size();i++) {
       if(index[i]==0) a[i] = robot.drivers[i].tmin;

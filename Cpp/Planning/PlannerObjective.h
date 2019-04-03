@@ -103,7 +103,7 @@ class ConfigObjective : public PlannerObjectiveBase
     return qend.distance(qgoal);
   }
   virtual Real PathCost(const ParabolicRamp::DynamicPath& path,Real tstart=0) {
-    return qgoal.distance(path.ramps.back().x1);
+    return qgoal.distance(Vector(path.ramps.back().x1));
   }
   virtual Real Delta(PlannerObjectiveBase* priorGoal);
   virtual bool TerminalTimeInvariant() const { return true; }
@@ -126,7 +126,7 @@ class VelocityObjective : public PlannerObjectiveBase
     return dqend.distance(vgoal);
   }
   virtual Real PathCost(const ParabolicRamp::DynamicPath& path,Real tstart=0) {
-    return vgoal.distance(path.ramps.back().dx1);
+    return vgoal.distance(Vector(path.ramps.back().dx1));
   }
   virtual Real Delta(PlannerObjectiveBase* priorGoal);
   virtual bool TerminalTimeInvariant() const { return true; }
@@ -180,7 +180,7 @@ class CartesianObjective : public PlannerObjectiveBase
 
   virtual Real TerminalCost(Real tend,const Vector& qend,const Vector& dqend);
   virtual Real PathCost(const ParabolicRamp::DynamicPath& path,Real tstart=0) {
-    return TerminalCost(0,path.ramps.back().x1,path.ramps.back().dx1);
+    return TerminalCost(0,Vector(path.ramps.back().x1),Vector(path.ramps.back().dx1));
   }
   virtual Real Delta(PlannerObjectiveBase* priorGoal);
   virtual bool TerminalTimeInvariant() const { return true; }
@@ -205,7 +205,7 @@ class IKObjective : public PlannerObjectiveBase
   virtual Real TerminalCost(Real tend,const Vector& qend,const Vector& dqend);
 
   virtual Real PathCost(const ParabolicRamp::DynamicPath& path,Real tstart=0) {
-    return TerminalCost(0,path.ramps.back().x1,path.ramps.back().dx1);
+    return TerminalCost(0,Vector(path.ramps.back().x1),Vector(path.ramps.back().dx1));
   }
 
   virtual Real Delta(PlannerObjectiveBase* priorGoal);

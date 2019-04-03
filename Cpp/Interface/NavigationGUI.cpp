@@ -314,7 +314,7 @@ void GLNavigationBackend::DragZoom(int dx,int dy)
 
 void GLNavigationBackend::DragTruck(int dx,int dy)
 {
-  Vector3 v = viewport.zDir();
+  Vector3 v(viewport.zDir());
   camera.tgt.madd(v,Real(dy)/viewport.scale/**camera.dist*/);
   SHOW_VIEW_TARGET(0.5);
   SendRefresh();
