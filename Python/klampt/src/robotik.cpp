@@ -83,7 +83,7 @@ void IKObjective::setRelativePoint(int link1,int link2,const double p1[3],const 
   goal.link = link1;
   goal.destLink = link2;
   goal.SetFreeRotation();
-  goal.SetFixedPosition(p2);
+  goal.SetFixedPosition(Vector3(p2));
   goal.localPosition.set(p1);
 }
 
@@ -125,7 +125,7 @@ void IKObjective::setFreePosition()
 void IKObjective::setFixedPosConstraint(const double tlocal[3],const double tworld[3])
 {
   goal.localPosition.set(tlocal);
-  goal.SetFixedPosition(tworld);
+  goal.SetFixedPosition(Vector3(tworld));
 }
 
 void IKObjective::setPlanarPosConstraint(const double tlocal[3],const double nworld[3],double oworld)
@@ -137,7 +137,7 @@ void IKObjective::setPlanarPosConstraint(const double tlocal[3],const double nwo
 void IKObjective::setLinearPosConstraint(const double tlocal[3],const double sworld[3],const double dworld[3])
 {
   goal.localPosition.set(tlocal);
-  goal.SetLinearPosition(sworld,dworld);
+  goal.SetLinearPosition(Vector3(sworld),Vector3(dworld));
 }
 
 void IKObjective::setFreeRotConstraint()
@@ -152,7 +152,7 @@ void IKObjective::setFixedRotConstraint(const double R[9])
 
 void IKObjective::setAxialRotConstraint(const double alocal[3],const double aworld[3])
 {
-  goal.SetAxisRotation(alocal,aworld);
+  goal.SetAxisRotation(Vector3(alocal),Vector3(aworld));
 }
 
 int IKObjective::numPosDims() const
@@ -283,7 +283,7 @@ GeneralizedIKObjective::GeneralizedIKObjective(const RigidObjectModel& o1,const 
 void GeneralizedIKObjective::setPoint(const double p1[3],const double p2[3])
 {
   goal.localPosition.set(p1);
-  goal.SetFixedPosition(p2);
+  goal.SetFixedPosition(Vector3(p2));
 }
 
 void GeneralizedIKObjective::setPoints(PyObject* p1s,PyObject* p2s)
@@ -385,8 +385,8 @@ void IKSolver::setJointLimits(const std::vector<double>& _qmin,const std::vector
     qmax.resize(0);
   }
   else {
-    qmin = _qmin;
-    qmax = _qmax;
+    qmin = Vector(_qmin);
+    qmax = Vector(_qmax);
     useJointLimits = true;
   }
 }
