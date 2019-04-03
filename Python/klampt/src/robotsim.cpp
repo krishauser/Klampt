@@ -4018,7 +4018,7 @@ void Simulator::setSetting(const std::string& name,const std::string& value)
 {
   ODESimulatorSettings& settings = sim->odesim.GetSettings();
   stringstream ss(value);
-  if(name == "gravity") { Vector3 g; ss >> g; sim->odesim.SetGravity(settings.gravity); }
+  if(name == "gravity") { Vector3 g; ss >> g; sim->odesim.SetGravity(g); }
   else if(name == "simStep") ss >> sim->simStep;
   else if(name == "boundaryLayerCollisions") ss >> settings.boundaryLayerCollisions;
   else if(name == "rigidObjectCollisions") ss >> settings.rigidObjectCollisions;
@@ -4624,7 +4624,7 @@ void SimRobotController::setLinear(const std::vector<double>& q,double dt)
   EnablePathControl(sim->sim->robotControllers[index].get());
   PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
   mq->Cut(0);
-  mq->AppendLinear(q,dt);
+  mq->AppendLinear(Vector(q),dt);
 }
 void SimRobotController::setCubic(const std::vector<double>& q,const std::vector<double>& v,double dt)
 {
@@ -4637,7 +4637,7 @@ void SimRobotController::setCubic(const std::vector<double>& q,const std::vector
   EnablePathControl(sim->sim->robotControllers[index].get());
   PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
   mq->Cut(0);
-  mq->AppendCubic(q,v,dt);
+  mq->AppendCubic(Vector(q),Vector(v),dt);
 }
 void SimRobotController::addLinear(const std::vector<double>& q,double dt)
 {
@@ -4646,7 +4646,7 @@ void SimRobotController::addLinear(const std::vector<double>& q,double dt)
   }
   EnablePathControl(sim->sim->robotControllers[index].get());
   PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
-  mq->AppendLinear(q,dt);
+  mq->AppendLinear(Vector(q),dt);
 }
 
 void SimRobotController::addCubic(const std::vector<double>& q,const std::vector<double>& v,double dt)
@@ -4659,7 +4659,7 @@ void SimRobotController::addCubic(const std::vector<double>& q,const std::vector
   }
   EnablePathControl(sim->sim->robotControllers[index].get());
   PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
-  mq->AppendCubic(q,v,dt);
+  mq->AppendCubic(Vector(q),Vector(v),dt);
 }
 
 void SimRobotController::addMilestone(const vector<double>& q,const vector<double>& dq)
