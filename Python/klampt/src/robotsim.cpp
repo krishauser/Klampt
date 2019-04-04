@@ -286,9 +286,22 @@ class ManualOverrideController : public RobotController
 
 bool ManualOverrideController::ReadState(File& f)
 {
-  if(!ReadFile(f,override)) return false;
-  if(!override) return base->ReadState(f);
-  return RobotController::ReadState(f);
+  if(!ReadFile(f,override)) {
+    printf("Unable to read override bit\n");
+    return false;
+  }
+  if(!override) {
+    if(!base->ReadState(f)) {
+      printf("Unable to read base controller\n");
+      return false;
+    }
+    return true;
+  }
+  if(!RobotController::ReadState(f)) {
+    printf("Unable to read RobotController\n");
+    return false;
+  }
+  return true;
 }
 
 bool ManualOverrideController::WriteState(File& f) const
@@ -1573,6 +1586,40 @@ void Appearance::setPointSize(float size)
   app->vertexSize = size;
 }
 
+void Appearance::setCreaseAngle(float creaseAngleRads)
+{
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) return;
+  if(!isStandalone()) {
+    RobotWorld& world=*worlds[this->world]->world;
+    ManagedGeometry& geom = GetManagedGeometry(world,id);
+    if(geom.IsAppearanceShared()) {
+      geom.SetUniqueAppearance();
+      app = geom.Appearance();
+    }
+  }
+  app->creaseAngle = creaseAngleRads;
+}
+
+void Appearance::setSilhouette(float radius,float r,float g,float b,float a)
+{
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) return;
+  if(!isStandalone()) {
+    RobotWorld& world=*worlds[this->world]->world;
+    ManagedGeometry& geom = GetManagedGeometry(world,id);
+    if(geom.IsAppearanceShared()) {
+      geom.SetUniqueAppearance();
+      app = geom.Appearance();
+    }
+  }
+  app->silhouetteRadius = radius;
+  app->silhouetteColor.rgba[0] = r;
+  app->silhouetteColor.rgba[1] = g;
+  app->silhouetteColor.rgba[2] = b;
+  app->silhouetteColor.rgba[3] = a;
+}
+
 void Appearance::drawGL()
 {
   shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
@@ -1588,6 +1635,8 @@ void Appearance::drawWorldGL(Geometry3D& g)
   if(!geom) return;
   if(!app) {
     app = make_shared<GLDraw::GeometryAppearance>();
+    app->creaseAngle = DtoR(30.0);
+    app->silhouetteRadius = 0.0025;
   }
   if(app->geom) {
     if(app->geom != geom.get()) {
@@ -1612,6 +1661,8 @@ void Appearance::drawGL(Geometry3D& g)
   if(!geom) return;
   if(!app) {
     app = make_shared<GLDraw::GeometryAppearance>();
+    app->creaseAngle = DtoR(30.0);
+    app->silhouetteRadius = 0.0025;
   }
   if(app->geom) {
     if(app->geom != geom.get()) {
@@ -3270,6 +3321,7 @@ void RobotModel::randomizeConfig(double unboundedStdDeviation)
 
 void RobotModel::drawGL(bool keepAppearance)
 {
+  if(!worlds[this->world]) throw PyException("RobotModel is associated with a deleted world");
   RobotWorld& world = *worlds[this->world]->world;
   if(keepAppearance) {
     world.robotViews[index].Draw();
@@ -3466,6 +3518,7 @@ bool RigidObjectModel::saveFile(const char* fn,const char* geometryName)
 
 const char* RigidObjectModel::getName() const
 {
+  if(!worlds[this->world]) throw PyException("RigidObjectModel is associated with a deleted world");
   RobotWorld& world = *worlds[this->world]->world;
   return world.rigidObjects[index]->name.c_str();
 }
@@ -3475,12 +3528,14 @@ void RigidObjectModel::setName(const char* name)
   if(index < 0) {
     throw PyException("Cannot set the name of an empty rigid object");
   }
+  if(!worlds[this->world]) throw PyException("RigidObjectModel is associated with a deleted world");
   RobotWorld& world = *worlds[this->world]->world;
   world.rigidObjects[index]->name = name;
 }
 
 int RigidObjectModel::getID() const
 {
+  if(!worlds[this->world]) throw PyException("RigidObjectModel is associated with a deleted world");
   RobotWorld& world = *worlds[this->world]->world;
   return world.RigidObjectID(index);
 }
@@ -3590,6 +3645,7 @@ void RigidObjectModel::setVelocity(const double angularVelocity[3],const double 
 
 void RigidObjectModel::drawGL(bool keepAppearance)
 {
+  if(!worlds[this->world]) throw PyException("RigidObjectModel is associated with a deleted world");
   RobotWorld& world = *worlds[this->world]->world;
   if(keepAppearance) {
     world.rigidObjects[index]->DrawGL();
@@ -3628,6 +3684,7 @@ bool TerrainModel::saveFile(const char* fn,const char* geometryName)
 
 const char* TerrainModel::getName() const
 {
+  if(!worlds[this->world]) throw PyException("TerrainModel is associated with a deleted world");
   RobotWorld& world = *worlds[this->world]->world;
   return world.terrains[index]->name.c_str();
 }
@@ -3637,6 +3694,7 @@ void TerrainModel::setName(const char* name)
   if(index < 0) {
     throw PyException("Cannot set the name of an empty rigid object");
   }
+  if(!worlds[this->world]) throw PyException("TerrainModel is associated with a deleted world");
   RobotWorld& world = *worlds[this->world]->world;
   world.terrains[index]->name = name;
 }
@@ -3644,6 +3702,7 @@ void TerrainModel::setName(const char* name)
 
 int TerrainModel::getID() const
 {
+  if(!worlds[this->world]) throw PyException("TerrainModel is associated with a deleted world");
   RobotWorld& world = *worlds[this->world]->world;
   return world.TerrainID(index);
 }
@@ -3676,6 +3735,7 @@ void TerrainModel::setFriction(double friction)
 
 void TerrainModel::drawGL(bool keepAppearance)
 {
+  if(!worlds[this->world]) throw PyException("TerrainModel is associated with a deleted world");
   RobotWorld& world = *worlds[this->world]->world;
   if(keepAppearance) {
     world.terrains[index]->DrawGL();
