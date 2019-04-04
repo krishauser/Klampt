@@ -76,23 +76,6 @@ void GLCheckeredSphere::Draw()
 }
 
 
-
-
-void InitDisplayLists(Robot& robot,vector<GLDisplayList>& displayLists)
-{
-  displayLists.resize(robot.links.size());
-  for(size_t i=0;i<robot.links.size();i++) {
-    if(!displayLists[i].isCompiled()) {
-      displayLists[i].beginCompile();
-      glBegin(GL_POINTS);
-      glVertex3f(0,0,0);
-      glEnd();
-      robot.DrawLinkGL(i);
-      displayLists[i].endCompile();
-    }
-  }
-}
-
 ViewRobot::ViewRobot(Robot* _robot)
   :robot(_robot)
 {
@@ -139,8 +122,9 @@ void ViewRobot::Draw()
     glPushMatrix();
     glMultMatrix(mat);
     GLDraw::GeometryAppearance& a = Appearance(i);
-    if(a.geom != robot->geometry[i].get())
+    if(a.geom != robot->geometry[i].get()) {
       a.Set(*robot->geometry[i]);
+    }
     a.DrawGL();
     glPopMatrix();
   }
@@ -278,7 +262,7 @@ GLDraw::GeometryAppearance& ViewRobot::Appearance(int link)
 {
   Assert(robot!=NULL);
   if(appearanceStack.empty()) {
-    if(robot->geomManagers[link].IsAppearanceShared())
+    if(robot->geomManagers[link].IsAppearanceShared()) 
       robot->geomManagers[link].SetUniqueAppearance();
     return *robot->geomManagers[link].Appearance();
   }
@@ -289,14 +273,37 @@ void ViewRobot::PushAppearance()
 {
   if(robot==NULL) return;
   vector<GLDraw::GeometryAppearance> app(robot->links.size());
-  for(size_t i=0;i<robot->links.size();i++)
+  for(size_t i=0;i<robot->links.size();i++) {
     app[i] = Appearance(i);
+    if(Appearance(i).faceDisplayList)
+      Assert(app[i].faceDisplayList);
+  }
   appearanceStack.push_back(app);
 }
 
 void ViewRobot::PopAppearance()
 {
-  if(!appearanceStack.empty()) appearanceStack.resize(appearanceStack.size()-1);
+  if(!appearanceStack.empty()) {
+    //may want to copy back face display lists up the stack
+    if(appearanceStack.size()==1) {
+      for(size_t i=0;i<robot->links.size();i++) {
+        if(!robot->geomManagers[i].Appearance()->faceDisplayList)
+          robot->geomManagers[i].Appearance()->faceDisplayList = appearanceStack.back()[i].faceDisplayList;
+        if(!robot->geomManagers[i].Appearance()->vertexDisplayList)
+          robot->geomManagers[i].Appearance()->vertexDisplayList = appearanceStack.back()[i].vertexDisplayList;
+      }
+    }
+    else {
+      size_t n=appearanceStack.size()-2;
+      for(size_t i=0;i<robot->links.size();i++) {
+        if(!appearanceStack[n][i].faceDisplayList)
+          appearanceStack[n][i].faceDisplayList = appearanceStack.back()[i].faceDisplayList;
+        if(!appearanceStack[n][i].vertexDisplayList)
+          appearanceStack[n][i].vertexDisplayList = appearanceStack.back()[i].vertexDisplayList;
+      }
+    }
+    appearanceStack.resize(appearanceStack.size()-1);
+  }
 }
 void ViewRobot::RestoreAppearance()
 
