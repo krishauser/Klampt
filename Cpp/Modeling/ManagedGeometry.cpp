@@ -85,6 +85,8 @@ shared_ptr<Geometry::AnyCollisionGeometry3D> ManagedGeometry::CreateEmpty()
   dynamicGeometrySource.clear();
   geometry = make_shared<Geometry::AnyCollisionGeometry3D>();
   appearance = make_shared<GLDraw::GeometryAppearance>();
+  appearance->creaseAngle = DtoR(30.0);
+  appearance->silhouetteRadius = 0.0025;
   appearance->geom = geometry.get();
   return geometry;
 }
@@ -95,6 +97,8 @@ void ManagedGeometry::Clear()
   dynamicGeometrySource.clear();
   geometry = NULL;
   appearance = make_shared<GLDraw::GeometryAppearance>();
+  appearance->creaseAngle = DtoR(30.0);
+  appearance->silhouetteRadius = 0.0025;
 }
 
 bool ManagedGeometry::Load(const string& filename)
@@ -198,6 +202,8 @@ bool ManagedGeometry::LoadNoCache(const string& filename)
       if(geometry->type == Geometry::AnyGeometry3D::TriangleMesh) {
         if(geometry->TriangleMeshAppearanceData() != NULL) {
           appearance = make_shared<GLDraw::GeometryAppearance>(*geometry->TriangleMeshAppearanceData());
+          appearance->creaseAngle = DtoR(30.0);
+          appearance->silhouetteRadius = 0.0025;
           appearance->Set(*geometry);
         }
         else {
@@ -418,7 +424,7 @@ void ManagedGeometry::DrawGL()
 {
   if(!geometry) return;
   Assert(appearance->geom != NULL);
-  Assert(appearance->geom == geometry.get());
+  //Assert(appearance->geom == geometry.get());
   if(appearance->geom == NULL)
     appearance->Set(*geometry);
   appearance->DrawGL();
