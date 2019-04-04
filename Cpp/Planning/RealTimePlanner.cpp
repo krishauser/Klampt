@@ -1534,7 +1534,7 @@ int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
     Assert(bestNode == rrt->milestones[0] || bestNode->hasAncestor(rrt->milestones[0]));
     rrt->CreatePath(rrt->milestones[0],bestNode,rampPath);
     Assert(!rampPath.edges.empty());
-    Assert(rampPath.edges.front()->Start() == rrt->milestones[0]);
+    Assert(Vector(rampPath.edges.front()->Start()) == rrt->milestones[0]->x);
 
     /*
     //test feasibility of last state
