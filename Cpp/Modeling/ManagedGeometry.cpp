@@ -50,8 +50,11 @@ ManagedGeometry::ManagedGeometry(const ManagedGeometry& rhs)
 {
   operator = (rhs);
   //if you're not careful with the cache you can copy appearance pointers directly without any record
-  if(cacheKey.empty()) 
+  if(cacheKey.empty()) {
     appearance.reset(new GLDraw::GeometryAppearance(*appearance));
+    appearance->creaseAngle = DtoR(30.0);
+    appearance->silhouetteRadius = 0.0025;
+  }
 }
 
 ManagedGeometry::~ManagedGeometry()
