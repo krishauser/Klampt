@@ -274,7 +274,9 @@ bool XmlRigidObject::GetRigidObject(RigidObject& obj)
   obj.kDamping=Inf;
 
   const char* fn = e->Attribute("file");
-  if(!LoadObjectFile(obj,path,fn,"XmlRigidObject")) return false;
+  if(fn) {
+    if(!LoadObjectFile(obj,path,fn,"XmlRigidObject")) return false;
+  }
 
   TiXmlElement* geom=e->FirstChildElement("geometry");
   if(geom) {
