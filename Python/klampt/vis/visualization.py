@@ -1105,6 +1105,8 @@ def objectToVisType(item,world):
                 validtypes.append(t)
             elif t=='RigidTransform':
                 validtypes.append(t)
+            elif t=='Geometry3D':
+                validtypes.append(t)
         if len(validtypes) > 1:
             print "Unable to draw item of ambiguous types",validtypes
             print "  (Try vis.setAttribute(item,'type',desired_type_str) to disambiguate)"
@@ -2136,6 +2138,8 @@ class VisAppearance:
             pass
         elif hasattr(item,'geometry'):
             return item.geometry().getBB()
+        elif hasattr(item,'getBB'):
+            return item.getBB()
         elif isinstance(item,(str,VisPlot)):
             pass
         else:
@@ -2148,6 +2152,7 @@ class VisAppearance:
                     #assumed to be a rigid transform
                     return (item[1],item[1])
             except Exception:
+                raise
                 pass
             print "Empty bound for object",self.name,"type",self.item.__class__.__name__
         return aabb_create()
