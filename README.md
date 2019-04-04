@@ -83,6 +83,7 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 **0.8.2  Latest version** (4/1/2019)
 -   Can now load almost all files from URLs!  Just use an http:// prefix to the filenames of worlds, robots,
     rigid objects, or geometries.  This also works for resources in Python.  (Resources in C++ are not done yet)
+-   New mesh visualization shows smooth meshes and black silhouettes by default, making things look prettier.
 -   Added ability to specify cost functions in kinematic planning.
 -   Added conversions to Numpy objects in Python API ([klampt.io.numpy_convert](http://motion.pratt.duke.edu/klampt/pyklampt_docs/klampt.io.numpy_convert.html))
 -   Added much more [ROS](http://ros.org) support in Python API ([klampt.io.ros](http://motion.pratt.duke.edu/klampt/pyklampt_docs/klampt.io.ros.html) module).
