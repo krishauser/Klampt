@@ -42,6 +42,8 @@ void GeometryManager::Clear()
 ManagedGeometry::ManagedGeometry()
 {
   appearance.reset(new GLDraw::GeometryAppearance);
+  appearance->creaseAngle = DtoR(30.0);
+  appearance->silhouetteRadius = 0.0025;
 }
 
 ManagedGeometry::ManagedGeometry(const ManagedGeometry& rhs)
