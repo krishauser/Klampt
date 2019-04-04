@@ -21,9 +21,9 @@ possible.
 C++ includes: appearance.h
 ";
 
-%feature("docstring") Appearance::clone "
+%feature("docstring") Appearance::free "
 
-Creates a standalone appearance from this appearance.  
+Frees the data associated with this appearance, if standalone.  
 ";
 
 %feature("docstring") Appearance::setPointSize "
@@ -31,22 +31,29 @@ Creates a standalone appearance from this appearance.
 For point clouds, sets the point size.  
 ";
 
-%feature("docstring") Appearance::setTexcoords "
+%feature("docstring") Appearance::set "
 
-Sets per-vertex texture coordinates.  
-
-If the texture is 1D, uvs is an array of length n containing 1D texture
-coordinates.  
-
-If the texture is 2D, uvs is an array of length 2n containing U-V coordinates
-u1, v1, u2, v2, ..., un, vn.  
-
-You may also set uvs to be empty, which turns off texture mapping altogether.  
+Copies the appearance of the argument into this appearance.  
 ";
 
-%feature("docstring") Appearance::isStandalone "
+%feature("docstring") Appearance::setElementColor "
 
-Returns true if this is a standalone appearance.  
+Sets the per-element color for the given feature.  
+";
+
+%feature("docstring") Appearance::setTexture1D "
+
+Sets a 1D texture of the given width. Valid format strings are.  
+
+*   \"\": turn off texture mapping  
+*   rgb8: unsigned byte RGB colors with red in the most significant byte  
+*   argb8: unsigned byte RGBA colors with alpha in the most significant byte  
+*   l8: unsigned byte grayscale colors  
+";
+
+%feature("docstring") Appearance::clone "
+
+Creates a standalone appearance from this appearance.  
 ";
 
 %feature("docstring") Appearance::getElementColor "
@@ -63,95 +70,6 @@ of features of that type.
 
 Otherwise they are assumed to be 3*N rgb values. Only supports feature=VERTICES
 and feature=FACES  
-";
-
-%feature("docstring") Appearance::free "
-
-Frees the data associated with this appearance, if standalone.  
-";
-
-%feature("docstring") Appearance::setDraw "
-";
-
-%feature("docstring") Appearance::setDraw "
-
-Turns on/off visibility of the object or a feature.  
-
-If one argument is given, turns the object visibility on or off  
-
-If two arguments are given, turns the feature (first int argument) visibility on
-or off. feature can be ALL, VERTICES, EDGES, or FACES.  
-";
-
-%feature("docstring") Appearance::refresh "
-
-call this to rebuild internal buffers, e.g., when the OpenGL context changes. If
-deep=True, the entire data structure will be revised. Use this for streaming
-data, for example.  
-";
-
-%feature("docstring") Appearance::drawWorldGL "
-
-Draws the given geometry with this appearance. NOTE: for best performance, an
-appearance should only be drawn with a single geometry. Otherwise, the OpenGL
-display lists will be completely recreated.  
-
-Differs from drawGL in that the geometry's current transform is applied before
-drawing.  
-";
-
-%feature("docstring") Appearance::getColor "
-";
-
-%feature("docstring") Appearance::getColor "
-";
-
-%feature("docstring") Appearance::set "
-
-Copies the appearance of the argument into this appearance.  
-";
-
-%feature("docstring") Appearance::setTexture2D "
-
-Sets a 2D texture of the given width/height. See setTexture1D for valid format
-strings.  
-";
-
-%feature("docstring") Appearance::getDraw "
-";
-
-%feature("docstring") Appearance::getDraw "
-
-Returns whether this object or feature is visible.  
-
-If no arguments are given, returns whether the object is visible.  
-
-If one int argument is given, returns whether the given feature is visible.
-feature can be ALL, VERTICES, EDGES, or FACES.  
-";
-
-%feature("docstring") Appearance::setElementColor "
-
-Sets the per-element color for the given feature.  
-";
-
-%feature("docstring") Appearance::~Appearance "
-";
-
-%feature("docstring") Appearance::Appearance "
-";
-
-%feature("docstring") Appearance::Appearance "
-";
-
-%feature("docstring") Appearance::setTexture1D "
-
-Sets a 1D texture of the given width. Valid format strings are.  
-
-*   \"\": turn off texture mapping  
-*   rgb8: unsigned byte RGB colors with red in the most significant byte  
-*   argb8: unsigned byte RGBA colors with alpha in the most significant byte  
-*   l8: unsigned byte grayscale colors  
 ";
 
 %feature("docstring") Appearance::drawGL "
@@ -174,6 +92,9 @@ Note that the geometry's current transform is NOT respected, and this only draws
 the geometry in its local transform.  
 ";
 
+%feature("docstring") Appearance::~Appearance "
+";
+
 %feature("docstring") Appearance::setColor "
 ";
 
@@ -185,6 +106,96 @@ If 3 or 4 arguments are given, changes the object color.
 
 If 5 arguments are given, changes the color of the given feature. feature can be
 ALL, VERTICES, EDGES, or FACES.  
+";
+
+%feature("docstring") Appearance::isStandalone "
+
+Returns true if this is a standalone appearance.  
+";
+
+%feature("docstring") Appearance::refresh "
+
+call this to rebuild internal buffers, e.g., when the OpenGL context changes. If
+deep=True, the entire data structure will be revised. Use this for streaming
+data, for example.  
+";
+
+%feature("docstring") Appearance::setTexcoords "
+
+Sets per-vertex texture coordinates.  
+
+If the texture is 1D, uvs is an array of length n containing 1D texture
+coordinates.  
+
+If the texture is 2D, uvs is an array of length 2n containing U-V coordinates
+u1, v1, u2, v2, ..., un, vn.  
+
+You may also set uvs to be empty, which turns off texture mapping altogether.  
+";
+
+%feature("docstring") Appearance::getColor "
+";
+
+%feature("docstring") Appearance::getColor "
+";
+
+%feature("docstring") Appearance::setTexture2D "
+
+Sets a 2D texture of the given width/height. See setTexture1D for valid format
+strings.  
+";
+
+%feature("docstring") Appearance::getDraw "
+";
+
+%feature("docstring") Appearance::getDraw "
+
+Returns whether this object or feature is visible.  
+
+If no arguments are given, returns whether the object is visible.  
+
+If one int argument is given, returns whether the given feature is visible.
+feature can be ALL, VERTICES, EDGES, or FACES.  
+";
+
+%feature("docstring") Appearance::setCreaseAngle "
+
+For meshes, sets the crease angle. Set to 0 to disable smoothing.  
+";
+
+%feature("docstring") Appearance::drawWorldGL "
+
+Draws the given geometry with this appearance. NOTE: for best performance, an
+appearance should only be drawn with a single geometry. Otherwise, the OpenGL
+display lists will be completely recreated.  
+
+Differs from drawGL in that the geometry's current transform is applied before
+drawing.  
+";
+
+%feature("docstring") Appearance::setSilhouette "
+
+For meshes sets a silhouette radius and color. Set the radius to 0 to disable
+silhouette drawing.  
+";
+
+%feature("docstring") Appearance::setDraw "
+";
+
+%feature("docstring") Appearance::setDraw "
+
+Turns on/off visibility of the object or a feature.  
+
+If one argument is given, turns the object visibility on or off  
+
+If two arguments are given, turns the feature (first int argument) visibility on
+or off. feature can be ALL, VERTICES, EDGES, or FACES.  
+";
+
+%feature("docstring") Appearance::Appearance "
+";
+
+%feature("docstring") Appearance::Appearance "
 ";
 
 // File: classContactParameters.xml

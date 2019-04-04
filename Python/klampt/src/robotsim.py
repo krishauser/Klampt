@@ -2607,6 +2607,35 @@ class Appearance(_object):
         return _robotsim.Appearance_setPointSize(self, size)
 
 
+    def setCreaseAngle(self, creaseAngleRads):
+        """
+        setCreaseAngle(Appearance self, float creaseAngleRads)
+
+
+
+        For meshes, sets the crease angle. Set to 0 to disable smoothing.  
+
+        """
+        return _robotsim.Appearance_setCreaseAngle(self, creaseAngleRads)
+
+
+    def setSilhouette(self, radius, r=0, g=0, b=0, a=1):
+        """
+        setSilhouette(Appearance self, float radius, float r=0, float g=0, float b=0, float a=1)
+        setSilhouette(Appearance self, float radius, float r=0, float g=0, float b=0)
+        setSilhouette(Appearance self, float radius, float r=0, float g=0)
+        setSilhouette(Appearance self, float radius, float r=0)
+        setSilhouette(Appearance self, float radius)
+
+
+
+        For meshes sets a silhouette radius and color. Set the radius to 0 to disable
+        silhouette drawing.  
+
+        """
+        return _robotsim.Appearance_setSilhouette(self, radius, r, g, b, a)
+
+
     def drawGL(self, *args):
         """
         drawGL(Appearance self)
