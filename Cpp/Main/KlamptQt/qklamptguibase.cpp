@@ -30,7 +30,7 @@ bool QKlamptGUIBase::OnPauseIdle(double secs)
 bool QKlamptGUIBase::OnRefresh()
 {
   if(!display->painted) {
-    printf("Skipping refresh, not painted yet\n");
+    //printf("Skipping refresh, not painted yet\n");
     return true;
   }
   display->painted = false;
