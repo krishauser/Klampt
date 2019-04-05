@@ -7,8 +7,6 @@ from klampt.math import vectorops,so3,se3
 from klampt.vis.glrobotprogram import *
 import importlib
 
-SPLIT_SCREEN_TEST = False
-
 class MyGLViewer(GLSimulationPlugin):
     """Simulates some functionality of the SimTest program.
     Shows how to subclass GLSimulationPlugin and apply hooks to SimpleSimulation for applying a
@@ -176,14 +174,4 @@ if __name__ == "__main__":
         viewer.sim.setController(world.robot(i),controller)
     
     vis.setWindowTitle("Klamp't Simulation Tester")
-    if SPLIT_SCREEN_TEST:
-        viewer2 = MyGLViewer(world)
-        vis.setPlugin(viewer)
-        vis.addPlugin(viewer2)
-        viewer2.window.broadcast = True
-        vis.show()
-        while vis.shown():
-            time.sleep(0.01)
-        vis.kill()
-    else:
-        vis.run(viewer)
+    vis.run(viewer)
