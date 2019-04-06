@@ -937,10 +937,16 @@ function KlamptFrontend(dom_sceneArea) {
              var clone_object=object.clone(true);
              
              clone_object.traverse( function ( child ) { 
-                      if (!is_undefined_or_null(child.name)) 
+                      if (!is_undefined_or_null(child.name)) {
                          child.name=prefix+child.name;
-                       console.log("changed name "+child.name);
-                      } );
+                         console.log("changed name "+child.name);
+                      }
+                      //ghosts should not cast shadows
+                      if (!is_undefined_or_null(child.castShadow)) {
+                         child.castShadow = False;
+                         child.receiveShadow = False;
+                      }
+             });
              addObject(prefix+object_name,clone_object);
           }
           else {
