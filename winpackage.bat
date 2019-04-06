@@ -7,7 +7,7 @@
 :: configuration variables
 SET klamptversion=0.8.2
 :: dependency libraries may be kept back to a prior version
-SET klamptdepversion=0.8.0
+SET klamptdepversion=0.8.2
 ::    this is used for Python build (VS 2015)
 SET VS90COMNTOOLS=%VS140COMNTOOLS%
 SET PYTHON27_32=D:\Python27\python.exe
