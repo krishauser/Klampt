@@ -34,6 +34,9 @@ IF(WIN32)
   SET(OPENGL_LIBRARY_DIR ${KLAMPT_DEPENDENCY_LIB_DIR})  #this is needed for glut32.lib / glui32.lib to be found in Cpp/Dependencies
   SET(GLEW_INCLUDE_DIR "${KLAMPT_DEPENDENCIES}/glew-2.0.0")
   SET(GLEW_LIBRARY "${KLAMPT_DEPENDENCY_LIB_DIR}/glew32.lib")
+
+  SET(CURL_INCLUDE_DIR "${KLAMPT_DEPENDENCIES}/curl-7.64.1/include")
+  SET(CURL_LIBRARY "${KLAMPT_DEPENDENCY_LIB_DIR}/libcurl.lib")
   
   FIND_PACKAGE(KrisLibrary REQUIRED)
   

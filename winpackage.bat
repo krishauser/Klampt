@@ -112,7 +112,7 @@ for %%P in (%PYTHON_64_VERSIONS%) do (
 set depfolder=Klampt-%klamptdepversion%.win32-deps-vs2015
 mkdir %depfolder%
 cd Cpp\Dependencies
-for %%I in (assimp--3.0.1270-sdk\lib\assimp_release-dll_win32\* Assimp32.dll glpk_4_61.dll glpk_4_61.lib glew32.dll glew32.lib KrisLibrary.lib ode_double.lib tinyxml_STL.lib) do copy /Y %%I ..\..\%depfolder%
+for %%I in (assimp--3.0.1270-sdk\lib\assimp_release-dll_win32\* Assimp32.dll glpk_4_61.dll glpk_4_61.lib glew32.dll glew32.lib KrisLibrary.lib ode_double.lib tinyxml_STL.lib libcurl.lib) do copy /Y %%I ..\..\%depfolder%
 if %errorlevel% neq 0 exit /b %errorlevel%
 cd ..\..
 cd %depfolder%
@@ -124,7 +124,7 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 set depfolder=Klampt-%klamptdepversion%.win32-deps-vs2015d
 mkdir %depfolder%
 cd Cpp\Dependencies
-for %%I in (assimp--3.0.1270-sdk\lib\assimp_debug-dll_win32\* Assimp32d.dll  glpk_4_61.dll glpk_4_61.lib glew32.dll glew32.lib KrisLibraryd.lib ode_doubled.lib ode-0.14\lib\DebugDoubleLib\ode.pdb tinyxmld_STL.lib) do copy /Y %%I ..\..\%depfolder%
+for %%I in (assimp--3.0.1270-sdk\lib\assimp_debug-dll_win32\* Assimp32d.dll  glpk_4_61.dll glpk_4_61.lib glew32.dll glew32.lib KrisLibraryd.lib ode_doubled.lib ode-0.14\lib\DebugDoubleLib\ode.pdb tinyxmld_STL.lib libcurl.lib) do copy /Y %%I ..\..\%depfolder%
 if %errorlevel% neq 0 exit /b %errorlevel%
 cd ..\..
 cd %depfolder%
@@ -136,7 +136,7 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 set depfolder=Klampt-%klamptdepversion%.win64-deps-vs2015
 mkdir %depfolder%
 cd Cpp\Dependencies
-for %%I in (assimp--3.0.1270-sdk\lib\assimp_release-dll_x64\* x64\Assimp64.dll glpk_4_61.dll glpk_4_61.lib glew32.dll glew32.lib x64\KrisLibrary.lib x64\ode_double.lib x64\tinyxml_STL.lib) do copy /Y %%I ..\..\%depfolder%
+for %%I in (assimp--3.0.1270-sdk\lib\assimp_release-dll_x64\* x64\Assimp64.dll glpk_4_61.dll glpk_4_61.lib glew32.dll glew32.lib x64\KrisLibrary.lib x64\ode_double.lib x64\tinyxml_STL.lib x64\libcurl.lib ) do copy /Y %%I ..\..\%depfolder%
 if %errorlevel% neq 0 exit /b %errorlevel%
 cd ..\..
 cd %depfolder%
@@ -148,7 +148,7 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 set depfolder=Klampt-%klamptdepversion%.win64-deps-vs2015d
 mkdir %depfolder%
 cd Cpp\Dependencies
-for %%I in (assimp--3.0.1270-sdk\lib\assimp_release-dll_x64\* x64\Assimp64d.dll glpk_4_61.dll glpk_4_61.lib glew32.dll glew32.lib x64\KrisLibraryd.lib x64\ode_doubled.lib x64\tinyxmld_STL.lib) do copy /Y %%I ..\..\%depfolder%
+for %%I in (assimp--3.0.1270-sdk\lib\assimp_release-dll_x64\* x64\Assimp64d.dll glpk_4_61.dll glpk_4_61.lib glew32.dll glew32.lib x64\KrisLibraryd.lib x64\ode_doubled.lib x64\tinyxmld_STL.lib x64\libcurl.lib ) do copy /Y %%I ..\..\%depfolder%
 if %errorlevel% neq 0 exit /b %errorlevel%
 cd ..\..
 cd %depfolder%
