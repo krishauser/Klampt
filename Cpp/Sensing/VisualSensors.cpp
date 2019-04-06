@@ -327,7 +327,7 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
       for(int j=0;j<yres;j++) {
         for(int i=0;i<xres;i++,k++) {
           if(floats[k] <= zmax) {
-            floats[k] = Discretize(floats[k],zresolution,zvarianceLinear*floats[k] + zvarianceConstant);
+            floats[k] = (float)Discretize(floats[k],zresolution,zvarianceLinear*floats[k] + zvarianceConstant);
           }
           measurements[vstart+j*xres + i] = floats[k];
         }
@@ -437,7 +437,7 @@ void CameraSensor::MeasurementNames(vector<string>& names) const
   if(rgb) {
     for(int i=0;i<xres;i++) {
       for(int j=0;j<yres;j++) {
-        sprintf(buf,"rgb[%d,%d]",i,j);
+        snprintf(buf,64,"rgb[%d,%d]",i,j);
         names.push_back(buf);
       }
     }
@@ -445,7 +445,7 @@ void CameraSensor::MeasurementNames(vector<string>& names) const
   if(depth) {
     for(int i=0;i<xres;i++) {
       for(int j=0;j<yres;j++) {
-        sprintf(buf,"d[%d,%d]",i,j);
+        snprintf(buf,64,"d[%d,%d]",i,j);
         names.push_back(buf);
       }
     }

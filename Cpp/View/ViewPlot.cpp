@@ -11,8 +11,8 @@ ViewPlot::ViewPlot()
    drawBound(true),drawPlotArea(true),drawXRangeBottom(true),drawXRangeTop(false),drawYRangeLeft(false),drawYRangeRight(true),
    x(0),y(0),width(100),height(80),xmin(0),xmax(1),ymin(0),ymax(1)
 {
-  axisColor.set(0.3,0.3,0.3);
-  boundColor.set(0.5,0.5,0.5);
+  axisColor.set(0.3f,0.3f,0.3f);
+  boundColor.set(0.5f,0.5f,0.5f);
   plotAreaColor.set(0,0,0,0.5);
 }
 
@@ -22,7 +22,7 @@ void ViewPlot::AddCurve(vector<double>& ys)
   if(curves.empty() && autoYRange) ymin = ymax = ys[0];
   curves.resize(curves.size()+1);
   curveColors.resize(curveColors.size()+1);
-  curveColors.back().setHSV(Math::Rand()*360,1,1);
+  curveColors.back().setHSV((float)Math::Rand()*360,1,1);
   for(size_t i=0;i<ys.size();i++)
     curves.back().push_back(pair<double,double>((int)i,ys[i]));
   if(autoXRange) {
@@ -129,7 +129,7 @@ void ViewPlot::AddPoint(double x,double y,int curve)
 
   if(curve >= (int)curves.size()) {
     curves.resize(curve+1);
-    GLColor randColor; randColor.setHSV(Math::Rand()*360,1,1);
+    GLColor randColor; randColor.setHSV((float)Math::Rand()*360,1,1);
     curveColors.resize(curve+1,randColor);
   }
   curves[curve].push_back(pair<double,double>(x,y));

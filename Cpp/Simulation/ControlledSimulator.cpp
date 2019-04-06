@@ -222,7 +222,7 @@ void ControlledRobotSimulator::Step(Real dt,WorldSimulation* sim)
       delay = 1.0/sensors.sensors[i]->rate;
     if(delay < dt) {
       printf("Sensor %s set to rate higher than internal simulation time step\n",sensors.sensors[i]->name.c_str());
-      printf("  ... Limiting sensor rate to %s\n",1.0/dt);
+      printf("  ... Limiting sensor rate to %f\n",1.0/dt);
       sensors.sensors[i]->rate = 1.0/dt;
       //todo: handle numerical errors in inversion...
       delay = dt;

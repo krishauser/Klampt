@@ -102,7 +102,7 @@ void RobotTestBackend::RenderWorld()
   ViewRobot& viewRobot = world->robotViews[0];
   //WorldViewProgram::RenderWorld();
   glDisable(GL_LIGHTING);
-  drawCoords(0.1);
+  drawCoords(0.1f);
   glEnable(GL_LIGHTING);
   for(size_t i=0;i<world->terrains.size();i++)
     world->terrains[i]->DrawGL();
@@ -168,7 +168,7 @@ void RobotTestBackend::RenderWorld()
     glDisable(GL_DEPTH_TEST);
     glPushMatrix();
     glMultMatrix((Matrix4)robot->links[cur_link].T_World);
-    drawCoords(0.2);
+    drawCoords(0.2f);
     glPopMatrix();
     glEnable(GL_DEPTH_TEST);
   }

@@ -839,7 +839,7 @@ bool Robot::LoadRob(const char* fn) {
     linkNames.resize(links.size());
     for (size_t i = 0; i < links.size(); i++) {
       char buf[64];
-      sprintf(buf, "Link %d", (int)i);
+      snprintf(buf,64, "Link %d", (int)i);
       linkNames[i] = buf;
     }
   }
@@ -1280,7 +1280,7 @@ void Robot::InitStandardJoints() {
     linkNames.resize(links.size());
     for (size_t i = 0; i < links.size(); i++) {
       char buf[64];
-      sprintf(buf, "Link %d", (int)i);
+      snprintf(buf,64, "Link %d", (int)i);
       linkNames[i] = buf;
     }
   }

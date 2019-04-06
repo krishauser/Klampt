@@ -120,13 +120,13 @@ Real NextCell(Robot& robot,const Geometry::GridTable<Vector>& commands,
 
   for(size_t i=0;i<index.size();i++) {
     if(index[i] > commands.imax[i]) {
-      if(i < q.n && robot.joints[i].type == RobotJoint::Spin) 
+      if((int)i < q.n && robot.joints[i].type == RobotJoint::Spin) 
 	index[i]=commands.imin[i];
       else
 	index[i]=commands.imax[i];
     }
     else if(index[i] < commands.imin[i]) {
-      if(i < q.n && robot.joints[i].type == RobotJoint::Spin) 
+      if((int)i < q.n && robot.joints[i].type == RobotJoint::Spin)
 	index[i] = commands.imax[i];
       else
 	index[i] = commands.imin[i];

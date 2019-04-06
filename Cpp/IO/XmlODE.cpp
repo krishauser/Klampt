@@ -25,7 +25,7 @@ XmlODEGeometry::XmlODEGeometry(TiXmlElement* _element)
 bool XmlODEGeometry::Get(ODEGeometry& mesh)
 {
   //const char* fn = e->Attribute("file");
-  double padding,temp;
+  double padding;
   int preshrink;
   if(e->QueryValueAttribute("padding",&padding)==TIXML_SUCCESS) {
     if(e->QueryValueAttribute("preshrink",&preshrink)==TIXML_SUCCESS && preshrink!=0) {
@@ -74,17 +74,17 @@ bool XmlODESettings::GetSettings(ODESimulator& sim)
     int boundaryLayer,adaptiveTimeStepping,rigidObjectCollisions,robotSelfCollisions,robotRobotCollisions;
     if(c->QueryValueAttribute("boundaryLayer",&boundaryLayer)==TIXML_SUCCESS) {
       printf("XML simulator: warning, boundary layer settings don't have an effect after world is loaded\n");
-      sim.GetSettings().boundaryLayerCollisions = boundaryLayer;
+      sim.GetSettings().boundaryLayerCollisions = (bool)boundaryLayer;
     }
     if(c->QueryValueAttribute("adaptiveTimeStepping",&adaptiveTimeStepping)==TIXML_SUCCESS) {
-      sim.GetSettings().adaptiveTimeStepping = adaptiveTimeStepping;
+      sim.GetSettings().adaptiveTimeStepping = (bool)adaptiveTimeStepping;
     }
     if(c->QueryValueAttribute("rigidObjectCollisions",&rigidObjectCollisions)==TIXML_SUCCESS)
-      sim.GetSettings().rigidObjectCollisions = rigidObjectCollisions;
+      sim.GetSettings().rigidObjectCollisions = (bool)rigidObjectCollisions;
     if(c->QueryValueAttribute("robotSelfCollisions",&robotSelfCollisions)==TIXML_SUCCESS)
-      sim.GetSettings().robotSelfCollisions = robotSelfCollisions;
+      sim.GetSettings().robotSelfCollisions = (bool)robotSelfCollisions;
     if(c->QueryValueAttribute("robotRobotCollisions",&robotRobotCollisions)==TIXML_SUCCESS)
-      sim.GetSettings().robotRobotCollisions = robotRobotCollisions;
+      sim.GetSettings().robotRobotCollisions = (bool)robotRobotCollisions;
   }
   else c=e->FirstChildElement();
 

@@ -52,7 +52,7 @@ int DebugCurve(const GeneralizedCubicBezierCurve& c,Real duration)
   vmax /= duration;
   amin /= Sqr(duration);
   amax /= Sqr(duration);
-  for(size_t j=0;j<vmin.n;j++) {
+  for(int j=0;j<vmin.n;j++) {
     if(vmin[j] < -vWarningThreshold || vmax[j] > vWarningThreshold || amin[j] < -aWarningThreshold || amax[j] > aWarningThreshold ) {
       printf("Projected deriv bounds seem odd on entry %d\n",j);
       printf("x0 %g, x1 %g, x2 %g, x3 %g\n",c.x0[j],c.x1[j],c.x2[j],c.x3[j]);

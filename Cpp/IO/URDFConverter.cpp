@@ -248,7 +248,7 @@ Math3D::Matrix3 URDFConverter::convertInertial(urdf::Inertial& I) {
 //}
 
 void URDFConverter::processTParentTransformations(vector<URDFLinkNode>& linkNodes){
-	for(int i = 0; i < linkNodes.size(); i++){
+	for(size_t i = 0; i < linkNodes.size(); i++){
 	  linkNodes[i].GetGeometryProperty(useVisGeom);
 		RigidTransform T0, T1, T2;
 		T0.setIdentity();

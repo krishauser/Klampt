@@ -42,8 +42,8 @@ void GeometryManager::Clear()
 ManagedGeometry::ManagedGeometry()
 {
   appearance.reset(new GLDraw::GeometryAppearance);
-  appearance->creaseAngle = DtoR(30.0);
-  appearance->silhouetteRadius = 0.0025;
+  appearance->creaseAngle = DtoR(30.0f);
+  appearance->silhouetteRadius = 0.0025f;
 }
 
 ManagedGeometry::ManagedGeometry(const ManagedGeometry& rhs)
@@ -52,8 +52,8 @@ ManagedGeometry::ManagedGeometry(const ManagedGeometry& rhs)
   //if you're not careful with the cache you can copy appearance pointers directly without any record
   if(cacheKey.empty()) {
     appearance.reset(new GLDraw::GeometryAppearance(*appearance));
-    appearance->creaseAngle = DtoR(30.0);
-    appearance->silhouetteRadius = 0.0025;
+    appearance->creaseAngle = DtoR(30.0f);
+    appearance->silhouetteRadius = 0.0025f;
   }
 }
 
@@ -85,8 +85,8 @@ shared_ptr<Geometry::AnyCollisionGeometry3D> ManagedGeometry::CreateEmpty()
   dynamicGeometrySource.clear();
   geometry = make_shared<Geometry::AnyCollisionGeometry3D>();
   appearance = make_shared<GLDraw::GeometryAppearance>();
-  appearance->creaseAngle = DtoR(30.0);
-  appearance->silhouetteRadius = 0.0025;
+  appearance->creaseAngle = DtoR(30.0f);
+  appearance->silhouetteRadius = 0.0025f;
   appearance->geom = geometry.get();
   return geometry;
 }
@@ -97,8 +97,8 @@ void ManagedGeometry::Clear()
   dynamicGeometrySource.clear();
   geometry = NULL;
   appearance = make_shared<GLDraw::GeometryAppearance>();
-  appearance->creaseAngle = DtoR(30.0);
-  appearance->silhouetteRadius = 0.0025;
+  appearance->creaseAngle = DtoR(30.0f);
+  appearance->silhouetteRadius = 0.0025f;
 }
 
 bool ManagedGeometry::Load(const string& filename)
@@ -202,8 +202,8 @@ bool ManagedGeometry::LoadNoCache(const string& filename)
       if(geometry->type == Geometry::AnyGeometry3D::TriangleMesh) {
         if(geometry->TriangleMeshAppearanceData() != NULL) {
           appearance = make_shared<GLDraw::GeometryAppearance>(*geometry->TriangleMeshAppearanceData());
-          appearance->creaseAngle = DtoR(30.0);
-          appearance->silhouetteRadius = 0.0025;
+          appearance->creaseAngle = DtoR(30.0f);
+          appearance->silhouetteRadius = 0.0025f;
           appearance->Set(*geometry);
         }
         else {

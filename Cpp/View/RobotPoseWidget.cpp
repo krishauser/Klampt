@@ -137,8 +137,8 @@ void RobotLinkPoseWidget::Set(Robot* _robot,ViewRobot* _viewRobot)
 bool RobotLinkPoseWidget::Hover(int x,int y,Camera::Viewport& viewport,double& distance) 
 { 
   Ray3D r;
-  viewport.getClickSource(x,y,r.source);
-  viewport.getClickVector(x,y,r.direction);
+  viewport.getClickSource((float)x, (float)y,r.source);
+  viewport.getClickVector((float)x, (float)y,r.direction);
   int oldHoverLink = hoverLink;
   distance = Inf;    
   hoverLink = affectedLink = affectedDriver = -1;
@@ -215,7 +215,7 @@ void RobotLinkPoseWidget::Drag(int dx,int dy,Camera::Viewport& viewport)
       float x,y,d;
       viewport.project(pt,x,y,d);
       Vector3 v;
-      viewport.getMovementVectorAtDistance(0,dy,d,v);
+      viewport.getMovementVectorAtDistance((float)0, (float)dy, d,v);
       shift = -Sign(Real(dy))*v.norm();
     }
   }
@@ -284,7 +284,7 @@ void RobotLinkPoseWidget::DrawGL(Camera::Viewport& viewport)
               Real q = q1;
               glBegin(GL_TRIANGLE_STRIP);
               while(q < q2) {
-                GLColor col(1,1-0.5*(q-q1)/(q2-q1),0);
+                GLColor col(1,float(1-0.5*(q-q1)/(q2-q1)),0);
                 glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,col);
                 Real c = Cos(q);
                 Real s = Sin(q);
@@ -313,7 +313,7 @@ void RobotLinkPoseWidget::DrawGL(Camera::Viewport& viewport)
               Vector3 pt = center+worldAxis*zscale*q + c*rmid*x + s*rmid*y;
               glPushMatrix();
               glTranslate(pt);
-              drawSphere(0.02,16,8);
+              drawSphere(0.02f,16,8);
               glPopMatrix();
             }
             else {
@@ -335,7 +335,7 @@ void RobotLinkPoseWidget::DrawGL(Camera::Viewport& viewport)
               p1 = center+worldAxis*robot->q(affectedLink);
               glPushMatrix();
               glTranslate(p1);
-              drawSphere(0.02,16,8);
+              drawSphere(0.02f,16,8);
               glPopMatrix();
             }
           }
@@ -534,11 +534,11 @@ void RobotIKPoseWidget::DrawGL(Camera::Viewport& viewport)
       if(poseGoals[i].destLink >= 0)
         T = robot->links[poseGoals[i].destLink].T_World*T;
       glMultMatrix(Matrix4(T));
-      drawBox(0.04,0.04,0.04);
+      drawBox(0.04f,0.04f,0.04f);
     }
     else {
       glTranslate(despos);
-      drawSphere(0.02,16,8);
+      drawSphere(0.02f,16,8);
     }
     glPopMatrix();
   }
@@ -862,8 +862,8 @@ void RobotPoseWidget::Drag(int dx,int dy,Camera::Viewport& viewport)
     //printf("Attach dragging, hover widget %d\n",ikPoser.ActiveWidget());
     attachx += dx;
     attachy += dy; 
-    viewport.getClickSource(attachx,attachy,attachRay.source);
-    viewport.getClickVector(attachx,attachy,attachRay.direction);
+    viewport.getClickSource((float)attachx, (float)attachy,attachRay.source);
+    viewport.getClickVector((float)attachx, (float)attachy,attachRay.direction);
     double dist;
     bool res=linkPoser.Hover(attachx,attachy,viewport,dist);
     Refresh();

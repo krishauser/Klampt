@@ -8,7 +8,7 @@
 
 RobotWorld::RobotWorld()
 {
-  background.set(0.4,0.4,1,0);
+  background.set(0.4f,0.4f,1,0);
 }
 
 bool RobotWorld::LoadXML(const char* fn)
@@ -281,7 +281,7 @@ int RobotWorld::LoadRobot(const string& fn)
   }
   const char* justfn = GetFileName(fn.c_str());
   char* buf = new char[strlen(justfn)+1];
-  strcpy(buf,justfn);
+  strcpy(buf, justfn);
   StripExtension(buf);
   string name=buf;
   delete [] buf;

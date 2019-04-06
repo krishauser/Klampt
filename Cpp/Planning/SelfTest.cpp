@@ -52,7 +52,7 @@ void TestShortcutting(SingleRobotCSpace* cspace,MotionPlannerFactory& plannerFac
     path.SetMilestones(vmilestones);
     
     //seed the RNG
-    srand(time(NULL));
+    srand((unsigned int)time(NULL));
     ParabolicRamp::DynamicPath porig = path;
     Real tol = cspace->settings->robotSettings[cspace->index].collisionEpsilon;
 

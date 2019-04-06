@@ -16,8 +16,8 @@ WorldViewWidget::WorldViewWidget(RobotWorld* _world)
 bool WorldViewWidget::Hover(int x, int y, Camera::Viewport& viewport, double& distance)
 {
   Ray3D r;
-  viewport.getClickSource(x, y, r.source);
-  viewport.getClickVector(x, y, r.direction);
+  viewport.getClickSource(float(x), float(y), r.source);
+  viewport.getClickVector(float(x), float(y), r.direction);
   clickedRobot = world->RayCastRobot(r, body, localpt);
   if (clickedRobot) {
     Vector3 worldpt = clickedRobot->links[body].T_World*localpt;

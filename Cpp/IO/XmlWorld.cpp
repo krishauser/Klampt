@@ -429,7 +429,7 @@ class XmlAppearance
   bool Get(Terrain& terrain)
   {
     terrain.geometry.SetUniqueAppearance();
-    terrain.geometry.Appearance()->faceColor.set(0.8,0.6,0.2);
+    terrain.geometry.Appearance()->faceColor.set(0.8f,0.6f,0.2f);
     Texturizer tex;
     //checker by default
     tex.texture = "checker";
@@ -661,7 +661,7 @@ bool XmlWorld::Save(RobotWorld& world,const string& fn,string itempath)
     if(names.count(world.robots[i]->name) != 0) {
       names[world.robots[i]->name] += 1;
       char buf[32];
-      sprintf(buf,"_%d",names[world.robots[i]->name]);
+      snprintf(buf,32,"_%d",names[world.robots[i]->name]);
       rfn = world.robots[i]->name + buf + ".rob";
     }
     else names[world.robots[i]->name] = 0;
@@ -673,7 +673,7 @@ bool XmlWorld::Save(RobotWorld& world,const string& fn,string itempath)
     if(names.count(world.rigidObjects[i]->name) != 0) {
       names[world.rigidObjects[i]->name] += 1;
       char buf[32];
-      sprintf(buf,"_%d",names[world.rigidObjects[i]->name]);
+      snprintf(buf,32,"_%d",names[world.rigidObjects[i]->name]);
       rfn = world.rigidObjects[i]->name + buf + ".obj";
     }
     else names[world.rigidObjects[i]->name] = 0;
@@ -685,7 +685,7 @@ bool XmlWorld::Save(RobotWorld& world,const string& fn,string itempath)
     if(names.count(world.terrains[i]->name) != 0) {
       names[world.terrains[i]->name] += 1;
       char buf[32];
-      sprintf(buf,"_%d",names[world.terrains[i]->name]);
+      snprintf(buf,32,"_%d",names[world.terrains[i]->name]);
       rfn = world.terrains[i]->name + buf + ".env";
     }
     else names[world.terrains[i]->name] = 0;

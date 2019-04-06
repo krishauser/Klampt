@@ -232,8 +232,8 @@ int main(int argc,const char** argv)
     ResourceLibrary lib;
     MakeRobotResourceLibrary(lib);
     if(argc - i == 1) {
-      //TODO: possible buffer overflow
       static char buf[1024];
+      buf[1023] = 0;
       const char* ext = FileExtension(argv[i]);
       if(ext!=NULL && 0==strcmp(ext,"xml")) {
 	if(!lib.LoadXml(argv[i])) {
@@ -241,7 +241,7 @@ int main(int argc,const char** argv)
 	  return 1;
 	}
 	if(outname == NULL) {
-	  strcpy(buf,argv[i]);
+	  strncpy(buf,argv[i],1023);
 	  StripExtension(buf);
 	  outname = buf;
 	}
@@ -252,7 +252,7 @@ int main(int argc,const char** argv)
 	  return 1;
 	}
 	if(outname == NULL) {
-	  strcpy(buf,argv[i]);
+    strncpy(buf, argv[i], 1023);
 	  //strip trailing slash
 	  if(buf[strlen(argv[i])-1]=='/')
 	    buf[strlen(argv[i])-1] = 0;
