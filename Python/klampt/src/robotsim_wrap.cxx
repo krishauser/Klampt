@@ -3011,76 +3011,77 @@ SWIG_Python_NonDynamicSetAttr(PyObject *obj, PyObject *name, PyObject *value) {
 
 #define SWIGTYPE_p_Appearance swig_types[0]
 #define SWIGTYPE_p_ContactParameters swig_types[1]
-#define SWIGTYPE_p_ControlledRobotSimulator swig_types[2]
-#define SWIGTYPE_p_DistanceQueryResult swig_types[3]
-#define SWIGTYPE_p_DistanceQuerySettings swig_types[4]
-#define SWIGTYPE_p_GeneralizedIKObjective swig_types[5]
-#define SWIGTYPE_p_GeneralizedIKSolver swig_types[6]
-#define SWIGTYPE_p_GeometricPrimitive swig_types[7]
-#define SWIGTYPE_p_Geometry3D swig_types[8]
-#define SWIGTYPE_p_IKGoal swig_types[9]
-#define SWIGTYPE_p_IKObjective swig_types[10]
-#define SWIGTYPE_p_IKSolver swig_types[11]
-#define SWIGTYPE_p_Mass swig_types[12]
-#define SWIGTYPE_p_ODEGeometry swig_types[13]
-#define SWIGTYPE_p_ObjectPoser swig_types[14]
-#define SWIGTYPE_p_PointCloud swig_types[15]
-#define SWIGTYPE_p_PointPoser swig_types[16]
-#define SWIGTYPE_p_RigidObject swig_types[17]
-#define SWIGTYPE_p_RigidObjectModel swig_types[18]
-#define SWIGTYPE_p_Robot swig_types[19]
-#define SWIGTYPE_p_RobotModel swig_types[20]
-#define SWIGTYPE_p_RobotModelDriver swig_types[21]
-#define SWIGTYPE_p_RobotModelLink swig_types[22]
-#define SWIGTYPE_p_RobotPoser swig_types[23]
-#define SWIGTYPE_p_SensorBase swig_types[24]
-#define SWIGTYPE_p_SimBody swig_types[25]
-#define SWIGTYPE_p_SimRobotController swig_types[26]
-#define SWIGTYPE_p_SimRobotSensor swig_types[27]
-#define SWIGTYPE_p_Simulator swig_types[28]
-#define SWIGTYPE_p_Terrain swig_types[29]
-#define SWIGTYPE_p_TerrainModel swig_types[30]
-#define SWIGTYPE_p_TransformPoser swig_types[31]
-#define SWIGTYPE_p_TriangleMesh swig_types[32]
-#define SWIGTYPE_p_Viewport swig_types[33]
-#define SWIGTYPE_p_VolumeGrid swig_types[34]
-#define SWIGTYPE_p_Widget swig_types[35]
-#define SWIGTYPE_p_WidgetSet swig_types[36]
-#define SWIGTYPE_p_WorldModel swig_types[37]
-#define SWIGTYPE_p_WorldSimulation swig_types[38]
-#define SWIGTYPE_p__object swig_types[39]
-#define SWIGTYPE_p_allocator_type swig_types[40]
-#define SWIGTYPE_p_char swig_types[41]
-#define SWIGTYPE_p_difference_type swig_types[42]
-#define SWIGTYPE_p_double swig_types[43]
-#define SWIGTYPE_p_doubleArray swig_types[44]
-#define SWIGTYPE_p_dxBody swig_types[45]
-#define SWIGTYPE_p_float swig_types[46]
-#define SWIGTYPE_p_floatArray swig_types[47]
-#define SWIGTYPE_p_int swig_types[48]
-#define SWIGTYPE_p_intArray swig_types[49]
-#define SWIGTYPE_p_p__object swig_types[50]
-#define SWIGTYPE_p_size_type swig_types[51]
-#define SWIGTYPE_p_std__allocatorT_double_t swig_types[52]
-#define SWIGTYPE_p_std__allocatorT_float_t swig_types[53]
-#define SWIGTYPE_p_std__allocatorT_int_t swig_types[54]
-#define SWIGTYPE_p_std__allocatorT_std__string_t swig_types[55]
-#define SWIGTYPE_p_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t swig_types[56]
-#define SWIGTYPE_p_std__invalid_argument swig_types[57]
-#define SWIGTYPE_p_std__mapT_std__string_std__string_t swig_types[58]
-#define SWIGTYPE_p_std__vectorT_GeneralizedIKObjective_std__allocatorT_GeneralizedIKObjective_t_t swig_types[59]
-#define SWIGTYPE_p_std__vectorT_IKObjective_std__allocatorT_IKObjective_t_t swig_types[60]
-#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t swig_types[61]
-#define SWIGTYPE_p_std__vectorT_float_std__allocatorT_float_t_t swig_types[62]
-#define SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t swig_types[63]
-#define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t swig_types[64]
-#define SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t swig_types[65]
-#define SWIGTYPE_p_std__vectorT_unsigned_char_std__allocatorT_unsigned_char_t_t swig_types[66]
-#define SWIGTYPE_p_swig__SwigPyIterator swig_types[67]
-#define SWIGTYPE_p_value_type swig_types[68]
-#define SWIGTYPE_p_void swig_types[69]
-static swig_type_info *swig_types[71];
-static swig_module_info swig_module = {swig_types, 70, 0, 0, 0, 0};
+#define SWIGTYPE_p_ContactQueryResult swig_types[2]
+#define SWIGTYPE_p_ControlledRobotSimulator swig_types[3]
+#define SWIGTYPE_p_DistanceQueryResult swig_types[4]
+#define SWIGTYPE_p_DistanceQuerySettings swig_types[5]
+#define SWIGTYPE_p_GeneralizedIKObjective swig_types[6]
+#define SWIGTYPE_p_GeneralizedIKSolver swig_types[7]
+#define SWIGTYPE_p_GeometricPrimitive swig_types[8]
+#define SWIGTYPE_p_Geometry3D swig_types[9]
+#define SWIGTYPE_p_IKGoal swig_types[10]
+#define SWIGTYPE_p_IKObjective swig_types[11]
+#define SWIGTYPE_p_IKSolver swig_types[12]
+#define SWIGTYPE_p_Mass swig_types[13]
+#define SWIGTYPE_p_ODEGeometry swig_types[14]
+#define SWIGTYPE_p_ObjectPoser swig_types[15]
+#define SWIGTYPE_p_PointCloud swig_types[16]
+#define SWIGTYPE_p_PointPoser swig_types[17]
+#define SWIGTYPE_p_RigidObject swig_types[18]
+#define SWIGTYPE_p_RigidObjectModel swig_types[19]
+#define SWIGTYPE_p_Robot swig_types[20]
+#define SWIGTYPE_p_RobotModel swig_types[21]
+#define SWIGTYPE_p_RobotModelDriver swig_types[22]
+#define SWIGTYPE_p_RobotModelLink swig_types[23]
+#define SWIGTYPE_p_RobotPoser swig_types[24]
+#define SWIGTYPE_p_SensorBase swig_types[25]
+#define SWIGTYPE_p_SimBody swig_types[26]
+#define SWIGTYPE_p_SimRobotController swig_types[27]
+#define SWIGTYPE_p_SimRobotSensor swig_types[28]
+#define SWIGTYPE_p_Simulator swig_types[29]
+#define SWIGTYPE_p_Terrain swig_types[30]
+#define SWIGTYPE_p_TerrainModel swig_types[31]
+#define SWIGTYPE_p_TransformPoser swig_types[32]
+#define SWIGTYPE_p_TriangleMesh swig_types[33]
+#define SWIGTYPE_p_Viewport swig_types[34]
+#define SWIGTYPE_p_VolumeGrid swig_types[35]
+#define SWIGTYPE_p_Widget swig_types[36]
+#define SWIGTYPE_p_WidgetSet swig_types[37]
+#define SWIGTYPE_p_WorldModel swig_types[38]
+#define SWIGTYPE_p_WorldSimulation swig_types[39]
+#define SWIGTYPE_p__object swig_types[40]
+#define SWIGTYPE_p_allocator_type swig_types[41]
+#define SWIGTYPE_p_char swig_types[42]
+#define SWIGTYPE_p_difference_type swig_types[43]
+#define SWIGTYPE_p_double swig_types[44]
+#define SWIGTYPE_p_doubleArray swig_types[45]
+#define SWIGTYPE_p_dxBody swig_types[46]
+#define SWIGTYPE_p_float swig_types[47]
+#define SWIGTYPE_p_floatArray swig_types[48]
+#define SWIGTYPE_p_int swig_types[49]
+#define SWIGTYPE_p_intArray swig_types[50]
+#define SWIGTYPE_p_p__object swig_types[51]
+#define SWIGTYPE_p_size_type swig_types[52]
+#define SWIGTYPE_p_std__allocatorT_double_t swig_types[53]
+#define SWIGTYPE_p_std__allocatorT_float_t swig_types[54]
+#define SWIGTYPE_p_std__allocatorT_int_t swig_types[55]
+#define SWIGTYPE_p_std__allocatorT_std__string_t swig_types[56]
+#define SWIGTYPE_p_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t swig_types[57]
+#define SWIGTYPE_p_std__invalid_argument swig_types[58]
+#define SWIGTYPE_p_std__mapT_std__string_std__string_t swig_types[59]
+#define SWIGTYPE_p_std__vectorT_GeneralizedIKObjective_std__allocatorT_GeneralizedIKObjective_t_t swig_types[60]
+#define SWIGTYPE_p_std__vectorT_IKObjective_std__allocatorT_IKObjective_t_t swig_types[61]
+#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t swig_types[62]
+#define SWIGTYPE_p_std__vectorT_float_std__allocatorT_float_t_t swig_types[63]
+#define SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t swig_types[64]
+#define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t swig_types[65]
+#define SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t swig_types[66]
+#define SWIGTYPE_p_std__vectorT_unsigned_char_std__allocatorT_unsigned_char_t_t swig_types[67]
+#define SWIGTYPE_p_swig__SwigPyIterator swig_types[68]
+#define SWIGTYPE_p_value_type swig_types[69]
+#define SWIGTYPE_p_void swig_types[70]
+static swig_type_info *swig_types[72];
+static swig_module_info swig_module = {swig_types, 71, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -20359,6 +20360,383 @@ SWIGINTERN PyObject *DistanceQueryResult_swigregister(PyObject *SWIGUNUSEDPARM(s
   return SWIG_Py_Void();
 }
 
+SWIGINTERN PyObject *_wrap_ContactQueryResult_depths_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ContactQueryResult *arg1 = (ContactQueryResult *) 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = (std::vector< double,std::allocator< double > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:ContactQueryResult_depths_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ContactQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ContactQueryResult_depths_set" "', argument " "1"" of type '" "ContactQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< ContactQueryResult * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "ContactQueryResult_depths_set" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > *""'"); 
+  }
+  arg2 = reinterpret_cast< std::vector< double,std::allocator< double > > * >(argp2);
+  if (arg1) (arg1)->depths = *arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_ContactQueryResult_depths_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ContactQueryResult *arg1 = (ContactQueryResult *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::vector< double,std::allocator< double > > *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:ContactQueryResult_depths_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ContactQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ContactQueryResult_depths_get" "', argument " "1"" of type '" "ContactQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< ContactQueryResult * >(argp1);
+  result = (std::vector< double,std::allocator< double > > *)& ((arg1)->depths);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_ContactQueryResult_points1_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ContactQueryResult *arg1 = (ContactQueryResult *) 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg2 = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:ContactQueryResult_points1_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ContactQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ContactQueryResult_points1_set" "', argument " "1"" of type '" "ContactQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< ContactQueryResult * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "ContactQueryResult_points1_set" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *""'"); 
+  }
+  arg2 = reinterpret_cast< std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > * >(argp2);
+  if (arg1) (arg1)->points1 = *arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_ContactQueryResult_points1_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ContactQueryResult *arg1 = (ContactQueryResult *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:ContactQueryResult_points1_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ContactQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ContactQueryResult_points1_get" "', argument " "1"" of type '" "ContactQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< ContactQueryResult * >(argp1);
+  result = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)& ((arg1)->points1);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_ContactQueryResult_points2_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ContactQueryResult *arg1 = (ContactQueryResult *) 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg2 = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:ContactQueryResult_points2_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ContactQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ContactQueryResult_points2_set" "', argument " "1"" of type '" "ContactQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< ContactQueryResult * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "ContactQueryResult_points2_set" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *""'"); 
+  }
+  arg2 = reinterpret_cast< std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > * >(argp2);
+  if (arg1) (arg1)->points2 = *arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_ContactQueryResult_points2_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ContactQueryResult *arg1 = (ContactQueryResult *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:ContactQueryResult_points2_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ContactQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ContactQueryResult_points2_get" "', argument " "1"" of type '" "ContactQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< ContactQueryResult * >(argp1);
+  result = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)& ((arg1)->points2);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_ContactQueryResult_normals_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ContactQueryResult *arg1 = (ContactQueryResult *) 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg2 = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:ContactQueryResult_normals_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ContactQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ContactQueryResult_normals_set" "', argument " "1"" of type '" "ContactQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< ContactQueryResult * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "ContactQueryResult_normals_set" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *""'"); 
+  }
+  arg2 = reinterpret_cast< std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > * >(argp2);
+  if (arg1) (arg1)->normals = *arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_ContactQueryResult_normals_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ContactQueryResult *arg1 = (ContactQueryResult *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:ContactQueryResult_normals_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ContactQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ContactQueryResult_normals_get" "', argument " "1"" of type '" "ContactQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< ContactQueryResult * >(argp1);
+  result = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)& ((arg1)->normals);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_ContactQueryResult_elems1_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ContactQueryResult *arg1 = (ContactQueryResult *) 0 ;
+  std::vector< int,std::allocator< int > > *arg2 = (std::vector< int,std::allocator< int > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:ContactQueryResult_elems1_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ContactQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ContactQueryResult_elems1_set" "', argument " "1"" of type '" "ContactQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< ContactQueryResult * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "ContactQueryResult_elems1_set" "', argument " "2"" of type '" "std::vector< int,std::allocator< int > > *""'"); 
+  }
+  arg2 = reinterpret_cast< std::vector< int,std::allocator< int > > * >(argp2);
+  if (arg1) (arg1)->elems1 = *arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_ContactQueryResult_elems1_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ContactQueryResult *arg1 = (ContactQueryResult *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::vector< int,std::allocator< int > > *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:ContactQueryResult_elems1_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ContactQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ContactQueryResult_elems1_get" "', argument " "1"" of type '" "ContactQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< ContactQueryResult * >(argp1);
+  result = (std::vector< int,std::allocator< int > > *)& ((arg1)->elems1);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_ContactQueryResult_elems2_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ContactQueryResult *arg1 = (ContactQueryResult *) 0 ;
+  std::vector< int,std::allocator< int > > *arg2 = (std::vector< int,std::allocator< int > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:ContactQueryResult_elems2_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ContactQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ContactQueryResult_elems2_set" "', argument " "1"" of type '" "ContactQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< ContactQueryResult * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "ContactQueryResult_elems2_set" "', argument " "2"" of type '" "std::vector< int,std::allocator< int > > *""'"); 
+  }
+  arg2 = reinterpret_cast< std::vector< int,std::allocator< int > > * >(argp2);
+  if (arg1) (arg1)->elems2 = *arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_ContactQueryResult_elems2_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ContactQueryResult *arg1 = (ContactQueryResult *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::vector< int,std::allocator< int > > *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:ContactQueryResult_elems2_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ContactQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ContactQueryResult_elems2_get" "', argument " "1"" of type '" "ContactQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< ContactQueryResult * >(argp1);
+  result = (std::vector< int,std::allocator< int > > *)& ((arg1)->elems2);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_ContactQueryResult(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ContactQueryResult *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)":new_ContactQueryResult")) SWIG_fail;
+  {
+    try {
+      result = (ContactQueryResult *)new ContactQueryResult();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_ContactQueryResult, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_ContactQueryResult(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ContactQueryResult *arg1 = (ContactQueryResult *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:delete_ContactQueryResult",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ContactQueryResult, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_ContactQueryResult" "', argument " "1"" of type '" "ContactQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< ContactQueryResult * >(argp1);
+  {
+    try {
+      delete arg1;
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *ContactQueryResult_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj;
+  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_ContactQueryResult, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
 SWIGINTERN PyObject *_wrap_new_Geometry3D__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Geometry3D *result = 0 ;
@@ -22904,6 +23282,221 @@ SWIGINTERN PyObject *_wrap_Geometry3D_rayCast(PyObject *SWIGUNUSEDPARM(self), Py
   return resultobj;
 fail:
   return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_contacts__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  Geometry3D *arg2 = 0 ;
+  double arg3 ;
+  double arg4 ;
+  int arg5 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  double val3 ;
+  int ecode3 = 0 ;
+  double val4 ;
+  int ecode4 = 0 ;
+  int val5 ;
+  int ecode5 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  PyObject * obj4 = 0 ;
+  ContactQueryResult result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOOO:Geometry3D_contacts",&obj0,&obj1,&obj2,&obj3,&obj4)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_contacts" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Geometry3D,  0  | 0);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_contacts" "', argument " "2"" of type '" "Geometry3D const &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_contacts" "', argument " "2"" of type '" "Geometry3D const &""'"); 
+  }
+  arg2 = reinterpret_cast< Geometry3D * >(argp2);
+  ecode3 = SWIG_AsVal_double(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Geometry3D_contacts" "', argument " "3"" of type '" "double""'");
+  } 
+  arg3 = static_cast< double >(val3);
+  ecode4 = SWIG_AsVal_double(obj3, &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "Geometry3D_contacts" "', argument " "4"" of type '" "double""'");
+  } 
+  arg4 = static_cast< double >(val4);
+  ecode5 = SWIG_AsVal_int(obj4, &val5);
+  if (!SWIG_IsOK(ecode5)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "Geometry3D_contacts" "', argument " "5"" of type '" "int""'");
+  } 
+  arg5 = static_cast< int >(val5);
+  {
+    try {
+      result = (arg1)->contacts((Geometry3D const &)*arg2,arg3,arg4,arg5);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj((new ContactQueryResult(static_cast< const ContactQueryResult& >(result))), SWIGTYPE_p_ContactQueryResult, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_contacts__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  Geometry3D *arg2 = 0 ;
+  double arg3 ;
+  double arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  double val3 ;
+  int ecode3 = 0 ;
+  double val4 ;
+  int ecode4 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  ContactQueryResult result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOO:Geometry3D_contacts",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_contacts" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Geometry3D,  0  | 0);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_contacts" "', argument " "2"" of type '" "Geometry3D const &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_contacts" "', argument " "2"" of type '" "Geometry3D const &""'"); 
+  }
+  arg2 = reinterpret_cast< Geometry3D * >(argp2);
+  ecode3 = SWIG_AsVal_double(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Geometry3D_contacts" "', argument " "3"" of type '" "double""'");
+  } 
+  arg3 = static_cast< double >(val3);
+  ecode4 = SWIG_AsVal_double(obj3, &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "Geometry3D_contacts" "', argument " "4"" of type '" "double""'");
+  } 
+  arg4 = static_cast< double >(val4);
+  {
+    try {
+      result = (arg1)->contacts((Geometry3D const &)*arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj((new ContactQueryResult(static_cast< const ContactQueryResult& >(result))), SWIGTYPE_p_ContactQueryResult, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_contacts(PyObject *self, PyObject *args) {
+  Py_ssize_t argc;
+  PyObject *argv[6] = {
+    0
+  };
+  Py_ssize_t ii;
+  
+  if (!PyTuple_Check(args)) SWIG_fail;
+  argc = args ? PyObject_Length(args) : 0;
+  for (ii = 0; (ii < 5) && (ii < argc); ii++) {
+    argv[ii] = PyTuple_GET_ITEM(args,ii);
+  }
+  if (argc == 4) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Geometry3D, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_Geometry3D, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        {
+          int res = SWIG_AsVal_double(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          {
+            int res = SWIG_AsVal_double(argv[3], NULL);
+            _v = SWIG_CheckState(res);
+          }
+          if (_v) {
+            return _wrap_Geometry3D_contacts__SWIG_1(self, args);
+          }
+        }
+      }
+    }
+  }
+  if (argc == 5) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Geometry3D, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_Geometry3D, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        {
+          int res = SWIG_AsVal_double(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          {
+            int res = SWIG_AsVal_double(argv[3], NULL);
+            _v = SWIG_CheckState(res);
+          }
+          if (_v) {
+            {
+              int res = SWIG_AsVal_int(argv[4], NULL);
+              _v = SWIG_CheckState(res);
+            }
+            if (_v) {
+              return _wrap_Geometry3D_contacts__SWIG_0(self, args);
+            }
+          }
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'Geometry3D_contacts'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    Geometry3D::contacts(Geometry3D const &,double,double,int)\n"
+    "    Geometry3D::contacts(Geometry3D const &,double,double)\n");
+  return 0;
 }
 
 
@@ -55160,7 +55753,8 @@ static PyMethodDef SwigMethods[] = {
 		"    cp1, cp2 (list of 3 floats, optional): closest points on self vs other,\n"
 		"        both given in world coordinates\n"
 		"    grad1, grad2 (list of 3 floats, optional): the gradients of the\n"
-		"        objects' signed distance fields, in world coordinates.\n"
+		"        objects' signed distance fields at the closest points.  Given in\n"
+		"        world coordinates.\n"
 		"\n"
 		"        I.e., to move object1 to touch object2, move it in direction\n"
 		"        grad1 by distance -d.  Note that grad2 is always -grad1.  \n"
@@ -55170,6 +55764,48 @@ static PyMethodDef SwigMethods[] = {
 		""},
 	 { (char *)"delete_DistanceQueryResult", _wrap_delete_DistanceQueryResult, METH_VARARGS, (char *)"delete_DistanceQueryResult(DistanceQueryResult self)"},
 	 { (char *)"DistanceQueryResult_swigregister", DistanceQueryResult_swigregister, METH_VARARGS, NULL},
+	 { (char *)"ContactQueryResult_depths_set", _wrap_ContactQueryResult_depths_set, METH_VARARGS, (char *)"ContactQueryResult_depths_set(ContactQueryResult self, doubleVector depths)"},
+	 { (char *)"ContactQueryResult_depths_get", _wrap_ContactQueryResult_depths_get, METH_VARARGS, (char *)"ContactQueryResult_depths_get(ContactQueryResult self) -> doubleVector"},
+	 { (char *)"ContactQueryResult_points1_set", _wrap_ContactQueryResult_points1_set, METH_VARARGS, (char *)"ContactQueryResult_points1_set(ContactQueryResult self, doubleMatrix points1)"},
+	 { (char *)"ContactQueryResult_points1_get", _wrap_ContactQueryResult_points1_get, METH_VARARGS, (char *)"ContactQueryResult_points1_get(ContactQueryResult self) -> doubleMatrix"},
+	 { (char *)"ContactQueryResult_points2_set", _wrap_ContactQueryResult_points2_set, METH_VARARGS, (char *)"ContactQueryResult_points2_set(ContactQueryResult self, doubleMatrix points2)"},
+	 { (char *)"ContactQueryResult_points2_get", _wrap_ContactQueryResult_points2_get, METH_VARARGS, (char *)"ContactQueryResult_points2_get(ContactQueryResult self) -> doubleMatrix"},
+	 { (char *)"ContactQueryResult_normals_set", _wrap_ContactQueryResult_normals_set, METH_VARARGS, (char *)"ContactQueryResult_normals_set(ContactQueryResult self, doubleMatrix normals)"},
+	 { (char *)"ContactQueryResult_normals_get", _wrap_ContactQueryResult_normals_get, METH_VARARGS, (char *)"ContactQueryResult_normals_get(ContactQueryResult self) -> doubleMatrix"},
+	 { (char *)"ContactQueryResult_elems1_set", _wrap_ContactQueryResult_elems1_set, METH_VARARGS, (char *)"ContactQueryResult_elems1_set(ContactQueryResult self, intVector elems1)"},
+	 { (char *)"ContactQueryResult_elems1_get", _wrap_ContactQueryResult_elems1_get, METH_VARARGS, (char *)"ContactQueryResult_elems1_get(ContactQueryResult self) -> intVector"},
+	 { (char *)"ContactQueryResult_elems2_set", _wrap_ContactQueryResult_elems2_set, METH_VARARGS, (char *)"ContactQueryResult_elems2_set(ContactQueryResult self, intVector elems2)"},
+	 { (char *)"ContactQueryResult_elems2_get", _wrap_ContactQueryResult_elems2_get, METH_VARARGS, (char *)"ContactQueryResult_elems2_get(ContactQueryResult self) -> intVector"},
+	 { (char *)"new_ContactQueryResult", _wrap_new_ContactQueryResult, METH_VARARGS, (char *)"\n"
+		"new_ContactQueryResult() -> ContactQueryResult\n"
+		"\n"
+		"\n"
+		"\n"
+		"The result from a contact query of :class:`~klampt.Geometry3D`. The number of\n"
+		"contacts n is variable.  \n"
+		"\n"
+		"Attributes:  \n"
+		"\n"
+		"    depths (list of n floats): penetration depths for each contact point.\n"
+		"        The depth is measured with respect to the padded geometry, and must\n"
+		"        be nonnegative. A value of 0 indicates that depth cannot be\n"
+		"        determined accurately.\n"
+		"    points1, points2 (list of n lists of floats): contact points on self vs\n"
+		"        other,  The top level list has n entries, and each entry is a\n"
+		"        3-list expressed in world coordinates.  If an object is padded,\n"
+		"        these points are on the surface of the padded geometry.\n"
+		"    normals (list of n lists of floats): the outward-facing contact normal\n"
+		"        from this to other at each contact point, given in world\n"
+		"        coordinates.  Each entry is a 3-list, and can be a unit vector,\n"
+		"        or [0,0,0] if the the normal cannot be computed properly.\n"
+		"    elems1, elems2 (list of n ints): for compound objects, these are the\n"
+		"        element indices corresponding to each contact.  \n"
+		"\n"
+		"C++ includes: geometry.h\n"
+		"\n"
+		""},
+	 { (char *)"delete_ContactQueryResult", _wrap_delete_ContactQueryResult, METH_VARARGS, (char *)"delete_ContactQueryResult(ContactQueryResult self)"},
+	 { (char *)"ContactQueryResult_swigregister", ContactQueryResult_swigregister, METH_VARARGS, NULL},
 	 { (char *)"new_Geometry3D", _wrap_new_Geometry3D, METH_VARARGS, (char *)"\n"
 		"Geometry3D()\n"
 		"Geometry3D(Geometry3D arg2)\n"
@@ -55528,13 +56164,19 @@ static PyMethodDef SwigMethods[] = {
 		"Returns the the distance and closest points between the given geometries.  \n"
 		"\n"
 		"If the objects are penetrating, some combinations of geometry types allow\n"
-		"calculating penetration depths (GeometricPrimitive-GeometricPrimitive,\n"
-		"GeometricPrimitive-TriangleMesh (surface only), GeometricPrimitive-PointCloud,\n"
-		"GeometricPrimitive-VolumeGrid, TriangleMesh (surface only)- GeometricPrimitive,\n"
-		"PointCloud-VolumeGrid). In this case, a negative value is returned and cp1,cp2\n"
-		"are the deepest penetrating points.  \n"
+		"calculating penetration depths:  \n"
 		"\n"
-		"Same comments as the distance_point function  \n"
+		"*   GeometricPrimitive-GeometricPrimitive  \n"
+		"*   GeometricPrimitive-TriangleMesh (surface only)  \n"
+		"*   GeometricPrimitive-PointCloud  \n"
+		"*   GeometricPrimitive-VolumeGrid  \n"
+		"*   TriangleMesh (surface only)-GeometricPrimitive  \n"
+		"*   PointCloud-VolumeGrid  \n"
+		"\n"
+		"If penetration is supported, a negative distance is returned and cp1,cp2 are the\n"
+		"deepest penetrating points.  \n"
+		"\n"
+		"See the comments of the distance_point function  \n"
 		"\n"
 		""},
 	 { (char *)"Geometry3D_distance_ext", _wrap_Geometry3D_distance_ext, METH_VARARGS, (char *)"\n"
@@ -55555,6 +56197,24 @@ static PyMethodDef SwigMethods[] = {
 		"Returns (hit,pt) where hit is true if the ray starting at s and pointing in\n"
 		"direction d hits the geometry (given in world coordinates); pt is the hit point,\n"
 		"in world coordinates.  \n"
+		"\n"
+		""},
+	 { (char *)"Geometry3D_contacts", _wrap_Geometry3D_contacts, METH_VARARGS, (char *)"\n"
+		"contacts(Geometry3D other, double padding1, double padding2, int maxContacts=0) -> ContactQueryResult\n"
+		"Geometry3D_contacts(Geometry3D self, Geometry3D other, double padding1, double padding2) -> ContactQueryResult\n"
+		"\n"
+		"\n"
+		"\n"
+		"Returns the set of contact points between this and other. This set is a discrete\n"
+		"representation of the region of surface overlap, which is defined as all pairs\n"
+		"of points within distance self.collisionMargin + other.collisionMargin +\n"
+		"padding1 + padding2.  \n"
+		"\n"
+		"For some geometry types (TriangleMesh-TriangleMesh, TriangleMesh-PointCloud,\n"
+		"PointCloud-PointCloud) padding must be positive to get meaningful contact poitns\n"
+		"and normals.  \n"
+		"\n"
+		"If maxContacts != 0 a clustering postprocessing step is performed.  \n"
 		"\n"
 		""},
 	 { (char *)"Geometry3D_world_set", _wrap_Geometry3D_world_set, METH_VARARGS, (char *)"Geometry3D_world_set(Geometry3D self, int world)"},
@@ -59604,6 +60264,7 @@ static void *_p_intArrayTo_p_int(void *x, int *SWIGUNUSEDPARM(newmemory)) {
 }
 static swig_type_info _swigt__p_Appearance = {"_p_Appearance", "Appearance *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_ContactParameters = {"_p_ContactParameters", "ContactParameters *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_ContactQueryResult = {"_p_ContactQueryResult", "ContactQueryResult *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_ControlledRobotSimulator = {"_p_ControlledRobotSimulator", "ControlledRobotSimulator *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_DistanceQueryResult = {"_p_DistanceQueryResult", "DistanceQueryResult *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_DistanceQuerySettings = {"_p_DistanceQuerySettings", "DistanceQuerySettings *", 0, 0, (void*)0, 0};
@@ -59676,6 +60337,7 @@ static swig_type_info _swigt__p_void = {"_p_void", "void *", 0, 0, (void*)0, 0};
 static swig_type_info *swig_type_initial[] = {
   &_swigt__p_Appearance,
   &_swigt__p_ContactParameters,
+  &_swigt__p_ContactQueryResult,
   &_swigt__p_ControlledRobotSimulator,
   &_swigt__p_DistanceQueryResult,
   &_swigt__p_DistanceQuerySettings,
@@ -59748,6 +60410,7 @@ static swig_type_info *swig_type_initial[] = {
 
 static swig_cast_info _swigc__p_Appearance[] = {  {&_swigt__p_Appearance, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ContactParameters[] = {  {&_swigt__p_ContactParameters, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_ContactQueryResult[] = {  {&_swigt__p_ContactQueryResult, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ControlledRobotSimulator[] = {  {&_swigt__p_ControlledRobotSimulator, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_DistanceQueryResult[] = {  {&_swigt__p_DistanceQueryResult, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_DistanceQuerySettings[] = {  {&_swigt__p_DistanceQuerySettings, 0, 0, 0},{0, 0, 0, 0}};
@@ -59820,6 +60483,7 @@ static swig_cast_info _swigc__p_void[] = {  {&_swigt__p_void, 0, 0, 0},{0, 0, 0,
 static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_Appearance,
   _swigc__p_ContactParameters,
+  _swigc__p_ContactQueryResult,
   _swigc__p_ControlledRobotSimulator,
   _swigc__p_DistanceQueryResult,
   _swigc__p_DistanceQuerySettings,

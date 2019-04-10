@@ -1202,6 +1202,41 @@ bool Geometry3D::rayCast(const double s[3],const double d[3],double out[3])
   return false;
 }
 
+ContactQueryResult Geometry3D::contacts(const Geometry3D& other,double padding1,double padding2,int maxContacts)
+{
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>& geom2 = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(other.geomPtr);
+  if(!geom) throw PyException("Geometry3D.contacts: Geometry is empty");
+  if(!geom2) throw PyException("Geometry3D.contacts: Other geometry is empty");
+  AnyContactsQuerySettings settings;
+  settings.padding1 = padding1;
+  settings.padding2 = padding2;
+  if(maxContacts > 0) {
+    settings.maxcontacts = maxContacts;
+    settings.cluster = true;
+  }
+  AnyContactsQueryResult res = geom->Contacts(*geom2,settings);
+  ContactQueryResult out;
+  out.depths.resize(res.contacts.size());
+  out.points1.resize(res.contacts.size());
+  out.points2.resize(res.contacts.size());
+  out.normals.resize(res.contacts.size());
+  out.elems1.resize(res.contacts.size());
+  out.elems2.resize(res.contacts.size());
+  for(size_t i=0;i<res.contacts.size();i++) {
+    out.depths[i] = res.contacts[i].depth;
+    out.points1[i].resize(3);
+    res.contacts[i].p1.get(&out.points1[i][0]);
+    out.points2[i].resize(3);
+    res.contacts[i].p2.get(&out.points2[i][0]);
+    out.normals[i].resize(3);
+    res.contacts[i].n.get(&out.normals[i][0]);
+    out.elems1[i] = res.contacts[i].elem1;
+    out.elems2[i] = res.contacts[i].elem2;
+  }
+  return out;
+}
+
 //KH: note: pointer gymnastics necessary to allow appearances to refer to temporary appearances as well as references to world, while also
 //exposing an opaque pointer in appearance.h
 Appearance::Appearance()
