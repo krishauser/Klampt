@@ -268,20 +268,20 @@ class ResourceBrowser(QtWidgets.QMainWindow):
         self.view.setRootIndex(currentRoot.parent())
 
     def selection_changed(self,newSelection,deselected):
-        #print "Selection changed!"
+        #print "klampt_browser: Selection changed!"
         for i in newSelection.indexes():
             if i.column() == 0:
                 fn = str(i.model().filePath(i))
                 self.selected.add(fn)
                 self.add(fn)
                 #print "  value:",fn
-        #print "Deselected:"
+        #print "klampt_browser: Deselected:"
         for i in deselected.indexes():
             if i.column() == 0:
                 fn = str(i.model().filePath(i))
                 self.selected.remove(fn)
                 self.remove(fn)
-                #print "  value:",fn
+                #klampt_browser: print "  value:",fn
         self.refresh()
 
     def onAutoFitCamera(self):
@@ -350,11 +350,11 @@ class ResourceBrowser(QtWidgets.QMainWindow):
             return
         fn = sorted(self.active.keys())[0]
         def doedit():
-            print("Launching resource.edit",fn,"...")
+            print("klampt_browser: Launching resource.edit",fn,"...")
             try:
                 obj = resource.edit(name=fn,value=self.active[fn].obj,world=self.world)
             except Exception as e:
-                print("Exception raised during resource.edit:",e)
+                print("klampt_browser: Exception raised during resource.edit:",e)
                 QtWidgets.QMessageBox.warning(self.splitter,"Editing not available","Unable to edit item of type "+self.active[fn].obj.__class__.__name__)
                 return
             if obj is not None:
@@ -369,7 +369,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
     def onSaveClicked(self):
         for fn in self.modified:
             if not save(self.active[fn].obj,fn):
-                print("Error saving file",fn)
+                print("klampt_browser: Error saving file",fn)
         self.modified = set()
         self.saveButton.setEnabled(False)
     
@@ -382,7 +382,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
         try:
             (save,obj) = resource.edit("untitled",types.make(type,robot),type=type,world=self.world)
         except Exception as e:
-            print("Exception raised during resource.edit():",e)
+            print("klampt_browser: Exception raised during resource.edit():",e)
             QtWidgets.QMessageBox.warning(self.splitter,"Creation not available","Unable to create item of type "+type+", did you remember to add items to the reference world?")
             return
         if obj is not None and save:
@@ -441,7 +441,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
         for i,(cfn,citem) in enumerate(self.visCache):
             if cfn == fn:
                 print() 
-                print("PULLED",fn,"FROM CACHE")
+                print("klampt_browser: PULLED",fn,"FROM CACHE")
                 print() 
                 self.active[fn] = citem
                 return True
@@ -507,7 +507,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
                         obj = loader.load('MultiPath',fn)
                     except Exception as e:
                         if warn:
-                            print("Trying MultiPath load, got exception",e)
+                            print("klampt_browser: Trying MultiPath load, got exception",e)
                             import traceback
                             traceback.print_exc()
                             QtWidgets.QMessageBox.warning(self.splitter,"Invalid WorldModel","Could not load "+fn+" as a world XML file")
@@ -542,7 +542,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
 
     def loadedItem(self,fn,obj):
         if fn in self.active:
-            print("Re-loaded item",fn,"so I'm first removing it")
+            print("klampt_browser: Re-loaded item",fn,"so I'm first removing it")
             self.remove(fn)
         assert fn not in self.active
         item = ResourceItem(obj)
@@ -564,7 +564,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
                 item.plugin.add("anim_xform",se3.identity())
                 item.animationBuddy = "anim_xform"
             else:
-                print("Can't interpret trajectory of length",d)
+                print("klampt_browser: Can't interpret trajectory of length",d)
         elif isinstance(obj,MultiPath):
             if self.world.numRobots() > 0:
                 robotpath = ('world',self.world.robot(0).getName())
@@ -603,7 +603,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
         if s.program is not None:
             copyCamera(s.program.view.camera,self.emptyVisProgram.view.camera)
         print() 
-        print("ADDING",fn,"TO CACHE")
+        print("klampt_browser: ADDING",fn,"TO CACHE")
         print() 
         self.visCache.append((fn,s))
         if len(self.visCache) > MAX_VIS_CACHE:
@@ -613,9 +613,12 @@ class ResourceBrowser(QtWidgets.QMainWindow):
             for (k,v) in self.active.items():
                 if isinstance(v.obj,(RobotModel,RigidObjectModel,TerrainModel)):
                     cleartemp = False
+                    break
         if cleartemp:
-            print("Clearing temp world...")
-            self.tempWorld = WorldModel()
+            if self.tempWorld.numRobots() + self.tempWorld.numRigidObjects() + self.tempWorld.numTerrains() > 10:
+                print("klampt_browser: Clearing temp world...")
+                self.tempWorld = WorldModel()
+                self.visCache = [(fn,s) for (fn,s) in self.visCache if not isinstance(s.obj,(RobotModel,RigidObjectModel,TerrainModel))]
     
     def maxGridItemsChanged(self):
         self.refresh()
@@ -647,7 +650,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
             obj = item.obj
             if isinstance(obj,(Trajectory,MultiPath)):
                 self.glviewportManager.animationDuration = max(self.glviewportManager.animationDuration,obj.duration())
-                print("Setting animation duration to",self.glviewportManager.animationDuration)
+                print("klampt_browser: Setting animation duration to",self.glviewportManager.animationDuration)
         self.glviewportManager.refresh()
 
 if __name__ == '__main__':
