@@ -211,20 +211,21 @@ MAIN INTERFACE
   after every lock().
 - def customUI(make_func): launches a user-defined UI window by calling make_func(gl_backend)
   in the visualization thread.  This can be used to build custom editors and windows that
-  are compatible with other visualization functionality.  Here gl_backend is an instance of
-  _GLBackend instantiated for the current plugin, and make_func returns a QDialog for dialog()
-  constructed windows, or QMainWindow (or similar Qt object) for show() constructed windows.
-- def getViewport(): Returns the currently active viewport.
+  are compatible with other visualization functionality.  Here make_func takes in an object of
+  type QtGLWidget, instantiated for the current plugin, and returns either a QDialog or
+  QMainWindow.  If a QDialog is returned, it will be launched as in windows started via dialog().
+  Otherwise, it will run as in windows started via show().
+- def getViewport(): Returns the viewport for the currently active window.
+- def setViewport(viewport): Sets the viewport for the currently active window.
 
 The following VisualizationPlugin methods are also added to the klampt.vis namespace
 and operate on the default plugin.  If you are calling these methods from an external
 loop (as opposed to inside a plugin) be sure to lock/unlock the visualization before/after
 calling these methods.
 
-- def add(name,item,keepAppearance=False): adds an item to the visualization.
+- def add(name,item,keepAppearance=False,*kwargs): adds an item to the visualization.
   name is a unique identifier.  If an item with the same name already exists,
-  it will no longer be shown.  If keepAppearance=True, then the prior item's
-  appearance will be kept, if a prior item exists.
+  it will no longer be shown.
 - def clear(): clears the visualization world.
 - def listItems(): prints out all names of visualization objects
 - def listItems(name): prints out all names of visualization objects under the given name
@@ -240,6 +241,7 @@ calling these methods.
   transforms, coordinate.Point's, coordinate.Transform's, coordinate.Frame's,
   robots, and objects are currently accepted.
 - def hideLabel(name,hidden=True): hides/unhides an item's text label.
+- def setLabel(name,text): changes an item's text label from its name to a custom string.
 - def setAppearance(name,appearance): changes the Appearance of an item.
 - def revertAppearance(name): restores the Appearance of an item
 - def setAttribute(name,attribute,value): sets an attribute of the appearance
@@ -632,6 +634,24 @@ def setViewport(viewport):
 
 
 ######### CONVENIENCE ALIASES FOR VisualizationPlugin methods ###########
+def addAction(hook,short_text,key=None,description=None):
+    """Adds a callback that can be triggered by menu choice or keyboard.
+    Alias for _vis.add_action().
+
+    Args:
+        hook (function): a python callback function, taking no arguments, called
+            when the action is triggered.
+        short_text (str): the text shown in the menu bar.
+        key (str, optional): a shortcut keyboard command (e.g., can be 'k' or 'Ctrl+k').
+        description (str, optional): if provided, this is a tooltip that shows up
+            when the user hovers their mouse over the menu item.
+    """
+
+    global _vis
+    if _vis is None:
+      return
+    _vis.add_action(hook,short_text,key,description)
+
 def clear():
     """Clears the visualization world."""
     global _vis
@@ -639,10 +659,18 @@ def clear():
         return
     _vis.clear()
 
-def add(name,item,keepAppearance=False):
-    """Adds an item to the visualization. name is a unique identifier.  If an item with
-    the same name already exists, it will no longer be shown.  If keepAppearance=True, then
-    the prior item's appearance will be kept, if a prior item exists."""
+def add(name,item,keepAppearance=False,**kwargs):
+    """Adds an item to the visualization.
+
+    Args:
+        name (str): a unique identifier.  If an item with the same name already
+            exists, it will no longer be shown. 
+        keepAppearance (bool, optional): if True, then if there was an item that
+            had the same name, the prior item's appearance will be kept.
+        kwargs: key-value pairs to be added into the attributes dictionary.  e.g.
+            vis.add("geom",geometry,color=[1,0,0,1]) adds a geometry while setting
+            its color to red.
+    """
     global _vis
     if _vis is None:
         print "Visualization disabled"
@@ -650,7 +678,7 @@ def add(name,item,keepAppearance=False):
     _globalLock.acquire()
     _checkWindowCurrent(item)
     _globalLock.release()
-    _vis.add(name,item,keepAppearance)
+    _vis.add(name,item,keepAppearance,**kwargs)
 
 def listItems(name=None,indent=0):
     global _vis
@@ -748,6 +776,10 @@ def setItemConfig(name,value):
         return
     return _vis.setItemConfig(name,value)
 
+def setLabel(name,text):
+    """Changes the label of an item in the visualization"""
+    setAttribute(name,"label",text)
+
 def hideLabel(name,hidden=True):
     """Hides or shows the label of an item in the visualization"""
     global _vis
@@ -808,6 +840,8 @@ def setAttribute(name,attr,value):
     - 'type': for ambiguous items, like a 3-item list when the robot has 3 links, specifies the type to be
        used.  For example, 'Config' draws the item as a robot configuration, while 'Vector3' or 'Point'
        draws it as a point.
+    - 'label': a replacement label (str)
+    - 'hide_label': if True, the label will be hidden
 
     """
     global _vis
@@ -1581,7 +1615,6 @@ class VisAppearance:
         
     def drawText(self,text,point):
         """Draws the given text at the given point"""
-        if self.attributes.get("text_hidden",False): return
         self.widget.addLabel(text,point[:],[0,0,0])
 
     def updateAnimation(self,t):
@@ -1643,17 +1676,48 @@ class VisAppearance:
             o.clearDisplayLists()
         self.markChanged()
 
-    def draw(self,world=None):
-        """Draws the specified item in the specified world.  If name
-        is given and text_hidden != False, then the name of the item is
-        shown."""
+    def transparent(self):
+        """Returns true if the item is entirely transparent, None if mixed transparency, and False otherwise"""
+        if len(self.subAppearances)!=0:
+            anyTransp = False
+            anyOpaque = False
+            for n,app in self.subAppearances.iteritems():
+                if app.transparent():
+                    anyTransp = True
+                else:
+                    anyOpaque = True
+            if anyTransp and anyOpaque:
+                return None
+            else:
+                return anyTransp
+        if hasattr(self.item,'appearance'):
+            if self.useDefaultAppearance or 'color' not in self.attributes:
+                return self.item.appearance().getColor()[3] < 1.0
+        try:
+            return (self.attributes['color'][3] < 1.0)
+        except:
+            return False
+
+    def draw(self,world=None,draw_transparent=None):
+        """Draws the specified item in the specified world, with all the
+        current modifications in attributes.
+
+        If a name or label are given, and self.attributes['hide_label'] != False, then the
+        label is shown.
+
+        If draw_transparent is None, then everything is drawn.  If True, then
+        only transparent items are drawn.  If False, then only opaque items are
+        drawn.  (This only affects WorldModels)
+        """
         if self.hidden: return
         if self.customDrawFunc is not None:
           self.customDrawFunc(self.item)
           return
        
         item = self.item
-        name = self.name
+        name = self.attributes.get('label',self.name)
+        if self.attributes.get("hide_label",False):
+          name = None
         #set appearance
         if not self.useDefaultAppearance and hasattr(item,'appearance'):
             #print "Has custom appearance"
@@ -1668,6 +1732,12 @@ class VisAppearance:
 
         if len(self.subAppearances)!=0:
             for n,app in self.subAppearances.iteritems():
+                if draw_transparent is True:
+                    if not app.transparent():
+                        continue
+                elif draw_transparent is False:
+                    if app.transparent():
+                        continue
                 app.widget = self.widget
                 app.draw(world)
         elif hasattr(item,'drawGL'):
@@ -1721,7 +1791,7 @@ class VisAppearance:
                     else:
                         drawTrajectory(item,width,color)
                 self.displayCache[0].draw(drawRaw)
-                if name != None:
+                if name is not None:
                     self.drawText(name,centroid)
         elif isinstance(item,MultiPath):
             robot = (world.robot(self.attributes.get("robot",0)) if world is not None and world.numRobots() > 0 else None)
@@ -1742,7 +1812,7 @@ class VisAppearance:
                             drawRobotTrajectory(s.configs,robot,ees,width,(color if i%2 == 0 else color2))
                     #draw it!
                     self.displayCache[0].draw(drawRaw)
-                    if name != None:
+                    if name is not None:
                         self.drawText(name,centroid)
         elif isinstance(item,coordinates.Point):
             def drawRaw():
@@ -1757,7 +1827,7 @@ class VisAppearance:
             glDisable(GL_DEPTH_TEST)
             self.displayCache[0].draw(drawRaw,[so3.identity(),item.worldCoordinates()])
             glEnable(GL_DEPTH_TEST)
-            if name != None:
+            if name is not None:
                 self.drawText(name,item.worldCoordinates())
         elif isinstance(item,coordinates.Direction):
             def drawRaw():
@@ -1773,7 +1843,7 @@ class VisAppearance:
                 glEnable(GL_DEPTH_TEST)
                 #write name
             self.displayCache[0].draw(drawRaw,item.frame().worldCoordinates(),parameters = item.localCoordinates())
-            if name != None:
+            if name is not None:
                 self.drawText(name,vectorops.add(item.frame().worldCoordinates()[1],item.worldCoordinates()))
         elif isinstance(item,coordinates.Frame):
             t = item.worldCoordinates()
@@ -1810,7 +1880,7 @@ class VisAppearance:
             #drawRaw()
             #glPopMatrix()
             #write name
-            if name != None:
+            if name is not None:
                 self.drawText(name,t[1])
         elif isinstance(item,coordinates.Transform):
             #draw curve between frames
@@ -1831,7 +1901,7 @@ class VisAppearance:
                 glEnable(GL_DEPTH_TEST)
                 #write name at curve
             self.displayCache[0].draw(drawRaw,transform=None,parameters = (t1,t2))
-            if name != None:
+            if name is not None:
                 self.drawText(name,spline.hermite_eval(t1[1],v1,t2[1],v2,0.5))
         elif isinstance(item,coordinates.Group):
             pass
@@ -1953,7 +2023,7 @@ class VisAppearance:
                     #TEMP for some reason the cached version sometimes gives a GL error
                     self.displayCache[2].draw(drawConnection,transform=None,parameters = (p1,v1,p2,v2))
                     #drawConnection()
-                    if name != None:
+                    if name is not None:
                         self.drawText(name,wp)
                 else:
                     wp = link.getTransform()[1]
@@ -1983,7 +2053,7 @@ class VisAppearance:
                     else:
                         #no drawing
                         pass
-                    if name != None:
+                    if name is not None:
                         self.drawText(name,wp)
         elif isinstance(item,(GeometricPrimitive,TriangleMesh,PointCloud,Geometry3D)):
             if not hasattr(self,'appearance'):
@@ -2025,7 +2095,7 @@ class VisAppearance:
             else:
                 glDisable(GL_LIGHTING)
             self.appearance.drawWorldGL(geometry)
-            if name != None:
+            if name is not None:
                 bmin,bmax = geometry.getBB()
                 wp = vectorops.mul(vectorops.add(bmin,bmax),0.5)
                 self.drawText(name,wp)
@@ -2094,7 +2164,7 @@ class VisAppearance:
                     glVertex3f(0,0,0)
                     glEnd()
                 self.displayCache[0].draw(drawRaw,[so3.identity(),item])
-                if name != None:
+                if name is not None:
                     self.drawText(name,item)
             elif itypes == 'RigidTransform':
                 def drawRaw():
@@ -2103,7 +2173,7 @@ class VisAppearance:
                     else: glDisable(GL_LIGHTING)
                     gldraw.xform_widget(se3.identity(),self.attributes.get("length",0.1),self.attributes.get("width",0.01),fancy=fancy)
                 self.displayCache[0].draw(drawRaw,transform=item)
-                if name != None:
+                if name is not None:
                     self.drawText(name,item[1])
             else:
                 print "Unable to draw item of type \"%s\""%(str(itypes),)
@@ -2323,12 +2393,20 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         self.labels = []
         world = self.items.get('world',None)
         if world != None: world=world.item
+        #draw solid items first
+        delayed = []
         for (k,v) in self.items.iteritems():
+            transparent = v.transparent()
+            if transparent is not False:
+                delayed.append(k)
+                if transparent is True:
+                    continue
             v.widget = self
             v.swapDrawConfig()
-            v.draw(world)
+            v.draw(world,draw_transparent=False)
             v.swapDrawConfig()
-            v.widget = None #allows garbage collector to delete these objects
+            #allows garbage collector to delete these objects
+            v.widget = None 
         #cluster label points
         pointTolerance = self.view.camera.dist*0.03
         pointHash = {}
@@ -2340,6 +2418,15 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
                 pointHash[index] = [point,[(text,color)]]
         for (p,items) in pointHash.itervalues():
             self._drawLabelRaw(p,*zip(*items))
+
+        for k in delayed:
+            v = self.items[k]
+            v.widget = self
+            v.swapDrawConfig()
+            v.draw(world,draw_transparent=True)
+            v.swapDrawConfig()
+            #allows garbage collector to delete these objects
+            v.widget = None 
         _globalLock.release()
 
     def display_screen(self):
@@ -2519,7 +2606,7 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
             for n,v in root.subAppearances.iteritems():
                 self.listItems(v,indent+2)
 
-    def add(self,name,item,keepAppearance=False):
+    def add(self,name,item,keepAppearance=False,**kwargs):
         """Adds a named item to the visualization world.  If the item already
         exists, the appearance information will be reinitialized if keepAppearance=False
         (default) or be kept if keepAppearance=True."""
@@ -2534,6 +2621,13 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
                 self.items[name].destroy()
             app = VisAppearance(item,name)
             self.items[name] = app
+        item = self.items[name]
+        for (attr,value) in kwargs.iteritems():
+            item.attributes[attr] = value
+            if value==None:
+                del item.attributes[attr]
+            if name=='color':
+                item.useDefaultAppearance = False
         _globalLock.release()
         #self.refresh()
 
@@ -2631,7 +2725,7 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         global _globalLock
         _globalLock.acquire()
         item = self.getItem(name)
-        item.attributes["text_hidden"] = hidden
+        item.attributes["hide_label"] = hidden
         item.markChanged()
         self.doRefresh = True
         _globalLock.release()
@@ -2759,6 +2853,8 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         item.attributes[attr] = value
         if value==None:
             del item.attributes[attr]
+        if name=='color':
+            item.useDefaultAppearance = False
         item.markChanged()
         self.doRefresh = True
         _globalLock.release()
@@ -2767,7 +2863,7 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         global _globalLock
         _globalLock.acquire()
         item = self.getItem(name)
-        item.useDefaultApperance = True
+        item.useDefaultAppearance = True
         item.markChanged()
         self.doRefresh = True
         _globalLock.release()
