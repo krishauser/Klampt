@@ -223,9 +223,9 @@ void SimViewProgram::RenderWorld()
   drawCoords(0.1);
   glEnable(GL_LIGHTING);
   for(size_t i=0;i<world->terrains.size();i++)
-    world->terrains[i]->DrawGL();
+    world->terrains[i]->DrawGLOpaque(true);
   for(size_t i=0;i<world->rigidObjects.size();i++)
-    world->rigidObjects[i]->DrawGL();
+    world->rigidObjects[i]->DrawGLOpaque(true);
 
   for(size_t i=0;i<world->robots.size();i++) {
     world->robotViews[i].PushAppearance();
@@ -265,6 +265,11 @@ void SimViewProgram::RenderWorld()
     }
     world->robotViews[i].PopAppearance();
   }
+
+  for(size_t i=0;i<world->terrains.size();i++)
+    world->terrains[i]->DrawGLOpaque(false);
+  for(size_t i=0;i<world->rigidObjects.size();i++)
+    world->rigidObjects[i]->DrawGLOpaque(false);
 }
 
 
