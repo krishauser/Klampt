@@ -371,6 +371,7 @@ class XmlAppearance
   XmlAppearance(TiXmlElement* element,const string& _path) : e(element),path(_path) {}
   bool Get(ManagedGeometry& geom)
   {
+    geom.SetUniqueAppearance();
     Texturizer tex;
     tex.texCoordAutoScale = false;
     geom.Appearance()->texWrap = true;
@@ -384,6 +385,80 @@ class XmlAppearance
       tex.texture = "";
       geom.Appearance()->faceColor.set(rgb.x,rgb.y,rgb.z,a);
       geom.Appearance()->vertexColor.set(rgb.x,rgb.y,rgb.z,a);
+    }
+    if(e->Attribute("vertexColor")) {
+      Vector3 rgb;
+      stringstream ss(e->Attribute("vertexColor"));
+      ss >> rgb;
+      Real a=1.0;
+      if(ss >> a) { }
+      else a=1.0;
+      geom.Appearance()->vertexColor.set(rgb.x,rgb.y,rgb.z,a);
+      if(a == 0)
+        geom.Appearance()->drawVertices = false;
+      else
+        geom.Appearance()->drawVertices = true;
+    }
+    if(e->Attribute("edgeColor")) {
+      Vector3 rgb;
+      stringstream ss(e->Attribute("edgeColor"));
+      ss >> rgb;
+      Real a=1.0;
+      if(ss >> a) { }
+      else a=1.0;
+      geom.Appearance()->edgeColor.set(rgb.x,rgb.y,rgb.z,a);
+      if(a == 0)
+        geom.Appearance()->drawEdges = false;
+      else
+        geom.Appearance()->drawEdges = true;
+    }
+    if(e->Attribute("faceColor")) {
+      Vector3 rgb;
+      stringstream ss(e->Attribute("faceColor"));
+      ss >> rgb;
+      Real a=1.0;
+      if(ss >> a) { }
+      else a=1.0;
+      tex.texture = "";
+      geom.Appearance()->faceColor.set(rgb.x,rgb.y,rgb.z,a);
+      if(a == 0)
+        geom.Appearance()->drawFaces = false;
+      else
+        geom.Appearance()->drawFaces = true;
+    }
+    if(e->Attribute("vertexSize")) {
+      Real vertexSize;
+      stringstream ss(e->Attribute("vertexSize"));
+      ss >> vertexSize;
+      geom.Appearance()->vertexSize = vertexSize;
+      geom.Appearance()->drawVertices = true;
+    }
+    if(e->Attribute("pointSize")) {
+      Real vertexSize;
+      stringstream ss(e->Attribute("pointSize"));
+      ss >> vertexSize;
+      geom.Appearance()->vertexSize = vertexSize;
+      geom.Appearance()->drawVertices = true;
+    }
+    if(e->Attribute("edgeSize")) {
+      Real edgeSize;
+      stringstream ss(e->Attribute("edgeSize"));
+      ss >> edgeSize;
+      geom.Appearance()->edgeSize = edgeSize;
+      geom.Appearance()->drawEdges = true;
+    }
+    if(e->Attribute("silhouette")) {
+      Real radius;
+      Vector3 rgb;
+      Real a=1.0;
+      stringstream ss(e->Attribute("silhouette"));
+      ss>>radius;
+      geom.Appearance()->silhouetteRadius = radius;
+      if(ss >> rgb) {
+        if(ss >> a) { }
+        else a=1.0;
+        geom.Appearance()->silhouetteColor.set(rgb.x,rgb.y,rgb.z,a);
+      }
     }
     if(e->Attribute("texture")) {
       tex.texture = e->Attribute("texture");
