@@ -292,7 +292,7 @@ def planToSet(world,robot,target,
     plan = SubsetMotionPlan(space,subset,q0,**planOptions)
 
     if isinstance(target,CSpace):
-      if isinstance(target,EmbeddedCSpace):
+      if isinstance(space,EmbeddedCSpace):
         def goaltest(x):
           return target.feasible(space.lift(x))
         def goalsample():
@@ -305,6 +305,7 @@ def planToSet(world,robot,target,
     else:
       goal = target
     try:
+        print("a",target)
         plan.setEndpoints([q0[s] for s in subset],goal)
     except RuntimeError:
         #the start configuration is infeasible, print it out
