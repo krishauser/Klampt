@@ -244,6 +244,12 @@ bool ManagedGeometry::IsCached() const
   return !cacheKey.empty();
 }
 
+bool ManagedGeometry::IsOriginal() const
+{
+  return !cacheKey.empty() && (cacheKey.rfind(']') == string::npos);
+}
+
+
 const string& ManagedGeometry::CachedFilename() const
 {
   return cacheKey;
