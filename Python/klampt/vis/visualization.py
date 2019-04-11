@@ -1692,6 +1692,10 @@ class VisAppearance:
                 return anyTransp
         if hasattr(self.item,'appearance'):
             if self.useDefaultAppearance or 'color' not in self.attributes:
+              if isinstance(self.item,WorldModel):
+                #corner case: empty world
+                return False
+              else:
                 return self.item.appearance().getColor()[3] < 1.0
         try:
             return (self.attributes['color'][3] < 1.0)
