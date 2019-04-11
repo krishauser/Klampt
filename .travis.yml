@@ -22,6 +22,8 @@ before_script:
 
 script:
   - cd Cpp/Dependencies && make unpack-deps
+  #using KrisLibrary's devel branch
+  - cd KrisLibrary && git checkout devel && cd ..
   - make deps && cd ../..
   - cmake . -DKLAMPT_COMPILE_TESTS:BOOL=True
   - make Klampt
@@ -37,7 +39,8 @@ script:
 branches:
   only:
   - master
-  - logging_devel
+  - 0.8.2
+  - 0.8.1
   - 0.8.0
   - v0.7
   - travis
