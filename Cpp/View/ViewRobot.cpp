@@ -1,5 +1,6 @@
 #include "ViewRobot.h"
 #include <KrisLibrary/GLdraw/drawextra.h>
+#include <KrisLibrary/Timer.h>
 using namespace GLDraw;
 
 const static GLColor grey(0.5,0.5,0.5);
@@ -126,6 +127,25 @@ void ViewRobot::Draw()
       a.Set(*robot->geometry[i]);
     }
     a.DrawGL();
+    glPopMatrix();
+  }
+}
+
+void ViewRobot::DrawOpaque(bool opaque)
+{
+  if(!robot) return;
+
+  GLDraw::GeometryAppearance::Element e = (opaque ? GLDraw::GeometryAppearance::OPAQUE : GLDraw::GeometryAppearance::TRANSPARENT);
+  for(size_t i=0;i<robot->links.size();i++) {
+    if(robot->IsGeometryEmpty(i)) continue;
+    Matrix4 mat = robot->links[i].T_World;
+    glPushMatrix();
+    glMultMatrix(mat);
+    GLDraw::GeometryAppearance& a = Appearance(i);
+    if(a.geom != robot->geometry[i].get()) {
+      a.Set(*robot->geometry[i]);
+    }
+    a.DrawGL(e);
     glPopMatrix();
   }
 }
@@ -262,8 +282,9 @@ GLDraw::GeometryAppearance& ViewRobot::Appearance(int link)
 {
   Assert(robot!=NULL);
   if(appearanceStack.empty()) {
-    if(robot->geomManagers[link].IsAppearanceShared()) 
+    if(robot->geomManagers[link].IsAppearanceShared()) {
       robot->geomManagers[link].SetUniqueAppearance();
+    }
     return *robot->geomManagers[link].Appearance();
   }
   return appearanceStack.back()[link];
@@ -289,8 +310,16 @@ void ViewRobot::PopAppearance()
       for(size_t i=0;i<robot->links.size();i++) {
         if(!robot->geomManagers[i].Appearance()->faceDisplayList)
           robot->geomManagers[i].Appearance()->faceDisplayList = appearanceStack.back()[i].faceDisplayList;
+        if(!robot->geomManagers[i].Appearance()->edgeDisplayList)
+          robot->geomManagers[i].Appearance()->edgeDisplayList = appearanceStack.back()[i].edgeDisplayList;
         if(!robot->geomManagers[i].Appearance()->vertexDisplayList)
           robot->geomManagers[i].Appearance()->vertexDisplayList = appearanceStack.back()[i].vertexDisplayList;
+        if(!robot->geomManagers[i].Appearance()->silhouetteDisplayList)
+          robot->geomManagers[i].Appearance()->silhouetteDisplayList = appearanceStack.back()[i].silhouetteDisplayList;
+        if(!robot->geomManagers[i].Appearance()->tempMesh)
+          robot->geomManagers[i].Appearance()->tempMesh = appearanceStack.back()[i].tempMesh;
+        if(!robot->geomManagers[i].Appearance()->tempMesh2)
+          robot->geomManagers[i].Appearance()->tempMesh2 = appearanceStack.back()[i].tempMesh2;
       }
     }
     else {
@@ -298,8 +327,16 @@ void ViewRobot::PopAppearance()
       for(size_t i=0;i<robot->links.size();i++) {
         if(!appearanceStack[n][i].faceDisplayList)
           appearanceStack[n][i].faceDisplayList = appearanceStack.back()[i].faceDisplayList;
+        if(!appearanceStack[n][i].edgeDisplayList)
+          appearanceStack[n][i].edgeDisplayList = appearanceStack.back()[i].edgeDisplayList;
         if(!appearanceStack[n][i].vertexDisplayList)
           appearanceStack[n][i].vertexDisplayList = appearanceStack.back()[i].vertexDisplayList;
+        if(!appearanceStack[n][i].silhouetteDisplayList)
+          appearanceStack[n][i].silhouetteDisplayList = appearanceStack.back()[i].silhouetteDisplayList;
+        if(!appearanceStack[n][i].tempMesh)
+          appearanceStack[n][i].tempMesh = appearanceStack.back()[i].tempMesh;
+        if(!appearanceStack[n][i].tempMesh2)
+          appearanceStack[n][i].tempMesh2 = appearanceStack.back()[i].tempMesh2;
       }
     }
     appearanceStack.resize(appearanceStack.size()-1);

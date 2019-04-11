@@ -13,6 +13,13 @@ using namespace std;
 string ResolveFileReference(const string& path,const string& fn);
 string MakeURLLocal(const string& url,const char* url_resolution_path="klampt_downloads");
 
+void SetupDefaultAppearance(GLDraw::GeometryAppearance& app)
+{
+  app.creaseAngle = DtoR(30.0f);
+  app.silhouetteRadius = 0.0025f;
+  app.vertexSize = 3.0;
+}
+
 GeometryManager::GeometryManager()
 {
 
@@ -42,8 +49,7 @@ void GeometryManager::Clear()
 ManagedGeometry::ManagedGeometry()
 {
   appearance.reset(new GLDraw::GeometryAppearance);
-  appearance->creaseAngle = DtoR(30.0f);
-  appearance->silhouetteRadius = 0.0025f;
+  SetupDefaultAppearance(*appearance);
 }
 
 ManagedGeometry::ManagedGeometry(const ManagedGeometry& rhs)
@@ -52,8 +58,7 @@ ManagedGeometry::ManagedGeometry(const ManagedGeometry& rhs)
   //if you're not careful with the cache you can copy appearance pointers directly without any record
   if(cacheKey.empty()) {
     appearance.reset(new GLDraw::GeometryAppearance(*appearance));
-    appearance->creaseAngle = DtoR(30.0f);
-    appearance->silhouetteRadius = 0.0025f;
+    SetupDefaultAppearance(*appearance);
   }
 }
 
@@ -85,8 +90,7 @@ shared_ptr<Geometry::AnyCollisionGeometry3D> ManagedGeometry::CreateEmpty()
   dynamicGeometrySource.clear();
   geometry = make_shared<Geometry::AnyCollisionGeometry3D>();
   appearance = make_shared<GLDraw::GeometryAppearance>();
-  appearance->creaseAngle = DtoR(30.0f);
-  appearance->silhouetteRadius = 0.0025f;
+  SetupDefaultAppearance(*appearance);
   appearance->geom = geometry.get();
   return geometry;
 }
@@ -97,8 +101,7 @@ void ManagedGeometry::Clear()
   dynamicGeometrySource.clear();
   geometry = NULL;
   appearance = make_shared<GLDraw::GeometryAppearance>();
-  appearance->creaseAngle = DtoR(30.0f);
-  appearance->silhouetteRadius = 0.0025f;
+  SetupDefaultAppearance(*appearance);
 }
 
 bool ManagedGeometry::Load(const string& filename)
@@ -202,8 +205,7 @@ bool ManagedGeometry::LoadNoCache(const string& filename)
       if(geometry->type == Geometry::AnyGeometry3D::TriangleMesh) {
         if(geometry->TriangleMeshAppearanceData() != NULL) {
           appearance = make_shared<GLDraw::GeometryAppearance>(*geometry->TriangleMeshAppearanceData());
-          appearance->creaseAngle = DtoR(30.0f);
-          appearance->silhouetteRadius = 0.0025f;
+          SetupDefaultAppearance(*appearance);
           appearance->Set(*geometry);
         }
         else {
@@ -428,6 +430,17 @@ void ManagedGeometry::DrawGL()
   if(appearance->geom == NULL)
     appearance->Set(*geometry);
   appearance->DrawGL();
+}
+
+void ManagedGeometry::DrawGLOpaque(bool opaque)
+{
+  if(!geometry) return;
+  Assert(appearance->geom != NULL);
+  //Assert(appearance->geom == geometry.get());
+  if(appearance->geom == NULL)
+    appearance->Set(*geometry);
+  GLDraw::GeometryAppearance::Element e = (opaque ? GLDraw::GeometryAppearance::OPAQUE : GLDraw::GeometryAppearance::TRANSPARENT);
+  appearance->DrawGL(e);
 }
 
 bool ManagedGeometry::IsDynamicGeometry() const

@@ -17,6 +17,8 @@ struct ViewRobot
   void Draw(Robot* robot);
   ///Draws the whole robot
   void Draw();
+  ///Draws opaque / transparent parts of the robot
+  void DrawOpaque(bool opaque);
   ///draws link i's geometry in its local frame
   void DrawLink_Local(int i,bool keepAppearance=true); 
   ///draws link i's geometry in the world frame

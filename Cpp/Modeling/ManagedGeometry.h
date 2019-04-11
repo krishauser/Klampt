@@ -83,6 +83,8 @@ class ManagedGeometry
   void OnGeometryChange();
   ///Renders the object using OpenGL
   void DrawGL();
+  ///Renders the opaque parts of the object using OpenGL
+  void DrawGLOpaque(bool opaque);
   ///Returns true if this geometry is connected to a dynamic source
   bool IsDynamicGeometry() const;
   ///Updates dynamic geometry, if an update is available.  If no update,

@@ -28,6 +28,7 @@ public:
   void InitCollisions();
   void UpdateGeometry(); ///< Call this before collision detection if the transform is changed
   void DrawGL();
+  void DrawGLOpaque(bool opaque);
 
   string name;
   string geomFile;
