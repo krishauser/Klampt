@@ -528,6 +528,8 @@ class Geometry3D
   ///Unsupported types:
   ///
   ///- GeometricPrimitive-GeometricPrimitive subtypes segment vs aabb
+  ///- VolumeGrid-GeometricPrimitive any subtypes except point and sphere.
+  ///  also, the results are potentially inaccurate for non-convex VolumeGrids.
   ///- VolumeGrid-TriangleMesh
   ///- VolumeGrid-VolumeGrid
   ///

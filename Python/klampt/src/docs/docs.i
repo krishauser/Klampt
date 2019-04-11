@@ -690,6 +690,11 @@ Frees the data associated with this geometry, if standalone.
 %feature("docstring") Geometry3D::collides "
 
 Returns true if this geometry collides with the other.  
+
+Unsupported types:  
+
+*   VolumeGrid - TriangleMesh  
+*   VolumeGrid - VolumeGrid  
 ";
 
 %feature("docstring") Geometry3D::getPointCloud "
@@ -722,7 +727,7 @@ Returns the the distance and closest points between the given geometries.
 If the objects are penetrating, some combinations of geometry types allow
 calculating penetration depths:  
 
-*   GeometricPrimitive-GeometricPrimitive  
+*   GeometricPrimitive-GeometricPrimitive (Python-supported sub-types only)  
 *   GeometricPrimitive-TriangleMesh (surface only)  
 *   GeometricPrimitive-PointCloud  
 *   GeometricPrimitive-VolumeGrid  
@@ -731,6 +736,13 @@ calculating penetration depths:
 
 If penetration is supported, a negative distance is returned and cp1,cp2 are the
 deepest penetrating points.  
+
+Unsupported types:  
+
+*   GeometricPrimitive-GeometricPrimitive subtypes segment vs aabb  
+*   PointCloud-PointCloud  
+*   VolumeGrid-TriangleMesh  
+*   VolumeGrid-VolumeGrid  
 
 See the comments of the distance_point function  
 ";
@@ -931,6 +943,14 @@ PointCloud-PointCloud) padding must be positive to get meaningful contact poitns
 and normals.  
 
 If maxContacts != 0 a clustering postprocessing step is performed.  
+
+Unsupported types:  
+
+*   GeometricPrimitive-GeometricPrimitive subtypes segment vs aabb  
+*   VolumeGrid-GeometricPrimitive any subtypes except point and sphere. also,
+    the results are potentially inaccurate for non-convex VolumeGrids.  
+*   VolumeGrid-TriangleMesh  
+*   VolumeGrid-VolumeGrid  
 ";
 
 %feature("docstring") Geometry3D::distance_ext "

@@ -1239,6 +1239,10 @@ ContactQueryResult Geometry3D::contacts(const Geometry3D& other,double padding1,
 
 //KH: note: pointer gymnastics necessary to allow appearances to refer to temporary appearances as well as references to world, while also
 //exposing an opaque pointer in appearance.h
+
+//defined in Cpp/Modeling/ManagedGeometry.cpp
+void SetupDefaultAppearance(GLDraw::GeometryAppearance& app);
+
 Appearance::Appearance()
   :world(-1),id(-1),appearancePtr(NULL)
 {
@@ -1670,8 +1674,7 @@ void Appearance::drawWorldGL(Geometry3D& g)
   if(!geom) return;
   if(!app) {
     app = make_shared<GLDraw::GeometryAppearance>();
-    app->creaseAngle = DtoR(30.0);
-    app->silhouetteRadius = 0.0025;
+    SetupDefaultAppearance(*app);
   }
   if(app->geom) {
     if(app->geom != geom.get()) {
@@ -1696,8 +1699,7 @@ void Appearance::drawGL(Geometry3D& g)
   if(!geom) return;
   if(!app) {
     app = make_shared<GLDraw::GeometryAppearance>();
-    app->creaseAngle = DtoR(30.0);
-    app->silhouetteRadius = 0.0025;
+    SetupDefaultAppearance(*app);
   }
   if(app->geom) {
     if(app->geom != geom.get()) {
