@@ -247,9 +247,9 @@ def fixed_rotation_objective(link,ref=None,local_axis=None,world_axis=None):
     obj.robot = link.robot()
     if ref:
         assert link.robot()==ref.robot(),"Can't do generalized fixed rotation objectives yet"
+    obj.setLinks(link.index,(-1 if ref is None else ref.index))
     if local_axis is None and world_axis is None:
         #fixed rotation objective
-        obj.setLinks(link.index,(-1 if ref is None else ref.index))
         obj.setFixedRotConstraint(Rrel)
     elif local_axis is None:
         #fixed axis, given by world coordinates
