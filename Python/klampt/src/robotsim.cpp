@@ -1041,6 +1041,7 @@ void Geometry3D::getBBTight(double out[3],double out2[3])
     out2[0] = out2[1] = out2[2] = -Inf;
     return;
   }
+  geom->InitCollisionData();
   AABB3D bb = geom->GetAABBTight();
   bb.bmin.get(out);
   bb.bmax.get(out2);
@@ -1137,6 +1138,12 @@ DistanceQueryResult Geometry3D::distance_point_ext(const double pt[3],const Dist
     result.cp2.resize(3);
     gres.cp1.get(&result.cp1[0]);
     gres.cp2.get(&result.cp2[0]);
+    result.elem1 = gres.elem1;
+    result.elem2 = gres.elem2;
+  }
+  else {
+    result.elem1 = -1;
+    result.elem2 = -1;
   }
   result.hasGradients = gres.hasDirections;
   if(result.hasGradients) {
@@ -1165,7 +1172,7 @@ DistanceQueryResult Geometry3D::distance_ext(const Geometry3D& other,const Dista
   gsettings.upperBound = settings.upperBound;
   AnyDistanceQueryResult gres = geom->Distance(*geom2,gsettings);
   if(IsInf(gres.d)) {
-    throw PyException("Distance queries not implemented yet for those types of geometry");
+    throw PyException("Distance queries not implemented yet for those types of geometry, or geometries are content-free?");
   }
   DistanceQueryResult result;
   result.d = gres.d;
@@ -1175,6 +1182,12 @@ DistanceQueryResult Geometry3D::distance_ext(const Geometry3D& other,const Dista
     result.cp2.resize(3);
     gres.cp1.get(&result.cp1[0]);
     gres.cp2.get(&result.cp2[0]);
+    result.elem1 = gres.elem1;
+    result.elem2 = gres.elem2;
+  }
+  else {
+    result.elem1 = -1;
+    result.elem2 = -1;
   }
   result.hasGradients = gres.hasDirections;
   if(result.hasGradients) {

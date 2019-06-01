@@ -20295,6 +20295,110 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_DistanceQueryResult_elem1_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  DistanceQueryResult *arg1 = (DistanceQueryResult *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:DistanceQueryResult_elem1_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_DistanceQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "DistanceQueryResult_elem1_set" "', argument " "1"" of type '" "DistanceQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< DistanceQueryResult * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "DistanceQueryResult_elem1_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  if (arg1) (arg1)->elem1 = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_DistanceQueryResult_elem1_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  DistanceQueryResult *arg1 = (DistanceQueryResult *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:DistanceQueryResult_elem1_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_DistanceQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "DistanceQueryResult_elem1_get" "', argument " "1"" of type '" "DistanceQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< DistanceQueryResult * >(argp1);
+  result = (int) ((arg1)->elem1);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_DistanceQueryResult_elem2_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  DistanceQueryResult *arg1 = (DistanceQueryResult *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:DistanceQueryResult_elem2_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_DistanceQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "DistanceQueryResult_elem2_set" "', argument " "1"" of type '" "DistanceQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< DistanceQueryResult * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "DistanceQueryResult_elem2_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  if (arg1) (arg1)->elem2 = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_DistanceQueryResult_elem2_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  DistanceQueryResult *arg1 = (DistanceQueryResult *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:DistanceQueryResult_elem2_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_DistanceQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "DistanceQueryResult_elem2_get" "', argument " "1"" of type '" "DistanceQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< DistanceQueryResult * >(argp1);
+  result = (int) ((arg1)->elem2);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_new_DistanceQueryResult(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   DistanceQueryResult *result = 0 ;
@@ -55735,6 +55839,10 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"DistanceQueryResult_grad1_get", _wrap_DistanceQueryResult_grad1_get, METH_VARARGS, (char *)"DistanceQueryResult_grad1_get(DistanceQueryResult self) -> doubleVector"},
 	 { (char *)"DistanceQueryResult_grad2_set", _wrap_DistanceQueryResult_grad2_set, METH_VARARGS, (char *)"DistanceQueryResult_grad2_set(DistanceQueryResult self, doubleVector grad2)"},
 	 { (char *)"DistanceQueryResult_grad2_get", _wrap_DistanceQueryResult_grad2_get, METH_VARARGS, (char *)"DistanceQueryResult_grad2_get(DistanceQueryResult self) -> doubleVector"},
+	 { (char *)"DistanceQueryResult_elem1_set", _wrap_DistanceQueryResult_elem1_set, METH_VARARGS, (char *)"DistanceQueryResult_elem1_set(DistanceQueryResult self, int elem1)"},
+	 { (char *)"DistanceQueryResult_elem1_get", _wrap_DistanceQueryResult_elem1_get, METH_VARARGS, (char *)"DistanceQueryResult_elem1_get(DistanceQueryResult self) -> int"},
+	 { (char *)"DistanceQueryResult_elem2_set", _wrap_DistanceQueryResult_elem2_set, METH_VARARGS, (char *)"DistanceQueryResult_elem2_set(DistanceQueryResult self, int elem2)"},
+	 { (char *)"DistanceQueryResult_elem2_get", _wrap_DistanceQueryResult_elem2_get, METH_VARARGS, (char *)"DistanceQueryResult_elem2_get(DistanceQueryResult self) -> int"},
 	 { (char *)"new_DistanceQueryResult", _wrap_new_DistanceQueryResult, METH_VARARGS, (char *)"\n"
 		"new_DistanceQueryResult() -> DistanceQueryResult\n"
 		"\n"
@@ -55747,7 +55855,7 @@ static PyMethodDef SwigMethods[] = {
 		"    d (float): The calculated distance, with negative values indicating\n"
 		"        penetration.  Can also be upperBound if the branch was hit.\n"
 		"    hasClosestPoints (bool):  If true, the closest point information is\n"
-		"        given in cp0 and cp1.\n"
+		"        given in cp0 and cp1, and elem1 and elem2\n"
 		"    hasGradients (bool):  f true, distance gradient information is given\n"
 		"        in grad0 and grad1.\n"
 		"    cp1, cp2 (list of 3 floats, optional): closest points on self vs other,\n"
@@ -55757,7 +55865,9 @@ static PyMethodDef SwigMethods[] = {
 		"        world coordinates.\n"
 		"\n"
 		"        I.e., to move object1 to touch object2, move it in direction\n"
-		"        grad1 by distance -d.  Note that grad2 is always -grad1.  \n"
+		"        grad1 by distance -d.  Note that grad2 is always -grad1.\n"
+		"    elems1, elems2 (int): for compound objects, these are the\n"
+		"        element indices corresponding to the closest points.  \n"
 		"\n"
 		"C++ includes: geometry.h\n"
 		"\n"
@@ -57116,7 +57226,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		""},
 	 { (char *)"RobotModelLink_getPositionJacobian", _wrap_RobotModelLink_getPositionJacobian, METH_VARARGS, (char *)"\n"
-		"RobotModelLink_getPositionJacobian(RobotModelLink self, double const [3] p)\n"
+		"RobotModelLink_getPositionJacobian(RobotModelLink self, double const [3] plocal)\n"
 		"\n"
 		"\n"
 		"\n"
@@ -57195,7 +57305,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		""},
 	 { (char *)"RobotModelLink_getPositionHessian", _wrap_RobotModelLink_getPositionHessian, METH_VARARGS, (char *)"\n"
-		"RobotModelLink_getPositionHessian(RobotModelLink self, double const [3] p)\n"
+		"RobotModelLink_getPositionHessian(RobotModelLink self, double const [3] plocal)\n"
 		"\n"
 		"\n"
 		"\n"

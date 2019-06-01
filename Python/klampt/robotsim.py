@@ -1615,7 +1615,7 @@ class DistanceQueryResult(_object):
         d (float): The calculated distance, with negative values indicating
             penetration.  Can also be upperBound if the branch was hit.
         hasClosestPoints (bool):  If true, the closest point information is
-            given in cp0 and cp1.
+            given in cp0 and cp1, and elem1 and elem2
         hasGradients (bool):  f true, distance gradient information is given
             in grad0 and grad1.
         cp1, cp2 (list of 3 floats, optional): closest points on self vs other,
@@ -1625,7 +1625,9 @@ class DistanceQueryResult(_object):
             world coordinates.
 
             I.e., to move object1 to touch object2, move it in direction
-            grad1 by distance -d.  Note that grad2 is always -grad1.  
+            grad1 by distance -d.  Note that grad2 is always -grad1.
+        elems1, elems2 (int): for compound objects, these are the
+            element indices corresponding to the closest points.  
 
     C++ includes: geometry.h
 
@@ -1664,6 +1666,14 @@ class DistanceQueryResult(_object):
     __swig_getmethods__["grad2"] = _robotsim.DistanceQueryResult_grad2_get
     if _newclass:
         grad2 = _swig_property(_robotsim.DistanceQueryResult_grad2_get, _robotsim.DistanceQueryResult_grad2_set)
+    __swig_setmethods__["elem1"] = _robotsim.DistanceQueryResult_elem1_set
+    __swig_getmethods__["elem1"] = _robotsim.DistanceQueryResult_elem1_get
+    if _newclass:
+        elem1 = _swig_property(_robotsim.DistanceQueryResult_elem1_get, _robotsim.DistanceQueryResult_elem1_set)
+    __swig_setmethods__["elem2"] = _robotsim.DistanceQueryResult_elem2_set
+    __swig_getmethods__["elem2"] = _robotsim.DistanceQueryResult_elem2_get
+    if _newclass:
+        elem2 = _swig_property(_robotsim.DistanceQueryResult_elem2_get, _robotsim.DistanceQueryResult_elem2_set)
 
     def __init__(self):
         """
@@ -1675,7 +1685,7 @@ class DistanceQueryResult(_object):
             d (float): The calculated distance, with negative values indicating
                 penetration.  Can also be upperBound if the branch was hit.
             hasClosestPoints (bool):  If true, the closest point information is
-                given in cp0 and cp1.
+                given in cp0 and cp1, and elem1 and elem2
             hasGradients (bool):  f true, distance gradient information is given
                 in grad0 and grad1.
             cp1, cp2 (list of 3 floats, optional): closest points on self vs other,
@@ -1685,7 +1695,9 @@ class DistanceQueryResult(_object):
                 world coordinates.
 
                 I.e., to move object1 to touch object2, move it in direction
-                grad1 by distance -d.  Note that grad2 is always -grad1.  
+                grad1 by distance -d.  Note that grad2 is always -grad1.
+            elems1, elems2 (int): for compound objects, these are the
+                element indices corresponding to the closest points.  
 
         C++ includes: geometry.h
 
@@ -3860,13 +3872,13 @@ class RobotModelLink(_object):
         return _robotsim.RobotModelLink_getJacobian(self, plocal)
 
 
-    def getPositionJacobian(self, p):
+    def getPositionJacobian(self, plocal):
         """
         Returns the position jacobian of a point on this link w.r.t. the robot's
         configuration q.  
 
         Args:
-            p (:obj:`list of 3 floats`)
+            plocal (:obj:`list of 3 floats`)
 
         Returns:  
 
@@ -3877,7 +3889,7 @@ class RobotModelLink(_object):
             np.dot(J,dq), where dq is the robot's joint velocities.  
 
         """
-        return _robotsim.RobotModelLink_getPositionJacobian(self, p)
+        return _robotsim.RobotModelLink_getPositionJacobian(self, plocal)
 
 
     def getOrientationJacobian(self):
@@ -3953,13 +3965,13 @@ class RobotModelLink(_object):
         return _robotsim.RobotModelLink_getAngularAcceleration(self, ddq)
 
 
-    def getPositionHessian(self, p):
+    def getPositionHessian(self, plocal):
         """
         Returns the Hessians of each component of the position p w.r.t the robot's
         configuration q.  
 
         Args:
-            p (:obj:`list of 3 floats`)
+            plocal (:obj:`list of 3 floats`)
 
         Returns:  
 
@@ -3967,7 +3979,7 @@ class RobotModelLink(_object):
             respectively, to the (x,y,z) components of the Hessian.  
 
         """
-        return _robotsim.RobotModelLink_getPositionHessian(self, p)
+        return _robotsim.RobotModelLink_getPositionHessian(self, plocal)
 
 
     def getOrientationHessian(self):
