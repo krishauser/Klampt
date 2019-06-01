@@ -253,7 +253,7 @@ public:
  *     d (float): The calculated distance, with negative values indicating
  *         penetration.  Can also be upperBound if the branch was hit.
  *     hasClosestPoints (bool):  If true, the closest point information is
- *         given in cp0 and cp1. 
+ *         given in cp0 and cp1, and elem1 and elem2
  *     hasGradients (bool):  f true, distance gradient information is given
  *         in grad0 and grad1.
  *     cp1, cp2 (list of 3 floats, optional): closest points on self vs other,
@@ -264,6 +264,8 @@ public:
  *         
  *         I.e., to move object1 to touch object2, move it in direction
  *         grad1 by distance -d.  Note that grad2 is always -grad1.
+ *     elems1, elems2 (int): for compound objects, these are the
+ *         element indices corresponding to the closest points.
  *
  */
 class DistanceQueryResult
@@ -274,6 +276,7 @@ public:
   bool hasGradients;
   std::vector<double> cp1,cp2;
   std::vector<double> grad1,grad2;
+  int elem1,elem2;
 };
 
 /** @brief The result from a contact query of :class:`~klampt.Geometry3D`.
