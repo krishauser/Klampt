@@ -20,7 +20,7 @@
 
 DEFINE_LOGGER(ODESimulator)
 
-#define TEST_READ_WRITE_STATE 0
+#define TEST_READ_WRITE_STATE 1
 #define DO_TIMING 0
 
 const static size_t gMaxKMeansSize = 5000;
@@ -380,7 +380,7 @@ void GetCurrentCollisionStatus(ODESimulator* sim,
       string id1=sim->ObjectName(collpair.first),id2=sim->ObjectName(collpair.second);
       for(size_t j=0;j<i->contacts.size();j++)
         depth = Max(depth,(double)i->contacts[j].depth);
-      //printf("ODESimulation: normal penetration depth between bodies %s and %s is %g/%g\n",id1.c_str(),id2.c_str(),depth,margin);
+      //printf("normal penetration depth between bodies %s and %s is %g/%g\n",id1.c_str(),id2.c_str(),depth,margin);
       double oldmargin = (sim->lastMarginsRemaining.count(collpair) == 0 ? margin : sim->lastMarginsRemaining[collpair]);
       if((margin - depth) < gRollbackPenetrationFraction*oldmargin) {
         //if there was some previous collision margin, we should do a rollback if the margins were reduced even further
@@ -562,7 +562,7 @@ void ODESimulator::Step(Real dt)
           if(marginsRemaining[collpair] == 0) {
             if(!didRollback) {
               string id1=ObjectName(collpair.first),id2=ObjectName(collpair.second);
-              LOG4CXX_INFO(GET_LOGGER(ODESimulator),"ODESimulation: rolling back due to new penetration between bodies "<<id1<<" and "<<id2);
+              LOG4CXX_INFO(GET_LOGGER(ODESimulator),"rolling back due to new penetration between bodies "<<id1<<" and "<<id2);
               if(lastMarginsRemaining.count(collpair) == 0) {
                 LOG4CXX_INFO(GET_LOGGER(ODESimulator),"  no previous contact");
               }
@@ -575,7 +575,7 @@ void ODESimulator::Step(Real dt)
           else {
             if(true || !didRollback) {
               string id1=ObjectName(collpair.first),id2=ObjectName(collpair.second);
-              LOG4CXX_INFO(GET_LOGGER(ODESimulator),"ODESimulation: rolling back due to increasing penetration between bodies "<<id1<<" and "<<id2);
+              LOG4CXX_INFO(GET_LOGGER(ODESimulator),"rolling back due to increasing penetration between bodies "<<id1<<" and "<<id2);
               if(lastMarginsRemaining.count(collpair) == 0) {
                 LOG4CXX_INFO(GET_LOGGER(ODESimulator),"  margin shrank from no-contact to "<<marginsRemaining[collpair]);
               }
@@ -586,12 +586,12 @@ void ODESimulator::Step(Real dt)
           }
         }
   		  if(rollback && !lastState.IsOpen()) {
-          LOG4CXX_INFO(GET_LOGGER(ODESimulator),"ODESimulation: Rollback rejected because last state not saved");
+          LOG4CXX_INFO(GET_LOGGER(ODESimulator),"Rollback rejected because last state not saved");
           //getchar();
           rollback = false;
   		  }
   		  if(rollback && timestep < settings.minimumAdaptiveTimeStep) {
-  		    LOG4CXX_INFO(GET_LOGGER(ODESimulator),"ODESimulation: Rollback rejected because timestep "<<timestep<<" below minimum threshold "<<settings.minimumAdaptiveTimeStep);
+  		    LOG4CXX_INFO(GET_LOGGER(ODESimulator),"Rollback rejected because timestep "<<timestep<<" below minimum threshold "<<settings.minimumAdaptiveTimeStep);
           //getchar();
 
           //TODO: DEBUG THIS PRINTOUT STUFF -- it changes the state of the adaptive time stepper
@@ -648,7 +648,7 @@ void ODESimulator::Step(Real dt)
   		  }
   	
   		  if(rollback) {
-          LOG4CXX_INFO(GET_LOGGER(ODESimulator),"ODESimulation: Rolling back at time "<<simTime<<" time step halved to "<<timestep*0.5);
+          LOG4CXX_INFO(GET_LOGGER(ODESimulator),"Rolling back at time "<<simTime<<" time step halved to "<<timestep*0.5);
           status = StatusAdaptiveTimeStepping;
           //PrintStatus(this,concernedObjects,"Backing up colliding objects","from");
           
@@ -667,7 +667,7 @@ void ODESimulator::Step(Real dt)
           GetCurrentCollisionStatus(this,marginsRemaining,newConcernedObjects);
           /*
           if(marginsRemaining != lastMarginsRemaining) {
-            printf("ODESimulation: Warning, difference between rolled-back re-detected margins and previous margins?\n");
+            printf("Warning, difference between rolled-back re-detected margins and previous margins?\n");
             printf("Press enter to continue\n");
             getchar();
           }
@@ -682,18 +682,18 @@ void ODESimulator::Step(Real dt)
           WriteState_Internal(lastState);
           for(size_t i=0;i<concernedObjects.size();i++) {
             if(marginsRemaining.count(concernedObjects[i]) == 0) {
-              printf("ODESimulation: collision %s - %s erased entirely\n",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str());
+              LOG4CXX_INFO(GET_LOGGER(ODESimulator),"collision %s - %s erased entirely",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str());
             }
             else {
               double d=marginsRemaining[concernedObjects[i]];
               if(lastMarginsRemaining.count(concernedObjects[i])) 
-                printf("ODESimulation: collision %s - %s changed from no contact to margin %g\n",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str(),d);
+                LOG4CXX_INFO(GET_LOGGER(ODESimulator),"collision %s - %s changed from no contact to margin %g",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str(),d);
               else
-                printf("ODESimulation: collision %s - %s changed from depth %g to margin %g\n",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str(),lastMarginsRemaining[concernedObjects[i]],d);
+                LOG4CXX_INFO(GET_LOGGER(ODESimulator),"collision %s - %s changed from depth %g to margin %g",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str(),lastMarginsRemaining[concernedObjects[i]],d);
             }
           }
           if(didRollback) {
-            printf("ODESimulation: Adaptive sub-step of size %g is valid, arriving at time %g.\n",timestep,simTime);
+            LOG4CXX_INFO(GET_LOGGER(ODESimulator),"Adaptive sub-step of size %g is valid, arriving at time %g.",timestep,simTime);
             //now restore prior forces applied to all objects
             int k=0;
             for(size_t i=0;i<robots.size();i++) {
@@ -743,7 +743,7 @@ void ODESimulator::Step(Real dt)
         //PrintStatus(this,concernedObjects,"Colliding objects","post-step");
   		}
   		if(didAnyRollback) {
-  		  LOG4CXX_INFO(GET_LOGGER(ODESimulator),"ODESimulation: Adaptive time step done, arrived at time "<<simTime);
+  		  LOG4CXX_INFO(GET_LOGGER(ODESimulator),"Adaptive time step done, arrived at time "<<simTime);
   		}
   	}
   	else {
@@ -776,12 +776,12 @@ void ODESimulator::Step(Real dt)
         }
   		}
   		if(rollback) {
-  			LOG4CXX_WARN(GET_LOGGER(ODESimulator),"ODESimulation: Warning, initial state has underlying meshes overlapping");
+  			LOG4CXX_WARN(GET_LOGGER(ODESimulator),"Warning, initial state has underlying meshes overlapping");
   			for(map<CollisionPair,double>::const_iterator i=marginsRemaining.begin();i!=marginsRemaining.end();i++) {
           if(i->second <= 0) {
     			  CollisionPair collpair = i->first;
             string id1=ObjectName(collpair.first),id2=ObjectName(collpair.second);
-            printf("  %s - %s\n",id1.c_str(),id2.c_str());
+            LOG4CXX_WARN(GET_LOGGER(ODESimulator),"  %s - %s",id1.c_str(),id2.c_str());
           }
   			}
   			//printf("Press enter to continue...\n");
@@ -853,7 +853,7 @@ void ODESimulator::Step(Real dt)
 	cl.forces.push_back(temp);
 	/*
 	if(!cl.points.back().isValidForce(-temp)) {
-	  printf("ODESimulator: Warning, solved contact force %d %d is invalid\n",k,i);
+	  printf("Warning, solved contact force %d %d is invalid\n",k,i);
 	  cout<<"  Force: "<<-temp<<", normal "<<cl.points.back().n<<" kFriction "<<cl.points.back().kFriction<<endl;
 	}
 	*/
@@ -1059,7 +1059,7 @@ void ClusterContactsMerge(vector<dContactGeom>& contacts,int maxClusters,Real cl
 
     Real len = Vector3(contacts[i].normal[0],contacts[i].normal[1],contacts[i].normal[2]).length();
     if(FuzzyZero(len) || !IsFinite(len)) {
-      LOG4CXX_WARN(GET_LOGGER(ODESimulator),"ODESimulator: Warning, clustered normal became zero/infinite");
+      LOG4CXX_WARN(GET_LOGGER(ODESimulator),"Warning, clustered normal became zero/infinite");
       int found = inds[0];
       contacts[i].pos[0] = pts[found][0];
       contacts[i].pos[1] = pts[found][1];
@@ -1116,7 +1116,7 @@ void ClusterContactsKMeans(vector<dContactGeom>& contacts,int maxClusters,Real c
     contacts[i].depth = kmeans.centers[i][6];
     Real len = Vector3(contacts[i].normal[0],contacts[i].normal[1],contacts[i].normal[2]).length();
     if(FuzzyZero(len) || !IsFinite(len)) {
-      LOG4CXX_WARN(GET_LOGGER(ODESimulator),"ODESimulator: Warning, clustered normal became zero/infinite");
+      LOG4CXX_WARN(GET_LOGGER(ODESimulator),"Warning, clustered normal became zero/infinite");
       //pick any in the cluster
       int found = -1;
       for(size_t k=0;k<kmeans.labels.size();k++) {
@@ -1246,7 +1246,7 @@ void collisionCallback(void *data, dGeomID o1, dGeomID o2)
   int numOk = 0;
   for(int i=0;i<num;i++) {
     if(gContactTemp[i].g1 == o2 && gContactTemp[i].g2 == o1) {
-      printf("Swapping contact\n");
+      LOG4CXX_INFO(GET_LOGGER(ODESimulator),"Swapping contact... should this be reached?");
       std::swap(gContactTemp[i].g1,gContactTemp[i].g2);
       for(int k=0;k<3;k++) gContactTemp[i].normal[k]*=-1.0;
       std::swap(gContactTemp[i].side1,gContactTemp[i].side2);
@@ -1301,7 +1301,7 @@ void selfCollisionCallback(void *data, dGeomID o1, dGeomID o2)
   int numOk = 0;
   for(int i=0;i<num;i++) {
     if(gContactTemp[i].g1 == o2 && gContactTemp[i].g2 == o1) {
-      printf("Swapping contact... shouldn't be here?\n");
+      LOG4CXX_INFO(GET_LOGGER(ODESimulator),"Swapping contact... shouldn't be here?");
       std::swap(gContactTemp[i].g1,gContactTemp[i].g2);
       for(int k=0;k<3;k++) gContactTemp[i].normal[k]*=-1.0;
       std::swap(gContactTemp[i].side1,gContactTemp[i].side2);
@@ -1824,7 +1824,7 @@ bool ODESimulator::InstabilityCorrection()
     {
       double stepThreshold = energies[id]*settings.instabilityLinearEnergyThreshold + settings.instabilityConstantEnergyThreshold*objects[i]->obj.mass;
       if(!(ke < stepThreshold)) {
-        //printf("ODESimulator: Rigid object %s energy %g exceeds linear threshold %g*%g + %g\n",objects[i]->obj.name.c_str(),ke,energies[id],settings.instabilityLinearEnergyThreshold,settings.instabilityConstantEnergyThreshold);
+        //printf("Rigid object %s energy %g exceeds linear threshold %g*%g + %g\n",objects[i]->obj.name.c_str(),ke,energies[id],settings.instabilityLinearEnergyThreshold,settings.instabilityConstantEnergyThreshold);
         unstable = true;
         if(stepThreshold < threshold)
           threshold = stepThreshold;
@@ -1832,11 +1832,11 @@ bool ODESimulator::InstabilityCorrection()
     }
     if(unstable) {
       if(!IsFinite(ke)) {
-        LOG4CXX_WARN(GET_LOGGER(ODESimulator),"ODESimulator: Rigid object "<<objects[i]->obj.name<<" has non-finite energy, setting to 0");
+        LOG4CXX_WARN(GET_LOGGER(ODESimulator),"Rigid object "<<objects[i]->obj.name<<" has non-finite energy, setting to 0");
         objects[i]->SetVelocity(Vector3(0.0),Vector3(0.0));
       }
       else {
-        LOG4CXX_INFO(GET_LOGGER(ODESimulator),"ODESimulator: Rigid object "<<objects[i]->obj.name<<" energy "<<ke<<" exceeds threshold "<<threshold);
+        LOG4CXX_INFO(GET_LOGGER(ODESimulator),"Rigid object "<<objects[i]->obj.name<<" energy "<<ke<<" exceeds threshold "<<threshold);
         Assert(ke > 0);
         Real newValue = 0;
         if(settings.instabilityPostCorrectionEnergy < 0)
@@ -1869,12 +1869,12 @@ bool ODESimulator::InstabilityCorrection()
     }
     if(unstable) {
       if(!IsFinite(ke)) {
-        LOG4CXX_WARN(GET_LOGGER(ODESimulator),"ODESimulator: Robot "<<robots[i]->robot.name<<" has non-finite energy, setting to 0");
+        LOG4CXX_WARN(GET_LOGGER(ODESimulator),"Robot "<<robots[i]->robot.name<<" has non-finite energy, setting to 0");
         Vector zero(robots[i]->robot.q.n,0.0);
         robots[i]->SetVelocities(zero);
       }
       else {
-        LOG4CXX_INFO(GET_LOGGER(ODESimulator),"ODESimulator: Robot"<<robots[i]->robot.name<<" energy "<<ke<<" exceeds threshold "<<threshold);
+        LOG4CXX_INFO(GET_LOGGER(ODESimulator),"Robot"<<robots[i]->robot.name<<" energy "<<ke<<" exceeds threshold "<<threshold);
         Assert(ke > 0);
         Real newValue = 0;
         if(settings.instabilityPostCorrectionEnergy < 0)
