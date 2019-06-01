@@ -512,17 +512,57 @@ class XmlAppearance
     tex.Set(terrain.geometry);
     return Get(terrain.geometry);
   }
+  bool Get(Robot& robot) {
+    const char* link = e->Attribute("link");
+    if(link == NULL) {
+      //apply to all geometries
+      for(size_t j=0;j<robot.links.size();j++) {
+        if(!Get(robot.geomManagers[j]))
+          return false;
+      }
+      return true;
+    }
+    int linkindex = robot.LinkIndex(link);
+    if(linkindex < 0) {
+      stringstream ss;
+      if(ss>>linkindex) {
+        if(linkindex < 0 || linkindex >= (int)robot.links.size()) {
+          LOG4CXX_ERROR(GET_LOGGER(XmlParser),"XmlWorld: Warning, invalid robot link specified "<<link);
+          return false;
+        }
+      }
+      else {
+        LOG4CXX_ERROR(GET_LOGGER(XmlParser),"XmlWorld: Warning, invalid robot link specified "<<link);
+        return false;
+      }
+    }
+    return Get(robot.geomManagers[linkindex]);
+  }
 
   TiXmlElement* e;
   string path;
 };
 
-void WriteAppearance(ManagedGeometry& geom,FILE* out,int indent=0)
+void WriteAppearance(ManagedGeometry& geom,FILE* out,int indent=0,const char* link=NULL)
 {
-  float* rgba = geom.Appearance()->faceColor;
+  GLDraw::GeometryAppearance* app=geom.Appearance().get();
   for(int i=0;i<indent;i++)
     fprintf(out," ");
-  fprintf(out,"<display color=\"%f %f %f %f\"",rgba[0],rgba[1],rgba[2],rgba[3]);
+  fprintf(out,"<display");
+  if(link) 
+    fprintf(out," link=\"%s\"",link);
+  float* rgba = app->faceColor;
+  if(rgba[3] != 0.0 && app->drawFaces)
+    fprintf(out," faceColor=\"%f %f %f %f\"",rgba[0],rgba[1],rgba[2],rgba[3]);
+  rgba = app->edgeColor;
+  if(rgba[3] != 0.0 && app->drawEdges)
+    fprintf(out," edgeColor=\"%f %f %f %f\" edgeSize=\"%f\"",rgba[0],rgba[1],rgba[2],rgba[3],app->edgeSize);
+  rgba = app->vertexColor;
+  if(rgba[3] != 0.0 && app->drawVertices)
+    fprintf(out," vertexColor=\"%f %f %f %f\" vertexSize=\"%f\"",rgba[0],rgba[1],rgba[2],rgba[3],app->vertexSize);
+  rgba = app->silhouetteColor;
+  if(app->drawFaces && app->silhouetteRadius > 0 && rgba[3] != 0.0)
+    fprintf(out," silhouette=\"%f %f %f %f %f\"",app->silhouetteRadius,rgba[0],rgba[1],rgba[2],rgba[3]);
   //TODO: any other display stuff?
   fprintf(out,"/>\n");
 }
@@ -589,6 +629,23 @@ bool XmlWorld::GetWorld(RobotWorld& world)
       return false;
     }
     int i = world.AddRobot(sname,r);
+    //parse appearances
+    TiXmlElement* d = e->FirstChildElement(display);
+    while(d) {
+      if(!XmlAppearance(d,path).Get(*world.robots[i])) {
+        d = d->NextSiblingElement();
+        continue;
+      }
+      d = d->NextSiblingElement();
+    }
+    e->FirstChildElement(appearance);
+    while(d) {
+      if(!XmlAppearance(d,path).Get(*world.robots[i])) {
+        d = d->NextSiblingElement();
+        continue;
+      }
+      d = d->NextSiblingElement();
+    }
     e = e->NextSiblingElement(robot);
   }
   //parse objects
@@ -772,10 +829,11 @@ bool XmlWorld::Save(RobotWorld& world,const string& fn,string itempath)
   for(size_t i=0;i<world.robots.size();i++) {
     for(size_t j=0;j<world.robots[i]->links.size();j++) {
       if(world.robots[i]->geomManagers[j].Empty()) continue;
-      if(world.robots[i]->geomManagers[j].IsCached()) {
+      if(world.robots[i]->geomManagers[j].IsOriginal()) {
         //modify geomFiles[j] to point to path of geomfile *relative* to where the robot will be saved
         const string& geomfile = world.robots[i]->geomManagers[j].CachedFilename();
         string relfile = GetRelativeFilename(geomfile,itempath);
+        LOG4CXX_INFO(GET_LOGGER(XmlParser),"  Saving reference to original geometry for link "<<world.robots[i]->linkNames[j]<<" to "<<relfile);
         world.robots[i]->geomFiles[j] = relfile;
       }
       else {
@@ -792,7 +850,7 @@ bool XmlWorld::Save(RobotWorld& world,const string& fn,string itempath)
   }
   for(size_t i=0;i<world.rigidObjects.size();i++) {
     if(world.rigidObjects[i]->geometry.Empty()) continue;
-    if(world.rigidObjects[i]->geometry.IsCached()) {
+    if(world.rigidObjects[i]->geometry.IsOriginal()) {
       //modify geomFile to point to path of geomfile *relative* to where the robot will be saved
       const string& geomfile = world.rigidObjects[i]->geometry.CachedFilename();
       string relfile = GetRelativeFilename(geomfile,itempath);
@@ -811,7 +869,7 @@ bool XmlWorld::Save(RobotWorld& world,const string& fn,string itempath)
   }
   for(size_t i=0;i<world.terrains.size();i++) {
     if(world.terrains[i]->geometry.Empty()) continue;
-    if(world.terrains[i]->geometry.IsCached()) {
+    if(world.terrains[i]->geometry.IsOriginal()) {
       //modify geomFile to point to path of geomfile *relative* to where the robot will be saved
       const string& geomfile = world.terrains[i]->geometry.CachedFilename();
       string relfile = GetRelativeFilename(geomfile,itempath);
@@ -855,7 +913,12 @@ bool XmlWorld::Save(RobotWorld& world,const string& fn,string itempath)
   fprintf(out,"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<world>\n");
   fprintf(out,"  <display background=\"%f %f %f %f\" />\n",world.background.rgba[0],world.background.rgba[1],world.background.rgba[2],world.background.rgba[3]);
   for(size_t i=0;i<world.robots.size();i++) {
-    fprintf(out,"  <robot name=\"%s\" file=\"%s\" />\n",world.robots[i]->name.c_str(),(relpath+robotFileNames[i]).c_str());
+    fprintf(out,"  <robot name=\"%s\" file=\"%s\" >\n",world.robots[i]->name.c_str(),(relpath+robotFileNames[i]).c_str());
+    for(size_t j=0;j<world.robots[i]->links.size();j++) {
+      if(!world.robots[i]->IsGeometryEmpty(j))
+        WriteAppearance(world.robots[i]->geomManagers[j],out,4,world.robots[i]->linkNames[i].c_str());
+    }
+    fprintf(out,"  </robot>\n");
   }
   for(size_t i=0;i<world.rigidObjects.size();i++) {
     fprintf(out,"  <rigidObject name=\"%s\" file=\"%s\" ",world.rigidObjects[i]->name.c_str(),(relpath+objectFileNames[i]).c_str());
