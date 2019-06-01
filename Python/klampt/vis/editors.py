@@ -172,13 +172,13 @@ class ConfigsEditor(VisualEditorBase):
             self.editingIndex -= 1
             if self.editingIndex < 0:
                 self.editingIndex = min(len(self.durations)-1,0)
-            self.indexEditBox.setValue(self.editingIndex)
+            self.indexSpinBox.setValue(self.editingIndex)
             self.indexChanged(self.editingIndex)
             return True
         elif c=='.' or c=='>':
             self.editingIndex += 1
             self.editingIndex = min(len(self.durations)-1,self.editingIndex)
-            self.indexEditBox.setValue(self.editingIndex)
+            self.indexSpinBox.setValue(self.editingIndex)
             self.indexChanged(self.editingIndex)
             return True
 
@@ -421,15 +421,15 @@ class TrajectoryEditor(VisualEditorBase):
             self.editingIndex -= 1
             if self.editingIndex < 0:
                 self.editingIndex = min(len(self.durations)-1,0)
-            if hasattr(self,'indexEditBox'):
-                self.indexEditBox.setValue(self.editingIndex)
+            if hasattr(self,'indexSpinBox'):
+                self.indexSpinBox.setValue(self.editingIndex)
                 self.indexChanged(self.editingIndex)
             return True
         elif c=='.' or c=='>':
             self.editingIndex += 1
             self.editingIndex = min(len(self.durations)-1,self.editingIndex)
-            if hasattr(self,'indexEditBox'):
-                self.indexEditBox.setValue(self.editingIndex)
+            if hasattr(self,'indexSpinBox'):
+                self.indexSpinBox.setValue(self.editingIndex)
                 self.indexChanged(self.editingIndex)
             return True
 
