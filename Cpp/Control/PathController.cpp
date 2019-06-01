@@ -409,13 +409,24 @@ void PolynomialPathController::Reset()
 
 bool PolynomialPathController::ReadState(File& f)
 {
-  if(!ReadFile(f,pathOffset)) return false;
-  if(!path.Read(f)) return false;
+  if(!JointTrackingController::ReadState(f)) {
+    printf("PolynomialPathController: Unable to read JointTrackingController state\n");
+    return false;
+  }
+  if(!ReadFile(f,pathOffset)) {
+    printf("PolynomialPathController:Unable to read pathOffset\n");
+    return false;
+  }
+  if(!path.Read(f)) {
+    printf("PolynomialPathController:Unable to read path\n");
+    return false;
+  }
   return true;
 }
 
 bool PolynomialPathController::WriteState(File& f) const
 {
+  if(!JointTrackingController::WriteState(f)) return false;
   if(!WriteFile(f,pathOffset)) return false;
   if(!path.Write(f)) return false;    
   return true;
