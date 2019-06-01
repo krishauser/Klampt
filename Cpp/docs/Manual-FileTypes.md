@@ -67,9 +67,20 @@ Structure: an XML v1.0 file, containing robots, rigid objects, and terrains, as 
         - `rotateZ` (float, optional): rotates the object about the z axis.
         - `rotateMoment` (`Vector3`, optional): rotates the object with a rotation matrix derived from the given exponential map representation.
       - _Children_
+         - `<display>` or `<appearance>` (optional): configures the visualization of the object.  Default color is blue.
+          - _Attributes_
+            - `color` (`Vector3` or `Vector4`, optional): sets the RGB or RGBA color of the object.
+            - `faceColor` (`Vector3` or `Vector4`, optional): sets the RGB or RGBA color of the object's faces.
+            - `vertexColor` (`Vector3` or `Vector4`, optional): sets the RGB or RGBA color of the object's vertices (default not drawn, except for point clouds).
+            - `vertexSize` or `pointSize` (float, optional): sets size of the points (in pixels) drawn at the object's vertices (default 3, for point clouds).
+            - `edgeColor` (`Vector3` or `Vector4`, optional): sets the RGB or RGBA color of the object's edges (default not drawn).
+            - `edgeSize` (float, optional): sets the width of the drawn edges.
+            - `silhouette` (1, 4, or 5 floats, optional): configures the silhouette using a string of the form "width [r g b] [a]".  Default value is "0.0025 0 0 0 1".
+            - `texture` (string, optional): sets a texture.  Can be an image file name, or "noise", "checker", "gradient", "colorgradient".
+            - `texture_projection` (string, optional): sets a texture projection.  Can be "xy", "z", or "conformal" at the moment.
         - `<geometry>`: sets the object's geometry (optional).
           - _Attributes_
-            - `mesh` (string): the geometry file (.off, other mesh, or .pcd).  May be relative or absolute path  (Note: "mesh" is a misnomer, it should work with any type of geometry file)
+            - `file` or `mesh` (string): the geometry file (.off, other mesh, or .pcd).  May be relative or absolute path  (Note: "mesh" is a misnomer, this works with any type of geometry file)
             - `scale` (float or `Vector3`, optional): a scale factor for the mesh.  If 3 elements are given, then this scales the mesh separately along each axis.
             - `translate` (`Vector3`, optional): a translation for the mesh.
             - `margin` (float, optional, default 0): the collision boundary layer width.
@@ -89,10 +100,7 @@ Structure: an XML v1.0 file, containing robots, rigid objects, and terrains, as 
         - `rotate*`: see `<world><rigidObject><rotate*>`.
         - `kFriction`: see `<world><rigidObject><physics kFriction>`.
       - _Children_
-        - `<display>` (optional): configures the OpenGL display of the terrain.
-          - _Attributes_
-            - `color` (`Vector3` or `Vector4`, optional, default light brown): sets the RGB or RGBA color of the terrain.
-            - `texture` (string, optional): sets a texture.  Can be "noise", "checker", "gradient", and "colorgradient" at the moment.
+        - `<display>` or `<appearance>` (optional): configures the visualization of the terrain (see `<rigidObject><display>`).  Default color is light brown.
     - `<simulation>` (optional): configures the simulation model.
       - _Children_
         - `<globals>` (optional): global ODE simulation parameters.
@@ -117,13 +125,13 @@ Structure: an XML v1.0 file, containing robots, rigid objects, and terrains, as 
           - _Attributes_
             - `index` (int): the rigid object index.
           - _Children_
-            - `<geometry>`: see `<world><simulation><env><geometry>`.
+            - `<geometry>`: see `<world><simulation><terrain><geometry>`.
         - `<robot>` (optional): robot configuration
           - _Attributes_
             - `index` (int): the robot index.
             - `body` (int, optional, default -1): the link index. -1 applies the settings to the entire robot.
           - _Children_
-            - `<geometry>`: see `<world><simulation><env><geometry>`.
+            - `<geometry>`: see `<world><simulation><terrain><geometry>`.
             - `<controller>`: configures the robot's controller. Each controller type has a certain set of optional attributes that can be set here.
               - _Attributes_
                 - `type` (string): the controller type. See the [controller documentation](Manual-Control.md#controllers) for more details.
