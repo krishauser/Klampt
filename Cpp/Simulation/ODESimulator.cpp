@@ -682,18 +682,20 @@ void ODESimulator::Step(Real dt)
           WriteState_Internal(lastState);
           for(size_t i=0;i<concernedObjects.size();i++) {
             if(marginsRemaining.count(concernedObjects[i]) == 0) {
-              LOG4CXX_INFO(GET_LOGGER(ODESimulator),"collision %s - %s erased entirely",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str());
+              LOG4CXX_INFO(GET_LOGGER(ODESimulator),"collision "<<ObjectName(concernedObjects[i].first)<<" - "<<ObjectName(concernedObjects[i].second)<<" erased entirely");
             }
             else {
               double d=marginsRemaining[concernedObjects[i]];
-              if(lastMarginsRemaining.count(concernedObjects[i])) 
-                LOG4CXX_INFO(GET_LOGGER(ODESimulator),"collision %s - %s changed from no contact to margin %g",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str(),d);
-              else
-                LOG4CXX_INFO(GET_LOGGER(ODESimulator),"collision %s - %s changed from depth %g to margin %g",ObjectName(concernedObjects[i].first).c_str(),ObjectName(concernedObjects[i].second).c_str(),lastMarginsRemaining[concernedObjects[i]],d);
+              if(lastMarginsRemaining.count(concernedObjects[i])) {
+                LOG4CXX_INFO(GET_LOGGER(ODESimulator),"collision "<<ObjectName(concernedObjects[i].first)<<" - "<<ObjectName(concernedObjects[i].second)<<" changed from no contact to margin "<<d);
+              }
+              else {
+                LOG4CXX_INFO(GET_LOGGER(ODESimulator),"collision "<<ObjectName(concernedObjects[i].first)<<" - "<<ObjectName(concernedObjects[i].second)<<" changed from depth "<<lastMarginsRemaining[concernedObjects[i]]<<" to margin "<<d);
+              }
             }
           }
           if(didRollback) {
-            LOG4CXX_INFO(GET_LOGGER(ODESimulator),"Adaptive sub-step of size %g is valid, arriving at time %g.",timestep,simTime);
+            LOG4CXX_INFO(GET_LOGGER(ODESimulator),"Adaptive sub-step of size "<<timestep<<" is valid, arriving at time "<<simTime);
             //now restore prior forces applied to all objects
             int k=0;
             for(size_t i=0;i<robots.size();i++) {
@@ -781,7 +783,7 @@ void ODESimulator::Step(Real dt)
           if(i->second <= 0) {
     			  CollisionPair collpair = i->first;
             string id1=ObjectName(collpair.first),id2=ObjectName(collpair.second);
-            LOG4CXX_WARN(GET_LOGGER(ODESimulator),"  %s - %s",id1.c_str(),id2.c_str());
+            LOG4CXX_WARN(GET_LOGGER(ODESimulator),"  "<<id1<<" - "<<id2);
           }
   			}
   			//printf("Press enter to continue...\n");
