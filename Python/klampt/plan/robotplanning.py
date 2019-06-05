@@ -188,7 +188,6 @@ def planToConfig(world,robot,target,
     """
     q0 = robot.getConfig()
     assert(len(q0)==len(target)),"target configuration must be of correct size for robot"
-    subset = []
     if movingSubset == 'auto':
         subset = []
         for i,(a,b) in enumerate(zip(q0,target)):
@@ -197,11 +196,11 @@ def planToConfig(world,robot,target,
     elif movingSubset == 'all' or movingSubset == None:
         subset = range(len(q0))
     else:
+        subset = movingSubset
         for i in range(len(q0)):
             if i not in subset:
                 if q0[i] != target[i]:
                     raise ValueError("Error: target configuration value differs from start configuration along a fixed DOF")
-        subset = movingSubset
     
     space = makeSpace(world=world,robot=robot,
                       edgeCheckResolution=edgeCheckResolution,
