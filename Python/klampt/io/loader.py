@@ -490,7 +490,7 @@ writers = {'Config':writeVector,
 def autoType(obj,validTypes):
     """Returns a type string for the Klamp't object obj, restricted
     to the set of validTypes.  If there are multiple interpretations,
-    the first type in objectToType that matches a valid type is
+    the first type in objectToTypes that matches a valid type is
     returned.
 
     Args:
@@ -501,7 +501,7 @@ def autoType(obj,validTypes):
         str or None: The type of the object, or None if no valid type
         was found
     """
-    otypes = types.objectToType(obj)
+    otypes = types.objectToTypes(obj)
     if isinstance(otypes,list):
         for otype in otypes:
             if otype in validTypes:
