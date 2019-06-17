@@ -630,7 +630,7 @@ bool XmlWorld::Save(RobotWorld& world,const string& fn,string itempath)
   for(size_t i=0;i<world.robots.size();i++) {
     for(size_t j=0;j<world.robots[i]->links.size();j++) {
       if(world.robots[i]->geomManagers[j].Empty()) continue;
-      if(world.robots[i]->geomManagers[j].IsCached()) {
+      if(world.robots[i]->geomManagers[j].IsOriginal()) {
         //modify geomFiles[j] to point to path of geomfile *relative* to where the robot will be saved
         const string& geomfile = world.robots[i]->geomManagers[j].CachedFilename();
         string relfile = GetRelativeFilename(geomfile,itempath);
@@ -650,7 +650,7 @@ bool XmlWorld::Save(RobotWorld& world,const string& fn,string itempath)
   }
   for(size_t i=0;i<world.rigidObjects.size();i++) {
     if(world.rigidObjects[i]->geometry.Empty()) continue;
-    if(world.rigidObjects[i]->geometry.IsCached()) {
+    if(world.rigidObjects[i]->geometry.IsOriginal()) {
       //modify geomFile to point to path of geomfile *relative* to where the robot will be saved
       const string& geomfile = world.rigidObjects[i]->geometry.CachedFilename();
       string relfile = GetRelativeFilename(geomfile,itempath);
@@ -669,7 +669,7 @@ bool XmlWorld::Save(RobotWorld& world,const string& fn,string itempath)
   }
   for(size_t i=0;i<world.terrains.size();i++) {
     if(world.terrains[i]->geometry.Empty()) continue;
-    if(world.terrains[i]->geometry.IsCached()) {
+    if(world.terrains[i]->geometry.IsOriginal()) {
       //modify geomFile to point to path of geomfile *relative* to where the robot will be saved
       const string& geomfile = world.terrains[i]->geometry.CachedFilename();
       string relfile = GetRelativeFilename(geomfile,itempath);
