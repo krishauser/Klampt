@@ -72,6 +72,7 @@ int dCustomGeometryCollide (dGeomID o1, dGeomID o2, int flags,
     if(c.unreliable)
       gCustomGeometryMeshesIntersect = true;
     k++;
+    if(k >= m) break;
   }
   return k;
 }
