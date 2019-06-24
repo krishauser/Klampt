@@ -131,8 +131,6 @@ def objective(body,ref=None,local=None,world=None,R=None,t=None):
     else:
         obj = IKObjective()
         obj.robot = body.robot()
-        if isinstance(obj.robot,SubRobotModel):
-            obj.robot = obj.robot._robot
         if local and world:
             assert(len(local)==len(world))
             if hasattr(local[0],'__iter__'):
@@ -334,7 +332,7 @@ def solver(objectives,iters=None,tol=None):
             for key,(r,objs) in robs.iteritems():
                 if isinstance(r,SubRobotModel):
                     s = IKSolver(r._robot)
-                    s.setActiveDofs(r.links)
+                    s.setActiveDofs(r._links)
                 else:
                     s = IKSolver(r)
                 if iters != None: s.setMaxIters(iters)
@@ -349,9 +347,11 @@ def solver(objectives,iters=None,tol=None):
         if isinstance(objectives,IKObjective):
             if not hasattr(objectives,'robot'):
                 raise ValueError("IKObjective object must have 'robot' member for use in ik.solver. Either set this manually or use the ik.objective function")
+            print objectives.robot.__class__.__name__
             if isinstance(objectives.robot,SubRobotModel):
-                s = IKSolver(objectives.robot._robot)
-                s.setActiveDofs(r.links)
+                r = objectives.robot
+                s = IKSolver(r._robot)
+                s.setActiveDofs(r._links)
             else:
                 s = IKSolver(objectives.robot)
             if iters != None: s.setMaxIters(iters)
