@@ -7,6 +7,7 @@ import math
 from ..model.trajectory import Trajectory
 from ..model.contact import ContactPoint
 
+
 def settle(world,obj,
     forcedir=(0,0,-1),forcept=(0,0,0),
     settletol=1e-4,orientationDamping=0.0,
@@ -53,9 +54,7 @@ def settle(world,obj,
                   h.setFixed(obj,sum(touched.values(),[]))
     """
     assert isinstance(world,WorldModel)
-    inworld = False
     if isinstance(obj,(str,int)):
-        world = world.copy()
         obj = world.rigidObject(obj)
         assert obj.index >= 0,"Object "+str(obj)+" does not exist in world"
     elif isinstance(obj,RobotModel):
@@ -245,6 +244,7 @@ def settle(world,obj,
             time.sleep(0)
         else:
             sim.simulate(dt)
+            sim.updateWorld()
 
         #test for settling
         w,v = body.getVelocity()
