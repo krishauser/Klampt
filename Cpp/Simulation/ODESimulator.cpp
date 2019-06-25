@@ -20,7 +20,7 @@
 
 DEFINE_LOGGER(ODESimulator)
 
-#define TEST_READ_WRITE_STATE 1
+#define TEST_READ_WRITE_STATE 0
 #define DO_TIMING 0
 
 const static size_t gMaxKMeansSize = 5000;
@@ -43,7 +43,8 @@ struct ODEContactResult
   bool meshOverlap;
 };
 
-const static int max_contacts = 1000;
+//this must be less than 2^16
+const static int max_contacts = 10000;
 static dContactGeom gContactTemp[max_contacts];
 static list<ODEContactResult> gContacts;
 static vector<ODEContactResult*> gContactsVector;
@@ -137,6 +138,7 @@ ODESimulatorSettings::ODESimulatorSettings()
 {
   gravity[0] = gravity[1] = 0;
   gravity[2] = -9.8;
+  autoDisable = false;
   defaultEnvPadding = gDefaultEnvPadding;
   defaultEnvSurface.kFriction = 0.3;
   defaultEnvSurface.kRestitution = 0.1;
@@ -239,6 +241,16 @@ void ODESimulator::SetGravity(const Vector3& g)
   dWorldSetGravity(worldID,g.x,g.y,g.z);
 }
 
+void ODESimulator::SetAutoDisable(bool autoDisable)
+{
+  settings.autoDisable = autoDisable;
+
+  //TEMP: play around with auto disable of rigid objects
+  int flag = (autoDisable? 1 :0);
+  for(size_t i=0;i<numObjects();i++)
+      dBodySetAutoDisableFlag(object(i)->body(),flag);
+}
+
 void ODESimulator::SetERP(double erp)
 {
   settings.errorReductionParameter = erp;
@@ -321,6 +333,8 @@ void ODESimulator::AddObject(RigidObject& object)
   //printf("Rigid object %d GeomData set to %p\n",objects.size()-1,ObjectIndexToGeomData((int)objects.size()-1));
   dGeomSetCategoryBits(objects.back()->geom(),0x2);
   dGeomSetCollideBits(objects.back()->geom(),0xffffffff);
+  if(settings.autoDisable)
+      dBodySetAutoDisableFlag(objects.back()->body(),(settings.autoDisable? 1 :0));
 }
 
 string ODESimulator::ObjectName(const ODEObjectID& obj) const
@@ -456,6 +470,7 @@ bool ODESimulator::CheckObjectOverlap(vector<pair<ODEObjectID,ODEObjectID> >& ov
 void ODESimulator::Step(Real dt)
 {
   if(GetStatus() == StatusError)  {
+    LOG4CXX_INFO(GET_LOGGER(ODESimulator),"sim is in StatusError, just advancing without physics simulation");
     simTime += dt;
     return;
   }
@@ -695,7 +710,7 @@ void ODESimulator::Step(Real dt)
             }
           }
           if(didRollback) {
-            LOG4CXX_INFO(GET_LOGGER(ODESimulator),"Adaptive sub-step of size "<<timestep<<" is valid, arriving at time "<<simTime);
+            LOG4CXX_INFO(GET_LOGGER(ODESimulator),"Adaptive sub-step of size "<<timestep<<" is valid, arriving at time "<<simTime+timestep);
             //now restore prior forces applied to all objects
             int k=0;
             for(size_t i=0;i<robots.size();i++) {

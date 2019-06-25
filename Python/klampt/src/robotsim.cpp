@@ -3850,10 +3850,6 @@ Simulator::Simulator(const WorldModel& model)
     printf("Done\n");
   }
 
-  //TEMP: play around with auto disable of rigid objects
-  for(size_t i=0;i<sim->odesim.numObjects();i++)
-      dBodySetAutoDisableFlag(sim->odesim.object(i)->body(),1);
-
   sim->WriteState(initialState);
 }
 
@@ -4107,6 +4103,7 @@ std::string Simulator::getSetting(const std::string& name)
   stringstream ss;
   if(name == "gravity") ss << Vector3(settings.gravity);
   else if(name == "simStep") ss << sim->simStep;
+  else if(name == "autoDisable") ss >> settings.autoDisable;
   else if(name == "boundaryLayerCollisions") ss << settings.boundaryLayerCollisions;
   else if(name == "rigidObjectCollisions") ss << settings.rigidObjectCollisions;
   else if(name == "robotSelfCollisions") ss << settings.robotSelfCollisions;
@@ -4131,6 +4128,7 @@ void Simulator::setSetting(const std::string& name,const std::string& value)
   stringstream ss(value);
   if(name == "gravity") { Vector3 g; ss >> g; sim->odesim.SetGravity(g); }
   else if(name == "simStep") ss >> sim->simStep;
+  else if(name == "autoDisable") { ss >> settings.autoDisable; sim->odesim.SetAutoDisable(settings.autoDisable); }
   else if(name == "boundaryLayerCollisions") ss >> settings.boundaryLayerCollisions;
   else if(name == "rigidObjectCollisions") ss >> settings.rigidObjectCollisions;
   else if(name == "robotSelfCollisions") ss >> settings.robotSelfCollisions;
