@@ -135,7 +135,7 @@ void ViewRobot::DrawOpaque(bool opaque)
 {
   if(!robot) return;
 
-  GLDraw::GeometryAppearance::Element e = (opaque ? GLDraw::GeometryAppearance::OPAQUE : GLDraw::GeometryAppearance::TRANSPARENT);
+  GLDraw::GeometryAppearance::Element e = (opaque ? GLDraw::GeometryAppearance::ALL_OPAQUE : GLDraw::GeometryAppearance::ALL_TRANSPARENT);
   for(size_t i=0;i<robot->links.size();i++) {
     if(robot->IsGeometryEmpty(i)) continue;
     Matrix4 mat = robot->links[i].T_World;

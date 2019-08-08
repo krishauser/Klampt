@@ -28,6 +28,17 @@ using namespace GLDraw;
   #include <KrisLibrary/GLdraw/GLScreenshotProgram.h>
   #define BASE_PROGRAM GLUTNavigationProgram
 
+  #if defined (__APPLE__) || defined (MACOSX)
+  #include <GLUT/glut.h>
+  #else
+  #include <GL/glut.h>
+  #endif // Apple
+
+  #if FREEGLUT
+  #include <GL/freeglut_ext.h>
+  #endif //FREEGLUT
+
+
   #endif //HAVE_GLUT
 
 #endif //HAVE_GLUI
