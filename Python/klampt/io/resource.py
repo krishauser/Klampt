@@ -121,37 +121,40 @@ def get(name,type='auto',directory=None,default=None,doedit='auto',description=N
 
     Resources can also be edited using RobotPose.
 
+    Returns default if the object doesn't exist and doedit=False, or the 
+    object doesn't exist and the user canceled the editor.
+
     Args:
         name (str): the resource name.  If type='auto', this is assumed to have
             a suffix of a file of the desired type.  The name can also be
             nested of the form 'group/subgroup/name.type'.
         type (str): the resource type, or 'auto' to determine it automatically.
-        directory (str, optional): the search directory.  If None, uses the current
-            resource directory.
-        default (optional): the default value if the resource does not exist on disk.
-            If None, some arbitrary default value will be inferred.
+        directory (str, optional): the search directory.  If None, uses the 
+            current resource directory.
+        default (optional): the default value if the resource does not exist on
+            disk. If None, some arbitrary default value will be inferred.
         doedit: if 'auto', if the resource does not exist on disk, an
             edit prompt will be displayed.  If False, an RuntimeError will be
             raised if the resource does not exist on disk.  If True, the
             user will be given an edit prompt to optionally edit the resource
             before this call returns.
-        description (str, optional): an optional text description of the resource, for use
-            in the edit prompt.
-        editor (str): either 'visual' or 'console', determining whether to use the
-            visual OpenGL or console editor.
-        world (WorldModel, optional): for a visual editor, this world will be shown along with
-            the item to edit.  If this is a string it points to a file
-            that will be loaded for the world (e.g., a world XML file, or a
-            robot file).
-        referenceObject (optional): to give visual reference points, one or more RobotModels,
-            ObjectModels, Geometry3D's, or RobotModelLink's may be designated to follow
-            the edited object.  Currently works with Config's / Configs' / Trajectories /
-            rigid transforms / rotations / points.
-        frame (optional): for rigid transforms / rotations / points, the reference
-          frame in which the quantity is represented.  This is an element of
-          se3, or an ObjectModel, or a RobotModelLink, or a string indicating a
-          named rigid element of the world.
-
+        description (str, optional): an optional text description of the
+            resource, for use in the edit prompt.
+        editor (str): either 'visual' or 'console', determining whether to use
+            the visual OpenGL or console editor.
+        world (WorldModel, optional): for a visual editor, this world will be 
+            shown along with the item to edit.  If this is a string it points
+            to a file that will be loaded for the world (e.g., a world XML
+            file, or a robot file).
+        referenceObject (optional): to give visual reference points, one or 
+            more RobotModels, ObjectModels, Geometry3D's, or RobotModelLink's
+            may be designated to follow the edited object.  Currently works
+            with Config's / Configs' / Trajectories / rigid transforms /
+            rotations / points.
+        frame (optional): for rigid transforms / rotations / points, the 
+          reference frame in which the quantity is represented.  This is an 
+          element of se3, or an ObjectModel, or a RobotModelLink, or a string 
+          indicating a named rigid element of the world.
     """
     if name==None:
         if doedit==False:

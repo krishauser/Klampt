@@ -115,3 +115,10 @@ void Terrain::DrawGL()
 
   geometry.DrawGL();
 }
+
+void Terrain::DrawGLOpaque(bool opaque)
+{
+  if(!geometry) return;
+
+  geometry.DrawGLOpaque(opaque);
+}

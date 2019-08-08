@@ -91,12 +91,27 @@ void FeedforwardController::Reset()
 
 bool FeedforwardController::ReadState(File& f)
 {
-  if(!RobotController::ReadState(f)) return false;
-  if(base && !base->ReadState(f)) return false;
-  if(!ReadFile(f,gravity)) return false;
+  if(!RobotController::ReadState(f)) {
+    printf("FeedforwardController::RobotController couldn't read state\n");
+    return false;
+  }
+  if(base && !base->ReadState(f)) {
+    printf("FeedforwardController::Couldn't read base state\n");
+    return false;
+  }
+  if(!ReadFile(f,gravity)) {
+    printf("FeedforwardController::Couldn't read gravity\n");
+    return false;
+  }
   for(size_t i=0;i<wrenches.size();i++) {
-    if(!ReadFile(f,wrenches[i].f)) return false;
-    if(!ReadFile(f,wrenches[i].m)) return false;
+    if(!ReadFile(f,wrenches[i].f)) {
+      printf("FeedforwardController::Couldn't read wrench %d\n",i);
+      return false;
+    }
+    if(!ReadFile(f,wrenches[i].m)) {
+      printf("FeedforwardController::Couldn't read wrench %d\n",i);
+      return false;
+    }
   }
   return true;
 }

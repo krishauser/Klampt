@@ -222,6 +222,34 @@ C++ includes: robotmodel.h
 %feature("docstring") ContactParameters::ContactParameters "
 ";
 
+// File: classContactQueryResult.xml
+
+
+%feature("docstring") ContactQueryResult "
+
+The result from a contact query of :class:`~klampt.Geometry3D`. The number of
+contacts n is variable.  
+
+Attributes:  
+
+    depths (list of n floats): penetration depths for each contact point.
+        The depth is measured with respect to the padded geometry, and must
+        be nonnegative. A value of 0 indicates that depth cannot be
+        determined accurately.
+    points1, points2 (list of n lists of floats): contact points on self vs
+        other,  The top level list has n entries, and each entry is a
+        3-list expressed in world coordinates.  If an object is padded,
+        these points are on the surface of the padded geometry.
+    normals (list of n lists of floats): the outward-facing contact normal
+        from this to other at each contact point, given in world
+        coordinates.  Each entry is a 3-list, and can be a unit vector,
+        or [0,0,0] if the the normal cannot be computed properly.
+    elems1, elems2 (list of n ints): for compound objects, these are the
+        element indices corresponding to each contact.  
+
+C++ includes: geometry.h
+";
+
 // File: classCSpaceInterface.xml
 
 
@@ -429,16 +457,19 @@ Attributes:
     d (float): The calculated distance, with negative values indicating
         penetration.  Can also be upperBound if the branch was hit.
     hasClosestPoints (bool):  If true, the closest point information is
-        given in cp0 and cp1.
+        given in cp0 and cp1, and elem1 and elem2
     hasGradients (bool):  f true, distance gradient information is given
         in grad0 and grad1.
     cp1, cp2 (list of 3 floats, optional): closest points on self vs other,
         both given in world coordinates
     grad1, grad2 (list of 3 floats, optional): the gradients of the
-        objects' signed distance fields, in world coordinates.
+        objects' signed distance fields at the closest points.  Given in
+        world coordinates.
 
         I.e., to move object1 to touch object2, move it in direction
-        grad1 by distance -d.  Note that grad2 is always -grad1.  
+        grad1 by distance -d.  Note that grad2 is always -grad1.
+    elems1, elems2 (int): for compound objects, these are the
+        element indices corresponding to the closest points.  
 
 C++ includes: geometry.h
 ";
@@ -661,6 +692,11 @@ Frees the data associated with this geometry, if standalone.
 %feature("docstring") Geometry3D::collides "
 
 Returns true if this geometry collides with the other.  
+
+Unsupported types:  
+
+*   VolumeGrid - TriangleMesh  
+*   VolumeGrid - VolumeGrid  
 ";
 
 %feature("docstring") Geometry3D::getPointCloud "
@@ -691,13 +727,26 @@ setElement() with increasing indices.
 Returns the the distance and closest points between the given geometries.  
 
 If the objects are penetrating, some combinations of geometry types allow
-calculating penetration depths (GeometricPrimitive-GeometricPrimitive,
-GeometricPrimitive-TriangleMesh (surface only), GeometricPrimitive-PointCloud,
-GeometricPrimitive-VolumeGrid, TriangleMesh (surface only)- GeometricPrimitive,
-PointCloud-VolumeGrid). In this case, a negative value is returned and cp1,cp2
-are the deepest penetrating points.  
+calculating penetration depths:  
 
-Same comments as the distance_point function  
+*   GeometricPrimitive-GeometricPrimitive (Python-supported sub-types only)  
+*   GeometricPrimitive-TriangleMesh (surface only)  
+*   GeometricPrimitive-PointCloud  
+*   GeometricPrimitive-VolumeGrid  
+*   TriangleMesh (surface only)-GeometricPrimitive  
+*   PointCloud-VolumeGrid  
+
+If penetration is supported, a negative distance is returned and cp1,cp2 are the
+deepest penetrating points.  
+
+Unsupported types:  
+
+*   GeometricPrimitive-GeometricPrimitive subtypes segment vs aabb  
+*   PointCloud-PointCloud  
+*   VolumeGrid-TriangleMesh  
+*   VolumeGrid-VolumeGrid  
+
+See the comments of the distance_point function  
 ";
 
 %feature("docstring") Geometry3D::getCurrentTransform "
@@ -882,6 +931,28 @@ other type.
 
 Sets a padding around the base geometry which affects the results of proximity
 queries.  
+";
+
+%feature("docstring") Geometry3D::contacts "
+
+Returns the set of contact points between this and other. This set is a discrete
+representation of the region of surface overlap, which is defined as all pairs
+of points within distance self.collisionMargin + other.collisionMargin +
+padding1 + padding2.  
+
+For some geometry types (TriangleMesh-TriangleMesh, TriangleMesh-PointCloud,
+PointCloud-PointCloud) padding must be positive to get meaningful contact poitns
+and normals.  
+
+If maxContacts != 0 a clustering postprocessing step is performed.  
+
+Unsupported types:  
+
+*   GeometricPrimitive-GeometricPrimitive subtypes segment vs aabb  
+*   VolumeGrid-GeometricPrimitive any subtypes except point and sphere. also,
+    the results are potentially inaccurate for non-convex VolumeGrids.  
+*   VolumeGrid-TriangleMesh  
+*   VolumeGrid-VolumeGrid  
 ";
 
 %feature("docstring") Geometry3D::distance_ext "

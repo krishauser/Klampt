@@ -30,6 +30,7 @@ public:
   }
   ///Renders the terrain in OpenGL
   void DrawGL();
+  void DrawGLOpaque(bool opaque);
 
   string name;
   string geomFile;

@@ -1633,16 +1633,19 @@ class DistanceQueryResult(_object):
         d (float): The calculated distance, with negative values indicating
             penetration.  Can also be upperBound if the branch was hit.
         hasClosestPoints (bool):  If true, the closest point information is
-            given in cp0 and cp1.
+            given in cp0 and cp1, and elem1 and elem2
         hasGradients (bool):  f true, distance gradient information is given
             in grad0 and grad1.
         cp1, cp2 (list of 3 floats, optional): closest points on self vs other,
             both given in world coordinates
         grad1, grad2 (list of 3 floats, optional): the gradients of the
-            objects' signed distance fields, in world coordinates.
+            objects' signed distance fields at the closest points.  Given in
+            world coordinates.
 
             I.e., to move object1 to touch object2, move it in direction
-            grad1 by distance -d.  Note that grad2 is always -grad1.  
+            grad1 by distance -d.  Note that grad2 is always -grad1.
+        elems1, elems2 (int): for compound objects, these are the
+            element indices corresponding to the closest points.  
 
     C++ includes: geometry.h
 
@@ -1681,6 +1684,14 @@ class DistanceQueryResult(_object):
     __swig_getmethods__["grad2"] = _robotsim.DistanceQueryResult_grad2_get
     if _newclass:
         grad2 = _swig_property(_robotsim.DistanceQueryResult_grad2_get, _robotsim.DistanceQueryResult_grad2_set)
+    __swig_setmethods__["elem1"] = _robotsim.DistanceQueryResult_elem1_set
+    __swig_getmethods__["elem1"] = _robotsim.DistanceQueryResult_elem1_get
+    if _newclass:
+        elem1 = _swig_property(_robotsim.DistanceQueryResult_elem1_get, _robotsim.DistanceQueryResult_elem1_set)
+    __swig_setmethods__["elem2"] = _robotsim.DistanceQueryResult_elem2_set
+    __swig_getmethods__["elem2"] = _robotsim.DistanceQueryResult_elem2_get
+    if _newclass:
+        elem2 = _swig_property(_robotsim.DistanceQueryResult_elem2_get, _robotsim.DistanceQueryResult_elem2_set)
 
     def __init__(self):
         """
@@ -1695,16 +1706,19 @@ class DistanceQueryResult(_object):
             d (float): The calculated distance, with negative values indicating
                 penetration.  Can also be upperBound if the branch was hit.
             hasClosestPoints (bool):  If true, the closest point information is
-                given in cp0 and cp1.
+                given in cp0 and cp1, and elem1 and elem2
             hasGradients (bool):  f true, distance gradient information is given
                 in grad0 and grad1.
             cp1, cp2 (list of 3 floats, optional): closest points on self vs other,
                 both given in world coordinates
             grad1, grad2 (list of 3 floats, optional): the gradients of the
-                objects' signed distance fields, in world coordinates.
+                objects' signed distance fields at the closest points.  Given in
+                world coordinates.
 
                 I.e., to move object1 to touch object2, move it in direction
-                grad1 by distance -d.  Note that grad2 is always -grad1.  
+                grad1 by distance -d.  Note that grad2 is always -grad1.
+            elems1, elems2 (int): for compound objects, these are the
+                element indices corresponding to the closest points.  
 
         C++ includes: geometry.h
 
@@ -1718,6 +1732,103 @@ class DistanceQueryResult(_object):
     __del__ = lambda self: None
 DistanceQueryResult_swigregister = _robotsim.DistanceQueryResult_swigregister
 DistanceQueryResult_swigregister(DistanceQueryResult)
+
+class ContactQueryResult(_object):
+    """
+
+
+    The result from a contact query of :class:`~klampt.Geometry3D`. The number of
+    contacts n is variable.  
+
+    Attributes:  
+
+        depths (list of n floats): penetration depths for each contact point.
+            The depth is measured with respect to the padded geometry, and must
+            be nonnegative. A value of 0 indicates that depth cannot be
+            determined accurately.
+        points1, points2 (list of n lists of floats): contact points on self vs
+            other,  The top level list has n entries, and each entry is a
+            3-list expressed in world coordinates.  If an object is padded,
+            these points are on the surface of the padded geometry.
+        normals (list of n lists of floats): the outward-facing contact normal
+            from this to other at each contact point, given in world
+            coordinates.  Each entry is a 3-list, and can be a unit vector,
+            or [0,0,0] if the the normal cannot be computed properly.
+        elems1, elems2 (list of n ints): for compound objects, these are the
+            element indices corresponding to each contact.  
+
+    C++ includes: geometry.h
+
+    """
+
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, ContactQueryResult, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, ContactQueryResult, name)
+    __repr__ = _swig_repr
+    __swig_setmethods__["depths"] = _robotsim.ContactQueryResult_depths_set
+    __swig_getmethods__["depths"] = _robotsim.ContactQueryResult_depths_get
+    if _newclass:
+        depths = _swig_property(_robotsim.ContactQueryResult_depths_get, _robotsim.ContactQueryResult_depths_set)
+    __swig_setmethods__["points1"] = _robotsim.ContactQueryResult_points1_set
+    __swig_getmethods__["points1"] = _robotsim.ContactQueryResult_points1_get
+    if _newclass:
+        points1 = _swig_property(_robotsim.ContactQueryResult_points1_get, _robotsim.ContactQueryResult_points1_set)
+    __swig_setmethods__["points2"] = _robotsim.ContactQueryResult_points2_set
+    __swig_getmethods__["points2"] = _robotsim.ContactQueryResult_points2_get
+    if _newclass:
+        points2 = _swig_property(_robotsim.ContactQueryResult_points2_get, _robotsim.ContactQueryResult_points2_set)
+    __swig_setmethods__["normals"] = _robotsim.ContactQueryResult_normals_set
+    __swig_getmethods__["normals"] = _robotsim.ContactQueryResult_normals_get
+    if _newclass:
+        normals = _swig_property(_robotsim.ContactQueryResult_normals_get, _robotsim.ContactQueryResult_normals_set)
+    __swig_setmethods__["elems1"] = _robotsim.ContactQueryResult_elems1_set
+    __swig_getmethods__["elems1"] = _robotsim.ContactQueryResult_elems1_get
+    if _newclass:
+        elems1 = _swig_property(_robotsim.ContactQueryResult_elems1_get, _robotsim.ContactQueryResult_elems1_set)
+    __swig_setmethods__["elems2"] = _robotsim.ContactQueryResult_elems2_set
+    __swig_getmethods__["elems2"] = _robotsim.ContactQueryResult_elems2_get
+    if _newclass:
+        elems2 = _swig_property(_robotsim.ContactQueryResult_elems2_get, _robotsim.ContactQueryResult_elems2_set)
+
+    def __init__(self):
+        """
+        __init__(ContactQueryResult self) -> ContactQueryResult
+
+
+
+        The result from a contact query of :class:`~klampt.Geometry3D`. The number of
+        contacts n is variable.  
+
+        Attributes:  
+
+            depths (list of n floats): penetration depths for each contact point.
+                The depth is measured with respect to the padded geometry, and must
+                be nonnegative. A value of 0 indicates that depth cannot be
+                determined accurately.
+            points1, points2 (list of n lists of floats): contact points on self vs
+                other,  The top level list has n entries, and each entry is a
+                3-list expressed in world coordinates.  If an object is padded,
+                these points are on the surface of the padded geometry.
+            normals (list of n lists of floats): the outward-facing contact normal
+                from this to other at each contact point, given in world
+                coordinates.  Each entry is a 3-list, and can be a unit vector,
+                or [0,0,0] if the the normal cannot be computed properly.
+            elems1, elems2 (list of n ints): for compound objects, these are the
+                element indices corresponding to each contact.  
+
+        C++ includes: geometry.h
+
+        """
+        this = _robotsim.new_ContactQueryResult()
+        try:
+            self.this.append(this)
+        except Exception:
+            self.this = this
+    __swig_destroy__ = _robotsim.delete_ContactQueryResult
+    __del__ = lambda self: None
+ContactQueryResult_swigregister = _robotsim.ContactQueryResult_swigregister
+ContactQueryResult_swigregister(ContactQueryResult)
 
 class Geometry3D(_object):
     """
@@ -2199,6 +2310,11 @@ class Geometry3D(_object):
 
         Returns true if this geometry collides with the other.  
 
+        Unsupported types:  
+
+        *   VolumeGrid - TriangleMesh  
+        *   VolumeGrid - VolumeGrid  
+
         """
         return _robotsim.Geometry3D_collides(self, other)
 
@@ -2272,13 +2388,26 @@ class Geometry3D(_object):
         Returns the the distance and closest points between the given geometries.  
 
         If the objects are penetrating, some combinations of geometry types allow
-        calculating penetration depths (GeometricPrimitive-GeometricPrimitive,
-        GeometricPrimitive-TriangleMesh (surface only), GeometricPrimitive-PointCloud,
-        GeometricPrimitive-VolumeGrid, TriangleMesh (surface only)- GeometricPrimitive,
-        PointCloud-VolumeGrid). In this case, a negative value is returned and cp1,cp2
-        are the deepest penetrating points.  
+        calculating penetration depths:  
 
-        Same comments as the distance_point function  
+        *   GeometricPrimitive-GeometricPrimitive (Python-supported sub-types only)  
+        *   GeometricPrimitive-TriangleMesh (surface only)  
+        *   GeometricPrimitive-PointCloud  
+        *   GeometricPrimitive-VolumeGrid  
+        *   TriangleMesh (surface only)-GeometricPrimitive  
+        *   PointCloud-VolumeGrid  
+
+        If penetration is supported, a negative distance is returned and cp1,cp2 are the
+        deepest penetrating points.  
+
+        Unsupported types:  
+
+        *   GeometricPrimitive-GeometricPrimitive subtypes segment vs aabb  
+        *   PointCloud-PointCloud  
+        *   VolumeGrid-TriangleMesh  
+        *   VolumeGrid-VolumeGrid  
+
+        See the comments of the distance_point function  
 
         """
         return _robotsim.Geometry3D_distance(self, other)
@@ -2310,6 +2439,36 @@ class Geometry3D(_object):
 
         """
         return _robotsim.Geometry3D_rayCast(self, s, d)
+
+
+    def contacts(self, other, padding1, padding2, maxContacts=0):
+        """
+        contacts(Geometry3D self, Geometry3D other, double padding1, double padding2, int maxContacts=0) -> ContactQueryResult
+        contacts(Geometry3D self, Geometry3D other, double padding1, double padding2) -> ContactQueryResult
+
+
+
+        Returns the set of contact points between this and other. This set is a discrete
+        representation of the region of surface overlap, which is defined as all pairs
+        of points within distance self.collisionMargin + other.collisionMargin +
+        padding1 + padding2.  
+
+        For some geometry types (TriangleMesh-TriangleMesh, TriangleMesh-PointCloud,
+        PointCloud-PointCloud) padding must be positive to get meaningful contact poitns
+        and normals.  
+
+        If maxContacts != 0 a clustering postprocessing step is performed.  
+
+        Unsupported types:  
+
+        *   GeometricPrimitive-GeometricPrimitive subtypes segment vs aabb  
+        *   VolumeGrid-GeometricPrimitive any subtypes except point and sphere. also,
+            the results are potentially inaccurate for non-convex VolumeGrids.  
+        *   VolumeGrid-TriangleMesh  
+        *   VolumeGrid-VolumeGrid  
+
+        """
+        return _robotsim.Geometry3D_contacts(self, other, padding1, padding2, maxContacts)
 
     __swig_setmethods__["world"] = _robotsim.Geometry3D_world_set
     __swig_getmethods__["world"] = _robotsim.Geometry3D_world_get
@@ -3887,9 +4046,9 @@ class RobotModelLink(_object):
         return _robotsim.RobotModelLink_getJacobian(self, plocal)
 
 
-    def getPositionJacobian(self, p):
+    def getPositionJacobian(self, plocal):
         """
-        getPositionJacobian(RobotModelLink self, double const [3] p)
+        getPositionJacobian(RobotModelLink self, double const [3] plocal)
 
 
 
@@ -3905,7 +4064,7 @@ class RobotModelLink(_object):
             np.dot(J,dq), where dq is the robot's joint velocities.  
 
         """
-        return _robotsim.RobotModelLink_getPositionJacobian(self, p)
+        return _robotsim.RobotModelLink_getPositionJacobian(self, plocal)
 
 
     def getOrientationJacobian(self):
@@ -3986,9 +4145,9 @@ class RobotModelLink(_object):
         return _robotsim.RobotModelLink_getAngularAcceleration(self, ddq)
 
 
-    def getPositionHessian(self, p):
+    def getPositionHessian(self, plocal):
         """
-        getPositionHessian(RobotModelLink self, double const [3] p)
+        getPositionHessian(RobotModelLink self, double const [3] plocal)
 
 
 
@@ -4001,7 +4160,7 @@ class RobotModelLink(_object):
             respectively, to the (x,y,z) components of the Hessian.  
 
         """
-        return _robotsim.RobotModelLink_getPositionHessian(self, p)
+        return _robotsim.RobotModelLink_getPositionHessian(self, plocal)
 
 
     def getOrientationHessian(self):

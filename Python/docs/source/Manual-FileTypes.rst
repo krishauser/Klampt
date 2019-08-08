@@ -107,10 +107,24 @@ schema.
 
    -  *Children*
 
+      -  ``<display>`` or ``<appearance>`` (optional): configures the OpenGL display of the
+         object.
+      -  *Attributes*
+
+         -  ``color`` (``Vector3`` or ``Vector4``, optional): sets the RGB or RGBA color of the object.
+         -  ``faceColor`` (``Vector3`` or ``Vector4``, optional): sets the RGB or RGBA color of the object's faces.
+         -  ``vertexColor`` (``Vector3`` or ``Vector4``, optional): sets the RGB or RGBA color of the object's vertices (default not drawn, except for point clouds).
+         -  ``vertexSize`` or ``pointSize`` (float, optional): sets size of the points (in pixels) drawn at the object's vertices (default 3, for point clouds).
+         -  ``edgeColor`` (``Vector3`` or ``Vector4``, optional): sets the RGB or RGBA color of the object's edges (default not drawn).
+         -  ``edgeSize`` (float, optional): sets the width of the drawn edges.
+         -  ``silhouette`` (1, 4, or 5 floats, optional): configures the silhouette using a string of the form "width [r g b] [a]".  Default value is "0.0025 0 0 0 1".
+         -  ``texture`` (string, optional): sets a texture.  Can be an image file name, or "noise", "checker", "gradient", "colorgradient".
+         -  ``texture_projection`` (string, optional): sets a texture projection.  Can be "xy", "z", or "conformal" at the moment.
+
       -  ``<geometry>``: sets the object's geometry (optional).
       -  *Attributes*
 
-         -  ``mesh`` (string): the geometry file (.off, other mesh, or
+         -  ``file`` or ``mesh`` (string): the geometry file (.off, other mesh, or
             .pcd). May be relative or absolute path (Note: "mesh" is a
             misnomer, it should work with any type of geometry file)
          -  ``scale`` (float or ``Vector3``, optional): a scale factor
@@ -150,15 +164,7 @@ schema.
 
    -  *Children*
 
-      -  ``<display>`` (optional): configures the OpenGL display of the
-         terrain.
-      -  *Attributes*
-
-         -  ``color`` (``Vector3`` or ``Vector4``, optional, default
-            light brown): sets the RGB or RGBA color of the terrain.
-         -  ``texture`` (string, optional): sets a texture. Can be
-            "noise", "checker", "gradient", and "colorgradient" at the
-            moment.
+      -  ``<display>`` or ``<appearance>`` (optional): configures the visualization of the terrain (see `<rigidObject><display>`).  Default color is light brown.
 
    -  ``<simulation>`` (optional): configures the simulation model.
    -  *Children*
@@ -205,7 +211,7 @@ schema.
 
       -  *Children*
 
-         -  ``<geometry>``: see ``<world><simulation><env><geometry>``.
+         -  ``<geometry>``: see ``<world><simulation><terrain><geometry>``.
 
       -  ``<robot>`` (optional): robot configuration
       -  *Attributes*
@@ -216,7 +222,7 @@ schema.
 
       -  *Children*
 
-         -  ``<geometry>``: see ``<world><simulation><env><geometry>``.
+         -  ``<geometry>``: see ``<world><simulation><terrain><geometry>``.
          -  ``<controller>``: configures the robot's controller. Each
             controller type has a certain set of optional attributes
             that can be set here.

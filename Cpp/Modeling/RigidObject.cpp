@@ -307,3 +307,17 @@ void RigidObject::DrawGL()
   glPopMatrix();
   glEnable(GL_CULL_FACE);
 }
+
+void RigidObject::DrawGLOpaque(bool opaque)
+{
+  if(!geometry) return;
+
+  glDisable(GL_CULL_FACE);
+  glPushMatrix();
+  GLDraw::glMultMatrix(Matrix4(T));
+
+  geometry.DrawGLOpaque(opaque);
+
+  glPopMatrix();
+  glEnable(GL_CULL_FACE);
+}

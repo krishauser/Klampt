@@ -264,11 +264,17 @@ void RobotWorld::SetGLLights()
 void RobotWorld::DrawGL()
 {
   for(size_t i=0;i<robots.size();i++)
-    robotViews[i].Draw();
+    robotViews[i].DrawOpaque(true);
   for(size_t i=0;i<terrains.size();i++)
-    terrains[i]->DrawGL();
+    terrains[i]->DrawGLOpaque(true);
   for(size_t i=0;i<rigidObjects.size();i++)
-    rigidObjects[i]->DrawGL();
+    rigidObjects[i]->DrawGLOpaque(true);
+  for(size_t i=0;i<robots.size();i++)
+    robotViews[i].DrawOpaque(false);
+  for(size_t i=0;i<terrains.size();i++)
+    terrains[i]->DrawGLOpaque(false);
+  for(size_t i=0;i<rigidObjects.size();i++)
+    rigidObjects[i]->DrawGLOpaque(false);
 }
 
 int RobotWorld::LoadRobot(const string& fn)

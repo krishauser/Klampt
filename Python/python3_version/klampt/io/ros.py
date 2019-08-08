@@ -3,7 +3,7 @@ Tested on ROS Kinetic.
 
 The easiest way to use this is to use the toMsg(klampt_obj) and
 fromMsg(ros_obj) functions.  However, certain objects, like
-JontState and JointTrajectory, have several configuration options
+JointState and JointTrajectory, have several configuration options
 that may need to be specified.
 
 Another simple way to use this is to use the publisher, subscriber,

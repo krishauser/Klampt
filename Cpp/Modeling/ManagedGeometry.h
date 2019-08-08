@@ -59,6 +59,8 @@ class ManagedGeometry
   static ManagedGeometry* IsCached(const std::string& filename);
   ///Returns true if this instance is cached.
   bool IsCached() const;
+  ///Returns true if this instance is cached and is identical to a file on disk
+  bool IsOriginal() const;
   ///Adds to cache, if not already in it
   void AddToCache(const std::string& filename);
   ///Returns the filename to which this object is cached
@@ -83,6 +85,8 @@ class ManagedGeometry
   void OnGeometryChange();
   ///Renders the object using OpenGL
   void DrawGL();
+  ///Renders the opaque parts of the object using OpenGL
+  void DrawGLOpaque(bool opaque);
   ///Returns true if this geometry is connected to a dynamic source
   bool IsDynamicGeometry() const;
   ///Updates dynamic geometry, if an update is available.  If no update,

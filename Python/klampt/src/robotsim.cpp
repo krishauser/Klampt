@@ -639,6 +639,7 @@ string Geometry3D::type()
   if(geom->Empty()) return "";
   string res = geom->TypeName();
   if(res == "Primitive") return "GeometricPrimitive";
+  if(res == "ImplicitSurface") return "VolumeGrid";
   return res;
 }
 
@@ -1041,6 +1042,7 @@ void Geometry3D::getBBTight(double out[3],double out2[3])
     out2[0] = out2[1] = out2[2] = -Inf;
     return;
   }
+  geom->InitCollisionData();
   AABB3D bb = geom->GetAABBTight();
   bb.bmin.get(out);
   bb.bmax.get(out2);
@@ -1065,7 +1067,7 @@ Geometry3D Geometry3D::convert(const char* destype,double param)
 
   if(srctype == destype2)
     return *this;
-  if(param < 0) throw PyException("Invalid conversion parameter, must be nonnegative");
+  if(param < 0 && srctype != AnyGeometry3D::ImplicitSurface) throw PyException("Invalid conversion parameter, must be nonnegative");
 
   //do the conversion
   geom->InitCollisionData();
@@ -1137,6 +1139,12 @@ DistanceQueryResult Geometry3D::distance_point_ext(const double pt[3],const Dist
     result.cp2.resize(3);
     gres.cp1.get(&result.cp1[0]);
     gres.cp2.get(&result.cp2[0]);
+    result.elem1 = gres.elem1;
+    result.elem2 = gres.elem2;
+  }
+  else {
+    result.elem1 = -1;
+    result.elem2 = -1;
   }
   result.hasGradients = gres.hasDirections;
   if(result.hasGradients) {
@@ -1165,7 +1173,7 @@ DistanceQueryResult Geometry3D::distance_ext(const Geometry3D& other,const Dista
   gsettings.upperBound = settings.upperBound;
   AnyDistanceQueryResult gres = geom->Distance(*geom2,gsettings);
   if(IsInf(gres.d)) {
-    throw PyException("Distance queries not implemented yet for those types of geometry");
+    throw PyException("Distance queries not implemented yet for those types of geometry, or geometries are content-free?");
   }
   DistanceQueryResult result;
   result.d = gres.d;
@@ -1175,6 +1183,12 @@ DistanceQueryResult Geometry3D::distance_ext(const Geometry3D& other,const Dista
     result.cp2.resize(3);
     gres.cp1.get(&result.cp1[0]);
     gres.cp2.get(&result.cp2[0]);
+    result.elem1 = gres.elem1;
+    result.elem2 = gres.elem2;
+  }
+  else {
+    result.elem1 = -1;
+    result.elem2 = -1;
   }
   result.hasGradients = gres.hasDirections;
   if(result.hasGradients) {
@@ -1202,8 +1216,47 @@ bool Geometry3D::rayCast(const double s[3],const double d[3],double out[3])
   return false;
 }
 
+ContactQueryResult Geometry3D::contacts(const Geometry3D& other,double padding1,double padding2,int maxContacts)
+{
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>& geom2 = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(other.geomPtr);
+  if(!geom) throw PyException("Geometry3D.contacts: Geometry is empty");
+  if(!geom2) throw PyException("Geometry3D.contacts: Other geometry is empty");
+  AnyContactsQuerySettings settings;
+  settings.padding1 = padding1;
+  settings.padding2 = padding2;
+  if(maxContacts > 0) {
+    settings.maxcontacts = maxContacts;
+    settings.cluster = true;
+  }
+  AnyContactsQueryResult res = geom->Contacts(*geom2,settings);
+  ContactQueryResult out;
+  out.depths.resize(res.contacts.size());
+  out.points1.resize(res.contacts.size());
+  out.points2.resize(res.contacts.size());
+  out.normals.resize(res.contacts.size());
+  out.elems1.resize(res.contacts.size());
+  out.elems2.resize(res.contacts.size());
+  for(size_t i=0;i<res.contacts.size();i++) {
+    out.depths[i] = res.contacts[i].depth;
+    out.points1[i].resize(3);
+    res.contacts[i].p1.get(&out.points1[i][0]);
+    out.points2[i].resize(3);
+    res.contacts[i].p2.get(&out.points2[i][0]);
+    out.normals[i].resize(3);
+    res.contacts[i].n.get(&out.normals[i][0]);
+    out.elems1[i] = res.contacts[i].elem1;
+    out.elems2[i] = res.contacts[i].elem2;
+  }
+  return out;
+}
+
 //KH: note: pointer gymnastics necessary to allow appearances to refer to temporary appearances as well as references to world, while also
 //exposing an opaque pointer in appearance.h
+
+//defined in Cpp/Modeling/ManagedGeometry.cpp
+void SetupDefaultAppearance(GLDraw::GeometryAppearance& app);
+
 Appearance::Appearance()
   :world(-1),id(-1),appearancePtr(NULL)
 {
@@ -1635,8 +1688,7 @@ void Appearance::drawWorldGL(Geometry3D& g)
   if(!geom) return;
   if(!app) {
     app = make_shared<GLDraw::GeometryAppearance>();
-    app->creaseAngle = DtoR(30.0);
-    app->silhouetteRadius = 0.0025;
+    SetupDefaultAppearance(*app);
   }
   if(app->geom) {
     if(app->geom != geom.get()) {
@@ -1661,8 +1713,7 @@ void Appearance::drawGL(Geometry3D& g)
   if(!geom) return;
   if(!app) {
     app = make_shared<GLDraw::GeometryAppearance>();
-    app->creaseAngle = DtoR(30.0);
-    app->silhouetteRadius = 0.0025;
+    SetupDefaultAppearance(*app);
   }
   if(app->geom) {
     if(app->geom != geom.get()) {

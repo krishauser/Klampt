@@ -134,7 +134,7 @@ def from_numpy(obj,type='auto',template=None):
                 else:
                     raise ValueError("Can't auto-detect type of irregular list")
         else:
-            assert isinstance(obj,np.ndarray)
+            assert isinstance(obj,np.ndarray),"Can only convert lists, tuples, and arrays from numpy"
             if obj.shape == (3,3):
                 type = 'Matrix3'
             elif obj.shape == (4,4):
@@ -150,7 +150,7 @@ def from_numpy(obj,type='auto',template=None):
     elif type == 'Rotation' or type == 'Matrix3':
         return so3.from_matrix(obj)
     elif type == 'Trajectory':
-        assert len(obj)==2
+        assert len(obj)==2,"Trajectory format is (times,milestones)"
         times = obj[0].tolist()
         milestones = obj[1].tolist()
         if template is not None:
@@ -167,8 +167,8 @@ def from_numpy(obj,type='auto',template=None):
         return res
     elif type == 'PointCloud':
         from klampt import PointCloud
-        assert len(obj.shape) == 2
-        assert obj.shape[1] >= 3
+        assert len(obj.shape) == 2,"PointCloud array must be a 2D array"
+        assert obj.shape[1] >= 3,"PointCloud array must have at least 3 values"
         points = obj[:,:3]
         properties = obj[:,3:]
         res = PointCloud()
@@ -186,8 +186,8 @@ def from_numpy(obj,type='auto',template=None):
         return res
     elif type == 'VolumeGrid':
         from klampt import VolumeGrid
-        assert len(obj) == 0
-        assert len(obj[2].shape) == 3
+        assert len(obj) == 3,"VolumeGrid format is (bmin,bmax,values)"
+        assert len(obj[2].shape) == 3,"VolumeGrid values must be a 3D array"
         bmin = obj[0]
         bmax = obj[1]
         values = obj[2]
@@ -207,7 +207,7 @@ def from_numpy(obj,type='auto',template=None):
     elif type == 'Group':
         from klampt import Geometry3D
         res = Geometry3D()
-        assert isinstance(obj,(list,tuple))
+        assert isinstance(obj,(list,tuple)),"Group format is a list or tuple of Geometry3D's"
         for i in range(len(obj)):
             res.setElement(i,from_numpy(obj[i],'Geometry3D'))
         return res
