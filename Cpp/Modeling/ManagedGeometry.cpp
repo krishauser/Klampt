@@ -7,6 +7,7 @@
 using namespace Math3D;
 using namespace std;
 
+//Turn this on to debug geometry caching
 #define CACHE_DEBUG 0
 
 //defined in XmlWorld.cpp
