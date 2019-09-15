@@ -446,7 +446,7 @@ void ManagedGeometry::DrawGLOpaque(bool opaque)
   //Assert(appearance->geom == geometry.get());
   if(appearance->geom == NULL)
     appearance->Set(*geometry);
-  GLDraw::GeometryAppearance::Element e = (opaque ? GLDraw::GeometryAppearance::OPAQUE : GLDraw::GeometryAppearance::TRANSPARENT);
+  GLDraw::GeometryAppearance::Element e = (opaque ? GLDraw::GeometryAppearance::ALL_OPAQUE : GLDraw::GeometryAppearance::ALL_TRANSPARENT);
   appearance->DrawGL(e);
 }
 
