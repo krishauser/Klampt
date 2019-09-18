@@ -865,7 +865,9 @@ def setAttribute(name,attr,value):
     - 'length': the length of axes in RigidTransform
     - 'width': the width of axes and trajectory curves
     - 'duration': the duration of a plot
-    - 'endeffectors': for a robot Trajectory, the list of end effectors to plot (default the last link).
+    - 'pointSize': for a trajectory, the size of points (default None, set to 0 to disable drawing points)
+    - 'pointColor': for a trajectory, the size of points (default None)
+    - 'endeffectors': for a RobotTrajectory, the list of end effectors to plot (default the last link).
     - 'maxConfigs': for a Configs resource, the maximum number of drawn configurations (default 10)
     - 'fancy': for RigidTransform objects, whether the axes are drawn with boxes or lines (default False)
     - 'type': for ambiguous items, like a 3-item list when the robot has 3 links, specifies the type to be
@@ -1551,14 +1553,22 @@ class VisPlot:
             self.outfile.write(' '.join([str(v) for v in vals]))
             self.outfile.write('\n')
 
-def drawTrajectory(traj,width,color):
-    """Draws a trajectory of points or transforms"""
+def drawTrajectory(traj,width,color,pointSize=None,pointColor=None):
+    """Draws a trajectory of points or transforms.
+
+    By default draws points along the trajectory.  To turn this off, set 
+    pointSize = 0.
+    """
+    if pointSize is None:
+        pointSize = width+2
+    if pointColor is None:
+        pointColor = (color[0]*0.75,color[1]*0.75,color[2]*0.75,color[3])
     if isinstance(traj,list):
         #R3 trajectory
         glDisable(GL_LIGHTING)
         glColor4f(*color)
         if len(traj) == 1:
-            glPointSize(width)
+            glPointSize(max(width,pointSize))
             glBegin(GL_POINTS)
             glVertex3fv(traj[0])
             glEnd()
@@ -1569,26 +1579,27 @@ def drawTrajectory(traj,width,color):
                 glVertex3fv(p)
             glEnd()
             glLineWidth(1.0)
-            glColor4f(color[0]*0.75,color[1]*0.75,color[2]*0.75,color[3])
-            glPointSize(width+2)
-            glBegin(GL_POINTS)
-            for p in traj:
-              glVertex3fv(p)
-            glEnd()
+            if pointSize > 0:
+                glColor4f(*pointColor)
+                glPointSize(pointSize)
+                glBegin(GL_POINTS)
+                for p in traj:
+                  glVertex3fv(p)
+                glEnd()
     elif isinstance(traj,SE3Trajectory):
         pointTraj = []
         for m in traj.milestones:
             pointTraj.append(m[9:])
-        drawTrajectory(pointTraj,width,color)
+        drawTrajectory(pointTraj,width,color,pointSize,pointColor)
     else:
         if len(traj.milestones[0]) == 3:
-            drawTrajectory(traj.milestones,width,color)
+            drawTrajectory(traj.milestones,width,color,pointSize,pointColor)
         elif len(traj.milestones[0]) == 2:
             #R2 trajectory
-            drawTrajectory([v + [0.0] for v in traj.milestones],width,color)
+            drawTrajectory([v + [0.0] for v in traj.milestones],width,color,pointSize,pointColor)
 
 
-def drawRobotTrajectory(traj,robot,ees,width=2,color=[1,0.5,0,1]):
+def drawRobotTrajectory(traj,robot,ees,width=2,color=(1,0.5,0,1),pointSize=None,pointColor=None):
     """Draws trajectories for the robot's end effectors.  Note: no additional discretization is performed,
     only the end effector points at the trajectory's milestones are shown.  If you want more accurate trajectories,
     first call traj.discretize(eps)."""
@@ -1604,7 +1615,7 @@ def drawRobotTrajectory(traj,robot,ees,width=2,color=[1,0.5,0,1]):
         for ee,eetraj in zip(ees,pointTrajectories):
             eetraj.append(robot.link(ee).getTransform()[1])
     for ptraj in pointTrajectories:
-        drawTrajectory(ptraj,width,color)
+        drawTrajectory(ptraj,width,color,pointSize,pointColor)
 
 
 class _CascadingDict:
@@ -1680,15 +1691,15 @@ class _CascadingDict:
         return item in self.parent
 
 _default_str_attributes = {'color':[0,0,0,1], 'position':None, 'size':12 }
-_default_Trajectory_attributes = { 'robot':0, "width":3, "color":(1,0.5,0,1),  }
-_default_RobotTrajectory_attributes = { 'robot':0, "width":3, "color":(1,0.5,0,1), "endeffectors":[-1]}
+_default_Trajectory_attributes = { 'robot':0, "width":3, "color":(1,0.5,0,1), "pointSize":None, "pointColor":None }
+_default_RobotTrajectory_attributes = { 'robot':0, "width":3, "color":(1,0.5,0,1), "pointSize":None, "pointColor":None , "endeffectors":[-1]}
 _default_VisPlot_attributes = {'compress':_defaultCompressThreshold, 'duration':5., 'position':None, 'range':(None,None), 'size':(200,150), 'hide_label':True}
 _default_Point_attributes = { "size":5.0, "color":(0,0,0,1) }
 _default_Direction_attributes = { "length":0.15, "color":[0,1,1,1] }
 _default_Frame_attributes = { "length":0.1, "width":0.01 }
 _default_ContactPoint_attributes = { "size":5.0, "length":0.05 }
 _default_IKObjective_attributes = { "size":5.0, "color":(0,0,0,1), "length":0.1, "width": 0.01, "axis_color":[0.5,0,0.5,1], "axis_width":3.0, "axis_length":0.1 }
-_default_Geometry_attributes = { "size":None, "color":(0.5,0.5,0.5,1) }
+_default_Geometry_attributes = { "size":None, "color":None }
 _default_RigidTransform_attributes = { "fancy":False, "length":0.1, "width":0.01 }
 
 def _default_attributes(item,type=None):
@@ -2049,11 +2060,13 @@ class VisAppearance:
                     pointTrajectories = []
                     width = self.attributes["width"]
                     color = self.attributes["color"]
+                    pointSize = self.attributes["pointSize"]
+                    pointColor = self.attributes["pointColor"]
                     if isinstance(item,RobotTrajectory) or treatAsRobotTrajectory:
                         ees = self.attributes.get("endeffectors",[-1])
-                        drawRobotTrajectory(item,robot,ees,width,color)                        
+                        drawRobotTrajectory(item,robot,ees,width,color,pointSize,pointColor) 
                     else:
-                        drawTrajectory(item,width,color)
+                        drawTrajectory(item,width,color,pointSize,pointColor)
                 self.displayCache[0].draw(drawRaw)
                 if name is not None:
                     self.drawText(name,centroid)
@@ -2063,7 +2076,7 @@ class VisAppearance:
             robot = (world.robot(self.attributes["robot"]) if world is not None and world.numRobots() > 0 else None)
             if robot is not None and item.numSections() > 0:
                 if len(item.sections[0].configs[0]) == robot.numLinks():
-                    ees = self.attributes["endeffectors"]
+                    ees = self.attributes.get("endeffectors",[-1])
                     if len(ees) > 0:
                         for i,ee in enumerate(ees):
                             if ee < 0: ees[i] = robot.numLinks()-1
@@ -2071,11 +2084,13 @@ class VisAppearance:
                         centroid = vectorops.div(vectorops.add(*[robot.link(ee).getTransform()[1] for ee in ees]),len(ees))
                     width = self.attributes["width"]
                     color = self.attributes["color"]
+                    pointSize = self.attributes["pointSize"]
+                    pointColor = self.attributes["pointColor"]
                     color2 = [1-c for c in color]
                     color2[3] = color[3]
                     def drawRaw():
                         for i,s in enumerate(item.sections):
-                            drawRobotTrajectory(s.configs,robot,ees,width,(color if i%2 == 0 else color2))
+                            drawRobotTrajectory(s.configs,robot,ees,width,(color if i%2 == 0 else color2),pointSize,pointColor)
                     #draw it!
                     self.displayCache[0].draw(drawRaw)
                     if name is not None:
@@ -2322,10 +2337,13 @@ class VisAppearance:
                     if name is not None:
                         self.drawText(name,wp)
         elif isinstance(item,(GeometricPrimitive,TriangleMesh,PointCloud,Geometry3D)):
+            #this can be tricky if the mesh or point cloud has colors
             if not hasattr(self,'appearance'):
                 self.appearance = Appearance()
+                self.appearance.setColor(0.5,0.5,0.5,1)
             c = self.attributes["color"]
-            self.appearance.setColor(*c)
+            if c is not None:
+                self.appearance.setColor(*c)
             s = self.attributes["size"]
             if s:
                 self.appearance.setPointSize(s)
