@@ -393,8 +393,9 @@ void GetPointCloud(const Geometry::AnyCollisionGeometry3D& geom,PointCloud& pc)
   for(size_t i=0;i<gpc.points.size();i++) 
     gpc.points[i].get(pc.vertices[i*3],pc.vertices[i*3+1],pc.vertices[i*3+2]);
   if(!gpc.propertyNames.empty()) {
-    for(size_t i=0;i<gpc.points.size();i++)
+    for(size_t i=0;i<gpc.points.size();i++) {
       gpc.properties[i].getCopy(&pc.properties[i*gpc.propertyNames.size()]);
+    }
   }
   pc.settings = gpc.settings;
 }
@@ -995,15 +996,17 @@ void Geometry3D::transform(const double R[9],const double t[3])
   RigidTransform T;
   T.R.set(R);
   T.t.set(t);
-  geom->Transform(T);
-  geom->ClearCollisionData();
-
-  if(!isStandalone()) {
+  if(isStandalone()) {
+    geom->Transform(T);
+    geom->ClearCollisionData();
+  }
+  else {
     //update the display list / cache
     RobotWorld& world=*worlds[this->world]->world;
     ManagedGeometry* mgeom = &GetManagedGeometry(world,id);
-    mgeom->OnGeometryChange();
-    mgeom->RemoveFromCache();
+    mgeom->TransformGeometry(Matrix4(T));
+    //mgeom->OnGeometryChange();
+    //mgeom->RemoveFromCache();
   }
 }
 
@@ -1435,7 +1438,6 @@ void Appearance::setColor(float r,float g,float b,float a)
       geom.SetUniqueAppearance();
       app = geom.Appearance();
     }
-
   }
   app->SetColor(r,g,b,a);
 }
