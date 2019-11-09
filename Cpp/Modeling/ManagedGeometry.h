@@ -10,24 +10,39 @@
 class GeometryManager;
 
 /** @ingroup Modeling
- * @brief A "smart" geometry loading class that caches previous geometries,
- * and does not re-load or re-initialize existing collision detection data
- * structures if the item has already been loaded.
+ * @brief A "smart" geometry loading class that caches previous geometries and 
+ * maintains shared collision detection / appearance information.  This greatly 
+ * speeds up loading time if multiple instances of the same geometry are loaded
+ * from disk, because multiple ManagedGeometry objects can share the same
+ * underlying data.  It can also read from dynamic geometry sources (ROS point
+ * cloud topics, for now).
  *
- * Note: the standard Load function will load a file if it hasn't been loaded
- * before, or if it has, it will copy the existing data structures from
- * a prior loaded value.  If the collision data structure of the prior
- * geometry haven't been created, they will be created and copied to the new
- * geometry.
+ * Shared geometries: The Load function will load a file normally if it hasn't
+ * been loaded before. But if it has, this geometry will simply refer to the
+ * existing geometry, collision detection data structures, and Appearance
+ * information.  This leads to major speed ups in running time and lower memory
+ * consumption when multiple objects of the same geometry are loaded.
  *
- * Note: if you wish to transform a geometry by a non-rigid transformation, 
- * you will need to call RemoveFromCache.  Otherwise, all subsequent
- * Load calls will load the transformed geometry.  Here, the TransformGeometry
- * method of this class does this for you.
+ * Caching can have some weird effects. If you change the geometry / appearance
+ * of a shared ManagedGeometry, then all of the other ManagedGeometrys' will
+ * receive the same changes. To avoid this, you can either
+ * 1) Call LoadNoCache or RemoveFromCache before the subsequent geometry is loaded, 
+ *    which avoids sharing geometries in the first place.
+ * 2) Call SetUnique after loading, which entirely breaks the connection between 
+ *    the object and the other shared geometries.
+ * 3) Call SetUniqueAppearance, which breaks the connection between the object's
+ *    appearance and the appearances of other shared geometries.  Note that this
+ *    does not break the connection between geometries.
  *
- * Note: geometries are not shared, but rather cached-and-copied.  Appearances
- * on the other hand are by default shared. To make an object have its own
- * custom appearance, call SetUniqueAppearance().
+ * Transforming geometries:
+ * - The TransformGeometry method automatically does the intended thing, which is
+ *   to break the connection between this geometry and shared geometries. Moreover,
+ *   if a prior geometry was transformed by the same amount, this geometry will be
+ *   shared with the prior call.
+ *   a.Load("file.obj");
+ *   b.Load("file.obj");   //b is now shared with a
+ *   a.TransformGeometry(T);  //this breaks the connection between a and b
+ *   b.TransformGeometry(T);  //now a and b have shared geometries again.  But, their appearances are not shared.
  *
  * Note: the Load / LoadNoCache functions can also accept strings of the form
  * "ros://[ROS_TOPIC]" or "ros:PointCloud2//[ROS_TOPIC]" to load dynamic 
