@@ -301,6 +301,8 @@ void ManagedGeometry::RemoveFromCache()
   }
   LOG4CXX_INFO(KrisLibrary::logger(),"ManagedGeometry::RemoveFromCache(): warning, item "<<cacheKey<<" pointer was not previously cached?");
   cacheKey.clear();
+
+  SetUniqueAppearance();
 }
 
 void ManagedGeometry::SetUnique()
@@ -344,6 +346,8 @@ void ManagedGeometry::TransformGeometry(const Math3D::Matrix4& xform)
         RemoveFromCache();
         geometry = make_shared<Geometry::AnyCollisionGeometry3D>(*prev->geometry);
         //geometry = prev->geometry;
+        if(appearance.use_count() > 1)   //don't share with prior transformed geometry or the un-transformed geometry
+          appearance = make_shared<GLDraw::GeometryAppearance>(*appearance);
         appearance->geom = geometry.get();
         cacheKey = newCacheKey;
 #if CACHE_DEBUG
@@ -363,7 +367,6 @@ void ManagedGeometry::TransformGeometry(const Math3D::Matrix4& xform)
     RemoveFromCache();
     geometry->Transform(xform);
     geometry->ClearCollisionData();
-    SetUniqueAppearance();
     if(!newCacheKey.empty()) {
       cacheKey = newCacheKey;
       manager.cache[newCacheKey].geoms.push_back(this);
