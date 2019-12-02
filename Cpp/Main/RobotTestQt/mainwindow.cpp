@@ -107,13 +107,15 @@ void MainWindow::UpdateDriverParameters(){
     bool oldState = ui->spn_driver->blockSignals(true);
 #define NUM(x) QString::number(x)
   Robot* rob = world.robots[0].get();
-  RobotJointDriver dr=rob->drivers[gui->driver_index];
-  QString driver_info=QString("V [%1 %2], T [%3,%4], PID %5,%6,%7").arg( \
-        NUM(dr.vmin),NUM(dr.vmax),NUM(dr.tmin),NUM(dr.tmax),NUM(dr.servoP),NUM(dr.servoI),NUM(dr.servoD));
-  ui->lbl_driver_info->setText(driver_info);
-  Vector2 limits = rob->GetDriverLimits(gui->driver_index);
-  ui->spn_driver->setMinimum(limits.x);
-  ui->spn_driver->setMaximum(limits.y);
+  if(gui->driver_index >=0) {
+    RobotJointDriver dr=rob->drivers[gui->driver_index];
+    QString driver_info=QString("V [%1 %2], T [%3,%4], PID %5,%6,%7").arg( \
+          NUM(dr.vmin),NUM(dr.vmax),NUM(dr.tmin),NUM(dr.tmax),NUM(dr.servoP),NUM(dr.servoI),NUM(dr.servoD));
+    ui->lbl_driver_info->setText(driver_info);
+    Vector2 limits = rob->GetDriverLimits(gui->driver_index);
+    ui->spn_driver->setMinimum(limits.x);
+    ui->spn_driver->setMaximum(limits.y);
+  }
 #undef NUM
      if(IsInf(ui->spn_driver->minimum()) || IsInf(ui->spn_driver->minimum()))
          ui->sld_driver->setEnabled(false);
@@ -128,16 +130,20 @@ void MainWindow::SetLink(int index){
 void MainWindow::UpdateLinkValue(){
     Robot* rob = world.robots[0].get();
     bool oldState = ui->spn_link->blockSignals(true);
-    ui->spn_link->setValue(rob->q[gui->link_index]);
-    UpdateLinkSlider(rob->q[gui->link_index]);
+    if(gui->link_index >= 0) {
+      ui->spn_link->setValue(rob->q[gui->link_index]);
+      UpdateLinkSlider(rob->q[gui->link_index]);
+    }
     ui->spn_link->blockSignals(oldState);
 }
 
 void MainWindow::UpdateDriverValue(){
     Robot* rob = world.robots[0].get();
     bool oldState = ui->spn_driver->blockSignals(true);
-    ui->spn_driver->setValue(rob->GetDriverValue(gui->driver_index));
-    UpdateDriverSlider(rob->GetDriverValue(gui->driver_index));
+    if(gui->driver_index >= 0) {
+      ui->spn_driver->setValue(rob->GetDriverValue(gui->driver_index));
+      UpdateDriverSlider(rob->GetDriverValue(gui->driver_index));
+    }
     ui->spn_driver->blockSignals((oldState));
 }
 
@@ -160,13 +166,15 @@ void MainWindow::UpdateDriverSlider(double value){
 void MainWindow::UpdateLinkParameters(){
 #define NUM(x) QString::number(x)
   Robot* rob = world.robots[0].get();
-  QString link_info=QString("V [%1 %2], A [%3,%4], T [%5,%6]").arg(
-	NUM(rob->velMin(gui->link_index)),NUM(rob->velMax(gui->link_index)),
-	NUM(-rob->accMax(gui->link_index)),NUM(rob->accMax(gui->link_index)),
-	NUM(-rob->torqueMax(gui->link_index)),NUM(rob->torqueMax(gui->link_index)));
-  ui->lbl_link_info->setText(link_info);
-  ui->spn_link->setMinimum(rob->qMin(gui->link_index));
-  ui->spn_link->setMaximum(rob->qMax(gui->link_index));
+  if(gui->link_index >= 0) {
+    QString link_info=QString("V [%1 %2], A [%3,%4], T [%5,%6]").arg(
+  	NUM(rob->velMin(gui->link_index)),NUM(rob->velMax(gui->link_index)),
+  	NUM(-rob->accMax(gui->link_index)),NUM(rob->accMax(gui->link_index)),
+  	NUM(-rob->torqueMax(gui->link_index)),NUM(rob->torqueMax(gui->link_index)));
+    ui->lbl_link_info->setText(link_info);
+    ui->spn_link->setMinimum(rob->qMin(gui->link_index));
+    ui->spn_link->setMaximum(rob->qMax(gui->link_index));
+  }
   if(IsInf(ui->spn_link->minimum()) || IsInf(ui->spn_link->minimum()))
       ui->sld_link->setEnabled(false);
   else ui->sld_link->setEnabled(true);
