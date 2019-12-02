@@ -11,6 +11,8 @@ To make any use of this extension, you will need to install:
 - [Jupyter notebook](http://jupyter.org) 
 - Klamp't 0.8.x Python API: try `pip install klampt`, or follow the [installation instructions here](http://motion.pratt.duke.edu/klampt/pyklampt_docs/Manual-Installation.html).
 
+### Linux / OSX
+
 To install the extension, you can simply enter
 
 `sudo make install`
@@ -21,6 +23,23 @@ For more control, you can use the following Makefile targets:
 
 - `install-user`: Installs this in the Jupyter user prefix
 - `install-wurlitzer`: The wurlitzer library for capturing C++ output in Python.  This is not strictly needed, but is nice to have
+
+### Windows
+
+To install for all users, type the following into a command prompt:
+
+```
+jupyter nbextension install klampt/
+jupyter nbextension enable klampt/main
+jupyter nbextension enable klampt/three.min
+jupyter nbextension enable klampt/KlamptFrontend
+```
+
+To install for just a single user, append `--user` to the first line, as follows:
+
+```
+jupyter nbextension install klampt/ --user
+```
 
 ## Usage
 
@@ -37,7 +56,7 @@ And then launch Jupyter:
 
 The Jupyter frontend widget can be created by a `KlamptWidget`, which is defined in the `klampt.vis.ipython` module. The module also contains useful helper widgets for editing robot configurations and points.
 
-[API documentation can be found found here](http://motion.pratt.duke.edu/klampt/pyklampt_docs/klampt.vis.ipython.html).
+[API documentation can be found found here](http://motion.cs.illinois.edu/klampt/pyklampt_docs/klampt.vis.ipython.html).
 
 ## Version history
 
@@ -59,6 +78,6 @@ The Jupyter frontend widget can be created by a `KlamptWidget`, which is defined
 
 Author: Kris Hauser
 
-Duke University
+University of Illinois at Urbana-Champaign
 
-kris.hauser@duke.edu
+kkhauser@illinois.edu
