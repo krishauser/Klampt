@@ -47,7 +47,7 @@ TODO
 Robots are loaded from Klamp't-specific .rob files or more widely-used URDF files.  These are simple text files that are editable by hand.
 Although URDF is more commonly used in the robotics field, there are some convenient aspects of .rob files that may be useful. For example, the `mount` command allows robot grippers and other attachments to be added automatically at load-time.  This is annoying to do with URDF, requiring a separate command line step with the xacro tool.
 
-The basic URDF file format does not specify some aspects of Klamp't robots. These can be added under the `<klampt>` XML tag. See the [file format documentation](Manual-FileTypes.md) or the Klampt [import robot tutorial](http://motion.pratt.duke.edu/klampt/tutorial_import_robot.html) for more details.
+The basic URDF file format does not specify some aspects of Klamp't robots. These can be added under the `<klampt>` XML tag. See the [file format documentation](Manual-FileTypes.md) or the Klampt [import robot tutorial](https://github.com/krishauser/Klampt/blob/master/Cpp/docs/Tutorials/Import-and-calibrate-urdf.md) for more details.
 
 For simulation purposes, Klamp't will need some motor parameters to be tweaked (`servoP`, `servoI`, `servoD`, `dryFriction`, `viscousFriction`). This can be done by hand by tuning and &quot;exercising&quot; the robot in simulation. The Driver window in SimTest can be used for this purpose.  An automatic solution is given by the `MotorCalibrate` program, which will optimize the constants to match a dataset of sensed and commanded joint angles that you record while exercising the physical robot.  See [the apps documentation](Manual-Apps#motorcalibrate) for more details.
 

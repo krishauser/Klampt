@@ -211,8 +211,8 @@ for (int i=0;i<world.NumIDs();i++)
     }
   }
 ```
-If you don't want to get mean contact force/torque, there are other methods of WorldSimulator you can use to retrieve other types of feedback. For example, you can get detailed contact point information using the  [ContactFeedbackInfo](http://motion.pratt.duke.edu/klampt/klampt_docs/structContactFeedbackInfo.html)  structure:
+If you don't want to get mean contact force/torque, there are other methods of WorldSimulator you can use to retrieve other types of feedback. For example, you can get detailed contact point information using the  [ContactFeedbackInfo](http://motion.cs.illinois.edu/klampt/klampt_docs/structContactFeedbackInfo.html)  structure:
 ```cpp
 ContactFeedbackInfo* info = sim.GetContactFeedback(i,j); 
 ```
-Please consult the [detailed API documentation for the Simulation module](http://motion.pratt.duke.edu/klampt/klampt_docs/group__Simulation.html) for more information
+Please consult the [detailed API documentation for the Simulation module](http://motion.cs.illinois.edu/klampt/klampt_docs/group__Simulation.html) for more information
