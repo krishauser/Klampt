@@ -59,16 +59,18 @@ devenv %buildfolder%\Klampt.sln /build Release
 devenv %buildfolder%\Klampt.sln /build Release /project PACKAGE
 :: (python doesnt build right here...) if %errorlevel% neq 0 exit /b %errorlevel%
 
+SET errorlevel=0
+
 :: build Klamp't Python bindings
 for %%P in (%PYTHON_32_VERSIONS%) do (
     copy /y %buildfolder%\Python\setup.py Python\
 	cd Python
     %%P setup.py build_ext
-    if %errorlevel% neq 1 exit /b %errorlevel%
+    if %errorlevel% neq 0 exit /b %errorlevel%
     %%P setup.py install
-    if %errorlevel% neq 1 exit /b %errorlevel%
+    if %errorlevel% neq 0 exit /b %errorlevel%
     %%P setup.py bdist_wheel
-    if %errorlevel% neq 1 exit /b %errorlevel%
+    if %errorlevel% neq 0 exit /b %errorlevel%
     cd ..
   )
 
@@ -99,11 +101,11 @@ for %%P in (%PYTHON_64_VERSIONS%) do (
     copy /y %buildfolder%\Python\setup.py Python\
 	cd Python
     %%P setup.py build_ext
-    if %errorlevel% neq 1 exit /b %errorlevel%
+    if %errorlevel% neq 0 exit /b %errorlevel%
     %%P setup.py install
-    if %errorlevel% neq 1 exit /b %errorlevel%
+    if %errorlevel% neq 0 exit /b %errorlevel%
     %%P setup.py bdist_wheel
-    if %errorlevel% neq 1 exit /b %errorlevel%
+    if %errorlevel% neq 0 exit /b %errorlevel%
     cd ..
   )
 
