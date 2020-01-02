@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import os
 import sys
 from klampt import *
@@ -130,9 +129,9 @@ class MyGLViewer(GLSimulationPlugin):
         return GLSimulationPlugin.keyboardfunc(self,c,x,y)
 
 
-if __name__ == "__main__":
+def main():
     print("============================================================")
-    print("simtest.py: Simulates a robot file and Python controller")
+    print(sys.argv[0]+": Simulates a robot file and Python controller")
     if len(sys.argv)<=1:
         print("USAGE: simtest.py [world_file] [controller files (.py)]")
     print("============================================================")
@@ -187,3 +186,6 @@ if __name__ == "__main__":
         vis.kill()
     else:
         vis.run(viewer)
+
+if __name__ == '__main__':
+    main()

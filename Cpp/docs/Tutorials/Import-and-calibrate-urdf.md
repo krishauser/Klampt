@@ -17,7 +17,7 @@ First, download the  [baxter_common](https://github.com/RethinkRobotics/baxter_c
 
 We can try loading this file using:
 ```
-./RobotTest ../baxter_common/baxter_description/urdf/baxter.urdf
+bin/RobotTest ../baxter_common/baxter_description/urdf/baxter.urdf
 ```
 
 ![Image](images/import1.jpg)
@@ -126,6 +126,28 @@ We can start to eliminate groups of self-collision checks using code like the fo
     <noselfcollision group1="right_upper_shoulder right_lower_shoulder" group2="left_upper_elbow"/>
   </klampt>
 ```
+
+### Mounting accessories (grippers, cameras)
+
+Klamp't lets you mount items onto a robot directly in the URDF, without using Xacro, which is really convenient for playing around with grippers, cameras, and other accessories that change a lot during a robot's lifetime.  To use it, add the `<mount link="X" file="X" [transform="X"] [as="X"]/>` tag.  As an example, assuming you have downloaded the Klampt-examples github repository, you can try this:
+
+```
+  <klampt package_root="../.." flip_yz="1" use_vis_geom="1"  >
+    <mount link="left_gripper_base" file="../../../Klampt-examples/data/robots/rethink_electric_gripper.rob" transform="0 -1 0   1 0 0   0 0 1    0 0 0" as="left_gripper"/>
+    <mount link="right_gripper_base" file="../../../Klampt-examples/data/robots/rethink_electric_gripper.rob" transform="0 -1 0   1 0 0   0 0 1    0 0 0" as="right_gripper"/>
+  </klampt>
+```
+
+Hooray, we have grippers!
+
+![Image](images/import_baxter_grippers.png)
+
+Some tips:
+- As usual, link strings can either be link names or integer indices.
+- Files can be geometry files (OFF, OBJ, STL, etc) or other robots (.urdf or .rob, note lower case).
+- The transform string is of the form "r11 r21 r31 r12 r22 r32 r13 r23 r33 t1 t2 t3" giving a 3x3 rotation matrix R and 3D translation vector t of the mounted object relative to the link.  The rotation matrix is given in column-major order.
+
+
 ## Calibration
 Let's place our Baxter robot on a floor so that it stands up rather than falling. First, let's make simulation faster by editing the URDF file so that use_vis_geom="0". Next, create a new XML file called baxter_plane.xml with the following lines:
 ```
@@ -142,7 +164,7 @@ Turn off the Poser checkbox and check the Desired checkbox. Run the simulation, 
 
 ### Manual tuning
 
-Manual tuning can be done by changing these constants by hand under the klampt URDF tag, with lines of the form <link name="X" servoP="X" servoD="X" servoI="X" dryFriction="X" viscousFriction="X" >
+Manual tuning can be done by changing these constants by hand under the klampt URDF tag, with lines of the form `<link name="X" servoP="X" servoD="X" servoI="X" dryFriction="X" viscousFriction="X" >`
 
 ### Automatic tuning using MotorCalibrate
 
@@ -150,13 +172,13 @@ An easier method is to use the MotorCalibrate program. This program gives the ab
 
 First, examine the motions in Klampt-examples/Cpp/MotorCalibrateBaxter. Run:
 ```
-./RobotPose ../baxter_common/baxter_description/urdf/baxter.urdf Examples/MotorCalibrateBaxter/*.path
+bin/RobotPose ../baxter_common/baxter_description/urdf/baxter.urdf Examples/MotorCalibrateBaxter/*.path
 ```
 And observe the two given paths, one a commanded trajectory(baxter-ref) and the other a sensed trajectory (baxter-sensed). The calibration routine tunes the motor parameters so that when the commanded trajectory is sent to the motors, the executed trajectory will match as close as possible to the sensed trajectory.
 
 Let's start calibrating. Run:
 ```
-./MotorCalibrate
+bin/MotorCalibrate
 ```
 and you'll see the following dialog box.
 

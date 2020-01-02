@@ -229,7 +229,7 @@ bool Robot::LoadRob(const char* fn) {
   vector<Real> geommargin;
   bool autoMass = false;
   Real autoTorque = 0;
-  vector<int> mountLinks;
+  vector<string> mountLinks;
   vector<string> mountFiles;
   vector<RigidTransform> mountT;
   vector<string> mountNames;
@@ -600,12 +600,16 @@ bool Robot::LoadRob(const char* fn) {
         return false;
       }
     } else if (name == "mount") {
-      ss >> itemp;
+      //ss >> itemp;
+      if (!SafeInputString(ss, stemp)) {
+        LOG4CXX_ERROR(GET_LOGGER(RobParser),"   Error reading mount link on line "<<lineno);
+        return false;
+      }
+      mountLinks.push_back(stemp);
       if (!SafeInputString(ss, stemp)) {
         LOG4CXX_ERROR(GET_LOGGER(RobParser),"   Error reading mount file name on line "<<lineno);
         return false;
       }
-      mountLinks.push_back(itemp);
       mountFiles.push_back(stemp);
       RigidTransform Ttemp;
       Ttemp.setIdentity();
@@ -1127,6 +1131,15 @@ bool Robot::LoadRob(const char* fn) {
 
 
   //first mount the geometries, they affect whether a link is included in self collision testing
+  vector<int> mountLinkIndices(mountLinks.size());
+  for (size_t i = 0; i < mountLinks.size(); i++) {
+    int linkIndex = LinkIndex(mountLinks[i].c_str());
+    if(linkIndex < 0 || linkIndex >= (int)links.size()) {
+      LOG4CXX_ERROR(GET_LOGGER(RobParser),"   Invalid mount link "<<mountLinks[i]<<", out of range");
+      return false;
+    }
+    mountLinkIndices[i] = linkIndex;
+  }
   for (size_t i = 0; i < mountLinks.size(); i++) {
     const char* ext = FileExtension(mountFiles[i].c_str());
     if(ext && (0==strcmp(ext,"rob") || 0==strcmp(ext,"urdf"))) {
@@ -1141,7 +1154,7 @@ bool Robot::LoadRob(const char* fn) {
         LOG4CXX_ERROR(GET_LOGGER(RobParser),"   Error loading mount geometry file " << fn);
         return false;
       }
-      Mount(mountLinks[i], *loader, mountT[i]);
+      Mount(mountLinkIndices[i], *loader, mountT[i]);
     }
   }
 
@@ -1227,7 +1240,7 @@ bool Robot::LoadRob(const char* fn) {
         return false;
       }
       const char* prefix = (mountNames[i].empty() ? NULL : mountNames[i].c_str());
-      Mount(mountLinks[i], subchain, mountT[i], prefix);
+      Mount(mountLinkIndices[i], subchain, mountT[i], prefix);
     }
   }
   if (!CheckValid())
@@ -2427,12 +2440,12 @@ bool Robot::LoadURDF(const char* fn)
   //Get content from the Willow Garage parser
   std::shared_ptr<urdf::ModelInterface> parser = urdf::parseURDF(localfile);
   if(!parser) {
-        LOG4CXX_ERROR(GET_LOGGER(URDFParser),"Robot::LoadURDF: error parsing XML");
+    LOG4CXX_ERROR(GET_LOGGER(URDFParser),"Robot::LoadURDF: error parsing XML");
     return false;
   }
   std::shared_ptr<urdf::Link> root_link = parser->root_link_;
   if (!root_link) {
-        LOG4CXX_ERROR(GET_LOGGER(URDFParser),"Robot::LoadURDF: Root link is NULL");
+    LOG4CXX_ERROR(GET_LOGGER(URDFParser),"Robot::LoadURDF: Root link is NULL");
     return false;
   }
 
@@ -2467,6 +2480,8 @@ bool Robot::LoadURDF(const char* fn)
   //    - <selfcollision pairs:"a1 b1 ... ak bk" >
   //      sets collision pairs for which self collision should be
   //      tested
+  //    - <mount link:{int or str} file:string transform:{12 floats giving rotation matrix} [as:string] >
+  //      mounts a geometry or another URDF / .rob file to a link.
   double default_mass = 0.0001;
   Matrix3 default_inertia; default_inertia.setIdentity(); default_inertia *= 1e-8;  
   double default_acc_max = 100;
@@ -2476,6 +2491,10 @@ bool Robot::LoadURDF(const char* fn)
   vector<pair<string, string> > noSelfCollision;
   map<string,bool> virtualLinks;
   map<string,Real> kP,kI,kD,dryFriction,viscousFriction,customAccMax;
+  vector<string> mountLinks;
+  vector<string> mountFiles;
+  vector<RigidTransform> mountT;
+  vector<string> mountNames;
   TiXmlDocument xml_doc;
   bool loaded=xml_doc.LoadFile(fn);
   if(!loaded) {
@@ -2558,21 +2577,21 @@ bool Robot::LoadURDF(const char* fn)
             LOG4CXX_ERROR(GET_LOGGER(URDFParser),"     Unable to read "<<prop<<" property from file "<<fn);
             return false;
           }
+        }
+        else {
+          LOG4CXX_ERROR(GET_LOGGER(URDFParser),"<klampt> XML tag \""<<prop<<"\" needs to be an external XML file");
+          properties[prop] = value;
+        }
       }
       else {
-        LOG4CXX_ERROR(GET_LOGGER(URDFParser),"<klampt> XML tag \""<<prop<<"\" needs to be an external XML file");
-        properties[prop] = value;
+        //or <sensors> / <controller> tags can be placed under the <klampt> tag
+        TiXmlElement* c = klampt_xml->FirstChildElement(prop);
+        if(c != NULL) {
+          stringstream ss;
+          ss<<*c;
+          properties[prop] = ss.str();
+        } 
       }
-    }
-    else {
-      //or <sensors> / <controller> tags can be placed under the <klampt> tag
-      TiXmlElement* c = klampt_xml->FirstChildElement(prop);
-      if(c != NULL) {
-        stringstream ss;
-        ss<<*c;
-        properties[prop] = ss.str();
-      } 
-    }
     }
     TiXmlElement* e = klampt_xml->FirstChildElement("link");
     while(e != NULL) {
@@ -2607,13 +2626,14 @@ bool Robot::LoadURDF(const char* fn)
       }
       e = e->NextSiblingElement("link");
     }
+
     e = klampt_xml->FirstChildElement("selfcollision");
     while(e != NULL) {
       if(e->Attribute("pairs")!=NULL) {
         stringstream ss(e->Attribute("pairs"));
         pair<string, string> ptemp;
         while (SafeInputString(ss,ptemp.first) && SafeInputString(ss,ptemp.second))
-    selfCollision.push_back(ptemp);
+          selfCollision.push_back(ptemp);
       }
       else if(e->Attribute("group1")!=NULL && e->Attribute("group2")!=NULL) {
         vector<string> group1,group2;
@@ -2621,12 +2641,12 @@ bool Robot::LoadURDF(const char* fn)
         stringstream ss1(e->Attribute("group1"));
         stringstream ss2(e->Attribute("group2"));
         while (SafeInputString(ss1,stemp))
-    group1.push_back(stemp);
+          group1.push_back(stemp);
         while (SafeInputString(ss2,stemp))
-    group2.push_back(stemp);
+          group2.push_back(stemp);
         for(size_t i=0;i<group1.size();i++) 
-    for(size_t j=0;j<group2.size();j++) 
-      selfCollision.push_back(pair<string,string>(group1[i],group2[j]));
+          for(size_t j=0;j<group2.size();j++) 
+            selfCollision.push_back(pair<string,string>(group1[i],group2[j]));
       }
       else {
         LOG4CXX_ERROR(GET_LOGGER(URDFParser),"Error, robot/klampt/selfcollision does not contain pairs, or group1 and group2 attributes");
@@ -2641,7 +2661,7 @@ bool Robot::LoadURDF(const char* fn)
         stringstream ss(e->Attribute("pairs"));
         pair<string, string> ptemp;
         while (SafeInputString(ss,ptemp.first) && SafeInputString(ss,ptemp.second))
-    noSelfCollision.push_back(ptemp);
+          noSelfCollision.push_back(ptemp);
       }
       else if(e->Attribute("group1")!=NULL && e->Attribute("group2")!=NULL) {
         vector<string> group1,group2;
@@ -2661,6 +2681,41 @@ bool Robot::LoadURDF(const char* fn)
       }       
 
       e = e->NextSiblingElement("noselfcollision");
+    }
+
+    e = klampt_xml->FirstChildElement("mount");
+    while(e != NULL) {
+      if(e->Attribute("link")!=NULL) {
+        string link = e->Attribute("link");
+        string prefix = "";
+        if(e->Attribute("file")==NULL) {
+          LOG4CXX_ERROR(GET_LOGGER(URDFParser),"Error, robot/klampt/mount does not contain a 'file' attribute");
+          return false;
+        }
+        string file=e->Attribute("file");
+        RigidTransform T;
+        T.setIdentity();
+        if(e->Attribute("transform")) {
+          stringstream ss(e->Attribute("transform"));
+          ss>>T;
+          if(!ss) {
+            LOG4CXX_ERROR(GET_LOGGER(URDFParser),"Error, robot/klampt/mount has an invalid 'transform' attribute");
+            return false;
+          }
+        }
+        if(e->Attribute("prefix")) {
+          prefix = e->Attribute("prefix");
+        }
+        mountLinks.push_back(link);
+        mountFiles.push_back(file);
+        mountT.push_back(T);
+        mountNames.push_back(prefix);
+      }
+      else {
+        LOG4CXX_ERROR(GET_LOGGER(URDFParser),"Error, robot/klampt/mount does not contain a 'link' attribute'");
+        return false;
+      }
+      e = e->NextSiblingElement("mount");
     }
   }
 
@@ -3043,8 +3098,130 @@ bool Robot::LoadURDF(const char* fn)
     }
   }
 
+
+  //first mount the geometries, they affect whether a link is included in self collision testing
+  vector<int> mountLinkIndices(mountLinks.size());
+  for (size_t i = 0; i < mountLinks.size(); i++) {
+    int linkIndex = LinkIndex(mountLinks[i].c_str());
+    if(linkIndex < 0) {
+      LOG4CXX_ERROR(GET_LOGGER(URDFParser),"   Invalid mount link "<<mountLinks[i]);
+      return false;
+    }
+    mountLinkIndices[i] = linkIndex;
+  }
+  for (size_t i = 0; i < mountLinks.size(); i++) {
+    const char* ext = FileExtension(mountFiles[i].c_str());
+    if(ext && (0==strcmp(ext,"rob") || 0==strcmp(ext,"urdf"))) {
+      //its a robot, delay til later
+    }
+    else {
+      string fn = ResolveFileReference(path,mountFiles[i]);
+      LOG4CXX_INFO(GET_LOGGER(URDFParser),"   Mounting geometry file " << mountFiles[i]);
+      //mount a triangle mesh on top of another triangle mesh
+      ManagedGeometry loader;
+      if(!loader.Load(fn.c_str())) {
+        LOG4CXX_ERROR(GET_LOGGER(URDFParser),"   Error loading mount geometry file " << fn);
+        return false;
+      }
+      Mount(mountLinkIndices[i], *loader, mountT[i]);
+    }
+  }
+
+  this->UpdateConfig(q);
+
   selfCollisions.resize(links_size, links_size, NULL);
   envCollisions.resize(links_size, NULL);
+
+  //Initialize self collisions -- pre subchain mounting
+  CleanupSelfCollisions();
+  vector<pair<string,string> > residualSelfCollisions,residualNoSelfCollisions;
+  if (selfCollision.empty()) {
+    InitAllSelfCollisions();
+  }
+  else {
+    for (size_t i = 0; i < selfCollision.size(); i++) {
+      int link1,link2;
+      link1 = LinkIndex(selfCollision[i].first.c_str());
+      link2 = LinkIndex(selfCollision[i].second.c_str());
+      if (link1 < 0 || link1 >= (int) links.size() ||
+          link2 < 0 || link2 >= (int) links.size()) {
+        residualSelfCollisions.push_back(selfCollision[i]);
+        continue;
+      }
+      if(link1 > link2) Swap(link1,link2);
+      if(!(link1 < link2)) {
+        LOG4CXX_ERROR(GET_LOGGER(URDFParser),"Robot::LoadURDF(): Invalid self collision pair "<<selfCollision[i].first<<", "<<selfCollision[i].second);
+          return false;
+      }
+      InitSelfCollisionPair(link1,link2);
+    }
+  }
+
+  for (size_t i = 0; i < noSelfCollision.size(); i++) {
+    int link1,link2;
+    link1 = LinkIndex(noSelfCollision[i].first.c_str());
+    link2 = LinkIndex(noSelfCollision[i].second.c_str());
+    if (link1 < 0 || link1 >= (int) links.size() ||
+        link2 < 0 || link2 >= (int) links.size()) {
+      residualNoSelfCollisions.push_back(noSelfCollision[i]);
+      continue;
+    }
+    if(link1 > link2) Swap(link1,link2);
+    if(link1 == link2) continue;
+    SafeDelete(selfCollisions(link1,link2));
+  }
+
+  //do the mounting of subchains
+  for (size_t i = 0; i < mountLinks.size(); i++) {
+    const char* ext = FileExtension(mountFiles[i].c_str());
+    if(ext && (0==strcmp(ext,"rob") || 0==strcmp(ext,"urdf"))) {
+      string fn = ResolveFileReference(path,mountFiles[i]);
+      LOG4CXX_INFO(GET_LOGGER(URDFParser),"   Mounting subchain file " << mountFiles[i]);
+      Robot subchain;
+      if (!subchain.Load(fn.c_str())) {
+        LOG4CXX_ERROR(GET_LOGGER(URDFParser),"   Error reading subchain file " << fn);
+        return false;
+      }
+      const char* prefix = (mountNames[i].empty() ? NULL : mountNames[i].c_str());
+      Mount(mountLinkIndices[i], subchain, mountT[i], prefix);
+    }
+  }
+  if (!CheckValid())
+    return false;
+
+  //after mounting may need to add extra self collisions / no self collisions
+  swap(selfCollision,residualSelfCollisions);
+  swap(noSelfCollision,residualNoSelfCollisions);
+  for (size_t i = 0; i < selfCollision.size(); i++) {
+    int link1,link2;
+    link1 = LinkIndex(selfCollision[i].first.c_str());
+    link2 = LinkIndex(selfCollision[i].second.c_str());
+    if (link1 < 0 || link1 >= (int) links.size() ||
+        link2 < 0 || link2 >= (int) links.size()) {
+      LOG4CXX_ERROR(GET_LOGGER(URDFParser),"   Error, invalid self-collision index "<<selfCollision[i].first.c_str()<<"-"<<
+        selfCollision[i].second.c_str()<<" (range is 0,...,"<<(int)links.size()-1 <<")");
+      return false;
+    }
+    if(link1 > link2) Swap(link1,link2);
+    if(link1 == link2) continue;
+    InitSelfCollisionPair(link1,link2);
+  }
+
+  for (size_t i = 0; i < noSelfCollision.size(); i++) {
+    int link1,link2;
+    link1 = LinkIndex(noSelfCollision[i].first.c_str());
+    link2 = LinkIndex(noSelfCollision[i].second.c_str());
+    if (link1 < 0 || link1 >= (int) links.size() ||
+        link2 < 0 || link2 >= (int) links.size()) {
+      LOG4CXX_ERROR(GET_LOGGER(URDFParser),"  Error, invalid no-collision index "<< noSelfCollision[i].first.c_str()<<"-"<<
+        noSelfCollision[i].second.c_str()<<" (range is 0,...,"<< (int)links.size()-1<<")");
+      return false;
+    }
+    if(link1 > link2) Swap(link1,link2);
+    if(link1 == link2) continue;
+    SafeDelete(selfCollisions(link1,link2));
+  }
+  /*
 
   //TESTING: don't need to do this with dynamic collision initialization
   //InitCollisions();
@@ -3064,7 +3241,6 @@ bool Robot::LoadURDF(const char* fn)
       }
       if(link1 == link2) continue;
       if(link1 > link2) Swap(link1,link2);
-      Assert(link1 < link2);
       InitSelfCollisionPair(link1,link2);
     }
   }
@@ -3076,19 +3252,16 @@ bool Robot::LoadURDF(const char* fn)
       link2 = LinkIndex(noSelfCollision[i].second.c_str());
       if (link1 < 0 || link1 >= (int) links.size() ||
           link2 < 0 || link2 >= (int) links.size()) {
-
-      LOG4CXX_ERROR(GET_LOGGER(URDFParser),"  Error, invalid no-collision index "<<noSelfCollision[i].first.c_str()<<"-"<< 
-        noSelfCollision[i].second.c_str()<<" (range is 0,...,"<<(int)links.size()-1<<")");
-      return false;
-    }
+        LOG4CXX_ERROR(GET_LOGGER(URDFParser),"  Error, invalid no-collision index "<<noSelfCollision[i].first.c_str()<<"-"<< 
+          noSelfCollision[i].second.c_str()<<" (range is 0,...,"<<(int)links.size()-1<<")");
+        return false;
+      }
       if(link1 == link2) continue;
       if(link1 > link2) Swap(link1,link2);
-    Assert(link1 < link2);
     SafeDelete(selfCollisions(link1,link2));
   }
 
-
-  this->UpdateConfig(q);
+  */
 
   LOG4CXX_INFO(GET_LOGGER(URDFParser),"Done loading robot file "<<fn);
   return true;

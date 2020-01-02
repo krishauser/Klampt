@@ -70,7 +70,7 @@ Installation instructions are also available for
 
 API documentation is available here
 - [Klamp't C++ API](http://cppdocs.klampt.org)
-- [KrisLibrary C++ API](http://motion.pratt.duke.edu//krislibrary_docs)
+- [KrisLibrary C++ API](http://motion.cs.illinois.edu//krislibrary_docs)
 
 ## Reporting bugs and getting help
 
@@ -80,16 +80,17 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 
 ## Version history
 
-**0.8.2  Latest version** (4/1/2019)
+**0.8.2  Latest version** (11/15/2019)
 -   Can now load almost all files from URLs!  Just use an http:// prefix to the filenames of worlds, robots,
     rigid objects, or geometries.  This also works for resources in Python.  (Resources in C++ are not done yet)
 -   New mesh visualization shows smooth meshes and black silhouettes by default, making things look prettier.
+-   Can now mount robots in URDF files (see [tutorial](Cpp/docs/Tutorials/Import-and-calibrate-urdf.md) for an example).
 -   Added ability to specify cost functions in kinematic planning.
--   Added conversions to Numpy objects in Python API ([klampt.io.numpy_convert](http://motion.pratt.duke.edu/klampt/pyklampt_docs/klampt.io.numpy_convert.html))
--   Added much more [ROS](http://ros.org) support in Python API ([klampt.io.ros](http://motion.pratt.duke.edu/klampt/pyklampt_docs/klampt.io.ros.html) module).
--   Added conversions to [Open3D](http://open3d.org) objects in Python API ([klampt.io.open3d_convert](http://motion.pratt.duke.edu/klampt/pyklampt_docs/klampt.io.open3d_convert.html))
+-   Added conversions to Numpy objects in Python API ([klampt.io.numpy_convert](http://motion.cs.illinois.edu/klampt/pyklampt_docs/klampt.io.numpy_convert.html))
+-   Added much more [ROS](http://ros.org) support in Python API ([klampt.io.ros](http://motion.cs.illinois.edu/klampt/pyklampt_docs/klampt.io.ros.html) module).
+-   Added conversions to [Open3D](http://open3d.org) objects in Python API ([klampt.io.open3d_convert](http://motion.cs.illinois.edu/klampt/pyklampt_docs/klampt.io.open3d_convert.html))
 -   The Python loading API has changed to have a more complete list of types and file extensions.
--   Fixed some bugs with editing in the `klampt_browser` Python program.
+-   Fixed some bugs when editing in the `klampt_browser` Python program.
 -   Fixed some motion planning bugs (closed loop + moving subset spaces in Python, some planners in C++).
 -   Fixed a bizarre Python 2 to 3 conversion bug in se3.mul.
 
@@ -165,7 +166,7 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 
 (This is not an exhaustive list; if you are using Klampt and would like to be listed, let us know!)
 
-* [Intelligent Motion Laboratory (IML)](http://motion.pratt.duke.edu), on the Baxter, [TRINA](http://motion.pratt.duke.edu/nursing), [RoboSimian](http://motion.pratt.duke.edu/locomotion/tactile.html), and UR5 robots.  Klamp't has also been used in dozens of academic papers.
+* [Intelligent Motion Laboratory (IML)](http://motion.cs.illinois.edu), on the Baxter, [TRINA](http://motion.cs.illinois.edu/nursing), [RoboSimian](http://motion.cs.illinois.edu/locomotion/tactile.html), and UR5 robots.  Klamp't has also been used in dozens of academic papers.
 
 * Multiple IML open-source projects, including:
 

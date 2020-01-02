@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 from klampt import *
 from klampt import vis
 from klampt.io import resource
@@ -44,7 +42,7 @@ def make_thumbnails(folder,outputfolder):
 	        	print "Could not save thumbnail."
 	        	exit(0)
 
-if __name__ == '__main__':
+def main():
     usage = "Usage: %prog [options] INPUT_FOLDER [OUTPUT_FOLDER]\nCreates thumbnails from a set of Klamp't objects."
     parser = optparse.OptionParser(usage=usage)
     parser.add_option("-w", "--world", dest="world",metavar="WORLD", help="Use WORLD as a reference world")
@@ -66,3 +64,5 @@ if __name__ == '__main__':
     print "Outputting thumbnails to",output_folder
     make_thumbnails(args[0],output_folder,world=world)
     
+if __name__ == '__main__':
+    main()

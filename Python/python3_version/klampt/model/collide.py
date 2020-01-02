@@ -202,16 +202,20 @@ class WorldCollider:
     Used in planning routines to mask out objects in the world to check /
     ignore when doing collision detection.
 
+    You should not need to interact directly with this object's attributes.
+    Instead, use the methods provided.
+
     Attributes:
-        geomList (list): a list of (object,geom) pairs for all objects in the
-            world
-        mask (list of sets): indicating which items are activated for collision
-            detection, one for each object in the world.
+        geomList (list): a list of (object,geom) pairs for all non-empty objects
+            in the world.
+        mask (list of sets of ints): indicating which items are activated for 
+            collision detection.  Basically, a sparse, symmetric boolean matrix 
+            over len(geomList)*len(geomList) possible collision pairs.
         terrains (list of ints): contains the geomList indices of each terrain
             in the world.
         rigidObjects (list of ints): contains the geomList indices of each
             object in the world
-        robots (list of list of lnts): contains the geomList indices of each
+        robots (list of list of ints): contains the geomList indices of each
             robot in the world.
 
     """
@@ -311,7 +315,7 @@ class WorldCollider:
         for i in ignore:
             self.ignoreCollision(i)
                 
-    def getGeomIndex(self,object):
+    def _getGeomIndex(self,object):
         """Finds the geomList index corresponding to an object
 
         Returns:
@@ -337,21 +341,44 @@ class WorldCollider:
         """
         if hasattr(ign,'__iter__'):
             (a,b) = ign
-            ageom = self.getGeomIndex(a)
-            bgeom = self.getGeomIndex(b)
+            ageom = self._getGeomIndex(a)
+            bgeom = self._getGeomIndex(b)
             if ageom is None or bgeom is None:
                 raise ValueError("Invalid ignore collision item, must be a pair of bodies in the world")
             self.mask[ageom].discard(bgeom)
             self.mask[bgeom].discard(ageom)
         else:
             #ignore all collisions with the given geometry
-            geom = self.getGeomIndex(ign)
+            geom = self._getGeomIndex(ign)
             if geom is None:
                 raise ValueError("Invalid ignore collision item, must be a body in the world")
             for i in self.mask[geom]:
                 #remove it from the list
                 self.mask[i].discard(geom)
             self.mask[geom]=set()
+
+    def isCollisionEnabled(self,obj_or_pair):
+        """Returns true if the object or pair of objects are considered for
+        collision.
+
+        Args:
+            obj_or_pair: either a single body (RobotModelLink, 
+                RigidObjectModel, TerrainModel) in the world, or a pair of
+                bodies.  In the former case, True is returned if the body
+                is checked with anything.
+        """
+        if hasattr(obj_or_pair,'__iter__'):
+            (a,b) = obj_or_pair
+            ageom = self._getGeomIndex(a)
+            bgeom = self._getGeomIndex(b)
+            if ageom is None or bgeom is None:
+                return False
+            return ageom in self.mask[bgeom] or bgeom in self.mask[ageom]
+        else:
+            geom = self._getGeomIndex(obj_or_pair)
+            if geom is None:
+                return False
+            return len(self.mask[geom]) > 0
 
     def collisionTests(self,filter1=None,filter2=None,bb_reject=True):
         """Returns an iterator over potential colliding pairs, which

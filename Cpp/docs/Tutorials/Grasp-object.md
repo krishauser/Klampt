@@ -33,7 +33,7 @@ Note that in motion 1, the planner must perform collision detection with the obj
 
 In the C++ API tutorial, we'll also demonstrate some of the dynamic planning tools in Klamp't. After planning a path, we'll dynamically smooth it, while maintaining feasibility, before executing it in simulation.
 
-You may download  [the code for this example here](http://motion.pratt.duke.edu/klampt/0.7/tutorials/grasptutorial_cpp.zip). Throughout, we will assume that your code is placed in a directory that shares the same parent as Klamp't. We also assume you have learned how to build applications that link to Klamp't using CMake, e.g. by completing the  [simulation tutorial](Run-a-simulation-Cpp.md).
+You may download  [the code for this example here](http://motion.cs.illinois.edu/klampt/0.7/tutorials/grasptutorial_cpp.zip). Throughout, we will assume that your code is placed in a directory that shares the same parent as Klamp't. We also assume you have learned how to build applications that link to Klamp't using CMake, e.g. by completing the  [simulation tutorial](Run-a-simulation-Cpp.md).
 
 In the tutorial code we provide a framework for setting up the environment in pickandplace.h. Browse through the documentation of this file to understand the key members of the environment (robot, object, grasp, pregrasp, freeSpace). The Setup function loads a world file and some predefined Grasp resources from disk into a PickAndPlaceEnvironment structure. With this file you'll be able to set up the tutorial environment using the following skeleton code (in main.cpp):
 ```

@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 from klampt import *
 from klampt.io import loader,resource
 from klampt.math import se3
@@ -403,8 +401,8 @@ class ResourceBrowser(QtWidgets.QMainWindow):
             if name not in self.active: continue
             s = self.active[name].obj
             if isinstance(s,(RobotModel,RigidObjectModel,TerrainModel)):
-                self.tempWorld.remove(s)
                 self.world.add(s.getName(),s)
+                self.tempWorld.remove(s)
                 todel.append(name)
             elif isinstance(s,WorldModel):
                 for i in xrange(s.numRobots()):
@@ -657,31 +655,31 @@ class ResourceBrowser(QtWidgets.QMainWindow):
                 print "klampt_browser: Setting animation duration to",self.glviewportManager.animationDuration
         self.glviewportManager.refresh()
 
-if __name__ == '__main__':
+def main():
     print """
 ===============================================================================
 A program to quickly browse Klamp't objects. 
 
-USAGE: klampt_browser [item1 item2 ...]
+USAGE: %s [item1 item2 ...]
 
 where the given items are world, robot, terrain, object, or geometry files. Run
 it without arguments
 
-   klampt_browser
+   %s
 
 for an empty reference world. You may add items to the reference world using
 the `Add to World` button.  If you know what items to use in the reference
 world, run it with
 
-   klampt_browser world.xml
+   %s world.xml
 
 or 
 
-   klampt_browser item1 item2 ...
+   %s item1 item2 ...
 
 where the items are world, robot, terrain, object, or geometry files.
 ===============================================================================
-"""
+"""%(sys.argv[0],sys.argv[0],sys.argv[0],sys.argv[0])
     #must be explicitly deleted for some reason in PyQt5...
     g_browser = None
     def makefunc(gl_backend):
@@ -708,7 +706,7 @@ where the items are world, robot, terrain, object, or geometry files.
     vis.spin(float('inf'))
     vis.kill()
     del g_browser
-    exit(0)
+    return
 
     #this code below is incorrect...
     app = QtWidgets.QApplication(sys.argv)
@@ -731,4 +729,8 @@ where the items are world, robot, terrain, object, or geometry files.
     browser.show()
     # Start the main loop.
     res = app.exec_()
+    return res
+
+if __name__ == '__main__':
+    res = main()
     sys.exit(res)

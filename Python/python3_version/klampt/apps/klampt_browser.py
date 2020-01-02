@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 from klampt import *
 from klampt.io import loader,resource
 from klampt.math import se3
@@ -247,7 +245,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
 
     def closeEvent(self,event):
         if len(self.modified) > 0:
-            reply = QtWidgets.QMessageBox.question(self, "Unsaved changes", "Would you like to save changes to " ', '.join(self.modified)+ "?",
+            reply = QtWidgets.QMessageBox.question(self, "Unsaved changes", "Would you like to save changes to " + ', '.join(self.modified)+ "?",
                                     QtWidgets.QMessageBox.Yes|QtWidgets.QMessageBox.No);
             if reply == QtWidgets.QMessageBox.Yes:
                 self.onSaveClicked()
@@ -352,12 +350,12 @@ class ResourceBrowser(QtWidgets.QMainWindow):
         def doedit():
             print("klampt_browser: Launching resource.edit",fn,"...")
             try:
-                obj = resource.edit(name=fn,value=self.active[fn].obj,world=self.world)
+                (save,obj) = resource.edit(name=fn,value=self.active[fn].obj,world=self.world)
             except Exception as e:
                 print("klampt_browser: Exception raised during resource.edit:",e)
                 QtWidgets.QMessageBox.warning(self.splitter,"Editing not available","Unable to edit item of type "+self.active[fn].obj.__class__.__name__)
                 return
-            if obj is not None:
+            if save and obj is not None:
                 self.active[fn].obj = obj
                 #mark it as modified and re-add it to the visualization
                 basename = os.path.basename(fn)
@@ -389,6 +387,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
             fn = resource.save(obj,type,directory='')
             if fn is not None:
                 self.loadedItem(fn,obj)
+                #TODO: should we add to selection in tree view?
         self.createComboBox.setCurrentIndex(0)
 
     def onAddClicked(self):
@@ -402,8 +401,8 @@ class ResourceBrowser(QtWidgets.QMainWindow):
             if name not in self.active: continue
             s = self.active[name].obj
             if isinstance(s,(RobotModel,RigidObjectModel,TerrainModel)):
-                self.tempWorld.remove(s)
                 self.world.add(s.getName(),s)
+                self.tempWorld.remove(s)
                 todel.append(name)
             elif isinstance(s,WorldModel):
                 for i in range(s.numRobots()):
@@ -437,7 +436,10 @@ class ResourceBrowser(QtWidgets.QMainWindow):
         self.refresh()
 
     def add(self,fn,openDir=True,warn=True):
-        assert fn not in self.active
+        #assert fn not in self.active
+        if fn in self.active:
+            print("add(): Warning, file",fn,"is already active")
+            return
         for i,(cfn,citem) in enumerate(self.visCache):
             if cfn == fn:
                 print() 
@@ -593,7 +595,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
         if fn not in self.active:
             return
         if fn in self.modified:
-            reply = QtWidgets.QMessageBox.question(self, "Unsaved changes", "Would you like to save changes to " ', '.join(self.modified)+ "?",
+            reply = QtWidgets.QMessageBox.question(self, "Unsaved changes", "Would you like to save changes to " + ', '.join(self.modified)+ "?",
                                     QtWidgets.QMessageBox.Yes|QtWidgets.QMessageBox.No);
             if reply == QtWidgets.QMessageBox.Yes:
                 save(self.active[fn],fn)
@@ -653,31 +655,31 @@ class ResourceBrowser(QtWidgets.QMainWindow):
                 print("klampt_browser: Setting animation duration to",self.glviewportManager.animationDuration)
         self.glviewportManager.refresh()
 
-if __name__ == '__main__':
+def main():
     print("""
 ===============================================================================
 A program to quickly browse Klamp't objects. 
 
-USAGE: klampt_browser [item1 item2 ...]
+USAGE: %s [item1 item2 ...]
 
 where the given items are world, robot, terrain, object, or geometry files. Run
 it without arguments
 
-   klampt_browser
+   %s
 
 for an empty reference world. You may add items to the reference world using
 the `Add to World` button.  If you know what items to use in the reference
 world, run it with
 
-   klampt_browser world.xml
+   %s world.xml
 
 or 
 
-   klampt_browser item1 item2 ...
+   %s item1 item2 ...
 
 where the items are world, robot, terrain, object, or geometry files.
 ===============================================================================
-""")
+"""%(sys.argv[0],sys.argv[0],sys.argv[0],sys.argv[0]))
     #must be explicitly deleted for some reason in PyQt5...
     g_browser = None
     def makefunc(gl_backend):
@@ -704,7 +706,7 @@ where the items are world, robot, terrain, object, or geometry files.
     vis.spin(float('inf'))
     vis.kill()
     del g_browser
-    exit(0)
+    return
 
     #this code below is incorrect...
     app = QtWidgets.QApplication(sys.argv)
@@ -727,4 +729,8 @@ where the items are world, robot, terrain, object, or geometry files.
     browser.show()
     # Start the main loop.
     res = app.exec_()
+    return res
+
+if __name__ == '__main__':
+    res = main()
     sys.exit(res)
