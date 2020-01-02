@@ -189,13 +189,13 @@ class ConfigsEditor(VisualEditorBase):
             self.editingIndex -= 1
             if self.editingIndex < 0:
                 self.editingIndex = min(len(self.durations)-1,0)
-            self.indexEditBox.setValue(self.editingIndex)
+            self.indexSpinBox.setValue(self.editingIndex)
             self.indexChanged(self.editingIndex)
             return True
         elif c=='.' or c=='>':
             self.editingIndex += 1
             self.editingIndex = min(len(self.durations)-1,self.editingIndex)
-            self.indexEditBox.setValue(self.editingIndex)
+            self.indexSpinBox.setValue(self.editingIndex)
             self.indexChanged(self.editingIndex)
             return True
 
@@ -240,7 +240,7 @@ class ConfigsEditor(VisualEditorBase):
     def updateGuiFromValue(self):
         if self.editingIndex >= len(self.value):
             self.editingIndex = len(self.value)-1
-        self.indexEditBox.setValue(self.editingIndex)
+        self.indexSpinBox.setValue(self.editingIndex)
         self.indexChanged(self.editingIndex)
 
 class TrajectoryEditor(VisualEditorBase):
@@ -444,15 +444,15 @@ class TrajectoryEditor(VisualEditorBase):
             self.editingIndex -= 1
             if self.editingIndex < 0:
                 self.editingIndex = min(len(self.durations)-1,0)
-            if hasattr(self,'indexEditBox'):
-                self.indexEditBox.setValue(self.editingIndex)
+            if hasattr(self,'indexSpinBox'):
+                self.indexSpinBox.setValue(self.editingIndex)
                 self.indexChanged(self.editingIndex)
             return True
         elif c=='.' or c=='>':
             self.editingIndex += 1
             self.editingIndex = min(len(self.durations)-1,self.editingIndex)
-            if hasattr(self,'indexEditBox'):
-                self.indexEditBox.setValue(self.editingIndex)
+            if hasattr(self,'indexSpinBox'):
+                self.indexSpinBox.setValue(self.editingIndex)
                 self.indexChanged(self.editingIndex)
             return True
 
@@ -518,14 +518,14 @@ class TrajectoryEditor(VisualEditorBase):
         return False
 
     def updateGuiFromValue(self):
-        if self.editingIndex >= len(self.value):
-            self.editingIndex = len(self.value)-1
+        if self.editingIndex >= len(self.value.times):
+            self.editingIndex = len(self.value.times)-1
         self.durations = []
-        if len(value.times) > 0:
-            self.durations.append(value.times[0])
-            for i in range(len(value.times)-1):
-                self.durations.append(value.times[i+1]-value.times[i])
-        self.indexEditBox.setValue(self.editingIndex)
+        if len(self.value.times) > 0:
+            self.durations.append(self.value.times[0])
+            for i in range(len(self.value.times)-1):
+                self.durations.append(self.value.times[i+1]-self.value.times[i])
+        self.indexSpinBox.setValue(self.editingIndex)
         self.indexChanged(self.editingIndex)
         self.onDurationsChanged()
 
