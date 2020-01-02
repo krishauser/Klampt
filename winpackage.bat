@@ -18,8 +18,10 @@ SET PYTHON36_32=D:\Python36-32\python.exe
 SET PYTHON36_64=D:\Python36\python.exe
 SET PYTHON37_32=D:\Python37-32\python.exe
 SET PYTHON37_64=D:\Python37\python.exe
-SET PYTHON_32_VERSIONS=%PYTHON27_32% %PYTHON35_32% %PYTHON36_32% %PYTHON37_32%
-SET PYTHON_64_VERSIONS=%PYTHON27_64% %PYTHON35_64% %PYTHON36_64% %PYTHON37_64%
+SET PYTHON38_32=D:\Python38-32\python.exe
+SET PYTHON38_64=D:\Python38\python.exe
+SET PYTHON_32_VERSIONS=%PYTHON27_32% %PYTHON35_32% %PYTHON36_32% %PYTHON37_32% %PYTHON38_32%
+SET PYTHON_64_VERSIONS=%PYTHON27_64% %PYTHON35_64% %PYTHON36_64% %PYTHON37_64% %PYTHON38_64%
 
 for %%P in (%PYTHON_32_VERSIONS%) do (
   %%P --version
@@ -86,9 +88,9 @@ copy /Y %buildfolder%\lib\Debug\KrisLibraryd.lib ..\x64
 cd ..\..\..\
 
 :: build Klampt
-devenv %buildfolder%\Klampt.sln /build Release
+:: Qt5 doesn't have a 64-bit build, don't build apps
+devenv %buildfolder%\Klampt.sln /build Release /project Klampt
 :: (python doesnt build right here...) if %errorlevel% neq 0 exit /b %errorlevel%
-:: Qt5 doesn't have a 64-bit build
 :: devenv %buildfolder%\Klampt.sln /build Release /project PACKAGE
 :: (python doesnt build right here...) if %errorlevel% neq 0 exit /b %errorlevel%
 
