@@ -1,4 +1,3 @@
-#!/usr/bin/python
 import sys
 import optparse
 from klampt.model.multipath import MultiPath
@@ -170,7 +169,7 @@ class GeneralizedPath:
                 ndofs = len(self.data.milestones[0])
             return '%s with %d DOFs, %d milestones'%(self.type,ndofs,len(self.data.milestones))
 
-def _main():
+def main():
     usage = "Usage: %prog [options] filename(s)\nPerforms basic operations on MultiPath, Trajectory, or Configs files."
     parser = optparse.OptionParser(usage=usage)
     parser.add_option("-s", "--start", action="store_true",dest="start",default=False, help="Print start config")
@@ -246,5 +245,5 @@ def _main():
 
 
 if __name__ == '__main__':
-    _main()
+    main()
     
