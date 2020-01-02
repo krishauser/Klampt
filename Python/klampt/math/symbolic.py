@@ -884,6 +884,20 @@ Matrix = Type('M')
 Matrix2 = Type('M',(2,2))
 Matrix3 = Type('M',(3,3))
 
+
+def _is_exactly(a,b):
+    """Returns True if these are exactly the same class and match.
+    Works for numpy arrays, scalars, and class objects (this latter
+    case is matched with the 'is' keyword)
+    """
+    if a.__class__ == b.__class__:
+        if isinstance(a,np.ndarray):
+            return np.all(a==b)
+        elif isinstance(a,(bool,float,int,str)):
+            return a == b
+        return a is b
+    return False
+
 def _ravel(obj):
     """A hyper-version of numpy's ravel function that also works for nested lists"""
     if isinstance(obj,np.ndarray):
@@ -2990,7 +3004,7 @@ class OperatorExpression(Expression):
                     outshape = _jacobian_shape(node)
                     if not is_const(rshape) or not is_const(outshape) or not np.array_equal(to_const(rshape),to_const(outshape)):
                         res = reshape.optimized(res,outshape)
-            if _is_exactly(res,0) and _jacobian_shape(node) is not ():
+            if _is_exactly(res,0) and not _is_exactly(_jacobian_shape(node),()):
                 #no derivative
                 try:
                     #print "Getting a jacobian of size",jacobian_size
@@ -3603,19 +3617,6 @@ def type_of(x):
 
 def const(v):
     return ConstantExpression(v)
-    
-def _is_exactly(a,b):
-    """Returns True if these are exactly the same class and match.
-    Works for numpy arrays, scalars, and class objects (this latter
-    case is matched with the 'is' keyword)
-    """
-    if a.__class__ == b.__class__:
-        if isinstance(a,np.ndarray):
-            return np.all(a==b)
-        elif isinstance(a,(bool,float,int,str)):
-            return a == b
-        return a is b
-    return False
 
 def is_const(v,context=None,shallow=False):
     """Returns True if v is a constant value or constant expression.
@@ -3997,7 +3998,7 @@ def _reshape(x,s):
     if _shape(x) == s:
         return x
     assert s != ()
-    if _shape(x) is ():
+    if _is_exactly(_shape(x),()):
         #scalar, just return ones
         return np.ones(s)*x
     if not _is_numpy_shape(s):

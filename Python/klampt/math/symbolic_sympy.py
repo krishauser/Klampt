@@ -1,5 +1,5 @@
 from symbolic import *
-from symbolic import _column_stack,_row_stack,_builtin_functions
+from symbolic import _is_exactly,_column_stack,_row_stack,_builtin_functions
 import sympy
 from sympy.matrices import Matrix
 from sympy.core.sympify import sympify
@@ -162,7 +162,7 @@ def _make_sympy_adaptor(func):
         f = self._symbolic_func
         if f.deriv is None: 
             raise ArgumentIndexError(self, argindex)
-        if f.deriv is 0:
+        if _is_exactly(f.deriv,0):
             return S(0)
         argindex -= 1
         if f.jacobian is not None and f.jacobian[argindex] is not None:
@@ -171,7 +171,7 @@ def _make_sympy_adaptor(func):
         if callable(f.deriv):
             raise NotImplementedError("Can't adapt a callable derivative to sympy yet")
         assert argindex >= 0 and argindex < len(f.deriv),"Invalid derivative argument index? 0 <= %d < %d"%(argindex,len(f.deriv))
-        if f.deriv[argindex] is 0:
+        if _is_exactly(f.deriv[argindex],0):
             return S(0)
         if f.deriv[argindex] is None:
             raise ArgumentIndexError(self, argindex)
