@@ -3612,7 +3612,7 @@ def _is_exactly(a,b):
     if a.__class__ == b.__class__:
         if isinstance(a,np.ndarray):
             return np.all(a==b)
-        elif isinstance(a,(bool,float,int,str):
+        elif isinstance(a,(bool,float,int,str)):
             return a == b
         return a is b
     return False
