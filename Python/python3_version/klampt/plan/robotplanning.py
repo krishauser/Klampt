@@ -3,7 +3,6 @@ from .cspaceutils import *
 from . import robotcspace
 from ..model import collide
 from ..robotsim import IKObjective
-import collections
 
 def preferredPlanOptions(robot,movingSubset=None,optimizing=False):
     """Returns some options that might be good for your given robot, and
@@ -271,8 +270,8 @@ def planToSet(world,robot,target,
     if isinstance(target,CSpace):
         goal = [(lambda x:target.feasible(x)),(lambda : target.sample())]
     else:
-        if not isinstance(target, collections.Callable):
-            if not isinstance(target,(tuple,list)) or len(target)!=2 or not isinstance(target[0], collections.Callable) or not isinstance(target[1], collections.Callable):
+        if not callable(target):
+            if not isinstance(target,(tuple,list)) or len(target)!=2 or not callable(target[0]) or not callable(target[1]):
                 raise TypeError("target must be a predicate function or CSpace object")
         goal = target
 
@@ -427,11 +426,11 @@ def wizard(world_or_space_or_plan,moving_object=None,
         start,goal = plan.planner.getEndpoints()
         gui.startConfig = start
         if hasattr(goal,'__iter__'):
-            if len(goal)==2 and isinstance(goal[0], collections.Callable):
+            if len(goal)==2 and callable(goal[0]):
                 gui.goalSetTest,gui.goalSetSampler = goal
             else:
                 gui.endConfig = goal
         else:
-            assert isinstance(goal, collections.Callable)
+            assert callable(goal)
             gui.goalSetTest = goal
         #TODO: parse IK targets

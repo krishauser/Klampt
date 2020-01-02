@@ -6,7 +6,6 @@ from . import ik
 from ..math import vectorops,so3,se3
 from .. import robotsim
 from ..robotsim import RobotModel,RobotModelLink,RigidObjectModel,TerrainModel
-import collections
 
 def idToObject(world,ID):
     """Helper: takes a WorldModel ID and converts it into an object."""
@@ -280,9 +279,9 @@ def worldContactMap(world,padding,kFriction=1,collider=None):
     """
     fpadding = padding
     ffriction = kFriction
-    if not isinstance(padding, collections.Callable):
+    if not callable(padding):
         fpadding = lambda obj:padding
-    if not isinstance(kFriction, collections.Callable):
+    if not callable(kFriction):
         ffriction = lambda obj1,obj2:kFriction
     from .collide import WorldCollider
     if collider is None:

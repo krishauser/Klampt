@@ -20,7 +20,6 @@ from .. import *
 from . import so3,se3
 from ..model import ik
 import weakref
-import collections
 
 def _so3_rotation(axis,angle):
     """Symbolic version of so3.rotation"""
@@ -474,8 +473,8 @@ class CollideContext(Context):
         self.declare(self.robotSelfCollision)
         self.declare(self.robotCollisionFree)
         self.declare(self.robotSelfCollisionFree)
-        assert isinstance(self.robotCollision.func, collections.Callable)
-        assert isinstance(self.robotSelfCollision.func, collections.Callable)
+        assert callable(self.robotCollision.func)
+        assert callable(self.robotSelfCollision.func)
         assert isinstance(self.robotCollisionFree.func,Expression)
         assert isinstance(self.robotSelfCollisionFree.func,Expression)
         

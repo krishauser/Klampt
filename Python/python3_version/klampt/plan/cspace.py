@@ -3,7 +3,6 @@
 
 from . import motionplanning
 import random
-import collections
 
 class CSpace:
     """Used alongside :class:`MotionPlan` to define a configuration space for
@@ -162,7 +161,7 @@ class CSpace:
             self.feasibilityTestNames = []
             self.feasibilityTestDependencies = []
         assert name is None or isinstance(name,str),"Name argument 'name' must be a string"
-        assert isinstance(func, collections.Callable),"Feasibility test 'func' must be a callable object"
+        assert callable(func),"Feasibility test 'func' must be a callable object"
         self.feasibilityTests.append(func)
         if name is None:
             name = "test_"+str(len(self.feasibilityTests)-1)
@@ -352,9 +351,9 @@ class MotionPlan:
             terminalCost (function, optional): has signature f(q)->float where
                 q is a configuration.
         """
-        if edgeCost is not None and not isinstance(edgeCost, collections.Callable):
+        if edgeCost is not None and not callable(edgeCost):
             raise TypeError("Need to pass a function into setCostFunction")
-        if terminalCost is not None and not isinstance(terminalCost, collections.Callable):
+        if terminalCost is not None and not callable(terminalCost):
             raise TypeError("Need to pass a function into setCostFunction")
         self.edgeCost = edgeCost
         self.terminalCost = terminalCost
@@ -507,7 +506,7 @@ def configurePlanner(space,start,goal,edgeCost=None,terminalCost=None,optimizing
     #pointLocation = ''
     restartTermCond="{foundSolution:1,maxIters:%d}"%(restartIters,)
 
-    isgoalset = isinstance(goal, collections.Callable) or isinstance(goal[0], collections.Callable)
+    isgoalset = callable(goal) or callable(goal[0])
     optimizingPlanner = (type in optimizingPlanners) or shortcut or restart or isgoalset
     if optimizingPlanner != optimizing:
         print("WARNING: returned planner is %soptimizing but requested a %soptimizing planner"%(('' if optimizingPlanner else 'not '),('' if optimizing else 'not ')))
@@ -582,12 +581,12 @@ def configurePlanner(space,start,goal,edgeCost=None,terminalCost=None,optimizing
         print("WARNING: Start configuration fails constraints",sfailures)
 
     if hasattr(goal,'__iter__'):
-        if not isinstance(goal[0], collections.Callable):
+        if not callable(goal[0]):
             if not space.isFeasible(goal):
                 gfailures = space.cspace.feasibilityFailures(goal)
                 print("WARNING: Goaconfiguration fails constraints",gfailures)
         else:
-            if not isinstance(goal[1], collections.Callable):
+            if not callable(goal[1]):
                 raise TypeError("goal sampler is not callable")
             try:
                 goal[0](start)
@@ -600,7 +599,7 @@ def configurePlanner(space,start,goal,edgeCost=None,terminalCost=None,optimizing
             except Exception:
                 print("WARNING: goal sampler doesn't seem to work properly")
     else:
-        if not isinstance(goal, collections.Callable):
+        if not callable(goal):
             raise TypeError("goal is not a configuration or callable")
         try:
             goal(start)

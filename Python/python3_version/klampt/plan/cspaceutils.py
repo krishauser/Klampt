@@ -2,7 +2,6 @@ import math
 import time
 from ..math import vectorops
 from .cspace import CSpace,MotionPlan
-import collections
 
 def default_sampleneighborhood(c,r):
     return [ci + random.uniform(-r,r) for ci in c]
@@ -224,7 +223,7 @@ class SubsetMotionPlan (MotionPlan):
         #space configurations
         embstart = self.project(start)
         if hasattr(goal,'__iter__'):
-            if len(goal)==2 and isinstance(goal[0], collections.Callable) and isinstance(goal[1], collections.Callable):
+            if len(goal)==2 and callable(goal[0]) and callable(goal[1]):
                 #it's a (test,sample) pair
                 def goaltest(x,test=goal[0]):
                     return test(self.lift(x))
@@ -236,7 +235,7 @@ class SubsetMotionPlan (MotionPlan):
             else:
                 #it's a configuration
                 embgoal = self.project(goal)
-        elif isinstance(goal, collections.Callable):
+        elif callable(goal):
             def goaltest(x,goal=goal):
                 return goal(self.lift(x))
             embgoal = goaltest
