@@ -625,6 +625,7 @@ string Geometry3D::type()
   if(geom->Empty()) return "";
   string res = geom->TypeName();
   if(res == "Primitive") return "GeometricPrimitive";
+  if(res == "ImplicitSurface") return "VolumeGrid";
   return res;
 }
 
