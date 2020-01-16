@@ -8,7 +8,6 @@ the place of RobotModel.
 from ..robotsim import *
 from collide import self_collision_iter
 from trajectory import Trajectory,HermiteTrajectory
-import weakref
 
 class SubRobotModel:
     """A helper that lets you conveniently set/get quantities for a subset
@@ -114,7 +113,7 @@ class SubRobotModel:
                     return i
             return None
         elif isinstance(object,RobotModelLink):
-            return SubRobotModelLink(object,weakref.byref(self))
+            return SubRobotModelLink(object,self)
         elif isinstance(object,(list,tuple)):
             if hasattr(object[0],'__iter__'):
                 #treat this like a list of configurations
@@ -140,9 +139,9 @@ class SubRobotModel:
 
     def link(self,index):
         if isinstance(index,str):
-            return SubRobotModelLink(self._robot.link(index),weakref.byref(self))
+            return SubRobotModelLink(self._robot.link(index),self)
         else:
-            return SubRobotModelLink(self._robot.link(self._links[index]),weakref.byref(self))
+            return SubRobotModelLink(self._robot.link(self._links[index]),self)
 
     def numDrivers(self):
         raise NotImplementedError("TODO Accessing number of drivers in sub-robot")
