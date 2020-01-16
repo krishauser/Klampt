@@ -594,7 +594,7 @@ void Geometry3D::set(const Geometry3D& g)
       geom = make_shared<AnyCollisionGeometry3D>();
   }
   else
-    Assert(&*geom == &*mgeom);
+    Assert(&*geom == &*(*mgeom));
   *geom = *ggeom;
   //geom->ClearCollisionData();
   if(mgeom) {
