@@ -96,7 +96,7 @@ def doSim(world,duration,initialCondition,
     initCond = getWorldSimState(world)
     args = ()
     for k,v in initialCondition.iteritems():
-        if k is not 'args':
+        if k != 'args':
             access.set_item(world,k,v)
         else:
             args = v

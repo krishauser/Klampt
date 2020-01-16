@@ -884,6 +884,20 @@ Matrix = Type('M')
 Matrix2 = Type('M',(2,2))
 Matrix3 = Type('M',(3,3))
 
+
+def _is_exactly(a,b):
+    """Returns True if these are exactly the same class and match.
+    Works for numpy arrays, scalars, and class objects (this latter
+    case is matched with the 'is' keyword)
+    """
+    if a.__class__ == b.__class__:
+        if isinstance(a,np.ndarray):
+            return np.all(a==b)
+        elif isinstance(a,(bool,float,int,str)):
+            return a == b
+        return a is b
+    return False
+
 def _ravel(obj):
     """A hyper-version of numpy's ravel function that also works for nested lists"""
     if isinstance(obj,np.ndarray):
@@ -1420,7 +1434,7 @@ class Context:
                 print "makeFlatFunctionDeriv: Derivative with respect to",v.name,"is undefined, returning None"
                 return None,varorder
             if not isinstance(dv,Expression):
-                if dv is 0 and not v.type.is_scalar():
+                if _is_exactly(dv,0) and not v.type.is_scalar():
                     #get the jacobian dimensions right
                     assert v.type.char == 'V',"Can't make flat function of non-numeric or non-vector types: "+str(v.type)
                     dv = zero(count.optimized(v))
@@ -1705,7 +1719,7 @@ class Function:
             self.deriv[aindex] = lambda *args:subs(dfunc,self.exprArgRefs+['d'+arg],args)
         elif isinstance(dfunc,Function):
             self.deriv[aindex] = dfunc
-        elif dfunc is None or dfunc is 0:
+        elif dfunc is None or _is_exactly(dfunc,0):
             self.deriv[aindex] = dfunc
         elif asExpr:
             assert callable(dfunc)
@@ -1742,7 +1756,7 @@ class Function:
             self.jacobian[aindex] = lambda *args:subs(dfunc,self.exprArgRefs,args)
         elif isinstance(dfunc,Function):
             self.jacobian[aindex] = dfunc
-        elif dfunc is None or dfunc is 0:
+        elif dfunc is None or _is_exactly(dfunc,0):
             self.jacobian[aindex] = dfunc
         elif asExpr:
             if not callable(dfunc):
@@ -1933,7 +1947,7 @@ class Function:
         derivHelp = None
         if self.deriv is not None or self.jacobian is not None:
             derivHelp = []
-            if self.deriv is 0:
+            if _is_exactly(self.deriv,0):
                 derivHelp.append('- derivative is 0 everywhere')
             elif callable(self.deriv):
                 deval = None
@@ -1956,7 +1970,7 @@ class Function:
                 vars = [expr(Variable(a,t)) for a,t in zip(self.argNames,argTypes)]
                 for i,a in enumerate(self.argNames):
                     if self.deriv is not None and self.deriv[i] is not None:
-                        if self.deriv[i] is 0:
+                        if _is_exactly(self.deriv[i],0):
                             derivHelp.append('- %s: derivative is 0'%(a,))
                         elif isinstance(self.deriv[i],Function):
                             derivHelp.append('- %s: available as Python df/da * da/dx function'%(a,))
@@ -1969,7 +1983,7 @@ class Function:
                             except Exception as e:
                                 derivHelp.append('- %s: available as df/da * da/dx function, Exception %s'%(a,str(e)))
                     elif self.jacobian is not None and self.jacobian[i] is not None:
-                        if self.jacobian[i] is 0:
+                        if _is_exactly(self.jacobian[i],0):
                             derivHelp.append('- %s: jacobian is 0'%(a,))
                         elif isinstance(self.deriv[i],Function):
                             derivHelp.append('- %s: available as Python jacobian df/da'%(a,))
@@ -2931,11 +2945,11 @@ class OperatorExpression(Expression):
             if isinstance(node,OperatorExpression) and hasattr(node.functionInfo,'custom_eval'):
                 if node.functionInfo.deriv is None:
                     return (False,True,None)
-                if node.functionInfo.deriv is 0:
+                if _is_exactly(node.functionInfo.deriv,0):
                     return (False,True,None)
                 assert callable(node.functionInfo.deriv),"custom_eval functions needs to define a callable deriv function"
                 res = node.functionInfo.deriv(*([context]+node.args+[varderivs]))
-                if res is 0:
+                if _is_exactly(res,0):
                     try:
                         res = zero._call(_jacobian_shape(node))
                     except Exception:
@@ -2950,10 +2964,10 @@ class OperatorExpression(Expression):
         def _deriv_post(node,cvals):
             res = 0
             if isinstance(node,OperatorExpression):
-                if node.functionInfo.deriv is 0:
+                if _is_exactly(node.functionInfo.deriv,0):
                     res = 0
                 elif node.functionInfo.deriv is None:
-                    if all(v is 0 or is_zero(v) for v in cvals): 
+                    if all(_is_exactly(v,0) or is_zero(v) for v in cvals): 
                         if _DEBUG_DERIVATIVES:
                             print "symbolic.deriv: No derivative for function",node.functionInfo.name,"but we happily had no variables to consider"
                             print "  Values of arguments"
@@ -2984,13 +2998,13 @@ class OperatorExpression(Expression):
                     res = varderivs[node.name]
             elif isinstance(node,ConstantExpression):
                 res = 0
-            if res is not None and res is not 0:
+            if res is not None and not _is_exactly(res,0):
                 if not var_scalar and to_const(dims.optimized(node)) > 1:
                     rshape = shape.optimized(res)
                     outshape = _jacobian_shape(node)
                     if not is_const(rshape) or not is_const(outshape) or not np.array_equal(to_const(rshape),to_const(outshape)):
                         res = reshape.optimized(res,outshape)
-            if res is 0 and _jacobian_shape(node) is not ():
+            if _is_exactly(res,0) and not _is_exactly(_jacobian_shape(node),()):
                 #no derivative
                 try:
                     #print "Getting a jacobian of size",jacobian_size
@@ -3025,7 +3039,7 @@ class OperatorExpression(Expression):
         If stackcount > 0, the result is a matrix with shape (stackcount,count(self)).
         """
         if self.functionInfo.deriv is None: return None
-        if self.functionInfo.deriv is 0: return 0
+        if _is_exactly(self.functionInfo.deriv,0): return 0
         assert len(dargs) == len(self.args)
         self_dims = dims.optimized(self)
         self_count = count.optimized(self)
@@ -3074,8 +3088,8 @@ class OperatorExpression(Expression):
         res = 0
         assert len(self.functionInfo.deriv) == len(self.args)
         for index,da in enumerate(dargs):
-            if self.functionInfo.deriv[index] is 0: continue
-            if da is 0 or is_op(da,'zero'): continue
+            if _is_exactly(self.functionInfo.deriv[index],0): continue
+            if _is_exactly(da,0) or is_op(da,'zero'): continue
             if da is None: return None
             if self.functionInfo.deriv[index] is None:
                 if self.functionInfo.jacobian is not None and self.functionInfo.jacobian[index] is not None:
@@ -3130,7 +3144,7 @@ class OperatorExpression(Expression):
                 print "symbolic.deriv: Partial derivative for function",self.functionInfo.name,"argument",index+1,str(inc)
             if inc is None:
                 return None
-            if res is 0:
+            if _is_exactly(res,0):
                 res = inc
             else:
                 res = add(res,inc)
@@ -3242,7 +3256,7 @@ class OperatorExpression(Expression):
         return res
 
     def _presimplify(self,depth):
-        if depth is 0: return None
+        if _is_exactly(depth,0): return None
         newdepth = None if depth is None else depth-1
         
         changed = False
@@ -3273,7 +3287,7 @@ class OperatorExpression(Expression):
             if _DEBUG_SIMPLIFY:
                 print " "*self.depth(),"Postsimplify",self,"cached to",self._cache["simplified"]
             return self._cache['simplified']
-        if depth is 0:
+        if _is_exactly(depth,0):
             return None
         newdepth = None if depth is None else depth-1
 
@@ -3371,7 +3385,7 @@ class OperatorExpression(Expression):
     def _constant_expansion(self,context,depth): 
         if 'simplified' in self._cache:
             return self._cache['simplified']
-        if depth is 0: return None
+        if _is_exactly(depth,0): return None
         newdepth = None if depth is None else depth-1
         #constant replacement
         simplified = False
@@ -3416,7 +3430,7 @@ class OperatorExpression(Expression):
                 for ac,v in zip(aconst,newargs):
                     if ac is None:
                         avar.append(v)
-                aconst = [ac for ac in aconst if ac is not None and ac is not 0]
+                aconst = [ac for ac in aconst if ac is not None and not _is_exactly(ac,0)]
                 if len(aconst) > 1:
                     const = self.op(*aconst)
                     if 'foldfunc' in self.functionInfo.properties:
@@ -3984,7 +3998,7 @@ def _reshape(x,s):
     if _shape(x) == s:
         return x
     assert s != ()
-    if _shape(x) is ():
+    if _is_exactly(_shape(x),()):
         #scalar, just return ones
         return np.ones(s)*x
     if not _is_numpy_shape(s):
@@ -5009,12 +5023,12 @@ def _sum_simplifier(*args):
         sargs = [v.args[0] for v in avar]
         return reshape(sum_(*sargs),avar[0].args[1])
     start = 0
-    if sumconst is not 0:
+    if not _is_exactly(sumconst,0):
         start += 1
     if start+len(avar) < len(args):
         #simplified some constants
         changed = True
-        if sumconst is not 0:
+        if not _is_exactly(sumconst,0):
             args = [sumconst]+avar
         else:
             args = avar
@@ -5566,12 +5580,12 @@ def _getitem_deriv(context,v,index,dvars):
             else:
                 return v.args[iconst].deriv(dvars,context)
         res = v.deriv(dvars,context)
-        if res is 0: return 0
+        if _is_exactly(res,0): return 0
         if res is None: return None
         return res[eindex]
     else:
         res = v.deriv(dvars,context)
-        if res is 0: return 0
+        if _is_exactly(res,0): return 0
         if res is None: return None
         if v.returnType().dims() >= 2:
             #the jacobian is flattened
@@ -6108,7 +6122,7 @@ def _dot_const_simplify(x,y):
                     for k in range(x.shape[-1]):
                         if x[xind+(k,)] != 0:
                             res += y[(k,)+yind]
-                    if res is not 0:
+                    if not _is_exactly(res,0):
                         newx[xind+yind] = res
                   newx[ind] = res
             """

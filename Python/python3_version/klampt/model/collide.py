@@ -14,7 +14,6 @@ intersection for a ray and a group of objects.
 
 from ..robotsim import *
 from ..math import vectorops,se3
-import collections
 
 
 def bb_intersect(a,b):
@@ -54,7 +53,7 @@ def self_collision_iter(geomlist,pairs='all'):
                 g2 = geomlist[j]
                 if g.collides(g2):
                     yield (i,j)
-    elif isinstance(pairs, collections.Callable):
+    elif callable(pairs):
         for i,g in enumerate(geomlist):
             for j in range(i+1,len(geomlist)):
                 if not pairs(i,j): continue
@@ -103,7 +102,7 @@ def group_collision_iter(geomlist1,geomlist2,pairs='all'):
                 #if not bb_intersect(bblist1[i],bblist2[j]): continue
                 if g.collides(g2):
                     yield (i,j)
-    elif isinstance(pairs, collections.Callable):
+    elif callable(pairs):
         for i,g in geoms1:
             for j,g2 in geoms2:
                 if not pairs(i,j): continue
@@ -158,7 +157,7 @@ def group_subset_collision_iter(geomlist,alist,blist,pairs='all'):
                 #if not bb_intersect(bblist[i],bblist[j]): continue
                 if g.collides(g2):
                     yield (i,j)
-    elif isinstance(pairs, collections.Callable):
+    elif callable(pairs):
         for i,g in geoms1:
             for j,g2 in geoms2:
                 if not pairs(i,j): continue

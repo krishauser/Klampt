@@ -10,7 +10,6 @@ import bisect
 from ..math import so3,se3,vectorops
 from ..math import spline
 from ..math.geodesic import *
-import collections
 
 class Trajectory:
     """A basic piecewise-linear trajectory class, which can be overloaded
@@ -589,7 +588,7 @@ class _HermiteConfigAdaptor(Trajectory):
             elif hasattr(res,'__iter__'):
                 return [(_HermiteConfigAdaptor(v) if isinstance(v,HermiteTrajectory) else v) for v in res]
             return res
-        if isinstance(hitem, collections.Callable):
+        if callable(hitem):
             return methodadaptor
         return hitem
 
@@ -894,7 +893,7 @@ def path_to_trajectory(path,velocities='auto',timing='limited',smoothing='spline
     _durations = None
     if isinstance(timing,(list,tuple)):
         _durations = timing
-    elif isinstance(timing, collections.Callable):
+    elif callable(timing):
         _durations = [timing(a,b) for a,b in zip(milestones[:-1],milestones[1:])]
     else:
         if isinstance(path,Trajectory):

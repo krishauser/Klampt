@@ -1,7 +1,6 @@
 """Defines the GLPluginInterface class, which is a unified base class for 
 plugins to the klampt.vis module.
 """
-import collections
 
 class GLPluginInterface:
     """Users can add their own hooks into the visualizer by overloading this
@@ -42,7 +41,7 @@ class GLPluginInterface:
     def add_action(self,callback,short_name,key,description=None):
         """Defines a new generic GUI action.  The action will be available in a menu in
         Qt or as keyboard commands in GLUT."""
-        if not isinstance(callback, collections.Callable):
+        if not callable(callback):
             raise ValueError("Invalid callback given to add_action(callback,short_name,key,description=None)")
         self.actions.append((callback,short_name,key,description))
 
