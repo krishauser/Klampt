@@ -1891,7 +1891,7 @@ bool ODESimulator::InstabilityCorrection()
         robots[i]->SetVelocities(zero);
       }
       else {
-        LOG4CXX_INFO(GET_LOGGER(ODESimulator),"Robot"<<robots[i]->robot.name<<" energy "<<ke<<" exceeds threshold "<<threshold);
+        LOG4CXX_INFO(GET_LOGGER(ODESimulator),"Robot "<<robots[i]->robot.name<<" energy "<<ke<<" exceeds threshold "<<threshold);
         Assert(ke > 0);
         Real newValue = 0;
         if(settings.instabilityPostCorrectionEnergy < 0)
