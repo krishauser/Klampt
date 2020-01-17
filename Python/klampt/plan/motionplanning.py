@@ -698,8 +698,6 @@ class PlannerInterface(_object):
         """
         Args:
             cspace (:class:`~klampt.CSpaceInterface`)
-        Returns:
-            (:obj:`PlannerInterface`):
         """
         this = _motionplanning.new_PlannerInterface(cspace)
         try:

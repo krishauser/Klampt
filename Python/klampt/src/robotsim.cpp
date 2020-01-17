@@ -594,7 +594,7 @@ void Geometry3D::set(const Geometry3D& g)
       geom = make_shared<AnyCollisionGeometry3D>();
   }
   else
-    Assert(&*geom == &*mgeom);
+    Assert(&*geom == &*(*mgeom));
   *geom = *ggeom;
   //geom->ClearCollisionData();
   if(mgeom) {
@@ -625,6 +625,7 @@ string Geometry3D::type()
   if(geom->Empty()) return "";
   string res = geom->TypeName();
   if(res == "Primitive") return "GeometricPrimitive";
+  if(res == "ImplicitSurface") return "VolumeGrid";
   return res;
 }
 
@@ -1051,7 +1052,7 @@ Geometry3D Geometry3D::convert(const char* destype,double param)
 
   if(srctype == destype2)
     return *this;
-  if(param < 0) throw PyException("Invalid conversion parameter, must be nonnegative");
+  if(param < 0 && srctype != AnyGeometry3D::ImplicitSurface) throw PyException("Invalid conversion parameter, must be nonnegative");
 
   //do the conversion
   geom->InitCollisionData();

@@ -441,7 +441,7 @@ class RobotTrajectory(Trajectory):
 
 class GeodesicTrajectory(Trajectory):
     """A trajectory that performs interpolation on a GeodesicSpace.
-    See klampt.geodesic for more information."""
+    See klampt.math.geodesic for more information."""
     def __init__(self,geodesic,times=None,milestones=None):
         self.geodesic = geodesic
         Trajectory.__init__(self,times,milestones)

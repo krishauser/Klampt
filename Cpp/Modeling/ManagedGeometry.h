@@ -59,6 +59,8 @@ class ManagedGeometry
   static ManagedGeometry* IsCached(const std::string& filename);
   ///Returns true if this instance is cached.
   bool IsCached() const;
+  ///Returns true if this instance is cached and is identical to a file on disk
+  bool IsOriginal() const;
   ///Adds to cache, if not already in it
   void AddToCache(const std::string& filename);
   ///Returns the filename to which this object is cached

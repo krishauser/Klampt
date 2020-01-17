@@ -1098,7 +1098,7 @@ def objectToVisType(item,world):
         validtypes = []
         for t in itypes:
             if t == 'Config':
-                if world != None and len(item) == world.robot(0).numLinks():
+                if world is not None and world.numRobots() > 0 and len(item) == world.robot(0).numLinks():
                     validtypes.append(t)
             elif t=='Vector3':
                 validtypes.append(t)

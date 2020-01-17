@@ -247,7 +247,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
 
     def closeEvent(self,event):
         if len(self.modified) > 0:
-            reply = QtWidgets.QMessageBox.question(self, "Unsaved changes", "Would you like to save changes to " ', '.join(self.modified)+ "?",
+            reply = QtWidgets.QMessageBox.question(self, "Unsaved changes", "Would you like to save changes to " + ', '.join(self.modified)+ "?",
                                     QtWidgets.QMessageBox.Yes|QtWidgets.QMessageBox.No);
             if reply == QtWidgets.QMessageBox.Yes:
                 self.onSaveClicked()
@@ -432,7 +432,10 @@ class ResourceBrowser(QtWidgets.QMainWindow):
         self.refresh()
 
     def add(self,fn,openDir=True):
-        assert fn not in self.active
+        #assert fn not in self.active
+        if fn in self.active:
+            print "add(): Warning, file",fn,"is already active"
+            return
         for i,(cfn,citem) in enumerate(self.visCache):
             if cfn == fn:
                 print 
@@ -572,7 +575,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
         if fn not in self.active:
             return
         if fn in self.modified:
-            reply = QtWidgets.QMessageBox.question(self, "Unsaved changes", "Would you like to save changes to " ', '.join(self.modified)+ "?",
+            reply = QtWidgets.QMessageBox.question(self, "Unsaved changes", "Would you like to save changes to " + ', '.join(self.modified)+ "?",
                                     QtWidgets.QMessageBox.Yes|QtWidgets.QMessageBox.No);
             if reply == QtWidgets.QMessageBox.Yes:
                 save(self.active[fn],fn)
