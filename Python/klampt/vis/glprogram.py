@@ -470,7 +470,7 @@ class GLRealtimeProgram(GLNavigationProgram):
         self.ttotal += self.dt
         self.counter += 1
 
-        #do something random
+        #call the user-defined idle function
         self.idle()
         
         self.lasttime = tcur
@@ -478,6 +478,7 @@ class GLRealtimeProgram(GLNavigationProgram):
         return True
 
     def idle(self):
+        """Overload me"""
         pass
 
 class GLPluginProgram(GLRealtimeProgram):
