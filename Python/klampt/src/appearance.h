@@ -102,6 +102,11 @@ class Appearance
   void setTexcoords(const std::vector<double>& uvs);
   ///For point clouds, sets the point size.
   void setPointSize(float size);
+  ///For meshes, sets the crease angle.  Set to 0 to disable smoothing.
+  void setCreaseAngle(float creaseAngleRads);
+  ///For meshes sets a silhouette radius and color.  Set the radius to 0 to disable
+  ///silhouette drawing.
+  void setSilhouette(float radius,float r=0,float g=0,float b=0,float a=1);
   ///Draws the currently associated geometry with this appearance.  A geometry
   ///is assocated with this appearance if this appearance comes from an
   ///element of the WorldMode, or if drawGL(geom) was previously called.

@@ -127,8 +127,9 @@ void SimGUIBackend::InitController(int i)
 void SimGUIBackend::InitContactFeedbackAll()
 {
   //world-object
-  for(size_t i=0;i<world->rigidObjects.size();i++) 
-    sim.EnableContactFeedback(world->RigidObjectID(i),world->TerrainID(0));
+  for(size_t i=0;i<world->terrains.size();i++) 
+    for(size_t j=0;j<world->rigidObjects.size();j++) 
+      sim.EnableContactFeedback(world->RigidObjectID(j),world->TerrainID(i));
   //robot-object
   for(size_t i=0;i<world->rigidObjects.size();i++) {
     for(size_t r=0;r<world->robots.size();r++) {
@@ -360,24 +361,24 @@ void SimGUIBackend::SetForceColors()
         kg /= world->robots[i]->GetTotalMass();
         Real green = 0.1, yellow = 1.0, red = 1.5; 
         if(kg < green) { //grey->green
-          color[0]=0.5-0.5*kg/green;
-          color[1]=0.5+0.5*kg/green;
-          color[2]=0.5-0.5*kg/green;
+          color[0]=float(0.5-0.5*kg/green);
+          color[1]=float(0.5+0.5*kg/green);
+          color[2]=float(0.5-0.5*kg/green);
         }
         else if(kg < yellow) { //green->yellow
           Real u=(kg-green)/(yellow-green);
-          color[0]=u;
-          color[1]=1.0;
+          color[0]=float(u);
+          color[1]=1;
           color[2]=0;
         }
         else if(kg < red) { //yellow->red
           Real u=(kg-yellow)/(red-yellow);
-          color[0]=u;
-          color[1]=1.0-u;
+          color[0]=float(u);
+          color[1]=float(1.0-u);
           color[2]=0;
         }
         else {
-          color[0]=1.0;
+          color[0]=1;
           color[1]=0;
           color[2]=0;
         }
@@ -400,12 +401,12 @@ void SimGUIBackend::RenderWorld()
 {
   //WorldGUIBackend::RenderWorld();
   glDisable(GL_LIGHTING);
-  drawCoords(0.1);
+  drawCoords(0.1f);
   glEnable(GL_LIGHTING);
   for(size_t i=0;i<world->terrains.size();i++)
-    world->terrains[i]->DrawGL();
+    world->terrains[i]->DrawGLOpaque(true);
   for(size_t i=0;i<world->rigidObjects.size();i++)
-    world->rigidObjects[i]->DrawGL();
+    world->rigidObjects[i]->DrawGLOpaque(true);
 
   for(size_t i=0;i<world->robots.size();i++) {
     for(size_t j=0;j<world->robots[i]->links.size();j++) {
@@ -413,6 +414,11 @@ void SimGUIBackend::RenderWorld()
       world->robotViews[i].DrawLink_World(j);
     }
   }
+
+  for(size_t i=0;i<world->terrains.size();i++)
+    world->terrains[i]->DrawGLOpaque(false);
+  for(size_t i=0;i<world->rigidObjects.size();i++)
+    world->rigidObjects[i]->DrawGLOpaque(false);
 }
 
 
@@ -423,7 +429,7 @@ void SimGUIBackend::DrawContacts(Real pointSize, Real fscale, Real nscale)
   glDisable(GL_BLEND);
   glEnable(GL_POINT_SMOOTH);
   glDisable(GL_DEPTH_TEST);
-  glPointSize(pointSize);
+  glPointSize((float)pointSize);
   for (WorldSimulation::ContactFeedbackMap::iterator i = sim.contactFeedback.begin(); i != sim.contactFeedback.end(); i++) {
     ODEContactList* c = sim.odesim.GetContactFeedback(i->first.first,
                                                       i->first.second);

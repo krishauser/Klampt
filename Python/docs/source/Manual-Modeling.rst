@@ -328,9 +328,9 @@ be interpreted in special ways. These special Joints include:
 -  ``spin`` joints, which are able to rotate freely and infinitely.
 -  ``floating`` joints, which translate and rotate freely in 3D (e.g.,
    free-floating bases)
--  ``floatingPlanar`` joints, which translate and rotate freely in 2D
+-  ``floatingplanar`` joints, which translate and rotate freely in 2D
    (e.g., mobile wheeled bases)
--  ``ballAndSocket`` joints, which rotate freely in 3D.
+-  ``ballandsocket`` joints, which rotate freely in 3D.
 -  ``closed`` joints, which indicate a closed kinematic loop. *Note:
    this is simply a placeholder for potential future capabilities; these
    are not yet handled in Klamp't.*
@@ -377,8 +377,9 @@ utility function for setting up a floating base.
 Rigid Object Models
 -------------------
 
-A Rigid Object Model is a Collision Geometry associated with a
-``RigidTransform`` and other dynamic parameters. ``Rigid Object``\ s may
+A Rigid Object Model is movable rigid object.  It consists of a Collision
+Geometry associated with a ``RigidTransform`` configuration, linear and
+angular velocity, and other dynamic parameters. Rigid objects may
 be loaded from ``.obj`` files or raw geometry files. In the latter case,
 the dynamic parameters are set to default values (e.g., ``mass = 1``).
 

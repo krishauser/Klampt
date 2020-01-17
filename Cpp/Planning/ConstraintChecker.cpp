@@ -99,7 +99,7 @@ bool ConstraintChecker::HasEnvCollision(Robot& robot,Terrain& env,const Stance& 
 	for (Stance::const_iterator i = stance.begin(); i != stance.end(); i++)
 		fixed[i->first] = true;
 
-	for (int i = 0; i < ignoreList.size(); i++)
+	for (size_t i = 0; i < ignoreList.size(); i++)
 		fixed[ignoreList[i]] = true;
 
 	for (size_t i = 0; i < robot.links.size(); i++) {
@@ -122,7 +122,7 @@ bool ConstraintChecker::HasEnvCollision(Robot& robot,Terrain& env,const vector<I
 	    fixed[constraints[i].link] = true;
 	}
 
-	for (int i = 0; i < ignoreList.size(); i++)
+	for (size_t i = 0; i < ignoreList.size(); i++)
 		fixed[ignoreList[i]] = true;
 
 	for (size_t i = 0; i < robot.links.size(); i++) {
@@ -142,7 +142,7 @@ bool ConstraintChecker::HasEnvCollision(Robot& robot,Terrain& env,const vector<I
 	robot.UpdateGeometry();
 	robot.InitMeshCollision(*env.geometry);
 	vector<bool> fixed(robot.links.size(), false);
-	for ( int i = 0;i < constraints.size(); i++)
+	for (size_t i = 0;i < constraints.size(); i++)
 	{
 		int linkIndex = constraints[i].link;
 		fixed[ linkIndex] = true;

@@ -155,6 +155,7 @@ bool GLUTGUI::OnDrawText(double x, double y, double z, const std::string &text, 
   glutBitmapString(fontface, text.c_str());
 
   glEnable(GL_DEPTH_TEST);
+  return true;
 }
 bool GLUTGUI::OnDrawText(int x, int y, const std::string &text, int height)
 {
@@ -173,6 +174,7 @@ bool GLUTGUI::OnDrawText(int x, int y, const std::string &text, int height)
   glutBitmapString(fontface, text.c_str());
 
   glEnable(GL_DEPTH_TEST);
+  return true;
 }
 
 #endif //HAVE_GLUT

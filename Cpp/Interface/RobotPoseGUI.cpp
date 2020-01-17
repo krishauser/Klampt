@@ -148,70 +148,71 @@ void RobotPoseBackend::RenderWorld()
   //want conditional drawing of the robot geometry
   //ResourceBrowserProgram::RenderWorld();
   for(size_t i=0;i<world->terrains.size();i++)
-    world->terrains[i]->DrawGL();
+    world->terrains[i]->DrawGLOpaque(true);
   for(size_t i=0;i<world->rigidObjects.size();i++)
-    world->rigidObjects[i]->DrawGL();
-  if(!robot) return;
-
-  if(draw_sensors) {
-    if(robotSensors.sensors.empty()) {
-      robotSensors.MakeDefault(robot);
+    world->rigidObjects[i]->DrawGLOpaque(true);
+  
+  if(robot) {
+    if(draw_sensors) {
+      if(robotSensors.sensors.empty()) {
+        robotSensors.MakeDefault(robot);
+      }
+      for(size_t i=0;i<robotSensors.sensors.size();i++) {
+        vector<double> measurements;
+        robotSensors.sensors[i]->DrawGL(*robot,measurements);
+      }
     }
-    for(size_t i=0;i<robotSensors.sensors.size();i++) {
-      vector<double> measurements;
-      robotSensors.sensors[i]->DrawGL(*robot,measurements);
-    }
-  }
 
-  ViewRobot& viewRobot = world->robotViews[0];
-  if(draw_geom) {
-    
-    //set the robot colors
-    GLColor robotColor(settings["robotColor"][0],settings["robotColor"][1],settings["robotColor"][2],settings["robotColor"][3]);
-    GLColor highlight(settings["hoverColor"][0],settings["hoverColor"][1],settings["hoverColor"][2],settings["hoverColor"][3]);
-    GLColor selfcolliding(settings["selfCollideColor"][0],settings["selfCollideColor"][1],settings["selfCollideColor"][2],settings["selfCollideColor"][3]);
-    GLColor envcolliding(settings["envCollideColor"][0],settings["envCollideColor"][1],settings["envCollideColor"][2],settings["envCollideColor"][3]);
+    ViewRobot& viewRobot = world->robotViews[0];
+    if(draw_geom) {
+      
+      //set the robot colors
+      GLColor robotColor(settings["robotColor"][0],settings["robotColor"][1],settings["robotColor"][2],settings["robotColor"][3]);
+      GLColor highlight(settings["hoverColor"][0],settings["hoverColor"][1],settings["hoverColor"][2],settings["hoverColor"][3]);
+      GLColor selfcolliding(settings["selfCollideColor"][0],settings["selfCollideColor"][1],settings["selfCollideColor"][2],settings["selfCollideColor"][3]);
+      GLColor envcolliding(settings["envCollideColor"][0],settings["envCollideColor"][1],settings["envCollideColor"][2],settings["envCollideColor"][3]);
 
-    viewRobot.SetColors(robotColor);
-    for(size_t i=0;i<robot->links.size();i++) {
-      if(self_colliding[i]) viewRobot.SetColor(i,selfcolliding);
-      if(env_colliding[i]) viewRobot.SetColor(i,envcolliding);
-      else if((int)i == cur_link)
-      viewRobot.SetColor(i,highlight);
+      viewRobot.SetColors(robotColor);
+      for(size_t i=0;i<robot->links.size();i++) {
+        if(self_colliding[i]) viewRobot.SetColor(i,selfcolliding);
+        if(env_colliding[i]) viewRobot.SetColor(i,envcolliding);
+        else if((int)i == cur_link)
+        viewRobot.SetColor(i,highlight);
+      }
+      if(draw_poser)
+        allWidgets.DrawGL(viewport);
+      else
+        viewRobot.Draw();
     }
-    if(draw_poser)
-      allWidgets.DrawGL(viewport);
-    else
-      viewRobot.Draw();
-  }
-  else {
-    if(draw_frame && draw_poser) {
-      //drawing frames, still should draw poser
-      viewRobot.SetColors(GLColor(0,0,0,0));
-      allWidgets.DrawGL(viewport);
+    else {
+      if(draw_frame && draw_poser) {
+        //drawing frames, still should draw poser
+        viewRobot.SetColors(GLColor(0,0,0,0));
+        allWidgets.DrawGL(viewport);
+      }
     }
-  }
 
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-  ResourceGUIBackend::RenderCurResource();
-  glDisable(GL_BLEND);
-   
-  if(draw_com) {
-    viewRobot.DrawCenterOfMass();
-    Real comSize = settings["linkCOMRadius"];
-    for(size_t i=0;i<robot->links.size();i++)
-      viewRobot.DrawLinkCenterOfMass(i,comSize);
-  }
-  if(draw_frame) {
-    viewRobot.DrawLinkFrames(settings["linkFrameSize"]);
-    viewRobot.DrawLinkSkeleton();
-    glDisable(GL_DEPTH_TEST);
-    glPushMatrix();
-    glMultMatrix((Matrix4)robot->links[cur_link].T_World);
-    drawCoords(settings["linkFrameSize"]);
-    glPopMatrix();
-    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+    ResourceGUIBackend::RenderCurResource();
+    glDisable(GL_BLEND);
+     
+    if(draw_com) {
+      viewRobot.DrawCenterOfMass();
+      Real comSize = settings["linkCOMRadius"];
+      for(size_t i=0;i<robot->links.size();i++)
+        viewRobot.DrawLinkCenterOfMass(i,comSize);
+    }
+    if(draw_frame) {
+      viewRobot.DrawLinkFrames(settings["linkFrameSize"]);
+      viewRobot.DrawLinkSkeleton();
+      glDisable(GL_DEPTH_TEST);
+      glPushMatrix();
+      glMultMatrix((Matrix4)robot->links[cur_link].T_World);
+      drawCoords(settings["linkFrameSize"]);
+      glPopMatrix();
+      glEnable(GL_DEPTH_TEST);
+    }
   }
   //draw bounding boxes
   if(draw_bbs) {
@@ -241,6 +242,11 @@ void RobotPoseBackend::RenderWorld()
       drawOrientedWireBox(bbox.dims.x,bbox.dims.y,bbox.dims.z,basis);
     }
   }
+
+  for(size_t i=0;i<world->terrains.size();i++)
+    world->terrains[i]->DrawGLOpaque(false);
+  for(size_t i=0;i<world->rigidObjects.size();i++)
+    world->rigidObjects[i]->DrawGLOpaque(false);
 }
 
 

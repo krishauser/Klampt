@@ -3,7 +3,7 @@ calculation subroutines, and performing equilibrium testing.
 """
 
 import ik
-from ..math import so3,se3
+from ..math import vectorops,so3,se3
 from .. import robotsim
 from ..robotsim import RobotModel,RobotModelLink,RigidObjectModel,TerrainModel
 
@@ -123,12 +123,12 @@ def _flatten(contactOrHoldList):
         return sum([_flatten(c) for c in contactOrHoldList],[])
 
 def forceClosure(contactOrHoldList):
-    """Given a list of contacts or Holds, tests for force closure.
+    """Given a list of ContactPoints or Holds, tests for force closure.
     Return value is True or False"""
     return robotsim.forceClosure(_flatten(contactOrHoldList))
     
 def comEquilibrium(contactOrHoldList,fext=(0,0,-1),com=None):
-    """Given a list of contacts or Holds, an external gravity force,
+    """Given a list of ContactPoints or Holds, an external gravity force,
     and a COM, tests for the existence of an equilibrium solution.
 
     If com == None, this tests whether there exists any equilibrium
@@ -139,7 +139,7 @@ def comEquilibrium(contactOrHoldList,fext=(0,0,-1),com=None):
     return robotsim.comEquilibrium(_flatten(contactOrHoldList),fext,com)
 
 def supportPolygon(contactOrHoldList):
-    """Given a list of contacts or Holds, returns the support polygon.
+    """Given a list of ContactPoints or Holds, returns the support polygon.
     The support polygon is given by list of tuples (ax,ay,b) such
     that the contraint ax*x+ay*y <= c holds for all (x,y) in the support
     polygon.
@@ -163,9 +163,9 @@ def equilibriumTorques(robot,holdList,fext=(0,0,-9.8),internalTorques=None,norm=
             may not get good results)
 
     Returns:
-        (tuple): A pair (t,f) giving the joint torques and a list of frictional
-            contact forces, if a solution exists. Or, the return value may be None
-            if no solution exists.
+        tuple or None: A pair (t,f) giving the joint torques and a list of frictional
+        contact forces, if a solution exists. The return value may be None
+        if no solution exists.
     """
     links = sum([[h.link]*len(h.contacts) for h in holdList],[])
     if internalTorques is None:
@@ -234,9 +234,76 @@ def contactMap(contacts,fixed=None):
             paircontacts.getdefault((o1,o2),[]).append(c)
     return paircontacts
 
+def geometryContacts(geom1,geom2,padding1,padding2=0,maxcontacts=0,kFriction=1):
+    """Similar to geom1.contacts(geom2,padding1,padding2,maxcontacts), but 
+    returns a list of ContactPoints, where the point (x) of each contact is 
+    placed in the middle of the overlap region.
+
+    The friction coefficient of each contact (kFriction) is set to kFriction.
+
+    Note:
+
+        Contact normals may be set to (0,0,0) if they cannot be computed
+        properly, such as when two meshes intersect.
+
+    """
+    res = geom1.contacts(geom2,padding1,padding2,maxcontacts)
+    cps = []
+    for i,(p1,p2,n) in enumerate(zip(res.points1,res.points2,res.normals)):
+        x = vectorops.interpolate(p1,p2,0.5)
+        n = [v for v in n]
+        cps.append(ContactPoint(x,n,kFriction))
+        cps[-1].object1 = geom1
+        cps[-1].object2 = geom2
+    return cps
+
+def worldContactMap(world,padding,kFriction=1,collider=None):
+    """Given a WorldModel, returns a contact map representing all current
+    contacts (distance >= 0 and <= padding).
+
+    Args:
+        world (WorldModel): the world
+        padding (float or function): if float, a constant padding, otherwise
+            a function f(object) that returns the padding for an object.
+        kFriction (float or function, optional): if float, a constant
+            friction.  Otherwise, a function f(object1,object2) that returns
+            the friction for a pair of objects.
+        collider (WorldCollider, optional): if given, only the pairs of
+            objects whose collisions are enabled will be checked.
+
+    Note:
+
+        Contact normals may be set to (0,0,0) if they cannot be computed
+        properly, such as when two meshes intersect.
+
+    """
+    fpadding = padding
+    ffriction = kFriction
+    if not callable(padding):
+        fpadding = lambda obj:padding
+    if not callable(kFriction):
+        ffriction = lambda obj1,obj2:kFriction
+    from collide import WorldCollider
+    if collider is None:
+        collider = WorldCollider(world)
+    cmap = dict()
+    for (i,j) in collider.collisionTests(bb_reject=False):
+        obj1,geom1 = i
+        obj2,geom2 = j
+        pad1 = fpadding(obj1)
+        pad2 = fpadding(obj2)
+        clist = geometryContacts(geom1,geom2,pad1,pad2)
+        if len(clist) > 0:
+            kf = ffriction(obj1,obj2)
+            for c in clist:
+                c.kFriction = kf
+            cmap[(obj1,obj2)] = clist
+    return cmap
+
 def simContactMap(sim):
-    """Given a robotsim simulation, returns a contact map representing all
-    current contacts (among bodies with collision feedback enabled)."""
+    """Given a Simulation, returns a contact map representing all
+    current contacts (among bodies with collision feedback enabled).
+    """
     cmap = dict()
     w = sim.world
     for a in xrange(w.numIDs()):

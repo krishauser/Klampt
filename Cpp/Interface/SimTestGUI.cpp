@@ -165,7 +165,7 @@ void SimTestBackend::ToggleSensorPlot(int sensorIndex,int enabled) {
     size_t start=sensorPlot.view.curveColors.size();
     sensorPlot.view.curveColors.resize(names.size());
     for(size_t i=start;i<sensorPlot.view.curveColors.size();i++) 
-      sensorPlot.view.curveColors[i].setHSV(Rand()*360.0,1,1);
+      sensorPlot.view.curveColors[i].setHSV((float)(Rand()*360.0),1,1);
 
     sensorPlots.push_back(sensorPlot);
   }
@@ -195,8 +195,8 @@ void SimTestBackend::ToggleSensorMeasurement(int sensorIndex,int measurement,int
     }
   if(!plot) return;
   if(measurement < 0 || measurement >= (int)plot->drawMeasurement.size()) return;
-  plot->drawMeasurement[measurement] = checked;
-  plot->view.curveColors[measurement].rgba[3] = checked;
+  plot->drawMeasurement[measurement] = bool(checked);
+  plot->view.curveColors[measurement].rgba[3] = float(checked);
   plot->view.AutoYRange();
   SendRefresh();
 }

@@ -17,10 +17,23 @@ You should also obtain:
 
 -  PyOpenGL for visualization. Try ``pip install PyOpenGL``.
 -  PyQt5 is highly recommended for resource editing and improved
-   visualization. Try ``pip install PyQt5``. (PyQt4 is also supported
-   for now, but at some point the package will be deprecated.)
+   visualization. Try ``pip install PyQt5``. (For Python 2.x users,
+   PyQt4 is also supported.  See note below.)
 -  Python Imaging Library (PIL) is required for saving screenshots to
    disk.
+
+.. note::
+
+    With Python 2.x on most platforms, PyQt5 can't be installed through pip,
+    so you will need to use PyQt4 instead. (You could try building PyQt5 from
+    source, but it's a tedious process.)
+
+    Python 2.7 Windows users will want to install the `correct PyQt4 binaries from
+    here <https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyqt4>`__
+
+    At some point PyQt4 will be deprecated, so eventually we will be migrating
+    Klamp't to use Python 3.x by default.
+
 
 Klampt-examples
 ----------------
@@ -36,13 +49,26 @@ install, e.g.,:
 
 Most of the examples in this manual require Klampt-examples to be downloaded to your computer.
 
+.. note::
+
+    All the examples in this manual are written assuming you are using Python 2.x.  If you are using Python 3.x,
+    you will need to replace any references to `Klampt-examples/Python` with `Klampt-examples/Python3`.
+
+    Moreover, if you have both Python 3.x and 2.x installed, but Klamp't is only installed with one version,
+    then all of the calls to `python` in the examples in this manual should be replaced with calls to either
+    `python2` or `python3`, whichever is appropriate.
+
 
 Troubleshooting
 ---------------
 
-Python 2.7 Windows users will want to install the `correct PyQt4
-binaries from
-here <https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyqt4>`__
+
+If you have multiple versions of Python installed on your machine,
+you will need to be aware of which version is currently referred to by `pip` and `python` commands.  You
+may need to use `pip3` or `pip2` to get the right version.  You may consider using a
+[virtual environment](https://docs.python-guide.org/dev/virtualenvs/) to help manage
+currently active version.
+
 
 You may get errors importing the \_robotsim module when calling
 ``import klampt``. This usually means some dependency DLL is missing on

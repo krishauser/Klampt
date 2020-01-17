@@ -1,13 +1,14 @@
-#include "Sensing/JointSensors.h"
-#include "Control/PathController.h"
-#include "Control/FeedforwardController.h"
-#include "Control/LoggingController.h"
-#include "Simulation/WorldSimulation.h"
-#include "Modeling/MultiPath.h"
-#include "WorldViewProgram.h"
-#include "IO/XmlWorld.h"
-#include "IO/XmlODE.h"
-#include "Planning/RobotTimeScaling.h"
+#include "SimViewProgram.h"
+
+#if HAVE_GLUI || HAVE_GLUT
+
+#include <Klampt/Sensing/JointSensors.h>
+#include <Klampt/Control/FeedforwardController.h>
+#include <Klampt/Control/LoggingController.h>
+#include <Klampt/Modeling/MultiPath.h>
+#include <Klampt/IO/XmlWorld.h>
+#include <Klampt/IO/XmlODE.h>
+#include <Klampt/Planning/RobotTimeScaling.h>
 #include <KrisLibrary/GLdraw/drawextra.h>
 #include <KrisLibrary/GLdraw/drawgeometry.h>
 #include <KrisLibrary/GLdraw/GL.h>
@@ -19,7 +20,7 @@
 typedef LoggingController MyController;
 typedef PolynomialPathController MyMilestoneController;
 
-inline PolynomialMotionQueue* GetMotionQueue(RobotController* rc)
+PolynomialMotionQueue* GetMotionQueue(RobotController* rc)
 {
   LoggingController* lc = dynamic_cast<LoggingController*>(rc);
   if(!lc) {
@@ -36,57 +37,9 @@ inline PolynomialMotionQueue* GetMotionQueue(RobotController* rc)
   return c;
 }
 
-
-class SimViewProgram : public WorldViewProgram
-{
-public:
-  int simulate;
-  WorldSimulation sim;
-  string initialState;
-
-  SimViewProgram(RobotWorld* world)
-    :WorldViewProgram(world),simulate(0)
-  {}
-
-  ///Loads from a world XML file
-  bool LoadAndInitSim(const char* xmlFile);
-
-  ///Loads from a command line
-  bool LoadAndInitSim(int argc,const char** argv);
-
-  ///Initializes simulation default controllers, sensors, and contact feedback
-  void InitSim();
-
-  ///Returns the simulation to its initial state
-  void ResetSim();
-
-  ///Renders the state of the simulation
-  virtual void RenderWorld();
-
-  ///Draws contact points
-  void DrawContacts(Real pointSize = 5.0, Real fscale = 0.01, Real nscale=0.05);
-  ///Draws wrenches
-  void DrawWrenches(Real fscale=-1);
-
-  ///Loads and sends a milestone path file
-  bool LoadMilestones(const char* fn);
-
-  ///Loads and sends a linear path file
-  bool LoadLinearPath(const char* fn);
-
-  ///Loads a simulation state file
-  bool LoadState(const char* fn);
-
-  ///Loads a multipath file and possibly discretizes it into a fine-grained linear path before sending
-  bool LoadMultiPath(const char* fn,bool constrainedInterpolate=true,Real interpolateTolerance=1e-2,Real durationScale=1.0);
-
-  ///Sends a linear path to the controller.  The path starts pathDelay
-  ///seconds after the current time
-  bool SendLinearPath(const vector<Real>& times,const vector<Config>& milestones,Real pathDelay=0.5); 
-
-  ///Logs the state of all objects in the world to the given CSV file
-  void DoLogging(const char* fn="simtest_log.csv");;
-};
+SimViewProgram::SimViewProgram(RobotWorld* world)
+  :WorldViewProgram(world),simulate(0)
+{}
 
 
 void SimViewProgram::InitSim()
@@ -270,9 +223,9 @@ void SimViewProgram::RenderWorld()
   drawCoords(0.1);
   glEnable(GL_LIGHTING);
   for(size_t i=0;i<world->terrains.size();i++)
-    world->terrains[i]->DrawGL();
+    world->terrains[i]->DrawGLOpaque(true);
   for(size_t i=0;i<world->rigidObjects.size();i++)
-    world->rigidObjects[i]->DrawGL();
+    world->rigidObjects[i]->DrawGLOpaque(true);
 
   for(size_t i=0;i<world->robots.size();i++) {
     world->robotViews[i].PushAppearance();
@@ -312,6 +265,11 @@ void SimViewProgram::RenderWorld()
     }
     world->robotViews[i].PopAppearance();
   }
+
+  for(size_t i=0;i<world->terrains.size();i++)
+    world->terrains[i]->DrawGLOpaque(false);
+  for(size_t i=0;i<world->rigidObjects.size();i++)
+    world->rigidObjects[i]->DrawGLOpaque(false);
 }
 
 
@@ -658,3 +616,5 @@ void SimViewProgram::DoLogging(const char* fn)
   out<<endl;
   out.close();
 }
+
+#endif //HAVE_GLUI || HAVE_GLUT

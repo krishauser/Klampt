@@ -9,6 +9,10 @@
 #include "IO/ROS.h"
 #include "View/Texturizer.h"
 
+//defined in XmlWorld.cpp
+string ResolveFileReference(const string& path,const string& fn);
+string MakeURLLocal(const string& url,const char* url_resolution_path="klampt_downloads");
+
 void Terrain::InitCollisions()
 {
   Timer timer;
@@ -22,7 +26,8 @@ bool Terrain::Load(const char* fn)
 {
   const char* ext=FileExtension(fn);
   if(ext && 0==strcmp(ext,"env")) {
-    SimpleFile f(fn);
+    string localpath = MakeURLLocal(fn);
+    SimpleFile f(localpath.c_str());
     if(!f) {
       fprintf(stderr,"SimpleFile read failed\n");
       return false;
@@ -33,7 +38,7 @@ bool Terrain::Load(const char* fn)
     }
     if(!f.CheckSize("mesh",1,fn)) return false;
     string fnPath = GetFilePath(fn);
-    string geomfn = fnPath + f["mesh"][0].AsString();
+    string geomfn = ResolveFileReference(fnPath,f["mesh"][0].AsString());
     if(!LoadGeometry(geomfn.c_str())) return false;
     Timer timer;
     if(timer.ElapsedTime() > 1.0)
@@ -42,13 +47,13 @@ bool Terrain::Load(const char* fn)
       if(!f.CheckType("kFriction",PrimitiveValue::Double,fn)) return false;
       vector<double> values=f.AsDouble("kFriction");
       if(values.size() == 1)
-	SetUniformFriction(values[0]);
+        SetUniformFriction(values[0]);
       else if(values.size() == geometry->NumElements()) {
-	kFriction = values;
+        kFriction = values;
       }
       else {
-	fprintf(stderr,"Terrain file doesn't contain the right number of friction values\n");
-	return false;
+        fprintf(stderr,"Terrain file doesn't contain the right number of friction values\n");
+        return false;
       }
     }
     else
@@ -69,7 +74,7 @@ bool Terrain::LoadGeometry(const char* fn)
   geomFile = fn;
   if(geometry.Load(geomFile)) {
     if(!geometry.Appearance()->tex1D && !geometry.Appearance()->tex2D) {
-      geometry.Appearance()->faceColor.set(0.8,0.6,0.2);
+      geometry.Appearance()->faceColor.set(0.8f,0.6f,0.2f);
       geometry.Appearance()->texWrap = true;
       Texturizer tex;
       tex.texture = "checker";
@@ -109,4 +114,11 @@ void Terrain::DrawGL()
   if(!geometry) return;
 
   geometry.DrawGL();
+}
+
+void Terrain::DrawGLOpaque(bool opaque)
+{
+  if(!geometry) return;
+
+  geometry.DrawGLOpaque(opaque);
 }

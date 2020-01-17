@@ -3011,76 +3011,77 @@ SWIG_Python_NonDynamicSetAttr(PyObject *obj, PyObject *name, PyObject *value) {
 
 #define SWIGTYPE_p_Appearance swig_types[0]
 #define SWIGTYPE_p_ContactParameters swig_types[1]
-#define SWIGTYPE_p_ControlledRobotSimulator swig_types[2]
-#define SWIGTYPE_p_DistanceQueryResult swig_types[3]
-#define SWIGTYPE_p_DistanceQuerySettings swig_types[4]
-#define SWIGTYPE_p_GeneralizedIKObjective swig_types[5]
-#define SWIGTYPE_p_GeneralizedIKSolver swig_types[6]
-#define SWIGTYPE_p_GeometricPrimitive swig_types[7]
-#define SWIGTYPE_p_Geometry3D swig_types[8]
-#define SWIGTYPE_p_IKGoal swig_types[9]
-#define SWIGTYPE_p_IKObjective swig_types[10]
-#define SWIGTYPE_p_IKSolver swig_types[11]
-#define SWIGTYPE_p_Mass swig_types[12]
-#define SWIGTYPE_p_ODEGeometry swig_types[13]
-#define SWIGTYPE_p_ObjectPoser swig_types[14]
-#define SWIGTYPE_p_PointCloud swig_types[15]
-#define SWIGTYPE_p_PointPoser swig_types[16]
-#define SWIGTYPE_p_RigidObject swig_types[17]
-#define SWIGTYPE_p_RigidObjectModel swig_types[18]
-#define SWIGTYPE_p_Robot swig_types[19]
-#define SWIGTYPE_p_RobotModel swig_types[20]
-#define SWIGTYPE_p_RobotModelDriver swig_types[21]
-#define SWIGTYPE_p_RobotModelLink swig_types[22]
-#define SWIGTYPE_p_RobotPoser swig_types[23]
-#define SWIGTYPE_p_SensorBase swig_types[24]
-#define SWIGTYPE_p_SimBody swig_types[25]
-#define SWIGTYPE_p_SimRobotController swig_types[26]
-#define SWIGTYPE_p_SimRobotSensor swig_types[27]
-#define SWIGTYPE_p_Simulator swig_types[28]
-#define SWIGTYPE_p_Terrain swig_types[29]
-#define SWIGTYPE_p_TerrainModel swig_types[30]
-#define SWIGTYPE_p_TransformPoser swig_types[31]
-#define SWIGTYPE_p_TriangleMesh swig_types[32]
-#define SWIGTYPE_p_Viewport swig_types[33]
-#define SWIGTYPE_p_VolumeGrid swig_types[34]
-#define SWIGTYPE_p_Widget swig_types[35]
-#define SWIGTYPE_p_WidgetSet swig_types[36]
-#define SWIGTYPE_p_WorldModel swig_types[37]
-#define SWIGTYPE_p_WorldSimulation swig_types[38]
-#define SWIGTYPE_p__object swig_types[39]
-#define SWIGTYPE_p_allocator_type swig_types[40]
-#define SWIGTYPE_p_char swig_types[41]
-#define SWIGTYPE_p_difference_type swig_types[42]
-#define SWIGTYPE_p_double swig_types[43]
-#define SWIGTYPE_p_doubleArray swig_types[44]
-#define SWIGTYPE_p_dxBody swig_types[45]
-#define SWIGTYPE_p_float swig_types[46]
-#define SWIGTYPE_p_floatArray swig_types[47]
-#define SWIGTYPE_p_int swig_types[48]
-#define SWIGTYPE_p_intArray swig_types[49]
-#define SWIGTYPE_p_p__object swig_types[50]
-#define SWIGTYPE_p_size_type swig_types[51]
-#define SWIGTYPE_p_std__allocatorT_double_t swig_types[52]
-#define SWIGTYPE_p_std__allocatorT_float_t swig_types[53]
-#define SWIGTYPE_p_std__allocatorT_int_t swig_types[54]
-#define SWIGTYPE_p_std__allocatorT_std__string_t swig_types[55]
-#define SWIGTYPE_p_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t swig_types[56]
-#define SWIGTYPE_p_std__invalid_argument swig_types[57]
-#define SWIGTYPE_p_std__mapT_std__string_std__string_t swig_types[58]
-#define SWIGTYPE_p_std__vectorT_GeneralizedIKObjective_std__allocatorT_GeneralizedIKObjective_t_t swig_types[59]
-#define SWIGTYPE_p_std__vectorT_IKObjective_std__allocatorT_IKObjective_t_t swig_types[60]
-#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t swig_types[61]
-#define SWIGTYPE_p_std__vectorT_float_std__allocatorT_float_t_t swig_types[62]
-#define SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t swig_types[63]
-#define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t swig_types[64]
-#define SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t swig_types[65]
-#define SWIGTYPE_p_std__vectorT_unsigned_char_std__allocatorT_unsigned_char_t_t swig_types[66]
-#define SWIGTYPE_p_swig__SwigPyIterator swig_types[67]
-#define SWIGTYPE_p_value_type swig_types[68]
-#define SWIGTYPE_p_void swig_types[69]
-static swig_type_info *swig_types[71];
-static swig_module_info swig_module = {swig_types, 70, 0, 0, 0, 0};
+#define SWIGTYPE_p_ContactQueryResult swig_types[2]
+#define SWIGTYPE_p_ControlledRobotSimulator swig_types[3]
+#define SWIGTYPE_p_DistanceQueryResult swig_types[4]
+#define SWIGTYPE_p_DistanceQuerySettings swig_types[5]
+#define SWIGTYPE_p_GeneralizedIKObjective swig_types[6]
+#define SWIGTYPE_p_GeneralizedIKSolver swig_types[7]
+#define SWIGTYPE_p_GeometricPrimitive swig_types[8]
+#define SWIGTYPE_p_Geometry3D swig_types[9]
+#define SWIGTYPE_p_IKGoal swig_types[10]
+#define SWIGTYPE_p_IKObjective swig_types[11]
+#define SWIGTYPE_p_IKSolver swig_types[12]
+#define SWIGTYPE_p_Mass swig_types[13]
+#define SWIGTYPE_p_ODEGeometry swig_types[14]
+#define SWIGTYPE_p_ObjectPoser swig_types[15]
+#define SWIGTYPE_p_PointCloud swig_types[16]
+#define SWIGTYPE_p_PointPoser swig_types[17]
+#define SWIGTYPE_p_RigidObject swig_types[18]
+#define SWIGTYPE_p_RigidObjectModel swig_types[19]
+#define SWIGTYPE_p_Robot swig_types[20]
+#define SWIGTYPE_p_RobotModel swig_types[21]
+#define SWIGTYPE_p_RobotModelDriver swig_types[22]
+#define SWIGTYPE_p_RobotModelLink swig_types[23]
+#define SWIGTYPE_p_RobotPoser swig_types[24]
+#define SWIGTYPE_p_SensorBase swig_types[25]
+#define SWIGTYPE_p_SimBody swig_types[26]
+#define SWIGTYPE_p_SimRobotController swig_types[27]
+#define SWIGTYPE_p_SimRobotSensor swig_types[28]
+#define SWIGTYPE_p_Simulator swig_types[29]
+#define SWIGTYPE_p_Terrain swig_types[30]
+#define SWIGTYPE_p_TerrainModel swig_types[31]
+#define SWIGTYPE_p_TransformPoser swig_types[32]
+#define SWIGTYPE_p_TriangleMesh swig_types[33]
+#define SWIGTYPE_p_Viewport swig_types[34]
+#define SWIGTYPE_p_VolumeGrid swig_types[35]
+#define SWIGTYPE_p_Widget swig_types[36]
+#define SWIGTYPE_p_WidgetSet swig_types[37]
+#define SWIGTYPE_p_WorldModel swig_types[38]
+#define SWIGTYPE_p_WorldSimulation swig_types[39]
+#define SWIGTYPE_p__object swig_types[40]
+#define SWIGTYPE_p_allocator_type swig_types[41]
+#define SWIGTYPE_p_char swig_types[42]
+#define SWIGTYPE_p_difference_type swig_types[43]
+#define SWIGTYPE_p_double swig_types[44]
+#define SWIGTYPE_p_doubleArray swig_types[45]
+#define SWIGTYPE_p_dxBody swig_types[46]
+#define SWIGTYPE_p_float swig_types[47]
+#define SWIGTYPE_p_floatArray swig_types[48]
+#define SWIGTYPE_p_int swig_types[49]
+#define SWIGTYPE_p_intArray swig_types[50]
+#define SWIGTYPE_p_p__object swig_types[51]
+#define SWIGTYPE_p_size_type swig_types[52]
+#define SWIGTYPE_p_std__allocatorT_double_t swig_types[53]
+#define SWIGTYPE_p_std__allocatorT_float_t swig_types[54]
+#define SWIGTYPE_p_std__allocatorT_int_t swig_types[55]
+#define SWIGTYPE_p_std__allocatorT_std__string_t swig_types[56]
+#define SWIGTYPE_p_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t swig_types[57]
+#define SWIGTYPE_p_std__invalid_argument swig_types[58]
+#define SWIGTYPE_p_std__mapT_std__string_std__string_t swig_types[59]
+#define SWIGTYPE_p_std__vectorT_GeneralizedIKObjective_std__allocatorT_GeneralizedIKObjective_t_t swig_types[60]
+#define SWIGTYPE_p_std__vectorT_IKObjective_std__allocatorT_IKObjective_t_t swig_types[61]
+#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t swig_types[62]
+#define SWIGTYPE_p_std__vectorT_float_std__allocatorT_float_t_t swig_types[63]
+#define SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t swig_types[64]
+#define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t swig_types[65]
+#define SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t swig_types[66]
+#define SWIGTYPE_p_std__vectorT_unsigned_char_std__allocatorT_unsigned_char_t_t swig_types[67]
+#define SWIGTYPE_p_swig__SwigPyIterator swig_types[68]
+#define SWIGTYPE_p_value_type swig_types[69]
+#define SWIGTYPE_p_void swig_types[70]
+static swig_type_info *swig_types[72];
+static swig_module_info swig_module = {swig_types, 71, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -20294,6 +20295,110 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_DistanceQueryResult_elem1_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  DistanceQueryResult *arg1 = (DistanceQueryResult *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:DistanceQueryResult_elem1_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_DistanceQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "DistanceQueryResult_elem1_set" "', argument " "1"" of type '" "DistanceQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< DistanceQueryResult * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "DistanceQueryResult_elem1_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  if (arg1) (arg1)->elem1 = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_DistanceQueryResult_elem1_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  DistanceQueryResult *arg1 = (DistanceQueryResult *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:DistanceQueryResult_elem1_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_DistanceQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "DistanceQueryResult_elem1_get" "', argument " "1"" of type '" "DistanceQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< DistanceQueryResult * >(argp1);
+  result = (int) ((arg1)->elem1);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_DistanceQueryResult_elem2_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  DistanceQueryResult *arg1 = (DistanceQueryResult *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:DistanceQueryResult_elem2_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_DistanceQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "DistanceQueryResult_elem2_set" "', argument " "1"" of type '" "DistanceQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< DistanceQueryResult * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "DistanceQueryResult_elem2_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  if (arg1) (arg1)->elem2 = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_DistanceQueryResult_elem2_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  DistanceQueryResult *arg1 = (DistanceQueryResult *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:DistanceQueryResult_elem2_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_DistanceQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "DistanceQueryResult_elem2_get" "', argument " "1"" of type '" "DistanceQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< DistanceQueryResult * >(argp1);
+  result = (int) ((arg1)->elem2);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_new_DistanceQueryResult(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   DistanceQueryResult *result = 0 ;
@@ -20356,6 +20461,383 @@ SWIGINTERN PyObject *DistanceQueryResult_swigregister(PyObject *SWIGUNUSEDPARM(s
   PyObject *obj;
   if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
   SWIG_TypeNewClientData(SWIGTYPE_p_DistanceQueryResult, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
+SWIGINTERN PyObject *_wrap_ContactQueryResult_depths_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ContactQueryResult *arg1 = (ContactQueryResult *) 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = (std::vector< double,std::allocator< double > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:ContactQueryResult_depths_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ContactQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ContactQueryResult_depths_set" "', argument " "1"" of type '" "ContactQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< ContactQueryResult * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "ContactQueryResult_depths_set" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > *""'"); 
+  }
+  arg2 = reinterpret_cast< std::vector< double,std::allocator< double > > * >(argp2);
+  if (arg1) (arg1)->depths = *arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_ContactQueryResult_depths_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ContactQueryResult *arg1 = (ContactQueryResult *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::vector< double,std::allocator< double > > *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:ContactQueryResult_depths_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ContactQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ContactQueryResult_depths_get" "', argument " "1"" of type '" "ContactQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< ContactQueryResult * >(argp1);
+  result = (std::vector< double,std::allocator< double > > *)& ((arg1)->depths);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_ContactQueryResult_points1_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ContactQueryResult *arg1 = (ContactQueryResult *) 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg2 = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:ContactQueryResult_points1_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ContactQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ContactQueryResult_points1_set" "', argument " "1"" of type '" "ContactQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< ContactQueryResult * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "ContactQueryResult_points1_set" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *""'"); 
+  }
+  arg2 = reinterpret_cast< std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > * >(argp2);
+  if (arg1) (arg1)->points1 = *arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_ContactQueryResult_points1_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ContactQueryResult *arg1 = (ContactQueryResult *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:ContactQueryResult_points1_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ContactQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ContactQueryResult_points1_get" "', argument " "1"" of type '" "ContactQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< ContactQueryResult * >(argp1);
+  result = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)& ((arg1)->points1);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_ContactQueryResult_points2_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ContactQueryResult *arg1 = (ContactQueryResult *) 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg2 = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:ContactQueryResult_points2_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ContactQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ContactQueryResult_points2_set" "', argument " "1"" of type '" "ContactQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< ContactQueryResult * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "ContactQueryResult_points2_set" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *""'"); 
+  }
+  arg2 = reinterpret_cast< std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > * >(argp2);
+  if (arg1) (arg1)->points2 = *arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_ContactQueryResult_points2_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ContactQueryResult *arg1 = (ContactQueryResult *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:ContactQueryResult_points2_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ContactQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ContactQueryResult_points2_get" "', argument " "1"" of type '" "ContactQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< ContactQueryResult * >(argp1);
+  result = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)& ((arg1)->points2);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_ContactQueryResult_normals_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ContactQueryResult *arg1 = (ContactQueryResult *) 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg2 = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:ContactQueryResult_normals_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ContactQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ContactQueryResult_normals_set" "', argument " "1"" of type '" "ContactQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< ContactQueryResult * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "ContactQueryResult_normals_set" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *""'"); 
+  }
+  arg2 = reinterpret_cast< std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > * >(argp2);
+  if (arg1) (arg1)->normals = *arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_ContactQueryResult_normals_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ContactQueryResult *arg1 = (ContactQueryResult *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:ContactQueryResult_normals_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ContactQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ContactQueryResult_normals_get" "', argument " "1"" of type '" "ContactQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< ContactQueryResult * >(argp1);
+  result = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)& ((arg1)->normals);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_ContactQueryResult_elems1_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ContactQueryResult *arg1 = (ContactQueryResult *) 0 ;
+  std::vector< int,std::allocator< int > > *arg2 = (std::vector< int,std::allocator< int > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:ContactQueryResult_elems1_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ContactQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ContactQueryResult_elems1_set" "', argument " "1"" of type '" "ContactQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< ContactQueryResult * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "ContactQueryResult_elems1_set" "', argument " "2"" of type '" "std::vector< int,std::allocator< int > > *""'"); 
+  }
+  arg2 = reinterpret_cast< std::vector< int,std::allocator< int > > * >(argp2);
+  if (arg1) (arg1)->elems1 = *arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_ContactQueryResult_elems1_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ContactQueryResult *arg1 = (ContactQueryResult *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::vector< int,std::allocator< int > > *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:ContactQueryResult_elems1_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ContactQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ContactQueryResult_elems1_get" "', argument " "1"" of type '" "ContactQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< ContactQueryResult * >(argp1);
+  result = (std::vector< int,std::allocator< int > > *)& ((arg1)->elems1);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_ContactQueryResult_elems2_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ContactQueryResult *arg1 = (ContactQueryResult *) 0 ;
+  std::vector< int,std::allocator< int > > *arg2 = (std::vector< int,std::allocator< int > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:ContactQueryResult_elems2_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ContactQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ContactQueryResult_elems2_set" "', argument " "1"" of type '" "ContactQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< ContactQueryResult * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "ContactQueryResult_elems2_set" "', argument " "2"" of type '" "std::vector< int,std::allocator< int > > *""'"); 
+  }
+  arg2 = reinterpret_cast< std::vector< int,std::allocator< int > > * >(argp2);
+  if (arg1) (arg1)->elems2 = *arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_ContactQueryResult_elems2_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ContactQueryResult *arg1 = (ContactQueryResult *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::vector< int,std::allocator< int > > *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:ContactQueryResult_elems2_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ContactQueryResult, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ContactQueryResult_elems2_get" "', argument " "1"" of type '" "ContactQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< ContactQueryResult * >(argp1);
+  result = (std::vector< int,std::allocator< int > > *)& ((arg1)->elems2);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_ContactQueryResult(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ContactQueryResult *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)":new_ContactQueryResult")) SWIG_fail;
+  {
+    try {
+      result = (ContactQueryResult *)new ContactQueryResult();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_ContactQueryResult, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_ContactQueryResult(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ContactQueryResult *arg1 = (ContactQueryResult *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:delete_ContactQueryResult",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ContactQueryResult, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_ContactQueryResult" "', argument " "1"" of type '" "ContactQueryResult *""'"); 
+  }
+  arg1 = reinterpret_cast< ContactQueryResult * >(argp1);
+  {
+    try {
+      delete arg1;
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *ContactQueryResult_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj;
+  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_ContactQueryResult, SWIG_NewClientData(obj));
   return SWIG_Py_Void();
 }
 
@@ -22907,6 +23389,221 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Geometry3D_contacts__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  Geometry3D *arg2 = 0 ;
+  double arg3 ;
+  double arg4 ;
+  int arg5 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  double val3 ;
+  int ecode3 = 0 ;
+  double val4 ;
+  int ecode4 = 0 ;
+  int val5 ;
+  int ecode5 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  PyObject * obj4 = 0 ;
+  ContactQueryResult result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOOO:Geometry3D_contacts",&obj0,&obj1,&obj2,&obj3,&obj4)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_contacts" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Geometry3D,  0  | 0);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_contacts" "', argument " "2"" of type '" "Geometry3D const &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_contacts" "', argument " "2"" of type '" "Geometry3D const &""'"); 
+  }
+  arg2 = reinterpret_cast< Geometry3D * >(argp2);
+  ecode3 = SWIG_AsVal_double(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Geometry3D_contacts" "', argument " "3"" of type '" "double""'");
+  } 
+  arg3 = static_cast< double >(val3);
+  ecode4 = SWIG_AsVal_double(obj3, &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "Geometry3D_contacts" "', argument " "4"" of type '" "double""'");
+  } 
+  arg4 = static_cast< double >(val4);
+  ecode5 = SWIG_AsVal_int(obj4, &val5);
+  if (!SWIG_IsOK(ecode5)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "Geometry3D_contacts" "', argument " "5"" of type '" "int""'");
+  } 
+  arg5 = static_cast< int >(val5);
+  {
+    try {
+      result = (arg1)->contacts((Geometry3D const &)*arg2,arg3,arg4,arg5);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj((new ContactQueryResult(static_cast< const ContactQueryResult& >(result))), SWIGTYPE_p_ContactQueryResult, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_contacts__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  Geometry3D *arg2 = 0 ;
+  double arg3 ;
+  double arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  double val3 ;
+  int ecode3 = 0 ;
+  double val4 ;
+  int ecode4 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  ContactQueryResult result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOO:Geometry3D_contacts",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_contacts" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Geometry3D,  0  | 0);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_contacts" "', argument " "2"" of type '" "Geometry3D const &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_contacts" "', argument " "2"" of type '" "Geometry3D const &""'"); 
+  }
+  arg2 = reinterpret_cast< Geometry3D * >(argp2);
+  ecode3 = SWIG_AsVal_double(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Geometry3D_contacts" "', argument " "3"" of type '" "double""'");
+  } 
+  arg3 = static_cast< double >(val3);
+  ecode4 = SWIG_AsVal_double(obj3, &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "Geometry3D_contacts" "', argument " "4"" of type '" "double""'");
+  } 
+  arg4 = static_cast< double >(val4);
+  {
+    try {
+      result = (arg1)->contacts((Geometry3D const &)*arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj((new ContactQueryResult(static_cast< const ContactQueryResult& >(result))), SWIGTYPE_p_ContactQueryResult, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_contacts(PyObject *self, PyObject *args) {
+  Py_ssize_t argc;
+  PyObject *argv[6] = {
+    0
+  };
+  Py_ssize_t ii;
+  
+  if (!PyTuple_Check(args)) SWIG_fail;
+  argc = args ? PyObject_Length(args) : 0;
+  for (ii = 0; (ii < 5) && (ii < argc); ii++) {
+    argv[ii] = PyTuple_GET_ITEM(args,ii);
+  }
+  if (argc == 4) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Geometry3D, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_Geometry3D, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        {
+          int res = SWIG_AsVal_double(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          {
+            int res = SWIG_AsVal_double(argv[3], NULL);
+            _v = SWIG_CheckState(res);
+          }
+          if (_v) {
+            return _wrap_Geometry3D_contacts__SWIG_1(self, args);
+          }
+        }
+      }
+    }
+  }
+  if (argc == 5) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Geometry3D, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_Geometry3D, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        {
+          int res = SWIG_AsVal_double(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          {
+            int res = SWIG_AsVal_double(argv[3], NULL);
+            _v = SWIG_CheckState(res);
+          }
+          if (_v) {
+            {
+              int res = SWIG_AsVal_int(argv[4], NULL);
+              _v = SWIG_CheckState(res);
+            }
+            if (_v) {
+              return _wrap_Geometry3D_contacts__SWIG_0(self, args);
+            }
+          }
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'Geometry3D_contacts'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    Geometry3D::contacts(Geometry3D const &,double,double,int)\n"
+    "    Geometry3D::contacts(Geometry3D const &,double,double)\n");
+  return 0;
+}
+
+
 SWIGINTERN PyObject *_wrap_Geometry3D_world_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Geometry3D *arg1 = (Geometry3D *) 0 ;
@@ -25001,6 +25698,508 @@ SWIGINTERN PyObject *_wrap_Appearance_setPointSize(PyObject *SWIGUNUSEDPARM(self
   return resultobj;
 fail:
   return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_setCreaseAngle(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
+  float arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  float val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:Appearance_setCreaseAngle",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_setCreaseAngle" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  ecode2 = SWIG_AsVal_float(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Appearance_setCreaseAngle" "', argument " "2"" of type '" "float""'");
+  } 
+  arg2 = static_cast< float >(val2);
+  {
+    try {
+      (arg1)->setCreaseAngle(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_setSilhouette__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
+  float arg2 ;
+  float arg3 ;
+  float arg4 ;
+  float arg5 ;
+  float arg6 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  float val2 ;
+  int ecode2 = 0 ;
+  float val3 ;
+  int ecode3 = 0 ;
+  float val4 ;
+  int ecode4 = 0 ;
+  float val5 ;
+  int ecode5 = 0 ;
+  float val6 ;
+  int ecode6 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  PyObject * obj4 = 0 ;
+  PyObject * obj5 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOOOO:Appearance_setSilhouette",&obj0,&obj1,&obj2,&obj3,&obj4,&obj5)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_setSilhouette" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  ecode2 = SWIG_AsVal_float(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Appearance_setSilhouette" "', argument " "2"" of type '" "float""'");
+  } 
+  arg2 = static_cast< float >(val2);
+  ecode3 = SWIG_AsVal_float(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Appearance_setSilhouette" "', argument " "3"" of type '" "float""'");
+  } 
+  arg3 = static_cast< float >(val3);
+  ecode4 = SWIG_AsVal_float(obj3, &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "Appearance_setSilhouette" "', argument " "4"" of type '" "float""'");
+  } 
+  arg4 = static_cast< float >(val4);
+  ecode5 = SWIG_AsVal_float(obj4, &val5);
+  if (!SWIG_IsOK(ecode5)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "Appearance_setSilhouette" "', argument " "5"" of type '" "float""'");
+  } 
+  arg5 = static_cast< float >(val5);
+  ecode6 = SWIG_AsVal_float(obj5, &val6);
+  if (!SWIG_IsOK(ecode6)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "Appearance_setSilhouette" "', argument " "6"" of type '" "float""'");
+  } 
+  arg6 = static_cast< float >(val6);
+  {
+    try {
+      (arg1)->setSilhouette(arg2,arg3,arg4,arg5,arg6);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_setSilhouette__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
+  float arg2 ;
+  float arg3 ;
+  float arg4 ;
+  float arg5 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  float val2 ;
+  int ecode2 = 0 ;
+  float val3 ;
+  int ecode3 = 0 ;
+  float val4 ;
+  int ecode4 = 0 ;
+  float val5 ;
+  int ecode5 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  PyObject * obj4 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOOO:Appearance_setSilhouette",&obj0,&obj1,&obj2,&obj3,&obj4)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_setSilhouette" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  ecode2 = SWIG_AsVal_float(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Appearance_setSilhouette" "', argument " "2"" of type '" "float""'");
+  } 
+  arg2 = static_cast< float >(val2);
+  ecode3 = SWIG_AsVal_float(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Appearance_setSilhouette" "', argument " "3"" of type '" "float""'");
+  } 
+  arg3 = static_cast< float >(val3);
+  ecode4 = SWIG_AsVal_float(obj3, &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "Appearance_setSilhouette" "', argument " "4"" of type '" "float""'");
+  } 
+  arg4 = static_cast< float >(val4);
+  ecode5 = SWIG_AsVal_float(obj4, &val5);
+  if (!SWIG_IsOK(ecode5)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "Appearance_setSilhouette" "', argument " "5"" of type '" "float""'");
+  } 
+  arg5 = static_cast< float >(val5);
+  {
+    try {
+      (arg1)->setSilhouette(arg2,arg3,arg4,arg5);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_setSilhouette__SWIG_2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
+  float arg2 ;
+  float arg3 ;
+  float arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  float val2 ;
+  int ecode2 = 0 ;
+  float val3 ;
+  int ecode3 = 0 ;
+  float val4 ;
+  int ecode4 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOO:Appearance_setSilhouette",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_setSilhouette" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  ecode2 = SWIG_AsVal_float(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Appearance_setSilhouette" "', argument " "2"" of type '" "float""'");
+  } 
+  arg2 = static_cast< float >(val2);
+  ecode3 = SWIG_AsVal_float(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Appearance_setSilhouette" "', argument " "3"" of type '" "float""'");
+  } 
+  arg3 = static_cast< float >(val3);
+  ecode4 = SWIG_AsVal_float(obj3, &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "Appearance_setSilhouette" "', argument " "4"" of type '" "float""'");
+  } 
+  arg4 = static_cast< float >(val4);
+  {
+    try {
+      (arg1)->setSilhouette(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_setSilhouette__SWIG_3(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
+  float arg2 ;
+  float arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  float val2 ;
+  int ecode2 = 0 ;
+  float val3 ;
+  int ecode3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:Appearance_setSilhouette",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_setSilhouette" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  ecode2 = SWIG_AsVal_float(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Appearance_setSilhouette" "', argument " "2"" of type '" "float""'");
+  } 
+  arg2 = static_cast< float >(val2);
+  ecode3 = SWIG_AsVal_float(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Appearance_setSilhouette" "', argument " "3"" of type '" "float""'");
+  } 
+  arg3 = static_cast< float >(val3);
+  {
+    try {
+      (arg1)->setSilhouette(arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_setSilhouette__SWIG_4(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
+  float arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  float val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:Appearance_setSilhouette",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_setSilhouette" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  ecode2 = SWIG_AsVal_float(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Appearance_setSilhouette" "', argument " "2"" of type '" "float""'");
+  } 
+  arg2 = static_cast< float >(val2);
+  {
+    try {
+      (arg1)->setSilhouette(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_setSilhouette(PyObject *self, PyObject *args) {
+  Py_ssize_t argc;
+  PyObject *argv[7] = {
+    0
+  };
+  Py_ssize_t ii;
+  
+  if (!PyTuple_Check(args)) SWIG_fail;
+  argc = args ? PyObject_Length(args) : 0;
+  for (ii = 0; (ii < 6) && (ii < argc); ii++) {
+    argv[ii] = PyTuple_GET_ITEM(args,ii);
+  }
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Appearance, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_float(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        return _wrap_Appearance_setSilhouette__SWIG_4(self, args);
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Appearance, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_float(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        {
+          int res = SWIG_AsVal_float(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          return _wrap_Appearance_setSilhouette__SWIG_3(self, args);
+        }
+      }
+    }
+  }
+  if (argc == 4) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Appearance, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_float(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        {
+          int res = SWIG_AsVal_float(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          {
+            int res = SWIG_AsVal_float(argv[3], NULL);
+            _v = SWIG_CheckState(res);
+          }
+          if (_v) {
+            return _wrap_Appearance_setSilhouette__SWIG_2(self, args);
+          }
+        }
+      }
+    }
+  }
+  if (argc == 5) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Appearance, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_float(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        {
+          int res = SWIG_AsVal_float(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          {
+            int res = SWIG_AsVal_float(argv[3], NULL);
+            _v = SWIG_CheckState(res);
+          }
+          if (_v) {
+            {
+              int res = SWIG_AsVal_float(argv[4], NULL);
+              _v = SWIG_CheckState(res);
+            }
+            if (_v) {
+              return _wrap_Appearance_setSilhouette__SWIG_1(self, args);
+            }
+          }
+        }
+      }
+    }
+  }
+  if (argc == 6) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Appearance, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_float(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        {
+          int res = SWIG_AsVal_float(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          {
+            int res = SWIG_AsVal_float(argv[3], NULL);
+            _v = SWIG_CheckState(res);
+          }
+          if (_v) {
+            {
+              int res = SWIG_AsVal_float(argv[4], NULL);
+              _v = SWIG_CheckState(res);
+            }
+            if (_v) {
+              {
+                int res = SWIG_AsVal_float(argv[5], NULL);
+                _v = SWIG_CheckState(res);
+              }
+              if (_v) {
+                return _wrap_Appearance_setSilhouette__SWIG_0(self, args);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'Appearance_setSilhouette'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    Appearance::setSilhouette(float,float,float,float,float)\n"
+    "    Appearance::setSilhouette(float,float,float,float)\n"
+    "    Appearance::setSilhouette(float,float,float)\n"
+    "    Appearance::setSilhouette(float,float)\n"
+    "    Appearance::setSilhouette(float)\n");
+  return 0;
 }
 
 
@@ -31415,25 +32614,18 @@ SWIGINTERN PyObject *_wrap_RobotModelDriver_getAffectedLinks(PyObject *SWIGUNUSE
   std::vector< int,std::allocator< int > > *arg2 = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
+  std::vector< int > temp2 ;
   PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:RobotModelDriver_getAffectedLinks",&obj0,&obj1)) SWIG_fail;
+  {
+    arg2 = &temp2;
+  }
+  if (!PyArg_ParseTuple(args,(char *)"O:RobotModelDriver_getAffectedLinks",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelDriver, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelDriver_getAffectedLinks" "', argument " "1"" of type '" "RobotModelDriver *""'"); 
   }
   arg1 = reinterpret_cast< RobotModelDriver * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t,  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "RobotModelDriver_getAffectedLinks" "', argument " "2"" of type '" "std::vector< int,std::allocator< int > > &""'"); 
-  }
-  if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "RobotModelDriver_getAffectedLinks" "', argument " "2"" of type '" "std::vector< int,std::allocator< int > > &""'"); 
-  }
-  arg2 = reinterpret_cast< std::vector< int,std::allocator< int > > * >(argp2);
   {
     try {
       (arg1)->getAffectedLinks(*arg2);
@@ -31448,6 +32640,25 @@ SWIGINTERN PyObject *_wrap_RobotModelDriver_getAffectedLinks(PyObject *SWIGUNUSE
     }
   }
   resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_iarray_obj(&(*arg2)[0],(int)arg2->size());
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
   return resultobj;
 fail:
   return NULL;
@@ -31461,36 +32672,22 @@ SWIGINTERN PyObject *_wrap_RobotModelDriver_getAffineCoeffs(PyObject *SWIGUNUSED
   std::vector< double,std::allocator< double > > *arg3 = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
+  std::vector< double > temp2 ;
+  std::vector< double > temp3 ;
   PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OOO:RobotModelDriver_getAffineCoeffs",&obj0,&obj1,&obj2)) SWIG_fail;
+  {
+    arg2 = &temp2;
+  }
+  {
+    arg3 = &temp3;
+  }
+  if (!PyArg_ParseTuple(args,(char *)"O:RobotModelDriver_getAffineCoeffs",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelDriver, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelDriver_getAffineCoeffs" "', argument " "1"" of type '" "RobotModelDriver *""'"); 
   }
   arg1 = reinterpret_cast< RobotModelDriver * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t,  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "RobotModelDriver_getAffineCoeffs" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > &""'"); 
-  }
-  if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "RobotModelDriver_getAffineCoeffs" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > &""'"); 
-  }
-  arg2 = reinterpret_cast< std::vector< double,std::allocator< double > > * >(argp2);
-  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t,  0 );
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "RobotModelDriver_getAffineCoeffs" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > &""'"); 
-  }
-  if (!argp3) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "RobotModelDriver_getAffineCoeffs" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > &""'"); 
-  }
-  arg3 = reinterpret_cast< std::vector< double,std::allocator< double > > * >(argp3);
   {
     try {
       (arg1)->getAffineCoeffs(*arg2,*arg3);
@@ -31505,6 +32702,44 @@ SWIGINTERN PyObject *_wrap_RobotModelDriver_getAffineCoeffs(PyObject *SWIGUNUSED
     }
   }
   resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(&(*arg2)[0],(int)arg2->size());
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(&(*arg3)[0],(int)arg3->size());
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
   return resultobj;
 fail:
   return NULL;
@@ -45108,7 +46343,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_new_SimRobotSensor(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_new_SimRobotSensor__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Robot *arg1 = (Robot *) 0 ;
   SensorBase *arg2 = (SensorBase *) 0 ;
@@ -45148,6 +46383,120 @@ SWIGINTERN PyObject *_wrap_new_SimRobotSensor(PyObject *SWIGUNUSEDPARM(self), Py
   return resultobj;
 fail:
   return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_SimRobotSensor__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SimRobotController *arg1 = 0 ;
+  char *arg2 = (char *) 0 ;
+  char *arg3 = (char *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  int res3 ;
+  char *buf3 = 0 ;
+  int alloc3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  SimRobotSensor *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:new_SimRobotSensor",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_SimRobotController,  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_SimRobotSensor" "', argument " "1"" of type '" "SimRobotController &""'"); 
+  }
+  if (!argp1) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_SimRobotSensor" "', argument " "1"" of type '" "SimRobotController &""'"); 
+  }
+  arg1 = reinterpret_cast< SimRobotController * >(argp1);
+  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "new_SimRobotSensor" "', argument " "2"" of type '" "char const *""'");
+  }
+  arg2 = reinterpret_cast< char * >(buf2);
+  res3 = SWIG_AsCharPtrAndSize(obj2, &buf3, NULL, &alloc3);
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "new_SimRobotSensor" "', argument " "3"" of type '" "char const *""'");
+  }
+  arg3 = reinterpret_cast< char * >(buf3);
+  {
+    try {
+      result = (SimRobotSensor *)new SimRobotSensor(*arg1,(char const *)arg2,(char const *)arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_SimRobotSensor, SWIG_POINTER_NEW |  0 );
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
+  return resultobj;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_SimRobotSensor(PyObject *self, PyObject *args) {
+  Py_ssize_t argc;
+  PyObject *argv[4] = {
+    0
+  };
+  Py_ssize_t ii;
+  
+  if (!PyTuple_Check(args)) SWIG_fail;
+  argc = args ? PyObject_Length(args) : 0;
+  for (ii = 0; (ii < 3) && (ii < argc); ii++) {
+    argv[ii] = PyTuple_GET_ITEM(args,ii);
+  }
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Robot, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      void *vptr = 0;
+      int res = SWIG_ConvertPtr(argv[1], &vptr, SWIGTYPE_p_SensorBase, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        return _wrap_new_SimRobotSensor__SWIG_0(self, args);
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_SimRobotController, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_AsCharPtrAndSize(argv[1], 0, NULL, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        int res = SWIG_AsCharPtrAndSize(argv[2], 0, NULL, 0);
+        _v = SWIG_CheckState(res);
+        if (_v) {
+          return _wrap_new_SimRobotSensor__SWIG_1(self, args);
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'new_SimRobotSensor'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    SimRobotSensor::SimRobotSensor(Robot *,SensorBase *)\n"
+    "    SimRobotSensor::SimRobotSensor(SimRobotController &,char const *,char const *)\n");
+  return 0;
 }
 
 
@@ -46064,6 +47413,63 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_SimRobotController_getCommandedTorque(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SimRobotController *arg1 = (SimRobotController *) 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::vector< double > temp2 ;
+  PyObject * obj0 = 0 ;
+  
+  {
+    arg2 = &temp2;
+  }
+  if (!PyArg_ParseTuple(args,(char *)"O:SimRobotController_getCommandedTorque",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SimRobotController, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotController_getCommandedTorque" "', argument " "1"" of type '" "SimRobotController *""'"); 
+  }
+  arg1 = reinterpret_cast< SimRobotController * >(argp1);
+  {
+    try {
+      (arg1)->getCommandedTorque(*arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(&(*arg2)[0],(int)arg2->size());
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_SimRobotController_getSensedConfig(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   SimRobotController *arg1 = (SimRobotController *) 0 ;
@@ -46142,6 +47548,63 @@ SWIGINTERN PyObject *_wrap_SimRobotController_getSensedVelocity(PyObject *SWIGUN
   {
     try {
       (arg1)->getSensedVelocity(*arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(&(*arg2)[0],(int)arg2->size());
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SimRobotController_getSensedTorque(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SimRobotController *arg1 = (SimRobotController *) 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::vector< double > temp2 ;
+  PyObject * obj0 = 0 ;
+  
+  {
+    arg2 = &temp2;
+  }
+  if (!PyArg_ParseTuple(args,(char *)"O:SimRobotController_getSensedTorque",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SimRobotController, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotController_getSensedTorque" "', argument " "1"" of type '" "SimRobotController *""'"); 
+  }
+  arg1 = reinterpret_cast< SimRobotController * >(argp1);
+  {
+    try {
+      (arg1)->getSensedTorque(*arg2);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -50099,6 +51562,72 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Simulator_getActualTorque(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Simulator *arg1 = (Simulator *) 0 ;
+  int arg2 ;
+  std::vector< double,std::allocator< double > > *arg3 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  std::vector< double > temp3 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  {
+    arg3 = &temp3;
+  }
+  if (!PyArg_ParseTuple(args,(char *)"OO:Simulator_getActualTorque",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Simulator, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Simulator_getActualTorque" "', argument " "1"" of type '" "Simulator *""'"); 
+  }
+  arg1 = reinterpret_cast< Simulator * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Simulator_getActualTorque" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  {
+    try {
+      (arg1)->getActualTorque(arg2,*arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(&(*arg3)[0],(int)arg3->size());
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_Simulator_getActualTorques(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Simulator *arg1 = (Simulator *) 0 ;
@@ -53940,6 +55469,16 @@ static PyMethodDef SwigMethods[] = {
 		"    m.vertices = [0,0,0]   #this is an error\n"
 		"    m.vertices += [1,2,3]   #this is also an error  \n"
 		"\n"
+		"To get all vertices as a numpy array:  \n"
+		"\n"
+		"    verts = np.array(m.vertices).reshape((len(m.vertices)//3,3))  \n"
+		"\n"
+		"To get all indices as a numpy array:  \n"
+		"\n"
+		"    inds = np.array(m.indices,dtype=np.int32).reshape((len(m.indices)//3,3))  \n"
+		"\n"
+		"(Or use the convenience functions in klampt.io.numpy)  \n"
+		"\n"
 		"C++ includes: geometry.h\n"
 		"\n"
 		""},
@@ -54119,6 +55658,8 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"*   version: version of the PCL file, typically \"0.7\"  \n"
 		"*   id: integer id  \n"
+		"*   width: the width of a structured point cloud  \n"
+		"*   height: the height of a structured point cloud  \n"
 		"*   viewpoint: \"ox oy oz qw qx qy qz\"  \n"
 		"\n"
 		"Examples::  \n"
@@ -54140,6 +55681,16 @@ static PyMethodDef SwigMethods[] = {
 		"    print len(pc.properties.size())\n"
 		"    #this prints 0; this is the default value added when addPoint is called\n"
 		"    print pc.getProperty(1,0)  \n"
+		"\n"
+		"To get all points as an n x 3 numpy array:  \n"
+		"\n"
+		"    points = np.array(pc.vertices).reshape((pc.numPoints(),3))  \n"
+		"\n"
+		"To get all properties as a n x k numpy array:  \n"
+		"\n"
+		"properties = np.array(pc.properties).reshape((p.numPoints(),p.numProperties()))  \n"
+		"\n"
+		"(Or use the convenience functions in klampt.io.numpy)  \n"
 		"\n"
 		"C++ includes: geometry.h\n"
 		"\n"
@@ -54242,7 +55793,18 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"An axis-aligned volumetric grid, typically a signed distance transform with > 0\n"
-		"indicating outside and < 0 indicating inside. Can also store an occupancy grid.  \n"
+		"indicating outside and < 0 indicating inside. Can also store an occupancy grid\n"
+		"with 1 indicating inside and 0 indicating outside.  \n"
+		"\n"
+		"Attributes: bbox (SWIG vector of 6 doubles): contains min and max bounds\n"
+		"(xmin,ymin,zmin),(xmax,ymax,zmax) dims (SWIG vector of of 3 ints): size of grid\n"
+		"in each of 3 dimensions values (SWIG vector of doubles): contains a 3D array of\n"
+		"dims[0]*dims[1]*dims[1] values.  \n"
+		"\n"
+		"The cell index (i,j,k) is flattened to i*dims[1]*dims[2] + j*dims[2] + k.  \n"
+		"\n"
+		"The array index i is associated to cell index (i/(dims[1]*dims[2]), (i/dims[2])\n"
+		"% dims[1], idims[2])  \n"
 		"\n"
 		"C++ includes: geometry.h\n"
 		"\n"
@@ -54277,6 +55839,10 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"DistanceQueryResult_grad1_get", _wrap_DistanceQueryResult_grad1_get, METH_VARARGS, (char *)"DistanceQueryResult_grad1_get(DistanceQueryResult self) -> doubleVector"},
 	 { (char *)"DistanceQueryResult_grad2_set", _wrap_DistanceQueryResult_grad2_set, METH_VARARGS, (char *)"DistanceQueryResult_grad2_set(DistanceQueryResult self, doubleVector grad2)"},
 	 { (char *)"DistanceQueryResult_grad2_get", _wrap_DistanceQueryResult_grad2_get, METH_VARARGS, (char *)"DistanceQueryResult_grad2_get(DistanceQueryResult self) -> doubleVector"},
+	 { (char *)"DistanceQueryResult_elem1_set", _wrap_DistanceQueryResult_elem1_set, METH_VARARGS, (char *)"DistanceQueryResult_elem1_set(DistanceQueryResult self, int elem1)"},
+	 { (char *)"DistanceQueryResult_elem1_get", _wrap_DistanceQueryResult_elem1_get, METH_VARARGS, (char *)"DistanceQueryResult_elem1_get(DistanceQueryResult self) -> int"},
+	 { (char *)"DistanceQueryResult_elem2_set", _wrap_DistanceQueryResult_elem2_set, METH_VARARGS, (char *)"DistanceQueryResult_elem2_set(DistanceQueryResult self, int elem2)"},
+	 { (char *)"DistanceQueryResult_elem2_get", _wrap_DistanceQueryResult_elem2_get, METH_VARARGS, (char *)"DistanceQueryResult_elem2_get(DistanceQueryResult self) -> int"},
 	 { (char *)"new_DistanceQueryResult", _wrap_new_DistanceQueryResult, METH_VARARGS, (char *)"\n"
 		"new_DistanceQueryResult() -> DistanceQueryResult\n"
 		"\n"
@@ -54289,22 +55855,67 @@ static PyMethodDef SwigMethods[] = {
 		"    d (float): The calculated distance, with negative values indicating\n"
 		"        penetration.  Can also be upperBound if the branch was hit.\n"
 		"    hasClosestPoints (bool):  If true, the closest point information is\n"
-		"        given in cp0 and cp1.\n"
+		"        given in cp0 and cp1, and elem1 and elem2\n"
 		"    hasGradients (bool):  f true, distance gradient information is given\n"
 		"        in grad0 and grad1.\n"
 		"    cp1, cp2 (list of 3 floats, optional): closest points on self vs other,\n"
 		"        both given in world coordinates\n"
 		"    grad1, grad2 (list of 3 floats, optional): the gradients of the\n"
-		"        objects' signed distance fields, in world coordinates.\n"
+		"        objects' signed distance fields at the closest points.  Given in\n"
+		"        world coordinates.\n"
 		"\n"
 		"        I.e., to move object1 to touch object2, move it in direction\n"
-		"        grad1 by distance -d.  Note that grad2 is always -grad1.  \n"
+		"        grad1 by distance -d.  Note that grad2 is always -grad1.\n"
+		"    elems1, elems2 (int): for compound objects, these are the\n"
+		"        element indices corresponding to the closest points.  \n"
 		"\n"
 		"C++ includes: geometry.h\n"
 		"\n"
 		""},
 	 { (char *)"delete_DistanceQueryResult", _wrap_delete_DistanceQueryResult, METH_VARARGS, (char *)"delete_DistanceQueryResult(DistanceQueryResult self)"},
 	 { (char *)"DistanceQueryResult_swigregister", DistanceQueryResult_swigregister, METH_VARARGS, NULL},
+	 { (char *)"ContactQueryResult_depths_set", _wrap_ContactQueryResult_depths_set, METH_VARARGS, (char *)"ContactQueryResult_depths_set(ContactQueryResult self, doubleVector depths)"},
+	 { (char *)"ContactQueryResult_depths_get", _wrap_ContactQueryResult_depths_get, METH_VARARGS, (char *)"ContactQueryResult_depths_get(ContactQueryResult self) -> doubleVector"},
+	 { (char *)"ContactQueryResult_points1_set", _wrap_ContactQueryResult_points1_set, METH_VARARGS, (char *)"ContactQueryResult_points1_set(ContactQueryResult self, doubleMatrix points1)"},
+	 { (char *)"ContactQueryResult_points1_get", _wrap_ContactQueryResult_points1_get, METH_VARARGS, (char *)"ContactQueryResult_points1_get(ContactQueryResult self) -> doubleMatrix"},
+	 { (char *)"ContactQueryResult_points2_set", _wrap_ContactQueryResult_points2_set, METH_VARARGS, (char *)"ContactQueryResult_points2_set(ContactQueryResult self, doubleMatrix points2)"},
+	 { (char *)"ContactQueryResult_points2_get", _wrap_ContactQueryResult_points2_get, METH_VARARGS, (char *)"ContactQueryResult_points2_get(ContactQueryResult self) -> doubleMatrix"},
+	 { (char *)"ContactQueryResult_normals_set", _wrap_ContactQueryResult_normals_set, METH_VARARGS, (char *)"ContactQueryResult_normals_set(ContactQueryResult self, doubleMatrix normals)"},
+	 { (char *)"ContactQueryResult_normals_get", _wrap_ContactQueryResult_normals_get, METH_VARARGS, (char *)"ContactQueryResult_normals_get(ContactQueryResult self) -> doubleMatrix"},
+	 { (char *)"ContactQueryResult_elems1_set", _wrap_ContactQueryResult_elems1_set, METH_VARARGS, (char *)"ContactQueryResult_elems1_set(ContactQueryResult self, intVector elems1)"},
+	 { (char *)"ContactQueryResult_elems1_get", _wrap_ContactQueryResult_elems1_get, METH_VARARGS, (char *)"ContactQueryResult_elems1_get(ContactQueryResult self) -> intVector"},
+	 { (char *)"ContactQueryResult_elems2_set", _wrap_ContactQueryResult_elems2_set, METH_VARARGS, (char *)"ContactQueryResult_elems2_set(ContactQueryResult self, intVector elems2)"},
+	 { (char *)"ContactQueryResult_elems2_get", _wrap_ContactQueryResult_elems2_get, METH_VARARGS, (char *)"ContactQueryResult_elems2_get(ContactQueryResult self) -> intVector"},
+	 { (char *)"new_ContactQueryResult", _wrap_new_ContactQueryResult, METH_VARARGS, (char *)"\n"
+		"new_ContactQueryResult() -> ContactQueryResult\n"
+		"\n"
+		"\n"
+		"\n"
+		"The result from a contact query of :class:`~klampt.Geometry3D`. The number of\n"
+		"contacts n is variable.  \n"
+		"\n"
+		"Attributes:  \n"
+		"\n"
+		"    depths (list of n floats): penetration depths for each contact point.\n"
+		"        The depth is measured with respect to the padded geometry, and must\n"
+		"        be nonnegative. A value of 0 indicates that depth cannot be\n"
+		"        determined accurately.\n"
+		"    points1, points2 (list of n lists of floats): contact points on self vs\n"
+		"        other,  The top level list has n entries, and each entry is a\n"
+		"        3-list expressed in world coordinates.  If an object is padded,\n"
+		"        these points are on the surface of the padded geometry.\n"
+		"    normals (list of n lists of floats): the outward-facing contact normal\n"
+		"        from this to other at each contact point, given in world\n"
+		"        coordinates.  Each entry is a 3-list, and can be a unit vector,\n"
+		"        or [0,0,0] if the the normal cannot be computed properly.\n"
+		"    elems1, elems2 (list of n ints): for compound objects, these are the\n"
+		"        element indices corresponding to each contact.  \n"
+		"\n"
+		"C++ includes: geometry.h\n"
+		"\n"
+		""},
+	 { (char *)"delete_ContactQueryResult", _wrap_delete_ContactQueryResult, METH_VARARGS, (char *)"delete_ContactQueryResult(ContactQueryResult self)"},
+	 { (char *)"ContactQueryResult_swigregister", ContactQueryResult_swigregister, METH_VARARGS, NULL},
 	 { (char *)"new_Geometry3D", _wrap_new_Geometry3D, METH_VARARGS, (char *)"\n"
 		"Geometry3D()\n"
 		"Geometry3D(Geometry3D arg2)\n"
@@ -54359,8 +55970,8 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Returns the type of geometry: TriangleMesh, PointCloud, VolumeGrid, or\n"
-		"GeometricPrimitive.  \n"
+		"Returns the type of geometry: TriangleMesh, PointCloud, VolumeGrid,\n"
+		"GeometricPrimitive, or Group.  \n"
 		"\n"
 		""},
 	 { (char *)"Geometry3D_empty", _wrap_Geometry3D_empty, METH_VARARGS, (char *)"\n"
@@ -54610,6 +56221,11 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns true if this geometry collides with the other.  \n"
 		"\n"
+		"Unsupported types:  \n"
+		"\n"
+		"*   VolumeGrid - TriangleMesh  \n"
+		"*   VolumeGrid - VolumeGrid  \n"
+		"\n"
 		""},
 	 { (char *)"Geometry3D_withinDistance", _wrap_Geometry3D_withinDistance, METH_VARARGS, (char *)"\n"
 		"Geometry3D_withinDistance(Geometry3D self, Geometry3D other, double tol) -> bool\n"
@@ -54663,13 +56279,26 @@ static PyMethodDef SwigMethods[] = {
 		"Returns the the distance and closest points between the given geometries.  \n"
 		"\n"
 		"If the objects are penetrating, some combinations of geometry types allow\n"
-		"calculating penetration depths (GeometricPrimitive-GeometricPrimitive,\n"
-		"GeometricPrimitive-TriangleMesh (surface only), GeometricPrimitive-PointCloud,\n"
-		"GeometricPrimitive-VolumeGrid, TriangleMesh (surface only)- GeometricPrimitive,\n"
-		"PointCloud-VolumeGrid). In this case, a negative value is returned and cp1,cp2\n"
-		"are the deepest penetrating points.  \n"
+		"calculating penetration depths:  \n"
 		"\n"
-		"Same comments as the distance_point function  \n"
+		"*   GeometricPrimitive-GeometricPrimitive (Python-supported sub-types only)  \n"
+		"*   GeometricPrimitive-TriangleMesh (surface only)  \n"
+		"*   GeometricPrimitive-PointCloud  \n"
+		"*   GeometricPrimitive-VolumeGrid  \n"
+		"*   TriangleMesh (surface only)-GeometricPrimitive  \n"
+		"*   PointCloud-VolumeGrid  \n"
+		"\n"
+		"If penetration is supported, a negative distance is returned and cp1,cp2 are the\n"
+		"deepest penetrating points.  \n"
+		"\n"
+		"Unsupported types:  \n"
+		"\n"
+		"*   GeometricPrimitive-GeometricPrimitive subtypes segment vs aabb  \n"
+		"*   PointCloud-PointCloud  \n"
+		"*   VolumeGrid-TriangleMesh  \n"
+		"*   VolumeGrid-VolumeGrid  \n"
+		"\n"
+		"See the comments of the distance_point function  \n"
 		"\n"
 		""},
 	 { (char *)"Geometry3D_distance_ext", _wrap_Geometry3D_distance_ext, METH_VARARGS, (char *)"\n"
@@ -54690,6 +56319,32 @@ static PyMethodDef SwigMethods[] = {
 		"Returns (hit,pt) where hit is true if the ray starting at s and pointing in\n"
 		"direction d hits the geometry (given in world coordinates); pt is the hit point,\n"
 		"in world coordinates.  \n"
+		"\n"
+		""},
+	 { (char *)"Geometry3D_contacts", _wrap_Geometry3D_contacts, METH_VARARGS, (char *)"\n"
+		"contacts(Geometry3D other, double padding1, double padding2, int maxContacts=0) -> ContactQueryResult\n"
+		"Geometry3D_contacts(Geometry3D self, Geometry3D other, double padding1, double padding2) -> ContactQueryResult\n"
+		"\n"
+		"\n"
+		"\n"
+		"Returns the set of contact points between this and other. This set is a discrete\n"
+		"representation of the region of surface overlap, which is defined as all pairs\n"
+		"of points within distance self.collisionMargin + other.collisionMargin +\n"
+		"padding1 + padding2.  \n"
+		"\n"
+		"For some geometry types (TriangleMesh-TriangleMesh, TriangleMesh-PointCloud,\n"
+		"PointCloud-PointCloud) padding must be positive to get meaningful contact poitns\n"
+		"and normals.  \n"
+		"\n"
+		"If maxContacts != 0 a clustering postprocessing step is performed.  \n"
+		"\n"
+		"Unsupported types:  \n"
+		"\n"
+		"*   GeometricPrimitive-GeometricPrimitive subtypes segment vs aabb  \n"
+		"*   VolumeGrid-GeometricPrimitive any subtypes except point and sphere. also,\n"
+		"    the results are potentially inaccurate for non-convex VolumeGrids.  \n"
+		"*   VolumeGrid-TriangleMesh  \n"
+		"*   VolumeGrid-VolumeGrid  \n"
 		"\n"
 		""},
 	 { (char *)"Geometry3D_world_set", _wrap_Geometry3D_world_set, METH_VARARGS, (char *)"Geometry3D_world_set(Geometry3D self, int world)"},
@@ -54881,6 +56536,27 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"For point clouds, sets the point size.  \n"
+		"\n"
+		""},
+	 { (char *)"Appearance_setCreaseAngle", _wrap_Appearance_setCreaseAngle, METH_VARARGS, (char *)"\n"
+		"Appearance_setCreaseAngle(Appearance self, float creaseAngleRads)\n"
+		"\n"
+		"\n"
+		"\n"
+		"For meshes, sets the crease angle. Set to 0 to disable smoothing.  \n"
+		"\n"
+		""},
+	 { (char *)"Appearance_setSilhouette", _wrap_Appearance_setSilhouette, METH_VARARGS, (char *)"\n"
+		"setSilhouette(float radius, float r=0, float g=0, float b=0, float a=1)\n"
+		"setSilhouette(float radius, float r=0, float g=0, float b=0)\n"
+		"setSilhouette(float radius, float r=0, float g=0)\n"
+		"setSilhouette(float radius, float r=0)\n"
+		"Appearance_setSilhouette(Appearance self, float radius)\n"
+		"\n"
+		"\n"
+		"\n"
+		"For meshes sets a silhouette radius and color. Set the radius to 0 to disable\n"
+		"silhouette drawing.  \n"
 		"\n"
 		""},
 	 { (char *)"Appearance_drawGL", _wrap_Appearance_drawGL, METH_VARARGS, (char *)"\n"
@@ -55550,7 +57226,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		""},
 	 { (char *)"RobotModelLink_getPositionJacobian", _wrap_RobotModelLink_getPositionJacobian, METH_VARARGS, (char *)"\n"
-		"RobotModelLink_getPositionJacobian(RobotModelLink self, double const [3] p)\n"
+		"RobotModelLink_getPositionJacobian(RobotModelLink self, double const [3] plocal)\n"
 		"\n"
 		"\n"
 		"\n"
@@ -55629,7 +57305,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		""},
 	 { (char *)"RobotModelLink_getPositionHessian", _wrap_RobotModelLink_getPositionHessian, METH_VARARGS, (char *)"\n"
-		"RobotModelLink_getPositionHessian(RobotModelLink self, double const [3] p)\n"
+		"RobotModelLink_getPositionHessian(RobotModelLink self, double const [3] plocal)\n"
 		"\n"
 		"\n"
 		"\n"
@@ -55724,20 +57400,22 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		""},
 	 { (char *)"RobotModelDriver_getAffectedLinks", _wrap_RobotModelDriver_getAffectedLinks, METH_VARARGS, (char *)"\n"
-		"RobotModelDriver_getAffectedLinks(RobotModelDriver self, intVector links)\n"
+		"RobotModelDriver_getAffectedLinks(RobotModelDriver self)\n"
 		"\n"
 		"\n"
 		"\n"
-		"Returns the driver's affected links.  \n"
+		"Returns the indices of the driver's affected links.  \n"
 		"\n"
 		""},
 	 { (char *)"RobotModelDriver_getAffineCoeffs", _wrap_RobotModelDriver_getAffineCoeffs, METH_VARARGS, (char *)"\n"
-		"RobotModelDriver_getAffineCoeffs(RobotModelDriver self, doubleVector scale, doubleVector offset)\n"
+		"RobotModelDriver_getAffineCoeffs(RobotModelDriver self)\n"
 		"\n"
 		"\n"
 		"\n"
 		"For \"affine\" links, returns the scale and offset of the driver value mapped to\n"
 		"the world.  \n"
+		"\n"
+		"Returns: tuple: a pair (scale,offset), each of length len(getAffectedLinks()).  \n"
 		"\n"
 		""},
 	 { (char *)"RobotModelDriver_setValue", _wrap_RobotModelDriver_setValue, METH_VARARGS, (char *)"\n"
@@ -57393,7 +59071,8 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		""},
 	 { (char *)"new_SimRobotSensor", _wrap_new_SimRobotSensor, METH_VARARGS, (char *)"\n"
-		"new_SimRobotSensor(Robot * robot, SensorBase * sensor) -> SimRobotSensor\n"
+		"SimRobotSensor(Robot * robot, SensorBase * sensor)\n"
+		"new_SimRobotSensor(SimRobotController robot, char const * name, char const * type) -> SimRobotSensor\n"
 		"\n"
 		"\n"
 		"\n"
@@ -57533,6 +59212,14 @@ static PyMethodDef SwigMethods[] = {
 		"Returns the current commanded velocity.  \n"
 		"\n"
 		""},
+	 { (char *)"SimRobotController_getCommandedTorque", _wrap_SimRobotController_getCommandedTorque, METH_VARARGS, (char *)"\n"
+		"SimRobotController_getCommandedTorque(SimRobotController self)\n"
+		"\n"
+		"\n"
+		"\n"
+		"Returns the current commanded (feedforward) torque.  \n"
+		"\n"
+		""},
 	 { (char *)"SimRobotController_getSensedConfig", _wrap_SimRobotController_getSensedConfig, METH_VARARGS, (char *)"\n"
 		"SimRobotController_getSensedConfig(SimRobotController self)\n"
 		"\n"
@@ -57547,6 +59234,15 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Returns the current \"sensed\" velocity from the simulator.  \n"
+		"\n"
+		""},
+	 { (char *)"SimRobotController_getSensedTorque", _wrap_SimRobotController_getSensedTorque, METH_VARARGS, (char *)"\n"
+		"SimRobotController_getSensedTorque(SimRobotController self)\n"
+		"\n"
+		"\n"
+		"\n"
+		"Returns the current \"sensed\" (feedback) torque from the simulator. Note: a\n"
+		"default robot doesn't have a torque sensor, so this will be 0.  \n"
 		"\n"
 		""},
 	 { (char *)"SimRobotController_sensor", _wrap_SimRobotController_sensor, METH_VARARGS, (char *)"\n"
@@ -58058,12 +59754,21 @@ static PyMethodDef SwigMethods[] = {
 		"Returns the current actual velocity of the robot from the simulator.  \n"
 		"\n"
 		""},
+	 { (char *)"Simulator_getActualTorque", _wrap_Simulator_getActualTorque, METH_VARARGS, (char *)"\n"
+		"Simulator_getActualTorque(Simulator self, int robot)\n"
+		"\n"
+		"\n"
+		"\n"
+		"Returns the current actual torques on the robot's drivers from the simulator.  \n"
+		"\n"
+		""},
 	 { (char *)"Simulator_getActualTorques", _wrap_Simulator_getActualTorques, METH_VARARGS, (char *)"\n"
 		"Simulator_getActualTorques(Simulator self, int robot)\n"
 		"\n"
 		"\n"
 		"\n"
-		"Returns the current actual torques on the robot's drivers from the simulator.  \n"
+		"Deprecated: renamed to getActualTorque to be consistent with SimRobotController\n"
+		"methods.  \n"
 		"\n"
 		""},
 	 { (char *)"Simulator_enableContactFeedback", _wrap_Simulator_enableContactFeedback, METH_VARARGS, (char *)"\n"
@@ -58295,7 +60000,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"    g (Geometry3D): the geometry that will be updated\n"
 		"    protocol (str): only \"ros\" accepted for now.\n"
-		"    name (str): the name of the stream. E.g., ROS topic.\n"
+		"    name (str): the name of the stream, i.e., ROS topic.\n"
 		"    type (str, optional): If provided, specifies the format of the data\n"
 		"        to be subscribed to. If not, tries to determine the type\n"
 		"        automatically.  \n"
@@ -58304,6 +60009,9 @@ static PyMethodDef SwigMethods[] = {
 		"also call `Geometry3D.loadFile(\"ros://[ROS_TOPIC]\")` or\n"
 		"`Geometry3D.loadFile(\"ros:PointCloud2//[ROS_TOPIC]\")` to accomplish the same\n"
 		"thing.  \n"
+		"\n"
+		"TODO: It has not yet been determined whether this interferes with Rospy, i.e.,\n"
+		"klampt.io.ros.  \n"
 		"\n"
 		"Returns: (bool): True if successful.  \n"
 		"\n"
@@ -58686,6 +60394,7 @@ static void *_p_intArrayTo_p_int(void *x, int *SWIGUNUSEDPARM(newmemory)) {
 }
 static swig_type_info _swigt__p_Appearance = {"_p_Appearance", "Appearance *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_ContactParameters = {"_p_ContactParameters", "ContactParameters *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_ContactQueryResult = {"_p_ContactQueryResult", "ContactQueryResult *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_ControlledRobotSimulator = {"_p_ControlledRobotSimulator", "ControlledRobotSimulator *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_DistanceQueryResult = {"_p_DistanceQueryResult", "DistanceQueryResult *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_DistanceQuerySettings = {"_p_DistanceQuerySettings", "DistanceQuerySettings *", 0, 0, (void*)0, 0};
@@ -58758,6 +60467,7 @@ static swig_type_info _swigt__p_void = {"_p_void", "void *", 0, 0, (void*)0, 0};
 static swig_type_info *swig_type_initial[] = {
   &_swigt__p_Appearance,
   &_swigt__p_ContactParameters,
+  &_swigt__p_ContactQueryResult,
   &_swigt__p_ControlledRobotSimulator,
   &_swigt__p_DistanceQueryResult,
   &_swigt__p_DistanceQuerySettings,
@@ -58830,6 +60540,7 @@ static swig_type_info *swig_type_initial[] = {
 
 static swig_cast_info _swigc__p_Appearance[] = {  {&_swigt__p_Appearance, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ContactParameters[] = {  {&_swigt__p_ContactParameters, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_ContactQueryResult[] = {  {&_swigt__p_ContactQueryResult, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ControlledRobotSimulator[] = {  {&_swigt__p_ControlledRobotSimulator, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_DistanceQueryResult[] = {  {&_swigt__p_DistanceQueryResult, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_DistanceQuerySettings[] = {  {&_swigt__p_DistanceQuerySettings, 0, 0, 0},{0, 0, 0, 0}};
@@ -58902,6 +60613,7 @@ static swig_cast_info _swigc__p_void[] = {  {&_swigt__p_void, 0, 0, 0},{0, 0, 0,
 static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_Appearance,
   _swigc__p_ContactParameters,
+  _swigc__p_ContactQueryResult,
   _swigc__p_ControlledRobotSimulator,
   _swigc__p_DistanceQueryResult,
   _swigc__p_DistanceQuerySettings,

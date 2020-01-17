@@ -178,14 +178,14 @@ void ContactSensor::DrawGL(const Robot& robot,const vector<double>& measurements
   glColor3f(1,0,0);
   if(measurements.empty() || measurements[0] == 0) {
     glBegin(GL_LINE_LOOP);
-    glVertex3f(patchMin.x,patchMin.y,0);
-    glVertex3f(patchMax.x,patchMin.y,0);
-    glVertex3f(patchMax.x,patchMax.y,0);
-    glVertex3f(patchMin.x,patchMax.y,0);
+    glVertex3d(patchMin.x,patchMin.y,0);
+    glVertex3d(patchMax.x,patchMin.y,0);
+    glVertex3d(patchMax.x,patchMax.y,0);
+    glVertex3d(patchMin.x,patchMax.y,0);
     glEnd();
     if(patchTolerance > 0) {
       glPushMatrix();
-      glTranslatef((patchMax.x+patchMin.x)*0.5,(patchMax.y+patchMin.y)*0.5,0.0);
+      glTranslated((patchMax.x+patchMin.x)*0.5,(patchMax.y+patchMin.y)*0.5,0.0);
       drawWireBox((patchMax.x-patchMin.x),(patchMax.y-patchMin.y),patchTolerance*2.0);
       glPopMatrix();
     }
@@ -348,9 +348,9 @@ void ForceTorqueSensor::DrawGL(const Robot& robot,const vector<double>& measurem
   if(measurements.size()!=6) {
     //just draw a box
     glEnable(GL_LIGHTING);
-    GLDraw::GLColor orange(1,0.5,0);
+    GLDraw::GLColor orange(1.f,0.5f,0);
     glMaterialfv(GL_FRONT,GL_AMBIENT_AND_DIFFUSE,orange);
-    drawBox(0.05,0.05,0.05);
+    drawBox(0.05f,0.05f,0.05f);
   }
   else {
     Vector3 f(0.0),m(0.0);

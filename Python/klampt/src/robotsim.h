@@ -23,9 +23,11 @@ class SimRobotController;
 class SimBody;
 class Simulator;
 
-/** @brief A sensor on a simulated robot.  Retrieve this from the controller,
- * using :meth:`SimRobotController.getSensor` (), and then use
- * :meth:`getMeasurements` () to get the currently simulated measurement
+/** @brief A sensor on a simulated robot.  Retrieve one from the controller
+ * using :meth:`SimRobotController.getSensor` (), or create a new one
+ * using SimRobotSensor(robotController,name,type)
+ *
+ * Use  :meth:`getMeasurements` () to get the currently simulated measurement
  * vector.
  *
  * Sensors are automatically updated through the :meth:`Simulator.simulate` () call,
@@ -54,6 +56,7 @@ class SimRobotSensor
 {
  public:
   SimRobotSensor(Robot* robot,SensorBase* sensor);
+  SimRobotSensor(SimRobotController& robot,const char* name,const char* type);
   ///Returns the name of the sensor
   std::string name();
   ///Returns the type of the sensor
@@ -133,16 +136,23 @@ class SimRobotController
   void getCommandedConfig(std::vector<double>& out);
   /// Returns the current commanded velocity
   void getCommandedVelocity(std::vector<double>& out);
+  /// Returns the current commanded (feedforward) torque
+  void getCommandedTorque(std::vector<double>& out);
 
   /// Returns the current "sensed" configuration from the simulator
   void getSensedConfig(std::vector<double>& out);
   /// Returns the current "sensed" velocity from the simulator
   void getSensedVelocity(std::vector<double>& out);
+  /// Returns the current "sensed" (feedback) torque from the simulator.
+  /// Note: a default robot doesn't have a torque sensor, so this will be 0
+  void getSensedTorque(std::vector<double>& out);
 
-  /// Returns a sensor by index or by name.  If out of bounds or unavailable, a null sensor is returned
+  /// Returns a sensor by index or by name.  If out of bounds or unavailable,
+  /// a null sensor is returned
   SimRobotSensor sensor(int index);
   //note: only the last overload docstring is added to the documentation
-  /// Returns a sensor by index or by name.  If out of bounds or unavailable, a null sensor is returned
+  /// Returns a sensor by index or by name.  If out of bounds or unavailable,
+  /// a null sensor is returned
   SimRobotSensor sensor(const char* name);
   
   /// gets a command list
@@ -362,6 +372,9 @@ class Simulator
   void getActualVelocity(int robot,std::vector<double>& out);
   /// Returns the current actual torques on the robot's drivers
   /// from the simulator
+  void getActualTorque(int robot,std::vector<double>& out);
+  /// Deprecated: renamed to getActualTorque to be consistent with
+  /// SimRobotController methods
   void getActualTorques(int robot,std::vector<double>& out);
 
   /// Call this to enable contact feedback between the two objects
@@ -437,22 +450,36 @@ class Simulator
    * 
    * Valid names are:
    * 
-   * - gravity
-   * - simStep
-   * - boundaryLayerCollisions
-   * - rigidObjectCollisions
-   * - robotSelfCollisions
-   * - robotRobotCollisions
-   * - adaptiveTimeStepping
-   * - minimumAdaptiveTimeStep
-   * - maxContacts
-   * - clusterNormalScale
-   * - errorReductionParameter
-   * - dampedLeastSquaresParameter
-   * - instabilityConstantEnergyThreshold
-   * - instabilityLinearEnergyThreshold
-   * - instabilityMaxEnergyThreshold
-   * - instabilityPostCorrectionEnergy
+   * - gravity: the gravity vector (default "0 0 -9.8")
+   * - simStep: the internal simulation step (default "0.001")
+   - - autoDisable: whether to disable bodies that don't move much between time
+   *   steps (default "0", set to "1" for many static objects)
+   * - boundaryLayerCollisions: whether to use the Klampt inflated boundaries
+   *   for contact detection'(default "1", recommended)
+   * - rigidObjectCollisions: whether rigid objects should collide (default "1")
+   * - robotSelfCollisions: whether robots should self collide (default "0")
+   * - robotRobotCollisions: whether robots should collide with other robots
+   *   (default "1")
+   * - adaptiveTimeStepping: whether adaptive time stepping should be used to
+   *   improve stability.  Slower but more stable. (default "1")
+   * - minimumAdaptiveTimeStep: the minimum size of an adaptive time step before
+   *   giving up (default "1e-6")
+   * - maxContacts: max # of clustered contacts between pairs of objects
+   *   (default "20")
+   * - clusterNormalScale: a parameter for clustering contacts (default "0.1")
+   * - errorReductionParameter: see ODE docs on ERP (default "0.95")
+   * - dampedLeastSquaresParameter: see ODE docs on CFM (default "1e-6")
+   * - instabilityConstantEnergyThreshold: parameter c0 in instability correction
+   *   (default "1")
+   * - instabilityLinearEnergyThreshold: parameter c1 in instability correction
+   *   (default "1.5")
+   * - instabilityMaxEnergyThreshold: parameter cmax in instability correction
+   *   (default "100000")
+   * - instabilityPostCorrectionEnergy: kinetic energy scaling parameter if 
+   *   instability is detected (default "0.8")
+   *
+   * Instability correction kicks in whenever the kinetic energy K(t) of an 
+   * object exceeds min(c0*m + c1*K(t-dt),cmax).  m is the object's mass.
    * 
    * See `Klampt/Simulation/ODESimulator.h <http://motion.pratt.duke.edu/klampt/klampt_docs/ODESimulator_8h_source.html>`_
    * for detailed descriptions of these parameters.

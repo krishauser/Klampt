@@ -7,16 +7,18 @@ class Geometry3D;
 class WorldModel;
 
 /** @file robotio.h 
- * Miscelleaneous IO routines for ROS and Three.js export.
+ * Miscelleaneous IO routines for ROS and Three.js export via the C++ backend.
+ *
+ * TODO: It has not yet been determined whether this interferes with Rospy.
  */
 
-/** @brief Subscribes a Geometry3D to a stream 
+/** @brief Subscribes a Geometry3D to a stream.
  * 
  * Args:
  * 
  *     g (Geometry3D): the geometry that will be updated
  *     protocol (str): only "ros" accepted for now.
- *     name (str): the name of the stream. E.g., ROS topic.
+ *     name (str): the name of the stream, i.e., ROS topic.
  *     type (str, optional): If provided, specifies the format of the data
  *         to be subscribed to. If not, tries to determine the type
  *         automatically.
@@ -25,6 +27,9 @@ class WorldModel;
  * Note that you can also call ``Geometry3D.loadFile("ros://[ROS_TOPIC]")``
  * or ``Geometry3D.loadFile("ros:PointCloud2//[ROS_TOPIC]")``
  * to accomplish the same thing.
+ *
+ * TODO: It has not yet been determined whether this interferes with Rospy,
+ * i.e., klampt.io.ros.
  *
  * Returns:
  *     (bool): True if successful.

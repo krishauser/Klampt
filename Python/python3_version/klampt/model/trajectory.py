@@ -10,7 +10,6 @@ import bisect
 from ..math import so3,se3,vectorops
 from ..math import spline
 from ..math.geodesic import *
-import collections
 
 class Trajectory:
     """A basic piecewise-linear trajectory class, which can be overloaded
@@ -289,12 +288,15 @@ class Trajectory:
             back.times = [time] + back.times
             back.milestones = [splitpt] + back.milestones
         return (front,back)
+
     def before(self,time):
         """Returns the part of the trajectory before the given time"""
         return self.split(time)[0]
+
     def after(self,time):
         """Returns the part of the trajectory after the given time"""
         return self.split(time)[1]
+
     def splice(self,suffix,time=None,relative=False,jumpPolicy='strict'):
         """Returns a path such that the suffix is spliced in at some time
 
@@ -322,6 +324,18 @@ class Trajectory:
         routines.  The result should be a function that takes two
         arguments: a list of times and a list of milestones."""
         return Trajectory
+
+    def length(self,metric=None):
+        """Returns the arc-length of the trajectory, according to the given
+        metric.
+
+        If metric = None, uses the "natural" metric for this trajectory,
+        which is usually Euclidean.  Otherwise it is a function f(a,b)
+        from configurations to nonnegative numbers.
+        """
+        if metric is None:
+            metric = vectorops.distance
+        return sum(vectorops.distance(a,b) for a,b in zip(self.milestones[:-1],self.milestones[1:]))
 
     def discretize(self,dt):
         """Returns a copy of this but with uniformly defined milestones at
@@ -413,6 +427,7 @@ class Trajectory:
             assert newtimes[i] == res.times[idx]
         return (res,resindices)
 
+
 class RobotTrajectory(Trajectory):
     """A trajectory that performs interpolation according to the robot's
     interpolation scheme."""
@@ -439,10 +454,15 @@ class RobotTrajectory(Trajectory):
             self.robot.setConfig(m)
             Rmilestones.append(link.getTransform())
         return SE3Trajectory(self.times[:],Rmilestones)
+    def length(self,metric=None):
+        if metric is None:
+            return Trajectory.length(self,self.robot.distance)
+        else:
+            return Trajectory.length(self,metric)
 
 class GeodesicTrajectory(Trajectory):
     """A trajectory that performs interpolation on a GeodesicSpace.
-    See klampt.geodesic for more information."""
+    See klampt.math.geodesic for more information."""
     def __init__(self,geodesic,times=None,milestones=None):
         self.geodesic = geodesic
         Trajectory.__init__(self,times,milestones)
@@ -456,6 +476,12 @@ class GeodesicTrajectory(Trajectory):
         return vectorops.mul(self.geodesic.difference(x,b),1.0/(dt*(1.0-u)))
     def constructor(self):
         return lambda times,milestones:GeodesicTrajectory(self.geodesic,times,milestones)
+    def length(self,metric=None):
+        if metric is None:
+            return Trajectory.length(self,self.geodesic.distance)
+        else:
+            return Trajectory.length(self,metric)
+
 
 class SO3Trajectory(GeodesicTrajectory):
     """A trajectory that performs interpolation in SO3.  Each milestone
@@ -478,6 +504,7 @@ class SO3Trajectory(GeodesicTrajectory):
             self.milestones[i] = se3.mul(m,T)
     def constructor(self):
         return SO3Trajectory
+
 
 class SE3Trajectory(GeodesicTrajectory):
     """A trajectory that performs interpolation in SE3.  Each milestone
@@ -535,7 +562,10 @@ class SE3Trajectory(GeodesicTrajectory):
     def constructor(self):
         return SE3Trajectory
 
+
 class _HermiteConfigAdaptor(Trajectory):
+    """Private class. Converts a HermiteTrajectory to a Trajectory in configuration
+    space rather than phase space."""
     def __init__(self,hermite):
         self.hermite = hermite
     def eval(self,t,endBehavior='halt'):
@@ -558,9 +588,10 @@ class _HermiteConfigAdaptor(Trajectory):
             elif hasattr(res,'__iter__'):
                 return [(_HermiteConfigAdaptor(v) if isinstance(v,HermiteTrajectory) else v) for v in res]
             return res
-        if isinstance(hitem, collections.Callable):
+        if callable(hitem):
             return methodadaptor
         return hitem
+
 
 class HermiteTrajectory(Trajectory):
     """A trajectory whose milestones are given in phase space (x,dx).
@@ -672,6 +703,7 @@ class HermiteTrajectory(Trajectory):
 
     def constructor(self):
         return HermiteTrajectory
+
 
 def path_to_trajectory(path,velocities='auto',timing='limited',smoothing='spline',
     stoptol=None,vmax='auto',amax='auto',
@@ -861,7 +893,7 @@ def path_to_trajectory(path,velocities='auto',timing='limited',smoothing='spline
     _durations = None
     if isinstance(timing,(list,tuple)):
         _durations = timing
-    elif isinstance(timing, collections.Callable):
+    elif callable(timing):
         _durations = [timing(a,b) for a,b in zip(milestones[:-1],milestones[1:])]
     else:
         if isinstance(path,Trajectory):
@@ -1214,6 +1246,7 @@ def execute_path(path,controller,speed=1.0,smoothing=None,activeDofs=None):
             controller.addMilestone(path[i])
     else:
         raise ValueError("Invalid smoothing method specified")
+
 
 def execute_trajectory(trajectory,controller,speed=1.0,smoothing=None,activeDofs=None):
     """Sends a timed trajectory to a controller.

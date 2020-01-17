@@ -6,13 +6,10 @@ import os
 import glob
 import sys
 
-scripts_folder = "bin"
 src_folder = "klampt/src"
 root_py_folder = "klampt"
 if sys.version_info[0] == 3:
     root_py_folder = "python3_version/klampt"
-    scripts_folder = "python3_version/bin"
-script_files = [os.path.join(scripts_folder,f) for f in ['klampt_sim','klampt_browser','klampt_path','klampt_thumbnails']]
 
 #Parse settings from CMake
 includeDirs = """${KLAMPT_INCLUDE_DIRS}""".split(';')
@@ -53,7 +50,7 @@ for l in libs:
     path,fn = os.path.split(l)
     if len(path)>0 and path not in libdirs:
         libdirs.append(path)
-    if fn.startswith('lib'):
+    if fn.startswith('lib') and sys.platform != 'win32':
         name = fn.split('.')[0]
         libnames.append(name[3:])
     elif fn.endswith('lib'):
@@ -125,10 +122,17 @@ setup(name='Klampt',
                    ],
       #py_modules=['klampt.robotsim','klampt.plan.motionplanning','klampt.math.rootfind'],
       py_modules=['klampt.robotsim','klampt.plan.motionplanning'],
-      packages=['klampt','klampt.io', 'klampt.math', 'klampt.model', 'klampt.model.create', 'klampt.plan', 'klampt.sim', 'klampt.vis', 'klampt.vis.ipython'],
+      packages=['klampt','klampt.apps', 'klampt.io', 'klampt.math', 'klampt.model', 'klampt.model.create', 'klampt.plan', 'klampt.sim', 'klampt.vis', 'klampt.vis.ipython'],
       package_dir={'klampt': root_py_folder},
       package_data={'klampt': extra_shared_libraries + ['data/*.html']},
-      scripts=script_files,
+      entry_points = {
+        'console_scripts': [
+            'klampt_browser=klampt.apps.klampt_browser:main',
+            'klampt_path=klampt.apps.klampt_path:main',
+            'klampt_sim=klampt.apps.klampt_sim:main',
+            'klampt_thumbnails=klampt.apps.klampt_thumbnails:main'
+            ],
+      },
       classifiers=[
         "Programming Language :: Python :: 2.7",
         "Development Status :: 4 - Beta",

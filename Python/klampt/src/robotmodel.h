@@ -227,7 +227,7 @@ class RobotModelLink
   ///
   ///    This matrix J gives the point's velocity (in world coordinates) via
   ///    np.dot(J,dq), where dq is the robot's joint velocities.
-  void getPositionJacobian(const double p[3],std::vector<std::vector<double> >& out);
+  void getPositionJacobian(const double plocal[3],std::vector<std::vector<double> >& out);
   ///Returns the orientation jacobian of this link  w.r.t. the robot's
   ///configuration q.
   ///
@@ -273,7 +273,7 @@ class RobotModelLink
   ///
   ///    (3-tuple): a triple (Hx,Hy,Hz) of of nxn matrices corresponding,
   ///    respectively, to the (x,y,z) components of the Hessian.
-  void getPositionHessian(const double p[3],std::vector<std::vector<double> >& out,std::vector<std::vector<double> >& out2,std::vector<std::vector<double> >& out3);
+  void getPositionHessian(const double plocal[3],std::vector<std::vector<double> >& out,std::vector<std::vector<double> >& out2,std::vector<std::vector<double> >& out3);
   ///Returns the Hessians of each orientation component of the link w.r.t the
   ///robot's configuration q.  
   ///
@@ -313,10 +313,14 @@ class RobotModelDriver
   const char* getType();
   ///Returns the single affected link for "normal" links
   int getAffectedLink();
-  ///Returns the driver's affected links
-  void getAffectedLinks(std::vector<int>& links);
-  ///For "affine" links, returns the scale and offset of the driver value mapped to the world
-  void getAffineCoeffs(std::vector<double>& scale,std::vector<double>& offset);
+  ///Returns the indices of the driver's affected links
+  void getAffectedLinks(std::vector<int>& out);
+  ///For "affine" links, returns the scale and offset of the driver value mapped
+  ///to the world.
+  ///
+  ///Returns:
+  ///    tuple: a pair (scale,offset), each of length len(getAffectedLinks()).
+  void getAffineCoeffs(std::vector<double>& out,std::vector<double>& out2);
   ///Sets the robot's config to correspond to the given driver value 
   void setValue(double val);
   ///Gets the current driver value from the robot's config

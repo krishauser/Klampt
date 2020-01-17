@@ -10,7 +10,7 @@ ViewCamera::ViewCamera()
 :drawIcon(true),drawIconWireframe(false),iconSize(0.05),
  drawFrustum(true)
 {
-  iconColor.set(0.3,0.3,0.3);
+  iconColor.set(0.3f,0.3f,0.3f);
   frustumColor.set(1,1,0,0.5);
 }
 

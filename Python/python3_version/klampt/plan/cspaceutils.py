@@ -1,7 +1,7 @@
 import math
 import time
 from ..math import vectorops
-from .cspace import CSpace
+from .cspace import CSpace,MotionPlan
 
 def default_sampleneighborhood(c,r):
     return [ci + random.uniform(-r,r) for ci in c]
@@ -100,6 +100,23 @@ class EmbeddedCSpace(CSpace):
     """A subspace of an ambient space, with the active DOFs given by a list
     of DOF indices of that ambient space.
     
+    Note:
+        A MotionPlan constructed on this object operates in the embedded space,
+        NOT the ambient space.  To push endpoints to the embedded space you 
+        will need to call :meth:`EmbeddedCSpace.project`, and to pull a plan 
+        back to the ambient space, use the :meth:`EmbeddedCSpace.liftPlan`
+        method.
+
+        To make this more convenient, the SubsetMotionPlan class is provided
+        for you.
+
+    Note:
+        Sampling does not work directly when the ambient space has implicit
+        manifold constraints, e.g., closed-loop constraints.  sample
+        and sampleneighborhood will need to be customized so that the
+        constraint solving is done without perturbing the seed configuration
+        except for the dofs in the moving subset.
+
     Attributes:
         ambientspace (CSpace): the ambient configuration space
         mapping (list): the list of active indices into the ambient configuration
@@ -160,8 +177,12 @@ class EmbeddedCSpace(CSpace):
         return xamb
 
     def liftPath(self,path):
-        """Given a CSpace path path, lifts this to the full ambient space configuration"""
+        """Given a CSpace path, lifts it to a full ambient C-space path"""
         return [self.lift(q) for q in path]
+
+    def projectPath(self,path_amb):
+        """Given an ambient C-space path, projects it to a C-space path"""
+        return [self.project(q) for q in path_amb]
 
     def feasible(self,x):
         return self.ambientspace.feasible(self.lift(x))
@@ -170,3 +191,68 @@ class EmbeddedCSpace(CSpace):
         return self.project(self.ambientspace.sample())
     
     
+class SubsetMotionPlan (MotionPlan):
+    """An adaptor that "lifts" a motion planner in an EmbeddedCSpace to a
+    higher dimensional ambient space.  Used for planning in subsets of robot DOFs.
+    """
+    def __init__(self,space,subset,q0,type=None,**options):
+        MotionPlan.__init__(self,space,type,**options)
+        self.subset = subset
+        self.q0 = q0
+
+    def project(self,xamb):
+        """Ambient space -> embedded space"""
+        if len(xamb) != len(self.q0):
+            raise ValueError("Invalid length of ambient space vector: %d should be %d"%(len(xamb),len(self.q0)))
+        return [xamb[i] for i in self.subset]
+
+    def lift(self,xemb):
+        """Embedded space -> ambient space"""
+        if len(xemb) != len(self.subset):
+            raise ValueError("Invalid length of embedded space vector: %d should be %d"%(len(xemb),len(self.subset)))
+        xamb = self.q0[:]
+        for (i,j) in enumerate(self.subset):
+            xamb[j] = xemb[i]
+        return xamb
+
+    def setEndpoints(self,start,goal):
+        """Takes care of projecting the start and goal (represented in the ambient
+        space) down to the subset. Works with both config and set goals.
+        """
+        #take care of the moving subset -- make sure to lift MP configurations back to
+        #space configurations
+        embstart = self.project(start)
+        if hasattr(goal,'__iter__'):
+            if len(goal)==2 and callable(goal[0]) and callable(goal[1]):
+                #it's a (test,sample) pair
+                def goaltest(x,test=goal[0]):
+                    return test(self.lift(x))
+                def goalsample(sample=goal[1]):
+                    qamb = sample()
+                    qproj = self.project(qamb)
+                    return qproj
+                embgoal = [goaltest,goalsample]
+            else:
+                #it's a configuration
+                embgoal = self.project(goal)
+        elif callable(goal):
+            def goaltest(x,goal=goal):
+                return goal(self.lift(x))
+            embgoal = goaltest
+        MotionPlan.setEndpoints(self,embstart,embgoal)
+
+    def addMilestone(self,x):
+        """Manually adds a milestone from the ambient space, and returns its index"""
+        return MotionPlan.addMilestone(self,self.project(x))
+
+    def getPath(self,milestone1=None,milestone2=None):
+        """Lifts the motion planner's lower-dimensional path back to the ambient space"""
+        spath = MotionPlan.getPath(self,milestone1,milestone2)
+        if spath == None: return None
+        return [self.lift(q) for q in spath]
+
+    def getRoadmap(self):
+        """Lifts the motion planner's lower-dimensional roadmap back to the ambient space"""
+        V,E = MotionPlan.getRoadmap(self)
+        return [self.lift(v) for v in V],E
+

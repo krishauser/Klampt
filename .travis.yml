@@ -22,6 +22,8 @@ before_script:
 
 script:
   - cd Cpp/Dependencies && make unpack-deps
+  #using KrisLibrary's devel branch
+  - cd KrisLibrary && cd ..
   - make deps && cd ../..
   - cmake . -DKLAMPT_COMPILE_TESTS:BOOL=True
   - make Klampt

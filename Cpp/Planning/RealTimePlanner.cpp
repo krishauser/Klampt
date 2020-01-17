@@ -1534,7 +1534,7 @@ int DynamicRRTPlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cutoff)
     Assert(bestNode == rrt->milestones[0] || bestNode->hasAncestor(rrt->milestones[0]));
     rrt->CreatePath(rrt->milestones[0],bestNode,rampPath);
     Assert(!rampPath.edges.empty());
-    Assert(rampPath.edges.front()->Start() == rrt->milestones[0]->x);
+    Assert(Vector(rampPath.edges.front()->Start()) == rrt->milestones[0]->x);
 
     /*
     //test feasibility of last state
@@ -1689,7 +1689,7 @@ public:
   virtual std::string Label() const { return "TrackingRamp"; }
   virtual std::string VariableLabel(int i) const {
     char buf[64];
-    if(i<(int)x0.size()) { sprintf(buf,"q%d",i+1); return buf; }
+    if(i<(int)x0.size()) { snprintf(buf,64,"q%d",i+1); return buf; }
     else { return "speed"; }
   }
   //layout: x=(q,speed);

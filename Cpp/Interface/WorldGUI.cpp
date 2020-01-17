@@ -61,7 +61,7 @@ bool WorldGUIBackend::OnMouseWheel(int dwheel)
 {
   camera.dist *= (1 + 0.01*Real(dwheel)/20);
   show_view_target=1; 
-  t_hide_view_target=timer.LastElapsedTime()+0.5; 
+  t_hide_view_target=float(timer.LastElapsedTime()+0.5); 
   SendPauseIdle(0);
   SendRefresh();
   return true;
@@ -231,7 +231,7 @@ return false;
 void WorldGUIBackend::RenderWorld()
 {
   glDisable(GL_LIGHTING);
-  drawCoords(0.1);
+  drawCoords(0.1f);
   glEnable(GL_LIGHTING);
   world->DrawGL();
 }
@@ -240,10 +240,10 @@ void WorldGUIBackend::Start()
 {
   //TODO: read in the camera from the world?
   camera.dist = 6;
-  viewport.n = 0.1;
+  viewport.n = 0.1f;
   viewport.f = 100;
-  viewport.setLensAngle(DtoR(60.0));
-  //viewport.setLensAngle(DtoR(90.0));
+  viewport.setLensAngle(DtoR(60.0f));
+  //viewport.setLensAngle(DtoR(90.0f));
 
   glEnable(GL_CULL_FACE);
   glEnable(GL_DEPTH_TEST);

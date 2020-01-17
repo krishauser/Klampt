@@ -268,7 +268,7 @@ string CompositeObjective::Description()
     desc += components[i]->Description();
     if(!weights.empty() && weights[i] != 1.0) {
       char buf[64];
-      sprintf(buf,"*%g\n",weights[i]);
+      snprintf(buf,64,"*%g\n",weights[i]);
       desc += buf;
     }
   }

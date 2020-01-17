@@ -11,12 +11,6 @@ using namespace Meshing;
 #include <ode/collision.h>
 #include "Modeling/World.h"
 
-//defined in ODECustomGeometry.cpp
-//TODO: make this native!
-int GeometryGeometryCollide(Geometry::AnyCollisionGeometry3D& g1,Real outerMargin1,
-        Geometry::AnyCollisionGeometry3D& g2,Real outerMargin2,
-        dContactGeom* contact,int m);
-
 
 //Produces a list of contacts as though the robot were standing on a plane.
 //tol is the tolerance with which minimum-distance points are generated.
@@ -220,11 +214,11 @@ void GetNearbyContacts(RobotWithGeometry& robot,int link,RobotWorld& world,Real 
   if(robot.IsGeometryEmpty(link)) {
     return;
   }
+  AnyContactsQuerySettings settings;
+  settings.padding1 = 0;
+  settings.padding2 = tol;
+
   Geometry::AnyCollisionGeometry3D& g1 = *robot.geometry[link];
-  Real m1 = 0;
-  Real m2 = tol;
-  dContactGeom temp[1000];
-  int maxContacts = 1000;
   vector<Geometry::AnyCollisionGeometry3D*> geomsToCheck;
   for(size_t i=0;i<world.terrains.size();i++) {
     if(world.terrains[i]->geometry.Empty()) continue;
@@ -239,24 +233,21 @@ void GetNearbyContacts(RobotWithGeometry& robot,int link,RobotWorld& world,Real 
   }
   //now do the tolerance checks and add to the contacts list
   for(size_t i=0;i<geomsToCheck.size();i++) {
-    int nc = GeometryGeometryCollide(g1,m1,*geomsToCheck[i],m2,temp,maxContacts);
-    if(nc > 0) {
-      size_t start = contacts.size();
-      contacts.resize(start+nc);
-      for(int j=0;j<nc;j++) {
-        //contacts[j].x.set(temp[j].pos);
-        contacts[j].x.set(temp[j].pos[0], temp[j].pos[1], temp[j].pos[2]);
-        contacts[j].n.set(temp[j].normal[0], temp[j].normal[1], temp[j].normal[2]);
-        //contacts[j].n.set(temp[j].normal);
-        contacts[j].kFriction = 0;
+    AnyContactsQueryResult res = g1.Contacts(*geomsToCheck[i],settings);
+    size_t start = contacts.size();
+    contacts.resize(start+res.contacts.size());
+    for(size_t j=0;j<res.contacts.size();j++) {
+      //contacts[j].x.set(temp[j].pos);
+      contacts[start+j].x = (res.contacts[j].p1+res.contacts[j].p2)*0.5;
+      contacts[start+j].n = res.contacts[j].n;
+      contacts[start+j].kFriction = 0;
 
-        //convert to local coordinates
-        Vector3 localPos,localNormal;
-        robot.links[link].T_World.mulInverse(contacts[j].x,localPos);
-        robot.links[link].T_World.R.mulTranspose(contacts[j].n,localNormal);
-        contacts[j].x = localPos;
-        contacts[j].n = localNormal;
-      }
+      //convert to local coordinates
+      Vector3 localPos,localNormal;
+      robot.links[link].T_World.mulInverse(contacts[start+j].x,localPos);
+      robot.links[link].T_World.R.mulTranspose(contacts[start+j].n,localNormal);
+      contacts[start+j].x = localPos;
+      contacts[start+j].n = localNormal;
     }
   }
 }

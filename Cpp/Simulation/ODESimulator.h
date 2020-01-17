@@ -23,6 +23,8 @@ struct ODESimulatorSettings
 
   ///The gravity vector
   double gravity[3];
+  ///Whether to use ODE's auto-disable functionality for non-moving objects
+  bool autoDisable;
   ///The default collision padding for environments
   double defaultEnvPadding;
   ///The default surface property for environments
@@ -39,6 +41,9 @@ struct ODESimulatorSettings
   bool robotRobotCollisions;
   ///If true, difficult collision situations are resolved using new
   ///adaptive time stepping methods (default true)
+  ///
+  ///NOTE: adaptiveTimeStepping and autoDisable should not be on at the same
+  ///time!  Disabling does weird stuff.
   bool adaptiveTimeStepping;
   ///The minimum time step used by adaptive time stepping (default 1e-6)
   double minimumAdaptiveTimeStep;
@@ -110,6 +115,7 @@ class ODESimulator
   ODESimulator();
   virtual ~ODESimulator();
   void SetGravity(const Vector3& g);
+  void SetAutoDisable(bool autoDisable=true);  //global auto disable -- see ODE docs
   void SetERP(double erp);   //global error reduction  -- see ODE docs
   void SetCFM(double erp);   //global constraint force mixing -- see ODE docs
   ODESimulatorSettings& GetSettings() { return settings; }

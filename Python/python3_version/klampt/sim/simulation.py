@@ -1,7 +1,6 @@
 from ..robotsim import *
 from . import simlog
 import weakref
-import collections
 
 class SensorEmulator:
     """A generic sensor emulator.  Translates from the physics simulation -> inputs to a Python controller.
@@ -198,7 +197,7 @@ class SimpleSimulator (Simulator):
             index = robot.index
         else:
             raise ValueError("Invalid robot specified")
-        if not isinstance(function, collections.Callable):
+        if not callable(function):
             assert hasattr(function,'output_and_advance'),"setController takes either a 1-argument function or a BaseController instance"
         self.robotControllers += [None]*(self.world.numRobots()-len(self.robotControllers))
         self.robotControllers[index] = function
@@ -350,7 +349,7 @@ class SimpleSimulator (Simulator):
     def control_loop(self,dt):
         for i in range(self.world.numRobots()):
             c = self.robotControllers[i]
-            if isinstance(c, collections.Callable):
+            if callable(c):
                 c(self.controller(i))
             else:
                 #build measurement dict

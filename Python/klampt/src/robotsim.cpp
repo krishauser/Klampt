@@ -10,6 +10,7 @@
 #include <Klampt/Control/PathController.h>
 #include <Klampt/Control/FeedforwardController.h>
 #include <Klampt/Control/LoggingController.h>
+#include <Klampt/Sensing/JointSensors.h>
 #include <Klampt/Planning/RobotCSpace.h>
 #include <Klampt/Simulation/WorldSimulation.h>
 #include <Klampt/Modeling/Interpolate.h>
@@ -285,9 +286,22 @@ class ManualOverrideController : public RobotController
 
 bool ManualOverrideController::ReadState(File& f)
 {
-  if(!ReadFile(f,override)) return false;
-  if(!override) return base->ReadState(f);
-  return RobotController::ReadState(f);
+  if(!ReadFile(f,override)) {
+    printf("Unable to read override bit\n");
+    return false;
+  }
+  if(!override) {
+    if(!base->ReadState(f)) {
+      printf("Unable to read base controller\n");
+      return false;
+    }
+    return true;
+  }
+  if(!RobotController::ReadState(f)) {
+    printf("Unable to read RobotController\n");
+    return false;
+  }
+  return true;
 }
 
 bool ManualOverrideController::WriteState(File& f) const
@@ -379,8 +393,9 @@ void GetPointCloud(const Geometry::AnyCollisionGeometry3D& geom,PointCloud& pc)
   for(size_t i=0;i<gpc.points.size();i++) 
     gpc.points[i].get(pc.vertices[i*3],pc.vertices[i*3+1],pc.vertices[i*3+2]);
   if(!gpc.propertyNames.empty()) {
-    for(size_t i=0;i<gpc.points.size();i++)
+    for(size_t i=0;i<gpc.points.size();i++) {
       gpc.properties[i].getCopy(&pc.properties[i*gpc.propertyNames.size()]);
+    }
   }
   pc.settings = gpc.settings;
 }
@@ -981,15 +996,17 @@ void Geometry3D::transform(const double R[9],const double t[3])
   RigidTransform T;
   T.R.set(R);
   T.t.set(t);
-  geom->Transform(T);
-  geom->ClearCollisionData();
-
-  if(!isStandalone()) {
+  if(isStandalone()) {
+    geom->Transform(T);
+    geom->ClearCollisionData();
+  }
+  else {
     //update the display list / cache
     RobotWorld& world=*worlds[this->world]->world;
     ManagedGeometry* mgeom = &GetManagedGeometry(world,id);
-    mgeom->OnGeometryChange();
-    mgeom->RemoveFromCache();
+    mgeom->TransformGeometry(Matrix4(T));
+    //mgeom->OnGeometryChange();
+    //mgeom->RemoveFromCache();
   }
 }
 
@@ -1028,6 +1045,7 @@ void Geometry3D::getBBTight(double out[3],double out2[3])
     out2[0] = out2[1] = out2[2] = -Inf;
     return;
   }
+  geom->InitCollisionData();
   AABB3D bb = geom->GetAABBTight();
   bb.bmin.get(out);
   bb.bmax.get(out2);
@@ -1124,6 +1142,12 @@ DistanceQueryResult Geometry3D::distance_point_ext(const double pt[3],const Dist
     result.cp2.resize(3);
     gres.cp1.get(&result.cp1[0]);
     gres.cp2.get(&result.cp2[0]);
+    result.elem1 = gres.elem1;
+    result.elem2 = gres.elem2;
+  }
+  else {
+    result.elem1 = -1;
+    result.elem2 = -1;
   }
   result.hasGradients = gres.hasDirections;
   if(result.hasGradients) {
@@ -1152,7 +1176,7 @@ DistanceQueryResult Geometry3D::distance_ext(const Geometry3D& other,const Dista
   gsettings.upperBound = settings.upperBound;
   AnyDistanceQueryResult gres = geom->Distance(*geom2,gsettings);
   if(IsInf(gres.d)) {
-    throw PyException("Distance queries not implemented yet for those types of geometry");
+    throw PyException("Distance queries not implemented yet for those types of geometry, or geometries are content-free?");
   }
   DistanceQueryResult result;
   result.d = gres.d;
@@ -1162,6 +1186,12 @@ DistanceQueryResult Geometry3D::distance_ext(const Geometry3D& other,const Dista
     result.cp2.resize(3);
     gres.cp1.get(&result.cp1[0]);
     gres.cp2.get(&result.cp2[0]);
+    result.elem1 = gres.elem1;
+    result.elem2 = gres.elem2;
+  }
+  else {
+    result.elem1 = -1;
+    result.elem2 = -1;
   }
   result.hasGradients = gres.hasDirections;
   if(result.hasGradients) {
@@ -1189,8 +1219,47 @@ bool Geometry3D::rayCast(const double s[3],const double d[3],double out[3])
   return false;
 }
 
+ContactQueryResult Geometry3D::contacts(const Geometry3D& other,double padding1,double padding2,int maxContacts)
+{
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>& geom2 = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(other.geomPtr);
+  if(!geom) throw PyException("Geometry3D.contacts: Geometry is empty");
+  if(!geom2) throw PyException("Geometry3D.contacts: Other geometry is empty");
+  AnyContactsQuerySettings settings;
+  settings.padding1 = padding1;
+  settings.padding2 = padding2;
+  if(maxContacts > 0) {
+    settings.maxcontacts = maxContacts;
+    settings.cluster = true;
+  }
+  AnyContactsQueryResult res = geom->Contacts(*geom2,settings);
+  ContactQueryResult out;
+  out.depths.resize(res.contacts.size());
+  out.points1.resize(res.contacts.size());
+  out.points2.resize(res.contacts.size());
+  out.normals.resize(res.contacts.size());
+  out.elems1.resize(res.contacts.size());
+  out.elems2.resize(res.contacts.size());
+  for(size_t i=0;i<res.contacts.size();i++) {
+    out.depths[i] = res.contacts[i].depth;
+    out.points1[i].resize(3);
+    res.contacts[i].p1.get(&out.points1[i][0]);
+    out.points2[i].resize(3);
+    res.contacts[i].p2.get(&out.points2[i][0]);
+    out.normals[i].resize(3);
+    res.contacts[i].n.get(&out.normals[i][0]);
+    out.elems1[i] = res.contacts[i].elem1;
+    out.elems2[i] = res.contacts[i].elem2;
+  }
+  return out;
+}
+
 //KH: note: pointer gymnastics necessary to allow appearances to refer to temporary appearances as well as references to world, while also
 //exposing an opaque pointer in appearance.h
+
+//defined in Cpp/Modeling/ManagedGeometry.cpp
+void SetupDefaultAppearance(GLDraw::GeometryAppearance& app);
+
 Appearance::Appearance()
   :world(-1),id(-1),appearancePtr(NULL)
 {
@@ -1369,7 +1438,6 @@ void Appearance::setColor(float r,float g,float b,float a)
       geom.SetUniqueAppearance();
       app = geom.Appearance();
     }
-
   }
   app->SetColor(r,g,b,a);
 }
@@ -1573,6 +1641,40 @@ void Appearance::setPointSize(float size)
   app->vertexSize = size;
 }
 
+void Appearance::setCreaseAngle(float creaseAngleRads)
+{
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) return;
+  if(!isStandalone()) {
+    RobotWorld& world=*worlds[this->world]->world;
+    ManagedGeometry& geom = GetManagedGeometry(world,id);
+    if(geom.IsAppearanceShared()) {
+      geom.SetUniqueAppearance();
+      app = geom.Appearance();
+    }
+  }
+  app->creaseAngle = creaseAngleRads;
+}
+
+void Appearance::setSilhouette(float radius,float r,float g,float b,float a)
+{
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) return;
+  if(!isStandalone()) {
+    RobotWorld& world=*worlds[this->world]->world;
+    ManagedGeometry& geom = GetManagedGeometry(world,id);
+    if(geom.IsAppearanceShared()) {
+      geom.SetUniqueAppearance();
+      app = geom.Appearance();
+    }
+  }
+  app->silhouetteRadius = radius;
+  app->silhouetteColor.rgba[0] = r;
+  app->silhouetteColor.rgba[1] = g;
+  app->silhouetteColor.rgba[2] = b;
+  app->silhouetteColor.rgba[3] = a;
+}
+
 void Appearance::drawGL()
 {
   shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
@@ -1588,6 +1690,7 @@ void Appearance::drawWorldGL(Geometry3D& g)
   if(!geom) return;
   if(!app) {
     app = make_shared<GLDraw::GeometryAppearance>();
+    SetupDefaultAppearance(*app);
   }
   if(app->geom) {
     if(app->geom != geom.get()) {
@@ -1612,6 +1715,7 @@ void Appearance::drawGL(Geometry3D& g)
   if(!geom) return;
   if(!app) {
     app = make_shared<GLDraw::GeometryAppearance>();
+    SetupDefaultAppearance(*app);
   }
   if(app->geom) {
     if(app->geom != geom.get()) {
@@ -2644,7 +2748,8 @@ void RobotModelLink::setTransform(const double R[9],const double t[3])
   RobotLink3D& link=robotPtr->links[index];
   link.T_World.R.set(R);
   link.T_World.t.set(t);
-  robotPtr->geometry[index]->SetTransform(link.T_World);
+  if (robotPtr->geometry[index])
+    robotPtr->geometry[index]->SetTransform(link.T_World);
 }
 
 void RobotModelLink::getParentTransform(double R[9],double t[3])
@@ -3269,6 +3374,7 @@ void RobotModel::randomizeConfig(double unboundedStdDeviation)
 
 void RobotModel::drawGL(bool keepAppearance)
 {
+  if(!worlds[this->world]) throw PyException("RobotModel is associated with a deleted world");
   RobotWorld& world = *worlds[this->world]->world;
   if(keepAppearance) {
     world.robotViews[index].Draw();
@@ -3465,6 +3571,7 @@ bool RigidObjectModel::saveFile(const char* fn,const char* geometryName)
 
 const char* RigidObjectModel::getName() const
 {
+  if(!worlds[this->world]) throw PyException("RigidObjectModel is associated with a deleted world");
   RobotWorld& world = *worlds[this->world]->world;
   return world.rigidObjects[index]->name.c_str();
 }
@@ -3474,12 +3581,14 @@ void RigidObjectModel::setName(const char* name)
   if(index < 0) {
     throw PyException("Cannot set the name of an empty rigid object");
   }
+  if(!worlds[this->world]) throw PyException("RigidObjectModel is associated with a deleted world");
   RobotWorld& world = *worlds[this->world]->world;
   world.rigidObjects[index]->name = name;
 }
 
 int RigidObjectModel::getID() const
 {
+  if(!worlds[this->world]) throw PyException("RigidObjectModel is associated with a deleted world");
   RobotWorld& world = *worlds[this->world]->world;
   return world.RigidObjectID(index);
 }
@@ -3589,6 +3698,7 @@ void RigidObjectModel::setVelocity(const double angularVelocity[3],const double 
 
 void RigidObjectModel::drawGL(bool keepAppearance)
 {
+  if(!worlds[this->world]) throw PyException("RigidObjectModel is associated with a deleted world");
   RobotWorld& world = *worlds[this->world]->world;
   if(keepAppearance) {
     world.rigidObjects[index]->DrawGL();
@@ -3627,6 +3737,7 @@ bool TerrainModel::saveFile(const char* fn,const char* geometryName)
 
 const char* TerrainModel::getName() const
 {
+  if(!worlds[this->world]) throw PyException("TerrainModel is associated with a deleted world");
   RobotWorld& world = *worlds[this->world]->world;
   return world.terrains[index]->name.c_str();
 }
@@ -3636,6 +3747,7 @@ void TerrainModel::setName(const char* name)
   if(index < 0) {
     throw PyException("Cannot set the name of an empty rigid object");
   }
+  if(!worlds[this->world]) throw PyException("TerrainModel is associated with a deleted world");
   RobotWorld& world = *worlds[this->world]->world;
   world.terrains[index]->name = name;
 }
@@ -3643,6 +3755,7 @@ void TerrainModel::setName(const char* name)
 
 int TerrainModel::getID() const
 {
+  if(!worlds[this->world]) throw PyException("TerrainModel is associated with a deleted world");
   RobotWorld& world = *worlds[this->world]->world;
   return world.TerrainID(index);
 }
@@ -3675,6 +3788,7 @@ void TerrainModel::setFriction(double friction)
 
 void TerrainModel::drawGL(bool keepAppearance)
 {
+  if(!worlds[this->world]) throw PyException("TerrainModel is associated with a deleted world");
   RobotWorld& world = *worlds[this->world]->world;
   if(keepAppearance) {
     world.terrains[index]->DrawGL();
@@ -3737,10 +3851,6 @@ Simulator::Simulator(const WorldModel& model)
     }
     printf("Done\n");
   }
-
-  //TEMP: play around with auto disable of rigid objects
-  for(size_t i=0;i<sim->odesim.numObjects();i++)
-      dBodySetAutoDisableFlag(sim->odesim.object(i)->body(),1);
 
   sim->WriteState(initialState);
 }
@@ -3832,11 +3942,21 @@ void Simulator::getActualVelocity(int robot,std::vector<double>& out)
   out = qv;
 }
 
-void Simulator::getActualTorques(int robot,std::vector<double>& out)
+void Simulator::getActualTorque(int robot,std::vector<double>& out)
 {
   Vector t;
   sim->controlSimulators[robot].GetActuatorTorques(t);
   out = t;
+}
+
+void Simulator::getActualTorques(int robot,std::vector<double>& out)
+{
+  static bool warned=false;
+  if(!warned) {
+    fprintf(stderr,"Warning: Simulator.getActualTorques will be deprecated. Use getActualTorque instead\n");
+    warned = true;
+  }
+  getActualTorque(robot,out);
 }
 
 bool Simulator::inContact(int aid,int bid)
@@ -3985,6 +4105,7 @@ std::string Simulator::getSetting(const std::string& name)
   stringstream ss;
   if(name == "gravity") ss << Vector3(settings.gravity);
   else if(name == "simStep") ss << sim->simStep;
+  else if(name == "autoDisable") ss >> settings.autoDisable;
   else if(name == "boundaryLayerCollisions") ss << settings.boundaryLayerCollisions;
   else if(name == "rigidObjectCollisions") ss << settings.rigidObjectCollisions;
   else if(name == "robotSelfCollisions") ss << settings.robotSelfCollisions;
@@ -4009,6 +4130,7 @@ void Simulator::setSetting(const std::string& name,const std::string& value)
   stringstream ss(value);
   if(name == "gravity") { Vector3 g; ss >> g; sim->odesim.SetGravity(g); }
   else if(name == "simStep") ss >> sim->simStep;
+  else if(name == "autoDisable") { ss >> settings.autoDisable; sim->odesim.SetAutoDisable(settings.autoDisable); }
   else if(name == "boundaryLayerCollisions") ss >> settings.boundaryLayerCollisions;
   else if(name == "rigidObjectCollisions") ss >> settings.rigidObjectCollisions;
   else if(name == "robotSelfCollisions") ss >> settings.robotSelfCollisions;
@@ -4316,6 +4438,15 @@ void SimRobotController::getCommandedVelocity(vector<double>& dq)
   qv.getCopy(&dq[0]);
 }
 
+void SimRobotController::getCommandedTorque(std::vector<double>& t)
+{
+  RobotMotorCommand& command = controller->command;
+  //Robot* robot=sim->sim->controlSimulators[index];
+  t.resize(command.actuators.size());
+  for(size_t i=0;i<command.actuators.size();i++) 
+    t[i] = command.actuators[i].torque;
+}
+
 void SimRobotController::getSensedConfig(vector<double>& q)
 {
   Vector qv;
@@ -4336,9 +4467,45 @@ void SimRobotController::getSensedVelocity(vector<double>& dq)
   }
 }
 
+void SimRobotController::getSensedTorque(std::vector<double>& t)
+{
+  DriverTorqueSensor* s = controller->sensors.GetTypedSensor<DriverTorqueSensor>();
+  if(s==NULL){
+      throw PyException("Robot has no torque sensor");
+  }
+  else {
+    //resize to the correct size
+    if(s->indices.empty() || s->t.empty())
+      t = s->t;
+    else {
+      t.resize(controller->robot->q.n);
+      fill(t.begin(),t.end(),0.0);
+      for(size_t i=0;i<s->indices.size();i++)
+        t[s->indices[i]] = s->t[i];
+    }
+  }
+}
+
 SimRobotSensor::SimRobotSensor(Robot* _robot,SensorBase* _sensor)
   :robot(_robot),sensor(_sensor)
 {}
+
+SimRobotSensor::SimRobotSensor(SimRobotController& _controller,const char* name,const char* type)
+  :robot(NULL),sensor(NULL)
+{
+  robot = _controller.controller->robot;
+  shared_ptr<SensorBase> newsensor = _controller.controller->sensors.CreateByType(type);
+  if(!newsensor) {
+    throw PyException("Invalid sensor type specified");
+  }
+  if(_controller.controller->sensors.GetNamedSensor(name)) {
+    throw PyException("Sensor name already exists");
+  }
+  newsensor->name = name;
+  _controller.controller->sensors.sensors.push_back(newsensor);
+  _controller.controller->nextSenseTime.push_back(_controller.controller->curTime);
+  sensor = _controller.controller->sensors.sensors.back().get();
+}
 
 std::string SimRobotSensor::name()
 {

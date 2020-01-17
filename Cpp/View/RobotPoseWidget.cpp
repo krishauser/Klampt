@@ -80,9 +80,22 @@ bool IsFloatingBase(Robot& robot)
 
 void SetFloatingBase(Robot& robot,const RigidTransform& T)
 {
-  T.t.get(robot.q(0),robot.q(1),robot.q(2));
+  RigidTransform Tp,Tchain;
+  if(robot.joints[0].type == RobotJoint::Floating || robot.joints[0].type == RobotJoint::FloatingPlanar) {
+    Tp.mulInverseB(T,robot.links[robot.joints[0].linkIndex].T0_Parent);
+    Tchain.mulInverseA(robot.links[robot.joints[0].baseIndex+1].T0_Parent,Tp);
+    if(robot.joints[0].baseIndex >= 0) {
+      Tp.mulInverseA(robot.links[robot.parents[robot.joints[0].baseIndex]].T_World,Tchain);
+      Tchain = Tp;
+    }
+  }
+  else {
+    Tp.mulInverseB(T,robot.links[5].T0_Parent);
+    Tchain.mulInverseA(robot.links[0].T0_Parent,Tp);
+  }
+  Tchain.t.get(robot.q(0),robot.q(1),robot.q(2));
   EulerAngleRotation e;
-  e.setMatrixZYX(T.R);
+  e.setMatrixZYX(Tchain.R);
   e.get(robot.q(3),robot.q(4),robot.q(5));
 }
 
@@ -127,8 +140,8 @@ void RobotLinkPoseWidget::Set(Robot* _robot,ViewRobot* _viewRobot)
 bool RobotLinkPoseWidget::Hover(int x,int y,Camera::Viewport& viewport,double& distance) 
 { 
   Ray3D r;
-  viewport.getClickSource(x,y,r.source);
-  viewport.getClickVector(x,y,r.direction);
+  viewport.getClickSource((float)x, (float)y,r.source);
+  viewport.getClickVector((float)x, (float)y,r.direction);
   int oldHoverLink = hoverLink;
   distance = Inf;    
   hoverLink = affectedLink = affectedDriver = -1;
@@ -205,7 +218,7 @@ void RobotLinkPoseWidget::Drag(int dx,int dy,Camera::Viewport& viewport)
       float x,y,d;
       viewport.project(pt,x,y,d);
       Vector3 v;
-      viewport.getMovementVectorAtDistance(0,dy,d,v);
+      viewport.getMovementVectorAtDistance((float)0, (float)dy, d,v);
       shift = -Sign(Real(dy))*v.norm();
     }
   }
@@ -518,11 +531,11 @@ void RobotIKPoseWidget::DrawGL(Camera::Viewport& viewport)
       if(poseGoals[i].destLink >= 0)
         T = robot->links[poseGoals[i].destLink].T_World*T;
       glMultMatrix(Matrix4(T));
-      drawBox(0.04,0.04,0.04);
+      drawBox(0.04f,0.04f,0.04f);
     }
     else {
       glTranslate(despos);
-      drawSphere(0.02,16,8);
+      drawSphere(0.02f,16,8);
     }
     glPopMatrix();
   }
@@ -846,8 +859,8 @@ void RobotPoseWidget::Drag(int dx,int dy,Camera::Viewport& viewport)
     //printf("Attach dragging, hover widget %d\n",ikPoser.ActiveWidget());
     attachx += dx;
     attachy += dy; 
-    viewport.getClickSource(attachx,attachy,attachRay.source);
-    viewport.getClickVector(attachx,attachy,attachRay.direction);
+    viewport.getClickSource((float)attachx, (float)attachy,attachRay.source);
+    viewport.getClickVector((float)attachx, (float)attachy,attachRay.direction);
     double dist;
     bool res=linkPoser.Hover(attachx,attachy,viewport,dist);
     Refresh();

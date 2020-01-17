@@ -19,7 +19,7 @@ string ReadFileAsString(const char* fn)
   char buf[1025];
   while(!in.eof()) {
     in.read(buf,1024);
-    int n = in.gcount();
+    int n = (int)in.gcount();
     buf[n]=0;
     s += buf;
   }
@@ -380,12 +380,12 @@ int main(int argc, char** argv)
       //write the final state
       char buf[256];
       if(commandFiles.size()==1) {
-	if(initialStates.size()==1) sprintf(buf,"%s.%s",prefix.c_str(),FormatExtension(format));
-	else sprintf(buf,"%s%04d.%s",prefix.c_str(),init,FormatExtension(format));
+	if(initialStates.size()==1) snprintf(buf,1024,"%s.%s",prefix.c_str(),FormatExtension(format));
+	else snprintf(buf,1024,"%s%04d.%s",prefix.c_str(),init,FormatExtension(format));
       }
       else {
-	if(initialStates.size()==1) sprintf(buf,"%s%04d.%s",prefix.c_str(),trial,FormatExtension(format));
-	else sprintf(buf,"%s_%04d_%04d.%s",prefix.c_str(),init,trial,FormatExtension(format));
+	if(initialStates.size()==1) snprintf(buf,1024,"%s%04d.%s",prefix.c_str(),trial,FormatExtension(format));
+	else snprintf(buf,1024,"%s_%04d_%04d.%s",prefix.c_str(),init,trial,FormatExtension(format));
       }
 
       printf("Writing state at time %g to file %s\n",sim.time,buf);

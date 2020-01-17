@@ -103,7 +103,7 @@ Build and temporary files
 
 -  ``CMakeFiles.txt``: CMake main file describing the build
    configuration.
--  ``CMakeModules/': Auxiliary CMake files.  If you are building other projects using Klampt, the``\ KlamptDependencies.cmake\`
+-  ``CMakeModules/``: Auxiliary CMake files.  If you are building other projects using Klampt, the``\ KlamptDependencies.cmake\`
    file will be useful to include.
 -  ``CMakeCache.txt``: CMake cache file. May need to be deleted if you
    are having build problems.

@@ -76,8 +76,8 @@ RobotUserInterface::RobotUserInterface()
 
 void RobotUserInterface::GetClickRay(int mx,int my,Ray3D& ray) const
 {
-  viewport->getClickSource(mx,viewport->h-my,ray.source);
-  viewport->getClickVector(mx,viewport->h-my,ray.direction);
+  viewport->getClickSource(float(mx),float(viewport->h-my),ray.source);
+  viewport->getClickVector(float(mx),float(viewport->h-my),ray.direction);
 }
 
 string JointCommandInterface::ActivateEvent(bool enabled)

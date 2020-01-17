@@ -58,7 +58,7 @@ Controllers can be dynamically and automatically loaded from world XML files via
 - [<tt>FeedforwardJointTrackingController</tt> (FeedforwardController.h)](../Control/FeedforwardController.h): a controller that additionally computes feedforward torques for gravity compensation and acceleration compensation. Works properly only with fixed-based robots. Otherwise works exactly like `JointTrackingController`.
 - <tt>FeedforwardMilestonePathController</tt>: see above.
 - <tt>FeedforwardPolynomialPathController</tt>: see above.
-- [<tt>SerialController</tt> (SerialController.h)](../Control/SerialController.h): a thin communication layer that serves sensor data and accepts commands to/from a client controller through a serial interface.  It listens on the port given by the setting servAddr and sends sensor data at the rate writeRate (in Hz).  Sensor data and commands are converted to/from JSON format, in a form that is compatible with the Python API dictionaries used by the `control.BaseController` class (see the [Python API documentation](http://motion.pratt.duke.edu/klampt/pyklampt_docs/Manual-Control.html#experimental-controller-api)).
+- [<tt>SerialController</tt> (SerialController.h)](../Control/SerialController.h): a thin communication layer that serves sensor data and accepts commands to/from a client controller through a serial interface.  It listens on the port given by the setting servAddr and sends sensor data at the rate writeRate (in Hz).  Sensor data and commands are converted to/from JSON format, in a form that is compatible with the Python API dictionaries used by the `control.BaseController` class (see the [Python API documentation](http://motion.cs.illinois.edu/klampt/pyklampt_docs/Manual-Control.html#experimental-controller-api)).
 
 
 #### API summary
@@ -128,7 +128,7 @@ Settings are:
 - `qresolution` (float list): resolution of each reading, in radians. E.g. "0.01 ... 0.01" indicates that each reading will be rounded to the nearest 0.01 radian
 - `qvariance` (float list): variance of each reading, in radians
 
-[C++ API documentation](http://motion.pratt.duke.edu/klampt/klampt_docs/classJointPositionSensor.html).
+[C++ API documentation](http://motion.cs.illinois.edu/klampt/klampt_docs/classJointPositionSensor.html).
 
 #### `JointVelocitySensor`
 
@@ -138,7 +138,7 @@ Settings are:
 - `qresolution` (float list): resolution of each reading, in rad/s. E.g. "0.1 ... 0.1" indicates that each reading will be rounded to the nearest 0.1 rad/s
 - `qvariance` (float list): variance of each reading, in rad/s.
 
-[C++ API documentation](http://motion.pratt.duke.edu/klampt/klampt_docs/classJointVelocitySensor.html).
+[C++ API documentation](http://motion.cs.illinois.edu/klampt/klampt_docs/classJointVelocitySensor.html).
 
 #### `CameraSensor`
 
@@ -153,43 +153,43 @@ Settings are:
 - `xfov`, `yfov` (float): the x and y field of view, in radians.
 - `zmin`, `zmax` (float): minimum and maximum range of the depth sensor.
 
-[C++ API documentation](http://motion.pratt.duke.edu/klampt/klampt_docs/classCameraSensor.html).
+[C++ API documentation](http://motion.cs.illinois.edu/klampt/klampt_docs/classCameraSensor.html).
 
 #### `LaserRangeSensor`
 
-See the [C++ API documentation](http://motion.pratt.duke.edu/klampt/klampt_docs/classLaserRangeSensor.html) for attributes.
+See the [C++ API documentation](http://motion.cs.illinois.edu/klampt/klampt_docs/classLaserRangeSensor.html) for attributes.
 
 #### `DriverTorqueSensor`
 
-See the [C++ API documentation](http://motion.pratt.duke.edu/klampt/klampt_docs/classDriverTorqueSensor.html) for attributes.
+See the [C++ API documentation](http://motion.cs.illinois.edu/klampt/klampt_docs/classDriverTorqueSensor.html) for attributes.
 
 #### `ContactSensor`
 
-See the [C++ API documentation](http://motion.pratt.duke.edu/klampt/klampt_docs/classContactSensorSensor.html) for attributes.
+See the [C++ API documentation](http://motion.cs.illinois.edu/klampt/klampt_docs/classContactSensorSensor.html) for attributes.
 
 #### `ForceTorqueSensor`
 
-See the [C++ API documentation](http://motion.pratt.duke.edu/klampt/klampt_docs/classForceTorqueSensor.html) for attributes.
+See the [C++ API documentation](http://motion.cs.illinois.edu/klampt/klampt_docs/classForceTorqueSensor.html) for attributes.
 
 #### `Accelerometer`
 
-See the [C++ API documentation](http://motion.pratt.duke.edu/klampt/klampt_docs/classAccelerometer.html) for attributes.
+See the [C++ API documentation](http://motion.cs.illinois.edu/klampt/klampt_docs/classAccelerometer.html) for attributes.
 
 #### `TiltSensor`
 
-See the [C++ API documentation](http://motion.pratt.duke.edu/klampt/klampt_docs/classTiltSensor.html) for attributes.
+See the [C++ API documentation](http://motion.cs.illinois.edu/klampt/klampt_docs/classTiltSensor.html) for attributes.
 
 #### `GyroSensor`
 
-See the [C++ API documentation](http://motion.pratt.duke.edu/klampt/klampt_docs/classGyroSensor.html) for attributes.
+See the [C++ API documentation](http://motion.cs.illinois.edu/klampt/klampt_docs/classGyroSensor.html) for attributes.
 
 #### `IMUSensor`
 
-See the [C++ API documentation](http://motion.pratt.duke.edu/klampt/klampt_docs/classIMUSensor.html) for attributes.
+See the [C++ API documentation](http://motion.cs.illinois.edu/klampt/klampt_docs/classIMUSensor.html) for attributes.
 
 #### `FilteredSensor`
 
-See the [C++ API documentation](http://motion.pratt.duke.edu/klampt/klampt_docs/classFilteredSensor.html) for attributes.
+See the [C++ API documentation](http://motion.cs.illinois.edu/klampt/klampt_docs/classFilteredSensor.html) for attributes.
 
 
 ## State estimation

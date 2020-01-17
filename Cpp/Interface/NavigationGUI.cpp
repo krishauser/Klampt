@@ -33,7 +33,7 @@ using namespace GLDraw;
 
 #define SHOW_VIEW_TARGET(secs) {\
   show_view_target=1; \
-  t_hide_view_target=timer.LastElapsedTime()+secs; \
+  t_hide_view_target=float(timer.LastElapsedTime()+secs); \
   SendPauseIdle(0);				   \
 }
 
@@ -123,7 +123,7 @@ void MouseDragBackend::DoDrag(int dx,int dy,int button,int modifiers)
 
 
 GLNavigationBackend::GLNavigationBackend()
-  :stereo_mode(false),stereo_offset(.02),
+  :stereo_mode(false),stereo_offset(.02f),
    show_view_target(0),t_hide_view_target(0),
    frames_per_second(0),show_frames_per_second(false),
    frames_rendered(0),
@@ -174,14 +174,14 @@ bool GLNavigationBackend::OnGLRender()
     glColorMask(GL_FALSE,GL_TRUE,GL_TRUE,GL_TRUE); // draw only to green, blue and alpha
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
-    glTranslatef(-stereo_offset*camera.dist,0,0);
+    glTranslatef(-stereo_offset*float(camera.dist),0,0);
     RenderWorld();
     glPopMatrix();
     glClear(GL_DEPTH_BUFFER_BIT); // leave the blue image but clear Z (NOTE: may need to clear alpha as well for transparency effects!)
     glColorMask(GL_TRUE,GL_FALSE,GL_FALSE,GL_TRUE); // draw only to red and alpha
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
-    glTranslatef(stereo_offset*camera.dist,0,0);
+    glTranslatef(stereo_offset*float(camera.dist),0,0);
     RenderWorld();
     glPopMatrix();
     glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);}
@@ -215,7 +215,7 @@ void GLNavigationBackend::ClickRay(int x,int y,Math3D::Vector3& src,Math3D::Vect
 
 bool GLNavigationBackend::OnMouseWheel(int dwheel)
 {
-  viewport.scale *= (1+float(dwheel)/20*0.01);
+  viewport.scale *= (1+float(dwheel)/20*0.01f);
   SHOW_VIEW_TARGET(0.5);
   SendRefresh();
   return true;
@@ -307,7 +307,7 @@ void GLNavigationBackend::DragRotate(int dx,int dy)
 
 void GLNavigationBackend::DragZoom(int dx,int dy)
 {
-  viewport.scale *= (1+float(dy)*0.01);
+  viewport.scale *= (1+float(dy)*0.01f);
   SHOW_VIEW_TARGET(0.5);
   SendRefresh();
 }
@@ -327,9 +327,9 @@ bool GLNavigationBackend::OnIdle()
   double new_time = timer.ElapsedTime();
   double delta_time=new_time-old_time;
   if(delta_time>0)
-    frames_per_second = 1.0/delta_time;
+    frames_per_second = float(1.0/delta_time);
   else
-    frames_per_second = 0.0;
+    frames_per_second = 0.0f;
 
   if(show_view_target && t_hide_view_target <= new_time) {
     show_view_target = 0;
@@ -351,8 +351,8 @@ void GLNavigationBackend::DisplayCameraTarget()
   GLfloat clear_color[4];
   glGetFloatv(GL_COLOR_CLEAR_VALUE,clear_color);
   glColor3f(1-clear_color[0],1-clear_color[1],1-clear_color[2]);
-  float logcd=log(camera.dist)/log(20.);
-  float smallsize=pow(20.0,floor(logcd-.5));
+  double logcd=log(camera.dist)/log(20.);
+  float smallsize=float(pow(20.0,floor(logcd-.5)));
   drawWireBox(smallsize,smallsize,smallsize);
   drawWireBox(20*smallsize,20*smallsize,20*smallsize);
   glEnable(GL_LIGHTING); 

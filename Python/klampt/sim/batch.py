@@ -96,7 +96,7 @@ def doSim(world,duration,initialCondition,
     initCond = getWorldSimState(world)
     args = ()
     for k,v in initialCondition.iteritems():
-        if k is not 'args':
+        if k != 'args':
             access.set_item(world,k,v)
         else:
             args = v
@@ -209,8 +209,10 @@ def monteCarloSim(world,duration,initialConditionSamplers,N,returnItems,
     Returns:
         list: contains N pairs (initCond,returnVal) containing each simulation
         result:
+
             * initCond: the sampled initial condition
             * returnVal: the return value from doSim().
+            
     """
     print "klampt.batch.monteCarloSim(): Running",N,"simulations..."
     res = []

@@ -116,6 +116,57 @@ bool RobotSensors::SaveSettings(const char* fn)
   return doc.SaveFile(fn);
 }
 
+shared_ptr<SensorBase> RobotSensors::CreateByType(const char* type) const
+{
+  if(0==strcmp(type,"JointPositionSensor")) {
+    return make_shared<JointPositionSensor>();
+  }
+  else if(0==strcmp(type,"JointVelocitySensor")) {
+    return make_shared<JointVelocitySensor>();
+  }
+  else if(0==strcmp(type,"DriverTorqueSensor")) {
+    return make_shared<DriverTorqueSensor>();
+  }
+  else if(0==strcmp(type,"GyroSensor")) {
+    return make_shared<GyroSensor>();
+  }
+  else if(0==strcmp(type,"Accelerometer")) {
+    return make_shared<Accelerometer>();
+  }
+  else if(0==strcmp(type,"TiltSensor")) {
+    return make_shared<TiltSensor>();
+  }
+  else if(0==strcmp(type,"IMUSensor")) {
+    return make_shared<IMUSensor>();
+  }
+  else if(0==strcmp(type,"ContactSensor")) {
+    return make_shared<ContactSensor>();
+  }
+  else if(0==strcmp(type,"ForceTorqueSensor")) {
+    return make_shared<ForceTorqueSensor>();
+  }
+  else if(0==strcmp(type,"LaserRangeSensor")) {
+    return make_shared<LaserRangeSensor>();
+  }
+  else if(0==strcmp(type,"CameraSensor")) {
+    return make_shared<CameraSensor>();
+  }
+  else if(0==strcmp(type,"TransformedSensor")) {
+    return make_shared<TransformedSensor>();
+  }
+  else if(0==strcmp(type,"CorruptedSensor")) {
+    return make_shared<CorruptedSensor>();
+  }
+  else if(0==strcmp(type,"FilteredSensor")) {
+    return make_shared<FilteredSensor>();
+  }
+  else if(0==strcmp(type,"TimeDelayedSensor")) {
+    return make_shared<TimeDelayedSensor>();
+  }
+  return shared_ptr<SensorBase>();
+
+}
+
 bool RobotSensors::LoadSettings(TiXmlElement* node)
 {
   if(0!=strcmp(node->Value(),"sensors")){
@@ -125,54 +176,15 @@ bool RobotSensors::LoadSettings(TiXmlElement* node)
   TiXmlElement* e=node->FirstChildElement();
   sensors.resize(0);
   while(e != NULL) {
-    shared_ptr<SensorBase> sensor;
+    shared_ptr<SensorBase> sensor = CreateByType(e->Value());
+    if(!sensor) {
+      LOG4CXX_ERROR(GET_LOGGER(XmlParser),"RobotSensors::LoadSettings: Unknown sensor type "<<e->Value());
+      return false;
+    }
+    sensors.push_back(sensor);
     set<string> processedAttributes;
-    if(0==strcmp(e->Value(),"JointPositionSensor")) {
-      sensor = make_shared<JointPositionSensor>();
-      sensors.push_back(sensor);
-    }
-    else if(0==strcmp(e->Value(),"JointVelocitySensor")) {
-      sensor = make_shared<JointVelocitySensor>();
-      sensors.push_back(sensor);
-    }
-    else if(0==strcmp(e->Value(),"DriverTorqueSensor")) {
-      sensor = make_shared<DriverTorqueSensor>();
-      sensors.push_back(sensor);
-    }
-    else if(0==strcmp(e->Value(),"GyroSensor")) {
-      sensor = make_shared<GyroSensor>();
-      sensors.push_back(sensor);
-    }
-    else if(0==strcmp(e->Value(),"Accelerometer")) {
-      sensor = make_shared<Accelerometer>();
-      sensors.push_back(sensor);
-    }
-    else if(0==strcmp(e->Value(),"TiltSensor")) {
-      sensor = make_shared<TiltSensor>();
-      sensors.push_back(sensor);
-    }
-    else if(0==strcmp(e->Value(),"IMUSensor")) {
-      sensor = make_shared<IMUSensor>();
-      sensors.push_back(sensor);
-    }
-    else if(0==strcmp(e->Value(),"ContactSensor")) {
-      sensor = make_shared<ContactSensor>();
-      sensors.push_back(sensor);
-    }
-    else if(0==strcmp(e->Value(),"ForceTorqueSensor")) {
-      sensor = make_shared<ForceTorqueSensor>();
-      sensors.push_back(sensor);
-    }
-    else if(0==strcmp(e->Value(),"LaserRangeSensor")) {
-      sensor = make_shared<LaserRangeSensor>();
-      sensors.push_back(sensor);
-    }
-    else if(0==strcmp(e->Value(),"CameraSensor")) {
-      sensor = make_shared<CameraSensor>();
-      sensors.push_back(sensor);
-    }
-    else if(0==strcmp(e->Value(),"TransformedSensor")) {
-      auto fs = make_shared<TransformedSensor>();
+    if(0==strcmp(e->Value(),"TransformedSensor")) {
+      auto fs = dynamic_cast<TransformedSensor*>(sensor.get());
       if(!e->Attribute("sensor")) {
         LOG4CXX_ERROR(GET_LOGGER(XmlParser),"Transformed sensor doesn't have a \"sensor\" attribute");
         return false;
@@ -182,12 +194,10 @@ bool RobotSensors::LoadSettings(TiXmlElement* node)
         LOG4CXX_ERROR(GET_LOGGER(XmlParser),"Transformed sensor has unknown sensor named \""<<e->Attribute("sensor"));
         return false;
       }
-      sensor = fs;
-      sensors.push_back(sensor);
       processedAttributes.insert("sensor");
     }
     else if(0==strcmp(e->Value(),"CorruptedSensor")) {
-      auto fs = make_shared<CorruptedSensor>();
+      auto fs = dynamic_cast<CorruptedSensor*>(sensor.get());
       if(!e->Attribute("sensor")) {
         LOG4CXX_ERROR(GET_LOGGER(XmlParser),"Corrupted sensor doesn't have a \"sensor\" attribute");
         return false;
@@ -197,12 +207,10 @@ bool RobotSensors::LoadSettings(TiXmlElement* node)
         LOG4CXX_ERROR(GET_LOGGER(XmlParser),"Corrupted sensor has unknown sensor named \""<<e->Attribute("sensor"));
         return false;
       }
-      sensor = fs;
-      sensors.push_back(sensor);
       processedAttributes.insert("sensor");
     }
     else if(0==strcmp(e->Value(),"FilteredSensor")) {
-      auto fs = make_shared<FilteredSensor>();
+      auto fs = dynamic_cast<FilteredSensor*>(sensor.get());
       if(!e->Attribute("sensor")) {
         LOG4CXX_ERROR(GET_LOGGER(XmlParser),"Filtered sensor doesn't have a \"sensor\" attribute");
         return false;
@@ -212,12 +220,10 @@ bool RobotSensors::LoadSettings(TiXmlElement* node)
         LOG4CXX_ERROR(GET_LOGGER(XmlParser),"Filtered sensor has unknown sensor named \""<<e->Attribute("sensor")<<"\"");
         return false;
       }
-      sensor = fs;
-      sensors.push_back(sensor);
       processedAttributes.insert("sensor");
     }
     else if(0==strcmp(e->Value(),"TimeDelayedSensor")) {
-      auto fs = make_shared<TimeDelayedSensor>();
+      auto fs = dynamic_cast<TimeDelayedSensor*>(sensor.get());
       if(!e->Attribute("sensor")) {
         LOG4CXX_ERROR(GET_LOGGER(XmlParser),"Time-delayed sensor doesn't have a \"sensor\" attribute");
         return false;
@@ -227,13 +233,7 @@ bool RobotSensors::LoadSettings(TiXmlElement* node)
         LOG4CXX_ERROR(GET_LOGGER(XmlParser),"Time-delayed sensor has unknown sensor named \""<<e->Attribute("sensor")<<"\"");
         return false;
       }
-      sensor = fs;
-      sensors.push_back(sensor);
       processedAttributes.insert("sensor");
-    }
-    else {
-      LOG4CXX_ERROR(GET_LOGGER(XmlParser),"RobotSensors::LoadSettings: Unknown sensor type "<<e->Value());
-      return false;
     }
     TiXmlAttribute* attr = e->FirstAttribute();
     while(attr != NULL) {

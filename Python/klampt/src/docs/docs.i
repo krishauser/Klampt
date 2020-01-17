@@ -21,9 +21,9 @@ possible.
 C++ includes: appearance.h
 ";
 
-%feature("docstring") Appearance::clone "
+%feature("docstring") Appearance::free "
 
-Creates a standalone appearance from this appearance.  
+Frees the data associated with this appearance, if standalone.  
 ";
 
 %feature("docstring") Appearance::setPointSize "
@@ -31,22 +31,29 @@ Creates a standalone appearance from this appearance.
 For point clouds, sets the point size.  
 ";
 
-%feature("docstring") Appearance::setTexcoords "
+%feature("docstring") Appearance::set "
 
-Sets per-vertex texture coordinates.  
-
-If the texture is 1D, uvs is an array of length n containing 1D texture
-coordinates.  
-
-If the texture is 2D, uvs is an array of length 2n containing U-V coordinates
-u1, v1, u2, v2, ..., un, vn.  
-
-You may also set uvs to be empty, which turns off texture mapping altogether.  
+Copies the appearance of the argument into this appearance.  
 ";
 
-%feature("docstring") Appearance::isStandalone "
+%feature("docstring") Appearance::setElementColor "
 
-Returns true if this is a standalone appearance.  
+Sets the per-element color for the given feature.  
+";
+
+%feature("docstring") Appearance::setTexture1D "
+
+Sets a 1D texture of the given width. Valid format strings are.  
+
+*   \"\": turn off texture mapping  
+*   rgb8: unsigned byte RGB colors with red in the most significant byte  
+*   argb8: unsigned byte RGBA colors with alpha in the most significant byte  
+*   l8: unsigned byte grayscale colors  
+";
+
+%feature("docstring") Appearance::clone "
+
+Creates a standalone appearance from this appearance.  
 ";
 
 %feature("docstring") Appearance::getElementColor "
@@ -63,95 +70,6 @@ of features of that type.
 
 Otherwise they are assumed to be 3*N rgb values. Only supports feature=VERTICES
 and feature=FACES  
-";
-
-%feature("docstring") Appearance::free "
-
-Frees the data associated with this appearance, if standalone.  
-";
-
-%feature("docstring") Appearance::setDraw "
-";
-
-%feature("docstring") Appearance::setDraw "
-
-Turns on/off visibility of the object or a feature.  
-
-If one argument is given, turns the object visibility on or off  
-
-If two arguments are given, turns the feature (first int argument) visibility on
-or off. feature can be ALL, VERTICES, EDGES, or FACES.  
-";
-
-%feature("docstring") Appearance::refresh "
-
-call this to rebuild internal buffers, e.g., when the OpenGL context changes. If
-deep=True, the entire data structure will be revised. Use this for streaming
-data, for example.  
-";
-
-%feature("docstring") Appearance::drawWorldGL "
-
-Draws the given geometry with this appearance. NOTE: for best performance, an
-appearance should only be drawn with a single geometry. Otherwise, the OpenGL
-display lists will be completely recreated.  
-
-Differs from drawGL in that the geometry's current transform is applied before
-drawing.  
-";
-
-%feature("docstring") Appearance::getColor "
-";
-
-%feature("docstring") Appearance::getColor "
-";
-
-%feature("docstring") Appearance::set "
-
-Copies the appearance of the argument into this appearance.  
-";
-
-%feature("docstring") Appearance::setTexture2D "
-
-Sets a 2D texture of the given width/height. See setTexture1D for valid format
-strings.  
-";
-
-%feature("docstring") Appearance::getDraw "
-";
-
-%feature("docstring") Appearance::getDraw "
-
-Returns whether this object or feature is visible.  
-
-If no arguments are given, returns whether the object is visible.  
-
-If one int argument is given, returns whether the given feature is visible.
-feature can be ALL, VERTICES, EDGES, or FACES.  
-";
-
-%feature("docstring") Appearance::setElementColor "
-
-Sets the per-element color for the given feature.  
-";
-
-%feature("docstring") Appearance::~Appearance "
-";
-
-%feature("docstring") Appearance::Appearance "
-";
-
-%feature("docstring") Appearance::Appearance "
-";
-
-%feature("docstring") Appearance::setTexture1D "
-
-Sets a 1D texture of the given width. Valid format strings are.  
-
-*   \"\": turn off texture mapping  
-*   rgb8: unsigned byte RGB colors with red in the most significant byte  
-*   argb8: unsigned byte RGBA colors with alpha in the most significant byte  
-*   l8: unsigned byte grayscale colors  
 ";
 
 %feature("docstring") Appearance::drawGL "
@@ -174,6 +92,9 @@ Note that the geometry's current transform is NOT respected, and this only draws
 the geometry in its local transform.  
 ";
 
+%feature("docstring") Appearance::~Appearance "
+";
+
 %feature("docstring") Appearance::setColor "
 ";
 
@@ -185,6 +106,96 @@ If 3 or 4 arguments are given, changes the object color.
 
 If 5 arguments are given, changes the color of the given feature. feature can be
 ALL, VERTICES, EDGES, or FACES.  
+";
+
+%feature("docstring") Appearance::isStandalone "
+
+Returns true if this is a standalone appearance.  
+";
+
+%feature("docstring") Appearance::refresh "
+
+call this to rebuild internal buffers, e.g., when the OpenGL context changes. If
+deep=True, the entire data structure will be revised. Use this for streaming
+data, for example.  
+";
+
+%feature("docstring") Appearance::setTexcoords "
+
+Sets per-vertex texture coordinates.  
+
+If the texture is 1D, uvs is an array of length n containing 1D texture
+coordinates.  
+
+If the texture is 2D, uvs is an array of length 2n containing U-V coordinates
+u1, v1, u2, v2, ..., un, vn.  
+
+You may also set uvs to be empty, which turns off texture mapping altogether.  
+";
+
+%feature("docstring") Appearance::getColor "
+";
+
+%feature("docstring") Appearance::getColor "
+";
+
+%feature("docstring") Appearance::setTexture2D "
+
+Sets a 2D texture of the given width/height. See setTexture1D for valid format
+strings.  
+";
+
+%feature("docstring") Appearance::getDraw "
+";
+
+%feature("docstring") Appearance::getDraw "
+
+Returns whether this object or feature is visible.  
+
+If no arguments are given, returns whether the object is visible.  
+
+If one int argument is given, returns whether the given feature is visible.
+feature can be ALL, VERTICES, EDGES, or FACES.  
+";
+
+%feature("docstring") Appearance::setCreaseAngle "
+
+For meshes, sets the crease angle. Set to 0 to disable smoothing.  
+";
+
+%feature("docstring") Appearance::drawWorldGL "
+
+Draws the given geometry with this appearance. NOTE: for best performance, an
+appearance should only be drawn with a single geometry. Otherwise, the OpenGL
+display lists will be completely recreated.  
+
+Differs from drawGL in that the geometry's current transform is applied before
+drawing.  
+";
+
+%feature("docstring") Appearance::setSilhouette "
+
+For meshes sets a silhouette radius and color. Set the radius to 0 to disable
+silhouette drawing.  
+";
+
+%feature("docstring") Appearance::setDraw "
+";
+
+%feature("docstring") Appearance::setDraw "
+
+Turns on/off visibility of the object or a feature.  
+
+If one argument is given, turns the object visibility on or off  
+
+If two arguments are given, turns the feature (first int argument) visibility on
+or off. feature can be ALL, VERTICES, EDGES, or FACES.  
+";
+
+%feature("docstring") Appearance::Appearance "
+";
+
+%feature("docstring") Appearance::Appearance "
 ";
 
 // File: classContactParameters.xml
@@ -209,6 +220,34 @@ C++ includes: robotmodel.h
 ";
 
 %feature("docstring") ContactParameters::ContactParameters "
+";
+
+// File: classContactQueryResult.xml
+
+
+%feature("docstring") ContactQueryResult "
+
+The result from a contact query of :class:`~klampt.Geometry3D`. The number of
+contacts n is variable.  
+
+Attributes:  
+
+    depths (list of n floats): penetration depths for each contact point.
+        The depth is measured with respect to the padded geometry, and must
+        be nonnegative. A value of 0 indicates that depth cannot be
+        determined accurately.
+    points1, points2 (list of n lists of floats): contact points on self vs
+        other,  The top level list has n entries, and each entry is a
+        3-list expressed in world coordinates.  If an object is padded,
+        these points are on the surface of the padded geometry.
+    normals (list of n lists of floats): the outward-facing contact normal
+        from this to other at each contact point, given in world
+        coordinates.  Each entry is a 3-list, and can be a unit vector,
+        or [0,0,0] if the the normal cannot be computed properly.
+    elems1, elems2 (list of n ints): for compound objects, these are the
+        element indices corresponding to each contact.  
+
+C++ includes: geometry.h
 ";
 
 // File: classCSpaceInterface.xml
@@ -418,16 +457,19 @@ Attributes:
     d (float): The calculated distance, with negative values indicating
         penetration.  Can also be upperBound if the branch was hit.
     hasClosestPoints (bool):  If true, the closest point information is
-        given in cp0 and cp1.
+        given in cp0 and cp1, and elem1 and elem2
     hasGradients (bool):  f true, distance gradient information is given
         in grad0 and grad1.
     cp1, cp2 (list of 3 floats, optional): closest points on self vs other,
         both given in world coordinates
     grad1, grad2 (list of 3 floats, optional): the gradients of the
-        objects' signed distance fields, in world coordinates.
+        objects' signed distance fields at the closest points.  Given in
+        world coordinates.
 
         I.e., to move object1 to touch object2, move it in direction
-        grad1 by distance -d.  Note that grad2 is always -grad1.  
+        grad1 by distance -d.  Note that grad2 is always -grad1.
+    elems1, elems2 (int): for compound objects, these are the
+        element indices corresponding to the closest points.  
 
 C++ includes: geometry.h
 ";
@@ -650,6 +692,11 @@ Frees the data associated with this geometry, if standalone.
 %feature("docstring") Geometry3D::collides "
 
 Returns true if this geometry collides with the other.  
+
+Unsupported types:  
+
+*   VolumeGrid - TriangleMesh  
+*   VolumeGrid - VolumeGrid  
 ";
 
 %feature("docstring") Geometry3D::getPointCloud "
@@ -680,13 +727,26 @@ setElement() with increasing indices.
 Returns the the distance and closest points between the given geometries.  
 
 If the objects are penetrating, some combinations of geometry types allow
-calculating penetration depths (GeometricPrimitive-GeometricPrimitive,
-GeometricPrimitive-TriangleMesh (surface only), GeometricPrimitive-PointCloud,
-GeometricPrimitive-VolumeGrid, TriangleMesh (surface only)- GeometricPrimitive,
-PointCloud-VolumeGrid). In this case, a negative value is returned and cp1,cp2
-are the deepest penetrating points.  
+calculating penetration depths:  
 
-Same comments as the distance_point function  
+*   GeometricPrimitive-GeometricPrimitive (Python-supported sub-types only)  
+*   GeometricPrimitive-TriangleMesh (surface only)  
+*   GeometricPrimitive-PointCloud  
+*   GeometricPrimitive-VolumeGrid  
+*   TriangleMesh (surface only)-GeometricPrimitive  
+*   PointCloud-VolumeGrid  
+
+If penetration is supported, a negative distance is returned and cp1,cp2 are the
+deepest penetrating points.  
+
+Unsupported types:  
+
+*   GeometricPrimitive-GeometricPrimitive subtypes segment vs aabb  
+*   PointCloud-PointCloud  
+*   VolumeGrid-TriangleMesh  
+*   VolumeGrid-VolumeGrid  
+
+See the comments of the distance_point function  
 ";
 
 %feature("docstring") Geometry3D::getCurrentTransform "
@@ -835,8 +895,8 @@ Returns the number of sub-elements in this geometry.
 
 %feature("docstring") Geometry3D::type "
 
-Returns the type of geometry: TriangleMesh, PointCloud, VolumeGrid, or
-GeometricPrimitive.  
+Returns the type of geometry: TriangleMesh, PointCloud, VolumeGrid,
+GeometricPrimitive, or Group.  
 ";
 
 %feature("docstring") Geometry3D::setPointCloud "
@@ -871,6 +931,28 @@ other type.
 
 Sets a padding around the base geometry which affects the results of proximity
 queries.  
+";
+
+%feature("docstring") Geometry3D::contacts "
+
+Returns the set of contact points between this and other. This set is a discrete
+representation of the region of surface overlap, which is defined as all pairs
+of points within distance self.collisionMargin + other.collisionMargin +
+padding1 + padding2.  
+
+For some geometry types (TriangleMesh-TriangleMesh, TriangleMesh-PointCloud,
+PointCloud-PointCloud) padding must be positive to get meaningful contact poitns
+and normals.  
+
+If maxContacts != 0 a clustering postprocessing step is performed.  
+
+Unsupported types:  
+
+*   GeometricPrimitive-GeometricPrimitive subtypes segment vs aabb  
+*   VolumeGrid-GeometricPrimitive any subtypes except point and sphere. also,
+    the results are potentially inaccurate for non-convex VolumeGrids.  
+*   VolumeGrid-TriangleMesh  
+*   VolumeGrid-VolumeGrid  
 ";
 
 %feature("docstring") Geometry3D::distance_ext "
@@ -1309,8 +1391,8 @@ Returns the COM as a list of 3 floats.
 
 %feature("docstring") PlannerInterface "
 
-An interface for a motion planner. The :class:`MotionPlan` interface in
-cspace.py is somewhat easier to use.  
+An interface for a kinematic motion planner. The :class:`MotionPlan` interface
+in cspace.py is somewhat easier to use.  
 
 On construction, uses the planner type specified by setPlanType and the settings
 currently specified by calls to setPlanSetting.  
@@ -1327,13 +1409,21 @@ configuration is a goal, and the second returns a sampled configuration in a
 superset of the goal. Ideally the goal sampler generates as many goals as
 possible.  
 
-PRM can be used in either point-to-point or multi-query mode. In multi-query
-mode, you may call addMilestone(q) to add a new milestone. addMilestone()
-returns the index of that milestone, which can be used in later calls to
-getPath().  
-
 To plan, call planMore(iters) until getPath(0,1) returns non-NULL. The return
 value is a list of configurations.  
+
+Some planners can be used multi-query mode (such as PRM). In multi-query mode,
+you may call addMilestone(q) to add a new milestone. addMilestone() returns the
+index of that milestone, which can be used in later calls to getPath().  
+
+In point-to-set mode, getSolutionPath will return the optimal path to any goal
+milestone.  
+
+All planners work with the standard path-length objective function. Some
+planners can work with other cost functions, and you can use setCostFunction to
+set the edge / terminal costs. Usually, the results will only be optimal on the
+computed graph, and the graph is not specifically computed to optimize that
+cost.  
 
 To get a roadmap (V,E), call getRoadmap(). V is a list of configurations (each
 configuration is a Python list) and E is a list of edges (each edge is a pair
@@ -1351,13 +1441,16 @@ C++ includes: motionplanning.h
 %feature("docstring") PlannerInterface::PlannerInterface "
 ";
 
-%feature("docstring") PlannerInterface::dump "
+%feature("docstring") PlannerInterface::getMilestone "
 ";
 
-%feature("docstring") PlannerInterface::~PlannerInterface "
+%feature("docstring") PlannerInterface::setCostFunction "
 ";
 
 %feature("docstring") PlannerInterface::addMilestone "
+";
+
+%feature("docstring") PlannerInterface::~PlannerInterface "
 ";
 
 %feature("docstring") PlannerInterface::destroy "
@@ -1366,7 +1459,7 @@ C++ includes: motionplanning.h
 %feature("docstring") PlannerInterface::getStats "
 ";
 
-%feature("docstring") PlannerInterface::getPathEndpoints "
+%feature("docstring") PlannerInterface::getClosestMilestone "
 ";
 
 %feature("docstring") PlannerInterface::getRoadmap "
@@ -1375,10 +1468,19 @@ C++ includes: motionplanning.h
 %feature("docstring") PlannerInterface::planMore "
 ";
 
-%feature("docstring") PlannerInterface::getData "
+%feature("docstring") PlannerInterface::getSolutionPath "
+";
+
+%feature("docstring") PlannerInterface::dump "
 ";
 
 %feature("docstring") PlannerInterface::setEndpointSet "
+";
+
+%feature("docstring") PlannerInterface::getData "
+";
+
+%feature("docstring") PlannerInterface::getPath "
 ";
 
 %feature("docstring") PlannerInterface::getPath "
@@ -1424,6 +1526,8 @@ include:
 
 *   version: version of the PCL file, typically \"0.7\"  
 *   id: integer id  
+*   width: the width of a structured point cloud  
+*   height: the height of a structured point cloud  
 *   viewpoint: \"ox oy oz qw qx qy qz\"  
 
 Examples::  
@@ -1445,6 +1549,16 @@ Examples::
     print len(pc.properties.size())
     #this prints 0; this is the default value added when addPoint is called
     print pc.getProperty(1,0)  
+
+To get all points as an n x 3 numpy array:  
+
+    points = np.array(pc.vertices).reshape((pc.numPoints(),3))  
+
+To get all properties as a n x k numpy array:  
+
+properties = np.array(pc.properties).reshape((p.numPoints(),p.numProperties()))  
+
+(Or use the convenience functions in klampt.io.numpy)  
 
 C++ includes: geometry.h
 ";
@@ -2095,7 +2209,7 @@ C++ includes: robotmodel.h
 
 %feature("docstring") RobotModelDriver::getAffectedLinks "
 
-Returns the driver's affected links.  
+Returns the indices of the driver's affected links.  
 ";
 
 %feature("docstring") RobotModelDriver::setValue "
@@ -2130,6 +2244,8 @@ Returns a reference to the driver's robot.
 
 For \"affine\" links, returns the scale and offset of the driver value mapped to
 the world.  
+
+Returns: tuple: a pair (scale,offset), each of length len(getAffectedLinks()).  
 ";
 
 %feature("docstring") RobotModelDriver::getType "
@@ -2687,6 +2803,11 @@ sensor is returned.
 Returns the current \"sensed\" configuration from the simulator.  
 ";
 
+%feature("docstring") SimRobotController::getCommandedTorque "
+
+Returns the current commanded (feedforward) torque.  
+";
+
 %feature("docstring") SimRobotController::setTorque "
 
 Sets a torque command controller.  
@@ -2700,6 +2821,12 @@ Returns the remaining duration of the motion queue.
 %feature("docstring") SimRobotController::setPIDGains "
 
 Sets the PID gains.  
+";
+
+%feature("docstring") SimRobotController::getSensedTorque "
+
+Returns the current \"sensed\" (feedback) torque from the simulator. Note: a
+default robot doesn't have a torque sensor, so this will be 0.  
 ";
 
 %feature("docstring") SimRobotController::addMilestoneLinear "
@@ -2853,9 +2980,12 @@ starting at the current queued end state.
 
 %feature("docstring") SimRobotSensor "
 
-A sensor on a simulated robot. Retrieve this from the controller, using
-:meth:`SimRobotController.getSensor` (), and then use :meth:`getMeasurements` ()
-to get the currently simulated measurement vector.  
+A sensor on a simulated robot. Retrieve one from the controller using
+:meth:`SimRobotController.getSensor` (), or create a new one using
+SimRobotSensor(robotController,name,type)  
+
+Use :meth:`getMeasurements` () to get the currently simulated measurement
+vector.  
 
 Sensors are automatically updated through the :meth:`Simulator.simulate` ()
 call, and :meth:`getMeasurements` () retrieves the updated values. As a result,
@@ -2891,6 +3021,9 @@ Returns the value of the named setting (you will need to manually parse this)
 %feature("docstring") SimRobotSensor::type "
 
 Returns the type of the sensor.  
+";
+
+%feature("docstring") SimRobotSensor::SimRobotSensor "
 ";
 
 %feature("docstring") SimRobotSensor::SimRobotSensor "
@@ -2979,6 +3112,11 @@ Returns the average contact force on object a over the last simulate() call.
 %feature("docstring") Simulator::getActualVelocity "
 
 Returns the current actual velocity of the robot from the simulator.  
+";
+
+%feature("docstring") Simulator::getActualTorque "
+
+Returns the current actual torques on the robot's drivers from the simulator.  
 ";
 
 %feature("docstring") Simulator::getContacts "
@@ -3105,7 +3243,8 @@ Returns the contact force on object a at the last time step. You can set bid to
 
 %feature("docstring") Simulator::getActualTorques "
 
-Returns the current actual torques on the robot's drivers from the simulator.  
+Deprecated: renamed to getActualTorque to be consistent with SimRobotController
+methods.  
 ";
 
 %feature("docstring") Simulator::getTime "
@@ -3299,6 +3438,16 @@ Examples::
     m.vertices = [0,0,0]   #this is an error
     m.vertices += [1,2,3]   #this is also an error  
 
+To get all vertices as a numpy array:  
+
+    verts = np.array(m.vertices).reshape((len(m.vertices)//3,3))  
+
+To get all indices as a numpy array:  
+
+    inds = np.array(m.indices,dtype=np.int32).reshape((len(m.indices)//3,3))  
+
+(Or use the convenience functions in klampt.io.numpy)  
+
 C++ includes: geometry.h
 ";
 
@@ -3339,7 +3488,18 @@ Translates all the vertices by v=v+t.
 %feature("docstring") VolumeGrid "
 
 An axis-aligned volumetric grid, typically a signed distance transform with > 0
-indicating outside and < 0 indicating inside. Can also store an occupancy grid.  
+indicating outside and < 0 indicating inside. Can also store an occupancy grid
+with 1 indicating inside and 0 indicating outside.  
+
+Attributes: bbox (SWIG vector of 6 doubles): contains min and max bounds
+(xmin,ymin,zmin),(xmax,ymax,zmax) dims (SWIG vector of of 3 ints): size of grid
+in each of 3 dimensions values (SWIG vector of doubles): contains a 3D array of
+dims[0]*dims[1]*dims[1] values.  
+
+The cell index (i,j,k) is flattened to i*dims[1]*dims[2] + j*dims[2] + k.  
+
+The array index i is associated to cell index (i/(dims[1]*dims[2]), (i/dims[2])
+% dims[1], idims[2])  
 
 C++ includes: geometry.h
 ";
@@ -3810,7 +3970,7 @@ Args:
 
     g (Geometry3D): the geometry that will be updated
     protocol (str): only \"ros\" accepted for now.
-    name (str): the name of the stream. E.g., ROS topic.
+    name (str): the name of the stream, i.e., ROS topic.
     type (str, optional): If provided, specifies the format of the data
         to be subscribed to. If not, tries to determine the type
         automatically.  
@@ -3819,6 +3979,9 @@ Only ROS point clouds (PointCloud2) are supported for now. Note that you can
 also call `Geometry3D.loadFile(\"ros://[ROS_TOPIC]\")` or
 `Geometry3D.loadFile(\"ros:PointCloud2//[ROS_TOPIC]\")` to accomplish the same
 thing.  
+
+TODO: It has not yet been determined whether this interferes with Rospy, i.e.,
+klampt.io.ros.  
 
 Returns: (bool): True if successful.  
 ";

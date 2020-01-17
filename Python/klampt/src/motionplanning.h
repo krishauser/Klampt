@@ -2,6 +2,7 @@
 #define MOTIONPLANNING_H
 
 #include <string>
+#include <vector>
 
 // Forward declaration of C-type PyObject
 struct _object;
@@ -56,9 +57,16 @@ void setPlanSetting(const char* setting,double value);
  *   "kdtree" is supported, optionally followed by a weight vector (for
  *   PRM, RRT*, PRM*, LazyPRM*, LazyRRG*)
  * - "restartTermCond": used if the "restart" setting is true.  This is a
- *   JSON string defining the termination condition (default value:
- *   "{foundSolution:1;maxIters:1000}")
-*/
+ *   JSON string defining the termination condition.
+ *
+ *   The default value is "{foundSolution:1;maxIters:1000}", which indicates
+ *   that the planner will restart if it has found a solution, or 1000
+ *   iterations have passed.
+ *
+ *   To restart after a certain amount of time has elasped, use
+ *   "{timeLimit:X}".  If you are using an optimizing planner, e.g.,
+ *   shortcutting, you should set foundSolution:0.
+ */
 void setPlanSetting(const char* setting,const char* value);
 
 ///Performs cleanup of all created spaces and planners
@@ -159,7 +167,7 @@ class CSpaceInterface
   int index;
 };
 
-/** @brief An interface for a motion planner.  The :class:`MotionPlan`
+/** @brief An interface for a kinematic motion planner.  The :class:`MotionPlan`
  * interface in cspace.py is somewhat easier to use.
  *
  * On construction, uses the planner type specified by setPlanType
@@ -177,14 +185,23 @@ class CSpaceInterface
  * The first in this pair  tests whether a configuration is a goal, and
  * the second returns a sampled configuration in a superset of the goal.
  * Ideally the goal sampler generates as many goals as possible.
- *
- * PRM can be used in either point-to-point or multi-query mode.  In 
- * multi-query mode, you may call addMilestone(q) to add a new milestone.
- * addMilestone() returns the index of that milestone, which can be used
- * in later calls to getPath().
  * 
  * To plan, call planMore(iters) until getPath(0,1) returns non-NULL.
  * The return value is a list of configurations.
+ *
+ * Some planners can be used multi-query mode (such as PRM).  In 
+ * multi-query mode, you may call addMilestone(q) to add a new milestone.
+ * addMilestone() returns the index of that milestone, which can be used
+ * in later calls to getPath().
+ *
+ * In point-to-set mode, getSolutionPath will return the optimal path to 
+ * any goal milestone.
+ *
+ * All planners work with the standard path-length objective function.
+ * Some planners can work with other cost functions, and you can use
+ * setCostFunction to set the edge / terminal costs. Usually, the results
+ * will only be optimal on the computed graph, and the graph is not
+ * specifically computed to optimize that cost.
  *
  * To get a roadmap (V,E), call getRoadmap().  V is a list of configurations
  * (each configuration is a Python list) and E is a list of edges (each edge is
@@ -201,10 +218,14 @@ class PlannerInterface
   void destroy();
   bool setEndpoints(PyObject* start,PyObject* goal);
   bool setEndpointSet(PyObject* start,PyObject* goal,PyObject* goalSample=NULL);
+  void setCostFunction(PyObject* edgeCost=NULL,PyObject* terminalCost=NULL);
   int addMilestone(PyObject* milestone);
+  int getClosestMilestone(PyObject* config);
+  PyObject* getMilestone(int);
   void planMore(int iterations);
-  PyObject* getPathEndpoints();
+  PyObject* getSolutionPath();
   PyObject* getPath(int milestone1,int milestone2);
+  PyObject* getPath(int milestone1,const std::vector<int>& goalMilestones);
   double getData(const char* setting);
   PyObject* getStats();
   PyObject* getRoadmap();

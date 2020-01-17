@@ -5,7 +5,8 @@ Can read/write objects using the general purpose reader/writer functions
 'read(type,text)' and 'write(x,type)'.
 
 Can load/save objects using the general purpose loader/saver functions
-'load(type,fileName)' and 'save(x,type,fileName)'.
+'load(type,fileName)' and 'save(x,type,fileName)'.  The load functions also
+support URLs
 
 Json serialization/deserialization are handled using the toJson and fromJson
 functions.
@@ -14,6 +15,83 @@ from ..robotsim import *
 from ..math import so3,vectorops
 from ..model.contact import ContactPoint, Hold
 from ..model.trajectory import Trajectory
+from ..model import types
+import os
+
+extensionToTypes = {'.config':['Config'],
+                   '.configs':['Configs'],
+                   '.tri':['Geometry3D','TriangleMesh'],
+                   '.off':['Geometry3D','TriangleMesh'],
+                   '.stl':['Geometry3D','TriangleMesh'],
+                   '.ply':['Geometry3D','TriangleMesh'],
+                   '.wrl':['Geometry3D','TriangleMesh'],
+                   '.dae':['Geometry3D','TriangleMesh'],
+                   '.poly':['Geometry3D','TriangleMesh'],
+                   '.geom':['Geometry3D','GeometricPrimitive'],
+                   '.pcd':['Geometry3D','PointCloud'],
+                   '.vector3':['Vector3'],
+                   '.matrix3':['Matrix3'],
+                   '.ikgoal':['IKGoal'],
+                   '.xform':['RigidTransform'],
+                   '.path':['Trajectory','LinearPath'],
+                   '.hold':['Hold'],
+                   '.stance':['Stance'],
+                   '.grasp':['Grasp'],
+                   '.rob':['RobotModel'],
+                   '.urdf':['RobotModel'],
+                   '.obj':['Geometry3D','RigidObjectModel','TriangleMesh'],
+                   '.env':['TerrainModel'],
+                   '.xml':['WorldModel','MultiPath']
+                   }
+
+unsupportedJsonTypes = ['Geometry3D','TriangleMesh','PointCloud','GeometricPrimitive','VolumeGrid',
+    'RobotModel','RigidObjectModel','TerrainModel','WorldModel']
+
+typeToExtensions = dict()
+for (k,v) in list(extensionToTypes.items()):
+    for t in v:
+        if t in typeToExtensions:
+            typeToExtensions[t].append(k)
+        else:
+            typeToExtensions[t] = [k]
+
+
+def filenameToTypes(name):
+    """Returns the Klampt types possibly represented by the given filename's
+    extension.
+    """
+    fileName, fileExtension = os.path.splitext(name)
+    if fileExtension in extensionToTypes:
+        return extensionToTypes[fileExtension]
+    else:
+        raise RuntimeError("Cannot determine type of object from filename "+name)
+
+def filenameToType(name):
+    """Returns one Klampt type represented by the given filename's
+    extension.
+
+    If the file is a dynamic type (.xml or .json), just 'xml' or 'json' is
+    returned because the type will need to be determined after parsing the
+    file.
+
+    If the type is ambiguous (like .obj), the first type in extensionToTypes is
+    returned.
+
+    Returns:
+        str: The Klamp't type
+    """
+    fileName, fileExtension = os.path.splitext(name)
+    if fileExtension == '.xml':
+        return 'xml'  #dynamic loading
+    elif fileExtension == '.json':
+        return 'json'  #dynamic loading
+    elif fileExtension in extensionToTypes:
+        ftypes = extensionToTypes[fileExtension]
+        if len(ftypes) > 1 and fileExtension not in ['.path'] and (ftypes[0] != 'Geometry3D' and len(ftypes) > 2):
+            print("loader.filenameToType(): Warning: filename",name,"is ambiguous, matches types",', '.join(ftypes))
+        return ftypes[0]
+    else:
+        raise RuntimeError("Cannot determine type of object from filename "+name)
 
 def writeVector(q):
     """Writes a vector to a string in the length-prepended format 'n v1 ... vn'"""
@@ -409,29 +487,84 @@ writers = {'Config':writeVector,
            'StringArray':writeVector,
            }
 
+def autoType(obj,validTypes):
+    """Returns a type string for the Klamp't object obj, restricted
+    to the set of validTypes.  If there are multiple interpretations,
+    the first type in objectToTypes that matches a valid type is
+    returned.
+
+    Args:
+        obj: A Klamp't-compatible object
+        validTypes: a set or dict of possible valid types
+
+    Returns:
+        str or None: The type of the object, or None if no valid type
+        was found
+    """
+    otypes = types.objectToTypes(obj)
+    if isinstance(otypes,list):
+        for otype in otypes:
+            if otype in validTypes:
+                return otype
+        return None
+    else:
+        #only one type
+        return otypes
 
 def write(obj,type):
-    """General-purpose write of an arbitrary Klampt object to a str."""
+    """General-purpose write of an arbitrary Klampt object to a str.
+
+    Args:
+        obj: A Klampt object
+        type (str): Either the Klamp't type, 'json', or 'auto'. If 'auto', the
+            type will be auto-detected from the object.
+
+    Returns:
+        str: The encoding of the object.
+    """
+    global writers
+    if type == 'auto':
+        type = autoType(obj,writers)
+        if type is None:
+            raise ValueError("Can't determine a writable type for object of type "+obj.__class__.__name__)
+    elif type == 'json':
+        import json
+        return json.dumps(toJson(obj))
     if type not in writers:
-        raise RuntimeError("Writing of objects of type "+type+" not supported")
+        raise ValueError("Writing of objects of type "+type+" not supported")
     return writers[type](obj)
 
 def read(type,text):
-    """General-purpose read of an arbitrary Klampt object from a str."""
+    """General-purpose read of an arbitrary Klampt object from a str.
+
+    Args:
+        type (str): Either the Klamp't type, or 'json'. Future versions may
+            support 'xml' but this is not supported right now.  'auto' may
+            not be specified.
+        text (str): A string containing the object data.
+
+    Returns:
+        Klamp't object
+    """
+    global readers
+    if type == 'json':
+        import json
+        jsonobj = json.loads(text)
+        return fromJson(jsonobj)
     if type not in readers:
-        raise RuntimeError("Reading of objects of type "+type+" not supported")
+        raise ValueError("Reading of objects of type "+type+" not supported")
     return readers[type](text)
 
 def loadWorldModel(fn):
     w = WorldModel()
     if not w.loadFile(fn):
-        raise RuntimeError("Error reading WorldModel from "+fn)
+        raise IOError("Error reading WorldModel from "+fn)
     return w
 
 def loadGeometry3D(fn):
     g = Geometry3D()
     if not g.loadFile(fn):
-        raise RuntimeError("Error reading Geometry3D from "+fn)
+        raise IOError("Error reading Geometry3D from "+fn)
     return g
 
 def loadTrajectory(fn):
@@ -445,11 +578,23 @@ def loadMultiPath(fn):
     value.load(fn)
     return value
 
+def loadDynamicXML(fn):
+    #XML types may only be a WorldModel or MultiPath
+    value = WorldModel()
+    res = value.readFile(fn)
+    if res:
+        return value
+    try:
+        return loadMultiPath(fn)
+    except Exception as e:
+        raise
+
 loaders = {'Trajectory':loadTrajectory,
            'LinearPath':loadTrajectory,
            'MultiPath':loadMultiPath,
            'Geometry3D':loadGeometry3D,
            'WorldModel':loadWorldModel,
+           'xml':loadDynamicXML
            }
 
 savers = {'Trajectory':lambda x,fn:x.save(fn),
@@ -460,31 +605,105 @@ savers = {'Trajectory':lambda x,fn:x.save(fn),
           }
 
 def save(obj,type,fn):
-    """General-purpose save of an arbitrary Klampt object to a file."""
+    """General-purpose save of an arbitrary Klampt object to a file.
+
+    This also works with RobotModel, RigidObjectModel, and TerrainModel
+    (which don't work with load).
+
+    Args:
+        obj: a Klamp't object.
+        type (str): the Klampt type, 'json', or 'auto'
+        fn (str): a file name
+
+    Returns:
+        bool: True if successful.
+    """
+    global savers,writers
+
+    if hasattr(obj,'saveFile'):
+        return obj.saveFile(fn)
+
+    if type == 'auto':
+        savers_and_writers = list(savers.keys()) + list(writers.keys())
+        type = autoType(obj,savers_and_writers)
+        if type is None:
+            raise ValueError("Can't determine a savable type for object of type "+obj.__class__.__name__)
+    elif type == 'json':
+        import json
+        with open(fn,'w') as f:
+            json.dump(toJson(obj),f)
+        return True
     if type in savers:
         return savers[type](obj,fn)
     elif type in writers:
-        f = open(fn,'w')
-        f.write(writers[type](obj)+'\n')
-        f.close()
+        with open(fn,'w') as f:
+            f.write(writers[type](obj)+'\n')
         return True
-    elif hasattr(obj,'saveFile'):
-        return obj.saveFile(fn)
     else:
-        raise RuntimeError("Saving of type "+type+" is not supported")
+        raise ValueError("Saving of type "+type+" is not supported")
 
 
 def load(type,fn):
-    """General-purpose load of an arbitrary Klampt object from a file."""
+    """General-purpose load of an arbitrary Klampt object from a file
+    or URL.
+
+    An exception is raised if there is an error loading or
+    parsing the file.  Possible exception types include IOError,
+    ValueError, and HTTPError.
+
+    Args:
+        type (str): a Klamp't type, 'json', or 'auto'
+        fn (str): a filename.
+
+    Returns: 
+        Klamp't object
+    """
+    if type == 'auto':
+        type = filenameToType(fn)
+    
+    global loaders,readers
+    cppurl = False
+    if type == 'WorldModel' or (type == 'Geometry3D' and fn.find('ros://') >= 0):  #these two types handle URLs in C++ API
+        cppurl = True
+    if not cppurl and fn.find('://') >= 0:
+        import urllib.request, urllib.error, urllib.parse
+        src = None
+        data = None
+        try:
+            src = urllib.request.urlopen(fn)
+            data = src.read()
+            print("klampt.io.loader.load(): Download %s HTTP response code %s, size %d bytes"%(fn,src.getcode(),len(data)))
+        finally:
+            if src:
+                src.close()
+        if type in loaders:
+            #need to write to temporary file
+            import os
+            import tempfile
+            local_filename = None
+            fileName, suffix = os.path.splitext(fn)
+            with tempfile.NamedTemporaryFile(delete=False,suffix=suffix) as tmp_file:
+                local_filename = tmp_file.name
+                print("klampt.io.loader.load(): saving data to temp file",local_filename)
+                tmp_file.write(data)
+                tmp_file.flush()
+            res = loaders[type](local_filename)
+            os.remove(local_filename)
+        elif type in readers or type == 'json':
+            res = readers[type](data)
+        else:
+            raise ValueError("Loading of type "+type+" is not supported")
+        return res
+
     if type in loaders:
         return loaders[type](fn)
-    elif type in readers:
-        f = open(fn,'r')
-        res = readers[type](''.join(f.readlines()))
-        f.close()
-        return res
+    elif type in readers or type == 'json':
+        text = None
+        with open(fn,'r') as f:
+            text = ''.join(f.readlines())
+        return read(type,text)
     else:
-        raise RuntimeError("Loading of type "+type+" is not supported")
+        raise ValueError("Loading of type "+type+" is not supported")
 
 
 
@@ -512,7 +731,7 @@ def toJson(obj,type='auto'):
                     if isconfigs:
                         type = 'Configs'
                     else:
-                        raise RuntimeError("Could not parse object "+str(obj))
+                        raise TypeError("Could not parse object "+str(obj))
         elif isinstance(obj,(bool,int,float,str)):
             type = 'Value'
         elif obj.__class__.__name__ in ['ContactPoint','IKObjective','Trajectory','MultiPath']:
@@ -520,7 +739,7 @@ def toJson(obj,type='auto'):
         elif isinstance(obj,Trajectory):   #some subclasses of Trajectory may be used here too
             return "Trajectory"
         else:
-            raise RuntimeError("Unknown object of type "+obj.__class__.__name__)
+            raise TypeError("Unknown object of type "+obj.__class__.__name__)
 
     if type in ['Config','Configs','Vector','Matrix','Vector2','Vector3','Matrix3','Point','Rotation','Value','IntArray','StringArray']:
         return obj
@@ -565,7 +784,7 @@ def toJson(obj,type='auto'):
     elif type in writers:
         return {'type':type,'data':write(obj,type)}
     else:
-        raise RuntimeError("Unknown or unsupported type "+type)
+        raise ValueError("Unknown or unsupported type "+type)
 
 
 def fromJson(jsonobj,type='auto'):
@@ -588,7 +807,7 @@ def fromJson(jsonobj,type='auto'):
             elif 'x' in jsonobj and 'n' in jsonobj and 'kFriction' in jsonobj:
                 type = 'ContactPoint'
         else:
-            raise RuntimeError("Unknown JSON object of type "+jsonobj.__class__.__name)
+            raise TypeError("Unknown JSON object of type "+jsonobj.__class__.__name)
 
     if type in ['Config','Configs','Vector','Matrix','Matrix3','Rotation','Value','IntArray','StringArray']:
         return jsonobj
@@ -651,8 +870,8 @@ def fromJson(jsonobj,type='auto'):
             obj.setFixedTransform(link,R,t)
             return obj
         else:
-            raise RuntimeError("Invalid IK rotation constraint "+rotConstraint)
+            raise ValueError("Invalid IK rotation constraint "+rotConstraint)
     elif type in readers:
         return read(type,jsonobj["data"])
     else:
-        raise RuntimeError("Unknown or unsupported type "+type)
+        raise ValueError("Unknown or unsupported type "+type)

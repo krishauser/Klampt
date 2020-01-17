@@ -32,6 +32,15 @@
  *     m.vertices = [0,0,0]   #this is an error
  *     m.vertices += [1,2,3]   #this is also an error
  *
+ * To get all vertices as a numpy array:
+ * 
+ *     verts = np.array(m.vertices).reshape((len(m.vertices)//3,3))
+ *
+ * To get all indices as a numpy array:
+ * 
+ *     inds = np.array(m.indices,dtype=np.int32).reshape((len(m.indices)//3,3))
+ *
+ * (Or use the convenience functions in klampt.io.numpy)
  */
 struct TriangleMesh
 {
@@ -64,7 +73,8 @@ struct TriangleMesh
  * indexing via [] are useful. Some other methods like resize() are
  * also provided.  However, you CANNOT set these items via assignment. 
  *
- * Properties are usually lowercase but follow PCL naming convention, and often include:
+ * Properties are usually lowercase but follow PCL naming convention, and often
+ * include:
  *
  * - normal_x, normal_y, normal_z: the outward normal 
  * - rgb, rgba: integer encoding of RGB (24 bit int) or RGBA color (32 bit int) 
@@ -73,10 +83,13 @@ struct TriangleMesh
  * - r,g,b,a: color channels, in range [0,1]
  * - u,v: texture coordinate
  * 
- * Settings are usually lowercase but follow PCL naming convention, and often include:
+ * Settings are usually lowercase but follow PCL naming convention, and often
+ * include:
  *
  * - version: version of the PCL file, typically "0.7" 
  * - id: integer id
+ * - width: the width of a structured point cloud
+ * - height: the height of a structured point cloud
  * - viewpoint: "ox oy oz qw qx qy qz"
  *
  * Examples::
@@ -98,7 +111,16 @@ struct TriangleMesh
  *     print len(pc.properties.size())
  *     #this prints 0; this is the default value added when addPoint is called
  *     print pc.getProperty(1,0) 
+ *
+ * To get all points as an n x 3 numpy array:
+ *
+ *     points = np.array(pc.vertices).reshape((pc.numPoints(),3))
  * 
+ * To get all properties as a n x k numpy array:
+ *
+ *    properties = np.array(pc.properties).reshape((p.numPoints(),p.numProperties()))
+ *
+ * (Or use the convenience functions in klampt.io.numpy)
  */
 struct PointCloud
 {
@@ -164,8 +186,23 @@ struct GeometricPrimitive
   std::vector<double> properties;
 };
 
-/** @brief An axis-aligned volumetric grid, typically a signed distance transform with > 0 
- * indicating outside and < 0 indicating inside.  Can also store an occupancy grid.
+/** @brief An axis-aligned volumetric grid, typically a signed distance
+ * transform with > 0 indicating outside and < 0 indicating inside. 
+ * Can also store an occupancy grid with 1 indicating inside and 0
+ * indicating outside.
+ *
+ * Attributes:
+ *     bbox (SWIG vector of 6 doubles): contains min and max bounds
+ *         (xmin,ymin,zmin),(xmax,ymax,zmax)
+ *     dims (SWIG vector of  of 3 ints): size of grid in each of 3 dimensions
+ *     values (SWIG vector of doubles): contains a 3D array of
+ *          dims[0]*dims[1]*dims[1] values. 
+ * 
+ *          The cell index (i,j,k) is flattened to
+ *          i*dims[1]*dims[2] + j*dims[2] + k.
+ *
+ *          The array index i is associated to cell index
+ *          (i/(dims[1]*dims[2]), (i/dims[2]) % dims[1], i%dims[2])
  */
 class VolumeGrid
 {
@@ -177,9 +214,9 @@ public:
   double get(int i,int j,int k);
   void shift(double dv);
 
-  std::vector<double> bbox; //xmin,ymin,zmin,xmax,ymax,zmax
-  std::vector<int> dims; //size in each of 3 dimensions
-  std::vector<double> values;  //triple index (i,j,k) is flattened to i*dims[1]*dims[2] + j*dims[2] + k
+  std::vector<double> bbox; 
+  std::vector<int> dims;
+  std::vector<double> values; 
 };
 
 /** @brief Configures the _ext distance queries of
@@ -216,16 +253,19 @@ public:
  *     d (float): The calculated distance, with negative values indicating
  *         penetration.  Can also be upperBound if the branch was hit.
  *     hasClosestPoints (bool):  If true, the closest point information is
- *         given in cp0 and cp1. 
+ *         given in cp0 and cp1, and elem1 and elem2
  *     hasGradients (bool):  f true, distance gradient information is given
  *         in grad0 and grad1.
  *     cp1, cp2 (list of 3 floats, optional): closest points on self vs other,
  *         both given in world coordinates
  *     grad1, grad2 (list of 3 floats, optional): the gradients of the
- *         objects' signed distance fields, in world coordinates. 
+ *         objects' signed distance fields at the closest points.  Given in
+ *         world coordinates. 
  *         
  *         I.e., to move object1 to touch object2, move it in direction
  *         grad1 by distance -d.  Note that grad2 is always -grad1.
+ *     elems1, elems2 (int): for compound objects, these are the
+ *         element indices corresponding to the closest points.
  *
  */
 class DistanceQueryResult
@@ -236,6 +276,36 @@ public:
   bool hasGradients;
   std::vector<double> cp1,cp2;
   std::vector<double> grad1,grad2;
+  int elem1,elem2;
+};
+
+/** @brief The result from a contact query of :class:`~klampt.Geometry3D`.
+ * The number of contacts n is variable.
+ *
+ * Attributes:
+ *
+ *     depths (list of n floats): penetration depths for each contact point. 
+ *         The depth is measured with respect to the padded geometry, and must
+ *         be nonnegative. A value of 0 indicates that depth cannot be 
+ *         determined accurately.
+ *     points1, points2 (list of n lists of floats): contact points on self vs 
+ *         other,  The top level list has n entries, and each entry is a
+ *         3-list expressed in world coordinates.  If an object is padded,
+ *         these points are on the surface of the padded geometry.
+ *     normals (list of n lists of floats): the outward-facing contact normal
+ *         from this to other at each contact point, given in world
+ *         coordinates.  Each entry is a 3-list, and can be a unit vector,
+ *         or [0,0,0] if the the normal cannot be computed properly.
+ *     elems1, elems2 (list of n ints): for compound objects, these are the
+ *         element indices corresponding to each contact.
+ */
+class ContactQueryResult
+{
+public:
+  std::vector<double> depths;
+  std::vector<std::vector<double> > points1,points2;
+  std::vector<std::vector<double> > normals;
+  std::vector<int> elems1,elems2;
 };
 
 /** @brief A three-D geometry.  Can either be a reference to a
@@ -292,8 +362,8 @@ class Geometry3D
   bool isStandalone();
   ///Frees the data associated with this geometry, if standalone 
   void free();
-  ///Returns the type of geometry: TriangleMesh, PointCloud, VolumeGrid, or
-  ///GeometricPrimitive
+  ///Returns the type of geometry: TriangleMesh, PointCloud, VolumeGrid, 
+  ///GeometricPrimitive, or Group
   std::string type();
   ///Returns true if this has no contents (not the same as numElements()==0)
   bool empty();
@@ -313,15 +383,15 @@ class Geometry3D
   void setGeometricPrimitive(const GeometricPrimitive&);
   ///Sets this Geometry3D to a volumeGrid
   void setVolumeGrid(const VolumeGrid&);
-  ///Sets this Geometry3D to a group geometry.  To add sub-geometries, repeatedly call
-  ///setElement() with increasing indices.
+  ///Sets this Geometry3D to a group geometry.  To add sub-geometries, 
+  ///repeatedly call setElement() with increasing indices.
   void setGroup();
-  ///Returns an element of the Geometry3D if it is a Group, TriangleMesh, or PointCloud.
-  ///The element will be in local coordinates.
+  ///Returns an element of the Geometry3D if it is a Group, TriangleMesh, or 
+  ///PointCloud.  The element will be in local coordinates.
   ///Raises an error if this is of any other type.  
   Geometry3D getElement(int element);
-  ///Sets an element of the Geometry3D if it is a Group, TriangleMesh, or PointCloud. 
-  ///The element will be in local coordinates.
+  ///Sets an element of the Geometry3D if it is a Group, TriangleMesh, or
+  /// PointCloud. The element will be in local coordinates.
   ///Raises an error if this is of any other type.  
   void setElement(int element,const Geometry3D& data);
   ///Returns the number of sub-elements in this geometry
@@ -385,43 +455,88 @@ class Geometry3D
    *
    */
   Geometry3D convert(const char* type,double param=0);
-  ///Returns true if this geometry collides with the other
+  /** @brief Returns true if this geometry collides with the other
+   *
+   * Unsupported types:
+   *
+   * - VolumeGrid - TriangleMesh
+   * - VolumeGrid - VolumeGrid
+   *
+   */
   bool collides(const Geometry3D& other);
   ///Returns true if this geometry is within distance tol to other
   bool withinDistance(const Geometry3D& other,double tol);
   ///Version 0.8: this is the same as the old distance() function.
   ///
-  ///Returns the distance from this geometry to the other.  If either geometry contains volume information,
-  ///this value may be negative to indicate penetration.
+  ///Returns the distance from this geometry to the other.  If either geometry 
+  ///contains volume information, this value may be negative to indicate
+  ///penetration.
   double distance_simple(const Geometry3D& other,double relErr=0,double absErr=0);
-  ///Returns the the distance and closest point to the input point, given in world coordinates.
-  ///An exception is raised if this operation is not supported with the given
-  ///geometry type.
+  ///Returns the the distance and closest point to the input point, given in 
+  ///world coordinates.  An exception is raised if this operation is not 
+  ///supported with the given geometry type.
   ///
-  ///The return value contains the distance, closest points, and gradients if available.
+  ///The return value contains the distance, closest points, and gradients if
+  ///available.
   DistanceQueryResult distance_point(const double pt[3]);
   ///A customizable version of distance_point.
-  ///The settings for the calculation can be customized with relErr, absErr, and upperBound, e.g., to
-  ///break if the closest points are at least upperBound distance from one another.  
+  ///The settings for the calculation can be customized with relErr, absErr, 
+  ///and upperBound, e.g., to break if the closest points are at least
+  ///upperBound distance from one another.  
   DistanceQueryResult distance_point_ext(const double pt[3],const DistanceQuerySettings& settings);
   ///Returns the the distance and closest points between the given geometries.
   ///
-  ///If the objects are penetrating, some combinations of geometry types allow calculating penetration
-  ///depths (GeometricPrimitive-GeometricPrimitive, GeometricPrimitive-TriangleMesh (surface only),
-  ///GeometricPrimitive-PointCloud, GeometricPrimitive-VolumeGrid, TriangleMesh (surface only)-
-  ///GeometricPrimitive, PointCloud-VolumeGrid).  In this case, a negative value is returned and cp1,cp2
+  ///If the objects are penetrating, some combinations of geometry types allow
+  ///calculating penetration depths:
+  ///
+  ///- GeometricPrimitive-GeometricPrimitive (Python-supported sub-types only)
+  ///- GeometricPrimitive-TriangleMesh (surface only)
+  ///- GeometricPrimitive-PointCloud
+  ///- GeometricPrimitive-VolumeGrid
+  ///- TriangleMesh (surface only)-GeometricPrimitive
+  ///- PointCloud-VolumeGrid
+  ///
+  ///If penetration is supported, a negative distance is returned and cp1,cp2
   ///are the deepest penetrating points.
   ///
-  ///Same comments as the distance_point function
+  ///Unsupported types:
+  ///
+  ///- GeometricPrimitive-GeometricPrimitive subtypes segment vs aabb
+  ///- PointCloud-PointCloud
+  ///- VolumeGrid-TriangleMesh
+  ///- VolumeGrid-VolumeGrid
+  ///
+  ///See the comments of the distance_point function
   DistanceQueryResult distance(const Geometry3D& other);
   ///A customizable version of distance.
-  ///The settings for the calculation can be customized with relErr, absErr, and upperBound, e.g., to
-  ///break if the closest points are at least upperBound distance from one another.  
+  ///The settings for the calculation can be customized with relErr, absErr,
+  ///and upperBound, e.g., to break if the closest points are at least
+  ///upperBound distance from one another.  
   DistanceQueryResult distance_ext(const Geometry3D& other,const DistanceQuerySettings& settings);
   ///Returns (hit,pt) where hit is true if the ray starting at s and pointing
   ///in direction d hits the geometry (given in world coordinates); pt is
   ///the hit point, in world coordinates.
   bool rayCast(const double s[3],const double d[3],double out[3]);
+  ///Returns the set of contact points between this and other.  This set
+  ///is a discrete representation of the region of surface overlap, which
+  ///is defined as all pairs of points within distance
+  ///self.collisionMargin + other.collisionMargin + padding1 + padding2.
+  ///
+  ///For some geometry types (TriangleMesh-TriangleMesh,
+  ///TriangleMesh-PointCloud, PointCloud-PointCloud) padding must be positive
+  ///to get meaningful contact poitns and normals.
+  ///
+  ///If maxContacts != 0  a clustering postprocessing step is performed.
+  ///
+  ///Unsupported types:
+  ///
+  ///- GeometricPrimitive-GeometricPrimitive subtypes segment vs aabb
+  ///- VolumeGrid-GeometricPrimitive any subtypes except point and sphere.
+  ///  also, the results are potentially inaccurate for non-convex VolumeGrids.
+  ///- VolumeGrid-TriangleMesh
+  ///- VolumeGrid-VolumeGrid
+  ///
+  ContactQueryResult contacts(const Geometry3D& other,double padding1,double padding2,int maxContacts=0);
 
   int world;
   int id;

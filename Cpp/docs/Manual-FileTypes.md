@@ -55,11 +55,11 @@ Structure: an XML v1.0 file, containing robots, rigid objects, and terrains, as 
     - `<robot>`: adds a robot to the world.
       - Attributes
         - `name` (string, optional, default "Robot"): a string to be used as an identifier.
-        - `file` (string): the Robot (.rob) file to be loaded. May be relative or absolute path.
+        - `file` (string): the Robot (.rob) file to be loaded. May be relative path, absolute path, or URL.
         - `config` (`Config`, optional): an initial configuration. Format: `N q1 ... qN` where N is the number of DOF in the robot.
     - `<rigidObject>`: adds a rigid object to the world. If the `file` attribute is not given, then the `geometry` child must be specified. Note: rotation attributes are applied in sequence.
       - _Attributes_
-        - `file` (string, optional): the Rigid object (.obj) file to be loaded. May be relative or absolute path.
+        - `file` (string, optional): the Rigid object (.obj) file to be loaded. May be relative path, absolute path, or URL.
         - `position` (`Vector3`, optional, default (0,0,0)): the position of the object center 
         - `rotateRPY` (`Vector3`, optional): rotates the object about the given roll-pitch-yaw entries.
         - `rotateX` (float, optional): rotates the object about the x axis.
@@ -67,9 +67,20 @@ Structure: an XML v1.0 file, containing robots, rigid objects, and terrains, as 
         - `rotateZ` (float, optional): rotates the object about the z axis.
         - `rotateMoment` (`Vector3`, optional): rotates the object with a rotation matrix derived from the given exponential map representation.
       - _Children_
+         - `<display>` or `<appearance>` (optional): configures the visualization of the object.  Default color is blue.
+          - _Attributes_
+            - `color` (`Vector3` or `Vector4`, optional): sets the RGB or RGBA color of the object.
+            - `faceColor` (`Vector3` or `Vector4`, optional): sets the RGB or RGBA color of the object's faces.
+            - `vertexColor` (`Vector3` or `Vector4`, optional): sets the RGB or RGBA color of the object's vertices (default not drawn, except for point clouds).
+            - `vertexSize` or `pointSize` (float, optional): sets size of the points (in pixels) drawn at the object's vertices (default 3, for point clouds).
+            - `edgeColor` (`Vector3` or `Vector4`, optional): sets the RGB or RGBA color of the object's edges (default not drawn).
+            - `edgeSize` (float, optional): sets the width of the drawn edges.
+            - `silhouette` (1, 4, or 5 floats, optional): configures the silhouette using a string of the form "width [r g b] [a]".  Default value is "0.0025 0 0 0 1".
+            - `texture` (string, optional): sets a texture.  Can be an image file name, or "noise", "checker", "gradient", "colorgradient".
+            - `texture_projection` (string, optional): sets a texture projection.  Can be "xy", "z", or "conformal" at the moment.
         - `<geometry>`: sets the object's geometry (optional).
           - _Attributes_
-            - `mesh` (string): the geometry file (.off, other mesh, or .pcd).  May be relative or absolute path  (Note: "mesh" is a misnomer, it should work with any type of geometry file)
+            - `file` or `mesh` (string): the geometry file (.off, other mesh, or .pcd).  May be relative path, absolute path, or URL  (Note: "mesh" is a misnomer, this works with any type of geometry file)
             - `scale` (float or `Vector3`, optional): a scale factor for the mesh.  If 3 elements are given, then this scales the mesh separately along each axis.
             - `translate` (`Vector3`, optional): a translation for the mesh.
             - `margin` (float, optional, default 0): the collision boundary layer width.
@@ -89,10 +100,7 @@ Structure: an XML v1.0 file, containing robots, rigid objects, and terrains, as 
         - `rotate*`: see `<world><rigidObject><rotate*>`.
         - `kFriction`: see `<world><rigidObject><physics kFriction>`.
       - _Children_
-        - `<display>` (optional): configures the OpenGL display of the terrain.
-          - _Attributes_
-            - `color` (`Vector3` or `Vector4`, optional, default light brown): sets the RGB or RGBA color of the terrain.
-            - `texture` (string, optional): sets a texture.  Can be "noise", "checker", "gradient", and "colorgradient" at the moment.
+        - `<display>` or `<appearance>` (optional): configures the visualization of the terrain (see `<rigidObject><display>`).  Default color is light brown.
     - `<simulation>` (optional): configures the simulation model.
       - _Children_
         - `<globals>` (optional): global ODE simulation parameters.
@@ -117,13 +125,13 @@ Structure: an XML v1.0 file, containing robots, rigid objects, and terrains, as 
           - _Attributes_
             - `index` (int): the rigid object index.
           - _Children_
-            - `<geometry>`: see `<world><simulation><env><geometry>`.
+            - `<geometry>`: see `<world><simulation><terrain><geometry>`.
         - `<robot>` (optional): robot configuration
           - _Attributes_
             - `index` (int): the robot index.
             - `body` (int, optional, default -1): the link index. -1 applies the settings to the entire robot.
           - _Children_
-            - `<geometry>`: see `<world><simulation><env><geometry>`.
+            - `<geometry>`: see `<world><simulation><terrain><geometry>`.
             - `<controller>`: configures the robot's controller. Each controller type has a certain set of optional attributes that can be set here.
               - _Attributes_
                 - `type` (string): the controller type. See the [controller documentation](Manual-Control.md#controllers) for more details.
@@ -175,7 +183,7 @@ A robot has N links, and D drivers.  Elements of each line are whitespace-separa
 
 **Geometric items**:
 
-- `geometry fn[0] ... fn[N-1]`: geometry files for each link. File names can be either absolute paths or relative paths. Files with spaces can be enclosed in quotes.  Empty geometries can be specified using &quot;&quot;.
+- `geometry fn[0] ... fn[N-1]`: geometry files for each link. File names can be either absolute paths, relative paths, or URLs. Files with spaces can be enclosed in quotes.  Empty geometries can be specified using &quot;&quot;.
 - `geomscale v[0] ... v[N-1]`: scales the link geometry.  Default: no scaling.
 - `geomtransform index m11 m12 m13 m14 m21 m22 m23 m24 m31 m32 m33 m34 m41 m42 m43 m44`: transforms the link geometry with a 4x4 transformation matrix m with entries given in row-major order.
 - `geommargin v[0] ... v[N-1]`: sets the collision geometry to have this virtual margin around each geometric mesh.  Default: 0.
@@ -237,6 +245,12 @@ URDF (Unified Robot Description Format) is a widely used XML-based robot format 
             - `group1`,`group2` (string, optional): if `group1` and group2 are specified, collisions between all of the links in group 1 (a whitespace separated list of link indices or names) will be turned off.  Either `pairs` or both `group1` and `group2` must be present in the element.
         - `<selfcollision>`: turns on certain self collisions.  Note: if this item is present, default self collisions are not used.  _Same attributes as `<noselfcollisions>`._
         - `<sensors>`: specifies sensors to be attached to the robot. See the World XML format above or the [sensor documentation](Manual-Control.md#sensors) for more details on the XML format of this element.
+        - <mount>`: mounts a geometry or another robot to a link.
+          - _Attributes_
+            - `link` (string): the name or integer index of the link.
+            - `file` (string): the absolute path / relative path / URL of a geometry file (OFF, OBJ, STL, etc) or other robot file (.urdf or .rob).
+            - `transform` (12 floats, optional): a 3x3 rotation matrix R and 3D translation vector t of the mounted object relative to the link. The rotation matrix is given in column-major order so the string has the form "r11 r21 r31 r12 r22 r32 r13 r23 r33 t1 t2 t3" giving
+            - `as` (string, optional): an alternative identifier for the sub-robot, prefixed to all of its links.
 
 ## Piecewise Linear Path (.path) files
 

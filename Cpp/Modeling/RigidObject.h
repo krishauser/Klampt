@@ -14,17 +14,21 @@ class RigidObject
 {
 public:
   RigidObject();
+  ///Loads from a .obj file.  If libcurl is available, can load from a URL
   bool Load(const char* fn);
   bool Save(const char* fn);
   ///Supports anything the AnyGeometry class uses, and also
   ///ROS PointCloud2 topics (use prefix ros://[topic_name] or
-  ///ros:PointCloud2/[topic_name])
+  ///ros:PointCloud2/[topic_name]).
+  ///
+  ///If libcurl is available, can load from a URL
   bool LoadGeometry(const char* fn);
   void SetMassFromGeometry(Real totalMass);
   void SetMassFromBB(Real totalMass);
   void InitCollisions();
   void UpdateGeometry(); ///< Call this before collision detection if the transform is changed
   void DrawGL();
+  void DrawGLOpaque(bool opaque);
 
   string name;
   string geomFile;

@@ -3,7 +3,6 @@ saving multipaths from xml files.
 """
 
 from ..model.contact import Hold
-from ..io.loader import *
 from ..math import vectorops
 import xml.etree.ElementTree as ET
 from xml.sax.saxutils import escape
@@ -284,6 +283,7 @@ class MultiPath:
 
     def saveXML(self):
         """Saves this multipath to a multipath xml tree (ElementTree)"""
+        from ..io import loader
         root = ET.Element("multipath")
         root.attrib = self.settings
         for sec in self.sections:
@@ -292,11 +292,13 @@ class MultiPath:
             xs.attrib = sec.settings
             for ikgoal in sec.ikObjectives:
                 xik = ET.SubElement(xs,"ikgoal")
-                #xik.text = writeIKObjective(ikgoal)
-                xik.text = ikgoal.text
+                if hasattr(ikgoal,'text'):
+                    xik.text = ikgoal.text
+                else:
+                    xik.text = loader.writeIKObjective(ikgoal)
             for h in sec.holds:
                 xh = ET.SubElement(xs,"hold")
-                xh.text = writeHold(h)
+                xh.text = loader.writeHold(h)
             for h in sec.holdIndices:
                 xh = ET.SubElement(xs,"hold")
                 if isinstance(h,int):
@@ -306,21 +308,22 @@ class MultiPath:
             for i in xrange(len(sec.configs)):
                 xm = ET.Element("milestone")
                 xs.append(xm)
-                xm.set("config",writeVector(sec.configs[i]))
+                xm.set("config",loader.writeVector(sec.configs[i]))
                 if sec.times != None:
                     xm.set("time",str(sec.times[i]))
                 if sec.velocities != None:
-                    xm.set("velocity",writeVector(sec.velocities[i]))
+                    xm.set("velocity",loader.writeVector(sec.velocities[i]))
         for hkey,h in self.holdSet.iteritems():
             xh = ET.Element("hold")
             root.append(xh)
             if not isinstance(hkey,int):
                 xh.set('name',str(hkey))
-            xh.text = writeHold(h)
+            xh.text = loader.writeHold(h)
         return ET.ElementTree(root)
 
     def loadXML(self,tree):
         """Loads a multipath from a multipath xml tree (ElementTree)."""
+        from ..io import loader
         self.sections = []
         self.holdSet = dict()
         self.settings = dict()
@@ -335,15 +338,15 @@ class MultiPath:
             for m in milestones:
                 if 'config' not in m.attrib:
                     raise ValueError("Milestone does not contain config attribute")
-                s.configs.append(readVector(m.attrib['config']))
+                s.configs.append(loader.readVector(m.attrib['config']))
                 if 'time' in m.attrib:
                     if s.times==None: s.times = []
                     s.times.append(float(m.attrib['time']))
                 if 'velocity' in m.attrib:
                     if s.velocities==None: s.velocities = []
-                    s.velocities.append(readVector(m.attrib['velocity']))
+                    s.velocities.append(loader.readVector(m.attrib['velocity']))
             for obj in sec.findall('ikgoal'):
-                s.ikObjectives.append(readIKObjective(obj.text))
+                s.ikObjectives.append(loader.readIKObjective(obj.text))
                 s.ikObjectives[-1].text = obj.text
             for h in sec.findall('hold'):
                 if 'index' in h.attrib:
@@ -351,11 +354,11 @@ class MultiPath:
                 elif 'name' in h.attrib:
                     s.holdIndices.append(h.attrib['name'])
                 else:
-                    s.holds.append(readHold(h.text))
+                    s.holds.append(loader.readHold(h.text))
             self.sections.append(s)
         #read global hold set
         for h in root.findall('hold'):
-            hold = readHold(h.text)
+            hold = loader.readHold(h.text)
             if 'name' in h.attrib:
                 self.holdSet[h.attrib['name']] = hold
             else:

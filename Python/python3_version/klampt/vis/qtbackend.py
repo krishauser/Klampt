@@ -80,6 +80,8 @@ class QtGLWindow(QGLWidget):
 
     def __init__(self,name="OpenGL window",parent=None):
         format = QGLFormat()
+        if not format.hasOpenGL():
+            raise RuntimeError("It appears that your system doesn't have OpenGL support?")
         format.setRgba(True)
         format.setDoubleBuffer(True)
         format.setDepth(True)
@@ -92,6 +94,8 @@ class QtGLWindow(QGLWidget):
             shareWidget = QtGLWindow._firstWidget
             QGLWidget.__init__(self,format,shareWidget=shareWidget)
             #self.setContext(self.context(),shareContext=shareWidget.context())
+        if not self.isValid():
+            raise RuntimeError("Unspecified error creating the Qt GLWidget, OpenGL rendering is not supported")
         
         self.name = name
         self.program = None
@@ -202,6 +206,8 @@ class QtGLWindow(QGLWidget):
     def close(self):
         """Qt thread should call close() after this widget should be closed down to stop
         any existing Qt callbacks."""
+        if not self.initialized:
+            return
         print("######### QGLWidget close ###############")
         self.idleTimer.stop()
         self.idleTimer.deleteLater()
@@ -211,19 +217,21 @@ class QtGLWindow(QGLWidget):
         self.program = None
         self.initialized = False
 
-    def add_action(self,hook,short_text,key,description=None):
+    def add_action(self,hook,short_text,key=None,description=None):
         """This is called by the user to add actions to the menu bar.
 
         Args:
-            hook (function): a python callback function, taking no arguments.
-            short_text (str): the text shown in the menu bar
-            key (str): a shortcut keyboard command (can be 'k' or 'Ctrl+k')
+            hook (function): a python callback function, taking no arguments, called
+                when the action is triggered.
+            short_text (str): the text shown in the menu bar.
+            key (str, optional): a shortcut keyboard command (can be 'k' or 'Ctrl+k').
             description (str, optional): if provided, this is a tooltip that shows up
                 when the user hovers their mouse over the menu item.
         """
         a = QAction(short_text, self)
-        a.setShortcut(key)
-        if description == None:
+        if key is not None:
+            a.setShortcut(key)
+        if description is None:
             description = short_text
         a.setStatusTip(description)
         a.triggered.connect(hook)

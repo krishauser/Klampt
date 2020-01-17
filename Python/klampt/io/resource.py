@@ -97,51 +97,17 @@ def _get_world(world):
             return w
     return world
 
-extensionToType = {'.config':'Config',
-                   '.configs':'Configs',
-                   '.tri':'Geometry3D',
-                   '.off':'Geometry3D',
-                   '.stl':'Geometry3D',
-                   '.ply':'Geometry3D',
-                   '.wrl':'Geometry3D',
-                   '.dae':'Geometry3D',
-                   '.poly':'Geometry3D',
-                   '.geom':'Geometry3D',
-                   '.pcd':'Geometry3D',
-                   '.vector3':'Vector3',
-                   '.ikgoal':'IKGoal',
-                   '.xform':'RigidTransform',
-                   '.path':'Trajectory',
-                   '.hold':'Hold',
-                   '.stance':'Stance',
-                   '.grasp':'Grasp'}
-
-typeToExtension = dict((v,k) for (k,v) in extensionToType.items())
-
 def knownExtensions():
-    """Returns all known file extensions"""
-    return extensionToType.keys()
+    """Returns all known resource file extensions"""
+    return loader.extensionToType.keys()
 
 def knownTypes():
-    """Returns all known types"""
-    return typeToExtension.keys()+['WorldModel','MultiPath','Point','Rotation','Matrix3','ContactPoint']
+    """Returns all known resource types"""
+    return loader.typeToExtension.keys()+['WorldModel','MultiPath','Point','Rotation','Matrix3','ContactPoint']
 
 def visualEditTypes():
     """Returns types that can be visually edited"""
     return ['Config','Configs','Trajectory','Vector3','Point','RigidTransform','Rotation','WorldModel']
-
-
-def filenameToType(name):
-    fileName, fileExtension = os.path.splitext(name)
-    if fileExtension in extensionToType:
-        return extensionToType[fileExtension]
-    elif fileExtension == '.xml':
-        return 'xml'  #dynamic loading
-    elif fileExtension == '.json':
-        return 'json'  #dynamic loading
-    else:
-        raise RuntimeError("Cannot determine type of resource from name "+name)
-
 
 def get(name,type='auto',directory=None,default=None,doedit='auto',description=None,editor='visual',world=None,referenceObject=None,frame=None):
     """Retrieve a resource of the given name from the current resources
@@ -155,37 +121,40 @@ def get(name,type='auto',directory=None,default=None,doedit='auto',description=N
 
     Resources can also be edited using RobotPose.
 
+    Returns default if the object doesn't exist and doedit=False, or the 
+    object doesn't exist and the user canceled the editor.
+
     Args:
         name (str): the resource name.  If type='auto', this is assumed to have
             a suffix of a file of the desired type.  The name can also be
             nested of the form 'group/subgroup/name.type'.
         type (str): the resource type, or 'auto' to determine it automatically.
-        directory (str, optional): the search directory.  If None, uses the current
-            resource directory.
-        default (optional): the default value if the resource does not exist on disk.
-            If None, some arbitrary default value will be inferred.
+        directory (str, optional): the search directory.  If None, uses the 
+            current resource directory.
+        default (optional): the default value if the resource does not exist on
+            disk. If None, some arbitrary default value will be inferred.
         doedit: if 'auto', if the resource does not exist on disk, an
             edit prompt will be displayed.  If False, an RuntimeError will be
             raised if the resource does not exist on disk.  If True, the
             user will be given an edit prompt to optionally edit the resource
             before this call returns.
-        description (str, optional): an optional text description of the resource, for use
-            in the edit prompt.
-        editor (str): either 'visual' or 'console', determining whether to use the
-            visual OpenGL or console editor.
-        world (WorldModel, optional): for a visual editor, this world will be shown along with
-            the item to edit.  If this is a string it points to a file
-            that will be loaded for the world (e.g., a world XML file, or a
-            robot file).
-        referenceObject (optional): to give visual reference points, one or more RobotModels,
-            ObjectModels, Geometry3D's, or RobotModelLink's may be designated to follow
-            the edited object.  Currently works with Config's / Configs' / Trajectories /
-            rigid transforms / rotations / points.
-        frame (optional): for rigid transforms / rotations / points, the reference
-          frame in which the quantity is represented.  This is an element of
-          se3, or an ObjectModel, or a RobotModelLink, or a string indicating a
-          named rigid element of the world.
-
+        description (str, optional): an optional text description of the
+            resource, for use in the edit prompt.
+        editor (str): either 'visual' or 'console', determining whether to use
+            the visual OpenGL or console editor.
+        world (WorldModel, optional): for a visual editor, this world will be 
+            shown along with the item to edit.  If this is a string it points
+            to a file that will be loaded for the world (e.g., a world XML
+            file, or a robot file).
+        referenceObject (optional): to give visual reference points, one or 
+            more RobotModels, ObjectModels, Geometry3D's, or RobotModelLink's
+            may be designated to follow the edited object.  Currently works
+            with Config's / Configs' / Trajectories / rigid transforms /
+            rotations / points.
+        frame (optional): for rigid transforms / rotations / points, the 
+          reference frame in which the quantity is represented.  This is an 
+          element of se3, or an ObjectModel, or a RobotModelLink, or a string 
+          indicating a named rigid element of the world.
     """
     if name==None:
         if doedit==False:
@@ -200,26 +169,12 @@ def get(name,type='auto',directory=None,default=None,doedit='auto',description=N
     if directory==None:
         directory = getDirectory()
     if type == 'auto':
-        type = filenameToType(name)
+        type = loader.filenameToType(name)
     value = None
     try:
         fn = os.path.join(directory,name)
         try:
-            if type == 'xml':
-                value = WorldModel()
-                res = value.readFile(fn)
-                if not res:
-                    try:
-                        value = loader.load('MultiPath',fn)
-                    except Exception as e:
-                        raise
-            elif type == 'json':
-                f = open(fn,'r')
-                text = ''.join(f.readlines())
-                f.close()
-                value = loader.fromJson(text,type=type)
-            else:
-                value = loader.load(type,fn)
+            value = loader.load(type,fn)
         except IOError:
             raise
         except Exception,e:
@@ -271,11 +226,11 @@ def set(name,value,type='auto',directory=None):
             determined by the value.
 
     Returns:
-        (bool): True on success
+        (bool): True on success, False otherwise
     """
     if type == 'auto':
         try:
-            type = filenameToType(name)
+            type = loader.filenameToType(name)
         except Exception:
             type = types.objectToTypes(value)
             if isinstance(type,(list,tuple)):
@@ -285,15 +240,11 @@ def set(name,value,type='auto',directory=None):
     fn = os.path.join(directory,name)
     _ensure_dir(fn)
     if type == 'xml':
-        if hasattr(value,'saveFile'):
-            return value.saveFile(fn)
-        raise NotImplementedError("TODO: save other xml files from Python API")
-    elif type == 'json':
-        f = open(fn,'w')
-        f.write(loader.toJson(value,type=type))
-        f.write('\n')
-        f.close()
-        return True
+        #loader can now save some xml files
+        return loader.save(value,'auto',fn)
+        #if hasattr(value,'saveFile'):
+        #    return value.saveFile(fn)
+        #raise NotImplementedError("TODO: save other xml files from Python API")
     else:
         return loader.save(value,type,fn)
 
@@ -351,7 +302,7 @@ def load(type=None,directory=None):
 
     Returns:
         (tuple or None): a (filename,value) pair if OK is pressed, or
-            None if the operation was canceled
+        None if the operation was canceled
     """
     
     fg = FileGetter('Open resource')
@@ -359,10 +310,7 @@ def load(type=None,directory=None):
     if directory==None:
         fg.directory = getDirectory()    
     if type is not None:
-        extensions=[]
-        for (k,v) in extensionToType.iteritems():
-            if v == type:
-                extensions.append(k)
+        extensions=[v for v in loader.typeToExtensions[type]]
         extensions.append('.json')
         fg.filetypes.append((type,extensions))
 
@@ -398,7 +346,7 @@ def save(value,type='auto',directory=None):
 
     Returns:
         (str or None): the file saved to, if OK is pressed, or
-            None if the operation was canceled.
+        None if the operation was canceled.
     """
     fg = FileGetter('Save resource')
     fg.directory = directory
@@ -406,13 +354,12 @@ def save(value,type='auto',directory=None):
         fg.directory = getDirectory()    
     if type == 'auto':
         typelist = types.objectToTypes(value)
+        if isinstance(typelist,str):
+            typelist = [typelist]
     else:
         typelist = [type] 
     for type in typelist:
-        extensions=[]
-        for (k,v) in extensionToType.iteritems():
-            if v == type:
-                extensions.append(k)
+        extensions=[v for v in loader.typeToExtensions[type]]
         extensions.append('.json')
         print "Available extensions for objects of type",type,":",extensions
         fg.filetypes.append((type,extensions))
@@ -482,7 +429,7 @@ def thumbnail(value,size,type='auto',world=None,frame=None):
 
     Returns:
         (Image or bytes): A PIL Image if PIL is available, or just a raw RGBA
-            memory buffer otherwise.
+        memory buffer otherwise.
 
     """
     global _thumbnail_window
@@ -643,7 +590,7 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,refe
             named rigid element of the world.
 
     Returns:
-        (tuple): A pair (save, result):
+        (tuple): A pair (save, result) containing:
 
             * save (bool): True if the user pressed OK, False if Cancel or the
                 close box where chosen.

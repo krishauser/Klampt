@@ -15,6 +15,9 @@ bool gl_texture_set_up=false;
 
 #define FLOAT_TO_UCHAR(x) (unsigned char)(x*255.0)
 
+//defined in XmlWorld.cpp
+string ResolveFileReference(const string& path,const string& fn);
+string MakeURLLocal(const string& url,const char* url_resolution_path="klampt_downloads");
 
 map<string,shared_ptr<Image> > ViewTextures::images;
 map<string,GLTextureObject> ViewTextures::textureObjects;
@@ -25,13 +28,15 @@ shared_ptr<Image> ViewTextures::Load(const char* fn)
     return images[fn];
   }
   else {
+    string localfile = MakeURLLocal(fn);
+    if(localfile.empty())
+      return NULL;
     shared_ptr<Image> img(new Image);
-    if(ImportImage(fn,*img)) {
+    if(ImportImage(localfile.c_str(),*img)) {
       images[fn] = img;
       return img;
     }
     else {
-      printf("  Failed.\n");
       return NULL;
     }
   }

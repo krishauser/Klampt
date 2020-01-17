@@ -187,9 +187,9 @@ void ViewResource::SetRobot(Robot* robot)
   configViewer.PushAppearance();
   configsViewer.PushAppearance();
   pathViewer.PushAppearance();
-  configViewer.SetColors(GLColor(0.5,0.5,0.5,0.7));
-  configsViewer.SetColors(GLColor(0.5,0.5,0.5,0.7));
-  pathViewer.SetColors(GLColor(0.5,0.5,0.5,0.7));
+  configViewer.SetColors(GLColor(0.5,0.5,0.5,0.7f));
+  configsViewer.SetColors(GLColor(0.5,0.5,0.5,0.7f));
+  pathViewer.SetColors(GLColor(0.5,0.5,0.5,0.7f));
 }
 void ViewResource::SetAnimTime(Real time)
 {

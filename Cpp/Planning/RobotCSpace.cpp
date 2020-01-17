@@ -131,6 +131,12 @@ void RobotCSpace::SampleNeighborhood(const Config& c,Real r,Config& q)
       break;
     case RobotJoint::Normal:
       robot.q(link) += Rand(-ri,ri);
+      //reflection sampling strategy
+      if(robot.q(link) < robot.qMin(link))
+        robot.q(link) = robot.qMin(link) + (robot.qMin(link)-robot.q(link));
+      if(robot.q(link) > robot.qMax(link))
+        robot.q(link) = robot.qMax(link) - (robot.q(link)-robot.qMax(link));
+      robot.q(link) = Clamp(robot.q(link),robot.qMin(link),robot.qMax(link));
       break;
     case RobotJoint::Spin:
       robot.q(link) += Rand(-ri,ri);
@@ -160,6 +166,13 @@ void RobotCSpace::SampleNeighborhood(const Config& c,Real r,Config& q)
       Real val = robot.GetDriverValue(i);
       Real scale = 1.0;
       //TODO: figure out the proper scale factor
+      val += scale*Rand(-r,r);
+      //reflection sampling strategy
+      if(val < robot.drivers[i].qmin)
+        val = robot.drivers[i].qmin + (robot.drivers[i].qmin-val);
+      if(val > robot.drivers[i].qmax)
+        val = robot.drivers[i].qmax - (val-robot.drivers[i].qmax);
+      val = Clamp(val,robot.drivers[i].qmin,robot.drivers[i].qmax);
       robot.SetDriverValue(i,val + Rand(-r,r));
     }
   }

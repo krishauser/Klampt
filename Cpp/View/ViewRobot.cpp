@@ -1,5 +1,6 @@
 #include "ViewRobot.h"
 #include <KrisLibrary/GLdraw/drawextra.h>
+#include <KrisLibrary/Timer.h>
 using namespace GLDraw;
 
 const static GLColor grey(0.5,0.5,0.5);
@@ -126,6 +127,25 @@ void ViewRobot::Draw()
       a.Set(*robot->geometry[i]);
     }
     a.DrawGL();
+    glPopMatrix();
+  }
+}
+
+void ViewRobot::DrawOpaque(bool opaque)
+{
+  if(!robot) return;
+
+  GLDraw::GeometryAppearance::Element e = (opaque ? GLDraw::GeometryAppearance::ALL_OPAQUE : GLDraw::GeometryAppearance::ALL_TRANSPARENT);
+  for(size_t i=0;i<robot->links.size();i++) {
+    if(robot->IsGeometryEmpty(i)) continue;
+    Matrix4 mat = robot->links[i].T_World;
+    glPushMatrix();
+    glMultMatrix(mat);
+    GLDraw::GeometryAppearance& a = Appearance(i);
+    if(a.geom != robot->geometry[i].get()) {
+      a.Set(*robot->geometry[i]);
+    }
+    a.DrawGL(e);
     glPopMatrix();
   }
 }
@@ -262,8 +282,9 @@ GLDraw::GeometryAppearance& ViewRobot::Appearance(int link)
 {
   Assert(robot!=NULL);
   if(appearanceStack.empty()) {
-    if(robot->geomManagers[link].IsAppearanceShared()) 
+    if(robot->geomManagers[link].IsAppearanceShared()) {
       robot->geomManagers[link].SetUniqueAppearance();
+    }
     return *robot->geomManagers[link].Appearance();
   }
   return appearanceStack.back()[link];

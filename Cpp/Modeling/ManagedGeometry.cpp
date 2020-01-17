@@ -7,7 +7,19 @@
 using namespace Math3D;
 using namespace std;
 
+//Turn this on to debug geometry caching
 #define CACHE_DEBUG 0
+
+//defined in XmlWorld.cpp
+string ResolveFileReference(const string& path,const string& fn);
+string MakeURLLocal(const string& url,const char* url_resolution_path="klampt_downloads");
+
+void SetupDefaultAppearance(GLDraw::GeometryAppearance& app)
+{
+  app.creaseAngle = DtoR(30.0f);
+  app.silhouetteRadius = 0.0025f;
+  app.vertexSize = 3.0;
+}
 
 GeometryManager::GeometryManager()
 {
@@ -38,14 +50,17 @@ void GeometryManager::Clear()
 ManagedGeometry::ManagedGeometry()
 {
   appearance.reset(new GLDraw::GeometryAppearance);
+  SetupDefaultAppearance(*appearance);
 }
 
 ManagedGeometry::ManagedGeometry(const ManagedGeometry& rhs)
 {
   operator = (rhs);
   //if you're not careful with the cache you can copy appearance pointers directly without any record
-  if(cacheKey.empty()) 
+  if(cacheKey.empty()) {
     appearance.reset(new GLDraw::GeometryAppearance(*appearance));
+    SetupDefaultAppearance(*appearance);
+  }
 }
 
 ManagedGeometry::~ManagedGeometry()
@@ -76,6 +91,7 @@ shared_ptr<Geometry::AnyCollisionGeometry3D> ManagedGeometry::CreateEmpty()
   dynamicGeometrySource.clear();
   geometry = make_shared<Geometry::AnyCollisionGeometry3D>();
   appearance = make_shared<GLDraw::GeometryAppearance>();
+  SetupDefaultAppearance(*appearance);
   appearance->geom = geometry.get();
   return geometry;
 }
@@ -86,6 +102,7 @@ void ManagedGeometry::Clear()
   dynamicGeometrySource.clear();
   geometry = NULL;
   appearance = make_shared<GLDraw::GeometryAppearance>();
+  SetupDefaultAppearance(*appearance);
 }
 
 bool ManagedGeometry::Load(const string& filename)
@@ -125,7 +142,7 @@ bool ManagedGeometry::Load(const string& filename)
 
   if(LoadNoCache(filename)) {  
 #if CACHE_DEBUG
-    printf("ManagedGeometry: adding %s to cache.\n",filename.c_str());
+    LOG4CXX_INFO(KrisLibrary::logger(),"ManagedGeometry: adding "<<filename<<" to cache");
 #endif
     cacheKey = filename;
     manager.cache[filename].geoms.push_back(this);
@@ -172,7 +189,13 @@ bool ManagedGeometry::LoadNoCache(const string& filename)
     if(Geometry::AnyGeometry3D::CanLoadExt(ext)) {
       Timer timer;
       geometry = make_shared<Geometry::AnyCollisionGeometry3D>();
-      if(!geometry->Load(fn)) {
+      string localfile = MakeURLLocal(fn);
+      if(localfile.empty()) {
+        LOG4CXX_WARN(KrisLibrary::logger(),"ManagedGeometry: Error downloading geometry file "<<fn);
+        geometry = NULL;
+        return false;
+      }
+      if(!geometry->Load(localfile.c_str())) {
         LOG4CXX_WARN(KrisLibrary::logger(),"ManagedGeometry: Error loading geometry file "<<fn);
         geometry = NULL;
         return false;
@@ -183,6 +206,7 @@ bool ManagedGeometry::LoadNoCache(const string& filename)
       if(geometry->type == Geometry::AnyGeometry3D::TriangleMesh) {
         if(geometry->TriangleMeshAppearanceData() != NULL) {
           appearance = make_shared<GLDraw::GeometryAppearance>(*geometry->TriangleMeshAppearanceData());
+          SetupDefaultAppearance(*appearance);
           appearance->Set(*geometry);
         }
         else {
@@ -277,6 +301,8 @@ void ManagedGeometry::RemoveFromCache()
   }
   LOG4CXX_INFO(KrisLibrary::logger(),"ManagedGeometry::RemoveFromCache(): warning, item "<<cacheKey<<" pointer was not previously cached?");
   cacheKey.clear();
+
+  SetUniqueAppearance();
 }
 
 void ManagedGeometry::SetUnique()
@@ -320,6 +346,8 @@ void ManagedGeometry::TransformGeometry(const Math3D::Matrix4& xform)
         RemoveFromCache();
         geometry = make_shared<Geometry::AnyCollisionGeometry3D>(*prev->geometry);
         //geometry = prev->geometry;
+        if(appearance.use_count() > 1)   //don't share with prior transformed geometry or the un-transformed geometry
+          appearance = make_shared<GLDraw::GeometryAppearance>(*appearance);
         appearance->geom = geometry.get();
         cacheKey = newCacheKey;
 #if CACHE_DEBUG
@@ -339,7 +367,6 @@ void ManagedGeometry::TransformGeometry(const Math3D::Matrix4& xform)
     RemoveFromCache();
     geometry->Transform(xform);
     geometry->ClearCollisionData();
-    SetUniqueAppearance();
     if(!newCacheKey.empty()) {
       cacheKey = newCacheKey;
       manager.cache[newCacheKey].geoms.push_back(this);
@@ -409,10 +436,21 @@ void ManagedGeometry::DrawGL()
 {
   if(!geometry) return;
   Assert(appearance->geom != NULL);
-  Assert(appearance->geom == geometry.get());
+  //Assert(appearance->geom == geometry.get());
   if(appearance->geom == NULL)
     appearance->Set(*geometry);
   appearance->DrawGL();
+}
+
+void ManagedGeometry::DrawGLOpaque(bool opaque)
+{
+  if(!geometry) return;
+  Assert(appearance->geom != NULL);
+  //Assert(appearance->geom == geometry.get());
+  if(appearance->geom == NULL)
+    appearance->Set(*geometry);
+  GLDraw::GeometryAppearance::Element e = (opaque ? GLDraw::GeometryAppearance::ALL_OPAQUE : GLDraw::GeometryAppearance::ALL_TRANSPARENT);
+  appearance->DrawGL(e);
 }
 
 bool ManagedGeometry::IsDynamicGeometry() const

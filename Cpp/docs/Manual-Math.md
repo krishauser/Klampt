@@ -53,11 +53,11 @@ int main(int argc,char** argv) {
 }
 ```
 
-Please consult the [Vector3 documentation](http://motion.pratt.duke.edu/klampt/krislibrary_docs/classMath3D_1_1Vector3.html) for more details.
+Please consult the [Vector3 documentation](http://motion.cs.illinois.edu/klampt/krislibrary_docs/classMath3D_1_1Vector3.html) for more details.
 
 ## 3D Rotations
 
-The Klamp't C++ API typically represents 3D rotations as a [Math3D::Matrix3](http://motion.pratt.duke.edu/klampt/krislibrary_docs/classMath3D_1_1Matrix3.html) object, as found in the KrisLibrary/math3d/primitives.h file.
+The Klamp't C++ API typically represents 3D rotations as a [Math3D::Matrix3](http://motion.cs.illinois.edu/klampt/krislibrary_docs/classMath3D_1_1Matrix3.html) object, as found in the KrisLibrary/math3d/primitives.h file.
 
 For some basic operation, try the following code:
 
@@ -128,7 +128,7 @@ int main(int argc,char** argv) {
 
 ## Rigid Transformations
 
-Rigid transformations are used throughout Klamp't, and represent an function y = R*x+t, where R is a 3x3 rotation matrix, t is a 3D translation vector, x is the input 3D point, and y is the 3D output point. The transform is represented via the [Math3D::RigidTransform](http://motion.pratt.duke.edu/klampt/krislibrary_docs/classMath3D_1_1RigidTransform.html) class. The object simply consists of members Matrix3 R and Vector3 t.
+Rigid transformations are used throughout Klamp't, and represent an function y = R*x+t, where R is a 3x3 rotation matrix, t is a 3D translation vector, x is the input 3D point, and y is the 3D output point. The transform is represented via the [Math3D::RigidTransform](http://motion.cs.illinois.edu/klampt/krislibrary_docs/classMath3D_1_1RigidTransform.html) class. The object simply consists of members Matrix3 R and Vector3 t.
 
 You may apply a transform T to a Vector3 x using T*x, or the function T.mul(x,y), or T.mulPoint(x,y). If x is a direction vector, and you wish to apply only the rotation part of the transform, you can either do this manually via T.R*x or via the convenience function T.mulVector(x,y)
 
@@ -136,7 +136,7 @@ Transforms may be composed using the RigidTransform.mul(A,B) function and invert
 
 ## Linear Algebra
 
-Klamp't comes with a large suite of linear algebra routines in the KrisLibrary library. The [Vector](http://motion.pratt.duke.edu/klampt/krislibrary_docs/classMath_1_1VectorTemplate.html) class in KrisLibrary/math/vector.h contains basic linear algebra routines on vectors (adding, subtracting, multiplying, interpolating). The [Matrix](http://motion.pratt.duke.edu/klampt/krislibrary_docs/classMath_1_1MatrixTemplate.html) class in KrisLibrary/math/matrix.h contains basic matrix-matrix and matrix-vector operations. There are also various sparse vector / sparse matrix structures available. Note that these are designed primarily for convenience, and are unlikely to be quite as fast as more specialized packages for basic operations (e.g., BLAS, ATLAS, Intel MKL).
+Klamp't comes with a large suite of linear algebra routines in the KrisLibrary library. The [Vector](http://motion.cs.illinois.edu/klampt/krislibrary_docs/classMath_1_1VectorTemplate.html) class in KrisLibrary/math/vector.h contains basic linear algebra routines on vectors (adding, subtracting, multiplying, interpolating). The [Matrix](http://motion.cs.illinois.edu/klampt/krislibrary_docs/classMath_1_1MatrixTemplate.html) class in KrisLibrary/math/matrix.h contains basic matrix-matrix and matrix-vector operations. There are also various sparse vector / sparse matrix structures available. Note that these are designed primarily for convenience, and are unlikely to be quite as fast as more specialized packages for basic operations (e.g., BLAS, ATLAS, Intel MKL).
 
 Linear algebra routines are available for the following operations:
 
@@ -146,4 +146,4 @@ Linear algebra routines are available for the following operations:
 *   QR decomposition
 *   Singular value decomposition
 
-Note that these are designed primarily for convenience and robustness rather than speed, and you may get better performance using other packages. Please consult the [KrisLibrary documentation](http://motion.pratt.duke.edu/klampt/krislibrary_docs) for more details.
+Note that these are designed primarily for convenience and robustness rather than speed, and you may get better performance using other packages. Please consult the [KrisLibrary documentation](http://motion.cs.illinois.edu/klampt/krislibrary_docs) for more details.

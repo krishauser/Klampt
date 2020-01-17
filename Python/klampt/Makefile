@@ -27,10 +27,6 @@ swig:
 python3_version:
 	cp -r data ../python3_version/klampt/
 	2to3 --output-dir=../python3_version/klampt -W -n .
-	2to3 ../bin/klampt_browser -n -w -o ../python3_version/bin
-	2to3 ../bin/klampt_path -n -w -o ../python3_version/bin
-	2to3 ../bin/klampt_sim -n -w -o ../python3_version/bin
-	2to3 ../bin/klampt_thumbnails -n -w -o ../python3_version/bin
 
 clean:
 	rm -f *.pyc
