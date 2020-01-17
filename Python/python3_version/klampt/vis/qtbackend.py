@@ -80,6 +80,8 @@ class QtGLWindow(QGLWidget):
 
     def __init__(self,name="OpenGL window",parent=None):
         format = QGLFormat()
+        if not format.hasOpenGL():
+            raise RuntimeError("It appears that your system doesn't have OpenGL support?")
         format.setRgba(True)
         format.setDoubleBuffer(True)
         format.setDepth(True)
@@ -92,6 +94,8 @@ class QtGLWindow(QGLWidget):
             shareWidget = QtGLWindow._firstWidget
             QGLWidget.__init__(self,format,shareWidget=shareWidget)
             #self.setContext(self.context(),shareContext=shareWidget.context())
+        if not self.isValid():
+            raise RuntimeError("Unspecified error creating the Qt GLWidget, OpenGL rendering is not supported")
         
         self.name = name
         self.program = None
