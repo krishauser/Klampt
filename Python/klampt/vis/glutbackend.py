@@ -82,8 +82,8 @@ class GLUTWindow:
         glutKeyboardUpFunc (glutsafe(program.keyboardupfunc,update_modifiers=True))
         glutSpecialFunc (glutsafe(self._specialfunc,update_modifiers=True))
         glutSpecialUpFunc (glutsafe(self._specialupfunc,update_modifiers=True))
-        glutMotionFunc (glutsafe(self._motionfunc,update_modifiers=True))
-        glutPassiveMotionFunc (glutsafe(self._motionfunc,update_modifiers=True))
+        glutMotionFunc (glutsafe(self._motionfunc,update_modifiers=False))
+        glutPassiveMotionFunc (glutsafe(self._motionfunc,update_modifiers=False))
         glutMouseFunc (glutsafe(self._mousefunc,update_modifiers=True))
         glutDisplayFunc (glutsafe(self._displayfunc))
         glutIdleFunc(glutsafe(program.idlefunc))
@@ -188,9 +188,9 @@ class GLUTWindow:
         modifiers = glutGetModifiers()
         if modifiers & GLUT_ACTIVE_CTRL:
             m.append('ctrl')
-        elif modifiers & GLUT_ACTIVE_SHIFT:
+        if modifiers & GLUT_ACTIVE_SHIFT:
             m.append('shift')
-        elif modifiers & GLUT_ACTIVE_ALT:
+        if modifiers & GLUT_ACTIVE_ALT:
             m.append('alt')
         self.modifierList = m
 
