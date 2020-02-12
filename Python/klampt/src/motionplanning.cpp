@@ -309,7 +309,7 @@ public:
       Py_INCREF(pya);
       Py_INCREF(pyb);
       PyTuple_SetItem(args, 0, pya);
-      PyTuple_SetItem(args, 1, pya);
+      PyTuple_SetItem(args, 1, pyb);
       for(size_t i=0;i<space->visibleTests.size();i++) {
         if(space->visibleTests[i] == NULL) {
           stringstream ss;
