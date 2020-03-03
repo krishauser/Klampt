@@ -93,13 +93,13 @@ This problem occurs primarily because the URDF file contains many non-physical l
     <link name="right_lower_forearm" servoP="20" servoI="0" servoD="1"/>
   </klampt>
 ```
-Once this issue is fixed, you can see that the robot simply falls. You can either place a plane below the robot in SimTest, or mark that the robot has a fixed base using the fixed_root_link attribute:
+Once this issue is fixed, you can see that the robot simply falls. You can either place a plane below the robot in SimTest, or mark that the robot has a fixed base using the freeze_root_link attribute:
 ```
-  <klampt package_root="../.." flip_yz="1" use_vis_geom="1"  fixed_root_link="1" >
+  <klampt package_root="../.." flip_yz="1" use_vis_geom="1"  freeze_root_link="1" >
 ```
 Another issue is that smooth point-to-point motions require the definition of acceleration limits for each link. These default to 100, which is rather fast. You can set a uniform acceleration limit using the default_acc_max attribute:
 ```
-  <klampt package_root="../.." flip_yz="1" use_vis_geom="1"  fixed_root_link="1" default_acc_max="4" >
+  <klampt package_root="../.." flip_yz="1" use_vis_geom="1"  freeze_root_link="1" default_acc_max="4" >
 ```
 Or specify an individual value per-link:
 ```
