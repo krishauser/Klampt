@@ -347,7 +347,6 @@ def solver(objectives,iters=None,tol=None):
         if isinstance(objectives,IKObjective):
             if not hasattr(objectives,'robot'):
                 raise ValueError("IKObjective object must have 'robot' member for use in ik.solver. Either set this manually or use the ik.objective function")
-            print objectives.robot.__class__.__name__
             if isinstance(objectives.robot,SubRobotModel):
                 r = objectives.robot
                 s = IKSolver(r._robot)
