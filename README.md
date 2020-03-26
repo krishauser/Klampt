@@ -69,7 +69,7 @@ Installation instructions are also available for
 
 API documentation is available here
 - [Klamp't C++ API](http://cppdocs.klampt.org)
-- [KrisLibrary C++ API](http://motion.cs.illinois.edu//krislibrary_docs)
+- [KrisLibrary C++ API](http://motion.cs.illinois.edu/software/krislibrary/krislibrary_docs)
 
 ## Reporting bugs and getting help
 
