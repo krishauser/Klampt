@@ -234,8 +234,8 @@ void RobotLinkPoseWidget::DrawGL(Camera::Viewport& viewport)
   if(!draw) return;
   robot->UpdateConfig(poseConfig);
   viewRobot->PushAppearance();
-  for(size_t i=0;i<poserAppearance.size();i++)
-    viewRobot->Appearance(i) = poserAppearance[i];
+  for(size_t i=0;i<poserAppearance.size();i++) 
+    viewRobot->Appearance(i).CopyMaterial(poserAppearance[i]);
   if(hasHighlight || hasFocus) {
     for(size_t i=0;i<highlightedLinks.size();i++)
       viewRobot->Appearance(highlightedLinks[i]).ModulateColor(highlightColor,0.5);
