@@ -127,12 +127,13 @@ linear.argTypes = [Vector,Matrix]
 linear.autoSetJacobians()
 bilinear = Function('bilinear',dot(_x,dot(_A,_y)),["x","A","y"])
 bilinear.argTypes = [Vector,Matrix,Vector]
-bilinear.autoSetJacobians()
+bilinear.setJacobian(0,lambda x,A,y:dot(A,y),asExpr=True)
+bilinear.setJacobian(1,lambda x,A,y:outer(x,y),asExpr=True)
+bilinear.setJacobian(2,lambda x,A,y:dot(A,x),asExpr=True)
 quadratic = Function('quadratic',dot(_x,dot(_A,_x)),["x","A"],returnType='N')
 quadratic.argTypes = [Vector,Matrix]
-#quadratic.setJacobian('x',lambda x,A:2*dot(x,A),asExpr=True)
-#quadratic.setJacobian('A',lambda x,A:outer(x,x),asExpr=True)
-quadratic.autoSetJacobians()
+quadratic.setJacobian('x',lambda x,A:2*dot(x,A),asExpr=True)
+quadratic.setJacobian('A',lambda x,A:outer(x,x),asExpr=True)
 mahalanobis_distance2 = Function('mahalanobis_distance2',quadratic(_x-_y,_A),['x','y','A'])
 mahalanobis_distance2.autoSetJacobians()
 mahalanobis_distance = Function('mahalanobis_distance',sqrt(mahalanobis_distance2(_x,_y,_A)),['x','y','A'])

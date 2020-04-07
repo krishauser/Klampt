@@ -13,7 +13,6 @@ More information can be found on the Klamp't website (http://klampt.org)
 - [Features](#features)
 - [Installation](#installation)
 - [Documentation](#documentation)
-- [Tutorials](#tutorials)
 - [Version history](#version-history)
 - [Who uses Klamp't?](#who-uses-klampt)
 - [Comparison to related packages](#comparison-to-related-packages)
@@ -70,7 +69,7 @@ Installation instructions are also available for
 
 API documentation is available here
 - [Klamp't C++ API](http://cppdocs.klampt.org)
-- [KrisLibrary C++ API](http://motion.cs.illinois.edu//krislibrary_docs)
+- [KrisLibrary C++ API](http://motion.cs.illinois.edu/software/krislibrary/krislibrary_docs)
 
 ## Reporting bugs and getting help
 

@@ -31,7 +31,7 @@ Other documentation includes:
 Tutorials are available in the [Tutorials folder](Tutorials).
 
 - Install Klampt ([Linux](Tutorials/Install-Linux.md), [Windows](Tutorials/Install-Windows.md), [Mac](Tutorials/Install-Mac.md))
-- Build and edit a world file([C++](Tutorials/Build-and-edit-world.md))
+- Build and edit a world file([Apps](Tutorials/Build-and-edit-world.md))
 - Generate a path/trajectory from keyframes ([Apps](Tutorials/Path-generation-Apps.md))
 - Animate a video of a path/trajectory ([Apps](Tutorials/Animation-generation-Apps.md))
 - Simulate the execution of a keyframe path ([Apps](Tutorials/Run-a-simulation-Apps.md), [C++](Tutorials/Run-a-simulation-Cpp.md))

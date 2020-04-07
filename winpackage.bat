@@ -163,19 +163,15 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 
 
 :: upload files to motion website
-pscp msvc/Klampt-%klamptversion%-win32.msi hauser@motion.pratt.duke.edu:software/
+copy msvc/Klampt-%klamptversion%-win32.msi d:\iml-webpage\software\klampt\0.8\
 :: Qt5 doesn't have a 64-bit version
-:: pscp msvc64/Klampt-%klamptversion%-win64.msi hauser@motion.pratt.duke.edu:software/
+:: copy msvc64/Klampt-%klamptversion%-win64.msi d:\iml-webpage\software\klampt\0.8\
 if %errorlevel% neq 0 exit /b %errorlevel%
-pscp Klampt-%klamptdepversion%.win32-deps-vs2015.zip hauser@motion.pratt.duke.edu:software/
-pscp Klampt-%klamptdepversion%.win32-deps-vs2015d.zip hauser@motion.pratt.duke.edu:software/
-pscp Klampt-%klamptdepversion%.win64-deps-vs2015.zip hauser@motion.pratt.duke.edu:software/
-pscp Klampt-%klamptdepversion%.win64-deps-vs2015d.zip hauser@motion.pratt.duke.edu:software/
+copy Klampt-%klamptdepversion%.win32-deps-vs2015.zip d:\iml-webpage\software\klampt\0.8\
+copy Klampt-%klamptdepversion%.win32-deps-vs2015d.zip d:\iml-webpage\software\klampt\0.8\
+copy Klampt-%klamptdepversion%.win64-deps-vs2015.zip d:\iml-webpage\software\klampt\0.8\
+copy Klampt-%klamptdepversion%.win64-deps-vs2015d.zip d:\iml-webpage\software\klampt\0.8\
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-:: upload wheels to motion website
-cd Python\dist
-pscp Klampt-%klamptversion%*.whl hauser@motion.pratt.duke.edu:software/
-cd ..\..\
 
 

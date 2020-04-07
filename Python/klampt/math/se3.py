@@ -53,7 +53,7 @@ def rotation(T):
 
 def from_rotation(mat):
     """Returns a transformation T corresponding to the 3x3 rotation matrix mat"""
-    R = so3.from_matrix(R)
+    R = so3.from_matrix(mat)
     return (R,[0.,0.,0.])
 
 def translation(T):
