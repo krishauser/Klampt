@@ -34,6 +34,7 @@ void DriverEdit::RequestDriverValue(){
 void DriverEdit::RequestDriverParameters(){
    //emit GetDriverValues(index);
     if(robot) {
+      Assert(current >= 0 && current < (int)robot->drivers.size());
       Vector2 limits=robot->GetDriverLimits(current);
       min=limits[0];
       max=limits[1];
@@ -43,20 +44,22 @@ void DriverEdit::RequestDriverParameters(){
       ui->doubleSpinBox->setMaximum(max);
       ui->doubleSpinBox->setMinimum(min);
       ui->doubleSpinBox->setValue(value);
-      ui->kPSpinBox->setValue(robot->drivers[current].servoP);
       ui->kPSpinBox->setMaximum(Max(robot->drivers[current].servoP*2.0,100.0));
-      ui->kDSpinBox->setValue(robot->drivers[current].servoD);
+      ui->kPSpinBox->setValue(robot->drivers[current].servoP);
       ui->kDSpinBox->setMaximum(Max(robot->drivers[current].servoD*2.0,100.0));
-      ui->kISpinBox->setValue(robot->drivers[current].servoI);
+      ui->kDSpinBox->setValue(robot->drivers[current].servoD);
       ui->kISpinBox->setMaximum(Max(robot->drivers[current].servoI*2.0,100.0));
+      ui->kISpinBox->setValue(robot->drivers[current].servoI);
+      ui->dryFrictionSpinBox->setMaximum(Max(robot->drivers[current].dryFriction*2.0,10.0));
       ui->dryFrictionSpinBox->setValue(robot->drivers[current].dryFriction);
+      ui->viscousFrictionSpinBox->setMaximum(Max(robot->drivers[current].viscousFriction*2.0,10.0));
       ui->viscousFrictionSpinBox->setValue(robot->drivers[current].viscousFriction);
-      ui->vmaxSpinBox->setValue(robot->drivers[current].vmax);
       ui->vmaxSpinBox->setMaximum(Max(robot->drivers[current].vmax*2,10.0));
-      ui->amaxSpinBox->setValue(robot->drivers[current].amax);
+      ui->vmaxSpinBox->setValue(robot->drivers[current].vmax);
       ui->amaxSpinBox->setMaximum(Max(robot->drivers[current].amax*2,100.0));
-      ui->tmaxSpinBox->setValue(robot->drivers[current].tmax);
+      ui->amaxSpinBox->setValue(robot->drivers[current].amax);
       ui->tmaxSpinBox->setMaximum(Max(robot->drivers[current].tmax*2,100.0));
+      ui->tmaxSpinBox->setValue(robot->drivers[current].tmax);
       HandleSpinBox(value);
     }
     //current=index;
@@ -104,7 +107,7 @@ void DriverEdit::HandleKP(double _value){
     robot->drivers[current].servoP = _value;
     if(sim)
       sim->controlSimulators[0].command.actuators[current].kP = _value;
-    ui->kPSpinBox->setMaximum(Max(robot->drivers[current].servoP*2.0,100.0));
+    ui->kPSpinBox->setMaximum(Max(ui->kPSpinBox->maximum(),robot->drivers[current].servoP*2.0,100.0));
 }
 
 void DriverEdit::HandleKD(double _value){
@@ -112,7 +115,7 @@ void DriverEdit::HandleKD(double _value){
     robot->drivers[current].servoD = _value;
     if(sim)
       sim->controlSimulators[0].command.actuators[current].kD = _value;
-    ui->kDSpinBox->setMaximum(Max(robot->drivers[current].servoD*2.0,100.0));
+    ui->kDSpinBox->setMaximum(Max(ui->kDSpinBox->maximum(),robot->drivers[current].servoD*2.0,100.0));
 }
 
 void DriverEdit::HandleKI(double _value){
@@ -120,44 +123,46 @@ void DriverEdit::HandleKI(double _value){
     robot->drivers[current].servoI = _value;
     if(sim)
       sim->controlSimulators[0].command.actuators[current].kI = _value;
-    ui->kISpinBox->setMaximum(Max(robot->drivers[current].servoI*2.0,100.0));
+    ui->kISpinBox->setMaximum(Max(ui->kISpinBox->maximum(),robot->drivers[current].servoI*2.0,100.0));
 }
 
 void DriverEdit::HandleDryFriction(double _value){
     if(robot==NULL) return;
     robot->drivers[current].dryFriction = _value;
+    ui->dryFrictionSpinBox->setMaximum(Max(ui->dryFrictionSpinBox->maximum(),robot->drivers[current].dryFriction*2.0,10.0));
 }
 
 void DriverEdit::HandleViscousFriction(double _value){
     if(robot==NULL) return;
     robot->drivers[current].viscousFriction = _value;
+    ui->viscousFrictionSpinBox->setMaximum(Max(ui->viscousFrictionSpinBox->maximum(),robot->drivers[current].viscousFriction*2.0,10.0));
 }
 
 void DriverEdit::HandleVmax(double _value){
     if(robot==NULL) return;
   robot->drivers[current].vmax = _value;
   robot->drivers[current].vmin = -_value;
-  ui->vmaxSpinBox->setMaximum(Max(robot->drivers[current].vmax*2,10.0));
+  ui->vmaxSpinBox->setMaximum(Max(ui->vmaxSpinBox->maximum(),robot->drivers[current].vmax*2,10.0));
 }
 
 void DriverEdit::HandleAmax(double _value){
     if(robot==NULL) return;
   robot->drivers[current].amax = _value;
   robot->drivers[current].amin = -_value;
-  ui->amaxSpinBox->setMaximum(Max(robot->drivers[current].amax*2,100.0));
+  ui->amaxSpinBox->setMaximum(Max(ui->amaxSpinBox->maximum(),robot->drivers[current].amax*2,100.0));
 }
 
 void DriverEdit::HandleTmax(double _value){
     if(robot==NULL) return;
   robot->drivers[current].tmax = _value;
   robot->drivers[current].tmin = -_value;
-  ui->tmaxSpinBox->setMaximum(Max(robot->drivers[current].tmax*2,100.0));
+  ui->tmaxSpinBox->setMaximum(Max(ui->tmaxSpinBox->maximum(),robot->drivers[current].tmax*2,100.0));
 }
 
 void DriverEdit::SaveSettings()
 {
     if(robot==NULL) return;
-    QString filename = QFileDialog::getSaveFileName(0, "Open Scenario", QString(), "Robot (*.rob *.urdf);;All Files (*)");
+    QString filename = QFileDialog::getSaveFileName(0, "Modified robot file", QString(), "Robot (*.rob *.urdf);;All Files (*)");
     if (filename.isNull()) return;
     robot->Save(toStdString(filename).c_str());
 }
