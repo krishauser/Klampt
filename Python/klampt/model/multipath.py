@@ -469,7 +469,7 @@ def _prettify(elem,indent_level=0):
     """
     indent = "  "
     res = indent_level*indent + '<'+elem.tag.encode('utf-8')
-    for k in elem.keys():
+    for k in elem.iterkeys():
         res += " "+k.encode('utf-8')+'="'+_escape_nl(elem.get(k)).encode('utf-8')+'"'
     children  = elem.getchildren()
     if len(children)==0 and not elem.text:
