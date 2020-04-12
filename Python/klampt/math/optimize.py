@@ -10,7 +10,7 @@ Works well with the klampt.math.symbolic module.
 
 import numpy as np
 import math,random
-import symbolic,symbolic_io,symbolic_linalg
+from . import symbolic,symbolic_io,symbolic_linalg
 from ..io import loader
 
 class OptimizationProblem:
@@ -143,19 +143,19 @@ class OptimizationProblem:
                 n = indices[-1]
                 if self.bounds is None:
                     self.bounds = ([-float('inf')]*n,[float('inf')]*n)
-                for i,a,b in zip(range(ai,bi),xmin,xmax):
+                for i,a,b in zip(list(range(ai,bi)),xmin,xmax):
                     self.bounds[0][i] = max(self.bounds[0][i],a)
                     self.bounds[1][i] = min(self.bounds[1][i],b)
             else:
                 #it's a generic boolean
                 if not blackbox:
-                    print "OptimizationProblem.addSymbolicConstraint(): Warning, turning function",func,"into black box function"
+                    print("OptimizationProblem.addSymbolicConstraint(): Warning, turning function",func,"into black box function")
                 fpy,varorder = context.makeFlatFunction(func,varorder)
                 self.addFeasibilityTest(fpy)
         else:
             #it's a generic boolean
             if not blackbox:
-                print "OptimizationProblem.addSymbolicConstraint(): Warning, turning function",func,"into black box function"
+                print("OptimizationProblem.addSymbolicConstraint(): Warning, turning function",func,"into black box function")
             fpy,varorder = context.makeFlatFunction(func,varorder)
             self.addFeasibilityTest(fpy)
     def objectiveValue(self,x):
@@ -333,20 +333,20 @@ class LocalOptimizer:
             if problem.bounds:
                 bmin = [v if not math.isinf(v) else None for v in problem.bounds[0]]
                 bmax = [v if not math.isinf(v) else None for v in problem.bounds[1]]
-                bounds = zip(bmin,bmax)
+                bounds = list(zip(bmin,bmax))
             constraintDicts = []
-            for i in xrange(len(problem.equalities)):
+            for i in range(len(problem.equalities)):
                 constraintDicts.append({'type':'eq','fun':problem.equalities[i]})
                 if problem.equalityGrads[i] is not None:
                     constraintDicts[-1]['jac'] = problem.equalityGrads[i]
-            for i in xrange(len(problem.inequalities)):
+            for i in range(len(problem.inequalities)):
                 #scipy asks for inequalities to be positive g(x) >= 0, which requires a flip of sign
                 constraintDicts.append({'type':'ineq','fun':lambda x:-np.array(problem.inequalities[i](x))})
                 if problem.inequalityGrads[i] is not None:
                     constraintDicts[-1]['jac'] = lambda x:-np.array(problem.inequalityGrads[i](x))
             if len(constraintDicts) > 0 and scipyMethod not in ['SLSQP','COBYLA']:
-                print "LocalOptimizer.solve(): warning, can't use method",scipyMethod,"with constraints"
-                raw_input("Press enter to continue > ")
+                print("LocalOptimizer.solve(): warning, can't use method",scipyMethod,"with constraints")
+                input("Press enter to continue > ")
             #print "Scipy constraints",constraintDicts
             #print "Scipy bounds",bounds
             #print "Objective jacobian",jac
@@ -354,11 +354,11 @@ class LocalOptimizer:
                                     jac=jac,bounds=bounds,
                                     constraints=constraintDicts,tol=tol,options={'maxiter':numIters,'disp':True})
             if res.success:
-                print "***********************************************************"
-                print "LocalOptimizer.solve(): Scipy solver result",res.message
-                print res
+                print("***********************************************************")
+                print("LocalOptimizer.solve(): Scipy solver result",res.message)
+                print(res)
                 x = res.x
-                print "My objective value:",problem.objective(x)
+                print("My objective value:",problem.objective(x))
                 if len(problem.equalities) > 0:
                     h = np.hstack([f(x) for f in problem.equalities])
                 else:
@@ -374,7 +374,7 @@ class LocalOptimizer:
                 if not feasible:
                     if not boundfeasible:
                         #try clamping
-                        for i in xrange(len(x)):
+                        for i in range(len(x)):
                             x[i] = min(max(x[i],problem.bounds[0][i]),problem.bounds[1][i])
                         boundfeasible = True
                         if len(problem.equalities) > 0:
@@ -388,24 +388,24 @@ class LocalOptimizer:
                         eqfeasible = all(abs(v)<tol for v in h)
                         ineqfeasible = all(v<=0 for v in g)
                         feasible = eqfeasible and ineqfeasible and boundfeasible
-                        print "LocalOptimizer: solution not in bounds, clamped."
-                        print "  Bound-corrected equality residual",h
-                        print "  Bound-corrected inequality residual",g
-                        print "  Feasible?",eqfeasible,ineqfeasible
+                        print("LocalOptimizer: solution not in bounds, clamped.")
+                        print("  Bound-corrected equality residual",h)
+                        print("  Bound-corrected inequality residual",g)
+                        print("  Feasible?",eqfeasible,ineqfeasible)
                 if not feasible:
-                    print "LocalOptimizer: Strange, Scipy optimizer says successful and came up with an infeasible solution"
+                    print("LocalOptimizer: Strange, Scipy optimizer says successful and came up with an infeasible solution")
                     if not eqfeasible:
-                        print "  Equality has max residual",max(abs(v) for v in h),"> tolerance",tol
-                        print "  Residual vector",h
+                        print("  Equality has max residual",max(abs(v) for v in h),"> tolerance",tol)
+                        print("  Residual vector",h)
                     if not ineqfeasible:
-                        print "  Inequality has residual",max(v for v in h),"> 0"
-                        print "  Residual vector",g
+                        print("  Inequality has residual",max(v for v in h),"> 0")
+                        print("  Residual vector",g)
                     if not boundfeasible:
                         for i,(v,a,b) in enumerate(zip(x,problem.bounds[0],problem.bounds[1])):
                             if v < a or v > b:
-                                print "  Bound %d: %f <= %f <= %f violated"%(i,a,v,b)
-                    raw_input("Press enter to continue >")
-                print "***********************************************************"
+                                print("  Bound %d: %f <= %f <= %f violated"%(i,a,v,b))
+                    input("Press enter to continue >")
+                print("***********************************************************")
             return res.success,res.x.tolist()
         elif self.method.startswith('pyOpt'):
             import pyOpt
@@ -497,7 +497,7 @@ class LocalOptimizer:
                         return fx,gx,flag
                     sens_type = objfuncgrad
                 else:
-                    print "LocalOptimizer.solve(): Warning, currently need all or no gradients provided. Assuming no gradients."
+                    print("LocalOptimizer.solve(): Warning, currently need all or no gradients provided. Assuming no gradients.")
             [fstr, xstr, inform] = opt(opt_prob,sens_type=sens_type)
             if inform['value'] != 0:
                 return False,xstr.tolist()
@@ -510,7 +510,7 @@ class LocalOptimizer:
             if not feasible:
                 if not boundfeasible:
                     #try clamping
-                    for i in xrange(len(xstr)):
+                    for i in range(len(xstr)):
                         xstr[i] = min(max(xstr[i],bmin[i]),bmax[i])
                     f,g,flag = objfunc(xstr)
                     boundfeasible = True
@@ -518,20 +518,20 @@ class LocalOptimizer:
                     ineqfeasible = all(v <= 0 for v in g[hlen:hlen+glen])
                     feasible = eqfeasible and ineqfeasible and boundfeasible
                 if not feasible:
-                    print "LocalOptimizer: Strange, pyOpt optimizer says successful and came up with an infeasible solution"
+                    print("LocalOptimizer: Strange, pyOpt optimizer says successful and came up with an infeasible solution")
                     h = g[:hlen]
                     g = g[hlen:hlen+glen]
                     if not eqfeasible:
-                        print "  Equality has max residual",max(abs(v) for v in h),"> tolerance",tol
-                        print "  Residual vector",h
+                        print("  Equality has max residual",max(abs(v) for v in h),"> tolerance",tol)
+                        print("  Residual vector",h)
                     if not ineqfeasible:
-                        print "  Inequality has residual",max(v for v in h),"> 0"
-                        print "  Residual vector",g
+                        print("  Inequality has residual",max(v for v in h),"> 0")
+                        print("  Residual vector",g)
                     if not boundfeasible:
                         for i,(v,a,b) in enumerate(zip(x,bmin,bmax)):
                             if v < a or v > b:
-                                print "  Bound %d: %f <= %f <= %f violated"%(i,a,v,b)
-                    raw_input("Press enter to continue >")
+                                print("  Bound %d: %f <= %f <= %f violated"%(i,a,v,b))
+                    input("Press enter to continue >")
             return feasible,xstr.tolist()
         else:
             raise RuntimeError('Invalid method specified: '+self.method)
@@ -624,7 +624,7 @@ class GlobalOptimizer:
                     toli = tol[i]
                 else:
                     toli = tol
-                print "GlobalOptimizer.solve(): Step",i,"method",m,'iters',itersi,'tol',toli
+                print("GlobalOptimizer.solve(): Step",i,"method",m,'iters',itersi,'tol',toli)
                 if m == 'auto':
                     opt = LocalOptimizer(m)
                 else:
@@ -640,10 +640,10 @@ class GlobalOptimizer:
             if problem.bounds == None:
                 raise RuntimeError("Cannot use scipy differential_evolution method without a bounded search space")
             flattenedProblem = problem.makeUnconstrained(objective_scale = 1e-5)
-            res = optimize.differential_evolution(flattenedProblem.objective,zip(*flattenedProblem.bounds))
-            print "GlobalOptimizer.solve(): scipy.differential_evolution solution:",res.x
-            print "  Objective value",res.fun
-            print "  Equality error:",[gx(res.x) for gx in problem.equalities]
+            res = optimize.differential_evolution(flattenedProblem.objective,list(zip(*flattenedProblem.bounds)))
+            print("GlobalOptimizer.solve(): scipy.differential_evolution solution:",res.x)
+            print("  Objective value",res.fun)
+            print("  Equality error:",[gx(res.x) for gx in problem.equalities])
             return (True,res.x)
         elif self.method == 'DIRECT':
             import DIRECT
@@ -658,11 +658,11 @@ class GlobalOptimizer:
                     userdata[1] = [float(xi) for xi in x]
                 return v
             (x,fmin,ierror)=DIRECT.solve(objfunc,problem.bounds[0],problem.bounds[1],eps=tol,maxT=numIters,maxf=40000,algmethod=1,user_data=minval)
-            print "GlobalOptimizer.solve(): DIRECT solution:",x
-            print "  Objective value",fmin
-            print "  Minimum value",minval[0],minval[1]
-            print "  Error:",ierror
-            print "  Equality error:",[gx(x) for gx in problem.equalities]
+            print("GlobalOptimizer.solve(): DIRECT solution:",x)
+            print("  Objective value",fmin)
+            print("  Minimum value",minval[0],minval[1])
+            print("  Error:",ierror)
+            print("  Equality error:",[gx(x) for gx in problem.equalities])
             return (True,minval[1])
         elif self.method.startswith('random-restart'):
             import random
@@ -672,19 +672,19 @@ class GlobalOptimizer:
             lopt = LocalOptimizer(localmethod)
             seed = self.seed
             best = self.seed
-            print "GlobalOptimizer.solve(): Random restart seed is:",best
+            print("GlobalOptimizer.solve(): Random restart seed is:",best)
             fbest = (problem.objective(best) if (best is not None and problem.feasible(best)) else float('inf'))
-            for it in xrange(numIters[0]):
+            for it in range(numIters[0]):
                 if seed is not None:
                     x = seed
                     seed = None
                 else:
                     x = [sample_range(a,b) for a,b in zip(*problem.bounds)]
-                print "  Solving from",x
+                print("  Solving from",x)
                 lopt.setSeed(x)
                 succ,x = lopt.solve(problem,numIters[1],tol)
-                print "  Result is",succ,x
-                print "  Equality:",problem.equalityResidual(x)
+                print("  Result is",succ,x)
+                print("  Equality:",problem.equalityResidual(x))
                 if succ:
                     fx = problem.objective(x)
                     if fx < fbest:
@@ -891,7 +891,7 @@ class OptimizationProblemBuilder:
                 ofs += v.type.size
     def randomVarBinding(self):
         """Samples values for all optimization variables, sampling uniformly according to their bounds"""
-        for k,bnds in self.variableBounds.iteritems():
+        for k,bnds in self.variableBounds.items():
             var = self.context.variableDict[k]
             if var.type.is_scalar():
                 var.bind(sample_range(*bnds))
@@ -905,7 +905,7 @@ class OptimizationProblemBuilder:
                 else:
                     assert v.type.char == 'V',"TODO: handle matrix/array variables"
                     assert var.type.size >= 0
-                    var.bind([sample_range(*infbnd) for i in xrange(var.type.size)])
+                    var.bind([sample_range(*infbnd) for i in range(var.type.size)])
 
     def cost(self):
         """Evaluates the cost function with the variables already bound."""
@@ -987,7 +987,7 @@ class OptimizationProblemBuilder:
 
     def inBounds(self):
         """Returns True if all bounded variables are within their ranges at the currently bound state x"""
-        for k,bnds in self.variableBounds.iteritems():
+        for k,bnds in self.variableBounds.items():
             var = self.context.variableDict[k]
             assert var.value is not None,"All optimization variables must be bound"
             xmin,xmax = bnds
@@ -1096,7 +1096,7 @@ class OptimizationProblemBuilder:
         """Returns a symbolic.Expression, over variables in self.context, that
         evaluates to True the configuration meets bound constraints"""
         exprs = []
-        for k,bnd in self.variableBounds.iteritems():
+        for k,bnd in self.variableBounds.items():
             exprs.append(self.context.linalg.bound_contains(qmin,qmax,self.context.get(k)))
         return symbolic.all_(*exprs)
 
@@ -1131,31 +1131,31 @@ class OptimizationProblemBuilder:
         ncost = len([obj for obj in self.objectives if obj.type == "cost" or obj.soft])
         istring = " "*indent
         if ncost == 0:
-            print "%sfind[%s]"%(istring,",".join([v.name for v in self.optimizationVariables]))
+            print("%sfind[%s]"%(istring,",".join([v.name for v in self.optimizationVariables])))
         else:
-            print "%smin[%s] %s"%(istring,",".join([v.name for v in self.optimizationVariables]),str(self.costSymbolic()))
+            print("%smin[%s] %s"%(istring,",".join([v.name for v in self.optimizationVariables]),str(self.costSymbolic())))
         if ncost < len(self.objectives) or len(self.variableBounds) > 0:
-            print "%s    such that"%(istring,)
+            print("%s    such that"%(istring,))
             for obj in self.objectives:
                 if not(obj.type == "cost" or obj.soft):
-                    print "%s%s%s"%(istring,("" if obj.name is None else obj.name+": "),str(obj.expr)),
+                    print("%s%s%s"%(istring,("" if obj.name is None else obj.name+": "),str(obj.expr)), end=' ')
                     if obj.type == "eq":
-                        print "= 0"
+                        print("= 0")
                     elif obj.type == "ineq":
-                        print "<= 0"
+                        print("<= 0")
                     else:
-                        print "holds"
-            for k,v in self.variableBounds.iteritems():
+                        print("holds")
+            for k,v in self.variableBounds.items():
                 if hasattr(v[0],'__iter__'):
-                    for i in xrange(len(v[0])):
-                        print "%s[%f]\t"%(istring,v[0][i]),
+                    for i in range(len(v[0])):
+                        print("%s[%f]\t"%(istring,v[0][i]), end=' ')
                         if i == len(v[0])/2:
-                            print "<=",k,"<=\t",
+                            print("<=",k,"<=\t", end=' ')
                         else:
-                            print "\t",
-                        print "[%f]"%(v[1][i],)
+                            print("\t", end=' ')
+                        print("[%f]"%(v[1][i],))
                 else:
-                    print "%s%f <= %s <= %f"%(istring,v[0],k,v[1])
+                    print("%s%f <= %s <= %f"%(istring,v[0],k,v[1]))
 
     def toJson(self,saveContextFunctions=False,prettyPrintExprs=False):
         """Returns a JSON object representing this optimization problem.
@@ -1196,7 +1196,7 @@ class OptimizationProblemBuilder:
 
         self.objectives = []
         for ojson in object['objectives']:
-            if isinstance(ojson['expr'],(str,unicode)):
+            if isinstance(ojson['expr'],str):
                 expr = symbolic_io.exprFromStr(self.context,ojson['expr'])
             else:
                 expr = symbolic_io.exprFromJson(self.context,ojson['expr'])
@@ -1259,7 +1259,7 @@ class OptimizationProblemBuilder:
                     assert v.type.char == 'V',"TODO: handle non numeric/vector valued variables, type %s"%(v.type,)
                     activeDofs = []
                     inactiveDofs = []
-                    for i in xrange(len(xmin)):
+                    for i in range(len(xmin)):
                         if xmin[i] == xmax[i]:
                             inactiveDofs.append(i)
                         else:
@@ -1270,8 +1270,8 @@ class OptimizationProblemBuilder:
                             modified = True
                         result.context.variableDict[v.name].bind(xmin)
                         #don't add to optimization variables
-                        print "OptimizationProblemBuilder.preprocess(): No active DOFS on",v.name,"removing from optimization variables"
-                        print "  xmin",xmin,"xmax",xmax
+                        print("OptimizationProblemBuilder.preprocess(): No active DOFS on",v.name,"removing from optimization variables")
+                        print("  xmin",xmin,"xmax",xmax)
                     elif len(inactiveDofs) > 0:
                         if not modified:
                             result.context = self.context.copy()
@@ -1376,7 +1376,7 @@ class OptimizationProblemBuilder:
         initial values of optimizationVariables), you may set cache=True to eliminate some overhead. 
         Note that caching does not work properly if you change constraints or non-optimization variables.
         """
-        print "OptimizationProblemBuilder.solve(): My optimization variables",[v.name for v in self.optimizationVariables]
+        print("OptimizationProblemBuilder.solve(): My optimization variables",[v.name for v in self.optimizationVariables])
         #first check for cached values
         if cache and hasattr(self,'_cached_problem'):
             p,pToSelf,selfToP,optp = self._cached_problem

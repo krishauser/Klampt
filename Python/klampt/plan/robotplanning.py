@@ -1,6 +1,6 @@
-from cspace import *
-from cspaceutils import *
-import robotcspace
+from .cspace import *
+from .cspaceutils import *
+from . import robotcspace
 from ..model import collide
 from ..robotsim import IKObjective
 
@@ -159,7 +159,7 @@ def planToConfig(world,robot,target,
             if a != b:
                 subset.append(i)
     elif movingSubset == 'all' or movingSubset == None:
-        subset = range(len(q0))
+        subset = list(range(len(q0)))
     else:
         subset = movingSubset
         for i in range(len(q0)):
@@ -183,8 +183,8 @@ def planToConfig(world,robot,target,
         if space.cspace==None: space.setup()
         sfailures = space.cspace.feasibilityFailures([q0[s] for s in subset])
         gfailures = space.cspace.feasibilityFailures([target[s] for s in subset])
-        print "Start configuration fails",sfailures
-        print "Goal configuration fails",gfailures
+        print("Start configuration fails",sfailures)
+        print("Goal configuration fails",gfailures)
         return None
     return plan
 
@@ -252,7 +252,7 @@ def planToSet(world,robot,target,
     q0 = robot.getConfig()
     subset = []
     if movingSubset == 'auto' or movingSubset == 'all' or movingSubset == None:
-        subset = range(len(q0))
+        subset = list(range(len(q0)))
     else:
         subset = movingSubset
 
@@ -281,7 +281,7 @@ def planToSet(world,robot,target,
         #the start configuration is infeasible, print it out
         if space.cspace==None: space.setup()
         sfailures = space.cspace.feasibilityFailures([q0[s] for s in subset])
-        print "Start configuration fails",sfailures
+        print("Start configuration fails",sfailures)
         raise
     return plan
 

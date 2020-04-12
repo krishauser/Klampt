@@ -154,39 +154,39 @@ class map:
         #handle non-standard getters
         if isinstance(self.obj,WorldModel):
             if name == 'robots':
-                return _index_name_map([self.obj.robot(i) for i in xrange(self.obj.numRobots())])
+                return _index_name_map([self.obj.robot(i) for i in range(self.obj.numRobots())])
             elif name == 'rigidObjects':
-                return _index_name_map([self.obj.rigidObject(i) for r in xrange(self.obj.numRigidObjects())])
+                return _index_name_map([self.obj.rigidObject(i) for r in range(self.obj.numRigidObjects())])
             elif name == 'terrains':
-                return _index_name_map([self.obj.terrain(i) for r in xrange(self.obj.numTerrains())])
+                return _index_name_map([self.obj.terrain(i) for r in range(self.obj.numTerrains())])
             elif name == 'elements':
-                elements = [self.obj.terrain(i) for r in xrange(self.obj.numTerrains())]+[self.obj.rigidObjects(i) for r in xrange(self.obj.numRigidObjects())]
-                for i in xrange(self.obj.numRobots()):
+                elements = [self.obj.terrain(i) for r in range(self.obj.numTerrains())]+[self.obj.rigidObjects(i) for r in range(self.obj.numRigidObjects())]
+                for i in range(self.obj.numRobots()):
                     elements.append(self.obj.robot(i))
                     for j in self.obj.robot(i).numLinks():
                         elements.append(self.obj.robotModelLink(i,j))
                 return _index_name_map(elements)
             else:
-                for i in xrange(self.obj.numRobots()):
+                for i in range(self.obj.numRobots()):
                     if name == self.obj.robot(i).getName():
                         return map(self.obj.robot(i))
-                for i in xrange(self.obj.numRigidObjects()):
+                for i in range(self.obj.numRigidObjects()):
                     if name == self.obj.rigidObject(i).getName():
                         return map(self.obj.rigidObject(i))
-                for i in xrange(self.obj.numTerrains()):
+                for i in range(self.obj.numTerrains()):
                     if name == self.obj.terrain(i).getName():
                         return map(self.obj.terrain(i))
         elif isinstance(self.obj,RobotModel):
             if name == 'id':
                 return self.obj.getID()
             elif name == 'links':
-                return _index_name_map([self.obj.link(i) for i in xrange(self.obj.numLinks())])
+                return _index_name_map([self.obj.link(i) for i in range(self.obj.numLinks())])
             elif name == 'config':
                 return map(self.obj.getConfig(),self.obj.setConfig)
             elif name == 'velocity':
                 return map(self.obj.getVelocity(),self.obj.setVelocity)
             else:
-                for i in xrange(self.obj.numLinks()):
+                for i in range(self.obj.numLinks()):
                     if self.obj.link(i).getName() == name:
                         return map(self.obj.link(i))
         elif isinstance(self.obj,RobotModelLink):
@@ -244,13 +244,13 @@ class map:
                 return map(self.obj.getGravity(),self.obj.setGravity)
             else:
                 try:
-                    obj = getattr(map(w),name)
+                    obj = getattr((map(w)),name)
                     if isinstance(obj.obj,RobotModel):
-                        return map(_SimRobot(self.obj,obj.obj.index))
-                    return map(self.obj.body(obj.obj))
+                        return (map(_SimRobot(self.obj,obj.obj.index)))
+                    return (map(self.obj.body(obj.obj)))
                 except Exception as e:
-                    print "Exception raised on Simulator.",name,":",e
-                    print "Simulator has no object",name
+                    print("Exception raised on Simulator.",name,":",e)
+                    print("Simulator has no object",name)
                     pass
         elif isinstance(self.obj,_SimRobot):
             if name=='links':
@@ -265,20 +265,20 @@ class map:
                 raise AttributeError("Object of type "+self.obj.__class__.__name__+" does not have attribute "+name)
         elif isinstance(self.obj,_SimObjectCentricBody):
             if name == 'transform':
-                return map(self.obj.obj.getObjectTransform(),lambda T:self.obj.obj.setObjectTransform(*T))
+                return (map(self.obj.obj.getObjectTransform(),lambda T:self.obj.obj.setObjectTransform(*T)))
             elif name == 'velocity':
-                return map(self.obj.obj.getObjectVelocity(),lambda twist:self.obj.obj.setObjectVelocity(*twist))
+                return (map(self.obj.obj.getObjectVelocity(),lambda twist:self.obj.obj.setObjectVelocity(*twist)))
         elif isinstance(self.obj,SimBody):
             if name=='enabled':
                 return self.obj.isEnabled()
             elif name == 'transform':
-                return map(self.obj.getTransform(),lambda T:self.obj.setTransform(*T))
+                return (map(self.obj.getTransform(),lambda T:self.obj.setTransform(*T)))
             elif name == 'objectTransform':
-                return map(self.obj.getObjectTransform(),lambda T:self.obj.setObjectTransform(*T))
+                return (map(self.obj.getObjectTransform(),lambda T:self.obj.setObjectTransform(*T)))
             elif name == 'velocity':
-                return map(self.obj.getVelocity(),lambda twist:self.obj.setVelocity(*twist))
+                return (map(self.obj.getVelocity(),lambda twist:self.obj.setVelocity(*twist)))
             elif name == 'objectVelocity':
-                return map(self.obj.getObjectVelocity(),lambda twist:self.obj.setObjectVelocity(*twist))
+                return (map(self.obj.getObjectVelocity(),lambda twist:self.obj.setObjectVelocity(*twist)))
         elif isinstance(self.obj,SimRobotController):
             if name=='sensors':
                 sensors = []
@@ -290,7 +290,7 @@ class map:
                     index += 1
                 return _index_name_map(sensors,[s.name() for s in sensors])
         elif isinstance(self.obj,(list,tuple,dict)):
-            print "Accessing",name,"from",self.obj
+            print("Accessing",name,"from",self.obj)
             return self.obj[name]
 
         #now do the default
@@ -376,7 +376,7 @@ class map:
             def subsetter(x):
                 self.obj[index] = x
                 self.setter(self.obj)
-            return map(self.obj[index],subsetter)
+            return (map(self.obj[index],subsetter))
         return self.obj[index]
 
     def __setitem__(self,index,value):
@@ -401,8 +401,8 @@ class _index_name_map:
                 self.nameMap[o.getName()]=i
     def __getitem__(self,index):
         if isinstance(index,str):
-            return map(self.objects[self.nameMap[index]])
-        return map(self.objects[index])
+            return (map(self.objects[self.nameMap[index]]))
+        return (map(self.objects[index]))
     def __len__(self):
         return len(self.objects)
     def __iter__(self):
@@ -447,7 +447,7 @@ def get_item(obj,name):
 
     Note: not secure! Uses eval()
     """
-    loc = {'_w':map(obj)}
+    loc = {'_w':(map(obj))}
     result = {}
     return eval('_w.'+name,globals(),loc)
 
@@ -456,9 +456,9 @@ def set_item(obj,name,value):
     
     Note: not secure! Uses exec
     """
-    loc = {'_w':map(obj)}
+    loc = {'_w':(map(obj))}
     result = {}
-    exec '_w.'+name+'='+str(value) in globals(),loc
+    exec('_w.'+name+'='+str(value), globals(),loc)
 
 def get_dict(world,items):
     """Retrieves a dictionary of elements referred to by the given
@@ -473,7 +473,7 @@ def set_dict(world,config):
     to values which should be set in the world.
         
     Note: not secure! Uses exec """
-    for (k,v) in config.iteritems():
+    for (k,v) in config.items():
         set_item(world,k,v)
 
 
@@ -513,7 +513,7 @@ class Vectorizer:
     def __init__(self,world,items):
         self.world = world
         self.ref = get_dict(world,items)
-        self.keys = self.ref.keys()
+        self.keys = list(self.ref.keys())
         self.lengths = [len(flatten(self.ref[k])) for k in self.keys]
 
     def getVector(self):
@@ -534,10 +534,10 @@ if __name__ == '__main__':
     w = WorldModel()
     res = w.readFile('tx90blocks.xml')
     assert(res)
-    print get_item(w,'tx90pr2.config')
-    print get_item(w,'robots[0].config')
-    print get_item(w,'robots[0].links[6].transform')
-    print get_item(w,'cube1.transform')
+    print(get_item(w,'tx90pr2.config'))
+    print(get_item(w,'robots[0].config'))
+    print(get_item(w,'robots[0].links[6].transform'))
+    print(get_item(w,'cube1.transform'))
 
     v = Vectorizer(w,['tx90pr2.config','cube1.transform'])
     q = v.getVector()

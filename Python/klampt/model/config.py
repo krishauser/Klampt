@@ -24,7 +24,7 @@ Supported objects include
 
 from ..robotsim import WorldModel,RobotModel,RobotModelLink,RigidObjectModel,IKObjective
 from ..math import vectorops,so3,se3
-import coordinates
+from . import coordinates
 
 def isCompound(item):
     if isinstance(item,WorldModel):
@@ -45,10 +45,10 @@ def components(item):
         res += [item.rigidObject(i) for i in range(item.numRigidObjects())]
         return res
     elif isinstance(item,coordinates.Group):
-        res = item.frames.values()
-        res += item.points.values()
-        res += item.directions.values()
-        res += [components(g) for g in item.subgroups.itervalues()]
+        res = list(item.frames.values())
+        res += list(item.points.values())
+        res += list(item.directions.values())
+        res += [components(g) for g in item.subgroups.values()]
         return res
     elif hasattr(item,'__iter__'):
         if all(isinstance(v,(bool,int,float,str)) for v in item):
@@ -64,10 +64,10 @@ def componentNames(item):
         res += [item.rigidObject(i).getName() for i in range(item.numRigidObjects())]
         return res
     elif isinstance(item,coordinates.Group):
-        res = item.frames.keys()
-        res += item.points.keys()
-        res += item.directions.keys()
-        res += [componentNames(g) for g in item.subgroups.iterkeys()]
+        res = list(item.frames.keys())
+        res += list(item.points.keys())
+        res += list(item.directions.keys())
+        res += [componentNames(g) for g in item.subgroups.keys()]
         return res
     elif hasattr(item,'__iter__'):
         if all(isinstance(v,(bool,int,float,str)) for v in item):
@@ -237,7 +237,7 @@ def setConfig(item,vector):
     elif hasattr(item,'__iter__'):
         assert isinstance(item[0],(bool,float,int))
         assert len(item) == len(vector)
-        for i in xrange(len(item)):
+        for i in range(len(item)):
             item[i] = vector[i]
     return
 
@@ -254,7 +254,7 @@ def getConfigNames(item):
     TODO: ContactPoint
     """
     if isinstance(item,RobotModel):
-        return [item.link(i).getName() for i in xrange(item.numLinks())]
+        return [item.link(i).getName() for i in range(item.numLinks())]
     elif isinstance(item,(RigidObjectModel,coordinates.Frame)):
         return _se3Names
     elif isinstance(item,(coordinates.Point,coordinates.Direction)):

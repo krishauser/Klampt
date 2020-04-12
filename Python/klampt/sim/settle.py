@@ -66,13 +66,13 @@ def settle(world,obj,
         robot = world.robot(obj.robotIndex)
         assert obj.index >= 0 and obj.index < robot.numLinks()
         newWorld = WorldModel()
-        for i in xrange(world.numRobots()):
+        for i in range(world.numRobots()):
             if i == obj.robotIndex:
                 continue
             newWorld.add(world.robot(i).getName(),world.robot(i))
-        for i in xrange(world.numRigidObjects()):
+        for i in range(world.numRigidObjects()):
             newWorld.add(world.rigidObject(i).getName(),world.rigidObject(i))
-        for i in xrange(world.numTerrains()):
+        for i in range(world.numTerrains()):
             newWorld.add(world.terrain(i).getName(),world.terrain(i))
         newObj = newWorld.makeRigidObject("obj")
         newObj.geometry().set(obj.geometry())
@@ -111,9 +111,9 @@ def settle(world,obj,
     #exclude objects that have no chance of being in way of object
     newWorld = WorldModel()
     newObj = None
-    for i in xrange(world.numRobots()):
+    for i in range(world.numRobots()):
         robot = world.robot(i)
-        for j in xrange(robot.numLinks()):
+        for j in range(robot.numLinks()):
             link = robot.link(j)
             if _bboverlap((bmin,bmax),link):
                 #add robot link as static geometry
@@ -126,14 +126,14 @@ def settle(world,obj,
                 newObj.setMass(mass)
                 newObj.setTransform(link.getTransform())
                 #TODO: what surface properties?
-    for i in xrange(world.numRigidObjects()):
+    for i in range(world.numRigidObjects()):
         if _bboverlap((bmin,bmax),world.rigidObject(i)):
             o = newWorld.add(world.rigidObject(i).getName(),world.rigidObject(i))
             if i == obj.index:
                 newObj = o
         else:
             assert i != obj.index
-    for i in xrange(world.numTerrains()):
+    for i in range(world.numTerrains()):
         if _bboverlap((bmin,bmax),world.terrain(i)):
             newWorld.add(world.terrain(i).getName(),world.terrain(i))
     world = newWorld
@@ -141,7 +141,7 @@ def settle(world,obj,
 
     movedist = vectorops.norm(forcedir)
     if movedist < settletol:
-        print "sim.settle(): warning, force movement distance less than settletol.  Was this intended?"
+        print("sim.settle(): warning, force movement distance less than settletol.  Was this intended?")
         return (body.getTransform(),[])
     forcedir = vectorops.div(forcedir,movedist)
     forceamt = obj.getMass().mass 
@@ -150,16 +150,16 @@ def settle(world,obj,
     body = sim.body(obj)
     otherbodies = []
     otherids = []
-    for i in xrange(world.numRigidObjects()):
+    for i in range(world.numRigidObjects()):
         otherids.append(world.rigidObject(i).getID())
         otherbodies.append(sim.body(world.rigidObject(i)))
-    for i in xrange(world.numTerrains()):
+    for i in range(world.numTerrains()):
         otherids.append(world.terrain(i).getID())
         otherbodies.append(sim.body(world.terrain(i)))
     otherids.remove(obj.getID())
     otherbodies = [b for b in otherbodies if b.body != body.body]
     if len(otherbodies) == 0:
-        print "sim.settle(): no objects in direction",vectorops.mul(forcedir,movedist)
+        print("sim.settle(): no objects in direction",vectorops.mul(forcedir,movedist))
         return (None,[])
     if margin != None:
         assert margin >= settletol,"Collision margin must be at least settletol"
@@ -194,13 +194,13 @@ def settle(world,obj,
     sim.simulate(0)
     s = sim.getStatus()
     if s == Simulator.STATUS_CONTACT_UNRELIABLE:
-        print "sim.settle(): warning, object already penetrating other objects.  Trying to pull back..."
+        print("sim.settle(): warning, object already penetrating other objects.  Trying to pull back...")
         T0 = body.getTransform()
         body.setTransform(T0[0],vectorops.madd(T0[1],forcedir,margin))
         sim.simulate(0)
         s = sim.getStatus()
         if s == Simulator.STATUS_CONTACT_UNRELIABLE:
-            print "  pulling back failed."
+            print("  pulling back failed.")
             return (None,[])
     if debug:
         vis.add("world",world)
@@ -257,7 +257,7 @@ def settle(world,obj,
         else:
             numSettled = 0
         if numSettled >= 2:
-            print "sim.settle(): Settled at time",t
+            print("sim.settle(): Settled at time",t)
             touched = [id for id in otherids if sim.inContact(obj.getID(),id)]
             cps = [sim.getContacts(obj.getID(),id) for id in touched]
             tdict = dict()
@@ -269,7 +269,7 @@ def settle(world,obj,
         Told = T
         springanchorworld = vectorops.madd(springanchorworld,forcedir,dt*movedist)
         t += dt
-    print "Failed to settle? Final velocity",body.getVelocity()
+    print("Failed to settle? Final velocity",body.getVelocity())
     touched = [id for id in otherids if sim.inContact(obj.getID(),id)]
     cps = [sim.getContacts(obj.getID(),id) for id in touched]
     tdict = dict()
@@ -279,14 +279,14 @@ def settle(world,obj,
 
 def _bboverlap(bb,element):
     if isinstance(element,RobotModel):
-        return any(_bboverlap(bb,element.link(i)) for i in xrange(element.numLinks()))
+        return any(_bboverlap(bb,element.link(i)) for i in range(element.numLinks()))
     else:
         bb2 = element.geometry().getBB()
-        print "BBox",bb
-        print "  Testing overlap with",element.getName(),"bbox",bb2
+        print("BBox",bb)
+        print("  Testing overlap with",element.getName(),"bbox",bb2)
         for (a,b,c,d) in zip(bb[0],bb[1],bb2[0],bb2[1]):
             if not (a >= c and a <= d or b >= c and b <= d) and not (c >= a and c <= b or d >= a and d <= b):
-                print "  No overlap"
+                print("  No overlap")
                 return False
-        print "  Overlap"
+        print("  Overlap")
         return True

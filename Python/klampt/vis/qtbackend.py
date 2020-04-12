@@ -80,6 +80,8 @@ class QtGLWindow(QGLWidget):
 
     def __init__(self,name="OpenGL window",parent=None):
         format = QGLFormat()
+        if not format.hasOpenGL():
+            raise RuntimeError("It appears that your system doesn't have OpenGL support?")
         format.setRgba(True)
         format.setDoubleBuffer(True)
         format.setDepth(True)
@@ -92,6 +94,8 @@ class QtGLWindow(QGLWidget):
             shareWidget = QtGLWindow._firstWidget
             QGLWidget.__init__(self,format,shareWidget=shareWidget)
             #self.setContext(self.context(),shareContext=shareWidget.context())
+        if not self.isValid():
+            raise RuntimeError("Unspecified error creating the Qt GLWidget, OpenGL rendering is not supported")
         
         self.name = name
         self.program = None
@@ -126,9 +130,9 @@ class QtGLWindow(QGLWidget):
 
     def setProgram(self,program):
         """User will call this to set up the program variable"""
-        from glprogram import GLProgram
+        from .glprogram import GLProgram
         assert isinstance(program,GLProgram)
-        print "######### QGLWidget setProgram ###############"
+        print("######### QGLWidget setProgram ###############")
         if hasattr(program,'name'):
             self.name = program.name
             if self.initialized:
@@ -161,7 +165,7 @@ class QtGLWindow(QGLWidget):
         try:
             glEnable(GL_MULTISAMPLE)
         except Exception:
-            print "QGLWidget.initialize(): perhaps Qt didn't initialize properly?"
+            print("QGLWidget.initialize(): perhaps Qt didn't initialize properly?")
             pass
         self.setMouseTracking(True)
         self.setFocusPolicy(Qt.StrongFocus)
@@ -181,7 +185,7 @@ class QtGLWindow(QGLWidget):
             for a in self.actions:
                 self.actionMenu.addAction(a)
         else:
-            print "QtGLWidget.initialize: no action menu?"
+            print("QtGLWidget.initialize: no action menu?")
 
         self.initialized = True
 
@@ -204,7 +208,7 @@ class QtGLWindow(QGLWidget):
         any existing Qt callbacks."""
         if not self.initialized:
             return
-        print "######### QGLWidget close ###############"
+        print("######### QGLWidget close ###############")
         self.idleTimer.stop()
         self.idleTimer.deleteLater()
         self.idleTimer = None
@@ -238,20 +242,20 @@ class QtGLWindow(QGLWidget):
 
     #QtGLWidget bindings
     def initializeGL(self):
-        print "######### QGLWidget Initialize GL ###############"
+        print("######### QGLWidget Initialize GL ###############")
         if self.initialized:
-            print "QGLWidget.initializeGL: already initialized?"
+            print("QGLWidget.initializeGL: already initialized?")
         try:
             self.makeCurrent()
             return self.initialize()
-        except Exception,e:
+        except Exception as e:
             import traceback
-            print "QGLWidget.initializeGL: hit an exception?"
+            print("QGLWidget.initializeGL: hit an exception?")
             traceback.print_exc()
             exit(-1)
     def resizeGL(self,w,h): 
         if self.program == None:
-            print "QGLWidget.resizeGL: called after close?"
+            print("QGLWidget.resizeGL: called after close?")
             return
         if not self.isVisible():
             return
@@ -259,10 +263,10 @@ class QtGLWindow(QGLWidget):
         return
     def paintGL(self):
         if self.program == None:
-            print "QGLWidget.paintGL: called after close?"
+            print("QGLWidget.paintGL: called after close?")
             return
         if not self.isVisible():
-            print "QGLWidget.paintGL: called while invisible?"
+            print("QGLWidget.paintGL: called while invisible?")
             return
         if self.inpaint:
             return
@@ -271,9 +275,9 @@ class QtGLWindow(QGLWidget):
         try:
             glRenderMode(GL_RENDER)
             res = self.program.displayfunc()
-        except Exception,e:
+        except Exception as e:
             import traceback
-            print "QGLWidget.paintGL: hit an exception?"
+            print("QGLWidget.paintGL: hit an exception?")
             traceback.print_exc()
             exit(-1)
         self.inpaint = False
@@ -281,7 +285,7 @@ class QtGLWindow(QGLWidget):
     #QWidget bindings
     def mouseMoveEvent(self,e):
         if self.program == None:
-            print "QGLWidget.mouseMoveEvent: called after close?"
+            print("QGLWidget.mouseMoveEvent: called after close?")
             return
         self.modifierList = toModifierList(e.modifiers())
         x,y = e.pos().x(),e.pos().y()
@@ -289,7 +293,7 @@ class QtGLWindow(QGLWidget):
         else: dx, dy = x - self.lastx, y - self.lasty
         try:
             res = self.program.motionfunc(x,y,dx,dy)
-        except Exception,e:
+        except Exception as e:
             import traceback
             traceback.print_exc()
             exit(-1)
@@ -436,7 +440,7 @@ class QtBackend:
         self.window = None
 
     def initialize(self,program_name):
-        print "INITIALIZING Qt BACKEND"
+        print("INITIALIZING Qt BACKEND")
         if self.app == None:
             #this is needed for some X11 multithreading bug 
             QCoreApplication.setAttribute(Qt.AA_X11InitThreads)

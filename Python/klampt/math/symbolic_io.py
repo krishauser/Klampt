@@ -1,9 +1,10 @@
-from symbolic import *
-from symbolic import _infix_operators,_prefix_operators,_builtin_functions
+from .symbolic import *
+from .symbolic import _infix_operators,_prefix_operators,_builtin_functions
 from ..io import loader
 import json
 from json import encoder
 import weakref
+import sys
 
 VAR_PREFIX = ''
 USER_DATA_PREFIX = '$'
@@ -22,17 +23,22 @@ _operator_precedence = {'pow':1,
 class _Object(object):
     pass
 
-def byteify(input):
-    """Helpful for converting unicode values in JSON loaded objects to strings"""
-    if isinstance(input, dict):
-        return {byteify(key): byteify(value)
-                for key, value in input.iteritems()}
-    elif isinstance(input, list):
-        return [byteify(element) for element in input]
-    elif isinstance(input, unicode):
-        return input.encode('utf-8')
-    else:
+if sys.version_info[0] == 2:
+    def byteify(input):
+        """Helpful for converting unicode values in JSON loaded objects to strings"""
+        if isinstance(input, dict):
+            return {byteify(key): byteify(value)
+                    for key, value in input.items()}
+        elif isinstance(input, list):
+            return [byteify(element) for element in input]
+        elif isinstance(input, str):
+            return input.encode('utf-8')
+        else:
+            return input
+else:
+    def byteify(input):
         return input
+
 
 class _TaggedExpression(Expression):
     def __init__(self,name):
@@ -81,12 +87,9 @@ def _prettyPrintExpr(expr,astr,parseCompatible):
         #    return astr[0] + '[%s:%s:%s]'%(astr[1],astr[2],astr[3])
         if isinstance(expr.args[1],slice):
             start,stop,step = expr.args[1].start,expr.args[1].stop,expr.args[1].step
-            if expr.args[1].stop > 90000000000:
-                astr[1] = str(start)+":"
-            else:
-                astr[1] = str(start)+":"+str(expr.args[1].stop)
-            if step is not None:
-                astr[1] = astr[1] + ":" + str(step)
+            astr[1] = "%s:%s%s"%(("" if start is None else str(start)),
+                ("" if (stop is None or stop > 900000000000) else str(stop)),
+                ("" if step is None else ":"+str(step)))
         return astr[0] + '[' +astr[1] + ']'
     #default
     if len(astr) > 1 and sum(len(a) for a in astr) > 80-2-len(expr.functionInfo.name):
@@ -186,7 +189,7 @@ def _json_complex(jsonval):
 
 def _json_depth(jsonval):
     if isinstance(jsonval,dict):
-        return 1 + max(_json_depth(v) for v in jsonval.itervalues())
+        return 1 + max(_json_depth(v) for v in jsonval.values())
     elif isinstance(jsonval,(list,tuple)):
         return 1 + max(_json_depth(v) for v in jsonval)
     else:
@@ -212,7 +215,9 @@ def exprToStr(expr,parseCompatible=True,expandSubexprs='auto'):
     if isinstance(expr,ConstantExpression):
         if isinstance(expr.value,slice):
             start,stop,step = expr.value.start,expr.value.stop,expr.value.step
-            return "%s:%s%s"%(str(start),"" if stop > 900000000000 else str(stop),"" if step is None else ":"+str(step))
+            return "%s:%s%s"%(("" if start is None else str(start)),
+                    ("" if (stop is None or stop > 900000000000) else str(stop)),
+                    ("" if step is None else ":"+str(step)))
         try:
             jsonval = _to_jsonobj(expr.value)
         except:
@@ -220,13 +225,24 @@ def exprToStr(expr,parseCompatible=True,expandSubexprs='auto'):
         if parseCompatible:
             return json.dumps(jsonval)
         else:
-            original_float_repr = encoder.FLOAT_REPR
+            #Note: DOESNT WORK IN Python 3
+            #original_float_repr = encoder.FLOAT_REPR
             encoder.FLOAT_REPR = lambda o:format(o,'.14g')
-            if _json_complex(jsonval):
-                res = json.dumps(jsonval,sort_keys=True, indent=4, separators=(',', ': '))
-            else:
-                res = json.dumps(jsonval,sort_keys=True)
-            encoder.FLOAT_REPR = original_float_repr
+            try:
+                if _json_complex(jsonval):
+                    res = json.dumps(jsonval,sort_keys=True, indent=4, separators=(',', ': '))
+                else:
+                    res = json.dumps(jsonval,sort_keys=True)
+            except Exception:
+                print("Unable to dump constant expression",expr.value,"of type",expr.value.__class__.__name__)
+                def print_recursive(v,indent=0):
+                    if hasattr(v,'__iter__'):
+                        print(indent*' ',"Sub objects have type",[a.__class__.__name__ for a in v])
+                        for a in v:
+                            print_recursive(a,indent+2)
+                print_recursive(expr.value)
+                return "___JSON_ENCODE_ERROR___"
+            #encoder.FLOAT_REPR = original_float_repr
             return res
     elif isinstance(expr,VariableExpression):
         if parseCompatible:
@@ -345,7 +361,7 @@ def exprFromStr(context,string,fmt=None,add=False):
         userdata = {}
         #hack to easily access functions with the class.attribute syntax
         allFunctions = _builtin_functions.copy()
-        for name,func in context.customFunctions.iteritems():
+        for name,func in context.customFunctions.items():
             path = name.split('.')
             if len(path) == 1:
                 allFunctions[name] = func
@@ -471,7 +487,7 @@ def exprFromJson(context,jsonObj,taggedExpressions=None):
                 elif a in context.expressions:
                     parsedArgs.append(context.expressions[a])
                 else:
-                    print "exprFromJson(): Valid tags:",taggedExpressions.keys(),"(tags)",context.expressions.keys(),"(expressions)"
+                    print("exprFromJson(): Valid tags:",list(taggedExpressions.keys()),"(tags)",list(context.expressions.keys()),"(expressions)")
                     raise RuntimeError("Invalid expression tag "+NAMED_EXPRESSION_PREFIX+a)
             else:
                 #variable reference
@@ -518,7 +534,7 @@ def typeFromJson(jsonObj):
         subtypeobj = jsonObj['subtype']
         if isinstance(subtypeobj,list):
             st = [typeFromJson(stobj) for stobj in subtypeobj]
-        elif isinstance(subtypeobj,(str,unicode)):
+        elif isinstance(subtypeobj,str):
             st = subtypeobj
         elif isinstance(subtypeobj,dict):
             st = typeFromJson(subtypeobj)
@@ -537,13 +553,13 @@ def contextToJson(ctx,saveFunctions=False):
         res['variables'] = varjson
     if len(ctx.expressions) > 0:
         exprjson = {}
-        for n,e in ctx.expressions.iteritems():
+        for n,e in ctx.expressions.items():
             exprjson[n] = exprToJson(e)
         res['expressions'] = exprjson
     if saveFunctions and len(ctx.customFunctions) > 0:
-        res['customFunctions'] = ctx.customFunctions.keys()
+        res['customFunctions'] = list(ctx.customFunctions.keys())
     if len(ctx.userData) > 0:
-        res['userData'] = ctx.userData.keys()
+        res['userData'] = list(ctx.userData.keys())
     return res
 
 def contextFromJson(context,jsonObj):
@@ -557,11 +573,11 @@ def contextFromJson(context,jsonObj):
     if 'userData' in jsonObj:
         for d in jsonObj['userData']:
             if d not in context.userData:
-                print "Context.fromJson(): Warning, item",d,"is not yet in userData"
+                print("Context.fromJson(): Warning, item",d,"is not yet in userData")
     if 'customFunctions' in jsonObj:
         for d in jsonObj['customFunctions']:
             if d not in context.customFunctions:
-                print "Context.fromJson(): Warning, item",d,"is not yet in customFunctions"
+                print("Context.fromJson(): Warning, item",d,"is not yet in customFunctions")
     context.variables = []
     context.variableDict = dict()
     context.expressions = dict()
@@ -569,7 +585,7 @@ def contextFromJson(context,jsonObj):
         for v in jsonObj['variables']:
             context.addVar(v['name'],typeFromJson(v['type']))
     if 'expressions' in jsonObj:
-        for n,v in jsonObj['expressions'].iteritems():
+        for n,v in jsonObj['expressions'].items():
             context.expressions[n] = exprFromJson(context,v)
     return context
 
@@ -591,7 +607,7 @@ def latex(expr):
     """Returns LaTeX code for the Expression expr.  Requires Sympy."""
     try:
         import sympy
-        import symbolic_sympy
+        from . import symbolic_sympy
     except ImportError as e:
         raise e
         raise RuntimeError("Sympy is required for conversion to latex")
@@ -602,14 +618,14 @@ def pprint(expr):
     pretty-printer."""
     try:
         import sympy
-        import symbolic_sympy
+        from . import symbolic_sympy
         sympy.pprint(symbolic_sympy.exprToSympy(expr),use_unicode=False)
     except ImportError:
-        print exprToStr(expr,parseCompatible=False)
+        print(exprToStr(expr,parseCompatible=False))
     except TypeError:
-        print exprToStr(expr,parseCompatible=False)
+        print(exprToStr(expr,parseCompatible=False))
     except ValueError:
-        print exprToStr(expr,parseCompatible=False)
+        print(exprToStr(expr,parseCompatible=False))
 
 def codegen(name_expr,language=None,**options):
     """Similar to sympy.codegen. Generates one or more expressions in the target language.
@@ -632,7 +648,7 @@ def codegen(name_expr,language=None,**options):
     """
     try:
         import sympy
-        import symbolic_sympy
+        from . import symbolic_sympy
         from sympy.utilities.codegen import codegen
     except ImportError:
         raise RuntimeError("Sympy is required for codegen")

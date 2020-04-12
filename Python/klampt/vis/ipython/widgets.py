@@ -216,7 +216,7 @@ class KlamptWidget(widgets.DOMWidget):
                 return self.add(name,item.milestones)
         elif type == 'WorldModel':
             if name != 'world' or self.world is not None:
-                print "KlamptWidget.add: Warning, only one world is supported, and should be added as world"
+                print("KlamptWidget.add: Warning, only one world is supported, and should be added as world")
             self.setWorld(item)
         else:
             raise ValueError("KlamptWidget can't handle objects of type "+type+" yet")
@@ -267,7 +267,7 @@ class KlamptWidget(widgets.DOMWidget):
         or object name to some RGBA color (each channel in the range [0,1])."""
         recursive=False
         target_name = None
-        if isinstance(target, (int, long, float, complex)):
+        if isinstance(target, (int, float, complex)):
             robot = self.world.robot(0)
             target_as_link = robot.link(target)
             target_name=target_as_link.getName()
@@ -279,7 +279,7 @@ class KlamptWidget(widgets.DOMWidget):
             target_name=target.getName()
             recursive = True
 
-        elif isinstance(target, basestring):
+        elif isinstance(target, str):
             target_name=target
             if target in self._extras:
                 type,data = self._extras[target]
@@ -581,10 +581,10 @@ class KlamptWidget(widgets.DOMWidget):
     @observe('drawn')
     def _recv_drawn(self,drawn):
         self.drawn = 0
-        print "Klampt widget drawn!"
+        print("Klampt widget drawn!")
 
     def on_event(self,e):
-        print "KlamptWidget got event",e
+        print("KlamptWidget got event",e)
 
 
 
@@ -618,7 +618,7 @@ def EditConfig(robot,klampt_widget=None,ghost=None,link_selector='slider',link_s
     qmin,qmax = robot.getJointLimits()
     qedit = robot.getConfig()[:]
     if link_subset == None:
-        link_subset = [i for i in xrange(robot.numLinks()) if qmin[i] != qmax[i]]
+        link_subset = [i for i in range(robot.numLinks()) if qmin[i] != qmax[i]]
     else:
         for link in link_subset:
             if link < 0 or link >= robot.numLinks():
@@ -897,8 +897,8 @@ class Playback(widgets.VBox):
                     self._advance()
                 except Exception as e:
                     with self.out:
-                        print "Exception occurred during Playback.advance, stopping animation"
-                        print e
+                        print("Exception occurred during Playback.advance, stopping animation")
+                        print(e)
                     playdata['stop'] = 1
                     lock.release()
                     return

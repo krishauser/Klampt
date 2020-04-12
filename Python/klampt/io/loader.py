@@ -48,7 +48,7 @@ unsupportedJsonTypes = ['Geometry3D','TriangleMesh','PointCloud','GeometricPrimi
     'RobotModel','RigidObjectModel','TerrainModel','WorldModel']
 
 typeToExtensions = dict()
-for (k,v) in extensionToTypes.items():
+for (k,v) in list(extensionToTypes.items()):
     for t in v:
         if t in typeToExtensions:
             typeToExtensions[t].append(k)
@@ -88,7 +88,7 @@ def filenameToType(name):
     elif fileExtension in extensionToTypes:
         ftypes = extensionToTypes[fileExtension]
         if len(ftypes) > 1 and fileExtension not in ['.path'] and (ftypes[0] != 'Geometry3D' and len(ftypes) > 2):
-            print "loader.filenameToType(): Warning: filename",name,"is ambiguous, matches types",', '.join(ftypes)
+            print("loader.filenameToType(): Warning: filename",name,"is ambiguous, matches types",', '.join(ftypes))
         return ftypes[0]
     else:
         raise RuntimeError("Cannot determine type of object from filename "+name)
@@ -156,7 +156,7 @@ def readMatrix(text):
         raise ValueError("Invalid number of matrix elements, should be %d, instead got %d"%(m*n,len(items)-2))
     k = 2
     x = []
-    for i in xrange(m):
+    for i in range(m):
         x.append([float(v) for v in items[k:k+n]])
         k += n
     return x
@@ -624,7 +624,7 @@ def save(obj,type,fn):
         return obj.saveFile(fn)
 
     if type == 'auto':
-        savers_and_writers = savers.keys() + writers.keys()
+        savers_and_writers = list(savers.keys()) + list(writers.keys())
         type = autoType(obj,savers_and_writers)
         if type is None:
             raise ValueError("Can't determine a savable type for object of type "+obj.__class__.__name__)
@@ -666,13 +666,13 @@ def load(type,fn):
     if type == 'WorldModel' or (type == 'Geometry3D' and fn.find('ros://') >= 0):  #these two types handle URLs in C++ API
         cppurl = True
     if not cppurl and fn.find('://') >= 0:
-        import urllib2
+        import urllib.request, urllib.error, urllib.parse
         src = None
         data = None
         try:
-            src = urllib2.urlopen(fn)
+            src = urllib.request.urlopen(fn)
             data = src.read()
-            print "klampt.io.loader.load(): Download %s HTTP response code %s, size %d bytes"%(fn,src.getcode(),len(data))
+            print("klampt.io.loader.load(): Download %s HTTP response code %s, size %d bytes"%(fn,src.getcode(),len(data)))
         finally:
             if src:
                 src.close()
@@ -684,7 +684,7 @@ def load(type,fn):
             fileName, suffix = os.path.splitext(fn)
             with tempfile.NamedTemporaryFile(delete=False,suffix=suffix) as tmp_file:
                 local_filename = tmp_file.name
-                print "klampt.io.loader.load(): saving data to temp file",local_filename
+                print("klampt.io.loader.load(): saving data to temp file",local_filename)
                 tmp_file.write(data)
                 tmp_file.flush()
             res = loaders[type](local_filename)
@@ -732,7 +732,7 @@ def toJson(obj,type='auto'):
                         type = 'Configs'
                     else:
                         raise TypeError("Could not parse object "+str(obj))
-        elif isinstance(obj,(bool,int,float,str,unicode)):
+        elif isinstance(obj,(bool,int,float,str)):
             type = 'Value'
         elif obj.__class__.__name__ in ['ContactPoint','IKObjective','Trajectory','MultiPath']:
             return obj.__class__.__name__
@@ -797,7 +797,7 @@ def fromJson(jsonobj,type='auto'):
     if type == 'auto':
         if isinstance(jsonobj,(list,tuple)):
             return jsonobj
-        elif isinstance(jsonobj,(bool,int,float,str,unicode)):
+        elif isinstance(jsonobj,(bool,int,float,str)):
             return jsonobj
         elif isinstance(jsonobj,dict):
             if 'type' in jsonobj:

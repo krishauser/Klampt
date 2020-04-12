@@ -23,7 +23,7 @@ Warning:
 Example usage can be seen in Klampt-examples/Python/demos/resourcetest.py.
 """
 
-import loader
+from . import loader
 from ..model import trajectory
 from ..model import multipath
 from ..model import types
@@ -99,11 +99,11 @@ def _get_world(world):
 
 def knownExtensions():
     """Returns all known resource file extensions"""
-    return loader.extensionToType.keys()
+    return list(loader.extensionToType.keys())
 
 def knownTypes():
     """Returns all known resource types"""
-    return loader.typeToExtension.keys()+['WorldModel','MultiPath','Point','Rotation','Matrix3','ContactPoint']
+    return list(loader.typeToExtension.keys())+['WorldModel','MultiPath','Point','Rotation','Matrix3','ContactPoint']
 
 def visualEditTypes():
     """Returns types that can be visually edited"""
@@ -161,10 +161,10 @@ def get(name,type='auto',directory=None,default=None,doedit='auto',description=N
             raise RuntimeError("Can't get() an anonymous resource without launching editor")
         success,newvalue = edit(name,value=default,type=type,description=description,editor=editor,world=world,referenceObject=referenceObject,frame=frame)
         if not success:
-            print "Cancel pressed, returning None"
+            print("Cancel pressed, returning None")
             return None
         else:
-            print "Ok pressed, returning anonymous resource"
+            print("Ok pressed, returning anonymous resource")
             return newvalue
     if directory==None:
         directory = getDirectory()
@@ -177,10 +177,10 @@ def get(name,type='auto',directory=None,default=None,doedit='auto',description=N
             value = loader.load(type,fn)
         except IOError:
             raise
-        except Exception,e:
+        except Exception as e:
             import traceback
-            print "Unable to read object from file "+fn
-            print "Traceback: "
+            print("Unable to read object from file "+fn)
+            print("Traceback: ")
             traceback.print_exc()
             raise IOError()
         if value==None:
@@ -188,29 +188,29 @@ def get(name,type='auto',directory=None,default=None,doedit='auto',description=N
         if doedit==True:
             success,newvalue = edit(name,value=value,type=type,description=description,editor=editor,world=world,referenceObject=referenceObject,frame=frame)
             if success:
-                print "Ok pressed, saving resource to",name
+                print("Ok pressed, saving resource to",name)
                 value = newvalue
                 set(name,value,type=type,directory=directory)
             else:
-                print "Cancel pressed, not saving resource to disk"
+                print("Cancel pressed, not saving resource to disk")
             return value
         return value
     except IOError as e:
         if doedit!=False:
-            print "Resource",fn,"does not exist, launching editor..."
+            print("Resource",fn,"does not exist, launching editor...")
             success,newvalue = edit(name,value=default,type=type,description=description,editor=editor,world=world,referenceObject=referenceObject,frame=frame)
             if success:
-                print "Ok pressed, saving resource to",name
+                print("Ok pressed, saving resource to",name)
                 value = newvalue
                 set(name,value=value,type=type,directory=directory)
             else:
-                print "Cancel pressed, not saving resource to disk"
+                print("Cancel pressed, not saving resource to disk")
             return value
         elif default is not None:
             return default
         else:
-            print "IO error"
-            print e
+            print("IO error")
+            print(e)
             raise RuntimeError("Resource "+name+" does not exist")
     return
 
@@ -268,7 +268,7 @@ class FileGetter:
             #print patternlist
             patterns = ";;".join(patternlist)
         self.result = QFileDialog.getOpenFileName(None, self.title, self.directory, patterns)
-        print "Result from open dialog",self.result
+        print("Result from open dialog",self.result)
         if isinstance(self.result,tuple):
             self.result = self.result[0]
     def getSave(self):
@@ -285,7 +285,7 @@ class FileGetter:
             #print "Pattern list:",patternlist
             patterns = ";;".join(patternlist)
         self.result = QFileDialog.getSaveFileName(None, self.title, self.directory, patterns)
-        print "Result from save dialog",self.result
+        print("Result from save dialog",self.result)
         if isinstance(self.result,tuple):
             self.result = self.result[0]
 
@@ -361,7 +361,7 @@ def save(value,type='auto',directory=None):
     for type in typelist:
         extensions=[v for v in loader.typeToExtensions[type]]
         extensions.append('.json')
-        print "Available extensions for objects of type",type,":",extensions
+        print("Available extensions for objects of type",type,":",extensions)
         fg.filetypes.append((type,extensions))
 
     def make_getfilename(glbackend):
@@ -497,42 +497,42 @@ def thumbnail(value,size,type='auto',world=None,frame=None):
     return plugin.image
 
 def console_edit(name,value,type,description=None,world=None,frame=None):
-    print "*********************************************************"
-    print 
-    print "Editing resource",name,"of type",type
-    print
+    print("*********************************************************")
+    print() 
+    print("Editing resource",name,"of type",type)
+    print()
     if description!=None:
-        print description
-        print
+        print(description)
+        print()
     if frame!=None:
         if hasattr(frame,'getName'):
-            print "Reference frame:",frame.getName()
+            print("Reference frame:",frame.getName())
         else:
-            print "Reference frame:",frame
-        print
-    print "*********************************************************"
-    print "Current value:",value
-    print "Do you wish to change it? (y/n/q) >",
+            print("Reference frame:",frame)
+        print()
+    print("*********************************************************")
+    print("Current value:",value)
+    print("Do you wish to change it? (y/n/q) >", end=' ')
     choice = ''
     while choice not in ['y','n','q']:
-        choice = raw_input()[0].lower()
+        choice = input()[0].lower()
         if choice not in ['y','n','q']:
-            print "Please enter y/n/q indicating yes/no/quit."
-            print ">",
+            print("Please enter y/n/q indicating yes/no/quit.")
+            print(">", end=' ')
     if choice=='y':
-        print "Enter the new desired value below.  You may use native text,"
-        print "JSON strings, or file(fn) to indicate a file name."
-        print "New value >",
+        print("Enter the new desired value below.  You may use native text,")
+        print("JSON strings, or file(fn) to indicate a file name.")
+        print("New value >", end=' ')
         import json
-        data = raw_input()
+        data = input()
         if data.startswith('{') or data.startswith('['):
             jsonobj = json.loads(data)
             try:
                 obj = loader.fromJson(jsonobj,type)
                 return True,obj
             except Exception:
-                print "Error loading from JSON, press enter to continue..."
-                raw_input()
+                print("Error loading from JSON, press enter to continue...")
+                input()
                 return False,value
         elif data.startswith('file('):
             try:
@@ -541,20 +541,20 @@ def console_edit(name,value,type,description=None,world=None,frame=None):
                     return False,value
                 return True,obj
             except Exception:
-                print "Error loading from file, press enter to continue..."
-                raw_input()
+                print("Error loading from file, press enter to continue...")
+                input()
                 return False,value
         else:
             try:
                 obj = loader.read(type,data)
                 return True,obj
             except Exception:
-                print "Error loading from text, press enter to continue..."
-                raw_input()
+                print("Error loading from text, press enter to continue...")
+                input()
                 return False,value
     elif choice=='n':
-        print "Using current value."
-        print "*********************************************************"
+        print("Using current value.")
+        print("*********************************************************")
         return False,value
     elif choice=='q':
         return False,None
@@ -608,7 +608,7 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,refe
         if isinstance(type,(list,tuple)):
             type = type[0]
     if not vis.glinit._PyQtAvailable and editor=='visual':
-        print "PyQt is not available, defaulting to console editor"
+        print("PyQt is not available, defaulting to console editor")
         editor = 'console'
             
     world = _get_world(world)
@@ -675,10 +675,10 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,refe
                 r = referenceObject.robot()
                 descendant = [False]*r.numLinks()
                 descendant[referenceObject.index] = True
-                for i in xrange(r.numLinks()):
+                for i in range(r.numLinks()):
                     p = r.link(i).getParent()
                     if p >= 0 and descendant[p]: descendant[i]=True
-                for i in xrange(r.numLinks()):
+                for i in range(r.numLinks()):
                     if descendant[i]:
                         editor.attach(r.link(i))
                 editor.attach(referenceObject)

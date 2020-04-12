@@ -104,7 +104,7 @@ def make(type,object=None):
         if isinstance(object,RobotModel):
             return object.getConfig()
         else:
-            import config
+            from . import config
             return config.getConfig(object)
     elif type == 'Configs':
         return [make('Config',object)]

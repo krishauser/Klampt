@@ -7,6 +7,7 @@ if(NOT KLAMPT_ROOT)
 endif( )
 
 find_program(PYTHON "python")
+find_program(PYTHON2 "python2")
 find_program(PYTHON3 "python3")
 
 SET(TEMPOUTPUT CMakeFiles)
@@ -25,7 +26,7 @@ IF(PYTHON)
   add_custom_command(
     OUTPUT ${OUTPUT}/python_timestamp
     COMMAND rm -rf build/
-    COMMAND ${PYTHON} setup.py build_ext
+    COMMAND ${PYTHON3} setup.py build_ext
     COMMAND ${CMAKE_COMMAND} -E touch ${TEMPOUTPUT}/python_timestamp
     DEPENDS ${DEPS}
   )
@@ -37,7 +38,7 @@ IF(PYTHON)
   )
   add_custom_command(
     OUTPUT ${OUTPUT}/python_install_timestamp
-    COMMAND ${PYTHON} setup.py install
+    COMMAND ${PYTHON3} setup.py install
     COMMAND ${CMAKE_COMMAND} -E touch ${TEMPOUTPUT}/python_install_timestamp
     DEPENDS ${DEPS}
   )
@@ -46,23 +47,23 @@ IF(PYTHON)
   add_custom_target(python-install DEPENDS ${OUTPUT}/python_install_timestamp python)
 
   add_custom_command(
-    OUTPUT python3_version
-    COMMAND mkdir python3_version
-    COMMAND cp -r klampt/data python3_version/klampt/
-    COMMAND 2to3 --output-dir=python3_version/klampt -W -n klampt
+    OUTPUT python2_version
+    COMMAND mkdir python2_version
+    COMMAND cp -r klampt/data python2_version/klampt/
+    COMMAND 2to3 --output-dir=python2_version/klampt -W -n klampt
   )
   add_custom_command(
-    OUTPUT ${OUTPUT}/python3_timestamp
-    COMMAND ${PYTHON3} setup.py build_ext
-    COMMAND ${CMAKE_COMMAND} -E touch ${TEMPOUTPUT}/python3_timestamp
-    DEPENDS ${DEPS} python3_version
+    OUTPUT ${OUTPUT}/python2_timestamp
+    COMMAND ${PYTHON2} setup.py build_ext
+    COMMAND ${CMAKE_COMMAND} -E touch ${TEMPOUTPUT}/python2_timestamp
+    DEPENDS ${DEPS} python2_version
   )
   add_custom_command(
-    OUTPUT ${OUTPUT}/python3_install_timestamp
-    COMMAND ${PYTHON3} setup.py install
-    COMMAND ${CMAKE_COMMAND} -E touch ${TEMPOUTPUT}/python3_install_timestamp
+    OUTPUT ${OUTPUT}/python2_install_timestamp
+    COMMAND ${PYTHON2} setup.py install
+    COMMAND ${CMAKE_COMMAND} -E touch ${TEMPOUTPUT}/python2_install_timestamp
     DEPENDS ${DEPS}
   )
-  add_custom_target(python3 ALL DEPENDS ${OUTPUT}/python3_timestamp)
-  add_custom_target(python3-install ALL DEPENDS ${OUTPUT}/python3_install_timestamp python3)
+  add_custom_target(python2 ALL DEPENDS ${OUTPUT}/python2_timestamp)
+  add_custom_target(python2-install ALL DEPENDS ${OUTPUT}/python2_install_timestamp python2)
 ENDIF(PYTHON)

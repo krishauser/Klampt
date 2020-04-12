@@ -1,7 +1,7 @@
-from cspace import CSpace
+from .cspace import CSpace
 from .. import robotsim
 from ..model import collide
-from cspaceutils import EmbeddedCSpace
+from .cspaceutils import EmbeddedCSpace
 import math
 import random
 
@@ -22,7 +22,7 @@ class RobotCSpace(CSpace):
         """
         CSpace.__init__(self)
         self.robot = robot
-        self.setBounds(zip(*robot.getJointLimits()))
+        self.setBounds(list(zip(*robot.getJointLimits())))
         self.collider = collider
         self.addFeasibilityTest((lambda x: self.inJointLimits(x)),"joint limits")
 
@@ -35,7 +35,7 @@ class RobotCSpace(CSpace):
             def calcbb(x):
                 bb[0] = bb0[0]
                 bb[1] = bb0[1]
-                for i in xrange(self.robot.numLinks()):
+                for i in range(self.robot.numLinks()):
                     g = self.robot.link(i).geometry()
                     if not g.empty():
                         bbi = g.getBB()
@@ -98,10 +98,10 @@ class RobotCSpace(CSpace):
         collision with the environment."""
         if not self.collider: return False
         if x is not None: self.robot.setConfig(x)
-        for o in xrange(self.collider.world.numRigidObjects()):
+        for o in range(self.collider.world.numRigidObjects()):
             if any(self.collider.robotObjectCollisions(self.robot.index,o)):
                 return True;
-        for o in xrange(self.collider.world.numTerrains()):
+        for o in range(self.collider.world.numTerrains()):
             if any(self.collider.robotTerrainCollisions(self.robot.index,o)):
                 return True;
         return False
@@ -255,7 +255,7 @@ class ClosedLoopRobotCSpace(RobotCSpace):
         nsegs = int(math.ceil(d/epsilon))
         if nsegs <= 1: return [a,b]
         res = [a]
-        for i in xrange(nsegs-1):
+        for i in range(nsegs-1):
             u = float(i+1)/float(nsegs)
             res.append(self.interpolate(a,b,u))
         res.append(b)
@@ -285,9 +285,9 @@ class ClosedLoopRobotCSpace(RobotCSpace):
         controller.setMilestone(dpath[0])
         for a,b in zip(dpath[:-1],dpath[1:]):
             dt = 0.0
-            for i in xrange(len(a)):
+            for i in range(len(a)):
                 if vmax[i] == 0:
-                    if a[i] != b[i]: print "ClosedLoopRobotCSpace.sendPathToController(): Warning, path moves on DOF %d with maximum velocity 0"%(i,)
+                    if a[i] != b[i]: print("ClosedLoopRobotCSpace.sendPathToController(): Warning, path moves on DOF %d with maximum velocity 0"%(i,))
                 else:
                     dt = max(dt,abs(a[i]-b[i])/vmax[i])
             #this does a piecewise lienar interpolation

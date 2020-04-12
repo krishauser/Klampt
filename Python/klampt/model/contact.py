@@ -2,7 +2,7 @@
 calculation subroutines, and performing equilibrium testing.
 """
 
-import ik
+from . import ik
 from ..math import vectorops,so3,se3
 from .. import robotsim
 from ..robotsim import RobotModel,RobotModelLink,RigidObjectModel,TerrainModel
@@ -16,7 +16,7 @@ def idToObject(world,ID):
     if ID < world.numRigidObjects():
         return world.rigidObject(ID)
     ID -= world.numRigidObjects()
-    for i in xrange(world.numRobots()):
+    for i in range(world.numRobots()):
         if ID==0:
             return world.robot(i)
         ID -= 1
@@ -174,7 +174,7 @@ def equilibriumTorques(robot,holdList,fext=(0,0,-9.8),internalTorques=None,norm=
         res = robotsim.equilibriumTorques(robot,_flatten(holdList),links,fext,internalTorques,norm)
     if res is None: return res
     f = res[1]
-    return (res[0],[f[i*3:i*3+3] for i in xrange(len(f)/3)])
+    return (res[0],[f[i*3:i*3+3] for i in range(len(f)/3)])
 
 def contactMap(contacts,fixed=None):
     """Given an unordered list of ContactPoints, computes a canonical dict
@@ -283,7 +283,7 @@ def worldContactMap(world,padding,kFriction=1,collider=None):
         fpadding = lambda obj:padding
     if not callable(kFriction):
         ffriction = lambda obj1,obj2:kFriction
-    from collide import WorldCollider
+    from .collide import WorldCollider
     if collider is None:
         collider = WorldCollider(world)
     cmap = dict()
@@ -306,8 +306,8 @@ def simContactMap(sim):
     """
     cmap = dict()
     w = sim.world
-    for a in xrange(w.numIDs()):
-        for b in xrange(a):
+    for a in range(w.numIDs()):
+        for b in range(a):
             c = sim.getContacts(a,b)
             if len(c) > 0:
                 for ci in c:
@@ -328,7 +328,7 @@ def contactMapIKObjectives(contactmap):
     objectives = contactMapIKObjectives(contactMap(contacts,lambda x:x==None or isinstance(x,TerrainModel)))
     """
     objectives = []
-    for ((o1,o2),clist) in contactmap.iteritems():
+    for ((o1,o2),clist) in contactmap.items():
         assert o1 != None
         
         x1loc = [o1.getLocalPosition(c.x) for c in clist]
@@ -348,7 +348,7 @@ def contactMapHolds(contactmap):
     objectives = contactMapHolds(contactMap(contacts,lambda x:x==None or isinstance(x,TerrainModel)))
     """
     holds = []
-    for ((o1,o2),clist) in contactmap.iteritems():
+    for ((o1,o2),clist) in contactmap.items():
         assert o1 != None
         
         if not isinstance(o1,RobotModelLink):

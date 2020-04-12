@@ -30,7 +30,7 @@ def circle(center,radius,res=0.01,filled=True):
         glVertex2f(*center)
     else:
         glBegin(GL_LINE_STRIP)
-    for i in xrange(numdivs+1):
+    for i in range(numdivs+1):
         u = float(i)/float(numdivs)*math.pi*2
         glVertex2f(center[0]+radius*math.cos(u),center[1]+radius*math.sin(u))
     glEnd()
@@ -126,7 +126,7 @@ def xform_widget(T,length,width,lighting=True,fancy=False):
     """Draws an axis-aligned transform widget for the se3 transform T.
     Length / width govern the length / width of the axes.  If fancy=True,
     draws the axes with real volume rather than lines"""
-    mat = zip(*se3.homogeneous(T))
+    mat = list(zip(*se3.homogeneous(T)))
     mat = sum([list(coli) for coli in mat],[])
 
     glPushMatrix()

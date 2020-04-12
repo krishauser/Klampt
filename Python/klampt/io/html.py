@@ -14,12 +14,12 @@ def make_fixed_precision(obj,digits):
     if isinstance(obj,float):
         return round(obj,digits)
     elif isinstance(obj,list):
-        for i in xrange(len(obj)):
+        for i in range(len(obj)):
             obj[i] = make_fixed_precision(obj[i],digits)
     elif isinstance(obj,tuple):
         return [make_fixed_precision(val,digits) for val in obj]
     elif isinstance(obj,dict):
-        for i,v in obj.iteritems():
+        for i,v in obj.items():
             obj[i] = make_fixed_precision(v,digits)
     return obj
 
@@ -107,7 +107,7 @@ class HTMLSharePath:
             dt -= self.dt
             self.last_t += self.dt
         if numadd > 1:
-            print "Uneven time spacing, duplicating frame",numadd,"times"
+            print("Uneven time spacing, duplicating frame",numadd,"times")
     def end(self):
         data = self.boilerplate_file.replace(_title_id,self.name)
         data = data.replace(_scene_id,self.scene)
@@ -115,7 +115,7 @@ class HTMLSharePath:
         data = data.replace(_rpc_id,'['+','.join(self.rpc)+']')
         data = data.replace(_compressed_id,'true')
         data = data.replace(_dt_id,str(self.dt))
-        print "Path with",len(self.rpc),"frames saved to",self.fn
+        print("Path with",len(self.rpc),"frames saved to",self.fn)
         f = open(self.fn,'w')
         f.write(data)
         f.close()

@@ -587,7 +587,7 @@ class Doxy2SWIG:
     def do_parameterlist(self, node):
         self.start_new_paragraph()
         text = 'unknown'
-        for key, val in node.attributes.items():
+        for key, val in list(node.attributes.items()):
             if key == 'kind':
                 if val == 'param':
                     text = 'Parameters'
@@ -723,7 +723,7 @@ class Doxy2SWIG:
         self.add_text('%feature("docstring") %s "\n%s' % (data, data))
 
         for n in node.childNodes:
-            if n not in first.values():
+            if n not in list(first.values()):
                 self.parse(n)
         self.add_text(['";', '\n'])
     
@@ -767,7 +767,7 @@ class Doxy2SWIG:
             if not os.path.exists(fname):
                 fname = os.path.join(self.my_dir,  fname)
             if not self.quiet:
-                print("parsing file: %s" % fname)
+                print(("parsing file: %s" % fname))
             p = Doxy2SWIG(fname,
                           with_function_signature = self.with_function_signature,
                           with_type_info = self.with_type_info,

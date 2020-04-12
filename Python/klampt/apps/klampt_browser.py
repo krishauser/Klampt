@@ -57,11 +57,11 @@ class MyMultiViewportProgram(GLMultiViewportProgram):
         #print "_updateTime",t
         def clearStartTime(v):
             v.animationStartTime = 0
-            for n,subapp in v.subAppearances.iteritems():
+            for n,subapp in v.subAppearances.items():
                 clearStartTime(subapp)
-        for (k,item) in self.items.iteritems():
+        for (k,item) in self.items.items():
             item.plugin.animationTime(self.animationTime)
-            for (k,v) in item.plugin.items.iteritems():
+            for (k,v) in item.plugin.items.items():
                 #do animation updates
                 clearStartTime(v)
                 v.updateAnimation(t)
@@ -96,10 +96,10 @@ class ResourceBrowser(QtWidgets.QMainWindow):
         self.model.setRootPath(QtCore.QDir.rootPath())
         # Add filters
         filters = []
-        print "ALLOWABLE FILE EXTENSIONS"
-        for k,v in loader.extensionToTypes.iteritems():
+        print("ALLOWABLE FILE EXTENSIONS")
+        for k,v in loader.extensionToTypes.items():
             filters.append("*"+k)
-            print " ",k
+            print(" ",k)
         filters.append("*.xml")
         filters.append("*.json")
         filters.append("*.txt")
@@ -284,7 +284,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
 
     def onAutoFitCamera(self):
         if self.autoFitCameraButton.isChecked():
-            for (k,item) in self.active.iteritems():
+            for (k,item) in self.active.items():
                 vis.autoFitViewport(item.program.view,[self.world,item.obj])
 
     def onLockCamerasToggled(self,on):
@@ -302,7 +302,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
     def timeDriverChanged(self,value):
         u = value * 0.001
         animTrajectoryTime = u*self.glviewportManager.animationDuration
-        for (k,item) in self.active.iteritems():
+        for (k,item) in self.active.items():
             obj = item.obj
             plugin = item.plugin
             if item.animationBuddy is not None:
@@ -318,7 +318,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
         self.animating = value
         self.glviewportManager.refresh()
         if value:
-            for (k,item) in self.active.iteritems():
+            for (k,item) in self.active.items():
                 obj = item.obj
                 plugin = item.plugin
                 if item.animationBuddy is not None:
@@ -334,7 +334,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
     def stopPlay(self):
         self.playButton.setChecked(False)
         #revert to no animations
-        for (k,item) in self.active.iteritems():
+        for (k,item) in self.active.items():
             obj = item.obj
             plugin = item.plugin
             if isinstance(obj,(Trajectory,MultiPath)):
@@ -348,11 +348,11 @@ class ResourceBrowser(QtWidgets.QMainWindow):
             return
         fn = sorted(self.active.keys())[0]
         def doedit():
-            print "klampt_browser: Launching resource.edit",fn,"..."
+            print("klampt_browser: Launching resource.edit",fn,"...")
             try:
                 (save,obj) = resource.edit(name=fn,value=self.active[fn].obj,world=self.world)
             except Exception as e:
-                print "klampt_browser: Exception raised during resource.edit:",e
+                print("klampt_browser: Exception raised during resource.edit:",e)
                 QtWidgets.QMessageBox.warning(self.splitter,"Editing not available","Unable to edit item of type "+self.active[fn].obj.__class__.__name__)
                 return
             if save and obj is not None:
@@ -367,7 +367,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
     def onSaveClicked(self):
         for fn in self.modified:
             if not save(self.active[fn].obj,fn):
-                print "klampt_browser: Error saving file",fn
+                print("klampt_browser: Error saving file",fn)
         self.modified = set()
         self.saveButton.setEnabled(False)
     
@@ -380,7 +380,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
         try:
             (save,obj) = resource.edit("untitled",types.make(type,robot),type=type,world=self.world)
         except Exception as e:
-            print "klampt_browser: Exception raised during resource.edit():",e
+            print("klampt_browser: Exception raised during resource.edit():",e)
             QtWidgets.QMessageBox.warning(self.splitter,"Creation not available","Unable to create item of type "+type+", did you remember to add items to the reference world?")
             return
         if obj is not None and save:
@@ -405,13 +405,13 @@ class ResourceBrowser(QtWidgets.QMainWindow):
                 self.tempWorld.remove(s)
                 todel.append(name)
             elif isinstance(s,WorldModel):
-                for i in xrange(s.numRobots()):
+                for i in range(s.numRobots()):
                     self.world.add(s.robot(i).getName(),s.robot(i))
-                for i in xrange(s.numRigidObjects()):
+                for i in range(s.numRigidObjects()):
                     self.world.add(s.rigidObject(i).getName(),s.rigidObject(i))
-                for i in xrange(s.numTerrains()):
+                for i in range(s.numTerrains()):
                     self.world.add(s.terrain(i).getName(),s.terrain(i))
-                for k,item in self.active.iteritems():
+                for k,item in self.active.items():
                     item.plugin.add("world",self.world)
                 todel.append(name)
             elif isinstance(s,(TriangleMesh,PointCloud,GeometricPrimitive)):
@@ -438,13 +438,13 @@ class ResourceBrowser(QtWidgets.QMainWindow):
     def add(self,fn,openDir=True,warn=True):
         #assert fn not in self.active
         if fn in self.active:
-            print "add(): Warning, file",fn,"is already active"
+            print("add(): Warning, file",fn,"is already active")
             return
         for i,(cfn,citem) in enumerate(self.visCache):
             if cfn == fn:
-                print 
-                print "klampt_browser: PULLED",fn,"FROM CACHE"
-                print 
+                print() 
+                print("klampt_browser: PULLED",fn,"FROM CACHE")
+                print() 
                 self.active[fn] = citem
                 return True
         if len(self.active) >= MAX_VIS_ITEMS:
@@ -478,15 +478,15 @@ class ResourceBrowser(QtWidgets.QMainWindow):
                     QtWidgets.QMessageBox.warning(self.splitter,"Invalid item","Could not load "+fn+" as a Klamp't world element")
                 return False
             obj = None
-            for i in xrange(self.tempWorld.numRobots()):
+            for i in range(self.tempWorld.numRobots()):
                 if self.tempWorld.robot(i).getID() == worldid:
                     obj = self.tempWorld.robot(i)
                     break
-            for i in xrange(self.tempWorld.numRigidObjects()):
+            for i in range(self.tempWorld.numRigidObjects()):
                 if self.tempWorld.rigidObject(i).getID() == worldid:
                     obj = self.tempWorld.rigidObject(i)
                     break
-            for i in xrange(self.tempWorld.numTerrains()):
+            for i in range(self.tempWorld.numTerrains()):
                 if self.tempWorld.terrain(i).getID() == worldid:
                     obj = self.tempWorld.terrain(i)
                     break
@@ -509,7 +509,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
                         obj = loader.load('MultiPath',fn)
                     except Exception as e:
                         if warn:
-                            print "klampt_browser: Trying MultiPath load, got exception",e
+                            print("klampt_browser: Trying MultiPath load, got exception",e)
                             import traceback
                             traceback.print_exc()
                             QtWidgets.QMessageBox.warning(self.splitter,"Invalid WorldModel","Could not load "+fn+" as a world XML file")
@@ -544,7 +544,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
 
     def loadedItem(self,fn,obj):
         if fn in self.active:
-            print "klampt_browser: Re-loaded item",fn,"so I'm first removing it"
+            print("klampt_browser: Re-loaded item",fn,"so I'm first removing it")
             self.remove(fn)
         assert fn not in self.active
         item = ResourceItem(obj)
@@ -566,7 +566,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
                 item.plugin.add("anim_xform",se3.identity())
                 item.animationBuddy = "anim_xform"
             else:
-                print "klampt_browser: Can't interpret trajectory of length",d
+                print("klampt_browser: Can't interpret trajectory of length",d)
         elif isinstance(obj,MultiPath):
             if self.world.numRobots() > 0:
                 robotpath = ('world',self.world.robot(0).getName())
@@ -604,21 +604,21 @@ class ResourceBrowser(QtWidgets.QMainWindow):
         del self.active[fn]
         if s.program is not None:
             copyCamera(s.program.view.camera,self.emptyVisProgram.view.camera)
-        print 
-        print "klampt_browser: ADDING",fn,"TO CACHE"
-        print 
+        print() 
+        print("klampt_browser: ADDING",fn,"TO CACHE")
+        print() 
         self.visCache.append((fn,s))
         if len(self.visCache) > MAX_VIS_CACHE:
             self.visCache.pop(0)
         cleartemp = isinstance(s.obj,(RobotModel,RigidObjectModel,TerrainModel))
         if cleartemp:
-            for (k,v) in self.active.iteritems():
+            for (k,v) in self.active.items():
                 if isinstance(v.obj,(RobotModel,RigidObjectModel,TerrainModel)):
                     cleartemp = False
                     break
         if cleartemp:
             if self.tempWorld.numRobots() + self.tempWorld.numRigidObjects() + self.tempWorld.numTerrains() > 10:
-                print "klampt_browser: Clearing temp world..."
+                print("klampt_browser: Clearing temp world...")
                 self.tempWorld = WorldModel()
                 self.visCache = [(fn,s) for (fn,s) in self.visCache if not isinstance(s.obj,(RobotModel,RigidObjectModel,TerrainModel))]
     
@@ -648,15 +648,15 @@ class ResourceBrowser(QtWidgets.QMainWindow):
             if self.glviewportManager.broadcast: #locking cameras
                 self.lockCameras()
         self.glviewportManager.animationDuration = 0
-        for (k,item) in self.active.iteritems():
+        for (k,item) in self.active.items():
             obj = item.obj
             if isinstance(obj,(Trajectory,MultiPath)):
                 self.glviewportManager.animationDuration = max(self.glviewportManager.animationDuration,obj.duration())
-                print "klampt_browser: Setting animation duration to",self.glviewportManager.animationDuration
+                print("klampt_browser: Setting animation duration to",self.glviewportManager.animationDuration)
         self.glviewportManager.refresh()
 
 def main():
-    print """
+    print("""
 ===============================================================================
 A program to quickly browse Klamp't objects. 
 
@@ -679,7 +679,7 @@ or
 
 where the items are world, robot, terrain, object, or geometry files.
 ===============================================================================
-"""%(sys.argv[0],sys.argv[0],sys.argv[0],sys.argv[0])
+"""%(sys.argv[0],sys.argv[0],sys.argv[0],sys.argv[0]))
     #must be explicitly deleted for some reason in PyQt5...
     g_browser = None
     def makefunc(gl_backend):
@@ -693,10 +693,10 @@ where the items are world, robot, terrain, object, or geometry files.
         for fn in sys.argv[1:]:
             res = browser.world.readFile(fn)
             if not res:
-                print "Unable to load model",fn
-                print "Quitting..."
+                print("Unable to load model",fn)
+                print("Quitting...")
                 sys.exit(1)
-            print "Added",fn,"to world"
+            print("Added",fn,"to world")
         if len(sys.argv) > 1:
             browser.emptyVisPlugin.add("world",browser.world)
         return browser
@@ -714,10 +714,10 @@ where the items are world, robot, terrain, object, or geometry files.
     for fn in sys.argv[1:]:
         res = browser.world.readFile(fn)
         if not res:
-            print "Unable to load model",fn
-            print "Quitting..."
+            print("Unable to load model",fn)
+            print("Quitting...")
             sys.exit(1)
-        print "Added",fn,"to world"
+        print("Added",fn,"to world")
     if len(sys.argv) > 1:
         browser.emptyVisPlugin.add("world",browser.world)
     dw = QtWidgets.QDesktopWidget()

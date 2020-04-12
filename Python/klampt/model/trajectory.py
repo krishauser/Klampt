@@ -40,7 +40,7 @@ class Trajectory:
         if milestones is None:
             milestones = []
         if times is None:
-            times = range(len(milestones))
+            times = list(range(len(milestones)))
         self.times = times
         self.milestones = milestones
 
@@ -220,8 +220,8 @@ class Trajectory:
                 #keyframe exactly equal; skip the first milestone
                 #check equality with last milestone
                 if jumpPolicy=='strict' and suffix.milestones[0] != self.milestones[-1]:
-                    print "Suffix start:",suffix.milestones[0]
-                    print "Self end:",self.milestones[-1]
+                    print("Suffix start:",suffix.milestones[0])
+                    print("Self end:",self.milestones[-1])
                     raise ValueError("Concatenation would cause a jump in configuration")
                 if jumpPolicy=='strict' or (jumpPolicy=='blend' and suffix.milestones[0] != self.milestones[-1]):
                     #discard last milestone of self
@@ -421,7 +421,7 @@ class Trajectory:
             res.times.append(self.times[j])
             res.milestones.append(self.milestones[j])
         #sanity check
-        for i in xrange(len(res.times)-1):
+        for i in range(len(res.times)-1):
             assert res.times[i] < res.times[i+1]
         for i,idx in enumerate(resindices):
             assert newtimes[i] == res.times[idx]
@@ -915,7 +915,7 @@ def path_to_trajectory(path,velocities='auto',timing='limited',smoothing='spline
                     if not amax >= 0:
                         raise ValueError("Invalid value for amax, must be positive")
                 _durations = [0.0]*(len(milestones)-1)
-                for i in xrange(len(milestones)-1):
+                for i in range(len(milestones)-1):
                     q,n = milestones[i],milestones[i+1]
                     if i == 0: p = q
                     else: p = milestones[i-1]
@@ -965,17 +965,17 @@ def path_to_trajectory(path,velocities='auto',timing='limited',smoothing='spline
                 if hasattr(path,'robot'):
                     durationfuncs['robot'] = path.robot.distance
                     durationfuncs['sqrt-robot'] = lambda a,b:math.sqrt(path.robot.distance(a,b))
-                assert timing in durationfuncs,"Invalid duration function specified, valid values are: "+", ".join(durationfuncs.keys())
+                assert timing in durationfuncs,"Invalid duration function specified, valid values are: "+", ".join(list(durationfuncs.keys()))
                 timing = durationfuncs[timing]
                 _durations = [timing(a,b) for a,b in zip(milestones[:-1],milestones[1:])]
     assert _durations is not None,"Hmm... didn't assign durations properly?"
     if verbose >= 1:
-        print "path_to_trajectory(): Segment durations are",_durations
+        print("path_to_trajectory(): Segment durations are",_durations)
     #by this time we have all milestones and durations
     if stoptol is not None:
         splits = [0]
         #split the trajectory then reassemble it
-        for i in xrange(1,len(milestones)-1):
+        for i in range(1,len(milestones)-1):
             prev = milestones[i-1]
             q = milestones[i]
             next = milestones[i+1]
@@ -985,9 +985,9 @@ def path_to_trajectory(path,velocities='auto',timing='limited',smoothing='spline
         splits.append(len(milestones)-1)
         if len(splits) > 2:
             if verbose >= 1:
-                print "path_to_trajectory(): Splitting path into",len(splits)-1,"segments, starting and stopping between"
+                print("path_to_trajectory(): Splitting path into",len(splits)-1,"segments, starting and stopping between")
             res = None
-            for i in xrange(len(splits)-1):
+            for i in range(len(splits)-1):
                 a,b = splits[i],splits[i+1]
                 segmentspeed = (1.0 if isinstance(speed,(int,float)) else speed)
                 traj = path_to_trajectory(milestones[a:b+1],velocities,timing,smoothing,
@@ -1020,7 +1020,7 @@ def path_to_trajectory(path,velocities='auto',timing='limited',smoothing='spline
         normalizedPath = hpath.configTrajectory()
 
     if startvel != 0.0 or endvel != 0.0:
-        print "path_to_trajectory(): WARNING: respecting nonzero start/end velocity not implemented yet"
+        print("path_to_trajectory(): WARNING: respecting nonzero start/end velocity not implemented yet")
 
     #print "path_to_trajectory(): Total distance",totaldistance
     if totaldistance == 0.0:
@@ -1082,11 +1082,11 @@ def path_to_trajectory(path,velocities='auto',timing='limited',smoothing='spline
         if finalduration < totaldistance*math.sqrt(evmax**2 + eamax):
             finalduration = totaldistance*math.sqrt(evmax**2 + eamax)
         if verbose >= 1:
-            print "path_to_trajectory(): Setting first guess of path duration to",finalduration
+            print("path_to_trajectory(): Setting first guess of path duration to",finalduration)
     res = normalizedPath.constructor()()
     if finalduration == 0:
         if verbose >= 1:
-            print "path_to_trajectory(): there is no movement in the path, returning a 0-duration path"
+            print("path_to_trajectory(): there is no movement in the path, returning a 0-duration path")
         res.times = [0.0,0.0]
         res.milestones = [normalizedPath.milestones[0],normalizedPath.milestones[0]]
         return res
@@ -1098,7 +1098,7 @@ def path_to_trajectory(path,velocities='auto',timing='limited',smoothing='spline
     res.milestones[0] = normalizedPath.milestones[0][:]
     dt = finalduration/float(N)
     #print velocities,"easing:"
-    for i in xrange(1,N+1):
+    for i in range(1,N+1):
         res.times[i] = float(i)/float(N)*finalduration
         u = easing(float(i)/float(N))
         #print float(i)/float(N),"->",u
@@ -1108,7 +1108,7 @@ def path_to_trajectory(path,velocities='auto',timing='limited',smoothing='spline
         vscaling = 0.0
         aLimitingTime = 0
         vLimitingTime = 0
-        for i in xrange(N):
+        for i in range(N):
             q,n = res.milestones[i],res.milestones[i+1]
             if i == 0: p = q
             else: p = res.milestones[i-1]
@@ -1150,22 +1150,22 @@ def path_to_trajectory(path,velocities='auto',timing='limited',smoothing='spline
                         scaling = math.sqrt(abs(x)/lim)
                         aLimitingTime = i
         if verbose >= 1:
-            print "path_to_trajectory(): Base traj exceeded velocity limit by factor of",vscaling,"at time",res.times[vLimitingTime]*max(scaling,vscaling)
-            print "path_to_trajectory(): Base traj exceeded acceleration limit by factor of",scaling,"at time",res.times[aLimitingTime]*max(scaling,vscaling)
+            print("path_to_trajectory(): Base traj exceeded velocity limit by factor of",vscaling,"at time",res.times[vLimitingTime]*max(scaling,vscaling))
+            print("path_to_trajectory(): Base traj exceeded acceleration limit by factor of",scaling,"at time",res.times[aLimitingTime]*max(scaling,vscaling))
         if velocities == 'trapezoidal':
             #speed up until vscaling is hit
             if vscaling < scaling:
                 if verbose >= 1:
-                    print "path_to_trajectory(): Velocity maximum not hit"
+                    print("path_to_trajectory(): Velocity maximum not hit")
             else:
                 if verbose >= 1:
-                    print "path_to_trajectory(): TODO: fiddle with velocity maximum."
+                    print("path_to_trajectory(): TODO: fiddle with velocity maximum.")
                 scaling = max(vscaling,scaling)
                 res.times = [t*scaling for t in res.times]
         else:
             scaling = max(vscaling,scaling)
         if verbose >= 1:
-            print "path_to_trajectory(): Velocity / acceleration limiting yields a time expansion of",scaling
+            print("path_to_trajectory(): Velocity / acceleration limiting yields a time expansion of",scaling)
         res.times = vectorops.mul(res.times,scaling)
     if isinstance(speed,(int,float)) and speed != 1.0:
         res.times = vectorops.mul(res.times,1.0/speed)
@@ -1232,7 +1232,7 @@ def execute_path(path,controller,speed=1.0,smoothing=None,activeDofs=None):
             controller.addCubic(dt,path[i],zero)
     elif smoothing == 'spline':
         hpath = HermiteTrajectory()
-        hpath.makeSpline(Trajectory(range(len(path)),path))
+        hpath.makeSpline(Trajectory(list(range(len(path))),path))
         qpath = hpath.configTrajectory()
         dt = controller.getRate()
         traj = qpath.discretize(dt)

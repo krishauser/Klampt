@@ -114,7 +114,7 @@ def from_JointState(ros_js,robot,joint_link_indices=None):
     """
     if joint_link_indices is None:
         joint_link_indices = dict()
-        for i in xrange(robot.numLinks()):
+        for i in range(robot.numLinks()):
             joint_link_indices[robot.link(i).getName()] = i
     q = robot.getConfig() if len(ros_js.position) > 0 else None
     dq = robot.getVelocity() if len(ros_js.velocity) > 0 else None
@@ -211,7 +211,7 @@ def to_JointState(robot,q='current',dq='current',effort=None,indices='auto',link
         effort = linkeffort
 
     if indices == 'auto':
-        indices = range(robot.numLinks())
+        indices = list(range(robot.numLinks()))
     js = JointState()
     for i,link in enumerate(indices):
         if link_joint_names is not None:
@@ -260,7 +260,7 @@ def from_JointTrajectory(ros_traj,robot=None,joint_link_indices=None):
         q0 = robot.getConfig()
         if joint_link_indices is None:
             joint_link_indices = dict()
-            for i in xrange(robot.numLinks()):
+            for i in range(robot.numLinks()):
                 joint_link_indices[robot.link(i).getName()] = i
         indices = []
         if len(ros_traj.joint_names) > 0:
@@ -307,7 +307,7 @@ def to_JointTrajectory(klampt_traj,indices='auto',link_joint_names=None):
     else:
         #TODO: hermite trajectories?
         if indices == 'auto':
-            indices = range(klampt_traj.robot.numLinks())
+            indices = list(range(klampt_traj.robot.numLinks()))
         if link_joint_names is None:
             link_joint_names = [klampt_traj.robot.link(i).getName() for i in range(klampt_traj.robot.numLinks())]
         for i,link in enumerate(indices):
@@ -400,10 +400,10 @@ def to_Mesh(klampt_mesh):
             mesh.transform(*T)
         klampt_mesh = mesh
     ros_mesh = Mesh()
-    for i in xrange(len(klampt_mesh.vertices)//3):
+    for i in range(len(klampt_mesh.vertices)//3):
         k = i*3
         ros_mesh.vertices.append(Vector3(klampt_mesh.vertices[k],klampt_mesh.vertices[k+1],klampt_mesh.vertices[k+2]))
-    for i in xrange(len(klampt_mesh.indices)//3):
+    for i in range(len(klampt_mesh.indices)//3):
         k = i*3
         ros_mesh.triangles.append(MeshTriangle([klampt_mesh.indices[k],klampt_mesh.indices[k+1],klampt_mesh.indices[k+2]]))
     return ros_mesh
@@ -463,7 +463,7 @@ def to_PointCloud2(klampt_pc,frame='0',stamp='now'):
     fields = [PointField('x', 0, PointField.FLOAT32, 1),
               PointField('y', 4, PointField.FLOAT32, 1),
               PointField('z', 8, PointField.FLOAT32, 1)]
-    for i in xrange(len(klampt_pc.propertyNames)):
+    for i in range(len(klampt_pc.propertyNames)):
         fields.append(PointField(klampt_pc.propertyNames[i],12+i*4,PointField.FLOAT32,1))
     import numpy
     points = numpy.array(klampt_pc.vertices).reshape((klampt_pc.numPoints(),3))
@@ -560,7 +560,7 @@ def from_CameraInfo(ros_ci,klampt_obj):
         klampt_obj.w = w
         klampt_obj.h = h
         if fx != fy:
-            print "from_CameraInfo: Warning, can't handle non-square pixels in Viewport"
+            print("from_CameraInfo: Warning, can't handle non-square pixels in Viewport")
         klampt_obj.scale = fx
     elif hasattr(klampt_obj,'toViewport'):
         klampt_obj.x = x
@@ -568,7 +568,7 @@ def from_CameraInfo(ros_ci,klampt_obj):
         klampt_obj.w = w
         klampt_obj.h = h
         if fx != fy:
-            print "from_CameraInfo: Warning, can't handle non-square pixels in GLViewport"
+            print("from_CameraInfo: Warning, can't handle non-square pixels in GLViewport")
         klampt_obj.xfov = 2*math.atan(0.5*w/fx)
     else:
         raise ValueError("Invalid object type: "+klampt_obj.__class__.__name__)
@@ -937,7 +937,7 @@ def object_subscriber(topic,klampt_obj,convert_kwargs=None,**kwargs):
         def default_copy(vin,out):
             assert isinstance(out,list),"Can only copy into lists, not tuples"
             assert len(vin) == len(out)
-            for i in xrange(len(vin)):
+            for i in range(len(vin)):
                 out[i] = vin[i]
         copy_fn = default_copy
     elif type == 'RobotModel':
@@ -1000,11 +1000,11 @@ def broadcast_tf(broadcaster,klampt_obj,frameprefix="klampt",root="world",stamp=
         klampt_obj.updateModel()
     if world is not None:
         prefix = frameprefix
-        for i in xrange(world.numRigidObjects()):
+        for i in range(world.numRigidObjects()):
             T = world.rigidObject(i).getTransform()
             q = so3.quaternion(T[0])
             broadcaster.sendTransform(T[1],(q[1],q[2],q[3],q[0]),stamp,root,prefix+"/"+world.rigidObject(i).getName())
-        for i in xrange(world.numRobots()):
+        for i in range(world.numRobots()):
             robot = world.robot(i)
             rprefix = prefix+"/"+robot.getName()
             broadcast_tf(broadcaster,robot,rprefix,root)
@@ -1017,7 +1017,7 @@ def broadcast_tf(broadcaster,klampt_obj,frameprefix="klampt",root="world",stamp=
         robot.setConfig(klampt_obj.getSensedConfig())
     if robot is not None:
         rprefix = frameprefix
-        for j in xrange(robot.numLinks()):
+        for j in range(robot.numLinks()):
             p = robot.link(j).getParent()
             if p < 0:
                 T = robot.link(j).getTransform()
@@ -1071,18 +1071,18 @@ def listen_tf(listener,klampt_obj,frameprefix="klampt",root="world",onerror=None
             return (so3.from_quaternion((rot[3],rot[0],rot[1],rot[2])),trans)
         except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
             if onerror == 'print':
-                print "listen_tf: Error looking up frame",frame
+                print("listen_tf: Error looking up frame",frame)
             elif onerror == 'raise':
                 raise
         return None          
     if isinstance(klampt_obj,WorldModel):
         world = klampt_obj
         prefix = frameprefix
-        for i in xrange(world.numRigidObjects()):
+        for i in range(world.numRigidObjects()):
             T = do_lookup(prefix+"/"+world.rigidObject(i).getName(),root)
             if T:
                 world.rigidObject(i).setTransform(*T)
-        for i in xrange(world.numRobots()):
+        for i in range(world.numRobots()):
             robot = world.robot(i)
             rprefix = prefix+"/"+robot.getName()
             listen_tf(listener,robot,rprefix,root,onerror)
@@ -1090,7 +1090,7 @@ def listen_tf(listener,klampt_obj,frameprefix="klampt",root="world",onerror=None
     elif isinstance(klampt_obj,RobotModel):
         robot = klampt_obj
         rprefix = frameprefix
-        for j in xrange(robot.numLinks()):
+        for j in range(robot.numLinks()):
             p = robot.link(j).getParent()
             if p < 0:
                 T = do_lookup(rprefix+"/"+robot.link(j).getName(),root)

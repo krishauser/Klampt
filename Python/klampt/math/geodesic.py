@@ -1,4 +1,4 @@
-import vectorops, so2, so3, se3
+from . import vectorops, so2, so3, se3
 import math
 
 class GeodesicSpace:

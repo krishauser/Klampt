@@ -1,22 +1,27 @@
 from .. import robotsim
 from ..model import contact,collide
 from ..math import vectorops
-from cspaceutils import CompositeCSpace
-from robotcspace import ClosedLoopRobotCSpace
-from rigidobjectcspace import RigidObjectCSpace
+from .cspaceutils import CompositeCSpace
+from .robotcspace import ClosedLoopRobotCSpace
+from .rigidobjectcspace import RigidObjectCSpace
 
 class StanceCSpace(ClosedLoopRobotCSpace):
-    """A cspace with contacts that impose closed-chain constraints between a robot and
-    zero or more objects.
+    """A cspace with contacts that impose closed-chain constraints between a
+    robot and zero or more objects.
 
     Collisions are not checked between the world and fixed robot links, or 
     contacting links that are initially already colliding with the world.
 
     Attributes:
-        robot, collider, solver, tol, maxIters: inherited from ClosedLoopRobotCSpace
-        gravity: the gravity vector (default [0,0,-9.8] -- currently cannot accept anything else)
-        holds (list of Holds): a list of Holds associated with the contacts.
-        supportPolygon (list): the support polygon planes resulting from contact.supportPolygon(holds)
+        robot, collider, solver, tol, maxIters: inherited from
+            :class:`ClosedLoopRobotCSpace`
+        gravity: the gravity vector (default [0,0,-9.8] -- currently cannot
+            accept anything else)
+        holds (list of :class:`Hold`): a list of Holds associated with the
+            contacts.
+        supportPolygon (list): the support polygon planes resulting from
+            `contact.supportPolygon`(holds)
+
     """
     def __init__(self,robot,holds,collider=None,world=None,checkTorqueLimits=False):
         if collider is None and world is not None:
@@ -48,6 +53,7 @@ class StanceCSpace(ClosedLoopRobotCSpace):
                 return False
         return True
 
+
 class TransitionCSpace(ClosedLoopRobotCSpace):
     """A configuration space for a transition between stances."""
     def __init__(self,space1,space2):
@@ -58,6 +64,7 @@ class TransitionCSpace(ClosedLoopRobotCSpace):
         self.space1,self.space2 = space1,space2
         ClosedLoopRobotCSpace.__init__(self,space1.robot,[h.ikConstraint for h in space2.holds],space2.collider)
         self.addFeasibilityTest(space1.testSupportPolygon,"suppPoly")
+
 
 class MultiContactCSpace(CompositeCSpace):
     """A cspace with contacts that impose closed-chain constraints between a robot and
@@ -132,10 +139,10 @@ class MultiContactCSpace(CompositeCSpace):
                 if isinstance(o,RobotModel):
                     #HACK: need a better test for floating bases
                     if o.numDrivers() + 6 <= o.numLinks():
-                        print "ContactCSpace: Robot",o.getName(),"is being treated as a floating-base robot"
+                        print("ContactCSpace: Robot",o.getName(),"is being treated as a floating-base robot")
                         stabilityTestObjects.append(o)
                     else:
-                        print "ContactCSpace: Robot",o.getName(),"is being treated as a fixed-base robot"
+                        print("ContactCSpace: Robot",o.getName(),"is being treated as a fixed-base robot")
                 else:
                     stabilityTestObjects.append(o)
         else:

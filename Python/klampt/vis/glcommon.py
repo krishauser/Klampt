@@ -3,8 +3,8 @@ are used by the core visualization module.  They may be useful for writing
 your own GLPluginInterface classes, too.
 """
 
-from glinterface import GLPluginInterface
-from glprogram import GLProgram,GLPluginProgram
+from .glinterface import GLPluginInterface
+from .glprogram import GLProgram,GLPluginProgram
 import math
 from OpenGL.GL import *
 import weakref
@@ -195,7 +195,7 @@ class GLMultiViewportProgram(GLProgram):
                 if p.displayfunc():
                     anyTrue = True
             except Exception:
-                print "Error running displayfunc() for plugin",p.__class__.__name__
+                print("Error running displayfunc() for plugin",p.__class__.__name__)
                 raise
         return anyTrue
     def display(self):
@@ -205,7 +205,7 @@ class GLMultiViewportProgram(GLProgram):
                 if p.display():
                     anyTrue = True
             except Exception:
-                print "Error running display() for plugin",p.__class__.__name__
+                print("Error running display() for plugin",p.__class__.__name__)
                 raise
         return anyTrue
     def display_screen(self):
@@ -215,7 +215,7 @@ class GLMultiViewportProgram(GLProgram):
                 if p.display_screen():
                     anyTrue = True
             except Exception:
-                print "Error running display_screen() for plugin",p.__class__.__name__
+                print("Error running display_screen() for plugin",p.__class__.__name__)
                 raise
         return anyTrue
     def keyboardfunc(self,c,x,y):
@@ -372,12 +372,12 @@ class CachedGLObject:
                     self.glDisplayList = glGenLists(1)
                 _CACHED_DISPLAY_LISTS.add(self.glDisplayList)
                 if len(_CACHED_DISPLAY_LISTS) > _CACHED_WARN_THRESHOLD:
-                    print "GLCachedObject: Creating",len(_CACHED_DISPLAY_LISTS),"GL objects",self.glDisplayList,"watch me for memory usage..."
+                    print("GLCachedObject: Creating",len(_CACHED_DISPLAY_LISTS),"GL objects",self.glDisplayList,"watch me for memory usage...")
                     _CACHED_WARN_THRESHOLD += 1000
             #print "Compiling display list",self.name
             if transform:
                 glPushMatrix()
-                glMultMatrixf(sum(zip(*se3.homogeneous(transform)),()))
+                glMultMatrixf(sum(list(zip(*se3.homogeneous(transform))),()))
             
             glNewList(self.glDisplayList,GL_COMPILE_AND_EXECUTE)
             self.makingDisplayList = True
@@ -385,7 +385,7 @@ class CachedGLObject:
                 renderFunction(*args)
             except GLError:
                 import traceback
-                print "Error encountered during draw, display list",self.glDisplayList
+                print("Error encountered during draw, display list",self.glDisplayList)
                 traceback.print_exc()
             self.makingDisplayList = False
             glEndList()
@@ -395,7 +395,7 @@ class CachedGLObject:
         else:
             if transform:
                 glPushMatrix()
-                glMultMatrixf(sum(zip(*se3.homogeneous(transform)),()))
+                glMultMatrixf(sum(list(zip(*se3.homogeneous(transform))),()))
             glCallList(self.glDisplayList)
             if transform:
                 glPopMatrix()

@@ -1,5 +1,5 @@
-from symbolic import *
-from symbolic import _is_exactly,_column_stack,_row_stack,_builtin_functions
+from .symbolic import *
+from .symbolic import _is_exactly,_column_stack,_row_stack,_builtin_functions
 import sympy
 from sympy.matrices import Matrix
 from sympy.core.sympify import sympify
@@ -114,29 +114,29 @@ def exprToSympy(expr):
             try:
                 return getattr(operator,fname)(*sargs)
             except Exception as e:
-                print "exprToSympy: Error raised while performing operator %s on arguments %s"%(fname,str(expr))
+                print("exprToSympy: Error raised while performing operator %s on arguments %s"%(fname,str(expr)))
                 raise
         if hasattr(sympy,sname):
             #try capitalized version first
             try:
                 return getattr(sympy,sname)(*sargs)
             except Exception:
-                print "exprToSympy: Error raised while trying sympy.%s on arguments %s"%(sname,str(expr))
+                print("exprToSympy: Error raised while trying sympy.%s on arguments %s"%(sname,str(expr)))
         if hasattr(sympy,fname):
             #numpy equivalents, like eye
             try:
                 return getattr(sympy,fname)(*sargs)
             except Exception:
-                print "exprToSympy: Error raised while trying sympy.%s on arguments %s"%(fname,str(expr))
+                print("exprToSympy: Error raised while trying sympy.%s on arguments %s"%(fname,str(expr)))
         if callable(expr.functionInfo.func):
-            print "exprToSympy: Function %s does not have Sympy equivalent, returning adaptor "%(fname,)
+            print("exprToSympy: Function %s does not have Sympy equivalent, returning adaptor "%(fname,))
             return _make_sympy_adaptor(expr.functionInfo)(*sargs)
         else:
-            print "exprToSympy: Function %s does not have Sympy equivalent, expanding expression"%(fname,)
+            print("exprToSympy: Function %s does not have Sympy equivalent, expanding expression"%(fname,))
             assert isinstance(expr.functionInfo.func,Expression)
             sfunc = exprToSympy(expr.functionInfo.func)
-            return sfunc.subs(zip(expr.functionInfo.argNames,sargs))
-        print "exprToSympy: Function %s does not have Sympy equivalent, returning generic Function"%(fname,)
+            return sfunc.subs(list(zip(expr.functionInfo.argNames,sargs)))
+        print("exprToSympy: Function %s does not have Sympy equivalent, returning generic Function"%(fname,))
         return sympy.Function(fname)(*sargs)
     else:
         if hasattr(expr,'__iter__'):
@@ -207,7 +207,7 @@ class SympyFunction(Function):
             if not all(v.name in set(symbol_order) for v in expr.free_symbols):
                 raise ValueError("symbol_order does not contain some free variables: %s vs %s"%(str(symbol_order),str([s.name for s in expr.free_symbols])))
 
-        func = (lambda *args: expr.evalf(subs=dict(zip(symbol_order,args))))
+        func = (lambda *args: expr.evalf(subs=dict(list(zip(symbol_order,args)))))
         Function.__init__(self,name,func,symbol_order)
         self.sympy_expr = expr
 
@@ -221,7 +221,7 @@ class SympyFunction(Function):
         else:
             for i,arg in enumerate(symbol_order):
                 self.sympy_jacobian[i] = sympy.diff(expr,arg)
-        for i in xrange(len(symbol_order)):
+        for i in range(len(symbol_order)):
             def cache_jacobian(*args):
                 if self.sympy_jacobian_funcs[i] is None:
                     #print "Creating jacobian function",name + "_jac_" + symbol_order[i]
@@ -247,7 +247,7 @@ class SympyFunctionAdaptor(Function):
         assert isinstance(func,sympy.FunctionClass)
         if hasattr(func,'nargs'):
             if len(func.nargs) > 1:
-                print "SympyFunctionAdaptor: can't yet handle multi-argument functions"
+                print("SympyFunctionAdaptor: can't yet handle multi-argument functions")
             nargs = None
             for i in func.nargs:
                 nargs = i
@@ -271,7 +271,7 @@ class SympyFunctionAdaptor(Function):
         for i,arg in enumerate(argnames):
             self.sympy_jacobian[i] = func(*xs).diff(xs[i])
         
-        for i in xrange(len(argnames)):
+        for i in range(len(argnames)):
             def cache_jacobian(*args):
                 if self.sympy_jacobian_funcs[i] is None:
                     #print "Creating jacobian function",name + "_jac_" + argnames[i]
@@ -305,7 +305,7 @@ def exprFromSympy(context,sexpr,addFuncs=True):
             #it's a matrix
             k = 0
             erows = []
-            for row in xrange(rows):
+            for row in range(rows):
                 erows.append(sentries[k:k+cols])
                 k += cols
             return row_stack(*erows)
@@ -320,7 +320,7 @@ def exprFromSympy(context,sexpr,addFuncs=True):
         args = [exprFromSympy(context,s) for s in sexpr.args]
         if context is None:
             if fname not in _builtin_functions:
-                print "exprFromSympy: Sympy function %s does not have symbolic.py equivalent, creating adaptor with name %s"%(sname,fname)
+                print("exprFromSympy: Sympy function %s does not have symbolic.py equivalent, creating adaptor with name %s"%(sname,fname))
                 f = SympyFunctionAdaptor(fname,sexpr.func)
                 #raise ValueError("Unknown Sympy function %s"%(sname,))
             else:
@@ -329,7 +329,7 @@ def exprFromSympy(context,sexpr,addFuncs=True):
             try:
                 f = context.function(fname)
             except KeyError as e:
-                print "exprFromSympy: Sympy function %s does not have symbolic.py equivalent, creating adaptor with name %s"%(sname,fname)
+                print("exprFromSympy: Sympy function %s does not have symbolic.py equivalent, creating adaptor with name %s"%(sname,fname))
                 f = SympyFunctionAdaptor(fname,sexpr.func)
                 if addFuncs:
                     context.declare(f)

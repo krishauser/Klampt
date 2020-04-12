@@ -6,6 +6,8 @@ from klampt.math import vectorops,so3,se3
 from klampt.vis.glrobotprogram import *
 import importlib
 
+SPLIT_SCREEN_TEST = False
+
 class MyGLViewer(GLSimulationPlugin):
     """Simulates some functionality of the SimTest program.
     Shows how to subclass GLSimulationPlugin and apply hooks to SimpleSimulation for applying a
@@ -70,15 +72,15 @@ class MyGLViewer(GLSimulationPlugin):
                 self.sim.updateWorld()
                 objs = self.click_world(x,y,want_points=True)
                 if len(objs) > 0:
-                    print "Clicked:",[o[0].getName() for o in objs]
+                    print("Clicked:",[o[0].getName() for o in objs])
                     obj,pt = objs[0]
                     if isinstance(obj,(RobotModelLink,RigidObjectModel)):
-                        print "Clicked, turning on force application mode with object",obj.getName()
+                        print("Clicked, turning on force application mode with object",obj.getName())
                         self.forceApplicationMode = True
                         self.addForceSpring(obj,pt)
                         return True
             elif self.forceApplicationMode:
-                print "Turning off force application mode"
+                print("Turning off force application mode")
                 self.forceApplicationMode = False
                 self.sim.hooks.pop(-1)
                 return True
@@ -128,11 +130,11 @@ class MyGLViewer(GLSimulationPlugin):
 
 
 def main():
-    print "============================================================"
-    print sys.argv[0]+": Simulates a robot file and Python controller"
+    print("============================================================")
+    print(sys.argv[0]+": Simulates a robot file and Python controller")
     if len(sys.argv)<=1:
-        print "USAGE: simtest.py [world_file] [controller files (.py)]"
-    print "============================================================"
+        print("USAGE: simtest.py [world_file] [controller files (.py)]")
+    print("============================================================")
     if len(sys.argv)<=1:
         exit()
 
@@ -151,8 +153,8 @@ def main():
         else:
             res = world.readFile(fn)
             if not res:
-                print "Unable to load model "+fn
-                print "Quitting..."
+                print("Unable to load model "+fn)
+                print("Quitting...")
                 sys.exit(1)
     viewer = MyGLViewer(world)
 
@@ -166,14 +168,24 @@ def main():
             try:
                 maker = c.make
             except AttributeError:
-                print "Module",c.__name__,"must have a make() method"
-                print "Quitting..."
+                print("Module",c.__name__,"must have a make() method")
+                print("Quitting...")
                 sys.exit(1)
             controller = maker(world.robot(i))
         viewer.sim.setController(world.robot(i),controller)
     
     vis.setWindowTitle("Klamp't Simulation Tester")
-    vis.run(viewer)
+    if SPLIT_SCREEN_TEST:
+        viewer2 = MyGLViewer(world)
+        vis.setPlugin(viewer)
+        vis.addPlugin(viewer2)
+        viewer2.window.broadcast = True
+        vis.show()
+        while vis.shown():
+            time.sleep(0.01)
+        vis.kill()
+    else:
+        vis.run(viewer)
 
 if __name__ == '__main__':
     main()

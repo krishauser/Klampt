@@ -336,12 +336,12 @@ class RobotOptimizationProblem(optimize.OptimizationProblemBuilder):
             item = self.managedVariables[itemname]
             del self.managedVariables[itemname]
             item.name = newname
-            print "Renaming KlamptVariable",itemname
+            print("Renaming KlamptVariable",itemname)
             self.context.expressions[newname] = self.context.expressions[itemname]
             del self.context.expressions[itemname]
             for var in item.variables:
                 varnewname = newname + var.name[len(itemname):]
-                print "  Renaming internal variable",var.name,"to",varnewname
+                print("  Renaming internal variable",var.name,"to",varnewname)
                 if var.name in self.variableBounds:
                     self.variableBounds[varnewname] = self.variableBounds[var.name]
                     del self.variableBounds[var.name]
@@ -424,7 +424,7 @@ class RobotOptimizationProblem(optimize.OptimizationProblemBuilder):
             res['activeDofs'] = self.activeDofs
         if len(self.managedVariables) > 0:
             varobjs = []
-            for (k,v) in self.managedVariables.iteritems():
+            for (k,v) in self.managedVariables.items():
                 varobj = dict()
                 assert k == v.name
                 varobj['name'] = v.name
@@ -461,7 +461,7 @@ class RobotOptimizationProblem(optimize.OptimizationProblemBuilder):
                 self.managedVariables[name] = self.addKlamptVar(name,type,encoding)
         if doAutoLoad:
             self.autoLoad = obj.get('autoLoad',dict())
-            for (name,fn) in self.autoLoad.iteritems():
+            for (name,fn) in self.autoLoad.items():
                 try:
                     obj = loader.load(fn)
                 except Exception:
@@ -477,7 +477,7 @@ class RobotOptimizationProblem(optimize.OptimizationProblemBuilder):
             params (OptimizerParams, optional): configures the optimizer.
         """
         if len(self.objectives) == 0:
-            print "Warning, calling solve without setting any constraints?"
+            print("Warning, calling solve without setting any constraints?")
             return self.robot.getConfig()
         robot = self.robot
         solver = IKSolver(robot)
@@ -505,11 +505,11 @@ class RobotOptimizationProblem(optimize.OptimizationProblemBuilder):
             else:
                 activeDofs = ikActiveDofs
                 nonIKDofs = []
-                ikToActive = range(len(activeDofs))
+                ikToActive = list(range(len(activeDofs)))
         else:
             activeDofs = ikActiveDofs
             activeNonIKDofs = []
-            ikToActive = range(len(ikActiveDofs))
+            ikToActive = list(range(len(ikActiveDofs)))
         anyIKProblems = False
         anyCosts = False
         softIK = False
@@ -547,7 +547,7 @@ class RobotOptimizationProblem(optimize.OptimizationProblemBuilder):
 
                 optq = reducedProblem.context.variableDict['q']
 
-                print "Preprocessed problem:"
+                print("Preprocessed problem:")
                 reducedProblem.pprint()
 
                 optProblem = reducedProblem.getProblem()
@@ -574,7 +574,7 @@ class RobotOptimizationProblem(optimize.OptimizationProblemBuilder):
             #do global optimization of the cost function and return
             (succ,res) = params.solve(optProblem,x0)
             if not succ:
-                print "Global optimize returned failure"
+                print("Global optimize returned failure")
                 return None
             if reducedToFullMapping is not None:
                 reducedProblem.setVarVector(res)
@@ -584,21 +584,21 @@ class RobotOptimizationProblem(optimize.OptimizationProblemBuilder):
                 self.setVarVector(res)
             #check feasibility if desired
             if not self.inJointLimits(self.q.value):
-                print "Result from global optimize is out of joint limits"
+                print("Result from global optimize is out of joint limits")
                 return None
             if not self.feasibilityTestsPass():
-                print "Result from global optimize isn't feasible"
+                print("Result from global optimize isn't feasible")
                 return None
             if not self.satisfiesEqualities(params.tol):
-                print "Result from global optimize doesn't satisfy tolerance."
+                print("Result from global optimize doesn't satisfy tolerance.")
                 return None
             #passed
-            print "Global optimize succeeded! Cost",self.cost()
+            print("Global optimize succeeded! Cost",self.cost())
             q = self.q.value
             return q
 
         if anyIKProblems:
-            print "Performing random-restart newton raphson"
+            print("Performing random-restart newton raphson")
             #random-restart newton-raphson
             solver.setMaxIters(params.numIters)
             solver.setTolerance(params.tol)
@@ -608,19 +608,19 @@ class RobotOptimizationProblem(optimize.OptimizationProblemBuilder):
                 #quality is a tuple
                 bestQuality = bestQuality,bestQuality
             quality = None
-            for restart in xrange(params.numRestarts):
+            for restart in range(params.numRestarts):
                 if time.time() - t0 > params.timeout:
                     return best
                 t0 = time.time()
                 res = solver.solve()
                 if res or self.softObjectives:
                     q = robot.getConfig()
-                    print "Got a solve, checking feasibility..."
+                    print("Got a solve, checking feasibility...")
                     #check feasibility if desired
                     t0 = time.time()
                     self.q.bind(q)
                     if not self.feasibilityTestsPass():
-                        print "Failed feasibility"
+                        print("Failed feasibility")
                         #TODO: resample other non-robot optimization variables
                         if len(nonIKDofs) > 0:
                             u = float(restart+0.5)/params.numRestarts
@@ -637,7 +637,7 @@ class RobotOptimizationProblem(optimize.OptimizationProblemBuilder):
                         else:
                             solver.sampleInitial()
                             continue
-                    print "Found a feasible config"
+                    print("Found a feasible config")
                     if softIK:
                         residual = solver.getResidual()
                         ikerr = max(abs(v) for v in residual)
@@ -657,12 +657,12 @@ class RobotOptimizationProblem(optimize.OptimizationProblemBuilder):
                     else:
                         if not anyCosts:
                             #feasible, no costs, so we're done
-                            print "Feasible and no costs, we're done"
+                            print("Feasible and no costs, we're done")
                             return q
                         else:
                             #optimize
                             quality = self.cost(q)
-                            print "Quality of solution",quality
+                            print("Quality of solution",quality)
                     if quality < bestQuality:
                         best = self.getVarValues()
                         bestQuality = quality
@@ -671,7 +671,7 @@ class RobotOptimizationProblem(optimize.OptimizationProblemBuilder):
 
             if best is None or params.localMethod is None:
                 return best[0]
-            print "Performing post-optimization"
+            print("Performing post-optimization")
             #post-optimize using local optimizer
             self.setVarValues(best)
             if softIK:
@@ -709,9 +709,9 @@ class RobotOptimizationProblem(optimize.OptimizationProblemBuilder):
                         best = self.getVarValues()
                         bestQuality = quality
                     elif quality > bestQuality + 1e-2:
-                        print "Got worse solution by local optimizing?",bestQuality,"->",quality
+                        print("Got worse solution by local optimizing?",bestQuality,"->",quality)
                 self.getVarValues(best)
-            print "Resulting quality",bestQuality
+            print("Resulting quality",bestQuality)
             return best[0]
         else:
             #no IK problems, no global method set -- for now, just perform random restarts
@@ -727,10 +727,10 @@ class RobotOptimizationProblem(optimize.OptimizationProblemBuilder):
                 x0 = reducedProblem.getVarVector()
 
             #do global optimization of the cost function and return
-            print "Current optimization variable vector is",x0
+            print("Current optimization variable vector is",x0)
             (succ,res) = params.solve(optProblem,x0)
             if not succ:
-                print "Global optimize returned failure"
+                print("Global optimize returned failure")
                 return None
             if reducedToFullMapping is not None:
                 reducedProblem.setVarVector(res)
@@ -740,18 +740,18 @@ class RobotOptimizationProblem(optimize.OptimizationProblemBuilder):
                 self.setVarVector(res)
             #check feasibility if desired
             if not self.inJointLimits(self.q.value):
-                print "Result from global optimize is out of joint limits"
+                print("Result from global optimize is out of joint limits")
                 return None
             if not self.feasibilityTestsPass():
-                print "Result from global optimize isn't feasible"
+                print("Result from global optimize isn't feasible")
                 return None
             if not self.satisfiesEqualities(params.tol):
-                print "Result from global optimize doesn't satisfy tolerance: result %s"%(str(self.equalityResidual()),)
+                print("Result from global optimize doesn't satisfy tolerance: result %s"%(str(self.equalityResidual()),))
                 for obj in self.objectives:
                     if obj.type == 'eq':
-                        print "  ",obj.expr,":",obj.expr.eval(self.context)
+                        print("  ",obj.expr,":",obj.expr.eval(self.context))
                 return None
             #passed
-            print "Global optimize succeeded! Cost",self.cost()
+            print("Global optimize succeeded! Cost",self.cost())
             q = self.q.value
             return q

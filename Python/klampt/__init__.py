@@ -1,4 +1,4 @@
-from robotsim import *
+from .robotsim import *
 import atexit
 atexit.register(destroy)
 

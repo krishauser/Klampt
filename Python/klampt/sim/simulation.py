@@ -1,5 +1,5 @@
 from ..robotsim import *
-import simlog
+from . import simlog
 import weakref
 
 class SensorEmulator:
@@ -114,9 +114,9 @@ class DefaultActuatorEmulator(ActuatorEmulator):
             c.setVelocityCommand(commands['dqcmd'],commands['tcmd'])
         elif 'torquecmd' in commands:
             c.setTorque(commands['torquecmd'])
-        for (k,v) in commands.iteritems():
+        for (k,v) in commands.items():
             if k not in defaultVals:
-                print "Sending command",k,v,"to low level controller"
+                print("Sending command",k,v,"to low level controller")
                 c.sendCommand(k,v)
         return
 
@@ -274,7 +274,7 @@ class SimpleSimulator (Simulator):
 
     def drawControllersGL(self):
         #draw controllers
-        for i in xrange(self.world.numRobots()):
+        for i in range(self.world.numRobots()):
             if self.robotControllers[i] == None: 
                 continue
             if not hasattr(self.robotControllers[i],'drawGL'):
@@ -330,9 +330,9 @@ class SimpleSimulator (Simulator):
                         resolvedArgs.append(a)
                 try:
                     hook(*resolvedArgs)
-                except Exception, e:
+                except Exception as e:
                     import traceback
-                    print "Hook encountered error with arguments",resolvedArgs
+                    print("Hook encountered error with arguments",resolvedArgs)
                     traceback.print_exc()
                     raise
             #Finally advance the physics simulation

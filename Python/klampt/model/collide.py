@@ -11,7 +11,7 @@ The :meth:`ray_cast` function is a convenient way to return the first point of
 intersection for a ray and a group of objects.
 """
 
-from __future__ import generators
+
 from ..robotsim import *
 from ..math import vectorops,se3
 
@@ -236,7 +236,7 @@ class WorldCollider:
         self.rigidObjects = []
         self.robots = []
         
-        for i in xrange(world.numTerrains()):
+        for i in range(world.numTerrains()):
             t = world.terrain(i)
             g = t.geometry()
             if g != None and g.type()!="":
@@ -244,7 +244,7 @@ class WorldCollider:
                 self.geomList.append((t,g))
             else:
                 self.terrains.append(-1)
-        for i in xrange(world.numRigidObjects()):
+        for i in range(world.numRigidObjects()):
             o = world.rigidObject(i)
             g = o.geometry()
             if g != None and g.type()!="":
@@ -252,10 +252,10 @@ class WorldCollider:
                 self.geomList.append((o,g))
             else:
                 self.rigidObjects.append(-1)
-        for i in xrange(world.numRobots()):
+        for i in range(world.numRobots()):
             r = world.robot(i)
             self.robots.append([])
-            for j in xrange(r.numLinks()):
+            for j in range(r.numLinks()):
                 l = r.link(j)
                 g = l.geometry()
                 if g != None and g.type()!="":
@@ -265,7 +265,7 @@ class WorldCollider:
                     self.robots[-1].append(-1)
 
         #construct the collision mask
-        for i in xrange(len(self.geomList)):
+        for i in range(len(self.geomList)):
             self.mask.append(set())
         for t in self.terrains:
             if t < 0: continue
@@ -305,8 +305,8 @@ class WorldCollider:
             #robot self-collision
             rob = self.geomList[r[0]][0].robot()
             nl = rob.numLinks()
-            for i in xrange(nl):
-                for j in xrange(i):
+            for i in range(nl):
+                for j in range(i):
                     if rob.selfCollisionEnabled(i,j):
                         self.mask[r[i]].add(r[j])
                         self.mask[r[j]].add(r[i])
@@ -491,7 +491,7 @@ class WorldCollider:
             robot = robot.index
         if robot is None:
             #test all robots
-            for r in xrange(len(self.robots)):
+            for r in range(len(self.robots)):
                 for c in self.robotSelfCollisions(r):
                     yield c
             return
@@ -522,7 +522,7 @@ class WorldCollider:
             object = object.index
         if object is None:
             #test all objects
-            for o in xrange(len(self.rigidObjects)):
+            for o in range(len(self.rigidObjects)):
                 for c in self.robotObjectCollisions(robot,o):
                     yield c
             return
@@ -554,7 +554,7 @@ class WorldCollider:
             terrain = terrain.index
         if terrain is None:
             #test all terrains
-            for t in xrange(len(self.terrains)):
+            for t in range(len(self.terrains)):
                 for c in self.robotTerrainCollisions(robot,t):
                     yield c
             return
@@ -586,7 +586,7 @@ class WorldCollider:
             terrain = terrain.index
         if terrain is None:
             #test all terrains
-            for t in xrange(len(self.terrains)):
+            for t in range(len(self.terrains)):
                 for c in self.objectTerrainCollisions(object,t):
                     yield c
             return
@@ -617,7 +617,7 @@ class WorldCollider:
             object2 = object2.index
         if object2 is None:
             #test all terrains
-            for o in xrange(len(self.rigidObjects)):
+            for o in range(len(self.rigidObjects)):
                 for c in self.objectObjectCollisions(object):
                     yield c
             return
@@ -666,7 +666,7 @@ class WorldCollider:
         """
         if isinstance(robot,RobotModel):
             try:
-                robot = [r for r in xrange(self.world.numRobots()) if self.world.robot(r).getID()==robot.getID()][0]
+                robot = [r for r in range(self.world.numRobots()) if self.world.robot(r).getID()==robot.getID()][0]
             except IndexError:
                 raise RuntimeError("Robot "+robot.getName()+" is not found in the world!")
         rindices = self.robots[robot]

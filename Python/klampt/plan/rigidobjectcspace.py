@@ -1,4 +1,4 @@
-from cspace import CSpace
+from .cspace import CSpace
 from .. import robotsim
 from ..model import collide
 from ..model import trajectory
@@ -114,13 +114,13 @@ class RigidObjectCSpace(CSpace):
         collision with the environment."""
         if not self.collider: return False
         if x is not None: self.setConfig(x)
-        for o in xrange(self.collider.world.numRobots()):
+        for o in range(self.collider.world.numRobots()):
             if any(self.collider.robotObjectCollisions(o.index,self.rigidObject.index)):
                 return True;
-        for o in xrange(self.collider.world.numRigidObjects()):
+        for o in range(self.collider.world.numRigidObjects()):
             if any(self.collider.objectObjectCollisions(self.rigidObject.index,o)):
                 return True;
-        for o in xrange(self.collider.world.numTerrains()):
+        for o in range(self.collider.world.numTerrains()):
             if any(self.collider.objectTerrainCollisions(self.rigidObject.index,o)):
                 return True;
         return False
@@ -138,6 +138,6 @@ class RigidObjectCSpace(CSpace):
         return [self.configToTransform(x) for x in path]
 
     def pathToTrajectory(self,path):
-        times = range(len(path))
+        times = list(range(len(path)))
         Ts = [self.configToTransform(x) for x in path]
         return trajectory.SE3Trajectory(times,Ts)

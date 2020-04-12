@@ -125,7 +125,7 @@ class SwigPyIterator(_object):
     def copy(self):
         return _robotsim.SwigPyIterator_copy(self)
 
-    def next(self):
+    def __next__(self):
         return _robotsim.SwigPyIterator_next(self)
 
     def __next__(self):
@@ -273,7 +273,7 @@ class stringVector(_object):
     def __iter__(self):
         return self.iterator()
 
-    def __nonzero__(self):
+    def __bool__(self):
         return _robotsim.stringVector___nonzero__(self)
 
     def __bool__(self):
@@ -386,7 +386,7 @@ class doubleVector(_object):
     def __iter__(self):
         return self.iterator()
 
-    def __nonzero__(self):
+    def __bool__(self):
         return _robotsim.doubleVector___nonzero__(self)
 
     def __bool__(self):
@@ -499,7 +499,7 @@ class floatVector(_object):
     def __iter__(self):
         return self.iterator()
 
-    def __nonzero__(self):
+    def __bool__(self):
         return _robotsim.floatVector___nonzero__(self)
 
     def __bool__(self):
@@ -612,7 +612,7 @@ class intVector(_object):
     def __iter__(self):
         return self.iterator()
 
-    def __nonzero__(self):
+    def __bool__(self):
         return _robotsim.intVector___nonzero__(self)
 
     def __bool__(self):
@@ -725,7 +725,7 @@ class doubleMatrix(_object):
     def __iter__(self):
         return self.iterator()
 
-    def __nonzero__(self):
+    def __bool__(self):
         return _robotsim.doubleMatrix___nonzero__(self)
 
     def __bool__(self):

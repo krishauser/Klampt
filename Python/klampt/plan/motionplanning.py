@@ -122,7 +122,7 @@ class SwigPyIterator(_object):
     def copy(self):
         return _motionplanning.SwigPyIterator_copy(self)
 
-    def next(self):
+    def __next__(self):
         return _motionplanning.SwigPyIterator_next(self)
 
     def __next__(self):

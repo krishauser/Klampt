@@ -1,7 +1,7 @@
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 import weakref
-from glcommon import GLMultiViewportProgram
+from .glcommon import GLMultiViewportProgram
 
 keymap = {GLUT_KEY_F1:'f1',
     GLUT_KEY_F2:'f2',
@@ -69,7 +69,7 @@ class GLUTWindow:
                     self._updateModifiers()
                 try:
                     return func(*args)
-                except Exception, e:
+                except Exception as e:
                     import traceback
                     traceback.print_exc()
                     glutLeaveMainLoop()
@@ -94,13 +94,13 @@ class GLUTWindow:
         glEnable(GL_MULTISAMPLE)
         glutPostRedisplay()
         self.initialized = True
-        print "Initialized"
+        print("Initialized")
 
     def add_action(self,*args):
         pass
 
     def setProgram(self,program):
-        from glprogram import GLProgram
+        from .glprogram import GLProgram
         assert isinstance(program,GLProgram)
         if hasattr(program,'name'):
             self.name = program.name
@@ -135,7 +135,7 @@ class GLUTWindow:
 
     def reshape(self,w,h):
         """Resizes the GL window. Called by frontend."""
-        print "reshaping",w,h
+        print("reshaping",w,h)
         self.width,self.height = w,h
         if self.initialized:
             glutReshapeWindow(self.width,self.height)
@@ -215,7 +215,6 @@ class GLUTWindow:
         self.lastx = x
         self.lasty = y
 
-
     def _specialfunc(self,c,x,y):
         if c in keymap:
             self.program.keyboardfunc(keymap[c],x,y)
@@ -228,7 +227,7 @@ class GLUTWindow:
         """Internal use."""
         if self.width == 0 or self.height == 0:
             #hidden?
-            print "GLProgram.displayfunc called on hidden window?"
+            print("GLProgram.displayfunc called on hidden window?")
             return
         self.program.displayfunc()
         glutSwapBuffers ()
@@ -236,6 +235,7 @@ class GLUTWindow:
     def _closefunc(self):
         self.program.closefunc()
         self.program.window = None
+
 
 class GLUTBackend:
     """A basic OpenGL program using GLUT.  Set up your GLProgramInterface class,

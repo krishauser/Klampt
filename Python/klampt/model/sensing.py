@@ -8,7 +8,7 @@ operated upon, e.g., images and point clouds.
 
 from ..robotsim import *
 from ..io import loader
-import coordinates
+from . import coordinates
 import math
 import sys
 from ..math import vectorops,so3,se3
@@ -29,7 +29,7 @@ def _try_numpy_import():
         _has_numpy = True
         #sys.modules['numpy'] = numpy
     except ImportError:
-        print "klampt.model.sensing.py: Warning, numpy not available."
+        print("klampt.model.sensing.py: Warning, numpy not available.")
         _has_numpy = False
     return _has_numpy
 
@@ -157,20 +157,20 @@ def camera_to_images(camera,image_format='numpy',color_format='channels'):
         else:
             if color_format == 'bgr':
                 rgb = []
-                for i in xrange(h):
+                for i in range(h):
                     rgb.append([int(v) for v in measurements[i*w:(i+1)*w]])
             elif color_format == 'rgb':
                 def bgr_to_rgb(pixel):
                     return ((pixel & 0x0000ff) << 16) | (pixel & 0x00ff00) | ((pixel & 0xff0000) >> 16)
                 rgb = []
-                for i in xrange(h):
+                for i in range(h):
                     rgb.append([bgr_to_rgb(int(v)) for v in measurements[i*w:(i+1)*w]])
             else:
                 rgb = []
-                for i in xrange(h):
+                for i in range(h):
                     start = i*w
                     row = []
-                    for j in xrange(w):
+                    for j in range(w):
                         pixel = int(measurements[start+j])
                         row.append([pixel&0xff,(pixel>>8)&0xff,(pixel>>16)&0xff])
                     rgb.append(row)
@@ -180,7 +180,7 @@ def camera_to_images(camera,image_format='numpy',color_format='channels'):
             depth = np.array(measurements[start:start+w*h]).reshape(h,w)
         else:
             depth = []
-            for i in xrange(h):
+            for i in range(h):
                 depth.append(measurements[start+i*w:start+(i+1)*w])
     if has_rgb and has_depth:
         return rgb,depth
