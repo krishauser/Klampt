@@ -8,8 +8,8 @@ import sys
 
 src_folder = "klampt/src"
 root_py_folder = "klampt"
-if sys.version_info[0] == 3:
-    root_py_folder = "python3_version/klampt"
+if sys.version_info[0] == 2:
+    root_py_folder = "python2_version/klampt"
 
 #Parse settings from CMake
 includeDirs = """${KLAMPT_INCLUDE_DIRS}""".split(';')
