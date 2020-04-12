@@ -136,7 +136,7 @@ Alternatively, there are several robot-level C-spaces are available for you in
    but also enforces balance under gravity given known points of contact.
 
 These instances require you to provide as input a robot and a
-:class:`klampt.model.collide.WorldCollider: instance, as follows:
+:class:`klampt.model.collide.WorldCollider`: instance, as follows:
 
 .. code:: python
 
