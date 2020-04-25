@@ -6,7 +6,7 @@ in order to make the controller stable.
 """
 
 import os
-from klampt.math import so3
+from klampt.math import vectorops,so3
 
 
 def make(robotfile,world,tempname="temp.rob",debug=False):
@@ -25,11 +25,11 @@ def make(robotfile,world,tempname="temp.rob",debug=False):
 		(RobotModel): the loaded robot, stored in ``world``.
 	"""
 	_template_ = """### Boilerplate kinematics of a drivable floating (translating and rotating) cube with a robot hand mounted on it
-TParent 1 0 0   0 1 0   0 0 1   0 0 0  \
-1 0 0   0 1 0   0 0 1   0 0 0  \
-1 0 0   0 1 0   0 0 1   0 0 0  \
-1 0 0   0 1 0   0 0 1   0 0 0  \
-1 0 0   0 1 0   0 0 1   0 0 0  \
+TParent 1 0 0   0 1 0   0 0 1   0 0 0  \\
+1 0 0   0 1 0   0 0 1   0 0 0  \\
+1 0 0   0 1 0   0 0 1   0 0 0  \\
+1 0 0   0 1 0   0 0 1   0 0 0  \\
+1 0 0   0 1 0   0 0 1   0 0 0  \\
 1 0 0   0 1 0   0 0 1   0 0 0  
 parents -1 0 1 2 3 4 
 axis 1 0 0   0 1 0    0 0 1     0 0 1     0 1 0     1 0 0 
@@ -38,15 +38,15 @@ qMin -1 -1 -1  -inf -inf -inf
 qMax  1  1  1   inf  inf  inf 
 q 0 0 0 0 0 0 
 links "tx" "ty" "tz" "rz" "ry" "rx"
-geometry   ""   ""   ""   ""    ""    "data/objects/cube.tri"
+geometry   ""   ""   ""   ""    ""    "{TriangleMesh\\nOFF\\n8 12 0\\n0 0 0\\n0 0 1\\n0 1 0\\n0 1 1\\n1 0 0\\n1 0 1\\n1 1 0\\n1 1 1\\n3 0 1 3\\n3 0 3 2\\n3 4 6 7\\n3 4 7 5\\n3 0 4 5\\n3 0 5 1\\n3 2 3 7\\n3 2 7 6\\n3 0 2 6\\n3 0 6 4\\n3 1 5 7\\n3 1 7 3\\n}"
 geomscale 1 1 1 1 1 0.01
 mass       0.1 0.1 0.1 0.1 0.1 0.1
 com 0 0 0   0 0 0   0 0 0   0 0 0   0 0 0   0 0 0   
-inertia 0.001 0 0 0 0.001 0 0 0 0.001 \
-   0.001 0 0 0 0.001 0 0 0 0.001 \
-   0.001 0 0 0 0.001 0 0 0 0.001 \
-   0.001 0 0 0 0.001 0 0 0 0.001 \
-   0.001 0 0 0 0.001 0 0 0 0.001 \
+inertia 0.001 0 0 0 0.001 0 0 0 0.001 \\
+   0.001 0 0 0 0.001 0 0 0 0.001 \\
+   0.001 0 0 0 0.001 0 0 0 0.001 \\
+   0.001 0 0 0 0.001 0 0 0 0.001 \\
+   0.001 0 0 0 0.001 0 0 0 0.001 \\
    0.001 0 0 0 0.001 0 0 0 0.001 
 torqueMax  500 500 500 50 50 50 
 accMax     4 4 4 4 4 4 4
@@ -72,16 +72,15 @@ servoD 100 100 100 10 10 10
 viscousFriction 50 50 50 50 50 50
 dryFriction 1 1 1 1 1 1
 
-property sensors <sensors><ForceTorqueSensor link="5" hasForce="1 1 1" hasTorque="1 1 1" /></sensors>
+property sensors <sensors><ForceTorqueSensor name="base_force" link="5" hasForce="1 1 1" hasTorque="1 1 1" /></sensors>
 mount 5 "%s" 1 0 0   0 1 0   0 0 1   0 0 0 as "%s"
 """
 
 	robotname = os.path.splitext(os.path.basename(robotfile))[0]
+	f = open(tempname,'w')
+	f.write(_template_ % (robotfile,robotname))
 	f.close()
-	f2 = open("temp.rob",'w')
-	f2.write(_template_ % (robotfile,robotname))
-	f2.close()
-	world.loadElement("temp.rob")
+	world.loadElement(tempname)
 	robot = world.robot(world.numRobots()-1)
 	#set torques
 	mass = sum(robot.link(i).getMass().mass for i in range(robot.numLinks()))
@@ -92,11 +91,12 @@ mount 5 "%s" 1 0 0   0 1 0   0 0 1   0 0 0 as "%s"
 	tmax = robot.getTorqueMax()
 	tmax[0] = tmax[1] = tmax[2] = mass*9.8*5
 	tmax[3] = tmax[4] = tmax[5] = inertia*9.8*5
+	robot.setName("moving-base["+robotname+"]")
 	robot.setTorqueMax(tmax)
 	if debug:
-		robot.saveFile("temp.rob")
+		robot.saveFile(tempname)
 	else:
-		os.remove("temp.rob")
+		os.remove(tempname)
 	return robot
 
 

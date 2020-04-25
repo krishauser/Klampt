@@ -1849,7 +1849,7 @@ void PointCloud::addProperty(const std::string& pname,const std::vector<double> 
   for(int i=0;i<n;i++) {
     assert (i*(m+1) + m < (int)newprops.size()); 
     if(m > 0) {
-      assert ((i+1)*m < (int)properties.size());     
+      assert ((i+1)*m < (int)properties.size());
       std::copy(properties.begin()+i*m,properties.begin()+(i+1)*m,newprops.begin()+i*(m+1));
     }
     newprops[i*(m+1) + m] = values[i];
