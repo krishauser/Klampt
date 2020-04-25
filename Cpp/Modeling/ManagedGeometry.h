@@ -44,10 +44,18 @@ class GeometryManager;
  *   a.TransformGeometry(T);  //this breaks the connection between a and b
  *   b.TransformGeometry(T);  //now a and b have shared geometries again.  But, their appearances are not shared.
  *
- * Note: the Load / LoadNoCache functions can also accept strings of the form
- * "ros://[ROS_TOPIC]" or "ros:PointCloud2//[ROS_TOPIC]" to load dynamic 
- * point clouds from ROS topics.  Only PointCloud2 messages are accepted for
- * now.
+ * Note: the Load / LoadNoCache functions can also accept non-file strings.
+ *   - Dynamic geometries can be loaded from ROS topics. The string takes the form
+ *     "ros://[ROS_TOPIC]" or "ros:PointCloud2//[ROS_TOPIC]". Only PointCloud2
+ *     messages are accepted for now.
+ *   - Inline strings can be parsed using a string of the form {DATA} where DATA
+ *     is a parseable geometry format, e.g.,
+ * 
+ *       "{GeometricPrimitive
+ *       Sphere
+ *       0 0 0  1}"
+ * 
+ *      would load a sphere with center 0,0,0 and radius 1
  */
 class ManagedGeometry
 {
