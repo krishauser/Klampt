@@ -1847,9 +1847,11 @@ void PointCloud::addProperty(const std::string& pname,const std::vector<double> 
   propertyNames.push_back(pname);
   vector<double> newprops(n*(m+1));
   for(int i=0;i<n;i++) {
-    assert ((i+1)*m < (int)properties.size()); 
     assert (i*(m+1) + m < (int)newprops.size()); 
-    std::copy(properties.begin()+i*m,properties.begin()+(i+1)*m,newprops.begin()+i*(m+1));
+    if(m > 0) {
+      assert ((i+1)*m < (int)properties.size());     
+      std::copy(properties.begin()+i*m,properties.begin()+(i+1)*m,newprops.begin()+i*(m+1));
+    }
     newprops[i*(m+1) + m] = values[i];
   }
   std::swap(newprops,properties);
@@ -4668,7 +4670,8 @@ void EnablePathControl(RobotController* c)
         pc->SetConstant(q);
       }
       else {
-        fprintf(stderr,"First simulation cycle: the path controller needs to read from the encoders before motion commands can be issued\n");
+        fprintf(stderr,"SimRobotController: Warning, motion queue used before first simulation cycle.\n");
+        fprintf(stderr,"  (The path controller needs to read from the encoders before motion commands can be issued)\n");
       }
     }
   }
@@ -4678,7 +4681,7 @@ void EnablePathControl(RobotController* c)
 void SimRobotController::setMilestone(const vector<double>& q)
 {
   if(controller->robot->links.size() != q.size()) {
-    throw PyException("Invalid size of configuration");
+    throw PyException("Invalid size of configuration, must be equal to robot.numLinks()");
   }
   EnablePathControl(sim->sim->robotControllers[index].get());
   Config qv(controller->robot->links.size(),&q[0]);
@@ -4690,10 +4693,10 @@ void SimRobotController::setMilestone(const vector<double>& q)
 void SimRobotController::setMilestone(const vector<double>& q,const vector<double>& dq)
 {
   if(controller->robot->links.size() != q.size()) {
-    throw PyException("Invalid size of configuration");
+    throw PyException("Invalid size of configuration, must be equal to robot.numLinks()");
   }
   if(controller->robot->links.size() != dq.size()) {
-    throw PyException("Invalid size of velocity");
+    throw PyException("Invalid size of velocity, must be equal to robot.numLinks()");
   }
   EnablePathControl(sim->sim->robotControllers[index].get());
   Config qv(controller->robot->links.size(),&q[0]);
@@ -4706,7 +4709,7 @@ void SimRobotController::setMilestone(const vector<double>& q,const vector<doubl
 void SimRobotController::addMilestone(const vector<double>& q)
 {
   if(controller->robot->links.size() != q.size()) {
-    throw PyException("Invalid size of configuration");
+    throw PyException("Invalid size of configuration, must be equal to robot.numLinks()");
   }
   EnablePathControl(sim->sim->robotControllers[index].get());
   Config qv(controller->robot->links.size(),&q[0]);
@@ -4718,7 +4721,7 @@ void SimRobotController::addMilestone(const vector<double>& q)
 void SimRobotController::addMilestoneLinear(const vector<double>& q)
 {
   if(controller->robot->links.size() != q.size()) {
-    throw PyException("Invalid size of configuration");
+    throw PyException("Invalid size of configuration, must be equal to robot.numLinks()");
   }
   EnablePathControl(sim->sim->robotControllers[index].get());
   Config qv(controller->robot->links.size(),&q[0]);
@@ -4730,7 +4733,7 @@ void SimRobotController::addMilestoneLinear(const vector<double>& q)
 void SimRobotController::setLinear(const std::vector<double>& q,double dt)
 {
   if(controller->robot->links.size() != q.size()) {
-    throw PyException("Invalid size of configuration");
+    throw PyException("Invalid size of configuration, must be equal to robot.numLinks()");
   }
   EnablePathControl(sim->sim->robotControllers[index].get());
   PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
@@ -4740,10 +4743,10 @@ void SimRobotController::setLinear(const std::vector<double>& q,double dt)
 void SimRobotController::setCubic(const std::vector<double>& q,const std::vector<double>& v,double dt)
 {
   if(controller->robot->links.size() != q.size()) {
-    throw PyException("Invalid size of configuration");
+    throw PyException("Invalid size of configuration, must be equal to robot.numLinks()");
   }
   if(controller->robot->links.size() != v.size()) {
-    throw PyException("Invalid size of velocity");
+    throw PyException("Invalid size of velocity, must be equal to robot.numLinks()");
   }
   EnablePathControl(sim->sim->robotControllers[index].get());
   PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
@@ -4753,7 +4756,7 @@ void SimRobotController::setCubic(const std::vector<double>& q,const std::vector
 void SimRobotController::addLinear(const std::vector<double>& q,double dt)
 {
   if(controller->robot->links.size() != q.size()) {
-    throw PyException("Invalid size of configuration");
+    throw PyException("Invalid size of configuration, must be equal to robot.numLinks()");
   }
   EnablePathControl(sim->sim->robotControllers[index].get());
   PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
@@ -4763,10 +4766,10 @@ void SimRobotController::addLinear(const std::vector<double>& q,double dt)
 void SimRobotController::addCubic(const std::vector<double>& q,const std::vector<double>& v,double dt)
 {
   if(controller->robot->links.size() != q.size()) {
-    throw PyException("Invalid size of configuration");
+    throw PyException("Invalid size of configuration, must be equal to robot.numLinks()");
   }
   if(controller->robot->links.size() != v.size()) {
-    throw PyException("Invalid size of velocity");
+    throw PyException("Invalid size of velocity, must be equal to robot.numLinks()");
   }
   EnablePathControl(sim->sim->robotControllers[index].get());
   PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
@@ -4776,10 +4779,10 @@ void SimRobotController::addCubic(const std::vector<double>& q,const std::vector
 void SimRobotController::addMilestone(const vector<double>& q,const vector<double>& dq)
 {
   if(controller->robot->links.size() != q.size()) {
-    throw PyException("Invalid size of configuration");
+    throw PyException("Invalid size of configuration, must be equal to robot.numLinks()");
   }
   if(controller->robot->links.size() != dq.size()) {
-    throw PyException("Invalid size of velocity");
+    throw PyException("Invalid size of velocity, must be equal to robot.numLinks()");
   }
   EnablePathControl(sim->sim->robotControllers[index].get());
   Config qv(controller->robot->links.size(),&q[0]);
@@ -4792,7 +4795,7 @@ void SimRobotController::addMilestone(const vector<double>& q,const vector<doubl
 void SimRobotController::setVelocity(const vector<double>& dq,double dt)
 {
   if(controller->robot->links.size() != dq.size()) {
-    throw PyException("Invalid size of velocity");
+    throw PyException("Invalid size of velocity, must be equal to robot.numLinks()");
   }
   EnablePathControl(sim->sim->robotControllers[index].get());
   Config qv(controller->robot->links.size(),&dq[0]);
@@ -4812,7 +4815,7 @@ void SimRobotController::setTorque(const std::vector<double>& t)
 {
   RobotMotorCommand& command = controller->command;
   if(t.size() != command.actuators.size()) {
-    throw PyException("Invalid command size, must be equal to driver size");
+    throw PyException("Invalid command size, must be equal to robot.numDrivers()");
   }
   for(size_t i=0;i<command.actuators.size();i++) {
     command.actuators[i].SetTorque(t[i]);
@@ -4831,7 +4834,7 @@ void SimRobotController::setPIDCommand(const std::vector<double>& qdes,const std
   Robot* robot=controller->robot;
   if(qdes.size() != command.actuators.size() || dqdes.size() != command.actuators.size()) {
     if(qdes.size() != robot->links.size() || dqdes.size() != robot->links.size())
-      throw PyException("Invalid command sizes");
+      throw PyException("Invalid command sizes, must be either robot.numLinks() or robot.numDrivers()");
     for(size_t i=0;i<qdes.size();i++) {
       robot->q(i) = qdes[i];
       robot->dq(i) = dqdes[i];
@@ -4859,7 +4862,7 @@ void SimRobotController::setPIDCommand(const std::vector<double>& qdes,const std
   RobotMotorCommand& command = controller->command;
   //Robot* robot=sim->sim->controlSimulators[index];
   if(tfeedforward.size() != command.actuators.size())
-     throw PyException("Invalid command sizes");
+     throw PyException("Invalid feedforward torque command size, must be robot.numDrivers()");
   for(size_t i=0;i<command.actuators.size();i++) {
     command.actuators[i].torque = tfeedforward[i];
   }
@@ -4871,7 +4874,7 @@ void SimRobotController::setPIDGains(const std::vector<double>& kP,const std::ve
 {
   RobotMotorCommand& command = controller->command;
   if(kP.size() != command.actuators.size() || kI.size() != command.actuators.size() || kD.size() != command.actuators.size()) {
-    throw PyException("Invalid gain sizes");
+    throw PyException("Invalid gain sizes, must be robot.numDrivers()");
   }
   for(size_t i=0;i<kP.size();i++) {
     command.actuators[i].kP = kP[i];
