@@ -283,7 +283,13 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
   if(useGLFramebuffers) {
     if(!renderer.Setup(xres,yres)) {
       LOG4CXX_WARN(GET_LOGGER(Sensing),"CameraSensor: Couldn't initialize GLEW, falling back to slow mode");
-      LOG4CXX_WARN(GET_LOGGER(Sensing),"  GL version is: "<<glGetString(GL_VERSION));
+      const GLubyte* glVersion = glGetString(GL_VERSION);
+      if(glVersion) {
+        LOG4CXX_WARN(GET_LOGGER(Sensing),"  GL version is: "<<glVersion);
+      }
+      else {
+        LOG4CXX_WARN(GET_LOGGER(Sensing),"  GL version could not be queried");
+      }
       useGLFramebuffers = false;
     }
   }
@@ -296,6 +302,7 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
     //-------------------------
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_BLEND);
+    glEnable(GL_LIGHTING);
     glEnable(GL_DEPTH_TEST);
     //-------------------------
     //now render the scene from the POV of the camera
@@ -372,8 +379,8 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
             //get color of object
             //TODO: lighting
             RobotWorld::AppearancePtr app = world.GetAppearance(obj);
-            float* rgba = app->faceColor.rgba;
-            measurements[k] = double(((unsigned char)(rgba[3]*255.0) << 24) | ((unsigned char)(rgba[0]*255.0) << 16) | ((unsigned char)(rgba[1]*255.0) << 8) | ((unsigned char)(rgba[2]*255.0)));
+            const float* rgba = app->faceColor.rgba;
+            measurements[k] = double(((unsigned char)(rgba[3]*255.0) << 24) | ((unsigned char)(rgba[2]*255.0) << 16) | ((unsigned char)(rgba[1]*255.0) << 8) | ((unsigned char)(rgba[0]*255.0)));
           }
           Real d = vfwd.dot(pt - vsrc);
           d = Min(d,zmax);
@@ -388,7 +395,7 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
     }
     static bool warned = false;
     if(!warned) {
-      LOG4CXX_WARN(GET_LOGGER(Sensing),"DepthCameraSensor: doing fallback from GLEW... "<<k<<" rays cast, may be slow");
+      LOG4CXX_WARN(GET_LOGGER(Sensing),"CameraSensor: doing fallback from GLEW... "<<k<<" rays cast, may be slow");
       warned = true;
     }
 
