@@ -1,6 +1,4 @@
 """ symbolic module
-Kris Hauser
-5/12/2018
 
 ===============================================================================
 Overview
@@ -44,9 +42,9 @@ symbolic_sympy module, and these are complete for most "tame" expressions.
 Basic usage
 ===============================================================================
 
-In standard usage, first create a ``Context`` and declare any extra functions
-to be used in your library. Then, and add variables and declare expressions as
-necessary.::
+In standard usage, first create a :class:`Context` and declare any extra
+functions to be used in your library. Then, and add variables and declare
+expressions as necessary.::
 
     ctx = Context()
     x = ctx.addVar("x",'N')
@@ -63,18 +61,19 @@ necessary.::
     x.unbind() #x is now a variable
     y.unbind() #y is now a variable
 
-An Expression can take on a form x OP y or OP(x,y,z), where x,y, and z are
-either Variables, Expressions, or constant values and OP is either a builtin
-function or a declared Function type.  Expressions can be evaluated to other
-Expressions via ``Expression.eval(context=None)``, or to constants using
-``Expression.evalf(context=None)``.
+An :class:`Expression` can take on a form ``x OP y`` or ``OP(x,y,z)``, where
+x,y, and z are either :class:`Variable`, :class:`Expression`, or constant
+values, and ``OP`` is either a builtin function or a declared :class:`Function`
+type.  Expressions can be evaluated to other Expressions via
+:meth:`Expression.eval`, or to constants using
+:meth:`Expression.evalf`.
 
-There are two kinds of Variables. 
+There are two kinds of :class:`Variable`: 
 
-- *Standard Variable*: This type is managed by ``Context`` and contains
-  information in the ``Variable`` class.  Such a variable can either be
+- *Standard Variable*: This type is managed by :class:`Context` and contains
+  information in the :class:`Variable` class.  Such a variable can either be
   numeric, vector, or matrix type.  It will contain size information and will
-  be saved to and  loaded from disk with the ``Context``. 
+  be saved to and  loaded from disk with the :class:`Context`. 
 - *User-data Variable*. This type is an unmanaged variable.  These have
   unlimited type, and can be complex Python objects, but the user must set
   these up in the context manually.  Hence, if you wish to reuse
@@ -82,22 +81,22 @@ There are two kinds of Variables.
   first set up the ``Context`` appropriately with a similar   user-data object.
 
 By default, expressions constructed in Python refer to user-data objects with
-strings, e.g., ``setConfig("robot",q)`` runs the setConfig Function on the
-"robot" user data and the q Variable. For use in the optimize.py module, all
-optimization parameters must be standard Variables.
+strings, e.g., ``setConfig("robot",q)`` runs the
+:func:`symbolic_klampt.setConfig` Function on the "robot" user data and the
+``q`` Variable. 
 
-The ``expr``() function is run on each argument to a ``Function``.  This will
-automatically preserve Variables and Expressions, while most Python
-constants will be converted to ConstantExpressions.  However, Python strings
-will be converted to references to user-data variables.
+The :func:`expr` function is run on each argument to a :class:`Function`.
+This will leave a :class:`Variable` and :class:`Expression` as is,
+and most Python constants will be converted to a :class:`ConstantExpression`. 
+However, Python strings will be converted to references to user-data variables.
 
 Constant values can be floats, integers, booleans, strings, lists, and numpy
 arrays (Dictionaries are not supported as constant values.)  Constants are
-converted to expressions using ``const(x)``, or ``expr(x)``.
+converted to expressions using :func:`const`, or :func:`expr`.
 
 Type specifiers are used for type checking and to determine the type of
-expressions, particularly for Jacobians.  The ``Type`` class is used for this.
-The type member specifies the general type of object, and is given by a
+expressions, particularly for Jacobians.  The :class:`Type` class is used for
+this. The type member specifies the general type of object, and is given by a
 character:
 
 - N: generic numeric
@@ -153,10 +152,11 @@ Standard operations on expressions include:
 Symbolic Functions
 ===============================================================================
 
-You can build an ``Expression`` out of built-in symbolic Functions.  Calling
-a ``Function`` does not immediately evaluate the function on its arguments,
-but instead builds an ``Expression`` that is the root of a symbolic Expression
-Graph.
+You can build an :class:`Expression` by calling a symbolic :class:`Function`,
+many of which duplicate the functions of plain Python, the math module, or
+Numpy.  Calling a :class:`Function` does not immediately evaluate
+the function on its arguments, but instead builds an :class:`Expression` that 
+is the root of a symbolic Expression Graph.
 
 Built-in symbolic Functions include:
 
@@ -241,7 +241,7 @@ Arithmetic functions
 - ``sum_(*args)``: Evaluates to sum(args).  If arguments are vectors or matrices,
   then the result is also a vector or matrix. This is somewhat different
   behavior from sum(x) if x is a list.
-- ``weightedsum(v1,...,vn,w1,...,wn)``: Evaluates to w1*v1+...+wn*vn. 
+- ``weightedsum(v1,...,vn,w1,...,wn)``: Evaluates to :math:`w1*v1+...+wn*vn`. 
 
 Accessors
 ---------
@@ -406,7 +406,7 @@ Python Lists as arguments are handled in somewhat of a tricky way.  If the list
 is compatible with a Numpy array  (i.e., each element is numeric or equal-sized
 arrays), it will be converted to a Numpy array.  Otherwise, (e.g., a non-
 constant Expression is inside or the elements do not have the same size) it will
-be converted to an ``array(e1,...,en)`` ``Expression``.  Tuples are NOT
+be converted to an ``array(e1,...,en)`` Expression.  Tuples are NOT
 converted in the same way, so that Numpy matrix indices can be preserved.
 Tuples of expressions are not supported implicitly, instead you will have to use
 ``tuple_(e1,...,en)``.
@@ -499,11 +499,11 @@ IO
 
 There are three forms of Expression IO in symbolic_io:
 
-1. Standard Python printing: str(expr) (output only)
-2. Human-readable strings: symbolic_io.toStr(expr) (output) /
-   symbolic_io.fromStr(str) (input)
-3. JSON-like objects: symbolic_io.toJson(expr) (output) /
-   symbolic_io.fromJson(jsonobj) (input)
+1. Standard Python printing: ``str(expr)`` (output only)
+2. Human-readable strings: :func:`symbolic_io.toStr` (output) /
+   :func:`symbolic_io.fromStr` (input)
+3. JSON-like objects: :func:`symbolic_io.toJson` (output) /
+   :func:`symbolic_io.fromJson` (input)
 
 Method 1 is the most readable when printed to the console, but can't be read.
 
@@ -522,8 +522,8 @@ particular, any common ConstantExpression and OperatorExpression objects are
 
 In Method 2, the first time a sub-expression appears it's tagged with a suffix
 #id.  Then, subsequent references are retrieved with the expression @id.  As an
-example, the string "(x+y)#1*@1" evaluates to (x+y)*(x+y), since '#1' assigns
-(x+y) to the id '1' and '@1' retrieves it.
+example, the string ``(x+y)#1*@1`` evaluates to ``(x+y)*(x+y)``, since '#1'
+assigns ``(x+y)`` to the id '1' and '@1' retrieves it.
 
 
 ===============================================================================
@@ -531,11 +531,11 @@ Code generation
 ===============================================================================
 
 - context.makePyFunction(expr,varorder=None): creates a Python function that
-  evaluates ``expr`` given arguments whose values are to be assigned to the
-  ``Variable``s in ``varorder``.
+  evaluates ``expr`` given arguments whose values are to be assigned to each
+  ``Variable`` in ``varorder``.
 - context.makeFlatFunction(expr,varorder=None): creates a Python function that
   evaluates ``expr`` given a flattened list or vector of parameters, which can
-  be unraveled to values to be assigned to the Variables in ``varorder``.
+  be unraveled to values to be assigned to each Variable in ``varorder``.
 - symbolic_io.latex(expr): produces a LaTex string representing the expression
   (requires Sympy)
 - symbolic_io.codegen(exprs,language): produces C / Matlab code to evaluate the
@@ -546,9 +546,10 @@ Code generation
 Sympy integration
 ===============================================================================
 
-Sympy integration is quite automatic.  See exprToSympy and exprFromSympy in
-symbolic_simpy.py. Built-in functions are converted mostly bidirectionally and
-hence support all aspects of both libraries.
+Sympy integration is quite automatic.  See :func:`symbolic_sympy.exprToSympy`
+and :func:`symbolic_sympy.exprFromSympy` in symbolic_sympy.py. Built-in
+functions are converted mostly bidirectionally and hence support all aspects of
+both libraries.
 
 Array operations are converted to Sympy Matrix operations, which expand all
 entries into scalar expressions, so array operations like dot() cannot be
@@ -1118,16 +1119,23 @@ class Context:
         self.expressions[name] = expr
         return expr
     def declare(self,func,fname=None,fargs=None):
-        """Declares a custom function.  If fname is provided, this will be how the function
-        will be referenced.  Otherwise, the Python name of the function is used.
+        """Declares a custom function.  If fname is provided, this will be how
+        the function will be referenced.  Otherwise, the Python name of the
+        function is used.
 
-        - func: either a Python function, or an Expression. 
-        - fname: the name of the Function.  If func is an Expression this is mandatory.
-        - fargs: the argument names.  If func is an Expression this is mandatory. 
+        Args:
+            func (function or :class:`Expression`): the function / expression
+                object
+            fname (str, optional): the name of the new Function.  If func is an
+                Expression this is mandatory.  Otherwise it is taken from the
+                Python function name.
+            fargs (list of str, optional): the argument names.  If func is an
+                :class:`Expression` this is mandatory. 
 
-        To convert Expressions into Functions, the fargs list declares the order in which
-        variables in func will be bound to arguments.  E.g., Context.declare(2*expr("x")*expr("y"),"twoxy",["x","y"])
-        produces a two argument function twoxy(x,y): 2*x*y.
+        To convert Expressions into Functions, the fargs list declares the
+        order in which variables in func will be bound to arguments.  E.g.,
+        ``Context.declare(2*expr("x")*expr("y"),"twoxy",["x","y"])``
+        produces a two argument function ``twoxy(x,y): 2*x*y``.
         """ 
         if isinstance(func,Function):
             if fname is None:
@@ -1156,13 +1164,21 @@ class Context:
             raise ValueError("func should be a symbolic Function, symbolic Expression, or Python function")
             
     def include(self,context,prefix=None,modify=False):
-        """Adds all items inside another context.  If prefix != None, self.[prefix] is set to context,
-        and all names in that context are prepended by the given prefix and a '.'.
+        """Adds all items inside another context as a sub-context.
 
-        If modify=True, then all the Variable and Function names inside the given sub-context are modified
-        to fit the `self` context.  This is useful if you are saving/loading expressions and using the convenience
-        form self.[prefix].[functionName] to instantiate Functions embedded inside the sub-context.  But be
-        careful not to re-use the sub-context inside multiple super-contexts.
+        If prefix != None, ``self.[prefix]`` is set to ``context``, and all
+        names in that context are prepended by the given prefix and a '.'.
+
+        If ``modify=True``, then all the Variable and Function names inside
+        the given sub-context are modified to fit the `self` context.  This is
+        useful if you are saving/loading expressions and using the convenience
+        form self.[prefix].[functionName] to instantiate Functions embedded
+        inside the sub-context. 
+
+        .. note::
+            When using modify=True, be careful not to re-use the sub-context
+            inside multiple super-contexts.
+
         """
         if prefix is not None:
             assert not hasattr(self,prefix),"Can't include a new context, already have an element named "+prefix
@@ -1245,13 +1261,17 @@ class Context:
                 assert isinstance(v,Variable)
                 v.value = val
     def bindFunction(self,function,remapping=None):
-        """Produces an Expression that evalutes the function, where its arguments are bound to
-        variables / user data in the current environment.  The argument names should map to 
-        similarly named variables or user data.
+        """Produces an Expression that evalutes the function, where its
+        arguments are bound to variables / user data in the current
+        environment.  The argument names should map to similarly named
+        variables or user data.
 
-        If remapping is provided, then it maps function arguments to variables or values
+        If remapping is provided, then it maps function arguments to variables
+        or values, either as
+
         - a dictionary mapping a function argument arg to remapping[arg].
         - a list or tuple mapping the i'th function argument to remapping[i].
+
         """
         if isinstance(function,str):
             function = self.customFunctions[function]
@@ -1326,9 +1346,9 @@ class Context:
     def get(self,name,*args):
         """Retrieves a named reference to a userData or variable.
 
-        Can be called as get(name), in which case a KeyError is raised if the key does not exist,
-        or get(name,defaultValue) in which case the default value is returned if the key
-        does not exist.
+        Can be called as ``get(name)``, in which case a KeyError is raised if 
+        the key does not exist, or ``get(name,defaultValue)`` in which case the
+        default value is returned if the key does not exist.
         """
         try:
             return self.userData[name]
@@ -1361,15 +1381,28 @@ class Context:
         del self.userData[itemname]
 
     def makePyFunction(self,expr,varorder=None):
-        """Given a function expr or an expression expr, returns (f,varorder),
-        where f is an equivalent 1-argument Python function that takes an argument list of
-        variable values.
-        The order of variables that should be provided to f in this tuple is returned in varorder.
+        """Converts an Expression or Function to a Python function ``f(x)``
+        that takes ``x`` as a list of scalar values, maps those to Variable
+        values, and returns the result of evaluating the expression / function.
 
-        If varorder != None, the tuple comes in varorder order.  Note that many of these may be
-          ignored.
-        If varorder == None, the variables remaining in the expression are ordered by the order
-          in which were added to this Context.
+        Args:
+            expr (:class:`Function` or :class:`Expression`): the function or
+                expression to evaluate
+            varorder (list, optional): If given, the list of Variables that
+                should appear in the flattened argument list ``x``.
+                
+                If this isn't provided, then the Variables in ``expr`` are
+                ordered by the order in which were added to this ``Context``.
+
+        Returns:
+            tuple: A pair ``(f,varorder)``, where:
+
+                * ``f(x)`` is a 1-argument Python function equivalent to ``expr``
+                    but where ``x`` is a list of variable values.
+
+                * ``varorder`` gives the order of variables that should be
+                    sent in ``x``
+
         """
         if isinstance(expr,Function):
             if varorder is None:
@@ -1418,11 +1451,15 @@ class Context:
                 varorder = []
             return ((lambda *args: res),varorder)
     def makeFlatFunction(self,expr,varorder=None,defaultsize=1):
-        """Given an expression expr, return (f,varorder),
-        where f is an equivalent 1-argument Python function that takes a list of numbers or numpy array.
-        The order of variables that should be provided to f in this tuple is returned in varorder.
+        """Given an expression expr, return ``(f,varorder)``,
+        where ``f`` is an equivalent 1-argument Python function that takes a
+        list of numbers or numpy array.  The order of variables that should
+        be provided to ``f`` in this tuple is returned in ``varorder``.
 
-        If vector variables are not given size hints, then they are assumed to have defaultsize.
+        If vector variables are not given size hints, then they are assumed
+        to have ``defaultsize``.
+
+        See also :meth:`makePyFunction`.
         """
         f,varorder = self.makePyFunction(expr,varorder)
         indices = self.getFlatVarRanges(varorder,defaultsize)
@@ -1440,14 +1477,20 @@ class Context:
             return f(*arglist)
         return fv,varorder
     def makeFlatFunctionDeriv(self,expr,varorder=None,defaultsize=1):
-        """Given a differentiable expression expr, return (df,varorder),
-        where df is an 1-argument Python function that that takes a list of numbers or numpy array and
-        outputs the derivative (Jacobian matrix) of expression expr.
-        The order of variables that should be provided to df in this tuple is returned in varorder.
+        """Given a differentiable expression expr, return ``(df,varorder)``,
+        where df is an 1-argument Python function that that takes a list of
+        numbers or numpy array and outputs the derivative (Jacobian matrix)
+        of expression ``expr``.
 
-        If expr is not differentiable, then df=None is returned
+        The order of variables that should be provided to ``df`` in this tuple
+        is returned in ``varorder``.
 
-        If vector variables are not given size hints, then they are assumed to have defaultsize.
+        If ``expr`` is not differentiable, then ``df=None`` is returned.
+
+        If vector variables are not given size hints, then they are assumed to
+        have ``defaultsize``.
+
+        See also :meth:`makeFlatFunction`.
         """
         if varorder is None:
             f,varorder = self.makePyFunction(expr)
@@ -1517,40 +1560,86 @@ class Context:
         assert not any(v.value is None for v in varorder),"All variables' values must be set"
         return np.hstack([v.value.flatten() if isinstance(v,np.ndarray) else v for v in varorder])
 
+
 class Function:
-    """A symbolic function.  Contains optional specifications of argument and return types, as well as
-    derivatives.
+    """A symbolic function.  Contains optional specifications of argument and
+    return types, as well as derivatives.
+
+    Args:
+        name (str):
+        func (Python function or :class:`Expression`):
+        argNames (list of str, optional):
+        returnType (str or function, optional): sets ``self.returnType`` or
+            ``self.returnTypeFunc``.
+
+    If ``func`` is a Python function, the argument list will be derived from
+    the declaration of the Python function. Otherwise, it must be an
+    :class:`Expression`, and ``argNames`` needs to be provided.  The
+    expression must be closed, meaning that all unspecified variables in the
+    expression must be named in ``argNames``.
+
+    Examples:
+        Basic instantiation::
+
+            #standard function method
+            def f(x,y):
+                ...
+            symfunc = Function("f",f)
+            a = context.addVar("a")
+            b = context.addVar("b")
+            c = context.addVar("c")
+            print symfunc(a,b)   # prints f($a,$b)
+
+        Creating a Function from an Expression (sort of like a lambda function)::
+
+            expr = a + 2*b
+            symfunc2 = Function("f2", expr, ["a","b"])  #when symfunc2 is called, its first argument will be bound to a, and its second will be bound to b
+            print symfunc2(c,4)   #prints f2(c,4)
+            print symfunc2(c,4).eval({'c':5})  #prints 13, because c + 2*4 = 5 + 2*4 = 13
+
+    If ``func`` is an Expression, then you can automatically set derivatives
+    if all the sub-expressions have derivatives. To do so, use the
+    :meth:`autoSetJacobians` method.
+
+    Defining derivatives:
+        There are three ways to define derivatives: :meth:`setDeriv`,
+        :meth:`setJacobian`, and :meth:`autoSetJacobians` (available if
+        ``func`` is an expression.  In :meth:`setDeriv` you provide
+        Jacobian-vector products.  In :meth:`setJacobian` you provide
+        Jacobian matrices (or tensors).
 
     Attributes:
         name (str): name of function used in printing and IO.
         description (str, optional): text description of function.
-        func: Expression or python function.
+        func (Python function or :class:`Expression`): the function to be
+            evaluated.
         argNames (list of strs, optional): names of arguments.
-        argTypes (list of Type, optional): list of argument ``Type``s.
+        argTypes (list of Type, optional): list of argument :class:`Type`s.
         argDescriptions (list of strs, optional): strings describing each
             argument
-        returnType (Type, optional): return ``Type``
+        returnType (Type, optional): return :class:`Type`
         returnTypeFunc (function, optional): a function that takes argument 
-            types and produces a more specific return ``Type`` than
+            types and produces a more specific return :class:`Type` than
             ``returnType``
         returnTypeDescription (str, optional): description of the return type
-        deriv (optional): Can be either
+        deriv (optional): Can be either:
 
-            1) a list of Jacobian-vector products with respect to a derivative
-                of each argument: ``[df1(*args,darg1),...,dfn(*args,dargn)]``.
-                Here, ``dargi`` is an argument of the same shape as
-                ``args``[i], giving the derivative d``args``[i]/dx w.r.t. some
-                scalar parameter x.  The function ``dfi`` gives
-                ``df/dargi*dargi/dx`` where df/dargi is the partial of
-                ``self`` with respect to the i'th argument.
-            2) a function ``df(args,dargs)`` giving the total derivative of f 
-                given directional derivatives of each of the argmuments. 
-                Here, ``dargs`` is a list of derivatives ``[darg1,...,dargn]``.
-                The result should be equal to df/dx =
-                df/darg1*darg1/dx + ... + df/dargn*dargn/dx.
+            1. a list of Jacobian-vector products with respect to a derivative
+               of each argument: ``[df1(*args,darg1),...,dfn(*args,dargn)]``.
+               Here, ``dargi`` is an argument of the same shape as
+               ``args[i]``, giving the derivative :math:`\\frac{dargs[i]}{dx}` 
+               w.r.t. some scalar parameter x.  The function ``dfi`` gives
+               :math:`\\frac{df}{dargs[i]}\\cdot\\frac{dargs[i]}{dx}` where
+               :math:`\\frac{df}{dargs[i]}` is the partial 
+               of ``self`` with respect to the i'th argument.
+            2. a function ``df(args,dargs)`` giving the total derivative of f 
+               given directional derivatives of each of the argmuments. 
+               Here, ``dargs`` is a list of derivatives ``[darg1,...,dargn]``.
+               The result should be equal to
+               :math:`\\frac{df}{dx} = \\frac{df}{dargs[0]}\\cdot \\frac{dargs[0]}{dx} + ... + \\frac{df}{dargs[n-1]}\\cdot\\frac{dargs[n-1]}{dx}`.
 
             The return value should have the same shape as
-            ``self.returnType()``.
+            ``self.returnType()``
 
         colstackderiv (optional): same as ``deriv``, except that each function
             accepts stacked argument derivatives.  This can be more efficient
@@ -1561,16 +1650,17 @@ class Function:
             `dargi` has shape ``(count(argi),k)``.
         rowstackderiv (optional): same as ``colstackderiv``, except that row-
             wise stacked argument derivatives are accepted.  In other words,
-            ``dargi`` is a matrix ``[dflatten(argi)/dx1, ... ,
-            dflatten(argi)/dxk]`` which has shape ``(k,count(argi))``.  This
+            ``dargi`` is a matrix
+            :math:`[\\frac{d\\text{flatten(args[i])}}{dx1}, ... , \\frac{d\\text{flatten(args[i])}}{dxk}]`
+            which has shape ``(k,count(argi))``.  This
             is more efficient than ``colstackderiv`` but corresponds less
             directly to standard mathematical notation.
         jacobian (list of functions, optional): list of Jacobian functions
             with respect to each argument.  Has the form
             ``[Jf1(*args),...,Jfn(*args)]`` where `Jfi` returns a matrix of 
             shape ``(count(self),count(args[i]))``.  The total derivative with
-            respect  some variable x is df/dx =
-            ``reshape(dot(Jf1,flatten(darg1)) + dot(Jfn,flatten(dargn)),shape(self))``
+            respect to some variable ``x`` is
+            :math:`\\frac{df}{dx} =` ``reshape(dot(Jf1,flatten(darg1)) + dot(Jfn,flatten(dargn)),shape(self))``
         presimplifier (function, optional):
         simplifier (function, optional):
         presimplifierDict (dict, optional): a nested dict, mapping argument
@@ -1591,35 +1681,6 @@ class Function:
 
     """
     def __init__(self,name,func,argNames=None,returnType=None):
-        """Initializes the function with a name, Python function or Expression, and optional argument list and
-        return type.
-
-        If func is a Python function, the argument list will be derived from the declaration of the Python function.
-        Otherwise, it must be an expression, and argNames needs to be provided.  The expression must be closed,
-        meaning that all unspecified variables in the expression must be named in argNames.
-
-        Examples:
-            Basic instantiation::
-
-                #standard function method
-                def f(x,y):
-                    ...
-                symfunc = Function("f",f)
-                a = context.addVar("a")
-                b = context.addVar("b")
-                c = context.addVar("c")
-                print symfunc(a,b)   # prints f($a,$b)
-
-            Creating a Function from an Expression (sort of like a lambda function)::
-
-                expr = a + 2*b
-                symfunc2 = Function("f2", expr, ["a","b"])  #when symfunc2 is called, its first argument will be bound to a, and its second will be bound to b
-                print symfunc2(c,4)   #prints f2(c,4)
-                print symfunc2(c,4).eval({'c':5})  #prints 13, because c + 2*4 = 5 + 2*4 = 13
-
-        The Expression method can automatically set derivatives if all the sub-expressions have derivatives. To do so, use
-        the autoSetJacobians function.
-        """
         self.name = name
         self.description = None
         self.func = func
@@ -1764,7 +1825,7 @@ class Function:
         argument arg.  The function ``dfunc`` is a function that takes
         arguments ``(arg1,...,argn,dx)``, where ``dx`` is the
         derivative of ``arg`` with respect to some variable x, and
-        returns ``df/darg(arg1,...,argn) * darg/dx``.
+        returns :math:`df/darg(arg1,...,argn) * darg/dx`.
         
         For vector-valued arguments and functions, the * is a matrix-vector
         product, and ``dfunc`` is required to produce what's commonly known as
@@ -1772,18 +1833,18 @@ class Function:
         
         For matrix-valued arguments or functions, the * is a tensor product.
 
-        Arguments:
+        Args:
             arg (int or str): either an argument index or name.
             dfunc: either:
             
-                1) an Expression of variables arg1,...,argn,darg,
-                2) a ``Function`` of n+1 variables mapping to ``arg1,...,argn,
+                1. an Expression of variables arg1,...,argn,darg,
+                2. a ``Function`` of n+1 variables mapping to ``arg1,...,argn,
                     dx``,
-                3) a Python function of n+1 variables (arg1,...,argn,dx) that
-                    either returns a value (setting ``asExpr=False``) or an
-                    ``Expression`` of the derivative (if ``asExpr=True``).
-                4) None, to indicate that the derivative is not defined,
-                5) 0, to indicate that the derivative is identically 0.
+                3. a Python function of n+1 variables ``(arg1,...,argn,dx)`` 
+                    that either returns a value (setting ``asExpr=False``) or 
+                    an ``Expression`` of the derivative (if ``asExpr=True``).
+                4. None, to indicate that the derivative is not defined,
+                5. 0, to indicate that the derivative is identically 0.
                 
                 In the normal case (``stackable=False``), the shape of ``dx`` 
                 is the same as ``arg``, and the result has the same shape as
@@ -1812,13 +1873,13 @@ class Function:
                 
                 If the argument is not an array or its type cannot be
                 determined (see ``setArgType``) then ``dvar`` will be passed as
-                a count(arg) x k matrix (for column-stacking) or a
-                k x count(arg) matrix (for row stacking).
+                a ``count(arg)`` x k matrix (for column-stacking) or a
+                k x ``count(arg)`` matrix (for row stacking).
                 
                 If the function does not return an array or the return type
                 cannot be determined (see ``setReturnType``), the shape of the
-                returned matrix must be count(self) x k (for column-stacking)
-                or k x count(self) (for row-stacking).
+                returned matrix must be ``count(self)`` x k (for column-
+                stacking) or k x ``count(self)`` (for row-stacking).
         """
         aindex,arg = self.checkArg(arg)
         if self.deriv is None:
@@ -1857,11 +1918,11 @@ class Function:
         This only makes sense when the arguments are all arrays or scalars; no
         complex types are supported.
         
-        Arguments: 
+        Args: 
             arg (int or str): same as ``setDeriv``.
             dfunc: similar to ``setDeriv``, but a function that takes n
                 arguments (arg1,...,argn) and returns the matrix
-                ``df/darg(arg1,...,argn)``.
+                :math:`df/darg(arg1,...,argn)`.
                 
         The return value of ``dfunc`` must have shape shape(self) + shape(arg),
         so that:
@@ -1925,10 +1986,10 @@ class Function:
         """Sets a return type specifier.
 
         Args:
-           type (Type, str, or function): if a Type object, the return type is set
-               directly.  If a character type specifier, it is cast to Type.
-               If it is a function, it is assumed to be a function that that takes
-               in argument ``Type``s and returns a ``Type``.
+           type (:class:`Type`, str, or function): if a Type object, the return
+               type is set directly.  If a character type specifier, it is cast
+               to Type. If it is a function, it is assumed to be a function 
+               that that takes in argument Types and returns a :class:`Type`.
         """
         if callable(type):
             self.returnTypeFunc = type
@@ -1940,8 +2001,8 @@ class Function:
 
         Args:
             arg (int or str): an index or string naming an argument.
-            type (Type or str): a Type object or character type specifier for 
-                the specified argument.
+            type (Type or str): a :class:`Type` object or character type
+                specifier for the specified argument.
         """
         if self.argTypes is None:
             self.argTypes = [None]*len(self.argNames)
@@ -1963,18 +2024,24 @@ class Function:
 
         Args:
             signatures (list): a list of argument signatures. A signature can
-            be:
+                be:
 
-                - the operation name for an OperatorExpression, passing the arg directly to func(...)
-                - '_scalar': matches to a constant scalar, and passes that constant to func(...)
-                - '_const': matches to constant, and passes that constant to func(...)
-                - '_returnType': passes the argument's returnType() to func(...)
-                - None: match all.  The arg is passed directly to func(...)
+                * the operation name for an OperatorExpression, passing the arg
+                  directly to func(...)
+                * '_scalar': matches to a constant scalar, and passes that
+                  constant to func(...)
+                * '_const': matches to constant, and passes that constant to
+                  ``func(...)``
+                * '_returnType': passes the argument's ``returnType()`` to
+                  ``func(...)``
+                * None: match all.  The arg is passed directly to func(...)
+                
+            func (callable): a callable that takes a list of function arguments, 
+                possibly transformed by _const or _returnType. This returns a 
+                simplified :class:`Expression` or ``None``.
 
-            func (callable): a callable that takes a list of arguments, possibly transformed by _const or _returnType.
-                This returns a simplified Expression or None.
-
-            pre (bool, optional): if True, the simplifier is called before arguments are simplified.
+            pre (bool, optional): if True, the simplifier is called before
+                arguments are simplified.
 
         If multiple matches are present then they are tested in order
 
@@ -1997,8 +2064,8 @@ class Function:
         root[signatures[-1]] = func
     
     def simplify(self,args,pre=False):
-        """Performs simplification of OperatorExpression(self,args), either with the simplifier function
-        or the simplifierDict."""
+        """Performs simplification of ``OperatorExpression(self,args)``, either
+        with the simplifier function or the simplifierDict."""
         if pre:
             simplifier = self.presimplifier
             simplifierDict = self.presimplifierDict
@@ -2329,9 +2396,9 @@ class Expression(object):
         """Returns the output type of this expression."""
         raise NotImplementedError()
     def depth(self,cache=True):
-        """Returns the depth of the deepest leaf of this expression tree (i.e., its height).
-        If cache = True, depths are cached as attribute 'depth' to speed up
-        subsequent depth() calls."""
+        """Returns the depth of the deepest leaf of this expression tree (i.e.,
+        its height). If cache = True, depths are cached as attribute 'depth' to
+        speed up subsequent depth() calls."""
         try:
             return self._cache['depth']
         except KeyError:
@@ -2350,8 +2417,9 @@ class Expression(object):
         """
         raise NotImplementedError()
     def returnConstant(self,context=None):
-        """Returns true if the evaluation of the expression in the given context results in a constant.
-        If so, then evalf() can safely be applied without error."""
+        """Returns true if the evaluation of the expression in the given
+        context results in a constant. If so, then :meth:`evalf` can safely be
+        applied without error."""
         raise NotImplementedError()
     def eval(self,context=None):
         """Evaluates the expression while substituting all constant values. 
@@ -2382,12 +2450,14 @@ class Expression(object):
         """Internally used eval"""
         raise NotImplementedError()
     def _evalf(self,context=None):
-        """Internally used evalf.  May be a tiny bit faster than evalf but has less informative error messages"""
+        """Internally used evalf.  May be a tiny bit faster than :meth:`evalf`
+        but has less informative error messages.
+        """
         raise NotImplementedError()
     def deriv(self,var,context=None):
-        """Returns a new expression where all bound variables and variables in context
-        are reduced to constant values. If all arguments are constant, returns a
-        constant.
+        """Returns a new expression where all bound variables and variables in 
+        context are reduced to constant values. If all arguments are constant,
+        returns a constant.
 
         Args:
             var: either a Variable, a string naming a Variable, or a dictionary
@@ -2435,9 +2505,17 @@ class Expression(object):
             raise ValueError("Unable to find term %s in expression %s"%(str(val),str(self)))
         return self
     def simplify(self,context=None,depth=None):
-        """Returns a simplified version of self, or self if it cannot be simplified.
-        - context: a dict or Context for Variable / UserData substitution
-        - depth: None for full-depth simplification, or the max depth to explore
+        """Returns a simplified version of self, or self if it cannot be
+        simplified.
+
+        Args:
+            context (dict or :class:`Context`): any Variable / UserData whose
+                name appears in here will be substituted with its value.
+            depth (int, optional): None for full-depth simplification, or the
+                max depth to explore.
+
+        Returns:
+            Expression:
         """
         res = self._simplify(context,depth)
         if res is None: return self
@@ -2452,31 +2530,41 @@ class Expression(object):
         """Generic traversal function.
 
         Args:
-            pre (function, optional): a function f(expr) of an Expression that is called before traversing
-                children. It returns a triple (descend,cont,value) which controls the recursion:
+            pre (function, optional): a function f(expr) of an Expression that
+                is called before traversing children. It returns a triple
+                ``(descend,cont,value)`` which controls the recursion:
 
-                - If descend is True, then this proceeds to traverse children and call post. value is ignored.
-                - If descend is False, value is the return value of the traversal.
-                - If cont is True, then the parent of expr continues traversing children.
-                - If cont is False, then the parent of expr continues traversing children.
+                * If descend is True, then this proceeds to traverse children
+                  and call post. value is ignored.
+                * If descend is False, value is the return value of the
+                  traversal.
+                * If cont is True, then the parent of expr continues traversing
+                  children.
+                * If cont is False, then the parent of expr continues
+                  traversing children.
 
-                For example, a find function would return (False,False,*) if an item is found, and
-                (True,True,*) otherwise.
+                For example, a find function would return (False,False,*) if an
+                item is found, and (True,True,*) otherwise.
 
-            post (function, optional): a two-argument function f(expr,childvals) called after traversing children.
-                childvals are the return values of traversing children.
-                It returns a pair (cont,value), where value is the return value of the traversal
-                under expr, and cont which controls the recursion:
+            post (function, optional): a two-argument function
+                ``f(expr,childvals)`` called after traversing children. 
+                ``childvals`` are the return values of traversing children.
+                It returns a pair ``(cont,value)``, where value is the return
+                value of the traversal under ``expr``, and ``cont`` which
+                controls the recursion:
 
-                - If cont is True, the parent of expr continues traversing children.
-                - If cont is False, the parent of expr stops traversing children and value is used the
-                  return value of the parent.
+                * If cont is True, the parent of expr continues traversing
+                  children.
+                * If cont is False, the parent of expr stops traversing
+                  children and value is used the return value of the parent.
 
-                If post is evaluated, the cont value here overrides the cont value of pre.
+                If post is evaluated, the cont value here overrides the cont
+                value of pre.
             cache (bool, optional): if True, uses the caching functionality.
-            clearcache (bool, optional): if True, deletes the cache after traversal.  Default uses cache and clears it.
-            cacheas (str, optional): if not None, caches the return value as an attribute. For this to work,
-                cache must be True.
+            clearcache (bool, optional): if True, deletes the cache after
+                traversal.  Default uses cache and clears it.
+            cacheas (str, optional): if not None, caches the return value as an
+                attribute. For this to work, ``cache`` must be True.
 
         Returns:
             result: The value returned by pre or post.
