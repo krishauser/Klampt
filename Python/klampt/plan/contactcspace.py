@@ -7,7 +7,7 @@ from .rigidobjectcspace import RigidObjectCSpace
 
 class StanceCSpace(ClosedLoopRobotCSpace):
     """A cspace with contacts that impose closed-chain constraints between a
-    robot and zero or more objects.
+    robot and zero or more objects.  Stability of the robot is also enforced.
 
     Collisions are not checked between the world and fixed robot links, or 
     contacting links that are initially already colliding with the world.
@@ -19,8 +19,11 @@ class StanceCSpace(ClosedLoopRobotCSpace):
             accept anything else)
         holds (list of :class:`Hold`): a list of Holds associated with the
             contacts.
-        supportPolygon (list): the support polygon planes resulting from
-            `contact.supportPolygon`(holds)
+        sp (list): the support polygon planes resulting from
+            ``contact.supportPolygon(holds)``
+        equilibriumMargin (float): Can enforce that the COM needs to be within
+            the support polygon shrunk by some safety margin.  default value
+            is 0.
 
     """
     def __init__(self,robot,holds,collider=None,world=None,checkTorqueLimits=False):
@@ -55,7 +58,13 @@ class StanceCSpace(ClosedLoopRobotCSpace):
 
 
 class TransitionCSpace(ClosedLoopRobotCSpace):
-    """A configuration space for a transition between stances."""
+    """A configuration space for a transition between stances.  For this to be
+    meaningful, the holds of one stance must be a superset of the holds of the other.
+
+    Args:
+        space1 (StanceCSpace): the first stance.
+        space2 (StanceCSpace): the second stance.
+    """
     def __init__(self,space1,space2):
         assert isinstance(space1,StanceCSpace)
         assert isinstance(space2,StanceCSpace)
@@ -67,22 +76,30 @@ class TransitionCSpace(ClosedLoopRobotCSpace):
 
 
 class MultiContactCSpace(CompositeCSpace):
-    """A cspace with contacts that impose closed-chain constraints between a robot and
-    zero or more objects.  NOT IMPLEMENTED YET
+    """A cspace with contacts that impose closed-chain constraints between a
+    robot and zero or more objects. 
+
+    .. warning::
+        NOT IMPLEMENTED YET
 
     Collisions are not checked between the world and fixed robot links, or 
     contacting links that are initially already colliding with the world.
 
     Attributes:
         gravity: the gravity vector (default [0,0,-9.8])
-        contactMap (dict): a dictionary mapping (obj1,obj2) pairs to lists of contacts. Same structures
-            that results from contactMap.
-        holds (list of Hold): a list of Holds associated with the contacts.
-        robotCSpace (ClosedLoopRobotCSpace): a ClosedLoopRobotCSpace for the robot
-        objectCSpaces (list of RigidObjectCSpace): a list of RigidObjectCSpace's for each moving object
+        contactMap (dict): a dictionary mapping (obj1,obj2) pairs to lists of
+            contacts. Same structures that results from :func:`contactMap`.
+        holds (list of :class:`Hold`): a list of Holds associated with the
+            contacts.
+        robotCSpace (ClosedLoopRobotCSpace): a ClosedLoopRobotCSpace for the
+            robot
+        objectCSpaces (list of :class:`RigidObjectCSpace`): a list of
+            RigidObjectCSpace's for each moving object.
         movingObjects (list): a list of moving robots and rigid objects.
-        stabilityTestObjects (list): a list of moving robots and rigid objects that will be stability tested
-        supportPolygon (list): a list of supportPolygon planes (result from contact.supportPolygon).
+        stabilityTestObjects (list): a list of moving robots and rigid objects
+            that will be stability tested.
+        supportPolygon (list): a list of supportPolygon planes (result from
+            :func:`contact.supportPolygon`).
         supportPolygonVerts (list): a list of support polygon vertices.
     """
     
@@ -92,11 +109,12 @@ class MultiContactCSpace(CompositeCSpace):
 
         Args:
             robot (RobotModel): the moving robot
-            contacts: a list of Holds, or ContactPoint objects with the object1 and/or object2 elements
-                filled out.
-            stabilityTestObjects (list, optional): if provided, specifies which objects are
-                stability tested (either type RobotModel or RigidObjectModel).  Otherwise,
-                all objects and free-floating robots in contact are stability tested.
+            contacts: a list of :class:`Hold`, or :class:`ContactPoint` objects
+                with the ``object1`` and/or ``object2`` elements filled out.
+            stabilityTestObjects (list, optional): if provided, specifies which
+                objects are stability tested (either type :class:`RobotModel`
+                or :class:`RigidObjectModel`).  Otherwise, all objects and
+                free-floating robots in contact are stability tested.
         """
         self.gravity = (0,0,-9.8)
         
