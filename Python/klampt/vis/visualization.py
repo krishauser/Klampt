@@ -186,10 +186,11 @@ MAIN INTERFACE
 - def getWindow(): gets the active window ID.
 - def setWindowTitle(title): sets the title of the visualization window.
 - def getWindowTitle(): returns the title of the visualization window
-- def setPlugin(plugin=None): sets the current plugin (a GLPluginInterface instance). 
-  This plugin will now capture input from the visualization and can override
-  any of the default behavior of the visualizer. Set plugin=None if you want to return
-  to the default visualization.
+- def setPlugin(plugin=None): sets the current plugin (a
+  :class:`GLPluginInterface` instance).  This plugin will now capture input
+  from the visualization and can override any of the default behavior of the
+  visualizer. Set plugin=None if you want to return to the default
+  visualization.
 - def addPlugin(plugin): adds a second OpenGL viewport governed by the given plugin (a
   GLPluginInterface instance).  
 - def run([plugin]): pops up a dialog and then kills the program afterwards.
@@ -226,8 +227,14 @@ MAIN INTERFACE
   QtGLWidget, instantiated for the current plugin, and returns either a
   QDialog or QMainWindow.  If a QDialog is returned, you should launch the
   window via dialog(). Otherwise, you should launch the window via show().
-- def getViewport(): Returns the viewport for the currently active window.
-- def setViewport(viewport): Sets the viewport for the currently active window.
+- def getViewport(): Returns the GLViewport for the currently active window.
+- def setViewport(viewport): Sets the GLViewport for the currently active
+  window.
+- def setBackgroundColor(r,g,b,a=1): Sets the background color for the active
+  window.
+- def threadCall(func): Call `func` inside the visualization thread. This is 
+  useful for some odd calls that are incompatible with being run outside the Qt
+  or OpenGL thread.
 
 The following VisualizationPlugin methods are also added to the klampt.vis
 namespace and operate on the default plugin.  If you are calling these methods
@@ -656,13 +663,29 @@ def customUI(func):
     _globalLock.release()
 
 def getViewport():
-    """Returns the GLViewport of the current window (see klampt.vis.glprogram.GLViewport)"""
+    """Returns the :class:`GLViewport` of the current window"""
     return _frontend.get_view()
 
 def setViewport(viewport):
-    """Sets the current window to use a given GLViewport (see klampt.vis.glprogram.GLViewport)"""
+    """Sets the current window to use a given :class:`GLViewport`"""
     _frontend.set_view(viewport)
 
+def setBackgroundColor(r,g,b,a=1): 
+    """Sets the background color of the current window."""
+    assert hasattr(_frontend,'clearColor')
+    _frontend.clearColor = [r,g,b,a]
+
+def threadCall(func):
+    """Call `func` inside the visualization thread. This is 
+    useful for some odd calls that are incompatible with being run outside the Qt
+    or OpenGL thread.
+
+    Most often used with OpenGL camera simulation.
+    """
+    global _globalLock,_threadcalls
+    _globalLock.acquire()
+    _threadcalls.append(func)
+    _globalLock.release()
 
 
 ######### CONVENIENCE ALIASES FOR VisualizationPlugin methods ###########
@@ -3224,6 +3247,7 @@ _vis_thread_running = False
 _vis_thread = None
 _in_app_thread = False
 _use_multithreaded = (True if sys.platform != 'darwin' else False)
+_threadcalls = []
 
 if _PyQtAvailable:
     if _PyQt5Available:
@@ -3765,7 +3789,7 @@ if _PyQtAvailable:
             self.setCentralWidget(self.glwidget)
 
     def _run_app_thread(callback=None):
-        global _vis_thread_running,_in_app_thread,_vis,_widget,_window,_quit,_showdialog,_showwindow,_globalLock
+        global _vis_thread_running,_in_app_thread,_quit,_globalLock,_threadcalls
         _vis_thread_running = True
 
         _GLBackend.initialize("Klamp't visualization")
@@ -3773,6 +3797,8 @@ if _PyQtAvailable:
         res = None
         while not _quit:
             _globalLock.acquire()
+            calls = _threadcalls
+            _threadcalls = []
             for i,w in enumerate(_windows):
                 if w.glwindow is None and w.mode != 'hidden':
                     print("vis: creating GL window")
@@ -3871,6 +3897,8 @@ if _PyQtAvailable:
                     w.guidata = None
             _globalLock.release()
             _in_app_thread = True
+            for c in calls:
+                c()
             _GLBackend.app.processEvents()
             _in_app_thread = False
             if callback:
@@ -3971,7 +3999,7 @@ elif _GLUTAvailable:
             return self.frontend.mousefunc(button,state,x,y)
         
         def idlefunc(self):
-            global _quit,_showdialog
+            global _quit,_threadcalls
             global _globalLock
             _globalLock.acquire()
             if _quit or (_in_vis_loop and self.hidden):
@@ -3993,7 +4021,11 @@ elif _GLUTAvailable:
                     glutSetWindow(self.window.glutWindowID)
                     glutShowWindow()
                     self.hidden = False
+            calls = _threadcalls
+            _threadcalls = []
             _globalLock.release()
+            for c in calls:
+                c()
             if self.callback:
                 self.callback()
             return self.frontend.idlefunc()
