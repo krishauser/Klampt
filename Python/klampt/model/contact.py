@@ -90,12 +90,14 @@ class Hold:
         self.contacts = []
 
     def setFixed(self,link,contacts):
-        """Creates this hold such that it fixes a robot link to match a list of contacts
-        (in world space) at its current transform.
+        """Creates this hold such that it fixes a robot link to match a list of
+        contacts (in world space) at its current transform.
 
         Args:
-            link: a robot link or rigid object, currently contacting the environment / object at contacts
-            contacts (list of ContactPoint): the fixed contact points, given in world coordinates.
+            link: a robot link or rigid object, currently contacting the
+                environment / object at contacts
+            contacts (list of :class:`ContactPoint`): the fixed contact points,
+                given in world coordinates.
         """
         assert isinstance(link,(RobotModelLink,RigidObjectModel)),"Argument must be a robot link or rigid object"
         self.link = link.index
@@ -156,16 +158,18 @@ def equilibriumTorques(robot,holdList,fext=(0,0,-9.8),internalTorques=None,norm=
         robot (RobotModel): the robot, posed in its current configuration
         holdList (list of Hold): a list of Holds.
         fext (list of 3 floats, optional): the external force (e.g., gravity)
-        internalTorques (list, optional): if given, a list of length robot.numDofs giving internal
-            torques. For example, using this can incorporate dynamics into the solver.
-        norm (float, optional): the torque norm to minimize.  If 0, minimizes the l-infinity norm
-            (default).  If 1, minimizes the l-1 norm.  If 2, minimizes the l-2 norm (experimental,
-            may not get good results)
+        internalTorques (list, optional): if given, a list of length
+            ``robot.numDofs`` giving internal torques. For example, setting
+            this to ``robot.accelToTorques(ddq)`` can incorporate dynamics
+            into the solver.
+        norm (float, optional): the torque norm to minimize.  If 0, minimizes
+            the l-infinity norm (default).  If 1, minimizes the l-1 norm.  If
+            2, minimizes the l-2 norm (experimental, may not get good results)
 
     Returns:
-        tuple or None: A pair (t,f) giving the joint torques and a list of frictional
-        contact forces, if a solution exists. The return value may be None
-        if no solution exists.
+        tuple or None: A pair (t,f) giving the joint torques and a list of
+        frictional contact forces, if a solution exists. The return value may
+        be None if no solution exists.
     """
     links = sum([[h.link]*len(h.contacts) for h in holdList],[])
     if internalTorques is None:
