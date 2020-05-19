@@ -448,7 +448,8 @@ class QtBackend:
 
     def createWindow(self,name,parent=None):
         self.initialize(name)
-        return QtGLWindow(name,parent)
+        self.window = QtGLWindow(name,parent)
+        return self.window
 
     def run(self):
         """Starts the main loop"""
