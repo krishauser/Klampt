@@ -364,7 +364,7 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
       measurements.resize(measurements.size()+xres*yres);
     }
     int k=0;
-    double background = double(0xff96aaff);
+    double background = double(0xffffaa96);
     Vector3 pt;
     for(int j=0;j<yres;j++) {
       Real v = 0.5*yres - Real(j);
