@@ -65,8 +65,8 @@ Troubleshooting
 
 If you have multiple versions of Python installed on your machine,
 you will need to be aware of which version is currently referred to by `pip` and `python` commands.  You
-may need to use `pip3` or `pip2` to get the right version.  You may consider using a
-[virtual environment](https://docs.python-guide.org/dev/virtualenvs/) to help manage
+may need to use `python3`, `python2`, `pip3`, or `pip2` to get the right version.  You may consider using a
+`virtual environment <https://docs.python-guide.org/dev/virtualenvs/>`__ to help manage
 currently active version.
 
 
@@ -106,6 +106,9 @@ in your jupyter notebook!
 
           cd Klampt/Jupyter
           sudo make install
+
+To get started using Klamp't in Jupyter, browse the examples in the Jupyter directory of
+the `Klampt-examples <https://github.com/krishauser/Klampt-examples>`__ repository.
 
 
 Should I build from source?
