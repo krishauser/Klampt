@@ -134,7 +134,7 @@ setup(name='Klampt',
             ],
       },
       classifiers=[
-        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: %d.%d"%(sys.version_info[0],sys.version_info[1]),
         "Development Status :: 4 - Beta",
         "License :: OSI Approved :: BSD License",
         "Natural Language :: English",
