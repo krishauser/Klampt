@@ -13,18 +13,34 @@ Real RobustSolveIK(Robot& robot,RobotIKFunction& f,int iters,Real tol,int numRes
   RobotIKSolver solver(f);
   solver.UseBiasConfiguration(robot.q);
   solver.UseJointLimits(TwoPi);
+  Config q0 = robot.q;
   int tempIters = iters;
   bool res = solver.Solve(tol,tempIters);
-  if(!res && numRestarts) {
-    //attempt to do random restarts
-    Timer timer;
+  if(!res) {
+    //pick the solution with the minimum residual norm
+    f.SetState(solver.solver.x);
     Config qbest = robot.q;
     Vector residual(f.NumDimensions());
     f(solver.solver.x,residual);
     Real residNorm = residual.normSquared();
+
+    //compare against original config
+    robot.q = q0;
+    f.GetState(solver.solver.x);
+    f(solver.solver.x,residual);
+    Real residNorm0 = residual.normSquared();
+    if(residNorm0 < residNorm) {
+      qbest = q0;
+      residNorm = residNorm0;
+    }
+    else {
+    }
+
+    //if numRestarts > 0, attempt to do random restarts
+    Timer timer;
     for(int restart=0;restart<numRestarts;restart++) {
       //random restarts
-      Config qorig = robot.q;
+      Config qorig = qbest;
       RobotCSpace space(robot);
       //space.Sample(robot.q);
       space.SampleNeighborhood(qorig,0.3,robot.q);
@@ -33,12 +49,12 @@ Real RobustSolveIK(Robot& robot,RobotIKFunction& f,int iters,Real tol,int numRes
         robot.q(f.activeDofs.mapping[j]) = qorig(f.activeDofs.mapping[j]);
       tempIters = iters;
       if(solver.Solve(tol,tempIters)) {
-        qbest = robot.q;
+        //robot.q now holds feasible solution
         return 0;
       }
       f(solver.solver.x,residual);
       Real newResidNorm = residual.normSquared();
-      if(newResidNorm < residNorm) {
+      if(newResidNorm + robot.q.distance(qbest)*0.01 < residNorm) {
         residNorm = newResidNorm;
         qbest = robot.q;
       }
@@ -925,7 +941,7 @@ bool RobotPoseWidget::SolveIK(int iters,Real tol)
   f.activeDofs.mapping = vector<int>(dofs.begin(),dofs.end());
 
   //define start config
-  if(undoConfigs.empty())
+  if(true || undoConfigs.empty())
     robot->UpdateConfig(linkPoser.poseConfig);
   else
     robot->UpdateConfig(undoConfigs.back());
@@ -968,8 +984,8 @@ bool RobotPoseWidget::SolveIKFixedBase(int iters,Real tol)
   bool res = (RobustSolveIK(*robot,f,iters,tol,5) == 0);
 
   linkPoser.poseConfig = robot->q;
-  if(useBase)
-    basePoser.T = GetFloatingBase(*robot);
+  //if(useBase)
+  //  basePoser.T = GetFloatingBase(*robot);
   Refresh();
   return res;
 }
