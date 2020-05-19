@@ -2,7 +2,7 @@ from . import vectorops, so2, so3, se3
 import math
 
 class GeodesicSpace:
-    """A class representing a geodesic space.  A geodesic is equipped with a
+    """Base class for geodesic spaces.  A geodesic is equipped with a
     a geodesic (interpolation via the interpolate(a,b,u) method), a natural
     arc length distance metric (distance(a,b) method), an intrinsic dimension
     (intrinsicDimension() method), an extrinsic dimension (extrinsicDimension()
@@ -26,6 +26,7 @@ class GeodesicSpace:
         spaces it is x+d"""
         return vectorops.add(x,d)
 
+
 class CartesianSpace(GeodesicSpace):
     """The standard geodesic on R^d"""
     def __init__(self,d):
@@ -35,7 +36,8 @@ class CartesianSpace(GeodesicSpace):
     def extrinsicDimension(self):
         return self.d
 
-class MultiGeodesicSpace:
+
+class MultiGeodesicSpace(GeodesicSpace):
     """This forms the cartesian product of one or more GeodesicSpace's.
     Distances are simply added together."""
     def __init__(self,*components):
@@ -88,7 +90,9 @@ class MultiGeodesicSpace:
             i += d
         return res
 
+
 class SO2Space(GeodesicSpace):
+    """The space of 2D rotations SO(2)."""
     def intrinsicDimension(self):
         return 1
     def extrinsicDimension(self):
@@ -102,7 +106,11 @@ class SO2Space(GeodesicSpace):
     def integrate(self,x,d):
         return [so2.normalize(x[0]+d[0])]
 
+
 class SO3Space(GeodesicSpace):
+    """The space of 3D rotations SO(3).  The representation is 9 entries of the
+    rotation matrix, laid out in column-major form, like the math.so3 module.
+    """
     def intrinsicDimension(self):
         return 3
     def extrinsicDimension(self):
@@ -120,6 +128,9 @@ class SO3Space(GeodesicSpace):
 
 
 class SE3Space(GeodesicSpace):
+    """The space of 3D rigid transforms SE(3).  The representation is 9 entries
+    of SO(3) + 3 entries of translation.
+    """
     def intrinsicDimension(self):
         return 6
     def extrinsicDimension(self):
