@@ -24,14 +24,14 @@ class SimBody;
 class Simulator;
 
 /** @brief A sensor on a simulated robot.  Retrieve one from the controller
- * using :meth:`SimRobotController.getSensor` (), or create a new one
- * using SimRobotSensor(robotController,name,type)
+ * using :meth:`SimRobotController.getSensor`, or create a new one
+ * using ``SimRobotSensor(robotController,name,type)``
  *
- * Use  :meth:`getMeasurements` () to get the currently simulated measurement
+ * Use  :meth:`getMeasurements` to get the currently simulated measurement
  * vector.
  *
- * Sensors are automatically updated through the :meth:`Simulator.simulate` () call,
- * and :meth:`getMeasurements` () retrieves the updated values.  As a result,
+ * Sensors are automatically updated through the :meth:`Simulator.simulate` call,
+ * and :meth:`getMeasurements` retrieves the updated values.  As a result,
  * you may get garbage measurements before the first Simulator.simulate call is
  * made.
  * 
@@ -39,9 +39,9 @@ class Simulator;
  * (i.e., makes sensible measurements) for some types of sensors when just 
  * a robot / world model is given. This is similar to Simulation.fakeSimulate
  * but the entire controller structure is bypassed.  You can arbitrarily set the
- * robot's position, call :meth:`kinematicReset` (), and then call
- * :meth:`kinematicSimulate` ().  Subsequent calls assume the robot is being
- * driven along a trajectory until the next :meth:`kinematicReset` () is called.
+ * robot's position, call :meth:`kinematicReset`, and then call
+ * :meth:`kinematicSimulate`.  Subsequent calls assume the robot is being
+ * driven along a trajectory until the next :meth:`kinematicReset` is called.
  * 
  * LaserSensor, CameraSensor, TiltSensor, AccelerometerSensor, GyroSensor,
  * JointPositionSensor, JointVelocitySensor support kinematic simulation mode.
@@ -116,9 +116,36 @@ class SimRobotSensor
  * steps.  Force controllers can be implemented using setTorque, again using
  * short time steps. 
  * 
- * If setVelocity, setTorque, or setPID command are called, the motion queue behavior
- * will be completely overridden.  To reset back to motion queue control, the function
- * setManualMode(False) must be called.
+ * If the setVelocity, setTorque, or setPID command are called, the motion queue 
+ * behavior will be completely overridden.  To reset back to motion queue control, 
+ * setManualMode(False) must be called first.
+ *
+ * Individual joints cannot be addressed with mixed motion queue mode and
+ * torque/PID mode.  However, you can mix PID and torque mode between
+ * different joints with a workaround::
+ * 
+ * <pre>
+ *    \# setup by zeroing out PID constants for torque controlled joints
+ *    pid_joint_indices = [...]
+ *    torque_joint_indices = [...] # complement of pid_joint_indices
+ *    kp,ki,kp = controller.getPIDGains()
+ *    for i in torque_joint_indices:  #turn off PID gains here
+ *       kp[i] = ki[i] = kp[i] = 0
+ *    
+ *    \# to send PID command (qcmd,dqcmd) and torque commands tcmd, use
+ *    \# a PID command with feedforward torques.  First we build a whole-robot
+ *    \# command:
+ *    qcmd_whole = [0]*controller.model().numLinks()
+ *    dqcmd_whole = [0]*controller.model().numLinks()
+ *    tcmd_whole = [0]*controller.model().numLinks()
+ *    for i,k in enumerate(pid_joint_indices):
+ *        qcmd_whole[k],dqcmd_whole[i] = qcmd[i],dqcmd[i]
+ *    for i,k in enumerate(torque_joint_indices):
+ *        tcmd_whole[k] = tcmd[i]
+ *    \# Then we send it to the controller
+ *    controller.setPIDCommand(qcmd_whole,dqcmd_whole,tcmd_whole)
+ *
+ * </pre>
  */
 class SimRobotController
 {
@@ -452,7 +479,7 @@ class Simulator
    * 
    * - gravity: the gravity vector (default "0 0 -9.8")
    * - simStep: the internal simulation step (default "0.001")
-   - - autoDisable: whether to disable bodies that don't move much between time
+   * - autoDisable: whether to disable bodies that don't move much between time
    *   steps (default "0", set to "1" for many static objects)
    * - boundaryLayerCollisions: whether to use the Klampt inflated boundaries
    *   for contact detection'(default "1", recommended)
