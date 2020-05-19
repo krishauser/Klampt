@@ -17,16 +17,12 @@ swig:
 	swig -python -c++ src/robotsim.i
 	swig -python -c++ src/motionplanning.i
 	swig -python -c++ src/rootfind.i
-	python src/improve_swig_docs.py src/robotsim.py > src/robotsim_temp.py
-	python src/improve_swig_docs.py src/motionplanning.py > src/motionplanning_temp.py
-	python src/improve_swig_docs.py src/rootfind.py > src/rootfind_temp.py
+	python3 src/improve_swig_docs.py src/robotsim.py > src/robotsim_temp.py
+	python3 src/improve_swig_docs.py src/motionplanning.py > src/motionplanning_temp.py
+	python3 src/improve_swig_docs.py src/rootfind.py > src/rootfind_temp.py
 	cp src/robotsim_temp.py robotsim.py
 	cp src/motionplanning_temp.py plan/motionplanning.py
 	cp src/rootfind_temp.py math/rootfind.py
-
-python3_version:
-	cp -r data ../python3_version/klampt/
-	2to3 --output-dir=../python3_version/klampt -W -n .
 
 clean:
 	rm -f *.pyc
