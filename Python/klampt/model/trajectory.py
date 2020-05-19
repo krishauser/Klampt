@@ -113,7 +113,9 @@ class Trajectory:
             endBehavior (str): If 'loop' then the trajectory loops forever.  
 
         Returns:
-            (tuple): (index,param) giving the segment index and interpolation parameter
+            (tuple): (index,param) giving the segment index and interpolation
+            parameter.  index < 0 indicates that the time is before the first
+            milestone and/or there is only 1 milestone.
         """
         if len(self.times)==0:
             raise ValueError("Empty trajectory")
@@ -130,7 +132,7 @@ class Trajectory:
         if t >= self.times[-1]:
             return (len(self.milestones)-1,0)
         if t <= self.times[0]:
-            return (0,0)
+            return (-1,0)
         i = bisect.bisect_right(self.times,t)
         p=i-1
         assert i > 0 and i < len(self.times),"Invalid time index "+str(t)+" in "+str(self.times)
@@ -241,11 +243,7 @@ class Trajectory:
             self.times = [time]
             self.milestones = [[]]
             return 0
-        i,u = self.getSegment(time)
-        if i < 0:
-            self.times.insert(0,time)
-            self.milestones.insert(0,self.milestones[0][:])
-        elif time <= self.times[0]:
+        if time <= self.times[0]:
             if time < self.times[0]:
                 self.times.insert(0,time)
                 self.milestones.insert(0,self.milestones[0][:])
@@ -255,28 +253,30 @@ class Trajectory:
                 self.times.append(time)
                 self.milestones.append(self.milestones[-1][:])
             return len(self.times)-1
-        elif u == 0:
-            return i
-        elif u == 1:
-            return i+1
         else:
-            q = self.interpolate(self.milestones[i],self.milestones[i+1],u,self.times[i+1]-self.times[i])
-            self.times.insert(i,time)
-            self.milestones.insert(i,q)
-            return i
+            i,u = self.getSegment(time)
+            assert i >= 0,"getSegment returned -1? something must be wrong with the times"
+            if u == 0:
+                return i
+            elif u == 1:
+                return i+1
+            else:
+                q = self.interpolate(self.milestones[i],self.milestones[i+1],u,self.times[i+1]-self.times[i])
+                self.times.insert(i,time)
+                self.milestones.insert(i,q)
+                return i
 
     def split(self,time):
         """Returns a pair of trajectories obtained from splitting this
         one at the given time"""
-        i,u = self.getSegment(time)
-        if i < 0:
-            return self.constructor()(),self.constructor()()
-        elif time <= self.times[0]:
+        if time <= self.times[0]:
             #split before start of trajectory
             return self.constructor()([time],[self.milestones[0]]),self.constructor()([time]+self.times,[self.milestones[0]]+self.milestones)
         elif time >= self.times[-1]:
             #split after end of trajectory
             return self.constructor()(self.times+[time],self.milestones+[self.milestones[-1]]),self.constructor()([time],self.milestones[-1])
+        i,u = self.getSegment(time)
+        assert i >= 0,"getSegment returned -1? something must be wrong with the times"
         #split in middle of trajectory
         splitpt = self.interpolate(self.milestones[i],self.milestones[i+1],u,self.times[i+1]-self.times[i])
         front = self.constructor()(self.times[:i+1],self.milestones[:i+1])
