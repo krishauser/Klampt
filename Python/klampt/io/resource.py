@@ -35,6 +35,8 @@ from ..robotsim import WorldModel,RobotModel,RobotModelLink,RigidObjectModel,IKO
 from ..model.contact import ContactPoint
 from ..model.contact import Hold
 from .. import vis
+from ..vis import editors
+from ..vis.backends import vis_gl
 
 
 global _directory
@@ -384,18 +386,18 @@ def save(value,type='auto',directory=None):
         return str(fg.result)
     return None
 
-class _ThumbnailPlugin(vis.VisualizationPlugin):
+class _ThumbnailPlugin(vis_gl.GLVisualizationPlugin):
     def __init__(self,world):
-        vis.VisualizationPlugin.__init__(self)
+        vis_gl.GLVisualizationPlugin.__init__(self)
         self.world = world
         self.done = False
         self.rendered = 0
         self.image = None
     def display(self):
         self.rendered += 1
-        vis.VisualizationPlugin.display(self)
+        vis_gl.GLVisualizationPlugin.display(self)
     def idle(self):
-        vis.VisualizationPlugin.idle(self)
+        vis_gl.GLVisualizationPlugin.idle(self)
         if self.rendered >= 2 and not self.done:
             from OpenGL.GL import glReadPixels,GL_RGBA,GL_UNSIGNED_BYTE
             view = self.window.program.view
@@ -607,7 +609,7 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,refe
             raise RuntimeError("Could not autodetect type of object "+name)
         if isinstance(type,(list,tuple)):
             type = type[0]
-    if not vis.glinit._PyQtAvailable and editor=='visual':
+    if not vis.glinit.available('PyQt') and editor=='visual':
         print("PyQt is not available, defaulting to console editor")
         editor = 'console'
             
@@ -646,27 +648,27 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,refe
     elif editor == 'visual':
         if type == 'Config':
             assert isinstance(referenceObject,RobotModel),"Can currently only edit Config values with a RobotModel reference object"
-            return vis.editors.run(vis.editors.ConfigEditor(name,value,description,world,referenceObject))
+            return editors.run(editors.ConfigEditor(name,value,description,world,referenceObject))
         elif type == 'Configs':
             assert isinstance(referenceObject,RobotModel),"Can currently only edit Configs values with a RobotModel reference object"
-            return vis.editors.run(vis.editors.ConfigsEditor(name,value,description,world,referenceObject))
+            return editors.run(editors.ConfigsEditor(name,value,description,world,referenceObject))
         elif type == 'Trajectory':
             assert isinstance(referenceObject,RobotModel),"Can currently only edit Trajectory values with a RobotModel reference object"
-            return vis.editors.run(vis.editors.TrajectoryEditor(name,value,description,world,referenceObject))
+            return editors.run(editors.TrajectoryEditor(name,value,description,world,referenceObject))
         elif type == 'Vector3' or type == 'Point':
             if hasattr(frame,'getTransform'):
                 frame = frame.getTransform()
-            return vis.editors.run(vis.editors.PointEditor(name,value,description,world,frame))
+            return editors.run(editors.PointEditor(name,value,description,world,frame))
         elif type == 'RigidTransform' or type == 'Rotation':
             if type == 'RigidTransform' and isinstance(frame,RigidObjectModel):
-                return vis.editors.run(vis.editors.ObjectTransformEditor(name,value,description,world,frame))
+                return editors.run(editors.ObjectTransformEditor(name,value,description,world,frame))
             if type == 'Rotation':
                 #convert from so3 to se3
                 value = [value,[0,0,0]]
             Tref = frame
             if hasattr(frame,'getTransform'):
                 Tref = frame.getTransform()
-            editor = vis.editors.RigidTransformEditor(name,value,description,world,Tref)
+            editor = editors.RigidTransformEditor(name,value,description,world,Tref)
             if type == 'Rotation':
                 editor.disableTranslation()
             #attach visualization items to the transform
@@ -690,11 +692,11 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,refe
             #Run!
             if type == 'Rotation':
                 #convert from se3 to so3
-                return vis.editors.run(editor)[0]
+                return editors.run(editor)[0]
             else:
-                return vis.editors.run(editor)
+                return editors.run(editor)
         elif type == 'WorldModel':
-            return vis.editors.run(vis.editors.WorldEditor(name,value,description))
+            return editors.run(editors.WorldEditor(name,value,description))
         else:
             raise RuntimeError("Visual editing of objects of type "+type+" not supported yet")
     else:
