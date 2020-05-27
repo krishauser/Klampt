@@ -2,6 +2,7 @@ from klampt import *
 from klampt.model import trajectory
 from klampt import robotsim
 import json
+import pkg_resources
 
 _title_id = '__TITLE__'
 _scene_id = '__SCENE_JSON__'
@@ -9,6 +10,7 @@ _path_id = '__PATH_JSON__'
 _rpc_id = '__RPC_JSON__'
 _compressed_id = '__COMPRESSED__'
 _dt_id = '__TIMESTEP__'
+_frontend_load_id = '__KLAMPT_FRONTEND_LOAD__'
 
 def make_fixed_precision(obj,digits):
     if isinstance(obj,float):
@@ -38,23 +40,33 @@ class HTMLSharePath:
 
     """
     
-    def __init__(self,filename="path.html",name="Klamp't Three.js app",boilerplate='auto'):
+    def __init__(self,filename="path.html",name="Klamp't Three.js app",boilerplate='auto',libraries='static'):
         """
         Args:
-            filename (str): the HTML file to generate
+            filename (str, optional): the HTML file to generate. If None, then
+                the end() method returns the HTML string.
             name (str): the title of the HTML page
-            boilerplate (str): the location of the boilerplate HTML file.  If 'auto', it's automatically
-                found in the ``klampt/data`` folder.
+            boilerplate (str): the location of the boilerplate HTML file.  If
+                'auto', it's automatically found in the ``klampt/data`` folder.
+            libraries (str): either 'static' or 'dynamic'. In the latter case,
+                the html file loads the libraries from the Klamp't website
+                dynamically. This reduces the size of the HTML file by about
+                600kb, but the viewer needs an internet connection
         
         """
         self.name = name
         if boilerplate == 'auto':
-            import pkg_resources
             boilerplate = pkg_resources.resource_filename('klampt','data/share_path_boilerplate.html')
         f = open(boilerplate,'r')
         self.boilerplate_file = ''.join(f.readlines())
         f.close()
-        if any(v not in self.boilerplate_file for v in [_title_id,_scene_id,_path_id,_rpc_id,_compressed_id,_dt_id]):
+        if libraries == 'static':
+            self.klampt_frontend_load_script = pkg_resources.resource_filename('klampt','data/klampt_frontend_load_static.js')
+        else:
+            if libraries != 'dynamic':
+                raise ValueError("The libraries argument must either be 'static' or 'dynamic'")
+            self.klampt_frontend_load_script = pkg_resources.resource_filename('klampt','data/klampt_frontend_load_dynamic.js')
+        if any(v not in self.boilerplate_file for v in [_title_id,_scene_id,_path_id,_rpc_id,_compressed_id,_dt_id,_frontend_load_id]):
             raise RuntimeError("Boilerplate file does not contain the right tags")
         self.fn = filename
         self.scene = []
@@ -115,10 +127,17 @@ class HTMLSharePath:
         data = data.replace(_rpc_id,'['+','.join(self.rpc)+']')
         data = data.replace(_compressed_id,'true')
         data = data.replace(_dt_id,str(self.dt))
-        print("Path with",len(self.rpc),"frames saved to",self.fn)
-        f = open(self.fn,'w')
-        f.write(data)
+        f = open(self.klampt_frontend_load_script,'r')
+        load_script = ''.join(f.readlines())
         f.close()
+        data = data.replace(_frontend_load_id,load_script)
+        if self.fn is None:
+            return data
+        else:
+            print("Path with",len(self.rpc),"frames saved to",self.fn)
+            f = open(self.fn,'w')
+            f.write(data)
+            f.close()
 
 if __name__ == '__main__':
     import sys

@@ -31,6 +31,8 @@
    </style>
    <body style="margin: 0px; height:100%; background-color:white;">
 <script>
+  __KLAMPT_FRONTEND_LOAD__
+
   //the HTML-maker code should fill this in
   var scene = __SCENE_JSON__;
   var animation = __PATH_JSON__;
@@ -41,6 +43,7 @@
   var lastAnimateTime = null;
   var animating = true;
   var looping = true;
+  var klampt_frontend = null;
 
   function numframes() {
     if(compressed) {
@@ -59,11 +62,10 @@
 
   function init() {
     var container = document.getElementById("canvas");
-    var textArea = document.getElementById("myTextarea");
-    KLAMPT.init(container,textArea);
-    KLAMPT.set_scene(scene);
-    KLAMPT.set_shadow(true);
-    KLAMPT.rpc({type:'add_text',name:'time_display',x:5,y:5});
+    klampt_frontend = KLAMPT.KlamptFrontend(container);
+    klampt_frontend.update_scene(scene);
+    klampt_frontend.set_shadow(true);
+    klampt_frontend.rpc({type:'add_text',name:'time_display',x:5,y:5});
     animationTime = 0;
     animate();
   }
@@ -109,8 +111,8 @@
     else if(i > len) {
       if(looping) {
         animationTime = 0;
-        KLAMPT.rpc({type:'clear_extras'});
-        KLAMPT.rpc({type:'add_text',name:'time_display',x:5,y:5});
+        klampt_frontend.clear_extras();
+        klampt_frontend.rpc({type:'add_text',name:'time_display',x:5,y:5});
         //console.log("Looped");
         return 0;
       }
@@ -123,7 +125,7 @@
   function update_time()
   {
     if(animation) {
-      KLAMPT.rpc({type:'update_text',name:'time_display',text:"Time "+(animationTime*0.001).toFixed(2)});
+      klampt_frontend.rpc({type:'add_text',name:'time_display',text:"Time "+(animationTime*0.001).toFixed(2)});
       if(compressed) {
         var ind = index();
         var transforms = []
@@ -132,13 +134,13 @@
           if(mat != null)
             transforms.push({name:obj,matrix:mat});
         }
-        KLAMPT.set_transforms(transforms);
+        klampt_frontend._set_transforms(transforms);
       }
       else {
-        KLAMPT.set_transforms(animation[index()].object);
+        klampt_frontend._set_transforms(animation[index()].object);
       }
     }
-    KLAMPT.render();
+    klampt_frontend.render();
   }
 
   function animate()
@@ -163,43 +165,8 @@
     requestAnimationFrame( animate  );
   }
 
-  //---  boilerplate KlamptClient.js loader follows ----
-  var klamptInitialized = false;
-  var windowInitialized = false;
-  window.klamptAsyncInit = function() {
-    console.log("async init");
-    if(windowInitialized) {
-      init();
-    }
-    klamptInitialized = true;
-  };
+  //---  boilerplate KlamptFrontend.js loader follows ----
 
-  function addScript(id,url,callback) {
-    var js, fjs = document.getElementsByTagName('script')[0];
-    if (document.getElementById(id)) {return;}
-    js = document.createElement('script');
-    js.id = id;
-    js.src = url;
-    js.onreadystatechange = callback;
-    js.onload = callback;
-    js.onerror = function() { 
-      c = document.getElementById("canvas");
-      msg = document.createElement("h3");
-      msg.innerHTML = "Error loading Javascript libraries from "+url+", you will need internet access to view this animation";
-      c.appendChild(msg);
-    }
-    fjs.parentNode.insertBefore(js, fjs);
-  }
-  //addScript("three_js_load","three.js/build/three.min.js",function() {
-  //  addScript("TrackballControls_load","three.js/examples/js/controls/TrackballControls.js",function() {
-  //    addScript("klampt_load","KlamptClient.js",null);
-  //  });
-  //});
-  addScript("three_js_load","http://klampt.org/three.min.js",function() {
-    addScript("TrackballControls_load","http://klampt.org/TrackballControls.js",function() {
-      addScript("klampt_load","http://klampt.org/KlamptClient.js",null);
-    });
-  });
 </script>
 
     <div id="center" style="position:relative; margin:auto; width:95vw; max-width:200vh; height:95vh; margin:auto; padding:0px;">
@@ -207,7 +174,7 @@
         <canvas id="reset" width="50" height="50" class="button" onclick="resetplay()"> </canvas> 
         <canvas id="play_pause" width="50" height="50" class="button" onclick="toggleplaypause()">  </canvas>
         <input id="slider" class="slider" type="range" name="duration" min="0" max="100" step="0.1" style="float:left; width:60%; height:40px; margin-top:20px; margin-left:10px;" onchange="sliderdrag()" oninput="sliderdrag()"/>
-        <a href="http://klampt.org"><img src="http://klampt.org/powered_by_klampt.jpg" width="200px" height="60px" style="float:right; margin-top:10px;"></a>
+        <a href="http://klampt.org"><img src="http://motion.cs.illinois.edu/klampt/powered_by_klampt.jpg" width="200px" height="60px" style="float:right; margin-top:10px;"></a>
 
       </div>
       <div id="canvas" style="position:relative; display:block; width:100%; height:90%; margin:0px; padding:0px;"></div>
@@ -341,10 +308,9 @@
      
          window.docReady(function() {
            
-            if(klamptInitialized) {
+            if(klampt_frontend == null) {
               init();
             }
-            windowInitialized = true;
          });
 
       </script>
