@@ -394,7 +394,6 @@ class GLNavigationProgram(GLProgram):
         e.g. a prior view that was saved to file."""
         self.view = v
         self.reshape(self.view.w,self.view.h)
-
     
     def prepare_GL(self):
         GLProgram.prepare_GL(self)
@@ -485,14 +484,16 @@ class GLPluginProgram(GLRealtimeProgram):
     GUI functionality (see glcommon.py).  Call setPlugin() on this object to set
     the currently used plugin.  pushPlugin()/popPlugin() can also be used to
     set a hierarchy of plugins."""
-    def __init__(self,name="GLWidget"):
+    def __init__(self,name="GLPluginProgram"):
         GLRealtimeProgram.__init__(self,name)
         self.plugins = []
     def setPlugin(self,plugin):
+        #first, detatch existing plugins
         import copy
         for p in self.plugins:
             p.window = None
             p.view = copy.copy(p.view)
+        #now just set this plugin
         self.plugins = []
         if plugin:
             self.pushPlugin(plugin)
@@ -514,6 +515,7 @@ class GLPluginProgram(GLRealtimeProgram):
         res = self.plugins[-1]
         self.plugins.pop(-1)
         res.window = None
+        res.view = copy.copy(res.view)
         if self.window:
             self.refresh()
         return res

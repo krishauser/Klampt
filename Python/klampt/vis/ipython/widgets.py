@@ -51,6 +51,7 @@ import threading
 DEFAULT_POINT_RADIUS = 0.05
 DEFAULT_AXIS_LENGTH = 0.2
 DEFAULT_AXIS_WIDTH = 1
+VALID_ITEM_TYPES = set(['Config','Configs','Vector3','RigidTransform','Trajectory','Geometry3D','TriangleMesh','WorldModel'])
 
 class KlamptWidget(widgets.DOMWidget):
     """
@@ -162,7 +163,18 @@ class KlamptWidget(widgets.DOMWidget):
             except Exception:
                 raise ValueError("Invalid item, not a known Klamp't type")
             if isinstance(candidates,(list,tuple)):
-                type = candidates[0]
+                #print("KlamptWidget.add: multiple matching types:",candidates)
+                if 'Config' in candidates:
+                    if self.world is None:
+                        candidates.remove('Config')
+                    else:
+                        match = any(len(item) == self.world.robot(i).numLinks()  for i in range(self.world.numRobots()))
+                        if not match:
+                            candidates.remove('Config')
+                new_candidates = [v for v in candidates if v in VALID_ITEM_TYPES]
+                if len(new_candidates)==0:
+                    raise ValueError("Invalid item, types %s not supported by IPython widget"%(str(candidates),))
+                type = new_candidates[0]
             else:
                 type = candidates
         if type == 'Config':
@@ -184,12 +196,12 @@ class KlamptWidget(widgets.DOMWidget):
                 self._extras[name] = ('Configs',names)
                 return names
         elif type == 'Vector3':
-            res = self.addSphere(name,item[0],item[1],item[2],DEFAULT_POINT_RADIUS)
-            return [res]
+            self.addSphere(name,item[0],item[1],item[2],DEFAULT_POINT_RADIUS)
+            return [name]
         elif type == 'RigidTransform':
-            res = self.addXform(name,length=DEFAULT_AXIS_LENGTH,width=DEFAULT_AXIS_WIDTH)
+            self.addXform(name,length=DEFAULT_AXIS_LENGTH,width=DEFAULT_AXIS_WIDTH)
             self.setTransform(name,R=item[0],t=item[1])
-            return [res]
+            return [name]
         elif type == 'Trajectory':
             if isinstance(item,SE3Trajectory):
                 res = []
@@ -214,6 +226,34 @@ class KlamptWidget(widgets.DOMWidget):
                 return names
             else:
                 return self.add(name,item.milestones)
+        elif type == 'Geometry3D':
+            g = item.convert('TriangleMesh')
+            tris = g.getTriangleMesh()
+            #Don't have Trimesh capability yet
+            verts = []
+            for i in range(0,len(tris.indices),3):
+                a,b,c = tris.indices[i],tris.indices[i+1],tris.indices[i+2]
+                verts += [tris.vertices[a*3],tris.vertices[a*3+1],tris.vertices[a*3+2]]
+                verts += [tris.vertices[b*3],tris.vertices[b*3+1],tris.vertices[b*3+2]]
+                verts += [tris.vertices[c*3],tris.vertices[c*3+1],tris.vertices[c*3+2]]
+            verts = tuple(verts)
+            self._extras[name] = ('Trilist',verts)
+            print("Vertex size",len(verts))
+            self._do_rpc({'type':'add_trilist','name':name,'verts':verts}) 
+            return [name]
+        elif type == 'TriangleMesh':
+            tris = item
+            #Don't have Trimesh capability yet
+            verts = []
+            for i in range(0,len(tris.indices),3):
+                a,b,c = tris.indices[i],tris.indices[i+1],tris.indices[i+2]
+                verts += [tris.vertices[a*3],tris.vertices[a*3+1],tris.vertices[a*3+2]]
+                verts += [tris.vertices[b*3],tris.vertices[b*3+1],tris.vertices[b*3+2]]
+                verts += [tris.vertices[c*3],tris.vertices[c*3+1],tris.vertices[c*3+2]]
+            verts = tuple(verts)
+            self._extras[name] = ('Trilist',verts)
+            self._do_rpc({'type':'add_trilist','name':name,'verts':verts}) 
+            return [name]
         elif type == 'WorldModel':
             if name != 'world' or self.world is not None:
                 print("KlamptWidget.add: Warning, only one world is supported, and should be added as world")

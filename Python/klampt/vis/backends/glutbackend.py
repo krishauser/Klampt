@@ -1,7 +1,6 @@
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 import weakref
-from .glcommon import GLMultiViewportProgram
 
 keymap = {GLUT_KEY_F1:'f1',
     GLUT_KEY_F2:'f2',
@@ -54,11 +53,12 @@ class GLUTWindow:
         self.modifierList = []
 
     def initialize(self):
-        assert self.program != None, "program member needs to be set"
+        assert self.program is not None, "program member needs to be set"
         assert not self.initialized,"initialized twice?"
         program = self.program
         #glutInitWindowPosition (0,0);
         glutInitWindowSize (self.width, self.height);
+        print("Calling glutCreateWindow",self.name)
         self.glutWindowID = glutCreateWindow (self.name)
         program.view.x = 0
         program.view.y = 0
@@ -94,13 +94,13 @@ class GLUTWindow:
         glEnable(GL_MULTISAMPLE)
         glutPostRedisplay()
         self.initialized = True
-        print("Initialized")
+        print("GLUTWindow",self.name,"Initialized")
 
     def add_action(self,*args):
         pass
 
     def setProgram(self,program):
-        from .glprogram import GLProgram
+        from ..glprogram import GLProgram
         assert isinstance(program,GLProgram)
         if hasattr(program,'name'):
             self.name = program.name
@@ -135,7 +135,7 @@ class GLUTWindow:
 
     def reshape(self,w,h):
         """Resizes the GL window. Called by frontend."""
-        print("reshaping",w,h)
+        print("GLUTWindow.reshape(",w,h,")")
         self.width,self.height = w,h
         if self.initialized:
             glutReshapeWindow(self.width,self.height)
@@ -178,10 +178,10 @@ class GLUTWindow:
             glutBitmapCharacter(font, ctypes.c_int( ord(c) ))
 
     def close(self):
-        if self.index != None:
+        if self.index is not None:
+            self._closefunc()
             glutDestroyWindow(self.index)
             self.index = None
-            self._closefunc()
 
     def _updateModifiers(self):
         m = []
@@ -251,6 +251,7 @@ class GLUTBackend:
     """
     def __init__(self):
         self.glutInitialized = False
+        self.inGlutLoop = False
         self.windows = []
 
     def initialize(self,program_name):
@@ -263,6 +264,7 @@ class GLUTBackend:
 
     def createWindow(self,name):
         self.initialize(name)
+        print("GLUTBackend.createWindow",name)
         w = GLUTWindow(name)
         self.windows.append(w)
         return w
@@ -272,7 +274,12 @@ class GLUTBackend:
         will not return."""
         # Initialize Glut
         assert len(self.windows) >= 1,"Need to define at least one GL interface"
+        print("GLUTBackend: run with windows",[w.name for w in self.windows])
         for w in self.windows:
-            w.initialize()
+            if not w.initialized:
+                w.initialize()
+            else:
+                print("  Warning, window",w.name,"already initialized before run()?")
+        self.inGlutLoop = True
         glutMainLoop ()
 

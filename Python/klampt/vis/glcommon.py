@@ -36,7 +36,7 @@ class GLWidgetPlugin(GLPluginInterface):
         return False
     def keyboardfunc(self,c,x,y):
         if len(c)==1:
-            self.klamptwidgetmaster.keypress(c)
+            self.klamptwidgetmaster.keypress(c[0])
         return False
     def keyboardupfunc(self,c,x,y):
         return False
@@ -73,6 +73,9 @@ class GLWidgetPlugin(GLPluginInterface):
         return True
 
 class GLMultiViewportProgram(GLProgram):
+    """A GLProgram that splits the window into several sub-views.  Each view is
+    a GLProgram or GLPluginInterface.
+    """
     def __init__(self):
         GLProgram.__init__(self)
         self.views = []
@@ -297,9 +300,9 @@ class GLMultiViewportProgram(GLProgram):
     def set_view(self,vp):
         #print "Getting viewport..."
         if self.activeView == None:
-            return self.window.get_view(vp)
+            return self.window.set_view(vp)
         else:
-            return self.views[self.activeView].get_view(vp)
+            return self.views[self.activeView].set_view(vp)
 
 _CACHED_DISPLAY_LISTS = set()
 _CACHED_WARN_THRESHOLD = 1000

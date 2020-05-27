@@ -2,7 +2,7 @@
 in ``resource.get(...)`` and ``resource.edit(...)``.
 
 A couple editors, SelectionEditor and WorldEditor, cannot be launched from
-the resource module.  To use these, call::
+the ``resource`` module.  To use these, call::
 
     from klampt.vis import editors
     ed = editors.SelectionEditor("Some links",[],"Select the links that you want to modify",world))
@@ -869,14 +869,22 @@ class WorldEditor(VisualEditorBase):
 
 
 #Qt stuff
-if glinit._PyQtAvailable:
-    if glinit._PyQt5Available:
-        from PyQt5.QtCore import *
-        from PyQt5.QtGui import *
-        from PyQt5.QtWidgets import *
-    else:
+global _has_qt
+_has_qt = False
+try:
+    from PyQt5.QtCore import *
+    from PyQt5.QtGui import *
+    from PyQt5.QtWidgets import *
+    _has_qt = True
+except ImportError:
+    try:
         from PyQt4.QtCore import *
         from PyQt4.QtGui import *
+        _has_qt = True
+    except ImportError:
+        _has_qt = False
+
+if _has_qt:
     global _vis_id,_my_dialog_res,_doexit
     _vis_id = None
     _my_dialog_res = None
@@ -1019,7 +1027,6 @@ if glinit._PyQtAvailable:
             assert gl_backend is not None
             res = _EditDialog(gl_backend)
             res.setEditor(editorObject)
-            visualization._checkWindowCurrent(editorObject.world)
             return res
         visualization.customUI(makefunc)
         visualization.dialog()
@@ -1033,7 +1040,8 @@ if glinit._PyQtAvailable:
 
         visualization.setPlugin(None)
         visualization.customUI(None)
-        visualization.setWindow(old_vis_window)
+        if old_vis_window is not None:
+            visualization.setWindow(old_vis_window)
 
         print("vis.editors.run(): Result",res,"return value",retVal)
         return res,retVal

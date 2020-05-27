@@ -130,7 +130,7 @@ class QtGLWindow(QGLWidget):
 
     def setProgram(self,program):
         """User will call this to set up the program variable"""
-        from .glprogram import GLProgram
+        from ..glprogram import GLProgram
         assert isinstance(program,GLProgram)
         print("######### QGLWidget setProgram ###############")
         if hasattr(program,'name'):
@@ -440,8 +440,8 @@ class QtBackend:
         self.window = None
 
     def initialize(self,program_name):
-        print("INITIALIZING Qt BACKEND")
         if self.app == None:
+            print("QtBackend: initializing app as",program_name)
             #this is needed for some X11 multithreading bug 
             QCoreApplication.setAttribute(Qt.AA_X11InitThreads)
             self.app = QApplication([program_name])
