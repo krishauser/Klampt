@@ -265,12 +265,9 @@ interacts with your Python script, but rather you create a scene / animation
 and then retrieve the HTML afterwards.  This mode is appropriate for Google
 Colab, for example.  
 
-The HTML is retrieved by casting ``vis.nativeWindow()`` to a str, calling
-``vis.nativeWindow().iframe(width,height)``, or ``vis.nativeWindow().page()``. 
-In the first case, the HTML is a couple of <script> and <div> elements that
-takes up the whole screen.  The .iframe() option places the code into an
-IFrame of a given size, and the page() option wraps the code into a full
-HTML page.
+To show the HTML page in an IPython notebook (e.g., Jupyter or Colab),
+call ``vis.show()`` after the animation is done.  This will show the visualizer
+in an IFrame, whose size is the current viewport size.
 
 To use it with a specified time step, use the following::
 
@@ -279,9 +276,7 @@ To use it with a specified time step, use the following::
     while not done:
         ... change the world, add / remove things, etc ... 
         vis.stepAnimation(dt)
-    print(vis.nativeWindow())
-    #or print(vis.nativeWindow().iframe(600,300))
-    #or print(vis.nativeWindow().page())
+    vis.show()
 
 To have it capture a real-time process, use the ``vis.update()`` function
 instead, as follows::
@@ -291,17 +286,41 @@ instead, as follows::
         ... change the world, add / remove things, etc ... 
         vis.update()
         time.sleep(1.0/3.0)
-    print(vis.nativeWindow())
-    #or print(vis.nativeWindow().iframe(600,300))
-    #or print(vis.nativeWindow().page())
+    vis.show()
 
 (Don't mix animations and updates, or else the resulting animation will be
 strange.)
 
+You may also retrieve raw HTML, either by casting ``vis.nativeWindow()`` to
+a str, calling ``vis.nativeWindow().iframe(width,height)``, or
+``vis.nativeWindow().page()``.  In the first case, the HTML does not contain
+the <html> or <body> tags, and takes up the whole screen.  The .iframe()
+option places the code into an IFrame of a given size, and the page() option
+wraps the code into a full HTML page.
+
+For example, to turn a Trajectory ``traj`` into a WebGL animation, use this
+code::
+
+    vis.add("world",world)
+    vis.animate(("world",world.robot(0).getName()),traj)
+    t = 0
+    while t < traj.endTime():
+        vis.stepAnimation(dt)
+        t += dt
+    vis.show()
+
+To turn a Simulator into a WebGL animation, use this code::
+
+    sim = Simulator(world)
+    vis.add("world",world)
+    while not done:
+        ... add forces, send commands to the robot, etc...
+        sim.simulate(dt)
+        vis.stepAnimation(dt)
+    vis.show()
 
 
-
-MAIN INTERFACE
+WINDOWING API
 --------------
 
 - def init(backends=None): initializes the visualization.  Can configure here
@@ -335,15 +354,12 @@ MAIN INTERFACE
   start, the callback() function is run every time the event thread is idle,
   and the cleanup() function is called on termination.
 
-  NOTE FOR MAC USERS: having the GUI in a separate thread is not supported on Mac, so the loop
-  function must be used rather than show/spin.
+  NOTE FOR MAC USERS: having the GUI in a separate thread is not supported on
+  Mac, so the ``loop`` function must be used rather than ``show``/``spin``.
 
   NOTE FOR GLUT USERS: this may only be run once.
-- def dialog(): pops up a dialog box (does not return to calling thread until closed).
-- def dialogInLoop(callback): for use inside loop(). Pops up a dialog box window, and returns
-  immediately to calling thread.
-  The callback function has signature callback(okPressed), where okPressed is True if the user
-  pressed the OK button, and False if Cancel or the close box was clicked.
+- def dialog(): pops up a dialog box (does not return to calling thread until
+  closed).  
 - def show(display=True): shows/hides a visualization window.  If not called 
   from the visualization loop, a new visualization thread is run in parallel
   with the calling script. 
@@ -365,6 +381,9 @@ MAIN INTERFACE
   QtGLWidget, instantiated for the current plugin, and returns either a
   QDialog or QMainWindow.  If a QDialog is returned, you should launch the
   window via dialog(). Otherwise, you should launch the window via show().
+
+SCENE MODIFICATION API
+--------------
 
 The following VisualizationScene methods are also added to the klampt.vis
 namespace and operate on the current scene (as returned from :func:`scene`).
@@ -455,6 +474,7 @@ will turn the robot green.  If 'link5' is the robot's 5th link, then::
     `setColor(('world','myRobot','link5'),0,0,1)`
 
 will turn the 5th link blue.
+
 """
 
 
@@ -691,7 +711,7 @@ def dialog():
     closed by pressing OK or closing the window."""
     global _window_manager
     _init()
-    _window_manager.dialog()
+    return _window_manager.dialog()
 
 def setWindowTitle(title):
     global _window_manager
@@ -1915,11 +1935,14 @@ class VisAppearance:
     def updateAnimation(self,t):
         """Updates the configuration, if it's being animated"""
         if not self.animation:
+            if self.drawConfig is not None:
+                self.markChanged(config=True,appearance=False)
             self.drawConfig = None
         else:
             u = self.animationSpeed*(t-self.animationStartTime)
             q = self.animation.eval(u,self.animationEndBehavior)
             self.drawConfig = q
+            self.markChanged(config=True,appearance=False)
         for n,app in self.subAppearances.items():
             app.updateAnimation(t)
 
@@ -1952,7 +1975,6 @@ class VisAppearance:
                 pass
         for n,app in self.subAppearances.items():
             app.swapDrawConfig()
-        self.markChanged(config=True,appearance=False)
 
     def clearDisplayLists(self):
         if isinstance(self.item,WorldModel):
@@ -2718,8 +2740,8 @@ class VisualizationScene:
     def __init__(self):
         self.items = {}
         self.labels = []
-        self.t = time.time()
-        self.startTime = self.t
+        self.t = 0
+        self.startTime = None
         self.animating = True
         self.currentAnimationTime = 0
         self.doRefresh = False
@@ -2943,7 +2965,7 @@ class VisualizationScene:
             customIndex = len(plot.items)
             plot.items.append(VisPlotItem('',None))
         plot.items[customIndex].compressThreshold = compress
-        plot.items[customIndex].customUpdate(itemname,self.t - self.startTime,value)
+        plot.items[customIndex].customUpdate(itemname,self.t,value)
         _globalLock.release()
 
     def logPlotEvent(self,plotname,eventname,color):
@@ -2951,7 +2973,7 @@ class VisualizationScene:
         _globalLock.acquire()
         plot = self.getItem(plotname)
         assert plot is not None and isinstance(plot.item,VisPlot),(plotname+" is not a valid plot")
-        plot.item.addEvent(eventname,self.t-self.startTime,color)
+        plot.item.addEvent(eventname,self.t,color)
         _globalLock.release()
 
     def hidePlotItem(self,plotname,itemname,hidden=True):
@@ -3077,13 +3099,15 @@ class VisualizationScene:
         """The backend will call this during an idle loop to update the
         visualization time.  This may also update animations if currently
         animating."""
+        if self.startTime is None:
+          self.startTime = t
         oldt = self.t
-        self.t = t
+        self.t = t-self.startTime
         if self.animating:
             self.stepAnimation(self.t - oldt)
         for (k,v) in self.items.items():
             #do other updates
-            v.updateTime(self.t-self.startTime)
+            v.updateTime(self.t)
 
     def edit(self,name,doedit=True):
         raise NotImplementedError("Needs to be implemented by subclass")

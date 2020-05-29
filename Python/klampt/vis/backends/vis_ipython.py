@@ -86,17 +86,24 @@ class KlamptWidgetAdaptor(KlamptWidget,VisualizationScene):
         raise RuntimeError("IPython: can't yet change the background color")
 
     def update(self):
-        VisualizationScene.updateAnimationTime(self)
+        if "world" in self.items:
+            for k,v in self.items["world"].subAppearances.items():
+                v.swapDrawConfig()
         KlamptWidget.update(self)
+        if "world" in self.items:
+            for k,v in self.items["world"].subAppearances.items():
+                v.swapDrawConfig()
 
         #look through changed items and update them
         def updateItem(item):
             if isinstance(item,VisPlot):
                 return
-            if item.doRefresh:
-                raise NotImplementedError("TODO: update moved things")
+            if isinstance(item.item,WorldModel):
+                return
+            if item.transformChanged:
+                raise NotImplementedError("TODO: update moved things of type",item.item.__class__.__name__)
                 KlamptWidget.setTransform()
-                item.doRefresh = False
+                item.transformChanged = False
             for k,c in item.subAppearances.items():
                 updateItem(c)
         self.beginRpc()

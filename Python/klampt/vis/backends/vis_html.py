@@ -1,7 +1,8 @@
 from ..visualization import _WindowManager,VisualizationScene,VisPlot
 from ..ipython import KlamptWidget
 from ...io.html import HTMLSharePath
-from IPython.display import display
+from IPython.display import display,HTML
+from ...robotsim import WorldModel
 import pkg_resources
 import math
 import time
@@ -39,6 +40,9 @@ class HTMLVisualizationScene(VisualizationScene):
         self.animating = False
         self._textItems = set()
         self.rpcs_this_frame = []
+        #reset the visualization clock
+        self.startTime = None
+        self.t = 0
 
     def clearText(self):
         VisualizationScene.clearText(self)
@@ -125,8 +129,10 @@ class HTMLVisualizationScene(VisualizationScene):
         def updateItem(item):
             if isinstance(item,VisPlot):
                 return
+            if isinstance(item.item,WorldModel):
+                return
             if item.transformChanged:
-                raise NotImplementedError("TODO: update moved things")
+                raise NotImplementedError("TODO: update moved things of type",item.item.__class__.__name__)
                 self.kw.setTransform()
                 item.transformChanged = False
             for k,c in item.subAppearances.items():
@@ -135,7 +141,13 @@ class HTMLVisualizationScene(VisualizationScene):
             updateItem(v)
         self.rpcs_this_frame += self.kw._rpc_calls
         self.kw.endRpc()
+        if "world" in self.items:
+            for k,v in self.items["world"].subAppearances.items():
+                v.swapDrawConfig()
         self.sp.animate(self.currentAnimationTime,rpc=self.rpcs_this_frame)
+        if "world" in self.items:
+            for k,v in self.items["world"].subAppearances.items():
+                v.swapDrawConfig()
         self.rpcs_this_frame = []
         self.updateTime(self.currentAnimationTime)
 
@@ -157,9 +169,19 @@ class HTMLVisualizationScene(VisualizationScene):
         self.rpcs_this_frame += self.kw._rpc_calls
         self.kw.endRpc()
         t = time.time()
+        if self.startTime is None:
+            self.startTime = t
+        t = t-self.startTime
         if t > self.t + 1.0/30.0: # 30fps
-            self.sp.animate(t-self.startTime,rpc=self.rpcs_this_frame)
+            if "world" in self.items:
+                for k,v in self.items["world"].subAppearances.items():
+                    v.swapDrawConfig()
+            self.sp.animate(t,rpc=self.rpcs_this_frame)
+            if "world" in self.items:
+                for k,v in self.items["world"].subAppearances.items():
+                    v.swapDrawConfig()
             self.rpcs_this_frame = []
+            self.t = t
         self.updateTime(t)
 
     def iframe(self,w=None,h=None):
@@ -220,27 +242,28 @@ class HTMLWindowManager(_WindowManager):
     def multithreaded(self):
         return False
     def run(self):
-        self.spin(float('inf'))
+        self.show()
     def loop(self,setup,callback,cleanup):
         setup()
-        self.show()
         t = 0
+        self.quit = False
         while t < duration:
             if not self.shown(): break
             callback()
-        self.show(False)
+        self.show()
         cleanup()
     def spin(self,duration):
-        self.show()
         t = 0
+        self.quit = False
         while t < duration:
             if not self.shown(): break
-            time.sleep(min(0.04,duration-t))
+            self.frontend().stepAnimation(0.04)
             t += 0.04
-        self.show(False)
+        self.show()
     def show(self):
         self.quit = False
         self.displayed = True
+        display(HTML(self.frontend().iframe()))
     def shown(self):
         return self.displayed and not self.quit
     def hide(self):
