@@ -17,14 +17,14 @@ Main features include:
   transforms)
 - Simple interface to drawing text and text labels, and drawing plots
 - Multi-window, multi-viewport support
-- Unified interface to PyQt, GLUT, IPython, and visualization server backends.
+- Automatic camera setup
+- Unified interface to PyQt, GLUT, IPython, and HTML backends.
   - PyQT is the backend with the fullest amount of features.  
   - GLUT loses resource editing and advanced windowing functionality.
   - IPython loses plugins, resource editing, custom drawing, and advanced 
     windowing functionality.
-  - Visualization server loses plugins, resource editing, custom drawing, 
-    and advanced windowing functionality.
-- Automatic camera setup
+  - HTML loses plugins, resource editing, custom drawing, and advanced 
+    windowing functionality.
 
 The resource editing functionality in the klampt.io.resource module (based on 
 klampt.vis.editors) use this module as well.
@@ -71,6 +71,107 @@ OpenGL-based visualizations use either PyQt or GLUT to handle windowing and are
 used by default. They run in the current process, have the best performance,
 and offer the richest set of features.  
 
+Quick start
+^^^^^^^^^^^^^^^
+
+- To show the visualization and quit when the user closes the window::
+
+        vis.run()
+
+- To show the visualization and return when the user closes the window::
+
+        vis.dialog()
+        ... do stuff afterwards ... 
+        vis.kill()
+
+- To show the visualization and run a script alongside it until the user
+  closes the window (multithreaded mode)::
+ 
+        vis.show()
+        while vis.shown():
+            vis.lock()
+            ... do stuff ...
+            [to exit the loop call vis.show(False)]
+            vis.unlock()
+            time.sleep(dt)
+        ... do stuff afterwards ...
+        vis.kill()
+
+- To show the visualization and run python commands until the user closes
+  the window (single-threaded mode)::
+ 
+        def callback():
+            ... do stuff ...
+            [to exit the loop manually call vis.show(False)]
+        vis.loop(setup=vis.show,callback=callback)
+        vis.kill()
+
+- To run a window with a custom plugin (GLPluginInterface) and terminate on
+  closure::
+ 
+        vis.run(plugin)
+  
+- To show a dialog or parallel window::
+
+        vis.setPlugin(plugin)
+        ... then call  
+        vis.dialog()
+        ... or
+        vis.show()
+        ... do stuff afterwards ... 
+        vis.kill()
+
+- To add a GLPluginInterface that just customizes a few things on top of
+  the default visualization::
+
+        vis.pushPlugin(plugin)
+        vis.dialog()
+        vis.popPlugin()
+
+- To run plugins side-by-side in the same window::
+
+        vis.setPlugin(plugin1)
+        vis.addPlugin(plugin2)  #this creates a new split-screen
+        vis.dialog()
+        ... or
+        vis.show()
+        ... do stuff afterwards ... 
+        vis.kill()
+
+- To run a custom Qt window or dialog containing a visualization window::
+
+        vis.setPlugin([desired plugin or None for visualization])
+        def makeMyUI(qtglwidget):
+            return MyQtMainWindow(qtglwidget)
+        vis.customUI(makeMyUI)
+        vis.dialog()   #if you return a QDialog
+        ... or
+        vis.show()     #if you return a QWidget or QMainWindow
+        ... do stuff afterwards ... 
+        vis.kill()
+
+- To launch a second window after the first is closed: just call whatever you
+  want again. Note: if show was previously called with a plugin and you wish to
+  revert to the default visualization, you should call setPlugin(None) first to 
+  restore the default.
+
+- To create a separate window with a given plugin::
+
+        w1 = vis.createWindow("Window 1")  #w1=0
+        show()
+        w2 = vis.createWindow("Window 2")  #w2=1
+        vis.setPlugin(plugin)
+        vis.dialog()
+        #to restore commands to the original window
+        vis.setWindow(w1)
+        while vis.shown():
+            ...
+        vis.kill()
+
+
+Implementation Details
+^^^^^^^^^^^^^^^^^^^^
+
 There are two primary modes of running OpenGL visualizations: multi-threaded 
 and single-threaded.
 
@@ -92,6 +193,13 @@ and single-threaded.
 
 There are also some convenience functions that will work in both modes, such
 as :func:`run`, :func:`spin`, and func:`dialog`.
+
+.. note::
+
+    In multithreaded mode, when changing the data shown by the window (e.g., 
+    modifying the configurations of robots in a WorldModel) you must call
+    ``vis.lock()`` before accessing the data and then call ``vis.unlock()``
+    afterwards.
 
 The biggest drawback of single-threaded operation is that you can only start
 blocking dialogs at the outer-most level, not inside loop().  So if you have
@@ -132,131 +240,66 @@ something in the world changes, you must manually make a call to
 .. note::
 
     For optimal performance when calling a lot of scene modifiers, you should
-    use ``vis.nativeWindow().beginRpc() / endRpc()`` calls to block off the 
-    start and end of scene modification. Doing so means that the WebGL widget
+    use ``vis.lock() / unlock()`` calls to block off the start and end of
+    scene modification. Doing so means that the WebGL widget
     is only re-rendered at the very end of your calls.  
 
-    ``vis.lock()`` / ``vis.unlock()`` are aliases for these calls.  Note the
-    semantics here are slightly different from the normal sense of locking /
-    unlocking, which normally only need to be placed around changes to the
-    underlying object data.
+    Note the semantics here are slightly different from the normal sense of
+    locking / unlocking, which is to prevent thread clashes amongst changes to 
+    the underlying object data.
 
 This mode does NOT support plugins, dialogs, or custom draw functions.  Also,
 certain types of geometries like VolumeGrids are not supported.
 
 Animations are supported, but you will manually have to advance the animations 
-and call ``vis.update()`` or ``vis.nativeWindow().update()`` for each frame.  
+and call ``vis.update()`` or ``vis.scene().update()`` for each frame.  
 See :class:`~klampt.vis.ipython.widgets.PlaybackWidget` for a convenient widget
 that handles this somewhat automatically.
 
 
+HTML
+~~~~~~~~~~~~~~~~~~~~
+This output mode outputs an HTML + Javascript page that uses WebGL to display
+the scene.  Unlike other methods, this is not a live visualization that
+interacts with your Python script, but rather you create a scene / animation
+and then retrieve the HTML afterwards.  This mode is appropriate for Google
+Colab, for example.  
+
+The HTML is retrieved by casting ``vis.nativeWindow()`` to a str, calling
+``vis.nativeWindow().iframe(width,height)``, or ``vis.nativeWindow().page()``. 
+In the first case, the HTML is a couple of <script> and <div> elements that
+takes up the whole screen.  The .iframe() option places the code into an
+IFrame of a given size, and the page() option wraps the code into a full
+HTML page.
+
+To use it with a specified time step, use the following::
+
+    vis.add("world",world)
+    dt = 1.0/30.0   #30fps
+    while not done:
+        ... change the world, add / remove things, etc ... 
+        vis.stepAnimation(dt)
+    print(vis.nativeWindow())
+    #or print(vis.nativeWindow().iframe(600,300))
+    #or print(vis.nativeWindow().page())
+
+To have it capture a real-time process, use the ``vis.update()`` function
+instead, as follows::
+
+    vis.add("world",world)
+    while not done:
+        ... change the world, add / remove things, etc ... 
+        vis.update()
+        time.sleep(1.0/3.0)
+    print(vis.nativeWindow())
+    #or print(vis.nativeWindow().iframe(600,300))
+    #or print(vis.nativeWindow().page())
+
+(Don't mix animations and updates, or else the resulting animation will be
+strange.)
 
 
-INSTRUCTIONS
-------------
 
-
-  - To show the visualization and quit when the user closes the window::
-  
-        vis.run()
-
-  - To show the visualization and return when the user closes the window::
-
-        vis.dialog()
-        ... do stuff afterwards ... 
-        vis.kill()
-
-  - To show the visualization and run a script alongside it until the user
-    closes the window (multithreaded mode)::
- 
-        vis.show()
-        while vis.shown():
-            vis.lock()
-            ... do stuff ...
-            [to exit the loop call vis.show(False)]
-            vis.unlock()
-            time.sleep(dt)
-        ... do stuff afterwards ...
-        vis.kill()
-
-  - To show the visualization and run python commands until the user closes
-    the window (single-threaded mode)::
- 
-        def callback():
-            ... do stuff ...
-            [to exit the loop manually call vis.show(False)]
-        vis.loop(setup=vis.show,callback=callback)
-        vis.kill()
-
-  - To run a window with a custom plugin (GLPluginInterface) and terminate on
-    closure::
- 
-        vis.run(plugin)
-  
-  - To show a dialog or parallel window::
-
-        vis.setPlugin(plugin)
-        ... then call  
-        vis.dialog()
-        ... or
-        vis.show()
-        ... do stuff afterwards ... 
-        vis.kill()
-
-  - To add a GLPluginInterface that just customizes a few things on top of
-    the default visualization::
-
-        vis.pushPlugin(plugin)
-        vis.dialog()
-        vis.popPlugin()
-
-  - To run plugins side-by-side in the same window::
-
-        vis.setPlugin(plugin1)
-        vis.addPlugin(plugin2)  #this creates a new split-screen
-        vis.dialog()
-        ... or
-        vis.show()
-        ... do stuff afterwards ... 
-        vis.kill()
-
-  - To run a custom Qt window or dialog containing a visualization window::
-
-        vis.setPlugin([desired plugin or None for visualization])
-        def makeMyUI(qtglwidget):
-            return MyQtMainWindow(qtglwidget)
-        vis.customUI(makeMyUI)
-        vis.dialog()   #if you return a QDialog
-        ... or
-        vis.show()     #if you return a QWidget or QMainWindow
-        ... do stuff afterwards ... 
-        vis.kill()
-
-  - To launch a second window after the first is closed: just call whatever you
-    want again. Note: if show was previously called with a plugin and you wish to
-    revert to the default visualization, you should call setPlugin(None) first to 
-    restore the default.
-
-  - To create a separate window with a given plugin::
-
-        w1 = vis.createWindow("Window 1")  #w1=0
-        show()
-        w2 = vis.createWindow("Window 2")  #w2=1
-        vis.setPlugin(plugin)
-        vis.dialog()
-        #to restore commands to the original window
-        vis.setWindow(w1)
-        while vis.shown():
-            ...
-        vis.kill()
-
-
-.. note::
-
-    In multithreaded mode, when changing the data shown by the window (e.g., 
-    modifying the configurations of robots in a WorldModel) you must call
-    ``vis.lock()`` before accessing the data and then call ``vis.unlock()``
-    afterwards.
 
 MAIN INTERFACE
 --------------
@@ -311,7 +354,7 @@ MAIN INTERFACE
   be paused until unlock() is called.
 - def unlock(): unlocks the visualization world.  Must only be called once
   after every lock().
-- def update(): manually triggers a redraw of the current front end.
+- def update(): manually triggers a redraw of the current scene.
 - def threadCall(func): Call `func` inside the visualization thread. This is 
   useful for some odd calls that are incompatible with being run outside the Qt
   or OpenGL thread.
@@ -454,19 +497,20 @@ def init(backends=None):
     - 'PyQt4' / 'PyQt5': uses a specific version of PyQT
     - 'GLUT': uses GLUT + OpenGL
     - 'IPython': uses an IPython widget
+    - 'HTML': outputs an HTML / Javascript widget
     """
     global _backend,_window_manager
     if _backend is not None:
         #already initialized
         return _backend
     if backends is None:
-        backends = ['PyQt','GLUT','IPython']
+        backends = ['PyQt','GLUT','IPython','HTML']
     if isinstance(backends,str):
         backends = [backends]
     OpenGLBackends = ['PyQt','PyQt4','PyQt5','GLUT']
     order = [[]]
     for backend in backends:
-        if backend == 'IPython':
+        if backend in ['IPython','HTML']:
             order.append(backend)
             order.append([])
         else:
@@ -477,6 +521,10 @@ def init(backends=None):
             from .backends import vis_ipython
             _window_manager = vis_ipython.IPythonWindowManager()
             return _backend
+        elif trials == 'HTML':
+            _backend = 'HTML'
+            from .backends import vis_html
+            _window_manager = vis_html.HTMLWindowManager()
         elif len(trials)>0:
             res = glinit.init(trials)
             if res is not None:
@@ -710,8 +758,9 @@ def unlock():
     _window_manager.unlock()
 
 def update():
-    """Manually triggers a redraw of the current front end."""
-    frontend().update()
+    """Manually triggers a redraw of the current window."""
+    global _window_manager
+    _window_manager.update()
 
 def shown():
     """Returns true if a visualization window is currently shown."""
@@ -755,7 +804,7 @@ def threadCall(func):
 ######### CONVENIENCE ALIASES FOR VisualizationScene methods ###########
 def addAction(hook,short_text,key=None,description=None):
     """Adds a callback to the window that can be triggered by menu choice or
-    keyboard. Alias for frontend().addAction().
+    keyboard. Alias for nativeWindow().addAction().
 
     Args:
         hook (function): a python callback function, taking no arguments, called
@@ -766,7 +815,7 @@ def addAction(hook,short_text,key=None,description=None):
             when the user hovers their mouse over the menu item.
     """
     _init()
-    frontend().addAction(hook,short_text,key,description)
+    nativeWindow().addAction(hook,short_text,key,description)
 
 def clear():
     """Clears the visualization world."""
@@ -1810,6 +1859,7 @@ class VisAppearance:
         self.displayCache[0].name = name
         #temporary configuration of the item
         self.drawConfig = None
+        self.transformChanged = False
         self.setItem(item)
 
     def setItem(self,item):
@@ -1841,13 +1891,15 @@ class VisAppearance:
             for n,c in enumerate(item.contacts):
                 self.subAppearances[("contact",n)] = VisAppearance(c,n)
         
-    def markChanged(self):
-        for c in self.displayCache:
-            c.markChanged()
+    def markChanged(self,config=True,appearance=True):
+        if appearance:
+            for c in self.displayCache:
+                c.markChanged()
         for (k,a) in self.subAppearances.items():
-            a.markChanged()
-        self.update_editor(True)
-        self.doRefresh = True
+            a.markChanged(config,appearance)
+        if config:
+            self.update_editor(True)
+            self.transformChanged = True
 
     def destroy(self):
         for c in self.displayCache:
@@ -1899,7 +1951,8 @@ class VisAppearance:
                 traceback.print_exc()
                 pass
         for n,app in self.subAppearances.items():
-            app.swapDrawConfig()        
+            app.swapDrawConfig()
+        self.markChanged(config=True,appearance=False)
 
     def clearDisplayLists(self):
         if isinstance(self.item,WorldModel):
@@ -1917,7 +1970,7 @@ class VisAppearance:
                 self.item.link(link).appearance().refresh()
         for n,o in self.subAppearances.items():
             o.clearDisplayLists()
-        self.markChanged()
+        self.markChanged(config=False,appearance=True)
 
     def transparent(self):
         """Returns true if the item is entirely transparent, None if mixed transparency, and False otherwise"""
@@ -2701,6 +2754,8 @@ class VisualizationScene:
         for (name,itemvis) in self.items.items():
             itemvis.destroy()
         self.items = {}
+        self.currentAnimationTime = 0
+        self.doRefresh = True
         _globalLock.release()
 
     def clearText(self):
@@ -2783,7 +2838,7 @@ class VisualizationScene:
         item.animationStartTime = self.currentAnimationTime
         item.animationSpeed = speed
         item.animationEndBehavior = endBehavior
-        item.markChanged()
+        item.markChanged(config=True,appearance=False)
         _globalLock.release()
 
     def pauseAnimation(self,paused=True):
@@ -2795,18 +2850,18 @@ class VisualizationScene:
     def stepAnimation(self,amount):
         global _globalLock
         _globalLock.acquire()
-        self.currentAnimationTime += amount
-        self.doRefresh = True
+        self.animationTime(self.currentAnimationTime + amount)
         _globalLock.release()
 
     def animationTime(self,newtime=None):
         global _globalLock
-        if self==None:
-            print("Visualization disabled")
-            return 0
         if newtime is not None:
             _globalLock.acquire()
             self.currentAnimationTime = newtime
+            self.doRefresh = True
+            for (k,v) in self.items.items():
+                #do animation updates
+                v.updateAnimation(self.currentAnimationTime)
             _globalLock.release()
         return self.currentAnimationTime
 
@@ -2837,6 +2892,7 @@ class VisualizationScene:
             config.setConfig(item.item,value)
         if item.editor:
             item.update_editor(item_to_editor = True)
+        item.markChanged(config=True,appearance=False)
         self.doRefresh = True
         _globalLock.release()
 
@@ -2848,7 +2904,7 @@ class VisualizationScene:
         _globalLock.acquire()
         item = self.getItem(name)
         item.attributes["hide_label"] = hidden
-        item.markChanged()
+        item.markChanged(config=False,appearance=True)
         self.doRefresh = True
         _globalLock.release()
 
@@ -2938,7 +2994,7 @@ class VisualizationScene:
         item = self.getItem(name)
         item.useDefaultAppearance = False
         item.customAppearance = appearance
-        item.markChanged()
+        item.markChanged(config=False,appearance=True)
         self.doRefresh = True
         _globalLock.release()
 
@@ -2956,7 +3012,7 @@ class VisualizationScene:
         if attr=='type':
             #modify the parent attributes
             item.attributes.setParent(_default_attributes(item.item,type=value))
-        item.markChanged()
+        item.markChanged(config=False,appearance=True)
 
     def setAttribute(self,name,attr,value):
         global _globalLock
@@ -2987,7 +3043,7 @@ class VisualizationScene:
         _globalLock.acquire()
         item = self.getItem(name)
         item.useDefaultAppearance = True
-        item.markChanged()
+        item.markChanged(config=False,appearance=True)
         self.doRefresh = True
         _globalLock.release()
 
@@ -2996,7 +3052,7 @@ class VisualizationScene:
         _globalLock.acquire()
         item = self.getItem(name)
         self._setAttribute(item,"color",[r,g,b,a])
-        item.markChanged()
+        item.markChanged(config=False,appearance=True)
         self.doRefresh = True
         _globalLock.release()
 
@@ -3017,14 +3073,14 @@ class VisualizationScene:
             print("Unable to auto-fit camera")
             print(e)
 
-    def updateAnimationTime(self,t):
+    def updateTime(self,t):
+        """The backend will call this during an idle loop to update the
+        visualization time.  This may also update animations if currently
+        animating."""
         oldt = self.t
         self.t = t
         if self.animating:
-            self.currentAnimationTime += (self.t - oldt)
-            for (k,v) in self.items.items():
-                #do animation updates
-                v.updateAnimation(self.currentAnimationTime)
+            self.stepAnimation(self.t - oldt)
         for (k,v) in self.items.items():
             #do other updates
             v.updateTime(self.t-self.startTime)

@@ -3,7 +3,6 @@
    <head>
       <title>__TITLE__</title>
       <meta charset="UTF-8">    
-
    </head>
    <style>
    .stretchedToMargin {
@@ -28,6 +27,17 @@
    .slider:hover { 
     cursor:pointer;
    }
+   .logo {
+     width:200px;
+     height:60px;
+     display:flex;
+     margin-top:10px;
+   }
+   @media screen and (max-width: 1024px) {
+      .logo {
+          display: none !important;
+      }
+    }
    </style>
    <body style="margin: 0px; height:100%; background-color:white;">
 <script>
@@ -39,9 +49,10 @@
   var rpcs = __RPC_JSON__;
   var dt = __TIMESTEP__;
   var compressed = __COMPRESSED__;
+  var animationIndex = null;
   var animationTime = 0;
   var lastAnimateTime = null;
-  var animating = true;
+  var animating = false;
   var looping = true;
   var klampt_frontend = null;
 
@@ -103,6 +114,7 @@
 
   function index() {
     if(animation == null) return null;
+    if(dt == 0) return null;
     var i = Math.floor((animationTime * 0.001)/dt);
     var len = numframes();
     if (i==len) {
@@ -111,7 +123,7 @@
     else if(i > len) {
       if(looping) {
         animationTime = 0;
-        klampt_frontend.clear_extras();
+        klampt_frontend.rpc({type:'clear_extras'});
         klampt_frontend.rpc({type:'add_text',name:'time_display',x:5,y:5});
         //console.log("Looped");
         return 0;
@@ -124,10 +136,11 @@
 
   function update_time()
   {
+    var ind = index();
+    if(ind == animationIndex) return;
     if(animation) {
       klampt_frontend.rpc({type:'add_text',name:'time_display',text:"Time "+(animationTime*0.001).toFixed(2)});
       if(compressed) {
-        var ind = index();
         var transforms = []
         for(var obj in animation) {
           var mat = animation[obj][ind];
@@ -140,7 +153,30 @@
         klampt_frontend._set_transforms(animation[index()].object);
       }
     }
+    if(rpcs) {
+      if(animationIndex == null)
+        animationIndex = 0;
+      if(ind > animationIndex) {
+        //move rpcs forward
+        for(i = animationIndex+1;i<=ind;i++) {
+          if(rpcs[i]) {
+            for(j=0;j<rpcs[i].length;j++)
+              klampt_frontend.rpc(rpcs[i][j]);
+          }
+        }
+      }
+      else {
+        klampt_frontend.rpc({type:'clear_extras'});
+        for(i = 0;i<=ind;i++) {
+          if(rpcs[i]) {
+            for(j=0;j<rpcs[i].length;j++)
+              klampt_frontend.rpc(rpcs[i][j]);
+          }
+        }
+      }
+    }
     klampt_frontend.render();
+    animationIndex = ind;
   }
 
   function animate()
@@ -169,71 +205,62 @@
 
 </script>
 
-    <div id="center" style="position:relative; margin:auto; width:95vw; max-width:200vh; height:95vh; margin:auto; padding:0px;">
+    <div id="center" style="position:relative; width:95vw; max-width:200vh; height:95vh; margin:auto; padding:0px;">
       <div id="controls" style="display:block; width:100%; height:10%; margin:0px; padding:0px;">
         <canvas id="reset" width="50" height="50" class="button" onclick="resetplay()"> </canvas> 
         <canvas id="play_pause" width="50" height="50" class="button" onclick="toggleplaypause()">  </canvas>
         <input id="slider" class="slider" type="range" name="duration" min="0" max="100" step="0.1" style="float:left; width:60%; height:40px; margin-top:20px; margin-left:10px;" onchange="sliderdrag()" oninput="sliderdrag()"/>
-        <a href="http://klampt.org"><img src="http://motion.cs.illinois.edu/klampt/powered_by_klampt.jpg" width="200px" height="60px" style="float:right; margin-top:10px;"></a>
+        <a href="http://klampt.org"><img src="http://motion.cs.illinois.edu/klampt/powered_by_klampt.jpg" class="logo"></a>
 
       </div>
       <div id="canvas" style="position:relative; display:block; width:100%; height:90%; margin:0px; padding:0px;"></div>
-        <!--<div id="textArea" style="width:100%; height:20%; margin:0; padding:0"><textarea readonly id="myTextarea" style="background-color: black;color:white;width:100%;height:100%">> </textarea></div> -->
     </div>
             
       <script>
 
+      function draw_path(c2,path,w,h) {
+        c2.beginPath();
+        c2.moveTo(path[0][0]*w/100, path[0][1]*h/100);
+        for(let i=1;i<path.length;i++) {
+          c2.lineTo(path[i][0]*w/100, path[i][1]*h/100);
+        }
+        c2.closePath();
+        c2.fill();
+      }
+
+      function draw_paths(id,color,paths) {
+        var canvas = document.getElementById(id);
+        var c2 =  canvas.getContext('2d');
+        var w=canvas.width;
+        var h=canvas.height;
+        c2.clearRect(0, 0, w, h);
+        c2.fillStyle = color;
+        for(let j=0;j<paths.length;j++) {
+          draw_path(c2,paths[j],w,h);
+        }
+      }
+
       function make_reset(id) {
-        var c2 =  document.getElementById(id).getContext('2d');
-        c2.fillStyle = '#f00';
-        c2.beginPath();
-        c2.moveTo(22, 10);
-        c2.lineTo(7, 25);
-        c2.lineTo(22, 40);
-        c2.closePath();
-        c2.fill();
-        c2.beginPath();
-        c2.moveTo(42, 10);
-        c2.lineTo(27, 25);
-        c2.lineTo(42, 40);
-        c2.closePath();
-        c2.fill();
+        var paths = [[[44,20],[14,50],[44,80]],
+          [[84,20],[54,50],[84,80]]];
+        draw_paths(id,'#f00',paths);
       }
       function make_play(id) {
-        var canvas = document.getElementById(id);
-        var c2 =  canvas.getContext('2d');
-        c2.clearRect(0, 0, canvas.width, canvas.height);
-        c2.fillStyle = '#0f0';
-        c2.beginPath();
-        c2.moveTo(15, 10);
-        c2.lineTo(35, 25);
-        c2.lineTo(15, 40);
-        c2.closePath();
-        c2.fill();
+        var paths = [[[30,20],[70,50],[30,80]]];
+        draw_paths(id,'#0f0',paths);
       }
       function make_pause(id) {
-        var canvas = document.getElementById(id);
-        var c2 =  canvas.getContext('2d');
-        c2.clearRect(0, 0, canvas.width, canvas.height);
-        c2.fillStyle = '#ff0';
-        c2.beginPath();
-        c2.moveTo(12, 10);
-        c2.lineTo(22, 10);
-        c2.lineTo(22, 40);
-        c2.lineTo(12, 40);
-        c2.closePath();
-        c2.fill();
-        c2.beginPath();
-        c2.moveTo(28, 10);
-        c2.lineTo(38, 10);
-        c2.lineTo(38, 40);
-        c2.lineTo(28, 40);
-        c2.closePath();
-        c2.fill();
+        var paths = [[[24,20],[44,20],[44,80],[24,80]],
+          [[56,20],[76,20],[76,80],[56,80]]];
+        draw_paths(id,'#ff0',paths);
       }
       make_reset('reset');
-      //make_play('play_pause');
-      make_pause('play_pause');
+      if(animating) {
+          make_pause('play_pause');
+      }
+      else {
+          make_play('play_pause');
+      }
 
 //replacement for jQuery $(document).ready()
 (function(funcName, baseObj) {

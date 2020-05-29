@@ -2316,7 +2316,6 @@ function KlamptFrontend(dom_sceneArea) {
   //  preserveDrawingBuffer   : true   // required to support .toDataURL()
   //});  
   this.loader = new THREE.ObjectLoader();
-  this.sceneArea = dom_sceneArea;
   //renderer.setClearColor(0x88888888);
   this.renderer.setClearColor(0x888888FF);
   this.renderer.shadowMapEnabled = true;

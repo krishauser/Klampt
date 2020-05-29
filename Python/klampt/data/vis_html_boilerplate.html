@@ -1,0 +1,367 @@
+<script>
+  __KLAMPT_FRONTEND_LOAD__
+
+  //the HTML-maker code should fill this in
+  var scene = __SCENE_JSON__;
+  var animation = __PATH_JSON__;
+  var rpcs = __RPC_JSON__;
+  var dt = __TIMESTEP__;
+  var compressed = __COMPRESSED__;
+  var animationIndex = null;
+  var animationTime = 0;
+  var lastAnimateTime = null;
+  var animating = false;
+  var looping = true;
+  var klampt_frontend = null;
+
+  function numframes() {
+    if(compressed) {
+      for(var obj in animation) {
+        return animation[obj].length;
+      }
+    }
+    return animation.length;
+  }
+
+  function progress() {
+    if(animation == null) return null;
+    var i = Math.floor((animationTime * 0.001)/dt);
+    return (i*100)/(numframes()-1);
+  }
+
+  function init() {
+    var container = document.getElementById("canvas");
+    klampt_frontend = KLAMPT.KlamptFrontend(container);
+    klampt_frontend.update_scene(scene);
+    klampt_frontend.set_shadow(true);
+    klampt_frontend.rpc({type:'add_text',name:'time_display',x:5,y:5});
+    klampt_frontend.render();
+    animationTime = 0;
+    animate();
+  }
+
+  function resetplay() {
+    animating = false;
+    make_play('play_pause');
+    animationTime = 0;
+    document.getElementById('slider').value = 0;
+    lastAnimateTime = null;
+    update_time()
+  }
+
+  function toggleplaypause() {
+    if(animating) {
+      animating = false;
+      lastAnimateTime = null;
+      make_play('play_pause');
+    }
+    else {
+      animating = true;
+      make_pause('play_pause');
+      animate();
+    }
+  }
+
+  function sliderdrag() {
+    if(animating) {
+      toggleplaypause();
+    }
+    var prog = document.getElementById('slider').value
+    animationTime = (prog*0.01 * numframes())*(dt * 1000);
+    update_time();
+  }
+
+  function index() {
+    if(animation == null) return null;
+    if(dt == 0) return null;
+    var i = Math.floor((animationTime * 0.001)/dt);
+    var len = numframes();
+    if (i==len) {
+      return len - 1;
+    }
+    else if(i > len) {
+      if(looping) {
+        animationTime = 0;
+        klampt_frontend.rpc({type:'clear_extras'});
+        klampt_frontend.rpc({type:'add_text',name:'time_display',x:5,y:5});
+        //console.log("Looped");
+        return 0;
+      }
+      return len - 1;
+    }
+    //console.log("Index is "+i);
+    return i;
+  }
+
+  function update_time()
+  {
+    var ind = index();
+    if(ind == animationIndex) return;
+    if(animation) {
+      klampt_frontend.rpc({type:'add_text',name:'time_display',text:"Time "+(animationTime*0.001).toFixed(2)});
+      if(compressed) {
+        var transforms = []
+        for(let obj in animation) {
+          var mat = animation[obj][ind];
+          if(mat != null)
+            transforms.push({name:obj,matrix:mat});
+        }
+        klampt_frontend._set_transforms(transforms);
+      }
+      else {
+        klampt_frontend._set_transforms(animation[index()].object);
+      }
+    }
+    if(rpcs) {
+      if(animationIndex == null)
+        animationIndex = 0;
+      if(ind > animationIndex) {
+        //move rpcs forward
+        for(let i = animationIndex+1;i<=ind;i++) {
+          if(rpcs[i]) {
+            for(j=0;j<rpcs[i].length;j++)
+              klampt_frontend.rpc(rpcs[i][j]);
+          }
+        }
+      }
+      else {
+        klampt_frontend.rpc({type:'clear_extras'});
+        for(let i = 0;i<=ind;i++) {
+          if(rpcs[i]) {
+            for(j=0;j<rpcs[i].length;j++)
+              klampt_frontend.rpc(rpcs[i][j]);
+          }
+        }
+      }
+    }
+    klampt_frontend.render();
+    animationIndex = ind;
+  }
+
+  function animate()
+  {
+    if(!animating) return;
+    if(lastAnimateTime == null) {
+      lastAnimateTime = performance.now();
+    }
+    else {
+      var curTime = performance.now();
+      if(curTime - lastAnimateTime < 20)  { //max 50fps
+        setTimeout(animate,20- (curTime - lastAnimateTime));
+        return;
+      }
+      animationTime += curTime - lastAnimateTime;
+      lastAnimateTime = curTime;
+      //console.log("Time is now "+animationTime);
+    }
+    update_time();
+    document.getElementById('slider').value = progress();
+    requestAnimationFrame( animate  );
+  }
+</script>
+
+<style>
+ .button { 
+  display:flex;
+  width:50px;
+  height:50px;
+  margin:10px;
+  border:2px solid #000000;
+  box-shadow: 3px 3px 5px #888888;
+ }
+ .button:hover { 
+  cursor:pointer;
+  background-color:#CCF;
+ }
+ .slider{
+  flex-grow:1;
+  width:auto;
+  height:40px;
+  margin-top:20px;
+  margin-left:10px;
+  margin-right:10px;
+ }
+ .slider:hover { 
+  cursor:pointer;
+ }
+ .controls {
+    display:flex;
+    position:absolute;
+    width:80%;
+    top:80%;
+    left:50%;
+    transform:translate(-50%, -50%);
+    color: white;
+    background: rgba(80, 80, 80, 0.7);
+    z-index: 1000;
+ }
+ .logo {
+   width:200px;
+   height:60px;
+   display:flex;
+   margin-top:10px;
+ }
+ @media screen and (max-width: 650px) {
+    .controls {
+      width:90% !important;
+      top:90% !important;
+    }
+    .button {
+      display:flex;
+      width:25px !important;
+      height:25px !important;
+      margin:5px !important;
+    }
+    .slider{
+      height:20px !important;
+      margin-top:10px !important;
+      margin-left:5px !important;
+      margin-right:5px !important;
+     }
+     .logo {
+        display: none !important;
+    }
+  }
+ @media screen and (max-width: 1024px) {
+    .logo {
+        display: none !important;
+    }
+  }
+</style>
+
+<div id="center" style="width:100%; height:100%; min-height:100%; margin:0px; padding:0px;">
+  <div id="controls" class="controls">
+    <canvas id="reset" class="button" onclick="resetplay()"> </canvas> 
+    <canvas id="play_pause" class="button" onclick="toggleplaypause()">  </canvas>
+    <input id="slider" class="slider" type="range" name="duration" min="0" max="100" step="0.1" onchange="sliderdrag()" oninput="sliderdrag()"/>
+    <a href="http://klampt.org"><img src="http://motion.cs.illinois.edu/klampt/powered_by_klampt_transparent.jpg" class="logo"></a>
+
+  </div>
+  <div id="canvas" style="position:absolute; top:0; left:0; display:block; width:100%; height:100%; margin:0px; padding:0px;"></div>
+</div>
+            
+<script>
+
+function draw_path(c2,path,w,h) {
+  c2.beginPath();
+  c2.moveTo(path[0][0]*w/100, path[0][1]*h/100);
+  for(let i=1;i<path.length;i++) {
+    c2.lineTo(path[i][0]*w/100, path[i][1]*h/100);
+  }
+  c2.closePath();
+  c2.fill();
+}
+
+function draw_paths(id,color,paths) {
+  var canvas = document.getElementById(id);
+  var c2 =  canvas.getContext('2d');
+  var w=canvas.width;
+  var h=canvas.height;
+  c2.clearRect(0, 0, w, h);
+  c2.fillStyle = color;
+  for(let j=0;j<paths.length;j++) {
+    draw_path(c2,paths[j],w,h);
+  }
+}
+
+function make_reset(id) {
+  var paths = [[[44,20],[14,50],[44,80]],
+    [[84,20],[54,50],[84,80]]];
+  draw_paths(id,'#f00',paths);
+}
+function make_play(id) {
+  var paths = [[[30,20],[70,50],[30,80]]];
+  draw_paths(id,'#0f0',paths);
+}
+function make_pause(id) {
+  var paths = [[[24,20],[44,20],[44,80],[24,80]],
+    [[56,20],[76,20],[76,80],[56,80]]];
+  draw_paths(id,'#ff0',paths);
+}
+make_reset('reset');
+if(animating) {
+    make_pause('play_pause');
+}
+else {
+    make_play('play_pause');
+}
+
+//replacement for jQuery $(document).ready()
+(function(funcName, baseObj) {
+// The public function name defaults to window.docReady
+// but you can pass in your own object and own function name and those will be used
+// if you want to put them in a different namespace
+funcName = funcName || "docReady";
+baseObj = baseObj || window;
+var readyList = [];
+var readyFired = false;
+var readyEventHandlersInstalled = false;
+
+// call this when the document is ready
+// this function protects itself against being called more than once
+function ready() {
+  if (!readyFired) {
+      // this must be set to true before we start calling callbacks
+      readyFired = true;
+      for (var i = 0; i < readyList.length; i++) {
+          // if a callback here happens to add new ready handlers,
+          // the docReady() function will see that it already fired
+          // and will schedule the callback to run right after
+          // this event loop finishes so all handlers will still execute
+          // in order and no new ones will be added to the readyList
+          // while we are processing the list
+          readyList[i].fn.call(window, readyList[i].ctx);
+      }
+      // allow any closures held by these functions to free
+      readyList = [];
+  }
+}
+
+function readyStateChange() {
+  if ( document.readyState === "complete" ) {
+      ready();
+  }
+}
+
+// This is the one public interface
+// docReady(fn, context);
+// the context argument is optional - if present, it will be passed
+// as an argument to the callback
+baseObj[funcName] = function(callback, context) {
+  // if ready has already fired, then just schedule the callback
+  // to fire asynchronously, but right away
+  if (readyFired) {
+      setTimeout(function() {callback(context);}, 1);
+      return;
+  } else {
+      // add the function and context to the list
+      readyList.push({fn: callback, ctx: context});
+  }
+  // if document already ready to go, schedule the ready function to run
+  if (document.readyState === "complete") {
+      setTimeout(ready, 1);
+  } else if (!readyEventHandlersInstalled) {
+      // otherwise if we don't have event handlers installed, install them
+      if (document.addEventListener) {
+          // first choice is DOMContentLoaded event
+          document.addEventListener("DOMContentLoaded", ready, false);
+          // backup is window load event
+          window.addEventListener("load", ready, false);
+      } else {
+          // must be IE
+          document.attachEvent("onreadystatechange", readyStateChange);
+          window.attachEvent("onload", ready);
+      }
+      readyEventHandlersInstalled = true;
+  }
+}
+})("docReady", window);
+
+   window.docReady(function() {
+     
+      if(klampt_frontend == null) {
+        init();
+      }
+   });
+
+</script>

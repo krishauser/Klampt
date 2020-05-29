@@ -41,14 +41,14 @@ class KlamptWidgetAdaptor(KlamptWidget,VisualizationScene):
 
     def addText(self,name,text,pos=None):
         self._textItems.add(name)
-        KlamptWidget.addText(name,text,pos)
+        KlamptWidget.addText(self,name,text,pos)
 
     def remove(self,name):
-        VisualizationScene.remove(name)
-        KlamptWidget.remove(name)
+        VisualizationScene.remove(self,name)
+        KlamptWidget.remove(self,name)
 
     def setItemConfig(self,name,value):
-        VisualizationScene.setItemConfig(name,value)
+        VisualizationScene.setItemConfig(self,name,value)
 
     def hideLabel(self,name,hidden=True):
         #no labels, ignore silently
@@ -58,13 +58,13 @@ class KlamptWidgetAdaptor(KlamptWidget,VisualizationScene):
         raise RuntimeError("IPython: can't do visual editing.  Try klampt.ipython.EditPoint, etc.")
 
     def hide(self,name,hidden=True):
-        VisualizationScene.hide(name,hidden)
-        KlamptWidget.hide(name,hidden)
+        VisualizationScene.hide(self,name,hidden)
+        KlamptWidget.hide(self,name,hidden)
 
-    def setAttribute(self,name,attr,value):
-        VisualizationScene.setAttribute(name,attr,value)
+    def _setAttribute(self,item,attr,value):
+        VisualizationScene._setAttribute(self,item,attr,value)
         if attr == 'color':
-            KlamptWidget.setColor(name,*value)
+            KlamptWidget.setColor(self,item.name,*value)
         elif attr == 'size':
             #TODO: modify point size
             pass
@@ -74,19 +74,20 @@ class KlamptWidgetAdaptor(KlamptWidget,VisualizationScene):
         raise RuntimeError("IPython: can't set up custom draw functions")
 
     def getViewport(self):
-        cam = KlamptWidget.getCamera()
+        cam = KlamptWidget.getCamera(self)
         #TODO: convert camera message to GLViewport
         return cam
 
     def setViewport(self,viewport):
         #TODO: convert from GLViewport to camera message
-        KlamptWidget.setCamera(viewport)
+        KlamptWidget.setCamera(self,viewport)
 
     def setBackgroundColor(self,r,g,b,a=1): 
         raise RuntimeError("IPython: can't yet change the background color")
 
     def update(self):
-        KlamptWidget.update()
+        VisualizationScene.updateAnimationTime(self)
+        KlamptWidget.update(self)
 
         #look through changed items and update them
         def updateItem(item):

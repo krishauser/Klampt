@@ -137,7 +137,7 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
     def idle(self):
         global _globalLock
         _globalLock.acquire()
-        VisualizationScene.updateAnimationTime(self,time.time())
+        VisualizationScene.updateTime(self,time.time())
         _globalLock.release()
         return False
 
