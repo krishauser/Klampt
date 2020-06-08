@@ -11,7 +11,7 @@ if not _PyQtAvailable and not _GLUTAvailable:
         from PyQt5.QtCore import *
         from PyQt5.QtGui import *
         from PyQt5.QtWidgets import *
-        from qtbackend import QtBackend
+        from backends.qtbackend import QtBackend
         _PyQtAvailable = True
         _PyQt5Available = True
         _GLBackend = QtBackend()
@@ -20,7 +20,7 @@ if not _PyQtAvailable and not _GLUTAvailable:
         try:
             from PyQt4.QtCore import *
             from PyQt4.QtGui import *
-            from qtbackend import QtBackend
+            from backends.qtbackend import QtBackend
             _PyQtAvailable = True
             _PyQt4Available = True
             _GLBackend = QtBackend()
@@ -32,7 +32,7 @@ if not _PyQtAvailable and not _GLUTAvailable:
               print 'PyQt4/PyQt5 are not available... try running "pip3 install PyQt5"'
           try:
               from OpenGL.GLUT import *
-              from glutbackend import GLUTBackend
+              from backends.glutbackend import GLUTBackend
               _GLUTAvailable = True
               _GLBackend = GLUTBackend()
               print "*** klampt.vis: using GLUT as the visualization backend ***"

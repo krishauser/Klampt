@@ -126,7 +126,7 @@ class QtGLWindow(QGLWidget):
 
     def setProgram(self,program):
         """User will call this to set up the program variable"""
-        from glprogram import GLProgram
+        from ..glprogram import GLProgram
         assert isinstance(program,GLProgram)
         print "######### QGLWidget setProgram ###############"
         if hasattr(program,'name'):

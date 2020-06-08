@@ -1,7 +1,6 @@
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 import weakref
-from glcommon import GLMultiViewportProgram
 
 keymap = {GLUT_KEY_F1:'f1',
     GLUT_KEY_F2:'f2',
@@ -100,7 +99,7 @@ class GLUTWindow:
         pass
 
     def setProgram(self,program):
-        from glprogram import GLProgram
+        from ..glprogram import GLProgram
         assert isinstance(program,GLProgram)
         if hasattr(program,'name'):
             self.name = program.name

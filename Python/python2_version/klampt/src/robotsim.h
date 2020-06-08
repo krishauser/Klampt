@@ -24,14 +24,14 @@ class SimBody;
 class Simulator;
 
 /** @brief A sensor on a simulated robot.  Retrieve one from the controller
- * using :meth:`SimRobotController.getSensor` (), or create a new one
- * using SimRobotSensor(robotController,name,type)
+ * using :meth:`SimRobotController.getSensor`, or create a new one
+ * using ``SimRobotSensor(robotController,name,type)``
  *
- * Use  :meth:`getMeasurements` () to get the currently simulated measurement
+ * Use  :meth:`getMeasurements` to get the currently simulated measurement
  * vector.
  *
- * Sensors are automatically updated through the :meth:`Simulator.simulate` () call,
- * and :meth:`getMeasurements` () retrieves the updated values.  As a result,
+ * Sensors are automatically updated through the :meth:`Simulator.simulate` call,
+ * and :meth:`getMeasurements` retrieves the updated values.  As a result,
  * you may get garbage measurements before the first Simulator.simulate call is
  * made.
  * 
@@ -39,9 +39,9 @@ class Simulator;
  * (i.e., makes sensible measurements) for some types of sensors when just 
  * a robot / world model is given. This is similar to Simulation.fakeSimulate
  * but the entire controller structure is bypassed.  You can arbitrarily set the
- * robot's position, call :meth:`kinematicReset` (), and then call
- * :meth:`kinematicSimulate` ().  Subsequent calls assume the robot is being
- * driven along a trajectory until the next :meth:`kinematicReset` () is called.
+ * robot's position, call :meth:`kinematicReset`, and then call
+ * :meth:`kinematicSimulate`.  Subsequent calls assume the robot is being
+ * driven along a trajectory until the next :meth:`kinematicReset` is called.
  * 
  * LaserSensor, CameraSensor, TiltSensor, AccelerometerSensor, GyroSensor,
  * JointPositionSensor, JointVelocitySensor support kinematic simulation mode.
