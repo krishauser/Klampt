@@ -122,9 +122,9 @@ setup(name='Klampt',
                    ],
       #py_modules=['klampt.robotsim','klampt.plan.motionplanning','klampt.math.rootfind'],
       py_modules=['klampt.robotsim','klampt.plan.motionplanning'],
-      packages=['klampt','klampt.apps', 'klampt.io', 'klampt.math', 'klampt.model', 'klampt.model.create', 'klampt.plan', 'klampt.sim', 'klampt.vis', 'klampt.vis.ipython'],
+      packages=['klampt','klampt.apps', 'klampt.io', 'klampt.math', 'klampt.model', 'klampt.model.create', 'klampt.plan', 'klampt.sim', 'klampt.vis', 'klampt.vis.ipython', 'klampt.vis.backends'],
       package_dir={'klampt': root_py_folder},
-      package_data={'klampt': extra_shared_libraries + ['data/*.html']},
+      package_data={'klampt': extra_shared_libraries + ['data/*.html','data/*.js']},
       entry_points = {
         'console_scripts': [
             'klampt_browser=klampt.apps.klampt_browser:main',
