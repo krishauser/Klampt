@@ -53,6 +53,16 @@ struct TriangleMesh
   std::vector<double> vertices;
 };
 
+struct ConvexHull
+{
+  ///Translates all the vertices by v=v+t
+  void translate(const double t[3]);
+  ///Transforms all the vertices by the rigid transform v=R*v+t
+  void transform(const double R[9],const double t[3]);
+
+  std::vector<double> points;
+};
+
 /** @brief A 3D point cloud class.  
  *
  * Attributes:
@@ -279,6 +289,12 @@ public:
   int elem1,elem2;
 };
 
+class SupportResult
+{
+public:
+  std::vector<double> support;
+};
+
 /** @brief The result from a contact query of :class:`~klampt.Geometry3D`.
  * The number of contacts n is variable.
  *
@@ -319,6 +335,7 @@ public:
  * - point clouds (PointCloud)
  * - volumetric grids (VolumeGrid)
  * - groups (Group)
+ * - ConvexHull
  * 
  * This class acts as a uniform container of all of these types.
  *
@@ -349,6 +366,8 @@ class Geometry3D
   Geometry3D();
   Geometry3D(const Geometry3D&);
   Geometry3D(const GeometricPrimitive&);
+  Geometry3D(const ConvexHull&);
+  //Geometry3D(const ConvexHull&, const ConvexHull&, bool);
   Geometry3D(const TriangleMesh&);
   Geometry3D(const PointCloud&);
   Geometry3D(const VolumeGrid&);
@@ -356,6 +375,9 @@ class Geometry3D
   const Geometry3D& operator = (const Geometry3D& rhs);
   ///Creates a standalone geometry from this geometry
   Geometry3D clone();
+  void from_hull_tran(const Geometry3D&);
+  void from_hull(const Geometry3D&, const Geometry3D &, bool);
+  void find_support(const double dir[3], double out[3]);
   ///Copies the geometry of the argument into this geometry.
   void set(const Geometry3D&);
   ///Returns true if this is a standalone geometry
@@ -374,6 +396,8 @@ class Geometry3D
   ///Returns a GeometricPrimitive if this geometry is of type GeometricPrimitive
   GeometricPrimitive getGeometricPrimitive();
   ///Returns a VoumeGrid if this geometry is of type VolumeGrid
+  ConvexHull getConvexHull();
+  ///Returns a VoumeGrid if this geometry is of type VolumeGrid
   VolumeGrid getVolumeGrid();
   ///Sets this Geometry3D to a TriangleMesh
   void setTriangleMesh(const TriangleMesh&);
@@ -381,6 +405,8 @@ class Geometry3D
   void setPointCloud(const PointCloud&);
   ///Sets this Geometry3D to a GeometricPrimitive
   void setGeometricPrimitive(const GeometricPrimitive&);
+  ///Sets this Geometry3D to a ConvexHull
+  void setConvexHull(const ConvexHull&);
   ///Sets this Geometry3D to a volumeGrid
   void setVolumeGrid(const VolumeGrid&);
   ///Sets this Geometry3D to a group geometry.  To add sub-geometries, 
@@ -407,6 +433,10 @@ class Geometry3D
   void setCurrentTransform(const double R[9],const double t[3]);
   ///Gets the current transformation 
   void getCurrentTransform(double out[9],double out2[3]);
+  // update relative transform for some datatypes
+  void setRelativeTransform(const double R[9], const double t[3]);
+  // update relative transform for some datatypes
+  void setFreeRelativeTransform(const double R[9], const double t[3]);
   ///Translates the geometry data.
   ///Permanently modifies the data and resets any collision data structures.
   void translate(const double t[3]);
