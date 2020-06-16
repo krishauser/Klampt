@@ -689,7 +689,7 @@ ConvexHull Geometry3D::getConvexHull()
 {
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   if(!geom) return ConvexHull();
-  Assert(geom.type == Geometry::AnyGeometry3D::ConvexHull);
+  Assert(geom->type == Geometry::AnyGeometry3D::ConvexHull);
   const Geometry::ConvexHull3D& hull = geom->AsConvexHull();
   ConvexHull chull;
   chull.points.resize(hull.points().size());
