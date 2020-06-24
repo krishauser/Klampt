@@ -41843,6 +41843,39 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_IKObjective_setFreePosConstraint(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  IKObjective *arg1 = (IKObjective *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:IKObjective_setFreePosConstraint",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_IKObjective, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKObjective_setFreePosConstraint" "', argument " "1"" of type '" "IKObjective *""'"); 
+  }
+  arg1 = reinterpret_cast< IKObjective * >(argp1);
+  {
+    try {
+      (arg1)->setFreePosConstraint();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_IKObjective_setFixedPosConstraint(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   IKObjective *arg1 = (IKObjective *) 0 ;
@@ -42784,6 +42817,110 @@ SWIGINTERN PyObject *_wrap_IKObjective_goal_get(PyObject *SWIGUNUSEDPARM(self), 
   arg1 = reinterpret_cast< IKObjective * >(argp1);
   result =  ((arg1)->goal);
   resultobj = SWIG_NewPointerObj((new IKGoal(static_cast< const IKGoal& >(result))), SWIGTYPE_p_IKGoal, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IKObjective_positionScale_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  IKObjective *arg1 = (IKObjective *) 0 ;
+  float arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  float val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:IKObjective_positionScale_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_IKObjective, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKObjective_positionScale_set" "', argument " "1"" of type '" "IKObjective *""'"); 
+  }
+  arg1 = reinterpret_cast< IKObjective * >(argp1);
+  ecode2 = SWIG_AsVal_float(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IKObjective_positionScale_set" "', argument " "2"" of type '" "float""'");
+  } 
+  arg2 = static_cast< float >(val2);
+  if (arg1) (arg1)->positionScale = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IKObjective_positionScale_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  IKObjective *arg1 = (IKObjective *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  float result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:IKObjective_positionScale_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_IKObjective, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKObjective_positionScale_get" "', argument " "1"" of type '" "IKObjective *""'"); 
+  }
+  arg1 = reinterpret_cast< IKObjective * >(argp1);
+  result = (float) ((arg1)->positionScale);
+  resultobj = SWIG_From_float(static_cast< float >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IKObjective_rotationScale_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  IKObjective *arg1 = (IKObjective *) 0 ;
+  float arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  float val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:IKObjective_rotationScale_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_IKObjective, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKObjective_rotationScale_set" "', argument " "1"" of type '" "IKObjective *""'"); 
+  }
+  arg1 = reinterpret_cast< IKObjective * >(argp1);
+  ecode2 = SWIG_AsVal_float(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IKObjective_rotationScale_set" "', argument " "2"" of type '" "float""'");
+  } 
+  arg2 = static_cast< float >(val2);
+  if (arg1) (arg1)->rotationScale = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IKObjective_rotationScale_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  IKObjective *arg1 = (IKObjective *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  float result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:IKObjective_rotationScale_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_IKObjective, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKObjective_rotationScale_get" "', argument " "1"" of type '" "IKObjective *""'"); 
+  }
+  arg1 = reinterpret_cast< IKObjective * >(argp1);
+  result = (float) ((arg1)->rotationScale);
+  resultobj = SWIG_From_float(static_cast< float >(result));
   return resultobj;
 fail:
   return NULL;
@@ -58594,6 +58731,14 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
+		"Deprecated: use setFreePosConstraint.  \n"
+		"\n"
+		""},
+	 { (char *)"IKObjective_setFreePosConstraint", _wrap_IKObjective_setFreePosConstraint, METH_VARARGS, (char *)"\n"
+		"IKObjective_setFreePosConstraint(IKObjective self)\n"
+		"\n"
+		"\n"
+		"\n"
 		"Manual: Sets a free position constraint.  \n"
 		"\n"
 		""},
@@ -58719,7 +58864,8 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Loads the objective from a Klamp't-native formatted string. For a more readable\n"
-		"but verbose format, try the JSON IO routines loader.toJson/fromJson()  \n"
+		"but verbose format, try the JSON IO routines :meth:`klampt.io.loader.toJson` /\n"
+		":meth:`klampt.io.loader.fromJson`  \n"
 		"\n"
 		""},
 	 { (char *)"IKObjective_saveString", _wrap_IKObjective_saveString, METH_VARARGS, (char *)"\n"
@@ -58728,11 +58874,16 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Saves the objective to a Klamp't-native formatted string. For a more readable\n"
-		"but verbose format, try the JSON IO routines loader.toJson/fromJson()  \n"
+		"but verbose format, try the JSON IO routines :meth:`klampt.io.loader.toJson` /\n"
+		":meth:`klampt.io.loader.fromJson`  \n"
 		"\n"
 		""},
 	 { (char *)"IKObjective_goal_set", _wrap_IKObjective_goal_set, METH_VARARGS, (char *)"IKObjective_goal_set(IKObjective self, IKGoal goal)"},
 	 { (char *)"IKObjective_goal_get", _wrap_IKObjective_goal_get, METH_VARARGS, (char *)"IKObjective_goal_get(IKObjective self) -> IKGoal"},
+	 { (char *)"IKObjective_positionScale_set", _wrap_IKObjective_positionScale_set, METH_VARARGS, (char *)"IKObjective_positionScale_set(IKObjective self, float positionScale)"},
+	 { (char *)"IKObjective_positionScale_get", _wrap_IKObjective_positionScale_get, METH_VARARGS, (char *)"IKObjective_positionScale_get(IKObjective self) -> float"},
+	 { (char *)"IKObjective_rotationScale_set", _wrap_IKObjective_rotationScale_set, METH_VARARGS, (char *)"IKObjective_rotationScale_set(IKObjective self, float rotationScale)"},
+	 { (char *)"IKObjective_rotationScale_get", _wrap_IKObjective_rotationScale_get, METH_VARARGS, (char *)"IKObjective_rotationScale_get(IKObjective self) -> float"},
 	 { (char *)"delete_IKObjective", _wrap_delete_IKObjective, METH_VARARGS, (char *)"delete_IKObjective(IKObjective self)"},
 	 { (char *)"IKObjective_swigregister", IKObjective_swigregister, METH_VARARGS, NULL},
 	 { (char *)"new_IKSolver", _wrap_new_IKSolver, METH_VARARGS, (char *)"\n"
@@ -59932,22 +60083,36 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Valid names are:  \n"
 		"\n"
-		"*   gravity  \n"
-		"*   simStep  \n"
-		"*   boundaryLayerCollisions  \n"
-		"*   rigidObjectCollisions  \n"
-		"*   robotSelfCollisions  \n"
-		"*   robotRobotCollisions  \n"
-		"*   adaptiveTimeStepping  \n"
-		"*   minimumAdaptiveTimeStep  \n"
-		"*   maxContacts  \n"
-		"*   clusterNormalScale  \n"
-		"*   errorReductionParameter  \n"
-		"*   dampedLeastSquaresParameter  \n"
-		"*   instabilityConstantEnergyThreshold  \n"
-		"*   instabilityLinearEnergyThreshold  \n"
-		"*   instabilityMaxEnergyThreshold  \n"
-		"*   instabilityPostCorrectionEnergy  \n"
+		"*   gravity: the gravity vector (default \"0 0 -9.8\")  \n"
+		"*   simStep: the internal simulation step (default \"0.001\")  \n"
+		"*   autoDisable: whether to disable bodies that don't move much between time\n"
+		"    steps (default \"0\", set to \"1\" for many static objects)  \n"
+		"*   boundaryLayerCollisions: whether to use the Klampt inflated boundaries for\n"
+		"    contact detection'(default \"1\", recommended)  \n"
+		"*   rigidObjectCollisions: whether rigid objects should collide (default \"1\")  \n"
+		"*   robotSelfCollisions: whether robots should self collide (default \"0\")  \n"
+		"*   robotRobotCollisions: whether robots should collide with other robots\n"
+		"    (default \"1\")  \n"
+		"*   adaptiveTimeStepping: whether adaptive time stepping should be used to\n"
+		"    improve stability. Slower but more stable. (default \"1\")  \n"
+		"*   minimumAdaptiveTimeStep: the minimum size of an adaptive time step before\n"
+		"    giving up (default \"1e-6\")  \n"
+		"*   maxContacts: max # of clustered contacts between pairs of objects (default\n"
+		"    \"20\")  \n"
+		"*   clusterNormalScale: a parameter for clustering contacts (default \"0.1\")  \n"
+		"*   errorReductionParameter: see ODE docs on ERP (default \"0.95\")  \n"
+		"*   dampedLeastSquaresParameter: see ODE docs on CFM (default \"1e-6\")  \n"
+		"*   instabilityConstantEnergyThreshold: parameter c0 in instability correction\n"
+		"    (default \"1\")  \n"
+		"*   instabilityLinearEnergyThreshold: parameter c1 in instability correction\n"
+		"    (default \"1.5\")  \n"
+		"*   instabilityMaxEnergyThreshold: parameter cmax in instability correction\n"
+		"    (default \"100000\")  \n"
+		"*   instabilityPostCorrectionEnergy: kinetic energy scaling parameter if\n"
+		"    instability is detected (default \"0.8\")  \n"
+		"\n"
+		"Instability correction kicks in whenever the kinetic energy K(t) of an object\n"
+		"exceeds min(c0*m + c1*K(t-dt),cmax). m is the object's mass.  \n"
 		"\n"
 		"See `Klampt/Simulation/ODESimulator.h\n"
 		"<http://motion.pratt.duke.edu/klampt/klampt_docs/ODESimulator_8h_source.html>`_\n"
