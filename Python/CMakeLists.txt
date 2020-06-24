@@ -64,6 +64,6 @@ IF(PYTHON)
     COMMAND ${CMAKE_COMMAND} -E touch ${TEMPOUTPUT}/python2_install_timestamp
     DEPENDS ${DEPS}
   )
-  add_custom_target(python2 ALL DEPENDS ${OUTPUT}/python2_timestamp)
-  add_custom_target(python2-install ALL DEPENDS ${OUTPUT}/python2_install_timestamp python2)
+  #add_custom_target(python2 ALL DEPENDS ${OUTPUT}/python2_timestamp)
+  #add_custom_target(python2-install ALL DEPENDS ${OUTPUT}/python2_install_timestamp python2)
 ENDIF(PYTHON)

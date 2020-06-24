@@ -537,6 +537,14 @@ Geometry3D::Geometry3D(const GeometricPrimitive& rhs)
   setGeometricPrimitive(rhs);
 }
 
+Geometry3D::Geometry3D(const ConvexHull& rhs)
+  :world(-1),id(-1),geomPtr(NULL)
+{
+  geomPtr = new shared_ptr<AnyCollisionGeometry3D>();
+  setConvexHull(rhs);
+}
+
+
 Geometry3D::Geometry3D(const TriangleMesh& rhs)
   :world(-1),id(-1),geomPtr(NULL)
 {
@@ -677,6 +685,51 @@ GeometricPrimitive Geometry3D::getGeometricPrimitive()
   return prim;
 }
 
+ConvexHull Geometry3D::getConvexHull()
+{
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  if(!geom) return ConvexHull();
+  Assert(geom->type == Geometry::AnyGeometry3D::ConvexHull);
+  const Geometry::ConvexHull3D& hull = geom->AsConvexHull();
+  ConvexHull chull;
+  chull.points.resize(hull.points().size());
+  std::copy(hull.points().begin(), hull.points().end(), chull.points.begin());
+  return chull;
+}
+
+void Geometry3D::from_hull_tran(const Geometry3D &geom)
+{
+  shared_ptr<AnyCollisionGeometry3D>& ingeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geom.geomPtr);
+  assert(ingeom->type == AnyGeometry3D::ConvexHull);
+  shared_ptr<AnyCollisionGeometry3D>& resgeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(this->geomPtr);
+  ConvexHull3D *hull = const_cast<ConvexHull3D*>(&ingeom->AsConvexHull());  // dangerous cast violates const assumption
+  hull->type = ConvexHull3D::Trans;
+  resgeom = make_shared<AnyCollisionGeometry3D>(*hull);
+  resgeom->InitCollisionData();
+}
+
+void Geometry3D::from_hull(const Geometry3D &geom1, const Geometry3D &geom2, bool is_free) {
+  // make sure both geometry is convexhull
+  shared_ptr<AnyCollisionGeometry3D>& ingeom1 = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geom1.geomPtr);
+  Assert(ingeom1->type == AnyGeometry3D::ConvexHull);
+  shared_ptr<AnyCollisionGeometry3D>& ingeom2 = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geom2.geomPtr);
+  Assert(ingeom2->type == AnyGeometry3D::ConvexHull);
+  // create collision data from its constructor
+  shared_ptr<AnyCollisionGeometry3D>& resgeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(this->geomPtr);
+  resgeom = make_shared<AnyCollisionGeometry3D>(ingeom1->AsConvexHull(), ingeom2->AsConvexHull(), is_free);
+  resgeom->InitCollisionData();
+}
+
+// compute the support point for a convex shape
+void Geometry3D::find_support(const double dir[3], double out[3]) {
+  shared_ptr<AnyCollisionGeometry3D>& ingeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(this->geomPtr);
+  Assert(ingeom->type == AnyGeometry3D::ConvexHull);
+  ingeom->FindSupport(dir, out);
+  //SupportResult result;
+  //result.support.resize(3);
+  //ingeom->FindSupport(dir, result.support.data());
+  //return result;
+}
 
 void Geometry3D::setTriangleMesh(const TriangleMesh& mesh)
 {
@@ -797,6 +850,8 @@ int Geometry3D::numElements()
     return (int)geom->AsPointCloud().points.size();
   case AnyCollisionGeometry3D::TriangleMesh:
     return (int)geom->AsTriangleMesh().tris.size();
+  case AnyCollisionGeometry3D::ConvexHull:
+    return (int)geom->AsConvexHull().points().size();
   default:
     return 0;
   }
@@ -873,6 +928,35 @@ void Geometry3D::setVolumeGrid(const VolumeGrid& vg)
   }
 }
 
+void Geometry3D::setConvexHull(const ConvexHull& hull)
+{
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  ManagedGeometry* mgeom = NULL;
+  if(!isStandalone()) {
+    RobotWorld& world = *worlds[this->world]->world;
+    mgeom = &GetManagedGeometry(world,id);
+  }
+  if(geom == NULL) {
+    if(mgeom) {
+      geom = mgeom->CreateEmpty();
+    }
+    else
+      geom = make_shared<AnyCollisionGeometry3D>();
+  }
+  // convert ConvexHull into ConvexHull3D, why the hell do I need this?
+  ConvexHull3D chull;  // TODO: Do I need namespace here?
+  chull.setPoints(hull.points);
+
+  *geom = chull;
+  geom->ClearCollisionData();
+
+  if(mgeom) {
+    //update the display list / cache
+    mgeom->OnGeometryChange();
+    mgeom->RemoveFromCache();
+  }
+}
+
 void Geometry3D::setGeometricPrimitive(const GeometricPrimitive& prim)
 {
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);  
@@ -936,7 +1020,6 @@ bool Geometry3D::saveFile(const char* fn)
   return geom->Save(fn);
 }
 
-
 void Geometry3D::setCurrentTransform(const double R[9],const double t[3])
 {
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
@@ -945,6 +1028,28 @@ void Geometry3D::setCurrentTransform(const double R[9],const double t[3])
   T.R.set(R);
   T.t.set(t);
   geom->SetTransform(T);
+}
+
+void Geometry3D::setRelativeTransform(const double R[9],const double t[3])
+{
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  if(!geom) return;
+  RigidTransform T;
+  T.R.set(R);
+  T.t.set(t);
+  //std::cout << "Set relative transform at klampt\n";
+  geom->SetRelativeTransform(T);
+}
+
+void Geometry3D::setFreeRelativeTransform(const double R[9],const double t[3])
+{
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  if(!geom) return;
+  RigidTransform T;
+  T.R.set(R);
+  T.t.set(t);
+  //std::cout << "Set relative transform at klampt\n";
+  geom->SetFreeRelativeTransform(T);
 }
 
 void Geometry3D::getCurrentTransform(double out[9],double out2[3])
@@ -1065,8 +1170,10 @@ Geometry3D Geometry3D::convert(const char* destype,double param)
     destype2 = AnyGeometry3D::ImplicitSurface;
   else if(0==strcmp(destype,"GeometricPrimitive")) 
     destype2 = AnyGeometry3D::Primitive;
+  else if(0==strcmp(destype,"ConvexHull")) 
+    destype2 = AnyGeometry3D::ConvexHull;
   else
-    throw PyException("Invalid desired type specified, must be TriangleMesh, PointCloud, or VolumeGrid");
+    throw PyException("Invalid desired type specified, must be TriangleMesh, PointCloud, or VolumeGrid or ConvexHull");
 
   if(srctype == destype2)
     return *this;
@@ -1174,6 +1281,7 @@ DistanceQueryResult Geometry3D::distance_ext(const Geometry3D& other,const Dista
   gsettings.relErr = settings.relErr;
   gsettings.absErr = settings.absErr;
   gsettings.upperBound = settings.upperBound;
+  //std::cout << "call dist\n";
   AnyDistanceQueryResult gres = geom->Distance(*geom2,gsettings);
   if(IsInf(gres.d)) {
     throw PyException("Distance queries not implemented yet for those types of geometry, or geometries are content-free?");
@@ -1788,6 +1896,31 @@ void TriangleMesh::transform(const double R[9],const double t[3])
   }
 }
 
+void ConvexHull::translate(const double t[3])
+{
+  for(size_t i=0;i<points.size();i+=3) {
+    points[i] += t[0];
+    points[i+1] += t[1];
+    points[i+2] += t[2];
+  }
+}
+
+void ConvexHull::transform(const double R[9],const double t[3])
+{
+  RigidTransform T;
+  T.R.set(R);
+  T.t.set(t);
+  std::vector<double> &vertices = points;
+  for(size_t i=0;i<vertices.size();i+=3) {
+    Vector3 v(vertices[i],vertices[i+1],vertices[i+2]);
+    v = T*v;
+    //v.get(vertices[i],vertices[i+1],vertices[i+2]);
+    vertices[i] = v[0];
+    vertices[i + 1] = v[1];
+    vertices[i + 2] = v[2];
+  }
+}
+
 int PointCloud::numPoints() const { return vertices.size()/3; }
 int PointCloud::numProperties() const { return propertyNames.size(); }
 void PointCloud::setPoints(int num,const vector<double>& plist)
@@ -1838,7 +1971,7 @@ void PointCloud::addProperty(const std::string& pname)
 void PointCloud::addProperty(const std::string& pname,const std::vector<double> & values)
 {
   int n = numPoints();
-  if(values.size() != n) {
+  if(int(values.size()) != n) {
     throw PyException("Invalid size of properties list, must have size #points");
   }
   assert(values.size() == n);
@@ -1849,7 +1982,7 @@ void PointCloud::addProperty(const std::string& pname,const std::vector<double> 
   for(int i=0;i<n;i++) {
     assert (i*(m+1) + m < (int)newprops.size()); 
     if(m > 0) {
-      assert ((i+1)*m < (int)properties.size());
+      assert ((i+1)*m < (int)properties.size()); 
       std::copy(properties.begin()+i*m,properties.begin()+(i+1)*m,newprops.begin()+i*(m+1));
     }
     newprops[i*(m+1) + m] = values[i];
@@ -4670,8 +4803,7 @@ void EnablePathControl(RobotController* c)
         pc->SetConstant(q);
       }
       else {
-        fprintf(stderr,"SimRobotController: Warning, motion queue used before first simulation cycle.\n");
-        fprintf(stderr,"  (The path controller needs to read from the encoders before motion commands can be issued)\n");
+        fprintf(stderr,"First simulation cycle: the path controller needs to read from the encoders before motion commands can be issued\n");
       }
     }
   }
@@ -4681,7 +4813,7 @@ void EnablePathControl(RobotController* c)
 void SimRobotController::setMilestone(const vector<double>& q)
 {
   if(controller->robot->links.size() != q.size()) {
-    throw PyException("Invalid size of configuration, must be equal to robot.numLinks()");
+    throw PyException("Invalid size of configuration");
   }
   EnablePathControl(sim->sim->robotControllers[index].get());
   Config qv(controller->robot->links.size(),&q[0]);
@@ -4693,10 +4825,10 @@ void SimRobotController::setMilestone(const vector<double>& q)
 void SimRobotController::setMilestone(const vector<double>& q,const vector<double>& dq)
 {
   if(controller->robot->links.size() != q.size()) {
-    throw PyException("Invalid size of configuration, must be equal to robot.numLinks()");
+    throw PyException("Invalid size of configuration");
   }
   if(controller->robot->links.size() != dq.size()) {
-    throw PyException("Invalid size of velocity, must be equal to robot.numLinks()");
+    throw PyException("Invalid size of velocity");
   }
   EnablePathControl(sim->sim->robotControllers[index].get());
   Config qv(controller->robot->links.size(),&q[0]);
@@ -4709,7 +4841,7 @@ void SimRobotController::setMilestone(const vector<double>& q,const vector<doubl
 void SimRobotController::addMilestone(const vector<double>& q)
 {
   if(controller->robot->links.size() != q.size()) {
-    throw PyException("Invalid size of configuration, must be equal to robot.numLinks()");
+    throw PyException("Invalid size of configuration");
   }
   EnablePathControl(sim->sim->robotControllers[index].get());
   Config qv(controller->robot->links.size(),&q[0]);
@@ -4721,7 +4853,7 @@ void SimRobotController::addMilestone(const vector<double>& q)
 void SimRobotController::addMilestoneLinear(const vector<double>& q)
 {
   if(controller->robot->links.size() != q.size()) {
-    throw PyException("Invalid size of configuration, must be equal to robot.numLinks()");
+    throw PyException("Invalid size of configuration");
   }
   EnablePathControl(sim->sim->robotControllers[index].get());
   Config qv(controller->robot->links.size(),&q[0]);
@@ -4733,7 +4865,7 @@ void SimRobotController::addMilestoneLinear(const vector<double>& q)
 void SimRobotController::setLinear(const std::vector<double>& q,double dt)
 {
   if(controller->robot->links.size() != q.size()) {
-    throw PyException("Invalid size of configuration, must be equal to robot.numLinks()");
+    throw PyException("Invalid size of configuration");
   }
   EnablePathControl(sim->sim->robotControllers[index].get());
   PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
@@ -4743,10 +4875,10 @@ void SimRobotController::setLinear(const std::vector<double>& q,double dt)
 void SimRobotController::setCubic(const std::vector<double>& q,const std::vector<double>& v,double dt)
 {
   if(controller->robot->links.size() != q.size()) {
-    throw PyException("Invalid size of configuration, must be equal to robot.numLinks()");
+    throw PyException("Invalid size of configuration");
   }
   if(controller->robot->links.size() != v.size()) {
-    throw PyException("Invalid size of velocity, must be equal to robot.numLinks()");
+    throw PyException("Invalid size of velocity");
   }
   EnablePathControl(sim->sim->robotControllers[index].get());
   PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
@@ -4756,7 +4888,7 @@ void SimRobotController::setCubic(const std::vector<double>& q,const std::vector
 void SimRobotController::addLinear(const std::vector<double>& q,double dt)
 {
   if(controller->robot->links.size() != q.size()) {
-    throw PyException("Invalid size of configuration, must be equal to robot.numLinks()");
+    throw PyException("Invalid size of configuration");
   }
   EnablePathControl(sim->sim->robotControllers[index].get());
   PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
@@ -4766,10 +4898,10 @@ void SimRobotController::addLinear(const std::vector<double>& q,double dt)
 void SimRobotController::addCubic(const std::vector<double>& q,const std::vector<double>& v,double dt)
 {
   if(controller->robot->links.size() != q.size()) {
-    throw PyException("Invalid size of configuration, must be equal to robot.numLinks()");
+    throw PyException("Invalid size of configuration");
   }
   if(controller->robot->links.size() != v.size()) {
-    throw PyException("Invalid size of velocity, must be equal to robot.numLinks()");
+    throw PyException("Invalid size of velocity");
   }
   EnablePathControl(sim->sim->robotControllers[index].get());
   PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
@@ -4779,10 +4911,10 @@ void SimRobotController::addCubic(const std::vector<double>& q,const std::vector
 void SimRobotController::addMilestone(const vector<double>& q,const vector<double>& dq)
 {
   if(controller->robot->links.size() != q.size()) {
-    throw PyException("Invalid size of configuration, must be equal to robot.numLinks()");
+    throw PyException("Invalid size of configuration");
   }
   if(controller->robot->links.size() != dq.size()) {
-    throw PyException("Invalid size of velocity, must be equal to robot.numLinks()");
+    throw PyException("Invalid size of velocity");
   }
   EnablePathControl(sim->sim->robotControllers[index].get());
   Config qv(controller->robot->links.size(),&q[0]);
@@ -4795,7 +4927,7 @@ void SimRobotController::addMilestone(const vector<double>& q,const vector<doubl
 void SimRobotController::setVelocity(const vector<double>& dq,double dt)
 {
   if(controller->robot->links.size() != dq.size()) {
-    throw PyException("Invalid size of velocity, must be equal to robot.numLinks()");
+    throw PyException("Invalid size of velocity");
   }
   EnablePathControl(sim->sim->robotControllers[index].get());
   Config qv(controller->robot->links.size(),&dq[0]);
@@ -4815,7 +4947,7 @@ void SimRobotController::setTorque(const std::vector<double>& t)
 {
   RobotMotorCommand& command = controller->command;
   if(t.size() != command.actuators.size()) {
-    throw PyException("Invalid command size, must be equal to robot.numDrivers()");
+    throw PyException("Invalid command size, must be equal to driver size");
   }
   for(size_t i=0;i<command.actuators.size();i++) {
     command.actuators[i].SetTorque(t[i]);
@@ -4834,7 +4966,7 @@ void SimRobotController::setPIDCommand(const std::vector<double>& qdes,const std
   Robot* robot=controller->robot;
   if(qdes.size() != command.actuators.size() || dqdes.size() != command.actuators.size()) {
     if(qdes.size() != robot->links.size() || dqdes.size() != robot->links.size())
-      throw PyException("Invalid command sizes, must be either robot.numLinks() or robot.numDrivers()");
+      throw PyException("Invalid command sizes");
     for(size_t i=0;i<qdes.size();i++) {
       robot->q(i) = qdes[i];
       robot->dq(i) = dqdes[i];
@@ -4862,7 +4994,7 @@ void SimRobotController::setPIDCommand(const std::vector<double>& qdes,const std
   RobotMotorCommand& command = controller->command;
   //Robot* robot=sim->sim->controlSimulators[index];
   if(tfeedforward.size() != command.actuators.size())
-     throw PyException("Invalid feedforward torque command size, must be robot.numDrivers()");
+     throw PyException("Invalid command sizes");
   for(size_t i=0;i<command.actuators.size();i++) {
     command.actuators[i].torque = tfeedforward[i];
   }
@@ -4874,7 +5006,7 @@ void SimRobotController::setPIDGains(const std::vector<double>& kP,const std::ve
 {
   RobotMotorCommand& command = controller->command;
   if(kP.size() != command.actuators.size() || kI.size() != command.actuators.size() || kD.size() != command.actuators.size()) {
-    throw PyException("Invalid gain sizes, must be robot.numDrivers()");
+    throw PyException("Invalid gain sizes");
   }
   for(size_t i=0;i<kP.size();i++) {
     command.actuators[i].kP = kP[i];
