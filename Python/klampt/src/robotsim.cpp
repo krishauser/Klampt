@@ -28,6 +28,7 @@
 #include <KrisLibrary/GLdraw/drawMesh.h>
 #include <KrisLibrary/GLdraw/Widget.h>
 #include <KrisLibrary/GLdraw/TransformWidget.h>
+#include <KrisLibrary/geometry/ConvexHull3D.h>
 #include <Klampt/View/ObjectPoseWidget.h>
 #include <Klampt/View/RobotPoseWidget.h>
 #include <KrisLibrary/utils/AnyCollection.h>
@@ -724,11 +725,7 @@ void Geometry3D::from_hull(const Geometry3D &geom1, const Geometry3D &geom2, boo
 void Geometry3D::find_support(const double dir[3], double out[3]) {
   shared_ptr<AnyCollisionGeometry3D>& ingeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(this->geomPtr);
   Assert(ingeom->type == AnyGeometry3D::ConvexHull);
-  ingeom->FindSupport(dir, out);
-  //SupportResult result;
-  //result.support.resize(3);
-  //ingeom->FindSupport(dir, result.support.data());
-  //return result;
+  ingeom->FindSupport(Vector3(dir));
 }
 
 void Geometry3D::setTriangleMesh(const TriangleMesh& mesh)
