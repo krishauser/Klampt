@@ -1,4 +1,4 @@
-from ..visualization import _WindowManager,VisualizationScene,VisPlot
+from ..visualization import _WindowManager,VisualizationScene,VisPlot,objectToVisType
 from ..ipython import KlamptWidget
 from ...io.html import HTMLSharePath
 from IPython.display import display,HTML
@@ -56,11 +56,17 @@ class HTMLVisualizationScene(VisualizationScene):
 
     def add(self,name,item,keepAppearance=False,**kwargs):
         self.kw.beginRpc()
-        try:
-            self.kw.add(name,item)
-        except ValueError:
-            self.kw.endRpc()
-            raise ValueError("Can't draw items of type "+item.__class__.__name__+" in HTML form")
+        handled = False
+        if 'size' in kwargs:
+            if hasattr(item,'__iter__') and len(item)==3:
+                self.kw.addSphere(name,item[0],item[1],item[2],kwargs['size'])
+                handled = True
+        if not handled:
+            try:
+                self.kw.add(name,item)
+            except ValueError:
+                self.kw.endRpc()
+                raise ValueError("Can't draw items of type "+item.__class__.__name__+" in HTML form")
         if 'color' in kwargs:
             self.kw.setColor(name,*kwargs['color'])
         if name=='world' or name=='sim':
@@ -68,7 +74,8 @@ class HTMLVisualizationScene(VisualizationScene):
         self.rpcs_this_frame += self.kw._rpc_calls
         self.kw.endRpc()
         
-        VisualizationScene.add(self,name,item,keepAppearance,**kwargs)
+        #VisualizationScene.add(self,name,item,keepAppearance,**kwargs)
+        VisualizationScene.add(self,name,item,keepAppearance)
 
     def addText(self,name,text,pos=None):
         self._textItems.add(name)
@@ -98,7 +105,9 @@ class HTMLVisualizationScene(VisualizationScene):
         if attr == 'color':
             self.kw.setColor(item.name,*value)
         elif attr == 'size':
-            #TODO: modify point size
+            #modify point size
+            if hasattr(item.item,'__iter__') and len(item.item)==3:
+                self.kw.addSphere(name,item.item[0],item.item[1],item.item[2],value)
             pass
         #can't handle any other attributes right now
         self.rpcs_this_frame += self.kw._rpc_calls
@@ -216,7 +225,7 @@ class HTMLWindowManager(_WindowManager):
         return self.windows[self.current_window]
     def scene(self):
         return self.windows[self.current_window]
-    def createWindow(self):
+    def createWindow(self,title):
         self.windows.append(HTMLVisualizationScene())
         self.current_window = len(self.windows)-1
         return self.current_window
