@@ -95,6 +95,8 @@ class GLUTWindowManager(_ThreadedWindowManager):
             self.windows.append(WindowInfo(self.window_title,self._frontend))    
             self.windows[-1].worlds = self.current_worlds
             self.windows[-1].active_worlds = self.current_worlds[:]
+        if title is None:
+            title = "Window "+str(len(self.windows))
         #make a new window
         self._frontend = GLUTVisualizationFrontend(None)
         self.windows.append(WindowInfo(title,self._frontend))
