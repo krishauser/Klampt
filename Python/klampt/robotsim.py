@@ -886,24 +886,21 @@ class TriangleMesh(_object):
 
     def translate(self, t):
         """
-        translate(TriangleMesh self, double const [3] t)
-
-
-
         Translates all the vertices by v=v+t.  
 
+        Args:
+            t (:obj:`list of 3 floats`)
         """
         return _robotsim.TriangleMesh_translate(self, t)
 
 
     def transform(self, R, t):
         """
-        transform(TriangleMesh self, double const [9] R, double const [3] t)
-
-
-
         Transforms all the vertices by the rigid transform v=R*v+t.  
 
+        Args:
+            R (:obj:`list of 9 floats (so3 element)`)
+            t (:obj:`list of 3 floats`)
         """
         return _robotsim.TriangleMesh_transform(self, R, t)
 
@@ -918,11 +915,8 @@ class TriangleMesh(_object):
 
     def __init__(self):
         """
-        __init__(TriangleMesh self) -> TriangleMesh
-
-
-
         A 3D indexed triangle mesh class.  
+
 
         Attributes:  
 
@@ -971,7 +965,10 @@ TriangleMesh_swigregister = _robotsim.TriangleMesh_swigregister
 TriangleMesh_swigregister(TriangleMesh)
 
 class ConvexHull(_object):
-    """Proxy of C++ ConvexHull class."""
+    """
+
+
+    """
 
     __swig_setmethods__ = {}
     __setattr__ = lambda self, name, value: _swig_setattr(self, ConvexHull, name, value)
@@ -980,12 +977,23 @@ class ConvexHull(_object):
     __repr__ = _swig_repr
 
     def translate(self, t):
-        """translate(ConvexHull self, double const [3] t)"""
+        """
+        Translates all the vertices by v=v+t.  
+
+        Args:
+            t (:obj:`list of 3 floats`)
+        """
         return _robotsim.ConvexHull_translate(self, t)
 
 
     def transform(self, R, t):
-        """transform(ConvexHull self, double const [9] R, double const [3] t)"""
+        """
+        Transforms all the vertices by the rigid transform v=R*v+t.  
+
+        Args:
+            R (:obj:`list of 9 floats (so3 element)`)
+            t (:obj:`list of 3 floats`)
+        """
         return _robotsim.ConvexHull_transform(self, R, t)
 
     __swig_setmethods__["points"] = _robotsim.ConvexHull_points_set
@@ -994,7 +1002,8 @@ class ConvexHull(_object):
         points = _swig_property(_robotsim.ConvexHull_points_get, _robotsim.ConvexHull_points_set)
 
     def __init__(self):
-        """__init__(ConvexHull self) -> ConvexHull"""
+        """
+        """
         this = _robotsim.new_ConvexHull()
         try:
             self.this.append(this)
@@ -1004,6 +1013,51 @@ class ConvexHull(_object):
     __del__ = lambda self: None
 ConvexHull_swigregister = _robotsim.ConvexHull_swigregister
 ConvexHull_swigregister(ConvexHull)
+
+class ConvexHullProxy(_object):
+    """Proxy of C++ ConvexHullProxy class."""
+
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, ConvexHullProxy, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, ConvexHullProxy, name)
+    __repr__ = _swig_repr
+    __swig_setmethods__["pointer"] = _robotsim.ConvexHullProxy_pointer_set
+    __swig_getmethods__["pointer"] = _robotsim.ConvexHullProxy_pointer_get
+    if _newclass:
+        pointer = _swig_property(_robotsim.ConvexHullProxy_pointer_get, _robotsim.ConvexHullProxy_pointer_set)
+
+    def fromTransform(self, hull):
+        """fromTransform(ConvexHullProxy self, ConvexHullProxy hull)"""
+        return _robotsim.ConvexHullProxy_fromTransform(self, hull)
+
+
+    def fromHull(self, hull1, hull2):
+        """fromHull(ConvexHullProxy self, ConvexHullProxy hull1, ConvexHullProxy hull2)"""
+        return _robotsim.ConvexHullProxy_fromHull(self, hull1, hull2)
+
+
+    def setRelativeTransform(self, R, t):
+        """setRelativeTransform(ConvexHullProxy self, double const [9] R, double const [3] t)"""
+        return _robotsim.ConvexHullProxy_setRelativeTransform(self, R, t)
+
+
+    def findSupport(self, R):
+        """findSupport(ConvexHullProxy self, double const [3] R)"""
+        return _robotsim.ConvexHullProxy_findSupport(self, R)
+
+
+    def __init__(self):
+        """__init__(ConvexHullProxy self) -> ConvexHullProxy"""
+        this = _robotsim.new_ConvexHullProxy()
+        try:
+            self.this.append(this)
+        except __builtin__.Exception:
+            self.this = this
+    __swig_destroy__ = _robotsim.delete_ConvexHullProxy
+    __del__ = lambda self: None
+ConvexHullProxy_swigregister = _robotsim.ConvexHullProxy_swigregister
+ConvexHullProxy_swigregister(ConvexHullProxy)
 
 class PointCloud(_object):
     """
@@ -1090,186 +1144,190 @@ class PointCloud(_object):
 
     def numPoints(self):
         """
-        numPoints(PointCloud self) -> int
-
-
-
         Returns the number of points.  
 
+        Returns:
+            (int):
         """
         return _robotsim.PointCloud_numPoints(self)
 
 
     def numProperties(self):
         """
-        numProperties(PointCloud self) -> int
-
-
-
         Returns the number of properties.  
 
+        Returns:
+            (int):
         """
         return _robotsim.PointCloud_numProperties(self)
 
 
     def setPoints(self, num, plist):
         """
-        setPoints(PointCloud self, int num, doubleVector plist)
-
-
-
         Sets all the points to the given list (a 3n-list)  
 
+        Args:
+            num (int)
+            plist (:obj:`list of floats`)
         """
         return _robotsim.PointCloud_setPoints(self, num, plist)
 
 
     def addPoint(self, p):
         """
-        addPoint(PointCloud self, double const [3] p) -> int
-
-
-
         Adds a point. Sets all its properties to 0. Returns the index.  
 
+        Args:
+            p (:obj:`list of 3 floats`)
+        Returns:
+            (int):
         """
         return _robotsim.PointCloud_addPoint(self, p)
 
 
     def setPoint(self, index, p):
         """
-        setPoint(PointCloud self, int index, double const [3] p)
-
-
-
         Sets the position of the point at the given index to p.  
 
+        Args:
+            index (int)
+            p (:obj:`list of 3 floats`)
         """
         return _robotsim.PointCloud_setPoint(self, index, p)
 
 
     def getPoint(self, index):
         """
-        getPoint(PointCloud self, int index)
-
-
-
         Retrieves the position of the point at the given index.  
 
+        Args:
+            index (int)
         """
         return _robotsim.PointCloud_getPoint(self, index)
 
 
     def addProperty(self, *args):
         """
-        addProperty(PointCloud self, std::string const & pname)
-        addProperty(PointCloud self, std::string const & pname, doubleVector properties)
-
-
-
         Adds a new property with name pname, and sets values for this property to the
         given list (a n-list)  
 
+        addProperty (pname)
+
+        addProperty (pname,properties)
+
+
+        Args:
+            pname (str): 
+            properties (:obj:`list of floats`, optional): 
         """
         return _robotsim.PointCloud_addProperty(self, *args)
 
 
     def setProperties(self, *args):
         """
-        setProperties(PointCloud self, doubleVector properties)
-        setProperties(PointCloud self, int pindex, doubleVector properties)
-
-
-
         Sets property pindex of all points to the given list (a n-list)  
 
+        setProperties (properties)
+
+        setProperties (pindex,properties)
+
+
+        Args:
+            properties (:obj:`list of floats`): 
+            pindex (int, optional): 
         """
         return _robotsim.PointCloud_setProperties(self, *args)
 
 
     def setProperty(self, *args):
         """
-        setProperty(PointCloud self, int index, int pindex, double value)
-        setProperty(PointCloud self, int index, std::string const & pname, double value)
-
-
-
         Sets the property named pname of point index to the given value.  
 
+        setProperty (index,pindex,value)
+
+        setProperty (index,pname,value)
+
+
+        Args:
+            index (int): 
+            pindex (int, optional): 
+            value (float): 
+            pname (str, optional): 
         """
         return _robotsim.PointCloud_setProperty(self, *args)
 
 
     def getProperty(self, *args):
         """
-        getProperty(PointCloud self, int index, int pindex) -> double
-        getProperty(PointCloud self, int index, std::string const & pname) -> double
-
-
-
         Gets the property named pname of point index.  
 
+        getProperty (index,pindex): float
+
+        getProperty (index,pname): float
+
+
+        Args:
+            index (int): 
+            pindex (int, optional): 
+            pname (str, optional): 
+
+        Returns:
+            (float):
         """
         return _robotsim.PointCloud_getProperty(self, *args)
 
 
     def translate(self, t):
         """
-        translate(PointCloud self, double const [3] t)
-
-
-
         Translates all the points by v=v+t.  
 
+        Args:
+            t (:obj:`list of 3 floats`)
         """
         return _robotsim.PointCloud_translate(self, t)
 
 
     def transform(self, R, t):
         """
-        transform(PointCloud self, double const [9] R, double const [3] t)
-
-
-
         Transforms all the points by the rigid transform v=R*v+t.  
 
+        Args:
+            R (:obj:`list of 9 floats (so3 element)`)
+            t (:obj:`list of 3 floats`)
         """
         return _robotsim.PointCloud_transform(self, R, t)
 
 
     def join(self, pc):
         """
-        join(PointCloud self, PointCloud pc)
-
-
-
         Adds the given point cloud to this one. They must share the same properties or
         else an exception is raised.  
 
+        Args:
+            pc (:class:`~klampt.PointCloud`)
         """
         return _robotsim.PointCloud_join(self, pc)
 
 
     def setSetting(self, key, value):
         """
-        setSetting(PointCloud self, std::string const & key, std::string const & value)
-
-
-
         Sets the given setting.  
 
+        Args:
+            key (str)
+            value (str)
         """
         return _robotsim.PointCloud_setSetting(self, key, value)
 
 
     def getSetting(self, key):
         """
-        getSetting(PointCloud self, std::string const & key) -> std::string
-
-
-
         Retrieves the given setting.  
 
+        Args:
+            key (str)
+        Returns:
+            (str):
         """
         return _robotsim.PointCloud_getSetting(self, key)
 
@@ -1292,11 +1350,8 @@ class PointCloud(_object):
 
     def __init__(self):
         """
-        __init__(PointCloud self) -> PointCloud
-
-
-
         A 3D point cloud class.  
+
 
         Attributes:  
 
@@ -1397,60 +1452,53 @@ class GeometricPrimitive(_object):
 
     def setPoint(self, pt):
         """
-        setPoint(GeometricPrimitive self, double const [3] pt)
-
-
-
+        Args:
+            pt (:obj:`list of 3 floats`)
         """
         return _robotsim.GeometricPrimitive_setPoint(self, pt)
 
 
     def setSphere(self, c, r):
         """
-        setSphere(GeometricPrimitive self, double const [3] c, double r)
-
-
-
+        Args:
+            c (:obj:`list of 3 floats`)
+            r (float)
         """
         return _robotsim.GeometricPrimitive_setSphere(self, c, r)
 
 
     def setSegment(self, a, b):
         """
-        setSegment(GeometricPrimitive self, double const [3] a, double const [3] b)
-
-
-
+        Args:
+            a (:obj:`list of 3 floats`)
+            b (:obj:`list of 3 floats`)
         """
         return _robotsim.GeometricPrimitive_setSegment(self, a, b)
 
 
     def setAABB(self, bmin, bmax):
         """
-        setAABB(GeometricPrimitive self, double const [3] bmin, double const [3] bmax)
-
-
-
+        Args:
+            bmin (:obj:`list of 3 floats`)
+            bmax (:obj:`list of 3 floats`)
         """
         return _robotsim.GeometricPrimitive_setAABB(self, bmin, bmax)
 
 
     def loadString(self, str):
         """
-        loadString(GeometricPrimitive self, char const * str) -> bool
-
-
-
+        Args:
+            str (str)
+        Returns:
+            (bool):
         """
         return _robotsim.GeometricPrimitive_loadString(self, str)
 
 
     def saveString(self):
         """
-        saveString(GeometricPrimitive self) -> std::string
-
-
-
+        Returns:
+            (str):
         """
         return _robotsim.GeometricPrimitive_saveString(self)
 
@@ -1465,12 +1513,9 @@ class GeometricPrimitive(_object):
 
     def __init__(self):
         """
-        __init__(GeometricPrimitive self) -> GeometricPrimitive
-
-
-
         A geometric primitive. So far only points, spheres, segments, and AABBs can be
         constructed manually in the Python API.  
+
 
         C++ includes: geometry.h
 
@@ -1515,51 +1560,55 @@ class VolumeGrid(_object):
 
     def setBounds(self, bmin, bmax):
         """
-        setBounds(VolumeGrid self, double const [3] bmin, double const [3] bmax)
-
-
-
+        Args:
+            bmin (:obj:`list of 3 floats`)
+            bmax (:obj:`list of 3 floats`)
         """
         return _robotsim.VolumeGrid_setBounds(self, bmin, bmax)
 
 
     def resize(self, sx, sy, sz):
         """
-        resize(VolumeGrid self, int sx, int sy, int sz)
-
-
-
+        Args:
+            sx (int)
+            sy (int)
+            sz (int)
         """
         return _robotsim.VolumeGrid_resize(self, sx, sy, sz)
 
 
     def set(self, *args):
         """
-        set(VolumeGrid self, double value)
-        set(VolumeGrid self, int i, int j, int k, double value)
+        set (value)
+
+        set (i,j,k,value)
 
 
-
+        Args:
+            value (float): 
+            i (int, optional): 
+            j (int, optional): 
+            k (int, optional): 
         """
         return _robotsim.VolumeGrid_set(self, *args)
 
 
     def get(self, i, j, k):
         """
-        get(VolumeGrid self, int i, int j, int k) -> double
-
-
-
+        Args:
+            i (int)
+            j (int)
+            k (int)
+        Returns:
+            (float):
         """
         return _robotsim.VolumeGrid_get(self, i, j, k)
 
 
     def shift(self, dv):
         """
-        shift(VolumeGrid self, double dv)
-
-
-
+        Args:
+            dv (float)
         """
         return _robotsim.VolumeGrid_shift(self, dv)
 
@@ -1578,13 +1627,10 @@ class VolumeGrid(_object):
 
     def __init__(self):
         """
-        __init__(VolumeGrid self) -> VolumeGrid
-
-
-
         An axis-aligned volumetric grid, typically a signed distance transform with > 0
         indicating outside and < 0 indicating inside. Can also store an occupancy grid
         with 1 indicating inside and 0 indicating outside.  
+
 
         Attributes: bbox (SWIG vector of 6 doubles): contains min and max bounds
         (xmin,ymin,zmin),(xmax,ymax,zmax) dims (SWIG vector of of 3 ints): size of grid
@@ -1639,10 +1685,6 @@ class DistanceQuerySettings(_object):
 
     def __init__(self):
         """
-        __init__(DistanceQuerySettings self) -> DistanceQuerySettings
-
-
-
         """
         this = _robotsim.new_DistanceQuerySettings()
         try:
@@ -1739,11 +1781,8 @@ class DistanceQueryResult(_object):
 
     def __init__(self):
         """
-        __init__(DistanceQueryResult self) -> DistanceQueryResult
-
-
-
         The result from a "fancy" distance query of :class:`~klampt.Geometry3D`.  
+
 
         Attributes:  
 
@@ -1776,31 +1815,6 @@ class DistanceQueryResult(_object):
     __del__ = lambda self: None
 DistanceQueryResult_swigregister = _robotsim.DistanceQueryResult_swigregister
 DistanceQueryResult_swigregister(DistanceQueryResult)
-
-class SupportResult(_object):
-    """Proxy of C++ SupportResult class."""
-
-    __swig_setmethods__ = {}
-    __setattr__ = lambda self, name, value: _swig_setattr(self, SupportResult, name, value)
-    __swig_getmethods__ = {}
-    __getattr__ = lambda self, name: _swig_getattr(self, SupportResult, name)
-    __repr__ = _swig_repr
-    __swig_setmethods__["support"] = _robotsim.SupportResult_support_set
-    __swig_getmethods__["support"] = _robotsim.SupportResult_support_get
-    if _newclass:
-        support = _swig_property(_robotsim.SupportResult_support_get, _robotsim.SupportResult_support_set)
-
-    def __init__(self):
-        """__init__(SupportResult self) -> SupportResult"""
-        this = _robotsim.new_SupportResult()
-        try:
-            self.this.append(this)
-        except __builtin__.Exception:
-            self.this = this
-    __swig_destroy__ = _robotsim.delete_SupportResult
-    __del__ = lambda self: None
-SupportResult_swigregister = _robotsim.SupportResult_swigregister
-SupportResult_swigregister(SupportResult)
 
 class ContactQueryResult(_object):
     """
@@ -1862,12 +1876,9 @@ class ContactQueryResult(_object):
 
     def __init__(self):
         """
-        __init__(ContactQueryResult self) -> ContactQueryResult
-
-
-
         The result from a contact query of :class:`~klampt.Geometry3D`. The number of
         contacts n is variable.  
+
 
         Attributes:  
 
@@ -1914,6 +1925,7 @@ class Geometry3D(_object):
     *   point clouds (PointCloud)  
     *   volumetric grids (VolumeGrid)  
     *   groups (Group)  
+    *   ConvexHull  
 
     This class acts as a uniform container of all of these types.  
 
@@ -1948,18 +1960,13 @@ class Geometry3D(_object):
 
     def __init__(self, *args):
         """
-        __init__(Geometry3D self) -> Geometry3D
-        __init__(Geometry3D self, Geometry3D arg2) -> Geometry3D
-        __init__(Geometry3D self, GeometricPrimitive arg2) -> Geometry3D
-        __init__(Geometry3D self, ConvexHull arg2) -> Geometry3D
-        __init__(Geometry3D self, TriangleMesh arg2) -> Geometry3D
-        __init__(Geometry3D self, PointCloud arg2) -> Geometry3D
-        __init__(Geometry3D self, VolumeGrid arg2) -> Geometry3D
+        __init__ (): :class:`~klampt.Geometry3D`
 
+        __init__ (arg2): :class:`~klampt.Geometry3D`
 
 
         Args:
-            arg2 (:class:`~klampt.GeometricPrimitive` or :class:`~klampt.TriangleMesh` or :class:`~klampt.VolumeGrid` or :class:`~klampt.Geometry3D` or :class:`~klampt.PointCloud`, optional): 
+            arg2 (:class:`~klampt.Geometry3D` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.VolumeGrid` or :class:`~klampt.TriangleMesh` or :obj:`ConvexHull` or :class:`~klampt.PointCloud`, optional): 
         """
         this = _robotsim.new_Geometry3D(*args)
         try:
@@ -1971,61 +1978,44 @@ class Geometry3D(_object):
 
     def clone(self):
         """
-        clone(Geometry3D self) -> Geometry3D
-
-
-
         Creates a standalone geometry from this geometry.  
 
+        Returns:
+            (:class:`~klampt.Geometry3D`):
         """
         return _robotsim.Geometry3D_clone(self)
 
 
-    def from_hull_tran(self, arg2):
-        """from_hull_tran(Geometry3D self, Geometry3D arg2)"""
-        return _robotsim.Geometry3D_from_hull_tran(self, arg2)
-
-
-    def from_hull(self, arg2, arg3, arg4):
-        """from_hull(Geometry3D self, Geometry3D arg2, Geometry3D arg3, bool arg4)"""
-        return _robotsim.Geometry3D_from_hull(self, arg2, arg3, arg4)
-
-
-    def find_support(self, dir):
-        """find_support(Geometry3D self, double const [3] dir)"""
-        return _robotsim.Geometry3D_find_support(self, dir)
+    def asConvexHull(self):
+        """
+        Returns:
+            (:obj:`ConvexHullProxy`):
+        """
+        return _robotsim.Geometry3D_asConvexHull(self)
 
 
     def set(self, arg2):
         """
-        set(Geometry3D self, Geometry3D arg2)
-
-
-
         Copies the geometry of the argument into this geometry.  
 
+        Args:
+            arg2 (:class:`~klampt.Geometry3D`)
         """
         return _robotsim.Geometry3D_set(self, arg2)
 
 
     def isStandalone(self):
         """
-        isStandalone(Geometry3D self) -> bool
-
-
-
         Returns true if this is a standalone geometry.  
 
+        Returns:
+            (bool):
         """
         return _robotsim.Geometry3D_isStandalone(self)
 
 
     def free(self):
         """
-        free(Geometry3D self)
-
-
-
         Frees the data associated with this geometry, if standalone.  
 
         """
@@ -2034,141 +2024,127 @@ class Geometry3D(_object):
 
     def type(self):
         """
-        type(Geometry3D self) -> std::string
-
-
-
         Returns the type of geometry: TriangleMesh, PointCloud, VolumeGrid,
         GeometricPrimitive, or Group.  
 
+        Returns:
+            (str):
         """
         return _robotsim.Geometry3D_type(self)
 
 
     def empty(self):
         """
-        empty(Geometry3D self) -> bool
-
-
-
         Returns true if this has no contents (not the same as numElements()==0)  
 
+        Returns:
+            (bool):
         """
         return _robotsim.Geometry3D_empty(self)
 
 
     def getTriangleMesh(self):
         """
-        getTriangleMesh(Geometry3D self) -> TriangleMesh
-
-
-
         Returns a TriangleMesh if this geometry is of type TriangleMesh.  
 
+        Returns:
+            (:class:`~klampt.TriangleMesh`):
         """
         return _robotsim.Geometry3D_getTriangleMesh(self)
 
 
     def getPointCloud(self):
         """
-        getPointCloud(Geometry3D self) -> PointCloud
-
-
-
         Returns a PointCloud if this geometry is of type PointCloud.  
 
+        Returns:
+            (:class:`~klampt.PointCloud`):
         """
         return _robotsim.Geometry3D_getPointCloud(self)
 
 
     def getGeometricPrimitive(self):
         """
-        getGeometricPrimitive(Geometry3D self) -> GeometricPrimitive
-
-
-
         Returns a GeometricPrimitive if this geometry is of type GeometricPrimitive.  
 
+        Returns:
+            (:class:`~klampt.GeometricPrimitive`):
         """
         return _robotsim.Geometry3D_getGeometricPrimitive(self)
 
 
     def getConvexHull(self):
-        """getConvexHull(Geometry3D self) -> ConvexHull"""
+        """
+        Returns a VoumeGrid if this geometry is of type VolumeGrid.  
+
+        Returns:
+            (:obj:`ConvexHull`):
+        """
         return _robotsim.Geometry3D_getConvexHull(self)
 
 
     def getVolumeGrid(self):
         """
-        getVolumeGrid(Geometry3D self) -> VolumeGrid
-
-
-
         Returns a VoumeGrid if this geometry is of type VolumeGrid.  
 
+        Returns:
+            (:class:`~klampt.VolumeGrid`):
         """
         return _robotsim.Geometry3D_getVolumeGrid(self)
 
 
     def setTriangleMesh(self, arg2):
         """
-        setTriangleMesh(Geometry3D self, TriangleMesh arg2)
-
-
-
         Sets this Geometry3D to a TriangleMesh.  
 
+        Args:
+            arg2 (:class:`~klampt.TriangleMesh`)
         """
         return _robotsim.Geometry3D_setTriangleMesh(self, arg2)
 
 
     def setPointCloud(self, arg2):
         """
-        setPointCloud(Geometry3D self, PointCloud arg2)
-
-
-
         Sets this Geometry3D to a PointCloud.  
 
+        Args:
+            arg2 (:class:`~klampt.PointCloud`)
         """
         return _robotsim.Geometry3D_setPointCloud(self, arg2)
 
 
     def setGeometricPrimitive(self, arg2):
         """
-        setGeometricPrimitive(Geometry3D self, GeometricPrimitive arg2)
-
-
-
         Sets this Geometry3D to a GeometricPrimitive.  
 
+        Args:
+            arg2 (:class:`~klampt.GeometricPrimitive`)
         """
         return _robotsim.Geometry3D_setGeometricPrimitive(self, arg2)
 
 
     def setConvexHull(self, arg2):
-        """setConvexHull(Geometry3D self, ConvexHull arg2)"""
+        """
+        Sets this Geometry3D to a ConvexHull.  
+
+        Args:
+            arg2 (:obj:`ConvexHull`)
+        """
         return _robotsim.Geometry3D_setConvexHull(self, arg2)
 
 
     def setVolumeGrid(self, arg2):
         """
-        setVolumeGrid(Geometry3D self, VolumeGrid arg2)
-
-
-
         Sets this Geometry3D to a volumeGrid.  
 
+        Args:
+            arg2 (:class:`~klampt.VolumeGrid`)
         """
         return _robotsim.Geometry3D_setVolumeGrid(self, arg2)
 
 
     def setGroup(self):
         """
-        setGroup(Geometry3D self)
-
-
-
         Sets this Geometry3D to a group geometry. To add sub-geometries, repeatedly call
         setElement() with increasing indices.  
 
@@ -2178,186 +2154,160 @@ class Geometry3D(_object):
 
     def getElement(self, element):
         """
-        getElement(Geometry3D self, int element) -> Geometry3D
-
-
-
         Returns an element of the Geometry3D if it is a Group, TriangleMesh, or
         PointCloud. The element will be in local coordinates. Raises an error if this is
         of any other type.  
 
+        Args:
+            element (int)
+        Returns:
+            (:class:`~klampt.Geometry3D`):
         """
         return _robotsim.Geometry3D_getElement(self, element)
 
 
     def setElement(self, element, data):
         """
-        setElement(Geometry3D self, int element, Geometry3D data)
-
-
-
         Sets an element of the Geometry3D if it is a Group, TriangleMesh, or PointCloud.
         The element will be in local coordinates. Raises an error if this is of any
         other type.  
 
+        Args:
+            element (int)
+            data (:class:`~klampt.Geometry3D`)
         """
         return _robotsim.Geometry3D_setElement(self, element, data)
 
 
     def numElements(self):
         """
-        numElements(Geometry3D self) -> int
-
-
-
         Returns the number of sub-elements in this geometry.  
 
+        Returns:
+            (int):
         """
         return _robotsim.Geometry3D_numElements(self)
 
 
     def loadFile(self, fn):
         """
-        loadFile(Geometry3D self, char const * fn) -> bool
-
-
-
         Loads from file. Standard mesh types, PCD files, and .geom files are supported.  
 
+        Args:
+            fn (str)
+        Returns:
+            (bool):
         """
         return _robotsim.Geometry3D_loadFile(self, fn)
 
 
     def saveFile(self, fn):
         """
-        saveFile(Geometry3D self, char const * fn) -> bool
-
-
-
         Saves to file. Standard mesh types, PCD files, and .geom files are supported.  
 
+        Args:
+            fn (str)
+        Returns:
+            (bool):
         """
         return _robotsim.Geometry3D_saveFile(self, fn)
 
 
     def setCurrentTransform(self, R, t):
         """
-        setCurrentTransform(Geometry3D self, double const [9] R, double const [3] t)
-
-
-
         Sets the current transformation (not modifying the underlying data)  
 
+        Args:
+            R (:obj:`list of 9 floats (so3 element)`)
+            t (:obj:`list of 3 floats`)
         """
         return _robotsim.Geometry3D_setCurrentTransform(self, R, t)
 
 
     def getCurrentTransform(self):
         """
-        getCurrentTransform(Geometry3D self)
-
-
-
         Gets the current transformation.  
 
         """
         return _robotsim.Geometry3D_getCurrentTransform(self)
 
 
-    def setRelativeTransform(self, R, t):
-        """setRelativeTransform(Geometry3D self, double const [9] R, double const [3] t)"""
-        return _robotsim.Geometry3D_setRelativeTransform(self, R, t)
-
-
-    def setFreeRelativeTransform(self, R, t):
-        """setFreeRelativeTransform(Geometry3D self, double const [9] R, double const [3] t)"""
-        return _robotsim.Geometry3D_setFreeRelativeTransform(self, R, t)
-
-
     def translate(self, t):
         """
-        translate(Geometry3D self, double const [3] t)
-
-
-
         Translates the geometry data. Permanently modifies the data and resets any
         collision data structures.  
 
+        Args:
+            t (:obj:`list of 3 floats`)
         """
         return _robotsim.Geometry3D_translate(self, t)
 
 
     def scale(self, *args):
         """
-        scale(Geometry3D self, double s)
-        scale(Geometry3D self, double sx, double sy, double sz)
-
-
-
         Scales the geometry data with different factors on each axis. Permanently
         modifies the data and resets any collision data structures.  
 
+        scale (s)
+
+        scale (sx,sy,sz)
+
+
+        Args:
+            s (float, optional): 
+            sx (float, optional): 
+            sy (float, optional): 
+            sz (float, optional): 
         """
         return _robotsim.Geometry3D_scale(self, *args)
 
 
     def rotate(self, R):
         """
-        rotate(Geometry3D self, double const [9] R)
-
-
-
         Rotates the geometry data. Permanently modifies the data and resets any
         collision data structures.  
 
+        Args:
+            R (:obj:`list of 9 floats (so3 element)`)
         """
         return _robotsim.Geometry3D_rotate(self, R)
 
 
     def transform(self, R, t):
         """
-        transform(Geometry3D self, double const [9] R, double const [3] t)
-
-
-
         Translates/rotates/scales the geometry data. Permanently modifies the data and
         resets any collision data structures.  
 
+        Args:
+            R (:obj:`list of 9 floats (so3 element)`)
+            t (:obj:`list of 3 floats`)
         """
         return _robotsim.Geometry3D_transform(self, R, t)
 
 
     def setCollisionMargin(self, margin):
         """
-        setCollisionMargin(Geometry3D self, double margin)
-
-
-
         Sets a padding around the base geometry which affects the results of proximity
         queries.  
 
+        Args:
+            margin (float)
         """
         return _robotsim.Geometry3D_setCollisionMargin(self, margin)
 
 
     def getCollisionMargin(self):
         """
-        getCollisionMargin(Geometry3D self) -> double
-
-
-
         Returns the padding around the base geometry. Default 0.  
 
+        Returns:
+            (float):
         """
         return _robotsim.Geometry3D_getCollisionMargin(self)
 
 
     def getBB(self):
         """
-        getBB(Geometry3D self)
-
-
-
         Returns the axis-aligned bounding box of the object. Note: O(1) time, but may
         not be tight.  
 
@@ -2367,10 +2317,6 @@ class Geometry3D(_object):
 
     def getBBTight(self):
         """
-        getBBTight(Geometry3D self)
-
-
-
         Returns a tighter axis-aligned bounding box of the object than getBB. Worst case
         O(n) time.  
 
@@ -2380,14 +2326,21 @@ class Geometry3D(_object):
 
     def convert(self, type, param=0):
         """
-        convert(Geometry3D self, char const * type, double param=0) -> Geometry3D
-        convert(Geometry3D self, char const * type) -> Geometry3D
-
-
-
         Converts a geometry to another type, if a conversion is available. The
         interpretation of param depends on the type of conversion, with 0 being a
         reasonable default.  
+
+        convert (type,param=0): :class:`~klampt.Geometry3D`
+
+        convert (type): :class:`~klampt.Geometry3D`
+
+
+        Args:
+            type (str): 
+            param (float, optional): default value 0
+
+        Returns:
+            (:class:`~klampt.Geometry3D`):
 
         Available conversions are:  
 
@@ -2411,11 +2364,12 @@ class Geometry3D(_object):
 
     def collides(self, other):
         """
-        collides(Geometry3D self, Geometry3D other) -> bool
-
-
-
         Returns true if this geometry collides with the other.  
+
+        Args:
+            other (:class:`~klampt.Geometry3D`)
+        Returns:
+            (bool):
 
         Unsupported types:  
 
@@ -2428,25 +2382,35 @@ class Geometry3D(_object):
 
     def withinDistance(self, other, tol):
         """
-        withinDistance(Geometry3D self, Geometry3D other, double tol) -> bool
-
-
-
         Returns true if this geometry is within distance tol to other.  
 
+        Args:
+            other (:class:`~klampt.Geometry3D`)
+            tol (float)
+        Returns:
+            (bool):
         """
         return _robotsim.Geometry3D_withinDistance(self, other, tol)
 
 
     def distance_simple(self, other, relErr=0, absErr=0):
         """
-        distance_simple(Geometry3D self, Geometry3D other, double relErr=0, double absErr=0) -> double
-        distance_simple(Geometry3D self, Geometry3D other, double relErr=0) -> double
-        distance_simple(Geometry3D self, Geometry3D other) -> double
-
-
-
         Version 0.8: this is the same as the old distance() function.  
+
+        distance_simple (other,relErr=0,absErr=0): float
+
+        distance_simple (other,relErr=0): float
+
+        distance_simple (other): float
+
+
+        Args:
+            other (:class:`~klampt.Geometry3D`): 
+            relErr (float, optional): default value 0
+            absErr (float, optional): default value 0
+
+        Returns:
+            (float):
 
         Returns the distance from this geometry to the other. If either geometry
         contains volume information, this value may be negative to indicate penetration.  
@@ -2457,13 +2421,14 @@ class Geometry3D(_object):
 
     def distance_point(self, pt):
         """
-        distance_point(Geometry3D self, double const [3] pt) -> DistanceQueryResult
-
-
-
         Returns the the distance and closest point to the input point, given in world
         coordinates. An exception is raised if this operation is not supported with the
         given geometry type.  
+
+        Args:
+            pt (:obj:`list of 3 floats`)
+        Returns:
+            (:class:`~klampt.DistanceQueryResult`):
 
         The return value contains the distance, closest points, and gradients if
         available.  
@@ -2474,25 +2439,27 @@ class Geometry3D(_object):
 
     def distance_point_ext(self, pt, settings):
         """
-        distance_point_ext(Geometry3D self, double const [3] pt, DistanceQuerySettings settings) -> DistanceQueryResult
-
-
-
         A customizable version of distance_point. The settings for the calculation can
         be customized with relErr, absErr, and upperBound, e.g., to break if the closest
         points are at least upperBound distance from one another.  
 
+        Args:
+            pt (:obj:`list of 3 floats`)
+            settings (:class:`~klampt.DistanceQuerySettings`)
+        Returns:
+            (:class:`~klampt.DistanceQueryResult`):
         """
         return _robotsim.Geometry3D_distance_point_ext(self, pt, settings)
 
 
     def distance(self, other):
         """
-        distance(Geometry3D self, Geometry3D other) -> DistanceQueryResult
-
-
-
         Returns the the distance and closest points between the given geometries.  
+
+        Args:
+            other (:class:`~klampt.Geometry3D`)
+        Returns:
+            (:class:`~klampt.DistanceQueryResult`):
 
         If the objects are penetrating, some combinations of geometry types allow
         calculating penetration depths:  
@@ -2522,43 +2489,54 @@ class Geometry3D(_object):
 
     def distance_ext(self, other, settings):
         """
-        distance_ext(Geometry3D self, Geometry3D other, DistanceQuerySettings settings) -> DistanceQueryResult
-
-
-
         A customizable version of distance. The settings for the calculation can be
         customized with relErr, absErr, and upperBound, e.g., to break if the closest
         points are at least upperBound distance from one another.  
 
+        Args:
+            other (:class:`~klampt.Geometry3D`)
+            settings (:class:`~klampt.DistanceQuerySettings`)
+        Returns:
+            (:class:`~klampt.DistanceQueryResult`):
         """
         return _robotsim.Geometry3D_distance_ext(self, other, settings)
 
 
     def rayCast(self, s, d):
         """
-        rayCast(Geometry3D self, double const [3] s, double const [3] d) -> bool
-
-
-
         Returns (hit,pt) where hit is true if the ray starting at s and pointing in
         direction d hits the geometry (given in world coordinates); pt is the hit point,
         in world coordinates.  
 
+        Args:
+            s (:obj:`list of 3 floats`)
+            d (:obj:`list of 3 floats`)
+        Returns:
+            (bool):
         """
         return _robotsim.Geometry3D_rayCast(self, s, d)
 
 
     def contacts(self, other, padding1, padding2, maxContacts=0):
         """
-        contacts(Geometry3D self, Geometry3D other, double padding1, double padding2, int maxContacts=0) -> ContactQueryResult
-        contacts(Geometry3D self, Geometry3D other, double padding1, double padding2) -> ContactQueryResult
-
-
-
         Returns the set of contact points between this and other. This set is a discrete
         representation of the region of surface overlap, which is defined as all pairs
         of points within distance self.collisionMargin + other.collisionMargin +
         padding1 + padding2.  
+
+        contacts (other,padding1,padding2,maxContacts=0): :obj:`ContactQueryResult`
+
+        contacts (other,padding1,padding2): :obj:`ContactQueryResult`
+
+
+        Args:
+            other (:class:`~klampt.Geometry3D`): 
+            padding1 (float): 
+            padding2 (float): 
+            maxContacts (int, optional): default value 0
+
+        Returns:
+            (:obj:`ContactQueryResult`):
 
         For some geometry types (TriangleMesh-TriangleMesh, TriangleMesh-PointCloud,
         PointCloud-PointCloud) padding must be positive to get meaningful contact poitns
@@ -2624,11 +2602,13 @@ class Appearance(_object):
 
     def __init__(self, *args):
         """
-        __init__(Appearance self) -> Appearance
-        __init__(Appearance self, Appearance app) -> Appearance
+        __init__ (): :class:`~klampt.Appearance`
+
+        __init__ (app): :class:`~klampt.Appearance`
 
 
-
+        Args:
+            app (:class:`~klampt.Appearance`, optional): 
         """
         this = _robotsim.new_Appearance(*args)
         try:
@@ -2640,61 +2620,53 @@ class Appearance(_object):
 
     def refresh(self, deep=True):
         """
-        refresh(Appearance self, bool deep=True)
-        refresh(Appearance self)
-
-
-
         call this to rebuild internal buffers, e.g., when the OpenGL context changes. If
         deep=True, the entire data structure will be revised. Use this for streaming
         data, for example.  
 
+        refresh (deep=True)
+
+        refresh ()
+
+
+        Args:
+            deep (bool, optional): default value True
         """
         return _robotsim.Appearance_refresh(self, deep)
 
 
     def clone(self):
         """
-        clone(Appearance self) -> Appearance
-
-
-
         Creates a standalone appearance from this appearance.  
 
+        Returns:
+            (:class:`~klampt.Appearance`):
         """
         return _robotsim.Appearance_clone(self)
 
 
     def set(self, arg2):
         """
-        set(Appearance self, Appearance arg2)
-
-
-
         Copies the appearance of the argument into this appearance.  
 
+        Args:
+            arg2 (:class:`~klampt.Appearance`)
         """
         return _robotsim.Appearance_set(self, arg2)
 
 
     def isStandalone(self):
         """
-        isStandalone(Appearance self) -> bool
-
-
-
         Returns true if this is a standalone appearance.  
 
+        Returns:
+            (bool):
         """
         return _robotsim.Appearance_isStandalone(self)
 
 
     def free(self):
         """
-        free(Appearance self)
-
-
-
         Frees the data associated with this appearance, if standalone.  
 
         """
@@ -2703,12 +2675,16 @@ class Appearance(_object):
 
     def setDraw(self, *args):
         """
-        setDraw(Appearance self, bool draw)
-        setDraw(Appearance self, int feature, bool draw)
-
-
-
         Turns on/off visibility of the object or a feature.  
+
+        setDraw (draw)
+
+        setDraw (feature,draw)
+
+
+        Args:
+            draw (bool): 
+            feature (int, optional): 
 
         If one argument is given, turns the object visibility on or off  
 
@@ -2721,12 +2697,18 @@ class Appearance(_object):
 
     def getDraw(self, *args):
         """
-        getDraw(Appearance self) -> bool
-        getDraw(Appearance self, int feature) -> bool
-
-
-
         Returns whether this object or feature is visible.  
+
+        getDraw (): bool
+
+        getDraw (feature): bool
+
+
+        Args:
+            feature (int, optional): 
+
+        Returns:
+            (bool):
 
         If no arguments are given, returns whether the object is visible.  
 
@@ -2739,13 +2721,21 @@ class Appearance(_object):
 
     def setColor(self, *args):
         """
-        setColor(Appearance self, float r, float g, float b, float a=1)
-        setColor(Appearance self, float r, float g, float b)
-        setColor(Appearance self, int feature, float r, float g, float b, float a)
-
-
-
         Sets color of the object or a feature.  
+
+        setColor (r,g,b,a=1)
+
+        setColor (r,g,b)
+
+        setColor (feature,r,g,b,a)
+
+
+        Args:
+            r (float): 
+            g (float): 
+            b (float): 
+            a (float, optional): default value 1
+            feature (int, optional): 
 
         If 3 or 4 arguments are given, changes the object color.  
 
@@ -2758,23 +2748,30 @@ class Appearance(_object):
 
     def getColor(self, *args):
         """
-        getColor(Appearance self)
-        getColor(Appearance self, int feature)
+        getColor ()
+
+        getColor (feature)
 
 
-
+        Args:
+            feature (int, optional): 
         """
         return _robotsim.Appearance_getColor(self, *args)
 
 
     def setColors(self, feature, colors, alpha=False):
         """
-        setColors(Appearance self, int feature, floatVector colors, bool alpha=False)
-        setColors(Appearance self, int feature, floatVector colors)
-
-
-
         Sets per-element color for elements of the given feature type.  
+
+        setColors (feature,colors,alpha=False)
+
+        setColors (feature,colors)
+
+
+        Args:
+            feature (int): 
+            colors (:obj:`list of floats`): 
+            alpha (bool, optional): default value False
 
         If alpha=True, colors are assumed to be 4*N rgba values, where N is the number
         of features of that type.  
@@ -2788,36 +2785,44 @@ class Appearance(_object):
 
     def setElementColor(self, feature, element, r, g, b, a=1):
         """
-        setElementColor(Appearance self, int feature, int element, float r, float g, float b, float a=1)
-        setElementColor(Appearance self, int feature, int element, float r, float g, float b)
-
-
-
         Sets the per-element color for the given feature.  
 
+        setElementColor (feature,element,r,g,b,a=1)
+
+        setElementColor (feature,element,r,g,b)
+
+
+        Args:
+            feature (int): 
+            element (int): 
+            r (float): 
+            g (float): 
+            b (float): 
+            a (float, optional): default value 1
         """
         return _robotsim.Appearance_setElementColor(self, feature, element, r, g, b, a)
 
 
     def getElementColor(self, feature, element):
         """
-        getElementColor(Appearance self, int feature, int element)
-
-
-
         Gets the per-element color for the given feature.  
 
+        Args:
+            feature (int)
+            element (int)
         """
         return _robotsim.Appearance_getElementColor(self, feature, element)
 
 
     def setTexture1D(self, w, format, bytes):
         """
-        setTexture1D(Appearance self, int w, char const * format, std::vector< unsigned char,std::allocator< unsigned char > > const & bytes)
-
-
-
         Sets a 1D texture of the given width. Valid format strings are.  
+
+        Args:
+            w (int)
+            format (str)
+            char (:obj:`std::vector< unsigned`)
+            bytes (:obj:`std::allocator< unsigned char > >`)
 
         *   "": turn off texture mapping  
         *   rgb8: unsigned byte RGB colors with red in the most significant byte  
@@ -2830,24 +2835,25 @@ class Appearance(_object):
 
     def setTexture2D(self, w, h, format, bytes):
         """
-        setTexture2D(Appearance self, int w, int h, char const * format, std::vector< unsigned char,std::allocator< unsigned char > > const & bytes)
-
-
-
         Sets a 2D texture of the given width/height. See setTexture1D for valid format
         strings.  
 
+        Args:
+            w (int)
+            h (int)
+            format (str)
+            char (:obj:`std::vector< unsigned`)
+            bytes (:obj:`std::allocator< unsigned char > >`)
         """
         return _robotsim.Appearance_setTexture2D(self, w, h, format, bytes)
 
 
     def setTexcoords(self, uvs):
         """
-        setTexcoords(Appearance self, doubleVector uvs)
-
-
-
         Sets per-vertex texture coordinates.  
+
+        Args:
+            uvs (:obj:`list of floats`)
 
         If the texture is 1D, uvs is an array of length n containing 1D texture
         coordinates.  
@@ -2863,55 +2869,63 @@ class Appearance(_object):
 
     def setPointSize(self, size):
         """
-        setPointSize(Appearance self, float size)
-
-
-
         For point clouds, sets the point size.  
 
+        Args:
+            size (float)
         """
         return _robotsim.Appearance_setPointSize(self, size)
 
 
     def setCreaseAngle(self, creaseAngleRads):
         """
-        setCreaseAngle(Appearance self, float creaseAngleRads)
-
-
-
         For meshes, sets the crease angle. Set to 0 to disable smoothing.  
 
+        Args:
+            creaseAngleRads (float)
         """
         return _robotsim.Appearance_setCreaseAngle(self, creaseAngleRads)
 
 
     def setSilhouette(self, radius, r=0, g=0, b=0, a=1):
         """
-        setSilhouette(Appearance self, float radius, float r=0, float g=0, float b=0, float a=1)
-        setSilhouette(Appearance self, float radius, float r=0, float g=0, float b=0)
-        setSilhouette(Appearance self, float radius, float r=0, float g=0)
-        setSilhouette(Appearance self, float radius, float r=0)
-        setSilhouette(Appearance self, float radius)
-
-
-
         For meshes sets a silhouette radius and color. Set the radius to 0 to disable
         silhouette drawing.  
 
+        setSilhouette (radius,r=0,g=0,b=0,a=1)
+
+        setSilhouette (radius,r=0,g=0,b=0)
+
+        setSilhouette (radius,r=0,g=0)
+
+        setSilhouette (radius,r=0)
+
+        setSilhouette (radius)
+
+
+        Args:
+            radius (float): 
+            r (float, optional): default value 0
+            g (float, optional): default value 0
+            b (float, optional): default value 0
+            a (float, optional): default value 1
         """
         return _robotsim.Appearance_setSilhouette(self, radius, r, g, b, a)
 
 
     def drawGL(self, *args):
         """
-        drawGL(Appearance self)
-        drawGL(Appearance self, Geometry3D geom)
-
-
-
         Draws the given geometry with this appearance. NOTE: for best performance, an
         appearance should only be drawn with a single geometry. Otherwise, the OpenGL
         display lists will be completely recreated.  
+
+        drawGL ()
+
+        drawGL (geom)
+
+
+        Args:
+            geom (:class:`~klampt.Geometry3D`, optional): 
 
         Note that the geometry's current transform is NOT respected, and this only draws
         the geometry in its local transform.  
@@ -2922,13 +2936,12 @@ class Appearance(_object):
 
     def drawWorldGL(self, geom):
         """
-        drawWorldGL(Appearance self, Geometry3D geom)
-
-
-
         Draws the given geometry with this appearance. NOTE: for best performance, an
         appearance should only be drawn with a single geometry. Otherwise, the OpenGL
         display lists will be completely recreated.  
+
+        Args:
+            geom (:class:`~klampt.Geometry3D`)
 
         Differs from drawGL in that the geometry's current transform is applied before
         drawing.  
@@ -2965,50 +2978,41 @@ class Viewport(_object):
 
     def fromJson(self, str):
         """
-        fromJson(Viewport self, std::string const & str) -> bool
-
-
-
+        Args:
+            str (str)
+        Returns:
+            (bool):
         """
         return _robotsim.Viewport_fromJson(self, str)
 
 
     def toJson(self):
         """
-        toJson(Viewport self) -> std::string
-
-
-
+        Returns:
+            (str):
         """
         return _robotsim.Viewport_toJson(self)
 
 
     def setModelviewMatrix(self, M):
         """
-        setModelviewMatrix(Viewport self, double const [16] M)
-
-
-
+        Args:
+            M (:obj:`double const [16]`)
         """
         return _robotsim.Viewport_setModelviewMatrix(self, M)
 
 
     def setRigidTransform(self, R, t):
         """
-        setRigidTransform(Viewport self, double const [9] R, double const [3] t)
-
-
-
+        Args:
+            R (:obj:`list of 9 floats (so3 element)`)
+            t (:obj:`list of 3 floats`)
         """
         return _robotsim.Viewport_setRigidTransform(self, R, t)
 
 
     def getRigidTransform(self):
         """
-        getRigidTransform(Viewport self)
-
-
-
         """
         return _robotsim.Viewport_getRigidTransform(self)
 
@@ -3051,10 +3055,6 @@ class Viewport(_object):
 
     def __init__(self):
         """
-        __init__(Viewport self) -> Viewport
-
-
-
         """
         this = _robotsim.new_Viewport()
         try:
@@ -3080,10 +3080,6 @@ class Widget(_object):
 
     def __init__(self):
         """
-        __init__(Widget self) -> Widget
-
-
-
         """
         this = _robotsim.new_Widget()
         try:
@@ -3095,100 +3091,86 @@ class Widget(_object):
 
     def hover(self, x, y, viewport):
         """
-        hover(Widget self, int x, int y, Viewport viewport) -> bool
-
-
-
+        Args:
+            x (int)
+            y (int)
+            viewport (:obj:`Viewport`)
+        Returns:
+            (bool):
         """
         return _robotsim.Widget_hover(self, x, y, viewport)
 
 
     def beginDrag(self, x, y, viewport):
         """
-        beginDrag(Widget self, int x, int y, Viewport viewport) -> bool
-
-
-
+        Args:
+            x (int)
+            y (int)
+            viewport (:obj:`Viewport`)
+        Returns:
+            (bool):
         """
         return _robotsim.Widget_beginDrag(self, x, y, viewport)
 
 
     def drag(self, dx, dy, viewport):
         """
-        drag(Widget self, int dx, int dy, Viewport viewport)
-
-
-
+        Args:
+            dx (int)
+            dy (int)
+            viewport (:obj:`Viewport`)
         """
         return _robotsim.Widget_drag(self, dx, dy, viewport)
 
 
     def endDrag(self):
         """
-        endDrag(Widget self)
-
-
-
         """
         return _robotsim.Widget_endDrag(self)
 
 
     def keypress(self, c):
         """
-        keypress(Widget self, char c)
-
-
-
+        Args:
+            c (str)
         """
         return _robotsim.Widget_keypress(self, c)
 
 
     def drawGL(self, viewport):
         """
-        drawGL(Widget self, Viewport viewport)
-
-
-
+        Args:
+            viewport (:obj:`Viewport`)
         """
         return _robotsim.Widget_drawGL(self, viewport)
 
 
     def idle(self):
         """
-        idle(Widget self)
-
-
-
         """
         return _robotsim.Widget_idle(self)
 
 
     def wantsRedraw(self):
         """
-        wantsRedraw(Widget self) -> bool
-
-
-
+        Returns:
+            (bool):
         """
         return _robotsim.Widget_wantsRedraw(self)
 
 
     def hasHighlight(self):
         """
-        hasHighlight(Widget self) -> bool
-
-
-
+        Returns:
+            (bool):
         """
         return _robotsim.Widget_hasHighlight(self)
 
 
     def hasFocus(self):
         """
-        hasFocus(Widget self) -> bool
-
-
-
+        Returns:
+            (bool):
         """
         return _robotsim.Widget_hasFocus(self)
 
@@ -3217,10 +3199,6 @@ class WidgetSet(Widget):
 
     def __init__(self):
         """
-        __init__(WidgetSet self) -> WidgetSet
-
-
-
         """
         this = _robotsim.new_WidgetSet()
         try:
@@ -3230,30 +3208,25 @@ class WidgetSet(Widget):
 
     def add(self, subwidget):
         """
-        add(WidgetSet self, Widget subwidget)
-
-
-
+        Args:
+            subwidget (:obj:`Widget`)
         """
         return _robotsim.WidgetSet_add(self, subwidget)
 
 
     def remove(self, subwidget):
         """
-        remove(WidgetSet self, Widget subwidget)
-
-
-
+        Args:
+            subwidget (:obj:`Widget`)
         """
         return _robotsim.WidgetSet_remove(self, subwidget)
 
 
     def enable(self, subwidget, enabled):
         """
-        enable(WidgetSet self, Widget subwidget, bool enabled)
-
-
-
+        Args:
+            subwidget (:obj:`Widget`)
+            enabled (bool)
         """
         return _robotsim.WidgetSet_enable(self, subwidget, enabled)
 
@@ -3280,10 +3253,6 @@ class PointPoser(Widget):
 
     def __init__(self):
         """
-        __init__(PointPoser self) -> PointPoser
-
-
-
         """
         this = _robotsim.new_PointPoser()
         try:
@@ -3293,32 +3262,24 @@ class PointPoser(Widget):
 
     def set(self, t):
         """
-        set(PointPoser self, double const [3] t)
-
-
-
+        Args:
+            t (:obj:`list of 3 floats`)
         """
         return _robotsim.PointPoser_set(self, t)
 
 
     def get(self):
         """
-        get(PointPoser self)
-
-
-
         """
         return _robotsim.PointPoser_get(self)
 
 
     def setAxes(self, R):
         """
-        setAxes(PointPoser self, double const [9] R)
-
-
-
         Sets the reference axes (by default aligned to x,y,z)  
 
+        Args:
+            R (:obj:`list of 9 floats (so3 element)`)
         """
         return _robotsim.PointPoser_setAxes(self, R)
 
@@ -3345,10 +3306,6 @@ class TransformPoser(Widget):
 
     def __init__(self):
         """
-        __init__(TransformPoser self) -> TransformPoser
-
-
-
         """
         this = _robotsim.new_TransformPoser()
         try:
@@ -3358,40 +3315,31 @@ class TransformPoser(Widget):
 
     def set(self, R, t):
         """
-        set(TransformPoser self, double const [9] R, double const [3] t)
-
-
-
+        Args:
+            R (:obj:`list of 9 floats (so3 element)`)
+            t (:obj:`list of 3 floats`)
         """
         return _robotsim.TransformPoser_set(self, R, t)
 
 
     def get(self):
         """
-        get(TransformPoser self)
-
-
-
         """
         return _robotsim.TransformPoser_get(self)
 
 
     def enableTranslation(self, arg2):
         """
-        enableTranslation(TransformPoser self, bool arg2)
-
-
-
+        Args:
+            arg2 (bool)
         """
         return _robotsim.TransformPoser_enableTranslation(self, arg2)
 
 
     def enableRotation(self, arg2):
         """
-        enableRotation(TransformPoser self, bool arg2)
-
-
-
+        Args:
+            arg2 (bool)
         """
         return _robotsim.TransformPoser_enableRotation(self, arg2)
 
@@ -3418,10 +3366,8 @@ class ObjectPoser(Widget):
 
     def __init__(self, object):
         """
-        __init__(ObjectPoser self, RigidObjectModel object) -> ObjectPoser
-
-
-
+        Args:
+            object (:class:`~klampt.RigidObjectModel`)
         """
         this = _robotsim.new_ObjectPoser(object)
         try:
@@ -3431,20 +3377,15 @@ class ObjectPoser(Widget):
 
     def set(self, R, t):
         """
-        set(ObjectPoser self, double const [9] R, double const [3] t)
-
-
-
+        Args:
+            R (:obj:`list of 9 floats (so3 element)`)
+            t (:obj:`list of 3 floats`)
         """
         return _robotsim.ObjectPoser_set(self, R, t)
 
 
     def get(self):
         """
-        get(ObjectPoser self)
-
-
-
         """
         return _robotsim.ObjectPoser_get(self)
 
@@ -3471,10 +3412,8 @@ class RobotPoser(Widget):
 
     def __init__(self, robot):
         """
-        __init__(RobotPoser self, RobotModel robot) -> RobotPoser
-
-
-
+        Args:
+            robot (:class:`~klampt.RobotModel`)
         """
         this = _robotsim.new_RobotPoser(robot)
         try:
@@ -3484,60 +3423,44 @@ class RobotPoser(Widget):
 
     def setActiveDofs(self, dofs):
         """
-        setActiveDofs(RobotPoser self, intVector dofs)
-
-
-
+        Args:
+            dofs (:obj:`list of int`)
         """
         return _robotsim.RobotPoser_setActiveDofs(self, dofs)
 
 
     def set(self, q):
         """
-        set(RobotPoser self, doubleVector q)
-
-
-
+        Args:
+            q (:obj:`list of floats`)
         """
         return _robotsim.RobotPoser_set(self, q)
 
 
     def get(self):
         """
-        get(RobotPoser self)
-
-
-
         """
         return _robotsim.RobotPoser_get(self)
 
 
     def getConditioned(self, qref):
         """
-        getConditioned(RobotPoser self, doubleVector qref)
-
-
-
+        Args:
+            qref (:obj:`list of floats`)
         """
         return _robotsim.RobotPoser_getConditioned(self, qref)
 
 
     def addIKConstraint(self, obj):
         """
-        addIKConstraint(RobotPoser self, IKObjective obj)
-
-
-
+        Args:
+            obj (:obj:`IKObjective`)
         """
         return _robotsim.RobotPoser_addIKConstraint(self, obj)
 
 
     def clearIKConstraints(self):
         """
-        clearIKConstraints(RobotPoser self)
-
-
-
         """
         return _robotsim.RobotPoser_clearIKConstraints(self)
 
@@ -3580,10 +3503,6 @@ class Mass(_object):
 
     def __init__(self):
         """
-        __init__(Mass self) -> Mass
-
-
-
         """
         this = _robotsim.new_Mass()
         try:
@@ -3593,40 +3512,30 @@ class Mass(_object):
 
     def setMass(self, _mass):
         """
-        setMass(Mass self, double _mass)
-
-
-
+        Args:
+            _mass (float)
         """
         return _robotsim.Mass_setMass(self, _mass)
 
 
     def getMass(self):
         """
-        getMass(Mass self) -> double
-
-
-
+        Returns:
+            (float):
         """
         return _robotsim.Mass_getMass(self)
 
 
     def setCom(self, _com):
         """
-        setCom(Mass self, doubleVector _com)
-
-
-
+        Args:
+            _com (:obj:`list of floats`)
         """
         return _robotsim.Mass_setCom(self, _com)
 
 
     def getCom(self):
         """
-        getCom(Mass self)
-
-
-
         Returns the COM as a list of 3 floats.  
 
         """
@@ -3635,22 +3544,16 @@ class Mass(_object):
 
     def setInertia(self, _inertia):
         """
-        setInertia(Mass self, doubleVector _inertia)
-
-
-
         Sets an inertia matrix.  
 
+        Args:
+            _inertia (:obj:`list of floats`)
         """
         return _robotsim.Mass_setInertia(self, _inertia)
 
 
     def getInertia(self):
         """
-        getInertia(Mass self)
-
-
-
         Returns the inertia matrix as a list of 3 floats or 9 floats.  
 
         """
@@ -3702,10 +3605,6 @@ class ContactParameters(_object):
 
     def __init__(self):
         """
-        __init__(ContactParameters self) -> ContactParameters
-
-
-
         """
         this = _robotsim.new_ContactParameters()
         try:
@@ -3765,10 +3664,6 @@ class RobotModelLink(_object):
 
     def __init__(self):
         """
-        __init__(RobotModelLink self) -> RobotModelLink
-
-
-
         """
         this = _robotsim.new_RobotModelLink()
         try:
@@ -3778,11 +3673,10 @@ class RobotModelLink(_object):
 
     def getID(self):
         """
-        getID(RobotModelLink self) -> int
-
-
-
         Returns the ID of the robot link in its world.  
+
+        Returns:
+            (int):
 
         Note: The world ID is not the same as the link's index, retrieved by getIndex.  
 
@@ -3792,146 +3686,126 @@ class RobotModelLink(_object):
 
     def getName(self):
         """
-        getName(RobotModelLink self) -> char const *
-
-
-
         Returns the name of the robot link.  
 
+        Returns:
+            (str):
         """
         return _robotsim.RobotModelLink_getName(self)
 
 
     def setName(self, name):
         """
-        setName(RobotModelLink self, char const * name)
-
-
-
         Sets the name of the robot link.  
 
+        Args:
+            name (str)
         """
         return _robotsim.RobotModelLink_setName(self, name)
 
 
     def robot(self):
         """
-        robot(RobotModelLink self) -> RobotModel
-
-
-
         Returns a reference to the link's robot.  
 
+        Returns:
+            (:class:`~klampt.RobotModel`):
         """
         return _robotsim.RobotModelLink_robot(self)
 
 
     def getIndex(self):
         """
-        getIndex(RobotModelLink self) -> int
-
-
-
         Returns the index of the link (on its robot).  
 
+        Returns:
+            (int):
         """
         return _robotsim.RobotModelLink_getIndex(self)
 
 
     def getParent(self):
         """
-        getParent(RobotModelLink self) -> int
-
-
-
         Returns the index of the link's parent (on its robot).  
 
+        Returns:
+            (int):
         """
         return _robotsim.RobotModelLink_getParent(self)
 
 
     def parent(self):
         """
-        parent(RobotModelLink self) -> RobotModelLink
-
-
-
         Returns a reference to the link's parent, or a NULL link if it has no parent.  
 
+        Returns:
+            (:class:`~klampt.RobotModelLink`):
         """
         return _robotsim.RobotModelLink_parent(self)
 
 
     def setParent(self, *args):
         """
-        setParent(RobotModelLink self, int p)
-        setParent(RobotModelLink self, RobotModelLink l)
-
-
-
         Sets the link's parent (must be on the same robot).  
 
+        setParent (p)
+
+        setParent (l)
+
+
+        Args:
+            p (int, optional): 
+            l (:class:`~klampt.RobotModelLink`, optional): 
         """
         return _robotsim.RobotModelLink_setParent(self, *args)
 
 
     def geometry(self):
         """
-        geometry(RobotModelLink self) -> Geometry3D
-
-
-
         Returns a reference to the link's geometry.  
 
+        Returns:
+            (:class:`~klampt.Geometry3D`):
         """
         return _robotsim.RobotModelLink_geometry(self)
 
 
     def appearance(self):
         """
-        appearance(RobotModelLink self) -> Appearance
-
-
-
         Returns a reference to the link's appearance.  
 
+        Returns:
+            (:class:`~klampt.Appearance`):
         """
         return _robotsim.RobotModelLink_appearance(self)
 
 
     def getMass(self):
         """
-        getMass(RobotModelLink self) -> Mass
-
-
-
         Retrieves the inertial properties of the link. (Note that the Mass is given with
         origin at the link frame, not about the COM.)  
 
+        Returns:
+            (:class:`~klampt.Mass`):
         """
         return _robotsim.RobotModelLink_getMass(self)
 
 
     def setMass(self, mass):
         """
-        setMass(RobotModelLink self, Mass mass)
-
-
-
         Sets the inertial proerties of the link. (Note that the Mass is given with
         origin at the link frame, not about the COM.)  
 
+        Args:
+            mass (:class:`~klampt.Mass`)
         """
         return _robotsim.RobotModelLink_setMass(self, mass)
 
 
     def getParentTransform(self):
         """
-        getParentTransform(RobotModelLink self)
-
-
-
         Gets transformation (R,t) to the parent link.  
+
 
         Returns:  
 
@@ -3945,22 +3819,17 @@ class RobotModelLink(_object):
 
     def setParentTransform(self, R, t):
         """
-        setParentTransform(RobotModelLink self, double const [9] R, double const [3] t)
-
-
-
         Sets transformation (R,t) to the parent link.  
 
+        Args:
+            R (:obj:`list of 9 floats (so3 element)`)
+            t (:obj:`list of 3 floats`)
         """
         return _robotsim.RobotModelLink_setParentTransform(self, R, t)
 
 
     def getAxis(self):
         """
-        getAxis(RobotModelLink self)
-
-
-
         Gets the local rotational / translational axis.  
 
         """
@@ -3969,23 +3838,20 @@ class RobotModelLink(_object):
 
     def setAxis(self, axis):
         """
-        setAxis(RobotModelLink self, double const [3] axis)
-
-
-
         Sets the local rotational / translational axis.  
 
+        Args:
+            axis (:obj:`list of 3 floats`)
         """
         return _robotsim.RobotModelLink_setAxis(self, axis)
 
 
     def getWorldPosition(self, plocal):
         """
-        getWorldPosition(RobotModelLink self, double const [3] plocal)
-
-
-
         Converts point from local to world coordinates.  
+
+        Args:
+            plocal (:obj:`list of 3 floats`)
 
         Returns:  
 
@@ -3997,11 +3863,10 @@ class RobotModelLink(_object):
 
     def getWorldDirection(self, vlocal):
         """
-        getWorldDirection(RobotModelLink self, double const [3] vlocal)
-
-
-
         Converts direction from local to world coordinates.  
+
+        Args:
+            vlocal (:obj:`list of 3 floats`)
 
         Returns:  
 
@@ -4014,11 +3879,10 @@ class RobotModelLink(_object):
 
     def getLocalPosition(self, pworld):
         """
-        getLocalPosition(RobotModelLink self, double const [3] pworld)
-
-
-
         Converts point from world to local coordinates.  
+
+        Args:
+            pworld (:obj:`list of 3 floats`)
 
         Returns:  
 
@@ -4030,11 +3894,10 @@ class RobotModelLink(_object):
 
     def getLocalDirection(self, vworld):
         """
-        getLocalDirection(RobotModelLink self, double const [3] vworld)
-
-
-
         Converts direction from world to local coordinates.  
+
+        Args:
+            vworld (:obj:`list of 3 floats`)
 
         Returns:  
 
@@ -4047,11 +3910,8 @@ class RobotModelLink(_object):
 
     def getTransform(self):
         """
-        getTransform(RobotModelLink self)
-
-
-
         Gets the link's current transformation (R,t) to the world frame.  
+
 
         Returns:  
 
@@ -4063,11 +3923,11 @@ class RobotModelLink(_object):
 
     def setTransform(self, R, t):
         """
-        setTransform(RobotModelLink self, double const [9] R, double const [3] t)
-
-
-
         Sets the link's current transformation (R,t) to the world frame.  
+
+        Args:
+            R (:obj:`list of 9 floats (so3 element)`)
+            t (:obj:`list of 3 floats`)
 
         Note:  
 
@@ -4080,12 +3940,9 @@ class RobotModelLink(_object):
 
     def getVelocity(self):
         """
-        getVelocity(RobotModelLink self)
-
-
-
         Returns the velocity of the link's origin given the robot's current joint
         configuration and velocities. Equivalent to getPointVelocity([0,0,0]).  
+
 
         Returns:  
 
@@ -4098,12 +3955,9 @@ class RobotModelLink(_object):
 
     def getAngularVelocity(self):
         """
-        getAngularVelocity(RobotModelLink self)
-
-
-
         Returns the angular velocity of the link given the robot's current joint
         configuration and velocities.  
+
 
         Returns:  
 
@@ -4116,12 +3970,11 @@ class RobotModelLink(_object):
 
     def getPointVelocity(self, plocal):
         """
-        getPointVelocity(RobotModelLink self, double const [3] plocal)
-
-
-
         Returns the world velocity of a point attached to the link, given the robot's
         current joint configuration and velocities.  
+
+        Args:
+            plocal (:obj:`list of 3 floats`)
 
         Returns:  
 
@@ -4134,12 +3987,11 @@ class RobotModelLink(_object):
 
     def getJacobian(self, plocal):
         """
-        getJacobian(RobotModelLink self, double const [3] plocal)
-
-
-
         Returns the total jacobian of a point on this link w.r.t. the robot's
         configuration q.  
+
+        Args:
+            plocal (:obj:`list of 3 floats`)
 
         Returns:  
 
@@ -4155,12 +4007,11 @@ class RobotModelLink(_object):
 
     def getPositionJacobian(self, plocal):
         """
-        getPositionJacobian(RobotModelLink self, double const [3] plocal)
-
-
-
         Returns the position jacobian of a point on this link w.r.t. the robot's
         configuration q.  
+
+        Args:
+            plocal (:obj:`list of 3 floats`)
 
         Returns:  
 
@@ -4176,12 +4027,9 @@ class RobotModelLink(_object):
 
     def getOrientationJacobian(self):
         """
-        getOrientationJacobian(RobotModelLink self)
-
-
-
         Returns the orientation jacobian of this link w.r.t. the robot's configuration
         q.  
+
 
         Returns:  
 
@@ -4197,12 +4045,11 @@ class RobotModelLink(_object):
 
     def getAcceleration(self, ddq):
         """
-        getAcceleration(RobotModelLink self, doubleVector ddq)
-
-
-
         Returns the acceleration of the link origin given the robot's current joint
         configuration and velocities, and the joint accelerations ddq.  
+
+        Args:
+            ddq (:obj:`list of floats`)
 
         ddq can be empty, which calculates the acceleration with acceleration 0, and is
         a little faster than setting ddq to [0]*n  
@@ -4218,12 +4065,12 @@ class RobotModelLink(_object):
 
     def getPointAcceleration(self, plocal, ddq):
         """
-        getPointAcceleration(RobotModelLink self, double const [3] plocal, doubleVector ddq)
-
-
-
         Returns the acceleration of the point given the robot's current joint
         configuration and velocities, and the joint accelerations ddq.  
+
+        Args:
+            plocal (:obj:`list of 3 floats`)
+            ddq (:obj:`list of floats`)
 
         Returns:  
 
@@ -4236,12 +4083,11 @@ class RobotModelLink(_object):
 
     def getAngularAcceleration(self, ddq):
         """
-        getAngularAcceleration(RobotModelLink self, doubleVector ddq)
-
-
-
         Returns the angular acceleration of the link given the robot's current joint
         configuration and velocities, and the joint accelerations ddq.  
+
+        Args:
+            ddq (:obj:`list of floats`)
 
         Returns:  
 
@@ -4254,12 +4100,11 @@ class RobotModelLink(_object):
 
     def getPositionHessian(self, plocal):
         """
-        getPositionHessian(RobotModelLink self, double const [3] plocal)
-
-
-
         Returns the Hessians of each component of the position p w.r.t the robot's
         configuration q.  
+
+        Args:
+            plocal (:obj:`list of 3 floats`)
 
         Returns:  
 
@@ -4272,12 +4117,9 @@ class RobotModelLink(_object):
 
     def getOrientationHessian(self):
         """
-        getOrientationHessian(RobotModelLink self)
-
-
-
         Returns the Hessians of each orientation component of the link w.r.t the robot's
         configuration q.  
+
 
         Returns:  
 
@@ -4290,28 +4132,32 @@ class RobotModelLink(_object):
 
     def drawLocalGL(self, keepAppearance=True):
         """
-        drawLocalGL(RobotModelLink self, bool keepAppearance=True)
-        drawLocalGL(RobotModelLink self)
-
-
-
         Draws the link's geometry in its local frame. If keepAppearance=true, the
         current Appearance is honored. Otherwise, just the geometry is drawn.  
 
+        drawLocalGL (keepAppearance=True)
+
+        drawLocalGL ()
+
+
+        Args:
+            keepAppearance (bool, optional): default value True
         """
         return _robotsim.RobotModelLink_drawLocalGL(self, keepAppearance)
 
 
     def drawWorldGL(self, keepAppearance=True):
         """
-        drawWorldGL(RobotModelLink self, bool keepAppearance=True)
-        drawWorldGL(RobotModelLink self)
-
-
-
         Draws the link's geometry in the world frame. If keepAppearance=true, the
         current Appearance is honored. Otherwise, just the geometry is drawn.  
 
+        drawWorldGL (keepAppearance=True)
+
+        drawWorldGL ()
+
+
+        Args:
+            keepAppearance (bool, optional): default value True
         """
         return _robotsim.RobotModelLink_drawWorldGL(self, keepAppearance)
 
@@ -4360,10 +4206,6 @@ class RobotModelDriver(_object):
 
     def __init__(self):
         """
-        __init__(RobotModelDriver self) -> RobotModelDriver
-
-
-
         """
         this = _robotsim.new_RobotModelDriver()
         try:
@@ -4373,57 +4215,45 @@ class RobotModelDriver(_object):
 
     def getName(self):
         """
-        getName(RobotModelDriver self) -> char const *
-
-
-
+        Returns:
+            (str):
         """
         return _robotsim.RobotModelDriver_getName(self)
 
 
     def robot(self):
         """
-        robot(RobotModelDriver self) -> RobotModel
-
-
-
         Returns a reference to the driver's robot.  
 
+        Returns:
+            (:class:`~klampt.RobotModel`):
         """
         return _robotsim.RobotModelDriver_robot(self)
 
 
     def getType(self):
         """
-        getType(RobotModelDriver self) -> char const *
-
-
-
         Currently can be "normal", "affine", "rotation", "translation", or
         "custom".  
 
+        Returns:
+            (str):
         """
         return _robotsim.RobotModelDriver_getType(self)
 
 
     def getAffectedLink(self):
         """
-        getAffectedLink(RobotModelDriver self) -> int
-
-
-
         Returns the single affected link for "normal" links.  
 
+        Returns:
+            (int):
         """
         return _robotsim.RobotModelDriver_getAffectedLink(self)
 
 
     def getAffectedLinks(self):
         """
-        getAffectedLinks(RobotModelDriver self)
-
-
-
         Returns the indices of the driver's affected links.  
 
         """
@@ -4432,12 +4262,9 @@ class RobotModelDriver(_object):
 
     def getAffineCoeffs(self):
         """
-        getAffineCoeffs(RobotModelDriver self)
-
-
-
         For "affine" links, returns the scale and offset of the driver value mapped to
         the world.  
+
 
         Returns: tuple: a pair (scale,offset), each of length len(getAffectedLinks()).  
 
@@ -4447,48 +4274,40 @@ class RobotModelDriver(_object):
 
     def setValue(self, val):
         """
-        setValue(RobotModelDriver self, double val)
-
-
-
         Sets the robot's config to correspond to the given driver value.  
 
+        Args:
+            val (float)
         """
         return _robotsim.RobotModelDriver_setValue(self, val)
 
 
     def getValue(self):
         """
-        getValue(RobotModelDriver self) -> double
-
-
-
         Gets the current driver value from the robot's config.  
 
+        Returns:
+            (float):
         """
         return _robotsim.RobotModelDriver_getValue(self)
 
 
     def setVelocity(self, val):
         """
-        setVelocity(RobotModelDriver self, double val)
-
-
-
         Sets the robot's velocity to correspond to the given driver velocity value.  
 
+        Args:
+            val (float)
         """
         return _robotsim.RobotModelDriver_setVelocity(self, val)
 
 
     def getVelocity(self):
         """
-        getVelocity(RobotModelDriver self) -> double
-
-
-
         Gets the current driver velocity value from the robot's velocity.  
 
+        Returns:
+            (float):
         """
         return _robotsim.RobotModelDriver_getVelocity(self)
 
@@ -4559,10 +4378,6 @@ class RobotModel(_object):
 
     def __init__(self):
         """
-        __init__(RobotModel self) -> RobotModel
-
-
-
         """
         this = _robotsim.new_RobotModel()
         try:
@@ -4572,24 +4387,31 @@ class RobotModel(_object):
 
     def loadFile(self, fn):
         """
-        loadFile(RobotModel self, char const * fn) -> bool
-
-
-
         Loads the robot from the file fn.  
 
+        Args:
+            fn (str)
+        Returns:
+            (bool):
         """
         return _robotsim.RobotModel_loadFile(self, fn)
 
 
     def saveFile(self, fn, geometryPrefix=None):
         """
-        saveFile(RobotModel self, char const * fn, char const * geometryPrefix=None) -> bool
-        saveFile(RobotModel self, char const * fn) -> bool
-
-
-
         Saves the robot to the file fn.  
+
+        saveFile (fn,geometryPrefix=None): bool
+
+        saveFile (fn): bool
+
+
+        Args:
+            fn (str): 
+            geometryPrefix (str, optional): default value None
+
+        Returns:
+            (bool):
 
         If `geometryPrefix == None` (default), the geometry is not saved. Otherwise, the
         geometry of each link will be saved to files named `geometryPrefix+name`, where
@@ -4602,11 +4424,10 @@ class RobotModel(_object):
 
     def getID(self):
         """
-        getID(RobotModel self) -> int
-
-
-
         Returns the ID of the robot in its world.  
+
+        Returns:
+            (int):
 
         Note: The world ID is not the same as the robot index.  
 
@@ -4616,94 +4437,100 @@ class RobotModel(_object):
 
     def getName(self):
         """
-        getName(RobotModel self) -> char const *
-
-
-
+        Returns:
+            (str):
         """
         return _robotsim.RobotModel_getName(self)
 
 
     def setName(self, name):
         """
-        setName(RobotModel self, char const * name)
-
-
-
+        Args:
+            name (str)
         """
         return _robotsim.RobotModel_setName(self, name)
 
 
     def numLinks(self):
         """
-        numLinks(RobotModel self) -> int
-
-
-
         Returns the number of links = number of DOF's.  
 
+        Returns:
+            (int):
         """
         return _robotsim.RobotModel_numLinks(self)
 
 
     def link(self, *args):
         """
-        link(RobotModel self, int index) -> RobotModelLink
-        link(RobotModel self, char const * name) -> RobotModelLink
-
-
-
         Returns a reference to the link by index or name.  
 
+        link (index): :class:`~klampt.RobotModelLink`
+
+        link (name): :class:`~klampt.RobotModelLink`
+
+
+        Args:
+            index (int, optional): 
+            name (str, optional): 
+
+        Returns:
+            (:class:`~klampt.RobotModelLink`):
         """
         return _robotsim.RobotModel_link(self, *args)
 
 
     def numDrivers(self):
         """
-        numDrivers(RobotModel self) -> int
-
-
-
         Returns the number of drivers.  
 
+        Returns:
+            (int):
         """
         return _robotsim.RobotModel_numDrivers(self)
 
 
     def driver(self, *args):
         """
-        driver(RobotModel self, int index) -> RobotModelDriver
-        driver(RobotModel self, char const * name) -> RobotModelDriver
-
-
-
         Returns a reference to the driver by index or name.  
 
+        driver (index): :obj:`RobotModelDriver`
+
+        driver (name): :obj:`RobotModelDriver`
+
+
+        Args:
+            index (int, optional): 
+            name (str, optional): 
+
+        Returns:
+            (:obj:`RobotModelDriver`):
         """
         return _robotsim.RobotModel_driver(self, *args)
 
 
     def getJointType(self, *args):
         """
-        getJointType(RobotModel self, int index) -> char const
-        getJointType(RobotModel self, char const * name) -> char const *
-
-
-
         Returns the joint type of the joint connecting the link to its parent, where the
         link is identified by index or by name.  
 
+        getJointType (index): str
+
+        getJointType (name): str
+
+
+        Args:
+            index (int, optional): 
+            name (str, optional): 
+
+        Returns:
+            (str):
         """
         return _robotsim.RobotModel_getJointType(self, *args)
 
 
     def getConfig(self):
         """
-        getConfig(RobotModel self)
-
-
-
         Retrieves the current configuration of the robot model.  
 
         """
@@ -4712,10 +4539,6 @@ class RobotModel(_object):
 
     def getVelocity(self):
         """
-        getVelocity(RobotModel self)
-
-
-
         Retreives the current velocity of the robot model.  
 
         """
@@ -4724,12 +4547,11 @@ class RobotModel(_object):
 
     def setConfig(self, q):
         """
-        setConfig(RobotModel self, doubleVector q)
-
-
-
         Sets the current configuration of the robot. Input q is a vector of length
         numLinks(). This also updates forward kinematics of all links.  
+
+        Args:
+            q (:obj:`list of floats`)
 
         Again, it is important to realize that the RobotModel is not the same as a
         simulated robot, and this will not change the simulation world. Many functions
@@ -4744,23 +4566,17 @@ class RobotModel(_object):
 
     def setVelocity(self, dq):
         """
-        setVelocity(RobotModel self, doubleVector dq)
-
-
-
         Sets the current velocity of the robot model. Like the configuration, this is
         also essentially a temporary variable.  
 
+        Args:
+            dq (:obj:`list of floats`)
         """
         return _robotsim.RobotModel_setVelocity(self, dq)
 
 
     def getJointLimits(self):
         """
-        getJointLimits(RobotModel self)
-
-
-
         Retrieves a pair (qmin,qmax) of min/max joint limit vectors.  
 
         """
@@ -4769,22 +4585,17 @@ class RobotModel(_object):
 
     def setJointLimits(self, qmin, qmax):
         """
-        setJointLimits(RobotModel self, doubleVector qmin, doubleVector qmax)
-
-
-
         Sets the min/max joint limit vectors (must have length numLinks())  
 
+        Args:
+            qmin (:obj:`list of floats`)
+            qmax (:obj:`list of floats`)
         """
         return _robotsim.RobotModel_setJointLimits(self, qmin, qmax)
 
 
     def getVelocityLimits(self):
         """
-        getVelocityLimits(RobotModel self)
-
-
-
         Retrieve the velocity limit vector vmax, the constraint is :math:`|dq[i]| \leq
         vmax[i]`  
 
@@ -4794,23 +4605,17 @@ class RobotModel(_object):
 
     def setVelocityLimits(self, vmax):
         """
-        setVelocityLimits(RobotModel self, doubleVector vmax)
-
-
-
         Sets the velocity limit vector vmax, the constraint is :math:`|dq[i]| \leq
         vmax[i]`  
 
+        Args:
+            vmax (:obj:`list of floats`)
         """
         return _robotsim.RobotModel_setVelocityLimits(self, vmax)
 
 
     def getAccelerationLimits(self):
         """
-        getAccelerationLimits(RobotModel self)
-
-
-
         Retrieve the acceleration limit vector amax, the constraint is :math:`|ddq[i]|
         \leq amax[i]`  
 
@@ -4820,23 +4625,17 @@ class RobotModel(_object):
 
     def setAccelerationLimits(self, amax):
         """
-        setAccelerationLimits(RobotModel self, doubleVector amax)
-
-
-
         Sets the acceleration limit vector amax, the constraint is :math:`|ddq[i]| \leq
         amax[i]`  
 
+        Args:
+            amax (:obj:`list of floats`)
         """
         return _robotsim.RobotModel_setAccelerationLimits(self, amax)
 
 
     def getTorqueLimits(self):
         """
-        getTorqueLimits(RobotModel self)
-
-
-
         Retrieve the torque limit vector tmax, the constraint is :math:`|torque[i]|
         \leq tmax[i]`  
 
@@ -4846,25 +4645,28 @@ class RobotModel(_object):
 
     def setTorqueLimits(self, tmax):
         """
-        setTorqueLimits(RobotModel self, doubleVector tmax)
-
-
-
         Sets the torque limit vector tmax, the constraint is :math:`|torque[i]|
         <\leqtmax[i]`  
 
+        Args:
+            tmax (:obj:`list of floats`)
         """
         return _robotsim.RobotModel_setTorqueLimits(self, tmax)
 
 
     def setDOFPosition(self, *args):
         """
-        setDOFPosition(RobotModel self, int i, double qi)
-        setDOFPosition(RobotModel self, char const * name, double qi)
-
-
-
         Sets a single DOF's position (by index or by name).  
+
+        setDOFPosition (i,qi)
+
+        setDOFPosition (name,qi)
+
+
+        Args:
+            i (int, optional): 
+            qi (float): 
+            name (str, optional): 
 
         Note: if you are setting several joints at once, use setConfig because this
         function computes forward kinematics each time it is called.  
@@ -4875,23 +4677,25 @@ class RobotModel(_object):
 
     def getDOFPosition(self, *args):
         """
-        getDOFPosition(RobotModel self, int i) -> double
-        getDOFPosition(RobotModel self, char const * name) -> double
-
-
-
         Returns a single DOF's position (by name)  
 
+        getDOFPosition (i): float
+
+        getDOFPosition (name): float
+
+
+        Args:
+            i (int, optional): 
+            name (str, optional): 
+
+        Returns:
+            (float):
         """
         return _robotsim.RobotModel_getDOFPosition(self, *args)
 
 
     def getCom(self):
         """
-        getCom(RobotModel self)
-
-
-
         Returns the 3D center of mass at the current config.  
 
         """
@@ -4900,10 +4704,6 @@ class RobotModel(_object):
 
     def getComVelocity(self):
         """
-        getComVelocity(RobotModel self)
-
-
-
         Returns the 3D velocity of the center of mass at the current config / velocity.  
 
         """
@@ -4912,11 +4712,8 @@ class RobotModel(_object):
 
     def getComJacobian(self):
         """
-        getComJacobian(RobotModel self)
-
-
-
         Returns the Jacobian matrix of the current center of mass.  
+
 
         Returns:  
 
@@ -4929,10 +4726,6 @@ class RobotModel(_object):
 
     def getLinearMomentum(self):
         """
-        getLinearMomentum(RobotModel self)
-
-
-
         Returns the 3D linear momentum vector.  
 
         """
@@ -4941,10 +4734,6 @@ class RobotModel(_object):
 
     def getAngularMomentum(self):
         """
-        getAngularMomentum(RobotModel self)
-
-
-
         Returns the 3D angular momentum vector.  
 
         """
@@ -4953,22 +4742,16 @@ class RobotModel(_object):
 
     def getKineticEnergy(self):
         """
-        getKineticEnergy(RobotModel self) -> double
-
-
-
         Returns the kinetic energy at the current config / velocity.  
 
+        Returns:
+            (float):
         """
         return _robotsim.RobotModel_getKineticEnergy(self)
 
 
     def getTotalInertia(self):
         """
-        getTotalInertia(RobotModel self)
-
-
-
         Calculates the 3x3 total inertia matrix of the robot.  
 
         """
@@ -4977,10 +4760,6 @@ class RobotModel(_object):
 
     def getMassMatrix(self):
         """
-        getMassMatrix(RobotModel self)
-
-
-
         Returns the nxn mass matrix B(q). Takes O(n^2) time.  
 
         """
@@ -4989,10 +4768,6 @@ class RobotModel(_object):
 
     def getMassMatrixInv(self):
         """
-        getMassMatrixInv(RobotModel self)
-
-
-
         Returns the inverse of the nxn mass matrix B(q)^-1. Takes O(n^2) time, which is
         much faster than inverting the result of getMassMatrix.  
 
@@ -5002,23 +4777,17 @@ class RobotModel(_object):
 
     def getMassMatrixDeriv(self, i):
         """
-        getMassMatrixDeriv(RobotModel self, int i)
-
-
-
         Returns the derivative of the nxn mass matrix with respect to q_i. Takes O(n^3)
         time.  
 
+        Args:
+            i (int)
         """
         return _robotsim.RobotModel_getMassMatrixDeriv(self, i)
 
 
     def getMassMatrixTimeDeriv(self):
         """
-        getMassMatrixTimeDeriv(RobotModel self)
-
-
-
         Returns the derivative of the nxn mass matrix with respect to t, given the
         robot's current velocity. Takes O(n^4) time.  
 
@@ -5028,10 +4797,6 @@ class RobotModel(_object):
 
     def getCoriolisForceMatrix(self):
         """
-        getCoriolisForceMatrix(RobotModel self)
-
-
-
         Returns the Coriolis force matrix C(q,dq) for current config and velocity. Takes
         O(n^2) time.  
 
@@ -5041,10 +4806,6 @@ class RobotModel(_object):
 
     def getCoriolisForces(self):
         """
-        getCoriolisForces(RobotModel self)
-
-
-
         Returns the Coriolis forces C(q,dq)*dq for current config and velocity. Takes
         O(n) time, which is faster than computing matrix and doing product. ("Forces"
         is somewhat of a misnomer; the result is a joint torque vector)  
@@ -5055,12 +4816,11 @@ class RobotModel(_object):
 
     def getGravityForces(self, g):
         """
-        getGravityForces(RobotModel self, double const [3] g)
-
-
-
         Returns the generalized gravity vector G(q) for the given workspace gravity
         vector g (usually (0,0,-9.8)).  
+
+        Args:
+            g (:obj:`list of 3 floats`)
 
         Note:  
 
@@ -5078,12 +4838,11 @@ class RobotModel(_object):
 
     def torquesFromAccel(self, ddq):
         """
-        torquesFromAccel(RobotModel self, doubleVector ddq)
-
-
-
         Computes the inverse dynamics. Uses Recursive Newton Euler solver and takes O(n)
         time.  
+
+        Args:
+            ddq (:obj:`list of floats`)
 
         Note:  
 
@@ -5101,11 +4860,10 @@ class RobotModel(_object):
 
     def accelFromTorques(self, t):
         """
-        accelFromTorques(RobotModel self, doubleVector t)
-
-
-
         Computes the foward dynamics (using Recursive Newton Euler solver)  
+
+        Args:
+            t (:obj:`list of floats`)
 
         Note:  
 
@@ -5123,12 +4881,13 @@ class RobotModel(_object):
 
     def interpolate(self, a, b, u):
         """
-        interpolate(RobotModel self, doubleVector a, doubleVector b, double u)
-
-
-
         Interpolates smoothly between two configurations, properly taking into account
         nonstandard joints.  
+
+        Args:
+            a (:obj:`list of floats`)
+            b (:obj:`list of floats`)
+            u (float)
 
         Returns:  
 
@@ -5141,91 +4900,95 @@ class RobotModel(_object):
 
     def distance(self, a, b):
         """
-        distance(RobotModel self, doubleVector a, doubleVector b) -> double
-
-
-
         Computes a distance between two configurations, properly taking into account
         nonstandard joints.  
 
+        Args:
+            a (:obj:`list of floats`)
+            b (:obj:`list of floats`)
+        Returns:
+            (float):
         """
         return _robotsim.RobotModel_distance(self, a, b)
 
 
     def interpolateDeriv(self, a, b):
         """
-        interpolateDeriv(RobotModel self, doubleVector a, doubleVector b)
-
-
-
         Returns the configuration derivative at a as you interpolate toward b at unit
         speed.  
 
+        Args:
+            a (:obj:`list of floats`)
+            b (:obj:`list of floats`)
         """
         return _robotsim.RobotModel_interpolateDeriv(self, a, b)
 
 
     def randomizeConfig(self, unboundedScale=1.0):
         """
-        randomizeConfig(RobotModel self, double unboundedScale=1.0)
-        randomizeConfig(RobotModel self)
-
-
-
         Samples a random configuration and updates the robot's pose. Properly handles
         non-normal joints and handles DOFs with infinite bounds using a centered
         Laplacian distribution with the given scaling term. (Note that the python random
         seeding does not affect the result.)  
 
+        randomizeConfig (unboundedScale=1.0)
+
+        randomizeConfig ()
+
+
+        Args:
+            unboundedScale (float, optional): default value 1.0
         """
         return _robotsim.RobotModel_randomizeConfig(self, unboundedScale)
 
 
     def selfCollisionEnabled(self, link1, link2):
         """
-        selfCollisionEnabled(RobotModel self, int link1, int link2) -> bool
-
-
-
         Queries whether self collisions between two links is enabled.  
 
+        Args:
+            link1 (int)
+            link2 (int)
+        Returns:
+            (bool):
         """
         return _robotsim.RobotModel_selfCollisionEnabled(self, link1, link2)
 
 
     def enableSelfCollision(self, link1, link2, value):
         """
-        enableSelfCollision(RobotModel self, int link1, int link2, bool value)
-
-
-
         Enables/disables self collisions between two links (depending on value)  
 
+        Args:
+            link1 (int)
+            link2 (int)
+            value (bool)
         """
         return _robotsim.RobotModel_enableSelfCollision(self, link1, link2, value)
 
 
     def selfCollides(self):
         """
-        selfCollides(RobotModel self) -> bool
-
-
-
         Returns true if the robot is in self collision (faster than manual testing)  
 
+        Returns:
+            (bool):
         """
         return _robotsim.RobotModel_selfCollides(self)
 
 
     def drawGL(self, keepAppearance=True):
         """
-        drawGL(RobotModel self, bool keepAppearance=True)
-        drawGL(RobotModel self)
-
-
-
         Draws the robot geometry. If keepAppearance=true, the current appearance is
         honored. Otherwise, only the raw geometry is drawn.  
+
+        drawGL (keepAppearance=True)
+
+        drawGL ()
+
+
+        Args:
+            keepAppearance (bool, optional): default value True
 
         PERFORMANCE WARNING: if keepAppearance is false, then this does not properly
         reuse OpenGL display lists. A better approach to changing the robot's
@@ -5278,10 +5041,6 @@ class RigidObjectModel(_object):
 
     def __init__(self):
         """
-        __init__(RigidObjectModel self) -> RigidObjectModel
-
-
-
         """
         this = _robotsim.new_RigidObjectModel()
         try:
@@ -5291,37 +5050,42 @@ class RigidObjectModel(_object):
 
     def loadFile(self, fn):
         """
-        loadFile(RigidObjectModel self, char const * fn) -> bool
-
-
-
         Loads the object from the file fn.  
 
+        Args:
+            fn (str)
+        Returns:
+            (bool):
         """
         return _robotsim.RigidObjectModel_loadFile(self, fn)
 
 
     def saveFile(self, fn, geometryName=None):
         """
-        saveFile(RigidObjectModel self, char const * fn, char const * geometryName=None) -> bool
-        saveFile(RigidObjectModel self, char const * fn) -> bool
-
-
-
         Saves the object to the file fn. If geometryName is given, the geometry is saved
         to that file.  
 
+        saveFile (fn,geometryName=None): bool
+
+        saveFile (fn): bool
+
+
+        Args:
+            fn (str): 
+            geometryName (str, optional): default value None
+
+        Returns:
+            (bool):
         """
         return _robotsim.RigidObjectModel_saveFile(self, fn, geometryName)
 
 
     def getID(self):
         """
-        getID(RigidObjectModel self) -> int
-
-
-
         Returns the ID of the rigid object in its world.  
+
+        Returns:
+            (int):
 
         Note: The world ID is not the same as the rigid object index.  
 
@@ -5331,55 +5095,46 @@ class RigidObjectModel(_object):
 
     def getName(self):
         """
-        getName(RigidObjectModel self) -> char const *
-
-
-
+        Returns:
+            (str):
         """
         return _robotsim.RigidObjectModel_getName(self)
 
 
     def setName(self, name):
         """
-        setName(RigidObjectModel self, char const * name)
-
-
-
+        Args:
+            name (str)
         """
         return _robotsim.RigidObjectModel_setName(self, name)
 
 
     def geometry(self):
         """
-        geometry(RigidObjectModel self) -> Geometry3D
-
-
-
         Returns a reference to the geometry associated with this object.  
 
+        Returns:
+            (:class:`~klampt.Geometry3D`):
         """
         return _robotsim.RigidObjectModel_geometry(self)
 
 
     def appearance(self):
         """
-        appearance(RigidObjectModel self) -> Appearance
-
-
-
         Returns a reference to the appearance associated with this object.  
 
+        Returns:
+            (:class:`~klampt.Appearance`):
         """
         return _robotsim.RigidObjectModel_appearance(self)
 
 
     def getMass(self):
         """
-        getMass(RigidObjectModel self) -> Mass
-
-
-
         Returns a copy of the Mass of this rigid object.  
+
+        Returns:
+            (:class:`~klampt.Mass`):
 
         Note:  
 
@@ -5392,21 +5147,18 @@ class RigidObjectModel(_object):
 
     def setMass(self, mass):
         """
-        setMass(RigidObjectModel self, Mass mass)
-
-
-
+        Args:
+            mass (:class:`~klampt.Mass`)
         """
         return _robotsim.RigidObjectModel_setMass(self, mass)
 
 
     def getContactParameters(self):
         """
-        getContactParameters(RigidObjectModel self) -> ContactParameters
-
-
-
         Returns a copy of the ContactParameters of this rigid object.  
+
+        Returns:
+            (:class:`~klampt.ContactParameters`):
 
         Note:  
 
@@ -5420,21 +5172,16 @@ class RigidObjectModel(_object):
 
     def setContactParameters(self, params):
         """
-        setContactParameters(RigidObjectModel self, ContactParameters params)
-
-
-
+        Args:
+            params (:class:`~klampt.ContactParameters`)
         """
         return _robotsim.RigidObjectModel_setContactParameters(self, params)
 
 
     def getTransform(self):
         """
-        getTransform(RigidObjectModel self)
-
-
-
         Retrieves the rotation / translation of the rigid object (R,t)  
+
 
         Returns:  
 
@@ -5447,23 +5194,19 @@ class RigidObjectModel(_object):
 
     def setTransform(self, R, t):
         """
-        setTransform(RigidObjectModel self, double const [9] R, double const [3] t)
-
-
-
         Sets the rotation / translation (R,t) of the rigid object.  
 
+        Args:
+            R (:obj:`list of 9 floats (so3 element)`)
+            t (:obj:`list of 3 floats`)
         """
         return _robotsim.RigidObjectModel_setTransform(self, R, t)
 
 
     def getVelocity(self):
         """
-        getVelocity(RigidObjectModel self)
-
-
-
         Retrieves the (angular velocity, velocity) of the rigid object.  
+
 
         Returns:  
 
@@ -5477,25 +5220,27 @@ class RigidObjectModel(_object):
 
     def setVelocity(self, angularVelocity, velocity):
         """
-        setVelocity(RigidObjectModel self, double const [3] angularVelocity, double const [3] velocity)
-
-
-
         Sets the (angular velocity, velocity) of the rigid object.  
 
+        Args:
+            angularVelocity (:obj:`list of 3 floats`)
+            velocity (:obj:`list of 3 floats`)
         """
         return _robotsim.RigidObjectModel_setVelocity(self, angularVelocity, velocity)
 
 
     def drawGL(self, keepAppearance=True):
         """
-        drawGL(RigidObjectModel self, bool keepAppearance=True)
-        drawGL(RigidObjectModel self)
-
-
-
         Draws the object's geometry. If keepAppearance=true, the current appearance is
         honored. Otherwise, only the raw geometry is drawn.  
+
+        drawGL (keepAppearance=True)
+
+        drawGL ()
+
+
+        Args:
+            keepAppearance (bool, optional): default value True
 
         PERFORMANCE WARNING: if keepAppearance is false, then this does not properly
         reuse OpenGL display lists. A better approach is to change the object's
@@ -5539,10 +5284,6 @@ class TerrainModel(_object):
 
     def __init__(self):
         """
-        __init__(TerrainModel self) -> TerrainModel
-
-
-
         """
         this = _robotsim.new_TerrainModel()
         try:
@@ -5552,37 +5293,42 @@ class TerrainModel(_object):
 
     def loadFile(self, fn):
         """
-        loadFile(TerrainModel self, char const * fn) -> bool
-
-
-
         Loads the terrain from the file fn.  
 
+        Args:
+            fn (str)
+        Returns:
+            (bool):
         """
         return _robotsim.TerrainModel_loadFile(self, fn)
 
 
     def saveFile(self, fn, geometryName=None):
         """
-        saveFile(TerrainModel self, char const * fn, char const * geometryName=None) -> bool
-        saveFile(TerrainModel self, char const * fn) -> bool
-
-
-
         Saves the terrain to the file fn. If geometryName is given, the geometry is
         saved to that file.  
 
+        saveFile (fn,geometryName=None): bool
+
+        saveFile (fn): bool
+
+
+        Args:
+            fn (str): 
+            geometryName (str, optional): default value None
+
+        Returns:
+            (bool):
         """
         return _robotsim.TerrainModel_saveFile(self, fn, geometryName)
 
 
     def getID(self):
         """
-        getID(TerrainModel self) -> int
-
-
-
         Returns the ID of the terrain in its world.  
+
+        Returns:
+            (int):
 
         Note: The world ID is not the same as the terrain index.  
 
@@ -5592,69 +5338,62 @@ class TerrainModel(_object):
 
     def getName(self):
         """
-        getName(TerrainModel self) -> char const *
-
-
-
+        Returns:
+            (str):
         """
         return _robotsim.TerrainModel_getName(self)
 
 
     def setName(self, name):
         """
-        setName(TerrainModel self, char const * name)
-
-
-
+        Args:
+            name (str)
         """
         return _robotsim.TerrainModel_setName(self, name)
 
 
     def geometry(self):
         """
-        geometry(TerrainModel self) -> Geometry3D
-
-
-
         Returns a reference to the geometry associated with this object.  
 
+        Returns:
+            (:class:`~klampt.Geometry3D`):
         """
         return _robotsim.TerrainModel_geometry(self)
 
 
     def appearance(self):
         """
-        appearance(TerrainModel self) -> Appearance
-
-
-
         Returns a reference to the appearance associated with this object.  
 
+        Returns:
+            (:class:`~klampt.Appearance`):
         """
         return _robotsim.TerrainModel_appearance(self)
 
 
     def setFriction(self, friction):
         """
-        setFriction(TerrainModel self, double friction)
-
-
-
         Changes the friction coefficient for this terrain.  
 
+        Args:
+            friction (float)
         """
         return _robotsim.TerrainModel_setFriction(self, friction)
 
 
     def drawGL(self, keepAppearance=True):
         """
-        drawGL(TerrainModel self, bool keepAppearance=True)
-        drawGL(TerrainModel self)
-
-
-
         Draws the object's geometry. If keepAppearance=true, the current appearance is
         honored. Otherwise, only the raw geometry is drawn.  
+
+        drawGL (keepAppearance=True)
+
+        drawGL ()
+
+
+        Args:
+            keepAppearance (bool, optional): default value True
 
         PERFORMANCE WARNING: if keepAppearance is false, then this does not properly
         reuse OpenGL display lists. A better approach is to change the object's
@@ -5715,14 +5454,21 @@ class WorldModel(_object):
 
     def __init__(self, *args):
         """
-        __init__(WorldModel self) -> WorldModel
-        __init__(WorldModel self, void * ptrRobotWorld) -> WorldModel
-        __init__(WorldModel self, WorldModel w) -> WorldModel
-        __init__(WorldModel self, char const * fn) -> WorldModel
-
-
-
         Creates a WorldModel.  
+
+        __init__ (): :class:`~klampt.WorldModel`
+
+        __init__ (ptrRobotWorld): :class:`~klampt.WorldModel`
+
+        __init__ (w): :class:`~klampt.WorldModel`
+
+        __init__ (fn): :class:`~klampt.WorldModel`
+
+
+        Args:
+            ptrRobotWorld (:obj:`void`, optional): 
+            w (:class:`~klampt.WorldModel`, optional): 
+            fn (str, optional): 
 
         *   Given no arguments, creates a new world.  
         *   Given another WorldModel instance, creates a reference to an existing world.
@@ -5743,260 +5489,279 @@ class WorldModel(_object):
 
     def copy(self):
         """
-        copy(WorldModel self) -> WorldModel
-
-
-
         Creates a copy of the world model. Note that geometries and appearances are
         shared, so this is very quick.  
 
+        Returns:
+            (:class:`~klampt.WorldModel`):
         """
         return _robotsim.WorldModel_copy(self)
 
 
     def readFile(self, fn):
         """
-        readFile(WorldModel self, char const * fn) -> bool
-
-
-
         Reads from a world XML file.  
 
+        Args:
+            fn (str)
+        Returns:
+            (bool):
         """
         return _robotsim.WorldModel_readFile(self, fn)
 
 
     def loadFile(self, fn):
         """
-        loadFile(WorldModel self, char const * fn) -> bool
-
-
-
         Alias of readFile.  
 
+        Args:
+            fn (str)
+        Returns:
+            (bool):
         """
         return _robotsim.WorldModel_loadFile(self, fn)
 
 
     def saveFile(self, fn, elementDir=None):
         """
-        saveFile(WorldModel self, char const * fn, char const * elementDir=None) -> bool
-        saveFile(WorldModel self, char const * fn) -> bool
-
-
-
         Saves to a world XML file. If elementDir is provided, then robots, terrains,
         etc. will be saved there. Otherwise they will be saved to a folder with the same
         base name as fn (without the trailing .xml)  
 
+        saveFile (fn,elementDir=None): bool
+
+        saveFile (fn): bool
+
+
+        Args:
+            fn (str): 
+            elementDir (str, optional): default value None
+
+        Returns:
+            (bool):
         """
         return _robotsim.WorldModel_saveFile(self, fn, elementDir)
 
 
     def numRobots(self):
         """
-        numRobots(WorldModel self) -> int
-
-
-
+        Returns:
+            (int):
         """
         return _robotsim.WorldModel_numRobots(self)
 
 
     def numRobotLinks(self, robot):
         """
-        numRobotLinks(WorldModel self, int robot) -> int
-
-
-
+        Args:
+            robot (int)
+        Returns:
+            (int):
         """
         return _robotsim.WorldModel_numRobotLinks(self, robot)
 
 
     def numRigidObjects(self):
         """
-        numRigidObjects(WorldModel self) -> int
-
-
-
+        Returns:
+            (int):
         """
         return _robotsim.WorldModel_numRigidObjects(self)
 
 
     def numTerrains(self):
         """
-        numTerrains(WorldModel self) -> int
-
-
-
+        Returns:
+            (int):
         """
         return _robotsim.WorldModel_numTerrains(self)
 
 
     def numIDs(self):
         """
-        numIDs(WorldModel self) -> int
-
-
-
+        Returns:
+            (int):
         """
         return _robotsim.WorldModel_numIDs(self)
 
 
     def robot(self, *args):
         """
-        robot(WorldModel self, int index) -> RobotModel
-        robot(WorldModel self, char const * name) -> RobotModel
-
-
-
         Returns a RobotModel in the world by index or name.  
 
+        robot (index): :class:`~klampt.RobotModel`
+
+        robot (name): :class:`~klampt.RobotModel`
+
+
+        Args:
+            index (int, optional): 
+            name (str, optional): 
+
+        Returns:
+            (:class:`~klampt.RobotModel`):
         """
         return _robotsim.WorldModel_robot(self, *args)
 
 
     def robotLink(self, *args):
         """
-        robotLink(WorldModel self, int robot, int index) -> RobotModelLink
-        robotLink(WorldModel self, char const * robot, char const * name) -> RobotModelLink
-
         Returns a RobotModelLink of some RobotModel in the world by index or name.  
 
+        robotLink (robot,index): :class:`~klampt.RobotModelLink`
+
+        robotLink (robot,name): :class:`~klampt.RobotModelLink`
+
+
         Args:
-            robot (str or int): 
+            robot (int or str): 
             index (int, optional): 
             name (str, optional): 
 
+        Returns:
+            (:class:`~klampt.RobotModelLink`):
         """
         return _robotsim.WorldModel_robotLink(self, *args)
 
 
     def rigidObject(self, *args):
         """
-        rigidObject(WorldModel self, int index) -> RigidObjectModel
-        rigidObject(WorldModel self, char const * name) -> RigidObjectModel
-
-
-
         Returns a RigidObjectModel in the world by index or name.  
 
+        rigidObject (index): :class:`~klampt.RigidObjectModel`
+
+        rigidObject (name): :class:`~klampt.RigidObjectModel`
+
+
+        Args:
+            index (int, optional): 
+            name (str, optional): 
+
+        Returns:
+            (:class:`~klampt.RigidObjectModel`):
         """
         return _robotsim.WorldModel_rigidObject(self, *args)
 
 
     def terrain(self, *args):
         """
-        terrain(WorldModel self, int index) -> TerrainModel
-        terrain(WorldModel self, char const * name) -> TerrainModel
-
-
-
         Returns a TerrainModel in the world by index or name.  
 
+        terrain (index): :obj:`TerrainModel`
+
+        terrain (name): :obj:`TerrainModel`
+
+
+        Args:
+            index (int, optional): 
+            name (str, optional): 
+
+        Returns:
+            (:obj:`TerrainModel`):
         """
         return _robotsim.WorldModel_terrain(self, *args)
 
 
     def makeRobot(self, name):
         """
-        makeRobot(WorldModel self, char const * name) -> RobotModel
-
-
-
         Creates a new empty robot. (Not terribly useful now since you can't resize the
         number of links yet)  
 
+        Args:
+            name (str)
+        Returns:
+            (:class:`~klampt.RobotModel`):
         """
         return _robotsim.WorldModel_makeRobot(self, name)
 
 
     def makeRigidObject(self, name):
         """
-        makeRigidObject(WorldModel self, char const * name) -> RigidObjectModel
-
-
-
         Creates a new empty rigid object.  
 
+        Args:
+            name (str)
+        Returns:
+            (:class:`~klampt.RigidObjectModel`):
         """
         return _robotsim.WorldModel_makeRigidObject(self, name)
 
 
     def makeTerrain(self, name):
         """
-        makeTerrain(WorldModel self, char const * name) -> TerrainModel
-
-
-
         Creates a new empty terrain.  
 
+        Args:
+            name (str)
+        Returns:
+            (:obj:`TerrainModel`):
         """
         return _robotsim.WorldModel_makeTerrain(self, name)
 
 
     def loadRobot(self, fn):
         """
-        loadRobot(WorldModel self, char const * fn) -> RobotModel
-
-
-
         Loads a robot from a .rob or .urdf file. An empty robot is returned if loading
         fails.  
 
+        Args:
+            fn (str)
+        Returns:
+            (:class:`~klampt.RobotModel`):
         """
         return _robotsim.WorldModel_loadRobot(self, fn)
 
 
     def loadRigidObject(self, fn):
         """
-        loadRigidObject(WorldModel self, char const * fn) -> RigidObjectModel
-
-
-
         Loads a rigid object from a .obj or a mesh file. An empty rigid object is
         returned if loading fails.  
 
+        Args:
+            fn (str)
+        Returns:
+            (:class:`~klampt.RigidObjectModel`):
         """
         return _robotsim.WorldModel_loadRigidObject(self, fn)
 
 
     def loadTerrain(self, fn):
         """
-        loadTerrain(WorldModel self, char const * fn) -> TerrainModel
-
-
-
         Loads a rigid object from a mesh file. An empty terrain is returned if loading
         fails.  
 
+        Args:
+            fn (str)
+        Returns:
+            (:obj:`TerrainModel`):
         """
         return _robotsim.WorldModel_loadTerrain(self, fn)
 
 
     def loadElement(self, fn):
         """
-        loadElement(WorldModel self, char const * fn) -> int
-
-
-
         Loads some element from a file, automatically detecting its type. Meshes are
         interpreted as terrains. The ID is returned, or -1 if loading failed.  
 
+        Args:
+            fn (str)
+        Returns:
+            (int):
         """
         return _robotsim.WorldModel_loadElement(self, fn)
 
 
     def add(self, *args):
         """
-        add(WorldModel self, char const * name, RobotModel robot) -> RobotModel
-        add(WorldModel self, char const * name, RigidObjectModel obj) -> RigidObjectModel
-        add(WorldModel self, char const * name, TerrainModel terrain) -> TerrainModel
-
-
-
         Adds a copy of the given robot, rigid object, or terrain to this world, either
         from this WorldModel or another.  
+
+        add (name,robot): :class:`~klampt.RobotModel`
+
+        add (name,obj): :class:`~klampt.RigidObjectModel`
+
+        add (name,terrain): :obj:`TerrainModel`
+
 
         Args:
             name (str): 
@@ -6012,14 +5777,20 @@ class WorldModel(_object):
 
     def remove(self, *args):
         """
-        remove(WorldModel self, RobotModel robot)
-        remove(WorldModel self, RigidObjectModel object)
-        remove(WorldModel self, TerrainModel terrain)
-
-
-
         Removes a robot, rigid object, or terrain from the world. It must be in this
         world or an exception is raised.  
+
+        remove (robot)
+
+        remove (object)
+
+        remove (terrain)
+
+
+        Args:
+            robot (:class:`~klampt.RobotModel`, optional): 
+            object (:class:`~klampt.RigidObjectModel`, optional): 
+            terrain (:obj:`TerrainModel`, optional): 
 
         IMPORTANT:  
 
@@ -6032,46 +5803,42 @@ class WorldModel(_object):
 
     def getName(self, id):
         """
-        getName(WorldModel self, int id) -> std::string
-
-
-
         Retrieves the name for a given element ID.  
 
+        Args:
+            id (int)
+        Returns:
+            (str):
         """
         return _robotsim.WorldModel_getName(self, id)
 
 
     def geometry(self, id):
         """
-        geometry(WorldModel self, int id) -> Geometry3D
-
-
-
         Retrieves a geometry for a given element ID.  
 
+        Args:
+            id (int)
+        Returns:
+            (:class:`~klampt.Geometry3D`):
         """
         return _robotsim.WorldModel_geometry(self, id)
 
 
     def appearance(self, id):
         """
-        appearance(WorldModel self, int id) -> Appearance
-
-
-
         Retrieves an appearance for a given element ID.  
 
+        Args:
+            id (int)
+        Returns:
+            (:class:`~klampt.Appearance`):
         """
         return _robotsim.WorldModel_appearance(self, id)
 
 
     def drawGL(self):
         """
-        drawGL(WorldModel self)
-
-
-
         Draws the entire world using OpenGL.  
 
         """
@@ -6080,28 +5847,25 @@ class WorldModel(_object):
 
     def enableGeometryLoading(self, enabled):
         """
-        enableGeometryLoading(WorldModel self, bool enabled)
-
-
-
         If geometry loading is set to false, then only the kinematics are loaded from
         disk, and no geometry / visualization / collision detection structures will be
         loaded. Useful for quick scripts that just use kinematics / dynamics of a robot.  
 
+        Args:
+            enabled (bool)
         """
         return _robotsim.WorldModel_enableGeometryLoading(self, enabled)
 
 
     def enableInitCollisions(self, enabled):
         """
-        enableInitCollisions(WorldModel self, bool enabled)
-
-
-
         If collision detection is set to true, then collision acceleration data
         structures will be automatically initialized, with debugging information. Useful
         for scripts that do planning and for which collision initialization may take a
         long time.  
+
+        Args:
+            enabled (bool)
 
         Note that even when this flag is off, the collision acceleration data structures
         will indeed be initialized the first time that geometry collision, distance, or
@@ -6142,14 +5906,16 @@ class IKObjective(_object):
 
     def __init__(self, *args):
         """
-        __init__(IKObjective self) -> IKObjective
-        __init__(IKObjective self, IKObjective arg2) -> IKObjective
-
-
-
         With no arguments, constructs a blank IKObjective. Given an IKObjective, acts as
         a copy constructor.  
 
+        __init__ (): :obj:`IKObjective`
+
+        __init__ (arg2): :obj:`IKObjective`
+
+
+        Args:
+            arg2 (:obj:`IKObjective`, optional): 
         """
         this = _robotsim.new_IKObjective(*args)
         try:
@@ -6159,145 +5925,141 @@ class IKObjective(_object):
 
     def copy(self):
         """
-        copy(IKObjective self) -> IKObjective
-
-
-
         Copy constructor.  
 
+        Returns:
+            (:obj:`IKObjective`):
         """
         return _robotsim.IKObjective_copy(self)
 
 
     def link(self):
         """
-        link(IKObjective self) -> int
-
-
-
         The index of the robot link that is constrained.  
 
+        Returns:
+            (int):
         """
         return _robotsim.IKObjective_link(self)
 
 
     def destLink(self):
         """
-        destLink(IKObjective self) -> int
-
-
-
         The index of the destination link, or -1 if fixed to the world.  
 
+        Returns:
+            (int):
         """
         return _robotsim.IKObjective_destLink(self)
 
 
     def numPosDims(self):
         """
-        numPosDims(IKObjective self) -> int
-
-
-
         Returns the number of position dimensions constrained (0-3)  
 
+        Returns:
+            (int):
         """
         return _robotsim.IKObjective_numPosDims(self)
 
 
     def numRotDims(self):
         """
-        numRotDims(IKObjective self) -> int
-
-
-
         Returns the number of rotation dimensions constrained (0-3)  
 
+        Returns:
+            (int):
         """
         return _robotsim.IKObjective_numRotDims(self)
 
 
     def setFixedPoint(self, link, plocal, pworld):
         """
-        setFixedPoint(IKObjective self, int link, double const [3] plocal, double const [3] pworld)
-
-
-
         Sets a fixed-point constraint.  
 
+        Args:
+            link (int)
+            plocal (:obj:`list of 3 floats`)
+            pworld (:obj:`list of 3 floats`)
         """
         return _robotsim.IKObjective_setFixedPoint(self, link, plocal, pworld)
 
 
     def setFixedPoints(self, link, plocals, pworlds):
         """
-        setFixedPoints(IKObjective self, int link, PyObject * plocals, PyObject * pworlds)
-
-
-
         Sets a multiple fixed-point constraint.  
 
+        Args:
+            link (int)
+            plocals (:obj:`object`)
+            pworlds (:obj:`object`)
         """
         return _robotsim.IKObjective_setFixedPoints(self, link, plocals, pworlds)
 
 
     def setFixedTransform(self, link, R, t):
         """
-        setFixedTransform(IKObjective self, int link, double const [9] R, double const [3] t)
-
-
-
         Sets a fixed-transform constraint (R,t)  
 
+        Args:
+            link (int)
+            R (:obj:`list of 9 floats (so3 element)`)
+            t (:obj:`list of 3 floats`)
         """
         return _robotsim.IKObjective_setFixedTransform(self, link, R, t)
 
 
     def setRelativePoint(self, link1, link2, p1, p2):
         """
-        setRelativePoint(IKObjective self, int link1, int link2, double const [3] p1, double const [3] p2)
-
-
-
         Sets a fixed-point constraint relative to link2.  
 
+        Args:
+            link1 (int)
+            link2 (int)
+            p1 (:obj:`list of 3 floats`)
+            p2 (:obj:`list of 3 floats`)
         """
         return _robotsim.IKObjective_setRelativePoint(self, link1, link2, p1, p2)
 
 
     def setRelativePoints(self, link1, link2, p1s, p2s):
         """
-        setRelativePoints(IKObjective self, int link1, int link2, PyObject * p1s, PyObject * p2s)
-
-
-
         Sets a multiple fixed-point constraint relative to link2.  
 
+        Args:
+            link1 (int)
+            link2 (int)
+            p1s (:obj:`object`)
+            p2s (:obj:`object`)
         """
         return _robotsim.IKObjective_setRelativePoints(self, link1, link2, p1s, p2s)
 
 
     def setRelativeTransform(self, link, linkTgt, R, t):
         """
-        setRelativeTransform(IKObjective self, int link, int linkTgt, double const [9] R, double const [3] t)
-
-
-
         Sets a fixed-transform constraint (R,t) relative to linkTgt.  
 
+        Args:
+            link (int)
+            linkTgt (int)
+            R (:obj:`list of 9 floats (so3 element)`)
+            t (:obj:`list of 3 floats`)
         """
         return _robotsim.IKObjective_setRelativeTransform(self, link, linkTgt, R, t)
 
 
     def setLinks(self, link, link2=-1):
         """
-        setLinks(IKObjective self, int link, int link2=-1)
-        setLinks(IKObjective self, int link)
-
-
-
         Manual construction.  
 
+        setLinks (link,link2=-1)
+
+        setLinks (link)
+
+
+        Args:
+            link (int): 
+            link2 (int, optional): default value -1
         """
         return _robotsim.IKObjective_setLinks(self, link, link2)
 
@@ -6320,47 +6082,42 @@ class IKObjective(_object):
 
     def setFixedPosConstraint(self, tlocal, tworld):
         """
-        setFixedPosConstraint(IKObjective self, double const [3] tlocal, double const [3] tworld)
-
-
-
         Manual: Sets a fixed position constraint.  
 
+        Args:
+            tlocal (:obj:`list of 3 floats`)
+            tworld (:obj:`list of 3 floats`)
         """
         return _robotsim.IKObjective_setFixedPosConstraint(self, tlocal, tworld)
 
 
     def setPlanarPosConstraint(self, tlocal, nworld, oworld):
         """
-        setPlanarPosConstraint(IKObjective self, double const [3] tlocal, double const [3] nworld, double oworld)
-
-
-
         Manual: Sets a planar position constraint nworld^T T(link)*tlocal + oworld = 0.  
 
+        Args:
+            tlocal (:obj:`list of 3 floats`)
+            nworld (:obj:`list of 3 floats`)
+            oworld (float)
         """
         return _robotsim.IKObjective_setPlanarPosConstraint(self, tlocal, nworld, oworld)
 
 
     def setLinearPosConstraint(self, tlocal, sworld, dworld):
         """
-        setLinearPosConstraint(IKObjective self, double const [3] tlocal, double const [3] sworld, double const [3] dworld)
-
-
-
         Manual: Sets a linear position constraint T(link)*tlocal = sworld + u*dworld for
         some real value u.  
 
+        Args:
+            tlocal (:obj:`list of 3 floats`)
+            sworld (:obj:`list of 3 floats`)
+            dworld (:obj:`list of 3 floats`)
         """
         return _robotsim.IKObjective_setLinearPosConstraint(self, tlocal, sworld, dworld)
 
 
     def setFreeRotConstraint(self):
         """
-        setFreeRotConstraint(IKObjective self)
-
-
-
         Manual: Sets a free rotation constraint.  
 
         """
@@ -6369,34 +6126,27 @@ class IKObjective(_object):
 
     def setFixedRotConstraint(self, R):
         """
-        setFixedRotConstraint(IKObjective self, double const [9] R)
-
-
-
         Manual: Sets a fixed rotation constraint.  
 
+        Args:
+            R (:obj:`list of 9 floats (so3 element)`)
         """
         return _robotsim.IKObjective_setFixedRotConstraint(self, R)
 
 
     def setAxialRotConstraint(self, alocal, aworld):
         """
-        setAxialRotConstraint(IKObjective self, double const [3] alocal, double const [3] aworld)
-
-
-
         Manual: Sets an axial rotation constraint.  
 
+        Args:
+            alocal (:obj:`list of 3 floats`)
+            aworld (:obj:`list of 3 floats`)
         """
         return _robotsim.IKObjective_setAxialRotConstraint(self, alocal, aworld)
 
 
     def getPosition(self):
         """
-        getPosition(IKObjective self)
-
-
-
         Returns the local and global position of the position constraint.  
 
         """
@@ -6405,10 +6155,6 @@ class IKObjective(_object):
 
     def getPositionDirection(self):
         """
-        getPositionDirection(IKObjective self)
-
-
-
         For linear and planar constraints, returns the direction.  
 
         """
@@ -6417,10 +6163,6 @@ class IKObjective(_object):
 
     def getRotation(self):
         """
-        getRotation(IKObjective self)
-
-
-
         For fixed rotation constraints, returns the orientation.  
 
         """
@@ -6429,10 +6171,6 @@ class IKObjective(_object):
 
     def getRotationAxis(self):
         """
-        getRotationAxis(IKObjective self)
-
-
-
         For axis rotation constraints, returns the local and global axes.  
 
         """
@@ -6441,10 +6179,6 @@ class IKObjective(_object):
 
     def getTransform(self):
         """
-        getTransform(IKObjective self)
-
-
-
         For fixed-transform constraints, returns the transform (R,t)  
 
         """
@@ -6453,67 +6187,62 @@ class IKObjective(_object):
 
     def transform(self, R, t):
         """
-        transform(IKObjective self, double const [9] R, double const [3] t)
-
-
-
         Tranforms the target position/rotation of this IK constraint by transform (R,t)  
 
+        Args:
+            R (:obj:`list of 9 floats (so3 element)`)
+            t (:obj:`list of 3 floats`)
         """
         return _robotsim.IKObjective_transform(self, R, t)
 
 
     def transformLocal(self, R, t):
         """
-        transformLocal(IKObjective self, double const [9] R, double const [3] t)
-
-
-
         Tranforms the local position/rotation of this IK constraint by transform (R,t)  
 
+        Args:
+            R (:obj:`list of 9 floats (so3 element)`)
+            t (:obj:`list of 3 floats`)
         """
         return _robotsim.IKObjective_transformLocal(self, R, t)
 
 
     def matchDestination(self, R, t):
         """
-        matchDestination(IKObjective self, double const [9] R, double const [3] t)
-
-
-
         Sets the destination coordinates of this constraint to fit the given target
         transform. In other words, if (R,t) is the current link transform, this sets the
         destination position / orientation so that this objective has zero error. The
         current position/rotation constraint types are kept.  
 
+        Args:
+            R (:obj:`list of 9 floats (so3 element)`)
+            t (:obj:`list of 3 floats`)
         """
         return _robotsim.IKObjective_matchDestination(self, R, t)
 
 
     def loadString(self, str):
         """
-        loadString(IKObjective self, char const * str) -> bool
-
-
-
         Loads the objective from a Klamp't-native formatted string. For a more readable
         but verbose format, try the JSON IO routines :meth:`klampt.io.loader.toJson` /
         :meth:`klampt.io.loader.fromJson`  
 
+        Args:
+            str (str)
+        Returns:
+            (bool):
         """
         return _robotsim.IKObjective_loadString(self, str)
 
 
     def saveString(self):
         """
-        saveString(IKObjective self) -> std::string
-
-
-
         Saves the objective to a Klamp't-native formatted string. For a more readable
         but verbose format, try the JSON IO routines :meth:`klampt.io.loader.toJson` /
         :meth:`klampt.io.loader.fromJson`  
 
+        Returns:
+            (str):
         """
         return _robotsim.IKObjective_saveString(self)
 
@@ -6567,14 +6296,17 @@ class IKSolver(_object):
 
     def __init__(self, *args):
         """
-        __init__(IKSolver self, RobotModel robot) -> IKSolver
-        __init__(IKSolver self, IKSolver solver) -> IKSolver
-
-
-
         Initializes an IK solver. Given a RobotModel, an empty solver is created. Given
         an IK solver, acts as a copy constructor.  
 
+        __init__ (robot): :obj:`IKSolver`
+
+        __init__ (solver): :obj:`IKSolver`
+
+
+        Args:
+            robot (:class:`~klampt.RobotModel`, optional): 
+            solver (:obj:`IKSolver`, optional): 
         """
         this = _robotsim.new_IKSolver(*args)
         try:
@@ -6584,46 +6316,37 @@ class IKSolver(_object):
 
     def copy(self):
         """
-        copy(IKSolver self) -> IKSolver
-
-
-
         Copy constructor.  
 
+        Returns:
+            (:obj:`IKSolver`):
         """
         return _robotsim.IKSolver_copy(self)
 
 
     def add(self, objective):
         """
-        add(IKSolver self, IKObjective objective)
-
-
-
         Adds a new simultaneous objective.  
 
+        Args:
+            objective (:obj:`IKObjective`)
         """
         return _robotsim.IKSolver_add(self, objective)
 
 
     def set(self, i, objective):
         """
-        set(IKSolver self, int i, IKObjective objective)
-
-
-
         Assigns an existing objective added by add.  
 
+        Args:
+            i (int)
+            objective (:obj:`IKObjective`)
         """
         return _robotsim.IKSolver_set(self, i, objective)
 
 
     def clear(self):
         """
-        clear(IKSolver self)
-
-
-
         Clears objectives.  
 
         """
@@ -6632,70 +6355,56 @@ class IKSolver(_object):
 
     def setMaxIters(self, iters):
         """
-        setMaxIters(IKSolver self, int iters)
-
-
-
         Sets the max # of iterations (default 100)  
 
+        Args:
+            iters (int)
         """
         return _robotsim.IKSolver_setMaxIters(self, iters)
 
 
     def getMaxIters(self):
         """
-        getMaxIters(IKSolver self) -> int
-
-
-
         Gets the max # of iterations.  
 
+        Returns:
+            (int):
         """
         return _robotsim.IKSolver_getMaxIters(self)
 
 
     def setTolerance(self, res):
         """
-        setTolerance(IKSolver self, double res)
-
-
-
         Sets the constraint solve tolerance (default 1e-3)  
 
+        Args:
+            res (float)
         """
         return _robotsim.IKSolver_setTolerance(self, res)
 
 
     def getTolerance(self):
         """
-        getTolerance(IKSolver self) -> double
-
-
-
         Gets the constraint solve tolerance.  
 
+        Returns:
+            (float):
         """
         return _robotsim.IKSolver_getTolerance(self)
 
 
     def setActiveDofs(self, active):
         """
-        setActiveDofs(IKSolver self, intVector active)
-
-
-
         Sets the active degrees of freedom.  
 
+        Args:
+            active (:obj:`list of int`)
         """
         return _robotsim.IKSolver_setActiveDofs(self, active)
 
 
     def getActiveDofs(self):
         """
-        getActiveDofs(IKSolver self)
-
-
-
         Gets the active degrees of freedom.  
 
         """
@@ -6704,22 +6413,17 @@ class IKSolver(_object):
 
     def setJointLimits(self, qmin, qmax):
         """
-        setJointLimits(IKSolver self, doubleVector qmin, doubleVector qmax)
-
-
-
         Sets limits on the robot's configuration. If empty, this turns off joint limits.  
 
+        Args:
+            qmin (:obj:`list of floats`)
+            qmax (:obj:`list of floats`)
         """
         return _robotsim.IKSolver_setJointLimits(self, qmin, qmax)
 
 
     def getJointLimits(self):
         """
-        getJointLimits(IKSolver self)
-
-
-
         Gets the limits on the robot's configuration (by default this is the robot's
         joint limits.  
 
@@ -6729,23 +6433,17 @@ class IKSolver(_object):
 
     def setBiasConfig(self, biasConfig):
         """
-        setBiasConfig(IKSolver self, doubleVector biasConfig)
-
-
-
         Biases the solver to approach a given configuration. Setting an empty vector
         clears the bias term.  
 
+        Args:
+            biasConfig (:obj:`list of floats`)
         """
         return _robotsim.IKSolver_setBiasConfig(self, biasConfig)
 
 
     def getBiasConfig(self):
         """
-        getBiasConfig(IKSolver self)
-
-
-
         Gets the solvers' bias configuration.  
 
         """
@@ -6754,22 +6452,16 @@ class IKSolver(_object):
 
     def isSolved(self):
         """
-        isSolved(IKSolver self) -> bool
-
-
-
         Returns true if the current configuration residual is less than tol.  
 
+        Returns:
+            (bool):
         """
         return _robotsim.IKSolver_isSolved(self)
 
 
     def getResidual(self):
         """
-        getResidual(IKSolver self)
-
-
-
         Returns a vector describing the error of the objective at the current
         configuration.  
 
@@ -6779,10 +6471,6 @@ class IKSolver(_object):
 
     def getJacobian(self):
         """
-        getJacobian(IKSolver self)
-
-
-
         Returns a matrix describing the instantaneous derivative of the objective with
         respect to the active Dofs.  
 
@@ -6792,14 +6480,14 @@ class IKSolver(_object):
 
     def solve(self, *args):
         """
-        solve(IKSolver self) -> bool
-        solve(IKSolver self, int iters, double tol) -> PyObject *
-
-
-
         Old-style: will be deprecated. Specify # of iterations and tolerance. Tries to
         find a configuration that satifies all simultaneous objectives up to the desired
         tolerance. Returns (res,iterations) where res is true if x converged.  
+
+        solve (): bool
+
+        solve (iters,tol): :obj:`object`
+
 
         Args:
             iters (int, optional): 
@@ -6813,22 +6501,16 @@ class IKSolver(_object):
 
     def lastSolveIters(self):
         """
-        lastSolveIters(IKSolver self) -> int
-
-
-
         Returns the number of Newton-Raphson iterations used in the last solve() call.  
 
+        Returns:
+            (int):
         """
         return _robotsim.IKSolver_lastSolveIters(self)
 
 
     def sampleInitial(self):
         """
-        sampleInitial(IKSolver self)
-
-
-
         Samples an initial random configuration. More initial configurations can be
         sampled in case the prior configs lead to local minima.  
 
@@ -6909,15 +6591,11 @@ class GeneralizedIKObjective(_object):
 
     def __init__(self, *args):
         """
-        __init__(GeneralizedIKObjective self, GeneralizedIKObjective obj) -> GeneralizedIKObjective
-        __init__(GeneralizedIKObjective self, RobotModelLink link) -> GeneralizedIKObjective
-        __init__(GeneralizedIKObjective self, RigidObjectModel obj) -> GeneralizedIKObjective
-        __init__(GeneralizedIKObjective self, RobotModelLink link, RobotModelLink link2) -> GeneralizedIKObjective
-        __init__(GeneralizedIKObjective self, RobotModelLink link, RigidObjectModel obj2) -> GeneralizedIKObjective
-        __init__(GeneralizedIKObjective self, RigidObjectModel obj, RobotModelLink link2) -> GeneralizedIKObjective
-        __init__(GeneralizedIKObjective self, RigidObjectModel obj, RigidObjectModel obj2) -> GeneralizedIKObjective
+        __init__ (obj): :obj:`GeneralizedIKObjective`
 
+        __init__ (link): :obj:`GeneralizedIKObjective`
 
+        __init__ (link,link2): :obj:`GeneralizedIKObjective`
 
         __init__ (link,obj2): :obj:`GeneralizedIKObjective`
 
@@ -6940,30 +6618,27 @@ class GeneralizedIKObjective(_object):
 
     def setPoint(self, p1, p2):
         """
-        setPoint(GeneralizedIKObjective self, double const [3] p1, double const [3] p2)
-
-
-
+        Args:
+            p1 (:obj:`list of 3 floats`)
+            p2 (:obj:`list of 3 floats`)
         """
         return _robotsim.GeneralizedIKObjective_setPoint(self, p1, p2)
 
 
     def setPoints(self, p1s, p2s):
         """
-        setPoints(GeneralizedIKObjective self, PyObject * p1s, PyObject * p2s)
-
-
-
+        Args:
+            p1s (:obj:`object`)
+            p2s (:obj:`object`)
         """
         return _robotsim.GeneralizedIKObjective_setPoints(self, p1s, p2s)
 
 
     def setTransform(self, R, t):
         """
-        setTransform(GeneralizedIKObjective self, double const [9] R, double const [3] t)
-
-
-
+        Args:
+            R (:obj:`list of 9 floats (so3 element)`)
+            t (:obj:`list of 3 floats`)
         """
         return _robotsim.GeneralizedIKObjective_setTransform(self, R, t)
 
@@ -7019,10 +6694,8 @@ class GeneralizedIKSolver(_object):
 
     def __init__(self, world):
         """
-        __init__(GeneralizedIKSolver self, WorldModel world) -> GeneralizedIKSolver
-
-
-
+        Args:
+            world (:class:`~klampt.WorldModel`)
         """
         this = _robotsim.new_GeneralizedIKSolver(world)
         try:
@@ -7032,46 +6705,36 @@ class GeneralizedIKSolver(_object):
 
     def add(self, objective):
         """
-        add(GeneralizedIKSolver self, GeneralizedIKObjective objective)
-
-
-
         Adds a new simultaneous objective.  
 
+        Args:
+            objective (:obj:`GeneralizedIKObjective`)
         """
         return _robotsim.GeneralizedIKSolver_add(self, objective)
 
 
     def setMaxIters(self, iters):
         """
-        setMaxIters(GeneralizedIKSolver self, int iters)
-
-
-
         Sets the max # of iterations (default 100)  
 
+        Args:
+            iters (int)
         """
         return _robotsim.GeneralizedIKSolver_setMaxIters(self, iters)
 
 
     def setTolerance(self, res):
         """
-        setTolerance(GeneralizedIKSolver self, double res)
-
-
-
         Sets the constraint solve tolerance (default 1e-3)  
 
+        Args:
+            res (float)
         """
         return _robotsim.GeneralizedIKSolver_setTolerance(self, res)
 
 
     def getResidual(self):
         """
-        getResidual(GeneralizedIKSolver self)
-
-
-
         Returns a vector describing the error of the objective.  
 
         """
@@ -7080,10 +6743,6 @@ class GeneralizedIKSolver(_object):
 
     def getJacobian(self):
         """
-        getJacobian(GeneralizedIKSolver self)
-
-
-
         Returns a matrix describing the instantaneous derivative of the objective with
         respect to the active parameters.  
 
@@ -7093,12 +6752,9 @@ class GeneralizedIKSolver(_object):
 
     def solve(self):
         """
-        solve(GeneralizedIKSolver self) -> PyObject *
-
-
-
         Tries to find a configuration that satifies all simultaneous objectives up to
         the desired tolerance.  
+
 
         Returns: res,iters (pair of bool, int): res indicates whether x converged, and
         iters is the number of iterations used.  
@@ -7109,10 +6765,6 @@ class GeneralizedIKSolver(_object):
 
     def sampleInitial(self):
         """
-        sampleInitial(GeneralizedIKSolver self)
-
-
-
         Samples an initial random configuration.  
 
         """
@@ -7146,14 +6798,14 @@ GeneralizedIKSolver_swigregister(GeneralizedIKSolver)
 
 def SampleTransform(*args):
     """
-    SampleTransform(IKObjective obj)
-    SampleTransform(GeneralizedIKObjective obj)
-
-
-
     Returns a transformation (R,t) from link relative to link2, sampled at random
     from the space of transforms that satisfies the objective obj.  
 
+    SampleTransform (obj)
+
+
+    Args:
+        obj (:obj:`IKObjective` or :obj:`GeneralizedIKObjective`): 
     """
     return _robotsim.SampleTransform(*args)
 class SimRobotSensor(_object):
@@ -7200,9 +6852,9 @@ class SimRobotSensor(_object):
 
     def __init__(self, *args):
         """
-        __init__(SimRobotSensor self, Robot * robot, SensorBase * sensor) -> SimRobotSensor
-        __init__(SimRobotSensor self, SimRobotController robot, char const * name, char const * type) -> SimRobotSensor
+        __init__ (robot,sensor): :class:`~klampt.SimRobotSensor`
 
+        __init__ (robot,name,type): :class:`~klampt.SimRobotSensor`
 
 
         Args:
@@ -7219,46 +6871,36 @@ class SimRobotSensor(_object):
 
     def name(self):
         """
-        name(SimRobotSensor self) -> std::string
-
-
-
         Returns the name of the sensor.  
 
+        Returns:
+            (str):
         """
         return _robotsim.SimRobotSensor_name(self)
 
 
     def type(self):
         """
-        type(SimRobotSensor self) -> std::string
-
-
-
         Returns the type of the sensor.  
 
+        Returns:
+            (str):
         """
         return _robotsim.SimRobotSensor_type(self)
 
 
     def measurementNames(self):
         """
-        measurementNames(SimRobotSensor self) -> stringVector
-
-
-
         Returns a list of names for the measurements (one per measurement).  
 
+        Returns:
+            (:obj:`stringVector`):
         """
         return _robotsim.SimRobotSensor_measurementNames(self)
 
 
     def getMeasurements(self):
         """
-        getMeasurements(SimRobotSensor self)
-
-
-
         Returns a list of measurements from the previous simulation (or
         kinematicSimulate) timestep.  
 
@@ -7268,62 +6910,58 @@ class SimRobotSensor(_object):
 
     def getSetting(self, name):
         """
-        getSetting(SimRobotSensor self, std::string const & name) -> std::string
-
-
-
         Returns the value of the named setting (you will need to manually parse this)  
 
+        Args:
+            name (str)
+        Returns:
+            (str):
         """
         return _robotsim.SimRobotSensor_getSetting(self, name)
 
 
     def setSetting(self, name, val):
         """
-        setSetting(SimRobotSensor self, std::string const & name, std::string const & val)
-
-
-
         Sets the value of the named setting (you will need to manually cast an
         int/float/etc to a str)  
 
+        Args:
+            name (str)
+            val (str)
         """
         return _robotsim.SimRobotSensor_setSetting(self, name, val)
 
 
     def drawGL(self, *args):
         """
-        drawGL(SimRobotSensor self)
-        drawGL(SimRobotSensor self, doubleVector measurements)
-
-
-
         Draws a sensor indicator using OpenGL. If measurements are given, the indicator
         is drawn as though these are the latest measurements, otherwise the last
         measurements are given.  
 
+        drawGL ()
+
+        drawGL (measurements)
+
+
+        Args:
+            measurements (:obj:`list of floats`, optional): 
         """
         return _robotsim.SimRobotSensor_drawGL(self, *args)
 
 
     def kinematicSimulate(self, world, dt):
         """
-        kinematicSimulate(SimRobotSensor self, WorldModel world, double dt)
-
-
-
         simulates / advances the kinematic simulation  
 
+        Args:
+            world (:class:`~klampt.WorldModel`)
+            dt (float)
         """
         return _robotsim.SimRobotSensor_kinematicSimulate(self, world, dt)
 
 
     def kinematicReset(self):
         """
-        kinematicReset(SimRobotSensor self)
-
-
-
         resets a kinematic simulation so that a new initial condition can be set  
 
         """
@@ -7417,10 +7055,6 @@ class SimRobotController(_object):
 
     def __init__(self):
         """
-        __init__(SimRobotController self) -> SimRobotController
-
-
-
         """
         this = _robotsim.new_SimRobotController()
         try:
@@ -7432,46 +7066,36 @@ class SimRobotController(_object):
 
     def model(self):
         """
-        model(SimRobotController self) -> RobotModel
-
-
-
         Retrieves the robot model associated with this controller.  
 
+        Returns:
+            (:class:`~klampt.RobotModel`):
         """
         return _robotsim.SimRobotController_model(self)
 
 
     def setRate(self, dt):
         """
-        setRate(SimRobotController self, double dt)
-
-
-
         Sets the current feedback control rate.  
 
+        Args:
+            dt (float)
         """
         return _robotsim.SimRobotController_setRate(self, dt)
 
 
     def getRate(self):
         """
-        getRate(SimRobotController self) -> double
-
-
-
         Gets the current feedback control rate.  
 
+        Returns:
+            (float):
         """
         return _robotsim.SimRobotController_getRate(self)
 
 
     def getCommandedConfig(self):
         """
-        getCommandedConfig(SimRobotController self)
-
-
-
         Returns the current commanded configuration.  
 
         """
@@ -7480,10 +7104,6 @@ class SimRobotController(_object):
 
     def getCommandedVelocity(self):
         """
-        getCommandedVelocity(SimRobotController self)
-
-
-
         Returns the current commanded velocity.  
 
         """
@@ -7492,10 +7112,6 @@ class SimRobotController(_object):
 
     def getCommandedTorque(self):
         """
-        getCommandedTorque(SimRobotController self)
-
-
-
         Returns the current commanded (feedforward) torque.  
 
         """
@@ -7504,10 +7120,6 @@ class SimRobotController(_object):
 
     def getSensedConfig(self):
         """
-        getSensedConfig(SimRobotController self)
-
-
-
         Returns the current "sensed" configuration from the simulator.  
 
         """
@@ -7516,10 +7128,6 @@ class SimRobotController(_object):
 
     def getSensedVelocity(self):
         """
-        getSensedVelocity(SimRobotController self)
-
-
-
         Returns the current "sensed" velocity from the simulator.  
 
         """
@@ -7528,10 +7136,6 @@ class SimRobotController(_object):
 
     def getSensedTorque(self):
         """
-        getSensedTorque(SimRobotController self)
-
-
-
         Returns the current "sensed" (feedback) torque from the simulator. Note: a
         default robot doesn't have a torque sensor, so this will be 0.  
 
@@ -7541,229 +7145,233 @@ class SimRobotController(_object):
 
     def sensor(self, *args):
         """
-        sensor(SimRobotController self, int index) -> SimRobotSensor
-        sensor(SimRobotController self, char const * name) -> SimRobotSensor
-
-
-
         Returns a sensor by index or by name. If out of bounds or unavailable, a null
         sensor is returned.  
 
+        sensor (index): :class:`~klampt.SimRobotSensor`
+
+        sensor (name): :class:`~klampt.SimRobotSensor`
+
+
+        Args:
+            index (int, optional): 
+            name (str, optional): 
+
+        Returns:
+            (:class:`~klampt.SimRobotSensor`):
         """
         return _robotsim.SimRobotController_sensor(self, *args)
 
 
     def commands(self):
         """
-        commands(SimRobotController self) -> stringVector
-
-
-
         gets a command list  
 
+        Returns:
+            (:obj:`stringVector`):
         """
         return _robotsim.SimRobotController_commands(self)
 
 
     def sendCommand(self, name, args):
         """
-        sendCommand(SimRobotController self, std::string const & name, std::string const & args) -> bool
-
-
-
         sends a command to the controller  
 
+        Args:
+            name (str)
+            args (str)
+        Returns:
+            (bool):
         """
         return _robotsim.SimRobotController_sendCommand(self, name, args)
 
 
     def getSetting(self, name):
         """
-        getSetting(SimRobotController self, std::string const & name) -> std::string
-
-
-
         gets a setting of the controller  
 
+        Args:
+            name (str)
+        Returns:
+            (str):
         """
         return _robotsim.SimRobotController_getSetting(self, name)
 
 
     def setSetting(self, name, val):
         """
-        setSetting(SimRobotController self, std::string const & name, std::string const & val) -> bool
-
-
-
         sets a setting of the controller  
 
+        Args:
+            name (str)
+            val (str)
+        Returns:
+            (bool):
         """
         return _robotsim.SimRobotController_setSetting(self, name, val)
 
 
     def setMilestone(self, *args):
         """
-        setMilestone(SimRobotController self, doubleVector q)
-        setMilestone(SimRobotController self, doubleVector q, doubleVector dq)
-
-
-
         Uses a dynamic interpolant to get from the current state to the desired
         milestone (with optional ending velocity). This interpolant is time-optimal with
         respect to the velocity and acceleration bounds.  
 
+        setMilestone (q)
+
+        setMilestone (q,dq)
+
+
+        Args:
+            q (:obj:`list of floats`): 
+            dq (:obj:`list of floats`, optional): 
         """
         return _robotsim.SimRobotController_setMilestone(self, *args)
 
 
     def addMilestone(self, *args):
         """
-        addMilestone(SimRobotController self, doubleVector q)
-        addMilestone(SimRobotController self, doubleVector q, doubleVector dq)
-
-
-
         Same as setMilestone, but appends an interpolant onto an internal motion queue
         starting at the current queued end state.  
 
+        addMilestone (q)
+
+        addMilestone (q,dq)
+
+
+        Args:
+            q (:obj:`list of floats`): 
+            dq (:obj:`list of floats`, optional): 
         """
         return _robotsim.SimRobotController_addMilestone(self, *args)
 
 
     def addMilestoneLinear(self, q):
         """
-        addMilestoneLinear(SimRobotController self, doubleVector q)
-
-
-
         Same as addMilestone, but enforces that the motion should move along a straight-
         line joint-space path.  
 
+        Args:
+            q (:obj:`list of floats`)
         """
         return _robotsim.SimRobotController_addMilestoneLinear(self, q)
 
 
     def setLinear(self, q, dt):
         """
-        setLinear(SimRobotController self, doubleVector q, double dt)
-
-
-
         Uses linear interpolation to get from the current configuration to the desired
         configuration after time dt.  
 
+        Args:
+            q (:obj:`list of floats`)
+            dt (float)
         """
         return _robotsim.SimRobotController_setLinear(self, q, dt)
 
 
     def setCubic(self, q, v, dt):
         """
-        setCubic(SimRobotController self, doubleVector q, doubleVector v, double dt)
-
-
-
         Uses cubic (Hermite) interpolation to get from the current
         configuration/velocity to the desired configuration/velocity after time dt.  
 
+        Args:
+            q (:obj:`list of floats`)
+            v (:obj:`list of floats`)
+            dt (float)
         """
         return _robotsim.SimRobotController_setCubic(self, q, v, dt)
 
 
     def addLinear(self, q, dt):
         """
-        addLinear(SimRobotController self, doubleVector q, double dt)
-
-
-
         Same as setLinear but appends an interpolant onto the motion queue.  
 
+        Args:
+            q (:obj:`list of floats`)
+            dt (float)
         """
         return _robotsim.SimRobotController_addLinear(self, q, dt)
 
 
     def addCubic(self, q, v, dt):
         """
-        addCubic(SimRobotController self, doubleVector q, doubleVector v, double dt)
-
-
-
         Same as setCubic but appends an interpolant onto the motion queue.  
 
+        Args:
+            q (:obj:`list of floats`)
+            v (:obj:`list of floats`)
+            dt (float)
         """
         return _robotsim.SimRobotController_addCubic(self, q, v, dt)
 
 
     def remainingTime(self):
         """
-        remainingTime(SimRobotController self) -> double
-
-
-
         Returns the remaining duration of the motion queue.  
 
+        Returns:
+            (float):
         """
         return _robotsim.SimRobotController_remainingTime(self)
 
 
     def setVelocity(self, dq, dt):
         """
-        setVelocity(SimRobotController self, doubleVector dq, double dt)
-
-
-
         Sets a rate controller from the current commanded config to move at rate dq for
         time dt.  
 
+        Args:
+            dq (:obj:`list of floats`)
+            dt (float)
         """
         return _robotsim.SimRobotController_setVelocity(self, dq, dt)
 
 
     def setTorque(self, t):
         """
-        setTorque(SimRobotController self, doubleVector t)
-
-
-
         Sets a torque command controller.  
 
+        Args:
+            t (:obj:`list of floats`)
         """
         return _robotsim.SimRobotController_setTorque(self, t)
 
 
     def setPIDCommand(self, *args):
         """
-        setPIDCommand(SimRobotController self, doubleVector qdes, doubleVector dqdes)
-        setPIDCommand(SimRobotController self, doubleVector qdes, doubleVector dqdes, doubleVector tfeedforward)
-
-
-
         Sets a PID command controller. If tfeedforward is provided, it is the
         feedforward torque vector.  
 
+        setPIDCommand (qdes,dqdes)
+
+        setPIDCommand (qdes,dqdes,tfeedforward)
+
+
+        Args:
+            qdes (:obj:`list of floats`): 
+            dqdes (:obj:`list of floats`): 
+            tfeedforward (:obj:`list of floats`, optional): 
         """
         return _robotsim.SimRobotController_setPIDCommand(self, *args)
 
 
     def setManualMode(self, enabled):
         """
-        setManualMode(SimRobotController self, bool enabled)
-
-
-
         Turns on/off manual mode, if either the setTorque or setPID command were
         previously set.  
 
+        Args:
+            enabled (bool)
         """
         return _robotsim.SimRobotController_setManualMode(self, enabled)
 
 
     def getControlType(self):
         """
-        getControlType(SimRobotController self) -> std::string
-
-
-
         Returns the control type for the active controller.  
+
+        Returns:
+            (str):
 
         Possible return values are:  
 
@@ -7779,22 +7387,18 @@ class SimRobotController(_object):
 
     def setPIDGains(self, kP, kI, kD):
         """
-        setPIDGains(SimRobotController self, doubleVector kP, doubleVector kI, doubleVector kD)
-
-
-
         Sets the PID gains.  
 
+        Args:
+            kP (:obj:`list of floats`)
+            kI (:obj:`list of floats`)
+            kD (:obj:`list of floats`)
         """
         return _robotsim.SimRobotController_setPIDGains(self, kP, kI, kD)
 
 
     def getPIDGains(self):
         """
-        getPIDGains(SimRobotController self)
-
-
-
         Gets the PID gains for the PID controller.  
 
         """
@@ -7845,124 +7449,114 @@ class SimBody(_object):
 
     def getID(self):
         """
-        getID(SimBody self) -> int
-
-
-
         Returns the object ID that this body associated with.  
 
+        Returns:
+            (int):
         """
         return _robotsim.SimBody_getID(self)
 
 
     def enable(self, enabled=True):
         """
-        enable(SimBody self, bool enabled=True)
-        enable(SimBody self)
-
-
-
         Sets the simulation of this body on/off.  
 
+        enable (enabled=True)
+
+        enable ()
+
+
+        Args:
+            enabled (bool, optional): default value True
         """
         return _robotsim.SimBody_enable(self, enabled)
 
 
     def isEnabled(self):
         """
-        isEnabled(SimBody self) -> bool
-
-
-
         Returns true if this body is being simulated.  
 
+        Returns:
+            (bool):
         """
         return _robotsim.SimBody_isEnabled(self)
 
 
     def enableDynamics(self, enabled=True):
         """
-        enableDynamics(SimBody self, bool enabled=True)
-        enableDynamics(SimBody self)
-
-
-
         Sets the dynamic simulation of the body on/off. If false, velocities will simply
         be integrated forward, and forces will not affect velocity i.e., it will be pure
         kinematic simulation.  
 
+        enableDynamics (enabled=True)
+
+        enableDynamics ()
+
+
+        Args:
+            enabled (bool, optional): default value True
         """
         return _robotsim.SimBody_enableDynamics(self, enabled)
 
 
     def isDynamicsEnabled(self):
         """
-        isDynamicsEnabled(SimBody self) -> bool
-
-
-
+        Returns:
+            (bool):
         """
         return _robotsim.SimBody_isDynamicsEnabled(self)
 
 
     def applyWrench(self, f, t):
         """
-        applyWrench(SimBody self, double const [3] f, double const [3] t)
-
-
-
         Applies a force and torque about the COM over the duration of the next
         Simulator.simulate(t) call.  
 
+        Args:
+            f (:obj:`list of 3 floats`)
+            t (:obj:`list of 3 floats`)
         """
         return _robotsim.SimBody_applyWrench(self, f, t)
 
 
     def applyForceAtPoint(self, f, pworld):
         """
-        applyForceAtPoint(SimBody self, double const [3] f, double const [3] pworld)
-
-
-
         Applies a force at a given point (in world coordinates) over the duration of the
         next Simulator.simulate(t) call.  
 
+        Args:
+            f (:obj:`list of 3 floats`)
+            pworld (:obj:`list of 3 floats`)
         """
         return _robotsim.SimBody_applyForceAtPoint(self, f, pworld)
 
 
     def applyForceAtLocalPoint(self, f, plocal):
         """
-        applyForceAtLocalPoint(SimBody self, double const [3] f, double const [3] plocal)
-
-
-
         Applies a force at a given point (in local center-of-mass-centered coordinates)
         over the duration of the next Simulator.simulate(t) call.  
 
+        Args:
+            f (:obj:`list of 3 floats`)
+            plocal (:obj:`list of 3 floats`)
         """
         return _robotsim.SimBody_applyForceAtLocalPoint(self, f, plocal)
 
 
     def setTransform(self, R, t):
         """
-        setTransform(SimBody self, double const [9] R, double const [3] t)
-
-
-
         Sets the body's transformation at the current simulation time step (in center-
         of-mass centered coordinates).  
 
+        Args:
+            R (:obj:`list of 9 floats (so3 element)`)
+            t (:obj:`list of 3 floats`)
         """
         return _robotsim.SimBody_setTransform(self, R, t)
 
 
     def getTransform(self):
         """
-        getTransform(SimBody self)
-
-
-
         Gets the body's transformation at the current simulation time step (in center-
         of-mass centered coordinates).  
 
@@ -7972,23 +7566,18 @@ class SimBody(_object):
 
     def setObjectTransform(self, R, t):
         """
-        setObjectTransform(SimBody self, double const [9] R, double const [3] t)
-
-
-
         Sets the body's transformation at the current simulation time step (in object-
         native coordinates)  
 
+        Args:
+            R (:obj:`list of 9 floats (so3 element)`)
+            t (:obj:`list of 3 floats`)
         """
         return _robotsim.SimBody_setObjectTransform(self, R, t)
 
 
     def getObjectTransform(self):
         """
-        getObjectTransform(SimBody self)
-
-
-
         Gets the body's transformation at the current simulation time step (in object-
         native coordinates).  
 
@@ -7998,23 +7587,18 @@ class SimBody(_object):
 
     def setVelocity(self, w, v):
         """
-        setVelocity(SimBody self, double const [3] w, double const [3] v)
-
-
-
         Sets the angular velocity and translational velocity at the current simulation
         time step.  
 
+        Args:
+            w (:obj:`list of 3 floats`)
+            v (:obj:`list of 3 floats`)
         """
         return _robotsim.SimBody_setVelocity(self, w, v)
 
 
     def getVelocity(self):
         """
-        getVelocity(SimBody self)
-
-
-
         Returns the angular velocity and translational velocity.  
 
         """
@@ -8023,64 +7607,58 @@ class SimBody(_object):
 
     def setCollisionPadding(self, padding):
         """
-        setCollisionPadding(SimBody self, double padding)
-
-
-
         Sets the collision padding used for contact generation. At 0 padding the
         simulation will be unstable for triangle mesh and point cloud geometries. A
         larger value is useful to maintain simulation stability for thin or soft
         objects. Default is 0.0025.  
 
+        Args:
+            padding (float)
         """
         return _robotsim.SimBody_setCollisionPadding(self, padding)
 
 
     def getCollisionPadding(self):
         """
-        getCollisionPadding(SimBody self) -> double
-
-
-
+        Returns:
+            (float):
         """
         return _robotsim.SimBody_getCollisionPadding(self)
 
 
     def setCollisionPreshrink(self, shrinkVisualization=False):
         """
-        setCollisionPreshrink(SimBody self, bool shrinkVisualization=False)
-        setCollisionPreshrink(SimBody self)
-
-
-
         If set, preshrinks the geometry so that the padded geometry better matches the
         original mesh. If shrinkVisualization=true, the underlying mesh is also shrunk
         (helps debug simulation artifacts due to preshrink)  
 
+        setCollisionPreshrink (shrinkVisualization=False)
+
+        setCollisionPreshrink ()
+
+
+        Args:
+            shrinkVisualization (bool, optional): default value False
         """
         return _robotsim.SimBody_setCollisionPreshrink(self, shrinkVisualization)
 
 
     def getSurface(self):
         """
-        getSurface(SimBody self) -> ContactParameters
-
-
-
         Gets (a copy of) the surface properties.  
 
+        Returns:
+            (:class:`~klampt.ContactParameters`):
         """
         return _robotsim.SimBody_getSurface(self)
 
 
     def setSurface(self, params):
         """
-        setSurface(SimBody self, ContactParameters params)
-
-
-
         Sets the surface properties.  
 
+        Args:
+            params (:class:`~klampt.ContactParameters`)
         """
         return _robotsim.SimBody_setSurface(self, params)
 
@@ -8103,12 +7681,9 @@ class SimBody(_object):
 
     def __init__(self):
         """
-        __init__(SimBody self) -> SimBody
-
-
-
         A reference to a rigid body inside a Simulator (either a RigidObjectModel,
         TerrainModel, or a link of a RobotModel).  
+
 
         Can use this class to directly apply forces to or control positions / velocities
         of objects in the simulation.  
@@ -8157,13 +7732,11 @@ class Simulator(_object):
 
     def __init__(self, model):
         """
-        __init__(Simulator self, WorldModel model) -> Simulator
-
-
-
         Constructs the simulator from a WorldModel. If the WorldModel was loaded from an
         XML file, then the simulation setup is loaded from it.  
 
+        Args:
+            model (:class:`~klampt.WorldModel`)
         """
         this = _robotsim.new_Simulator(model)
         try:
@@ -8175,10 +7748,6 @@ class Simulator(_object):
 
     def reset(self):
         """
-        reset(Simulator self)
-
-
-
         Resets to the initial state (same as setState(initialState))  
 
         """
@@ -8187,38 +7756,37 @@ class Simulator(_object):
 
     def getStatus(self):
         """
-        getStatus(Simulator self) -> int
-
-
-
         Returns an indicator code for the simulator status. The return result is one of
         the STATUS_X flags. (Technically, this returns the *worst* status over the last
         simulate() call)  
 
+        Returns:
+            (int):
         """
         return _robotsim.Simulator_getStatus(self)
 
 
     def getStatusString(self, s=-1):
         """
-        getStatusString(Simulator self, int s=-1) -> std::string
-        getStatusString(Simulator self) -> std::string
-
-
-
         Returns a string indicating the simulator's status. If s is provided and >= 0,
         this function maps the indicator code s to a string.  
 
+        getStatusString (s=-1): str
+
+        getStatusString (): str
+
+
+        Args:
+            s (int, optional): default value -1
+
+        Returns:
+            (str):
         """
         return _robotsim.Simulator_getStatusString(self, s)
 
 
     def checkObjectOverlap(self):
         """
-        checkObjectOverlap(Simulator self)
-
-
-
         Checks if any objects are overlapping. Returns a pair of lists of integers,
         giving the pairs of object ids that are overlapping.  
 
@@ -8228,74 +7796,60 @@ class Simulator(_object):
 
     def getState(self):
         """
-        getState(Simulator self) -> std::string
-
-
-
         Returns a Base64 string representing the binary data for the current simulation
         state, including controller parameters, etc.  
 
+        Returns:
+            (str):
         """
         return _robotsim.Simulator_getState(self)
 
 
     def setState(self, str):
         """
-        setState(Simulator self, std::string const & str)
-
-
-
         Sets the current simulation state from a Base64 string returned by a prior
         getState call.  
 
+        Args:
+            str (str)
         """
         return _robotsim.Simulator_setState(self, str)
 
 
     def simulate(self, t):
         """
-        simulate(Simulator self, double t)
-
-
-
         Advances the simulation by time t, and updates the world model from the
         simulation state.  
 
+        Args:
+            t (float)
         """
         return _robotsim.Simulator_simulate(self, t)
 
 
     def fakeSimulate(self, t):
         """
-        fakeSimulate(Simulator self, double t)
-
-
-
         Advances a faked simulation by time t, and updates the world model from the
         faked simulation state.  
 
+        Args:
+            t (float)
         """
         return _robotsim.Simulator_fakeSimulate(self, t)
 
 
     def getTime(self):
         """
-        getTime(Simulator self) -> double
-
-
-
         Returns the simulation time.  
 
+        Returns:
+            (float):
         """
         return _robotsim.Simulator_getTime(self)
 
 
     def updateWorld(self):
         """
-        updateWorld(Simulator self)
-
-
-
         Updates the world model from the current simulation state. This only needs to be
         called if you change the world model and want to revert back to the simulation
         state.  
@@ -8306,75 +7860,62 @@ class Simulator(_object):
 
     def getActualConfig(self, robot):
         """
-        getActualConfig(Simulator self, int robot)
-
-
-
         Returns the current actual configuration of the robot from the simulator.  
 
+        Args:
+            robot (int)
         """
         return _robotsim.Simulator_getActualConfig(self, robot)
 
 
     def getActualVelocity(self, robot):
         """
-        getActualVelocity(Simulator self, int robot)
-
-
-
         Returns the current actual velocity of the robot from the simulator.  
 
+        Args:
+            robot (int)
         """
         return _robotsim.Simulator_getActualVelocity(self, robot)
 
 
     def getActualTorque(self, robot):
         """
-        getActualTorque(Simulator self, int robot)
-
-
-
         Returns the current actual torques on the robot's drivers from the simulator.  
 
+        Args:
+            robot (int)
         """
         return _robotsim.Simulator_getActualTorque(self, robot)
 
 
     def getActualTorques(self, robot):
         """
-        getActualTorques(Simulator self, int robot)
-
-
-
         Deprecated: renamed to getActualTorque to be consistent with SimRobotController
         methods.  
 
+        Args:
+            robot (int)
         """
         return _robotsim.Simulator_getActualTorques(self, robot)
 
 
     def enableContactFeedback(self, obj1, obj2):
         """
-        enableContactFeedback(Simulator self, int obj1, int obj2)
-
-
-
         Call this to enable contact feedback between the two objects (arguments are
         indexes returned by object.getID()). Contact feedback has a small overhead so
         you may want to do this selectively. This must be called before using inContact,
         getContacts, getContactForces, contactForce, contactTorque, hadContact,
         hadSeparation, hadPenetration, and meanContactForce.  
 
+        Args:
+            obj1 (int)
+            obj2 (int)
         """
         return _robotsim.Simulator_enableContactFeedback(self, obj1, obj2)
 
 
     def enableContactFeedbackAll(self):
         """
-        enableContactFeedbackAll(Simulator self)
-
-
-
         Call this to enable contact feedback between all pairs of objects. Contact
         feedback has a small overhead so you may want to do this selectively.  
 
@@ -8384,105 +7925,106 @@ class Simulator(_object):
 
     def inContact(self, aid, bid):
         """
-        inContact(Simulator self, int aid, int bid) -> bool
-
-
-
         Returns true if the objects (indexes returned by object.getID()) are in contact
         on the current time step. You can set bid=-1 to tell if object `a` is in contact
         with any object.  
 
+        Args:
+            aid (int)
+            bid (int)
+        Returns:
+            (bool):
         """
         return _robotsim.Simulator_inContact(self, aid, bid)
 
 
     def getContacts(self, aid, bid):
         """
-        getContacts(Simulator self, int aid, int bid)
-
-
-
         Returns the list of contacts (x,n,kFriction) at the last time step. Normals
         point into object `a`. The contact point (x,n,kFriction) is represented as a
         7-element vector.  
 
+        Args:
+            aid (int)
+            bid (int)
         """
         return _robotsim.Simulator_getContacts(self, aid, bid)
 
 
     def getContactForces(self, aid, bid):
         """
-        getContactForces(Simulator self, int aid, int bid)
-
-
-
         Returns the list of contact forces on object a at the last time step.  
 
+        Args:
+            aid (int)
+            bid (int)
         """
         return _robotsim.Simulator_getContactForces(self, aid, bid)
 
 
     def contactForce(self, aid, bid):
         """
-        contactForce(Simulator self, int aid, int bid)
-
-
-
         Returns the contact force on object a at the last time step. You can set bid to
         -1 to get the overall contact force on object a.  
 
+        Args:
+            aid (int)
+            bid (int)
         """
         return _robotsim.Simulator_contactForce(self, aid, bid)
 
 
     def contactTorque(self, aid, bid):
         """
-        contactTorque(Simulator self, int aid, int bid)
-
-
-
         Returns the contact force on object `a` (about `a`'s origin) at the last time
         step. You can set `bid` to -1 to get the overall contact force on object `a`.  
 
+        Args:
+            aid (int)
+            bid (int)
         """
         return _robotsim.Simulator_contactTorque(self, aid, bid)
 
 
     def hadContact(self, aid, bid):
         """
-        hadContact(Simulator self, int aid, int bid) -> bool
-
-
-
         Returns true if the objects had contact over the last simulate() call. You can
         set `bid` to -1 to determine if object `a` had contact with any other object.  
 
+        Args:
+            aid (int)
+            bid (int)
+        Returns:
+            (bool):
         """
         return _robotsim.Simulator_hadContact(self, aid, bid)
 
 
     def hadSeparation(self, aid, bid):
         """
-        hadSeparation(Simulator self, int aid, int bid) -> bool
-
-
-
         Returns true if the objects had ever separated during the last simulate() call.
         You can set `bid` to -1 to determine if object `a` had no contact with any other
         object.  
 
+        Args:
+            aid (int)
+            bid (int)
+        Returns:
+            (bool):
         """
         return _robotsim.Simulator_hadSeparation(self, aid, bid)
 
 
     def hadPenetration(self, aid, bid):
         """
-        hadPenetration(Simulator self, int aid, int bid) -> bool
-
-
-
         Returns true if the objects interpenetrated during the last simulate() call. If
         so, the simulation may lead to very inaccurate results or artifacts.  
+
+        Args:
+            aid (int)
+            bid (int)
+        Returns:
+            (bool):
 
         You can set `bid` to -1 to determine if object `a` penetrated any object, or you
         can set `aid=bid=-1` to determine whether any object is penetrating any other
@@ -8494,91 +8036,93 @@ class Simulator(_object):
 
     def meanContactForce(self, aid, bid):
         """
-        meanContactForce(Simulator self, int aid, int bid)
-
-
-
         Returns the average contact force on object a over the last simulate() call.  
 
+        Args:
+            aid (int)
+            bid (int)
         """
         return _robotsim.Simulator_meanContactForce(self, aid, bid)
 
 
     def controller(self, *args):
         """
-        controller(Simulator self, int robot) -> SimRobotController
-        controller(Simulator self, RobotModel robot) -> SimRobotController
+        Returns a controller for the indicated robot, either by index or by RobotModel.  
 
+        controller (robot): :class:`~klampt.SimRobotController`
 
 
         Args:
-            robot (:class:`~klampt.RobotModel` or int): 
+            robot (int or :class:`~klampt.RobotModel`): 
 
-        Returns a controller for the indicated robot, either by index or by RobotModel.  
-
+        Returns:
+            (:class:`~klampt.SimRobotController`):
         """
         return _robotsim.Simulator_controller(self, *args)
 
 
     def body(self, *args):
         """
-        body(Simulator self, RobotModelLink link) -> SimBody
-        body(Simulator self, RigidObjectModel object) -> SimBody
-        body(Simulator self, TerrainModel terrain) -> SimBody
-
-
-
         Returns the SimBody corresponding to the given link, rigid object, or terrain.  
 
+        body (link): :class:`~klampt.SimBody`
+
+        body (object): :class:`~klampt.SimBody`
+
+        body (terrain): :class:`~klampt.SimBody`
+
+
+        Args:
+            link (:class:`~klampt.RobotModelLink`, optional): 
+            object (:class:`~klampt.RigidObjectModel`, optional): 
+            terrain (:obj:`TerrainModel`, optional): 
+
+        Returns:
+            (:class:`~klampt.SimBody`):
         """
         return _robotsim.Simulator_body(self, *args)
 
 
     def getJointForces(self, link):
         """
-        getJointForces(Simulator self, RobotModelLink link)
-
-
-
         Returns the joint force and torque local to the link, as would be read by a
         force-torque sensor mounted at the given link's origin. The 6 entries are
         (fx,fy,fz,mx,my,mz)  
 
+        Args:
+            link (:class:`~klampt.RobotModelLink`)
         """
         return _robotsim.Simulator_getJointForces(self, link)
 
 
     def setGravity(self, g):
         """
-        setGravity(Simulator self, double const [3] g)
-
-
-
         Sets the overall gravity vector.  
 
+        Args:
+            g (:obj:`list of 3 floats`)
         """
         return _robotsim.Simulator_setGravity(self, g)
 
 
     def setSimStep(self, dt):
         """
-        setSimStep(Simulator self, double dt)
-
-
-
         Sets the internal simulation substep. Values < 0.01 are recommended.  
 
+        Args:
+            dt (float)
         """
         return _robotsim.Simulator_setSimStep(self, dt)
 
 
     def getSetting(self, name):
         """
-        getSetting(Simulator self, std::string const & name) -> std::string
-
-
-
         Retrieves some simulation setting.  
+
+        Args:
+            name (str)
+        Returns:
+            (str):
 
         Valid names are:  
 
@@ -8623,13 +8167,12 @@ class Simulator(_object):
 
     def setSetting(self, name, value):
         """
-        setSetting(Simulator self, std::string const & name, std::string const & value)
-
-
-
         Sets some simulation setting. Raises an exception if the name is unknown or the
         value is of improper format.  
 
+        Args:
+            name (str)
+            value (str)
         """
         return _robotsim.Simulator_setSetting(self, name, value)
 
@@ -8655,21 +8198,15 @@ Simulator_swigregister(Simulator)
 
 def setRandomSeed(seed):
     """
-    setRandomSeed(int seed)
-
-
-
     Sets the random seed used by the configuration sampler.  
 
+    Args:
+        seed (int)
     """
     return _robotsim.setRandomSeed(seed)
 
 def destroy():
     """
-    destroy()
-
-
-
     destroys internal data structures  
 
     """
@@ -8677,12 +8214,12 @@ def destroy():
 
 def SubscribeToStream(*args):
     """
-    SubscribeToStream(Geometry3D g, char const * protocol, char const * name, char const * type) -> bool
-    SubscribeToStream(Geometry3D g, char const * protocol, char const * name) -> bool
-
-
-
     Subscribes a Geometry3D to a stream.  
+
+    SubscribeToStream (g,protocol,name,type): bool
+
+    SubscribeToStream (g,protocol,name): bool
+
 
     Args:  
 
@@ -8708,24 +8245,25 @@ def SubscribeToStream(*args):
 
 def DetachFromStream(protocol, name):
     """
-    DetachFromStream(char const * protocol, char const * name) -> bool
-
-
-
     Unsubscribes from a stream previously subscribed to via
     :func:`SubscribeToStream`  
 
+    Args:
+        protocol (str)
+        name (str)
+    Returns:
+        (bool):
     """
     return _robotsim.DetachFromStream(protocol, name)
 
 def ProcessStreams(*args):
     """
-    ProcessStreams(char const * protocol) -> bool
-    ProcessStreams() -> bool
-
-
-
     Does some processing on stream subscriptions.  
+
+    ProcessStreams (protocol): bool
+
+    ProcessStreams (): bool
+
 
     Args:  
 
@@ -8739,11 +8277,14 @@ def ProcessStreams(*args):
 
 def WaitForStream(protocol, name, timeout):
     """
-    WaitForStream(char const * protocol, char const * name, double timeout) -> bool
-
-
-
     Waits up to timeout seconds for an update on the given stream.  
+
+    Args:
+        protocol (str)
+        name (str)
+        timeout (float)
+    Returns:
+        (bool):
 
     Return:  
 
@@ -8754,46 +8295,47 @@ def WaitForStream(protocol, name, timeout):
 
 def ThreeJSGetScene(arg1):
     """
-    ThreeJSGetScene(WorldModel arg1) -> std::string
-
-
-
     Exports the WorldModel to a JSON string ready for use in Three.js.  
 
+    Args:
+        arg1 (:class:`~klampt.WorldModel`)
+    Returns:
+        (str):
     """
     return _robotsim.ThreeJSGetScene(arg1)
 
 def ThreeJSGetTransforms(arg1):
     """
-    ThreeJSGetTransforms(WorldModel arg1) -> std::string
-
-
-
     Exports the WorldModel to a JSON string ready for use in Three.js.  
 
+    Args:
+        arg1 (:class:`~klampt.WorldModel`)
+    Returns:
+        (str):
     """
     return _robotsim.ThreeJSGetTransforms(arg1)
 
 def setFrictionConeApproximationEdges(numEdges):
     """
-    setFrictionConeApproximationEdges(int numEdges)
-
-
-
     Globally sets the number of edges used in the friction cone approximation. The
     default value is 4.  
 
+    Args:
+        numEdges (int)
     """
     return _robotsim.setFrictionConeApproximationEdges(numEdges)
 
 def forceClosure(*args):
     """
-    forceClosure(doubleMatrix contacts) -> bool
-    forceClosure(doubleMatrix contactPositions, doubleMatrix frictionCones) -> bool
-
-
-
     Returns true if the list of contact points has force closure.  
+
+    forceClosure (contacts): bool
+
+    forceClosure (contactPositions,frictionCones): bool
+
+
+    Returns:
+        (bool):
 
     In the 1-argument version, each contact point is specified by a list of 7
     floats, [x,y,z,nx,ny,nz,k] where (x,y,z) is the position, (nx,ny,nz) is the
@@ -8826,12 +8368,15 @@ def forceClosure(*args):
 
 def forceClosure2D(*args):
     """
-    forceClosure2D(doubleMatrix contacts) -> bool
-    forceClosure2D(doubleMatrix contactPositions, doubleMatrix frictionCones) -> bool
-
-
-
     Returns true if the list of 2D contact points has force closure.  
+
+    forceClosure2D (contacts): bool
+
+    forceClosure2D (contactPositions,frictionCones): bool
+
+
+    Returns:
+        (bool):
 
     In the 1-argument version, each contact point is given by a list of 4 floats,
     [x,y,theta,k] where (x,y) is the position, theta is the normal angle, and k is
@@ -8862,13 +8407,13 @@ def forceClosure2D(*args):
 
 def comEquilibrium(*args):
     """
-    comEquilibrium(doubleMatrix contacts, doubleVector fext, PyObject * com) -> PyObject
-    comEquilibrium(doubleMatrix contactPositions, doubleMatrix frictionCones, doubleVector fext, PyObject * com) -> PyObject *
-
-
-
     Tests whether the given COM com is stable for the given contacts and the given
     external force fext.  
+
+    comEquilibrium (contacts,fext,com): :obj:`object`
+
+    comEquilibrium (contactPositions,frictionCones,fext,com): :obj:`object`
+
 
     The 2-argument version is a "fancy" version that allows more control over the
     constraint planes.  
@@ -8905,13 +8450,13 @@ def comEquilibrium(*args):
 
 def comEquilibrium2D(*args):
     """
-    comEquilibrium2D(doubleMatrix contacts, doubleVector fext, PyObject * com) -> PyObject
-    comEquilibrium2D(doubleMatrix contactPositions, doubleMatrix frictionCones, doubleVector fext, PyObject * com) -> PyObject *
-
-
-
     Tests whether the given COM com is stable for the given contacts and the given
     external force fext.  
+
+    comEquilibrium2D (contacts,fext,com): :obj:`object`
+
+    comEquilibrium2D (contactPositions,frictionCones,fext,com): :obj:`object`
+
 
     The 2-argument version is a "fancy" version that allows more control over the
     constraint planes.  
@@ -8951,13 +8496,13 @@ def comEquilibrium2D(*args):
 
 def supportPolygon(*args):
     """
-    supportPolygon(doubleMatrix contacts) -> PyObject
-    supportPolygon(doubleMatrix contactPositions, doubleMatrix frictionCones) -> PyObject *
-
-
-
     Calculates the support polygon for a given set of contacts and a downward
     external force (0,0,-g).  
+
+    supportPolygon (contacts): :obj:`object`
+
+    supportPolygon (contactPositions,frictionCones): :obj:`object`
+
 
     In the 1-argument version, a contact point is given by a list of 7 floats,
     [x,y,z,nx,ny,nz,k] as usual. The 2-argument version is a "fancy" version that
@@ -9002,13 +8547,13 @@ def supportPolygon(*args):
 
 def supportPolygon2D(*args):
     """
-    supportPolygon2D(doubleMatrix contacts) -> PyObject
-    supportPolygon2D(doubleMatrix contacts, doubleMatrix frictionCones) -> PyObject *
-
-
-
     Calculates the support polygon (interval) for a given set of contacts and a
     downward external force (0,-g).  
+
+    supportPolygon2D (contacts): :obj:`object`
+
+    supportPolygon2D (contacts,frictionCones): :obj:`object`
+
 
     The 2-argument version is a "fancy" version that allows more control over the
     constraint planes.  
@@ -9040,14 +8585,16 @@ def supportPolygon2D(*args):
 
 def equilibriumTorques(*args):
     """
-    equilibriumTorques(RobotModel robot, doubleMatrix contacts, intVector links, doubleVector fext, double norm=0) -> PyObject
-    equilibriumTorques(RobotModel robot, doubleMatrix contacts, intVector links, doubleVector fext) -> PyObject
-    equilibriumTorques(RobotModel robot, doubleMatrix contacts, intVector links, doubleVector fext, doubleVector internalTorques, double norm=0) -> PyObject
-    equilibriumTorques(RobotModel robot, doubleMatrix contacts, intVector links, doubleVector fext, doubleVector internalTorques) -> PyObject *
-
-
-
     Solves for the torques / forces that keep the robot balanced against gravity.  
+
+    equilibriumTorques (robot,contacts,links,fext,norm=0): :obj:`object`
+
+    equilibriumTorques (robot,contacts,links,fext): :obj:`object`
+
+    equilibriumTorques (robot,contacts,links,fext,internalTorques,norm=0): :obj:`object`
+
+    equilibriumTorques (robot,contacts,links,fext,internalTorques): :obj:`object`
+
 
     The problem being solved is  
 
