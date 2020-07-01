@@ -179,7 +179,7 @@ class KlamptWidget(widgets.DOMWidget):
                 type = candidates
         if type == 'Config':
             res = self.addGhost(name)
-            self.setGhostConfig(name,item)
+            self.setGhostConfig(item,name=name)
             return [res]
         elif type == 'Configs':
             if len(item[0]) == 3:
@@ -191,7 +191,7 @@ class KlamptWidget(widgets.DOMWidget):
                 for i,q in enumerate(item):
                     iname = name+'_'+str(i)
                     self.addGhost(iname)
-                    self.setGhostConfig(q,iname)
+                    self.setGhostConfig(q,name=iname)
                     names.append(iname)
                 self._extras[name] = ('Configs',names)
                 return names
@@ -771,11 +771,11 @@ def EditPoint(value=None,min=None,max=None,labels=None,
     if labels is None:
         labels = 'xyz'
     if min is None:
-        min = [-5,-5,-5]
+        min = vectorops.add(value,[-5,-5,-5])
     elif isinstance(min,(int,float)):
         min = [min,min,min]
     if max is None:
-        max = [5,5,5]
+        max = vectorops.add(value,[5,5,5])
     elif isinstance(max,(int,float)):
         max = [max,max,max]
     if len(min) != 3:
@@ -829,11 +829,11 @@ def EditTransform(value=None,xmin=None,xmax=None,labels=None,
     if labels is None:
         labels = ['roll','pitch','yaw','x','y','z']
     if xmin is None:
-        xmin = [-5,-5,-5]
+        xmin = vectorops.add(value[1],[-5,-5,-5])
     elif isinstance(xmin,(int,float)):
         xmin = [xmin,xmin,xmin]
     if xmax is None:
-        xmax = [5,5,5]
+        xmax = vectorops.add(value[1],[5,5,5])
     elif isinstance(xmax,(int,float)):
         xmax = [xmax,xmax,xmax]
     if len(xmin) != 3:

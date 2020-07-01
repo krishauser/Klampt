@@ -3,10 +3,12 @@ from . import simlog
 import weakref
 
 class SensorEmulator:
-    """A generic sensor emulator.  Translates from the physics simulation -> inputs to a Python controller.
+    """A generic sensor emulator.  Translates from the physics simulation ->
+    inputs to a Python controller.
 
-    The Python controller is assumed to have the structure of BaseController, where it is given as input
-    a dictionary of named items reflecting the most up-to-date readings on each control time-step.
+    The Python controller is assumed to have the structure of BaseController,
+    where it is given as input a dictionary of named items reflecting the
+    most up-to-date readings on each control time-step.
     """
     def __init__(self):
         pass
@@ -122,17 +124,19 @@ class DefaultActuatorEmulator(ActuatorEmulator):
 
 
 class SimpleSimulator (Simulator):
-    """A convenience class that enables easy logging, definition of simulation hooks, emulators
-    of sensors / actuators, and definition of robot controllers.
+    """A convenience class that enables easy logging, definition of simulation
+    hooks, emulators of sensors / actuators, and definition of robot
+    controllers.
 
-    Note that for greatest compatibility you should NOT manually apply forces to the simulation
-    except for inside of hooks and emulators.  This is because several simulation sub-steps will be
-    taken, and you will have no control over the forces applied except for the first time step.
+    Note that for greatest compatibility you should NOT manually apply forces
+    to the simulation except for inside of hooks and emulators.  This is
+    because several simulation sub-steps will be taken, and you will have
+    no control over the forces applied except for the first time step.
+
+    Args:
+        world (WorldModel): the world that should be simulated.
     """
     def __init__(self,world):
-        """Args:
-            world (WorldModel): the world that should be simulated.
-        """
         Simulator.__init__(self,world)
         #these are functions automatically called at each time step
         self.robotControllers = [None]*world.numRobots()

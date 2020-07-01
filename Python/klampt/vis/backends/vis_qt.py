@@ -55,6 +55,8 @@ class QtWindowManager(_ThreadedWindowManager):
         if len(self.windows) == 0:
             #save the defaults in window 0
             self.windows.append(WindowInfo(self.window_title,self._frontend))    
+        if title is None:
+            title = "Window "+str(len(self.windows))
         #make a new window
         self._frontend = GLVisualizationFrontend()
         self.windows.append(WindowInfo(title,self._frontend))

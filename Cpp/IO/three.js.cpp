@@ -1,5 +1,6 @@
 #include "three.js.h"
 #include <KrisLibrary/meshing/MeshPrimitives.h>
+#include <KrisLibrary/meshing/PointCloud.h>
 #include <KrisLibrary/math/random.h>
 //#include <boost/uuid/uuid.hpp>            // uuid class
 //#include <boost/uuid/uuid_generators.hpp> // generators
@@ -70,7 +71,7 @@ void ThreeJSExport(const Terrain& terrain,AnyCollection& out,ThreeJSCache& cache
 void ThreeJSExportGeometry(const ManagedGeometry& geom,AnyCollection& out,ThreeJSCache& cache);
 void ThreeJSExportAppearance(const ManagedGeometry& geom,AnyCollection& out,ThreeJSCache& cache);
 void ThreeJSExport(const Geometry::AnyCollisionGeometry3D& geom,AnyCollection& out,ThreeJSCache& cache);
-void ThreeJSExport(const GLDraw::GeometryAppearance& app,AnyCollection& out,ThreeJSCache& cache);
+void ThreeJSExport(const GLDraw::GeometryAppearance& app,const Geometry::AnyCollisionGeometry3D& geom,AnyCollection& out,ThreeJSCache& cache);
 
 void ThreeJSExport(const RigidTransform& T,AnyCollection& out)
 {
@@ -444,11 +445,11 @@ void ThreeJSExportGeometry(const ManagedGeometry& geom,AnyCollection& out,ThreeJ
 void ThreeJSExportAppearance(const ManagedGeometry& geom,AnyCollection& out,ThreeJSCache& cache)
 {
   if(!geom.Empty())
-    ThreeJSExport(*geom.Appearance(),out,cache);
+    ThreeJSExport(*geom.Appearance(),*geom,out,cache);
 }
 void ThreeJSExport(const Meshing::TriMesh& mesh,AnyCollection& out)
 {
-  out["type"] = "Geometry";
+  out["type"] = "BufferGeometry";
   AnyCollection vertices, faces;
   vertices.resize(mesh.verts.size()*3);
   for(size_t i=0;i<mesh.verts.size();i++) {
@@ -463,8 +464,31 @@ void ThreeJSExport(const Meshing::TriMesh& mesh,AnyCollection& out)
     faces[int(i*4+2)] = mesh.tris[i].b;
     faces[int(i*4+3)] = mesh.tris[i].c;
   }
-  out["data"]["vertices"] = vertices;
-  out["data"]["faces"] = faces;
+  out["data"]["position"] = vertices;
+  out["data"]["index"] = faces;
+}
+void ThreeJSExport(const Meshing::PointCloud3D& pc,AnyCollection& out)
+{
+  out["type"] = "BufferGeometry";
+  AnyCollection vertices;
+  vertices.resize(pc.points.size()*3);
+  for(size_t i=0;i<pc.points.size();i++) {
+    vertices[int(i*3)] = float(pc.points[i].x);
+    vertices[int(i*3+1)] = float(pc.points[i].y);
+    vertices[int(i*3+2)] = float(pc.points[i].z);
+  }
+  out["data"]["position"] = vertices;
+  vector<Vector4> rgba;
+  if(pc.GetColors(rgba)) {
+    AnyCollection colors;
+    colors.resize(pc.points.size()*3);
+    for(size_t i=0;i<pc.points.size();i++) {
+      colors[int(i*3)] = float(rgba[i].x);
+      colors[int(i*3+1)] = float(rgba[i].y);
+      colors[int(i*3+2)] = float(rgba[i].z);
+    }
+    out["data"]["color"] = colors;
+  }
 }
 void ThreeJSExport(const Geometry::AnyCollisionGeometry3D& geom,AnyCollection& out,ThreeJSCache& cache)
 {
@@ -487,6 +511,7 @@ void ThreeJSExport(const Geometry::AnyCollisionGeometry3D& geom,AnyCollection& o
       if(s->radius < 0.05) numStacks = 6;
       else if(s->radius < 0.2) numStacks = 10;
       else if(s->radius > 1.0) numStacks = 40;
+      int numSlices = numStacks*2;
       Meshing::TriMesh mesh;
       Meshing::MakeTriMesh(*s,numStacks,numStacks*2,mesh);
       ThreeJSExport(mesh,out);
@@ -509,12 +534,18 @@ void ThreeJSExport(const Geometry::AnyCollisionGeometry3D& geom,AnyCollection& o
     out["uuid"] = cache.GetUUID(geom);
     ThreeJSExport(mesh,out);
   }
+  else if(geom.type == Geometry::AnyCollisionGeometry3D::PointCloud) {
+    //fprintf(stderr,"Triangle mesh geometry.\n");
+    const Meshing::PointCloud3D& pc = geom.AsPointCloud();
+    out["uuid"] = cache.GetUUID(geom);
+    ThreeJSExport(pc,out);
+  }
   else {
     //can't export files of that type
-    fprintf(stderr,"Unable to save geometries of that type to three.js!\n");
+    fprintf(stderr,"Unable to save geometries of type %s to three.js!\n",geom.TypeName());
   }
 }
-void ThreeJSExport(const GLDraw::GeometryAppearance& app,AnyCollection& out,ThreeJSCache& cache)
+void ThreeJSExport(const GLDraw::GeometryAppearance& app,const Geometry::AnyCollisionGeometry3D& geom,AnyCollection& out,ThreeJSCache& cache)
 {
   if(cache.HasUUID(app)) { 
     //just a string
@@ -524,14 +555,26 @@ void ThreeJSExport(const GLDraw::GeometryAppearance& app,AnyCollection& out,Thre
   else {
     //save material
     out["uuid"] = cache.GetUUID(app);
-    //out["type"] = "MeshStandardMaterial";
-    out["type"] = "MeshPhongMaterial";
-    int rgb = ToRGB32(app.faceColor);
-    out["color"] = rgb;
-    out["emissive"] = 0;
-    if(app.faceColor.rgba[3] != 1.0) {
-      out["transparent"] = true;
-      out["opacity"] = app.faceColor.rgba[3];
+    if(geom.type != Geometry::AnyGeometry3D::PointCloud) {
+      //out["type"] = "MeshStandardMaterial";
+      out["type"] = "MeshPhongMaterial";
+      int rgb = ToRGB32(app.faceColor);
+      out["color"] = rgb;
+      out["emissive"] = 0;
+      if(app.faceColor.rgba[3] != 1.0) {
+        out["transparent"] = true;
+        out["opacity"] = app.faceColor.rgba[3];
+      }
+    }
+    else {
+      out["type"] = "PointsMaterial";
+      int rgb = ToRGB32(app.vertexColor);
+      out["color"] = rgb;
+      out["emissive"] = 0;
+      if(app.vertexColor.rgba[3] != 1.0) {
+        out["transparent"] = true;
+        out["opacity"] = app.vertexColor.rgba[3];
+      }
     }
   }
 }
@@ -601,8 +644,8 @@ void ThreeJSExport(const Geometry::AnyCollisionGeometry3D& geom,AnyCollection& o
   ThreeJSExport(geom,out,cache);
 }
 ///Exports to a three.js scene Material instance
-void ThreeJSExport(const GLDraw::GeometryAppearance& app,AnyCollection& out)
+void ThreeJSExport(const GLDraw::GeometryAppearance& app,const Geometry::AnyCollisionGeometry3D& geom,AnyCollection& out)
 {
   ThreeJSCache cache;
-  ThreeJSExport(app,out,cache);
+  ThreeJSExport(app,geom,out,cache);
 }

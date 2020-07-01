@@ -226,10 +226,11 @@ IPython visualizations run in a Jupyter notebook in a web browser, using a
 WebGL widget to render the content.  The Python code communicates with the 
 browser upon certain calls to update the visualization. 
 
-To use this, first call ``vis.init('IPython')``.  Then, in the cell that
-you want to show the WebGL widget, call ``vis.show()``.  You can create new
-windows to show multiple worlds, and use ``setWindow`` to switch between which
-widget you'd like subsequent calls to modify.
+This mode will be enabled by default inside a Jupyter notebook, or if you first
+call ``vis.init('IPython')``.  In the cell in which you want to show the WebGL
+widget, call ``vis.show()``.  To show multiple widgets you can create new vis
+windows, and use ``setWindow`` to switch between which widget you'd like
+subsequent calls to modify.
 
 The WebGL widget is updated automatically upon ``addX``, ``setColor``,
 ``clear``, and ``hide`` calls, but it can't tell when something changes in the
@@ -507,6 +508,18 @@ _backend = None
 #the _WindowManager instance
 _window_manager = None
 
+def _isnotebook():
+    try:
+        shell = get_ipython().__class__.__name__
+        if shell == 'ZMQInteractiveShell':
+            return True   # Jupyter notebook or qtconsole
+        elif shell == 'TerminalInteractiveShell':
+            return False  # Terminal running IPython
+        else:
+            return False  # Other type (?)
+    except NameError:
+        return False      # Probably standard Python interpreter
+
 def init(backends=None):
     """Initializes the vis module using some visualization backend.  `backends`
     can be None, in which case it tries using PyQt, then GLUT, then IPython in
@@ -524,7 +537,10 @@ def init(backends=None):
         #already initialized
         return _backend
     if backends is None:
-        backends = ['PyQt','GLUT','IPython','HTML']
+        if _isnotebook():
+            backends = ['IPython']
+        else:
+            backends = ['PyQt','GLUT','IPython','HTML']
     if isinstance(backends,str):
         backends = [backends]
     OpenGLBackends = ['PyQt','PyQt4','PyQt5','GLUT']
@@ -583,7 +599,7 @@ def scene():
         return None
     return _window_manager.scene()
 
-def createWindow(title):
+def createWindow(title=None):
     """Creates a new window (and sets it active).
 
     Returns:
@@ -945,8 +961,29 @@ def hide(name,hidden=True):
 def edit(name,doedit=True):
     """Turns on/off visual editing of some item. 
 
-    Only items of type point, transform, coordinate.Point, coordinate.Transform, coordinate.Frame, config,
-    robot, and rigid object are currently accepted.
+    In OpenGL mode, currently accepts items of type:
+
+    - Vector3 (3-list)
+    - Matrix3 (9-list)
+    - Config (n-list, where n is the # of robot links)
+    - RigidTransform (so3 object)
+    - :class:`~klampt.robotsim.RobotModel`
+    - :class:`~klampt.robotsim.RigidObjectModel`
+    - :class:`~klampt.model.coordinate.Point`
+    - :class:`~klampt.model.coordinate.Transform`
+    - :class:`~klampt.model.coordinate.Frame`
+
+    In IPython mode, currently accepts items of type:
+
+    - Vector3 (3-lists)
+    - Config (n-list, where n is the # of robot links)
+    - RigidTransform (so3 objects)
+    - :class:`~klampt.robotsim.RobotModel`
+    - :class:`~klampt.robotsim.RigidObjectModel`
+    - :class:`~klampt.model.coordinate.Point`
+    - :class:`~klampt.model.coordinate.Transform`
+    - :class:`~klampt.model.coordinate.Frame`
+
     """
     scene().edit(name,doedit)
 
@@ -968,18 +1005,23 @@ def setAttribute(name,attr,value):
 
     - 'robot': the index of the robot associated with this (default 0)
     - 'color': the item's color (r,g,b) or (r,g,b,a)
-    - 'size': the size of the plot or text
-    - 'length': the length of axes in RigidTransform
+    - 'size': the size of the plot, text, point, ContactPoint, or IKObjective
+    - 'length': the length of axes in RigidTransform, or normal in ContactPoint
     - 'width': the width of axes and trajectory curves
     - 'duration': the duration of a plot
-    - 'pointSize': for a trajectory, the size of points (default None, set to 0 to disable drawing points)
+    - 'pointSize': for a trajectory, the size of points (default None, set to 0
+       to disable drawing points)
     - 'pointColor': for a trajectory, the size of points (default None)
-    - 'endeffectors': for a RobotTrajectory, the list of end effectors to plot (default the last link).
-    - 'maxConfigs': for a Configs resource, the maximum number of drawn configurations (default 10)
-    - 'fancy': for RigidTransform objects, whether the axes are drawn with boxes or lines (default False)
-    - 'type': for ambiguous items, like a 3-item list when the robot has 3 links, specifies the type to be
-       used.  For example, 'Config' draws the item as a robot configuration, while 'Vector3' or 'Point'
-       draws it as a point.
+    - 'endeffectors': for a RobotTrajectory, the list of end effectors to plot
+       (default the last link).
+    - 'maxConfigs': for a Configs resource, the maximum number of drawn
+       configurations (default 10)
+    - 'fancy': for RigidTransform objects, whether the axes are drawn with boxes
+       or lines (default False)
+    - 'type': for ambiguous items, like a 3-item list when the robot has 3
+       links, specifies the type to be used.  For example, 'Config' draws the
+       item as a robot configuration, while 'Vector3' or 'Point' draws it as a
+       point.
     - 'label': a replacement label (str)
     - 'hide_label': if True, the label will be hidden
 
@@ -2613,43 +2655,43 @@ class VisAppearance:
         item = self.item
         if isinstance(item,coordinates.Point):
             res = PointPoser()
-            res.set(self.item.worldCoordinates())
-            res.setAxes(self.item.frame().worldCoordinates()[0])
+            res.set(item.worldCoordinates())
+            res.setAxes(item.frame().worldCoordinates()[0])
         elif isinstance(item,coordinates.Direction):
             res = PointPoser()
-            res.set(self.item.worldCoordinates())
-            res.setAxes(self.item.frame().worldCoordinates()[0])
+            res.set(item.worldCoordinates())
+            res.setAxes(item.frame().worldCoordinates()[0])
         elif isinstance(item,coordinates.Frame):
             res = TransformPoser()
-            res.set(*self.item.worldCoordinates())
-        elif isinstance(self.item,RobotModel):
-            res = RobotPoser(self.item)
-        elif isinstance(self.item,SubRobotModel):
-            res = RobotPoser(self.item._robot)
-            res.setActiveDofs(self.item.links);
-        elif isinstance(self.item,RigidObjectModel):
-            res = ObjectPoser(self.item)
-        elif isinstance(self.item,(list,tuple)):
+            res.set(*item.worldCoordinates())
+        elif isinstance(item,RobotModel):
+            res = RobotPoser(item)
+        elif isinstance(item,SubRobotModel):
+            res = RobotPoser(item._robot)
+            res.setActiveDofs(item.links);
+        elif isinstance(item,RigidObjectModel):
+            res = ObjectPoser(item)
+        elif isinstance(item,(list,tuple)):
             #determine if it's a rotation, transform, or point
-            itype = objectToVisType(self.item,None)
+            itype = objectToVisType(item,None)
             if itype == 'Vector3':
                 res = PointPoser()
-                res.set(self.item)
+                res.set(item)
             elif itype == 'Matrix3':
                 res = TransformPoser()
                 res.enableRotation(True)
                 res.enableTranslation(False)
-                res.set(self.item)
+                res.set(item)
             elif itype == 'RigidTransform':
                 res = TransformPoser()
                 res.enableRotation(True)
                 res.enableTranslation(True)
-                res.set(*self.item)
+                res.set(*item)
             elif itype == 'Config':
                 if world is not None and world.numRobots() > 0 and world.robot(0).numLinks() == len(item):
                     #it's a valid configuration
                     oldconfig = world.robot(0).getConfig()
-                    world.robot(0).setConfig(self.item)
+                    world.robot(0).setConfig(item)
                     res = RobotPoser(world.robot(0))
                     world.robot(0).setConfig(oldconfig)
                 else:
@@ -2659,7 +2701,7 @@ class VisAppearance:
                 print("VisAppearance.make_editor(): Warning, editor for object of type",itype,"not defined")
                 return
         else:
-            print("VisAppearance.make_editor(): Warning, editor for object of type",self.item.__class__.__name__,"not defined")
+            print("VisAppearance.make_editor(): Warning, editor for object of type",item.__class__.__name__,"not defined")
             return
         self.editor = res
 
@@ -3239,7 +3281,7 @@ class _WindowManager:
         raise NotImplementedError()
     def setWindowName(self,name):
         raise NotImplementedError()
-    def createWindow(self,frontend=None):
+    def createWindow(self,title):
         raise NotImplementedError()
     def setWindow(self,id):
         raise NotImplementedError()

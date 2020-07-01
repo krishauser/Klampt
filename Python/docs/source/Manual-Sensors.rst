@@ -58,8 +58,9 @@ The following sensors are natively supported:
    -  ``TimeDelayedSensor``: Delays the measurements provided by another sensor.
 
 
-At the user's level of abstraction, they generically provide streaming
-numerical-valued measurements. It is up to the controller to process these raw
+Every simulation time step, a sensor produces a set of measurements, which is
+just a vector of floating-point numbers. The interpretation of these
+measurements is sensor-dependent. It is up to the controller to process these raw
 measurements into meaningful information.
 
 Each sensor obeys a standard interface for configuring the sensor's settings and
@@ -68,18 +69,15 @@ attribute/value pairs, which are fed to the sensor's ``setSetting`` method.
 More details on measurements and sensor-specific settings are
 `listed below <#sensor-measurements-and-attributes>`__.
 
+
 XML configuration
 -------------------
 
 
-To use sensors in a simulation, they must first be defined in a
-simulation world file.
+To use sensors in a simulation, they must either be defined in a
+simulation world file or programmatically.
 
-.. note::
-   Sensors cannot yet be defined programmatically in the Python API.
-   This functionality may be supported in the future.
-
-Sensors are defined, with initial settings, via an XML tag
+In XML world files, sensors and their settings are defined, via an XML tag
 of the form
 
 .. highlight:: xml
@@ -94,9 +92,13 @@ of the form
 
 These XML strings can be inserted into several places:
 
-#. .rob files under a line::
+#. .rob files referring to an external sensor XML file under a line::
 
       property sensors [SENSORS_XML_FILE]
+
+   or embedded in the .rob file::
+
+      property sensors <sensors> <TheSensorType name="some_name" attr1="value1" attr2="value2" > </sensors>
 
 #. URDF files under the ``<klampt>`` element, and
 
@@ -112,10 +114,12 @@ example of configuring sensors in a world XML file.
 API summary
 ------------
 
-The main interface to sensors is :class:`~klampt.SimRobotSensor`
+The main interface to sensors is :class:`~klampt.SimRobotSensor`.
 
 -  ``sensor = controller.sensor(index or name)``: retrieves a
-   SimRobotSensor reference.
+   SimRobotSensor reference from a :class:`SimRobotController`.
+-  ``sensor = SimRobotSensor(controller,name,type)``: creates a new
+   sensor for the SimRobotController of the given name and type string.
 -  ``sensor.name()``: gets the sensor’s name string
 -  ``sensor.type()``: gets the sensor’s type string
 -  ``sensor.measurementNames()``: returns a list of strings naming the
@@ -128,10 +132,13 @@ The main interface to sensors is :class:`~klampt.SimRobotSensor`
    returned as a string
 
 It is often useful to retrieve hypothetical sensor data without actually
-running a simulation, in particular for visual sensors.
+running a physics simulation, in particular for visual sensors.  This can
+be accomplished using the kinematic simulation functions:
 
 -  ``sensor.kinematicSimulate(world,dt)``: kinematically simulates the
    sensor for its corresponding robot in the given world.
+-  ``sensor.kinematicReset()``: resets any internal state for the
+   kinematic simulation.
 
 The `sensing <klampt.model.sensing.html>`__
 module contains utility functions for reading sensor transforms and
@@ -159,7 +166,7 @@ Settings are:
 -  ``qvariance`` (list of floats): variance of each reading, in radians
 
 `C++ API
-documentation <http://motion.pratt.duke.edu/klampt/klampt_docs/classJointPositionSensor.html>`__.
+documentation <http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classJointPositionSensor.html>`__.
 
 ``JointVelocitySensor``
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -174,7 +181,7 @@ Settings are:
 -  ``qvariance`` (list of floats): variance of each reading, in rad/s.
 
 `C++ API
-documentation <http://motion.pratt.duke.edu/klampt/klampt_docs/classJointVelocitySensor.html>`__.
+documentation <http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classJointVelocitySensor.html>`__.
 
 ``CameraSensor``
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -182,67 +189,87 @@ documentation <http://motion.pratt.duke.edu/klampt/klampt_docs/classJointVelocit
 Simulates a camera or RGB-D sensor. Measurements give the pixel
 measurements of the RGB sensor (if present) followed by the pixel
 measurements of the depth sensor (if present). RGB measurements are
-three floating point measurements in the range [0,1] giving the RGB
-channels of each pixel, in scan-line order. Depth measurements are in
-meters.
+give the RGB channels of each pixel, in scan-line order (left to right,
+top to bottom). Depth measurements follow the same scan-line order, but are
+given in meters.
+
+RGB values are packed in a somewhat odd way.  An RGB triple (r,g,b) consists of 
+three byte-valued measurements in the range [0,255]. They are then packed into
+an integer and then cast to a float.  In other words, the value you receive is
+``float(r<<16 | g << 8 | b)``.
+
+To convert an RGB measurement v to an (r,g,b) triple, you can use the
+following code:
+
+.. code:: python
+
+    temp = int(v)
+    r,g,b = (v>>16)%0xff,(v>>8)%0xff,v%0xff
+
+See also the :func:`~klampt.model.sensing.camera_to_images` and :func:`~klampt.model.sensing.camera_to_points`
+utility functions.
 
 Settings are:
 
--  ``link`` (int): the link on which this sensor lies.
+-  ``link`` (int): the link on which this sensor lies.  -1 indicates the world frame.
 -  ``rgb`` (bool): if true, the camera provides RGB output.
 -  ``depth`` (bool): if true, the camera provides depth output.
 -  ``xres``, ``yres`` (int): the x and y resolution of the sensor.
 -  ``xfov``, ``yfov`` (float): the x and y field of view, in radians.
 -  ``zmin``, ``zmax`` (float): minimum and maximum range of the depth
    sensor.
+-  ``T`` (RigidTransform): the camera's transform on the designated link.  Z is
+   forward, X is right, and Y is down.
+   Use :func:`~klampt.model.sensing.set_sensor_xform` and
+   :func:`~klampt.model.sensing.get_sensor_xform` to easily set and get this value.
 
 `C++ API
-documentation <http://motion.pratt.duke.edu/klampt/klampt_docs/classCameraSensor.html>`__.
+documentation <http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classCameraSensor.html>`__.
 
 ``LaserRangeSensor``
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-See the `C++ API documentation <http://motion.pratt.duke.edu/klampt/klampt_docs/classLaserRangeSensor.html>`__ for attributes.
+See the `C++ API documentation <http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classLaserRangeSensor.html>`__ for attributes.
 
 ``DriverTorqueSensor``
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-See the `C++ API documentation <http://motion.pratt.duke.edu/klampt/klampt_docs/classDriverTorqueSensor.html>`__ for attributes.
+See the `C++ API documentation <http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classDriverTorqueSensor.html>`__ for attributes.
 
 ``ContactSensor``
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-See the `C++ API documentation <http://motion.pratt.duke.edu/klampt/klampt_docs/classContactSensorSensor.html>`__ for attributes.
+See the `C++ API documentation <http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classContactSensorSensor.html>`__ for attributes.
 
 ``ForceTorqueSensor``
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-See the `C++ API documentation <http://motion.pratt.duke.edu/klampt/klampt_docs/classForceTorqueSensor.html>`__ for attributes.
+See the `C++ API documentation <http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classForceTorqueSensor.html>`__ for attributes.
 
 ``Accelerometer``
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-See the `C++ API documentation <http://motion.pratt.duke.edu/klampt/klampt_docs/classAccelerometer.html>`__ for attributes.
+See the `C++ API documentation <http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classAccelerometer.html>`__ for attributes.
 
 ``TiltSensor``
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-See the `C++ API documentation <http://motion.pratt.duke.edu/klampt/klampt_docs/classTiltSensor.html>`__ for attributes.
+See the `C++ API documentation <http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classTiltSensor.html>`__ for attributes.
 
 ``GyroSensor``
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-See the `C++ API documentation <http://motion.pratt.duke.edu/klampt/klampt_docs/classGyroSensor.html>`__ for attributes.
+See the `C++ API documentation <http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classGyroSensor.html>`__ for attributes.
 
 ``IMUSensor``
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-See the `C++ API documentation <http://motion.pratt.duke.edu/klampt/klampt_docs/classIMUSensor.html>`__ for attributes.
+See the `C++ API documentation <http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classIMUSensor.html>`__ for attributes.
 
 ``FilteredSensor``
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-See the `C++ API documentation <http://motion.pratt.duke.edu/klampt/klampt_docs/classFilteredSensor.html>`__ for attributes.
+See the `C++ API documentation <http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classFilteredSensor.html>`__ for attributes.
 
 
 
@@ -452,5 +479,60 @@ each time it is called.
       rgb.save("last_rgb_image.jpg","JPEG")
       depth.save("last_depth_image.jpg","JPEG")
 
-(Note that another convenience routine, ``sensing.camera_to_points``, processes
+(Note that another convenience routine, :meth:`klampt.model.sensing.camera_to_points`, processes
 the camera measurements into point clouds.)
+
+
+Interactions between camera sensors and threading
+----------------------------
+
+Although most sensors can be used very straightforwardly offline or in conjunction 
+with the `klampt.vis <Manual-visualization.html>`__ module, camera sensors have a bit of
+an odd interaction.  For optimal performance they will use OpenGL when it is
+initialized, but will fall back to (much slower) software emulation if OpenGL has 
+not been initialized.  These two methods provide different results, and so OpenGL
+is preferred.  However, OpenGL has subtle interactions with threading and
+windowing systems, including the ``klampt.vis`` module.  There are four ways to
+get this to work:
+
+Method 1: No OpenGL.  If you are running a console program or in Jupyter notebook,
+the sensor simulator will fall back to software emulation.
+
+Method 2: :class:`~klampt.vis.glinterface.GLPluginInterface`.  Here, all of your
+simulation code should go into this plugin interface and run in a ``klampt.vis`` GUI.
+As in the example shown above, there are no negative interactions between the GUI and
+the renderer.
+
+Method 3: ``klampt.vis`` thread injection.  Call your simulation code within the
+visualization thread using the :func:`~klampt.vis.visualization.threadCall`
+function.  This is fully compatible with the visualizer.
+
+Method 4: manual OpenGL context creation. This method is suitable for console scripts
+that don't use the ``klampt.vis`` module.  The easiest way to do this in Python is with
+GLUT, creating a tiny window that doesn't really show up.  Note that you have to set up
+your own lighting and background color; otherwise, the RGB scene will be really dark. 
+
+.. code :: python
+
+    #WORKAROUND FOR OPENGL INITIALIZATION... call before simulating sensor
+    from OpenGL.GLUT import *
+    from OpenGL.GL import *
+    glutInit ([])
+    glutInitDisplayMode (GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH | GLUT_MULTISAMPLE)
+    glutInitWindowSize (1, 1);
+    windowID = glutCreateWindow ("test")
+
+    # Default background color
+    glClearColor(0.8,0.8,0.9,0)
+
+    # Default light source
+    glLightfv(GL_LIGHT0,GL_POSITION,[0,-1,2,0])
+    glLightfv(GL_LIGHT0,GL_DIFFUSE,[1,1,1,1])
+    glLightfv(GL_LIGHT0,GL_SPECULAR,[1,1,1,1])
+    glEnable(GL_LIGHT0)
+
+    glLightfv(GL_LIGHT1,GL_POSITION,[-1,2,1,0])
+    glLightfv(GL_LIGHT1,GL_DIFFUSE,[0.5,0.5,0.5,1])
+    glLightfv(GL_LIGHT1,GL_SPECULAR,[0.5,0.5,0.5,1])
+    glEnable(GL_LIGHT1)
+

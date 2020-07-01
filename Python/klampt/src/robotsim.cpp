@@ -28,6 +28,7 @@
 #include <KrisLibrary/GLdraw/drawMesh.h>
 #include <KrisLibrary/GLdraw/Widget.h>
 #include <KrisLibrary/GLdraw/TransformWidget.h>
+#include <KrisLibrary/geometry/ConvexHull3D.h>
 #include <Klampt/View/ObjectPoseWidget.h>
 #include <Klampt/View/RobotPoseWidget.h>
 #include <KrisLibrary/utils/AnyCollection.h>

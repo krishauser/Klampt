@@ -1,7 +1,11 @@
-from ..visualization import _WindowManager,VisualizationScene,VisPlot
-from ..ipython import KlamptWidget
+from ..visualization import _WindowManager,VisualizationScene,VisPlot,objectToVisType
+from ..ipython import KlamptWidget,EditPoint,EditTransform,EditConfig
+from ...model import coordinates
+from ...model.subrobot import SubRobotModel
+from ...robotsim import WorldModel,RobotModel,RigidObjectModel
 from IPython.display import display
 import math
+import weakref
 
 class KlamptWidgetAdaptor(KlamptWidget,VisualizationScene):
     """Handles the conversion between vis calls and the KlamptWidget."""
@@ -11,6 +15,7 @@ class KlamptWidgetAdaptor(KlamptWidget,VisualizationScene):
         self._textItems = set()
         self.plot_axs = dict()
         self.axs = None
+        self._editors = dict()
 
     def addAction(self,hook,short_text,key,description):
         raise NotImplementedError("Can't add actions to this frontend")
@@ -19,6 +24,7 @@ class KlamptWidgetAdaptor(KlamptWidget,VisualizationScene):
         KlamptWidget.clear(self)
         VisualizationScene.clear(self)
         self._textItems = set()
+        self._editors = []
 
     def clearText(self):
         VisualizationScene.clearText(self)
@@ -30,14 +36,21 @@ class KlamptWidgetAdaptor(KlamptWidget,VisualizationScene):
             self._textItems = set()
 
     def add(self,name,item,keepAppearance=False,**kwargs):
-        try:
-            KlamptWidget.add(self,name,item)
-        except ValueError:
-            raise ValueError("Can't draw items of type "+item.__class__.__name__+" in Jupyter notebook")
+        handled = False
+        if 'size' in kwargs:
+            if hasattr(item,'__iter__') and len(item)==3:
+                KlamptWidget.addSphere(self,name,item[0],item[1],item[2],kwargs['size'])
+                handled = True
+        if not handled:
+            try:
+                KlamptWidget.add(self,name,item)
+            except ValueError:
+                raise ValueError("Can't draw items of type "+item.__class__.__name__+" in Jupyter notebook")
         if 'color' in kwargs:
             KlamptWidget.setColor(self,name,*kwargs['color'])
-
-        VisualizationScene.add(self,name,item,keepAppearance,**kwargs)
+        
+        #VisualizationScene.add(self,name,item,keepAppearance,**kwargs)
+        VisualizationScene.add(self,name,item,keepAppearance)
 
     def addText(self,name,text,pos=None):
         self._textItems.add(name)
@@ -46,16 +59,95 @@ class KlamptWidgetAdaptor(KlamptWidget,VisualizationScene):
     def remove(self,name):
         VisualizationScene.remove(self,name)
         KlamptWidget.remove(self,name)
+        if name in self._textItems:
+            self._textItems.remove(name)
+        if name in self._editors:
+            del self._editors[name]
 
     def setItemConfig(self,name,value):
         VisualizationScene.setItemConfig(self,name,value)
+        if name in self._editors:
+            print("vis_ipython: TODO: update editor from setItemConfig")
 
     def hideLabel(self,name,hidden=True):
         #no labels, ignore silently
         pass
 
+    def make_editor(self,obj,world):
+        if obj.editor is not None:
+            return 
+        item = obj.item
+        if isinstance(item,coordinates.Point):
+            res = EditPoint(item.worldCoordinates(),klampt_widget=weakref.proxy(self),point_name=obj.name)
+        elif isinstance(item,coordinates.Direction):
+            res = EditPoint(item.worldCoordinates(),klampt_widget=weakref.proxy(self),point_name=obj.name)
+        elif isinstance(item,coordinates.Frame):
+            res = EditTransform(item.worldCoordinates(),klampt_widget=weakref.proxy(self),xform_name=obj.name)
+        elif isinstance(item,RobotModel):
+            link_selector = 'all'
+            if item.numLinks() > 10:
+                link_selector = 'dropdown'
+            elif item.numLinks() > 4:
+                link_selector = 'dropdown'
+            res = EditConfig(item,klampt_widget=weakref.proxy(self),link_selector=link_selector)
+        elif isinstance(item,SubRobotModel):
+            link_selector = 'all'
+            if len(item.links) > 10:
+                link_selector = 'dropdown'
+            elif len(item.links) > 4:
+                link_selector = 'dropdown'
+            res = EditConfig(item._robot,klampt_widget=weakref.proxy(self),link_subset=item.links,link_selector=link_selector)
+        elif isinstance(item,RigidObjectModel):
+            res = EditTransform(item.getTransform(),klampt_widget=weakref.proxy(self),xform_name=obj.name,callback=lambda T:item.setTranform(*T))
+        elif isinstance(item,(list,tuple)):
+            #determine if it's a rotation, transform, or point
+            itype = objectToVisType(item,None)
+            if itype == 'Vector3':
+                res = EditPoint(item,klampt_widget=weakref.proxy(self),point_name=obj.name)
+            elif itype == 'Matrix3':
+                print("vis_ipython.make_editor(): Warning, editor for object of type",itype,"not defined")
+                return
+            elif itype == 'RigidTransform':
+                res = EditTransform(item,klampt_widget=weakref.proxy(self),xform_name=obj.name)
+            elif itype == 'Config':
+                if world is not None and world.numRobots() > 0 and world.robot(0).numLinks() == len(item):
+                    #it's a valid configuration
+                    oldconfig = world.robot(0).getConfig()
+                    world.robot(0).setConfig(item)
+                    link_selector = 'all'
+                    if len(item) > 10:
+                        link_selector = 'dropdown'
+                    elif len(item) > 4:
+                        link_selector = 'dropdown'
+                    res = EditConfig(world.robot(0),ghost=obj.name,klampt_widget=weakref.proxy(self),link_selector=link_selector)
+                    world.robot(0).setConfig(oldconfig)
+                else:
+                    print("vis_ipython.make_editor(): Warning, editor for object of type",itype,"cannot be associated with a robot")
+                    return
+            else:
+                print("vis_ipython.make_editor(): Warning, editor for object of type",itype,"not defined")
+                return
+        else:
+            print("vis_ipython.make_editor(): Warning, editor for object of type",item.__class__.__name__,"not defined")
+            return
+        obj.editor = res
+
     def edit(self,name,doedit=True):
-        raise RuntimeError("IPython: can't do visual editing.  Try klampt.ipython.EditPoint, etc.")
+        global _globalLock
+        obj = self.getItem(name)
+        if obj is None:
+            raise ValueError("Object "+name+" does not exist in visualization")
+        if doedit:
+            world = self.items.get('world',None)
+            if world is not None:
+                world=world.item
+            self.make_editor(obj,world)
+            if obj.editor is not None:
+                self._editors[name] = obj.editor
+        else:
+            if obj.editor:
+                del self._editors[name]
+        self.doRefresh = True
 
     def hide(self,name,hidden=True):
         VisualizationScene.hide(self,name,hidden)
@@ -66,7 +158,9 @@ class KlamptWidgetAdaptor(KlamptWidget,VisualizationScene):
         if attr == 'color':
             KlamptWidget.setColor(self,item.name,*value)
         elif attr == 'size':
-            #TODO: modify point size
+            #modify point size
+            if hasattr(item.item,'__iter__') and len(item.item)==3:
+                KlamptWidget.addSphere(self,item.name,item.item[0],item.item[1],item.item[2],value)
             pass
         #can't handle any other attributes right now
 
@@ -192,7 +286,7 @@ class IPythonWindowManager(_WindowManager):
         return self.windows[self.current_window]
     def scene(self):
         return self.windows[self.current_window]
-    def createWindow(self):
+    def createWindow(self,title):
         self.windows.append(KlamptWidgetAdaptor())
         self.current_window = len(self.windows)-1
         return self.current_window
@@ -240,6 +334,8 @@ class IPythonWindowManager(_WindowManager):
         self.quit = False
         self.displayed = True
         display(self.frontend())
+        for k,v in self.frontend()._editors.items():
+            display(v)
         self.frontend().display_plots()
     def shown(self):
         return self.displayed and not self.quit

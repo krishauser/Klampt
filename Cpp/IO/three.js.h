@@ -46,7 +46,7 @@ void ThreeJSExportAppearance(const ManagedGeometry& geom,AnyCollection& out);
 ///Exports to a three.js scene Geometry instance
 void ThreeJSExport(const Geometry::AnyCollisionGeometry3D& geom,AnyCollection& out);
 ///Exports to a three.js scene Material instance
-void ThreeJSExport(const GLDraw::GeometryAppearance& app,AnyCollection& out);
+void ThreeJSExport(const GLDraw::GeometryAppearance& app,const Geometry::AnyCollisionGeometry3D& geom,AnyCollection& out);
 
 /*@}*/
 
