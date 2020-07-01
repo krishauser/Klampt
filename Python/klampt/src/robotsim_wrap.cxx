@@ -3011,76 +3011,77 @@ SWIG_Python_NonDynamicSetAttr(PyObject *obj, PyObject *name, PyObject *value) {
 #define SWIGTYPE_p_ContactQueryResult swig_types[2]
 #define SWIGTYPE_p_ControlledRobotSimulator swig_types[3]
 #define SWIGTYPE_p_ConvexHull swig_types[4]
-#define SWIGTYPE_p_DistanceQueryResult swig_types[5]
-#define SWIGTYPE_p_DistanceQuerySettings swig_types[6]
-#define SWIGTYPE_p_GeneralizedIKObjective swig_types[7]
-#define SWIGTYPE_p_GeneralizedIKSolver swig_types[8]
-#define SWIGTYPE_p_GeometricPrimitive swig_types[9]
-#define SWIGTYPE_p_Geometry3D swig_types[10]
-#define SWIGTYPE_p_IKGoal swig_types[11]
-#define SWIGTYPE_p_IKObjective swig_types[12]
-#define SWIGTYPE_p_IKSolver swig_types[13]
-#define SWIGTYPE_p_Mass swig_types[14]
-#define SWIGTYPE_p_ODEGeometry swig_types[15]
-#define SWIGTYPE_p_ObjectPoser swig_types[16]
-#define SWIGTYPE_p_PointCloud swig_types[17]
-#define SWIGTYPE_p_PointPoser swig_types[18]
-#define SWIGTYPE_p_RigidObject swig_types[19]
-#define SWIGTYPE_p_RigidObjectModel swig_types[20]
-#define SWIGTYPE_p_Robot swig_types[21]
-#define SWIGTYPE_p_RobotModel swig_types[22]
-#define SWIGTYPE_p_RobotModelDriver swig_types[23]
-#define SWIGTYPE_p_RobotModelLink swig_types[24]
-#define SWIGTYPE_p_RobotPoser swig_types[25]
-#define SWIGTYPE_p_SensorBase swig_types[26]
-#define SWIGTYPE_p_SimBody swig_types[27]
-#define SWIGTYPE_p_SimRobotController swig_types[28]
-#define SWIGTYPE_p_SimRobotSensor swig_types[29]
-#define SWIGTYPE_p_Simulator swig_types[30]
-#define SWIGTYPE_p_SupportResult swig_types[31]
-#define SWIGTYPE_p_Terrain swig_types[32]
-#define SWIGTYPE_p_TerrainModel swig_types[33]
-#define SWIGTYPE_p_TransformPoser swig_types[34]
-#define SWIGTYPE_p_TriangleMesh swig_types[35]
-#define SWIGTYPE_p_Viewport swig_types[36]
-#define SWIGTYPE_p_VolumeGrid swig_types[37]
-#define SWIGTYPE_p_Widget swig_types[38]
-#define SWIGTYPE_p_WidgetSet swig_types[39]
-#define SWIGTYPE_p_WorldModel swig_types[40]
-#define SWIGTYPE_p_WorldSimulation swig_types[41]
-#define SWIGTYPE_p__object swig_types[42]
-#define SWIGTYPE_p_allocator_type swig_types[43]
-#define SWIGTYPE_p_char swig_types[44]
-#define SWIGTYPE_p_difference_type swig_types[45]
-#define SWIGTYPE_p_double swig_types[46]
-#define SWIGTYPE_p_doubleArray swig_types[47]
-#define SWIGTYPE_p_dxBody swig_types[48]
-#define SWIGTYPE_p_float swig_types[49]
-#define SWIGTYPE_p_floatArray swig_types[50]
-#define SWIGTYPE_p_int swig_types[51]
-#define SWIGTYPE_p_intArray swig_types[52]
-#define SWIGTYPE_p_p__object swig_types[53]
-#define SWIGTYPE_p_size_type swig_types[54]
-#define SWIGTYPE_p_std__allocatorT_double_t swig_types[55]
-#define SWIGTYPE_p_std__allocatorT_float_t swig_types[56]
-#define SWIGTYPE_p_std__allocatorT_int_t swig_types[57]
-#define SWIGTYPE_p_std__allocatorT_std__string_t swig_types[58]
-#define SWIGTYPE_p_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t swig_types[59]
-#define SWIGTYPE_p_std__invalid_argument swig_types[60]
-#define SWIGTYPE_p_std__mapT_std__string_std__string_t swig_types[61]
-#define SWIGTYPE_p_std__vectorT_GeneralizedIKObjective_std__allocatorT_GeneralizedIKObjective_t_t swig_types[62]
-#define SWIGTYPE_p_std__vectorT_IKObjective_std__allocatorT_IKObjective_t_t swig_types[63]
-#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t swig_types[64]
-#define SWIGTYPE_p_std__vectorT_float_std__allocatorT_float_t_t swig_types[65]
-#define SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t swig_types[66]
-#define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t swig_types[67]
-#define SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t swig_types[68]
-#define SWIGTYPE_p_std__vectorT_unsigned_char_std__allocatorT_unsigned_char_t_t swig_types[69]
-#define SWIGTYPE_p_swig__SwigPyIterator swig_types[70]
-#define SWIGTYPE_p_value_type swig_types[71]
-#define SWIGTYPE_p_void swig_types[72]
-static swig_type_info *swig_types[74];
-static swig_module_info swig_module = {swig_types, 73, 0, 0, 0, 0};
+#define SWIGTYPE_p_ConvexHullProxy swig_types[5]
+#define SWIGTYPE_p_DistanceQueryResult swig_types[6]
+#define SWIGTYPE_p_DistanceQuerySettings swig_types[7]
+#define SWIGTYPE_p_GeneralizedIKObjective swig_types[8]
+#define SWIGTYPE_p_GeneralizedIKSolver swig_types[9]
+#define SWIGTYPE_p_GeometricPrimitive swig_types[10]
+#define SWIGTYPE_p_Geometry3D swig_types[11]
+#define SWIGTYPE_p_Geometry__CollisionConvexHull3D swig_types[12]
+#define SWIGTYPE_p_IKGoal swig_types[13]
+#define SWIGTYPE_p_IKObjective swig_types[14]
+#define SWIGTYPE_p_IKSolver swig_types[15]
+#define SWIGTYPE_p_Mass swig_types[16]
+#define SWIGTYPE_p_ODEGeometry swig_types[17]
+#define SWIGTYPE_p_ObjectPoser swig_types[18]
+#define SWIGTYPE_p_PointCloud swig_types[19]
+#define SWIGTYPE_p_PointPoser swig_types[20]
+#define SWIGTYPE_p_RigidObject swig_types[21]
+#define SWIGTYPE_p_RigidObjectModel swig_types[22]
+#define SWIGTYPE_p_Robot swig_types[23]
+#define SWIGTYPE_p_RobotModel swig_types[24]
+#define SWIGTYPE_p_RobotModelDriver swig_types[25]
+#define SWIGTYPE_p_RobotModelLink swig_types[26]
+#define SWIGTYPE_p_RobotPoser swig_types[27]
+#define SWIGTYPE_p_SensorBase swig_types[28]
+#define SWIGTYPE_p_SimBody swig_types[29]
+#define SWIGTYPE_p_SimRobotController swig_types[30]
+#define SWIGTYPE_p_SimRobotSensor swig_types[31]
+#define SWIGTYPE_p_Simulator swig_types[32]
+#define SWIGTYPE_p_Terrain swig_types[33]
+#define SWIGTYPE_p_TerrainModel swig_types[34]
+#define SWIGTYPE_p_TransformPoser swig_types[35]
+#define SWIGTYPE_p_TriangleMesh swig_types[36]
+#define SWIGTYPE_p_Viewport swig_types[37]
+#define SWIGTYPE_p_VolumeGrid swig_types[38]
+#define SWIGTYPE_p_Widget swig_types[39]
+#define SWIGTYPE_p_WidgetSet swig_types[40]
+#define SWIGTYPE_p_WorldModel swig_types[41]
+#define SWIGTYPE_p_WorldSimulation swig_types[42]
+#define SWIGTYPE_p__object swig_types[43]
+#define SWIGTYPE_p_allocator_type swig_types[44]
+#define SWIGTYPE_p_char swig_types[45]
+#define SWIGTYPE_p_difference_type swig_types[46]
+#define SWIGTYPE_p_double swig_types[47]
+#define SWIGTYPE_p_doubleArray swig_types[48]
+#define SWIGTYPE_p_dxBody swig_types[49]
+#define SWIGTYPE_p_float swig_types[50]
+#define SWIGTYPE_p_floatArray swig_types[51]
+#define SWIGTYPE_p_int swig_types[52]
+#define SWIGTYPE_p_intArray swig_types[53]
+#define SWIGTYPE_p_p__object swig_types[54]
+#define SWIGTYPE_p_size_type swig_types[55]
+#define SWIGTYPE_p_std__allocatorT_double_t swig_types[56]
+#define SWIGTYPE_p_std__allocatorT_float_t swig_types[57]
+#define SWIGTYPE_p_std__allocatorT_int_t swig_types[58]
+#define SWIGTYPE_p_std__allocatorT_std__string_t swig_types[59]
+#define SWIGTYPE_p_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t swig_types[60]
+#define SWIGTYPE_p_std__invalid_argument swig_types[61]
+#define SWIGTYPE_p_std__mapT_std__string_std__string_t swig_types[62]
+#define SWIGTYPE_p_std__vectorT_GeneralizedIKObjective_std__allocatorT_GeneralizedIKObjective_t_t swig_types[63]
+#define SWIGTYPE_p_std__vectorT_IKObjective_std__allocatorT_IKObjective_t_t swig_types[64]
+#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t swig_types[65]
+#define SWIGTYPE_p_std__vectorT_float_std__allocatorT_float_t_t swig_types[66]
+#define SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t swig_types[67]
+#define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t swig_types[68]
+#define SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t swig_types[69]
+#define SWIGTYPE_p_std__vectorT_unsigned_char_std__allocatorT_unsigned_char_t_t swig_types[70]
+#define SWIGTYPE_p_swig__SwigPyIterator swig_types[71]
+#define SWIGTYPE_p_value_type swig_types[72]
+#define SWIGTYPE_p_void swig_types[73]
+static swig_type_info *swig_types[75];
+static swig_module_info swig_module = {swig_types, 74, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -17548,6 +17549,342 @@ SWIGINTERN PyObject *ConvexHull_swigregister(PyObject *SWIGUNUSEDPARM(self), PyO
   return SWIG_Py_Void();
 }
 
+SWIGINTERN PyObject *_wrap_ConvexHullProxy_pointer_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ConvexHullProxy *arg1 = (ConvexHullProxy *) 0 ;
+  Geometry::CollisionConvexHull3D *arg2 = (Geometry::CollisionConvexHull3D *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:ConvexHullProxy_pointer_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ConvexHullProxy, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ConvexHullProxy_pointer_set" "', argument " "1"" of type '" "ConvexHullProxy *""'"); 
+  }
+  arg1 = reinterpret_cast< ConvexHullProxy * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_Geometry__CollisionConvexHull3D, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "ConvexHullProxy_pointer_set" "', argument " "2"" of type '" "Geometry::CollisionConvexHull3D *""'"); 
+  }
+  arg2 = reinterpret_cast< Geometry::CollisionConvexHull3D * >(argp2);
+  if (arg1) (arg1)->pointer = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_ConvexHullProxy_pointer_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ConvexHullProxy *arg1 = (ConvexHullProxy *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  Geometry::CollisionConvexHull3D *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:ConvexHullProxy_pointer_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ConvexHullProxy, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ConvexHullProxy_pointer_get" "', argument " "1"" of type '" "ConvexHullProxy *""'"); 
+  }
+  arg1 = reinterpret_cast< ConvexHullProxy * >(argp1);
+  result = (Geometry::CollisionConvexHull3D *) ((arg1)->pointer);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Geometry__CollisionConvexHull3D, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_ConvexHullProxy_fromTransform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ConvexHullProxy *arg1 = (ConvexHullProxy *) 0 ;
+  ConvexHullProxy *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:ConvexHullProxy_fromTransform",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ConvexHullProxy, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ConvexHullProxy_fromTransform" "', argument " "1"" of type '" "ConvexHullProxy *""'"); 
+  }
+  arg1 = reinterpret_cast< ConvexHullProxy * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_ConvexHullProxy,  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "ConvexHullProxy_fromTransform" "', argument " "2"" of type '" "ConvexHullProxy &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "ConvexHullProxy_fromTransform" "', argument " "2"" of type '" "ConvexHullProxy &""'"); 
+  }
+  arg2 = reinterpret_cast< ConvexHullProxy * >(argp2);
+  {
+    try {
+      (arg1)->fromTransform(*arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_ConvexHullProxy_fromHull(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ConvexHullProxy *arg1 = (ConvexHullProxy *) 0 ;
+  ConvexHullProxy *arg2 = 0 ;
+  ConvexHullProxy *arg3 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:ConvexHullProxy_fromHull",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ConvexHullProxy, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ConvexHullProxy_fromHull" "', argument " "1"" of type '" "ConvexHullProxy *""'"); 
+  }
+  arg1 = reinterpret_cast< ConvexHullProxy * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_ConvexHullProxy,  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "ConvexHullProxy_fromHull" "', argument " "2"" of type '" "ConvexHullProxy &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "ConvexHullProxy_fromHull" "', argument " "2"" of type '" "ConvexHullProxy &""'"); 
+  }
+  arg2 = reinterpret_cast< ConvexHullProxy * >(argp2);
+  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_ConvexHullProxy,  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "ConvexHullProxy_fromHull" "', argument " "3"" of type '" "ConvexHullProxy &""'"); 
+  }
+  if (!argp3) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "ConvexHullProxy_fromHull" "', argument " "3"" of type '" "ConvexHullProxy &""'"); 
+  }
+  arg3 = reinterpret_cast< ConvexHullProxy * >(argp3);
+  {
+    try {
+      (arg1)->fromHull(*arg2,*arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_ConvexHullProxy_setRelativeTransform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ConvexHullProxy *arg1 = (ConvexHullProxy *) 0 ;
+  double *arg2 ;
+  double *arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[9] ;
+  double temp3[3] ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:ConvexHullProxy_setRelativeTransform",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ConvexHullProxy, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ConvexHullProxy_setRelativeTransform" "', argument " "1"" of type '" "ConvexHullProxy *""'"); 
+  }
+  arg1 = reinterpret_cast< ConvexHullProxy * >(argp1);
+  {
+    if (!convert_darray(obj1,temp2,9)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    if (!convert_darray(obj2,temp3,3)) {
+      return NULL;
+    }
+    arg3 = &temp3[0];
+  }
+  {
+    try {
+      (arg1)->setRelativeTransform((double const (*))arg2,(double const (*))arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_ConvexHullProxy_findSupport(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ConvexHullProxy *arg1 = (ConvexHullProxy *) 0 ;
+  double *arg2 ;
+  double *arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  double temp3[3] ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  {
+    arg3 = &temp3[0];
+  }
+  if (!PyArg_ParseTuple(args,(char *)"OO:ConvexHullProxy_findSupport",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ConvexHullProxy, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ConvexHullProxy_findSupport" "', argument " "1"" of type '" "ConvexHullProxy *""'"); 
+  }
+  arg1 = reinterpret_cast< ConvexHullProxy * >(argp1);
+  {
+    if (!convert_darray(obj1,temp2,3)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    try {
+      (arg1)->findSupport((double const (*))arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg3,3);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_ConvexHullProxy(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ConvexHullProxy *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)":new_ConvexHullProxy")) SWIG_fail;
+  {
+    try {
+      result = (ConvexHullProxy *)new ConvexHullProxy();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_ConvexHullProxy, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_ConvexHullProxy(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ConvexHullProxy *arg1 = (ConvexHullProxy *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:delete_ConvexHullProxy",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_ConvexHullProxy, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_ConvexHullProxy" "', argument " "1"" of type '" "ConvexHullProxy *""'"); 
+  }
+  arg1 = reinterpret_cast< ConvexHullProxy * >(argp1);
+  {
+    try {
+      delete arg1;
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *ConvexHullProxy_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj;
+  if (!PyArg_ParseTuple(args,(char *)"O:swigregister", &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_ConvexHullProxy, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
 SWIGINTERN PyObject *_wrap_PointCloud_numPoints(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   PointCloud *arg1 = (PointCloud *) 0 ;
@@ -20882,123 +21219,6 @@ SWIGINTERN PyObject *DistanceQueryResult_swigregister(PyObject *SWIGUNUSEDPARM(s
   return SWIG_Py_Void();
 }
 
-SWIGINTERN PyObject *_wrap_SupportResult_support_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  SupportResult *arg1 = (SupportResult *) 0 ;
-  std::vector< double,std::allocator< double > > *arg2 = (std::vector< double,std::allocator< double > > *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OO:SupportResult_support_set",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SupportResult, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SupportResult_support_set" "', argument " "1"" of type '" "SupportResult *""'"); 
-  }
-  arg1 = reinterpret_cast< SupportResult * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SupportResult_support_set" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > *""'"); 
-  }
-  arg2 = reinterpret_cast< std::vector< double,std::allocator< double > > * >(argp2);
-  if (arg1) (arg1)->support = *arg2;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SupportResult_support_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  SupportResult *arg1 = (SupportResult *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  std::vector< double,std::allocator< double > > *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:SupportResult_support_get",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SupportResult, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SupportResult_support_get" "', argument " "1"" of type '" "SupportResult *""'"); 
-  }
-  arg1 = reinterpret_cast< SupportResult * >(argp1);
-  result = (std::vector< double,std::allocator< double > > *)& ((arg1)->support);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, 0 |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_new_SupportResult(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  SupportResult *result = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)":new_SupportResult")) SWIG_fail;
-  {
-    try {
-      result = (SupportResult *)new SupportResult();
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_SupportResult, SWIG_POINTER_NEW |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_delete_SupportResult(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  SupportResult *arg1 = (SupportResult *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject * obj0 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"O:delete_SupportResult",&obj0)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SupportResult, SWIG_POINTER_DISOWN |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_SupportResult" "', argument " "1"" of type '" "SupportResult *""'"); 
-  }
-  arg1 = reinterpret_cast< SupportResult * >(argp1);
-  {
-    try {
-      delete arg1;
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *SupportResult_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *obj;
-  if (!PyArg_ParseTuple(args,(char *)"O:swigregister", &obj)) return NULL;
-  SWIG_TypeNewClientData(SWIGTYPE_p_SupportResult, SWIG_NewClientData(obj));
-  return SWIG_Py_Void();
-}
-
 SWIGINTERN PyObject *_wrap_ContactQueryResult_depths_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   ContactQueryResult *arg1 = (ContactQueryResult *) 0 ;
@@ -21768,34 +21988,23 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Geometry3D_from_hull_tran(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Geometry3D_asConvexHull(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Geometry3D *arg1 = (Geometry3D *) 0 ;
-  Geometry3D *arg2 = 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
   PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
+  ConvexHullProxy result;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:Geometry3D_from_hull_tran",&obj0,&obj1)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"O:Geometry3D_asConvexHull",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_from_hull_tran" "', argument " "1"" of type '" "Geometry3D *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_asConvexHull" "', argument " "1"" of type '" "Geometry3D *""'"); 
   }
   arg1 = reinterpret_cast< Geometry3D * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Geometry3D,  0  | 0);
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_from_hull_tran" "', argument " "2"" of type '" "Geometry3D const &""'"); 
-  }
-  if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_from_hull_tran" "', argument " "2"" of type '" "Geometry3D const &""'"); 
-  }
-  arg2 = reinterpret_cast< Geometry3D * >(argp2);
   {
     try {
-      (arg1)->from_hull_tran((Geometry3D const &)*arg2);
+      result = (arg1)->asConvexHull();
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -21806,139 +22015,7 @@ SWIGINTERN PyObject *_wrap_Geometry3D_from_hull_tran(PyObject *SWIGUNUSEDPARM(se
       return NULL;
     }
   }
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Geometry3D_from_hull(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Geometry3D *arg1 = (Geometry3D *) 0 ;
-  Geometry3D *arg2 = 0 ;
-  Geometry3D *arg3 = 0 ;
-  bool arg4 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  bool val4 ;
-  int ecode4 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  PyObject * obj3 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOOO:Geometry3D_from_hull",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_from_hull" "', argument " "1"" of type '" "Geometry3D *""'"); 
-  }
-  arg1 = reinterpret_cast< Geometry3D * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_Geometry3D,  0  | 0);
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_from_hull" "', argument " "2"" of type '" "Geometry3D const &""'"); 
-  }
-  if (!argp2) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_from_hull" "', argument " "2"" of type '" "Geometry3D const &""'"); 
-  }
-  arg2 = reinterpret_cast< Geometry3D * >(argp2);
-  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_Geometry3D,  0  | 0);
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "Geometry3D_from_hull" "', argument " "3"" of type '" "Geometry3D const &""'"); 
-  }
-  if (!argp3) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Geometry3D_from_hull" "', argument " "3"" of type '" "Geometry3D const &""'"); 
-  }
-  arg3 = reinterpret_cast< Geometry3D * >(argp3);
-  ecode4 = SWIG_AsVal_bool(obj3, &val4);
-  if (!SWIG_IsOK(ecode4)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "Geometry3D_from_hull" "', argument " "4"" of type '" "bool""'");
-  } 
-  arg4 = static_cast< bool >(val4);
-  {
-    try {
-      (arg1)->from_hull((Geometry3D const &)*arg2,(Geometry3D const &)*arg3,arg4);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Geometry3D_find_support(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Geometry3D *arg1 = (Geometry3D *) 0 ;
-  double *arg2 ;
-  double *arg3 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  double temp2[3] ;
-  double temp3[3] ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  
-  {
-    arg3 = &temp3[0];
-  }
-  if (!PyArg_ParseTuple(args,(char *)"OO:Geometry3D_find_support",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_find_support" "', argument " "1"" of type '" "Geometry3D *""'"); 
-  }
-  arg1 = reinterpret_cast< Geometry3D * >(argp1);
-  {
-    if (!convert_darray(obj1,temp2,3)) {
-      return NULL;
-    }
-    arg2 = &temp2[0];
-  }
-  {
-    try {
-      (arg1)->find_support((double const (*))arg2,arg3);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_Py_Void();
-  {
-    PyObject *o, *o2, *o3;
-    o = convert_darray_obj(arg3,3);
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
-  }
+  resultobj = SWIG_NewPointerObj((new ConvexHullProxy(static_cast< const ConvexHullProxy& >(result))), SWIGTYPE_p_ConvexHullProxy, SWIG_POINTER_OWN |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -22902,108 +22979,6 @@ SWIGINTERN PyObject *_wrap_Geometry3D_getCurrentTransform(PyObject *SWIGUNUSEDPA
       Py_DECREF(o3);
     }
   }
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Geometry3D_setRelativeTransform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Geometry3D *arg1 = (Geometry3D *) 0 ;
-  double *arg2 ;
-  double *arg3 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  double temp2[9] ;
-  double temp3[3] ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOO:Geometry3D_setRelativeTransform",&obj0,&obj1,&obj2)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_setRelativeTransform" "', argument " "1"" of type '" "Geometry3D *""'"); 
-  }
-  arg1 = reinterpret_cast< Geometry3D * >(argp1);
-  {
-    if (!convert_darray(obj1,temp2,9)) {
-      return NULL;
-    }
-    arg2 = &temp2[0];
-  }
-  {
-    if (!convert_darray(obj2,temp3,3)) {
-      return NULL;
-    }
-    arg3 = &temp3[0];
-  }
-  {
-    try {
-      (arg1)->setRelativeTransform((double const (*))arg2,(double const (*))arg3);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Geometry3D_setFreeRelativeTransform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  Geometry3D *arg1 = (Geometry3D *) 0 ;
-  double *arg2 ;
-  double *arg3 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  double temp2[9] ;
-  double temp3[3] ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOO:Geometry3D_setFreeRelativeTransform",&obj0,&obj1,&obj2)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_setFreeRelativeTransform" "', argument " "1"" of type '" "Geometry3D *""'"); 
-  }
-  arg1 = reinterpret_cast< Geometry3D * >(argp1);
-  {
-    if (!convert_darray(obj1,temp2,9)) {
-      return NULL;
-    }
-    arg2 = &temp2[0];
-  }
-  {
-    if (!convert_darray(obj2,temp3,3)) {
-      return NULL;
-    }
-    arg3 = &temp3[0];
-  }
-  {
-    try {
-      (arg1)->setFreeRelativeTransform((double const (*))arg2,(double const (*))arg3);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
   return NULL;
@@ -56560,13 +56535,41 @@ static PyMethodDef SwigMethods[] = {
 		""},
 	 { (char *)"delete_TriangleMesh", _wrap_delete_TriangleMesh, METH_VARARGS, (char *)"delete_TriangleMesh(TriangleMesh self)"},
 	 { (char *)"TriangleMesh_swigregister", TriangleMesh_swigregister, METH_VARARGS, NULL},
-	 { (char *)"ConvexHull_translate", _wrap_ConvexHull_translate, METH_VARARGS, (char *)"ConvexHull_translate(ConvexHull self, double const [3] t)"},
-	 { (char *)"ConvexHull_transform", _wrap_ConvexHull_transform, METH_VARARGS, (char *)"ConvexHull_transform(ConvexHull self, double const [9] R, double const [3] t)"},
+	 { (char *)"ConvexHull_translate", _wrap_ConvexHull_translate, METH_VARARGS, (char *)"\n"
+		"ConvexHull_translate(ConvexHull self, double const [3] t)\n"
+		"\n"
+		"\n"
+		"\n"
+		"Translates all the vertices by v=v+t.  \n"
+		"\n"
+		""},
+	 { (char *)"ConvexHull_transform", _wrap_ConvexHull_transform, METH_VARARGS, (char *)"\n"
+		"ConvexHull_transform(ConvexHull self, double const [9] R, double const [3] t)\n"
+		"\n"
+		"\n"
+		"\n"
+		"Transforms all the vertices by the rigid transform v=R*v+t.  \n"
+		"\n"
+		""},
 	 { (char *)"ConvexHull_points_set", _wrap_ConvexHull_points_set, METH_VARARGS, (char *)"ConvexHull_points_set(ConvexHull self, doubleVector points)"},
 	 { (char *)"ConvexHull_points_get", _wrap_ConvexHull_points_get, METH_VARARGS, (char *)"ConvexHull_points_get(ConvexHull self) -> doubleVector"},
-	 { (char *)"new_ConvexHull", _wrap_new_ConvexHull, METH_VARARGS, (char *)"new_ConvexHull() -> ConvexHull"},
+	 { (char *)"new_ConvexHull", _wrap_new_ConvexHull, METH_VARARGS, (char *)"\n"
+		"new_ConvexHull() -> ConvexHull\n"
+		"\n"
+		"\n"
+		"\n"
+		""},
 	 { (char *)"delete_ConvexHull", _wrap_delete_ConvexHull, METH_VARARGS, (char *)"delete_ConvexHull(ConvexHull self)"},
 	 { (char *)"ConvexHull_swigregister", ConvexHull_swigregister, METH_VARARGS, NULL},
+	 { (char *)"ConvexHullProxy_pointer_set", _wrap_ConvexHullProxy_pointer_set, METH_VARARGS, (char *)"ConvexHullProxy_pointer_set(ConvexHullProxy self, Geometry::CollisionConvexHull3D * pointer)"},
+	 { (char *)"ConvexHullProxy_pointer_get", _wrap_ConvexHullProxy_pointer_get, METH_VARARGS, (char *)"ConvexHullProxy_pointer_get(ConvexHullProxy self) -> Geometry::CollisionConvexHull3D *"},
+	 { (char *)"ConvexHullProxy_fromTransform", _wrap_ConvexHullProxy_fromTransform, METH_VARARGS, (char *)"ConvexHullProxy_fromTransform(ConvexHullProxy self, ConvexHullProxy hull)"},
+	 { (char *)"ConvexHullProxy_fromHull", _wrap_ConvexHullProxy_fromHull, METH_VARARGS, (char *)"ConvexHullProxy_fromHull(ConvexHullProxy self, ConvexHullProxy hull1, ConvexHullProxy hull2)"},
+	 { (char *)"ConvexHullProxy_setRelativeTransform", _wrap_ConvexHullProxy_setRelativeTransform, METH_VARARGS, (char *)"ConvexHullProxy_setRelativeTransform(ConvexHullProxy self, double const [9] R, double const [3] t)"},
+	 { (char *)"ConvexHullProxy_findSupport", _wrap_ConvexHullProxy_findSupport, METH_VARARGS, (char *)"ConvexHullProxy_findSupport(ConvexHullProxy self, double const [3] R)"},
+	 { (char *)"new_ConvexHullProxy", _wrap_new_ConvexHullProxy, METH_VARARGS, (char *)"new_ConvexHullProxy() -> ConvexHullProxy"},
+	 { (char *)"delete_ConvexHullProxy", _wrap_delete_ConvexHullProxy, METH_VARARGS, (char *)"delete_ConvexHullProxy(ConvexHullProxy self)"},
+	 { (char *)"ConvexHullProxy_swigregister", ConvexHullProxy_swigregister, METH_VARARGS, NULL},
 	 { (char *)"PointCloud_numPoints", _wrap_PointCloud_numPoints, METH_VARARGS, (char *)"\n"
 		"PointCloud_numPoints(PointCloud self) -> int\n"
 		"\n"
@@ -56957,11 +56960,6 @@ static PyMethodDef SwigMethods[] = {
 		""},
 	 { (char *)"delete_DistanceQueryResult", _wrap_delete_DistanceQueryResult, METH_VARARGS, (char *)"delete_DistanceQueryResult(DistanceQueryResult self)"},
 	 { (char *)"DistanceQueryResult_swigregister", DistanceQueryResult_swigregister, METH_VARARGS, NULL},
-	 { (char *)"SupportResult_support_set", _wrap_SupportResult_support_set, METH_VARARGS, (char *)"SupportResult_support_set(SupportResult self, doubleVector support)"},
-	 { (char *)"SupportResult_support_get", _wrap_SupportResult_support_get, METH_VARARGS, (char *)"SupportResult_support_get(SupportResult self) -> doubleVector"},
-	 { (char *)"new_SupportResult", _wrap_new_SupportResult, METH_VARARGS, (char *)"new_SupportResult() -> SupportResult"},
-	 { (char *)"delete_SupportResult", _wrap_delete_SupportResult, METH_VARARGS, (char *)"delete_SupportResult(SupportResult self)"},
-	 { (char *)"SupportResult_swigregister", SupportResult_swigregister, METH_VARARGS, NULL},
 	 { (char *)"ContactQueryResult_depths_set", _wrap_ContactQueryResult_depths_set, METH_VARARGS, (char *)"ContactQueryResult_depths_set(ContactQueryResult self, doubleVector depths)"},
 	 { (char *)"ContactQueryResult_depths_get", _wrap_ContactQueryResult_depths_get, METH_VARARGS, (char *)"ContactQueryResult_depths_get(ContactQueryResult self) -> doubleVector"},
 	 { (char *)"ContactQueryResult_points1_set", _wrap_ContactQueryResult_points1_set, METH_VARARGS, (char *)"ContactQueryResult_points1_set(ContactQueryResult self, doubleMatrix points1)"},
@@ -57030,9 +57028,12 @@ static PyMethodDef SwigMethods[] = {
 		"Creates a standalone geometry from this geometry.  \n"
 		"\n"
 		""},
-	 { (char *)"Geometry3D_from_hull_tran", _wrap_Geometry3D_from_hull_tran, METH_VARARGS, (char *)"Geometry3D_from_hull_tran(Geometry3D self, Geometry3D arg3)"},
-	 { (char *)"Geometry3D_from_hull", _wrap_Geometry3D_from_hull, METH_VARARGS, (char *)"Geometry3D_from_hull(Geometry3D self, Geometry3D arg3, Geometry3D arg4, bool arg5)"},
-	 { (char *)"Geometry3D_find_support", _wrap_Geometry3D_find_support, METH_VARARGS, (char *)"Geometry3D_find_support(Geometry3D self, double const [3] dir)"},
+	 { (char *)"Geometry3D_asConvexHull", _wrap_Geometry3D_asConvexHull, METH_VARARGS, (char *)"\n"
+		"Geometry3D_asConvexHull(Geometry3D self) -> ConvexHullProxy\n"
+		"\n"
+		"\n"
+		"\n"
+		""},
 	 { (char *)"Geometry3D_set", _wrap_Geometry3D_set, METH_VARARGS, (char *)"\n"
 		"Geometry3D_set(Geometry3D self, Geometry3D arg3)\n"
 		"\n"
@@ -57098,7 +57099,14 @@ static PyMethodDef SwigMethods[] = {
 		"Returns a GeometricPrimitive if this geometry is of type GeometricPrimitive.  \n"
 		"\n"
 		""},
-	 { (char *)"Geometry3D_getConvexHull", _wrap_Geometry3D_getConvexHull, METH_VARARGS, (char *)"Geometry3D_getConvexHull(Geometry3D self) -> ConvexHull"},
+	 { (char *)"Geometry3D_getConvexHull", _wrap_Geometry3D_getConvexHull, METH_VARARGS, (char *)"\n"
+		"Geometry3D_getConvexHull(Geometry3D self) -> ConvexHull\n"
+		"\n"
+		"\n"
+		"\n"
+		"Returns a VoumeGrid if this geometry is of type VolumeGrid.  \n"
+		"\n"
+		""},
 	 { (char *)"Geometry3D_getVolumeGrid", _wrap_Geometry3D_getVolumeGrid, METH_VARARGS, (char *)"\n"
 		"Geometry3D_getVolumeGrid(Geometry3D self) -> VolumeGrid\n"
 		"\n"
@@ -57131,7 +57139,14 @@ static PyMethodDef SwigMethods[] = {
 		"Sets this Geometry3D to a GeometricPrimitive.  \n"
 		"\n"
 		""},
-	 { (char *)"Geometry3D_setConvexHull", _wrap_Geometry3D_setConvexHull, METH_VARARGS, (char *)"Geometry3D_setConvexHull(Geometry3D self, ConvexHull arg3)"},
+	 { (char *)"Geometry3D_setConvexHull", _wrap_Geometry3D_setConvexHull, METH_VARARGS, (char *)"\n"
+		"Geometry3D_setConvexHull(Geometry3D self, ConvexHull arg3)\n"
+		"\n"
+		"\n"
+		"\n"
+		"Sets this Geometry3D to a ConvexHull.  \n"
+		"\n"
+		""},
 	 { (char *)"Geometry3D_setVolumeGrid", _wrap_Geometry3D_setVolumeGrid, METH_VARARGS, (char *)"\n"
 		"Geometry3D_setVolumeGrid(Geometry3D self, VolumeGrid arg3)\n"
 		"\n"
@@ -57209,8 +57224,6 @@ static PyMethodDef SwigMethods[] = {
 		"Gets the current transformation.  \n"
 		"\n"
 		""},
-	 { (char *)"Geometry3D_setRelativeTransform", _wrap_Geometry3D_setRelativeTransform, METH_VARARGS, (char *)"Geometry3D_setRelativeTransform(Geometry3D self, double const [9] R, double const [3] t)"},
-	 { (char *)"Geometry3D_setFreeRelativeTransform", _wrap_Geometry3D_setFreeRelativeTransform, METH_VARARGS, (char *)"Geometry3D_setFreeRelativeTransform(Geometry3D self, double const [9] R, double const [3] t)"},
 	 { (char *)"Geometry3D_translate", _wrap_Geometry3D_translate, METH_VARARGS, (char *)"\n"
 		"Geometry3D_translate(Geometry3D self, double const [3] t)\n"
 		"\n"
@@ -59690,10 +59703,17 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
+		"Deprecated: use setFreePosConstraint.  \n"
+		"\n"
+		""},
+	 { (char *)"IKObjective_setFreePosConstraint", _wrap_IKObjective_setFreePosConstraint, METH_VARARGS, (char *)"\n"
+		"IKObjective_setFreePosConstraint(IKObjective self)\n"
+		"\n"
+		"\n"
+		"\n"
 		"Manual: Sets a free position constraint.  \n"
 		"\n"
 		""},
-	 { (char *)"IKObjective_setFreePosConstraint", _wrap_IKObjective_setFreePosConstraint, METH_VARARGS, (char *)"IKObjective_setFreePosConstraint(IKObjective self)"},
 	 { (char *)"IKObjective_setFixedPosConstraint", _wrap_IKObjective_setFixedPosConstraint, METH_VARARGS, (char *)"\n"
 		"IKObjective_setFixedPosConstraint(IKObjective self, double const [3] tlocal, double const [3] tworld)\n"
 		"\n"
@@ -59816,7 +59836,8 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Loads the objective from a Klamp't-native formatted string. For a more readable\n"
-		"but verbose format, try the JSON IO routines loader.toJson/fromJson()  \n"
+		"but verbose format, try the JSON IO routines :meth:`klampt.io.loader.toJson` /\n"
+		":meth:`klampt.io.loader.fromJson`  \n"
 		"\n"
 		""},
 	 { (char *)"IKObjective_saveString", _wrap_IKObjective_saveString, METH_VARARGS, (char *)"\n"
@@ -59825,7 +59846,8 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Saves the objective to a Klamp't-native formatted string. For a more readable\n"
-		"but verbose format, try the JSON IO routines loader.toJson/fromJson()  \n"
+		"but verbose format, try the JSON IO routines :meth:`klampt.io.loader.toJson` /\n"
+		":meth:`klampt.io.loader.fromJson`  \n"
 		"\n"
 		""},
 	 { (char *)"IKObjective_goal_set", _wrap_IKObjective_goal_set, METH_VARARGS, (char *)"IKObjective_goal_set(IKObjective self, IKGoal goal)"},
@@ -61033,22 +61055,36 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Valid names are:  \n"
 		"\n"
-		"*   gravity  \n"
-		"*   simStep  \n"
-		"*   boundaryLayerCollisions  \n"
-		"*   rigidObjectCollisions  \n"
-		"*   robotSelfCollisions  \n"
-		"*   robotRobotCollisions  \n"
-		"*   adaptiveTimeStepping  \n"
-		"*   minimumAdaptiveTimeStep  \n"
-		"*   maxContacts  \n"
-		"*   clusterNormalScale  \n"
-		"*   errorReductionParameter  \n"
-		"*   dampedLeastSquaresParameter  \n"
-		"*   instabilityConstantEnergyThreshold  \n"
-		"*   instabilityLinearEnergyThreshold  \n"
-		"*   instabilityMaxEnergyThreshold  \n"
-		"*   instabilityPostCorrectionEnergy  \n"
+		"*   gravity: the gravity vector (default \"0 0 -9.8\")  \n"
+		"*   simStep: the internal simulation step (default \"0.001\")  \n"
+		"*   autoDisable: whether to disable bodies that don't move much between time\n"
+		"    steps (default \"0\", set to \"1\" for many static objects)  \n"
+		"*   boundaryLayerCollisions: whether to use the Klampt inflated boundaries for\n"
+		"    contact detection'(default \"1\", recommended)  \n"
+		"*   rigidObjectCollisions: whether rigid objects should collide (default \"1\")  \n"
+		"*   robotSelfCollisions: whether robots should self collide (default \"0\")  \n"
+		"*   robotRobotCollisions: whether robots should collide with other robots\n"
+		"    (default \"1\")  \n"
+		"*   adaptiveTimeStepping: whether adaptive time stepping should be used to\n"
+		"    improve stability. Slower but more stable. (default \"1\")  \n"
+		"*   minimumAdaptiveTimeStep: the minimum size of an adaptive time step before\n"
+		"    giving up (default \"1e-6\")  \n"
+		"*   maxContacts: max # of clustered contacts between pairs of objects (default\n"
+		"    \"20\")  \n"
+		"*   clusterNormalScale: a parameter for clustering contacts (default \"0.1\")  \n"
+		"*   errorReductionParameter: see ODE docs on ERP (default \"0.95\")  \n"
+		"*   dampedLeastSquaresParameter: see ODE docs on CFM (default \"1e-6\")  \n"
+		"*   instabilityConstantEnergyThreshold: parameter c0 in instability correction\n"
+		"    (default \"1\")  \n"
+		"*   instabilityLinearEnergyThreshold: parameter c1 in instability correction\n"
+		"    (default \"1.5\")  \n"
+		"*   instabilityMaxEnergyThreshold: parameter cmax in instability correction\n"
+		"    (default \"100000\")  \n"
+		"*   instabilityPostCorrectionEnergy: kinetic energy scaling parameter if\n"
+		"    instability is detected (default \"0.8\")  \n"
+		"\n"
+		"Instability correction kicks in whenever the kinetic energy K(t) of an object\n"
+		"exceeds min(c0*m + c1*K(t-dt),cmax). m is the object's mass.  \n"
 		"\n"
 		"See `Klampt/Simulation/ODESimulator.h\n"
 		"<http://motion.pratt.duke.edu/klampt/klampt_docs/ODESimulator_8h_source.html>`_\n"
@@ -61498,12 +61534,14 @@ static swig_type_info _swigt__p_ContactParameters = {"_p_ContactParameters", "Co
 static swig_type_info _swigt__p_ContactQueryResult = {"_p_ContactQueryResult", "ContactQueryResult *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_ControlledRobotSimulator = {"_p_ControlledRobotSimulator", "ControlledRobotSimulator *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_ConvexHull = {"_p_ConvexHull", "ConvexHull *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_ConvexHullProxy = {"_p_ConvexHullProxy", "ConvexHullProxy *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_DistanceQueryResult = {"_p_DistanceQueryResult", "DistanceQueryResult *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_DistanceQuerySettings = {"_p_DistanceQuerySettings", "DistanceQuerySettings *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_GeneralizedIKObjective = {"_p_GeneralizedIKObjective", "GeneralizedIKObjective *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_GeneralizedIKSolver = {"_p_GeneralizedIKSolver", "GeneralizedIKSolver *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_GeometricPrimitive = {"_p_GeometricPrimitive", "GeometricPrimitive *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_Geometry3D = {"_p_Geometry3D", "Geometry3D *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_Geometry__CollisionConvexHull3D = {"_p_Geometry__CollisionConvexHull3D", "Geometry::CollisionConvexHull3D *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_IKGoal = {"_p_IKGoal", "IKGoal *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_IKObjective = {"_p_IKObjective", "IKObjective *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_IKSolver = {"_p_IKSolver", "IKSolver *", 0, 0, (void*)0, 0};
@@ -61524,7 +61562,6 @@ static swig_type_info _swigt__p_SimBody = {"_p_SimBody", "SimBody *", 0, 0, (voi
 static swig_type_info _swigt__p_SimRobotController = {"_p_SimRobotController", "SimRobotController *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_SimRobotSensor = {"_p_SimRobotSensor", "SimRobotSensor *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_Simulator = {"_p_Simulator", "Simulator *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_SupportResult = {"_p_SupportResult", "SupportResult *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_Terrain = {"_p_Terrain", "Terrain *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_TerrainModel = {"_p_TerrainModel", "TerrainModel *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_TransformPoser = {"_p_TransformPoser", "TransformPoser *", 0, 0, (void*)0, 0};
@@ -61573,12 +61610,14 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_ContactQueryResult,
   &_swigt__p_ControlledRobotSimulator,
   &_swigt__p_ConvexHull,
+  &_swigt__p_ConvexHullProxy,
   &_swigt__p_DistanceQueryResult,
   &_swigt__p_DistanceQuerySettings,
   &_swigt__p_GeneralizedIKObjective,
   &_swigt__p_GeneralizedIKSolver,
   &_swigt__p_GeometricPrimitive,
   &_swigt__p_Geometry3D,
+  &_swigt__p_Geometry__CollisionConvexHull3D,
   &_swigt__p_IKGoal,
   &_swigt__p_IKObjective,
   &_swigt__p_IKSolver,
@@ -61599,7 +61638,6 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_SimRobotController,
   &_swigt__p_SimRobotSensor,
   &_swigt__p_Simulator,
-  &_swigt__p_SupportResult,
   &_swigt__p_Terrain,
   &_swigt__p_TerrainModel,
   &_swigt__p_TransformPoser,
@@ -61648,12 +61686,14 @@ static swig_cast_info _swigc__p_ContactParameters[] = {  {&_swigt__p_ContactPara
 static swig_cast_info _swigc__p_ContactQueryResult[] = {  {&_swigt__p_ContactQueryResult, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ControlledRobotSimulator[] = {  {&_swigt__p_ControlledRobotSimulator, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ConvexHull[] = {  {&_swigt__p_ConvexHull, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_ConvexHullProxy[] = {  {&_swigt__p_ConvexHullProxy, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_DistanceQueryResult[] = {  {&_swigt__p_DistanceQueryResult, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_DistanceQuerySettings[] = {  {&_swigt__p_DistanceQuerySettings, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_GeneralizedIKObjective[] = {  {&_swigt__p_GeneralizedIKObjective, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_GeneralizedIKSolver[] = {  {&_swigt__p_GeneralizedIKSolver, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_GeometricPrimitive[] = {  {&_swigt__p_GeometricPrimitive, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Geometry3D[] = {  {&_swigt__p_Geometry3D, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_Geometry__CollisionConvexHull3D[] = {  {&_swigt__p_Geometry__CollisionConvexHull3D, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_IKGoal[] = {  {&_swigt__p_IKGoal, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_IKObjective[] = {  {&_swigt__p_IKObjective, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_IKSolver[] = {  {&_swigt__p_IKSolver, 0, 0, 0},{0, 0, 0, 0}};
@@ -61674,7 +61714,6 @@ static swig_cast_info _swigc__p_SimBody[] = {  {&_swigt__p_SimBody, 0, 0, 0},{0,
 static swig_cast_info _swigc__p_SimRobotController[] = {  {&_swigt__p_SimRobotController, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_SimRobotSensor[] = {  {&_swigt__p_SimRobotSensor, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Simulator[] = {  {&_swigt__p_Simulator, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_SupportResult[] = {  {&_swigt__p_SupportResult, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Terrain[] = {  {&_swigt__p_Terrain, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_TerrainModel[] = {  {&_swigt__p_TerrainModel, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_TransformPoser[] = {  {&_swigt__p_TransformPoser, 0, 0, 0},{0, 0, 0, 0}};
@@ -61723,12 +61762,14 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_ContactQueryResult,
   _swigc__p_ControlledRobotSimulator,
   _swigc__p_ConvexHull,
+  _swigc__p_ConvexHullProxy,
   _swigc__p_DistanceQueryResult,
   _swigc__p_DistanceQuerySettings,
   _swigc__p_GeneralizedIKObjective,
   _swigc__p_GeneralizedIKSolver,
   _swigc__p_GeometricPrimitive,
   _swigc__p_Geometry3D,
+  _swigc__p_Geometry__CollisionConvexHull3D,
   _swigc__p_IKGoal,
   _swigc__p_IKObjective,
   _swigc__p_IKSolver,
@@ -61749,7 +61790,6 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_SimRobotController,
   _swigc__p_SimRobotSensor,
   _swigc__p_Simulator,
-  _swigc__p_SupportResult,
   _swigc__p_Terrain,
   _swigc__p_TerrainModel,
   _swigc__p_TransformPoser,

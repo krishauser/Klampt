@@ -971,7 +971,10 @@ TriangleMesh_swigregister = _robotsim.TriangleMesh_swigregister
 TriangleMesh_swigregister(TriangleMesh)
 
 class ConvexHull(_object):
-    """Proxy of C++ ConvexHull class."""
+    """
+
+
+    """
 
     __swig_setmethods__ = {}
     __setattr__ = lambda self, name, value: _swig_setattr(self, ConvexHull, name, value)
@@ -980,12 +983,26 @@ class ConvexHull(_object):
     __repr__ = _swig_repr
 
     def translate(self, t):
-        """translate(ConvexHull self, double const [3] t)"""
+        """
+        translate(ConvexHull self, double const [3] t)
+
+
+
+        Translates all the vertices by v=v+t.  
+
+        """
         return _robotsim.ConvexHull_translate(self, t)
 
 
     def transform(self, R, t):
-        """transform(ConvexHull self, double const [9] R, double const [3] t)"""
+        """
+        transform(ConvexHull self, double const [9] R, double const [3] t)
+
+
+
+        Transforms all the vertices by the rigid transform v=R*v+t.  
+
+        """
         return _robotsim.ConvexHull_transform(self, R, t)
 
     __swig_setmethods__["points"] = _robotsim.ConvexHull_points_set
@@ -994,7 +1011,12 @@ class ConvexHull(_object):
         points = _swig_property(_robotsim.ConvexHull_points_get, _robotsim.ConvexHull_points_set)
 
     def __init__(self):
-        """__init__(ConvexHull self) -> ConvexHull"""
+        """
+        __init__(ConvexHull self) -> ConvexHull
+
+
+
+        """
         this = _robotsim.new_ConvexHull()
         try:
             self.this.append(this)
@@ -1004,6 +1026,51 @@ class ConvexHull(_object):
     __del__ = lambda self: None
 ConvexHull_swigregister = _robotsim.ConvexHull_swigregister
 ConvexHull_swigregister(ConvexHull)
+
+class ConvexHullProxy(_object):
+    """Proxy of C++ ConvexHullProxy class."""
+
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, ConvexHullProxy, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, ConvexHullProxy, name)
+    __repr__ = _swig_repr
+    __swig_setmethods__["pointer"] = _robotsim.ConvexHullProxy_pointer_set
+    __swig_getmethods__["pointer"] = _robotsim.ConvexHullProxy_pointer_get
+    if _newclass:
+        pointer = _swig_property(_robotsim.ConvexHullProxy_pointer_get, _robotsim.ConvexHullProxy_pointer_set)
+
+    def fromTransform(self, hull):
+        """fromTransform(ConvexHullProxy self, ConvexHullProxy hull)"""
+        return _robotsim.ConvexHullProxy_fromTransform(self, hull)
+
+
+    def fromHull(self, hull1, hull2):
+        """fromHull(ConvexHullProxy self, ConvexHullProxy hull1, ConvexHullProxy hull2)"""
+        return _robotsim.ConvexHullProxy_fromHull(self, hull1, hull2)
+
+
+    def setRelativeTransform(self, R, t):
+        """setRelativeTransform(ConvexHullProxy self, double const [9] R, double const [3] t)"""
+        return _robotsim.ConvexHullProxy_setRelativeTransform(self, R, t)
+
+
+    def findSupport(self, R):
+        """findSupport(ConvexHullProxy self, double const [3] R)"""
+        return _robotsim.ConvexHullProxy_findSupport(self, R)
+
+
+    def __init__(self):
+        """__init__(ConvexHullProxy self) -> ConvexHullProxy"""
+        this = _robotsim.new_ConvexHullProxy()
+        try:
+            self.this.append(this)
+        except __builtin__.Exception:
+            self.this = this
+    __swig_destroy__ = _robotsim.delete_ConvexHullProxy
+    __del__ = lambda self: None
+ConvexHullProxy_swigregister = _robotsim.ConvexHullProxy_swigregister
+ConvexHullProxy_swigregister(ConvexHullProxy)
 
 class PointCloud(_object):
     """
@@ -1777,31 +1844,6 @@ class DistanceQueryResult(_object):
 DistanceQueryResult_swigregister = _robotsim.DistanceQueryResult_swigregister
 DistanceQueryResult_swigregister(DistanceQueryResult)
 
-class SupportResult(_object):
-    """Proxy of C++ SupportResult class."""
-
-    __swig_setmethods__ = {}
-    __setattr__ = lambda self, name, value: _swig_setattr(self, SupportResult, name, value)
-    __swig_getmethods__ = {}
-    __getattr__ = lambda self, name: _swig_getattr(self, SupportResult, name)
-    __repr__ = _swig_repr
-    __swig_setmethods__["support"] = _robotsim.SupportResult_support_set
-    __swig_getmethods__["support"] = _robotsim.SupportResult_support_get
-    if _newclass:
-        support = _swig_property(_robotsim.SupportResult_support_get, _robotsim.SupportResult_support_set)
-
-    def __init__(self):
-        """__init__(SupportResult self) -> SupportResult"""
-        this = _robotsim.new_SupportResult()
-        try:
-            self.this.append(this)
-        except __builtin__.Exception:
-            self.this = this
-    __swig_destroy__ = _robotsim.delete_SupportResult
-    __del__ = lambda self: None
-SupportResult_swigregister = _robotsim.SupportResult_swigregister
-SupportResult_swigregister(SupportResult)
-
 class ContactQueryResult(_object):
     """
 
@@ -1914,6 +1956,7 @@ class Geometry3D(_object):
     *   point clouds (PointCloud)  
     *   volumetric grids (VolumeGrid)  
     *   groups (Group)  
+    *   ConvexHull  
 
     This class acts as a uniform container of all of these types.  
 
@@ -1979,19 +2022,14 @@ class Geometry3D(_object):
         return _robotsim.Geometry3D_clone(self)
 
 
-    def from_hull_tran(self, arg2):
-        """from_hull_tran(Geometry3D self, Geometry3D arg2)"""
-        return _robotsim.Geometry3D_from_hull_tran(self, arg2)
+    def asConvexHull(self):
+        """
+        asConvexHull(Geometry3D self) -> ConvexHullProxy
 
 
-    def from_hull(self, arg2, arg3, arg4):
-        """from_hull(Geometry3D self, Geometry3D arg2, Geometry3D arg3, bool arg4)"""
-        return _robotsim.Geometry3D_from_hull(self, arg2, arg3, arg4)
 
-
-    def find_support(self, dir):
-        """find_support(Geometry3D self, double const [3] dir)"""
-        return _robotsim.Geometry3D_find_support(self, dir)
+        """
+        return _robotsim.Geometry3D_asConvexHull(self)
 
 
     def set(self, arg2):
@@ -2092,7 +2130,14 @@ class Geometry3D(_object):
 
 
     def getConvexHull(self):
-        """getConvexHull(Geometry3D self) -> ConvexHull"""
+        """
+        getConvexHull(Geometry3D self) -> ConvexHull
+
+
+
+        Returns a VoumeGrid if this geometry is of type VolumeGrid.  
+
+        """
         return _robotsim.Geometry3D_getConvexHull(self)
 
 
@@ -2145,7 +2190,14 @@ class Geometry3D(_object):
 
 
     def setConvexHull(self, arg2):
-        """setConvexHull(Geometry3D self, ConvexHull arg2)"""
+        """
+        setConvexHull(Geometry3D self, ConvexHull arg2)
+
+
+
+        Sets this Geometry3D to a ConvexHull.  
+
+        """
         return _robotsim.Geometry3D_setConvexHull(self, arg2)
 
 
@@ -2260,16 +2312,6 @@ class Geometry3D(_object):
 
         """
         return _robotsim.Geometry3D_getCurrentTransform(self)
-
-
-    def setRelativeTransform(self, R, t):
-        """setRelativeTransform(Geometry3D self, double const [9] R, double const [3] t)"""
-        return _robotsim.Geometry3D_setRelativeTransform(self, R, t)
-
-
-    def setFreeRelativeTransform(self, R, t):
-        """setFreeRelativeTransform(Geometry3D self, double const [9] R, double const [3] t)"""
-        return _robotsim.Geometry3D_setFreeRelativeTransform(self, R, t)
 
 
     def translate(self, t):
@@ -6112,8 +6154,10 @@ class IKObjective(_object):
     on a fixed position/orientation in the world frame, or a relative
     position/orientation to another frame.  
 
-    Currently only fixed-point constraints and fixed-transform constraints are
-    implemented in the Python API.  
+    The positionScale and orientationScale attributes scale the solver's residual
+    vector. This affects whether the convergence tolerance is met, and also controls
+    the emphasis on each objective / component when the objective cannot be reached.
+    By default these are both 1.  
 
     C++ includes: robotik.h
 
@@ -6293,14 +6337,21 @@ class IKObjective(_object):
 
 
 
-        Manual: Sets a free position constraint.  
+        Deprecated: use setFreePosConstraint.  
 
         """
         return _robotsim.IKObjective_setFreePosition(self)
 
 
     def setFreePosConstraint(self):
-        """setFreePosConstraint(IKObjective self)"""
+        """
+        setFreePosConstraint(IKObjective self)
+
+
+
+        Manual: Sets a free position constraint.  
+
+        """
         return _robotsim.IKObjective_setFreePosConstraint(self)
 
 
@@ -6483,7 +6534,8 @@ class IKObjective(_object):
 
 
         Loads the objective from a Klamp't-native formatted string. For a more readable
-        but verbose format, try the JSON IO routines loader.toJson/fromJson()  
+        but verbose format, try the JSON IO routines :meth:`klampt.io.loader.toJson` /
+        :meth:`klampt.io.loader.fromJson`  
 
         """
         return _robotsim.IKObjective_loadString(self, str)
@@ -6496,7 +6548,8 @@ class IKObjective(_object):
 
 
         Saves the objective to a Klamp't-native formatted string. For a more readable
-        but verbose format, try the JSON IO routines loader.toJson/fromJson()  
+        but verbose format, try the JSON IO routines :meth:`klampt.io.loader.toJson` /
+        :meth:`klampt.io.loader.fromJson`  
 
         """
         return _robotsim.IKObjective_saveString(self)
@@ -7127,24 +7180,22 @@ class SimRobotSensor(_object):
 
 
     A sensor on a simulated robot. Retrieve one from the controller using
-    :meth:`SimRobotController.getSensor` (), or create a new one using
-    SimRobotSensor(robotController,name,type)  
+    :meth:`SimRobotController.getSensor`, or create a new one using
+    `SimRobotSensor(robotController,name,type)`  
 
-    Use :meth:`getMeasurements` () to get the currently simulated measurement
-    vector.  
+    Use :meth:`getMeasurements` to get the currently simulated measurement vector.  
 
-    Sensors are automatically updated through the :meth:`Simulator.simulate` ()
-    call, and :meth:`getMeasurements` () retrieves the updated values. As a result,
-    you may get garbage measurements before the first Simulator.simulate call is
-    made.  
+    Sensors are automatically updated through the :meth:`Simulator.simulate` call,
+    and :meth:`getMeasurements` retrieves the updated values. As a result, you may
+    get garbage measurements before the first Simulator.simulate call is made.  
 
     There is also a mode for doing kinematic simulation, which is supported (i.e.,
     makes sensible measurements) for some types of sensors when just a robot / world
     model is given. This is similar to Simulation.fakeSimulate but the entire
     controller structure is bypassed. You can arbitrarily set the robot's position,
-    call :meth:`kinematicReset` (), and then call :meth:`kinematicSimulate` ().
-    Subsequent calls assume the robot is being driven along a trajectory until the
-    next :meth:`kinematicReset` () is called.  
+    call :meth:`kinematicReset`, and then call :meth:`kinematicSimulate`. Subsequent
+    calls assume the robot is being driven along a trajectory until the next
+    :meth:`kinematicReset` is called.  
 
     LaserSensor, CameraSensor, TiltSensor, AccelerometerSensor, GyroSensor,
     JointPositionSensor, JointVelocitySensor support kinematic simulation mode.
@@ -7337,9 +7388,36 @@ class SimRobotController(_object):
     steps. Force controllers can be implemented using setTorque, again using short
     time steps.  
 
-    If setVelocity, setTorque, or setPID command are called, the motion queue
+    If the setVelocity, setTorque, or setPID command are called, the motion queue
     behavior will be completely overridden. To reset back to motion queue control,
-    the function setManualMode(False) must be called.  
+    setManualMode(False) must be called first.  
+
+    Individual joints cannot be addressed with mixed motion queue mode and
+    torque/PID mode. However, you can mix PID and torque mode between different
+    joints with a workaround::  
+
+
+       # setup by zeroing out PID constants for torque controlled joints
+       pid_joint_indices = [...]
+       torque_joint_indices = [...] # complement of pid_joint_indices
+       kp,ki,kp = controller.getPIDGains()
+       for i in torque_joint_indices:  #turn off PID gains here
+          kp[i] = ki[i] = kp[i] = 0  
+
+       # to send PID command (qcmd,dqcmd) and torque commands tcmd, use
+       # a PID command with feedforward torques.  First we build a whole-robot
+       # command:
+       qcmd_whole = [0]*controller.model().numLinks()
+       dqcmd_whole = [0]*controller.model().numLinks()
+       tcmd_whole = [0]*controller.model().numLinks()
+       for i,k in enumerate(pid_joint_indices):
+           qcmd_whole[k],dqcmd_whole[i] = qcmd[i],dqcmd[i]
+       for i,k in enumerate(torque_joint_indices):
+           tcmd_whole[k] = tcmd[i]
+       # Then we send it to the controller
+       controller.setPIDCommand(qcmd_whole,dqcmd_whole,tcmd_whole)  
+
+
 
     C++ includes: robotsim.h
 
@@ -8515,22 +8593,36 @@ class Simulator(_object):
 
         Valid names are:  
 
-        *   gravity  
-        *   simStep  
-        *   boundaryLayerCollisions  
-        *   rigidObjectCollisions  
-        *   robotSelfCollisions  
-        *   robotRobotCollisions  
-        *   adaptiveTimeStepping  
-        *   minimumAdaptiveTimeStep  
-        *   maxContacts  
-        *   clusterNormalScale  
-        *   errorReductionParameter  
-        *   dampedLeastSquaresParameter  
-        *   instabilityConstantEnergyThreshold  
-        *   instabilityLinearEnergyThreshold  
-        *   instabilityMaxEnergyThreshold  
-        *   instabilityPostCorrectionEnergy  
+        *   gravity: the gravity vector (default "0 0 -9.8")  
+        *   simStep: the internal simulation step (default "0.001")  
+        *   autoDisable: whether to disable bodies that don't move much between time
+            steps (default "0", set to "1" for many static objects)  
+        *   boundaryLayerCollisions: whether to use the Klampt inflated boundaries for
+            contact detection'(default "1", recommended)  
+        *   rigidObjectCollisions: whether rigid objects should collide (default "1")  
+        *   robotSelfCollisions: whether robots should self collide (default "0")  
+        *   robotRobotCollisions: whether robots should collide with other robots
+            (default "1")  
+        *   adaptiveTimeStepping: whether adaptive time stepping should be used to
+            improve stability. Slower but more stable. (default "1")  
+        *   minimumAdaptiveTimeStep: the minimum size of an adaptive time step before
+            giving up (default "1e-6")  
+        *   maxContacts: max # of clustered contacts between pairs of objects (default
+            "20")  
+        *   clusterNormalScale: a parameter for clustering contacts (default "0.1")  
+        *   errorReductionParameter: see ODE docs on ERP (default "0.95")  
+        *   dampedLeastSquaresParameter: see ODE docs on CFM (default "1e-6")  
+        *   instabilityConstantEnergyThreshold: parameter c0 in instability correction
+            (default "1")  
+        *   instabilityLinearEnergyThreshold: parameter c1 in instability correction
+            (default "1.5")  
+        *   instabilityMaxEnergyThreshold: parameter cmax in instability correction
+            (default "100000")  
+        *   instabilityPostCorrectionEnergy: kinetic energy scaling parameter if
+            instability is detected (default "0.8")  
+
+        Instability correction kicks in whenever the kinetic energy K(t) of an object
+        exceeds min(c0*m + c1*K(t-dt),cmax). m is the object's mass.  
 
         See `Klampt/Simulation/ODESimulator.h
         <http://motion.pratt.duke.edu/klampt/klampt_docs/ODESimulator_8h_source.html>`_

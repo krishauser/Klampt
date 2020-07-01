@@ -513,6 +513,25 @@ std::string GeometricPrimitive::saveString() const
   return ss.str();
 }
 
+// write member functions for this proxy
+void ConvexHullProxy::fromTransform(ConvexHullProxy &hull) {
+  pointer->FromTransform(*hull.pointer);
+}
+
+void ConvexHullProxy::fromHull(ConvexHullProxy &hull1, ConvexHullProxy &hull2) {
+  pointer->FromHull(*hull1.pointer, *hull2.pointer);
+}
+
+void ConvexHullProxy::setRelativeTransform(const double R[9], const double t[3]) {
+  RigidTransform T;
+  T.R.set(R);
+  T.t.set(t);
+  pointer->UpdateRelativeTransform(&T);
+}
+
+void ConvexHullProxy::findSupport(const double dir[3], double support[3]) {
+  pointer->FindSupport(dir, support);
+}
 
 Geometry3D::Geometry3D()
   :world(-1),id(-1),geomPtr(NULL)
@@ -690,46 +709,73 @@ ConvexHull Geometry3D::getConvexHull()
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   if(!geom) return ConvexHull();
   Assert(geom->type == Geometry::AnyGeometry3D::ConvexHull);
+  if(geom->type != Geometry::AnyGeometry3D::ConvexHull) {
+    ConvexHull chull;
+    return chull;
+  }
   const Geometry::ConvexHull3D& hull = geom->AsConvexHull();
   ConvexHull chull;
   chull.points.resize(hull.points().size());
-  std::copy(hull.points().begin(), hull.points().end(), chull.points.begin());
+  std::vector<double> hpoints = hull.points();
+  std::copy(hpoints.begin(), hpoints.end(), chull.points.begin());
   return chull;
 }
 
-void Geometry3D::from_hull_tran(const Geometry3D &geom)
+ConvexHullProxy Geometry3D::asConvexHull()  // with this function, local functions of convexhull can be called.
 {
-  shared_ptr<AnyCollisionGeometry3D>& ingeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geom.geomPtr);
-  assert(ingeom->type == AnyGeometry3D::ConvexHull);
-  shared_ptr<AnyCollisionGeometry3D>& resgeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(this->geomPtr);
-  ConvexHull3D *hull = const_cast<ConvexHull3D*>(&ingeom->AsConvexHull());  // dangerous cast violates const assumption
-  hull->type = ConvexHull3D::Trans;
-  resgeom = make_shared<AnyCollisionGeometry3D>(*hull);
-  resgeom->InitCollisionData();
+  shared_ptr<AnyCollisionGeometry3D>& ingeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  //If not initialized
+  if(ingeom == NULL) {
+    ingeom = make_shared<AnyCollisionGeometry3D>();
+    ingeom->type = AnyGeometry3D::ConvexHull;
+    ingeom->collisionData = CollisionConvexHull3D();
+  }
+  else{
+    assert(ingeom->type == AnyGeometry3D::ConvexHull);
+    ingeom->InitCollisionData(); // in case collision data is not initialized
+  }
+  ConvexHullProxy proxy;
+  proxy.pointer = AnyCast<CollisionConvexHull3D>(&ingeom->collisionData);
+  return proxy;
 }
 
-void Geometry3D::from_hull(const Geometry3D &geom1, const Geometry3D &geom2, bool is_free) {
-  // make sure both geometry is convexhull
-  shared_ptr<AnyCollisionGeometry3D>& ingeom1 = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geom1.geomPtr);
-  Assert(ingeom1->type == AnyGeometry3D::ConvexHull);
-  shared_ptr<AnyCollisionGeometry3D>& ingeom2 = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geom2.geomPtr);
-  Assert(ingeom2->type == AnyGeometry3D::ConvexHull);
-  // create collision data from its constructor
-  shared_ptr<AnyCollisionGeometry3D>& resgeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(this->geomPtr);
-  resgeom = make_shared<AnyCollisionGeometry3D>(ingeom1->AsConvexHull(), ingeom2->AsConvexHull(), is_free);
-  resgeom->InitCollisionData();
-}
-
-// compute the support point for a convex shape
-void Geometry3D::find_support(const double dir[3], double out[3]) {
-  shared_ptr<AnyCollisionGeometry3D>& ingeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(this->geomPtr);
-  Assert(ingeom->type == AnyGeometry3D::ConvexHull);
-  ingeom->FindSupport(dir, out);
-  //SupportResult result;
-  //result.support.resize(3);
-  //ingeom->FindSupport(dir, result.support.data());
-  //return result;
-}
+// void Geometry3D::from_hull_tran(const Geometry3D &geom)
+// {
+//   shared_ptr<AnyCollisionGeometry3D>& ingeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geom.geomPtr);
+//   assert(ingeom->type == AnyGeometry3D::ConvexHull);
+//   shared_ptr<AnyCollisionGeometry3D>& resgeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(this->geomPtr);
+//   ConvexHull3D *hull = const_cast<ConvexHull3D*>(&ingeom->AsConvexHull());  // dangerous cast violates const assumption
+//   hull->type = ConvexHull3D::Trans;
+//   resgeom = make_shared<AnyCollisionGeometry3D>(*hull);
+//   resgeom->InitCollisionData();
+// }
+// 
+// void Geometry3D::from_hull(const Geometry3D &geom1, const Geometry3D &geom2, bool is_free) {
+//   // make sure both geometry is convexhull
+//   shared_ptr<AnyCollisionGeometry3D>& ingeom1 = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geom1.geomPtr);
+//   Assert(ingeom1->type == AnyGeometry3D::ConvexHull);
+//   shared_ptr<AnyCollisionGeometry3D>& ingeom2 = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geom2.geomPtr);
+//   Assert(ingeom2->type == AnyGeometry3D::ConvexHull);
+//   // create collision data from its constructor
+//   shared_ptr<AnyCollisionGeometry3D>& resgeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(this->geomPtr);
+//   resgeom = make_shared<AnyCollisionGeometry3D>(ingeom1->AsConvexHull(), ingeom2->AsConvexHull(), is_free);
+//   resgeom->InitCollisionData();
+// }
+// 
+// // compute the support point for a convex shape
+// void Geometry3D::find_support(const double dir[3], double out[3]) {
+//   shared_ptr<AnyCollisionGeometry3D>& ingeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(this->geomPtr);
+//   Assert(ingeom->type == AnyGeometry3D::ConvexHull);
+//   Vector3 direc(dir);
+//   Vector3 support = ingeom->FindSupport(direc);
+//   out[0] = support[0];
+//   out[1] = support[1];
+//   out[2] = support[2];
+//   //SupportResult result;
+//   //result.support.resize(3);
+//   //ingeom->FindSupport(dir, result.support.data());
+//   //return result;
+// }
 
 void Geometry3D::setTriangleMesh(const TriangleMesh& mesh)
 {
@@ -1030,27 +1076,27 @@ void Geometry3D::setCurrentTransform(const double R[9],const double t[3])
   geom->SetTransform(T);
 }
 
-void Geometry3D::setRelativeTransform(const double R[9],const double t[3])
-{
-  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
-  if(!geom) return;
-  RigidTransform T;
-  T.R.set(R);
-  T.t.set(t);
-  //std::cout << "Set relative transform at klampt\n";
-  geom->SetRelativeTransform(T);
-}
-
-void Geometry3D::setFreeRelativeTransform(const double R[9],const double t[3])
-{
-  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
-  if(!geom) return;
-  RigidTransform T;
-  T.R.set(R);
-  T.t.set(t);
-  //std::cout << "Set relative transform at klampt\n";
-  geom->SetFreeRelativeTransform(T);
-}
+// void Geometry3D::setRelativeTransform(const double R[9],const double t[3])
+// {
+//   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+//   if(!geom) return;
+//   RigidTransform T;
+//   T.R.set(R);
+//   T.t.set(t);
+//   //std::cout << "Set relative transform at klampt\n";
+//   geom->SetRelativeTransform(T);
+// }
+// 
+// void Geometry3D::setFreeRelativeTransform(const double R[9],const double t[3])
+// {
+//   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+//   if(!geom) return;
+//   RigidTransform T;
+//   T.R.set(R);
+//   T.t.set(t);
+//   //std::cout << "Set relative transform at klampt\n";
+//   geom->SetFreeRelativeTransform(T);
+// }
 
 void Geometry3D::getCurrentTransform(double out[9],double out2[3])
 {

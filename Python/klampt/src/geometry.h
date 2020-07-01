@@ -63,6 +63,18 @@ struct ConvexHull
   std::vector<double> points;
 };
 
+namespace Geometry{class CollisionConvexHull3D;};
+// this class stores a pointer to the collisionData we want to use...
+// this is only constructed by calling asConvexHull()
+struct ConvexHullProxy
+{
+  Geometry::CollisionConvexHull3D *pointer;
+  void fromTransform(ConvexHullProxy &hull);
+  void fromHull(ConvexHullProxy &hull1, ConvexHullProxy &hull2);
+  void setRelativeTransform(const double R[9], const double t[3]);
+  void findSupport(const double R[3], double out[3]);
+};
+
 /** @brief A 3D point cloud class.  
  *
  * Attributes:
@@ -289,12 +301,6 @@ public:
   int elem1,elem2;
 };
 
-class SupportResult
-{
-public:
-  std::vector<double> support;
-};
-
 /** @brief The result from a contact query of :class:`~klampt.Geometry3D`.
  * The number of contacts n is variable.
  *
@@ -375,9 +381,12 @@ class Geometry3D
   const Geometry3D& operator = (const Geometry3D& rhs);
   ///Creates a standalone geometry from this geometry
   Geometry3D clone();
-  void from_hull_tran(const Geometry3D&);
-  void from_hull(const Geometry3D&, const Geometry3D &, bool);
-  void find_support(const double dir[3], double out[3]);
+
+  ConvexHullProxy asConvexHull();  // with this function, local functions of convexhull can be called.
+  // void from_hull_tran(const Geometry3D&);
+  // void from_hull(const Geometry3D&, const Geometry3D &, bool);
+  // void find_support(const double dir[3], double out[3]);
+
   ///Copies the geometry of the argument into this geometry.
   void set(const Geometry3D&);
   ///Returns true if this is a standalone geometry
@@ -433,10 +442,12 @@ class Geometry3D
   void setCurrentTransform(const double R[9],const double t[3]);
   ///Gets the current transformation 
   void getCurrentTransform(double out[9],double out2[3]);
+
   // update relative transform for some datatypes
-  void setRelativeTransform(const double R[9], const double t[3]);
+  // void setRelativeTransform(const double R[9], const double t[3]);
   // update relative transform for some datatypes
-  void setFreeRelativeTransform(const double R[9], const double t[3]);
+  // void setFreeRelativeTransform(const double R[9], const double t[3]);
+
   ///Translates the geometry data.
   ///Permanently modifies the data and resets any collision data structures.
   void translate(const double t[3]);

@@ -102,10 +102,11 @@ class KineTrajOpt:
     :param link_index: arr-like, if not None, it is the links whose configurations are optimized. It can have smaller length than robot.numLinks()
     :param geom_index: arr-like, if not None, it is the links whose geometries are considered for collision.
     :param obs_index: arr-like, if not None, it is the index of terrains considered as obstacles
+    :param mounted: list of (int, se3, convexhull), this means other geometries rigidly mounted on link with given index
     :param constrs: ConstrContainer, if not None, it contains the constraints the trajectory has to satisfy.
     :param losses: list of CostInterface, if not None, it contains all the loss functions. If None, we optimize \sum (q_i - q_{i-1}) ** 2
     """
-    def __init__(self, world, robot, q0=None, qf=None, config=None, link_index=None, geom_index=None, obs_index=None, constrs=None, losses=None):
+    def __init__(self, world, robot, q0=None, qf=None, config=None, link_index=None, geom_index=None, obs_index=None, mounted=None, constrs=None, losses=None):
         n_robot_link = robot.numLinks()
         link_index = np.arange(n_robot_link) if link_index is None else link_index
         self.dimq = len(link_index)
@@ -136,6 +137,7 @@ class KineTrajOpt:
             self.constrs.add_ineq(None, JointLimitsConstr(self.qmin, self.qmax))
         obs_index = np.arange(world.numTerrains()) if obs_index is None else obs_index
         geom_index = np.arange(n_robot_link) if geom_index is None else geom_index
+        self.mounted = mounted if mounted is not None else []
         self.world = MaskedTerrain(world, obs_index)
         self.robot = MaskedRobot(robot, link_index)
         self.compute_point_collision = True
@@ -146,6 +148,14 @@ class KineTrajOpt:
         qmin, qmax = robot.getJointLimits()
         self.qmin = np.array(qmin)[link_index]
         self.qmax = np.array(qmax)[link_index]
+
+    def update_q0(self, q0):
+        """For using the same solver in several problems. This function sets initial configuration."""
+        self.q0[:] = q0
+
+    def update_qf(self, qf):
+        """For using the same solver in several problems. This function sets final configuration."""
+        self.qf[:] = qf
 
     def add_pose_constraint(self, index, linkid, pose):
         """Add constraint such that at index of the trajectory, the robot link linkid is at pose"""
@@ -167,7 +177,7 @@ class KineTrajOpt:
         """Given an initial trajectory, use trajopt algorithm to update it.
         
         :param theta0: ndarray, shape is N by dof where N is grid size and dof is number of links being optimized. It is the initial guess provided to the solver.
-        :return: ndarray, same shape with theta0, the optimized trajectory.
+        :return: dict, contains keys success, sol, cost
         """
         if theta0.ndim == 1:
             theta0 = theta0.reshape((-1, self.dimq))
@@ -181,6 +191,7 @@ class KineTrajOpt:
         N = theta0.shape[0]
         cost_cache = None
         collision_cache = None
+        is_feasible = False
         for i in range(self.config.max_merit_coeff_increase):  # loop to adjust penalty
             for j in range(self.config.max_iter):  # trajopt is endless loop here
                 if collision_cache is not None:
@@ -191,6 +202,7 @@ class KineTrajOpt:
                 # convexify the problem at current solution, which means we find collision
                 if cost_cache is None:
                     cost0_t, cost0_c = self.compute_costs(cur_sol, point_collisions, sweep_collisions, d_safe)
+                    cost_cache = (cost0_t, cost0_c)
                 else:
                     cost0_t, cost0_c = cost_cache
                 cost0 = cost0_t + mu * cost0_c
@@ -210,7 +222,8 @@ class KineTrajOpt:
                     pcs, scs = self.find_collision_pair(new_theta, self.config.dcheck)
                     new_cost_t, new_cost_c = self.compute_costs(new_theta, pcs, scs, d_safe)
                     new_cost = new_cost_t + mu * new_cost_c
-                    print(f'i={i} mu={mu} j={j} k={trk} cost0={cost0:.3f} obj={obj:.3f} newcost={new_cost:.3f} tr_size={tr_size:.2e}')
+                    if self.config.verbose:
+                        print(f'i={i} mu={mu} j={j} k={trk} cost0={cost0:.3f} obj={obj:.3f} newcost={new_cost:.3f} tr_size={tr_size:.2e}')
                     trk += 1
                     # compute true and model improve
                     approx_merit_improve = cost0 - obj
@@ -218,45 +231,55 @@ class KineTrajOpt:
                     merit_improve_ratio = exact_merit_improve / approx_merit_improve
 
                     if approx_merit_improve < -1e-5:
-                        print(f'approximate merit got worse {approx_merit_improve:.3e}')
+                        if self.config.verbose:
+                            print(f'approximate merit got worse {approx_merit_improve:.3e}')
                     if approx_merit_improve < self.config.min_approx_improve:
-                        print('approxi merit improve ABSOLUTE small')
+                        if self.config.verbose:
+                            print('approxi merit improve ABSOLUTE small')
                         goto15 = True
                         break
                     if approx_merit_improve / cost0 < self.config.min_approx_improve_frac:
-                        print('approxi merit improve RELATIVE small')
+                        if self.config.verbose:
+                            print('approxi merit improve RELATIVE small')
                         goto15 = True
                         break
                     elif exact_merit_improve < 0 or merit_improve_ratio < self.config.improve_ratio_threshold:
-                        print('shrink trust region size')
+                        if self.config.verbose:
+                            print('shrink trust region size')
                         tr_size *= taum
                     else:
                         cur_sol = new_theta
                         cost_cache = (new_cost_t, new_cost_c)
                         collision_cache = (pcs, scs)
                         tr_size *= taup
-                        print('expand trust region size')
+                        if self.config.verbose:
+                            print('expand trust region size')
                         break
                 # check how convergence is obtained
                 if tr_size < self.config.min_trust_box_size:
-                    print(f'trust region too small {tr_size:.5f} / {self.config.min_trust_box_size:.5f}')
+                    if self.config.verbose:
+                        print(f'trust region too small {tr_size:.5f} / {self.config.min_trust_box_size:.5f}')
                     goto15 = True
                 elif j == self.config.max_iter - 1:
-                    print('Iteration limit reached, return')
+                    if self.config.verbose:
+                        print('Iteration limit reached, return')
                     return cur_sol
                 if goto15:
                     break
             # Here comes step15, check collision and see if update of mu is needed
             point_collisions, sweep_collisions = collision_cache
             if self.collision_satisfy(point_collisions, sweep_collisions, ctol, d_safe) and self.constrs_satisfy(cur_sol, ctol):
-                print('collision satisfy and constraint satisfy')
+                if self.config.verbose:
+                    print('collision satisfy and constraint satisfy')
+                is_feasible = True
                 break
             else:
-                print(f'mu update from {mu} to {self.config.merit_coeff_increase_ratio * mu}')
+                if self.config.verbose:
+                    print(f'mu update from {mu} to {self.config.merit_coeff_increase_ratio * mu}')
                 mu = self.config.merit_coeff_increase_ratio * mu
                 tr_size = max(tr_size, self.config.min_trust_box_size / taum * 1.5)
         # that's it, easy, but maybe we need more...
-        return cur_sol
+        return {'success': is_feasible, 'sol': cur_sol, 'cost': cost_cache[0]}
 
     def _indexes(self, idx):
         if idx is None:
@@ -434,9 +457,24 @@ class KineTrajOpt:
             link_sweep_geoms = []
             for geom, geom_idx, link_idx in link_geom_info:
                 sweep_geom = Geometry3D()
-                sweep_geom.from_hull_tran(geom)
+                sweep_geom.asConvexHull().fromTransform(geom.asConvexHull())
                 link_sweep_geoms.append((sweep_geom, geom_idx, link_idx))
             self.link_cache['sweep'] = link_sweep_geoms
+        # consider the rigidly mounted part
+        mount_cache = []
+        for i in range(len(self.mounted)):
+            link_idx, relT, geom = self.mounted[i]
+            geom = geom.convert('ConvexHull', 0)
+            mount_cache.append((link_idx, relT, geom))
+        self.link_cache['mount'] = mount_cache
+        # consider the sweep of mounted geometry
+        if self.compute_sweep_collision:
+            mount_sweep_geoms = []
+            for link_idx, _, geom in mount_cache:
+                sweep_geom = Geometry3D()
+                sweep_geom.asConvexHull().fromTransform(geom.asConvexHull())
+                mount_sweep_geoms.append((sweep_geom, None, link_idx))
+            self.link_cache['sweepmount'] = mount_sweep_geoms
         # for obstacles, there is not much we have to do
         n_obs = len(self.world)
         obs_geoms = []
@@ -459,26 +497,80 @@ class KineTrajOpt:
         Return a list (for each configuration) of list (for each active link) of (R, t) tuples
         """
         trans = []
+        mtrans = []
         for q in thetas:
             self.robot.setConfig(q)
             tmp = []
             for _, geom_idx, _ in self.link_cache['link']:
                 tmp.append(self.robot.link(geom_idx).getTransform())
             trans.append(tmp)
-        return trans
+            # for mounted
+            tmp = []
+            for link_idx, relT, _ in self.link_cache['mount']:
+                tmp.append(se3.mul(self.robot.link(link_idx).getTransform(), relT))
+            mtrans.append(tmp)
+        return trans, mtrans
 
     def find_collision_pair(self, thetas, dcheck):
         """
         Given current solution, find all possible collision pairs.
         """
-        link_trans = self.all_linkgeom_transforms(thetas)
+        link_trans, mount_trans = self.all_linkgeom_transforms(thetas)
         point_collisions = []
         sweep_collisions = []
         # Just iterate through all stuff and see what happens... We can safely ignore first and last
         n_theta = thetas.shape[0]
         setting = DistanceQuerySettings()
         setting.upperBound = dcheck  # value greater than this is not considered
-        # first I compute single point collision information
+
+        def add_point(link_idx, geom_idx, rst, i, oj):
+            # This function add point collision information...
+            p1, p2 = np.array(rst.cp1), np.array(rst.cp2)
+            if rst.d > 0:
+                normal = (p1 - p2)
+            else:
+                normal = p2 - p1
+            normal /= np.linalg.norm(normal)
+            # find p1 in local coordinate
+            self.robot.setConfig(thetas[i])
+            p1_local = self.robot.link(link_idx).getLocalPosition(list(p1))
+            jacobian = self.robot.positionJacobian(link_idx, lcl_pos=p1_local)
+            point_collisions.append(JointObjectInfo(geom_idx, oj, thetas[i].copy(), i, jacobian, normal, rst.d))
+
+        def add_sweep(link_idx, geom_idx, sgl_lv, ltran1, ltran2, rst, i, oj):
+            # This function add sweep collision information
+            p2, pswept = np.array(rst.cp2), np.array(rst.cp1)
+            if rst.d > 0:
+                normal = pswept - p2
+            else:
+                normal = p2 - pswept
+            normal /= np.linalg.norm(normal)
+            # I have to find the two points on two seperate geometry 
+            sgl_lv.setCurrentTransform(*ltran1)
+            p0 = np.array(sgl_lv.asConvexHull().findSupport(-normal))
+            sgl_lv.setCurrentTransform(*ltran2)
+            p1 = np.array(sgl_lv.asConvexHull().findSupport(-normal))
+            dist1 = np.linalg.norm(p1 - pswept)
+            dist0 = np.linalg.norm(p0 - pswept)
+            alpha = dist1 / (dist0 + dist1)
+            # print(f'Sweep link {li} obj {oj} step {i} dist {dist:.3f} dist0 {dist0:.3f} dist1 {dist1:.3f}')
+            # compute the two jacobians
+            self.robot.setConfig(thetas[i])
+            the_link = self.robot.link(link_idx)
+            p0_local = the_link.getLocalPosition(p0)
+            # jac0 = np.array(self.robot.link(li_).getPositionJacobian(p0_local))
+            jac0 = self.robot.positionJacobian(link_idx, None, p0_local)
+            self.robot.setConfig(thetas[i + 1])
+            p1_local = the_link.getLocalPosition(p1)
+            # jac1 = np.array(self.robot.link(li_).getPositionJacobian(p1_local))
+            jac1 = self.robot.positionJacobian(link_idx, None, p1_local)
+            sweep_collisions.append(SweepJointObjectInfo(geom_idx, oj, thetas[i].copy(), thetas[i + 1].copy(), i, alpha, jac0, jac1, normal, rst.d))
+            sweep_collisions[-1].point1 = p0
+            sweep_collisions[-1].point2 = p1
+            sweep_collisions[-1].pswept = pswept
+            sweep_collisions[-1].pobs = p2
+
+        # outer loop is for obstacles
         for oj_, oj in enumerate(self.world.index):
             ov = self.obs_cache[oj_]  # transformation information is already contained in Geometry3D
             for li_, (lv, geom_idx, link_idx) in enumerate(self.link_cache['link']):
@@ -490,18 +582,7 @@ class KineTrajOpt:
                         rst = lv.distance_ext(ov, setting)
                         # append if dist is smaller than dcheck
                         if rst.d < dcheck:
-                            p1, p2 = np.array(rst.cp1), np.array(rst.cp2)
-                            if rst.d > 0:
-                                normal = (p1 - p2)
-                            else:
-                                normal = p2 - p1
-                            normal /= np.linalg.norm(normal)
-                            # find p1 in local coordinate
-                            self.robot.setConfig(thetas[i])
-                            p1_local = self.robot.link(link_idx).getLocalPosition(list(p1))
-                            # jacobian = np.array(self.robot.link(li_).getPositionJacobian(p1_local))
-                            jacobian = self.robot.positionJacobian(link_idx, lcl_pos=p1_local)
-                            point_collisions.append(JointObjectInfo(geom_idx, oj, thetas[i].copy(), i, jacobian, normal, rst.d))
+                            add_point(link_idx, geom_idx, rst, i, oj)
                 # the next step is to compute sweep information
                 if self.compute_sweep_collision:
                     slv = self.link_cache['sweep'][li_][0]  # the last two are simply ignored since it repeats information
@@ -509,38 +590,32 @@ class KineTrajOpt:
                         ltran1, ltran2 = link_trans[i][li_], link_trans[i + 1][li_]
                         slv.setCurrentTransform(*ltran1)  # set transformation of link start
                         rel_tran = se3.mul(se3.inv(ltran1), ltran2)
-                        slv.setRelativeTransform(*rel_tran)  # set relative transform after sweeping
+                        slv.asConvexHull().setRelativeTransform(*rel_tran)  # set relative transform after sweeping
                         rst = slv.distance_ext(ov, setting)
                         if rst.d < dcheck:
-                            p2, pswept = np.array(rst.cp2), np.array(rst.cp1)
-                            if rst.d > 0:
-                                normal = pswept - p2
-                            else:
-                                normal = p2 - pswept
-                            normal /= np.linalg.norm(normal)
-                            # I have to find the two points on two seperate geometry 
-                            sgl_lv = lv  # now sgl_lv is simply alias of lv
-                            sgl_lv.setCurrentTransform(*ltran1)
-                            p0 = np.array(sgl_lv.find_support(-normal))
-                            sgl_lv.setCurrentTransform(*ltran2)
-                            p1 = np.array(sgl_lv.find_support(-normal))
-                            dist1 = np.linalg.norm(p1 - pswept)
-                            dist0 = np.linalg.norm(p0 - pswept)
-                            alpha = dist1 / (dist0 + dist1)
-                            # print(f'Sweep link {li} obj {oj} step {i} dist {dist:.3f} dist0 {dist0:.3f} dist1 {dist1:.3f}')
-                            # compute the two jacobians
-                            self.robot.setConfig(thetas[i])
-                            the_link = self.robot.link(link_idx)
-                            p0_local = the_link.getLocalPosition(p0)
-                            # jac0 = np.array(self.robot.link(li_).getPositionJacobian(p0_local))
-                            jac0 = self.robot.positionJacobian(link_idx, None, p0_local)
-                            self.robot.setConfig(thetas[i + 1])
-                            p1_local = the_link.getLocalPosition(p1)
-                            # jac1 = np.array(self.robot.link(li_).getPositionJacobian(p1_local))
-                            jac1 = self.robot.positionJacobian(link_idx, None, p1_local)
-                            sweep_collisions.append(SweepJointObjectInfo(geom_idx, oj, thetas[i].copy(), thetas[i + 1].copy(), i, alpha, jac0, jac1, normal, rst.d))
-                            sweep_collisions[-1].point1 = p0
-                            sweep_collisions[-1].point2 = p1
-                            sweep_collisions[-1].pswept = pswept
-                            sweep_collisions[-1].pobs = p2
+                            add_sweep(link_idx, geom_idx, slv, ltran1, ltran2, rst, i, oj)
+            # now I consider attached geometries
+            for li_, (link_idx, relT, geom) in enumerate(self.link_cache['mount']):
+                # start with point ocllision
+                if self.compute_point_collision:
+                    for i in range(1, n_theta - 1):
+                        ltran = mount_trans[i][li_]
+                        geom.setCurrentTransform(*ltran)
+                        rst = geom.distance_ext(ov, setting)
+                        if rst.d < dcheck:
+                            add_point(link_idx, -1 - li_, rst, i, oj)
+                # then sweep one
+                if self.compute_sweep_collision:
+                    slv = self.link_cache['sweepmount'][li_][0]
+                    for i in range(n_theta - 1):
+                        ltran1, ltran2 = mount_trans[i][li_], mount_trans[i + 1][li_]
+                        rel_tran = se3.mul(se3.inv(ltran1), ltran2)
+                        slv.setCurrentTransform(*ltran1)
+                        slv.asConvexHull().setRelativeTransform(*rel_tran)
+                        rst = slv.distance_ext(ov, setting)
+                        if rst.d < dcheck:
+                            add_sweep(link_idx, -1 - li_, slv, ltran1, ltran2, rst, i, oj)
+        # print([pc.distance for pc in point_collisions])
+        # print([pc.distance for pc in sweep_collisions])
+        # import pdb; pdb.set_trace()
         return point_collisions, sweep_collisions
