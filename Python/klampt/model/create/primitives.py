@@ -1,7 +1,8 @@
 from klampt import *
 
 def box(width,depth,height,center=None,R=None,t=None,world=None,name=None,mass=float('inf'),type='TriangleMesh'):
-    """Makes a box with dimensions width x depth x height. 
+    """Makes a box with dimensions width x depth x height.  The box is centered
+    at (0,0,0) by default.
 
     Args:
         width,depth,height (float): x,y,z dimensions of the box
