@@ -36,7 +36,8 @@ class GLWidgetPlugin(GLPluginInterface):
         return False
     def keyboardfunc(self,c,x,y):
         if len(c)==1:
-            self.klamptwidgetmaster.keypress(c)
+            #if c is a bytes object, need to extract out the first byte
+            self.klamptwidgetmaster.keypress(c[0])
         return False
     def keyboardupfunc(self,c,x,y):
         return False
