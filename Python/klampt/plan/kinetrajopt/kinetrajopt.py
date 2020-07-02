@@ -208,7 +208,7 @@ class KineTrajOpt:
                 cost0 = cost0_t + mu * cost0_c
                 self.logs.append((point_collisions, sweep_collisions))
                 if self.config.verbose:
-                    print(f'qp has {len(point_collisions)} point and {len(sweep_collisions)} sweep')
+                    print('qp has %d point and %d sweep'%(len(point_collisions),len(sweep_collisions)))
                 self.build_qp(point_collisions, sweep_collisions, N, cur_sol, mu, d_safe)
                 goto15 = False
                 trk = 0
@@ -217,13 +217,13 @@ class KineTrajOpt:
                     # print(f'~~~constraint residual {self.cp_cache[-1].value}')
                     update = new_theta - cur_sol
                     if self.config.verbose:
-                        print(f'!Update region size {np.amax(np.abs(update))}')
+                        print('!Update region size %d'%(np.amax(np.abs(update)),))
                     # compute cost at new solution
                     pcs, scs = self.find_collision_pair(new_theta, self.config.dcheck)
                     new_cost_t, new_cost_c = self.compute_costs(new_theta, pcs, scs, d_safe)
                     new_cost = new_cost_t + mu * new_cost_c
                     if self.config.verbose:
-                        print(f'i={i} mu={mu} j={j} k={trk} cost0={cost0:.3f} obj={obj:.3f} newcost={new_cost:.3f} tr_size={tr_size:.2e}')
+                        print('i=%d mu=%f j=%d k=%d cost0=%.3f obj=%.3f newcost=%.3f tr_size=%.2g'%(i,mu,j,trk,cost0,obj,new_cost,tr_size))
                     trk += 1
                     # compute true and model improve
                     approx_merit_improve = cost0 - obj
@@ -232,7 +232,7 @@ class KineTrajOpt:
 
                     if approx_merit_improve < -1e-5:
                         if self.config.verbose:
-                            print(f'approximate merit got worse {approx_merit_improve:.3e}')
+                            print('approximate merit got worse %.3g'%(approx_merit_improve,))
                     if approx_merit_improve < self.config.min_approx_improve:
                         if self.config.verbose:
                             print('approxi merit improve ABSOLUTE small')
@@ -258,7 +258,7 @@ class KineTrajOpt:
                 # check how convergence is obtained
                 if tr_size < self.config.min_trust_box_size:
                     if self.config.verbose:
-                        print(f'trust region too small {tr_size:.5f} / {self.config.min_trust_box_size:.5f}')
+                        print('trust region too small %.5f / %.5f'%(tr_size,self.config.min_trust_box_size))
                     goto15 = True
                 elif j == self.config.max_iter - 1:
                     if self.config.verbose:
@@ -275,7 +275,7 @@ class KineTrajOpt:
                 break
             else:
                 if self.config.verbose:
-                    print(f'mu update from {mu} to {self.config.merit_coeff_increase_ratio * mu}')
+                    print('mu update from %f to %f'%(mu,self.config.merit_coeff_increase_ratio * mu))
                 mu = self.config.merit_coeff_increase_ratio * mu
                 tr_size = max(tr_size, self.config.min_trust_box_size / taum * 1.5)
         # that's it, easy, but maybe we need more...
@@ -318,7 +318,7 @@ class KineTrajOpt:
                 val = con.compute(thetas[idx], grad_level=0)[0]
                 closs += np.sum(np.maximum(0, val))
         if self.config.verbose:
-            print(f'traj loss {loss:.4f} collision loss {closs:.4f} bad dists {["%.4f" % i for i in dists]}')
+            print('traj loss %.4f collision loss %.4f bad dists %s'%(loss,closs,', '.join(["%.4f" % (i,) for i in dists])))
         return loss, closs
 
     def collision_satisfy(self, point_collisions, sweep_collisions, ctol, dsafe):
@@ -327,7 +327,7 @@ class KineTrajOpt:
         for pc in point_collisions + sweep_collisions:
             if pc.distance < dist_threshold:
                 if self.config.verbose:
-                    print(f'Distance {pc.distance} not satisfied')
+                    print('Distance %f not satisfied'%(pc.distance,))
                 return False
         return True
 
