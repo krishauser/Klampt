@@ -73,18 +73,26 @@ class OptimizationProblem:
     def addFeasibilityTest(self,test):
         self.feasibilityTests.append(test)
     def setSymbolicObjective(self,func,context,varorder=None):
-        """Sets an objective function from a symbolic Function or Expression
-        (see symbolic module)."""
+        """Sets an objective function from a symbolic :class:`Function` or
+        :class:`Expression` (see :mod:`symbolic` module).
+
+        .. note::
+            The optimization parameters will be a flattened version of each
+            :class:`Variable` appearing in ``func``.
+
+        """
         if varorder is None: varorder = context.variables
         fpy,varorder = context.makeFlatFunction(func,varorder)
         dfpy,varorder = context.makeFlatFunctionDeriv(func,varorder)
         self.setObjective(fpy,dfpy)
     def addSymbolicConstraint(self,func,context,varorder=None,blackbox=False):
-        """adds a constraint from a symbolic Function or Expression
-        (see symbolic module).  This will be "smart" in that AND Expressions will be
-        converted to multiple constraints, inequalities will be converted to inequality
-        constraints, and bounds will be converted to bound constraints.  All other
-        constraints will be treated as feasibility constraints"""
+        """Adds a constraint from a symbolic :class:`Function` or
+        :class:`symbolic.Expression` (see :mod:`symbolic` module).  This
+        will be "smart" in that ``and`` Expressions will be converted to
+        multiple constraints, inequalities will be converted to inequality
+        constraints, and bounds will be converted to bound constraints.  All 
+        other constraints will be treated as feasibility constraints.
+        """
         if varorder is None: varorder = context.variables
         if symbolic.is_op(func,"and"):
             for a in func.args:
@@ -238,12 +246,12 @@ class LocalOptimizer:
     
     The method is specified using the method string, which can be:
 
-    - auto: picks between scipy and pyOpt, whatever is available.
-    - scipy: uses scipy.optimize.minimize with default settings.
-    - scipy.[METHOD]: uses scipy.optimize.minimize with the argument
+    - 'auto': picks between scipy and pyOpt, whatever is available.
+    - 'scipy': uses scipy.optimize.minimize with default settings.
+    - 'scipy.[METHOD]': uses scipy.optimize.minimize with the argument
       method=[METHOD].
-    - pyOpt: uses pyOpt with SLSQP.
-    - pyOpt.[METHOD]: uses pyOpt with the given method.
+    - 'pyOpt': uses pyOpt with SLSQP.
+    - 'pyOpt.[METHOD]': uses pyOpt with the given method.
 
     """
     def __init__(self,method='auto'):
@@ -540,13 +548,16 @@ def sample_range(a,b):
     """Samples x in the range [a,b].
     
     * If the range is bounded, the uniform distribution x~U(a,b) is used.
-    * If the range is unbounded, then this uses the log transform to sample a distribution.
+    * If the range is unbounded, then this uses the log transform to sample a
+      distribution.
 
-    Specifically, if a=-inf and b is finite, then :math:`x \sim b + \log(y)` where
-    :math:`y \sim U(0,1)`.  A similar formula holds for a finite and b=inf.
+    Specifically, if a=-inf and b is finite, then :math:`x \\sim b + \\log(y)`
+    where :math:`y \\sim U(0,1)`.  A similar formula holds for a finite and
+    :math:`b=\\infty`.
 
-    If a=-inf and b=inf, then :math:`x \sim s*\log(y)`, where `y \sim U(0,1)` and the sign
-    s takes on either of {-1,1} each with probability 0.5.
+    If a=-inf and b=inf, then :math:`x \\sim s*\\log(y)`, where
+    :math:`y \\sim U(0,1)` and the sign ``s`` takes on either of {-1,1} each
+    with probability 0.5.
     """
     x = random.uniform(a,b)
     if math.isinf(x) or math.isnan(x):
@@ -572,16 +583,18 @@ class GlobalOptimizer:
     """A wrapper around different global optimization libraries. Only
     minimization is supported, and only DIRECT, scipy, and pyOpt are supported.
     
-    The optimization technique is specified using the method string, which can be:
+    The optimization technique is specified using the method string, which can
+    be:
 
-    - 'auto': picks between DIRECT and random-restart
-    - 'random-restart.METHOD': random restarts using the local optimizer METHOD.
-    - 'DIRECT': the DIRECT global optimizer
-    - 'scipy': uses scipy.optimize.minimize with default settings.
-    - 'scipy.METHOD': uses scipy.optimize.minimize with the argument
+    * 'auto': picks between DIRECT and random-restart
+    * 'random-restart.METHOD': random restarts using the local optimizer
+      METHOD.
+    * 'DIRECT': the DIRECT global optimizer
+    * 'scipy': uses scipy.optimize.minimize with default settings.
+    * 'scipy.METHOD': uses scipy.optimize.minimize with the argument
       method=METHOD.
-    - 'pyOpt': uses pyOpt with SLSQP.
-    - 'pyOpt.METHOD': uses pyOpt with the given method.
+    * 'pyOpt': uses pyOpt with SLSQP.
+    * 'pyOpt.METHOD': uses pyOpt with the given method.
 
     The method attribute can also be a list, which does a cascading solver
     in which the previous solution point is used as a seed for the next
@@ -589,11 +602,11 @@ class GlobalOptimizer:
 
     Examples:
 
-    - 'DIRECT': Run the DIRECT method
-    - 'scipy.differential_evolution': Runs the scipy differential evolution technique
-    - 'random-restart.scipy': Runs random restarts using scipy's default local optimizer
-    - 'random-restart.pyOpt.SLSQP': Runs random restarts using pyOpt as a local optimizer
-    - ['DIRECT','auto']: Run the DIRECT method then clean it up with the default local optimizer
+    * 'DIRECT': Run the DIRECT method
+    * 'scipy.differential_evolution': Runs the scipy differential evolution technique
+    * 'random-restart.scipy': Runs random restarts using scipy's default local optimizer
+    * 'random-restart.pyOpt.SLSQP': Runs random restarts using pyOpt as a local optimizer
+    * ['DIRECT','auto']: Run the DIRECT method then clean it up with the default local optimizer
             
     Random restarts picks each component x of the seed state randomly using sample_range(a,b)
     where [a,b] is the range of x given by problem.bounds.
@@ -718,11 +731,15 @@ class OptimizerParams:
             if attr in obj:
                 setattr(self,attr,obj[attr])
     def solve(self,optProblem,seed=None):
-        """Globally or locally solves an OptimizationProblem instance with the given parameters.
-        Optionally takes a seed as well.  Basically, this is a thin wrapper around GlobalOptimizer
-        that converts the OptimizerParams to the appropriate format.
+        """Globally or locally solves an :class:`OptimizationProblem` instance
+        with the given parameters. Optionally takes a seed as well. 
 
-        Returns (success,x) where success is True or False and x is the solution.
+        Basically, this is a thin wrapper around :class:`GlobalOptimizer` that
+        converts the :class:`OptimizerParams` to the appropriate format.
+
+        Returns:
+            tuple: (success,x) where success is True or False and x is the
+            solution.
         """
         method = self.globalMethod
         numIters = self.numIters
@@ -758,13 +775,15 @@ class OptimizationObjective:
         expr (symbolic.Expression):  object f(x)
         type (str): string describing what the objective does:
 
-            - 'cost': added to the cost.  Must be scalar.
-            - 'eq': an equality f(x)=0 that must be met exactly (up to a given equality tolerance)
-            - 'ineq': an inequality constraint f(x)<=0
-            - 'feas': a black-box boolean feasibility test f(x) = True
+            * 'cost': added to the cost.  Must be scalar.
+            * 'eq': an equality f(x)=0 that must be met exactly (up to a given
+              equality tolerance)
+            * 'ineq': an inequality constraint f(x)<=0
+            * 'feas': a black-box boolean feasibility test f(x) = True
 
-        soft (bool): if true, this is penalized as part of the cost function.  Specifically
-            :math:`w \|f(x)\|^2` is the penalty for eq types, and w I[f(x)!=True] for feas types.
+        soft (bool): if true, this is penalized as part of the cost function.  
+            Specifically :math:`w \\|f(x)\\|^2` is the penalty for 'eq' types,
+            and :math:`w I[f(x)\\neq \\text{True}]` for 'feas' types.
         weight (float, optional): a weight, used only for cost or soft objectives
         name (str, optional): a name for this objective.
 
@@ -783,19 +802,22 @@ class OptimizationObjective:
 
 class OptimizationProblemBuilder:
     """Defines a generalized optimization problem that can be saved/loaded from
-    a JSON string.  Allows custom lists of objectives, feasibility tests, and cost functions.
-    Multiple variables can be optimized at once.
+    a JSON string.  Allows custom lists of objectives, feasibility tests, and 
+    cost functions. Multiple variables can be optimized at once.
 
     Attributes:
-        context (symbolic.Context): a context that stores the optimization variables and any user data.
-        objectives (list of OptimizationObjective): all objectives or cosntraints used in the optimization.
-        optimizationVariables (list of Variable): A list of Variables used for optimization.  If not set,
-            this will try to find the variable 'x'.  If not found, this will use all unbound variables in
-            the objectives.
+        context (symbolic.Context): a context that stores the optimization
+            variables and any user data.
+        objectives (list of OptimizationObjective): all objectives or
+            constraints used in the optimization.
+        optimizationVariables (list of Variable): A list of Variables used for
+            optimization.  If not set, this will try to find the variable 'x'.
+            If not found, this will use all unbound variables in the
+            objectives.
 
-    Note that objectives must be symbolic.Function
-    objects, so that they are savable/loadable.  See the documentation of the symbolic
-    module for more detail.
+    Note that objectives must be created from :class:`symbolic.Function`
+    objects, so that they are savable/loadable.  See the documentation of the
+    :mod:`symbolic` module for more detail.
     """
     def __init__(self,context=None):
         if context is None:
@@ -1213,23 +1235,30 @@ class OptimizationProblemBuilder:
         """Preprocesses the problem to make solving more efficient
 
         Returns:
-            tuple: (opt,optToSelf,selfToOpt)
+            tuple: (opt,optToSelf,selfToOpt) giving:
 
-                - opt: a simplified version of this optimization problem. If no simplfication can be performed, opt = self
-                - optToSelf: a map of opt's variables to self's variables. If no simplification can be performed, optToSelf = None
-                - selfToOpt: a map of self's variables to opts's variables. If no simplification can be performed, selfToOpt = None
+                * opt: a simplified version of this optimization problem. If no
+                  simplfication can be performed, opt = self
+                * optToSelf: a map of opt's variables to self's variables. If
+                  no simplification can be performed, optToSelf = None
+                * selfToOpt: a map of self's variables to opts's variables. If
+                  no simplification can be performed, selfToOpt = None
 
         Specific steps include:
 
-        # delete any objectives with 0 weight
-        # delete any optimization variables not appearing in expressions
-        # fixed-bound (x in [a,b], with a=b) variables are replaced with fixed values.
-        # simplify objectives
-        # TODO: replace equalities of the form var = expr by matching var to expr?
+        #. delete any objectives with 0 weight
+        #. delete any optimization variables not appearing in expressions
+        #. fixed-bound (x in [a,b], with a=b) variables are replaced with fixed
+           values.
+        #. simplify objectives
+        #. TODO: replace equalities of the form var = expr by matching var to
+           expr?
 
-        If optToSelf is not None, then it is a list of Expressions that, when eval'ed, produce the values of the corresponding
-        optimizationVariables in the original optimization problem.  selfToOpt performs the converse mapping.
-        In other words, if opt has bound values to all of its optimizationVariables, the code::
+        If optToSelf is not None, then it is a list of Expressions that, when
+        eval'ed, produce the values of the corresponding optimizationVariables
+        in the original optimization problem.  selfToOpt performs the converse
+        mapping. In other words, if opt has bound values to all of its
+        optimizationVariables, the code::
 
             for var,expr in zip(self.optimizationVariables,optToSelf):
                 var.bind(expr.eval(opt.context))
