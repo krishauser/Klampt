@@ -729,7 +729,7 @@ Geometry3D Geometry3D::getElement(int element)
       throw PyException("Invalid element specified");
     Geometry3D res;
     shared_ptr<AnyCollisionGeometry3D>& rgeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(res.geomPtr);
-    *rgeom = data[element];
+    rgeom = make_shared<AnyCollisionGeometry3D>(data[element]);
     return res;
   }
   else if(geom->type == AnyCollisionGeometry3D::TriangleMesh) {
