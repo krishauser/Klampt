@@ -2636,6 +2636,10 @@ class Geometry3D(_object):
 
         Calculates the furthest point on this geometry in the direction dir.  
 
+        Supported types:  
+
+        *   ConvexHull  
+
         """
         return _robotsim.Geometry3D_support(self, dir)
 

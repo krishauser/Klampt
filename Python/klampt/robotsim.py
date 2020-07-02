@@ -1958,7 +1958,7 @@ class Geometry3D(_object):
 
 
         Args:
-            arg2 (:class:`~klampt.PointCloud` or :class:`~klampt.VolumeGrid` or :class:`~klampt.Geometry3D` or :obj:`ConvexHull` or :class:`~klampt.TriangleMesh` or :class:`~klampt.GeometricPrimitive`, optional): 
+            arg2 (:class:`~klampt.VolumeGrid` or :class:`~klampt.PointCloud` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.TriangleMesh` or :class:`~klampt.Geometry3D` or :obj:`ConvexHull`, optional): 
         """
         this = _robotsim.new_Geometry3D(*args)
         try:
@@ -2568,6 +2568,11 @@ class Geometry3D(_object):
 
         Args:
             dir (:obj:`list of 3 floats`)
+
+        Supported types:  
+
+        *   ConvexHull  
+
         """
         return _robotsim.Geometry3D_support(self, dir)
 
@@ -5630,7 +5635,7 @@ class WorldModel(_object):
 
 
         Args:
-            robot (int or str): 
+            robot (str or int): 
             index (int, optional): 
             name (str, optional): 
 
@@ -6621,7 +6626,7 @@ class GeneralizedIKObjective(_object):
 
 
         Args:
-            obj (:class:`~klampt.RigidObjectModel` or :obj:`GeneralizedIKObjective`, optional): 
+            obj (:obj:`GeneralizedIKObjective` or :class:`~klampt.RigidObjectModel`, optional): 
             link (:class:`~klampt.RobotModelLink`, optional): 
             link2 (:class:`~klampt.RobotModelLink`, optional): 
             obj2 (:class:`~klampt.RigidObjectModel`, optional): 
@@ -6821,7 +6826,7 @@ def SampleTransform(*args):
 
 
     Args:
-        obj (:obj:`IKObjective` or :obj:`GeneralizedIKObjective`): 
+        obj (:obj:`GeneralizedIKObjective` or :obj:`IKObjective`): 
     """
     return _robotsim.SampleTransform(*args)
 class SimRobotSensor(_object):
@@ -6874,7 +6879,7 @@ class SimRobotSensor(_object):
 
 
         Args:
-            robot (:obj:`Robot` or :class:`~klampt.SimRobotController`): 
+            robot (:class:`~klampt.SimRobotController` or :obj:`Robot`): 
             sensor (:obj:`SensorBase`, optional): 
             name (str, optional): 
             type (str, optional): 
@@ -8069,7 +8074,7 @@ class Simulator(_object):
 
 
         Args:
-            robot (int or :class:`~klampt.RobotModel`): 
+            robot (:class:`~klampt.RobotModel` or int): 
 
         Returns:
             (:class:`~klampt.SimRobotController`):

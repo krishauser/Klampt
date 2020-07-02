@@ -691,6 +691,10 @@ ConvexHull Geometry3D::getConvexHull()
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   if(!geom) return ConvexHull();
   Assert(geom->type == Geometry::AnyGeometry3D::ConvexHull);
+  if(geom->type != Geometry::AnyGeometry3D::ConvexHull) {
+    ConvexHull chull;
+    return chull;
+  }
   const Geometry::ConvexHull3D& hull = geom->AsConvexHull();
   if(hull.type != Geometry::ConvexHull3D::Polytope) {
     throw PyException("Can't get ConvexHull object from ConvexHull groups");
@@ -699,6 +703,24 @@ ConvexHull Geometry3D::getConvexHull()
   ConvexHull chull;
   chull.points = pts;
   return chull;
+}
+
+ConvexHullProxy Geometry3D::asConvexHull()  // with this function, local functions of convexhull can be called.
+{
+  shared_ptr<AnyCollisionGeometry3D>& ingeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  //If not initialized
+  if(ingeom == NULL) {
+    ingeom = make_shared<AnyCollisionGeometry3D>();
+    ingeom->type = AnyGeometry3D::ConvexHull;
+    ingeom->collisionData = CollisionConvexHull3D();
+  }
+  else{
+    assert(ingeom->type == AnyGeometry3D::ConvexHull);
+    ingeom->InitCollisionData(); // in case collision data is not initialized
+  }
+  ConvexHullProxy proxy;
+  proxy.pointer = AnyCast<CollisionConvexHull3D>(&ingeom->collisionData);
+  return proxy;
 }
 
 void Geometry3D::setTriangleMesh(const TriangleMesh& mesh)

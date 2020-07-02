@@ -299,7 +299,6 @@ public:
   int elem1,elem2;
 };
 
-
 /** @brief The result from a contact query of :class:`~klampt.Geometry3D`.
  * The number of contacts n is variable.
  *

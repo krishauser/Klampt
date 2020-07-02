@@ -57184,6 +57184,10 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Calculates the furthest point on this geometry in the direction dir.  \n"
 		"\n"
+		"Supported types:  \n"
+		"\n"
+		"*   ConvexHull  \n"
+		"\n"
 		""},
 	 { (char *)"Geometry3D_world_set", _wrap_Geometry3D_world_set, METH_VARARGS, (char *)"Geometry3D_world_set(Geometry3D self, int world)"},
 	 { (char *)"Geometry3D_world_get", _wrap_Geometry3D_world_get, METH_VARARGS, (char *)"Geometry3D_world_get(Geometry3D self) -> int"},

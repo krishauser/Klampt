@@ -1003,6 +1003,10 @@ collision data structures.
 %feature("docstring") Geometry3D::support "
 
 Calculates the furthest point on this geometry in the direction dir.  
+
+Supported types:  
+
+*   ConvexHull  
 ";
 
 %feature("docstring") Geometry3D::getCollisionMargin "
