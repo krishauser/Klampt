@@ -167,7 +167,7 @@ class KlamptWidget(widgets.DOMWidget):
                 type = candidates
         if type == 'Config':
             res = self.addGhost(name)
-            self.setGhostConfig(name,item)
+            self.setGhostConfig(item,name)
             return [res]
         elif type == 'Configs':
             if len(item[0]) == 3:
