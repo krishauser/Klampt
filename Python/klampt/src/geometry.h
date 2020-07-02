@@ -53,8 +53,18 @@ struct TriangleMesh
   std::vector<double> vertices;
 };
 
+/** @brief Stores a set of points to be set into a ConvexHull type. Note: 
+ * These may not actually be the vertices of the convex hull; the actual
+ * convex hull is computed internally.
+ */
 struct ConvexHull
 {
+  ///Returns the # of points
+  int numPoints() const; 
+  ///Adds a point
+  void addPoint(const double pt[3]);
+  ///Retrieves a point
+  void getPoint(int index,double out[3]) const;
   ///Translates all the vertices by v=v+t
   void translate(const double t[3]);
   ///Transforms all the vertices by the rigid transform v=R*v+t
@@ -289,11 +299,6 @@ public:
   int elem1,elem2;
 };
 
-class SupportResult
-{
-public:
-  std::vector<double> support;
-};
 
 /** @brief The result from a contact query of :class:`~klampt.Geometry3D`.
  * The number of contacts n is variable.
@@ -335,7 +340,7 @@ public:
  * - point clouds (PointCloud)
  * - volumetric grids (VolumeGrid)
  * - groups (Group)
- * - ConvexHull
+ * - convex hulls (ConvexHull)
  * 
  * This class acts as a uniform container of all of these types.
  *
@@ -352,7 +357,10 @@ public:
  * Modifiers include any setX() functions, translate(), and transform().
  *
  * Proximity queries include collides(), withinDistance(), distance(), 
- * closestPoint(), and rayCast().
+ * closestPoint(), and rayCast().  For some geometry types (TriangleMesh,
+ * PointCloud), the first time you perform a query, some collision
+ * detection data structures will be initialized.  This preprocessing step
+ * can take some time for complex geometries.
  *
  * Each object also has a "collision margin" which may virtually fatten the
  * object, as far as proximity queries are concerned. This is useful
@@ -367,7 +375,6 @@ class Geometry3D
   Geometry3D(const Geometry3D&);
   Geometry3D(const GeometricPrimitive&);
   Geometry3D(const ConvexHull&);
-  //Geometry3D(const ConvexHull&, const ConvexHull&, bool);
   Geometry3D(const TriangleMesh&);
   Geometry3D(const PointCloud&);
   Geometry3D(const VolumeGrid&);
@@ -375,9 +382,6 @@ class Geometry3D
   const Geometry3D& operator = (const Geometry3D& rhs);
   ///Creates a standalone geometry from this geometry
   Geometry3D clone();
-  void from_hull_tran(const Geometry3D&);
-  void from_hull(const Geometry3D&, const Geometry3D &, bool);
-  void find_support(const double dir[3], double out[3]);
   ///Copies the geometry of the argument into this geometry.
   void set(const Geometry3D&);
   ///Returns true if this is a standalone geometry
@@ -395,9 +399,9 @@ class Geometry3D
   PointCloud getPointCloud();
   ///Returns a GeometricPrimitive if this geometry is of type GeometricPrimitive
   GeometricPrimitive getGeometricPrimitive();
-  ///Returns a VoumeGrid if this geometry is of type VolumeGrid
+  ///Returns a ConvexHull if this geometry is of type ConvexHull
   ConvexHull getConvexHull();
-  ///Returns a VoumeGrid if this geometry is of type VolumeGrid
+  ///Returns a VolumeGrid if this geometry is of type VolumeGrid
   VolumeGrid getVolumeGrid();
   ///Sets this Geometry3D to a TriangleMesh
   void setTriangleMesh(const TriangleMesh&);
@@ -407,6 +411,10 @@ class Geometry3D
   void setGeometricPrimitive(const GeometricPrimitive&);
   ///Sets this Geometry3D to a ConvexHull
   void setConvexHull(const ConvexHull&);
+  ///Sets this Geometry3D to be a convex hull of two geometries.  Note: the relative
+  ///transform of these two objects is frozen in place; i.e., setting the current
+  ///transform of g2 doesn't do anything to this object.
+  void setConvexHullGroup(const Geometry3D& g1, const Geometry3D & g2);
   ///Sets this Geometry3D to a volumeGrid
   void setVolumeGrid(const VolumeGrid&);
   ///Sets this Geometry3D to a group geometry.  To add sub-geometries, 
@@ -433,10 +441,6 @@ class Geometry3D
   void setCurrentTransform(const double R[9],const double t[3]);
   ///Gets the current transformation 
   void getCurrentTransform(double out[9],double out2[3]);
-  // update relative transform for some datatypes
-  void setRelativeTransform(const double R[9], const double t[3]);
-  // update relative transform for some datatypes
-  void setFreeRelativeTransform(const double R[9], const double t[3]);
   ///Translates the geometry data.
   ///Permanently modifies the data and resets any collision data structures.
   void translate(const double t[3]);
@@ -474,14 +478,19 @@ class Geometry3D
    *        method with good results only if the mesh is watertight.
    *        param is the grid resolution, by default set to the average
    *        triangle diameter.
+   *   - TriangleMesh -> ConvexHull.  Converted using SOLID / Qhull.
    *   - PointCloud -> TriangleMesh. Available if the point cloud is
    *        structured. param is the threshold for splitting triangles
    *        by depth discontinuity. param is by default infinity.
+   *   - PointCloud -> ConvexHull.  Converted using SOLID / Qhull.
    *   - GeometricPrimitive -> anything.  param determines the desired
    *        resolution.
    *   - VolumeGrid -> TriangleMesh.  param determines the level set for
    *         the marching cubes algorithm.
    *   - VolumeGrid -> PointCloud.  param determines the level set.
+   *   - ConvexHull -> TriangleMesh. 
+   *   - ConvexHull -> PointCloud.  param is the desired dispersion of the
+   *         points.  Equivalent to ConvexHull -> TriangleMesh -> PointCloud
    *
    */
   Geometry3D convert(const char* type,double param=0);
@@ -491,7 +500,7 @@ class Geometry3D
    *
    * - VolumeGrid - TriangleMesh
    * - VolumeGrid - VolumeGrid
-   *
+   * - ConvexHull - anything else besides ConvexHull
    */
   bool collides(const Geometry3D& other);
   ///Returns true if this geometry is within distance tol to other
@@ -525,6 +534,7 @@ class Geometry3D
   ///- GeometricPrimitive-VolumeGrid
   ///- TriangleMesh (surface only)-GeometricPrimitive
   ///- PointCloud-VolumeGrid
+  ///- ConvexHull - ConvexHull
   ///
   ///If penetration is supported, a negative distance is returned and cp1,cp2
   ///are the deepest penetrating points.
@@ -535,6 +545,7 @@ class Geometry3D
   ///- PointCloud-PointCloud
   ///- VolumeGrid-TriangleMesh
   ///- VolumeGrid-VolumeGrid
+  ///- ConvexHull - anything else besides ConvexHull
   ///
   ///See the comments of the distance_point function
   DistanceQueryResult distance(const Geometry3D& other);
@@ -565,8 +576,16 @@ class Geometry3D
   ///  also, the results are potentially inaccurate for non-convex VolumeGrids.
   ///- VolumeGrid-TriangleMesh
   ///- VolumeGrid-VolumeGrid
+  ///- ConvexHull - anything
   ///
   ContactQueryResult contacts(const Geometry3D& other,double padding1,double padding2,int maxContacts=0);
+  ///Calculates the furthest point on this geometry in the direction dir.
+  ///
+  ///Supported types:
+  ///
+  ///- ConvexHull
+  ///
+  void support(const double dir[3], double out[3]);
 
   int world;
   int id;
