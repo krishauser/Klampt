@@ -705,24 +705,6 @@ ConvexHull Geometry3D::getConvexHull()
   return chull;
 }
 
-ConvexHullProxy Geometry3D::asConvexHull()  // with this function, local functions of convexhull can be called.
-{
-  shared_ptr<AnyCollisionGeometry3D>& ingeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
-  //If not initialized
-  if(ingeom == NULL) {
-    ingeom = make_shared<AnyCollisionGeometry3D>();
-    ingeom->type = AnyGeometry3D::ConvexHull;
-    ingeom->collisionData = CollisionConvexHull3D();
-  }
-  else{
-    assert(ingeom->type == AnyGeometry3D::ConvexHull);
-    ingeom->InitCollisionData(); // in case collision data is not initialized
-  }
-  ConvexHullProxy proxy;
-  proxy.pointer = AnyCast<CollisionConvexHull3D>(&ingeom->collisionData);
-  return proxy;
-}
-
 void Geometry3D::setTriangleMesh(const TriangleMesh& mesh)
 {
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
@@ -774,8 +756,7 @@ Geometry3D Geometry3D::getElement(int element)
       throw PyException("Invalid element specified");
     Geometry3D res;
     shared_ptr<AnyCollisionGeometry3D>& rgeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(res.geomPtr);
-    Assert(rgeom.get() != NULL);
-    *rgeom = data[element];
+    rgeom = make_shared<AnyCollisionGeometry3D>(data[element]);
     return res;
   }
   else if(geom->type == AnyCollisionGeometry3D::TriangleMesh) {
@@ -786,7 +767,6 @@ Geometry3D Geometry3D::getElement(int element)
     data.GetTriangle(element,tri);
     Geometry3D res;
     shared_ptr<AnyCollisionGeometry3D>& rgeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(res.geomPtr);
-    Assert(rgeom.get() != NULL);
     rgeom = make_shared<AnyCollisionGeometry3D>(Math3D::GeometricPrimitive3D(tri));
     return res;
   }
@@ -979,7 +959,7 @@ void Geometry3D::setConvexHullGroup(const Geometry3D& geom1, const Geometry3D & 
   hull.SetHull(ingeom1->AsConvexHull(), ingeom2->AsConvexHull());
   *geom = AnyCollisionGeometry3D(hull);
   geom->InitCollisionData();
-  geom->ConvexHullCollisionData().UpdateHullSecondRelativeTransform(&TRel);
+  geom->ConvexHullCollisionData().UpdateHullSecondRelativeTransform(TRel);
   geom->SetTransform(T1);
 
   if(mgeom) {

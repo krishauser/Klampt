@@ -55,7 +55,11 @@ struct TriangleMesh
 
 /** @brief Stores a set of points to be set into a ConvexHull type. Note: 
  * These may not actually be the vertices of the convex hull; the actual
- * convex hull is computed internally.
+ * convex hull may be computed internally for some datatypes.
+ *
+ * Attributes:
+ *     points (SWIG vector of floats): a list of points, given  as a flattened
+ *         coordinate list [x1,y1,z1,x2,y2,...]
  */
 struct ConvexHull
 {
@@ -477,7 +481,8 @@ class Geometry3D
    *        method with good results only if the mesh is watertight.
    *        param is the grid resolution, by default set to the average
    *        triangle diameter.
-   *   - TriangleMesh -> ConvexHull.  Converted using SOLID / Qhull.
+   *   - TriangleMesh -> ConvexHull.  If param==0, just calculates a convex
+   *        hull. Otherwise, uses convex decomposition with the HACD library.
    *   - PointCloud -> TriangleMesh. Available if the point cloud is
    *        structured. param is the threshold for splitting triangles
    *        by depth discontinuity. param is by default infinity.
