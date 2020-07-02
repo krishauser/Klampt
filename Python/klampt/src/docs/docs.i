@@ -250,6 +250,43 @@ Attributes:
 C++ includes: geometry.h
 ";
 
+// File: structConvexHull.xml
+
+
+%feature("docstring") ConvexHull "
+
+Stores a set of points to be set into a ConvexHull type. Note: These may not
+actually be the vertices of the convex hull; the actual convex hull is computed
+internally.  
+
+C++ includes: geometry.h
+";
+
+%feature("docstring") ConvexHull::numPoints "
+
+Returns the # of points.  
+";
+
+%feature("docstring") ConvexHull::transform "
+
+Transforms all the vertices by the rigid transform v=R*v+t.  
+";
+
+%feature("docstring") ConvexHull::getPoint "
+
+Retrieves a point.  
+";
+
+%feature("docstring") ConvexHull::addPoint "
+
+Adds a point.  
+";
+
+%feature("docstring") ConvexHull::translate "
+
+Translates all the vertices by v=v+t.  
+";
+
 // File: classCSpaceInterface.xml
 
 
@@ -649,6 +686,7 @@ There are five currently supported types of geometry:
 *   point clouds (PointCloud)  
 *   volumetric grids (VolumeGrid)  
 *   groups (Group)  
+*   convex hulls (ConvexHull)  
 
 This class acts as a uniform container of all of these types.  
 
@@ -664,7 +702,10 @@ use the set(rhs) function rather than the assignment (=) operator.
 Modifiers include any setX() functions, translate(), and transform().  
 
 Proximity queries include collides(), withinDistance(), distance(),
-closestPoint(), and rayCast().  
+closestPoint(), and rayCast(). For some geometry types (TriangleMesh,
+PointCloud), the first time you perform a query, some collision detection data
+structures will be initialized. This preprocessing step can take some time for
+complex geometries.  
 
 Each object also has a \"collision margin\" which may virtually fatten the
 object, as far as proximity queries are concerned. This is useful for setting
@@ -697,6 +738,7 @@ Unsupported types:
 
 *   VolumeGrid - TriangleMesh  
 *   VolumeGrid - VolumeGrid  
+*   ConvexHull - anything else besides ConvexHull  
 ";
 
 %feature("docstring") Geometry3D::getPointCloud "
@@ -706,7 +748,7 @@ Returns a PointCloud if this geometry is of type PointCloud.
 
 %feature("docstring") Geometry3D::getVolumeGrid "
 
-Returns a VoumeGrid if this geometry is of type VolumeGrid.  
+Returns a VolumeGrid if this geometry is of type VolumeGrid.  
 ";
 
 %feature("docstring") Geometry3D::rayCast "
@@ -735,6 +777,7 @@ calculating penetration depths:
 *   GeometricPrimitive-VolumeGrid  
 *   TriangleMesh (surface only)-GeometricPrimitive  
 *   PointCloud-VolumeGrid  
+*   ConvexHull - ConvexHull  
 
 If penetration is supported, a negative distance is returned and cp1,cp2 are the
 deepest penetrating points.  
@@ -745,6 +788,7 @@ Unsupported types:
 *   PointCloud-PointCloud  
 *   VolumeGrid-TriangleMesh  
 *   VolumeGrid-VolumeGrid  
+*   ConvexHull - anything else besides ConvexHull  
 
 See the comments of the distance_point function  
 ";
@@ -767,6 +811,27 @@ Sets this Geometry3D to a GeometricPrimitive.
 A customizable version of distance_point. The settings for the calculation can
 be customized with relErr, absErr, and upperBound, e.g., to break if the closest
 points are at least upperBound distance from one another.  
+";
+
+%feature("docstring") Geometry3D::Geometry3D "
+";
+
+%feature("docstring") Geometry3D::Geometry3D "
+";
+
+%feature("docstring") Geometry3D::Geometry3D "
+";
+
+%feature("docstring") Geometry3D::Geometry3D "
+";
+
+%feature("docstring") Geometry3D::Geometry3D "
+";
+
+%feature("docstring") Geometry3D::Geometry3D "
+";
+
+%feature("docstring") Geometry3D::Geometry3D "
 ";
 
 %feature("docstring") Geometry3D::distance_simple "
@@ -797,6 +862,11 @@ Returns true if this has no contents (not the same as numElements()==0)
 Returns true if this geometry is within distance tol to other.  
 ";
 
+%feature("docstring") Geometry3D::setConvexHull "
+
+Sets this Geometry3D to a ConvexHull.  
+";
+
 %feature("docstring") Geometry3D::convert "
 
 Converts a geometry to another type, if a conversion is available. The
@@ -811,13 +881,18 @@ Available conversions are:
 *   TriangleMesh -> VolumeGrid. Converted using the fast marching method with
     good results only if the mesh is watertight. param is the grid resolution,
     by default set to the average triangle diameter.  
+*   TriangleMesh -> ConvexHull. Converted using SOLID / Qhull.  
 *   PointCloud -> TriangleMesh. Available if the point cloud is structured.
     param is the threshold for splitting triangles by depth discontinuity. param
     is by default infinity.  
+*   PointCloud -> ConvexHull. Converted using SOLID / Qhull.  
 *   GeometricPrimitive -> anything. param determines the desired resolution.  
 *   VolumeGrid -> TriangleMesh. param determines the level set for the marching
     cubes algorithm.  
 *   VolumeGrid -> PointCloud. param determines the level set.  
+*   ConvexHull -> TriangleMesh.  
+*   ConvexHull -> PointCloud. param is the desired dispersion of the points.
+    Equivalent to ConvexHull -> TriangleMesh -> PointCloud  
 ";
 
 %feature("docstring") Geometry3D::transform "
@@ -836,6 +911,29 @@ The return value contains the distance, closest points, and gradients if
 available.  
 ";
 
+%feature("docstring") Geometry3D::contacts "
+
+Returns the set of contact points between this and other. This set is a discrete
+representation of the region of surface overlap, which is defined as all pairs
+of points within distance self.collisionMargin + other.collisionMargin +
+padding1 + padding2.  
+
+For some geometry types (TriangleMesh-TriangleMesh, TriangleMesh-PointCloud,
+PointCloud-PointCloud) padding must be positive to get meaningful contact poitns
+and normals.  
+
+If maxContacts != 0 a clustering postprocessing step is performed.  
+
+Unsupported types:  
+
+*   GeometricPrimitive-GeometricPrimitive subtypes segment vs aabb  
+*   VolumeGrid-GeometricPrimitive any subtypes except point and sphere. also,
+    the results are potentially inaccurate for non-convex VolumeGrids.  
+*   VolumeGrid-TriangleMesh  
+*   VolumeGrid-VolumeGrid  
+*   ConvexHull - anything  
+";
+
 %feature("docstring") Geometry3D::getBB "
 
 Returns the axis-aligned bounding box of the object. Note: O(1) time, but may
@@ -852,22 +950,9 @@ Returns a TriangleMesh if this geometry is of type TriangleMesh.
 Returns true if this is a standalone geometry.  
 ";
 
-%feature("docstring") Geometry3D::Geometry3D "
-";
+%feature("docstring") Geometry3D::getConvexHull "
 
-%feature("docstring") Geometry3D::Geometry3D "
-";
-
-%feature("docstring") Geometry3D::Geometry3D "
-";
-
-%feature("docstring") Geometry3D::Geometry3D "
-";
-
-%feature("docstring") Geometry3D::Geometry3D "
-";
-
-%feature("docstring") Geometry3D::Geometry3D "
+Returns a ConvexHull if this geometry is of type ConvexHull.  
 ";
 
 %feature("docstring") Geometry3D::scale "
@@ -915,6 +1000,11 @@ Rotates the geometry data. Permanently modifies the data and resets any
 collision data structures.  
 ";
 
+%feature("docstring") Geometry3D::support "
+
+Calculates the furthest point on this geometry in the direction dir.  
+";
+
 %feature("docstring") Geometry3D::getCollisionMargin "
 
 Returns the padding around the base geometry. Default 0.  
@@ -933,26 +1023,11 @@ Sets a padding around the base geometry which affects the results of proximity
 queries.  
 ";
 
-%feature("docstring") Geometry3D::contacts "
+%feature("docstring") Geometry3D::setConvexHullGroup "
 
-Returns the set of contact points between this and other. This set is a discrete
-representation of the region of surface overlap, which is defined as all pairs
-of points within distance self.collisionMargin + other.collisionMargin +
-padding1 + padding2.  
-
-For some geometry types (TriangleMesh-TriangleMesh, TriangleMesh-PointCloud,
-PointCloud-PointCloud) padding must be positive to get meaningful contact poitns
-and normals.  
-
-If maxContacts != 0 a clustering postprocessing step is performed.  
-
-Unsupported types:  
-
-*   GeometricPrimitive-GeometricPrimitive subtypes segment vs aabb  
-*   VolumeGrid-GeometricPrimitive any subtypes except point and sphere. also,
-    the results are potentially inaccurate for non-convex VolumeGrids.  
-*   VolumeGrid-TriangleMesh  
-*   VolumeGrid-VolumeGrid  
+Sets this Geometry3D to be a convex hull of two geometries. Note: the relative
+transform of these two objects is frozen in place; i.e., setting the current
+transform of g2 doesn't do anything to this object.  
 ";
 
 %feature("docstring") Geometry3D::distance_ext "
@@ -999,8 +1074,10 @@ A class defining an inverse kinematic target. Either a link on a robot can take
 on a fixed position/orientation in the world frame, or a relative
 position/orientation to another frame.  
 
-Currently only fixed-point constraints and fixed-transform constraints are
-implemented in the Python API.  
+The positionScale and orientationScale attributes scale the solver's residual
+vector. This affects whether the convergence tolerance is met, and also controls
+the emphasis on each objective / component when the objective cannot be reached.
+By default these are both 1.  
 
 C++ includes: robotik.h
 ";
@@ -1059,7 +1136,7 @@ Manual: Sets a free rotation constraint.
 
 %feature("docstring") IKObjective::setFreePosition "
 
-Manual: Sets a free position constraint.  
+Deprecated: use setFreePosConstraint.  
 ";
 
 %feature("docstring") IKObjective::setPlanarPosConstraint "
@@ -1088,7 +1165,13 @@ current position/rotation constraint types are kept.
 %feature("docstring") IKObjective::loadString "
 
 Loads the objective from a Klamp't-native formatted string. For a more readable
-but verbose format, try the JSON IO routines loader.toJson/fromJson()  
+but verbose format, try the JSON IO routines :meth:`klampt.io.loader.toJson` /
+:meth:`klampt.io.loader.fromJson`  
+";
+
+%feature("docstring") IKObjective::setFreePosConstraint "
+
+Manual: Sets a free position constraint.  
 ";
 
 %feature("docstring") IKObjective::numPosDims "
@@ -1109,7 +1192,8 @@ Sets a multiple fixed-point constraint relative to link2.
 %feature("docstring") IKObjective::saveString "
 
 Saves the objective to a Klamp't-native formatted string. For a more readable
-but verbose format, try the JSON IO routines loader.toJson/fromJson()  
+but verbose format, try the JSON IO routines :meth:`klampt.io.loader.toJson` /
+:meth:`klampt.io.loader.fromJson`  
 ";
 
 %feature("docstring") IKObjective::setLinks "
@@ -1117,9 +1201,9 @@ but verbose format, try the JSON IO routines loader.toJson/fromJson()
 Manual construction.  
 ";
 
-%feature("docstring") IKObjective::destLink "
+%feature("docstring") IKObjective::getPositionDirection "
 
-The index of the destination link, or -1 if fixed to the world.  
+For linear and planar constraints, returns the direction.  
 ";
 
 %feature("docstring") IKObjective::getRotationAxis "
@@ -1163,9 +1247,9 @@ For fixed-transform constraints, returns the transform (R,t)
 Sets a multiple fixed-point constraint.  
 ";
 
-%feature("docstring") IKObjective::getPositionDirection "
+%feature("docstring") IKObjective::destLink "
 
-For linear and planar constraints, returns the direction.  
+The index of the destination link, or -1 if fixed to the world.  
 ";
 
 // File: classIKSolver.xml
@@ -2774,9 +2858,36 @@ Arbitrary trajectories can be tracked by using setVelocity over short time
 steps. Force controllers can be implemented using setTorque, again using short
 time steps.  
 
-If setVelocity, setTorque, or setPID command are called, the motion queue
+If the setVelocity, setTorque, or setPID command are called, the motion queue
 behavior will be completely overridden. To reset back to motion queue control,
-the function setManualMode(False) must be called.  
+setManualMode(False) must be called first.  
+
+Individual joints cannot be addressed with mixed motion queue mode and
+torque/PID mode. However, you can mix PID and torque mode between different
+joints with a workaround::  
+
+
+   # setup by zeroing out PID constants for torque controlled joints
+   pid_joint_indices = [...]
+   torque_joint_indices = [...] # complement of pid_joint_indices
+   kp,ki,kp = controller.getPIDGains()
+   for i in torque_joint_indices:  #turn off PID gains here
+      kp[i] = ki[i] = kp[i] = 0  
+
+   # to send PID command (qcmd,dqcmd) and torque commands tcmd, use
+   # a PID command with feedforward torques.  First we build a whole-robot
+   # command:
+   qcmd_whole = [0]*controller.model().numLinks()
+   dqcmd_whole = [0]*controller.model().numLinks()
+   tcmd_whole = [0]*controller.model().numLinks()
+   for i,k in enumerate(pid_joint_indices):
+       qcmd_whole[k],dqcmd_whole[i] = qcmd[i],dqcmd[i]
+   for i,k in enumerate(torque_joint_indices):
+       tcmd_whole[k] = tcmd[i]
+   # Then we send it to the controller
+   controller.setPIDCommand(qcmd_whole,dqcmd_whole,tcmd_whole)  
+
+  
 
 C++ includes: robotsim.h
 ";
@@ -2981,24 +3092,22 @@ starting at the current queued end state.
 %feature("docstring") SimRobotSensor "
 
 A sensor on a simulated robot. Retrieve one from the controller using
-:meth:`SimRobotController.getSensor` (), or create a new one using
-SimRobotSensor(robotController,name,type)  
+:meth:`SimRobotController.getSensor`, or create a new one using
+`SimRobotSensor(robotController,name,type)`  
 
-Use :meth:`getMeasurements` () to get the currently simulated measurement
-vector.  
+Use :meth:`getMeasurements` to get the currently simulated measurement vector.  
 
-Sensors are automatically updated through the :meth:`Simulator.simulate` ()
-call, and :meth:`getMeasurements` () retrieves the updated values. As a result,
-you may get garbage measurements before the first Simulator.simulate call is
-made.  
+Sensors are automatically updated through the :meth:`Simulator.simulate` call,
+and :meth:`getMeasurements` retrieves the updated values. As a result, you may
+get garbage measurements before the first Simulator.simulate call is made.  
 
 There is also a mode for doing kinematic simulation, which is supported (i.e.,
 makes sensible measurements) for some types of sensors when just a robot / world
 model is given. This is similar to Simulation.fakeSimulate but the entire
 controller structure is bypassed. You can arbitrarily set the robot's position,
-call :meth:`kinematicReset` (), and then call :meth:`kinematicSimulate` ().
-Subsequent calls assume the robot is being driven along a trajectory until the
-next :meth:`kinematicReset` () is called.  
+call :meth:`kinematicReset`, and then call :meth:`kinematicSimulate`. Subsequent
+calls assume the robot is being driven along a trajectory until the next
+:meth:`kinematicReset` is called.  
 
 LaserSensor, CameraSensor, TiltSensor, AccelerometerSensor, GyroSensor,
 JointPositionSensor, JointVelocitySensor support kinematic simulation mode.
@@ -3173,22 +3282,36 @@ Retrieves some simulation setting.
 
 Valid names are:  
 
-*   gravity  
-*   simStep  
-*   boundaryLayerCollisions  
-*   rigidObjectCollisions  
-*   robotSelfCollisions  
-*   robotRobotCollisions  
-*   adaptiveTimeStepping  
-*   minimumAdaptiveTimeStep  
-*   maxContacts  
-*   clusterNormalScale  
-*   errorReductionParameter  
-*   dampedLeastSquaresParameter  
-*   instabilityConstantEnergyThreshold  
-*   instabilityLinearEnergyThreshold  
-*   instabilityMaxEnergyThreshold  
-*   instabilityPostCorrectionEnergy  
+*   gravity: the gravity vector (default \"0 0 -9.8\")  
+*   simStep: the internal simulation step (default \"0.001\")  
+*   autoDisable: whether to disable bodies that don't move much between time
+    steps (default \"0\", set to \"1\" for many static objects)  
+*   boundaryLayerCollisions: whether to use the Klampt inflated boundaries for
+    contact detection'(default \"1\", recommended)  
+*   rigidObjectCollisions: whether rigid objects should collide (default \"1\")  
+*   robotSelfCollisions: whether robots should self collide (default \"0\")  
+*   robotRobotCollisions: whether robots should collide with other robots
+    (default \"1\")  
+*   adaptiveTimeStepping: whether adaptive time stepping should be used to
+    improve stability. Slower but more stable. (default \"1\")  
+*   minimumAdaptiveTimeStep: the minimum size of an adaptive time step before
+    giving up (default \"1e-6\")  
+*   maxContacts: max # of clustered contacts between pairs of objects (default
+    \"20\")  
+*   clusterNormalScale: a parameter for clustering contacts (default \"0.1\")  
+*   errorReductionParameter: see ODE docs on ERP (default \"0.95\")  
+*   dampedLeastSquaresParameter: see ODE docs on CFM (default \"1e-6\")  
+*   instabilityConstantEnergyThreshold: parameter c0 in instability correction
+    (default \"1\")  
+*   instabilityLinearEnergyThreshold: parameter c1 in instability correction
+    (default \"1.5\")  
+*   instabilityMaxEnergyThreshold: parameter cmax in instability correction
+    (default \"100000\")  
+*   instabilityPostCorrectionEnergy: kinetic energy scaling parameter if
+    instability is detected (default \"0.8\")  
+
+Instability correction kicks in whenever the kinetic energy K(t) of an object
+exceeds min(c0*m + c1*K(t-dt),cmax). m is the object's mass.  
 
 See `Klampt/Simulation/ODESimulator.h
 <http://motion.pratt.duke.edu/klampt/klampt_docs/ODESimulator_8h_source.html>`_
@@ -3919,8 +4042,15 @@ Valid string values are:
     \"kdtree\" is supported, optionally followed by a weight vector (for PRM,
     RRT*, PRM*, LazyPRM*, LazyRRG*)  
 *   \"restartTermCond\": used if the \"restart\" setting is true. This is a JSON
-    string defining the termination condition (default value:
-    \"{foundSolution:1;maxIters:1000}\")  
+    string defining the termination condition.  
+
+    The default value is \"{foundSolution:1;maxIters:1000}\", which indicates
+    that the planner will restart if it has found a solution, or 1000 iterations
+    have passed.  
+
+    To restart after a certain amount of time has elasped, use
+    \"{timeLimit:X}\". If you are using an optimizing planner, e.g.,
+    shortcutting, you should set foundSolution:0.  
 ";
 
 // File: robotik_8h.xml
