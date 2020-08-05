@@ -89,6 +89,10 @@ class SweepJointObjectInfo(object):
         self.pobs = None
 
 
+class QPException(Exception):
+    pass
+
+
 class KineTrajOpt:
     r"""
     My implementation of the trajopt library by Josh Schulman.
@@ -213,7 +217,10 @@ class KineTrajOpt:
                 goto15 = False
                 trk = 0
                 while tr_size > self.config.min_trust_box_size:
-                    obj, new_theta = self.solve_qp_with_tr_size(tr_size)
+                    try:
+                        obj, new_theta = self.solve_qp_with_tr_size(tr_size)
+                    except QPException:
+                        return {'success': False, 'sol': cur_sol, 'cost': np.inf}
                     # print(f'~~~constraint residual {self.cp_cache[-1].value}')
                     update = new_theta - cur_sol
                     if self.config.verbose:
@@ -354,9 +361,13 @@ class KineTrajOpt:
         """Given trust region size, we solve the qp"""
         prob_cache, trs_cache, x_cache = self.cp_cache
         trs_cache.value = tr_size
-        prob_cache.solve(**self.config.cvxpy_args)
+        try:
+            prob_cache.solve(**self.config.cvxpy_args)
+        except Exception as e:
+            print("Gurobi fail to solve, exception is", e)
+            raise QPException
         if x_cache.value is None:
-            raise Exception("QP not sovled")
+            raise QPException
         return prob_cache.value, x_cache.value
 
     def build_qp(self, point_collisions, sweep_collisions, N, theta0, mu, d_safe):
