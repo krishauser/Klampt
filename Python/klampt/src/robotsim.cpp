@@ -514,25 +514,6 @@ std::string GeometricPrimitive::saveString() const
   return ss.str();
 }
 
-// write member functions for this proxy
-void ConvexHullProxy::fromTransform(ConvexHullProxy &hull) {
-  pointer->FromTransform(*hull.pointer);
-}
-
-void ConvexHullProxy::fromHull(ConvexHullProxy &hull1, ConvexHullProxy &hull2) {
-  pointer->FromHull(*hull1.pointer, *hull2.pointer);
-}
-
-void ConvexHullProxy::setRelativeTransform(const double R[9], const double t[3]) {
-  RigidTransform T;
-  T.R.set(R);
-  T.t.set(t);
-  pointer->UpdateRelativeTransform(&T);
-}
-
-void ConvexHullProxy::findSupport(const double dir[3], double support[3]) {
-  pointer->FindSupport(dir, support);
-}
 
 Geometry3D::Geometry3D()
   :world(-1),id(-1),geomPtr(NULL)
@@ -715,68 +696,14 @@ ConvexHull Geometry3D::getConvexHull()
     return chull;
   }
   const Geometry::ConvexHull3D& hull = geom->AsConvexHull();
+  if(hull.type != Geometry::ConvexHull3D::Polytope) {
+    throw PyException("Can't get ConvexHull object from ConvexHull groups");
+  }
+  const auto& pts = hull.AsPolytope();
   ConvexHull chull;
-  chull.points.resize(hull.points().size());
-  std::vector<double> hpoints = hull.points();
-  std::copy(hpoints.begin(), hpoints.end(), chull.points.begin());
+  chull.points = pts;
   return chull;
 }
-
-ConvexHullProxy Geometry3D::asConvexHull()  // with this function, local functions of convexhull can be called.
-{
-  shared_ptr<AnyCollisionGeometry3D>& ingeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
-  //If not initialized
-  if(ingeom == NULL) {
-    ingeom = make_shared<AnyCollisionGeometry3D>();
-    ingeom->type = AnyGeometry3D::ConvexHull;
-    ingeom->collisionData = CollisionConvexHull3D();
-  }
-  else{
-    assert(ingeom->type == AnyGeometry3D::ConvexHull);
-    ingeom->InitCollisionData(); // in case collision data is not initialized
-  }
-  ConvexHullProxy proxy;
-  proxy.pointer = AnyCast<CollisionConvexHull3D>(&ingeom->collisionData);
-  return proxy;
-}
-
-// void Geometry3D::from_hull_tran(const Geometry3D &geom)
-// {
-//   shared_ptr<AnyCollisionGeometry3D>& ingeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geom.geomPtr);
-//   assert(ingeom->type == AnyGeometry3D::ConvexHull);
-//   shared_ptr<AnyCollisionGeometry3D>& resgeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(this->geomPtr);
-//   ConvexHull3D *hull = const_cast<ConvexHull3D*>(&ingeom->AsConvexHull());  // dangerous cast violates const assumption
-//   hull->type = ConvexHull3D::Trans;
-//   resgeom = make_shared<AnyCollisionGeometry3D>(*hull);
-//   resgeom->InitCollisionData();
-// }
-// 
-// void Geometry3D::from_hull(const Geometry3D &geom1, const Geometry3D &geom2, bool is_free) {
-//   // make sure both geometry is convexhull
-//   shared_ptr<AnyCollisionGeometry3D>& ingeom1 = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geom1.geomPtr);
-//   Assert(ingeom1->type == AnyGeometry3D::ConvexHull);
-//   shared_ptr<AnyCollisionGeometry3D>& ingeom2 = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geom2.geomPtr);
-//   Assert(ingeom2->type == AnyGeometry3D::ConvexHull);
-//   // create collision data from its constructor
-//   shared_ptr<AnyCollisionGeometry3D>& resgeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(this->geomPtr);
-//   resgeom = make_shared<AnyCollisionGeometry3D>(ingeom1->AsConvexHull(), ingeom2->AsConvexHull(), is_free);
-//   resgeom->InitCollisionData();
-// }
-// 
-// // compute the support point for a convex shape
-// void Geometry3D::find_support(const double dir[3], double out[3]) {
-//   shared_ptr<AnyCollisionGeometry3D>& ingeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(this->geomPtr);
-//   Assert(ingeom->type == AnyGeometry3D::ConvexHull);
-//   Vector3 direc(dir);
-//   Vector3 support = ingeom->FindSupport(direc);
-//   out[0] = support[0];
-//   out[1] = support[1];
-//   out[2] = support[2];
-//   //SupportResult result;
-//   //result.support.resize(3);
-//   //ingeom->FindSupport(dir, result.support.data());
-//   //return result;
-// }
 
 void Geometry3D::setTriangleMesh(const TriangleMesh& mesh)
 {
@@ -829,7 +756,7 @@ Geometry3D Geometry3D::getElement(int element)
       throw PyException("Invalid element specified");
     Geometry3D res;
     shared_ptr<AnyCollisionGeometry3D>& rgeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(res.geomPtr);
-    *rgeom = data[element];
+    rgeom = make_shared<AnyCollisionGeometry3D>(data[element]);
     return res;
   }
   else if(geom->type == AnyCollisionGeometry3D::TriangleMesh) {
@@ -849,6 +776,7 @@ Geometry3D Geometry3D::getElement(int element)
       throw PyException("Invalid element specified");
     Geometry3D res;
     shared_ptr<AnyCollisionGeometry3D>& rgeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(res.geomPtr);
+    Assert(rgeom.get() != NULL);
     rgeom = make_shared<AnyCollisionGeometry3D>(Math3D::GeometricPrimitive3D(data.points[element]));
     return res;
   }
@@ -897,8 +825,6 @@ int Geometry3D::numElements()
     return (int)geom->AsPointCloud().points.size();
   case AnyCollisionGeometry3D::TriangleMesh:
     return (int)geom->AsTriangleMesh().tris.size();
-  case AnyCollisionGeometry3D::ConvexHull:
-    return (int)geom->AsConvexHull().points().size();
   default:
     return 0;
   }
@@ -990,12 +916,51 @@ void Geometry3D::setConvexHull(const ConvexHull& hull)
     else
       geom = make_shared<AnyCollisionGeometry3D>();
   }
-  // convert ConvexHull into ConvexHull3D, why the hell do I need this?
-  ConvexHull3D chull;  // TODO: Do I need namespace here?
-  chull.setPoints(hull.points);
+  ConvexHull3D chull;  
+  chull.SetPoints(hull.points);
 
   *geom = chull;
   geom->ClearCollisionData();
+
+  if(mgeom) {
+    //update the display list / cache
+    mgeom->OnGeometryChange();
+    mgeom->RemoveFromCache();
+  }
+}
+
+void Geometry3D::setConvexHullGroup(const Geometry3D& geom1, const Geometry3D & geom2)
+{
+  // make sure both geometry is convexhull
+  shared_ptr<AnyCollisionGeometry3D>& ingeom1 = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geom1.geomPtr);
+  Assert(ingeom1->type == AnyGeometry3D::ConvexHull);
+  shared_ptr<AnyCollisionGeometry3D>& ingeom2 = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geom2.geomPtr);
+  Assert(ingeom2->type == AnyGeometry3D::ConvexHull);
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  ManagedGeometry* mgeom = NULL;
+  if(!isStandalone()) {
+    RobotWorld& world = *worlds[this->world]->world;
+    mgeom = &GetManagedGeometry(world,id);
+  }
+  if(geom == NULL) {
+    if(mgeom) {
+      geom = mgeom->CreateEmpty();
+    }
+    else
+      geom = make_shared<AnyCollisionGeometry3D>();
+  }
+  // create collision data from its constructor
+  RigidTransform T1 = ingeom1->GetTransform();
+  RigidTransform T2 = ingeom2->GetTransform();
+  RigidTransform TRel;
+  TRel.mulInverseA(T1,T2);
+  shared_ptr<AnyCollisionGeometry3D>& resgeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(this->geomPtr);
+  Geometry::ConvexHull3D hull;
+  hull.SetHull(ingeom1->AsConvexHull(), ingeom2->AsConvexHull());
+  *geom = AnyCollisionGeometry3D(hull);
+  geom->InitCollisionData();
+  geom->ConvexHullCollisionData().UpdateHullSecondRelativeTransform(TRel);
+  geom->SetTransform(T1);
 
   if(mgeom) {
     //update the display list / cache
@@ -1076,28 +1041,6 @@ void Geometry3D::setCurrentTransform(const double R[9],const double t[3])
   T.t.set(t);
   geom->SetTransform(T);
 }
-
-// void Geometry3D::setRelativeTransform(const double R[9],const double t[3])
-// {
-//   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
-//   if(!geom) return;
-//   RigidTransform T;
-//   T.R.set(R);
-//   T.t.set(t);
-//   //std::cout << "Set relative transform at klampt\n";
-//   geom->SetRelativeTransform(T);
-// }
-// 
-// void Geometry3D::setFreeRelativeTransform(const double R[9],const double t[3])
-// {
-//   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
-//   if(!geom) return;
-//   RigidTransform T;
-//   T.R.set(R);
-//   T.t.set(t);
-//   //std::cout << "Set relative transform at klampt\n";
-//   geom->SetFreeRelativeTransform(T);
-// }
 
 void Geometry3D::getCurrentTransform(double out[9],double out2[3])
 {
@@ -1407,6 +1350,17 @@ ContactQueryResult Geometry3D::contacts(const Geometry3D& other,double padding1,
     out.elems2[i] = res.contacts[i].elem2;
   }
   return out;
+}
+
+
+void Geometry3D::support(const double dir[3], double out[3])
+{
+  shared_ptr<AnyCollisionGeometry3D>& ingeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(this->geomPtr);
+  if(ingeom->type != AnyGeometry3D::ConvexHull)
+    throw PyException("Only the ConvexHull type supports the support() method");
+  const auto& ch = ingeom->ConvexHullCollisionData();
+  Vector3 res = ch.FindSupport(Vector3(dir));
+  res.get(out);
 }
 
 //KH: note: pointer gymnastics necessary to allow appearances to refer to temporary appearances as well as references to world, while also
@@ -1941,6 +1895,28 @@ void TriangleMesh::transform(const double R[9],const double t[3])
     v = T*v;
     v.get(vertices[i],vertices[i+1],vertices[i+2]);
   }
+}
+
+int ConvexHull::numPoints() const
+{
+  return points.size()/3;
+}
+
+void ConvexHull::addPoint(const double pt[3])
+{
+  points.push_back(pt[0]);
+  points.push_back(pt[1]);
+  points.push_back(pt[2]);
+}
+
+void ConvexHull::getPoint(int index,double out[3]) const
+{
+  int i=index*3;
+  if(i<0 || i >= (int)points.size())
+    throw PyException("Invalid point index");
+  out[0] = points[i];
+  out[1] = points[i+1];
+  out[2] = points[i+2];
 }
 
 void ConvexHull::translate(const double t[3])

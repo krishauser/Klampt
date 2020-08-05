@@ -2,6 +2,7 @@
 Implementation of TrajOpt algorithm with klampt and pysolid.
 With those distances stuff ready, this should be pretty straightforward.
 """
+from __future__ import print_function,division
 from collections import Iterable
 import numpy as np
 import cvxpy as cp
@@ -87,10 +88,6 @@ class SweepJointObjectInfo(object):
         self.point2 = None
         self.pswept = None
         self.pobs = None
-
-
-class QPException(Exception):
-    pass
 
 
 class KineTrajOpt:
@@ -217,10 +214,7 @@ class KineTrajOpt:
                 goto15 = False
                 trk = 0
                 while tr_size > self.config.min_trust_box_size:
-                    try:
-                        obj, new_theta = self.solve_qp_with_tr_size(tr_size)
-                    except QPException:
-                        return {'success': False, 'sol': cur_sol, 'cost': np.inf}
+                    obj, new_theta = self.solve_qp_with_tr_size(tr_size)
                     # print(f'~~~constraint residual {self.cp_cache[-1].value}')
                     update = new_theta - cur_sol
                     if self.config.verbose:
@@ -361,13 +355,9 @@ class KineTrajOpt:
         """Given trust region size, we solve the qp"""
         prob_cache, trs_cache, x_cache = self.cp_cache
         trs_cache.value = tr_size
-        try:
-            prob_cache.solve(**self.config.cvxpy_args)
-        except Exception as e:
-            print("Gurobi fail to solve, exception is", e)
-            raise QPException
+        prob_cache.solve(**self.config.cvxpy_args)
         if x_cache.value is None:
-            raise QPException
+            raise Exception("QP not sovled")
         return prob_cache.value, x_cache.value
 
     def build_qp(self, point_collisions, sweep_collisions, N, theta0, mu, d_safe):
