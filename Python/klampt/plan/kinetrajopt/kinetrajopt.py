@@ -146,7 +146,7 @@ class KineTrajOpt:
         self.robot = MaskedRobot(robot, link_index)
         self.compute_point_collision = True
         self.compute_sweep_collision = True
-        self.logs = []  # cacheing the results...
+        self.logs = []  # caching the results...
         self.create_geometry_cache(robot, link_index, geom_index)
         # compute joint limits...
         qmin, qmax = robot.getJointLimits()
@@ -251,21 +251,21 @@ class KineTrajOpt:
                         goto15 = True
                         break
                     elif exact_merit_improve < 0 or merit_improve_ratio < self.config.improve_ratio_threshold:
-                        if self.config.verbose:
-                            print('shrink trust region size')
                         tr_size *= taum
+                        if self.config.verbose:
+                            print('shrink trust region size to %.5f' % tr_size)
                     else:
                         cur_sol = new_theta
                         cost_cache = (new_cost_t, new_cost_c)
                         collision_cache = (pcs, scs)
                         tr_size *= taup
                         if self.config.verbose:
-                            print('expand trust region size')
+                            print('expand trust region size to %.5f' % tr_size)
                         break
                 # check how convergence is obtained
                 if tr_size < self.config.min_trust_box_size:
                     if self.config.verbose:
-                        print('trust region too small %.5f / %.5f'%(tr_size,self.config.min_trust_box_size))
+                        print('trust region too small %.5f / %.5f'%(tr_size, self.config.min_trust_box_size))
                     goto15 = True
                 elif j == self.config.max_iter - 1:
                     if self.config.verbose:
@@ -364,7 +364,7 @@ class KineTrajOpt:
         try:
             prob_cache.solve(**self.config.cvxpy_args)
         except Exception as e:
-            print("Gurobi fail to solve, exception is", e)
+            print("QP failure, exception is", e)
             raise QPException
         if x_cache.value is None:
             raise QPException
@@ -450,8 +450,11 @@ class KineTrajOpt:
         self.cp_cache = (prob, trsize, thetas)
 
     def create_geometry_cache(self, robot, link_index, geom_index):
-        """Copy into triangle mesh format"""
-        self.link_cache = {}
+        """Copy into triangle mesh format.
+        Due to API change of klampt, the sweep cache is no longer valid.
+        link cache is stored with a copy of the geometry
+        """
+        self.geom_cache = {}
         link_geom_info = []  # stores the (hull, geom_idx, link_idx) tuple
         for i, geom_idx in enumerate(geom_index):
             link_idx = geom_idx
@@ -460,32 +463,18 @@ class KineTrajOpt:
                 assert link_idx != -1  # error may occur
             link = self.robot.link(geom_idx)
             geom = link.geometry().convert('ConvexHull', 0)
-            link_geom_info.append((geom, geom_idx, link_idx))
+            geom_copy = link.geometry().convert('ConvexHull', 0)
+            link_geom_info.append((geom, geom_copy, geom_idx, link_idx))
         assert self.compute_point_collision or self.compute_sweep_collision, "You have to at least consider one link collision"
-        self.link_cache['link'] = link_geom_info
-        # do the sweep part
-        if self.compute_sweep_collision:
-            link_sweep_geoms = []
-            for geom, geom_idx, link_idx in link_geom_info:
-                sweep_geom = Geometry3D()
-                sweep_geom.asConvexHull().fromTransform(geom.asConvexHull())
-                link_sweep_geoms.append((sweep_geom, geom_idx, link_idx))
-            self.link_cache['sweep'] = link_sweep_geoms
+        self.geom_cache['link'] = link_geom_info
         # consider the rigidly mounted part
         mount_cache = []
         for i in range(len(self.mounted)):
             link_idx, relT, geom = self.mounted[i]
             geom = geom.convert('ConvexHull', 0)
-            mount_cache.append((link_idx, relT, geom))
-        self.link_cache['mount'] = mount_cache
-        # consider the sweep of mounted geometry
-        if self.compute_sweep_collision:
-            mount_sweep_geoms = []
-            for link_idx, _, geom in mount_cache:
-                sweep_geom = Geometry3D()
-                sweep_geom.asConvexHull().fromTransform(geom.asConvexHull())
-                mount_sweep_geoms.append((sweep_geom, None, link_idx))
-            self.link_cache['sweepmount'] = mount_sweep_geoms
+            geom_copy = geom.convert('ConvexHull', 0)
+            mount_cache.append((link_idx, relT, geom, geom_copy))
+        self.geom_cache['mount'] = mount_cache
         # for obstacles, there is not much we have to do
         n_obs = len(self.world)
         obs_geoms = []
@@ -493,15 +482,15 @@ class KineTrajOpt:
             terrain = self.world.terrain(i)
             geom = terrain.geometry().convert('ConvexHull', 0)
             obs_geoms.append(geom)
-        self.obs_cache = obs_geoms
+        self.geom_cache['obs'] = obs_geoms
 
     def distance_with_one_link(self, q, geom_order):
         self.robot.setConfig(q)
-        lk_geom, geom_idx, _ = self.link_cache['link'][geom_order]
+        lk_geom, geom_idx, _ = self.geom_cache['link'][geom_order]
         tran = self.robot.link(geom_idx).getTransform()
         assert lk_geom is not None
         lk_geom.setCurrentTransform(*tran)
-        return [lk_geom.distance(obs).d for obs in self.obs_cache]
+        return [lk_geom.distance(obs).d for obs in self.geom_cache['obs']]
 
     def all_linkgeom_transforms(self, thetas):
         """Compute transform matrix for all active links for all configurations.
@@ -512,12 +501,12 @@ class KineTrajOpt:
         for q in thetas:
             self.robot.setConfig(q)
             tmp = []
-            for _, geom_idx, _ in self.link_cache['link']:
+            for _, _, geom_idx, _ in self.geom_cache['link']:
                 tmp.append(self.robot.link(geom_idx).getTransform())
             trans.append(tmp)
             # for mounted
             tmp = []
-            for link_idx, relT, _ in self.link_cache['mount']:
+            for link_idx, relT, _, _ in self.geom_cache['mount']:
                 tmp.append(se3.mul(self.robot.link(link_idx).getTransform(), relT))
             mtrans.append(tmp)
         return trans, mtrans
@@ -558,9 +547,9 @@ class KineTrajOpt:
             normal /= np.linalg.norm(normal)
             # I have to find the two points on two seperate geometry 
             sgl_lv.setCurrentTransform(*ltran1)
-            p0 = np.array(sgl_lv.asConvexHull().findSupport(-normal))
+            p0 = np.array(sgl_lv.support(-normal))
             sgl_lv.setCurrentTransform(*ltran2)
-            p1 = np.array(sgl_lv.asConvexHull().findSupport(-normal))
+            p1 = np.array(sgl_lv.support(-normal))
             dist1 = np.linalg.norm(p1 - pswept)
             dist0 = np.linalg.norm(p0 - pswept)
             alpha = dist1 / (dist0 + dist1)
@@ -583,8 +572,8 @@ class KineTrajOpt:
 
         # outer loop is for obstacles
         for oj_, oj in enumerate(self.world.index):
-            ov = self.obs_cache[oj_]  # transformation information is already contained in Geometry3D
-            for li_, (lv, geom_idx, link_idx) in enumerate(self.link_cache['link']):
+            ov = self.geom_cache['obs'][oj_]  # transformation information is already contained in Geometry3D
+            for li_, (lv, lv_copy, geom_idx, link_idx) in enumerate(self.geom_cache['link']):
                 # first step is to compute point violation...
                 if self.compute_point_collision:
                     for i in range(1, n_theta - 1):
@@ -596,17 +585,17 @@ class KineTrajOpt:
                             add_point(link_idx, geom_idx, rst, i, oj)
                 # the next step is to compute sweep information
                 if self.compute_sweep_collision:
-                    slv = self.link_cache['sweep'][li_][0]  # the last two are simply ignored since it repeats information
                     for i in range(n_theta - 1):
                         ltran1, ltran2 = link_trans[i][li_], link_trans[i + 1][li_]
-                        slv.setCurrentTransform(*ltran1)  # set transformation of link start
-                        rel_tran = se3.mul(se3.inv(ltran1), ltran2)
-                        slv.asConvexHull().setRelativeTransform(*rel_tran)  # set relative transform after sweeping
-                        rst = slv.distance_ext(ov, setting)
+                        lv.setCurrentTransform(*ltran1)  # set transformation of link start
+                        lv_copy.setCurrentTransform(*ltran2)  # set transform of link end
+                        cvxhull = Geometry3D()
+                        cvxhull.setConvexHullGroup(lv, lv_copy)
+                        rst = cvxhull.distance_ext(ov, setting)
                         if rst.d < dcheck:
-                            add_sweep(link_idx, geom_idx, slv, ltran1, ltran2, rst, i, oj)
+                            add_sweep(link_idx, geom_idx, lv, ltran1, ltran2, rst, i, oj)
             # now I consider attached geometries
-            for li_, (link_idx, relT, geom) in enumerate(self.link_cache['mount']):
+            for li_, (link_idx, relT, geom, geom_copy) in enumerate(self.geom_cache['mount']):
                 # start with point ocllision
                 if self.compute_point_collision:
                     for i in range(1, n_theta - 1):
@@ -617,16 +606,13 @@ class KineTrajOpt:
                             add_point(link_idx, -1 - li_, rst, i, oj)
                 # then sweep one
                 if self.compute_sweep_collision:
-                    slv = self.link_cache['sweepmount'][li_][0]
                     for i in range(n_theta - 1):
                         ltran1, ltran2 = mount_trans[i][li_], mount_trans[i + 1][li_]
-                        rel_tran = se3.mul(se3.inv(ltran1), ltran2)
-                        slv.setCurrentTransform(*ltran1)
-                        slv.asConvexHull().setRelativeTransform(*rel_tran)
+                        geom.setCurrentTransform(*ltran1)
+                        geom_copy.setCurrentTransform(*ltran2)
+                        cvxhull = Geometry3D()
+                        cvxhull.setConvexHullGroup(geom, geom_copy)
                         rst = slv.distance_ext(ov, setting)
                         if rst.d < dcheck:
-                            add_sweep(link_idx, -1 - li_, slv, ltran1, ltran2, rst, i, oj)
-        # print([pc.distance for pc in point_collisions])
-        # print([pc.distance for pc in sweep_collisions])
-        # import pdb; pdb.set_trace()
+                            add_sweep(link_idx, -1 - li_, geom, ltran1, ltran2, rst, i, oj)
         return point_collisions, sweep_collisions
