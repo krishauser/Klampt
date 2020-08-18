@@ -960,8 +960,11 @@ class ConvexHull(_object):
 
 
     Stores a set of points to be set into a ConvexHull type. Note: These may not
-    actually be the vertices of the convex hull; the actual convex hull is computed
-    internally.  
+    actually be the vertices of the convex hull; the actual convex hull may be
+    computed internally for some datatypes.  
+
+    Attributes: points (SWIG vector of floats): a list of points, given as a
+    flattened coordinate list [x1,y1,z1,x2,y2,...]  
 
     C++ includes: geometry.h
 
@@ -1031,9 +1034,12 @@ class ConvexHull(_object):
     def __init__(self):
         """
         Stores a set of points to be set into a ConvexHull type. Note: These may not
-        actually be the vertices of the convex hull; the actual convex hull is computed
-        internally.  
+        actually be the vertices of the convex hull; the actual convex hull may be
+        computed internally for some datatypes.  
 
+
+        Attributes: points (SWIG vector of floats): a list of points, given as a
+        flattened coordinate list [x1,y1,z1,x2,y2,...]  
 
         C++ includes: geometry.h
 
@@ -1264,6 +1270,22 @@ class PointCloud(_object):
             (float):
         """
         return _robotsim.PointCloud_getProperty(self, *args)
+
+
+    def getProperties(self, *args):
+        """
+        Gets property named pindex of all points as an array.  
+
+        getProperties (pindex)
+
+        getProperties (pname)
+
+
+        Args:
+            pindex (int, optional): 
+            pname (str, optional): 
+        """
+        return _robotsim.PointCloud_getProperties(self, *args)
 
 
     def translate(self, t):
@@ -1958,7 +1980,7 @@ class Geometry3D(_object):
 
 
         Args:
-            arg2 (:class:`~klampt.VolumeGrid` or :class:`~klampt.PointCloud` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.TriangleMesh` or :class:`~klampt.Geometry3D` or :obj:`ConvexHull`, optional): 
+            arg2 (:class:`~klampt.TriangleMesh` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.Geometry3D` or :obj:`ConvexHull` or :class:`~klampt.PointCloud` or :class:`~klampt.VolumeGrid`, optional): 
         """
         this = _robotsim.new_Geometry3D(*args)
         try:
@@ -2347,7 +2369,8 @@ class Geometry3D(_object):
         *   TriangleMesh -> VolumeGrid. Converted using the fast marching method with
             good results only if the mesh is watertight. param is the grid resolution,
             by default set to the average triangle diameter.  
-        *   TriangleMesh -> ConvexHull. Converted using SOLID / Qhull.  
+        *   TriangleMesh -> ConvexHull. If param==0, just calculates a convex hull.
+            Otherwise, uses convex decomposition with the HACD library.  
         *   PointCloud -> TriangleMesh. Available if the point cloud is structured.
             param is the threshold for splitting triangles by depth discontinuity. param
             is by default infinity.  
@@ -5791,7 +5814,7 @@ class WorldModel(_object):
             terrain (:obj:`TerrainModel`, optional): 
 
         Returns:
-            (:obj:`TerrainModel` or :class:`~klampt.RobotModel` or :class:`~klampt.RigidObjectModel`):
+            (:class:`~klampt.RobotModel` or :obj:`TerrainModel` or :class:`~klampt.RigidObjectModel`):
         """
         return _robotsim.WorldModel_add(self, *args)
 
@@ -6826,7 +6849,7 @@ def SampleTransform(*args):
 
 
     Args:
-        obj (:obj:`GeneralizedIKObjective` or :obj:`IKObjective`): 
+        obj (:obj:`IKObjective` or :obj:`GeneralizedIKObjective`): 
     """
     return _robotsim.SampleTransform(*args)
 class SimRobotSensor(_object):
@@ -6879,7 +6902,7 @@ class SimRobotSensor(_object):
 
 
         Args:
-            robot (:class:`~klampt.SimRobotController` or :obj:`Robot`): 
+            robot (:obj:`Robot` or :class:`~klampt.SimRobotController`): 
             sensor (:obj:`SensorBase`, optional): 
             name (str, optional): 
             type (str, optional): 
