@@ -966,8 +966,11 @@ class ConvexHull(_object):
 
 
     Stores a set of points to be set into a ConvexHull type. Note: These may not
-    actually be the vertices of the convex hull; the actual convex hull is computed
-    internally.  
+    actually be the vertices of the convex hull; the actual convex hull may be
+    computed internally for some datatypes.  
+
+    Attributes: points (SWIG vector of floats): a list of points, given as a
+    flattened coordinate list [x1,y1,z1,x2,y2,...]  
 
     C++ includes: geometry.h
 
@@ -1050,8 +1053,11 @@ class ConvexHull(_object):
 
 
         Stores a set of points to be set into a ConvexHull type. Note: These may not
-        actually be the vertices of the convex hull; the actual convex hull is computed
-        internally.  
+        actually be the vertices of the convex hull; the actual convex hull may be
+        computed internally for some datatypes.  
+
+        Attributes: points (SWIG vector of floats): a list of points, given as a
+        flattened coordinate list [x1,y1,z1,x2,y2,...]  
 
         C++ includes: geometry.h
 
@@ -1272,6 +1278,19 @@ class PointCloud(_object):
 
         """
         return _robotsim.PointCloud_getProperty(self, *args)
+
+
+    def getProperties(self, *args):
+        """
+        getProperties(PointCloud self, int pindex)
+        getProperties(PointCloud self, std::string const & pname)
+
+
+
+        Gets property named pindex of all points as an array.  
+
+        """
+        return _robotsim.PointCloud_getProperties(self, *args)
 
 
     def translate(self, t):
@@ -2438,7 +2457,8 @@ class Geometry3D(_object):
         *   TriangleMesh -> VolumeGrid. Converted using the fast marching method with
             good results only if the mesh is watertight. param is the grid resolution,
             by default set to the average triangle diameter.  
-        *   TriangleMesh -> ConvexHull. Converted using SOLID / Qhull.  
+        *   TriangleMesh -> ConvexHull. If param==0, just calculates a convex hull.
+            Otherwise, uses convex decomposition with the HACD library.  
         *   PointCloud -> TriangleMesh. Available if the point cloud is structured.
             param is the threshold for splitting triangles by depth discontinuity. param
             is by default infinity.  

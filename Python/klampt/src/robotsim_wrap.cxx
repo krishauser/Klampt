@@ -18470,6 +18470,195 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_PointCloud_getProperties__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  int arg2 ;
+  std::vector< double,std::allocator< double > > *arg3 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  std::vector< double > temp3 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  {
+    arg3 = &temp3;
+  }
+  if (!PyArg_ParseTuple(args,(char *)"OO:PointCloud_getProperties",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_getProperties" "', argument " "1"" of type '" "PointCloud const *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "PointCloud_getProperties" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  {
+    try {
+      ((PointCloud const *)arg1)->getProperties(arg2,*arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(&(*arg3)[0],(int)arg3->size());
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_getProperties__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  std::string *arg2 = 0 ;
+  std::vector< double,std::allocator< double > > *arg3 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  std::vector< double > temp3 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  {
+    arg3 = &temp3;
+  }
+  if (!PyArg_ParseTuple(args,(char *)"OO:PointCloud_getProperties",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_getProperties" "', argument " "1"" of type '" "PointCloud const *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  {
+    std::string *ptr = (std::string *)0;
+    res2 = SWIG_AsPtr_std_string(obj1, &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "PointCloud_getProperties" "', argument " "2"" of type '" "std::string const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PointCloud_getProperties" "', argument " "2"" of type '" "std::string const &""'"); 
+    }
+    arg2 = ptr;
+  }
+  {
+    try {
+      ((PointCloud const *)arg1)->getProperties((std::string const &)*arg2,*arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(&(*arg3)[0],(int)arg3->size());
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return resultobj;
+fail:
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_getProperties(PyObject *self, PyObject *args) {
+  Py_ssize_t argc;
+  PyObject *argv[3] = {
+    0
+  };
+  Py_ssize_t ii;
+  
+  if (!PyTuple_Check(args)) SWIG_fail;
+  argc = args ? PyObject_Length(args) : 0;
+  for (ii = 0; (ii < 2) && (ii < argc); ii++) {
+    argv[ii] = PyTuple_GET_ITEM(args,ii);
+  }
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_PointCloud, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_int(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        return _wrap_PointCloud_getProperties__SWIG_0(self, args);
+      }
+    }
+  }
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_PointCloud, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_AsPtr_std_string(argv[1], (std::string**)(0));
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        return _wrap_PointCloud_getProperties__SWIG_1(self, args);
+      }
+    }
+  }
+  
+fail:
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'PointCloud_getProperties'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    PointCloud::getProperties(int,std::vector< double,std::allocator< double > > &) const\n"
+    "    PointCloud::getProperties(std::string const &,std::vector< double,std::allocator< double > > &) const\n");
+  return 0;
+}
+
+
 SWIGINTERN PyObject *_wrap_PointCloud_translate(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   PointCloud *arg1 = (PointCloud *) 0 ;
@@ -56270,8 +56459,11 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Stores a set of points to be set into a ConvexHull type. Note: These may not\n"
-		"actually be the vertices of the convex hull; the actual convex hull is computed\n"
-		"internally.  \n"
+		"actually be the vertices of the convex hull; the actual convex hull may be\n"
+		"computed internally for some datatypes.  \n"
+		"\n"
+		"Attributes: points (SWIG vector of floats): a list of points, given as a\n"
+		"flattened coordinate list [x1,y1,z1,x2,y2,...]  \n"
 		"\n"
 		"C++ includes: geometry.h\n"
 		"\n"
@@ -56361,6 +56553,15 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Gets the property named pname of point index.  \n"
+		"\n"
+		""},
+	 { (char *)"PointCloud_getProperties", _wrap_PointCloud_getProperties, METH_VARARGS, (char *)"\n"
+		"getProperties(int pindex)\n"
+		"PointCloud_getProperties(PointCloud self, std::string const & pname)\n"
+		"\n"
+		"\n"
+		"\n"
+		"Gets property named pindex of all points as an array.  \n"
 		"\n"
 		""},
 	 { (char *)"PointCloud_translate", _wrap_PointCloud_translate, METH_VARARGS, (char *)"\n"
@@ -57026,7 +57227,8 @@ static PyMethodDef SwigMethods[] = {
 		"*   TriangleMesh -> VolumeGrid. Converted using the fast marching method with\n"
 		"    good results only if the mesh is watertight. param is the grid resolution,\n"
 		"    by default set to the average triangle diameter.  \n"
-		"*   TriangleMesh -> ConvexHull. Converted using SOLID / Qhull.  \n"
+		"*   TriangleMesh -> ConvexHull. If param==0, just calculates a convex hull.\n"
+		"    Otherwise, uses convex decomposition with the HACD library.  \n"
 		"*   PointCloud -> TriangleMesh. Available if the point cloud is structured.\n"
 		"    param is the threshold for splitting triangles by depth discontinuity. param\n"
 		"    is by default infinity.  \n"

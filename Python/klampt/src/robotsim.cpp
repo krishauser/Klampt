@@ -866,7 +866,9 @@ void Geometry3D::setPointCloud(const PointCloud& pc)
     else
       geom = make_shared<AnyCollisionGeometry3D>();
   }
+  RigidTransform T = geom->GetTransform();
   GetPointCloud(pc,*geom);
+  geom->SetTransform(T);
   //this is already called
   //geom->ClearCollisionData();
   if(mgeom) {
@@ -891,7 +893,9 @@ void Geometry3D::setVolumeGrid(const VolumeGrid& vg)
     else
       geom = make_shared<AnyCollisionGeometry3D>();
   }
+  RigidTransform T = geom->GetTransform();
   GetVolumeGrid(vg,*geom);
+  geom->SetTransform(T);
   //this is already called
   //geom->ClearCollisionData();
   if(mgeom) {
@@ -919,8 +923,10 @@ void Geometry3D::setConvexHull(const ConvexHull& hull)
   ConvexHull3D chull;  
   chull.SetPoints(hull.points);
 
+  RigidTransform T = geom->GetTransform();
   *geom = chull;
   geom->ClearCollisionData();
+  geom->SetTransform(T);
 
   if(mgeom) {
     //update the display list / cache
@@ -954,7 +960,6 @@ void Geometry3D::setConvexHullGroup(const Geometry3D& geom1, const Geometry3D & 
   RigidTransform T2 = ingeom2->GetTransform();
   RigidTransform TRel;
   TRel.mulInverseA(T1,T2);
-  shared_ptr<AnyCollisionGeometry3D>& resgeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(this->geomPtr);
   Geometry::ConvexHull3D hull;
   hull.SetHull(ingeom1->AsConvexHull(), ingeom2->AsConvexHull());
   *geom = AnyCollisionGeometry3D(hull);
@@ -990,8 +995,10 @@ void Geometry3D::setGeometricPrimitive(const GeometricPrimitive& prim)
   if(!ss) {
     throw PyException("Internal error, can't read geometric primitive?");
   }
+  RigidTransform T = geom->GetTransform();
   *geom = g;
   geom->ClearCollisionData();
+  geom->SetTransform(T);
   if(mgeom) {
     //update the display list / cache
     mgeom->OnGeometryChange();
@@ -1372,7 +1379,10 @@ void SetupDefaultAppearance(GLDraw::GeometryAppearance& app);
 Appearance::Appearance()
   :world(-1),id(-1),appearancePtr(NULL)
 {
-  appearancePtr = new shared_ptr<GLDraw::GeometryAppearance>;
+  auto ptr = new shared_ptr<GLDraw::GeometryAppearance>;
+  ptr->reset(new GLDraw::GeometryAppearance());
+  SetupDefaultAppearance(**ptr);
+  appearancePtr = ptr;
 }
 
 Appearance::Appearance(const Appearance& rhs)
@@ -1626,13 +1636,11 @@ void Appearance::setColors(int feature,const std::vector<float>& colors,bool alp
   switch(feature) {
   case VERTICES:
     {
-      printf("SetColors VERTICES %d %d\n",(int)n,(int)nchannels);
       app->vertexColors.resize(n,app->vertexColor);
       for(size_t i=0;i<n;i++) {
         for(size_t k=0;k<nchannels;k++)
           app->vertexColors[i].rgba[k] = colors[i*nchannels+k];
       }
-      printf("%f %f %f\n",app->vertexColors[100].rgba[0],app->vertexColors[100].rgba[1],app->vertexColors[100].rgba[2]);
     }
     break;
   case FACES:
@@ -2031,8 +2039,9 @@ void PointCloud::setProperties(int pindex,const vector<double>& vproperties)
     throw PyException("Invalid property index"); 
   int n = numPoints();
   assert((int)vproperties.size() >= n);
-  for(int i=0;i<n;i++)
-    properties[i*propertyNames.size()+pindex] = vproperties[i];
+  size_t k=pindex;
+  for(int i=0;i<n;i++,k+=propertyNames.size())
+    properties[k] = vproperties[i];
 }
 
 void PointCloud::setProperty(int index,int pindex,double value)
@@ -2077,6 +2086,30 @@ double PointCloud::getProperty(int index,const std::string& pname) const
   if(pindex < 0)
     throw PyException("Invalid property name");  
   return getProperty(index,pindex);
+}
+
+void PointCloud::getProperties(int pindex,std::vector<double>& out) const
+{
+  if(pindex < 0 || pindex >= (int)propertyNames.size())
+    throw PyException("Invalid property index");  
+  int n=numPoints();
+  out.resize(n);
+  size_t k=pindex;
+  for(int i=0;i<n;i++,k+=propertyNames.size())
+    out[i] = properties[k];
+}
+
+void PointCloud::getProperties(const std::string& pname,std::vector<double>& out) const
+{
+  int pindex = -1;
+  for(size_t i=0;i<propertyNames.size();i++)
+    if(propertyNames[i] == pname) {
+      pindex = (int)i;
+      break;
+    }
+  if(pindex < 0)
+    throw PyException("Invalid property name");  
+  return getProperties(pindex,out); 
 }
 
 void PointCloud::join(const PointCloud& pc)

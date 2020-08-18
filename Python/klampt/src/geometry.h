@@ -176,6 +176,10 @@ struct PointCloud
   double getProperty(int index,int pindex) const;
   ///Gets the property named pname of point index
   double getProperty(int index,const std::string& pname) const;
+  ///Gets property pindex of all points as an array
+  void getProperties(int pindex,std::vector<double>& out) const;
+  ///Gets property named pindex of all points as an array
+  void getProperties(const std::string& pname,std::vector<double>& out) const;
   ///Translates all the points by v=v+t
   void translate(const double t[3]);
   ///Transforms all the points by the rigid transform v=R*v+t
