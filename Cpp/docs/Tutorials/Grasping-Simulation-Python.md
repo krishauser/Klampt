@@ -1,8 +1,9 @@
-# [Lab Service] Tutorials for Klampt Grasping Test
+# Klamp't Tutorial: Grasping Simulation in Python 
 
-In this tutorial, we will learn how to implement a simple grasping simulation for the gripper that has a free-floating moving base. 
+In this tutorial, we will learn how to implement a simple grasping simulation for the gripper that has a free-floating moving base. To create rob file and xml file, you can see how [this project](https://github.com/krishauser/IROS2016ManipulationChallenge) works. You can use functions in [moving_base_control.py](https://github.com/krishauser/IROS2016ManipulationChallenge/blob/master/moving_base_control.py) for handling the free-floating moving base. 
 
-```python
+
+```pythons
 import klampt 
 from klampt.vis import GLRealtimeProgram
 from klampt import vis
@@ -16,11 +17,10 @@ if not res:
     raise RuntimeError("Unable to load world")
 ```
 
-To create rob file and xml file, you can see how [this project](https://github.com/krishauser/IROS2016ManipulationChallenge) works. You can use functions in [moving_base_control.py](https://github.com/krishauser/IROS2016ManipulationChallenge/blob/master/moving_base_control.py) for handling the free-floating moving base. 
 
 ### 1. Make Rigid Object from file
 
-You can use the OFF file of the object to be grasped. To locate the object on the ground safely before starting grasp simulation, transformation is computed by using approximation of the bounding box surrounding the object. 
+You can use a .off file of the object to be grasped. To locate the object on the ground safely before starting grasp simulation, transformation is computed by using approximation of the bounding box surrounding the object. 
 
 ```python
 object = klampt.Geometry3D()
@@ -50,7 +50,7 @@ object_r = np.sqrt(3)* np.max(np.abs([bmin[0], bmax[0], bmin[1], bmax[1], bmin[2
 
 ### 2. Set approach direction & starting position
 
-You may set an approach direction as a unit vector on the hemisphere. By using spherical coordinates, define a unit vector as $(\theta, \phi), \theta\in[0, 2\pi]\phi\in[0, \pi/2]$. 
+You may set an approach direction as a unit vector on the hemisphere. By using spherical coordinates, define an unit vector using (theta, phi). 
 
 ```python
 theta = np.pi
@@ -69,7 +69,7 @@ set_moving_base_xform(world.robot(0), R, t)
 
 ### 3. Simulation
 
-You can find the following example code from [Klampt-examples/Python3/demos/gl_vis.py](https://github.com/krishauser/Klampt-examples/blob/master/Python3/demos/gl_vis.py). GLRealtimeProgram calls a idle() function on a constant time step. 
+You can find the following example code from [Klampt-examples/Python3/demos/gl_vis.py](https://github.com/krishauser/Klampt-examples/blob/master/Python3/demos/gl_vis.py). `GLRealtimeProgram` calls a `idle()` function on a constant time step. 
 
 ```python
 class GraspGL(GLRealtimeProgram):
@@ -88,7 +88,7 @@ class GraspGL(GLRealtimeProgram):
         return
 ```
 
-We need to set some variables in init function.
+We need to set some variables in `init` function.
 
 ```python
 self.sim.enableContactFeedbackAll()
@@ -110,7 +110,7 @@ self.gripper_state = 1
 self.grasp_sucess = False
 ```
 
-Every time step, contacts info should be updated in idle() method. For the convenience, you can create contact cheking methods in GraspGL class.
+Every time step, contacts info should be updated in `idle()` method. For the convenience, you can create contact cheking methods in `GraspGL` class.
 
 ```python
 def check_contact_terrain(self):
@@ -139,12 +139,12 @@ The gripper approaches the object until it touches the object. And the gripper s
 
 Following my plan, the gripper's states are defined as: 
 
-- done = -1
-- collide_with_terrain = 0
-- approaching = 1
-- closing = 2
+- `done` = -1
+- `collide_with_terrain` = 0
+- `approaching` = 1
+- `closing` = 2
 
-Here is the example idle() method. 
+Here is the example `idle()` method. 
 
 ```python
 def idle(self):
@@ -180,7 +180,7 @@ def idle(self):
     return 
 ```
 
-After filling in the GraspGL with your control plan, run the simulation and see what happens.
+After filling in `GraspGL` with your control plan, run the simulation and see what happens.
 
 ```python
 sim = klampt.Simulator(world)
