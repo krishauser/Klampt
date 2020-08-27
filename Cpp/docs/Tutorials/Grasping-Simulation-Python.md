@@ -68,7 +68,7 @@ set_moving_base_xform(world.robot(0), R, t)
 
 ### 3. Simulation
 
-You can find the following example code from [Klampt-examples/Python3/demos/gl_vis.py](https://github.com/krishauser/Klampt-examples/blob/master/Python3/demos/gl_vis.py). `GLRealtimeProgram` calls a `idle()` function on a constant time step. 
+You can find the similar example code with the following one from [Klampt-examples/Python3/demos/gl_vis.py](https://github.com/krishauser/Klampt-examples/blob/master/Python3/demos/gl_vis.py).  
 
 ```python
 class GraspGL(GLProgram):
