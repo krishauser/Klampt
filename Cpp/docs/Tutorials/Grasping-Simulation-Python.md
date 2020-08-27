@@ -5,11 +5,11 @@ In this tutorial, we will learn how to implement a simple grasping simulation fo
 
 ```pythons
 import klampt 
-from klampt.vis import GLProgram
 from klampt import vis
 from klampt.math import vectorops, so3, se3
 from klampt.model import contact
 from moving_base_control import set_moving_base_xform, send_moving_base_xform_linear
+import time
 
 world = klampt.WorldModel()
 res = world.readFile('box_robot_floating.xml')
@@ -67,24 +67,22 @@ set_moving_base_xform(world.robot(0), R, t)
 ```
 
 ### 3. Simulation
-
-You can find the similar example code with the following one from [Klampt-examples/Python3/demos/gl_vis.py](https://github.com/krishauser/Klampt-examples/blob/master/Python3/demos/gl_vis.py).  
+We're going to create the `GraspTest` Class that contains all methods needed for the grasping test. Let's start with the following skeleton code.
 
 ```python
-class GraspGL(GLProgram):
+class GraspTest:
     def __init__(self,world,sim):
-        GLProgram.__init__(self,"GraspGL")
         self.world = world
         self.sim = sim
 
-    def display(self):
-        self.sim.updateWorld()
-        self.world.drawGL()
-
     def idle(self):
-        # Fill out this part.	
+        #Fill out this part: Do stuff to world. 
         sim.simulate(self.dt)
         return
+    
+    def done(self):
+        #Return True if the simulation is done.
+    
 ```
 
 We need to define some variables in `__init__` function.
@@ -143,12 +141,10 @@ According to the plan, the gripper's states are defined as:
 - `approaching` = 1
 - `closing` = 2
 
-Here is the example `idle()` method. 
+Here are the examples of `idle()` and `done()` methods. 
 
 ```python
 def idle(self):
-    if self.gripper_state <= 0:
-        vis.show(False)
     controller = self.sim.controller(0)
     if self.sim.getTime() > 1 and self.gripper_state > 0:
         contacted_links = self.check_contact_object()
@@ -177,15 +173,29 @@ def idle(self):
                     self.gripper_state = done
     self.sim.simulate(self.dt)
     return 
+
+def done(self):
+    return self.gripper_state <= 0
 ```
 
-After filling in `GraspGL` with your simulation plan, run the simulation, and see what happens.
+After filling in `GraspTest` with your simulation plan, run the simulation, and see what happens.
 
 ```python
 sim = klampt.Simulator(world)
-grasp_glprogram = GraspGL(world, sim)
-grasp_glprogram.run()
-print('simulation result: ', grasp_glprogram.grasp_success)
+grasp_test = GraspTest(world, sim)
+vis.add("world",world)
+
+def setup():
+    vis.show()
+
+def callback():
+    grasp_test.idle()
+    time.sleep(0.02)
+    if grasp_test.done():
+        vis.show(False)         #hides the window if not closed by user
+
+vis.loop(setup=setup, callback=callback)
+print('succeds in grasping: ', grasp_test.grasp_success)
 ```
 - Grasp test with RobotiQ gripper & Box-shaped finger gripper
 
