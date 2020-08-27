@@ -1,11 +1,11 @@
 # Klamp't Tutorial: Grasping Simulation in Python 
 
-In this tutorial, we will learn how to implement a simple grasping simulation for the gripper that has a free-floating moving base. To create rob file and xml file, you can see how [this project](https://github.com/krishauser/IROS2016ManipulationChallenge) works. You can use functions in [moving_base_control.py](https://github.com/krishauser/IROS2016ManipulationChallenge/blob/master/moving_base_control.py) for handling the free-floating moving base. 
+In this tutorial, we will learn how to implement a simple grasping simulation for the gripper that has a free-floating moving base. To create a rob file and XML file, you can see how this project works. You can use functions in moving_base_control.py for handling the free-floating moving base.
 
 
 ```pythons
 import klampt 
-from klampt.vis import GLRealtimeProgram
+from klampt.vis import GLProgram
 from klampt import vis
 from klampt.math import vectorops, so3, se3
 from klampt.model import contact
@@ -20,7 +20,7 @@ if not res:
 
 ### 1. Make Rigid Object from file
 
-You can use a .off file of the object to be grasped. To locate the object on the ground safely before starting grasp simulation, transformation is computed by using approximation of the bounding box surrounding the object. 
+You can use a .off file for the  `RigidObject`. Since the object should be located on the ground safely before the grasp simulation, we approximate its height by using a bounding box surrounding the object.
 
 ```python
 object = klampt.Geometry3D()
@@ -50,8 +50,7 @@ object_r = np.sqrt(3)* np.max(np.abs([bmin[0], bmax[0], bmin[1], bmax[1], bmin[2
 
 ### 2. Set approach direction & starting position
 
-You may set an approach direction as a unit vector on the hemisphere. By using spherical coordinates, define an unit vector using (theta, phi). 
-
+You may set an approach direction as a unit vector on the hemisphere. By using spherical coordinates, define a unit vector using (theta, phi). 
 ```python
 theta = np.pi
 phi = np.pi/6
@@ -72,9 +71,9 @@ set_moving_base_xform(world.robot(0), R, t)
 You can find the following example code from [Klampt-examples/Python3/demos/gl_vis.py](https://github.com/krishauser/Klampt-examples/blob/master/Python3/demos/gl_vis.py). `GLRealtimeProgram` calls a `idle()` function on a constant time step. 
 
 ```python
-class GraspGL(GLRealtimeProgram):
+class GraspGL(GLProgram):
     def __init__(self,world,sim):
-        GLRealtimeProgram.__init__(self,"GraspGL")
+        GLProgram.__init__(self,"GraspGL")
         self.world = world
         self.sim = sim
 
@@ -88,7 +87,7 @@ class GraspGL(GLRealtimeProgram):
         return
 ```
 
-We need to set some variables in `init` function.
+We need to define some variables in `__init__` function.
 
 ```python
 self.sim.enableContactFeedbackAll()
@@ -110,7 +109,7 @@ self.gripper_state = 1
 self.grasp_sucess = False
 ```
 
-Every time step, contacts info should be updated in `idle()` method. For the convenience, you can create contact cheking methods in `GraspGL` class.
+The contacts should be updated in `idle()` method each time step. For convenience, you can create contact checking methods in `GraspGL` class.
 
 ```python
 def check_contact_terrain(self):
@@ -133,11 +132,11 @@ def check_contact_object(self):
     return contacted_links
 ```
 
-My simulation plan is as below:
+The simulation plan is as below:
 
-The gripper approaches the object until it touches the object. And the gripper starts closing its fingers to grasp the object. If it touches the ground first, grasp simulation is regarded as failure. If the max of the sensed velocities of links is less than the threshold and the number of contacted links is greater than 4, it stops closing. 
+The gripper approaches the object until it touches the object. If it touches the ground first, grasp simulation is regarded as a failure and stops. If it touches the object first, the gripper stops approaching and starts closing its fingers to grasp the object. If the max of the sensed velocities of links is less than the threshold and the number of contacted links is greater than 4, it stops closing.
 
-Following my plan, the gripper's states are defined as: 
+According to the plan, the gripper's states are defined as: 
 
 - `done` = -1
 - `collide_with_terrain` = 0
@@ -180,16 +179,19 @@ def idle(self):
     return 
 ```
 
-After filling in `GraspGL` with your control plan, run the simulation and see what happens.
+After filling in `GraspGL` with your simulation plan, run the simulation, and see what happens.
 
 ```python
 sim = klampt.Simulator(world)
-gl_test = GraspGL(world, sim)
-gl_test.run()
-print('simulation result: ', gl_test.grasp_success)
+grasp_glprogram = GraspGL(world, sim)
+grasp_glprogram.run()
+print('simulation result: ', grasp_glprogram.grasp_success)
 ```
+- Grasp test with RobotiQ gripper & Box-shaped finger gripper
 
-You can evaluate the grasp by 
+![Image](../images/grasp_test_1.png)
+![Image2](../images/grasp_test_2.png)
 
-- Constructing Grasp Wrench Space from the contact information
+You can evaluate the grasp performance by 
+- Constructing Grasp Wrench Space from the contact information.
 - Lifting the object and moving the gripper in random directions to check if the grasp is robust.
