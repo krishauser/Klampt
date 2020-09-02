@@ -593,7 +593,7 @@ def nativeWindow():
 
 def scene():
     """Returns the active window data used by the backend.  The result will be
-    a subclass of :class:VisualizationScene"""
+    a subclass of :class:`VisualizationScene`"""
     global _window_manager
     if _window_manager is None:
         return None
@@ -1036,16 +1036,16 @@ def getAttribute(name,attr):
         name (str): the name of the item
         attr (str): the name of the attribute (see :func:`setAttribute`)
     """
-    scene().getAttribute(name,attr)
+    return scene().getAttribute(name,attr)
 
-def getAttributes(name,attr):
+def getAttributes(name):
     """Gets a dictionary of all relevant attributes of an item's appearance. 
     If not previously set by the user, default values will be returned.
 
     Args:
         name (str): the name of the item
     """
-    scene().getAttributes(name)
+    return scene().getAttributes(name)
 
 def revertAppearance(name):
     scene().revertAppearance(name)
@@ -3094,7 +3094,7 @@ class VisualizationScene:
         _globalLock.release()
         return res
 
-    def getAttributes(self,name,attr):
+    def getAttributes(self,name):
         global _globalLock
         _globalLock.acquire()
         item = self.getItem(name)
