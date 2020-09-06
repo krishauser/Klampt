@@ -1,6 +1,6 @@
 # Klamp't Tutorial: Grasping Simulation in Python 
 
-In this tutorial, we will learn how to implement a simple grasping simulation for the gripper that has a free-floating moving base. Here we'll be using Klampt-examples/data/grasp_simulation.xml as the world file.
+In this tutorial, we will learn how to implement a simple grasping simulation for the gripper that has a free-floating moving base. Here we'll be using Klampt-examples/data/grasping_simulation.xml as the world file.
 
 ```pythons
 import klampt 
