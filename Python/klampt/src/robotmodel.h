@@ -142,6 +142,12 @@ class RobotModelLink
   void getAxis(double out[3]);
   ///Sets the local rotational / translational axis
   void setAxis(const double axis[3]);
+  ///Returns whether the joint is prismatic
+  bool isPrismatic();
+  ///Returns whether the joint is revolute
+  bool isRevolute();
+  ///Changes a link from revolute to prismatic or vice versa
+  void setPrismatic(bool prismatic);
 
   ///Converts point from local to world coordinates 
   ///
@@ -435,7 +441,7 @@ class RobotModel
   void setAccelerationLimits(const std::vector<double>& amax);
   ///Retrieve the torque limit vector tmax, the constraint is :math:`|torque[i]| \leq tmax[i]`
   void getTorqueLimits(std::vector<double>& out);
-  ///Sets the torque limit vector tmax, the constraint is :math:`|torque[i]| <\leqtmax[i]`
+  ///Sets the torque limit vector tmax, the constraint is :math:`|torque[i]| \leq tmax[i]`
   void setTorqueLimits(const std::vector<double>& tmax);
   ///Sets a single DOF's position (by index or by name).
   ///
