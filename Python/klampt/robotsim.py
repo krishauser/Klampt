@@ -1980,7 +1980,7 @@ class Geometry3D(_object):
 
 
         Args:
-            arg2 (:class:`~klampt.TriangleMesh` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.Geometry3D` or :obj:`ConvexHull` or :class:`~klampt.PointCloud` or :class:`~klampt.VolumeGrid`, optional): 
+            arg2 (:obj:`ConvexHull` or :class:`~klampt.TriangleMesh` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.VolumeGrid` or :class:`~klampt.PointCloud` or :class:`~klampt.Geometry3D`, optional): 
         """
         this = _robotsim.new_Geometry3D(*args)
         try:
@@ -3890,6 +3890,36 @@ class RobotModelLink(_object):
         return _robotsim.RobotModelLink_setAxis(self, axis)
 
 
+    def isPrismatic(self):
+        """
+        Returns whether the joint is prismatic.  
+
+        Returns:
+            (bool):
+        """
+        return _robotsim.RobotModelLink_isPrismatic(self)
+
+
+    def isRevolute(self):
+        """
+        Returns whether the joint is revolute.  
+
+        Returns:
+            (bool):
+        """
+        return _robotsim.RobotModelLink_isRevolute(self)
+
+
+    def setPrismatic(self, prismatic):
+        """
+        Changes a link from revolute to prismatic or vice versa.  
+
+        Args:
+            prismatic (bool)
+        """
+        return _robotsim.RobotModelLink_setPrismatic(self, prismatic)
+
+
     def getWorldPosition(self, plocal):
         """
         Converts point from local to world coordinates.  
@@ -4689,8 +4719,8 @@ class RobotModel(_object):
 
     def setTorqueLimits(self, tmax):
         """
-        Sets the torque limit vector tmax, the constraint is :math:`|torque[i]|
-        <\leqtmax[i]`  
+        Sets the torque limit vector tmax, the constraint is :math:`|torque[i]| \leq
+        tmax[i]`  
 
         Args:
             tmax (:obj:`list of floats`)
@@ -5658,7 +5688,7 @@ class WorldModel(_object):
 
 
         Args:
-            robot (str or int): 
+            robot (int or str): 
             index (int, optional): 
             name (str, optional): 
 
@@ -5814,7 +5844,7 @@ class WorldModel(_object):
             terrain (:obj:`TerrainModel`, optional): 
 
         Returns:
-            (:class:`~klampt.RobotModel` or :obj:`TerrainModel` or :class:`~klampt.RigidObjectModel`):
+            (:obj:`TerrainModel` or :class:`~klampt.RobotModel` or :class:`~klampt.RigidObjectModel`):
         """
         return _robotsim.WorldModel_add(self, *args)
 
@@ -6538,7 +6568,7 @@ class IKSolver(_object):
             tol (float, optional): 
 
         Returns:
-            (:obj:`object` or bool):
+            (bool or :obj:`object`):
         """
         return _robotsim.IKSolver_solve(self, *args)
 
@@ -6849,7 +6879,7 @@ def SampleTransform(*args):
 
 
     Args:
-        obj (:obj:`IKObjective` or :obj:`GeneralizedIKObjective`): 
+        obj (:obj:`GeneralizedIKObjective` or :obj:`IKObjective`): 
     """
     return _robotsim.SampleTransform(*args)
 class SimRobotSensor(_object):
@@ -6902,7 +6932,7 @@ class SimRobotSensor(_object):
 
 
         Args:
-            robot (:obj:`Robot` or :class:`~klampt.SimRobotController`): 
+            robot (:class:`~klampt.SimRobotController` or :obj:`Robot`): 
             sensor (:obj:`SensorBase`, optional): 
             name (str, optional): 
             type (str, optional): 
@@ -8097,7 +8127,7 @@ class Simulator(_object):
 
 
         Args:
-            robot (:class:`~klampt.RobotModel` or int): 
+            robot (int or :class:`~klampt.RobotModel`): 
 
         Returns:
             (:class:`~klampt.SimRobotController`):

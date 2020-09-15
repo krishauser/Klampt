@@ -2969,6 +2969,24 @@ void RobotModelLink::setAxis(const double axis[3])
   link.w.set(axis);
 }
 
+bool RobotModelLink::isPrismatic()
+{
+  RobotLink3D& link=robotPtr->links[index];
+  return link.type == RobotLink3D::Prismatic;
+}
+
+bool RobotModelLink::isRevolute()
+{
+  RobotLink3D& link=robotPtr->links[index];
+  return link.type == RobotLink3D::Revolute;
+}
+
+void RobotModelLink::setPrismatic(bool prismatic)
+{
+  RobotLink3D& link=robotPtr->links[index];
+  link.type = (prismatic ? RobotLink3D::Prismatic : RobotLink3D::Revolute);
+}
+
 void RobotModelLink::getJacobian(const double p[3],vector<vector<double> >& J)
 {
   Matrix Jmat;

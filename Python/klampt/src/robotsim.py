@@ -4065,6 +4065,42 @@ class RobotModelLink(_object):
         return _robotsim.RobotModelLink_setAxis(self, axis)
 
 
+    def isPrismatic(self):
+        """
+        isPrismatic(RobotModelLink self) -> bool
+
+
+
+        Returns whether the joint is prismatic.  
+
+        """
+        return _robotsim.RobotModelLink_isPrismatic(self)
+
+
+    def isRevolute(self):
+        """
+        isRevolute(RobotModelLink self) -> bool
+
+
+
+        Returns whether the joint is revolute.  
+
+        """
+        return _robotsim.RobotModelLink_isRevolute(self)
+
+
+    def setPrismatic(self, prismatic):
+        """
+        setPrismatic(RobotModelLink self, bool prismatic)
+
+
+
+        Changes a link from revolute to prismatic or vice versa.  
+
+        """
+        return _robotsim.RobotModelLink_setPrismatic(self, prismatic)
+
+
     def getWorldPosition(self, plocal):
         """
         getWorldPosition(RobotModelLink self, double const [3] plocal)
@@ -4936,8 +4972,8 @@ class RobotModel(_object):
 
 
 
-        Sets the torque limit vector tmax, the constraint is :math:`|torque[i]|
-        <\leqtmax[i]`  
+        Sets the torque limit vector tmax, the constraint is :math:`|torque[i]| \leq
+        tmax[i]`  
 
         """
         return _robotsim.RobotModel_setTorqueLimits(self, tmax)
