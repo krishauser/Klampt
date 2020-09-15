@@ -9,7 +9,11 @@ import sys
 src_folder = "klampt/src"
 root_py_folder = "klampt"
 if sys.version_info[0] == 2:
+    #python2 version has drifted from current Python3 version... maintain separate packages list for compatibility
     root_py_folder = "python2_version/klampt"
+    klampt_packages = ['klampt','klampt.apps', 'klampt.io', 'klampt.math', 'klampt.model', 'klampt.model.create', 'klampt.plan', 'klampt.sim', 'klampt.vis', 'klampt.vis.ipython', 'klampt.vis.backends']
+else:
+    klampt_packages = ['klampt','klampt.apps', 'klampt.io', 'klampt.math', 'klampt.math.autodiff', klampt.model', 'klampt.model.create', 'klampt.plan','klampt.plan.kinetrajopt', 'klampt.sim', 'klampt.vis', 'klampt.vis.ipython', 'klampt.vis.backends']
 
 #Parse settings from CMake
 includeDirs = """${KLAMPT_INCLUDE_DIRS}""".split(';')
@@ -122,7 +126,7 @@ setup(name='Klampt',
                    ],
       #py_modules=['klampt.robotsim','klampt.plan.motionplanning','klampt.math.rootfind'],
       py_modules=['klampt.robotsim','klampt.plan.motionplanning'],
-      packages=['klampt','klampt.apps', 'klampt.io', 'klampt.math', 'klampt.model', 'klampt.model.create', 'klampt.plan','klampt.plan.kinetrajopt', 'klampt.sim', 'klampt.vis', 'klampt.vis.ipython', 'klampt.vis.backends'],
+      packages=klampt_packages,
       package_dir={'klampt': root_py_folder},
       package_data={'klampt': extra_shared_libraries + ['data/*.html','data/*.js']},
       entry_points = {
