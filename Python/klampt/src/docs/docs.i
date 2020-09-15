@@ -2269,8 +2269,8 @@ Returns a reference to the link by index or name.
 
 %feature("docstring") RobotModel::setTorqueLimits "
 
-Sets the torque limit vector tmax, the constraint is :math:`|torque[i]|
-<\\leqtmax[i]`  
+Sets the torque limit vector tmax, the constraint is :math:`|torque[i]| \\leq
+tmax[i]`  
 ";
 
 %feature("docstring") RobotModel::setVelocityLimits "
@@ -2423,20 +2423,20 @@ Returns:
     vworld  
 ";
 
+%feature("docstring") RobotModelLink::isPrismatic "
+
+Returns whether the joint is prismatic.  
+";
+
 %feature("docstring") RobotModelLink::getMass "
 
 Retrieves the inertial properties of the link. (Note that the Mass is given with
 origin at the link frame, not about the COM.)  
 ";
 
-%feature("docstring") RobotModelLink::setTransform "
+%feature("docstring") RobotModelLink::setPrismatic "
 
-Sets the link's current transformation (R,t) to the world frame.  
-
-Note:  
-
-    This does NOT perform inverse kinematics.  The transform is
-    overwritten when the robot's setConfig() method is called.  
+Changes a link from revolute to prismatic or vice versa.  
 ";
 
 %feature("docstring") RobotModelLink::getWorldDirection "
@@ -2546,13 +2546,9 @@ Returns a reference to the link's appearance.
 Returns a reference to the link's parent, or a NULL link if it has no parent.  
 ";
 
-%feature("docstring") RobotModelLink::getLocalPosition "
+%feature("docstring") RobotModelLink::getName "
 
-Converts point from world to local coordinates.  
-
-Returns:  
-
-    (list of 3 floats): the local coordinates of the world point pworld  
+Returns the name of the robot link.  
 ";
 
 %feature("docstring") RobotModelLink::RobotModelLink "
@@ -2585,9 +2581,13 @@ Returns:
     world coordinates.  
 ";
 
-%feature("docstring") RobotModelLink::getName "
+%feature("docstring") RobotModelLink::getLocalPosition "
 
-Returns the name of the robot link.  
+Converts point from world to local coordinates.  
+
+Returns:  
+
+    (list of 3 floats): the local coordinates of the world point pworld  
 ";
 
 %feature("docstring") RobotModelLink::getPositionHessian "
@@ -2641,6 +2641,16 @@ Returns a reference to the link's robot.
 Gets the local rotational / translational axis.  
 ";
 
+%feature("docstring") RobotModelLink::setTransform "
+
+Sets the link's current transformation (R,t) to the world frame.  
+
+Note:  
+
+    This does NOT perform inverse kinematics.  The transform is
+    overwritten when the robot's setConfig() method is called.  
+";
+
 %feature("docstring") RobotModelLink::drawWorldGL "
 
 Draws the link's geometry in the world frame. If keepAppearance=true, the
@@ -2675,6 +2685,11 @@ Returns:
 
     (3-tuple): a triple (Hx,Hy,Hz) of of nxn matrices corresponding,
     respectively, to the (wx,wy,wz) components of the Hessian.  
+";
+
+%feature("docstring") RobotModelLink::isRevolute "
+
+Returns whether the joint is revolute.  
 ";
 
 %feature("docstring") RobotModelLink::getVelocity "
