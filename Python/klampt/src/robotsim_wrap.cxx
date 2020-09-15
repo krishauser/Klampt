@@ -31535,6 +31535,116 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_RobotModelLink_isPrismatic(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelLink *arg1 = (RobotModelLink *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:RobotModelLink_isPrismatic",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelLink, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelLink_isPrismatic" "', argument " "1"" of type '" "RobotModelLink *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelLink * >(argp1);
+  {
+    try {
+      result = (bool)(arg1)->isPrismatic();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModelLink_isRevolute(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelLink *arg1 = (RobotModelLink *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  bool result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:RobotModelLink_isRevolute",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelLink, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelLink_isRevolute" "', argument " "1"" of type '" "RobotModelLink *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelLink * >(argp1);
+  {
+    try {
+      result = (bool)(arg1)->isRevolute();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModelLink_setPrismatic(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelLink *arg1 = (RobotModelLink *) 0 ;
+  bool arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  bool val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:RobotModelLink_setPrismatic",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModelLink, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelLink_setPrismatic" "', argument " "1"" of type '" "RobotModelLink *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelLink * >(argp1);
+  ecode2 = SWIG_AsVal_bool(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "RobotModelLink_setPrismatic" "', argument " "2"" of type '" "bool""'");
+  } 
+  arg2 = static_cast< bool >(val2);
+  {
+    try {
+      (arg1)->setPrismatic(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_RobotModelLink_getWorldPosition(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RobotModelLink *arg1 = (RobotModelLink *) 0 ;
@@ -58135,6 +58245,30 @@ static PyMethodDef SwigMethods[] = {
 		"Sets the local rotational / translational axis.  \n"
 		"\n"
 		""},
+	 { (char *)"RobotModelLink_isPrismatic", _wrap_RobotModelLink_isPrismatic, METH_VARARGS, (char *)"\n"
+		"RobotModelLink_isPrismatic(RobotModelLink self) -> bool\n"
+		"\n"
+		"\n"
+		"\n"
+		"Returns whether the joint is prismatic.  \n"
+		"\n"
+		""},
+	 { (char *)"RobotModelLink_isRevolute", _wrap_RobotModelLink_isRevolute, METH_VARARGS, (char *)"\n"
+		"RobotModelLink_isRevolute(RobotModelLink self) -> bool\n"
+		"\n"
+		"\n"
+		"\n"
+		"Returns whether the joint is revolute.  \n"
+		"\n"
+		""},
+	 { (char *)"RobotModelLink_setPrismatic", _wrap_RobotModelLink_setPrismatic, METH_VARARGS, (char *)"\n"
+		"RobotModelLink_setPrismatic(RobotModelLink self, bool prismatic)\n"
+		"\n"
+		"\n"
+		"\n"
+		"Changes a link from revolute to prismatic or vice versa.  \n"
+		"\n"
+		""},
 	 { (char *)"RobotModelLink_getWorldPosition", _wrap_RobotModelLink_getWorldPosition, METH_VARARGS, (char *)"\n"
 		"RobotModelLink_getWorldPosition(RobotModelLink self, double const [3] plocal)\n"
 		"\n"
@@ -58705,8 +58839,8 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Sets the torque limit vector tmax, the constraint is :math:`|torque[i]|\n"
-		"<\\leqtmax[i]`  \n"
+		"Sets the torque limit vector tmax, the constraint is :math:`|torque[i]| \\leq\n"
+		"tmax[i]`  \n"
 		"\n"
 		""},
 	 { (char *)"RobotModel_setDOFPosition", _wrap_RobotModel_setDOFPosition, METH_VARARGS, (char *)"\n"
