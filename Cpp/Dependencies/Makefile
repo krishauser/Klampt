@@ -14,12 +14,15 @@ UNAME = $(shell uname)
 
 unpack-deps:
 	git clone https://github.com/krishauser/KrisLibrary
-	cd KrisLibrary; git checkout master
+	cd KrisLibrary; git checkout devel
 	tar xvzf ode-0.14.tar.gz
 	tar xvzf glui-2.36.tgz
 	tar xvzf glew-2.0.0.tgz
 
-deps: dep-tinyxml dep-glew dep-glui dep-ode dep-KrisLibrary
+deps: dep-tinyxml dep-glew dep-glui dep-ode dep-KrisLibrary def-vapory
+
+dep-vapory:
+	cd vapory; sudo python3 setup.py install
 
 dep-KrisLibrary:
 	cd KrisLibrary; cmake .
