@@ -19,10 +19,7 @@ unpack-deps:
 	tar xvzf glui-2.36.tgz
 	tar xvzf glew-2.0.0.tgz
 
-deps: dep-tinyxml dep-glew dep-glui dep-ode dep-KrisLibrary def-vapory
-
-dep-vapory:
-	cd vapory; sudo python3 setup.py install
+deps: dep-tinyxml dep-glew dep-glui dep-ode dep-KrisLibrary
 
 dep-KrisLibrary:
 	cd KrisLibrary; cmake .
