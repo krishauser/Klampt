@@ -115,15 +115,19 @@ class ADModule(torch.autograd.Function):
     @staticmethod
     def check_derivatives_torch(func,terminals,h=1e-6,rtol=1e-2,atol=1e-3):
         #sample some random parameters of the appropriate length
-        params=[]
-        for i in range(len(terminals)):
-            try:
-                N = func.n_in(i)
-                if N < 0:
+        if isinstance(func,ad.ADFunctionInterface):
+            params=[]
+            for i in range(len(terminals)):
+                try:
+                    N = func.n_in(i)
+                    if N < 0:
+                        N = 10
+                except NotImplementedError:
                     N = 10
-            except NotImplementedError:
-                N = 10
-            params.append(torch.randn(N))
+                params.append(torch.randn(N))
+        else:
+            N = 10
+            params = [torch.randn(N) for i in range(len(terminals))]
         for p in params:
             p.requires_grad_(True)
         torch.autograd.gradcheck(ADModule.apply,tuple([func,terminals]+params),eps=h,atol=atol,rtol=rtol,raise_exception=True)
@@ -148,7 +152,7 @@ def ad_to_torch(func,terminals=None):
             n_args = func.n_args()
             terminals = [func.argname(i) for i in range(n_args)]
     else:
-        if isinstance(func.ADFunctionCall):
+        if isinstance(func,ad.ADFunctionCall):
             fterminals = func.terminals()
             if len(terminals) != len(fterminals):
                 raise ValueError("The number of terminals provided is incorrect")
