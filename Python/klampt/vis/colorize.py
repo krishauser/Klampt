@@ -11,31 +11,34 @@ def colorize(object,value,colormap=None,feature=None,vrange=None):
     and triangle meshes.
 
     Examples:
-    - colorize(point_cloud,'z','plasma'): sets the point cloud to a rainbow
+
+    - ``colorize(point_cloud,'z','plasma')``: sets the point cloud to a rainbow
       colorization (the 'plasma' colormap in Matplotlib) depending on z.
 
-    - colorize(trimesh,'nz'): colorizes the trimesh according to the z
+    - ``colorize(trimesh,'nz')``: colorizes the trimesh according to the z
       component of each triangle normal.
 
-    - colorize(trimesh,[v1_val,v2_val,...,vm_val]): colorizes each vertex
+    - ``colorize(trimesh,[v1_val,v2_val,...,vm_val])``: colorizes each vertex
       of the triangle mesh by the default colormap. (here m is the # of
       vertices)
 
-    - colorize(trimesh,[t1_rgb,t2_rgb,...,tn_rgb]): colorizes each triangle
+    - ``colorize(trimesh,[t1_rgb,t2_rgb,...,tn_rgb])``: colorizes each triangle
       of the triangle mesh to an assigned color. (here n is the # of
       triangles)
 
-    - colorize(trimesh,'index','random',feature='vertices'): assigns random
+    - ``colorize(trimesh,'index','random',feature='vertices')``: assigns random
       vertex colors.
 
-    - colorize(trimesh,segments,'random'): if clusters is a list of segment
+    - ``colorize(trimesh,segments,'random')``: if clusters is a list of segment
       IDs (len(segments) = # triangles), this assigns a random color to each
       segment.
 
+
     Arguments:
         object: either an object with both an ``appearance()`` and
-            ``geometry()`` method, a :class:`PointCloud`, a
-            :class:`Geometry3D`, or an :class:`Appearance`.
+            ``geometry()`` method, a :class:`~klampt.robotsim.PointCloud`, a
+            :class:`~klampt.robotsim.Geometry3D`, or an
+            :class:`~klampt.robotsim.Appearance`.
 
             - In the first case, the associated appearance is updated.
             - For PointClouds, the 'color' attribute is added, if not already

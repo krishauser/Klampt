@@ -1,4 +1,5 @@
 """so3 module AD functions:
+
  ====================  ============= 
  Function              Derivative    
  ====================  ============= 
@@ -22,7 +23,8 @@
  canonical             N
  interpolate           N
  det                   N
-=====================  ============= 
+ ====================  ============= 
+
 """
 
 import numpy as np 

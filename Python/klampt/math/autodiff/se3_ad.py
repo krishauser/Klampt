@@ -25,7 +25,8 @@ the ``se3_ad.rotation`` and ``se3_ad.translation`` functions.
  distance              N
  interpolate           N
  error                 N
-=====================  =============  ====================================
+ ====================  =============  ====================================
+ 
 """
 
 import numpy as np 

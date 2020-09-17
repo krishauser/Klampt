@@ -182,32 +182,20 @@ def render_povstring(string, outfile=None, height=None, width=None,
 
     """ Renders the provided scene description with POV-Ray.
 
-    Parameters
-    ------------
+    Args:
+        string (str): A string representing valid POVRay code. Typically, it
+            will be the result of ``scene(*objects)``
+        outfile (str, optional): Name of the PNG file for the output. If
+            outfile is None, a numpy array is returned (if numpy is installed).
+            If outfile is 'ipython' and this function is called last in an 
+            IPython notebook cell, this will print the result in the notebook.
 
-    string
-      A string representing valid POVRay code. Typically, it will be the result
-      of scene(*objects)
-
-    outfile
-      Name of the PNG file for the output.
-      If outfile is None, a numpy array is returned (if numpy is installed).
-      If outfile is 'ipython' and this function is called last in an IPython
-      notebook cell, this will print the result in the notebook.
-
-    height
-      height in pixels
-
-    width
-      width in pixels
-
-    output_alpha
-      If true, the background will be transparent,
-    rather than the default black background.  Note
-    that this option is ignored if rendering to a
-    numpy array, due to limitations of the intermediate
-    ppm format.
-
+        height (int, optional): height in pixels
+        width (int, optional): width in pixels
+        output_alpha (bool, optional):  If true, the background will be
+            transparent, rather than the default black background.  Note that
+            this option is ignored if rendering to a numpy array, due to
+            limitations of the intermediate ppm format.
     """
 
     pov_file = tempfile or '__temp__.pov'
@@ -265,13 +253,19 @@ def render_povstring(string, outfile=None, height=None, width=None,
         return Image(outfile)
 
 def to_povray(vis,world,properties={}):
-    """Convert a frame in klampt visualization to a povray script (or render to an image)
-    Parameters:
+    """Convert a frame in klampt visualization to a povray script (or render
+    to an image)
+
+    Args:
         vis: sub-class of GLProgram
         world: sub-class of WorldModel
-        properties: some additional information that povray can take but does not map to anything in klampt
-    Suggestion:
-        do not modify properties, use convenient function that I provide below (after this function)
+        properties: some additional information that povray can take but does
+            not map to anything in klampt.
+    
+    Note::
+        Do not modify properties, use the convenience functions that I provide 
+        below (after this function).  These take the form ``render_to_x`` and
+        ``add_x``.
     """
     #patch on vapory
     patch_vapory()
@@ -388,15 +382,16 @@ def compute_bb(entity):
         return bb
     return entity.geometry().getBBTight()
     
-"""Convenient functions to setup your property"""
 def render_to_file(properties,file):
-    """This will call povray to give you an image"""
+    """This will setup your properties dict to call povray to give you an image"""
     properties['tempfile']=None
     properties['remove_temp']=True
     properties['outfile']=file
     
 def render_to_animation(properties,folder):
-    """This will not call povray, just generate a render script"""
+    """This will setup your properties dict to not call povray, but rather just
+    generate a render script.
+    """
     if not os.path.exists(folder):
         os.mkdir(folder)
         
@@ -447,11 +442,10 @@ def add_light(properties,pos,tgt=None,color=[1.,1.,1.], \
             light_params+=['area_light',list(op.mul(t0,area)),list(op.mul(t1,area)),sample,sample,'adaptive',1,'jitter']
         properties['lights'].append(vp.LightSource(*light_params))
 
-"""This is a convenient function that call add_light mulitple times"""
 def add_multiple_lights(properties,object,dist,numLight,gravity=[0,0,-9.81],tgt=None,color=[1.,1.,1.], \
               spotlight=False,radius=15.,falloff=20.,tightness=10., \
               area=0.,sample=9,adaptive=True,jitter=True):
-    
+    """This is a convenient function that calls add_light multiple times"""    
     #normalize gravity
     g=op.mul(gravity,-1/op.norm(gravity))
     
@@ -477,8 +471,9 @@ def add_multiple_lights(properties,object,dist,numLight,gravity=[0,0,-9.81],tgt=
         add_light(properties,op.add(d0,op.add(d1,d2)),ctr,color,
                   spotlight,radius,falloff,tightness,area,sample,adaptive,jitter)
         
-"""If you know object will not change over time, use this function to tell povray (save computation)"""
 def mark_transient(properties,object,transient=False):
+    """If you know object will not change over time, use this function to tell
+    povray.  This saves computation."""
     if object not in properties:
         properties[object.getName()]={}
     properties[object.getName()]["transient"]=transient
@@ -491,12 +486,16 @@ def mark_robot_transient(properties,robot,transient=False):
     for i in range(robot.numLinks()):
         mark_transient(properties,robot.link(i),transient)
 
-"""Override default color-only material with more advanced material specification in povray
-    finish is a vapory.Finish object
-    normal is a vapory.Normal object
-    setting up these two material parameters is not easy and requires artistic tuning.
-    TODO: create a preset library of materials and convenient functions."""
 def set_material(properties,object,finish,normal):
+    """Override default color-only material with more advanced material specification in povray
+
+    Args:
+        finish: a vapory.Finish object
+        normal: a vapory.Normal object
+    
+    setting up these two material parameters is not easy and requires artistic tuning.
+    TODO: create a preset library of materials and convenient functions.
+    """
     if object not in properties:
         properties[object.getName()]={}
     properties[object.getName()]["finish"]=finish

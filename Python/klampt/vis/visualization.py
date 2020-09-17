@@ -19,6 +19,7 @@ Main features include:
 - Multi-window, multi-viewport support
 - Automatic camera setup
 - Unified interface to PyQt, GLUT, IPython, and HTML backends.
+
   - PyQT is the backend with the fullest amount of features.  
   - GLUT loses resource editing and advanced windowing functionality.
   - IPython loses plugins, resource editing, custom drawing, and advanced 
@@ -54,10 +55,10 @@ implemented.  See Klampt-examples/Python/demos/vistemplate.py for more
 examples.
 
 To capture user interaction and add other functionality, you may create a
-:class:`GLPluginInterface` subclass to add functionality on top of the default
-visualization world.  To do so, call ``vis.pushPlugin(plugin)``.  Note that
-custom rendering (the ``display()`` method) is only available with the OpenGL
-rendering backend.
+:class:`~klampt.vis.glinterface.GLPluginInterface` subclass to add
+functionality on top of the default visualization world.  To do so, call
+``vis.pushPlugin(plugin)``.  Note that custom rendering (the ``display()``
+method) is only available with the OpenGL rendering backend.
 
 Only one rendering backend can be chosen during the lifetime of your process,
 and each backend has its own quirks with regards to window launching and
@@ -170,7 +171,7 @@ Quick start
 
 
 Implementation Details
-^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^
 
 There are two primary modes of running OpenGL visualizations: multi-threaded 
 and single-threaded.
@@ -212,15 +213,16 @@ It is possible to start in single-threaded mode and convert to multi-threaded,
 but the converse is not possible.
 
 In OpenGL mode, you can also completely override the scene manager and run your
-own OpenGL calls using a subclass of :class:`GLPluginInterface`.  Here, you will
-need to perform all the necessary OpenGL drawing / interaction inside its hooks.
+own OpenGL calls using a subclass of
+:class:`~klampt.vis.glinterface.GLPluginInterface`.  Here, you will need to
+perform all the necessary OpenGL drawing / interaction inside its hooks.
 To use this, you should call ``vis.setPlugin(plugin)`` to override the default
 visualization behavior before creating your window. See
 Klampt-examples/Python/demos/visplugin.py for an example of this in use.
 
 
 IPython (Jupyter notebook)
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 IPython visualizations run in a Jupyter notebook in a web browser, using a
 WebGL widget to render the content.  The Python code communicates with the 
@@ -254,7 +256,7 @@ certain types of geometries like VolumeGrids are not supported.
 
 Animations are supported, but you will manually have to advance the animations 
 and call ``vis.update()`` or ``vis.scene().update()`` for each frame.  
-See :class:`~klampt.vis.ipython.widgets.PlaybackWidget` for a convenient widget
+See :class:`~klampt.vis.ipython.widgets.Playback` for a convenient widget
 that handles this somewhat automatically.
 
 
@@ -336,10 +338,10 @@ WINDOWING API
 - def getWindowTitle(): returns the title of the visualization window.
 - def scene(): returns the current :class:`VisualizationScene`
 - def setPlugin(plugin=None): sets the current plugin (a
-  :class:`GLPluginInterface` instance).  This plugin will now capture input
-  from the visualization and can override any of the default behavior of the
-  visualizer. Set plugin=None if you want to return to the default
-  visualization.
+  :class:`~klampt.vis.glinterface.GLPluginInterface` instance).  This plugin
+  will now capture input from the visualization and can override any of the
+  default behavior of the visualizer. Set plugin=None if you want to return to
+  the default visualization.
 - def pushPlugin(plugin): adds a new plugin (e.g., to capture input) on top of
   the old one.
 - def splitView(plugin=None): adds a second scene / viewport to the current
@@ -384,7 +386,7 @@ WINDOWING API
   window via dialog(). Otherwise, you should launch the window via show().
 
 SCENE MODIFICATION API
---------------
+------------------------
 
 The following VisualizationScene methods are also added to the klampt.vis
 namespace and operate on the current scene (as returned from :func:`scene`).
@@ -584,8 +586,9 @@ def _init():
 
 def nativeWindow():
     """Returns the active window data used by the backend.  The result will be
-    a subclass of :class:`GLPluginProgram` if OpenGL is used (PyQt or GLUT) or
-    a :class:`ipython.widgets.KlamptWidget`"""
+    a subclass of :class:`~klampt.vis.glprogram.GLPluginProgram` if OpenGL is
+    used (PyQt or GLUT) or a :class:`~klampt.vis.ipython.widgets.KlamptWidget`
+    """
     global _window_manager
     if _window_manager is None:
         return None
@@ -593,7 +596,8 @@ def nativeWindow():
 
 def scene():
     """Returns the active window data used by the backend.  The result will be
-    a subclass of :class:`VisualizationScene`"""
+    a subclass of :class:`VisualizationScene`.
+    """
     global _window_manager
     if _window_manager is None:
         return None
@@ -632,12 +636,14 @@ def getWindow():
 
 def setPlugin(plugin):
     """Lets the user capture input via a glinterface.GLPluginInterface class.
-    Set plugin to None to disable plugins and return to the standard visualization
+    Set plugin to None to disable plugins and return to the standard
+    visualization.
 
     Args:
         plugin (GLPluginInterface): a plugin that will hereafter capture input
-            from the visualization and can override any of the default behavior of the
-            visualizer. Can be set to None if you want to return to the default visualization.
+            from the visualization and can override any of the default behavior
+            of the visualizer. Can be set to None if you want to return to the
+            default visualization.
     """
     global _globalLock,_window_manager
     _init()
@@ -649,8 +655,9 @@ def pushPlugin(plugin):
     """Adds a new plugin on top of the old one.
 
     Args:
-        plugin (GLPluginInterface): a plugin that will optionally intercept GUI callbacks.
-            Unhandled callbacks will be forwarded to the next plugin on the stack.
+        plugin (GLPluginInterface): a plugin that will optionally intercept GUI
+            callbacks. Unhandled callbacks will be forwarded to the next plugin
+            on the stack.
 
     """
     global _globalLock,_window_manager
@@ -750,8 +757,9 @@ def kill():
 
 def loop(setup=None,callback=None,cleanup=None):
     """Runs the visualization thread inline with the main thread.
-    The setup() function is called at the start, the callback() function is run every time the event thread
-    is idle, and the cleanup() function is called on termination.
+    The setup() function is called at the start, the callback() function is run
+    every time the event thread is idle, and the cleanup() function is called
+    on termination.
 
     NOTE FOR MAC USERS: a multithreaded GUI is not supported on Mac, so the loop()
     function must be used rather than "show and wait".
@@ -765,8 +773,10 @@ def loop(setup=None,callback=None,cleanup=None):
 def show(display=True):
     """Shows or hides the current window.
 
-    NOTE FOR MAC USERS: due to a lack of support of multithreading on Mac, this will not work outside
-    of the setup / callback / cleanup functions given in a call to loop()."""
+    NOTE FOR MAC USERS: due to a lack of support of multithreading on Mac, this
+    will not work outside of the setup / callback / cleanup functions given in a
+    call to loop().
+    """
     global _window_manager
     _init()
     _globalLock.acquire()
@@ -783,8 +793,10 @@ def spin(duration):
     _window_manager.spin(duration)
 
 def lock():
-    """Begins a locked section.  Needs to be called any time you modify a visualization item outside
-    of the visualization thread.  unlock() must be called to let the visualization thread proceed."""
+    """Begins a locked section.  Needs to be called any time you modify a
+    visualization item outside of the visualization thread.  unlock() must be
+    called to let the visualization thread proceed.
+    """
     global _window_manager
     _window_manager.lock()
 

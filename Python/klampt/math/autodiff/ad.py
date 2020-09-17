@@ -9,7 +9,7 @@ all sorts of optimization functions, e.g., machine learning, calibration,
 and trajectory optimization.
 
 This can be used standalone, but is more powerful in conjunction with
-PyTorch or CadADi. Use the functions in :module:`pytorch` and :module:`casadi`
+PyTorch or CadADi. Use the functions in :mod:`pytorch` and :mod:`casadi`
 to convert these Klamp't functions to PyTorch or CasADi functions.
 
 
@@ -191,8 +191,8 @@ ad Module
 =========
 
 This module defines :func:`var`, :func:`function`, and the helper functions
-:func:`check_derivatives`, :func:`eval_multiple`: and
-:func:`finite_differences`. 
+:func:`check_derivatives`, :func:`eval_multiple`, :func:`derivative_multiple`
+and :func:`finite_differences`. 
 
 The operators :func:`stack`, :func:`sum_`, :func:`minimum`, and :func:`maximum`
 operate somewhat like their Numpy counterparts:
@@ -219,16 +219,16 @@ Other Klampt ad Modules
 
 autodiff versions of many Klamp't functions are found in:
 
-- :module:`math_ad` : basic vector math, including functions from the
-  :module:`~klampt.math.vectorops` module.
-- :module:`so3_ad` : operations on SO(3), mostly compatible with the
-  :module:`~klampt.math.so3` module.
-- :module:`se3_ad` : operations on SE(3), mostly compatible with the
-  :module:`~klampt.math.se3` module.
-- :module:`kinematics_ad` kinematics functions, e.g., robot Jacobians.
-- :module:`geometry_ad` geometry derivative functions. TODO
-- :module:`dynamics_ad` dynamics derivative functions. TODO
-- :module:`spline_ad` spline derivative functions. TODO
+- :mod:`math_ad` : basic vector math, including functions from the
+  :mod:`~klampt.math.vectorops` module.
+- :mod:`so3_ad` : operations on SO(3), mostly compatible with the
+  :mod:`~klampt.math.so3` module.
+- :mod:`se3_ad` : operations on SE(3), mostly compatible with the
+  :mod:`~klampt.math.se3` module.
+- :mod:`kinematics_ad` kinematics functions, e.g., robot Jacobians.
+- :mod:`geometry_ad` geometry derivative functions. TODO
+- :mod:`dynamics_ad` dynamics derivative functions. TODO
+- :mod:`spline_ad` spline derivative functions. TODO
 """
 
 import numpy as np
@@ -239,26 +239,27 @@ FINITE_DIFFERENCE_RES = 1e-6
 class ADFunctionInterface:
     """The base class for a new auto-differentiable function. 
 
-    The function has the form f(x_0,...,x_k) with k+1 == self.n_args().  All
-    inputs and outputs are either scalars or numpy ndarrays.
+    The function has the form :math:`f(x_0,...,x_k)` with ``k+1 ==
+    self.n_args()``.  All inputs and outputs are either scalars or numpy
+    ndarrays.
 
-    To define a new function, you need to implement n_args(), eval(*args), and
-    optionally n_in(arg), n_out(), derivative(arg,*args), and
-    jvp(arg,darg,*args).
+    To define a new function, you need to implement ``n_args()``,
+    ``eval(*args)``, and optionally ``n_in(arg)``, ``n_out()``,
+    ``derivative(arg,*args)``, and ``jvp(arg,darg,*args).``
 
     A function class can be instantiated with non-numeric data.  For example,
     to perform forward kinematics the call::
 
          wp = WorldPosition(link,localPos)
 
-    (see :module:`kinematics_ad`) creates a function wp(q) that will accept a 
+    (see :mod:`kinematics_ad`) creates a function wp(q) that will accept a 
     robot configuration q and return the world position of the point 
     ``localPos`` on link ``link``.
 
     This makes these function classes more expressive, but also leads to a 
     slight annoyance in that to define a function that can be called, you need
     to instantiate a function.  For exaple, the sin function is defined in
-    :module:`math_ad` as ``sin = ADSinFunction()`` where ``ADSinFunction`` is
+    :mod:`math_ad` as ``sin = ADSinFunction()`` where ``ADSinFunction`` is
     the actual class that implements the sin function.  This construction lets
     you call ``math_ad.sin(var('x'))`` as though it were a normal function.
 
@@ -300,7 +301,7 @@ class ADFunctionInterface:
         """Evaluates the application of the function to the given
         (instantiated) arguments. 
 
-        Arguments:
+        Args:
             args (list): a list of arguments, which are either ndarrays or
             scalars.
         """
@@ -309,13 +310,13 @@ class ADFunctionInterface:
     def derivative(self,arg,*args):
         """Returns the Jacobian of the function w.r.t. argument #arg.
 
-        Arguments:
+        Args:
             arg (int): A value from 0,...,self.n_args()-1 indicating that we
-                wish to take df/dx_arg. 
+                wish to take :math:`df/dx_{arg}`. 
             args (list of ndarrays): arguments for the function.
 
         Returns:
-            ndarray: A numpy array of shape (self.n_out(),self.n_in(arg)).
+            ndarray: A numpy array of shape ``(self.n_out(),self.n_in(arg))``.
             Keep in mind that even if the argument or result is a scalar, this
             needs to be a 2D array.
 
@@ -330,14 +331,15 @@ class ADFunctionInterface:
         """Generalized derivative that allows higher-order derivatives to be
         taken.
 
-        Arguments:
+        Args:
             arg (list): Indicates the order of derivatives to be taken.  For
                 example, to take the 2nd derivative w.r.t. x0,x1,
                 arg = [0,1] should be specified.
             args (list of ndarrays): arguments for the function.
 
         Returns:
-            ndarray: A tensor of shape (n_out,n_in(arg[0]),...,n_in(arg[-1]).
+            ndarray: A tensor of shape ``(n_out,n_in(arg[0]),...,
+            n_in(arg[-1])``.
 
             If the generalized derivative is not implemented, raise a
             NotImplementedError.
@@ -351,24 +353,27 @@ class ADFunctionInterface:
     def jvp(self,arg,darg,*args):
         """Performs a Jacobian-vector product for argument #arg.
 
-        Arguments:
+        Args:
             arg (int): A value from 0,...,self.n_args()-1 indicating that we
                 wish to calculate df/dx_arg * darg. 
             darg (ndarray): the derivative of x_arg w.r.t some other parameter.
-                Must have darg.shape = (self.n_in(arg),). 
+                Must have ``darg.shape = (self.n_in(arg),)``. 
             args (list of ndarrays): arguments for the function.
 
         Returns:
-            ndarray: A numpy array of length self.n_out()
+            ndarray: A numpy array of length ``self.n_out()``
 
             If the derivative is not implemented, raise a NotImplementedError.
         """
         raise NotImplementedError()
 
     def __call__(self,*args):
-        na = self.n_args()
-        if na >= 0 and len(args) != na:
-            raise ValueError("Invalid number of arguments to function %s, wanted %d, got %d"%(str(self),na,len(args)))
+        try:
+            na = self.n_args()
+            if na >= 0 and len(args) != na:
+                raise ValueError("Invalid number of arguments to function %s, wanted %d, got %d"%(str(self),na,len(args)))
+        except NotImplementedError:
+            pass
         return ADFunctionCall(self,args)
 
 
@@ -420,13 +425,11 @@ class ADFunctionCall:
     def __init__(self,func,args):
         self.func = func
         self.args = [a for a in args]
-        self.terminals = {}
         for i,arg in enumerate(args):
             if isinstance(arg,str):
                 self.args[i] = ADTerminal(arg)
-                self.terminals[arg] = self.args[i]
             elif isinstance(arg,ADTerminal):
-                self.terminals[arg.name] = arg
+                pass
             elif isinstance(arg,ADFunctionCall):
                 try:
                     narg = arg.func.n_out()
@@ -449,16 +452,12 @@ class ADFunctionCall:
                     #argument sizes not specified, ignore
                     pass
                 pass
-        self._print_id = None
-        self._eval_result = None
-        self._eval_context = None
-        self._eval_instantiated_args = None
-        self._deriv_result = None
+        self._cache = {}
 
     def __str__(self):
         terms = {}
         dag = self._print_dag(terms)
-        self._clear_print_cache()
+        self._clear_cache('print_id')
         def _flatten_str_tree(tree):
             flat = []
             for v in tree:
@@ -469,37 +468,6 @@ class ADFunctionCall:
             return ''.join(flat)
         return _flatten_str_tree(dag)
 
-    def _clear_print_cache(self):
-        if self._print_id is None:
-            return
-        self._print_id = None
-        for v in self.args:
-            if isinstance(v,ADFunctionCall):
-                v._clear_print_cache()
-
-    def _print_dag(self,terms):
-        assert self._print_id is None
-        id = len(terms)
-        self._print_id = id
-        argstr = []
-        for v in self.args:
-            if isinstance(v,ADTerminal):
-                argstr.append(str(v))
-            elif isinstance(v,ADFunctionCall):
-                if v._print_id is not None:
-                    argstr.append('@'+str(v._print_id))
-                    if not terms[v._print_id][-1].startswith('#'):
-                        terms[v._print_id].append('#'+str(v._print_id))
-                else:
-                    argstr.append(v._print_dag(terms))
-            else:
-                argstr.append(str(v))
-            argstr.append(',')
-        argstr.pop(-1)
-        res = [str(self.func),'(',argstr,')']
-        terms[id] = res
-        return res
-
     def eval(self,**kwargs):
         """Evaluate a function call with bound values given by the keyword
         arguments.  Example::
@@ -507,7 +475,7 @@ class ADFunctionCall:
             print((3*var('x')**2 - 2*var('x')).eval(x=1.5))
 
         """
-        self._clear_eval_cache()
+        self._clear_cache('eval_result','eval_context','eval_instantiated_args')
         return self._eval([],kwargs)
 
     def derivative(self,arg,**kwargs):
@@ -521,22 +489,72 @@ class ADFunctionCall:
         call eval() again with kwargs.  So, the sequence eval(**kwargs),
         derivative(**kwargs) will save some time compared to changing the args.
         """
-        self._clear_deriv_cache()
-        if self._eval_context is None or not _context_equal(self._eval_context,kwargs):
+        if 'eval_context' not in self._cache or not _context_equal(self._cache['eval_context'],kwargs):
             self.eval(**kwargs)
-            assert _context_equal(self._eval_context,kwargs)
+            assert _context_equal(self._cache['eval_context'],kwargs)
         res = self._deriv([],arg,kwargs)
+        self._clear_cache('deriv_result')
         if res is 0:
-            return np.zeros((_size(self._eval_result),_size(kwargs[arg])))
+            return np.zeros((_size(self._cache['eval_result']),_size(kwargs[arg])))
         if len(res.shape) == 1:
             #deriv w.r.t. scalar
             res = res.reshape((res.shape[0],1))
         return res
 
+    def replace(self,**kwargs):
+        """Replaces any symbols whose names are keys in kwargs with the
+        matching value as an expression.  The result is an ADFunctionCall.
+
+        For example, (var('x')**2 + var('y')).replace(x=var('z'),y=3) would 
+        return the expression var('z')**2 + 3.
+        """
+        res = self._replace(kwargs)
+        self._clear_cache('replace_result')
+        return res
+
+    def terminals(self,sort=False):
+        """Returns the list of terminals in this expression.  If sort=True,
+        they are sorted by alphabetical order.
+
+        Returns:
+            list of str
+        """
+        res = []
+        resset = set()
+        self._terminals(res,resset)
+        self._clear_cache('terminals_visited')
+        if sort:
+            return sorted(res)
+        return res
+
+    def _print_dag(self,terms):
+        assert 'print_id' not in self._cache
+        id = len(terms)
+        self._cache['print_id'] = id
+        argstr = []
+        for v in self.args:
+            if isinstance(v,ADTerminal):
+                argstr.append(str(v))
+            elif isinstance(v,ADFunctionCall):
+                if 'print_id' in v._cache:
+                    vid = v._cache['print_id']
+                    argstr.append('@'+str(vid))
+                    if not terms[vid][-1].startswith('#'):
+                        terms[vid].append('#'+str(vid))
+                else:
+                    argstr.append(v._print_dag(terms))
+            else:
+                argstr.append(str(v))
+            argstr.append(',')
+        argstr.pop(-1)
+        res = [str(self.func),'(',argstr,')']
+        terms[id] = res
+        return res
+
     def _eval(self,callStack,kwargs):
-        if self._eval_result is not None:
-            return self._eval_result
-        self._eval_context = kwargs
+        if 'eval_result' in self._cache:
+            return self._cache['eval_result']
+        self._cache['eval_context'] = kwargs
         instantiated_args = []
         callStack.append(self)
         for i,arg in enumerate(self.args):
@@ -562,7 +580,7 @@ class ADFunctionCall:
                 pass
 
         callStack.pop(-1)
-        self._eval_instantiated_args = instantiated_args
+        self._cache['eval_instantiated_args'] = instantiated_args
         try:
             res = self.func.eval(*instantiated_args)
         except Exception:
@@ -576,7 +594,7 @@ class ADFunctionCall:
         except NotImplementedError:
             #not implemented, just ignore
             pass
-        self._eval_result = res
+        self._cache['eval_result'] = res
         return res
 
     def _deriv_jacobian(self,arg,args):
@@ -671,17 +689,19 @@ class ADFunctionCall:
             return np.dot(finite_differences(lambda x:self.func.eval(*(args[:arg]+[x]+args[arg+1:])),args[arg],FINITE_DIFFERENCE_RES),mat)
 
     def _deriv(self,callStack,deriv_arg,kwargs):
-        if self._deriv_result is not None:
-            return self._deriv_result
-        assert self._eval_context is not None
+        if 'deriv_result' in self._cache:
+            return self._cache['deriv_result']
+        assert 'eval_context' in self._cache
+        eval_result = self._cache['eval_result']
+        eval_args = self._cache['eval_instantiated_args']
         callStack.append(self)
         res = 0
         for i,arg in enumerate(self.args):
             if isinstance(arg,ADTerminal):
                 if arg.name == deriv_arg:
-                    inc = self._deriv_jacobian(i,self._eval_instantiated_args)
-                    assert hasattr(inc,'shape') and inc.shape[0] == _size(self._eval_result),"Function %s has invalid jacobian shape? Context %s"%(str(self.func),str(self))
-                    if _scalar(self._eval_instantiated_args[i]):
+                    inc = self._deriv_jacobian(i,eval_args)
+                    assert hasattr(inc,'shape') and inc.shape[0] == _size(eval_result),"Function %s has invalid jacobian shape? Context %s"%(str(self.func),str(self))
+                    if _scalar(eval_args[i]):
                         #for scalar derivatives, we just use a 1D vector rather than a 2D array
                         inc = inc[:,0]
                 else:
@@ -691,8 +711,8 @@ class ADFunctionCall:
                 da = arg._deriv(callStack,deriv_arg,kwargs)
                 if da is 0:
                     continue
-                inc = self._deriv_jacobian_array_product(i,da,self._eval_instantiated_args)
-                assert hasattr(inc,'shape') and inc.shape[0] == _size(self._eval_result),"Function %s has invalid jacobian shape? Context %s"%(str(self.func),str(self))
+                inc = self._deriv_jacobian_array_product(i,da,eval_args)
+                assert hasattr(inc,'shape') and inc.shape[0] == _size(eval_result),"Function %s has invalid jacobian shape? Context %s"%(str(self.func),str(self))
             else:
                 #const, no derivative
                 continue
@@ -701,27 +721,56 @@ class ADFunctionCall:
             else:
                 res += inc
         callStack.pop(-1)
-        self._deriv_result = res
+        self._cache['deriv_result'] = res
         return res
 
-
-    def _clear_eval_cache(self):
-        if self._eval_result is None:
-            return
-        self._eval_result = None
-        self._eval_context = None
-        self._eval_instantiated_args = None
+    def _replace(self,kwargs):
+        if 'replace_result' in self._cache:
+            return self._cache['replace_result']
+        replaced = False
+        newargs = []
         for arg in self.args:
-            if isinstance(arg,ADFunctionCall):
-                arg._clear_eval_cache()
+            if isinstance(arg,ADTerminal):
+                if arg.name in kwargs:
+                    newargs.append(kwargs[arg.name])
+                    replaced = True
+                else:
+                    newargs.append(arg)
+            elif isinstance(arg,ADFunctionCall):
+                newargs.append(arg._replace(kwargs))
+                if newargs[-1] is not arg:
+                    replaced = True
+            else:
+                newargs.append(arg)
+        if replaced:
+            res = ADFunctionCall(self.func,newargs)
+        else:
+            #circular reference... can we make sure this won't mess up the GC?
+            res = self
+        self._cache['replace_result'] = res
+        return res
 
-    def _clear_deriv_cache(self):
-        if self._deriv_result is None:
+    def _terminals(self,res,resset):
+        if 'terminals_visited' in self._cache:
             return
-        self._deriv_result = None
         for arg in self.args:
-            if isinstance(arg,ADFunctionCall):
-                arg._clear_deriv_cache()
+            if isinstance(arg,ADTerminal):
+                if arg.name not in resset:
+                    res.append(arg.name)
+                    resset.add(arg.name)
+            elif isinstance(arg,ADFunctionCall):
+                arg._terminals(res,resset)
+        self._cache['terminals_visited'] = True
+        return
+
+    def _clear_cache(self,*args):
+        if args[0] not in self._cache:
+            return
+        for a in args:
+            del self._cache[a]
+        for v in self.args:
+            if isinstance(v,ADFunctionCall):
+                v._clear_cache(*args)
 
     def __neg__(self):
         return neg(self)
@@ -776,12 +825,12 @@ def function(func,name='auto',argspec='auto',outspec=None,argnames=None,
         argnames
         derivative (callable or list of callables, optional): one or more
             derivative functions.  If a callable, takes the index-arguments
-            tuple (arg,*args).  If a list, each element just takes the same
+            tuple ``(arg,*args)``.  If a list, each element just takes the same
             arguments as func.
         jvp (callable or list of callables, optional): one or more Jacobian-
             vector product functions. If a single callable, has signature
-            (arg,darg,*args).  If a list, each element has the signature
-            (darg,*args)
+            ``(arg,darg,*args)``.  If a list, each element has the signature
+            ``(darg,*args)``.
         gen_derivative (callable, list of callables, or dict, optional): a
             higher-order derivative function. 
 
@@ -790,10 +839,10 @@ def function(func,name='auto',argspec='auto',outspec=None,argnames=None,
             If a list of callables is given, they are a list of higher-order
             derivatives, starting at the second derivative.  In this case,
             the function may only have 1 argument, and each callable has the
-            signature (*args).
+            signature ``(*args)``.
 
             If a dict is given, it must map tuples to callables, each of which
-            has the signature (*args).
+            has the signature ``(*args)``.
         order (int, optional): if provided, we know that all derivatives higher
             than this order will be zero.
     """
@@ -875,7 +924,7 @@ def finite_differences(f,x,h=1e-6):
     """Performs forward differences to approximate the derivative of f at x.
     f can be a vector or scalar function, and x can be a scalar or vector.
 
-    The result is a Numpy array of shape (_size(f(x)),_size(x)).
+    The result is a Numpy array of shape ``(_size(f(x)),_size(x))``.
 
     h is the step size.
     """

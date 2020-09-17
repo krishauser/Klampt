@@ -8,9 +8,9 @@
  WorldTransform        1,2            wt[link,*localPos](q) -> SE(3)
  WorldVelocity         1              wv[link,localPos](q,dq) -> R^3
  WorldAngularVelocity  1              ww[link](q,dq) -> R^3
-#LocalPosition         1              lp[link,worldPos](q) -> R^3
-#LocalDirection        1              ld[link,worldDir](q) -> R^3
-#LocalOrientation      1              lo[link](q) -> SO(3)
+ #LocalPosition        1              lp[link,worldPos](q) -> R^3
+ #LocalDirection       1              ld[link,worldDir](q) -> R^3
+ #LocalOrientation     1              lo[link](q) -> SO(3)
  DriversToLinks        Y              d2l[robot](qdriver) -> R^numLinks()
  DriverDerivsToLinks   Y              d2l'[robot](vdriver) -> R^numLinks()
  LinksToDrivers        Y              l2d[robot](q) -> R^numDrivers()

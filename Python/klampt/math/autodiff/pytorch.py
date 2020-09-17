@@ -1,8 +1,8 @@
 import klampt.math.autodiff.ad as ad
 import torch,numpy as np
 
-"""torch to ad wrapper function"""
-class TorchModuleFunction:
+class TorchModuleFunction(ad.ADFunctionInterface):
+    """Converts a PyTorch function to a Klamp't autodiff function class."""
     def __init__(self,module):
         self.module=module
         self._eval_params=[]
@@ -66,13 +66,12 @@ class TorchModuleFunction:
                 return False
         return True
 
-def torch_to_ad(module,args):
-    wrapper=TorchModuleFunction(module)
-    return ad.ADFunctionCall(wrapper,args)
 
-"""ad to torch wrapper function"""
 class ADModule(torch.autograd.Function):
-    
+    """Converts a Klamp't autodiff function call or function instance to a
+    PyTorch Function. The class must be created with the terminal symbols
+    corresponding to the PyTorch arguments to which this is called.
+    """
     @staticmethod
     def forward(ctx,func,terminals,*args):
         torch.set_default_dtype(torch.float64)
@@ -99,7 +98,11 @@ class ADModule(torch.autograd.Function):
         func,terminals,context = ctx.saved_state
         if isinstance(func,ad.ADFunctionCall):
             for k in range(len(terminals)):
-                deriv=torch.Tensor(func.derivative(terminals[k].name,**context))
+                if isinstance(terminals[k],ad.ADTerminal):
+                    name = terminals[k].name
+                else:
+                    name = terminals[k]
+                deriv=torch.Tensor(func.derivative(name,**context))
                 ret.append(deriv.T@grad)
         elif isinstance(func,ad.ADFunctionInterface):
             for k in range(len(terminals)):
@@ -111,9 +114,55 @@ class ADModule(torch.autograd.Function):
     
     @staticmethod
     def check_derivatives_torch(func,terminals,h=1e-6,rtol=1e-2,atol=1e-3):
-        N=10
-        params=[torch.randn(N) for i in range(len(terminals))]
+        #sample some random parameters of the appropriate length
+        params=[]
+        for i in range(len(terminals)):
+            try:
+                N = func.n_in(i)
+                if N < 0:
+                    N = 10
+            except NotImplementedError:
+                N = 10
+            params.append(torch.randn(N))
         for p in params:
             p.requires_grad_(True)
         torch.autograd.gradcheck(ADModule.apply,tuple([func,terminals]+params),eps=h,atol=atol,rtol=rtol,raise_exception=True)
-    
+
+
+def torch_to_ad(module,args):
+    """Converts a PyTorch function applied to args (list of scalars or numpy
+    arrays) to a Klamp't autodiff function call on those arguments."""
+    wrapper=TorchModuleFunction(module)
+    return wrapper(*args)
+
+
+def ad_to_torch(func,terminals=None):
+    """Converts a Klamp't autodiff function call or function instance to a
+    PyTorch Function.  If terminals is provided, this is the list of arguments
+    that PyTorch will expect.  Otherwise, the variables in the expression
+    will be automatically determined by the forward traversal order."""
+    if terminals is None:
+        if isinstance(func,ad.ADFunctionCall):
+            terminals = func.terminals()
+        else:
+            n_args = func.n_args()
+            terminals = [func.argname(i) for i in range(n_args)]
+    else:
+        if isinstance(func.ADFunctionCall):
+            fterminals = func.terminals()
+            if len(terminals) != len(fterminals):
+                raise ValueError("The number of terminals provided is incorrect")
+            for t in terminals:
+                if isinstance(t,ad.ADTerminal):
+                    name = t.name
+                else:
+                    name = t
+                if name not in fterminals:
+                    raise ValueError("Invalid terminal %s, function call %s only has terminals %s"%(name,str(func),str(terminals)))
+        else:
+            try:
+                if len(terminals) != func.n_args():
+                    raise ValueError("Invalid number of terminals, function %s expects %d"%(str(func),func.n_args()))
+            except NotImplementedError:
+                pass
+    return ADModule(func,terminals)

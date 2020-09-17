@@ -1,4 +1,5 @@
 """Klampt dynamics AD functions:
+
  ====================  =============  ======================================
  Function              Derivative     Notes
  ====================  =============  ======================================
@@ -15,6 +16,7 @@
  PointWrenchTorques    1              J^T*w[link,localpt](q,w) -> R^n
  FullDynamics          N              ddq[robot,g,links,localpoints](q,dq,t,fs) -> R^n
  ====================  =============  ======================================
+
 """
 
 
