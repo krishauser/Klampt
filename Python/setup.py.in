@@ -13,7 +13,7 @@ if sys.version_info[0] == 2:
     root_py_folder = "python2_version/klampt"
     klampt_packages = ['klampt','klampt.apps', 'klampt.io', 'klampt.math', 'klampt.model', 'klampt.model.create', 'klampt.plan', 'klampt.sim', 'klampt.vis', 'klampt.vis.ipython', 'klampt.vis.backends']
 else:
-    klampt_packages = ['klampt','klampt.apps', 'klampt.io', 'klampt.math', 'klampt.math.autodiff', klampt.model', 'klampt.model.create', 'klampt.plan','klampt.plan.kinetrajopt', 'klampt.sim', 'klampt.vis', 'klampt.vis.ipython', 'klampt.vis.backends']
+    klampt_packages = ['klampt','klampt.apps', 'klampt.io', 'klampt.math', 'klampt.math.autodiff', 'klampt.model', 'klampt.model.create', 'klampt.plan','klampt.plan.kinetrajopt', 'klampt.sim', 'klampt.vis', 'klampt.vis.ipython', 'klampt.vis.backends']
 
 #Parse settings from CMake
 includeDirs = """${KLAMPT_INCLUDE_DIRS}""".split(';')
