@@ -53,9 +53,18 @@ klampt.io.open3d_convert module
     :undoc-members:
     :show-inheritance:
 
+klampt.io.povray module
+-----------------------
 
-.. Module contents
-.. ---------------
+.. automodule:: klampt.io.povray
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+
+Module contents
+---------------
 
 .. automodule:: klampt.io
     :members:

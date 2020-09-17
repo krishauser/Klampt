@@ -1,7 +1,7 @@
 klampt.vis.qtbackend module
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. automodule:: klampt.vis.qtbackend
+.. automodule:: klampt.vis.backends.qtbackend
     :members:
     :undoc-members:
     :show-inheritance:
