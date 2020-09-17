@@ -44,7 +44,7 @@ install, e.g.,:
 .. code:: sh
 
     git clone https://github.com/krishauser/Klampt-examples
-    cd Klampt-examples/Python/demos
+    cd Klampt-examples/Python3/demos
     python kbdrive.py ../../data/tx90roll.xml
 
 Most of the examples in this manual require Klampt-examples to be downloaded to your computer.

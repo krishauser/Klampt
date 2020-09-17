@@ -177,20 +177,20 @@ Now, let's see how the eval function works:
 .. code:: python
 
     #prints milestones 0-5
-    print 0,":",traj.eval(0)
-    print 1,":",traj.eval(1)
-    print 2,":",traj.eval(2)
-    print 3,":",traj.eval(3)
-    print 4,":",traj.eval(4)
-    print 5,":",traj.eval(5)
-    print 6,":",traj.eval(6)
+    print(0,":",traj.eval(0))
+    print(1,":",traj.eval(1))
+    print(2,":",traj.eval(2))
+    print(3,":",traj.eval(3))
+    print(4,":",traj.eval(4))
+    print(5,":",traj.eval(5))
+    print(6,":",traj.eval(6))
     #print some interpolated points
-    print 0.5,":",traj.eval(0.5)
-    print 2.5,":",traj.eval(2.5)
+    print(0.5,":",traj.eval(0.5))
+    print(2.5,":",traj.eval(2.5))
     #print some stuff after the end of trajectory
-    print 7,":",traj.eval(7)
-    print 100.3,":",traj.eval(100.3)
-    print -2,":",traj.eval(-2)
+    print(7,":",traj.eval(7))
+    print(100.3,":",traj.eval(100.3))
+    print(-2,":",traj.eval(-2))
 
 OK, that seems reasonable.  But it's a little hard to understand what this
 looks like through text printouts.  Let's use the visualization to see
@@ -308,7 +308,7 @@ and conversions on ``MultiPath``\ s.
 
 Also, you may see the utility scripts in
 
-  ``Klampt-examples/Python/utils/multipath\_to\_timed\_path.py``
+  ``Klampt-examples/Python3/utils/multipath\_to\_timed\_path.py``
 
 for an example of assigning times to a multipath
 .
@@ -386,7 +386,7 @@ First, convert the path to a Trajectory.  Then, run something like this:
         dqrobot = convert_klampt_velocity(dqklampt)
         pid_command(qrobot,dqrobot)
         time.sleep(dt)
-    print "Done"
+    print("Done")
 
 **If your robot accepts queued, timed waypoints**
 

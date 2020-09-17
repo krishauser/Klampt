@@ -157,7 +157,7 @@ the commanded configuration by 1 radian / sec over 10 seconds.
 
         #advance the simulation
         sim.simulate(dt)
-    print "End configuration:",controller.getSensedConfig()
+    print("End configuration:",controller.getSensedConfig())
 
 In general, your control loop can make use of sensors and planners. There
 are countless ways to implement robot behaviors, and you are only limited by

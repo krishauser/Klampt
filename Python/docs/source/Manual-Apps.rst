@@ -112,8 +112,8 @@ interest may include:
 Utilities and Demos
 ~~~~~~~~~~~~~~~~~~~
 
-The ``Klampt-examples/Python/utils`` and
-``Klampt-examples/Python/demos`` folders contain a few example
+The ``Klampt-examples/Python3/utils`` and
+``Klampt-examples/Python3/demos`` folders contain a few example
 utilities and programs that can be built upon to start getting a flavor
 of programming Klamp't applications in Python.
 
