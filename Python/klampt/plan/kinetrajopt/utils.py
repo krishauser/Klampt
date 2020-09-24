@@ -1,70 +1,54 @@
 import numpy as np
-import autograd as jax
-
 
 class CostInterface(object):
-    """Define the cost function class, it must support several function evaluation"""
-    def __jax_cost__(self, x):
-        raise NotImplementedError('Sub-class has to implement __jax_cost__ function')
-
+    """An abstract base class for a cost function.  The subclass must implement
+    `compute` to evaluate f(x), d/dx f(x), and/or d^2/dx^2 f(x).
+    """
     def compute(self, x, grad_level=0):
-        """This function evaluates the cost and possibly (determining on grad_level) return high order derivatives
+        """Evaluates the cost and possibly (determining on grad_level) the
+        derivative and/or Hessian.
 
         Args:
             x (ndarray): The evaluation point
-            grad_level (int, optional): Which order of derivatives are computed. Defaults to 0.
+            grad_level (int, optional): Which order of derivatives are
+                computed. Defaults to 0, which only computes cost.
+
         Returns:
-            Depending on grad_level, this function is expected to return different things
-            if grad_level == 0, it returns the cost value itself
-            if grad_level == 1, it has to additionally return gradient
-            if grad_level == 2, it has to additionally return Hessian
+            tuple: the cost and optional derivatives, structured as follows:
+
+            - if grad_level == 0, it returns (cost,)
+            - if grad_level == 1, it returns (cost,gradient)
+            - if grad_level == 2, it returns (cost,gradient,hessian)
         """
-        if self.__jax_cost__.__func__ is not CostInterface.__jax_cost__:
-            cost = self.__jax_cost__(x)
-            if grad_level == 0:
-                return (cost,)
-            else:
-                if not hasattr(self, '__jax_grad__'):
-                    self.__jax_grad__ = jax.grad(self.__jax_cost__)
-                grad = self.__jax_grad__(x)  # ._value
-                if grad_level == 1:
-                    return (cost, grad)
-                # now hessian is necessary
-                if not hasattr(self, '__jax_hess__'):
-                    self.__jax_hess__ = jax.hessian(self.__jax_cost__)
-                hess = self.__jax_hess__(x) # ._value
-                return (cost, grad, hess)
         raise NotImplementedError("Sub-class has to implement function compute")
 
 
 class ConstrInterface(object):
-    """Define the constraint class, it has to return Jacobian sometimes.
-    Currently sparsity is not supported.
-    It has to keep track of number of constraints, too.
-    """
-    def __jax_constr__(self, x):
-        raise NotImplementedError('Sub-class has to implement __jax_constr__ function')
+    """An abstract base class for a constraint function.  The subclass must
+    implement `compute` to evaluate g(x) and/or d/dx g(x).
 
+    The interpretation of whether this gives an equality or equality is not
+    provided in this class.  See :class:`ConstrContainer`.
+
+    Currently sparsity is not supported.
+    """
     def compute(self, x, grad_level=0):
-        """Similar to cost interface, by calling this function, the constraints value are returned
+        """Evaluates the constraint function and possibly (determining on
+        grad_level) the Jacobian.
 
         Args:
             x (ndarray): the point to be evaluated
-            grad_level (int, optional): which level of gradient is computed. Defaults to 0.
+            grad_level (int, optional): which level of gradient is computed.
+                Defaults to 0.
+
         Returns:
-            In the highest level, it returns a tuple of information on equality and inequality constraints. 
-            For each one of them, depending on grad_level, the return is different.
-            If grad_level == 0, it returns an ndarray of constraint values
-            If grad_level == 1, it also returns an ndarray of constraint Jacobian
+            tuple: The constraint value and optional derivatives, structured as
+            follows:
+
+            - If grad_level == 0, it returns a 1-D ndarray of g(x)
+            - If grad_level == 1, it also returns a 2-D ndarray giving the
+              constraint Jacobian d/dx g(x).
         """
-        if self.__jax_constr__.__func__ is not ConstrInterface.__jax_constr__:
-            if grad_level == 0:
-                return (self.__jax_constr__(x),) #._value,)
-            else:
-                if not hasattr(self, '__jax_jac__'):
-                    self.__jax_jac__ = jax.jacobian(self.__jax_constr__)
-                # return (self.__jax_constr__(x)._value, self.__jax_jac__(x)._value)
-                return (self.__jax_constr__(x), self.__jax_jac__(x))
         raise NotImplementedError("Sub-class has to implement function compute.")
 
 
@@ -122,7 +106,9 @@ class JointLimitsConstr(ConstrInterface):
 
 
 class MaskedRobot(object):
-    """This object creates a mask to robot so only certain links can be changed
+    """Creates a mask to robot so only certain links can be changed.
+    
+    Slightly faster than SubRobotModel since it uses numpy to do the indexing.
 
     Args:
         object (robot): klampt robot

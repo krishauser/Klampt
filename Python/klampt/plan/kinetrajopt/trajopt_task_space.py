@@ -1,9 +1,6 @@
 """Implement trajopt with a target in task space. It cleverly uses autograd functions and the general framework.
 """
 import numpy as np
-import autograd.numpy as anp
-from autograd.core import primitive
-from autograd.extend import primitive as pprimitive, defvjp
 
 from klampt import WorldModel
 import klampt.math.so3 as so3
@@ -11,16 +8,6 @@ import klampt.math.so3 as so3
 from .utils import CostInterface, ConstrInterface, MaskedRobot
 
 
-class JaxMinVelCost(CostInterface):
-    def __init__(self, n, dimq):
-        self.n = n
-        self.dimq = dimq
-
-    def __jax_cost__(self, x):
-        y = x.reshape((self.n, self.dimq))
-        z = y[1:] - y[:-1]
-        cost = anp.sum(z ** 2)
-        return cost
 
 
 class PoseConstraint(ConstrInterface):
@@ -179,3 +166,4 @@ class PositionConstraint(ConstrInterface):
             jac = self.robot.positionJacobian(self.linkid, lcl_pos=self.lcl_pos)
             return (val, jac)
         return (val,)
+
