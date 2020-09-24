@@ -21,7 +21,7 @@
  cross              1 
  interpolate        1
  =================  =============  ===================================
- 
+
 """
 
 import numpy as np 
@@ -397,18 +397,33 @@ class _ADDistanceSquared(ADFunctionInterface):
 
 
 exp = _ADExp()
+"""Autodiff'ed function comparable to np.exp.  First derivative is implemented."""
+
 log = _ADLog()
+"""Autodiff'ed function comparable to np.log.  First derivative is implemented."""
+
 sin = _ADSin()
+"""Autodiff'ed function comparable to np.sin.  All derivatives are implemented."""
+
 cos = _ADCos()
+"""Autodiff'ed function comparable to np.cos.  All derivatives are implemented."""
+
 dot = _ADDot()
+"""Autodiff'ed function comparable to np.dot.  All derivatives are implemented."""
 
 def linear(A,x):
+    """Autodiff'ed function comparable to np.dot(A,x).  A must be a constant, 
+    2D np.array.  x may be an expression."""
     return _ADLinear(A)(x)
 
 def quadratric(A,x):
+    """Autodiff'ed function comparable to np.dot(x,np.dot(A,x)).  A must be a 
+    constant, 2D np.array.  x may be an expression."""
     return _ADQuadratic(A)(x)
 
 def bilinear(x,A,y):
+    """Autodiff'ed function comparable to np.dot(x,np.dot(A,y)).  A must be a 
+    constant, 2D np.array.  x and y may be expressions."""
     return _ADBilinear(A)(x,y)
 
 def norm_derivative(x):
@@ -425,15 +440,26 @@ def distance_derivative_a(a,b):
 def distance_jvp_a(da,a,b):
     a = np.asarray(a)
     b = np.asarray(b)
-    return np.dot(a - b,d) / np.linalg.norm(a-b)
+    return np.dot(a - b,da) / np.linalg.norm(a-b)
 
 norm = function(np.linalg.norm,'norm',[-1],1,
     derivative=[lambda x:norm_derivative(x)[np.newaxis,:]],
     jvp=[norm_jvp])
+"""Autodiff'ed function comparable to np.linalg.norm.  First derivative is
+implemented."""
+
 normSquared = function(lambda x:np.dot(x,x),'normSquared',[-1],1,
     derivative=[lambda x:2*np.asarray(x)[np.newaxis,:]],jvp=[lambda dx,x:2*np.dot(x,dx)],gen_derivative=[lambda x:2*np.eye(len(x))])
+"""Autodiff'ed function comparable to np.dot(x,x).  All derivatives are
+implemented."""
+
 distance = _ADDistanceL2()
+"""Autodiff'ed function comparable to np.linalg.norm(x-y).  First derivative is
+implemented."""
+
 distanceSquared = _ADDistanceSquared()
+"""Autodiff'ed function comparable to np.dot(x-y,x-y).  All derivatives are
+implemented."""
 
 def _unit(x):
     n = np.linalg.norm(x)
@@ -448,11 +474,17 @@ def unit_jvp(dx,x):
     return np.linalg.norm(dx)
 unit = function(_unit,'unit',[-1],-1,
     jvp=[unit_jvp])
+"""Autodiff'ed function comparable to x/norm(x).  First derivative is
+implemented."""
 
 cross = function(np.cross,'cross',[-1,-1],-1,
     jvp=[(lambda da,a,b:np.cross(da,b)),(lambda db,a,b:np.cross(a,db))],
     gen_derivative={(0,0):0,(1,1):0},
     order=2)
+"""Autodiff'ed function comparable to np.cross(x,y).  First derivative is
+implemented.  Some 2nd derivatives are implemented."""
 
 interpolate = function(lambda a,b,u:(1-u)*a+u*b,'interpolate',[-1,-1,1],-1,['a','b','u'],
     jvp=[(lambda da,a,b,u:(1-u)*da),(lambda db,a,b,u:u*db),(lambda du,a,b,u:du*(b-a))],order=2)
+"""Autodiff'ed function comparable to (1-u)*a+u*b.  First derivatives is
+implemented."""

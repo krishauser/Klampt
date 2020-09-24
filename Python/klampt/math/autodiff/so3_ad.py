@@ -25,6 +25,14 @@
  det                   N
  ====================  ============= 
 
+All so3_ad elements are just 9-element numpy arrays, just like the so3 module.
+
+.. note:
+    To do gradient descent on so3 elements, you will need to either project to
+    the so3 submanifold or use a non-redundant representation.  The rotation 
+    vector representation (see rotation_vector/from_rotation_vector) is
+    recommended.
+
 """
 
 import numpy as np 
@@ -33,15 +41,28 @@ from . import math_ad
 from .. import vectorops,so3
 import math
 
-identity = so3.identity
+SIZE = 9
+"""Constant giving the dimension of an so3_ad element"""
+
+identity = lambda: np.array(so3.identity())
+"""A 0 argument function that returns the SO(3) identity (just an alias to
+so3.identity)"""
+
 inv = function(so3.inv,'so3.inv',(9,),9,
         jvp=[lambda dR,R:so3.inv(dR)],order=1)
+"""Autodiff'ed version of so3.identity. All derivatives are implemented."""
+
 mul = function(so3.mul,'so3.mul',(9,9),9,['R1','R1'],
         jvp=[lambda dR1,R1,R2:so3.mul(dR1,R2),lambda dR2,R1,R2:so3.mul(R1,dR2)],order=2)
+"""Autodiff'ed version of so3.mul. First derivatives are implemented."""
+
 apply = function(so3.apply,'so3.apply',(9,3),3,['R','x'],
         jvp=[lambda dR,R,x:so3.apply(dR,x),lambda dx,R,x:so3.apply(R,dx)],order=2)
+"""Autodiff'ed version of so3.apply. First derivatives are implemented."""
+
 trace = function(so3.trace,'so3.trace',(9,),1,
         jvp=[lambda dR,R:so3.trace(dR)],order=1)
+"""Autodiff'ed version of so3.trace. Allderivatives are implemented."""
 
 def from_rpy_jvp(drpy,rpy):
     roll,pitch,yaw = rpy
@@ -54,7 +75,10 @@ def from_rpy_jvp(drpy,rpy):
     return vectorops.add(so3.mul(so3.mul(wz,Rz),Ryx), so3.mul(Rz,so3.mul(so3.mul(wy,Ryx))), so3.mul(so3.mul(Rz,Ry),so3.mul(wx,Rx)))
 from_rpy = function(so3.from_rpy,'so3.from_rpy',(3,),9,
     jvp=[from_rpy_jvp])
+"""Autodiff'ed version of so3.from_rpy. First derivatives are implemented."""
+
 rpy = function(so3.rpy,'so3.rpy',(9,),3)
+"""Autodiff'ed version of so3.rpy."""
 
 def from_rotation_vector_jvp(dw,w):
     length = np.linalg.norm(w)
@@ -65,6 +89,8 @@ def from_rotation_vector_jvp(dw,w):
     return from_axis_angle_jvp_axis(daxis,axis,length) + from_axis_angle_jvp_angle(dlength,length)
 from_rotation_vector = function(so3.from_rotation_vector,'so3.from_rotation_vector',(3,),9,
     jvp = [from_rotation_vector_jvp])
+"""Autodiff'ed version of so3.from_rotation_vector. First derivatives are
+implemented."""
 
 def rotation_vector_jvp(dR,R):
     theta = so3.angle(R)
@@ -83,9 +109,15 @@ def rotation_vector_jvp(dR,R):
     return [x,y,z]
 rotation_vector = function(so3.rotation_vector,'so3.rotation_vector',(9,),3,
     jvp=[rotation_vector_jvp])
+"""Autodiff'ed version of so3.rotation_vector. First derivatives are
+implemented."""
 
 from_quaternion = function(so3.from_quaternion,'so3.from_quaternion',(4,),9,order=2)
+"""Autodiff'ed version of so3.from_quaternion. First derivatives are
+implemented."""
+
 quaternion = function(so3.quaternion,'so3.quaternion',(9,),4)
+"""Autodiff'ed version of so3.quaternion. First derivatives are implemented."""
 
 def from_axis_angle_derivative_axis(axis,angle):
     raise NotImplementedError()
@@ -110,6 +142,8 @@ def from_axis_angle_jvp_angle(dangle,axis,angle):
 from_axis_angle = function(lambda axis,angle:so3.from_axis_angle((axis,angle)),'so3.from_axis_angle',(3,1),9,['axis','angle'],
                     derivative=[from_axis_angle_derivative_axis,from_axis_angle_derivative_angle],
                     jvp=[from_axis_angle_jvp_axis,from_axis_angle_jvp_angle])
+"""Autodiff'ed version of so3.from_axis_angle. First derivatives are
+implemented."""
 
 def axis_jvp(dR,R):
     w = np.array(so3.rotation_vector(R))
@@ -117,6 +151,8 @@ def axis_jvp(dR,R):
     return math_ad.unit_jvp(dw,w)
 axis = function(lambda R:vectorops.unit(so3.rotation_vector(R)),'axis',(9,),3,
     jvp=[axis_jvp])
+"""Autodiff'ed version of so3.axis_angle(R)[0]. First derivatives are
+implemented."""
 
 def angle_jvp(dR,R):
     cosangle = (so3.trace(R) - 1)*0.5
@@ -127,6 +163,8 @@ def angle_jvp(dR,R):
     dacos = -1.0/math.sqrt(1-cosangle**2)
     return so3.trace(dR)*0.5*dacos
 angle = function(so3.angle,'so3.angle',(9,),1,jvp=[angle_jvp])
+"""Autodiff'ed version of so3.angle. First derivatives are
+implemented."""
 
 def error_jvp_Ra(dRa,Ra,Rb):
     #error = so3.rotation_vector(so3.mul(Ra,so3.inv(Rb))
@@ -140,10 +178,22 @@ def error_jvp_Rb(dRb,Ra,Rb):
     return -error_jvp_Ra(dRb,Rb,Ra)
 error = function(so3.error,'so3.error',(9,9),3,
     jvp=[error_jvp_Ra,error_jvp_Rb])
+"""Autodiff'ed version of so3.error. First derivatives are
+implemented."""
+
 distance = function(so3.distance,'so3.distance',(9,9),1,['Ra','Rb'])
+"""Autodiff'ed version of so3.distance."""
+
 canonical = function(so3.canonical,'so3.canonical',(3,),9)
+"""Autodiff'ed version of so3.canonical."""
+
 cross_product = function(so3.cross_product,'so3.cross_product',(3,),9,['x'],
         jvp=[lambda dx,x:so3.cross_product(dx)],order=1)
+"""Autodiff'ed version of so3.cross_product. All derivatives are implemented."""
+
 interpolate = function(so3.interpolate,'so3.interpolate',(9,9,1),9,['Ra','Rb','u'])
+"""Autodiff'ed version of so3.interpolate."""
+
 det = function(so3.det,'so3.det',(9,),1)
+"""Autodiff'ed version of so3.det."""
 

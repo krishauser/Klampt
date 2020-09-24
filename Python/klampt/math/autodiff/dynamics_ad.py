@@ -27,7 +27,7 @@ from .. import vectorops,so3,se3
 from ...robotsim import RobotModel,RobotModelLink
 
 class CenterOfMass(ADFunctionInterface):
-    """Wraps RobotModel.getCom()."""
+    """Autodiff wrapper of RobotModel.getCom()."""
     def __init__(self,robot):
         self.robot = robot
     def __str__(self):
@@ -53,7 +53,7 @@ class CenterOfMass(ADFunctionInterface):
 
 
 class GravityVector(ADFunctionInterface):
-    """Wraps RobotModel.getGravityForces()."""
+    """Autodiff wrapper of RobotModel.getGravityForces()."""
     def __init__(self,robot):
         self.robot = robot
     def __str__(self):
@@ -84,7 +84,7 @@ class GravityVector(ADFunctionInterface):
             raise NotImplementedError()
 
 class KineticEnergy(ADFunctionInterface):
-    """Wraps RobotModel.getKineticEnergy()."""
+    """Autodiff wrapper of RobotModel.getKineticEnergy()."""
     def __init__(self,robot):
         self.robot = robot
     def __str__(self):
@@ -113,8 +113,8 @@ class KineticEnergy(ADFunctionInterface):
 
 
 class MassMatrix(ADFunctionInterface):
-    """Wraps RobotModel.getMassMatrix(). The result is flattened into a 1D
-    array of length n^2.
+    """Autodiff wrapper of RobotModel.getMassMatrix(). The result is flattened
+    into a 1D array of length n^2.
     """
     def __init__(self,robot):
         self.robot = robot
@@ -138,8 +138,8 @@ class MassMatrix(ADFunctionInterface):
 
 
 class MassMatrixInv(ADFunctionInterface):
-    """Wraps RobotModel.getMassMatrixInv(). The result is flattened into a 1D
-    array of length n^2.
+    """Autodiff wrapper of RobotModel.getMassMatrixInv(). The result is 
+    flattened into a 1D array of length n^2.
     """
     def __init__(self,robot):
         self.robot = robot
@@ -157,7 +157,8 @@ class MassMatrixInv(ADFunctionInterface):
 
 
 class MomentumVector(ADFunctionInterface):
-    """Computes B(q)*v as a function of (q,v) where B(q) is the mass matrix."""
+    """Autodiff function to compute B(q)*v as a function of (q,v) where B(q)
+    is the mass matrix."""
     def __init__(self,robot):
         self.robot = robot
     def __str__(self):
@@ -185,7 +186,7 @@ class MomentumVector(ADFunctionInterface):
 
 
 class CoriolisVector(ADFunctionInterface):
-    """Wraps RobotModel.getCorolisForces()."""
+    """Autodiff wrapper of RobotModel.getCorolisForces()."""
     def __init__(self,robot):
         self.robot = robot
     def __str__(self):
@@ -203,7 +204,7 @@ class CoriolisVector(ADFunctionInterface):
 
 
 class ForwardDynamics(ADFunctionInterface):
-    """Computes the forward dynamics ddq = f(q,dq,t).
+    """Autodiff function to compute the forward dynamics ddq = f(q,dq,t).
 
     Note: the torque vector is the full torque vector of length
     robot.numLinks(). If you want to convert from a driver torque vector, use
@@ -228,6 +229,12 @@ class ForwardDynamics(ADFunctionInterface):
 
 
 class InverseDynamics(ADFunctionInterface):
+    """Autodiff function to compute the inverse dynamics t = f(q,dq,ddq).
+
+    Note: the torque vector is the full torque vector of length
+    robot.numLinks(). If you want to convert to a driver torque vector, use
+    :class:`kinematics_ad.LinkDerivsToDrivers`.
+    """
     def __init__(self,robot):
         self.robot = robot
     def __str__(self):
@@ -310,7 +317,7 @@ class PointWrenchTorques(ADFunctionInterface):
         
 
 class FullDynamics(ADFunctionInterface):
-    """Returns the standard forward dynamics equation:
+    """Autodiff function that computes the standard forward dynamics equation:
 
     :math:`\ddot{q} = B(q)^{-1} (S \tau + sum_i J_i(q)^T f_i - C(q,\dot{q}) - G(q))`
 

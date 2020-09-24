@@ -43,7 +43,6 @@ something like ``'x'+'y'`` since Python sees this as string addition. Instead,
 you should explicitly declare a variable using the ``var`` keyword:
 ``var('x') + var('y')``.
 
-
 Everything evaluates to a scalar or 1D array
 ============================================
 
@@ -186,6 +185,10 @@ derivatives w.r.t. scalars, ``jvp`` won't create the intermediate Jacobian
 matrix, so it will be faster.  Implementing both will let the system figure out
 the best alternative.
 
+When you create a new function with its derivatives, you ought to run it
+through check_derivatives to see whether they match with finite differences.
+To modify the finite difference step size, modify ``FINITE_DIFFERENCE_RES``.
+
 
 ad Module
 =========
@@ -194,24 +197,29 @@ This module defines :func:`var`, :func:`function`, and the helper functions
 :func:`check_derivatives`, :func:`eval_multiple`, :func:`derivative_multiple`
 and :func:`finite_differences`. 
 
-The operators :func:`stack`, :func:`sum_`, :func:`minimum`, and :func:`maximum`
+The operators :data:`stack`, :data:`sum_`, :data:`minimum`, and :data:`maximum`
 operate somewhat like their Numpy counterparts:
 
-- stack acts like hstack, since all items are 1D arrays. 
-- sum_ acts like Numpy's sum if only one item is provided.  Otherwise, it
+- stack acts like np.stack, since all items are 1D arrays. 
+- sum\_ acts like Numpy's sum if only one item is provided.  Otherwise, it
   acts like the builtin sum.
 - minimum/maximum act like ndarray.min/max if only one item is provided, and
   otherwise they act like Numpy's minimum/maximum. If more than 2 items are
   provided, they are applied elementwise and sequentially.
 
-The operators add, sub, mul, div, neg, pow_, abs_, and getitem are also
+The operators add, sub, mul, div, neg, pow\_, abs\_, and getitem are also
 provided here, but you will probably just want to use the standard Python 
 operators +, -, *, /, -, **, abs, and [].  On arrays, they act just like
 the standard numpy functions.
 
-When you create a new function with its derivatives, you ought to run it
-through check_derivatives to see whether they match with finite differences.
-To modify the finite difference step size, modify ``FINITE_DIFFERENCE_RES``.
+Another convenience function is :func:`setitem`, which has the signature
+``setitem(x,indices,v)`` and is equivalent to::
+
+    xcopy = np.copy(x)
+    xcopy[indices] = v
+    return xcopy
+
+which is sort of a proper functional version of the normal ``x[indices]=v``.
 
 
 Other Klampt ad Modules
@@ -486,14 +494,15 @@ class ADFunctionCall:
         with step size FINITE_DIFFERENCE_RES.
 
         If the prior eval() call wasn't with the same arguments, then this will
-        call eval() again with kwargs.  So, the sequence eval(**kwargs),
-        derivative(**kwargs) will save some time compared to changing the args.
+        call eval() again with kwargs.  So, the sequence ``eval(**kwargs),
+        derivative(**kwargs)`` will save some time compared to changing the
+        args.
         """
         if 'eval_context' not in self._cache or not _context_equal(self._cache['eval_context'],kwargs):
             self.eval(**kwargs)
             assert _context_equal(self._cache['eval_context'],kwargs)
-        res = self._deriv([],arg,kwargs)
         self._clear_cache('deriv_result')
+        res = self._deriv([],arg,kwargs)
         if res is 0:
             return np.zeros((_size(self._cache['eval_result']),_size(kwargs[arg])))
         if len(res.shape) == 1:
@@ -501,12 +510,60 @@ class ADFunctionCall:
             res = res.reshape((res.shape[0],1))
         return res
 
+    def gen_derivative(self,args,**kwargs):
+        """Evaluates the generalized derivative of this computation graph with 
+        respect to the named variables in args, at the given settings in
+        kwargs.
+
+        Examples:
+
+        - ``(var('x')**3).gen_derivative(['x','x'])`` returns the
+          second derivative of :math:`x^3` with respect to x. 
+        - ``var('x')**2*var('y').gen_derivative(['x','y']) returns
+          :math:`\frac{d^2}{dx dy} x^2 y`.
+
+        If args is [], this is equivalent to ``self.eval(**kwargs)``.
+
+        If args has only one element, this is equivalent to
+        ``self.derivative(args[0],**kwargs)``.
+
+        Args:
+            args (list of str): the denominators of the derivative to be
+                evaluated.
+            kwargs (dict): the values at which the derivative is evaluated.
+
+        Result:
+            ndarray: A tensor of shape
+            ``(_size(this),_size(args[0]),...,_size(args[-1]))`` containing
+            the derivatives.
+        """
+        if len(args)==0:
+            return self.eval(**kwargs)
+        elif len(args)==1:
+            return self.derivative(args[0],**kwargs)
+        elif len(args)==2:
+            if 'eval_context' not in self._cache or not _context_equal(self._cache['eval_context'],kwargs):
+                self.eval(**kwargs)
+                assert _context_equal(self._cache['eval_context'],kwargs)
+            self._clear_cache('hessian_result','deriv_darg1','deriv_darg2')
+            self.derivative(args[0],**kwargs)
+            self._move_cache('deriv_result','deriv_darg1')
+            self.derivative(args[1],**kwargs)
+            self._move_cache('deriv_result','deriv_darg2')
+            res = self._hessian([],args[0],args[1],kwargs)
+            hess_shape = (_size(self._cache['eval_result']),)+tuple(_size(kwargs[arg]) for arg in args)
+            if res is 0:
+                return np.zeros(hess_shape)
+            return res
+        else:
+            raise NotImplementedError("TODO: higher-order derivatives")
+
     def replace(self,**kwargs):
         """Replaces any symbols whose names are keys in kwargs with the
         matching value as an expression.  The result is an ADFunctionCall.
 
-        For example, (var('x')**2 + var('y')).replace(x=var('z'),y=3) would 
-        return the expression var('z')**2 + 3.
+        For example, ``(var('x')**2 + var('y')).replace(x=var('z'),y=3)`` would
+        return the expression ``var('z')**2 + 3``.
         """
         res = self._replace(kwargs)
         self._clear_cache('replace_result')
@@ -724,6 +781,90 @@ class ADFunctionCall:
         self._cache['deriv_result'] = res
         return res
 
+    def _hessian(self,callStack,darg1,darg2,kwargs):
+        #d/dv f(x1,...,xn) = sum_{i=1...,n} d/dxi f(...)* dxi/dv
+        #d/du d/dv f(x1,...,xn) = sum_{i=1...,n} (sum_{j=1...,n} (d^2/dxixj) f(...)* dxi/dv * dxj/du) + d/dxi f(...) (d^2 / duv) xi
+        if 'hessian_result' in self._cache:
+            return self._cache['hessian_result']
+        assert 'eval_context' in self._cache
+        assert 'deriv_darg1' in self._cache
+        assert 'deriv_darg2' in self._cache
+        eval_result = self._cache['eval_result']
+        eval_args = self._cache['eval_instantiated_args']
+        callStack.append(self)
+        res = 0
+        #add d/dxi f * (d^2/duv) xi to res
+        for i,arg in enumerate(self.args):
+            if isinstance(arg,ADTerminal):
+                #no second derivative of a constant
+                continue
+            elif isinstance(arg,ADFunctionCall):
+                da = arg._hessian(callStack,darg1,darg2,kwargs)
+                if da is 0:
+                    continue
+                inc = np.empty((_size(eval_result),_size(kwargs[darg1]),_size(kwargs[darg12])))
+                for i in range(da.shape[-1]):
+                    inc[:,:,i] = self._deriv_jacobian_array_product(i,da[:,:,i],eval_args)
+                print("Deriv * hessian",arg," = ",inc)
+            else:
+                #const, no derivative
+                continue
+            if res is 0:
+                res = inc
+            else:
+                res += inc
+        #add (d^2/dxixj) f(...)* dxi/dv * dxj/du
+        for i,arg in enumerate(self.args):
+            if isinstance(arg,ADTerminal):
+                if arg.name != darg1:
+                    continue
+            elif isinstance(arg,ADFunctionCall):
+                if arg._cache['deriv_arg1'] is 0:
+                    continue
+            else:
+                #constant
+                continue
+            for j,arg2 in enumerate(self.args):
+                inc = 0
+                if isinstance(arg2,ADTerminal):
+                    if arg2.name != darg2:
+                        continue
+                elif isinstance(arg2,ADFunctionCall):
+                    if arg2._cache['deriv_arg2'] is 0:
+                        continue
+                else:
+                    #constant
+                    continue
+                try:
+                    ddf = self.func.gen_derivative([i,j],*eval_args)
+                except NotImplementedError:
+                    finite_differences()
+                #print("d^2/d",i,j,"of func",self.func,"is",ddf)
+                if ddf is 0:
+                    continue
+                if isinstance(arg,ADTerminal):
+                    if isinstance(arg2,ADTerminal):
+                        #print("d^2/d",i,j,"of terminal",arg.name,"and terminal",arg2.name)
+                        inc = ddf
+                    elif isinstance(arg2,ADFunctionCall):
+                        #print("d^2/d",darg1,darg2," of terminal",arg.name,"and arg",j)
+                        inc = np.tensordot(ddf,(2,0),arg2._cache['deriv_arg2'])
+                elif isinstance(arg,ADFunctionCall):
+                    if isinstance(arg2,ADTerminal):
+                        #print("d^2/d",i,j," of arg",i,"and terminal",arg2.name)
+                        inc = np.tensordot(ddf,(1,0),arg._cache['deriv_arg1'])
+                    elif isinstance(arg2,ADFunctionCall):
+                        #print("d^2/d",darg1,darg2," of arg",i," and arg",j)
+                        inc = np.tensordot(np.tensordot(ddf,(1,0),arg._cache['deriv_arg1']),(1,0),arg._cache['deriv_arg2'])
+                print("hessian",arg,"of func",self.func,"*d^2/dx",i,"dx",j," = ",inc)
+                if res is 0:
+                    res = inc
+                else:
+                    res += inc
+        callStack.pop(-1)
+        self._cache['hessian_result'] = res
+        return res            
+
     def _replace(self,kwargs):
         if 'replace_result' in self._cache:
             return self._cache['replace_result']
@@ -771,6 +912,15 @@ class ADFunctionCall:
         for v in self.args:
             if isinstance(v,ADFunctionCall):
                 v._clear_cache(*args)
+
+    def _move_cache(self,src,dest):
+        if src not in self._cache:
+            return
+        self._cache[dest] = self._cache[src]
+        del self._cache[src]
+        for v in self.args:
+            if isinstance(v,ADFunctionCall):
+                v._move_cache(src,dest)
 
     def __neg__(self):
         return neg(self)
@@ -942,6 +1092,90 @@ def finite_differences(f,x,h=1e-6):
     return g.T
 
 
+def finite_differences_hessian(f,x,h):
+    """Performs forward differences to approximate the Hessian of f(x) w.r.t.
+    x.
+    """
+    f0 = f(x)
+    g = np.empty((_size(f0),_size(x),_size(x)))
+    if hasattr(x,'__iter__'):
+        xtemp = x.astype(float,copy=True)
+        fx = []
+        for i in range(len(x)):
+            xtemp[i] += h
+            fx.append(np.copy(f(xtemp)))
+            xtemp[i] = x[i]
+        for i in range(len(x)):
+            xtemp[i] -= h
+            g[:,i,i] = (fx[i] - 2*f0 + f(xtemp))
+            xtemp[i] = x[i]
+            xtemp[i] += h
+            for j in range(i):
+                xtemp[j] += h
+                g[:,j,i] = g[:,i,j] = (f(xtemp) - fx[i]) - (fx[j] - f0)
+                xtemp[j] = x[j]
+            xtemp[i] = x[i]
+    else:
+        fx = f(x+h)
+        g[:,0,0] = (fx - 2*f0 + f(x-h))
+    return g/h**2
+
+
+def finite_differences_hessian2(f,x,y,hx,hy=None):
+    """Performs forward differences to approximate the Hessian of f(x,y) w.r.t.
+    x and y.
+    """
+    if hy is None:
+        hy = hx
+    f0 = f(x,y)
+    g = np.empty((_size(f0),_size(x),_size(y)))
+    if hasattr(x,'__iter__'):
+        xtemp = x.astype(float,copy=True)
+        fx = []
+        for i in range(len(x)):
+            xtemp[i] += hx
+            fx.append(np.copy(f(xtemp,y)))
+            xtemp[i] = x[i]
+        
+    else:
+        fx = f(x+hx,y)
+
+    if hasattr(y,'__iter__'):
+        fy = []
+        ytemp = y.astype(float,copy=True)
+        for j in range(len(y)):
+            ytemp[j] += hy
+            fy.append(np.copy(f(x,ytemp)))
+            ytemp[j] = y[j]
+    else:
+        fy = f(x,y+hy)
+
+    if hasattr(x,'__iter__'):
+        if hasattr(y,'__iter__'):
+            for i in range(len(x)):
+                xtemp[i] += hx
+                for j in range(len(y)):
+                    ytemp[j] += hy
+                    g[:,i,j] = (f(xtemp,ytemp)-fx[i]) - (fy[j] - f0)
+                    ytemp[j] = y[j]
+                xtemp[i] = x[i]
+        else:
+            for i in range(len(x)):
+                xtemp[i] += hx
+                g[:,i,0] = (f(xtemp,y+hy)-fx[i]) - (fy - f0)
+                xtemp[i] = x[i]
+    else:
+        if hasattr(y,'__iter__'):
+            for j in range(len(y)):
+                ytemp[j] += hy
+                g[:,0,j] = (f(x+hy,ytemp)-fx) - (fy[j] - f0)
+                ytemp[j] = y[j]
+        else:
+            g[:,0,0] = (f(x+hx,y+hy)-fx) - (fy - f0)
+    g *= 1.0/(hx*hy)
+    return g
+
+
 def check_derivatives(f,x,h=1e-6,rtol=1e-2,atol=1e-3):
     """Checks the derivatives of a ADFunctionCall or an ADFunctionInterface.
 
@@ -988,11 +1222,14 @@ def check_derivatives(f,x,h=1e-6,rtol=1e-2,atol=1e-3):
                 print("Derivative:",g)
                 raise AssertionError("derivative of %s w.r.t. %s has an error of size %f"%(str(f.func),k,np.linalg.norm(g-g_fd)))
     elif isinstance(f,ADFunctionInterface):
-        assert f.n_args() < 0 or f.n_args() == len(x),"Invalid number of arguments provided"
+        assert f.n_args() < 0 or f.n_args() == len(x),"Invalid number of arguments provided to %s: %d != %d"%(str(f),len(x),f.n_args())
+        has_gen_derivative = True
         for i,v in enumerate(x):
+            has_derivative = False
             try:
-                g_fd = finite_differences(lambda y:f.eval(*(x[:i]+[y]+x[i+1:])),v,h)
                 g = f.derivative(i,*x)
+                has_derivative = True
+                g_fd = finite_differences(lambda y:f.eval(*(x[:i]+[y]+x[i+1:])),v,h)
                 if g is 0:
                     g = np.zeros(g_fd.shape)
                 elif g.shape != g_fd.shape:
@@ -1003,23 +1240,98 @@ def check_derivatives(f,x,h=1e-6,rtol=1e-2,atol=1e-3):
                     print("Derivative:",g)
                     raise AssertionError("derivative of %s w.r.t. %s has an error of size %f"%(str(f),f.argname(i),np.linalg.norm(g-g_fd)))
             except NotImplementedError:
-                #try jvp
-                try:
-                    dv = np.random.uniform(-1,1,_size(v))
+                pass
+            
+            has_jvp = False
+            try:
+                for j in range(_size(v)):
+                    dv = np.zeros(_size(v))
+                    dv[j] = 1
                     g = f.jvp(i,dv,*x)
+                    has_jvp = True
                     g_fd = finite_differences(lambda t:f.eval(*(x[:i]+[v+dv*t]+x[i+1:])),0,h)[:,0]
                     if g is 0:
                         g = np.zeros(g_fd.shape)
+                    if _scalar(g):
+                        g = np.array([g])
                     elif g.shape != g_fd.shape:
                         raise AssertionError("Jacobian-vector product of %s w.r.t. %s did not produce the correct shape: %s vs %s"%(str(f),f.argname(i),g.shape,g_fd.shape))
                     if not np.allclose(g_fd,g,rtol,atol):
                         print("check_derivative",f,"failed with args",x,"@ argument",i)
-                        print("Random direction",dv)
+                        print("Chosen direction",dv)
                         print("jvp Finite differences:",g_fd)
                         print("jvp:",g)
                         raise AssertionError("Jacobian-vector product of %s w.r.t. %s has an error of size %f"%(str(f),f.argname(i),np.linalg.norm(g-g_fd)))
-                except NotImplementedError:
-                    print("check_derivative: function",f,"has no derivative or jvp function defined")
+                for j in range(_size(v)):
+                    #test with scaling
+                    dv = np.zeros(_size(v))
+                    dv[j] = np.random.uniform(-0.9,-0.05)
+                    g = f.jvp(i,dv,*x)
+                    has_jvp = True
+                    g_fd = finite_differences(lambda t:f.eval(*(x[:i]+[v+dv*t]+x[i+1:])),0,h)[:,0]
+                    if g is 0:
+                        g = np.zeros(g_fd.shape)
+                    if _scalar(g):
+                        g = np.array([g])
+                    elif g.shape != g_fd.shape:
+                        raise AssertionError("Jacobian-vector product of %s w.r.t. %s did not produce the correct shape: %s vs %s"%(str(f),f.argname(i),g.shape,g_fd.shape))
+                    if not np.allclose(g_fd,g,rtol,atol):
+                        print("check_derivative",f,"failed with args",x,"@ argument",i)
+                        print("Chosen direction",dv)
+                        print("jvp Finite differences:",g_fd)
+                        print("jvp:",g)
+                        raise AssertionError("Jacobian-vector product of %s w.r.t. %s has an error of size %f"%(str(f),f.argname(i),np.linalg.norm(g-g_fd)))
+                dv = np.random.uniform(-1,-1,_size(v))
+                g = f.jvp(i,dv,*x)
+                has_jvp = True
+                g_fd = finite_differences(lambda t:f.eval(*(x[:i]+[v+dv*t]+x[i+1:])),0,h)[:,0]
+                if g is 0:
+                    g = np.zeros(g_fd.shape)
+                if _scalar(g):
+                    g = np.array([g])
+                elif g.shape != g_fd.shape:
+                    raise AssertionError("Jacobian-vector product of %s w.r.t. %s did not produce the correct shape: %s vs %s"%(str(f),f.argname(i),g.shape,g_fd.shape))
+                if not np.allclose(g_fd,g,rtol,atol):
+                    print("check_derivative",f,"failed with args",x,"@ argument",i)
+                    print("Chosen direction",dv)
+                    print("jvp Finite differences:",g_fd)
+                    print("jvp:",g)
+                    raise AssertionError("Jacobian-vector product of %s w.r.t. %s has an error of size %f"%(str(f),f.argname(i),np.linalg.norm(g-g_fd)))
+            except NotImplementedError:
+                pass
+            if not (has_derivative or has_jvp):
+                print("check_derivative: function",f,"has no derivative or jvp function defined")
+
+            try:
+                H = f.gen_derivative([i,i],*x)
+                H_fd = finite_differences_hessian(lambda y:f.eval(*(x[:i]+[y]+x[i+1:])),v,h)
+                if H is 0:
+                    H = np.zeros(H_fd.shape)
+                elif H.shape != H_fd.shape:
+                    raise AssertionError("Hessian of %s w.r.t. %s did not produce the correct shape: %s vs %s"%(str(f),f.argname(i),H.shape,H_fd.shape))
+                if not np.allclose(H_fd,H,rtol,atol):
+                    print("check_derivative",f,"failed with args",x,"@ argument",i)
+                    print("Finite differences:",H_fd)
+                    print("Hessian:",H)
+                    raise AssertionError("gen_derivative of %s w.r.t. %s has an error of size %f"%(str(f),f.argname(i),np.linalg.norm(H-H_fd)))
+            except NotImplementedError:
+                has_gen_derivative = False
+                pass
+        if has_gen_derivative:
+            for i,v in enumerate(x):
+                for j,w in list(enumerate(x))[i+1:]:
+                    H = f.gen_derivative([i,j],*x)
+                    H_fd = finite_differences_hessian2(lambda y,z:f.eval(*(x[:i]+[y]+x[i+1:j]+[z]+x[j+1:])),v,w,h)
+                    if H is 0:
+                        H = np.zeros(H_fd.shape)
+                    elif H.shape != H_fd.shape:
+                        raise AssertionError("Hessian of %s w.r.t. %s,%s did not produce the correct shape: %s vs %s"%(str(f),f.argname(i),f.argname(j),H.shape,H_fd.shape))
+                    H2 = f.gen_derivative([j,i],*x)
+                    H2_fd = finite_differences_hessian2(lambda z,y:f.eval(*(x[:i]+[y]+x[i+1:j]+[z]+x[j+1:])),w,v,h)
+                    if H2 is 0:
+                        H2 = np.zeros(H2_fd.shape)
+                    elif H2.shape != H2_fd.shape:
+                        raise AssertionError("Hessian of %s w.r.t. %s,%s did not produce the correct shape: %s vs %s"%(str(f),f.argname(j),f.argname(i),H.shape,H_fd.shape))
     else:
         raise ValueError("f must be a ADFunctionCall or ADFunctionInterface")
     return True
@@ -1208,6 +1520,32 @@ class _ADMul(ADFunctionInterface):
     def jvp(self,arg,darg,*args):
         return args[1-arg]*darg
 
+    def gen_derivative(self,arg,*args):
+        if len(arg) == 1:
+            return self.derivative(arg[0],*args)
+        elif len(arg) == 2:
+            i,j = arg
+            if i == j:
+                return 0
+            res = args[i]*args[j]
+            hess_shape = (_size(res),_size(args[i]),_size(args[j]))
+            res = np.zeros(hess_shape)
+            if _scalar(args[i]):
+                if _scalar(args[j]):
+                    res[0,0,0] = 1
+                else:
+                    for i in range(hess_shape[2]):
+                        res[i,0,i] = 1
+            else:
+                if _scalar(args[j]):
+                    for i in range(hess_shape[1]):
+                        res[i,i,0] = 1
+                else:
+                    for i in range(hess_shape[1]):
+                        res[i,i,i] = 1
+            return res
+        return 0
+
 
 class _ADDiv(ADFunctionInterface):
     def __str__(self):
@@ -1245,6 +1583,48 @@ class _ADDiv(ADFunctionInterface):
         else:
             return -(x*darg)/y**2
 
+    def gen_derivative(self,arg,x,y):
+        if len(arg) == 1:
+            return self.derivative(arg[0],x,y)
+        elif len(arg) == 2:
+            i,j = arg
+            if i == 0 and j == 0:
+                return 0
+            if i == j:
+                #double derivative w.r.t. y
+                m = max(_size(x),_size(y))
+                n = _size(y)
+                hess_shape = (m,n,n)
+                res = np.zeros(hess_shape)
+                xarr = [x]*n if _scalar(x) else x
+                if _scalar(y):
+                    for i in range(m):
+                        res[i,0,0] = 2*xarr[i]/y**3
+                else:
+                    for i in range(n):
+                        res[i,i,i] = 2*xarr[i]/y[i]**3
+                return res
+            else:
+                swap = (i == 1)
+                #double derivative d^2/dxy or d^2/dyx
+                m = max(_size(x),_size(y))
+                hess_shape = (m,_size(x),_size(y))
+                res = np.zeros(hess_shape)
+                if _scalar(y):
+                    for i in range(hess_shape[1]):
+                        res[i,i,0] = -1.0/y**2
+                elif _scalar(x):
+                    for i in range(hess_shape[2]):
+                        res[i,0,i] = -1.0/y[i]**2
+                else:
+                    for i in range(hess_shape[2]):
+                        res[i,i,i] = -1.0/y[i]**2
+                if swap:
+                    return np.swapaxes(res,1,2)
+                else:
+                    return res
+        raise NotImplementedError()
+
 
 class _ADNeg(ADFunctionInterface):
     def __str__(self):
@@ -1267,7 +1647,7 @@ class _ADNeg(ADFunctionInterface):
         return -np.eye(size)
 
     def jvp(self,arg,dx,x):
-        return np.sign(x)*dx
+        return -dx
 
     def gen_derivative(self,arg,x):
         if len(arg) == 1:
@@ -1336,12 +1716,12 @@ class _ADPow(ADFunctionInterface):
     def eval(self,base,exp):
         return np.power(base,exp)
 
-    def deriv(self,arg,base,exp):
+    def derivative(self,arg,base,exp):
         size = max(_size(base),_size(exp))
         if arg == 0:
             diag = exp*np.power(base,exp-1)
             if _scalar(base):
-                return diag.reshape((diag.shape[0],1))
+                return diag.reshape((_size(diag),1))
             return np.diag(diag)
         else:
             with np.errstate(divide='ignore'):
@@ -1353,7 +1733,7 @@ class _ADPow(ADFunctionInterface):
                 diag[base==0] = 0
             diag = diag*np.power(base,exp)
             if _scalar(exp):
-                return diag.reshape((diag.shape[0],1))
+                return diag.reshape((_size(diag),1))
             return np.diag(diag)
 
     def jvp(self,arg,darg,base,exp):
@@ -1368,6 +1748,56 @@ class _ADPow(ADFunctionInterface):
             else:
                 scale[base==0] = 0
             return scale*np.power(base,exp)*darg
+
+    def gen_derivative(self,arg,*args):
+        if len(arg)==1:
+            return self.derivative(arg[0],*args)
+        elif len(arg)==2:
+            base,exp = args
+            n = max(_size(base),_size(exp))
+            hess_shape = (n,_size(args[arg[0]]),_size(args[arg[1]]))
+            res = np.zeros(hess_shape)
+            if arg[0]==0 and arg[1]==0:
+                diag = exp*(exp-1)*np.power(base,exp-2)
+                if _scalar(base):
+                    return diag.reshape((1,1,1))
+                else:
+                    for i in range(n):
+                        res[i,i,i] = diag[i]
+            elif arg[0]==1 and arg[1]==1:
+                #first deriv is log(base)*base**exp
+                #second deriv is log(base)**2*base**exp
+                with np.errstate(divide='ignore'):
+                    scale = np.log(base)**2
+                if _scalar(base):
+                    if base == 0:
+                        scale = 0.0
+                else:
+                    scale[base==0] = 0
+                diag = scale*np.power(base,exp)
+                if _scalar(exp):
+                    return diag.reshape((n,1,1))
+                else:
+                    for i in range(n):
+                        res[i,i,i] = diag[i]
+            else:
+                #d/dexp log(base)*base**exp
+                #d^2/dexp dbase is (1 + log(base)*exp)*base**(exp-1)
+                with np.errstate(divide='ignore'):
+                    scale = np.log(base)
+                if _scalar(base):
+                    if base == 0:
+                        scale = 0.0
+                else:
+                    scale[base==0] = 0
+                diag = (1 + scale*exp)*np.power(base,exp-1)
+                if arg[0] == 1:
+                    for i in range(n):
+                        j = 0 if hess_shape[1] == 1 else i
+                        k = 0 if hess_shape[2] == 1 else i
+                        res[i,j,k] = diag[i]
+                return res
+        raise NotImplementedError()
 
 
 class _ADAbs(ADFunctionInterface):
@@ -1403,11 +1833,11 @@ class _ADAbs(ADFunctionInterface):
 
 
 class _ADGetItem(ADFunctionInterface):
-    def __str__(self):
-        return 'getitem['+str(self.indices)+']'
-
     def __init__(self,indices):
         self.indices = indices
+
+    def __str__(self):
+        return 'getitem['+str(self.indices)+']'
 
     def n_args(self):
         return 1
@@ -1456,6 +1886,75 @@ class _ADGetItem(ADFunctionInterface):
     def gen_derivative(self,arg,x):
         if len(arg) == 1:
             return self.derivative(arg[0],x)
+        return 0
+
+
+class _ADSetItem(ADFunctionInterface):
+    def __init__(self,indices):
+        self.indices = indices
+
+    def __str__(self):
+        return 'setitem['+str(self.indices)+']'
+
+    def n_args(self):
+        return 2
+
+    def n_in(self,arg):
+        if arg==0: return -1
+        if isinstance(self.indices,slice):
+            if self.indices.stop is not None:
+                start, stop, step = self.indices.start,self.indices.stop,self.indices.step
+                if self.indices.step >= 0 and self.indices.stop >= 0:
+                    return (stop-start)//step
+            return -1
+        elif hasattr(self.indices,'__iter__'):
+            return len(self.indices)
+        else:
+            return 1
+
+    def n_out(self):
+        return -1
+
+    def eval(self,x,v):
+        xcopy = np.copy(x)
+        xcopy[self.indices] = v
+        return xcopy
+
+    def derivative(self,arg,x,v):
+        if arg==0:
+            diag = np.ones(x.shape)
+            diag[self.indices] = 0
+            return np.diag(diag)
+        else:
+            res = np.zeros((_size(x),_size(v)))
+            if isinstance(self.indices,slice):
+                start, stop, step = self.indices.indices(res.shape[0])
+                nres = (stop-start)//step
+                for i in range(nres):
+                    j = start+i*step
+                    res[j,i] = 1
+                return res
+            elif hasattr(self.indices,'__iter__'):
+                for i,j in enumerate(self.indices):
+                    res[j,i] = 1
+                return res
+            else:
+                res[self.indices,0] = 1
+                return res
+
+    def jvp(self,arg,darg,x,v):
+        if arg==0:
+            res = np.copy(darg)
+            res[self.indices] = 0
+            return res
+        else:
+            res = np.zeros(x.shape)
+            res[self.indices] = darg
+            return res
+
+    def gen_derivative(self,arg,x,v):
+        if len(arg) == 1:
+            return self.derivative(arg[0],x,v)
         return 0
 
 
@@ -1585,6 +2084,12 @@ class _ADMinimum(ADFunctionInterface):
                     Jdx[i] = darg[i]
         return Jdx 
 
+    def gen_derivative(self,arg,*args):
+        if len(arg) == 1:
+            return self.derivative(arg[0],*args)
+        return 0
+
+
 
 class _ADMaximum(ADFunctionInterface):
     def __str__(self):
@@ -1672,19 +2177,70 @@ class _ADMaximum(ADFunctionInterface):
                     Jdx[i] = darg[i]
         return Jdx 
 
+    def gen_derivative(self,arg,*args):
+        if len(arg) == 1:
+            return self.derivative(arg[0],*args)
+        return 0
+
 
 add = _ADAdd()
+"""Autodiff'ed function comparable to the addition operator +. Applied 
+automatically when the + operator is called on an ADTerminal or an
+ADFunctionCall."""
+
 sub = _ADSub()
+"""Autodiff'ed function comparable to the subtraction operator -. Applied 
+automatically when the - operator is called on an ADTerminal or an
+ADFunctionCall."""
+
 mul = _ADMul()
+"""Autodiff'ed function comparable to the multiplication operator \*. Applied 
+automatically when the * operator is called on an ADTerminal or an
+ADFunctionCall.  Multiplication of vectors is performed element-wise."""
+
 div = _ADDiv()
+"""Autodiff'ed function comparable to the division operator /. Applied 
+automatically when the / operator is called on an ADTerminal or an
+ADFunctionCall.  Divison of vectors is performed element-wise."""
+
 neg = _ADNeg()
+"""Autodiff'ed function comparable to the negation operator -. Applied 
+automatically when the - operator is called on an ADTerminal or an
+ADFunctionCall."""
+
 sum_ = _ADSum()
+"""Autodiff'ed function comparable to sum.  It acts like np.sum if only one
+item is provided.  Otherwise, it acts like the builtin sum."""
+
 pow_ = _ADPow()
+"""Autodiff'ed function comparable to np.power. Applied automatically when the
+** operator is called on an ADTerminal or an ADFunctionCall."""
+
 abs_ = _ADAbs()
+"""Autodiff'ed function comparable to abs. Applied automatically when abs is
+called on an ADTerminal or an ADFunctionCall."""
+
 stack = _ADStack()
+"""Autodiff'ed function comparable to np.stack."""
 
 def getitem(a,index):
+    """Creates an Autodiff'ed function comparable to the [] operator. Note that
+    the index argument cannot be a variable."""
     return _ADGetItem(index)(a)
 
+def setitem(x,index,v):
+    """Creates an Autodiff'ed function similar to ``x[index] = v, return x``
+    but without modifying x.  The index argument cannot be a variable."""
+    return _ADSetItem(index)(x,v)
+
 minimum = _ADMinimum()
+"""Autodiff'ed function comparable to np.minimum. It acts like ndarray.min if
+only one item is provided, and otherwise it acts like np.minimum. If more than
+2 items are provided, they are applied elementwise and sequentially.
+"""
+
 maximum = _ADMaximum()
+"""Autodiff'ed function comparable to np.maximum. It acts like ndarray.max if
+only one item is provided, and otherwise it acts like np.maximum. If more than
+2 items are provided, they are applied elementwise and sequentially.
+"""

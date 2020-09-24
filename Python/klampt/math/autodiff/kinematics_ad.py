@@ -1,4 +1,5 @@
 """Klampt kinematics AD functions:
+
  ====================  =============  ======================================
  Function              Derivative     Notes
  ====================  =============  ======================================
@@ -34,8 +35,8 @@ from ...robotsim import RobotModel,RobotModelLink
 
 
 class WorldPosition(ADFunctionInterface):
-    """Wraps the link.getWorldPosition() function as a function of robot
-    configuration q.
+    """Autodiff wrapper of the link.getWorldPosition() function as a function 
+    of robot configuration q.
     """
     def __init__(self,link,localPos):
         self.robot = link.robot()
@@ -68,8 +69,8 @@ class WorldPosition(ADFunctionInterface):
 
 
 class WorldDirection(ADFunctionInterface):
-    """Wraps the link.getWorldDirection() function as a function of robot
-    configuration q.
+    """Autodiff wrapper of the link.getWorldDirection() function as a function
+    of robot configuration q.
     """
     def __init__(self,link,localDir):
         self.robot = link.robot()
@@ -108,8 +109,8 @@ class WorldDirection(ADFunctionInterface):
 
 
 class WorldOrientation(ADFunctionInterface):
-    """Wraps the link.getTransform()[0] function as a function of robot
-    configuration q.
+    """Autodiff wrapper of the link.getTransform()[0] function as a function of
+    robot configuration q.
     """
     def __init__(self,link):
         self.robot = link.robot()
@@ -142,7 +143,7 @@ class WorldOrientation(ADFunctionInterface):
 
 
 class WorldTransform(ADFunctionInterface):
-    """Wraps the link.getTransform() function as a function of robot
+    """Autodiff wrapper of the link.getTransform() function as a function of robot
     configuration q.
     """
     def __init__(self,link,localPos=None):
@@ -186,8 +187,8 @@ class WorldTransform(ADFunctionInterface):
 
 
 class WorldVelocity(ADFunctionInterface):
-    """Wraps the link.getPointVelocity() function as a function of robot
-    configuration q and velocity dq.
+    """Autodiff wrapper of the link.getPointVelocity() function as a function 
+    of robot configuration q and velocity dq.
     """
     def __init__(self,link,localPos):
         self.robot = link.robot()
@@ -216,8 +217,8 @@ class WorldVelocity(ADFunctionInterface):
 
 
 class WorldAngularVelocity(ADFunctionInterface):
-    """Wraps the link.getAngularVelocity() function as a function of robot
-    configuration q and velocity dq.
+    """Autodiff wrapper of the link.getAngularVelocity() function, as a
+    function of robotconfiguration q and velocity dq.
     """
     def __init__(self,link):
         self.robot = link.robot()
@@ -245,7 +246,7 @@ class WorldAngularVelocity(ADFunctionInterface):
 
 
 class DriversToLinks(ADFunctionInterface):
-    """Converts driver values to link values."""
+    """Autodiff function to convert driver values to link values."""
     def __init__(self,robot):
         self.robot = robot
         self.drivers = [robot.driver(i) for i in robot.numDrivers()]
@@ -269,7 +270,7 @@ class DriversToLinks(ADFunctionInterface):
 
 
 class DriverDerivsToLinks(ADFunctionInterface):
-    """Converts driver velocities to link velocities."""
+    """Autodiff function to convert driver velocities to link velocities."""
     def __init__(self,robot):
         self.robot = robot
         self.drivers = [robot.driver(i) for i in robot.numDrivers()]
@@ -292,7 +293,7 @@ class DriverDerivsToLinks(ADFunctionInterface):
 
 
 class LinksToDrivers(ADFunctionInterface):
-    """Converts link values to driver values."""
+    """Autodiff function to convert link values to driver values."""
     def __init__(self,robot):
         self.robot = robot
         self.drivers = [robot.driver(i) for i in robot.numDrivers()]
@@ -314,7 +315,7 @@ class LinksToDrivers(ADFunctionInterface):
 
 
 class LinkDerivsToDrivers(ADFunctionInterface):
-    """Converts link velocities to driver velocities."""
+    """Autodiff function to convert link velocities to driver velocities."""
     def __init__(self,robot):
         self.robot = robot
         self.drivers = [robot.driver(i) for i in robot.numDrivers()]
@@ -335,7 +336,7 @@ class LinkDerivsToDrivers(ADFunctionInterface):
 
 
 class ConfigInterpolate(ADFunctionInterface):
-    """Wraps the RobotModel.interpolate function"""
+    """Autodiff wrapper of the RobotModel.interpolate function"""
     def __init__(self,robot):
         self.robot = robot
     def __str__(self):
@@ -378,8 +379,8 @@ def _cross_product_twiddle(J):
 
 class KinematicsBuilder:
     """A class that computes the entire computation graph of forward kinematics
-    and caches it so that multiple queries share the same intermediate
-    computations.
+    and caches it so that multiple queries are auto-diffable and share the same
+    intermediate computations.
 
     Args:
         robot (RobotModel): the robot
