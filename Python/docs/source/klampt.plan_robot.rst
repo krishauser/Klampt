@@ -7,4 +7,5 @@ Submodules, robot-level kinematic planning
     klampt.plan.robotoptimize
     klampt.plan.contactcspace
     klampt.plan.rigidobjectcspace
+    klampt.plan.kinetrajopt
 
