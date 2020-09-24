@@ -1,22 +1,13 @@
-from scipy import sparse
-from klampt import vectorops
+from klampt.math import vectorops
 import math
 import numpy as np
+from scipy import sparse
 from leastsq_bounds import leastsq_bounds
 from controller import BaseController
 from system_id import LinearSystemID
 from online_leastsq import OnlineLeastSquares
+from sparse_linalg import spdot
 
-def spdot(A, B):
-    "The same as np.dot(A, B), except it works even if A or B or both might be sparse."
-    if sparse.issparse(A) and sparse.issparse(B):
-        return A * B
-    elif sparse.issparse(A) and not sparse.issparse(B):
-        return (A * B).view(type=B.__class__)
-    elif not sparse.issparse(A) and sparse.issparse(B):
-        return (B.T * A.T).T.view(type=A.__class__)
-    else:
-        return np.dot(A, B)
 
 class MotionModel(object):
     """Members inputs and outputs are labels for the input type u and the
@@ -38,6 +29,7 @@ class MotionModel(object):
         """Returns the inverted motion model for which evaluation produces
         the inputs u that would produce output v: u = f^-1(q,dq,v). """
         return DefaultInverseMotionModel(self)
+
 
 class DefaultInverseMotionModel(MotionModel):
     """Basic inverse motion model that uses a linear equation solve to
@@ -68,6 +60,7 @@ class DefaultInverseMotionModel(MotionModel):
                 Ainv = np.linalg.pinv(A)
         return (Ainv,-spdot(Ainv,b))
 
+
 class NaiveMotionModel(MotionModel):
     """An identity motion model that sets v = u"""
     def __init__(self,inputs='torque',outputs='accel'):
@@ -78,6 +71,7 @@ class NaiveMotionModel(MotionModel):
         return (sparse.eye(len(dq),len(dq)),np.zeros((len(dq),)))
     def getInverse():
         return NaiveMotionModel(self.outname,self.inname)
+
 
 class CompositeMotionModel(MotionModel):
     """Returns f(q,dq,g(q,dq,u))"""
@@ -91,6 +85,7 @@ class CompositeMotionModel(MotionModel):
         Af,bf = self.f.linearization(q,dq)
         Ag,bg = self.g.linearization(q,dq)
         return (spdot(Af,Ag),bf+spdot(Af,bg))
+
 
 class IntegratorMotionModel(MotionModel):
     """A motion model that integrates the output of another motion model
@@ -119,6 +114,7 @@ class IntegratorMotionModel(MotionModel):
             return (A*dt,q+b*dt)
         else:
             raise NotImplementedError()
+
 
 class FreeBaseRobotMotionModel(MotionModel):
     """A relatively naive motion model with a free base and some links
@@ -205,6 +201,7 @@ class RobotDynamicsMotionModel(MotionModel):
     def getInverse(self):
         return RobotInverseDynamicsMotionModel(self)
 
+
 class RobotInverseDynamicsMotionModel(MotionModel):
     def __init__(self,forward):
         self.forward = forward
@@ -223,6 +220,7 @@ class RobotInverseDynamicsMotionModel(MotionModel):
         C = np.array(robotModel.getCoriolisForces())
         m = np.array(robotModel.getMassMatrix())
         return (m,C-f)
+
 
 class AdaptiveMotionModel(MotionModel):
     """A motion model that performs adaptive estimation.
@@ -267,6 +265,7 @@ class AdaptiveMotionModel(MotionModel):
             self.sysids[i].discount(0.1,'hyperbolic')
             self.sysids[i].add([q[i],dq[i]],[u[i]],[qnext[i],dqnext[i]])
         return
+
 
 class GravityCompensationAdaptiveMotionModel(MotionModel):
     """A motion model that performs adaptive estimation with a gravity
@@ -336,6 +335,7 @@ class GravityCompensationAdaptiveMotionModel(MotionModel):
                 #print e.Atb
         return
 
+
 class FreeBaseAdaptiveMotionModel(AdaptiveMotionModel):
     """A motion model that performs adaptive estimation for a free-base
     robot.  It estimates all joints independently, and estimates the effect
@@ -401,6 +401,7 @@ class FreeBaseAdaptiveMotionModel(AdaptiveMotionModel):
                 self.baseSysID[i].discount(0.1,'hyperbolic')
             self.baseSysID[i].add(xbase,dq[i])
         return
+
 
 def clamp(x,a,b):
     return a if x < a else (b if x > b else x)

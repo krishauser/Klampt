@@ -79,7 +79,7 @@ class BalanceController(OpSpaceController):
         return
     
 
-class FootContactEstimator(BaseController):
+class FootContactEstimator(ControllerBase):
     def __init__(self,robot):
         self.robot = robot
         self.lfscale = -1.0
@@ -107,7 +107,7 @@ class FootContactEstimator(BaseController):
         return out
 
 
-class HuboStateEstimator(BaseController):
+class HuboStateEstimator(ControllerBase):
     def __init__(self,robot):
         self.robot = robot
         self.qbase = robot.getConfig()[:6]
@@ -116,7 +116,7 @@ class HuboStateEstimator(BaseController):
         return {'q':qbase + enc}
 
 def makeBasic(robot):
-    return TimedControllerSequence([BaseController(),BalanceController(robot)],
+    return TimedControllerSequence([ControllerBase(),BalanceController(robot)],
                                    [0.1,1e30])
 
 def makeAdaptive(robot):
@@ -128,7 +128,7 @@ def makeAdaptive(robot):
     c = MultiController()
     c.launch(VelocityEstimator(robot))
     c.launch(sysidEstimator)
-    c.launch(TimedControllerSequence([BaseController(),balanceController],[0.1,1e30]))
+    c.launch(TimedControllerSequence([ControllerBase(),balanceController],[0.1,1e30]))
     c.map_my_output('qcmd')
     c.map_my_output('dqcmd')
     return c
@@ -139,7 +139,7 @@ def makeFootEstimator(robot):
     c = MultiController()
     c.launch(VelocityEstimator(robot))
     c.launch(footEstimator)
-    c.launch(TimedControllerSequence([BaseController(),balanceController],[0.1,1e30]))
+    c.launch(TimedControllerSequence([ControllerBase(),balanceController],[0.1,1e30]))
     c.map_my_output('qcmd')
     c.map_my_output('dqcmd')
     return c

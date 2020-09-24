@@ -11,7 +11,7 @@ class TrajectoryWithFeedforwardController(BaseController):
         self.startTime = None
         self.realStartTime = time.time()
     def output(self,**inputs):
-        api = ControllerAPI(inputs)
+        api = ControllerAccessor(inputs)
         t = api.time()
         if self.startTime == None:
             self.startTime = t

@@ -5,663 +5,110 @@
 #	Updated June 17 2013
 ###########################################
 
-import numpy as np
-from scipy import sparse
-from scipy.sparse import linalg
 import math
 import time
 from klampt.math import vectorops,so3,se3
-from OpenGL.GL import *
 from abc import ABCMeta, abstractmethod
 from collections import defaultdict
+from sparse_linalg import *
+from scipy import sparse 
 
 DEBUG_MOTION_MODEL = 1
 
-def gen_mul(a,b):
-	"""Multiplies lists or scalars in a unified way.  With lists
-	the multiplication is elementwise."""
-	if isinstance(a,np.ndarray):
-		return np.dot(a,b)
-	elif hasattr(a,'__iter__'):
-		return vectorops.mul(a,b)
-	elif hasattr(b,'__iter__'):
-		return vectorops.mul(b,a)
-	return a*b
 
-def spdot(A, B):
-    "The same as np.dot(A, B), except it works even if A or B or both might be sparse."
-    if sparse.issparse(A) and sparse.issparse(B):
-        return A * B
-    elif sparse.issparse(A) and not sparse.issparse(B):
-        return (A * B).view(type=B.__class__)
-    elif not sparse.issparse(A) and sparse.issparse(B):
-        return (B.T * A.T).T.view(type=A.__class__)
-    else:
-        return np.dot(A, B)
-
-def zero_col(A,col):
-	"""Sets the specified column of A to zero"""
-	if sparse.issparse(A):
-		if sparse.isspmatrix_coo(A) or sparse.isspmatrix_dia(A):
-			A = A.tolil()
-		#doesn't support slicing
-		for i in xrange(A.shape[0]):
-			A[i,col] = 0
-		return A
-	else:
-		A[:,col] = np.zeros(A.shape[0])
-		return A
-
-def zero_cols(A,cols):
-	"""Sets the specified columns of A to zero"""
-	if sparse.issparse(A):
-		for k in cols:
-			A = zero_col(A,k)
-	else:
-		for k in cols:
-			A[:,k] = np.zeros(A.shape[0])
-	return A
-
-def select_cols(A,cols):
-	"""Returns the matrix where all columns not in cols are zeroed out.
-	Modifies A inplace"""
-	i = 0
-	k = 0
-	while i < A.shape[1] and k < len(cols):
-		while i<cols[k]:
-			A = zero_col(A,i)
-			i+=1
-		i+=1
-		k += 1
-	return A
-
-
-def scaleToBounds( val, bmin, bmax, origin=None):
-	"""Cap the ray starting origin in the direction val against bounding box limits.
-	"""
-	if origin != None:
-		if isinstance(bmin,np.ndarray):
-			bmin -= origin
-		else:
-			bmin = vectorops.sub(bmin,origin)
-		if isinstance(bmax,np.ndarray):
-			bmax -= origin
-		else:
-			bmax = vectorops.sub(bmax,origin)
-		return scaleToBounds(val,bmin,bmax)
-	umax = 1.0
-	for vali,ai,bi in zip(val,bmin,bmax):
-		assert bi >= ai
-		if vali < ai:
-			umax = ai/vali
-		if vali > bi:
-			umax = bi/vali
-	if umax==1.0: return val
-	assert umax >= 0
-	print "Scaling to velocity maximum, factor",umax
-	if isinstance(val,np.ndarray):
-		return val*umax
-	else:
-		return vectorops.mul(val,umax)
-
-def constrained_lsqr(A,b,C,p,q):
-	"""Solves the least-squares problem min_x ||Ax-b||^2
-	with the constraints p<=Cx<=q.  If there are more than one solution,
-	picks the one with the lowest L-2 norm.
-
-	The result is (x,activeSet,activeRhs) where activeSet lists the
-	indices of the bounds that are met exactly and activeRhs lists
-	the values.
-	"""
-	(x,istop,itn,normr,normar,norma,conda,normx) = sparse.linalg.lsmr(A,b,damp=1e-5)
-	Cx = spdot(C,x)
-	pmax,ipmax = max((pi-xi,i) for i,(pi,xi) in enumerate(zip(p,Cx)))
-	qmax,iqmax = max((xi-qi,i) for i,(qi,xi) in enumerate(zip(q,Cx)))
-	candidates = set(range(A.shape[1]))
-	activeSet = []
-	activeRhs = []
-	AtA = None
-	while pmax > 0 or qmax > 0:
-		#add the most violated constraint to the active set
-		#and re-solve
-		cval = q[iqmax]
-		crow = iqmax
-		if pmax > qmax:
-			cval = p[ipmax]
-			crow = ipmax
-		#print "Bound %d violation %f <= %f <= %f, active set size %d"%(crow,p[crow],Cx[crow],q[crow],len(activeSet))
-		candidates.remove(crow)
-		activeSet.append(crow)
-		activeRhs.append(cval)
-		#form active set matrices
-		if sparse.isspmatrix_coo(C) or sparse.isspmatrix_dia(C):
-			C = C.tocsr()
-		Atemp = sparse.vstack([A]+[C[crow,:] for crow in activeSet])
-		btemp = np.hstack((b,activeRhs))
-		#solve for A'x ~= b' with starting point x0 that satisfies Ax=b
-		#for old active set
-		#Let x=y+x0
-		#Solve for y that solves A'y ~= b'-A'x0
-		Atempx = Atemp.dot(x)
-		(y,istop,itn,normr,normar,norma,conda,normx) = sparse.linalg.lsmr(Atemp,btemp-Atempx)
-		if normr > 1e-4:
-			#solve (AtA)x+C^T z = At b, Cx=d
-			if AtA == None:
-				AtA = A.T.dot(A)
-			Ca = sparse.vstack([C[crow,:] for crow in activeSet])
-			kktMatrix = sparse.vstack(sparse.hstack((AtA,Ca.T)),sparse.hstack((Ca,sparse.csr_matrix((Ca.shape[0],Ca.shape[0])))))
-			(xz,istop,itn,normr,normar,norma,conda,normx) = sparse.linalg.lsmr(kktMatrix,np.hstack((np.dot(A.T,b),activeRhs)))
-			if normr > 1e-4:
-				print "Warning, could not solve for constraints exactly, error",normr
-			x = xz[:x.shape[0]]
-		else:
-			x = x+y
-		#(x,istop,itn,normr,normar,norma,conda,normx) = sparse.linalg.lsmr(Atemp,btemp)
-		Cx = spdot(C,x)
-		pmax,ipmax = max((p[i]-Cx[i],i) for i in candidates)
-		qmax,iqmax = max((Cx[i]-q[i],i) for i in candidates)
-	chtol = 1e-7
-	for i in xrange(len(x)):
-		if Cx[i] < p[i]-chtol or Cx[i] > q[i]+chtol:
-			print "Warning, constraint violation %d: %f <= %f <= %f"%(i,p[i],Cx[i],q[i])
-	return (x,activeSet,activeRhs)
-	
-
-
-class Task:
-	"""A base class for an operational space task. x=f(q)
-	Subclasses should override getters for sensed x, sensed error
-	(optional), sensed dx (optional), and appropriate calculation
-	of Jacobian.
-	Subclasses inherits setters for xdes, dxdes, gains, priority level, 
-	weight, and task name.
-	If the task space is non-cartesian, the taskDifference method should
-	be overridden.
-	"""
-	__metaclass__ = ABCMeta
-
-	@abstractmethod
-	def __init__(self):
-		"""Subclasses need to override __init__ to initialize 
-		gains, priority level, task weight, task name, xdes, dxdes. 
-		"""
-		self.level = 1
-		self.weight = 1
-		self.name = 'unnamed'
-		self.hP, self.hD, self.hI = -1, 0, 0
-		self.qLast = None
-		self.xdes = [0]
-		self.dxdes = [0]
-		self.eImax = 1e300
-		self.vcmdmax = 1e300
-		self.dvcmdmax = 1e300
-		self.eI = None
-		return
-
-	def getDesiredValue(self):
-		"""Returns task xdes that has been set
-		"""
-		return self.xdes
-	def setDesiredValue(self, xdes):
-		"""User calls this to set task state xdes
-		"""
-		self.xdes = xdes
-	def setDesiredVelocity(self, dxdes):
-		"""User calls this to set task state dxdes
-		"""
-		self.dxdes = dxdes
-	def setGains(self,hP=-1,hD=-0.1,hI=-0.1):
-		"""User calls this to set PID gains for feedback control in operational space
-		"""
-		self.hP,self.hD,self.hI = hP,hD,hI
-	def setGainsTaskFrame(self,A,Ainv,hP,hD,hI):
-		"""User calls this to set PID gains for feedback control
-		in a task frame in operational space: as though controlling
-		the variable y = Ax = A f(q) axis-wise.
-		"""
-		if hasattr(hP,'__iter__'):
-			self.hP = np.dot(Ainv,np.dot(np.diag(hP),A))
-		else:
-			self.hP = hP
-		if hasattr(hD,'__iter__'):
-			self.hD = np.dot(Ainv,np.dot(np.diag(hD),A))
-		else:
-			self.hD = hD
-		if hasattr(hI,'__iter__'):
-			self.hI = np.dot(Ainv,np.dot(np.diag(hI),A))
-		else:
-			self.hI = hI
-	def setPriority(self,level=1):
-		"""User calls this to set priority level. A smaller value means more important
-		"""
-		self.level = level
-	def setWeight(self, weight):
-		"""User calls this to set task weight to differentiate from others on the same 
-		priority level. A larger weight means more important.
-		"""
-		self.weight = weight
-	def setName(self, name):
-		"""Task name can be used to retrieve a task in an OperationalSpaceController instance."""
-		self.name = name
-	def resetITerm(self):
-		self.eI = None
-
-	def updateState(self,q,dq,dt):
-		"""Called at beginning of new timestep.
-		Optionally does something before computing stuff in getCommandVelocity/advance. e.g., compute cached
-		values."""
-		pass
-
-	def getCommandVelocity(self, q, dq, dt):
-		"""Gets the command velocity from the current state of the
-		robot.
-		"""
-		eP = self.getSensedError(q)
-		#vcmd = hP*eP + hD*eV + hI*eI
-		vP = gen_mul(self.hP,eP)
-		vcmd = vP
-		#D term
-		vcur = self.getSensedVelocity(q,dq,dt)
-		eD = None
-		if vcur != None:
-			eD = vectorops.sub(vcur, self.dxdes)
-			vD = gen_mul(self.hD,eD)
-			vcmd = vectorops.add(vcmd, vD)
-		#I term
-		if self.eI != None:
-			vI = gen_mul(self.hI,self.eI)
-			vcmd = vectorops.add(vcmd, vI)
-		#print "task",self.name,"error P=",eP,"D=",eD,"E=",self.eI
-		#do acceleration limiting
-		if vcur != None:
-			dvcmd = vectorops.div(vectorops.sub(vcmd,vcur),dt)
-			dvnorm = vectorops.norm(dvcmd)
-			if dvnorm > self.dvcmdmax:
-				vcmd = vectorops.madd(vcur,dvcmd,self.dvcmdmax/dvnorm*dt)
-				print self.name,"acceleration limited by factor",self.dvcmdmax/dvnorm*dt,"to",vcmd
-		#do velocity limiting
-		vnorm = vectorops.norm(vcmd)
-		if vnorm > self.vcmdmax:
-			vcmd = vectorops.mul(vcmd,self.vcmdmax/vnorm)
-			print self.name,"velocity limited by factor",self.vcmdmax/vnorm,"to",vcmd
-		return vcmd
-
-	def advance(self, q, dq, dt):
-		""" Updates internal state: accumulates iterm and updates x_last
-		"""
-		if self.weight > 0:
-			eP = self.getSensedError(q)
-			# update iterm
-			if self.eI == None:
-				self.eI = vectorops.mul(eP,dt)
-			else:
-				self.eI = vectorops.madd(self.eI, eP, dt)
-			einorm = vectorops.norm(self.eI)
-			if einorm > self.eImax:
-				self.eI = vectorops.mul(self.eI,self.eImax/einorm)
-
-		#update qLast
-		self.qLast = q
-		return
-
-	@abstractmethod
-	def getSensedValue(self, q):
-		"""Gets task x from sensed configuration q.
-		Subclasses MUST override this.
-		"""
-		return
-	@abstractmethod
-	def getJacobian(self, q):
-		"""Gets Jacobian dx/dq(q).
-		Subclasses MUST override this.
-		"""
-		return 
-
-	def getSensedError(self, q):
-		"""Returns x(q)-xdes where - is the task-space differencing operator"""
-		return self.taskDifference(self.getSensedValue(q), self.xdes)
-	def taskDifference(self,a,b):
-		"""Default: assumes a Cartesian space"""
-		return vectorops.sub(a,b)
-	def getSensedVelocity(self, q, dq, dt):
-		"""Gets task velocity from sensed configuration q.
-		Default implementation uses finite differencing.  Other
-		implementations may use jacobian.
-		"""
-		#uncomment this to get a jacobian based technique
-		#return np.dot(self.getJacobian(q),dq)
-		if self.qLast==None:
-			return None
-		else:
-			xlast = self.getSensedValue(self.qLast)
-			xcur = self.getSensedValue(q)
-			return vectorops.div(self.taskDifference(xcur,xlast),dt)
-	def drawGL(self,q):
-		"""Optionally can be overridden to visualize the task in OpenGL."""
-		pass
-
-class COMTask(Task):
-	""" Center of Mass position task subclass
-	
-	If baseLinkNo is supplied, the COM task is measured relative to
-	the given base link.  Otherwise, it is measured in absolute
-	coordinates.
-
-	If activeDofs are supplied, the COM task is adjusted only with
-	those dofs.
-	"""
-	def __init__(self, robot, baseLinkNo=-1):
-		Task.__init__(self)
-		self.robot = robot
-		q = self.robot.getConfig()
-		self.name = "CoM"
-		self.baseLinkNo = baseLinkNo
-		self.activeDofs = None
-		
-	def getSensedValue(self, q):
-		"""Returns CoM position
-		"""
-		self.robot.setConfig(q)
-		com = self.robot.getCom()
-		if self.baseLinkNo >= 0:
-			Tb = self.robot.link(self.baseLinkNo).getTransform()
-			Tbinv = se3.inv(Tb)
-			com = se3.apply(Tbinv,com)
-		return com
-		
-	def getJacobian(self, q):
-		"""Returns axis-weighted CoM Jacobian by averaging
-		mass-weighted Jacobian of each link.
-		"""
-		self.robot.setConfig(q)
-		numLinks = self.robot.numLinks()
-		Jcom = np.array(self.robot.getComJacobian())
-		#if relative positioning task, subtract out COM jacobian w.r.t. base
-		if self.baseLinkNo >= 0:
-			Tb = self.robot.link(self.baseLinkNo).getTransform()
-			pb = se3.apply(se3.inv(Tb),self.robot.getCom())
-			Jb = np.array(self.robot.link(self.baseLinkNo).getPositionJacobian(pb))
-			Jcom -= Jb
-		if self.activeDofs != None:
-			Jcom = select_cols(Jcom,self.activeDofs)
-		return Jcom
-
-	def drawGL(self,q):
-		x = self.getSensedValue(q)
-		xdes = self.xdes
-		#invert the transformations from task to world coordinates
-		if self.baseLinkNo >= 0:
-			Tb = self.robot.link(self.baseLinkNo).getTransform()
-			xdes = se3.apply(Tb,self.xdes)
-			x = se3.apply(Tb,x)
-		glPointSize(10)
-		glEnable(GL_POINT_SMOOTH)
-		glBegin(GL_POINTS)
-		glColor3f(0,1,0)	#green 
-		glVertex3fv(xdes)
-		glColor3f(0,1,1)	#cyan
-		glVertex3fv(x)
-		glEnd()
-
-
-class LinkTask(Task):
-	"""Link position/orientation task subclass.
-	Supports both absolute and relative positioning.
-	"""
-	def __init__(self, robot, linkNo, taskType, baseLinkNo=-1):
-		"""Supply a robot and link number to control.  taskType can be:
-		-'po' for position and orientation (in concordance with se3, the task variables are a matrix (R,t))
-		-'position' for position only
-		-'orientation' for orientation only.
-
-		For po and position tasks the localPosition member can be set to
-		control a specified point on the link.  The origin is assumed by
-		default.
-
-		If baseLinkNo is supplied, the values are treated as relative
-		values as calculated with respect to a given base link.
-		"""
-		Task.__init__(self)
-		self.linkNo = linkNo
-		self.link = robot.link(self.linkNo)
-		self.baseLinkNo = baseLinkNo
-		self.baseLink = (None if baseLinkNo < 0 else robot.link(baseLinkNo))
-		self.activeDofs = None
-		self.robot = robot
-		self.hP, self.hD, self.hI = -1, 0, 0
-		self.localPosition=[0.,0., 0.]
-		self.taskType = taskType
-		self.name = "Link"
-
-		if self.taskType == 'po' or self.taskType == 'position' or self.taskType == 'orientation':
-			pass
-		else:
-			raise ValueError("Invalid taskType "+self.taskType)
-
-	def getSensedValue(self, q):
-		"""Get link x, which is rotation matrix and/or translation
-		"""
-		self.robot.setConfig(q)
-		T = self.link.getTransform()
-		#check if relative transform task, modify T to local transform
-		if self.baseLinkNo >= 0:
-			Tb = self.baseLink.getTransform()
-			Tbinv = se3.inv(Tb)
-			T = se3.mul(Tbinv,T)
-		if self.taskType == 'po':
-			x = (T[0],se3.apply(T,self.localPosition))
-		elif self.taskType == 'position':
-			x = se3.apply(T,self.localPosition)
-		elif self.taskType == 'orientation':
-			x = T[0]
-		else:
-			raise ValueError("Invalid taskType "+self.taskType)
-		return x
-
-	def taskDifference(self,a,b):
-		if self.taskType == 'po':
-			return se3.error(a,b)
-		elif self.taskType == 'position':
-			return vectorops.sub(a,b)
-		elif self.taskType == 'orientation':
-			return so3.error(a,b)
-		else:
-			raise ValueError("Invalid taskType "+self.taskType)
-
-	def getJacobian(self, q):
-		self.robot.setConfig(q)
-		J = None
-		if self.taskType == 'po':
-			J = self.link.getJacobian(self.localPosition)
-		elif self.taskType == 'position':
-			J = self.link.getPositionJacobian(self.localPosition)
-		elif self.taskType == 'orientation':
-			J = self.link.getOrientationJacobian()
-		else:
-			raise ValueError("Invalid taskType "+self.taskType)
-		J = np.array(J)
-		#check if relative transform task, modify Jacobian accordingly
-		if self.baseLinkNo >= 0:
-			T = self.link.getTransform()
-			Tb = self.baseLink.getTransform()
-			Tbinv = se3.inv(Tb)
-			pb = se3.apply(Tbinv,se3.apply(T,self.localPosition))
-			if self.taskType == 'po':
-				Jb = self.baseLink.getJacobian(pb)
-			elif self.taskType == 'position':
-				Jb = self.baseLink.getPositionJacobian(pb)
-			elif self.taskType == 'orientation':
-				Jb = self.baseLink.getOrientationJacobian()
-			Jb = np.array(Jb)
-			#subtract out jacobian w.r.t. baseLink
-			J -= Jb
-		if self.activeDofs!=None:
-			J = select_cols(J,self.activeDofs)
-		return J
-
-	def drawGL(self,q):
-		x = self.getSensedValue(q)
-		xdes = self.xdes
-		if self.baseLinkNo >= 0:
-			Tb = self.baseLink.getTransform()
-			if self.taskType == "position":
-				x = se3.apply(Tb,x)
-				xdes = se3.apply(Tb,xdes)
-			elif self.taskType == "po":
-				x = se3.mul(Tb,x)
-				xdes = se3.mul(Tb,xdes)
-		glPointSize(6)
-		glEnable(GL_POINT_SMOOTH)
-		glBegin(GL_POINTS)
-		if self.taskType == "position":
-			glColor3f(1,0,0)	#red 
-			glVertex3fv(xdes)
-			glColor3f(1,0.5,0)	#orange
-			glVertex3fv(x)
-		elif self.taskType == "po":
-			glColor3f(1,0,0)	#red 
-			glVertex3fv(xdes[1])
-			glColor3f(1,0.5,0)	#orange
-			glVertex3fv(x[1])
-		glEnd()
-
-
-class JointTask(Task):
-	"""A joint angle task class 
-	"""
-	def __init__(self, robot, jointIndices):
-		Task.__init__(self)
-		self.robot = robot
-		self.jointIndices = jointIndices
-		self.name = "Joint"
-		pass
-
-	def getSensedValue(self, q):
-		return [q[jointi] for jointi in self.jointIndices]
-	
-	def getJacobian(self, q):
-		J = sparse.lil_matrix((len(self.jointIndices),self.robot.numLinks()))
-		for i,jointi in enumerate(self.jointIndices):
-			J[i,jointi] = 1
-		return J
-	
-		J = []
-		for jointi in self.jointIndices:
-			Ji = [0] * self.robot.numLinks()
-			Ji[jointi] = 1
-			J.append(Ji)
-		return J
-
-class JointLimitTask(Task):
+class OpSpaceController(controller.ControllerBase):
+	"""An operational space controller that conforms to the ControllerBase
+	interface in klampt.control.controller. """
 	def __init__(self,robot):
-		Task.__init__(self)
-		self.robot = robot
-		self.buffersize = 2.0
-		self.qmin,self.qmax = robot.getJointLimits()
-		self.accelMax = robot.getAccelerationLimits()
-		self.wscale = 0.1
-		self.maxw = 10
-		self.active = []
-		self.weight = 0
-		self.xdes = []
-		self.dxdes = []
-		self.name = "Joint limits"
-		self.setGains(-0.1,-0.2,0)
-	
-		
-	def updateState(self, q, dq, dt):
-		""" check (q, dq) against joint limits
-		Activates joint limit constraint, i.e., add a joint task
-		to avoid reaching limit, when surpassing a threshold.
-
-		Or, increase weight on this joint task as joint gets closer to its limit.
-
+		"""Setup tasks in operational space, and reads in trajectory files.
+		@param robot is an RobotModel instance
 		"""
-		self.active = []
-		self.weight = []
-		self.xdes = []
-		self.dxdes = []
-		buffersize = self.buffersize
-		wscale = self.wscale
-		maxw = self.maxw
-		for i,(j,dj,jmin,jmax,amax) in enumerate(zip(q,dq,self.qmin,self.qmax,self.accelMax)):
-			if jmax <= jmin: continue
-			jstop = j
-			a = amax / buffersize
-			w = 0
-			ades = 0
-			if dj > 0.0:
-				t = dj / a
-			        #j + t*dj - t^2*a/2
-				jstop = j + t*dj - t*t*a*0.5
-				if jstop > jmax:
-					#add task to slow down
-				        #perfect accel solves for:
-				        #j+ dj^2 / 2a  = jmax
-				        #dj^2 / 2(jmax-j)   = a
-					if j >= jmax:
-						print "Joint",self.robot.link(i).getName(),"exceeded max",j,">=",jmax
-						ades = -amax
-						w = maxw
-					else:
-						alim = dj*dj/(jmax-j)*0.5
-						if alim > amax:
-							ades = -amax
-							w = maxw
-						else:
-							ades = -alim
-							w = wscale*(alim-a)/(amax-alim)
-						#print "Joint",self.robot.link(i).getName(),j,dj,"near upper limit",jmax,", desired accel:",ades," weight",w
-			else:
-				t = -dj / a
-			        #j + t*dj + t^2*a/2
-				jstop = j + t*dj + t*t*a*0.5
-				if jstop < jmin:
-					#add task to slow down
-				        #perfect accel solves for:
-				        #j - dj^2 / 2a  = jmin
-				        #dj^2 / 2(j-jmin)   = a
-					if j <= jmin:
-						print "Joint",self.robot.link(i).getName(),"exceeded min",j,"<=",jmin
-						ades = amax
-						w = maxw
-					else:
-						alim = dj*dj/(j-jmin)*0.5
-						if alim > amax:
-							ades = amax
-							w = maxw
-						else:
-							ades = alim
-							w = wscale*(alim-a)/(amax-alim)
-						#print "Joint",self.robot.link(i).getName(),j,dj,"near lower limit",jmin,", desired accel:",ades," weight",w
-			if w > maxw:
-				w = maxw
-			self.active.append(i)
-			self.xdes.append(max(jmin,min(jmax,j)))
-			self.dxdes.append(dj+dt*ades)
-			self.weight.append(w)
-		if len(self.weight)==0:
-			self.weight = 0
-		return
-	
-	def getSensedValue(self, q):
-		return [q[jointi] for jointi in self.active]
-	
-	def getJacobian(self, q):
-		J = sparse.lil_matrix((len(self.active),self.robot.numLinks()))
-		for i,jointi in enumerate(self.active):
-			J[i,jointi] = 1
-		return J
+		self.robot = robot
+		# Initiate an operational space controller
+		self.opController = OperationalSpaceSolver(robot)
+		self.reset()
 
-		J = []
-		for jointi in self.active:
-			Ji = [0] * self.robot.numLinks()
-			Ji[jointi] = 1
-			J.append(Ji)
-		return J
+	def __str__(self):
+		return self.__class__.__name__ + "tasks " + ','.join(t.name for t in self.opController.taskList)
 
-class OperationalSpaceController:
-	"""A two-level velocity-based operational space controller class.
+	def inputNames(self):
+		return ['dt','q','dq']
+
+	def outputNames(self):
+		return ['qcmd','dqcmd']
+
+	def setMotionModel(self,mm):
+		"""Sets the motion model used by the controller"""
+		self.opController.motionModel = mm
+
+	def reset(self):
+		"""By default sets all tasks to their current value in the robot"""
+		self.opController.taskList = []
+		self.setupTasks(self.opController)
+		self.qlast = None
+		self.dqlast = None
+		self.dqpredlast = None
+
+	def drawGL(self):
+		from OpenGL import GL
+		# Visualize tasks
+		GL.glDisable(GL.GL_DEPTH_TEST)
+		GL.glDisable(GL.GL_LIGHTING)
+		q=self.robot.getConfig()
+		for task in self.opController.taskList:
+			task.drawGL(q)
+		GL.glEnable(GL.GL_DEPTH_TEST)
+
+	def signal(self,type,**inputs):
+		"""Subclasses might want to override this to catch more signals, e.g., 'reset'."""
+		if type == 'enter':
+			self.robot.setConfig(inputs['q'])
+			self.reset()
+
+	def output(self,**input):
+		try:
+			dt = inputs["dt"]
+			q = inputs["q"]
+			dq = inputs["dq"]
+		except:
+			print "OpSpaceController: Input needs to have state 'q','dq', and timestep 'dt'"
+			return None
+		
+		(qdes,dqdes) = self.opController.solve(q, dq, dt)
+		return {'qcmd':qdes,'dqcmd':dqdes}
+		
+	def output_and_advance(self,**inputs):
+		#modify tasks if necessary
+		self.manageTasks(inputs,self.opController)
+
+		try:
+			dt = inputs["dt"]
+			q = inputs["q"]
+			dq = inputs["dq"]
+		except:
+			print "OpSpaceController: Input needs to have state 'q','dq', and timestep 'dt'"
+			return None
+		
+		(qdes,dqdes) = self.opController.solve(q, dq, dt)
+		self.opController.advance(q, dq, dt)
+		#self.opController.printStatus(q)
+
+		#return {'qcmd':qdes,'dqcmd':[0.0]*len(qdes)}
+		return {'qcmd':qdes,'dqcmd':dqdes}
+
+	def setupTasks(self,opSpaceController):
+		"""Overload this to add tasks to the operational space controller"""
+		pass
+
+	def manageTasks(self,inputs,opSpaceController):
+		"""Overload this to add, delete, or change operational space tasks
+		while the controller is running"""
+		pass
+
+
+
+class OperationalSpaceSolver:
+	"""A two-level velocity-based operational space controll solver.
 	Operational space control tasks are converted into velocity commands
 	which are then added onto the current sensed configuration.
 
@@ -680,6 +127,7 @@ class OperationalSpaceController:
 		self.robot = robot
 		self.motionModel = None
 		self.activeDofs = None
+		self.verbose = False
 
 	def addTask(self, task, **args):
 		"""Adds a task into operational space. Keyword args can include
@@ -947,14 +395,15 @@ class OperationalSpaceController:
 			#bact = np.hstack((v1-J1b,activeRhs))
 			J1Ainv = np.linalg.pinv(Aact)
 			dq1 = A.dot(u1)+b
-			if len(active)>0:
+			if self.verbose and len(active)>0:
 				print "Priority 1 active constraints:"
 				for a in active:
 					print self.robot.link(a).getName(),vmin[a],dq1[a],vmax[a]
 
 			r1 = J1.dot(dq1)-v1
-			print "Op space controller solve"
-			print "  Residual 1",np.linalg.norm(r1)
+			if self.verbose:
+				print "Op space controller solve"
+				print "  Residual 1",np.linalg.norm(r1)
 
 			# priority 2
 			N = np.eye(len(dq)) - np.dot(J1Ainv, Aact)
@@ -979,10 +428,11 @@ class OperationalSpaceController:
 			dq2 = A.dot(u2) + dq1
 
 			#debug, should be equal to residual 2 printout above
-			print "  Residual 2",np.linalg.norm(J2.dot(dq2)-V2)
+			if self.verbose:
+				print "  Residual 2",np.linalg.norm(J2.dot(dq2)-V2)
 			#debug should be close to zero
 			#print "  Residual 2 in priority 1 frame",np.linalg.norm(J1.dot(dq2)-v1)
-			if len(active)>0:
+			if self.verbose and len(active)>0:
 				print "Priority 2 active constraints:"
 				for a in active:
 					print self.robot.link(a).getName(),vmin[a],dq2[a],vmax[a]
@@ -990,9 +440,10 @@ class OperationalSpaceController:
 		#compose the velocities together
 		u = np.ravel((u1 + u2))
 		dqpred = A.dot(u)+b
-		print "  Residual 1 final",np.linalg.norm(np.ravel(J1.dot(dqpred))-v1)
-		if J2 != None:
-			print "  Residual 2 final",np.linalg.norm(np.ravel(J2.dot(dqpred))-V2)
+		if self.verbose:
+			print "  Residual 1 final",np.linalg.norm(np.ravel(J1.dot(dqpred))-v1)
+			if J2 != None:
+				print "  Residual 2 final",np.linalg.norm(np.ravel(J2.dot(dqpred))-V2)
 		
 		u = u.tolist()
 		#if self.activeDofs != None:
@@ -1002,10 +453,11 @@ class OperationalSpaceController:
 
 		t6 = time.time()
 		self.timingStats['total']+=t6-t1
-		if self.timingStats['count']%10==0:
-			n=self.timingStats['count']
-			print "OpSpace times (ms): vel/jac 1 %.2f inv 1 %.2f vel/jac 2 %.2f inv 2 %.2f total %.2f"%(self.timingStats['get jac/vel p1']/n*1000,self.timingStats['pinv jac p1']/n*1000,self.timingStats['get jac/vel p2']/n*1000,self.timingStats['ls jac p2']/n*1000,self.timingStats['total']/n*1000)
-			
+		if self.verbose:
+			if self.timingStats['count']%10==0:
+				n=self.timingStats['count']
+				print "OpSpace times (ms): vel/jac 1 %.2f inv 1 %.2f vel/jac 2 %.2f inv 2 %.2f total %.2f"%(self.timingStats['get jac/vel p1']/n*1000,self.timingStats['pinv jac p1']/n*1000,self.timingStats['get jac/vel p2']/n*1000,self.timingStats['ls jac p2']/n*1000,self.timingStats['total']/n*1000)
+				
 		return (self.qdes,u)
 
 	def advance(self,q,dq,dt):
@@ -1015,70 +467,499 @@ class OperationalSpaceController:
 
 
 
-class OpSpaceController:
-	"""An operational space controller that conforms to the BaseController
-	interface in controller.py. """
-	def __init__(self,robot):
-		"""Setup tasks in operational space, and reads in trajectory files.
-		@param robot is an RobotModel instance
+
+
+
+class Task:
+	"""A base class for an operational space task. x=f(q)
+	Subclasses should override getters for sensed x, sensed error
+	(optional), sensed dx (optional), and appropriate calculation
+	of Jacobian.
+	Subclasses inherits setters for xdes, dxdes, gains, priority level, 
+	weight, and task name.
+	If the task space is non-cartesian, the taskDifference method should
+	be overridden.
+	"""
+	__metaclass__ = ABCMeta
+
+	@abstractmethod
+	def __init__(self):
+		"""Subclasses need to override __init__ to initialize 
+		gains, priority level, task weight, task name, xdes, dxdes. 
 		"""
-		self.robot = robot
-		# Initiate an operational space controller
-		self.opController = OperationalSpaceController(robot)
-		self.reset()
+		self.level = 1
+		self.weight = 1
+		self.name = 'unnamed'
+		self.hP, self.hD, self.hI = -1, 0, 0
+		self.qLast = None
+		self.xdes = [0]
+		self.dxdes = [0]
+		self.eImax = 1e300
+		self.vcmdmax = 1e300
+		self.dvcmdmax = 1e300
+		self.eI = None
+		return
 
-	def setMotionModel(self,mm):
-		"""Sets the motion model used by the controller"""
-		self.opController.motionModel = mm
+	def getDesiredValue(self):
+		"""Returns task xdes that has been set
+		"""
+		return self.xdes
+	def setDesiredValue(self, xdes):
+		"""User calls this to set task state xdes
+		"""
+		self.xdes = xdes
+	def setDesiredVelocity(self, dxdes):
+		"""User calls this to set task state dxdes
+		"""
+		self.dxdes = dxdes
+	def setGains(self,hP=-1,hD=-0.1,hI=-0.1):
+		"""User calls this to set PID gains for feedback control in operational space
+		"""
+		self.hP,self.hD,self.hI = hP,hD,hI
+	def setGainsTaskFrame(self,A,Ainv,hP,hD,hI):
+		"""User calls this to set PID gains for feedback control
+		in a task frame in operational space: as though controlling
+		the variable y = Ax = A f(q) axis-wise.
+		"""
+		if hasattr(hP,'__iter__'):
+			self.hP = np.dot(Ainv,np.dot(np.diag(hP),A))
+		else:
+			self.hP = hP
+		if hasattr(hD,'__iter__'):
+			self.hD = np.dot(Ainv,np.dot(np.diag(hD),A))
+		else:
+			self.hD = hD
+		if hasattr(hI,'__iter__'):
+			self.hI = np.dot(Ainv,np.dot(np.diag(hI),A))
+		else:
+			self.hI = hI
+	def setPriority(self,level=1):
+		"""User calls this to set priority level. A smaller value means more important
+		"""
+		self.level = level
+	def setWeight(self, weight):
+		"""User calls this to set task weight to differentiate from others on the same 
+		priority level. A larger weight means more important.
+		"""
+		self.weight = weight
+	def setName(self, name):
+		"""Task name can be used to retrieve a task in an OperationalSpaceSolver instance."""
+		self.name = name
+	def resetITerm(self):
+		self.eI = None
 
-	def reset(self):
-		"""By default sets all tasks to their current value in the robot"""
-		self.opController.taskList = []
-		self.setupTasks(self.opController)
-		self.qlast = None
-		self.dqlast = None
-		self.dqpredlast = None
+	def updateState(self,q,dq,dt):
+		"""Called at beginning of new timestep.
+		Optionally does something before computing stuff in getCommandVelocity/advance. e.g., compute cached
+		values."""
+		pass
 
-	def drawGL(self):
-		# Visualize tasks
-		glDisable(GL_DEPTH_TEST)
-		glDisable(GL_LIGHTING)
-		q=self.robot.getConfig()
-		for task in self.opController.taskList:
-			task.drawGL(q)
-		glEnable(GL_DEPTH_TEST)
+	def getCommandVelocity(self, q, dq, dt):
+		"""Gets the command velocity from the current state of the
+		robot.
+		"""
+		eP = self.getSensedError(q)
+		#vcmd = hP*eP + hD*eV + hI*eI
+		vP = gen_mul(self.hP,eP)
+		vcmd = vP
+		#D term
+		vcur = self.getSensedVelocity(q,dq,dt)
+		eD = None
+		if vcur != None:
+			eD = vectorops.sub(vcur, self.dxdes)
+			vD = gen_mul(self.hD,eD)
+			vcmd = vectorops.add(vcmd, vD)
+		#I term
+		if self.eI != None:
+			vI = gen_mul(self.hI,self.eI)
+			vcmd = vectorops.add(vcmd, vI)
+		#print "task",self.name,"error P=",eP,"D=",eD,"E=",self.eI
+		#do acceleration limiting
+		if vcur != None:
+			dvcmd = vectorops.div(vectorops.sub(vcmd,vcur),dt)
+			dvnorm = vectorops.norm(dvcmd)
+			if dvnorm > self.dvcmdmax:
+				vcmd = vectorops.madd(vcur,dvcmd,self.dvcmdmax/dvnorm*dt)
+				print self.name,"acceleration limited by factor",self.dvcmdmax/dvnorm*dt,"to",vcmd
+		#do velocity limiting
+		vnorm = vectorops.norm(vcmd)
+		if vnorm > self.vcmdmax:
+			vcmd = vectorops.mul(vcmd,self.vcmdmax/vnorm)
+			print self.name,"velocity limited by factor",self.vcmdmax/vnorm,"to",vcmd
+		return vcmd
 
-	def signal(self,type,**inputs):
-		"""Subclasses might want to override this to catch more
-		signals."""
-		if type == 'enter':
-			self.robot.setConfig(inputs['q'])
-			self.reset()
-		
-	def output_and_advance(self,**inputs):
-		#modify tasks if necessary
-		self.manageTasks(inputs,self.opController)
+	def advance(self, q, dq, dt):
+		""" Updates internal state: accumulates iterm and updates x_last
+		"""
+		if self.weight > 0:
+			eP = self.getSensedError(q)
+			# update iterm
+			if self.eI == None:
+				self.eI = vectorops.mul(eP,dt)
+			else:
+				self.eI = vectorops.madd(self.eI, eP, dt)
+			einorm = vectorops.norm(self.eI)
+			if einorm > self.eImax:
+				self.eI = vectorops.mul(self.eI,self.eImax/einorm)
 
-		try:
-			dt = inputs["dt"]
-			q = inputs["q"]
-			dq = inputs["dq"]
-		except:
-			print "OperationalSpaceController: Input needs to have state 'q','dq', and timestep 'dt'"
+		#update qLast
+		self.qLast = q
+		return
+
+	@abstractmethod
+	def getSensedValue(self, q):
+		"""Gets task x from sensed configuration q.
+		Subclasses MUST override this.
+		"""
+		return
+	@abstractmethod
+	def getJacobian(self, q):
+		"""Gets Jacobian dx/dq(q).
+		Subclasses MUST override this.
+		"""
+		return 
+
+	def getSensedError(self, q):
+		"""Returns x(q)-xdes where - is the task-space differencing operator"""
+		return self.taskDifference(self.getSensedValue(q), self.xdes)
+	def taskDifference(self,a,b):
+		"""Default: assumes a Cartesian space"""
+		return vectorops.sub(a,b)
+	def getSensedVelocity(self, q, dq, dt):
+		"""Gets task velocity from sensed configuration q.
+		Default implementation uses finite differencing.  Other
+		implementations may use jacobian.
+		"""
+		#uncomment this to get a jacobian based technique
+		#return np.dot(self.getJacobian(q),dq)
+		if self.qLast==None:
 			return None
+		else:
+			xlast = self.getSensedValue(self.qLast)
+			xcur = self.getSensedValue(q)
+			return vectorops.div(self.taskDifference(xcur,xlast),dt)
+	def drawGL(self,q):
+		"""Optionally can be overridden to visualize the task in OpenGL."""
+		pass
+
+class COMTask(Task):
+	""" Center of Mass position task subclass
+	
+	If baseLinkNo is supplied, the COM task is measured relative to
+	the given base link.  Otherwise, it is measured in absolute
+	coordinates.
+
+	If activeDofs are supplied, the COM task is adjusted only with
+	those dofs.
+	"""
+	def __init__(self, robot, baseLinkNo=-1):
+		Task.__init__(self)
+		self.robot = robot
+		q = self.robot.getConfig()
+		self.name = "CoM"
+		self.baseLinkNo = baseLinkNo
+		self.activeDofs = None
 		
-		(qdes,dqdes) = self.opController.solve(q, dq, dt)
-		self.opController.advance(q, dq, dt)
-		#self.opController.printStatus(q)
+	def getSensedValue(self, q):
+		"""Returns CoM position
+		"""
+		self.robot.setConfig(q)
+		com = self.robot.getCom()
+		if self.baseLinkNo >= 0:
+			Tb = self.robot.link(self.baseLinkNo).getTransform()
+			Tbinv = se3.inv(Tb)
+			com = se3.apply(Tbinv,com)
+		return com
+		
+	def getJacobian(self, q):
+		"""Returns axis-weighted CoM Jacobian by averaging
+		mass-weighted Jacobian of each link.
+		"""
+		self.robot.setConfig(q)
+		numLinks = self.robot.numLinks()
+		Jcom = np.array(self.robot.getComJacobian())
+		#if relative positioning task, subtract out COM jacobian w.r.t. base
+		if self.baseLinkNo >= 0:
+			Tb = self.robot.link(self.baseLinkNo).getTransform()
+			pb = se3.apply(se3.inv(Tb),self.robot.getCom())
+			Jb = np.array(self.robot.link(self.baseLinkNo).getPositionJacobian(pb))
+			Jcom -= Jb
+		if self.activeDofs != None:
+			Jcom = select_cols(Jcom,self.activeDofs)
+		return Jcom
 
-		#return {'qcmd':qdes,'dqcmd':[0.0]*len(qdes)}
-		return {'qcmd':qdes,'dqcmd':dqdes}
+	def drawGL(self,q):
+		from OpenGL import GL
+		x = self.getSensedValue(q)
+		xdes = self.xdes
+		#invert the transformations from task to world coordinates
+		if self.baseLinkNo >= 0:
+			Tb = self.robot.link(self.baseLinkNo).getTransform()
+			xdes = se3.apply(Tb,self.xdes)
+			x = se3.apply(Tb,x)
+		GL.glPointSize(10)
+		GL.glEnable(GL.GL_POINT_SMOOTH)
+		GL.glBegin(GL.GL_POINTS)
+		GL.glColor3f(0,1,0)	#green 
+		GL.glVertex3fv(xdes)
+		GL.glColor3f(0,1,1)	#cyan
+		GL.glVertex3fv(x)
+		GL.glEnd()
 
-	def setupTasks(self,opSpaceController):
-		"""Add the tasks to the given operational space controller"""
+
+class LinkTask(Task):
+	"""Link position/orientation task subclass.
+	Supports both absolute and relative positioning.
+	"""
+	def __init__(self, robot, linkNo, taskType, baseLinkNo=-1):
+		"""Supply a robot and link number to control.  taskType can be:
+		-'po' for position and orientation (in concordance with se3, the task variables are a matrix (R,t))
+		-'position' for position only
+		-'orientation' for orientation only.
+
+		For po and position tasks the localPosition member can be set to
+		control a specified point on the link.  The origin is assumed by
+		default.
+
+		If baseLinkNo is supplied, the values are treated as relative
+		values as calculated with respect to a given base link.
+		"""
+		Task.__init__(self)
+		self.linkNo = linkNo
+		self.link = robot.link(self.linkNo)
+		self.baseLinkNo = baseLinkNo
+		self.baseLink = (None if baseLinkNo < 0 else robot.link(baseLinkNo))
+		self.activeDofs = None
+		self.robot = robot
+		self.hP, self.hD, self.hI = -1, 0, 0
+		self.localPosition=[0.,0., 0.]
+		self.taskType = taskType
+		self.name = "Link"
+
+		if self.taskType == 'po' or self.taskType == 'position' or self.taskType == 'orientation':
+			pass
+		else:
+			raise ValueError("Invalid taskType "+self.taskType)
+
+	def getSensedValue(self, q):
+		"""Get link x, which is rotation matrix and/or translation
+		"""
+		self.robot.setConfig(q)
+		T = self.link.getTransform()
+		#check if relative transform task, modify T to local transform
+		if self.baseLinkNo >= 0:
+			Tb = self.baseLink.getTransform()
+			Tbinv = se3.inv(Tb)
+			T = se3.mul(Tbinv,T)
+		if self.taskType == 'po':
+			x = (T[0],se3.apply(T,self.localPosition))
+		elif self.taskType == 'position':
+			x = se3.apply(T,self.localPosition)
+		elif self.taskType == 'orientation':
+			x = T[0]
+		else:
+			raise ValueError("Invalid taskType "+self.taskType)
+		return x
+
+	def taskDifference(self,a,b):
+		if self.taskType == 'po':
+			return se3.error(a,b)
+		elif self.taskType == 'position':
+			return vectorops.sub(a,b)
+		elif self.taskType == 'orientation':
+			return so3.error(a,b)
+		else:
+			raise ValueError("Invalid taskType "+self.taskType)
+
+	def getJacobian(self, q):
+		self.robot.setConfig(q)
+		J = None
+		if self.taskType == 'po':
+			J = self.link.getJacobian(self.localPosition)
+		elif self.taskType == 'position':
+			J = self.link.getPositionJacobian(self.localPosition)
+		elif self.taskType == 'orientation':
+			J = self.link.getOrientationJacobian()
+		else:
+			raise ValueError("Invalid taskType "+self.taskType)
+		J = np.array(J)
+		#check if relative transform task, modify Jacobian accordingly
+		if self.baseLinkNo >= 0:
+			T = self.link.getTransform()
+			Tb = self.baseLink.getTransform()
+			Tbinv = se3.inv(Tb)
+			pb = se3.apply(Tbinv,se3.apply(T,self.localPosition))
+			if self.taskType == 'po':
+				Jb = self.baseLink.getJacobian(pb)
+			elif self.taskType == 'position':
+				Jb = self.baseLink.getPositionJacobian(pb)
+			elif self.taskType == 'orientation':
+				Jb = self.baseLink.getOrientationJacobian()
+			Jb = np.array(Jb)
+			#subtract out jacobian w.r.t. baseLink
+			J -= Jb
+		if self.activeDofs!=None:
+			J = select_cols(J,self.activeDofs)
+		return J
+
+	def drawGL(self,q):
+		from OpenGL import GL
+		x = self.getSensedValue(q)
+		xdes = self.xdes
+		if self.baseLinkNo >= 0:
+			Tb = self.baseLink.getTransform()
+			if self.taskType == "position":
+				x = se3.apply(Tb,x)
+				xdes = se3.apply(Tb,xdes)
+			elif self.taskType == "po":
+				x = se3.mul(Tb,x)
+				xdes = se3.mul(Tb,xdes)
+		GL.glPointSize(6)
+		GL.glEnable(GL.GL_POINT_SMOOTH)
+		GL.glBegin(GL.GL_POINTS)
+		if self.taskType == "position":
+			GL.glColor3f(1,0,0)	#red 
+			GL.glVertex3fv(xdes)
+			GL.glColor3f(1,0.5,0)	#orange
+			GL.glVertex3fv(x)
+		elif self.taskType == "po":
+			GL.glColor3f(1,0,0)	#red 
+			GL.glVertex3fv(xdes[1])
+			GL.glColor3f(1,0.5,0)	#orange
+			GL.glVertex3fv(x[1])
+		GL.glEnd()
+
+
+class JointTask(Task):
+	"""A joint angle task class 
+	"""
+	def __init__(self, robot, jointIndices):
+		Task.__init__(self)
+		self.robot = robot
+		self.jointIndices = jointIndices
+		self.name = "Joint"
 		pass
 
-	def manageTasks(self,inputs,opSpaceController):
-		"""Add, delete, or change operational space tasks"""
-		pass
+	def getSensedValue(self, q):
+		return [q[jointi] for jointi in self.jointIndices]
+	
+	def getJacobian(self, q):
+		J = sparse.lil_matrix((len(self.jointIndices),self.robot.numLinks()))
+		for i,jointi in enumerate(self.jointIndices):
+			J[i,jointi] = 1
+		return J
+	
+		J = []
+		for jointi in self.jointIndices:
+			Ji = [0] * self.robot.numLinks()
+			Ji[jointi] = 1
+			J.append(Ji)
+		return J
 
+class JointLimitTask(Task):
+	def __init__(self,robot):
+		Task.__init__(self)
+		self.robot = robot
+		self.buffersize = 2.0
+		self.qmin,self.qmax = robot.getJointLimits()
+		self.accelMax = robot.getAccelerationLimits()
+		self.wscale = 0.1
+		self.maxw = 10
+		self.active = []
+		self.weight = 0
+		self.xdes = []
+		self.dxdes = []
+		self.name = "Joint limits"
+		self.setGains(-0.1,-0.2,0)
+	
+		
+	def updateState(self, q, dq, dt):
+		""" check (q, dq) against joint limits
+		Activates joint limit constraint, i.e., add a joint task
+		to avoid reaching limit, when surpassing a threshold.
+
+		Or, increase weight on this joint task as joint gets closer to its limit.
+
+		"""
+		self.active = []
+		self.weight = []
+		self.xdes = []
+		self.dxdes = []
+		buffersize = self.buffersize
+		wscale = self.wscale
+		maxw = self.maxw
+		for i,(j,dj,jmin,jmax,amax) in enumerate(zip(q,dq,self.qmin,self.qmax,self.accelMax)):
+			if jmax <= jmin: continue
+			jstop = j
+			a = amax / buffersize
+			w = 0
+			ades = 0
+			if dj > 0.0:
+				t = dj / a
+			        #j + t*dj - t^2*a/2
+				jstop = j + t*dj - t*t*a*0.5
+				if jstop > jmax:
+					#add task to slow down
+				        #perfect accel solves for:
+				        #j+ dj^2 / 2a  = jmax
+				        #dj^2 / 2(jmax-j)   = a
+					if j >= jmax:
+						print "Joint",self.robot.link(i).getName(),"exceeded max",j,">=",jmax
+						ades = -amax
+						w = maxw
+					else:
+						alim = dj*dj/(jmax-j)*0.5
+						if alim > amax:
+							ades = -amax
+							w = maxw
+						else:
+							ades = -alim
+							w = wscale*(alim-a)/(amax-alim)
+						#print "Joint",self.robot.link(i).getName(),j,dj,"near upper limit",jmax,", desired accel:",ades," weight",w
+			else:
+				t = -dj / a
+			        #j + t*dj + t^2*a/2
+				jstop = j + t*dj + t*t*a*0.5
+				if jstop < jmin:
+					#add task to slow down
+				        #perfect accel solves for:
+				        #j - dj^2 / 2a  = jmin
+				        #dj^2 / 2(j-jmin)   = a
+					if j <= jmin:
+						print "Joint",self.robot.link(i).getName(),"exceeded min",j,"<=",jmin
+						ades = amax
+						w = maxw
+					else:
+						alim = dj*dj/(j-jmin)*0.5
+						if alim > amax:
+							ades = amax
+							w = maxw
+						else:
+							ades = alim
+							w = wscale*(alim-a)/(amax-alim)
+						#print "Joint",self.robot.link(i).getName(),j,dj,"near lower limit",jmin,", desired accel:",ades," weight",w
+			if w > maxw:
+				w = maxw
+			self.active.append(i)
+			self.xdes.append(max(jmin,min(jmax,j)))
+			self.dxdes.append(dj+dt*ades)
+			self.weight.append(w)
+		if len(self.weight)==0:
+			self.weight = 0
+		return
+	
+	def getSensedValue(self, q):
+		return [q[jointi] for jointi in self.active]
+	
+	def getJacobian(self, q):
+		J = sparse.lil_matrix((len(self.active),self.robot.numLinks()))
+		for i,jointi in enumerate(self.active):
+			J[i,jointi] = 1
+		return J
+
+		J = []
+		for jointi in self.active:
+			Ji = [0] * self.robot.numLinks()
+			Ji[jointi] = 1
+			J.append(Ji)
+		return J
