@@ -228,7 +228,7 @@ def colorize(object,value,colormap=None,feature=None,vrange=None,lighting=None):
                         n = vectorops.cross(positions[b]-positions[a],positions[c]-positions[a])
                         normals[i//3] = np.array(vectorops.unit(n))
         if feature == 'faces':
-            if lighting is not None or value in ['positions','x','y','z']:
+            if lighting is not None or value in ['position','x','y','z']:
                 #compute positions = triangle centroids
                 assert not isinstance(geometrydata,PointCloud)
                 tris = np.array(geometrydata.indices,dtype=np.uint32)
@@ -237,6 +237,7 @@ def colorize(object,value,colormap=None,feature=None,vrange=None,lighting=None):
                 for i,t in enumerate(tris):
                     tpositions[i] = np.average(positions[t,:],axis=0)
                 positions = tpositions
+            
         if isinstance(value,str):
             if value == 'p' or value == 'position':
                 pmin = positions.min(axis=0)
@@ -265,7 +266,7 @@ def colorize(object,value,colormap=None,feature=None,vrange=None,lighting=None):
                 else:
                     assert False,"Code should never be reached"
             assert value is not None
-            assert len(value) == N
+            assert len(value) == N,"Got the wrong values? feature = %s, positions size %d, value size %d, N=%d"%(feature,positions.shape[0],len(value),N)
 
         if lighting is not None:
             if hasattr(lighting,'__iter__'):
