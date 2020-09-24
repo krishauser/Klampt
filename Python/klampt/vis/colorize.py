@@ -5,7 +5,7 @@ try:
 except Exception:
     HAVE_NUMPY = False
 
-def colorize(object,value,colormap=None,feature=None,vrange=None):
+def colorize(object,value,colormap=None,feature=None,vrange=None,lighting=None):
     """Colorizes an object according to some value.  Useful for making
     heatmaps, false color images, etc.  Can only be used with point clouds
     and triangle meshes.
@@ -32,6 +32,10 @@ def colorize(object,value,colormap=None,feature=None,vrange=None):
     - ``colorize(trimesh,segments,'random')``: if clusters is a list of segment
       IDs (len(segments) = # triangles), this assigns a random color to each
       segment.
+
+    - ``colorize(trimesh,segments,'random',lighting=[0,0,-1])``: similar to
+      above, but each triangle is shaded as though the scene was lighted by a
+      downward-facing directional light (noonday sun).
 
 
     Arguments:
@@ -75,6 +79,12 @@ def colorize(object,value,colormap=None,feature=None,vrange=None):
             to u=(v-vrange[0])/(vrange[1]-vrange[0]) before passing to the
             colormap.  If not provided, the range is determined automatically
             by the min/max of values.
+        lighting (3-list or callable, optional): if a 3-list, this is
+            interpreted as the direction of a directional light. The items are
+            shaded as though the light were illuminating the scene.  If it's a
+            callable, this is a function ``f(p,n)`` of the position and normal
+            of a point or triangle, which should return a value in the range
+            [0,1] indicating the overall brightness of the item.
 
     """
     if colormap is None:
@@ -131,6 +141,7 @@ def colorize(object,value,colormap=None,feature=None,vrange=None):
             raise ValueError("Triangle meshes are the only geometries that can use the 'faces' feature")
         N = len(geometrydata.indices)//3
 
+    #check if values needs transforming
     if isinstance(value,str):
         if feature == None:
             if not isinstance(colormap,str) or colormap != 'random' or isinstance(geometrydata,PointCloud):
@@ -149,101 +160,20 @@ def colorize(object,value,colormap=None,feature=None,vrange=None):
             vname = value
             found = False
             if isinstance(geometrydata,PointCloud):
+                if vname == 'nx':
+                    vname = 'normal_x'
+                elif vname == 'ny':
+                    vname = 'normal_y'
+                elif vname == 'nz':
+                    vname = 'normal_z'
                 for i in range(geometrydata.numProperties()):
                     if value == geometrydata.propertyNames[i]:
                         found = True
                         value = geometrydata.getProperties(i)
                         break
-            if not found:
-                positions = np.array(geometrydata.vertices)
-                positions = positions.reshape((positions.shape[0]//3,3))
-                if feature == 'vertices':
-                    if value == 'p' or value == 'position':
-                        pmin = positions.min(axis=0)
-                        pmax = positions.max(axis=0)
-                        assert pmin.shape == (3,)
-                        dim = (pmax-pmin).max()
-                        value = (positions - pmin[np.newaxis,:])/dim
-                    elif value == 'x':
-                        value = positions[:,0]
-                    elif value == 'y':
-                        value = positions[:,1]
-                    elif value == 'z':
-                        value = positions[:,2]
-                    else:
-                        if value not in ['n','normal','nx','ny','nz']:
-                            raise ValueError("Invalid named value "+value)
-                        if isinstance(geometrydata,PointCloud):
-                            raise ValueError("Invalid named value "+value)
-                        vrange = [-1,1]
-                        vnormals = np.zeros((N,3))
-                        for i in range(0,len(geometrydata.indices),3):
-                            a,b,c = geometrydata.indices[i],geometrydata.indices[i+1],geometrydata.indices[i+2]
-                            n = vectorops.cross(positions[b]-positions[a],positions[c]-positions[a])
-                            n = np.array(vectorops.unit(n))
-                            vnormals[a] += n
-                            vnormals[b] += n
-                            vnormals[c] += n
-                        for i in range(vnormals.shape[0]):
-                            l = np.linalg.norm(vnormals[i])
-                            if l > 0:
-                                vnormals[i] *= 1.0/l
-                        if value == 'n' or value == 'normal':
-                            value = (vnormals + 1.0)*0.5
-                        elif value == 'nx':
-                            value = vnormals[:,0]
-                        elif value == 'ny':
-                            value = vnormals[:,1]
-                        elif value == 'nz':
-                            value = vnormals[:,2]
-                        else:
-                            assert False,"Code should never be reached"
-                    assert value is not None
-                else:
-                    assert not isinstance(geometrydata,PointCloud)
-                    tris = np.array(geometrydata.indices,dtype=np.uint32)
-                    tris = tris.reshape((tris.shape[0]//3,3))
-                    if value in ['p','position','x','y','z']:
-                        tpositions = np.zeros((N,3))
-                        for i,t in enumerate(tris):
-                            tpositions[i] = np.average(positions[t,:],axis=0)
-                        if value == 'p' or value == 'position':
-                            pmin = tpositions.min(axis=0)
-                            pmax = tpositions.max(axis=0)
-                            assert pmin.shape == (3,)
-                            dim = (pmax-pmin).max()
-                            value = (tpositions - pmin[np.newaxis,:])/dim
-                        elif value == 'x':
-                            value = tpositions[:,0]
-                        elif value == 'y':
-                            value = tpositions[:,1]
-                        elif value == 'z':
-                            value = tpositions[:,2]
-                        else:
-                            assert False,"Code should never be reached"
-                    else:
-                        if value not in ['n','normal','nx','ny','nz']:
-                            raise ValueError("Invalid named value "+value)
-                        vrange = [-1,1]
-                        normals = np.zeros((N,3))
-                        for i in range(0,len(geometrydata.indices),3):
-                            a,b,c = geometrydata.indices[i],geometrydata.indices[i+1],geometrydata.indices[i+2]
-                            n = vectorops.cross(positions[b]-positions[a],positions[c]-positions[a])
-                            normals[i//3] = np.array(vectorops.unit(n))
-                        if value == 'n' or value == 'normal':
-                            value = (normals + 1.0)*0.5
-                        elif value == 'nx':
-                            value = normals[:,0]
-                        elif value == 'ny':
-                            value = normals[:,1]
-                        elif value == 'nz':
-                            value = normals[:,2]
-                        else:
-                            assert False,"Code should never be reached"
-                    assert value is not None
-            else:
+            if found:
                 assert value is not None
-        assert len(value) == N,"Feature is "+feature+" with length "+str(N)+" but extracted values of size "+str(len(value))
+                assert len(value) == N,"Feature is "+feature+" with length "+str(N)+" but extracted values of size "+str(len(value))
     else:
         if not hasattr(value,'__iter__'):
             raise ValueError("Provided an invalid value "+str(value))
@@ -265,6 +195,92 @@ def colorize(object,value,colormap=None,feature=None,vrange=None):
         if len(value) != N:
             raise ValueError("The number of values does not match the number of features: %d != %d"%(len(value),N))
 
+    shading = None
+    if isinstance(value,str) or lighting is not None:
+        #need positions / normals -- compute them for the indicated features
+        positions = np.array(geometrydata.vertices)
+        positions = positions.reshape((positions.shape[0]//3,3))
+        if lighting is not None or value in ['n','normal','nx','ny','nz']:
+            if isinstance(geometrydata,PointCloud):
+                #get normals from point cloud
+                from ..model import sensing
+                normals = np.asarray(sensing.point_cloud_normals(geometrydata,estimation_viewpoint=[0,0,0]))
+
+            else:
+                if feature == 'vertices':
+                    #compute normals by averaging triangle vertices
+                    normals = np.zeros((N,3))
+                    for i in range(0,len(geometrydata.indices),3):
+                        a,b,c = geometrydata.indices[i],geometrydata.indices[i+1],geometrydata.indices[i+2]
+                        n = vectorops.cross(positions[b]-positions[a],positions[c]-positions[a])
+                        n = np.array(vectorops.unit(n))
+                        normals[a] += n
+                        normals[b] += n
+                        normals[c] += n
+                    for i in range(normals.shape[0]):
+                        l = np.linalg.norm(normals[i])
+                        if l > 0:
+                            normals[i] *= 1.0/l
+                else:
+                    normals = np.zeros((N,3))
+                    for i in range(0,len(geometrydata.indices),3):
+                        a,b,c = geometrydata.indices[i],geometrydata.indices[i+1],geometrydata.indices[i+2]
+                        n = vectorops.cross(positions[b]-positions[a],positions[c]-positions[a])
+                        normals[i//3] = np.array(vectorops.unit(n))
+        if feature == 'faces':
+            if lighting is not None or value in ['positions','x','y','z']:
+                #compute positions = triangle centroids
+                assert not isinstance(geometrydata,PointCloud)
+                tris = np.array(geometrydata.indices,dtype=np.uint32)
+                tris = tris.reshape((tris.shape[0]//3,3))
+                tpositions = np.zeros((N,3))
+                for i,t in enumerate(tris):
+                    tpositions[i] = np.average(positions[t,:],axis=0)
+                positions = tpositions
+        if isinstance(value,str):
+            if value == 'p' or value == 'position':
+                pmin = positions.min(axis=0)
+                pmax = positions.max(axis=0)
+                assert pmin.shape == (3,)
+                dim = (pmax-pmin).max()
+                value = (positions - pmin[np.newaxis,:])/dim
+            elif value == 'x':
+                value = positions[:,0]
+            elif value == 'y':
+                value = positions[:,1]
+            elif value == 'z':
+                value = positions[:,2]
+            else:
+                if value not in ['n','normal','nx','ny','nz']:
+                    raise ValueError("Invalid named value "+value)
+                vrange = [-1,1]
+                if value == 'n' or value == 'normal':
+                    value = (normals + 1.0)*0.5
+                elif value == 'nx':
+                    value = normals[:,0]
+                elif value == 'ny':
+                    value = normals[:,1]
+                elif value == 'nz':
+                    value = normals[:,2]
+                else:
+                    assert False,"Code should never be reached"
+            assert value is not None
+            assert len(value) == N
+
+        if lighting is not None:
+            if hasattr(lighting,'__iter__'):
+                if len(lighting) != 3:
+                    raise ValueError("Lighting vector needs to be a 3-vector")
+                shading = -np.dot(normals,np.asarray(lighting))
+                shading[shading < 0] = 0
+                shading[shading > 1] = 1
+                shading = 0.75*shading + 0.25
+                assert np.all(shading >= 0) and np.all(shading <= 1)
+            else:
+                if not callable(lighting):
+                    raise ValueError("Lighting argument needs to be a 3-vector or callable")
+                shading = np.array([lighting(p,n) for p,n in zip(positions,normals)])
+
     #now map values to colors
     colors = None
     if colormap == 'random':
@@ -285,6 +301,9 @@ def colorize(object,value,colormap=None,feature=None,vrange=None):
         value = np.asarray(value)
         interp = (value - vrange[0])*(1.0/(vrange[1]-vrange[0]))
         colors = cm_interpolator(interp)
+
+    if shading is not None:
+        colors[:,:3] = shading[:,np.newaxis]*colors[:,:3]
 
     #finally, assign colors to object
     if isinstance(appearance,PointCloud):

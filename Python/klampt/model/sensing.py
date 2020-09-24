@@ -18,6 +18,10 @@ _has_numpy = False
 _tried_numpy_import = False
 np = None
 
+_has_scipy = False
+_tried_scipy_import = False
+sp = None
+
 def _try_numpy_import():
     global _has_numpy,_tried_numpy_import
     global np
@@ -32,6 +36,21 @@ def _try_numpy_import():
         print("klampt.model.sensing.py: Warning, numpy not available.")
         _has_numpy = False
     return _has_numpy
+
+def _try_scipy_import():
+    global _has_scipy,_tried_scipy_import
+    global sp
+    if _tried_scipy_import:
+        return _has_scipy
+    _tried_scipy_import = True
+    try:
+        import scipy as sp
+        _has_scipy = True
+        #sys.modules['scipy'] = scipy
+    except ImportError:
+        print("klampt.model.sensing.py: Warning, scipy not available.")
+        _has_scipy = False
+    return _has_scipy
 
 def get_sensor_xform(sensor,robot=None):
     """Extracts the transform of a SimRobotSensor.  The sensor must be
@@ -130,11 +149,17 @@ def camera_to_images(camera,image_format='numpy',color_format='channels'):
     """
     assert isinstance(camera,SimRobotSensor),"Must provide a SimRobotSensor instance"
     assert camera.type() == 'CameraSensor',"Must provide a camera sensor instance"
+    import time
+    t_1 = time.time()
     w = int(camera.getSetting('xres'))
     h = int(camera.getSetting('yres'))
     has_rgb = int(camera.getSetting('rgb'))
     has_depth = int(camera.getSetting('depth'))
+    t0 = time.time()
+    print("camera.getSettings() time",t0-t_1)
     measurements = camera.getMeasurements()
+    t1 = time.time()
+    print("camera.getMeasurements() time",t1-t0)
     if image_format == 'numpy':
         if not _try_numpy_import():
             image_format = 'native'
@@ -142,7 +167,10 @@ def camera_to_images(camera,image_format='numpy',color_format='channels'):
     depth = None
     if has_rgb:
         if image_format == 'numpy':
+            t0 = time.time()
             abgr = np.array(measurements[0:w*h]).reshape(h,w).astype(np.uint32)
+            t1 = time.time()
+            print("Numpy array creation time",t1-t0)
             if color_format == 'bgr':
                 rgb = abgr
             elif color_format == 'rgb':
@@ -154,6 +182,8 @@ def camera_to_images(camera,image_format='numpy',color_format='channels'):
                 rgb[:,:,0] =                np.bitwise_and(abgr,0x00000ff)
                 rgb[:,:,1] = np.right_shift(np.bitwise_and(abgr,0x00ff00), 8)
                 rgb[:,:,2] = np.right_shift(np.bitwise_and(abgr,0x0ff0000), 16)
+            t2 = time.time()
+            print("  Conversion time",t2-t1)
         else:
             if color_format == 'bgr':
                 rgb = []
@@ -177,7 +207,10 @@ def camera_to_images(camera,image_format='numpy',color_format='channels'):
     if has_depth:
         start = (w*h if has_rgb else 0)
         if image_format == 'numpy':
+            t0 = time.time()
             depth = np.array(measurements[start:start+w*h]).reshape(h,w)
+            t1 = time.time()
+            print("Numpy array creation time",t1-t0)
         else:
             depth = []
             for i in range(h):
@@ -189,6 +222,7 @@ def camera_to_images(camera,image_format='numpy',color_format='channels'):
     elif has_depth:
         return depth
     return None
+
 
 def camera_to_points(camera,points_format='numpy',all_points=False,color_format='channels'):
     """Given a SimRobotSensor that is a CameraSensor, returns a point cloud associated with the current measurements.
@@ -307,6 +341,7 @@ def camera_to_points(camera,points_format='numpy',all_points=False,color_format=
     else:
         raise NotImplementedError("Native format depth image processing not done yet")
 
+
 def camera_to_points_world(camera,robot,points_format='numpy',color_format='channels'):
     """Same as :meth:`camera_to_points`, but converts to the world coordinate
     system given the robot to which the camera is attached.  
@@ -337,6 +372,7 @@ def camera_to_points_world(camera,robot,points_format='numpy',color_format='chan
         raise ValueError("Invalid format "+str(points_format))
     return pts
 
+
 def camera_to_viewport(camera,robot):
     """Returns a GLViewport instance corresponding to the camera's view. 
 
@@ -365,3 +401,242 @@ def camera_to_viewport(camera,robot):
     view.camera.set_orientation(xform[0],['x','y','z'])
     view.clippingplanes = (zmin,zmax)
     return view
+
+
+def fit_plane3(point1,point2,point3):
+    """Returns a 3D plane equation fitting the 3 points.
+  
+    The result is (a,b,c,d) with the plane equation ax+by+cz+d=0
+    """
+    normal = np.cross(point2-point1,point3-point1)
+    nlen = np.linalg.norm(normal)
+    if nlen < 1e-4:
+        #degenerate
+        raise ValueError("Points are degenerate")
+    normal = normal / nlen
+    offset = -np.dot(normal,point1)
+    return (normal[0],normal[1],normal[2],offset)
+
+
+def fit_plane(points):
+    """Returns a 3D plane equation that is a least squares fit
+    through the points (len(points) >= 3)."""
+    if len(points)<3:
+        raise ValueError("Need to have at least 3 points to fit a plane")
+    #if len(points)==3:
+    #    return fit_plane3(points[0],points[1],points[2])
+    points = np.asarray(points)
+    centroid = np.average(points,axis=0)
+    U,W,Vt = np.linalg.svd(points-[centroid]*len(points))
+    normal = Vt[2,:]
+    return normal[0],normal[1],normal[2],-np.dot(centroid,normal)
+
+ 
+class PlaneFitter:
+    """
+    Online fitting of planes through 3D point clouds
+   
+    Attributes:
+        normal (3-vector): best-fit normal
+        centroid (3-vector): centroid of points
+        count (int): # of points
+        sse (float): fitting sum of squared errors
+        cov (3x3 array): covariance of points
+    """
+    def __init__(self,points=None):
+        if points is None:
+            self.count = 0
+            self.centroid = np.zeros(3)
+            self.cov = np.zeros((3,3))
+            self.normal = np.array([0,0,1])
+            self.sse = 0
+        else:
+            self.count = len(points)
+            self.centroid = np.average(points,axis=0)
+            pprime = points - [self.centroid]*len(points)
+            self.cov = np.dot(pprime.T,pprime)/self.count
+            self._update_plane()
+   
+    def plane_equation(self):
+        """Returns (a,b,c,d) with ax+by+cz+d=0 the plane equation"""
+        offset = np.dot(self.centroid,self.normal)
+        return (self.normal[0],self.normal[1],self.normal[2],-offset)
+   
+    def goodness_of_fit(self):
+        """Returns corrected RMSE"""
+        if self.count <= 3:
+            return float('inf')
+        return math.sqrt(self.sse*self.count / (self.count-3))
+   
+    def add_point(self,pt):
+        """Online estimation of best fit plane"""
+        new_count = self.count + 1
+        new_centroid = self.centroid + (pt-self.centroid)/new_count
+        old_sse = (self.cov + np.outer(self.centroid,self.centroid))*self.count
+        new_sse = old_sse + np.outer(pt,pt)
+        new_cov = new_sse/new_count - np.outer(new_centroid,new_centroid)
+        self.count = new_count
+        self.centroid = new_centroid
+        self.cov = new_cov
+        self._update_plane()
+   
+    def merge(self,fitter,inplace = False):
+        """Online merging of two plane fitters.
+        
+        If inplace = False, returns a new PlaneFitter.
+        If inplace = True, self is updated with the result.
+        """
+        if not inplace:
+            res = PlaneFitter()
+        else:
+            res = self
+        new_count = self.count + fitter.count
+        old_sum = self.centroid*self.count
+        new_sum = old_sum + fitter.centroid*fitter.count
+        new_centroid = new_sum/new_count
+        old_sse = (self.cov + np.outer(self.centroid,self.centroid))*self.count
+        fitter_sse = (fitter.cov + np.outer(fitter.centroid,fitter.centroid))*fitter.count
+        new_sse = old_sse + fitter_sse
+        new_cov = new_sse/new_count - np.outer(new_centroid,new_centroid)
+        res.count = new_count
+        res.centroid = new_centroid
+        res.cov = new_cov
+        res._update_plane()
+        return res
+   
+    def distance(self,pt):
+        """Returns the signed distance to this plane"""
+        return np.dot(self.normal,pt)-np.dot(self.normal,self.centroid)
+ 
+    def _update_plane(self):
+        w,v = np.linalg.eig(self.cov)
+        index = np.argmin(w)
+        self.normal = v[:,index]
+        self.sse = self.count * np.dot(self.normal,np.dot(self.cov,self.normal))
+ 
+
+def point_cloud_normals(pc,estimation_radius=None,estimation_knn=None,estimation_viewpoint=None,add=True):
+    """Returns the normals of the point cloud.  If pc has the standard
+    ``normal_x, normal_y, normal_z`` properties, these will be returned. 
+    Otherwise, they will be estimated using plane fitting.
+
+    The plane fitting method uses scipy nearest neighbor detection if
+    scipy is available. Otherwise it uses a spatial grid.  The process is as
+    follows:
+
+    - If ``estimation_radius`` is provided, then it will use neighbors within
+      this range.  For a spatial grid, this is the grid size.
+    - If ``estimation_knn`` is provided, then planes will be fit to these 
+      number of neighbors. 
+    - If neither is provided, then estimation_radius is set to 3 * max
+      dimension of the point cloud / sqrt(N). 
+    - If not enough points are within a neighborhood (either 4 or
+      ``estimation_knn``, whichever is larger), then the normal is set to 0.
+    - If ``estimation_viewpoint`` is provided, this must be a 3-list.  The
+      normals are oriented such that they point toward the viewpoint.
+
+    Returns:
+        A list of N 3-lists, or an N x 3 numpy array if numpy is available.
+
+        If ``add=True``, estimated normals will be added to the point cloud 
+        under the ``normal_x, normal_y, normal_z`` properties.
+    """
+    geom = None
+    if isinstance(pc,Geometry3D):
+        assert pc.type() == 'PointCloud',"Must provide a point cloud to point_cloud_normals"
+        geom = pc
+        pc = pc.getPointCloud()
+    assert isinstance(pc,PointCloud)
+    inds = [-1,-1,-1]
+    props = ['normal_x','normal_y','normal_z']
+    for i in range(pc.numProperties()):
+        try:
+            ind = props.index(pc.propertyNames[i])
+            inds[ind] = i
+        except ValueError:
+            pass
+    if all(i>=0 for i in inds):
+        #has the properties!
+        normal_x = pc.getProperties(inds[0])
+        normal_y = pc.getProperties(inds[1])
+        normal_z = pc.getProperties(inds[2])
+        if _has_numpy:
+            return np.array([normal_x,normal_y,normal_z]).T
+        else:
+            return list(zip(normal_x,normal_y,normal_z))
+
+    if not all(i < 0 for i in inds):
+        raise ValueError("Point cloud has some normal components but not all of them?")
+    #need to estimate normals
+    _try_numpy_import()
+    _try_scipy_import()
+    N = len(pc.vertices)//3
+    if not _has_numpy:
+        raise RuntimeError("Need numpy to perform plane fitting")
+    positions = np.array(pc.vertices)
+    positions = positions.reshape((N,3))
+    if estimation_radius is None and estimation_knn is None:
+        R = max(positions.max(axis=0)-positions.min(axis=0))
+        estimation_radius = 3*R/math.sqrt(N)
+    if estimation_knn is None or estimation_knn < 4:
+        estimation_knn = 4
+    if _has_scipy:
+        normals = []
+        import scipy.spatial
+        tree = scipy.spatial.cKDTree(positions)
+        if estimation_radius is not None:
+            neighbors = tree.query_ball_point(positions,estimation_radius)
+            for n in neighbors:
+                if len(n) < estimation_knn:
+                    normals.append([0,0,0])
+                else:
+                    #fit a plane to neighbors
+                    normals.append(fit_plane([positions[i] for i in n])[:3])
+        else:
+            d,neighbors = tree.query(positions,estimation_knn)
+            for n in neighbors:
+                normals.append(fit_plane([positions[i] for i in n])[:3])
+    else:
+        if estimation_radius is None:
+            raise ValueError("Without scipy, can't do a k-NN plane estimation")
+        #do a spatial hash
+        normals = np.zeros((N,3))
+        indices = (positions / estimation_radius).astype(int)
+        from collections import defaultdict
+        pt_hash = defaultdict(list)
+        for i,(ind,p) in enumerate(zip(indices,positions)):
+            pt_hash[ind].append((i,p))
+        successful = 0
+        for (ind,iplist) in pt_hash.items():
+            if len(iplist) < estimation_knn:
+                pass
+            else:
+                pindices = [ip[0] for ip in iplist]
+                pts = [ip[1] for ip in iplist]
+                n = fit_plane(pts)[:3]
+                normals[pindices,:] = n
+                successful += len(pindices)
+    normals = np.asarray(normals)
+
+    if estimation_viewpoint is not None:
+        #flip back-facing normals
+        disp = positions - estimation_viewpoint
+        for i,(n,d) in enumerate(zip(normals,disp)):
+            if np.dot(n,d) < 0:
+                normals[i,:] = -n
+    else:
+        #flip back-facing normals
+        for i,(n,p) in enumerate(zip(normals,positions)):
+            if np.dot(n,p) < 0:
+                normals[i,:] = -n
+
+    if add:
+        normal_x = normals[:,0].tolist()
+        normal_y = normals[:,1].tolist()
+        normal_z = normals[:,2].tolist()
+        pc.addProperty('normal_x',normal_x)
+        pc.addProperty('normal_y',normal_y)
+        pc.addProperty('normal_z',normal_z)
+        if geom is not None:
+            geom.setPointCloud(pc)
+    return normals
