@@ -5,19 +5,20 @@ from collections import deque
 import math
 
 def set_cartesian_constraints(x,constraints,solver):
-    """For x a workspace parameter setting (achieved via config.getConfig(constraints)),
-    a set of constraints, and a IKSolver object, modifies the constraints
-    and the solver so that the solver is setup to match the workspace parameter
-    setting x."""
+    """For x a workspace parameter setting (achieved via
+    ``config.getConfig(constraints)``), a set of constraints, and a IKSolver
+    object, modifies the constraints and the solver so that the solver is setup
+    to match the workspace parameter setting x."""
     config.setConfig(constraints,x)
     solver.clear()
     for c in constraints:
         solver.add(c)
 
 def solve_cartesian(x,constraints,solver):
-    """For x a workspace parameter setting (achieved via config.getConfig(constraints)),
-    a set of constraints, and a IKSolver object, returns True if the solver can find
-    a solution (from the robot's current configuration). Returns True if successful."""
+    """For x a workspace parameter setting (achieved via
+    ``config.getConfig(constraints)``), a set of constraints, and a IKSolver
+    object, returns True if the solver can find a solution, starting from the
+    robot's current configuration). Returns True if successful."""
     set_cartesian_constraints(x,constraints,solver)
     return  solver.solve()
 
@@ -57,13 +58,18 @@ def cartesian_interpolate_linear(robot,a,b,constraints,
     solver=None,
     feasibilityTest=None,
     maximize=False):
-    """Resolves a continuous robot trajectory that interpolates between
-    two cartesian points for specified IK constraints.  The output
-    path is only a kinematic resolution, and has time domain [0,1].
+    """Resolves a continuous robot trajectory that interpolates between two
+    cartesian points for specified IK constraints.  The output path is only a
+    kinematic resolution, and has time domain [0,1].
+
+    Differs from :func:`cartesian_interpolate_bisect` in that the solver moves
+    incrementally along the path from a to b in linear fashion.
 
     Args:
         robot: the RobotModel or SubRobotModel.
-        a, b (list of floats): endpoints of the Cartesian trajectory.
+        a (list of floats): start point of the Cartesian trajectory.
+            Assumed derived from config.getConfig(constraints)
+        b (list of floats): start point of the Cartesian trajectory.
             Assumed derived from config.getConfig(constraints)
         constraints: one or more link indices, link names, or IKObjective's
             giving the manner in which the Cartesian space is defined. 
@@ -228,29 +234,45 @@ def cartesian_interpolate_bisect(robot,a,b,constraints,
     solver=None,
     feasibilityTest=None,
     growthTol=10):
-    """Resolves a continuous robot trajectory that interpolates between two cartesian points
-    for a single link of a robot.  Note that the output path is only a kinematic resolution.
-    It has time domain [0,1].
+    """Resolves a continuous robot trajectory that interpolates between two
+    cartesian points for a single link of a robot.  Note that the output path
+    is only a kinematic resolution, and has time domain [0,1].
+
+    Differs from :func:`cartesian_interpolate_linear` in that the solver
+    creates the path from a to b using bisection.  This function may be more
+    capable, but doesn't accept the ``maximize`` argument in case the query
+    doesn't have a solution.
 
     Args:
         robot (RobotModel or SubRobotModel): the robot.
-        a, b (list of floats): endpoints of the Cartesian trajectory.  Assumed derived from config.getConfig(constraints)
-        constraints: one or more link indices, link names, or IKObjective's giving the manner
-            in which the Cartesian space is defined.  Interpreted as follows:
+        a (list of floats): start point of the Cartesian trajectory.
+            Assumed derived from config.getConfig(constraints)
+        b (list of floats): start point of the Cartesian trajectory.
+            Assumed derived from config.getConfig(constraints)
+        constraints: one or more link indices, link names, or IKObjective's
+            giving the manner in which the Cartesian space is defined. 
+            Interpreted as follows:
 
             * int or str: the specified link's entire pose is constrained
-            * IKObjective: the links, constraint types, local positions, and local axes are used as constraints.
-              The world space elements are considered temporary and will change to match the Cartesian trajectory.
-            * list of int, list of str, or list of IKObjective: concatenates the specified constraints together
+            * IKObjective: the links, constraint types, local positions, and
+              local axes are used as constraints. The world space elements are
+              considered temporary and will change to match the Cartesian
+              trajectory.
+            * list of int, list of str, or list of IKObjective: concatenates
+              the specified constraints together
 
-        startConfig (optional): either 'robot' (configuration taken from the robot), a configuration, or None (any configuration)
+        startConfig (optional): either 'robot' (configuration taken from the
+            robot), a configuration, or None (any configuration)
         endConfig (optional): same type as startConfig.
-        delta (float, optional): the maximum configuration space distance between points on the output path
-        solver (IKSolver, optional): if provided, an IKSolver configured with the desired parameters for IK
-            constraint solving.
-        feasibilityTest (function, optional): a function f(q) that returns false when a configuration q is infeasible
-        growthTol (float, optional): the end path can be at most growthTol the times length of the length between the
-            start and goal configurations.
+        delta (float, optional): the maximum configuration space
+            distance between points on the output path
+        solver (IKSolver, optional): if provided, an IKSolver configured with
+            the desired parameters for IK constraint solving.
+        feasibilityTest (function, optional): a function f(q) that returns
+            false when a configuration q is infeasible
+        growthTol (float, optional): the end path can be at most ``growthTol`` 
+            times the length of the length between the start and goal
+            configurations.
 
     Returns: 
         RobotTrajectory or None: a configuration space path that interpolates
