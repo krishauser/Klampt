@@ -1,17 +1,31 @@
-from .robotcontroller import *
+"""Contains utilities for the Klampt Robot Interface Layer.  These help
+implement:
+
+- Generalization of simple interfaces to handle advanced functions, e.g.,
+  motion queues and Cartesian controllers (:class:`RobotInterfaceCompleter` ).
+  This is useful when you have a position controlled robot (e.g., an Arduino-
+  controlled set of motors) and want to do more sophisticated work with it.
+- Robots composed of separate independent parts :class:`MultiRobotInterface`,
+  such as a robot arm + gripper, each working on separate interfaces.
+- Logging... TODO
+- Interface with the Klampt :class:`ControllerBase` controller API.
+
+"""
+
+from .robotinterface import *
 from ..math import vectorops,spline
 from .cartesian_drive import CartesianDriveSolver
 import bisect
 import math
 
-class RobotControllerCompleter(RobotControllerBase):
-    """Completes as much of the RobotControllerBase API as possible from a
-    partially specified RobotControllerBase.  For example, if your
-    RobotControllerBase implements position control, then the Completer
+class RobotInterfaceCompleter(RobotInterfaceBase):
+    """Completes as much of the RobotInterfaceBase API as possible from a
+    partially specified RobotInterfaceBase.  For example, if your
+    RobotInterfaceBase implements position control, then the Completer
     will provide velocity, piecewise linear, and piecewise cubic, and Cartesian
     control commands.  
 
-    Note: Completing the base's part controllers is not implemented yet.
+    Note: Completing the base's part interfaces is not implemented yet.
 
     At a minimum, a base must implement :meth:`sensedPosition` and one of the
     following:
@@ -27,7 +41,7 @@ class RobotControllerCompleter(RobotControllerBase):
         - :meth:`klamptModel`
 
     This class will also not emulate the following, although the basic
-    RobotControllerBase class has default implementations that work OK:
+    RobotInterfaceBase class has default implementations that work OK:
         - :meth:`reset`
         - :meth:`estop`
         - :meth:`softStop`
@@ -46,12 +60,12 @@ class RobotControllerCompleter(RobotControllerBase):
         - Cartesian control using the Klamp't model and IK
 
     Args:
-        baseController (RobotControllerBase): the partially-implemented
-            controller.
+        baseInterface (RobotInterfaceBase): the partially-implemented
+            interface.
     """
-    def __init__(self,baseController):
-        RobotControllerBase.__init__(self)
-        self._base = baseController
+    def __init__(self,baseInterface):
+        RobotInterfaceBase.__init__(self)
+        self._base = baseInterface
         self._parent = None
         self._subRobot = False
         self._parts = None
@@ -94,7 +108,7 @@ class RobotControllerCompleter(RobotControllerBase):
         res is the result of a successful call, and fn is the function name.
 
         Results of prior calls are cached so that we only explore the base
-        controllers' capabilities once.
+        interfaces' capabilities once.
         """
         if isinstance(fn,list):
             #go through functions
@@ -125,7 +139,7 @@ class RobotControllerCompleter(RobotControllerBase):
                 else:
                     #fall through to next iterations
                     pass
-            raise NotImplementedError("Functions "+','.join(fn)+" are not implemented by base controller")
+            raise NotImplementedError("Functions "+','.join(fn)+" are not implemented by base interface")
         try:
             #print("Trying to get native",fn)
             if self._has[fn]:
@@ -144,7 +158,7 @@ class RobotControllerCompleter(RobotControllerBase):
             except NotImplementedError:
                 self._has[fn] = False
                 if fallback is None:
-                    raise NotImplementedError("Function "+fn+" is not implemented by base controller, no fallback available")
+                    raise NotImplementedError("Function "+fn+" is not implemented by base interface, no fallback available")
                 #print("...not available, returning",fallback(*args))
                 return fallback(*args)
 
@@ -159,7 +173,7 @@ class RobotControllerCompleter(RobotControllerBase):
         self._try('controlRate',[],lambda :0)
         curclock = self._try('clock',[],lambda :0)
         if not self._has['controlRate'] and not self._has['clock']:
-            print ("RobotControllerCompleter(%s): Need at least one of controlRate() and clock() to be implemented"%(str(self._base),))
+            print ("RobotInterfaceCompleter(%s): Need at least one of controlRate() and clock() to be implemented"%(str(self._base),))
             return False
         self._try('sensedPosition',[],lambda *args:0)
         self._try('sensedVelocity',[],lambda *args:0)
@@ -172,16 +186,16 @@ class RobotControllerCompleter(RobotControllerBase):
         self._try('destinationTime',[],lambda *args:0)
         self._try('queuedTrajectory',[],lambda *args:0)
         if not self._has['sensedPosition'] and not self._has['commandedPosition']:
-            print ("RobotControllerCompleter(%s): Need at least one of sensedPosition() and commandedPosition() to be implemented"%(str(self._base),))
+            print ("RobotInterfaceCompleter(%s): Need at least one of sensedPosition() and commandedPosition() to be implemented"%(str(self._base),))
             return False
-        self._emulator = _RobotControllerEmulatorData(self._base.numDOFs(),self._base.klamptModel())
+        self._emulator = _RobotInterfaceEmulatorData(self._base.numDOFs(),self._base.klamptModel())
         self._emulator.curClock = curclock
         assert curclock is not None
         self._emulator.lastClock = None
         return True
 
     def startStep(self):
-        assert not self._subRobot,"Can't do startStep on a sub-controller"
+        assert not self._subRobot,"Can't do startStep on a sub-interface"
         if not self._has['controlRate']:
             self._emulator.pendingClock = self.clock()
             if self._emulator.lastClock != self._emulator.pendingClock:
@@ -192,7 +206,7 @@ class RobotControllerCompleter(RobotControllerBase):
     _FUNC_TO_CONTROL_MODE = {'setPosition':'p','moveToPosition':'m','setVelocity':'v','setTorque':'t','pid':'setPID','pwl':'setPiecewiseLinear','pwc':'setPiecewiseCubic'}
 
     def endStep(self):
-        assert not self._subRobot,"Can't do endStep on a sub-controller"
+        assert not self._subRobot,"Can't do endStep on a sub-interface"
         self._try('endStep',[],lambda *args:0)
         if not self._has['controlRate']:
             self._emulator.lastClock = self._emulator.curClock
@@ -258,7 +272,7 @@ class RobotControllerCompleter(RobotControllerBase):
     def controlRate(self):
         def _controlRate_backup(self):
             if self._emulator.dt is None:
-                raise RuntimeError("Base controller doesn't have controlRate, and need to have at least one time step before determining backup controlRate")
+                raise RuntimeError("Base interface doesn't have controlRate, and need to have at least one time step before determining backup controlRate")
             return 1.0/self._emulator.dt
         return self._try('controlRate',[],lambda :_controlRate_backup(self))
 
@@ -274,8 +288,8 @@ class RobotControllerCompleter(RobotControllerBase):
     def reset(self):
         return self._base.reset()
 
-    def getPartController(self,part=None,joint_idx=None):
-        return _SubRobotControllerCompleter(self,part,joint_idx)
+    def getPartInterface(self,part=None,joint_idx=None):
+        return _SubRobotInterfaceCompleter(self,part,joint_idx)
 
     def jointName(self,joint_idx):
         return self._try('jointName',[self.joint_idx],lambda joint_idx: 'Joint '+str(joint_idx))
@@ -381,69 +395,69 @@ class RobotControllerCompleter(RobotControllerBase):
 
     def destinationPosition(self):
         if self._baseControlMode == self._emulatorControlMode:
-            #using base controller
+            #using base interface
             return self._try('destinationPosition',[],lambda : self._emulator.destinationPosition())
         else:
             return self._emulator.destinationPosition()
 
     def destinationVelocity(self):
         if self._baseControlMode == self._emulatorControlMode:
-            #using base controller
+            #using base interface
             return self._try('destinationVelocity',[],lambda : self._emulator.destinationVelocity())
         else:
             return self._emulator.destinationVelocity()
 
     def destinationTime(self):
         if self._baseControlMode == self._emulatorControlMode:
-            #using base controller
+            #using base interface
             return self._try('destinationTime',[],lambda : self._emulator.destinationTime())
         else:
             return self._emulator.destinationTime()
 
     def cartesianPosition(self,q):
         if self._baseControlMode == self._emulatorControlMode:
-            #using base controller
+            #using base interface
             return self._try('cartesianPosition',[q],lambda q: self._emulator.cartesianPosition(q,self._indices))
         else:
             return self._emulator.cartesianPosition(q,self._indices)
 
     def cartesianVelocity(self,q,dq):
         if self._baseControlMode == self._emulatorControlMode:
-            #using base controller
+            #using base interface
             return self._try('cartesianVelocity',[q,dq],lambda q,dq: self._emulator.cartesianPosition(q,dq,self._indices))
         else:
             return self._emulator.cartesianVelocity(q,dq,self._indices)
 
     def cartesianForce(self,q,t):
         if self._baseControlMode == self._emulatorControlMode:
-            #using base controller
+            #using base interface
             return self._try('cartesianForce',[q,t],lambda q,t: self._emulator.cartesianForce(q,t,self._indices))
         else:
             return self._emulator.cartesianForce(q,t,self._indices)
 
     def sensedCartesianPosition(self):
-        return self._try('sensedCartesianPosition',[],lambda : RobotControllerBase.sensedCartesianPosition(self))
+        return self._try('sensedCartesianPosition',[],lambda : RobotInterfaceBase.sensedCartesianPosition(self))
 
     def sensedCartesianVelocity(self):
-        return self._try('sensedCartesianVelocity',[],lambda : RobotControllerBase.sensedCartesianVelocity(self))
+        return self._try('sensedCartesianVelocity',[],lambda : RobotInterfaceBase.sensedCartesianVelocity(self))
 
     def sensedCartesianForce(self):
-        return self._try('sensedCartesianForce',[],lambda : RobotControllerBase.sensedCartesianForce(self))
+        return self._try('sensedCartesianForce',[],lambda : RobotInterfaceBase.sensedCartesianForce(self))
 
     def commandedCartesianPosition(self):
-        return self._try('commandedCartesianPosition',[],lambda : RobotControllerBase.commandedCartesianPosition(self))
+        return self._try('commandedCartesianPosition',[],lambda : RobotInterfaceBase.commandedCartesianPosition(self))
 
     def commandedCartesianVelocity(self):
-        return self._try('commandedCartesianVelocity',[],lambda : RobotControllerBase.commandedCartesianVelocity(self))
+        return self._try('commandedCartesianVelocity',[],lambda : RobotInterfaceBase.commandedCartesianVelocity(self))
 
     def commandedCartesianForce(self):
-        return self._try('destinationCartesianForce',[],lambda : RobotControllerBase.destinationCartesianForce(self))
+        return self._try('destinationCartesianForce',[],lambda : RobotInterfaceBase.destinationCartesianForce(self))
 
     def destinationCartesianPosition(self):
-        return self._try('destinationCartesianPosition',[],lambda : RobotControllerBase.destinationCartesianPosition(self))
+        return self._try('destinationCartesianPosition',[],lambda : RobotInterfaceBase.destinationCartesianPosition(self))
 
     def destinationCartesianVelocity(self):
-        return self._try('destinationCartesianVelocity',[],lambda : RobotControllerBase.destinationCartesianVelocity(self))
+        return self._try('destinationCartesianVelocity',[],lambda : RobotInterfaceBase.destinationCartesianVelocity(self))
 
     def partToRobotConfig(self,pconfig,part,robotConfig):
         return self._base.partToRobotConfig(pconfig,part,robotConfig)
@@ -464,16 +478,16 @@ class RobotControllerCompleter(RobotControllerBase):
         return self._base.toKlamptVelocity(velocity,klamptVelocity,part=None,joint_idx=None)
 
 
-class MultiRobotController(RobotControllerBase):
-    """A RobotControllerBase that consists of multiple parts that are
+class MultiRobotInterface(RobotInterfaceBase):
+    """A RobotInterfaceBase that consists of multiple parts that are
     addressed separately.  For example, a mobile manipulator can consist of
     a base, arms, and grippers.
 
-    On startup, call ``addPart(name,controller,klamptModel,klamptIndices)`` for
+    On startup, call ``addPart(name,interface,klamptModel,klamptIndices)`` for
     each part of the robot.
 
     .. note::
-        TIP: wrap your controller with a :class:`RobotControllerCompleter`
+        TIP: wrap your interface with a :class:`RobotInterfaceCompleter`
         before adding it so that all parts get a uniform interface.
 
     The total configuration for the robot is a list of floats, segmented into
@@ -482,31 +496,31 @@ class MultiRobotController(RobotControllerBase):
     """
     def __init__(self):
         self._partNames = []
-        self._partControllers = dict()
+        self._partInterfaces = dict()
         self._parts = dict()
         self._parts[None] = []
         self._jointToPart = []
         self._klamptModel = None
         self._klamptParts = dict()
 
-    def addPart(self,partName,partController,klamptModel=None,klamptIndices=None):
-        """Adds a part `partName` with the given controller `partController`. 
+    def addPart(self,partName,partInterface,klamptModel=None,klamptIndices=None):
+        """Adds a part `partName` with the given interface `partInterface`. 
         The DOFs of the unified robot range from N to N+Np where N is the current
         number of robot DOFs and Np is the number of part DOFs.
 
         If klamptModel / klamptIndices are given, The part is associated with the given klamptModel, and the indices of the
-        part's sub-model are given by klamptIndices.  (The indices of partController
+        part's sub-model are given by klamptIndices.  (The indices of partInterface
         are indices into klamptIndices, not klamptModel )
         """
         self._partNames.append(partName)
-        self._partControllers[partName] = partController
+        self._partInterfaces[partName] = partInterface
 
-        part_ndof = partController.numDOFs()
+        part_ndof = partInterface.numDOFs()
         partdofs = list(range(len(self._jointToPart),len(self._jointToPart)+part_ndof))
         for i,d in enumerate(partdofs):
             self._jointToPart.append((partName,i))
 
-        for cp,dofs in partController.parts().iteritems():
+        for cp,dofs in partInterface.parts().iteritems():
             assert all(d >= 0 and d < len(partdofs) for d in dofs),"Invalid DOF of part %s, must be between 0 and %d"%(str(cp),str(len(partdofs)))
             bigdofs = [partdofs[d] for d in dofs]
             if cp is None:
@@ -536,58 +550,58 @@ class MultiRobotController(RobotControllerBase):
         return self._parts
 
     def controlRate(self):
-        return max(c.controlRate() for (p,c) in self._partControllers.iteritems())
+        return max(c.controlRate() for (p,c) in self._partInterfaces.iteritems())
 
     def initialize(self):
-        for (p,c) in self._partControllers.iteritems():
+        for (p,c) in self._partInterfaces.iteritems():
             if not c.initialize():
-                print ("MultiRobotController: Part",p,"failed to initialize")
+                print ("MultiRobotInterface: Part",p,"failed to initialize")
                 return False
         return True
 
     def startStep(self):
-        for (p,c) in self._partControllers.iteritems():
+        for (p,c) in self._partInterfaces.iteritems():
             c.startStep()
 
     def endStep(self):
-        for (p,c) in self._partControllers.iteritems():
+        for (p,c) in self._partInterfaces.iteritems():
             c.endStep()
 
     def clock(self):
-        for (p,c) in self._partControllers.iteritems():
+        for (p,c) in self._partInterfaces.iteritems():
             return c.clock()
         raise ValueError("No parts defined, so clock isn't well defined")
 
     def reset(self):
-        for (p,c) in self._partControllers.iteritems():
+        for (p,c) in self._partInterfaces.iteritems():
             if c.status() != 'ok':
                 if not c.reset():
                     return False
         return True
 
-    def getPartController(self,part=None,joint_idx=None):
+    def getPartInterface(self,part=None,joint_idx=None):
         if part is None and joint_idx is None:
             return self
-        assert part in self._partControllers
+        assert part in self._partInterfaces
         if joint_idx is None:
-            return self._partControllers[part]
+            return self._partInterfaces[part]
         else:
-            return self._partControllers[part].getPartController(None,joint_idx)
+            return self._partInterfaces[part].getPartInterface(None,joint_idx)
 
     def jointName(self,joint_idx,part=None):
         if part is None:
             part = self._jointToPart[joint_idx]
-        return part + ' ' + self._partControllers[part].jointName(joint_idx)
+        return part + ' ' + self._partInterfaces[part].jointName(joint_idx)
 
     def sensors(self):
         s = []
-        for (p,c) in self._partControllers.iteritems():
+        for (p,c) in self._partInterfaces.iteritems():
             s += [(p,n) for n in c.sensors()]
         return s
 
     def enabledSensors(self):
         s = []
-        for (p,c) in self._partControllers.iteritems():
+        for (p,c) in self._partInterfaces.iteritems():
             s += [(p,n) for n in c.enabledSensors()]
         return s
 
@@ -597,15 +611,15 @@ class MultiRobotController(RobotControllerBase):
     def enableSensor(self,sensor):
         assert isinstance(sensor,(list,tuple))
         p = sensor[0]
-        return self._partControllers[p].enableSensor(sensor[1])
+        return self._partInterfaces[p].enableSensor(sensor[1])
 
     def _setSplit(self,q,cmd,*otherArgs):
         qparts = self.split(q)
         for qp,p in zip(qparts,self._partNames):
-            getattr(self._partControllers[p],cmd)(qp,*otherArgs)
+            getattr(self._partInterfaces[p],cmd)(qp,*otherArgs)
 
     def _getJoin(self,cmd):
-        qparts = [getattr(self._partControllers[p],cmd)() for p in self._partNames]
+        qparts = [getattr(self._partInterfaces[p],cmd)() for p in self._partNames]
         return self.join(qparts)
 
     def setPosition(self,q,immediate=False):
@@ -625,14 +639,14 @@ class MultiRobotController(RobotControllerBase):
         else:
             ts = self.split(t)
         for (p,q,dq,t) in zip(self._partNames,qs,dqs,ts):
-            self._partControllers[p].setPID(q,dq,t)
+            self._partInterfaces[p].setPID(q,dq,t)
 
     def setPIDGains(self,kP,kI,kD):
         kPs = self.split(kP)
         kIs = self.split(kI)
         kDs = self.split(kD)
         for (p,kP,kI,kD) in zip(self._partNames,kPs,kIs,kDs):
-            self._partControllers[p].setPID(kP,kI,kD)
+            self._partInterfaces[p].setPID(kP,kI,kD)
 
     def setPiecewiseLinear(self):
         raise NotImplementedError()
@@ -650,14 +664,14 @@ class MultiRobotController(RobotControllerBase):
         raise ValueError("Can't do cartesian control without specifying a part")
 
     def status(self):
-        for p,c in self._partControllers.iteritems():
+        for p,c in self._partInterfaces.iteritems():
             s = c.status()
             if s != 'ok':
                 return s
         return 'ok'
 
     def isMoving(self):
-        return any(c.isMoving() for p,c in self._partControllers.iteritems())
+        return any(c.isMoving() for p,c in self._partInterfaces.iteritems())
 
     def sensedPosition(self):
         return self._getJoin('sensedPosition')
@@ -714,7 +728,7 @@ class MultiRobotController(RobotControllerBase):
         raise ValueError("Can't do cartesian get without specifying a part")
 
 
-class _JointControllerEmulatorData:
+class _JointInterfaceEmulatorData:
     CONTROL_MODES = ['pid','v','p','m','pwl','pwc']
     CONTROL_MODE_PRECEDENCE = {'pid':0,'v':1,'p':2,'pwl':3,'pwc':4}
 
@@ -1006,17 +1020,17 @@ class _CartesianEmulatorData:
             return [vectorops.dot(Jrow,t) for Jrow in J]
 
 
-class _RobotControllerEmulatorData:
+class _RobotInterfaceEmulatorData:
     def __init__(self,nd,klamptModel):
         self.klamptModel = klamptModel
         self.curClock = None
         self.lastClock = None
         self.dt = None
-        self.jointData = [_JointControllerEmulatorData() for i in range(nd)]
-        self.cartesianControllers = dict()
+        self.jointData = [_JointInterfaceEmulatorData() for i in range(nd)]
+        self.cartesianInterfaces = dict()
 
     def update(self,t,q,v):
-        """Advances the controller"""
+        """Advances the interface"""
         self.lastClock = self.curClock
         self.curClock = t
         self.dt = t - self.lastClock
@@ -1032,8 +1046,8 @@ class _RobotControllerEmulatorData:
                     commonMode = j.controlMode
                 elif j.controlMode is None:
                     pass
-                elif _JointControllerEmulatorData.CONTROL_MODE_PRECEDENCE[j.controlMode] < precedence:
-                    precedence = _JointControllerEmulatorData.CONTROL_MODE_PRECEDENCE[j.controlMode]
+                elif _JointInterfaceEmulatorData.CONTROL_MODE_PRECEDENCE[j.controlMode] < precedence:
+                    precedence = _JointInterfaceEmulatorData.CONTROL_MODE_PRECEDENCE[j.controlMode]
                     commonMode = j.controlMode
         return commonMode
 
@@ -1052,7 +1066,7 @@ class _RobotControllerEmulatorData:
         current state to the controlMode"""
         if controlType == 'pwl':
             if any(self.jointData[i].controlMode == 'pwc' and len(self.jointData[i].trajectoryTimes) > 1 for i in indices):
-                print("RobotControllerCompleter: Warning, converting from piecewise cubic to piecewise linear trajectory")
+                print("RobotInterfaceCompleter: Warning, converting from piecewise cubic to piecewise linear trajectory")
         for i in indices:
             self.jointData[i].promote(controlType)
 
@@ -1228,13 +1242,13 @@ class _RobotControllerEmulatorData:
         return max(j.destinationTime(self.curClock) for j in self.jointData)
 
     def setToolCoordinates(self,xtool_local,indices):
-        c = self._makeCartesianController(indices)
+        c = self._makeCartesianInterface(indices)
         c.setToolCoordinates(xtool_local)
 
     def cartesianPosition(self,q,indices):
         assert len(q) == len(self.jointData),"cartesianPosition: must use full-body configuration"
         try:
-            c = self.cartesianControllers[tuple(indices)]
+            c = self.cartesianInterfaces[tuple(indices)]
             return c.cartesianPosition(q)
         except KeyError:
             raise ValueError("Invalid Cartesian index set for emulator: no command currently set")
@@ -1243,7 +1257,7 @@ class _RobotControllerEmulatorData:
         assert len(q) == len(self.jointData),"cartesianVelocity: must use full-body configuration"
         assert len(dq) == len(self.jointData),"cartesianVelocity: must use full-body configuration"
         try:
-            c = self.cartesianControllers[tuple(indices)]
+            c = self.cartesianInterfaces[tuple(indices)]
             return c.cartesianVelocity(q,dq)
         except KeyError:
             raise ValueError("Invalid Cartesian index set for emulator: no command currently set")
@@ -1252,21 +1266,21 @@ class _RobotControllerEmulatorData:
         assert len(q) == len(self.jointData),"cartesianForce: must use full-body configuration"
         assert len(t) == len(self.jointData),"cartesianForce: must use full-body configuration"
         try:
-            c = self.cartesianControllers[tuple(indices)]
+            c = self.cartesianInterfaces[tuple(indices)]
             return c.cartesianForce(q,t)
         except KeyError:
             raise ValueError("Invalid Cartesian index set for emulator: no command currently set")
 
 
-class _SubRobotControllerCompleter(RobotControllerCompleter):
-    def __init__(self,controller,part,joint_idx):
-        RobotControllerCompleter.__init__(self,controller._base)
-        #it's a sub-controller
-        assert isinstance(controller,RobotControllerBase)
-        assert not isinstance(controller._base,RobotControllerBase),"Can't do nested sub-controllers"
-        assert controller._emulator._curClock is not None,"Controller needs to be initialized before accessing a part"
-        self._parent = controller
-        self.properties = controller.properties.copy()
+class _SubRobotInterfaceCompleter(RobotInterfaceCompleter):
+    def __init__(self,interface,part,joint_idx):
+        RobotInterfaceCompleter.__init__(self,interface._base)
+        #it's a sub-interface
+        assert isinstance(interface,RobotInterfaceBase)
+        assert not isinstance(interface._base,RobotInterfaceBase),"Can't do nested sub-interfaces"
+        assert interface._emulator._curClock is not None,"Interface needs to be initialized before accessing a part"
+        self._parent = interface
+        self.properties = interface.properties.copy()
         if part is not None:
             if joint_idx is None:
                 self.properties['name'] = part
@@ -1274,14 +1288,14 @@ class _SubRobotControllerCompleter(RobotControllerCompleter):
                 self.properties['name'] = part + '[' + str(joint_idx) + ']'
         else:
             self.properties['name'] = str(joint_idx)
-        self._klamptModel = controller._klamptModel
-        self._worldModel = controller._worldModel
+        self._klamptModel = interface._klamptModel
+        self._worldModel = interface._worldModel
         self._subRobot  = True
-        self._indices = controller._base.indices(part,joint_idx)
+        self._indices = interface._base.indices(part,joint_idx)
         self._parts = dict()
         self._parts[None] = self._indices
-        self._has = controller._has
-        self._emulator = controller._emulator
+        self._has = interface._has
+        self._emulator = interface._emulator
 
     def __str__(self):
         return str(self._parent)+'['+self.properties['name']+']'
@@ -1290,13 +1304,13 @@ class _SubRobotControllerCompleter(RobotControllerCompleter):
         raise RuntimeError("Can't add sub-parts to part")
 
     def initialize(self):
-        raise RuntimeError("Can't call initialize() on a sub-robot controller.")
+        raise RuntimeError("Can't call initialize() on a sub-robot interface.")
 
     def startStep(self):
-        raise RuntimeError("Can't call startStep() on a sub-robot controller.")
+        raise RuntimeError("Can't call startStep() on a sub-robot interface.")
 
     def endStep(self):
-        raise RuntimeError("Can't call endStep() on a sub-robot controller.")
+        raise RuntimeError("Can't call endStep() on a sub-robot interface.")
 
     def _toPart(self,q):
         return [q[i] for i in self._indices]

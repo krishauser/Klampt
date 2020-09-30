@@ -1,5 +1,5 @@
-"""An adaptor between python controllers and the Klamp't serial controller
-interface (SerialController).
+"""An adaptor between :class:`BaseController` and the Klamp't C++ serial 
+controller interface (SerialController).
 """
 import asyncore,socket
 import errno
@@ -43,10 +43,10 @@ def readSocket(socket,length):
     return msg
 
 class JsonClient(asyncore.dispatcher):
-    """A client that transmits JSON messages in the Klamp't simple serial
-    interface. Sends/receives variable-length messages such that the first
-    4 bytes are the length of the message (in binary) and the remainder is
-    the payload.
+    """An asyncore client that transmits JSON messages in the Klamp't simple 
+    serial interface. Sends/receives variable-length messages such that the 
+    first 4 bytes are the length of the message (in binary) and the remainder
+    is the payload.
 
     Subclasses should override onMessage, which accepts with arbitrary
     Python objects that can be serialized by the json module.
@@ -140,9 +140,9 @@ class JsonClient(asyncore.dispatcher):
                     raise
 
 class ControllerClient(JsonClient):
-    """A client that relays Python ControllerBase input/output via a JSON-based
-    serial interface.  For example, this can be connected to a
-    :class:`SerialController` or to the SimTest app.
+    """An asyncore client that relays Klampt :class:`ControllerBase` I/O to 
+    some receiver via a JSON-based serial interface.  For example, this can be
+    connected to a :class:`SerialController` or to the SimTest app.
 
     The interface simply translates messages back and forth using the raw
     ControllerBase input / output dictionaries.
@@ -159,9 +159,11 @@ class ControllerClient(JsonClient):
             ...define your controller here...
 
         #open up a client on localhost:3456
-        client = ControllerClient('localhost:3456','MyController())
+        client = ControllerClient(('localhost',3456),'MyController())
         asyncore.loop()
-        
+
+    Arguments:
+        addr: a (host,port) pair or         
     """
     
     def __init__(self,addr,controller):
@@ -202,7 +204,9 @@ class ControllerClient(JsonClient):
 
 
 class JsonSerialController(controller.ControllerBase):
-    """A controller that maintains a server to write/read messages.
+    """A controller that maintains a server to write/read messages every
+    output_and_advance cycle.
+
     It simply translates messages back and forth to a client via a JSON-based
     serial interface.
     """
@@ -224,7 +228,7 @@ class JsonSerialController(controller.ControllerBase):
                 self.clientsock = sock
         return
     
-    def output(self,**inputs):
+    def output_and_advance(self,**inputs):
         self.accept()
         if self.clientsock == None:
             return None
@@ -249,6 +253,12 @@ class JsonSerialController(controller.ControllerBase):
             #didn't parse properly
             print "Couldn't read Python object from JSON message '"+msg+"'"
             return None
+
+    def output(self,**inputs):
+        raise NotImplementedError("Only the output_and_advance interface is accepted")
+
+    def advance(self,**inputs):
+        raise NotImplementedError("Only the output_and_advance interface is accepted")
 
 
 if __name__ == "__main__":

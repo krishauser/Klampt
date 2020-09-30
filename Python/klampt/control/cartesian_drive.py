@@ -427,3 +427,5 @@ def normalize_rotation(R):
     returns a true orthogonal matrix."""
     q = so3.quaternion(R)  #normalizes
     return so3.from_quaternion(q)
+
+

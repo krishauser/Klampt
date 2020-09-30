@@ -2,37 +2,37 @@ from ..robotsim import WorldModel
 import functools
 
 
-class RobotControllerBase(object):
-    """Defines a unifying API for a robot's motor controller, whether it's
-    simulated or a real robot. 
+class RobotInterfaceBase(object):
+    """The main class for the Klamp't Robot Interface Layer. Defines a unifying
+    API to interface with a robot's motor controller, whether it's simulated or
+    a real robot. 
 
     .. note::
         The API may look intimidating, but a subclass implementer is free to
         set up as many or as few of the given methods as the robot's motor
-        controller truly implements.  The :class:`RobotControllerCompleter` 
+        controller truly implements.  The :class:`RobotInterfaceCompleter` 
         class will fill in the remainder of derived methods.  See the
         Functionalities section for more details.
     
-
     Each of these methods should be synchronous calls, called at a single time
     step.  The calling convention is::
 
-        controller = MyController(...args...)
-        if not controller.initialize():  #should be called first
-            raise RuntimeError("There was some problem initializing controller "+str(controller))
-        dt = 1.0/controller.controlRate()
-        while controller.status() == 'ok':  #no error handling done here...
+        interafce = MyRobotInterface(...args...)
+        if not interface.initialize():  #should be called first
+            raise RuntimeError("There was some problem initializing interface "+str(interface))
+        dt = 1.0/interface.controlRate()
+        while interface.status() == 'ok':  #no error handling done here...
             t0 = time.time()
-            controller.startStep()
+            interface.startStep()
             [any getXXX or setXXX commands here comprising the control loop]
-            controller.endStep()
+            interface.endStep()
             t1 = time.time()
             telapsed = t1 - t0
             [wait for time max(dt - telapsed,0)]
 
-    To accept asynchronous commands, a :class:`RobotControllerBase` subclass
-    can be passed to :class:`AsynchronousRobotController` or
-    :class:`RobotControllerServer`.
+    To accept asynchronous commands, a :class:`RobotInterfaceBase` subclass
+    can be passed to :class:`AsynchronousRobotInterface` or
+    :class:`RobotInterfaceServer`.
 
 
     DOFs and Parts
@@ -44,7 +44,9 @@ class RobotControllerBase(object):
 
     A robot can have "parts", which are named groups of DOFs.  For example, a
     hand can have "thumb", "finger 1", etc.  To implement parts, override the
-    :meth:`parts` method and the :meth:`partController` methods.
+    :meth:`parts` method and the :meth:`partController` methods.  It is
+    expected that these correspond with the parts in the robot's 
+    :class:`RobotInfo` structure.
 
 
     Functionalities
@@ -57,9 +59,12 @@ class RobotControllerBase(object):
       :meth:`setTorque`, or :meth:`setPID`
     * Either :meth:`sensedPosition` or :meth:`commandedPosition`
 
-    Pass your RobotControllerBase subclass to RobotControllerCompleter to 
-    complete the implementation of as many of the remaining items as
+    Pass your RobotInterfaceBase subclass to :class:`RobotInterfaceCompleter`
+    to complete the implementation of as many of the remaining items as
     possible.
+
+    See the :class:`SimPositionControlInterface` class for an example that
+    passes commands to a Klamp't physics simulator.
 
 
     Attributes:
@@ -84,7 +89,7 @@ class RobotControllerBase(object):
             inner.append(self.properties['name'])
         if 'version' in self.properties:
             inner.append(self.properties['version'])
-        return "RobotController("+','.join(inner)+')'
+        return "RobotInterface("+','.join(inner)+')'
 
     def initialize(self):
         """Tries to connect to the robot.  Returns true if ready to send
@@ -116,8 +121,8 @@ class RobotControllerBase(object):
         """Returns a dictionary of (part-name,configuration index list) pairs
         defining the named parts of the robot.
 
-        Note: this may be called a lot; it should be useful to use
-        functools.lru_cache.
+        Since this will be used a lot, make sure to declare your override with
+        @functools.lru_cache.
         """
         return {None:list(range(self.numDOFs()))}
 
@@ -129,8 +134,8 @@ class RobotControllerBase(object):
         assert joint_idx >= 0 and joint_idx < len(plist),"Invalid joint index for part "+str(part)
         return [plist[joint_idx]]
 
-    def partController(self,part=None,joint_idx=None):
-        """Returns a RobotControllerBase that allows control of the given 
+    def partInterface(self,part=None,joint_idx=None):
+        """Returns a RobotInterfaceBase that allows control of the given 
         part/joint.  If no such controller exists, raises a
         NotImplementedError.
 
@@ -188,6 +193,16 @@ class RobotControllerBase(object):
         """
         raise NotImplementedError()
 
+    def sensorMeasurements(self,name):
+        """Returns the latest measurements from a sensor.  Interpretation of
+        the result is sensor-dependent.
+        """
+        raise NotImplementedError()
+
+    def sensorUpdateTime(self,name):
+        """Returns the clock time of the last sensor update."""
+        raise NotImplementedError()
+
     def setPosition(self,q):
         """Sets an instantaneous position command.
 
@@ -223,7 +238,7 @@ class RobotControllerBase(object):
         """
         raise NotImplementedError()
 
-    def setPIDGains(self,kP,kD,kI):
+    def setPIDGains(self,kP,kI,kD):
         """Sets the PID gains.  Some controllers might not implement this even 
         if they implement setPID...
         """
@@ -495,7 +510,7 @@ class RobotControllerBase(object):
         return None
 
     def configFromKlampt(self,klamptConfig,part=None,joint_idx=None):
-        """Extracts a RobotControllerBase configuration from a configuration of
+        """Extracts a RobotInterfaceBase configuration from a configuration of
         the Klampt model. 
 
         Note: the configuration of the model in self.klamptModel() is overridden.
@@ -511,7 +526,7 @@ class RobotControllerBase(object):
         return qdrivers
 
     def velocityFromKlampt(self,klamptVelocity,part=None,joint_idx=None):
-        """Extracts a RobotControllerBase velocity from a velocity of
+        """Extracts a RobotInterfaceBase velocity from a velocity of
         the Klampt model."""
         model = self.klamptModel()
         if model is None:
@@ -524,7 +539,7 @@ class RobotControllerBase(object):
 
     def configToKlampt(self,config,klamptConfig=None,part=None,joint_idx=None):
         """Creates a configuration vector for the Klamp't model using the 
-        RobotControllerBase configuration.
+        RobotInterfaceBase configuration.
 
         If klamptConfig is given, then these values are used for the non-part
         configuration values.  Otherwise, the robot's current configuration from
