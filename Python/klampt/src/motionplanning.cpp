@@ -41,7 +41,8 @@ class PyCSpace : public CSpace
 public:
   PyCSpace()
     :sample(NULL),sampleNeighborhood(NULL),
-     distance(NULL),interpolate(NULL),edgeResolution(0.001),cacheq(NULL),cacheq2(NULL),cachex(NULL),cachex2(NULL),
+     distance(NULL),interpolate(NULL),edgeResolution(0.001),
+     cacheq(NULL),cacheq2(NULL),cachex(NULL),cachex2(NULL),
      visibleDistance(0),notVisibleDistance(0)
   {
     feasibleStats.cost = 0;
@@ -305,25 +306,16 @@ public:
     PyObject* pya = space->UpdateTempConfig(a);
     PyObject* pyb = space->UpdateTempConfig2(b);
     if(obstacle < 0) { //test all obstacles
-      PyObject* args = PyTuple_New(2);
-      Py_INCREF(pya);
-      Py_INCREF(pyb);
-      PyTuple_SetItem(args, 0, pya);
-      PyTuple_SetItem(args, 1, pyb);
       for(size_t i=0;i<space->visibleTests.size();i++) {
         if(space->visibleTests[i] == NULL) {
           stringstream ss;
           ss<<"Python visible test for constraint "<<space->constraintNames[i]<<"not defined"<<endl;
-          Py_DECREF(args);
           throw PyException(ss.str().c_str());
         }
 
-        PyObject* result = PyObject_CallObject(space->visibleTests[i],args);
+        PyObject* result = PyObject_CallFunctionObjArgs(space->visibleTests[i],pya,pyb,NULL);
         if(!result) {
-          Py_DECREF(pya);
-          Py_DECREF(pyb);
-          Py_DECREF(args);
-          if(!PyErr_Occurred()) {
+            if(!PyErr_Occurred()) {
             throw PyException("Python visible method failed");
           }
           else {
@@ -331,24 +323,15 @@ public:
           }
         }
         if(!PyBool_Check(result) && !PyInt_Check(result)) {
-          Py_DECREF(pya);
-          Py_DECREF(pyb);
-          Py_DECREF(args);
           Py_DECREF(result);
           throw PyException("Python visible test didn't return bool");
         }
         int res=PyObject_IsTrue(result);
         Py_DECREF(result);
         if(res != 1) {
-          Py_DECREF(pya);
-          Py_DECREF(pyb);
-          Py_DECREF(args);
           return false;
         }
       }
-      Py_DECREF(pya);
-      Py_DECREF(pyb);
-      Py_DECREF(args);
     }
     else {
       //call visibility test for one obstacle
