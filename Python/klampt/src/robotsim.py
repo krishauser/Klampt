@@ -1105,6 +1105,7 @@ class PointCloud(_object):
     *   c: opacity, in range [0,255]  
     *   r,g,b,a: color channels, in range [0,1]  
     *   u,v: texture coordinate  
+    *   radius: treats the point cloud as a collection of balls  
 
     Settings are usually lowercase but follow PCL naming convention, and often
     include:  
@@ -1405,6 +1406,7 @@ class PointCloud(_object):
         *   c: opacity, in range [0,255]  
         *   r,g,b,a: color channels, in range [0,1]  
         *   u,v: texture coordinate  
+        *   radius: treats the point cloud as a collection of balls  
 
         Settings are usually lowercase but follow PCL naming convention, and often
         include:  
@@ -2418,8 +2420,8 @@ class Geometry3D(_object):
 
 
 
-        Returns the axis-aligned bounding box of the object. Note: O(1) time, but may
-        not be tight.  
+        Returns the axis-aligned bounding box of the object as a tuple (bmin,bmax).
+        Note: O(1) time, but may not be tight.  
 
         """
         return _robotsim.Geometry3D_getBB(self)
@@ -2431,8 +2433,8 @@ class Geometry3D(_object):
 
 
 
-        Returns a tighter axis-aligned bounding box of the object than getBB. Worst case
-        O(n) time.  
+        Returns a tighter axis-aligned bounding box of the object than
+        :meth:`Geometry3D.getBB`. Worst case O(n) time.  
 
         """
         return _robotsim.Geometry3D_getBBTight(self)
@@ -2499,7 +2501,7 @@ class Geometry3D(_object):
 
 
 
-        Returns true if this geometry is within distance tol to other.  
+        Returns true if this geometry is within distance `tol` to other.  
 
         """
         return _robotsim.Geometry3D_withinDistance(self, other, tol)
@@ -2516,7 +2518,8 @@ class Geometry3D(_object):
         Version 0.8: this is the same as the old distance() function.  
 
         Returns the distance from this geometry to the other. If either geometry
-        contains volume information, this value may be negative to indicate penetration.  
+        contains volume information, this value may be negative to indicate penetration.
+        See :meth:`Geometry3D.distance` for more information.  
 
         """
         return _robotsim.Geometry3D_distance_simple(self, other, relErr, absErr)
@@ -2535,6 +2538,19 @@ class Geometry3D(_object):
         The return value contains the distance, closest points, and gradients if
         available.  
 
+        For some geometry types, the signed distance is returned. The signed distance
+        returns the negative penetration depth if pt is within this. The following
+        geometry types return signed distances:  
+
+        *   GeometricPrimitive  
+        *   PointCloud (approximate, if the cloud is a set of balls with the radius
+            property)  
+        *   VolumeGrid  
+        *   ConvexHull  
+
+        For other types, a signed distance will be returned if the geometry has a
+        positive collision margin, and the point penetrates less than this margin.  
+
         """
         return _robotsim.Geometry3D_distance_point(self, pt)
 
@@ -2545,9 +2561,9 @@ class Geometry3D(_object):
 
 
 
-        A customizable version of distance_point. The settings for the calculation can
-        be customized with relErr, absErr, and upperBound, e.g., to break if the closest
-        points are at least upperBound distance from one another.  
+        A customizable version of :meth:`Geometry3D.distance_point`. The settings for
+        the calculation can be customized with relErr, absErr, and upperBound, e.g., to
+        break if the closest points are at least upperBound distance from one another.  
 
         """
         return _robotsim.Geometry3D_distance_point_ext(self, pt, settings)
@@ -2559,10 +2575,16 @@ class Geometry3D(_object):
 
 
 
-        Returns the the distance and closest points between the given geometries.  
+        Returns the the distance and closest points between the given geometries. This
+        may be either the normal distance or the signed distance, depending on the
+        geometry type.  
 
-        If the objects are penetrating, some combinations of geometry types allow
-        calculating penetration depths:  
+        The normal distance returns 0 if the two objects are touching
+        (this.collides(other)=True).  
+
+        The signed distance returns the negative penetration depth if the objects are
+        touching. Only the following combinations of geometry types return signed
+        distances:  
 
         *   GeometricPrimitive-GeometricPrimitive (Python-supported sub-types only)  
         *   GeometricPrimitive-TriangleMesh (surface only)  
@@ -2595,9 +2617,9 @@ class Geometry3D(_object):
 
 
 
-        A customizable version of distance. The settings for the calculation can be
-        customized with relErr, absErr, and upperBound, e.g., to break if the closest
-        points are at least upperBound distance from one another.  
+        A customizable version of :meth:`Geometry3D.distance`. The settings for the
+        calculation can be customized with relErr, absErr, and upperBound, e.g., to
+        break if the closest points are at least upperBound distance from one another.  
 
         """
         return _robotsim.Geometry3D_distance_ext(self, other, settings)

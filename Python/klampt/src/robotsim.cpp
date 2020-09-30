@@ -394,6 +394,9 @@ void GetPointCloud(const Geometry::AnyCollisionGeometry3D& geom,PointCloud& pc)
   for(size_t i=0;i<gpc.points.size();i++) 
     gpc.points[i].get(pc.vertices[i*3],pc.vertices[i*3+1],pc.vertices[i*3+2]);
   if(!gpc.propertyNames.empty()) {
+    if(gpc.properties.size() != gpc.points.size()) {
+      throw PyException("GetPointCloud: Internal error, invalid # of properties");
+    }
     for(size_t i=0;i<gpc.points.size();i++) {
       gpc.properties[i].getCopy(&pc.properties[i*gpc.propertyNames.size()]);
     }
@@ -409,6 +412,10 @@ void GetPointCloud(const PointCloud& pc,Geometry::AnyCollisionGeometry3D& geom)
     gpc.points[i].set(pc.vertices[i*3],pc.vertices[i*3+1],pc.vertices[i*3+2]);
   gpc.propertyNames = pc.propertyNames;
   if(pc.propertyNames.size() > 0) {
+    if(pc.properties.size() != gpc.points.size()*pc.propertyNames.size()) {
+      printf("Expected %d = %d*%d properties, got %d\n",gpc.points.size(),pc.propertyNames.size(),gpc.points.size()*pc.propertyNames.size(),pc.properties.size());
+      throw PyException("GetPointCloud: Invalid number of properties in PointCloud");
+    }
     gpc.properties.resize(pc.properties.size() / pc.propertyNames.size());
     for(size_t i=0;i<gpc.properties.size();i++) {
       gpc.properties[i].resize(pc.propertyNames.size());

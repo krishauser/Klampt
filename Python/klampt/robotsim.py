@@ -1087,6 +1087,7 @@ class PointCloud(_object):
     *   c: opacity, in range [0,255]  
     *   r,g,b,a: color channels, in range [0,1]  
     *   u,v: texture coordinate  
+    *   radius: treats the point cloud as a collection of balls  
 
     Settings are usually lowercase but follow PCL naming convention, and often
     include:  
@@ -1391,6 +1392,7 @@ class PointCloud(_object):
         *   c: opacity, in range [0,255]  
         *   r,g,b,a: color channels, in range [0,1]  
         *   u,v: texture coordinate  
+        *   radius: treats the point cloud as a collection of balls  
 
         Settings are usually lowercase but follow PCL naming convention, and often
         include:  
@@ -1980,7 +1982,7 @@ class Geometry3D(_object):
 
 
         Args:
-            arg2 (:obj:`ConvexHull` or :class:`~klampt.TriangleMesh` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.VolumeGrid` or :class:`~klampt.PointCloud` or :class:`~klampt.Geometry3D`, optional): 
+            arg2 (:class:`~klampt.PointCloud` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.Geometry3D` or :obj:`ConvexHull` or :class:`~klampt.TriangleMesh` or :class:`~klampt.VolumeGrid`, optional): 
         """
         this = _robotsim.new_Geometry3D(*args)
         try:
@@ -2327,8 +2329,8 @@ class Geometry3D(_object):
 
     def getBB(self):
         """
-        Returns the axis-aligned bounding box of the object. Note: O(1) time, but may
-        not be tight.  
+        Returns the axis-aligned bounding box of the object as a tuple (bmin,bmax).
+        Note: O(1) time, but may not be tight.  
 
         """
         return _robotsim.Geometry3D_getBB(self)
@@ -2336,8 +2338,8 @@ class Geometry3D(_object):
 
     def getBBTight(self):
         """
-        Returns a tighter axis-aligned bounding box of the object than getBB. Worst case
-        O(n) time.  
+        Returns a tighter axis-aligned bounding box of the object than
+        :meth:`Geometry3D.getBB`. Worst case O(n) time.  
 
         """
         return _robotsim.Geometry3D_getBBTight(self)
@@ -2408,7 +2410,7 @@ class Geometry3D(_object):
 
     def withinDistance(self, other, tol):
         """
-        Returns true if this geometry is within distance tol to other.  
+        Returns true if this geometry is within distance `tol` to other.  
 
         Args:
             other (:class:`~klampt.Geometry3D`)
@@ -2439,7 +2441,8 @@ class Geometry3D(_object):
             (float):
 
         Returns the distance from this geometry to the other. If either geometry
-        contains volume information, this value may be negative to indicate penetration.  
+        contains volume information, this value may be negative to indicate penetration.
+        See :meth:`Geometry3D.distance` for more information.  
 
         """
         return _robotsim.Geometry3D_distance_simple(self, other, relErr, absErr)
@@ -2459,15 +2462,28 @@ class Geometry3D(_object):
         The return value contains the distance, closest points, and gradients if
         available.  
 
+        For some geometry types, the signed distance is returned. The signed distance
+        returns the negative penetration depth if pt is within this. The following
+        geometry types return signed distances:  
+
+        *   GeometricPrimitive  
+        *   PointCloud (approximate, if the cloud is a set of balls with the radius
+            property)  
+        *   VolumeGrid  
+        *   ConvexHull  
+
+        For other types, a signed distance will be returned if the geometry has a
+        positive collision margin, and the point penetrates less than this margin.  
+
         """
         return _robotsim.Geometry3D_distance_point(self, pt)
 
 
     def distance_point_ext(self, pt, settings):
         """
-        A customizable version of distance_point. The settings for the calculation can
-        be customized with relErr, absErr, and upperBound, e.g., to break if the closest
-        points are at least upperBound distance from one another.  
+        A customizable version of :meth:`Geometry3D.distance_point`. The settings for
+        the calculation can be customized with relErr, absErr, and upperBound, e.g., to
+        break if the closest points are at least upperBound distance from one another.  
 
         Args:
             pt (:obj:`list of 3 floats`)
@@ -2480,15 +2496,21 @@ class Geometry3D(_object):
 
     def distance(self, other):
         """
-        Returns the the distance and closest points between the given geometries.  
+        Returns the the distance and closest points between the given geometries. This
+        may be either the normal distance or the signed distance, depending on the
+        geometry type.  
 
         Args:
             other (:class:`~klampt.Geometry3D`)
         Returns:
             (:class:`~klampt.DistanceQueryResult`):
 
-        If the objects are penetrating, some combinations of geometry types allow
-        calculating penetration depths:  
+        The normal distance returns 0 if the two objects are touching
+        (this.collides(other)=True).  
+
+        The signed distance returns the negative penetration depth if the objects are
+        touching. Only the following combinations of geometry types return signed
+        distances:  
 
         *   GeometricPrimitive-GeometricPrimitive (Python-supported sub-types only)  
         *   GeometricPrimitive-TriangleMesh (surface only)  
@@ -2517,9 +2539,9 @@ class Geometry3D(_object):
 
     def distance_ext(self, other, settings):
         """
-        A customizable version of distance. The settings for the calculation can be
-        customized with relErr, absErr, and upperBound, e.g., to break if the closest
-        points are at least upperBound distance from one another.  
+        A customizable version of :meth:`Geometry3D.distance`. The settings for the
+        calculation can be customized with relErr, absErr, and upperBound, e.g., to
+        break if the closest points are at least upperBound distance from one another.  
 
         Args:
             other (:class:`~klampt.Geometry3D`)
@@ -5844,7 +5866,7 @@ class WorldModel(_object):
             terrain (:obj:`TerrainModel`, optional): 
 
         Returns:
-            (:obj:`TerrainModel` or :class:`~klampt.RobotModel` or :class:`~klampt.RigidObjectModel`):
+            (:class:`~klampt.RobotModel` or :class:`~klampt.RigidObjectModel` or :obj:`TerrainModel`):
         """
         return _robotsim.WorldModel_add(self, *args)
 
@@ -6679,7 +6701,7 @@ class GeneralizedIKObjective(_object):
 
 
         Args:
-            obj (:obj:`GeneralizedIKObjective` or :class:`~klampt.RigidObjectModel`, optional): 
+            obj (:class:`~klampt.RigidObjectModel` or :obj:`GeneralizedIKObjective`, optional): 
             link (:class:`~klampt.RobotModelLink`, optional): 
             link2 (:class:`~klampt.RobotModelLink`, optional): 
             obj2 (:class:`~klampt.RigidObjectModel`, optional): 
@@ -6879,7 +6901,7 @@ def SampleTransform(*args):
 
 
     Args:
-        obj (:obj:`GeneralizedIKObjective` or :obj:`IKObjective`): 
+        obj (:obj:`IKObjective` or :obj:`GeneralizedIKObjective`): 
     """
     return _robotsim.SampleTransform(*args)
 class SimRobotSensor(_object):
@@ -8127,7 +8149,7 @@ class Simulator(_object):
 
 
         Args:
-            robot (int or :class:`~klampt.RobotModel`): 
+            robot (:class:`~klampt.RobotModel` or int): 
 
         Returns:
             (:class:`~klampt.SimRobotController`):

@@ -498,7 +498,7 @@ PyObject* IKSolver::solve(int iters,double tol)
     for(size_t i=0;i<qmin.size();i++) {
       if(robot.robot->q(i) < qmin[i] || robot.robot->q(i) > qmax[i]) {
         if(robot.robot->q(i) < qmin[i]-Epsilon || robot.robot->q(i) > qmax[i]+Epsilon) 
-          printf("Joint limits %f < %f <%f exceeded on joint %i. Clamping to limit...\n", qmin[i],robot.robot->q(i),qmax[i],(int)i);
+          printf("Joint limits %f < %f <%f exceeded on joint %i. Clamping to limit...\n", qmin[i],robot.robot->q(i),qmax[i],i);
         if(robot.robot->q(i) < qmin[i]) {
           robot.robot->q(i) = qmin[i];
         } else {
