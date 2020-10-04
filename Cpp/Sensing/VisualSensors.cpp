@@ -328,7 +328,8 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
     measurements.resize(0);
     if(rgb) {
       measurements.resize(xres*yres);
-      renderer.GetRGBA(pixels);
+      //renderer.GetRGBA(pixels);
+      renderer.GetRGB(pixels);
       #if DEBUG_GL_RENDER_TIMING
       printf("CameraSensor: Download RGBA %f\n",timer.ElapsedTime());
       timer.Reset();
@@ -336,8 +337,10 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
       int l=0;
       int k=0;
       for(int j=0;j<yres;j++) {
-        for(int i=0;i<xres;i++,k+=4) {
-          unsigned int pix = (pixels[k] << 24 ) | (pixels[k+1] << 16 ) | (pixels[k+2] << 8 ) | (pixels[k+3]);
+        //for(int i=0;i<xres;i++,k+=4) {
+          //unsigned int pix = (pixels[k] << 24 ) | (pixels[k+1] << 16 ) | (pixels[k+2] << 8 ) | (pixels[k+3]);
+        for(int i=0;i<xres;i++,k+=3) {
+          unsigned int pix = (pixels[k] << 16 | pixels[k+1] << 8 | pixels[k+2]);
           measurements[l++] = double(pix);
         }
       }
