@@ -159,18 +159,23 @@ class SimRobotController
   /// Gets the current feedback control rate
   double getRate();
 
-  /// Returns the current commanded configuration
+  /// Returns the current commanded configuration (size model().numLinks())
   void getCommandedConfig(std::vector<double>& out);
-  /// Returns the current commanded velocity
+  /// Returns the current commanded velocity (size model().numLinks())
   void getCommandedVelocity(std::vector<double>& out);
   /// Returns the current commanded (feedforward) torque
+  /// (size model().numDrivers())
   void getCommandedTorque(std::vector<double>& out);
 
   /// Returns the current "sensed" configuration from the simulator
+  /// (size model().numLinks())
   void getSensedConfig(std::vector<double>& out);
   /// Returns the current "sensed" velocity from the simulator
+  /// (size model().numLinks())
   void getSensedVelocity(std::vector<double>& out);
-  /// Returns the current "sensed" (feedback) torque from the simulator.
+  /// Returns the current "sensed" (feedback) torque from the simulator. 
+  /// (size model().numDrivers())
+  ///
   /// Note: a default robot doesn't have a torque sensor, so this will be 0
   void getSensedTorque(std::vector<double>& out);
 
@@ -182,9 +187,9 @@ class SimRobotController
   /// a null sensor is returned
   SimRobotSensor sensor(const char* name);
   
-  /// gets a command list
+  /// gets a custom command list
   std::vector<std::string> commands();
-  /// sends a command to the controller
+  /// sends a custom string command to the controller
   bool sendCommand(const std::string& name,const std::string& args);
 
   /// gets a setting of the controller
@@ -195,6 +200,8 @@ class SimRobotController
   /// Uses a dynamic interpolant to get from the current state to the
   /// desired milestone (with optional ending velocity).  This interpolant
   /// is time-optimal with respect to the velocity and acceleration bounds.
+  ///
+  /// Arguments have size model().numLinks().
   void setMilestone(const std::vector<double>& q);
   //note: only the last overload docstring is added to the documentation
   /// Uses a dynamic interpolant to get from the current state to the
@@ -203,6 +210,8 @@ class SimRobotController
   void setMilestone(const std::vector<double>& q,const std::vector<double>& dq);
   /// Same as setMilestone, but appends an interpolant onto an internal
   /// motion queue starting at the current queued end state.
+  ///
+  /// Arguments have size model().numLinks().
   void addMilestone(const std::vector<double>& q);
   //note: only the last overload docstring is added to the documentation
   /// Same as setMilestone, but appends an interpolant onto an internal
@@ -213,9 +222,13 @@ class SimRobotController
   void addMilestoneLinear(const std::vector<double>& q);
   /// Uses linear interpolation to get from the current configuration to the
   /// desired configuration after time dt
+  ///
+  /// q has size model().numLinks().  dt must be > 0.
   void setLinear(const std::vector<double>& q,double dt);
   /// Uses cubic (Hermite) interpolation to get from the current
   /// configuration/velocity to the desired configuration/velocity after time dt
+  ///
+  /// q and v have size model().numLinks().  dt must be > 0.
   void setCubic(const std::vector<double>& q,const std::vector<double>& v,double dt);
   /// Same as setLinear but appends an interpolant onto the motion queue
   void addLinear(const std::vector<double>& q,double dt);
@@ -226,11 +239,13 @@ class SimRobotController
   double remainingTime() const;
 
   /// Sets a rate controller from the current commanded config to move at
-  /// rate dq for time dt.
+  /// rate dq for time dt > 0.  dq has size model().numLinks()
   void setVelocity(const std::vector<double>& dq,double dt);
-  /// Sets a torque command controller
+  /// Sets a torque command controller.  t can have size model().numDrivers() or
+  /// model().numLinks().
   void setTorque(const std::vector<double>& t);
-  /// Sets a PID command controller
+  /// Sets a PID command controller.  Arguments can have size model().numDrivers()
+  /// or model().numLinks().
   void setPIDCommand(const std::vector<double>& qdes,const std::vector<double>& dqdes);
   //note: only the last overload docstring is added to the documentation
   /// Sets a PID command controller.  If tfeedforward is provided, it is the feedforward torque vector
@@ -251,7 +266,7 @@ class SimRobotController
    */
   std::string getControlType();
 
-  /// Sets the PID gains
+  /// Sets the PID gains.  Arguments have size model().numDrivers().
   void setPIDGains(const std::vector<double>& kP,const std::vector<double>& kI,const std::vector<double>& kD);
   /// Gets the PID gains for the PID controller
   void getPIDGains(std::vector<double>& kPout,std::vector<double>& kIout,std::vector<double>& kDout);
