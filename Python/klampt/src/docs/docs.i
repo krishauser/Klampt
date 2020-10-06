@@ -2965,17 +2965,19 @@ sensor is returned.
 
 %feature("docstring") SimRobotController::getSensedConfig "
 
-Returns the current \"sensed\" configuration from the simulator.  
+Returns the current \"sensed\" configuration from the simulator (size
+model().numLinks())  
 ";
 
 %feature("docstring") SimRobotController::getCommandedTorque "
 
-Returns the current commanded (feedforward) torque.  
+Returns the current commanded (feedforward) torque (size model().numDrivers())  
 ";
 
 %feature("docstring") SimRobotController::setTorque "
 
-Sets a torque command controller.  
+Sets a torque command controller. t can have size model().numDrivers() or
+model().numLinks().  
 ";
 
 %feature("docstring") SimRobotController::remainingTime "
@@ -2985,13 +2987,15 @@ Returns the remaining duration of the motion queue.
 
 %feature("docstring") SimRobotController::setPIDGains "
 
-Sets the PID gains.  
+Sets the PID gains. Arguments have size model().numDrivers().  
 ";
 
 %feature("docstring") SimRobotController::getSensedTorque "
 
-Returns the current \"sensed\" (feedback) torque from the simulator. Note: a
-default robot doesn't have a torque sensor, so this will be 0.  
+Returns the current \"sensed\" (feedback) torque from the simulator. (size
+model().numDrivers())  
+
+Note: a default robot doesn't have a torque sensor, so this will be 0  
 ";
 
 %feature("docstring") SimRobotController::addMilestoneLinear "
@@ -3007,7 +3011,7 @@ gets a setting of the controller
 
 %feature("docstring") SimRobotController::sendCommand "
 
-sends a command to the controller  
+sends a custom string command to the controller  
 ";
 
 %feature("docstring") SimRobotController::setManualMode "
@@ -3018,13 +3022,16 @@ previously set.
 
 %feature("docstring") SimRobotController::getSensedVelocity "
 
-Returns the current \"sensed\" velocity from the simulator.  
+Returns the current \"sensed\" velocity from the simulator (size
+model().numLinks())  
 ";
 
 %feature("docstring") SimRobotController::setCubic "
 
 Uses cubic (Hermite) interpolation to get from the current
 configuration/velocity to the desired configuration/velocity after time dt.  
+
+q and v have size model().numLinks(). dt must be > 0.  
 ";
 
 %feature("docstring") SimRobotController::~SimRobotController "
@@ -3037,7 +3044,7 @@ Same as setCubic but appends an interpolant onto the motion queue.
 
 %feature("docstring") SimRobotController::getCommandedConfig "
 
-Returns the current commanded configuration.  
+Returns the current commanded configuration (size model().numLinks())  
 ";
 
 %feature("docstring") SimRobotController::SimRobotController "
@@ -3052,6 +3059,8 @@ sets a setting of the controller
 
 Uses linear interpolation to get from the current configuration to the desired
 configuration after time dt.  
+
+q has size model().numLinks(). dt must be > 0.  
 ";
 
 %feature("docstring") SimRobotController::addLinear "
@@ -3067,7 +3076,7 @@ Retrieves the robot model associated with this controller.
 %feature("docstring") SimRobotController::setVelocity "
 
 Sets a rate controller from the current commanded config to move at rate dq for
-time dt.  
+time dt > 0. dq has size model().numLinks()  
 ";
 
 %feature("docstring") SimRobotController::getControlType "
@@ -3090,7 +3099,7 @@ Gets the current feedback control rate.
 
 %feature("docstring") SimRobotController::getCommandedVelocity "
 
-Returns the current commanded velocity.  
+Returns the current commanded velocity (size model().numLinks())  
 ";
 
 %feature("docstring") SimRobotController::setMilestone "
@@ -3098,6 +3107,8 @@ Returns the current commanded velocity.
 Uses a dynamic interpolant to get from the current state to the desired
 milestone (with optional ending velocity). This interpolant is time-optimal with
 respect to the velocity and acceleration bounds.  
+
+Arguments have size model().numLinks().  
 ";
 
 %feature("docstring") SimRobotController::setMilestone "
@@ -3109,12 +3120,13 @@ respect to the velocity and acceleration bounds.
 
 %feature("docstring") SimRobotController::commands "
 
-gets a command list  
+gets a custom command list  
 ";
 
 %feature("docstring") SimRobotController::setPIDCommand "
 
-Sets a PID command controller.  
+Sets a PID command controller. Arguments can have size model().numDrivers() or
+model().numLinks().  
 ";
 
 %feature("docstring") SimRobotController::setPIDCommand "
@@ -3132,6 +3144,8 @@ Sets the current feedback control rate.
 
 Same as setMilestone, but appends an interpolant onto an internal motion queue
 starting at the current queued end state.  
+
+Arguments have size model().numLinks().  
 ";
 
 %feature("docstring") SimRobotController::addMilestone "
@@ -3195,6 +3209,14 @@ Returns the type of the sensor.
 %feature("docstring") SimRobotSensor::kinematicSimulate "
 
 simulates / advances the kinematic simulation  
+";
+
+%feature("docstring") SimRobotSensor::kinematicSimulate "
+";
+
+%feature("docstring") SimRobotSensor::robot "
+
+Returns the model of the robot to which this belongs.  
 ";
 
 %feature("docstring") SimRobotSensor::getMeasurements "
