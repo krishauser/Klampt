@@ -501,7 +501,7 @@ class SO3Trajectory(GeodesicTrajectory):
         this method converts this SO3Trajectory from describing how F'
         rotates to how F rotates."""
         for i,m in enumerate(self.milestones):
-            self.milestones[i] = se3.mul(m,T)
+            self.milestones[i] = so3.mul(m,R)
     def constructor(self):
         return SO3Trajectory
 
