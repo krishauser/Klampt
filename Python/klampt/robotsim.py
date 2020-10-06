@@ -1982,7 +1982,7 @@ class Geometry3D(_object):
 
 
         Args:
-            arg2 (:class:`~klampt.PointCloud` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.Geometry3D` or :obj:`ConvexHull` or :class:`~klampt.TriangleMesh` or :class:`~klampt.VolumeGrid`, optional): 
+            arg2 (:class:`~klampt.TriangleMesh` or :class:`~klampt.Geometry3D` or :obj:`ConvexHull` or :class:`~klampt.VolumeGrid` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.PointCloud`, optional): 
         """
         this = _robotsim.new_Geometry3D(*args)
         try:
@@ -5710,7 +5710,7 @@ class WorldModel(_object):
 
 
         Args:
-            robot (int or str): 
+            robot (str or int): 
             index (int, optional): 
             name (str, optional): 
 
@@ -5866,7 +5866,7 @@ class WorldModel(_object):
             terrain (:obj:`TerrainModel`, optional): 
 
         Returns:
-            (:class:`~klampt.RobotModel` or :class:`~klampt.RigidObjectModel` or :obj:`TerrainModel`):
+            (:class:`~klampt.RobotModel` or :obj:`TerrainModel` or :class:`~klampt.RigidObjectModel`):
         """
         return _robotsim.WorldModel_add(self, *args)
 
@@ -6901,7 +6901,7 @@ def SampleTransform(*args):
 
 
     Args:
-        obj (:obj:`IKObjective` or :obj:`GeneralizedIKObjective`): 
+        obj (:obj:`GeneralizedIKObjective` or :obj:`IKObjective`): 
     """
     return _robotsim.SampleTransform(*args)
 class SimRobotSensor(_object):
@@ -6954,7 +6954,7 @@ class SimRobotSensor(_object):
 
 
         Args:
-            robot (:class:`~klampt.SimRobotController` or :obj:`Robot`): 
+            robot (:class:`~klampt.RobotModel` or :class:`~klampt.SimRobotController`): 
             sensor (:obj:`SensorBase`, optional): 
             name (str, optional): 
             type (str, optional): 
@@ -6983,6 +6983,16 @@ class SimRobotSensor(_object):
             (str):
         """
         return _robotsim.SimRobotSensor_type(self)
+
+
+    def robot(self):
+        """
+        Returns the model of the robot to which this belongs.  
+
+        Returns:
+            (:class:`~klampt.RobotModel`):
+        """
+        return _robotsim.SimRobotSensor_robot(self)
 
 
     def measurementNames(self):
@@ -7045,15 +7055,18 @@ class SimRobotSensor(_object):
         return _robotsim.SimRobotSensor_drawGL(self, *args)
 
 
-    def kinematicSimulate(self, world, dt):
+    def kinematicSimulate(self, *args):
         """
-        simulates / advances the kinematic simulation  
+        kinematicSimulate (world,dt)
+
+        kinematicSimulate (dt)
+
 
         Args:
-            world (:class:`~klampt.WorldModel`)
-            dt (float)
+            world (:class:`~klampt.WorldModel`, optional): 
+            dt (float): 
         """
-        return _robotsim.SimRobotSensor_kinematicSimulate(self, world, dt)
+        return _robotsim.SimRobotSensor_kinematicSimulate(self, *args)
 
 
     def kinematicReset(self):
@@ -7063,10 +7076,10 @@ class SimRobotSensor(_object):
         """
         return _robotsim.SimRobotSensor_kinematicReset(self)
 
-    __swig_setmethods__["robot"] = _robotsim.SimRobotSensor_robot_set
-    __swig_getmethods__["robot"] = _robotsim.SimRobotSensor_robot_get
+    __swig_setmethods__["robotModel"] = _robotsim.SimRobotSensor_robotModel_set
+    __swig_getmethods__["robotModel"] = _robotsim.SimRobotSensor_robotModel_get
     if _newclass:
-        robot = _swig_property(_robotsim.SimRobotSensor_robot_get, _robotsim.SimRobotSensor_robot_set)
+        robotModel = _swig_property(_robotsim.SimRobotSensor_robotModel_get, _robotsim.SimRobotSensor_robotModel_set)
     __swig_setmethods__["sensor"] = _robotsim.SimRobotSensor_sensor_set
     __swig_getmethods__["sensor"] = _robotsim.SimRobotSensor_sensor_get
     if _newclass:
@@ -7192,7 +7205,7 @@ class SimRobotController(_object):
 
     def getCommandedConfig(self):
         """
-        Returns the current commanded configuration.  
+        Returns the current commanded configuration (size model().numLinks())  
 
         """
         return _robotsim.SimRobotController_getCommandedConfig(self)
@@ -7200,7 +7213,7 @@ class SimRobotController(_object):
 
     def getCommandedVelocity(self):
         """
-        Returns the current commanded velocity.  
+        Returns the current commanded velocity (size model().numLinks())  
 
         """
         return _robotsim.SimRobotController_getCommandedVelocity(self)
@@ -7208,7 +7221,7 @@ class SimRobotController(_object):
 
     def getCommandedTorque(self):
         """
-        Returns the current commanded (feedforward) torque.  
+        Returns the current commanded (feedforward) torque (size model().numDrivers())  
 
         """
         return _robotsim.SimRobotController_getCommandedTorque(self)
@@ -7216,7 +7229,8 @@ class SimRobotController(_object):
 
     def getSensedConfig(self):
         """
-        Returns the current "sensed" configuration from the simulator.  
+        Returns the current "sensed" configuration from the simulator (size
+        model().numLinks())  
 
         """
         return _robotsim.SimRobotController_getSensedConfig(self)
@@ -7224,7 +7238,8 @@ class SimRobotController(_object):
 
     def getSensedVelocity(self):
         """
-        Returns the current "sensed" velocity from the simulator.  
+        Returns the current "sensed" velocity from the simulator (size
+        model().numLinks())  
 
         """
         return _robotsim.SimRobotController_getSensedVelocity(self)
@@ -7232,8 +7247,11 @@ class SimRobotController(_object):
 
     def getSensedTorque(self):
         """
-        Returns the current "sensed" (feedback) torque from the simulator. Note: a
-        default robot doesn't have a torque sensor, so this will be 0.  
+        Returns the current "sensed" (feedback) torque from the simulator. (size
+        model().numDrivers())  
+
+
+        Note: a default robot doesn't have a torque sensor, so this will be 0  
 
         """
         return _robotsim.SimRobotController_getSensedTorque(self)
@@ -7261,7 +7279,7 @@ class SimRobotController(_object):
 
     def commands(self):
         """
-        gets a command list  
+        gets a custom command list  
 
         Returns:
             (:obj:`stringVector`):
@@ -7271,7 +7289,7 @@ class SimRobotController(_object):
 
     def sendCommand(self, name, args):
         """
-        sends a command to the controller  
+        sends a custom string command to the controller  
 
         Args:
             name (str)
@@ -7361,6 +7379,9 @@ class SimRobotController(_object):
         Args:
             q (:obj:`list of floats`)
             dt (float)
+
+        q has size model().numLinks(). dt must be > 0.  
+
         """
         return _robotsim.SimRobotController_setLinear(self, q, dt)
 
@@ -7374,6 +7395,9 @@ class SimRobotController(_object):
             q (:obj:`list of floats`)
             v (:obj:`list of floats`)
             dt (float)
+
+        q and v have size model().numLinks(). dt must be > 0.  
+
         """
         return _robotsim.SimRobotController_setCubic(self, q, v, dt)
 
@@ -7414,7 +7438,7 @@ class SimRobotController(_object):
     def setVelocity(self, dq, dt):
         """
         Sets a rate controller from the current commanded config to move at rate dq for
-        time dt.  
+        time dt > 0. dq has size model().numLinks()  
 
         Args:
             dq (:obj:`list of floats`)
@@ -7425,7 +7449,8 @@ class SimRobotController(_object):
 
     def setTorque(self, t):
         """
-        Sets a torque command controller.  
+        Sets a torque command controller. t can have size model().numDrivers() or
+        model().numLinks().  
 
         Args:
             t (:obj:`list of floats`)
@@ -7483,7 +7508,7 @@ class SimRobotController(_object):
 
     def setPIDGains(self, kP, kI, kD):
         """
-        Sets the PID gains.  
+        Sets the PID gains. Arguments have size model().numDrivers().  
 
         Args:
             kP (:obj:`list of floats`)
