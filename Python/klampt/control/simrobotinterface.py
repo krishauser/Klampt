@@ -34,7 +34,7 @@ class _SimControlInterface(RobotInterfaceBase):
     def parts(self):
         if self.robotInfo is None:
             return RobotInterfaceBase.parts(self)
-        res = dict(None:list(range(self.numDOFs())))
+        res = {None:list(range(self.numDOFs()))}
         for (k,v) in self.robotInfo.parts:
             res[k] = self.robotInfo.toIndices(v)
         return res
