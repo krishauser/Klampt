@@ -55,12 +55,14 @@ class Simulator;
 class SimRobotSensor
 {
  public:
-  SimRobotSensor(Robot* robot,SensorBase* sensor);
+  SimRobotSensor(const RobotModel& robot,SensorBase* sensor);
   SimRobotSensor(SimRobotController& robot,const char* name,const char* type);
   ///Returns the name of the sensor
   std::string name();
   ///Returns the type of the sensor
   std::string type();
+  ///Returns the model of the robot to which this belongs
+  RobotModel robot();
   ///Returns a list of names for the measurements (one per measurement).
   std::vector<std::string> measurementNames();
   ///Returns a list of measurements from the previous simulation (or kinematicSimulate) timestep
@@ -80,10 +82,11 @@ class SimRobotSensor
 
   ///simulates / advances the kinematic simulation
   void kinematicSimulate(WorldModel& world,double dt);
+  void kinematicSimulate(double dt);
   ///resets a kinematic simulation so that a new initial condition can be set
   void kinematicReset();
 
-  Robot* robot;
+  RobotModel robotModel;
   SensorBase* sensor;
 };
 

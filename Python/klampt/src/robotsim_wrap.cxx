@@ -47382,7 +47382,7 @@ fail:
 
 SWIGINTERN PyObject *_wrap_new_SimRobotSensor__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
-  Robot *arg1 = (Robot *) 0 ;
+  RobotModel *arg1 = 0 ;
   SensorBase *arg2 = (SensorBase *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -47393,11 +47393,14 @@ SWIGINTERN PyObject *_wrap_new_SimRobotSensor__SWIG_0(PyObject *SWIGUNUSEDPARM(s
   SimRobotSensor *result = 0 ;
   
   if (!PyArg_ParseTuple(args,(char *)"OO:new_SimRobotSensor",&obj0,&obj1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Robot, 0 |  0 );
+  res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_RobotModel,  0  | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_SimRobotSensor" "', argument " "1"" of type '" "Robot *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_SimRobotSensor" "', argument " "1"" of type '" "RobotModel const &""'"); 
   }
-  arg1 = reinterpret_cast< Robot * >(argp1);
+  if (!argp1) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_SimRobotSensor" "', argument " "1"" of type '" "RobotModel const &""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModel * >(argp1);
   res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_SensorBase, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "new_SimRobotSensor" "', argument " "2"" of type '" "SensorBase *""'"); 
@@ -47405,7 +47408,7 @@ SWIGINTERN PyObject *_wrap_new_SimRobotSensor__SWIG_0(PyObject *SWIGUNUSEDPARM(s
   arg2 = reinterpret_cast< SensorBase * >(argp2);
   {
     try {
-      result = (SimRobotSensor *)new SimRobotSensor(arg1,arg2);
+      result = (SimRobotSensor *)new SimRobotSensor((RobotModel const &)*arg1,arg2);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -47498,8 +47501,7 @@ SWIGINTERN PyObject *_wrap_new_SimRobotSensor(PyObject *self, PyObject *args) {
   }
   if (argc == 2) {
     int _v;
-    void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Robot, 0);
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_RobotModel, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
       void *vptr = 0;
@@ -47531,7 +47533,7 @@ SWIGINTERN PyObject *_wrap_new_SimRobotSensor(PyObject *self, PyObject *args) {
 fail:
   SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'new_SimRobotSensor'.\n"
     "  Possible C/C++ prototypes are:\n"
-    "    SimRobotSensor::SimRobotSensor(Robot *,SensorBase *)\n"
+    "    SimRobotSensor::SimRobotSensor(RobotModel const &,SensorBase *)\n"
     "    SimRobotSensor::SimRobotSensor(SimRobotController &,char const *,char const *)\n");
   return 0;
 }
@@ -47599,6 +47601,40 @@ SWIGINTERN PyObject *_wrap_SimRobotSensor_type(PyObject *SWIGUNUSEDPARM(self), P
     }
   }
   resultobj = SWIG_From_std_string(static_cast< std::string >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SimRobotSensor_robot(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SimRobotSensor *arg1 = (SimRobotSensor *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  RobotModel result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:SimRobotSensor_robot",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SimRobotSensor, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotSensor_robot" "', argument " "1"" of type '" "SimRobotSensor *""'"); 
+  }
+  arg1 = reinterpret_cast< SimRobotSensor * >(argp1);
+  {
+    try {
+      result = (arg1)->robot();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj((new RobotModel(static_cast< const RobotModel& >(result))), SWIGTYPE_p_RobotModel, SWIG_POINTER_OWN |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -47937,7 +47973,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_SimRobotSensor_kinematicSimulate(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_SimRobotSensor_kinematicSimulate__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   SimRobotSensor *arg1 = (SimRobotSensor *) 0 ;
   WorldModel *arg2 = 0 ;
@@ -47991,6 +48027,105 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_SimRobotSensor_kinematicSimulate__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SimRobotSensor *arg1 = (SimRobotSensor *) 0 ;
+  double arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:SimRobotSensor_kinematicSimulate",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SimRobotSensor, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotSensor_kinematicSimulate" "', argument " "1"" of type '" "SimRobotSensor *""'"); 
+  }
+  arg1 = reinterpret_cast< SimRobotSensor * >(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "SimRobotSensor_kinematicSimulate" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  {
+    try {
+      (arg1)->kinematicSimulate(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SimRobotSensor_kinematicSimulate(PyObject *self, PyObject *args) {
+  Py_ssize_t argc;
+  PyObject *argv[4] = {
+    0
+  };
+  Py_ssize_t ii;
+  
+  if (!PyTuple_Check(args)) SWIG_fail;
+  argc = args ? PyObject_Length(args) : 0;
+  for (ii = 0; (ii < 3) && (ii < argc); ii++) {
+    argv[ii] = PyTuple_GET_ITEM(args,ii);
+  }
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_SimRobotSensor, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_double(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        return _wrap_SimRobotSensor_kinematicSimulate__SWIG_1(self, args);
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_SimRobotSensor, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      void *vptr = 0;
+      int res = SWIG_ConvertPtr(argv[1], &vptr, SWIGTYPE_p_WorldModel, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        {
+          int res = SWIG_AsVal_double(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          return _wrap_SimRobotSensor_kinematicSimulate__SWIG_0(self, args);
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'SimRobotSensor_kinematicSimulate'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    SimRobotSensor::kinematicSimulate(WorldModel &,double)\n"
+    "    SimRobotSensor::kinematicSimulate(double)\n");
+  return 0;
+}
+
+
 SWIGINTERN PyObject *_wrap_SimRobotSensor_kinematicReset(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   SimRobotSensor *arg1 = (SimRobotSensor *) 0 ;
@@ -48024,10 +48159,10 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_SimRobotSensor_robot_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_SimRobotSensor_robotModel_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   SimRobotSensor *arg1 = (SimRobotSensor *) 0 ;
-  Robot *arg2 = (Robot *) 0 ;
+  RobotModel *arg2 = (RobotModel *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -48035,18 +48170,18 @@ SWIGINTERN PyObject *_wrap_SimRobotSensor_robot_set(PyObject *SWIGUNUSEDPARM(sel
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OO:SimRobotSensor_robot_set",&obj0,&obj1)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"OO:SimRobotSensor_robotModel_set",&obj0,&obj1)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SimRobotSensor, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotSensor_robot_set" "', argument " "1"" of type '" "SimRobotSensor *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotSensor_robotModel_set" "', argument " "1"" of type '" "SimRobotSensor *""'"); 
   }
   arg1 = reinterpret_cast< SimRobotSensor * >(argp1);
-  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_Robot, SWIG_POINTER_DISOWN |  0 );
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_RobotModel, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SimRobotSensor_robot_set" "', argument " "2"" of type '" "Robot *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SimRobotSensor_robotModel_set" "', argument " "2"" of type '" "RobotModel *""'"); 
   }
-  arg2 = reinterpret_cast< Robot * >(argp2);
-  if (arg1) (arg1)->robot = arg2;
+  arg2 = reinterpret_cast< RobotModel * >(argp2);
+  if (arg1) (arg1)->robotModel = *arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -48054,22 +48189,22 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_SimRobotSensor_robot_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_SimRobotSensor_robotModel_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   SimRobotSensor *arg1 = (SimRobotSensor *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject * obj0 = 0 ;
-  Robot *result = 0 ;
+  RobotModel *result = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"O:SimRobotSensor_robot_get",&obj0)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"O:SimRobotSensor_robotModel_get",&obj0)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SimRobotSensor, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotSensor_robot_get" "', argument " "1"" of type '" "SimRobotSensor *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotSensor_robotModel_get" "', argument " "1"" of type '" "SimRobotSensor *""'"); 
   }
   arg1 = reinterpret_cast< SimRobotSensor * >(argp1);
-  result = (Robot *) ((arg1)->robot);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Robot, 0 |  0 );
+  result = (RobotModel *)& ((arg1)->robotModel);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_RobotModel, 0 |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -56757,6 +56892,7 @@ static PyMethodDef SwigMethods[] = {
 		"*   c: opacity, in range [0,255]  \n"
 		"*   r,g,b,a: color channels, in range [0,1]  \n"
 		"*   u,v: texture coordinate  \n"
+		"*   radius: treats the point cloud as a collection of balls  \n"
 		"\n"
 		"Settings are usually lowercase but follow PCL naming convention, and often\n"
 		"include:  \n"
@@ -57306,8 +57442,8 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Returns the axis-aligned bounding box of the object. Note: O(1) time, but may\n"
-		"not be tight.  \n"
+		"Returns the axis-aligned bounding box of the object as a tuple (bmin,bmax).\n"
+		"Note: O(1) time, but may not be tight.  \n"
 		"\n"
 		""},
 	 { (char *)"Geometry3D_getBBTight", _wrap_Geometry3D_getBBTight, METH_VARARGS, (char *)"\n"
@@ -57315,8 +57451,8 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Returns a tighter axis-aligned bounding box of the object than getBB. Worst case\n"
-		"O(n) time.  \n"
+		"Returns a tighter axis-aligned bounding box of the object than\n"
+		":meth:`Geometry3D.getBB`. Worst case O(n) time.  \n"
 		"\n"
 		""},
 	 { (char *)"Geometry3D_convert", _wrap_Geometry3D_convert, METH_VARARGS, (char *)"\n"
@@ -57371,7 +57507,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Returns true if this geometry is within distance tol to other.  \n"
+		"Returns true if this geometry is within distance `tol` to other.  \n"
 		"\n"
 		""},
 	 { (char *)"Geometry3D_distance_simple", _wrap_Geometry3D_distance_simple, METH_VARARGS, (char *)"\n"
@@ -57384,7 +57520,8 @@ static PyMethodDef SwigMethods[] = {
 		"Version 0.8: this is the same as the old distance() function.  \n"
 		"\n"
 		"Returns the distance from this geometry to the other. If either geometry\n"
-		"contains volume information, this value may be negative to indicate penetration.  \n"
+		"contains volume information, this value may be negative to indicate penetration.\n"
+		"See :meth:`Geometry3D.distance` for more information.  \n"
 		"\n"
 		""},
 	 { (char *)"Geometry3D_distance_point", _wrap_Geometry3D_distance_point, METH_VARARGS, (char *)"\n"
@@ -57399,15 +57536,28 @@ static PyMethodDef SwigMethods[] = {
 		"The return value contains the distance, closest points, and gradients if\n"
 		"available.  \n"
 		"\n"
+		"For some geometry types, the signed distance is returned. The signed distance\n"
+		"returns the negative penetration depth if pt is within this. The following\n"
+		"geometry types return signed distances:  \n"
+		"\n"
+		"*   GeometricPrimitive  \n"
+		"*   PointCloud (approximate, if the cloud is a set of balls with the radius\n"
+		"    property)  \n"
+		"*   VolumeGrid  \n"
+		"*   ConvexHull  \n"
+		"\n"
+		"For other types, a signed distance will be returned if the geometry has a\n"
+		"positive collision margin, and the point penetrates less than this margin.  \n"
+		"\n"
 		""},
 	 { (char *)"Geometry3D_distance_point_ext", _wrap_Geometry3D_distance_point_ext, METH_VARARGS, (char *)"\n"
 		"Geometry3D_distance_point_ext(Geometry3D self, double const [3] pt, DistanceQuerySettings settings) -> DistanceQueryResult\n"
 		"\n"
 		"\n"
 		"\n"
-		"A customizable version of distance_point. The settings for the calculation can\n"
-		"be customized with relErr, absErr, and upperBound, e.g., to break if the closest\n"
-		"points are at least upperBound distance from one another.  \n"
+		"A customizable version of :meth:`Geometry3D.distance_point`. The settings for\n"
+		"the calculation can be customized with relErr, absErr, and upperBound, e.g., to\n"
+		"break if the closest points are at least upperBound distance from one another.  \n"
 		"\n"
 		""},
 	 { (char *)"Geometry3D_distance", _wrap_Geometry3D_distance, METH_VARARGS, (char *)"\n"
@@ -57415,10 +57565,16 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Returns the the distance and closest points between the given geometries.  \n"
+		"Returns the the distance and closest points between the given geometries. This\n"
+		"may be either the normal distance or the signed distance, depending on the\n"
+		"geometry type.  \n"
 		"\n"
-		"If the objects are penetrating, some combinations of geometry types allow\n"
-		"calculating penetration depths:  \n"
+		"The normal distance returns 0 if the two objects are touching\n"
+		"(this.collides(other)=True).  \n"
+		"\n"
+		"The signed distance returns the negative penetration depth if the objects are\n"
+		"touching. Only the following combinations of geometry types return signed\n"
+		"distances:  \n"
 		"\n"
 		"*   GeometricPrimitive-GeometricPrimitive (Python-supported sub-types only)  \n"
 		"*   GeometricPrimitive-TriangleMesh (surface only)  \n"
@@ -57447,9 +57603,9 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"A customizable version of distance. The settings for the calculation can be\n"
-		"customized with relErr, absErr, and upperBound, e.g., to break if the closest\n"
-		"points are at least upperBound distance from one another.  \n"
+		"A customizable version of :meth:`Geometry3D.distance`. The settings for the\n"
+		"calculation can be customized with relErr, absErr, and upperBound, e.g., to\n"
+		"break if the closest points are at least upperBound distance from one another.  \n"
 		"\n"
 		""},
 	 { (char *)"Geometry3D_rayCast", _wrap_Geometry3D_rayCast, METH_VARARGS, (char *)"\n"
@@ -60263,7 +60419,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		""},
 	 { (char *)"new_SimRobotSensor", _wrap_new_SimRobotSensor, METH_VARARGS, (char *)"\n"
-		"SimRobotSensor(Robot * robot, SensorBase * sensor)\n"
+		"SimRobotSensor(RobotModel robot, SensorBase * sensor)\n"
 		"new_SimRobotSensor(SimRobotController robot, char const * name, char const * type) -> SimRobotSensor\n"
 		"\n"
 		"\n"
@@ -60283,6 +60439,14 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Returns the type of the sensor.  \n"
+		"\n"
+		""},
+	 { (char *)"SimRobotSensor_robot", _wrap_SimRobotSensor_robot, METH_VARARGS, (char *)"\n"
+		"SimRobotSensor_robot(SimRobotSensor self) -> RobotModel\n"
+		"\n"
+		"\n"
+		"\n"
+		"Returns the model of the robot to which this belongs.  \n"
 		"\n"
 		""},
 	 { (char *)"SimRobotSensor_measurementNames", _wrap_SimRobotSensor_measurementNames, METH_VARARGS, (char *)"\n"
@@ -60331,11 +60495,10 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		""},
 	 { (char *)"SimRobotSensor_kinematicSimulate", _wrap_SimRobotSensor_kinematicSimulate, METH_VARARGS, (char *)"\n"
-		"SimRobotSensor_kinematicSimulate(SimRobotSensor self, WorldModel world, double dt)\n"
+		"kinematicSimulate(WorldModel world, double dt)\n"
+		"SimRobotSensor_kinematicSimulate(SimRobotSensor self, double dt)\n"
 		"\n"
 		"\n"
-		"\n"
-		"simulates / advances the kinematic simulation  \n"
 		"\n"
 		""},
 	 { (char *)"SimRobotSensor_kinematicReset", _wrap_SimRobotSensor_kinematicReset, METH_VARARGS, (char *)"\n"
@@ -60346,8 +60509,8 @@ static PyMethodDef SwigMethods[] = {
 		"resets a kinematic simulation so that a new initial condition can be set  \n"
 		"\n"
 		""},
-	 { (char *)"SimRobotSensor_robot_set", _wrap_SimRobotSensor_robot_set, METH_VARARGS, (char *)"SimRobotSensor_robot_set(SimRobotSensor self, Robot * robot)"},
-	 { (char *)"SimRobotSensor_robot_get", _wrap_SimRobotSensor_robot_get, METH_VARARGS, (char *)"SimRobotSensor_robot_get(SimRobotSensor self) -> Robot *"},
+	 { (char *)"SimRobotSensor_robotModel_set", _wrap_SimRobotSensor_robotModel_set, METH_VARARGS, (char *)"SimRobotSensor_robotModel_set(SimRobotSensor self, RobotModel robotModel)"},
+	 { (char *)"SimRobotSensor_robotModel_get", _wrap_SimRobotSensor_robotModel_get, METH_VARARGS, (char *)"SimRobotSensor_robotModel_get(SimRobotSensor self) -> RobotModel"},
 	 { (char *)"SimRobotSensor_sensor_set", _wrap_SimRobotSensor_sensor_set, METH_VARARGS, (char *)"SimRobotSensor_sensor_set(SimRobotSensor self, SensorBase * sensor)"},
 	 { (char *)"SimRobotSensor_sensor_get", _wrap_SimRobotSensor_sensor_get, METH_VARARGS, (char *)"SimRobotSensor_sensor_get(SimRobotSensor self) -> SensorBase *"},
 	 { (char *)"delete_SimRobotSensor", _wrap_delete_SimRobotSensor, METH_VARARGS, (char *)"delete_SimRobotSensor(SimRobotSensor self)"},
@@ -60393,7 +60556,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Returns the current commanded configuration.  \n"
+		"Returns the current commanded configuration (size model().numLinks())  \n"
 		"\n"
 		""},
 	 { (char *)"SimRobotController_getCommandedVelocity", _wrap_SimRobotController_getCommandedVelocity, METH_VARARGS, (char *)"\n"
@@ -60401,7 +60564,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Returns the current commanded velocity.  \n"
+		"Returns the current commanded velocity (size model().numLinks())  \n"
 		"\n"
 		""},
 	 { (char *)"SimRobotController_getCommandedTorque", _wrap_SimRobotController_getCommandedTorque, METH_VARARGS, (char *)"\n"
@@ -60409,7 +60572,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Returns the current commanded (feedforward) torque.  \n"
+		"Returns the current commanded (feedforward) torque (size model().numDrivers())  \n"
 		"\n"
 		""},
 	 { (char *)"SimRobotController_getSensedConfig", _wrap_SimRobotController_getSensedConfig, METH_VARARGS, (char *)"\n"
@@ -60417,7 +60580,8 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Returns the current \"sensed\" configuration from the simulator.  \n"
+		"Returns the current \"sensed\" configuration from the simulator (size\n"
+		"model().numLinks())  \n"
 		"\n"
 		""},
 	 { (char *)"SimRobotController_getSensedVelocity", _wrap_SimRobotController_getSensedVelocity, METH_VARARGS, (char *)"\n"
@@ -60425,7 +60589,8 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Returns the current \"sensed\" velocity from the simulator.  \n"
+		"Returns the current \"sensed\" velocity from the simulator (size\n"
+		"model().numLinks())  \n"
 		"\n"
 		""},
 	 { (char *)"SimRobotController_getSensedTorque", _wrap_SimRobotController_getSensedTorque, METH_VARARGS, (char *)"\n"
@@ -60433,8 +60598,10 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Returns the current \"sensed\" (feedback) torque from the simulator. Note: a\n"
-		"default robot doesn't have a torque sensor, so this will be 0.  \n"
+		"Returns the current \"sensed\" (feedback) torque from the simulator. (size\n"
+		"model().numDrivers())  \n"
+		"\n"
+		"Note: a default robot doesn't have a torque sensor, so this will be 0  \n"
 		"\n"
 		""},
 	 { (char *)"SimRobotController_sensor", _wrap_SimRobotController_sensor, METH_VARARGS, (char *)"\n"
@@ -60452,7 +60619,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"gets a command list  \n"
+		"gets a custom command list  \n"
 		"\n"
 		""},
 	 { (char *)"SimRobotController_sendCommand", _wrap_SimRobotController_sendCommand, METH_VARARGS, (char *)"\n"
@@ -60460,7 +60627,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"sends a command to the controller  \n"
+		"sends a custom string command to the controller  \n"
 		"\n"
 		""},
 	 { (char *)"SimRobotController_getSetting", _wrap_SimRobotController_getSetting, METH_VARARGS, (char *)"\n"
@@ -60517,6 +60684,8 @@ static PyMethodDef SwigMethods[] = {
 		"Uses linear interpolation to get from the current configuration to the desired\n"
 		"configuration after time dt.  \n"
 		"\n"
+		"q has size model().numLinks(). dt must be > 0.  \n"
+		"\n"
 		""},
 	 { (char *)"SimRobotController_setCubic", _wrap_SimRobotController_setCubic, METH_VARARGS, (char *)"\n"
 		"SimRobotController_setCubic(SimRobotController self, doubleVector q, doubleVector v, double dt)\n"
@@ -60525,6 +60694,8 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Uses cubic (Hermite) interpolation to get from the current\n"
 		"configuration/velocity to the desired configuration/velocity after time dt.  \n"
+		"\n"
+		"q and v have size model().numLinks(). dt must be > 0.  \n"
 		"\n"
 		""},
 	 { (char *)"SimRobotController_addLinear", _wrap_SimRobotController_addLinear, METH_VARARGS, (char *)"\n"
@@ -60557,7 +60728,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Sets a rate controller from the current commanded config to move at rate dq for\n"
-		"time dt.  \n"
+		"time dt > 0. dq has size model().numLinks()  \n"
 		"\n"
 		""},
 	 { (char *)"SimRobotController_setTorque", _wrap_SimRobotController_setTorque, METH_VARARGS, (char *)"\n"
@@ -60565,7 +60736,8 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Sets a torque command controller.  \n"
+		"Sets a torque command controller. t can have size model().numDrivers() or\n"
+		"model().numLinks().  \n"
 		"\n"
 		""},
 	 { (char *)"SimRobotController_setPIDCommand", _wrap_SimRobotController_setPIDCommand, METH_VARARGS, (char *)"\n"
@@ -60608,7 +60780,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Sets the PID gains.  \n"
+		"Sets the PID gains. Arguments have size model().numDrivers().  \n"
 		"\n"
 		""},
 	 { (char *)"SimRobotController_getPIDGains", _wrap_SimRobotController_getPIDGains, METH_VARARGS, (char *)"\n"

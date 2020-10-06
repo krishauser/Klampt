@@ -4702,14 +4702,14 @@ void SimRobotController::getSensedTorque(std::vector<double>& t)
   }
 }
 
-SimRobotSensor::SimRobotSensor(Robot* _robot,SensorBase* _sensor)
-  :robot(_robot),sensor(_sensor)
+SimRobotSensor::SimRobotSensor(const RobotModel& _robot,SensorBase* _sensor)
+  :robotModel(_robot),sensor(_sensor)
 {}
 
 SimRobotSensor::SimRobotSensor(SimRobotController& _controller,const char* name,const char* type)
-  :robot(NULL),sensor(NULL)
+  :sensor(NULL)
 {
-  robot = _controller.controller->robot;
+  robotModel = _controller.model();
   shared_ptr<SensorBase> newsensor = _controller.controller->sensors.CreateByType(type);
   if(!newsensor) {
     throw PyException("Invalid sensor type specified");
@@ -4721,6 +4721,11 @@ SimRobotSensor::SimRobotSensor(SimRobotController& _controller,const char* name,
   _controller.controller->sensors.sensors.push_back(newsensor);
   _controller.controller->nextSenseTime.push_back(_controller.controller->curTime);
   sensor = _controller.controller->sensors.sensors.back().get();
+}
+
+RobotModel SimRobotSensor::robot()
+{
+  return robotModel;
 }
 
 std::string SimRobotSensor::name()
@@ -4772,13 +4777,20 @@ void SimRobotSensor::drawGL()
 void SimRobotSensor::drawGL(const std::vector<double>& measurements)
 {
   if(!sensor) return;
-  sensor->DrawGL(*robot,measurements);
+  sensor->DrawGL(*robotModel.robot,measurements);
+}
+
+void SimRobotSensor::kinematicSimulate(double dt)
+{
+  if(!sensor) return;
+  sensor->SimulateKinematic(*robotModel.robot,*worlds[robotModel.world]->world);
+  sensor->Advance(dt);
 }
 
 void SimRobotSensor::kinematicSimulate(WorldModel& world,double dt)
 {
   if(!sensor) return;
-  sensor->SimulateKinematic(*robot,*worlds[world.index]->world);
+  sensor->SimulateKinematic(*robotModel.robot,*worlds[robotModel.index]->world);
   sensor->Advance(dt);
 }
 
@@ -4793,8 +4805,8 @@ SimRobotSensor SimRobotController::sensor(int sensorIndex)
 {
   RobotSensors& sensors = controller->sensors;
   if(sensorIndex < 0 || sensorIndex >= (int)sensors.sensors.size())
-    return SimRobotSensor(NULL,NULL);
-  return SimRobotSensor(controller->robot,sensors.sensors[sensorIndex].get());
+    return SimRobotSensor(RobotModel(),NULL);
+  return SimRobotSensor(model(),sensors.sensors[sensorIndex].get());
 }
 
 SimRobotSensor SimRobotController::sensor(const char* name)
@@ -4804,7 +4816,7 @@ SimRobotSensor SimRobotController::sensor(const char* name)
   if(sensor==NULL) {
     fprintf(stderr,"Warning, sensor %s does not exist\n",name);
   }
-  return SimRobotSensor(controller->robot,sensor.get());
+  return SimRobotSensor(model(),sensor.get());
 }
 
 std::vector<std::string> SimRobotController::commands()

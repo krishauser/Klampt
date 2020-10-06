@@ -7323,7 +7323,7 @@ class SimRobotSensor(_object):
 
     def __init__(self, *args):
         """
-        __init__(SimRobotSensor self, Robot * robot, SensorBase * sensor) -> SimRobotSensor
+        __init__(SimRobotSensor self, RobotModel robot, SensorBase * sensor) -> SimRobotSensor
         __init__(SimRobotSensor self, SimRobotController robot, char const * name, char const * type) -> SimRobotSensor
 
 
@@ -7357,6 +7357,18 @@ class SimRobotSensor(_object):
 
         """
         return _robotsim.SimRobotSensor_type(self)
+
+
+    def robot(self):
+        """
+        robot(SimRobotSensor self) -> RobotModel
+
+
+
+        Returns the model of the robot to which this belongs.  
+
+        """
+        return _robotsim.SimRobotSensor_robot(self)
 
 
     def measurementNames(self):
@@ -7424,16 +7436,15 @@ class SimRobotSensor(_object):
         return _robotsim.SimRobotSensor_drawGL(self, *args)
 
 
-    def kinematicSimulate(self, world, dt):
+    def kinematicSimulate(self, *args):
         """
         kinematicSimulate(SimRobotSensor self, WorldModel world, double dt)
+        kinematicSimulate(SimRobotSensor self, double dt)
 
 
-
-        simulates / advances the kinematic simulation  
 
         """
-        return _robotsim.SimRobotSensor_kinematicSimulate(self, world, dt)
+        return _robotsim.SimRobotSensor_kinematicSimulate(self, *args)
 
 
     def kinematicReset(self):
@@ -7447,10 +7458,10 @@ class SimRobotSensor(_object):
         """
         return _robotsim.SimRobotSensor_kinematicReset(self)
 
-    __swig_setmethods__["robot"] = _robotsim.SimRobotSensor_robot_set
-    __swig_getmethods__["robot"] = _robotsim.SimRobotSensor_robot_get
+    __swig_setmethods__["robotModel"] = _robotsim.SimRobotSensor_robotModel_set
+    __swig_getmethods__["robotModel"] = _robotsim.SimRobotSensor_robotModel_get
     if _newclass:
-        robot = _swig_property(_robotsim.SimRobotSensor_robot_get, _robotsim.SimRobotSensor_robot_set)
+        robotModel = _swig_property(_robotsim.SimRobotSensor_robotModel_get, _robotsim.SimRobotSensor_robotModel_set)
     __swig_setmethods__["sensor"] = _robotsim.SimRobotSensor_sensor_set
     __swig_getmethods__["sensor"] = _robotsim.SimRobotSensor_sensor_get
     if _newclass:
@@ -7590,7 +7601,7 @@ class SimRobotController(_object):
 
 
 
-        Returns the current commanded configuration.  
+        Returns the current commanded configuration (size model().numLinks())  
 
         """
         return _robotsim.SimRobotController_getCommandedConfig(self)
@@ -7602,7 +7613,7 @@ class SimRobotController(_object):
 
 
 
-        Returns the current commanded velocity.  
+        Returns the current commanded velocity (size model().numLinks())  
 
         """
         return _robotsim.SimRobotController_getCommandedVelocity(self)
@@ -7614,7 +7625,7 @@ class SimRobotController(_object):
 
 
 
-        Returns the current commanded (feedforward) torque.  
+        Returns the current commanded (feedforward) torque (size model().numDrivers())  
 
         """
         return _robotsim.SimRobotController_getCommandedTorque(self)
@@ -7626,7 +7637,8 @@ class SimRobotController(_object):
 
 
 
-        Returns the current "sensed" configuration from the simulator.  
+        Returns the current "sensed" configuration from the simulator (size
+        model().numLinks())  
 
         """
         return _robotsim.SimRobotController_getSensedConfig(self)
@@ -7638,7 +7650,8 @@ class SimRobotController(_object):
 
 
 
-        Returns the current "sensed" velocity from the simulator.  
+        Returns the current "sensed" velocity from the simulator (size
+        model().numLinks())  
 
         """
         return _robotsim.SimRobotController_getSensedVelocity(self)
@@ -7650,8 +7663,10 @@ class SimRobotController(_object):
 
 
 
-        Returns the current "sensed" (feedback) torque from the simulator. Note: a
-        default robot doesn't have a torque sensor, so this will be 0.  
+        Returns the current "sensed" (feedback) torque from the simulator. (size
+        model().numDrivers())  
+
+        Note: a default robot doesn't have a torque sensor, so this will be 0  
 
         """
         return _robotsim.SimRobotController_getSensedTorque(self)
@@ -7677,7 +7692,7 @@ class SimRobotController(_object):
 
 
 
-        gets a command list  
+        gets a custom command list  
 
         """
         return _robotsim.SimRobotController_commands(self)
@@ -7689,7 +7704,7 @@ class SimRobotController(_object):
 
 
 
-        sends a command to the controller  
+        sends a custom string command to the controller  
 
         """
         return _robotsim.SimRobotController_sendCommand(self, name, args)
@@ -7770,6 +7785,8 @@ class SimRobotController(_object):
         Uses linear interpolation to get from the current configuration to the desired
         configuration after time dt.  
 
+        q has size model().numLinks(). dt must be > 0.  
+
         """
         return _robotsim.SimRobotController_setLinear(self, q, dt)
 
@@ -7782,6 +7799,8 @@ class SimRobotController(_object):
 
         Uses cubic (Hermite) interpolation to get from the current
         configuration/velocity to the desired configuration/velocity after time dt.  
+
+        q and v have size model().numLinks(). dt must be > 0.  
 
         """
         return _robotsim.SimRobotController_setCubic(self, q, v, dt)
@@ -7830,7 +7849,7 @@ class SimRobotController(_object):
 
 
         Sets a rate controller from the current commanded config to move at rate dq for
-        time dt.  
+        time dt > 0. dq has size model().numLinks()  
 
         """
         return _robotsim.SimRobotController_setVelocity(self, dq, dt)
@@ -7842,7 +7861,8 @@ class SimRobotController(_object):
 
 
 
-        Sets a torque command controller.  
+        Sets a torque command controller. t can have size model().numDrivers() or
+        model().numLinks().  
 
         """
         return _robotsim.SimRobotController_setTorque(self, t)
@@ -7901,7 +7921,7 @@ class SimRobotController(_object):
 
 
 
-        Sets the PID gains.  
+        Sets the PID gains. Arguments have size model().numDrivers().  
 
         """
         return _robotsim.SimRobotController_setPIDGains(self, kP, kI, kD)
