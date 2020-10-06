@@ -47,31 +47,31 @@ class GLViewport:
         """Sets the pose of the camera, with T given in world coordinates.
 
         If convention = 'openGL', the Z axis of T is the *backward* direction of
-        the camera, with X pointing *up* and Y pointing to the *right*.
+        the camera, with Y pointing *up* and X pointing to the *right*.
 
         If convention = 'standard', the Z axis of T is the *forward* direction of
-        the camera, with X pointing *down* and Y pointing to the *right*
+        the camera, with Y pointing *down* and X pointing to the *right*
         """
         if convention == 'openGL':
             self.camera.set_matrix(T)
         else:
-            xzflip = [-1,0,0,  0,1,0,  0,0,-1]
+            xzflip = [1,0,0,  0,-1,0,  0,0,-1]
             self.camera.set_matrix((so3.mul(T[0],xzflip),T[1]))
 
     def getTransform(self,convention='standard'):
         """Gets the pose of the camera, with T given in world coordinates.
 
         If convention = 'openGL', the Z axis of T is the *backward* direction of
-        the camera, with X pointing *up* and Y pointing to the *right*.
+        the camera, with Y pointing *up* and X pointing to the *right*.
 
         If convention = 'standard', the Z axis of T is the *forward* direction of
-        the camera, with X pointing *down* and Y pointing to the *right*
+        the camera, with Y pointing *down* and X pointing to the *right*
         """
         if convention == 'openGL':
             return self.camera.matrix()
         else:
             T = self.camera.matrix()
-            xzflip = [-1,0,0,  0,1,0,  0,0,-1]
+            xzflip = [1,0,0,  0,-1,0,  0,0,-1]
             return (so3.mul(T[0],xzflip),T[1])
 
     def fit(self,center,radius):
@@ -94,7 +94,7 @@ class GLViewport:
         vp.n,vp.f = self.clippingplanes
         vp.perspective = True
         aspect = float(self.w)/float(self.h)
-        rfov = self.fov*math.pi/180.0
+        rfov = math.radians(self.fov)
         vp.scale = 1.0/(2.0*math.tan(rfov*0.5/aspect)*aspect)
         vp.setRigidTransform(*self.camera.matrix())
         return vp
@@ -107,7 +107,7 @@ class GLViewport:
         u = float(x-(self.x + self.w/2))/self.w
         v = float((self.y + self.h/2) -y)/self.w
         aspect = float(self.w)/float(self.h)
-        rfov = self.fov*math.pi/180.0
+        rfov = math.radians(self.fov)
         scale = 2.0*math.tan(rfov*0.5/aspect)*aspect
         d = (u*scale,v*scale,-1.0)
         d = vectorops.div(d,vectorops.norm(d))
@@ -126,12 +126,12 @@ class GLViewport:
             if -ploc[2] <= self.clippingplanes[0] or -ploc[2] >= self.clippingplanes[1]:
                 return None
         if abs(ploc[2]) < 1e-8:
-            return (self.x+self.w/2,self.y+self.h/2)
+            return (self.x+self.w/2,self.y+self.h/2,-ploc[2])
         #d = (u*scale,v*scale,-1.0)
         #ploc.x = ploc.z*d.x
         #ploc.y = ploc.z*d.y
         aspect = float(self.w)/float(self.h)
-        rfov = self.fov*math.pi/180.0
+        rfov = math.radians(self.fov)
         scale = 2.0*math.tan(rfov*0.5/aspect)*aspect
         u = -ploc[0]/(ploc[2]*scale)
         v = -ploc[1]/(ploc[2]*scale)
@@ -163,6 +163,7 @@ class GLViewport:
         pack = sum((list(c) for c in cols),[])
         glMultMatrixf(pack)
 
+
 class GLProgramAction:
     def __init__(self,hook,short_text,key,description=None):
         self.hook = hook
@@ -171,6 +172,7 @@ class GLProgramAction:
         self.description = description
         if description == None:
             self.description = short_text
+
 
 class GLProgram:
     """A basic OpenGL visualization, run as part of some _GLBackend.
@@ -416,7 +418,7 @@ class GLNavigationProgram(GLProgram):
             if 'ctrl' in self.modifiers():
                 R,t = self.view.camera.matrix()
                 aspect = float(self.view.w)/self.view.h
-                rfov = self.view.fov*math.pi/180.0
+                rfov = math.radians(self.view.fov)
                 scale = 2.0*math.tan(rfov*0.5/aspect)*aspect
                 delta = so3.apply(R,[-scale*float(dx)*self.view.camera.dist/self.view.w,scale*float(dy)*self.view.camera.dist/self.view.w,0])
                 self.view.camera.tgt = vectorops.add(self.view.camera.tgt,delta)
