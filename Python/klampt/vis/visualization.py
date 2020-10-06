@@ -38,8 +38,8 @@ Basic use of the vis module is fairly straightforward:
 
 0. (optional) Configure the rendering backend.
 1. Add things to the visualization scene with ``vis.add(name,thing)``.  Worlds,
-   geometries, points, transforms, trajectories, contact points, and more
-   can be added in this manner.
+   geometries, points, transforms, trajectories, contact points, and more can
+   be added in this manner.
 2. Modify the appearance of things using modifier calls like
    ``vis.setColor(name,r,g,b,a)``.
 3. Launch windows and/or visualization thread (OpenGL or IPython modes)
@@ -453,6 +453,8 @@ methods.
   scene.
 - def autoFitCamera(scale=1.0): Automatically fits the camera to all objects
   in the visualization.  A scale > 1 magnifies the camera zoom.
+- def followCamera(target,translate=True,rotate=False,center=False): Sets the 
+  camera to follow a target.
 
 Utility functions:
 
@@ -1141,30 +1143,9 @@ def _getBounds(object):
             return res
     return []
 
-def _fitPlane(pts):
-    import numpy as np
-    if len(pts) < 3:
-        raise ValueError("Point set is degenerate")
-    centroid = vectorops.div(vectorops.add(*pts),len(pts))
-    A = np.array([vectorops.sub(pt,centroid) for pt in pts])
-    U,S,V = np.linalg.svd(A,full_matrices=False)
-    imin = 0
-    smin = S[0]
-    zeros = []
-    for i in range(len(S)):
-        if abs(S[i]) < 1e-6:
-            zeros.append(i)
-        if abs(S[i]) < smin:
-            smin = S[i]
-            imin = i
-    if len(zeros) > 1:
-        raise ValueError("Point set is degenerate")
-    assert V.shape == (3,3)
-    #normal is the corresponding row of U
-    normal = V[imin,:]
-    return centroid,normal.tolist()
 
 def autoFitViewport(viewport,objects): 
+    from ..model.sensing import fit_plane_centroid
     ofs = sum([_getOffsets(o) for o in objects],[])
     pts = sum([_getBounds(o) for o in objects],[])
     #print "Bounding box",bb,"center",center
@@ -1186,10 +1167,10 @@ def autoFitViewport(viewport,objects):
     viewport.camera.rot = [0,math.radians(30),math.radians(45)]
     #fit a plane to these points
     try:
-        centroid,normal = _fitPlane(ofs)
+        centroid,normal = fit_plane_centroid(ofs)
     except Exception as e:
         try:
-            centroid,normal = _fitPlane(pts)
+            centroid,normal = fit_plane_centroid(pts)
         except Exception as e:
             print("Exception occurred during fitting to points")
             print(ofs)
@@ -1299,6 +1280,31 @@ def autoFitCamera(scale=1):
     """
     print("klampt.vis: auto-fitting camera to scene.")
     scene().autoFitCamera(scale)
+
+def followCamera(target,translate=True,rotate=False,center=False):
+    """Sets the camera to follow a target.  The camera starts from its current
+    location and keeps the target in the same position on screen. 
+
+    It can operate in the following modes:
+
+    - translation (``translate=True, rotate=False``): the camera moves with the
+      object.  This is default.
+    - look-at (``translate=False, rotate=True``): the camera stays in the
+      current location but rotates to aim toward the object.
+    - follow (``translate=True, rotate=True``): the camera moves as though it
+      were fixed to the object.
+
+    Args:
+        target (str, Trajectory, or None): the target that is to be followed.
+            If this is None, the camera no longer follows anything.
+        translate (bool, optional): whether the camera should follow using
+            translation.
+        rotate (bool, optional): whether the camera should follow using
+            rotation.
+        center (bool, optional): whether the camera should first aim toward the
+            object before following. Default is False.
+    """
+    scene().followCamera(target,translate,rotate,center)
 
 def getViewport():
     """Returns the :class:`GLViewport` of the current scene"""
@@ -2083,12 +2089,19 @@ class VisAppearance:
         """Draws the specified item in the specified world, with all the
         current modifications in attributes.
 
-        If a name or label are given, and self.attributes['hide_label'] != False, then the
-        label is shown.
+        If a name or label are given, and
+        ``self.attributes['hide_label'] != False``, then the label is shown.
 
-        If draw_transparent is None, then everything is drawn.  If True, then
-        only transparent items are drawn.  If False, then only opaque items are
-        drawn.  (This only affects WorldModels)
+        The drawing passes are controlled by ``draw_transparent`` -- opaque
+        items should be rasterized before transparent ones.
+
+        Args:
+            world (WorldModel): the world model
+            viewport (Viewport): the C++ viewport of the current view, which is
+                compatible with the Klampt C++ Widget class.
+            draw_transparent (bool or None): If None, then everything is drawn. 
+                If True, then only transparent items are drawn.  If False, then
+                only opaque items are drawn.  (This only affects WorldModels)
         """
         if self.attributes["hidden"]:
             return
@@ -2644,12 +2657,43 @@ class VisAppearance:
                     return (item,item)
                 elif 'RigidTransform' == vtype:
                     #assumed to be a rigid transform
-                    return (item[1],item[1])
+                    T = item
+                    L = self.attributes.get("length",0.1)
+                    return aabb_create(T[1],se3.apply(T,(L,0,0)),se3.apply(T,(0,L,0)),se3.apply(T,(0,0,L)))
             except Exception:
                 raise
                 pass
             print("Empty bound for object",self.name,"type",self.item.__class__.__name__)
         return aabb_create()
+
+    def getCenter(self):
+        bb = self.getBounds()
+        return vectorops.interpolate(bb[0],bb[1],0.5)
+
+    def getTransform(self):
+        if len(self.subAppearances) != 0:
+            return (so3.identity(),self.getCenter())
+        item = self.item
+        if isinstance(item,coordinates.Frame):
+            T = item.worldCoordinates()
+            L = self.attributes.get("length",0.1)
+            return (T[0],se3.apply(T,(L/2,L/2,L/2)))
+        elif hasattr(item,'geometry'):
+            return item.geometry().getCurrentTransform()
+        elif hasattr(item,'getCurrentTransform'):
+            return item.getCurrentTransform()
+        elif hasattr(item,'getTransform'):
+            return item.getCurrentTransform()
+        else:
+            try:
+                vtype = objectToVisType(item,None)
+                if 'RigidTransform' == vtype:
+                    T = item
+                    L = self.attributes.get("length",0.1)
+                    return (T[0],se3.apply(T,(L/2,L/2,L/2)))
+            except Exception:
+                raise
+        return (so3.identity(),self.getCenter())
 
     def getSubItem(self,path):
         if len(path) == 0: return self
@@ -2799,6 +2843,7 @@ class VisualizationScene:
         self.animating = True
         self.currentAnimationTime = 0
         self.doRefresh = False
+        self.cameraController = None
 
     def getItem(self,item_name):
         """Returns an VisAppearance according to the given name or path"""
@@ -2931,15 +2976,19 @@ class VisualizationScene:
 
     def animationTime(self,newtime=None):
         global _globalLock
-        if newtime is not None:
-            _globalLock.acquire()
-            self.currentAnimationTime = newtime
-            self.doRefresh = True
-            for (k,v) in self.items.items():
-                #do animation updates
-                v.updateAnimation(self.currentAnimationTime)
-            _globalLock.release()
-        return self.currentAnimationTime
+        if newtime is None:
+            #query mode
+            return self.currentAnimationTime
+
+        #update mode
+        _globalLock.acquire()
+        self.currentAnimationTime = newtime
+        self.doRefresh = True
+        for (k,v) in self.items.items():
+            #do animation updates
+            v.updateAnimation(self.currentAnimationTime)
+        _globalLock.release()
+        return 
 
     def remove(self,name):
         global _globalLock
@@ -3145,9 +3194,42 @@ class VisualizationScene:
         try:
             autoFitViewport(vp,list(self.items.values()))
             vp.camera.dist /= scale
+            self.setViewport(vp)
         except Exception as e:
             print("Unable to auto-fit camera")
             print(e)
+
+    def followCamera(self,target,translate,rotate,center):
+        if target is None:
+            self.cameraController = None
+            return
+        vp = self.getViewport()
+        if isinstance(target,str) or isinstance(target,(tuple,list)):
+            try:
+                target = self.getItem(target)
+            except KeyError:
+                raise ValueError("Invalid item "+str(target))
+            target_center = target.getCenter()
+            if center:
+                if translate:
+                    _camera_translate(vp,target_center)
+                else:
+                    _camera_lookat(vp,target_center)
+
+            if translate and rotate:
+                self.cameraController = _TrackingCameraController(vp,target)
+            elif translate:
+                self.cameraController = _TranslatingCameraController(vp,target)
+            elif rotate:
+                self.cameraController = _TargetCameraController(vp,target)
+            else:
+                self.cameraController = None
+        elif isinstance(target,Trajectory):
+            self.cameraController = _TrajectoryCameraController(vp,target)
+        elif isinstance(target,SimRobotSensor):
+          self.cameraController = _SimCamCameraController(vp,target)
+        else:
+            raise ValueError("Invalid value for target, must either be str or a Trajectory")
 
     def updateTime(self,t):
         """The backend will call this during an idle loop to update the
@@ -3163,6 +3245,14 @@ class VisualizationScene:
             #do other updates
             v.updateTime(self.t)
 
+    def updateCamera(self):
+        """Updates the camera, if controlled.  The backend should call
+        this whenever the scene is to be drawn."""
+        if self.cameraController is not None:
+            vp = self.cameraController.update(self.currentAnimationTime)
+            if vp is not None:
+                self.setViewport(vp)
+
     def edit(self,name,doedit=True):
         raise NotImplementedError("Needs to be implemented by subclass")
 
@@ -3175,7 +3265,8 @@ class VisualizationScene:
     def setBackgroundColor(self,r,g,b,a=1): 
         raise NotImplementedError("Needs to be implemented by subclass")
 
-    def renderGL(self,view):        
+    def renderGL(self,view):
+        """Renders the scene in OpenGL"""
         vp = view.toViewport()
         self.labels = []
         world = self.items.get('world',None)
@@ -3280,8 +3371,88 @@ class VisualizationScene:
         for i in self.items.values():
             i.clearDisplayLists()
 
+def _camera_translate(vp,tgt):
+    vp.camera.tgt = tgt
 
+def _camera_lookat(vp,tgt):
+    T = vp.getTransform()
+    vp.camera.tgt = tgt
+    vp.camera.dist = vectorops.distance(T[1],tgt)
+    #set R to point at target
+    zdir = vectorops.unit(vectorops.sub(tgt,T[1]))
+    xdir = vectorops.unit(vectorops.cross(zdir,[0,0,1]))
+    ydir = vectorops.unit(vectorops.cross(zdir,xdir))
+    R = xdir + ydir + zdir
+    vp.camera.set_orientation(R,'xyz')
 
+class _TrackingCameraController:
+    def __init__(self,vp,target):
+        self.vp = vp
+        T = vp.getTransform()
+        self.viewportToTarget = se3.mul(se3.inv(target.getTransform()),T)
+        self.target = target
+    def update(self,t):
+        T = se3.mul(self.target.getTransform(),self.viewportToTarget)
+        self.vp.setTransform(T)
+        return self.vp
+
+class _TranslatingCameraController:
+    def __init__(self,vp,target):
+        self.vp = vp
+        self.last_target_pos = target.getCenter()
+        self.target = target
+    def update(self,t):
+        t = self.target.getCenter()
+        self.vp.camera.tgt = vectorops.add(self.vp.camera.tgt,vectorops.sub(t,self.last_target_pos))
+        self.last_target_pos = t
+        return self.vp
+
+class _TargetCameraController:
+    def __init__(self,vp,target):
+        self.vp = vp
+        self.last_target_pos = target.getCenter()
+        self.target = target
+    def update(self,t):
+        t = self.target.getCenter()
+        tgt = vectorops.add(self.vp.camera.tgt,vectorops.sub(t,self.last_target_pos))
+        self.last_target_pos = t
+        _camera_lookat(self.vp,tgt)
+        return self.vp
+
+class _TrajectoryCameraController:
+    def __init__(self,vp,trajectory):
+        self.vp = vp
+        if isinstance(trajectory,SE3Trajectory):
+            pass
+        elif isinstance(trajectory,SO3Trajectory):
+            pass
+        else:
+            assert isinstance(trajectory,Trajectory)
+            pass
+        self.trajectory = trajectory
+    def update(self,t):
+        if isinstance(self.trajectory,(SE3Trajectory,SE3BezierTrajectory)):
+            T = self.trajectory.eval_se3(t,'loop')
+            self.vp.setTransform(T)
+        elif isinstance(self.trajectory,(SO3Trajectory,SO3BezierTrajectory)):
+            R = self.trajectory.eval(t,'loop')
+            self.vp.camera.set_orientation(R,'xyz')
+        else:
+            trans = self.trajectory.eval(t,'loop')
+            T = self.vp.getTransform()
+            ofs = vectorops(vp.tgt,T[0])
+            self.vp.camera.tgt = vectorops.add(trans,ofs)
+        return self.vp
+
+class _SimCamCameraController:
+    def __init__(self,vp,target):
+        self.vp = vp
+        self.target = target
+    def update(self,t):
+        from ..model import sensing
+        T = sensing.get_sensor_xform(self.target,self.target.robot())
+        self.vp.setTransform(T)
+        return self.vp
 
 
 class _WindowManager:
