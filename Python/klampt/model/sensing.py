@@ -1,9 +1,41 @@
 """A collection of utility functions for dealing with sensors and sensor data.
 
-The get/set_sensor_xform functions are used to interface cleanly with the klampt se3 functions.
+More sophisticated operations call for the use of a full-fledged sensor
+package, such as Open3D or PCL.
 
-The camera_to_X functions convert raw CameraSensor outputs to Python objects that are more easily
-operated upon, e.g., images and point clouds.
+Sensor transforms
+=================
+
+The :func:`get_sensor_xform`/:func:`set_sensor_xform` functions are used to
+interface cleanly with the klampt :mod:`klampt.math.se3` transform
+representation.
+
+Getting images and point clouds
+===============================
+
+The :func:`camera_to_images`, :func:`camera_to_points`, and
+:func:`camera_to_points_world` functions convert raw CameraSensor outputs to
+Python objects that are more easily operated upon, e.g., images and point
+clouds.  Use these to retrieve images as Numpy arrays.
+
+Working with cameras
+====================
+
+The :class:`ProjectiveCameraModel`, :func:`camera_to_viewport`, and
+:func:`camera_from_viewport` help with converting to and from the
+:class:`klampt.vis.glprogram.GLViewport` class used in :mod:`klampt.vis`.
+
+:func:`camera_ray`, and :func:`camera_project` convert to/from image points.
+:func:`visible` determines whether a point or object is visible from a camera.
+
+Working with point clouds
+=========================
+
+:func:`point_cloud_normals` estimates normals from a normal-free point cloud.
+
+The :func:`fit_plane`, :func:`fit_plane3`, and :class:`PlaneFitter` class help
+with plane estimation.
+
 """
 
 from ..robotsim import *
@@ -332,6 +364,7 @@ def camera_to_points(camera,points_format='numpy',all_points=False,color_format=
             if points_format == 'PointCloud':
                 return res
             else:
+                from klampt import Geometry3D
                 g = Geometry3D()
                 g.setPointCloud(res)
                 return g
@@ -376,11 +409,19 @@ def camera_to_points_world(camera,robot,points_format='numpy',color_format='chan
 def camera_to_viewport(camera,robot):
     """Returns a GLViewport instance corresponding to the camera's view. 
 
-    See klampt.vis.glprogram and klampt.vis.visualization for information about how
-    to use the object with the visualization, e.g. `vis.setViewport(vp)`.
+    See :mod:`klampt.vis.glprogram` and :mod:`klampt.vis.visualization` for
+    information about how to use the object with the visualization, e.g.
+    ``vis.setViewport(vp)``.
+
+    Args:
+        camera (SimRobotSensor): the camera instance.
+        robot (RobotModel): the robot on which the camera is located, which
+            should be set to the robot's current configuration.  This could be
+            set to None, in which case the camera's transform is in its link's
+            local coordinates.
 
     Returns:
-        GLViewport: the camera's current viewport.
+        GLViewport: matches the camera's viewport.
     """
     assert isinstance(camera,SimRobotSensor),"Must provide a SimRobotSensor instance"
     assert camera.type() == 'CameraSensor',"Must provide a camera sensor instance"
@@ -403,6 +444,179 @@ def camera_to_viewport(camera,robot):
     return view
 
 
+def viewport_to_camera(viewport,camera,robot):
+    """Fills in a simulated camera's settings to match a GLViewport specifying
+    the camera's view. 
+
+    Args:
+        viewport (GLViewport): the viewport to match
+        camera (SimRobotSensor): the viewport will be output to this sensor
+        robot (RobotModel): the robot on which the camera is located, which
+            should be set to the robot's current configuration.  This could be
+            set to None, in which case the camera's transform is in its link's
+            local coordinates.
+
+    """
+    from ..vis.glprogram import GLViewport
+    assert isinstance(viewport,GLViewport)
+    assert isinstance(camera,SimRobotSensor),"Must provide a SimRobotSensor instance"
+    assert camera.type() == 'CameraSensor',"Must provide a camera sensor instance"
+    xform = view.getTransform()
+    link = int(camera.getSetting('link'))
+    if link < 0 or robot is None:
+        rlink = None
+    else:
+        rlink = robot.link(link)
+    set_sensor_xform(camera,xform,rlink)
+    (zmin,zmax) = view.clippingplanes
+    xfov = math.radians(view.fov)
+    yfov = xfov*view.h/view.w
+    camera.setSetting('xres',str(view.w))
+    camera.setSetting('yres',str(view.h))
+    camera.setSetting('xfov',str(xfov))
+    camera.setSetting('yfov',str(yfov))
+    camera.setSetting('zmin',str(zmin))
+    camera.setSetting('zmax',str(zmax))
+    return camera
+
+def camera_ray(camera,robot,x,y):
+    """Returns the (source,direction) of a ray emanating from the
+    SimRobotSensor at pixel coordinates (x,y).
+
+    If you are doing this multiple times, it's faster to convert the camera
+    to GLViewport and use GLViewport.click_ray.
+
+    Arguments:
+        camera (SimRobotSensor): the camera
+        robot (RobotModel): the robot on which the camera is mounted.
+        x (int/float): x pixel coordinates
+        y (int/float): y pixel coordinates
+
+    Returns:
+        (source,direction): world-space ray source/direction.
+    """
+    return camera_to_viewport(camera,robot).click_ray(x,y)
+
+def camera_project(camera,robot,pt,clip=True):
+    """Given a point in world space, returns the (x,y,z) coordinates of the
+    projected pixel.  z is given in absolute coordinates, while x,y are given
+    in pixel values.
+
+    If clip=True and the point is out of the viewing volume, then None is
+    returned. Otherwise, if the point is exactly at the focal plane then the
+    middle of the viewport is returned.
+
+    If you are doing this multiple times, it's faster to convert the camera
+    to GLViewport and use GLViewport.project.
+
+    Arguments:
+        camera (SimRobotSensor): the camera
+        robot (RobotModel): the robot on which the camera is mounted.
+        pt (3-vector): world coordinates of point
+        clip (bool, optional): if true, None will be returned if the point is
+            outside of the viewing volume.
+
+    Returns:
+        tuple: (x,y,z), where x,y are pixel value of image, z is depth.
+    """
+    return camera_to_viewport(camera,robot).project(pt,clip)
+
+def visible(camera,object,full=True,robot=None):
+    """Tests whether the given object is visible in a SimRobotSensor or a
+    GLViewport. 
+
+    If you are doing this multiple times, first convert to GLViewport.
+
+    Args:
+        camera (SimRobotSensor or GLViewport): the camera.
+        object: a 3-vector, a (center,radius) pair indicating a sphere,
+            an axis-aligned bounding box (bmin,bmax), or a Geometry3D.
+        full (bool, optional): if True, the entire object must be in the
+            viewing frustum for it to be considered visible.  If False,
+            any part of the object can be in the viewing frustum.
+        robot (RobotModel): if camera is a SimRobotSensor, this will be
+            used to derive the transform.
+    """
+    if isinstance(camera,SimRobotSensor):
+        camera = camera_to_viewport(camera,robot)
+    if hasattr(object,'__iter__'):
+        if not hasattr(object[0],'__iter__'):
+            #vector
+            if len(object) != 3:
+                raise ValueError("Object must be a 3-vector")
+            return camera.project(object) != None
+        elif hasattr(object[1],'__iter__'):
+            if len(object[0]) != 3 or len(object[1]) != 3:
+                raise ValueError("Object must be a bounding box")
+            bmin,bmax = object
+            if not full:
+                #test whether center is in bmin,bmax
+                center = vectorops.interpolate(bmin,bmax,0.5)
+                cproj = camera.project(center)
+                if cproj is not None:
+                    return True
+                if all(a <= v <= b for (a,b,v) in zip(bmin,bmax,camera.getTransform()[1])):
+                    return True
+
+            points = [camera.project(bmin,full),camera.project(bmax,full)]
+            pt = [bmin[0],bmin[1],bmax[2]]
+            points.append(camera.project(pt,full))
+            pt = [bmin[0],bmax[1],bmax[2]]
+            points.append(camera.project(pt,full))
+            pt = [bmin[0],bmax[1],bmin[2]]
+            points.append(camera.project(pt,full))
+            pt = [bmax[0],bmin[1],bmin[2]]
+            points.append(camera.project(pt,full))
+            pt = [bmax[0],bmin[1],bmax[2]]
+            points.append(camera.project(pt,full))
+            pt = [bmax[0],bmax[1],bmin[2]]
+            points.append(camera.project(pt,full))
+            if any(p is None for p in points):
+                return False
+            if full:
+                return True
+            if min(p[2] for p in points) > camera.clippingplanes[1]:
+                return False
+            if max(p[2] for p in points) < camera.clippingplanes[0]:
+                return False
+            points = [p for p in points if p[2] > 0]
+            for p in points:
+                if 0 <= p[0] <= camera.w and 0 <= p[1] <= camera.h:
+                    return True
+            #TODO: intersection of projected polygon
+            return False
+        else:
+            #sphere
+            if len(object[0]) != 3:
+                raise ValueError("Object must be a sphere")
+            c,r = object
+            if full:
+                cproj = camera.project(c,True)
+                if cproj is None: return False
+                rproj = camera.w/cproj[2]*r
+                if cproj[2] - r < camera.clippingplanes[0] or cproj[2] + r > camera.clippingplanes[1]: return False
+                return 0 <= cproj[0] - rproj and cproj[0] + rproj <= camera.w and 0 <= cproj[1] - rproj and cproj[1] + rproj <= camera.h
+            else:
+                cproj = camera.project(c,False)
+                if cproj is None:
+                    dist = r - vectorops.distance(camera.getTransform()[1],c) 
+                    if dist >= camera.clippingplanes[0]:
+                        return True
+                    return False
+                if 0 <= cproj[0] <= camera.w and 0 <= cproj[1] <= camera.h:
+                    if cproj[2] + r > camera.clippingplanes[0] and cproj[2] - r < camera.clippingplanes[1]:
+                        return True
+                    return False
+                rproj = camera.w/cproj[2]*r
+                xclosest = max(min(cproj[0],camera.w),0)
+                yclosest = max(min(cproj[1],camera.h),0)
+                zclosest = max(min(cproj[2],camera.clippingplanes[1]),camera.clippingplanes[0])
+                return vectorops.distance((xclosest,yclosest),cproj[0:2]) <= rproj
+    from klampt import Geometry3D
+    if not isinstance(object,Geometry3D):
+        raise ValueError("Object must be a point, sphere, bounding box, or Geometry3D")
+    return visible(camera,object.getBB(),full,robot)
+
 def fit_plane3(point1,point2,point3):
     """Returns a 3D plane equation fitting the 3 points.
   
@@ -421,17 +635,25 @@ def fit_plane3(point1,point2,point3):
 def fit_plane(points):
     """Returns a 3D plane equation that is a least squares fit
     through the points (len(points) >= 3)."""
+    normal,centroid = fit_plane_centroid()
+    return normal[0],normal[1],normal[2],-vectorops.dot(centroid,normal)
+
+
+def fit_plane_centroid(points):
+    """Similar to :func:`fit_plane`, but returns a (centroid,normal) pair."""
     if len(points)<3:
         raise ValueError("Need to have at least 3 points to fit a plane")
     #if len(points)==3:
     #    return fit_plane3(points[0],points[1],points[2])
     points = np.asarray(points)
     centroid = np.average(points,axis=0)
-    U,W,Vt = np.linalg.svd(points-[centroid]*len(points))
+    U,W,Vt = np.linalg.svd(points-[centroid]*len(points),full_matrices=False)
+    if numpy.sum(W<1e-6) > 1:
+        raise ValueError("Point set is degenerate")
     normal = Vt[2,:]
-    return normal[0],normal[1],normal[2],-np.dot(centroid,normal)
+    return centroid.tolist(),normal.tolist()
 
- 
+
 class PlaneFitter:
     """
     Online fitting of planes through 3D point clouds
