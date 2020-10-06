@@ -134,6 +134,7 @@ class HTMLVisualizationScene(VisualizationScene):
     def stepAnimation(self,dt):
         VisualizationScene.stepAnimation(self,dt)
         self.kw.beginRpc()
+        self.updateCamera()
         #look through changed items and update them
         def updateItem(item):
             if isinstance(item,VisPlot):
@@ -163,6 +164,7 @@ class HTMLVisualizationScene(VisualizationScene):
     def update(self):
         #self.kw.update()   #this isn't necessary
         self.kw.beginRpc()
+        self.updateCamera()
         #look through changed items and update them
         def updateItem(item):
             if isinstance(item,VisPlot):
