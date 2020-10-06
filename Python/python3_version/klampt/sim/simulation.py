@@ -111,7 +111,7 @@ class DefaultActuatorEmulator(ActuatorEmulator):
                 c.setPIDCommand(commands['qcmd'],dqcmd)
         elif 'dqcmd' in commands:
             assert 'tcmd' in commands
-            c.setVelocityCommand(commands['dqcmd'],commands['tcmd'])
+            c.setVelocity(commands['dqcmd'],commands['tcmd'])
         elif 'torquecmd' in commands:
             c.setTorque(commands['torquecmd'])
         for (k,v) in commands.items():
