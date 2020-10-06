@@ -47,10 +47,10 @@ class GLViewport:
         """Sets the pose of the camera, with T given in world coordinates.
 
         If convention = 'openGL', the Z axis of T is the *backward* direction of
-        the camera, with X pointing *up* and Y pointing to the *right*.
+        the camera, with Y pointing *up* and X pointing to the *right*.
 
         If convention = 'standard', the Z axis of T is the *forward* direction of
-        the camera, with X pointing *down* and Y pointing to the *right*
+        the camera, with Y pointing *down* and X pointing to the *right*
         """
         if convention == 'openGL':
             self.camera.set_matrix(T)
@@ -62,10 +62,10 @@ class GLViewport:
         """Gets the pose of the camera, with T given in world coordinates.
 
         If convention = 'openGL', the Z axis of T is the *backward* direction of
-        the camera, with X pointing *up* and Y pointing to the *right*.
+        the camera, with Y pointing *up* and X pointing to the *right*.
 
         If convention = 'standard', the Z axis of T is the *forward* direction of
-        the camera, with X pointing *down* and Y pointing to the *right*
+        the camera, with Y pointing *down* and X pointing to the *right*
         """
         if convention == 'openGL':
             return self.camera.matrix()
@@ -126,7 +126,7 @@ class GLViewport:
             if -ploc[2] <= self.clippingplanes[0] or -ploc[2] >= self.clippingplanes[1]:
                 return None
         if abs(ploc[2]) < 1e-8:
-            return (self.x+self.w/2,self.y+self.h/2)
+            return (self.x+self.w/2,self.y+self.h/2,-ploc[2])
         #d = (u*scale,v*scale,-1.0)
         #ploc.x = ploc.z*d.x
         #ploc.y = ploc.z*d.y
