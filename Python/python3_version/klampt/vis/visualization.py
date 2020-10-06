@@ -893,9 +893,9 @@ def getAttribute(name,attr):
     global _vis
     if _vis is None:
         return
-    _vis.getAttribute(name,attr)
+    return _vis.getAttribute(name,attr)
 
-def getAttributes(name,attr):
+def getAttributes(name):
     """Gets a dictionary of all relevant attributes of an item's appearance. 
     If not previously set by the user, default values will be returned.
 
@@ -905,7 +905,7 @@ def getAttributes(name,attr):
     global _vis
     if _vis is None:
         return
-    _vis.getAttributes(name)
+    return _vis.getAttributes(name)
 
 def revertAppearance(name):
     global _vis
@@ -3164,7 +3164,7 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         _globalLock.release()
         return res
 
-    def getAttributes(self,name,attr):
+    def getAttributes(self,name):
         global _globalLock
         _globalLock.acquire()
         item = self.getItem(name)
