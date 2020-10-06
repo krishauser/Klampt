@@ -72,7 +72,6 @@ class QtGLWindow(QGLWidget):
             user must call resize(w,h) to change the dimensions.
         devwidth, devheight (int): width/height of the window in OpenGL device pixel units
           (Note that these may be different from the screen dimensions due to Retina displays)
-        clearColor (list of 4 floats): the RGBA floating point values of the background color.
     """
     idlesleep_signal = pyqtSignal(float)
     refresh_signal = pyqtSignal()
@@ -108,7 +107,6 @@ class QtGLWindow(QGLWidget):
             self.devheight = self.height
             self.devwidth = self.width
         self.sizePolicy = "resize"
-        self.clearColor = [1.0,1.0,1.0,0.0]
         #keyboard state information
         self.modifierList = []
         #mouse state information
