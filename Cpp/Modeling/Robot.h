@@ -100,6 +100,8 @@ public:
   ///The reduced robot is a robot for which all fixed DOFs are eliminated; this
   ///helps with Newton-Euler solving.  dofMap maps robot DOFs to reduced dofs, with
   ///-1 indicating the dof is eliminated.
+  ///
+  ///Note: all links fixed to the environment no longer have any geometry attached
   void Reduce(Robot& reducedRobot,vector<int>& dofMap);
 
   bool DoesJointAffect(int joint,int dof) const;
