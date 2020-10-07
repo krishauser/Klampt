@@ -1982,7 +1982,7 @@ class Geometry3D(_object):
 
 
         Args:
-            arg2 (:class:`~klampt.TriangleMesh` or :class:`~klampt.Geometry3D` or :obj:`ConvexHull` or :class:`~klampt.VolumeGrid` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.PointCloud`, optional): 
+            arg2 (:class:`~klampt.TriangleMesh` or :class:`~klampt.VolumeGrid` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.Geometry3D` or :obj:`ConvexHull` or :class:`~klampt.PointCloud`, optional): 
         """
         this = _robotsim.new_Geometry3D(*args)
         try:
@@ -5093,6 +5093,40 @@ class RobotModel(_object):
         """
         return _robotsim.RobotModel_drawGL(self, keepAppearance)
 
+
+    def reduce(self, robot):
+        """
+        Sets self to a reduced version of robot, where all fixed DOFs are eliminated.
+        The return value is a map from the original robot DOF indices to the reduced
+        DOFs.  
+
+        Args:
+            robot (:class:`~klampt.RobotModel`)
+
+        Note that any geometries fixed to the world will disappear.  
+
+        """
+        return _robotsim.RobotModel_reduce(self, robot)
+
+
+    def mount(self, link, subRobot, R, t, prefix=None):
+        """
+        Mounts a sub-robot onto a link, with its origin at a given local transform (R,t)  
+
+        mount (link,subRobot,R,t,prefix=None)
+
+        mount (link,subRobot,R,t)
+
+
+        Args:
+            link (int): 
+            subRobot (:class:`~klampt.RobotModel`): 
+            R (:obj:`list of 9 floats (so3 element)`): 
+            t (:obj:`list of 3 floats`): 
+            prefix (str, optional): default value None
+        """
+        return _robotsim.RobotModel_mount(self, link, subRobot, R, t, prefix)
+
     __swig_setmethods__["world"] = _robotsim.RobotModel_world_set
     __swig_getmethods__["world"] = _robotsim.RobotModel_world_get
     if _newclass:
@@ -5710,7 +5744,7 @@ class WorldModel(_object):
 
 
         Args:
-            robot (str or int): 
+            robot (int or str): 
             index (int, optional): 
             name (str, optional): 
 
@@ -5866,7 +5900,7 @@ class WorldModel(_object):
             terrain (:obj:`TerrainModel`, optional): 
 
         Returns:
-            (:class:`~klampt.RobotModel` or :obj:`TerrainModel` or :class:`~klampt.RigidObjectModel`):
+            (:class:`~klampt.RigidObjectModel` or :obj:`TerrainModel` or :class:`~klampt.RobotModel`):
         """
         return _robotsim.WorldModel_add(self, *args)
 
@@ -6590,7 +6624,7 @@ class IKSolver(_object):
             tol (float, optional): 
 
         Returns:
-            (bool or :obj:`object`):
+            (:obj:`object` or bool):
         """
         return _robotsim.IKSolver_solve(self, *args)
 
@@ -6901,7 +6935,7 @@ def SampleTransform(*args):
 
 
     Args:
-        obj (:obj:`GeneralizedIKObjective` or :obj:`IKObjective`): 
+        obj (:obj:`IKObjective` or :obj:`GeneralizedIKObjective`): 
     """
     return _robotsim.SampleTransform(*args)
 class SimRobotSensor(_object):
@@ -6954,7 +6988,7 @@ class SimRobotSensor(_object):
 
 
         Args:
-            robot (:class:`~klampt.RobotModel` or :class:`~klampt.SimRobotController`): 
+            robot (:class:`~klampt.SimRobotController` or :class:`~klampt.RobotModel`): 
             sensor (:obj:`SensorBase`, optional): 
             name (str, optional): 
             type (str, optional): 
@@ -8174,7 +8208,7 @@ class Simulator(_object):
 
 
         Args:
-            robot (:class:`~klampt.RobotModel` or int): 
+            robot (int or :class:`~klampt.RobotModel`): 
 
         Returns:
             (:class:`~klampt.SimRobotController`):

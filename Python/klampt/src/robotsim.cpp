@@ -413,7 +413,7 @@ void GetPointCloud(const PointCloud& pc,Geometry::AnyCollisionGeometry3D& geom)
   gpc.propertyNames = pc.propertyNames;
   if(pc.propertyNames.size() > 0) {
     if(pc.properties.size() != gpc.points.size()*pc.propertyNames.size()) {
-      printf("Expected %d = %d*%d properties, got %d\n",gpc.points.size(),pc.propertyNames.size(),gpc.points.size()*pc.propertyNames.size(),pc.properties.size());
+      printf("Expected %d = %d*%d properties, got %d\n",(int)gpc.points.size(),(int)pc.propertyNames.size(),(int)gpc.points.size()*pc.propertyNames.size(),(int)pc.properties.size());
       throw PyException("GetPointCloud: Invalid number of properties in PointCloud");
     }
     gpc.properties.resize(pc.properties.size() / pc.propertyNames.size());
@@ -3743,7 +3743,10 @@ void RobotModel::torquesFromAccel(const std::vector<double>& ddq,std::vector<dou
     ne.CalcTorques(ddqvec,tvec);
   }
   else {
-    robot->UpdateDynamics();
+    if(dirty_dynamics) {
+      robot->UpdateDynamics();
+      dirty_dynamics = false;
+    }
     robot->CalcTorques(ddqvec,tvec);
   }
   copy(tvec,out);
@@ -3752,16 +3755,34 @@ void RobotModel::torquesFromAccel(const std::vector<double>& ddq,std::vector<dou
 void RobotModel::accelFromTorques(const std::vector<double>& t,std::vector<double>& out)
 {
   Vector ddqvec,tvec;
-  copy(t,tvec);
   if(robot->links.size() > 6) {
+    copy(t,tvec);
     NewtonEulerSolver ne(*robot);
     ne.CalcAccel(tvec,ddqvec);
+    copy(ddqvec,out);
   }
   else {
-    robot->UpdateDynamics();
+    copy(t,tvec);
+    if(dirty_dynamics) {
+      robot->UpdateDynamics();
+      dirty_dynamics = false;
+    }
     robot->CalcAcceleration(ddqvec,tvec);
+    copy(ddqvec,out);
   }
-  copy(ddqvec,out);
+}
+
+void RobotModel::reduce(const RobotModel& fullRobot,std::vector<int>& out)
+{
+  fullRobot.robot->Reduce(*robot,out);
+}
+
+void RobotModel::mount(int link,const RobotModel& subRobot,const double R[9],const double t[3],const char* prefix)
+{
+  RigidTransform T;
+  T.R.set(R);
+  T.t.set(t);
+  robot->Mount(link,*subRobot.robot,T,prefix);
 }
 
 

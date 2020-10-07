@@ -5378,6 +5378,35 @@ class RobotModel(_object):
         """
         return _robotsim.RobotModel_drawGL(self, keepAppearance)
 
+
+    def reduce(self, robot):
+        """
+        reduce(RobotModel self, RobotModel robot)
+
+
+
+        Sets self to a reduced version of robot, where all fixed DOFs are eliminated.
+        The return value is a map from the original robot DOF indices to the reduced
+        DOFs.  
+
+        Note that any geometries fixed to the world will disappear.  
+
+        """
+        return _robotsim.RobotModel_reduce(self, robot)
+
+
+    def mount(self, link, subRobot, R, t, prefix=None):
+        """
+        mount(RobotModel self, int link, RobotModel subRobot, double const [9] R, double const [3] t, char const * prefix=None)
+        mount(RobotModel self, int link, RobotModel subRobot, double const [9] R, double const [3] t)
+
+
+
+        Mounts a sub-robot onto a link, with its origin at a given local transform (R,t)  
+
+        """
+        return _robotsim.RobotModel_mount(self, link, subRobot, R, t, prefix)
+
     __swig_setmethods__["world"] = _robotsim.RobotModel_world_set
     __swig_getmethods__["world"] = _robotsim.RobotModel_world_get
     if _newclass:

@@ -1979,6 +1979,15 @@ appearances is to set the link Appearance's directly.
 %feature("docstring") RobotModel::setName "
 ";
 
+%feature("docstring") RobotModel::reduce "
+
+Sets self to a reduced version of robot, where all fixed DOFs are eliminated.
+The return value is a map from the original robot DOF indices to the reduced
+DOFs.  
+
+Note that any geometries fixed to the world will disappear.  
+";
+
 %feature("docstring") RobotModel::getKineticEnergy "
 
 Returns the kinetic energy at the current config / velocity.  
@@ -2052,6 +2061,11 @@ If `geometryPrefix == None` (default), the geometry is not saved. Otherwise, the
 geometry of each link will be saved to files named `geometryPrefix+name`, where
 `name` is either the name of the geometry file that was loaded, or
 `[link_name].off`  
+";
+
+%feature("docstring") RobotModel::mount "
+
+Mounts a sub-robot onto a link, with its origin at a given local transform (R,t)  
 ";
 
 %feature("docstring") RobotModel::enableSelfCollision "
