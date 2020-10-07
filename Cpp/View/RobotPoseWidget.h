@@ -34,6 +34,7 @@ public:
   virtual bool BeginDrag(int x,int y,Camera::Viewport& viewport,double& distance);
   virtual void Drag(int dx,int dy,Camera::Viewport& viewport);
   virtual void DrawGL(Camera::Viewport& viewport);
+  void InitDefaultAppearance();
 
   Robot* robot;
   ViewRobot* viewRobot;

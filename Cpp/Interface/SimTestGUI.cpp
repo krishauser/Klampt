@@ -51,11 +51,13 @@ void SimTestBackend::Start()
   robotWidgets.resize(world->robots.size());
   for(size_t i=0;i<world->robots.size();i++) {
     robotWidgets[i].Set(world->robots[i].get(),&world->robotViews[i]);
-    robotWidgets[i].linkPoser.poserAppearance.resize(world->robots[i]->links.size());
+    robotWidgets[i].linkPoser.InitDefaultAppearance();
     AnyCollection poserColorSetting = settings["poser"]["color"];
     GLColor poserColor(poserColorSetting[0],poserColorSetting[1],poserColorSetting[2],poserColorSetting[3]);
-    for(size_t j=0;j<robotWidgets[i].linkPoser.poserAppearance.size();j++)
+    for(size_t j=0;j<robotWidgets[i].linkPoser.poserAppearance.size();j++) {
       robotWidgets[i].linkPoser.poserAppearance[j].faceColor = poserColor;
+      robotWidgets[i].linkPoser.poserAppearance[j].vertexColor = poserColor;
+    }
   }
   //draw desired milestone
   objectWidgets.resize(world->rigidObjects.size());
