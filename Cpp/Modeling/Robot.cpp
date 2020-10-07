@@ -10,6 +10,7 @@
 #include <KrisLibrary/meshing/IO.h>
 #include <KrisLibrary/meshing/VolumeGrid.h>
 #include <KrisLibrary/meshing/PointCloud.h>
+#include <KrisLibrary/geometry/Conversions.h>
 #include <KrisLibrary/utils/ioutils.h>
 #include <KrisLibrary/utils/fileutils.h>
 #include <fstream>
@@ -85,7 +86,7 @@ Real Radius(const Geometry::AnyGeometry3D& geom)
       const Meshing::TriMesh& mesh = geom.AsTriangleMesh();
       Real dmax = 0;
       for(size_t i=0;i<mesh.verts.size();i++)
-  dmax = Max(dmax,mesh.verts[i].normSquared());
+        dmax = Max(dmax,mesh.verts[i].normSquared());
       return Sqrt(dmax);
     }
   case Geometry::AnyGeometry3D::PointCloud:
@@ -93,7 +94,7 @@ Real Radius(const Geometry::AnyGeometry3D& geom)
       const Meshing::PointCloud3D& mesh = geom.AsPointCloud();
       Real dmax = 0;
       for(size_t i=0;i<mesh.points.size();i++)
-  dmax = Max(dmax,mesh.points[i].normSquared());
+        dmax = Max(dmax,mesh.points[i].normSquared());
       return Sqrt(dmax);
     }
   case Geometry::AnyGeometry3D::ImplicitSurface:
@@ -107,14 +108,22 @@ Real Radius(const Geometry::AnyGeometry3D& geom)
       Real zmax = Max(Abs(originLocal.z),Abs(originLocal.z+box.dims.z));
       return Sqrt(Sqr(xmax)+Sqr(ymax)+Sqr(zmax));
     }
-    break;
   case Geometry::AnyGeometry3D::Group:
     {
       const vector<Geometry::AnyGeometry3D>& items = geom.AsGroup();
       Real rmax = 0;
       for(size_t i=0;i<items.size();i++)
-  rmax = Max(rmax,Radius(items[i]));
+        rmax = Max(rmax,Radius(items[i]));
       return rmax;
+    }
+  case Geometry::AnyGeometry3D::ConvexHull:
+    {
+      Meshing::TriMesh mesh;
+      Geometry::ConvexHullToMesh(geom.AsConvexHull(),mesh);
+      Real dmax = 0;
+      for(size_t i=0;i<mesh.verts.size();i++)
+        dmax = Max(dmax,mesh.verts[i].normSquared());
+      return Sqrt(dmax);
     }
   }
   return 0;
@@ -1549,6 +1558,21 @@ bool Robot::Save(const char* fn) {
     case RobotJointDriver::Normal:
       if(drivers[i].linkIndices.size() > 0){
         file << "driver normal " << drivers[i].linkIndices[0] << endl;
+      }
+      break;
+    case RobotJointDriver::Affine:
+      if(drivers[i].linkIndices.size() > 0){
+        file << "driver affine "<<drivers[i].linkIndices.size() <<"\t";
+        for (auto l:drivers[i].linkIndices)
+          file << l<<" ";
+        file << "\t";
+        for (auto l:drivers[i].affScaling)
+          file << l<<" ";
+        file << "\t";
+        for (auto l:drivers[i].affOffset)
+          file << l<<" ";
+        file << "\t";
+        file << drivers[i].qmin<<" "<<drivers[i].qmax<<"\t"<<drivers[i].vmin<<" "<<drivers[i].vmax<<"\t"<<drivers[i].tmin<<" "<<drivers[i].tmax<<endl;
       }
       break;
     default:
@@ -3275,7 +3299,8 @@ bool Robot::LoadURDF(const char* fn)
   return true;
 }
 
-void Robot::ComputeLipschitzMatrix() {
+void Robot::ComputeLipschitzMatrix()
+{
   Timer timer;
   lipschitzMatrix.resize(links.size(), links.size(), 0.0);
   for (size_t i = 0; i < links.size(); i++) {
@@ -3325,6 +3350,198 @@ void Robot::ComputeLipschitzMatrix() {
   LOG4CXX_INFO(GET_LOGGER(Robot),"Done computing lipschitz constants, took "<<timer.ElapsedTime()<<"s");
 }
 
+//defined in ODERobot.cpp
+Matrix3 TranslateInertia(const Matrix3& Hc,const Vector3& c,Real mass);
+
+void Robot::Reduce(Robot& reduced,vector<int>& dofMap)
+{
+  vector<bool> fixedLink(q.n,false);
+  vector<int> fixedParent(q.n,-1);
+  for(int i=0;i<q.n;i++) {
+    if(qMin[i] == qMax[i] || (velMin[i] == 0 && velMax[i] == 0))
+      fixedLink[i] = true;
+  }
+  for(size_t i=0;i<joints.size();i++)
+    if(joints[i].type == RobotJoint::Weld) {
+      fixedLink[joints[i].linkIndex] = true;
+    }
+  for(size_t i=0;i<drivers.size();i++)
+    if(drivers[i].qmin == drivers[i].qmax || (drivers[i].vmax == 0 && drivers[i].vmin == 0)) {
+      for(auto j:drivers[i].linkIndices) {
+        fixedLink[j] = true;
+      }
+    }
+  //determine fixed link parents
+  for(int i=0;i<q.n;i++) {
+    if(fixedLink[i]) {
+      if(parents[i] >= 0)
+        fixedParent[i] = fixedParent[parents[i]];
+    }
+    else {
+      fixedParent[i] = i;
+    }
+    int p=parents[i];
+    //printf("Attaching link %d, %s (%s, normal parent %d) to %d\n",i,linkNames[i].c_str(),(fixedLink[i]?"fixed":"free"),p,fixedParent[i]);
+  }
+  vector<vector<int> > children(q.n);
+  for(size_t i=0;i<fixedParent.size();i++) {
+    if(fixedParent[i] >= 0)
+      children[fixedParent[i]].push_back(int(i));
+  }
+  vector<int> freeToRobot;
+  vector<int> robotToFree(q.n,-1);
+  for(size_t i=0;i<fixedLink.size();i++) {
+    if(!fixedLink[i]) {
+      robotToFree[i] = (int)freeToRobot.size();
+      freeToRobot.push_back(i);
+    }
+  }
+  Config oldq = q;
+  q.setZero();
+  UpdateFrames();
+  q = oldq;
+  reduced.Initialize((int)freeToRobot.size());
+  reduced.linkNames.resize(freeToRobot.size());
+  reduced.accMax.resize(freeToRobot.size());
+  reduced.geomManagers.resize(freeToRobot.size());
+  reduced.geomFiles.resize(freeToRobot.size());
+  reduced.name = name;
+  for(size_t i=0;i<freeToRobot.size();i++) {
+    int origLink = freeToRobot[i];
+    //printf("Mapping link %d to %d\n",origLink,i);
+    reduced.linkNames[i] = linkNames[origLink];
+    reduced.qMin[i] = qMin[origLink];
+    reduced.qMax[i] = qMax[origLink];
+    reduced.velMin[i] = velMin[origLink];
+    reduced.velMax[i] = velMax[origLink];
+    reduced.accMax[i] = accMax[origLink];
+    reduced.torqueMax[i] = torqueMax[origLink];
+    reduced.powerMax[i] = powerMax[origLink];
+    if(parents[origLink] >= 0) {
+      int fp = fixedParent[parents[origLink]];
+      if(fp >= 0)
+        reduced.parents[i] = robotToFree[fp];
+      else
+        reduced.parents[i] = -1;
+    }
+    else
+      reduced.parents[i] = -1;
+    //printf("Parent of %d set to %d\n",i,reduced.parents[i]);
+    reduced.links[i] = links[origLink];
+    reduced.q[i] = q[origLink];
+    reduced.dq[i] = dq[origLink];
+    reduced.geometry[i] = geometry[origLink];
+    reduced.geomFiles[i] = geomFiles[origLink];
+    reduced.geomManagers[i] = geomManagers[origLink];
+    RobotLink3D& newLink = reduced.links[i];
+    //transform to parent may have been changed
+    if(reduced.parents[i] >= 0)
+      newLink.T0_Parent.mulInverseA(reduced.links[reduced.parents[i]].T_World,reduced.links[i].T_World);
+    else
+      newLink.T0_Parent = reduced.links[i].T_World;
+    //update geometry / inertial properties for aggregate link
+    if(children[origLink].size() > 1) {
+      newLink.mass = 0;
+      newLink.com.setZero();
+      newLink.inertia.setZero();
+      vector<Geometry::AnyGeometry3D> cgeoms(children[origLink].size());
+      //printf("Merging link %d children ",origLink);
+      //for(auto c:children[origLink])
+      //  printf("%d ",c);
+      //printf("\n");
+      for(size_t j=0;j<children[origLink].size();j++) {
+        int c = children[origLink][j];
+        const RobotLink3D& oldLink = links[c];
+        RigidTransform Trel;
+        Trel.mulInverseA(links[origLink].T_World,oldLink.T_World);
+        if(geometry[c] && !geometry[c]->Empty()) {
+          cgeoms[j] = *geometry[c];
+          cgeoms[j].Transform(Trel);
+        }
+        if(oldLink.mass <= 0) continue;
+        newLink.mass += oldLink.mass;
+        newLink.com += oldLink.mass*(Trel*oldLink.com);
+        //transform inertia matrix
+        Matrix3 temp,inertiaLink;
+        temp.mulTransposeB(oldLink.inertia,Trel.R);
+        inertiaLink.mul(Trel.R,temp);
+        inertiaLink = TranslateInertia(inertiaLink,Trel.t,oldLink.mass);
+        newLink.inertia += (inertiaLink*oldLink.mass);
+      }
+      reduced.geomFiles[i] = "";
+      ManagedGeometry::GeometryPtr g = reduced.geomManagers[i].CreateEmpty();
+      Assert(reduced.geomManagers[i].Empty());
+      for(size_t j=0;j<cgeoms.size();j++)
+        if(cgeoms[j].Empty()) {
+          cgeoms[j] = cgeoms.back();
+          cgeoms.resize(cgeoms.size()-1);
+        }
+      //printf("Creating group with %d geometries\n",cgeoms.size());
+      if(cgeoms.size() == 1) {
+        *g = CollisionGeometry(cgeoms[0]);
+        Assert(!reduced.geomManagers[i].Empty());
+      }
+      else if(cgeoms.size() > 1) {
+        *g = CollisionGeometry(cgeoms);
+        Assert(!reduced.geomManagers[i].Empty());
+      }
+      reduced.geomManagers[i].OnGeometryChange();
+      reduced.geometry[i] = reduced.geomManagers[i];
+      reduced.geomFiles[i] = "";
+      newLink.com /= newLink.mass;
+      newLink.inertia /= newLink.mass;
+    }
+  }
+  reduced.UpdateFrames();
+  reduced.UpdateGeometry();
+  //copy self-collision information
+  for(size_t i=0;i<freeToRobot.size();i++) {
+    int origLink = freeToRobot[i];
+    for(size_t j=0;j<freeToRobot.size();j++) {
+      int origLink2 = freeToRobot[j];
+      if(selfCollisions(origLink,origLink2) != NULL) {
+        reduced.InitSelfCollisionPair(i,j);
+      }
+    }
+  }
+  //copy driver information
+  reduced.drivers.resize(0);
+  reduced.driverNames.resize(0);
+  for(size_t i=0;i<drivers.size();i++) {
+    const auto& d=drivers[i];
+    vector<int> mappedIndices (d.linkIndices.size());
+    bool include = true;
+    for(size_t j=0;j<d.linkIndices.size();j++) {
+      if(robotToFree[d.linkIndices[j]] < 0) {
+        include=false;
+        break;
+      }
+      mappedIndices[j] = robotToFree[d.linkIndices[j]];
+    }
+    if(!include) {
+      LOG4CXX_WARN(GET_LOGGER(Robot),"Robot::Reduce: driver dropped because it drives a fixed link??");
+      continue;
+    }
+    reduced.drivers.push_back(d);
+    reduced.drivers.back().linkIndices = mappedIndices;
+    reduced.driverNames.push_back(driverNames[i]);
+  }
+  //copy joint information
+  reduced.joints.resize(0);
+  for(size_t i=0;i<joints.size();i++) {
+    const auto& j=joints[i];
+    if(fixedLink[j.linkIndex]) continue;
+    Assert(j.type != RobotJoint::Weld);
+    reduced.joints.push_back(j);
+    Assert(j.linkIndex >= 0);
+    reduced.joints.back().linkIndex = robotToFree[j.linkIndex];
+    if(j.baseIndex >= 0)
+      reduced.joints.back().baseIndex = robotToFree[j.baseIndex];
+  }
+  printf("Reduced %d joints to %d\n",joints.size(),reduced.joints.size());
+  dofMap = robotToFree;
+  reduced.Save("reduced.rob");
+}
 
 void Robot::Merge(const std::vector<Robot*>& robots)
 {
