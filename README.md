@@ -79,7 +79,21 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 
 ## Version history
 
-**0.8.2  Latest version** (11/15/2019)
+**0.8.3  Latest version** (10/5/2020)
+-   Python 3 is now the default version used by the Python API, and all further feature development will be focused on Python 3.  The Python 2 version will receive occasional bug fixes but will be deprecated by the next version.
+-   The visualization API has a unified interface between PyQT, PyOpenGL, Jupyter notebooks, and HTML output. This makes it easy to convert your OpenGL visualizations into shareable, animated web pages (with some caveats).  Use vis.init() to select which visualization backend to use.
+-   A new [klampt.math.autodiff](http://motion.cs.illinois.edu/klampt/pyklampt_docs/klampt.math.autodiff.html) module supports taking derivatives of many Klamp't functions.  This lets you use optimization for, say, trajectory optimization, deep learning, etc.  A Pytorch binding is supported.
+-   Convex hulls are a new geometry type.  They support conversion from multiple geometry types and conversion to meshes, visualization, and fast convex hull-convex hull proximity queries.
+-   A new kinematic trajectory optimization toolbox is available in Python, [klampt.plan.kinetrajopt](http://motion.cs.illinois.edu/klampt/pyklampt_docs/klampt.plan.kinetrajopt.html). This uses convex hulls to enforce collision constraints along a path.
+-   A new Python colorization module, [klampt.vis.colorize](http://motion.cs.illinois.edu/klampt/pyklampt_docs/klampt.vis.colorize.html), makes it easy to color-code point clouds and meshes for classy visualizations.
+-   The Jupyter / HTML API backends are upgraded to use the latest version of three.js.
+-   The [klampt.math.symbolic](http://motion.cs.illinois.edu/klampt/pyklampt_docs/klampt.math.symbolic.html) now supports tensor derivatives (e.g., the derivative of vector w.r.t. a matrix).
+-   The [klampt.math.vis](http://motion.cs.illinois.edu/klampt/pyklampt_docs/klampt.vis.html) module now supports a followCamera function that is helpful for making animations.
+-   The C++ Robot class and the Python RobotModel class have methods to reduce the number of DOFs of a robot that contains fixed DOFs.  The Mount function is now exposed to Python.
+-   [tentative] Klamp't can now drive your robots with the new Python [klampt.control](http://motion.cs.illinois.edu/klampt/pyklampt_docs/klampt.control.html) module! The RobotInterfaceBase class provides a unified interface for working with real motor controllers. For example, if you build a robot with basic position-controlled servos, the RobotInterfaceCompleter class provides a unified interface for executing trajectories on servos, motion smoothing, emergency stops, and Cartesian control.  Also, if you build a robot consisting of multiple parts, such as an arm and a gripper, you can perform coordinated control using the MultiRobotInterface class.
+-   Miscellaneous bug fixes.
+
+**0.8.2** (11/15/2019)
 -   Can now load almost all files from URLs!  Just use an http:// prefix to the filenames of worlds, robots,
     rigid objects, or geometries.  This also works for resources in Python.  (Resources in C++ are not done yet)
 -   New mesh visualization shows smooth meshes and black silhouettes by default, making things look prettier.
@@ -197,7 +211,7 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 
 ## Contributors
 
-[Kris Hauser](mailto:kris.hauser@duke.edu) has been the primary maintainer throughout the project. Other major contributors include Jordan Tritell, Jingru Luo, and Alessio Rocchi.
+[Kris Hauser](mailto:kris.hauser@duke.edu) has been the primary maintainer throughout the project. Other major contributors include Zherong Pan, Gao Tang, Jordan Tritell, Jingru Luo, and Alessio Rocchi.
 
 Adam Konnecker, Cam Allen, and Steve Kuznetsov have helped with the Mac build.  Hayden Bader helped with the prebuilt Docker container.
 
