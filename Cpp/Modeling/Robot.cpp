@@ -3538,9 +3538,7 @@ void Robot::Reduce(Robot& reduced,vector<int>& dofMap)
     if(j.baseIndex >= 0)
       reduced.joints.back().baseIndex = robotToFree[j.baseIndex];
   }
-  printf("Reduced %d joints to %d\n",joints.size(),reduced.joints.size());
   dofMap = robotToFree;
-  reduced.Save("reduced.rob");
 }
 
 void Robot::Merge(const std::vector<Robot*>& robots)
