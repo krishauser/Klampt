@@ -183,11 +183,13 @@ class SimRobotController
   void getSensedTorque(std::vector<double>& out);
 
   /// Returns a sensor by index or by name.  If out of bounds or unavailable,
-  /// a null sensor is returned
+  /// a null sensor is returned (i.e., SimRobotSensor.name() or
+  /// SimRobotSensor.type()) will return the empty string.)
   SimRobotSensor sensor(int index);
   //note: only the last overload docstring is added to the documentation
   /// Returns a sensor by index or by name.  If out of bounds or unavailable,
-  /// a null sensor is returned
+  /// a null sensor is returned (i.e., SimRobotSensor.name() or
+  /// SimRobotSensor.type()) will return the empty string.)
   SimRobotSensor sensor(const char* name);
   
   /// gets a custom command list
