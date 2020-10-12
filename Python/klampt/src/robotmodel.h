@@ -13,6 +13,7 @@ class RobotModel;
 class RobotModelLink;
 class RigidObjectModel;
 class TerrainModel;
+class SimRobotSensor;
 
 //forward definitions for pointers to internal objects
 class RigidObject;
@@ -578,6 +579,16 @@ class RobotModel
   void reduce(const RobotModel& robot,std::vector<int>& out);
   ///Mounts a sub-robot onto a link, with its origin at a given local transform (R,t)
   void mount(int link,const RobotModel& subRobot,const double R[9],const double t[3],const char* prefix=NULL);
+
+  /// Returns a sensor by index or by name.  If out of bounds or unavailable,
+  /// a null sensor is returned (i.e., SimRobotSensor.name() or
+  /// SimRobotSensor.type()) will return the empty string.)
+  SimRobotSensor sensor(int index);
+  //note: only the last overload docstring is added to the documentation
+  /// Returns a sensor by index or by name.  If out of bounds or unavailable,
+  /// a null sensor is returned (i.e., SimRobotSensor.name() or
+  /// SimRobotSensor.type()) will return the empty string.)
+  SimRobotSensor sensor(const char* name);
 
   int world;
   int index;

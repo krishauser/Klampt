@@ -51,6 +51,7 @@ struct WorldData
   bool worldExternal;
   XmlWorld xmlWorld;
   int refCount;
+  vector<shared_ptr<RobotSensors> > robotSensors;
 };
 
 /// Internally used.
@@ -1329,6 +1330,23 @@ bool Geometry3D::rayCast(const double s[3],const double d[3],double out[3])
     return true;
   }
   return false;
+}
+
+int Geometry3D::rayCast_ext(const double s[3],const double d[3],double out[3])
+{
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  if(!geom) return false;
+  Ray3D r;
+  r.source.set(s);
+  r.direction.set(d);
+  Real distance;
+  int element=-1;
+  if(geom->RayCast(r,&distance,&element)) {
+    Vector3 pt = r.source + r.direction*distance;
+    pt.get(out);
+    return element;
+  }
+  return -1;
 }
 
 ContactQueryResult Geometry3D::contacts(const Geometry3D& other,double padding1,double padding2,int maxContacts)
@@ -3785,6 +3803,39 @@ void RobotModel::mount(int link,const RobotModel& subRobot,const double R[9],con
   robot->Mount(link,*subRobot.robot,T,prefix);
 }
 
+SimRobotSensor RobotModel::sensor(int sensorIndex)
+{
+  shared_ptr<WorldData> worldData = worlds[this->world];
+  if(index >= (int)worldData->robotSensors.size())
+    worldData->robotSensors.resize(index+1);
+  if(!worldData->robotSensors[index]) {
+    worldData->robotSensors[index].reset(new RobotSensors);
+    worldData->robotSensors[index]->MakeDefault(robot);
+  }
+  RobotSensors* sensors = worldData->robotSensors[index].get();
+  Assert(sensors != NULL);
+  if(sensorIndex < 0 || sensorIndex >= (int)sensors->sensors.size()) 
+    return SimRobotSensor(*this,NULL);
+  return SimRobotSensor(*this,sensors->sensors[sensorIndex].get());
+}
+
+SimRobotSensor RobotModel::sensor(const char* name)
+{
+  shared_ptr<WorldData> worldData = worlds[this->world];
+  if(index >= (int)worldData->robotSensors.size())
+    worldData->robotSensors.resize(index+1);
+  if(!worldData->robotSensors[index]) {
+    worldData->robotSensors[index].reset(new RobotSensors);
+    worldData->robotSensors[index]->MakeDefault(robot);
+  }
+  RobotSensors* sensors = worldData->robotSensors[index].get();
+  Assert(sensors != NULL);
+  shared_ptr<SensorBase> sensor = sensors->GetNamedSensor(name);
+  if(sensor==NULL) {
+    fprintf(stderr,"Warning, sensor %s does not exist\n",name);
+  }
+  return SimRobotSensor(*this,sensor.get());
+}
 
 RigidObjectModel::RigidObjectModel()
   :world(-1),index(-1),object(NULL)
@@ -4825,7 +4876,7 @@ void SimRobotSensor::kinematicReset()
 SimRobotSensor SimRobotController::sensor(int sensorIndex)
 {
   RobotSensors& sensors = controller->sensors;
-  if(sensorIndex < 0 || sensorIndex >= (int)sensors.sensors.size())
+  if(sensorIndex < 0 || sensorIndex >= (int)sensors.sensors.size()) 
     return SimRobotSensor(RobotModel(),NULL);
   return SimRobotSensor(model(),sensors.sensors[sensorIndex].get());
 }

@@ -587,7 +587,35 @@ class Geometry3D
   ///Returns (hit,pt) where hit is true if the ray starting at s and pointing
   ///in direction d hits the geometry (given in world coordinates); pt is
   ///the hit point, in world coordinates.
+  ///
+  ///Supported types:
+  ///
+  ///- GeometricPrimitive
+  ///- TriangleMesh
+  ///- PointCloud (need a positive collision margin, or points need to have a
+  ///  'radius' property assigned)
+  ///- Group (groups of the aforementioned types)
+  ///
   bool rayCast(const double s[3],const double d[3],double out[3]);
+  ///Returns (hit_element,pt) where hit_element is >= 0 if ray starting at 
+  ///s and pointing in direction d hits the geometry (given in world 
+  ///coordinates).  
+  ///
+  ///- hit_element is -1 if the object is not hit, otherwise it gives the
+  ///  index of the element (triangle, point, sub-object) that was hit.  
+  ///  For geometric primitives, this will be 0.
+  ///- pt is the hit point, in world coordinates.
+  ///
+  ///Supported types:
+  ///
+  ///- GeometricPrimitive
+  ///- TriangleMesh
+  ///- PointCloud (need a positive collision margin, or points need to have a
+  ///  'radius' property assigned)
+  ///- Group (groups of the aforementioned types)
+  ///
+  int rayCast_ext(const double s[3],const double d[3],double out[3]);
+ 
   ///Returns the set of contact points between this and other.  This set
   ///is a discrete representation of the region of surface overlap, which
   ///is defined as all pairs of points within distance

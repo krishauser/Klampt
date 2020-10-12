@@ -24113,6 +24113,82 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Geometry3D_rayCast_ext(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  double *arg2 ;
+  double *arg3 ;
+  double *arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  double temp3[3] ;
+  double temp4[3] ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  int result;
+  
+  {
+    arg4 = &temp4[0];
+  }
+  if (!PyArg_ParseTuple(args,(char *)"OOO:Geometry3D_rayCast_ext",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_rayCast_ext" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  {
+    if (!convert_darray(obj1,temp2,3)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    if (!convert_darray(obj2,temp3,3)) {
+      return NULL;
+    }
+    arg3 = &temp3[0];
+  }
+  {
+    try {
+      result = (int)(arg1)->rayCast_ext((double const (*))arg2,(double const (*))arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg4,3);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_Geometry3D_contacts__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Geometry3D *arg1 = (Geometry3D *) 0 ;
@@ -37738,6 +37814,145 @@ fail:
     "  Possible C/C++ prototypes are:\n"
     "    RobotModel::mount(int,RobotModel const &,double const [9],double const [3],char const *)\n"
     "    RobotModel::mount(int,RobotModel const &,double const [9],double const [3])\n");
+  return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModel_sensor__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModel *arg1 = (RobotModel *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  SwigValueWrapper< SimRobotSensor > result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:RobotModel_sensor",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModel_sensor" "', argument " "1"" of type '" "RobotModel *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModel * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "RobotModel_sensor" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  {
+    try {
+      result = (arg1)->sensor(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj((new SimRobotSensor(static_cast< const SimRobotSensor& >(result))), SWIGTYPE_p_SimRobotSensor, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModel_sensor__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModel *arg1 = (RobotModel *) 0 ;
+  char *arg2 = (char *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  SwigValueWrapper< SimRobotSensor > result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:RobotModel_sensor",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModel_sensor" "', argument " "1"" of type '" "RobotModel *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModel * >(argp1);
+  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "RobotModel_sensor" "', argument " "2"" of type '" "char const *""'");
+  }
+  arg2 = reinterpret_cast< char * >(buf2);
+  {
+    try {
+      result = (arg1)->sensor((char const *)arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj((new SimRobotSensor(static_cast< const SimRobotSensor& >(result))), SWIGTYPE_p_SimRobotSensor, SWIG_POINTER_OWN |  0 );
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return resultobj;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModel_sensor(PyObject *self, PyObject *args) {
+  Py_ssize_t argc;
+  PyObject *argv[3] = {
+    0
+  };
+  Py_ssize_t ii;
+  
+  if (!PyTuple_Check(args)) SWIG_fail;
+  argc = args ? PyObject_Length(args) : 0;
+  for (ii = 0; (ii < 2) && (ii < argc); ii++) {
+    argv[ii] = PyTuple_GET_ITEM(args,ii);
+  }
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_RobotModel, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_int(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        return _wrap_RobotModel_sensor__SWIG_0(self, args);
+      }
+    }
+  }
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_RobotModel, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_AsCharPtrAndSize(argv[1], 0, NULL, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        return _wrap_RobotModel_sensor__SWIG_1(self, args);
+      }
+    }
+  }
+  
+fail:
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'RobotModel_sensor'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    RobotModel::sensor(int)\n"
+    "    RobotModel::sensor(char const *)\n");
   return 0;
 }
 
@@ -57926,6 +58141,36 @@ static PyMethodDef SwigMethods[] = {
 		"direction d hits the geometry (given in world coordinates); pt is the hit point,\n"
 		"in world coordinates.  \n"
 		"\n"
+		"Supported types:  \n"
+		"\n"
+		"*   GeometricPrimitive  \n"
+		"*   TriangleMesh  \n"
+		"*   PointCloud (need a positive collision margin, or points need to have a\n"
+		"    'radius' property assigned)  \n"
+		"*   Group (groups of the aforementioned types)  \n"
+		"\n"
+		""},
+	 { (char *)"Geometry3D_rayCast_ext", _wrap_Geometry3D_rayCast_ext, METH_VARARGS, (char *)"\n"
+		"Geometry3D_rayCast_ext(Geometry3D self, double const [3] s, double const [3] d) -> int\n"
+		"\n"
+		"\n"
+		"\n"
+		"Returns (hit_element,pt) where hit_element is >= 0 if ray starting at s and\n"
+		"pointing in direction d hits the geometry (given in world coordinates).  \n"
+		"\n"
+		"*   hit_element is -1 if the object is not hit, otherwise it gives the index of\n"
+		"    the element (triangle, point, sub-object) that was hit. For geometric\n"
+		"    primitives, this will be 0.  \n"
+		"*   pt is the hit point, in world coordinates.  \n"
+		"\n"
+		"Supported types:  \n"
+		"\n"
+		"*   GeometricPrimitive  \n"
+		"*   TriangleMesh  \n"
+		"*   PointCloud (need a positive collision margin, or points need to have a\n"
+		"    'radius' property assigned)  \n"
+		"*   Group (groups of the aforementioned types)  \n"
+		"\n"
 		""},
 	 { (char *)"Geometry3D_contacts", _wrap_Geometry3D_contacts, METH_VARARGS, (char *)"\n"
 		"contacts(Geometry3D other, double padding1, double padding2, int maxContacts=0) -> ContactQueryResult\n"
@@ -59603,6 +59848,17 @@ static PyMethodDef SwigMethods[] = {
 		"Mounts a sub-robot onto a link, with its origin at a given local transform (R,t)  \n"
 		"\n"
 		""},
+	 { (char *)"RobotModel_sensor", _wrap_RobotModel_sensor, METH_VARARGS, (char *)"\n"
+		"sensor(int index) -> SimRobotSensor\n"
+		"RobotModel_sensor(RobotModel self, char const * name) -> SimRobotSensor\n"
+		"\n"
+		"\n"
+		"\n"
+		"Returns a sensor by index or by name. If out of bounds or unavailable, a null\n"
+		"sensor is returned (i.e., SimRobotSensor.name() or SimRobotSensor.type()) will\n"
+		"return the empty string.)  \n"
+		"\n"
+		""},
 	 { (char *)"RobotModel_world_set", _wrap_RobotModel_world_set, METH_VARARGS, (char *)"RobotModel_world_set(RobotModel self, int world)"},
 	 { (char *)"RobotModel_world_get", _wrap_RobotModel_world_get, METH_VARARGS, (char *)"RobotModel_world_get(RobotModel self) -> int"},
 	 { (char *)"RobotModel_index_set", _wrap_RobotModel_index_set, METH_VARARGS, (char *)"RobotModel_index_set(RobotModel self, int index)"},
@@ -60941,7 +61197,8 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Returns a sensor by index or by name. If out of bounds or unavailable, a null\n"
-		"sensor is returned.  \n"
+		"sensor is returned (i.e., SimRobotSensor.name() or SimRobotSensor.type()) will\n"
+		"return the empty string.)  \n"
 		"\n"
 		""},
 	 { (char *)"SimRobotController_commands", _wrap_SimRobotController_commands, METH_VARARGS, (char *)"\n"

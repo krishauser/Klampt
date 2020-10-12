@@ -2635,8 +2635,42 @@ class Geometry3D(_object):
         direction d hits the geometry (given in world coordinates); pt is the hit point,
         in world coordinates.  
 
+        Supported types:  
+
+        *   GeometricPrimitive  
+        *   TriangleMesh  
+        *   PointCloud (need a positive collision margin, or points need to have a
+            'radius' property assigned)  
+        *   Group (groups of the aforementioned types)  
+
         """
         return _robotsim.Geometry3D_rayCast(self, s, d)
+
+
+    def rayCast_ext(self, s, d):
+        """
+        rayCast_ext(Geometry3D self, double const [3] s, double const [3] d) -> int
+
+
+
+        Returns (hit_element,pt) where hit_element is >= 0 if ray starting at s and
+        pointing in direction d hits the geometry (given in world coordinates).  
+
+        *   hit_element is -1 if the object is not hit, otherwise it gives the index of
+            the element (triangle, point, sub-object) that was hit. For geometric
+            primitives, this will be 0.  
+        *   pt is the hit point, in world coordinates.  
+
+        Supported types:  
+
+        *   GeometricPrimitive  
+        *   TriangleMesh  
+        *   PointCloud (need a positive collision margin, or points need to have a
+            'radius' property assigned)  
+        *   Group (groups of the aforementioned types)  
+
+        """
+        return _robotsim.Geometry3D_rayCast_ext(self, s, d)
 
 
     def contacts(self, other, padding1, padding2, maxContacts=0):
@@ -5407,6 +5441,21 @@ class RobotModel(_object):
         """
         return _robotsim.RobotModel_mount(self, link, subRobot, R, t, prefix)
 
+
+    def sensor(self, *args):
+        """
+        sensor(RobotModel self, int index) -> SimRobotSensor
+        sensor(RobotModel self, char const * name) -> SimRobotSensor
+
+
+
+        Returns a sensor by index or by name. If out of bounds or unavailable, a null
+        sensor is returned (i.e., SimRobotSensor.name() or SimRobotSensor.type()) will
+        return the empty string.)  
+
+        """
+        return _robotsim.RobotModel_sensor(self, *args)
+
     __swig_setmethods__["world"] = _robotsim.RobotModel_world_set
     __swig_getmethods__["world"] = _robotsim.RobotModel_world_get
     if _newclass:
@@ -7709,7 +7758,8 @@ class SimRobotController(_object):
 
 
         Returns a sensor by index or by name. If out of bounds or unavailable, a null
-        sensor is returned.  
+        sensor is returned (i.e., SimRobotSensor.name() or SimRobotSensor.type()) will
+        return the empty string.)  
 
         """
         return _robotsim.SimRobotController_sensor(self, *args)

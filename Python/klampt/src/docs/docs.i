@@ -759,6 +759,14 @@ Returns a VolumeGrid if this geometry is of type VolumeGrid.
 Returns (hit,pt) where hit is true if the ray starting at s and pointing in
 direction d hits the geometry (given in world coordinates); pt is the hit point,
 in world coordinates.  
+
+Supported types:  
+
+*   GeometricPrimitive  
+*   TriangleMesh  
+*   PointCloud (need a positive collision margin, or points need to have a
+    'radius' property assigned)  
+*   Group (groups of the aforementioned types)  
 ";
 
 %feature("docstring") Geometry3D::setGroup "
@@ -810,6 +818,25 @@ Gets the current transformation.
 %feature("docstring") Geometry3D::setGeometricPrimitive "
 
 Sets this Geometry3D to a GeometricPrimitive.  
+";
+
+%feature("docstring") Geometry3D::rayCast_ext "
+
+Returns (hit_element,pt) where hit_element is >= 0 if ray starting at s and
+pointing in direction d hits the geometry (given in world coordinates).  
+
+*   hit_element is -1 if the object is not hit, otherwise it gives the index of
+    the element (triangle, point, sub-object) that was hit. For geometric
+    primitives, this will be 0.  
+*   pt is the hit point, in world coordinates.  
+
+Supported types:  
+
+*   GeometricPrimitive  
+*   TriangleMesh  
+*   PointCloud (need a positive collision margin, or points need to have a
+    'radius' property assigned)  
+*   Group (groups of the aforementioned types)  
 ";
 
 %feature("docstring") Geometry3D::~Geometry3D "
@@ -2009,6 +2036,20 @@ Retrieves the current configuration of the robot model.
 Returns the nxn mass matrix B(q). Takes O(n^2) time.  
 ";
 
+%feature("docstring") RobotModel::sensor "
+
+Returns a sensor by index or by name. If out of bounds or unavailable, a null
+sensor is returned (i.e., SimRobotSensor.name() or SimRobotSensor.type()) will
+return the empty string.)  
+";
+
+%feature("docstring") RobotModel::sensor "
+
+Returns a sensor by index or by name. If out of bounds or unavailable, a null
+sensor is returned (i.e., SimRobotSensor.name() or SimRobotSensor.type()) will
+return the empty string.)  
+";
+
 %feature("docstring") RobotModel::getGravityForces "
 
 Returns the generalized gravity vector G(q) for the given workspace gravity
@@ -2968,13 +3009,15 @@ Gets the PID gains for the PID controller.
 %feature("docstring") SimRobotController::sensor "
 
 Returns a sensor by index or by name. If out of bounds or unavailable, a null
-sensor is returned.  
+sensor is returned (i.e., SimRobotSensor.name() or SimRobotSensor.type()) will
+return the empty string.)  
 ";
 
 %feature("docstring") SimRobotController::sensor "
 
 Returns a sensor by index or by name. If out of bounds or unavailable, a null
-sensor is returned.  
+sensor is returned (i.e., SimRobotSensor.name() or SimRobotSensor.type()) will
+return the empty string.)  
 ";
 
 %feature("docstring") SimRobotController::getSensedConfig "
