@@ -1982,7 +1982,7 @@ class Geometry3D(_object):
 
 
         Args:
-            arg2 (:class:`~klampt.TriangleMesh` or :class:`~klampt.VolumeGrid` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.Geometry3D` or :obj:`ConvexHull` or :class:`~klampt.PointCloud`, optional): 
+            arg2 (:class:`~klampt.GeometricPrimitive` or :class:`~klampt.Geometry3D` or :class:`~klampt.VolumeGrid` or :class:`~klampt.PointCloud` or :obj:`ConvexHull` or :class:`~klampt.TriangleMesh`, optional): 
         """
         this = _robotsim.new_Geometry3D(*args)
         try:
@@ -2563,8 +2563,45 @@ class Geometry3D(_object):
             d (:obj:`list of 3 floats`)
         Returns:
             (bool):
+
+        Supported types:  
+
+        *   GeometricPrimitive  
+        *   TriangleMesh  
+        *   PointCloud (need a positive collision margin, or points need to have a
+            'radius' property assigned)  
+        *   Group (groups of the aforementioned types)  
+
         """
         return _robotsim.Geometry3D_rayCast(self, s, d)
+
+
+    def rayCast_ext(self, s, d):
+        """
+        Returns (hit_element,pt) where hit_element is >= 0 if ray starting at s and
+        pointing in direction d hits the geometry (given in world coordinates).  
+
+        Args:
+            s (:obj:`list of 3 floats`)
+            d (:obj:`list of 3 floats`)
+        Returns:
+            (int):
+
+        *   hit_element is -1 if the object is not hit, otherwise it gives the index of
+            the element (triangle, point, sub-object) that was hit. For geometric
+            primitives, this will be 0.  
+        *   pt is the hit point, in world coordinates.  
+
+        Supported types:  
+
+        *   GeometricPrimitive  
+        *   TriangleMesh  
+        *   PointCloud (need a positive collision margin, or points need to have a
+            'radius' property assigned)  
+        *   Group (groups of the aforementioned types)  
+
+        """
+        return _robotsim.Geometry3D_rayCast_ext(self, s, d)
 
 
     def contacts(self, other, padding1, padding2, maxContacts=0):
@@ -5127,6 +5164,27 @@ class RobotModel(_object):
         """
         return _robotsim.RobotModel_mount(self, link, subRobot, R, t, prefix)
 
+
+    def sensor(self, *args):
+        """
+        Returns a sensor by index or by name. If out of bounds or unavailable, a null
+        sensor is returned (i.e., SimRobotSensor.name() or SimRobotSensor.type()) will
+        return the empty string.)  
+
+        sensor (index): :class:`~klampt.SimRobotSensor`
+
+        sensor (name): :class:`~klampt.SimRobotSensor`
+
+
+        Args:
+            index (int, optional): 
+            name (str, optional): 
+
+        Returns:
+            (:class:`~klampt.SimRobotSensor`):
+        """
+        return _robotsim.RobotModel_sensor(self, *args)
+
     __swig_setmethods__["world"] = _robotsim.RobotModel_world_set
     __swig_getmethods__["world"] = _robotsim.RobotModel_world_get
     if _newclass:
@@ -6624,7 +6682,7 @@ class IKSolver(_object):
             tol (float, optional): 
 
         Returns:
-            (:obj:`object` or bool):
+            (bool or :obj:`object`):
         """
         return _robotsim.IKSolver_solve(self, *args)
 
@@ -6735,7 +6793,7 @@ class GeneralizedIKObjective(_object):
 
 
         Args:
-            obj (:class:`~klampt.RigidObjectModel` or :obj:`GeneralizedIKObjective`, optional): 
+            obj (:obj:`GeneralizedIKObjective` or :class:`~klampt.RigidObjectModel`, optional): 
             link (:class:`~klampt.RobotModelLink`, optional): 
             link2 (:class:`~klampt.RobotModelLink`, optional): 
             obj2 (:class:`~klampt.RigidObjectModel`, optional): 
@@ -6935,7 +6993,7 @@ def SampleTransform(*args):
 
 
     Args:
-        obj (:obj:`IKObjective` or :obj:`GeneralizedIKObjective`): 
+        obj (:obj:`GeneralizedIKObjective` or :obj:`IKObjective`): 
     """
     return _robotsim.SampleTransform(*args)
 class SimRobotSensor(_object):
@@ -7294,7 +7352,8 @@ class SimRobotController(_object):
     def sensor(self, *args):
         """
         Returns a sensor by index or by name. If out of bounds or unavailable, a null
-        sensor is returned.  
+        sensor is returned (i.e., SimRobotSensor.name() or SimRobotSensor.type()) will
+        return the empty string.)  
 
         sensor (index): :class:`~klampt.SimRobotSensor`
 
