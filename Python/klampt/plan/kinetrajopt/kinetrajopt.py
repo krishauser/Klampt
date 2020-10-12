@@ -612,7 +612,7 @@ class KineTrajOpt:
                         geom_copy.setCurrentTransform(*ltran2)
                         cvxhull = Geometry3D()
                         cvxhull.setConvexHullGroup(geom, geom_copy)
-                        rst = slv.distance_ext(ov, setting)
+                        rst = cvxhull.distance_ext(ov, setting)
                         if rst.d < dcheck:
                             add_sweep(link_idx, -1 - li_, geom, ltran1, ltran2, rst, i, oj)
         return point_collisions, sweep_collisions
