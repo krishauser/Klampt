@@ -966,8 +966,11 @@ class ConvexHull(_object):
 
 
     Stores a set of points to be set into a ConvexHull type. Note: These may not
-    actually be the vertices of the convex hull; the actual convex hull is computed
-    internally.  
+    actually be the vertices of the convex hull; the actual convex hull may be
+    computed internally for some datatypes.  
+
+    Attributes: points (SWIG vector of floats): a list of points, given as a
+    flattened coordinate list [x1,y1,z1,x2,y2,...]  
 
     C++ includes: geometry.h
 
@@ -1050,8 +1053,11 @@ class ConvexHull(_object):
 
 
         Stores a set of points to be set into a ConvexHull type. Note: These may not
-        actually be the vertices of the convex hull; the actual convex hull is computed
-        internally.  
+        actually be the vertices of the convex hull; the actual convex hull may be
+        computed internally for some datatypes.  
+
+        Attributes: points (SWIG vector of floats): a list of points, given as a
+        flattened coordinate list [x1,y1,z1,x2,y2,...]  
 
         C++ includes: geometry.h
 
@@ -1099,6 +1105,7 @@ class PointCloud(_object):
     *   c: opacity, in range [0,255]  
     *   r,g,b,a: color channels, in range [0,1]  
     *   u,v: texture coordinate  
+    *   radius: treats the point cloud as a collection of balls  
 
     Settings are usually lowercase but follow PCL naming convention, and often
     include:  
@@ -1274,6 +1281,19 @@ class PointCloud(_object):
         return _robotsim.PointCloud_getProperty(self, *args)
 
 
+    def getProperties(self, *args):
+        """
+        getProperties(PointCloud self, int pindex)
+        getProperties(PointCloud self, std::string const & pname)
+
+
+
+        Gets property named pindex of all points as an array.  
+
+        """
+        return _robotsim.PointCloud_getProperties(self, *args)
+
+
     def translate(self, t):
         """
         translate(PointCloud self, double const [3] t)
@@ -1386,6 +1406,7 @@ class PointCloud(_object):
         *   c: opacity, in range [0,255]  
         *   r,g,b,a: color channels, in range [0,1]  
         *   u,v: texture coordinate  
+        *   radius: treats the point cloud as a collection of balls  
 
         Settings are usually lowercase but follow PCL naming convention, and often
         include:  
@@ -2399,8 +2420,8 @@ class Geometry3D(_object):
 
 
 
-        Returns the axis-aligned bounding box of the object. Note: O(1) time, but may
-        not be tight.  
+        Returns the axis-aligned bounding box of the object as a tuple (bmin,bmax).
+        Note: O(1) time, but may not be tight.  
 
         """
         return _robotsim.Geometry3D_getBB(self)
@@ -2412,8 +2433,8 @@ class Geometry3D(_object):
 
 
 
-        Returns a tighter axis-aligned bounding box of the object than getBB. Worst case
-        O(n) time.  
+        Returns a tighter axis-aligned bounding box of the object than
+        :meth:`Geometry3D.getBB`. Worst case O(n) time.  
 
         """
         return _robotsim.Geometry3D_getBBTight(self)
@@ -2438,7 +2459,8 @@ class Geometry3D(_object):
         *   TriangleMesh -> VolumeGrid. Converted using the fast marching method with
             good results only if the mesh is watertight. param is the grid resolution,
             by default set to the average triangle diameter.  
-        *   TriangleMesh -> ConvexHull. Converted using SOLID / Qhull.  
+        *   TriangleMesh -> ConvexHull. If param==0, just calculates a convex hull.
+            Otherwise, uses convex decomposition with the HACD library.  
         *   PointCloud -> TriangleMesh. Available if the point cloud is structured.
             param is the threshold for splitting triangles by depth discontinuity. param
             is by default infinity.  
@@ -2479,7 +2501,7 @@ class Geometry3D(_object):
 
 
 
-        Returns true if this geometry is within distance tol to other.  
+        Returns true if this geometry is within distance `tol` to other.  
 
         """
         return _robotsim.Geometry3D_withinDistance(self, other, tol)
@@ -2496,7 +2518,8 @@ class Geometry3D(_object):
         Version 0.8: this is the same as the old distance() function.  
 
         Returns the distance from this geometry to the other. If either geometry
-        contains volume information, this value may be negative to indicate penetration.  
+        contains volume information, this value may be negative to indicate penetration.
+        See :meth:`Geometry3D.distance` for more information.  
 
         """
         return _robotsim.Geometry3D_distance_simple(self, other, relErr, absErr)
@@ -2515,6 +2538,19 @@ class Geometry3D(_object):
         The return value contains the distance, closest points, and gradients if
         available.  
 
+        For some geometry types, the signed distance is returned. The signed distance
+        returns the negative penetration depth if pt is within this. The following
+        geometry types return signed distances:  
+
+        *   GeometricPrimitive  
+        *   PointCloud (approximate, if the cloud is a set of balls with the radius
+            property)  
+        *   VolumeGrid  
+        *   ConvexHull  
+
+        For other types, a signed distance will be returned if the geometry has a
+        positive collision margin, and the point penetrates less than this margin.  
+
         """
         return _robotsim.Geometry3D_distance_point(self, pt)
 
@@ -2525,9 +2561,9 @@ class Geometry3D(_object):
 
 
 
-        A customizable version of distance_point. The settings for the calculation can
-        be customized with relErr, absErr, and upperBound, e.g., to break if the closest
-        points are at least upperBound distance from one another.  
+        A customizable version of :meth:`Geometry3D.distance_point`. The settings for
+        the calculation can be customized with relErr, absErr, and upperBound, e.g., to
+        break if the closest points are at least upperBound distance from one another.  
 
         """
         return _robotsim.Geometry3D_distance_point_ext(self, pt, settings)
@@ -2539,10 +2575,16 @@ class Geometry3D(_object):
 
 
 
-        Returns the the distance and closest points between the given geometries.  
+        Returns the the distance and closest points between the given geometries. This
+        may be either the normal distance or the signed distance, depending on the
+        geometry type.  
 
-        If the objects are penetrating, some combinations of geometry types allow
-        calculating penetration depths:  
+        The normal distance returns 0 if the two objects are touching
+        (this.collides(other)=True).  
+
+        The signed distance returns the negative penetration depth if the objects are
+        touching. Only the following combinations of geometry types return signed
+        distances:  
 
         *   GeometricPrimitive-GeometricPrimitive (Python-supported sub-types only)  
         *   GeometricPrimitive-TriangleMesh (surface only)  
@@ -2575,9 +2617,9 @@ class Geometry3D(_object):
 
 
 
-        A customizable version of distance. The settings for the calculation can be
-        customized with relErr, absErr, and upperBound, e.g., to break if the closest
-        points are at least upperBound distance from one another.  
+        A customizable version of :meth:`Geometry3D.distance`. The settings for the
+        calculation can be customized with relErr, absErr, and upperBound, e.g., to
+        break if the closest points are at least upperBound distance from one another.  
 
         """
         return _robotsim.Geometry3D_distance_ext(self, other, settings)
@@ -4045,6 +4087,42 @@ class RobotModelLink(_object):
         return _robotsim.RobotModelLink_setAxis(self, axis)
 
 
+    def isPrismatic(self):
+        """
+        isPrismatic(RobotModelLink self) -> bool
+
+
+
+        Returns whether the joint is prismatic.  
+
+        """
+        return _robotsim.RobotModelLink_isPrismatic(self)
+
+
+    def isRevolute(self):
+        """
+        isRevolute(RobotModelLink self) -> bool
+
+
+
+        Returns whether the joint is revolute.  
+
+        """
+        return _robotsim.RobotModelLink_isRevolute(self)
+
+
+    def setPrismatic(self, prismatic):
+        """
+        setPrismatic(RobotModelLink self, bool prismatic)
+
+
+
+        Changes a link from revolute to prismatic or vice versa.  
+
+        """
+        return _robotsim.RobotModelLink_setPrismatic(self, prismatic)
+
+
     def getWorldPosition(self, plocal):
         """
         getWorldPosition(RobotModelLink self, double const [3] plocal)
@@ -4916,8 +4994,8 @@ class RobotModel(_object):
 
 
 
-        Sets the torque limit vector tmax, the constraint is :math:`|torque[i]|
-        <\leqtmax[i]`  
+        Sets the torque limit vector tmax, the constraint is :math:`|torque[i]| \leq
+        tmax[i]`  
 
         """
         return _robotsim.RobotModel_setTorqueLimits(self, tmax)
@@ -5299,6 +5377,35 @@ class RobotModel(_object):
 
         """
         return _robotsim.RobotModel_drawGL(self, keepAppearance)
+
+
+    def reduce(self, robot):
+        """
+        reduce(RobotModel self, RobotModel robot)
+
+
+
+        Sets self to a reduced version of robot, where all fixed DOFs are eliminated.
+        The return value is a map from the original robot DOF indices to the reduced
+        DOFs.  
+
+        Note that any geometries fixed to the world will disappear.  
+
+        """
+        return _robotsim.RobotModel_reduce(self, robot)
+
+
+    def mount(self, link, subRobot, R, t, prefix=None):
+        """
+        mount(RobotModel self, int link, RobotModel subRobot, double const [9] R, double const [3] t, char const * prefix=None)
+        mount(RobotModel self, int link, RobotModel subRobot, double const [9] R, double const [3] t)
+
+
+
+        Mounts a sub-robot onto a link, with its origin at a given local transform (R,t)  
+
+        """
+        return _robotsim.RobotModel_mount(self, link, subRobot, R, t, prefix)
 
     __swig_setmethods__["world"] = _robotsim.RobotModel_world_set
     __swig_getmethods__["world"] = _robotsim.RobotModel_world_get
@@ -7245,7 +7352,7 @@ class SimRobotSensor(_object):
 
     def __init__(self, *args):
         """
-        __init__(SimRobotSensor self, Robot * robot, SensorBase * sensor) -> SimRobotSensor
+        __init__(SimRobotSensor self, RobotModel robot, SensorBase * sensor) -> SimRobotSensor
         __init__(SimRobotSensor self, SimRobotController robot, char const * name, char const * type) -> SimRobotSensor
 
 
@@ -7279,6 +7386,18 @@ class SimRobotSensor(_object):
 
         """
         return _robotsim.SimRobotSensor_type(self)
+
+
+    def robot(self):
+        """
+        robot(SimRobotSensor self) -> RobotModel
+
+
+
+        Returns the model of the robot to which this belongs.  
+
+        """
+        return _robotsim.SimRobotSensor_robot(self)
 
 
     def measurementNames(self):
@@ -7346,16 +7465,15 @@ class SimRobotSensor(_object):
         return _robotsim.SimRobotSensor_drawGL(self, *args)
 
 
-    def kinematicSimulate(self, world, dt):
+    def kinematicSimulate(self, *args):
         """
         kinematicSimulate(SimRobotSensor self, WorldModel world, double dt)
+        kinematicSimulate(SimRobotSensor self, double dt)
 
 
-
-        simulates / advances the kinematic simulation  
 
         """
-        return _robotsim.SimRobotSensor_kinematicSimulate(self, world, dt)
+        return _robotsim.SimRobotSensor_kinematicSimulate(self, *args)
 
 
     def kinematicReset(self):
@@ -7369,10 +7487,10 @@ class SimRobotSensor(_object):
         """
         return _robotsim.SimRobotSensor_kinematicReset(self)
 
-    __swig_setmethods__["robot"] = _robotsim.SimRobotSensor_robot_set
-    __swig_getmethods__["robot"] = _robotsim.SimRobotSensor_robot_get
+    __swig_setmethods__["robotModel"] = _robotsim.SimRobotSensor_robotModel_set
+    __swig_getmethods__["robotModel"] = _robotsim.SimRobotSensor_robotModel_get
     if _newclass:
-        robot = _swig_property(_robotsim.SimRobotSensor_robot_get, _robotsim.SimRobotSensor_robot_set)
+        robotModel = _swig_property(_robotsim.SimRobotSensor_robotModel_get, _robotsim.SimRobotSensor_robotModel_set)
     __swig_setmethods__["sensor"] = _robotsim.SimRobotSensor_sensor_set
     __swig_getmethods__["sensor"] = _robotsim.SimRobotSensor_sensor_get
     if _newclass:
@@ -7512,7 +7630,7 @@ class SimRobotController(_object):
 
 
 
-        Returns the current commanded configuration.  
+        Returns the current commanded configuration (size model().numLinks())  
 
         """
         return _robotsim.SimRobotController_getCommandedConfig(self)
@@ -7524,7 +7642,7 @@ class SimRobotController(_object):
 
 
 
-        Returns the current commanded velocity.  
+        Returns the current commanded velocity (size model().numLinks())  
 
         """
         return _robotsim.SimRobotController_getCommandedVelocity(self)
@@ -7536,7 +7654,7 @@ class SimRobotController(_object):
 
 
 
-        Returns the current commanded (feedforward) torque.  
+        Returns the current commanded (feedforward) torque (size model().numDrivers())  
 
         """
         return _robotsim.SimRobotController_getCommandedTorque(self)
@@ -7548,7 +7666,8 @@ class SimRobotController(_object):
 
 
 
-        Returns the current "sensed" configuration from the simulator.  
+        Returns the current "sensed" configuration from the simulator (size
+        model().numLinks())  
 
         """
         return _robotsim.SimRobotController_getSensedConfig(self)
@@ -7560,7 +7679,8 @@ class SimRobotController(_object):
 
 
 
-        Returns the current "sensed" velocity from the simulator.  
+        Returns the current "sensed" velocity from the simulator (size
+        model().numLinks())  
 
         """
         return _robotsim.SimRobotController_getSensedVelocity(self)
@@ -7572,8 +7692,10 @@ class SimRobotController(_object):
 
 
 
-        Returns the current "sensed" (feedback) torque from the simulator. Note: a
-        default robot doesn't have a torque sensor, so this will be 0.  
+        Returns the current "sensed" (feedback) torque from the simulator. (size
+        model().numDrivers())  
+
+        Note: a default robot doesn't have a torque sensor, so this will be 0  
 
         """
         return _robotsim.SimRobotController_getSensedTorque(self)
@@ -7599,7 +7721,7 @@ class SimRobotController(_object):
 
 
 
-        gets a command list  
+        gets a custom command list  
 
         """
         return _robotsim.SimRobotController_commands(self)
@@ -7611,7 +7733,7 @@ class SimRobotController(_object):
 
 
 
-        sends a command to the controller  
+        sends a custom string command to the controller  
 
         """
         return _robotsim.SimRobotController_sendCommand(self, name, args)
@@ -7692,6 +7814,8 @@ class SimRobotController(_object):
         Uses linear interpolation to get from the current configuration to the desired
         configuration after time dt.  
 
+        q has size model().numLinks(). dt must be > 0.  
+
         """
         return _robotsim.SimRobotController_setLinear(self, q, dt)
 
@@ -7704,6 +7828,8 @@ class SimRobotController(_object):
 
         Uses cubic (Hermite) interpolation to get from the current
         configuration/velocity to the desired configuration/velocity after time dt.  
+
+        q and v have size model().numLinks(). dt must be > 0.  
 
         """
         return _robotsim.SimRobotController_setCubic(self, q, v, dt)
@@ -7752,7 +7878,7 @@ class SimRobotController(_object):
 
 
         Sets a rate controller from the current commanded config to move at rate dq for
-        time dt.  
+        time dt > 0. dq has size model().numLinks()  
 
         """
         return _robotsim.SimRobotController_setVelocity(self, dq, dt)
@@ -7764,7 +7890,8 @@ class SimRobotController(_object):
 
 
 
-        Sets a torque command controller.  
+        Sets a torque command controller. t can have size model().numDrivers() or
+        model().numLinks().  
 
         """
         return _robotsim.SimRobotController_setTorque(self, t)
@@ -7823,7 +7950,7 @@ class SimRobotController(_object):
 
 
 
-        Sets the PID gains.  
+        Sets the PID gains. Arguments have size model().numDrivers().  
 
         """
         return _robotsim.SimRobotController_setPIDGains(self, kP, kI, kD)

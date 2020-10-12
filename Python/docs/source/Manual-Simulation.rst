@@ -206,8 +206,8 @@ To inspect the contact status of objects:
 Example
 -------------------------------
 
-In this example we'll work from the template in Klampt-examples/Python/demos/gl_vis.py. 
-First, copy Klampt/Python/demos/gl_vis.py to your own folder and
+In this example we'll work from the template in Klampt-examples/Python3/demos/gl_vis.py. 
+First, copy Klampt/Python3/demos/gl_vis.py to your own folder and
 rename it, for example, ``myapp.py``. 
 
 First, let's change to using the ATHLETE robot on a fractal terrain.
@@ -381,11 +381,11 @@ in contact, and examine the contact forces/torques:
         #you could loop over a selective set of id pairs rather than i and j, if you wanted...
         if sim.inContact(i,j):
           if not contacted:
-            print "Touching bodies:",i,j
+            print("Touching bodies:",i,j)
             contacted=True
           f = sim.contactForce(i,j)
           t = sim.contactTorque(i,j)
-          print " ",world.getName(i),"-",world.getName(j),"contact force",f,"and torque",t
+          print(" ",world.getName(i),"-",world.getName(j),"contact force",f,"and torque",t)
 
 Even more detailed information about the latest contact points can be
 retrieved using the ``sim.getContacts()`` function. This returns a list of
@@ -397,7 +397,7 @@ contacts between the given objects:
 
     contactlist = sim.getContacts(objectid,linkid)
     for c in contactlist:
-      print "Contact point",c[0:3],"normal",c[3:6],"friction coefficient",c[6]
+      print("Contact point",c[0:3],"normal",c[3:6],"friction coefficient",c[6])
 
 
 
@@ -405,11 +405,11 @@ Batch simulation example
 -------------------------
 
 This example will do a very simple Monte Carlo example on a 1-link
-robot in the ``Klampt-examples/Python/exercises/control`` example,
+robot in the ``Klampt-examples/Python3/exercises/control`` example,
 just to cover the basics on how
 to run the batch simulation module.
 
-First, create a new file in ``Klampt-examples/Python/exercises/control``
+First, create a new file in ``Klampt-examples/Python3/exercises/control``
 called ``batch_test.py`` and use text editor to open it.
 In this example, we want to test if the controller works from different
 initial joint angles within the range [-pi, pi]. After a preset
@@ -508,7 +508,7 @@ file to record the data for post processing.
         initialCond,results = res[i]
         startConfig = initialCond['robots[0].config[0]']
         endConfig = results[returnItems[0]]
-        print startConfig,"->",endConfig
+        print(startConfig,"->",endConfig)
         f.write('%lf\n'%(endConfig[0]))
     f.close()
 
@@ -558,11 +558,11 @@ can do so as follows:
 
     f = open('result.txt', 'w')
     for i in range(N):
-        #print res[i][1]
+        #print(res[i][1])
         initialCond,results = res[i]
         startConfig = initialCond['robots[0].config[0]']
         endConfig = results[returnItems[0]]
-        print "from",startConfig,"to",initialCond["args"][0],"->",endConfig
+        print("from",startConfig,"to",initialCond["args"][0],"->",endConfig)
         f.write('%lf\n'%(endConfig[0]))
     f.close()
 

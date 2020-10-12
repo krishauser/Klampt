@@ -256,8 +256,11 @@ C++ includes: geometry.h
 %feature("docstring") ConvexHull "
 
 Stores a set of points to be set into a ConvexHull type. Note: These may not
-actually be the vertices of the convex hull; the actual convex hull is computed
-internally.  
+actually be the vertices of the convex hull; the actual convex hull may be
+computed internally for some datatypes.  
+
+Attributes: points (SWIG vector of floats): a list of points, given as a
+flattened coordinate list [x1,y1,z1,x2,y2,...]  
 
 C++ includes: geometry.h
 ";
@@ -766,10 +769,16 @@ setElement() with increasing indices.
 
 %feature("docstring") Geometry3D::distance "
 
-Returns the the distance and closest points between the given geometries.  
+Returns the the distance and closest points between the given geometries. This
+may be either the normal distance or the signed distance, depending on the
+geometry type.  
 
-If the objects are penetrating, some combinations of geometry types allow
-calculating penetration depths:  
+The normal distance returns 0 if the two objects are touching
+(this.collides(other)=True).  
+
+The signed distance returns the negative penetration depth if the objects are
+touching. Only the following combinations of geometry types return signed
+distances:  
 
 *   GeometricPrimitive-GeometricPrimitive (Python-supported sub-types only)  
 *   GeometricPrimitive-TriangleMesh (surface only)  
@@ -808,9 +817,9 @@ Sets this Geometry3D to a GeometricPrimitive.
 
 %feature("docstring") Geometry3D::distance_point_ext "
 
-A customizable version of distance_point. The settings for the calculation can
-be customized with relErr, absErr, and upperBound, e.g., to break if the closest
-points are at least upperBound distance from one another.  
+A customizable version of :meth:`Geometry3D.distance_point`. The settings for
+the calculation can be customized with relErr, absErr, and upperBound, e.g., to
+break if the closest points are at least upperBound distance from one another.  
 ";
 
 %feature("docstring") Geometry3D::Geometry3D "
@@ -839,7 +848,8 @@ points are at least upperBound distance from one another.
 Version 0.8: this is the same as the old distance() function.  
 
 Returns the distance from this geometry to the other. If either geometry
-contains volume information, this value may be negative to indicate penetration.  
+contains volume information, this value may be negative to indicate penetration.
+See :meth:`Geometry3D.distance` for more information.  
 ";
 
 %feature("docstring") Geometry3D::setTriangleMesh "
@@ -859,7 +869,7 @@ Returns true if this has no contents (not the same as numElements()==0)
 
 %feature("docstring") Geometry3D::withinDistance "
 
-Returns true if this geometry is within distance tol to other.  
+Returns true if this geometry is within distance `tol` to other.  
 ";
 
 %feature("docstring") Geometry3D::setConvexHull "
@@ -881,7 +891,8 @@ Available conversions are:
 *   TriangleMesh -> VolumeGrid. Converted using the fast marching method with
     good results only if the mesh is watertight. param is the grid resolution,
     by default set to the average triangle diameter.  
-*   TriangleMesh -> ConvexHull. Converted using SOLID / Qhull.  
+*   TriangleMesh -> ConvexHull. If param==0, just calculates a convex hull.
+    Otherwise, uses convex decomposition with the HACD library.  
 *   PointCloud -> TriangleMesh. Available if the point cloud is structured.
     param is the threshold for splitting triangles by depth discontinuity. param
     is by default infinity.  
@@ -909,6 +920,19 @@ given geometry type.
 
 The return value contains the distance, closest points, and gradients if
 available.  
+
+For some geometry types, the signed distance is returned. The signed distance
+returns the negative penetration depth if pt is within this. The following
+geometry types return signed distances:  
+
+*   GeometricPrimitive  
+*   PointCloud (approximate, if the cloud is a set of balls with the radius
+    property)  
+*   VolumeGrid  
+*   ConvexHull  
+
+For other types, a signed distance will be returned if the geometry has a
+positive collision margin, and the point penetrates less than this margin.  
 ";
 
 %feature("docstring") Geometry3D::contacts "
@@ -936,8 +960,8 @@ Unsupported types:
 
 %feature("docstring") Geometry3D::getBB "
 
-Returns the axis-aligned bounding box of the object. Note: O(1) time, but may
-not be tight.  
+Returns the axis-aligned bounding box of the object as a tuple (bmin,bmax).
+Note: O(1) time, but may not be tight.  
 ";
 
 %feature("docstring") Geometry3D::getTriangleMesh "
@@ -969,8 +993,8 @@ modifies the data and resets any collision data structures.
 
 %feature("docstring") Geometry3D::getBBTight "
 
-Returns a tighter axis-aligned bounding box of the object than getBB. Worst case
-O(n) time.  
+Returns a tighter axis-aligned bounding box of the object than
+:meth:`Geometry3D.getBB`. Worst case O(n) time.  
 ";
 
 %feature("docstring") Geometry3D::numElements "
@@ -1036,9 +1060,9 @@ transform of g2 doesn't do anything to this object.
 
 %feature("docstring") Geometry3D::distance_ext "
 
-A customizable version of distance. The settings for the calculation can be
-customized with relErr, absErr, and upperBound, e.g., to break if the closest
-points are at least upperBound distance from one another.  
+A customizable version of :meth:`Geometry3D.distance`. The settings for the
+calculation can be customized with relErr, absErr, and upperBound, e.g., to
+break if the closest points are at least upperBound distance from one another.  
 ";
 
 %feature("docstring") Geometry3D::clone "
@@ -1608,6 +1632,7 @@ include:
 *   c: opacity, in range [0,255]  
 *   r,g,b,a: color channels, in range [0,1]  
 *   u,v: texture coordinate  
+*   radius: treats the point cloud as a collection of balls  
 
 Settings are usually lowercase but follow PCL naming convention, and often
 include:  
@@ -1715,6 +1740,16 @@ Sets property pindex of point index to the given value.
 %feature("docstring") PointCloud::setProperty "
 
 Sets the property named pname of point index to the given value.  
+";
+
+%feature("docstring") PointCloud::getProperties "
+
+Gets property pindex of all points as an array.  
+";
+
+%feature("docstring") PointCloud::getProperties "
+
+Gets property named pindex of all points as an array.  
 ";
 
 %feature("docstring") PointCloud::addProperty "
@@ -1944,6 +1979,15 @@ appearances is to set the link Appearance's directly.
 %feature("docstring") RobotModel::setName "
 ";
 
+%feature("docstring") RobotModel::reduce "
+
+Sets self to a reduced version of robot, where all fixed DOFs are eliminated.
+The return value is a map from the original robot DOF indices to the reduced
+DOFs.  
+
+Note that any geometries fixed to the world will disappear.  
+";
+
 %feature("docstring") RobotModel::getKineticEnergy "
 
 Returns the kinetic energy at the current config / velocity.  
@@ -2017,6 +2061,11 @@ If `geometryPrefix == None` (default), the geometry is not saved. Otherwise, the
 geometry of each link will be saved to files named `geometryPrefix+name`, where
 `name` is either the name of the geometry file that was loaded, or
 `[link_name].off`  
+";
+
+%feature("docstring") RobotModel::mount "
+
+Mounts a sub-robot onto a link, with its origin at a given local transform (R,t)  
 ";
 
 %feature("docstring") RobotModel::enableSelfCollision "
@@ -2255,8 +2304,8 @@ Returns a reference to the link by index or name.
 
 %feature("docstring") RobotModel::setTorqueLimits "
 
-Sets the torque limit vector tmax, the constraint is :math:`|torque[i]|
-<\\leqtmax[i]`  
+Sets the torque limit vector tmax, the constraint is :math:`|torque[i]| \\leq
+tmax[i]`  
 ";
 
 %feature("docstring") RobotModel::setVelocityLimits "
@@ -2409,20 +2458,20 @@ Returns:
     vworld  
 ";
 
+%feature("docstring") RobotModelLink::isPrismatic "
+
+Returns whether the joint is prismatic.  
+";
+
 %feature("docstring") RobotModelLink::getMass "
 
 Retrieves the inertial properties of the link. (Note that the Mass is given with
 origin at the link frame, not about the COM.)  
 ";
 
-%feature("docstring") RobotModelLink::setTransform "
+%feature("docstring") RobotModelLink::setPrismatic "
 
-Sets the link's current transformation (R,t) to the world frame.  
-
-Note:  
-
-    This does NOT perform inverse kinematics.  The transform is
-    overwritten when the robot's setConfig() method is called.  
+Changes a link from revolute to prismatic or vice versa.  
 ";
 
 %feature("docstring") RobotModelLink::getWorldDirection "
@@ -2532,13 +2581,9 @@ Returns a reference to the link's appearance.
 Returns a reference to the link's parent, or a NULL link if it has no parent.  
 ";
 
-%feature("docstring") RobotModelLink::getLocalPosition "
+%feature("docstring") RobotModelLink::getName "
 
-Converts point from world to local coordinates.  
-
-Returns:  
-
-    (list of 3 floats): the local coordinates of the world point pworld  
+Returns the name of the robot link.  
 ";
 
 %feature("docstring") RobotModelLink::RobotModelLink "
@@ -2571,9 +2616,13 @@ Returns:
     world coordinates.  
 ";
 
-%feature("docstring") RobotModelLink::getName "
+%feature("docstring") RobotModelLink::getLocalPosition "
 
-Returns the name of the robot link.  
+Converts point from world to local coordinates.  
+
+Returns:  
+
+    (list of 3 floats): the local coordinates of the world point pworld  
 ";
 
 %feature("docstring") RobotModelLink::getPositionHessian "
@@ -2627,6 +2676,16 @@ Returns a reference to the link's robot.
 Gets the local rotational / translational axis.  
 ";
 
+%feature("docstring") RobotModelLink::setTransform "
+
+Sets the link's current transformation (R,t) to the world frame.  
+
+Note:  
+
+    This does NOT perform inverse kinematics.  The transform is
+    overwritten when the robot's setConfig() method is called.  
+";
+
 %feature("docstring") RobotModelLink::drawWorldGL "
 
 Draws the link's geometry in the world frame. If keepAppearance=true, the
@@ -2661,6 +2720,11 @@ Returns:
 
     (3-tuple): a triple (Hx,Hy,Hz) of of nxn matrices corresponding,
     respectively, to the (wx,wy,wz) components of the Hessian.  
+";
+
+%feature("docstring") RobotModelLink::isRevolute "
+
+Returns whether the joint is revolute.  
 ";
 
 %feature("docstring") RobotModelLink::getVelocity "
@@ -2915,17 +2979,19 @@ sensor is returned.
 
 %feature("docstring") SimRobotController::getSensedConfig "
 
-Returns the current \"sensed\" configuration from the simulator.  
+Returns the current \"sensed\" configuration from the simulator (size
+model().numLinks())  
 ";
 
 %feature("docstring") SimRobotController::getCommandedTorque "
 
-Returns the current commanded (feedforward) torque.  
+Returns the current commanded (feedforward) torque (size model().numDrivers())  
 ";
 
 %feature("docstring") SimRobotController::setTorque "
 
-Sets a torque command controller.  
+Sets a torque command controller. t can have size model().numDrivers() or
+model().numLinks().  
 ";
 
 %feature("docstring") SimRobotController::remainingTime "
@@ -2935,13 +3001,15 @@ Returns the remaining duration of the motion queue.
 
 %feature("docstring") SimRobotController::setPIDGains "
 
-Sets the PID gains.  
+Sets the PID gains. Arguments have size model().numDrivers().  
 ";
 
 %feature("docstring") SimRobotController::getSensedTorque "
 
-Returns the current \"sensed\" (feedback) torque from the simulator. Note: a
-default robot doesn't have a torque sensor, so this will be 0.  
+Returns the current \"sensed\" (feedback) torque from the simulator. (size
+model().numDrivers())  
+
+Note: a default robot doesn't have a torque sensor, so this will be 0  
 ";
 
 %feature("docstring") SimRobotController::addMilestoneLinear "
@@ -2957,7 +3025,7 @@ gets a setting of the controller
 
 %feature("docstring") SimRobotController::sendCommand "
 
-sends a command to the controller  
+sends a custom string command to the controller  
 ";
 
 %feature("docstring") SimRobotController::setManualMode "
@@ -2968,13 +3036,16 @@ previously set.
 
 %feature("docstring") SimRobotController::getSensedVelocity "
 
-Returns the current \"sensed\" velocity from the simulator.  
+Returns the current \"sensed\" velocity from the simulator (size
+model().numLinks())  
 ";
 
 %feature("docstring") SimRobotController::setCubic "
 
 Uses cubic (Hermite) interpolation to get from the current
 configuration/velocity to the desired configuration/velocity after time dt.  
+
+q and v have size model().numLinks(). dt must be > 0.  
 ";
 
 %feature("docstring") SimRobotController::~SimRobotController "
@@ -2987,7 +3058,7 @@ Same as setCubic but appends an interpolant onto the motion queue.
 
 %feature("docstring") SimRobotController::getCommandedConfig "
 
-Returns the current commanded configuration.  
+Returns the current commanded configuration (size model().numLinks())  
 ";
 
 %feature("docstring") SimRobotController::SimRobotController "
@@ -3002,6 +3073,8 @@ sets a setting of the controller
 
 Uses linear interpolation to get from the current configuration to the desired
 configuration after time dt.  
+
+q has size model().numLinks(). dt must be > 0.  
 ";
 
 %feature("docstring") SimRobotController::addLinear "
@@ -3017,7 +3090,7 @@ Retrieves the robot model associated with this controller.
 %feature("docstring") SimRobotController::setVelocity "
 
 Sets a rate controller from the current commanded config to move at rate dq for
-time dt.  
+time dt > 0. dq has size model().numLinks()  
 ";
 
 %feature("docstring") SimRobotController::getControlType "
@@ -3040,7 +3113,7 @@ Gets the current feedback control rate.
 
 %feature("docstring") SimRobotController::getCommandedVelocity "
 
-Returns the current commanded velocity.  
+Returns the current commanded velocity (size model().numLinks())  
 ";
 
 %feature("docstring") SimRobotController::setMilestone "
@@ -3048,6 +3121,8 @@ Returns the current commanded velocity.
 Uses a dynamic interpolant to get from the current state to the desired
 milestone (with optional ending velocity). This interpolant is time-optimal with
 respect to the velocity and acceleration bounds.  
+
+Arguments have size model().numLinks().  
 ";
 
 %feature("docstring") SimRobotController::setMilestone "
@@ -3059,12 +3134,13 @@ respect to the velocity and acceleration bounds.
 
 %feature("docstring") SimRobotController::commands "
 
-gets a command list  
+gets a custom command list  
 ";
 
 %feature("docstring") SimRobotController::setPIDCommand "
 
-Sets a PID command controller.  
+Sets a PID command controller. Arguments can have size model().numDrivers() or
+model().numLinks().  
 ";
 
 %feature("docstring") SimRobotController::setPIDCommand "
@@ -3082,6 +3158,8 @@ Sets the current feedback control rate.
 
 Same as setMilestone, but appends an interpolant onto an internal motion queue
 starting at the current queued end state.  
+
+Arguments have size model().numLinks().  
 ";
 
 %feature("docstring") SimRobotController::addMilestone "
@@ -3145,6 +3223,14 @@ Returns the type of the sensor.
 %feature("docstring") SimRobotSensor::kinematicSimulate "
 
 simulates / advances the kinematic simulation  
+";
+
+%feature("docstring") SimRobotSensor::kinematicSimulate "
+";
+
+%feature("docstring") SimRobotSensor::robot "
+
+Returns the model of the robot to which this belongs.  
 ";
 
 %feature("docstring") SimRobotSensor::getMeasurements "

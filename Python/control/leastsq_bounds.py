@@ -46,7 +46,7 @@ http://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.leastsq.html
         funcbox = lambda p: \
             np.hstack(( func(p), _inbox( p, bounds, boundsweight )))
         if Dfun != None:
-            myDfun = lambda(p): np.hstack((Dfun(p),_inbox_jacobian(p,bounds,boundsweight)))
+            myDfun = lambda p: np.hstack((Dfun(p),_inbox_jacobian(p,bounds,boundsweight)))
     else:
         funcbox = func
     return leastsq( funcbox, x0, Dfun = myDfun, **kwargs )
@@ -92,7 +92,7 @@ http://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.leastsq.html
         funcbox = lambda p: \
             np.hstack(( func(p), _inbox( Cfunc(p), bounds, boundsweight )))
         if Dfun != None:
-            myDfun = lambda(p): np.hstack((Dfun(p),np.dot(CDfun(p),_inbox_jacobian(Cfunc(p),bounds,boundsweight))))
+            myDfun = lambda p: np.hstack((Dfun(p),np.dot(CDfun(p),_inbox_jacobian(Cfunc(p),bounds,boundsweight))))
     else:
         funcbox = func
     return leastsq( funcbox, x0, Dfun = myDfun, **kwargs )

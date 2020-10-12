@@ -135,15 +135,26 @@ class SE3Space(GeodesicSpace):
         return 6
     def extrinsicDimension(self):
         return 12
+    def to_se3(self,x):
+        return (x[:9],x[9:])
+    def from_se3(self,T):
+        return list(T[0])+list(T[1])
     def distance(self,a,b):
-        return vectorops.norm(se3.error((a[:9],a[9:]),(b[:9],b[9:])))
+        return vectorops.norm(se3.error(self.to_se3(a),self.to_se3(b)))
     def interpolate(self,a,b,u):
-        r = se3.interpolate((a[:9],a[9:]),(b[:9],b[9:]),u)
+        r = se3.interpolate(self.to_se3(a),self.to_se3(b),u)
         return r[0]+r[1]
     def difference(self,a,b):
-        w = se3.error(a,b)
+        w = se3.error(self.to_se3(a),self.to_se3(b))
         return so3.cross_product(w[:3])+w[3:]
     def integrate(self,x,d):
-        w = [d[0],d[4],d[8]]
+        assert len(x) == 12
+        w = [0.5*(d[5]-d[7]),0.5*(d[6]-d[2]),0.5*(d[1]-d[3])]
         v = d[9:]
-        return se3.mul(x,(so3.from_moment(w),v))
+        wR = so3.from_moment(w)
+        assert len(wR) == 9
+        Tx = self.to_se3(x)
+        R = so3.mul(Tx[0],wR)
+        t = vectorops.add(Tx[1],v)
+        return R + t
+    

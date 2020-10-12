@@ -35,8 +35,6 @@ class GLUTWindow:
             width, height (int): width/height of the window (only has an effect
                 before calling run(), and these are updated when the user resizes
                 the window.
-            clearColor (list of 4 floats): the RGBA floating point values of the
-                background color.
             glutInitialized (bool): true if GLUT has been initialized
     """
     def __init__(self,name):
@@ -45,7 +43,6 @@ class GLUTWindow:
         self.program = None
         self.width = 640
         self.height = 480
-        self.clearColor = [1.0,1.0,1.0,0.0]
         self.lastx = 0
         self.lasty = 0
         self.initialized = False

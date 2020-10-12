@@ -28,7 +28,7 @@ loads an xform resource, and visually edits it if it doesnt exist:
     from klampt.math import se3
     resource.get("test.xform",type="RigidTransform",default=se3.identity())
 
-See the ``Klampt-examples/Python/demos/resourcetest.py`` demo for more
+See the ``Klampt-examples/Python3/demos/resourcetest.py`` demo for more
 examples about how to use this module.
 
 Currently supported types include:
@@ -119,7 +119,7 @@ As an example, you can run
                     value=[15,16,17,18,19,20],
                     description="Robot arm links for IK",
                     world=world))
-    print "Selected links",links
+    print("Selected links",links)
 
 The editor will pop up as follows, and you may click on links in the
 scene or in the list to change the selected links:

@@ -49,8 +49,8 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
         self.program.set_view(viewport)
 
     def setBackgroundColor(self,r,g,b,a=1): 
-        if self.window is not None:
-            self.window.clearColor = [r,g,b,a]
+        if self.program is not None:
+            self.program.clearColor = [r,g,b,a]
         else:
             print("setBackgroundColor(): doesn't work yet because scene is not bound to a window")
 
@@ -82,6 +82,7 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
         #according to the vis settings
         #glcommon.GLWidgetPlugin.display(self)
         #restore any reference objects
+        self.updateCamera()
         self.renderGL(self.view)
 
         _globalLock.release()

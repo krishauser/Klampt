@@ -8,6 +8,7 @@ klampt.math package
     klampt.math_optimization
     klampt.math_symbolic
     klampt.math_misc
+    klampt.math.autodiff
 
 
 

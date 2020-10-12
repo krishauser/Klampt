@@ -63,7 +63,7 @@ class RospyProxy:
 rospy = RospyProxy()
 """
 
-class RosRobotController(controller.BaseController):
+class RosRobotController(controller.ControllerBase):
     """A controller that reads JointTrajectory messages from a given ROS topic,
     maintains the trajectory for use in a Klamp't simulation, and writes
     JointState messages to another ROS topic.
@@ -234,7 +234,8 @@ class RosRobotController(controller.BaseController):
         output_map[output_name] = val
         return
 
-class RosTimeController(controller.BaseController):
+
+class RosTimeController(controller.ControllerBase):
     """A controller that simply publishes the simulation time to ROS.
     Doesn't output anything.
     """

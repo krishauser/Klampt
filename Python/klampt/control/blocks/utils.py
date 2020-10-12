@@ -1,185 +1,25 @@
-class BaseController(object):
-    """A generic class that outputs a control based on a dictionary of
-    inputs"""
-    def __init__(self):
-        pass
-    def output(self,**inputs):
-        """Computes the output of this controller given a dictionary of
-        inputs.  The output is typically a dictionary but could also be a
-        list.
+"""
+Contains the following helper controllers:
 
-        A top-level controller that communicates with SerialController and
-        simtest.py will get the following values as input:
+- :class:`MultiController`: a process that runs many other sub-processes on 
+  each step.  The I/O dictionaries are basically used as a blackboard
+  architecture.
+- :class:`LambdaController`: a stateless process that simply runs a fixed 
+  function on each time step.
+- :class:`StateMachineController`: a state machine that switches between
+  multiple sub-controllers, with one sub-controller running at once and the
+  active controller triggered by some signal.
+- :class:`TransitionStateMachineController`: a state machine with explicit
+  transition conditions.
+- :class:`TimedControllerSequence`: a sequence of controllers, switched by
+  time.
+- :class:`ComposeController`: a set of controllers for parts of a robot,
+  for which q, dq, qcmd, dqcmd, torquecmd, are concatenated.
+- :class:`LinearController`: computes a linear function of its inputs.
 
-        - t = time: simulation time
-        - dt = timestep: controller time step
-        - sensor1 = sensor1_values: measurements for sensor 1
-        - ...
-        - sensork = sensork_values: measurements for sensor k
+"""
 
-        A top-level controller that communicates with SerialController and
-        simtest.py should produce a dictionary containing one or more of
-        the following keys:
-
-        - qcmd
-        - dqcmd 
-        - tcmd
-        - torquecmd
-        
-        If qcmd is set, then it's a PID command. If dqcmd is set, then it's
-        the desired velocity, otherwise the desired velocity is 0.
-        
-        If qcmd is set and torquecmd is set, then torquecmd is a feedforward
-        torque.
-        
-        If dqcmd and tcmd are set, it's a fixed velocity command.
-
-        Otherwise, torquecmd must be set, and it's a torque command.
-
-        For convenience, your BaseController subclass may use the ControllerAPI
-        class for object-oriented access to the input / output data.
-        Example usage is as follows:
-
-            api = ControllerAPI(inputs)
-            print "Current time is",api.time()
-            #set a position command
-            api.setJointPositionCommand(5,0.5)
-            return api.makeCommand()
-
-        """
-        return None
-    def signal(self,type,**inputs):
-        """Sends some asynchronous signal to the controller. The inputs
-        are application-defined, but typical signals include:
-
-        - 'reset'
-        - 'enter'
-        - 'exit'
-        """
-        pass
-    def advance(self,**inputs):
-        pass
-    def output_and_advance(self,**inputs):
-        res = self.output(**inputs)
-        self.advance(**inputs)
-        return res
-    def drawGL(self):
-        """Optional: hook to give feedback to the visualizer"""
-        pass
-
-class ControllerAPI:
-    """A helper class that makes it a bit easier to interact with the
-    dictionary-based controller communication protocol, if you prefer
-    object-oriented code.
-
-    The non-prefixed methods get values from the input dictionary.
-
-    The makeXCommand functions return a propertly formatted output
-    dictionary.  Alternatively, you can make several setXCommand calls
-    and then call makeCommand() to retrieve the output dictionary.
-    """
-    def __init__(self,inputs):
-        self.inputs = inputs.copy()
-        self.retval = dict()
-    def time(self):
-        """Returns the robot clock time"""
-        return self.inputs['t']
-    def timeStep(self):
-        """Returns the robot time step"""
-        return self.inputs['dt']
-    def commandedConfiguration(self):
-        """Returns the commanded joint configuration or None if it is not
-        sensed."""
-        try: return self.inputs['qcmd']
-        except KeyError: return None
-    def commandedVelocity(self):
-        """Returns the commanded joint velocities or None if it is not
-        sensed."""
-        try: return self.inputs['dqcmd']
-        except KeyError: return None
-    def sensedConfiguration(self):
-        """Returns the sensed joint configuration or None if it is not
-        sensed."""
-        try: return self.inputs['q']
-        except KeyError: return None
-    def sensedVelocity(self):
-        """Returns the sensed joint velocity or None if it is not
-        sensed."""
-        try: return self.inputs['dq']
-        except KeyError: return None
-    def sensedTorque(self):
-        """Returns the sensed torque or None if it is not
-        sensed."""
-        try: return self.inputs['torque']
-        except KeyError: return None
-    def sensorNames(self):
-        """Returns the list of sensor names (including clock and time step)"""
-        return self.inputs.keys()
-    def sensorValue(self,sensor):
-        """Returns the value of the named sensor."""
-        try: return self.inputs[sensor]
-        except KeyError: return None
-    def makePositionCommand(self,q):
-        return {'qcmd':q}
-    def makePIDCommand(self,q,dq):
-        return {'qcmd':q,'dqcmd':dq}
-    def makeFeedforwardPIDCommand(self,q,dq,torque):
-        return {'qcmd':q,'dqcmd':dq,'torquecmd':torque}
-    def makeVelocityCommand(self,dq,t):
-        return {'dqcmd':dq,'tcmd':t}
-    def makeTorqueCommand(self,torque):
-        return {'torquecmd':torque}
-    def setPositionCommand(self,value):
-        self.retval['qcmd'] = value
-    def setPIDCommand(self,q,dq):
-        self.retval['qcmd'] = q
-        self.retval['dqcmd'] = dq
-    def setFeedforwardPIDCommand(self,q,dq,torque):
-        self.retval['qcmd'] = q
-        self.retval['dqcmd'] = dq
-        self.retval['torquecmd'] = torque
-    def setVelocityCommand(self,v,dt):
-        self.retval['dqcmd'] = value
-        self.retval['tcmd'] = dt
-    def setTorqueCommand(self,torque):
-        self.retval['torquecmd'] = torque
-    def setJointPositionCommand(self,index,value):
-        """Sets a single indexed joint to a position command"""
-        #klampt can only do uniform position, velocity, or torque commands
-        if 'qcmd' in self.retval:
-            self.retval['qcmd'][index] = value
-        elif 'dqcmd' in self.retval:
-            self.retval['dqcmd'][index] = (value - self.inputs['qcmd'][index]) / inputs['dt']
-            self.retval['tcmd']=self.inputs['dt']
-        elif 'torquecmd' in self.retval:
-            print "Cannot combine joint position commands with joint torque commands"
-        else:
-            #no joint commands set yet, set a position command
-            self.retval['qcmd'] = self.inputs['qcmd']
-            self.retval['qcmd'][index] = value
-    def setJointVelocityCommand(self,index,value):
-        """Sets a single indexed joint to a velocity command"""
-        #klampt can only do uniform position, velocity, or torque commands
-        if 'qcmd' in self.retval:
-            self.retval['qcmd'][index] = self.inputs['qcmd'][index]+value*self.inputs['dt']
-            if 'dqcmd' not in self.retval:
-                self.retval['dqcmd'] = self.inputs['dqcmd']
-            self.retval['dqcmd'][index] = value
-        elif 'dqcmd' in self.retval:
-            self.retval['dqcmd'][index] = value
-            self.retval['tcmd']=self.inputs['dt']
-        elif 'torquecmd' in self.retval:
-            print "Cannot combine joint velocity commands with joint torque commands"
-        else:
-            #no velocity commands set yet, set a velocity command
-            self.retval['dqcmd'] = self.inputs['dqcmd']
-            self.retval['dqcmd'][index] = value
-    def makeCommand(self):
-        """Returns the command from previous setXCommand() calls."""
-        return self.retval
-
-
-class MultiController(BaseController):
+class MultiController(ControllerBase):
     """A controller that runs several other subcontrollers each time step
     and emulates a sort of blackboard architecture.  Basically used to
     emulate a multiprocessor on a robot.
@@ -207,21 +47,34 @@ class MultiController(BaseController):
         self.outmap = [None for c in self.controllers]
         self.myoutmap = None
 
+    def inputNames(self):
+        res = set()
+        for i in self.inmap:
+            if i is not None:
+                res |= set(i.keys())
+        return res
+
+    def outputNames(self):
+        return self.myoutmap.values()
+
     def launch(self,c):
-        """Start running a new controller and returns its id"""
+        """Start running a new controller and returns its id.  By default,
+        all items in the registry are sent to the controllers.  To remap,
+        call the `map_input` method."""
         self.controllers.append(c)
+
         self.inmap.append(None)
         self.outmap.append(None)
         return len(self.controllers)-1
     
     def map_input(self,c,regitem,citem=None):
-        """Sends register regitem to the input of controller c.
+        """Sends register `regitem` to the input of controller `c`.
 
         Args:
             c (int): the index of a sub-controller
-            regitem (str): the name of an input item.
-            citem (str, optional): if specified, the input item name is 
-                mapped to c's input name citem.
+            regitem (str): the name of an input arg.
+            citem (str, optional): if specified, the input arg name is 
+                mapped to c's argument `citem`.
         
         If this is not called for a given controller, then all items
         in the register are automatically sent to the controller.
@@ -306,23 +159,46 @@ class MultiController(BaseController):
                 try:
                     res[v] = self.outregister[k]
                 except KeyError:
-                    print "Warning, output item",k,"not present in register"
+                    print("Warning, output item",k,"not present in register")
             return res
+    def getState(self):
+        res = []
+        for c in self.controllers:
+            try:
+                s = c.getState()
+            except NotImplementedError:
+                s = None
+            res.append(s)
+        return res
+    def setState(self,state):
+        assert len(state) == len(self.controllers)
+        for c,s in zip(self.controllers,state):
+            if s is not None:
+                c.setState(s)
     def drawGL(self):
         for c in self.controllers:
             c.drawGL()
         return
 
-class LambdaController(BaseController):
+
+class LambdaController(ControllerBase):
+    """A fixed-function controller that simply evaluates a function.  The
+    function arguments and return values are mapped from/to the input/output
+    dictionaries.
+    """
     def __init__(self,f,argnames,outnames=None):
         self.f = f
         self.argnames = argnames
         self.outnames = outnames
+    def inputNames(self):
+        return self.argnames
+    def outputNames(self):
+        return self.outnames
     def output_and_advance(self,**inputs):
         try:
             args = [inputs[a] for a in self.argnames]
         except KeyError:
-            print "LambdaController: Warning, argument does not exist in inputs"
+            print("LambdaController: Warning, argument does not exist in inputs")
             return None
         res = self.f(*args)
         if isinstance(self.outnames,(list,tuple)):
@@ -334,12 +210,17 @@ class LambdaController(BaseController):
                 return res
             return None
 
-class StateMachineController(BaseController):
-    """A base class for a finite state machine controller. next_state needs
-    to be filled out by the subclass."""
+
+class StateMachineController(ControllerBase):
+    """A base class for a finite state machine controller. :meth:`next_state`
+    needs to be filled out by the subclass."""
     def __init__(self,controllers,start=0):
         self.controllers = controllers
         self.current = start
+    def __str__(self):
+        strs = [str(c) for c in self.controllers]
+        strs[self.current] = '* '+strs[self.current]
+        return self.__class__.__name__+'\n'+'\n  '.join(strs)
     def signal(self,type,**inputs):
         if self.current >= 0:
             self.controllers[self.current].signal(type,**inputs)
@@ -366,6 +247,23 @@ class StateMachineController(BaseController):
     def next_state(self,state,**inputs):
         """Subclasses should override this to implement the transitions"""
         return state
+    def getState(self):
+        controllerState = []
+        for c in self.controllers:
+            try:
+                s = c.getState()
+            except NotImplementedError:
+                s = None
+            controllerState.append(s)
+        return {'current':self.current,'controllers':controllerState}
+    def setState(self,state):
+        if 'current' not in state or 'controllers' not in state or len(state['controllers']) != len(self.controllers):
+            raise ValueError("Invalid state dict")
+        self.current = state.current
+        for (c,s) in zip(self.controllers,state['controllers']):
+            if s is not None:
+                c.setState(s)
+
 
 class TransitionStateMachineController(StateMachineController):
     """A state machine controller with a transition matrix that determines
@@ -379,27 +277,29 @@ class TransitionStateMachineController(StateMachineController):
         """
         StateMachineController.__init__(self,controllers,start)
         self.transitions = transitions
+
     def next_state(self,state,**inputs):
         if state < 0: return state
         trans = self.transitions[state]
         for (k,v) in trans.iteritems():
             if v(inputs):
-                print "Transition to controller",k
+                print("TransitionStateMachineController: Transition to controller",k)
                 return k
         return state
 
 
-class ComposeController(BaseController):
+class ComposeController(ControllerBase):
     """Integrates vectors from multiple items into a single vector.
-    Useful for when you have one controller for each arm, one for a lower
-    body, etc.
+    Useful for when you have one controller for each arm, one for a lower body,
+    etc.
     
-    Initializers:
-        - itemindices: a dict from items to indices
-        - outitem: the name of the output
-        - flatten: true if you want a list rather than a dict, in which case
-          the indices are assumed to be all integers. Empty indices are
-          filled in with 'self.fill'.  By default this produces a vector.
+    Arguments:
+        itemindices (dict): a map from items to indices
+        outitem (str): the name of the output
+        flatten (bool, optional): true if you want a list rather than a dict,
+            in which case the indices are assumed to be all integers. Empty
+            indices are filled in with 'self.fill'.  By default this produces
+            a vector.
     """
     def __init__(self,itemindices,outitem,flatten=True):
         self.itemindices = itemindices
@@ -414,7 +314,7 @@ class ComposeController(BaseController):
                 for index in v:
                     res[index] = inputs[k][index]
             except KeyError:
-                print "Warning, item",k,"does not exist in index"
+                print("ComposeController: Warning, item",k,"does not exist in index")
                 pass
         if self.flatten:
             inds = sorted(res.keys())
@@ -425,6 +325,7 @@ class ComposeController(BaseController):
         else:
             return {self.outitem:res}
 
+
 class TimedControllerSequence(TransitionStateMachineController):
     """A state-machine controller that goes through each sub-controller
     in sequence.
@@ -433,16 +334,19 @@ class TimedControllerSequence(TransitionStateMachineController):
         assert len(times)==len(controllers)
         trans = [{} for c in controllers]
         for i in xrange(len(controllers)-1):
-            trans[i][i+1] = lambda(input):input['t'] >= times[i]
-        trans[-1][-1] = lambda(input):input['t'] >= times[-1]
+            trans[i][i+1] = lambda input:input['t'] >= times[i]
+        trans[-1][-1] = lambda input:input['t'] >= times[-1]
         TransitionStateMachineController.__init__(self,controllers,trans)
 
-class LinearController(BaseController):
+
+class LinearController(ControllerBase):
     """Implements a linear controller
     u = K1*input[x1] + ... + Kn*input[xn] + offset
 
     The user must fill out the self.gains member using the addGain()
     method.
+
+    To use this, Numpy must be available on your system.
     """
     def __init__(self,type='torquecmd'):
         import numpy as np
@@ -451,34 +355,22 @@ class LinearController(BaseController):
         self.offset = None
     def addGain(self,inputTerm,K):
         self.gains[inputTerm] = K
+    def inputNames(self):
+        return self.gains.keys()
+    def outputNames(self):
+        return [self.outputType]
     def setConstant(self,offset):
         self.offset = offset
     def output(self,**inputs):
         res = self.offset
         for (x,K) in self.gains.iteritems():
             if x not in inputs:
-                print "LinearController: warning, input",x,"doesn't exist, ignoring"
+                print("LinearController: warning, input",x,"doesn't exist, ignoring")
                 continue
             if res==None:
                 res = np.dot(K,inputs[x])
             else:
                 res += np.dot(K,inputs[x])
         return {outputType:res}
-        
-def make(robot):
-    return BaseController()
 
-def launch(fn,robot):
-    """Launches a controller given by the given python module for the
-    given robot using the module's default make(robot) routine."""
-    import os
-    import importlib
-    path,base = os.path.split(fn)
-    mod_name,file_ext = os.path.splitext(base)
-    mod = importlib.import_module(path+"."+mod_name,fn)
-    try:
-        maker = mod.make
-    except AttributeError:
-        print "Module",mod.__name__,"must have a make() method"
-        raise
-    return maker(robot)
+

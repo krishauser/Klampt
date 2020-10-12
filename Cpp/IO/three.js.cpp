@@ -8,6 +8,8 @@
 #include <sstream>
 using namespace std;
 
+#define THREE_JS_OLD_VERSION 0
+
 unsigned char FloatColorChar(float v)
 {
   return Max(Min(int(v*255.0),255),0);
@@ -449,7 +451,12 @@ void ThreeJSExportAppearance(const ManagedGeometry& geom,AnyCollection& out,Thre
 }
 void ThreeJSExport(const Meshing::TriMesh& mesh,AnyCollection& out)
 {
-  out["type"] = "BufferGeometry";
+  #if THREE_JS_OLD_VERSION
+    out["type"] = "Geometry";
+  #else
+    out["type"] = "BufferGeometry";
+    AnyCollection attributes;
+  #endif //THREE_JS_OLD_VERSION
   AnyCollection vertices, faces;
   vertices.resize(mesh.verts.size()*3);
   for(size_t i=0;i<mesh.verts.size();i++) {
@@ -457,19 +464,74 @@ void ThreeJSExport(const Meshing::TriMesh& mesh,AnyCollection& out)
     vertices[int(i*3+1)] = float(mesh.verts[i].y);
     vertices[int(i*3+2)] = float(mesh.verts[i].z);
   }
-  faces.resize(mesh.tris.size()*4);
-  for(size_t i=0;i<mesh.tris.size();i++) {
-    faces[int(i*4)] = 0;
-    faces[int(i*4+1)] = mesh.tris[i].a;
-    faces[int(i*4+2)] = mesh.tris[i].b;
-    faces[int(i*4+3)] = mesh.tris[i].c;
-  }
-  out["data"]["position"] = vertices;
-  out["data"]["index"] = faces;
+  #if THREE_JS_OLD_VERSION
+    faces.resize(mesh.tris.size()*4);
+    for(size_t i=0;i<mesh.tris.size();i++) {
+      faces[int(i*4)] = 0;
+      faces[int(i*4+1)] = mesh.tris[i].a;
+      faces[int(i*4+2)] = mesh.tris[i].b;
+      faces[int(i*4+3)] = mesh.tris[i].c;
+    }
+  #else
+    faces.resize(mesh.tris.size()*3);
+    for(size_t i=0;i<mesh.tris.size();i++) {
+      faces[int(i*3)] = mesh.tris[i].a;
+      faces[int(i*3+1)] = mesh.tris[i].b;
+      faces[int(i*3+2)] = mesh.tris[i].c;
+    }
+  #endif //THREE_JS_OLD_VERSION
+  
+  #if THREE_JS_OLD_VERSION
+    out["data"]["position"] = vertices;
+    out["data"]["index"] = faces;
+  #else
+    AnyCollection normals;
+    normals.resize(mesh.verts.size()*3);
+    vector<Vector3> vnormals(mesh.verts.size(),Vector3(0.0));
+    for(size_t i=0;i<mesh.tris.size();i++) {
+      Vector3 n = mesh.TriangleNormal(i);
+      vnormals[mesh.tris[i].a] += n;
+      vnormals[mesh.tris[i].b] += n;
+      vnormals[mesh.tris[i].c] += n;
+    }
+    int k=0;
+    for(size_t i=0;i<vnormals.size();i++,k+=3) {
+      Real len = vnormals[i].length();
+      if(len > 0)
+        vnormals[i] *= 1.0/len;
+      normals[k] = int(vnormals[i].x*32767);
+      normals[k+1] = int(vnormals[i].y*32767);
+      normals[k+2] = int(vnormals[i].z*32767);
+    }
+
+    AnyCollection vertarray,normalarray,facearray;
+    vertarray["type"] = "Float32Array";
+    vertarray["array"] = vertices;
+    vertarray["itemSize"] = 3;
+    normalarray["type"] = "Int16Array";
+    normalarray["array"] = normals;
+    normalarray["itemSize"] = 3;
+    normalarray["normalized"] = true;
+    if(mesh.tris.size() > 0xffff)
+      facearray["type"] = "Uint32Array";
+    else
+      facearray["type"] = "Uint16Array";
+    facearray["array"] = faces;
+    facearray["itemSize"] = 1;
+    attributes["position"] = vertarray;
+    attributes["normal"] = normalarray;
+    out["data"]["attributes"] = attributes;
+    out["data"]["index"] = facearray;
+  #endif //THREE_JS_OLD_VERSION
 }
 void ThreeJSExport(const Meshing::PointCloud3D& pc,AnyCollection& out)
 {
-  out["type"] = "BufferGeometry";
+  #if THREE_JS_OLD_VERSION
+    out["type"] = "Geometry";
+  #else
+    out["type"] = "BufferGeometry";
+    AnyCollection attributes;
+  #endif
   AnyCollection vertices;
   vertices.resize(pc.points.size()*3);
   for(size_t i=0;i<pc.points.size();i++) {
@@ -477,18 +539,47 @@ void ThreeJSExport(const Meshing::PointCloud3D& pc,AnyCollection& out)
     vertices[int(i*3+1)] = float(pc.points[i].y);
     vertices[int(i*3+2)] = float(pc.points[i].z);
   }
-  out["data"]["position"] = vertices;
+  #if THREE_JS_OLD_VERSION
+    out["data"]["position"] = vertices;
+  #else
+    AnyCollection vertarray;
+    vertarray["type"] = "Float32Array";
+    vertarray["array"] = vertices;
+    vertarray["itemSize"] = 3;
+    attributes["position"] = vertarray;
+    out["data"]["position"] = vertarray;
+  #endif //THREE_JS_OLD_VERSION
   vector<Vector4> rgba;
   if(pc.GetColors(rgba)) {
     AnyCollection colors;
-    colors.resize(pc.points.size()*3);
-    for(size_t i=0;i<pc.points.size();i++) {
-      colors[int(i*3)] = float(rgba[i].x);
-      colors[int(i*3+1)] = float(rgba[i].y);
-      colors[int(i*3+2)] = float(rgba[i].z);
-    }
-    out["data"]["color"] = colors;
+    
+    #if THREE_JS_OLD_VERSION
+      colors.resize(pc.points.size()*3);
+      for(size_t i=0;i<pc.points.size();i++) {
+        colors[int(i*3)] = float(rgba[i].x);
+        colors[int(i*3+1)] = float(rgba[i].y);
+        colors[int(i*3+2)] = float(rgba[i].z);
+      }
+      out["data"]["color"] = colors;
+    #else
+      colors.resize(pc.points.size()*4);
+      for(size_t i=0;i<pc.points.size();i++) {
+        colors[int(i*3)] = int(rgba[i].x*255.0);
+        colors[int(i*3+1)] = int(rgba[i].y*255.0);
+        colors[int(i*3+2)] = int(rgba[i].z*255.0);
+        colors[int(i*3+3)] = int(rgba[i].w*255.0);
+      }
+      AnyCollection colorarray;
+      colorarray["type"] = "Uint8Array";
+      colorarray["array"] = colors;
+      colorarray["itemSize"] = 4;
+      attributes["color"] = colorarray;
+    #endif //THREE_JS_OLD_VERSION
   }
+  #if THREE_JS_OLD_VERSION
+  #else
+    out["data"]["attributes"] = attributes;
+  #endif //THREE_JS_OLD_VERSION
 }
 void ThreeJSExport(const Geometry::AnyCollisionGeometry3D& geom,AnyCollection& out,ThreeJSCache& cache)
 {

@@ -19,6 +19,7 @@ Main features include:
 - Multi-window, multi-viewport support
 - Automatic camera setup
 - Unified interface to PyQt, GLUT, IPython, and HTML backends.
+
   - PyQT is the backend with the fullest amount of features.  
   - GLUT loses resource editing and advanced windowing functionality.
   - IPython loses plugins, resource editing, custom drawing, and advanced 
@@ -37,8 +38,8 @@ Basic use of the vis module is fairly straightforward:
 
 0. (optional) Configure the rendering backend.
 1. Add things to the visualization scene with ``vis.add(name,thing)``.  Worlds,
-   geometries, points, transforms, trajectories, contact points, and more
-   can be added in this manner.
+   geometries, points, transforms, trajectories, contact points, and more can
+   be added in this manner.
 2. Modify the appearance of things using modifier calls like
    ``vis.setColor(name,r,g,b,a)``.
 3. Launch windows and/or visualization thread (OpenGL or IPython modes)
@@ -54,10 +55,10 @@ implemented.  See Klampt-examples/Python/demos/vistemplate.py for more
 examples.
 
 To capture user interaction and add other functionality, you may create a
-:class:`GLPluginInterface` subclass to add functionality on top of the default
-visualization world.  To do so, call ``vis.pushPlugin(plugin)``.  Note that
-custom rendering (the ``display()`` method) is only available with the OpenGL
-rendering backend.
+:class:`~klampt.vis.glinterface.GLPluginInterface` subclass to add
+functionality on top of the default visualization world.  To do so, call
+``vis.pushPlugin(plugin)``.  Note that custom rendering (the ``display()``
+method) is only available with the OpenGL rendering backend.
 
 Only one rendering backend can be chosen during the lifetime of your process,
 and each backend has its own quirks with regards to window launching and
@@ -170,7 +171,7 @@ Quick start
 
 
 Implementation Details
-^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^
 
 There are two primary modes of running OpenGL visualizations: multi-threaded 
 and single-threaded.
@@ -212,15 +213,16 @@ It is possible to start in single-threaded mode and convert to multi-threaded,
 but the converse is not possible.
 
 In OpenGL mode, you can also completely override the scene manager and run your
-own OpenGL calls using a subclass of :class:`GLPluginInterface`.  Here, you will
-need to perform all the necessary OpenGL drawing / interaction inside its hooks.
+own OpenGL calls using a subclass of
+:class:`~klampt.vis.glinterface.GLPluginInterface`.  Here, you will need to
+perform all the necessary OpenGL drawing / interaction inside its hooks.
 To use this, you should call ``vis.setPlugin(plugin)`` to override the default
 visualization behavior before creating your window. See
 Klampt-examples/Python/demos/visplugin.py for an example of this in use.
 
 
 IPython (Jupyter notebook)
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 IPython visualizations run in a Jupyter notebook in a web browser, using a
 WebGL widget to render the content.  The Python code communicates with the 
@@ -254,7 +256,7 @@ certain types of geometries like VolumeGrids are not supported.
 
 Animations are supported, but you will manually have to advance the animations 
 and call ``vis.update()`` or ``vis.scene().update()`` for each frame.  
-See :class:`~klampt.vis.ipython.widgets.PlaybackWidget` for a convenient widget
+See :class:`~klampt.vis.ipython.widgets.Playback` for a convenient widget
 that handles this somewhat automatically.
 
 
@@ -336,10 +338,10 @@ WINDOWING API
 - def getWindowTitle(): returns the title of the visualization window.
 - def scene(): returns the current :class:`VisualizationScene`
 - def setPlugin(plugin=None): sets the current plugin (a
-  :class:`GLPluginInterface` instance).  This plugin will now capture input
-  from the visualization and can override any of the default behavior of the
-  visualizer. Set plugin=None if you want to return to the default
-  visualization.
+  :class:`~klampt.vis.glinterface.GLPluginInterface` instance).  This plugin
+  will now capture input from the visualization and can override any of the
+  default behavior of the visualizer. Set plugin=None if you want to return to
+  the default visualization.
 - def pushPlugin(plugin): adds a new plugin (e.g., to capture input) on top of
   the old one.
 - def splitView(plugin=None): adds a second scene / viewport to the current
@@ -384,7 +386,7 @@ WINDOWING API
   window via dialog(). Otherwise, you should launch the window via show().
 
 SCENE MODIFICATION API
---------------
+------------------------
 
 The following VisualizationScene methods are also added to the klampt.vis
 namespace and operate on the current scene (as returned from :func:`scene`).
@@ -451,6 +453,8 @@ methods.
   scene.
 - def autoFitCamera(scale=1.0): Automatically fits the camera to all objects
   in the visualization.  A scale > 1 magnifies the camera zoom.
+- def followCamera(target,translate=True,rotate=False,center=False): Sets the 
+  camera to follow a target.
 
 Utility functions:
 
@@ -584,8 +588,9 @@ def _init():
 
 def nativeWindow():
     """Returns the active window data used by the backend.  The result will be
-    a subclass of :class:`GLPluginProgram` if OpenGL is used (PyQt or GLUT) or
-    a :class:`ipython.widgets.KlamptWidget`"""
+    a subclass of :class:`~klampt.vis.glprogram.GLPluginProgram` if OpenGL is
+    used (PyQt or GLUT) or a :class:`~klampt.vis.ipython.widgets.KlamptWidget`
+    """
     global _window_manager
     if _window_manager is None:
         return None
@@ -593,7 +598,8 @@ def nativeWindow():
 
 def scene():
     """Returns the active window data used by the backend.  The result will be
-    a subclass of :class:VisualizationScene"""
+    a subclass of :class:`VisualizationScene`.
+    """
     global _window_manager
     if _window_manager is None:
         return None
@@ -632,12 +638,14 @@ def getWindow():
 
 def setPlugin(plugin):
     """Lets the user capture input via a glinterface.GLPluginInterface class.
-    Set plugin to None to disable plugins and return to the standard visualization
+    Set plugin to None to disable plugins and return to the standard
+    visualization.
 
     Args:
         plugin (GLPluginInterface): a plugin that will hereafter capture input
-            from the visualization and can override any of the default behavior of the
-            visualizer. Can be set to None if you want to return to the default visualization.
+            from the visualization and can override any of the default behavior
+            of the visualizer. Can be set to None if you want to return to the
+            default visualization.
     """
     global _globalLock,_window_manager
     _init()
@@ -649,8 +657,9 @@ def pushPlugin(plugin):
     """Adds a new plugin on top of the old one.
 
     Args:
-        plugin (GLPluginInterface): a plugin that will optionally intercept GUI callbacks.
-            Unhandled callbacks will be forwarded to the next plugin on the stack.
+        plugin (GLPluginInterface): a plugin that will optionally intercept GUI
+            callbacks. Unhandled callbacks will be forwarded to the next plugin
+            on the stack.
 
     """
     global _globalLock,_window_manager
@@ -750,8 +759,9 @@ def kill():
 
 def loop(setup=None,callback=None,cleanup=None):
     """Runs the visualization thread inline with the main thread.
-    The setup() function is called at the start, the callback() function is run every time the event thread
-    is idle, and the cleanup() function is called on termination.
+    The setup() function is called at the start, the callback() function is run
+    every time the event thread is idle, and the cleanup() function is called
+    on termination.
 
     NOTE FOR MAC USERS: a multithreaded GUI is not supported on Mac, so the loop()
     function must be used rather than "show and wait".
@@ -765,8 +775,10 @@ def loop(setup=None,callback=None,cleanup=None):
 def show(display=True):
     """Shows or hides the current window.
 
-    NOTE FOR MAC USERS: due to a lack of support of multithreading on Mac, this will not work outside
-    of the setup / callback / cleanup functions given in a call to loop()."""
+    NOTE FOR MAC USERS: due to a lack of support of multithreading on Mac, this
+    will not work outside of the setup / callback / cleanup functions given in a
+    call to loop().
+    """
     global _window_manager
     _init()
     _globalLock.acquire()
@@ -783,8 +795,10 @@ def spin(duration):
     _window_manager.spin(duration)
 
 def lock():
-    """Begins a locked section.  Needs to be called any time you modify a visualization item outside
-    of the visualization thread.  unlock() must be called to let the visualization thread proceed."""
+    """Begins a locked section.  Needs to be called any time you modify a
+    visualization item outside of the visualization thread.  unlock() must be
+    called to let the visualization thread proceed.
+    """
     global _window_manager
     _window_manager.lock()
 
@@ -1036,16 +1050,16 @@ def getAttribute(name,attr):
         name (str): the name of the item
         attr (str): the name of the attribute (see :func:`setAttribute`)
     """
-    scene().getAttribute(name,attr)
+    return scene().getAttribute(name,attr)
 
-def getAttributes(name,attr):
+def getAttributes(name):
     """Gets a dictionary of all relevant attributes of an item's appearance. 
     If not previously set by the user, default values will be returned.
 
     Args:
         name (str): the name of the item
     """
-    scene().getAttributes(name)
+    return scene().getAttributes(name)
 
 def revertAppearance(name):
     scene().revertAppearance(name)
@@ -1129,30 +1143,9 @@ def _getBounds(object):
             return res
     return []
 
-def _fitPlane(pts):
-    import numpy as np
-    if len(pts) < 3:
-        raise ValueError("Point set is degenerate")
-    centroid = vectorops.div(vectorops.add(*pts),len(pts))
-    A = np.array([vectorops.sub(pt,centroid) for pt in pts])
-    U,S,V = np.linalg.svd(A,full_matrices=False)
-    imin = 0
-    smin = S[0]
-    zeros = []
-    for i in range(len(S)):
-        if abs(S[i]) < 1e-6:
-            zeros.append(i)
-        if abs(S[i]) < smin:
-            smin = S[i]
-            imin = i
-    if len(zeros) > 1:
-        raise ValueError("Point set is degenerate")
-    assert V.shape == (3,3)
-    #normal is the corresponding row of U
-    normal = V[imin,:]
-    return centroid,normal.tolist()
 
 def autoFitViewport(viewport,objects): 
+    from ..model.sensing import fit_plane_centroid
     ofs = sum([_getOffsets(o) for o in objects],[])
     pts = sum([_getBounds(o) for o in objects],[])
     #print "Bounding box",bb,"center",center
@@ -1174,10 +1167,10 @@ def autoFitViewport(viewport,objects):
     viewport.camera.rot = [0,math.radians(30),math.radians(45)]
     #fit a plane to these points
     try:
-        centroid,normal = _fitPlane(ofs)
+        centroid,normal = fit_plane_centroid(ofs)
     except Exception as e:
         try:
-            centroid,normal = _fitPlane(pts)
+            centroid,normal = fit_plane_centroid(pts)
         except Exception as e:
             print("Exception occurred during fitting to points")
             print(ofs)
@@ -1287,6 +1280,31 @@ def autoFitCamera(scale=1):
     """
     print("klampt.vis: auto-fitting camera to scene.")
     scene().autoFitCamera(scale)
+
+def followCamera(target,translate=True,rotate=False,center=False):
+    """Sets the camera to follow a target.  The camera starts from its current
+    location and keeps the target in the same position on screen. 
+
+    It can operate in the following modes:
+
+    - translation (``translate=True, rotate=False``): the camera moves with the
+      object.  This is default.
+    - look-at (``translate=False, rotate=True``): the camera stays in the
+      current location but rotates to aim toward the object.
+    - follow (``translate=True, rotate=True``): the camera moves as though it
+      were fixed to the object.
+
+    Args:
+        target (str, Trajectory, or None): the target that is to be followed.
+            If this is None, the camera no longer follows anything.
+        translate (bool, optional): whether the camera should follow using
+            translation.
+        rotate (bool, optional): whether the camera should follow using
+            rotation.
+        center (bool, optional): whether the camera should first aim toward the
+            object before following. Default is False.
+    """
+    scene().followCamera(target,translate,rotate,center)
 
 def getViewport():
     """Returns the :class:`GLViewport` of the current scene"""
@@ -2071,12 +2089,19 @@ class VisAppearance:
         """Draws the specified item in the specified world, with all the
         current modifications in attributes.
 
-        If a name or label are given, and self.attributes['hide_label'] != False, then the
-        label is shown.
+        If a name or label are given, and
+        ``self.attributes['hide_label'] != False``, then the label is shown.
 
-        If draw_transparent is None, then everything is drawn.  If True, then
-        only transparent items are drawn.  If False, then only opaque items are
-        drawn.  (This only affects WorldModels)
+        The drawing passes are controlled by ``draw_transparent`` -- opaque
+        items should be rasterized before transparent ones.
+
+        Args:
+            world (WorldModel): the world model
+            viewport (Viewport): the C++ viewport of the current view, which is
+                compatible with the Klampt C++ Widget class.
+            draw_transparent (bool or None): If None, then everything is drawn. 
+                If True, then only transparent items are drawn.  If False, then
+                only opaque items are drawn.  (This only affects WorldModels)
         """
         if self.attributes["hidden"]:
             return
@@ -2632,12 +2657,43 @@ class VisAppearance:
                     return (item,item)
                 elif 'RigidTransform' == vtype:
                     #assumed to be a rigid transform
-                    return (item[1],item[1])
+                    T = item
+                    L = self.attributes.get("length",0.1)
+                    return aabb_create(T[1],se3.apply(T,(L,0,0)),se3.apply(T,(0,L,0)),se3.apply(T,(0,0,L)))
             except Exception:
                 raise
                 pass
             print("Empty bound for object",self.name,"type",self.item.__class__.__name__)
         return aabb_create()
+
+    def getCenter(self):
+        bb = self.getBounds()
+        return vectorops.interpolate(bb[0],bb[1],0.5)
+
+    def getTransform(self):
+        if len(self.subAppearances) != 0:
+            return (so3.identity(),self.getCenter())
+        item = self.item
+        if isinstance(item,coordinates.Frame):
+            T = item.worldCoordinates()
+            L = self.attributes.get("length",0.1)
+            return (T[0],se3.apply(T,(L/2,L/2,L/2)))
+        elif hasattr(item,'geometry'):
+            return item.geometry().getCurrentTransform()
+        elif hasattr(item,'getCurrentTransform'):
+            return item.getCurrentTransform()
+        elif hasattr(item,'getTransform'):
+            return item.getCurrentTransform()
+        else:
+            try:
+                vtype = objectToVisType(item,None)
+                if 'RigidTransform' == vtype:
+                    T = item
+                    L = self.attributes.get("length",0.1)
+                    return (T[0],se3.apply(T,(L/2,L/2,L/2)))
+            except Exception:
+                raise
+        return (so3.identity(),self.getCenter())
 
     def getSubItem(self,path):
         if len(path) == 0: return self
@@ -2787,6 +2843,7 @@ class VisualizationScene:
         self.animating = True
         self.currentAnimationTime = 0
         self.doRefresh = False
+        self.cameraController = None
 
     def getItem(self,item_name):
         """Returns an VisAppearance according to the given name or path"""
@@ -2919,15 +2976,19 @@ class VisualizationScene:
 
     def animationTime(self,newtime=None):
         global _globalLock
-        if newtime is not None:
-            _globalLock.acquire()
-            self.currentAnimationTime = newtime
-            self.doRefresh = True
-            for (k,v) in self.items.items():
-                #do animation updates
-                v.updateAnimation(self.currentAnimationTime)
-            _globalLock.release()
-        return self.currentAnimationTime
+        if newtime is None:
+            #query mode
+            return self.currentAnimationTime
+
+        #update mode
+        _globalLock.acquire()
+        self.currentAnimationTime = newtime
+        self.doRefresh = True
+        for (k,v) in self.items.items():
+            #do animation updates
+            v.updateAnimation(self.currentAnimationTime)
+        _globalLock.release()
+        return 
 
     def remove(self,name):
         global _globalLock
@@ -3094,7 +3155,7 @@ class VisualizationScene:
         _globalLock.release()
         return res
 
-    def getAttributes(self,name,attr):
+    def getAttributes(self,name):
         global _globalLock
         _globalLock.acquire()
         item = self.getItem(name)
@@ -3133,9 +3194,42 @@ class VisualizationScene:
         try:
             autoFitViewport(vp,list(self.items.values()))
             vp.camera.dist /= scale
+            self.setViewport(vp)
         except Exception as e:
             print("Unable to auto-fit camera")
             print(e)
+
+    def followCamera(self,target,translate,rotate,center):
+        if target is None:
+            self.cameraController = None
+            return
+        vp = self.getViewport()
+        if isinstance(target,str) or isinstance(target,(tuple,list)):
+            try:
+                target = self.getItem(target)
+            except KeyError:
+                raise ValueError("Invalid item "+str(target))
+            target_center = target.getCenter()
+            if center:
+                if translate:
+                    _camera_translate(vp,target_center)
+                else:
+                    _camera_lookat(vp,target_center)
+
+            if translate and rotate:
+                self.cameraController = _TrackingCameraController(vp,target)
+            elif translate:
+                self.cameraController = _TranslatingCameraController(vp,target)
+            elif rotate:
+                self.cameraController = _TargetCameraController(vp,target)
+            else:
+                self.cameraController = None
+        elif isinstance(target,Trajectory):
+            self.cameraController = _TrajectoryCameraController(vp,target)
+        elif isinstance(target,SimRobotSensor):
+          self.cameraController = _SimCamCameraController(vp,target)
+        else:
+            raise ValueError("Invalid value for target, must either be str or a Trajectory")
 
     def updateTime(self,t):
         """The backend will call this during an idle loop to update the
@@ -3151,6 +3245,14 @@ class VisualizationScene:
             #do other updates
             v.updateTime(self.t)
 
+    def updateCamera(self):
+        """Updates the camera, if controlled.  The backend should call
+        this whenever the scene is to be drawn."""
+        if self.cameraController is not None:
+            vp = self.cameraController.update(self.currentAnimationTime)
+            if vp is not None:
+                self.setViewport(vp)
+
     def edit(self,name,doedit=True):
         raise NotImplementedError("Needs to be implemented by subclass")
 
@@ -3163,7 +3265,8 @@ class VisualizationScene:
     def setBackgroundColor(self,r,g,b,a=1): 
         raise NotImplementedError("Needs to be implemented by subclass")
 
-    def renderGL(self,view):        
+    def renderGL(self,view):
+        """Renders the scene in OpenGL"""
         vp = view.toViewport()
         self.labels = []
         world = self.items.get('world',None)
@@ -3268,8 +3371,88 @@ class VisualizationScene:
         for i in self.items.values():
             i.clearDisplayLists()
 
+def _camera_translate(vp,tgt):
+    vp.camera.tgt = tgt
 
+def _camera_lookat(vp,tgt):
+    T = vp.getTransform()
+    vp.camera.tgt = tgt
+    vp.camera.dist = vectorops.distance(T[1],tgt)
+    #set R to point at target
+    zdir = vectorops.unit(vectorops.sub(tgt,T[1]))
+    xdir = vectorops.unit(vectorops.cross(zdir,[0,0,1]))
+    ydir = vectorops.unit(vectorops.cross(zdir,xdir))
+    R = xdir + ydir + zdir
+    vp.camera.set_orientation(R,'xyz')
 
+class _TrackingCameraController:
+    def __init__(self,vp,target):
+        self.vp = vp
+        T = vp.getTransform()
+        self.viewportToTarget = se3.mul(se3.inv(target.getTransform()),T)
+        self.target = target
+    def update(self,t):
+        T = se3.mul(self.target.getTransform(),self.viewportToTarget)
+        self.vp.setTransform(T)
+        return self.vp
+
+class _TranslatingCameraController:
+    def __init__(self,vp,target):
+        self.vp = vp
+        self.last_target_pos = target.getCenter()
+        self.target = target
+    def update(self,t):
+        t = self.target.getCenter()
+        self.vp.camera.tgt = vectorops.add(self.vp.camera.tgt,vectorops.sub(t,self.last_target_pos))
+        self.last_target_pos = t
+        return self.vp
+
+class _TargetCameraController:
+    def __init__(self,vp,target):
+        self.vp = vp
+        self.last_target_pos = target.getCenter()
+        self.target = target
+    def update(self,t):
+        t = self.target.getCenter()
+        tgt = vectorops.add(self.vp.camera.tgt,vectorops.sub(t,self.last_target_pos))
+        self.last_target_pos = t
+        _camera_lookat(self.vp,tgt)
+        return self.vp
+
+class _TrajectoryCameraController:
+    def __init__(self,vp,trajectory):
+        self.vp = vp
+        if isinstance(trajectory,SE3Trajectory):
+            pass
+        elif isinstance(trajectory,SO3Trajectory):
+            pass
+        else:
+            assert isinstance(trajectory,Trajectory)
+            pass
+        self.trajectory = trajectory
+    def update(self,t):
+        if isinstance(self.trajectory,(SE3Trajectory,SE3BezierTrajectory)):
+            T = self.trajectory.eval_se3(t,'loop')
+            self.vp.setTransform(T)
+        elif isinstance(self.trajectory,(SO3Trajectory,SO3BezierTrajectory)):
+            R = self.trajectory.eval(t,'loop')
+            self.vp.camera.set_orientation(R,'xyz')
+        else:
+            trans = self.trajectory.eval(t,'loop')
+            T = self.vp.getTransform()
+            ofs = vectorops(vp.tgt,T[0])
+            self.vp.camera.tgt = vectorops.add(trans,ofs)
+        return self.vp
+
+class _SimCamCameraController:
+    def __init__(self,vp,target):
+        self.vp = vp
+        self.target = target
+    def update(self,t):
+        from ..model import sensing
+        T = sensing.get_sensor_xform(self.target,self.target.robot())
+        self.vp.setTransform(T)
+        return self.vp
 
 
 class _WindowManager:

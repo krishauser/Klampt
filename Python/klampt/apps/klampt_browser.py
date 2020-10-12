@@ -5,8 +5,10 @@ from klampt.model.trajectory import Trajectory,RobotTrajectory
 from klampt.model.multipath import MultiPath
 from klampt.model import types
 from klampt import vis
-from klampt.vis.qtbackend import QtGLWindow
 from klampt.vis.glcommon import GLMultiViewportProgram
+vis.init("PyQt5")
+from klampt.vis.backends.vis_gl import GLVisualizationPlugin
+from klampt.vis.backends.qtbackend import QtGLWindow
 import sys,os,time
 from PyQt5 import QtGui
 from PyQt5 import QtCore
@@ -126,7 +128,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
         self.world = WorldModel()
         self.tempWorld = WorldModel()
         self.active = dict()
-        self.emptyVisPlugin = vis.VisualizationPlugin()
+        self.emptyVisPlugin = GLVisualizationPlugin()
         self.emptyVisPlugin.add("world",self.world)
         self.emptyVisProgram = None
         self.selected = set()
@@ -549,7 +551,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
         assert fn not in self.active
         item = ResourceItem(obj)
         self.active[fn] = item
-        item.plugin = vis.VisualizationPlugin()
+        item.plugin = GLVisualizationPlugin()
         basename = os.path.basename(fn)
 
         #determine whether it's being animated

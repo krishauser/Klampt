@@ -20,11 +20,9 @@ bool MainWindow::Initialize(int _argc,const char** _argv)
     argc=_argc;
     argv=_argv;
 
-    const string robname="placeholder";
-    //world->AddRobot(robname,&robot);
     if(world.LoadRobot(argv[1]) < 0) {
-      printf("RobotTest: error loading robot file %s, quitting\n",argv[1]);
-      return false;
+        printf("RobotTest: error loading robot file %s, quitting\n",argv[1]);
+        return false;
     }
     backend.reset(new RobotTestBackend(&world));
     printf("BACKEND LOADED\n");
@@ -56,7 +54,7 @@ bool MainWindow::Initialize(int _argc,const char** _argv)
 
     ui->displaywidget->installEventFilter(this);
     ui->displaywidget->setFocusPolicy(Qt::WheelFocus);    
-	
+  
     return true;
 }
 
@@ -168,9 +166,9 @@ void MainWindow::UpdateLinkParameters(){
   Robot* rob = world.robots[0].get();
   if(gui->link_index >= 0) {
     QString link_info=QString("V [%1 %2], A [%3,%4], T [%5,%6]").arg(
-  	NUM(rob->velMin(gui->link_index)),NUM(rob->velMax(gui->link_index)),
-  	NUM(-rob->accMax(gui->link_index)),NUM(rob->accMax(gui->link_index)),
-  	NUM(-rob->torqueMax(gui->link_index)),NUM(rob->torqueMax(gui->link_index)));
+    NUM(rob->velMin(gui->link_index)),NUM(rob->velMax(gui->link_index)),
+    NUM(-rob->accMax(gui->link_index)),NUM(rob->accMax(gui->link_index)),
+    NUM(-rob->torqueMax(gui->link_index)),NUM(rob->torqueMax(gui->link_index)));
     ui->lbl_link_info->setText(link_info);
     ui->spn_link->setMinimum(rob->qMin(gui->link_index));
     ui->spn_link->setMaximum(rob->qMax(gui->link_index));

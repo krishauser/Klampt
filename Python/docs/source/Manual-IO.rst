@@ -12,15 +12,24 @@ Klamp't supports many types of I/O formats:
 -  URDF files: Klamp't natively supports ROS' Universal Robot
    Description Format.
 -  Geometry files: Klamp't natively supports OFF (Object File Format),
-   OBJ (Wavefront OBJ), and PCD (Point Cloud Data) file formats. If it
-   is built with Assimp support, then any file format that Assimp reads
-   can also be read as a mesh.
+   OBJ (Wavefront OBJ), and PCD (Point Cloud Data) file format in the
+   :class:`klampt.robotsim.Geometry3D` class.
+
+   If you have used pip install, or build from source with Assimp support, 
+   then any file format that Assimp reads (STL, OBJ, DXF, Collada DAE) can
+   also be read as a mesh.
 -  ROS: Klamp't can publish and subscribe to several ROS message types.
 -  Three.js: Klamp't can export Three.js scenes.
 -  MPEG: Klamp't's SimTest app and Python vis module can export MPEG
    videos of simulations, if ffmpeg is installed.
--  HTML: Klamp't's Python vis module can export HTML files for
+-  HTML: The :mod:`klampt.vis` module can export HTML files for
    simulation playback.
+-  Numpy: Many Klamp't objects can be converted to/from numpy objects.  
+   See the :mod:`klampt.io.numpy_convert` module for more details.
+-  Open3D: Many Klamp't objects can be converted to/from Open3D objects.  
+   See the :mod:`klampt.io.open3d_convert` module for more details.
+-  POV-Ray: The :mod:`klampt.io.povray` module can export POV-Ray
+   scripts for rendering.
 
 Custom file formats in Klamp't
 ------------------------------
@@ -92,7 +101,7 @@ As an example with an IK Objective:
     #method 2: serializing and deserializing in the old format
     from klampt.io import loader
     s = loader.writeIKObjective(obj)  #converts to a string representation compatible with RobotPose
-    print s
+    print(s)
     obj2 = loader.readIKObjective(s)  #reads from a string compatible with RobotPose
 
     #method 3: saving and loading in the old format
@@ -103,7 +112,7 @@ As an example with an IK Objective:
     import json
     jsonobj = loader.toJson(obj)  #converts to a data structure compatible with JSON I/O routines
     s = json.dumps(jsonobj) #converts to a JSON string
-    print s
+    print(s)
     jsonobj2 = json.parse(s)  #converts from a JSON string
     obj2 = loader.fromJson(jsonobj2)  #converts from a JSON-compatible data structure
 
@@ -238,16 +247,16 @@ following lines:
 
     #Subscribe to topic
     if io.SubscribeToStream(g,"ros",topic):       #subscribe to myROSTopic
-        print "Subscribed!"
+        print("Subscribed!")
     else:
-        print "Could not subscribe to", topic
+        print("Could not subscribe to", topic)
 
     numReceived = 0
     t0 = time.time()
     while True:
         processed = io.ProcessStreams()
         if processed:
-            print "Received a PointCloud on",topic,"with",g.getPointCloud().numPoints(),"points"
+            print("Received a PointCloud on",topic,"with",g.getPointCloud().numPoints(),"points")
             numReceived += 1
         time.sleep(0.01)
     
@@ -277,5 +286,5 @@ Congratulations, you have subscribed to your first point cloud!
     
         vis.dirty(path_to_geometry)
 
-For additional examples, see ``Klampt-examples/Python/demos/ros_point_cloud_show.py``
+For additional examples, see ``Klampt-examples/Python3/demos/ros_point_cloud_show.py``
 

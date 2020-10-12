@@ -394,6 +394,9 @@ void GetPointCloud(const Geometry::AnyCollisionGeometry3D& geom,PointCloud& pc)
   for(size_t i=0;i<gpc.points.size();i++) 
     gpc.points[i].get(pc.vertices[i*3],pc.vertices[i*3+1],pc.vertices[i*3+2]);
   if(!gpc.propertyNames.empty()) {
+    if(gpc.properties.size() != gpc.points.size()) {
+      throw PyException("GetPointCloud: Internal error, invalid # of properties");
+    }
     for(size_t i=0;i<gpc.points.size();i++) {
       gpc.properties[i].getCopy(&pc.properties[i*gpc.propertyNames.size()]);
     }
@@ -409,6 +412,10 @@ void GetPointCloud(const PointCloud& pc,Geometry::AnyCollisionGeometry3D& geom)
     gpc.points[i].set(pc.vertices[i*3],pc.vertices[i*3+1],pc.vertices[i*3+2]);
   gpc.propertyNames = pc.propertyNames;
   if(pc.propertyNames.size() > 0) {
+    if(pc.properties.size() != gpc.points.size()*pc.propertyNames.size()) {
+      printf("Expected %d = %d*%d properties, got %d\n",(int)gpc.points.size(),(int)pc.propertyNames.size(),(int)gpc.points.size()*pc.propertyNames.size(),(int)pc.properties.size());
+      throw PyException("GetPointCloud: Invalid number of properties in PointCloud");
+    }
     gpc.properties.resize(pc.properties.size() / pc.propertyNames.size());
     for(size_t i=0;i<gpc.properties.size();i++) {
       gpc.properties[i].resize(pc.propertyNames.size());
@@ -866,7 +873,9 @@ void Geometry3D::setPointCloud(const PointCloud& pc)
     else
       geom = make_shared<AnyCollisionGeometry3D>();
   }
+  RigidTransform T = geom->GetTransform();
   GetPointCloud(pc,*geom);
+  geom->SetTransform(T);
   //this is already called
   //geom->ClearCollisionData();
   if(mgeom) {
@@ -891,7 +900,9 @@ void Geometry3D::setVolumeGrid(const VolumeGrid& vg)
     else
       geom = make_shared<AnyCollisionGeometry3D>();
   }
+  RigidTransform T = geom->GetTransform();
   GetVolumeGrid(vg,*geom);
+  geom->SetTransform(T);
   //this is already called
   //geom->ClearCollisionData();
   if(mgeom) {
@@ -919,8 +930,10 @@ void Geometry3D::setConvexHull(const ConvexHull& hull)
   ConvexHull3D chull;  
   chull.SetPoints(hull.points);
 
+  RigidTransform T = geom->GetTransform();
   *geom = chull;
   geom->ClearCollisionData();
+  geom->SetTransform(T);
 
   if(mgeom) {
     //update the display list / cache
@@ -954,7 +967,6 @@ void Geometry3D::setConvexHullGroup(const Geometry3D& geom1, const Geometry3D & 
   RigidTransform T2 = ingeom2->GetTransform();
   RigidTransform TRel;
   TRel.mulInverseA(T1,T2);
-  shared_ptr<AnyCollisionGeometry3D>& resgeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(this->geomPtr);
   Geometry::ConvexHull3D hull;
   hull.SetHull(ingeom1->AsConvexHull(), ingeom2->AsConvexHull());
   *geom = AnyCollisionGeometry3D(hull);
@@ -990,8 +1002,10 @@ void Geometry3D::setGeometricPrimitive(const GeometricPrimitive& prim)
   if(!ss) {
     throw PyException("Internal error, can't read geometric primitive?");
   }
+  RigidTransform T = geom->GetTransform();
   *geom = g;
   geom->ClearCollisionData();
+  geom->SetTransform(T);
   if(mgeom) {
     //update the display list / cache
     mgeom->OnGeometryChange();
@@ -1372,7 +1386,10 @@ void SetupDefaultAppearance(GLDraw::GeometryAppearance& app);
 Appearance::Appearance()
   :world(-1),id(-1),appearancePtr(NULL)
 {
-  appearancePtr = new shared_ptr<GLDraw::GeometryAppearance>;
+  auto ptr = new shared_ptr<GLDraw::GeometryAppearance>;
+  ptr->reset(new GLDraw::GeometryAppearance());
+  SetupDefaultAppearance(**ptr);
+  appearancePtr = ptr;
 }
 
 Appearance::Appearance(const Appearance& rhs)
@@ -1626,13 +1643,11 @@ void Appearance::setColors(int feature,const std::vector<float>& colors,bool alp
   switch(feature) {
   case VERTICES:
     {
-      printf("SetColors VERTICES %d %d\n",(int)n,(int)nchannels);
       app->vertexColors.resize(n,app->vertexColor);
       for(size_t i=0;i<n;i++) {
         for(size_t k=0;k<nchannels;k++)
           app->vertexColors[i].rgba[k] = colors[i*nchannels+k];
       }
-      printf("%f %f %f\n",app->vertexColors[100].rgba[0],app->vertexColors[100].rgba[1],app->vertexColors[100].rgba[2]);
     }
     break;
   case FACES:
@@ -2031,8 +2046,9 @@ void PointCloud::setProperties(int pindex,const vector<double>& vproperties)
     throw PyException("Invalid property index"); 
   int n = numPoints();
   assert((int)vproperties.size() >= n);
-  for(int i=0;i<n;i++)
-    properties[i*propertyNames.size()+pindex] = vproperties[i];
+  size_t k=pindex;
+  for(int i=0;i<n;i++,k+=propertyNames.size())
+    properties[k] = vproperties[i];
 }
 
 void PointCloud::setProperty(int index,int pindex,double value)
@@ -2077,6 +2093,30 @@ double PointCloud::getProperty(int index,const std::string& pname) const
   if(pindex < 0)
     throw PyException("Invalid property name");  
   return getProperty(index,pindex);
+}
+
+void PointCloud::getProperties(int pindex,std::vector<double>& out) const
+{
+  if(pindex < 0 || pindex >= (int)propertyNames.size())
+    throw PyException("Invalid property index");  
+  int n=numPoints();
+  out.resize(n);
+  size_t k=pindex;
+  for(int i=0;i<n;i++,k+=propertyNames.size())
+    out[i] = properties[k];
+}
+
+void PointCloud::getProperties(const std::string& pname,std::vector<double>& out) const
+{
+  int pindex = -1;
+  for(size_t i=0;i<propertyNames.size();i++)
+    if(propertyNames[i] == pname) {
+      pindex = (int)i;
+      break;
+    }
+  if(pindex < 0)
+    throw PyException("Invalid property name");  
+  return getProperties(pindex,out); 
 }
 
 void PointCloud::join(const PointCloud& pc)
@@ -2936,6 +2976,24 @@ void RobotModelLink::setAxis(const double axis[3])
   link.w.set(axis);
 }
 
+bool RobotModelLink::isPrismatic()
+{
+  RobotLink3D& link=robotPtr->links[index];
+  return link.type == RobotLink3D::Prismatic;
+}
+
+bool RobotModelLink::isRevolute()
+{
+  RobotLink3D& link=robotPtr->links[index];
+  return link.type == RobotLink3D::Revolute;
+}
+
+void RobotModelLink::setPrismatic(bool prismatic)
+{
+  RobotLink3D& link=robotPtr->links[index];
+  link.type = (prismatic ? RobotLink3D::Prismatic : RobotLink3D::Revolute);
+}
+
 void RobotModelLink::getJacobian(const double p[3],vector<vector<double> >& J)
 {
   Matrix Jmat;
@@ -3685,7 +3743,10 @@ void RobotModel::torquesFromAccel(const std::vector<double>& ddq,std::vector<dou
     ne.CalcTorques(ddqvec,tvec);
   }
   else {
-    robot->UpdateDynamics();
+    if(dirty_dynamics) {
+      robot->UpdateDynamics();
+      dirty_dynamics = false;
+    }
     robot->CalcTorques(ddqvec,tvec);
   }
   copy(tvec,out);
@@ -3694,16 +3755,34 @@ void RobotModel::torquesFromAccel(const std::vector<double>& ddq,std::vector<dou
 void RobotModel::accelFromTorques(const std::vector<double>& t,std::vector<double>& out)
 {
   Vector ddqvec,tvec;
-  copy(t,tvec);
   if(robot->links.size() > 6) {
+    copy(t,tvec);
     NewtonEulerSolver ne(*robot);
     ne.CalcAccel(tvec,ddqvec);
+    copy(ddqvec,out);
   }
   else {
-    robot->UpdateDynamics();
+    copy(t,tvec);
+    if(dirty_dynamics) {
+      robot->UpdateDynamics();
+      dirty_dynamics = false;
+    }
     robot->CalcAcceleration(ddqvec,tvec);
+    copy(ddqvec,out);
   }
-  copy(ddqvec,out);
+}
+
+void RobotModel::reduce(const RobotModel& fullRobot,std::vector<int>& out)
+{
+  fullRobot.robot->Reduce(*robot,out);
+}
+
+void RobotModel::mount(int link,const RobotModel& subRobot,const double R[9],const double t[3],const char* prefix)
+{
+  RigidTransform T;
+  T.R.set(R);
+  T.t.set(t);
+  robot->Mount(link,*subRobot.robot,T,prefix);
 }
 
 
@@ -4644,14 +4723,14 @@ void SimRobotController::getSensedTorque(std::vector<double>& t)
   }
 }
 
-SimRobotSensor::SimRobotSensor(Robot* _robot,SensorBase* _sensor)
-  :robot(_robot),sensor(_sensor)
+SimRobotSensor::SimRobotSensor(const RobotModel& _robot,SensorBase* _sensor)
+  :robotModel(_robot),sensor(_sensor)
 {}
 
 SimRobotSensor::SimRobotSensor(SimRobotController& _controller,const char* name,const char* type)
-  :robot(NULL),sensor(NULL)
+  :sensor(NULL)
 {
-  robot = _controller.controller->robot;
+  robotModel = _controller.model();
   shared_ptr<SensorBase> newsensor = _controller.controller->sensors.CreateByType(type);
   if(!newsensor) {
     throw PyException("Invalid sensor type specified");
@@ -4663,6 +4742,11 @@ SimRobotSensor::SimRobotSensor(SimRobotController& _controller,const char* name,
   _controller.controller->sensors.sensors.push_back(newsensor);
   _controller.controller->nextSenseTime.push_back(_controller.controller->curTime);
   sensor = _controller.controller->sensors.sensors.back().get();
+}
+
+RobotModel SimRobotSensor::robot()
+{
+  return robotModel;
 }
 
 std::string SimRobotSensor::name()
@@ -4714,13 +4798,20 @@ void SimRobotSensor::drawGL()
 void SimRobotSensor::drawGL(const std::vector<double>& measurements)
 {
   if(!sensor) return;
-  sensor->DrawGL(*robot,measurements);
+  sensor->DrawGL(*robotModel.robot,measurements);
+}
+
+void SimRobotSensor::kinematicSimulate(double dt)
+{
+  if(!sensor) return;
+  sensor->SimulateKinematic(*robotModel.robot,*worlds[robotModel.world]->world);
+  sensor->Advance(dt);
 }
 
 void SimRobotSensor::kinematicSimulate(WorldModel& world,double dt)
 {
   if(!sensor) return;
-  sensor->SimulateKinematic(*robot,*worlds[world.index]->world);
+  sensor->SimulateKinematic(*robotModel.robot,*worlds[robotModel.index]->world);
   sensor->Advance(dt);
 }
 
@@ -4735,8 +4826,8 @@ SimRobotSensor SimRobotController::sensor(int sensorIndex)
 {
   RobotSensors& sensors = controller->sensors;
   if(sensorIndex < 0 || sensorIndex >= (int)sensors.sensors.size())
-    return SimRobotSensor(NULL,NULL);
-  return SimRobotSensor(controller->robot,sensors.sensors[sensorIndex].get());
+    return SimRobotSensor(RobotModel(),NULL);
+  return SimRobotSensor(model(),sensors.sensors[sensorIndex].get());
 }
 
 SimRobotSensor SimRobotController::sensor(const char* name)
@@ -4746,7 +4837,7 @@ SimRobotSensor SimRobotController::sensor(const char* name)
   if(sensor==NULL) {
     fprintf(stderr,"Warning, sensor %s does not exist\n",name);
   }
-  return SimRobotSensor(controller->robot,sensor.get());
+  return SimRobotSensor(model(),sensor.get());
 }
 
 std::vector<std::string> SimRobotController::commands()

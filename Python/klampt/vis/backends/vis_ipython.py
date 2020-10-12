@@ -201,6 +201,7 @@ class KlamptWidgetAdaptor(KlamptWidget,VisualizationScene):
             for k,c in item.subAppearances.items():
                 updateItem(c)
         self.beginRpc()
+        self.updateCamera()
         for k,v in self.items.items():
             updateItem(v)
         self.endRpc()

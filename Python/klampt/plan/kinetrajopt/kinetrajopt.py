@@ -5,7 +5,6 @@ With those distances stuff ready, this should be pretty straightforward.
 from collections import Iterable
 import numpy as np
 import cvxpy as cp
-import autograd as jax
 
 from klampt import Geometry3D, DistanceQuerySettings
 from klampt.math import se3
@@ -14,7 +13,8 @@ from .utils import CostInterface, ConstrInterface, ConstrContainer, JointLimitsC
 from .trajopt_task_space import PoseConstraint, DirectionConstraint, PositionConstraint, OrientationConstraint
 
 
-class TrajOptConfig(object):
+class TrajOptSettings(object):
+    """Defines some settings of the KineTrajOpt solver."""
     def __init__(self, **kw):
         self.dsafe = kw.get('dsafe', 0.05)  # safe distance one has to keep
         self.dcheck = kw.get('dcheck', 0.1)  # distance that trigers constraint consideration
@@ -95,14 +95,13 @@ class QPException(Exception):
 
 class KineTrajOpt:
     r"""
-    My implementation of the trajopt library by Josh Schulman.
-    This is specially designed for klampt and extensively uses the functions provided by Klampt.
+    An implementation of the trajopt library by Josh Schulman, authored by Gao Tang.
 
     :param world: WorldModel, the world which contains obstacle information.
     :param robot: RobotModel, the robot whose trajectory has to be optimized.
     :param q0: arr-like, if not None, it gives the initial configuration of the robot. Its length equals number of joints being optimized. See link_index for details
     :param qf: arr-like, if not None, it gives the final configuration of the robot. Its length equals q0
-    :param config: TrajOptConfig, it sets some hyperparameters of the solver.
+    :param config: TrajOptSettings, it sets some hyperparameters of the solver.
     :param link_index: arr-like, if not None, it is the links whose configurations are optimized. It can have smaller length than robot.numLinks()
     :param geom_index: arr-like, if not None, it is the links whose geometries are considered for collision.
     :param obs_index: arr-like, if not None, it is the index of terrains considered as obstacles
@@ -132,7 +131,7 @@ class KineTrajOpt:
         self.losses = losses
         if self.losses is not None and not isinstance(self.losses, Iterable):
             self.losses = [self.losses]
-        self.config = config if config is not None else TrajOptConfig()
+        self.config = config if config is not None else TrajOptSettings()
         # compute and set joint limits
         qmin, qmax = robot.getJointLimits()
         self.qmin = np.array(qmin)[link_index]
@@ -153,13 +152,21 @@ class KineTrajOpt:
         self.qmin = np.array(qmin)[link_index]
         self.qmax = np.array(qmax)[link_index]
 
-    def update_q0(self, q0):
-        """For using the same solver in several problems. This function sets initial configuration."""
-        self.q0[:] = q0
+    def set_q0(self, q0):
+        """Sets a fixed initial configuration."""
+        if not self.fixedq0:
+            self.fixedq0 = True
+            self.q0 = np.copy(q0)
+        else:
+            self.q0[:] = q0
 
-    def update_qf(self, qf):
-        """For using the same solver in several problems. This function sets final configuration."""
-        self.qf[:] = qf
+    def set_qf(self, qf):
+        """Sets a fixed final configuration."""
+        if not self.fixedqf:
+            self.fixedqf = True
+            self.qf = np.copy(qf)
+        else:
+            self.qf[:] = qf
 
     def add_pose_constraint(self, index, linkid, pose):
         """Add constraint such that at index of the trajectory, the robot link linkid is at pose"""
@@ -180,8 +187,20 @@ class KineTrajOpt:
     def optimize(self, theta0):
         """Given an initial trajectory, use trajopt algorithm to update it.
         
-        :param theta0: ndarray, shape is N by dof where N is grid size and dof is number of links being optimized. It is the initial guess provided to the solver.
-        :return: dict, contains keys success, sol, cost
+        Args:
+            theta0 (ndarray). The initial guess provided to the solver. This 
+                should have shape (N,dof) where N is grid size and dof is the
+                number of links being optimized.  It can also have size N*dof,
+                in which case it will be internally reshaped to the proper
+                dimension.
+        
+        Returns:
+            dict: The result of optimization. Contains keys:
+
+            - 'success': True if successful, False otherwise
+            - 'sol': the solution trajectory, in the same form as theta0.
+            - 'cost': the cost of the solution trajectory.
+            
         """
         if theta0.ndim == 1:
             theta0 = theta0.reshape((-1, self.dimq))
@@ -450,9 +469,8 @@ class KineTrajOpt:
         self.cp_cache = (prob, trsize, thetas)
 
     def create_geometry_cache(self, robot, link_index, geom_index):
-        """Copy into triangle mesh format.
-        Due to API change of klampt, the sweep cache is no longer valid.
-        link cache is stored with a copy of the geometry
+        """Populates the internal geometry cache with ConvexHull versions of
+        the link and terrain geometries.
         """
         self.geom_cache = {}
         link_geom_info = []  # stores the (hull, geom_idx, link_idx) tuple

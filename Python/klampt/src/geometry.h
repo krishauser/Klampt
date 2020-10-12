@@ -106,6 +106,7 @@ struct ConvexHull
  * - c: opacity, in range [0,255]
  * - r,g,b,a: color channels, in range [0,1]
  * - u,v: texture coordinate
+ * - radius: treats the point cloud as a collection of balls
  * 
  * Settings are usually lowercase but follow PCL naming convention, and often
  * include:
@@ -176,6 +177,10 @@ struct PointCloud
   double getProperty(int index,int pindex) const;
   ///Gets the property named pname of point index
   double getProperty(int index,const std::string& pname) const;
+  ///Gets property pindex of all points as an array
+  void getProperties(int pindex,std::vector<double>& out) const;
+  ///Gets property named pindex of all points as an array
+  void getProperties(const std::string& pname,std::vector<double>& out) const;
   ///Translates all the points by v=v+t
   void translate(const double t[3]);
   ///Transforms all the points by the rigid transform v=R*v+t
@@ -464,9 +469,11 @@ class Geometry3D
   void setCollisionMargin(double margin);
   ///Returns the padding around the base geometry.  Default 0
   double getCollisionMargin();
-  ///Returns the axis-aligned bounding box of the object. Note: O(1) time, but may not be tight
+  ///Returns the axis-aligned bounding box of the object as a tuple (bmin,bmax). 
+  ///Note: O(1) time, but may not be tight
   void getBB(double out[3],double out2[3]);
-  ///Returns a tighter axis-aligned bounding box of the object than getBB. Worst case O(n) time.
+  ///Returns a tighter axis-aligned bounding box of the object than
+  ///:meth:`Geometry3D.getBB`. Worst case O(n) time.
   void getBBTight(double out[3],double out2[3]);
   /** @brief Converts a geometry to another type, if a conversion is
    * available.  The interpretation of param depends on the type of
@@ -507,13 +514,13 @@ class Geometry3D
    * - ConvexHull - anything else besides ConvexHull
    */
   bool collides(const Geometry3D& other);
-  ///Returns true if this geometry is within distance tol to other
+  ///Returns true if this geometry is within distance ``tol`` to other
   bool withinDistance(const Geometry3D& other,double tol);
   ///Version 0.8: this is the same as the old distance() function.
   ///
   ///Returns the distance from this geometry to the other.  If either geometry 
   ///contains volume information, this value may be negative to indicate
-  ///penetration.
+  ///penetration.  See :meth:`Geometry3D.distance` for more information.
   double distance_simple(const Geometry3D& other,double relErr=0,double absErr=0);
   ///Returns the the distance and closest point to the input point, given in 
   ///world coordinates.  An exception is raised if this operation is not 
@@ -521,16 +528,35 @@ class Geometry3D
   ///
   ///The return value contains the distance, closest points, and gradients if
   ///available.
+  ///
+  ///For some geometry types, the signed distance is returned.  The signed
+  ///distance returns the negative penetration depth if pt is within this.
+  ///The following geometry types return signed distances:
+  ///
+  ///- GeometricPrimitive
+  ///- PointCloud (approximate, if the cloud is a set of balls with the radius
+  ///  property)
+  ///- VolumeGrid
+  ///- ConvexHull
+  ///
+  ///For other types, a signed distance will be returned if the geometry has
+  ///a positive collision margin, and the point penetrates less than this margin.
   DistanceQueryResult distance_point(const double pt[3]);
-  ///A customizable version of distance_point.
+  ///A customizable version of :meth:`Geometry3D.distance_point`.
   ///The settings for the calculation can be customized with relErr, absErr, 
   ///and upperBound, e.g., to break if the closest points are at least
-  ///upperBound distance from one another.  
+  ///upperBound distance from one another.
   DistanceQueryResult distance_point_ext(const double pt[3],const DistanceQuerySettings& settings);
   ///Returns the the distance and closest points between the given geometries.
+  ///This may be either the normal distance or the signed distance, depending on
+  ///the geometry type. 
   ///
-  ///If the objects are penetrating, some combinations of geometry types allow
-  ///calculating penetration depths:
+  ///The normal distance returns 0 if the two objects are touching
+  ///(this.collides(other)=True).
+  ///
+  ///The signed distance returns the negative penetration depth if the objects
+  ///are touching.  Only the following combinations of geometry types return
+  ///signed distances:
   ///
   ///- GeometricPrimitive-GeometricPrimitive (Python-supported sub-types only)
   ///- GeometricPrimitive-TriangleMesh (surface only)
@@ -553,7 +579,7 @@ class Geometry3D
   ///
   ///See the comments of the distance_point function
   DistanceQueryResult distance(const Geometry3D& other);
-  ///A customizable version of distance.
+  ///A customizable version of :meth:`Geometry3D.distance`.
   ///The settings for the calculation can be customized with relErr, absErr,
   ///and upperBound, e.g., to break if the closest points are at least
   ///upperBound distance from one another.  

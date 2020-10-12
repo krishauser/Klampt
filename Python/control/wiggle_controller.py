@@ -1,7 +1,7 @@
-from controller import ControllerAPI,BaseController
+from controller import ControllerAccessor,ControllerBase
 import math
 
-class WiggleController(BaseController):
+class WiggleController(ControllerBase):
     """A controller that wiggles each of the robot's joints between their
     extrema"""
     def __init__(self,robot,period=2):
@@ -11,8 +11,22 @@ class WiggleController(BaseController):
         self.index = 0
         self.startTime = None
         self.period = period
+
+    def inputNames(self):
+        return ['t']
+
+    def outputNames(self):
+        return ['qcmd']
+
+    def getState(self):
+        return {'index':self.index,'startTime',self.startTime}
+
+    def setState(self,state):
+        self.index=state['index']
+        self.startTime=state['startTime']
+        
     def output(self,**inputs):
-        api = ControllerAPI(inputs)
+        api = ControllerAccessor(inputs)
         t = api.time()
         if self.startTime == None:
             self.startTime = t
@@ -47,6 +61,7 @@ class WiggleController(BaseController):
         if type=='reset':
             self.index = 0
             self.startTime = None
+
 
 def make(robot):
     return WiggleController(robot)

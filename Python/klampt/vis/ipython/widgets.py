@@ -608,6 +608,7 @@ class KlamptWidget(widgets.DOMWidget):
     @observe('_camera')
     def _recv_camera(self,cam):
         #trigger an update?
+        #print("Klampt widget received '_camera' message")
         marked = cam['new'].copy()
         marked['r'] = 1
         self._camera = marked
@@ -623,7 +624,7 @@ class KlamptWidget(widgets.DOMWidget):
     @observe('drawn')
     def _recv_drawn(self,drawn):
         self.drawn = 0
-        print("Klampt widget drawn!")
+        #print("Klampt widget received 'drawn' message")
 
     def on_event(self,e):
         print("KlamptWidget got event",e)

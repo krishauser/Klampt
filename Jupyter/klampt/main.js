@@ -23,10 +23,10 @@ define(function(){
             }
 
             var KlamptView = widgets.DOMWidgetView.extend({
-                initialize: function() {
-                    console.log("Initialize");
+                initialize: function(parameters) {
+                    console.log("KlamptView.initialize "+parameters);
                     this.klampt = null;
-                    this.options = {};
+                    widgets.DOMWidgetView.prototype.initialize.call(this, parameters);
                 },
                 createDiv: function(){
                     var width = this.model.get('width');
@@ -51,11 +51,32 @@ define(function(){
                     this.messageArea = document.createElement("div");
                     this.klampt.renderer.domElement.addEventListener( 'keydown', this.keydown, false );
                     this.el.appendChild(this.messageArea);
-                    this.wait_for_dom();
+                    //this.wait_for_dom();
                     this.model.on('change:scene', this.scene_changed, this);
                     this.model.on('change:transforms', this.transforms_changed, this);
                     this.model.on('change:rpc', this.rpc_changed, this);
                     this.model.on("change:camera", this.camera_changed, this);
+                    //this.klampt.resize(this.model.get('width'),this.model.get('height'));
+
+                    //write initial camera to model
+                    var cam = this.klampt.get_camera();
+                    this.model.set('_camera',cam);
+                    if(!isEmpty(this.model.get('scene'))) {
+                        console.log("KlamptView.render: scene not empty");
+                        this.scene_changed();
+                    }
+                    if(!isEmpty(this.model.get('transforms'))) {
+                      console.log("KlamptView.render: transforms not empty");
+                        this.transforms_changed();
+                    }
+                    if(!isEmpty(this.model.get('camera'))) {
+                        console.log("KlamptView.render: camera not empty");
+                        this.camera_changed();
+                    } 
+                    if(!isEmpty(this.model.get('rpc'))) {
+                        console.log("KlamptView.render: rpc not empty");
+                        this.rpc_changed();
+                    }
                 },
                 wait_for_dom: function() {
                     var _this=this;
@@ -77,7 +98,7 @@ define(function(){
                           }
                           _this.touch();
                         },
-                        300);
+                        10);
                 },
                 keydown : function(event) {
                     console.log("Got a keydown event "+event.keyCode);
@@ -90,26 +111,25 @@ define(function(){
                     var msg = this.model.get('scene');
                     var _this = this;
                     console.log("Klamp't widget: setting scene");
-                        setTimeout(function() {
-                            _this.klampt.update_scene(msg);
-                            _this.klampt.render();
-                            _this.model.set('drawn',1);
-                            _this.touch();
-                            },0);
+                    setTimeout(function() {
+                        _this.klampt.update_scene(msg);
+                        _this.klampt.render();
+                        _this.model.set('drawn',1);
+                        _this.touch();
+                        },0);
                 },
                 transforms_changed: function() {
                     var msg = this.model.get('transforms');
                     var _this = this;
                     console.log("Klamp't widget: setting transforms");
-                        setTimeout(function() {
-                            _this.klampt.update_scene(msg);
-                            _this.klampt.render();
-                            _this.model.set('drawn',1);
-                            _this.touch();
-                            },0);
+                    setTimeout(function() {
+                        _this.klampt.update_scene(msg);
+                        _this.klampt.render();
+                        _this.model.set('drawn',1);
+                        _this.touch();
+                        },0);
                 },
                 camera_changed: function() {
-                    console.log("Camera changed from backend...");
                     var _this = this;
                     setTimeout(function() {
                         _this.klampt.set_camera(_this.model.get('camera'));
@@ -139,6 +159,7 @@ define(function(){
                 },
                 rpc_changed: function() {
                     var msg = this.model.get('rpc');
+                    console.log("rpc "+msg);
                     var _this = this;
                     setTimeout(function() { 
                         _this.do_rpc(_this,msg); 

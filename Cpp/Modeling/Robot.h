@@ -97,6 +97,12 @@ public:
   void Mount(int link,const Robot& subchain,const RigidTransform& T,const char* prefix=NULL);
   ///Creates this into a mega-robot from several other robots
   void Merge(const std::vector<Robot*>& robots);
+  ///The reduced robot is a robot for which all fixed DOFs are eliminated; this
+  ///helps with Newton-Euler solving.  dofMap maps robot DOFs to reduced dofs, with
+  ///-1 indicating the dof is eliminated.
+  ///
+  ///Note: all links fixed to the environment no longer have any geometry attached
+  void Reduce(Robot& reducedRobot,vector<int>& dofMap);
 
   bool DoesJointAffect(int joint,int dof) const;
   void GetJointIndices(int joint,vector<int>& indices) const;

@@ -125,15 +125,15 @@ For some basic operation, try the following code:
     from klampt.math import so3,vectorops
 
         A = so3.identity()  #builds an identity rotation
-        print "Original:",A  #prints [1,0,0,0,1,0,0,0,1]
+        print("Original:",A)  #prints [1,0,0,0,1,0,0,0,1]
         #pretty-print the rotation matrix
-        print "Pretty printed:",so3.__str__(A) 
+        print("Pretty printed:",so3.__str__(A) )
         #returns the 2D array form of A
-        print "matrix()",so3.matrix(A) 
+        print("matrix()",so3.matrix(A) )
 
         point = [3.0,1.5,-0.4]  #make some point
         #Apply the rotation A to the point. 
-        print so3.apply(A,point)  
+        print(so3.apply(A,point)  )
         #Since it's an identity, the point does not change
         
 
@@ -154,20 +154,20 @@ used above, we can avoid fussing about the ordering of elements in the
         from klampt.math import so3
 
         #first argument is the axis, second argument is the angle in radians
-        print so3.rotation((0,0,1),math.radians(90))
+        print(so3.rotation((0,0,1),math.radians(90)))
         
 
 Klamp't also supports conversions to three other commonly used rotation
-representations: axis-angle, moment (aka exponential map), and
+representations: axis-angle, rotation vector (aka exponential map), and
 quaternions.
 
 #. Axis-angle representations we have seen above, and are simply a pair
    (axis,angle). To convert to/from an so3 element, use
    so3.from\_axis\_angle() and so3.axis\_angle()
-#. Moment representations are very similar to axis-angle representations
-   but are more compact. They are a 3-tuple (mx,my,mz) equivalent to
-   axis\*angle. To convert to/from an so3 element use so3.from\_moment()
-   and so3.moment().
+#. Rotation vector representations are very similar to axis-angle 
+   representations but are more compact. They are a 3-tuple (mx,my,mz) 
+   equivalent to axis\*angle. To convert to/from an so3 element use
+   so3.from\_rotation_vector() and so3.rotation_vector().
 #. Quaternion representations are 4-tuples representing a unit
    quaternion. To convert to/from an so3 element use
    so3.from\_quaternion() and so3.quaternion().
@@ -195,16 +195,16 @@ computing geodesics on SO(3).
         B = so3.rotation((1,0,0),math.radians(-90))
 
         #WRONG WAY! SO3 is not a cartesian space
-        #print "Distance:",vectorops.distance(A,B)
-        #print "Halfway:",vectorops.interpolate(A,B,0.5)
-        #print "Difference:",vectorops.sub(B,A)
+        #print("Distance:",vectorops.distance(A,B))
+        #print("Halfway:",vectorops.interpolate(A,B,0.5))
+        #print("Difference:",vectorops.sub(B,A))
 
         #RIGHT WAY! 
-        print "Distance:",so3.distance(A,B)
-        print "Start of interpolation:",so3.interpolate(A,B,0)
-        print "Halfway:",so3.interpolate(A,B,0.5)
-        print "End of interpolation:",so3.interpolate(A,B,1)
-        print "Lie derivative:",so3.error(A,B)
+        print("Distance:",so3.distance(A,B))
+        print("Start of interpolation:",so3.interpolate(A,B,0))
+        print("Halfway:",so3.interpolate(A,B,0.5))
+        print("End of interpolation:",so3.interpolate(A,B,1))
+        print("Lie derivative:",so3.error(A,B))
         
 
 The last term is a 3-tuple indicating the amounts by which A would need

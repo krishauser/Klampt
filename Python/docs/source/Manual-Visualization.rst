@@ -19,7 +19,7 @@ event loop. They can also be hybridized to customize how the scene
 manager responds to user input.
 
 Examples of these methods in action are available in the
-``Klampt-examples/Python/demos/vis_template.py`` script.
+``Klampt-examples/Python3/demos/vis_template.py`` script.
 
 .. note::
     `klampt.vis` is not imported when you run `import klampt`, because some
@@ -195,7 +195,7 @@ GUIs, to customize appearances, control animations, and other
 visualization functions. For more information see the documentation of
 `klampt.vis.visualization <klampt.vis.html>`__,
 and the example code in
-``Klampt-examples/Python/demos/vistemplate.py``.
+``Klampt-examples/Python3/demos/vistemplate.py``.
 
 -  ``vis.add(name,item)``: adds a named item to the scene manager.
 -  ``vis.clear()``: clears all items.
@@ -226,16 +226,21 @@ Here are the accepted types in the scene manager.
 +-----------------------------+------------------------------------------+------------------------------------------+
 | ``Geometry3D``              |                                          |                                          |
 +-----------------------------+------------------------------------------+------------------------------------------+
+| ``PointCloud``              |                                          | ``size`` (1)                             |
++-----------------------------+------------------------------------------+------------------------------------------+
 | ``Vector3``                 |                                          | ``size`` (5)                             |
 +-----------------------------+------------------------------------------+------------------------------------------+
 | ``RigidTransform``          |                                          | ``fancy`` (False), ``length`` (0.1),     |
 |                             |                                          | ``width`` (0.01)                         |
 +-----------------------------+------------------------------------------+------------------------------------------+
-| ``Config``                  | Shows a ghost of the robot               |                                          |
+| ``Config``                  | Shows a ghost of the robot               | ``robot`` (0)                            |
 +-----------------------------+------------------------------------------+------------------------------------------+
-| ``Configs``                 |                                          | ``maxConfigs`` (20)                      |
+| ``Configs``                 |                                          | ``robot`` (0), ``maxConfigs`` (20)       |
 +-----------------------------+------------------------------------------+------------------------------------------+
-| ``Trajectory``              | Draws 3D, SE(3), or end-effector paths   | ``endeffectors`` (all terminal links)    |
+| ``Trajectory``              | Draws 3D, SE(3), or end-effector paths   | ``robot`` (0), ``width`` (3),            |
+|                             |                                          | ``pointSize`` (None), ``pointColor``     |
+|                             |                                          | (None), ``endeffectors`` (all terminal   |
+|                             |                                          | links)                                   |
 +-----------------------------+------------------------------------------+------------------------------------------+
 | ``IKGoal``                  |                                          | ``length`` (0.1), ``width`` (0.01)       |
 +-----------------------------+------------------------------------------+------------------------------------------+
@@ -316,7 +321,7 @@ process mouse and keyboard input, etc. Users are also welcome to use
 Klamp't object OpenGL calls in their own frameworks. For more
 information, see the :class:`~klampt.vis.glinterface.GLPluginInterface` documentation 
 and the simple example file
-``Klampt-examples/Python/demos/gl_vis.py``.
+``Klampt-examples/Python3/demos/gl_vis.py``.
 
 For each GUI event (display, mousefunc, etc), the event cascades through
 the plugin stack until one plugin's handler catches it by returning
@@ -396,10 +401,10 @@ class, as well as the *mousefunc* and *motionfunc* callbacks to capture mouse cl
         #Put your mouse handler here
         #the current example prints out the list of objects clicked whenever
         #you right click
-        print "mouse",button,state,x,y
+        print("mouse",button,state,x,y)
         if button==2:
           if state==0:
-            print [o.getName() for o in self.click_world(x,y)]
+            print([o.getName() for o in self.click_world(x,y)])
             return
         GLWorldPlugin.mousefunc(self,button,state,x,y)
 

@@ -6,9 +6,10 @@ class SensorEmulator:
     """A generic sensor emulator.  Translates from the physics simulation ->
     inputs to a Python controller.
 
-    The Python controller is assumed to have the structure of BaseController,
-    where it is given as input a dictionary of named items reflecting the
-    most up-to-date readings on each control time-step.
+    The Python controller is assumed to have the structure of
+    :class:`klampt.control.controller.ControllerBase`, where it is given as
+    input a dictionary of named items reflecting the most up-to-date readings
+    on each control time-step.
     """
     def __init__(self):
         pass
@@ -18,6 +19,7 @@ class SensorEmulator:
     def drawGL(self):
         """Optional: for debugging"""
         return
+
 
 class DefaultSensorEmulator(SensorEmulator):
     """A sensor emulator that by default provides the robot's commanded position, velocity, 
@@ -51,7 +53,9 @@ class DefaultSensorEmulator(SensorEmulator):
                 r.link(j).appearance().setColor(0,1,0,0.5)
             r.drawGL()
             for j in range(r.numLinks()):
+
                 r.link(j).appearance().setColor(*colors[j])
+
 
 class ActuatorEmulator:
     """A generic actuator emulator.  Translates outputs from the Python controller -> the physics simulation.
@@ -84,6 +88,7 @@ class ActuatorEmulator:
         """Optional: for debugging"""
         return
 
+
 class DefaultActuatorEmulator(ActuatorEmulator):
     """This default emulator can take the commands
 
@@ -113,7 +118,7 @@ class DefaultActuatorEmulator(ActuatorEmulator):
                 c.setPIDCommand(commands['qcmd'],dqcmd)
         elif 'dqcmd' in commands:
             assert 'tcmd' in commands
-            c.setVelocityCommand(commands['dqcmd'],commands['tcmd'])
+            c.setVelocity(commands['dqcmd'],commands['tcmd'])
         elif 'torquecmd' in commands:
             c.setTorque(commands['torquecmd'])
         for (k,v) in commands.items():
@@ -202,7 +207,7 @@ class SimpleSimulator (Simulator):
         else:
             raise ValueError("Invalid robot specified")
         if not callable(function):
-            assert hasattr(function,'output_and_advance'),"setController takes either a 1-argument function or a BaseController instance"
+            assert hasattr(function,'output_and_advance'),"setController takes either a 1-argument function or a ControllerBase instance"
         self.robotControllers += [None]*(self.world.numRobots()-len(self.robotControllers))
         self.robotControllers[index] = function
 
@@ -371,7 +376,7 @@ class SimpleSimulator (Simulator):
                         print v
                 """
                 if c:
-                    #assume it's a BaseController instance
+                    #assume it's a ControllerBase instance
                     #compute controller output, advance controller
                     output = c.output_and_advance(**measurements)
                 else:

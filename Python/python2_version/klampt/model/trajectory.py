@@ -501,7 +501,7 @@ class SO3Trajectory(GeodesicTrajectory):
         this method converts this SO3Trajectory from describing how F'
         rotates to how F rotates."""
         for i,m in enumerate(self.milestones):
-            self.milestones[i] = se3.mul(m,T)
+            self.milestones[i] = so3.mul(m,R)
     def constructor(self):
         return SO3Trajectory
 
@@ -639,7 +639,7 @@ class HermiteTrajectory(Trajectory):
                 v = vectorops.mul(vectorops.sub(t.milestones[i+1],t.milestones[i-1]),s)
                 if preventOvershoot:
                     dtp = t.times[i]-t.times[i-1]
-                    dtn = t.times[i]-t.times[i-1]
+                    dtn = t.times[i+1]-t.times[i]
                     for j,(x,a,b) in enumerate(zip(t.milestones[i],t.milestones[i-1],t.milestones[i+1])):
                         if x <= min(a,b):
                             v[j] = 0.0

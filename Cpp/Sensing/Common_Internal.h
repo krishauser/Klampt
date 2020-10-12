@@ -25,6 +25,16 @@ inline Real Discretize(Real value,Real resolution,Real variance)
   return value;
 }
 
+//a faster version of Discretize
+inline Real Discretize2(Real value,Real resolution,Real invresolution,Real stdev)
+{
+  if(stdev>0)
+    value += RandGaussian()*stdev;
+  if(resolution>0)
+    value = round(value*invresolution)*resolution;
+  return value;
+}
+
 inline Vector3 Discretize(const Vector3& value,const Vector3& resolution,const Vector3& variance)
 {
   Vector3 res;

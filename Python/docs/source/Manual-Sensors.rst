@@ -385,8 +385,8 @@ location/direction.
 
 .. code:: python
 
-    print sensor.getSetting("link")
-    print sensor.getSetting("Tsensor")
+    print(sensor.getSetting("link"))
+    print(sensor.getSetting("Tsensor"))
     sensor.setSetting("link",str(-1))
     T = (so3.sample(),[0,0,1.0])
     sensor.setSetting("Tsensor",' '.join(str(v) for v in T[0]+T[1]))
@@ -451,7 +451,7 @@ by ``getMeasurements`` and the available settings vary for each sensor.
           depth = data[pixelofs+w*h]
           mind = min(depth,mind)
           maxd = max(depth,maxd)
-      print "Depth range",mind,maxd
+      print("Depth range",mind,maxd)
 
 Now, change the idle function to read this:
 

@@ -1,7 +1,7 @@
 try:
     import cvxpy
-    import autograd
     from .utils import CostInterface, ConstrInterface
-    from .kinetrajopt import TrajOptConfig, KineTrajOpt
-except:
-    print("Cannot import cvxpy and autograd, kinedynopt is not imported")
+    from .kinetrajopt import TrajOptSettings, KineTrajOpt
+except ImportError:
+    print('kinetrajopt is not supported because cvxpy cannot be imported. Try "pip install cvxpy"')
+    raise
