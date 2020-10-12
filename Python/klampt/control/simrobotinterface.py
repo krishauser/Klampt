@@ -1,15 +1,16 @@
 """A variety of RobotInterfaceBase methods that work with Klamp't simulations.
-Very useful if you wish to test code that works with the Klamp't Robot 
-Interface Layer across simulated and real robots.
+Useful for testing code that works with the Klamp't Robot Interface Layer on a
+simualted robot.
 
 For each of the classes in this module, if you provide the simulator argument
 then this will automatically update your simulation upon each startStep() /
-endStep() pair.  Otherwise, you will have to step the simulation this manually.
+endStep() pair.  Otherwise, you will have to step the simulation manually.
 """
 
 from .robotinterface import RobotInterfaceBase
-from .robotinfo import RobotInfo
-from klampt import Simulator,SimRobotController
+from klampt.model.robotinfo import RobotInfo
+from klampt import RobotModel,Simulator,SimRobotController
+import functools
 
 class _SimControlInterface(RobotInterfaceBase):
     def __init__(self,sim_controller,simulator=None,robotInfo=None):
@@ -71,7 +72,7 @@ class _SimControlInterface(RobotInterfaceBase):
         return self._status
 
 
-class SimPositionControlInterface(RobotInterfaceBase):
+class SimPositionControlInterface(_SimControlInterface):
     """Adapts a SimRobotController to the RobotInterfaceBase class in position
     control mode. 
 
@@ -102,12 +103,6 @@ class SimMoveToControlInterface(_SimControlInterface):
     """
     def __init__(self,sim_controller,simulator=None,robotInfo=None):
         _SimControlInterface.__init__(self,sim_controller,simulator,robotInfo)
-
-    def klamptModel(self):
-        return self.robot
-
-    def controlRate(self):
-        return 1.0/self.sim_controller.getRate()
 
     def moveToPosition(self,q,speed=1.0):
         assert speed == 1.0,"Can't accept non-max speed commands yet"
@@ -211,3 +206,88 @@ class SimFullControlInterface(_SimControlInterface):
     def commandedPosition(self):
         return self.configFromKlampt(self.sim_controller.getCommandedConfig())
 
+
+
+
+class KinematicSimControlInterface(RobotInterfaceBase):
+    """A very basic control interface that just sets the robot's config to the
+    last setPosition command.  Can also perform kinematic simulation of
+    simulators.
+
+    Also performs joint limit testing and self collision checking. These change
+    the status of the interface to non-'ok' error codes.
+    """
+    def __init__(self,robot,robotInfo=None):
+        assert isinstance(robot,RobotModel)
+        self.robot = robot
+        self._status = 'ok'
+        self.robotInfo = robotInfo
+        if robotInfo is not None:
+            assert isinstance(robotInfo,RobotInfo)
+        self.q = self.configFromKlampt(robot.getConfig())
+        qmin,qmax = robot.getJointLimits()
+        self.qmin,self.qmax = self.configFromKlampt(qmin),self.configFromKlampt(qmax)
+        RobotInterfaceBase.__init__(self,name=self.__class__.__name__)
+
+    def klamptModel(self):
+        return self.robot
+
+    @functools.lru_cache(maxsize=None)
+    def parts(self):
+        if self.robotInfo is None:
+            return RobotInterfaceBase.parts(self)
+        res = {None:list(range(self.numDOFs()))}
+        for (k,v) in self.robotInfo.parts:
+            res[k] = self.robotInfo.toIndices(v)
+        return res
+
+    def controlRate(self):
+        return 1000.0
+
+    def sensors(self):
+        sensorNames = []
+        index = 0
+        while True:
+            s = self.robot.sensor(index)
+            sname = s.name()
+            if len(sname) > 0:
+                sensorNames.append(sname)
+            else:
+                break
+            index += 1
+        return sensorNames
+
+    def enabledSensors(self):
+        return self.sensors()
+
+    def sensorMeasurements(self,name):
+        self.robot.setConfig(self.configToKlampt(self.q))
+        return self.robot.sensor(name).getMeasurements()
+
+    def endStep(self):
+        pass
+
+    def status(self):
+        return self._status
+
+    def setPosition(self,q):
+        if self._status != 'ok':
+            return
+        if len(q) != len(self.q):
+            raise ValueError("Invalid position command")
+        self.q = q
+        if any(v < a or v > b for (v,a,b) in zip(q,self.qmin,self.qmax)):
+            self._status = 'joint error'
+        self.robot.setConfig(self.configToKlampt(self.q))
+        if self.robot.selfCollides():
+            self._status = 'self collision'
+        
+    def reset(self):
+        self._status = 'ok'
+        return True
+
+    def sensedPosition(self):
+        return self.q
+    
+    def commandedPosition(self):
+        return self.q

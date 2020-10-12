@@ -163,7 +163,6 @@ class CartesianDriveSolver:
             assert vmax is not None,"vmin and vmax are either both given or both None"
             self.vmin,self.vmax = vmin,vmax
 
-
     def drive(self,qcur,angVel,vel,dt):
         """Drives the robot by an incremental time step to reach the desired
         Cartesian (angular/linear) velocities of the links previously specified

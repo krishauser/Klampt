@@ -1,25 +1,73 @@
 """
 Contains the following helper controllers:
 
-- :class:`MultiController`: a process that runs many other sub-processes on 
+- :class:`RemappedBlock`: a remapping of inputs/outputs into another block's 
+  inputs and outputs.
+- :class:`MultiBlock`: a block that runs many other sub-blocks on 
   each step.  The I/O dictionaries are basically used as a blackboard
   architecture.
-- :class:`LambdaController`: a stateless process that simply runs a fixed 
+- :class:`LambdaBlock`: a stateless block that simply runs a fixed 
   function on each time step.
-- :class:`StateMachineController`: a state machine that switches between
-  multiple sub-controllers, with one sub-controller running at once and the
-  active controller triggered by some signal.
-- :class:`TransitionStateMachineController`: a state machine with explicit
-  transition conditions.
-- :class:`TimedControllerSequence`: a sequence of controllers, switched by
+- :class:`SumBlock`: computes a sum operation
+- :class:`DifferenceBlock`: computes a minus operation
+- :class:`ProductBlock`: computes a product operation
+- :class:`LinearBlock`: computes a linear function of its inputs.
+- :class:`TimedSequenceBlock`: a sequence of controllers, switched by
   time.
 - :class:`ComposeController`: a set of controllers for parts of a robot,
   for which q, dq, qcmd, dqcmd, torquecmd, are concatenated.
-- :class:`LinearController`: computes a linear function of its inputs.
-
+- :class:`SourceBlock`: a block that writes to the ControllerBlock
+  architecture.
+- :class:`SinkBlock`: a block that reads from the ControllerBlock
+  architecture.
 """
+from state_machine import TransitionStateMachine
 
-class MultiController(ControllerBase):
+
+class RemappedBlock(ControllerBlock):
+    """A remapping of a block's inputs and outputs"""
+    def __init__(self,block,inmap=None,outmap=None):
+        self.block = block
+        self.inmap = inmap
+        self.outmap = outmap
+    def __str__(self):
+        instr = str(self.inmap) if self.inmap is not None else ''
+        outstr = str(self.outmap) if self.outmap is not None else ''
+        return str(self.block)+'{'+instr+';'+outstr+'}'
+    def inputValid(self,**inputs):
+        if self.inmap is None:
+            return self.block.inputValid(**inputs)
+        else:
+            return ControllerBlock.inputValid(self,**inputs)
+    def inputNames(self):
+        if self.inmap is None:
+            return self.block.inputNames()
+        else:
+            return list(self.inmap.keys())
+    def outputNames(self):
+        if self.inmap is None:
+            return self.block.inputNames()
+        else:
+            return list(self.inmap.keys())
+    def advance(self,**inputs):
+        blockInputs = inputs if self.inmap is None else dict((v,inputs[k]) for v,k in self.inmap.items())
+        blockOutputs = self.block.advance(**blockInputs)
+        if self.outmap is None:
+            return blockOutputs
+        else:
+            return dict((v,blockOutputs[k]) for (v,k) in self.outmap.items())
+    def signal(self,type,**inputs):
+        blockInputs = inputs if self.inmap is None else dict((v,inputs[k]) for v,k in self.inmap.items())
+        self.block.signal(type,**blockInputs)
+    def getState(self):
+        return self.block.getState()
+    def setState(self,state):
+        return self.block.setState(state)
+    def drawGL(self):
+        return self.block.drawGL()
+
+
+class MultiBlock(ControllerBlock):
     """A controller that runs several other subcontrollers each time step
     and emulates a sort of blackboard architecture.  Basically used to
     emulate a multiprocessor on a robot.
@@ -136,13 +184,13 @@ class MultiController(ControllerBase):
         if self.inmap[c] == None: return self.register
         return dict((k,self.register[v]) for k,v in self.inmap[c].iteritems())
     
-    def output_and_advance(self,**inputs):
+    def advance(self,**inputs):
         assert len(self.inmap)==len(self.controllers),"%d inmaps != %d controlers"%(len(self.inmap),len(self.controllers))
         assert len(self.outmap)==len(self.controllers),"%d outmaps != %d controlers"%(len(self.outmap),len(self.controllers))
         self.register.update(inputs)
         self.outregister = {}
         for i,c in enumerate(self.controllers):
-            cout = c.output_and_advance(**self.controller_inputs(i))
+            cout = c.advance(**self.controller_inputs(i))
             if not cout: continue
             if self.outmap[i] == None:
                 self.register.update(cout)
@@ -181,7 +229,7 @@ class MultiController(ControllerBase):
         return
 
 
-class LambdaController(ControllerBase):
+class LambdaBlock(ControllerBlock):
     """A fixed-function controller that simply evaluates a function.  The
     function arguments and return values are mapped from/to the input/output
     dictionaries.
@@ -194,11 +242,11 @@ class LambdaController(ControllerBase):
         return self.argnames
     def outputNames(self):
         return self.outnames
-    def output_and_advance(self,**inputs):
+    def advance(self,**inputs):
         try:
             args = [inputs[a] for a in self.argnames]
         except KeyError:
-            print("LambdaController: Warning, argument does not exist in inputs")
+            print("LambdaBlock: Warning, argument does not exist in inputs")
             return None
         res = self.f(*args)
         if isinstance(self.outnames,(list,tuple)):
@@ -211,136 +259,41 @@ class LambdaController(ControllerBase):
             return None
 
 
-class StateMachineController(ControllerBase):
-    """A base class for a finite state machine controller. :meth:`next_state`
-    needs to be filled out by the subclass."""
-    def __init__(self,controllers,start=0):
-        self.controllers = controllers
-        self.current = start
-    def __str__(self):
-        strs = [str(c) for c in self.controllers]
-        strs[self.current] = '* '+strs[self.current]
-        return self.__class__.__name__+'\n'+'\n  '.join(strs)
-    def signal(self,type,**inputs):
-        if self.current >= 0:
-            self.controllers[self.current].signal(type,**inputs)
-    def output(self,**inputs):
-        if self.current<0: return None
-        return self.controllers[self.current].output(**inputs)
-    def advance(self,**inputs):
-        if self.current<0: return None
-        self.controllers[self.current].advance(**inputs)
-        self.current = self.next_state(self.current,**inputs)
-    def output_and_advance(self,**inputs):
-        if self.current<0: return None
-        res = self.controllers[self.current].output_and_advance(**inputs)
-        n = self.next_state(self.current,**inputs)
-        if n != self.current:
-            self.controllers[self.current].signal('exit',**inputs)
-            if n >= 0:
-                self.controllers[n].signal('enter',**inputs)
-            self.current = n
-        return res
-    def drawGL(self):
-        if self.current>=0:
-            self.controllers[self.current].drawGL()
-    def next_state(self,state,**inputs):
-        """Subclasses should override this to implement the transitions"""
-        return state
-    def getState(self):
-        controllerState = []
-        for c in self.controllers:
-            try:
-                s = c.getState()
-            except NotImplementedError:
-                s = None
-            controllerState.append(s)
-        return {'current':self.current,'controllers':controllerState}
-    def setState(self,state):
-        if 'current' not in state or 'controllers' not in state or len(state['controllers']) != len(self.controllers):
-            raise ValueError("Invalid state dict")
-        self.current = state.current
-        for (c,s) in zip(self.controllers,state['controllers']):
-            if s is not None:
-                c.setState(s)
+class SumBlock(LambdaBlock):
+    """An estimator that produces an output "A + B [ + ...]" for two or more arguments"""
+    def __init__(self,*args):
+        def add(*args):
+            if hasattr(args[0],'__iter__'):
+                return vectorops.add(*args)
+            else:
+                return sum(args)
+        LambdaBlock.__init__(self,add,args,' + '.join(args))
 
 
-class TransitionStateMachineController(StateMachineController):
-    """A state machine controller with a transition matrix that determines
-    when to move to the next state.
-    """
-    def __init__(self,controllers,transitions,start=0):
-        """transitions is a list of dictionaries,
-        [{x1:cond1,...,xk:condk},...,{}]
-        so that if j is in transitions[i], then transitions[i][j](inputs)
-        is a condition that tells you whether to change states from i to j.
-        """
-        StateMachineController.__init__(self,controllers,start)
-        self.transitions = transitions
-
-    def next_state(self,state,**inputs):
-        if state < 0: return state
-        trans = self.transitions[state]
-        for (k,v) in trans.iteritems():
-            if v(inputs):
-                print("TransitionStateMachineController: Transition to controller",k)
-                return k
-        return state
+class DifferenceBlock(LambdaBlock):
+    """An estimator that produces an output "A - B" for two arguments "A" and "B"."""
+    def __init__(self,arg1,arg2):
+        def diff(x,y):
+            if hasattr(x,'__iter__'):
+                return vectorops.sub(x,y)
+            else:
+                return x-y
+        LambdaBlock.__init__(self,diff,[arg1,arg2],arg1+" - "+arg2)    
 
 
-class ComposeController(ControllerBase):
-    """Integrates vectors from multiple items into a single vector.
-    Useful for when you have one controller for each arm, one for a lower body,
-    etc.
-    
-    Arguments:
-        itemindices (dict): a map from items to indices
-        outitem (str): the name of the output
-        flatten (bool, optional): true if you want a list rather than a dict,
-            in which case the indices are assumed to be all integers. Empty
-            indices are filled in with 'self.fill'.  By default this produces
-            a vector.
-    """
-    def __init__(self,itemindices,outitem,flatten=True):
-        self.itemindices = itemindices
-        self.outitem = outitem
-        self.flatten = flatten
-        self.fill = 0.0
-    
-    def output(self,**inputs):
-        res = {}
-        for (k,v) in self.itemindices.iteritems():
-            try:
-                for index in v:
-                    res[index] = inputs[k][index]
-            except KeyError:
-                print("ComposeController: Warning, item",k,"does not exist in index")
-                pass
-        if self.flatten:
-            inds = sorted(res.keys())
-            vres = [self.fill]*(max(inds)+1)
-            for (k,v) in res.iteritems():
-                vres[k] = v
-            return {self.outitem:vres}
-        else:
-            return {self.outitem:res}
+class ProductBlock(LambdaBlock):
+    """An estimator that produces an output "A*B" for two arguments "A" and "B"."""
+    def __init__(self,arg1,arg2):
+        def prod(x,y):
+            if hasattr(x,'__iter__') or hasattr(y,'__iter__'):
+                return vectorops.mul(x,y)
+            else:
+                return x*y
+        LambdaBlock.__init__(self,prod,[arg1,arg2],arg1+" * "+arg2)    
 
 
-class TimedControllerSequence(TransitionStateMachineController):
-    """A state-machine controller that goes through each sub-controller
-    in sequence.
-    """
-    def __init__(self,controllers,times):
-        assert len(times)==len(controllers)
-        trans = [{} for c in controllers]
-        for i in xrange(len(controllers)-1):
-            trans[i][i+1] = lambda input:input['t'] >= times[i]
-        trans[-1][-1] = lambda input:input['t'] >= times[-1]
-        TransitionStateMachineController.__init__(self,controllers,trans)
-
-
-class LinearController(ControllerBase):
-    """Implements a linear controller
+class LinearBlock(ControllerBlock):
+    """Implements a linear function
     u = K1*input[x1] + ... + Kn*input[xn] + offset
 
     The user must fill out the self.gains member using the addGain()
@@ -361,7 +314,7 @@ class LinearController(ControllerBase):
         return [self.outputType]
     def setConstant(self,offset):
         self.offset = offset
-    def output(self,**inputs):
+    def advance(self,**inputs):
         res = self.offset
         for (x,K) in self.gains.iteritems():
             if x not in inputs:
@@ -374,3 +327,114 @@ class LinearController(ControllerBase):
         return {outputType:res}
 
 
+class CounterBlock(ControllerBlock):
+    """A block that just counts the number of times that it's run"""
+    def __init__(self,initial=0):
+        self.counter = initial
+    def inputNames(self):
+        return []
+    def outputNames(self):
+        return ['counter']
+    def advance(self,**inputs):
+        res = {'counter':self.counter}
+        self.counter = self.counter+1
+        return res
+    def getState(self):
+        return self.counter
+    def setState(self,state):
+        self.counter = state
+    def signal(self,type,**inputs):
+        if type=='reset':
+            self.counter = 0
+
+
+class ComposeController(ControllerBlock):
+    """Concatenates vectors from multiple items into a single vector.
+    Useful for when you have one controller for each arm, one for a lower body,
+    etc.
+    
+    Arguments:
+        itemindices (dict): a map from items to indices
+        outitem (str): the name of the output
+        flatten (bool, optional): true if you want a list rather than a dict,
+            in which case the indices are assumed to be all integers. Empty
+            indices are filled in with 'self.fill'.  By default this produces
+            a vector.
+    """
+    def __init__(self,itemindices,outitem,flatten=True):
+        self.itemindices = itemindices
+        self.outitem = outitem
+        self.flatten = flatten
+        self.fill = 0.0
+    
+    def advance(self,**inputs):
+        res = {}
+        for (k,v) in self.itemindices.iteritems():
+            try:
+                for index in v:
+                    res[index] = inputs[k][index]
+            except KeyError:
+                print("ComposeController: Warning, item",k,"does not exist in index")
+                pass
+        if self.flatten:
+            inds = sorted(res.keys())
+            vres = [self.fill]*(max(inds)+1)
+            for (k,v) in res.iteritems():
+                vres[k] = v
+            return {self.outitem:vres}
+        else:
+            return {self.outitem:res}
+
+
+class TimedSequenceBlock(TransitionStateMachine):
+    """A state-machine controller that goes through each sub-controller
+    in sequence.
+    """
+    def __init__(self,controllers,times):
+        assert len(times)==len(controllers)
+        trans = [{} for c in controllers]
+        for i in xrange(len(controllers)-1):
+            trans[i][i+1] = lambda input:input['t'] >= times[i]
+        trans[-1][-1] = lambda input:input['t'] >= times[-1]
+        TransitionStateMachine.__init__(self,controllers,trans)
+
+
+class SourceBlock(ControllerBlock):
+    """Outputs the dictionary self.values, which may be constant or written to
+    by an external process (that is, code outside of the ControllerBlock
+    architecture).
+    """
+    def __init__(self,values=None):
+        if values is None:
+            values = dict()
+        self.values = values
+    def outputNames(self):
+        return list(self.values.keys())
+    def inputNames(self):
+        return []
+    def advance(self,**inputs):
+        return self.values
+    def getState(self):
+        return self.values
+    def setState(self,state):
+        self.values = state
+
+
+class SinkBlock(ControllerBlock):
+    """Inputs to the dictionary self.values, which may be read by an external
+    process (that is, code outside of the ControllerBlock architecture).
+    """
+    def __init__(self,values=None):
+        self.values = None
+    def outputNames(self):
+        return None
+    def advance(self,**inputs):
+        self.values = inputs
+        return
+    def getState(self):
+        return self.values
+    def setState(self,state):
+        self.values = state
+    def signal(self,type,**inputs):
+        if type=='reset':
+            self.values = None

@@ -1,14 +1,15 @@
-from .controller import ControllerBase
+from .controller import ControllerBlock
 from .robotinterface import RobotInterfaceBase
 from .robotinterfaceutils import RobotInterfaceCompleter
 
 class RobotControllerToInterface(object):
-    """A class that connects the output of a standard :class:`ControllerBase` 
+    """A class that connects the I/O of a standard :class:`ControllerBlock` 
     robot controller with a :class:`RobotInterfaceBase` Robot Interface Layer
     API.
 
     Arguments:
-        controller (ControllerBase): the controller software
+        controller (ControllerBlock): the controller software, should conform
+            to the RobotControllerBase convention.
         robotInterface (RobotInterfaceBase): the robot interface
         controllerRateRatio (float, optional): if not 1, scales how many times
             the controller is run for each main loop of the robotInterface
@@ -37,7 +38,7 @@ class RobotControllerToInterface(object):
             pass
         for s in self.robotInterface.enabledSensors():
             inputs[s] = self.robotInterface.sensorMeasurements(s)
-        res = self.controller.output_and_advance(**inputs)
+        res = self.controller.advance(**inputs)
         if 'qcmd' in res:
             dqcmd = res['dqcmd'] if 'dqcmd' in res else [0.0]*len(res['qcmd'])
             if 'torquecmd' in res:

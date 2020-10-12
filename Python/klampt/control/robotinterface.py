@@ -17,7 +17,7 @@ class RobotInterfaceBase(object):
     Each of these methods should be synchronous calls, called at a single time
     step.  The calling convention is::
 
-        interafce = MyRobotInterface(...args...)
+        interface = MyRobotInterface(...args...)
         if not interface.initialize():  #should be called first
             raise RuntimeError("There was some problem initializing interface "+str(interface))
         dt = 1.0/interface.controlRate()

@@ -1,29 +1,30 @@
-"""Defines a set of generic "controllers" that are repeatedly-updating
+"""Defines a set of generic "controller blocks" that are repeatedly-updating
 processes, which typically output commands to a simulated or real robot. 
-However, controllers can be much more, including estimators, sensor drivers, 
-etc.
+However, blocks can do much more, including estimators, read from sensor
+drivers, etc.
 
-The :class:`ControllerBase` class defines a generic process that accepts some
-inputs and produces some outputs every time that output_and_advance() is
+The :class:`ControllerBlock` class defines a block as accepting some
+inputs and produces some outputs every time that ``advance()`` is
 called.  The inputs and outputs are extremely general, and are just string-
-indexed dictionaries.  The usage of a ControllerBase is governed by convention.
+indexed dictionaries.  The usage of a ControllerBlock is governed by
+convention.
 
 
-Robot controllers
-=================
+Robot controller blocks
+=======================
 
-If the controller is being used for a simulated robot or the Klampt Robot
-Interface Layer, there's a standard convention.  It expects to receive the
-following values as input:
+If the block is being used for :class:`SimpleSimulator` or the Klampt Robot
+Interface Layer (see :class:`RobotInterfaceBase`, there's a standard convention
+defined by :class:`RobotControllerBase`. It expects to receive the following
+values as input:
 
-- t = time: current time
-- dt = timestep: controller time step
-- sensor1 = sensor1_values: measurements for sensor 1
+- t: current time, in seconds
+- dt: controller time step, in seconds
+- q: sensed robot configuration
+- dq: sensed robot velocity
+- [sensor1_name]: measurement vector for sensor 1
 - ...
-- sensork = sensork_values: measurements for sensor k
-
-in which 'q', 'dq' are standard sensors, but other sensors may also be
-provided.
+- [sensor1_name]: measurement vector for sensor k
 
 The output dictionary is expected to contain one or more of the following keys:
 
@@ -32,17 +33,18 @@ The output dictionary is expected to contain one or more of the following keys:
 - tcmd
 - torquecmd
 
-If qcmd is set, then it's a PID command. If dqcmd is set, then it's
-the desired velocity, otherwise the desired velocity is 0.
+These are interpreted as follows:
 
-If qcmd is set and torquecmd is set, then torquecmd is a feedforward
-torque.
+- If qcmd is set, then it's a PID command. If dqcmd is also set, then it 
+  describes the desired velocity. If dqcmd is not set, the desired velocity is
+  0.  If torquecmd is also set, then torquecmd is a feedforward torque.
+- If dqcmd and tcmd are set, they describe a fixed velocity command for
+  duration tcmd.
+- If torquecmd is set, this describes a torque command.
 
-If dqcmd and tcmd are set, it's a fixed velocity command for duration tcmd.
+No other combinations are currently supported.
 
-Otherwise, torquecmd must be set, and it's a torque command.
-
-For convenience, your ControllerBase subclass may use the
+For convenience, your RobotControllerBase subclass may use the
 :class:`RobotControllerIO` class for object-oriented access to the input
 / output data. Example usage is as follows::
 
@@ -61,7 +63,7 @@ The easiest way to use this with a simulated / real robot is the
 
 Example that outputs to a simulation (and visualizes it)::
 
-    from klampt.control.controller import ControllerBase
+    from klampt.control.controller import RobotControllerBase
     from klampt.control.simrobotinterface import *
     from klampt.control.interop import RobotControllerToInterface
     from klampt import WorldModel, Simulator
@@ -75,7 +77,7 @@ Example that outputs to a simulation (and visualizes it)::
 
     vis.add("world",world)
     vis.show()
-    controller = MyControllerObject()  #subclass of ControllerBase
+    controller = MyControllerObject()  #subclass of RobotControllerBase
     interface = SimPositionControlInterface(sim.controller(0),sim)
     binding = RobotControllerToInterface(controller,interface)
     while vis.shown():
@@ -85,43 +87,43 @@ Example that outputs to a simulation (and visualizes it)::
 
 Example that outputs to a real robot::
 
-    from klampt.control.controller import ControllerBase
+    from klampt.control.controller import RobotControllerBase
     from klampt.control.interop import RobotControllerToInterface
 
     #create MyControllerObject, MyRobotInterface class here
 
-    controller = MyControllerObject()  #subclass of ControllerBase
+    controller = MyControllerObject()  #subclass of RobotControllerBase
     interface = MyRobotInterface(...)
     binding = RobotControllerToInterface(controller,interface)
     while not done:
         binding.advance()
 
 For tighter control over a simulation, such as sub-stepping, you should use the
-:mod:`klampt.sim.simulate` module.  Robot controllers in ControllerBase form
+:mod:`klampt.sim.simulation` module.  Robot controllers in ControllerBlock form
 are accepted by the :meth:`SimpleSimulator.setController` method.
 
 
 Blocks submodule
 ================
 
-The :mod:`klampt.control.blocks` module gives several examples of controllers
-that can be composed.
+The :mod:`klampt.control.blocks` module gives several examples of controller 
+blocks that can be composed.  See :mod:`klampt.control.blocks.utils` for
+utilities, and :mod:`klampt.control.blocks.state_machine` for state machines
+that use ControllerBlocks.
 
 """
 
 
 
-class ControllerBase(object):
+class ControllerBlock(object):
     """A generic base class that outputs a named dictionary outputs of based
     on a dictionary of inputs.  This is typically used to define robot
     controllers and components of such controllers, such as state estimators.
 
-    At a minimum, a stateless controller should implement the output()
-    method. 
+    At a minimum, a controller should implement the :meth:`advance` method. 
 
-    A stateful controller should also implement the :meth:`advance` method, and
-    ideally the :meth:`getState` and :meth:`setState` methods.  The
-    :meth:`output` method should not modify state.
+    A stateful controller should also implement the :meth:`getState` and
+    :meth:`setState` methods. 
     """
     def __init__(self):
         pass
@@ -133,12 +135,15 @@ class ControllerBase(object):
     def inputNames(self):
         """Optional: to help debug, this is the set of input arguments that are
         expected. Returns a list, tuple, or set."""
-        return []
+        raise NotImplementedError()
 
     def inputValid(self,**inputs):
         """Optional: to help debug, tests whether the input argument dictionary
         is valid.  Returns bool."""
-        return all(i in inputs for i in self.inputNames())
+        try:
+            return all(i in inputs for i in self.inputNames())
+        except NotImplementedError:
+            return True
 
     def outputNames(self):
         """Optional: to help debug, this is the set of output arguments that are
@@ -146,10 +151,9 @@ class ControllerBase(object):
         output."""
         return None
 
-    def output(self,**inputs):
+    def advance(self,**inputs):
         """Computes the output of this controller given a dictionary of
-        inputs.  The output is typically a dictionary but could also be a
-        list.
+        inputs, and advances the time step.  The output is a dictionary.
         """
         return None
 
@@ -157,19 +161,12 @@ class ControllerBase(object):
         """Sends some asynchronous signal to the controller. The inputs
         are application-defined, but typical signals include:
 
-        - 'reset'
-        - 'enter'
-        - 'exit'
+        - 'reset': return state to the initial state
+        - 'enter': for state machine: repeated advance() calls will now begin.
+        - 'exit': for state machine: advance() calls will now stop.
+
         """
         pass
-
-    def advance(self,**inputs):
-        pass
-
-    def output_and_advance(self,**inputs):
-        res = self.output(**inputs)
-        self.advance(**inputs)
-        return res
 
     def getState(self):
         """Optional: for stateful controllers, returns some serializable
@@ -186,15 +183,37 @@ class ControllerBase(object):
         pass
 
 
+class RobotControllerBase(ControllerBlock):
+    """A base class for a robot controller.  This doesn't do anything but
+    implement the inputNames method; the subclass still has to implement
+    advance, signal, getState/saveState, etc.
+    """
+    def __init__(self,robotModel=None):
+        self.robotModel = robotModel
+    def inputNames(self):
+        inputs = ['t','dt','q','dq']
+        if self.robotModel is not None:
+            i = 0
+            while True:
+                s = self.robotModel.sensor(i)
+                i += 1
+                if s.name()=='':
+                    break
+                if s.name() in ['q','dq']:
+                    continue
+                inputs.append(s.name())
+        return inputs
+
+
 class RobotControllerIO:
     """A helper class that makes it a bit easier to implement a
-    `ControllerBase` robot controller by providing an object-oriented 
-    interface to the dictionary-based protocol.
+    `RobotControllerBase` by providing an object-oriented interface to the
+    dictionary-based protocol.
 
     Usage::
 
-        class MyController(ControllerBase):
-            def output(**input):
+        class MyController(ControllerBlock):
+            def advance(**input):
                 api = RobotControllerIO(inputs)
                 print("Current time is",api.time())
                 #set a position command
@@ -311,21 +330,3 @@ class RobotControllerIO:
 
 
         
-def make(robot):
-    return ControllerBase()
-
-
-def launch(fn,robot):
-    """Launches a controller given by the given python module for the
-    given robot using the module's default make(robot) routine."""
-    import os
-    import importlib
-    path,base = os.path.split(fn)
-    mod_name,file_ext = os.path.splitext(base)
-    mod = importlib.import_module(path+"."+mod_name,fn)
-    try:
-        maker = mod.make
-    except AttributeError:
-        print("Module",mod.__name__,"must have a make() method")
-        raise
-    return maker(robot)

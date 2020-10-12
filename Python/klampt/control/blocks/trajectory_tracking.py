@@ -1,8 +1,8 @@
-from .controller import ControllerBase,RobotControlI
+from .controller import ControllerBlock,RobotControlIO
 from klampt.model import trajectory
 
 
-class TrajectoryPositionController(ControllerBase):
+class TrajectoryPositionController(ControllerBlock):
     """A (robot) controller that takes in a trajectory and outputs the position
     along the trajectory.  If type is a 2-tuple, this will also output the
     derivative of the trajectory"""
@@ -20,7 +20,7 @@ class TrajectoryPositionController(ControllerBase):
         else:
             return [self.outputType]
     
-    def output(self,**inputs):
+    def advance(self,**inputs):
         t = inputs['t']
         if self.startTime == None:
             self.startTime = t
@@ -41,7 +41,7 @@ class TrajectoryPositionController(ControllerBase):
             self.startTime = None
 
 
-class TrajectoryWithFeedforwardTorqueController(ControllerBase):
+class TrajectoryWithFeedforwardTorqueController(ControllerBlock):
     """A controller that takes in a joint trajectory and a feedforward torque
     trajectory."""
     def __init__(self,traj,torquetraj):
@@ -55,7 +55,7 @@ class TrajectoryWithFeedforwardTorqueController(ControllerBase):
     def outputNames(self):
         return ['qcmd','dqcmd','torquecmd']
 
-    def output(self,**inputs):
+    def advance(self,**inputs):
         api = RobotControlIO(inputs)
         t = api.time()
         if self.startTime == None:

@@ -1,9 +1,9 @@
-from ..controller import ControllerBase
+from ..controller import ControllerBlock
 from ..cartesian_driver import CartesianDriveSolver
 
 
-class CartesianDriveController(ControllerBase):
-    """Adapts a CartesianDriveSolver to a ControllerBase.  The robot's
+class CartesianDriveController(ControllerBlock):
+    """Adapts a CartesianDriveSolver to a ControllerBlock.  The robot's
     commanded position is updated by the solver.
 
     It is assumed that the solver is initialized with all the settings but
@@ -29,13 +29,7 @@ class CartesianDriveController(ControllerBase):
         if type == 'enter' or type == 'start':
             self.start = True
 
-    def output(self,**inputs):
-        raise RuntimeError("CartesianDriveController can only be run in output_and_advance mode")
-
     def advance(self,**inputs):
-        raise RuntimeError("CartesianDriveController can only be run in output_and_advance mode")
-
-    def output_and_advance(self,**inputs):
         if 'qcmd' in inputs:
             self._qcmd = inputs['qcmd']
         elif self._qcmd is None:

@@ -96,7 +96,7 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
 
     def _try(self,fn,args,fallback=None):
         """Tries calling a function implemented in the base class, with potential
-        alternates.
+        alternatives.
 
         Returns the result of calling getattr(_base,fn)(*args), or if that raises a
         NotImplementedError, returns fallback(*args).
@@ -476,6 +476,27 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
 
     def toKlamptVelocity(self,config,klamptVelocity,part=None,joint_idx=None):
         return self._base.toKlamptVelocity(velocity,klamptVelocity,part=None,joint_idx=None)
+
+    def print_status(self):
+        print("****** Status of RobotInterfaceCompleter *********")
+        print("Base interface",str(self._base))
+        if self._indices is None:
+            print("Not initialized")
+            print("**************************************************")
+            return
+        print("Status",self.status())
+        if len(self._parts) != len(self._baseParts):
+            newparts = [k for k in self._parts.keys() if k not in self._baseParts]
+            print("Added parts:",','.join(newparts))
+        
+        if self._baseControlMode == self._emulatorControlMode:
+            print("Using base control mode",self._baseControlMode)
+        else:
+            print("Using emulator control mode",self._emulatorControlMode,"and base mode",self._baseControlMode)
+            self._emulator.print_status()
+
+        print("**************************************************")
+
 
 
 class MultiRobotInterface(RobotInterfaceBase):
@@ -967,12 +988,89 @@ class _CartesianEmulatorData:
         self.driver = CartesianDriveSolver(robot)
         assert indices[-1] == max(indices),"Indices must be in sorted order"
         self.eeLink = robot.link(indices[-1])
-        self.qcur = robot.getConfig()
-        self.driver.start(self.qcur,indices[-1])
-        self.orientationConstrained = False
+        self.toolCoordinates = [0,0,0]
+        self.orientationConstrained = True
+        self.t = None
+        self.active = False
+        self.driveCommand = None,None
+        self.endDriveTime = None
 
     def setToolCoordinates(self,xtool_local):
-        self.driver.start(self.qcur,self.indices[-1],xtool_local)
+        if self.active:
+            raise RuntimeError("Can't set tool coordinates while a cartesian velocity command is active")
+        self.toolCoordinates = xtool_local
+
+    def solveIK(self,xparams):
+        qorig = self.robot.getConfig()
+        if not self.active:
+            self.driver.start(qorig,self.indices[-1],endEffectorPositions=self.toolCoordinates)
+        goal = self.driver.ikGoals[0]
+        if len(xparams) == 3:
+            #point-to-point constraint
+            goal.setFixedPosConstraint(self.toolCoordinates,xparams)
+            goal.setFreeRotConstraint()
+            self.orientationConstrained = False
+        elif len(xparams) == 2:
+            if len(xparams[0]) != 9 or len(xparams[1]) != 3:
+                raise ValueError("Invalid IK parameters, must be a point or se3 element")
+            goal.setFixedPosConstraint(self.toolCoordinates,xparams[1])
+            goal.setFixedRotConstraint(xparams[0]);
+            self.orientationConstrained = True
+        else:
+            raise ValueError("Invalid IK parameters, must be a point or se3 element")
+        self.driver.solver.set(0,goal)
+        err = self.driver.solver.getResidual()
+        res = self.driver.solver.solve()
+        if res:
+            return self.robot.getConfig()
+        err2 = self.driver.solver.getResidual()
+        if vectorops.normSquared(err2) < vectorops.normSquared(err):
+            return self.robot.getConfig()
+        else:
+            return qorig
+
+    def setCartesianVelocity(self,qcur,dxparams,ttl):
+        assert len(qcur) == self.robot.numDrivers()
+        for i,v in enumerate(qcur):
+            self.robot.driver(i).setValue(v)
+        qcur = self.robot.getConfig()
+
+        if not self.active:
+            self.driver.start(qcur,self.indices[-1],endEffectorPositions=self.toolCoordinates)
+            self.active = True
+        
+        if self.t is None:
+            self.endDriveTime = ttl
+        else:
+            self.endDriveTime = self.t + ttl
+        if len(dxparams) == 2:
+            if len(dxparams[0]) != 3 or len(dxparams[1]) != 3:
+                raise ValueError("Invalid IK parameters, must be a 3 vector or a pair of angular velocity / velocity vectors")
+            self.driveCommand = dxparams
+            self.orientationConstrained = True
+        else:
+            if len(dxparam) != 3:
+                raise ValueError("Invalid IK parameters, must be a 3 vector or a pair of angular velocity / velocity vectors")
+            self.driveCommand = None,dxparams
+            self.orientationConstrained = False
+
+    def update(self,qcur,t,dt):
+        if self.t is None:
+            if self.endDriveTime is not None:
+                self.endDriveTime = t + self.endDriveTime
+            self.t = t
+        if not self.active:
+            return
+        if t > self.endDriveTime:
+            self.active = False
+            return
+        assert len(qcur) == self.robot.numDrivers()
+        for i,v in enumerate(qcur):
+            self.robot.driver(i).setValue(v)
+        qcur = self.robot.getConfig()
+        (amt,q) = self.driver.drive(qcur,self.driveCommand[0],self.driveCommand[1],dt)
+        self.robot.setConfig(q)
+        return [self.robot.driver(i).getValue() for i in range(self.robot.numDrivers())]
 
     def cartesianPosition(self,q):
         assert len(q) == self.robot.numDrivers()
@@ -981,8 +1079,7 @@ class _CartesianEmulatorData:
             model.driver(i).setValue(v)
         model.setConfig(model.getConfig())
         T = self.eeLink.getTransform()
-        local = self.driver.endEffectorOffsets[0]
-        t = T.apply(local)
+        t = T.apply(self.toolCoordinates)
         if self.orientationConstrained:
             return (T[0],t)
         else:
@@ -997,7 +1094,7 @@ class _CartesianEmulatorData:
             model.driver(i).setValue(v)
             model.driver(i).setVelocity(dq[i])
         model.setConfig(model.getConfig())
-        local = self.driver.endEffectorOffsets[0]
+        local = self.toolCoordinates
         v = self.eeLink.getPointVelocity(local)
         if self.orientationConstrained:
             w = self.eeLink.getAngularVelocity()
@@ -1010,7 +1107,7 @@ class _CartesianEmulatorData:
         for i,v in enumerate(q):
             model.driver(i).setValue(v)
         model.setConfig(model.getConfig())
-        local = self.driver.endEffectorOffsets[0]
+        local = self.toolCoordinates
         if self.orientationConstrained:
             J = self.eeLink.getJacobian(local)
             wrench = [vectorops.dot(Jrow,t) for Jrow in J]
@@ -1034,6 +1131,11 @@ class _RobotInterfaceEmulatorData:
         self.lastClock = self.curClock
         self.curClock = t
         self.dt = t - self.lastClock
+        for inds,c in self.cartesianInterfaces.items():
+            qdes = c.update(q,self.curClock,self.dt)
+            if qdes is not None:
+                assert len(qdes) == len(self.jointData)
+                self.setPosition(inds,[qdes[i] for i in inds])
         for i,j in enumerate(self.jointData):
             j.update(self.curClock,q[i],v[i],self.dt)
 
@@ -1242,8 +1344,56 @@ class _RobotInterfaceEmulatorData:
         return max(j.destinationTime(self.curClock) for j in self.jointData)
 
     def setToolCoordinates(self,xtool_local,indices):
-        c = self._makeCartesianInterface(indices)
+        try:
+            c = self.cartesianInterfaces[tuple(indices)]
+        except KeyError:
+            c = _CartesianEmulatorData(self.klamptModel,indices)
+            self.cartesianInterfaces[tuple(indices)] = c
         c.setToolCoordinates(xtool_local)
+
+    def setGravityCompensation(self,gravity,load,load_com,indices):
+        raise NotImplementedError("TODO: implement gravity compensation?")
+
+    def setCartesianPosition(self,xparams,indices):
+        try:
+            c = self.cartesianInterfaces[tuple(indices)]
+        except KeyError:
+            c = _CartesianEmulatorData(self.klamptModel,indices)
+            self.cartesianInterfaces[tuple(indices)] = c
+        for i,j in enumerate(self.jointData):
+            self.klamptModel.driver(i).setValue(j.commandedPosition)
+        qKlamptNext = c.solveIK(xparams)
+        self.klamptModel.setConfig(qKlamptNext)
+        self.setPosition(indices,[self.klamptModel.driver(i).getValue() for i in indices])
+
+    def moveToCartesianPosition(self,xparams,speed=1.0):
+        try:
+            c = self.cartesianInterfaces[tuple(indices)]
+        except KeyError:
+            c = _CartesianEmulatorData(self.klamptModel,indices)
+            self.cartesianInterfaces[tuple(indices)] = c
+        for i,j in enumerate(self.jointData):
+            self.klamptModel.driver(i).setValue(j.commandedPosition)
+        qKlamptNext = c.solveIK(xparams)
+        self.klamptModel.setConfig(qKlamptNext)
+        self.moveToPosition(indices,[self.klamptModel.driver(i).getValue() for i in indices],speed)
+
+    def setCartesianVelocity(self,dxparams,ttl=None):
+        try:
+            c = self.cartesianInterfaces[tuple(indices)]
+        except KeyError:
+            c = _CartesianEmulatorData(self.klamptModel,indices)
+            self.cartesianInterfaces[tuple(indices)] = c
+        c.setCartesianVelocity(self.commandedPosition(),dxparams,ttl)
+
+    def setCartesianForce(self,fparams,ttl=None):
+        try:
+            c = self.cartesianInterfaces[tuple(indices)]
+        except KeyError:
+            c = _CartesianEmulatorData(self.klamptModel,indices)
+            self.cartesianInterfaces[tuple(indices)] = c
+        raise NotImplementedError("TODO: implement cartesian force?")
+        c.setCartesianForce(self.commandedPosition(),fparams,ttl)
 
     def cartesianPosition(self,q,indices):
         assert len(q) == len(self.jointData),"cartesianPosition: must use full-body configuration"
@@ -1270,6 +1420,9 @@ class _RobotInterfaceEmulatorData:
             return c.cartesianForce(q,t)
         except KeyError:
             raise ValueError("Invalid Cartesian index set for emulator: no command currently set")
+
+    def print_status(self):
+        pass
 
 
 class _SubRobotInterfaceCompleter(RobotInterfaceCompleter):

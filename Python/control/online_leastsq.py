@@ -1,5 +1,4 @@
 import numpy as np
-import scipy
 import math
 
 def check_symmetry(A,tol=1e-7):

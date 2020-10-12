@@ -1,27 +1,29 @@
 from klampt.math import vectorops
-from controller import ControllerBase,LambdaController
-from MotionModel import AdaptiveMotionModel
+from ..controller import ControllerBlock
+from .utils import LambdaBlock
 
-class VelocityEstimator(ControllerBase):
-    """An estimator that runs by computing the velocity using finite
-    differences."""
-    def __init__(self,robot=None):
+class DerivativeEstimator(ControllerBlock):
+    """An estimator computes the derivative of some input (typically 'q') using
+    finite differences.  Outputs to 'dq' or ('d'+name in general).
+    """
+    def __init__(self,name='q',robot=None):
+        self.name = name
         self.robot = robot
         self.qlast = None
     def inputNames(self):
-        return ['dt','q']
+        return ['dt',self.name]
     def outputNames(self):
-        return ['dq']
+        return ['d'+self.name]
     def getState(self):
-        return {'qlast':self.qlast}
+        return {'last':self.qlast}
     def setState(self,state):
-        self.qlast = state['qlast']
-    def output_and_advance(self,**inputs):
+        self.qlast = state['last']
+    def advance(self,**inputs):
         try:
             dt = inputs["dt"]
-            q = inputs["q"]
+            q = inputs[self.name]
         except KeyError:
-            raise ValueError("Input needs to have configuration 'q' and timestep 'dt'")
+            raise ValueError("Input needs to have value '%s' and timestep 'dt'"%(self.name,))
         if len(q)==0: return None
         if self.qlast==None:
             dq = [0]*len(q)
@@ -32,25 +34,48 @@ class VelocityEstimator(ControllerBase):
                 assert(len(self.qlast)==len(q))
                 dq = vectorops.div(self.robot.interpolate_deriv(self.qlast,q),dt)
         self.qlast = q
-        return {'dq':dq}
+        return {'d'+self.name:dq}
 
     def signal(self,type,**inputs):
         if type=='reset':
             self.qlast=None
 
 
-class DifferenceEstimator(LambdaController):
-    """An estimator that produces an output "A - B" for two arguments "A" and "B"."""
-    def __init__(self,arg1,arg2):
-        def diff(x,y):
-            if hasattr(x,'__iter__'):
-                return vectorops.sub(x,y)
-            else:
-                return x-y
-        LambdaController.__init__(self,diff,[arg1,arg2],arg1+" - "+arg2)
+class IntegralEstimator(ControllerBlock):
+    """An estimator computes the integral of some input using the 
+    trapezoidal rule.
+    """
+    def __init__(self,name):
+        self.name = name
+        self.integral = None
+    def inputNames(self):
+        return ['dt',self.name]
+    def outputNames(self):
+        return ['I'+self.name]
+    def getState(self):
+        return self.integral
+    def setState(self,state):
+        self.integral = state
+    def advance(self,**inputs):
+        try:
+            dt = inputs["dt"]
+            v = inputs[self.name]
+        except KeyError:
+            raise ValueError("Input needs to have value %s and timestep 'dt'"%(self.name,))
+        if len(v)==0: return None
+        if self.integral is None:
+            self.integral = vectorops.mul(v,dt)
+        else:
+            self.integral = vectorops.madd(self.integral,v,dt)
+        result = vectorops.madd(self.integral,v,-0.5*dt)
+        return {'I'+self.name:result}
+
+    def signal(self,type,**inputs):
+        if type=='reset':
+            self.integral=None
 
 
-class FIRFilter(ControllerBase):
+class FIRFilter(ControllerBlock):
     """An estimator that filters some other signal using a Finite Impulse Response
     filter.  `b` is the vector of coefficients.
 
@@ -72,7 +97,7 @@ class FIRFilter(ControllerBase):
     def outputNames(self):
         return [self.outname]
 
-    def output(self,**inputs):
+    def advance(self,**inputs):
         val = inputs[self.argname]
         if hasattr(val,'__iter__'):
             res = vectorops.mul(val,self.b[0])
@@ -81,7 +106,6 @@ class FIRFilter(ControllerBase):
                 res = vectorops.madd(res,v,self.b[i+1])
             if len(self.history) + 1 < len(self.b):
                 res = vectorops.madd(res,self.history[-1],sum(self.b[len(self.history)+1:]))
-            return res
         else:
             res = val*self.b[0]
             assert len(self.history)+1 <= len(self.b)
@@ -89,13 +113,11 @@ class FIRFilter(ControllerBase):
                 res += v*self.b[i+1]
             if len(self.history) + 1 < len(self.b):
                 res += self.history[-1]*sum(self.b[len(self.history)+1:])
-            return res
-
-    def advance(self,**inputs):
-        val = inputs[self.argname]
+        #advance history
         self.history.appendleft(val)
         while len(self.history) >= len(self.b):
             self.history.pop()
+        return res
 
     def getState(self):
         return {'history',self.history}

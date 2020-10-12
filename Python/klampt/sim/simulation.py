@@ -196,7 +196,10 @@ class SimpleSimulator (Simulator):
             robot: either an index, string, or RobotModel.
             function: either 1) a one-argument function that takes the
                 robot's SimRobotController instance, or 2) an instance of a
-                BaseController class (see Python/control/controller.py)
+                :class:`klampt.control.controller.ControllerBlock` class,
+                which must conform to the
+                :class:`klampt.control.controller.RobotControllerBase`
+                convention.
         """
         if isinstance(robot,int):
             index = robot
@@ -207,7 +210,7 @@ class SimpleSimulator (Simulator):
         else:
             raise ValueError("Invalid robot specified")
         if not callable(function):
-            assert hasattr(function,'output_and_advance'),"setController takes either a 1-argument function or a ControllerBase instance"
+            assert hasattr(function,'advance'),"setController takes either a 1-argument function or a ControllerBase instance"
         self.robotControllers += [None]*(self.world.numRobots()-len(self.robotControllers))
         self.robotControllers[index] = function
 
@@ -378,7 +381,7 @@ class SimpleSimulator (Simulator):
                 if c:
                     #assume it's a ControllerBase instance
                     #compute controller output, advance controller
-                    output = c.output_and_advance(**measurements)
+                    output = c.advance(**measurements)
                 else:
                     output = None
 

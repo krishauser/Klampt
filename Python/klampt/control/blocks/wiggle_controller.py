@@ -1,7 +1,7 @@
-from controller import ControllerAccessor,ControllerBase
+from ..controller import RobotControlIO,RobotControllerBase
 import math
 
-class WiggleController(ControllerBase):
+class BigWiggleController(RobotControllerBase):
     """A controller that wiggles each of the robot's joints between their
     extrema"""
     def __init__(self,robot,period=2):
@@ -25,8 +25,8 @@ class WiggleController(ControllerBase):
         self.index=state['index']
         self.startTime=state['startTime']
         
-    def output(self,**inputs):
-        api = ControllerAccessor(inputs)
+    def advance(self,**inputs):
+        api = RobotControlIO(inputs)
         t = api.time()
         if self.startTime == None:
             self.startTime = t
@@ -63,5 +63,42 @@ class WiggleController(ControllerBase):
             self.startTime = None
 
 
-def make(robot):
-    return WiggleController(robot)
+class OneJointWiggleController(RobotControllerBase):
+    """A controller that wiggles one of the robot's joints by some magnitude"""
+    def __init__(self,robot,index,magnitude,period=2):
+        self.robot = robot
+        self.qmin,self.qmax = robot.getJointLimits()
+        self.q = robot.getConfig()
+        self.index = index
+        self.startTime = None
+        self.magnitude = magnitude
+        self.period = period
+
+    def inputNames(self):
+        return ['t']
+
+    def outputNames(self):
+        return ['qcmd']
+
+    def getState(self):
+        return {'startTime',self.startTime}
+
+    def setState(self,state):
+        self.startTime=state['startTime']
+        
+    def advance(self,**inputs):
+        api = RobotControlIO(inputs)
+        t = api.time()
+        if self.startTime == None:
+            self.startTime = t
+        u = (t - self.startTime)/self.period
+        
+        qdes = self.q[:]
+        s = math.sin(u*4*math.pi*0.5)
+        qdes[self.index] += s*self.magnitude
+        return api.makePositionCommand(qdes)
+
+    def signal(self,type,**inputs):
+        if type=='reset':
+            self.startTime = None
+
