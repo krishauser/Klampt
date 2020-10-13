@@ -5359,6 +5359,58 @@ class RobotModel(_object):
         return _robotsim.RobotModel_randomizeConfig(self, unboundedScale)
 
 
+    def configToDrivers(self, config):
+        """
+        configToDrivers(RobotModel self, doubleVector config)
+
+
+
+        Converts a full configuration (length numLinks()) to a list of driver values
+        (length numDrivers()).  
+
+        """
+        return _robotsim.RobotModel_configToDrivers(self, config)
+
+
+    def velocityToDrivers(self, velocities):
+        """
+        velocityToDrivers(RobotModel self, doubleVector velocities)
+
+
+
+        Converts a full velocity vector (length numLinks()) to a list of driver
+        velocities (length numDrivers()).  
+
+        """
+        return _robotsim.RobotModel_velocityToDrivers(self, velocities)
+
+
+    def configFromDrivers(self, driverValues):
+        """
+        configFromDrivers(RobotModel self, doubleVector driverValues)
+
+
+
+        Converts a list of driver values (length numDrivers()) to a full configuration
+        (length numLinks()).  
+
+        """
+        return _robotsim.RobotModel_configFromDrivers(self, driverValues)
+
+
+    def velocityFromDrivers(self, driverVelocities):
+        """
+        velocityFromDrivers(RobotModel self, doubleVector driverVelocities)
+
+
+
+        Converts a list of driver velocities (length numDrivers()) to a full velocity
+        vector (length numLinks()).  
+
+        """
+        return _robotsim.RobotModel_velocityFromDrivers(self, driverVelocities)
+
+
     def selfCollisionEnabled(self, link1, link2):
         """
         selfCollisionEnabled(RobotModel self, int link1, int link2) -> bool

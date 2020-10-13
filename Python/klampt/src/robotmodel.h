@@ -556,6 +556,19 @@ class RobotModel
   ///(Note that the python random seeding does not affect the result.)
   void randomizeConfig(double unboundedScale=1.0);
 
+  ///Converts a full configuration (length numLinks()) to a list of driver values
+  ///(length numDrivers()).
+  void configToDrivers(const std::vector<double>& config,std::vector<double>& out);
+  ///Converts a full velocity vector (length numLinks()) to a list of driver
+  ///velocities (length numDrivers()).
+  void velocityToDrivers(const std::vector<double>& velocities,std::vector<double>& out);
+  ///Converts a list of driver values (length numDrivers()) to a full configuration
+  ///(length numLinks()).
+  void configFromDrivers(const std::vector<double>& driverValues,std::vector<double>& out);
+  ///Converts a list of driver velocities (length numDrivers()) to a full velocity
+  ///vector (length numLinks()).
+  void velocityFromDrivers(const std::vector<double>& driverVelocities,std::vector<double>& out);
+
   //geometry functions
   ///Queries whether self collisions between two links is enabled
   bool selfCollisionEnabled(int link1,int link2);

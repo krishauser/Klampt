@@ -1982,7 +1982,7 @@ class Geometry3D(_object):
 
 
         Args:
-            arg2 (:class:`~klampt.GeometricPrimitive` or :class:`~klampt.Geometry3D` or :class:`~klampt.VolumeGrid` or :class:`~klampt.PointCloud` or :obj:`ConvexHull` or :class:`~klampt.TriangleMesh`, optional): 
+            arg2 (:class:`~klampt.PointCloud` or :obj:`ConvexHull` or :class:`~klampt.TriangleMesh` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.Geometry3D` or :class:`~klampt.VolumeGrid`, optional): 
         """
         this = _robotsim.new_Geometry3D(*args)
         try:
@@ -5075,6 +5075,50 @@ class RobotModel(_object):
         return _robotsim.RobotModel_randomizeConfig(self, unboundedScale)
 
 
+    def configToDrivers(self, config):
+        """
+        Converts a full configuration (length numLinks()) to a list of driver values
+        (length numDrivers()).  
+
+        Args:
+            config (:obj:`list of floats`)
+        """
+        return _robotsim.RobotModel_configToDrivers(self, config)
+
+
+    def velocityToDrivers(self, velocities):
+        """
+        Converts a full velocity vector (length numLinks()) to a list of driver
+        velocities (length numDrivers()).  
+
+        Args:
+            velocities (:obj:`list of floats`)
+        """
+        return _robotsim.RobotModel_velocityToDrivers(self, velocities)
+
+
+    def configFromDrivers(self, driverValues):
+        """
+        Converts a list of driver values (length numDrivers()) to a full configuration
+        (length numLinks()).  
+
+        Args:
+            driverValues (:obj:`list of floats`)
+        """
+        return _robotsim.RobotModel_configFromDrivers(self, driverValues)
+
+
+    def velocityFromDrivers(self, driverVelocities):
+        """
+        Converts a list of driver velocities (length numDrivers()) to a full velocity
+        vector (length numLinks()).  
+
+        Args:
+            driverVelocities (:obj:`list of floats`)
+        """
+        return _robotsim.RobotModel_velocityFromDrivers(self, driverVelocities)
+
+
     def selfCollisionEnabled(self, link1, link2):
         """
         Queries whether self collisions between two links is enabled.  
@@ -5958,7 +6002,7 @@ class WorldModel(_object):
             terrain (:obj:`TerrainModel`, optional): 
 
         Returns:
-            (:class:`~klampt.RigidObjectModel` or :obj:`TerrainModel` or :class:`~klampt.RobotModel`):
+            (:class:`~klampt.RobotModel` or :class:`~klampt.RigidObjectModel` or :obj:`TerrainModel`):
         """
         return _robotsim.WorldModel_add(self, *args)
 
@@ -6993,7 +7037,7 @@ def SampleTransform(*args):
 
 
     Args:
-        obj (:obj:`GeneralizedIKObjective` or :obj:`IKObjective`): 
+        obj (:obj:`IKObjective` or :obj:`GeneralizedIKObjective`): 
     """
     return _robotsim.SampleTransform(*args)
 class SimRobotSensor(_object):
@@ -7046,7 +7090,7 @@ class SimRobotSensor(_object):
 
 
         Args:
-            robot (:class:`~klampt.SimRobotController` or :class:`~klampt.RobotModel`): 
+            robot (:class:`~klampt.RobotModel` or :class:`~klampt.SimRobotController`): 
             sensor (:obj:`SensorBase`, optional): 
             name (str, optional): 
             type (str, optional): 

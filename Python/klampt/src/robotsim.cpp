@@ -3606,6 +3606,50 @@ void RobotModel::randomizeConfig(double unboundedStdDeviation)
   robot->UpdateGeometry();
 }
 
+void RobotModel::configToDrivers(const std::vector<double>& config,std::vector<double>& out)
+{
+  if(config.size() != robot->links.size()) throw PyException("Invalid size of configuration");
+  Config oldq = robot->q;
+  robot->q.copy(&config[0]);
+  out.resize(robot->drivers.size());
+  for(size_t i=0;i<robot->drivers.size();i++) 
+    out[i] = robot->GetDriverValue(i);
+  robot->q = oldq;
+}
+
+void RobotModel::velocityToDrivers(const std::vector<double>& velocities,std::vector<double>& out)
+{
+  if(velocities.size() != robot->links.size()) throw PyException("Invalid size of configuration");
+  Config oldq = robot->dq;
+  robot->dq.copy(&velocities[0]);
+  out.resize(robot->drivers.size());
+  for(size_t i=0;i<robot->drivers.size();i++) 
+    out[i] = robot->GetDriverVelocity(i);
+  robot->dq = oldq;
+}
+
+void RobotModel::configFromDrivers(const std::vector<double>& driverValues,std::vector<double>& out)
+{
+  if(driverValues.size() != robot->drivers.size()) throw PyException("Invalid size of driver value vector");
+  Config oldq = robot->q;
+  for(size_t i=0;i<robot->drivers.size();i++) 
+    robot->SetDriverValue(i,driverValues[i]);
+  out.resize(robot->q.n);
+  robot->q.getCopy(&out[0]);
+  robot->q = oldq;
+}
+
+void RobotModel::velocityFromDrivers(const std::vector<double>& driverVelocities,std::vector<double>& out)
+{
+  if(driverVelocities.size() != robot->drivers.size()) throw PyException("Invalid size of driver velocity vector");
+  Config oldq = robot->dq;
+  for(size_t i=0;i<robot->drivers.size();i++) 
+    robot->SetDriverVelocity(i,driverVelocities[i]);
+  out.resize(robot->q.n);
+  robot->dq.getCopy(&out[0]);
+  robot->dq = oldq;
+}
+
 void RobotModel::drawGL(bool keepAppearance)
 {
   if(!worlds[this->world]) throw PyException("RobotModel is associated with a deleted world");
@@ -5094,10 +5138,14 @@ void SimRobotController::setVelocity(const vector<double>& dq,double dt)
   if(controller->robot->links.size() != dq.size()) {
     throw PyException("Invalid size of velocity");
   }
+  if(dt < 0) {
+    throw PyException("Negative dt");
+  }
   EnablePathControl(sim->sim->robotControllers[index].get());
+  PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
   Config qv(controller->robot->links.size(),&dq[0]);
   stringstream ss;
-  ss<<dt<<"\t"<<qv;
+  ss<<mq->CurTime()+dt<<"\t"<<qv;
   controller->controller->SendCommand("set_tv",ss.str());
 }
 
