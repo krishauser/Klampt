@@ -1988,6 +1988,20 @@ outside must rather be enforced by the planner / simulator.
 C++ includes: robotmodel.h
 ";
 
+%feature("docstring") RobotModel::sensor "
+
+Returns a sensor by index or by name. If out of bounds or unavailable, a null
+sensor is returned (i.e., SimRobotSensor.name() or SimRobotSensor.type()) will
+return the empty string.)  
+";
+
+%feature("docstring") RobotModel::sensor "
+
+Returns a sensor by index or by name. If out of bounds or unavailable, a null
+sensor is returned (i.e., SimRobotSensor.name() or SimRobotSensor.type()) will
+return the empty string.)  
+";
+
 %feature("docstring") RobotModel::getLinearMomentum "
 
 Returns the 3D linear momentum vector.  
@@ -2036,18 +2050,10 @@ Retrieves the current configuration of the robot model.
 Returns the nxn mass matrix B(q). Takes O(n^2) time.  
 ";
 
-%feature("docstring") RobotModel::sensor "
+%feature("docstring") RobotModel::velocityFromDrivers "
 
-Returns a sensor by index or by name. If out of bounds or unavailable, a null
-sensor is returned (i.e., SimRobotSensor.name() or SimRobotSensor.type()) will
-return the empty string.)  
-";
-
-%feature("docstring") RobotModel::sensor "
-
-Returns a sensor by index or by name. If out of bounds or unavailable, a null
-sensor is returned (i.e., SimRobotSensor.name() or SimRobotSensor.type()) will
-return the empty string.)  
+Converts a list of driver velocities (length numDrivers()) to a full velocity
+vector (length numLinks()).  
 ";
 
 %feature("docstring") RobotModel::getGravityForces "
@@ -2204,6 +2210,12 @@ Returns the derivative of the nxn mass matrix with respect to q_i. Takes O(n^3)
 time.  
 ";
 
+%feature("docstring") RobotModel::configToDrivers "
+
+Converts a full configuration (length numLinks()) to a list of driver values
+(length numDrivers()).  
+";
+
 %feature("docstring") RobotModel::getTorqueLimits "
 
 Retrieve the torque limit vector tmax, the constraint is :math:`|torque[i]|
@@ -2276,6 +2288,18 @@ Returns the 3D angular momentum vector.
 
 Returns the Coriolis force matrix C(q,dq) for current config and velocity. Takes
 O(n^2) time.  
+";
+
+%feature("docstring") RobotModel::velocityToDrivers "
+
+Converts a full velocity vector (length numLinks()) to a list of driver
+velocities (length numDrivers()).  
+";
+
+%feature("docstring") RobotModel::configFromDrivers "
+
+Converts a list of driver values (length numDrivers()) to a full configuration
+(length numLinks()).  
 ";
 
 %feature("docstring") RobotModel::setConfig "
