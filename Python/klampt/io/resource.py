@@ -609,7 +609,8 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,refe
             raise RuntimeError("Could not autodetect type of object "+name)
         if isinstance(type,(list,tuple)):
             type = type[0]
-    if not vis.glinit.available('PyQt') and editor=='visual':
+
+    if editor=='visual' and vis.init('PyQt') is None:
         print("PyQt is not available, defaulting to console editor")
         editor = 'console'
             
