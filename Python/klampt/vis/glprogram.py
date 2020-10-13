@@ -513,6 +513,7 @@ class GLPluginProgram(GLRealtimeProgram):
         else:
             plugin.view = self.view
     def popPlugin(self):
+        import copy
         if len(self.plugins)==0: return None
         res = self.plugins[-1]
         self.plugins.pop(-1)
