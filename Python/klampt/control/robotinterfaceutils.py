@@ -200,10 +200,14 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
             self._emulator.pendingClock = self.clock()
             if self._emulator.lastClock != self._emulator.pendingClock:
                 self._emulator.dt = self._emulator.pendingClock - self._emulator.lastClock
-        if not self._has['clock']:
-            self._emulator.pendingClock = self._emulator.curClock + 1.0/self.controlRate()
+        elif not self._has['clock']:
+            self._emulator.dt = self.controlRate()
+            self._emulator.pendingClock = self._emulator.curClock + 1.0/self._emulator.dt
+        else:
+            self._emulator.dt = self.controlRate()
+            self._emulator.pendingClock = self.clock()
 
-    _FUNC_TO_CONTROL_MODE = {'setPosition':'p','moveToPosition':'m','setVelocity':'v','setTorque':'t','pid':'setPID','pwl':'setPiecewiseLinear','pwc':'setPiecewiseCubic'}
+    _FUNC_TO_CONTROL_MODE = {'setPosition':'p','moveToPosition':'m','setVelocity':'v','setTorque':'t','setPID':'pid','setPiecewiseLinear':'pwl','setPiecewiseCubic':'pwc'}
 
     def endStep(self):
         assert not self._subRobot,"Can't do endStep on a sub-interface"
@@ -233,6 +237,8 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
                       lambda :self._emulator.getCommand('m'),
                       lambda :self._emulator.getCommand('t')])
             self._baseControlMode = self._FUNC_TO_CONTROL_MODE[res[1]]
+            if self._baseControlMode in ['pwc','pwl']:
+                self._emulator.commandSent = True
         elif desiredControlMode == 'pwl':
             res=self._try(['setPiecewiseLinear','setPID','setPosition','setVelocity','moveToPosition','setTorque'],[self._emulator.getCommand('pwl'),
                       lambda :self._emulator.getCommand('pid'),
@@ -241,6 +247,8 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
                       lambda :self._emulator.getCommand('m'),
                       lambda :self._emulator.getCommand('t')])
             self._baseControlMode = self._FUNC_TO_CONTROL_MODE[res[1]]
+            if self._baseControlMode == 'pwl':
+                self._emulator.commandSent = True
         elif desiredControlMode == 'pid':
             res=self._try(['setPID','setTorque','setPosition','setVelocity','moveToPosition'],[self.emulator.getCommand('pid'),
                       lambda :self._emulator.getCommand('t'),
@@ -248,6 +256,8 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
                       lambda :self._emulator.getCommand('v'),
                       lambda :self._emulator.getCommand('m')])
             self._baseControlMode = self._FUNC_TO_CONTROL_MODE[res[1]]
+            if self._baseControlMode in ['pid','p','m']:
+                self._emulator.commandSent = True
         elif desiredControlMode == 'p':
             res=self._try(['setPosition','setVelocity','setPID','moveToPosition','setTorque'],[self._emulator.getCommand('p'),
                       lambda :self._emulator.getCommand('v'),
@@ -255,6 +265,8 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
                       lambda :self._emulator.getCommand('m'),
                       lambda :self._emulator.getCommand('t')])
             self._baseControlMode = self._FUNC_TO_CONTROL_MODE[res[1]]
+            if self._baseControlMode in ['p','m']:
+                self._emulator.commandSent = True
         elif desiredControlMode == 'v':
             res=self._try(['setVelocity','setPosition','setPID','moveToPosition','setTorque'],[self._emulator.getCommand('v'),
                       lambda :self._emulator.getCommand('p'),
@@ -262,10 +274,14 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
                       lambda :self._emulator.getCommand('m'),
                       lambda :self._emulator.getCommand('t')])
             self._baseControlMode = self._FUNC_TO_CONTROL_MODE[res[1]]
+            if self._baseControlMode == 'v':
+                self._emulator.commandSent = True
         elif desiredControlMode == 't':
             res=self._try(['setTorque','setPID'],[self._emulator.getCommand('t'),
                       lambda :self._emulator.getCommand('pid')])
             self._baseControlMode = self._FUNC_TO_CONTROL_MODE[res[1]]
+            if self._baseControlMode in ['t','pid']:
+                self._emulator.commandSent = True
         else:
             raise RuntimeError("Invalid emulator control type? "+self._emulator.controlType)
 
@@ -354,7 +370,7 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
         self._emulator.setCartesianPosition(xparams,self._indices)
 
     def moveToCartesianPosition(self,xparams,speed=1.0):
-        self._emulator.moveToCartesianPosition(xparams,self._indices,speed)
+        self._emulator.moveToCartesianPosition(xparams,speed,self._indices)
 
     def setCartesianVelocity(self,dxparams,ttl=None):
         self._emulator.setCartesianVelocity(dxparams,ttl,self._indices)
@@ -493,7 +509,7 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
             print("Using base control mode",self._baseControlMode)
         else:
             print("Using emulator control mode",self._emulatorControlMode,"and base mode",self._baseControlMode)
-            self._emulator.print_status()
+        self._emulator.print_status()
 
         print("**************************************************")
 
@@ -769,6 +785,7 @@ class _JointInterfaceEmulatorData:
         self.trajectoryTimes = None
         self.trajectoryMilestones = None
         self.trajectoryVelocities = None
+        self.externalController = None
 
     def update(self,t,q,v,dt):
         if v is None:
@@ -796,7 +813,6 @@ class _JointInterfaceEmulatorData:
             self.commandTTL = dt*5
             self.updateTrajectory(t)
             self.commandedTorque = 0
-            return
         elif self.controlMode == 'p' or self.controlMode == 'm':
             if self.lastCommandedPosition is None:
                 self.commandedVelocity = 0
@@ -821,14 +837,13 @@ class _JointInterfaceEmulatorData:
         assert self.controlMode is not None
         if commandType == 'pwc':
             assert self.controlMode == 'pwc'
-            #TODO: only return these if changed
             return self.trajectoryTimes,self.trajectoryMilestones,self.trajectoryVelocities
         elif commandType == 'pwl':
+            if self.controlMode == 'pwc':
+                raise NotImplementedError("TODO: convert cubic to linear path")
             assert self.controlMode == 'pwl'
-            #TODO: only return these if changed
             return self.trajectoryTimes,self.trajectoryMilestones
         if commandType == 'pid':
-            #TODO: only return these if changed
             return self.commandedPosition,self.commandedVelocity,self.commandedTorque
         elif commandType == 't':
             if self.controlMode == 'pid':
@@ -839,7 +854,6 @@ class _JointInterfaceEmulatorData:
                 t_pid = kp*(qdes-self.sensedPosition) + kd*(vdes-self.sensedVelocity) + ki*self.pidIntegralError + tdes
                 #if abs(self.pidIntegralError[i]*ki) > tmax:
                 #cap integral error to prevent wind-up
-                self.commandedTorque = t_pid
                 return self.commandedTorque,self.commandTTL
             else:
                 assert self.controlMode == 't',"Can't emulate torque control with any command type except for PID and torque control"
@@ -1038,10 +1052,11 @@ class _CartesianEmulatorData:
         if not self.active:
             self.driver.start(qcur,self.indices[-1],endEffectorPositions=self.toolCoordinates)
             self.active = True
-        
+
         if self.t is None:
             self.endDriveTime = ttl
         else:
+            print("Setting endDriveTime",self.t,"+",ttl)
             self.endDriveTime = self.t + ttl
         if len(dxparams) == 2:
             if len(dxparams[0]) != 3 or len(dxparams[1]) != 3:
@@ -1049,7 +1064,7 @@ class _CartesianEmulatorData:
             self.driveCommand = dxparams
             self.orientationConstrained = True
         else:
-            if len(dxparam) != 3:
+            if len(dxparams) != 3:
                 raise ValueError("Invalid IK parameters, must be a 3 vector or a pair of angular velocity / velocity vectors")
             self.driveCommand = None,dxparams
             self.orientationConstrained = False
@@ -1058,9 +1073,10 @@ class _CartesianEmulatorData:
         if self.t is None:
             if self.endDriveTime is not None:
                 self.endDriveTime = t + self.endDriveTime
-            self.t = t
+        self.t = t
         if not self.active:
             return
+        #print("CartesianEmulatorData update",t)
         if t > self.endDriveTime:
             self.active = False
             return
@@ -1068,9 +1084,11 @@ class _CartesianEmulatorData:
         for i,v in enumerate(qcur):
             self.robot.driver(i).setValue(v)
         qcur = self.robot.getConfig()
+        #print("Drive command",self.driveCommand,"dt",dt)
         (amt,q) = self.driver.drive(qcur,self.driveCommand[0],self.driveCommand[1],dt)
         self.robot.setConfig(q)
-        return [self.robot.driver(i).getValue() for i in range(self.robot.numDrivers())]
+        #print("Result",amt,q)
+        return [self.robot.driver(i).getValue() for i in self.indices]
 
     def cartesianPosition(self,q):
         assert len(q) == self.robot.numDrivers()
@@ -1125,6 +1143,7 @@ class _RobotInterfaceEmulatorData:
         self.dt = None
         self.jointData = [_JointInterfaceEmulatorData() for i in range(nd)]
         self.cartesianInterfaces = dict()
+        self.commandSent = False
 
     def update(self,t,q,v):
         """Advances the interface"""
@@ -1134,12 +1153,19 @@ class _RobotInterfaceEmulatorData:
         for inds,c in self.cartesianInterfaces.items():
             qdes = c.update(q,self.curClock,self.dt)
             if qdes is not None:
-                assert len(qdes) == len(self.jointData)
-                self.setPosition(inds,[qdes[i] for i in inds])
+                assert len(qdes) == len(c.indices)
+                self.commandSent = False
+                for i,x in zip(inds,qdes):
+                    self.jointData[i].promote('p')
+                    self.jointData[i].commandedPosition = x
+                    self.jointData[i].commandedVelocity = (x-self.jointData[i].commandedPosition)/self.dt
+                    self.jointData[i].commandTTL = 5.0*self.dt
         for i,j in enumerate(self.jointData):
             j.update(self.curClock,q[i],v[i],self.dt)
 
     def desiredControlMode(self):
+        if self.commandSent:
+            return None
         commonMode = None
         precedence = 10000
         for j in self.jointData:
@@ -1161,16 +1187,48 @@ class _RobotInterfaceEmulatorData:
             if any(x[1] is not None for x in res):
                 ttl = max(x[1] for x in res if x[1] is not None)
             return list(x[0] for x in res),ttl
+        if commandType == 'pwl':
+            unifiedTimes = None
+            for times,positions in res:
+                if unifiedTimes is None:
+                    unifiedTimes = times
+                elif unifiedTimes != times:
+                    raise NotImplementedError("TODO: convert nonuniform piecewise linear times to position control")
+            unifiedMilestones = []
+            for i in range(len(unifiedTimes)):
+                unifiedMilestones.append([traj[1][i] for traj in res])
+            t0 = self.curClock-self.dt if self.curClock is not None else 0
+            return [t-t0 for t in unifiedTimes][1:],unifiedMilestones[1:]
+        if commandType == 'pwc':
+            unifiedTimes = None
+            for times,positions,velocities in res:
+                if unifiedTimes is None:
+                    unifiedTimes = times
+                elif unifiedTimes != times:
+                    raise NotImplementedError("TODO: convert nonuniform piecewise cubic times to position control")
+            unifiedMilestones = []
+            for i in range(len(unifiedTimes)):
+                unifiedMilestones.append([traj[1][i] for traj in res])
+            unifiedVelocities = []
+            for i in range(len(unifiedTimes)):
+                unifiedVelocities.append([traj[2][i] for traj in res])
+            t0 = self.curClock if self.curClock is not None else 0
+            return [t-t0 for t in unifiedTimes][1:],unifiedMilestones[1:],unifiedVelocities[1:]
         return list(zip(*res))
 
     def promote(self,indices,controlType):
         """To accept commands of the given controlMode, switches over the
         current state to the controlMode"""
+        self.commandSent = False
         if controlType == 'pwl':
             if any(self.jointData[i].controlMode == 'pwc' and len(self.jointData[i].trajectoryTimes) > 1 for i in indices):
                 print("RobotInterfaceCompleter: Warning, converting from piecewise cubic to piecewise linear trajectory")
         for i in indices:
             self.jointData[i].promote(controlType)
+        for i in indices:
+            if self.jointData[i].externalController:
+                self.jointData[i].externalController.active = False
+                self.jointData[i].externalController = None
 
     def setPosition(self,indices,q):
         """Backup: runs an immediate position command"""
@@ -1361,39 +1419,45 @@ class _RobotInterfaceEmulatorData:
             c = _CartesianEmulatorData(self.klamptModel,indices)
             self.cartesianInterfaces[tuple(indices)] = c
         for i,j in enumerate(self.jointData):
-            self.klamptModel.driver(i).setValue(j.commandedPosition)
+            self.klamptModel.driver(i).setValue(j.sensedPosition if j.commandedPosition is None else j.commandedPosition)
+        c.active = False
         qKlamptNext = c.solveIK(xparams)
         self.klamptModel.setConfig(qKlamptNext)
         self.setPosition(indices,[self.klamptModel.driver(i).getValue() for i in indices])
 
-    def moveToCartesianPosition(self,xparams,speed=1.0):
+    def moveToCartesianPosition(self,xparams,speed,indices):
         try:
             c = self.cartesianInterfaces[tuple(indices)]
         except KeyError:
             c = _CartesianEmulatorData(self.klamptModel,indices)
             self.cartesianInterfaces[tuple(indices)] = c
         for i,j in enumerate(self.jointData):
-            self.klamptModel.driver(i).setValue(j.commandedPosition)
+            self.klamptModel.driver(i).setValue(j.sensedPosition if j.commandedPosition is None else j.commandedPosition)
+        c.active = False
         qKlamptNext = c.solveIK(xparams)
         self.klamptModel.setConfig(qKlamptNext)
         self.moveToPosition(indices,[self.klamptModel.driver(i).getValue() for i in indices],speed)
 
-    def setCartesianVelocity(self,dxparams,ttl=None):
+    def setCartesianVelocity(self,dxparams,ttl,indices):
         try:
             c = self.cartesianInterfaces[tuple(indices)]
         except KeyError:
             c = _CartesianEmulatorData(self.klamptModel,indices)
             self.cartesianInterfaces[tuple(indices)] = c
-        c.setCartesianVelocity(self.commandedPosition(),dxparams,ttl)
+        qstart = [j.sensedPosition if j.commandedPosition is None else j.commandedPosition for j in self.jointData]
+        c.setCartesianVelocity(qstart,dxparams,ttl)
+        for i in indices:
+            self.jointData[i].externalController = c
 
-    def setCartesianForce(self,fparams,ttl=None):
+    def setCartesianForce(self,fparams,ttl,indices):
         try:
             c = self.cartesianInterfaces[tuple(indices)]
         except KeyError:
             c = _CartesianEmulatorData(self.klamptModel,indices)
             self.cartesianInterfaces[tuple(indices)] = c
         raise NotImplementedError("TODO: implement cartesian force?")
-        c.setCartesianForce(self.commandedPosition(),fparams,ttl)
+        qstart = [j.sensedPosition if j.commandedPosition is None else j.commandedPosition for j in self.jointData]
+        c.setCartesianForce(qstart,fparams,ttl)
 
     def cartesianPosition(self,q,indices):
         assert len(q) == len(self.jointData),"cartesianPosition: must use full-body configuration"
@@ -1422,7 +1486,18 @@ class _RobotInterfaceEmulatorData:
             raise ValueError("Invalid Cartesian index set for emulator: no command currently set")
 
     def print_status(self):
-        pass
+        joint_control = [True]*len(self.jointData)
+        for k,c in self.cartesianInterfaces.items():
+            if c.active:
+                print("Cartesian interface active on joints",k)
+                print("  Tool coordinates",c.toolCoordinates)
+                print("  Drive command",c.driveCommand)
+                for j in k:
+                    joint_control[j] = False
+        for i,j in enumerate(self.jointData):
+            if not joint_control[i]: continue
+            print("Joint",i,"control mode",j.controlMode)
+
 
 
 class _SubRobotInterfaceCompleter(RobotInterfaceCompleter):

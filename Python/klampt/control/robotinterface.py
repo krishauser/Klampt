@@ -520,10 +520,10 @@ class RobotInterfaceBase(object):
             return klamptConfig
         if len(klamptConfig) != model.numLinks():
             raise ValueError("Length of klamptConfig is invalid for "+str(self))
-
-        model.setConfig(klamptConfig)
-        qdrivers = [model.driver(i).getValue() for i in self.indices(part,joint_idx)]
-        return qdrivers
+        qdrivers = model.configToDrivers(klamptConfig)
+        if part is None and joint_idx is None:
+            return qdrivers
+        return [qdrivers[i] for i in self.indices(part,joint_idx)]
 
     def velocityFromKlampt(self,klamptVelocity,part=None,joint_idx=None):
         """Extracts a RobotInterfaceBase velocity from a velocity of
@@ -533,9 +533,10 @@ class RobotInterfaceBase(object):
             return klamptVelocity
         if len(klamptVelocity) != model.numLinks():
             raise ValueError("Length of klamptVelocity is invalid for "+str(self))
-        model.setConfig(klamptVelocity)
-        vdrivers = [model.driver(i).getVelocity() for i in self.indices(part,joint_idx)]
-        return vdrivers
+        vdrivers = model.velocityToDrivers(klamptVelocity)
+        if part is None and joint_idx is None:
+            return vdrivers
+        return [vdrivers[i] for i in self.indices(part,joint_idx)]
 
     def configToKlampt(self,config,klamptConfig=None,part=None,joint_idx=None):
         """Creates a configuration vector for the Klamp't model using the 
@@ -555,11 +556,14 @@ class RobotInterfaceBase(object):
             raise ValueError("Length of config is invalid for "+str(self))
         if klamptConfig is not None:
             model.setConfig(klamptConfig)
-        for (i,x) in zip(dofs,config):
-            model.driver(i).setValue(x)
-        return model.getConfig()
+        if part is None and joint_idx is None:
+            return model.configFromDrivers(config)
+        else:
+            for (i,x) in zip(dofs,config):
+                model.driver(i).setValue(x)
+            return model.getConfig()
 
-    def velocityToKlampt(self,velocity,klamptVelocity=None,part=None,joint_dx=None):
+    def velocityToKlampt(self,velocity,klamptVelocity=None,part=None,joint_idx=None):
         """Creates a velocity vector for a Klamp't model using the joint velocity.
 
         If klamptVelocity is given, then these values are used for the non-part
@@ -572,12 +576,15 @@ class RobotInterfaceBase(object):
         if model is None:
             return velocity
         dofs = self.indices(part,joint_idx)
-        if len(dofs) != len(config):
+        if len(dofs) != len(velocity):
             raise ValueError("Length of velocity is invalid for "+str(self))
         if klamptVelocity is not None:
             model.setVelocity(klamptVelocity)
-        for (i,x) in zip(dofs,config):
-            model.driver(i).setVelocity(x)
-        return model.getVelocity()
+        if part is None and joint_idx is None:
+            return model.velocityFromDrivers(velocity)
+        else:
+            for (i,x) in zip(dofs,velocity):
+                model.driver(i).setVelocity(x)
+            return model.getVelocity()
 
     

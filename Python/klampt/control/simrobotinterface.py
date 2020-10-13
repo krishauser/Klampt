@@ -93,6 +93,29 @@ class SimPositionControlInterface(_SimControlInterface):
         return self.configFromKlampt(self.sim_controller.getCommandedConfig())
 
 
+class SimVelocityControlInterface(_SimControlInterface):
+    """Adapts a SimRobotController to the RobotInterfaceBase class in velocity
+    control mode. 
+
+    Only implements setVelocity, sensedPosition, and commandedPosition; you
+    should use :class:`RobotInterfaceCompleter` to fill in move-to control,
+    cartesian control, position control, etc.
+    """
+    def __init__(self,sim_controller,simulator=None,robotInfo=None):
+        _SimControlInterface.__init__(self,sim_controller,simulator,robotInfo)
+
+    def setVelocity(self,v,ttl=None):
+        if ttl is None:
+            ttl = 1.0
+        self.sim_controller.setVelocity(self.velocityToKlampt(v),ttl)
+        
+    def sensedPosition(self):
+        return self.configFromKlampt(self.sim_controller.getSensedConfig())
+    
+    def commandedPosition(self):
+        return self.configFromKlampt(self.sim_controller.getCommandedConfig())
+
+
 class SimMoveToControlInterface(_SimControlInterface):
     """Adapts a SimRobotController to the RobotInterfaceBase class in move-to
     control mode. 
@@ -224,9 +247,11 @@ class KinematicSimControlInterface(RobotInterfaceBase):
         self.robotInfo = robotInfo
         if robotInfo is not None:
             assert isinstance(robotInfo,RobotInfo)
+        q0 = robot.getConfig()
         self.q = self.configFromKlampt(robot.getConfig())
         qmin,qmax = robot.getJointLimits()
         self.qmin,self.qmax = self.configFromKlampt(qmin),self.configFromKlampt(qmax)
+        robot.setConfig(q0)
         RobotInterfaceBase.__init__(self,name=self.__class__.__name__)
 
     def klamptModel(self):
@@ -242,7 +267,7 @@ class KinematicSimControlInterface(RobotInterfaceBase):
         return res
 
     def controlRate(self):
-        return 1000.0
+        return 200.0
 
     def sensors(self):
         sensorNames = []
@@ -277,7 +302,9 @@ class KinematicSimControlInterface(RobotInterfaceBase):
             raise ValueError("Invalid position command")
         self.q = q
         if any(v < a or v > b for (v,a,b) in zip(q,self.qmin,self.qmax)):
-            self._status = 'joint error'
+            for i,(v,a,b) in enumerate(zip(q,self.qmin,self.qmax)):
+                if v < a or v > b:
+                    self._status = 'joint %d limit violation: %f <= %f <= %f'%(i,a,v,b)
         self.robot.setConfig(self.configToKlampt(self.q))
         if self.robot.selfCollides():
             self._status = 'self collision'
