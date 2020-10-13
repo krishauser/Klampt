@@ -11,7 +11,7 @@ camera sensor these parameters include the field of view and
 resolution.
 
 
-The following sensors are natively supported:
+The following sensor types are natively supported:
 
 -  Joint sensors
 
