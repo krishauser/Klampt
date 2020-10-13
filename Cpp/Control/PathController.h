@@ -118,7 +118,7 @@ public:
  * @brief A controller that uses a piecewise polynomial trajectory.
  *
  * Accepts commands set_q,append_q,set_tq,append_tq,set_qv,append_qv,
- * append_q_linear,brake.
+ * append_q_linear,set_tqv,append_tqv,set_tv,brake.
  */
 class PolynomialPathController : public JointTrackingController, public PolynomialMotionQueue
 {
