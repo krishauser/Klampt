@@ -1042,6 +1042,8 @@ if _has_qt:
         visualization.customUI(None)
         if old_vis_window is not None:
             visualization.setWindow(old_vis_window)
+        else:
+            visualization.setWindow(0)
 
         print("vis.editors.run(): Result",res,"return value",retVal)
         return res,retVal
