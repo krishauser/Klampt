@@ -124,7 +124,7 @@ def settle(world,obj,
                 mass.setCom([0]*3)
                 mass.setInertia([float('inf')]*3)
                 newObj.setMass(mass)
-                newObj.setTransform(link.getTransform())
+                newObj.setTransform(*link.getTransform())
                 #TODO: what surface properties?
     for i in range(world.numRigidObjects()):
         if _bboverlap((bmin,bmax),world.rigidObject(i)):
