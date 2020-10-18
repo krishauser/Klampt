@@ -14,6 +14,8 @@ implement:
 
 from .robotinterface import *
 from ..math import vectorops,spline
+from ..plan import motionplanning
+from ..model.trajectory import HermiteTrajectory
 from .cartesian_drive import CartesianDriveSolver
 import bisect
 import math
@@ -50,7 +52,7 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
         - :meth:`softStop`
 
     It will emulate:
-    
+
         - Clock time from control rate using integration
         - Control rate from clock time using differences
         - Joint velocities from joint positions using finite differences
@@ -329,15 +331,20 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
         return self._try('enableSensor',[sensor],lambda *args:False)
 
     def setPosition(self,q):
+        assert len(q) == len(self._indices)
         self._emulator.setPosition(self._indices,q)
 
     def setVelocity(self,v,ttl=None):
+        assert len(v) == len(self._indices)
         self._emulator.setVelocity(self._indices,v,ttl)
 
     def setTorque(self,t,ttl=None):
+        assert len(t) == len(self._indices)
         self._emulator.setTorque(self._indices,t,ttl)
         
     def setPID(self,q,dq,t=None):
+        assert len(q) == len(self._indices)
+        assert len(dq) == len(self._indices)
         self._emulator.setPID(self._indices,q,dq,t)
 
     def setPIDGains(self,kP,kI,kD):
@@ -354,6 +361,7 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
         self._emulator.setPIDGains(self._indices,kP,kI,kD)
 
     def moveToPosition(self,q,speed=1):
+        assert len(q) == len(self._indices)
         self._emulator.moveToPosition(self._indices,q,speed)
 
     def setPiecewiseLinear(self,ts,qs,relative=True):
@@ -776,6 +784,7 @@ class _JointInterfaceEmulatorData:
     CONTROL_MODE_PRECEDENCE = {'pid':0,'v':1,'p':2,'pwl':3,'pwc':4}
 
     def __init__(self):
+        self.dt = None
         self.controlMode = None
         self.sensedPosition = None
         self.sensedVelocity = None
@@ -842,11 +851,13 @@ class _JointInterfaceEmulatorData:
     def getCommand(self,commandType):
         assert self.controlMode is not None
         if commandType == 'pwc':
-            assert self.controlMode == 'pwc'
             return self.trajectoryTimes,self.trajectoryMilestones,self.trajectoryVelocities
         elif commandType == 'pwl':
             if self.controlMode == 'pwc':
-                raise NotImplementedError("TODO: convert cubic to linear path")
+                traj = HermiteTrajectory(self.trajectoryTimes,[[m] for m in self.trajectoryMilestones],[[v] for v in self.trajectoryVelocities])
+                assert self.dt is not None
+                configTraj = traj.discretize(self.dt).configTrajectory()
+                return configTraj.times,[m[0] for m in configTraj.milestones]
             if self.controlMode == 'pwl':
                 return self.trajectoryTimes,self.trajectoryMilestones
             elif self.controlMode == 'p':
@@ -999,7 +1010,7 @@ class _JointInterfaceEmulatorData:
                 self.trajectoryMilestones = self.trajectoryMilestones[-1:]
                 if self.trajectoryVelocities is not None:
                     self.trajectoryVelocities = self.trajectoryVelocities[-1:]
-                print("STOP",self.trajectoryTimes,self.trajectoryMilestones,self.trajectoryVelocities)
+                #print("STOP",self.trajectoryTimes,self.trajectoryMilestones,self.trajectoryVelocities)
             return
         #math.log2 is available only in Python 3... convert to math.log(x,2) in Python 2
         if i > math.log2(len(self.trajectoryTimes)):
@@ -1007,7 +1018,7 @@ class _JointInterfaceEmulatorData:
             self.trajectoryMilestones = self.trajectoryMilestones[i:]
             if self.trajectoryVelocities is not None:
                 self.trajectoryVelocities = self.trajectoryVelocities[i:]
-            print("PWL now have",len(self.trajectoryTimes),"milestnoes ending in",self.trajectoryMilestones[-1])
+            #print("PWL now have",len(self.trajectoryTimes),"milestnoes ending in",self.trajectoryMilestones[-1])
 
 
 class _CartesianEmulatorData:
@@ -1071,7 +1082,6 @@ class _CartesianEmulatorData:
         if self.t is None:
             self.endDriveTime = ttl
         else:
-            print("Setting endDriveTime",self.t,"+",ttl)
             self.endDriveTime = self.t + ttl
         if len(dxparams) == 2:
             if len(dxparams[0]) != 3 or len(dxparams[1]) != 3:
@@ -1176,6 +1186,7 @@ class _RobotInterfaceEmulatorData:
                     self.jointData[i].commandedVelocity = (x-self.jointData[i].commandedPosition)/self.dt
                     self.jointData[i].commandTTL = 5.0*self.dt
         for i,j in enumerate(self.jointData):
+            j.dt = self.dt
             j.update(self.curClock,q[i],v[i],self.dt)
 
     def desiredControlMode(self):
@@ -1213,6 +1224,8 @@ class _RobotInterfaceEmulatorData:
             for i in range(len(unifiedTimes)):
                 unifiedMilestones.append([traj[1][i] for traj in res])
             t0 = self.curClock-self.dt if self.curClock is not None else 0
+            if any(t < t0 for t in unifiedTimes[1:]):
+                print("Uh... have some times that are before current time",t0,"?",min(unifiedTimes[1:]))
             return [t-t0 for t in unifiedTimes][1:],unifiedMilestones[1:]
         if commandType == 'pwc':
             unifiedTimes = None
@@ -1228,7 +1241,12 @@ class _RobotInterfaceEmulatorData:
             for i in range(len(unifiedTimes)):
                 unifiedVelocities.append([traj[2][i] for traj in res])
             t0 = self.curClock if self.curClock is not None else 0
-            return [t-t0 for t in unifiedTimes][1:],unifiedMilestones[1:],unifiedVelocities[1:]
+            istart = 0
+            while istart < len(unifiedTimes) and unifiedTimes[istart] < t0:
+                istart += 1
+            if istart==len(unifiedTimes):
+                print("WARNING: getCommand is returning empty command because no times are after current time???")
+            return [t-t0 for t in unifiedTimes][istart:],unifiedMilestones[istart:],unifiedVelocities[istart:]
         return list(zip(*res))
 
     def promote(self,indices,controlType):
@@ -1261,12 +1279,22 @@ class _RobotInterfaceEmulatorData:
                 self.jointData[i].commandedPosition = v
         else:
             #move to command emulation using fixed-velocity
-            vmax = model.getVelocityLimits()
+            qmin,qmax = model.getJointLimits()
+            xmin = model.configToDrivers(qmin)
+            xmax = model.configToDrivers(qmax)
+            vmax = model.velocityToDrivers(model.getVelocityLimits())
+            amax = model.velocityToDrivers(model.getAccelerationLimits())
+            xmin = [xmin[i] for i in indices]
+            xmax = [xmax[i] for i in indices]
+            vmax = [vmax[i] for i in indices]
+            amax = [amax[i] for i in indices]
             qcmd = [self.jointData[i].commandedPosition if self.jointData[i].commandedPosition is not None else self.jointData[i].sensedPosition for i in indices]
-            model.setVelocity(vmax)
-            vmax = [model.driver(i).getVelocity()*speed for i in indices]
-            t = max(abs(qi-qi0)/vimax for (qi,qi0,vimax) in zip(q,qcmd,vmax))
-            self.setPiecewiseLinear(indices,[t],[q],True)
+            dqcmd = [self.jointData[i].commandedVelocity if self.jointData[i].commandedVelocity is not None else self.jointData[i].sensedVelocity for i in indices]
+            ts,xs,vs = motionplanning.interpolateNDMinTime(qcmd,dqcmd,q,[0]*len(q),xmin,xmax,vmax,amax)
+            ts,xs,vs = motionplanning.combineNDCubic(ts,xs,vs)
+            self.setPiecewiseCubic(indices,ts,xs,vs,True)
+            #t = max(abs(qi-qi0)/vimax for (qi,qi0,vimax) in zip(q,qcmd,vmax))
+            #self.setPiecewiseLinear(indices,[t],[q],True)
 
     def setVelocity(self,indices,v,ttl):
         """Backup: runs a velocity command for ttl seconds using a piecewise linear
@@ -1277,10 +1305,10 @@ class _RobotInterfaceEmulatorData:
             model = self.klamptModel
             if model is not None:
                 qmin,qmax = model.getJointLimits()
-                model.setConfig(qmin)
-                qmin = [model.driver(i).getValue() for i in indices]
-                model.setConfig(qmax)
-                qmax = [model.driver(i).getValue() for i in indices]
+                xmin = model.configToDrivers(qmin)
+                xmax = model.configToDrivers(qmax)
+                xmin = [xmin[i] for i in indices]
+                xmax = [xmax[i] for i in indices]
                 #stop when the first joint limit is hit
                 ttl = 1.0
                 for i in range(len(indices)):
@@ -1290,7 +1318,7 @@ class _RobotInterfaceEmulatorData:
                         ttl = (qmax[i]-1e-3-qcmd[i])/v[i]
         q0 = qcmd
         q = vectorops.madd(q0,v,ttl)
-        self.setPiecewiseLinear(indices,[t],[q],True)
+        self.setPiecewiseLinear(indices,[ttl],[q],True)
 
     def setTorque(self,indices,t,ttl):
         self.promote(indices,'t')
