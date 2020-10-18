@@ -130,11 +130,11 @@ class MyGLViewer(GLSimulationPlugin):
 
 
 def main():
-    print("============================================================")
+    print("================================================================================")
     print(sys.argv[0]+": Simulates a robot file and Python controller")
     if len(sys.argv)<=1:
-        print("USAGE: simtest.py [world_file] [controller files (.py)]")
-    print("============================================================")
+        print("USAGE: klampt_sim [world_file] [trajectory (.traj) or controller (.py)]")
+    print("================================================================================")
     if len(sys.argv)<=1:
         exit()
 
