@@ -3872,6 +3872,42 @@ class RobotModelLink(_object):
         return _robotsim.RobotModelLink_setAxis(self, axis)
 
 
+    def isPrismatic(self):
+        """
+        isPrismatic(RobotModelLink self) -> bool
+
+
+
+        Returns whether the joint is prismatic.  
+
+        """
+        return _robotsim.RobotModelLink_isPrismatic(self)
+
+
+    def isRevolute(self):
+        """
+        isRevolute(RobotModelLink self) -> bool
+
+
+
+        Returns whether the joint is revolute.  
+
+        """
+        return _robotsim.RobotModelLink_isRevolute(self)
+
+
+    def setPrismatic(self, prismatic):
+        """
+        setPrismatic(RobotModelLink self, bool prismatic)
+
+
+
+        Changes a link from revolute to prismatic or vice versa.  
+
+        """
+        return _robotsim.RobotModelLink_setPrismatic(self, prismatic)
+
+
     def getWorldPosition(self, plocal):
         """
         getWorldPosition(RobotModelLink self, double const [3] plocal)
@@ -4743,8 +4779,8 @@ class RobotModel(_object):
 
 
 
-        Sets the torque limit vector tmax, the constraint is :math:`|torque[i]|
-        <\leqtmax[i]`  
+        Sets the torque limit vector tmax, the constraint is :math:`|torque[i]| \leq
+        tmax[i]`  
 
         """
         return _robotsim.RobotModel_setTorqueLimits(self, tmax)
@@ -5074,6 +5110,58 @@ class RobotModel(_object):
         return _robotsim.RobotModel_randomizeConfig(self, unboundedScale)
 
 
+    def configToDrivers(self, config):
+        """
+        configToDrivers(RobotModel self, doubleVector config)
+
+
+
+        Converts a full configuration (length numLinks()) to a list of driver values
+        (length numDrivers()).  
+
+        """
+        return _robotsim.RobotModel_configToDrivers(self, config)
+
+
+    def velocityToDrivers(self, velocities):
+        """
+        velocityToDrivers(RobotModel self, doubleVector velocities)
+
+
+
+        Converts a full velocity vector (length numLinks()) to a list of driver
+        velocities (length numDrivers()).  
+
+        """
+        return _robotsim.RobotModel_velocityToDrivers(self, velocities)
+
+
+    def configFromDrivers(self, driverValues):
+        """
+        configFromDrivers(RobotModel self, doubleVector driverValues)
+
+
+
+        Converts a list of driver values (length numDrivers()) to a full configuration
+        (length numLinks()).  
+
+        """
+        return _robotsim.RobotModel_configFromDrivers(self, driverValues)
+
+
+    def velocityFromDrivers(self, driverVelocities):
+        """
+        velocityFromDrivers(RobotModel self, doubleVector driverVelocities)
+
+
+
+        Converts a list of driver velocities (length numDrivers()) to a full velocity
+        vector (length numLinks()).  
+
+        """
+        return _robotsim.RobotModel_velocityFromDrivers(self, driverVelocities)
+
+
     def selfCollisionEnabled(self, link1, link2):
         """
         selfCollisionEnabled(RobotModel self, int link1, int link2) -> bool
@@ -5126,6 +5214,50 @@ class RobotModel(_object):
 
         """
         return _robotsim.RobotModel_drawGL(self, keepAppearance)
+
+
+    def reduce(self, robot):
+        """
+        reduce(RobotModel self, RobotModel robot)
+
+
+
+        Sets self to a reduced version of robot, where all fixed DOFs are eliminated.
+        The return value is a map from the original robot DOF indices to the reduced
+        DOFs.  
+
+        Note that any geometries fixed to the world will disappear.  
+
+        """
+        return _robotsim.RobotModel_reduce(self, robot)
+
+
+    def mount(self, link, subRobot, R, t, prefix=None):
+        """
+        mount(RobotModel self, int link, RobotModel subRobot, double const [9] R, double const [3] t, char const * prefix=None)
+        mount(RobotModel self, int link, RobotModel subRobot, double const [9] R, double const [3] t)
+
+
+
+        Mounts a sub-robot onto a link, with its origin at a given local transform (R,t)  
+
+        """
+        return _robotsim.RobotModel_mount(self, link, subRobot, R, t, prefix)
+
+
+    def sensor(self, *args):
+        """
+        sensor(RobotModel self, int index) -> SimRobotSensor
+        sensor(RobotModel self, char const * name) -> SimRobotSensor
+
+
+
+        Returns a sensor by index or by name. If out of bounds or unavailable, a null
+        sensor is returned (i.e., SimRobotSensor.name() or SimRobotSensor.type()) will
+        return the empty string.)  
+
+        """
+        return _robotsim.RobotModel_sensor(self, *args)
 
     __swig_setmethods__["world"] = _robotsim.RobotModel_world_set
     __swig_getmethods__["world"] = _robotsim.RobotModel_world_get
@@ -7009,24 +7141,22 @@ class SimRobotSensor(_object):
 
 
     A sensor on a simulated robot. Retrieve one from the controller using
-    :meth:`SimRobotController.getSensor` (), or create a new one using
-    SimRobotSensor(robotController,name,type)  
+    :meth:`SimRobotController.getSensor`, or create a new one using
+    `SimRobotSensor(robotController,name,type)`  
 
-    Use :meth:`getMeasurements` () to get the currently simulated measurement
-    vector.  
+    Use :meth:`getMeasurements` to get the currently simulated measurement vector.  
 
-    Sensors are automatically updated through the :meth:`Simulator.simulate` ()
-    call, and :meth:`getMeasurements` () retrieves the updated values. As a result,
-    you may get garbage measurements before the first Simulator.simulate call is
-    made.  
+    Sensors are automatically updated through the :meth:`Simulator.simulate` call,
+    and :meth:`getMeasurements` retrieves the updated values. As a result, you may
+    get garbage measurements before the first Simulator.simulate call is made.  
 
     There is also a mode for doing kinematic simulation, which is supported (i.e.,
     makes sensible measurements) for some types of sensors when just a robot / world
     model is given. This is similar to Simulation.fakeSimulate but the entire
     controller structure is bypassed. You can arbitrarily set the robot's position,
-    call :meth:`kinematicReset` (), and then call :meth:`kinematicSimulate` ().
-    Subsequent calls assume the robot is being driven along a trajectory until the
-    next :meth:`kinematicReset` () is called.  
+    call :meth:`kinematicReset`, and then call :meth:`kinematicSimulate`. Subsequent
+    calls assume the robot is being driven along a trajectory until the next
+    :meth:`kinematicReset` is called.  
 
     LaserSensor, CameraSensor, TiltSensor, AccelerometerSensor, GyroSensor,
     JointPositionSensor, JointVelocitySensor support kinematic simulation mode.
@@ -7050,7 +7180,7 @@ class SimRobotSensor(_object):
 
     def __init__(self, *args):
         """
-        __init__(SimRobotSensor self, Robot * robot, SensorBase * sensor) -> SimRobotSensor
+        __init__(SimRobotSensor self, RobotModel robot, SensorBase * sensor) -> SimRobotSensor
         __init__(SimRobotSensor self, SimRobotController robot, char const * name, char const * type) -> SimRobotSensor
 
 
@@ -7084,6 +7214,18 @@ class SimRobotSensor(_object):
 
         """
         return _robotsim.SimRobotSensor_type(self)
+
+
+    def robot(self):
+        """
+        robot(SimRobotSensor self) -> RobotModel
+
+
+
+        Returns the model of the robot to which this belongs.  
+
+        """
+        return _robotsim.SimRobotSensor_robot(self)
 
 
     def measurementNames(self):
@@ -7151,16 +7293,15 @@ class SimRobotSensor(_object):
         return _robotsim.SimRobotSensor_drawGL(self, *args)
 
 
-    def kinematicSimulate(self, world, dt):
+    def kinematicSimulate(self, *args):
         """
         kinematicSimulate(SimRobotSensor self, WorldModel world, double dt)
+        kinematicSimulate(SimRobotSensor self, double dt)
 
 
-
-        simulates / advances the kinematic simulation  
 
         """
-        return _robotsim.SimRobotSensor_kinematicSimulate(self, world, dt)
+        return _robotsim.SimRobotSensor_kinematicSimulate(self, *args)
 
 
     def kinematicReset(self):
@@ -7174,10 +7315,10 @@ class SimRobotSensor(_object):
         """
         return _robotsim.SimRobotSensor_kinematicReset(self)
 
-    __swig_setmethods__["robot"] = _robotsim.SimRobotSensor_robot_set
-    __swig_getmethods__["robot"] = _robotsim.SimRobotSensor_robot_get
+    __swig_setmethods__["robotModel"] = _robotsim.SimRobotSensor_robotModel_set
+    __swig_getmethods__["robotModel"] = _robotsim.SimRobotSensor_robotModel_get
     if _newclass:
-        robot = _swig_property(_robotsim.SimRobotSensor_robot_get, _robotsim.SimRobotSensor_robot_set)
+        robotModel = _swig_property(_robotsim.SimRobotSensor_robotModel_get, _robotsim.SimRobotSensor_robotModel_set)
     __swig_setmethods__["sensor"] = _robotsim.SimRobotSensor_sensor_set
     __swig_getmethods__["sensor"] = _robotsim.SimRobotSensor_sensor_get
     if _newclass:
@@ -7219,9 +7360,36 @@ class SimRobotController(_object):
     steps. Force controllers can be implemented using setTorque, again using short
     time steps.  
 
-    If setVelocity, setTorque, or setPID command are called, the motion queue
+    If the setVelocity, setTorque, or setPID command are called, the motion queue
     behavior will be completely overridden. To reset back to motion queue control,
-    the function setManualMode(False) must be called.  
+    setManualMode(False) must be called first.  
+
+    Individual joints cannot be addressed with mixed motion queue mode and
+    torque/PID mode. However, you can mix PID and torque mode between different
+    joints with a workaround::  
+
+
+       # setup by zeroing out PID constants for torque controlled joints
+       pid_joint_indices = [...]
+       torque_joint_indices = [...] # complement of pid_joint_indices
+       kp,ki,kp = controller.getPIDGains()
+       for i in torque_joint_indices:  #turn off PID gains here
+          kp[i] = ki[i] = kp[i] = 0  
+
+       # to send PID command (qcmd,dqcmd) and torque commands tcmd, use
+       # a PID command with feedforward torques.  First we build a whole-robot
+       # command:
+       qcmd_whole = [0]*controller.model().numLinks()
+       dqcmd_whole = [0]*controller.model().numLinks()
+       tcmd_whole = [0]*controller.model().numLinks()
+       for i,k in enumerate(pid_joint_indices):
+           qcmd_whole[k],dqcmd_whole[i] = qcmd[i],dqcmd[i]
+       for i,k in enumerate(torque_joint_indices):
+           tcmd_whole[k] = tcmd[i]
+       # Then we send it to the controller
+       controller.setPIDCommand(qcmd_whole,dqcmd_whole,tcmd_whole)  
+
+
 
     C++ includes: robotsim.h
 
@@ -7266,7 +7434,7 @@ class SimRobotController(_object):
 
 
 
-        Sets the current feedback control rate.  
+        Sets the current feedback control rate, in s.  
 
         """
         return _robotsim.SimRobotController_setRate(self, dt)
@@ -7278,7 +7446,7 @@ class SimRobotController(_object):
 
 
 
-        Gets the current feedback control rate.  
+        Gets the current feedback control rate, in s.  
 
         """
         return _robotsim.SimRobotController_getRate(self)
@@ -7290,7 +7458,7 @@ class SimRobotController(_object):
 
 
 
-        Returns the current commanded configuration.  
+        Returns the current commanded configuration (size model().numLinks())  
 
         """
         return _robotsim.SimRobotController_getCommandedConfig(self)
@@ -7302,7 +7470,7 @@ class SimRobotController(_object):
 
 
 
-        Returns the current commanded velocity.  
+        Returns the current commanded velocity (size model().numLinks())  
 
         """
         return _robotsim.SimRobotController_getCommandedVelocity(self)
@@ -7314,7 +7482,7 @@ class SimRobotController(_object):
 
 
 
-        Returns the current commanded (feedforward) torque.  
+        Returns the current commanded (feedforward) torque (size model().numDrivers())  
 
         """
         return _robotsim.SimRobotController_getCommandedTorque(self)
@@ -7326,7 +7494,8 @@ class SimRobotController(_object):
 
 
 
-        Returns the current "sensed" configuration from the simulator.  
+        Returns the current "sensed" configuration from the simulator (size
+        model().numLinks())  
 
         """
         return _robotsim.SimRobotController_getSensedConfig(self)
@@ -7338,7 +7507,8 @@ class SimRobotController(_object):
 
 
 
-        Returns the current "sensed" velocity from the simulator.  
+        Returns the current "sensed" velocity from the simulator (size
+        model().numLinks())  
 
         """
         return _robotsim.SimRobotController_getSensedVelocity(self)
@@ -7350,8 +7520,10 @@ class SimRobotController(_object):
 
 
 
-        Returns the current "sensed" (feedback) torque from the simulator. Note: a
-        default robot doesn't have a torque sensor, so this will be 0.  
+        Returns the current "sensed" (feedback) torque from the simulator. (size
+        model().numDrivers())  
+
+        Note: a default robot doesn't have a torque sensor, so this will be 0  
 
         """
         return _robotsim.SimRobotController_getSensedTorque(self)
@@ -7365,7 +7537,8 @@ class SimRobotController(_object):
 
 
         Returns a sensor by index or by name. If out of bounds or unavailable, a null
-        sensor is returned.  
+        sensor is returned (i.e., SimRobotSensor.name() or SimRobotSensor.type()) will
+        return the empty string.)  
 
         """
         return _robotsim.SimRobotController_sensor(self, *args)
@@ -7377,7 +7550,7 @@ class SimRobotController(_object):
 
 
 
-        gets a command list  
+        gets a custom command list  
 
         """
         return _robotsim.SimRobotController_commands(self)
@@ -7389,7 +7562,7 @@ class SimRobotController(_object):
 
 
 
-        sends a command to the controller  
+        sends a custom string command to the controller  
 
         """
         return _robotsim.SimRobotController_sendCommand(self, name, args)
@@ -7470,6 +7643,8 @@ class SimRobotController(_object):
         Uses linear interpolation to get from the current configuration to the desired
         configuration after time dt.  
 
+        q has size model().numLinks(). dt must be > 0.  
+
         """
         return _robotsim.SimRobotController_setLinear(self, q, dt)
 
@@ -7482,6 +7657,8 @@ class SimRobotController(_object):
 
         Uses cubic (Hermite) interpolation to get from the current
         configuration/velocity to the desired configuration/velocity after time dt.  
+
+        q and v have size model().numLinks(). dt must be > 0.  
 
         """
         return _robotsim.SimRobotController_setCubic(self, q, v, dt)
@@ -7530,7 +7707,7 @@ class SimRobotController(_object):
 
 
         Sets a rate controller from the current commanded config to move at rate dq for
-        time dt.  
+        time dt > 0. dq has size model().numLinks()  
 
         """
         return _robotsim.SimRobotController_setVelocity(self, dq, dt)
@@ -7542,7 +7719,8 @@ class SimRobotController(_object):
 
 
 
-        Sets a torque command controller.  
+        Sets a torque command controller. t can have size model().numDrivers() or
+        model().numLinks().  
 
         """
         return _robotsim.SimRobotController_setTorque(self, t)
@@ -7601,7 +7779,7 @@ class SimRobotController(_object):
 
 
 
-        Sets the PID gains.  
+        Sets the PID gains. Arguments have size model().numDrivers().  
 
         """
         return _robotsim.SimRobotController_setPIDGains(self, kP, kI, kD)
@@ -8397,22 +8575,36 @@ class Simulator(_object):
 
         Valid names are:  
 
-        *   gravity  
-        *   simStep  
-        *   boundaryLayerCollisions  
-        *   rigidObjectCollisions  
-        *   robotSelfCollisions  
-        *   robotRobotCollisions  
-        *   adaptiveTimeStepping  
-        *   minimumAdaptiveTimeStep  
-        *   maxContacts  
-        *   clusterNormalScale  
-        *   errorReductionParameter  
-        *   dampedLeastSquaresParameter  
-        *   instabilityConstantEnergyThreshold  
-        *   instabilityLinearEnergyThreshold  
-        *   instabilityMaxEnergyThreshold  
-        *   instabilityPostCorrectionEnergy  
+        *   gravity: the gravity vector (default "0 0 -9.8")  
+        *   simStep: the internal simulation step (default "0.001")  
+        *   autoDisable: whether to disable bodies that don't move much between time
+            steps (default "0", set to "1" for many static objects)  
+        *   boundaryLayerCollisions: whether to use the Klampt inflated boundaries for
+            contact detection'(default "1", recommended)  
+        *   rigidObjectCollisions: whether rigid objects should collide (default "1")  
+        *   robotSelfCollisions: whether robots should self collide (default "0")  
+        *   robotRobotCollisions: whether robots should collide with other robots
+            (default "1")  
+        *   adaptiveTimeStepping: whether adaptive time stepping should be used to
+            improve stability. Slower but more stable. (default "1")  
+        *   minimumAdaptiveTimeStep: the minimum size of an adaptive time step before
+            giving up (default "1e-6")  
+        *   maxContacts: max # of clustered contacts between pairs of objects (default
+            "20")  
+        *   clusterNormalScale: a parameter for clustering contacts (default "0.1")  
+        *   errorReductionParameter: see ODE docs on ERP (default "0.95")  
+        *   dampedLeastSquaresParameter: see ODE docs on CFM (default "1e-6")  
+        *   instabilityConstantEnergyThreshold: parameter c0 in instability correction
+            (default "1")  
+        *   instabilityLinearEnergyThreshold: parameter c1 in instability correction
+            (default "1.5")  
+        *   instabilityMaxEnergyThreshold: parameter cmax in instability correction
+            (default "100000")  
+        *   instabilityPostCorrectionEnergy: kinetic energy scaling parameter if
+            instability is detected (default "0.8")  
+
+        Instability correction kicks in whenever the kinetic energy K(t) of an object
+        exceeds min(c0*m + c1*K(t-dt),cmax). m is the object's mass.  
 
         See `Klampt/Simulation/ODESimulator.h
         <http://motion.pratt.duke.edu/klampt/klampt_docs/ODESimulator_8h_source.html>`_

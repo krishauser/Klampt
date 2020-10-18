@@ -55,12 +55,14 @@ class Simulator;
 class SimRobotSensor
 {
  public:
-  SimRobotSensor(Robot* robot,SensorBase* sensor);
+  SimRobotSensor(const RobotModel& robot,SensorBase* sensor);
   SimRobotSensor(SimRobotController& robot,const char* name,const char* type);
   ///Returns the name of the sensor
   std::string name();
   ///Returns the type of the sensor
   std::string type();
+  ///Returns the model of the robot to which this belongs
+  RobotModel robot();
   ///Returns a list of names for the measurements (one per measurement).
   std::vector<std::string> measurementNames();
   ///Returns a list of measurements from the previous simulation (or kinematicSimulate) timestep
@@ -80,10 +82,11 @@ class SimRobotSensor
 
   ///simulates / advances the kinematic simulation
   void kinematicSimulate(WorldModel& world,double dt);
+  void kinematicSimulate(double dt);
   ///resets a kinematic simulation so that a new initial condition can be set
   void kinematicReset();
 
-  Robot* robot;
+  RobotModel robotModel;
   SensorBase* sensor;
 };
 
@@ -116,9 +119,36 @@ class SimRobotSensor
  * steps.  Force controllers can be implemented using setTorque, again using
  * short time steps. 
  * 
- * If setVelocity, setTorque, or setPID command are called, the motion queue behavior
- * will be completely overridden.  To reset back to motion queue control, the function
- * setManualMode(False) must be called.
+ * If the setVelocity, setTorque, or setPID command are called, the motion queue 
+ * behavior will be completely overridden.  To reset back to motion queue control, 
+ * setManualMode(False) must be called first.
+ *
+ * Individual joints cannot be addressed with mixed motion queue mode and
+ * torque/PID mode.  However, you can mix PID and torque mode between
+ * different joints with a workaround::
+ * 
+ * <pre>
+ *    \# setup by zeroing out PID constants for torque controlled joints
+ *    pid_joint_indices = [...]
+ *    torque_joint_indices = [...] # complement of pid_joint_indices
+ *    kp,ki,kp = controller.getPIDGains()
+ *    for i in torque_joint_indices:  #turn off PID gains here
+ *       kp[i] = ki[i] = kp[i] = 0
+ *    
+ *    \# to send PID command (qcmd,dqcmd) and torque commands tcmd, use
+ *    \# a PID command with feedforward torques.  First we build a whole-robot
+ *    \# command:
+ *    qcmd_whole = [0]*controller.model().numLinks()
+ *    dqcmd_whole = [0]*controller.model().numLinks()
+ *    tcmd_whole = [0]*controller.model().numLinks()
+ *    for i,k in enumerate(pid_joint_indices):
+ *        qcmd_whole[k],dqcmd_whole[i] = qcmd[i],dqcmd[i]
+ *    for i,k in enumerate(torque_joint_indices):
+ *        tcmd_whole[k] = tcmd[i]
+ *    \# Then we send it to the controller
+ *    controller.setPIDCommand(qcmd_whole,dqcmd_whole,tcmd_whole)
+ *
+ * </pre>
  */
 class SimRobotController
 {
@@ -127,37 +157,44 @@ class SimRobotController
   ~SimRobotController();
   ///Retrieves the robot model associated with this controller
   RobotModel model();
-  /// Sets the current feedback control rate
+  /// Sets the current feedback control rate, in s
   void setRate(double dt);
-  /// Gets the current feedback control rate
+  /// Gets the current feedback control rate, in s
   double getRate();
 
-  /// Returns the current commanded configuration
+  /// Returns the current commanded configuration (size model().numLinks())
   void getCommandedConfig(std::vector<double>& out);
-  /// Returns the current commanded velocity
+  /// Returns the current commanded velocity (size model().numLinks())
   void getCommandedVelocity(std::vector<double>& out);
   /// Returns the current commanded (feedforward) torque
+  /// (size model().numDrivers())
   void getCommandedTorque(std::vector<double>& out);
 
   /// Returns the current "sensed" configuration from the simulator
+  /// (size model().numLinks())
   void getSensedConfig(std::vector<double>& out);
   /// Returns the current "sensed" velocity from the simulator
+  /// (size model().numLinks())
   void getSensedVelocity(std::vector<double>& out);
-  /// Returns the current "sensed" (feedback) torque from the simulator.
+  /// Returns the current "sensed" (feedback) torque from the simulator. 
+  /// (size model().numDrivers())
+  ///
   /// Note: a default robot doesn't have a torque sensor, so this will be 0
   void getSensedTorque(std::vector<double>& out);
 
   /// Returns a sensor by index or by name.  If out of bounds or unavailable,
-  /// a null sensor is returned
+  /// a null sensor is returned (i.e., SimRobotSensor.name() or
+  /// SimRobotSensor.type()) will return the empty string.)
   SimRobotSensor sensor(int index);
   //note: only the last overload docstring is added to the documentation
   /// Returns a sensor by index or by name.  If out of bounds or unavailable,
-  /// a null sensor is returned
+  /// a null sensor is returned (i.e., SimRobotSensor.name() or
+  /// SimRobotSensor.type()) will return the empty string.)
   SimRobotSensor sensor(const char* name);
   
-  /// gets a command list
+  /// gets a custom command list
   std::vector<std::string> commands();
-  /// sends a command to the controller
+  /// sends a custom string command to the controller
   bool sendCommand(const std::string& name,const std::string& args);
 
   /// gets a setting of the controller
@@ -168,6 +205,8 @@ class SimRobotController
   /// Uses a dynamic interpolant to get from the current state to the
   /// desired milestone (with optional ending velocity).  This interpolant
   /// is time-optimal with respect to the velocity and acceleration bounds.
+  ///
+  /// Arguments have size model().numLinks().
   void setMilestone(const std::vector<double>& q);
   //note: only the last overload docstring is added to the documentation
   /// Uses a dynamic interpolant to get from the current state to the
@@ -176,6 +215,8 @@ class SimRobotController
   void setMilestone(const std::vector<double>& q,const std::vector<double>& dq);
   /// Same as setMilestone, but appends an interpolant onto an internal
   /// motion queue starting at the current queued end state.
+  ///
+  /// Arguments have size model().numLinks().
   void addMilestone(const std::vector<double>& q);
   //note: only the last overload docstring is added to the documentation
   /// Same as setMilestone, but appends an interpolant onto an internal
@@ -186,9 +227,13 @@ class SimRobotController
   void addMilestoneLinear(const std::vector<double>& q);
   /// Uses linear interpolation to get from the current configuration to the
   /// desired configuration after time dt
+  ///
+  /// q has size model().numLinks().  dt must be > 0.
   void setLinear(const std::vector<double>& q,double dt);
   /// Uses cubic (Hermite) interpolation to get from the current
   /// configuration/velocity to the desired configuration/velocity after time dt
+  ///
+  /// q and v have size model().numLinks().  dt must be > 0.
   void setCubic(const std::vector<double>& q,const std::vector<double>& v,double dt);
   /// Same as setLinear but appends an interpolant onto the motion queue
   void addLinear(const std::vector<double>& q,double dt);
@@ -199,11 +244,13 @@ class SimRobotController
   double remainingTime() const;
 
   /// Sets a rate controller from the current commanded config to move at
-  /// rate dq for time dt.
+  /// rate dq for time dt > 0.  dq has size model().numLinks()
   void setVelocity(const std::vector<double>& dq,double dt);
-  /// Sets a torque command controller
+  /// Sets a torque command controller.  t can have size model().numDrivers() or
+  /// model().numLinks().
   void setTorque(const std::vector<double>& t);
-  /// Sets a PID command controller
+  /// Sets a PID command controller.  Arguments can have size model().numDrivers()
+  /// or model().numLinks().
   void setPIDCommand(const std::vector<double>& qdes,const std::vector<double>& dqdes);
   //note: only the last overload docstring is added to the documentation
   /// Sets a PID command controller.  If tfeedforward is provided, it is the feedforward torque vector
@@ -224,7 +271,7 @@ class SimRobotController
    */
   std::string getControlType();
 
-  /// Sets the PID gains
+  /// Sets the PID gains.  Arguments have size model().numDrivers().
   void setPIDGains(const std::vector<double>& kP,const std::vector<double>& kI,const std::vector<double>& kD);
   /// Gets the PID gains for the PID controller
   void getPIDGains(std::vector<double>& kPout,std::vector<double>& kIout,std::vector<double>& kDout);
@@ -452,7 +499,7 @@ class Simulator
    * 
    * - gravity: the gravity vector (default "0 0 -9.8")
    * - simStep: the internal simulation step (default "0.001")
-   - - autoDisable: whether to disable bodies that don't move much between time
+   * - autoDisable: whether to disable bodies that don't move much between time
    *   steps (default "0", set to "1" for many static objects)
    * - boundaryLayerCollisions: whether to use the Klampt inflated boundaries
    *   for contact detection'(default "1", recommended)

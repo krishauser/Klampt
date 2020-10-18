@@ -1838,6 +1838,20 @@ outside must rather be enforced by the planner / simulator.
 C++ includes: robotmodel.h
 ";
 
+%feature("docstring") RobotModel::sensor "
+
+Returns a sensor by index or by name. If out of bounds or unavailable, a null
+sensor is returned (i.e., SimRobotSensor.name() or SimRobotSensor.type()) will
+return the empty string.)  
+";
+
+%feature("docstring") RobotModel::sensor "
+
+Returns a sensor by index or by name. If out of bounds or unavailable, a null
+sensor is returned (i.e., SimRobotSensor.name() or SimRobotSensor.type()) will
+return the empty string.)  
+";
+
 %feature("docstring") RobotModel::getLinearMomentum "
 
 Returns the 3D linear momentum vector.  
@@ -1854,6 +1868,15 @@ appearances is to set the link Appearance's directly.
 ";
 
 %feature("docstring") RobotModel::setName "
+";
+
+%feature("docstring") RobotModel::reduce "
+
+Sets self to a reduced version of robot, where all fixed DOFs are eliminated.
+The return value is a map from the original robot DOF indices to the reduced
+DOFs.  
+
+Note that any geometries fixed to the world will disappear.  
 ";
 
 %feature("docstring") RobotModel::getKineticEnergy "
@@ -1875,6 +1898,12 @@ Retrieves the current configuration of the robot model.
 %feature("docstring") RobotModel::getMassMatrix "
 
 Returns the nxn mass matrix B(q). Takes O(n^2) time.  
+";
+
+%feature("docstring") RobotModel::velocityFromDrivers "
+
+Converts a list of driver velocities (length numDrivers()) to a full velocity
+vector (length numLinks()).  
 ";
 
 %feature("docstring") RobotModel::getGravityForces "
@@ -1929,6 +1958,11 @@ If `geometryPrefix == None` (default), the geometry is not saved. Otherwise, the
 geometry of each link will be saved to files named `geometryPrefix+name`, where
 `name` is either the name of the geometry file that was loaded, or
 `[link_name].off`  
+";
+
+%feature("docstring") RobotModel::mount "
+
+Mounts a sub-robot onto a link, with its origin at a given local transform (R,t)  
 ";
 
 %feature("docstring") RobotModel::enableSelfCollision "
@@ -2026,6 +2060,12 @@ Returns the derivative of the nxn mass matrix with respect to q_i. Takes O(n^3)
 time.  
 ";
 
+%feature("docstring") RobotModel::configToDrivers "
+
+Converts a full configuration (length numLinks()) to a list of driver values
+(length numDrivers()).  
+";
+
 %feature("docstring") RobotModel::getTorqueLimits "
 
 Retrieve the torque limit vector tmax, the constraint is :math:`|torque[i]|
@@ -2100,6 +2140,18 @@ Returns the Coriolis force matrix C(q,dq) for current config and velocity. Takes
 O(n^2) time.  
 ";
 
+%feature("docstring") RobotModel::velocityToDrivers "
+
+Converts a full velocity vector (length numLinks()) to a list of driver
+velocities (length numDrivers()).  
+";
+
+%feature("docstring") RobotModel::configFromDrivers "
+
+Converts a list of driver values (length numDrivers()) to a full configuration
+(length numLinks()).  
+";
+
 %feature("docstring") RobotModel::setConfig "
 
 Sets the current configuration of the robot. Input q is a vector of length
@@ -2167,8 +2219,8 @@ Returns a reference to the link by index or name.
 
 %feature("docstring") RobotModel::setTorqueLimits "
 
-Sets the torque limit vector tmax, the constraint is :math:`|torque[i]|
-<\\leqtmax[i]`  
+Sets the torque limit vector tmax, the constraint is :math:`|torque[i]| \\leq
+tmax[i]`  
 ";
 
 %feature("docstring") RobotModel::setVelocityLimits "
@@ -2321,20 +2373,20 @@ Returns:
     vworld  
 ";
 
+%feature("docstring") RobotModelLink::isPrismatic "
+
+Returns whether the joint is prismatic.  
+";
+
 %feature("docstring") RobotModelLink::getMass "
 
 Retrieves the inertial properties of the link. (Note that the Mass is given with
 origin at the link frame, not about the COM.)  
 ";
 
-%feature("docstring") RobotModelLink::setTransform "
+%feature("docstring") RobotModelLink::setPrismatic "
 
-Sets the link's current transformation (R,t) to the world frame.  
-
-Note:  
-
-    This does NOT perform inverse kinematics.  The transform is
-    overwritten when the robot's setConfig() method is called.  
+Changes a link from revolute to prismatic or vice versa.  
 ";
 
 %feature("docstring") RobotModelLink::getWorldDirection "
@@ -2444,13 +2496,9 @@ Returns a reference to the link's appearance.
 Returns a reference to the link's parent, or a NULL link if it has no parent.  
 ";
 
-%feature("docstring") RobotModelLink::getLocalPosition "
+%feature("docstring") RobotModelLink::getName "
 
-Converts point from world to local coordinates.  
-
-Returns:  
-
-    (list of 3 floats): the local coordinates of the world point pworld  
+Returns the name of the robot link.  
 ";
 
 %feature("docstring") RobotModelLink::RobotModelLink "
@@ -2483,9 +2531,13 @@ Returns:
     world coordinates.  
 ";
 
-%feature("docstring") RobotModelLink::getName "
+%feature("docstring") RobotModelLink::getLocalPosition "
 
-Returns the name of the robot link.  
+Converts point from world to local coordinates.  
+
+Returns:  
+
+    (list of 3 floats): the local coordinates of the world point pworld  
 ";
 
 %feature("docstring") RobotModelLink::getPositionHessian "
@@ -2539,6 +2591,16 @@ Returns a reference to the link's robot.
 Gets the local rotational / translational axis.  
 ";
 
+%feature("docstring") RobotModelLink::setTransform "
+
+Sets the link's current transformation (R,t) to the world frame.  
+
+Note:  
+
+    This does NOT perform inverse kinematics.  The transform is
+    overwritten when the robot's setConfig() method is called.  
+";
+
 %feature("docstring") RobotModelLink::drawWorldGL "
 
 Draws the link's geometry in the world frame. If keepAppearance=true, the
@@ -2573,6 +2635,11 @@ Returns:
 
     (3-tuple): a triple (Hx,Hy,Hz) of of nxn matrices corresponding,
     respectively, to the (wx,wy,wz) components of the Hessian.  
+";
+
+%feature("docstring") RobotModelLink::isRevolute "
+
+Returns whether the joint is revolute.  
 ";
 
 %feature("docstring") RobotModelLink::getVelocity "
@@ -2774,9 +2841,36 @@ Arbitrary trajectories can be tracked by using setVelocity over short time
 steps. Force controllers can be implemented using setTorque, again using short
 time steps.  
 
-If setVelocity, setTorque, or setPID command are called, the motion queue
+If the setVelocity, setTorque, or setPID command are called, the motion queue
 behavior will be completely overridden. To reset back to motion queue control,
-the function setManualMode(False) must be called.  
+setManualMode(False) must be called first.  
+
+Individual joints cannot be addressed with mixed motion queue mode and
+torque/PID mode. However, you can mix PID and torque mode between different
+joints with a workaround::  
+
+
+   # setup by zeroing out PID constants for torque controlled joints
+   pid_joint_indices = [...]
+   torque_joint_indices = [...] # complement of pid_joint_indices
+   kp,ki,kp = controller.getPIDGains()
+   for i in torque_joint_indices:  #turn off PID gains here
+      kp[i] = ki[i] = kp[i] = 0  
+
+   # to send PID command (qcmd,dqcmd) and torque commands tcmd, use
+   # a PID command with feedforward torques.  First we build a whole-robot
+   # command:
+   qcmd_whole = [0]*controller.model().numLinks()
+   dqcmd_whole = [0]*controller.model().numLinks()
+   tcmd_whole = [0]*controller.model().numLinks()
+   for i,k in enumerate(pid_joint_indices):
+       qcmd_whole[k],dqcmd_whole[i] = qcmd[i],dqcmd[i]
+   for i,k in enumerate(torque_joint_indices):
+       tcmd_whole[k] = tcmd[i]
+   # Then we send it to the controller
+   controller.setPIDCommand(qcmd_whole,dqcmd_whole,tcmd_whole)  
+
+  
 
 C++ includes: robotsim.h
 ";
@@ -2789,28 +2883,32 @@ Gets the PID gains for the PID controller.
 %feature("docstring") SimRobotController::sensor "
 
 Returns a sensor by index or by name. If out of bounds or unavailable, a null
-sensor is returned.  
+sensor is returned (i.e., SimRobotSensor.name() or SimRobotSensor.type()) will
+return the empty string.)  
 ";
 
 %feature("docstring") SimRobotController::sensor "
 
 Returns a sensor by index or by name. If out of bounds or unavailable, a null
-sensor is returned.  
+sensor is returned (i.e., SimRobotSensor.name() or SimRobotSensor.type()) will
+return the empty string.)  
 ";
 
 %feature("docstring") SimRobotController::getSensedConfig "
 
-Returns the current \"sensed\" configuration from the simulator.  
+Returns the current \"sensed\" configuration from the simulator (size
+model().numLinks())  
 ";
 
 %feature("docstring") SimRobotController::getCommandedTorque "
 
-Returns the current commanded (feedforward) torque.  
+Returns the current commanded (feedforward) torque (size model().numDrivers())  
 ";
 
 %feature("docstring") SimRobotController::setTorque "
 
-Sets a torque command controller.  
+Sets a torque command controller. t can have size model().numDrivers() or
+model().numLinks().  
 ";
 
 %feature("docstring") SimRobotController::remainingTime "
@@ -2820,13 +2918,15 @@ Returns the remaining duration of the motion queue.
 
 %feature("docstring") SimRobotController::setPIDGains "
 
-Sets the PID gains.  
+Sets the PID gains. Arguments have size model().numDrivers().  
 ";
 
 %feature("docstring") SimRobotController::getSensedTorque "
 
-Returns the current \"sensed\" (feedback) torque from the simulator. Note: a
-default robot doesn't have a torque sensor, so this will be 0.  
+Returns the current \"sensed\" (feedback) torque from the simulator. (size
+model().numDrivers())  
+
+Note: a default robot doesn't have a torque sensor, so this will be 0  
 ";
 
 %feature("docstring") SimRobotController::addMilestoneLinear "
@@ -2842,7 +2942,7 @@ gets a setting of the controller
 
 %feature("docstring") SimRobotController::sendCommand "
 
-sends a command to the controller  
+sends a custom string command to the controller  
 ";
 
 %feature("docstring") SimRobotController::setManualMode "
@@ -2853,13 +2953,16 @@ previously set.
 
 %feature("docstring") SimRobotController::getSensedVelocity "
 
-Returns the current \"sensed\" velocity from the simulator.  
+Returns the current \"sensed\" velocity from the simulator (size
+model().numLinks())  
 ";
 
 %feature("docstring") SimRobotController::setCubic "
 
 Uses cubic (Hermite) interpolation to get from the current
 configuration/velocity to the desired configuration/velocity after time dt.  
+
+q and v have size model().numLinks(). dt must be > 0.  
 ";
 
 %feature("docstring") SimRobotController::~SimRobotController "
@@ -2872,7 +2975,7 @@ Same as setCubic but appends an interpolant onto the motion queue.
 
 %feature("docstring") SimRobotController::getCommandedConfig "
 
-Returns the current commanded configuration.  
+Returns the current commanded configuration (size model().numLinks())  
 ";
 
 %feature("docstring") SimRobotController::SimRobotController "
@@ -2887,6 +2990,8 @@ sets a setting of the controller
 
 Uses linear interpolation to get from the current configuration to the desired
 configuration after time dt.  
+
+q has size model().numLinks(). dt must be > 0.  
 ";
 
 %feature("docstring") SimRobotController::addLinear "
@@ -2902,7 +3007,7 @@ Retrieves the robot model associated with this controller.
 %feature("docstring") SimRobotController::setVelocity "
 
 Sets a rate controller from the current commanded config to move at rate dq for
-time dt.  
+time dt > 0. dq has size model().numLinks()  
 ";
 
 %feature("docstring") SimRobotController::getControlType "
@@ -2920,12 +3025,12 @@ Possible return values are:
 
 %feature("docstring") SimRobotController::getRate "
 
-Gets the current feedback control rate.  
+Gets the current feedback control rate, in s.  
 ";
 
 %feature("docstring") SimRobotController::getCommandedVelocity "
 
-Returns the current commanded velocity.  
+Returns the current commanded velocity (size model().numLinks())  
 ";
 
 %feature("docstring") SimRobotController::setMilestone "
@@ -2933,6 +3038,8 @@ Returns the current commanded velocity.
 Uses a dynamic interpolant to get from the current state to the desired
 milestone (with optional ending velocity). This interpolant is time-optimal with
 respect to the velocity and acceleration bounds.  
+
+Arguments have size model().numLinks().  
 ";
 
 %feature("docstring") SimRobotController::setMilestone "
@@ -2944,12 +3051,13 @@ respect to the velocity and acceleration bounds.
 
 %feature("docstring") SimRobotController::commands "
 
-gets a command list  
+gets a custom command list  
 ";
 
 %feature("docstring") SimRobotController::setPIDCommand "
 
-Sets a PID command controller.  
+Sets a PID command controller. Arguments can have size model().numDrivers() or
+model().numLinks().  
 ";
 
 %feature("docstring") SimRobotController::setPIDCommand "
@@ -2960,13 +3068,15 @@ feedforward torque vector.
 
 %feature("docstring") SimRobotController::setRate "
 
-Sets the current feedback control rate.  
+Sets the current feedback control rate, in s.  
 ";
 
 %feature("docstring") SimRobotController::addMilestone "
 
 Same as setMilestone, but appends an interpolant onto an internal motion queue
 starting at the current queued end state.  
+
+Arguments have size model().numLinks().  
 ";
 
 %feature("docstring") SimRobotController::addMilestone "
@@ -2981,24 +3091,22 @@ starting at the current queued end state.
 %feature("docstring") SimRobotSensor "
 
 A sensor on a simulated robot. Retrieve one from the controller using
-:meth:`SimRobotController.getSensor` (), or create a new one using
-SimRobotSensor(robotController,name,type)  
+:meth:`SimRobotController.getSensor`, or create a new one using
+`SimRobotSensor(robotController,name,type)`  
 
-Use :meth:`getMeasurements` () to get the currently simulated measurement
-vector.  
+Use :meth:`getMeasurements` to get the currently simulated measurement vector.  
 
-Sensors are automatically updated through the :meth:`Simulator.simulate` ()
-call, and :meth:`getMeasurements` () retrieves the updated values. As a result,
-you may get garbage measurements before the first Simulator.simulate call is
-made.  
+Sensors are automatically updated through the :meth:`Simulator.simulate` call,
+and :meth:`getMeasurements` retrieves the updated values. As a result, you may
+get garbage measurements before the first Simulator.simulate call is made.  
 
 There is also a mode for doing kinematic simulation, which is supported (i.e.,
 makes sensible measurements) for some types of sensors when just a robot / world
 model is given. This is similar to Simulation.fakeSimulate but the entire
 controller structure is bypassed. You can arbitrarily set the robot's position,
-call :meth:`kinematicReset` (), and then call :meth:`kinematicSimulate` ().
-Subsequent calls assume the robot is being driven along a trajectory until the
-next :meth:`kinematicReset` () is called.  
+call :meth:`kinematicReset`, and then call :meth:`kinematicSimulate`. Subsequent
+calls assume the robot is being driven along a trajectory until the next
+:meth:`kinematicReset` is called.  
 
 LaserSensor, CameraSensor, TiltSensor, AccelerometerSensor, GyroSensor,
 JointPositionSensor, JointVelocitySensor support kinematic simulation mode.
@@ -3032,6 +3140,14 @@ Returns the type of the sensor.
 %feature("docstring") SimRobotSensor::kinematicSimulate "
 
 simulates / advances the kinematic simulation  
+";
+
+%feature("docstring") SimRobotSensor::kinematicSimulate "
+";
+
+%feature("docstring") SimRobotSensor::robot "
+
+Returns the model of the robot to which this belongs.  
 ";
 
 %feature("docstring") SimRobotSensor::getMeasurements "
@@ -3173,22 +3289,36 @@ Retrieves some simulation setting.
 
 Valid names are:  
 
-*   gravity  
-*   simStep  
-*   boundaryLayerCollisions  
-*   rigidObjectCollisions  
-*   robotSelfCollisions  
-*   robotRobotCollisions  
-*   adaptiveTimeStepping  
-*   minimumAdaptiveTimeStep  
-*   maxContacts  
-*   clusterNormalScale  
-*   errorReductionParameter  
-*   dampedLeastSquaresParameter  
-*   instabilityConstantEnergyThreshold  
-*   instabilityLinearEnergyThreshold  
-*   instabilityMaxEnergyThreshold  
-*   instabilityPostCorrectionEnergy  
+*   gravity: the gravity vector (default \"0 0 -9.8\")  
+*   simStep: the internal simulation step (default \"0.001\")  
+*   autoDisable: whether to disable bodies that don't move much between time
+    steps (default \"0\", set to \"1\" for many static objects)  
+*   boundaryLayerCollisions: whether to use the Klampt inflated boundaries for
+    contact detection'(default \"1\", recommended)  
+*   rigidObjectCollisions: whether rigid objects should collide (default \"1\")  
+*   robotSelfCollisions: whether robots should self collide (default \"0\")  
+*   robotRobotCollisions: whether robots should collide with other robots
+    (default \"1\")  
+*   adaptiveTimeStepping: whether adaptive time stepping should be used to
+    improve stability. Slower but more stable. (default \"1\")  
+*   minimumAdaptiveTimeStep: the minimum size of an adaptive time step before
+    giving up (default \"1e-6\")  
+*   maxContacts: max # of clustered contacts between pairs of objects (default
+    \"20\")  
+*   clusterNormalScale: a parameter for clustering contacts (default \"0.1\")  
+*   errorReductionParameter: see ODE docs on ERP (default \"0.95\")  
+*   dampedLeastSquaresParameter: see ODE docs on CFM (default \"1e-6\")  
+*   instabilityConstantEnergyThreshold: parameter c0 in instability correction
+    (default \"1\")  
+*   instabilityLinearEnergyThreshold: parameter c1 in instability correction
+    (default \"1.5\")  
+*   instabilityMaxEnergyThreshold: parameter cmax in instability correction
+    (default \"100000\")  
+*   instabilityPostCorrectionEnergy: kinetic energy scaling parameter if
+    instability is detected (default \"0.8\")  
+
+Instability correction kicks in whenever the kinetic energy K(t) of an object
+exceeds min(c0*m + c1*K(t-dt),cmax). m is the object's mass.  
 
 See `Klampt/Simulation/ODESimulator.h
 <http://motion.pratt.duke.edu/klampt/klampt_docs/ODESimulator_8h_source.html>`_
@@ -3919,8 +4049,15 @@ Valid string values are:
     \"kdtree\" is supported, optionally followed by a weight vector (for PRM,
     RRT*, PRM*, LazyPRM*, LazyRRG*)  
 *   \"restartTermCond\": used if the \"restart\" setting is true. This is a JSON
-    string defining the termination condition (default value:
-    \"{foundSolution:1;maxIters:1000}\")  
+    string defining the termination condition.  
+
+    The default value is \"{foundSolution:1;maxIters:1000}\", which indicates
+    that the planner will restart if it has found a solution, or 1000 iterations
+    have passed.  
+
+    To restart after a certain amount of time has elasped, use
+    \"{timeLimit:X}\". If you are using an optimizing planner, e.g.,
+    shortcutting, you should set foundSolution:0.  
 ";
 
 // File: robotik_8h.xml

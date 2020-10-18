@@ -249,8 +249,15 @@ def setPlanSetting(*args):
         "kdtree" is supported, optionally followed by a weight vector (for PRM,
         RRT*, PRM*, LazyPRM*, LazyRRG*)  
     *   "restartTermCond": used if the "restart" setting is true. This is a JSON
-        string defining the termination condition (default value:
-        "{foundSolution:1;maxIters:1000}")  
+        string defining the termination condition.  
+
+        The default value is "{foundSolution:1;maxIters:1000}", which indicates
+        that the planner will restart if it has found a solution, or 1000 iterations
+        have passed.  
+
+        To restart after a certain amount of time has elasped, use
+        "{timeLimit:X}". If you are using an optimizing planner, e.g.,
+        shortcutting, you should set foundSolution:0.  
 
     """
     return _motionplanning.setPlanSetting(*args)
