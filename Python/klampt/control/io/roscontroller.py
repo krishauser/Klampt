@@ -320,6 +320,7 @@ class RosRobotInterface(robotinterface.RobotInterfaceBase):
     def sensedVelocity(self):
         js = self.last_joint_state
         if js is None: return None
+        if len(js.velocity) == 0: return None
         dq = self.robot.getVelocity()
         for (v,n) in zip(js.velocity,js.names):
             dq[self.link_dict[n]] = v
@@ -327,6 +328,7 @@ class RosRobotInterface(robotinterface.RobotInterfaceBase):
     def sensedTorque(self):
         js = self.last_joint_state
         if js is None: return None
+        if len(js.effort) == 0: return None
         t = [0.0]*robot.numLinks()
         for (v,n) in zip(js.effort,js.names):
             t[self.link_dict[n]] = v
