@@ -1,3 +1,7 @@
+"""Conversions to and from Numpy objects; makes numerical computations much
+more convenient.
+"""
+
 import numpy as np
 from klampt.math import so3,se3
 from ..model import types

@@ -1,3 +1,10 @@
+"""Utilities for Cartesian IK solving, interpolation, and path adjustment.
+
+Uses a unified representation of the workspace of one or more IK constraints
+given by ``config.getConfig(constraints)``.  See the
+:mod:`~klampt.model.config` module for details.
+"""
+
 from .trajectory import *
 from . import ik
 from . import config

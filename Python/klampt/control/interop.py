@@ -1,3 +1,7 @@
+"""Defines utilities for connecting simulation controllers to the Robot 
+Interface Layer, and connect ControllerBlocks to RobotInterfaceLayer receivers.
+"""
+
 from .controller import ControllerBlock
 from .robotinterface import RobotInterfaceBase
 from .robotinterfaceutils import RobotInterfaceCompleter

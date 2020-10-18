@@ -1,5 +1,5 @@
-Control submodules
-====================
+klampt.control package
+======================
 
 .. toctree::
     klampt.control.robotinterface

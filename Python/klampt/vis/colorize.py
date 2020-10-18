@@ -1,3 +1,7 @@
+"""Colorize an object to show heatmaps, false color images, etc.
+"""
+
+
 from ..robotsim import *
 from ..math import vectorops
 try:

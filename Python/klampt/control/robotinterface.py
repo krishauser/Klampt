@@ -1,3 +1,6 @@
+"""The main module for Klampt's Robot Interface Layer.
+"""
+
 from ..robotsim import WorldModel
 import functools
 

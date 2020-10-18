@@ -1,3 +1,6 @@
+"""An exporter that converts scenes / animations to shareable HTML files.
+"""
+
 from klampt import *
 from klampt.model import trajectory
 from klampt import robotsim
@@ -26,7 +29,7 @@ def make_fixed_precision(obj,digits):
     return obj
 
 class HTMLSharePath:
-    """An exporter that converts animations to shareable HTML files.
+    """An exporter that converts scenes / animations to shareable HTML files.
 
     Examples::
 

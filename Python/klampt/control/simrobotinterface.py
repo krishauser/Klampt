@@ -1,6 +1,6 @@
-"""A variety of RobotInterfaceBase methods that work with Klamp't simulations.
-Useful for testing code that works with the Klamp't Robot Interface Layer on a
-simualted robot.
+"""Used for testing code that works with the Klamp't Robot Interface Layer on a
+simualted robot.  Defines a variety of RobotInterfaceBase interfaces that work
+with Klamp't simulations.
 
 For each of the classes in this module, if you provide the simulator argument
 then this will automatically update your simulation upon each startStep() /

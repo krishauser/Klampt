@@ -330,8 +330,8 @@ is implemented.)
   subject to change. If you plan to use RIL, we suggest that you install from
   source so that you can get the latest updates.
 
-Best practices
-^^^^^^^^^^^^^^^
+Multithreaded Implementations
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The best practice for implementing an RIL API is to launch a thread that
 synchrononously communicates with your robot, while relaying asynchronous
@@ -402,8 +402,26 @@ positions to/from the robot.
 
 (Note: a complete implementation will do a better job of error handling.)
 
+ROS Implementations
+^^^^^^^^^^^^^^^^^^^
+
 For a ROS implementation, ROS messaging  will already be running in a separate
-thread, so you only need to setup ROS once in initialize().
+thread, so you don't need to set up a new thread after you've run ``rospy.init_node(...)``.
+This could happen, for example, in the ``initialize`` method.  Then, for all robot commands
+provided by your robot's ROS interface:
+
+1. In the appropriate RIL method, translate the Klamp't command to a ROS message.
+2. Publish the message to the appropriate topic, or call the appropriate service.
+
+For all sensor messages provided by your robot's ROS interface:
+
+1. In ``initialize``, set up a subscriber to the sensor message.
+2. The callback from that subscriber should just store the sensor message.
+3. In the appropriate RIL method, translate the ROS message to a Klamp't object.
+
+As an example, consult the implementation of :class:`~klampt.control.io.roscontroller.RosRobotInterface`.
+This class sends ROS JointTrajectory commands and receives ROS JointState sensor
+messages.  
 
 
 Frankenstein Robots

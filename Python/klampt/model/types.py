@@ -1,3 +1,7 @@
+"""Utilities for inspecting Klamp't objects to retrieve a type string / create
+objects from type strings.
+"""
+
 from ..model.contact import ContactPoint,Hold
 from ..model.trajectory import Trajectory,RobotTrajectory,SO3Trajectory,SE3Trajectory
 from ..model.multipath import MultiPath
