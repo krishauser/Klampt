@@ -7707,7 +7707,7 @@ class SimRobotController(_object):
 
 
 
-        Sets the current feedback control rate.  
+        Sets the current feedback control rate, in s.  
 
         """
         return _robotsim.SimRobotController_setRate(self, dt)
@@ -7719,7 +7719,7 @@ class SimRobotController(_object):
 
 
 
-        Gets the current feedback control rate.  
+        Gets the current feedback control rate, in s.  
 
         """
         return _robotsim.SimRobotController_getRate(self)

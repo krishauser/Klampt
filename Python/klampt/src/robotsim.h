@@ -157,9 +157,9 @@ class SimRobotController
   ~SimRobotController();
   ///Retrieves the robot model associated with this controller
   RobotModel model();
-  /// Sets the current feedback control rate
+  /// Sets the current feedback control rate, in s
   void setRate(double dt);
-  /// Gets the current feedback control rate
+  /// Gets the current feedback control rate, in s
   double getRate();
 
   /// Returns the current commanded configuration (size model().numLinks())

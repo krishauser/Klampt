@@ -1982,7 +1982,7 @@ class Geometry3D(_object):
 
 
         Args:
-            arg2 (:class:`~klampt.PointCloud` or :obj:`ConvexHull` or :class:`~klampt.TriangleMesh` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.Geometry3D` or :class:`~klampt.VolumeGrid`, optional): 
+            arg2 (:class:`~klampt.VolumeGrid` or :obj:`ConvexHull` or :class:`~klampt.PointCloud` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.Geometry3D` or :class:`~klampt.TriangleMesh`, optional): 
         """
         this = _robotsim.new_Geometry3D(*args)
         try:
@@ -6002,7 +6002,7 @@ class WorldModel(_object):
             terrain (:obj:`TerrainModel`, optional): 
 
         Returns:
-            (:class:`~klampt.RobotModel` or :class:`~klampt.RigidObjectModel` or :obj:`TerrainModel`):
+            (:obj:`TerrainModel` or :class:`~klampt.RigidObjectModel` or :class:`~klampt.RobotModel`):
         """
         return _robotsim.WorldModel_add(self, *args)
 
@@ -7037,7 +7037,7 @@ def SampleTransform(*args):
 
 
     Args:
-        obj (:obj:`IKObjective` or :obj:`GeneralizedIKObjective`): 
+        obj (:obj:`GeneralizedIKObjective` or :obj:`IKObjective`): 
     """
     return _robotsim.SampleTransform(*args)
 class SimRobotSensor(_object):
@@ -7090,7 +7090,7 @@ class SimRobotSensor(_object):
 
 
         Args:
-            robot (:class:`~klampt.RobotModel` or :class:`~klampt.SimRobotController`): 
+            robot (:class:`~klampt.SimRobotController` or :class:`~klampt.RobotModel`): 
             sensor (:obj:`SensorBase`, optional): 
             name (str, optional): 
             type (str, optional): 
@@ -7321,7 +7321,7 @@ class SimRobotController(_object):
 
     def setRate(self, dt):
         """
-        Sets the current feedback control rate.  
+        Sets the current feedback control rate, in s.  
 
         Args:
             dt (float)
@@ -7331,7 +7331,7 @@ class SimRobotController(_object):
 
     def getRate(self):
         """
-        Gets the current feedback control rate.  
+        Gets the current feedback control rate, in s.  
 
         Returns:
             (float):

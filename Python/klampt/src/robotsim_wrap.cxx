@@ -61454,7 +61454,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Sets the current feedback control rate.  \n"
+		"Sets the current feedback control rate, in s.  \n"
 		"\n"
 		""},
 	 { (char *)"SimRobotController_getRate", _wrap_SimRobotController_getRate, METH_VARARGS, (char *)"\n"
@@ -61462,7 +61462,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
-		"Gets the current feedback control rate.  \n"
+		"Gets the current feedback control rate, in s.  \n"
 		"\n"
 		""},
 	 { (char *)"SimRobotController_getCommandedConfig", _wrap_SimRobotController_getCommandedConfig, METH_VARARGS, (char *)"\n"
