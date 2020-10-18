@@ -1,4 +1,4 @@
-"""An adaptor between :class:`BaseController` and the Klamp't C++ serial 
+"""An adaptor between :class:`ControllerBlock` and the Klamp't C++ serial 
 controller interface (SerialController).
 """
 import asyncore,socket
@@ -140,22 +140,22 @@ class JsonClient(asyncore.dispatcher):
                     raise
 
 class ControllerClient(JsonClient):
-    """An asyncore client that relays Klampt :class:`ControllerBase` I/O to 
+    """An asyncore client that relays Klampt :class:`ControllerBlock` I/O to 
     some receiver via a JSON-based serial interface.  For example, this can be
     connected to a :class:`SerialController` or to the SimTest app.
 
     The interface simply translates messages back and forth using the raw
-    ControllerBase input / output dictionaries.
+    ControllerBlock input / output dictionaries.
 
     This uses the asyncore module. To run, pass it an address and a
-    :class:`ControllerBase` interface. Then, call ``asyncore.loop()``. The
+    :class:`ControllerBlock` interface. Then, call ``asyncore.loop()``. The
     calling convention looks like this::
 
         import asyncore
         from klampt.control.io.serialcontroller import ControllerClient
-        from klampt.control.controller import ControllerBase
+        from klampt.control.controller import ControllerBlock
 
-        class MyController(ControllerBase):
+        class MyController(ControllerBlock):
             ...define your controller here...
 
         #open up a client on localhost:3456
@@ -203,7 +203,7 @@ class ControllerClient(JsonClient):
             return
 
 
-class JsonSerialController(controller.ControllerBase):
+class JsonSerialController(controller.ControllerBlock):
     """A controller that maintains a server to write/read messages every
     output_and_advance cycle.
 
@@ -228,7 +228,7 @@ class JsonSerialController(controller.ControllerBase):
                 self.clientsock = sock
         return
     
-    def output_and_advance(self,**inputs):
+    def advance(self,**inputs):
         self.accept()
         if self.clientsock == None:
             return None
@@ -253,12 +253,6 @@ class JsonSerialController(controller.ControllerBase):
             #didn't parse properly
             print "Couldn't read Python object from JSON message '"+msg+"'"
             return None
-
-    def output(self,**inputs):
-        raise NotImplementedError("Only the output_and_advance interface is accepted")
-
-    def advance(self,**inputs):
-        raise NotImplementedError("Only the output_and_advance interface is accepted")
 
 
 if __name__ == "__main__":

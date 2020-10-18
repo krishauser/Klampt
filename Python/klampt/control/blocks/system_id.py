@@ -12,7 +12,7 @@ class LinearSystemIDBlock(ControllerBlock):
         self.bname = bname
         self.cname = cname
         self.estimator = LinearSystemID(m,n)
-    def output_and_advance(self,**inputs):
+    def advance(self,**inputs):
         x = inputs[self.xname]
         y = inputs[self.yname]
         u = inputs[self.uname]
@@ -37,7 +37,7 @@ class LinearSystemIDPredictionBlock(ControllerBlock):
         self.xlast = None
         self.ulast = None
         self.estimator = LinearSystemID(m,n)
-    def output_and_advance(self,**inputs):
+    def advance(self,**inputs):
         x = inputs[self.xname]
         y = inputs[self.yname]
         u = inputs[self.uname]

@@ -135,7 +135,7 @@ class RosRobotController(controller.RobotControllerBase):
     def set_index(self,name,index):
         self.nameToIndex[name] = index
 
-    def output(self,**inputs):       
+    def advance(self,**inputs):       
         res = {}
         for msg in self.jointTrajectoryRosMsgQueue:
             #parse in the message -- are positions, velocities, efforts specified?
@@ -254,7 +254,7 @@ class RosTimeBlock(controller.ControllerBlock):
     def __init__(self):
         self.clockpub = rospy.Publisher("/clock", Clock)
         
-    def output(self,**inputs):
+    def advance(self,**inputs):
         t = inputs['t']
         time = Clock()
         time.clock = rospy.Time.from_sec(t)
