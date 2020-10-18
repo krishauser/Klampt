@@ -1,6 +1,6 @@
-.PHONY: docs swig clean python3_version
+.PHONY: docs swig clean
 
-default: cpp-docs swig docs
+default: docs cpp-docs swig
 
 cpp-docs: 
 	cd src; doxygen doxygen.conf
