@@ -1442,16 +1442,18 @@ void destroy()
 void append_ramp(const ParabolicRamp::ParabolicRamp1D& ramp,
       vector<double>& t,vector<double>& x,vector<double>& v)
 {
-  t.push_back(0);
+  double tlast = 0;
+  if(!t.empty()) tlast = t.back();
+  t.push_back(tlast);
   x.push_back(ramp.x0);
   v.push_back(ramp.dx0);
   if(ramp.tswitch1 != 0) {
-    t.push_back(ramp.tswitch1);
+    t.push_back(tlast+ramp.tswitch1);
     x.push_back(ramp.Evaluate(ramp.tswitch1));
     v.push_back(ramp.Derivative(ramp.tswitch1));
   }
   if(ramp.tswitch2 != ramp.tswitch1) {
-    t.push_back(ramp.tswitch2);
+    t.push_back(tlast+ramp.tswitch2);
     x.push_back(ramp.Evaluate(ramp.tswitch2));
     v.push_back(ramp.Derivative(ramp.tswitch2));
   }
@@ -1460,7 +1462,7 @@ void append_ramp(const ParabolicRamp::ParabolicRamp1D& ramp,
     v.back() = ramp.dx1;
   }
   else {
-    t.push_back(ramp.ttotal);
+    t.push_back(tlast+ramp.ttotal);
     x.push_back(ramp.x1);
     v.push_back(ramp.dx1);
   }
@@ -1520,6 +1522,11 @@ void interpolateNDMinTime(const vector<double>& x0,const vector<double>& v0,cons
     out3[i].reserve(ramps[i].size()*4);
     for(size_t j=0;j<ramps[i].size();j++)
       append_ramp(ramps[i][j],out[i],out2[i],out3[i]);
+  }
+  for(size_t i=0;i<out.size();i++) {
+    for(size_t j=0;j+1<out[i].size();j++) {
+      Assert(out[i][j] <= out[i][j+1]);
+    }
   }
 }
 
