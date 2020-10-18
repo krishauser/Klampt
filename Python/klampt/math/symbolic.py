@@ -1614,7 +1614,8 @@ class Function:
         func (Python function or :class:`Expression`): the function to be
             evaluated.
         argNames (list of strs, optional): names of arguments.
-        argTypes (list of Type, optional): list of argument :class:`Type`s.
+        argTypes (list of Type, optional): list giving each argument's
+          :class:`Type`.
         argDescriptions (list of strs, optional): strings describing each
             argument
         returnType (Type, optional): return :class:`Type`
@@ -1838,8 +1839,7 @@ class Function:
             dfunc: either:
             
                 1. an Expression of variables arg1,...,argn,darg,
-                2. a ``Function`` of n+1 variables mapping to ``arg1,...,argn,
-                    dx``,
+                2. a ``Function`` of n+1 variables mapping to ``arg1,...,argn,dx``,
                 3. a Python function of n+1 variables ``(arg1,...,argn,dx)`` 
                     that either returns a value (setting ``asExpr=False``) or 
                     an ``Expression`` of the derivative (if ``asExpr=True``).
