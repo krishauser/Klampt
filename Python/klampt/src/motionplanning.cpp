@@ -1425,3 +1425,250 @@ void destroy()
   plans.clear();
   plansDeleteList.clear();
 }
+
+
+
+
+
+
+
+
+//////////////////////////////////////////// interpolate.h ///////////////////////////////////////////
+
+#include "motionplanning.h"
+#include <Klampt/Modeling/ParabolicRamp.h>
+#include <KrisLibrary/spline/Hermite.h>
+
+void append_ramp(const ParabolicRamp::ParabolicRamp1D& ramp,
+      vector<double>& t,vector<double>& x,vector<double>& v)
+{
+  t.push_back(0);
+  x.push_back(ramp.x0);
+  v.push_back(ramp.dx0);
+  if(ramp.tswitch1 != 0) {
+    t.push_back(ramp.tswitch1);
+    x.push_back(ramp.Evaluate(ramp.tswitch1));
+    v.push_back(ramp.Derivative(ramp.tswitch1));
+  }
+  if(ramp.tswitch2 != ramp.tswitch1) {
+    t.push_back(ramp.tswitch2);
+    x.push_back(ramp.Evaluate(ramp.tswitch2));
+    v.push_back(ramp.Derivative(ramp.tswitch2));
+  }
+  if(ramp.ttotal == ramp.tswitch2) {
+    x.back() = ramp.x1;
+    v.back() = ramp.dx1;
+  }
+  else {
+    t.push_back(ramp.ttotal);
+    x.push_back(ramp.x1);
+    v.push_back(ramp.dx1);
+  }
+}
+
+void interpolate1DMinTime(double x0,double v0,double x1,double v1,
+             double xmin,double xmax,double vmax,double amax,
+             vector<double>& out,vector<double>& out2,vector<double>& out3)
+{
+  ParabolicRamp::ParabolicRamp1D ramp;
+  bool res=ParabolicRamp::SolveMinTimeBounded(x0,v0,x1,v1,amax,vmax,xmin,xmax,ramp);
+  out.resize(0);
+  out2.resize(0);
+  out3.resize(0);
+  if(!res) return;
+  out.reserve(4);
+  out2.reserve(4);
+  out3.reserve(4);
+  append_ramp(ramp,out,out2,out3);
+}
+
+void interpolate1DMinAccel(double x0,double v0,double x1,double v1,
+              double endTime,double xmin,double xmax,double vmax,
+              vector<double>& out,vector<double>& out2,vector<double>& out3)
+{
+  vector<ParabolicRamp::ParabolicRamp1D> ramps;
+  bool res=ParabolicRamp::SolveMinAccelBounded(x0,v0,x1,v1,endTime,vmax,xmin,xmax,ramps);
+  out.resize(0);
+  out2.resize(0);
+  out3.resize(0);
+  if(!res) return;
+  out.resize(4*ramps.size());
+  out2.resize(4*ramps.size());
+  out3.resize(4*ramps.size());
+  for(size_t i=0;i<ramps.size();i++) 
+    append_ramp(ramps[i],out,out2,out3);
+}
+
+void interpolateNDMinTime(const vector<double>& x0,const vector<double>& v0,const vector<double>& x1,const vector<double>& v1,
+             const vector<double>& xmin,const vector<double>& xmax,const vector<double>& vmax,const vector<double>& amax,
+             vector<vector<double> >& out,vector<vector<double> >& out2,vector<vector<double> >& out3)
+{
+  vector<vector<ParabolicRamp::ParabolicRamp1D> > ramps;
+  bool res=ParabolicRamp::SolveMinTimeBounded(x0,v0,x1,v1,amax,vmax,xmin,xmax,ramps);
+  if(!res) {
+    out.resize(0);
+    out2.resize(0);
+    out3.resize(0);
+    return;
+  }
+  out.resize(x0.size());
+  out2.resize(x0.size());
+  out3.resize(x0.size());
+  for(size_t i=0;i<x0.size();i++) {
+    out[i].reserve(ramps[i].size()*4);
+    out2[i].reserve(ramps[i].size()*4);
+    out3[i].reserve(ramps[i].size()*4);
+    for(size_t j=0;j<ramps[i].size();j++)
+      append_ramp(ramps[i][j],out[i],out2[i],out3[i]);
+  }
+}
+
+void interpolateNDMinAccel(const vector<double>& x0,const vector<double>& v0,const vector<double>& x1,const vector<double>& v1,
+             double endTime,const vector<double>& xmin,const vector<double>& xmax,const vector<double>& vmax,
+             vector<vector<double> >& out,vector<vector<double> >& out2,vector<vector<double> >& out3)
+{
+  vector<vector<ParabolicRamp::ParabolicRamp1D> > ramps;
+  bool res=ParabolicRamp::SolveMinAccelBounded(x0,v0,x1,v1,endTime,vmax,xmin,xmax,ramps);
+  if(!res) {
+    out.resize(0);
+    out2.resize(0);
+    out3.resize(0);
+    return;
+  }
+  out.resize(x0.size());
+  out2.resize(x0.size());
+  out3.resize(x0.size());
+  for(size_t i=0;i<x0.size();i++) {
+    out[i].reserve(ramps[i].size()*4);
+    out2[i].reserve(ramps[i].size()*4);
+    out3[i].reserve(ramps[i].size()*4);
+    for(size_t j=0;j<ramps[i].size();j++)
+      append_ramp(ramps[i][j],out[i],out2[i],out3[i]);
+  }
+}
+
+void interpolateNDMinTimeLinear(const vector<double>& x0,const vector<double>& x1,
+             const vector<double>& vmax,const vector<double>& amax,
+             vector<double>& out,vector<vector<double> >& out2,vector<vector<double> >& out3)
+{
+  ParabolicRamp::ParabolicRampND ramp;
+  ramp.x0 = x0;
+  ramp.x1 = x1;
+  ramp.dx0.resize(x0.size(),0);
+  ramp.dx1.resize(x0.size(),0);
+  bool res=ramp.SolveMinTimeLinear(amax,vmax);
+  if(!res) throw PyException("Unable to solve for a straight line path, vmax or amax must be invalid");
+  out.resize(0);
+  out2.resize(0);
+  out3.resize(0);
+  for(size_t i=0;i<ramp.ramps.size();i++) {
+    vector<double> temp,temp2,temp3;
+    append_ramp(ramp.ramps[i],temp,temp2,temp3);
+    if(out.empty()) {
+      out = temp;
+      out2.resize(x0.size());
+      out3.resize(x0.size());
+    }
+    else {
+      Assert(out == temp);
+      Assert(out2[0].size()==temp.size());
+      Assert(out3[0].size()==temp.size());
+    }
+    for(size_t j=0;j<temp.size();j++) {
+      out2[j][i] = temp2[j];
+      out3[j][i] = temp3[j];
+    }
+  }
+}
+
+void combineNDCubic(const vector<vector<double> >& times,const vector<vector<double> >& positions,const vector<vector<double> >& velocities,
+    vector<double>& out,vector<vector<double> >& out2,vector<vector<double> >& out3)
+{
+  if(positions.size() != times.size()) throw PyException("Invalid input, need same # of positions as times");
+  if(velocities.size() != times.size()) throw PyException("Invalid input, need same # of velocities as times");
+  for(size_t i=0;i<times.size();i++) {
+    if(times[i].empty()) throw PyException("Invalid input, some channel has no spline");
+    if(positions[i].size() != times[i].size()) throw PyException("Invalid input, some channel doesn't have same # of positions as times");
+    if(velocities[i].size() != times[i].size()) throw PyException("Invalid input, some channel doesn't have same # of velocities as times");
+    for(size_t j=0;j+1<times[i].size();j++)
+      if(times[i][j] > times[i][j+1]) throw PyException("Invalid input, times are not monotonically increasing");
+  }
+  out.resize(0);
+  out2.resize(0);
+  out3.resize(0);
+  if(times.empty()) return;
+  out.reserve(times[0].size());
+  for(size_t i=0;i<times.size();i++) {
+    out2.reserve(times[0].size());
+    out3.reserve(times[0].size());
+  }
+  size_t numTimes = 0;
+  vector<vector<double>::const_iterator> indices(times.size());
+  for(size_t i=0;i<times.size();i++) {
+    indices[i] = times[i].begin();
+    numTimes += times[i].size();
+  }
+  vector<double> temp(times.size(),-1);
+  double t=-Inf;
+  while(true) {
+    //pick next ramp
+    double tnext=Inf;
+    for(size_t i=0;i<times.size();i++) {
+      if(indices[i] != times[i].end()) {
+        tnext = Min(tnext,*indices[i]);
+      }
+    }
+    if(IsInf(tnext)) break; //done
+    Assert(tnext > t);
+    t = tnext;
+    out.push_back(tnext);
+    out2.push_back(temp);
+    out3.push_back(temp);
+    int numMoved = 0;
+    for(size_t i=0;i<times.size();i++) {
+      if(indices[i] == times[i].end()) {
+        out2.back()[i] = positions[i].back() + (t-times[i].back())*velocities[i].back();
+        out3.back()[i] = velocities[i].back();
+      }
+      else {
+        int idx = (int)(indices[i]-times[i].begin());
+        if(idx == 0) {
+          out2.back()[i] = positions[i].front() + (t-times[i].front())*velocities[i].front();
+          out3.back()[i] = velocities[i].front();
+        }
+        else if(t == times[i][idx]) {
+          out2.back()[i] = positions[i][idx];
+          out3.back()[i] = velocities[i][idx];
+        }
+        else {
+          //cubic interpolation
+          double x0=positions[i][idx-1];
+          double x1=positions[i][idx];
+          double v0=velocities[i][idx-1];
+          double v1=velocities[i][idx];
+          double t0 = times[i][idx-1];
+          double t1 = times[i][idx];
+          double x,v;
+          Spline::HermiteInterpolate(t0,x0,v0,t1,x1,v1,t,x,v);
+          out2.back()[i] = x;
+          out3.back()[i] = v;
+        }
+        //advance pointers
+        if(t == *indices[i]) {
+          ++indices[i];
+          numMoved += 1;
+        }
+      }
+    }
+    if(out.size() > numTimes) {
+      throw PyException("Uh... incorrect implementation of combineNDCubic? exceeded max");
+    }
+    if(numMoved == 0) {
+      throw PyException("Uh... incorrect implementation of combineNDCubic? no times moved");
+    }
+  }
+  for(size_t i=0;i<out2.size();i++)
+    Assert(out2[i].size()==out2[0].size());
+  for(size_t i=0;i<out3.size();i++)
+    Assert(out3[i].size()==out2[0].size());
+}
