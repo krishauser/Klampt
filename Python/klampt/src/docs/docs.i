@@ -3175,7 +3175,7 @@ Possible return values are:
 
 %feature("docstring") SimRobotController::getRate "
 
-Gets the current feedback control rate.  
+Gets the current feedback control rate, in s.  
 ";
 
 %feature("docstring") SimRobotController::getCommandedVelocity "
@@ -3218,7 +3218,7 @@ feedforward torque vector.
 
 %feature("docstring") SimRobotController::setRate "
 
-Sets the current feedback control rate.  
+Sets the current feedback control rate, in s.  
 ";
 
 %feature("docstring") SimRobotController::addMilestone "
