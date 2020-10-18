@@ -35,24 +35,28 @@ class RobotInterfaceBase(object):
     :class:`RobotInterfaceServer`.
 
 
-    DOFs and Parts
-    --------------
+    **DOFs and Parts**
 
     The number of DOFs is assumed equal to the number of joint actuators / 
     encoders. If the robot has fewer actuators than encoders, the commands for 
-    unactuated joints should just be ignored.
+    unactuated joints should just be ignored. If the robot corresponds to a 
+    Klampt model (typical), then the number of DOFs should be
+    ``model.numDrivers()``
 
     A robot can have "parts", which are named groups of DOFs.  For example, a
-    hand can have "thumb", "finger 1", etc.  To implement parts, override the
-    :meth:`parts` method and the :meth:`partController` methods.  It is
-    expected that these correspond with the parts in the robot's 
-    :class:`RobotInfo` structure.
+    robot with a gripper can have parts "arm" and "gripper", which can be 
+    controlled separately.  You may retrieve part names using :meth:`parts`, 
+    part indices using :meth:`indices`, and access a RIL interface to a part
+    using :meth:`partController`. 
+
+    It is suggested that these parts correspond with parts in the robot's 
+    :class:`~klampt.model.robotinfo.RobotInfo` structure.
 
 
-    Functionalities
-    ---------------
+    **Functionalities**
 
     There are a few functions your subclass will need to fill out:
+
     * :meth:`numDOFs` or :meth:`klamptModel`
     * Either :meth:`clock` or :meth:`controlRate`
     * Either :meth:`setPosition`, :meth:`moveToPosition`, :meth:`setVelocity`, 
@@ -188,8 +192,8 @@ class RobotInterfaceBase(object):
         """
         return sensor in self.sensors()
 
-    def enableSensor(self,sensor):
-        """Enables a sensor. Returns true if successful.
+    def enableSensor(self,sensor,enabled=True):
+        """Enables / disables a sensor. Returns true if successful.
         """
         raise NotImplementedError()
 

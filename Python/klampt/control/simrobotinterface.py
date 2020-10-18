@@ -22,11 +22,15 @@ class _SimControlInterface(RobotInterfaceBase):
             self.simulator = simulator
         else:
             self.simulator = None
-        self._status = 'ok'
+        self._status = 'disconnected'
         self.robotInfo = robotInfo
         if robotInfo is not None:
             assert isinstance(robotInfo,RobotInfo)
         RobotInterfaceBase.__init__(self,name=self.__class__.__name__)
+
+    def initialize(self):
+        self._status = 'ok'
+        return True
 
     def klamptModel(self):
         return self.robot
@@ -58,6 +62,14 @@ class _SimControlInterface(RobotInterfaceBase):
 
     def enabledSensors(self):
         return self.sensors()
+
+    def hasSensor(self,sensor):
+        return len(self.sim_controller.sensor(sensor).type()) > 0
+
+    def enableSensor(self,sensor,enabled=True):
+        if not enabled:
+            raise NotImplementedError("Can't disable a simulation sensor")
+        return True
 
     def sensorMeasurements(self,name):
         return self.sim_controller.sensor(name).getMeasurements()

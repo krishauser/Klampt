@@ -29,6 +29,7 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
 
     At a minimum, a base must implement :meth:`sensedPosition` and one of the
     following:
+
         - :meth:`setPosition`
         - :meth:`moveToPosition`
         - :meth:`setVelocity`
@@ -36,17 +37,20 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
         - :meth:`setTorque`
 
     This class will *not* emulate:
+
         - :meth:`status`
         - :meth:`sensedTorque`
         - :meth:`klamptModel`
 
     This class will also not emulate the following, although the basic
     RobotInterfaceBase class has default implementations that work OK:
+
         - :meth:`reset`
         - :meth:`estop`
         - :meth:`softStop`
 
     It will emulate:
+    
         - Clock time from control rate using integration
         - Control rate from clock time using differences
         - Joint velocities from joint positions using finite differences
@@ -259,22 +263,24 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
             if self._baseControlMode in ['pid','p','m']:
                 self._emulator.commandSent = True
         elif desiredControlMode == 'p':
-            res=self._try(['setPosition','setVelocity','setPID','moveToPosition','setTorque'],[self._emulator.getCommand('p'),
+            res=self._try(['setPosition','setVelocity','setPID','moveToPosition','setPiecewiseLinear','setTorque'],[self._emulator.getCommand('p'),
                       lambda :self._emulator.getCommand('v'),
                       lambda :self._emulator.getCommand('pid'),
                       lambda :self._emulator.getCommand('m'),
+                      lambda :self._emulator.getCommand('pwl'),
                       lambda :self._emulator.getCommand('t')])
             self._baseControlMode = self._FUNC_TO_CONTROL_MODE[res[1]]
-            if self._baseControlMode in ['p','m']:
+            if self._baseControlMode in ['p','m','pwl']:
                 self._emulator.commandSent = True
         elif desiredControlMode == 'v':
-            res=self._try(['setVelocity','setPosition','setPID','moveToPosition','setTorque'],[self._emulator.getCommand('v'),
+            res=self._try(['setVelocity','setPosition','setPID','moveToPosition','setPiecewiseLinear','setTorque'],[self._emulator.getCommand('v'),
                       lambda :self._emulator.getCommand('p'),
                       lambda :self._emulator.getCommand('pid'),
                       lambda :self._emulator.getCommand('m'),
+                      lambda :self._emulator.getCommand('pwl'),
                       lambda :self._emulator.getCommand('t')])
             self._baseControlMode = self._FUNC_TO_CONTROL_MODE[res[1]]
-            if self._baseControlMode == 'v':
+            if self._baseControlMode == ['v','pwl']:
                 self._emulator.commandSent = True
         elif desiredControlMode == 't':
             res=self._try(['setTorque','setPID'],[self._emulator.getCommand('t'),
@@ -841,8 +847,17 @@ class _JointInterfaceEmulatorData:
         elif commandType == 'pwl':
             if self.controlMode == 'pwc':
                 raise NotImplementedError("TODO: convert cubic to linear path")
-            assert self.controlMode == 'pwl'
-            return self.trajectoryTimes,self.trajectoryMilestones
+            if self.controlMode == 'pwl':
+                return self.trajectoryTimes,self.trajectoryMilestones
+            elif self.controlMode == 'p':
+                #construct interpolant... should we do it in 1 time step or stretch it out
+                dt = (self.commandedPosition - self.lastCommandedPosition)/self.commandedVelocity
+                return [dt],[self.commandedPosition]
+            elif self.controlMode == 'v':
+                #construct interpolant
+                raise NotImplementedError("Shouldn't ever be in v control model")
+            else:
+                raise NotImplementedError("TODO: convert other control types to linear path")
         if commandType == 'pid':
             return self.commandedPosition,self.commandedVelocity,self.commandedTorque
         elif commandType == 't':

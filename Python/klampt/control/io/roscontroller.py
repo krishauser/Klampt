@@ -1,14 +1,24 @@
-"""This controller accepts ROS JointTrajectory messages
-from the ROS topic '/[robot_name]/joint_trajectory' and writes out
-JointState messages to the ROS topic '/[robot_name]/joint_state'.
+"""Defines control interfaces between Klamp't and ROS.
 
-It also acts as a ROS clock server.
+- :class:`RosRobotController` is a Klampt
+  :class:`~klampt.control.controller.ControllerBlock` that accepts inputs from
+  a ROS controller.  This can be used to drive a simulation.
+- :class:`RosRobotInterface` is a Klampt Robot Interface Layer
+  (:class:~klampt.control.robotinterface.RobotInterfaceBase`) implementation 
+  that outputs commands to a ROS controller.
+
+This also implements the make() protocol for use in klampt_sim.  The returned
+controller accepts ROS JointTrajectory messages from the ROS topic
+'/[robot_name]/joint_trajectory' and writes out JointState messages to the ROS
+topic '/[robot_name]/joint_state'.  It also acts as a ROS clock server.
 """
 
-import controller
+from .. import robotinterface
+from .. import controller
+from .. import blocks
 import rospy
 from klampt.trajectory import Trajectory,HermiteTrajectory
-from trajectory_msgs.msg import JointTrajectory
+from trajectory_msgs.msg import JointTrajectory,JointTrajectoryPoint
 from sensor_msgs.msg import JointState
 from rosgraph_msgs.msg import Clock
 
@@ -63,7 +73,7 @@ class RospyProxy:
 rospy = RospyProxy()
 """
 
-class RosRobotController(controller.ControllerBase):
+class RosRobotController(controller.RobotControllerBase):
     """A controller that reads JointTrajectory messages from a given ROS topic,
     maintains the trajectory for use in a Klamp't simulation, and writes
     JointState messages to another ROS topic.
@@ -93,6 +103,7 @@ class RosRobotController(controller.ControllerBase):
         of link names in the Klamp't robot model."""
         self.state = JointState()
         n = len(link_list)
+        self.state.header.seq = 0
         self.state.name = link_list[:]
         self.state.position     = []
         self.state.velocity     = []
@@ -209,6 +220,7 @@ class RosRobotController(controller.ControllerBase):
 
         #sense the configuration and velocity, possibly the effort
         self.state.header.stamp = rospy.get_rostime()
+        self.state.header.seq += 1
         if 'q' in inputs:
             self.state.position = inputs['q']
         if 'dq' in inputs:
@@ -235,7 +247,7 @@ class RosRobotController(controller.ControllerBase):
         return
 
 
-class RosTimeController(controller.ControllerBase):
+class RosTimeBlock(controller.ControllerBlock):
     """A controller that simply publishes the simulation time to ROS.
     Doesn't output anything.
     """
@@ -250,11 +262,97 @@ class RosTimeController(controller.ControllerBase):
         return {}
 
 
+class RosRobotInterface(robotinterface.RobotInterfaceBase):
+    """Implements a Klampt Robot Interface Layer for a ROS controlled
+    robot that outputs JointState messages and accepts JointTrajectory
+    commands.
+
+    initialize() will create and start a ROS node.
+
+    initialize(False) will not start ROS. Instead, you'll have to do this 
+    manually before calling initialize.
+    """
+    def __init__(self,robot,joint_state_sub_topic,joint_trajectory_pub_topic):
+        self.robot = robot
+        self.link_list = [robot.link(i).getName() for i in range(robot.numLinks())]
+        self.driver_list = [robot.link(robot.driver(i).getAffectedLink()).getName() for i in range(robot.numDrivers())]
+        self.link_dict = dict((n,i) for i,n in enumerate(self.link_list))
+        self.joint_state_sub_topic = joint_state_sub_topic
+        self.joint_trajectory_pub_topic = joint_trajectory_pub_topic
+        self.commandedPosition = None
+        self.last_joint_state = None
+        self.joint_state_sub = None
+        self.joint_trajectory_sub = None
+        self.pub_seq = 0
+    def initialize(self,init_ros=True):
+        if init_ros:
+            global ros_initialized
+            ros_initialized = True
+            rospy.init_node('klampt_RosRobotInterface')
+        self.joint_state_sub = rospy.Subscriber(self.joint_state_sub_topic, JointState,self.jointStateCallback)
+        self.joint_trajectory_pub = rospy.Publisher(self.joint_trajectory_pub_topic, JointTrajectory)
+    def stop(self):
+        self.joint_state_sub.unregister()
+        self.joint_state_sub = None
+        self.joint_state_pub.unregister()
+        self.joint_state_pub = None
+    def jointStateCallback(self,jointState):
+        if len(jointState.names) > self.robot.numLinks():
+            raise RuntimeError("Invalid number of links")
+        if any(n not in self.link_dict):
+            raise RuntimeError("Invalid link "+n+", must match Klamp't model")
+        self.last_joint_state = jointState
+    def klamptModel(self):
+        return self.robot
+    def controlRate(self):
+        return 200
+    def status(self):
+        return 'ok'
+    def commandedPosition(self):
+        return self.commandedPosition
+    def sensedPosition(self):
+        js = self.last_joint_state
+        if js is None: return None
+        q = self.robot.getConfig()
+        for (v,n) in zip(js.position,js.names):
+            q[self.link_dict[n]] = v
+        return self.configFromKlampt(q)
+    def sensedVelocity(self):
+        js = self.last_joint_state
+        if js is None: return None
+        dq = self.robot.getVelocity()
+        for (v,n) in zip(js.velocity,js.names):
+            dq[self.link_dict[n]] = v
+        return self.velocityFromKlampt(dq)
+    def sensedTorque(self):
+        js = self.last_joint_state
+        if js is None: return None
+        t = [0.0]*robot.numLinks()
+        for (v,n) in zip(js.effort,js.names):
+            t[self.link_dict[n]] = v
+        return self.velocityFromKlampt(t)
+    def setPiecewiseLinear(self,ts,qs,relative=True):
+        if not relative:
+            raise NotImplementedError("Can't do non-relative piecewise-linear commands")
+        traj = JointTrajectory()
+        traj.header.seq = self.pub_seq
+        self.pub_seq += 1
+        traj.header.stamp = rospy.get_rostime()
+        traj.joint_names = self.driver_list
+        points = []
+        for t,q in zip(ts,qs):
+            pt = JointTrajectoryPoint()
+            pt.time_from_start = rospy.Duration.from_sec(t)
+            pt.positions = q
+            points.append(pt)
+        traj.points = points
+        self.joint_trajectory_pub.publish(traj)
+
 
 ros_initialized = False
 
 def make(klampt_robot_model):
-    """Creates a ROS controller for the given model.
+    """Creates a RosRobotController for the given model.
     klampt_robot_model is a RobotModel instance.
 
     Subscribes to '/[robot_name]/joint_trajectory'.
@@ -268,12 +366,14 @@ def make(klampt_robot_model):
         rospy.init_node('klampt_sim')
         #launch a controller to publish the simulation time to ROS, PLUS
         #the robot's controller
-        c = controller.MultiController()
-        c.launch(RosTimeController())
+        c = blocks.utils.MultiBlock()
+        c.launch(RosTimeBlock())
         joint_trajectory_topic = "/%s/joint_trajectory"%(robotName,)
         joint_states_topic = "/%s/joint_states"%(robotName,)
         c.launch(RosRobotController(joint_trajectory_topic,joint_states_topic,linkNames))
         return c
     #just launch the robot's controller, some other RosTimeController has been
     #launched before
-    return RosRobotController(robotName,linkNames)
+    joint_trajectory_topic = "/%s/joint_trajectory"%(robotName,)
+    joint_states_topic = "/%s/joint_states"%(robotName,)
+    return RosRobotController(joint_trajectory_topic,joint_states_topic,linkNames)
