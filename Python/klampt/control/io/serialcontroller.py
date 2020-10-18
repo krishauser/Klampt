@@ -79,7 +79,7 @@ class JsonClient(asyncore.dispatcher):
         try:
             output = json.loads(msg)
         except ValueError:
-            print "Error parsing JSON object from message '"+msg+"'"
+            print("Error parsing JSON object from message '"+msg+"'")
             return
         self.onMessage(output)
 
@@ -100,9 +100,9 @@ class JsonClient(asyncore.dispatcher):
     def sendMessage(self,msg):
         """Call this to send an outgoing message"""
         smsg = json.dumps(msg)
-        #print "JSON message:",smsg
+        #print("JSON message:",smsg)
         self.buffer = self.buffer + packStrlen(smsg) + smsg
-        #print "buffer now:",self.buffer
+        #print("buffer now:",self.buffer)
 
     def read(self,length):
         chunk = self.recv(length)
@@ -122,12 +122,12 @@ class JsonClient(asyncore.dispatcher):
                 if not data:
                     # a closed connection is indicated by signaling
                     # a read condition, and having recv() return 0.
-                    print "Socket closed..."
+                    print("JsonClient: Socket closed...")
                     self.handle_close()
                     return ''
                 else:
                     return data
-            except socket.error, why:
+            except socket.error as why:
                 # winsock sometimes throws ENOTCONN
                 if why.args[0] in (errno.EAGAIN, errno.EWOULDBLOCK):
                     #print "EGAIN or EWOULDBLOCK returned... spin waiting"
@@ -171,18 +171,18 @@ class ControllerClient(JsonClient):
         JsonClient.__init__(self,addr)
         self.controller = controller
     def handle_connect(self):
-        print "Handle connect"
+        print("Handle connect")
         JsonClient.handle_connect(self)
     def handle_expt(self):
         self.close()
     def handle_error(self):
         JsonClient.handle_error(self)
         if self.connecting:
-            print
-            print "(Did you forget to start up a Klamp't controller server?)"
+            print()
+            print("(Did you forget to start up a Klamp't controller server?)")
         else:
-            print
-            print "(Did the Klamp't controller server shut down?)"
+            print()
+            print("(Did the Klamp't controller server shut down?)")
     def handle_connect(self):
         self.connecting = False;
         self.controller.signal('enter')
@@ -193,13 +193,13 @@ class ControllerClient(JsonClient):
             res = self.controller.output_and_advance(**msg)
             if res==None: return
         except Exception as e:
-            print "Exception",e,"on read"
+            print("Exception",e,"on read")
             return
         try:
             #print "sending message",res
             self.sendMessage(res)
         except IOError as e:
-            print "Exception",e,"on send"
+            print("Exception",e,"on send")
             return
 
 
@@ -215,7 +215,7 @@ class JsonSerialController(controller.ControllerBlock):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.bind( addr )
         self.sock.listen(1)
-        print "SerialController: Listening on port",addr[1]
+        print("JsonSerialController: Listening on port",addr[1])
         self.clientsock = None
 
     def accept(self):
@@ -224,7 +224,7 @@ class JsonSerialController(controller.ControllerBlock):
             pair = self.sock.accept()
             if pair != None:
                 sock, addr = pair
-                print 'SerialController: Incoming connection from %s' % repr(addr)
+                print('JsonSerialController: Incoming connection from %s' % repr(addr))
                 self.clientsock = sock
         return
     
@@ -242,7 +242,7 @@ class JsonSerialController(controller.ControllerBlock):
             msglen = unpackStrlen(lenstr)
             msg = readSocket(self.clientsock,msglen)
         except IOError:
-            print "SerialController: Error writing or reading socket..."
+            print("JsonSerialController: Error writing or reading socket...")
             self.clientsock.close()
             self.clientsock = None
             return None
@@ -251,7 +251,7 @@ class JsonSerialController(controller.ControllerBlock):
             return output
         except ValueError:
             #didn't parse properly
-            print "Couldn't read Python object from JSON message '"+msg+"'"
+            print("JsonSerialController: Couldn't read Python object from JSON message '"+msg+"'")
             return None
 
 
@@ -263,8 +263,8 @@ if __name__ == "__main__":
     port = 3456
 
     if len(sys.argv)==1:
-        print "Usage: %s [linear_path_file]\n"%(sys.argv[0],)
-        print "By default connects to localhost:3456"
+        print("Usage: %s [linear_path_file]\n"%(sys.argv[0],))
+        print("By default connects to localhost:3456")
         exit()
         
     #by default, runs a trajectory controller

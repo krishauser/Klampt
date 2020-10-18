@@ -48,10 +48,10 @@ class PublisherProxy:
         self.message_type = message_type
         return
     def publish(self,object):
-        print "Publishing on topic "+self.name+":"
+        print("Publishing on topic "+self.name+":")
         for k,v in object.__dict__.iteritems():
             if k[0]=='_': continue
-            print "  ",k,":",v
+            print("  ",k,":",v)
         return
 
 class SubscriberProxy:
@@ -62,13 +62,13 @@ class SubscriberProxy:
 
 class RospyProxy:
     def init_node(self,name):
-        print "init_node("+name+") called"
+        print("init_node("+name+") called")
         return
     def Publisher(self,topic,message_type):
-        print "Making publisher on topic "+topic
+        print("Making publisher on topic "+topic)
         return PublisherProxy(topic,message_type)
     def Subscriber(self,topic,message_type,callback):
-        print "Making subscriber on topic "+topic
+        print("Making subscriber on topic "+topic)
         return SubscriberProxy(topic,message_type,callback)
 rospy = RospyProxy()
 """
@@ -152,7 +152,7 @@ class RosRobotController(controller.RobotControllerBase):
             efforts = [p.efforts for p in msg.points]
             #TODO: quintic interpolation with accelerations
             if any(len(x) != 0 for x in accels):
-                print "roscontroller.py: Warning, acceleration trajectories not handled"
+                print("RosRobotController: Warning, acceleration trajectories not handled")
             if all(len(x) != 0 for x in milestones):
                 if all(len(x) != 0 for x in velocities):
                     #Hermite interpolation
@@ -228,7 +228,7 @@ class RosRobotController(controller.RobotControllerBase):
         if 'torque' in inputs:
             self.state.effort = inputs['torque']
         self.pub.publish(self.state)
-        #print "ROS control result is",res
+        #print("ROS control result is",res)
         return res
 
     def map_output(self,vector,names,output_map,output_name):
