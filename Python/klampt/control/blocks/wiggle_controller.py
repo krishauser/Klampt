@@ -19,7 +19,7 @@ class BigWiggleController(RobotControllerBase):
         return ['qcmd']
 
     def getState(self):
-        return {'index':self.index,'startTime',self.startTime}
+        return {'index':self.index,'startTime':self.startTime}
 
     def setState(self,state):
         self.index=state['index']
