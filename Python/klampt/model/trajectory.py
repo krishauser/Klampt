@@ -685,6 +685,66 @@ class HermiteTrajectory(Trajectory):
                 velocities = [v0]+velocities+[vn]
         self.__init__(waypointTrajectory.times[:],waypointTrajectory.milestones,velocities)
 
+    def makeMinTimeSpline(self,milestones,velocities=None,xmin=None,xmax=None,vmax=None,amax=None):
+        """Creates a spline that interpolates between the given milestones with
+        bounded velocities, accelerations, and positions.
+        """
+        from ..plan import motionplanning
+        if vmax is None and amax is None:
+            raise ValueError("Either vmax or amax must be provided")
+        if len(milestones) == 0 or len(milestones[0]) == 0:
+            raise ValueError("Milestones need to be provided and at least 1-d")
+        n = len(milestones[0])
+        for m in milestones[1:]:
+            if len(m) != n:
+                raise ValueError("Invalid size of milestone")
+        if velocities is not None:
+            if len(velocities) != len(milestones):
+                raise ValueError("Velocities need to have the same size as milestones")
+            for v in velocities:
+                if len(v) != n:
+                    raise ValueError("Invalid size of velocity milestone")
+        inf = float('inf')
+        if xmin is None:
+            xmin = [-inf]*n
+        else:
+            if len(xmin) != n:
+                raise ValueError("Invalid size of lower bound")
+        if xmax is None:
+            xmax = [inf]*n
+        else:
+            if len(xmax) != n:
+                raise ValueError("Invalid size of upper bound")
+        if vmax is None:
+            vmax = [inf]*n
+        else:
+            if len(vmax) != n:
+                raise ValueError("Invalid size of velocity bound")
+        if amax is None:
+            #do a piecewise linear interpolation, ignore x bounds
+            raise NotImplementedError("TODO: amax = None case")
+        else:
+            if len(amax) != n:
+                raise ValueError("Invalid size of acceleration bound")
+            zeros = [0]*n
+            newtimes = [0]
+            newmilestones = [milestones[0]]
+            newvelocities = [velocities[0] if velocities is not None else zeros]
+            for i in range(len(milestones)-1):
+                m0 = milestones[i]
+                m1 = milestones[i+1]
+                if velocities is None:
+                    ts,xs,vs = motionplanning.interpolateNDMinTimeLinear(m0,m1,vmax,amax)
+                else:
+                    v0 = velocities[i]
+                    v1 = velocities[i+1]
+                    ts,xs,vs = motionplanning.interpolateNDMinTime(m0,v0,m1,v1,xmin,xmax,vmax,amax)
+                ts,xs,vs = motionplanning.combineNDCubic(ts,xs,vs)
+                newtimes += [newtimes[-1] + t for t in ts[1:]]
+                newmilestones += xs[1:]
+                newvelocities += vs[1:]
+            self.__init__(newtimes,newmilestones,newvelocities)
+
     def eval_state(self,t,endBehavior='halt'):
         """Returns the (configuration,velocity) state at time t."""
         return Trajectory.eval(self,t,endBehavior)
