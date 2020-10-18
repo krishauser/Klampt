@@ -29,6 +29,12 @@ Simulated Robot Controllers
     and on real robots.
 
 
+The overall structure of a simulated robot controller is shown below. The
+primary interfaces to your Python code are in the
+:class:`~klampt.SimRobotController` and :class:`~klampt.SimRobotSensor` classes.
+
+|SimRobotController|
+
 Actuators
 ~~~~~~~~~
 
@@ -140,8 +146,6 @@ queue to the indicated milestone
 Writing a Custom Controller
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-|Controller illustration|
-
 To wrap a controller around a simulated robot, the user should
 implement a control loop. At every time step, the control loop reads
 the robot's sensors, computes the control, and then sends the control
@@ -183,7 +187,9 @@ easily connect the same controller code to a real robot.  This is where the
 Klamp't Robot Interface Layer (RIL) comes in.  The RIL API defines a
 superset of common functionality that most robots' motor controllers provide.
 It also provides a common interface to switch between simulated and real
-robots.
+robots. The overall diagram looks like the following:
+
+|RobotInterfaceLayer|
 
 To interface with your own robot, you will need to construct a subclass of RIL's
 main :class:`~klampt.control.robotinterface.RobotInterfaceBase` class, or
@@ -197,14 +203,96 @@ switch to the real robot.  There are two ways to do this:
    Note there are some discrepancies between this and SimRobotController that you
    should watch out for.  Then, use one of the classes in :mod:`klampt.control.simrobotinterface`
    to test your controller in a simulator. 
-
-   The reason why this route is preferable is that you can pick the RIL interface to
-   your simulated robot that corresponds most closely to your actual robot, whether
-   it's position controlled, velocity controlled, or provides motion queue functionality.
 2. Use your existing control code, but replace your SimRobotController object with a
    :class:`klampt.control.interop.SimRobotControllerToInterface` object that points
    to your robot's interface.
 
+
+The reason why route 1 is preferable is that you can pick the RIL interface to
+your simulated robot that corresponds most closely to your actual robot, whether
+it's position controlled, velocity controlled, or provides motion queue functionality.
+SimXControllInterface classes are available to use physics simulation as well as
+basic kinematic simulation (KinematicSimControlInterface), which is faster.  This usage
+is summarized in the following diagrams.
+
+|RobotInterfaceLayer-simulation| |RobotInterfaceLayer-kinematic|
+
+Using the RIL API
+~~~~~~~~~~~~~~~~~~
+
+For your controller code to use an RIL API, it should treat the API as a synchronous
+process, in which all commands and queries at a given time step are placed within a
+``startStep()``/``endStep()`` block.  The calling convention is:
+
+.. code:: python
+
+    interface = MyRobotInterface(...args...)
+    if not interface.initialize():  #should be called first
+        raise RuntimeError("There was some problem initializing interface "+str(interface))
+    dt = 1.0/interface.controlRate()
+    while interface.status() == 'ok':  #no error handling done here...
+        t0 = time.time()
+        interface.startStep()
+        [any getXXX or setXXX commands here comprising the control loop]
+        interface.endStep()
+        t1 = time.time()
+        telapsed = t1 - t0
+        [wait for time max(dt - telapsed,0)]
+
+DOFs and Parts
+^^^^^^^^^^^^^^
+
+The number of DOFs in RIL is assumed equal to the number of joint actuators / 
+encoders.  If the robot has fewer actuators than encoders, the commands for 
+unactuated joints should just be ignored.  If the robot corresponds to a Klampt
+model (typical), then the number of DOFs should be ``model.numDrivers()``.
+
+A robot can have "parts", which are named groups of DOFs.  For example, a
+robot with a gripper can have parts "arm" and "gripper", which can be controlled
+separately.  You may retrieve part names using  ``interface.parts()``,
+part indices using ``interface.indices(part)``, and access a RIL interface
+to a part using ``interface.partController(part)``.
+
+
+Status Management
+^^^^^^^^^^^^^^^^^
+
+- ``interface.initialize()``: must be called before the control loop. May return False
+  if there was an error connecting.
+- ``interface.status()``: returns 'ok' if everything is ok.  Otherwise, returns an
+  implementation-dependent string.
+- ``interface.clock()``: returns the robot's clock, in s.
+- ``interface.controlRate()``: returns the control rate, in Hz.
+- ``interface.reset()``: if status() is not 'ok', tries to reset to an ok state.
+  A controller should not issue commands until status() is 'ok' again.
+- ``interface.estop()``: triggers an emergency stop.  Default just does a soft stop.
+- ``interface.softStop()``: triggers a soft stop.
+
+Command types
+^^^^^^^^^^^^^^
+
+Keep in mind that almost all robots will only implement a subset of these natively.
+
+**Basic control**
+
+- ``interface.setPosition(q)``: Immediate position control.
+- ``interface.moveTo(q,speed=1)``: Smooth position control.
+- ``interface.setVelocity(v,ttl=None)``: Immediate velocity control, with an optimal time-to-live.
+- ``interface.setTorque(t,ttl=None)``: Torque control, with an optimal time-to-live.
+- ``interface.setVelocity(v,ttl=None)``: Immediate velocity control, with an optimal time-to-live.
+- ``interface.setPID(q,dq,t_feedforward=None)``: PID command, with optional feedforward torque.
+- ``interface.setPiecewiseLinear(times,milestones,relative=True)``: initiates a piecewise linear
+  trajectory between the given times and milestones.  If relative=True, time 0 is the current time,
+  but otherwise all the times should be greater than ``interface.clock()``.
+- ``interface.setPiecewiseCubic(times,milestones,velocities,relative=True)``: initiates a piecewise
+  cubic trajectory between the given times, milestones, and velocities.  If relative=True, time 0 
+  is the current time, but otherwise all the times should be greater than ``interface.clock()``.
+
+**Cartesian control**
+
+Each RIL robot has at most one end effector.  If you have a robot with multiple end effectors,
+
+- ``interface.setToolCoordinates(x)``: sets the tool center point
 
 Writing RIL Implementations for Your Robot
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -213,10 +301,43 @@ Writing RIL Implementations for Your Robot
 
     This has not been thoroughly tested.
 
-The best practice for the RIL API is to launch a thread that synchrononously
-communicates with your robot, while relaying asynchronous commands from the caller.
-The following code does a very basic job of this for a position-controlled robot,
-which only relays the sensed/ commanded positions to/from the robot. 
+
+To implement an RIL layer for your robot, you will need to understand details on the
+communication method used by the manufacturer, e.g., Ethernet, serial, ROS, or some other API.
+Your RIL implementation should fill out as much of the RobotInterfaceBase methods as provided
+by the communication layer.  The block diagram of the architecture looks like this:
+
+|RobotInterfaceLayer-physical|
+
+For RIL to work, there are a few functions your subclass will need to fill out, at a minimum:
+
+  * :meth:`~klampt.control.robotinterface.RobotInterfaceBase.numDOFs` or :meth:`~klampt.control.robotinterface.RobotInterfaceBase.klamptModel`
+  * Either :meth:`~klampt.control.robotinterface.RobotInterfaceBase.clock` or :meth:`~klampt.control.robotinterface.RobotInterfaceBase.controlRate`
+  * Either :meth:`~klampt.control.robotinterface.RobotInterfaceBase.setPosition`, :meth:`~klampt.control.robotinterface.RobotInterfaceBase.moveToPosition`, :meth:`~klampt.control.robotinterface.RobotInterfaceBase.setVelocity`, 
+    :meth:`~klampt.control.robotinterface.RobotInterfaceBase.setTorque`, or :meth:`~klampt.control.robotinterface.RobotInterfaceBase.setPID`
+  * Either :meth:`~klampt.control.robotinterface.RobotInterfaceBase.sensedPosition` or :meth:`~klampt.control.robotinterface.RobotInterfaceBase.commandedPosition`
+
+Given these implementations, we provide a convenience class,
+:class:`~klampt.control.robotinterfaceutils.RobotInterfaceCompleter`,
+that will automatically fill in all other parts of the RIL API, e.g., velocity
+control, motion queue control, and Cartesian control.  (Note: move-to and
+Cartesian control functions are only available if ``RobotInterfaceBase.klamptModel``
+is implemented.)
+
+.. note::
+
+  The emulation of some components has rough edges, and this code is
+  subject to change. If you plan to use RIL, we suggest that you install from
+  source so that you can get the latest updates.
+
+Best practices
+^^^^^^^^^^^^^^^
+
+The best practice for implementing an RIL API is to launch a thread that
+synchrononously communicates with your robot, while relaying asynchronous
+commands from the caller. The following code does a very basic job of this
+for a position-controlled robot, which only relays the sensed/ commanded
+positions to/from the robot. 
 
 .. code:: python
 
@@ -281,14 +402,8 @@ which only relays the sensed/ commanded positions to/from the robot.
 
 (Note: a complete implementation will do a better job of error handling.)
 
-The RIL API may be daunting, but luckily you only need to implement a few parts for 
-your robot.  We provide a convenience class, :class:`~klampt.control.robotinterfaceutils.RobotInterfaceCompleter`,
-that will automatically fill in all other parts of the RIL API, including velocity
-control, motion queue control, and Cartesian control.
-
-Note that there may be some rough edges for some emulated parts, and this code is
-subject to change. If you plan to use RIL, we suggest that you install from
-source so that you can get the latest updates.
+For a ROS implementation, ROS messaging  will already be running in a separate
+thread, so you only need to setup ROS once in initialize().
 
 
 Frankenstein Robots
@@ -302,6 +417,8 @@ We often build robots out of several components, such as an arm and a gripper,
 and it can be a pain to coordinate the control of each component.  Klamp't
 provides a convenience class, :class:`~klampt.control.robotinterfaceutils.MultiRobotInterface`,
 that lets you assemble robots into parts.
+
+|RobotInterfaceLayer-multirobot|
 
 
 Experimental Controller Building Blocks
@@ -414,7 +531,11 @@ objects in the ``advance()`` method.
 
 
 
-.. |Controller illustration| image:: _static/images/concepts-controller.png
+.. |SimRobotController| image:: _static/images/SimRobotController.png
 .. |Motion queue illustration| image:: _static/images/motion-queue.png
 .. |Trapezoidal velocity profiles| image:: _static/images/trapezoidal-velocity-profile.png
-
+.. |RobotInterfaceLayer| image:: _static/images/RobotInterfaceLayer.png
+.. |RobotInterfaceLayer-simulation| image:: _static/images/RobotInterfaceLayer-simulation.png
+.. |RobotInterfaceLayer-kinematic| image:: _static/images/RobotInterfaceLayer-kinematic.png
+.. |RobotInterfaceLayer-physical| image:: _static/images/RobotInterfaceLayer-physical.png
+.. |RobotInterfaceLayer-multirobot| image:: _static/images/RobotInterfaceLayer-multirobot.png

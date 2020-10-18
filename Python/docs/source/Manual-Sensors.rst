@@ -484,7 +484,7 @@ the camera measurements into point clouds.)
 
 
 Interactions between camera sensors and threading
-----------------------------
+--------------------------------------------------
 
 Although most sensors can be used very straightforwardly offline or in conjunction 
 with the `klampt.vis <Manual-visualization.html>`__ module, camera sensors have a bit of
