@@ -518,9 +518,9 @@ class ADFunctionCall:
         Examples:
 
         - ``(var('x')**3).gen_derivative(['x','x'])`` returns the
-          second derivative of :math:`x^3` with respect to x. 
+           second derivative of :math:`x^3` with respect to x. 
         - ``var('x')**2*var('y').gen_derivative(['x','y'])`` returns
-          :math:`\frac{d^2}{dx dy} x^2 y`.
+           :math:`\\frac{d^2}{dx dy} x^2 y`.
 
         If args is [], this is equivalent to ``self.eval(**kwargs)``.
 
