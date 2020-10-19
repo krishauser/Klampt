@@ -37870,91 +37870,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_RobotModel_mount__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  RobotModel *arg1 = (RobotModel *) 0 ;
-  int arg2 ;
-  RobotModel *arg3 = 0 ;
-  double *arg4 ;
-  double *arg5 ;
-  char *arg6 = (char *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  double temp4[9] ;
-  double temp5[3] ;
-  int res6 ;
-  char *buf6 = 0 ;
-  int alloc6 = 0 ;
-  PyObject * obj0 = 0 ;
-  PyObject * obj1 = 0 ;
-  PyObject * obj2 = 0 ;
-  PyObject * obj3 = 0 ;
-  PyObject * obj4 = 0 ;
-  PyObject * obj5 = 0 ;
-  
-  if (!PyArg_ParseTuple(args,(char *)"OOOOOO:RobotModel_mount",&obj0,&obj1,&obj2,&obj3,&obj4,&obj5)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_RobotModel, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModel_mount" "', argument " "1"" of type '" "RobotModel *""'"); 
-  }
-  arg1 = reinterpret_cast< RobotModel * >(argp1);
-  ecode2 = SWIG_AsVal_int(obj1, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "RobotModel_mount" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
-  res3 = SWIG_ConvertPtr(obj2, &argp3, SWIGTYPE_p_RobotModel,  0  | 0);
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "RobotModel_mount" "', argument " "3"" of type '" "RobotModel const &""'"); 
-  }
-  if (!argp3) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "RobotModel_mount" "', argument " "3"" of type '" "RobotModel const &""'"); 
-  }
-  arg3 = reinterpret_cast< RobotModel * >(argp3);
-  {
-    if (!convert_darray(obj3,temp4,9)) {
-      return NULL;
-    }
-    arg4 = &temp4[0];
-  }
-  {
-    if (!convert_darray(obj4,temp5,3)) {
-      return NULL;
-    }
-    arg5 = &temp5[0];
-  }
-  res6 = SWIG_AsCharPtrAndSize(obj5, &buf6, NULL, &alloc6);
-  if (!SWIG_IsOK(res6)) {
-    SWIG_exception_fail(SWIG_ArgError(res6), "in method '" "RobotModel_mount" "', argument " "6"" of type '" "char const *""'");
-  }
-  arg6 = reinterpret_cast< char * >(buf6);
-  {
-    try {
-      (arg1)->mount(arg2,(RobotModel const &)*arg3,(double const (*))arg4,(double const (*))arg5,(char const *)arg6);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_Py_Void();
-  if (alloc6 == SWIG_NEWOBJ) delete[] buf6;
-  return resultobj;
-fail:
-  if (alloc6 == SWIG_NEWOBJ) delete[] buf6;
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_RobotModel_mount__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_RobotModel_mount(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RobotModel *arg1 = (RobotModel *) 0 ;
   int arg2 ;
@@ -38023,90 +37939,6 @@ SWIGINTERN PyObject *_wrap_RobotModel_mount__SWIG_1(PyObject *SWIGUNUSEDPARM(sel
   return resultobj;
 fail:
   return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_RobotModel_mount(PyObject *self, PyObject *args) {
-  Py_ssize_t argc;
-  PyObject *argv[7] = {
-    0
-  };
-  Py_ssize_t ii;
-  
-  if (!PyTuple_Check(args)) SWIG_fail;
-  argc = args ? PyObject_Length(args) : 0;
-  for (ii = 0; (ii < 6) && (ii < argc); ii++) {
-    argv[ii] = PyTuple_GET_ITEM(args,ii);
-  }
-  if (argc == 5) {
-    int _v;
-    void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_RobotModel, 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      {
-        int res = SWIG_AsVal_int(argv[1], NULL);
-        _v = SWIG_CheckState(res);
-      }
-      if (_v) {
-        int res = SWIG_ConvertPtr(argv[2], 0, SWIGTYPE_p_RobotModel, 0);
-        _v = SWIG_CheckState(res);
-        if (_v) {
-          void *vptr = 0;
-          int res = SWIG_ConvertPtr(argv[3], &vptr, SWIGTYPE_p_double, 0);
-          _v = SWIG_CheckState(res);
-          if (_v) {
-            void *vptr = 0;
-            int res = SWIG_ConvertPtr(argv[4], &vptr, SWIGTYPE_p_double, 0);
-            _v = SWIG_CheckState(res);
-            if (_v) {
-              return _wrap_RobotModel_mount__SWIG_1(self, args);
-            }
-          }
-        }
-      }
-    }
-  }
-  if (argc == 6) {
-    int _v;
-    void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_RobotModel, 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      {
-        int res = SWIG_AsVal_int(argv[1], NULL);
-        _v = SWIG_CheckState(res);
-      }
-      if (_v) {
-        int res = SWIG_ConvertPtr(argv[2], 0, SWIGTYPE_p_RobotModel, 0);
-        _v = SWIG_CheckState(res);
-        if (_v) {
-          void *vptr = 0;
-          int res = SWIG_ConvertPtr(argv[3], &vptr, SWIGTYPE_p_double, 0);
-          _v = SWIG_CheckState(res);
-          if (_v) {
-            void *vptr = 0;
-            int res = SWIG_ConvertPtr(argv[4], &vptr, SWIGTYPE_p_double, 0);
-            _v = SWIG_CheckState(res);
-            if (_v) {
-              int res = SWIG_AsCharPtrAndSize(argv[5], 0, NULL, 0);
-              _v = SWIG_CheckState(res);
-              if (_v) {
-                return _wrap_RobotModel_mount__SWIG_0(self, args);
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  
-fail:
-  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'RobotModel_mount'.\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    RobotModel::mount(int,RobotModel const &,double const [9],double const [3],char const *)\n"
-    "    RobotModel::mount(int,RobotModel const &,double const [9],double const [3])\n");
-  return 0;
 }
 
 
@@ -60168,12 +60000,14 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		""},
 	 { (char *)"RobotModel_mount", _wrap_RobotModel_mount, METH_VARARGS, (char *)"\n"
-		"mount(int link, RobotModel subRobot, double const [9] R, double const [3] t, char const * prefix=None)\n"
 		"RobotModel_mount(RobotModel self, int link, RobotModel subRobot, double const [9] R, double const [3] t)\n"
 		"\n"
 		"\n"
 		"\n"
-		"Mounts a sub-robot onto a link, with its origin at a given local transform (R,t)  \n"
+		"Mounts a sub-robot onto a link, with its origin at a given local transform\n"
+		"(R,t). The sub-robot's links will be renamed to subRobot.getName() + ':' +\n"
+		"link.getName() unless subRobot.getName() is '', in which case the link names are\n"
+		"preserved.  \n"
 		"\n"
 		""},
 	 { (char *)"RobotModel_sensor", _wrap_RobotModel_sensor, METH_VARARGS, (char *)"\n"

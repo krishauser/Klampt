@@ -5481,17 +5481,19 @@ class RobotModel(_object):
         return _robotsim.RobotModel_reduce(self, robot)
 
 
-    def mount(self, link, subRobot, R, t, prefix=None):
+    def mount(self, link, subRobot, R, t):
         """
-        mount(RobotModel self, int link, RobotModel subRobot, double const [9] R, double const [3] t, char const * prefix=None)
         mount(RobotModel self, int link, RobotModel subRobot, double const [9] R, double const [3] t)
 
 
 
-        Mounts a sub-robot onto a link, with its origin at a given local transform (R,t)  
+        Mounts a sub-robot onto a link, with its origin at a given local transform
+        (R,t). The sub-robot's links will be renamed to subRobot.getName() + ':' +
+        link.getName() unless subRobot.getName() is '', in which case the link names are
+        preserved.  
 
         """
-        return _robotsim.RobotModel_mount(self, link, subRobot, R, t, prefix)
+        return _robotsim.RobotModel_mount(self, link, subRobot, R, t)
 
 
     def sensor(self, *args):

@@ -590,8 +590,10 @@ class RobotModel
   ///
   ///Note that any geometries fixed to the world will disappear.
   void reduce(const RobotModel& robot,std::vector<int>& out);
-  ///Mounts a sub-robot onto a link, with its origin at a given local transform (R,t)
-  void mount(int link,const RobotModel& subRobot,const double R[9],const double t[3],const char* prefix=NULL);
+  ///Mounts a sub-robot onto a link, with its origin at a given local transform (R,t).
+  ///The sub-robot's links will be renamed to subRobot.getName() + ':' + link.getName()
+  ///unless subRobot.getName() is '', in which case the link names are preserved.
+  void mount(int link,const RobotModel& subRobot,const double R[9],const double t[3]);
 
   /// Returns a sensor by index or by name.  If out of bounds or unavailable,
   /// a null sensor is returned (i.e., SimRobotSensor.name() or

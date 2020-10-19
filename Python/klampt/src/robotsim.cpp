@@ -3839,12 +3839,17 @@ void RobotModel::reduce(const RobotModel& fullRobot,std::vector<int>& out)
   fullRobot.robot->Reduce(*robot,out);
 }
 
-void RobotModel::mount(int link,const RobotModel& subRobot,const double R[9],const double t[3],const char* prefix)
+void RobotModel::mount(int link,const RobotModel& subRobot,const double R[9],const double t[3])
 {
   RigidTransform T;
   T.R.set(R);
   T.t.set(t);
-  robot->Mount(link,*subRobot.robot,T,prefix);
+  const char* name = subRobot.getName();
+  if(strlen(name)==0)
+    robot->Mount(link,*subRobot.robot,T,NULL);
+  else {
+    robot->Mount(link,*subRobot.robot,T,name);
+  }
 }
 
 SimRobotSensor RobotModel::sensor(int sensorIndex)

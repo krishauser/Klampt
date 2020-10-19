@@ -1982,7 +1982,7 @@ class Geometry3D(_object):
 
 
         Args:
-            arg2 (:class:`~klampt.VolumeGrid` or :obj:`ConvexHull` or :class:`~klampt.PointCloud` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.Geometry3D` or :class:`~klampt.TriangleMesh`, optional): 
+            arg2 (:class:`~klampt.PointCloud` or :obj:`ConvexHull` or :class:`~klampt.TriangleMesh` or :class:`~klampt.VolumeGrid` or :class:`~klampt.Geometry3D` or :class:`~klampt.GeometricPrimitive`, optional): 
         """
         this = _robotsim.new_Geometry3D(*args)
         try:
@@ -5190,23 +5190,20 @@ class RobotModel(_object):
         return _robotsim.RobotModel_reduce(self, robot)
 
 
-    def mount(self, link, subRobot, R, t, prefix=None):
+    def mount(self, link, subRobot, R, t):
         """
-        Mounts a sub-robot onto a link, with its origin at a given local transform (R,t)  
-
-        mount (link,subRobot,R,t,prefix=None)
-
-        mount (link,subRobot,R,t)
-
+        Mounts a sub-robot onto a link, with its origin at a given local transform
+        (R,t). The sub-robot's links will be renamed to subRobot.getName() + ':' +
+        link.getName() unless subRobot.getName() is '', in which case the link names are
+        preserved.  
 
         Args:
-            link (int): 
-            subRobot (:class:`~klampt.RobotModel`): 
-            R (:obj:`list of 9 floats (so3 element)`): 
-            t (:obj:`list of 3 floats`): 
-            prefix (str, optional): default value None
+            link (int)
+            subRobot (:class:`~klampt.RobotModel`)
+            R (:obj:`list of 9 floats (so3 element)`)
+            t (:obj:`list of 3 floats`)
         """
-        return _robotsim.RobotModel_mount(self, link, subRobot, R, t, prefix)
+        return _robotsim.RobotModel_mount(self, link, subRobot, R, t)
 
 
     def sensor(self, *args):
@@ -5846,7 +5843,7 @@ class WorldModel(_object):
 
 
         Args:
-            robot (int or str): 
+            robot (str or int): 
             index (int, optional): 
             name (str, optional): 
 
@@ -7037,7 +7034,7 @@ def SampleTransform(*args):
 
 
     Args:
-        obj (:obj:`GeneralizedIKObjective` or :obj:`IKObjective`): 
+        obj (:obj:`IKObjective` or :obj:`GeneralizedIKObjective`): 
     """
     return _robotsim.SampleTransform(*args)
 class SimRobotSensor(_object):
@@ -8311,7 +8308,7 @@ class Simulator(_object):
 
 
         Args:
-            robot (int or :class:`~klampt.RobotModel`): 
+            robot (:class:`~klampt.RobotModel` or int): 
 
         Returns:
             (:class:`~klampt.SimRobotController`):
