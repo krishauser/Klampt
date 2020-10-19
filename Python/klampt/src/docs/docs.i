@@ -2112,7 +2112,10 @@ geometry of each link will be saved to files named `geometryPrefix+name`, where
 
 %feature("docstring") RobotModel::mount "
 
-Mounts a sub-robot onto a link, with its origin at a given local transform (R,t)  
+Mounts a sub-robot onto a link, with its origin at a given local transform
+(R,t). The sub-robot's links will be renamed to subRobot.getName() + ':' +
+link.getName() unless subRobot.getName() is '', in which case the link names are
+preserved.  
 ";
 
 %feature("docstring") RobotModel::enableSelfCollision "
