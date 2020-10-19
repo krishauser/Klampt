@@ -20,12 +20,12 @@ Main features include:
 - Automatic camera setup
 - Unified interface to PyQt, GLUT, IPython, and HTML backends.
 
-  - PyQT is the backend with the fullest amount of features.  
-  - GLUT loses resource editing and advanced windowing functionality.
-  - IPython loses plugins, resource editing, custom drawing, and advanced 
-    windowing functionality.
-  - HTML loses plugins, resource editing, custom drawing, and advanced 
-    windowing functionality.
+    - PyQT is the backend with the fullest amount of features.  
+    - GLUT loses resource editing and advanced windowing functionality.
+    - IPython loses plugins, resource editing, custom drawing, and advanced 
+      windowing functionality.
+    - HTML loses plugins, resource editing, custom drawing, and advanced 
+      windowing functionality.
 
 The resource editing functionality in the klampt.io.resource module (based on 
 klampt.vis.editors) use this module as well.
@@ -535,6 +535,7 @@ def init(backends=None):
     - 'GLUT': uses GLUT + OpenGL
     - 'IPython': uses an IPython widget
     - 'HTML': outputs an HTML / Javascript widget
+
     """
     global _backend,_window_manager
     if _backend is not None:
@@ -1328,8 +1329,15 @@ def objectToVisType(item,world):
         validtypes = []
         for t in itypes:
             if t == 'Config':
-                if world is not None and world.numRobots() > 0 and len(item) == world.robot(0).numLinks():
-                    validtypes.append(t)
+                if world is not None:
+                    match = False
+                    for i in range(world.numRobots()):
+                        if len(item) == world.robot(i).numLinks():
+                            validtypes.append(t)
+                            match = True
+                            break
+                    if not match:
+                        print("Config-like item of length",len(item),"doesn't match any of the # links of robots in the world:",[world.robot(i).numLinks() for i in range(world.numRobots())])
             elif t=='Vector3':
                 validtypes.append(t)
             elif t=='RigidTransform':
@@ -2549,23 +2557,27 @@ class VisAppearance:
                 print("Unable to convert item",item,"to drawable")
                 return
             elif itypes == 'Config':
-                if world and world.numRobots() >= 1:
-                    robot = world.robot(self.attributes.get("robot",0))
-                    if not self.useDefaultAppearance:
-                        oldAppearance = [robot.link(i).appearance().clone() for i in range(robot.numLinks())]
-                        for i in range(robot.numLinks()):
-                            if self.customAppearance is not None:
-                                robot.link(i).appearance().set(self.customAppearance)
-                            elif "color" in self.attributes:
-                                robot.link(i).appearance().setColor(*self.attributes["color"])
+                rindex = self.attributes.get("robot",0)
+                if world and rindex < world.numRobots():
+                    robot = world.robot(rindex)
+                    if robot.numLinks() != len(item):
+                        print("Unable to draw Config, does not have the same # of DOFs as the robot: %d != %d"%(robot.numLinks(),len(item)))
+                    else:
+                        if not self.useDefaultAppearance:
+                            oldAppearance = [robot.link(i).appearance().clone() for i in range(robot.numLinks())]
+                            for i in range(robot.numLinks()):
+                                if self.customAppearance is not None:
+                                    robot.link(i).appearance().set(self.customAppearance)
+                                elif "color" in self.attributes:
+                                    robot.link(i).appearance().setColor(*self.attributes["color"])
 
-                    oldconfig = robot.getConfig()
-                    robot.setConfig(item)
-                    robot.drawGL()
-                    robot.setConfig(oldconfig)
-                    if not self.useDefaultAppearance:
-                        for (i,app) in enumerate(oldAppearance):
-                            robot.link(i).appearance().set(app)
+                        oldconfig = robot.getConfig()
+                        robot.setConfig(item)
+                        robot.drawGL()
+                        robot.setConfig(oldconfig)
+                        if not self.useDefaultAppearance:
+                            for (i,app) in enumerate(oldAppearance):
+                                robot.link(i).appearance().set(app)
                 else:
                     print("Unable to draw Config items without a world or robot")
             elif itypes == 'Configs':
