@@ -304,8 +304,8 @@ class RosRobotInterface(robotinterface.RobotInterfaceBase):
         self.last_joint_state = jointState
     def klamptModel(self):
         return self.robot
-    def controlRate(self):
-        return 200
+    def clock(self):
+        return rospy.get_rostime().to_sec()
     def status(self):
         return 'ok'
     def commandedPosition(self):
