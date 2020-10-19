@@ -1,10 +1,11 @@
-"""A uniform interface for determining configurations of arbitrary objects.
-These objects can be a world entity, a mathematical object, or an IK goal.
+"""A uniform interface for getting/setting configurations of arbitrary objects.
+A configuration is a flattened list of floats describing the physical pose of
+an object.  Supported objects include world entities, mathematical objects, 
+and IK goals.  You can also set a configuration of a set of objects, or a
+world, in which case the configuration is the concatenation of the
+configurations of each object.
 
-A configuration is a flattened list of floats describing the physical layout of
-the object.
-
-Most notably, used in the :meth:`klampt.vis.visualization.setItemConfig`, 
+Notably, used in the :meth:`klampt.vis.visualization.setItemConfig`, 
 :meth:`klampt.vis.visualization.getItemConfig`, and
 :meth:`klampt.vis.visualization.animate` methods.
 
