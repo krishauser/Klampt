@@ -86,11 +86,13 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
         return "Completer("+str(self._base)+')'
 
     def numDOFs(self,part=None):
-        if part in self._parts:
+        if self._parts is not None and part in self._parts:
             return len(self._parts[part])
         return self._base.numDOFs(part)
 
     def parts(self):
+        if self._parts is None: #pre-initialization
+            return self._base.parts()
         return self._parts
 
     def addPart(self,name,indices):
@@ -202,6 +204,12 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
 
     def startStep(self):
         assert not self._subRobot,"Can't do startStep on a sub-interface"
+        self._try('startStep',[],lambda *args:0)
+        if self._emulator.lastClock is None:
+            qcmd = self._try('commandedPosition',[],lambda *args:None)
+            vcmd = self._try('commandedVelocity',[],lambda *args:None)
+            tcmd = self._try('commandedTorque',[],lambda *args:None)
+            self._emulator.updateCommand(qcmd,vcmd,tcmd)
         if not self._has['controlRate']:
             self._emulator.pendingClock = self.clock()
             if self._emulator.lastClock != self._emulator.pendingClock:
@@ -217,7 +225,6 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
 
     def endStep(self):
         assert not self._subRobot,"Can't do endStep on a sub-interface"
-        self._try('endStep',[],lambda *args:0)
         if not self._has['controlRate']:
             self._emulator.lastClock = self._emulator.curClock
             
@@ -292,6 +299,7 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
                 self._emulator.commandSent = True
         else:
             raise RuntimeError("Invalid emulator control type? "+self._emulator.controlType)
+        self._try('endStep',[],lambda *args:0)
 
     def controlRate(self):
         def _controlRate_backup(self):
@@ -571,7 +579,7 @@ class MultiRobotInterface(RobotInterfaceBase):
         for i,d in enumerate(partdofs):
             self._jointToPart.append((partName,i))
 
-        for cp,dofs in partInterface.parts().iteritems():
+        for cp,dofs in partInterface.parts().items():
             assert all(d >= 0 and d < len(partdofs) for d in dofs),"Invalid DOF of part %s, must be between 0 and %d"%(str(cp),str(len(partdofs)))
             bigdofs = [partdofs[d] for d in dofs]
             if cp is None:
@@ -592,7 +600,7 @@ class MultiRobotInterface(RobotInterfaceBase):
         
         if klamptIndices is not None:
             assert klamptModel is not None,"Need to specify a Klamp't model"
-            self._klamptParts[part] = klamptIndices
+            self._klamptParts[partName] = klamptIndices
 
     def numDOFs(self,part=None):
         return len(self._parts[part])
@@ -601,30 +609,30 @@ class MultiRobotInterface(RobotInterfaceBase):
         return self._parts
 
     def controlRate(self):
-        return max(c.controlRate() for (p,c) in self._partInterfaces.iteritems())
+        return max(c.controlRate() for (p,c) in self._partInterfaces.items())
 
     def initialize(self):
-        for (p,c) in self._partInterfaces.iteritems():
+        for (p,c) in self._partInterfaces.items():
             if not c.initialize():
                 print ("MultiRobotInterface: Part",p,"failed to initialize")
                 return False
         return True
 
     def startStep(self):
-        for (p,c) in self._partInterfaces.iteritems():
+        for (p,c) in self._partInterfaces.items():
             c.startStep()
 
     def endStep(self):
-        for (p,c) in self._partInterfaces.iteritems():
+        for (p,c) in self._partInterfaces.items():
             c.endStep()
 
     def clock(self):
-        for (p,c) in self._partInterfaces.iteritems():
+        for (p,c) in self._partInterfaces.items():
             return c.clock()
         raise ValueError("No parts defined, so clock isn't well defined")
 
     def reset(self):
-        for (p,c) in self._partInterfaces.iteritems():
+        for (p,c) in self._partInterfaces.items():
             if c.status() != 'ok':
                 if not c.reset():
                     return False
@@ -646,13 +654,13 @@ class MultiRobotInterface(RobotInterfaceBase):
 
     def sensors(self):
         s = []
-        for (p,c) in self._partInterfaces.iteritems():
+        for (p,c) in self._partInterfaces.items():
             s += [(p,n) for n in c.sensors()]
         return s
 
     def enabledSensors(self):
         s = []
-        for (p,c) in self._partInterfaces.iteritems():
+        for (p,c) in self._partInterfaces.items():
             s += [(p,n) for n in c.enabledSensors()]
         return s
 
@@ -663,6 +671,25 @@ class MultiRobotInterface(RobotInterfaceBase):
         assert isinstance(sensor,(list,tuple))
         p = sensor[0]
         return self._partInterfaces[p].enableSensor(sensor[1])
+
+    def split(self,q):
+        """Splits a whole-body robot to parts (one per listed item)."""
+        res = []
+        for p in self._partNames:
+            indices = self._parts[p]
+            res.append([q[i] for i in indices])
+        return res
+
+    def join(self,qparts):
+        """Joins a bunch of parts into a whole-body robot."""
+        assert len(qparts) == len(self._partNames)
+        res = [0]*len(self._parts[None])
+        for q,p in zip(qparts,self._partNames):
+            indices = self._parts[p]
+            assert len(indices)==len(q)
+            for i,j in enumerate(indices):
+                res[j] = q[i]
+        return res
 
     def _setSplit(self,q,cmd,*otherArgs):
         qparts = self.split(q)
@@ -715,14 +742,14 @@ class MultiRobotInterface(RobotInterfaceBase):
         raise ValueError("Can't do cartesian control without specifying a part")
 
     def status(self):
-        for p,c in self._partInterfaces.iteritems():
+        for p,c in self._partInterfaces.items():
             s = c.status()
             if s != 'ok':
                 return s
         return 'ok'
 
     def isMoving(self):
-        return any(c.isMoving() for p,c in self._partInterfaces.iteritems())
+        return any(c.isMoving() for p,c in self._partInterfaces.items())
 
     def sensedPosition(self):
         return self._getJoin('sensedPosition')
@@ -1189,6 +1216,21 @@ class _RobotInterfaceEmulatorData:
             j.dt = self.dt
             j.update(self.curClock,q[i],v[i],self.dt)
 
+    def updateCommand(self,qcmd,vcmd,tcmd):
+        """Could be called before the emulator starts running to initialize the
+        commanded joint positions before the emulator takes over.
+        """
+        assert qcmd is None or len(qcmd) == len(self.jointData)
+        assert vcmd is None or len(vcmd) == len(self.jointData)
+        assert tcmd is None or len(tcmd) == len(self.jointData)
+        for i,j in enumerate(self.jointData):
+            if qcmd is not None:
+                j.commandedPosition = qcmd[i]
+            if vcmd is not None:
+                j.commandedVelocity = vcmd[i]
+            if tcmd is not None:
+                j.commandedTorque = tcmd[i]
+
     def desiredControlMode(self):
         if self.commandSent:
             return None
@@ -1312,10 +1354,12 @@ class _RobotInterfaceEmulatorData:
                 #stop when the first joint limit is hit
                 ttl = 1.0
                 for i in range(len(indices)):
-                    if qcmd[i] + ttl*v[i] < qmin[i]:
-                        ttl = (qmin[i]+1e-3-qcmd[i])/v[i]
-                    if qcmd[i] + ttl*v[i] < qmax[i]:
-                        ttl = (qmax[i]-1e-3-qcmd[i])/v[i]
+                    if qcmd[i] < xmin[i] or qcmd[i] > xmax[i]:
+                        raise ValueError("Current position %d is out of joint limits: %f <= %f <= %f"%(i,xmin[i],qcmd[i],xmax[i]))
+                    if qcmd[i] + ttl*v[i] < xmin[i]:
+                        ttl = (xmin[i]+1e-3-qcmd[i])/v[i]
+                    if qcmd[i] + ttl*v[i] > xmax[i]:
+                        ttl = (xmax[i]-1e-3-qcmd[i])/v[i]
         q0 = qcmd
         q = vectorops.madd(q0,v,ttl)
         self.setPiecewiseLinear(indices,[ttl],[q],True)
