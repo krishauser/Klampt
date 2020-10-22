@@ -74,8 +74,11 @@ class ContactPoint:
 
 
 class Hold:
-    """A Hold, contains both contact points and an IK constraint.
-    Similar to the Hold class in the C++ RobotSim library.
+    """A container for both contact points and an IK constraint on a robot's
+    link.  Can represent face-face, point-point, or edge contact. 
+
+    Similar to the Hold class in the C++ RobotSim library.  Hypothetically,
+    can also represent sliding contact.
 
     Attributes:
         link (int): the link index
@@ -126,18 +129,38 @@ def _flatten(contactOrHoldList):
 
 def forceClosure(contactOrHoldList):
     """Given a list of ContactPoints or Holds, tests for force closure.
-    Return value is True or False"""
+    Return value is True or False.
+
+    Formulates the wrench matrix W of all contacts, including edges of the
+    friction cones.  If Hull(W) contains the zero vector in its interior,
+    then the contacts are said to be in force closure.
+    """
     return robotsim.forceClosure(_flatten(contactOrHoldList))
     
 def comEquilibrium(contactOrHoldList,fext=(0,0,-1),com=None):
     """Given a list of ContactPoints or Holds, an external gravity force,
     and a COM, tests for the existence of an equilibrium solution.
 
+    Specifically, an equilibrium exists when the following equations are
+    met:
+
+    .. math::
+
+        \\begin{eqnarray}
+          fext    & = \\sum_i f_i \\\\
+          0 &= \\sum_i f_i \\times (p_i - com) \\\\
+          f_i & \\in FC_i
+       \end{eqnarray}
+ 
+    where :math:`f_i`, :math:`p_i`, and :math:`FC_i` are the force, position,
+    and the friction cone of the i'th contact point.
+
     If com == None, this tests whether there exists any equilibrium
     com, and returns True/False.
 
     If com != None, this returns either None if there is no solution,
-    or otherwise returns a list of contact forces"""
+    or otherwise returns a list of contact forces.
+    """
     return robotsim.comEquilibrium(_flatten(contactOrHoldList),fext,com)
 
 def supportPolygon(contactOrHoldList):
@@ -152,8 +175,19 @@ def supportPolygon(contactOrHoldList):
     return robotsim.supportPolygon(_flatten(contactOrHoldList))
 
 def equilibriumTorques(robot,holdList,fext=(0,0,-9.8),internalTorques=None,norm=0):
-    """ Solves for the torques / forces that keep the robot balanced against gravity.
+    """ Solves for the torques / forces that keep the robot balanced against
+    gravity.
+
+    Specifically, solves for :math:`(\\tau,f)` in the equation:
+
+    .. math::
+
+        G(q;fext) + \\tau_{int} = \\tau + \\sum_i J_i(q)^T f_i
  
+    where :math:`G(q;fext)` is the generalized gravity, :math:`\\tau_{int}` are
+    the internal torques, and :math:`J_i(q)` is the Jacobian of the i'th
+    contact point.  All forces are required to be in their friction cones.
+
     Args:
         robot (RobotModel): the robot, posed in its current configuration
         holdList (list of Hold): a list of Holds.
@@ -190,6 +224,7 @@ def contactMap(contacts,fixed=None):
     set to None.  The most common example, which fixes terrains, is::
     
        lambda x: x is None or isinstance(x,TerrainModel)
+
     """
     worlds = set()
     robots = set()
@@ -239,9 +274,9 @@ def contactMap(contacts,fixed=None):
     return paircontacts
 
 def geometryContacts(geom1,geom2,padding1,padding2=0,maxcontacts=0,kFriction=1):
-    """Similar to geom1.contacts(geom2,padding1,padding2,maxcontacts), but 
-    returns a list of ContactPoints, where the point (x) of each contact is 
-    placed in the middle of the overlap region.
+    """Similar to ``geom1.contacts(geom2,padding1,padding2,maxcontacts)``, but
+    returns a list of :class:`ContactPoint`, where the point (x) of each 
+    contact is placed in the center of the overlap region.
 
     The friction coefficient of each contact (kFriction) is set to kFriction.
 
@@ -305,7 +340,7 @@ def worldContactMap(world,padding,kFriction=1,collider=None):
     return cmap
 
 def simContactMap(sim):
-    """Given a Simulation, returns a contact map representing all
+    """Given a :class:`Simulation`, returns a contact map representing all
     current contacts (among bodies with collision feedback enabled).
     """
     cmap = dict()
@@ -327,9 +362,10 @@ def contactMapIKObjectives(contactmap):
     """Given a contact map, computes a set of non-conflicting
     IKObjective's or GeneralizedIKObjective's that enforce all simultaneous
     contact constraints.  Usually called in conjunction with contactMap
-    with the following sequence:
+    with the following sequence::
 
-    objectives = contactMapIKObjectives(contactMap(contacts,lambda x:x==None or isinstance(x,TerrainModel)))
+        objectives = contactMapIKObjectives(contactMap(contacts,lambda x:x==None or isinstance(x,TerrainModel)))
+
     """
     objectives = []
     for ((o1,o2),clist) in contactmap.items():
@@ -347,9 +383,10 @@ def contactMapIKObjectives(contactmap):
 def contactMapHolds(contactmap):
     """Given a contact map, computes a set of non-conflicting
     Holds that enforce all simultaneous contact constraints.  Usually called in conjunction with contactMap
-    with the following sequence:
+    with the following sequence::
 
-    objectives = contactMapHolds(contactMap(contacts,lambda x:x==None or isinstance(x,TerrainModel)))
+        objectives = contactMapHolds(contactMap(contacts,lambda x:x==None or isinstance(x,TerrainModel)))
+        
     """
     holds = []
     for ((o1,o2),clist) in contactmap.items():
@@ -388,10 +425,10 @@ def skew(x):
     return xhat
 
 def invMassMatrix(obj):
-    """Returns the inverse of obj's generalized mass matrix
+    """Returns the inverse of obj's generalized mass matrix::
 
-      [H 0 ]-1
-      [0 mI]
+        [H 0 ]-1
+        [0 mI]
 
     about the origin."""
     try:
