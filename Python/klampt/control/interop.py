@@ -197,14 +197,58 @@ class RobotControllerToInterface(object):
         self.lastOutputs = res
     
 
-class InterfacetoVis(object):
+class RobotInterfacetoVis(object):
     """A class that manages connections between the sensor readings of a
     :class:`RobotInterfaceBase` Robot Interface Layer API to the Klamp't vis
-    module."""
-    def __init__(self,robotInterface):
+    module.
+
+    This assumes that ``vis`` has been set up with an appropriate world.
+    """
+    def __init__(self,robotInterface,visRobotIndex=0):
         if not isinstance(robotInterface,RobotInterfaceCompleter):
             robotInterface = RobotInterfaceCompleter(robotInterface)
-        self.robotInterface = robotInterface
+        self.interface = robotInterface
+        self.visRobotIndex = visRobotIndex
 
     def update(self):
-        pass
+        from klampt import vis
+
+        t = self.interface.clock()
+        stat = self.interface.status()
+        moving = self.interface.isMoving()
+        if moving:
+            endTime = self.interface.destinationTime()
+        else:
+            endTime = 0
+        vis.addText("clock",'%.3f'%(t,),(10,10))
+        if moving:
+            if endTime > t:
+                vis.addText("moving","Moving, %.3fs left"%(endTime-t,),(10,25))
+            else:
+                vis.addText("moving","Moving",(10,25))
+        else:
+            try:
+                vis.remove("moving")
+            except Exception:
+                pass
+        if stat != 'ok':
+            vis.addText("status",'Status: '+stat,(10,40),color=(1,0,0))
+        else:
+            try:
+                vis.remove("status")
+            except Exception:
+                pass
+
+        qsns = self.interface.configToKlampt(self.interface.sensedPosition())
+        vis.add("q_sns",qsns,robot=self.visRobotIndex,color=(0,1,0,0.5))
+        if qcmd != qsns:
+            qcmd = self.interface.configToKlampt(self.interface.commandedPosition())
+            vis.add("q_cmd",qcmd,robot=self.visRobotIndex,color=(1,1,0,0.5))
+        if moving and endTime > t:
+            qdes = self.interface.configToKlampt(self.interface.destinationPosition())
+            vis.add("q_dest",qdes,robot=self.visRobotIndex,color=(1,0,0,0.5))
+        else:
+            try:
+                vis.remove("q_dest")
+            except Exception:
+                pass
