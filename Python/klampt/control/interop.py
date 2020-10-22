@@ -205,50 +205,69 @@ class RobotInterfacetoVis(object):
     This assumes that ``vis`` has been set up with an appropriate world.
     """
     def __init__(self,robotInterface,visRobotIndex=0):
-        if not isinstance(robotInterface,RobotInterfaceCompleter):
-            robotInterface = RobotInterfaceCompleter(robotInterface)
         self.interface = robotInterface
         self.visRobotIndex = visRobotIndex
+        self.text_x = 10
+        self.text_y = 10
+        self.tag = '_'+str(visRobotIndex)+'_'
 
     def update(self):
         from klampt import vis
-
-        t = self.interface.clock()
-        stat = self.interface.status()
-        moving = self.interface.isMoving()
-        if moving:
-            endTime = self.interface.destinationTime()
-        else:
-            endTime = 0
-        vis.addText("clock",'%.3f'%(t,),(10,10))
-        if moving:
-            if endTime > t:
-                vis.addText("moving","Moving, %.3fs left"%(endTime-t,),(10,25))
+        t = 0
+        try:
+            t = self.interface.clock()
+            vis.addText(self.tag+"clock",'%.3f'%(t,),(self.text_x,self.text_y))
+        except NotImplementedError:
+            vis.addText(self.tag+"clock",str(self.interface)+" provides no clock",(self.text_x,self.text_y))
+        try:
+            stat = self.interface.status()
+            if stat != 'ok':
+                vis.addText(self.tag+"status",'Status: '+stat,(self.text_x,self.text_y+15),color=(1,0,0))
             else:
-                vis.addText("moving","Moving",(10,25))
-        else:
-            try:
-                vis.remove("moving")
-            except Exception:
-                pass
-        if stat != 'ok':
-            vis.addText("status",'Status: '+stat,(10,40),color=(1,0,0))
-        else:
-            try:
-                vis.remove("status")
-            except Exception:
-                pass
+                try:
+                    vis.remove(self.tag+"status")
+                except Exception:
+                    pass
+        except NotImplementedError:
+            vis.addText(self.tag+"status",str(self.interface)+" provides no status",(self.text_x,self.text_y+15))
+        moving = False
+        endTime = 0
+        try:
+            moving = self.interface.isMoving()
+            if moving:
+                endTime = self.interface.destinationTime()
+            if moving:
+                if endTime > t:
+                    vis.addText(self.tag+"moving","Moving, %.3fs left"%(endTime-t,),(self.text_x,self.text_y+30))
+                else:
+                    vis.addText(self.tag+"moving","Moving",(self.text_x,self.text_y+30))
+            else:
+                try:
+                    vis.remove(self.tag+"moving")
+                except Exception:
+                    pass
+        except NotImplementedError:
+            pass
 
-        qsns = self.interface.configToKlampt(self.interface.sensedPosition())
-        vis.add("q_sns",qsns,robot=self.visRobotIndex,color=(0,1,0,0.5))
-        if qcmd != qsns:
+        try:
+            qsns = self.interface.configToKlampt(self.interface.sensedPosition())
+            vis.add(self.tag+"q_sns",qsns,robot=self.visRobotIndex,color=(0,1,0,0.5))
+        except NotImplementedError:
+            qsns = None
+        try:
             qcmd = self.interface.configToKlampt(self.interface.commandedPosition())
-            vis.add("q_cmd",qcmd,robot=self.visRobotIndex,color=(1,1,0,0.5))
-        if moving and endTime > t:
-            qdes = self.interface.configToKlampt(self.interface.destinationPosition())
-            vis.add("q_dest",qdes,robot=self.visRobotIndex,color=(1,0,0,0.5))
-        else:
-            try:
-                vis.remove("q_dest")
-            except Exception:
-                pass
+            if qcmd != qsns:
+                vis.add(self.tag+"q_cmd",qcmd,robot=self.visRobotIndex,color=(1,1,0,0.5))
+        except NotImplementedError:
+            pass
+        try:
+            if moving and endTime > t:
+                qdes = self.interface.configToKlampt(self.interface.destinationPosition())
+                vis.add(self.tag+"q_dest",qdes,robot=self.visRobotIndex,color=(1,0,0,0.5))
+            else:
+                try:
+                    vis.remove(self.tag+"q_dest")
+                except Exception:
+                    pass
+        except NotImplementedError:
+            pass
