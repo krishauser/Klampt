@@ -738,7 +738,6 @@ def toJson(obj,type='auto'):
             type = obj.__class__.__name__
         elif isinstance(obj,Trajectory):   #some subclasses of Trajectory may be used here too
             type = "Trajectory"
-            return obj.__class__.__name__
         else:
             raise TypeError("Unknown object of type "+obj.__class__.__name__)
 
