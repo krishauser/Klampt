@@ -381,6 +381,9 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
     def setToolCoordinates(self,xtool_local):
         self._emulator.setToolCoordinates(xtool_local,self._indices)
 
+    def getToolCoordinates(self):
+        self._emulator.getToolCoordinates(self._indices)
+
     def setGravityCompensation(self,gravity=[0,0,-9.8],load=0.0,load_com=[0,0,0]):
         try:
             self._base.setGravityCompensation(gravity,load,load_com)
@@ -1067,6 +1070,9 @@ class _CartesianEmulatorData:
             raise RuntimeError("Can't set tool coordinates while a cartesian velocity command is active")
         self.toolCoordinates = xtool_local
 
+    def getToolCoordinates(self):
+        return self.toolCoordinates
+
     def solveIK(self,xparams):
         qorig = self.robot.getConfig()
         if not self.active:
@@ -1495,6 +1501,13 @@ class _RobotInterfaceEmulatorData:
             c = _CartesianEmulatorData(self.klamptModel,indices)
             self.cartesianInterfaces[tuple(indices)] = c
         c.setToolCoordinates(xtool_local)
+
+    def getToolCoordinates(self,indices):
+        try:
+            c = self.cartesianInterfaces[tuple(indices)]
+        except KeyError:
+            return [0,0,0]
+        return c.getToolCoordinates()
 
     def setGravityCompensation(self,gravity,load,load_com,indices):
         raise NotImplementedError("TODO: implement gravity compensation?")

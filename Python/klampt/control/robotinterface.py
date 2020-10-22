@@ -300,6 +300,11 @@ class RobotInterfaceBase(object):
         effector link."""
         raise NotImplementedError()
 
+    def getToolCoordinates(self):
+        """Gets the tool coordinates of this robot relative to its end
+        effector link."""
+        raise NotImplementedError()
+        
     def setGravityCompensation(self,gravity=[0,0,-9.8],load=0.0,load_com=[0,0,0]):
         """Sets up gravity compensation with a given gravity vector and end
         effector load.
