@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """Launches a relay from ROS messages to Klamp't serial controller messages.
 """
-from . import roscontroller
-from .serialcontroller import ControllerClient
+from klampt.control.io import roscontroller
+from klampt.control.io.serialcontroller import ControllerClient
 from klampt import *
 import asyncore
 import rospy

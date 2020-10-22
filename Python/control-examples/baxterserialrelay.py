@@ -4,7 +4,7 @@ between Klamp't serial controller and ROS Baxter robot.
 """
 
 import rosbaxtercontroller
-from serialcontroller import ControllerClient
+from klampt.control.io.serialcontroller import ControllerClient
 from klampt import *
 import asyncore
 import rospy

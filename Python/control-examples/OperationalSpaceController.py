@@ -16,8 +16,8 @@ from scipy import sparse
 DEBUG_MOTION_MODEL = 1
 
 
-class OpSpaceController(controller.ControllerBase):
-	"""An operational space controller that conforms to the ControllerBase
+class OpSpaceController(controller.ControllerBlock):
+	"""An operational space controller that conforms to the ControllerBlock
 	interface in klampt.control.controller. """
 	def __init__(self,robot):
 		"""Setup tasks in operational space, and reads in trajectory files.
@@ -64,20 +64,8 @@ class OpSpaceController(controller.ControllerBase):
 		if type == 'enter':
 			self.robot.setConfig(inputs['q'])
 			self.reset()
-
-	def output(self,**input):
-		try:
-			dt = inputs["dt"]
-			q = inputs["q"]
-			dq = inputs["dq"]
-		except:
-			print "OpSpaceController: Input needs to have state 'q','dq', and timestep 'dt'"
-			return None
 		
-		(qdes,dqdes) = self.opController.solve(q, dq, dt)
-		return {'qcmd':qdes,'dqcmd':dqdes}
-		
-	def output_and_advance(self,**inputs):
+	def advance(self,**inputs):
 		#modify tasks if necessary
 		self.manageTasks(inputs,self.opController)
 

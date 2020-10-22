@@ -19,7 +19,7 @@ VELOCITY_MODE=2
 TORQUE_MODE=3
 RAW_POSITION_MODE=4
 
-class RosBaxterController(controller.BaseController):
+class RosBaxterController(controller.ControllerBlock):
     """A controller that reads from the ROS topics
     
     '/[robot_name]/limb/right/joint_command' (JointCommand)
@@ -110,7 +110,7 @@ class RosBaxterController(controller.BaseController):
         self.currentHeadNodMsg = msg
         return
 
-    def output(self,**inputs):       
+    def advance(self,**inputs):       
         res = {}
         if self.currentRightArmMsg != None or self.currentLeftArmMsg != None:
             if self.currentRightArmMsg != None and self.currentLeftArmMsg != None:
