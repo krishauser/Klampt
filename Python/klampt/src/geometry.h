@@ -28,7 +28,7 @@
  *     m.vertices.append(0)
  *     m.vertices.append(0)
  *     m.vertices.append(0)
- *     print len(m.vertices)  #prints 3
+ *     print(len(m.vertices))  #prints 3
  *     m.vertices = [0,0,0]   #this is an error
  *     m.vertices += [1,2,3]   #this is also an error
  *
