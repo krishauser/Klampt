@@ -8,13 +8,13 @@ Can load/save objects using the general purpose loader/saver functions
 'load(type,fileName)' and 'save(x,type,fileName)'.  The load functions also
 support URLs
 
-Json serialization/deserialization are handled using the toJson and fromJson
-functions.
+Json serialization/deserialization are handled using the :func:`toJson` and
+:func:`fromJson` functions.
 """
 from ..robotsim import *
 from ..math import so3,vectorops
 from ..model.contact import ContactPoint, Hold
-from ..model.trajectory import Trajectory
+from ..model.trajectory import Trajectory,HermiteTrajectory,SO3Trajectory,SE3Trajectory
 from ..model import types
 import os
 
@@ -709,12 +709,19 @@ def load(type,fn):
 
 def toJson(obj,type='auto'):
     """Converts from a Klamp't object to a JSON-compatible structure.
-    If 'type' is not provided, the type of the object is inferred
-    automatically.
 
-    The structure can be converted to a JSON string using json.dumps().
+    The resulting structure can be converted to a JSON string using 
+    ``json.dumps()`` in the Python builtin ``json`` module.
+
+    Not all objects are supported yet, notably geometry-related objects and
+    world entities.
     
-    Not all objects are supported yet.
+    Args:
+        obj: A Klamp't object.
+        type (str, optional): the type of the object (see
+            :mod:`~klampt.model.types`) If 'auto' (default), the type of the
+            object is inferred automatically.
+    
     """
     if type == 'auto':
         if isinstance(obj,(list,tuple)):
@@ -734,10 +741,10 @@ def toJson(obj,type='auto'):
                         raise TypeError("Could not parse object "+str(obj))
         elif isinstance(obj,(bool,int,float,str)):
             type = 'Value'
-        elif obj.__class__.__name__ in ['ContactPoint','IKObjective','Trajectory','MultiPath']:
-            return obj.__class__.__name__
+        elif obj.__class__.__name__ in ['ContactPoint','IKObjective','Trajectory','MultiPath','GeometricPrimitive','TriangleMesh','ConvexHull','PointCloud','VolumeGrid','Geometry3D']:
+            type = obj.__class__.__name__
         elif isinstance(obj,Trajectory):   #some subclasses of Trajectory may be used here too
-            return "Trajectory"
+            type = obj.__class__.__name__
         else:
             raise TypeError("Unknown object of type "+obj.__class__.__name__)
 
@@ -749,6 +756,8 @@ def toJson(obj,type='auto'):
         return {'x':obj.x,'n':obj.n,'kFriction':kFriction}
     elif type == 'Trajectory' or type == 'LinearPath':
         return {'times':obj.times,'milestones':obj.milestones}
+    elif type.endswith('Trajectory'):
+        return {'type':type,'times':obj.times,'milestones':obj.milestones}
     elif type == 'IKObjective' or type == 'IKGoal':
         res = {'type':type,'link':obj.link()}
         if obj.destLink() >= 0:
@@ -781,6 +790,53 @@ def toJson(obj,type='auto'):
             #res['rotConstraint']='free'
             pass
         return res
+    elif type == 'TriangleMesh':
+        inds = list(obj.indices)
+        inds = [inds[i*3:i*3+3] for i in range(len(inds)//3)]
+        verts = list(obj.vertices)
+        verts = [verts[i*3:i*3+3] for i in range(len(verts)//3)]
+        return {'type':type,'indices':inds,'vertices':verts}
+    elif type == 'PointCloud':
+        verts = list(obj.vertices)
+        verts = [verts[i*3:i*3+3] for i in range(len(verts)//3)]
+        res = {'type':type,'vertices':verts}
+        propNames = list(obj.propertyNames)
+        if len(propNames) > 0:
+            res['propertyNames'] = propNames
+        if len(verts) * len(propNames) > 0:
+            n = len(verts)
+            k = len(propNames)
+            props = list(obj.properties)
+            props = [props[i*k:i*k+k] for i in range(n)]
+            res['properties'] = props
+        #TODO: settings
+        return res
+    elif type == 'VolumeGrid':
+        res = {'type':type}
+        res['bmin'] = [obj.bbox[i] for i in range(3)]
+        res['bmax'] = [obj.bbox[i] for i in range(3,6)]
+        res['dims'] = list(obj.dims)
+        res['values'] = list(obj.values)
+        return res
+    elif type == 'ConvexHull':
+        points = [[obj.points[i],obj.points[i+1],obj.points[i+2]] for i in range(0,len(obj.points),3)]
+        return {'type':type,'points':points}
+    elif type == 'Geometry3D':
+        data = None
+        gtype = obj.type()
+        if gtype == 'GeometricPrimitive':
+            data = toJson(obj.getGeometricPrimitive(),gtype)
+        elif gtype == 'TriangleMesh':
+            data = toJson(obj.getTriangleMesh(),gtype)
+        elif gtype == 'PointCloud':
+            data = toJson(obj.getPointCloud(),gtype)
+        elif gtype == 'ConvexHull':
+            data = toJson(obj.getConvexHull(),gtype)
+        elif gtype == 'VolumeGrid':
+            data = toJson(obj.getVolumeGrid(),gtype)
+        elif gtype == 'Group':
+            data = [toJson(obj.getElement(i)) for i in range(obj.numElements())]
+        return {'type':type,'datatype':gtype,'data':data}
     elif type in writers:
         return {'type':type,'data':write(obj,type)}
     else:
@@ -789,10 +845,20 @@ def toJson(obj,type='auto'):
 
 def fromJson(jsonobj,type='auto'):
     """Converts from a JSON structure to a Klamp't object of the appropriate
-    type.  If 'type' is not provided, the type of the object is inferred
-    automatically.
+    type. 
 
-    A JSON structure can be created from a JSON string using json.loads().
+    Note: a JSON structure can be created from a JSON string using the
+    ``json.loads()`` function in the Python builtin ``json`` module.
+
+    Not all objects are supported yet, notably geometry-related objects and
+    world entities.
+
+    Args:
+        jsonobj: A JSON structure (i.e., one coming from :func:`toJson`)
+        type (str, optional): the type of the object (see
+            :mod:`~klampt.model.types`) If 'auto' (default), the type of the
+            object is inferred automatically.
+
     """
     if type == 'auto':
         if isinstance(jsonobj,(list,tuple)):
@@ -817,6 +883,12 @@ def fromJson(jsonobj,type='auto'):
         return ContactPoint(jsonobj['x'],jsonobj['n'],jsonobj['kFriction'])
     elif type == 'Trajectory' or type == 'LinearPath':
         return Trajectory(jsonobj['times'],jsonobj['milestones'])
+    elif type == 'HermiteTrajectory':
+        return HermiteTrajectory(jsonobj['times'],jsonobj['milestones'])
+    elif type == 'SO3Trajectory':
+        return SO3Trajectory(jsonobj['times'],jsonobj['milestones'])
+    elif type == 'SE3Trajectory':
+        return SO3Trajectory(jsonobj['times'],jsonobj['milestones'])
     elif type == 'IKObjective' or type == 'IKGoal':
         link = jsonobj['link']
         destlink = jsonobj['destLink'] if 'destLink' in jsonobj else -1
@@ -871,6 +943,61 @@ def fromJson(jsonobj,type='auto'):
             return obj
         else:
             raise ValueError("Invalid IK rotation constraint "+rotConstraint)
+    elif type == 'TriangleMesh':
+        inds = sum(jsonobj['indices'],[])
+        verts = sum(jsonobj['vertices'],[])
+        mesh = TriangleMesh()
+        mesh.indices.resize(len(inds))
+        mesh.vertices.resize(len(verts))
+        for i,v in enumerate(inds):
+            mesh.indices[i] = v
+        for i,v in enumerate(verts):
+            mesh.vertices[i] = v
+        return mesh
+    elif type == 'PointCloud':
+        pc = PointCloud()
+        verts = sum(jsonobj['vertices'],[])
+        pc.vertices.resize(len(verts))
+        for i,v in enumerate(verts):
+            pc.vertices[i] = v
+        if 'propertyNames' in jsonobj:
+            propNames = jsonobj['propertyNames']
+            pc.propertyNames.resize(len(propNames))
+            for i,v in enumerate(propNames):
+                pc.propertyNames[i] = v
+            if 'properties' in jsonobj:
+                props = sum(jsonobj['properties'])
+                pc.properties.resize(len(props))
+                for i,v in enumerate(props):
+                    pc.properties[i] = v
+        #TODO: settings
+        return pc
+    elif type == 'VolumeGrid':
+        vg = VolumeGrid()
+        bbox = jsonobj['bmin'] + jsonobj['bmax']
+        vg.bbox.resize(6)
+        for i,v in enumerate(bbox):
+            vg.bbox[i] = v
+        vg.dims.resize(3)
+        for i,v in enumerate(jsonobj['dims']):
+            vg.dims[i] = v
+        values = jsonobj['values']
+        vg.values.resize(len(values))
+        for i,v in enumerate(values):
+            vg.values[i] = v
+        return vg
+    elif type == 'ConvexHull':
+        ch = ConvexHull()
+        points = sum(jsonobj['points'])
+        ch.points.resize(len(points))
+        for i,v in enumerate(points):
+            ch.points[i] = v
+        return ch
+    elif type == 'Geometry3D':
+        gtype = jsonobj['datatype']
+        if gtype == '':
+            return Geometry3D()
+        return Geometry3D(fromJson(jsonobj['data'],gtype))
     elif type in readers:
         return read(type,jsonobj["data"])
     else:
