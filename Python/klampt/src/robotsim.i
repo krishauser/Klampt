@@ -15,6 +15,7 @@
 %include "carrays.i"
 %include "std_string.i"
 %include "std_vector.i"
+%include "std_map.i"
 
 %array_class(double, doubleArray);
 %array_class(float, floatArray);
@@ -26,6 +27,7 @@ namespace std {
    %template(floatVector) vector<float>;
    %template(intVector) vector<int>;
    %template(doubleMatrix) vector<vector<double> >;
+   %template(stringMap) map<string,string>;
 };
 
 %exception {
@@ -396,6 +398,70 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 
 %feature("autodoc","1");
 %include "docs/docs.i"
+
+%extend IKObjective {
+%pythoncode {
+    def __reduce__(self):
+        from klampt.io import loader
+        jsonobj = loader.toJson(self,'IKObjective')
+        return (loaderfromJson,(jsonobj,'IKObjective'))
+}
+}
+
+%extend Geometry3D {
+%pythoncode {
+    def __reduce__(self):
+        from klampt.io import loader
+        jsonobj = loader.toJson(self,'Geometry3D')
+        return (loader.fromJson,(jsonobj,'Geometry3D'))
+}
+}
+
+
+%extend TriangleMesh {
+%pythoncode {
+    def __reduce__(self):
+        from klampt.io import loader
+        jsonobj = loader.toJson(self,'TriangleMesh')
+        return (loader.fromJson,(jsonobj,'TriangleMesh'))
+}
+}
+
+%extend PointCloud {
+%pythoncode {
+    def __reduce__(self):
+        from klampt.io import loader
+        jsonobj = loader.toJson(self,'PointCloud')
+        return (loader.fromJson,(jsonobj,'PointCloud'))
+}
+}
+
+%extend VolumeGrid {
+%pythoncode {
+    def __reduce__(self):
+        from klampt.io import loader
+        jsonobj = loader.toJson(self,'VolumeGrid')
+        return (loader.fromJson,(jsonobj,'VolumeGrid'))
+}
+}
+
+%extend ConvexHull {
+%pythoncode {
+    def __reduce__(self):
+        from klampt.io import loader
+        jsonobj = loader.toJson(self,'ConvexHull')
+        return (loader.fromJson,(jsonobj,'ConvexHull'))
+}
+}
+
+%extend GeometricPrimitive {
+%pythoncode {
+    def __reduce__(self):
+        from klampt.io import loader
+        jsonobj = loader.toJson(self,'GeometricPrimitive')
+        return (loader.fromJson,(jsonobj,'GeometricPrimitive'))
+}
+}
 
 %include "geometry.h"
 %include "appearance.h"

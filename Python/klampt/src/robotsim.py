@@ -826,6 +826,121 @@ class doubleMatrix(_object):
 doubleMatrix_swigregister = _robotsim.doubleMatrix_swigregister
 doubleMatrix_swigregister(doubleMatrix)
 
+class stringMap(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, stringMap, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, stringMap, name)
+    __repr__ = _swig_repr
+
+    def iterator(self):
+        return _robotsim.stringMap_iterator(self)
+    def __iter__(self):
+        return self.iterator()
+
+    def __nonzero__(self):
+        return _robotsim.stringMap___nonzero__(self)
+
+    def __bool__(self):
+        return _robotsim.stringMap___bool__(self)
+
+    def __len__(self):
+        return _robotsim.stringMap___len__(self)
+    def __iter__(self):
+        return self.key_iterator()
+    def iterkeys(self):
+        return self.key_iterator()
+    def itervalues(self):
+        return self.value_iterator()
+    def iteritems(self):
+        return self.iterator()
+
+    def __getitem__(self, key):
+        return _robotsim.stringMap___getitem__(self, key)
+
+    def __delitem__(self, key):
+        return _robotsim.stringMap___delitem__(self, key)
+
+    def has_key(self, key):
+        return _robotsim.stringMap_has_key(self, key)
+
+    def keys(self):
+        return _robotsim.stringMap_keys(self)
+
+    def values(self):
+        return _robotsim.stringMap_values(self)
+
+    def items(self):
+        return _robotsim.stringMap_items(self)
+
+    def __contains__(self, key):
+        return _robotsim.stringMap___contains__(self, key)
+
+    def key_iterator(self):
+        return _robotsim.stringMap_key_iterator(self)
+
+    def value_iterator(self):
+        return _robotsim.stringMap_value_iterator(self)
+
+    def __setitem__(self, *args):
+        return _robotsim.stringMap___setitem__(self, *args)
+
+    def asdict(self):
+        return _robotsim.stringMap_asdict(self)
+
+    def __init__(self, *args):
+        this = _robotsim.new_stringMap(*args)
+        try:
+            self.this.append(this)
+        except Exception:
+            self.this = this
+
+    def empty(self):
+        return _robotsim.stringMap_empty(self)
+
+    def size(self):
+        return _robotsim.stringMap_size(self)
+
+    def swap(self, v):
+        return _robotsim.stringMap_swap(self, v)
+
+    def begin(self):
+        return _robotsim.stringMap_begin(self)
+
+    def end(self):
+        return _robotsim.stringMap_end(self)
+
+    def rbegin(self):
+        return _robotsim.stringMap_rbegin(self)
+
+    def rend(self):
+        return _robotsim.stringMap_rend(self)
+
+    def clear(self):
+        return _robotsim.stringMap_clear(self)
+
+    def get_allocator(self):
+        return _robotsim.stringMap_get_allocator(self)
+
+    def count(self, x):
+        return _robotsim.stringMap_count(self, x)
+
+    def erase(self, *args):
+        return _robotsim.stringMap_erase(self, *args)
+
+    def find(self, x):
+        return _robotsim.stringMap_find(self, x)
+
+    def lower_bound(self, x):
+        return _robotsim.stringMap_lower_bound(self, x)
+
+    def upper_bound(self, x):
+        return _robotsim.stringMap_upper_bound(self, x)
+    __swig_destroy__ = _robotsim.delete_stringMap
+    __del__ = lambda self: None
+stringMap_swigregister = _robotsim.stringMap_swigregister
+stringMap_swigregister(stringMap)
+
 class TriangleMesh(_object):
     """
 
@@ -906,6 +1021,12 @@ class TriangleMesh(_object):
     __swig_getmethods__["vertices"] = _robotsim.TriangleMesh_vertices_get
     if _newclass:
         vertices = _swig_property(_robotsim.TriangleMesh_vertices_get, _robotsim.TriangleMesh_vertices_set)
+
+    def __reduce__(self):
+        from klampt.io import loader
+        jsonobj = loader.toJson(self,'TriangleMesh')
+        return (loader.fromJson,(jsonobj,'TriangleMesh'))
+
 
     def __init__(self):
         """
@@ -1045,6 +1166,12 @@ class ConvexHull(_object):
     __swig_getmethods__["points"] = _robotsim.ConvexHull_points_get
     if _newclass:
         points = _swig_property(_robotsim.ConvexHull_points_get, _robotsim.ConvexHull_points_set)
+
+    def __reduce__(self):
+        from klampt.io import loader
+        jsonobj = loader.toJson(self,'ConvexHull')
+        return (loader.fromJson,(jsonobj,'ConvexHull'))
+
 
     def __init__(self):
         """
@@ -1371,6 +1498,12 @@ class PointCloud(_object):
     if _newclass:
         settings = _swig_property(_robotsim.PointCloud_settings_get, _robotsim.PointCloud_settings_set)
 
+    def __reduce__(self):
+        from klampt.io import loader
+        jsonobj = loader.toJson(self,'PointCloud')
+        return (loader.fromJson,(jsonobj,'PointCloud'))
+
+
     def __init__(self):
         """
         __init__(PointCloud self) -> PointCloud
@@ -1545,6 +1678,12 @@ class GeometricPrimitive(_object):
     if _newclass:
         properties = _swig_property(_robotsim.GeometricPrimitive_properties_get, _robotsim.GeometricPrimitive_properties_set)
 
+    def __reduce__(self):
+        from klampt.io import loader
+        jsonobj = loader.toJson(self,'GeometricPrimitive')
+        return (loader.fromJson,(jsonobj,'GeometricPrimitive'))
+
+
     def __init__(self):
         """
         __init__(GeometricPrimitive self) -> GeometricPrimitive
@@ -1657,6 +1796,12 @@ class VolumeGrid(_object):
     __swig_getmethods__["values"] = _robotsim.VolumeGrid_values_get
     if _newclass:
         values = _swig_property(_robotsim.VolumeGrid_values_get, _robotsim.VolumeGrid_values_set)
+
+    def __reduce__(self):
+        from klampt.io import loader
+        jsonobj = loader.toJson(self,'VolumeGrid')
+        return (loader.fromJson,(jsonobj,'VolumeGrid'))
+
 
     def __init__(self):
         """
@@ -2731,6 +2876,12 @@ class Geometry3D(_object):
     __swig_getmethods__["geomPtr"] = _robotsim.Geometry3D_geomPtr_get
     if _newclass:
         geomPtr = _swig_property(_robotsim.Geometry3D_geomPtr_get, _robotsim.Geometry3D_geomPtr_set)
+
+    def __reduce__(self):
+        from klampt.io import loader
+        jsonobj = loader.toJson(self,'Geometry3D')
+        return (loader.fromJson,(jsonobj,'Geometry3D'))
+
 Geometry3D_swigregister = _robotsim.Geometry3D_swigregister
 Geometry3D_swigregister(Geometry3D)
 
@@ -6802,6 +6953,12 @@ class IKObjective(_object):
     __swig_getmethods__["rotationScale"] = _robotsim.IKObjective_rotationScale_get
     if _newclass:
         rotationScale = _swig_property(_robotsim.IKObjective_rotationScale_get, _robotsim.IKObjective_rotationScale_set)
+
+    def __reduce__(self):
+        from klampt.io import loader
+        jsonobj = loader.toJson(self,'IKObjective')
+        return (loaderfromJson,(jsonobj,'IKObjective'))
+
     __swig_destroy__ = _robotsim.delete_IKObjective
     __del__ = lambda self: None
 IKObjective_swigregister = _robotsim.IKObjective_swigregister
