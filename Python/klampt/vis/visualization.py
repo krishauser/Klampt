@@ -394,7 +394,7 @@ If you are calling these methods from an external loop (as opposed to inside
 a plugin) be sure to lock/unlock the visualization before/after calling these
 methods.
 
-- def add(name,item,keepAppearance=False,*kwargs): adds an item to the 
+- def add(name,item,keepAppearance=False,**kwargs): adds an item to the 
   visualization.  name is a unique identifier.  If an item with the same name
   already exists, it will no longer be shown.
 - def clear(): clears the visualization world.
@@ -432,7 +432,7 @@ methods.
 - def stepAnimation(amount): Moves forward the animation time by the given 
   amount, in seconds.
 - def animationTime(newtime=None): Gets/sets the current animation time
-- def addText(name,text,position=None): adds text to the visualizer.
+- def addText(name,text,position=None,**kwargs): adds text to the visualizer.
 - def clearText(): clears all previously added text.
 - def addPlot(name): creates a new empty plot.
 - def addPlotItem(name,itemname): adds a visualization item to a plot.
