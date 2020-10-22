@@ -614,9 +614,8 @@ def createWindow(title=None):
     """
     global _globalLock,_window_manager
     _init()
-    _globalLock.acquire()
-    id = _window_manager.createWindow(title)
-    _globalLock.release()
+    with _globalLock:
+        id = _window_manager.createWindow(title)
     return id
 
 def setWindow(id):
@@ -627,9 +626,8 @@ def setWindow(id):
     """
     global _globalLock,_window_manager
     _init()
-    _globalLock.acquire()
-    _window_manager.setWindow(id)
-    _globalLock.release()
+    with _globalLock:
+        _window_manager.setWindow(id)
 
 def getWindow():
     """Retrieves ID of currently active window or -1 if no window is active"""
@@ -650,9 +648,8 @@ def setPlugin(plugin):
     """
     global _globalLock,_window_manager
     _init()
-    _globalLock.acquire()
-    _window_manager.setPlugin(plugin)
-    _globalLock.release()
+    with _globalLock:
+        _window_manager.setPlugin(plugin)
 
 def pushPlugin(plugin):
     """Adds a new plugin on top of the old one.
@@ -665,17 +662,15 @@ def pushPlugin(plugin):
     """
     global _globalLock,_window_manager
     _init()
-    _globalLock.acquire()
-    _window_manager.pushPlugin(plugin)
-    _globalLock.release()
+    with _globalLock:
+        _window_manager.pushPlugin(plugin)
 
 def popPlugin():
     """Reverses a prior pushPlugin() call"""
     global _window_manager
     _init()
-    _globalLock.acquire()
-    _window_manager.popPlugin()
-    _globalLock.release()
+    with _globalLock:
+        _window_manager.popPlugin()
 
 def splitView(plugin=None):
     """Adds a second OpenGL viewport in the same window, governed by the given
@@ -689,9 +684,8 @@ def splitView(plugin=None):
     """
     global _window_manager
     _init()
-    _globalLock.acquire()
-    _window_manager.splitView(plugin)
-    _globalLock.release()
+    with _globalLock:
+        _window_manager.splitView(plugin)
 
 def addPlugin(plugin=None):
     """Adds a second OpenGL viewport in the same window, governed by the given
@@ -782,12 +776,11 @@ def show(display=True):
     """
     global _window_manager
     _init()
-    _globalLock.acquire()
-    if display:
-        _window_manager.show()
-    else:
-        _window_manager.hide()
-    _globalLock.release()
+    with _globalLock:
+        if display:
+            _window_manager.show()
+        else:
+            _window_manager.hide()
 
 def spin(duration):
     """Spin-shows a window for a certain duration or until the window is closed."""
@@ -817,9 +810,8 @@ def shown():
     """Returns true if a visualization window is currently shown."""
     global _globalLock,_window_manager
     _init()
-    _globalLock.acquire()
-    res = _window_manager.shown()
-    _globalLock.release()
+    with _globalLock:
+        res = _window_manager.shown()
     return res
 
 def customUI(func):
@@ -835,9 +827,8 @@ def customUI(func):
     """
     global _globalLock,_window_manager
     _init()
-    _globalLock.acquire()
-    _window_manager.set_custom_ui(func)
-    _globalLock.release()
+    with _globalLock:
+        _window_manager.set_custom_ui(func)
 
 def threadCall(func):
     """Call `func` inside the visualization thread. This is 
@@ -847,9 +838,8 @@ def threadCall(func):
     Most often used with OpenGL camera simulation.
     """
     global _globalLock,_window_manager
-    _globalLock.acquire()
-    _window_manager.threadCall(func)
-    _globalLock.release()
+    with _globalLock:
+        _window_manager.threadCall(func)
 
 
 ######### CONVENIENCE ALIASES FOR VisualizationScene methods ###########
@@ -886,11 +876,8 @@ def add(name,item,keepAppearance=False,**kwargs):
             vis.add("geom",geometry,color=[1,0,0,1]) adds a geometry while setting
             its color to red.
     """
-    global _globalLock
     _init()
-    _globalLock.acquire()
     scene().add(name,item,keepAppearance,**kwargs)
-    _globalLock.release()
     
 def listItems(name=None,indent=0):
     _init()
@@ -1203,23 +1190,31 @@ def autoFitViewport(viewport,objects):
     #print "Distance",viewport.camera.dist
     viewport.camera.rot = [roll,pitch,yaw]
 
-def addText(name,text,pos=None):
-    """Adds text to the visualizer.  You must give an identifier to all pieces of
-    text, which will be used to access the text as any other vis object. 
+def addText(name,text,position=None,**kwargs):
+    """Adds text to the visualizer.  You must give an identifier to all pieces 
+    of text, which will be used to access the text as any other vis object. 
 
     Args:
         name (str): the text's unique identifier.
         text (str): the string to be drawn
-        pos (list, optional): the position of the string. If pos=None, this is added to the on-screen
-            "console" display.  If pos has length 2, it is the (x,y) position of the upper left corner
-            of the text on the screen.  Negative units anchor the text to the right or bottom of the
-            window.  If pos has length 3, the text is drawn in the world coordinates. 
+        pos (list, optional): the position of the string. If pos=None, this is
+            added to the on-screen "console" display.  If pos has length 2, it
+            is the (x,y) position of the upper left corner of the text on the
+            screen.  Negative units anchor the text to the right or bottom of
+            the window.  If pos has length 3, the text is drawn in the world
+            coordinates. 
+        kwargs (optional): optional keywords to give to setAppearance.
 
-    To customize the text appearance, you can set the color, 'size' attribute, and 'position'
-    attribute of the text using the identifier given in 'name'.
+    To customize the text appearance, you can set the 'color', 'size', and
+    'position' attributes, either through the keyword arguments, or using
+    setAttribute().  To refer to this item, use the identifier given in
+    ``name``.
     """
     _init()
-    scene().addText(name,text,pos)
+    if position is None:
+        scene().addText(name,text,**kwargs)
+    else:
+        scene().addText(name,text,position=position,**kwargs)
 
 def clearText():
     """Clears all text in the visualization."""
@@ -2872,37 +2867,34 @@ class VisualizationScene:
     def dirty(self,item_name='all'):
         """Marks an item or everything as dirty, forcing a deep redraw."""
         global _globalLock
-        _globalLock.acquire()
-        if item_name == 'all':
-            for (name,itemvis) in self.items.items():
-                itemvis.markChanged()
-        else:
-            self.getItem(item_name).markChanged()
-        _globalLock.release()
+        with _globalLock:
+            if item_name == 'all':
+                for (name,itemvis) in self.items.items():
+                    itemvis.markChanged()
+            else:
+                self.getItem(item_name).markChanged()
 
     def clear(self):
         """Clears the visualization world"""
         global _globalLock
-        _globalLock.acquire()
-        for (name,itemvis) in self.items.items():
-            itemvis.destroy()
-        self.items = {}
-        self.currentAnimationTime = 0
-        self.doRefresh = True
-        _globalLock.release()
+        with _globalLock:
+            for (name,itemvis) in self.items.items():
+                itemvis.destroy()
+            self.items = {}
+            self.currentAnimationTime = 0
+            self.doRefresh = True
 
     def clearText(self):
         """Clears all text in the visualization."""
         global _globalLock
-        _globalLock.acquire()
-        del_items = []
-        for (name,itemvis) in self.items.items():
-            if isinstance(itemvis.item,str):
-                itemvis.destroy()
-                del_items.append(name)
-        for n in del_items:
-            del self.items[n]
-        _globalLock.release()
+        with _globalLock:
+            del_items = []
+            for (name,itemvis) in self.items.items():
+                if isinstance(itemvis.item,str):
+                    itemvis.destroy()
+                    del_items.append(name)
+            for n in del_items:
+                del self.items[n]
 
     def listItems(self,root=None,indent=0):
         """Prints out all items in the visualization world."""
@@ -2924,67 +2916,61 @@ class VisualizationScene:
         (default) or be kept if keepAppearance=True."""
         global _globalLock
         assert not isinstance(name,(list,tuple)),"Cannot add sub-path items"
-        _globalLock.acquire()
-        if keepAppearance and name in self.items:
-            self.items[name].setItem(item)
-        else:
-            #need to erase prior item visualizer
-            if name in self.items:
-                self.items[name].destroy()
-            app = VisAppearance(item,name)
-            self.items[name] = app
-        item = self.items[name]
-        for (attr,value) in kwargs.items():
-            self._setAttribute(item,attr,value)
-        _globalLock.release()
+        with _globalLock:
+            if keepAppearance and name in self.items:
+                self.items[name].setItem(item)
+            else:
+                #need to erase prior item visualizer
+                if name in self.items:
+                    self.items[name].destroy()
+                app = VisAppearance(item,name)
+                self.items[name] = app
+            item = self.items[name]
+            for (attr,value) in kwargs.items():
+                self._setAttribute(item,attr,value)
         #self.refresh()
 
-    def addText(self,name,text,pos=None):
-        self.add(name,text,True)
-        if pos is not None:
-            self.setAttribute(name,'position',pos)
+    def addText(self,name,text,**kwargs):
+        self.add(name,text,True,**kwargs)
 
     def animate(self,name,animation,speed=1.0,endBehavior='loop'):
         global _globalLock
-        _globalLock.acquire()
-        if hasattr(animation,'__iter__'):
-            #a list of milestones -- loop through them with 1s delay
-            print("visualization.animate(): Making a Trajectory with unit durations between",len(animation),"milestones")
-            animation = Trajectory(list(range(len(animation))),animation)
-        if isinstance(animation,HermiteTrajectory):
-            animation = animation.configTrajectory()
-        if isinstance(animation,MultiPath):
-            world = self.items.get('world',None)
-            if world is not None:
-                world=world.item
-                if world.numRobots() > 0:
-                    #discretize multipath
-                    robot = world.robot(0)
-                    animation = animation.getTrajectory(robot,0.1)
+        with _globalLock:
+            if hasattr(animation,'__iter__'):
+                #a list of milestones -- loop through them with 1s delay
+                print("visualization.animate(): Making a Trajectory with unit durations between",len(animation),"milestones")
+                animation = Trajectory(list(range(len(animation))),animation)
+            if isinstance(animation,HermiteTrajectory):
+                animation = animation.configTrajectory()
+            if isinstance(animation,MultiPath):
+                world = self.items.get('world',None)
+                if world is not None:
+                    world=world.item
+                    if world.numRobots() > 0:
+                        #discretize multipath
+                        robot = world.robot(0)
+                        animation = animation.getTrajectory(robot,0.1)
+                    else:
+                        animation = animation.getTrajectory()
                 else:
                     animation = animation.getTrajectory()
-            else:
-                animation = animation.getTrajectory()
-        assert isinstance(animation,Trajectory) or animation is None,"Must animate() with a Trajectory object or list of milestones"
-        item = self.getItem(name)
-        item.animation = animation
-        item.animationStartTime = self.currentAnimationTime
-        item.animationSpeed = speed
-        item.animationEndBehavior = endBehavior
-        item.markChanged(config=True,appearance=False)
-        _globalLock.release()
+            assert isinstance(animation,Trajectory) or animation is None,"Must animate() with a Trajectory object or list of milestones"
+            item = self.getItem(name)
+            item.animation = animation
+            item.animationStartTime = self.currentAnimationTime
+            item.animationSpeed = speed
+            item.animationEndBehavior = endBehavior
+            item.markChanged(config=True,appearance=False)
 
     def pauseAnimation(self,paused=True):
         global _globalLock
-        _globalLock.acquire()
-        self.animating = not paused
-        _globalLock.release()
+        with _globalLock:
+            self.animating = not paused
 
     def stepAnimation(self,amount):
         global _globalLock
-        _globalLock.acquire()
-        self.animationTime(self.currentAnimationTime + amount)
-        _globalLock.release()
+        with _globalLock:
+            self.animationTime(self.currentAnimationTime + amount)
 
     def animationTime(self,newtime=None):
         global _globalLock
@@ -2993,147 +2979,137 @@ class VisualizationScene:
             return self.currentAnimationTime
 
         #update mode
-        _globalLock.acquire()
-        self.currentAnimationTime = newtime
-        self.doRefresh = True
-        for (k,v) in self.items.items():
-            #do animation updates
-            v.updateAnimation(self.currentAnimationTime)
-        _globalLock.release()
+        with _globalLock:
+            self.currentAnimationTime = newtime
+            self.doRefresh = True
+            for (k,v) in self.items.items():
+                #do animation updates
+                v.updateAnimation(self.currentAnimationTime)
         return 
 
     def remove(self,name):
         global _globalLock
-        _globalLock.acquire()
-        assert name in self.items,"Can only remove top level objects from visualization, try hide() instead"
-        item = self.getItem(name)
-        item.destroy()
-        del self.items[name]
-        self.doRefresh = True
-        _globalLock.release()
+        with _globalLock:
+            assert name in self.items,"Can only remove top level objects from visualization, try hide() instead"
+            item = self.getItem(name)
+            item.destroy()
+            del self.items[name]
+            self.doRefresh = True
 
     def getItemConfig(self,name):
         global _globalLock
-        _globalLock.acquire()
-        res = config.getConfig(self.getItem(name).item)
-        _globalLock.release()
+        with _globalLock:
+            res = config.getConfig(self.getItem(name).item)
         return res
 
     def setItemConfig(self,name,value):
         global _globalLock
-        _globalLock.acquire()
-        item = self.getItem(name)
-        if isinstance(item.item,(list,tuple,str)):
-            item.item = value
-        else:
-            config.setConfig(item.item,value)
-        if item.editor:
-            item.update_editor(item_to_editor = True)
-        item.markChanged(config=True,appearance=False)
-        self.doRefresh = True
-        _globalLock.release()
+        with _globalLock:
+            item = self.getItem(name)
+            if isinstance(item.item,(list,tuple,str)):
+                item.item = value
+            else:
+                config.setConfig(item.item,value)
+            if item.editor:
+                item.update_editor(item_to_editor = True)
+            item.markChanged(config=True,appearance=False)
+            self.doRefresh = True
 
     def addLabel(self,text,point,color):
-        self.labels.append((text,point,color))
+        global _globalLock
+        with _globalLock:
+            self.labels.append((text,point,color))
 
     def hideLabel(self,name,hidden=True):
         global _globalLock
-        _globalLock.acquire()
-        item = self.getItem(name)
-        item.attributes["hide_label"] = hidden
-        item.markChanged(config=False,appearance=True)
-        self.doRefresh = True
-        _globalLock.release()
+        with _globalLock:
+            item = self.getItem(name)
+            item.attributes["hide_label"] = hidden
+            item.markChanged(config=False,appearance=True)
+            self.doRefresh = True
 
     def hide(self,name,hidden=True):
         global _globalLock
-        _globalLock.acquire()
-        self.getItem(name).attributes['hidden'] = hidden
-        self.doRefresh = True
-        _globalLock.release()
+        with _globalLock:
+            self.getItem(name).attributes['hidden'] = hidden
+            self.doRefresh = True
 
     def addPlotItem(self,plotname,itemname):
         global _globalLock
-        _globalLock.acquire()
-        plot = self.getItem(plotname)
-        assert plot is not None and isinstance(plot.item,VisPlot),(plotname+" is not a valid plot")
-        plot = plot.item
-        for i in plot.items:
-            assert i.name != itemname,(str(itemname)+" is already in the plot "+plotname)
-        item = self.getItem(itemname)
-        assert item is not None,(str(itemname)+" is not a valid item")
-        plot.items.append(VisPlotItem(itemname,item))
-        _globalLock.release()
+        with _globalLock:
+            plot = self.getItem(plotname)
+            assert plot is not None and isinstance(plot.item,VisPlot),(plotname+" is not a valid plot")
+            plot = plot.item
+            for i in plot.items:
+                assert i.name != itemname,(str(itemname)+" is already in the plot "+plotname)
+            item = self.getItem(itemname)
+            assert item is not None,(str(itemname)+" is not a valid item")
+            plot.items.append(VisPlotItem(itemname,item))
 
     def logPlot(self,plotname,itemname,value):
         global _globalLock
-        _globalLock.acquire()
-        customIndex = -1
-        plot = self.getItem(plotname)
-        assert plot is not None and isinstance(plot.item,VisPlot),(plotname+" is not a valid plot")
-        compress = plot.attributes['compress']
-        plot = plot.item
-        for i,item in enumerate(plot.items):
-            if len(item.name)==0:
-                customIndex = i
-        if customIndex < 0:
-            customIndex = len(plot.items)
-            plot.items.append(VisPlotItem('',None))
-        plot.items[customIndex].compressThreshold = compress
-        plot.items[customIndex].customUpdate(itemname,self.t,value)
-        _globalLock.release()
+        with _globalLock:
+            customIndex = -1
+            plot = self.getItem(plotname)
+            assert plot is not None and isinstance(plot.item,VisPlot),(plotname+" is not a valid plot")
+            compress = plot.attributes['compress']
+            plot = plot.item
+            for i,item in enumerate(plot.items):
+                if len(item.name)==0:
+                    customIndex = i
+            if customIndex < 0:
+                customIndex = len(plot.items)
+                plot.items.append(VisPlotItem('',None))
+            plot.items[customIndex].compressThreshold = compress
+            plot.items[customIndex].customUpdate(itemname,self.t,value)
 
     def logPlotEvent(self,plotname,eventname,color):
         global _globalLock
-        _globalLock.acquire()
-        plot = self.getItem(plotname)
-        assert plot is not None and isinstance(plot.item,VisPlot),(plotname+" is not a valid plot")
-        plot.item.addEvent(eventname,self.t,color)
-        _globalLock.release()
+        with _globalLock:
+            plot = self.getItem(plotname)
+            assert plot is not None and isinstance(plot.item,VisPlot),(plotname+" is not a valid plot")
+            plot.item.addEvent(eventname,self.t,color)
 
     def hidePlotItem(self,plotname,itemname,hidden=True):
         global _globalLock
-        _globalLock.acquire()
-        plot = self.getItem(plotname)
-        assert plot is not None and isinstance(plot.item,VisPlot),plotname+" is not a valid plot"
-        plot = plot.item
-        identified = False
-        if isinstance(itemname,(tuple,list)):
-            for i in plot.items:
-                if i.name == itemname[0]:
-                    assert itemname[1] < len(i.hidden),("Invalid component index of item "+str(itemname[0]))
-                    identified = True
-                    i.hidden[itemname] = hidden
-        else:
-            for i in plot.items:
-                if i.name == itemname:
-                    for j in range(len(i.hidden)):
-                        i.hidden[j] = hidden
-        assert identified,("Invalid item "+str(itemname)+" specified in plot "+plotname)
-        self.doRefresh = True
-        _globalLock.release()
+        with _globalLock:
+            plot = self.getItem(plotname)
+            assert plot is not None and isinstance(plot.item,VisPlot),plotname+" is not a valid plot"
+            plot = plot.item
+            identified = False
+            if isinstance(itemname,(tuple,list)):
+                for i in plot.items:
+                    if i.name == itemname[0]:
+                        assert itemname[1] < len(i.hidden),("Invalid component index of item "+str(itemname[0]))
+                        identified = True
+                        i.hidden[itemname] = hidden
+            else:
+                for i in plot.items:
+                    if i.name == itemname:
+                        for j in range(len(i.hidden)):
+                            i.hidden[j] = hidden
+            assert identified,("Invalid item "+str(itemname)+" specified in plot "+plotname)
+            self.doRefresh = True
 
     def savePlot(self,plotname,fn):
         global _globalLock
-        _globalLock.acquire()
-        plot = self.getItem(plotname)
-        assert plot is not None and isinstance(plot.item,VisPlot),plotname+" is not a valid plot"
-        plot = plot.item
-        if fn is not None:
-            plot.beginSave(fn)
-        else:
-            plot.endSave(fn)
-        _globalLock.release()
+        with _globalLock:
+            plot = self.getItem(plotname)
+            assert plot is not None and isinstance(plot.item,VisPlot),plotname+" is not a valid plot"
+            plot = plot.item
+            if fn is not None:
+                plot.beginSave(fn)
+            else:
+                plot.endSave(fn)
 
     def setAppearance(self,name,appearance):
         global _globalLock
-        _globalLock.acquire()
-        item = self.getItem(name)
-        item.useDefaultAppearance = False
-        item.customAppearance = appearance
-        item.markChanged(config=False,appearance=True)
-        self.doRefresh = True
-        _globalLock.release()
+        with _globalLock:
+            item = self.getItem(name)
+            item.useDefaultAppearance = False
+            item.customAppearance = appearance
+            item.markChanged(config=False,appearance=True)
+            self.doRefresh = True
 
     def _setAttribute(self,item,attr,value):
         """Internal use only"""
@@ -3153,53 +3129,47 @@ class VisualizationScene:
 
     def setAttribute(self,name,attr,value):
         global _globalLock
-        _globalLock.acquire()
-        item = self.getItem(name)
-        self._setAttribute(item,attr,value)
-        self.doRefresh = True
-        _globalLock.release()
+        with _globalLock:
+            item = self.getItem(name)
+            self._setAttribute(item,attr,value)
+            self.doRefresh = True
 
     def getAttribute(self,name,attr):
         global _globalLock
-        _globalLock.acquire()
-        item = self.getItem(name)
-        res = item.attributes[attr]
-        _globalLock.release()
+        with _globalLock:
+            item = self.getItem(name)
+            res = item.attributes[attr]
         return res
 
     def getAttributes(self,name):
         global _globalLock
-        _globalLock.acquire()
-        item = self.getItem(name)
-        res = item.getAttributes()
-        _globalLock.release()
+        with _globalLock:
+            item = self.getItem(name)
+            res = item.getAttributes()
         return res
 
     def revertAppearance(self,name):
         global _globalLock
-        _globalLock.acquire()
-        item = self.getItem(name)
-        item.useDefaultAppearance = True
-        item.markChanged(config=False,appearance=True)
-        self.doRefresh = True
-        _globalLock.release()
+        with _globalLock:
+            item = self.getItem(name)
+            item.useDefaultAppearance = True
+            item.markChanged(config=False,appearance=True)
+            self.doRefresh = True
 
     def setColor(self,name,r,g,b,a=1.0):
         global _globalLock
-        _globalLock.acquire()
-        item = self.getItem(name)
-        self._setAttribute(item,"color",[r,g,b,a])
-        item.markChanged(config=False,appearance=True)
-        self.doRefresh = True
-        _globalLock.release()
+        with _globalLock:
+            item = self.getItem(name)
+            self._setAttribute(item,"color",[r,g,b,a])
+            item.markChanged(config=False,appearance=True)
+            self.doRefresh = True
 
     def setDrawFunc(self,name,func):
         global _globalLock
-        _globalLock.acquire()
-        item = self.getItem(name)
-        item.customDrawFunc = func
-        self.doRefresh = True
-        _globalLock.release()
+        with _globalLock:
+            item = self.getItem(name)
+            item.customDrawFunc = func
+            self.doRefresh = True
 
     def autoFitCamera(self,scale=1.0):
         vp = self.getViewport()
