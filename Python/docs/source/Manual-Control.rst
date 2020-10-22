@@ -417,7 +417,16 @@ For all sensor messages provided by your robot's ROS interface:
 
 1. In ``initialize``, set up a subscriber to the sensor message.
 2. The callback from that subscriber should just store the sensor message.
-3. In the appropriate RIL method, translate the ROS message to a Klamp't object.
+3. Overload the appropriate RIL method to translate the ROS message to a Klamp't object.
+   For standard positions, velocities, and torques, use the sensedPosition(), sensedVelocity(),
+   and sensedTorque() methods.
+
+   For more complex, asynchronous items like laser sensors, cameras, RGB-D sensors, and
+   force/torque sensors, you should use the sensors(), sensorMeasurements(), and
+   sensorUpdateTime() methods. For best interpretability (and compatibility with Klampt's
+   visualization tools, e.g. :class:`~klampt.control.interop.RobotInterfacetoVis`), you
+   should also make sure the sensor is defined in the robot's klamptModel() model,
+   and that these measurements match the format of the corresponding `Klamp't sensor <Manual-Sensors.html>`__.
 
 As an example, consult the implementation of :class:`~klampt.control.io.roscontroller.RosRobotInterface`.
 This class sends ROS JointTrajectory commands and receives ROS JointState sensor
@@ -496,7 +505,7 @@ form.  To specify such a controller, provide as input a .py file with a
 single ``make(robot)`` function that returns a subclass of ``ControllerBlock`` 
 that implements the desired functionality.  For example,
 to see a controller that interfaces with ROS, see
-`control/roscontroller.py <https://github.com/krishauser/klampt/blob/master/Python/control/roscontroller.py>`__.
+`klampt/control/io/roscontroller.py <https://github.com/krishauser/klampt/blob/master/Python/klampt/control/io/roscontroller.py>`__.
 
 
 Building controllers from blocks
@@ -526,13 +535,13 @@ Several common blocks are implemented in :mod:`klampt.control.blocks`.
    controller with an explicit matrix of transition conditions.
 
 A trajectory tracking controller is given in
-`control/trajectory\_controller.py <https://github.com/krishauser/klampt/blob/master/Python/control/trajectory_controller.py>`__.
+`klampt/control/blocks/trajectory\_tracking.py <https://github.com/krishauser/klampt/blob/master/Python/klampt/control/trajectory_tracking.py>`__.
 Its make function accepts a robot model (optionally ``None``) and a
 linear path file name.
 
 A preliminary velocity-based operational space controller is implemented
 in
-`control/OperationalSpaceController.py <https://github.com/krishauser/klampt/blob/master/Python/control/OperationalSpaceController.py>`__,
+`control-examples/OperationalSpaceController.py <https://github.com/krishauser/klampt/blob/master/Python/control-examples/OperationalSpaceController.py>`__,
 but its use is highly experimental at the moment.
 
 
