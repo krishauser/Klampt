@@ -115,13 +115,13 @@ then automatically generate an ADFunctionInterface instance that can be called
 to produce an auto-differentable function.
 
 You can either provide a ``derivative`` function, ``J(arg,x1,...,xn)``, which
-returns the Jacobian :math:`\frac{df}{dx_{arg}}(x1,..,xn)` , or a ``jvp``
+returns the Jacobian :math:`\\frac{df}{dx_{arg}}(x1,..,xn)` , or a ``jvp``
 function ``Jdx(arg,dx,x1,...,xn)``, which calculates the jacobian-vector
-product :math:`\frac{df}{dx_{arg}}(x1,...,xn)\cdot dx` .  More conveniently,
+product :math:`\\frac{df}{dx_{arg}}(x1,...,xn)\cdot dx` .  More conveniently,
 you can just provide a list of functions ``Ji(x1,...,xn)``, with i=1,..,n,
-with ``Ji`` giving :math:`\frac{df}{dx_i}(x1,...,xn)` , or in the JVP form,
+with ``Ji`` giving :math:`\\frac{df}{dx_i}(x1,...,xn)` , or in the JVP form,
 functions ``Jdxi(dx,x1,...,xn)`` each giving
-:math:`\frac{df}{dx_{i}}(x1,...,xn)\cdot dx`.  See the :func:`function`
+:math:`\\frac{df}{dx_{i}}(x1,...,xn)\cdot dx`.  See the :func:`function`
 documentation for more details.
 
 Example::
