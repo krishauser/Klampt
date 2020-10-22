@@ -12,7 +12,7 @@ _knownTypes = set(['Value','Vector2','Vector3','Matrix3','Point','Rotation','Rig
                 'IntArray','StringArray',
                 'Configs','Trajectory','LinearPath','MultiPath',
                 'IKGoal','ContactPoint','Hold',
-                'TriangleMesh','PointCloud','VolumeGrid','GeometricPrimitive','Geometry3D',
+                'TriangleMesh','PointCloud','VolumeGrid','GeometricPrimitive','ConvexHull','Geometry3D',
                 'WorldModel','RobotModel','RigidObjectModel','TerrainModel'])
 
 def knownTypes():
@@ -42,6 +42,8 @@ def objectToTypes(object,world=None):
         return 'PointCloud'
     elif isinstance(object,VolumeGrid):
         return 'VolumeGrid'
+    elif isinstance(object,ConvexHull):
+        return 'ConvexHull'
     elif isinstance(object,Geometry3D):
         return ['Geometry3D',object.type()]
     elif isinstance(object,WorldModel):
@@ -152,8 +154,9 @@ def make(type,object=None):
         p.setPoint((0,0,0))
         return p
     elif type == 'VolumeGrid':
-        v = VolumeGrid()
-        return v
+        return VolumeGrid()
+    elif type == 'ConvexHull':
+        return ConvexHull()
     elif isinstance(object,WorldModel):
         return WorldModel()
     elif isinstance(object,(RobotModel,RigidObjectModel,TerrainModel)):
