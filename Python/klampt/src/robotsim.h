@@ -16,6 +16,7 @@ class WorldSimulation;
 class ControlledRobotSimulator;
 class ODEGeometry;
 typedef struct dxBody *dBodyID;
+typedef struct dxJoint *dJointID;
 
 //forward declarations
 class SimRobotSensor;
@@ -307,7 +308,7 @@ class SimBody
   /// Returns true if this body is being simulated
   bool isEnabled();
 
-  /// Sets the dynamic simulation of the body on/off.  If false, velocities
+  /// Turns dynamic simulation of the body on/off.  If false, velocities
   /// will simply be integrated forward, and forces will not affect velocity
   /// i.e., it will be pure kinematic simulation.
   void enableDynamics(bool enabled=true);
@@ -362,6 +363,44 @@ class SimBody
   int objectID;
   ODEGeometry* geometry;
   dBodyID body;
+};
+
+/** @brief An interface to ODE's hinge and slider joints. You may use this
+ * to create custom objects, e.g., drawers, doors, cabinets, etc.  It can 
+ * also be used to attach objects together, e.g., an object to a robot's
+ * gripper.
+ */
+class SimJoint
+{
+public:
+  SimJoint();
+  ~SimJoint();
+  ///Creates a hinge between ``a`` and ``b``, or ``a`` and the world.  The hinge 
+  ///is located at point ``pt``, with axis ``axis``, both in world coordinates.
+  void makeHinge(const SimBody& a,const SimBody& b,const double pt[3],const double axis[3]);
+  void makeHinge(const SimBody& a,const double pt[3],const double axis[3]);
+  ///Creates a slider between ``a`` and ``b``, or ``a`` and the world.  The slider
+  ///restricts movement to axis ``axis``, given in world coordinates.
+  void makeSlider(const SimBody& a,const SimBody& b,const double axis[3]);
+  void makeSlider(const SimBody& a,const double axis[3]);
+  ///Creates a fixed joint between ``a`` and ``b``.  (There's no method to fix a
+  ///to the world; just call a.enableDynamics(False))
+  void makeFixed(const SimBody& a,const SimBody& b);
+  ///Removes the joint from the simulation.
+  void destroy();
+  ///Sets the joint limits, relative to the initial configuration of the bodies.
+  ///Units are in radians for hinges and meters for sliders.
+  void setLimits(double min,double max);
+  ///Sets the (dry) friction of the joint
+  void setFriction(double friction);
+  ///Locks velocity of the joint, up to force fmax. Can't be used with setFriction.
+  void setVelocity(double vel,double fmax);
+  ///Adds a torque for the hinge joint and a force for a slider joint
+  void addForce(double force);
+
+  int type;
+  const SimBody *a,*b;
+  dJointID joint;
 };
 
 /** @brief A dynamics simulator for a WorldModel.

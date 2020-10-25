@@ -468,6 +468,8 @@ void GetVolumeGrid(const VolumeGrid& grid,Geometry::AnyCollisionGeometry3D& geom
   geom.ClearCollisionData();
 }
 
+GeometricPrimitive::GeometricPrimitive()
+{}
 
 void GeometricPrimitive::setPoint(const double pt[3])
 {
@@ -492,6 +494,27 @@ void GeometricPrimitive::setSegment(const double a[3],const double b[3])
   copy(b,b+3,properties.begin()+3);
 }
 
+void GeometricPrimitive::setTriangle(const double a[3],const double b[3],const double c[3])
+{
+  type = "Triangle";
+  properties.resize(9);
+  copy(a,a+3,properties.begin());
+  copy(b,b+3,properties.begin()+3);
+  copy(c,c+3,properties.begin()+6);
+}
+
+void GeometricPrimitive::setPolygon(const std::vector<double>& verts)
+{
+  if(verts.size() % 3 != 0)
+    throw PyException("setPolygon requires a list of concatenated 3D vertices");
+  if(verts.size() < 9)
+    throw PyException("setPolygon requires at least 3 vertices (9 elements in list)");
+  type = "Polygon";
+  properties.resize(verts.size()+1);
+  properties[0] = verts.size()/3;
+  copy(verts.begin(),verts.end(),properties.begin()+1);
+}
+
 void GeometricPrimitive::setAABB(const double bmin[3],const double bmax[3])
 {
   type = "AABB";
@@ -500,9 +523,23 @@ void GeometricPrimitive::setAABB(const double bmin[3],const double bmax[3])
   copy(bmax,bmax+3,properties.begin()+3);
 }
 
+void GeometricPrimitive::setBox(const double ori[3],const double R[9],const double dims[3])
+{
+  type = "Box";
+  properties.resize(15);
+  copy(ori,ori+3,properties.begin());
+  copy(R,R+9,properties.begin()+3);
+  copy(dims,dims+3,properties.begin()+12);
+}
+
 bool GeometricPrimitive::loadString(const char* str)
 {
   vector<string> items = Split(str," \t\n");
+  if(items.size() == 0) {
+    type = "";
+    properties.resize(0);
+    return true;
+  }
   type = items[0];
   properties.resize(items.size()-1);
   for(size_t i=1;i<items.size();i++)
@@ -1229,6 +1266,12 @@ DistanceQuerySettings::DistanceQuerySettings()
 :relErr(0),absErr(0),upperBound(Inf)
 {}
 
+DistanceQueryResult::DistanceQueryResult()
+{}
+
+ContactQueryResult::ContactQueryResult()
+{}
+
 DistanceQueryResult Geometry3D::distance_point(const double pt[3])
 {
   return distance_point_ext(pt,DistanceQuerySettings());
@@ -1909,6 +1952,9 @@ void copy(const Matrix& mat,vector<vector<double> >& v)
   }
 }
 
+TriangleMesh::TriangleMesh()
+{}
+
 void TriangleMesh::translate(const double t[3])
 {
   for(size_t i=0;i<vertices.size();i+=3) {
@@ -1929,6 +1975,10 @@ void TriangleMesh::transform(const double R[9],const double t[3])
     v.get(vertices[i],vertices[i+1],vertices[i+2]);
   }
 }
+
+ConvexHull::ConvexHull()
+{}
+
 
 int ConvexHull::numPoints() const
 {
@@ -1977,6 +2027,8 @@ void ConvexHull::transform(const double R[9],const double t[3])
   }
 }
 
+PointCloud::PointCloud()
+{}
 int PointCloud::numPoints() const { return vertices.size()/3; }
 int PointCloud::numProperties() const { return propertyNames.size(); }
 void PointCloud::setPoints(int num,const vector<double>& plist)
@@ -2220,6 +2272,9 @@ void PointCloud::transform(const double R[9],const double t[3])
   }
 }
 
+
+VolumeGrid::VolumeGrid()
+{}
 
 void VolumeGrid::setBounds(const double bmin[3],const double bmax[3])
 {
@@ -4683,6 +4738,137 @@ void SimBody::setSurface(const ContactParameters& res)
   params->kStiffness=res.kStiffness;
   params->kDamping=res.kDamping;
 }
+
+SimJoint::SimJoint()
+:type(0),a(NULL),b(NULL),joint(0)
+{}
+
+SimJoint::~SimJoint()
+{
+  destroy();
+}
+
+void SimJoint::makeHinge(const SimBody& a,const SimBody& b,const double pt[3],const double axis[3])
+{
+  if(a.sim != b.sim)
+    throw PyException("The two bodies are not part of the same simulation");
+  destroy();
+  type = 1;
+  this->a = &a;
+  this->b = &b;
+  joint = dJointCreateHinge(a.sim->sim->odesim.world(),0);
+  dJointAttach(joint,a.body,b.body);
+  dJointSetHingeAnchor(joint,pt[0],pt[1],pt[2]);
+  dJointSetHingeAxis(joint,axis[0],axis[1],axis[2]);
+  dJointSetHingeParam(joint,dParamBounce,0);
+  dJointSetHingeParam(joint,dParamFMax,0);
+}
+
+void SimJoint::makeHinge(const SimBody& a,const double pt[3],const double axis[3])
+{
+  destroy();
+  type = 1;
+  this->a = &a;
+  this->b = NULL;
+  joint = dJointCreateHinge(a.sim->sim->odesim.world(),0);
+  dJointAttach(joint,a.body,0);
+  dJointSetHingeAnchor(joint,pt[0],pt[1],pt[2]);
+  dJointSetHingeAxis(joint,axis[0],axis[1],axis[2]);
+  dJointSetHingeParam(joint,dParamBounce,0);
+  dJointSetHingeParam(joint,dParamFMax,0);
+}
+
+void SimJoint::makeSlider(const SimBody& a,const SimBody& b,const double axis[3])
+{
+  if(a.sim != b.sim)
+    throw PyException("The two bodies are not part of the same simulation");
+  destroy();
+  type = 2;
+  this->a = &a;
+  this->b = &b;
+  joint = dJointCreateSlider(a.sim->sim->odesim.world(),0);
+  dJointAttach(joint,a.body,b.body);
+  dJointSetSliderAxis(joint,axis[0],axis[1],axis[2]);
+  dJointSetSliderParam(joint,dParamBounce,0);
+  dJointSetSliderParam(joint,dParamFMax,0);
+}
+
+void SimJoint::makeSlider(const SimBody& a,const double axis[3])
+{
+  destroy();
+  type = 2;
+  this->a = &a;
+  this->b = NULL;
+  joint = dJointCreateSlider(a.sim->sim->odesim.world(),0);
+  dJointAttach(joint,a.body,NULL);
+  dJointSetSliderAxis(joint,axis[0],axis[1],axis[2]);
+  dJointSetSliderParam(joint,dParamBounce,0);
+  dJointSetSliderParam(joint,dParamFMax,0);
+}
+
+void SimJoint::makeFixed(const SimBody& a,const SimBody& b)
+{
+  if(a.sim != b.sim)
+    throw PyException("The two bodies are not part of the same simulation");
+  destroy();
+  type = 2;
+  this->a = &a;
+  this->b = &b;
+  joint = dJointCreateFixed(a.sim->sim->odesim.world(),0);
+  dJointAttach(joint,a.body,b.body);
+}
+
+void SimJoint::destroy()
+{
+  if(joint) {
+    dJointDestroy(joint);
+    joint = 0;
+  }
+  a = NULL;
+  b = NULL;
+}
+
+void SimJoint::setLimits(double min,double max)
+{
+  if(!joint) throw PyException("Joint has not yet been made, call makeX before setX");
+  if(type == 1) {
+    dJointSetHingeParam(joint,dParamLoStop,min);
+    dJointSetHingeParam(joint,dParamHiStop,max);
+  }
+  else if(type == 2) {
+    dJointSetSliderParam(joint,dParamLoStop,min);
+    dJointSetSliderParam(joint,dParamHiStop,max); 
+  }
+}
+
+void SimJoint::setFriction(double friction)
+{
+  setVelocity(0,friction);
+}
+
+void SimJoint::setVelocity(double vel,double fmax)
+{
+  if(!joint) throw PyException("Joint has not yet been made, call makeX before setX");
+  if(type == 1) {
+    dJointSetHingeParam(joint,dParamVel,vel);
+    dJointSetHingeParam(joint,dParamFMax,fmax);
+  }
+  else if(type == 2) {
+    dJointSetSliderParam(joint,dParamVel,vel);
+    dJointSetSliderParam(joint,dParamFMax,fmax);
+  }
+}
+
+void SimJoint::addForce(double force)
+{
+  if(!joint) throw PyException("Joint has not yet been made, call makeX before addForce");
+  if(type == 1) 
+    dJointAddHingeTorque(joint,force);
+  else if(type == 2)
+    dJointAddSliderForce(joint,force);
+}
+
+
 
 
 SimBody Simulator::body(const RobotModelLink& link)

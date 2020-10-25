@@ -22,9 +22,9 @@ class Robot;
 
 /** @brief Stores mass information for a rigid body or robot link.
  * 
- * Note:
+ * .. note::
  * 
- *     You should use the set/get functions rather than changing the members
+ *     Recommended to use the set/get functions rather than changing the members
  *     directly due to strangeness in SWIG's handling of vectors.
  * 
  * Attributes:
@@ -52,9 +52,9 @@ public:
   ///Returns the inertia matrix as a list of 3 floats or 9 floats
   void getInertia(std::vector<double>& out) const { out=inertia; }
 
-  double mass;        ///<mass
-  std::vector<double> com;      ///<local center of mass, size 3
-  std::vector<double> inertia;  ///<local inertia matrix, size 3 or 9
+  double mass;        //<mass
+  std::vector<double> com;      //<local center of mass, size 3
+  std::vector<double> inertia;  //<local inertia matrix, size 3 or 9
 };
 
 /** @brief Stores contact parameters for an entity.  Currently only
