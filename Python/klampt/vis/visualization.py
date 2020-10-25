@@ -461,8 +461,8 @@ methods.
 
 Utility functions:
 
-- def autoFitViewport(viewport,objects,rotate=True): Automatically fits a 
-  viewport's camera to see all the given objects.
+- def autoFitViewport(viewport,objects,zoom=True,rotate=True): Automatically 
+  fits a viewport's camera to see all the given objects.
 
 NAMING CONVENTION
 -----------------
@@ -673,7 +673,7 @@ def debug(*args,**kwargs):
     if animation is not None:
         animate(lastName,animation)
     if centerCamera is True:
-        autoFitCamera()
+        autoFitCamera(rotate=False)
     elif centerCamera:
         if isinstance(centerCamera,int):
             centerCamera = 'item['+str(centerCamera)+']'
@@ -684,7 +684,6 @@ def debug(*args,**kwargs):
         else:
             vp = getViewport()
             try:
-                print("TRYING TO CENTER CAMERA ON",centerCamera)
                 autoFitViewport(vp,[scene().getItem(centerCamera)],rotate=False)
                 setViewport(vp)
             except Exception:
@@ -693,13 +692,13 @@ def debug(*args,**kwargs):
                 traceback.print_exc()
     if followCameraItem is not None:
         if followCameraItem is True:
-            followCamera(lastName)
+            followCamera(lastName,center=True)
         else:
             if not isinstance(followCameraItem,(str,tuple)):
                 followCameraItem = getItemName(followCameraItem)
             if followCameraItem is None:
-                print("vis.debug(): could not follow camera, invalid object named")
-            followCamera(followCameraItem)
+                print("vis.debug(): could not follow camera, invalid object name")
+            followCamera(followCameraItem,center=True)
     if doDialog:
         dialog()
         setWindow(oldWindow)
@@ -1212,7 +1211,7 @@ def _getOffsets(object):
     elif isinstance(object,RigidObjectModel):
         return [object.getTransform()[1]]
     elif isinstance(object,Geometry3D):
-        return object.getCurrentTransform()[1]
+        return [object.getCurrentTransform()[1]]
     elif isinstance(object,VisAppearance):
         res = _getOffsets(object.item)
         if len(res) != 0: return res
@@ -1243,11 +1242,11 @@ def _getBounds(object):
                 res += list(bb)
         return res
     elif isinstance(object,RobotModelLink):
-        return [object.geometry().getBB()]
+        return list(object.geometry().getBB())
     elif isinstance(object,RigidObjectModel):
-        return [object.geometry().getBB()]
+        return list(object.geometry().getBB())
     elif isinstance(object,Geometry3D):
-        return [object.getBB()]
+        return list(object.getBB())
     elif isinstance(object,VisAppearance):
         if len(object.subAppearances) == 0:
             if isinstance(object.item,TerrainModel):
@@ -1277,6 +1276,8 @@ def autoFitViewport(viewport,objects,zoom=True,rotate=True):
     if len(ofs) == 0:
         return
 
+    print(pts)
+    print(ofs)
     pts = pts + ofs # just in case
 
     bb = bb_create(*pts)
@@ -1411,14 +1412,16 @@ def savePlot(name,fn):
     """Saves a plot to a CSV (extension .csv) or Trajectory (extension .traj) file."""
     scene().savePlot(name,fn)
 
-def autoFitCamera(scale=1):
+def autoFitCamera(zoom=True,rotate=True,scale=1):
     """Automatically fits the camera to all items in the visualization. 
 
     Args:
+        zoom (bool, optional): zooms the scene to the objects
+        rotate (bool, optional): rotates the scene to face the objects
         scale (float, optional): a scale > 1 magnifies the camera zoom.
     """
     print("klampt.vis: auto-fitting camera to scene.")
-    scene().autoFitCamera(scale)
+    scene().autoFitCamera(zoom,rotate,scale)
 
 def followCamera(target,translate=True,rotate=False,center=False):
     """Sets the camera to follow a target.  The camera starts from its current
@@ -2801,6 +2804,13 @@ class VisAppearance:
 
     def getCenter(self):
         bb = self.getBounds()
+        if bb_empty(bb):
+            item = self.item
+            if hasattr(item,'getCurrentTransform'):
+                return item.getCurrentTransform()[1]
+            elif hasattr(item,'getTransform'):
+                return item.getTransform()[1]
+            return [0,0,0]
         return vectorops.interpolate(bb[0],bb[1],0.5)
 
     def getTransform(self):
@@ -2816,7 +2826,7 @@ class VisAppearance:
         elif hasattr(item,'getCurrentTransform'):
             return item.getCurrentTransform()
         elif hasattr(item,'getTransform'):
-            return item.getCurrentTransform()
+            return item.getTransform()
         else:
             try:
                 vtype = objectToVisType(item,None)
@@ -3342,15 +3352,17 @@ class VisualizationScene:
             item.customDrawFunc = func
             self.doRefresh = True
 
-    def autoFitCamera(self,scale=1.0):
+    def autoFitCamera(self,zoom=True,rotate=True,scale=1.0):
         vp = self.getViewport()
         try:
-            autoFitViewport(vp,list(self.items.values()))
+            autoFitViewport(vp,list(self.items.values()),zoom=zoom,rotate=rotate)
             vp.camera.dist /= scale
             self.setViewport(vp)
         except Exception as e:
             print("Unable to auto-fit camera")
-            print(e)
+            import traceback
+            traceback.print_exc()
+            #print(e)
 
     def followCamera(self,target,translate,rotate,center):
         if target is None:
