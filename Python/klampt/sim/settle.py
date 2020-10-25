@@ -211,7 +211,7 @@ def settle(world,obj,
     Told = body.getTransform()
     t = 0
     while t < 1:
-        #print "Simulating, t =",t
+        #print("Simulating, t =",t)
         if perturb:
             fpert = (random.gauss(0,perturb),random.gauss(0,perturb),random.gauss(0,perturb))
             fpert = vectorops.sub(fpert,vectorops.mul(forcedir,vectorops.dot(forcedir,fpert)))
@@ -251,7 +251,7 @@ def settle(world,obj,
         T = body.getTransform()
         err = se3.error(T,Told)
         #if debug:
-        #   print "Status:",sim.getStatus(),"velocity",w,v,"error",vectorops.norm(err)
+        #   print("Status:",sim.getStatus(),"velocity",w,v,"error",vectorops.norm(err))
         if vectorops.norm(err) < settletol:
             numSettled += 1
         else:

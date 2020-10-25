@@ -49,15 +49,15 @@ expressions as necessary.::
     ctx = Context()
     x = ctx.addVar("x",'N')
     y = ctx.addVar("y",'N')
-    print x + y  #(x+y) is an Expression object, which has not been evaluated yet
-    print flatten(x,y)   #flatten(x,y) is an Expression object, which has not been evaluated yet
-    print (x + y).eval({'x':5,'y':3})  #prints 8 (a ConstantExpression)
-    print flatten(x,y).eval({'x':5,'y':3})  #prints [5,3] (a ConstantExpression
-    print flatten(x,y).eval({'y':[1,2]})  #prints [x,1,2] (an Expression object)
+    print(x + y)  #(x+y) is an Expression object, which has not been evaluated yet
+    print(flatten(x,y))   #flatten(x,y) is an Expression object, which has not been evaluated yet
+    print((x + y).eval({'x':5,'y':3}))  #prints 8 (a ConstantExpression)
+    print(flatten(x,y).eval({'x':5,'y':3}))  #prints [5,3] (a ConstantExpression
+    print(flatten(x,y).eval({'y':[1,2]}))  #prints [x,1,2] (an Expression object)
     x.bind(5)  #x is now treated as a constant
     y.bind(3)  #y is now treated as a constant
-    print (x+y).eval()  #prints 8 (a ConstantExpression)
-    print (x+y).evalf()  #prints 8 (as an integer)
+    print((x+y).eval())  #prints 8 (a ConstantExpression)
+    print((x+y).evalf())  #prints 8 (as an integer)
     x.unbind() #x is now a variable
     y.unbind() #y is now a variable
 
@@ -348,8 +348,8 @@ to the undecorated name.::
         return 2*x*y
     ctx = Context()
     f = ctx.declare(_f,"f")
-    print f(3,4)   #prints f(3,4)
-    print f(3,4).evalf()  #prints 24, since 2*3*4=12.
+    print(f(3,4))   #prints f(3,4)
+    print(f(3,4).evalf())  #prints 24, since 2*3*4=12.
 
 At this point, the module does not know how to take derivatives, so any
 ``deriv(f(...),arg)`` call will return None. To set derivatives, you can
@@ -1417,7 +1417,7 @@ class Context:
                 eargs = expr.argNames[:]
                 for i,a in zip(iorder,args):
                     eargs[i] = a
-                #print "Arguments",eargs
+                #print("Arguments",eargs)
                 return expr(*eargs).evalf(self)
             return f,varorder
         assert isinstance(expr,Expression)
@@ -1438,7 +1438,7 @@ class Context:
                         print("Error while creating Python function corresponding to",res)
                         raise ValueError("Unbound variable "+v.name+" not in given variable order "+",".join([var.name for var in varorder]))
             def f(*args):
-                #print "Evaluating with order",[str(v) for v in varorder],args
+                #print("Evaluating with order",[str(v) for v in varorder],args)
                 for (v,val) in zip(varorder,args):
                     v.bind(val)
                 res = expr.evalf(self)
@@ -1472,8 +1472,8 @@ class Context:
                     arglist.append(x[indices[i]:indices[i+1]])
                 else:
                     arglist.append(x[indices[i]])
-            #print "makeFlatFunction lambda function: Extracted arguments",arglist,"from",x
-            #print "Evaluating expression",expr
+            #print("makeFlatFunction lambda function: Extracted arguments",arglist,"from",x)
+            #print("Evaluating expression",expr)
             return f(*arglist)
         return fv,varorder
     def makeFlatFunctionDeriv(self,expr,varorder=None,defaultsize=1):
@@ -1533,7 +1533,7 @@ class Context:
                     arglist.append(x[indices[i]:indices[i+1]])
                 else:
                     arglist.append(x[indices[i]])
-            #print "Extracted arguments",arglist
+            #print("Extracted arguments",arglist)
             return df(*arglist)
         return dfv,varorder
     def getFlatVarRanges(self,varorder,defaultsize=1):
@@ -1588,14 +1588,14 @@ class Function:
             a = context.addVar("a")
             b = context.addVar("b")
             c = context.addVar("c")
-            print symfunc(a,b)   # prints f($a,$b)
+            print(symfunc(a,b))   # prints f($a,$b)
 
         Creating a Function from an Expression (sort of like a lambda function)::
 
             expr = a + 2*b
             symfunc2 = Function("f2", expr, ["a","b"])  #when symfunc2 is called, its first argument will be bound to a, and its second will be bound to b
-            print symfunc2(c,4)   #prints f2(c,4)
-            print symfunc2(c,4).eval({'c':5})  #prints 13, because c + 2*4 = 5 + 2*4 = 13
+            print(symfunc2(c,4))   #prints f2(c,4)
+            print(symfunc2(c,4).eval({'c':5}))  #prints 13, because c + 2*4 = 5 + 2*4 = 13
 
     If ``func`` is an Expression, then you can automatically set derivatives
     if all the sub-expressions have derivatives. To do so, use the
@@ -1795,7 +1795,7 @@ class Function:
                 try:
                     return ConstantExpression(self.func(*newargs))
                 except Exception as e:
-                    #print "Error evaluating expression",self.name,"arguments",newargs
+                    #print("Error evaluating expression",self.name,"arguments",newargs)
                     raise
             else:
                 #return self.func.eval(context=dict(self.argNames,newargs))
@@ -1892,11 +1892,11 @@ class Function:
             self.deriv[aindex] = dfunc
         elif asExpr:
             assert callable(dfunc)
-            #print "Setting derivative function with name",self.name,"argument",arg,"as expression"
+            #print("Setting derivative function with name",self.name,"argument",arg,"as expression")
             self.deriv[aindex] = dfunc
         else:
             assert callable(dfunc)
-            #print "Declaring new derivative function with name",self.name + "_deriv_" + arg
+            #print("Declaring new derivative function with name",self.name + "_deriv_" + arg)
             temp_function_info = Function(self.name + "_deriv_" + arg,dfunc,self.argNames + [VAR_DERIV_PREFIX+arg])
             if not hasattr(self,'deriv_funcs'):
                 self.deriv_funcs = [None]*len(self.argNames)
@@ -2992,7 +2992,7 @@ class OperatorExpression(Expression):
         self._children = self.args
     #def __del__(self):
     #    #remove references in parents list
-    #    #print "OperatorExpression.__del__ called"
+    #    #print("OperatorExpression.__del__ called")
     #    for a in self.args:
     #        a._parents = [(p,index) for p,index in a._parents if p() is not None]
     def _do(self,constargs):
@@ -3004,24 +3004,24 @@ class OperatorExpression(Expression):
         except Exception as e:
             #this will be handled during eval's exception handler
             """
-            print "Error while evaluating",self.functionInfo.name,"with arguments:"
+            print("Error while evaluating",self.functionInfo.name,"with arguments:")
             if self.functionInfo.argNames:
                 for (name,a) in zip(self.functionInfo.argNames,constargs):
-                    print " ",name,"=",a
+                    print(" ",name,"=",a)
             else:
-                print " ",','.join([str(a) for a in constargs])
-            print "Error",e
+                print(" ",','.join([str(a) for a in constargs]))
+            print("Error",e)
             import traceback
-            print "Traceback"
+            print("Traceback")
             traceback.print_exc()
             try:
-                print "Call stack:",
+                print("Call stack:",)
                 self._print_call_stack()
             except Exception as e2:
-                print "Hmm... exception occured while calling print_call_stack()?"
-                print e2
+                print("Hmm... exception occured while calling print_call_stack()?")
+                print(e2)
                 import traceback
-                print "Traceback"
+                print("Traceback")
                 traceback.print_exc()
             raise ValueError("Exception "+str(e)+" while evaluating function "+self.functionInfo.name+" with args "+",".join(str(v) for v in constargs))
             """
@@ -3725,11 +3725,11 @@ class OperatorExpression(Expression):
                             varset.add(v.name)
                     """
                     #DEBUGGING
-                    print "Expression free variables",[x.name for x in exprvars],"replaced variables",[x.name for x in replvars]
+                    print("Expression free variables",[x.name for x in exprvars],"replaced variables",[x.name for x in replvars])
                     exprvars += replvars
                     evars = node.functionInfo.custom_eval(context,*node.args).vars()
-                    print "Custom eval",node.functionInfo.custom_eval(context,*node.args)
-                    print "Test free variables",[x.name for x in evars]
+                    print("Custom eval",node.functionInfo.custom_eval(context,*node.args))
+                    print("Test free variables",[x.name for x in evars])
                     assert all(x.name in [y.name for y in evars] for x in exprvars)
                     assert all(x.name in [y.name for y in exprvars] for x in evars)
                     """

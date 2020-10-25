@@ -16,14 +16,36 @@ from ..robotsim import *
 from ..math import vectorops,se3
 
 
+def bb_create(*ptlist):
+    """Creates a bounding box from an optional set of points. If no points
+    are provided, creates an empty bounding box."""
+    if len(ptlist) == 0:
+        return [float('inf')]*3,[float('-inf')]*3
+    else:
+        bmin,bmax = list(ptlist[0]),list(ptlist[0])
+        for i in range(1,len(ptlist)):
+            x = ptlist[i]
+            bmin = [min(a,b) for (a,b) in zip(bmin,x)]
+            bmax = [max(a,b) for (a,b) in zip(bmax,x)]
+        return bmin,bmax
+
+def bb_empty(bb):
+    """Returns True if the bounding box is empty"""
+    return any((a > b) for (a,b) in zip(bb[0],bb[1]))
+
 def bb_intersect(a,b):
     """Returns true if the bounding boxes (a[0]->a[1]) and (b[0]->b[1]) intersect"""
     amin,amax=a
     bmin,bmax=b
     return not any(q < u or v < p for (p,q,u,v) in zip(amin,amax,bmin,bmax))
 
+def bb_intersection(*bbs):
+    """Returns the bounding box representing the intersection the given bboxes.
+    The result may be empty."""
+    return [max(*x) for x in zip(*[b[0] for b in bbs])],[min(*x) for x in zip(*[b[1] for b in bbs])]
+
 def bb_union(*bbs):
-    """Returns a bounding box containing the given bboxes"""
+    """Returns the smallest bounding box containing the given bboxes"""
     return [min(*x) for x in zip(*[b[0] for b in bbs])],[max(*x) for x in zip(*[b[1] for b in bbs])]
 
 
@@ -281,7 +303,7 @@ class WorldCollider:
                         self.mask[l].add(t)
                         self.mask[t].add(l)
                     else:
-                        #print "Ignoring fixed link..."
+                        #print("Ignoring fixed link...")
                         pass
         for o in self.rigidObjects:
             if o < 0: continue
@@ -388,7 +410,7 @@ class WorldCollider:
 
                 for i,j in worldCollider.collisionTests():
                     if i[1].collides(j[1]):
-                        print "Object",i[0].getName(),"collides with",j[0].getName()
+                        print("Object",i[0].getName(),"collides with",j[0].getName())
                     
         (Note that for this purpose is easier to just call :meth:`collisions`;
         however you may want to use `collisionTests` to perform other queries

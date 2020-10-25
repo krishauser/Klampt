@@ -299,7 +299,7 @@ class SimLogPlayback:
             for i in range(len(timelist)-1):
                 if time < timelist[i]:
                     break
-            #print "Time",time,"Time step",timestep
+            #print("Time",time,"Time step",timestep)
             self.updateSim(timestep = i)
             return
         if timestep >= len(self.state_array):

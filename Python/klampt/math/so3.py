@@ -56,13 +56,7 @@ def mul(R1,R2):
     for i in range(3):
         for j in range(3):
             mres[i][j] = vectorops.dot(m1[i],m2T[j])
-    #print "Argument 1"
-    #print __str__(R1)
-    #print "Argument 2"
-    #print __str__(R2)
-    #print "Result"
     R = from_matrix(mres)
-    #print __str__(R)
     return R
 
 def trace(R):

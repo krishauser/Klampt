@@ -622,6 +622,7 @@ def fit_plane3(point1,point2,point3):
   
     The result is (a,b,c,d) with the plane equation ax+by+cz+d=0
     """
+    _try_numpy_import()
     normal = np.cross(point2-point1,point3-point1)
     nlen = np.linalg.norm(normal)
     if nlen < 1e-4:
@@ -635,7 +636,7 @@ def fit_plane3(point1,point2,point3):
 def fit_plane(points):
     """Returns a 3D plane equation that is a least squares fit
     through the points (len(points) >= 3)."""
-    normal,centroid = fit_plane_centroid()
+    normal,centroid = fit_plane_centroid(points)
     return normal[0],normal[1],normal[2],-vectorops.dot(centroid,normal)
 
 
@@ -645,10 +646,11 @@ def fit_plane_centroid(points):
         raise ValueError("Need to have at least 3 points to fit a plane")
     #if len(points)==3:
     #    return fit_plane3(points[0],points[1],points[2])
+    _try_numpy_import()
     points = np.asarray(points)
     centroid = np.average(points,axis=0)
     U,W,Vt = np.linalg.svd(points-[centroid]*len(points),full_matrices=False)
-    if numpy.sum(W<1e-6) > 1:
+    if np.sum(W<1e-6) > 1:
         raise ValueError("Point set is degenerate")
     normal = Vt[2,:]
     return centroid.tolist(),normal.tolist()
@@ -666,6 +668,7 @@ class PlaneFitter:
         cov (3x3 array): covariance of points
     """
     def __init__(self,points=None):
+        _try_numpy_import()
         if points is None:
             self.count = 0
             self.centroid = np.zeros(3)

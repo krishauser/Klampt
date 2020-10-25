@@ -16,12 +16,12 @@ to set the configuration of robot 0, rather than world.robot(0).setConfig([q1,..
 
 Conveniently, you can write expressions like::
 
-    print len(access.map(world).robots)
+    print(len(access.map(world).robots))
     access.map(world).robots[0].config[4] = 3.5
 
 Which is a shortcut to::
 
-    print world.numRobots()
+    print(world.numRobots())
     q = world.robot(0).getConfig()
     q[4] = 3.5
     world.robot(0).setConfig(q)

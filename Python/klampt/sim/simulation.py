@@ -372,11 +372,11 @@ class SimpleSimulator (Simulator):
                 """
                 #debug: print measurements
                 for (k,v) in measurements.iteritems():
-                    print k,":",
+                    print(k,":",)
                     if hasattr(v,'__iter__'):
-                        print ' '.join("%.2f"%(vi,) for vi in v)
+                        print(' '.join("%.2f"%(vi,) for vi in v))
                     else:
-                        print v
+                        print(v)
                 """
                 if c:
                     #assume it's a ControllerBase instance

@@ -14,11 +14,11 @@ For basic IK, the calling sequence is::
     goal = ik.objective(link,local=[p1,p2,p3],world=[r1,r2,r3])
     robot.setConfig(startConfig)  #(optional, set the initial configuration)
     if ik.solve(goal):
-        print "Hooray, IK solved"
-        print "Resulting config:",robot.getConfig()
+        print("Hooray, IK solved")
+        print("Resulting config:",robot.getConfig())
     else:
-        print "IK failed"
-        print "Final config:",robot.getConfig()
+        print("IK failed")
+        print("Final config:",robot.getConfig())
 
 Here, the points p1,...,p3 on the link (specified in local coordinates)
 will be matched to the points r1,...,r3 in the world.  You can also

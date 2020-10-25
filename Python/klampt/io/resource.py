@@ -267,7 +267,7 @@ class FileGetter:
                 pattern = desc + " ("
                 pattern = pattern + ' '.join("*"+ext for ext in exts) + ")"
                 patternlist.append(pattern)
-            #print patternlist
+            #print("Pattern list:",patternlist)
             patterns = ";;".join(patternlist)
         self.result = QFileDialog.getOpenFileName(None, self.title, self.directory, patterns)
         print("Result from open dialog",self.result)
@@ -284,7 +284,7 @@ class FileGetter:
                 pattern = desc + " ("
                 pattern = pattern + ' '.join("*"+ext for ext in exts) + ")"
                 patternlist.append(pattern)
-            #print "Pattern list:",patternlist
+            #print("Pattern list:",patternlist)
             patterns = ";;".join(patternlist)
         self.result = QFileDialog.getSaveFileName(None, self.title, self.directory, patterns)
         print("Result from save dialog",self.result)

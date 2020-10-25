@@ -117,11 +117,11 @@ class IKObjective
  *     s.setTolerance(1e-4)
  *     res = s.solve()
  *     if res:
- *         print ("IK solution:",robot.getConfig(),"found in",
- *             s.lastSolveIters(),"iterations, residual",s.getResidual()
+ *         print("IK solution:",robot.getConfig(),"found in",
+ *             s.lastSolveIters(),"iterations, residual",s.getResidual())
  *     else:
- *         print "IK failed:",robot.getConfig(),"found in",
- *             s.lastSolveIters(),"iterations, residual",s.getResidual()
+ *         print("IK failed:",robot.getConfig(),"found in",
+ *             s.lastSolveIters(),"iterations, residual",s.getResidual())
  *
  */
 class IKSolver

@@ -355,9 +355,9 @@ class LocalOptimizer:
             if len(constraintDicts) > 0 and scipyMethod not in ['SLSQP','COBYLA']:
                 print("LocalOptimizer.solve(): warning, can't use method",scipyMethod,"with constraints")
                 input("Press enter to continue > ")
-            #print "Scipy constraints",constraintDicts
-            #print "Scipy bounds",bounds
-            #print "Objective jacobian",jac
+            #print("Scipy constraints",constraintDicts)
+            #print("Scipy bounds",bounds)
+            #print("Objective jacobian",jac)
             res = optimize.minimize(problem.objective,x0=self.seed,method=scipyMethod,
                                     jac=jac,bounds=bounds,
                                     constraints=constraintDicts,tol=tol,options={'maxiter':numIters,'disp':True})
@@ -438,7 +438,7 @@ class LocalOptimizer:
                 ubIndices = []
                 lbIndices = []
             def objfunc(x):
-                #print "EVALUATING OBJECTIVE AT",x
+                #print("EVALUATING OBJECTIVE AT",x)
                 fx = problem.objective(x)
                 eqs = [f(x) for f in problem.equalities]+[f(x) for f in problem.inequalities]
                 if len(eqs) == 0:
@@ -455,12 +455,12 @@ class LocalOptimizer:
                     else:
                         gx = gx + ub.tolist() + lb.tolist()
                 #for f in problem.equalities:
-                #    print "EQUALITY VALUE",f(x)
+                #    print("EQUALITY VALUE",f(x))
                 #for f in problem.inequalities:
-                #    print "INEQUALITY VALUE",f(x)
+                #    print("INEQUALITY VALUE",f(x))
                 flag = not any(not f(x) for f in problem.feasibilityTests)
-                #print "CONSTRAINTS",gx
-                #print "FUNCTION VALUE IS",fx
+                #print("CONSTRAINTS",gx)
+                #print("FUNCTION VALUE IS",fx)
                 assert len(gx) == hlen+glen+len(ubIndices)+len(lbIndices)
                 flag = True
                 if any(math.isnan(v) for v in x):
@@ -489,7 +489,7 @@ class LocalOptimizer:
             if problem.objectiveGrad is not None:
                 #user provided gradients
                 if all(f is not None for f in problem.equalityGrads) and all(f is not None for f in problem.inequalityGrads):
-                    #print "RETURNING GRADIENTS"
+                    #print("RETURNING GRADIENTS")
                     def objfuncgrad(x):
                         fx = problem.objectiveGrad(x)
                         gx = sum([f(x) for f in problem.equalityGrads]+[f(x) for f in problem.inequalityGrads],[])
@@ -937,7 +937,7 @@ class OptimizationProblemBuilder:
         csum = 0.0
         for obj in self.objectives:
             if obj.type == 'cost':
-                #print obj.weight,obj.expr.evalf(self.context)
+                #print(obj.weight,obj.expr.evalf(self.context))
                 csum += obj.weight*obj.expr.evalf(self.context)
             elif obj.soft:
                 if obj.type == 'eq':
@@ -1324,7 +1324,7 @@ class OptimizationProblemBuilder:
                             result.setBounds(v.name,vmin,vmax)
                         optToSelf.append(symbolic.expr(result.context.variableDict[v.name]))
                         selfToOpt.append(symbolic.expr(v))
-        #print "OptimizationProblemBuilder.preprocess(): optimization variables",[str(v) for v in self.optimizationVariables],"->",[str(v) for v in result.optimizationVariables]
+        #print("OptimizationProblemBuilder.preprocess(): optimization variables",[str(v) for v in self.optimizationVariables],"->",[str(v) for v in result.optimizationVariables])
         assert modified != (len(optToSelf) == 0 and len(result.optimizationVariables) == len(self.optimizationVariables))
         #delete any objectives with 0 weight
         sourceObjectives = self.objectives
@@ -1348,9 +1348,9 @@ class OptimizationProblemBuilder:
                     expr = expr.replace(var,vexpr)
                 except ValueError:
                     pass
-            #print "Replacement for",obj.type,"objective",obj.expr,"is",expr
+            #print("Replacement for",obj.type,"objective",obj.expr,"is",expr)
             expr = symbolic.simplify(expr)
-            #print "  simplified to",expr
+            #print("  simplified to",expr)
             #raw_input()
             result.objectives.append(OptimizationObjective(expr,obj.type,obj.weight))
             result.objectives[-1].soft = obj.soft

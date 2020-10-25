@@ -1280,7 +1280,7 @@ def path_to_trajectory(path,velocities='auto',timing='limited',smoothing='spline
                         for j,(x,lim) in enumerate(zip(v,vmax)):
                             if abs(x) > lim*_durations[i]:
                                 _durations[i] = abs(x)/lim
-                                #print "Segment",i,"limited on axis",j,"path velocity",x,"limit",lim
+                                #print("Segment",i,"limited on axis",j,"path velocity",x,"limit",lim)
                     else:
                         _durations[i] = vectorops.norm(v)/vmax
                     if hasattr(amax,'__iter__'):
@@ -1288,12 +1288,12 @@ def path_to_trajectory(path,velocities='auto',timing='limited',smoothing='spline
                             for j,(x,lim) in enumerate(zip(a1,amax)):
                                 if abs(x) > lim*_durations[i]**2:
                                     _durations[i] = math.sqrt(abs(x)/lim)
-                                    #print "Segment",i,"limited on axis",j,"path accel",x,"limit",lim
+                                    #print("Segment",i,"limited on axis",j,"path accel",x,"limit",lim)
                         if i+2 < len(milestones):
                             for j,(x,lim) in enumerate(zip(a2,amax)):
                                 if abs(x) > lim*_durations[i]**2:
                                     _durations[i] = math.sqrt(abs(x)/lim)
-                                    #print "Segment",i,"limited on axis",j,"outgoing path accel",x,"limit",lim
+                                    #print("Segment",i,"limited on axis",j,"outgoing path accel",x,"limit",lim)
                     else:
                         if i > 0:
                             n = vectorops.norm(a1)
@@ -1369,7 +1369,7 @@ def path_to_trajectory(path,velocities='auto',timing='limited',smoothing='spline
     if startvel != 0.0 or endvel != 0.0:
         print("path_to_trajectory(): WARNING: respecting nonzero start/end velocity not implemented yet")
 
-    #print "path_to_trajectory(): Total distance",totaldistance
+    #print("path_to_trajectory(): Total distance",totaldistance)
     if totaldistance == 0.0:
         return normalizedPath
     finalduration = totaldistance
@@ -1415,9 +1415,9 @@ def path_to_trajectory(path,velocities='auto',timing='limited',smoothing='spline
     else:
         raise NotImplementedError("Can't do velocity profile "+velocities+" yet")
     if timing == 'limited':
-        #print "Easing velocity max",evmax,"acceleration max",eamax
-        #print "Velocity and acceleration-limited segment distances",_durations
-        #print "Total distance traveled",totaldistance
+        #print("Easing velocity max",evmax,"acceleration max",eamax)
+        #print("Velocity and acceleration-limited segment distances",_durations)
+        #print("Total distance traveled",totaldistance)
         finalduration = totaldistance*evmax
         #y(t) = p(L*e(t/T))
         #y'(t) = p'(L*e(t)/T)*e'(t) L/T 
@@ -1444,11 +1444,11 @@ def path_to_trajectory(path,velocities='auto',timing='limited',smoothing='spline
     res.milestones = [None]*(N+1)
     res.milestones[0] = normalizedPath.milestones[0][:]
     dt = finalduration/float(N)
-    #print velocities,"easing:"
+    #print(velocities,"easing:")
     for i in range(1,N+1):
         res.times[i] = float(i)/float(N)*finalduration
         u = easing(float(i)/float(N))
-        #print float(i)/float(N),"->",u
+        #print(float(i)/float(N),"->",u)
         res.milestones[i] = normalizedPath.eval(u*totaldistance)
     if timing == 'limited' or speed == 'limited':
         scaling = 0.0
@@ -1469,14 +1469,14 @@ def path_to_trajectory(path,velocities='auto',timing='limited',smoothing='spline
             if not hasattr(vmax,'__iter__'):
                 n = vectorops.norm(v)
                 if n > vmax*scaling:
-                    #print "path segment",i,"exceeded scaling",scaling,"by |velocity|",n,' > ',vmax*scaling
+                    #print("path segment",i,"exceeded scaling",scaling,"by |velocity|",n,' > ',vmax*scaling)
                     vscaling = n/vmax
                     vLimitingTime = i
             else:
                 for x,lim in zip(v,vmax):
                     if abs(x) > lim*vscaling:
-                        #print "path segment",i,"exceeded scaling",scaling,"by velocity",x,' > ',lim*scaling
-                        #print "Velocity",v
+                        #print("path segment",i,"exceeded scaling",scaling,"by velocity",x,' > ',lim*scaling)
+                        #print("Velocity",v)
                         vscaling = abs(x)/lim
                         vLimitingTime = i
             if i == 0:
@@ -1484,16 +1484,16 @@ def path_to_trajectory(path,velocities='auto',timing='limited',smoothing='spline
             if not hasattr(amax,'__iter__'):
                 n = vectorops.norm(a)
                 if n > amax*scaling**2:
-                    #print "path segment",i,"exceeded scaling",scaling,"by |acceleration|",n,' > ',amax*scaling**2
+                    #print("path segment",i,"exceeded scaling",scaling,"by |acceleration|",n,' > ',amax*scaling**2)
                     scaling = math.sqrt(n/amax)
                     aLimitingTime = i
             else:
                 for x,lim in zip(a,amax):
                     if abs(x) > lim*scaling**2:
-                        #print "path segment",i,"exceeded scaling",scaling,"by acceleration",x,' > ',lim*scaling**2
-                        #print p,q,n
-                        #print "Velocity",v
-                        #print "Previous velocity",path.difference(p,q,1.,dt)
+                        #print("path segment",i,"exceeded scaling",scaling,"by acceleration",x,' > ',lim*scaling**2)
+                        #print(p,q,n)
+                        #print("Velocity",v)
+                        #print("Previous velocity",path.difference(p,q,1.,dt))
                         scaling = math.sqrt(abs(x)/lim)
                         aLimitingTime = i
         if verbose >= 1:
