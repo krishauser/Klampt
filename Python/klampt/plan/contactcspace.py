@@ -35,7 +35,6 @@ class StanceCSpace(ClosedLoopRobotCSpace):
         self.gravity = (0,0,-9.8)
 
         sp = contact.supportPolygon(holds)
-        #print "Support polygon",sp
         self.sp = sp
         self.equilibriumMargin = 0.0
         self.addFeasibilityTest(self.testSupportPolygon,"suppPoly")
@@ -50,9 +49,9 @@ class StanceCSpace(ClosedLoopRobotCSpace):
         x = self.robot.getCom()
         for plane in self.sp:
             if vectorops.dot(plane[:2],(x[0],x[1])) > plane[2] - self.equilibriumMargin:
-                #print "COM",x[:2],"out of support polygon size",len(sp)
+                #print("COM",x[:2],"out of support polygon size",len(sp))
                 #for plane in sp:
-                #   print "  ",vectorops.dot(plane[:2],(x[0],x[1])) - plane[2]
+                #   print("  ",vectorops.dot(plane[:2],(x[0],x[1])) - plane[2])
                 return False
         return True
 

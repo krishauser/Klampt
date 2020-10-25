@@ -608,7 +608,7 @@ def configurePlanner(space,start,goal,edgeCost=None,terminalCost=None,optimizing
         
     planner.setEndpoints(start,goal)
     if edgeCost or terminalCost:
-        print ("SETTING COST FUNCTION FROM PYTHON")
+        #print("SETTING COST FUNCTION FROM PYTHON")
         planner.setCostFunction(edgeCost,terminalCost)
     return planner,args
 
