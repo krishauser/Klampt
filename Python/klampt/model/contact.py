@@ -212,7 +212,7 @@ def equilibriumTorques(robot,holdList,fext=(0,0,-9.8),internalTorques=None,norm=
         res = robotsim.equilibriumTorques(robot,_flatten(holdList),links,fext,internalTorques,norm)
     if res is None: return res
     f = res[1]
-    return (res[0],[f[i*3:i*3+3] for i in range(len(f)/3)])
+    return (res[0],[f[i*3:i*3+3] for i in range(len(f)//3)])
 
 def contactMap(contacts,fixed=None):
     """Given an unordered list of ContactPoints, computes a canonical dict
