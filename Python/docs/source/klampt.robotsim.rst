@@ -45,8 +45,10 @@ Imported into the main ``klampt`` package.
     ~klampt.TriangleMesh
     ~klampt.PointCloud
     ~klampt.VolumeGrid
+    ~klampt.ConvexHull
     ~klampt.DistanceQuerySettings
     ~klampt.DistanceQueryResult
+    ~klampt.ContactQueryResult
 
 Inverse kinematics
 -------------------
@@ -68,6 +70,7 @@ Imported into the main ``klampt`` package.
 .. autosummary::
     ~klampt.Simulator
     ~klampt.SimBody
+    ~klampt.SimJoint
     ~klampt.SimRobotController
     ~klampt.SimRobotSensor
 
