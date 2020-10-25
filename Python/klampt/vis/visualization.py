@@ -326,6 +326,7 @@ To turn a Simulator into a WebGL animation, use this code::
 WINDOWING API
 --------------
 
+- def debug(*args,**kwargs): a super easy way to visualize Klamp't items.
 - def init(backends=None): initializes the visualization.  Can configure here
   what backend(s) to use.
 - def createWindow(title): creates a new visualization window and returns an
@@ -401,6 +402,8 @@ methods.
 - def listItems(): prints out all names of visualization objects
 - def listItems(name): prints out all names of visualization objects under the
   given name
+- def getItemName(object): retrieves the name / path of a given object in the
+  scene, or returns None if the object doesnt exist.
 - def dirty(item_name='all'): marks the given item as dirty and recreates the
   OpenGL display lists.  You may need to call this if you modify an item's 
   geometry, for example.
@@ -458,8 +461,8 @@ methods.
 
 Utility functions:
 
-- def autoFitViewport(viewport,objects): Automatically fits a viewport's camera
-  to see all the given objects.
+- def autoFitViewport(viewport,objects,rotate=True): Automatically fits a 
+  viewport's camera to see all the given objects.
 
 NAMING CONVENTION
 -----------------
@@ -472,11 +475,11 @@ item name (a string) or a sub-item (a sequence of strings, given a path from
 the root to the leaf). For example, if you've added a RobotWorld under the
 name 'world' containing a robot called 'myRobot', then::
 
-    `setColor(('world','myRobot'),0,1,0)`
+    setColor(('world','myRobot'),0,1,0)
 
 will turn the robot green.  If 'link5' is the robot's 5th link, then::
 
-    `setColor(('world','myRobot','link5'),0,0,1)`
+    setColor(('world','myRobot','link5'),0,0,1)
 
 will turn the 5th link blue.
 
@@ -504,6 +507,7 @@ from ..model.subrobot import SubRobotModel
 from ..model.trajectory import *
 from ..model.multipath import MultiPath
 from ..model.contact import ContactPoint,Hold
+from ..model.collide import bb_empty,bb_create,bb_union
 
 #the global lock for all visualization calls
 _globalLock = threading.RLock()
@@ -545,7 +549,7 @@ def init(backends=None):
         if _isnotebook():
             backends = ['IPython']
         else:
-            backends = ['PyQt','GLUT','IPython','HTML']
+            backends = ['PyQt','GLUT','HTML']
     if isinstance(backends,str):
         backends = [backends]
     OpenGLBackends = ['PyQt','PyQt4','PyQt5','GLUT']
@@ -586,6 +590,124 @@ def init(backends=None):
 def _init():
     if init() is None: 
         raise RuntimeError("Unable to initialize visualization")
+
+def debug(*args,**kwargs):
+    """A super easy way to visualize Klamp't items.
+
+    The argument list can be a list of Klamp't items, and can also include
+    strings or dicts.  If a string precedes an item, then it will be labeled
+    by the string.  If a dict follows an item, the dict will specify 
+    attributes for the item.  It can also contain the 'animation' key, in
+    which case it should contain a Trajectory animating the item.
+
+    Keyword arguments may include:
+
+    - title: the window title
+    - animation: if only one item is given, can set a looping the animation
+    - centerCamera: the name of the item that the camera should look at, or
+      True to center on the whole scene.
+    - followCamera: the name of the item that the camera will follow if
+      animated, or None (default).
+    - dialog: True if a dialog should be shown (default), False if a standard
+      show() should be used.
+    - anything else: Treated as named klamp't item.
+    """
+    oldWindow = getWindow()
+    if oldWindow is None:
+        oldWindow = createWindow()
+    myWindow = createWindow()
+    nextName = None
+    lastName = None
+    itemcount = 0
+    if 'world' in kwargs:
+        add('world',kwargs['world'])
+    for i,arg in enumerate(args):
+        if isinstance(arg,str):
+            nextName = arg
+        elif isinstance(arg,dict):
+            if i==0:
+                continue
+            for (k,v) in arg.items():
+                try:
+                    setAttribute(lastName,k,v)
+                except Exception:
+                    print("vis.debug(): Couldn't set attribute",k,"of item",lastName)
+        else:
+            label = None
+            if nextName is None:
+                name = 'item['+str(itemcount)+']'
+            else:
+                name = nextName
+                label = name
+            add(name,arg)
+            itemcount += 1
+            lastName = name
+            nextName = None
+
+    title = None
+    doDialog = True
+    centerCamera = None
+    followCameraItem = None
+    animation = None
+    for k,v in kwargs.items():
+        if k=='title':
+            title = v
+        elif k=='world':
+            pass
+        elif k=='dialog':
+            doDialog = v
+        elif k=='animation':
+            animation = v
+        elif k=='followCamera':
+            followCameraItem = v
+        elif k=='centerCamera':
+            centerCamera = v
+        else:
+            add(k,v)
+            lastName = k
+            itemcount += 1
+    if title is not None:
+        setWindowTitle(v)
+    else:
+        setWindowTitle("Klampt debugging: "+','.join(scene().items.keys()))
+    if animation is not None:
+        animate(lastName,animation)
+    if centerCamera is True:
+        autoFitCamera()
+    elif centerCamera:
+        if isinstance(centerCamera,int):
+            centerCamera = 'item['+str(centerCamera)+']'
+        elif not isinstance(centerCamera,(str,tuple)):
+            centerCamera = getItemName(centerCamera)
+        if centerCamera is None:
+            print("vis.debug(): could not center camera, invalid object named")
+        else:
+            vp = getViewport()
+            try:
+                print("TRYING TO CENTER CAMERA ON",centerCamera)
+                autoFitViewport(vp,[scene().getItem(centerCamera)],rotate=False)
+                setViewport(vp)
+            except Exception:
+                print("vis.debug(): Centering camera failed")
+                import traceback
+                traceback.print_exc()
+    if followCameraItem is not None:
+        if followCameraItem is True:
+            followCamera(lastName)
+        else:
+            if not isinstance(followCameraItem,(str,tuple)):
+                followCameraItem = getItemName(followCameraItem)
+            if followCameraItem is None:
+                print("vis.debug(): could not follow camera, invalid object named")
+            followCamera(followCameraItem)
+    if doDialog:
+        dialog()
+        setWindow(oldWindow)
+    else:
+        show()
+        #open ended...
+    
+
 
 def nativeWindow():
     """Returns the active window data used by the backend.  The result will be
@@ -883,6 +1005,11 @@ def listItems(name=None,indent=0):
     _init()
     scene().listItems(name,indent)
 
+def getItemName(object):
+    if _backend is None:
+        return None
+    return scene().getItemName(object)
+
 def dirty(item_name='all'):
     """Marks the given item as dirty and recreates the OpenGL display lists.  You may need
     to call this if you modify an item's geometry, for example.  If things start disappearing
@@ -1080,6 +1207,8 @@ def _getOffsets(object):
         object.setConfig(q)
         wnew = [object.link(i).getTransform()[1] for i in range(object.numLinks())]
         return [vectorops.sub(b,a) for a,b in zip(worig,wnew)]
+    elif isinstance(object,RobotModelLink):
+        return [object.getTransform()[1]]
     elif isinstance(object,RigidObjectModel):
         return [object.getTransform()[1]]
     elif isinstance(object,Geometry3D):
@@ -1089,7 +1218,7 @@ def _getOffsets(object):
         if len(res) != 0: return res
         if len(object.subAppearances) == 0:
             bb = object.getBounds()
-            if bb is not None and not aabb_empty(bb):
+            if bb is not None and not bb_empty(bb):
                 return [vectorops.mul(vectorops.add(bb[0],bb[1]),0.5)]
         else:
             res = []
@@ -1110,19 +1239,21 @@ def _getBounds(object):
         res = []
         for i in range(object.numLinks()):
             bb = object.link(i).geometry().getBB()
-            if bb is not None and not aabb_empty(bb):
+            if bb is not None and not bb_empty(bb):
                 res += list(bb)
         return res
+    elif isinstance(object,RobotModelLink):
+        return [object.geometry().getBB()]
     elif isinstance(object,RigidObjectModel):
-        return list(object.geometry().getBB())
+        return [object.geometry().getBB()]
     elif isinstance(object,Geometry3D):
-        return list(object.getBB())
+        return [object.getBB()]
     elif isinstance(object,VisAppearance):
         if len(object.subAppearances) == 0:
             if isinstance(object.item,TerrainModel):
                 return []
             bb = object.getBounds()
-            if bb is not None and not aabb_empty(bb):
+            if bb is not None and not bb_empty(bb):
                 return list(bb)
         else:
             res = []
@@ -1132,11 +1263,11 @@ def _getBounds(object):
     return []
 
 
-def autoFitViewport(viewport,objects): 
+def autoFitViewport(viewport,objects,zoom=True,rotate=True): 
     from ..model.sensing import fit_plane_centroid
     ofs = sum([_getOffsets(o) for o in objects],[])
     pts = sum([_getBounds(o) for o in objects],[])
-    #print "Bounding box",bb,"center",center
+    #print("Bounding box",bb,"center",center)
     #raw_input()
     #reset
     viewport.camera.rot = [0.,0.,0.]
@@ -1146,49 +1277,61 @@ def autoFitViewport(viewport,objects):
     if len(ofs) == 0:
         return
 
-    bb = aabb_create(*pts)
+    pts = pts + ofs # just in case
+
+    bb = bb_create(*pts)
     center = vectorops.mul(vectorops.add(bb[0],bb[1]),0.5)
     viewport.camera.tgt = center
-    radius = max(vectorops.distance(bb[0],center),0.1)
-    viewport.camera.dist = 1.2*radius / math.tan(math.radians(viewport.fov*0.5))
+    if zoom:
+        radius = max(vectorops.distance(bb[0],center),0.25)
+        viewport.camera.dist = 1.2*radius / math.tan(math.radians(viewport.fov*0.5))
     #default: oblique view
-    viewport.camera.rot = [0,math.radians(30),math.radians(45)]
-    #fit a plane to these points
-    try:
-        centroid,normal = fit_plane_centroid(ofs)
-    except Exception as e:
+    if rotate:
+        viewport.camera.rot = [0,math.radians(30),math.radians(45)]
+        #fit a plane to these points
         try:
-            centroid,normal = fit_plane_centroid(pts)
+            centroid,normal = fit_plane_centroid(ofs)
         except Exception as e:
-            print("Exception occurred during fitting to points")
-            print(ofs)
-            print(pts)
-            raise
-            return
-    if normal[2] > 0:
-        normal = vectorops.mul(normal,-1)
-    z,x,y = so3.matrix(so3.inv(so3.canonical(normal)))
-    #print z,x,y
-    #raw_input()
-    radius = max([abs(vectorops.dot(x,vectorops.sub(center,pt))) for pt in pts] + [abs(vectorops.dot(y,vectorops.sub(center,pt)))*viewport.w/viewport.h for pt in pts])
-    zmin = min([vectorops.dot(z,vectorops.sub(center,pt)) for pt in pts])
-    zmax = max([vectorops.dot(z,vectorops.sub(center,pt)) for pt in pts])
-    #print "Viewing direction",normal,"at point",center,"with scene size",radius
-    #orient camera to point along normal direction
-    viewport.camera.tgt = center
-    viewport.camera.dist = 1.2*radius / math.tan(math.radians(viewport.fov*0.5))
-    near,far = viewport.clippingplanes
-    if viewport.camera.dist + zmin < near:
-        near = max((viewport.camera.dist + zmin)*0.5, radius*0.1)
-    if viewport.camera.dist + zmax > far:
-        far = max((viewport.camera.dist + zmax)*1.5, radius*3)
-    viewport.clippingplanes = (near,far)
-    roll = 0
-    yaw = math.atan2(normal[0],normal[1])
-    pitch = math.atan2(-normal[2],vectorops.norm(normal[0:2]))
-    #print "Roll pitch and yaw",roll,pitch,yaw
-    #print "Distance",viewport.camera.dist
-    viewport.camera.rot = [roll,pitch,yaw]
+            try:
+                centroid,normal = fit_plane_centroid(pts)
+            except Exception as e:
+                print("Exception occurred during fitting to points")
+                print(e)
+                import traceback
+                traceback.print_exc()
+                #print(ofs)
+                #print(pts)
+                raise
+                return
+        if normal[2] > 0:
+            normal = vectorops.mul(normal,-1)
+        z,x,y = so3.matrix(so3.inv(so3.canonical(normal)))
+        roll = 0
+        yaw = math.atan2(normal[0],normal[1])
+        pitch = math.atan2(-normal[2],vectorops.norm(normal[0:2]))
+        #print("Roll pitch and yaw",roll,pitch,yaw)
+        #print("Distance",viewport.camera.dist)
+        viewport.camera.rot = [roll,pitch,yaw]
+    else:
+        x = [1,0,0]
+        y = [0,0,1]
+        z = [0,1,0]
+    #print(z,x,y)
+    if zoom:
+        radius = max([abs(vectorops.dot(x,vectorops.sub(center,pt))) for pt in pts] + [abs(vectorops.dot(y,vectorops.sub(center,pt)))*viewport.w/viewport.h for pt in pts])
+        radius = max(radius,0.25)
+        zmin = min([vectorops.dot(z,vectorops.sub(center,pt)) for pt in pts])
+        zmax = max([vectorops.dot(z,vectorops.sub(center,pt)) for pt in pts])
+        #print("Viewing direction",normal,"at point",center,"with scene size",radius)
+        #orient camera to point along normal direction
+        viewport.camera.tgt = center
+        viewport.camera.dist = 1.2*radius / math.tan(math.radians(viewport.fov*0.5))
+        near,far = viewport.clippingplanes
+        if viewport.camera.dist + zmin < near:
+            near = max((viewport.camera.dist + zmin)*0.5, radius*0.1)
+        if viewport.camera.dist + zmax > far:
+            far = max((viewport.camera.dist + zmax)*1.5, radius*3)
+        viewport.clippingplanes = (near,far)
 
 def addText(name,text,position=None,**kwargs):
     """Adds text to the visualizer.  You must give an identifier to all pieces 
@@ -1331,7 +1474,7 @@ def objectToVisType(item,world):
                             validtypes.append(t)
                             match = True
                             break
-                    if not match:
+                    if not match and len(itypes) == 1:
                         print("Config-like item of length",len(item),"doesn't match any of the # links of robots in the world:",[world.robot(i).numLinks() for i in range(world.numRobots())])
             elif t=='Vector3':
                 validtypes.append(t)
@@ -1349,24 +1492,6 @@ def objectToVisType(item,world):
         return validtypes[0]
     return itypes
 
-def aabb_create(*ptlist):
-    if len(ptlist) == 0:
-        return [float('inf')]*3,[float('-inf')]*3
-    else:
-        bmin,bmax = list(ptlist[0]),list(ptlist[0])
-        for i in range(1,len(ptlist)):
-            x = ptlist[i]
-            bmin = [min(a,b) for (a,b) in zip(bmin,x)]
-            bmax = [max(a,b) for (a,b) in zip(bmax,x)]
-        return bmin,bmax
-
-def aabb_expand(bb,bb2):
-    bmin = [min(a,b) for a,b in zip(bb[0],bb2[0])]
-    bmax = [max(a,b) for a,b in zip(bb[1],bb2[1])]
-    return (bmin,bmax)
-
-def aabb_empty(bb):
-    return any((a > b) for (a,b) in zip(bb[0],bb[1]))
 
 _defaultCompressThreshold = 1e-2
 
@@ -1771,10 +1896,10 @@ class _CascadingDict:
         obj = _CascadingDict(parent=parent)
         obj['foo'][0] = 'hello'   #this actually changes the value of parent['foo']
         obj2 = _CascadingDict(parent=parent)
-        print obj2['foo']    #prints ['hello',2,3]
+        print(obj2['foo'])   #prints ['hello',2,3]
 
         obj['foo'] = 4       #modifies the object's key 'foo'
-        print obj2['foo']    #still prints ['hello',2,3], since the non-overridden key
+        print(obj2['foo'])   #still prints ['hello',2,3], since the non-overridden key
                              #is still pointing to parent
 
     """
@@ -2028,13 +2153,15 @@ class VisAppearance:
         if self.drawConfig: 
             try:
                 newDrawConfig = config.getConfig(self.item)
-                #self.item = 
+                if len(newDrawConfig) != len(self.drawConfig):
+                    print("Incorrect length of draw configuration?",len(self.drawConfig),'vs',len(newDrawConfig))
                 config.setConfig(self.item,self.drawConfig)
                 self.drawConfig = newDrawConfig
             except Exception as e:
                 print("Warning, exception thrown during animation update.  Probably have incorrect length of configuration")
                 import traceback
                 traceback.print_exc()
+                self.animation = None
                 pass
         for n,app in self.subAppearances.items():
             app.swapDrawConfig()
@@ -2118,7 +2245,6 @@ class VisAppearance:
             name = self.attributes['label']
         #set appearance
         if not self.useDefaultAppearance and hasattr(item,'appearance'):
-            #print "Has custom appearance"
             if not hasattr(self,'oldAppearance'):
                 self.oldAppearance = item.appearance().clone()
             if self.customAppearance is not None:
@@ -2629,9 +2755,9 @@ class VisAppearance:
     def getBounds(self):
         """Returns a bounding box (bmin,bmax) or None if it can't be found"""
         if len(self.subAppearances)!=0:
-            bb = aabb_create()
+            bb = bb_create()
             for n,app in self.subAppearances.items():
-                bb = aabb_expand(bb,app.getBounds())
+                bb = bb_union(bb,app.getBounds())
             return bb
         item = self.item
         if isinstance(item,coordinates.Point):
@@ -2640,14 +2766,14 @@ class VisAppearance:
             T = item.frame().worldCoordinates()
             d = item.localCoordinates()
             L = self.attributes.get("length",0.1)
-            return aabb_create(T[1],se3.apply(T,vectorops.mul(d,L)))
+            return bb_create(T[1],se3.apply(T,vectorops.mul(d,L)))
         elif isinstance(item,coordinates.Frame):
             T = item.worldCoordinates()
             L = self.attributes.get("length",0.1)
-            return aabb_create(T[1],se3.apply(T,(L,0,0)),se3.apply(T,(0,L,0)),se3.apply(T,(0,0,L)))
+            return bb_create(T[1],se3.apply(T,(L,0,0)),se3.apply(T,(0,L,0)),se3.apply(T,(0,0,L)))
         elif isinstance(item,ContactPoint):
             L = self.attributes.get("length",0.05)
-            return aabb_create(item.x,vectorops.madd(item.x,item.n,L))
+            return bb_create(item.x,vectorops.madd(item.x,item.n,L))
         elif isinstance(item,WorldModel):
             pass
         elif hasattr(item,'geometry'):
@@ -2666,12 +2792,12 @@ class VisAppearance:
                     #assumed to be a rigid transform
                     T = item
                     L = self.attributes.get("length",0.1)
-                    return aabb_create(T[1],se3.apply(T,(L,0,0)),se3.apply(T,(0,L,0)),se3.apply(T,(0,0,L)))
+                    return bb_create(T[1],se3.apply(T,(L,0,0)),se3.apply(T,(0,L,0)),se3.apply(T,(0,0,L)))
             except Exception:
                 raise
                 pass
             print("Empty bound for object",self.name,"type",self.item.__class__.__name__)
-        return aabb_create()
+        return bb_create()
 
     def getCenter(self):
         bb = self.getBounds()
@@ -2710,7 +2836,7 @@ class VisAppearance:
                     return v.getSubItem(path[1:])
                 except ValueError as e:
                     raise ValueError("Invalid sub-path specified "+str(path)+" at "+str(e))
-        raise ValueError("Invalid sub-item specified "+path[0])
+        raise ValueError("Invalid sub-item specified "+str(path[0]))
 
     def make_editor(self,world=None):
         if self.editor is not None:
@@ -2909,6 +3035,51 @@ class VisualizationScene:
             print(root.name)
             for n,v in root.subAppearances.items():
                 self.listItems(v,indent+2)
+
+    def getItemName(self,object):
+        name = None
+        if hasattr(object,'getName'):
+            name = object.getName()
+        if hasattr(object,'name'):
+            name = object.name()
+        if name is not None and name in self.items:
+            if self.items[name].item is object:
+                return name
+        if isinstance(object,RobotModelLink):  #a link?
+            robot = object.robot()
+            robpath = self.getItemName(robot)
+            if robpath:
+                return robpath + (name,)
+            else:
+                print("Couldnt find link",name,"under robot")
+        def objectPath(app,obj,name):
+            if app.item == object:
+                return ()
+            if name is not None and app.name == name:
+                return ()
+            for (subitem,subapp) in app.subAppearances.items():
+                subpath = objectPath(subapp,obj,name)
+                if subpath is not None:
+                    return (subapp.name,)+subpath
+            return None
+        if hasattr(object,'world'):
+            #look through the world for the object
+            world = self.items.get('world',None)
+            if world is not None:
+                p = objectPath(self.items['world'],object,name)
+                if p is not None:
+                    return ('world',)+p
+                else:
+                    print("Couldnt find object",name,"under world")
+        for (k,v) in self.items.items():
+            p = objectPath(v,object,name)
+            if p is not None:
+                if len(p)==0:  #top level item
+                    return k
+                return (k,)+p
+            else:
+                print("Couldnt find object",name,"under",k)
+        return None
 
     def add(self,name,item,keepAppearance=False,**kwargs):
         """Adds a named item to the visualization world.  If the item already
@@ -3279,15 +3450,16 @@ class VisualizationScene:
 
         #cluster label points and draw labels
         pointTolerance = view.camera.dist*0.03
-        pointHash = {}
-        for (text,point,color) in self.labels:
-            index = tuple([int(x/pointTolerance) for x in point])
-            try:
-                pointHash[index][1].append((text,color))
-            except KeyError:
-                pointHash[index] = [point,[(text,color)]]
-        for (p,items) in pointHash.values():
-            self._renderGLLabelRaw(view,p,*list(zip(*items)))
+        if pointTolerance > 0:
+            pointHash = {}
+            for (text,point,color) in self.labels:
+                index = tuple([int(x/pointTolerance) for x in point])
+                try:
+                    pointHash[index][1].append((text,color))
+                except KeyError:
+                    pointHash[index] = [point,[(text,color)]]
+            for (p,items) in pointHash.values():
+                self._renderGLLabelRaw(view,p,*list(zip(*items)))
 
     def renderScreenGL(self,view,window):
         cx = 20
@@ -3359,7 +3531,7 @@ def _camera_translate(vp,tgt):
 def _camera_lookat(vp,tgt):
     T = vp.getTransform()
     vp.camera.tgt = tgt
-    vp.camera.dist = vectorops.distance(T[1],tgt)
+    vp.camera.dist = max(vectorops.distance(T[1],tgt),0.1)
     #set R to point at target
     zdir = vectorops.unit(vectorops.sub(tgt,T[1]))
     xdir = vectorops.unit(vectorops.cross(zdir,[0,0,1]))
@@ -3371,20 +3543,28 @@ class _TrackingCameraController:
     def __init__(self,vp,target):
         self.vp = vp
         T = vp.getTransform()
+        target.swapDrawConfig()
         self.viewportToTarget = se3.mul(se3.inv(target.getTransform()),T)
+        target.swapDrawConfig()
         self.target = target
     def update(self,t):
+        self.target.swapDrawConfig()
         T = se3.mul(self.target.getTransform(),self.viewportToTarget)
+        self.target.swapDrawConfig()
         self.vp.setTransform(T)
         return self.vp
 
 class _TranslatingCameraController:
     def __init__(self,vp,target):
         self.vp = vp
+        target.swapDrawConfig()
         self.last_target_pos = target.getCenter()
+        target.swapDrawConfig()
         self.target = target
     def update(self,t):
+        self.target.swapDrawConfig()
         t = self.target.getCenter()
+        self.target.swapDrawConfig()
         self.vp.camera.tgt = vectorops.add(self.vp.camera.tgt,vectorops.sub(t,self.last_target_pos))
         self.last_target_pos = t
         return self.vp
@@ -3392,10 +3572,14 @@ class _TranslatingCameraController:
 class _TargetCameraController:
     def __init__(self,vp,target):
         self.vp = vp
+        target.swapDrawConfig()
         self.last_target_pos = target.getCenter()
+        target.swapDrawConfig()
         self.target = target
     def update(self,t):
+        self.target.swapDrawConfig()
         t = self.target.getCenter()
+        self.target.swapDrawConfig()
         tgt = vectorops.add(self.vp.camera.tgt,vectorops.sub(t,self.last_target_pos))
         self.last_target_pos = t
         _camera_lookat(self.vp,tgt)
