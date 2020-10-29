@@ -26,6 +26,7 @@ from sensor_msgs.msg import JointState
 from sensor_msgs.msg import PointCloud2
 from sensor_msgs.msg import Image
 from sensor_msgs.msg import CameraInfo
+from sensor_msgs.msg import LaserScan
 from klampt.math import so3,se3
 import math
 
@@ -665,6 +666,25 @@ def to_SensorMsg(klampt_sensor,frame=None,frame_prefix='klampt',stamp='now'):
         res.wrench.torque.x = measurements[3]
         res.wrench.torque.y = measurements[4]
         res.wrench.torque.z = measurements[5]
+        return res
+    elif klampt_sensor.type() == 'LaserRangeSensor':
+        measurements = klampt_sensor.getMeasurements()
+        res = LaserScan()
+        if stamp=='now':
+            stamp = rospy.Time.now()
+        elif isinstance(stamp,(int,float)):
+            stamp = rospy.Time(stamp)
+        res.header.frame_id = frame
+        res.header.stamp = stamp
+        res.angle_max = float(klampt_sensor.getSetting("xSweepMagnitude"))
+        res.angle_min = -1.0 * res.angle_max
+        measurement_count = float(klampt_sensor.getSetting("measurementCount"))
+        res.angle_increment = (res.angle_max - res.angle_min)/measurement_count
+        res.time_increment = float(klampt_sensor.getSetting("xSweepPeriod"))
+        res.range_min = float(klampt_sensor.getSetting("depthMinimum"))
+        res.range_max = float(klampt_sensor.getSetting("depthMaximum"))
+        res.ranges = measurements
+        res.intensities = []
         return res
     else:
         measurements = klampt_sensor.getMeasurements()

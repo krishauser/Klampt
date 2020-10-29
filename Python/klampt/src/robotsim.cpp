@@ -729,7 +729,7 @@ Geometry3D Geometry3D::getElement(int element)
       throw PyException("Invalid element specified");
     Geometry3D res;
     shared_ptr<AnyCollisionGeometry3D>& rgeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(res.geomPtr);
-    *rgeom = data[element];
+    rgeom = make_shared<AnyCollisionGeometry3D>(data[element]);
     return res;
   }
   else if(geom->type == AnyCollisionGeometry3D::TriangleMesh) {
@@ -1847,9 +1847,11 @@ void PointCloud::addProperty(const std::string& pname,const std::vector<double> 
   propertyNames.push_back(pname);
   vector<double> newprops(n*(m+1));
   for(int i=0;i<n;i++) {
-    assert ((i+1)*m < (int)properties.size()); 
     assert (i*(m+1) + m < (int)newprops.size()); 
-    std::copy(properties.begin()+i*m,properties.begin()+(i+1)*m,newprops.begin()+i*(m+1));
+    if(m > 0) {
+      assert ((i+1)*m < (int)properties.size()); 
+      std::copy(properties.begin()+i*m,properties.begin()+(i+1)*m,newprops.begin()+i*(m+1));
+    }
     newprops[i*(m+1) + m] = values[i];
   }
   std::swap(newprops,properties);

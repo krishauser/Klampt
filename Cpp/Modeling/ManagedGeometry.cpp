@@ -4,6 +4,7 @@
 #include <string.h>
 #include <KrisLibrary/Timer.h>
 #include <KrisLibrary/utils/stringutils.h>
+#include <KrisLibrary/utils/ioutils.h>
 using namespace Math3D;
 using namespace std;
 
@@ -107,19 +108,28 @@ void ManagedGeometry::Clear()
 
 bool ManagedGeometry::Load(const string& filename)
 {
-  //these lines are sort of like Clear(), but the appearance is kept
-  RemoveFromCache();
-  dynamicGeometrySource.clear();
-  geometry = NULL;
-  if(appearance) appearance->geom = NULL;
-  //keep appearance
-
+  if(filename.length() == 0) {
+    LOG4CXX_WARN(KrisLibrary::logger(),"ManagedGeometry::Load: empty filename?");
+    return false;
+  }
   if(0==strncmp(filename.c_str(),"ros:",4)) {
+    //ros topic, no caching here
+    return LoadNoCache(filename);
+  }
+  if(filename[0] == '{') {
+    //direct load, no caching here
     return LoadNoCache(filename);
   }
 
   ManagedGeometry* prev = ManagedGeometry::IsCached(filename);
   if(prev) {
+    //these lines are sort of like Clear(), but the appearance is kept
+    RemoveFromCache();
+    dynamicGeometrySource.clear();
+    geometry = NULL;
+    if(appearance) appearance->geom = NULL;
+    //keep appearance
+
     cacheKey = filename;
     //printf("ManagedGeometry: Copying data from previously loaded file %s\n",filename.c_str());
     if(!prev->geometry->CollisionDataInitialized()) {
@@ -159,8 +169,29 @@ bool ManagedGeometry::LoadNoCache(const string& filename)
   if(appearance) appearance->geom = NULL;
   //keep appearance
 
-  //load from scratch
+  if(filename.length()==0) {
+    LOG4CXX_WARN(KrisLibrary::logger(),"ManagedGeometry::LoadNoCache: empty filename?");
+    return false;
+  }
+
   const char* fn = filename.c_str();
+  if(fn[0] == '{') {
+    //inline file
+    if(fn[filename.length()-1] != '}') {
+      LOG4CXX_ERROR(KrisLibrary::logger(),"ManagedGeometry::LoadNoCache: bracketed inline string "<<filename<<" doesn't have end brace '}'");
+      return false;
+    }
+    string str = filename.substr(1,filename.length()-1);
+    string rawstr = TranslateEscapes(str);
+    stringstream ss(rawstr);
+    *geometry = Geometry::AnyCollisionGeometry3D();
+    if(!geometry->Load(ss)) {
+      LOG4CXX_WARN(KrisLibrary::logger(),"ManagedGeometry::LoadNoCache: unable to parse inline string: "<<rawstr);
+      return false;
+    }
+    appearance->Set(*geometry);
+    return true;
+  }
   if(0==strncmp(fn,"ros:PointCloud2//",17)) {
     //it's a ROS topic
     if(!ROSInit()) return false;

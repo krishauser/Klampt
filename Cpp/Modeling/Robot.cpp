@@ -269,9 +269,14 @@ bool Robot::LoadRob(const char* fn) {
           c = in.get();
           if (c == '\r') //possibly windows-encoded file
             c = in.get();
-          if (c == '\n')
+          else if (c == '\n')
             lineno++;
-          c = TranslateEscape(c);
+          else {
+            buf[i] = '\\';
+            i++;
+          }
+          //Change: don't escape in file, since quoted strings might contain escaped characters
+          //c = TranslateEscape(c);
         }
         buf[i] = c;
       }
@@ -427,8 +432,9 @@ bool Robot::LoadRob(const char* fn) {
     } else if (name == "autotorque") {
       ss >> autoTorque;
     } else if (name == "geometry") {
-      while (SafeInputString(ss, stemp))
+      while (SafeInputString(ss, stemp)) {
         geomFn.push_back(stemp);
+      }
     } else if (name == "scale") {
       ss >> scale;
     } else if (name == "geomscale") {
@@ -648,10 +654,11 @@ bool Robot::LoadRob(const char* fn) {
       SafeInputString(ss,stemp);
       getline(ss, value);
       if(ss.fail() || ss.bad()) {
-      LOG4CXX_ERROR(GET_LOGGER(RobParser), "   Explicit property on line "<< lineno<<" could not be read");
-      return false;
+        LOG4CXX_ERROR(GET_LOGGER(RobParser), "   Explicit property on line "<< lineno<<" could not be read");
+        return false;
       }
       if(stemp == "controller" || stemp == "sensors") {
+        //need to escape these strings
         stringstream ss(value);
         string file;
         SafeInputString(ss,file);
@@ -667,15 +674,16 @@ bool Robot::LoadRob(const char* fn) {
             LOG4CXX_ERROR(GET_LOGGER(RobParser),"     Unable to read "<<stemp<<" property from file "<<fn);
             return false;
           }
-      }
-      else {
-        properties[stemp] = value;
-        stringstream ss(value);
-        TiXmlElement e(stemp.c_str());
-        ss >> e;
-        if(!ss) 
-          LOG4CXX_ERROR(GET_LOGGER(RobParser),"     Property "<<stemp<<" is not valid XML");
-      }
+        }
+        else {
+          //this property may have escapes (e.g. /n, /") which should be translated
+          properties[stemp] = TranslateEscapes(value);
+          stringstream ss(value);
+          TiXmlElement e(stemp.c_str());
+          ss >> e;
+          if(!ss) 
+            LOG4CXX_ERROR(GET_LOGGER(RobParser),"     Property "<<stemp<<" is not valid XML");
+        }
       }
       else 
         properties[stemp] = value; 

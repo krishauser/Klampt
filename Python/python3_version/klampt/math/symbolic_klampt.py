@@ -85,21 +85,33 @@ class SO3Context(Context):
         pointvar = Variable("point",V3type)
         pointsymb = VariableExpression(pointvar)
         self.identity = self.declare(expr(so3.identity()),"identity",[])
+        self.identity.returnType = self.type
         self.identity.description = "The identity rotation"
-        self.matrix = self.declare(expr(so3.matrix(Rsymb)),"matrix",["R"])
-        self.matrix.addSimplifier(['so3.identity'],(lambda R:eye(3)),pre=True)
-        self.matrix.description = "Converts to a 3x3 matrix"
         M = Variable("M",Type('M',(3,3)))
         self.from_matrix = self.declare(flatten(transpose(M)),"from_matrix",['M'])
+        self.from_matrix.returnType = self.type
+        self.from_matrix.argTypes = [M.type]
         self.from_matrix.description = "Converts from a 3x3 matrix"
-        self.from_matrix.autoSetJacobians()
+        self.from_matrix.setDeriv(0,lambda M,dM:self.from_matrix(dM),asExpr=True)
+        self.matrix = self.declare(expr(so3.matrix(Rsymb)),"matrix",["R"])
+        self.matrix.returnType = self.from_matrix.argTypes[0]
+        self.matrix.argTypes = [self.from_matrix.returnType]
+        self.matrix.addSimplifier(['so3.identity'],(lambda R:eye(3)),pre=True)
+        self.matrix.description = "Converts to a 3x3 matrix"
+        self.matrix.setDeriv(0,lambda R,dR:self.matrix(dR),asExpr=True)
+        self.from_matrix.properties['inverse'] = weakref.proxy(self.matrix)
+        self.matrix.properties['inverse'] = weakref.proxy(self.from_matrix)
         self.inv = self.declare(expr(so3.inv(Rsymb)),"inv",["R"])
         self.inv.description = "Inverts a rotation"
-        self.inv.autoSetJacobians()
+        self.inv.setDeriv(0,lambda R,dR:self.inv(dR),asExpr=True)
         self.inv.properties['inverse'] = weakref.proxy(self.inv)
+        self.inv.returnType = self.type
+        self.inv.argTypes = [self.type]
         self.inv.addSimplifier(['so3.identity'],lambda R:R)
         self.mul = self.declare(so3.mul,"mul")
         self.mul.description = "Inverts a rotation"
+        self.mul.returnType = self.type
+        self.mul.argTypes = [self.type,self.type]
         self.mul.setDeriv(0,lambda R1,R2,dR1:self.mul(dR1,R2),asExpr=True)
         self.mul.setDeriv(1,lambda R1,R2,dR2:self.mul(R1,dR2),asExpr=True)
         self.mul.addSimplifier(['so3.identity',None],(lambda R1,R2:R2),pre=True)
@@ -108,64 +120,77 @@ class SO3Context(Context):
         self.apply = self.declare(expr(so3.apply(Rsymb,pointsymb)),"apply",["R","point"])
         self.apply.addSimplifier(['so3.identity',None],(lambda R,point:point),pre=True)
         self.apply.addSimplifier([None,'zero'],(lambda R,point:point),pre=True)
-        self.apply.autoSetJacobians()
-        self.rotation = self.declare(so3.rotation,"rotation")
-        self.from_rpy = self.declare(so3.from_rpy,"from_rpy")
-        self.rpy = self.declare(so3.rpy,"rpy")
-        self.from_quaternion = self.declare(expr(so3.from_quaternion([q[0],q[1],q[2],q[3]])),"from_quaternion",["q"])
-        self.quaternion = self.declare(so3.quaternion,"quaternion")
-        self.from_rotation_vector = self.declare(so3.from_rotation_vector,"from_rotation_vector")
-        self.rotation_vector = self.declare(so3.rotation_vector,"rotation_vector")
-        self.axis = self.declare(unit(self.rotation_vector(Rvar)),"rotation",["R"])
-        self.angle = self.declare(so3.angle,"angle")
-        self.error = self.declare(so3.error,"error")
-        self.distance = self.declare(self.angle(self.mul(self.inv(R1),R2)),"distance",['R1','R2'])
-        self.distance.properties['nonnegative'] = True
-        Rm = self.matrix(Rsymb)
-        self.eq_constraint = self.declare(dot(Rm.T,Rm),'eq_constraint',['R'])
-        self.quaternion_constraint = self.declare(norm2(q)-1,'quaternion_constraint',['q'])
-        self.identity.returnType = self.type
-        self.inv.returnType = self.type
-        self.inv.argTypes = [self.type]
-        self.mul.returnType = self.type
-        self.mul.argTypes = [self.type,self.type]
         self.apply.returnType = V3type
         self.apply.argTypes = [self.type,V3type]
+        self.apply.autoSetJacobians()
+        self.rotation = self.declare(so3.rotation,"rotation")
         self.rotation.returnType = self.type
         self.rotation.argTypes = [V3type,Numeric]
         self.rotation.setDeriv(1,lambda axis,angle:so3.cross_product(axis))
+        self.rotation.addSimplifier([None,'zero'],(lambda axis,angle:self.identity),pre=True)
+        self.from_rpy = self.declare(so3.from_rpy,"from_rpy")
+        self.from_rpy.returnType = self.type
+        self.from_rpy.argTypes = [V3type]
+        self.rpy = self.declare(so3.rpy,"rpy")
+        self.rpy.returnType = self.from_rpy.argTypes[0]
+        self.rpy.argTypes = [self.from_rpy.returnType]
+        self.from_rpy.properties['inverse'] = weakref.proxy(self.rpy)
+        self.rpy.properties['inverse'] = weakref.proxy(self.from_rpy)
+        self.from_quaternion = self.declare(expr(so3.from_quaternion([q[0],q[1],q[2],q[3]])),"from_quaternion",["q"])
+        self.from_quaternion.returnType = self.type
+        self.from_quaternion.argTypes = [Type('V',4)]
+        self.quaternion = self.declare(so3.quaternion,"quaternion")
+        self.quaternion.returnType = self.from_quaternion.argTypes[0]
+        self.quaternion.argTypes = [self.from_quaternion.returnType]
+        self.from_quaternion.properties['inverse'] = weakref.proxy(self.quaternion)
+        self.quaternion.properties['inverse'] = weakref.proxy(self.from_quaternion)
+        self.from_rotation_vector = self.declare(so3.from_rotation_vector,"from_rotation_vector")
+        self.from_rotation_vector.returnType = self.type
+        self.from_rotation_vector.argTypes = [V3type]
+        self.rotation_vector = self.declare(so3.rotation_vector,"rotation_vector")
+        self.rotation_vector.returnType = self.from_rotation_vector.argTypes[0]
+        self.rotation_vector.argTypes = [self.from_rotation_vector.returnType]
+        self.from_rotation_vector.properties['inverse'] = weakref.proxy(self.rotation_vector)
+        self.rotation_vector.properties['inverse'] = weakref.proxy(self.from_rotation_vector)
+        self.axis = self.declare(unit(self.rotation_vector(Rvar)),"rotation",["R"])
         self.axis.returnType = V3type
         self.axis.argTypes = [self.type]
-        self.angle.returnType = V3type
+        self.angle = self.declare(so3.angle,"angle")
+        self.angle.returnType = Numeric
         self.angle.argTypes = [self.type]
-        def angle_deriv(R,dR):
+        def angle_jacobian(R):
             cosangle = (R[0]+R[4]+R[8]-1)*0.5
             angle = arccos(cosangle)
             #dangle / dR[0] = -1.0/sqrt(1-cosangle**2) * dcosangle/dR[0]
             dacos = -1.0/sqrt(1-cosangle**2)
-            return expr([0.5*dacos*dR[0],0,0,0,0.5*dacos*dR[4],0,0,0,0.5*dacos*dR[8]])
-        self.angle.setDeriv(0,angle_deriv,asExpr=True)
+            x = 0.5*dacos
+            return expr([[x,0,0,0,x,0,0,0,x]])
+        self.angle.setJacobian(0,angle_jacobian,asExpr=True)
+        self.error = self.declare(so3.error,"error")
         self.error.returnType = V3type
         self.error.argTypes = [self.type,self.type]
+        self.distance = self.declare(self.angle(self.mul(self.inv(R1),R2)),"distance",['R1','R2'])
         self.distance.returnType = Numeric
         self.distance.argTypes = [self.type,self.type]
         self.distance.autoSetJacobians()
-        self.from_matrix.returnType = self.type
-        self.from_matrix.argTypes = [M.type]
-        self.from_rpy.returnType = self.type
-        self.from_rpy.argTypes = [V3type]
-        self.from_quaternion.returnType = self.type
-        self.from_quaternion.argTypes = [Type('V',4)]
-        self.from_rotation_vector.returnType = self.type
-        self.from_rotation_vector.argTypes = [V3type]
-        self.matrix.returnType = self.from_matrix.argTypes[0]
-        self.matrix.argTypes = [self.from_matrix.returnType]
-        self.rpy.returnType = self.from_rpy.argTypes[0]
-        self.rpy.argTypes = [self.from_rpy.returnType]
-        self.quaternion.returnType = self.from_quaternion.argTypes[0]
-        self.quaternion.argTypes = [self.from_quaternion.returnType]
-        self.rotation_vector.returnType = self.from_rotation_vector.argTypes[0]
-        self.rotation_vector.argTypes = [self.from_rotation_vector.returnType]
+        self.distance.properties['nonnegative'] = True
+        Rm = self.matrix(Rsymb)
+        self.eq_constraint = self.declare(dot(Rm.T,Rm),'eq_constraint',['R'])
+        self.quaternion_constraint = self.declare(norm2(q)-1,'quaternion_constraint',['q'])
+        def sym_canonical(v):
+            x=v[0]
+            y=v[1]
+            z=v[2]
+            one_plus_x = x+1
+            return if_(abs_(one_plus_x) <= 1e-5,
+                array(x,y,z,-y,x,0,-z,0,0),
+                array(x,y,z,-y,x + z*z/one_plus_x,-y*z/one_plus_x,-z,-y*z/one_plus_x,x + y*y/one_plus_x))
+        v = Variable("v",V3type)
+        self.canonical = self.declare(sym_canonical(v).simplify(),'canonical',['v'])
+        self.canonical.argTypes = [V3type]
+        self.canonical.returnType = self.type
+        self.canonical.autoSetJacobians()
+
 
 
 class SE3Context(Context):
@@ -235,7 +260,7 @@ class SE3Context(Context):
             [dT[0][2],dT[0][5],dT[0][8],dT[1][2]],
             [0.,0.,0.,0.]]),asExpr=True)
         M = Variable("M",Type('M',(4,4)))
-        self.from_homogeneous = self.declare(array(array(M[0,0],M[1,0],M[2,0],M[0,1],M[1,1],M[2,1],M[0,2],M[1,2],M[2,2]),array(M[0,3],M[1,3],M[2,3])),'from_homogeneous',['M'])
+        self.from_homogeneous = self.declare(array(array(M[0][0],M[1][0],M[2][0],M[0][1],M[1][1],M[2][1],M[0][2],M[1][2],M[2][2]),array(M[0][3],M[1][3],M[2][3])),'from_homogeneous',['M'])
         self.from_homogeneous.autoSetJacobians()
         self.matrix = self.declare(self.homogeneous(T),"matrix",['T'])
         self.make.autoSetJacobians()
@@ -394,6 +419,8 @@ class GeometryContext(Context):
     - closestPoint(geom,pt): returns the closest point to pt on geom.
     - rayCast(geom,src,dir): returns the distance t>=0 along the ray src + t*dir that intersects geom, or
       inf if there is no intersection.
+      
+    NOT IMPLEMENTED YET
 
     Completeness table
     
