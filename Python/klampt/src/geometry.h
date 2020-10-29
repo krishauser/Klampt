@@ -624,6 +624,7 @@ class Geometry3D
   ///- TriangleMesh
   ///- PointCloud (need a positive collision margin, or points need to have a
   ///  'radius' property assigned)
+  ///- VolumeGrid
   ///- Group (groups of the aforementioned types)
   ///
   bool rayCast(const double s[3],const double d[3],double out[3]);
@@ -642,6 +643,7 @@ class Geometry3D
   ///- TriangleMesh
   ///- PointCloud (need a positive collision margin, or points need to have a
   ///  'radius' property assigned)
+  ///- VolumeGrid
   ///- Group (groups of the aforementioned types)
   ///
   int rayCast_ext(const double s[3],const double d[3],double out[3]);

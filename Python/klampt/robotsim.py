@@ -1983,7 +1983,7 @@ class Geometry3D(_object):
 
 
         Args:
-            arg2 (:class:`~klampt.GeometricPrimitive` or :class:`~klampt.VolumeGrid` or :class:`~klampt.Geometry3D` or :class:`~klampt.TriangleMesh` or :class:`~klampt.PointCloud` or :obj:`ConvexHull`, optional): 
+            arg2 (:class:`~klampt.TriangleMesh` or :class:`~klampt.Geometry3D` or :class:`~klampt.GeometricPrimitive` or :obj:`ConvexHull` or :class:`~klampt.PointCloud` or :class:`~klampt.VolumeGrid`, optional): 
         """
         this = _robotsim.new_Geometry3D(*args)
         try:
@@ -2571,6 +2571,7 @@ class Geometry3D(_object):
         *   TriangleMesh  
         *   PointCloud (need a positive collision margin, or points need to have a
             'radius' property assigned)  
+        *   VolumeGrid  
         *   Group (groups of the aforementioned types)  
 
         """
@@ -2599,6 +2600,7 @@ class Geometry3D(_object):
         *   TriangleMesh  
         *   PointCloud (need a positive collision margin, or points need to have a
             'radius' property assigned)  
+        *   VolumeGrid  
         *   Group (groups of the aforementioned types)  
 
         """
@@ -5850,7 +5852,7 @@ class WorldModel(_object):
 
 
         Args:
-            robot (int or str): 
+            robot (str or int): 
             index (int, optional): 
             name (str, optional): 
 
@@ -6006,7 +6008,7 @@ class WorldModel(_object):
             terrain (:obj:`TerrainModel`, optional): 
 
         Returns:
-            (:class:`~klampt.RigidObjectModel` or :class:`~klampt.RobotModel` or :obj:`TerrainModel`):
+            (:class:`~klampt.RigidObjectModel` or :obj:`TerrainModel` or :class:`~klampt.RobotModel`):
         """
         return _robotsim.WorldModel_add(self, *args)
 
@@ -7047,7 +7049,7 @@ def SampleTransform(*args):
 
 
     Args:
-        obj (:obj:`IKObjective` or :obj:`GeneralizedIKObjective`): 
+        obj (:obj:`GeneralizedIKObjective` or :obj:`IKObjective`): 
     """
     return _robotsim.SampleTransform(*args)
 class SimRobotSensor(_object):

@@ -60913,6 +60913,7 @@ static PyMethodDef SwigMethods[] = {
 		"*   TriangleMesh  \n"
 		"*   PointCloud (need a positive collision margin, or points need to have a\n"
 		"    'radius' property assigned)  \n"
+		"*   VolumeGrid  \n"
 		"*   Group (groups of the aforementioned types)  \n"
 		"\n"
 		""},
@@ -60935,6 +60936,7 @@ static PyMethodDef SwigMethods[] = {
 		"*   TriangleMesh  \n"
 		"*   PointCloud (need a positive collision margin, or points need to have a\n"
 		"    'radius' property assigned)  \n"
+		"*   VolumeGrid  \n"
 		"*   Group (groups of the aforementioned types)  \n"
 		"\n"
 		""},

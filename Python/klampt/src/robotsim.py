@@ -2651,6 +2651,7 @@ class Geometry3D(_object):
         *   TriangleMesh  
         *   PointCloud (need a positive collision margin, or points need to have a
             'radius' property assigned)  
+        *   VolumeGrid  
         *   Group (groups of the aforementioned types)  
 
         """
@@ -2677,6 +2678,7 @@ class Geometry3D(_object):
         *   TriangleMesh  
         *   PointCloud (need a positive collision margin, or points need to have a
             'radius' property assigned)  
+        *   VolumeGrid  
         *   Group (groups of the aforementioned types)  
 
         """

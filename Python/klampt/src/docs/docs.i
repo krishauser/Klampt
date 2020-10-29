@@ -796,6 +796,7 @@ Supported types:
 *   TriangleMesh  
 *   PointCloud (need a positive collision margin, or points need to have a
     'radius' property assigned)  
+*   VolumeGrid  
 *   Group (groups of the aforementioned types)  
 ";
 
@@ -866,6 +867,7 @@ Supported types:
 *   TriangleMesh  
 *   PointCloud (need a positive collision margin, or points need to have a
     'radius' property assigned)  
+*   VolumeGrid  
 *   Group (groups of the aforementioned types)  
 ";
 
