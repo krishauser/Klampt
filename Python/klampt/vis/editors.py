@@ -2,7 +2,7 @@
 in ``resource.get(...)`` and ``resource.edit(...)``.
 
 A couple editors, SelectionEditor and WorldEditor, cannot be launched from
-the resource module.  To use these, call::
+the ``resource`` module.  To use these, call::
 
     from klampt.vis import editors
     ed = editors.SelectionEditor("Some links",[],"Select the links that you want to modify",world))
@@ -10,9 +10,9 @@ the resource module.  To use these, call::
 
 """
 
-import glcommon
-import glinit
-import visualization
+from . import glcommon
+from . import glinit
+from . import visualization
 import time
 from ..math import vectorops,so3,se3
 from ..robotsim import WidgetSet,RobotPoser,ObjectPoser,TransformPoser,PointPoser,WorldModel,RobotModelLink,RigidObjectModel,IKObjective
@@ -94,11 +94,11 @@ class ConfigEditor(VisualEditorBase):
         #Override display handler since the widget draws the robot
         #the next few lines draw everything but the robot
         if self.world:
-            for i in xrange(self.world.numTerrains()):
+            for i in range(self.world.numTerrains()):
                 self.world.terrain(i).drawGL()
-            for i in xrange(self.world.numRigidObjects()):
+            for i in range(self.world.numRigidObjects()):
                 self.world.rigidObject(i).drawGL()
-            for i in xrange(self.world.numRobots()):
+            for i in range(self.world.numRobots()):
                 if i != self.robot.index:
                     self.world.robot(i).drawGL()
         #this line will draw the robot
@@ -160,7 +160,7 @@ class ConfigsEditor(VisualEditorBase):
                 self.editingIndex = len(self.value)-1
             if self.editingIndex >= 0:
                 self.robotposer.set(self.value[self.editingIndex])
-            print "Now has",len(self.value),"configs, editing index",self.editingIndex
+            print("Now has",len(self.value),"configs, editing index",self.editingIndex)
         if hasattr(self,'indexSpinBox'):
             self.indexSpinBox.setRange(0,len(self.value)-1)
             self.indexSpinBox.setValue(self.editingIndex)
@@ -203,11 +203,11 @@ class ConfigsEditor(VisualEditorBase):
         #Override display handler since the widget draws the robot
         #the next few lines draw everything but the robot
         if self.world != None:
-            for i in xrange(self.world.numTerrains()):
+            for i in range(self.world.numTerrains()):
                 self.world.terrain(i).drawGL()
-            for i in xrange(self.world.numRigidObjects()):
+            for i in range(self.world.numRigidObjects()):
                 self.world.rigidObject(i).drawGL()
-            for i in xrange(self.world.numRobots()):
+            for i in range(self.world.numRobots()):
                 if i != self.robot.index:
                     self.world.robot(i).drawGL()
         glEnable(GL_BLEND)
@@ -215,7 +215,7 @@ class ConfigsEditor(VisualEditorBase):
         #draw most opaque first
         order = []
         if self.editingIndex < 0:
-            order = range(len(self.value))
+            order = list(range(len(self.value)))
         else:
             order = [self.editingIndex]
             n = max(self.editingIndex,len(self.value)-self.editingIndex)
@@ -225,7 +225,7 @@ class ConfigsEditor(VisualEditorBase):
         for i in order:
             #draw transparent
             opacity = pow(0.5,abs(i-self.editingIndex))
-            for j in xrange(self.robot.numLinks()):
+            for j in range(self.robot.numLinks()):
                 self.robot.link(j).appearance().setColor(0.5,0.5,0.5,opacity)
             if i == self.editingIndex:
                 #this line will draw the robot at the current editing config
@@ -233,7 +233,7 @@ class ConfigsEditor(VisualEditorBase):
             else:
                 self.robot.setConfig(self.value[i])
                 self.robot.drawGL()
-        for j in xrange(self.robot.numLinks()):
+        for j in range(self.robot.numLinks()):
             self.robot.link(j).appearance().setColor(0.5,0.5,0.5,1)
         glDisable(GL_BLEND)
 
@@ -255,7 +255,7 @@ class TrajectoryEditor(VisualEditorBase):
         self.durations = []
         if len(value.times) > 0:
             self.durations.append(value.times[0])
-            for i in xrange(len(value.times)-1):
+            for i in range(len(value.times)-1):
                 self.durations.append(value.times[i+1]-value.times[i])
         self.animTrajectory = None
         self.animTrajectoryTime = 0.0
@@ -363,7 +363,7 @@ class TrajectoryEditor(VisualEditorBase):
             if self.editingIndex >= 0:
                 self.robotposer.set(self.value.milestones[self.editingIndex])
             self.onDurationsChanged()
-            print "Now has",len(self.durations),"configs, editing index",self.editingIndex
+            print("Now has",len(self.durations),"configs, editing index",self.editingIndex)
         if hasattr(self,'indexSpinBox'):
             self.indexSpinBox.setRange(0,len(self.durations)-1)
             self.indexSpinBox.setValue(self.editingIndex)
@@ -460,11 +460,11 @@ class TrajectoryEditor(VisualEditorBase):
         #Override display handler since the widget draws the robot
         #the next few lines draw everything but the robot
         if self.world != None:
-            for i in xrange(self.world.numTerrains()):
+            for i in range(self.world.numTerrains()):
                 self.world.terrain(i).drawGL()
-            for i in xrange(self.world.numRigidObjects()):
+            for i in range(self.world.numRigidObjects()):
                 self.world.rigidObject(i).drawGL()
-            for i in xrange(self.world.numRobots()):
+            for i in range(self.world.numRobots()):
                 if i != self.robot.index:
                     self.world.robot(i).drawGL()
         glEnable(GL_BLEND)
@@ -472,18 +472,18 @@ class TrajectoryEditor(VisualEditorBase):
 
         #draw animation, if available
         if self.animTrajectoryTime is not None:
-            for j in xrange(self.robot.numLinks()):
+            for j in range(self.robot.numLinks()):
                 self.robot.link(j).appearance().setColor(1.0,1.0,0,0.5)
             q = self.animTrajectory.eval(self.animTrajectoryTime,'loop')
             self.robot.setConfig(q)
             self.robot.drawGL()
-            for j in xrange(self.robot.numLinks()):
+            for j in range(self.robot.numLinks()):
                 self.robot.link(j).appearance().setColor(0.5,0.5,0.5,1)
         
         #draw most opaque first
         order = []
         if self.editingIndex < 0:
-            order = range(len(self.durations))
+            order = list(range(len(self.durations)))
         else:
             order = [self.editingIndex]
             n = max(self.editingIndex,len(self.durations)-self.editingIndex)
@@ -493,7 +493,7 @@ class TrajectoryEditor(VisualEditorBase):
         for i in order:
             #draw transparent
             opacity = pow(0.5,abs(i-self.editingIndex))
-            for j in xrange(self.robot.numLinks()):
+            for j in range(self.robot.numLinks()):
                 self.robot.link(j).appearance().setColor(0.5,0.5,0.5,opacity)
             if i == self.editingIndex:
                 #this line will draw the robot at the current editing config
@@ -501,7 +501,7 @@ class TrajectoryEditor(VisualEditorBase):
             else:
                 self.robot.setConfig(self.value.milestones[i])
                 self.robot.drawGL()
-        for j in xrange(self.robot.numLinks()):
+        for j in range(self.robot.numLinks()):
             self.robot.link(j).appearance().setColor(0.5,0.5,0.5,1)
         glDisable(GL_BLEND)
 
@@ -523,7 +523,7 @@ class TrajectoryEditor(VisualEditorBase):
         self.durations = []
         if len(self.value.times) > 0:
             self.durations.append(self.value.times[0])
-            for i in xrange(len(self.value.times)-1):
+            for i in range(len(self.value.times)-1):
                 self.durations.append(self.value.times[i+1]-self.value.times[i])
         self.indexSpinBox.setValue(self.editingIndex)
         self.indexChanged(self.editingIndex)
@@ -548,10 +548,10 @@ class SelectionEditor(VisualEditorBase):
         self.selectionList = QListWidget()
         self.selectionList.setSelectionMode(QAbstractItemView.MultiSelection)
         if self.robot != None:
-            for i in xrange(self.robot.numLinks()):
+            for i in range(self.robot.numLinks()):
                 self.selectionList.addItem(self.robot.link(i).getName())
         elif self.world != None:
-            for i in xrange(self.world.numIDs()):
+            for i in range(self.world.numIDs()):
                 self.selectionList.addItem(self.world.getName(i))
         self.updateGuiFromValue()
         layout.addWidget(self.clearButton)
@@ -570,9 +570,9 @@ class SelectionEditor(VisualEditorBase):
     def selectAll(self):
         if self.robot == None:
             #select all ids in the world
-            self.value = range(self.world.numIDs())
+            self.value = list(range(self.world.numIDs()))
         else:
-            self.value = range(self.robot.numLinks())
+            self.value = list(range(self.robot.numLinks()))
         self.selectionListChangeFlag = True
         for i in self.value:
             self.selectionList.setCurrentItem(self.selectionList.item(i),QItemSelectionModel.Select)
@@ -675,10 +675,10 @@ class SelectionEditor(VisualEditorBase):
         #save old appearance and set new appearance
         apps = {}
         if self.robot != None:
-            for i in xrange(self.robot.numLinks()):
+            for i in range(self.robot.numLinks()):
                 apps[i] = self.robot.link(i).appearance()
         elif self.world != None:
-            for i in xrange(self.world.numIDs()):
+            for i in range(self.world.numIDs()):
                 apps[i] = self.world.appearance(i)
         changed = self.value[:]
         if self.lastClicked >= 0: changed.append(self.lastClicked)
@@ -841,7 +841,7 @@ class WorldEditor(VisualEditorBase):
 
     def display(self):
         #Override display handler since the widget draws the rigid objects and transforms
-        for i in xrange(self.world.numTerrains()):
+        for i in range(self.world.numTerrains()):
             #self.world.terrain(i).geometry().getCurrentTransform()
             self.world.terrain(i).appearance().drawWorldGL(self.world.terrain(i).geometry())
         self.klamptwidgetmaster.drawGL(self.viewport())
@@ -849,7 +849,7 @@ class WorldEditor(VisualEditorBase):
 
     def updateValueFromGui(self):
         """Applies the transforms to all the terrain geometries."""
-        for i in xrange(self.world.numTerrains()):
+        for i in range(self.world.numTerrains()):
             T0 = self.world.terrain(i).geometry().getCurrentTransform()
             self.world.terrain(i).geometry().setCurrentTransform(*se3.identity())
             self.world.terrain(i).geometry().transform(*T0)
@@ -869,14 +869,22 @@ class WorldEditor(VisualEditorBase):
 
 
 #Qt stuff
-if glinit._PyQtAvailable:
-    if glinit._PyQt5Available:
-        from PyQt5.QtCore import *
-        from PyQt5.QtGui import *
-        from PyQt5.QtWidgets import *
-    else:
+global _has_qt
+_has_qt = False
+try:
+    from PyQt5.QtCore import *
+    from PyQt5.QtGui import *
+    from PyQt5.QtWidgets import *
+    _has_qt = True
+except ImportError:
+    try:
         from PyQt4.QtCore import *
         from PyQt4.QtGui import *
+        _has_qt = True
+    except ImportError:
+        _has_qt = False
+
+if _has_qt:
     global _vis_id,_my_dialog_res,_doexit
     _vis_id = None
     _my_dialog_res = None
@@ -961,18 +969,18 @@ if glinit._PyQtAvailable:
         def accept(self):
             global _my_dialog_res
             _my_dialog_res = True
-            print "#########################################"
-            print "klampt.vis: EditDialog accept"
-            print "#########################################"
+            print("#########################################")
+            print("klampt.vis: EditDialog accept")
+            print("#########################################")
             self.editorObject.updateValueFromGui()
             return QDialog.accept(self)
 
         def reject(self):
             global _my_dialog_res
             _my_dialog_res = False
-            print "#########################################"
-            print "klampt.vis: EditDialog reject"
-            print "#########################################"
+            print("#########################################")
+            print("klampt.vis: EditDialog reject")
+            print("#########################################")
             return QDialog.reject(self)
 
         def load(self):
@@ -1019,7 +1027,6 @@ if glinit._PyQtAvailable:
             assert gl_backend is not None
             res = _EditDialog(gl_backend)
             res.setEditor(editorObject)
-            visualization._checkWindowCurrent(editorObject.world)
             return res
         visualization.customUI(makefunc)
         visualization.dialog()
@@ -1028,14 +1035,17 @@ if glinit._PyQtAvailable:
 
         if _doexit:
             visualization.kill()
-            print "Exiting program."
+            print("Exiting program.")
             exit(0)
 
         visualization.setPlugin(None)
         visualization.customUI(None)
-        visualization.setWindow(old_vis_window)
+        if old_vis_window is not None:
+            visualization.setWindow(old_vis_window)
+        else:
+            visualization.setWindow(0)
 
-        print "vis.editors.run(): Result",res,"return value",retVal
+        print("vis.editors.run(): Result",res,"return value",retVal)
         return res,retVal
 else:
     def run(editorObject):

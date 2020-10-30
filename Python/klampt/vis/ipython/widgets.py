@@ -51,6 +51,7 @@ import threading
 DEFAULT_POINT_RADIUS = 0.05
 DEFAULT_AXIS_LENGTH = 0.2
 DEFAULT_AXIS_WIDTH = 1
+VALID_ITEM_TYPES = set(['Config','Configs','Vector3','RigidTransform','Trajectory','Geometry3D','TriangleMesh','WorldModel'])
 
 class KlamptWidget(widgets.DOMWidget):
     """
@@ -162,12 +163,23 @@ class KlamptWidget(widgets.DOMWidget):
             except Exception:
                 raise ValueError("Invalid item, not a known Klamp't type")
             if isinstance(candidates,(list,tuple)):
-                type = candidates[0]
+                #print("KlamptWidget.add: multiple matching types:",candidates)
+                if 'Config' in candidates:
+                    if self.world is None:
+                        candidates.remove('Config')
+                    else:
+                        match = any(len(item) == self.world.robot(i).numLinks()  for i in range(self.world.numRobots()))
+                        if not match:
+                            candidates.remove('Config')
+                new_candidates = [v for v in candidates if v in VALID_ITEM_TYPES]
+                if len(new_candidates)==0:
+                    raise ValueError("Invalid item, types %s not supported by IPython widget"%(str(candidates),))
+                type = new_candidates[0]
             else:
                 type = candidates
         if type == 'Config':
             res = self.addGhost(name)
-            self.setGhostConfig(item,name)
+            self.setGhostConfig(item,name=name)
             return [res]
         elif type == 'Configs':
             if len(item[0]) == 3:
@@ -179,17 +191,17 @@ class KlamptWidget(widgets.DOMWidget):
                 for i,q in enumerate(item):
                     iname = name+'_'+str(i)
                     self.addGhost(iname)
-                    self.setGhostConfig(q,iname)
+                    self.setGhostConfig(q,name=iname)
                     names.append(iname)
                 self._extras[name] = ('Configs',names)
                 return names
         elif type == 'Vector3':
-            res = self.addSphere(name,item[0],item[1],item[2],DEFAULT_POINT_RADIUS)
-            return [res]
+            self.addSphere(name,item[0],item[1],item[2],DEFAULT_POINT_RADIUS)
+            return [name]
         elif type == 'RigidTransform':
-            res = self.addXform(name,length=DEFAULT_AXIS_LENGTH,width=DEFAULT_AXIS_WIDTH)
+            self.addXform(name,length=DEFAULT_AXIS_LENGTH,width=DEFAULT_AXIS_WIDTH)
             self.setTransform(name,R=item[0],t=item[1])
-            return [res]
+            return [name]
         elif type == 'Trajectory':
             if isinstance(item,SE3Trajectory):
                 res = []
@@ -214,10 +226,40 @@ class KlamptWidget(widgets.DOMWidget):
                 return names
             else:
                 return self.add(name,item.milestones)
+        elif type == 'Geometry3D':
+            g = item.convert('TriangleMesh')
+            tris = g.getTriangleMesh()
+            #Don't have Trimesh capability yet
+            verts = []
+            for i in range(0,len(tris.indices),3):
+                a,b,c = tris.indices[i],tris.indices[i+1],tris.indices[i+2]
+                verts += [tris.vertices[a*3],tris.vertices[a*3+1],tris.vertices[a*3+2]]
+                verts += [tris.vertices[b*3],tris.vertices[b*3+1],tris.vertices[b*3+2]]
+                verts += [tris.vertices[c*3],tris.vertices[c*3+1],tris.vertices[c*3+2]]
+            verts = tuple(verts)
+            self._extras[name] = ('Trilist',verts)
+            print("Vertex size",len(verts))
+            self._do_rpc({'type':'add_trilist','name':name,'verts':verts}) 
+            return [name]
+        elif type == 'TriangleMesh':
+            tris = item
+            #Don't have Trimesh capability yet
+            verts = []
+            for i in range(0,len(tris.indices),3):
+                a,b,c = tris.indices[i],tris.indices[i+1],tris.indices[i+2]
+                verts += [tris.vertices[a*3],tris.vertices[a*3+1],tris.vertices[a*3+2]]
+                verts += [tris.vertices[b*3],tris.vertices[b*3+1],tris.vertices[b*3+2]]
+                verts += [tris.vertices[c*3],tris.vertices[c*3+1],tris.vertices[c*3+2]]
+            verts = tuple(verts)
+            self._extras[name] = ('Trilist',verts)
+            self._do_rpc({'type':'add_trilist','name':name,'verts':verts}) 
+            return [name]
         elif type == 'WorldModel':
             if name != 'world' or self.world is not None:
-                print "KlamptWidget.add: Warning, only one world is supported, and should be added as world"
-            self.setWorld(item)
+                print("KlamptWidget.add: Warning, only one world is supported, and should be added as world")
+            self.world = item
+            s = ThreeJSGetScene(self.world)
+            self.scene = json.loads(s)
         else:
             raise ValueError("KlamptWidget can't handle objects of type "+type+" yet")
 
@@ -267,7 +309,7 @@ class KlamptWidget(widgets.DOMWidget):
         or object name to some RGBA color (each channel in the range [0,1])."""
         recursive=False
         target_name = None
-        if isinstance(target, (int, long, float, complex)):
+        if isinstance(target, (int, float, complex)):
             robot = self.world.robot(0)
             target_as_link = robot.link(target)
             target_name=target_as_link.getName()
@@ -279,7 +321,7 @@ class KlamptWidget(widgets.DOMWidget):
             target_name=target.getName()
             recursive = True
 
-        elif isinstance(target, basestring):
+        elif isinstance(target, str):
             target_name=target
             if target in self._extras:
                 type,data = self._extras[target]
@@ -566,6 +608,7 @@ class KlamptWidget(widgets.DOMWidget):
     @observe('_camera')
     def _recv_camera(self,cam):
         #trigger an update?
+        #print("Klampt widget received '_camera' message")
         marked = cam['new'].copy()
         marked['r'] = 1
         self._camera = marked
@@ -581,10 +624,10 @@ class KlamptWidget(widgets.DOMWidget):
     @observe('drawn')
     def _recv_drawn(self,drawn):
         self.drawn = 0
-        print "Klampt widget drawn!"
+        #print("Klampt widget received 'drawn' message")
 
     def on_event(self,e):
-        print "KlamptWidget got event",e
+        print("KlamptWidget got event",e)
 
 
 
@@ -618,7 +661,7 @@ def EditConfig(robot,klampt_widget=None,ghost=None,link_selector='slider',link_s
     qmin,qmax = robot.getJointLimits()
     qedit = robot.getConfig()[:]
     if link_subset == None:
-        link_subset = [i for i in xrange(robot.numLinks()) if qmin[i] != qmax[i]]
+        link_subset = [i for i in range(robot.numLinks()) if qmin[i] != qmax[i]]
     else:
         for link in link_subset:
             if link < 0 or link >= robot.numLinks():
@@ -729,11 +772,11 @@ def EditPoint(value=None,min=None,max=None,labels=None,
     if labels is None:
         labels = 'xyz'
     if min is None:
-        min = [-5,-5,-5]
+        min = vectorops.add(value,[-5,-5,-5])
     elif isinstance(min,(int,float)):
         min = [min,min,min]
     if max is None:
-        max = [5,5,5]
+        max = vectorops.add(value,[5,5,5])
     elif isinstance(max,(int,float)):
         max = [max,max,max]
     if len(min) != 3:
@@ -787,11 +830,11 @@ def EditTransform(value=None,xmin=None,xmax=None,labels=None,
     if labels is None:
         labels = ['roll','pitch','yaw','x','y','z']
     if xmin is None:
-        xmin = [-5,-5,-5]
+        xmin = vectorops.add(value[1],[-5,-5,-5])
     elif isinstance(xmin,(int,float)):
         xmin = [xmin,xmin,xmin]
     if xmax is None:
-        xmax = [5,5,5]
+        xmax = vectorops.add(value[1],[5,5,5])
     elif isinstance(xmax,(int,float)):
         xmax = [xmax,xmax,xmax]
     if len(xmin) != 3:
@@ -897,8 +940,8 @@ class Playback(widgets.VBox):
                     self._advance()
                 except Exception as e:
                     with self.out:
-                        print "Exception occurred during Playback.advance, stopping animation"
-                        print e
+                        print("Exception occurred during Playback.advance, stopping animation")
+                        print(e)
                     playdata['stop'] = 1
                     lock.release()
                     return

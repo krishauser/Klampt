@@ -6,6 +6,7 @@ Commonly used submodules
 
 .. autosummary::
     ~klampt.vis.glinterface
+    ~klampt.vis.colorize
     ~klampt.vis.editors
     ~klampt.vis.gldraw
     ~klampt.vis.ipython
@@ -19,8 +20,8 @@ Internally used submodules
     ~klampt.vis.camera
     ~klampt.vis.glinit
     ~klampt.vis.glprogram
-    ~klampt.vis.glutbackend
-    ~klampt.vis.qtbackend
+    ~klampt.vis.backends.qtbackend
+    ~klampt.vis.backends.glutbackend
 
 
 Module contents
@@ -51,6 +52,7 @@ All submodules
     :maxdepth: 1
 
     klampt.vis.camera
+    klampt.vis.colorize
     klampt.vis.editors
     klampt.vis.glcommon
     klampt.vis.gldraw
@@ -58,6 +60,6 @@ All submodules
     klampt.vis.glinterface
     klampt.vis.glprogram
     klampt.vis.glrobotprogram
-    klampt.vis.glutbackend
     klampt.vis.ipython
-    klampt.vis.qtbackend
+    klampt.vis.backends.qtbackend
+    klampt.vis.backends.glutbackend

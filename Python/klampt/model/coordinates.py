@@ -16,7 +16,7 @@ in/out using :meth:`setManager`.
 
 from ..math import so3,se3,vectorops
 from ..robotsim import RobotModelLink,RigidObjectModel
-import ik
+from . import ik
 from collections import defaultdict
 
 
@@ -239,17 +239,17 @@ class Group:
         self.subgroups = {}
     def setWorldModel(self,worldModel):
         """Sets this group to contain all entities of a world model"""
-        for i in xrange(worldModel.numRobots()):
+        for i in range(worldModel.numRobots()):
             rgroup = self.addGroup(worldModel.robot(i).getName())
             rgroup.setRobotModel(worldModel.robot(i))
-        for i in xrange(worldModel.numRigidObjects()):
+        for i in range(worldModel.numRigidObjects()):
             try:
                 f = self.addFrame(worldModel.rigidObject(i).getName(),worldCoordinates=worldModel.rigidObject(i).getTransform())
                 f._data = worldModel.rigidObject(i)
             except ValueError:
                 f = self.addFrame("%s[%d]"%(worldModel.rigidObject(i).getName(),i),worldCoordinates=worldModel.rigidObject(i).getTransform())
                 f._data = worldModel.rigidObject(i)
-        for i in xrange(worldModel.numTerrains()):
+        for i in range(worldModel.numTerrains()):
             try:
                 f = self.addFrame(worldModel.terrain(i).getName(),worldCoordinates=se3.identity())
                 f._data = worldModel.terrain(i)
@@ -260,7 +260,7 @@ class Group:
     def setRobotModel(self,robotModel):
         """Sets this group to contain all links of a robot model"""
         root = self.frames['root']
-        for i in xrange(robotModel.numLinks()):
+        for i in range(robotModel.numLinks()):
             p = robotModel.link(i).getParent()
             if p >= 0:
                 Fp = self.frames[robotModel.link(p).getName()]
@@ -275,7 +275,7 @@ class Group:
         root = self.frames['root']
         robot = controller.robot()
         robot.setConfig(controller.getCommandedConfig())
-        for i in xrange(robot.numLinks()):
+        for i in range(robot.numLinks()):
             if p >= 0:
                 Fp = self.frames[robotModel.link(p).getName()+"_commanded"]
             else:
@@ -283,7 +283,7 @@ class Group:
             f = self.addFrame(robot.link(i).getName()+"_commanded",worldCoordinates=robot.link(i).getTransform(),parent=Fp)
             f._data = (controller,i,'commanded')
         robot.setConfig(controller.getSensedConfig())
-        for i in xrange(robot.numLinks()):
+        for i in range(robot.numLinks()):
             if p >= 0:
                 Fp = self.frames[robotModel.link(p).getName()+"_commanded"]
             else:
@@ -299,7 +299,7 @@ class Group:
     def updateFromWorld(self):
         """For any frames with associated world elements, updates the
         transforms from the world elements."""
-        for (n,f) in self.frames.iteritems():
+        for (n,f) in self.frames.items():
             if f._data == None:
                 continue
             if hasattr(f._data,'getTransform'):
@@ -323,17 +323,17 @@ class Group:
             if isinstance(f._data,tuple) and isinstance(f._data[0],SimRobotController):
                 controller,index,itemtype = f._data
                 #TODO: update the frame from the controller data
-        for (n,g) in self.subgroups.iteritems():
+        for (n,g) in self.subgroups.items():
             g.updateFromWorld()
     def updateToWorld(self):
         """For any frames with associated world elements, updates the
         transforms of the world elements.  Note: this does NOT perform inverse
         kinematics!"""
-        for (n,f) in self.frames.iteritems():
+        for (n,f) in self.frames.items():
             if f.data == None: continue
             if hasattr(f.data,'setTransform'):
                 f.data.setTransform(*f.worldCoordinates())
-        for (n,g) in self.subgroups.iteritems():
+        for (n,g) in self.subgroups.items():
             g.updateToWorld()
     def addFrame(self,name,worldCoordinates=None,parent=None,relativeCoordinates=None):
         """Adds a new named Frame, possibly with a parent.  'parent' may either be a string
@@ -392,11 +392,11 @@ class Group:
         f._parent = None
         if f._parent != None:
             self.childLists[f._parent._name].remove(f)
-        for (n,p) in self.points.iteritems():
+        for (n,p) in self.points.items():
             if p._parent == f:
                 p._localCoordinates = p.worldCoordinates()
                 p._parent = self.frames['root']
-        for (n,p) in self.directions.iteritems():
+        for (n,p) in self.directions.items():
             if p._parent == f:
                 p._localCoordinates = p.worldCoordinates()
                 p._parent = self.frames['root']
@@ -518,55 +518,55 @@ class Group:
         return Direction(local,f)
     def listFrames(self,indent=0):
         """Prints all the frames in this group and subgroups"""
-        for k,f in self.frames.iteritems():
+        for k,f in self.frames.items():
             if indent > 0:
-                print " "*(indent-1),
+                print(" "*(indent-1), end=' ')
             if f._parent == None:
-                print k
+                print(k)
             else:
-                print k,"(%s)"%(f._parent._name,)
-        for n,g in self.subgroups.iteritems():
+                print(k,"(%s)"%(f._parent._name,))
+        for n,g in self.subgroups.items():
             if indent > 0:
-                print " "*(indent-1),
-            print n,":"
+                print(" "*(indent-1), end=' ')
+            print(n,":")
             g.listFrames(indent+2)
     def listItems(self,indent=0):
         """Prints all the items in this group"""
         if len(self.frames) > 0:
             if indent > 0:
-                print " "*(indent-1),
-            print "Frames:"
-            for k,f in self.frames.iteritems():
+                print(" "*(indent-1), end=' ')
+            print("Frames:")
+            for k,f in self.frames.items():
                 if indent > 0:
-                    print " "*(indent+1),
+                    print(" "*(indent+1), end=' ')
                 if f._parent == None:
-                    print k
+                    print(k)
                 else:
-                    print k,"(%s)"%(f._parent._name,)
+                    print(k,"(%s)"%(f._parent._name,))
         if len(self.points) > 0:
             if indent > 0:
-                print " "*(indent-1),
-            print "Points:"
-            for k in self.points.iterkeys():
+                print(" "*(indent-1), end=' ')
+            print("Points:")
+            for k in self.points.keys():
                 if indent > 0:
-                    print " "*(indent+1),
-                print k
+                    print(" "*(indent+1), end=' ')
+                print(k)
         if len(self.directions) > 0:
             if indent > 0:
-                print " "*(indent-1),
-            print "Directions:"
-            for k in self.directions.iterkeys():
+                print(" "*(indent-1), end=' ')
+            print("Directions:")
+            for k in self.directions.keys():
                 if indent > 0:
-                    print " "*(indent+1),
-                print k
+                    print(" "*(indent+1), end=' ')
+                print(k)
         if len(self.subgroups) > 0:
             if indent > 0:
-                print " "*(indent-1),
-            print "Subgroups:"
-            for n,g in self.subgroups.iteritems():
+                print(" "*(indent-1), end=' ')
+            print("Subgroups:")
+            for n,g in self.subgroups.items():
                 if indent > 0:
-                    print " "*(indent+1),
-                print n,":"
+                    print(" "*(indent+1), end=' ')
+                print(n,":")
                 g.listItems(indent+2)
 
 class Manager(Group):
@@ -679,7 +679,7 @@ def ik_objective(obj,target):
         ref = target.parent()
         coords = target.relativeCoordinates()
     elif isinstance(obj,Transform):
-        if ref != None: print "ik_objective: Warning, ref argument passed with Transform object, ignoring"
+        if ref != None: print("ik_objective: Warning, ref argument passed with Transform object, ignoring")
         body = obj.source()
         ref = obj.destination()
         coords = target
@@ -693,7 +693,7 @@ def ik_objective(obj,target):
     
     linkframe = _ancestor_with_link(body)
     if linkframe == None:
-        print "Warning: object provided to ik_objective is not attached to a robot link or rigid object, returning None"
+        print("Warning: object provided to ik_objective is not attached to a robot link or rigid object, returning None")
         return None
     linkbody = linkframe._data
 
@@ -751,7 +751,7 @@ def ik_fixed_objective(obj,ref=None):
     elif isinstance(obj,Frame):
         return ik_fixed_objective(Transform(obj,ref))
     elif isinstance(obj,Transform):
-        if ref != None: print "ik_fixed_objective: Warning, ref argument passed with Transform object, ignoring"
+        if ref != None: print("ik_fixed_objective: Warning, ref argument passed with Transform object, ignoring")
         return ik_objective(obj,obj.coordinates())
     else:
         raise ValueError("Argument to ik_fixed_objective must be an object from the coordinates module")

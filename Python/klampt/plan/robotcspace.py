@@ -1,28 +1,30 @@
-from cspace import CSpace
+from .cspace import CSpace
 from .. import robotsim
 from ..model import collide
-from cspaceutils import EmbeddedCSpace
+from .cspaceutils import EmbeddedCSpace
 import math
 import random
 
 class RobotCSpace(CSpace):
     """A basic robot cspace that allows collision free motion.
 
+    Args:
+        robot (RobotModel): the robot that's moving.
+        collider (:class:`WorldCollider`, optional): a collide.WorldCollider
+            instance instantiated with the world in which the robot lives. 
+            Any ignored collisions in the collider will be respected in the
+            feasibility tests of this CSpace.
+
+            If this is not provided, then only self-collisions will be checked.
+
     Warning: if your robot has non-standard joints, like a free-
     floating base or continuously rotating (spin) joints, you will need to
-    overload the sample() method."""
+    overload the :meth:`sample` method.
+    """
     def __init__(self,robot,collider=None):
-        """
-        Args:
-            robot (RobotModel): the robot which should move.
-            collider (:class:`WorldCollider`, optional): a collide.WorldCollider
-                instance instantiated with the world in which the robot lives. 
-                Any ignored collisions in the collider will be respected in the
-                feasibility tests of this CSpace.
-        """
         CSpace.__init__(self)
         self.robot = robot
-        self.setBounds(zip(*robot.getJointLimits()))
+        self.setBounds(list(zip(*robot.getJointLimits())))
         self.collider = collider
         self.addFeasibilityTest((lambda x: self.inJointLimits(x)),"joint limits")
 
@@ -35,7 +37,7 @@ class RobotCSpace(CSpace):
             def calcbb(x):
                 bb[0] = bb0[0]
                 bb[1] = bb0[1]
-                for i in xrange(self.robot.numLinks()):
+                for i in range(self.robot.numLinks()):
                     g = self.robot.link(i).geometry()
                     if not g.empty():
                         bbi = g.getBB()
@@ -98,10 +100,10 @@ class RobotCSpace(CSpace):
         collision with the environment."""
         if not self.collider: return False
         if x is not None: self.robot.setConfig(x)
-        for o in xrange(self.collider.world.numRigidObjects()):
+        for o in range(self.collider.world.numRigidObjects()):
             if any(self.collider.robotObjectCollisions(self.robot.index,o)):
                 return True;
-        for o in xrange(self.collider.world.numTerrains()):
+        for o in range(self.collider.world.numTerrains()):
             if any(self.collider.robotTerrainCollisions(self.robot.index,o)):
                 return True;
         return False
@@ -120,6 +122,7 @@ class RobotCSpace(CSpace):
         for q in path[1:]:
             controller.appendMilestoneLinear(q)
 
+
 class RobotSubsetCSpace(EmbeddedCSpace):
     """A basic robot cspace that allows collision free motion of a *subset*
     of joints.  The subset is given by the indices in the list "subset"
@@ -129,17 +132,17 @@ class RobotSubsetCSpace(EmbeddedCSpace):
     This class will automatically disable all collisions for inactive robot links
     in the collider.
 
-    Note:
+    .. note::
         To convert from start/goal robot configurations to the CSpace, call
         the `project(qrobot)` method for the start and goal.
         (see :meth:`EmbeddedCSpace.project`)
 
-    Note: 
+    .. note::
         To convert from a planned path back to the robot's full configuration space,
         you will need to call the `lift(q)` method for all configurations q in the
         planned path. (see :meth:`EmbeddedCSpace.lift`) 
 
-    Warning:
+    .. warning::
         If your robot has non-standard joints, like a free-floating base or
         continuously rotating (spin) joints, you will need to overload the
         :meth:`sample` method.
@@ -172,13 +175,20 @@ class RobotSubsetCSpace(EmbeddedCSpace):
                     self.collider.mask[rindex] = newmask
 
     def sendPathToController(self,path,controller):
-        """Given a planned CSpace path 'path' and a SimRobotController 'controller',
-        sends the path so that it is executed correctly by the controller (this assumes
-        a fully actuated robot)."""
+        """Given a planned :class:`CSpace` path ``path`` and a
+        :class:`SimRobotController` ``controller``, sends the path so that it
+        is executed correctly by the controller.
+
+        .. note:
+            This assumes a fully actuated robot.  It won't work for robots with
+            free-floating bases.
+
+        """
         lpath = self.liftPath(path)
         controller.setMilestone(lpath[0])
         for q in lpath[1:]:
             controller.appendMilestoneLinear(q)
+
 
 class ClosedLoopRobotCSpace(RobotCSpace):
     """A closed loop cspace.  Allows one or more IK constraints to be
@@ -186,13 +196,15 @@ class ClosedLoopRobotCSpace(RobotCSpace):
 
     Attributes:
         solver (IKSolver): the solver containing all IK constraints
-        maxIters (int): the maximum number of iterations for numerical IK solver
-        tol (float): how closely the IK constraint must be met, in meters and/or radians
+        maxIters (int): the maximum number of iterations for numerical IK
+            solver
+        tol (float): how closely the IK constraint must be met, in meters and/
+            or radians
 
     To satisfy the IK constraint, the motion planner ensures that configuration
-    samples are projected to the manifold of closed-loop IK solutions.  To create
-    edges between samples a and b, the straight line path a and b is projected to
-    the manifold via an IK solve.
+    samples are projected to the manifold of closed-loop IK solutions.  To
+    create edges between samples a and b, the straight line path a and b is
+    projected to the manifold via an IK solve.
     """
     def __init__(self,robot,iks,collider=None):
         RobotCSpace.__init__(self,robot,collider)
@@ -209,26 +221,35 @@ class ClosedLoopRobotCSpace(RobotCSpace):
         self.addFeasibilityTest((lambda x: self.closedLoop(x)),'closed loop constraint')
 
     def setIKActiveDofs(self,activeSet):
-        """Marks that only a subset of the DOFs of the robot are to be used for solving
-        the IK constraint."""
+        """Marks that only a subset of the DOFs of the robot are to be used for
+        solving the IK constraint.
+
+        Args:
+            activeSet (list of int): the robot DOF indices that should be active.
+        """
         self.solver.setActiveDofs(activeSet)
 
     def sample(self):
-        """Samples directly on the contact manifold.  The basic method samples arbitrarily in
-        the configuration space and then solves IK constraints.  This may be an ineffective
-        method especially for floating-base robots, since the floating joints may be sampled
-        arbitrarily."""
+        """Samples directly on the contact manifold.  The basic method samples
+        arbitrarily in the configuration space and then solves IK constraints. 
+        This may be an ineffective method especially for floating-base robots, 
+        since the floating joints may be sampled arbitrarily.
+        """
         x = RobotCSpace.sample(self)
         return self.solveConstraints(x)
 
     def sampleneighborhood(self,c,r):
-        """Samples a neighborhood in ambient space and then projects onto the contact manifold"""
+        """Samples a neighborhood in ambient space and then projects onto the
+        contact manifold.
+        """
         x = RobotCSpace.sampleneighborhood(self,c,r)
         return self.solveConstraints(x)
 
     def solveConstraints(self,x):
-        """Given an initial configuration of the robot x, attempts to solve the IK constraints 
-        given in this space.  Return value is the best configuration found via local optimization."""
+        """Given an initial configuration of the robot x, attempts to solve the
+        IK constraints given in this space.  Return value is the best
+        configuration found via local optimization.
+        """
         self.robot.setConfig(x)
         self.solver.setMaxIters(self.maxIters)
         self.solver.setTolerance(self.tol)
@@ -249,21 +270,24 @@ class ClosedLoopRobotCSpace(RobotCSpace):
         return self.solveConstraints(x)
 
     def interpolationPath(self,a,b,epsilon=1e-2):
-        """Creates a discretized path on the contact manifold between the points a and b, with
-        resolution epsilon"""
+        """Creates a discretized path on the contact manifold between the
+        points a and b, with resolution epsilon.
+        """
         d = self.distance(a,b)
         nsegs = int(math.ceil(d/epsilon))
         if nsegs <= 1: return [a,b]
         res = [a]
-        for i in xrange(nsegs-1):
+        for i in range(nsegs-1):
             u = float(i+1)/float(nsegs)
             res.append(self.interpolate(a,b,u))
         res.append(b)
         return res
 
     def discretizePath(self,path,epsilon=1e-2):
-        """Given a CSpace path path, generates a path that satisfies closed-loop constraints
-        up to the given distance between milestones"""
+        """Given a :class:`CSpace` path ``path``, generates a path that
+        satisfies closed-loop constraints up to the given distance between
+        milestones.
+        """
         if path is None: return None
         if len(path)==0: return []
         respath = [path[0]]
@@ -272,22 +296,27 @@ class ClosedLoopRobotCSpace(RobotCSpace):
         return respath
 
     def sendPathToController(self,path,controller,epsilon=1e-2):
-        """Given a CSpace path path, sends the path to be executed to the SimRobotController.
-        This discretizes the path and sends it as a piecewise linear curve, limited in speed
-        by the robot's maximum velocity.
+        """Given a :class:`CSpace` path ``path``, sends the path to be executed
+        to the :class:`SimRobotController` ``controller``.
 
-        NOTE: this isn't the best thing to do for robots with slow acceleration limits
-        and/or high inertias because it ignores acceleration.  A better solution can be found
-        in the MInTOS package or the C++ code in Klampt/Planning/RobotTimeScaling.h."""
+        This discretizes the path and sends it as a piecewise linear curve,
+        limited in speed by the robot's maximum velocity.
+
+        .. note::
+            This isn't the best thing to do for robots with slow acceleration
+            limits and/or high inertias because it ignores acceleration.  A
+            better solution can be found in the MInTOS package or the C++ code
+            in Klampt/Cpp/Planning/RobotTimeScaling.h.
+        """
         dpath = self.discretizePath(path,epsilon)
         vmax = controller.model().getVelocityLimits()
         assert len(dpath[0]) == len(vmax)
         controller.setMilestone(dpath[0])
         for a,b in zip(dpath[:-1],dpath[1:]):
             dt = 0.0
-            for i in xrange(len(a)):
+            for i in range(len(a)):
                 if vmax[i] == 0:
-                    if a[i] != b[i]: print "ClosedLoopRobotCSpace.sendPathToController(): Warning, path moves on DOF %d with maximum velocity 0"%(i,)
+                    if a[i] != b[i]: print("ClosedLoopRobotCSpace.sendPathToController(): Warning, path moves on DOF %d with maximum velocity 0"%(i,))
                 else:
                     dt = max(dt,abs(a[i]-b[i])/vmax[i])
             #this does a piecewise lienar interpolation

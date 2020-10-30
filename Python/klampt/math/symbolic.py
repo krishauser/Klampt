@@ -1,6 +1,4 @@
 """ symbolic module
-Kris Hauser
-5/12/2018
 
 ===============================================================================
 Overview
@@ -44,37 +42,38 @@ symbolic_sympy module, and these are complete for most "tame" expressions.
 Basic usage
 ===============================================================================
 
-In standard usage, first create a ``Context`` and declare any extra functions
-to be used in your library. Then, and add variables and declare expressions as
-necessary.::
+In standard usage, first create a :class:`Context` and declare any extra
+functions to be used in your library. Then, and add variables and declare
+expressions as necessary.::
 
     ctx = Context()
     x = ctx.addVar("x",'N')
     y = ctx.addVar("y",'N')
-    print x + y  #(x+y) is an Expression object, which has not been evaluated yet
-    print flatten(x,y)   #flatten(x,y) is an Expression object, which has not been evaluated yet
-    print (x + y).eval({'x':5,'y':3})  #prints 8 (a ConstantExpression)
-    print flatten(x,y).eval({'x':5,'y':3})  #prints [5,3] (a ConstantExpression
-    print flatten(x,y).eval({'y':[1,2]})  #prints [x,1,2] (an Expression object)
+    print(x + y)  #(x+y) is an Expression object, which has not been evaluated yet
+    print(flatten(x,y))   #flatten(x,y) is an Expression object, which has not been evaluated yet
+    print((x + y).eval({'x':5,'y':3}))  #prints 8 (a ConstantExpression)
+    print(flatten(x,y).eval({'x':5,'y':3}))  #prints [5,3] (a ConstantExpression
+    print(flatten(x,y).eval({'y':[1,2]}))  #prints [x,1,2] (an Expression object)
     x.bind(5)  #x is now treated as a constant
     y.bind(3)  #y is now treated as a constant
-    print (x+y).eval()  #prints 8 (a ConstantExpression)
-    print (x+y).evalf()  #prints 8 (as an integer)
+    print((x+y).eval())  #prints 8 (a ConstantExpression)
+    print((x+y).evalf())  #prints 8 (as an integer)
     x.unbind() #x is now a variable
     y.unbind() #y is now a variable
 
-An Expression can take on a form x OP y or OP(x,y,z), where x,y, and z are
-either Variables, Expressions, or constant values and OP is either a builtin
-function or a declared Function type.  Expressions can be evaluated to other
-Expressions via ``Expression.eval(context=None)``, or to constants using
-``Expression.evalf(context=None)``.
+An :class:`Expression` can take on a form ``x OP y`` or ``OP(x,y,z)``, where
+x,y, and z are either :class:`Variable`, :class:`Expression`, or constant
+values, and ``OP`` is either a builtin function or a declared :class:`Function`
+type.  Expressions can be evaluated to other Expressions via
+:meth:`Expression.eval`, or to constants using
+:meth:`Expression.evalf`.
 
-There are two kinds of Variables. 
+There are two kinds of :class:`Variable`: 
 
-- *Standard Variable*: This type is managed by ``Context`` and contains
-  information in the ``Variable`` class.  Such a variable can either be
+- *Standard Variable*: This type is managed by :class:`Context` and contains
+  information in the :class:`Variable` class.  Such a variable can either be
   numeric, vector, or matrix type.  It will contain size information and will
-  be saved to and  loaded from disk with the ``Context``. 
+  be saved to and  loaded from disk with the :class:`Context`. 
 - *User-data Variable*. This type is an unmanaged variable.  These have
   unlimited type, and can be complex Python objects, but the user must set
   these up in the context manually.  Hence, if you wish to reuse
@@ -82,22 +81,22 @@ There are two kinds of Variables.
   first set up the ``Context`` appropriately with a similar   user-data object.
 
 By default, expressions constructed in Python refer to user-data objects with
-strings, e.g., ``setConfig("robot",q)`` runs the setConfig Function on the
-"robot" user data and the q Variable. For use in the optimize.py module, all
-optimization parameters must be standard Variables.
+strings, e.g., ``setConfig("robot",q)`` runs the
+:func:`symbolic_klampt.setConfig` Function on the "robot" user data and the
+``q`` Variable. 
 
-The ``expr``() function is run on each argument to a ``Function``.  This will
-automatically preserve Variables and Expressions, while most Python
-constants will be converted to ConstantExpressions.  However, Python strings
-will be converted to references to user-data variables.
+The :func:`expr` function is run on each argument to a :class:`Function`.
+This will leave a :class:`Variable` and :class:`Expression` as is,
+and most Python constants will be converted to a :class:`ConstantExpression`. 
+However, Python strings will be converted to references to user-data variables.
 
 Constant values can be floats, integers, booleans, strings, lists, and numpy
 arrays (Dictionaries are not supported as constant values.)  Constants are
-converted to expressions using ``const(x)``, or ``expr(x)``.
+converted to expressions using :func:`const`, or :func:`expr`.
 
 Type specifiers are used for type checking and to determine the type of
-expressions, particularly for Jacobians.  The ``Type`` class is used for this.
-The type member specifies the general type of object, and is given by a
+expressions, particularly for Jacobians.  The :class:`Type` class is used for
+this. The type member specifies the general type of object, and is given by a
 character:
 
 - N: generic numeric
@@ -153,10 +152,11 @@ Standard operations on expressions include:
 Symbolic Functions
 ===============================================================================
 
-You can build an ``Expression`` out of built-in symbolic Functions.  Calling
-a ``Function`` does not immediately evaluate the function on its arguments,
-but instead builds an ``Expression`` that is the root of a symbolic Expression
-Graph.
+You can build an :class:`Expression` by calling a symbolic :class:`Function`,
+many of which duplicate the functions of plain Python, the math module, or
+Numpy.  Calling a :class:`Function` does not immediately evaluate
+the function on its arguments, but instead builds an :class:`Expression` that 
+is the root of a symbolic Expression Graph.
 
 Built-in symbolic Functions include:
 
@@ -180,6 +180,7 @@ Shape functions
 - ``reshape(x,s)``: Evaluates to x reshaped to the shape s.  If x is a scalar,
   this evaluates to a constant matrix.
 - ``transpose(x)``: Evaluates to np.transpose(x).  (shortcut: "x.T")
+- ``transpose2(x,axes)``: Tensor transpose; evaluates to np.transpose(x,axes).
 - ``basis(i,n)``: Evaluates to the i'th elementary basis vector in dimension n.
 - ``eye(n)``: Evaluates to np.eye(n) if n > 0, otherwise returns 1.
 - ``zero(s)``: Evaluates to np.zeros(s) if s is a matrix shape or scalar > 0,
@@ -224,6 +225,8 @@ Arithmetic functions
   (elementwise division), and vector / scalar.
 - ``pow_(x,y)``: Evaluates to ``pow(x,y)`` (shortcut "x**y").
 - ``dot(x,y)``: Evaluates to ``np.dot(x,y)``.
+- ``outer(x,y)``: Evaluates to ``np.outer(x,y)``.
+- ``tensordot(x,y,axes)``: Evaluates to ``np.tensordot(x,y,axes)``.
 - ``max_(*args)``: Evaluates to the maximum of the arguments.
 - ``min_(*args)``: Evaluates to the minimum of the arguments.
 - ``argmax(*args)``: Evaluates to the index of the maximum of the argments.
@@ -238,7 +241,7 @@ Arithmetic functions
 - ``sum_(*args)``: Evaluates to sum(args).  If arguments are vectors or matrices,
   then the result is also a vector or matrix. This is somewhat different
   behavior from sum(x) if x is a list.
-- ``weightedsum(v1,...,vn,w1,...,wn)``: Evaluates to w1*v1+...+wn*vn. 
+- ``weightedsum(v1,...,vn,w1,...,wn)``: Evaluates to :math:`w1*v1+...+wn*vn`. 
 
 Accessors
 ---------
@@ -315,7 +318,7 @@ or userData referenced in the ``Expression`` ``expr``:
 - ``map_(expr,var,values)``: like the Python ``map`` function, evaluates to a
   list where each entry evaluates ``expr`` with ``var`` substituted with
   a value from the list ``values``.  For example, if x is a ``Variable``, then
-  ``map_(x**"i","i",range(3))`` yields the list ``[x**0, x**1, x**2]``
+  ``map_(x**"i","i",range_(3))`` yields the list ``[x**0, x**1, x**2]``
 - ``forall(expr,var,values)``: True if, for every value in the list ``values``,
   ``expr`` evaluates to nonzero when ``var`` is substituted with that value.
   Equivalent to ``all_(*[subs(expr,var,value) for value in values])``
@@ -345,8 +348,8 @@ to the undecorated name.::
         return 2*x*y
     ctx = Context()
     f = ctx.declare(_f,"f")
-    print f(3,4)   #prints f(3,4)
-    print f(3,4).evalf()  #prints 24, since 2*3*4=12.
+    print(f(3,4))   #prints f(3,4)
+    print(f(3,4).evalf())  #prints 24, since 2*3*4=12.
 
 At this point, the module does not know how to take derivatives, so any
 ``deriv(f(...),arg)`` call will return None. To set derivatives, you can
@@ -403,7 +406,7 @@ Python Lists as arguments are handled in somewhat of a tricky way.  If the list
 is compatible with a Numpy array  (i.e., each element is numeric or equal-sized
 arrays), it will be converted to a Numpy array.  Otherwise, (e.g., a non-
 constant Expression is inside or the elements do not have the same size) it will
-be converted to an ``array(e1,...,en)`` ``Expression``.  Tuples are NOT
+be converted to an ``array(e1,...,en)`` Expression.  Tuples are NOT
 converted in the same way, so that Numpy matrix indices can be preserved.
 Tuples of expressions are not supported implicitly, instead you will have to use
 ``tuple_(e1,...,en)``.
@@ -433,10 +436,10 @@ matrices in the form::
     [dfm/dx1 ... dfm/dxn ].
 
 However, if the function or variable has an "exotic" type, like a matrix,
-tensor, or nested list, then the Jacobian is taken with respect to the flattened
-version of the function and the variable.  The way this is handled can be seen
-in some complex derivative expressions, which will have various reshape
-operations.
+tensor, or nested list, then the Jacobian is taken with respect to the
+**flattened** version of the function and the variable.  The way this is
+handled can be seen in some complex derivative expressions, which will have
+various reshape operations.
 
 Many standard Python operators -- +,-,*,/,**, and, or, not, comparison tests,
 the [] indexing operator, and list construction via [a,b] -- are supported
@@ -496,11 +499,11 @@ IO
 
 There are three forms of Expression IO in symbolic_io:
 
-1. Standard Python printing: str(expr) (output only)
-2. Human-readable strings: symbolic_io.toStr(expr) (output) /
-   symbolic_io.fromStr(str) (input)
-3. JSON-like objects: symbolic_io.toJson(expr) (output) /
-   symbolic_io.fromJson(jsonobj) (input)
+1. Standard Python printing: ``str(expr)`` (output only)
+2. Human-readable strings: :func:`symbolic_io.toStr` (output) /
+   :func:`symbolic_io.fromStr` (input)
+3. JSON-like objects: :func:`symbolic_io.toJson` (output) /
+   :func:`symbolic_io.fromJson` (input)
 
 Method 1 is the most readable when printed to the console, but can't be read.
 
@@ -519,8 +522,8 @@ particular, any common ConstantExpression and OperatorExpression objects are
 
 In Method 2, the first time a sub-expression appears it's tagged with a suffix
 #id.  Then, subsequent references are retrieved with the expression @id.  As an
-example, the string "(x+y)#1*@1" evaluates to (x+y)*(x+y), since '#1' assigns
-(x+y) to the id '1' and '@1' retrieves it.
+example, the string ``(x+y)#1*@1`` evaluates to ``(x+y)*(x+y)``, since '#1'
+assigns ``(x+y)`` to the id '1' and '@1' retrieves it.
 
 
 ===============================================================================
@@ -528,11 +531,11 @@ Code generation
 ===============================================================================
 
 - context.makePyFunction(expr,varorder=None): creates a Python function that
-  evaluates ``expr`` given arguments whose values are to be assigned to the
-  ``Variable``s in ``varorder``.
+  evaluates ``expr`` given arguments whose values are to be assigned to each
+  ``Variable`` in ``varorder``.
 - context.makeFlatFunction(expr,varorder=None): creates a Python function that
   evaluates ``expr`` given a flattened list or vector of parameters, which can
-  be unraveled to values to be assigned to the Variables in ``varorder``.
+  be unraveled to values to be assigned to each Variable in ``varorder``.
 - symbolic_io.latex(expr): produces a LaTex string representing the expression
   (requires Sympy)
 - symbolic_io.codegen(exprs,language): produces C / Matlab code to evaluate the
@@ -543,9 +546,10 @@ Code generation
 Sympy integration
 ===============================================================================
 
-Sympy integration is quite automatic.  See exprToSympy and exprFromSympy in
-symbolic_simpy.py. Built-in functions are converted mostly bidirectionally and
-hence support all aspects of both libraries.
+Sympy integration is quite automatic.  See :func:`symbolic_sympy.exprToSympy`
+and :func:`symbolic_sympy.exprFromSympy` in symbolic_sympy.py. Built-in
+functions are converted mostly bidirectionally and hence support all aspects of
+both libraries.
 
 Array operations are converted to Sympy Matrix operations, which expand all
 entries into scalar expressions, so array operations like dot() cannot be
@@ -572,7 +576,7 @@ Wish list
 """
 
 import weakref
-import vectorops
+from . import vectorops
 import operator
 import numpy as np
 import math
@@ -591,6 +595,12 @@ ARRAY_TYPES = 'AVM'
 BUILTIN_TYPES = 'NIBAVMX'
 VAR_DERIV_PREFIX = 'D'
 TYPE_CHECKING = True
+SHAPE_CHECKING = True
+_PY_INT_TYPES = (int,np.int32,np.int64)
+_PY_FLOAT_TYPES = (float,np.float32,np.float64)
+_PY_NUMERIC_TYPES = _PY_INT_TYPES + _PY_FLOAT_TYPES
+_PY_PRIMITIVE_TYPES = _PY_NUMERIC_TYPES + (bool,str)
+_PY_CONST_TYPES = _PY_INT_TYPES + _PY_FLOAT_TYPES + (bool,np.ndarray)
 
 class Type:
     """A specification of a variable/expression type.
@@ -619,7 +629,7 @@ class Type:
                 self.subtype = Type(subtype)
         else:
             if type is not None:
-                assert isinstance(type,str),"Type argument must be a string, not "+type.__class__.__name__
+                assert isinstance(type,str),"Type argument "+str(type)+" must be a string, not "+type.__class__.__name__
             if type is not None and len(type) > 1:
                 #assume it's a user type
                 self.char = 'U'
@@ -634,7 +644,7 @@ class Type:
                     self.subtype = [Type(s) for s in subtype]
                 else:
                     self.subtype = Type(subtype)
-        assert self.size is None or isinstance(self.size,(int,list,tuple,dict,np.ndarray)),"Erroneous type of size? "+str(size)+": "+size.__class__.__name__
+        assert self.size is None or isinstance(self.size,_PY_INT_TYPES) or isinstance(self.size,(list,tuple,dict,np.ndarray)),"Erroneous type of size? "+str(size)+": "+size.__class__.__name__
         if isinstance(self.size,dict):
             assert self.char in 'AL',"Hyper-shape objects must have A or L type"
             self.char = 'L'
@@ -642,7 +652,7 @@ class Type:
             size = self.size
             self.size = len(self.size)
             self.subtype = [None]*self.size
-            for (k,v) in size.iteritems():
+            for (k,v) in size.items():
                 if isinstance(v,dict):
                     self.subtype[k] = Type('L',v,subtype)
                 else:
@@ -651,17 +661,20 @@ class Type:
             self.size = tuple(self.size.astype(np.int64))
         elif isinstance(self.size,list):
             self.size = tuple(self.size)
-        if self.char == 'A' and isinstance(self.size,int):
+        if self.char == 'A' and isinstance(self.size,_PY_INT_TYPES):
             self.size = (self.size,)
         if self.char is not None and self.char in 'AM':
-            assert not isinstance(self.size,int)
+            assert not isinstance(self.size,_PY_INT_TYPES)
                     
     def is_scalar(self):
         if self.char is None: return False
         return self.char in SCALAR_TYPES
     def shape(self,hypershape=True):
-        """Returns the Numpy shape or hypershape of this type.  A ValueError is raised if no size is
-        specified."""
+        """Returns the Numpy shape or hypershape of this type.  If it's array-
+        like, the return value is a tuple. Otherwise, it's a dict.
+        
+        A ValueError is raised if no size is specified.
+        """
         if self.char is None: 
             raise ValueError("Item of unknown type does not map to a Numpy shape")
         if self.char in SCALAR_TYPES: return ()
@@ -677,7 +690,7 @@ class Type:
                         res[i] = st.shape()
                 else:
                     stsh = self.subtype.shape()
-                    for i in xrange(self.size):
+                    for i in range(self.size):
                         res[i] = shsh
                 return res
         raise ValueError("Item of type "+self.char+" does not map to a Numpy shape")
@@ -704,15 +717,21 @@ class Type:
             try:
                 if self.subtype is not None:
                     if isinstance(self.subtype,list):
-                        return sum(s.count() for s in self.subtype)
+                        res = sum(s.count() for s in self.subtype)
+                        assert isinstance(res,int),"Result of count isn't an integer? %s"%(res.__class__.__name__,)
+                        return res
                     elif self.subtype.len() is not None:
-                        return self.size*self.subtype.count()
+                        res = self.size*self.subtype.count()
+                        assert isinstance(res,int),"Result of count isn't an integer? %s"%(res.__class__.__name__,)
+                        return res
+                    return None  #no length specified
             except Exception:
                 return None
             return self.size
         if self.char in 'MA':
             if self.size is None: return None
-            return np.product(self.size)
+            return int(np.product(self.size))
+        assert isinstance(self.len(),int),"Result of count isn't an integer? %s"%(self.len().__class__.__name__,)
         return self.len()
     def dims(self):
         """Returns the number of entries in the shape of this type. For compound list types, this is
@@ -764,7 +783,7 @@ class Type:
                 if obj.char in ARRAY_TYPES:
                     if self.size is None: return True
                     if obj.size is None: return not strict
-                    assert isinstance(self.size,int),"Invalid size of list: "+str(self.size)
+                    assert isinstance(self.size,_PY_INT_TYPES),"Invalid size of list: "+str(self.size)
                     if obj.len() != self.size: return False
                     if self.subtype is None: return True
                     if isinstance(self.subtype,list):
@@ -893,7 +912,7 @@ def _is_exactly(a,b):
     if a.__class__ == b.__class__:
         if isinstance(a,np.ndarray):
             return np.all(a==b)
-        elif isinstance(a,(bool,float,int,str)):
+        elif isinstance(a,_PY_PRIMITIVE_TYPES + _PY_FLOAT_TYPES):
             return a == b
         return a is b
     return False
@@ -903,8 +922,14 @@ def _ravel(obj):
     if isinstance(obj,np.ndarray):
         return np.ravel(obj)
     elif isinstance(obj,(list,tuple)):
+        hstack_args = [_ravel(v) for v in obj]
+        hstack_args = [v for v in hstack_args if len(v) > 0]
+        if len(hstack_args) == 0:
+            return np.array([])
+        elif len(hstack_args) == 1:
+            return hstack_args[0]
         try:
-            return np.hstack([_ravel(v) for v in obj])
+            return np.hstack(hstack_args)
         except ValueError as e:
             return np.array([])
     else:
@@ -945,19 +970,19 @@ def _hyper_shape(obj):
 
 def _is_numpy_shape(sh):
     if isinstance(sh,(tuple,list)):
-        return (len(sh)==0 or all(isinstance(x,(int,float)) for x in sh))
+        return (len(sh)==0 or all(isinstance(x,_PY_INT_TYPES) for x in sh))
     elif isinstance(sh,np.ndarray):
         return len(sh.shape) == 1 and sh.dtype.char != 'O'
     return False
 
 def _is_hyper_shape(sh):
     if isinstance(sh,(tuple,list)):
-        return len(sh)==0 or all(isinstance(x,(int,float)) for x in sh)
+        return len(sh)==0 or all(isinstance(x,_PY_INT_TYPES) for x in sh)
     elif isinstance(sh,np.ndarray):
         return len(sh.shape) == 1 and sh.dtype.char != 'O'
     elif isinstance(sh,dict):
-        for (k,v) in sh.iteritems():
-            if not isinstance(k,int): return False
+        for (k,v) in sh.items():
+            if not isinstance(k,_PY_INT_TYPES): return False
             if not _is_hyper_shape(v): return False
         return True
 
@@ -971,7 +996,7 @@ def _concat_hyper_shape(sh1,sh2):
         else:
             assert isinstance(sh1,dict),"Erroneous hypershape object class "+sh1.__class__.__name__
             res = {}
-            for (k,v) in sh1.iteritems():
+            for (k,v) in sh1.items():
                 res[k] = _concat_hyper_shape(v,sh2)
             return res
     else:
@@ -979,13 +1004,13 @@ def _concat_hyper_shape(sh1,sh2):
             if len(sh1) == 0:
                 return sh2
             elif len(sh1) == 1:
-                return dict((i,sh2) for i in xrange(sh1[0]))
+                return dict((i,sh2) for i in range(sh1[0]))
             else:
                 raise NotImplementedError("TODO: cartesian product of multidimensional hyper-shapes")
         else:
             assert isinstance(sh1,dict),"Erroneous hypershape object class "+sh1.__class__.__name__
             res = {}
-            for (k,v) in sh1.iteritems():
+            for (k,v) in sh1.items():
                 res[k] = _concat_hyper_shape(v,sh2)
             return res
 
@@ -1001,7 +1026,7 @@ def _unravel(obj,shape):
     if isinstance(shape,dict):
         res = [None]*len(shape)
         ofs = 0
-        for (i,s) in shape.iteritems():
+        for (i,s) in shape.items():
             res[i] = _unravel(obj[ofs:],s)
             ofs += _hyper_count(res[i])
             if ofs > olen: raise ValueError("Insufficent sized vector to extract the desired parameters")
@@ -1018,7 +1043,7 @@ def _addDictPrefix(prefix,items,prefixedKeys=None):
     """Recursively adds the prefix prefix to the keys in items, and any sub-dicts."""
     if not isinstance(items,dict): return items
     newdict = dict()
-    for (k,v) in items.iteritems():
+    for (k,v) in items.items():
         if prefixedKeys is None or k in prefixedKeys:
             if prefix+k in newdict:
                 raise RuntimeError("Adding dictionary prefix %s created a name clash with key %s"%(str(prefix),str(k)))
@@ -1067,7 +1092,7 @@ class Context:
         type is the same as in addVar, but by default it is numeric.
         """
         res = []
-        for i in xrange(N):
+        for i in range(N):
             res.append(self.addVar(prefix+str(i+1),type,size))
         return res
     def addUserData(self,name,value):
@@ -1094,16 +1119,23 @@ class Context:
         self.expressions[name] = expr
         return expr
     def declare(self,func,fname=None,fargs=None):
-        """Declares a custom function.  If fname is provided, this will be how the function
-        will be referenced.  Otherwise, the Python name of the function is used.
+        """Declares a custom function.  If fname is provided, this will be how
+        the function will be referenced.  Otherwise, the Python name of the
+        function is used.
 
-        - func: either a Python function, or an Expression. 
-        - fname: the name of the Function.  If func is an Expression this is mandatory.
-        - fargs: the argument names.  If func is an Expression this is mandatory. 
+        Args:
+            func (function or :class:`Expression`): the function / expression
+                object
+            fname (str, optional): the name of the new Function.  If func is an
+                Expression this is mandatory.  Otherwise it is taken from the
+                Python function name.
+            fargs (list of str, optional): the argument names.  If func is an
+                :class:`Expression` this is mandatory. 
 
-        To convert Expressions into Functions, the fargs list declares the order in which
-        variables in func will be bound to arguments.  E.g., Context.declare(2*expr("x")*expr("y"),"twoxy",["x","y"])
-        produces a two argument function twoxy(x,y): 2*x*y.
+        To convert Expressions into Functions, the fargs list declares the
+        order in which variables in func will be bound to arguments.  E.g.,
+        ``Context.declare(2*expr("x")*expr("y"),"twoxy",["x","y"])``
+        produces a two argument function ``twoxy(x,y): 2*x*y``.
         """ 
         if isinstance(func,Function):
             if fname is None:
@@ -1132,13 +1164,21 @@ class Context:
             raise ValueError("func should be a symbolic Function, symbolic Expression, or Python function")
             
     def include(self,context,prefix=None,modify=False):
-        """Adds all items inside another context.  If prefix != None, self.[prefix] is set to context,
-        and all names in that context are prepended by the given prefix and a '.'.
+        """Adds all items inside another context as a sub-context.
 
-        If modify=True, then all the Variable and Function names inside the given sub-context are modified
-        to fit the `self` context.  This is useful if you are saving/loading expressions and using the convenience
-        form self.[prefix].[functionName] to instantiate Functions embedded inside the sub-context.  But be
-        careful not to re-use the sub-context inside multiple super-contexts.
+        If prefix != None, ``self.[prefix]`` is set to ``context``, and all
+        names in that context are prepended by the given prefix and a '.'.
+
+        If ``modify=True``, then all the Variable and Function names inside
+        the given sub-context are modified to fit the `self` context.  This is
+        useful if you are saving/loading expressions and using the convenience
+        form self.[prefix].[functionName] to instantiate Functions embedded
+        inside the sub-context. 
+
+        .. note::
+            When using modify=True, be careful not to re-use the sub-context
+            inside multiple super-contexts.
+
         """
         if prefix is not None:
             assert not hasattr(self,prefix),"Can't include a new context, already have an element named "+prefix
@@ -1161,18 +1201,18 @@ class Context:
             elif isinstance(e,OperatorExpression):
                 return OperatorExpression(e.functionInfo,[emodify(a) for a in e.args],e.op)
             return e
-        for n,e in context.expressions.iteritems():
+        for n,e in context.expressions.items():
             n = n if prefix is None else prefix+n
             if prefix is None:
                 self.addExpr(n,e)
             else:
                 #need to modify any user data or variables
                 self.addExpr(n,emodify(e))
-        for n,d in context.userData.iteritems():
+        for n,d in context.userData.items():
             n = n if prefix is None else prefix+n
             self.addUserData(n,d)
         newfunctions = []
-        for n,d in context.customFunctions.iteritems():
+        for n,d in context.customFunctions.items():
             if modify:
                 fnew = d
             else:
@@ -1185,9 +1225,9 @@ class Context:
             self.declare(f)
         if modify:
             context.variableDict = dict((v.name,v) for v in context.variables)
-            context.userData = dict((prefix+n,d) for n,d in context.userData.iteritems())
-            context.expressions = dict((prefix+n,e) for n,e in context.expressions.iteritems())
-            context.customFunctions = dict((d.name,d) for d in context.customFunctions.itervalues())
+            context.userData = dict((prefix+n,d) for n,d in context.userData.items())
+            context.expressions = dict((prefix+n,e) for n,e in context.expressions.items())
+            context.customFunctions = dict((d.name,d) for d in context.customFunctions.values())
     def copy(self,copyFunctions=False):
         """Returns a shallow copy of this context."""
         res = Context()
@@ -1205,7 +1245,7 @@ class Context:
                 return VariableExpression(res.variableDict[expr.var.name])
             else:
                 return expr
-        for n,e in self.expressions.iteritems():
+        for n,e in self.expressions.items():
             res.expressions[n] = rebind(e,res)
         if copyFunctions:
             res.customFunctions = self.customFunctions.copy()
@@ -1221,13 +1261,17 @@ class Context:
                 assert isinstance(v,Variable)
                 v.value = val
     def bindFunction(self,function,remapping=None):
-        """Produces an Expression that evalutes the function, where its arguments are bound to
-        variables / user data in the current environment.  The argument names should map to 
-        similarly named variables or user data.
+        """Produces an Expression that evalutes the function, where its
+        arguments are bound to variables / user data in the current
+        environment.  The argument names should map to similarly named
+        variables or user data.
 
-        If remapping is provided, then it maps function arguments to variables or values
+        If remapping is provided, then it maps function arguments to variables
+        or values, either as
+
         - a dictionary mapping a function argument arg to remapping[arg].
         - a list or tuple mapping the i'th function argument to remapping[i].
+
         """
         if isinstance(function,str):
             function = self.customFunctions[function]
@@ -1261,25 +1305,25 @@ class Context:
     def listVars(self,doprint=True,indent=0):
         if doprint:
             for v in self.variables:
-                print ' '*indent + "%s (type %s)"%(v.name,str(v.type))
+                print(' '*indent + "%s (type %s)"%(v.name,str(v.type)))
         return [v.name for v in self.variables]
     def listExprs(self,doprint=True,indent=0):
         if doprint:
-            for n,f in self.expressions.iteritems():
-                print ' '*indent + n + '=' + str(f)
-        return self.expressions.keys()
+            for n,f in self.expressions.items():
+                print(' '*indent + n + '=' + str(f))
+        return list(self.expressions.keys())
     def listFunctions(self,doprint=True,indent=0,builtins=False):
         global _builtin_functions
         if doprint:
-            for n,f in _builtin_functions.iteritems():
+            for n,f in _builtin_functions.items():
                 argstr =  '...' if f.argNames is None else ','.join(f.argNames)
-                print ' '*indent + n + '(' + argstr + ')'
-            for n,f in self.customFunctions.iteritems():
+                print(' '*indent + n + '(' + argstr + ')')
+            for n,f in self.customFunctions.items():
                 argstr =  '...' if f.argNames is None else ','.join(f.argNames)
-                print ' '*indent + n + '(' + argstr + ')'
+                print(' '*indent + n + '(' + argstr + ')')
         if builtins:
-            return self.customFunctions.keys() + _builtin_functions.keys()
-        return self.customFunctions.keys()
+            return list(self.customFunctions.keys()) + list(_builtin_functions.keys())
+        return list(self.customFunctions.keys())
     def expr(self,name):
         """Retrieves a named expression"""
         try:
@@ -1302,9 +1346,9 @@ class Context:
     def get(self,name,*args):
         """Retrieves a named reference to a userData or variable.
 
-        Can be called as get(name), in which case a KeyError is raised if the key does not exist,
-        or get(name,defaultValue) in which case the default value is returned if the key
-        does not exist.
+        Can be called as ``get(name)``, in which case a KeyError is raised if 
+        the key does not exist, or ``get(name,defaultValue)`` in which case the
+        default value is returned if the key does not exist.
         """
         try:
             return self.userData[name]
@@ -1337,21 +1381,34 @@ class Context:
         del self.userData[itemname]
 
     def makePyFunction(self,expr,varorder=None):
-        """Given a function expr or an expression expr, returns (f,varorder),
-        where f is an equivalent 1-argument Python function that takes an argument list of
-        variable values.
-        The order of variables that should be provided to f in this tuple is returned in varorder.
+        """Converts an Expression or Function to a Python function ``f(x)``
+        that takes ``x`` as a list of scalar values, maps those to Variable
+        values, and returns the result of evaluating the expression / function.
 
-        If varorder != None, the tuple comes in varorder order.  Note that many of these may be
-          ignored.
-        If varorder == None, the variables remaining in the expression are ordered by the order
-          in which were added to this Context.
+        Args:
+            expr (:class:`Function` or :class:`Expression`): the function or
+                expression to evaluate
+            varorder (list, optional): If given, the list of Variables that
+                should appear in the flattened argument list ``x``.
+                
+                If this isn't provided, then the Variables in ``expr`` are
+                ordered by the order in which were added to this ``Context``.
+
+        Returns:
+            tuple: A pair ``(f,varorder)``, where:
+
+                * ``f(x)`` is a 1-argument Python function equivalent to ``expr``
+                    but where ``x`` is a list of variable values.
+
+                * ``varorder`` gives the order of variables that should be
+                    sent in ``x``
+
         """
         if isinstance(expr,Function):
             if varorder is None:
                 varnames = expr.argNames
                 varorder = [self.variableDict[v] for v in varnames]
-                iorder = range(len(varorder))
+                iorder = list(range(len(varorder)))
             else:
                 varorder = [(self.variableDict[v] if isinstance(v,str) else v) for v in varorder]
                 iorder = [expr.argNames.index(v.name) for v in varorder]
@@ -1360,7 +1417,7 @@ class Context:
                 eargs = expr.argNames[:]
                 for i,a in zip(iorder,args):
                     eargs[i] = a
-                #print "Arguments",eargs
+                #print("Arguments",eargs)
                 return expr(*eargs).evalf(self)
             return f,varorder
         assert isinstance(expr,Expression)
@@ -1378,10 +1435,10 @@ class Context:
                 vnames = set(v.name for v in varorder)
                 for v in rvars:
                     if v.name not in vnames:
-                        print "Error while creating Python function corresponding to",res
+                        print("Error while creating Python function corresponding to",res)
                         raise ValueError("Unbound variable "+v.name+" not in given variable order "+",".join([var.name for var in varorder]))
             def f(*args):
-                #print "Evaluating with order",[str(v) for v in varorder],args
+                #print("Evaluating with order",[str(v) for v in varorder],args)
                 for (v,val) in zip(varorder,args):
                     v.bind(val)
                 res = expr.evalf(self)
@@ -1394,11 +1451,15 @@ class Context:
                 varorder = []
             return ((lambda *args: res),varorder)
     def makeFlatFunction(self,expr,varorder=None,defaultsize=1):
-        """Given an expression expr, return (f,varorder),
-        where f is an equivalent 1-argument Python function that takes a list of numbers or numpy array.
-        The order of variables that should be provided to f in this tuple is returned in varorder.
+        """Given an expression expr, return ``(f,varorder)``,
+        where ``f`` is an equivalent 1-argument Python function that takes a
+        list of numbers or numpy array.  The order of variables that should
+        be provided to ``f`` in this tuple is returned in ``varorder``.
 
-        If vector variables are not given size hints, then they are assumed to have defaultsize.
+        If vector variables are not given size hints, then they are assumed
+        to have ``defaultsize``.
+
+        See also :meth:`makePyFunction`.
         """
         f,varorder = self.makePyFunction(expr,varorder)
         indices = self.getFlatVarRanges(varorder,defaultsize)
@@ -1411,19 +1472,25 @@ class Context:
                     arglist.append(x[indices[i]:indices[i+1]])
                 else:
                     arglist.append(x[indices[i]])
-            #print "makeFlatFunction lambda function: Extracted arguments",arglist,"from",x
-            #print "Evaluating expression",expr
+            #print("makeFlatFunction lambda function: Extracted arguments",arglist,"from",x)
+            #print("Evaluating expression",expr)
             return f(*arglist)
         return fv,varorder
     def makeFlatFunctionDeriv(self,expr,varorder=None,defaultsize=1):
-        """Given a differentiable expression expr, return (df,varorder),
-        where df is an 1-argument Python function that that takes a list of numbers or numpy array and
-        outputs the derivative (Jacobian matrix) of expression expr.
-        The order of variables that should be provided to df in this tuple is returned in varorder.
+        """Given a differentiable expression expr, return ``(df,varorder)``,
+        where df is an 1-argument Python function that that takes a list of
+        numbers or numpy array and outputs the derivative (Jacobian matrix)
+        of expression ``expr``.
 
-        If expr is not differentiable, then df=None is returned
+        The order of variables that should be provided to ``df`` in this tuple
+        is returned in ``varorder``.
 
-        If vector variables are not given size hints, then they are assumed to have defaultsize.
+        If ``expr`` is not differentiable, then ``df=None`` is returned.
+
+        If vector variables are not given size hints, then they are assumed to
+        have ``defaultsize``.
+
+        See also :meth:`makeFlatFunction`.
         """
         if varorder is None:
             f,varorder = self.makePyFunction(expr)
@@ -1431,7 +1498,7 @@ class Context:
         for v in varorder:
             dv = expr.deriv(v)
             if dv is None:
-                print "makeFlatFunctionDeriv: Derivative with respect to",v.name,"is undefined, returning None"
+                print("makeFlatFunctionDeriv: Derivative with respect to",v.name,"is undefined, returning None")
                 return None,varorder
             if not isinstance(dv,Expression):
                 if _is_exactly(dv,0) and not v.type.is_scalar():
@@ -1444,7 +1511,7 @@ class Context:
         if len(dvs) > 1:
             rt = expr.returnType()
             if rt is None or rt.char is None:
-                print "makeFlatFunctionDeriv: no return type inferred, assuming vector"
+                print("makeFlatFunctionDeriv: no return type inferred, assuming vector")
                 rt = Type('V')
             if rt.is_scalar():
                 dflist,varorder = self.makePyFunction(flatten(*dvs),varorder)
@@ -1452,7 +1519,7 @@ class Context:
             elif rt.char == 'V':
                 df,varorder = self.makePyFunction(column_stack(*dvs),varorder)
             else:
-                print "Expression",expr,"has return type",rt
+                print("Expression",expr,"has return type",rt)
                 raise NotImplementedError("Can't make flat function of non-numeric or non-vector types: "+str(rt))
         else:
             df,varorder = self.makePyFunction(dvs[0],varorder)
@@ -1466,7 +1533,7 @@ class Context:
                     arglist.append(x[indices[i]:indices[i+1]])
                 else:
                     arglist.append(x[indices[i]])
-            #print "Extracted arguments",arglist
+            #print("Extracted arguments",arglist)
             return df(*arglist)
         return dfv,varorder
     def getFlatVarRanges(self,varorder,defaultsize=1):
@@ -1493,70 +1560,128 @@ class Context:
         assert not any(v.value is None for v in varorder),"All variables' values must be set"
         return np.hstack([v.value.flatten() if isinstance(v,np.ndarray) else v for v in varorder])
 
+
 class Function:
-    """A symbolic function.  Contains optional specifications of argument and return types, as well as
-    derivatives.
+    """A symbolic function.  Contains optional specifications of argument and
+    return types, as well as derivatives.
+
+    Args:
+        name (str):
+        func (Python function or :class:`Expression`):
+        argNames (list of str, optional):
+        returnType (str or function, optional): sets ``self.returnType`` or
+            ``self.returnTypeFunc``.
+
+    If ``func`` is a Python function, the argument list will be derived from
+    the declaration of the Python function. Otherwise, it must be an
+    :class:`Expression`, and ``argNames`` needs to be provided.  The
+    expression must be closed, meaning that all unspecified variables in the
+    expression must be named in ``argNames``.
+
+    Examples:
+        Basic instantiation::
+
+            #standard function method
+            def f(x,y):
+                ...
+            symfunc = Function("f",f)
+            a = context.addVar("a")
+            b = context.addVar("b")
+            c = context.addVar("c")
+            print(symfunc(a,b))   # prints f($a,$b)
+
+        Creating a Function from an Expression (sort of like a lambda function)::
+
+            expr = a + 2*b
+            symfunc2 = Function("f2", expr, ["a","b"])  #when symfunc2 is called, its first argument will be bound to a, and its second will be bound to b
+            print(symfunc2(c,4))   #prints f2(c,4)
+            print(symfunc2(c,4).eval({'c':5}))  #prints 13, because c + 2*4 = 5 + 2*4 = 13
+
+    If ``func`` is an Expression, then you can automatically set derivatives
+    if all the sub-expressions have derivatives. To do so, use the
+    :meth:`autoSetJacobians` method.
+
+    Defining derivatives:
+        There are three ways to define derivatives: :meth:`setDeriv`,
+        :meth:`setJacobian`, and :meth:`autoSetJacobians` (available if
+        ``func`` is an expression.  In :meth:`setDeriv` you provide
+        Jacobian-vector products.  In :meth:`setJacobian` you provide
+        Jacobian matrices (or tensors).
 
     Attributes:
         name (str): name of function used in printing and IO.
         description (str, optional): text description of function.
-        func: Expression or python function.
+        func (Python function or :class:`Expression`): the function to be
+            evaluated.
         argNames (list of strs, optional): names of arguments.
-        argTypes (list of Type, optional): list of argument Types.
-        argDescriptions (list of strs, optional): strings describing each argument
-        returnType (Type, optional): return Type
-        returnTypeFunc (function, optional): a function that takes argument types
-            and produces a more specific return type than returnType
+        argTypes (list of Type, optional): list giving each argument's
+          :class:`Type`.
+        argDescriptions (list of strs, optional): strings describing each
+            argument
+        returnType (Type, optional): return :class:`Type`
+        returnTypeFunc (function, optional): a function that takes argument 
+            types and produces a more specific return :class:`Type` than
+            ``returnType``
         returnTypeDescription (str, optional): description of the return type
-        deriv (optional): list of Jacobian-vector products with respect to each argument, or a function
-            df(args,dargs).
-        colstackderiv (optional): same as deriv, except that stacked argument derivatives are accepted.
-        rowstackderiv (optional): same as deriv, except that row-wise stacked argument derivatives are accepted.
-        jacobian (list of functions, optional): list of Jacobian functions with respect to each argument.
-        presimplifier (function, optional)
-        simplifier (function, optional)
-        presimplifierDict (dict, optional): a nested dict, mapping argument signatures to simplification
-            functions.  See :meth:`addSimplifier` for more details.
-        simplifierDict (dict, optional): a nested dict, mapping argument signatures to simplification functions. 
-            See :meth:`addSimplifier` for more details.
-        properties (dict): possible properties of this function, such as associativity, etc (not really used yet)
-        printers (dict of functions): a dict containing code generation methods.  Each entry, if present, is a
-            function printer(expr,argstrs) that returns a string. Common key values are:
+        deriv (optional): Can be either:
+
+            1. a list of Jacobian-vector products with respect to a derivative
+               of each argument: ``[df1(*args,darg1),...,dfn(*args,dargn)]``.
+               Here, ``dargi`` is an argument of the same shape as
+               ``args[i]``, giving the derivative :math:`\\frac{dargs[i]}{dx}` 
+               w.r.t. some scalar parameter x.  The function ``dfi`` gives
+               :math:`\\frac{df}{dargs[i]}\\cdot\\frac{dargs[i]}{dx}` where
+               :math:`\\frac{df}{dargs[i]}` is the partial 
+               of ``self`` with respect to the i'th argument.
+            2. a function ``df(args,dargs)`` giving the total derivative of f 
+               given directional derivatives of each of the argmuments. 
+               Here, ``dargs`` is a list of derivatives ``[darg1,...,dargn]``.
+               The result should be equal to
+               :math:`\\frac{df}{dx} = \\frac{df}{dargs[0]}\\cdot \\frac{dargs[0]}{dx} + ... + \\frac{df}{dargs[n-1]}\\cdot\\frac{dargs[n-1]}{dx}`.
+
+            The return value should have the same shape as
+            ``self.returnType()``
+
+        colstackderiv (optional): same as ``deriv``, except that each function
+            accepts stacked argument derivatives.  This can be more efficient
+            than filling in ``deriv``, since taking derivatives w.r.t. k
+            variables x1,...,xk can be done by setting up ``dargi`` as a matrix
+            ``[dflatten(argi)/dx1 | ... | dflatten(argi)/dxk]``, i.e.,. the 
+            column stacking of each of the flattened argument derivatives.
+            `dargi` has shape ``(count(argi),k)``.
+        rowstackderiv (optional): same as ``colstackderiv``, except that row-
+            wise stacked argument derivatives are accepted.  In other words,
+            ``dargi`` is a matrix
+            :math:`[\\frac{d\\text{flatten(args[i])}}{dx1}, ... , \\frac{d\\text{flatten(args[i])}}{dxk}]`
+            which has shape ``(k,count(argi))``.  This
+            is more efficient than ``colstackderiv`` but corresponds less
+            directly to standard mathematical notation.
+        jacobian (list of functions, optional): list of Jacobian functions
+            with respect to each argument.  Has the form
+            ``[Jf1(*args),...,Jfn(*args)]`` where `Jfi` returns a matrix of 
+            shape ``(count(self),count(args[i]))``.  The total derivative with
+            respect to some variable ``x`` is
+            :math:`\\frac{df}{dx} =` ``reshape(dot(Jf1,flatten(darg1)) + dot(Jfn,flatten(dargn)),shape(self))``
+        presimplifier (function, optional):
+        simplifier (function, optional):
+        presimplifierDict (dict, optional): a nested dict, mapping argument
+            signatures to simplification functions.  See :meth:`addSimplifier`
+            for more details.
+        simplifierDict (dict, optional): a nested dict, mapping argument
+            signatures to simplification functions. See :meth:`addSimplifier`
+            for more details.
+        properties (dict): possible properties of this function, such as
+            associativity, etc.
+        printers (dict of functions): a dict containing code generation
+            methods.  Each entry, if present, is a function
+            ``printer(expr,argstrs)`` that returns a string. Common key values
+            are:
 
             * "str": for printing to console 
             * "parse": for parseCompatible=True exprToStr
 
     """
     def __init__(self,name,func,argNames=None,returnType=None):
-        """Initializes the function with a name, Python function or Expression, and optional argument list and
-        return type.
-
-        If func is a Python function, the argument list will be derived from the declaration of the Python function.
-        Otherwise, it must be an expression, and argNames needs to be provided.  The expression must be closed,
-        meaning that all unspecified variables in the expression must be named in argNames.
-
-        Examples:
-            Basic instantiation::
-
-                #standard function method
-                def f(x,y):
-                    ...
-                symfunc = Function("f",f)
-                a = context.addVar("a")
-                b = context.addVar("b")
-                c = context.addVar("c")
-                print symfunc(a,b)   # prints f($a,$b)
-
-            Creating a Function from an Expression (sort of like a lambda function)::
-
-                expr = a + 2*b
-                symfunc2 = Function("f2", expr, ["a","b"])  #when symfunc2 is called, its first argument will be bound to a, and its second will be bound to b
-                print symfunc2(c,4)   #prints f2(c,4)
-                print symfunc2(c,4).eval({'c':5})  #prints 13, because c + 2*4 = 5 + 2*4 = 13
-
-        The Expression method can automatically set derivatives if all the sub-expressions have derivatives. To do so, use
-        the autoSetJacobians function.
-        """
         self.name = name
         self.description = None
         self.func = func
@@ -1572,7 +1697,7 @@ class Function:
             (argNames,varargs,keywords,defaults) = inspect.getargspec(func)
             if varargs != None or keywords != None:
                 #variable number of arguments
-                print "symbolic.py: Note that Function",name,"is declared with variable arguments, pass '...' as argNames to suppress this warning"
+                print("symbolic.py: Note that Function",name,"is declared with variable arguments, pass '...' as argNames to suppress this warning")
                 pass
             else:
                 self.argNames = argNames
@@ -1610,22 +1735,25 @@ class Function:
         self.simplifierDict = dict()
         self.properties = dict()
         self.printers = dict()
+    
     def __call__(self,*args):
         if self.argNames is not None:
             if len(args) != len(self.argNames):
                 raise ValueError("Invalid number of arguments passed to "+self.name)
         if TYPE_CHECKING and self.argTypes is not None:
-            #print "Calling",self.name,"(",','.join(str(a) for a in args),")"
+            #print("Calling",self.name,"(",','.join(str(a) for a in args),")")
             for i,(a,t) in enumerate(zip(args,self.argTypes)):
-                #print "  Type checking argument",a,"against",t
+                #print("  Type checking argument",a,"against type",t)
+                #print("    ... argument has type",type_of(a))
                 #raw_input()
                 if t is None: continue
                 a = expr(a)
                 if not t.match(type_of(a)):
-                    raise ValueError("Invalid argument %d (%s) passed to %s: type %s doesn't match %s"%(i,str(a),self.name,type_of(a),t))
+                    raise ValueError("Invalid argument %d (%s) passed to %s: type %s doesn't match %s"%(i,str(simplify(a)),self.name,type_of(a),t))
                 #rint "  match."
                 #raw_input()
         return self._call(*args)
+    
     def _call(self,*args):
         """Internally used version of __call__ -- does not perform type checking"""
         if callable(self.func):
@@ -1635,6 +1763,7 @@ class Function:
             assert self.argNames is not None
             assert len(self.exprArgRefs) == len(args)
             return OperatorExpression(self,args,lambda *argvals:subs(self.func,self.exprArgRefs,argvals).eval())
+    
     def optimized(self,*args):
         """Similar to ``self(*args).simplify(depth=1)``, but optimized to
         reduce complexity earlier. In particular, this directly applies the
@@ -1666,14 +1795,17 @@ class Function:
                 try:
                     return ConstantExpression(self.func(*newargs))
                 except Exception as e:
-                    #print "Error evaluating expression",self.name,"arguments",newargs
+                    #print("Error evaluating expression",self.name,"arguments",newargs)
                     raise
             else:
                 #return self.func.eval(context=dict(self.argNames,newargs))
                 return subs(self.func,self.exprArgRefs,newargs).eval()
         else:
-            return self.__call__(*newargs)
-            #return self.__call__(*newargs).simplify(depth=1)
+            res = self.__call__(*newargs)
+            res2 = res._simplify(depth=1,constant_expansion=False)
+            if res2 is not None:
+                return res2
+            return res
 
     def checkArg(self,arg):
         """Verifies that a named or indexed argument is valid, and normalizes it.  Returns an (index,name) tuple"""
@@ -1690,27 +1822,64 @@ class Function:
         return arg,self.argNames[arg]
 
     def setDeriv(self,arg,dfunc,asExpr=False,stackable=False):
-        """Declares a (partial) derivative of the function with respect to argument arg. 
-        The function dfunc is a function that takes arguments (arg1,...,argn,dvar) where darg is the
-        derivative of arg, and returns df/darg(arg1,...,argn) * dvar.
+        """Declares a (partial) derivative of the function with respect to
+        argument arg.  The function ``dfunc`` is a function that takes
+        arguments ``(arg1,...,argn,dx)``, where ``dx`` is the
+        derivative of ``arg`` with respect to some variable x, and
+        returns :math:`df/darg(arg1,...,argn) * darg/dx`.
+        
+        For vector-valued arguments and functions, the * is a matrix-vector
+        product, and ``dfunc`` is required to produce what's commonly known as
+        the Jacobian-vector product.
+        
+        For matrix-valued arguments or functions, the * is a tensor product.
 
-        dfunc can be an Expression of variables arg1,...,argn,darg, a Function of n+1 variables mapping to
-        arg1,...,argn,darg, or a Python function.  It can also be None, to indicate that the derivative is not
-        defined, or 0, to indicate that the derivative is identically 0. 
+        Args:
+            arg (int or str): either an argument index or name.
+            dfunc: either:
+            
+                1. an Expression of variables arg1,...,argn,darg,
+                2. a ``Function`` of n+1 variables mapping to ``arg1,...,argn,dx``,
+                3. a Python function of n+1 variables ``(arg1,...,argn,dx)`` 
+                    that either returns a value (setting ``asExpr=False``) or 
+                    an ``Expression`` of the derivative (if ``asExpr=True``).
+                4. None, to indicate that the derivative is not defined,
+                5. 0, to indicate that the derivative is identically 0.
+                
+                In the normal case (``stackable=False``), the shape of ``dx`` 
+                is the same as ``arg``, and the result has the same shape as
+                self.
 
-        If dfunc is a Python function, it takes arguments (arg1,...,argn,darg) and either returns a value
-        (if asExpr=False) or an Expression of the derivative (if asExpr=True). The asExpr functionality
-        allows taking multiple derivatives.
+            asExpr (bool, optional): if ``dfunc`` is a Python function, this
+                flag says that it will return an ``Expression``.  Using an
+                ``Expression`` allows taking multiple derivatives.
+            stackable (bool or str, optional): states whether ``dfunc`` can
+                accept stacked derivative arguments.  If ``True`` or ``'col'``,
+                then it can accept ``dvar`` as a column-stacked array of
+                derivatives.  In other words, ``dvar[...,0]`` is the derivative
+                w.r.t. x0, ``dvar[...,1]`` is the derivative w.r.t. x1, etc. 
+                
+                E.g., for vector arguments, dvar can be thought of as a matrix
+                with k=``dvar.shape[-1]`` derivatives in its *columns*. 
+                
+                In this case, ``dfunc`` should return an array of shape
+                shape(self) x k (i.e., f's derivatives are stacked in columns.)
 
-        If stackable is true or 'col', then the function can take darg as a column-stacked array of derivatives. 
-        dvar[...,0] is the derivative w.r.t. x0, dvar[...,1] is the derivative w.r.t. x1, etc.  E.g., for vector
-        arguments, dvar can be thought of as a matrix with dvar derivatives in its *columns*.  When stackable=True or 'col',
-        the result of dfunc should be a matrix with results stacked in *columns*.
-
-        stackable can also be 'row' in which case the function can take darg as a row-stacked array of derivatives.
-        dvar[0,...] is the derivative w.r.t. x0, dvar[1,...] is the derivative w.r.t., x1, etc. E.g., for vector
-        arguments, dvar can be thought of as a matrix with dvar derivatives in its *rows*.  When stackable='row',
-        the result of dfunc should be a list of derivatives, or a matrix with results stacked in *rows*.
+                ``stackable`` can also be ``'row'`` in which case ``dfunc``
+                accepts ``dvar`` as a row-stacked array of derivatives. I.e,
+                ``dvar[0,...]`` is the derivative w.r.t. x0, ``dvar[1,...]`` is
+                the derivative w.r.t., x1, etc.  In this case, ``dfunc`` should
+                return a list of derivatives.
+                
+                If the argument is not an array or its type cannot be
+                determined (see ``setArgType``) then ``dvar`` will be passed as
+                a ``count(arg)`` x k matrix (for column-stacking) or a
+                k x ``count(arg)`` matrix (for row stacking).
+                
+                If the function does not return an array or the return type
+                cannot be determined (see ``setReturnType``), the shape of the
+                returned matrix must be ``count(self)`` x k (for column-
+                stacking) or k x ``count(self)`` (for row-stacking).
         """
         aindex,arg = self.checkArg(arg)
         if self.deriv is None:
@@ -1723,11 +1892,11 @@ class Function:
             self.deriv[aindex] = dfunc
         elif asExpr:
             assert callable(dfunc)
-            #print "Setting derivative function with name",self.name,"argument",arg,"as expression"
+            #print("Setting derivative function with name",self.name,"argument",arg,"as expression")
             self.deriv[aindex] = dfunc
         else:
             assert callable(dfunc)
-            #print "Declaring new derivative function with name",self.name + "_deriv_" + arg
+            #print("Declaring new derivative function with name",self.name + "_deriv_" + arg)
             temp_function_info = Function(self.name + "_deriv_" + arg,dfunc,self.argNames + [VAR_DERIV_PREFIX+arg])
             if not hasattr(self,'deriv_funcs'):
                 self.deriv_funcs = [None]*len(self.argNames)
@@ -1741,13 +1910,39 @@ class Function:
             if self.rowstackderiv is None:
                 self.rowstackderiv = [None]*len(self.argNames)
             self.rowstackderiv[aindex] = self.deriv[aindex]
+    
     def setJacobian(self,arg,dfunc,asExpr=False):
-        """Declares a (partial) derivative of the function with respect to argument arg. 
-        The function dfunc is a function that takes arguments (arg1,...,argn) and returns df/darg(arg1,...,argn).
-
-        The arguments are the same as in setDeriv but dfunc does not take the final argument darg.
+        """Declares a (partial) derivative of the function with respect to
+        argument ``arg``. 
+        
+        This only makes sense when the arguments are all arrays or scalars; no
+        complex types are supported.
+        
+        Args: 
+            arg (int or str): same as ``setDeriv``.
+            dfunc: similar to ``setDeriv``, but a function that takes n
+                arguments (arg1,...,argn) and returns the matrix
+                :math:`df/darg(arg1,...,argn)`.
+                
+        The return value of ``dfunc`` must have shape shape(self) + shape(arg),
+        so that:
+        
+            - If self and arg are scalars, the Jacobian is also a scalar
+            - If self and arg are a scalar and a vector (or vice versa) the
+              Jacobian is a vector.
+            - If self and arg contain a scalar and an N-D array, the Jacobian
+              is an N-D array.
+            - If self and arg are both vectors, the Jacobian is a matrix.
+        
         """
         aindex,arg = self.checkArg(arg)
+        if TYPE_CHECKING:
+            self_irregular =  isinstance(self.returnType,Type) and self.returnType.char not in SCALAR_TYPES+ARRAY_TYPES
+            var_irregular = self.argTypes is not None and isinstance(self.argTypes[aindex],Type) and self.argTypes[aindex].char not in SCALAR_TYPES+ARRAY_TYPES
+            if self_irregular:
+                print("symbolic.autoSetJacobians: Warning, setting Jacobian of a non-array function. Will flatten.")
+            if var_irregular:
+                print("symbolic.autoSetJacobians: Warning, setting Jacobian of a non-array argument. Will flatten.")
         if self.deriv is None:
             self.deriv = [None]*len(self.argNames)
         if self.jacobian is None:
@@ -1769,44 +1964,51 @@ class Function:
             #print "Declaring new derivative function with name",self.name + "_jacobian_" + arg
             temp_function_info = Function(self.name + "_jacobian_" + arg,dfunc,self.argNames)
             self.jacobian[aindex] = temp_function_info  #lambda *args:OperatorExpression(temp_function_info,args)
+    
     def autoSetJacobians(self,args=None):
-        """For Expression functions, can automatically set the jacobians.  If args is not None,
-        only the arguments in args are set."""
+        """For ``Expression``-based functions, can automatically set the
+        Jacobians.  If ``args`` is not None, only the arguments in ``args``
+        are set.
+        """
         if not isinstance(self.func,Expression):
             raise ValueError("Can only auto-set jacobians for Expressions")
         if args is None:
             args = self.argNames
         for arg in args:
             darg = self.func.deriv(arg)
-            #print "Derivative of",self.func,"w.r.t",arg,"is (type %s)"%(darg.__class__.__name__,),darg
+            if _DEBUG_DERIVATIVES:
+                print("symbolic.autoSetJacobians: Derivative of",self.func,"w.r.t",arg,"is (type %s)"%(darg.__class__.__name__,),darg)
             if darg is not None:
                 darg = expr(darg)
             self.setJacobian(arg,darg,asExpr=True)
+    
     def setReturnType(self,type):
         """Sets a return type specifier.
 
         Args:
-           type (Type, str, or function): if a Type object, the return type is set
-               directly.  If a character type specifier, it is cast to Type.
-               If it is a function, it is assumed to be a function that that takes
-               in argument ``Type``s and returns a ``Type``.
+           type (:class:`Type`, str, or function): if a Type object, the return
+               type is set directly.  If a character type specifier, it is cast
+               to Type. If it is a function, it is assumed to be a function 
+               that that takes in argument Types and returns a :class:`Type`.
         """
         if callable(type):
             self.returnTypeFunc = type
         else:
             self.returnType = Type(type)
+    
     def setArgType(self,arg,type):
         """Sets an argument type specifier.
 
         Args:
             arg (int or str): an index or string naming an argument.
-            type (Type or str): a Type object or character type specifier for 
-                the specified argument.
+            type (Type or str): a :class:`Type` object or character type
+                specifier for the specified argument.
         """
         if self.argTypes is None:
             self.argTypes = [None]*len(self.argNames)
         index,name = self.checkArg(arg)
         self.argTypes[index] = Type(type)
+    
     def getArgType(self,arg):
         """Retrieves an argument type.
 
@@ -1816,22 +2018,30 @@ class Function:
         if self.argTypes is None: return None
         index,name = self.checkArg(arg)
         return self.argTypes[index]
+    
     def addSimplifier(self,signatures,func,pre=False):
-        """For a signature tuple, sets the simplifier to func.
+        """For a signature tuple, sets the simplifier to ``func``.
 
         Args:
-            signatures (list): a list of argument signatures. A signature can be:
+            signatures (list): a list of argument signatures. A signature can
+                be:
 
-                - the operation name for an OperatorExpression, passing the arg directly to func(...)
-                - '_scalar': matches to a constant scalar, and passes that constant to func(...)
-                - '_const': matches to constant, and passes that constant to func(...)
-                - '_returnType': passes the argument's returnType() to func(...)
-                - None: match all.  The arg is passed directly to func(...)
+                * the operation name for an OperatorExpression, passing the arg
+                  directly to func(...)
+                * '_scalar': matches to a constant scalar, and passes that
+                  constant to func(...)
+                * '_const': matches to constant, and passes that constant to
+                  ``func(...)``
+                * '_returnType': passes the argument's ``returnType()`` to
+                  ``func(...)``
+                * None: match all.  The arg is passed directly to func(...)
+                
+            func (callable): a callable that takes a list of function arguments, 
+                possibly transformed by _const or _returnType. This returns a 
+                simplified :class:`Expression` or ``None``.
 
-            func (callable): a callable that takes a list of arguments, possibly transformed by _const or _returnType.
-                This returns a simplified Expression or None.
-
-            pre (bool, optional): if True, the simplifier is called before arguments are simplified.
+            pre (bool, optional): if True, the simplifier is called before
+                arguments are simplified.
 
         If multiple matches are present then they are tested in order
 
@@ -1852,59 +2062,103 @@ class Function:
                 raise ValueError("Signatures must be strings or None")
             root = root.setdefault(s,dict())
         root[signatures[-1]] = func
+    
     def simplify(self,args,pre=False):
-        """Performs simplification of OperatorExpression(self,args), either with the simplifier function
-        or the simplifierDict."""
+        """Performs simplification of ``OperatorExpression(self,args)``, either
+        with the simplifier function or the simplifierDict."""
         if pre:
             simplifier = self.presimplifier
             simplifierDict = self.presimplifierDict
         else:
             simplifier = self.simplifier
             simplifierDict = self.simplifierDict
+        for a in args:
+            assert isinstance(a,Expression),"Uh... args to simplify need to be Expressions, got an arg %s of type %s"%(str(a),a.__class__.__name__)
         if simplifier is not None:
             res = simplifier(*args)
-            if res is not None: return res
+            if res is not None:
+                if SHAPE_CHECKING and isinstance(res,Expression):
+                    try:
+                        shres = res.returnType().shape()
+                        if to_const(shres) is not None:
+                            shself = self.__call__(*args).returnType().shape()
+                            if to_const(shself) is None or to_const(shres) != to_const(shself):
+                                print("symbolic.simplify: Warning, simplified version of",self.functionInfo.name,"doesn't have same size:",shself,"->",shres)
+                                print("Args:",args)
+                                print("Simplified",res)
+                    except Exception:
+                        pass
+                return res
         if len(simplifierDict) > 0:
             #print "Trying to match",[str(a) for a in args],"to simplifier dict"
             root = simplifierDict
+            stack = []
             passedArgs = args[:]
             for i,a in enumerate(args):
                 #print "Keys:",root.keys()
                 #print "Arg",i,":",a
                 if isinstance(a,OperatorExpression) and a.functionInfo.name in root:
-                    #print "  Matches operator"
+                    if _DEBUG_SIMPLIFY:
+                        print("Function",self.name,"simplifier list matches arg",a.functionInfo.name)
+                        stack.append(a.functionInfo.name)
                     root = root[a.functionInfo.name]
                     continue
                 if '_scalar' in root:
                     ac = to_scalar(a)
                     if ac is not None:
-                        #print "  Matches _scalar"
+                        if _DEBUG_SIMPLIFY:
+                            print("Function",self.name,"simplifier list matches _scalar for arg",a)
+                            stack.append('_scalar')
                         passedArgs[i] = ac
                         root = root['_scalar']
                         continue
                 if '_const' in root:
                     ac = to_const(a)
                     if ac is not None:
-                        #print "  Matches _const"
+                        if _DEBUG_SIMPLIFY:
+                            print("Function",self.name,"simplifier list matches _const for arg",a)
+                            stack.append('_const')
                         passedArgs[i] = ac
                         root = root['_const']
                         continue
                 if '_returnType' in root:
-                    #print "  Matches _returnType"
+                    if _DEBUG_SIMPLIFY:
+                        print("Function",self.name,"simplifier list matches arg",a,"returnType",a.returnType())
+                        stack.append('_returnType')
                     passedArgs[i] = a.returnType()
                     root = root['_returnType']
                     continue
                 if None in root:
                     #print "  Matches None"
+                    if _DEBUG_SIMPLIFY:
+                        print("Function",self.name,"simplifier list matches all for arg",a)
+                        stack.append(None)
                     root = root[None]
                     continue
                 #no match
-                #print "  No match"
+                if _DEBUG_SIMPLIFY:
+                    if isinstance(a,OperatorExpression):
+                        print("Function",self.name,"simplifier list",list(root.keys()),"fails to match",a)
                 return None
             if callable(root):
-                return root(*passedArgs)
+                res = root(*passedArgs)
+                if _DEBUG_SIMPLIFY:
+                    print("Function",self.name,"matches pattern",stack,", simplified to",res)
+                if SHAPE_CHECKING and isinstance(res,Expression):
+                    try:
+                        shres = res.returnType().shape()
+                        if to_const(shres) is not None:
+                            shself = self.__call__(*args).returnType().shape()
+                            if to_const(shself) is None or to_const(shres) != to_const(shself):
+                                print("symbolic.simplify: Warning, simplified version of",self.name,"doesn't have same size:",shself,"->",shres)
+                                print("Args:",passedArgs)
+                                print("Simplified",res)
+                    except Exception:
+                        pass
+                return res
             return None
         return None
+    
     def info(self):
         """Returns an text string describing the Function, similar to a docstring"""
         argstr =  '...' if self.argNames is None else ','.join(self.argNames)
@@ -2058,6 +2312,8 @@ class Variable:
         return mul(self,rhs)
     def __div__(self,rhs):
         return div(self,rhs)
+    def __truediv__(self,rhs):
+        return div(self,rhs)
     def __pow__(self,rhs):
         return pow_(self,rhs)
     def __radd__(self,lhs):
@@ -2068,10 +2324,14 @@ class Variable:
         return mul(lhs,self)
     def __rdiv__(self,lhs):
         return div(lhs,self)
+    def __rtruediv__(self,lhs):
+        return div(lhs,self)
     def __rpow__(self,lhs):
         return pow_(lhs,self)
     def __getitem__(self,index):
         return getitem(self,index)
+    def __abs__(self):
+        return abs_(self)
     def __setitem__(self,index,val):
         return setitem(self,index,val)
     def __getattr__(self,attr):
@@ -2099,27 +2359,27 @@ class _TraverseException(Exception):
         self.path = self.path[::-1]
         self.task = task
     def __str__(self):
-        print ":",
+        print(":", end=' ')
         if isinstance(self.e,_TraverseException):
             #lazy traversal
-            print "Expression traversal: Recursive exception during %s"%(str(self.task),)
+            print("Expression traversal: Recursive exception during %s"%(str(self.task),))
             elist = [self.e]
             while isinstance(elist[-1].e,_TraverseException):
                 elist.append(elist[-1].e)
             self.print_call_stack()
             for i,e in enumerate(elist):
-                print " ","@",e.task,"@:"
+                print(" ","@",e.task,"@:")
                 e.print_call_stack((i+1)*2)
-            print "Lowest level exception:",
+            print("Lowest level exception:", end=' ')
             return elist[-1].e.__class__.__name__+": "+str(elist[-1].e)
         else:
-            print "Expression traversal: Exception '%s' during %s"%(self.e,str(self.task))
+            print("Expression traversal: Exception '%s' during %s"%(self.e,str(self.task)))
             self.print_call_stack()
             return ""
     def __repr__(self):
         return self.__str__()
     def reraise(self):
-        raise self.e,None,self.exc_info
+        raise self.e.with_traceback(self.exc_info)
     def print_call_stack(self,indent=0):
         self.path[0]._parent = self.task
         for n,p in zip(self.path[1:],self.parents):
@@ -2136,9 +2396,9 @@ class Expression(object):
         """Returns the output type of this expression."""
         raise NotImplementedError()
     def depth(self,cache=True):
-        """Returns the depth of the deepest leaf of this expression tree (i.e., its height).
-        If cache = True, depths are cached as attribute 'depth' to speed up
-        subsequent depth() calls."""
+        """Returns the depth of the deepest leaf of this expression tree (i.e.,
+        its height). If cache = True, depths are cached as attribute 'depth' to
+        speed up subsequent depth() calls."""
         try:
             return self._cache['depth']
         except KeyError:
@@ -2157,8 +2417,9 @@ class Expression(object):
         """
         raise NotImplementedError()
     def returnConstant(self,context=None):
-        """Returns true if the evaluation of the expression in the given context results in a constant.
-        If so, then evalf() can safely be applied without error."""
+        """Returns true if the evaluation of the expression in the given
+        context results in a constant. If so, then :meth:`evalf` can safely be
+        applied without error."""
         raise NotImplementedError()
     def eval(self,context=None):
         """Evaluates the expression while substituting all constant values. 
@@ -2177,24 +2438,26 @@ class Expression(object):
         """
         r = self.eval(context)
         if not is_const(r):
-            import symbolic_io
+            from . import symbolic_io
             raise ValueError("Expression.evalf: result of %s is not a constant, result is %s"%(str(symbolic_io.exprToJson(self)),str(r)))
         if isinstance(r,ConstantExpression):
             return r.value
         if isinstance(r,Expression):
-            import symbolic_io
+            from . import symbolic_io
             raise ValueError("Expression.evalf: result of %s is not a constant, result is %s"%(str(symbolic_io.exprToJson(self)),str(r)))
         return r
     def _eval(self,context):
         """Internally used eval"""
         raise NotImplementedError()
     def _evalf(self,context=None):
-        """Internally used evalf.  May be a tiny bit faster than evalf but has less informative error messages"""
+        """Internally used evalf.  May be a tiny bit faster than :meth:`evalf`
+        but has less informative error messages.
+        """
         raise NotImplementedError()
     def deriv(self,var,context=None):
-        """Returns a new expression where all bound variables and variables in context
-        are reduced to constant values. If all arguments are constant, returns a
-        constant.
+        """Returns a new expression where all bound variables and variables in 
+        context are reduced to constant values. If all arguments are constant,
+        returns a constant.
 
         Args:
             var: either a Variable, a string naming a Variable, or a dictionary
@@ -2206,17 +2469,17 @@ class Expression(object):
                 constant values.
         """
         return self._deriv(var,context)
-    def _deriv(self,var,context):
+    def _deriv(self,var,context,rows):
         """Internally used deriv"""
         return 0
     def __str__(self):
         """Returns a string representing this expression"""
-        import symbolic_io
+        from . import symbolic_io
         exp = symbolic_io.exprToStr(self,parseCompatible=False)
         assert isinstance(exp,str),"Invalid type returned by exprToStr: "+exp.__class__.__name__
         return exp
     def __repr__(self):
-        import symbolic_io
+        from . import symbolic_io
         return symbolic_io.exprToStr(self,parseCompatible=True)
     def vars(self,context=None,bound=False):
         """Returns a list of all free Variables under this expression. 
@@ -2242,9 +2505,17 @@ class Expression(object):
             raise ValueError("Unable to find term %s in expression %s"%(str(val),str(self)))
         return self
     def simplify(self,context=None,depth=None):
-        """Returns a simplified version of self, or self if it cannot be simplified.
-        - context: a dict or Context for Variable / UserData substitution
-        - depth: None for full-depth simplification, or the max depth to explore
+        """Returns a simplified version of self, or self if it cannot be
+        simplified.
+
+        Args:
+            context (dict or :class:`Context`): any Variable / UserData whose
+                name appears in here will be substituted with its value.
+            depth (int, optional): None for full-depth simplification, or the
+                max depth to explore.
+
+        Returns:
+            Expression:
         """
         res = self._simplify(context,depth)
         if res is None: return self
@@ -2259,31 +2530,41 @@ class Expression(object):
         """Generic traversal function.
 
         Args:
-            pre (function, optional): a function f(expr) of an Expression that is called before traversing
-                children. It returns a triple (descend,cont,value) which controls the recursion:
+            pre (function, optional): a function f(expr) of an Expression that
+                is called before traversing children. It returns a triple
+                ``(descend,cont,value)`` which controls the recursion:
 
-                - If descend is True, then this proceeds to traverse children and call post. value is ignored.
-                - If descend is False, value is the return value of the traversal.
-                - If cont is True, then the parent of expr continues traversing children.
-                - If cont is False, then the parent of expr continues traversing children.
+                * If descend is True, then this proceeds to traverse children
+                  and call post. value is ignored.
+                * If descend is False, value is the return value of the
+                  traversal.
+                * If cont is True, then the parent of expr continues traversing
+                  children.
+                * If cont is False, then the parent of expr continues
+                  traversing children.
 
-                For example, a find function would return (False,False,*) if an item is found, and
-                (True,True,*) otherwise.
+                For example, a find function would return (False,False,*) if an
+                item is found, and (True,True,*) otherwise.
 
-            post (function, optional): a two-argument function f(expr,childvals) called after traversing children.
-                childvals are the return values of traversing children.
-                It returns a pair (cont,value), where value is the return value of the traversal
-                under expr, and cont which controls the recursion:
+            post (function, optional): a two-argument function
+                ``f(expr,childvals)`` called after traversing children. 
+                ``childvals`` are the return values of traversing children.
+                It returns a pair ``(cont,value)``, where value is the return
+                value of the traversal under ``expr``, and ``cont`` which
+                controls the recursion:
 
-                - If cont is True, the parent of expr continues traversing children.
-                - If cont is False, the parent of expr stops traversing children and value is used the
-                  return value of the parent.
+                * If cont is True, the parent of expr continues traversing
+                  children.
+                * If cont is False, the parent of expr stops traversing
+                  children and value is used the return value of the parent.
 
-                If post is evaluated, the cont value here overrides the cont value of pre.
+                If post is evaluated, the cont value here overrides the cont
+                value of pre.
             cache (bool, optional): if True, uses the caching functionality.
-            clearcache (bool, optional): if True, deletes the cache after traversal.  Default uses cache and clears it.
-            cacheas (str, optional): if not None, caches the return value as an attribute. For this to work,
-                cache must be True.
+            clearcache (bool, optional): if True, deletes the cache after
+                traversal.  Default uses cache and clears it.
+            cacheas (str, optional): if not None, caches the return value as an
+                attribute. For this to work, ``cache`` must be True.
 
         Returns:
             result: The value returned by pre or post.
@@ -2292,8 +2573,8 @@ class Expression(object):
             cacheas = 0
         if cache and clearcache:
             if cacheas in self._cache:
-                print "Hmm... cache[%s] was not cleared correctly before traverse is called?  Or perhaps reentrant traversal?"%(str(cacheas),)
-                print "Myself: %s, cached value %s"%(str(self),str(self._cache[cacheas]))
+                print("Hmm... cache[%s] was not cleared correctly before traverse is called?  Or perhaps reentrant traversal?"%(str(cacheas),))
+                print("Myself: %s, cached value %s"%(str(self),str(self._cache[cacheas])))
                 import traceback
                 traceback.print_stack()
                 cache = False
@@ -2301,7 +2582,7 @@ class Expression(object):
             try:
                 res = node._cache[cacheas]
                 if _DEBUG_TRAVERSE and cacheas in _DEBUG_TRAVERSE_ITEMS:
-                    print "Found cached value cache[%s]=%s for node %s"%(cacheas,str(res),str(self))
+                    print("Found cached value cache[%s]=%s for node %s"%(cacheas,str(res),str(self)))
                 return (True,res)
             except KeyError:
                 #print "Did not find cached value cache[%s]"%(cacheas,)
@@ -2316,7 +2597,7 @@ class Expression(object):
                     return (False,_TraverseException(e,node,'pre-traverse '+cacheas,sys.exc_info()[2]))
                 if not descend:
                     if _DEBUG_TRAVERSE and cacheas in _DEBUG_TRAVERSE_ITEMS:
-                        print "Not descending under %s, caching as %s and returning value"%(str(node),cacheas,value)
+                        print("Not descending under %s, caching as %s and returning value"%(str(node),cacheas,value))
                     node._cache[cacheas] = value
                     return (cont,value)
             cvals = []
@@ -2325,7 +2606,7 @@ class Expression(object):
                     try:
                         res = c._cache[cacheas]
                         if _DEBUG_TRAVERSE and cacheas in _DEBUG_TRAVERSE_ITEMS:
-                            print "Found cached child %d cache[%s]=%s for node %s"%(i,cacheas,str(res),str(node))
+                            print("Found cached child %d cache[%s]=%s for node %s"%(i,cacheas,str(res),str(node)))
                         cvals.append(res)
                     except KeyError:
                         c._parent = (weakref.ref(node),i)
@@ -2335,7 +2616,7 @@ class Expression(object):
                             return False,value
                         if not ccont:
                             if _DEBUG_TRAVERSE and cacheas in _DEBUG_TRAVERSE_ITEMS:
-                                print "Not continuing under %s, caching as %s and returning value"%(str(node),cacheas,value)
+                                print("Not continuing under %s, caching as %s and returning value"%(str(node),cacheas,value))
                             node._cache[cacheas] = value
                             return (False,value)
                         cvals.append(value)
@@ -2346,7 +2627,7 @@ class Expression(object):
                     import sys
                     return (False,_TraverseException(e,node,cacheas,sys.exc_info()[2]))
             if _DEBUG_TRAVERSE and cacheas in _DEBUG_TRAVERSE_ITEMS:
-                print "Completed traversal under %s, caching as %s and returning value %s"%(str(node),cacheas,value)
+                print("Completed traversal under %s, caching as %s and returning value %s"%(str(node),cacheas,value))
             node._cache[cacheas] = value
             return (cont,value)
         def _traverse_recurse_nocache(node,pre,post):
@@ -2360,7 +2641,7 @@ class Expression(object):
                     return (False,_TraverseException(e,node,'pre-traverse '+cacheas,sys.exc_info()[2]))
                 if not descend:
                     if _DEBUG_TRAVERSE and cacheas in _DEBUG_TRAVERSE_ITEMS:
-                        print "Not descending under",str(node),", returning value",value
+                        print("Not descending under",str(node),", returning value",value)
                     return (cont,value)
             cvals = []
             if node._children is not None:
@@ -2372,7 +2653,7 @@ class Expression(object):
                         return False,value
                     if not cont:
                         if _DEBUG_TRAVERSE and cacheas in _DEBUG_TRAVERSE_ITEMS:
-                            print "Not continuing under",str(node),", returning value",value
+                            print("Not continuing under",str(node),", returning value",value)
                         return (False,value)
                     cvals.append(value)
             if post is not None:
@@ -2382,7 +2663,7 @@ class Expression(object):
                     import sys
                     return (False,_TraverseException(e,node,cacheas,sys.exc_info()[2]))
             if _DEBUG_TRAVERSE and cacheas in _DEBUG_TRAVERSE_ITEMS:
-                print "Completed traversal under",str(node),", returning value",value
+                print("Completed traversal under",str(node),", returning value",value)
             return (cont,value)
         self._parent = str(cacheas)
         if cache:
@@ -2393,7 +2674,7 @@ class Expression(object):
             cont,value = _traverse_recurse_nocache(self,pre,post)
         self._parent = None
         if isinstance(value,_TraverseException):
-            raise value,None,value.exc_info
+            raise value.with_traceback(value.exc_info)
         return value
     def _clearCache(self,key,deep=False):
         incache = key in self._cache
@@ -2413,15 +2694,15 @@ class Expression(object):
                 checkcleared(self,key)
     def _print_call_stack(self,indent=0):
         """Prints the traversal stack.  Used for debugging purposes."""
-        import symbolic_io
+        from . import symbolic_io
         if indent > 0:
-            print ""*(indent-1),
+            print(""*(indent-1), end=' ')
         sstr = '##'+str(self)+'##'
         if self._parent is None:
-            print sstr
+            print(sstr)
             return
         if isinstance(self._parent,str):
-            print self._parent,"(",sstr,")"
+            print(self._parent,"(",sstr,")")
             return
         def call_stack_str(n,cstr,cindex):
             astr = []
@@ -2439,12 +2720,12 @@ class Expression(object):
             return nstr
         ref = self._parent[0]()
         if ref is not None:
-            print call_stack_str(ref,sstr,self._parent[1])
+            print(call_stack_str(ref,sstr,self._parent[1]))
     def _signature(self):
         """Returns a tuple that can be used for comparisons and hashing"""
         return ()
     def __bool__(self):
-        print "__bool__ was called on",self
+        print("__bool__ was called on",self)
         raise ValueError("Can't test the truth value of an Expression.... did you mean to use if_(...)?")
     def __not__(self):
         return not_(self)
@@ -2470,6 +2751,8 @@ class Expression(object):
         return mul(self,rhs)
     def __div__(self,rhs):
         return div(self,rhs)
+    def __truediv__(self,rhs):
+        return div(self,rhs)
     def __pow__(self,rhs):
         return pow_(self,rhs)
     def __radd__(self,lhs):
@@ -2479,6 +2762,8 @@ class Expression(object):
     def __rmul__(self,lhs):
         return mul(lhs,self)
     def __rdiv__(self,lhs):
+        return div(lhs,self)
+    def __rtruediv__(self,lhs):
         return div(lhs,self)
     def __rpow__(self,lhs):
         return pow_(lhs,self)
@@ -2506,7 +2791,7 @@ class Wildcard(Expression):
         raise ValueError("Can't evaluate Wildcard expressions")
     def _evalf(self,context):
         raise ValueError("Can't evaluate Wildcard expressions")
-    def _deriv(self,var,context):
+    def _deriv(self,var,context,rows):
         raise ValueError("Can't take derivative of Wildcard expressions")
 
 class ConstantExpression(Expression):
@@ -2520,6 +2805,12 @@ class ConstantExpression(Expression):
             raise ValueError("Can't initialize a ConstantExpression with a non-constant Expression")
         else:
             self.value = value
+        def checkType(v):
+            if hasattr(v,'__iter__') and not isinstance(v,str):
+                for x in v:
+                    checkType(x)
+            assert not isinstance(v,ConstantExpression)
+        checkType(self.value)
     def returnType(self):
         return type_of(self.value)
     def isConstant(self):
@@ -2533,11 +2824,11 @@ class ConstantExpression(Expression):
     def match(self,val):
         if not isinstance(val,Expression): val = expr(val)
         if isinstance(val,Wildcard): return True
-        return isinstance(val,ConstantExpression) and self.value == val.value
+        return isinstance(val,ConstantExpression) and np.all(self.value == val.value)
     def __len__(self):
         return len(self.value)
     def _signature(self):
-        if isinstance(self.value,(int,float,bool,str)):
+        if isinstance(self.value,_PY_PRIMITIVE_TYPES):
             return (self.value,)
         elif isinstance(self.value,np.ndarray):
             return tuple(self.value.flatten())
@@ -2600,8 +2891,8 @@ class UserDataExpression(Expression):
             return context[self.name]
         else:
             return context.userData[self.name]
-    def _deriv(self,var,context):
-        print "Attempting derivative of user data expression",name,"w.r.t.",var
+    def _deriv(self,var,context,rows):
+        print("Attempting derivative of user data expression",name,"w.r.t.",var)
         if isinstance(var,dict):
             return var.get(self.name,0)
         else:
@@ -2623,7 +2914,7 @@ class UserDataExpression(Expression):
     def _simplify(self,context=None,depth=None):
         if context is not None: 
             res = context.get(self.name,None)
-            if isinstance(res,(bool,int,float,list,tuple,np.ndarray)):
+            if isinstance(res,_PY_CONST_TYPES) or isinstance(res,(list,tuple)):
                 return ConstantExpression(res)
             return None
         return None
@@ -2654,18 +2945,21 @@ class VariableExpression(Expression):
         if isinstance(context,dict):
             return context[self.var.name]
         raise ValueError("Must provide variable binding or context")
-    def _deriv(self,var,context):
+    def _deriv(self,var,context,rows):
         if isinstance(var,Variable): return self.deriv(var.name)
         elif isinstance(var,dict):
             return var.get(self.var.name,0)
         else:
+            if not isinstance(var,str):
+                raise ValueError("Can't take the derivative of an expression w.r.t. anything except a str, Variable, or dict")
             if self.var.name == var:
                 size = self.var.type.size
                 if size is None:
                     assert self.var.type.char in SCALAR_TYPES,"Can only take derivative if the size of a variable is known"
-                    return _eye(0)
+                    return 1
                 else:
-                    return _eye(size)
+                    assert len(size) == 1,"Can't take derivative with respect to a non-vector Variable yet?"
+                    return _eye(size[0])
             return 0
     def match(self,val):
         if isinstance(val,Wildcard): return True
@@ -2698,7 +2992,7 @@ class OperatorExpression(Expression):
         self._children = self.args
     #def __del__(self):
     #    #remove references in parents list
-    #    #print "OperatorExpression.__del__ called"
+    #    #print("OperatorExpression.__del__ called")
     #    for a in self.args:
     #        a._parents = [(p,index) for p,index in a._parents if p() is not None]
     def _do(self,constargs):
@@ -2710,30 +3004,30 @@ class OperatorExpression(Expression):
         except Exception as e:
             #this will be handled during eval's exception handler
             """
-            print "Error while evaluating",self.functionInfo.name,"with arguments:"
+            print("Error while evaluating",self.functionInfo.name,"with arguments:")
             if self.functionInfo.argNames:
                 for (name,a) in zip(self.functionInfo.argNames,constargs):
-                    print " ",name,"=",a
+                    print(" ",name,"=",a)
             else:
-                print " ",','.join([str(a) for a in constargs])
-            print "Error",e
+                print(" ",','.join([str(a) for a in constargs]))
+            print("Error",e)
             import traceback
-            print "Traceback"
+            print("Traceback")
             traceback.print_exc()
             try:
-                print "Call stack:",
+                print("Call stack:",)
                 self._print_call_stack()
             except Exception as e2:
-                print "Hmm... exception occured while calling print_call_stack()?"
-                print e2
+                print("Hmm... exception occured while calling print_call_stack()?")
+                print(e2)
                 import traceback
-                print "Traceback"
+                print("Traceback")
                 traceback.print_exc()
             raise ValueError("Exception "+str(e)+" while evaluating function "+self.functionInfo.name+" with args "+",".join(str(v) for v in constargs))
             """
             task = "Evaluating "+self.functionInfo.name+" with args "+",".join(str(v) for v in constargs)
             import sys
-            raise _TraverseException(e,self,task,sys.exc_info()[2]),None,sys.exc_info()[2]
+            raise _TraverseException(e,self,task,sys.exc_info()[2]).with_traceback(sys.exc_info()[2])
     def returnType(self):
         if 'returnType' in self._cache:
             return self._cache['returnType']
@@ -2743,8 +3037,8 @@ class OperatorExpression(Expression):
                 self._cache['returnType'] = type
                 return type
             except Exception as e:
-                print "Exception while evaluating",self.functionInfo.name,"return type with args",','.join(str(v) for v in self.args)
-                print "   exception is:",e
+                print("Exception while evaluating",self.functionInfo.name,"return type with args",','.join(str(v) for v in self.args))
+                print("   exception is:",e)
                 raise
         if self.functionInfo.returnType:
             self._cache['returnType'] = self.functionInfo.returnType
@@ -2773,9 +3067,11 @@ class OperatorExpression(Expression):
         are reduced to constant values. If all arguments are constant, returns a
         constant expression."""
         if 'eval' in self._cache:
-            print "WARNING: Expression.eval already has cached value?"
-            print "  Cached value",self._cache['eval']
-            raw_input()
+            print("WARNING: Expression.eval already has cached value?")
+            print("  expression",self)
+            print("  Cached value",self._cache['eval'])
+            raise ValueError()
+            input()
         res = self._eval(context)
         self._clearCache('eval')
         return res
@@ -2810,21 +3106,31 @@ class OperatorExpression(Expression):
             return (True,node._do(aexprs))
         return self._traverse(_preeval,_posteval,cacheas='evalf')
     def deriv(self,var,context=None):
-        """Returns an expression for the derivative d/dvar(self), where all bound variables and
-        variables in context are reduced to constant values.  
+        """Returns an expression for the derivative dself/dvar, where all
+        bound variables and variables in context are reduced to constant
+        values.
+        
+        Normally, ``var`` is a ``Variable`` or ``str``.
 
         The derivative/Jacobian size is determined as follows:
 
         - If both var and self are scalar, the result is a scalar.
-        - If self is scalar and var is non-scalar, the result has the same shape as var.
-        - If self is non-scalar and var is scalar, the result the same shape as self.
-        - If both self and var are arrays, the result is an n-D array with shape shape(self)+shape(var).
-        - If other self or var are compound (i.e., unstructured lists), the result is an m x n matrix,
-          where m = count(self) and n = count(var).
+        - If self is scalar and var is non-scalar, the result has the same
+          shape as var.
+        - If self is non-scalar and var is scalar, the result the same shape
+          as self.
+        - If both self and var are arrays, the result is an n-D array with
+          shape shape(self)+shape(var).
+        - If other self or var are compound (i.e., unstructured lists), the
+          result is an m x n matrix, where m = count(self) and n = count(var).
 
         If no derivative can be determined, this returns None.
 
-        If the expression evaluates to a constant, the result will be either 0 or a constant expression.
+        If the expression evaluates to a constant, the result will be either 0
+        or a constant expression.
+        
+        Another option is for ``var`` to be a dict of variable names to their
+        derivatives.
         """
         if not isinstance(var,dict):
             if isinstance(var,Variable):
@@ -2838,108 +3144,175 @@ class OperatorExpression(Expression):
                 else:
                     ud = self.find(UserDataExpression(name))
                     if ud is not None:
-                        print "symbolic.deriv: Warning, taking the derivative w.r.t. user data "+var+", assuming a numeric value"
+                        print("symbolic.deriv: Warning, taking the derivative w.r.t. user data "+var+", assuming a numeric value")
                         var = VariableExpression(Variable(var,'N'))
                     else:
-                        raise ValueError("Can't take the derivative w.r.t. undefined variable "+var)                    
+                        raise ValueError("Can't take the derivative w.r.t. undefined variable "+var)
 
-            if var.type.is_scalar():
-                var_cols = 0
-                var_shape = ()
-                var_scalar = True
-                var_dims = 0
-                var_complex = False
-            else:
-                var_cols = count.optimized(var)
+            var_irregular = var.type.char not in SCALAR_TYPES + ARRAY_TYPES
+            try:
+                var_shape = var.type.shape()
+            except Exception:
                 var_shape = shape.optimized(var)
+            if not var_irregular:
+                var_scalar = False
+                if isinstance(var_shape,tuple):
+                    #array type, fixed shape
+                    var_cols = np.product(var_shape)
+                    if var_shape == ():
+                        var_cols = 0
+                    var_dims = len(var_shape)
+                    var_scalar = (var_cols == 0)
+                else:
+                    #array type, variable shape
+                    var_scalar = False
+                    var_cols = count.optimized(var)
+                    var_dims = dims.optimized(var)
+                    assert is_const(var_dims),"Variable dimensions are not constant? "+str(var_dims)+' type '+str(var.type)
+                    var_dims = to_const(var_dims)
+                #reshape arrays with 2 or more dims 
+                var_deriv_reshape = (var_dims > 1)
+            else:
+                #irregular type
+                var_cols = count.optimized(var)
+                if is_const(var_cols):
+                    var_cols = int(to_const(var_cols))
                 var_scalar = False
                 var_dims = dims.optimized(var)
-                assert is_const(var_dims),"Variable dimensions are not constant? "+str(var_dims)+' type '+str(var.type)
-                var_dims = to_const(var_dims)
-                var_complex = (var_dims > 1)
+                #don't reshape hyper-types, keep them as count
+                var_deriv_reshape = False
             #print "Number of columns of deriv variable",var,"is",cols
             #if not is_const(cols):
             #    print "WARNING: variable number of columns",cols,"in derivative Variable type",var.type
-            if is_const(var_cols) and var_cols <= 1:
-                varderivs = {name:eye.optimized(to_const(var_cols))}
+            if isinstance(var_cols,int) and var_cols == 0:
+                varderivs = {name:1}
+                assert var_deriv_reshape == False
+            elif isinstance(var_cols,int) and var_cols == 1:
+                varderivs = {name:eye.optimized(var_cols)}
+                assert var_deriv_reshape == False
             else:
-                varderivs = {name:eye._call(var_cols)}
-            
-            res = self.deriv(varderivs,context)
-            return res
-
-        #var is a dict
-        varderivs = var
-        cols = _stack_count(varderivs,context)
-        res = self._deriv(varderivs,context,cols)
+                if var_deriv_reshape:
+                    varderivs = {name:reshape._call(eye._call(var_cols),flatten.optimized(var_cols,var_shape))}
+                else:
+                    varderivs = {name:eye._call(var_cols)}
+        else:
+            #var is a dict
+            varderivs = var
+            var_deriv_reshape = False
+            #because some functions' derivatives may call Expression.deriv again with the
+            #same dict, we need to determine the dict size dynamically
+            var_cols = 0
+            for (k,v) in varderivs.items():
+                if is_op(v,'eye'):
+                    var_cols = v.args[0]
+                elif is_op(v,'reshape'):
+                    var_cols = getitem.optimized(v.args[1],0)
+                elif is_const(v):
+                    var_cols = 0
+                break
+            print("CALLING DERIV",self,"WITH ARG DERIV dict INFERRED COLUMNS",var_cols)
+            if to_const(var_cols) is not None:
+                var_cols = to_const(var_cols)
+            var_scalar = is_scalar(var_cols,0)
+            var_dims = 0
+            var_irregular = False
+        
+        res = self._deriv(varderivs,context,var_cols)
 
         self._clearCache('deriv',deep=True)
 
         if _DEBUG_DERIVATIVES:
-            print "symbolic.deriv: Derivative of",self,"w.r.t.",varderivs.keys(),"is",res
+            print("symbolic.deriv: Derivative of",self,"w.r.t.",list(varderivs.keys()),"is",res)
 
         if res is None:
+            #error occurred, return None
             return None
 
-        self_dims = dims.optimized(self)
+        self_type = self.returnType()
+        self_irregular = self_type is None or self_type.char not in SCALAR_TYPES + ARRAY_TYPES
+        self_dims = dims.optimized(self) if self_type is None else self_type.dims()
         if not is_const(self_dims):
             if _DEBUG_DERIVATIVES:
-                print "symbolic.deriv: warning, can't determine dimensions of self, trying eval"
+                print("symbolic.deriv: warning, can't determine dimensions of self, trying eval")
             self_dims = dims.optimized(self.eval(context))
             if _DEBUG_DERIVATIVES:
                 if not is_const(self_dims):
-                    print "   ... really cannot determine dimensions of self. Proceeding as though non-scalar"
-        self_dims = to_const(self_dims)
+                    print("   ... really cannot determine dimensions of self. Proceeding as though non-scalar")
         self_scalar = is_scalar(self_dims,0)
-        var_scalar = is_scalar(cols,0)
         if not var_scalar and not self_scalar:
-            if _DEBUG_DERIVATIVES:
-                print "symbolic.deriv: doing transpose of",res
-            res = transpose(res)
+            if to_const(self_dims+1) == 2:
+                if _DEBUG_DERIVATIVES:
+                    print("symbolic.deriv: doing transpose of",res)
+                res = transpose(res)
+            else:
+                #use the proper transpose for higher dimensional derivatives
+                if _DEBUG_DERIVATIVES:
+                    print("symbolic.deriv: using tensor transpose for self dims",self_dims,"var dims",var_dims)
+                if self_dims > 2:
+                    print("WEIRD TENSOR RESULT",self)
+                res = transpose2(res,flatten(1+range_(dims.optimized(res)-1),0))
         else:
             #print "symbolic.deriv: not doing transpose of",res
             pass
         
+        """
+        if self_irregular or var_irregular:
+            print("derivative result",res,"with irregular self?",self_irregular,"or var:",var_irregular)
+            print("Res shape",shape.optimized(res))
+            print("Self shape",shape.optimized(self))
+            print("Var shape",var_shape)
+            print("Self scalar:",self_scalar,"var scalar:",var_scalar)
+        """
+        if self_scalar and (var_irregular or var_deriv_reshape):
+            if _DEBUG_DERIVATIVES:
+                print("symbolic.deriv: reshaping result to",var_shape)
+            res = reshape(res,var_shape)
+        if not self_scalar and var_deriv_reshape:
+            if _DEBUG_DERIVATIVES:
+                print("symbolic.deriv: reshaping result to",simplify(flatten(shape(res)[0:-1],var_shape)))
+            res = reshape(res,simplify(flatten(shape(res)[0:-1],var_shape)))
+        
         if isinstance(res,OperatorExpression):
-            if False and res.returnConstant(context):
+            rsimp = res._postsimplify(depth=None)
+            res._clearCache('simplified',deep=True)
+            if rsimp is not None:
                 if _DEBUG_DERIVATIVES:
-                    print "symbolic.deriv: Return value of",res,"is constant"
-                return res.evalf()
+                    print("symbolic.deriv: Post-simplified derivative from",res,"to",rsimp)
+                res = rsimp
             else:
-                rsimp = res._postsimplify(depth=None)
+                if _DEBUG_DERIVATIVES:
+                    print("symbolic.deriv: Couldn't simplify")
+            if isinstance(res,OperatorExpression):
+                rsimp = res._constant_expansion(context,depth=None)
                 res._clearCache('simplified',deep=True)
-                if rsimp is not None:
-                    if _DEBUG_DERIVATIVES:
-                        print "symbolic.deriv: Post-simplified derivative from",res,"to",rsimp
-                    res = rsimp
-                if isinstance(res,OperatorExpression):
-                    rsimp = res._constant_expansion(context,depth=None)
-                    res._clearCache('simplified',deep=True)
-                    if _DEBUG_DERIVATIVES:
-                        if rsimp is not None:
-                            print "symbolic.deriv: Constant expansion of derivative from",res,"to",rsimp
-                if rsimp is not None: return rsimp
-                return res
+                if _DEBUG_DERIVATIVES:
+                    if rsimp is not None:
+                        print("symbolic.deriv: Constant expansion of derivative from",res,"to",rsimp)
+            if rsimp is not None: return rsimp
+            return res
         return res
 
-    def _deriv(self,varderivs,context,cols=None):
-        #varderivs must contain a map from variable names to derivatives dvar.
+    def _deriv(self,varderivs,context,rows=None):
+        #varderivs must contain a map from variable names var to derivatives dvar.
+        #
+        #If rows == 0, then each dvar is a derivative of var w.r.t. a scalar parameter x.
+        #
+        #If rows > 0, then each dvar is a row-stacked array of shape [rows] + shape(var)
+        #if var is array-like, or (rows,count(var)) otherwise.
         assert len(varderivs) > 0,"Must provide at least one variable derivative"
-        if cols is None:
-            cols = _stack_count(varderivs,context)
-        var_scalar = is_scalar(cols,0)
-
-        def _jacobian_shape(node):
-            ndims = dims.optimized(node)
-            if is_scalar(ndims,0):
-                if var_scalar:
-                    return ()
-                else:
-                    return cols
-            elif var_scalar:
+        assert rows is not None
+        var_scalar = is_scalar(rows,0)
+        if var_scalar:
+            assert isinstance(to_const(rows),int),"NUMBER OF ROWS ISNT INTEGER? %s %s"%(str(rows),rows.__class__.__name__)
+            def _jacobian_shape(node):
                 return shape.optimized(node)
-            else:
-                return array.optimized(cols,count.optimized(node))
+        else:
+            def _jacobian_shape(node):
+                nt = node.returnType()
+                if nt is not None and nt.char in SCALAR_TYPES+ARRAY_TYPES:
+                    return flatten.optimized(rows,shape.optimized(node))
+                else:
+                    return array.optimized(rows,count.optimized(node))
 
         def _deriv_pre(node):
             if isinstance(node,OperatorExpression) and hasattr(node.functionInfo,'custom_eval'):
@@ -2948,7 +3321,9 @@ class OperatorExpression(Expression):
                 if _is_exactly(node.functionInfo.deriv,0):
                     return (False,True,None)
                 assert callable(node.functionInfo.deriv),"custom_eval functions needs to define a callable deriv function"
-                res = node.functionInfo.deriv(*([context]+node.args+[varderivs]))
+                if var_scalar:
+                    assert isinstance(to_const(rows),int),"NUMBER OF ROWS ISNT INTEGER? %s %s"%(str(rows),rows.__class__.__name__)
+                res = node.functionInfo.deriv(*([context]+node.args+[varderivs,rows]))
                 if _is_exactly(res,0):
                     try:
                         res = zero._call(_jacobian_shape(node))
@@ -2958,7 +3333,10 @@ class OperatorExpression(Expression):
                 elif res is None:
                     pass
                 else:
-                    res = transpose.optimized(res)
+                    pass
+                    #print("In branch",node,"deriv",res)
+                    #raise NotImplementedError("Haven't tested this branch... why do we need a transpose?")
+                    #res = transpose.optimized(res)
                 return (False,True,res)
             return (True,True,None)
         def _deriv_post(node,cvals):
@@ -2969,26 +3347,36 @@ class OperatorExpression(Expression):
                 elif node.functionInfo.deriv is None:
                     if all(_is_exactly(v,0) or is_zero(v) for v in cvals): 
                         if _DEBUG_DERIVATIVES:
-                            print "symbolic.deriv: No derivative for function",node.functionInfo.name,"but we happily had no variables to consider"
-                            print "  Values of arguments"
+                            print("symbolic.deriv: No derivative for function",node.functionInfo.name,"but we happily had no variables to consider")
+                            print("  Values of arguments")
                             for v in node.args:
-                                print "    ",v
-                            print "  Derivatives of arguments"
+                                print("    ",v)
+                            print("  Derivatives of arguments")
                             for v in cvals:
-                                print "    ",v
+                                print("    ",simplify(v))
                         res = 0
                     else:
-                        print "Warning: No derivative for function",node.functionInfo.name
+                        print("symbolic.deriv: Warning, no derivative for function",node.functionInfo.name)
                         return True,None
+                elif all(_is_exactly(v,0) or is_zero(v) for v in cvals): 
+                    if _DEBUG_DERIVATIVES:
+                        print("symbolic.deriv: zero derivatives of arguments for",node.functionInfo.name)
+                    res = 0
                 else:
                     if _DEBUG_DERIVATIVES:
-                        print "symbolic.deriv: Computing raw derivative of %s(%s)"%(node.functionInfo.name,','.join(str(a) for a in node.args))
-                        print "   w.r.t.",', '.join('d/d'+k+'='+str(v) for (k,v) in varderivs.iteritems())
-                        print "   with argument derivatives",','.join([str(v) for v in cvals])
+                        print("symbolic.deriv: Computing raw derivative of %s(%s)"%(node.functionInfo.name,','.join(str(a) for a in node.args)))
+                        print("   w.r.t.",', '.join('d/d'+k+'='+str(v) for (k,v) in varderivs.items()))
+                        if len(cvals) <= 1:
+                            print("   with argument derivatives",','.join([str(v) for v in cvals]))
+                        else:
+                            print("   with argument derivatives")
+                            for v in cvals:
+                                print("   -",v)
                     #ACTUALLY DO THE DERIVATIVE
-                    res = node._do_deriv(cvals,cols)
-                    if _DEBUG_DERIVATIVES:
-                        print "  Result is %s (type %s)"%(str(res),res.__class__.__name__)
+                    res = node._do_deriv(cvals,rows)
+                    #if _DEBUG_DERIVATIVES:
+                    #    print("  Result is %s (type %s)"%(str(simplify(res)),res.__class__.__name__))
+                    #    print("  unsimplified",res)
                     #print "Result of derivative of",node.functionInfo.name,"w.r.t.",[(k,str(v)) for (k,v) in varderivs.iteritems()],"is",str(res)
             elif isinstance(node,VariableExpression):
                 if node.var.name in varderivs:
@@ -2999,98 +3387,278 @@ class OperatorExpression(Expression):
             elif isinstance(node,ConstantExpression):
                 res = 0
             if res is not None and not _is_exactly(res,0):
-                if not var_scalar and to_const(dims.optimized(node)) > 1:
+                dconst = to_const(dims.optimized(node))
+                if dconst is None:
+                    raise ValueError("Odd, dimensions of node "+str(node)+" don't have constant # of dimensions?  dims="+str(dims.optimized(node)))
+                if not var_scalar and dconst > 1:
                     rshape = shape.optimized(res)
                     outshape = _jacobian_shape(node)
-                    if not is_const(rshape) or not is_const(outshape) or not np.array_equal(to_const(rshape),to_const(outshape)):
+                    if not is_const(rshape) or not is_const(outshape):
+                        if not rshape.match(outshape):
+                            print("symbolic.deriv: Warning, had to reshape result of derivative of",node)
+                            print("   had type",res.returnType(),"need shape",outshape)
+                    elif not np.array_equal(to_const(rshape),to_const(outshape)):
+                        print("symbolic.deriv: Warning, had to reshape result of derivative of",node)
+                        print("   had shape",rshape,"need shape",outshape)
                         res = reshape.optimized(res,outshape)
             if _is_exactly(res,0) and not _is_exactly(_jacobian_shape(node),()):
                 #no derivative
                 try:
-                    #print "Getting a jacobian of size",jacobian_size
                     res = zero._call(_jacobian_shape(node))
                     if _DEBUG_DERIVATIVES:
-                        print "symbolic.deriv: Converted zero jacobian of",node,"to size",_jacobian_shape(node)
+                        print("symbolic.deriv: Converted zero jacobian of",node,"to size",_jacobian_shape(node))
                 except Exception as e:
                     #there's a problem getting the shape... let's hope that it's ok to return 0
                     if _DEBUG_DERIVATIVES:
-                        print "Uh... couldn't get the jacobian shape of",node
-                        print "=== REASON ==="
-                        print e
-                        print "=== END REASON ==="
+                        print("Uh... couldn't get the jacobian shape of",node)
+                        print("=== REASON ===")
+                        print(e)
+                        print("=== END REASON ===")
                         pass
             if _DEBUG_DERIVATIVES:
-                print "symbolic.deriv: Derivative of",node,"is",res
+                print("symbolic.deriv: Derivative of",node,"with arg derivs",cvals,"is (unsimplified)",res)
             return True,res
         return self._traverse(pre=_deriv_pre,post=_deriv_post,cacheas='deriv',clearcache=False)
         
 
     def _do_deriv(self,dargs,stackcount):
         """Returns the derivative expression of the output with respect to some
-        variable x, when dargs is a list [d/dx args[i] for i = 0,...,nargs-1]
+        variable x, when dargs is a list [dargs[i]/dx for i = 0,...,nargs-1]
 
         If a derivative is not available, returns None
         If a derivative is 0 or a zero vector/matrix, should return 0
 
-        If stackcount>0, each entry dargs[i] is a matrix with shape (stackcount,count(args[i]))
-        or a list with stackcount entries.
+        If stackcount>0, each entry dargs[i] is an array with shape [stackcount]+shape(args[i]))
+        if args[i] is array-like, or a matrix with shape (stackcount,count(args[i])) if args[i]
+        is complex.
 
         If stackcount==0, the result of this operation has shape shape(self). 
-        If stackcount > 0, the result is a matrix with shape (stackcount,count(self)).
+        If stackcount > 0, the result is a matrix with shape [stackcount]+shape(self) if
+        self is array-like, or a matrix with shape (stackcount,count(self)) if self is complex.
         """
         if self.functionInfo.deriv is None: return None
         if _is_exactly(self.functionInfo.deriv,0): return 0
-        assert len(dargs) == len(self.args)
+        assert len(dargs) == len(self.args),"Invalid argument to deriv: not enough arguments"
+        #short-circuit termination: no derivative available for sub-argument
+        if any(v is None for v in dargs): return None
+
+        #check what kind of derivative / jacobian we should produce
+        cstackcount = to_const(stackcount)
+        do_stack = cstackcount is None or cstackcount > 0
         self_dims = dims.optimized(self)
-        self_count = count.optimized(self)
+        self_type = self.returnType()
+
         if not is_const(self_dims):
             if _DEBUG_DERIVATIVES:
-                print "Can't determine dimensionality of expression",self,"type",self.returnType()
-                print "  dims type",self_dims.__class__.__name__
-                print "  Proceeding by assuming non-scalar result"
-                raw_input("Press enter to continue...")
+                print("Can't determine dimensionality of expression",self,"type",self.returnType())
+                print("  dims type",self_dims.__class__.__name__)
+                print("  Proceeding by assuming non-scalar result")
+                input("Press enter to continue...")
         else:
             self_dims = to_const(self_dims)
-        self_scalar = is_scalar(self_dims,0)
-        if stackcount > 0:
-            needs_reshaping = [_needs_jacobian_reshape(a)  for (a,da) in zip(self.args,dargs)]
-            reshapers1 = [(lambda a,da:reshape.optimized(da,flatten.optimized(stackcount,shape.optimized(a)))) if do_reshape else (lambda a,da:da) for do_reshape in needs_reshaping]
-            reshapers2 = [(lambda a,da:reshape.optimized(da,shape.optimized(a))) if do_reshape else (lambda a,da:da) for do_reshape in needs_reshaping]
-            if callable(self.functionInfo.rowstackderiv):
-                if any(v is None for v in dargs): return None
-                daresized = [reshaper(a,da) for (reshaper,a,da) in zip(reshapers1,self.args,dargs)]
-                return self.functionInfo.rowstackderiv(self.args,daresized)
-            elif callable(self.functionInfo.colstackderiv):
-                if any(v is None for v in dargs): return None
-                daresized = [reshaper(a,da) for (reshaper,a,da) in zip(reshapers1,self.args,dargs)]
-                res = self.functionInfo.colstackderiv(self.args,[transpose.optimized(da) if (da is not None) else None for da in daresized])
-                if res is not None:
-                    return transpose.optimized(res)
-                return None
-            elif callable(self.functionInfo.deriv):
-                if any(v is None for v in dargs): return None
-                assert is_const(stackcount),"Can't do functional derivatives yet with variable stack size"
-                di = []
-                #print [str(da) for da in dargs]
-                for i in range(stackcount):
-                    #print "deriv",self.functionInfo.name,"is a function, shape of args",self.functionInfo.argNames,"are",[str(shape.optimized(a)) for a in self.args]
-                    #print "  argument derivatives",[str(da) for da in dargs]
-                    #print "  shape of derivs w.r.t",i,"are",[str(shape.optimized(getitem.optimized(da,i))) for da in dargs]
-                    #print "  Extracted i'th derivatives",[str(getitem.optimized(da,i)) for a,da in zip(self.args,dargs)]
-                    diargs = [reshaper(a,getitem.optimized(da,i)) for reshaper,a,da in zip(reshapers2,self.args,dargs)]
-                    #print "  Reshaped i'th derivatives",[str(da) for da in diargs]
-                    di.append(self.functionInfo.deriv(self.args,diargs))
-                return array(*di)
+
+        self_irregular = self_type is None or self_type.char not in SCALAR_TYPES + ARRAY_TYPES
+        if not self_irregular:
+            try:
+                self_shape = self_type.shape()
+            except Exception:
+                self_shape = shape.optimized(self)
+            if do_stack:
+                jacobian_shape = flatten.optimized(stackcount,self_shape)
+                jacobian_dims = 1 + self_dims
+            else:
+                jacobian_shape = self_shape
+                jacobian_dims = self_dims
         else:
-            if callable(self.functionInfo.deriv):
+            if do_stack:
+                self_shape = None
+                self_count = count.optimized(self)
+                jacobian_shape = array.optimized(stackcount,self_count)
+                jacobian_dims = 2
+            else:
+                self_shape = shape.optimized(self)
+                jacobian_shape = self_shape
+                jacobian_dims = self_dims
+
+        if do_stack:
+            #determine whether the arguments' are array-like or not.  None indicates non-array like
+            arg_dims = []
+            for (a,da) in zip(self.args,dargs):
+                art = a.returnType()
+                if art is not None and art.char in SCALAR_TYPES + ARRAY_TYPES:
+                    arg_dims.append(art.dims())
+                else:
+                    arg_dims.append(None)
+            res = None
+            if _DEBUG_DERIVATIVES:
+                print("symbolic.deriv: Reshaping arguments to",self,"have dims",arg_dims)
+            if callable(self.functionInfo.rowstackderiv):
+                if _DEBUG_DERIVATIVES:
+                    print("symbolic.deriv: Using row-stack derivative to",self.functionInfo.name)
                 if any(v is None for v in dargs): return None
-                return self.functionInfo.deriv(self.args,dargs)
+                #print("callback rowstackderiv: Shapes",[simplify(shape(da)) for da in dargs])
+                #print("Needs reshaping?",needs_reshaping)
+                res = self.functionInfo.rowstackderiv(self.args,dargs)
+                #print("rowstackderiv,",self.functionInfo.name,"result",res)
+            elif callable(self.functionInfo.colstackderiv):
+                if _DEBUG_DERIVATIVES:
+                    print("symbolic.deriv: Using column-stack derivative to",self.functionInfo.name)
+                daresized = []
+                for (a,da,adims) in zip(self.args,dargs,arg_dims):
+                    if da is 0:
+                        daresized.append(0)
+                    elif adims is None:
+                        #can't determine dimensions: prepare for the worst case tensor
+                        daresized.append(transpose2(da,flatten(1+range_(adims-1),0)))
+                    elif adims == 0:
+                        daresized.append(da)
+                    elif adims == 1:
+                        daresized.append(transpose.optimized(da))
+                    else:
+                        daresized.append(transpose2(da,list(range(1,adims))+[0]))
+                res = self.functionInfo.colstackderiv(self.args,daresized)
+                if res is not None:
+                    if jacobian_dims <= 1:
+                        pass
+                    elif jacobian_dims == 2:
+                        res = transpose.optimized(res)
+                    else:
+                        raise ValueError("Can't rearrange column-stacked jacobians for matrix functions yet")
+            elif callable(self.functionInfo.deriv):
+                assert is_const(stackcount),"Can't do functional derivatives yet with variable stack size"
+                row_derivs = []
+                #print("DERIV",self.functionInfo.name,"WITH STACK COUNT",stackcount)
+                #print([str(da) for da in dargs])
+                for i in range(stackcount):
+                    daresized = []
+                    for a,da,adims in zip(self.args,dargs,arg_dims):
+                        if da is 0:
+                            daresized.append(0)
+                        elif is_op(da,'zero'):
+                            if adims == 0:
+                                daresized.append(0)
+                            else:
+                                daresized.append(zero(shape.optimized(a)))
+                        elif adims is None:
+                            #non-array-like, needs reshaping
+                            daresized.append(reshape.optimized(getitem.optimized(da,i),shape.optimized(a)))
+                        else:
+                            daresized.append(getitem.optimized(da,i))
+                    #print "  Reshaped i'th derivatives",[str(da) for da in daresized]
+                    di = self.functionInfo.deriv(self.args,daresized)
+                    dishape = to_const(shape.optimized(di))
+                    if dishape is not None and to_const(self_shape) is not None:
+                        assert dishape == self_shape,"Result of derivative %s should have shape %s, instead has %s"%(self.functionInfo.name,str(self_shape),str(dishape))
+                    if self_irregular:
+                        di = flatten.optimized(di)
+                    row_derivs.append(di)
+                    
+                res = array(*row_derivs)
+            else:
+                #individual deriv, rowstackderiv, colstackderiv, or jacobian functions
+                #order from most efficient to least: rowstackderiv, colstackderiv, jacobian (if stackcount > count(a), deriv
+                #print("INDIVIDUAL DERIVS",self.functionInfo.name,"WITH STACK COUNT",stackcount)
+                #print([str(simplify(da)) for da in dargs])
+                res = 0
+                for index,da in enumerate(dargs):
+                    if _is_exactly(self.functionInfo.deriv[index],0): continue
+                    if _is_exactly(da,0) or is_op(da,'zero'): continue
+                    adims = arg_dims[index]
+                    needs_reshaping_i = (arg_dims[index] is None)
+                    if self.functionInfo.rowstackderiv is not None and self.functionInfo.rowstackderiv[index] is not None:
+                        inc = self.functionInfo.rowstackderiv[index](*(self.args+[da]))
+                    elif self.functionInfo.colstackderiv is not None and self.functionInfo.colstackderiv[index] is not None:
+                        if adims is None:
+                            daresized = transpose2(da,flatten(1+range_(adims-1),0))
+                        elif adims == 0:
+                            daresized = da
+                        elif adims == 1:
+                            daresized = transpose.optimized(da)
+                        else:
+                            daresized = transpose2(da,list(range(1,adims))+[0])
+                        #print("Stack",simplify(da_stack),"has shape",simplify(shape(da_stack)))
+                        inc = self.functionInfo.colstackderiv[index](*(self.args+[daresized]))
+                        if _DEBUG_DERIVATIVES:
+                            print("symbolic.deriv: Column stack form",index," dargs:",daresized)
+                            print("   raw derivative",inc)
+                        if inc is not None:
+                            #convert from column to row form
+                            if jacobian_dims <= 1:
+                                pass
+                            elif jacobian_dims == 2:
+                                if _DEBUG_DERIVATIVES:
+                                    print("symbolic.deriv: doing transpose to convert",inc,"into row form")
+                                inc = transpose.optimized(inc)
+                            else:
+                                raise ValueError("Can't rearrange column-stacked jacobians for matrix functions yet")
+                    else:
+                        use_jacobian = self.functionInfo.jacobian is not None and self.functionInfo.jacobian[index] is not None
+                        if self.functionInfo.deriv is not None and self.functionInfo.deriv[index] is not None:
+                            if adims != 2 and adims != None:
+                                #not flattened?
+                                use_jacobian = False
+                            nargs = to_const(count.optimized(self.args[index]))
+                            if use_jacobian and nargs is not None and (cstackcount is not None and nargs > cstackcount):
+                                #jacobian is less efficient
+                                use_jacobian = False
+                        if use_jacobian:
+                            #print("symbolic.deriv: Using jacobian for",self.functionInfo.name,"arg",index)
+                            J = self.functionInfo.jacobian[index](*self.args)
+                            assert J is not None
+                            Jconst = to_const(J)
+                            if Jconst is not None:
+                                da_cols = shape.optimized(da)[-1]
+                                if is_const(da_cols):
+                                    assert Jconst.shape[-1] == to_const(da_cols),"Invalid jacobian size for %s argument %d"%(self.functionInfo.name,index)
+                            inc = dot(da,transpose(J))
+                        else:
+                            #da is stacked, but deriv can't handle them
+                            if is_const(stackcount):
+                                """
+                                print("arg_shape",arg_shape,"needs reshaping?",needs_reshaping_i)
+                                for i in range(stackcount):
+                                    print("Argument derivative",i,":",simplify(reshape.optimized(da[i],arg_shape)))
+                                    print("Orig shape",shape.optimized(da[i]))
+                                    print("Shape",shape.optimized(reshape.optimized(da[i],arg_shape)))
+                                    print("Shape",shape.optimized(reshape(da[i],arg_shape)))
+                                """
+                                darows = [getitem.optimized(da,i) for i in range(stackcount)]
+                                ashape = shape.optimized(self.args[index])
+                                rows = [self.functionInfo.deriv[index](*(self.args+[reshape.optimized(darow,ashape) if needs_reshaping_i else darow])) for darow in darows]
+                                inc = expr(rows)
+                            else:
+                                #Need an apply_ and concat function
+                                #inc = array(*map_(apply_(self.functionInfo.deriv[index],flatten(self.args,[reshaper(da['i'])])),'i',range_(stackcount))
+                                raise NotImplementedError("Dynamically sized dispatch to stacked derivatives of function %s?"%(self.functionInfo.name,))
+                    if inc is None:
+                        return None
+                    if _is_exactly(res,0):
+                        res = inc
+                    else:
+                        if to_const(shape.optimized(inc)) is not None:
+                            if self_irregular:
+                                assert to_const(shape.optimized(inc)) == (to_const(stackcount),to_const(self_count)),"Invalid (irregular)jacobian size %s, should be %s"%(shape.optimized(inc),(stackcount,self_count))
+                            else:
+                                assert to_const(shape.optimized(inc)) == to_const(jacobian_shape),"Invalid jacobian size %s, should be %s"%(shape.optimized(inc),jacobian_shape)
+                        res = add(res,inc)
+                    #res += inc
+            if not _is_exactly(res,0):
+                if res is None:
+                    return res
+                if self_irregular:
+                    if _DEBUG_DERIVATIVES:
+                        print("symbolic.deriv: I think I need to reshape the result of",self,"to",jacobian_shape)
+                    res = reshape(res,jacobian_shape)
+            return res
+
+        #normal derivative, stackcount = 0
+        if callable(self.functionInfo.deriv):
+            return self.functionInfo.deriv(self.args,dargs)
         res = 0
         assert len(self.functionInfo.deriv) == len(self.args)
         for index,da in enumerate(dargs):
             if _is_exactly(self.functionInfo.deriv[index],0): continue
             if _is_exactly(da,0) or is_op(da,'zero'): continue
-            if da is None: return None
             if self.functionInfo.deriv[index] is None:
                 if self.functionInfo.jacobian is not None and self.functionInfo.jacobian[index] is not None:
                     J = self.functionInfo.jacobian[index](*self.args)
@@ -3100,48 +3668,23 @@ class OperatorExpression(Expression):
                         da_cols = shape.optimized(da)[-1]
                         if is_const(da_cols):
                             assert Jconst.shape[-1] == to_const(da_cols),"Invalid jacobian size for %s argument %d"%(self.functionInfo.name,index)
-                    inc = dot(da,transpose(J))
+                    inc = dot(J,da)
                 else:
-                    print "symbolic.deriv: No partial derivative for function %s argument %d (%s)"%(self.functionInfo.name,index+1,self.functionInfo.argNames[index])
-                    print "  Derivative with respect to argument is",da
+                    print("symbolic.deriv: No partial derivative for function %s argument %d (%s)"%(self.functionInfo.name,index+1,self.functionInfo.argNames[index]))
+                    print("  Derivative with respect to argument is",da)
                     return None
             else:
                 arg = self.args[index]
-                arg_shape = shape.optimized(arg)
-                #if dimensions cannot be determined, then 
-                needs_reshaping = _needs_jacobian_reshape(arg)
                 # and not is_const(stackcount) or to_const(stackcount) > 0?
                 if not callable(self.functionInfo.deriv[index]):
                     #df/di = const (usually 0)
                     inc = self.functionInfo.deriv[index]
-                elif not is_const(stackcount) or to_const(stackcount) > 0:
-                    if self.functionInfo.rowstackderiv is not None and self.functionInfo.rowstackderiv[index] is not None:
-                        daresized = reshape.optimized(da,flatten.optimized(stackcount,arg_shape)) if needs_reshaping else da
-                        inc = self.functionInfo.rowstackderiv[index](*(self.args+[daresized]))
-                    elif self.functionInfo.colstackderiv is not None and self.functionInfo.colstackderiv[index] is not None:
-                        #assume it can handle the derivatives
-                        daresized = reshape.optimized(da,flatten.optimized(stackcount,arg_shape)) if needs_reshaping else da
-                        assert daresized is not None
-                        da_stack = transpose.optimized(daresized)
-                        inc = self.functionInfo.colstackderiv[index](*(self.args+[da_stack]))
-                        if inc is not None:
-                            #convert from column to row form
-                            inc = transpose.optimized(inc)
-                    else:
-                        #da is stacked, but deriv can't handle them
-                        if is_const(stackcount):
-                            rows = [self.functionInfo.deriv[index](*(self.args+[reshape.optimized(da[i],arg_shape) if needs_reshaping else da[i]])) for i in range(stackcount)]
-                            inc = array(*rows)
-                        else:
-                            #Need an apply_ and concat function
-                            #inc = array(*map_(apply_(self.functionInfo.deriv[index],concat(self.args,[reshaper(da['i'])])),'i',range_(stackcount))
-                            raise NotImplementedError("Dynamically sized dispatch to stacked derivatives of function %s?"%(self.functionInfo.name,))
                 else:
                     #da is not stacked
                     #reshape da to the format of self.args[index]
-                    inc = self.functionInfo.deriv[index](*(self.args+[reshape.optimized(da,arg_shape) if needs_reshaping else da]))
+                    inc = self.functionInfo.deriv[index](*(self.args+[da]))
             if _DEBUG_DERIVATIVES:
-                print "symbolic.deriv: Partial derivative for function",self.functionInfo.name,"argument",index+1,str(inc)
+                print("symbolic.deriv: Partial derivative for function",self.functionInfo.name,"argument",index+1,str(simplify(inc)))
             if inc is None:
                 return None
             if _is_exactly(res,0):
@@ -3149,6 +3692,13 @@ class OperatorExpression(Expression):
             else:
                 res = add(res,inc)
             #res += inc
+        if SHAPE_CHECKING and not _is_exactly(res,0):
+            myshape = to_const(shape.optimized(self))
+            resshape = to_const(shape.optimized(res))
+            if myshape is not None and resshape is not None:
+                if myshape != resshape:
+                    print("symbolic.deriv: WARNING! derivative doesn't match my shape? derivative shape %s = shape(%s)"%(resshape,simplify(res)))
+                    print("  compared to self's shape %s = shape(%s)"%(myshape,simplify(self)))
         return res
 
     def vars(self,context=None,bound=False):
@@ -3175,11 +3725,11 @@ class OperatorExpression(Expression):
                             varset.add(v.name)
                     """
                     #DEBUGGING
-                    print "Expression free variables",[x.name for x in exprvars],"replaced variables",[x.name for x in replvars]
+                    print("Expression free variables",[x.name for x in exprvars],"replaced variables",[x.name for x in replvars])
                     exprvars += replvars
                     evars = node.functionInfo.custom_eval(context,*node.args).vars()
-                    print "Custom eval",node.functionInfo.custom_eval(context,*node.args)
-                    print "Test free variables",[x.name for x in evars]
+                    print("Custom eval",node.functionInfo.custom_eval(context,*node.args))
+                    print("Test free variables",[x.name for x in evars])
                     assert all(x.name in [y.name for y in evars] for x in exprvars)
                     assert all(x.name in [y.name for y in exprvars] for x in evars)
                     """
@@ -3200,6 +3750,7 @@ class OperatorExpression(Expression):
     def match(self,expr):
         if isinstance(expr,Wildcard): return True
         if not isinstance(expr,OperatorExpression): return False
+        if self.functionInfo.name != expr.functionInfo.name: return False
         if len(self.args) != len(expr.args): return False
         if 'depth' in self._cache:
             if self._cache['depth'] != expr._cache.get('depth',None): return False
@@ -3262,6 +3813,8 @@ class OperatorExpression(Expression):
         changed = False
         argsChanged = False
         expr = self
+        for a in self.args:
+            assert isinstance(a,Expression),"Uh... args need to be Expressions, got an arg %s of type %s"%(str(a),a.__class__.__name__)
         res = self.functionInfo.simplify(self.args,pre=True)
         if res is not None:
             expr = res
@@ -3282,10 +3835,10 @@ class OperatorExpression(Expression):
         else:
             return expr
         return None
-    def _postsimplify(self,depth):
+    def _postsimplify(self,depth,mydepth=0):
         if 'simplified' in self._cache:
             if _DEBUG_SIMPLIFY:
-                print " "*self.depth(),"Postsimplify",self,"cached to",self._cache["simplified"]
+                print(" "*mydepth,"Postsimplify",self,"cached to",self._cache["simplified"])
             return self._cache['simplified']
         if _is_exactly(depth,0):
             return None
@@ -3294,18 +3847,45 @@ class OperatorExpression(Expression):
         simplified = False
         newargs = []
         if _DEBUG_SIMPLIFY:
-            print " "*self.depth(),"Postsimplify",self
-        for i,a in enumerate(self.args):
-            a._parent = (weakref.ref(self),i)
-            asimp = (a._postsimplify(newdepth) if isinstance(a,OperatorExpression) else None)
-            a._parent = None
-            if asimp is None:
-                newargs.append(a)
-            else:
-                if _DEBUG_SIMPLIFY:
-                    print " "*self.depth(),"  Simplified arg",a,"to",asimp
-                newargs.append(asimp)
-                simplified = True
+            print(" "*mydepth,"Postsimplify",self.functionInfo.name,":",self)
+        if self.functionInfo.name == 'subs':
+            #DON'T simplify variable lists or values-as-list
+            newargs= [self.args[0],self.args[1],self.args[2]]
+            values = self.args[2]
+            if is_op(values,'array') or is_op(values,'list'):
+                newvalues = []
+                for i,v in enumerate(values.args):
+                    if isinstance(v,OperatorExpression):
+                        v._parent = (weakref.ref(values),i)
+                        vsimp = v._postsimplify(newdepth,mydepth+1)
+                        v._parent = None
+                    else:
+                        vsimp = None
+                    if vsimp is None:
+                        newvalues.append(v)
+                    else:
+                        if _DEBUG_SIMPLIFY:
+                            print(" "*mydepth,"  Simplified subs value",v,"to",vsimp)
+                        newvalues.append(vsimp)
+                        simplified = True
+                newargs[-1] = array(*newvalues)
+        else:
+            for i,a in enumerate(self.args):
+                if isinstance(a,OperatorExpression):
+                    a._parent = (weakref.ref(self),i)
+                    asimp = a._postsimplify(newdepth,mydepth+1)
+                    a._parent = None
+                else:
+                    asimp = None
+                if asimp is None:
+                    newargs.append(a)
+                else:
+                    if _DEBUG_SIMPLIFY:
+                        print(" "*mydepth,"  Simplified arg",a,"to",asimp)
+                    newargs.append(asimp)
+                    simplified = True
+        for a in newargs:
+            assert isinstance(a,Expression),"Uh... args need to be Expressions, got an arg %s of type %s"%(str(a),a.__class__.__name__)
         #default simplifications
         #1. inversion
         if len(newargs) == 1 and 'inverse' in self.functionInfo.properties:
@@ -3313,7 +3893,7 @@ class OperatorExpression(Expression):
                 res = newargs[0].args[0]
                 self._cache['simplified'] = res
                 if _DEBUG_SIMPLIFY:
-                    print " "*self.depth(),"Simplified operation",self.functionInfo.name,"in context",OperatorExpression(self.functionInfo,newargs),"via inverse rule"
+                    print(" "*mydepth,"Simplified operation",self.functionInfo.name,"in context",OperatorExpression(self.functionInfo,newargs),"via inverse rule")
                 if isinstance(res,ConstantExpression):
                     assert res.value is not None
                 return res
@@ -3330,23 +3910,28 @@ class OperatorExpression(Expression):
             if len(newargs2) > len(newargs):
                 simplified = True
                 if _DEBUG_SIMPLIFY:
-                    print "Folded variable argument operator",self.functionInfo.name,"args from",[str(e) for e in newargs],"to",[str(e) for e in newargs2]
+                    print(' '*mydepth,"Folded variable argument operator",self.functionInfo.name,"args from",[str(e) for e in newargs],"to",[str(e) for e in newargs2])
                 newargs = newargs2
         #custom simplification
-        assert not any((a is None or isinstance(a,ConstantExpression) and a.value is None )for a in newargs)
+        assert not any(a is None or (isinstance(a,ConstantExpression) and a.value is None )for a in newargs)
+        for a in newargs:
+            assert isinstance(a,Expression),"Uh... args need to be Expressions, got an arg %s of type %s"%(str(a),a.__class__.__name__)
         try:
             res = self.functionInfo.simplify(newargs)
             if res is not None:
                 if _DEBUG_SIMPLIFY:
-                    print " "*self.depth(),"Simplified operation",self.functionInfo.name,"in context",OperatorExpression(self.functionInfo,newargs),"via simplifier to",res
+                    print(" "*mydepth,"Simplified operation",self.functionInfo.name,"in context",OperatorExpression(self.functionInfo,newargs),"via simplifier to",res)
                     #print "Args",[str(a) for a in newargs]
                 if isinstance(res,OperatorExpression):
-                    res2 = res._postsimplify(depth)
+                    res2 = res._postsimplify(depth,mydepth)
                     if res2 is not None:
+                        #should we clear the cache? less efficient for future operations, but better to be on the safe side
                         res._clearCache('simplified',deep=True)
                         if _DEBUG_SIMPLIFY:
-                            print "... re-simplified to",res2
+                            print("... re-simplified to",res2)
                         res = res2
+                if not isinstance(res,Expression):
+                    res = expr(res)
                 self._cache['simplified'] = res
                 return res
             else:
@@ -3354,30 +3939,87 @@ class OperatorExpression(Expression):
                 #print "Unable to simplify",self
                 #print "Call stack",self._print_call_stack()
         except Exception as e:
-            print " "*self.depth(),"  Call stack:",
+            print(" "*mydepth,"  Call stack:", end=' ')
             self._print_call_stack()
-            print " "*self.depth(),"Exception:",e
+            print(" "*mydepth,"Exception:",e)
             import traceback
             traceback.print_exc()
-            print " "*self.depth(),"Error post-simplifying function",OperatorExpression(self.functionInfo,newargs,self.op)
+            print(" "*mydepth,"Error post-simplifying function",OperatorExpression(self.functionInfo,newargs,self.op))
             raise
             return None
+        #5. If-collapsing: pull all equivalent conditions to front
+        #op(if(cond,arg1,arg1'),arg2) => if(cond,op(arg1,arg2),op(arg1',arg2)) if the inner op's can be simplified
+        #op(if(cond,arg1,arg1')) => if(cond,op(arg1),op(arg1'))
+        #or op(if(cond,arg1,arg1'),if(cond,arg2,arg2')) => if(cond,op(arg1,arg2),op(arg1',arg2'))
+        if len(newargs) > 0 and any(is_op(a,'if') for a in newargs):
+            ifcond = None
+            for a in newargs:
+                if is_op(a,'if'):
+                    ifcond = a.args[0]
+                    break
+            docollapse = True
+            numifs = 0
+            for i in range(1,len(newargs)):
+                if is_op(newargs[i],'if'):
+                    numifs += 1
+                    if not ifcond.match(newargs[i].args[0]):
+                        docollapse = False
+                        break
+            if _DEBUG_SIMPLIFY:
+                print(" "*mydepth,"Considering if-folding of operator",self.functionInfo.name,"judgement:",docollapse)
+            if docollapse:
+                trueargs = []
+                falseargs = []
+                for a in newargs:
+                    if is_op(a,'if'):
+                        trueargs.append(a.args[1])
+                        falseargs.append(a.args[2])
+                    else:
+                        trueargs.append(a)
+                        falseargs.append(a)
+                trueres = OperatorExpression(self.functionInfo,trueargs)
+                trueres2 = trueres._postsimplify(depth,mydepth+1)
+                if trueres2 is not None: trueres = trueres2
+                if _DEBUG_SIMPLIFY:
+                    if trueres2 is not None:
+                        print(" "*mydepth,"True condition simplified to",trueres2)
+                    else:
+                        print(" "*mydepth,"True condition remains",trueres)
+                falseres = OperatorExpression(self.functionInfo,falseargs)
+                falseres2 = falseres._postsimplify(depth,mydepth+1)
+                if falseres2 is not None: falseres = falseres2
+                if _DEBUG_SIMPLIFY:
+                    if falseres2 is not None:
+                        print(" "*mydepth,"False condition simplified to",falseres2)
+                    else:
+                        print(" "*mydepth,"False condition remains",falseres)
+                if numifs > 1 or len(newargs)==1 or trueres2 is not None or falseres2 is not None:
+                    res = if_(ifcond,trueres,falseres)
+                    self._cache['simplified'] = res
+                    return res
+                else:
+                    if _DEBUG_SIMPLIFY:
+                        print(" "*mydepth,"If-folding of operator",self.functionInfo.name,"ignored, no improvement in expression size")
+                
         #expand Functions defined as expressions
         if isinstance(self.functionInfo.func,Expression):
             res = _subs(None,self.functionInfo.func,self.functionInfo.exprArgRefs,newargs,False,False,False)
             if isinstance(res,OperatorExpression):
-                res2 = res._postsimplify(depth)
+                res2 = res._postsimplify(depth,mydepth+1)
                 if res2 is not None:
                     res._clearCache('simplified',deep=True)
                     res = res2
             self._cache['simplified'] = res
             if _DEBUG_SIMPLIFY:
-                print " "*self.depth(),"Simplied via Expression espansion to",res
+                print(" "*mydepth,"Simplied via Expression espansion to",res)
             return res
         if simplified:
             self._cache['simplified'] = OperatorExpression(self.functionInfo,newargs,self.op)
             if _DEBUG_SIMPLIFY:
-                print " "*self.depth(),"Simplified one or more arguments of operation",self.functionInfo.name,"in context",self
+                if len(self.args) > 1:
+                    print(" "*mydepth,"Simplified one or more arguments of operation",self.functionInfo.name,"in context",self)
+                else:
+                    print(" "*mydepth,"Simplified argument of operation",self.functionInfo.name,"in context",self)
             #print "Simplified args result",self._cache
             return self._cache['simplified']
         self._cache['simplified'] = None
@@ -3416,10 +4058,10 @@ class OperatorExpression(Expression):
             try:
                 return ConstantExpression(self._do(aconst))
             except Exception as e:
-                print "Error simplifying function",self.functionInfo.name
-                print "  Call stack:",
+                print("Error simplifying function",self.functionInfo.name)
+                print("  Call stack:", end=' ')
                 self._print_call_stack()
-                print "Exception:",e
+                print("Exception:",e)
                 raise 
                 return None
         if self.functionInfo.properties.get('foldable',False):
@@ -3438,20 +4080,20 @@ class OperatorExpression(Expression):
                         if stop:
                             return ConstantExpression(const)
                     if const is not None:
-                        newargs = avar + [const]
+                        newargs = avar + [ConstantExpression(const)]
                     simplified = True
             else:
                 #fold streaks of constant arguments together
                 newargs2 = []
                 istart = None
-                for i in xrange(len(aconst)):
+                for i in range(len(aconst)):
                     if aconst[i] is None:
                         #non-constant
                         if istart is not None:
                             if i-istart > 1:
                                 #fold istart...i-1 into a constant
                                 const = self.op(*[aconst[j] for j in range(istart,i)])
-                                newargs2.append(const)
+                                newargs2.append(ConstantExpression(const))
                             else:
                                 newargs2.append(newargs[istart])
                         istart = None
@@ -3464,7 +4106,7 @@ class OperatorExpression(Expression):
                     if i-istart > 1:
                         #fold istart...i-1 into a constant
                         const = self.op(*[aconst[j] for j in range(istart,i)])
-                        newargs2.append(const)
+                        newargs2.append(ConstantExpression(const))
                     else:
                         newargs2.append(newargs[istart])
                 if len(newargs2) < len(newargs):
@@ -3473,16 +4115,21 @@ class OperatorExpression(Expression):
                     newargs = newargs2
         if simplified:
             if _DEBUG_SIMPLIFY:
-                print " "*self.depth(),"Constant expansion of",self
-                print " "*self.depth(),"   with arguments",[str(a) for a in newargs]
+                print(" "*mydepth,"Constant expansion of",self)
+                print(" "*mydepth,"   with arguments",[str(a) for a in newargs])
                 #print "Evaluated arguments",[str(a) for a in aconst]
             if self.functionInfo.simplifier != None:
+                for i,a in enumerate(newargs):
+                    if not isinstance(a,Expression):
+                        if a is not 0:
+                            print("symbolic.simplify: warning, function %s shouldn't simplify to constant: %s"%(self.functionInfo.name,a))
+                        newargs[i] = expr(a)
                 try:
                     res = self.functionInfo.simplifier(*newargs)
                     if res is not None:
                         self._cache['simplified'] = res
                         if _DEBUG_SIMPLIFY:
-                            print "=>",res
+                            print("=>",res)
                         if isinstance(res,ConstantExpression):
                             assert res.value is not None
                         return res
@@ -3498,7 +4145,7 @@ class OperatorExpression(Expression):
                     raise
                     return None
             if _DEBUG_SIMPLIFY:
-                print " "*self.depth(),"=>",OperatorExpression(self.functionInfo,newargs,self.op)
+                print(" "*mydepth,"=>",OperatorExpression(self.functionInfo,newargs,self.op))
             self._cache['simplified'] = OperatorExpression(self.functionInfo,newargs,self.op)
             return self._cache['simplified']
         return None
@@ -3517,7 +4164,7 @@ class OperatorExpression(Expression):
 
         """
         if _DEBUG_SIMPLIFY:
-            print "Simplifying expression",self,"to depth",depth
+            print("Simplifying expression",self,"to depth",depth)
         simplest = self
         res = self._presimplify(depth)
         if res is not None:
@@ -3527,7 +4174,7 @@ class OperatorExpression(Expression):
             simplest = res
         res = simplest._postsimplify(depth)
         if _DEBUG_SIMPLIFY:
-            print "After pre/postsimplify:",res
+            print("After pre/postsimplify:",res)
         simplest._clearCache('simplified',deep=True)
         if res is not None:
             if not isinstance(res,OperatorExpression): 
@@ -3536,12 +4183,14 @@ class OperatorExpression(Expression):
             simplest = res
         if constant_expansion:
             res = simplest._constant_expansion(context,depth)
+            if _DEBUG_SIMPLIFY: print("After constant expansion:",res)
             simplest._clearCache('simplified',deep=True)
-            if res is not None: simplest = res
+            if res is not None:
+                simplest = res
         if simplest is self:
-            if _DEBUG_SIMPLIFY: print "... no simplification possible"
+            if _DEBUG_SIMPLIFY: print("... no simplification possible")
             return None
-        if _DEBUG_SIMPLIFY: print "... simplified to",simplest
+        if _DEBUG_SIMPLIFY: print("... simplified to",simplest)
         if not isinstance(simplest,Expression): return ConstantExpression(simplest)
         return simplest
 
@@ -3585,8 +4234,8 @@ def type_of(x):
     elif isinstance(x,Expression): return x.returnType()
     else:
         if isinstance(x,bool): return Type('B')
-        elif isinstance(x,int): return Type('I')
-        elif isinstance(x,float): return Type('N')
+        elif isinstance(x,_PY_INT_TYPES): return Type('I')
+        elif isinstance(x,_PY_FLOAT_TYPES): return Type('N')
         elif isinstance(x,slice): return Type('X')
         elif isinstance(x,np.ndarray): 
             if len(x.shape) == 1:
@@ -3613,6 +4262,7 @@ def type_of(x):
                 else:
                     return Type('L',len(x),itemtype)
         else:
+            #print("object ",x,"is not of known type, setting as user data of type",x.__class__.__name__)
             return Type(x.__class__.__name__)
 
 def const(v):
@@ -3634,10 +4284,10 @@ def is_const(v,context=None,shallow=False):
         if shallow and isinstance(v,OperatorExpression) and not is_zero(v): return False
         if context is None: return v.isConstant()
         else: return v.isConstant() or v.returnConstant(context)
-    elif isinstance(v,(float,int,bool,np.ndarray)):
+    elif isinstance(v,_PY_CONST_TYPES):
         return True
     elif isinstance(v,dict):
-        return len(v) == 0 or all(is_const(x,context) for x in v.itervalues())
+        return len(v) == 0 or all(is_const(x,context) for x in v.values())
     elif hasattr(v,'__iter__'):
         try:
             return len(v) == 0 or all(is_const(x,context) for x in v)
@@ -3670,11 +4320,11 @@ def to_const(v,context=None,shallow=False):
             if v.isConstant() or v.returnConstant(context):
                 return v.evalf(context)
         return None
-    elif isinstance(v,(float,int,bool,np.ndarray)):
+    elif isinstance(v,_PY_CONST_TYPES):
         return v
     elif isinstance(v,dict):
         vc = {}
-        for k,x in v.iteritems():
+        for k,x in v.items():
             kc = to_const(x,context,shallow)
             if kc is None: return None
             vc[k] = kc
@@ -3702,7 +4352,7 @@ def is_scalar(v,value=None):
         if not rt.is_scalar(): return False
         return value is None
     else:
-        if not (isinstance(v,(float,int,bool)) or (hasattr(v,'shape') and v.shape == ())): return False
+        if not (isinstance(v,(bool,)+_PY_NUMERIC_TYPES) or (hasattr(v,'shape') and v.shape == ())): return False
         return value is None or v == value
 
 def to_scalar(v):
@@ -3715,18 +4365,20 @@ def to_scalar(v):
     elif isinstance(v,Expression):
         return None
     else:
-        if not (isinstance(v,(float,int,bool)) or (hasattr(v,'shape') and v.shape == ())): return None
+        if not (isinstance(v,(bool,)+_PY_NUMERIC_TYPES) or (hasattr(v,'shape') and v.shape == ())): return None
         return v
 
 def is_zero(v):   
     """Returns true if v represents a 0 value"""
+    if is_op(v,'zero'): return True
+    if isinstance(v,Expression): return False
     vc = to_const(v)
     if vc is not None:
         if isinstance(vc,np.ndarray):
-            return (vc==0).all()
+            return np.all(vc==0)
         else:
             return vc == 0
-    return is_op(v,'zero')
+    return False
 
 def is_var(v):
     """Returns True if v is equivalent to a stand-alone variable."""
@@ -3757,7 +4409,7 @@ def is_sparse(v,threshold='auto'):
     if callable(threshold):
         threshold = threshold(sh)
     elif threshold == 'auto':
-        threshold = math.sqrt(np.product(sh))
+        threshold = 3*math.sqrt(np.product(sh))
     return (nnz < threshold)
 
 def expr(x):
@@ -3787,12 +4439,12 @@ def expr(x):
             if all(v is not None for v in xc):
                 return ConstantExpression(xc)
         except Exception as e:
-            print "symbolic.expr: Error doing conversion to list of constants?",x.__class__.__name__,x
-            print "=== EXCEPTION ==="
-            print e
-            print "=== END EXCEPTION ==="
+            print("symbolic.expr: Error doing conversion to list of constants?",x.__class__.__name__,x)
+            print("=== EXCEPTION ===")
+            print(e)
+            print("=== END EXCEPTION ===")
             raise
-            raw_input()
+            input()
         return array(*[expr(v) for v in x])
     return ConstantExpression(x)
 
@@ -3824,6 +4476,9 @@ def to_monomial(v):
                 if res is None: return None
                 return (res[0],mul.optimized(v.args[1],res[1]))
             elif v.functionInfo.name == 'mul':
+                if len(v.args) != 2:
+                    #print("NOT MONOMIAL, ",str(v),"HAS",len(v.args),"ARGS")
+                    return None
                 assert len(v.args) == 2
                 res1 = to_monomial(v.args[0])
                 res2 = to_monomial(v.args[1])
@@ -3843,8 +4498,9 @@ def to_polynomial(expr,x=None,const_only=True):
     """
     if not const_only:
         raise NotImplementedError("TODO: extract polynomial with non-constant coefficients")
-    if x is not None and is_const(expr):
-        return x,[to_const(expr)],[0]
+    econst = to_const(expr)
+    if x is not None and econst is not None:
+        return x,[econst],[0]
     mon = to_monomial(expr)
     if mon != None:
         if x is None or mon[0].name == x.name:
@@ -3898,42 +4554,6 @@ def to_polynomial(expr,x=None,const_only=True):
 
 
 
-def _stack_count(varderivs,context):
-    if len(varderivs) > 1:
-        raise NotImplementedError("Multiple simultaneous derivatives not allowed yet")
-    cols = 0
-    for k,v in varderivs.iteritems():
-        if is_op(v,'eye'):
-            cols = v.args[0]
-        elif is_const(v):
-            cols = 0
-        else:
-            d = to_const(dims.optimized(v))
-            if d <= 1:
-                cols = 0
-            else:
-                cols = to_const(shape.optimized(v)[1])
-                if cols is None:
-                    print "Variable: %s=%s has unknown size %s"%(str(k),str(v),str(shape.optimized(v)))
-                    raise NotImplementedError("TODO: determine derivative denominator shape")
-    if isinstance(cols,Expression):
-        try:
-            cols = cols.simplify(context).evalf(context)
-            assert is_const(cols)
-            cols = to_const(cols)
-        except Exception as e:
-            if _DEBUG_DERIVATIVES:
-                print "symbolic.deriv: Undetermined derivative shape"
-            pass
-    return cols
-
-def _needs_jacobian_reshape(arg):
-    try:
-        return arg.returnType().dims() >= 2
-    except Exception:
-        #assuming a vector or scalar type
-        return 0
-
 def _dims(v):
     if hasattr(v,'shape'): return len(v.shape)
     if hasattr(v,'__len__'):
@@ -3974,7 +4594,7 @@ def _zero(n):
     if isinstance(n,dict):
         #hyper array
         res = [None]*len(n)
-        for (k,v) in n.iteritems():
+        for (k,v) in n.items():
             res[k] = _zero(v)
         return res
     if hasattr(n,'__iter__'):
@@ -4011,6 +4631,8 @@ def _reshape(x,s):
 
 def _transpose(v):
     if not hasattr(v,'__iter__'): return v
+    if hasattr(v,'shape') and len(v.shape) >= 3:
+        print("symbolic.transpose: Warning, being applied to tensor? You probably want transpose2")
     return np.transpose(v)
 
 def _diag(v):
@@ -4101,6 +4723,15 @@ def _weightedsum(*arglist):
     return res
 
 def _getitem(vector,index):
+    if isinstance(index,slice):
+        start,stop,step =index.start,index.stop,index.step
+        if isinstance(start,ConstantExpression):
+            start = start.value
+        if isinstance(stop,ConstantExpression):
+            stop = stop.value
+        if isinstance(step,ConstantExpression):
+            step = step.value
+        index = slice(start,stop,step)
     if hasattr(index,'__iter__'):
         return [vector[i] for i in index]
     else:
@@ -4109,6 +4740,15 @@ def _getitem(vector,index):
 def _lazy_getitem(context,vector,index):
     #lazy evaluation of list entries
     eindex = index.eval(context)
+    if isinstance(eindex,slice):
+        start,stop,step = eindex.start,eindex.stop,eindex.step
+        if isinstance(start,ConstantExpression):
+            start = start.value
+        if isinstance(stop,ConstantExpression):
+            stop = stop.value
+        if isinstance(step,ConstantExpression):
+            step = step.value
+        eindex = slice(start,stop,step)
     if is_op(vector,'array'):
         #special lazy evaluation for array
         if is_const(eindex):
@@ -4133,6 +4773,8 @@ def _lazy_getitem(context,vector,index):
                     return evector[eindex]
                     #return flatten(*[vector[i] for i in eindex]).eval(context)
                 return [evector[i] for i in eindex]
+            return evector[eindex]
+        print("WARNING: Non-constant getitem?",eindex,"class",eindex.__class__.__name__)
         return evector[eindex]
 
 def _elementary_basis(n,index):
@@ -4152,6 +4794,8 @@ def _array(*args):
         return list(args)
 
 def _array_returnType(*args):
+    if len(args) == 0:
+        return Type('L',0)
     atypes = [type_of(a) for a in args]
     atype = supertype(atypes)
     if atype.is_scalar():
@@ -4163,6 +4807,10 @@ def _array_returnType(*args):
         res.subtype = atype.subtype
         return res
     #default
+    #print("Could not deduce return type of array of arg types",[str(t) for t in atypes])
+    #if len(atypes) >= 2:
+    #    for i in range(1,len(atypes)):
+    #        print("match",i,"?",atypes[0].match(atypes[1]))
     return Type('L',len(args),atypes)
 
 def _array_simplifier(*args):
@@ -4170,7 +4818,7 @@ def _array_simplifier(*args):
     if len(args) > 0 and all(is_op(a,'getitem') for a in args):
         v = args[0].args[0]
         i0 = to_const(args[0].args[1])
-        if i0 is None or not isinstance(i0,int):
+        if i0 is None or not isinstance(i0,_PY_INT_TYPES):
             return None
         for (i,a) in enumerate(args):
             if not is_scalar(a.args[1],i+i0):
@@ -4181,6 +4829,13 @@ def _array_simplifier(*args):
         else:
             assert lv is None or i0+len(args) <= lv
             return v[i0:i0+len(args)]
+    if len(args) > 0 and all(is_op(a,'zero') for a in args):
+        ash = [shape.optimized(a) for a in args]
+        sconst = to_const(ash[0])
+        if sconst:
+            convertable = all(to_const(a) == sconst for a in ash[1:])
+            if convertable:
+                return zero([len(args),] + list(sconst))
 
 def _list_simplifier(*args):
     return _array_simplifier(*args)
@@ -4227,7 +4882,7 @@ def _getattr(object,attr):
     return res
 
 def _setattr(object,attr,val):
-    assert isinstance(attr,(int,str))
+    assert isinstance(attr,str) or isinstance(attr,_PY_INT_TYPES)
     if callable(getattr(object,attr)):
         getattr(object,attr)(val)
     else:
@@ -4289,17 +4944,18 @@ def _subs(context,expr,var,value,evalexpr=True,evalvar=True,evalvalue=True):
                 expr = expr.replace(v,x,error_no_match=False)
             return expr
     #if evalexpr: expr = expr._eval(context)
-    print "original var argument:",var,var.__class__.__name__
+    #print("original var argument:",var,var.__class__.__name__)
     if evalvar: var = var._eval(context)
     if evalvalue: value = value._eval(context)
     if not isinstance(var,(VariableExpression,UserDataExpression)):
-        print "var argument:",var
+        #print("var argument:",var)
         raise ValueError("var argument must be a variable or a userData, got an instance of "+var.__class__.__name__)
     if is_const(value,context):
         if isinstance(var,VariableExpression):
             #this is a bit more efficient than expr.replace(var,value)
             oldval = var.var.value
             var.var.value = to_const(value,context)
+            assert var.var.value is not None
             res = expr._eval(context)
             expr._clearCache('eval')
             var.var.value = oldval
@@ -4475,12 +5131,13 @@ def _returnType3(*args):
     return args[2].returnType()
 
 #all of these are symbolic Functions in the default namespace
-range_ = Function('range',range,['n'],returnType='V')
+range_ = Function('range',lambda x:np.array(list(range(x))),['n'],returnType='V')
 len_ = Function('len',_len,['x'],returnType='I')
 count = Function('count',_count,['x'],returnType='I')
 shape = Function('shape',_shape,['x'],returnType='V')
 reshape = Function('reshape',_reshape,['x','s'])
-transpose = Function('transpose',_transpose,['x'],returnType=_propagate_returnType)
+transpose = Function('transpose',_transpose,['x'])
+transpose2 = Function('transpose2',lambda x,axes:np.transpose(x,axes),['x','axes'])
 dims = Function('dims',_dims,['x'],returnType='I')
 eye = Function('eye',_eye,['n'],returnType='M')
 basis = Function('basis',_basis,['i','n'],returnType='V')
@@ -4502,6 +5159,8 @@ mul = Function('mul',_mul,'...',returnType=_promote_returnType)
 div = Function('div',_div,['x','y'],returnType=_promote_returnType)
 pow_ = Function('pow',_pow,['x','y'],returnType=_promote_returnType)
 dot = Function('dot',np.dot,['x','y'],'A')
+outer = Function('outer',np.outer,['x','y'],'A')
+tensordot = Function('tensordot',np.tensordot,['x','y','axes'],'A')
 if_ = Function('if',_if,['cond','trueval','falseval'],returnType=_if_returnType)
 if_.returnTypeDescription = "either the type of trueval or falseval"
 max_ = Function('max',_max,'...',returnType=_propagate_returnType)
@@ -4524,7 +5183,8 @@ any_ = Function('any',any,'...',returnType='B')
 all_ = Function('all',all,'...',returnType='B')
 getitem = Function('getitem',_getitem,['vec','index'])
 setitem = Function('setitem',_setitem,['vec','index','val'])
-getslice = Function('getslice',operator.getslice,'...',returnType='L')
+#Deprecated in Python 3...
+#getslice = Function('getslice',operator.getslice,'...',returnType='L')
 getattr_ = Function('getattr',_getattr)
 setattr_ = Function('setattr',_setattr)
 flatten = Function('flatten',_flatten,'...',returnType='V')
@@ -4533,7 +5193,7 @@ column_stack = Function('column_stack',_column_stack,'...',returnType='M')
 array = Function('array',_array,'...',returnType='A')
 list_ = Function('list',lambda *args:args,'...',returnType='L')
 tuple_ = Function('tuple',lambda *args:tuple(args),'...',returnType='L')
-zip_ = Function('zip',lambda *args:zip(*args),'...',returnType='L')
+zip_ = Function('zip',lambda *args:list(zip(*args)),'...',returnType='L')
 weightedsum = Function('weightedsum',_weightedsum,'...',returnType=_propagate_returnType)
 subs = Function('subs',_subs,['expr','var','value'],returnType=_returnType1)
 map_ = Function('map',_map,['expr','var','values'],returnType='L')
@@ -4564,6 +5224,7 @@ otherwise it is a hyper-shape. (shortcut: "x.shape")"""
 reshape.description = """Evaluates to x reshaped to the shape s.  If x is a scalar, this evaluates to a constant
 matrix."""
 transpose.description = """Evaluates to np.transpose(x).  (shortcut: "x.T")"""
+transpose2.description = """Evaluates to np.transpose(x,axes). """
 basis.description = """Evaluates to the i'th elementary basis vector in dimension n."""
 eye.description = """Evaluates to np.eye(n) if n > 0, otherwise returns 1."""
 zero.description = """Evaluates to np.zeros(s) if s is a matrix shape or scalar > 0, otherwise evaluates to 0."""
@@ -4595,6 +5256,8 @@ div.description = """Evaluates to x / y (shortcut: "x / y").  Works with arrays 
 vector / scalar."""
 pow_.description = """Evaluates to pow(x,y) (shortcut "x**y")."""
 dot.description = """Evaluates to np.dot(x,y)."""
+outer.description = """Evaluates to np.outer(x,y)."""
+tensordot.description = """Evaluates to np.tensordot(x,y,axes)."""
 max_.description = """Evaluates to the maximum of the arguments."""
 min_.description = """Evaluates to the minimum of the arguments."""
 argmax.description = """Evaluates to the index of the maximum of the argments."""
@@ -4650,7 +5313,8 @@ with that value. Equivalent to any_(*[subs(expr,var,value) for value in values])
 summation.description = """The sum of expr over var when var is substitued with each value in the list values.
 Equivalent to sum_(*[subs(expr,var,value) for value in values])"""
 
-_builtin_functions = {'dims':dims,'len':len_,'count':count,'shape':shape,'reshape':reshape,'transpose':transpose,'range':range_,
+_builtin_functions = {'dims':dims,'len':len_,'count':count,'shape':shape,'reshape':reshape,'transpose':transpose,'transpose2':transpose2,
+                    'range':range_,
                     'eye':eye,'basis':basis,'zero':zero,'diag':diag,
                     'eq':eq,'ne':ne,'ge':ge,'le':le,
                     'not':not_,'or':or_,'and':and_,
@@ -4667,7 +5331,8 @@ _builtin_functions = {'dims':dims,'len':len_,'count':count,'shape':shape,'reshap
                     'sum':sum_,
                     'any':any_,'all':all_,
                     'getitem':getitem, 'setitem':setitem,
-                    'getslice':getslice,
+                    #Deprecated in Python 3
+                    #'getslice':getslice,
                     'getattr':getattr_,'setattr':setattr_,
                     'flatten':flatten,'row_stack':row_stack,'column_stack':column_stack,
                     'array':array,'list':list_,'tuple':tuple_,'zip':zip_,
@@ -4781,8 +5446,10 @@ def _count_simplifier(x):
     if is_scalar(x): return 1
     if is_op(x):
         try:
-            return x.returnType().count()
-        except Exception:
+            c = x.returnType().count()
+            if c is not None:
+                return c
+        except Exception as e:
             pass
     elif isinstance(x,VariableExpression):
         if x.var.type.size is not None:
@@ -4790,12 +5457,15 @@ def _count_simplifier(x):
     elif isinstance(x,Variable):
         if x.type.size is not None:
             return x.type.count()
+    if is_op(x,'shape'):
+        return dims(x.args[0])
     return None
 def _shape_simplifier(x):
     if is_scalar(x): return ()
     try:
         res = x.returnType().shape()
-        if res is not None: return res
+        if res is not None:
+            return res
     except Exception as e:
         pass
     if isinstance(x,VariableExpression):
@@ -4804,13 +5474,6 @@ def _shape_simplifier(x):
     elif isinstance(x,Variable):
         if x.type.size is not None:
             return x.type.shape()
-    if is_op(x):
-        rt = x.returnType()
-        if rt is not None:
-            try:
-                return rt.shape()
-            except Exception:
-                pass
     #TEST: new simplifier
     """
     if is_op(x):
@@ -4841,10 +5504,27 @@ def _eye_returnType(N):
     if Nc is not None:
         return Type('M',(Nc,Nc))
     return Type('M')
+def _basis_returnType(i,n):
+    Nc = to_const(n)
+    if Nc is not None:
+        return Type('V',Nc)
+    return Type('V')
 def _zero_returnType(sh):
     shc = to_const(sh)
     if shc is not None:
-        return Type('A',shc)
+        if isinstance(shc,int):
+            if shc == 0:
+                return Type('N')
+            else:
+                return Type('V',shc)
+        if len(shc) == 0:
+            return Type('N')
+        elif len(shc) == 1:
+            return Type('V',shc[0])
+        elif len(shc) == 2:
+            return Type('M',shc)
+        else:
+            return Type('A',shc)
     try:
         d = sh.returnType().dims()
         if d <= 1:
@@ -4859,7 +5539,18 @@ def _reshape_returnType(x,sh):
     shc = to_const(sh)
     if shc is not None:
         return Type('A',shc)
+    l = simplify(len_(sh))
+    lc = to_const(l)
+    if lc is not None:
+        if lc == 0:
+            return Type('N')
+        elif lc == 1:
+            return Type('V')
+    return Type('A')
+    """
+    #is there some way to getting the length of the shape?
     try:
+        print("reshape returntype not const",sh)
         d = sh.returnType().dims()
         if d <= 1:
             return Type('V')
@@ -4868,9 +5559,12 @@ def _reshape_returnType(x,sh):
             return Type('L')
     except Exception:
         return Type('A')
+    """
 
-def _reshape_simplifier(x,sh):
+def _reshape_presimplifier(x,sh):
     if is_op(x,'reshape'):
+        return reshape(x.args[0],sh)
+    if is_op(x,'flatten'):
         return reshape(x.args[0],sh)
     if is_op(x,'zero'):
         return zero(sh)
@@ -4885,6 +5579,74 @@ def _reshape_simplifier(x,sh):
                 return x
             if len(shc) == 1:
                 return flatten(x)
+            elif len(shc) == 0:
+                assert xsh==(1,)
+                return x[0]
+        return None
+    try:
+        if sh.returnType().dims() == 1:
+            return flatten(x)
+    except Exception:
+        pass
+
+def _reshape_simplifier(x,sh):
+    if is_op(x,'reshape'):
+        return reshape(x.args[0],sh)
+    if is_op(x,'zero'):
+        return zero(sh)
+    if is_op(x,'eye'):
+        #print("RESHAPE EYE",x.args[0],"TO",sh)
+        if to_const(len_.optimized(sh)) == 2:
+            try:
+                #print("It's square")
+                if x.args[0].match(simplify(sh[0])) and x.args[0].match(simplify(sh[1])):
+                    #print("It matches",simplify(sh[0]),"and",simplify(sh[1]))
+                    return x
+            except Exception:
+                pass
+    try:
+        xsh = x.returnType().shape()
+    except Exception:
+        return None
+    if is_const(sh):
+        shc = to_const(sh)
+        if shc is not None:
+            if np.array_equal(xsh,shc):
+                return x
+            if len(shc) == 1:
+                return flatten(x)
+            if len(xsh) > 1 and xsh[0] == 1:
+                return getitem.optimized(x,0)
+            #try flattening and reshaping 
+            size = np.prod(shc)
+            if is_op(x,'array') or is_op(x,'list'):
+                def to_nparray(v):
+                    if is_op(v,'array') or is_op(v,'list'):
+                        try:
+                            return np.array([to_nparray(a) for a in v.args])
+                        except ValueError:
+                            raise
+                    return v
+                try:
+                    xarr = to_nparray(x)
+                    if np.prod(xarr.shape) == size:
+                        #print("reshape: converted",x,"to array",xarr)
+                        #print("Trying to flatten and reshape from",xsh,"to shape",shc)
+                        res = xarr.reshape(shc)
+                        def to_array(v):
+                            if isinstance(v,np.ndarray) and len(v.shape) >= 1:
+                                return array(*[to_array(w) for w in v])
+                            return v
+                        #print("Result as np array",res)
+                        res_array = to_array(res)
+                        #print("Result as symbolic array:",res_array)
+                        return res_array
+                except ValueError as e:
+                    #import traceback
+                    #print("Exception encountered:",e)
+                    #traceback.print_exc()
+                    #print("context is trying to convert",x,"into an numpy array")
+                    pass
         return None
     try:
         if len(sh.returnType().shape()) == 1:
@@ -4926,8 +5688,38 @@ def _transpose_returnType(x):
         s[0],s[-1] = s[-1],s[0]
         return Type(xt,tuple(s))
     elif xt.char == 'L':
-        raise ValueError("transpose: Can't do a transpose on a list object")
+        if xt.subtype is not None:
+            if isinstance(xt.subtype,Type) and xt.subtype.char in 'AMLV':
+                return Type('A')
+        raise ValueError("transpose: Can't do a transpose on a list object with subtype "+str(xt.subtype))
     return None
+
+def _transpose2_simplifier(x,axes):
+    da = to_const(len_.optimized(axes))
+    if da is not None:
+        if da <= 1:
+            return x
+        if da == 2:
+            a0 = to_const(axes[0])
+            if a0 == 0:
+                return x
+            elif a0 == 1:
+                return transpose(x)
+    return None
+
+def _transpose2_returnType(x,axes):
+    xt = x.returnType()
+    if xt is None: return None
+    elif xt.char is None: return None
+    elif xt.size is None: return xt
+    caxes = to_const(axes)
+    if caxes is not None:
+        if any(i < 0 or i >= len(xt.size) for i in caxes):
+            raise ValueError("transpose2: invalid axis index")
+        return Type(xt.char,tuple(xt.size[i] for i in caxes),xt.subtype)
+    return Type(xt.char,None,xt.subtype)
+
+
 
 """
 def _neg_simplifier(arg):
@@ -4961,7 +5753,7 @@ def _sum_simplifier(*args):
     #print "Sum of constants",sumconst
     changed = False
     if isinstance(sumconst,np.ndarray):
-        if (sumconst == 0).all():
+        if np.all(sumconst == 0):
             sumconst = 0
     elif hasattr(sumconst,'__iter__'):
         if all(v == 0 for v in sumconst):
@@ -4972,6 +5764,8 @@ def _sum_simplifier(*args):
     if len(avar) == 0:
         return sumconst
     def match(a,b):
+        if a is b:
+            return True
         if isinstance(a,VariableExpression) and isinstance(b,VariableExpression):
             if a.var.name == b.var.name:
                 return True
@@ -4983,9 +5777,9 @@ def _sum_simplifier(*args):
                     return True
         return False
     #now check for duplicate arguments that can be converted to multiplies
-    for i in xrange(len(avar)):
+    for i in range(len(avar)):
         if avar[i] is None: continue
-        matches = [j for j in xrange(len(avar)) if j != i and match(avar[i],avar[j])]
+        matches = [j for j in range(len(avar)) if j != i and match(avar[i],avar[j])]
         if len(matches) >= 1:
             for j in matches:
                 avar[j] = None
@@ -5000,7 +5794,7 @@ def _sum_simplifier(*args):
                 break
         if match:
             sargs = []
-            for i in xrange(len(avar[0].args)):
+            for i in range(len(avar[0].args)):
                 sargs.append(sum_(*[v.args[i] for v in avar]))
             return array(*sargs)
     if len(avar) > 1 and all(is_op(v,'flatten') for v in avar):
@@ -5015,7 +5809,7 @@ def _sum_simplifier(*args):
                 break
         if match:
             sargs = []
-            for i in xrange(len(avar[0].args)):
+            for i in range(len(avar[0].args)):
                 sargs.append(sum_(*[v.args[i] for v in avar]))
             return flatten(*sargs)
     if len(avar) > 1 and all(is_op(v,'reshape') for v in avar):
@@ -5054,13 +5848,43 @@ def _mul_deriv(args,dargs):
     for i,dx in enumerate(dargs):
         if not is_zero(dx):
             dxargs = args[:i]+[dx]+args[i+1:]
-            inc = mul(*dxargs)
+            inc = mul.optimized(*dxargs)
             terms.append(inc)
     if len(terms) == 0:
         return 0
-    return sum_(*terms)
+    return sum_.optimized(*terms)
+
+def _mul_presimplifier(*args):
+    if any(is_op(x,'basis') for x in args):
+        #pull out the basis term
+        print("TRYING TO PULL OUT MUL BASIS TERM")
+        entry = None
+        basisTerm = None
+        for x in args:
+            if is_op(x,'basis'):
+                if entry is not None:
+                    if not entry.matches(x.args[0]):
+                        print("mul(basis(%s),basis(%s)) simplifies to zero?"%(entry,x.args[0]))
+                        return zero(x.args[1])
+                entry = x.args[0]
+                basisTerm = x
+        anyVec = False
+        eargs = []
+        for x in args:
+            if not is_op(x,'basis'):
+                if is_scalar(x):
+                    eargs.append(x)
+                else:
+                    eargs.append(getitem._call(x,entry))
+                    anyVec = True
+        if anyVec:
+            return mul(basisTerm,*eargs)
+            
 
 def _mul_simplifier(*args):
+    if len(args) == 1:
+        return args[0]
+    
     aconst = [to_const(x) for x in args]
     avar = []
     for xc,x in zip(aconst,args):
@@ -5075,13 +5899,24 @@ def _mul_simplifier(*args):
         aconst = mul.optimized(*aconst)
     else:
         aconst = 1
-    if all(is_op(x,'neg') for x in avar) and len(avar) > 1:
-        inner = mul.optimized(*[x.args[0] for x in avar])
-        odd = len(avar)%2
+    if any(is_op(x,'neg') for x in avar):
+        #print("Pulling out negative")
+        inner_args = [(x.args[0] if is_op(x,'neg') else x) for x in avar]
+        #print("Inner args",inner_args)
+        odd = sum(is_op(x,'neg') for x in avar)%2
+        #print("Odd-ness",odd)
         if odd:
-            return mul(aconst,neg(inner))
+            if aconst == 1:
+                return neg(mul.optimized(*inner_args))
+            elif aconst == -1:
+                return mul.optimized(*inner_args)
+            return mul.optimized(*([neg.optimized(aconst)]+inner_args))
         else:
-            return mul(aconst,inner)
+            if aconst == 1:
+                return mul.optimized(*inner_args)
+            elif aconst == -1:
+                return neg(mul.optimized(*inner_args))
+            return mul.optimized(*([aconst]+inner_args))
 
     if len(avar) == 0: return aconst
     if not is_scalar(aconst,1):
@@ -5096,7 +5931,7 @@ def _mul_simplifier(*args):
         return mul(*newargs)
 
     #combine polynomial factors
-    asort = sorted(args)
+    asort = sorted(args,key=lambda x: str(x))
     apoly = [to_monomial(x) for x in asort]
     newargs = [asort[0]]
     for i in range(len(apoly)-1):
@@ -5121,7 +5956,7 @@ def _mul_simplifier(*args):
         x,y = args
         xconst = to_const(x)
         yconst = to_const(y)
-        if isinstance(xconst,(int,float)):
+        if isinstance(xconst,_PY_NUMERIC_TYPES):
             if xconst == -1: 
                 return -y
             #if is_op(y,'mul'):
@@ -5136,7 +5971,7 @@ def _mul_simplifier(*args):
                     return div(_div(xconst,y0const),y.args[1])
             if is_op(y,'neg'):
                 return mul(_mul(xconst,-1),y.args[0])
-        elif isinstance(yconst,(int,float)):
+        elif isinstance(yconst,_PY_NUMERIC_TYPES):
             #put constants in leading terms
             return mul(y,x)
         elif isinstance(xconst,np.ndarray):
@@ -5148,7 +5983,7 @@ def _mul_simplifier(*args):
 def _div_simplifier(x,y):
     xconst = to_const(x)
     yconst = to_const(y)
-    if isinstance(xconst,(int,float)):
+    if isinstance(xconst,_PY_NUMERIC_TYPES):
         if xconst == 0: return 0
         if is_op(y,'mul'):
             #look for other constants
@@ -5162,9 +5997,22 @@ def _div_simplifier(x,y):
                 return mul.optimized(_div(xconst,y0const),y.args[1])
         if is_op(y,'neg'):
             return div.optimized(_mul(xconst,-1),y.args[0])
-    elif isinstance(yconst,(int,float)):
+    elif isinstance(yconst,_PY_NUMERIC_TYPES):
         #put constants in leading terms
         return mul(1.0/y,x)
+    elif is_op(x,'mul') and to_const(x.args[0]):
+        #put constants in leading terms
+        if len(x.args) > 2:
+            return mul(x.args[0],div.optimized(mul.optimized(*x.args[1:]),y))
+        return mul(x.args[0],div.optimized(x.args[1],y))
+    elif is_op(x,'neg'):
+        #take out negatives
+        if is_op(y,'neg'):
+            return div.optimized(x.args[0],y.args[0])
+        else:
+            return neg(div.optimized(x.args[0],y))
+    elif is_op(y,'neg'):
+        return neg(div.optimized(x,y.args[0]))
     else:
         xpoly = to_monomial(x)
         ypoly = to_monomial(y)
@@ -5220,7 +6068,12 @@ def dotshape(x,y):
     if is_const(lx) and is_const(ly): 
         lx = to_const(lx)
         ly = to_const(ly)
-        return flatten.optimized(sx,sy) if (lx == 0 or ly == 0) else flatten.optimized(sx[0:lx-1],sy[1:ly])
+        if lx > 0 and ly > 0:
+            if to_const(sx) and to_const(sy):
+                assert to_const(sx)[-1]==to_const(sy)[0],"Error forming dot product: dimensions don't match"
+            return flatten.optimized(sx[0:lx-1],sy[1:ly])
+        else:
+            return flatten.optimized(sx,sy)
     else:
         res = if_._call(or_._call(lx == 0,ly == 0),
                 flatten._call(sx,sy),           #scalar - array
@@ -5228,8 +6081,8 @@ def dotshape(x,y):
         return simplify(res)
 
 def dottype(x,y):
-    dx = simplify(dims._call(x))
-    dy = simplify(dims._call(y))
+    dx = dims.optimized(x)
+    dy = dims.optimized(y)
     try:
         assert is_const(dx)
         assert is_const(dy)
@@ -5246,11 +6099,71 @@ def dottype(x,y):
             basetype = 'A'
     except:
         basetype = 'A'
-    s = dotshape(x,y)
-    if isinstance(s,Expression): return Type(basetype)
+    s = to_const(dotshape(x,y))
+    if s is None: return Type(basetype)
     if len(s) == 0:
         return Type('N')
+    if basetype == 'V':
+        s = s[0]
     return Type(basetype,s)
+
+def _tensordot_shape(x,y,axes):
+    try:
+        xs = x.returnType().shape()
+        ys = y.returnType().shape()
+        ac = to_const(axes)
+    except Exception:
+        return None
+    if ac is None:
+        return None
+    if isinstance(ac,int):
+        return xs[:ac] + ys[ac:]
+    else:
+        assert hasattr(ac,'__iter__'),"tensordot axes must be an index or pair of indices"
+        assert len(ac) == 2,"too many items in tensordot axes"
+        assert hasattr(ac[0],'__iter__') and hasattr(ac[1],'__iter__'),"tensordot axes must be a pair of lists"
+        xused = [False]*len(xs)
+        yused = [False]*len(ys)
+        for i in ac[0]:
+            assert i >= 0 and i < len(xs),"Invalid index in tensordot"
+            xused[i] = True
+        for i in ac[1]:
+            assert i >= 0 and i < len(ys),"Invalid index in tensordot"
+            yused[i] = True
+        return [s for s,u in zip(xs,xused) if not u] + [s for s,u in zip(ys,yused) if not u]
+
+def _tensordot_returnType(x,y,axes):
+    sh = _tensordot_shape(x,y,axes)
+    if sh is None:
+        return Type('A')
+    return Type('A',sh)
+
+def _tensordot_const_simplifier(x,y,axes):
+    if axes == 1:
+        return dot(x,y)
+    try:
+        xd = x.returnType().dims()
+        yd = y.returnType().dims()    
+        if xd == 1 and yd == 1:
+            if axes == 0 or axes==[[],[]]:
+                return outer(x,y)
+            elif axes == 1 or axes == [[0],[0]]:
+                return dot(x,y)
+            else:
+                raise ValueError("Invalid value for axes in tensordot of two vectors:",axes)
+    except Exception:
+        return None
+    return None
+
+def _dot_simplifier(x,y):
+    try:
+        xd = x.returnType().dims()
+        yd = y.returnType().dims()
+        if xd == 1 and yd == 2:
+            if is_op(y,'transpose'):
+                return dot(y.args[0],x)
+    except Exception:
+        pass
 
 """
 def _dot_simplifier(x,y):
@@ -5399,7 +6312,7 @@ def _dot_simplifier(x,y):
                         for yind in itertools.product(*[range(d) for d in yshape[1:]]):
                             #print "Index",dpindex,yind
                             #print dpindex+yind,"in shape",newx.shape
-                            newx[dpindex+yind] = val[yind]
+                            newx[d+yind] = val[yind]
                     #print "RESULT",array(*newx.tolist())
                     #raw_input()
                     return array(*newx.tolist())
@@ -5481,9 +6394,17 @@ def _any_simplifier(*args):
     return None
 
 def _flatten_simplifier(*args):
+    #sanity check
+    for a in args:
+        if isinstance(a,int):
+            raise ValueError("Args need to be ConstantExpressions")
     if len(args)==1:
         if is_op(args[0],'array'):
             return flatten.optimized(*args[0].args)
+        #elif is_const(args[0]):
+        #    return _flatten(args[0])
+        elif args[0].returnType().char == 'N':
+            return array(args[0])
         elif args[0].returnType().char == 'V':
             return args[0]
     newargs = []
@@ -5492,7 +6413,7 @@ def _flatten_simplifier(*args):
         if is_op(a,'flatten'):
             newargs += a.args
             changed = True
-        if is_op(a,'array') or is_op(a,'list'):
+        elif is_op(a,'array') or is_op(a,'list'):
             newargs += a.args
             changed = True
         elif is_op(a,'reshape'):
@@ -5501,12 +6422,25 @@ def _flatten_simplifier(*args):
             changed = True
         else:
             cnt = count.optimized(a)
-            if not is_zero(cnt):
-                newargs.append(a)
-            else:
+            if is_zero(cnt):
+                #skip
                 changed = True
-    if len(newargs) == 1 and newargs[0].returnType().char == 'V':
-        return args[0]
+            elif is_const(cnt,1) and to_const(len_.optimized(a)) == 1:
+                newargs.append(a[0])
+                changed = True
+            else:
+                newargs.append(a)
+    if len(newargs) == 1:
+        #if is_const(newargs[0]):
+        #    return _flatten(newargs[0])
+        #el
+        if newargs[0].returnType().char == 'N':
+            return array(newargs[0])
+        elif newargs[0].returnType().char == 'V':
+            return newargs[0]
+    if all(is_scalar(dims.optimized(a),0) for a in newargs):
+        #all scalars
+        return array(*newargs)
     if changed:
         return flatten(*newargs)
     return None
@@ -5569,38 +6503,69 @@ def _weightedsum_simplifier(*args):
         return None
     return weightedsum.optimized(*(newvals+newweights))
 
-def _getitem_deriv(context,v,index,dvars):
+def _getitem_deriv(context,v,index,dvars,rows):
     eindex = index.eval(context)
-    if is_op(v,'array'):
+    if is_op(v,'array') or is_op(v,'list'):
         iconst = to_const(eindex)
-        #TODO: this is reentrant
         if iconst is not None:
             if isinstance(iconst,(list,np.ndarray)):
-                return array(*[v.args[i].deriv(dvars,context) for i in iconst])
+                if is_op(v,'list'):
+                    return list_(*[v.args[i]._deriv(dvars,context,rows) for i in iconst])
+                else:
+                    return array(*[v.args[i]._deriv(dvars,context,rows) for i in iconst])
             else:
-                return v.args[iconst].deriv(dvars,context)
-        res = v.deriv(dvars,context)
+                return v.args[iconst]._deriv(dvars,context,rows)
+        res = v._deriv(dvars,context,rows)
         if _is_exactly(res,0): return 0
         if res is None: return None
         return res[eindex]
     else:
-        res = v.deriv(dvars,context)
+        res = v._deriv(dvars,context,rows)
+        vtype = v.returnType()
+        if vtype is not None and vtype.char not in SCALAR_TYPES + ARRAY_TYPES:
+            #irregular type: need to extract out the flattened indices corresponding to the original eindex
+            orig_indices = []
+            vcount = 0
+            if isinstance(eindex,int):
+                if eindex == 0:
+                    estart = 0
+                    orig_indices = range_(count.optimized(v[eindex]))
+                else:
+                    estart = count.optimized(v[:eindex])
+                    orig_indices = estart+range_(count.optimized(v[eindex]))
+                #print("IRREGULAR INDEX",eindex,"CONVERTED TO",orig_indices)
+                eindex = orig_indices
+            elif isinstance(eindex,(list,tuple)):  #it's a range
+                estart = 0
+                ilast = 0
+                for ei in eindex:
+                    if ei > ilast:
+                        estart += count.optimized(v[ilast:ei])
+                    vicount = count.optimized(v[ei])
+                    orig_indices.append(estart + range_(vicount))
+                    estart += vicount
+                    ilast = ei+1
+                #print("IRREGULAR INDEX",eindex,"CONVERTED TO",orig_indices)
+                eindex = flatten(*orig_indices)
+            else:
+                raise ValueError("symbolic.deriv: Don't know how to take derivative with respect to variable index yet")
+        if is_op(res,'eye') and res.args[0].match(rows):
+            return transpose.optimized(getitem.optimized(res,eindex))
+        if _DEBUG_DERIVATIVES:
+            print("GETITEM DERIV",index,"v=",v,"deriv",res)
         if _is_exactly(res,0): return 0
         if res is None: return None
-        if v.returnType().dims() >= 2:
-            #the jacobian is flattened
-            cols = to_const(shape.optimized(res)[-1])
-            jacobian_shape = _concat_hyper_shape(to_const(shape.optimized(v)),(int(cols),))
-            if _DEBUG_DERIVATIVES:
-                print "RESHAPING GETITEM",jacobian_shape
-            return reshape.optimized(res,jacobian_shape)[eindex]
+        crows = to_const(rows)
+        if crows is None or crows > 0:
+            #the jacobian has shape rows * shape(v)
+            #want to extract out entry [:,eindex,...]
+            if crows is not None:
+                return array(*[getitem.optimized(res,i)[eindex] for i in range(int(crows))])
+            else:   
+                #this returns a list...
+                print("Mapping derivative with",rows,"rows and indexed columns",eindex)
+                return getitem(array.optimized(map_(getitem.optimized(res,"i")[eindex],"i",range_(rows))),0)
         else:
-            #print "GETITEM: SHOULD WE RESIZE?"
-            #print "v is",v
-            #cols = to_const(shape.optimized(res)[-1])
-            #print "# of columns",cols
-            #print "DESIRED SHAPE",_concat_hyper_shape(to_const(shape.optimized(v)),(int(cols),))
-            #print "RES SHAPE",shape.optimized(res)
             return res[eindex]
 
 """
@@ -5640,10 +6605,10 @@ def _getitem_simplifier(v,indices):
     if is_op(indices,'if'):
         cond,trueval,falseval = indices.args
         return if_._call(cond,v[trueval],v[falseval])
-    if iconst is not None and isinstance(iconst,(int,list,slice)) and is_op(v,'dot'):
+    if iconst is not None and isinstance(iconst,_PY_INT_TYPES+(list,slice)) and is_op(v,'dot'):
         A,B = v.args
         return dot._call(A[iconst],B)
-    if iconst is not None and isinstance(iconst,int) and is_op(v,'row_stack'):
+    if iconst is not None and isinstance(iconst,_PY_INT_TYPES) and is_op(v,'row_stack'):
         if li == 0:
             for a in v.args:
                 sa = to_const(shape.optimized(a))
@@ -5655,7 +6620,7 @@ def _getitem_simplifier(v,indices):
                 else:
                     if iconst < sa[0]: return a[iconst]
                     iconst -= sa[0]
-    if iconst is not None and isinstance(iconst,int) and is_op(v,'flatten'):
+    if iconst is not None and isinstance(iconst,_PY_INT_TYPES) and is_op(v,'flatten'):
         if li == 0:
             for a in v.args:
                 ca = to_const(count.optimized(a))
@@ -5726,13 +6691,17 @@ def _getitem_returnType(x,indices):
     if iconst is not None:
         if isinstance(iconst,slice):
             start,stop,step = iconst.start,iconst.stop,iconst.step
-            if stop > 90000000000:
+            if start is None:
+                start = 0
+            if stop is None or stop > 90000000000:
                 size = None
             else:
                 if step is not None:
                     size =  (stop-start)//step
                 else:
                     size = stop-start
+            if isinstance(xt.subtype,list):
+                return Type(xt.char,size,xt.subtype[iconst])
             return Type(xt.char,size,xt.itemtype())
         if hasattr(iconst,'__iter__'):
             if xt.char in 'MA':
@@ -5760,7 +6729,7 @@ def _setitem_simplifier(x,indices,rhs):
         return rhs
     return None
 
-def _subs_deriv(context,expr,var,value,derivs):
+def _subs_deriv(context,expr,var,value,derivs,rows):
     #chain rule d/dx expr(x,value(x)) = d/dx expr + d/dvalue expr dvalue/dx
     if isinstance(context,Context):
         context = context.userData
@@ -5769,20 +6738,20 @@ def _subs_deriv(context,expr,var,value,derivs):
     if hasattr(var,'__iter__'):
         assert hasattr(value,'__iter__')
         assert len(var) == len(value)
-        vderivs = [val._deriv(derivs,context) for val in value]
+        vderivs = [val._deriv(derivs,context,rows) for val in value]
         varnames = [v.name if isinstance(v,(Variable,UserDataExpression)) else v for v in var]
-        dxexpr = expr._deriv(derivs,context=context)
+        dxexpr = expr._deriv(derivs,context,rows)
         dvexprs = []
         #NEED TO DO A CACHE CLEAR SINCE THIS IS REENTRANT 
         for (varname,vderiv) in zip(varnames,vderivs):
              expr._clearCache('deriv',deep=True)
-             dvexprs.append(expr._deriv({varname:vderiv},context=context))
+             dvexprs.append(expr._deriv({varname:vderiv},context=context,rows=rows))
         expr._clearCache('deriv',deep=True)
         if dxexpr is None or any(v is None for v in dvexprs):
             return None
         return subs(dxexpr+sum_(dvxprs),var,value)
     else:
-        vderiv = value.deriv(derivs,context)
+        vderiv = value._deriv(derivs,context,rows)
         varname = var.name if isinstance(var,(Variable,UserDataExpression)) else var
         dxexpr = expr._deriv(derivs,context=context)
         #NEED TO DO A CACHE CLEAR SINCE THIS IS REENTRANT 
@@ -5793,16 +6762,16 @@ def _subs_deriv(context,expr,var,value,derivs):
             return None
         return subs(dxexpr + dvexpr,var,value)
 
-def _map_deriv(context,expr,var,values,derivs):
+def _map_deriv(context,expr,var,values,derivs,rows):
     if isinstance(context,Context):
         context = context.userData
     elif context is None:
         context = {}
     varname = var.name if isinstance(var,(Variable,UserDataExpression)) else var
-    vderivs = values._deriv(derivs,context=context)
+    vderivs = values._deriv(derivs,context=context,rows=rows)
     if vderivs is None:
         return None
-    dxexpr = expr._deriv(derivs,context=context)
+    dxexpr = expr._deriv(derivs,context=context,rows=rows)
     if dxexpr is None:
         return None
     if is_zero(vderivs):
@@ -5813,7 +6782,7 @@ def _map_deriv(context,expr,var,values,derivs):
     dvvar = Variable(dvname,values[0].returnType())
     vdv = UserDataExpression(vdvname)
     expr._clearCache('deriv',deep=True)
-    dvexpr = expr._deriv({varname:dvvar},context=context)
+    dvexpr = expr._deriv({varname:dvvar},context=context,rows=rows)
     expr._clearCache('deriv',deep=True)
     if dvexpr is None:
         return None
@@ -5825,16 +6794,16 @@ def _map_returnType(expr,var,values):
     else:
         return Type('L',None,expr.returnType())
 
-def _summation_deriv(context,expr,var,values,derivs):
+def _summation_deriv(context,expr,var,values,derivs,rows):
     if isinstance(context,Context):
         context = context.userData
     elif context is None:
         context = {}
     varname = var.name if isinstance(var,(Variable,UserDataExpression)) else var
-    vderivs = values._deriv(derivs,context=context)
+    vderivs = values._deriv(derivs,context=context,rows=rows)
     if vderivs is None:
         return None
-    dxexpr = expr._deriv(derivs,context=context)
+    dxexpr = expr._deriv(derivs,context=context,rows=rows)
     if dxexpr is None:
         return None
     if is_zero(vderivs):
@@ -5885,8 +6854,10 @@ shape.addSimplifier(['_returnType'],_shape_from_returnType)
 shape.addSimplifier(['zero'],lambda x:x.args[0])
 shape.addSimplifier(['basis'],lambda x:flatten(x.args[1]))
 shape.addSimplifier(['eye'],lambda x:flatten(x.args[0],x.args[0]))
-shape.addSimplifier(['diag'],lambda x:flatten(len_(x.args[0]),len_(x.args[0])))
+shape.addSimplifier(['diag'],lambda x:array(len_(x.args[0]),len_(x.args[0])))
 shape.addSimplifier(['dot'],lambda x:dotshape(x.args[0],x.args[1]))
+shape.addSimplifier(['outer'],lambda x:array(len_(x.args[0]),len_(x.args[1])))
+shape.addSimplifier(['tensordot'],lambda x,axes:_tensordot_shape(x.args[0],x.args[1],x.args[2]))
 def _shape_getitem(x):
     if isinstance(to_const(x.args[1]),(list,tuple)):
         return (len_(x.args[1]),)
@@ -5895,11 +6866,14 @@ shape.addSimplifier(['getitem'],_shape_getitem)
 shape.addSimplifier(['setitem'],lambda x:x.args[0])
 shape.addSimplifier(['reshape'],lambda x:x.args[1])
 shape.addSimplifier(['flatten'],lambda x:array(sum_(*[count(a) for a in x.args])))
+shape.addSimplifier(['neg'],lambda x:shape(x.args[0]))
+shape.addSimplifier(['transpose'],lambda x:array(shape(x.args[0])[1],shape(x.args[0])[0]))
 eye.returnTypeFunc = _eye_returnType
+basis.returnTypeFunc = _basis_returnType
 zero.returnTypeFunc = _zero_returnType
 reshape.returnTypeFunc = _reshape_returnType
 reshape.returnTypeDescription = "array, or a list if size is a nested tuple"
-reshape.presimplifier = _reshape_simplifier
+reshape.presimplifier = _reshape_presimplifier
 reshape.simplifier = _reshape_simplifier
 transpose.deriv = [lambda x,dx:transpose(dx)]
 #TEST: new simplifiers
@@ -5916,10 +6890,40 @@ def _zerotranspose(sh):
     return None
 transpose.addSimplifier(['zero'],lambda x:_zerotranspose(x.args[0]))
 transpose.addSimplifier(['neg'],lambda x:-transpose(x.args[0]))
+transpose.addSimplifier(['row_stack'],lambda x:column_stack(transpose.optimized(v) for v in x.args))
+def _transpose_array_simplifier(x):
+    vsize = None
+    for v in x.args:
+        if is_op(v,'array') or is_op(v,'list'):
+            vlen = to_const(shape.optimized(v))
+            if vlen is None:
+                return None
+            if vsize is None:
+                vsize = vlen
+            else:
+                if vsize != vlen:
+                    return None
+    if not isinstance(vsize,(list,tuple)) or len(vsize) != 1:
+        return None
+    #everything is good for a 
+    n = vsize[0]
+    m = len(x.args)
+    inner = []
+    for i in range(n):
+        inner.append(array(*[v[i] for v in x.args]))
+    return array(*inner)
+transpose.addSimplifier(['array'],_transpose_array_simplifier)
+transpose.addSimplifier(['column_stack'],lambda x:row_stack(transpose.optimized(v) for v in x.args))
 transpose.returnTypeFunc = _transpose_returnType
 transpose.returnTypeDescription = "Same as input, but with the first and second axes transposed"
 transpose.properties['inverse'] = weakref.proxy(transpose)
 transpose.printers['str'] = lambda expr,astr:'('+astr[0]+').T' if isinstance(expr.args[0],OperatorExpression) else astr[0]+'.T'
+transpose2.argTypes = [Type('A'),Type('L')]
+transpose2.returnTypeFunc = _transpose2_returnType
+transpose2.returnTypeDescription = "array with shuffled axes"
+transpose2.deriv = [lambda x,axes,dx:transpose(dx,axes),None]
+transpose2.simplifier = _transpose2_simplifier
+transpose2.addSimplifier(['neg',None],lambda x,axes:-transpose2(x.args[0],axes))
 range_.argTypes = [Type('I')]
 eye.argTypes = [Type('I')]
 basis.argTypes = [Type('I'),Type('I')]
@@ -5932,7 +6936,7 @@ neg.addSimplifier(['zero'],lambda x:x.args[0])
 neg.addSimplifier(['sum'],lambda x:sum_(*[-a for a in x.args]))
 neg.addSimplifier(['add'],lambda x:add(*[-a for a in x.args]))
 neg.properties['inverse'] = weakref.proxy(neg)
-add.deriv = lambda args,dargs:sum_(*dargs)
+add.deriv = lambda args,dargs:sum_.optimized(*dargs)
 add.colstackderiv = add.deriv
 add.rowstackderiv = add.deriv
 add.simplifier = _sum_simplifier
@@ -5943,8 +6947,8 @@ add.properties['foldfunc'] = lambda const: (const,False) if not is_zero(const) e
 add.printers['str'] = lambda expr,astr: ' + '.join(astr)
 add.printers['parse'] = lambda expr,astr: ' + '.join(astr)
 sum_.deriv = add.deriv
-sum_.colstackderiv = sum_.deriv
-sum_.rowstackderiv = sum_.deriv
+sum_.colstackderiv = add.colstackderiv
+sum_.rowstackderiv = add.rowstackderiv
 sum_.simplifier = add.simplifier
 sum_.properties = add.properties
 sum_.printers = add.printers
@@ -5959,6 +6963,7 @@ sub.addSimplifier(['zero',None],lambda x,y:neg(y))
 sub.addSimplifier(['add',None],lambda x,y:sum_(*(x.args+[neg(y)])))
 sub.addSimplifier(['sum',None],lambda x,y:sum_(*(x.args+[neg(y)])))
 mul.deriv = _mul_deriv
+mul.presimplifier = _mul_presimplifier
 mul.simplifier = _mul_simplifier
 mul.properties['commutative'] = True
 mul.properties['associative'] = True
@@ -5969,7 +6974,7 @@ mul.printers['parse'] = lambda expr,astr: '*'.join(astr)
 div.deriv = [(lambda x,y,dx:div(dx,y)),(lambda x,y,dy:-mul(dy,div(x,y**2)))]
 div.simplifier = _div_simplifier
 abs_.deriv = [lambda x,dx:sign(x)*dx]
-abs_.colstackderiv = [lambda x,dx:sign(x)*dx]
+abs_.rowstackderiv = [lambda x,dx:sign(x)*dx]
 #TEST: new simplifiers
 #abs_.simplifier = _abs_simplifier
 abs_.addSimplifier(['neg'],lambda x:abs_(x.args[0]))
@@ -5994,10 +6999,11 @@ sign.addSimplifier(['zero'],lambda x:x)
 sign.addSimplifier(['eye'],lambda x:x)
 sign.addSimplifier(['basis'],lambda x:x)
 dot.deriv = [(lambda x,y,dx:dot(dx,y)),(lambda x,y,dy:dot(x,dy))]
-dot.colstackderiv = [(lambda x,y,dx:dot(transpose.optimized(dx),transpose.optimized(y)).T),(lambda x,y,dy:dot(x,dy))]
+dot.rowstackderiv = [lambda x,y,dx:dot(dx,y),None]
+dot.colstackderiv = [None,lambda x,y,dy:dot(x,dy)]
 dot.returnTypeFunc = dottype
 #TEST: new simplifiers
-#dot.simplifier = _dot_simplifier
+dot.simplifier = _dot_simplifier
 dot.addSimplifier(['neg','neg'],lambda x,y:dot(x.args[0],y.args[0]))
 dot.addSimplifier([None,'neg'],lambda x,y:-dot(x,y.args[0]))
 dot.addSimplifier(['neg',None],lambda x,y:-dot(x.args[0],y))
@@ -6102,10 +7108,17 @@ dot.addSimplifier(['_scalar',None],lambda x,y:mul._call(x,y))
 dot.addSimplifier([None,'_scalar'],lambda x,y:mul._call(y,x))
 def _dot_const_simplify(x,y):
     x = np.asarray(x)
-    if (x==0).all():
+    try:
+        iszero = np.all(x==0)
+    except Exception:
+        print("dot(constant,y): Weird case, x can't be tested for equality to 0?")
+        print(x.__class__.__name__)
+        print(x)
+        raise
+    if iszero:
         return zero(dotshape(x,y))
     if is_sparse(x):
-        #print "SPARSIFYING DOT PRODUCT",np.count_nonzero(x),"NONZEROS"
+        #print("SPARSIFYING DOT PRODUCT x with",np.count_nonzero(x),"NONZEROS / ",count.optimized(x))
         nzs = np.nonzero(x)
         yshape = to_const(shape.optimized(y))
         if len(x.shape) == 1:
@@ -6126,6 +7139,7 @@ def _dot_const_simplify(x,y):
                         newx[xind+yind] = res
                   newx[ind] = res
             """
+            assert x.shape[-1] == yshape[0],"Uh... dot is between two arrays of mismatched shape? %s vs %s"%(str(x.shape),str(yshape))
             if len(yshape) == 1:
                 yentries = [getitem._call(y,i) for i in range(yshape[0])]
                 newx = np.zeros(x.shape[:-1],dtype='O')
@@ -6136,67 +7150,118 @@ def _dot_const_simplify(x,y):
                     xindex = tuple(nzdim[i] for nzdim in nzs)
                     dpindex = tuple(nzdim[i] for nzdim in nzs[:-1])
                     #print "SETTING RESULT INDEX",dpindex,"to",x[xindex]*y[ind]
-                    newx[dpindex] = x[xindex]*yentries[ind]
+                    newx[dpindex] += x[xindex]*yentries[ind]
                 #print "RESULT",array(*newx.tolist())
                 #raw_input()
                 return array(*newx.tolist())
             else:
                 yentries = [getitem._call(y,i) for i in range(yshape[0])]
                 newx = np.zeros(x.shape[:-1]+tuple(yshape[1:]),dtype='O')
-                #print "dot",x,y
-                #print "Nonzeros:",nzs
-                #print "xshape",x.shape,"yshape",yshape
-                #print "Result shape",newx.shape
-                for i,ind in enumerate(nzs[-1]):
+                for i in range(len(nzs[0])):
                     xindex = tuple(nzdim[i] for nzdim in nzs)
-                    dpindex = tuple(nzdim[i] for nzdim in nzs[:-1])
-                    val = simplify(x[xindex]*yentries[ind])
-                    #print "SETTING RESULT INDEX",dpindex,"to",val
-                    for yind in itertools.product(*[range(d) for d in yshape[1:]]):
-                        #print "Index",dpindex,yind
-                        #print dpindex+yind,"in shape",newx.shape
-                        entry = val[yind]
-                        if isinstance(entry,ConstantExpression):
-                          entry = entry.value
-                          if hasattr(entry,'__iter__'):
-                            entry = entry[0]
-                        newx[dpindex+yind] = entry
-                #print "RESULT",array(*newx.tolist())
+                    dpindex = xindex[:-1]
+                    yindex = xindex[-1]
+                    val = simplify(x[xindex]*yentries[yindex])
+                    if len(yshape) == 2:
+                        for yind in range(yshape[1]):
+                            entry = val[yind]
+                            if isinstance(entry,ConstantExpression):
+                                entry = entry.value
+                            newx[dpindex+(yind,)] += entry
+                    else:
+                        for yind in itertools.product(*[list(range(d)) for d in yshape[1:]]):
+                            entry = val[yind]
+                            if isinstance(entry,ConstantExpression):
+                                entry = entry.value
+                        newx[dpindex+yind] += entry
                 #raw_input()
                 return array(*newx.tolist())
 def _dot_const_simplify2(x,y):
     y = np.asarray(y)
-    if (y==0).all():
+    if np.all(y==0):
         return zero(dotshape(x,y))
     if is_sparse(y):
-        #print "SPARSIFYING DOT PRODUCT",np.count_nonzero(y),"NONZEROS"
+        #print("SPARSIFYING DOT PRODUCT y with",np.count_nonzero(y),"NONZEROS / ",count.optimized(x))
         nzs = np.nonzero(y)
-        xshape = to_const(shape.optimized(y))
+        xshape = to_const(shape.optimized(x))
+        if xshape is None:
+            #Not sure how to handle this
+            return None
         if len(y.shape) == 1:
-            #it's a sum-product
-            args = [x[ind]*y[ind] for ind in nzs[0]]
-            dp = sum_(args)
-            return dp
-        elif xshape is not None:
-            if len(xshape) == 1:
-                xentries = [getitem._call(x,i) for i in range(xshape[-1])]
-                newy = np.zeros(y.shape[1:],dtype='O')
-                #print "dot",x,y
-                #print "Nonzeros:",nzs
-                #print "Result shape",newy.shape
-                for i,ind in enumerate(nzs[0]):
-                    yindex = tuple(nzdim[i] for nzdim in nzs)
-                    dpindex = tuple(nzdim[i] for nzdim in nzs[1:])
-                    #print "SETTING RESULT INDEX",dpindex,"to",y[yindex]*x[ind]
-                    newy[dpindex] = y[yindex]*xentries[ind]
-                #print "RESULT",array(*newy.tolist())
-                #raw_input()
-                return array(*newy.tolist())
+            #matrix-vector product
+            rows = xshape[0]
+            res = []
+            for i in range(rows):
+                xrow = getitem.optimized(x,i)
+                elems = [mul.optimized(xrow[j],y[j]) for j in nzs[0]]
+                if len(elems) > 1:
+                    res.append(sum_.optimized(*elems))
+                elif len(elems) == 1:
+                    res.append(elems[0])
+                else:
+                    res.append(0)
+            return array(*res)
+        elif len(xshape) == 1:
+            xentries = [getitem.optimized(x,i) for i in range(xshape[-1])]
+            newy = np.zeros(y.shape[1:],dtype='O')
+            #print "dot",x,y
+            #print "Nonzeros:",nzs
+            #print "Result shape",newy.shape
+            for i,ind in enumerate(nzs[0]):
+                yindex = tuple(nzdim[i] for nzdim in nzs)
+                dpindex = tuple(nzdim[i] for nzdim in nzs[1:])
+                #print "SETTING RESULT INDEX",dpindex,"to",y[yindex]*x[ind]
+                newy[dpindex] += y[yindex]*xentries[ind]
+            #print "RESULT",array(*newy.tolist())
+            #raw_input()
+            return array(*newy.tolist())
+        elif len(xshape) == 2 and len(y.shape)==2:
+            #matrix-matrix product
+            rows = xshape[0]
+            cols = y.shape[1]
+            res = []
+            for i in range(rows):
+                xrow = getitem.optimized(x,i)
+                elems = [0]*cols                
+                for (j,k) in zip(*nzs):
+                    elems[k] += mul.optimized(xrow[j],y[j,k])
+                res.append(elems)
+            return array(*res)
     return None
 dot.addSimplifier(['_const',None],_dot_const_simplify)
 dot.addSimplifier([None,'_const'],_dot_const_simplify2)
 dot.properties['associative'] = True
 #dot.properties['foldable'] = True
+outer.argTypes = [Type('V'),Type('V')]
+outer.deriv = [lambda x,y,dx:outer(dx,y),lambda x,y,dy:outer(y,dx)]
+outer.rowstackderiv = [lambda x,y,dx:dot(dx,y),None]
+outer.colstackderiv = [None,lambda x,y,dy:outer(x,dy)]
+def _outer_returnType(x,y):
+    try:
+        xs = x.returnType().count()
+        ys = y.returnType().count()
+        if xs is not None and ys is not None:
+            return Type('M',(xs,ys))
+    except Exception:
+        return Type('M')
+outer.returnTypeFunc = _outer_returnType
+outer.addSimplifier(['neg','neg'],lambda x,y:outer(x.args[0],y.args[0]))
+outer.addSimplifier([None,'neg'],lambda x,y:-outer(x,y.args[0]))
+outer.addSimplifier(['neg',None],lambda x,y:-outer(x.args[0],y))
+outer.addSimplifier(['zero',None],lambda x,y:zero._call(array._call(len_._call(x),len_._call(y))))
+outer.addSimplifier([None,'zero'],lambda x,y:zero._call(array._call(len_._call(x),len_._call(y))))
+tensordot.argTypes = [Type('V'),Type('V'),Type('X')]
+tensordot.deriv = [lambda x,y,dx:tensordot(dx,y,axes),lambda x,y,axes,dy:tensordot(y,dx,axes),None]
+tensordot.rowstackderiv = [lambda x,y,axes,dx:tensordot(dx,y,axes),None,None]
+tensordot.colstackderiv = [None,lambda x,y,axes,dy:tensordot(x,dy,axes),None]        
+tensordot.returnTypeFunc = _tensordot_returnType
+tensordot.properties['associative'] = True
+tensordot.addSimplifier(['neg','neg',None],lambda x,y,axes:tensordot(x.args[0],y.args[0],axes))
+tensordot.addSimplifier([None,'neg',None],lambda x,y,axes:-tensordot(x,y.args[0],axes))
+tensordot.addSimplifier(['neg',None,None],lambda x,y,axes:-tensordot(x.args[0],y,axes))
+tensordot.addSimplifier([None,None,'_const'],_tensordot_const_simplifier)
+
+
 pow_.deriv = [(lambda b,e,db:mul(mul.optimized(db,e),pow_(b,e-1))),(lambda b,e,de:mul(mul.optimized(de,ln(b)),pow_(b,e)))]
 pow_.simplifier = _pow_simplifier
 array.returnTypeFunc = _array_returnType
@@ -6212,6 +7277,12 @@ if_.stackderiv = if_.deriv
 #if_.simplifier = _if_simplifier
 if_.addSimplifier(['_const',None,None],(lambda cond,trueval,falseval:(trueval if cond else falseval)),pre=True)
 if_.addSimplifier(['_const',None,None],(lambda cond,trueval,falseval:(trueval if cond else falseval)),pre=False)
+if_.addSimplifier([None,'_scalar','_scalar'],(lambda cond,trueval,falseval:trueval if trueval == falseval else None),pre=False)
+def _if_simplifier(cond,trueval,falseval):
+    if trueval.match(falseval):
+        return trueval
+    return None
+if_.addSimplifier([None,None,None],_if_simplifier,pre=False)
 argmax.simplifier = _argmax_simplifier
 argmin.simplifier = _argmin_simplifier
 all_.properties['foldable'] = True
@@ -6269,26 +7340,62 @@ getitem.returnTypeFunc = _getitem_returnType
 #getitem.simplifier = _getitem_simplifier
 def _to_indices(v,slice_or_list):
     if isinstance(slice_or_list,slice):
+        sl = slice_or_list
         vlen = len_.optimized(v)
         vlen = to_const(vlen)
         if vlen is None:
-            #can't simplify a slice of a variable-length object
+            if sl.stop is not None and sl.stop < 900000000:
+                return list(range(sl.start,sl.stop,(sl.step if sl.step is not None else 1)))
+            #can't simplify an open-ended slice of a variable-length object
             raise ValueError("Can't get a slice of a variable-length object")
-        sl = slice_or_list
-        return range(sl.start,min(vlen,sl.stop if sl.stop is not None else 1),(sl.step if sl.step is not None else 1))
+        return list(range(sl.start,min(vlen,sl.stop if sl.stop is not None else None),(sl.step if sl.step is not None else 1)))
     else:
         return slice_or_list
+getitem.addSimplifier(['eye','_scalar'],lambda v,index:basis._call(index,getitem.optimized(shape.optimized(v),0)),pre=True)
 getitem.addSimplifier(['eye','_scalar'],lambda v,index:basis._call(index,getitem.optimized(shape.optimized(v),0)))
-getitem.addSimplifier(['eye','_const'],lambda v,indices:row_stack(*[basis._call(i,getitem.optimized(shape.optimized(v),0)) for i in _to_indices(v,indices)]))
-getitem.addSimplifier(['zero','_scalar'],lambda v,index:zero.optimized(getitem.optimized(shape.optimized(v),-1)))
-getitem.addSimplifier(['zero','_const'],lambda v,indices:zero.optimized((getitem.optimized(shape.optimized(v),-1),len_.optimized(_to_indices(v,indices)))))
+getitem.addSimplifier(['eye','_const'],lambda v,indices:array(*[basis._call(i,getitem.optimized(shape.optimized(v),0)) for i in _to_indices(v,indices)]),pre=True)
+getitem.addSimplifier(['eye','_const'],lambda v,indices:array(*[basis._call(i,getitem.optimized(shape.optimized(v),0)) for i in _to_indices(v,indices)]))
+getitem.addSimplifier(['zero','_scalar'],lambda v,index:zero(getitem.optimized(v.args[0],slice(1,None,None))),pre=True)
+getitem.addSimplifier(['zero','_const'],lambda v,indices:zero(flatten.optimized(v.args[0],slice(1,None,None)),len_.optimized(_to_indices(v,indices))),pre=True)
+getitem.addSimplifier(['array','_scalar'],lambda v,index:v.args[index],pre=True)
 getitem.addSimplifier(['array','_scalar'],lambda v,index:v.args[index])
+getitem.addSimplifier(['array','_const'],lambda v,indices:array(*[v.args[i] for i in _to_indices(v,indices)]),pre=True)
 getitem.addSimplifier(['array','_const'],lambda v,indices:array(*[v.args[i] for i in _to_indices(v,indices)]))
-getitem.addSimplifier(['add',None],lambda v,indices:add(*[a[indices] for a in v.args]))
-getitem.addSimplifier(['sum',None],lambda v,indices:sum_(*[a[indices] for a in v.args]))
-getitem.addSimplifier(['sub',None],lambda v,indices:sub(*[a[indices] for a in v.args]))
-getitem.addSimplifier([None,'if'],lambda v,indices:if_._call(indices.args[0],v[indices.args[1]],v[indices.args[2]]))
-getitem.addSimplifier(['dot','_const'],lambda v,indices:(dot._call(v.args[0][indices],v.args[1]) if isinstance(indices,(int,list,slice)) else None))
+getitem.addSimplifier(['list','_scalar'],lambda v,index:v.args[index],pre=True)
+getitem.addSimplifier(['list','_scalar'],lambda v,index:v.args[index])
+getitem.addSimplifier(['list','_const'],lambda v,indices:list(*[v.args[i] for i in _to_indices(v,indices)]),pre=True)
+getitem.addSimplifier(['list','_const'],lambda v,indices:list(*[v.args[i] for i in _to_indices(v,indices)]))
+getitem.addSimplifier(['row_stack','_scalar'],lambda v,index:v.args[index],pre=True)
+getitem.addSimplifier(['row_stack','_const'],lambda v,indices:list(*[v.args[i] for i in _to_indices(v,indices)]),pre=True)
+getitem.addSimplifier(['add',None],lambda v,indices:add(*[a[indices] for a in v.args]),pre=True)
+getitem.addSimplifier(['sum',None],lambda v,indices:sum_(*[a[indices] for a in v.args]),pre=True)
+getitem.addSimplifier(['sub',None],lambda v,indices:sub(*[a[indices] for a in v.args]),pre=True)
+getitem.addSimplifier(['mul',None],lambda v,indices:mul(*[a if is_scalar(a) else a[indices] for a in v.args]),pre=True)
+getitem.addSimplifier(['neg',None],lambda v,indices:neg(v.args[0][indices]),pre=True)
+getitem.addSimplifier(['dot','_const'],lambda v,indices:(dot._call(v.args[0][indices],v.args[1]) if isinstance(indices,_PY_INT_TYPES+(list,slice)) else None),pre=True)
+getitem.addSimplifier(['basis','_scalar'],lambda v,index:if_.optimized(v.args[0]==index,1,0),pre=True)
+getitem.addSimplifier(['if',None],lambda v,indices:if_(v.args[0],v.args[1][indices],v.args[2][indices]),pre=True)
+def _getitem_basis_simplifier(v,indices):
+    if not is_const(v.args[0]):
+        return None
+    i = to_const(v.args[0])
+    try:
+        eindices = _to_indices(v,indices)
+        if i in eindices:
+            return basis(eindices.index(i),len(eindices))
+        else:
+            return zero(len(eindices))
+    except Exception:
+        return None
+getitem.addSimplifier(['basis','_const'],_getitem_basis_simplifier,pre=True)
+getitem.addSimplifier(['basis','_const'],_getitem_basis_simplifier)
+getitem.addSimplifier(['flatten','_scalar'],lambda v,index:v.args[0][0] if index==0 else (v.args[-1][-1] if index == -1 else None),pre=True)
+getitem.addSimplifier(['flatten','_scalar'],lambda v,index:v.args[0][0] if index==0 else (v.args[-1][-1] if index == -1 else None))
+getitem.addSimplifier(['range','_scalar'],lambda v,index:v.args[0]+index,pre=True)
+getitem.addSimplifier(['range','_scalar'],lambda v,index:v.args[0]+index)
+#TODO: something mistakes variable slices as being constant
+#getitem.addSimplifier(['range','_const'],lambda v,indices:[v.args[0]+i for i in _to_indices(v,indices)])
+
 def _getitem_row_stack(v,index):
     for a in v.args:
         sa = to_const(shape.optimized(a))
@@ -6368,8 +7475,45 @@ def _getitem_setitem_list(v,indices):
         else:
             return row_stack(*[x[i] if ifromx else rhs for (i,ifromx) in zip(resindices,fromx)])
     return
-getitem.addSimplifier(['setitem','_scalar'],_getitem_setitem_scalar)
-getitem.addSimplifier(['setitem','_const'],_getitem_setitem_list)
+getitem.addSimplifier(['setitem','_scalar'],_getitem_setitem_scalar,pre=True)
+getitem.addSimplifier(['setitem','_const'],_getitem_setitem_list,pre=True)
+def _getitem_getitem_scalar(v,index):
+    x,innerindices = v.args
+    if is_op(x,'eye'):
+        cinnerindices = to_const(innerindices)
+        if isinstance(cinnerindices,int):
+            return 1 if cinnerindices == index else 0
+        elif isinstance(cinnerindices,slice):
+            start,stop,step = cinnerindices.start,cinnerindices.stop,cinnerindices.step
+            if start is None:
+                start = 0
+            if step is None:
+                step = 1
+            if stop is None:
+                return 1 if (index - to_const(start))%step == 0 else 0
+            else:
+                return 1 if ((index - to_const(start))%step == 0 and index - to_const(start) < to_const(stop)) else 0
+        if dims.optimized(innerindices)==0:
+            return if_(innerindices ==index,1,0)
+    elif is_op(x,'transpose'):
+        cinnerindices = to_const(innerindices)
+        cindex = to_const(index)
+        if isinstance(cinnerindices,int) and cindex is not None:
+            Ash = to_const(shape.optimized(x.args[0]))
+            if Ash is not None:
+                assert len(Ash) == 2 and index < Ash[0] and cinnerindices < Ash[1],"Invalid indices to transposed matrix: shape %s, indices %s %s"%(Ash,innerindices,index)
+        return x.args[0][index][innerindices]
+    return None
+def _getitem_getitem(v,indices):
+    x,innerindices = v.args
+    if is_op(x,'transpose'):
+        return x.args[0][indices][innerindices]
+    if is_op(x,'column_stack'):
+        return x.args[indices][innerindices]
+    return None
+
+getitem.addSimplifier(['getitem','_scalar'],_getitem_getitem_scalar,pre=True)
+getitem.addSimplifier(['getitem',None],_getitem_getitem,pre=True)
 getitem.returnTypeDescription = "numeric, or an array if a slice is given"
 setitem.returnTypeFunc = _returnType1
 #getslice.deriv = [lambda v,start,stop,dv:getslice(dv,start,stop),None]
@@ -6408,72 +7552,72 @@ summation.argTypes = [Type(None),Type('U'),Type('L')]
 summation.deriv = _summation_deriv
 
 def _run_basic_test():
-    print "Type of 0.4",type_of(0.4)
-    print "Type of [0.5,0.2]",type_of([0.5,0.2])
-    print "Type of [1,0]",type_of([1,0])
-    print "Type of [1,[0,1]]",type_of([1,[0,1]])
-    print "Type of [[1,0],[0,1]]",type_of([[1,0],[0,1]])
-    print "Type of [[1,0],[0,[1,2]]]",type_of([[1,0],[0,[1,2]]])
+    print("Type of 0.4",type_of(0.4))
+    print("Type of [0.5,0.2]",type_of([0.5,0.2]))
+    print("Type of [1,0]",type_of([1,0]))
+    print("Type of [1,[0,1]]",type_of([1,[0,1]]))
+    print("Type of [[1,0],[0,1]]",type_of([[1,0],[0,1]]))
+    print("Type of [[1,0],[0,[1,2]]]",type_of([[1,0],[0,[1,2]]]))
     e = Context()
     x = e.addVar("x",'V',size=2)
     y = e.addVar("y",'N')
     subexpr = y+y
-    print "x[1] + y:",x[1] + y
-    print "flatten(x[1],y):",flatten(x[1],y)
-    print "flatten(x[1],y) at x=[3,4], y=[5,6]:",flatten(x[1],y).eval({'x':[3,4],'y':[5,6]})
-    print "d/dy stack(x[1],y):",deriv(flatten(x[1],y),y),"= [0,1]"
+    print("x[1] + y:",x[1] + y)
+    print("flatten(x[1],y):",flatten(x[1],y))
+    print("flatten(x[1],y) at x=[3,4], y=[5,6]:",flatten(x[1],y).eval({'x':[3,4],'y':[5,6]}))
+    print("d/dy stack(x[1],y):",deriv(flatten(x[1],y),y),"= [0,1]")
     #print "deriv(flatten(x[1],y)) at x=[3,4], y=[5,6]:",deriv(flatten(x[1],y),y).eval({'x':[3,4],'y':[5,6]})
-    print "Simplification of 0+y:",simplify(0+y)
-    print "Simplification of 0*y:",simplify(0*y)
-    print "Simplification of 1*y:",simplify(1.0*y)
-    print "Simplification of y+y:",simplify(y+y)
-    print "Simplification of zero(2):",simplify(zero(2))
-    print "Simplification of zero(100):",simplify(zero(100))
-    print "Simplification of y/x[1]:",simplify(y/x[1])
-    print "Simplification of d/dy cos(-y):",simplify(cos(-y).deriv(y))
-    print "Derivative of y^3:",(y**3).deriv(y)
-    print "Derivative of y^4:",(y**4).deriv(y)
-    print "Derivative of (expanded) y^3:",(y*y*y).deriv(y)
-    print "Derivative of (expanded) y^4:",(y*y*y*y).deriv(y)
-    print "Derivative of (y+y):",deriv(subexpr,y)
-    print "Derivative of (y+y)^3:",deriv(subexpr*subexpr*subexpr,y)
-    print "Derivative of (expanded) (y+y)^3, simplified:",simplify(deriv(subexpr*subexpr*subexpr,y))
-    print "eye(2)[1]",(eye(2)[1]).evalf()
-    print "0+eye(2)[1] (simplified)",simplify(0+eye(2)[1])
-    print "d/dx (x[1])",(x[1]).deriv(x)
-    print "d/dx (x[1] + 1)",(x[1] + 1).deriv(x)
-    print "d/dx (x[1] + y)",(x[1] + y).deriv(x)
-    print "d/dx (x[0] + 3*x[1] + y)",(x[0] + 3*x[1] + y).deriv(x)
-    print "d/dy (x[1] + y)",(x[1] + y).deriv(y)
-    print "d/dx (x[0]*x[1])",(x[0]*x[1]).deriv(x)
-    print "d/dy (y^2/x[1]):",deriv(y**2/x[1],y)
-    print "d/dx (y^2/x[1]):",deriv(y**2/x[1],x)
-    print "d/dx (x[0]*x[1])",(x[0]*x[1]).deriv(x)
-    print "d/dx (x[0]*x[1]) at [3,4]",(x[0]*x[1]).deriv(x).evalf({'x':[3,4]})
-    print "d/dx max(x[0],x[1]):",(max_(x[0],x[1])).deriv(x)
-    print "range(10)[3:6]:",range_(10)[3:6].eval()
+    print("Simplification of 0+y:",simplify(0+y))
+    print("Simplification of 0*y:",simplify(0*y))
+    print("Simplification of 1*y:",simplify(1.0*y))
+    print("Simplification of y+y:",simplify(y+y))
+    print("Simplification of zero(2):",simplify(zero(2)))
+    print("Simplification of zero(100):",simplify(zero(100)))
+    print("Simplification of y/x[1]:",simplify(y/x[1]))
+    print("Simplification of d/dy cos(-y):",simplify(cos(-y).deriv(y)))
+    print("Derivative of y^3:",(y**3).deriv(y))
+    print("Derivative of y^4:",(y**4).deriv(y))
+    print("Derivative of (expanded) y^3:",(y*y*y).deriv(y))
+    print("Derivative of (expanded) y^4:",(y*y*y*y).deriv(y))
+    print("Derivative of (y+y):",deriv(subexpr,y))
+    print("Derivative of (y+y)^3:",deriv(subexpr*subexpr*subexpr,y))
+    print("Derivative of (expanded) (y+y)^3, simplified:",simplify(deriv(subexpr*subexpr*subexpr,y)))
+    print("eye(2)[1]",(eye(2)[1]).evalf())
+    print("0+eye(2)[1] (simplified)",simplify(0+eye(2)[1]))
+    print("d/dx (x[1])",(x[1]).deriv(x))
+    print("d/dx (x[1] + 1)",(x[1] + 1).deriv(x))
+    print("d/dx (x[1] + y)",(x[1] + y).deriv(x))
+    print("d/dx (x[0] + 3*x[1] + y)",(x[0] + 3*x[1] + y).deriv(x))
+    print("d/dy (x[1] + y)",(x[1] + y).deriv(y))
+    print("d/dx (x[0]*x[1])",(x[0]*x[1]).deriv(x))
+    print("d/dy (y^2/x[1]):",deriv(y**2/x[1],y))
+    print("d/dx (y^2/x[1]):",deriv(y**2/x[1],x))
+    print("d/dx (x[0]*x[1])",(x[0]*x[1]).deriv(x))
+    print("d/dx (x[0]*x[1]) at [3,4]",(x[0]*x[1]).deriv(x).evalf({'x':[3,4]}))
+    print("d/dx max(x[0],x[1]):",(max_(x[0],x[1])).deriv(x))
+    print("range(10)[3:6]:",range_(10)[3:6].eval())
     depth = 20
     expr = const(1)
-    for i in xrange(depth):
+    for i in range(depth):
         expr = expr + expr
     expr2 = sum_(*[const(1)]*pow(2,depth))
     import time
-    print "Timing test,",pow(2,depth)," adds"
-    print "Expression depth",expr.depth()
+    print("Timing test,",pow(2,depth)," adds")
+    print("Expression depth",expr.depth())
     t0=time.time()
-    print "  nested eval",expr.eval(),time.time()-t0
+    print("  nested eval",expr.eval(),time.time()-t0)
     #raw_input("Press enter to continue...")
     t0=time.time()
-    print "  nested evalf",expr.evalf(),time.time()-t0
+    print("  nested evalf",expr.evalf(),time.time()-t0)
     #raw_input("Press enter to continue...")
     t0=time.time()
-    print "  nested _evalf",expr._evalf(None),time.time()-t0
+    print("  nested _evalf",expr._evalf(None),time.time()-t0)
     #raw_input("Press enter to continue...")
     t0=time.time()
-    print "  sum eval",expr2.eval(),time.time()-t0
+    print("  sum eval",expr2.eval(),time.time()-t0)
     #raw_input("Press enter to continue...")
     t0=time.time()
-    print "  plain sum",sum([1]*pow(2,depth)),time.time()-t0
+    print("  plain sum",sum([1]*pow(2,depth)),time.time()-t0)
     #raw_input("Press enter to continue...")
     
 def _run_function_test():
@@ -6484,53 +7628,53 @@ def _run_function_test():
     ef = e.declare(f,"myFunc")
     e.addExpr("z",ef(x[1],2.0))
     z = e.expr('z')
-    print "Unbound variables",[v.name for v in z.vars()],"= [x]"
-    print z.eval({'x':[3.0,4.0]}),'=',f(4.0,2.0)
+    print("Unbound variables",[v.name for v in z.vars()],"= [x]")
+    print(z.eval({'x':[3.0,4.0]}),'=',f(4.0,2.0))
     fz,vorder = e.makeFlatFunction(z)
-    print fz([3.0,4.0]),'=',f(4.0,2.0)
+    print(fz([3.0,4.0]),'=',f(4.0,2.0))
     fw,vorder = e.makeFlatFunction(x[1]+y)
-    print fw([3.0,4.0,1.0]),"= 5"
+    print(fw([3.0,4.0,1.0]),"= 5")
     fw2,vorder = e.makeFlatFunction(x[1]+y,varorder=['y','x'])
-    print fw2([1.0,3.0,4.0]),"= 5"
+    print(fw2([1.0,3.0,4.0]),"= 5")
     dfw,vorder = e.makeFlatFunctionDeriv(x[1]*x[0]+y)
-    print dfw([3.0,4.0,1.0]),"= [4,3,1]"
+    print(dfw([3.0,4.0,1.0]),"= [4,3,1]")
 
     context = dict()
     context['some_param'] = 4.0
     g = lambda a,some_param:a+some_param
     eg = e.declare(g,"myFunc2")
-    print "Custom function is printed as",eg(y,'some_param')
-    print "Evaluation in context:",eg(y,'some_param').eval(context)
-    print "Unbound variables",[v.name for v in eg(y,'some_param').vars()]
+    print("Custom function is printed as",eg(y,'some_param'))
+    print("Evaluation in context:",eg(y,'some_param').eval(context))
+    print("Unbound variables",[v.name for v in eg(y,'some_param').vars()])
     y.bind(4)
-    print "Unbound variables with y bound to 4",[v.name for v in eg(y,'some_param').vars()]
-    print "All variables with y bound to 4",[v.name for v in eg(y,'some_param').vars(bound=True)]
+    print("Unbound variables with y bound to 4",[v.name for v in eg(y,'some_param').vars()])
+    print("All variables with y bound to 4",[v.name for v in eg(y,'some_param').vars(bound=True)])
     y.unbind()
-    print "Unbound variables with context",[v.name for v in eg(y,'some_param').vars(context)]
+    print("Unbound variables with context",[v.name for v in eg(y,'some_param').vars(context)])
 
-    print "Unbound variables of subs",[v.name for v in subs(expr("x")**2,"x",y).vars()]
-    print "Unbound variables of subs",[v.name for v in subs(expr("x")**2*expr("z"),"x",y).vars()]
-    print "Unbound variables of multiple-subs",[v.name for v in subs(expr("x")**2*expr("y"),["x","y"],["z","w"]).vars()]
+    print("Unbound variables of subs",[v.name for v in subs(expr("x")**2,"x",y).vars()])
+    print("Unbound variables of subs",[v.name for v in subs(expr("x")**2*expr("z"),"x",y).vars()])
+    print("Unbound variables of multiple-subs",[v.name for v in subs(expr("x")**2*expr("y"),["x","y"],["z","w"]).vars()])
 
 def _run_simplify_test():
     e = Context()
     x = e.addVar("x",'N')
     y = e.addVar("y",'N')
     z = e.addVar("z",'V',2)
-    print "x*1 simplifies to",simplify(x*1)
-    print "x*0 simplifies to",simplify(x*0)
-    print "x^2 * x^3 simplifies to",simplify(x**2 * x**3)
-    print "x+x simplifies to",simplify(x + x)
-    print "(x+x)+(x+x) simplifies to",simplify((x + x) + (x + x))
-    print "x-x simplifies to",simplify(x - x)
-    print "-(-x) simplifies to",simplify(-(-x))
-    print "4*(-x) simplifies to",simplify(const(4)*(-x))
-    print "x+(-x) simplifies to",simplify(x + (-x))
+    print("x*1 simplifies to",simplify(x*1))
+    print("x*0 simplifies to",simplify(x*0))
+    print("x^2 * x^3 simplifies to",simplify(x**2 * x**3))
+    print("x+x simplifies to",simplify(x + x))
+    print("(x+x)+(x+x) simplifies to",simplify((x + x) + (x + x)))
+    print("x-x simplifies to",simplify(x - x))
+    print("-(-x) simplifies to",simplify(-(-x)))
+    print("4*(-x) simplifies to",simplify(const(4)*(-x)))
+    print("x+(-x) simplifies to",simplify(x + (-x)))
     v,cs,ds = to_polynomial(x*(x+3)+1)
-    print "Polynomial x*(x+3)+1:",simplify(sum_(*[const(c)*v**d for (c,d) in zip(cs,ds)]))
-    print "setitem([0]*10,[1,3],z)[1] simplifies to",simplify(setitem([0]*10,[1,3],z)[1])," (should be z[0])"
-    print "flatten(z,y)[2] simplifies to",simplify(flatten(z,y)[2])
-    print "dot(setitem([0]*10,[1,3],z),setitem([0]*10,[1,3],z)) simplifies to",simplify(dot(setitem([0]*10,[1,3],z),setitem([0]*10,[1,3],z)))," (should be dot(z,z))"
+    print("Polynomial x*(x+3)+1:",simplify(sum_(*[const(c)*v**d for (c,d) in zip(cs,ds)])))
+    print("setitem([0]*10,[1,3],z)[1] simplifies to",simplify(setitem([0]*10,[1,3],z)[1])," (should be z[0])")
+    print("flatten(z,y)[2] simplifies to",simplify(flatten(z,y)[2]))
+    print("dot(setitem([0]*10,[1,3],z),setitem([0]*10,[1,3],z)) simplifies to",simplify(dot(setitem([0]*10,[1,3],z),setitem([0]*10,[1,3],z)))," (should be dot(z,z))")
 
 def _run_arraytest():
     e = Context()
@@ -6539,15 +7683,15 @@ def _run_arraytest():
     f = lambda a,b:3*a*b
     ef = e.declare(f,"myFunc")
     e.addExpr("z",ef(x[1],2.0))
-    print "Variables:"
+    print("Variables:")
     e.listVars(indent=2)
-    print "Expressions:"
+    print("Expressions:")
     e.listExprs(indent=2)
-    print "Functions:"
+    print("Functions:")
     e.listFunctions(indent=2)
 
 def _run_io_test():
-    import symbolic_io
+    from . import symbolic_io
     e = Context()
     x = e.addVar("x",'V',size=2)
     y = e.addVar("y",'N')
@@ -6555,11 +7699,11 @@ def _run_io_test():
     ef = e.declare(f,"myFunc")
     e.addExpr("z",ef(x[1],2.0))
     #test saving and loading
-    print "JSON Context output   :",symbolic_io.toJson(e)
+    print("JSON Context output   :",symbolic_io.toJson(e))
     e2 = Context()
     e2.declare(f,"myFunc")
-    e2 = symbolic_io.exprFromJson(symbolic_io.toJson(e))
-    print "JSON re-loaded Context:",symbolic_io.toJson(e2)
+    e2 = symbolic_io.contextFromJson(e2,symbolic_io.toJson(e))
+    print("JSON re-loaded Context:",symbolic_io.toJson(e2))
 
 def _run_jacobian_test():
     x = np.zeros(2)
@@ -6567,82 +7711,85 @@ def _run_jacobian_test():
     z = np.zeros(3)
     A = np.zeros((2,3))
     B = np.zeros((3,4))
-    print dotshape(y,z),
-    print "==",np.dot(y,z).shape
-    print dotshape(x,A),
-    print "==",np.dot(x,A).shape
-    print dotshape(A,y),
-    print "==",np.dot(A,y).shape
-    print dotshape(A,B),
-    print "==",np.dot(A,B).shape
+    print(dotshape(y,z), end=' ')
+    print("==",np.dot(y,z).shape)
+    print(dotshape(x,A), end=' ')
+    print("==",np.dot(x,A).shape)
+    print(dotshape(A,y), end=' ')
+    print("==",np.dot(A,y).shape)
+    print(dotshape(A,B), end=' ')
+    print("==",np.dot(A,B).shape)
 
     e = Context()
     vs = e.addVars("v",5,'N')
     s = flatten(*vs)
-    print s.deriv(vs[3]),"should be [0,0,0,1,0]"
+    print(s.deriv(vs[3]),"should be [0,0,0,1,0]")
     x = e.addVar("x",'V',size=5)
     y = e.addVar("y",'V',size=3)
     z = e.addVar("z",'N')
     s = flatten(x,y,z)
-    print s.eval({'x':[1,2,3,4,5],'y':[6,7,8],'z':9}),"= [1,2,...,9]"
-    print s.deriv(z),"= [0,0,0,0,0,0,0,0,1]"
-    print s.deriv(y)," should have 3 columns, an identity matrix in rows 5-7"
+    print(s.eval({'x':[1,2,3,4,5],'y':[6,7,8],'z':9}),"= [1,2,...,9]")
+    print(s.deriv(z),"= [0,0,0,0,0,0,0,0,1]")
+    print(s.deriv(y)," should have 3 columns, an identity matrix in rows 5-7")
     dp1 = dot([[1,2,3],[4,5,6]],dot(eye(3),y))
     dp2 = dot(flatten(vs[0],vs[1]),dp1)
-    print "M*ident*V product",dp1
-    print "M*ident*V simplified",simplify(dp1)
-    print "Deriv:",dp1.deriv(y)
-    print "Deriv w.r.t. irrelevant variable:",dp1.deriv(vs[0])
-    print "Deriv of [v0,v1]*M*ident*V w.r.t. y",dp2.deriv(y)
-    print "Deriv of [v0,v1]*M*ident*V w.r.t. v0",dp2.deriv(vs[0])
+    print("M*ident*V product",dp1)
+    print("M*ident*V simplified",simplify(dp1))
+    print("Deriv:",dp1.deriv(y),"(should be [[1,2,3],[4,5,6]])")
+    print("Deriv w.r.t. irrelevant variable:",dp1.deriv(vs[0]),"(should be [0,0])")
+    print("Deriv of [v0,v1]*M*ident*V w.r.t. y",dp2.deriv(y),"(should be [v[0]+4v[1],2v[0]+5v[1],3v[0]+6v[1]])")
+    print("Deriv of [v0,v1]*M*ident*V w.r.t. v0",dp2.deriv(vs[0]))
     A = np.zeros((5,3))
     A[0,0] = 1
     A[3,1] = 2
     xAy = dot(x,dot(A,dot(eye(3),y)))
-    print "Deriv of x^T A y w.r.t x",xAy.deriv(x)
-    print "Deriv of x^T A y w.r.t y",xAy.deriv(y)
-    print "Deriv of dot(x,x) w.r.t x",dot(x,x).deriv(x)
-    print 
-    print "(Beginning tests with more sophisticated matrix calculus)"
+    print("Deriv of x^T A y w.r.t x",xAy.deriv(x),"(should be dot(A,y)=[y[0],0,0,2y[1],0])")
+    print("Deriv of x^T A y w.r.t y",xAy.deriv(y),"(should be dot(x,A)=[x[0],2x[3],0])")
+    print("Deriv of dot(x,x) w.r.t x",dot(x,x).deriv(x),"(should be 2x)")
+    print() 
+    print("(Beginning tests with more sophisticated matrix calculus)")
     A = e.addVar("A",'M',size=(3,3))
     B = e.addVar("B",'M',size=(3,3))
-    print "Derivative of A+B matrix addition",(A+B).deriv(A)
-    print "Derivative of y*^T*A*y matrix-vector multiplication w.r.t. A should be outer product",dot(y,dot(A,y)).deriv(A)
-    print "  Evaluated ",(dot(y,dot(A,y)).deriv(A)).evalf({'y':[1,2,3]})
-    print "Derivative of A*y matrix-vector multiplication w.r.t. A",dot(A,y).deriv(A)
-    print "Derivative of A*B matrix multiplication w.r.t. A",dot(A,B).deriv(A)
-    print 
-    print "(Beginning tests with more sophisticated reshaping)"
+    print("Derivative of A+B matrix addition",(A+B).deriv(A))
+    print("Derivative of y*^T*A*y matrix-vector multiplication w.r.t. A should be outer product",dot(y,dot(A,y)).deriv(A))
+    print("  Evaluated ",(dot(y,dot(A,y)).deriv(A)).evalf({'y':[1,2,3]}))
+    print("Derivative of A*y matrix-vector multiplication w.r.t. A",dot(A,y).deriv(A))
+    print("Derivative of A*B matrix multiplication w.r.t. A",dot(A,B).deriv(A))
+    print() 
+    print("(Beginning tests with more sophisticated reshaping)")
     somelist = array(z,y)
-    print "Derivative of uneven list w.r.t. scalar first argument:",somelist.deriv(z),"(should be [1,[0,0,0]])"
-    print "Derivative of uneven list access w.r.t. vector second argument:",somelist[1][2].deriv(y),"(should be [0,0,1])"
-    print "Derivative of uneven list w.r.t. vector second argument:",somelist.deriv(y),"(should be [[0,0,0],3x3 identity])"
+    print("Derivative of uneven list w.r.t. scalar first argument:",somelist.deriv(z),"(should be [1,[0,0,0]])")
+    print("Derivative of uneven list access w.r.t. vector second argument:",somelist[1][2].deriv(y),"(should be [0,0,1])")
+    print("Derivative of uneven list w.r.t. vector second argument:",somelist.deriv(y),"(should be [[0,0,0],3x3 identity])")
     Ltype = Type('L',{0:(),1:(3,)})
     L = e.addVar('Lvar',Ltype)
-    print "Derivative of list scalar access w.r.t. uneven list:",L[0].deriv(L),"(should be [1,[0,0,0]])"
-    print "Derivative of list vector access w.r.t. uneven list:",L[1].deriv(L),"(should be [[0,1,0,0],[0,0,1,0],[0,0,0,1]])"
+    print("Derivative of list scalar access w.r.t. uneven list:",L[0].deriv(L),"(should be [1,[0,0,0]])")
+    global _DEBUG_DERIVATIVES
+    _DEBUG_DERIVATIVES = True
+    print("Derivative of list vector access w.r.t. uneven list:",L[1].deriv(L),"(should be [[0,1,0,0],[0,0,1,0],[0,0,0,1]])")
+    _DEBUG_DERIVATIVES = False
     #raw_input("Press enter to continue...")
 
 def _run_subs_test():
-    print "2*i with i=3.5:",subs(const(2)*"i","i",3.5)
-    print "  evaluates to",subs(const(2)*"i","i",3.5).eval()
+    print("2*i with i=3.5:",subs(const(2)*"i","i",3.5))
+    print("  evaluates to",subs(const(2)*"i","i",3.5).eval())
     ctx = Context()
     x = ctx.addVar("x",'N')
-    print "map(x**i with i in range(3))",map_(x**"i","i",range_(3))
-    print "  evaluates to",map_(x**"i","i",range_(3)).eval()
-    print "  with x=2 evalutes to",map_(x**"i","i",range_(3)).eval({'x':2})
-    print "  stacked (simplfied)",simplify(flatten(map_(x**"i","i",range_(3)).eval()))
-    print "summation(x**i with i in range(3))",summation(x**"i","i",range_(3))
-    print "  evaluates to",summation(x**"i","i",range_(3)).eval()
-    print "  evaluates to (simplified)",simplify(summation(x**"i","i",range_(3)).eval())
-    print "  with x=2 evalutes to",summation(x**"i","i",range_(3)).eval({'x':2})
+    print("map(x**i with i in range(3))",map_(x**"i","i",range_(3)))
+    print("  evaluates to",map_(x**"i","i",range_(3)).eval())
+    print("  with x=2 evalutes to",map_(x**"i","i",range_(3)).eval({'x':2}))
+    print("  stacked (simplfied)",simplify(flatten(map_(x**"i","i",range_(3)).eval())))
+    print("summation(x**i with i in range(3))",summation(x**"i","i",range_(3)))
+    print("  evaluates to",summation(x**"i","i",range_(3)).eval())
+    print("  evaluates to (simplified)",simplify(summation(x**"i","i",range_(3)).eval()))
+    print("  with x=2 evalutes to",summation(x**"i","i",range_(3)).eval({'x':2}))
     N = ctx.addVar("N",'N')
-    print "summation((x+x)**i with i in range(N))",summation((x+x)**"i","i",range_(N))
-    print "  simplifies to",simplify(summation((x+x)**"i","i",range_(N)))
-    print "  with x=2 evalutes to",summation((x+x)**"i","i",range_(N)).eval({'x':2})
+    print("summation((x+x)**i with i in range(N))",summation((x+x)**"i","i",range_(N)))
+    print("  simplifies to",simplify(summation((x+x)**"i","i",range_(N))))
+    print("  with x=2 evalutes to",summation((x+x)**"i","i",range_(N)).eval({'x':2}))
 
 if __name__ == '__main__':
-    print "Beginning self-test"
+    print("Beginning self-test")
     _run_basic_test()
     _run_function_test()
     #_run_print_test()

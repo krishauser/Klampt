@@ -4,7 +4,7 @@ classes for your own plugins.
 
 from OpenGL.GL import *
 from ..robotsim import WidgetSet,RobotPoser
-from glinterface import GLPluginInterface
+from .glinterface import GLPluginInterface
 from ..model import collide
 from ..math import vectorops
 from ..sim.simulation import SimpleSimulator
@@ -107,10 +107,10 @@ class GLSimulationPlugin(GLWorldPlugin):
         
         def toggle_simulate():
             self.simulate = not self.simulate
-            print "Simulating:",self.simulate
+            print("Simulating:",self.simulate)
         def toggle_movie_mode():
             self.saveScreenshots = not self.saveScreenshots
-            print "Movie mode:",self.saveScreenshots
+            print("Movie mode:",self.saveScreenshots)
         def toggle_draw_contacts():
             self.drawContacts = not self.drawContacts
             if self.drawContacts:
@@ -123,7 +123,7 @@ class GLSimulationPlugin(GLWorldPlugin):
             else:
                 self.drawSensors = False
         def single_step():
-            print "Advancing by 0.01s"
+            print("Advancing by 0.01s")
             self.simStep(0.01)
         self.add_action(toggle_simulate,'Toggle simulation','s')
         self.add_action(single_step,'Step simulation',' ',)
@@ -153,8 +153,8 @@ class GLSimulationPlugin(GLWorldPlugin):
             glPointSize(5.0)
             forceLen = 0.1  #scale of forces
             maxid = self.world.numIDs()
-            for i in xrange(maxid):
-                for j in xrange(i+1,maxid):
+            for i in range(maxid):
+                for j in range(i+1,maxid):
                     points = self.sim.getContacts(i,j)
                     if len(points) > 0:
                         forces = self.sim.getContactForces(i,j)
@@ -171,7 +171,7 @@ class GLSimulationPlugin(GLWorldPlugin):
 
         #draw sensors, if enabled
         if self.drawSensors:
-            for i in xrange(self.world.numRobots()):
+            for i in range(self.world.numRobots()):
                 c = self.sim.controller(i)
                 j = 0
                 while j >= 0:
@@ -225,7 +225,7 @@ class GLSimulationPlugin(GLWorldPlugin):
         #Put your mouse handler here
         #the current example prints out the list of objects clicked whenever
         #you right click
-        if self.verbose: print "mouse",button,state,x,y
+        if self.verbose: print("mouse",button,state,x,y)
         return GLPluginInterface.mousefunc(self,button,state,x,y)
 
     def motionfunc(self,x,y,dx,dy):

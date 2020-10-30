@@ -3,7 +3,7 @@ klampt.robotsim (core classes) module
 
 The robotsim module contains all of the core classes and functions from the C++ API.  These are imported into the main ``klampt`` namespace.
 
-Note: The C++ API is converted from SWIG, so the documentation may be a little rough. The first lines of the documentation for overloaded SWIG functions may describe the signature for each function overload.  For example, :meth:`WorldModel.add` contains the listing::
+Note: The C++ API is converted from SWIG, so the documentation may be a little rough. The first lines of the documentation for overloaded SWIG functions may describe the signature for each function overload.  For example, :meth:`klampt.WorldModel.add` contains the listing::
 
     add (name,robot): RobotModel
     add (name,obj): RigidObjectModel
@@ -14,7 +14,7 @@ Note: The C++ API is converted from SWIG, so the documentation may be a little r
                 * obj (RigidObjectModel, optional) –
                 * terrain (TerrainModel, optional) –
 
-The colon followed by a type descriptor, ``: Type``, gives the type of the return value.  This  means that if the second argument is a RobotModel, the first overload is matched, and the return value is a :class:`RobotModel`.
+The colon followed by a type descriptor, ``: Type``, gives the type of the return value.  This  means that if the second argument is a RobotModel, the first overload is matched, and the return value is a :class:`klampt.RobotModel`.
 
 Modeling robots and worlds
 --------------------------
@@ -45,8 +45,10 @@ Imported into the main ``klampt`` package.
     ~klampt.TriangleMesh
     ~klampt.PointCloud
     ~klampt.VolumeGrid
+    ~klampt.ConvexHull
     ~klampt.DistanceQuerySettings
     ~klampt.DistanceQueryResult
+    ~klampt.ContactQueryResult
 
 Inverse kinematics
 -------------------
@@ -68,6 +70,7 @@ Imported into the main ``klampt`` package.
 .. autosummary::
     ~klampt.Simulator
     ~klampt.SimBody
+    ~klampt.SimJoint
     ~klampt.SimRobotController
     ~klampt.SimRobotSensor
 
@@ -121,6 +124,10 @@ Module contents
     :undoc-members:
     :show-inheritance:
     :exclude-members: doubleArray, doubleVector, floatArray, floatVector, intArray, intVector, stringArray, stringVector, doubleMatrix
+
+.. autofunction:: klampt.robotsim.setRandomSeed
+
+.. autofunction:: klampt.robotsim.SampleTransform
 
 .. autofunction:: klampt.robotsim.comEquilibrium
 

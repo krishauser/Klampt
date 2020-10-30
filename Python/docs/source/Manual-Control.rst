@@ -1,19 +1,47 @@
 Control
 =======================
 
+
 Controllers provide the "glue" between the physical robot's actuators,
-sensors, and planners. They are very similar to planners in that they
-generate controls for the robot, but the main difference is that a
-controller is expected to work online and synchronously within a fixed,
-small time budget. As a result, they can only perform relatively light
-computations.
+sensors, and planners. Like planners, they generate controls for the
+robot, but controllers are expected to work online and synchronously
+within a fixed, small time budget. As a result, they can only perform
+relatively light computations.
+
+The number of ways in which a robot may be controlled is infinite, and
+can range from extremely simple methods, e.g., a linear gain, to
+extremely complex ones, e.g. an operational space controller or a
+learned policy. Yet, all controllers are structured as a simple callback
+loop: repeatedly read off sensor data, perform some processing, and
+write motor commands. The implementation of the internal processing is
+open to the user.
+
+
+Simulated Robot Controllers
+---------------------------
+
+.. note::
+
+    If you are planning to write a controller that only works in 
+    simulation, then continue reading this section.  Otherwise, you
+    should skip ahead to the `Experimental Robot Interface Layer <#experimental-robot-interface-layer>`__
+    section to learn how to build controllers that work both in simulation
+    and on real robots.
+
+
+The overall structure of a simulated robot controller is shown below. The
+primary interfaces to your Python code are in the
+:class:`~klampt.SimRobotController` and :class:`~klampt.SimRobotSensor` classes.
+
+|SimRobotController|
 
 Actuators
----------
+~~~~~~~~~
 
-At the lowest level, a robot is controlled by *actuators*. These receive
-instructions from the controller and produce link torques that are used
-by the simulator. Klamp't supports three types of actuator:
+At the lowest level, a robot is driven by forces coming from *actuators*.
+These receive instructions from the controller and produce link torques
+that are used by the simulator. Klamp't simulators support two types of
+actuator:
 
 -  *Torque control* accepts torques and feeds them directly to links.
 -  *PID control* accepts a desired joint value and velocity and uses a
@@ -21,16 +49,12 @@ by the simulator. Klamp't supports three types of actuator:
    position. Gain constants kP, kI, and kD should be tuned for behavior
    similar to those of the physical robot. PID controllers may also
    accept feedforward torques.
--  *Locked velocity control* drives a link at a fixed velocity.
-   *Experimental*. (Note: this is different from "soft" velocity control
-   which feeds a piecewise linear path to a PID controller)
 
-Note that the PID control and locked velocity control loops are
-performed as fast as possible with the simulation time step. This rate
-is typically faster than that of the robot controller. Hence a PID
-controlled actuator typically performs better (rejects disturbances
-faster, is less prone to instability) than a torque controlled actuator
-with a simulated PID loop at the controller level.
+Note that PID control is performed as fast as possible with the simulation
+time step. This rate is typically faster than that of the robot controller.
+Hence a PID controlled actuator typically performs better (rejects
+disturbances faster, is less prone to instability) than a torque controlled
+actuator with a simulated PID loop at the controller level.
 
 .. important::
    When using Klamp't to prototype behaviors for a physical
@@ -46,27 +70,15 @@ with a simulated PID loop at the controller level.
    the physical actuators, nor will it complain if such errors are made.
 
 
-Controllers
------------
-
-|Controller illustration|
-
-The number of ways in which a robot may be controlled is infinite, and
-can range from extremely simple methods, e.g., a linear gain, to
-extremely complex ones, e.g. an operational space controller or a
-learned policy. Yet, all controllers are structured as a simple callback
-loop: repeatedly read off sensor data, perform some processing, and
-write motor commands. The implementation of the internal processing is
-open to the user.
-
 Default motion queue controller
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 |Motion queue illustration|
 
-The default controller for each robot is a motion-queued controller with
-optional feedforward torques, which simulates typical controllers for
-industrial robots. It supports piecewise linear and piecewise cubic
+The default :class:`~klampt.SimRobotController` for simulated robots
+is a motion-queued controller with optional feedforward torques,
+which simulates typical controllers for industrial robots. It
+supports direct access to actuators, piecewise linear and piecewise cubic
 interpolation, as well as time-optimal acceleration-bounded
 trajectories. The trajectory interpolation profile is the standard
 trapezoidal velocity profile, except it also accepts interruption and
@@ -75,8 +87,8 @@ arbitrary start and goal velocities.
 |Trapezoidal velocity profiles|
 
 (Note: One limitation of the API is that it is impossible to have
-certain joints controlled by a motion queue, while others are controlled
-by PID commands.)
+a subset of joints controlled by a motion queue, while others are
+controlled by PID or torque commands.)
 
 API summary
 ~~~~~~~~~~~~
@@ -127,16 +139,19 @@ queue to the indicated milestone
    joint encoders
 -  ``controller.getSensedVelocity()``: retrieve sensed velocity from
    joint encoders
--  ``controller.sensor(index or name)``: retrieve SimRobotSensor
+-  ``controller.sensor(index or name)``: retrieve :class:`~klampt.SimRobotSensor`
    reference by index/name
 
-Custom control loops
-~~~~~~~~~~~~~~~~~~~~
 
-To define a custom controller, the user should implement a
-custom control loop. At every time step, read the robot's sensors,
-compute the control, and then send the control to the robot via the
-``setPIDCommand`` or ``setTorqueCommand`` methods.
+Writing a Custom Controller
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To wrap a controller around a simulated robot, the user should
+implement a control loop. At every time step, the control loop reads
+the robot's sensors, computes the control, and then sends the control
+to the robot via the ``setPIDCommand`` or ``setTorqueCommand`` methods. 
+You are also free to use the motion queue commands as well.  Finally,
+advance the simulation.
 
 The following example shows a very simple example that just moves
 the commanded configuration by 1 radian / sec over 10 seconds.
@@ -157,58 +172,325 @@ the commanded configuration by 1 radian / sec over 10 seconds.
 
         #advance the simulation
         sim.simulate(dt)
-    print "End configuration:",controller.getSensedConfig()
+    print("End configuration:",controller.getSensedConfig())
 
 In general, your control loop can make use of sensors and planners. There
 are countless ways to implement robot behaviors, and you are only limited by
 your imagination.
 
-Experimental controller API
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``klampt_sim`` script also accepts arbitrary feedback controllers
-given as input. To do so, provide as input a .py file with a
-single ``make(robot)`` function that returns a controller object. This
-object should be an instance of a subclass ``BaseController`` in
-`control.controller <https://github.com/krishauser/klampt/blob/master/Python/control/controller.py>`__. For example,
-to see a controller that interfaces with ROS, see
-`control/roscontroller.py <https://github.com/krishauser/klampt/blob/master/Python/control/roscontroller.py>`__.
+Experimental Robot Interface Layer
+----------------------------------
 
-A ``BaseController`` interface is a very simple object with three important
+Ideally, you'd like to be able to prototype a controller in simulation, and then
+easily connect the same controller code to a real robot.  This is where the
+Klamp't Robot Interface Layer (RIL) comes in.  The RIL API defines a
+superset of common functionality that most robots' motor controllers provide.
+It also provides a common interface to switch between simulated and real
+robots. The overall diagram looks like the following:
+
+|RobotInterfaceLayer|
+
+To interface with your own robot, you will need to construct a subclass of RIL's
+main :class:`~klampt.control.robotinterface.RobotInterfaceBase` class, or
+find someone else's implementation for your brand / type of robot.
+
+Because creating and debugging such an interface can take some time, it's useful
+to test your control code in simulation so that it can work directly when you
+switch to the real robot.  There are two ways to do this:
+
+1. (preferable) Port your control code to use :class:`~klampt.control.robotinterface.RobotInterfaceBase`.
+   Note there are some discrepancies between this and SimRobotController that you
+   should watch out for.  Then, use one of the classes in :mod:`klampt.control.simrobotinterface`
+   to test your controller in a simulator. 
+2. Use your existing control code, but replace your SimRobotController object with a
+   :class:`klampt.control.interop.SimRobotControllerToInterface` object that points
+   to your robot's interface.
+
+
+The reason why route 1 is preferable is that you can pick the RIL interface to
+your simulated robot that corresponds most closely to your actual robot, whether
+it's position controlled, velocity controlled, or provides motion queue functionality.
+SimXControllInterface classes are available to use physics simulation as well as
+basic kinematic simulation (KinematicSimControlInterface), which is faster.  This usage
+is summarized in the following diagrams.
+
+|RobotInterfaceLayer-simulation| |RobotInterfaceLayer-kinematic|
+
+Using the RIL API
+~~~~~~~~~~~~~~~~~~
+
+For your controller code to use an RIL API, it should treat the API as a synchronous
+process, in which all commands and queries at a given time step are placed within a
+``startStep()``/``endStep()`` block.  The calling convention is:
+
+.. code:: python
+
+    interface = MyRobotInterface(...args...)
+    if not interface.initialize():  #should be called first
+        raise RuntimeError("There was some problem initializing interface "+str(interface))
+    dt = 1.0/interface.controlRate()
+    while interface.status() == 'ok':  #no error handling done here...
+        t0 = time.time()
+        interface.startStep()
+        [any getXXX or setXXX commands here comprising the control loop]
+        interface.endStep()
+        t1 = time.time()
+        telapsed = t1 - t0
+        [wait for time max(dt - telapsed,0)]
+
+DOFs and Parts
+^^^^^^^^^^^^^^
+
+The number of DOFs in RIL is assumed equal to the number of joint actuators / 
+encoders.  If the robot has fewer actuators than encoders, the commands for 
+unactuated joints should just be ignored.  If the robot corresponds to a Klampt
+model (typical), then the number of DOFs should be ``model.numDrivers()``.
+
+A robot can have "parts", which are named groups of DOFs.  For example, a
+robot with a gripper can have parts "arm" and "gripper", which can be controlled
+separately.  You may retrieve part names using  ``interface.parts()``,
+part indices using ``interface.indices(part)``, and access a RIL interface
+to a part using ``interface.partController(part)``.
+
+
+Status Management
+^^^^^^^^^^^^^^^^^
+
+- ``interface.initialize()``: must be called before the control loop. May return False
+  if there was an error connecting.
+- ``interface.status()``: returns 'ok' if everything is ok.  Otherwise, returns an
+  implementation-dependent string.
+- ``interface.clock()``: returns the robot's clock, in s.
+- ``interface.controlRate()``: returns the control rate, in Hz.
+- ``interface.reset()``: if status() is not 'ok', tries to reset to an ok state.
+  A controller should not issue commands until status() is 'ok' again.
+- ``interface.estop()``: triggers an emergency stop.  Default just does a soft stop.
+- ``interface.softStop()``: triggers a soft stop.
+
+Command types
+^^^^^^^^^^^^^^
+
+Keep in mind that almost all robots will only implement a subset of these natively.
+
+**Basic control**
+
+- ``interface.setPosition(q)``: Immediate position control.
+- ``interface.moveTo(q,speed=1)``: Smooth position control.
+- ``interface.setVelocity(v,ttl=None)``: Immediate velocity control, with an optimal time-to-live.
+- ``interface.setTorque(t,ttl=None)``: Torque control, with an optimal time-to-live.
+- ``interface.setVelocity(v,ttl=None)``: Immediate velocity control, with an optimal time-to-live.
+- ``interface.setPID(q,dq,t_feedforward=None)``: PID command, with optional feedforward torque.
+- ``interface.setPiecewiseLinear(times,milestones,relative=True)``: initiates a piecewise linear
+  trajectory between the given times and milestones.  If relative=True, time 0 is the current time,
+  but otherwise all the times should be greater than ``interface.clock()``.
+- ``interface.setPiecewiseCubic(times,milestones,velocities,relative=True)``: initiates a piecewise
+  cubic trajectory between the given times, milestones, and velocities.  If relative=True, time 0 
+  is the current time, but otherwise all the times should be greater than ``interface.clock()``.
+
+**Cartesian control**
+
+Each RIL robot has at most one end effector.  If you have a robot with multiple end effectors,
+
+- ``interface.setToolCoordinates(x)``: sets the tool center point
+
+Writing RIL Implementations for Your Robot
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. important::
+
+    This has not been thoroughly tested.
+
+
+To implement an RIL layer for your robot, you will need to understand details on the
+communication method used by the manufacturer, e.g., Ethernet, serial, ROS, or some other API.
+Your RIL implementation should fill out as much of the RobotInterfaceBase methods as provided
+by the communication layer.  The block diagram of the architecture looks like this:
+
+|RobotInterfaceLayer-physical|
+
+For RIL to work, there are a few functions your subclass will need to fill out, at a minimum:
+
+  * :meth:`~klampt.control.robotinterface.RobotInterfaceBase.numDOFs` or :meth:`~klampt.control.robotinterface.RobotInterfaceBase.klamptModel`
+  * Either :meth:`~klampt.control.robotinterface.RobotInterfaceBase.clock` or :meth:`~klampt.control.robotinterface.RobotInterfaceBase.controlRate`
+  * Either :meth:`~klampt.control.robotinterface.RobotInterfaceBase.setPosition`, :meth:`~klampt.control.robotinterface.RobotInterfaceBase.moveToPosition`, :meth:`~klampt.control.robotinterface.RobotInterfaceBase.setVelocity`, 
+    :meth:`~klampt.control.robotinterface.RobotInterfaceBase.setTorque`, or :meth:`~klampt.control.robotinterface.RobotInterfaceBase.setPID`
+  * Either :meth:`~klampt.control.robotinterface.RobotInterfaceBase.sensedPosition` or :meth:`~klampt.control.robotinterface.RobotInterfaceBase.commandedPosition`
+
+Given these implementations, we provide a convenience class,
+:class:`~klampt.control.robotinterfaceutils.RobotInterfaceCompleter`,
+that will automatically fill in all other parts of the RIL API, e.g., velocity
+control, motion queue control, and Cartesian control.  (Note: move-to and
+Cartesian control functions are only available if ``RobotInterfaceBase.klamptModel``
+is implemented.)
+
+.. note::
+
+  The emulation of some components has rough edges, and this code is
+  subject to change. If you plan to use RIL, we suggest that you install from
+  source so that you can get the latest updates.
+
+Multithreaded Implementations
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The best practice for implementing an RIL API is to launch a thread that
+synchrononously communicates with your robot, while relaying asynchronous
+commands from the caller. The following code does a very basic job of this
+for a position-controlled robot, which only relays the sensed/ commanded
+positions to/from the robot. 
+
+.. code:: python
+
+  from klampt.control.robotinterface import *
+  from klampt import *
+  from threading import Thread,Lock
+
+  class RobotCommThread:
+    def __init__(self,connection):
+      Thread.__init__(self)
+      self.connection = connection
+      self.doStop = False
+      self.lock = Lock()
+      self.commandedPosition = None
+      self.sensedPosition = None
+      self.new_commandedPosition = None
+      self.status = 'ok'
+      self.daemon = True  #flag in Thread that will help kill this Thread under Ctrl+C
+    def run(self):
+      while not self.doStop:
+        with self.lock:
+          ...read status, sensedPosition, commandedPosition from the robot...
+          ...if disconnected, set status to 'disconnected'...
+          if self.new_commandedPosition is not None:
+            ...send new_commandedPosition to the robot...
+            self.commandedPosition = new_commandedPosition
+        #unlock
+        time.sleep(0.001) # or some small amount
+
+  class MyRIL(RobotInterfaceBase):
+    def __init__(self):
+      self.thread = None
+      self.world = WorldModel()
+      self.world.readFile(...path to robot file...)
+      self.robot = self.world.robot(0)
+    def initialize(self):
+      ...connect to the robot, return False if unsuccessful...
+      self.thread = RobotCommThread(robot_connection)
+      self.thread.start()
+    def stop(self):
+      if self.thread is not None:
+        self.thread.doStop = True
+        self.thread.join()
+        self.thread = True
+    def klamptModel(self):
+      return self.robot
+    def controlRate(self):
+      return ...whatever the robot's control rate is...
+    def status(self):
+      return self.thread.status
+    def commandedPosition(self):
+      with self.thread.lock:
+        res = self.thread.commandedPosition
+      return res
+    def sensedPosition(self):
+      with self.thread.lock:
+        res = self.thread.sensedPosition
+      return res
+    def setPosition(self,q):
+      with self.thread.lock:
+        self.thread.new_commandedPosition = q
+
+(Note: a complete implementation will do a better job of error handling.)
+
+ROS Implementations
+^^^^^^^^^^^^^^^^^^^
+
+For a ROS implementation, ROS messaging  will already be running in a separate
+thread, so you don't need to set up a new thread after you've run ``rospy.init_node(...)``.
+This could happen, for example, in the ``initialize`` method.  Then, for all robot commands
+provided by your robot's ROS interface:
+
+1. In the appropriate RIL method, translate the Klamp't command to a ROS message.
+2. Publish the message to the appropriate topic, or call the appropriate service.
+
+For all sensor messages provided by your robot's ROS interface:
+
+1. In ``initialize``, set up a subscriber to the sensor message.
+2. The callback from that subscriber should just store the sensor message.
+3. Overload the appropriate RIL method to translate the ROS message to a Klamp't object.
+   For standard positions, velocities, and torques, use the sensedPosition(), sensedVelocity(),
+   and sensedTorque() methods.
+
+   For more complex, asynchronous items like laser sensors, cameras, RGB-D sensors, and
+   force/torque sensors, you should use the sensors(), sensorMeasurements(), and
+   sensorUpdateTime() methods. For best interpretability (and compatibility with Klampt's
+   visualization tools, e.g. :class:`~klampt.control.interop.RobotInterfacetoVis`), you
+   should also make sure the sensor is defined in the robot's klamptModel() model,
+   and that these measurements match the format of the corresponding `Klamp't sensor <Manual-Sensors.html>`__.
+
+As an example, consult the implementation of :class:`~klampt.control.io.roscontroller.RosRobotInterface`.
+This class sends ROS JointTrajectory commands and receives ROS JointState sensor
+messages.  
+
+
+Frankenstein Robots
+~~~~~~~~~~~~~~~~~~~
+
+.. important::
+
+    New in 0.8.3 and has barely been tested. Use at your own risk.
+
+We often build robots out of several components, such as an arm and a gripper, 
+and it can be a pain to coordinate the control of each component.  Klamp't
+provides a convenience class, :class:`~klampt.control.robotinterfaceutils.MultiRobotInterface`,
+that lets you assemble robots into parts.
+
+|RobotInterfaceLayer-multirobot|
+
+
+Experimental Controller Building Blocks
+---------------------------------------
+
+
+.. important::
+
+    THESE DOCS ARE OUT OF DATE.  The API has changed a lot and the previously
+    meager functionality is only slightly improved in 0.8.3.  It is not clear whether this
+    API will be maintained.
+
+
+A :class:`~klampt.control.controller.ControllerBlock` interface is a very simple object with two important
 methods:
 
--  ``output(self,**inputs)``: given a set of named inputs, produce a
+-  ``advance(self,**inputs)``:  given a set of named inputs, produce a
    dictionary of named outputs. The semantics of the inputs and outputs
-   are defined by the caller.
--  ``advance(self,**inputs)``: advance by a single time step, performing
-   any necessary changes to the controller's state. 
-
-   .. note:: 
-      ``output`` should NOT change internal state! The only state-changing
-      functions should be implemented in advance.
+   are defined by the caller.  The block moves forward single time step, 
+   performing any necessary changes to internal state. 
 
 -  ``signal(self,type,**inputs)``: sends some asynchronous signal to the
-   controller. The usage is caller dependent. (This method is never
-   called directly by ``klampt_sim``, but some higher controllers may
-   call it.)
+   controller. The usage is caller dependent. 
 
-``klampt_sim`` will structure a sensor message as the inputs to ``output`` and ``advance``.
-Specifically, this is a dictionary of named sensor items containing
+Optionally, it can also implement inputNames/outputNames, and get/setState.
+
+Robot controller blocks
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+A ControllerBlock that operates as the top-level controller for a robot
+is said to follow the :class:`~klampt.control.controller.RobotControllerBase` convention.  The input
+dictionary contains sensor messages, specifically containing
 the following elements:
 
 -  t: the current simulation time
 -  dt: the controller time step
 -  q: the robot's current sensed configuration
 -  dq: the robot's current sensed velocity
--  qcmd: the robot's current commanded configuration
--  dqcmd: the robot's current commanded configuration
 -  The names of each sensors in the simulated robot controller, mapped
    to a list of its measurements.
 
-``klampt_sim`` expects ``output`` to return a dictionary that
-represents a command message.  A command message can have one of the
-following combinations of keys, signifying which type of joint
-control should be used:
+The RobotControllerBase output dictionary represents a command message.
+to be sent to the robot's low-level motor controllers.  A command message
+can have one of the following combinations of keys, signifying which type
+of joint control should be used:
 
 -  qcmd: use PI control.
 -  qcmd and dqcmd: use PID control.
@@ -217,15 +499,20 @@ control should be used:
    velocities, executed for time tcmd.
 -  torquecmd: use torque control.
 
-Several existing controllers have been implemented in
-`control/controller.py <https://github.com/krishauser/klampt/blob/master/Python/control/controller.py>`__  to make the design and composition
-of controllers a bit easier, e.g., finite state machines, switching
-controllers, linear controllers, etc.
 
+The ``klampt_sim`` script accepts arbitrary feedback controllers in this
+form.  To specify such a controller, provide as input a .py file with a
+single ``make(robot)`` function that returns a subclass of ``ControllerBlock`` 
+that implements the desired functionality.  For example,
+to see a controller that interfaces with ROS, see
+`klampt/control/io/roscontroller.py <https://github.com/krishauser/klampt/blob/master/Python/klampt/control/io/roscontroller.py>`__.
+
+
+Building controllers from blocks
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Internally the controller can produce arbitrarily complex behavior.
-Several common design patterns are implemented in
-`control/controller.py <https://github.com/krishauser/klampt/blob/master/Python/control/controller.py>`__:
+Several common blocks are implemented in :mod:`klampt.control.blocks`.
 
 -  ``TimedControllerSequence``: runs a sequence of sub-controllers,
    switching at predefined times.
@@ -237,24 +524,24 @@ Several common design patterns are implemented in
    a single vector in the output. Most often used as the last stage of a
    MultiController when several parts of the body are controlled with
    different sub-controllers.
--  ``LinearController``: outputs a linear function of some number of
+-  ``LinearBlock``: outputs a linear function of some number of
    inputs.
--  ``LambdaController``: outputs ``f(arg1,...,argk)`` for any arbitrary
+-  ``LambdaBlock``: outputs ``f(arg1,...,argk)`` for any arbitrary
    Python function ``f``.
--  ``StateMachineController``: a base class for a finite state machine
+-  ``StateMachine``: a base class for a finite state machine
    controller. The subclass must determine when to transition between
    sub-controllers.
--  ``TransitionStateMachineController``: a finite state machine
+-  ``TransitionStateMachine``: a finite state machine
    controller with an explicit matrix of transition conditions.
 
 A trajectory tracking controller is given in
-`control/trajectory\_controller.py <https://github.com/krishauser/klampt/blob/master/Python/control/trajectory_controller.py>`__.
+`klampt/control/blocks/trajectory\_tracking.py <https://github.com/krishauser/klampt/blob/master/Python/klampt/control/trajectory_tracking.py>`__.
 Its make function accepts a robot model (optionally ``None``) and a
 linear path file name.
 
 A preliminary velocity-based operational space controller is implemented
 in
-`control/OperationalSpaceController.py <https://github.com/krishauser/klampt/blob/master/Python/control/OperationalSpaceController.py>`__,
+`control-examples/OperationalSpaceController.py <https://github.com/krishauser/klampt/blob/master/Python/control-examples/OperationalSpaceController.py>`__,
 but its use is highly experimental at the moment.
 
 
@@ -266,12 +553,16 @@ State estimation
 Controllers may or may not perform state estimation. 
 
 Using the controller.py interface, state estimators can be implemented
-as ``BaseController`` subclasses that calculate the estimated state
-objects in the ``output()`` method.
+as ``ControllerBlock`` subclasses that calculate the estimated state
+objects in the ``advance()`` method.
 
 
 
-.. |Controller illustration| image:: _static/images/concepts-controller.png
+.. |SimRobotController| image:: _static/images/SimRobotController.png
 .. |Motion queue illustration| image:: _static/images/motion-queue.png
 .. |Trapezoidal velocity profiles| image:: _static/images/trapezoidal-velocity-profile.png
-
+.. |RobotInterfaceLayer| image:: _static/images/RobotInterfaceLayer.png
+.. |RobotInterfaceLayer-simulation| image:: _static/images/RobotInterfaceLayer-simulation.png
+.. |RobotInterfaceLayer-kinematic| image:: _static/images/RobotInterfaceLayer-kinematic.png
+.. |RobotInterfaceLayer-physical| image:: _static/images/RobotInterfaceLayer-physical.png
+.. |RobotInterfaceLayer-multirobot| image:: _static/images/RobotInterfaceLayer-multirobot.png

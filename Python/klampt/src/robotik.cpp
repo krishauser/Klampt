@@ -40,11 +40,12 @@ bool PySequence_ToVector3Array(PyObject* seq,vector<Vector3>& array)
 
 
 IKObjective::IKObjective()
+:positionScale(1),rotationScale(1)
 {
 }
 
 IKObjective::IKObjective(const IKObjective& rhs)
-:goal(rhs.goal)
+:goal(rhs.goal),positionScale(rhs.positionScale),rotationScale(rhs.rotationScale)
 {
 }
 
@@ -118,6 +119,12 @@ void IKObjective::setLinks(int link,int link2)
 }
 
 void IKObjective::setFreePosition()
+{
+  printf("IKObjective::setFreePosition: deprecated, use setFreePosConstraint");
+  goal.SetFreePosition();
+}
+
+void IKObjective::setFreePosConstraint()
 {
   goal.SetFreePosition();
 }
@@ -491,7 +498,7 @@ PyObject* IKSolver::solve(int iters,double tol)
     for(size_t i=0;i<qmin.size();i++) {
       if(robot.robot->q(i) < qmin[i] || robot.robot->q(i) > qmax[i]) {
         if(robot.robot->q(i) < qmin[i]-Epsilon || robot.robot->q(i) > qmax[i]+Epsilon) 
-          printf("Joint limits %f < %f <%f exceeded on joint %i. Clamping to limit...\n", qmin[i],robot.robot->q(i),qmax[i],(int)i);
+          printf("Joint limits %f < %f <%f exceeded on joint %i. Clamping to limit...\n", qmin[i],robot.robot->q(i),qmax[i],i);
         if(robot.robot->q(i) < qmin[i]) {
           robot.robot->q(i) = qmin[i];
         } else {
@@ -505,6 +512,11 @@ PyObject* IKSolver::solve(int iters,double tol)
   for(size_t i=0;i<objectives.size();i++)
     goals[i] = objectives[i].goal;
   f.UseIK(goals);
+  for(size_t i=0;i<objectives.size();i++) {
+    IKGoalFunction* obji = dynamic_cast<IKGoalFunction*>(f.functions[i].get());
+    obji->positionScale = objectives[i].positionScale;
+    obji->rotationScale = objectives[i].rotationScale;
+  }
   if(activeDofs.empty()) GetDefaultIKDofs(*robot.robot,goals,f.activeDofs);
   else f.activeDofs.mapping = activeDofs;
 
@@ -546,6 +558,11 @@ bool IKSolver::solve()
   for(size_t i=0;i<objectives.size();i++)
     goals[i] = objectives[i].goal;
   f.UseIK(goals);
+  for(size_t i=0;i<objectives.size();i++) {
+    IKGoalFunction* obji = dynamic_cast<IKGoalFunction*>(f.functions[i].get());
+    obji->positionScale = objectives[i].positionScale;
+    obji->rotationScale = objectives[i].rotationScale;
+  }
   if(activeDofs.empty()) GetDefaultIKDofs(*robot.robot,goals,f.activeDofs);
   else f.activeDofs.mapping = activeDofs;
 

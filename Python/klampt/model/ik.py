@@ -14,11 +14,11 @@ For basic IK, the calling sequence is::
     goal = ik.objective(link,local=[p1,p2,p3],world=[r1,r2,r3])
     robot.setConfig(startConfig)  #(optional, set the initial configuration)
     if ik.solve(goal):
-        print "Hooray, IK solved"
-        print "Resulting config:",robot.getConfig()
+        print("Hooray, IK solved")
+        print("Resulting config:",robot.getConfig())
     else:
-        print "IK failed"
-        print "Final config:",robot.getConfig()
+        print("IK failed")
+        print("Final config:",robot.getConfig())
 
 Here, the points p1,...,p3 on the link (specified in local coordinates)
 will be matched to the points r1,...,r3 in the world.  You can also
@@ -61,8 +61,8 @@ is not yet implemented and will result in a thrown exception.
 
 from ..robotsim import *
 from ..math import so3,se3
-from subrobot import SubRobotModel
-from coordinates import Point,Direction,Frame,Transform
+from .subrobot import SubRobotModel
+from .coordinates import Point,Direction,Frame,Transform
 
 def objective(body,ref=None,local=None,world=None,R=None,t=None):
     """Returns an IKObjective for a given body.
@@ -323,13 +323,13 @@ def solver(objectives,iters=None,tol=None):
             if tol != None: s.setTolerance(tol)
             for obj in generalized:
                 s.add(obj)
-            for (key,(r,objs)) in robs.iteritems():
+            for (key,(r,objs)) in robs.items():
                 for obj in objs:
                     s.add(GeneralizedIKObjective(r,obj))
             return s
         else:
             res = []
-            for key,(r,objs) in robs.iteritems():
+            for key,(r,objs) in robs.items():
                 if isinstance(r,SubRobotModel):
                     s = IKSolver(r._robot)
                     s.setActiveDofs(r._links)
@@ -458,7 +458,7 @@ def solve_global(objectives,iters=1000,tol=1e-3,activeDofs=None,numRestarts=100,
         if all(res):
             if feasibilityCheck():
                 return True
-        for i in xrange(numRestarts):
+        for i in range(numRestarts):
             for si in s:
                 si.sampleInitial()
             res = [si.solve() for si in s]
@@ -472,7 +472,7 @@ def solve_global(objectives,iters=1000,tol=1e-3,activeDofs=None,numRestarts=100,
         if s.solve():
             if feasibilityCheck():
                 return True
-        for i in xrange(numRestarts):
+        for i in range(numRestarts):
             s.sampleInitial()
             if s.solve():
                 if feasibilityCheck():
@@ -519,7 +519,7 @@ def solve_nearby(objectives,maxDeviation,iters=1000,tol=1e-3,activeDofs=None,num
     if s.solve():
         if feasibilityCheck():
             return True
-    for i in xrange(numRestarts):
+    for i in range(numRestarts):
         s.sampleInitial()
         if s.solve():
             if feasibilityCheck():

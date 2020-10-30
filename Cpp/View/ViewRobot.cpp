@@ -119,13 +119,15 @@ void ViewRobot::Draw()
 
   for(size_t i=0;i<robot->links.size();i++) {
     if(robot->IsGeometryEmpty(i)) continue;
+    //TODO: why does this sanity check need to be here?  Example: TRINA_with_greflex.rob
+    if(robot->geomManagers[i].Appearance()->geom != robot->geometry[i].get())
+      robot->geomManagers[i].Appearance()->Set(*robot->geometry[i]);
     Matrix4 mat = robot->links[i].T_World;
     glPushMatrix();
     glMultMatrix(mat);
     GLDraw::GeometryAppearance& a = Appearance(i);
-    if(a.geom != robot->geometry[i].get()) {
+    if(a.geom != robot->geometry[i].get()) 
       a.Set(*robot->geometry[i]);
-    }
     a.DrawGL();
     glPopMatrix();
   }
@@ -308,42 +310,24 @@ void ViewRobot::PopAppearance()
     //may want to copy back face display lists up the stack
     if(appearanceStack.size()==1) {
       for(size_t i=0;i<robot->links.size();i++) {
-        if(!robot->geomManagers[i].Appearance()->faceDisplayList)
-          robot->geomManagers[i].Appearance()->faceDisplayList = appearanceStack.back()[i].faceDisplayList;
-        if(!robot->geomManagers[i].Appearance()->edgeDisplayList)
-          robot->geomManagers[i].Appearance()->edgeDisplayList = appearanceStack.back()[i].edgeDisplayList;
-        if(!robot->geomManagers[i].Appearance()->vertexDisplayList)
-          robot->geomManagers[i].Appearance()->vertexDisplayList = appearanceStack.back()[i].vertexDisplayList;
-        if(!robot->geomManagers[i].Appearance()->silhouetteDisplayList)
-          robot->geomManagers[i].Appearance()->silhouetteDisplayList = appearanceStack.back()[i].silhouetteDisplayList;
-        if(!robot->geomManagers[i].Appearance()->tempMesh)
-          robot->geomManagers[i].Appearance()->tempMesh = appearanceStack.back()[i].tempMesh;
-        if(!robot->geomManagers[i].Appearance()->tempMesh2)
-          robot->geomManagers[i].Appearance()->tempMesh2 = appearanceStack.back()[i].tempMesh2;
+        ManagedGeometry::AppearancePtr app = robot->geomManagers[i].Appearance();
+        const GLDraw::GeometryAppearance& oldapp = appearanceStack.back()[i];
+        app->CopyCache(oldapp);
       }
     }
     else {
       size_t n=appearanceStack.size()-2;
       for(size_t i=0;i<robot->links.size();i++) {
-        if(!appearanceStack[n][i].faceDisplayList)
-          appearanceStack[n][i].faceDisplayList = appearanceStack.back()[i].faceDisplayList;
-        if(!appearanceStack[n][i].edgeDisplayList)
-          appearanceStack[n][i].edgeDisplayList = appearanceStack.back()[i].edgeDisplayList;
-        if(!appearanceStack[n][i].vertexDisplayList)
-          appearanceStack[n][i].vertexDisplayList = appearanceStack.back()[i].vertexDisplayList;
-        if(!appearanceStack[n][i].silhouetteDisplayList)
-          appearanceStack[n][i].silhouetteDisplayList = appearanceStack.back()[i].silhouetteDisplayList;
-        if(!appearanceStack[n][i].tempMesh)
-          appearanceStack[n][i].tempMesh = appearanceStack.back()[i].tempMesh;
-        if(!appearanceStack[n][i].tempMesh2)
-          appearanceStack[n][i].tempMesh2 = appearanceStack.back()[i].tempMesh2;
+        GLDraw::GeometryAppearance& app = appearanceStack[n][i];
+        const GLDraw::GeometryAppearance& oldapp = appearanceStack.back()[i];
+        app.CopyCache(oldapp);
       }
     }
     appearanceStack.resize(appearanceStack.size()-1);
   }
 }
-void ViewRobot::RestoreAppearance()
 
+void ViewRobot::RestoreAppearance()
 {
   appearanceStack.resize(0);
 }
@@ -363,6 +347,7 @@ void ViewRobot::SetAppearance(const vector<GLDraw::GeometryAppearance>& app)
   if(!robot) return;
   Assert(app.size()==robot->links.size());
   for(size_t i=0;i<app.size();i++) {
-    Appearance(i) = app[i];
+    Appearance(i).CopyMaterial(app[i]);
+    Appearance(i).CopyCache(app[i],true);
   }
 }

@@ -8,7 +8,7 @@
 
 from OpenGL.GL import *
 from OpenGL.GLU import *
-import camera
+from . import camera
 from ..math import so3,se3,vectorops
 from ..robotsim import Viewport
 import math
@@ -55,7 +55,7 @@ class GLViewport:
         if convention == 'openGL':
             self.camera.set_matrix(T)
         else:
-            xzflip = [-1,0,0,  0,1,0,  0,0,-1]
+            xzflip = [1,0,0,  0,-1,0,  0,0,-1]
             self.camera.set_matrix((so3.mul(T[0],xzflip),T[1]))
 
     def getTransform(self,convention='standard'):
@@ -71,7 +71,7 @@ class GLViewport:
             return self.camera.matrix()
         else:
             T = self.camera.matrix()
-            xzflip = [-1,0,0,  0,1,0,  0,0,-1]
+            xzflip = [1,0,0,  0,-1,0,  0,0,-1]
             return (so3.mul(T[0],xzflip),T[1])
 
     def fit(self,center,radius):
@@ -94,7 +94,7 @@ class GLViewport:
         vp.n,vp.f = self.clippingplanes
         vp.perspective = True
         aspect = float(self.w)/float(self.h)
-        rfov = self.fov*math.pi/180.0
+        rfov = math.radians(self.fov)
         vp.scale = 1.0/(2.0*math.tan(rfov*0.5/aspect)*aspect)
         vp.setRigidTransform(*self.camera.matrix())
         return vp
@@ -107,7 +107,7 @@ class GLViewport:
         u = float(x-(self.x + self.w/2))/self.w
         v = float((self.y + self.h/2) -y)/self.w
         aspect = float(self.w)/float(self.h)
-        rfov = self.fov*math.pi/180.0
+        rfov = math.radians(self.fov)
         scale = 2.0*math.tan(rfov*0.5/aspect)*aspect
         d = (u*scale,v*scale,-1.0)
         d = vectorops.div(d,vectorops.norm(d))
@@ -131,7 +131,7 @@ class GLViewport:
         #ploc.x = ploc.z*d.x
         #ploc.y = ploc.z*d.y
         aspect = float(self.w)/float(self.h)
-        rfov = self.fov*math.pi/180.0
+        rfov = math.radians(self.fov)
         scale = 2.0*math.tan(rfov*0.5/aspect)*aspect
         u = -ploc[0]/(ploc[2]*scale)
         v = -ploc[1]/(ploc[2]*scale)
@@ -159,9 +159,10 @@ class GLViewport:
         
         # View transformation
         mat = se3.homogeneous(se3.inv(self.camera.matrix()))
-        cols = zip(*mat)
+        cols = list(zip(*mat))
         pack = sum((list(c) for c in cols),[])
         glMultMatrixf(pack)
+
 
 class GLProgramAction:
     def __init__(self,hook,short_text,key,description=None):
@@ -171,6 +172,7 @@ class GLProgramAction:
         self.description = description
         if description == None:
             self.description = short_text
+
 
 class GLProgram:
     """A basic OpenGL visualization, run as part of some _GLBackend.
@@ -207,7 +209,7 @@ class GLProgram:
         """Starts a new event loop with this object as the main program.
         Note: might not return, in the case of GLUT.
         """
-        import visualization
+        from . import visualization
         visualization.setWindowTitle(self.name)
         visualization.run(self)
 
@@ -245,11 +247,11 @@ class GLProgram:
 
     def print_help(self):
         #Put your help printouts here
-        print "************** Help **************"
-        print "?: print this help message"
+        print("************** Help **************")
+        print("?: print this help message")
         for a in self.actions:
-            print a.key,":",a.description
-        print "**********************************"
+            print(a.key,":",a.description)
+        print("**********************************")
         
     def keyboardfunc(self,c,x,y):
         """Called on keypress down. May be overridden.  c is either the ASCII/unicode
@@ -284,7 +286,7 @@ class GLProgram:
         may wish to override display() and display_screen() instead."""
         if self.view.w == 0 or self.view.h == 0:
             #hidden?
-            print "GLProgram.displayfunc called on hidden window?"
+            print("GLProgram.displayfunc called on hidden window?")
             return False
         self.prepare_GL()
         self.display()
@@ -350,7 +352,7 @@ class GLProgram:
             try:
                 import Image
             except ImportError:
-                print "Cannot save screens to disk, the Python Imaging Library is not installed"
+                print("Cannot save screens to disk, the Python Imaging Library is not installed")
                 return
         if hasattr(self.window,'makeCurrent'):
             self.window.makeCurrent()
@@ -358,7 +360,7 @@ class GLProgram:
         x,y,w,h = self.view.x*self.view.screenDeviceScale,self.view.y*self.view.screenDeviceScale,self.view.w*self.view.screenDeviceScale,self.view.h*self.view.screenDeviceScale
         screenshot = glReadPixels( x, y, w, h, GL_RGBA, GL_UNSIGNED_BYTE)
         im = Image.frombuffer("RGBA", (w, h), screenshot, "raw", "RGBA", 0, 0)
-        print "Saving screen to",fn
+        print("Saving screen to",fn)
         if not multithreaded:
             im.save(fn)
         else:
@@ -394,7 +396,6 @@ class GLNavigationProgram(GLProgram):
         e.g. a prior view that was saved to file."""
         self.view = v
         self.reshape(self.view.w,self.view.h)
-
     
     def prepare_GL(self):
         GLProgram.prepare_GL(self)
@@ -417,7 +418,7 @@ class GLNavigationProgram(GLProgram):
             if 'ctrl' in self.modifiers():
                 R,t = self.view.camera.matrix()
                 aspect = float(self.view.w)/self.view.h
-                rfov = self.view.fov*math.pi/180.0
+                rfov = math.radians(self.view.fov)
                 scale = 2.0*math.tan(rfov*0.5/aspect)*aspect
                 delta = so3.apply(R,[-scale*float(dx)*self.view.camera.dist/self.view.w,scale*float(dy)*self.view.camera.dist/self.view.w,0])
                 self.view.camera.tgt = vectorops.add(self.view.camera.tgt,delta)
@@ -470,7 +471,7 @@ class GLRealtimeProgram(GLNavigationProgram):
         self.ttotal += self.dt
         self.counter += 1
 
-        #call the user-defined idle function
+        #do something random
         self.idle()
         
         self.lasttime = tcur
@@ -478,7 +479,6 @@ class GLRealtimeProgram(GLNavigationProgram):
         return True
 
     def idle(self):
-        """Overload me"""
         pass
 
 class GLPluginProgram(GLRealtimeProgram):
@@ -486,14 +486,16 @@ class GLPluginProgram(GLRealtimeProgram):
     GUI functionality (see glcommon.py).  Call setPlugin() on this object to set
     the currently used plugin.  pushPlugin()/popPlugin() can also be used to
     set a hierarchy of plugins."""
-    def __init__(self,name="GLWidget"):
+    def __init__(self,name="GLPluginProgram"):
         GLRealtimeProgram.__init__(self,name)
         self.plugins = []
     def setPlugin(self,plugin):
+        #first, detatch existing plugins
         import copy
         for p in self.plugins:
             p.window = None
             p.view = copy.copy(p.view)
+        #now just set this plugin
         self.plugins = []
         if plugin:
             self.pushPlugin(plugin)
@@ -502,7 +504,7 @@ class GLPluginProgram(GLRealtimeProgram):
         plugin.window = self.window
         if self.window:
             if self.window.initialized:
-                print "GLPluginProgram.pushPlugin called after window was initialized, some actions may not be available"
+                print("GLPluginProgram.pushPlugin called after window was initialized, some actions may not be available")
             plugin.view = self.view
             plugin.reshapefunc(self.view.w,self.view.h)
             self.refresh()
@@ -511,10 +513,12 @@ class GLPluginProgram(GLRealtimeProgram):
         else:
             plugin.view = self.view
     def popPlugin(self):
+        import copy
         if len(self.plugins)==0: return None
         res = self.plugins[-1]
         self.plugins.pop(-1)
         res.window = None
+        res.view = copy.copy(res.view)
         if self.window:
             self.refresh()
         return res
@@ -527,7 +531,7 @@ class GLPluginProgram(GLRealtimeProgram):
         for plugin in self.plugins:
             plugin.window = self.window
             if not plugin.initialize():
-                print "GLPluginProgram.initialize(): Plugin of type",plugin.__class__.__name__,"Did not initialize"
+                print("GLPluginProgram.initialize(): Plugin of type",plugin.__class__.__name__,"Did not initialize")
                 return False
             if hasattr(plugin,'actions'):
                 #print "Adding",len(plugin.actions),"actions for plugin",plugin.__class__.__name__

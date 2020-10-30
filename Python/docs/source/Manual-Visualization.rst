@@ -2,29 +2,98 @@ Visualization
 =============================
 
 Klamp't allows you to easily produce custom interactive visualizations
-with just a few lines of Python code.  This is extremely debug
+with just a few lines of Python code.  This is extremely useful for
+debugging!
 
-The `klampt.vis <klampt.vis.html>`__ module supports two frameworks for
-doing so:
+The `klampt.vis <klampt.vis.html>`__ module features:
 
--  Method 1: use the builtin *scene manager*.
--  Method 2: overload
-   :class:`~klampt.vis.glinterface.GLPluginInterface`
-   and customize the event handling and drawing routines.
+- Hardware-accelerated OpenGL visualizations using PyQT (available with
+  `pip install PyQt`) or GLUT (`pip install PyOpenGL`)
+- Unified interface to Jupyter notebooks and HTML output
+- Can draw most anything supported in Klampt, as well as text
+- One-line visual debugging with ``vis.debug()``
+- Automatic animations
+- Simple plotting
+- Multi-window management
+- Animation exporting (available with ffmpeg and ``pip install Pillow``)
+- Camera fitting and automatic following control
+- In-GUI scene customization available (available with ``pip install pyqtgraph``)
 
-Method 1 is easier to set up, and is more intuitive for users who may be
-unfamiliar with the event-driven paradigm used in GUI programming.
-However, Method 2 is necessary to get control over the low-level GUI
-event loop. They can also be hybridized to customize how the scene
-manager responds to user input.
 
-Examples of these methods in action are available in the
-``Klampt-examples/Python/demos/vis_template.py`` script.
+Quick start
+-------------
 
-.. note::
-    `klampt.vis` is not imported when you run `import klampt`, because some
-    systems don't have the capability to run OpenGL.  You will need to run
-    `import klampt.vis` or `from klampt import vis`.
+Ultra-quick start is to use ``vis.debug()``, which pops up a window to display
+the given items. For example::
+
+    from klampt import *
+
+    #some Klamp't code
+    w = WorldModel()
+    w.readFile("Klampt-examples/data/tx90_scenario.xml")
+    r = w.robot(0)
+    q0 = r.getConfig()
+    r.randomizeConfig()
+    qrand = r.getConfig()
+
+    #show it
+    vis.debug(qrand,{'color':[1,0,0,0.5]},world=w)
+
+    #some more Klamp't code
+    g = Geometry3D()
+    g.loadFile("Klampt-examples/data/objects/srimugsmooth.off")
+
+    #show it
+    vis.debug(g)
+
+Basic use of the vis module is fairly straightforward:
+
+1. Add things to the visualization scene with ``vis.add(name,thing)``.  Worlds,
+   geometries, points, transforms, trajectories, contact points, and more can
+   be added in this manner.
+2. Modify the scene using modifier calls like
+   ``vis.setColor(name,r,g,b,a)``, ``vis.hide(name)``, or ``vis.remove(name).
+3. Launch visualization window(s)
+4. Continue adding, modifying, and removing things as you desire.
+5. You may then close the window when you are done, or wait until the user 
+   closes the window.
+
+More advanced functions allow you to dynamically launch multiple windows,
+capture user input, embed the visualization into Qt windows, and create
+animations as standalone HTML web pages.
+
+
+Visualization backends
+-----------------------
+
+The first time you call a ``klampt.vis`` function, the :func:`~klampt.vis.visualization.init`
+function is called to initialize one of four possible backends: PyQt, GLUT,
+IPython (Jupyter notebook), or HTML (compatible with Google Colab or as
+standalone web pages). 
+
+- The PyQt and GLUT backends deliver interactive OpenGL visualizations that
+  (typically run in a separate thread from the main thread.  Your main thread
+  of code can update the visualization asynchronously. 
+- The IPython and HTML backends are single-threaded and require you to
+  structure your code to update the visualization and obtain the output where
+  needed.  See the `klampt.vis <klampt.vis.html#ipython-jupyter-notebook>`__
+  documentation for more details.
+
+If run by default, init() will auto-determine the visualization backend to use.
+This is usually the most sensible / powerful backend available for your system:
+
+- Running from a console: use PyQt if available, falling back to GLUT, then
+  HTML.  (Note that most vis programs are written assuming OpenGL support and
+  don't support HTML output.)
+- Running from an IPython notebook: use IPython output.
+
+If you would like to use another backend, you can call 
+``vis.init(DESIRED BACKENDS)`` before any other ``klampt.vis`` call.
+For example, if you'd like to view a PyQT window from an IPython notebook, call
+``vis.init('PyQt')`` at the top your notebook.  Also, if you'd like to use HTML
+output (Google Colab users), call ``vis.init('HTML')`` at the top of your
+notebook.
+
 
 Visualization window management
 --------------------------------
@@ -32,7 +101,7 @@ Visualization window management
 Window creation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-When ``klampt.vis`` is imported, it can be thought of as
+it can be thought of as
 having an existing hidden window which hosts the scene manager. You will
 then configure the window or scene manager, and in the most cross-platform
 compatible mode of operation, you will show it using one
@@ -193,9 +262,9 @@ Using the scene manager, the main thread can easily add and remove items
 to be drawn. Simple functions are available to build multi-viewport
 GUIs, to customize appearances, control animations, and other
 visualization functions. For more information see the documentation of
-`klampt.vis.visualization <klampt.vis.html>`__,
+`klampt.vis <klampt.vis.html>`__,
 and the example code in
-``Klampt-examples/Python/demos/vistemplate.py``.
+``Klampt-examples/Python3/demos/vistemplate.py``.
 
 -  ``vis.add(name,item)``: adds a named item to the scene manager.
 -  ``vis.clear()``: clears all items.
@@ -226,16 +295,21 @@ Here are the accepted types in the scene manager.
 +-----------------------------+------------------------------------------+------------------------------------------+
 | ``Geometry3D``              |                                          |                                          |
 +-----------------------------+------------------------------------------+------------------------------------------+
+| ``PointCloud``              |                                          | ``size`` (1)                             |
++-----------------------------+------------------------------------------+------------------------------------------+
 | ``Vector3``                 |                                          | ``size`` (5)                             |
 +-----------------------------+------------------------------------------+------------------------------------------+
 | ``RigidTransform``          |                                          | ``fancy`` (False), ``length`` (0.1),     |
 |                             |                                          | ``width`` (0.01)                         |
 +-----------------------------+------------------------------------------+------------------------------------------+
-| ``Config``                  | Shows a ghost of the robot               |                                          |
+| ``Config``                  | Shows a ghost of the robot               | ``robot`` (0)                            |
 +-----------------------------+------------------------------------------+------------------------------------------+
-| ``Configs``                 |                                          | ``maxConfigs`` (20)                      |
+| ``Configs``                 |                                          | ``robot`` (0), ``maxConfigs`` (20)       |
 +-----------------------------+------------------------------------------+------------------------------------------+
-| ``Trajectory``              | Draws 3D, SE(3), or end-effector paths   | ``endeffectors`` (all terminal links)    |
+| ``Trajectory``              | Draws 3D, SE(3), or end-effector paths   | ``robot`` (0), ``width`` (3),            |
+|                             |                                          | ``pointSize`` (None), ``pointColor``     |
+|                             |                                          | (None), ``endeffectors`` (all terminal   |
+|                             |                                          | links)                                   |
 +-----------------------------+------------------------------------------+------------------------------------------+
 | ``IKGoal``                  |                                          | ``length`` (0.1), ``width`` (0.01)       |
 +-----------------------------+------------------------------------------+------------------------------------------+
@@ -316,7 +390,7 @@ process mouse and keyboard input, etc. Users are also welcome to use
 Klamp't object OpenGL calls in their own frameworks. For more
 information, see the :class:`~klampt.vis.glinterface.GLPluginInterface` documentation 
 and the simple example file
-``Klampt-examples/Python/demos/gl_vis.py``.
+``Klampt-examples/Python3/demos/gl_vis.py``.
 
 For each GUI event (display, mousefunc, etc), the event cascades through
 the plugin stack until one plugin's handler catches it by returning
@@ -396,10 +470,10 @@ class, as well as the *mousefunc* and *motionfunc* callbacks to capture mouse cl
         #Put your mouse handler here
         #the current example prints out the list of objects clicked whenever
         #you right click
-        print "mouse",button,state,x,y
+        print("mouse",button,state,x,y)
         if button==2:
           if state==0:
-            print [o.getName() for o in self.click_world(x,y)]
+            print([o.getName() for o in self.click_world(x,y)])
             return
         GLWorldPlugin.mousefunc(self,button,state,x,y)
 

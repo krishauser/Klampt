@@ -14,6 +14,7 @@
 #include <KrisLibrary/GLdraw/GLView.h>
 #include <KrisLibrary/GLdraw/GLError.h>
 #include "View/ViewCamera.h"
+#include <KrisLibrary/Timer.h>
 
 #ifndef GL_BGRA
 #ifndef GL_BGRA_EXT
@@ -23,6 +24,7 @@
 #endif //GL_BGRA
 
 DECLARE_LOGGER(Sensing)
+#define DEBUG_GL_RENDER_TIMING 0
 
 using namespace GLDraw;
 
@@ -276,6 +278,9 @@ CameraSensor::~CameraSensor()
 
 void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
 {
+  #if DEBUG_GL_RENDER_TIMING
+  Timer timer;
+  #endif //DEBUG_GL_RENDER_TIMING
   RigidTransform Tlink;
   if(link >= 0) Tlink = robot.links[link].T_World;
   else Tlink.setIdentity();
@@ -283,9 +288,19 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
   if(useGLFramebuffers) {
     if(!renderer.Setup(xres,yres)) {
       LOG4CXX_WARN(GET_LOGGER(Sensing),"CameraSensor: Couldn't initialize GLEW, falling back to slow mode");
-      LOG4CXX_WARN(GET_LOGGER(Sensing),"  GL version is: "<<glGetString(GL_VERSION));
+      const GLubyte* glVersion = glGetString(GL_VERSION);
+      if(glVersion) {
+        LOG4CXX_WARN(GET_LOGGER(Sensing),"  GL version is: "<<glVersion);
+      }
+      else {
+        LOG4CXX_WARN(GET_LOGGER(Sensing),"  GL version could not be queried");
+      }
       useGLFramebuffers = false;
     }
+    #if DEBUG_GL_RENDER_TIMING
+    printf("CameraSensor: Setup renderer %f\n",timer.ElapsedTime());
+    timer.Reset();
+    #endif //DEBUG_GL_RENDER_TIMING
   }
   if(useGLFramebuffers) {
     //set up the POV of the camera
@@ -296,6 +311,7 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
     //-------------------------
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_BLEND);
+    glEnable(GL_LIGHTING);
     glEnable(GL_DEPTH_TEST);
     //-------------------------
     //now render the scene from the POV of the camera
@@ -303,36 +319,78 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
     //DONE: now captured on graphics card in framebuffer
     //----------------
     renderer.End();
+    #if DEBUG_GL_RENDER_TIMING
+    printf("CameraSensor: Draw GL world %f\n",timer.ElapsedTime());
+    timer.Reset();
+    #endif //DEBUG_GL_RENDER_TIMING
 
     //extract measurements
     measurements.resize(0);
     if(rgb) {
       measurements.resize(xres*yres);
-      renderer.GetRGBA(pixels);
+      //renderer.GetRGBA(pixels);
+      renderer.GetRGB(pixels);
+      #if DEBUG_GL_RENDER_TIMING
+      printf("CameraSensor: Download RGBA %f\n",timer.ElapsedTime());
+      timer.Reset();
+      #endif //DEBUG_GL_RENDER_TIMING
+      int l=0;
       int k=0;
       for(int j=0;j<yres;j++) {
-        for(int i=0;i<xres;i++,k+=4) {
-          unsigned int pix = (pixels[k] << 24 ) | (pixels[k+1] << 16 ) | (pixels[k+2] << 8 ) | (pixels[k+3]);
-          measurements[j*xres + i] = double(pix);
+        //for(int i=0;i<xres;i++,k+=4) {
+          //unsigned int pix = (pixels[k] << 24 ) | (pixels[k+1] << 16 ) | (pixels[k+2] << 8 ) | (pixels[k+3]);
+        for(int i=0;i<xres;i++,k+=3) {
+          unsigned int pix = (pixels[k] << 16 | pixels[k+1] << 8 | pixels[k+2]);
+          measurements[l++] = double(pix);
         }
       }
+      #if DEBUG_GL_RENDER_TIMING
+      printf("CameraSensor: Extract measurements %f\n",timer.ElapsedTime());
+      timer.Reset();
+      #endif //DEBUG_GL_RENDER_TIMING
     }
     if(depth) {
       size_t vstart = measurements.size();
       measurements.resize(measurements.size() + xres*yres); 
-
-      renderer.GetDepth(vp,floats);
       
-      int k=0;
-      for(int j=0;j<yres;j++) {
-        for(int i=0;i<xres;i++,k++) {
-          if(floats[k] <= zmax) {
-            floats[k] = (float)Discretize(floats[k],zresolution,zvarianceLinear*floats[k] + zvarianceConstant);
+      renderer.GetDepth(vp,floats);
+      #if DEBUG_GL_RENDER_TIMING
+      printf("CameraSensor: Download depth %f\n",timer.ElapsedTime());
+      timer.Reset();
+      #endif //DEBUG_GL_RENDER_TIMING
+      
+      double invzresolution = 1.0/zresolution;
+      if(zvarianceLinear == 0) {
+        Real zstdev = Sqrt(zvarianceConstant);
+        int k=0;
+        for(int j=0;j<yres;j++) {
+          for(int i=0;i<xres;i++,k++) {
+            if(floats[k] <= zmax) {
+              floats[k] = (float)Discretize2(floats[k],zresolution,invzresolution,zstdev);
+            }
+            measurements[vstart+k] = floats[k];
           }
-          measurements[vstart+j*xres + i] = floats[k];
         }
       }
+      else {
+        int k=0;
+        for(int j=0;j<yres;j++) {
+          for(int i=0;i<xres;i++,k++) {
+            if(floats[k] <= zmax) {
+              floats[k] = (float)Discretize2(floats[k],zresolution,invzresolution,Sqrt(zvarianceLinear*floats[k] + zvarianceConstant));
+              //TEMP: testing simpler discretization
+              //floats[k] = (float)Discretize2(floats[k],zresolution,invzresolution,zstdev);
+            }
+            measurements[vstart+k] = floats[k];
+          }
+        }
+      }
+      #if DEBUG_GL_RENDER_TIMING
+      printf("CameraSensor: Extract measurements %f\n",timer.ElapsedTime());
+      timer.Reset();
+      #endif //DEBUG_GL_RENDER_TIMING
     }
+    
   }
   else {
     //fallback will use ray casting: (slow!)
@@ -357,7 +415,7 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
       measurements.resize(measurements.size()+xres*yres);
     }
     int k=0;
-    double background = double(0xff96aaff);
+    double background = double(0xffffaa96);
     Vector3 pt;
     for(int j=0;j<yres;j++) {
       Real v = 0.5*yres - Real(j);
@@ -372,8 +430,8 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
             //get color of object
             //TODO: lighting
             RobotWorld::AppearancePtr app = world.GetAppearance(obj);
-            float* rgba = app->faceColor.rgba;
-            measurements[k] = double(((unsigned char)(rgba[3]*255.0) << 24) | ((unsigned char)(rgba[0]*255.0) << 16) | ((unsigned char)(rgba[1]*255.0) << 8) | ((unsigned char)(rgba[2]*255.0)));
+            const float* rgba = app->faceColor.rgba;
+            measurements[k] = double(((unsigned char)(rgba[3]*255.0) << 24) | ((unsigned char)(rgba[2]*255.0) << 16) | ((unsigned char)(rgba[1]*255.0) << 8) | ((unsigned char)(rgba[0]*255.0)));
           }
           Real d = vfwd.dot(pt - vsrc);
           d = Min(d,zmax);
@@ -388,9 +446,13 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
     }
     static bool warned = false;
     if(!warned) {
-      LOG4CXX_WARN(GET_LOGGER(Sensing),"DepthCameraSensor: doing fallback from GLEW... "<<k<<" rays cast, may be slow");
+      LOG4CXX_WARN(GET_LOGGER(Sensing),"CameraSensor: doing fallback from GLEW... "<<k<<" rays cast, may be slow");
       warned = true;
     }
+    #if DEBUG_GL_RENDER_TIMING
+    printf("CameraSensor: Software ray-casting and extraction %f\n",timer.ElapsedTime());
+    timer.Reset();
+    #endif //DEBUG_GL_RENDER_TIMING
 
     //need to upload the texture for sensor visualization
     if(renderer.color_tex == 0) { 
@@ -415,6 +477,9 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
       //NULL means reserve texture memory, but texels are undefined
       glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, xres, yres, 0, GL_BGRA, GL_UNSIGNED_BYTE, &image[0]);
     }
+    #if DEBUG_GL_RENDER_TIMING
+    printf("CameraSensor: Software texture setup %f\n",timer.ElapsedTime());
+    #endif //DEBUG_GL_RENDER_TIMING
   }
 }
 

@@ -1,6 +1,6 @@
 from ..robotsim import *
 from ..model import access
-from simulation import SimpleSimulator
+from .simulation import SimpleSimulator
 import time
 
 
@@ -27,7 +27,7 @@ def setWorldSimState(world,state):
     NOTE: this does not perfectly save simulation state!  To do that,
     you must use the Simulator().getState()/saveState() methods.
     """
-    for (k,v) in state.iteritems():
+    for (k,v) in state.items():
         access.set_item(world,k,v)
     return
 
@@ -95,7 +95,7 @@ def doSim(world,duration,initialCondition,
             returnItems.append('robots['+str(i)+'].actualTorques')
     initCond = getWorldSimState(world)
     args = ()
-    for k,v in initialCondition.iteritems():
+    for k,v in initialCondition.items():
         if k != 'args':
             access.set_item(world,k,v)
         else:
@@ -108,7 +108,7 @@ def doSim(world,duration,initialCondition,
         for k in returnItems:
             res[k] = [access.get_item(sim,k)]
         res['status'] = [sim.getStatusString()]
-    print "klampt.batch.doSim(): Running simulation for",duration,"s"
+    print("klampt.batch.doSim(): Running simulation for",duration,"s")
     t0 = time.time()
     t = 0
     worst_status = 0
@@ -122,8 +122,8 @@ def doSim(world,duration,initialCondition,
                 res['wall_clock_time']=time.time()-t0
             #restore initial world state
             setWorldSimState(world,initCond)
-            print "  Termination condition reached at",t,"s"
-            print "  Computation time:",time.time()-t0
+            print("  Termination condition reached at",t,"s")
+            print("  Computation time:",time.time()-t0)
             return res
         if simStep: simStep(sim,*args)
         sim.simulate(simDt)
@@ -143,8 +143,8 @@ def doSim(world,duration,initialCondition,
         res['time']=t
         res['wall_clock_time']=time.time()-t0
 
-    print "  Done."
-    print "  Computation time:",time.time()-t0
+    print("  Done.")
+    print("  Computation time:",time.time()-t0)
     #restore initial world state
     setWorldSimState(world,initCond)
     return res
@@ -168,27 +168,27 @@ def batchSim(world,duration,initialConditions,returnItems,
     res = []
     if isinstance(initialConditions,dict):
         #assume it is a dict-of-lists type
-        v0 = dict.itervalues().next()
-        for (k,v) in initialConditions.iteritems():
+        v0 = next(iter(dict.values()))
+        for (k,v) in initialConditions.items():
             assert len(v)==len(v0),"initialConditions entries must all be of same length"
-        print "klampt.batch.batchSim(): Running",len(v0),"simulations..."
-        for i in xrange(len(v0)):
-            initCond = dict((k,v[i]) for (k,v) in initialConditions.iteritems())
+        print("klampt.batch.batchSim(): Running",len(v0),"simulations...")
+        for i in range(len(v0)):
+            initCond = dict((k,v[i]) for (k,v) in initialConditions.items())
             try:
                 simRes = doSim(world,duration,initCond,returnItems,trace=False,
                                simDt=simDt,simInit=simInit,simStep=simStep,simTerm=simTerm)
             except Exception:
-                print "  Exception thrown on trial",i
+                print("  Exception thrown on trial",i)
                 simRes = 'error'
             res.append(simRes)
     else:
-        print "klampt.batch.batchSim(): Running",len(initialConditions),"simulations..."
+        print("klampt.batch.batchSim(): Running",len(initialConditions),"simulations...")
         for i,initCond in enumerate(initialConditions):
             try:
                 simRes = doSim(world,duration,initCond,returnItems,trace=False,
                                simDt=simDt,simInit=simInit,simStep=simStep,simTerm=simTerm)
             except Exception:
-                print "  Exception thrown on trial",i
+                print("  Exception thrown on trial",i)
                 simRes = 'error'
             res.append(simRes)
     return res
@@ -214,16 +214,16 @@ def monteCarloSim(world,duration,initialConditionSamplers,N,returnItems,
             * returnVal: the return value from doSim().
             
     """
-    print "klampt.batch.monteCarloSim(): Running",N,"simulations..."
+    print("klampt.batch.monteCarloSim(): Running",N,"simulations...")
     res = []
-    for sample in xrange(N):
-        initCond = dict((k,v()) for k,v in initialConditionSamplers.iteritems())
+    for sample in range(N):
+        initCond = dict((k,v()) for k,v in initialConditionSamplers.items())
         try:
             simRes = doSim(world,duration,initCond,returnItems,trace=False,
                            simDt=simDt,simInit=simInit,simStep=simStep,simTerm=simTerm)
         except Exception as e:
-            print "  Exception thrown on trial",sample
-            print "    what:",e
+            print("  Exception thrown on trial",sample)
+            print("    what:",e)
             import traceback
             traceback.print_exc()
             simRes = 'error'
@@ -238,7 +238,7 @@ def saveStateHeaderCSV(state,f):
     vflat = [access.flatten(state[k]) for k in state]
     #write header
     itemNames = []
-    for k,v in zip(state.keys(),vflat):
+    for k,v in zip(list(state.keys()),vflat):
         if len(v)==1:
             itemNames.append(k)
         else:
@@ -267,15 +267,15 @@ def saveStatesCSV(states,f):
 def saveStateTrajectoryCSV(stateTraj,f):
     """Given a state trajectory (dict mapping keys to lists), saves it
     to CSV format to the given output stream f."""
-    state0 = dict((k,v[0]) for (k,v) in stateTraj.iteritems())
+    state0 = dict((k,v[0]) for (k,v) in stateTraj.items())
     state0['iter'] = 0
     saveStateHeaderCSV(state0,f)
-    if len(stateTraj.items())==0:
+    if len(list(stateTraj.items()))==0:
         return
-    length = len(stateTraj.values()[0])
-    for i in xrange(length):
+    length = len(list(stateTraj.values())[0])
+    for i in range(length):
         state0['iter'] = i
-        for k in stateTraj.iterkeys():
+        for k in stateTraj.keys():
             state0[k] = stateTraj[k][i]
         f.write(','.join(str(v) for v in access.flatten(state0)))
         f.write('\n')

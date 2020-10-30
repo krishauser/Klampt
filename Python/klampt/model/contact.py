@@ -2,7 +2,7 @@
 calculation subroutines, and performing equilibrium testing.
 """
 
-import ik
+from . import ik
 from ..math import vectorops,so3,se3
 from .. import robotsim
 from ..robotsim import RobotModel,RobotModelLink,RigidObjectModel,TerrainModel
@@ -16,7 +16,7 @@ def idToObject(world,ID):
     if ID < world.numRigidObjects():
         return world.rigidObject(ID)
     ID -= world.numRigidObjects()
-    for i in xrange(world.numRobots()):
+    for i in range(world.numRobots()):
         if ID==0:
             return world.robot(i)
         ID -= 1
@@ -74,8 +74,11 @@ class ContactPoint:
 
 
 class Hold:
-    """A Hold, contains both contact points and an IK constraint.
-    Similar to the Hold class in the C++ RobotSim library.
+    """A container for both contact points and an IK constraint on a robot's
+    link.  Can represent face-face, point-point, or edge contact. 
+
+    Similar to the Hold class in the C++ RobotSim library.  Hypothetically,
+    can also represent sliding contact.
 
     Attributes:
         link (int): the link index
@@ -90,12 +93,14 @@ class Hold:
         self.contacts = []
 
     def setFixed(self,link,contacts):
-        """Creates this hold such that it fixes a robot link to match a list of contacts
-        (in world space) at its current transform.
+        """Creates this hold such that it fixes a robot link to match a list of
+        contacts (in world space) at its current transform.
 
         Args:
-            link: a robot link or rigid object, currently contacting the environment / object at contacts
-            contacts (list of ContactPoint): the fixed contact points, given in world coordinates.
+            link: a robot link or rigid object, currently contacting the
+                environment / object at contacts
+            contacts (list of :class:`ContactPoint`): the fixed contact points,
+                given in world coordinates.
         """
         assert isinstance(link,(RobotModelLink,RigidObjectModel)),"Argument must be a robot link or rigid object"
         self.link = link.index
@@ -124,18 +129,38 @@ def _flatten(contactOrHoldList):
 
 def forceClosure(contactOrHoldList):
     """Given a list of ContactPoints or Holds, tests for force closure.
-    Return value is True or False"""
+    Return value is True or False.
+
+    Formulates the wrench matrix W of all contacts, including edges of the
+    friction cones.  If Hull(W) contains the zero vector in its interior,
+    then the contacts are said to be in force closure.
+    """
     return robotsim.forceClosure(_flatten(contactOrHoldList))
     
 def comEquilibrium(contactOrHoldList,fext=(0,0,-1),com=None):
     """Given a list of ContactPoints or Holds, an external gravity force,
     and a COM, tests for the existence of an equilibrium solution.
 
+    Specifically, an equilibrium exists when the following equations are
+    met:
+
+    .. math::
+
+        \\begin{eqnarray}
+          fext    & = \\sum_i f_i \\\\
+          0 &= \\sum_i f_i \\times (p_i - com) \\\\
+          f_i & \\in FC_i
+       \end{eqnarray}
+ 
+    where :math:`f_i`, :math:`p_i`, and :math:`FC_i` are the force, position,
+    and the friction cone of the i'th contact point.
+
     If com == None, this tests whether there exists any equilibrium
     com, and returns True/False.
 
     If com != None, this returns either None if there is no solution,
-    or otherwise returns a list of contact forces"""
+    or otherwise returns a list of contact forces.
+    """
     return robotsim.comEquilibrium(_flatten(contactOrHoldList),fext,com)
 
 def supportPolygon(contactOrHoldList):
@@ -150,22 +175,35 @@ def supportPolygon(contactOrHoldList):
     return robotsim.supportPolygon(_flatten(contactOrHoldList))
 
 def equilibriumTorques(robot,holdList,fext=(0,0,-9.8),internalTorques=None,norm=0):
-    """ Solves for the torques / forces that keep the robot balanced against gravity.
+    """ Solves for the torques / forces that keep the robot balanced against
+    gravity.
+
+    Specifically, solves for :math:`(\\tau,f)` in the equation:
+
+    .. math::
+
+        G(q;fext) + \\tau_{int} = \\tau + \\sum_i J_i(q)^T f_i
  
+    where :math:`G(q;fext)` is the generalized gravity, :math:`\\tau_{int}` are
+    the internal torques, and :math:`J_i(q)` is the Jacobian of the i'th
+    contact point.  All forces are required to be in their friction cones.
+
     Args:
         robot (RobotModel): the robot, posed in its current configuration
         holdList (list of Hold): a list of Holds.
         fext (list of 3 floats, optional): the external force (e.g., gravity)
-        internalTorques (list, optional): if given, a list of length robot.numDofs giving internal
-            torques. For example, using this can incorporate dynamics into the solver.
-        norm (float, optional): the torque norm to minimize.  If 0, minimizes the l-infinity norm
-            (default).  If 1, minimizes the l-1 norm.  If 2, minimizes the l-2 norm (experimental,
-            may not get good results)
+        internalTorques (list, optional): if given, a list of length
+            ``robot.numDofs`` giving internal torques. For example, setting
+            this to ``robot.accelToTorques(ddq)`` can incorporate dynamics
+            into the solver.
+        norm (float, optional): the torque norm to minimize.  If 0, minimizes
+            the l-infinity norm (default).  If 1, minimizes the l-1 norm.  If
+            2, minimizes the l-2 norm (experimental, may not get good results)
 
     Returns:
-        tuple or None: A pair (t,f) giving the joint torques and a list of frictional
-        contact forces, if a solution exists. The return value may be None
-        if no solution exists.
+        tuple or None: A pair (t,f) giving the joint torques and a list of
+        frictional contact forces, if a solution exists. The return value may
+        be None if no solution exists.
     """
     links = sum([[h.link]*len(h.contacts) for h in holdList],[])
     if internalTorques is None:
@@ -174,7 +212,7 @@ def equilibriumTorques(robot,holdList,fext=(0,0,-9.8),internalTorques=None,norm=
         res = robotsim.equilibriumTorques(robot,_flatten(holdList),links,fext,internalTorques,norm)
     if res is None: return res
     f = res[1]
-    return (res[0],[f[i*3:i*3+3] for i in xrange(len(f)/3)])
+    return (res[0],[f[i*3:i*3+3] for i in range(len(f)//3)])
 
 def contactMap(contacts,fixed=None):
     """Given an unordered list of ContactPoints, computes a canonical dict
@@ -186,6 +224,7 @@ def contactMap(contacts,fixed=None):
     set to None.  The most common example, which fixes terrains, is::
     
        lambda x: x is None or isinstance(x,TerrainModel)
+
     """
     worlds = set()
     robots = set()
@@ -235,9 +274,9 @@ def contactMap(contacts,fixed=None):
     return paircontacts
 
 def geometryContacts(geom1,geom2,padding1,padding2=0,maxcontacts=0,kFriction=1):
-    """Similar to geom1.contacts(geom2,padding1,padding2,maxcontacts), but 
-    returns a list of ContactPoints, where the point (x) of each contact is 
-    placed in the middle of the overlap region.
+    """Similar to ``geom1.contacts(geom2,padding1,padding2,maxcontacts)``, but
+    returns a list of :class:`ContactPoint`, where the point (x) of each 
+    contact is placed in the center of the overlap region.
 
     The friction coefficient of each contact (kFriction) is set to kFriction.
 
@@ -283,7 +322,7 @@ def worldContactMap(world,padding,kFriction=1,collider=None):
         fpadding = lambda obj:padding
     if not callable(kFriction):
         ffriction = lambda obj1,obj2:kFriction
-    from collide import WorldCollider
+    from .collide import WorldCollider
     if collider is None:
         collider = WorldCollider(world)
     cmap = dict()
@@ -301,13 +340,13 @@ def worldContactMap(world,padding,kFriction=1,collider=None):
     return cmap
 
 def simContactMap(sim):
-    """Given a Simulation, returns a contact map representing all
+    """Given a :class:`Simulation`, returns a contact map representing all
     current contacts (among bodies with collision feedback enabled).
     """
     cmap = dict()
     w = sim.world
-    for a in xrange(w.numIDs()):
-        for b in xrange(a):
+    for a in range(w.numIDs()):
+        for b in range(a):
             c = sim.getContacts(a,b)
             if len(c) > 0:
                 for ci in c:
@@ -323,12 +362,13 @@ def contactMapIKObjectives(contactmap):
     """Given a contact map, computes a set of non-conflicting
     IKObjective's or GeneralizedIKObjective's that enforce all simultaneous
     contact constraints.  Usually called in conjunction with contactMap
-    with the following sequence:
+    with the following sequence::
 
-    objectives = contactMapIKObjectives(contactMap(contacts,lambda x:x==None or isinstance(x,TerrainModel)))
+        objectives = contactMapIKObjectives(contactMap(contacts,lambda x:x==None or isinstance(x,TerrainModel)))
+
     """
     objectives = []
-    for ((o1,o2),clist) in contactmap.iteritems():
+    for ((o1,o2),clist) in contactmap.items():
         assert o1 != None
         
         x1loc = [o1.getLocalPosition(c.x) for c in clist]
@@ -343,12 +383,13 @@ def contactMapIKObjectives(contactmap):
 def contactMapHolds(contactmap):
     """Given a contact map, computes a set of non-conflicting
     Holds that enforce all simultaneous contact constraints.  Usually called in conjunction with contactMap
-    with the following sequence:
+    with the following sequence::
 
-    objectives = contactMapHolds(contactMap(contacts,lambda x:x==None or isinstance(x,TerrainModel)))
+        objectives = contactMapHolds(contactMap(contacts,lambda x:x==None or isinstance(x,TerrainModel)))
+        
     """
     holds = []
-    for ((o1,o2),clist) in contactmap.iteritems():
+    for ((o1,o2),clist) in contactmap.items():
         assert o1 != None
         
         if not isinstance(o1,RobotModelLink):
@@ -384,10 +425,10 @@ def skew(x):
     return xhat
 
 def invMassMatrix(obj):
-    """Returns the inverse of obj's generalized mass matrix
+    """Returns the inverse of obj's generalized mass matrix::
 
-      [H 0 ]-1
-      [0 mI]
+        [H 0 ]-1
+        [0 mI]
 
     about the origin."""
     try:

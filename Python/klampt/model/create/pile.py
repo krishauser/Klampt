@@ -15,7 +15,7 @@ def _get_bound(objects):
         bbs = [bound(o) for o in objects]
         if len(bbs) == 1:
             return bbs[0]
-        print bbs
+        print(bbs)
         return bb_union(*bbs)
     else:
         return objects.geometry().getBBTight()
@@ -58,16 +58,16 @@ def xy_jiggle(world,objects,fixed_objects,bmin,bmax,iters,randomize=True,
             #conflict free
             return
         if verbose: 
-            print cmax,"conflicts with object",objects[amax].getName()
+            print(cmax,"conflicts with object",objects[amax].getName())
         other_geoms = [o.geometry() for o in objects[:amax]+objects[amax+1:]+fixed_objects]
-        for it in xrange(inner_iters):
+        for it in range(inner_iters):
             xy_randomize(objects[amax],bmin,bmax)
             nc = sum([1 for p in collide.group_collision_iter([objects[amax].geometry()],other_geoms)])
             if nc < cmax:
                 break
             iters-=1
         if verbose: 
-            print "Now",nc,"conflicts with object",objects[amax].getName()
+            print("Now",nc,"conflicts with object",objects[amax].getName())
 
     numConflicts = [0]*len(objects)
     for (i,j) in collide.self_collision_iter([o.geometry() for o in objects]):
@@ -80,7 +80,7 @@ def xy_jiggle(world,objects,fixed_objects,bmin,bmax,iters,randomize=True,
         amax = max((c,i) for (i,c) in enumerate(numConflicts))[1]
         cmax = numConflicts[amax]
         if verbose: 
-            print "Unable to find conflict-free configuration for object",objects[amax].getName(),"with",cmax,"conflicts"
+            print("Unable to find conflict-free configuration for object",objects[amax].getName(),"with",cmax,"conflicts")
         removed.append(amax)
 
         #revise # of conflicts -- this could be faster, but whatever...
@@ -204,17 +204,17 @@ def make_object_pile(world,container,objects,container_wall_thickness=0.01,rando
         sim.body(object).setTransform(*Tfar)
         sim.body(object).enable(False)
     if verbose: 
-        print "Spawn area",spawn_area
+        print("Spawn area",spawn_area)
     if visualize:
         vis.lock()
         config.setConfig(visworld,config.getConfig(world))
         vis.unlock()
-    for index in xrange(len(objects)):
+    for index in range(len(objects)):
         #always spawn above the current height of the pile 
         if index > 0:
             objects_bound = _get_bound(objects[:index])
             if verbose: 
-                print "Existing objects bound:",objects_bound
+                print("Existing objects bound:",objects_bound)
             zshift = max(0.0,objects_bound[1][2] - spawn_area[0][2])
             spawn_area[0][2] += zshift
             spawn_area[1][2] += zshift
@@ -223,7 +223,7 @@ def make_object_pile(world,container,objects,container_wall_thickness=0.01,rando
         zmin = obb[0][2]
         R0,t0 = object.getTransform()
         feasible = False
-        for sample in xrange(1000):
+        for sample in range(1000):
             R,t = R0[:],t0[:]
             if randomize_orientation == True:
                 R = so3.sample()
@@ -231,7 +231,7 @@ def make_object_pile(world,container,objects,container_wall_thickness=0.01,rando
             object.setTransform(R,t)
             xy_randomize(object,spawn_area[0],spawn_area[1])
             if verbose: 
-                print "Sampled position of",object.getName(),object.getTransform()[1]
+                print("Sampled position of",object.getName(),object.getTransform()[1])
             if not randomize_orientation:
                 _,t = object.getTransform()
                 object.setTransform(R,t)
@@ -245,12 +245,12 @@ def make_object_pile(world,container,objects,container_wall_thickness=0.01,rando
                 feasible = True
                 #get it low as possible without overlapping
                 R,t = object.getTransform()
-                for lower in xrange(100):
+                for lower in range(100):
                     sobject.setTransform(R,vectorops.add(t,[0,0,-(lower+1)*0.01]))
                     res = sim.checkObjectOverlap()
                     if len(res[0]) != 0:
                         if verbose: 
-                            print "Terminated lowering at",lower,"cm lower"
+                            print("Terminated lowering at",lower,"cm lower")
                         sobject.setTransform(R,vectorops.add(t,[0,0,-lower*0.01]))
                         res = sim.checkObjectOverlap()
                         break
@@ -258,7 +258,7 @@ def make_object_pile(world,container,objects,container_wall_thickness=0.01,rando
                 break
         if not feasible:
             if verbose: 
-                print "Failed to place object",object.getName()
+                print("Failed to place object",object.getName())
             return None
         if visualize:
             vis.lock()
@@ -267,9 +267,9 @@ def make_object_pile(world,container,objects,container_wall_thickness=0.01,rando
             time.sleep(0.1)
     
     if verbose: 
-        print "Beginning to simulate"
+        print("Beginning to simulate")
     #start letting everything  fall
-    for firstfall in xrange(10):
+    for firstfall in range(10):
         sim.simulate(0.01)
         if visualize:
             vis.lock()

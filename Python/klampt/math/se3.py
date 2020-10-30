@@ -21,8 +21,8 @@ compatible with  other Klamp't IO routines, use ``klampt.io.loader.writeSe3()``
 and ``klampt.io.loader.readSe3()``.
 """
 
-import vectorops
-import so3
+from . import vectorops
+from . import so3
 
 def identity():
     """Returns the identity transformation."""
@@ -53,7 +53,7 @@ def rotation(T):
 
 def from_rotation(mat):
     """Returns a transformation T corresponding to the 3x3 rotation matrix mat"""
-    R = so3.from_matrix(mat)
+    R = so3.from_matrix(R)
     return (R,[0.,0.,0.])
 
 def translation(T):

@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 import sys
 from collections import defaultdict
 
@@ -197,7 +197,7 @@ def print_signature(siglist,indent0,docstring):
             print()
             #output the Args: section
             print(indent0+'Args:')
-            alist = [(n,o) for (n,o) in aorders.iteritems()]
+            alist = [(n,o) for (n,o) in aorders.items()]
             alist = sorted(alist,key=lambda item:item[1])
             for (arg,i) in alist:
                 typestr = ''

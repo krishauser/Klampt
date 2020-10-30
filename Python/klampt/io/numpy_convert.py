@@ -1,3 +1,7 @@
+"""Conversions to and from Numpy objects; makes numerical computations much
+more convenient.
+"""
+
 import numpy as np
 from klampt.math import so3,se3
 from ..model import types
@@ -16,10 +20,10 @@ def to_numpy(obj,type='auto'):
     * Matrix3, Rotation: returned as 3x3 matrix. Can't be determined
       with 'auto', need to specify type='Matrix3' or 'Rotation'.
     * Configs
-    * Trajectory
-    * TriangleMesh
-    * PointCloud
-    * VolumeGrid
+    * Trajectory: returns a pair (times,milestones)
+    * TriangleMesh: returns a pair (verts,indices)
+    * PointCloud: returns a n x (3+k) array, where k is the # of properties
+    * VolumeGrid: returns a triple (bmin,bmax,array)
     * Geometry3D: returns a pair (T,geomdata)
 
     If you want to get a transformed point cloud or mesh, you can pass in a
@@ -93,15 +97,14 @@ def from_numpy(obj,type='auto',template=None):
     Supports:
 
     * lists and tuples
-    * RigidTransform: returned as 4x4 homogeneous coordinate transform
-    * Matrix3, Rotation: returned as 3x3 matrix. Can't be determined
-      with 'auto', need to specify type='Matrix3' or 'Rotation'.
+    * RigidTransform: accepts a 4x4 homogeneous coordinate transform
+    * Matrix3, Rotation: accepts a 3x3 matrix.
     * Configs
-    * Trajectory
-    * TriangleMesh
-    * PointCloud
-    * VolumeGrid
-    * Geometry3D
+    * Trajectory: accepts a pair (times,milestones)
+    * TriangleMesh: accepts a pair (verts,indices)
+    * PointCloud: accepts a n x (3+k) array, where k is the # of properties
+    * VolumeGrid: accepts a triple (bmin,bmax,array)
+    * Geometry3D: accepts a pair (T,geomdata)
     """
     global supportedTypes 
     if type == 'auto' and template is not None:
@@ -160,10 +163,13 @@ def from_numpy(obj,type='auto',template=None):
     elif type == 'TriangleMesh':
         from klampt import TriangleMesh
         res = TriangleMesh()
-        for v in obj[0].flatten():
-            res.vertices.append(v)
-        for i in obj[1].flatten():
-            res.indices.append(int(i))
+        vflat = obj[0].flatten()
+        res.vertices.resize(len(vflat))
+        for i,v in enumerate(vflat):
+            res.vertices[i] = v
+        iflat = obj[1].flatten()
+        for i,v in enumerate(iflat):
+            res.indices[i] = v
         return res
     elif type == 'PointCloud':
         from klampt import PointCloud
@@ -201,8 +207,10 @@ def from_numpy(obj,type='auto',template=None):
         res.dims.append(values.shape[0])
         res.dims.append(values.shape[1])
         res.dims.append(values.shape[2])
-        for v in values.flatten():
-            res.values.append(v)
+        vflat = values.flatten()
+        res.values.resize(len(vflat))
+        for i,v in vflat:
+            res.values[i] = v
         return res
     elif type == 'Group':
         from klampt import Geometry3D

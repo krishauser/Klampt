@@ -245,16 +245,28 @@ void RobotLinkPoseWidget::Drag(int dx,int dy,Camera::Viewport& viewport)
   Refresh();
 }
 
+void RobotLinkPoseWidget::InitDefaultAppearance()
+{
+  poserAppearance.resize(robot->links.size());
+  for(size_t i=0;i<poserAppearance.size();i++) { 
+    poserAppearance[i] = viewRobot->Appearance(i);
+  }
+}
+
 void RobotLinkPoseWidget::DrawGL(Camera::Viewport& viewport) 
 {
   if(!draw) return;
   robot->UpdateConfig(poseConfig);
   viewRobot->PushAppearance();
-  for(size_t i=0;i<poserAppearance.size();i++)
-    viewRobot->Appearance(i) = poserAppearance[i];
+  for(size_t i=0;i<poserAppearance.size();i++) { 
+    auto& app = viewRobot->Appearance(i);
+    app.CopyMaterial(poserAppearance[i]);
+  }
   if(hasHighlight || hasFocus) {
-    for(size_t i=0;i<highlightedLinks.size();i++)
+    for(size_t i=0;i<highlightedLinks.size();i++) {
       viewRobot->Appearance(highlightedLinks[i]).ModulateColor(highlightColor,0.5);
+      const auto& app = viewRobot->Appearance(highlightedLinks[i]);
+    }
   }
   if(!activeDofs.empty()) {
     GLColor black(0,0,0,0);
@@ -262,7 +274,7 @@ void RobotLinkPoseWidget::DrawGL(Camera::Viewport& viewport)
     for(size_t i=0;i<activeDofs.size();i++)
       active[activeDofs[i]] = true;
     for(size_t i=0;i<robot->links.size();i++)
-      if(!active[i])
+      if(!active[i]) 
         viewRobot->Appearance(i).ModulateColor(black,0.5);
   }
   viewRobot->Draw();
@@ -984,8 +996,8 @@ bool RobotPoseWidget::SolveIKFixedBase(int iters,Real tol)
   bool res = (RobustSolveIK(*robot,f,iters,tol,5) == 0);
 
   linkPoser.poseConfig = robot->q;
-  if(useBase)
-    basePoser.T = GetFloatingBase(*robot);
+  //if(useBase)
+  //  basePoser.T = GetFloatingBase(*robot);
   Refresh();
   return res;
 }

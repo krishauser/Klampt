@@ -86,8 +86,8 @@ geometries.  Each data type is represented by one of the data classes,
 
 -  ``geom=Geometry3D()``: creates a new standalone geometry, not
    associated with any world object.
--  ``geom=Geometry3D()``: creates a new standalone geometry from a geometry
-   data type.
+-  ``geom=Geometry3D(data)``: creates a new standalone geometry from a geometry
+   data class.
 -  ``geom=[RobotModelLink/RigidObjectModel/TerrainModel].geometry()``:
    retrieves a reference to the object's geometry.
 -  ``geom.clone()``: duplicates the geometry.
@@ -106,13 +106,13 @@ geometries.  Each data type is represented by one of the data classes,
 **Extraction of data**:
 
 -  ``geom.type()``: returns a string giving the type of the object.
--  ``geom.getTriangleMesh()``: returns the :class:`TriangleMesh` data of the
+-  ``geom.getTriangleMesh()``: returns the :class:`~klampt.TriangleMesh` data of the
    geometry if the type is ``'TriangleMesh'``
--  ``geom.getPointCloud()``: returns the :class:`PointCloud` data of the
+-  ``geom.getPointCloud()``: returns the :class:`~klampt.PointCloud` data of the
    geometry if the type is ``'PointCloud'``
--  ``geom.getGeometricPrimitive()``: returns the :class:`GeometricPrimitive` data of the
+-  ``geom.getGeometricPrimitive()``: returns the :class:`~klampt.GeometricPrimitive` data of the
    geometry if the type is ``'GeometricPrimitive'``
--  ``geom.getVolumeGrid()``: returns the :class:`VolumeGrid` data of the
+-  ``geom.getVolumeGrid()``: returns the :class:`~klampt.VolumeGrid` data of the
    geometry if the type is ``'VolumeGrid'``
 -  ``geom.numElements()``: returns the number of elements.
 -  ``geom.getElement(id)``: returns a sub-object of a Group, TriangleMesh, or
@@ -143,8 +143,7 @@ The :class:`~klampt.Geometry3D` class allows collision testing between
 geometries. All the standard Klamp't geometry types (geometric
 primitives, triangle meshes, point clouds) are supported.
 
-For convenience, the
-`klampt.model.collide <klampt.model.collide.html>`__
+For convenience, the :mod:`klampt.model.collide`
 module provides utility functions for checking collision with sets of
 objects, as well as a :class:`~klampt.model.collide.WorldCollider` class that by checks collision
 between any set of objects and any other set of objects. These methods

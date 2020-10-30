@@ -6,8 +6,8 @@ the place of RobotModel.
 """
 
 from ..robotsim import *
-from collide import self_collision_iter
-from trajectory import Trajectory,HermiteTrajectory
+from .collide import self_collision_iter
+from .trajectory import Trajectory,HermiteTrajectory
 
 class SubRobotModel:
     """A helper that lets you conveniently set/get quantities for a subset
@@ -34,8 +34,8 @@ class SubRobotModel:
         self.index = robot.index
         self.world = robot.world
         if isinstance(robot,SubRobotModel):
-            print "Warning, taking sub-robot of sub-robot... not tested yet"
-            raw_input("Press enter to continue...")         
+            print("Warning, taking sub-robot of sub-robot... not tested yet")
+            input("Press enter to continue...")         
         for i,l in enumerate(self._links):
             if isinstance(l,str):
                 self._links[i] = robot.link(l).getIndex()

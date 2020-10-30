@@ -13,8 +13,10 @@ typedef _object PyObject;
  * robot can take on a fixed position/orientation in the world frame, or
  * a relative position/orientation to another frame.
  *
- * Currently only fixed-point constraints and fixed-transform constraints are
- * implemented in the Python API.
+ * The positionScale and orientationScale attributes scale the solver's
+ * residual vector.  This affects whether the convergence tolerance is met,
+ * and also controls the emphasis on each objective / component when the
+ * objective cannot be reached.  By default these are both 1.
  */
 class IKObjective
 {
@@ -51,8 +53,10 @@ class IKObjective
   void setRelativeTransform(int link,int linkTgt,const double R[9],const double t[3]);
   ///Manual construction
   void setLinks(int link,int link2=-1);
-  ///Manual: Sets a free position constraint
+  ///Deprecated: use setFreePosConstraint
   void setFreePosition();
+  ///Manual: Sets a free position constraint
+  void setFreePosConstraint();
   ///Manual: Sets a fixed position constraint
   void setFixedPosConstraint(const double tlocal[3],const double tworld[3]);
   ///Manual: Sets a planar position constraint
@@ -90,14 +94,15 @@ class IKObjective
 
   ///Loads the objective from a Klamp't-native formatted string. For a
   ///more readable but verbose format, try the JSON IO routines
-  ///loader.toJson/fromJson()
+  ///:meth:`klampt.io.loader.toJson` / :meth:`klampt.io.loader.fromJson`
   bool loadString(const char* str);
   ///Saves the objective to a Klamp't-native formatted string.  For a
   ///more readable but verbose format, try the JSON IO routines
-  ///loader.toJson/fromJson()
+  ///:meth:`klampt.io.loader.toJson` / :meth:`klampt.io.loader.fromJson`
   std::string saveString() const;
 
   IKGoal goal;
+  float positionScale,rotationScale;
 };
 
 /**
@@ -112,11 +117,11 @@ class IKObjective
  *     s.setTolerance(1e-4)
  *     res = s.solve()
  *     if res:
- *         print ("IK solution:",robot.getConfig(),"found in",
- *             s.lastSolveIters(),"iterations, residual",s.getResidual()
+ *         print("IK solution:",robot.getConfig(),"found in",
+ *             s.lastSolveIters(),"iterations, residual",s.getResidual())
  *     else:
- *         print "IK failed:",robot.getConfig(),"found in",
- *             s.lastSolveIters(),"iterations, residual",s.getResidual()
+ *         print("IK failed:",robot.getConfig(),"found in",
+ *             s.lastSolveIters(),"iterations, residual",s.getResidual())
  *
  */
 class IKSolver

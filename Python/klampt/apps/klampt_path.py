@@ -21,9 +21,9 @@ class GeneralizedPath:
             self.type = 'Configs'
             self.data = Trajectory()
             self.data.configs = loader.load('Configs',fn)
-            self.data.times = range(len(self.data.configs))
+            self.data.times = list(range(len(self.data.configs)))
         else:
-            print "Unknown extension on file",fn,", loading as Trajectory"
+            print("Unknown extension on file",fn,", loading as Trajectory")
             self.type = 'Trajectory'
             self.data = Trajectory()
             self.data.load(fn)
@@ -58,7 +58,7 @@ class GeneralizedPath:
             scale = -scale
             if self.type == 'MultiPath':
                 if not self.data.hasTiming():
-                    print "MultiPath timescale(): Path does not have timing"
+                    print("MultiPath timescale(): Path does not have timing")
                     return
                 et = self.data.endTime()
                 for s in self.data.sections:
@@ -79,7 +79,7 @@ class GeneralizedPath:
         else:
             if self.type == 'MultiPath':
                 if not self.hasTiming():
-                    print "MultiPath timescale(): Path does not have timing"
+                    print("MultiPath timescale(): Path does not have timing")
                     return
                 for s in self.data.sections:
                     s.times = [ofs+scale*t for t in s.times]
@@ -117,7 +117,7 @@ class GeneralizedPath:
                         times += s.times[1:]
                     milestones += s.configs[1:]
             if len(times)==0:
-                times = range(len(milestones))
+                times = list(range(len(milestones)))
             else:
                 assert len(times)==len(milestones)
             self.data = Trajectory(times,milestones)
@@ -129,7 +129,7 @@ class GeneralizedPath:
             return
         else:
             self.toTrajectory()
-            self.data.times = range(len(milestones))
+            self.data.times = list(range(len(milestones)))
             self.type = 'Configs'
     def concat(self,other):
         """Warning: destructive"""
@@ -143,7 +143,7 @@ class GeneralizedPath:
             self.data.concat(other.data,relative=True)
     def discretize(self,dt):
         if self.type == 'MultiPath':
-            print "Warning, MultiPath discretize is not supported yet"
+            print("Warning, MultiPath discretize is not supported yet")
         else:
             self.data = self.data.discretize(dt)
 
@@ -192,33 +192,33 @@ def main():
     for p,arg in zip(paths,args):
         p.load(arg)
         if not options.start and not options.goal and not options.duration:
-            print "Loaded",p
+            print("Loaded",p)
 
     scale = (float(options.timescale) if options.timescale else 1)
     ofs = (float(options.timeshift) if options.timeshift else 0)
     if options.reverse:
         if scale != 1 or ofs != 0:
-            print "Cannot specify both --reverse and --timescale or --timeshift options"
+            print("Cannot specify both --reverse and --timescale or --timeshift options")
             exit(1)
         scale = -1
     if scale != 1 or ofs != 0:
         for p in paths:
             p.timescale(scale,ofs)
         if not options.output:
-            print "Warning: time scaled path not saved, --output needs to be specified"
+            print("Warning: time scaled path not saved, --output needs to be specified")
     if options.concat:
         for i in range(1,len(paths)):
             if paths[i-1].end() != paths[i].start():
-                print "Warning, path "+str(i)+" has incorrect start config"
-                print paths[i-1].end()
-                print paths[i].start()
+                print("Warning, path "+str(i)+" has incorrect start config")
+                print(paths[i-1].end())
+                print(paths[i].start())
             paths[0].concat(paths[i])
         if not options.output:
-            print "Warning: concatenated path not saved, --output needs to be specified"
+            print("Warning: concatenated path not saved, --output needs to be specified")
     if options.discretize:
         paths[0].discretize(float(options.discretize))
         if not options.output:
-            print "Warning: discretized path not saved, --output needs to be specified"
+            print("Warning: discretized path not saved, --output needs to be specified")
     if options.convert:
         if options.convert.lower() == 'trajectory':
             paths[0].toTrajectory()
@@ -230,18 +230,18 @@ def main():
             parser.error("Invalid convert argument, must be Configs, Trajectory, or Multipath")
             exit(1)
     if options.output:
-        print "Saving to",options.output
+        print("Saving to",options.output)
         if paths[0].type == 'MultiPath':
             paths[0].data.settings['program']=' '.join(sys.argv)
         paths[0].save(options.output)
     else:
         for p in paths:
             if options.start:
-                print loader.writeVector(p.start())
+                print(loader.writeVector(p.start()))
             if options.goal:
-                print loader.writeVector(p.end())
+                print(loader.writeVector(p.end()))
             if options.duration:
-                print p.duration()
+                print(p.duration())
 
 
 if __name__ == '__main__':

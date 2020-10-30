@@ -826,6 +826,121 @@ class doubleMatrix(_object):
 doubleMatrix_swigregister = _robotsim.doubleMatrix_swigregister
 doubleMatrix_swigregister(doubleMatrix)
 
+class stringMap(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, stringMap, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, stringMap, name)
+    __repr__ = _swig_repr
+
+    def iterator(self):
+        return _robotsim.stringMap_iterator(self)
+    def __iter__(self):
+        return self.iterator()
+
+    def __nonzero__(self):
+        return _robotsim.stringMap___nonzero__(self)
+
+    def __bool__(self):
+        return _robotsim.stringMap___bool__(self)
+
+    def __len__(self):
+        return _robotsim.stringMap___len__(self)
+    def __iter__(self):
+        return self.key_iterator()
+    def iterkeys(self):
+        return self.key_iterator()
+    def itervalues(self):
+        return self.value_iterator()
+    def iteritems(self):
+        return self.iterator()
+
+    def __getitem__(self, key):
+        return _robotsim.stringMap___getitem__(self, key)
+
+    def __delitem__(self, key):
+        return _robotsim.stringMap___delitem__(self, key)
+
+    def has_key(self, key):
+        return _robotsim.stringMap_has_key(self, key)
+
+    def keys(self):
+        return _robotsim.stringMap_keys(self)
+
+    def values(self):
+        return _robotsim.stringMap_values(self)
+
+    def items(self):
+        return _robotsim.stringMap_items(self)
+
+    def __contains__(self, key):
+        return _robotsim.stringMap___contains__(self, key)
+
+    def key_iterator(self):
+        return _robotsim.stringMap_key_iterator(self)
+
+    def value_iterator(self):
+        return _robotsim.stringMap_value_iterator(self)
+
+    def __setitem__(self, *args):
+        return _robotsim.stringMap___setitem__(self, *args)
+
+    def asdict(self):
+        return _robotsim.stringMap_asdict(self)
+
+    def __init__(self, *args):
+        this = _robotsim.new_stringMap(*args)
+        try:
+            self.this.append(this)
+        except Exception:
+            self.this = this
+
+    def empty(self):
+        return _robotsim.stringMap_empty(self)
+
+    def size(self):
+        return _robotsim.stringMap_size(self)
+
+    def swap(self, v):
+        return _robotsim.stringMap_swap(self, v)
+
+    def begin(self):
+        return _robotsim.stringMap_begin(self)
+
+    def end(self):
+        return _robotsim.stringMap_end(self)
+
+    def rbegin(self):
+        return _robotsim.stringMap_rbegin(self)
+
+    def rend(self):
+        return _robotsim.stringMap_rend(self)
+
+    def clear(self):
+        return _robotsim.stringMap_clear(self)
+
+    def get_allocator(self):
+        return _robotsim.stringMap_get_allocator(self)
+
+    def count(self, x):
+        return _robotsim.stringMap_count(self, x)
+
+    def erase(self, *args):
+        return _robotsim.stringMap_erase(self, *args)
+
+    def find(self, x):
+        return _robotsim.stringMap_find(self, x)
+
+    def lower_bound(self, x):
+        return _robotsim.stringMap_lower_bound(self, x)
+
+    def upper_bound(self, x):
+        return _robotsim.stringMap_upper_bound(self, x)
+    __swig_destroy__ = _robotsim.delete_stringMap
+    __del__ = lambda self: None
+stringMap_swigregister = _robotsim.stringMap_swigregister
+stringMap_swigregister(stringMap)
+
 class TriangleMesh(_object):
     """
 
@@ -851,19 +966,19 @@ class TriangleMesh(_object):
         m.vertices.append(0)
         m.vertices.append(0)
         m.vertices.append(0)
-        print len(m.vertices)  #prints 3
+        print(len(m.vertices))  #prints 3
         m.vertices = [0,0,0]   #this is an error
         m.vertices += [1,2,3]   #this is also an error  
 
-    To get all vertices as a numpy array:  
+    To get all vertices as a numpy array::  
 
         verts = np.array(m.vertices).reshape((len(m.vertices)//3,3))  
 
-    To get all indices as a numpy array:  
+    To get all indices as a numpy array::  
 
         inds = np.array(m.indices,dtype=np.int32).reshape((len(m.indices)//3,3))  
 
-    (Or use the convenience functions in klampt.io.numpy)  
+    (Or use the convenience functions in :mod:`klampt.io.numpy_convert`)  
 
     C++ includes: geometry.h
 
@@ -874,6 +989,19 @@ class TriangleMesh(_object):
     __swig_getmethods__ = {}
     __getattr__ = lambda self, name: _swig_getattr(self, TriangleMesh, name)
     __repr__ = _swig_repr
+
+    def __init__(self):
+        """
+        __init__(TriangleMesh self) -> TriangleMesh
+
+
+
+        """
+        this = _robotsim.new_TriangleMesh()
+        try:
+            self.this.append(this)
+        except Exception:
+            self.this = this
 
     def translate(self, t):
         """
@@ -907,59 +1035,125 @@ class TriangleMesh(_object):
     if _newclass:
         vertices = _swig_property(_robotsim.TriangleMesh_vertices_get, _robotsim.TriangleMesh_vertices_set)
 
-    def __init__(self):
-        """
-        __init__(TriangleMesh self) -> TriangleMesh
+    def __reduce__(self):
+        from klampt.io import loader
+        jsonobj = loader.toJson(self,'TriangleMesh')
+        return (loader.fromJson,(jsonobj,'TriangleMesh'))
 
-
-
-        A 3D indexed triangle mesh class.  
-
-        Attributes:  
-
-            vertices (SWIG vector of floats):  a list of vertices, given as
-                a flattened coordinate list [x1, y1, z1, x2, y2, ...]
-            indices (SWIG vector of ints): a list of triangle vertices given
-                as indices into the vertices list, i.e., [a1,b1,c2, a2,b2,c2, ...]  
-
-        Note: because the bindings are generated by SWIG, you can access the indices /
-        vertices members via some automatically generated accessors / modifiers. In
-        particular len(), append(), and indexing via [] are useful. Some other methods
-        like resize() are also provided. However, you CANNOT set these items via
-        assignment.  
-
-        Examples::  
-
-            m = TriangleMesh()
-            m.vertices.append(0)
-            m.vertices.append(0)
-            m.vertices.append(0)
-            print len(m.vertices)  #prints 3
-            m.vertices = [0,0,0]   #this is an error
-            m.vertices += [1,2,3]   #this is also an error  
-
-        To get all vertices as a numpy array:  
-
-            verts = np.array(m.vertices).reshape((len(m.vertices)//3,3))  
-
-        To get all indices as a numpy array:  
-
-            inds = np.array(m.indices,dtype=np.int32).reshape((len(m.indices)//3,3))  
-
-        (Or use the convenience functions in klampt.io.numpy)  
-
-        C++ includes: geometry.h
-
-        """
-        this = _robotsim.new_TriangleMesh()
-        try:
-            self.this.append(this)
-        except Exception:
-            self.this = this
     __swig_destroy__ = _robotsim.delete_TriangleMesh
     __del__ = lambda self: None
 TriangleMesh_swigregister = _robotsim.TriangleMesh_swigregister
 TriangleMesh_swigregister(TriangleMesh)
+
+class ConvexHull(_object):
+    """
+
+
+    Stores a set of points to be set into a ConvexHull type. Note: These may not
+    actually be the vertices of the convex hull; the actual convex hull may be
+    computed internally for some datatypes.  
+
+    Attributes:  
+
+        points (SWIG vector of floats): a list of points, given  as a flattened
+            coordinate list [x1,y1,z1,x2,y2,...]  
+
+    C++ includes: geometry.h
+
+    """
+
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, ConvexHull, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, ConvexHull, name)
+    __repr__ = _swig_repr
+
+    def __init__(self):
+        """
+        __init__(ConvexHull self) -> ConvexHull
+
+
+
+        """
+        this = _robotsim.new_ConvexHull()
+        try:
+            self.this.append(this)
+        except Exception:
+            self.this = this
+
+    def numPoints(self):
+        """
+        numPoints(ConvexHull self) -> int
+
+
+
+        Returns the # of points.  
+
+        """
+        return _robotsim.ConvexHull_numPoints(self)
+
+
+    def addPoint(self, pt):
+        """
+        addPoint(ConvexHull self, double const [3] pt)
+
+
+
+        Adds a point.  
+
+        """
+        return _robotsim.ConvexHull_addPoint(self, pt)
+
+
+    def getPoint(self, index):
+        """
+        getPoint(ConvexHull self, int index)
+
+
+
+        Retrieves a point.  
+
+        """
+        return _robotsim.ConvexHull_getPoint(self, index)
+
+
+    def translate(self, t):
+        """
+        translate(ConvexHull self, double const [3] t)
+
+
+
+        Translates all the vertices by v=v+t.  
+
+        """
+        return _robotsim.ConvexHull_translate(self, t)
+
+
+    def transform(self, R, t):
+        """
+        transform(ConvexHull self, double const [9] R, double const [3] t)
+
+
+
+        Transforms all the vertices by the rigid transform v=R*v+t.  
+
+        """
+        return _robotsim.ConvexHull_transform(self, R, t)
+
+    __swig_setmethods__["points"] = _robotsim.ConvexHull_points_set
+    __swig_getmethods__["points"] = _robotsim.ConvexHull_points_get
+    if _newclass:
+        points = _swig_property(_robotsim.ConvexHull_points_get, _robotsim.ConvexHull_points_set)
+
+    def __reduce__(self):
+        from klampt.io import loader
+        jsonobj = loader.toJson(self,'ConvexHull')
+        return (loader.fromJson,(jsonobj,'ConvexHull'))
+
+    __swig_destroy__ = _robotsim.delete_ConvexHull
+    __del__ = lambda self: None
+ConvexHull_swigregister = _robotsim.ConvexHull_swigregister
+ConvexHull_swigregister(ConvexHull)
 
 class PointCloud(_object):
     """
@@ -979,30 +1173,37 @@ class PointCloud(_object):
            property
         settings (SWIG map of strs to strs): a general property map .  
 
-    Note: because the bindings are generated by SWIG, you can access the
-    vertices/properties/propertyName members via some automatically generated
-    accessors / modifiers. In particular len(), append(), and indexing via [] are
-    useful. Some other methods like resize() are also provided. However, you CANNOT
-    set these items via assignment.  
+    .. note::  
 
-    Properties are usually lowercase but follow PCL naming convention, and often
+        Because the bindings are generated by SWIG, you can access the members
+        via some automatically generated accessors / modifiers.  In particular
+        len(), append(), and indexing via [] are useful. Some other methods like
+        resize() and iterators are also provided.  However, you CANNOT set these
+        items via assignment, i.e., ``pc.vertices = [0,0,0]`` is not allowed.  
+
+    Property names are usually lowercase but follow PCL naming convention, and often
     include:  
 
-    *   normal_x, normal_y, normal_z: the outward normal  
-    *   rgb, rgba: integer encoding of RGB (24 bit int) or RGBA color (32 bit int)  
-    *   opacity: opacity, in range [0,1]  
-    *   c: opacity, in range [0,255]  
-    *   r,g,b,a: color channels, in range [0,1]  
-    *   u,v: texture coordinate  
+    *   `normal_x`, `normal_y`, `normal_z`: the outward normal  
+    *   `rgb`, `rgba`: integer encoding of RGB (24 bit int) or RGBA color (32 bit
+        int)  
+    *   `opacity`: opacity, in range [0,1]  
+    *   `c`: opacity, in range [0,255]  
+    *   `r,g,b,a`: color channels, in range [0,1]  
+    *   `u,v`: texture coordinate  
+    *   `radius`: treats the point cloud as a collection of balls  
 
     Settings are usually lowercase but follow PCL naming convention, and often
     include:  
 
-    *   version: version of the PCL file, typically "0.7"  
-    *   id: integer id  
-    *   width: the width of a structured point cloud  
-    *   height: the height of a structured point cloud  
-    *   viewpoint: "ox oy oz qw qx qy qz"  
+    *   `version`: version of the PCL file, typically "0.7"  
+    *   `id`: integer id  
+    *   `width`: the width (in pixels) of a structured point cloud  
+    *   `height`: the height (in pixels) of a structured point cloud  
+    *   `viewpoint`: Camera position and orientation in the form `ox oy oz qw qx qy
+        qz`, with (ox,oy,oz) the focal point and (qw,qx,qy,qz) the quaternion
+        representation of the orientation (canonical representation, with X right, Y
+        down, Z forward).  
 
     Examples::  
 
@@ -1013,26 +1214,26 @@ class PointCloud(_object):
         pc.vertices.append(0)
         pc.vertices.append(0)
         pc.properties.append(0)
-        print len(pc.vertices)  #prints 3
-        print pc.numPoints()  #prints 1
+        print(len(pc.vertices))  #prints 3
+        print(pc.numPoints())  #prints 1
         #add another point with coordinates (1,2,3)
         pc.addPoint([1,2,3])
         #this prints 2
-        print pc.numPoints()
+        print(pc.numPoints() )
         #this prints 2, because there is 1 property category x 2 points
-        print len(pc.properties.size())
+        print(len(pc.properties.size()))
         #this prints 0; this is the default value added when addPoint is called
-        print pc.getProperty(1,0)  
+        print(pc.getProperty(1,0) )  
 
-    To get all points as an n x 3 numpy array:  
+    To get all points as an n x 3 numpy array::  
 
         points = np.array(pc.vertices).reshape((pc.numPoints(),3))  
 
-    To get all properties as a n x k numpy array:  
+    To get all properties as a n x k numpy array::  
 
     properties = np.array(pc.properties).reshape((p.numPoints(),p.numProperties()))  
 
-    (Or use the convenience functions in klampt.io.numpy)  
+    (Or use the convenience functions in :mod:`klampt.io.numpy_convert`)  
 
     C++ includes: geometry.h
 
@@ -1043,6 +1244,19 @@ class PointCloud(_object):
     __swig_getmethods__ = {}
     __getattr__ = lambda self, name: _swig_getattr(self, PointCloud, name)
     __repr__ = _swig_repr
+
+    def __init__(self):
+        """
+        __init__(PointCloud self) -> PointCloud
+
+
+
+        """
+        this = _robotsim.new_PointCloud()
+        try:
+            self.this.append(this)
+        except Exception:
+            self.this = this
 
     def numPoints(self):
         """
@@ -1169,6 +1383,19 @@ class PointCloud(_object):
         return _robotsim.PointCloud_getProperty(self, *args)
 
 
+    def getProperties(self, *args):
+        """
+        getProperties(PointCloud self, int pindex)
+        getProperties(PointCloud self, std::string const & pname)
+
+
+
+        Gets property named pindex of all points as an array.  
+
+        """
+        return _robotsim.PointCloud_getProperties(self, *args)
+
+
     def translate(self, t):
         """
         translate(PointCloud self, double const [3] t)
@@ -1246,89 +1473,11 @@ class PointCloud(_object):
     if _newclass:
         settings = _swig_property(_robotsim.PointCloud_settings_get, _robotsim.PointCloud_settings_set)
 
-    def __init__(self):
-        """
-        __init__(PointCloud self) -> PointCloud
+    def __reduce__(self):
+        from klampt.io import loader
+        jsonobj = loader.toJson(self,'PointCloud')
+        return (loader.fromJson,(jsonobj,'PointCloud'))
 
-
-
-        A 3D point cloud class.  
-
-        Attributes:  
-
-            vertices (SWIG vector of floats): a list of vertices, given as a
-                list [x1, y1, z1, x2, y2, ... zn]
-            properties (SWIG vector of floats): a list of vertex properties,
-               given as a list [p11, p21, ..., pk1,  p12, p22, ..., pk2, ...,
-               p1n, p2n, ..., pkn] where each vertex has k properties.  The
-               name of each property is given by the ``propertyNames`` member.
-            propertyNames (SWIG vector of strs): a list of the names of each
-               property
-            settings (SWIG map of strs to strs): a general property map .  
-
-        Note: because the bindings are generated by SWIG, you can access the
-        vertices/properties/propertyName members via some automatically generated
-        accessors / modifiers. In particular len(), append(), and indexing via [] are
-        useful. Some other methods like resize() are also provided. However, you CANNOT
-        set these items via assignment.  
-
-        Properties are usually lowercase but follow PCL naming convention, and often
-        include:  
-
-        *   normal_x, normal_y, normal_z: the outward normal  
-        *   rgb, rgba: integer encoding of RGB (24 bit int) or RGBA color (32 bit int)  
-        *   opacity: opacity, in range [0,1]  
-        *   c: opacity, in range [0,255]  
-        *   r,g,b,a: color channels, in range [0,1]  
-        *   u,v: texture coordinate  
-
-        Settings are usually lowercase but follow PCL naming convention, and often
-        include:  
-
-        *   version: version of the PCL file, typically "0.7"  
-        *   id: integer id  
-        *   width: the width of a structured point cloud  
-        *   height: the height of a structured point cloud  
-        *   viewpoint: "ox oy oz qw qx qy qz"  
-
-        Examples::  
-
-            pc = PointCloud()
-            pc.propertyNames.append('rgb')
-            #add 1 point with coordinates (0,0,0) and color #000000 (black)
-            pc.vertices.append(0)
-            pc.vertices.append(0)
-            pc.vertices.append(0)
-            pc.properties.append(0)
-            print len(pc.vertices)  #prints 3
-            print pc.numPoints()  #prints 1
-            #add another point with coordinates (1,2,3)
-            pc.addPoint([1,2,3])
-            #this prints 2
-            print pc.numPoints()
-            #this prints 2, because there is 1 property category x 2 points
-            print len(pc.properties.size())
-            #this prints 0; this is the default value added when addPoint is called
-            print pc.getProperty(1,0)  
-
-        To get all points as an n x 3 numpy array:  
-
-            points = np.array(pc.vertices).reshape((pc.numPoints(),3))  
-
-        To get all properties as a n x k numpy array:  
-
-        properties = np.array(pc.properties).reshape((p.numPoints(),p.numProperties()))  
-
-        (Or use the convenience functions in klampt.io.numpy)  
-
-        C++ includes: geometry.h
-
-        """
-        this = _robotsim.new_PointCloud()
-        try:
-            self.this.append(this)
-        except Exception:
-            self.this = this
     __swig_destroy__ = _robotsim.delete_PointCloud
     __del__ = lambda self: None
 PointCloud_swigregister = _robotsim.PointCloud_swigregister
@@ -1341,6 +1490,13 @@ class GeometricPrimitive(_object):
     A geometric primitive. So far only points, spheres, segments, and AABBs can be
     constructed manually in the Python API.  
 
+    Attributes:  
+
+    type (str): Can be "Point", "Sphere", "Segment", "Triangle",
+    "Polygon", "AABB", and "Box". Semi-supported types include "Ellipsoid",
+    and "Cylinder". properties (SWIG vector): a list of parameters defining the
+    primitive. The interpretation is type-specific.  
+
     C++ includes: geometry.h
 
     """
@@ -1350,6 +1506,19 @@ class GeometricPrimitive(_object):
     __swig_getmethods__ = {}
     __getattr__ = lambda self, name: _swig_getattr(self, GeometricPrimitive, name)
     __repr__ = _swig_repr
+
+    def __init__(self):
+        """
+        __init__(GeometricPrimitive self) -> GeometricPrimitive
+
+
+
+        """
+        this = _robotsim.new_GeometricPrimitive()
+        try:
+            self.this.append(this)
+        except Exception:
+            self.this = this
 
     def setPoint(self, pt):
         """
@@ -1381,6 +1550,26 @@ class GeometricPrimitive(_object):
         return _robotsim.GeometricPrimitive_setSegment(self, a, b)
 
 
+    def setTriangle(self, a, b, c):
+        """
+        setTriangle(GeometricPrimitive self, double const [3] a, double const [3] b, double const [3] c)
+
+
+
+        """
+        return _robotsim.GeometricPrimitive_setTriangle(self, a, b, c)
+
+
+    def setPolygon(self, verts):
+        """
+        setPolygon(GeometricPrimitive self, doubleVector verts)
+
+
+
+        """
+        return _robotsim.GeometricPrimitive_setPolygon(self, verts)
+
+
     def setAABB(self, bmin, bmax):
         """
         setAABB(GeometricPrimitive self, double const [3] bmin, double const [3] bmax)
@@ -1389,6 +1578,16 @@ class GeometricPrimitive(_object):
 
         """
         return _robotsim.GeometricPrimitive_setAABB(self, bmin, bmax)
+
+
+    def setBox(self, ori, R, dims):
+        """
+        setBox(GeometricPrimitive self, double const [3] ori, double const [9] R, double const [3] dims)
+
+
+
+        """
+        return _robotsim.GeometricPrimitive_setBox(self, ori, R, dims)
 
 
     def loadString(self, str):
@@ -1419,23 +1618,11 @@ class GeometricPrimitive(_object):
     if _newclass:
         properties = _swig_property(_robotsim.GeometricPrimitive_properties_get, _robotsim.GeometricPrimitive_properties_set)
 
-    def __init__(self):
-        """
-        __init__(GeometricPrimitive self) -> GeometricPrimitive
+    def __reduce__(self):
+        from klampt.io import loader
+        jsonobj = loader.toJson(self,'GeometricPrimitive')
+        return (loader.fromJson,(jsonobj,'GeometricPrimitive'))
 
-
-
-        A geometric primitive. So far only points, spheres, segments, and AABBs can be
-        constructed manually in the Python API.  
-
-        C++ includes: geometry.h
-
-        """
-        this = _robotsim.new_GeometricPrimitive()
-        try:
-            self.this.append(this)
-        except Exception:
-            self.this = this
     __swig_destroy__ = _robotsim.delete_GeometricPrimitive
     __del__ = lambda self: None
 GeometricPrimitive_swigregister = _robotsim.GeometricPrimitive_swigregister
@@ -1449,15 +1636,19 @@ class VolumeGrid(_object):
     indicating outside and < 0 indicating inside. Can also store an occupancy grid
     with 1 indicating inside and 0 indicating outside.  
 
-    Attributes: bbox (SWIG vector of 6 doubles): contains min and max bounds
-    (xmin,ymin,zmin),(xmax,ymax,zmax) dims (SWIG vector of of 3 ints): size of grid
-    in each of 3 dimensions values (SWIG vector of doubles): contains a 3D array of
-    dims[0]*dims[1]*dims[1] values.  
+    Attributes:  
 
-    The cell index (i,j,k) is flattened to i*dims[1]*dims[2] + j*dims[2] + k.  
+        bbox (SWIG vector of 6 doubles): contains min and max bounds
+            (xmin,ymin,zmin),(xmax,ymax,zmax)
+        dims (SWIG vector of  of 3 ints): size of grid in each of 3 dimensions
+        values (SWIG vector of doubles): contains a 3D array of
+             ``dims[0]*dims[1]*dims[1]`` values.
 
-    The array index i is associated to cell index (i/(dims[1]*dims[2]), (i/dims[2])
-    % dims[1], idims[2])  
+             The cell index (i,j,k) is flattened to
+             ``i*dims[1]*dims[2] + j*dims[2] + k``.
+
+             The array index i is associated to cell index
+             ``(i/(dims[1]*dims[2]), (i/dims[2]) % dims[1], i%dims[2])``  
 
     C++ includes: geometry.h
 
@@ -1468,6 +1659,19 @@ class VolumeGrid(_object):
     __swig_getmethods__ = {}
     __getattr__ = lambda self, name: _swig_getattr(self, VolumeGrid, name)
     __repr__ = _swig_repr
+
+    def __init__(self):
+        """
+        __init__(VolumeGrid self) -> VolumeGrid
+
+
+
+        """
+        this = _robotsim.new_VolumeGrid()
+        try:
+            self.this.append(this)
+        except Exception:
+            self.this = this
 
     def setBounds(self, bmin, bmax):
         """
@@ -1532,34 +1736,11 @@ class VolumeGrid(_object):
     if _newclass:
         values = _swig_property(_robotsim.VolumeGrid_values_get, _robotsim.VolumeGrid_values_set)
 
-    def __init__(self):
-        """
-        __init__(VolumeGrid self) -> VolumeGrid
+    def __reduce__(self):
+        from klampt.io import loader
+        jsonobj = loader.toJson(self,'VolumeGrid')
+        return (loader.fromJson,(jsonobj,'VolumeGrid'))
 
-
-
-        An axis-aligned volumetric grid, typically a signed distance transform with > 0
-        indicating outside and < 0 indicating inside. Can also store an occupancy grid
-        with 1 indicating inside and 0 indicating outside.  
-
-        Attributes: bbox (SWIG vector of 6 doubles): contains min and max bounds
-        (xmin,ymin,zmin),(xmax,ymax,zmax) dims (SWIG vector of of 3 ints): size of grid
-        in each of 3 dimensions values (SWIG vector of doubles): contains a 3D array of
-        dims[0]*dims[1]*dims[1] values.  
-
-        The cell index (i,j,k) is flattened to i*dims[1]*dims[2] + j*dims[2] + k.  
-
-        The array index i is associated to cell index (i/(dims[1]*dims[2]), (i/dims[2])
-        % dims[1], idims[2])  
-
-        C++ includes: geometry.h
-
-        """
-        this = _robotsim.new_VolumeGrid()
-        try:
-            self.this.append(this)
-        except Exception:
-            self.this = this
     __swig_destroy__ = _robotsim.delete_VolumeGrid
     __del__ = lambda self: None
 VolumeGrid_swigregister = _robotsim.VolumeGrid_swigregister
@@ -1656,6 +1837,19 @@ class DistanceQueryResult(_object):
     __swig_getmethods__ = {}
     __getattr__ = lambda self, name: _swig_getattr(self, DistanceQueryResult, name)
     __repr__ = _swig_repr
+
+    def __init__(self):
+        """
+        __init__(DistanceQueryResult self) -> DistanceQueryResult
+
+
+
+        """
+        this = _robotsim.new_DistanceQueryResult()
+        try:
+            self.this.append(this)
+        except Exception:
+            self.this = this
     __swig_setmethods__["d"] = _robotsim.DistanceQueryResult_d_set
     __swig_getmethods__["d"] = _robotsim.DistanceQueryResult_d_get
     if _newclass:
@@ -1692,42 +1886,6 @@ class DistanceQueryResult(_object):
     __swig_getmethods__["elem2"] = _robotsim.DistanceQueryResult_elem2_get
     if _newclass:
         elem2 = _swig_property(_robotsim.DistanceQueryResult_elem2_get, _robotsim.DistanceQueryResult_elem2_set)
-
-    def __init__(self):
-        """
-        __init__(DistanceQueryResult self) -> DistanceQueryResult
-
-
-
-        The result from a "fancy" distance query of :class:`~klampt.Geometry3D`.  
-
-        Attributes:  
-
-            d (float): The calculated distance, with negative values indicating
-                penetration.  Can also be upperBound if the branch was hit.
-            hasClosestPoints (bool):  If true, the closest point information is
-                given in cp0 and cp1, and elem1 and elem2
-            hasGradients (bool):  f true, distance gradient information is given
-                in grad0 and grad1.
-            cp1, cp2 (list of 3 floats, optional): closest points on self vs other,
-                both given in world coordinates
-            grad1, grad2 (list of 3 floats, optional): the gradients of the
-                objects' signed distance fields at the closest points.  Given in
-                world coordinates.
-
-                I.e., to move object1 to touch object2, move it in direction
-                grad1 by distance -d.  Note that grad2 is always -grad1.
-            elems1, elems2 (int): for compound objects, these are the
-                element indices corresponding to the closest points.  
-
-        C++ includes: geometry.h
-
-        """
-        this = _robotsim.new_DistanceQueryResult()
-        try:
-            self.this.append(this)
-        except Exception:
-            self.this = this
     __swig_destroy__ = _robotsim.delete_DistanceQueryResult
     __del__ = lambda self: None
 DistanceQueryResult_swigregister = _robotsim.DistanceQueryResult_swigregister
@@ -1766,6 +1924,19 @@ class ContactQueryResult(_object):
     __swig_getmethods__ = {}
     __getattr__ = lambda self, name: _swig_getattr(self, ContactQueryResult, name)
     __repr__ = _swig_repr
+
+    def __init__(self):
+        """
+        __init__(ContactQueryResult self) -> ContactQueryResult
+
+
+
+        """
+        this = _robotsim.new_ContactQueryResult()
+        try:
+            self.this.append(this)
+        except Exception:
+            self.this = this
     __swig_setmethods__["depths"] = _robotsim.ContactQueryResult_depths_set
     __swig_getmethods__["depths"] = _robotsim.ContactQueryResult_depths_get
     if _newclass:
@@ -1790,41 +1961,6 @@ class ContactQueryResult(_object):
     __swig_getmethods__["elems2"] = _robotsim.ContactQueryResult_elems2_get
     if _newclass:
         elems2 = _swig_property(_robotsim.ContactQueryResult_elems2_get, _robotsim.ContactQueryResult_elems2_set)
-
-    def __init__(self):
-        """
-        __init__(ContactQueryResult self) -> ContactQueryResult
-
-
-
-        The result from a contact query of :class:`~klampt.Geometry3D`. The number of
-        contacts n is variable.  
-
-        Attributes:  
-
-            depths (list of n floats): penetration depths for each contact point.
-                The depth is measured with respect to the padded geometry, and must
-                be nonnegative. A value of 0 indicates that depth cannot be
-                determined accurately.
-            points1, points2 (list of n lists of floats): contact points on self vs
-                other,  The top level list has n entries, and each entry is a
-                3-list expressed in world coordinates.  If an object is padded,
-                these points are on the surface of the padded geometry.
-            normals (list of n lists of floats): the outward-facing contact normal
-                from this to other at each contact point, given in world
-                coordinates.  Each entry is a 3-list, and can be a unit vector,
-                or [0,0,0] if the the normal cannot be computed properly.
-            elems1, elems2 (list of n ints): for compound objects, these are the
-                element indices corresponding to each contact.  
-
-        C++ includes: geometry.h
-
-        """
-        this = _robotsim.new_ContactQueryResult()
-        try:
-            self.this.append(this)
-        except Exception:
-            self.this = this
     __swig_destroy__ = _robotsim.delete_ContactQueryResult
     __del__ = lambda self: None
 ContactQueryResult_swigregister = _robotsim.ContactQueryResult_swigregister
@@ -1845,6 +1981,7 @@ class Geometry3D(_object):
     *   point clouds (PointCloud)  
     *   volumetric grids (VolumeGrid)  
     *   groups (Group)  
+    *   convex hulls (ConvexHull)  
 
     This class acts as a uniform container of all of these types.  
 
@@ -1860,7 +1997,10 @@ class Geometry3D(_object):
     Modifiers include any setX() functions, translate(), and transform().  
 
     Proximity queries include collides(), withinDistance(), distance(),
-    closestPoint(), and rayCast().  
+    closestPoint(), and rayCast(). For some geometry types (TriangleMesh,
+    PointCloud), the first time you perform a query, some collision detection data
+    structures will be initialized. This preprocessing step can take some time for
+    complex geometries.  
 
     Each object also has a "collision margin" which may virtually fatten the
     object, as far as proximity queries are concerned. This is useful for setting
@@ -1882,6 +2022,7 @@ class Geometry3D(_object):
         __init__(Geometry3D self) -> Geometry3D
         __init__(Geometry3D self, Geometry3D arg2) -> Geometry3D
         __init__(Geometry3D self, GeometricPrimitive arg2) -> Geometry3D
+        __init__(Geometry3D self, ConvexHull arg2) -> Geometry3D
         __init__(Geometry3D self, TriangleMesh arg2) -> Geometry3D
         __init__(Geometry3D self, PointCloud arg2) -> Geometry3D
         __init__(Geometry3D self, VolumeGrid arg2) -> Geometry3D
@@ -2006,13 +2147,25 @@ class Geometry3D(_object):
         return _robotsim.Geometry3D_getGeometricPrimitive(self)
 
 
+    def getConvexHull(self):
+        """
+        getConvexHull(Geometry3D self) -> ConvexHull
+
+
+
+        Returns a ConvexHull if this geometry is of type ConvexHull.  
+
+        """
+        return _robotsim.Geometry3D_getConvexHull(self)
+
+
     def getVolumeGrid(self):
         """
         getVolumeGrid(Geometry3D self) -> VolumeGrid
 
 
 
-        Returns a VoumeGrid if this geometry is of type VolumeGrid.  
+        Returns a VolumeGrid if this geometry is of type VolumeGrid.  
 
         """
         return _robotsim.Geometry3D_getVolumeGrid(self)
@@ -2052,6 +2205,32 @@ class Geometry3D(_object):
 
         """
         return _robotsim.Geometry3D_setGeometricPrimitive(self, arg2)
+
+
+    def setConvexHull(self, arg2):
+        """
+        setConvexHull(Geometry3D self, ConvexHull arg2)
+
+
+
+        Sets this Geometry3D to a ConvexHull.  
+
+        """
+        return _robotsim.Geometry3D_setConvexHull(self, arg2)
+
+
+    def setConvexHullGroup(self, g1, g2):
+        """
+        setConvexHullGroup(Geometry3D self, Geometry3D g1, Geometry3D g2)
+
+
+
+        Sets this Geometry3D to be a convex hull of two geometries. Note: the relative
+        transform of these two objects is frozen in place; i.e., setting the current
+        transform of g2 doesn't do anything to this object.  
+
+        """
+        return _robotsim.Geometry3D_setConvexHullGroup(self, g1, g2)
 
 
     def setVolumeGrid(self, arg2):
@@ -2251,8 +2430,8 @@ class Geometry3D(_object):
 
 
 
-        Returns the axis-aligned bounding box of the object. Note: O(1) time, but may
-        not be tight.  
+        Returns the axis-aligned bounding box of the object as a tuple (bmin,bmax).
+        Note: O(1) time, but may not be tight.  
 
         """
         return _robotsim.Geometry3D_getBB(self)
@@ -2264,8 +2443,8 @@ class Geometry3D(_object):
 
 
 
-        Returns a tighter axis-aligned bounding box of the object than getBB. Worst case
-        O(n) time.  
+        Returns a tighter axis-aligned bounding box of the object than
+        :meth:`Geometry3D.getBB`. Worst case O(n) time.  
 
         """
         return _robotsim.Geometry3D_getBBTight(self)
@@ -2290,13 +2469,19 @@ class Geometry3D(_object):
         *   TriangleMesh -> VolumeGrid. Converted using the fast marching method with
             good results only if the mesh is watertight. param is the grid resolution,
             by default set to the average triangle diameter.  
+        *   TriangleMesh -> ConvexHull. If param==0, just calculates a convex hull.
+            Otherwise, uses convex decomposition with the HACD library.  
         *   PointCloud -> TriangleMesh. Available if the point cloud is structured.
             param is the threshold for splitting triangles by depth discontinuity. param
             is by default infinity.  
+        *   PointCloud -> ConvexHull. Converted using SOLID / Qhull.  
         *   GeometricPrimitive -> anything. param determines the desired resolution.  
         *   VolumeGrid -> TriangleMesh. param determines the level set for the marching
             cubes algorithm.  
         *   VolumeGrid -> PointCloud. param determines the level set.  
+        *   ConvexHull -> TriangleMesh.  
+        *   ConvexHull -> PointCloud. param is the desired dispersion of the points.
+            Equivalent to ConvexHull -> TriangleMesh -> PointCloud  
 
         """
         return _robotsim.Geometry3D_convert(self, type, param)
@@ -2314,6 +2499,7 @@ class Geometry3D(_object):
 
         *   VolumeGrid - TriangleMesh  
         *   VolumeGrid - VolumeGrid  
+        *   ConvexHull - anything else besides ConvexHull  
 
         """
         return _robotsim.Geometry3D_collides(self, other)
@@ -2325,7 +2511,7 @@ class Geometry3D(_object):
 
 
 
-        Returns true if this geometry is within distance tol to other.  
+        Returns true if this geometry is within distance `tol` to other.  
 
         """
         return _robotsim.Geometry3D_withinDistance(self, other, tol)
@@ -2342,7 +2528,8 @@ class Geometry3D(_object):
         Version 0.8: this is the same as the old distance() function.  
 
         Returns the distance from this geometry to the other. If either geometry
-        contains volume information, this value may be negative to indicate penetration.  
+        contains volume information, this value may be negative to indicate penetration.
+        See :meth:`Geometry3D.distance` for more information.  
 
         """
         return _robotsim.Geometry3D_distance_simple(self, other, relErr, absErr)
@@ -2361,6 +2548,19 @@ class Geometry3D(_object):
         The return value contains the distance, closest points, and gradients if
         available.  
 
+        For some geometry types, the signed distance is returned. The signed distance
+        returns the negative penetration depth if pt is within this. The following
+        geometry types return signed distances:  
+
+        *   GeometricPrimitive  
+        *   PointCloud (approximate, if the cloud is a set of balls with the radius
+            property)  
+        *   VolumeGrid  
+        *   ConvexHull  
+
+        For other types, a signed distance will be returned if the geometry has a
+        positive collision margin, and the point penetrates less than this margin.  
+
         """
         return _robotsim.Geometry3D_distance_point(self, pt)
 
@@ -2371,9 +2571,9 @@ class Geometry3D(_object):
 
 
 
-        A customizable version of distance_point. The settings for the calculation can
-        be customized with relErr, absErr, and upperBound, e.g., to break if the closest
-        points are at least upperBound distance from one another.  
+        A customizable version of :meth:`Geometry3D.distance_point`. The settings for
+        the calculation can be customized with relErr, absErr, and upperBound, e.g., to
+        break if the closest points are at least upperBound distance from one another.  
 
         """
         return _robotsim.Geometry3D_distance_point_ext(self, pt, settings)
@@ -2385,10 +2585,16 @@ class Geometry3D(_object):
 
 
 
-        Returns the the distance and closest points between the given geometries.  
+        Returns the the distance and closest points between the given geometries. This
+        may be either the normal distance or the signed distance, depending on the
+        geometry type.  
 
-        If the objects are penetrating, some combinations of geometry types allow
-        calculating penetration depths:  
+        The normal distance returns 0 if the two objects are touching
+        (this.collides(other)=True).  
+
+        The signed distance returns the negative penetration depth if the objects are
+        touching. Only the following combinations of geometry types return signed
+        distances:  
 
         *   GeometricPrimitive-GeometricPrimitive (Python-supported sub-types only)  
         *   GeometricPrimitive-TriangleMesh (surface only)  
@@ -2396,6 +2602,7 @@ class Geometry3D(_object):
         *   GeometricPrimitive-VolumeGrid  
         *   TriangleMesh (surface only)-GeometricPrimitive  
         *   PointCloud-VolumeGrid  
+        *   ConvexHull - ConvexHull  
 
         If penetration is supported, a negative distance is returned and cp1,cp2 are the
         deepest penetrating points.  
@@ -2406,6 +2613,7 @@ class Geometry3D(_object):
         *   PointCloud-PointCloud  
         *   VolumeGrid-TriangleMesh  
         *   VolumeGrid-VolumeGrid  
+        *   ConvexHull - anything else besides ConvexHull  
 
         See the comments of the distance_point function  
 
@@ -2419,9 +2627,9 @@ class Geometry3D(_object):
 
 
 
-        A customizable version of distance. The settings for the calculation can be
-        customized with relErr, absErr, and upperBound, e.g., to break if the closest
-        points are at least upperBound distance from one another.  
+        A customizable version of :meth:`Geometry3D.distance`. The settings for the
+        calculation can be customized with relErr, absErr, and upperBound, e.g., to
+        break if the closest points are at least upperBound distance from one another.  
 
         """
         return _robotsim.Geometry3D_distance_ext(self, other, settings)
@@ -2437,8 +2645,44 @@ class Geometry3D(_object):
         direction d hits the geometry (given in world coordinates); pt is the hit point,
         in world coordinates.  
 
+        Supported types:  
+
+        *   GeometricPrimitive  
+        *   TriangleMesh  
+        *   PointCloud (need a positive collision margin, or points need to have a
+            'radius' property assigned)  
+        *   VolumeGrid  
+        *   Group (groups of the aforementioned types)  
+
         """
         return _robotsim.Geometry3D_rayCast(self, s, d)
+
+
+    def rayCast_ext(self, s, d):
+        """
+        rayCast_ext(Geometry3D self, double const [3] s, double const [3] d) -> int
+
+
+
+        Returns (hit_element,pt) where hit_element is >= 0 if ray starting at s and
+        pointing in direction d hits the geometry (given in world coordinates).  
+
+        *   hit_element is -1 if the object is not hit, otherwise it gives the index of
+            the element (triangle, point, sub-object) that was hit. For geometric
+            primitives, this will be 0.  
+        *   pt is the hit point, in world coordinates.  
+
+        Supported types:  
+
+        *   GeometricPrimitive  
+        *   TriangleMesh  
+        *   PointCloud (need a positive collision margin, or points need to have a
+            'radius' property assigned)  
+        *   VolumeGrid  
+        *   Group (groups of the aforementioned types)  
+
+        """
+        return _robotsim.Geometry3D_rayCast_ext(self, s, d)
 
 
     def contacts(self, other, padding1, padding2, maxContacts=0):
@@ -2466,9 +2710,26 @@ class Geometry3D(_object):
             the results are potentially inaccurate for non-convex VolumeGrids.  
         *   VolumeGrid-TriangleMesh  
         *   VolumeGrid-VolumeGrid  
+        *   ConvexHull - anything  
 
         """
         return _robotsim.Geometry3D_contacts(self, other, padding1, padding2, maxContacts)
+
+
+    def support(self, dir):
+        """
+        support(Geometry3D self, double const [3] dir)
+
+
+
+        Calculates the furthest point on this geometry in the direction dir.  
+
+        Supported types:  
+
+        *   ConvexHull  
+
+        """
+        return _robotsim.Geometry3D_support(self, dir)
 
     __swig_setmethods__["world"] = _robotsim.Geometry3D_world_set
     __swig_getmethods__["world"] = _robotsim.Geometry3D_world_get
@@ -2482,6 +2743,12 @@ class Geometry3D(_object):
     __swig_getmethods__["geomPtr"] = _robotsim.Geometry3D_geomPtr_get
     if _newclass:
         geomPtr = _swig_property(_robotsim.Geometry3D_geomPtr_get, _robotsim.Geometry3D_geomPtr_set)
+
+    def __reduce__(self):
+        from klampt.io import loader
+        jsonobj = loader.toJson(self,'Geometry3D')
+        return (loader.fromJson,(jsonobj,'Geometry3D'))
+
 Geometry3D_swigregister = _robotsim.Geometry3D_swigregister
 Geometry3D_swigregister(Geometry3D)
 
@@ -3445,9 +3712,9 @@ class Mass(_object):
 
     Stores mass information for a rigid body or robot link.  
 
-    Note:  
+    .. note::  
 
-        You should use the set/get functions rather than changing the members
+        Recommended to use the set/get functions rather than changing the members
         directly due to strangeness in SWIG's handling of vectors.  
 
     Attributes:  
@@ -3870,6 +4137,42 @@ class RobotModelLink(_object):
 
         """
         return _robotsim.RobotModelLink_setAxis(self, axis)
+
+
+    def isPrismatic(self):
+        """
+        isPrismatic(RobotModelLink self) -> bool
+
+
+
+        Returns whether the joint is prismatic.  
+
+        """
+        return _robotsim.RobotModelLink_isPrismatic(self)
+
+
+    def isRevolute(self):
+        """
+        isRevolute(RobotModelLink self) -> bool
+
+
+
+        Returns whether the joint is revolute.  
+
+        """
+        return _robotsim.RobotModelLink_isRevolute(self)
+
+
+    def setPrismatic(self, prismatic):
+        """
+        setPrismatic(RobotModelLink self, bool prismatic)
+
+
+
+        Changes a link from revolute to prismatic or vice versa.  
+
+        """
+        return _robotsim.RobotModelLink_setPrismatic(self, prismatic)
 
 
     def getWorldPosition(self, plocal):
@@ -4743,8 +5046,8 @@ class RobotModel(_object):
 
 
 
-        Sets the torque limit vector tmax, the constraint is :math:`|torque[i]|
-        <\leqtmax[i]`  
+        Sets the torque limit vector tmax, the constraint is :math:`|torque[i]| \leq
+        tmax[i]`  
 
         """
         return _robotsim.RobotModel_setTorqueLimits(self, tmax)
@@ -5074,6 +5377,58 @@ class RobotModel(_object):
         return _robotsim.RobotModel_randomizeConfig(self, unboundedScale)
 
 
+    def configToDrivers(self, config):
+        """
+        configToDrivers(RobotModel self, doubleVector config)
+
+
+
+        Converts a full configuration (length numLinks()) to a list of driver values
+        (length numDrivers()).  
+
+        """
+        return _robotsim.RobotModel_configToDrivers(self, config)
+
+
+    def velocityToDrivers(self, velocities):
+        """
+        velocityToDrivers(RobotModel self, doubleVector velocities)
+
+
+
+        Converts a full velocity vector (length numLinks()) to a list of driver
+        velocities (length numDrivers()).  
+
+        """
+        return _robotsim.RobotModel_velocityToDrivers(self, velocities)
+
+
+    def configFromDrivers(self, driverValues):
+        """
+        configFromDrivers(RobotModel self, doubleVector driverValues)
+
+
+
+        Converts a list of driver values (length numDrivers()) to a full configuration
+        (length numLinks()).  
+
+        """
+        return _robotsim.RobotModel_configFromDrivers(self, driverValues)
+
+
+    def velocityFromDrivers(self, driverVelocities):
+        """
+        velocityFromDrivers(RobotModel self, doubleVector driverVelocities)
+
+
+
+        Converts a list of driver velocities (length numDrivers()) to a full velocity
+        vector (length numLinks()).  
+
+        """
+        return _robotsim.RobotModel_velocityFromDrivers(self, driverVelocities)
+
+
     def selfCollisionEnabled(self, link1, link2):
         """
         selfCollisionEnabled(RobotModel self, int link1, int link2) -> bool
@@ -5126,6 +5481,52 @@ class RobotModel(_object):
 
         """
         return _robotsim.RobotModel_drawGL(self, keepAppearance)
+
+
+    def reduce(self, robot):
+        """
+        reduce(RobotModel self, RobotModel robot)
+
+
+
+        Sets self to a reduced version of robot, where all fixed DOFs are eliminated.
+        The return value is a map from the original robot DOF indices to the reduced
+        DOFs.  
+
+        Note that any geometries fixed to the world will disappear.  
+
+        """
+        return _robotsim.RobotModel_reduce(self, robot)
+
+
+    def mount(self, link, subRobot, R, t):
+        """
+        mount(RobotModel self, int link, RobotModel subRobot, double const [9] R, double const [3] t)
+
+
+
+        Mounts a sub-robot onto a link, with its origin at a given local transform
+        (R,t). The sub-robot's links will be renamed to subRobot.getName() + ':' +
+        link.getName() unless subRobot.getName() is '', in which case the link names are
+        preserved.  
+
+        """
+        return _robotsim.RobotModel_mount(self, link, subRobot, R, t)
+
+
+    def sensor(self, *args):
+        """
+        sensor(RobotModel self, int index) -> SimRobotSensor
+        sensor(RobotModel self, char const * name) -> SimRobotSensor
+
+
+
+        Returns a sensor by index or by name. If out of bounds or unavailable, a null
+        sensor is returned (i.e., SimRobotSensor.name() or SimRobotSensor.type()) will
+        return the empty string.)  
+
+        """
+        return _robotsim.RobotModel_sensor(self, *args)
 
     __swig_setmethods__["world"] = _robotsim.RobotModel_world_set
     __swig_getmethods__["world"] = _robotsim.RobotModel_world_get
@@ -6007,8 +6408,10 @@ class IKObjective(_object):
     on a fixed position/orientation in the world frame, or a relative
     position/orientation to another frame.  
 
-    Currently only fixed-point constraints and fixed-transform constraints are
-    implemented in the Python API.  
+    The positionScale and orientationScale attributes scale the solver's residual
+    vector. This affects whether the convergence tolerance is met, and also controls
+    the emphasis on each objective / component when the objective cannot be reached.
+    By default these are both 1.  
 
     C++ includes: robotik.h
 
@@ -6188,10 +6591,22 @@ class IKObjective(_object):
 
 
 
-        Manual: Sets a free position constraint.  
+        Deprecated: use setFreePosConstraint.  
 
         """
         return _robotsim.IKObjective_setFreePosition(self)
+
+
+    def setFreePosConstraint(self):
+        """
+        setFreePosConstraint(IKObjective self)
+
+
+
+        Manual: Sets a free position constraint.  
+
+        """
+        return _robotsim.IKObjective_setFreePosConstraint(self)
 
 
     def setFixedPosConstraint(self, tlocal, tworld):
@@ -6373,7 +6788,8 @@ class IKObjective(_object):
 
 
         Loads the objective from a Klamp't-native formatted string. For a more readable
-        but verbose format, try the JSON IO routines loader.toJson/fromJson()  
+        but verbose format, try the JSON IO routines :meth:`klampt.io.loader.toJson` /
+        :meth:`klampt.io.loader.fromJson`  
 
         """
         return _robotsim.IKObjective_loadString(self, str)
@@ -6386,7 +6802,8 @@ class IKObjective(_object):
 
 
         Saves the objective to a Klamp't-native formatted string. For a more readable
-        but verbose format, try the JSON IO routines loader.toJson/fromJson()  
+        but verbose format, try the JSON IO routines :meth:`klampt.io.loader.toJson` /
+        :meth:`klampt.io.loader.fromJson`  
 
         """
         return _robotsim.IKObjective_saveString(self)
@@ -6395,6 +6812,20 @@ class IKObjective(_object):
     __swig_getmethods__["goal"] = _robotsim.IKObjective_goal_get
     if _newclass:
         goal = _swig_property(_robotsim.IKObjective_goal_get, _robotsim.IKObjective_goal_set)
+    __swig_setmethods__["positionScale"] = _robotsim.IKObjective_positionScale_set
+    __swig_getmethods__["positionScale"] = _robotsim.IKObjective_positionScale_get
+    if _newclass:
+        positionScale = _swig_property(_robotsim.IKObjective_positionScale_get, _robotsim.IKObjective_positionScale_set)
+    __swig_setmethods__["rotationScale"] = _robotsim.IKObjective_rotationScale_set
+    __swig_getmethods__["rotationScale"] = _robotsim.IKObjective_rotationScale_get
+    if _newclass:
+        rotationScale = _swig_property(_robotsim.IKObjective_rotationScale_get, _robotsim.IKObjective_rotationScale_set)
+
+    def __reduce__(self):
+        from klampt.io import loader
+        jsonobj = loader.toJson(self,'IKObjective')
+        return (loaderfromJson,(jsonobj,'IKObjective'))
+
     __swig_destroy__ = _robotsim.delete_IKObjective
     __del__ = lambda self: None
 IKObjective_swigregister = _robotsim.IKObjective_swigregister
@@ -6415,11 +6846,11 @@ class IKSolver(_object):
         s.setTolerance(1e-4)
         res = s.solve()
         if res:
-            print ("IK solution:",robot.getConfig(),"found in",
-                s.lastSolveIters(),"iterations, residual",s.getResidual()
+            print("IK solution:",robot.getConfig(),"found in",
+                s.lastSolveIters(),"iterations, residual",s.getResidual())
         else:
-            print "IK failed:",robot.getConfig(),"found in",
-                s.lastSolveIters(),"iterations, residual",s.getResidual()  
+            print("IK failed:",robot.getConfig(),"found in",
+                s.lastSolveIters(),"iterations, residual",s.getResidual())  
 
     C++ includes: robotik.h
 
@@ -7009,24 +7440,22 @@ class SimRobotSensor(_object):
 
 
     A sensor on a simulated robot. Retrieve one from the controller using
-    :meth:`SimRobotController.getSensor` (), or create a new one using
-    SimRobotSensor(robotController,name,type)  
+    :meth:`SimRobotController.getSensor`, or create a new one using
+    `SimRobotSensor(robotController,name,type)`  
 
-    Use :meth:`getMeasurements` () to get the currently simulated measurement
-    vector.  
+    Use :meth:`getMeasurements` to get the currently simulated measurement vector.  
 
-    Sensors are automatically updated through the :meth:`Simulator.simulate` ()
-    call, and :meth:`getMeasurements` () retrieves the updated values. As a result,
-    you may get garbage measurements before the first Simulator.simulate call is
-    made.  
+    Sensors are automatically updated through the :meth:`Simulator.simulate` call,
+    and :meth:`getMeasurements` retrieves the updated values. As a result, you may
+    get garbage measurements before the first Simulator.simulate call is made.  
 
     There is also a mode for doing kinematic simulation, which is supported (i.e.,
     makes sensible measurements) for some types of sensors when just a robot / world
     model is given. This is similar to Simulation.fakeSimulate but the entire
     controller structure is bypassed. You can arbitrarily set the robot's position,
-    call :meth:`kinematicReset` (), and then call :meth:`kinematicSimulate` ().
-    Subsequent calls assume the robot is being driven along a trajectory until the
-    next :meth:`kinematicReset` () is called.  
+    call :meth:`kinematicReset`, and then call :meth:`kinematicSimulate`. Subsequent
+    calls assume the robot is being driven along a trajectory until the next
+    :meth:`kinematicReset` is called.  
 
     LaserSensor, CameraSensor, TiltSensor, AccelerometerSensor, GyroSensor,
     JointPositionSensor, JointVelocitySensor support kinematic simulation mode.
@@ -7050,7 +7479,7 @@ class SimRobotSensor(_object):
 
     def __init__(self, *args):
         """
-        __init__(SimRobotSensor self, Robot * robot, SensorBase * sensor) -> SimRobotSensor
+        __init__(SimRobotSensor self, RobotModel robot, SensorBase * sensor) -> SimRobotSensor
         __init__(SimRobotSensor self, SimRobotController robot, char const * name, char const * type) -> SimRobotSensor
 
 
@@ -7084,6 +7513,18 @@ class SimRobotSensor(_object):
 
         """
         return _robotsim.SimRobotSensor_type(self)
+
+
+    def robot(self):
+        """
+        robot(SimRobotSensor self) -> RobotModel
+
+
+
+        Returns the model of the robot to which this belongs.  
+
+        """
+        return _robotsim.SimRobotSensor_robot(self)
 
 
     def measurementNames(self):
@@ -7151,16 +7592,15 @@ class SimRobotSensor(_object):
         return _robotsim.SimRobotSensor_drawGL(self, *args)
 
 
-    def kinematicSimulate(self, world, dt):
+    def kinematicSimulate(self, *args):
         """
         kinematicSimulate(SimRobotSensor self, WorldModel world, double dt)
+        kinematicSimulate(SimRobotSensor self, double dt)
 
 
-
-        simulates / advances the kinematic simulation  
 
         """
-        return _robotsim.SimRobotSensor_kinematicSimulate(self, world, dt)
+        return _robotsim.SimRobotSensor_kinematicSimulate(self, *args)
 
 
     def kinematicReset(self):
@@ -7174,10 +7614,10 @@ class SimRobotSensor(_object):
         """
         return _robotsim.SimRobotSensor_kinematicReset(self)
 
-    __swig_setmethods__["robot"] = _robotsim.SimRobotSensor_robot_set
-    __swig_getmethods__["robot"] = _robotsim.SimRobotSensor_robot_get
+    __swig_setmethods__["robotModel"] = _robotsim.SimRobotSensor_robotModel_set
+    __swig_getmethods__["robotModel"] = _robotsim.SimRobotSensor_robotModel_get
     if _newclass:
-        robot = _swig_property(_robotsim.SimRobotSensor_robot_get, _robotsim.SimRobotSensor_robot_set)
+        robotModel = _swig_property(_robotsim.SimRobotSensor_robotModel_get, _robotsim.SimRobotSensor_robotModel_set)
     __swig_setmethods__["sensor"] = _robotsim.SimRobotSensor_sensor_set
     __swig_getmethods__["sensor"] = _robotsim.SimRobotSensor_sensor_get
     if _newclass:
@@ -7219,9 +7659,36 @@ class SimRobotController(_object):
     steps. Force controllers can be implemented using setTorque, again using short
     time steps.  
 
-    If setVelocity, setTorque, or setPID command are called, the motion queue
+    If the setVelocity, setTorque, or setPID command are called, the motion queue
     behavior will be completely overridden. To reset back to motion queue control,
-    the function setManualMode(False) must be called.  
+    setManualMode(False) must be called first.  
+
+    Individual joints cannot be addressed with mixed motion queue mode and
+    torque/PID mode. However, you can mix PID and torque mode between different
+    joints with a workaround::  
+
+
+       # setup by zeroing out PID constants for torque controlled joints
+       pid_joint_indices = [...]
+       torque_joint_indices = [...] # complement of pid_joint_indices
+       kp,ki,kp = controller.getPIDGains()
+       for i in torque_joint_indices:  #turn off PID gains here
+          kp[i] = ki[i] = kp[i] = 0  
+
+       # to send PID command (qcmd,dqcmd) and torque commands tcmd, use
+       # a PID command with feedforward torques.  First we build a whole-robot
+       # command:
+       qcmd_whole = [0]*controller.model().numLinks()
+       dqcmd_whole = [0]*controller.model().numLinks()
+       tcmd_whole = [0]*controller.model().numLinks()
+       for i,k in enumerate(pid_joint_indices):
+           qcmd_whole[k],dqcmd_whole[i] = qcmd[i],dqcmd[i]
+       for i,k in enumerate(torque_joint_indices):
+           tcmd_whole[k] = tcmd[i]
+       # Then we send it to the controller
+       controller.setPIDCommand(qcmd_whole,dqcmd_whole,tcmd_whole)  
+
+
 
     C++ includes: robotsim.h
 
@@ -7266,7 +7733,7 @@ class SimRobotController(_object):
 
 
 
-        Sets the current feedback control rate.  
+        Sets the current feedback control rate, in s.  
 
         """
         return _robotsim.SimRobotController_setRate(self, dt)
@@ -7278,7 +7745,7 @@ class SimRobotController(_object):
 
 
 
-        Gets the current feedback control rate.  
+        Gets the current feedback control rate, in s.  
 
         """
         return _robotsim.SimRobotController_getRate(self)
@@ -7290,7 +7757,7 @@ class SimRobotController(_object):
 
 
 
-        Returns the current commanded configuration.  
+        Returns the current commanded configuration (size model().numLinks())  
 
         """
         return _robotsim.SimRobotController_getCommandedConfig(self)
@@ -7302,7 +7769,7 @@ class SimRobotController(_object):
 
 
 
-        Returns the current commanded velocity.  
+        Returns the current commanded velocity (size model().numLinks())  
 
         """
         return _robotsim.SimRobotController_getCommandedVelocity(self)
@@ -7314,7 +7781,7 @@ class SimRobotController(_object):
 
 
 
-        Returns the current commanded (feedforward) torque.  
+        Returns the current commanded (feedforward) torque (size model().numDrivers())  
 
         """
         return _robotsim.SimRobotController_getCommandedTorque(self)
@@ -7326,7 +7793,8 @@ class SimRobotController(_object):
 
 
 
-        Returns the current "sensed" configuration from the simulator.  
+        Returns the current "sensed" configuration from the simulator (size
+        model().numLinks())  
 
         """
         return _robotsim.SimRobotController_getSensedConfig(self)
@@ -7338,7 +7806,8 @@ class SimRobotController(_object):
 
 
 
-        Returns the current "sensed" velocity from the simulator.  
+        Returns the current "sensed" velocity from the simulator (size
+        model().numLinks())  
 
         """
         return _robotsim.SimRobotController_getSensedVelocity(self)
@@ -7350,8 +7819,10 @@ class SimRobotController(_object):
 
 
 
-        Returns the current "sensed" (feedback) torque from the simulator. Note: a
-        default robot doesn't have a torque sensor, so this will be 0.  
+        Returns the current "sensed" (feedback) torque from the simulator. (size
+        model().numDrivers())  
+
+        Note: a default robot doesn't have a torque sensor, so this will be 0  
 
         """
         return _robotsim.SimRobotController_getSensedTorque(self)
@@ -7365,7 +7836,8 @@ class SimRobotController(_object):
 
 
         Returns a sensor by index or by name. If out of bounds or unavailable, a null
-        sensor is returned.  
+        sensor is returned (i.e., SimRobotSensor.name() or SimRobotSensor.type()) will
+        return the empty string.)  
 
         """
         return _robotsim.SimRobotController_sensor(self, *args)
@@ -7377,7 +7849,7 @@ class SimRobotController(_object):
 
 
 
-        gets a command list  
+        gets a custom command list  
 
         """
         return _robotsim.SimRobotController_commands(self)
@@ -7389,7 +7861,7 @@ class SimRobotController(_object):
 
 
 
-        sends a command to the controller  
+        sends a custom string command to the controller  
 
         """
         return _robotsim.SimRobotController_sendCommand(self, name, args)
@@ -7470,6 +7942,8 @@ class SimRobotController(_object):
         Uses linear interpolation to get from the current configuration to the desired
         configuration after time dt.  
 
+        q has size model().numLinks(). dt must be > 0.  
+
         """
         return _robotsim.SimRobotController_setLinear(self, q, dt)
 
@@ -7482,6 +7956,8 @@ class SimRobotController(_object):
 
         Uses cubic (Hermite) interpolation to get from the current
         configuration/velocity to the desired configuration/velocity after time dt.  
+
+        q and v have size model().numLinks(). dt must be > 0.  
 
         """
         return _robotsim.SimRobotController_setCubic(self, q, v, dt)
@@ -7530,7 +8006,7 @@ class SimRobotController(_object):
 
 
         Sets a rate controller from the current commanded config to move at rate dq for
-        time dt.  
+        time dt > 0. dq has size model().numLinks()  
 
         """
         return _robotsim.SimRobotController_setVelocity(self, dq, dt)
@@ -7542,7 +8018,8 @@ class SimRobotController(_object):
 
 
 
-        Sets a torque command controller.  
+        Sets a torque command controller. t can have size model().numDrivers() or
+        model().numLinks().  
 
         """
         return _robotsim.SimRobotController_setTorque(self, t)
@@ -7601,7 +8078,7 @@ class SimRobotController(_object):
 
 
 
-        Sets the PID gains.  
+        Sets the PID gains. Arguments have size model().numDrivers().  
 
         """
         return _robotsim.SimRobotController_setPIDGains(self, kP, kI, kD)
@@ -7705,8 +8182,8 @@ class SimBody(_object):
 
 
 
-        Sets the dynamic simulation of the body on/off. If false, velocities will simply
-        be integrated forward, and forces will not affect velocity i.e., it will be pure
+        Turns dynamic simulation of the body on/off. If false, velocities will simply be
+        integrated forward, and forces will not affect velocity i.e., it will be pure
         kinematic simulation.  
 
         """
@@ -7951,6 +8428,153 @@ class SimBody(_object):
     __del__ = lambda self: None
 SimBody_swigregister = _robotsim.SimBody_swigregister
 SimBody_swigregister(SimBody)
+
+class SimJoint(_object):
+    """
+
+
+    An interface to ODE's hinge and slider joints. You may use this to create custom
+    objects, e.g., drawers, doors, cabinets, etc. It can also be used to attach
+    objects together, e.g., an object to a robot's gripper.  
+
+    C++ includes: robotsim.h
+
+    """
+
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, SimJoint, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, SimJoint, name)
+    __repr__ = _swig_repr
+
+    def __init__(self):
+        """
+        __init__(SimJoint self) -> SimJoint
+
+
+
+        """
+        this = _robotsim.new_SimJoint()
+        try:
+            self.this.append(this)
+        except Exception:
+            self.this = this
+    __swig_destroy__ = _robotsim.delete_SimJoint
+    __del__ = lambda self: None
+
+    def makeHinge(self, *args):
+        """
+        makeHinge(SimJoint self, SimBody a, SimBody b, double const [3] pt, double const [3] axis)
+        makeHinge(SimJoint self, SimBody a, double const [3] pt, double const [3] axis)
+
+
+
+        """
+        return _robotsim.SimJoint_makeHinge(self, *args)
+
+
+    def makeSlider(self, *args):
+        """
+        makeSlider(SimJoint self, SimBody a, SimBody b, double const [3] axis)
+        makeSlider(SimJoint self, SimBody a, double const [3] axis)
+
+
+
+        """
+        return _robotsim.SimJoint_makeSlider(self, *args)
+
+
+    def makeFixed(self, a, b):
+        """
+        makeFixed(SimJoint self, SimBody a, SimBody b)
+
+
+
+        Creates a fixed joint between `a` and `b`. (There's no method to fix a to the
+        world; just call a.enableDynamics(False))  
+
+        """
+        return _robotsim.SimJoint_makeFixed(self, a, b)
+
+
+    def destroy(self):
+        """
+        destroy(SimJoint self)
+
+
+
+        Removes the joint from the simulation.  
+
+        """
+        return _robotsim.SimJoint_destroy(self)
+
+
+    def setLimits(self, min, max):
+        """
+        setLimits(SimJoint self, double min, double max)
+
+
+
+        Sets the joint limits, relative to the initial configuration of the bodies.
+        Units are in radians for hinges and meters for sliders.  
+
+        """
+        return _robotsim.SimJoint_setLimits(self, min, max)
+
+
+    def setFriction(self, friction):
+        """
+        setFriction(SimJoint self, double friction)
+
+
+
+        Sets the (dry) friction of the joint.  
+
+        """
+        return _robotsim.SimJoint_setFriction(self, friction)
+
+
+    def setVelocity(self, vel, fmax):
+        """
+        setVelocity(SimJoint self, double vel, double fmax)
+
+
+
+        Locks velocity of the joint, up to force fmax. Can't be used with setFriction.  
+
+        """
+        return _robotsim.SimJoint_setVelocity(self, vel, fmax)
+
+
+    def addForce(self, force):
+        """
+        addForce(SimJoint self, double force)
+
+
+
+        Adds a torque for the hinge joint and a force for a slider joint.  
+
+        """
+        return _robotsim.SimJoint_addForce(self, force)
+
+    __swig_setmethods__["type"] = _robotsim.SimJoint_type_set
+    __swig_getmethods__["type"] = _robotsim.SimJoint_type_get
+    if _newclass:
+        type = _swig_property(_robotsim.SimJoint_type_get, _robotsim.SimJoint_type_set)
+    __swig_setmethods__["a"] = _robotsim.SimJoint_a_set
+    __swig_getmethods__["a"] = _robotsim.SimJoint_a_get
+    if _newclass:
+        a = _swig_property(_robotsim.SimJoint_a_get, _robotsim.SimJoint_a_set)
+    __swig_setmethods__["b"] = _robotsim.SimJoint_b_set
+    __swig_getmethods__["b"] = _robotsim.SimJoint_b_get
+    if _newclass:
+        b = _swig_property(_robotsim.SimJoint_b_get, _robotsim.SimJoint_b_set)
+    __swig_setmethods__["joint"] = _robotsim.SimJoint_joint_set
+    __swig_getmethods__["joint"] = _robotsim.SimJoint_joint_get
+    if _newclass:
+        joint = _swig_property(_robotsim.SimJoint_joint_get, _robotsim.SimJoint_joint_set)
+SimJoint_swigregister = _robotsim.SimJoint_swigregister
+SimJoint_swigregister(SimJoint)
 
 class Simulator(_object):
     """
@@ -8397,22 +9021,36 @@ class Simulator(_object):
 
         Valid names are:  
 
-        *   gravity  
-        *   simStep  
-        *   boundaryLayerCollisions  
-        *   rigidObjectCollisions  
-        *   robotSelfCollisions  
-        *   robotRobotCollisions  
-        *   adaptiveTimeStepping  
-        *   minimumAdaptiveTimeStep  
-        *   maxContacts  
-        *   clusterNormalScale  
-        *   errorReductionParameter  
-        *   dampedLeastSquaresParameter  
-        *   instabilityConstantEnergyThreshold  
-        *   instabilityLinearEnergyThreshold  
-        *   instabilityMaxEnergyThreshold  
-        *   instabilityPostCorrectionEnergy  
+        *   gravity: the gravity vector (default "0 0 -9.8")  
+        *   simStep: the internal simulation step (default "0.001")  
+        *   autoDisable: whether to disable bodies that don't move much between time
+            steps (default "0", set to "1" for many static objects)  
+        *   boundaryLayerCollisions: whether to use the Klampt inflated boundaries for
+            contact detection'(default "1", recommended)  
+        *   rigidObjectCollisions: whether rigid objects should collide (default "1")  
+        *   robotSelfCollisions: whether robots should self collide (default "0")  
+        *   robotRobotCollisions: whether robots should collide with other robots
+            (default "1")  
+        *   adaptiveTimeStepping: whether adaptive time stepping should be used to
+            improve stability. Slower but more stable. (default "1")  
+        *   minimumAdaptiveTimeStep: the minimum size of an adaptive time step before
+            giving up (default "1e-6")  
+        *   maxContacts: max # of clustered contacts between pairs of objects (default
+            "20")  
+        *   clusterNormalScale: a parameter for clustering contacts (default "0.1")  
+        *   errorReductionParameter: see ODE docs on ERP (default "0.95")  
+        *   dampedLeastSquaresParameter: see ODE docs on CFM (default "1e-6")  
+        *   instabilityConstantEnergyThreshold: parameter c0 in instability correction
+            (default "1")  
+        *   instabilityLinearEnergyThreshold: parameter c1 in instability correction
+            (default "1.5")  
+        *   instabilityMaxEnergyThreshold: parameter cmax in instability correction
+            (default "100000")  
+        *   instabilityPostCorrectionEnergy: kinetic energy scaling parameter if
+            instability is detected (default "0.8")  
+
+        Instability correction kicks in whenever the kinetic energy K(t) of an object
+        exceeds min(c0*m + c1*K(t-dt),cmax). m is the object's mass.  
 
         See `Klampt/Simulation/ODESimulator.h
         <http://motion.pratt.duke.edu/klampt/klampt_docs/ODESimulator_8h_source.html>`_

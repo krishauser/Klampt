@@ -23,17 +23,17 @@ def to_open3d(obj):
     """
     if isinstance(obj,PointCloud):
         pc = open3d.geometry.PointCloud()
-        for i in xrange(obj.numPoints()):
+        for i in range(obj.numPoints()):
             k = i*3
             pc.points.append((obj.vertices[k],obj.vertices[k+1],obj.vertices[k+2]))
         #TODO: other properties
         return pc
     elif isinstance(obj,TriangleMesh):
         m = open3d.geometry.TriangleMesh()
-        for i in xrange(len(obj.vertices)//3):
+        for i in range(len(obj.vertices)//3):
             k = i*3
             m.vertices.append((obj.vertices[k],obj.vertices[k+1],obj.vertices[k+2]))
-        for i in xrange(len(obj.indices)//3):
+        for i in range(len(obj.indices)//3):
             k = i*3
             m.triangles.append((obj.indices[k],obj.indices[k+1],obj.indices[k+2]))
         return m

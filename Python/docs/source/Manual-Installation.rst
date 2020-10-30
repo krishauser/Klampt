@@ -19,8 +19,17 @@ You should also obtain:
 -  PyQt5 is highly recommended for resource editing and improved
    visualization. Try ``pip install PyQt5``. (For Python 2.x users,
    PyQt4 is also supported.  See note below.)
+
+To enable all features, you may also obtain the following optional packages:
+
+-  PyQtGraph lets you customize PyQt visualizations through the GUI.
+   Try ``pip install pyqtgraph``.
 -  Python Imaging Library (PIL) is required for saving screenshots to
    disk.
+-  ffmpeg is needed to save movies.
+-  cvxpy is needed to use the :mod:`klampt.plan.kinetrajopt` module. 
+   If you are interested in collision-free trajectory optimization, try
+   ``pip install cvxpy``.
 
 .. note::
 
@@ -44,19 +53,19 @@ install, e.g.,:
 .. code:: sh
 
     git clone https://github.com/krishauser/Klampt-examples
-    cd Klampt-examples/Python/demos
+    cd Klampt-examples/Python3/demos
     python kbdrive.py ../../data/tx90roll.xml
 
 Most of the examples in this manual require Klampt-examples to be downloaded to your computer.
 
 .. note::
 
-    All the examples in this manual are written assuming you are using Python 2.x.  If you are using Python 3.x,
-    you will need to replace any references to `Klampt-examples/Python` with `Klampt-examples/Python3`.
+    All the examples in this manual are written assuming you are using Python 3.x.  If you are using Python 2.x,
+    you will need to replace any references to `Klampt-examples/Python3` with `Klampt-examples/Python2`.
 
     Moreover, if you have both Python 3.x and 2.x installed, but Klamp't is only installed with one version,
     then all of the calls to `python` in the examples in this manual should be replaced with calls to either
-    `python2` or `python3`, whichever is appropriate.
+    `python3` or `python2`, whichever is appropriate.
 
 
 Troubleshooting
@@ -65,8 +74,8 @@ Troubleshooting
 
 If you have multiple versions of Python installed on your machine,
 you will need to be aware of which version is currently referred to by `pip` and `python` commands.  You
-may need to use `pip3` or `pip2` to get the right version.  You may consider using a
-[virtual environment](https://docs.python-guide.org/dev/virtualenvs/) to help manage
+may need to use `python3`, `python2`, `pip3`, or `pip2` to get the right version.  You may consider using a
+`virtual environment <https://docs.python-guide.org/dev/virtualenvs/>`__ to help manage
 currently active version.
 
 
@@ -93,7 +102,7 @@ Simply enter
       sudo make install
 
 and the next time you run Jupyter notebooks, you can use the functionality of the
-`klampt.vis.ipython <klampt.vis.ipython.html>`__ module to display interactive 3D displays
+:mod:`klampt.vis.ipython` module to display interactive 3D displays
 in your jupyter notebook!
 
 .. image:: _static/images/jupyter.png
@@ -106,6 +115,9 @@ in your jupyter notebook!
 
           cd Klampt/Jupyter
           sudo make install
+
+To get started using Klamp't in Jupyter, browse the examples in the Jupyter directory of
+the `Klampt-examples <https://github.com/krishauser/Klampt-examples>`__ repository.
 
 
 Should I build from source?

@@ -1,14 +1,18 @@
+"""Utilities for inspecting Klamp't objects to retrieve a type string / create
+objects from type strings.
+"""
+
 from ..model.contact import ContactPoint,Hold
 from ..model.trajectory import Trajectory,RobotTrajectory,SO3Trajectory,SE3Trajectory
 from ..model.multipath import MultiPath
 from ..math import vectorops,so3,se3
-from ..robotsim import WorldModel,RobotModel,RobotModelLink,RigidObjectModel,TerrainModel,IKObjective,Geometry3D,TriangleMesh,PointCloud,GeometricPrimitive,VolumeGrid
+from ..robotsim import WorldModel,RobotModel,RobotModelLink,RigidObjectModel,TerrainModel,IKObjective,Geometry3D,TriangleMesh,PointCloud,GeometricPrimitive,ConvexHull,VolumeGrid
 
 _knownTypes = set(['Value','Vector2','Vector3','Matrix3','Point','Rotation','RigidTransform','Vector','Config',
                 'IntArray','StringArray',
                 'Configs','Trajectory','LinearPath','MultiPath',
                 'IKGoal','ContactPoint','Hold',
-                'TriangleMesh','PointCloud','VolumeGrid','GeometricPrimitive','Geometry3D',
+                'TriangleMesh','PointCloud','VolumeGrid','GeometricPrimitive','ConvexHull','Geometry3D',
                 'WorldModel','RobotModel','RigidObjectModel','TerrainModel'])
 
 def knownTypes():
@@ -38,6 +42,8 @@ def objectToTypes(object,world=None):
         return 'PointCloud'
     elif isinstance(object,VolumeGrid):
         return 'VolumeGrid'
+    elif isinstance(object,ConvexHull):
+        return 'ConvexHull'
     elif isinstance(object,Geometry3D):
         return ['Geometry3D',object.type()]
     elif isinstance(object,WorldModel):
@@ -104,7 +110,7 @@ def make(type,object=None):
         if isinstance(object,RobotModel):
             return object.getConfig()
         else:
-            import config
+            from . import config
             return config.getConfig(object)
     elif type == 'Configs':
         return [make('Config',object)]
@@ -148,8 +154,9 @@ def make(type,object=None):
         p.setPoint((0,0,0))
         return p
     elif type == 'VolumeGrid':
-        v = VolumeGrid()
-        return v
+        return VolumeGrid()
+    elif type == 'ConvexHull':
+        return ConvexHull()
     elif isinstance(object,WorldModel):
         return WorldModel()
     elif isinstance(object,(RobotModel,RigidObjectModel,TerrainModel)):

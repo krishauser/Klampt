@@ -307,11 +307,17 @@ void ODERobot::Create(int robotIndex,dWorldID worldID,bool useBoundaryLayer)
     int res=dMassCheck(&mass);
     if(res != 1) {
       LOG4CXX_WARN(GET_LOGGER(ODESimulator),"Uh... mass of body "<<i<<" is not considered to be valid by ODE?");
+      if(body.mass <= 0) {
+        LOG4CXX_WARN(GET_LOGGER(ODESimulator),"  Mass: "<<body.mass);
+        mass.mass = 0.001;
+        LOG4CXX_WARN(GET_LOGGER(ODESimulator),"  Setting mass to 0.001.");
+      }
       LOG4CXX_WARN(GET_LOGGER(ODESimulator),"  Inertia: "<<body.inertia);
-      body.inertia.setIdentity(); body.inertia *= 0.01;
+      body.inertia.setIdentity(); body.inertia *= 0.001;
       CopyMatrix(mass.I,body.inertia);
-      LOG4CXX_WARN(GET_LOGGER(ODESimulator),"  Setting inertia to 0.01*identity.");
+      LOG4CXX_WARN(GET_LOGGER(ODESimulator),"  Setting inertia to 0.001*identity.");
       KrisLibrary::loggerWait();
+      Assert(dMassCheck(&mass)==1);
     }
     dBodySetMass(bodyID[primaryLink],&mass);
 

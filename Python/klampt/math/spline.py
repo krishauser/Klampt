@@ -1,5 +1,5 @@
 """Spline utilities."""
-import vectorops
+from . import vectorops
 
 def hermite_eval(x1,v1,x2,v2,u):
     """Returns the position a hermite curve with control points
@@ -14,7 +14,7 @@ def hermite_eval(x1,v1,x2,v2,u):
     cv1 = (u3-2.0*u2+u)
     cv2 = (u3-u2)
     x = [0]*len(x1)
-    for i in xrange(len(x1)):
+    for i in range(len(x1)):
         x[i] = cx1*x1[i] + cx2*x2[i] + cv1*v1[i] + cv2*v2[i]
     return x
 
@@ -33,7 +33,7 @@ def hermite_deriv(x1,v1,x2,v2,u,order=1):
         dcv1 = 3.0*u2-4.0*u+1.0
         dcv2 = 3.0*u2-2.0*u
         dx = [0]*len(x1)
-        for i in xrange(len(x1)):
+        for i in range(len(x1)):
             dx[i] = dcx1*x1[i] + dcx2*x2[i] + dcv1*v1[i] + dcv2*v2[i];
         return dx
     elif order == 2:
@@ -42,7 +42,7 @@ def hermite_deriv(x1,v1,x2,v2,u,order=1):
         ddcv1 = 6.0*u-4.0
         ddcv2 = 6.0*u-2.0
         ddx = [0]*len(x1)
-        for i in xrange(len(x1)):
+        for i in range(len(x1)):
             ddx[i] = ddcx1*x1[i] + ddcx2*x2[i] + ddcv1*v1[i] + ddcv2*v2[i]
         return ddx
     elif order == 3:
@@ -51,7 +51,7 @@ def hermite_deriv(x1,v1,x2,v2,u,order=1):
         cv1 = 6.0
         cv2 = 6.0
         dddx = [0]*len(x1)
-        for i in xrange(len(x1)):
+        for i in range(len(x1)):
             dddx[i] = cx1*x1[i] + cx2*x2[i] + cv1*v1[i] + cv2*v2[i]
         return dddx
     elif order == 0:

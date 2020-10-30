@@ -1,7 +1,7 @@
 import math
 import time
 from ..math import vectorops
-from cspace import CSpace,MotionPlan
+from .cspace import CSpace,MotionPlan
 
 def default_sampleneighborhood(c,r):
     return [ci + random.uniform(-r,r) for ci in c]

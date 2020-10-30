@@ -6,6 +6,8 @@
 #include <KrisLibrary/errors.h>
 #include <iostream>
 
+DECLARE_LOGGER(ODESimulator)
+
 double ODERigidObject::defaultPadding = gDefaultRigidObjectPadding;
 ODESurfaceProperties ODERigidObject::defaultSurface = {0.1,0.5,Inf,Inf};
 
@@ -32,8 +34,8 @@ void ODERigidObject::Create(dWorldID worldID,dSpaceID space,bool useBoundaryLaye
   CopyMatrix(mass.I,obj.inertia);
   int res=dMassCheck(&mass);
   if(res != 1) {
-    fprintf(stderr,"Uh... mass is not considered to be valid by ODE?\n");
-    std::cerr<<"Inertia: "<<obj.inertia<<std::endl;
+    LOG4CXX_ERROR(GET_LOGGER(ODESimulator),"Uh... rigid object mass is not considered to be valid by ODE?");
+    LOG4CXX_ERROR(GET_LOGGER(ODESimulator),"  Inertia: "<<obj.inertia);
   }
   dBodySetMass(bodyID,&mass);
   

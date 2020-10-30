@@ -1,6 +1,15 @@
 klampt.io package
 =================
 
+.. autosummary::
+    ~klampt.io.html
+    ~klampt.io.loader
+    ~klampt.io.resource
+    ~klampt.io.ros
+    ~klampt.io.numpy_convert
+    ~klampt.io.open3d_convert
+    ~klampt.io.povray
+    
 
 .. Submodules
 .. ----------
@@ -53,9 +62,18 @@ klampt.io.open3d_convert module
     :undoc-members:
     :show-inheritance:
 
+klampt.io.povray module
+-----------------------
 
-.. Module contents
-.. ---------------
+.. automodule:: klampt.io.povray
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+
+Module contents
+---------------
 
 .. automodule:: klampt.io
     :members:

@@ -1,12 +1,15 @@
 from ..robotsim import *
-import simlog
+from . import simlog
 import weakref
 
 class SensorEmulator:
-    """A generic sensor emulator.  Translates from the physics simulation -> inputs to a Python controller.
+    """A generic sensor emulator.  Translates from the physics simulation ->
+    inputs to a Python controller.
 
-    The Python controller is assumed to have the structure of BaseController, where it is given as input
-    a dictionary of named items reflecting the most up-to-date readings on each control time-step.
+    The Python controller is assumed to have the structure of
+    :class:`klampt.control.controller.ControllerBase`, where it is given as
+    input a dictionary of named items reflecting the most up-to-date readings
+    on each control time-step.
     """
     def __init__(self):
         pass
@@ -16,6 +19,7 @@ class SensorEmulator:
     def drawGL(self):
         """Optional: for debugging"""
         return
+
 
 class DefaultSensorEmulator(SensorEmulator):
     """A sensor emulator that by default provides the robot's commanded position, velocity, 
@@ -49,7 +53,9 @@ class DefaultSensorEmulator(SensorEmulator):
                 r.link(j).appearance().setColor(0,1,0,0.5)
             r.drawGL()
             for j in range(r.numLinks()):
+
                 r.link(j).appearance().setColor(*colors[j])
+
 
 class ActuatorEmulator:
     """A generic actuator emulator.  Translates outputs from the Python controller -> the physics simulation.
@@ -81,6 +87,7 @@ class ActuatorEmulator:
     def drawGL(self):
         """Optional: for debugging"""
         return
+
 
 class DefaultActuatorEmulator(ActuatorEmulator):
     """This default emulator can take the commands
@@ -114,25 +121,27 @@ class DefaultActuatorEmulator(ActuatorEmulator):
             c.setVelocity(commands['dqcmd'],commands['tcmd'])
         elif 'torquecmd' in commands:
             c.setTorque(commands['torquecmd'])
-        for (k,v) in commands.iteritems():
+        for (k,v) in commands.items():
             if k not in defaultVals:
-                print "Sending command",k,v,"to low level controller"
+                print("Sending command",k,v,"to low level controller")
                 c.sendCommand(k,v)
         return
 
 
 class SimpleSimulator (Simulator):
-    """A convenience class that enables easy logging, definition of simulation hooks, emulators
-    of sensors / actuators, and definition of robot controllers.
+    """A convenience class that enables easy logging, definition of simulation
+    hooks, emulators of sensors / actuators, and definition of robot
+    controllers.
 
-    Note that for greatest compatibility you should NOT manually apply forces to the simulation
-    except for inside of hooks and emulators.  This is because several simulation sub-steps will be
-    taken, and you will have no control over the forces applied except for the first time step.
+    Note that for greatest compatibility you should NOT manually apply forces
+    to the simulation except for inside of hooks and emulators.  This is
+    because several simulation sub-steps will be taken, and you will have
+    no control over the forces applied except for the first time step.
+
+    Args:
+        world (WorldModel): the world that should be simulated.
     """
     def __init__(self,world):
-        """Args:
-            world (WorldModel): the world that should be simulated.
-        """
         Simulator.__init__(self,world)
         #these are functions automatically called at each time step
         self.robotControllers = [None]*world.numRobots()
@@ -187,7 +196,10 @@ class SimpleSimulator (Simulator):
             robot: either an index, string, or RobotModel.
             function: either 1) a one-argument function that takes the
                 robot's SimRobotController instance, or 2) an instance of a
-                BaseController class (see Python/control/controller.py)
+                :class:`klampt.control.controller.ControllerBlock` class,
+                which must conform to the
+                :class:`klampt.control.controller.RobotControllerBase`
+                convention.
         """
         if isinstance(robot,int):
             index = robot
@@ -198,7 +210,7 @@ class SimpleSimulator (Simulator):
         else:
             raise ValueError("Invalid robot specified")
         if not callable(function):
-            assert hasattr(function,'output_and_advance'),"setController takes either a 1-argument function or a BaseController instance"
+            assert hasattr(function,'advance'),"setController takes either a 1-argument function or a ControllerBase instance"
         self.robotControllers += [None]*(self.world.numRobots()-len(self.robotControllers))
         self.robotControllers[index] = function
 
@@ -274,7 +286,7 @@ class SimpleSimulator (Simulator):
 
     def drawControllersGL(self):
         #draw controllers
-        for i in xrange(self.world.numRobots()):
+        for i in range(self.world.numRobots()):
             if self.robotControllers[i] == None: 
                 continue
             if not hasattr(self.robotControllers[i],'drawGL'):
@@ -330,9 +342,9 @@ class SimpleSimulator (Simulator):
                         resolvedArgs.append(a)
                 try:
                     hook(*resolvedArgs)
-                except Exception, e:
+                except Exception as e:
                     import traceback
-                    print "Hook encountered error with arguments",resolvedArgs
+                    print("Hook encountered error with arguments",resolvedArgs)
                     traceback.print_exc()
                     raise
             #Finally advance the physics simulation
@@ -360,16 +372,16 @@ class SimpleSimulator (Simulator):
                 """
                 #debug: print measurements
                 for (k,v) in measurements.iteritems():
-                    print k,":",
+                    print(k,":",)
                     if hasattr(v,'__iter__'):
-                        print ' '.join("%.2f"%(vi,) for vi in v)
+                        print(' '.join("%.2f"%(vi,) for vi in v))
                     else:
-                        print v
+                        print(v)
                 """
                 if c:
-                    #assume it's a BaseController instance
+                    #assume it's a ControllerBase instance
                     #compute controller output, advance controller
-                    output = c.output_and_advance(**measurements)
+                    output = c.advance(**measurements)
                 else:
                     output = None
 

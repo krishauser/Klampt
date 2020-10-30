@@ -47,7 +47,7 @@ class free:
         Ry = so3.rotation([0.,1.,0.],self.rot[0])
         R = so3.mul(Rz,so3.mul(Rx,Ry))
         R = so3.mul(R,o);
-        raise (R,self.pos)
+        raise R
 
     def set_matrix(self,T):
         raise NotImplementedError("Can't set free camera matrix yet")

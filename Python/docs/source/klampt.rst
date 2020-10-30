@@ -12,6 +12,7 @@ Full API documentation
    klampt.sim
    klampt.plan
    klampt.io
+   klampt.control
 
 
 

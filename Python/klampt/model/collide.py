@@ -11,10 +11,27 @@ The :meth:`ray_cast` function is a convenient way to return the first point of
 intersection for a ray and a group of objects.
 """
 
-from __future__ import generators
+
 from ..robotsim import *
 from ..math import vectorops,se3
 
+
+def bb_create(*ptlist):
+    """Creates a bounding box from an optional set of points. If no points
+    are provided, creates an empty bounding box."""
+    if len(ptlist) == 0:
+        return [float('inf')]*3,[float('-inf')]*3
+    else:
+        bmin,bmax = list(ptlist[0]),list(ptlist[0])
+        for i in range(1,len(ptlist)):
+            x = ptlist[i]
+            bmin = [min(a,b) for (a,b) in zip(bmin,x)]
+            bmax = [max(a,b) for (a,b) in zip(bmax,x)]
+        return bmin,bmax
+
+def bb_empty(bb):
+    """Returns True if the bounding box is empty"""
+    return any((a > b) for (a,b) in zip(bb[0],bb[1]))
 
 def bb_intersect(a,b):
     """Returns true if the bounding boxes (a[0]->a[1]) and (b[0]->b[1]) intersect"""
@@ -22,8 +39,13 @@ def bb_intersect(a,b):
     bmin,bmax=b
     return not any(q < u or v < p for (p,q,u,v) in zip(amin,amax,bmin,bmax))
 
+def bb_intersection(*bbs):
+    """Returns the bounding box representing the intersection the given bboxes.
+    The result may be empty."""
+    return [max(*x) for x in zip(*[b[0] for b in bbs])],[min(*x) for x in zip(*[b[1] for b in bbs])]
+
 def bb_union(*bbs):
-    """Returns a bounding box containing the given bboxes"""
+    """Returns the smallest bounding box containing the given bboxes"""
     return [min(*x) for x in zip(*[b[0] for b in bbs])],[max(*x) for x in zip(*[b[1] for b in bbs])]
 
 
@@ -236,7 +258,7 @@ class WorldCollider:
         self.rigidObjects = []
         self.robots = []
         
-        for i in xrange(world.numTerrains()):
+        for i in range(world.numTerrains()):
             t = world.terrain(i)
             g = t.geometry()
             if g != None and g.type()!="":
@@ -244,7 +266,7 @@ class WorldCollider:
                 self.geomList.append((t,g))
             else:
                 self.terrains.append(-1)
-        for i in xrange(world.numRigidObjects()):
+        for i in range(world.numRigidObjects()):
             o = world.rigidObject(i)
             g = o.geometry()
             if g != None and g.type()!="":
@@ -252,10 +274,10 @@ class WorldCollider:
                 self.geomList.append((o,g))
             else:
                 self.rigidObjects.append(-1)
-        for i in xrange(world.numRobots()):
+        for i in range(world.numRobots()):
             r = world.robot(i)
             self.robots.append([])
-            for j in xrange(r.numLinks()):
+            for j in range(r.numLinks()):
                 l = r.link(j)
                 g = l.geometry()
                 if g != None and g.type()!="":
@@ -265,7 +287,7 @@ class WorldCollider:
                     self.robots[-1].append(-1)
 
         #construct the collision mask
-        for i in xrange(len(self.geomList)):
+        for i in range(len(self.geomList)):
             self.mask.append(set())
         for t in self.terrains:
             if t < 0: continue
@@ -281,7 +303,7 @@ class WorldCollider:
                         self.mask[l].add(t)
                         self.mask[t].add(l)
                     else:
-                        #print "Ignoring fixed link..."
+                        #print("Ignoring fixed link...")
                         pass
         for o in self.rigidObjects:
             if o < 0: continue
@@ -305,8 +327,8 @@ class WorldCollider:
             #robot self-collision
             rob = self.geomList[r[0]][0].robot()
             nl = rob.numLinks()
-            for i in xrange(nl):
-                for j in xrange(i):
+            for i in range(nl):
+                for j in range(i):
                     if rob.selfCollisionEnabled(i,j):
                         self.mask[r[i]].add(r[j])
                         self.mask[r[j]].add(r[i])
@@ -388,7 +410,7 @@ class WorldCollider:
 
                 for i,j in worldCollider.collisionTests():
                     if i[1].collides(j[1]):
-                        print "Object",i[0].getName(),"collides with",j[0].getName()
+                        print("Object",i[0].getName(),"collides with",j[0].getName())
                     
         (Note that for this purpose is easier to just call :meth:`collisions`;
         however you may want to use `collisionTests` to perform other queries
@@ -491,7 +513,7 @@ class WorldCollider:
             robot = robot.index
         if robot is None:
             #test all robots
-            for r in xrange(len(self.robots)):
+            for r in range(len(self.robots)):
                 for c in self.robotSelfCollisions(r):
                     yield c
             return
@@ -522,7 +544,7 @@ class WorldCollider:
             object = object.index
         if object is None:
             #test all objects
-            for o in xrange(len(self.rigidObjects)):
+            for o in range(len(self.rigidObjects)):
                 for c in self.robotObjectCollisions(robot,o):
                     yield c
             return
@@ -554,7 +576,7 @@ class WorldCollider:
             terrain = terrain.index
         if terrain is None:
             #test all terrains
-            for t in xrange(len(self.terrains)):
+            for t in range(len(self.terrains)):
                 for c in self.robotTerrainCollisions(robot,t):
                     yield c
             return
@@ -586,7 +608,7 @@ class WorldCollider:
             terrain = terrain.index
         if terrain is None:
             #test all terrains
-            for t in xrange(len(self.terrains)):
+            for t in range(len(self.terrains)):
                 for c in self.objectTerrainCollisions(object,t):
                     yield c
             return
@@ -617,7 +639,7 @@ class WorldCollider:
             object2 = object2.index
         if object2 is None:
             #test all terrains
-            for o in xrange(len(self.rigidObjects)):
+            for o in range(len(self.rigidObjects)):
                 for c in self.objectObjectCollisions(object):
                     yield c
             return
@@ -666,7 +688,7 @@ class WorldCollider:
         """
         if isinstance(robot,RobotModel):
             try:
-                robot = [r for r in xrange(self.world.numRobots()) if self.world.robot(r).getID()==robot.getID()][0]
+                robot = [r for r in range(self.world.numRobots()) if self.world.robot(r).getID()==robot.getID()][0]
             except IndexError:
                 raise RuntimeError("Robot "+robot.getName()+" is not found in the world!")
         rindices = self.robots[robot]

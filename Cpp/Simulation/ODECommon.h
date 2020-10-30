@@ -30,6 +30,7 @@ inline void CopyMatrix(dMatrix3 x,const Matrix3& v)
   for(int i=0;i<3;i++) 
     for(int j=0;j<3;j++)
       x[i*4+j] = v(i,j);
+  x[3] = x[7] = x[11] = 0;
 }
 
 inline void CopyMatrix(Matrix3& x,const dMatrix3 v)

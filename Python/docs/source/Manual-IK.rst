@@ -332,7 +332,7 @@ the point (1.5,0,1). Let us start doing this in a naive manner:
     ...
     >>> robot= world.robot(0)
     >>> link = robot.link(2)
-    >>> print robot.getConfig()
+    >>> print(robot.getConfig())
     [0.0, 0.0, 0.0]
     >>> obj = ik.objective(link,local=[1,0,0],world=[1.5,0,1])
     >>> solver = ik.solver(obj)
@@ -340,7 +340,7 @@ the point (1.5,0,1). Let us start doing this in a naive manner:
     False
     >>> robot.getConfig()
     [0.0, 0.0, 4.215773454225064]
-    >>> print solver.getResidual()
+    >>> print(solver.getResidual())
     [0.023547356775342587, 0.0, -0.12079986421507116]
 
 So why did this fail? Well, the joint limits on the robot don't allow
@@ -356,9 +356,9 @@ turn off the limits, like so:
     >>> robot.setConfig([0,0,0])
     >>> solver.solve()
     True
-    >>> print robot.getConfig()
+    >>> print(robot.getConfig())
     [6.2210827440574805, 6.275852672978871, 4.263178112891824]
-    >>> print solver.getResidual()
+    >>> print(solver.getResidual())
     [-4.36569416761845e-06, 0.0, -2.3191920574427982e-05]
 
 Another rationale is that the initial seed configuration as not chosen
@@ -372,9 +372,9 @@ restarts*, one iteration of which is shown as follows:
     >>> solver.sampleInitial()   # the initial configuration didn't let the solver find a solution, sample a new one
     >>> solver.solve() 
     True
-    >>> print robot.getConfig()
+    >>> print(robot.getConfig())
     [0.9280844225663805, 5.24982420453923, 2.3118916002271988]
-    >>> print solver.getResidual()
+    >>> print(solver.getResidual())
     [-4.36569416761845e-06, 0.0, -2.3191920574427982e-05]
 
 We can visualize the result as follows:
@@ -406,11 +406,11 @@ configuration that reaches almost as close as possible to the target:
     >>> robot.setConfig([0,0,0])
     >>> solver.solve()
     False
-    >>> print robot.getConfig()
+    >>> print(robot.getConfig())
     [5.88713697296476, 6.278604588847693, 6.274884577272825]
-    >>> print solver.getResidual()
+    >>> print(solver.getResidual())
     [-0.2390446069453609, 0.0, -0.32659917185852283]
-    >>> print link.getWorldPosition([1,0,0])
+    >>> print(link.getWorldPosition([1,0,0]))
     [2.760955393054639, 0.0, 1.1734008281414772]
 
 Running the visualization code again, we get something like this:
@@ -421,7 +421,7 @@ Running the visualization code again, we get something like this:
 Exercise
 ------------------
 
-Let us start from Exercise 2 in ``Klampt-examples/Python/exercises/ik``.
+Let us start from Exercise 2 in ``Klampt-examples/Python3/exercises/ik``.
 Open up ``ik.pdf`` in this folder, and read the instructions. Then run
 
 ::
@@ -454,7 +454,7 @@ set the initial configuration to 0 by calling robot.setConfig, and then
             s.setTolerance(1e-3)
             res = s.solve()
             numIter = s.lastSolveIters()
-            if not res: print "IK failure!"
+            if not res: print("IK failure!")
 
 If res=True, then the robot's configuration is now set to the IK
 solution. If res=False, then the robot's configuration is set to the
@@ -466,7 +466,7 @@ klampt.model.ik:
 .. code:: python
 
             res = model.ik.solve(obj)
-            if not res: print "IK failure!"
+            if not res: print("IK failure!")
 
 However, note that this will only give you the solution to the IK
 problem. It will not allow you to later interact directly with the
@@ -517,7 +517,7 @@ this is to just perform random restarts on the start configuration:
                     if res:
                             solved=True
                             break
-            if not solved: print "IK failure!"
+            if not solved: print("IK failure!")
 
 Additionally, Klamp't has a convenience routine
 :meth:`~klampt.model.ik.solve_global` that implements this same functionality in
@@ -526,7 +526,7 @@ a single line.
 ::
 
             if not ik.solve_global(obj,iters = 100,tol=1e-3,numRestarts=100):
-                    print "IK failure!"
+                    print("IK failure!")
 
 For feasible objectives, this is likely to come up with a solution in
 just a few iterations, and not be much more expensive than a single IK

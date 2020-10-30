@@ -136,7 +136,7 @@ Alternatively, there are several robot-level C-spaces are available for you in
    but also enforces balance under gravity given known points of contact.
 
 These instances require you to provide as input a robot and a
-:class:`klampt.model.collide.WorldCollider: instance, as follows:
+:class:`klampt.model.collide.WorldCollider`: instance, as follows:
 
 .. code:: python
 
@@ -282,8 +282,8 @@ following code gives an example of how to do so.
         planner.planMore(increment)
         path = planner.getPath()
         if len(path) > 0:
-            print "Solved, path has",len(path),"milestones"
-            print "Took time",time.time()-t0
+            print("Solved, path has",len(path),"milestones")
+            print("Took time",time.time()-t0)
             break
     planner.close()   #frees a little memory... this is only really necessary if you are creating lots of planners
 
@@ -328,12 +328,12 @@ Open up a new Python file in a text editor, and enter in the following code:
     save,qstart = resource.edit("Start config",qstart,"Config",world=world)
     #it's worthwile to make sure that it's feasible
     while save and not space.feasible(qstart):
-        print "Start configuration isn't feasible, please pick one that is collision-free"
+        print("Start configuration isn't feasible, please pick one that is collision-free")
         save,qstart = resource.edit("Start config",qstart,"Config",world=world)
 
     save,qgoal = resource.edit("Goal config",qgoal,"Config",world=world)
     while save and not space.feasible(qgoal):
-        print "Goal configuration isn't feasible, please pick one that is collision-free"
+        print("Goal configuration isn't feasible, please pick one that is collision-free")
         save,qgoal = resource.edit("Goal config",qgoal,"Config",world=world)
 
 This will pop up some windows so you can edit the start and goal configuration for a motion plan.
@@ -357,26 +357,26 @@ run it for some amount of time.  Add this code to the end of the file, and run a
         'restartTermCond':"{foundSolution:1,maxIters:1000}"
     }
     t0 = time.time()
-    print "Creating planner..."
+    print("Creating planner...")
     #Manual construction of planner 
     planner = cspace.MotionPlan(space, **settings)
     planner.setEndpoints(qstart,qgoal)
-    print "Planner creation time",time.time()-t0
+    print("Planner creation time",time.time()-t0)
     t0 = time.time()
-    print "Planning..."
+    print("Planning...")
     numIters = 0
     for round in range(10):
         planner.planMore(500)
         numIters += 1
         if planner.getPath() is not None:
           break
-    print "Planning time,",numIters,"iterations",time.time()-t0
+    print("Planning time,",numIters,"iterations",time.time()-t0)
 
     path = planner.getPath()
     if path is not None:
-        print "Got a path with",len(path),"milestones"
+        print("Got a path with",len(path),"milestones")
     else:
-        print "No feasible path was found"
+        print("No feasible path was found")
 
 Great! This took some time, and we got a printout at the end.  But is the plan correct?  Moreover, the planner might have failed, and we don't necessarily know why.  For example, if we make it tough for the planner by asking the robot to go under the table, the planner may or may not succeed.  We typically will want to do some inspection of the results, either looking at the planning statistics or visualizing the result.  We may also want to save the result to disk, in case we'd like to look at it later.
 
@@ -384,21 +384,21 @@ Great! This took some time, and we got a printout at the end.  But is the plan c
     
     #provide some debugging information
     V,E = planner.getRoadmap()
-    print len(V),"feasible milestones sampled,",len(E),"edges connected"
+    print(len(V),"feasible milestones sampled,",len(E),"edges connected")
 
-    print "CSpace stats:"
+    print("CSpace stats:")
     spacestats = space.getStats()
     for k in sorted(spacestats.keys()):
-        print " ",k,":",spacestats[k]
+        print(" ",k,":",spacestats[k])
 
-    print "Planner stats:"
+    print("Planner stats:")
     planstats = planner.getStats()
     for k in sorted(planstats.keys()):
-        print " ",k,":",planstats[k]
+        print(" ",k,":",planstats[k])
 
     if path:
         #save planned milestone path to disk
-        print "Saving to my_plan.configs"
+        print("Saving to my_plan.configs")
         resource.set("my_plan.configs",path,"Configs")
 
         #visualize path as a Trajectory resource
@@ -422,7 +422,7 @@ If you're running lots of plans, you may want to also perform these final cleanu
     planner.space.close()
     planner.close()
 
-See Klampt-examples/Python/demos/planningtest.py for more information.
+See Klampt-examples/Python3/demos/planningtest.py for more information.
 
 
 
@@ -524,7 +524,7 @@ Example
 ~~~~~~~~
 
 An example to illustrate the C-space level motion planning process is given
-in ``Klampt-examples/Python/exercises/motionplanning/ex.py``.
+in ``Klampt-examples/Python3/exercises/motionplanning/ex.py``.
 
 Open up the Python file using a text editor.  It defines CircleObstacleCSpace,
 which is a CSpace subclass, as well as some visualization routines.

@@ -17,79 +17,76 @@ Main features include:
   transforms)
 - Simple interface to drawing text and text labels, and drawing plots
 - Multi-window, multi-viewport support
-- Unified interface to PyQt and GLUT (with loss of resource editing functionality
-  under GLUT)
 - Automatic camera setup
+- Unified interface to PyQt, GLUT, IPython, and HTML backends.
+
+    - PyQT is the backend with the fullest amount of features.  
+    - GLUT loses resource editing and advanced windowing functionality.
+    - IPython loses plugins, resource editing, custom drawing, and advanced 
+      windowing functionality.
+    - HTML loses plugins, resource editing, custom drawing, and advanced 
+      windowing functionality.
 
 The resource editing functionality in the klampt.io.resource module (based on 
 klampt.vis.editors) use this module as well.
 
-There are two primary modes of running the visualization: multi-threaded and
-single-threaded.
-
-- Multi-threaded mode pops up a window using show(), and the caller can then
-  continue to interact with the vis module.
-
-  IMPORTANT: multi-threaded mode is only supported on some systems (Linux,
-  Windows using Qt). Due to weird OpenGL and Qt behavior in multi-threaded
-  programs, if you are using multithreaded mode, you should only interact
-  with OpenGL and the visualization using the methods in this module. 
-  Custom OpenGL calls can be implemented inside GLPluginInterface plugins
-  and customDrawFunc.
-
-- Single-threaded mode blocks the calling thread using loop().  To interact
-  with the scene, the caller will provide callbacks that can modify the
-  visualization world, pop up windows etc.
-  Single-threaded mode is the most compatible, and is the only mode that works
-  with GLUT and Mac OS.
-
-There are also some convenience functions that will work in both modes, such
-as run(), spin(), and dialog().
-
-The biggest drawback of single-threaded operation is that you can only start
-blocking dialogs at the outer-most level, not inside loop().  So if you have
-a GUI that's running in real-time, in a multi-threaded visualization your
-code can pop up a dialog (like an editor) and the continue running with the
-returned value.  There are some workarounds in single-thread mode (providing
-a callback to the dialog function) but these are not nearly as convenient. 
-
-It is possible to start in single-threaded mode and convert to multi-threaded, but the converse is not
-possible.
-
-To set up and modify the visualization scene, there are three primary ways to do so:
-
-  - Default scene manager.  You can use the scene manager to add items to the visualization world and
-    then customize them using the vis.X routines in this module (like
-    add, setColor, animate, etc).  See Python/demos/vistemplate.py for more information.  
-    These just mirror the methods in VisualizationPlugin, which is how the default scene manager is
-    implemented.
-  - Custom GLPluginInterface.  The user creates a subclass of GLPluginInterface and performs
-    all the necessary OpenGL drawing / interaction inside its hooks.  In this case, you will call
-    vis.setPlugin(plugin) to override the default visualization behavior before creating your
-    window. See Python/demos/visplugin.py for more information.
-  - Hybrid visualization.  A GLPluginInterface subclass is created to add functionality on top of
-    default the visualization world.  To augment the default scene manager, call vis.pushPlugin(plugin).
-    Another option for hybrid visualization is to  subclass the vis.VisualizationPlugin class, and
-    selectively augment / override the default functionality.
 
 INSTRUCTIONS
-------------
+-------------------
 
-  - To add things to the default visualization:
-    Call the VisualizationPlugin aliases (add, animate, setColor, etc)
+Basic use of the vis module is fairly straightforward:
 
-  - To show the visualization and quit when the user closes the window::
-  
+0. (optional) Configure the rendering backend.
+1. Add things to the visualization scene with ``vis.add(name,thing)``.  Worlds,
+   geometries, points, transforms, trajectories, contact points, and more can
+   be added in this manner.
+2. Modify the appearance of things using modifier calls like
+   ``vis.setColor(name,r,g,b,a)``.
+3. Launch windows and/or visualization thread (OpenGL or IPython modes)
+4. Continue adding, modifying, and removing things as you desire. 
+
+More advanced functions allow you to dynamically launch multiple windows,
+capture user input, and embed the visualization into Qt windows.
+
+The default scene manager lets you set up and modify the visualization scene
+(Steps 1 and 2).  These just mirror the methods in
+:class:`VisualizationScene`, which is how the default scene manager is
+implemented.  See Klampt-examples/Python/demos/vistemplate.py for more
+examples.
+
+To capture user interaction and add other functionality, you may create a
+:class:`~klampt.vis.glinterface.GLPluginInterface` subclass to add
+functionality on top of the default visualization world.  To do so, call
+``vis.pushPlugin(plugin)``.  Note that custom rendering (the ``display()``
+method) is only available with the OpenGL rendering backend.
+
+Only one rendering backend can be chosen during the lifetime of your process,
+and each backend has its own quirks with regards to window launching and
+configuration.  We'll describe the different options below.
+
+
+OpenGL (PyQt, GLUT)
+~~~~~~~~~~~~~~~~~~~~
+
+OpenGL-based visualizations use either PyQt or GLUT to handle windowing and are
+used by default. They run in the current process, have the best performance,
+and offer the richest set of features.  
+
+Quick start
+^^^^^^^^^^^^^^^
+
+- To show the visualization and quit when the user closes the window::
+
         vis.run()
 
-  - To show the visualization and return when the user closes the window::
+- To show the visualization and return when the user closes the window::
 
         vis.dialog()
         ... do stuff afterwards ... 
         vis.kill()
 
-  - To show the visualization and run a script alongside it until the user
-    closes the window (multithreaded mode)::
+- To show the visualization and run a script alongside it until the user
+  closes the window (multithreaded mode)::
  
         vis.show()
         while vis.shown():
@@ -101,8 +98,8 @@ INSTRUCTIONS
         ... do stuff afterwards ...
         vis.kill()
 
-  - To show the visualization and run python commands until the user closes
-    the window (single-threaded mode)::
+- To show the visualization and run python commands until the user closes
+  the window (single-threaded mode)::
  
         def callback():
             ... do stuff ...
@@ -110,12 +107,12 @@ INSTRUCTIONS
         vis.loop(setup=vis.show,callback=callback)
         vis.kill()
 
-  - To run a window with a custom plugin (GLPluginInterface) and terminate on
-    closure::
+- To run a window with a custom plugin (GLPluginInterface) and terminate on
+  closure::
  
         vis.run(plugin)
   
-  - To show a dialog or parallel window::
+- To show a dialog or parallel window::
 
         vis.setPlugin(plugin)
         ... then call  
@@ -125,14 +122,14 @@ INSTRUCTIONS
         ... do stuff afterwards ... 
         vis.kill()
 
-  - To add a GLPluginInterface that just customizes a few things on top of
-    the default visualization::
+- To add a GLPluginInterface that just customizes a few things on top of
+  the default visualization::
 
         vis.pushPlugin(plugin)
         vis.dialog()
         vis.popPlugin()
 
-  - To run plugins side-by-side in the same window::
+- To run plugins side-by-side in the same window::
 
         vis.setPlugin(plugin1)
         vis.addPlugin(plugin2)  #this creates a new split-screen
@@ -142,7 +139,7 @@ INSTRUCTIONS
         ... do stuff afterwards ... 
         vis.kill()
 
-  - To run a custom Qt window or dialog containing a visualization window::
+- To run a custom Qt window or dialog containing a visualization window::
 
         vis.setPlugin([desired plugin or None for visualization])
         def makeMyUI(qtglwidget):
@@ -154,12 +151,12 @@ INSTRUCTIONS
         ... do stuff afterwards ... 
         vis.kill()
 
-  - To launch a second window after the first is closed: just call whatever you
-    want again. Note: if show was previously called with a plugin and you wish to
-    revert to the default visualization, you should call setPlugin(None) first to 
-    restore the default.
+- To launch a second window after the first is closed: just call whatever you
+  want again. Note: if show was previously called with a plugin and you wish to
+  revert to the default visualization, you should call setPlugin(None) first to 
+  restore the default.
 
-  - To create a separate window with a given plugin::
+- To create a separate window with a given plugin::
 
         w1 = vis.createWindow("Window 1")  #w1=0
         show()
@@ -172,43 +169,201 @@ INSTRUCTIONS
             ...
         vis.kill()
 
-Note: in multithreaded mode, when changing the data shown by the window (e.g., modifying
-the configurations of robots in a WorldModel) you must call vis.lock() before
-accessing the data and then call vis.unlock() afterwards.
 
-MAIN INTERFACE
+Implementation Details
+^^^^^^^^^^^^^^^^^^^^^^
+
+There are two primary modes of running OpenGL visualizations: multi-threaded 
+and single-threaded.
+
+- Multi-threaded mode pops up a window using :func:`show`, and the caller can 
+  then continue to interact with the vis module.
+
+  IMPORTANT: multi-threaded mode is only supported on some systems (Linux,
+  Windows using Qt). Due to weird OpenGL and Qt behavior in multi-threaded
+  programs, if you are using multithreaded mode, you should only interact
+  with OpenGL and the visualization using the methods in this module. 
+  Custom OpenGL calls can be implemented inside GLPluginInterface plugins
+  and customDrawFunc.
+
+- Single-threaded mode blocks the calling thread using :func:`loop`.  To 
+  interact with the scene, the caller will provide callbacks that can modify 
+  the visualization world, pop up windows etc.
+  Single-threaded mode is the most compatible, and is the only mode that works
+  with GLUT and Mac OS.
+
+There are also some convenience functions that will work in both modes, such
+as :func:`run`, :func:`spin`, and func:`dialog`.
+
+.. note::
+
+    In multithreaded mode, when changing the data shown by the window (e.g., 
+    modifying the configurations of robots in a WorldModel) you must call
+    ``vis.lock()`` before accessing the data and then call ``vis.unlock()``
+    afterwards.
+
+The biggest drawback of single-threaded operation is that you can only start
+blocking dialogs at the outer-most level, not inside loop().  So if you have
+a GUI that's running in real-time, in a multi-threaded visualization your
+code can pop up a dialog (like an editor) and the continue running with the
+returned value.  There are some workarounds in single-thread mode (providing
+a callback to the dialog function) but these are not nearly as convenient. 
+
+It is possible to start in single-threaded mode and convert to multi-threaded,
+but the converse is not possible.
+
+In OpenGL mode, you can also completely override the scene manager and run your
+own OpenGL calls using a subclass of
+:class:`~klampt.vis.glinterface.GLPluginInterface`.  Here, you will need to
+perform all the necessary OpenGL drawing / interaction inside its hooks.
+To use this, you should call ``vis.setPlugin(plugin)`` to override the default
+visualization behavior before creating your window. See
+Klampt-examples/Python/demos/visplugin.py for an example of this in use.
+
+
+IPython (Jupyter notebook)
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+IPython visualizations run in a Jupyter notebook in a web browser, using a
+WebGL widget to render the content.  The Python code communicates with the 
+browser upon certain calls to update the visualization. 
+
+This mode will be enabled by default inside a Jupyter notebook, or if you first
+call ``vis.init('IPython')``.  In the cell in which you want to show the WebGL
+widget, call ``vis.show()``.  To show multiple widgets you can create new vis
+windows, and use ``setWindow`` to switch between which widget you'd like
+subsequent calls to modify.
+
+The WebGL widget is updated automatically upon ``addX``, ``setColor``,
+``clear``, and ``hide`` calls, but it can't tell when something changes in the
+world, like a robot configuration or object transform.  When the state of
+something in the world changes, you must manually make a call to
+``vis.update()``.
+
+.. note::
+
+    For optimal performance when calling a lot of scene modifiers, you should
+    use ``vis.lock() / unlock()`` calls to block off the start and end of
+    scene modification. Doing so means that the WebGL widget
+    is only re-rendered at the very end of your calls.  
+
+    Note the semantics here are slightly different from the normal sense of
+    locking / unlocking, which is to prevent thread clashes amongst changes to 
+    the underlying object data.
+
+This mode does NOT support plugins, dialogs, or custom draw functions.  Also,
+certain types of geometries like VolumeGrids are not supported.
+
+Animations are supported, but you will manually have to advance the animations 
+and call ``vis.update()`` or ``vis.scene().update()`` for each frame.  
+See :class:`~klampt.vis.ipython.widgets.Playback` for a convenient widget
+that handles this somewhat automatically.
+
+
+HTML
+~~~~~~~~~~~~~~~~~~~~
+This output mode outputs an HTML + Javascript page that uses WebGL to display
+the scene.  Unlike other methods, this is not a live visualization that
+interacts with your Python script, but rather you create a scene / animation
+and then retrieve the HTML afterwards.  This mode is appropriate for Google
+Colab, for example.  
+
+To show the HTML page in an IPython notebook (e.g., Jupyter or Colab),
+call ``vis.show()`` after the animation is done.  This will show the visualizer
+in an IFrame, whose size is the current viewport size.
+
+To use it with a specified time step, use the following::
+
+    vis.add("world",world)
+    dt = 1.0/30.0   #30fps
+    while not done:
+        ... change the world, add / remove things, etc ... 
+        vis.stepAnimation(dt)
+    vis.show()
+
+To have it capture a real-time process, use the ``vis.update()`` function
+instead, as follows::
+
+    vis.add("world",world)
+    while not done:
+        ... change the world, add / remove things, etc ... 
+        vis.update()
+        time.sleep(1.0/3.0)
+    vis.show()
+
+(Don't mix animations and updates, or else the resulting animation will be
+strange.)
+
+You may also retrieve raw HTML, either by casting ``vis.nativeWindow()`` to
+a str, calling ``vis.nativeWindow().iframe(width,height)``, or
+``vis.nativeWindow().page()``.  In the first case, the HTML does not contain
+the <html> or <body> tags, and takes up the whole screen.  The .iframe()
+option places the code into an IFrame of a given size, and the page() option
+wraps the code into a full HTML page.
+
+For example, to turn a Trajectory ``traj`` into a WebGL animation, use this
+code::
+
+    vis.add("world",world)
+    vis.animate(("world",world.robot(0).getName()),traj)
+    t = 0
+    while t < traj.endTime():
+        vis.stepAnimation(dt)
+        t += dt
+    vis.show()
+
+To turn a Simulator into a WebGL animation, use this code::
+
+    sim = Simulator(world)
+    vis.add("world",world)
+    while not done:
+        ... add forces, send commands to the robot, etc...
+        sim.simulate(dt)
+        vis.stepAnimation(dt)
+    vis.show()
+
+
+WINDOWING API
 --------------
 
+- def debug(*args,**kwargs): a super easy way to visualize Klamp't items.
+- def init(backends=None): initializes the visualization.  Can configure here
+  what backend(s) to use.
 - def createWindow(title): creates a new visualization window and returns an
   integer identifier.
 - def setWindow(id): sets the active window for all subsequent calls.  ID 0 is
   the default visualization window.
 - def getWindow(): gets the active window ID.
+- def nativeWindow(): returns the current window object used by the backend.
 - def setWindowTitle(title): sets the title of the visualization window.
-- def getWindowTitle(): returns the title of the visualization window
-- def setPlugin(plugin=None): sets the current plugin (a GLPluginInterface instance). 
-  This plugin will now capture input from the visualization and can override
-  any of the default behavior of the visualizer. Set plugin=None if you want to return
-  to the default visualization.
-- def addPlugin(plugin): adds a second OpenGL viewport governed by the given plugin (a
-  GLPluginInterface instance).  
+- def getWindowTitle(): returns the title of the visualization window.
+- def scene(): returns the current :class:`VisualizationScene`
+- def setPlugin(plugin=None): sets the current plugin (a
+  :class:`~klampt.vis.glinterface.GLPluginInterface` instance).  This plugin
+  will now capture input from the visualization and can override any of the
+  default behavior of the visualizer. Set plugin=None if you want to return to
+  the default visualization.
+- def pushPlugin(plugin): adds a new plugin (e.g., to capture input) on top of
+  the old one.
+- def splitView(plugin=None): adds a second scene / viewport to the current
+  window. If a plugin is provided (a :class:`GLPluginInterface` instance) then
+  the new view is set to use this plugin.
 - def run([plugin]): pops up a dialog and then kills the program afterwards.
-- def kill(): kills all previously launched visualizations and terminates the visualization thread.
-  Afterwards, you may not be able to start new windows. Call this to cleanly quit.
+- def kill(): kills all previously launched visualizations and terminates the
+  visualization thread. Afterwards, you may not be able to start new windows.
+  Call this to cleanly quit.
 - def multithreaded(): returns true if multithreading is available.
-- def loop(setup=None,callback=None,cleanup=None): Runs the visualization thread inline with the main thread.
-  The setup() function is called at the start, the callback() function is run every time the event thread
-  is idle, and the cleanup() function is called on termination.
+- def loop(setup=None,callback=None,cleanup=None): Runs the visualization
+  thread inline with the main thread.  The setup() function is called at the
+  start, the callback() function is run every time the event thread is idle,
+  and the cleanup() function is called on termination.
 
-  NOTE FOR MAC USERS: having the GUI in a separate thread is not supported on Mac, so the loop
-  function must be used rather than show/spin.
+  NOTE FOR MAC USERS: having the GUI in a separate thread is not supported on
+  Mac, so the ``loop`` function must be used rather than ``show``/``spin``.
 
   NOTE FOR GLUT USERS: this may only be run once.
-- def dialog(): pops up a dialog box (does not return to calling thread until closed).
-- def dialogInLoop(callback): for use inside loop(). Pops up a dialog box window, and returns
-  immediately to calling thread.
-  The callback function has signature callback(okPressed), where okPressed is True if the user
-  pressed the OK button, and False if Cancel or the close box was clicked.
+- def dialog(): pops up a dialog box (does not return to calling thread until
+  closed).  
 - def show(display=True): shows/hides a visualization window.  If not called 
   from the visualization loop, a new visualization thread is run in parallel
   with the calling script. 
@@ -219,6 +374,10 @@ MAIN INTERFACE
   be paused until unlock() is called.
 - def unlock(): unlocks the visualization world.  Must only be called once
   after every lock().
+- def update(): manually triggers a redraw of the current scene.
+- def threadCall(func): Call `func` inside the visualization thread. This is 
+  useful for some odd calls that are incompatible with being run outside the Qt
+  or OpenGL thread.
 - def customUI(make_func): launches a user-defined UI window by calling
   `make_func(gl_backend)` in the visualization thread.  This can be used to
   build custom editors and windows that are compatible with other
@@ -226,21 +385,25 @@ MAIN INTERFACE
   QtGLWidget, instantiated for the current plugin, and returns either a
   QDialog or QMainWindow.  If a QDialog is returned, you should launch the
   window via dialog(). Otherwise, you should launch the window via show().
-- def getViewport(): Returns the viewport for the currently active window.
-- def setViewport(viewport): Sets the viewport for the currently active window.
 
-The following VisualizationPlugin methods are also added to the klampt.vis
-namespace and operate on the default plugin.  If you are calling these methods
-from an external loop (as opposed to inside a plugin) be sure to lock/unlock
-the visualization before/after calling these methods.
+SCENE MODIFICATION API
+------------------------
 
-- def add(name,item,keepAppearance=False,*kwargs): adds an item to the 
+The following VisualizationScene methods are also added to the klampt.vis
+namespace and operate on the current scene (as returned from :func:`scene`).
+If you are calling these methods from an external loop (as opposed to inside
+a plugin) be sure to lock/unlock the visualization before/after calling these
+methods.
+
+- def add(name,item,keepAppearance=False,**kwargs): adds an item to the 
   visualization.  name is a unique identifier.  If an item with the same name
   already exists, it will no longer be shown.
 - def clear(): clears the visualization world.
 - def listItems(): prints out all names of visualization objects
 - def listItems(name): prints out all names of visualization objects under the
   given name
+- def getItemName(object): retrieves the name / path of a given object in the
+  scene, or returns None if the object doesnt exist.
 - def dirty(item_name='all'): marks the given item as dirty and recreates the
   OpenGL display lists.  You may need to call this if you modify an item's 
   geometry, for example.
@@ -268,11 +431,11 @@ the visualization before/after calling these methods.
 - def animate(name,animation,speed=1.0,endBehavior='loop'): Sends an animation
   to the object. May be a Trajectory or a list of configurations.  Works with 
   points, so3 elements, se3 elements, rigid objects, or robots. 
-- def pauseAnimation(paused=True): Turns on/off animation.
+- def pauseAnimation(paused=True): Turns animation on/off.
 - def stepAnimation(amount): Moves forward the animation time by the given 
-  amount, in seconds
+  amount, in seconds.
 - def animationTime(newtime=None): Gets/sets the current animation time
-- def addText(name,text,position=None): adds text to the visualizer.
+- def addText(name,text,position=None,**kwargs): adds text to the visualizer.
 - def clearText(): clears all previously added text.
 - def addPlot(name): creates a new empty plot.
 - def addPlotItem(name,itemname): adds a visualization item to a plot.
@@ -286,13 +449,20 @@ the visualization before/after calling these methods.
 - def setPlotSize(name,w,h): sets the width and height of the plot.
 - def savePlot(name,fn): saves a plot to a CSV (extension .csv) or Trajectory 
   (extension .traj) file.
+- def getViewport(): Returns the GLViewport for the currently active view.
+- def setViewport(viewport): Sets the GLViewport for the currently active
+  scene.  (This is also used to resize windows.)
+- def setBackgroundColor(r,g,b,a=1): Sets the background color for the active
+  scene.
 - def autoFitCamera(scale=1.0): Automatically fits the camera to all objects
   in the visualization.  A scale > 1 magnifies the camera zoom.
+- def followCamera(target,translate=True,rotate=False,center=False): Sets the 
+  camera to follow a target.
 
-Utility function:
+Utility functions:
 
-- def autoFitViewport(viewport,objects): Automatically fits a viewport's camera
-  to see all the given objects.
+- def autoFitViewport(viewport,objects,zoom=True,rotate=True): Automatically 
+  fits a viewport's camera to see all the given objects.
 
 NAMING CONVENTION
 -----------------
@@ -303,15 +473,16 @@ paths are drawn with reference to the first robot in the world.
 All items that refer to a name (except add) can either be given a top level
 item name (a string) or a sub-item (a sequence of strings, given a path from
 the root to the leaf). For example, if you've added a RobotWorld under the
-name 'world' containing a robot called 'myRobot', then 
+name 'world' containing a robot called 'myRobot', then::
 
-  `setColor(('world','myRobot'),0,1,0)`
+    setColor(('world','myRobot'),0,1,0)
 
-will turn the robot green.  If 'link5' is the robot's 5th link, then
+will turn the robot green.  If 'link5' is the robot's 5th link, then::
 
-  `setColor(('world','myRobot','link5'),0,0,1)`
+    setColor(('world','myRobot','link5'),0,0,1)
 
 will turn the 5th link blue.
+
 """
 
 
@@ -319,12 +490,12 @@ from OpenGL.GL import *
 import threading
 from ..robotsim import *
 from ..math import vectorops,so3,se3
-import gldraw
-from glinit import *
-from glinit import _GLBackend,_PyQtAvailable,_PyQt5Available,_PyQt4Available,_GLUTAvailable
-from glinterface import GLPluginInterface
-from glprogram import GLPluginProgram
-import glcommon
+from . import gldraw
+from . import glinit
+from .glinit import _GLBackend
+from .glinterface import GLPluginInterface
+from .glprogram import GLPluginProgram
+from . import glcommon
 import time
 import signal
 import weakref
@@ -336,61 +507,236 @@ from ..model.subrobot import SubRobotModel
 from ..model.trajectory import *
 from ..model.multipath import MultiPath
 from ..model.contact import ContactPoint,Hold
+from ..model.collide import bb_empty,bb_create,bb_union
 
-class WindowInfo:
-    """Mode can be hidden, shown, or dialog"""
-    def __init__(self,name,frontend,vis,glwindow=None):
-        self.name = name
-        self.frontend = frontend
-        self.vis = vis
-        self.glwindow = glwindow
-        self.mode = 'hidden'
-        self.guidata = None
-        self.custom_ui = None
-        self.doRefresh = False
-        self.doReload = False
-        self.worlds = []
-        self.active_worlds = []
-
+#the global lock for all visualization calls
 _globalLock = threading.RLock()
-#the VisualizationPlugin instance of the currently active window
-_vis = None
-#the GLPluginProgram of the currently active window.  Accepts _vis as plugin or other user-defined plugins as well
-_frontend = GLPluginProgram()
-#the window title for the next created window
-_window_title = "Klamp't visualizer (%s)"%(sys.argv[0],)
-#a list of WorldModel's in the current window.  A world cannot be used in multiple simultaneous
-#windows in GLUT.  If a world is reused with a different window, its display lists will be refreshed.
-#Note: must be proxies to allow for deletion
-_current_worlds = []
-#list of WindowInfo's
-_windows = []
-#the index of the current window
-_current_window = None
+#the chosen backend
+_backend = None
+#the _WindowManager instance
+_window_manager = None
 
-def createWindow(title):
+def _isnotebook():
+    try:
+        shell = get_ipython().__class__.__name__
+        if shell == 'ZMQInteractiveShell':
+            return True   # Jupyter notebook or qtconsole
+        elif shell == 'TerminalInteractiveShell':
+            return False  # Terminal running IPython
+        else:
+            return False  # Other type (?)
+    except NameError:
+        return False      # Probably standard Python interpreter
+
+def init(backends=None):
+    """Initializes the vis module using some visualization backend.  `backends`
+    can be None, in which case it tries using PyQt, then GLUT, then IPython in
+    that order.  It can also be a string or list of strings from the following
+    set:
+
+    - 'PyQt': uses PyQT + OpenGL
+    - 'PyQt4' / 'PyQt5': uses a specific version of PyQT
+    - 'GLUT': uses GLUT + OpenGL
+    - 'IPython': uses an IPython widget
+    - 'HTML': outputs an HTML / Javascript widget
+
+    """
+    global _backend,_window_manager
+    if _backend is not None:
+        #already initialized
+        return _backend
+    if backends is None:
+        if _isnotebook():
+            backends = ['IPython']
+        else:
+            backends = ['PyQt','GLUT','HTML']
+    if isinstance(backends,str):
+        backends = [backends]
+    OpenGLBackends = ['PyQt','PyQt4','PyQt5','GLUT']
+    order = [[]]
+    for backend in backends:
+        if backend in ['IPython','HTML']:
+            order.append(backend)
+            order.append([])
+        else:
+            order[-1].append(backend)
+    for trials in order:
+        if trials == 'IPython':
+            _backend = 'IPython'
+            from .backends import vis_ipython
+            _window_manager = vis_ipython.IPythonWindowManager()
+            return _backend
+        elif trials == 'HTML':
+            _backend = 'HTML'
+            from .backends import vis_html
+            _window_manager = vis_html.HTMLWindowManager()
+        elif len(trials)>0:
+            res = glinit.init(trials)
+            if res is not None:
+                _backend = res
+                if glinit.active() == 'GLUT':
+                    from .backends import vis_glut
+                    _window_manager = vis_glut.GLUTWindowManager()
+                    print("klampt.visualization: QT is not available, falling back to poorer")
+                    print("GLUT interface.  Returning to another GLUT thread will not work")
+                    print("properly.")
+                    print("")
+                else:
+                    from .backends import vis_qt
+                    _window_manager = vis_qt.QtWindowManager()
+                return res
+    return None
+
+def _init():
+    if init() is None: 
+        raise RuntimeError("Unable to initialize visualization")
+
+def debug(*args,**kwargs):
+    """A super easy way to visualize Klamp't items.
+
+    The argument list can be a list of Klamp't items, and can also include
+    strings or dicts.  If a string precedes an item, then it will be labeled
+    by the string.  If a dict follows an item, the dict will specify 
+    attributes for the item.  It can also contain the 'animation' key, in
+    which case it should contain a Trajectory animating the item.
+
+    Keyword arguments may include:
+
+    - title: the window title
+    - animation: if only one item is given, can set a looping the animation
+    - centerCamera: the name of the item that the camera should look at, or
+      True to center on the whole scene.
+    - followCamera: the name of the item that the camera will follow if
+      animated, or None (default).
+    - dialog: True if a dialog should be shown (default), False if a standard
+      show() should be used.
+    - anything else: Treated as named klamp't item.
+    """
+    oldWindow = getWindow()
+    if oldWindow is None:
+        oldWindow = createWindow()
+    myWindow = createWindow()
+    nextName = None
+    lastName = None
+    itemcount = 0
+    if 'world' in kwargs:
+        add('world',kwargs['world'])
+    for i,arg in enumerate(args):
+        if isinstance(arg,str):
+            nextName = arg
+        elif isinstance(arg,dict):
+            if i==0:
+                continue
+            for (k,v) in arg.items():
+                try:
+                    setAttribute(lastName,k,v)
+                except Exception:
+                    print("vis.debug(): Couldn't set attribute",k,"of item",lastName)
+        else:
+            label = None
+            if nextName is None:
+                name = 'item['+str(itemcount)+']'
+            else:
+                name = nextName
+                label = name
+            add(name,arg)
+            itemcount += 1
+            lastName = name
+            nextName = None
+
+    title = None
+    doDialog = True
+    centerCamera = None
+    followCameraItem = None
+    animation = None
+    for k,v in kwargs.items():
+        if k=='title':
+            title = v
+        elif k=='world':
+            pass
+        elif k=='dialog':
+            doDialog = v
+        elif k=='animation':
+            animation = v
+        elif k=='followCamera':
+            followCameraItem = v
+        elif k=='centerCamera':
+            centerCamera = v
+        else:
+            add(k,v)
+            lastName = k
+            itemcount += 1
+    if title is not None:
+        setWindowTitle(v)
+    else:
+        setWindowTitle("Klampt debugging: "+','.join(scene().items.keys()))
+    if animation is not None:
+        animate(lastName,animation)
+    if centerCamera is True:
+        autoFitCamera(rotate=False)
+    elif centerCamera:
+        if isinstance(centerCamera,int):
+            centerCamera = 'item['+str(centerCamera)+']'
+        elif not isinstance(centerCamera,(str,tuple)):
+            centerCamera = getItemName(centerCamera)
+        if centerCamera is None:
+            print("vis.debug(): could not center camera, invalid object named")
+        else:
+            vp = getViewport()
+            try:
+                autoFitViewport(vp,[scene().getItem(centerCamera)],rotate=False)
+                setViewport(vp)
+            except Exception:
+                print("vis.debug(): Centering camera failed")
+                import traceback
+                traceback.print_exc()
+    if followCameraItem is not None:
+        if followCameraItem is True:
+            followCamera(lastName,center=True)
+        else:
+            if not isinstance(followCameraItem,(str,tuple)):
+                followCameraItem = getItemName(followCameraItem)
+            if followCameraItem is None:
+                print("vis.debug(): could not follow camera, invalid object name")
+            followCamera(followCameraItem,center=True)
+    if doDialog:
+        dialog()
+        setWindow(oldWindow)
+    else:
+        show()
+        #open ended...
+    
+
+
+def nativeWindow():
+    """Returns the active window data used by the backend.  The result will be
+    a subclass of :class:`~klampt.vis.glprogram.GLPluginProgram` if OpenGL is
+    used (PyQt or GLUT) or a :class:`~klampt.vis.ipython.widgets.KlamptWidget`
+    """
+    global _window_manager
+    if _window_manager is None:
+        return None
+    return _window_manager.frontend()
+
+def scene():
+    """Returns the active window data used by the backend.  The result will be
+    a subclass of :class:`VisualizationScene`.
+    """
+    global _window_manager
+    if _window_manager is None:
+        return None
+    return _window_manager.scene()
+
+def createWindow(title=None):
     """Creates a new window (and sets it active).
 
     Returns:
         int: an identifier of the window (for use with :func:`setWindow`).
     """
-    global _globalLock,_frontend,_vis,_window_title,_current_worlds,_windows,_current_window
-    _globalLock.acquire()
-    if len(_windows) == 0:
-        #save the defaults in window 0
-        _windows.append(WindowInfo(_window_title,_frontend,_vis))    
-        _windows[-1].worlds = _current_worlds
-        _windows[-1].active_worlds = _current_worlds[:]
-    #make a new window
-    _window_title = title
-    _frontend = GLPluginProgram()
-    _vis = VisualizationPlugin()
-    _frontend.setPlugin(_vis)
-    _windows.append(WindowInfo(_window_title,_frontend,_vis))
-    _current_worlds = []
-    id = len(_windows)-1
-    _current_window = id
-    _globalLock.release()
+    global _globalLock,_window_manager
+    _init()
+    with _globalLock:
+        id = _window_manager.createWindow(title)
     return id
 
 def setWindow(id):
@@ -399,119 +745,80 @@ def setWindow(id):
     Note:
         ID 0 is the default visualization window.
     """
-    global _globalLock,_frontend,_vis,_window_title,_windows,_current_window,_current_worlds
-    if id == _current_window:
-        return
-    _globalLock.acquire()
-    if len(_windows) == 0:
-        #save the defaults in window 0
-        _windows.append(WindowInfo(_window_title,_frontend,_vis)) 
-        _windows[-1].worlds = _current_worlds
-        _windows[-1].active_worlds = _current_worlds[:]
-    assert id >= 0 and id < len(_windows),"Invalid window id"
-    _window_title,_frontend,_vis,_current_worlds = _windows[id].name,_windows[id].frontend,_windows[id].vis,_windows[id].worlds
-    #print "vis.setWindow(",id,") the window has status",_windows[id].mode
-    if not _PyQtAvailable:
-        #PyQt interface allows sharing display lists but GLUT does not.
-        #refresh all worlds' display lists that were once active.
-        for w in _current_worlds:
-            if w in _windows[_current_window].active_worlds:
-                print "klampt.vis.setWindow(): world",w().index,"becoming active in the new window",id
-                _refreshDisplayLists(w())
-                _windows[_current_window].active_worlds.remove(w)
-    _windows[id].active_worlds = _current_worlds[:]
-    _current_window = id
-    _globalLock.release()
+    global _globalLock,_window_manager
+    _init()
+    with _globalLock:
+        _window_manager.setWindow(id)
 
 def getWindow():
     """Retrieves ID of currently active window or -1 if no window is active"""
-    global _current_window
-    if _current_window is None: return 0
-    return _current_window
+    global _window_manager
+    _init()
+    return _window_manager.getWindow()
 
 def setPlugin(plugin):
     """Lets the user capture input via a glinterface.GLPluginInterface class.
-    Set plugin to None to disable plugins and return to the standard visualization
+    Set plugin to None to disable plugins and return to the standard
+    visualization.
 
     Args:
         plugin (GLPluginInterface): a plugin that will hereafter capture input
-            from the visualization and can override any of the default behavior of the
-            visualizer. Can be set to None if you want to return to the default visualization.
+            from the visualization and can override any of the default behavior
+            of the visualizer. Can be set to None if you want to return to the
+            default visualization.
     """
-    global _globalLock,_frontend,_windows,_current_window
-    _globalLock.acquire()
-    if not isinstance(_frontend,GLPluginProgram):
-        _frontend = GLPluginProgram()
-        if _current_window is not None:
-            if _windows[_current_window].glwindow is not None:
-                _frontend.window = _windows[_current_window].glwindow
-    if plugin is None:
-        global _vis
-        if _vis is None:
-            raise RuntimeError("Visualization disabled")
-        _frontend.setPlugin(_vis)
-    else:
-        _frontend.setPlugin(plugin)
-    if hasattr(plugin,'world'):
-        _checkWindowCurrent(plugin.world)
-    _onFrontendChange()
-    _globalLock.release()
+    global _globalLock,_window_manager
+    _init()
+    with _globalLock:
+        _window_manager.setPlugin(plugin)
 
 def pushPlugin(plugin):
     """Adds a new plugin on top of the old one.
 
     Args:
-        plugin (GLPluginInterface): a plugin that will optionally intercept GUI callbacks.
-            Unhandled callbacks will be forwarded to the next plugin on the stack.
+        plugin (GLPluginInterface): a plugin that will optionally intercept GUI
+            callbacks. Unhandled callbacks will be forwarded to the next plugin
+            on the stack.
 
     """
-    global _globalLock,_frontend
-    _globalLock.acquire()
-    assert isinstance(_frontend,GLPluginProgram),"Can't push a plugin after addPlugin"
-    if len(_frontend.plugins) == 0:
-        global _vis
-        if _vis is None:
-            raise RuntimeError("Visualization disabled")
-        _frontend.setPlugin(_vis)
-    _frontend.pushPlugin(plugin)
-    _onFrontendChange()
-    _globalLock.release()
+    global _globalLock,_window_manager
+    _init()
+    with _globalLock:
+        _window_manager.pushPlugin(plugin)
 
 def popPlugin():
     """Reverses a prior pushPlugin() call"""
-    global _frontend
-    _globalLock.acquire()
-    _frontend.popPlugin()
-    _onFrontendChange()
-    _globalLock.release()
+    global _window_manager
+    _init()
+    with _globalLock:
+        _window_manager.popPlugin()
 
-def addPlugin(plugin):
-    """Adds a second OpenGL viewport in the same window, governed by the given plugin
+def splitView(plugin=None):
+    """Adds a second OpenGL viewport in the same window, governed by the given
+    plugin.
 
     Args:
         plugin (GLPluginInterface): the plugin used for the second viewport.
+            If None, the new viewport will have the default visualization
+            plugin.
 
     """
-    global _frontend
-    _globalLock.acquire()
-    #create a multi-view widget
-    if isinstance(_frontend,glcommon.GLMultiViewportProgram):
-        _frontend.addView(plugin)
-    else:
-        if len(_frontend.plugins) == 0:
-            setPlugin(None)
-        multiProgram = glcommon.GLMultiViewportProgram()
-        multiProgram.window = None
-        if _current_window is not None:
-            if _windows[_current_window].glwindow is not None:
-                multiProgram.window = _windows[_current_window].glwindow
-        multiProgram.addView(_frontend)
-        multiProgram.addView(plugin)
-        multiProgram.name = _window_title
-        _frontend = multiProgram
-    _onFrontendChange()
-    _globalLock.release()
+    global _window_manager
+    _init()
+    with _globalLock:
+        _window_manager.splitView(plugin)
 
+def addPlugin(plugin=None):
+    """Adds a second OpenGL viewport in the same window, governed by the given
+    plugin.  DEPRECATED: use :func:`splitView` instead.
+
+    Args:
+        plugin (GLPluginInterface): the plugin used for the second viewport.
+            If None, the new viewport will have the default visualization
+            plugin.
+
+    """
+    splitView(plugin)
 
 def run(plugin=None):
     """A blocking call to start a single window and then kill the visualization
@@ -525,16 +832,10 @@ def run(plugin=None):
     Note:
         Works in both multi-threaded and single-threaded mode.
     """
-    global _vis_thread_running
+    global _window_manager
+    _init()
     setPlugin(plugin)
-    if _vis_thread_running:
-        #already multithreaded, can't go back to single thread
-        show()
-        while shown():
-            time.sleep(0.1)
-    else:
-        #run in a single thread
-        loop(setup=show)
+    _window_manager.run()
     setPlugin(None)
     kill()
 
@@ -542,101 +843,96 @@ def multithreaded():
     """Returns true if the current GUI system allows multithreading.  Useful for apps
     that will work cross-platform with Macs and systems with only GLUT.
     """
-    global _use_multithreaded
-    return _use_multithreaded
+    global _window_manager
+    _init()
+    return _window_manager.multithreaded()
 
 def dialog():
     """A blocking call to start a single dialog window with the current plugin.  It is
     closed by pressing OK or closing the window."""
-    _dialog()
+    global _window_manager
+    _init()
+    return _window_manager.dialog()
 
 def setWindowTitle(title):
-    global _window_title
-    _window_title = title
-    _onFrontendChange()
+    global _window_manager
+    _init()
+    _window_manager.setWindowName(title)
 
 def getWindowTitle():
-    global _window_title
-    return _window_title
+    global _window_manager
+    return _window_manager.getWindowName()
 
 def kill():
     """This should be called at the end of the calling program to cleanly terminate the
     visualization thread"""
-    global _vis,_globalLock
-    if _vis is None:
-        print "vis.kill() Visualization disabled"
+    global _backend,_window_manager
+    if _backend is None:
         return
-    _kill()
+    _window_manager.kill()
+    _window_manager = None
+    _backend = None
 
 def loop(setup=None,callback=None,cleanup=None):
     """Runs the visualization thread inline with the main thread.
-    The setup() function is called at the start, the callback() function is run every time the event thread
-    is idle, and the cleanup() function is called on termination.
+    The setup() function is called at the start, the callback() function is run
+    every time the event thread is idle, and the cleanup() function is called
+    on termination.
 
     NOTE FOR MAC USERS: a multithreaded GUI is not supported on Mac, so the loop()
     function must be used rather than "show and wait".
 
     NOTE FOR GLUT USERS: this may only be run once.
     """
-    _loop(setup,callback,cleanup)
-
+    global _window_manager
+    _init()
+    _window_manager.loop(setup,callback,cleanup)
 
 def show(display=True):
     """Shows or hides the current window.
 
-    NOTE FOR MAC USERS: due to a lack of support of multithreading on Mac, this will not work outside
-    of the setup / callback / cleanup functions given in a call to loop()."""
-    _globalLock.acquire()
-    if display:
-        _show()
-    else:
-        _hide()
-    _globalLock.release()
+    NOTE FOR MAC USERS: due to a lack of support of multithreading on Mac, this
+    will not work outside of the setup / callback / cleanup functions given in a
+    call to loop().
+    """
+    global _window_manager
+    _init()
+    with _globalLock:
+        if display:
+            _window_manager.show()
+        else:
+            _window_manager.hide()
 
 def spin(duration):
     """Spin-shows a window for a certain duration or until the window is closed."""
-    global _use_multithreaded,_in_vis_loop
-    if _in_vis_loop:
-        raise RuntimeError("spin() cannot be used inside loop()")
-    if _use_multithreaded:
-        #use existing thread
-        show()
-        t = 0
-        while t < duration:
-            if not shown(): break
-            time.sleep(min(0.04,duration-t))
-            t += 0.04
-        show(False)
-    else:
-        #use single thread
-        t0 = time.time()
-        def timed_break():
-            t1 = time.time()
-            if t1 - t0 >= duration:
-                show(False)
-        loop(callback=timed_break,setup=lambda:show())
-    return
+    global _window_manager
+    _init()
+    _window_manager.spin(duration)
 
 def lock():
-    """Begins a locked section.  Needs to be called any time you modify a visualization item outside
-    of the visualization thread.  unlock() must be called to let the visualization thread proceed."""
-    global _globalLock
-    _globalLock.acquire()
+    """Begins a locked section.  Needs to be called any time you modify a
+    visualization item outside of the visualization thread.  unlock() must be
+    called to let the visualization thread proceed.
+    """
+    global _window_manager
+    _window_manager.lock()
 
 def unlock():
     """Ends a locked section acquired by lock()."""
-    global _globalLock,_windows
-    for w in _windows:
-        if w.glwindow:
-            w.doRefresh = True
-    _globalLock.release()
+    global _window_manager
+    _window_manager.unlock()
+
+def update():
+    """Manually triggers a redraw of the current window."""
+    global _window_manager
+    _window_manager.update()
 
 def shown():
     """Returns true if a visualization window is currently shown."""
-    global _globalLock,_vis_thread_running,_current_window
-    _globalLock.acquire()
-    res = (_vis_thread_running and _current_window is not None and _windows[_current_window].mode in ['shown','dialog'] or _windows[_current_window].guidata is not None)
-    _globalLock.release()
+    global _globalLock,_window_manager
+    _init()
+    with _globalLock:
+        res = _window_manager.shown()
     return res
 
 def customUI(func):
@@ -650,25 +946,27 @@ def customUI(func):
             (Could also be used with GLUT, but what would you do with a
             GLUTWindow?)
     """
-    global _globalLock
-    _globalLock.acquire()
-    _set_custom_ui(func)
-    _globalLock.release()
+    global _globalLock,_window_manager
+    _init()
+    with _globalLock:
+        _window_manager.set_custom_ui(func)
 
-def getViewport():
-    """Returns the GLViewport of the current window (see klampt.vis.glprogram.GLViewport)"""
-    return _frontend.get_view()
+def threadCall(func):
+    """Call `func` inside the visualization thread. This is 
+    useful for some odd calls that are incompatible with being run outside the Qt
+    or OpenGL thread.
 
-def setViewport(viewport):
-    """Sets the current window to use a given GLViewport (see klampt.vis.glprogram.GLViewport)"""
-    _frontend.set_view(viewport)
+    Most often used with OpenGL camera simulation.
+    """
+    global _globalLock,_window_manager
+    with _globalLock:
+        _window_manager.threadCall(func)
 
 
-
-######### CONVENIENCE ALIASES FOR VisualizationPlugin methods ###########
+######### CONVENIENCE ALIASES FOR VisualizationScene methods ###########
 def addAction(hook,short_text,key=None,description=None):
-    """Adds a callback that can be triggered by menu choice or keyboard.
-    Alias for _vis.add_action().
+    """Adds a callback to the window that can be triggered by menu choice or
+    keyboard. Alias for nativeWindow().addAction().
 
     Args:
         hook (function): a python callback function, taking no arguments, called
@@ -678,18 +976,14 @@ def addAction(hook,short_text,key=None,description=None):
         description (str, optional): if provided, this is a tooltip that shows up
             when the user hovers their mouse over the menu item.
     """
-
-    global _vis
-    if _vis is None:
-      return
-    _vis.add_action(hook,short_text,key,description)
+    _init()
+    nativeWindow().addAction(hook,short_text,key,description)
 
 def clear():
     """Clears the visualization world."""
-    global _vis
-    if _vis is None:
+    if _backend is None:
         return
-    _vis.clear()
+    scene().clear()
 
 def add(name,item,keepAppearance=False,**kwargs):
     """Adds an item to the visualization.
@@ -703,31 +997,23 @@ def add(name,item,keepAppearance=False,**kwargs):
             vis.add("geom",geometry,color=[1,0,0,1]) adds a geometry while setting
             its color to red.
     """
-    global _vis
-    if _vis is None:
-        print "Visualization disabled"
-        return
-    _globalLock.acquire()
-    _checkWindowCurrent(item)
-    _globalLock.release()
-    _vis.add(name,item,keepAppearance,**kwargs)
-
+    _init()
+    scene().add(name,item,keepAppearance,**kwargs)
+    
 def listItems(name=None,indent=0):
-    global _vis
-    if _vis is None:
-        print "Visualization disabled"
-        return
-    _vis.listItems(name,indent)
+    _init()
+    scene().listItems(name,indent)
+
+def getItemName(object):
+    if _backend is None:
+        return None
+    return scene().getItemName(object)
 
 def dirty(item_name='all'):
     """Marks the given item as dirty and recreates the OpenGL display lists.  You may need
     to call this if you modify an item's geometry, for example.  If things start disappearing
     from your world when you create a new window, you may need to call this too."""
-    global _vis
-    if _vis is None:
-        print "Visualization disabled"
-        return
-    _vis.dirty(item_name)
+    scene().dirty(item_name)
 
 def animate(name,animation,speed=1.0,endBehavior='loop'):
     """Sends an animation to the named object.
@@ -742,25 +1028,15 @@ def animate(name,animation,speed=1.0,endBehavior='loop'):
             (plays once).
 
     """
-    global _vis
-    if _vis is None:
-        print "Visualization disabled"
-        return
-    _vis.animate(name,animation,speed,endBehavior)
+    scene().animate(name,animation,speed,endBehavior)
 
 def pauseAnimation(paused=True):
-    global _vis
-    if _vis is None:
-        print "Visualization disabled"
-        return
-    _vis.pauseAnimation(paused)
+    """Pauses or unpauses the animation."""
+    scene().pauseAnimation(paused)
 
 def stepAnimation(amount):
-    global _vis
-    if _vis is None:
-        print "Visualization disabled"
-        return
-    _vis.stepAnimation(amount)
+    """Moves forward the animation time by ``amount``, given in seconds"""
+    scene().stepAnimation(amount)
 
 def animationTime(newtime=None):
     """Gets/sets the current animation time
@@ -769,18 +1045,11 @@ def animationTime(newtime=None):
 
     If newtime is not None, this sets a new animation time.
     """
-    global _vis
-    if _vis is None:
-        print "Visualization disabled"
-        return 0
-    return _vis.animationTime(newtime)
+    return scene().animationTime(newtime)
 
 def remove(name):
     """Removes an item from the visualization"""
-    global _vis
-    if _vis is None:
-        return
-    return _vis.remove(name)
+    return scene().remove(name)
 
 def getItemConfig(name):
     """Returns a configuration of an item from the visualization.  Useful for 
@@ -789,10 +1058,7 @@ def getItemConfig(name):
     Returns:
         list: a list of floats describing the item's current configuration.  Returns
             None if name doesnt refer to an object."""
-    global _vis
-    if _vis is None:
-        return None
-    return _vis.getItemConfig(name)
+    return scene().getItemConfig(name)
 
 def setItemConfig(name,value):
     """Sets a configuration of an item from the visualization.
@@ -803,10 +1069,7 @@ def setItemConfig(name,value):
             depends on the object's type.  See the config module for more information.
 
     """
-    global _vis
-    if _vis is None:
-        return
-    return _vis.setItemConfig(name,value)
+    return scene().setItemConfig(name,value)
 
 def setLabel(name,text):
     """Changes the label of an item in the visualization"""
@@ -814,40 +1077,49 @@ def setLabel(name,text):
 
 def hideLabel(name,hidden=True):
     """Hides or shows the label of an item in the visualization"""
-    global _vis
-    if _vis is None:
-        return
-    return _vis.hideLabel(name,hidden)
+    return scene().hideLabel(name,hidden)
 
 def hide(name,hidden=True):
     """Hides an item in the visualization.  
 
     Note: the opposite of hide() is not show(), it's hide(False).
     """
-    global _vis
-    if _vis is None:
-        return
-    _vis.hide(name,hidden)
+    scene().hide(name,hidden)
 
 def edit(name,doedit=True):
     """Turns on/off visual editing of some item. 
 
-    Only items of type point, transform, coordinate.Point, coordinate.Transform, coordinate.Frame, config,
-    robot, and rigid object are currently accepted.
+    In OpenGL mode, currently accepts items of type:
+
+    - Vector3 (3-list)
+    - Matrix3 (9-list)
+    - Config (n-list, where n is the # of robot links)
+    - RigidTransform (so3 object)
+    - :class:`~klampt.robotsim.RobotModel`
+    - :class:`~klampt.robotsim.RigidObjectModel`
+    - :class:`~klampt.model.coordinate.Point`
+    - :class:`~klampt.model.coordinate.Transform`
+    - :class:`~klampt.model.coordinate.Frame`
+
+    In IPython mode, currently accepts items of type:
+
+    - Vector3 (3-lists)
+    - Config (n-list, where n is the # of robot links)
+    - RigidTransform (so3 objects)
+    - :class:`~klampt.robotsim.RobotModel`
+    - :class:`~klampt.robotsim.RigidObjectModel`
+    - :class:`~klampt.model.coordinate.Point`
+    - :class:`~klampt.model.coordinate.Transform`
+    - :class:`~klampt.model.coordinate.Frame`
+
     """
-    global _vis
-    if _vis is None:
-        return
-    _vis.edit(name,doedit)
+    scene().edit(name,doedit)
 
 def setAppearance(name,appearance):
     """Changes the Appearance of an item, for an item that uses the Appearance
     item to draw (config, geometry, robots, rigid bodies).
     """
-    global _vis
-    if _vis is None:
-        return
-    _vis.setAppearance(name,appearance)
+    scene().setAppearance(name,appearance)
 
 def setAttribute(name,attr,value):
     """Sets an attribute of an item's appearance.
@@ -861,26 +1133,28 @@ def setAttribute(name,attr,value):
 
     - 'robot': the index of the robot associated with this (default 0)
     - 'color': the item's color (r,g,b) or (r,g,b,a)
-    - 'size': the size of the plot or text
-    - 'length': the length of axes in RigidTransform
+    - 'size': the size of the plot, text, point, ContactPoint, or IKObjective
+    - 'length': the length of axes in RigidTransform, or normal in ContactPoint
     - 'width': the width of axes and trajectory curves
     - 'duration': the duration of a plot
-    - 'pointSize': for a trajectory, the size of points (default None, set to 0 to disable drawing points)
+    - 'pointSize': for a trajectory, the size of points (default None, set to 0
+       to disable drawing points)
     - 'pointColor': for a trajectory, the size of points (default None)
-    - 'endeffectors': for a RobotTrajectory, the list of end effectors to plot (default the last link).
-    - 'maxConfigs': for a Configs resource, the maximum number of drawn configurations (default 10)
-    - 'fancy': for RigidTransform objects, whether the axes are drawn with boxes or lines (default False)
-    - 'type': for ambiguous items, like a 3-item list when the robot has 3 links, specifies the type to be
-       used.  For example, 'Config' draws the item as a robot configuration, while 'Vector3' or 'Point'
-       draws it as a point.
+    - 'endeffectors': for a RobotTrajectory, the list of end effectors to plot
+       (default the last link).
+    - 'maxConfigs': for a Configs resource, the maximum number of drawn
+       configurations (default 10)
+    - 'fancy': for RigidTransform objects, whether the axes are drawn with boxes
+       or lines (default False)
+    - 'type': for ambiguous items, like a 3-item list when the robot has 3
+       links, specifies the type to be used.  For example, 'Config' draws the
+       item as a robot configuration, while 'Vector3' or 'Point' draws it as a
+       point.
     - 'label': a replacement label (str)
     - 'hide_label': if True, the label will be hidden
 
     """
-    global _vis
-    if _vis is None:
-        return
-    _vis.setAttribute(name,attr,value)
+    scene().setAttribute(name,attr,value)
 
 def getAttribute(name,attr):
     """Gets an attribute of an item's appearance. If not previously set by the
@@ -908,16 +1182,10 @@ def getAttributes(name):
     return _vis.getAttributes(name)
 
 def revertAppearance(name):
-    global _vis
-    if _vis is None:
-        return
-    _vis.revertAppearance(name)
+    scene().revertAppearance(name)
 
 def setColor(name,r,g,b,a=1.0):
-    global _vis
-    if _vis is None:
-        return
-    _vis.setColor(name,r,g,b,a)
+    scene().setColor(name,r,g,b,a)
 
 def setDrawFunc(name,func):
     """Sets a custom OpenGL drawing function for an item.
@@ -927,10 +1195,7 @@ def setDrawFunc(name,func):
         func (function or None): a one-argument function draw(data) that takes the item data
             as input.  Set func to None to revert to default drawing.
     """
-    global _vis
-    if _vis is None:
-        return
-    _vis.setDrawFunc(name,func)
+    scene().setDrawFunc(name,func)
 
 def _getOffsets(object):
     if isinstance(object,WorldModel):
@@ -947,20 +1212,22 @@ def _getOffsets(object):
         object.setConfig(q)
         wnew = [object.link(i).getTransform()[1] for i in range(object.numLinks())]
         return [vectorops.sub(b,a) for a,b in zip(worig,wnew)]
+    elif isinstance(object,RobotModelLink):
+        return [object.getTransform()[1]]
     elif isinstance(object,RigidObjectModel):
         return [object.getTransform()[1]]
     elif isinstance(object,Geometry3D):
-        return object.getCurrentTransform()[1]
+        return [object.getCurrentTransform()[1]]
     elif isinstance(object,VisAppearance):
         res = _getOffsets(object.item)
         if len(res) != 0: return res
         if len(object.subAppearances) == 0:
             bb = object.getBounds()
-            if bb is not None and not aabb_empty(bb):
+            if bb is not None and not bb_empty(bb):
                 return [vectorops.mul(vectorops.add(bb[0],bb[1]),0.5)]
         else:
             res = []
-            for a in object.subAppearances.itervalues():
+            for a in object.subAppearances.values():
                 res += _getOffsets(a)
             return res
     return []
@@ -977,9 +1244,11 @@ def _getBounds(object):
         res = []
         for i in range(object.numLinks()):
             bb = object.link(i).geometry().getBB()
-            if bb is not None and not aabb_empty(bb):
+            if bb is not None and not bb_empty(bb):
                 res += list(bb)
         return res
+    elif isinstance(object,RobotModelLink):
+        return list(object.geometry().getBB())
     elif isinstance(object,RigidObjectModel):
         return list(object.geometry().getBB())
     elif isinstance(object,Geometry3D):
@@ -989,42 +1258,21 @@ def _getBounds(object):
             if isinstance(object.item,TerrainModel):
                 return []
             bb = object.getBounds()
-            if bb is not None and not aabb_empty(bb):
+            if bb is not None and not bb_empty(bb):
                 return list(bb)
         else:
             res = []
-            for a in object.subAppearances.itervalues():
+            for a in object.subAppearances.values():
                 res += _getBounds(a)
             return res
     return []
 
-def _fitPlane(pts):
-    import numpy as np
-    if len(pts) < 3:
-        raise ValueError("Point set is degenerate")
-    centroid = vectorops.div(vectorops.add(*pts),len(pts))
-    A = np.array([vectorops.sub(pt,centroid) for pt in pts])
-    U,S,V = np.linalg.svd(A,full_matrices=False)
-    imin = 0
-    smin = S[0]
-    zeros = []
-    for i in xrange(len(S)):
-        if abs(S[i]) < 1e-6:
-            zeros.append(i)
-        if abs(S[i]) < smin:
-            smin = S[i]
-            imin = i
-    if len(zeros) > 1:
-        raise ValueError("Point set is degenerate")
-    assert V.shape == (3,3)
-    #normal is the corresponding row of U
-    normal = V[imin,:]
-    return centroid,normal.tolist()
 
-def autoFitViewport(viewport,objects): 
+def autoFitViewport(viewport,objects,zoom=True,rotate=True): 
+    from ..model.sensing import fit_plane_centroid
     ofs = sum([_getOffsets(o) for o in objects],[])
     pts = sum([_getBounds(o) for o in objects],[])
-    #print "Bounding box",bb,"center",center
+    #print("Bounding box",bb,"center",center)
     #raw_input()
     #reset
     viewport.camera.rot = [0.,0.,0.]
@@ -1034,100 +1282,108 @@ def autoFitViewport(viewport,objects):
     if len(ofs) == 0:
         return
 
-    bb = aabb_create(*pts)
+    print(pts)
+    print(ofs)
+    pts = pts + ofs # just in case
+
+    bb = bb_create(*pts)
     center = vectorops.mul(vectorops.add(bb[0],bb[1]),0.5)
     viewport.camera.tgt = center
-    radius = max(vectorops.distance(bb[0],center),0.1)
-    viewport.camera.dist = 1.2*radius / math.tan(math.radians(viewport.fov*0.5))
+    if zoom:
+        radius = max(vectorops.distance(bb[0],center),0.25)
+        viewport.camera.dist = 1.2*radius / math.tan(math.radians(viewport.fov*0.5))
     #default: oblique view
-    viewport.camera.rot = [0,math.radians(30),math.radians(45)]
-    #fit a plane to these points
-    try:
-        centroid,normal = _fitPlane(ofs)
-    except Exception as e:
+    if rotate:
+        viewport.camera.rot = [0,math.radians(30),math.radians(45)]
+        #fit a plane to these points
         try:
-            centroid,normal = _fitPlane(pts)
+            centroid,normal = fit_plane_centroid(ofs)
         except Exception as e:
-            print "Exception occurred during fitting to points"
-            print ofs
-            print pts
-            raise
-            return
-    if normal[2] > 0:
-        normal = vectorops.mul(normal,-1)
-    z,x,y = so3.matrix(so3.inv(so3.canonical(normal)))
-    #print z,x,y
-    #raw_input()
-    radius = max([abs(vectorops.dot(x,vectorops.sub(center,pt))) for pt in pts] + [abs(vectorops.dot(y,vectorops.sub(center,pt)))*viewport.w/viewport.h for pt in pts])
-    zmin = min([vectorops.dot(z,vectorops.sub(center,pt)) for pt in pts])
-    zmax = max([vectorops.dot(z,vectorops.sub(center,pt)) for pt in pts])
-    #print "Viewing direction",normal,"at point",center,"with scene size",radius
-    #orient camera to point along normal direction
-    viewport.camera.tgt = center
-    viewport.camera.dist = 1.2*radius / math.tan(math.radians(viewport.fov*0.5))
-    near,far = viewport.clippingplanes
-    if viewport.camera.dist + zmin < near:
-        near = max((viewport.camera.dist + zmin)*0.5, radius*0.1)
-    if viewport.camera.dist + zmax > far:
-        far = max((viewport.camera.dist + zmax)*1.5, radius*3)
-    viewport.clippingplanes = (near,far)
-    roll = 0
-    yaw = math.atan2(normal[0],normal[1])
-    pitch = math.atan2(-normal[2],vectorops.norm(normal[0:2]))
-    #print "Roll pitch and yaw",roll,pitch,yaw
-    #print "Distance",viewport.camera.dist
-    viewport.camera.rot = [roll,pitch,yaw]
+            try:
+                centroid,normal = fit_plane_centroid(pts)
+            except Exception as e:
+                print("Exception occurred during fitting to points")
+                print(e)
+                import traceback
+                traceback.print_exc()
+                #print(ofs)
+                #print(pts)
+                raise
+                return
+        if normal[2] > 0:
+            normal = vectorops.mul(normal,-1)
+        z,x,y = so3.matrix(so3.inv(so3.canonical(normal)))
+        roll = 0
+        yaw = math.atan2(normal[0],normal[1])
+        pitch = math.atan2(-normal[2],vectorops.norm(normal[0:2]))
+        #print("Roll pitch and yaw",roll,pitch,yaw)
+        #print("Distance",viewport.camera.dist)
+        viewport.camera.rot = [roll,pitch,yaw]
+    else:
+        x = [1,0,0]
+        y = [0,0,1]
+        z = [0,1,0]
+    #print(z,x,y)
+    if zoom:
+        radius = max([abs(vectorops.dot(x,vectorops.sub(center,pt))) for pt in pts] + [abs(vectorops.dot(y,vectorops.sub(center,pt)))*viewport.w/viewport.h for pt in pts])
+        radius = max(radius,0.25)
+        zmin = min([vectorops.dot(z,vectorops.sub(center,pt)) for pt in pts])
+        zmax = max([vectorops.dot(z,vectorops.sub(center,pt)) for pt in pts])
+        #print("Viewing direction",normal,"at point",center,"with scene size",radius)
+        #orient camera to point along normal direction
+        viewport.camera.tgt = center
+        viewport.camera.dist = 1.2*radius / math.tan(math.radians(viewport.fov*0.5))
+        near,far = viewport.clippingplanes
+        if viewport.camera.dist + zmin < near:
+            near = max((viewport.camera.dist + zmin)*0.5, radius*0.1)
+        if viewport.camera.dist + zmax > far:
+            far = max((viewport.camera.dist + zmax)*1.5, radius*3)
+        viewport.clippingplanes = (near,far)
 
-def addText(name,text,pos=None):
-    """Adds text to the visualizer.  You must give an identifier to all pieces of
-    text, which will be used to access the text as any other vis object. 
+def addText(name,text,position=None,**kwargs):
+    """Adds text to the visualizer.  You must give an identifier to all pieces 
+    of text, which will be used to access the text as any other vis object. 
 
     Args:
         name (str): the text's unique identifier.
         text (str): the string to be drawn
-        pos (list, optional): the position of the string. If pos=None, this is added to the on-screen
-            "console" display.  If pos has length 2, it is the (x,y) position of the upper left corner
-            of the text on the screen.  Negative units anchor the text to the right or bottom of the
-            window.  If pos has length 3, the text is drawn in the world coordinates. 
+        pos (list, optional): the position of the string. If pos=None, this is
+            added to the on-screen "console" display.  If pos has length 2, it
+            is the (x,y) position of the upper left corner of the text on the
+            screen.  Negative units anchor the text to the right or bottom of
+            the window.  If pos has length 3, the text is drawn in the world
+            coordinates. 
+        kwargs (optional): optional keywords to give to setAppearance.
 
-    To customize the text appearance, you can set the color, 'size' attribute, and 'position'
-    attribute of the text using the identifier given in 'name'.
+    To customize the text appearance, you can set the 'color', 'size', and
+    'position' attributes, either through the keyword arguments, or using
+    setAttribute().  To refer to this item, use the identifier given in
+    ``name``.
     """
-    global _vis
-    if _vis is None:
-        return
-    _vis.addText(name,text,pos)
+    _init()
+    if position is None:
+        scene().addText(name,text,**kwargs)
+    else:
+        scene().addText(name,text,position=position,**kwargs)
 
 def clearText():
     """Clears all text in the visualization."""
-    global _vis
-    if _vis is None:
-        return
-    _vis.clearText()
+    scene().clearText()
 
 def addPlot(name):
     """Creates a new empty plot.."""
     add(name,VisPlot())
 
 def addPlotItem(name,itemname):
-    global _vis
-    if _vis is None:
-        return
-    _vis.addPlotItem(name,itemname)
+    scene().addPlotItem(name,itemname)
 
 def logPlot(name,itemname,value):
     """Logs a custom visualization item to a plot"""
-    global _vis
-    if _vis is None:
-        return
-    _vis.logPlot(name,itemname,value)
+    scene().logPlot(name,itemname,value)
 
 def logPlotEvent(name,eventname,color=None):
     """Logs an event on the plot."""
-    global _vis
-    if _vis is None:
-        return
-    _vis.logPlotEvent(name,eventname,color)
+    scene().logPlotEvent(name,eventname,color)
 
 def hidePlotItem(name,itemname,hidden=True):
     """Hides an item in the plot.  To hide a particular channel of a given item
@@ -1140,10 +1396,7 @@ def hidePlotItem(name,itemname,hidden=True):
             hidePlotItem('plot',('robot',5))
 
     """
-    global _vis
-    if _vis is None:
-        return
-    _vis.hidePlotItem(name,itemname,hidden)
+    scene().hidePlotItem(name,itemname,hidden)
 
 def setPlotDuration(name,time):
     """Sets the plot duration."""
@@ -1163,23 +1416,55 @@ def setPlotSize(name,w,h):
 
 def savePlot(name,fn):
     """Saves a plot to a CSV (extension .csv) or Trajectory (extension .traj) file."""
-    global _vis
-    if _vis is None:
-        return
-    _vis.savePlot(name,fn)
+    scene().savePlot(name,fn)
 
-def autoFitCamera(scale=1):
+def autoFitCamera(zoom=True,rotate=True,scale=1):
     """Automatically fits the camera to all items in the visualization. 
 
     Args:
+        zoom (bool, optional): zooms the scene to the objects
+        rotate (bool, optional): rotates the scene to face the objects
         scale (float, optional): a scale > 1 magnifies the camera zoom.
     """
-    global _vis
-    if _vis is None:
-        return
-    print "klampt.vis: auto-fitting camera to scene."
-    _vis.autoFitCamera(scale)
+    print("klampt.vis: auto-fitting camera to scene.")
+    scene().autoFitCamera(zoom,rotate,scale)
 
+def followCamera(target,translate=True,rotate=False,center=False):
+    """Sets the camera to follow a target.  The camera starts from its current
+    location and keeps the target in the same position on screen. 
+
+    It can operate in the following modes:
+
+    - translation (``translate=True, rotate=False``): the camera moves with the
+      object.  This is default.
+    - look-at (``translate=False, rotate=True``): the camera stays in the
+      current location but rotates to aim toward the object.
+    - follow (``translate=True, rotate=True``): the camera moves as though it
+      were fixed to the object.
+
+    Args:
+        target (str, Trajectory, or None): the target that is to be followed.
+            If this is None, the camera no longer follows anything.
+        translate (bool, optional): whether the camera should follow using
+            translation.
+        rotate (bool, optional): whether the camera should follow using
+            rotation.
+        center (bool, optional): whether the camera should first aim toward the
+            object before following. Default is False.
+    """
+    scene().followCamera(target,translate,rotate,center)
+
+def getViewport():
+    """Returns the :class:`GLViewport` of the current scene"""
+    return scene().getViewport()
+
+def setViewport(viewport):
+    """Sets the current scene to use a given :class:`GLViewport`"""
+    scene().setViewport(viewport)
+
+def setBackgroundColor(r,g,b,a=1): 
+    """Sets the background color of the current scene."""
+    scene().setBackgroundColor(r,g,b,a)
 
 
 
@@ -1191,8 +1476,15 @@ def objectToVisType(item,world):
         validtypes = []
         for t in itypes:
             if t == 'Config':
-                if world is not None and world.numRobots() > 0 and len(item) == world.robot(0).numLinks():
-                    validtypes.append(t)
+                if world is not None:
+                    match = False
+                    for i in range(world.numRobots()):
+                        if len(item) == world.robot(i).numLinks():
+                            validtypes.append(t)
+                            match = True
+                            break
+                    if not match and len(itypes) == 1:
+                        print("Config-like item of length",len(item),"doesn't match any of the # links of robots in the world:",[world.robot(i).numLinks() for i in range(world.numRobots())])
             elif t=='Vector3':
                 validtypes.append(t)
             elif t=='RigidTransform':
@@ -1200,33 +1492,15 @@ def objectToVisType(item,world):
             elif t=='Geometry3D':
                 validtypes.append(t)
         if len(validtypes) > 1:
-            print "Unable to draw item of ambiguous types",validtypes
-            print "  (Try vis.setAttribute(item,'type',desired_type_str) to disambiguate)"
+            print("Unable to draw item of ambiguous types",validtypes)
+            print("  (Try vis.setAttribute(item,'type',desired_type_str) to disambiguate)")
             return
         if len(validtypes) == 0:
-            print "Unable to draw any of types",itypes
+            print("Unable to draw any of types",itypes)
             return
         return validtypes[0]
     return itypes
 
-def aabb_create(*ptlist):
-    if len(ptlist) == 0:
-        return [float('inf')]*3,[float('-inf')]*3
-    else:
-        bmin,bmax = list(ptlist[0]),list(ptlist[0])
-        for i in xrange(1,len(ptlist)):
-            x = ptlist[i]
-            bmin = [min(a,b) for (a,b) in zip(bmin,x)]
-            bmax = [max(a,b) for (a,b) in zip(bmax,x)]
-        return bmin,bmax
-
-def aabb_expand(bb,bb2):
-    bmin = [min(a,b) for a,b in zip(bb[0],bb2[0])]
-    bmax = [max(a,b) for a,b in zip(bb[1],bb2[1])]
-    return (bmin,bmax)
-
-def aabb_empty(bb):
-    return any((a > b) for (a,b) in zip(bb[0],bb[1]))
 
 _defaultCompressThreshold = 1e-2
 
@@ -1350,7 +1624,7 @@ class VisPlot:
         for i in self.items:
             i.discard(tmin)
         delevents = []
-        for e,times in self.events.iteritems():
+        for e,times in self.events.items():
             while len(times) > 0 and times[0] < tmin:
                 times.popleft()
             if len(times)==0: 
@@ -1377,7 +1651,7 @@ class VisPlot:
         vmin = float('inf')
         vmax = -float('inf')
         for i in self.items:
-            for j in xrange(len(i.traceRanges)):
+            for j in range(len(i.traceRanges)):
                 if not i.hidden[j]:
                     vmin = min(vmin,i.traceRanges[j][0])
                     vmax = max(vmax,i.traceRanges[j][1])
@@ -1387,7 +1661,7 @@ class VisPlot:
             vmax += 1.0
         return (float(vmin),float(vmax))
 
-    def render(self,window,x,y,w,h,duration,vmin=None,vmax=None):
+    def renderGL(self,window,x,y,w,h,duration,vmin=None,vmax=None):
         if vmin is None:
             vmin,vmax = self.autoRange()
         import random
@@ -1422,7 +1696,7 @@ class VisPlot:
                 glColor3fv(vectorops.mul(self.colors[i],item.luminosity[j]))
                 window.draw_text((x+w+3,labelheight+4),label,9)
                 glBegin(GL_LINE_STRIP)
-                for k in xrange(len(trace)-1):
+                for k in range(len(trace)-1):
                     if trace[k+1][0] > tmax-duration:
                         u,v = trace[k]
                         if trace[k][0] < tmax-duration:
@@ -1442,7 +1716,7 @@ class VisPlot:
                 glEnd()
 
         if len(self.events) > 0:
-            for e,times in self.events.iteritems():
+            for e,times in self.events.items():
                 for t in times:
                     if t < tmax-duration: continue
                     labelx = (t - (tmax-duration))/duration
@@ -1453,7 +1727,7 @@ class VisPlot:
             glEnable(GL_BLEND)
             glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
             glBegin(GL_LINES)
-            for e,times in self.events.iteritems():
+            for e,times in self.events.items():
                 for t in times:
                     if t < tmax-duration: continue
                     labelx = (t - (tmax-duration))/duration
@@ -1507,20 +1781,20 @@ class VisPlot:
             if len(i.traces) == 0:
                 continue
             for j,trace in enumerate(i.traces):
-                times,vals = zip(*trace)
+                times,vals = list(zip(*trace))
                 if isinstance(vals[0],(int,float)):
                     vals = [[v] for v in vals]
                 traj = Trajectory(times,vals)
                 cols.append(traj)
                 mint = min(mint,traj.times[0])
                 maxt = max(maxt,traj.times[-1])
-                for k in xrange(len(traj.times)-1):
+                for k in range(len(traj.times)-1):
                     mindt = min(mindt,traj.times[k+1] - traj.times[k])
         assert mindt > 0, "For some reason, there is a duplicate time?"
         N = int((maxt - mint)/mindt)
         dt = (maxt - mint)/N
         times = [mint + i*(maxt-mint)/N for i in range(N+1)]
-        for i in xrange(N+1):
+        for i in range(N+1):
             vals = [col.eval(times[i]) for col in cols]
             if self.outformat == '.csv':
                 self.outfile.write(str(times[i])+',')
@@ -1625,17 +1899,17 @@ class _CascadingDict:
     from the parent.
 
     Be careful when modifying sub-items of top-level keys.  You may not know
-    whether the key accesses the parent or this object.
+    whether the key accesses the parent or this object::
 
-      parent = {'foo':[1,2,3]}
-      obj = _CascadingDict(parent=parent)
-      obj['foo'][0] = 'hello'   #this actually changes the value of parent['foo']
-      obj2 = _CascadingDict(parent=parent)
-      print obj2['foo']    #prints ['hello',2,3]
+        parent = {'foo':[1,2,3]}
+        obj = _CascadingDict(parent=parent)
+        obj['foo'][0] = 'hello'   #this actually changes the value of parent['foo']
+        obj2 = _CascadingDict(parent=parent)
+        print(obj2['foo'])   #prints ['hello',2,3]
 
-      obj['foo'] = 4       #modifies the object's key 'foo'
-      print obj2['foo']    #still prints ['hello',2,3], since the non-overridden key
-                           #is still pointing to parent
+        obj['foo'] = 4       #modifies the object's key 'foo'
+        print(obj2['foo'])   #still prints ['hello',2,3], since the non-overridden key
+                             #is still pointing to parent
 
     """
     def __init__(self,rhs=None,parent=None):
@@ -1673,7 +1947,7 @@ class _CascadingDict:
             pdict = self.parent.flatten()
         elif isinstance(self.parent,dict):
             pdict = self.parent.copy()
-        for k,v in self.overrides.iteritems():
+        for k,v in self.overrides.items():
             pdict[k] = v
         return pdict
 
@@ -1697,7 +1971,7 @@ _default_VisPlot_attributes = {'compress':_defaultCompressThreshold, 'duration':
 _default_Point_attributes = { "size":5.0, "color":(0,0,0,1) }
 _default_Direction_attributes = { "length":0.15, "color":[0,1,1,1] }
 _default_Frame_attributes = { "length":0.1, "width":0.01 }
-_default_ContactPoint_attributes = { "size":5.0, "length":0.05 }
+_default_ContactPoint_attributes = { "size":5.0, "length":0.05, "color":[1,0.5,0,1] }
 _default_IKObjective_attributes = { "size":5.0, "color":(0,0,0,1), "length":0.1, "width": 0.01, "axis_color":[0.5,0,0.5,1], "axis_width":3.0, "axis_length":0.1 }
 _default_Geometry_attributes = { "size":None, "color":None }
 _default_RigidTransform_attributes = { "fancy":False, "length":0.1, "width":0.01 }
@@ -1749,11 +2023,11 @@ def _default_attributes(item,type=None):
                 itypes = objectToVisType(item,None)
                 res["type"]=itypes
             except Exception as e:
-                print e
-                print "visualization.py: Unsupported object type",item,"of type:",item.__class__.__name__
+                print(e)
+                print("visualization.py: Unsupported object type",item,"of type:",item.__class__.__name__)
                 return
         if itypes is None:
-            print "Unable to convert item",item,"to drawable"
+            print("Unable to convert item",item,"to drawable")
             return
         elif itypes == 'Config':
             pass
@@ -1764,8 +2038,8 @@ def _default_attributes(item,type=None):
         elif itypes == 'RigidTransform':
             return _default_RigidTransform_attributes
         else:
-            print "klampt.vis: Unable to draw item of type \"%s\""%(str(itypes),)
-            raw_input("Press enter to continue...")
+            print("klampt.vis: Unable to draw item of type \"%s\""%(str(itypes),))
+            input("Press enter to continue...")
             res['hidden'] = True
             res['hide_label'] = True
     return res
@@ -1802,6 +2076,7 @@ class VisAppearance:
         self.displayCache[0].name = name
         #temporary configuration of the item
         self.drawConfig = None
+        self.transformChanged = False
         self.setItem(item)
 
     def setItem(self,item):
@@ -1809,23 +2084,23 @@ class VisAppearance:
         self.subAppearances = {}
         #Parse out sub-items which can have their own appearance changed
         if isinstance(item,WorldModel):
-            for i in xrange(item.numRobots()):
+            for i in range(item.numRobots()):
                 self.subAppearances[("Robot",i)] = VisAppearance(item.robot(i),item.robot(i).getName())
-            for i in xrange(item.numRigidObjects()):
+            for i in range(item.numRigidObjects()):
                 self.subAppearances[("RigidObject",i)] = VisAppearance(item.rigidObject(i),item.rigidObject(i).getName())
-            for i in xrange(item.numTerrains()):
+            for i in range(item.numTerrains()):
                 self.subAppearances[("Terrain",i)] = VisAppearance(item.terrain(i),item.terrain(i).getName())
         elif isinstance(item,RobotModel):
-            for i in xrange(item.numLinks()):
+            for i in range(item.numLinks()):
                 self.subAppearances[("Link",i)] = VisAppearance(item.link(i),item.link(i).getName())
         elif isinstance(item,coordinates.Group):
-            for n,f in item.frames.iteritems():
+            for n,f in item.frames.items():
                 self.subAppearances[("Frame",n)] = VisAppearance(f,n)
-            for n,p in item.points.iteritems():
+            for n,p in item.points.items():
                 self.subAppearances[("Point",n)] = VisAppearance(p,n)
-            for n,d in item.directions.iteritems():
+            for n,d in item.directions.items():
                 self.subAppearances[("Direction",n)] = VisAppearance(d,n)
-            for n,g in item.subgroups.iteritems():
+            for n,g in item.subgroups.items():
                 self.subAppearances[("Subgroup",n)] = VisAppearance(g,n)
         elif isinstance(item,Hold):
             if item.ikConstraint is not None:
@@ -1833,18 +2108,20 @@ class VisAppearance:
             for n,c in enumerate(item.contacts):
                 self.subAppearances[("contact",n)] = VisAppearance(c,n)
         
-    def markChanged(self):
-        for c in self.displayCache:
-            c.markChanged()
-        for (k,a) in self.subAppearances.iteritems():
-            a.markChanged()
-        self.update_editor(True)
-        self.doRefresh = True
+    def markChanged(self,config=True,appearance=True):
+        if appearance:
+            for c in self.displayCache:
+                c.markChanged()
+        for (k,a) in self.subAppearances.items():
+            a.markChanged(config,appearance)
+        if config:
+            self.update_editor(True)
+            self.transformChanged = True
 
     def destroy(self):
         for c in self.displayCache:
             c.destroy()
-        for (k,a) in self.subAppearances.iteritems():
+        for (k,a) in self.subAppearances.items():
             a.destroy()
         self.subAppearances = {}
         
@@ -1855,12 +2132,15 @@ class VisAppearance:
     def updateAnimation(self,t):
         """Updates the configuration, if it's being animated"""
         if not self.animation:
+            if self.drawConfig is not None:
+                self.markChanged(config=True,appearance=False)
             self.drawConfig = None
         else:
             u = self.animationSpeed*(t-self.animationStartTime)
             q = self.animation.eval(u,self.animationEndBehavior)
             self.drawConfig = q
-        for n,app in self.subAppearances.iteritems():
+            self.markChanged(config=True,appearance=False)
+        for n,app in self.subAppearances.items():
             app.updateAnimation(t)
 
     def updateTime(self,t):
@@ -1882,16 +2162,18 @@ class VisAppearance:
         if self.drawConfig: 
             try:
                 newDrawConfig = config.getConfig(self.item)
-                #self.item = 
+                if len(newDrawConfig) != len(self.drawConfig):
+                    print("Incorrect length of draw configuration?",len(self.drawConfig),'vs',len(newDrawConfig))
                 config.setConfig(self.item,self.drawConfig)
                 self.drawConfig = newDrawConfig
             except Exception as e:
-                print "Warning, exception thrown during animation update.  Probably have incorrect length of configuration"
+                print("Warning, exception thrown during animation update.  Probably have incorrect length of configuration")
                 import traceback
                 traceback.print_exc()
+                self.animation = None
                 pass
-        for n,app in self.subAppearances.iteritems():
-            app.swapDrawConfig()        
+        for n,app in self.subAppearances.items():
+            app.swapDrawConfig()
 
     def clearDisplayLists(self):
         if isinstance(self.item,WorldModel):
@@ -1907,16 +2189,16 @@ class VisAppearance:
         elif isinstance(self.item,RobotModel):
             for link in range(self.item.numLinks()):
                 self.item.link(link).appearance().refresh()
-        for n,o in self.subAppearances.iteritems():
+        for n,o in self.subAppearances.items():
             o.clearDisplayLists()
-        self.markChanged()
+        self.markChanged(config=False,appearance=True)
 
     def transparent(self):
         """Returns true if the item is entirely transparent, None if mixed transparency, and False otherwise"""
         if len(self.subAppearances)!=0:
             anyTransp = False
             anyOpaque = False
-            for n,app in self.subAppearances.iteritems():
+            for n,app in self.subAppearances.items():
                 if app.transparent():
                     anyTransp = True
                 else:
@@ -1942,16 +2224,23 @@ class VisAppearance:
             return {}
         return self.attributes.flatten()
 
-    def draw(self,world=None,viewport=None,draw_transparent=None):
+    def drawGL(self,world=None,viewport=None,draw_transparent=None):
         """Draws the specified item in the specified world, with all the
         current modifications in attributes.
 
-        If a name or label are given, and self.attributes['hide_label'] != False, then the
-        label is shown.
+        If a name or label are given, and
+        ``self.attributes['hide_label'] != False``, then the label is shown.
 
-        If draw_transparent is None, then everything is drawn.  If True, then
-        only transparent items are drawn.  If False, then only opaque items are
-        drawn.  (This only affects WorldModels)
+        The drawing passes are controlled by ``draw_transparent`` -- opaque
+        items should be rasterized before transparent ones.
+
+        Args:
+            world (WorldModel): the world model
+            viewport (Viewport): the C++ viewport of the current view, which is
+                compatible with the Klampt C++ Widget class.
+            draw_transparent (bool or None): If None, then everything is drawn. 
+                If True, then only transparent items are drawn.  If False, then
+                only opaque items are drawn.  (This only affects WorldModels)
         """
         if self.attributes["hidden"]:
             return
@@ -1965,7 +2254,6 @@ class VisAppearance:
             name = self.attributes['label']
         #set appearance
         if not self.useDefaultAppearance and hasattr(item,'appearance'):
-            #print "Has custom appearance"
             if not hasattr(self,'oldAppearance'):
                 self.oldAppearance = item.appearance().clone()
             if self.customAppearance is not None:
@@ -1979,7 +2267,7 @@ class VisAppearance:
             if draw_transparent is None or draw_transparent == self.transparent() or (self.transparent() is None and draw_transparent==False):
                 #KLUDGE:
                 #might be a robot, make sure the appearances are all up to date before drawing the editor
-                for n,app in self.subAppearances.iteritems():
+                for n,app in self.subAppearances.items():
                     if app.useDefaultAppearance or not hasattr(app.item,'appearance'):
                         continue
                     if not hasattr(app,'oldAppearance'):
@@ -1992,7 +2280,7 @@ class VisAppearance:
                 self.editor.drawGL(viewport)
 
                 #Restore sub-appearances
-                for n,app in self.subAppearances.iteritems():
+                for n,app in self.subAppearances.items():
                     if app.useDefaultAppearance or not hasattr(app.item,'appearance'):
                         continue
                     app.item.appearance().set(app.oldAppearance)
@@ -2004,7 +2292,7 @@ class VisAppearance:
                 return
 
         if len(self.subAppearances)!=0:
-            for n,app in self.subAppearances.iteritems():
+            for n,app in self.subAppearances.items():
                 if draw_transparent is True:
                     if not app.transparent():
                         continue
@@ -2012,7 +2300,7 @@ class VisAppearance:
                     if app.transparent():
                         continue
                 app.widget = self.widget
-                app.draw(world,viewport,draw_transparent)
+                app.drawGL(world,viewport,draw_transparent)
         elif hasattr(item,'drawGL'):
             item.drawGL()
         elif hasattr(item,'drawWorldGL'):
@@ -2392,47 +2680,51 @@ class VisAppearance:
                 except Exception as e:
                     import traceback
                     traceback.print_exc()
-                    print e
-                    print "visualization.py: Unsupported object type",item,"of type:",item.__class__.__name__
+                    print(e)
+                    print("visualization.py: Unsupported object type",item,"of type:",item.__class__.__name__)
                     return
             if itypes is None:
-                print "Unable to convert item",item,"to drawable"
+                print("Unable to convert item",item,"to drawable")
                 return
             elif itypes == 'Config':
-                if world and world.numRobots() >= 1:
-                    robot = world.robot(self.attributes.get("robot",0))
-                    if not self.useDefaultAppearance:
-                        oldAppearance = [robot.link(i).appearance().clone() for i in xrange(robot.numLinks())]
-                        for i in xrange(robot.numLinks()):
-                            if self.customAppearance is not None:
-                                robot.link(i).appearance().set(self.customAppearance)
-                            elif "color" in self.attributes:
-                                robot.link(i).appearance().setColor(*self.attributes["color"])
+                rindex = self.attributes.get("robot",0)
+                if world and rindex < world.numRobots():
+                    robot = world.robot(rindex)
+                    if robot.numLinks() != len(item):
+                        print("Unable to draw Config, does not have the same # of DOFs as the robot: %d != %d"%(robot.numLinks(),len(item)))
+                    else:
+                        if not self.useDefaultAppearance:
+                            oldAppearance = [robot.link(i).appearance().clone() for i in range(robot.numLinks())]
+                            for i in range(robot.numLinks()):
+                                if self.customAppearance is not None:
+                                    robot.link(i).appearance().set(self.customAppearance)
+                                elif "color" in self.attributes:
+                                    robot.link(i).appearance().setColor(*self.attributes["color"])
 
-                    oldconfig = robot.getConfig()
-                    robot.setConfig(item)
-                    robot.drawGL()
-                    robot.setConfig(oldconfig)
-                    if not self.useDefaultAppearance:
-                        for (i,app) in enumerate(oldAppearance):
-                            robot.link(i).appearance().set(app)
+                        oldconfig = robot.getConfig()
+                        robot.setConfig(item)
+                        robot.drawGL()
+                        robot.setConfig(oldconfig)
+                        if not self.useDefaultAppearance:
+                            for (i,app) in enumerate(oldAppearance):
+                                robot.link(i).appearance().set(app)
                 else:
-                    print "Unable to draw Config items without a world or robot"
+                    print("Unable to draw Config items without a world or robot")
             elif itypes == 'Configs':
                 if world and world.numRobots() >= 1:
                     maxConfigs = self.attributes.get("maxConfigs",min(10,len(item)))
                     robot = world.robot(self.attributes.get("robot",0))
                     if not self.useDefaultAppearance:
-                        oldAppearance = [robot.link(i).appearance().clone() for i in xrange(robot.numLinks())]
-                        for i in xrange(robot.numLinks()):
+                        oldAppearance = [robot.link(i).appearance().clone() for i in range(robot.numLinks())]
+                        for i in range(robot.numLinks()):
                           if self.customAppearance is not None:
                             robot.link(i).appearance().set(self.customAppearance)
                           elif "color" in self.attributes:
                             robot.link(i).appearance().setColor(*self.attributes["color"])
 
                     oldconfig = robot.getConfig()
-                    for i in xrange(maxConfigs):
-                        idx = int(i*len(item))/maxConfigs
+                    for i in range(maxConfigs):
+                        idx = int(i*len(item))//maxConfigs
                         robot.setConfig(item[idx])
                         robot.drawGL()
                     robot.setConfig(oldconfig)
@@ -2440,7 +2732,7 @@ class VisAppearance:
                         for (i,app) in enumerate(oldAppearance):
                             robot.link(i).appearance().set(app)
                 else:
-                    print "Unable to draw Configs items without a world or robot"
+                    print("Unable to draw Configs items without a world or robot")
             elif itypes == 'Vector3':
                 def drawRaw():
                     glDisable(GL_LIGHTING)
@@ -2463,7 +2755,7 @@ class VisAppearance:
                 if name is not None:
                     self.drawText(name,item[1])
             else:
-                print "Unable to draw item of type \"%s\""%(str(itypes),)
+                print("Unable to draw item of type \"%s\""%(str(itypes),))
 
         #revert appearance
         if not self.useDefaultAppearance and hasattr(item,'appearance'):
@@ -2472,9 +2764,9 @@ class VisAppearance:
     def getBounds(self):
         """Returns a bounding box (bmin,bmax) or None if it can't be found"""
         if len(self.subAppearances)!=0:
-            bb = aabb_create()
-            for n,app in self.subAppearances.iteritems():
-                bb = aabb_expand(bb,app.getBounds())
+            bb = bb_create()
+            for n,app in self.subAppearances.items():
+                bb = bb_union(bb,app.getBounds())
             return bb
         item = self.item
         if isinstance(item,coordinates.Point):
@@ -2483,14 +2775,14 @@ class VisAppearance:
             T = item.frame().worldCoordinates()
             d = item.localCoordinates()
             L = self.attributes.get("length",0.1)
-            return aabb_create(T[1],se3.apply(T,vectorops.mul(d,L)))
+            return bb_create(T[1],se3.apply(T,vectorops.mul(d,L)))
         elif isinstance(item,coordinates.Frame):
             T = item.worldCoordinates()
             L = self.attributes.get("length",0.1)
-            return aabb_create(T[1],se3.apply(T,(L,0,0)),se3.apply(T,(0,L,0)),se3.apply(T,(0,0,L)))
+            return bb_create(T[1],se3.apply(T,(L,0,0)),se3.apply(T,(0,L,0)),se3.apply(T,(0,0,L)))
         elif isinstance(item,ContactPoint):
             L = self.attributes.get("length",0.05)
-            return aabb_create(item.x,vectorops.madd(item.x,item.n,L))
+            return bb_create(item.x,vectorops.madd(item.x,item.n,L))
         elif isinstance(item,WorldModel):
             pass
         elif hasattr(item,'geometry'):
@@ -2507,22 +2799,60 @@ class VisAppearance:
                     return (item,item)
                 elif 'RigidTransform' == vtype:
                     #assumed to be a rigid transform
-                    return (item[1],item[1])
+                    T = item
+                    L = self.attributes.get("length",0.1)
+                    return bb_create(T[1],se3.apply(T,(L,0,0)),se3.apply(T,(0,L,0)),se3.apply(T,(0,0,L)))
             except Exception:
                 raise
                 pass
-            print "Empty bound for object",self.name,"type",self.item.__class__.__name__
-        return aabb_create()
+            print("Empty bound for object",self.name,"type",self.item.__class__.__name__)
+        return bb_create()
+
+    def getCenter(self):
+        bb = self.getBounds()
+        if bb_empty(bb):
+            item = self.item
+            if hasattr(item,'getCurrentTransform'):
+                return item.getCurrentTransform()[1]
+            elif hasattr(item,'getTransform'):
+                return item.getTransform()[1]
+            return [0,0,0]
+        return vectorops.interpolate(bb[0],bb[1],0.5)
+
+    def getTransform(self):
+        if len(self.subAppearances) != 0:
+            return (so3.identity(),self.getCenter())
+        item = self.item
+        if isinstance(item,coordinates.Frame):
+            T = item.worldCoordinates()
+            L = self.attributes.get("length",0.1)
+            return (T[0],se3.apply(T,(L/2,L/2,L/2)))
+        elif hasattr(item,'geometry'):
+            return item.geometry().getCurrentTransform()
+        elif hasattr(item,'getCurrentTransform'):
+            return item.getCurrentTransform()
+        elif hasattr(item,'getTransform'):
+            return item.getTransform()
+        else:
+            try:
+                vtype = objectToVisType(item,None)
+                if 'RigidTransform' == vtype:
+                    T = item
+                    L = self.attributes.get("length",0.1)
+                    return (T[0],se3.apply(T,(L/2,L/2,L/2)))
+            except Exception:
+                raise
+        return (so3.identity(),self.getCenter())
 
     def getSubItem(self,path):
         if len(path) == 0: return self
-        for k,v in self.subAppearances.iteritems():
+        for k,v in self.subAppearances.items():
             if v.name == path[0]:
                 try:
                     return v.getSubItem(path[1:])
-                except ValueError,e:
+                except ValueError as e:
                     raise ValueError("Invalid sub-path specified "+str(path)+" at "+str(e))
-        raise ValueError("Invalid sub-item specified "+path[0])
+        raise ValueError("Invalid sub-item specified "+str(path[0]))
 
     def make_editor(self,world=None):
         if self.editor is not None:
@@ -2530,58 +2860,58 @@ class VisAppearance:
         item = self.item
         if isinstance(item,coordinates.Point):
             res = PointPoser()
-            res.set(self.item.worldCoordinates())
-            res.setAxes(self.item.frame().worldCoordinates()[0])
+            res.set(item.worldCoordinates())
+            res.setAxes(item.frame().worldCoordinates()[0])
         elif isinstance(item,coordinates.Direction):
             res = PointPoser()
-            res.set(self.item.worldCoordinates())
-            res.setAxes(self.item.frame().worldCoordinates()[0])
+            res.set(item.worldCoordinates())
+            res.setAxes(item.frame().worldCoordinates()[0])
         elif isinstance(item,coordinates.Frame):
             res = TransformPoser()
-            res.set(*self.item.worldCoordinates())
-        elif isinstance(self.item,RobotModel):
-            res = RobotPoser(self.item)
-        elif isinstance(self.item,SubRobotModel):
-            res = RobotPoser(self.item._robot)
-            res.setActiveDofs(self.item.links);
-        elif isinstance(self.item,RigidObjectModel):
-            res = ObjectPoser(self.item)
-        elif isinstance(self.item,(list,tuple)):
+            res.set(*item.worldCoordinates())
+        elif isinstance(item,RobotModel):
+            res = RobotPoser(item)
+        elif isinstance(item,SubRobotModel):
+            res = RobotPoser(item._robot)
+            res.setActiveDofs(item.links);
+        elif isinstance(item,RigidObjectModel):
+            res = ObjectPoser(item)
+        elif isinstance(item,(list,tuple)):
             #determine if it's a rotation, transform, or point
-            itype = objectToVisType(self.item,None)
+            itype = objectToVisType(item,None)
             if itype == 'Vector3':
                 res = PointPoser()
-                res.set(self.item)
+                res.set(item)
             elif itype == 'Matrix3':
                 res = TransformPoser()
                 res.enableRotation(True)
                 res.enableTranslation(False)
-                res.set(self.item)
+                res.set(item)
             elif itype == 'RigidTransform':
                 res = TransformPoser()
                 res.enableRotation(True)
                 res.enableTranslation(True)
-                res.set(*self.item)
+                res.set(*item)
             elif itype == 'Config':
                 if world is not None and world.numRobots() > 0 and world.robot(0).numLinks() == len(item):
                     #it's a valid configuration
                     oldconfig = world.robot(0).getConfig()
-                    world.robot(0).setConfig(self.item)
+                    world.robot(0).setConfig(item)
                     res = RobotPoser(world.robot(0))
                     world.robot(0).setConfig(oldconfig)
                 else:
-                    print "VisAppearance.make_editor(): Warning, editor for object of type",itype,"cannot be associated with a robot"
+                    print("VisAppearance.make_editor(): Warning, editor for object of type",itype,"cannot be associated with a robot")
                     return
             else:
-                print "VisAppearance.make_editor(): Warning, editor for object of type",itype,"not defined"
+                print("VisAppearance.make_editor(): Warning, editor for object of type",itype,"not defined")
                 return
         else:
-            print "VisAppearance.make_editor(): Warning, editor for object of type",self.item.__class__.__name__,"not defined"
+            print("VisAppearance.make_editor(): Warning, editor for object of type",item.__class__.__name__,"not defined")
             return
         self.editor = res
 
     def update_editor(self,item_to_editor=False):
-        for (name,item) in self.subAppearances.iteritems():
+        for (name,item) in self.subAppearances.items():
             item.update_editor(item_to_editor)
         if self.editor is None:
             return
@@ -2630,7 +2960,7 @@ class VisAppearance:
                 def setList(a,b):
                     if isinstance(a,(list,tuple)) and isinstance(b,(list,tuple)):
                         if len(a) == len(b):
-                            for i in xrange(len(a)):
+                            for i in range(len(a)):
                                 if not setList(a[i],b[i]):
                                     if isinstance(a,list):
                                         a[i] = b[i]
@@ -2642,7 +2972,7 @@ class VisAppearance:
                 if not setList(self.item,v):
                     self.item = v
             elif isinstance(self.item,tuple):
-                print "Edited a tuple... maybe a point or an xform? can't actually edit"
+                print("Edited a tuple... maybe a point or an xform? can't actually edit")
                 self.item = self.editor.get()
             else:
                 raise RuntimeError("Uh... unsupported type with an editor?")
@@ -2650,192 +2980,19 @@ class VisAppearance:
     def remove_editor(self):
         self.editor = None
 
-class VisualizationPlugin(glcommon.GLWidgetPlugin):
+
+class VisualizationScene:
+    """Holds all of the visualization information for a scene, including
+    labels, edit status, and animations"""
     def __init__(self):
-        glcommon.GLWidgetPlugin.__init__(self)
         self.items = {}
         self.labels = []
-        self.t = time.time()
-        self.startTime = self.t
+        self.t = 0
+        self.startTime = None
         self.animating = True
         self.currentAnimationTime = 0
         self.doRefresh = False
-
-    def initialize(self):
-        #keep or refresh display lists?
-        #self._clearDisplayLists()
-        return glcommon.GLWidgetPlugin.initialize(self)
-
-    def addLabel(self,text,point,color):
-        self.labels.append((text,point,color))
-
-    def display(self):
-        global _globalLock
-        _globalLock.acquire()
-        #for items currently being edited AND having the appearance changed, draw the reference object
-        #according to the vis settings
-        #glcommon.GLWidgetPlugin.display(self)
-        #restore any reference objects
-        vp = self.viewport()
-
-        self.labels = []
-        world = self.items.get('world',None)
-        if world is not None: world=world.item
-        #draw solid items first
-        delayed = []
-        for (k,v) in self.items.iteritems():
-            transparent = v.transparent()
-            if transparent is not False:
-                delayed.append(k)
-                if transparent is True:
-                    continue
-            v.widget = self
-            v.swapDrawConfig()
-            v.draw(world,viewport=vp,draw_transparent=False)
-            v.swapDrawConfig()
-            #allows garbage collector to delete these objects
-            v.widget = None 
-
-        for k in delayed:
-            v = self.items[k]
-            v.widget = self
-            v.swapDrawConfig()
-            v.draw(world,viewport=vp,draw_transparent=True)
-            v.swapDrawConfig()
-            #allows garbage collector to delete these objects
-            v.widget = None 
-
-        #cluster label points and draw labels
-        pointTolerance = self.view.camera.dist*0.03
-        pointHash = {}
-        for (text,point,color) in self.labels:
-            index = tuple([int(x/pointTolerance) for x in point])
-            try:
-                pointHash[index][1].append((text,color))
-            except KeyError:
-                pointHash[index] = [point,[(text,color)]]
-        for (p,items) in pointHash.itervalues():
-            self._drawLabelRaw(p,*zip(*items))
-
-        _globalLock.release()
-
-    def display_screen(self):
-        global _globalLock
-        _globalLock.acquire()
-        glcommon.GLWidgetPlugin.display_screen(self)
-        cx = 20
-        cy = 20
-        glDisable(GL_LIGHTING)
-        glDisable(GL_DEPTH_TEST)
-        for (k,v) in self.items.iteritems():
-            if isinstance(v.item,VisPlot) and not v.attributes['hidden']:
-                pos = v.attributes['position']
-                duration = v.attributes['duration']
-                vrange = v.attributes['range']
-                w,h = v.attributes['size']
-                if pos is None:
-                    v.item.render(self.window,cx,cy,w,h,duration,vrange[0],vrange[1])
-                    cy += h+18
-                else:
-                    x = pos[0]
-                    y = pos[1]
-                    if x < 0:
-                        x = self.view.w + x
-                    if y < 0:
-                        y = self.view.h + y
-                    v.item.render(self.window,x,y,w,h,duration,vrange[0],vrange[1])
-        for (k,v) in self.items.iteritems():
-            if isinstance(v.item,str) and not v.attributes['hidden']:
-                pos = v.attributes['position']
-                col = v.attributes['color']
-                size = v.attributes['size']
-                if pos is None:
-                    #draw at console
-                    self.window.draw_text((cx,cy+size),v.item,size,col)
-                    cy += (size*15)/10
-                elif len(pos)==2:
-                    x = pos[0]
-                    y = pos[1]
-                    if x < 0:
-                        x = self.view.w + x
-                    if y < 0:
-                        y = self.view.h + y
-                    self.window.draw_text((x,y+size),v.item,size,col)
-        glEnable(GL_DEPTH_TEST)
-        _globalLock.release()
-
-    def reshapefunc(self,w,h):
-        global _globalLock
-        _globalLock.acquire()
-        glcommon.GLWidgetPlugin.reshapefunc(self,w,h)
-        _globalLock.release()
-    def keyboardfunc(self,c,x,y):
-        global _globalLock
-        _globalLock.acquire()
-        glcommon.GLWidgetPlugin.keyboardfunc(self,c,x,y)
-        _globalLock.release()
-    def keyboardupfunc(self,c,x,y):
-        global _globalLock
-        _globalLock.acquire()
-        glcommon.GLWidgetPlugin.keyboardupfunc(self,c,x,y)
-        _globalLock.release()
-    def mousefunc(self,button,state,x,y):
-        global _globalLock
-        _globalLock.acquire()
-        glcommon.GLWidgetPlugin.mousefunc(self,button,state,x,y)
-        _globalLock.release()
-    def motionfunc(self,x,y,dx,dy):
-        global _globalLock
-        _globalLock.acquire()
-        glcommon.GLWidgetPlugin.motionfunc(self,x,y,dx,dy)
-        _globalLock.release()
-    def eventfunc(self,type,args=""):
-        global _globalLock
-        _globalLock.acquire()
-        glcommon.GLWidgetPlugin.eventfunc(self,type,args)
-        _globalLock.release()
-    def closefunc(self):
-        global _globalLock
-        _globalLock.acquire()
-        glcommon.GLWidgetPlugin.closefunc(self)
-        _globalLock.release()
-
-    def _drawLabelRaw(self,point,textList,colorList):
-        #assert not self.makingDisplayList,"drawText must be called outside of display list"
-        assert self.window is not None
-        for i,(text,c) in enumerate(zip(textList,colorList)):
-            if i+1 < len(textList): text = text+","
-
-            projpt = self.view.project(point,clip=False)
-            if projpt[2] > self.view.clippingplanes[0]:
-                d = float(12)/float(self.view.w)*projpt[2]*0.7
-                point = vectorops.add(point,so3.apply(so3.inv(self.view.camera.matrix()[0]),(0,-d,0)))
-
-            glDisable(GL_LIGHTING)
-            glDisable(GL_DEPTH_TEST)
-            glColor3f(*c)
-            self.draw_text(point,text,size=12)
-            glEnable(GL_DEPTH_TEST)
-            
-    def _clearDisplayLists(self):
-        for i in self.items.itervalues():
-            i.clearDisplayLists()
-
-    def idle(self):
-        global _globalLock
-        _globalLock.acquire()
-        oldt = self.t
-        self.t = time.time()
-        if self.animating:
-            self.currentAnimationTime += (self.t - oldt)
-            for (k,v) in self.items.iteritems():
-                #do animation updates
-                v.updateAnimation(self.currentAnimationTime)
-        for (k,v) in self.items.iteritems():
-            #do other updates
-            v.updateTime(self.t-self.startTime)
-        _globalLock.release()
-        return False
+        self.cameraController = None
 
     def getItem(self,item_name):
         """Returns an VisAppearance according to the given name or path"""
@@ -2852,49 +3009,93 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
     def dirty(self,item_name='all'):
         """Marks an item or everything as dirty, forcing a deep redraw."""
         global _globalLock
-        _globalLock.acquire()
-        if item_name == 'all':
-            for (name,itemvis) in self.items.iteritems():
-                itemvis.markChanged()
-        else:
-            self.getItem(item_name).markChanged()
-        _globalLock.release()
+        with _globalLock:
+            if item_name == 'all':
+                for (name,itemvis) in self.items.items():
+                    itemvis.markChanged()
+            else:
+                self.getItem(item_name).markChanged()
 
     def clear(self):
         """Clears the visualization world"""
         global _globalLock
-        _globalLock.acquire()
-        for (name,itemvis) in self.items.iteritems():
-            itemvis.destroy()
-        self.items = {}
-        _globalLock.release()
+        with _globalLock:
+            for (name,itemvis) in self.items.items():
+                itemvis.destroy()
+            self.items = {}
+            self.currentAnimationTime = 0
+            self.doRefresh = True
 
     def clearText(self):
         """Clears all text in the visualization."""
         global _globalLock
-        _globalLock.acquire()
-        del_items = []
-        for (name,itemvis) in self.items.iteritems():
-            if isinstance(itemvis.item,str):
-                itemvis.destroy()
-                del_items.append(name)
-        for n in del_items:
-            del self.items[n]
-        _globalLock.release()
+        with _globalLock:
+            del_items = []
+            for (name,itemvis) in self.items.items():
+                if isinstance(itemvis.item,str):
+                    itemvis.destroy()
+                    del_items.append(name)
+            for n in del_items:
+                del self.items[n]
 
     def listItems(self,root=None,indent=0):
         """Prints out all items in the visualization world."""
         if root is None:
-            for name,value in self.items.iteritems():
+            for name,value in self.items.items():
                 self.listItems(value,indent)
         else:
             if isinstance(root,str):
                 root = self.getItem(root)
             if indent > 0:
-                print " "*(indent-1),
-            print root.name
-            for n,v in root.subAppearances.iteritems():
+                print(" "*(indent-1), end=' ')
+            print(root.name)
+            for n,v in root.subAppearances.items():
                 self.listItems(v,indent+2)
+
+    def getItemName(self,object):
+        name = None
+        if hasattr(object,'getName'):
+            name = object.getName()
+        if hasattr(object,'name'):
+            name = object.name()
+        if name is not None and name in self.items:
+            if self.items[name].item is object:
+                return name
+        if isinstance(object,RobotModelLink):  #a link?
+            robot = object.robot()
+            robpath = self.getItemName(robot)
+            if robpath:
+                return robpath + (name,)
+            else:
+                print("Couldnt find link",name,"under robot")
+        def objectPath(app,obj,name):
+            if app.item == object:
+                return ()
+            if name is not None and app.name == name:
+                return ()
+            for (subitem,subapp) in app.subAppearances.items():
+                subpath = objectPath(subapp,obj,name)
+                if subpath is not None:
+                    return (subapp.name,)+subpath
+            return None
+        if hasattr(object,'world'):
+            #look through the world for the object
+            world = self.items.get('world',None)
+            if world is not None:
+                p = objectPath(self.items['world'],object,name)
+                if p is not None:
+                    return ('world',)+p
+                else:
+                    print("Couldnt find object",name,"under world")
+        for (k,v) in self.items.items():
+            p = objectPath(v,object,name)
+            if p is not None:
+                if len(p)==0:  #top level item
+                    return k
+                return (k,)+p
+            else:
+                print("Couldnt find object",name,"under",k)
+        return None
 
     def add(self,name,item,keepAppearance=False,**kwargs):
         """Adds a named item to the visualization world.  If the item already
@@ -2902,235 +3103,200 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
         (default) or be kept if keepAppearance=True."""
         global _globalLock
         assert not isinstance(name,(list,tuple)),"Cannot add sub-path items"
-        _globalLock.acquire()
-        if keepAppearance and name in self.items:
-            self.items[name].setItem(item)
-        else:
-            #need to erase prior item visualizer
-            if name in self.items:
-                self.items[name].destroy()
-            app = VisAppearance(item,name)
-            self.items[name] = app
-        item = self.items[name]
-        for (attr,value) in kwargs.iteritems():
-            self._setAttribute(item,attr,value)
-        _globalLock.release()
+        with _globalLock:
+            if keepAppearance and name in self.items:
+                self.items[name].setItem(item)
+            else:
+                #need to erase prior item visualizer
+                if name in self.items:
+                    self.items[name].destroy()
+                app = VisAppearance(item,name)
+                self.items[name] = app
+            item = self.items[name]
+            for (attr,value) in kwargs.items():
+                self._setAttribute(item,attr,value)
         #self.refresh()
 
-    def addText(self,name,text,pos=None):
-        self.add(name,text,True)
-        if pos is not None:
-            self.setAttribute(name,'position',pos)
-
+    def addText(self,name,text,**kwargs):
+        self.add(name,text,True,**kwargs)
 
     def animate(self,name,animation,speed=1.0,endBehavior='loop'):
         global _globalLock
-        _globalLock.acquire()
-        if hasattr(animation,'__iter__'):
-            #a list of milestones -- loop through them with 1s delay
-            print "visualization.animate(): Making a Trajectory with unit durations between",len(animation),"milestones"
-            animation = Trajectory(range(len(animation)),animation)
-        if isinstance(animation,HermiteTrajectory):
-            animation = animation.configTrajectory()
-        if isinstance(animation,MultiPath):
-            world = self.items.get('world',None)
-            if world is not None:
-                world=world.item
-                if world.numRobots() > 0:
-                    #discretize multipath
-                    robot = world.robot(0)
-                    animation = animation.getTrajectory(robot,0.1)
+        with _globalLock:
+            if hasattr(animation,'__iter__'):
+                #a list of milestones -- loop through them with 1s delay
+                print("visualization.animate(): Making a Trajectory with unit durations between",len(animation),"milestones")
+                animation = Trajectory(list(range(len(animation))),animation)
+            if isinstance(animation,HermiteTrajectory):
+                animation = animation.configTrajectory()
+            if isinstance(animation,MultiPath):
+                world = self.items.get('world',None)
+                if world is not None:
+                    world=world.item
+                    if world.numRobots() > 0:
+                        #discretize multipath
+                        robot = world.robot(0)
+                        animation = animation.getTrajectory(robot,0.1)
+                    else:
+                        animation = animation.getTrajectory()
                 else:
                     animation = animation.getTrajectory()
-            else:
-                animation = animation.getTrajectory()
-        assert isinstance(animation,Trajectory) or animation is None,"Must animate() with a Trajectory object or list of milestones"
-        item = self.getItem(name)
-        item.animation = animation
-        item.animationStartTime = self.currentAnimationTime
-        item.animationSpeed = speed
-        item.animationEndBehavior = endBehavior
-        item.markChanged()
-        _globalLock.release()
+            assert isinstance(animation,Trajectory) or animation is None,"Must animate() with a Trajectory object or list of milestones"
+            item = self.getItem(name)
+            item.animation = animation
+            item.animationStartTime = self.currentAnimationTime
+            item.animationSpeed = speed
+            item.animationEndBehavior = endBehavior
+            item.markChanged(config=True,appearance=False)
 
     def pauseAnimation(self,paused=True):
         global _globalLock
-        _globalLock.acquire()
-        self.animating = not paused
-        _globalLock.release()
+        with _globalLock:
+            self.animating = not paused
 
     def stepAnimation(self,amount):
         global _globalLock
-        _globalLock.acquire()
-        self.currentAnimationTime += amount
-        self.doRefresh = True
-        _globalLock.release()
+        with _globalLock:
+            self.animationTime(self.currentAnimationTime + amount)
 
     def animationTime(self,newtime=None):
         global _globalLock
-        if self==None:
-            print "Visualization disabled"
-            return 0
-        if newtime is not None:
-            _globalLock.acquire()
+        if newtime is None:
+            #query mode
+            return self.currentAnimationTime
+
+        #update mode
+        with _globalLock:
             self.currentAnimationTime = newtime
-            _globalLock.release()
-        return self.currentAnimationTime
+            self.doRefresh = True
+            for (k,v) in self.items.items():
+                #do animation updates
+                v.updateAnimation(self.currentAnimationTime)
+        return 
 
     def remove(self,name):
         global _globalLock
-        _globalLock.acquire()
-        assert name in self.items,"Can only remove top level objects from visualization, try hide() instead"
-        item = self.getItem(name)
-        item.destroy()
-        del self.items[name]
-        self.doRefresh = True
-        _globalLock.release()
+        with _globalLock:
+            assert name in self.items,"Can only remove top level objects from visualization, try hide() instead"
+            item = self.getItem(name)
+            item.destroy()
+            del self.items[name]
+            self.doRefresh = True
 
     def getItemConfig(self,name):
         global _globalLock
-        _globalLock.acquire()
-        res = config.getConfig(self.getItem(name).item)
-        _globalLock.release()
+        with _globalLock:
+            res = config.getConfig(self.getItem(name).item)
         return res
 
     def setItemConfig(self,name,value):
         global _globalLock
-        _globalLock.acquire()
-        item = self.getItem(name)
-        if isinstance(item.item,(list,tuple,str)):
-            item.item = value
-        else:
-            config.setConfig(item.item,value)
-        if item.editor:
-            item.update_editor(item_to_editor = True)
-        self.doRefresh = True
-        _globalLock.release()
+        with _globalLock:
+            item = self.getItem(name)
+            if isinstance(item.item,(list,tuple,str)):
+                item.item = value
+            else:
+                config.setConfig(item.item,value)
+            if item.editor:
+                item.update_editor(item_to_editor = True)
+            item.markChanged(config=True,appearance=False)
+            self.doRefresh = True
+
+    def addLabel(self,text,point,color):
+        global _globalLock
+        with _globalLock:
+            self.labels.append((text,point,color))
 
     def hideLabel(self,name,hidden=True):
         global _globalLock
-        _globalLock.acquire()
-        item = self.getItem(name)
-        item.attributes["hide_label"] = hidden
-        item.markChanged()
-        self.doRefresh = True
-        _globalLock.release()
-
-    def edit(self,name,doedit=True):
-        global _globalLock
-        _globalLock.acquire()
-        obj = self.getItem(name)
-        if obj is None:
-            _globalLock.release()
-            raise ValueError("Object "+name+" does not exist in visualization")
-        if doedit:
-            world = self.items.get('world',None)
-            if world is not None:
-                world=world.item
-            obj.make_editor(world)
-            if obj.editor:
-                self.klamptwidgetmaster.add(obj.editor)
-        else:
-            if obj.editor:
-                self.klamptwidgetmaster.remove(obj.editor)
-                obj.remove_editor()
-        self.doRefresh = True
-        _globalLock.release()
-
-    def widgetchangefunc(self,edit):
-        """Called by GLWidgetPlugin on any widget change"""
-        for name,item in self.items.iteritems():
-            item.update_editor()
+        with _globalLock:
+            item = self.getItem(name)
+            item.attributes["hide_label"] = hidden
+            item.markChanged(config=False,appearance=True)
+            self.doRefresh = True
 
     def hide(self,name,hidden=True):
         global _globalLock
-        _globalLock.acquire()
-        self.getItem(name).attributes['hidden'] = hidden
-        self.doRefresh = True
-        _globalLock.release()
+        with _globalLock:
+            self.getItem(name).attributes['hidden'] = hidden
+            self.doRefresh = True
 
     def addPlotItem(self,plotname,itemname):
         global _globalLock
-        _globalLock.acquire()
-        plot = self.getItem(plotname)
-        assert plot is not None and isinstance(plot.item,VisPlot),(plotname+" is not a valid plot")
-        plot = plot.item
-        for i in plot.items:
-            assert i.name != itemname,(str(itemname)+" is already in the plot "+plotname)
-        item = self.getItem(itemname)
-        assert item is not None,(str(itemname)+" is not a valid item")
-        plot.items.append(VisPlotItem(itemname,item))
-        _globalLock.release()
+        with _globalLock:
+            plot = self.getItem(plotname)
+            assert plot is not None and isinstance(plot.item,VisPlot),(plotname+" is not a valid plot")
+            plot = plot.item
+            for i in plot.items:
+                assert i.name != itemname,(str(itemname)+" is already in the plot "+plotname)
+            item = self.getItem(itemname)
+            assert item is not None,(str(itemname)+" is not a valid item")
+            plot.items.append(VisPlotItem(itemname,item))
 
     def logPlot(self,plotname,itemname,value):
         global _globalLock
-        _globalLock.acquire()
-        customIndex = -1
-        plot = self.getItem(plotname)
-        assert plot is not None and isinstance(plot.item,VisPlot),(plotname+" is not a valid plot")
-        compress = plot.attributes['compress']
-        plot = plot.item
-        for i,item in enumerate(plot.items):
-            if len(item.name)==0:
-                customIndex = i
-        if customIndex < 0:
-            customIndex = len(plot.items)
-            plot.items.append(VisPlotItem('',None))
-        plot.items[customIndex].compressThreshold = compress
-        plot.items[customIndex].customUpdate(itemname,self.t - self.startTime,value)
-        _globalLock.release()
+        with _globalLock:
+            customIndex = -1
+            plot = self.getItem(plotname)
+            assert plot is not None and isinstance(plot.item,VisPlot),(plotname+" is not a valid plot")
+            compress = plot.attributes['compress']
+            plot = plot.item
+            for i,item in enumerate(plot.items):
+                if len(item.name)==0:
+                    customIndex = i
+            if customIndex < 0:
+                customIndex = len(plot.items)
+                plot.items.append(VisPlotItem('',None))
+            plot.items[customIndex].compressThreshold = compress
+            plot.items[customIndex].customUpdate(itemname,self.t,value)
 
     def logPlotEvent(self,plotname,eventname,color):
         global _globalLock
-        _globalLock.acquire()
-        plot = self.getItem(plotname)
-        assert plot is not None and isinstance(plot.item,VisPlot),(plotname+" is not a valid plot")
-        plot.item.addEvent(eventname,self.t-self.startTime,color)
-        _globalLock.release()
+        with _globalLock:
+            plot = self.getItem(plotname)
+            assert plot is not None and isinstance(plot.item,VisPlot),(plotname+" is not a valid plot")
+            plot.item.addEvent(eventname,self.t,color)
 
     def hidePlotItem(self,plotname,itemname,hidden=True):
         global _globalLock
-        _globalLock.acquire()
-        plot = self.getItem(plotname)
-        assert plot is not None and isinstance(plot.item,VisPlot),plotname+" is not a valid plot"
-        plot = plot.item
-        identified = False
-        if isinstance(itemname,(tuple,list)):
-            for i in plot.items:
-                if i.name == itemname[0]:
-                    assert itemname[1] < len(i.hidden),("Invalid component index of item "+str(itemname[0]))
-                    identified = True
-                    i.hidden[itemname] = hidden
-        else:
-            for i in plot.items:
-                if i.name == itemname:
-                    for j in xrange(len(i.hidden)):
-                        i.hidden[j] = hidden
-        assert identified,("Invalid item "+str(itemname)+" specified in plot "+plotname)
-        self.doRefresh = True
-        _globalLock.release()
+        with _globalLock:
+            plot = self.getItem(plotname)
+            assert plot is not None and isinstance(plot.item,VisPlot),plotname+" is not a valid plot"
+            plot = plot.item
+            identified = False
+            if isinstance(itemname,(tuple,list)):
+                for i in plot.items:
+                    if i.name == itemname[0]:
+                        assert itemname[1] < len(i.hidden),("Invalid component index of item "+str(itemname[0]))
+                        identified = True
+                        i.hidden[itemname] = hidden
+            else:
+                for i in plot.items:
+                    if i.name == itemname:
+                        for j in range(len(i.hidden)):
+                            i.hidden[j] = hidden
+            assert identified,("Invalid item "+str(itemname)+" specified in plot "+plotname)
+            self.doRefresh = True
 
     def savePlot(self,plotname,fn):
         global _globalLock
-        _globalLock.acquire()
-        plot = self.getItem(plotname)
-        assert plot is not None and isinstance(plot.item,VisPlot),plotname+" is not a valid plot"
-        plot = plot.item
-        if fn is not None:
-            plot.beginSave(fn)
-        else:
-            plot.endSave(fn)
-        _globalLock.release()
+        with _globalLock:
+            plot = self.getItem(plotname)
+            assert plot is not None and isinstance(plot.item,VisPlot),plotname+" is not a valid plot"
+            plot = plot.item
+            if fn is not None:
+                plot.beginSave(fn)
+            else:
+                plot.endSave(fn)
 
     def setAppearance(self,name,appearance):
         global _globalLock
-        _globalLock.acquire()
-        item = self.getItem(name)
-        item.useDefaultAppearance = False
-        item.customAppearance = appearance
-        item.markChanged()
-        self.doRefresh = True
-        _globalLock.release()
+        with _globalLock:
+            item = self.getItem(name)
+            item.useDefaultAppearance = False
+            item.customAppearance = appearance
+            item.markChanged(config=False,appearance=True)
+            self.doRefresh = True
 
     def _setAttribute(self,item,attr,value):
         """Internal use only"""
@@ -3141,1099 +3307,477 @@ class VisualizationPlugin(glcommon.GLWidgetPlugin):
             item.useDefaultAppearance = False
         if len(item.subAppearances) > 0 and attr not in ['label','hidden']:
             #some attributes don't get inherited
-            for n,app in item.subAppearances.iteritems():
+            for n,app in item.subAppearances.items():
                 self._setAttribute(app,attr,value)
         if attr=='type':
             #modify the parent attributes
             item.attributes.setParent(_default_attributes(item.item,type=value))
-        item.markChanged()
+        item.markChanged(config=False,appearance=True)
 
     def setAttribute(self,name,attr,value):
         global _globalLock
-        _globalLock.acquire()
-        item = self.getItem(name)
-        self._setAttribute(item,attr,value)
-        self.doRefresh = True
-        _globalLock.release()
+        with _globalLock:
+            item = self.getItem(name)
+            self._setAttribute(item,attr,value)
+            self.doRefresh = True
 
     def getAttribute(self,name,attr):
         global _globalLock
-        _globalLock.acquire()
-        item = self.getItem(name)
-        res = item.attributes[attr]
-        _globalLock.release()
+        with _globalLock:
+            item = self.getItem(name)
+            res = item.attributes[attr]
         return res
 
     def getAttributes(self,name):
         global _globalLock
-        _globalLock.acquire()
-        item = self.getItem(name)
-        res = item.getAttributes()
-        _globalLock.release()
+        with _globalLock:
+            item = self.getItem(name)
+            res = item.getAttributes()
         return res
 
     def revertAppearance(self,name):
         global _globalLock
-        _globalLock.acquire()
-        item = self.getItem(name)
-        item.useDefaultAppearance = True
-        item.markChanged()
-        self.doRefresh = True
-        _globalLock.release()
+        with _globalLock:
+            item = self.getItem(name)
+            item.useDefaultAppearance = True
+            item.markChanged(config=False,appearance=True)
+            self.doRefresh = True
 
     def setColor(self,name,r,g,b,a=1.0):
         global _globalLock
-        _globalLock.acquire()
-        item = self.getItem(name)
-        self._setAttribute(item,"color",[r,g,b,a])
-        item.markChanged()
-        self.doRefresh = True
-        _globalLock.release()
+        with _globalLock:
+            item = self.getItem(name)
+            self._setAttribute(item,"color",[r,g,b,a])
+            item.markChanged(config=False,appearance=True)
+            self.doRefresh = True
 
     def setDrawFunc(self,name,func):
         global _globalLock
-        _globalLock.acquire()
-        item = self.getItem(name)
-        item.customDrawFunc = func
-        self.doRefresh = True
-        _globalLock.release()
+        with _globalLock:
+            item = self.getItem(name)
+            item.customDrawFunc = func
+            self.doRefresh = True
 
-    def autoFitCamera(self,scale=1.0):
-        vp = None
-        if self.window is None:
-            global _frontend
-            vp = _frontend.get_view()
-        else:
-            vp = self.window.get_view()
+    def autoFitCamera(self,zoom=True,rotate=True,scale=1.0):
+        vp = self.getViewport()
         try:
-            autoFitViewport(vp,self.items.values())
+            autoFitViewport(vp,list(self.items.values()),zoom=zoom,rotate=rotate)
             vp.camera.dist /= scale
+            self.setViewport(vp)
         except Exception as e:
-            print "Unable to auto-fit camera"
-            print e
+            print("Unable to auto-fit camera")
+            import traceback
+            traceback.print_exc()
+            #print(e)
 
-
-
-_vis = VisualizationPlugin() 
-_frontend.setPlugin(_vis)
-
-#signals to visualization thread
-_quit = False
-_in_vis_loop = False
-_vis_thread_running = False
-_vis_thread = None
-_in_app_thread = False
-_use_multithreaded = (True if sys.platform != 'darwin' else False)
-
-if _PyQtAvailable:
-    if _PyQt5Available:
-        from PyQt5.QtWidgets import QDialog,QFileDialog,QInputDialog,QDialogButtonBox,QMainWindow,QApplication,QAction
-    else:
-        from PyQt4.QtGui import QDialog,QFileDialog,QInputDialog,QDialogButtonBox,QMainWindow,QApplication,QAction
-    #Qt specific startup
-    #need to set up a QDialog and an QApplication
-    class _MyDialog(QDialog):
-        def __init__(self,windowinfo):
-            QDialog.__init__(self)
-            self.windowinfo = windowinfo
-            glwidget = windowinfo.glwindow
-            glwidget.setMinimumSize(640,480)
-            glwidget.setMaximumSize(4000,4000)
-            glwidget.setSizePolicy(QSizePolicy(QSizePolicy.Maximum,QSizePolicy.Maximum))
-
-            self.description = QLabel("Press OK to continue")
-            self.description.setSizePolicy(QSizePolicy(QSizePolicy.Preferred,QSizePolicy.Fixed))
-            self.layout = QVBoxLayout(self)
-            self.layout.addWidget(glwidget)
-            self.layout.addWidget(self.description)
-            self.buttons = QDialogButtonBox(QDialogButtonBox.Ok,Qt.Horizontal, self)
-            self.buttons.accepted.connect(self.accept)
-            self.layout.addWidget(self.buttons)
-            self.setWindowTitle(windowinfo.name)
-            glwidget.name = windowinfo.name
-        
-    class _MyWindow(QMainWindow):
-        def __init__(self,windowinfo):
-            QMainWindow.__init__(self)
-            self.windowinfo = windowinfo
-            self.glwidget = windowinfo.glwindow
-            self.glwidget.setMinimumSize(self.glwidget.width,self.glwidget.height)
-            self.glwidget.setMaximumSize(4000,4000)
-            self.glwidget.setSizePolicy(QSizePolicy(QSizePolicy.Maximum,QSizePolicy.Maximum))
-            self.setCentralWidget(self.glwidget)
-            self.glwidget.setParent(self)
-            self.setWindowTitle(windowinfo.name)
-            self.glwidget.name = windowinfo.name
-            self.saving_movie = False
-            self.movie_timer = QTimer(self)
-            self.movie_timer.timeout.connect(self.movie_update)
-            self.movie_frame = 0
-            self.movie_time_last = 0
-            self.saving_html = False
-            self.html_saver = None
-            self.html_start_time = 0
-            self.html_timer = QTimer(self)
-            self.html_timer.timeout.connect(self.html_update)
-            #TODO: for action-free programs, don't add this... but this has to be detected after initializeGL()?
-            mainMenu = self.menuBar()
-            fileMenu = mainMenu.addMenu('&Actions')
-            self.glwidget.actionMenu = fileMenu
-            visMenu = mainMenu.addMenu('&Visualization')
-            a = QAction('Edit appearances...', self)
-            a.setStatusTip("Edit the appearance of items in the visualization")
-            a.triggered.connect(self.edit_gui)
-            self.edit_gui_window = None
-            visMenu.addAction(a)
-            a = QAction('Save world...', self)
-            a.setStatusTip('Saves world to xml file')
-            a.triggered.connect(self.save_world)
-            visMenu.addAction(a)
-            a = QAction('Add to world...', self)
-            a.setStatusTip('Adds an item to the world')
-            a.triggered.connect(self.add_to_world)
-            visMenu.addAction(a)
-            a = QAction('Save camera...', self)
-            a.setStatusTip('Saves camera settings')
-            a.triggered.connect(self.save_camera)
-            visMenu.addAction(a)
-            a = QAction('Load camera...', self)
-            a.setStatusTip('Loads camera settings')
-            a.triggered.connect(self.load_camera)
-            visMenu.addAction(a)
-            a = QAction('Start/stop movie output', self)
-            a.setShortcut('Ctrl+M')
-            a.setStatusTip('Starts / stops saving movie frames')
-            a.triggered.connect(self.toggle_movie_mode)
-            visMenu.addAction(a)
-            a = QAction('Start/stop html output', self)
-            a.setShortcut('Ctrl+H')
-            a.setStatusTip('Starts / stops saving animation to HTML file')
-            a.triggered.connect(self.toggle_html_mode)
-            visMenu.addAction(a)
-        
-        def getWorld(self):
-            if not hasattr(self.glwidget.program,'plugins'):
-                return None
-            for p in self.glwidget.program.plugins:
-                if hasattr(p,'world'):
-                    return p.world
-                elif isinstance(p,VisualizationPlugin):
-                    world = p.items.get('world',None)
-                    if world is not None: return world.item
-            return None
-        
-        def getSimulator(self):
-            if not hasattr(self.glwidget.program,'plugins'):
-                return None
-            for p in self.glwidget.program.plugins:
-                if hasattr(p,'sim'):
-                    return p.sim
-                elif isinstance(p,VisualizationPlugin):
-                    sim = p.items.get('sim',None)
-                    if sim is not None: return sim.item
-            return None
-        
-        def save_camera(self):
-            if not hasattr(self.glwidget.program,'get_view'):
-                print "Program does not appear to have a camera"
-                return
-            v = self.glwidget.program.get_view()
-            #fn = QFileDialog.getSaveFileName(caption="Viewport file (*.txt)",filter="Viewport file (*.txt);;All files (*.*)",options=QFileDialog.DontUseNativeDialog)
-            fn = QFileDialog.getSaveFileName(caption="Viewport file (*.txt)",filter="Viewport file (*.txt);;All files (*.*)")
-            if isinstance(fn,tuple):
-                fn = fn[0]
-            if fn is None:
-                return
-            f = open(str(fn),'w')
-            f.write("VIEWPORT\n")
-            f.write("FRAME %d %d %d %d\n"%(v.x,v.y,v.w,v.h))
-            f.write("PERSPECTIVE 1\n")
-            aspect = float(v.w)/float(v.h)
-            rfov = v.fov*math.pi/180.0
-            scale = 1.0/(2.0*math.tan(rfov*0.5/aspect)*aspect)
-            f.write("SCALE %f\n"%(scale,))
-            f.write("NEARPLANE %f\n"%(v.clippingplanes[0],))
-            f.write("FARPLANE %f\n"%(v.clippingplanes[1],))
-            f.write("CAMTRANSFORM ")
-            mat = se3.homogeneous(v.camera.matrix())
-            f.write(' '.join(str(v) for v in sum(mat,[])))
-            f.write('\n')
-            f.write("ORBITDIST %f\n"%(v.camera.dist,))
-            f.close()
-        
-        def load_camera(self):
-            v = self.glwidget.program.get_view()
-            #fn = QFileDialog.getOpenFileName(caption="Viewport file (*.txt)",filter="Viewport file (*.txt);;All files (*.*)",options=QFileDialog.DontUseNativeDialog)
-            fn = QFileDialog.getOpenFileName(caption="Viewport file (*.txt)",filter="Viewport file (*.txt);;All files (*.*)")
-            if isinstance(fn,tuple):
-                fn = fn[0]
-            if fn is None:
-                return
-            f = open(str(fn),'r')
-            read_viewport = False
-            mat = None
-            for line in f:
-                entries = line.split()
-                if len(entries) == 0:
-                    continue
-                kw = entries[0]
-                args = entries[1:]
-                if kw == 'VIEWPORT':
-                    read_viewport = True
-                    continue
-                else:
-                    if not read_viewport:
-                        print "File does not appear to be a valid viewport file, must start with VIEWPORT"
-                        break
-                if kw == 'FRAME':
-                    v.x,v.y,v.w,v.h = [int(x) for x in args]
-                elif kw == 'PERSPECTIVE':
-                    if args[0] != '1':
-                        print "WARNING: CANNOT CHANGE TO ORTHO MODE IN PYTHON VISUALIZATION"
-                elif kw == 'SCALE':
-                    scale = float(args[0])
-                    aspect = float(v.w)/float(v.h)
-                    #2.0*math.tan(rfov*0.5/aspect)*aspect = 1.0/scale
-                    #math.tan(rfov*0.5/aspect) = 0.5/(scale*aspect)
-                    #rfov*0.5/aspect = math.atan(0.5/(scale*aspect))
-                    #rfov = 2*aspect*math.atan(0.5/(scale*aspect))
-                    rfov = math.atan(0.5/(scale*aspect))*2*aspect
-                    v.fov = math.degrees(rfov)
-                elif kw == 'NEARPLANE':
-                    v.clippingplanes = (float(args[0]),v.clippingplanes[1])
-                elif kw == 'FARPLANE':
-                    v.clippingplanes = (v.clippingplanes[0],float(args[0]))
-                elif kw == 'CAMTRANSFORM':
-                    mat = [args[0:4],args[4:8],args[8:12],args[12:16]]
-                    for i,row in enumerate(mat):
-                        mat[i] = [float(x) for x in row]
-                elif kw == 'ORBITDIST':
-                    v.camera.dist = float(args[0])
-                else:
-                    raise RuntimeError("Invalid viewport keyword "+kw)
-            if mat is not None:
-                v.camera.set_matrix(se3.from_homogeneous(mat))
-            self.glwidget.program.set_view(v)
-            f.close()
-
-        
-        def save_world(self):
-            w = self.getWorld()
-            if w is None:
-                print "Program does not appear to have a world"
-            fn = QFileDialog.getSaveFileName(caption="World file (elements will be saved to folder)",filter="World file (*.xml);;All files (*.*)")
-            if isinstance(fn,tuple):
-                fn = fn[0]
-            if fn is not None:
-                w.saveFile(str(fn))
-                print "Saved to",fn,"and elements were saved to a directory of the same name."
-        
-        def add_to_world(self):
-            w = self.getWorld()
-            if w is None:
-                print "Program does not appear to have a world"
-            fn = QFileDialog.getOpenFileName(caption="World element",filter="Robot file (*.rob *.urdf);;Object file (*.obj);;Terrain file (*.env *.off *.obj *.stl *.wrl);;All files (*.*)")
-            if isinstance(fn,tuple):
-                fn = fn[0]
-            if fn is not None:
-                w.loadElement(str(fn))
-                for p in self.glwidget.program.plugins:
-                    if isinstance(p,VisualizationPlugin):
-                        p.getItem('world').setItem(w)
-        
-        def toggle_movie_mode(self):
-            self.saving_movie = not self.saving_movie
-            if self.saving_movie:
-                self.movie_timer.start(33)
-                sim = self.getSimulator()
-                if sim is not None:
-                    self.movie_time_last = sim.getTime()
-            else:
-                self.movie_timer.stop()
-                dlg =  QInputDialog(self)                 
-                dlg.setInputMode( QInputDialog.TextInput) 
-                dlg.setLabelText("Command")
-                dlg.setTextValue('ffmpeg -y -f image2 -i image%04d.png -vcodec libx264 -pix_fmt yuv420p klampt_record.mp4')
-                dlg.resize(600,100)                             
-                ok = dlg.exec_()                                
-                cmd = dlg.textValue()
-                #(cmd,ok) = QInputDialog.getText(self,"Process with ffmpeg?","Command", text='ffmpeg -y -f image2 -i image%04d.png klampt_record.mp4')
-                if ok:
-                    import os,glob
-                    os.system(str(cmd))
-                    print "Removing temporary files"
-                    for fn in glob.glob('image*.png'):
-                        os.remove(fn)
-        
-        def movie_update(self):
-            sim = self.getSimulator()
-            if sim is not None:
-                while sim.getTime() >= self.movie_time_last + 1.0/30.0:
-                    self.glwidget.program.save_screen('image%04d.png'%(self.movie_frame))
-                    self.movie_frame += 1
-                    self.movie_time_last += 1.0/30.0
-            else:
-                self.glwidget.program.save_screen('image%04d.png'%(self.movie_frame))
-                self.movie_frame += 1
-        
-        def toggle_html_mode(self):
-            self.saving_html = not self.saving_html
-            if self.saving_html:
-                world = self.getSimulator()
-                if world is None:
-                    world = self.getWorld()
-                if world is None:
-                    print "There is no world in the current plugin, can't save"
-                    self.saving_html = False
-                    return
-                fn = QFileDialog.getSaveFileName(caption="Save path HTML file to...",filter="HTML file (*.html);;All files (*.*)")
-                if isinstance(fn,tuple):
-                    fn = fn[0]
-                if fn is None:
-                    self.saving_html = False
-                    return
-                from ..io import html
-                self.html_start_time = time.time()
-                self.html_saver = html.HTMLSharePath(fn)
-                self.html_saver.dt = 0.033;
-                self.html_saver.start(world)
-                self.html_timer.start(33)
-            else:
-                self.html_saver.end()
-                self.html_timer.stop()
-        
-        def html_update(self):
-            t = None
-            if self.html_saver.sim is None:
-                #t = time.time()-self.html_start_time
-                t = self.html_saver.last_t + 0.034
-            self.html_saver.animate(t)
-        
-        def edit_gui(self):
-            if self.edit_gui_window:
-                self.edit_gui_window.close()
-                self.edit_gui_window = None
+    def followCamera(self,target,translate,rotate,center):
+        if target is None:
+            self.cameraController = None
+            return
+        vp = self.getViewport()
+        if isinstance(target,str) or isinstance(target,(tuple,list)):
             try:
-                import pyqtgraph as pg
-                import pyqtgraph.parametertree.parameterTypes as pTypes
-                from pyqtgraph.parametertree import Parameter, ParameterTree, ParameterItem, registerParameterType
-            except ImportError as e:
-                print e
-                print 'Unable to edit, PyQtGraph is not installed.  Try "pip install pyqtgraph"'
-                return
-
-            def _item_to_params(world,name,visappearance):
-                attrs = []
-                itemdict = {'name':name, 'type':'group', 'children': attrs}
-                if len(visappearance.subAppearances) > 0:
-                    attrs_plus_defaults = visappearance.attributes.overrides
+                target = self.getItem(target)
+            except KeyError:
+                raise ValueError("Invalid item "+str(target))
+            target_center = target.getCenter()
+            if center:
+                if translate:
+                    _camera_translate(vp,target_center)
                 else:
-                    attrs_plus_defaults = visappearance.getAttributes()
+                    _camera_lookat(vp,target_center)
 
-                for k in sorted(attrs_plus_defaults.keys()):
-                    v = attrs_plus_defaults[k]
-                    vvalue = v
-                    vtype = v.__class__.__name__
-                    if k=='color':
-                        vtype = 'color'
-                        vvalue = (int(v[0]*255),int(v[1]*255),int(v[2]*255),int(v[3]*255))
-                        #todo, add opacity
-                    elif k=='label':
-                        vtype = 'str'
-                    elif k in ['hide_label','hidden']:
-                        vtype = 'bool'
-                    elif k=='robot':
-                        assert isinstance(v,int)
-                        if world is not None:
-                            robotnames = {}
-                            for i in xrange(world.numRobots()):
-                                robotnames[world.robot(i).getName()] = i
-                            attrs.append({'name':k,'type':'list','values':robotnames,'value':v})
-                            continue
-                    elif v is None:
-                        #it's an optional parameter, skip for now
-                        #TODO: handle this case
-                        continue
-                    elif isinstance(v,(tuple,list)):
-                        #its a tuple, skip for now
-                        #TODO: handle this case
-                        continue
-                    attrs.append({'name':k,'type':vtype,'value':vvalue})
-
-                for k in sorted(visappearance.subAppearances.keys()):
-                        v = visappearance.subAppearances[k]
-                        attrs.append(_item_to_params(world,v.name,v))
-
-                return itemdict
-
-            params = []
-            for pindex,p in enumerate(self.glwidget.program.plugins):
-                if isinstance(p,VisualizationPlugin):
-                    items = []
-                    visdict = {'name':'Plugin '+str(pindex+1), 'type':'group', 'children':items}
-                    for (k,v) in p.items.iteritems():
-                        vdict = _item_to_params(self.getWorld(),k,v)
-                        items.append(vdict)
-                    params.append(visdict)
-            if len(params)==1:
-                params = params[0]['children']
-            #print "Showing parameters",params
-
-            ## Create tree of Parameter objects
-            p = Parameter.create(name='params', type='group', children=params)
-
-            ## If anything changes in the tree, print a message
-            def change(param, changes):
-                for param, change, data in changes:
-                    path = p.childPath(param)
-                    """
-                    if path is not None:
-                        childName = '.'.join(path)
-                    else:
-                        childName = param.name()
-                    print('  parameter: %s'% childName)
-                    print('  change:    %s'% change)
-                    print('  data:      %s'% str(data))
-                    print('  ----------')
-                    """
-                    if param.type()=='str':
-                        value = data
-                    elif param.type()=='int':
-                        value = int(data)
-                    elif param.type()=='bool':
-                        value = bool(data)
-                    elif param.type()=='float':
-                        value = float(data)
-                    elif param.type()=='color':
-                        #data is a QColor
-                        value = (float(data.red())/255.0,float(data.green())/255.0,float(data.blue())/255.0,float(data.alpha())/255.0)
-                    else:
-                        raise ValueError("Can't convert to type "+param.type())
-                    if path[0].startswith("Plugin "):
-                        pluginindex = int(path[0][7:])-1
-                        plugin = self.glwidget.program.plugins[pluginindex]
-                        path = path[1:]
-                    else:
-                        plugin = self.glwidget.program.plugins[0]
-                    attr = path[-1]
-                    item = plugin.getItem(path[:-1])
-                    global _globalLock
-                    _globalLock.acquire()
-                    plugin._setAttribute(item,attr,value)
-                    _globalLock.release()
-                self.glwidget.refresh()
-
-            p.sigTreeStateChanged.connect(change)
-
-            """
-            def valueChanging(param, value):
-                print("Value changing (not finalized): %s %s" % (param, value))
-                
-            # Too lazy for recursion:
-            for child in p.children():
-                child.sigValueChanging.connect(valueChanging)
-                for ch2 in child.children():
-                    ch2.sigValueChanging.connect(valueChanging)
-            """
-
-
-            ## Create two ParameterTree widgets, both accessing the same data
-            t = ParameterTree()
-            t.setParameters(p, showTop=False)
-            t.setWindowTitle('pyqtgraph example: Parameter Tree')
-
-            def onload():
-                fn = QFileDialog.getOpenFileName(caption="Load visualization config file",filter="JSON file (*.json);;All files (*.*)")
-                if isinstance(fn,tuple):
-                    fn = fn[0]
-                if fn is not None:
-                    self.loadJsonConfig(fn)
-                    print "TODO: update the edit window according to the loaded visualization parameters"
-
-            def onsave():
-                fn = QFileDialog.getSaveFileName(caption="Save visualization config file",filter="JSON file (*.json);;All files (*.*)")
-                if isinstance(fn,tuple):
-                    fn = fn[0]
-                if fn is not None:
-                    self.saveJsonConfig(fn)
-
-            self.edit_gui_window = QWidget()
-            self.edit_gui_window.setWindowTitle("Visualization appearance editor")
-            layout = QGridLayout()
-            self.edit_gui_window.setLayout(layout)
-            loadButton = QPushButton("Load...")
-            saveButton = QPushButton("Save...")
-            loadButton.clicked.connect(onload)
-            saveButton.clicked.connect(onsave)
-            layout.addWidget(t,0,0,1,2)
-            layout.addWidget(loadButton,1,0,1,1)
-            layout.addWidget(saveButton,1,1,1,1)
-            self.edit_gui_window.resize(400,800)
-            self.edit_gui_window.show()
-       
-        def loadJsonConfig(self,fn):
-            import json
-
-            def parseitem(js,app):
-                if isinstance(js,dict):
-                    for (attr,value) in js.iteritems():
-                        app.attributes[attr] = value
-                elif isinstance(js,list):
-                    for val in js:
-                        if not isinstance(val,dict) or "name" not in val or "appearance" not in val:
-                            print "Warning, JSON object",js,"does not contain a valid subappearance"
-                        name = val["name"]
-                        jsapp = val["appearance"]
-                        if isinstance(name,list):
-                            name = tuple(name)
-                        if name not in app.subAppearances:
-                            print "Warning, JSON object",js,"subappearance",name,"not in visualization"
-                        else:
-                            parseitem(jsapp,app.subAppearances[name])
-                else:
-                    print "Warning, JSON object",js,"does not contain a dict of attributes or list of sub-appearances"
-
-            f = open(fn,'r')
-            jsonobj = json.load(f)
-            f.close()
-            for p in self.glwidget.program.plugins:
-                if isinstance(p,VisualizationPlugin):
-                    parsed = set()
-                    for (k,v) in p.items.iteritems():
-                        if k in jsonobj:
-                            parsed.add(k)
-                            parseitem(jsonobj[k],v)
-                        else:
-                            print "Warning, visualization object",k,"not in JSON object"
-                    for (k,v) in jsonobj.iteritems():
-                        if k not in parsed:
-                            print "Warning, JSON object",k,"not in visualization"
-                    self.glwidget.refresh()
-                    return
-            print "loadJsonConfig: no visualization plugins active"
-        
-        def saveJsonConfig(self,fn):
-            import json
-            out = {}
-            def dumpitem(v):
-                if len(v.subAppearances) > 0:
-                    items = []
-                    for (k,app) in v.subAppearances.iteritems():
-                        jsapp = dumpitem(app)
-                        if len(jsapp) > 0:
-                            items.append({"name":k,"appearance":jsapp})
-                    return items
-                else:
-                    return v.attributes
-            for p in self.glwidget.program.plugins:
-                if isinstance(p,VisualizationPlugin):
-                    for (k,v) in p.items.iteritems():
-                        out[k] = dumpitem(v) 
-                    f = open(fn,'w')
-                    json.dump(out,f)
-                    f.close()
-                    return
-            print "saveJsonConfig: no visualization plugins active"
-        
-        def closeEvent(self,event):
-            if self.edit_gui_window:
-                self.edit_gui_window.close()
-                self.edit_gui_window = None
-            if self.saving_movie:
-                self.toggle_movie_mode()
-            if self.saving_html:
-                self.toggle_html_mode()
-            #self.html_timer.deleteLater()
-            #self.movie_timer.deleteLater()
-        
-        def close(self):
-            """Called to clean up resources"""
-            self.html_timer.stop()
-            self.movie_timer.stop()
-            self.html_timer.deleteLater()
-            self.movie_timer.deleteLater()
-            self.movie_timer = None
-            self.html_timer = None
-        
-        def detachGLWindow(self):
-            """Used for closing and restoring windows, while saving the OpenGL context"""
-            self.glwidget.setParent(None)
-        
-        def attachGLWindow(self):
-            """Used for closing and restoring windows, while saving the OpenGL context"""
-            self.glwidget.setParent(self)
-            self.setCentralWidget(self.glwidget)
-
-    def _run_app_thread(callback=None):
-        global _vis_thread_running,_in_app_thread,_vis,_widget,_window,_quit,_showdialog,_showwindow,_globalLock
-        _vis_thread_running = True
-
-        _GLBackend.initialize("Klamp't visualization")
-        
-        res = None
-        while not _quit:
-            _globalLock.acquire()
-            for i,w in enumerate(_windows):
-                if w.glwindow is None and w.mode != 'hidden':
-                    print "vis: creating GL window"
-                    w.glwindow = _GLBackend.createWindow(w.name)
-                    w.glwindow.setProgram(w.frontend)
-                    w.glwindow.setParent(None)
-                    w.glwindow.refresh()
-                if w.doRefresh:
-                    if w.mode != 'hidden':
-                        w.glwindow.updateGL()
-                    w.doRefresh = False
-                if w.doReload and w.glwindow is not None:
-                    w.glwindow.setProgram(w.frontend)
-                    if w.guidata:
-                        w.guidata.setWindowTitle(w.name)
-                        w.guidata.glwidget = w.glwindow
-                        w.guidata.attachGLWindow()
-                    w.doReload = False
-                if w.mode == 'dialog':
-                    print "#########################################"
-                    print "klampt.vis: Dialog on window",i
-                    print "#########################################"
-                    if w.custom_ui is None:
-                        dlg = _MyDialog(w)
-                    else:
-                        dlg = w.custom_ui(w.glwindow)
-                    if dlg is not None:
-                        w.glwindow.show()
-                        _in_app_thread = True
-                        _globalLock.release()
-                        res = dlg.exec_()
-                        _globalLock.acquire()
-                        w.glwindow.hide()
-                        w.glwindow.setParent(None)
-                            
-                        _in_app_thread = False
-                    print "#########################################"
-                    print "klampt.vis: Dialog done on window",i
-                    print "#########################################"
-                    w.glwindow.hide()
-                    w.glwindow.setParent(None)
-                    w.mode = 'hidden'
-                if w.mode == 'shown' and w.guidata is None:
-                    print "#########################################"
-                    print "klampt.vis: Making window",i
-                    print "#########################################"
-                    if w.custom_ui is None:
-                        w.guidata = _MyWindow(w)
-                    else:
-                        w.guidata = w.custom_ui(w.glwindow)
-                    def closeMonkeyPatch(self,event,windowinfo=w,oldcloseevent=w.guidata.closeEvent):
-                        oldcloseevent(event)
-                        if not event.isAccepted():
-                            return
-                        windowinfo.mode='hidden'
-                        print "#########################################"
-                        print "klampt.vis: Window close"
-                        print "#########################################"
-                        _globalLock.acquire()
-                        w.glwindow.hide()
-                        w.mode = 'hidden'
-                        w.glwindow.idlesleep()
-                        w.glwindow.setParent(None)
-                        _globalLock.release()
-                    w.guidata.closeEvent = closeMonkeyPatch.__get__(w.guidata, w.guidata.__class__)
-                    w.guidata.setWindowTitle(w.name)
-                    w.glwindow.show()
-                    w.guidata.show()
-                    if w.glwindow.initialized:
-                        #boot it back up again
-                        w.glwindow.idlesleep(0)
-                if w.mode == 'shown' and not w.guidata.isVisible():
-                    print "#########################################"
-                    print "klampt.vis: Showing window",i
-                    print "#########################################"
-                    if hasattr(w.guidata,'attachGLWindow'):
-                        w.guidata.attachGLWindow()
-                    else:
-                        w.glwindow.setParent(w.guidata)
-                    w.glwindow.show()
-                    w.guidata.show()
-                if w.mode == 'hidden' and w.guidata is not None:
-                    #prevent deleting the GL window
-                    if hasattr(w.guidata,'detachGLWindow'):
-                        w.guidata.detachGLWindow()
-                    else:
-                        w.glwindow.setParent(None)
-                        w.guidata.setParent(None)
-                    if w.guidata.isVisible():
-                        print "#########################################"
-                        print "klampt.vis: Hiding window",i
-                        print "#########################################"
-                        w.glwindow.hide()
-                        w.guidata.hide()
-                    w.guidata.close()
-                    w.guidata = None
-            _globalLock.release()
-            _in_app_thread = True
-            _GLBackend.app.processEvents()
-            _in_app_thread = False
-            if callback:
-                callback()
+            if translate and rotate:
+                self.cameraController = _TrackingCameraController(vp,target)
+            elif translate:
+                self.cameraController = _TranslatingCameraController(vp,target)
+            elif rotate:
+                self.cameraController = _TargetCameraController(vp,target)
             else:
-                if not _in_vis_loop:
-                    #give other threads time to work
-                    time.sleep(0.001)
-            if _in_vis_loop and (len(_windows)==0 or all(w.mode == 'hidden' for w in _windows)):
-                print "klampt.vis: No windows shown, breaking out of vis loop"
-                _vis_thread_running = False
-                return
-        print "Visualization thread closing and cleaning up Qt..."
-        _cleanup()
-        _vis_thread_running = False
-        return res
+                self.cameraController = None
+        elif isinstance(target,Trajectory):
+            self.cameraController = _TrajectoryCameraController(vp,target)
+        elif isinstance(target,SimRobotSensor):
+          self.cameraController = _SimCamCameraController(vp,target)
+        else:
+            raise ValueError("Invalid value for target, must either be str or a Trajectory")
 
-    def _cleanup():
-        for w in _windows:
-            w.vis.clear()
-            if w.glwindow:
-                w.glwindow.setParent(None)
-                w.glwindow.close()
-                #must be explicitly deleted for some reason in PyQt5...
-                del w.glwindow
-        _GLBackend.app.processEvents()
+    def updateTime(self,t):
+        """The backend will call this during an idle loop to update the
+        visualization time.  This may also update animations if currently
+        animating."""
+        if self.startTime is None:
+          self.startTime = t
+        oldt = self.t
+        self.t = t-self.startTime
+        if self.animating:
+            self.stepAnimation(self.t - oldt)
+        for (k,v) in self.items.items():
+            #do other updates
+            v.updateTime(self.t)
 
-        #must be explicitly deleted for some reason in PyQt5...
-        del _GLBackend.app
-        _GLBackend.app = None
+    def updateCamera(self):
+        """Updates the camera, if controlled.  The backend should call
+        this whenever the scene is to be drawn."""
+        if self.cameraController is not None:
+            vp = self.cameraController.update(self.currentAnimationTime)
+            if vp is not None:
+                self.setViewport(vp)
 
-elif _GLUTAvailable:
-    print "klampt.visualization: QT is not available, falling back to poorer"
-    print "GLUT interface.  Returning to another GLUT thread will not work"
-    print "properly."
-    print ""
-    
-    class GLUTHijacker(GLPluginProgram):
-        def __init__(self,windowinfo):
-            GLPluginProgram.__init__(self)
-            self.windowinfo = windowinfo
-            self.name = windowinfo.name
-            self.view = windowinfo.frontend.view
-            self.clearColor = windowinfo.frontend.clearColor
-            self.actions = windowinfo.frontend.actions
-            self.frontend = windowinfo.frontend
-            self.inDialog = False
-            self.hidden = False
-            self.callback = None
-        def initialize(self):
-            self.frontend.window = self.window
-            if not self.frontend.initialize(): return False
-            GLPluginProgram.initialize(self)
-            return True
-        def display(self):
-            global _globalLock
-            _globalLock.acquire()
-            self.frontend.display()
-            _globalLock.release()
-            return True
-        def display_screen(self):
-            global _globalLock
-            _globalLock.acquire()
-            self.frontend.display_screen()
-            glColor3f(1,1,1)
-            glRasterPos(20,50)
-            gldraw.glutBitmapString(GLUT_BITMAP_HELVETICA_18,"(Do not close this window except to quit)")
-            if self.inDialog:
-                glColor3f(1,1,0)
-                glRasterPos(20,80)
-                gldraw.glutBitmapString(GLUT_BITMAP_HELVETICA_18,"In Dialog mode. Press 'Esc' to return to normal mode")
-            else:
-                glColor3f(1,1,0)
-                glRasterPos(20,80)
-                gldraw.glutBitmapString(GLUT_BITMAP_HELVETICA_18,"In Window mode. Press 'Esc' to hide window")
-            _globalLock.release()
-        def keyboardfunc(self,c,x,y):
-            if len(c)==1 and ord(c)==27:
-                if self.inDialog:
-                    print "Esc pressed, hiding dialog"
-                    self.inDialog = False
+    def edit(self,name,doedit=True):
+        raise NotImplementedError("Needs to be implemented by subclass")
+
+    def getViewport(self):
+        raise NotImplementedError("Needs to be implemented by subclass")
+
+    def setViewport(self,viewport):
+        raise NotImplementedError("Needs to be implemented by subclass")
+
+    def setBackgroundColor(self,r,g,b,a=1): 
+        raise NotImplementedError("Needs to be implemented by subclass")
+
+    def renderGL(self,view):
+        """Renders the scene in OpenGL"""
+        vp = view.toViewport()
+        self.labels = []
+        world = self.items.get('world',None)
+        if world is not None: world=world.item
+        #draw solid items first
+        delayed = []
+        for (k,v) in self.items.items():
+            transparent = v.transparent()
+            if transparent is not False:
+                delayed.append(k)
+                if transparent is True:
+                    continue
+            v.widget = self
+            v.swapDrawConfig()
+            v.drawGL(world,viewport=vp,draw_transparent=False)
+            v.swapDrawConfig()
+            #allows garbage collector to delete these objects
+            v.widget = None 
+
+        for k in delayed:
+            v = self.items[k]
+            v.widget = self
+            v.swapDrawConfig()
+            v.drawGL(world,viewport=vp,draw_transparent=True)
+            v.swapDrawConfig()
+            #allows garbage collector to delete these objects
+            v.widget = None 
+
+        #cluster label points and draw labels
+        pointTolerance = view.camera.dist*0.03
+        if pointTolerance > 0:
+            pointHash = {}
+            for (text,point,color) in self.labels:
+                index = tuple([int(x/pointTolerance) for x in point])
+                try:
+                    pointHash[index][1].append((text,color))
+                except KeyError:
+                    pointHash[index] = [point,[(text,color)]]
+            for (p,items) in pointHash.values():
+                self._renderGLLabelRaw(view,p,*list(zip(*items)))
+
+    def renderScreenGL(self,view,window):
+        cx = 20
+        cy = 20
+        glDisable(GL_LIGHTING)
+        glDisable(GL_DEPTH_TEST)
+        for (k,v) in self.items.items():
+            if isinstance(v.item,VisPlot) and not v.attributes['hidden']:
+                pos = v.attributes['position']
+                duration = v.attributes['duration']
+                vrange = v.attributes['range']
+                w,h = v.attributes['size']
+                if pos is None:
+                    v.item.renderGL(window,cx,cy,w,h,duration,vrange[0],vrange[1])
+                    cy += h+18
                 else:
-                    print "Esc pressed, hiding window"
-                global _globalLock
-                _globalLock.acquire()
-                self.windowinfo.mode = 'hidden'
-                self.hidden = True
-                glutHideWindow()
-                _globalLock.release()
-                return True
-            else:
-                return self.frontend.keyboardfunc(c,x,y)
-        def keyboardupfunc(self,c,x,y):
-            return self.frontend.keyboardupfunc(c,x,y)
-        def motionfunc(self,x,y,dx,dy):
-            return self.frontend.motionfunc(x,y,dx,dy)
-        def mousefunc(self,button,state,x,y):
-            return self.frontend.mousefunc(button,state,x,y)
-        
-        def idlefunc(self):
-            global _quit,_showdialog
-            global _globalLock
-            _globalLock.acquire()
-            if _quit or (_in_vis_loop and self.hidden):
-                if bool(glutLeaveMainLoop):
-                    glutLeaveMainLoop()
-                else:
-                    print "Not compiled with freeglut, can't exit main loop safely. Press Ctrl+C instead"
-                    raw_input()
-            if self.hidden:
-                print "hidden, waiting...",self.windowinfo.mode
-                if self.windowinfo.mode == 'shown':
-                    print "Showing window"
-                    glutSetWindow(self.window.glutWindowID)
-                    glutShowWindow()
-                    self.hidden = False
-                elif self.windowinfo.mode == 'dialog':
-                    print "Showing window in dialog mode"
-                    self.inDialog = True
-                    glutSetWindow(self.window.glutWindowID)
-                    glutShowWindow()
-                    self.hidden = False
-            _globalLock.release()
-            if self.callback:
-                self.callback()
-            return self.frontend.idlefunc()
-
-    def _run_app_thread(callback=None):
-        global _vis_thread_running,_vis,_old_glut_window,_quit,_windows
-        import weakref
-        _vis_thread_running = True
-        _GLBackend.initialize("Klamp't visualization")
-        w = _GLBackend.createWindow("Klamp't visualization")
-        hijacker = GLUTHijacker(_windows[0])
-        hijacker.callback = callback
-        _windows[0].guidata = weakref.proxy(hijacker)
-        w.setProgram(hijacker)
-        _GLBackend.run()
-        print "Visualization thread closing..."
-        _cleanup()
-        _vis_thread_running = False
-        return
-
-    def _cleanup():
-        for w in _windows:
-            w.vis.clear()
-    
-def _kill():
-    global _quit,_in_vis_loop,_vis_thread_running,_vis_thread,_cleanup
-    _quit = True
-    if _in_vis_loop:
-        #if the thread is running, _quit=True just signals to the vis loop to quit.
-        #otherwise, the program needs to be killed and cleaned up
-        if not _vis_thread_running:
-            #need to clean up Qt resources
-            _cleanup()
-        return
-    if _vis_thread_running:
-        _vis_thread.join()
-        assert _vis_thread_running == False
-
-    _quit = False
-
-if _PyQtAvailable:
-    if _PyQt5Available:
-        from PyQt5 import QtCore
-    else:
-        from PyQt4 import QtCore
-    class MyQThread(QtCore.QThread):
-        def __init__(self,func,*args):
-            self.func = func
-            self.args = args
-            QtCore.QThread.__init__(self)
-        def run(self):
-            self.func(*self.args)
-
-def _loop(setup,callback,cleanup):
-    global _in_vis_loop,_vis_thread_running,_use_multithreaded,_quit
-    if _vis_thread_running or _in_vis_loop:
-        raise RuntimeError("Cannot call loop() after show(), inside dialog(), or inside loop() callbacks")
-    _in_vis_loop = True
-    try:
-        if setup is not None:
-            setup()
-        _quit = False
-        _run_app_thread(callback)
-        if cleanup is not None:
-            cleanup()
-    finally:
-        _in_vis_loop = False
-
-def _start_app_thread():
-    global _vis_thread
-    signal.signal(signal.SIGINT, signal.SIG_DFL)
-    if _PyQtAvailable and False:
-        #for some reason, QThread doesn't allow for mouse events to be posted?
-        _vis_thread = MyQThread(_run_app_thread)
-        _vis_thread.start()
-    else:
-        _vis_thread = threading.Thread(target=_run_app_thread)
-        _vis_thread.setDaemon(True)
-        _vis_thread.start()
-    time.sleep(0.1)
+                    x = pos[0]
+                    y = pos[1]
+                    if x < 0:
+                        x = view.w + x
+                    if y < 0:
+                        y = view.h + y
+                    v.item.renderGL(window,x,y,w,h,duration,vrange[0],vrange[1])
+        for (k,v) in self.items.items():
+            if isinstance(v.item,str) and not v.attributes['hidden']:
+                pos = v.attributes['position']
+                col = v.attributes['color']
+                size = v.attributes['size']
+                if pos is None:
+                    #draw at console
+                    window.draw_text((cx,cy+size),v.item,size,col)
+                    cy += (size*15)/10
+                elif len(pos)==2:
+                    x = pos[0]
+                    y = pos[1]
+                    if x < 0:
+                        x = view.w + x
+                    if y < 0:
+                        y = view.h + y
+                    window.draw_text((x,y+size),v.item,size,col)
+        glEnable(GL_DEPTH_TEST)
 
 
-def _show():
-    global _windows,_current_window,_in_vis_loop,_vis_thread_running,_vis_thread
-    if len(_windows)==0:
-        _windows.append(WindowInfo(_window_title,_frontend,_vis)) 
-        _current_window = 0
-    _windows[_current_window].mode = 'shown'
-    _windows[_current_window].worlds = _current_worlds
-    _windows[_current_window].active_worlds = _current_worlds[:]
-    if _in_vis_loop:
-        #this will be handled in the loop, no need to start it
-        return
-    if not _vis_thread_running:
-        _start_app_thread()
+    def _renderGLLabelRaw(self,view,point,textList,colorList):
+        #assert not self.makingDisplayList,"drawText must be called outside of display list"
+        assert self.window is not None
+        invCameraRot = so3.inv(view.camera.matrix()[0])
+        for i,(text,c) in enumerate(zip(textList,colorList)):
+            if i+1 < len(textList): text = text+","
 
-def _hide():
-    global _windows,_current_window,_vis_thread_running
-    if _current_window is None:
-        return
-    _windows[_current_window].mode = 'hidden'
+            projpt = view.project(point,clip=False)
+            if projpt[2] > view.clippingplanes[0]:
+                d = float(12)/float(view.w)*projpt[2]*0.7
+                point = vectorops.add(point,so3.apply(invCameraRot,(0,-d,0)))
 
-def _dialog():
-    global __windows,_current_window,_in_vis_loop,_vis_thread_running,_vis_thread
-    if len(_windows)==0:
-        _windows.append(WindowInfo(_window_title,_frontend,_vis,None))
-        _current_window = 0
-    if _vis_thread_running:
-        if _in_vis_loop:
-            #single threaded
-            raise RuntimeError("Can't call dialog() inside loop().  Try dialogInLoop() instead.")
-        #just show the dialog and let the thread take over
-        assert _windows[_current_window].mode == 'hidden',"dialog() called inside dialog?"
-        print "#########################################"
-        print "klampt.vis: Creating dialog on window",_current_window
-        print "#########################################"
+            glDisable(GL_LIGHTING)
+            glDisable(GL_DEPTH_TEST)
+            glColor3f(*c)
+            self.draw_text(point,text,size=12)
+            glEnable(GL_DEPTH_TEST)
+            
+    def clearDisplayLists(self):
+        for i in self.items.values():
+            i.clearDisplayLists()
+
+def _camera_translate(vp,tgt):
+    vp.camera.tgt = tgt
+
+def _camera_lookat(vp,tgt):
+    T = vp.getTransform()
+    vp.camera.tgt = tgt
+    vp.camera.dist = max(vectorops.distance(T[1],tgt),0.1)
+    #set R to point at target
+    zdir = vectorops.unit(vectorops.sub(tgt,T[1]))
+    xdir = vectorops.unit(vectorops.cross(zdir,[0,0,1]))
+    ydir = vectorops.unit(vectorops.cross(zdir,xdir))
+    R = xdir + ydir + zdir
+    vp.camera.set_orientation(R,'xyz')
+
+class _TrackingCameraController:
+    def __init__(self,vp,target):
+        self.vp = vp
+        T = vp.getTransform()
+        target.swapDrawConfig()
+        self.viewportToTarget = se3.mul(se3.inv(target.getTransform()),T)
+        target.swapDrawConfig()
+        self.target = target
+    def update(self,t):
+        self.target.swapDrawConfig()
+        T = se3.mul(self.target.getTransform(),self.viewportToTarget)
+        self.target.swapDrawConfig()
+        self.vp.setTransform(T)
+        return self.vp
+
+class _TranslatingCameraController:
+    def __init__(self,vp,target):
+        self.vp = vp
+        target.swapDrawConfig()
+        self.last_target_pos = target.getCenter()
+        target.swapDrawConfig()
+        self.target = target
+    def update(self,t):
+        self.target.swapDrawConfig()
+        t = self.target.getCenter()
+        self.target.swapDrawConfig()
+        self.vp.camera.tgt = vectorops.add(self.vp.camera.tgt,vectorops.sub(t,self.last_target_pos))
+        self.last_target_pos = t
+        return self.vp
+
+class _TargetCameraController:
+    def __init__(self,vp,target):
+        self.vp = vp
+        target.swapDrawConfig()
+        self.last_target_pos = target.getCenter()
+        target.swapDrawConfig()
+        self.target = target
+    def update(self,t):
+        self.target.swapDrawConfig()
+        t = self.target.getCenter()
+        self.target.swapDrawConfig()
+        tgt = vectorops.add(self.vp.camera.tgt,vectorops.sub(t,self.last_target_pos))
+        self.last_target_pos = t
+        _camera_lookat(self.vp,tgt)
+        return self.vp
+
+class _TrajectoryCameraController:
+    def __init__(self,vp,trajectory):
+        self.vp = vp
+        if isinstance(trajectory,SE3Trajectory):
+            pass
+        elif isinstance(trajectory,SO3Trajectory):
+            pass
+        else:
+            assert isinstance(trajectory,Trajectory)
+            pass
+        self.trajectory = trajectory
+    def update(self,t):
+        if isinstance(self.trajectory,(SE3Trajectory,SE3BezierTrajectory)):
+            T = self.trajectory.eval_se3(t,'loop')
+            self.vp.setTransform(T)
+        elif isinstance(self.trajectory,(SO3Trajectory,SO3BezierTrajectory)):
+            R = self.trajectory.eval(t,'loop')
+            self.vp.camera.set_orientation(R,'xyz')
+        else:
+            trans = self.trajectory.eval(t,'loop')
+            T = self.vp.getTransform()
+            ofs = vectorops(vp.tgt,T[0])
+            self.vp.camera.tgt = vectorops.add(trans,ofs)
+        return self.vp
+
+class _SimCamCameraController:
+    def __init__(self,vp,target):
+        self.vp = vp
+        self.target = target
+    def update(self,t):
+        from ..model import sensing
+        T = sensing.get_sensor_xform(self.target,self.target.robot())
+        self.vp.setTransform(T)
+        return self.vp
+
+
+class _WindowManager:
+    def frontend(self):
+        raise NotImplementedError()
+    def scene(self):
+        raise NotImplementedError()
+    def getWindowName(self):
+        raise NotImplementedError()
+    def setWindowName(self,name):
+        raise NotImplementedError()
+    def createWindow(self,title):
+        raise NotImplementedError()
+    def setWindow(self,id):
+        raise NotImplementedError()
+    def getWindow(self):
+        raise NotImplementedError()
+    def setPlugin(self,plugin):
+        raise NotImplementedError()
+    def pushPlugin(self,plugin):
+        raise NotImplementedError()
+    def popPlugin(self):
+        raise NotImplementedError()
+    def splitView(self,plugin):
+        raise NotImplementedError()
+    def multithreaded(self):
+        return False
+    def run(self):
+        raise NotImplementedError()
+    def loop(self,setup,callback,cleanup):
+        raise NotImplementedError()
+    def spin(self,duration):
+        raise NotImplementedError()
+    def show(self):
+        raise NotImplementedError()
+    def shown(self):
+        raise NotImplementedError()
+    def hide(self):
+        raise NotImplementedError()
+    def dialog(self):
+        raise NotImplementedError()
+    def lock(self):
+        global _globalLock
         _globalLock.acquire()
-        _windows[_current_window].mode = 'dialog'
-        _windows[_current_window].worlds = _current_worlds
-        _windows[_current_window].active_worlds = _current_worlds[:]
+    def unlock(self):
+        global _globalLock
         _globalLock.release()
+    def update(self):
+        pass
+    def cleanup(self):
+        pass
+    def kill(self):
+        pass
+    def threadCall(self,func):
+        func()
 
-        if not _in_app_thread or threading.current_thread().__class__.__name__ == '_MainThread':
-            print "vis.dialog(): Waiting for dialog on window",_current_window,"to complete...."
-            while _windows[_current_window].mode == 'dialog':
-                time.sleep(0.1)
-            print "vis.dialog(): ... dialog done, status is now",_windows[_current_window].mode
+
+class _ThreadedWindowManager(_WindowManager):
+    def __init__(self):
+        #signals to visualization thread
+        self.quit = False
+        self.in_vis_loop = False
+        self.vis_thread_running = False
+        self.vis_thread = None
+        self.in_app_thread = False
+        self.threadcalls = []
+
+    def run_app_thread(self,callback):
+        raise NotImplementedError()
+
+    def multithreaded(self):
+        return (True if sys.platform != 'darwin' else False)
+
+    def kill(self):
+        self.quit = True
+        if self.in_vis_loop:
+            #if the thread is running, _quit=True just signals to the vis loop to quit.
+            #otherwise, the program needs to be killed and cleaned up
+            if not self.vis_thread_running:
+                #need to clean up Qt resources
+                self.cleanup()
+            return
+        if self.vis_thread_running:
+            self.vis_thread.join()
+            assert self.vis_thread_running == False
+
+        self.quit = False
+
+    def loop(self,setup,callback,cleanup):
+        if self.vis_thread_running or self.in_vis_loop:
+            raise RuntimeError("Cannot call loop() after show(), inside dialog(), or inside loop() callbacks")
+        self.in_vis_loop = True
+        try:
+            if setup is not None:
+                setup()
+            self.quit = False
+            self.run_app_thread(callback)
+            if cleanup is not None:
+                cleanup()
+        finally:
+            self.in_vis_loop = False
+
+    def spin(self,duration):
+        if self.in_vis_loop:
+            raise RuntimeError("spin() cannot be used inside loop()")
+        if self.multithreaded():
+            #use existing thread
+            self.show()
+            t = 0
+            while t < duration:
+                if not self.shown(): break
+                time.sleep(min(0.04,duration-t))
+                t += 0.04
+            self.hide()
         else:
-            #called from another dialog or window!
-            print "vis: Creating a dialog from within another dialog or window"
-            _globalLock.acquire()
-            w = _windows[_current_window]
-            if w.glwindow is None:
-                print "vis: creating GL window"
-                w.glwindow = _GLBackend.createWindow(w.name)
-                w.glwindow.setProgram(w.frontend)
-                w.glwindow.setParent(None)
-                w.glwindow.refresh()
-            if w.custom_ui is None:
-                dlg = _MyDialog(w)
-            else:
-                dlg = w.custom_ui(w.glwindow)
-            print "#########################################"
-            print "klampt.vis: Dialog starting on window",_current_window
-            print "#########################################"
-            if dlg is not None:
-                w.glwindow.show()
-                _globalLock.release()
-                res = dlg.exec_()
-                _globalLock.acquire()
-            print "#########################################"
-            print "klampt.vis: Dialog done on window",_current_window
-            print "#########################################"
-            w.glwindow.hide()
-            w.glwindow.setParent(None)
-            w.mode = 'hidden'
-            _globalLock.release()
-        return None
-    else:
-        _windows[_current_window].mode = 'dialog'
-        _windows[_current_window].worlds = _current_worlds
-        _windows[_current_window].active_worlds = _current_worlds[:]
-        if _use_multithreaded:
-            print "#########################################"
-            print "klampt.vis: Running multi-threaded dialog, waiting to complete..."
-            _start_app_thread()
-            while _windows[_current_window].mode == 'dialog':
-                time.sleep(0.1)
-            print "klampt.vis: ... dialog done."
-            print "#########################################"
-            return None
-        else:
-            print "#########################################"
-            print "klampt.vis: Running single-threaded dialog"
-            _in_vis_loop = True
-            res = _run_app_thread()
-            _in_vis_loop = False
-            print "klampt.vis: ... dialog done."
-            print "#########################################"
-            return res
-
-def _set_custom_ui(func):
-    global _windows,_current_window,_vis_thread_running
-    if len(_windows)==0:
-        print "Making first window for custom ui"
-        _windows.append(WindowInfo(_window_title,_frontend,_vis,None))
-        _current_window = 0
-    _windows[_current_window].custom_ui = func
-    print "setting custom ui on window",_current_window
-    return
-
-def _onFrontendChange():
-    global _windows,_frontend,_window_title,_current_window,_vis_thread_running
-    if _current_window is None:
+            #use single thread
+            t0 = time.time()
+            def timed_break():
+                t1 = time.time()
+                if t1 - t0 >= duration:
+                    self.hide()
+            self.loop(callback=timed_break,setup=lambda:self.show())
         return
-    w = _windows[_current_window]
-    w.doReload = True
-    w.name = _window_title
-    w.frontend = _frontend
-    if w.glwindow:
-        w.glwindow.reshape(_frontend.view.w,_frontend.view.h)
-    if w.guidata and not _PyQtAvailable:
-        w.guidata.frontend = _frontend
-        _frontend.window = w.guidata.window
 
-def _refreshDisplayLists(item):
-    if isinstance(item,WorldModel):
-        for i in xrange(item.numRobots()):
-            _refreshDisplayLists(item.robot(i))
-        for i in xrange(item.numRigidObjects()):
-            _refreshDisplayLists(item.rigidObject(i))
-        for i in xrange(item.numTerrains()):
-            _refreshDisplayLists(item.terrain(i))
-    elif isinstance(item,RobotModel):
-        for i in xrange(item.numLinks()):
-            _refreshDisplayLists(item.link(i))
-    elif hasattr(item,'appearance'):
-        item.appearance().refresh(False)
+    def run(self):
+        if self.vis_thread_running:
+            #already multithreaded, can't go back to single thread
+            self.show()
+            while self.shown():
+                time.sleep(0.1)
+        else:
+            #run in a single thread
+            self.loop(setup=None,callback=None,cleanup=None)
 
-def _checkWindowCurrent(item):
-    global _windows,_current_window,_world_to_window,_current_worlds
-    if isinstance(item,int):
-        if not all(w().index != item for w in _current_worlds):
-            print "klampt.vis: item appears to be in a new world, but doesn't have a full WorldModel instance"
-    if isinstance(item,WorldModel):
-        #print "Worlds active in current window",_current_window,":",[w().index for w in _current_worlds]
-        if all(item != w() for w in _current_worlds):
-            #PyQt interface allows sharing display lists but GLUT does not.
-            #refresh all worlds' display lists that will be shifted to the current window.
-            for i,win in enumerate(_windows):
-                #print "Window",i,"active worlds",[w().index for w in win.active_worlds]
-                if any(item == w() for w in win.active_worlds):
-                    if not _PyQtAvailable:
-                        print "klampt.vis: world",item.index,"was shown in a different window, now refreshing display lists"
-                        _refreshDisplayLists(item)
-                    win.active_worlds.remove(weakref.ref(item))
-            _current_worlds.append(weakref.ref(item))
-            #print "klampt.vis: world added to the visualization's world (items:",[w().index for w in _current_worlds],")"
-        #else:
-        #    print "klampt.vis: world",item,"is already in the current window's world"
-    elif hasattr(item,'world'):
-        _checkWindowCurrent(item.world)
+    def _start_app_thread(self):
+        signal.signal(signal.SIGINT, signal.SIG_DFL)
+        self.vis_thread = threading.Thread(target=self.run_app_thread)
+        self.vis_thread.setDaemon(True)
+        self.vis_thread.start()
+        time.sleep(0.1)
+
+    def threadCall(self,func):
+        self.threadcalls.append(func)
 

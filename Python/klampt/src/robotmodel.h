@@ -13,6 +13,7 @@ class RobotModel;
 class RobotModelLink;
 class RigidObjectModel;
 class TerrainModel;
+class SimRobotSensor;
 
 //forward definitions for pointers to internal objects
 class RigidObject;
@@ -21,9 +22,9 @@ class Robot;
 
 /** @brief Stores mass information for a rigid body or robot link.
  * 
- * Note:
+ * .. note::
  * 
- *     You should use the set/get functions rather than changing the members
+ *     Recommended to use the set/get functions rather than changing the members
  *     directly due to strangeness in SWIG's handling of vectors.
  * 
  * Attributes:
@@ -51,9 +52,9 @@ public:
   ///Returns the inertia matrix as a list of 3 floats or 9 floats
   void getInertia(std::vector<double>& out) const { out=inertia; }
 
-  double mass;        ///<mass
-  std::vector<double> com;      ///<local center of mass, size 3
-  std::vector<double> inertia;  ///<local inertia matrix, size 3 or 9
+  double mass;        //<mass
+  std::vector<double> com;      //<local center of mass, size 3
+  std::vector<double> inertia;  //<local inertia matrix, size 3 or 9
 };
 
 /** @brief Stores contact parameters for an entity.  Currently only
@@ -142,6 +143,12 @@ class RobotModelLink
   void getAxis(double out[3]);
   ///Sets the local rotational / translational axis
   void setAxis(const double axis[3]);
+  ///Returns whether the joint is prismatic
+  bool isPrismatic();
+  ///Returns whether the joint is revolute
+  bool isRevolute();
+  ///Changes a link from revolute to prismatic or vice versa
+  void setPrismatic(bool prismatic);
 
   ///Converts point from local to world coordinates 
   ///
@@ -435,7 +442,7 @@ class RobotModel
   void setAccelerationLimits(const std::vector<double>& amax);
   ///Retrieve the torque limit vector tmax, the constraint is :math:`|torque[i]| \leq tmax[i]`
   void getTorqueLimits(std::vector<double>& out);
-  ///Sets the torque limit vector tmax, the constraint is :math:`|torque[i]| <\leqtmax[i]`
+  ///Sets the torque limit vector tmax, the constraint is :math:`|torque[i]| \leq tmax[i]`
   void setTorqueLimits(const std::vector<double>& tmax);
   ///Sets a single DOF's position (by index or by name).
   ///
@@ -529,7 +536,8 @@ class RobotModel
   ///    result from joint torques t in the absence of external forces.
   void accelFromTorques(const std::vector<double>& t,std::vector<double>& out);
 
-  ///Interpolates smoothly between two configurations, properly taking into account nonstandard joints
+  ///Interpolates smoothly between two configurations, properly taking into
+  ///account nonstandard joints.
   ///
   ///Returns:
   ///
@@ -548,6 +556,19 @@ class RobotModel
   ///(Note that the python random seeding does not affect the result.)
   void randomizeConfig(double unboundedScale=1.0);
 
+  ///Converts a full configuration (length numLinks()) to a list of driver values
+  ///(length numDrivers()).
+  void configToDrivers(const std::vector<double>& config,std::vector<double>& out);
+  ///Converts a full velocity vector (length numLinks()) to a list of driver
+  ///velocities (length numDrivers()).
+  void velocityToDrivers(const std::vector<double>& velocities,std::vector<double>& out);
+  ///Converts a list of driver values (length numDrivers()) to a full configuration
+  ///(length numLinks()).
+  void configFromDrivers(const std::vector<double>& driverValues,std::vector<double>& out);
+  ///Converts a list of driver velocities (length numDrivers()) to a full velocity
+  ///vector (length numLinks()).
+  void velocityFromDrivers(const std::vector<double>& driverVelocities,std::vector<double>& out);
+
   //geometry functions
   ///Queries whether self collisions between two links is enabled
   bool selfCollisionEnabled(int link1,int link2);
@@ -555,13 +576,34 @@ class RobotModel
   void enableSelfCollision(int link1,int link2,bool value);
   ///Returns true if the robot is in self collision (faster than manual testing)
   bool selfCollides();
-  ///Draws the robot geometry. If keepAppearance=true, the current appearance is honored.
-  ///Otherwise, only the raw geometry is drawn.
+  ///Draws the robot geometry. If keepAppearance=true, the current appearance is 
+  ///honored. Otherwise, only the raw geometry is drawn.
   ///
   ///PERFORMANCE WARNING: if keepAppearance is false, then this does not properly
   ///reuse OpenGL display lists.  A better approach to changing the robot's
   ///appearances is to set the link Appearance's directly.
   void drawGL(bool keepAppearance=true);
+
+  ///Sets self to a reduced version of robot, where all fixed DOFs are eliminated.
+  ///The return value is a map from the original robot DOF indices to the reduced
+  ///DOFs.
+  ///
+  ///Note that any geometries fixed to the world will disappear.
+  void reduce(const RobotModel& robot,std::vector<int>& out);
+  ///Mounts a sub-robot onto a link, with its origin at a given local transform (R,t).
+  ///The sub-robot's links will be renamed to subRobot.getName() + ':' + link.getName()
+  ///unless subRobot.getName() is '', in which case the link names are preserved.
+  void mount(int link,const RobotModel& subRobot,const double R[9],const double t[3]);
+
+  /// Returns a sensor by index or by name.  If out of bounds or unavailable,
+  /// a null sensor is returned (i.e., SimRobotSensor.name() or
+  /// SimRobotSensor.type()) will return the empty string.)
+  SimRobotSensor sensor(int index);
+  //note: only the last overload docstring is added to the documentation
+  /// Returns a sensor by index or by name.  If out of bounds or unavailable,
+  /// a null sensor is returned (i.e., SimRobotSensor.name() or
+  /// SimRobotSensor.type()) will return the empty string.)
+  SimRobotSensor sensor(const char* name);
 
   int world;
   int index;
