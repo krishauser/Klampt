@@ -54,7 +54,7 @@ Real RobustSolveIK(Robot& robot,RobotIKFunction& f,int iters,Real tol,int numRes
       }
       f(solver.solver.x,residual);
       Real newResidNorm = residual.normSquared();
-      if(newResidNorm < residNorm) {
+      if(newResidNorm + robot.q.distance(qbest)*0.01 < residNorm) {
         residNorm = newResidNorm;
         qbest = robot.q;
       }
