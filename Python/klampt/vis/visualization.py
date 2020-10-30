@@ -1164,7 +1164,10 @@ def getAttribute(name,attr):
         name (str): the name of the item
         attr (str): the name of the attribute (see :func:`setAttribute`)
     """
-    return scene().getAttribute(name,attr)
+    global _vis
+    if _vis is None:
+        return
+    return _vis.getAttribute(name,attr)
 
 def getAttributes(name):
     """Gets a dictionary of all relevant attributes of an item's appearance. 
@@ -1173,7 +1176,10 @@ def getAttributes(name):
     Args:
         name (str): the name of the item
     """
-    return scene().getAttributes(name)
+    global _vis
+    if _vis is None:
+        return
+    return _vis.getAttributes(name)
 
 def revertAppearance(name):
     scene().revertAppearance(name)

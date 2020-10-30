@@ -737,7 +737,7 @@ def toJson(obj,type='auto'):
         elif obj.__class__.__name__ in ['ContactPoint','IKObjective','Trajectory','MultiPath']:
             type = obj.__class__.__name__
         elif isinstance(obj,Trajectory):   #some subclasses of Trajectory may be used here too
-            type = obj.__class__.__name__
+            type = "Trajectory"
         else:
             raise TypeError("Unknown object of type "+obj.__class__.__name__)
 

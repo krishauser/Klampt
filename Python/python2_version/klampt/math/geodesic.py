@@ -157,4 +157,5 @@ class SE3Space(GeodesicSpace):
         R = so3.mul(Tx[0],wR)
         t = vectorops.add(Tx[1],v)
         return R + t
-    
+
+

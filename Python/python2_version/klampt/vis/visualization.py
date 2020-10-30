@@ -2431,8 +2431,8 @@ class VisAppearance:
                             robot.link(i).appearance().setColor(*self.attributes["color"])
 
                     oldconfig = robot.getConfig()
-                    for i in xrange(maxConfigs):
-                        idx = int(i*len(item))/maxConfigs
+                    for i in range(maxConfigs):
+                        idx = int(i*len(item))//maxConfigs
                         robot.setConfig(item[idx])
                         robot.drawGL()
                     robot.setConfig(oldconfig)
