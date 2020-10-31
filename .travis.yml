@@ -30,8 +30,8 @@ script:
   - make apps
   - make python
   - sudo make python-install
-  - make python3
-  - sudo make python3-install
+  - make python2
+  - sudo make python2-install
   - env CTEST_OUTPUT_ON_FAILURE=1 make test
 
 
@@ -39,6 +39,7 @@ script:
 branches:
   only:
   - master
+  - 0.8.3
   - 0.8.2
   - 0.8.1
   - 0.8.0
