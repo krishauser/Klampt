@@ -47,16 +47,9 @@ IF(PYTHON)
   add_custom_target(python-install DEPENDS ${OUTPUT}/python_install_timestamp python)
 
   add_custom_command(
-    OUTPUT python2_version
-    COMMAND mkdir python2_version
-    COMMAND cp -r klampt/data python2_version/klampt/
-    COMMAND 2to3 --output-dir=python2_version/klampt -W -n klampt
-  )
-  add_custom_command(
     OUTPUT ${OUTPUT}/python2_timestamp
     COMMAND ${PYTHON2} setup.py build_ext
     COMMAND ${CMAKE_COMMAND} -E touch ${TEMPOUTPUT}/python2_timestamp
-    DEPENDS ${DEPS} python2_version
   )
   add_custom_command(
     OUTPUT ${OUTPUT}/python2_install_timestamp
@@ -64,6 +57,6 @@ IF(PYTHON)
     COMMAND ${CMAKE_COMMAND} -E touch ${TEMPOUTPUT}/python2_install_timestamp
     DEPENDS ${DEPS}
   )
-  #add_custom_target(python2 ALL DEPENDS ${OUTPUT}/python2_timestamp)
-  #add_custom_target(python2-install ALL DEPENDS ${OUTPUT}/python2_install_timestamp python2)
+  add_custom_target(python2 DEPENDS ${OUTPUT}/python2_timestamp)
+  add_custom_target(python2-install DEPENDS ${OUTPUT}/python2_install_timestamp python2)
 ENDIF(PYTHON)
