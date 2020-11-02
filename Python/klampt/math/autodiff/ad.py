@@ -221,6 +221,14 @@ Another convenience function is :func:`setitem`, which has the signature
 
 which is sort of a proper functional version of the normal ``x[indices]=v``.
 
+The function :data:`cond` acts like an if statement, where
+``cond(pred,posval,negval)`` returns posval if pred > 0 and negval otherwise.
+There's also ``cond3(pred,posval,zeroval,negval)`` that returns posval if
+pred > 0, zeroval if pred==0, and negval otherwise.  Conditions can also be 
+applied when pred is an array, but it must be of equal size to posval and
+negval.  The result in this case is an array with the i'th value taking on
+posval[i] when pred[i] > 0 and negval[i] otherwise.
+
 
 Other Klampt ad Modules
 =======================
@@ -234,9 +242,9 @@ autodiff versions of many Klamp't functions are found in:
 - :mod:`se3_ad` : operations on SE(3), mostly compatible with the
   :mod:`~klampt.math.se3` module.
 - :mod:`kinematics_ad` kinematics functions, e.g., robot Jacobians.
-- :mod:`geometry_ad` geometry derivative functions. TODO
-- :mod:`dynamics_ad` dynamics derivative functions. TODO
-- :mod:`spline_ad` spline derivative functions. TODO
+- :mod:`geometry_ad` geometry derivative functions.
+- :mod:`dynamics_ad` dynamics derivative functions.
+- :mod:`trajectory_ad` trajectory derivative functions.
 """
 
 import numpy as np
@@ -645,6 +653,8 @@ class ADFunctionCall:
             raise RuntimeError("Error running function %s in context %s"%(str(self.func),' -> '.join(context)))
         try:
             no = self.func.n_out()
+            if not isinstance(no,int):
+                raise ValueError("Error evaluating %s: return # of outputs is not integer? got %s"%(str(self),str(no)))
             if no >= 0:
                 if _size(res) != no:
                     raise ValueError("Error evaluating %s: return value has expected size %d, instead got %d"%(str(self),no,_size(res)))
@@ -1704,6 +1714,9 @@ class _ADPow(ADFunctionInterface):
     def __str__(self):
         return 'pow'
 
+    def argname(self,arg):
+        return ['base','exp'][arg]
+
     def n_args(self):
         return 2
 
@@ -2183,6 +2196,120 @@ class _ADMaximum(ADFunctionInterface):
         return 0
 
 
+class _ADCond(ADFunctionInterface):
+    def __str__(self):
+        return 'cond'
+
+    def argname(self,arg):
+        return ['pred','posval','negval'][arg]
+
+    def n_args(self):
+        return 3
+
+    def n_in(self,arg):
+        return -1
+
+    def n_out(self):
+        return -1
+
+    def eval(self,pred,trueval,falseval):
+        if _scalar(pred):
+            if pred > 0:
+                return trueval
+            return falseval
+        else:
+            assert len(pred)==len(trueval)
+            assert len(pred)==len(falseval)
+            res = falseval.copy()
+            res[pred>0]=trueval[pred>0]
+            return res
+
+    def jvp(self,arg,darg,pred,trueval,falseval):
+        if arg==0:
+            return 0
+        if arg==1:
+            if _scalar(pred):
+                if pred > 0:
+                    return darg
+                return 0
+            else:
+                res = np.zeros(trueval.shape)
+                res[pred > 0] = darg[pred > 0]
+        else:
+            if _scalar(pred):
+                if pred > 0:
+                    return 0
+                return darg
+            else:
+                res = darg.copy()
+                res[pred > 0] = 0
+                return res
+
+
+class _ADCond3(ADFunctionInterface):
+    def __str__(self):
+        return 'cond3'
+
+    def argname(self,arg):
+        return ['pred','posval','zeroval','negval'][arg]
+
+    def n_args(self):
+        return 4
+
+    def n_in(self,arg):
+        return -1
+
+    def n_out(self):
+        return -1
+
+    def eval(self,pred,trueval,zeroval,falseval):
+        if _scalar(pred):
+            if pred > 0:
+                return trueval
+            elif pred == 0:
+                return zeroval
+            else:
+                return falseval
+        else:
+            assert len(pred)==len(trueval)
+            assert len(pred)==len(zeroval)
+            assert len(pred)==len(falseval)
+            res = falseval.copy()
+            res[pred>0]=trueval[pred>0]
+            res[pred==0]=zeroval[pred==0]
+            return res
+
+    def jvp(self,arg,darg,pred,trueval,zeroval,falseval):
+        if arg==0:
+            return 0
+        if arg==1:
+            if _scalar(pred):
+                if pred > 0:
+                    return darg
+                return 0
+            else:
+                res = np.zeros(trueval.shape)
+                res[pred > 0] = darg[pred > 0]
+        elif arg==2:
+            if _scalar(pred):
+                if pred == 0:
+                    return darg
+                return 0
+            else:
+                res = np.zeros(trueval.shape)
+                res[pred == 0] = darg[pred == 0]
+        else:
+            if _scalar(pred):
+                if pred >= 0:
+                    return 0
+                return darg
+            else:
+                res = darg.copy()
+                res[pred >= 0] = 0
+                return res
+
+
+
 add = _ADAdd()
 """Autodiff'ed function comparable to the addition operator +. Applied 
 automatically when the + operator is called on an ADTerminal or an
@@ -2243,4 +2370,19 @@ maximum = _ADMaximum()
 """Autodiff'ed function comparable to np.maximum. It acts like ndarray.max if
 only one item is provided, and otherwise it acts like np.maximum. If more than
 2 items are provided, they are applied elementwise and sequentially.
+"""
+
+cond = _ADCond()
+"""Autodiff'ed function that performs a conditional (pred,trueval,falseval).
+It returns trueval if pred > 0 and falseval otherwise.   If pred is an array,
+then it must have the same size as trueval and falseval, and performs the
+conditioning element-wise.
+"""
+
+cond3 = _ADCond3()
+"""Autodiff'ed function that performs a triple conditional
+(pred,trueval,zeroval,falseval). It returns trueval if pred > 0, zeroval if
+pred=0, and falseval otherwise.   If pred is an array, then it must have the
+same size as trueval, zeroval, and falseval, and performs the conditioning
+element-wise.
 """
