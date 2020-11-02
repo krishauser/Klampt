@@ -886,7 +886,7 @@ class _JointInterfaceEmulatorData:
             if self.controlMode == 'pwc':
                 traj = HermiteTrajectory(self.trajectoryTimes,[[m] for m in self.trajectoryMilestones],[[v] for v in self.trajectoryVelocities])
                 assert self.dt is not None
-                configTraj = traj.discretize(self.dt).configTrajectory()
+                configTraj = traj.discretize(self.dt)
                 return configTraj.times,[m[0] for m in configTraj.milestones]
             if self.controlMode == 'pwl':
                 return self.trajectoryTimes,self.trajectoryMilestones

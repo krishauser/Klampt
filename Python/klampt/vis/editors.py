@@ -423,7 +423,7 @@ class TrajectoryEditor(VisualEditorBase):
         if self.animSelectorValue == 1:
             traj = trajectory.HermiteTrajectory()
             traj.makeSpline(self.value)
-            self.animTrajectory = traj.configTrajectory()
+            self.animTrajectory = traj
         else:
             #TODO: other selections
             self.animTrajectory = self.value

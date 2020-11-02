@@ -1855,11 +1855,11 @@ def drawTrajectory(traj,width,color,pointSize=None,pointColor=None):
     By default draws points along the trajectory.  To turn this off, set 
     pointSize = 0.
     """
-    if pointSize is None:
-        pointSize = width+2
-    if pointColor is None:
-        pointColor = (color[0]*0.75,color[1]*0.75,color[2]*0.75,color[3])
     if isinstance(traj,list):
+        if pointSize is None:
+            pointSize = width+2
+        if pointColor is None:
+            pointColor = (color[0]*0.75,color[1]*0.75,color[2]*0.75,color[3])
         #R3 trajectory
         glDisable(GL_LIGHTING)
         glColor4f(*color)
@@ -1868,31 +1868,53 @@ def drawTrajectory(traj,width,color,pointSize=None,pointColor=None):
             glBegin(GL_POINTS)
             glVertex3fv(traj[0])
             glEnd()
-        if len(traj) >= 2:
+        if len(traj) >= 2 and width > 0:
             glLineWidth(width)
             glBegin(GL_LINE_STRIP)
             for p in traj:
                 glVertex3fv(p)
             glEnd()
             glLineWidth(1.0)
-            if pointSize > 0:
-                glColor4f(*pointColor)
-                glPointSize(pointSize)
-                glBegin(GL_POINTS)
-                for p in traj:
-                  glVertex3fv(p)
-                glEnd()
+        if len(traj) >= 2 and pointSize > 0:
+            glColor4f(*pointColor)
+            glPointSize(pointSize)
+            glBegin(GL_POINTS)
+            for p in traj:
+                glVertex3fv(p)
+            glEnd()
     elif isinstance(traj,SE3Trajectory):
         pointTraj = []
         for m in traj.milestones:
-            pointTraj.append(m[9:])
+            pointTraj.append(m[9:12])
         drawTrajectory(pointTraj,width,color,pointSize,pointColor)
+    elif isinstance(traj,SE3HermiteTrajectory):
+        pointTraj = []
+        velTraj = []
+        for m in traj.milestones:
+            pointTraj.append(m[9:12])
+            velTraj.append(m[21:24])
+        drawTrajectory(HermiteTrajectory(traj.times,pointTraj,velTraj),width,color,pointSize,pointColor)
     else:
-        if len(traj.milestones[0]) == 3:
-            drawTrajectory(traj.milestones,width,color,pointSize,pointColor)
-        elif len(traj.milestones[0]) == 2:
+        wp = traj.waypoint(traj.milestones[0])
+        if len(wp) == 3:
+            if len(wp) == len(traj.milestones[0]):   
+                drawTrajectory(traj.milestones,width,color,pointSize,pointColor)
+            else:  #discrepancy, must be hermite
+                if width > 0:
+                    discretized = traj.discretize(traj.duration()/len(traj.milestones)*0.1)
+                    drawTrajectory(discretized.milestones,width,color,0,None)
+                if pointSize is None or pointSize > 0:
+                    drawTrajectory([traj.waypoint(m) for m in traj.milestones],0,color,pointSize,pointColor)
+        elif len(wp) == 2:
             #R2 trajectory
-            drawTrajectory([v + [0.0] for v in traj.milestones],width,color,pointSize,pointColor)
+            if len(wp) == len(traj.milestones[0]): 
+                drawTrajectory([v + [0.0] for v in traj.milestones],width,color,pointSize,pointColor)
+            else:  #discrepancy, must be hermite
+                if width > 0:
+                    discretized = traj.discretize(traj.duration()/len(traj.milestones)*0.1)
+                    drawTrajectory([m  + [0.0] for m in discretized.milestones],width,color,0,None)
+                if pointSize is None or pointSize > 0:
+                    drawTrajectory([traj.waypoint(m) + [0.0] for m in traj.milestones],0,color,pointSize,pointColor)
 
 
 def drawRobotTrajectory(traj,robot,ees,width=2,color=(1,0.5,0,1),pointSize=None,pointColor=None):
@@ -2149,6 +2171,9 @@ class VisAppearance:
         
     def drawText(self,text,point):
         """Draws the given text at the given point"""
+        if len(point) != 3:
+            print("WARNING drawText INCORRECT POINT SIZE",point,text)
+            return
         self.widget.addLabel(text,point[:],[0,0,0])
 
     def updateAnimation(self,t):
@@ -2160,7 +2185,7 @@ class VisAppearance:
         else:
             u = self.animationSpeed*(t-self.animationStartTime)
             q = self.animation.eval(u,self.animationEndBehavior)
-            self.drawConfig = q
+            self.drawConfig = config.getConfig(q)
             self.markChanged(config=True,appearance=False)
         for n,app in self.subAppearances.items():
             app.updateAnimation(t)
@@ -2350,22 +2375,24 @@ class VisAppearance:
                     if doDraw:
                         robot.setConfig(item.milestones[0])
                         centroid = vectorops.div(vectorops.add(*[robot.link(ee).getTransform()[1] for ee in ees]),len(ees))
-            elif isinstance(item,SE3Trajectory):
+            elif isinstance(item,(SE3Trajectory,SE3HermiteTrajectory)):
                 doDraw = True
-                centroid = item.milestones[0][9:]
+                centroid = item.waypoint(item.milestones[0])[1]
             else:
-                if len(item.milestones[0]) == 3:
+                wp = item.waypoint(item.milestones[0])
+                if len(wp) == 3:
                     #R3 trajectory
                     doDraw = True
-                    centroid = item.milestones[0]
-                elif len(item.milestones[0]) == 2:
+                    centroid = wp
+                elif len(item.waypoint(item.milestones[0])) == 2:
                     #R2 trajectory
                     doDraw = True
-                    centroid = item.milestones[0]+[0.0]
+                    centroid = wp+[0.0]
                 else:
                     #don't know how to interpret this trajectory
                     pass
             if doDraw:
+                assert len(centroid)==3
                 def drawRaw():
                     pointTrajectories = []
                     width = self.attributes["width"]
@@ -3149,8 +3176,6 @@ class VisualizationScene:
                 #a list of milestones -- loop through them with 1s delay
                 print("visualization.animate(): Making a Trajectory with unit durations between",len(animation),"milestones")
                 animation = Trajectory(list(range(len(animation))),animation)
-            if isinstance(animation,HermiteTrajectory):
-                animation = animation.configTrajectory()
             if isinstance(animation,MultiPath):
                 world = self.items.get('world',None)
                 if world is not None:
@@ -3701,7 +3726,7 @@ class _TrajectoryCameraController:
         self.trajectory = trajectory
     def update(self,t):
         if isinstance(self.trajectory,(SE3Trajectory,SE3BezierTrajectory)):
-            T = self.trajectory.eval_se3(t,'loop')
+            T = self.trajectory.eval(t,'loop')
             self.vp.setTransform(T)
         elif isinstance(self.trajectory,(SO3Trajectory,SO3BezierTrajectory)):
             R = self.trajectory.eval(t,'loop')
