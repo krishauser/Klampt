@@ -395,6 +395,8 @@ If you are calling these methods from an external loop (as opposed to inside
 a plugin) be sure to lock/unlock the visualization before/after calling these
 methods.
 
+Scene management functions:
+
 - def add(name,item,keepAppearance=False,**kwargs): adds an item to the 
   visualization.  name is a unique identifier.  If an item with the same name
   already exists, it will no longer be shown.
@@ -449,15 +451,22 @@ methods.
 - def setPlotSize(name,w,h): sets the width and height of the plot.
 - def savePlot(name,fn): saves a plot to a CSV (extension .csv) or Trajectory 
   (extension .traj) file.
+
+Global appearance / camera control functions:
+
 - def getViewport(): Returns the GLViewport for the currently active view.
 - def setViewport(viewport): Sets the GLViewport for the currently active
   scene.  (This is also used to resize windows.)
 - def setBackgroundColor(r,g,b,a=1): Sets the background color for the active
   scene.
-- def autoFitCamera(scale=1.0): Automatically fits the camera to all objects
-  in the visualization.  A scale > 1 magnifies the camera zoom.
+- def autoFitCamera(zoom=True,rotate=True,scale=1.0): Automatically fits the 
+  camera to all objects in the visualization.  A scale > 1 magnifies the zoom.
 - def followCamera(target,translate=True,rotate=False,center=False): Sets the 
   camera to follow a target.
+- saveJsonConfig() / saveJsonConfig(fn): Saves the configuration to a JSON
+  object or JSON file.
+- loadJsonConfig(jsonObj) / loadJsonConfig(fn): Loads the configuration from a
+  JSON object or JSON file.
 
 Utility functions:
 
@@ -1466,7 +1475,20 @@ def setBackgroundColor(r,g,b,a=1):
     """Sets the background color of the current scene."""
     scene().setBackgroundColor(r,g,b,a)
 
+def saveJsonConfig(fn=None):
+    """Saves the visualization options to a JSON object or file.
 
+    If fn is provided, it's saved to a file.  Otherwise, it is returned.
+    """
+    return scene().saveJsonConfig(fn)
+
+def loadJsonConfig(jsonobj_or_fn):
+    """Loads the visualization options from a JSON object or file.
+
+    jsonobj_or_fn can either by a dict (previously obtained by saveJsonConfig
+    or a str indicating a filename (previously saved using saveJsonConfig.)
+    """
+    return scene().loadJsonConfig(jsonobj_or_fn)
 
 def objectToVisType(item,world):
     """Returns the default type for the given item in the current world"""
@@ -3542,6 +3564,69 @@ class VisualizationScene:
     def clearDisplayLists(self):
         for i in self.items.values():
             i.clearDisplayLists()
+
+    def saveJsonConfig(self,fn=None):
+        def dumpitem(v):
+            if len(v.subAppearances) > 0:
+                items = []
+                for (k,app) in v.subAppearances.items():
+                    jsapp = dumpitem(app)
+                    if len(jsapp) > 0:
+                        items.append({"name":k,"appearance":jsapp})
+                return items
+            else:
+                return v.attributes.flatten()
+        out = {}
+        for (k,v) in self.items.items():
+            out[k] = dumpitem(v) 
+        if fn is None:
+            return out
+        else:
+            import json
+            f = open(fn,'w')
+            json.dump(out,f)
+            f.close()
+            return out
+                
+    def loadJsonConfig(self,jsonobj_or_file):
+        if isinstance(jsonobj_or_file,str):
+            import json
+            f = open(jsonobj_or_file,'r')
+            jsonobj = json.load(f)
+            f.close()
+        else:
+            jsonobj = jsonobj_or_file
+
+        def parseitem(js,app):
+            if isinstance(js,dict):
+                for (attr,value) in js.items():
+                    app.attributes[attr] = value
+                    app.markChanged()
+            elif isinstance(js,list):
+                for val in js:
+                    if not isinstance(val,dict) or "name" not in val or "appearance" not in val:
+                        print("Warning, JSON object",js,"does not contain a valid subappearance")
+                    name = val["name"]
+                    jsapp = val["appearance"]
+                    if isinstance(name,list):
+                        name = tuple(name)
+                    if name not in app.subAppearances:
+                        print("Warning, JSON object",js,"subappearance",name,"not in visualization")
+                    else:
+                        parseitem(jsapp,app.subAppearances[name])
+            else:
+                print("Warning, JSON object",js,"does not contain a dict of attributes or list of sub-appearances")
+
+        parsed = set()
+        for (k,v) in self.items.items():
+            if k in jsonobj:
+                parsed.add(k)
+                parseitem(jsonobj[k],v)
+            else:
+                print("Warning, visualization object",k,"not in JSON object")
+        for (k,v) in jsonobj.items():
+            if k not in parsed:
+                print("Warning, JSON object",k,"not in visualization")
 
 def _camera_translate(vp,tgt):
     vp.camera.tgt = tgt
