@@ -1983,7 +1983,7 @@ class Geometry3D(_object):
 
 
         Args:
-            arg2 (:class:`~klampt.TriangleMesh` or :class:`~klampt.Geometry3D` or :class:`~klampt.GeometricPrimitive` or :obj:`ConvexHull` or :class:`~klampt.PointCloud` or :class:`~klampt.VolumeGrid`, optional): 
+            arg2 (:obj:`ConvexHull` or :class:`~klampt.VolumeGrid` or :class:`~klampt.PointCloud` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.Geometry3D` or :class:`~klampt.TriangleMesh`, optional): 
         """
         this = _robotsim.new_Geometry3D(*args)
         try:
@@ -5852,7 +5852,7 @@ class WorldModel(_object):
 
 
         Args:
-            robot (str or int): 
+            robot (int or str): 
             index (int, optional): 
             name (str, optional): 
 
@@ -6008,7 +6008,7 @@ class WorldModel(_object):
             terrain (:obj:`TerrainModel`, optional): 
 
         Returns:
-            (:class:`~klampt.RigidObjectModel` or :obj:`TerrainModel` or :class:`~klampt.RobotModel`):
+            (:class:`~klampt.RigidObjectModel` or :class:`~klampt.RobotModel` or :obj:`TerrainModel`):
         """
         return _robotsim.WorldModel_add(self, *args)
 
@@ -7049,7 +7049,7 @@ def SampleTransform(*args):
 
 
     Args:
-        obj (:obj:`GeneralizedIKObjective` or :obj:`IKObjective`): 
+        obj (:obj:`IKObjective` or :obj:`GeneralizedIKObjective`): 
     """
     return _robotsim.SampleTransform(*args)
 class SimRobotSensor(_object):
