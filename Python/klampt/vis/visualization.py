@@ -3725,10 +3725,10 @@ class _TrajectoryCameraController:
             pass
         self.trajectory = trajectory
     def update(self,t):
-        if isinstance(self.trajectory,(SE3Trajectory,SE3BezierTrajectory)):
+        if isinstance(self.trajectory,(SE3Trajectory,SE3HermiteTrajectory)):
             T = self.trajectory.eval(t,'loop')
             self.vp.setTransform(T)
-        elif isinstance(self.trajectory,(SO3Trajectory,SO3BezierTrajectory)):
+        elif isinstance(self.trajectory,(SO3Trajectory,SO3HermiteTrajectory)):
             R = self.trajectory.eval(t,'loop')
             self.vp.camera.set_orientation(R,'xyz')
         else:
