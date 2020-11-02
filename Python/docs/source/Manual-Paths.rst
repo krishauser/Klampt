@@ -31,12 +31,13 @@ Path and trajectory representations
 |           |               |           | that should be piecewise linearly interpolated.  *These are     |
 |           |               |           | outputted from kinematic motion planners*.                      |
 +-----------+---------------+-----------+-----------------------------------------------------------------+
-| Piecewise | C0            | Yes       | Given by a   list of  ``times`` and  ``milestones``             |
-| linear    |               |           | that should be piecewise linearly interpolated.  *The most      |
-|           |               |           | compatible trajectory  type*.                                   |
+| Piecewise | C0            | Yes       | Given by lists of ``times`` and  ``milestones`` that should be  |
+| linear    |               |           | piecewise linearly interpolated. *The most compatible trajectory|
+|           |               |           | type*.  Implemented for Euclidean spaces via the                |
+|           |               |           | :class:~`klampt.model.trajectory.Trajectory` class              |
 +-----------+---------------+-----------+-----------------------------------------------------------------+
-| Cubic     | C1            | Yes       | Piecewise cubic curve, with time.                               |
-| spline    |               |           |                                                                 |
+| Cubic     | C1            | Yes       | Piecewise cubic curve, with time. Implemented for Euclidean     |
+| spline    |               |           | spaces by :class:~`klampt.model.trajectory.HermiteTrajectory`.  |
 +-----------+---------------+-----------+-----------------------------------------------------------------+
 | MultiPath | C0 or C1      | Either    | A rich container type for paths/trajectories annotated with     |
 |           |               |           | changing contacts and  IK constraints.                          |
@@ -46,10 +47,10 @@ Path and trajectory representations
     To properly handle a robot's rotational joints, milestones should
     be interpolated via robot-specific interpolation functions. Cartesian
     linear interpolation does not correctly handle floating and spin joints.
-    See the function ``RobotModel.interpolate()`` to do so.  We also
-    provide the ``RobotTrajectory`` class to do this automatically.
+    We provide the :class:`~klampt.model.trajectory.RobotTrajectory` class
+    to do this automatically.
 
-Especially for legged robots, the preferred path type is ``MultiPath``,
+For legged robots and multi-step manipulations, the preferred path type is ``MultiPath``,
 which allows storing both untimed paths and timed trajectories. It can
 also store multiple path sections with inverse kinematics constraints on
 each section. More details on the ``MultiPath`` type `are given below <#multipaths>`__.
@@ -57,10 +58,11 @@ each section. More details on the ``MultiPath`` type `are given below <#multipat
 API summary
 ~~~~~~~~~~~
 
-Piecewise linear trajectories are given in the :class:`~klampt.model.trajectory.Trajectory`,
-:class:`~klampt.model.trajectory.SO3Trajectory`, :class:`~klampt.model.trajectory.SE3Trajectory`,
-and :class:`~klampt.model.trajectory.RobotTrajectory` classes of
-`klampt.model.trajectory <klampt.model.trajectory.html>`__.
+The code for implementing `klampt.model.trajectory <klampt.model.trajectory.html>`__.
+Piecewise linear trajectories are given in the :class:`~klampt.model.trajectory.Trajectory` class.
+Paths in non-Euclidean spaces are represented by the :class:`~klampt.model.trajectory.SO3Trajectory`,
+:class:`~klampt.model.trajectory.SE3Trajectory`,
+and :class:`~klampt.model.trajectory.RobotTrajectory` classes.
 
 Members include:
 
@@ -144,10 +146,29 @@ as follows:
     traj2 = trajectory.HermiteTrajectory()
     traj2.makeSpline(traj)
 
+For non-Euclidean Hermite splines, you may use the :class:`~klampt.model.trajectory.GeodesicHermiteTrajectory` 
+representation.  The :class:`~klampt.model.trajectory.SO3HermiteTrajectory` and :class:`~klampt.model.trajectory.SE3HermiteTrajectory`
+classes are available for smooth curves in SO(3) and SE(3).  [New in 0.8.3]
+
+Conversions
+~~~~~~~~~~~
+
 Conversions between path types are found in
-`klampt.model.trajectory <klampt.model.trajectory.html>`__,
-in particular the :meth:`~klampt.model.trajectory.path_to_trajectory` method,
-which converts an untimed path into a timed trajectory.
+`klampt.model.trajectory <klampt.model.trajectory.html>`__.
+
+In particular the :meth:`~klampt.model.trajectory.path_to_trajectory` method
+converts an untimed path into a timed trajectory.  This has many options, and
+the example program `path_test.py <https://github.com/krishauser/Klampt-examples/blob/0.8.3/Python3/demos/path_test.py>`__
+demos several of these options.
+
+To convert from a cubic trajectory to an approximate linear trajectory, the
+``discretize_config`` method should be used.
+
+To get the SE(3) trajectory of a link's transform as the robot follows a
+RobotTrajectory, use ``RobotTrajectory.getLinkTrajectory(link,dt)``.  Here, dt
+is a discretization resolution.  To further convert this to the trajectory of
+the position of a point on the link, use ``RobotTrajectory.getLinkTrajectory(link,dt).getPositionTrajectory(localPt)``,
+where ``localPt`` gives the local coordinates of the point.
 
 
 Example
@@ -221,25 +242,14 @@ Let's now look at what happens when we convert this to a HermiteTrajectory...
     traj2.makeSpline(traj)
 
     vis.animate("point",traj2)
+    vis.add("traj2",traj2)
     vis.spin(float('inf'))
+
+.. image:: _static/images/traj_test2.png
 
 Now the point curves smoothly through the milestones we defined! 
 
-.. note::
-    Hermite splines can't be drawn directly, but you can use the
-    :meth:`~klampt.model.trajectory.HermiteTrajectory.configTrajectory`
-    method to show the spline.  The vis module only draws straight lines
-    between milestones, so to show the curves of the spline, the
-    ``discretize`` method should be used to get a path with finer
-    resolution, like so:
 
-    .. code:: python
-
-        vis.hide("traj")
-        vis.add("traj2",traj2.configTrajectory().discretize(0.1))
-        vis.spin(float('inf'))
-
-    .. image:: _static/images/traj_test2.png
 
 Finally we might want to address the problem that the milestones are executed
 uniformly in the time domain, even though the first two milestones are
@@ -253,7 +263,7 @@ get the results that you want.
     #next, try this line instead
     #traj_timed = trajectory.path_to_trajectory(traj,timing='sqrt-L2',speed='limited',vmax=2,amax=4)
     #or this line
-    #traj_timed = trajectory.path_to_trajectory(traj2.configTrajectory().discretize(0.1),timing='sqrt-L2',speed=0.3)
+    #traj_timed = trajectory.path_to_trajectory(traj2.discretize(0.1),timing='sqrt-L2',speed=0.3)
     vis.animate("point",traj_timed)
     vis.spin(float('inf'))
 
