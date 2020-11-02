@@ -44,6 +44,14 @@ class GLViewport:
         return x >= self.x and y >= self.y and x < self.x + self.w and y < self.y + self.h
 
     def setTransform(self,T,convention='standard'):
+        """Deprecated soon: use set_transform"""
+        self.set_transform(T,convention)
+
+    def getTransform(self,convention='standard'):
+        """Deprecated soon: use get_transform"""
+        return self.get_transform(convention)
+
+    def set_transform(self,T,convention='standard'):
         """Sets the pose of the camera, with T given in world coordinates.
 
         If convention = 'openGL', the Z axis of T is the *backward* direction of
@@ -58,7 +66,8 @@ class GLViewport:
             xzflip = [1,0,0,  0,-1,0,  0,0,-1]
             self.camera.set_matrix((so3.mul(T[0],xzflip),T[1]))
 
-    def getTransform(self,convention='standard'):
+
+    def get_transform(self,convention='standard'):
         """Gets the pose of the camera, with T given in world coordinates.
 
         If convention = 'openGL', the Z axis of T is the *backward* direction of
@@ -87,6 +96,10 @@ class GLViewport:
         self.clippingplanes = (zmin,zmax)
 
     def toViewport(self):
+        """Deprecated soon: use to_viewport."""
+        return self.to_viewport()
+
+    def to_viewport(self):
         """Returns a Klampt C++ Viewport() instance corresponding to this view.
         This is used to interface with the Widget classes"""
         vp = Viewport()
@@ -142,6 +155,10 @@ class GLViewport:
         return (x,y,-ploc[2])
 
     def setCurrentGL(self):
+        """Deprecated soon: use set_current_GL"""
+        self.set_current_GL()
+
+    def set_current_GL(self):
         """Sets up the view in the current OpenGL context"""
         # Projection
         glMatrixMode(GL_PROJECTION)
@@ -162,6 +179,78 @@ class GLViewport:
         cols = list(zip(*mat))
         pack = sum((list(c) for c in cols),[])
         glMultMatrixf(pack)
+
+    def save_file(self,fn):
+        """Saves to a viewport txt file. The file format is compatible with
+        the RobotTest, RobotPose, and SimTest apps.
+        """
+        f = open(str(fn),'w')
+        f.write("VIEWPORT\n")
+        f.write("FRAME %d %d %d %d\n"%(self.x,self.y,self.w,self.h))
+        f.write("PERSPECTIVE 1\n")
+        aspect = float(self.w)/float(self.h)
+        rfov = self.fov*math.pi/180.0
+        scale = 1.0/(2.0*math.tan(rfov*0.5/aspect)*aspect)
+        f.write("SCALE %f\n"%(scale,))
+        f.write("NEARPLANE %f\n"%(self.clippingplanes[0],))
+        f.write("FARPLANE %f\n"%(self.clippingplanes[1],))
+        f.write("CAMTRANSFORM ")
+        mat = se3.homogeneous(self.camera.matrix())
+        f.write(' '.join(str(v) for v in sum(mat,[])))
+        f.write('\n')
+        f.write("ORBITDIST %f\n"%(self.camera.dist,))
+        f.close()
+
+    def load_file(self,fn):
+        """Loads from a viewport txt file. The file format is compatible with
+        the RobotTest, RobotPose, and SimTest apps.
+        """
+        f = open(str(fn),'r')
+        read_viewport = False
+        mat = None
+        for line in f:
+            entries = line.split()
+            if len(entries) == 0:
+                continue
+            kw = entries[0]
+            args = entries[1:]
+            if kw == 'VIEWPORT':
+                read_viewport = True
+                continue
+            else:
+                if not read_viewport:
+                    print("File does not appear to be a valid viewport file, must start with VIEWPORT")
+                    break
+            if kw == 'FRAME':
+                self.x,self.y,self.w,self.h = [int(x) for x in args]
+            elif kw == 'PERSPECTIVE':
+                if args[0] != '1':
+                    print("WARNING: CANNOT CHANGE TO ORTHO MODE IN PYTHON VISUALIZATION")
+            elif kw == 'SCALE':
+                scale = float(args[0])
+                aspect = float(self.w)/float(self.h)
+                #2.0*math.tan(rfov*0.5/aspect)*aspect = 1.0/scale
+                #math.tan(rfov*0.5/aspect) = 0.5/(scale*aspect)
+                #rfov*0.5/aspect = math.atan(0.5/(scale*aspect))
+                #rfov = 2*aspect*math.atan(0.5/(scale*aspect))
+                rfov = math.atan(0.5/(scale*aspect))*2*aspect
+                self.fov = math.degrees(rfov)
+            elif kw == 'NEARPLANE':
+                self.clippingplanes = (float(args[0]),self.clippingplanes[1])
+            elif kw == 'FARPLANE':
+                self.clippingplanes = (self.clippingplanes[0],float(args[0]))
+            elif kw == 'CAMTRANSFORM':
+                mat = [args[0:4],args[4:8],args[8:12],args[12:16]]
+                for i,row in enumerate(mat):
+                    mat[i] = [float(x) for x in row]
+            elif kw == 'ORBITDIST':
+                self.camera.dist = float(args[0])
+            else:
+                raise RuntimeError("Invalid viewport keyword "+kw)
+        if mat is not None:
+            self.camera.set_matrix(se3.from_homogeneous(mat))
+
+        f.close()
 
 
 class GLProgramAction:
@@ -400,7 +489,7 @@ class GLNavigationProgram(GLProgram):
     def prepare_GL(self):
         GLProgram.prepare_GL(self)
 
-        self.view.setCurrentGL()
+        self.view.set_current_GL()
 
         # Default light source
         glLightfv(GL_LIGHT0,GL_POSITION,[0,-1,2,0])
