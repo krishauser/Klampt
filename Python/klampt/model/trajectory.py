@@ -488,6 +488,10 @@ class SO3Trajectory(GeodesicTrajectory):
     is a 9-D :mod:`klampt.math.so3` element."""
     def __init__(self,times=None,milestones=None):
         GeodesicTrajectory.__init__(self,SO3Space(),times,milestones)
+    def deriv_angvel(self,t,endBehavior='halt'):
+        """Returns the derivative at t, in angular velocity form"""
+        cw = GeodesicTrajectory.deriv(self,t,endBehavior)
+        return so3.deskew(cw)
     def preTransform(self,R):
         """Premultiplies every rotation in here by the so3 element
         R. In other words, if R rotates a local frame F to frame F',
@@ -502,6 +506,10 @@ class SO3Trajectory(GeodesicTrajectory):
         rotates to how F rotates."""
         for i,m in enumerate(self.milestones):
             self.milestones[i] = so3.mul(m,R)
+    def getPointTrajectory(self,localPt):
+        """Returns a Trajectory describing the movement of the point localPt
+        attached to this rotating frame. """
+        return Trajectory(self.times,[so3.apply(m,pt) for m in self.milestones])
     def constructor(self):
         return SO3Trajectory
 
@@ -532,8 +540,13 @@ class SE3Trajectory(GeodesicTrajectory):
         element"""
         res = self.deriv(t,endBehavior)
         return self.to_se3(res)
+    def deriv_screw(self,t,endBehavior='halt'):
+        """Returns the derivative at t, in screw form, that is, a 6D
+        (angular velocity,velocity) vector."""
+        dT = self.deriv(t,endBehavior)
+        return so3.deskew(dT[0])+dT[1]
     def preTransform(self,T):
-        """Premultiplies every transform in here by the se3 element
+        """Premultiplies every transform in self by the se3 element
         T. In other words, if T transforms a local frame F to frame F',
         this method converts this SE3Trajectory from coordinates in F
         to coordinates in F'"""
@@ -541,7 +554,7 @@ class SE3Trajectory(GeodesicTrajectory):
             Tm = self.to_se3(m)
             self.milestones[i] = self.from_se3(se3.mul(T,Tm))
     def postTransform(self,T):
-        """Postmultiplies every transform in here by the se3 element
+        """Postmultiplies every transform in self by the se3 element
         T. In other words, if T transforms a local frame F to frame F',
         this method converts this SE3Trajectory from describing how F'
         moves to how F moves."""
@@ -602,13 +615,29 @@ class HermiteTrajectory(Trajectory):
     If you want to use one of these trajectories like a normal configuration-
     space trajectory, so that ``eval()`` returns a configuration, call
     ``configTrajectory()``
+
+    Args:
+        times (list of float, optional): the knot points
+        milestones (list of lists, optional): the milestones met at the knot
+            points.
+        dmilestones (list of lists, optional): the velocities (derivatives
+            w.r.t time) at each knot point.  
+
+    Possible constructor options are:
+
+    - HermiteTrajectory(): empty trajectory
+    - HermiteTrajectory(times,milestones): milestones contains 
+      2N-D lists consisting of the concatenation of a point and its outgoing 
+      derivative.
+    - HermiteTrajectory(times,milestones,dmilestones):
+      milestones and dmilestones contain N-D lists defining the points and
+      outgoing velocities.
+
+    Note: the curve is assumed to be smooth. To make a non-smooth curve,
+    duplicate the knot point and milestone, but set a different velocity
+    at the copy.
     """
     def __init__(self,times=None,milestones=None,dmilestones=None):
-        """If dmilestones is given, then milestones is interpreted
-        as configurations and dmilestones is interpreted as velocities.
-        
-        Otherwise, the milestones are interpreted as states (x,dx)
-        """
         if dmilestones is None:
             Trajectory.__init__(self,times,milestones)
         else:
@@ -618,6 +647,9 @@ class HermiteTrajectory(Trajectory):
             self.milestones = [q+dq for (q,dq) in zip(milestones,dmilestones)]
 
     def configTrajectory(self):
+        """Returns a Trajectory-like object on the configuration space, for
+        which eval() returns a configuration and deriv() returns a velocity.
+        """
         return _HermiteConfigAdaptor(self)
 
     def makeSpline(self,waypointTrajectory,preventOvershoot=True,loop=False):
@@ -685,9 +717,47 @@ class HermiteTrajectory(Trajectory):
                 velocities = [v0]+velocities+[vn]
         self.__init__(waypointTrajectory.times[:],waypointTrajectory.milestones,velocities)
 
+    def makeBezier(self,times,controlPoints):
+        """Sets up this spline to perform Bezier interpolation of the given 
+        control points, with segment 0 a Bezier curve on cps[0:3], segment 1 a
+        Bezier curve on cps[3:6], etc.
+        """
+        nsegs = len(times)-1
+        if nsegs*3+1 != len(controlPoints):
+            raise ValueError("To perform Bezier interpolation, need # of controlPoints to be 3*Nsegs+1")
+        newtimes = []
+        milestones = []
+        outgoingVelocities = []
+        for i in range(0,len(times)-1):
+            a,b,c,d = controlPoints[i*3:i*3+4]
+            dt = times[i+1]-times[i]
+            if dt <= 0: raise ValueError("Times must be strictly monotonically increasing")
+            lieDeriv0 = vectorops.mul(vectorops.sub(b,a),3/dt)
+            lieDeriv1 = vectorops.mul(vectorops.sub(c,d),-3/dt)
+            if len(outgoingVelocities) > 0:
+                if vectorops.difference(lieDeriv0,outgoingVelocities[-1]) > 1e-4:
+                    #need to double up knot point
+                    newtimes.append(newtimes[-1])
+                    milestones.append(milestones[-1])
+                    outgoingVelocities.append(lieDeriv0)
+            else:
+                newtimes.append(times[i])
+                milestones.append(a)
+                outgoingVelocities.append(lieDeriv0)
+            newtimes.append(times[i+1])
+            milestones.append(d)
+            outgoingVelocities.append(lieDeriv1)
+            milestones.append(d)
+        self.__init__(newtimes,milestones,outgoingVelocities)
+
     def makeMinTimeSpline(self,milestones,velocities=None,xmin=None,xmax=None,vmax=None,amax=None):
         """Creates a spline that interpolates between the given milestones with
-        bounded velocities, accelerations, and positions.
+        bounded velocities, accelerations, and positions. 
+
+        If velocities==None, this requires the spline to move in a straight
+        configuration-space path between the given milestones.  This option is 
+        helpful for postprocessing the results for kinematic motion planning, 
+        for example.
         """
         from ..plan import motionplanning
         if vmax is None and amax is None:
@@ -739,7 +809,7 @@ class HermiteTrajectory(Trajectory):
                     v0 = velocities[i]
                     v1 = velocities[i+1]
                     ts,xs,vs = motionplanning.interpolateNDMinTime(m0,v0,m1,v1,xmin,xmax,vmax,amax)
-                ts,xs,vs = motionplanning.combineNDCubic(ts,xs,vs)
+                    ts,xs,vs = motionplanning.combineNDCubic(ts,xs,vs)
                 newtimes += [newtimes[-1] + t for t in ts[1:]]
                 newmilestones += xs[1:]
                 newvelocities += vs[1:]
@@ -780,45 +850,76 @@ class HermiteTrajectory(Trajectory):
         ddx = vectorops.mul(spline.hermite_deriv(x1,v1,x2,v2,u,order=2),1.0/pow(dt,2))
         return dx+ddx
 
+    def discretize_config(self,dt):
+        """Creates a discretized piecewise linear Trajectory in config space
+        that approximates this curve with resolution dt.
+        """
+        res = self.discretize(dt)
+        n = len(res.milestones[0])//2
+        return Trajectory(res.times,[m[:n] for m in res.milestones])
+
     def constructor(self):
         return HermiteTrajectory
 
 
-class _GeodesicBezierConfigAdaptor(Trajectory):
-    """Private class. Converts a GeodesicBezierTrajectory to a Trajectory in 
+class _GeodesicHermiteConfigAdaptor(Trajectory):
+    """Private class. Converts a GeodesicHermiteTrajectory to a Trajectory in 
     configuration space rather than phase space."""
-    def __init__(self,bezier):
-        self.bezier = bezier
+    def __init__(self,hermite):
+        self.hermite = hermite
     def eval(self,t,endBehavior='halt'):
-        return self.bezier.eval_config(t,endBehavior)
+        return self.hermite.eval_config(t,endBehavior)
     def deriv(self,t,endBehavior='halt'):
-        return self.bezier.eval(t,endBehavior)[self.bezier.geodesic.extrinsicDimension():]
+        return self.hermite.eval(t,endBehavior)[self.hermite.geodesic.extrinsicDimension():]
     def __getattr__(self,item):
         if item in ['eval','deriv']:
             return self.__dict__[item]
-        bezier = self.__dict__['bezier']
-        hitem = getattr(bezier,item)
+        hermite = self.__dict__['hermite']
+        hitem = getattr(hermite,item)
         if item == 'milestones':
             return [q[:len(q)//2] for q in hitem]
         def methodadaptor(*args,**kwargs):
             res = hitem(*args,**kwargs)
-            if isinstance(res,GeodesicBezierTrajectory):
-                return _GeodesicBezierConfigAdaptor(res)
+            if isinstance(res,GeodesicHermiteTrajectory):
+                return _GeodesicHermiteConfigAdaptor(res)
             elif hasattr(res,'__iter__'):
-                return [(_GeodesicBezierConfigAdaptor(v) if isinstance(v,GeodesicBezierTrajectory) else v) for v in res]
+                return [(_GeodesicHermiteConfigAdaptor(v) if isinstance(v,GeodesicHermiteTrajectory) else v) for v in res]
             return res
         if callable(hitem):
             return methodadaptor
         return hitem
 
 
-class GeodesicBezierTrajectory(Trajectory):
-    """A trajectory that performs Bezier interpolation on a GeodesicSpace
+class GeodesicHermiteTrajectory(Trajectory):
+    """A trajectory that performs Hermite interpolation on a GeodesicSpace
     using the DeCastlejau algorithm.
 
     The milestones are a concatenation of the segment start point and the
-    outgoing Lie derivatives. The incoming Lie derivative at the segment end
-    point is assumed to be the negative of the incoming Lie derivative.
+    outgoing Lie derivatives w.r.t. t. The incoming Lie derivative at the 
+    segment end point is assumed to be the negative of the outgoing Lie
+    derivative.
+
+    Args:
+        geodesic (GeodesicSpace): the underlying space
+        times (list of floats, optional): the knot points defining each segment
+        milestones (list of lists, optional): the points at the ends of each
+            segment
+        outgoingLieDerivatives (list of lists, optional): the Lie derivatives
+            (velocities) at the ends of each segment.
+
+    Possible constructor options are:
+
+    - GeodesicHermiteTrajectory(geodesic): empty trajectory
+    - GeodesicHermiteTrajectory(geodesic,times,milestones): milestones contains 
+      2N-D lists consisting of the concatenation of a point and its outgoing 
+      Lie derivative.
+    - GeodesicHermiteTrajectory(geodesic,times,milestones,lieDerivatives):
+      milestones and lieDerivatives contain N-D lists defining the points and
+      outgoing Lie derivatives.
+
+    Note: the curve is assumed to be smooth. To make a non-smooth curve,
+    duplicate the knot point and milestone, but set a different Lie derivative
+    at the copy.
     """
     def __init__(self,geodesic,times=None,milestones=None,outgoingLieDerivatives=None):
         self.geodesic = geodesic
@@ -830,7 +931,10 @@ class GeodesicBezierTrajectory(Trajectory):
         Trajectory.__init__(self,times,milestones)
         self._skip_deriv = False
     def configTrajectory(self):
-        return _GeodesicBezierConfigAdaptor(self)
+        """Returns a Trajectory-like representation that only yields the
+        configuration part during eval() and the velocity part during deriv().
+        """
+        return _GeodesicHermiteConfigAdaptor(self)
     def makeSpline(self,waypointTrajectory,loop=False):
         """Creates a spline from a set of waypoints, with smooth interpolation
         between waypoints."""
@@ -879,7 +983,39 @@ class GeodesicBezierTrajectory(Trajectory):
                 velocities = [v0]+velocities+[vn]
             else:
                 assert len(velocities) == N
-        self.__init__(waypointTrajectory.times[:],waypointTrajectory.milestones,velocities)
+        GeodesicHermiteTrajectory.__init__(self,self.geodesic,waypointTrajectory.times[:],waypointTrajectory.milestones,velocities)
+    def makeBezier(self,times,controlPoints):
+        """Sets up this spline to perform Bezier interpolation of the given
+        control points, with segment 0 a Bezier curve on cps[0:3], segment 1 a
+        Bezier curve on cps[3:6], etc.
+        """
+        nsegs = len(times)-1
+        if nsegs*3+1 != len(controlPoints):
+            raise ValueError("To perform Bezier interpolation, need # of controlPoints to be 3*Nsegs+1")
+        newtimes = []
+        milestones = []
+        outgoingLieDerivatives = []
+        for i in range(0,len(times)-1):
+            a,b,c,d = controlPoints[i*3:i*3+4]
+            dt = times[i+1]-times[i]
+            if dt <= 0: raise ValueError("Times must be strictly monotonically increasing")
+            lieDeriv0 = vectorops.mul(geodesic.difference(b,a),3/dt)
+            lieDeriv1 = vectorops.mul(geodesic.difference(c,d),-3/dt)
+            if len(outgoingLieDerivatives) > 0:
+                if vectorops.difference(lieDeriv0,outgoingLieDerivatives[-1]) > 1e-4:
+                    #need to double up knot point
+                    newtimes.append(newtimes[-1])
+                    milestones.append(milestones[-1])
+                    outgoingLieDerivatives.append(lieDeriv0)
+            else:
+                newtimes.append(times[i])
+                milestones.append(a)
+                outgoingLieDerivatives.append(lieDeriv0)
+            newtimes.append(times[i+1])
+            milestones.append(d)
+            outgoingLieDerivatives.append(lieDeriv1)
+            milestones.append(d)
+        GeodesicHermiteTrajectory.__init__(self,self.geodesic,newtimes,milestones,outgoingLieDerivatives)
     def interpolate(self,a,b,u,dt):
         n = self.geodesic.extrinsicDimension()
         assert len(a) == n*2
@@ -945,27 +1081,37 @@ class GeodesicBezierTrajectory(Trajectory):
             l += metric(c2,c3)
         return l
     def discretize_config(self,dt):
+        """Creates a discretized piecewise-geodesic (GeodesicTrajectory)
+        approximation of this curve in config space, with resolution dt.
+        """
         self._skip_deriv = True
         res = self.discretize(dt)
         self._skip_deriv = False
         n = self.geodesic.extrinsicDimension()
         return GeodesicTrajectory(self.geodesic,res.times,[m[:n] for m in res.milestones])
     def constructor(self):
-        return lambda times,milestones:BezierGeodesicTrajectory(self.geodesic,times,milestones)
+        return lambda times,milestones:GeodesicHermiteTrajectory(self.geodesic,times,milestones)
     
 
 
-class SO3BezierTrajectory(GeodesicBezierTrajectory):
-    """A trajectory that performs Bezier interpolation in SO3.  Each milestone
+class SO3HermiteTrajectory(GeodesicHermiteTrajectory):
+    """A trajectory that performs Hermite interpolation in SO3.  Each milestone
     is 18-D, consisting of a 9-D :mod:`klampt.math.so3` element and its
-    subsequent control point.
+    subsequent Lie derivative.
+
+    Args:
+        times (list of float): knot points.
+        milestones (list of 9-D lists): list of waypoint orientations.
+        outgoingLieDerivatives (list of 9-D lists): list of Lie derivatives,
+            i.e. cross product matrix (:func:`~klampt.math.so3.cross_product`)
+            for each angular velocity.
     """
-    def __init__(self,times=None,milestones=None,outoingCPs=None):
-        GeodesicBezierTrajectory.__init__(self,SO3Space(),times,milestones,outgoingCPs)
+    def __init__(self,times=None,milestones=None,outgoingLieDerivatives=None):
+        GeodesicHermiteTrajectory.__init__(self,SO3Space(),times,milestones,outgoingLieDerivatives)
     def preTransform(self,R):
         """Premultiplies every rotation in here by the so3 element
         R. In other words, if R rotates a local frame F to frame F',
-        this method converts this SO3BezierTrajectory from coordinates in F
+        this method converts this SO3HermiteTrajectory from coordinates in F
         to coordinates in F'"""
         for i,m in enumerate(self.milestones):
             assert len(m) == 18
@@ -973,17 +1119,21 @@ class SO3BezierTrajectory(GeodesicBezierTrajectory):
             mv = m[9:]
             self.milestones[i] = so3.mul(R,mq) + so3.mul(R,mv)
     def eval_so3(self,t,endBehavior='halt'):
-        GeodesicBezierTrajectory.eval_config(t,endBehavior)
+        return GeodesicHermiteTrajectory.eval_config(self,t,endBehavior)
+    def deriv_angvel(self,t,endBehavior='halt'):
+        """Returns the derivative at t, in angular velocity form"""
+        dR = GeodesicHermiteTrajectory.eval_velocity(self,t,endBehavior)
+        return so3.deskew(dR)
     def postTransform(self,R):
         """Postmultiplies every rotation in here by the se3 element
         R. In other words, if R rotates a local frame F to frame F',
-        this method converts this SO3BezierTrajectory from describing how F'
+        this method converts this SO3HermiteTrajectory from describing how F'
         rotates to how F rotates."""
         for i,m in enumerate(self.milestones):
             assert len(m) == 18
             mq = m[:9]
             mv = m[9:]
-            self.milestones[i] = so3.mul(mv,R) + so3.mul(mv,R)
+            self.milestones[i] = so3.mul(mq,R) + so3.mul(mv,R)
     def discretize_so3(self,dt):
         self._skip_deriv = True
         res = self.discretize(dt)
@@ -991,11 +1141,11 @@ class SO3BezierTrajectory(GeodesicBezierTrajectory):
         n = 9
         return SO3Trajectory(res.times,[m[:n] for m in res.milestones])
     def constructor(self):
-        return SO3BezierTrajectory
+        return SO3HermiteTrajectory
     
 
 
-class SE3BezierTrajectory(GeodesicBezierTrajectory):
+class SE3HermiteTrajectory(GeodesicHermiteTrajectory):
     """A trajectory that performs Bezier interpolation in SE3.  Each milestone
     is 12-D, consisting of a 12-D flattened :mod:`klampt.math.se3` element and
     its subsequent control point.
@@ -1005,7 +1155,7 @@ class SE3BezierTrajectory(GeodesicBezierTrajectory):
             milestones = [R+t for (R,t) in milestones]
         if outgoingLieDerivatives is not None and len(outgoingLieDerivatives) > 0 and len(outgoingLieDerivatives[0])==2:
             outgoingLieDerivatives = [R+t for (R,t) in outgoingLieDerivatives]
-        GeodesicBezierTrajectory.__init__(self,SE3Space(),times,milestones,outgoingLieDerivatives)
+        GeodesicHermiteTrajectory.__init__(self,SE3Space(),times,milestones,outgoingLieDerivatives)
     def to_se3(self,milestone):
         """Converts a state parameter vector to a klampt.se3 element"""
         return (milestone[:9],milestone[9:])
@@ -1021,10 +1171,15 @@ class SE3BezierTrajectory(GeodesicBezierTrajectory):
         element"""
         res = self.deriv(t,endBehavior)
         return self.to_se3(res[:12])
+    def deriv_screw(self,t,endBehavior='halt'):
+        """Returns the derivative at t, in screw vector form, that is, a 6D
+        vector (angular velocity, velocity)."""
+        dT = self.deriv_se3(t,endBehavior)
+        return so3.deskew(dT[0])+dT[1]
     def preTransform(self,T):
         """Premultiplies every transform in here by the se3 element T. In other
         words, if T transforms a local frame F to frame F', this method
-        converts this SE3BezierTrajectory from coordinates in F to coordinates
+        converts this SE3HermiteTrajectory from coordinates in F to coordinates
         in F'"""
         for i,m in enumerate(self.milestones):
             assert len(m) == 24
@@ -1038,9 +1193,9 @@ class SE3BezierTrajectory(GeodesicBezierTrajectory):
         rotates to how F rotates."""
         for i,m in enumerate(self.milestones):
             assert len(m) == 24
-            m1 = self.to_se3(m[:12])
-            m2 = self.to_se3(m[12:])
-            self.milestones[i] = self.from_se3(se3.mul(m1,T)) + self.from_se3((so3.mul(mv[0],T[0]),so3.apply(so3.inv(T[0]),mv[1])))
+            mq = self.to_se3(m[:12])
+            mv = self.to_se3(m[12:])
+            self.milestones[i] = self.from_se3(se3.mul(mq,T)) + self.from_se3((so3.mul(mv[0],T[0]),so3.apply(so3.inv(T[0]),mv[1])))
     def discretize_se3(self,dt):
         self._skip_deriv = True
         res = self.discretize(dt)
@@ -1048,7 +1203,7 @@ class SE3BezierTrajectory(GeodesicBezierTrajectory):
         n = 12
         return SE3Trajectory(res.times,[m[:n] for m in res.milestones])
     def constructor(self):
-        return SE3BezierTrajectory
+        return SE3HermiteTrajectory
 
 
 
@@ -1087,7 +1242,7 @@ def path_to_trajectory(path,velocities='auto',timing='limited',smoothing='spline
 
     The fifth step is to time scale the result by speed.
 
-    Note:
+    .. note::
 
         There are only some meaningful combinations of arguments:
 
@@ -1604,9 +1759,11 @@ def execute_trajectory(trajectory,controller,speed=1.0,smoothing=None,activeDofs
         speed (float, optional): modulates the speed of the path.
         smoothing (str, optional): any smoothing applied to the path.  Only valid for piecewise
             linear trajectories.  Valid values are
+
             * None: no smoothing, just do a piecewise linear trajectory
             * 'spline': interpolate tangents to the curve
             * 'pause': smoothly speed up and slow down
+
         activeDofs (list, optional): if not None, a list of dofs that are moved by the trajectory.  Each
             entry may be an integer or a string.
     """
