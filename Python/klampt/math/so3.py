@@ -169,13 +169,10 @@ def rotation_vector(R):
                 z = -z
         return [x,y,z]
     #normal
-    scale = 0.5
+    scale = 1
     if abs(theta) > 1e-5:
-        scale = 0.5*theta/math.sin(theta)
-    x = (R[3+2]-R[6+1]) * scale;
-    y = (R[6+0]-R[0+2]) * scale;
-    z = (R[0+1]-R[3+0]) * scale;
-    return [x,y,z]
+        scale = theta/math.sin(theta)
+    return vectorops.mul(deskew(R),scale)
 
 def axis_angle(R):
     """Returns the (axis,angle) pair representing R"""
@@ -277,6 +274,16 @@ def cross_product(w):
     the axis w/||w|| with angular velocity ||w||.
     """
     return [0.,w[2],-w[1],  -w[2],0.,w[0],  w[1],-w[0],0.]
+
+def diag(R):
+    """Returns the diagonal of the 3x3 matrix reprsenting the so3 element R."""
+    return [R[0],R[4],R[8]]
+
+def deskew(R):
+    """If R is a (flattened) cross-product matrix of the 3-vector w, this will
+    return w.  Otherwise, it will return a representation w of (R-R^T)/2 (off
+    diagonals of R) such that (R-R^T)/2 = cross_product(w). """
+    return [0.5*(R[5]-R[7]),0.5*(R[6]-R[2]),0.5*(R[1]-R[3])]
 
 def rotation(axis,angle):
     """Given a unit axis and an angle in radians, returns the rotation

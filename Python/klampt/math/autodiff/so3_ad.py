@@ -20,6 +20,8 @@
  distance              N
  error                 1
  cross_product         N
+ diag                  Y
+ deskew                Y
  canonical             N
  interpolate           N
  det                   N
@@ -190,6 +192,14 @@ canonical = function(so3.canonical,'so3.canonical',(3,),9)
 cross_product = function(so3.cross_product,'so3.cross_product',(3,),9,['x'],
         jvp=[lambda dx,x:so3.cross_product(dx)],order=1)
 """Autodiff'ed version of so3.cross_product. All derivatives are implemented."""
+
+diag = function(so3.diag,'so3.diag',(9,),3,['R'],
+        jvp=[lambda dR,R:so3.diag(dR)],order=1)
+"""Autodiff'ed version of so3.diag. All derivatives are implemented."""
+
+deskew = function(so3.deskew,'so3.deskew',(9,),3,['R'],
+        jvp=[lambda dR,R:so3.deskew(dR)],order=1)
+"""Autodiff'ed version of so3.deskew. All derivatives are implemented."""
 
 interpolate = function(so3.interpolate,'so3.interpolate',(9,9,1),9,['Ra','Rb','u'])
 """Autodiff'ed version of so3.interpolate."""
