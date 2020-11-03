@@ -37,6 +37,7 @@ More information can be found on the Klamp't website (http://klampt.org)
     - \*nux environments
     - Windows
     - MacOS
+    - Google Colab
     
 (Please let us know if you are able to compile on other platforms in order to help us support them in the future.)
 
@@ -59,6 +60,9 @@ Installation instructions are also available for
 - [Mac OSX](Cpp/docs/Tutorials/Install-Mac.md)
 - [Jupyter notebook](Jupyter/README.md)
 - [Docker](Cpp/docs/Tutorials/Install-Docker.md)
+
+This [Google Colab example](https://colab.research.google.com/gist/krishauser/1a518571493d2582f8bda908d9db02fb/klamptcolab.ipynb)
+shows how to get started on Colab.
 
 
 ## Documentation
