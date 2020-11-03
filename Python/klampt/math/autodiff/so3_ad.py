@@ -201,7 +201,14 @@ deskew = function(so3.deskew,'so3.deskew',(9,),3,['R'],
         jvp=[lambda dR,R:so3.deskew(dR)],order=1)
 """Autodiff'ed version of so3.deskew. All derivatives are implemented."""
 
-interpolate = function(so3.interpolate,'so3.interpolate',(9,9,1),9,['Ra','Rb','u'])
+def _interpolate_deriv_u(Ra,Rb,u,du):
+    x = so3.interpolate(Ra,Rb,u)
+    ea = so3.cross_product(so3.error(Ra,x))
+    eb = so3.cross_product(so3.error(Rb,x))
+    return so3.mul(vectorops.sub(eb,ea),x)
+
+interpolate = function(so3.interpolate,'so3.interpolate',(9,9,1),9,['Ra','Rb','u'],
+    jvp=[None,None,_interpolate_deriv_u])
 """Autodiff'ed version of so3.interpolate."""
 
 det = function(so3.det,'so3.det',(9,),1)
