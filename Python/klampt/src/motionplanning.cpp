@@ -1573,14 +1573,20 @@ void interpolateNDMinTimeLinear(const vector<double>& x0,const vector<double>& x
     append_ramp(ramp.ramps[i],temp,temp2,temp3);
     if(out.empty()) {
       out = temp;
-      out2.resize(x0.size());
-      out3.resize(x0.size());
+      out2.resize(temp.size());
+      out3.resize(temp.size());
+      for(size_t j=0;j<temp.size();j++) {
+        out2[j].resize(x0.size());
+        out3[j].resize(x0.size());
+      }
     }
     else {
       Assert(out == temp);
       Assert(out2[0].size()==temp.size());
       Assert(out3[0].size()==temp.size());
     }
+    Assert(out.size() == out2.size());
+    Assert(out.size() == out3.size());
     for(size_t j=0;j<temp.size();j++) {
       out2[j][i] = temp2[j];
       out3[j][i] = temp3[j];

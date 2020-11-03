@@ -514,29 +514,14 @@ class _MyWindow(QMainWindow):
             print("Program does not appear to have a camera")
             return
         scene = self.glwidget.program.scene
-        v = scene.get_view()
         #fn = QFileDialog.getSaveFileName(caption="Viewport file (*.txt)",filter="Viewport file (*.txt);;All files (*.*)",options=QFileDialog.DontUseNativeDialog)
         fn = QFileDialog.getSaveFileName(caption="Viewport file (*.txt)",filter="Viewport file (*.txt);;All files (*.*)")
         if isinstance(fn,tuple):
             fn = fn[0]
         if fn is None:
             return
-        f = open(str(fn),'w')
-        f.write("VIEWPORT\n")
-        f.write("FRAME %d %d %d %d\n"%(v.x,v.y,v.w,v.h))
-        f.write("PERSPECTIVE 1\n")
-        aspect = float(v.w)/float(v.h)
-        rfov = v.fov*math.pi/180.0
-        scale = 1.0/(2.0*math.tan(rfov*0.5/aspect)*aspect)
-        f.write("SCALE %f\n"%(scale,))
-        f.write("NEARPLANE %f\n"%(v.clippingplanes[0],))
-        f.write("FARPLANE %f\n"%(v.clippingplanes[1],))
-        f.write("CAMTRANSFORM ")
-        mat = se3.homogeneous(v.camera.matrix())
-        f.write(' '.join(str(v) for v in sum(mat,[])))
-        f.write('\n')
-        f.write("ORBITDIST %f\n"%(v.camera.dist,))
-        f.close()
+        v = scene.get_view()
+        v.save_file(fn)
     
     def load_camera(self):
         scene = self.glwidget.program.scene
@@ -547,52 +532,8 @@ class _MyWindow(QMainWindow):
             fn = fn[0]
         if fn is None:
             return
-        f = open(str(fn),'r')
-        read_viewport = False
-        mat = None
-        for line in f:
-            entries = line.split()
-            if len(entries) == 0:
-                continue
-            kw = entries[0]
-            args = entries[1:]
-            if kw == 'VIEWPORT':
-                read_viewport = True
-                continue
-            else:
-                if not read_viewport:
-                    print("File does not appear to be a valid viewport file, must start with VIEWPORT")
-                    break
-            if kw == 'FRAME':
-                v.x,v.y,v.w,v.h = [int(x) for x in args]
-            elif kw == 'PERSPECTIVE':
-                if args[0] != '1':
-                    print("WARNING: CANNOT CHANGE TO ORTHO MODE IN PYTHON VISUALIZATION")
-            elif kw == 'SCALE':
-                scale = float(args[0])
-                aspect = float(v.w)/float(v.h)
-                #2.0*math.tan(rfov*0.5/aspect)*aspect = 1.0/scale
-                #math.tan(rfov*0.5/aspect) = 0.5/(scale*aspect)
-                #rfov*0.5/aspect = math.atan(0.5/(scale*aspect))
-                #rfov = 2*aspect*math.atan(0.5/(scale*aspect))
-                rfov = math.atan(0.5/(scale*aspect))*2*aspect
-                v.fov = math.degrees(rfov)
-            elif kw == 'NEARPLANE':
-                v.clippingplanes = (float(args[0]),v.clippingplanes[1])
-            elif kw == 'FARPLANE':
-                v.clippingplanes = (v.clippingplanes[0],float(args[0]))
-            elif kw == 'CAMTRANSFORM':
-                mat = [args[0:4],args[4:8],args[8:12],args[12:16]]
-                for i,row in enumerate(mat):
-                    mat[i] = [float(x) for x in row]
-            elif kw == 'ORBITDIST':
-                v.camera.dist = float(args[0])
-            else:
-                raise RuntimeError("Invalid viewport keyword "+kw)
-        if mat is not None:
-            v.camera.set_matrix(se3.from_homogeneous(mat))
+        v.load_file(fn)
         scene.set_view(v)
-        f.close()
 
     
     def save_world(self):
@@ -857,66 +798,17 @@ class _MyWindow(QMainWindow):
         self.edit_gui_window.show()
    
     def loadJsonConfig(self,fn):
-        import json
-
-        def parseitem(js,app):
-            if isinstance(js,dict):
-                for (attr,value) in js.items():
-                    app.attributes[attr] = value
-            elif isinstance(js,list):
-                for val in js:
-                    if not isinstance(val,dict) or "name" not in val or "appearance" not in val:
-                        print("Warning, JSON object",js,"does not contain a valid subappearance")
-                    name = val["name"]
-                    jsapp = val["appearance"]
-                    if isinstance(name,list):
-                        name = tuple(name)
-                    if name not in app.subAppearances:
-                        print("Warning, JSON object",js,"subappearance",name,"not in visualization")
-                    else:
-                        parseitem(jsapp,app.subAppearances[name])
-            else:
-                print("Warning, JSON object",js,"does not contain a dict of attributes or list of sub-appearances")
-
-        f = open(fn,'r')
-        jsonobj = json.load(f)
-        f.close()
         if isinstance(self.glwidget.program,GLVisualizationFrontend):
             scene = self.glwidget.program.scene
-            parsed = set()
-            for (k,v) in scene.items.items():
-                if k in jsonobj:
-                    parsed.add(k)
-                    parseitem(jsonobj[k],v)
-                else:
-                    print("Warning, visualization object",k,"not in JSON object")
-            for (k,v) in jsonobj.items():
-                if k not in parsed:
-                    print("Warning, JSON object",k,"not in visualization")
+            scene.loadJsonConfig(fn)
             self.glwidget.refresh()
             return
         print("loadJsonConfig: no visualization plugins active")
     
     def saveJsonConfig(self,fn):
-        import json
-        out = {}
-        def dumpitem(v):
-            if len(v.subAppearances) > 0:
-                items = []
-                for (k,app) in v.subAppearances.items():
-                    jsapp = dumpitem(app)
-                    if len(jsapp) > 0:
-                        items.append({"name":k,"appearance":jsapp})
-                return items
-            else:
-                return v.attributes
         if isinstance(self.glwidget.program,GLVisualizationFrontend):
             scene = self.glwidget.program.scene
-            for (k,v) in scene.items.items():
-                out[k] = dumpitem(v) 
-            f = open(fn,'w')
-            json.dump(out,f)
-            f.close()
+            scene.saveJsonConfig(fn)
             return
         print("saveJsonConfig: no visualization plugins active")
     

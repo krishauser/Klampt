@@ -37,8 +37,8 @@ def hermite_deriv(x1,v1,x2,v2,u,order=1):
             dx[i] = dcx1*x1[i] + dcx2*x2[i] + dcv1*v1[i] + dcv2*v2[i];
         return dx
     elif order == 2:
-        ddcx1 = 12*u
-        ddcx2 = -12.0*u
+        ddcx1 = 12*u-6.0
+        ddcx2 = -12.0*u+6.0
         ddcv1 = 6.0*u-4.0
         ddcv2 = 6.0*u-2.0
         ddx = [0]*len(x1)

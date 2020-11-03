@@ -124,7 +124,7 @@ class GLSimulationPlugin(GLWorldPlugin):
                 self.drawSensors = False
         def single_step():
             print("Advancing by 0.01s")
-            self.simStep(0.01)
+            self.sim_step(0.01)
         self.add_action(toggle_simulate,'Toggle simulation','s')
         self.add_action(single_step,'Step simulation',' ',)
         #self.add_action(toggle_movie_mode,'Toggle movie mode','m')
@@ -190,7 +190,7 @@ class GLSimulationPlugin(GLWorldPlugin):
         """Overload this to perform custom control handling."""
         pass
 
-    def simStep(self,dt=None):
+    def sim_step(self,dt=None):
         """Advance the simulation and update the GUI"""
         if dt is None:
             dt = self.dt
@@ -218,7 +218,7 @@ class GLSimulationPlugin(GLWorldPlugin):
         #Put your idle loop handler here
         #the current example simulates with the current time step self.dt
         if self.simulate:
-            self.simStep()
+            self.sim_step()
         return True
 
     def mousefunc(self,button,state,x,y):

@@ -459,7 +459,7 @@ class GeomGeomDistance(ADFunctionInterface):
             self.eval_res = self.geom1.distance_ext(self.geom2,self.settings)
         else:
             self.eval_res = self.geom1.distance(self.geom2)
-        print("Eval result",self.eval_res.d,"for transforms",T1,T2)
+        #print("Eval result",self.eval_res.d,"for transforms",T1,T2)
         return self.eval_res.d
     def jvp(self,arg,darg,T1,T2):
         if not _array_list_equal(self.eval_args,(T1,T2)):

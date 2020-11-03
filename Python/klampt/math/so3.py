@@ -169,13 +169,10 @@ def rotation_vector(R):
                 z = -z
         return [x,y,z]
     #normal
-    scale = 0.5
+    scale = 1
     if abs(theta) > 1e-5:
-        scale = 0.5*theta/math.sin(theta)
-    x = (R[3+2]-R[6+1]) * scale;
-    y = (R[6+0]-R[0+2]) * scale;
-    z = (R[0+1]-R[3+0]) * scale;
-    return [x,y,z]
+        scale = theta/math.sin(theta)
+    return vectorops.mul(deskew(R),scale)
 
 def axis_angle(R):
     """Returns the (axis,angle) pair representing R"""
@@ -265,8 +262,12 @@ def distance(R1,R2):
 
 def error(R1,R2):
     """Returns a 3D "difference vector" that describes how far R1 is from R2.
-    More precisely, this is the Lie derivative, which is the rotation vector
-    representation of R1*R2^T."""
+    More precisely, this is the (local) Lie derivative, which is the rotation 
+    vector representation of R1*R2^T.
+
+    Fun fact: this is related to the derivative of interpolate(R2,R1,u) at u=0
+    by d/du interpolate(R2,R1,0) = mul(error(R1,R2),R2).
+    """
     R = mul(R1,inv(R2))
     return moment(R)
 
@@ -277,6 +278,16 @@ def cross_product(w):
     the axis w/||w|| with angular velocity ||w||.
     """
     return [0.,w[2],-w[1],  -w[2],0.,w[0],  w[1],-w[0],0.]
+
+def diag(R):
+    """Returns the diagonal of the 3x3 matrix reprsenting the so3 element R."""
+    return [R[0],R[4],R[8]]
+
+def deskew(R):
+    """If R is a (flattened) cross-product matrix of the 3-vector w, this will
+    return w.  Otherwise, it will return a representation w of (R-R^T)/2 (off
+    diagonals of R) such that (R-R^T)/2 = cross_product(w). """
+    return [0.5*(R[5]-R[7]),0.5*(R[6]-R[2]),0.5*(R[1]-R[3])]
 
 def rotation(axis,angle):
     """Given a unit axis and an angle in radians, returns the rotation
@@ -347,6 +358,21 @@ def interpolate(R1,R2,u):
     axis = vectorops.div(m,angle)
     return mul(R1,rotation(axis,angle*u))
 
+def interpolator(R1,R2):
+    """Returns a function of one parameter u that interpolates linearly
+    between the two rotations R1 and R2. After f(u) is constructed, calling
+    f(u) is about 2x faster than calling interpolate(R1,R2,u)."""
+    R = mul(inv(R1),R2)
+    m = moment(R)
+    angle = vectorops.norm(m)
+    if angle==0:
+        axis = [1,0,0]
+    else:
+        axis = vectorops.div(m,angle)
+    def f(u,R1=R1,axis=axis,angle=angle):
+        return mul(R1,rotation(axis,angle*u))
+    return f
+
 def det(R):
     """Returns the determinant of the 3x3 matrix R"""
     m = matrix(R)
@@ -361,7 +387,6 @@ def is_rotation(R,tol=1e-5):
     if det(R) < 0: 
         return False
     return True
-
 
 def sample():
     """Returns a uniformly distributed rotation matrix."""

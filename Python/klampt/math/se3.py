@@ -105,3 +105,14 @@ def error(T1,T2):
 def interpolate(T1,T2,u):
     """Interpolate linearly between the two transformations T1 and T2."""
     return (so3.interpolate(T1[0],T2[0],u),vectorops.interpolate(T1[1],T2[1],u))
+
+def interpolator(T1,T2):
+    """Returns a function of one parameter u that interpolates linearly
+    between the two transformations T1 and T2. After f(u) is constructed, calling
+    f(u) is about 2x faster than calling interpolate(T1,T2,u)."""
+    R1,t1 = T1
+    R2,t2 = T2
+    dt = vectorops.sub(t2,t1)
+    def f(u,so3_interp=so3.interpolator(R1,R2),t1=t1,dt=dt):
+        return (so3_interp(u),vectorops.madd(t1,dt,u))
+    return f

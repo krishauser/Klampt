@@ -395,6 +395,8 @@ If you are calling these methods from an external loop (as opposed to inside
 a plugin) be sure to lock/unlock the visualization before/after calling these
 methods.
 
+Scene management functions:
+
 - def add(name,item,keepAppearance=False,**kwargs): adds an item to the 
   visualization.  name is a unique identifier.  If an item with the same name
   already exists, it will no longer be shown.
@@ -449,15 +451,22 @@ methods.
 - def setPlotSize(name,w,h): sets the width and height of the plot.
 - def savePlot(name,fn): saves a plot to a CSV (extension .csv) or Trajectory 
   (extension .traj) file.
+
+Global appearance / camera control functions:
+
 - def getViewport(): Returns the GLViewport for the currently active view.
 - def setViewport(viewport): Sets the GLViewport for the currently active
   scene.  (This is also used to resize windows.)
 - def setBackgroundColor(r,g,b,a=1): Sets the background color for the active
   scene.
-- def autoFitCamera(scale=1.0): Automatically fits the camera to all objects
-  in the visualization.  A scale > 1 magnifies the camera zoom.
+- def autoFitCamera(zoom=True,rotate=True,scale=1.0): Automatically fits the 
+  camera to all objects in the visualization.  A scale > 1 magnifies the zoom.
 - def followCamera(target,translate=True,rotate=False,center=False): Sets the 
   camera to follow a target.
+- saveJsonConfig() / saveJsonConfig(fn): Saves the configuration to a JSON
+  object or JSON file.
+- loadJsonConfig(jsonObj) / loadJsonConfig(fn): Loads the configuration from a
+  JSON object or JSON file.
 
 Utility functions:
 
@@ -1466,7 +1475,20 @@ def setBackgroundColor(r,g,b,a=1):
     """Sets the background color of the current scene."""
     scene().setBackgroundColor(r,g,b,a)
 
+def saveJsonConfig(fn=None):
+    """Saves the visualization options to a JSON object or file.
 
+    If fn is provided, it's saved to a file.  Otherwise, it is returned.
+    """
+    return scene().saveJsonConfig(fn)
+
+def loadJsonConfig(jsonobj_or_fn):
+    """Loads the visualization options from a JSON object or file.
+
+    jsonobj_or_fn can either by a dict (previously obtained by saveJsonConfig
+    or a str indicating a filename (previously saved using saveJsonConfig.)
+    """
+    return scene().loadJsonConfig(jsonobj_or_fn)
 
 def objectToVisType(item,world):
     """Returns the default type for the given item in the current world"""
@@ -1833,11 +1855,11 @@ def drawTrajectory(traj,width,color,pointSize=None,pointColor=None):
     By default draws points along the trajectory.  To turn this off, set 
     pointSize = 0.
     """
-    if pointSize is None:
-        pointSize = width+2
-    if pointColor is None:
-        pointColor = (color[0]*0.75,color[1]*0.75,color[2]*0.75,color[3])
     if isinstance(traj,list):
+        if pointSize is None:
+            pointSize = width+2
+        if pointColor is None:
+            pointColor = (color[0]*0.75,color[1]*0.75,color[2]*0.75,color[3])
         #R3 trajectory
         glDisable(GL_LIGHTING)
         glColor4f(*color)
@@ -1846,31 +1868,53 @@ def drawTrajectory(traj,width,color,pointSize=None,pointColor=None):
             glBegin(GL_POINTS)
             glVertex3fv(traj[0])
             glEnd()
-        if len(traj) >= 2:
+        if len(traj) >= 2 and width > 0:
             glLineWidth(width)
             glBegin(GL_LINE_STRIP)
             for p in traj:
                 glVertex3fv(p)
             glEnd()
             glLineWidth(1.0)
-            if pointSize > 0:
-                glColor4f(*pointColor)
-                glPointSize(pointSize)
-                glBegin(GL_POINTS)
-                for p in traj:
-                  glVertex3fv(p)
-                glEnd()
+        if len(traj) >= 2 and pointSize > 0:
+            glColor4f(*pointColor)
+            glPointSize(pointSize)
+            glBegin(GL_POINTS)
+            for p in traj:
+                glVertex3fv(p)
+            glEnd()
     elif isinstance(traj,SE3Trajectory):
         pointTraj = []
         for m in traj.milestones:
-            pointTraj.append(m[9:])
+            pointTraj.append(m[9:12])
         drawTrajectory(pointTraj,width,color,pointSize,pointColor)
+    elif isinstance(traj,SE3HermiteTrajectory):
+        pointTraj = []
+        velTraj = []
+        for m in traj.milestones:
+            pointTraj.append(m[9:12])
+            velTraj.append(m[21:24])
+        drawTrajectory(HermiteTrajectory(traj.times,pointTraj,velTraj),width,color,pointSize,pointColor)
     else:
-        if len(traj.milestones[0]) == 3:
-            drawTrajectory(traj.milestones,width,color,pointSize,pointColor)
-        elif len(traj.milestones[0]) == 2:
+        wp = traj.waypoint(traj.milestones[0])
+        if len(wp) == 3:
+            if len(wp) == len(traj.milestones[0]):   
+                drawTrajectory(traj.milestones,width,color,pointSize,pointColor)
+            else:  #discrepancy, must be hermite
+                if width > 0:
+                    discretized = traj.discretize(traj.duration()/len(traj.milestones)*0.1)
+                    drawTrajectory(discretized.milestones,width,color,0,None)
+                if pointSize is None or pointSize > 0:
+                    drawTrajectory([traj.waypoint(m) for m in traj.milestones],0,color,pointSize,pointColor)
+        elif len(wp) == 2:
             #R2 trajectory
-            drawTrajectory([v + [0.0] for v in traj.milestones],width,color,pointSize,pointColor)
+            if len(wp) == len(traj.milestones[0]): 
+                drawTrajectory([v + [0.0] for v in traj.milestones],width,color,pointSize,pointColor)
+            else:  #discrepancy, must be hermite
+                if width > 0:
+                    discretized = traj.discretize(traj.duration()/len(traj.milestones)*0.1)
+                    drawTrajectory([m  + [0.0] for m in discretized.milestones],width,color,0,None)
+                if pointSize is None or pointSize > 0:
+                    drawTrajectory([traj.waypoint(m) + [0.0] for m in traj.milestones],0,color,pointSize,pointColor)
 
 
 def drawRobotTrajectory(traj,robot,ees,width=2,color=(1,0.5,0,1),pointSize=None,pointColor=None):
@@ -2127,6 +2171,9 @@ class VisAppearance:
         
     def drawText(self,text,point):
         """Draws the given text at the given point"""
+        if len(point) != 3:
+            print("WARNING drawText INCORRECT POINT SIZE",point,text)
+            return
         self.widget.addLabel(text,point[:],[0,0,0])
 
     def updateAnimation(self,t):
@@ -2138,7 +2185,7 @@ class VisAppearance:
         else:
             u = self.animationSpeed*(t-self.animationStartTime)
             q = self.animation.eval(u,self.animationEndBehavior)
-            self.drawConfig = q
+            self.drawConfig = config.getConfig(q)
             self.markChanged(config=True,appearance=False)
         for n,app in self.subAppearances.items():
             app.updateAnimation(t)
@@ -2328,22 +2375,24 @@ class VisAppearance:
                     if doDraw:
                         robot.setConfig(item.milestones[0])
                         centroid = vectorops.div(vectorops.add(*[robot.link(ee).getTransform()[1] for ee in ees]),len(ees))
-            elif isinstance(item,SE3Trajectory):
+            elif isinstance(item,(SE3Trajectory,SE3HermiteTrajectory)):
                 doDraw = True
-                centroid = item.milestones[0][9:]
+                centroid = item.waypoint(item.milestones[0])[1]
             else:
-                if len(item.milestones[0]) == 3:
+                wp = item.waypoint(item.milestones[0])
+                if len(wp) == 3:
                     #R3 trajectory
                     doDraw = True
-                    centroid = item.milestones[0]
-                elif len(item.milestones[0]) == 2:
+                    centroid = wp
+                elif len(item.waypoint(item.milestones[0])) == 2:
                     #R2 trajectory
                     doDraw = True
-                    centroid = item.milestones[0]+[0.0]
+                    centroid = wp+[0.0]
                 else:
                     #don't know how to interpret this trajectory
                     pass
             if doDraw:
+                assert len(centroid)==3
                 def drawRaw():
                     pointTrajectories = []
                     width = self.attributes["width"]
@@ -3127,8 +3176,6 @@ class VisualizationScene:
                 #a list of milestones -- loop through them with 1s delay
                 print("visualization.animate(): Making a Trajectory with unit durations between",len(animation),"milestones")
                 animation = Trajectory(list(range(len(animation))),animation)
-            if isinstance(animation,HermiteTrajectory):
-                animation = animation.configTrajectory()
             if isinstance(animation,MultiPath):
                 world = self.items.get('world',None)
                 if world is not None:
@@ -3543,6 +3590,69 @@ class VisualizationScene:
         for i in self.items.values():
             i.clearDisplayLists()
 
+    def saveJsonConfig(self,fn=None):
+        def dumpitem(v):
+            if len(v.subAppearances) > 0:
+                items = []
+                for (k,app) in v.subAppearances.items():
+                    jsapp = dumpitem(app)
+                    if len(jsapp) > 0:
+                        items.append({"name":k,"appearance":jsapp})
+                return items
+            else:
+                return v.attributes.flatten()
+        out = {}
+        for (k,v) in self.items.items():
+            out[k] = dumpitem(v) 
+        if fn is None:
+            return out
+        else:
+            import json
+            f = open(fn,'w')
+            json.dump(out,f)
+            f.close()
+            return out
+                
+    def loadJsonConfig(self,jsonobj_or_file):
+        if isinstance(jsonobj_or_file,str):
+            import json
+            f = open(jsonobj_or_file,'r')
+            jsonobj = json.load(f)
+            f.close()
+        else:
+            jsonobj = jsonobj_or_file
+
+        def parseitem(js,app):
+            if isinstance(js,dict):
+                for (attr,value) in js.items():
+                    app.attributes[attr] = value
+                    app.markChanged()
+            elif isinstance(js,list):
+                for val in js:
+                    if not isinstance(val,dict) or "name" not in val or "appearance" not in val:
+                        print("Warning, JSON object",js,"does not contain a valid subappearance")
+                    name = val["name"]
+                    jsapp = val["appearance"]
+                    if isinstance(name,list):
+                        name = tuple(name)
+                    if name not in app.subAppearances:
+                        print("Warning, JSON object",js,"subappearance",name,"not in visualization")
+                    else:
+                        parseitem(jsapp,app.subAppearances[name])
+            else:
+                print("Warning, JSON object",js,"does not contain a dict of attributes or list of sub-appearances")
+
+        parsed = set()
+        for (k,v) in self.items.items():
+            if k in jsonobj:
+                parsed.add(k)
+                parseitem(jsonobj[k],v)
+            else:
+                print("Warning, visualization object",k,"not in JSON object")
+        for (k,v) in jsonobj.items():
+            if k not in parsed:
+                print("Warning, JSON object",k,"not in visualization")
+
 def _camera_translate(vp,tgt):
     vp.camera.tgt = tgt
 
@@ -3615,10 +3725,10 @@ class _TrajectoryCameraController:
             pass
         self.trajectory = trajectory
     def update(self,t):
-        if isinstance(self.trajectory,(SE3Trajectory,SE3BezierTrajectory)):
-            T = self.trajectory.eval_se3(t,'loop')
+        if isinstance(self.trajectory,(SE3Trajectory,SE3HermiteTrajectory)):
+            T = self.trajectory.eval(t,'loop')
             self.vp.setTransform(T)
-        elif isinstance(self.trajectory,(SO3Trajectory,SO3BezierTrajectory)):
+        elif isinstance(self.trajectory,(SO3Trajectory,SO3HermiteTrajectory)):
             R = self.trajectory.eval(t,'loop')
             self.vp.camera.set_orientation(R,'xyz')
         else:

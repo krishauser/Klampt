@@ -17,7 +17,8 @@ class GeodesicSpace:
         return vectorops.interpolate(a,b,u)
     def difference(self,a,b):
         """For Lie groups, returns a difference vector that, when integrated
-        would get to a from b.  In Cartesian spaces it is a-b."""
+        would get to a from b.  In Cartesian spaces it is a-b.  In other spaces,
+        it should be d/du interpolate(b,a,u) at u=0."""
         return vectorops.sub(a,b)
     def integrate(self,x,d):
         """For Lie groups, returns the point that would be arrived at via
@@ -73,6 +74,7 @@ class MultiGeodesicSpace(GeodesicSpace):
             res[i:i+d] = c.interpolate(a[i:i+d],b[i:i+d],u)
             i += d
         return res
+
     def difference(self,a,b):
         i = 0
         res = [0]*len(a)
@@ -121,10 +123,11 @@ class SO3Space(GeodesicSpace):
         return so3.interpolate(a,b,u)
     def difference(self,a,b):
         w = so3.error(a,b)
-        return so3.cross_product(w)
+        return so3.mul(so3.cross_product(w),b)
     def integrate(self,x,d):
-        w = [d[0],d[4],d[8]]
-        return so3.mul(x,so3.from_moment(w))
+        wcross = so3.mul(d,so3.inv(x))
+        w = so3.deskew(wcross)
+        return so3.mul(so3.from_moment(w),x)
 
 
 class SE3Space(GeodesicSpace):
@@ -145,11 +148,13 @@ class SE3Space(GeodesicSpace):
         r = se3.interpolate(self.to_se3(a),self.to_se3(b),u)
         return r[0]+r[1]
     def difference(self,a,b):
+        Rb,tb = self.to_se3(b)
         w = se3.error(self.to_se3(a),self.to_se3(b))
-        return so3.cross_product(w[:3])+w[3:]
+        return so3.mul(Rb,so3.cross_product(w[:3]))+w[3:]
     def integrate(self,x,d):
         assert len(x) == 12
-        w = [0.5*(d[5]-d[7]),0.5*(d[6]-d[2]),0.5*(d[1]-d[3])]
+        Rx,rx = self.to_se3(x)
+        w = so3.deskew(so3.mul(so3.inv(Rx),d[:9]))
         v = d[9:]
         wR = so3.from_moment(w)
         assert len(wR) == 9

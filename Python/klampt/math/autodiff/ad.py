@@ -221,6 +221,14 @@ Another convenience function is :func:`setitem`, which has the signature
 
 which is sort of a proper functional version of the normal ``x[indices]=v``.
 
+The function :data:`cond` acts like an if statement, where
+``cond(pred,posval,negval)`` returns posval if pred > 0 and negval otherwise.
+There's also ``cond3(pred,posval,zeroval,negval)`` that returns posval if
+pred > 0, zeroval if pred==0, and negval otherwise.  Conditions can also be 
+applied when pred is an array, but it must be of equal size to posval and
+negval.  The result in this case is an array with the i'th value taking on
+posval[i] when pred[i] > 0 and negval[i] otherwise.
+
 
 Other Klampt ad Modules
 =======================
@@ -234,9 +242,9 @@ autodiff versions of many Klamp't functions are found in:
 - :mod:`se3_ad` : operations on SE(3), mostly compatible with the
   :mod:`~klampt.math.se3` module.
 - :mod:`kinematics_ad` kinematics functions, e.g., robot Jacobians.
-- :mod:`geometry_ad` geometry derivative functions. TODO
-- :mod:`dynamics_ad` dynamics derivative functions. TODO
-- :mod:`spline_ad` spline derivative functions. TODO
+- :mod:`geometry_ad` geometry derivative functions.
+- :mod:`dynamics_ad` dynamics derivative functions.
+- :mod:`trajectory_ad` trajectory derivative functions.
 """
 
 import numpy as np
@@ -645,6 +653,8 @@ class ADFunctionCall:
             raise RuntimeError("Error running function %s in context %s"%(str(self.func),' -> '.join(context)))
         try:
             no = self.func.n_out()
+            if not isinstance(no,int):
+                raise ValueError("Error evaluating %s: return # of outputs is not integer? got %s"%(str(self),str(no)))
             if no >= 0:
                 if _size(res) != no:
                     raise ValueError("Error evaluating %s: return value has expected size %d, instead got %d"%(str(self),no,_size(res)))
@@ -1014,12 +1024,17 @@ def function(func,name='auto',argspec='auto',outspec=None,argnames=None,
     if argnames is not None:
         if len(argnames) != len(argspec):
             raise ValueError("Invalid number of argument names provided")
+    def run_if_not_none(f,*args):
+        if f is None:
+            raise NotImplementedError()
+        else:
+            return f(*args)
     if hasattr(derivative,'__iter__'):
         derivative_list = derivative
-        derivative = lambda arg,*args:derivative_list[arg](*args)
+        derivative = lambda arg,*args:run_if_not_none(derivative_list[arg],*args)
     if hasattr(jvp,'__iter__'):
         jvp_list = jvp
-        jvp = lambda arg,darg,*args:jvp_list[arg](darg,*args)
+        jvp = lambda arg,darg,*args:run_if_not_none(jvp_list[arg],darg,*args)
     if gen_derivative is None and order is not None:
         def default_gen_deriv(arg,*args):
             if len(arg) > order:
@@ -1047,6 +1062,8 @@ def function(func,name='auto',argspec='auto',outspec=None,argnames=None,
             if len(arg) == 1:
                 return derivative(arg[0],*args)
             if len(arg)-2 < len(gen_derivative_list):
+                if gen_derivative_list[len(arg)-1] is None: 
+                    raise NotImplementedError()
                 return gen_derivative_list[len(arg)-1](*args)
             if order is not None and len(tuple) > order:
                 return 0
@@ -1058,12 +1075,14 @@ def function(func,name='auto',argspec='auto',outspec=None,argnames=None,
     members['n_in'] = lambda self,arg:argspec[arg]
     if outspec is not None:
         members['n_out'] = lambda self:outspec
+    def toarray(res):
+        return res if _scalar(res) else np.asarray(res)
     if derivative is not None:
-        members['derivative'] = lambda self,arg,*args:np.asarray(derivative(arg,*args))
+        members['derivative'] = lambda self,arg,*args:toarray(derivative(arg,*args))
     if jvp is not None:
-        members['jvp'] = lambda self,arg,darg,*args:np.asarray(jvp(arg,darg,*args))
+        members['jvp'] = lambda self,arg,darg,*args:toarray(jvp(arg,darg,*args))
     if gen_derivative is not None:
-        members['gen_derivative'] = lambda self,arg,*args:np.asarray(gen_derivative(arg,*args))
+        members['gen_derivative'] = lambda self,arg,*args:toarray(gen_derivative(arg,*args))
     if argnames is not None:
         members['argname'] = lambda self,arg:argnames[arg]
     TempType = type("_ad_"+name,(ADFunctionInterface,),members)
@@ -1249,6 +1268,8 @@ def check_derivatives(f,x,h=1e-6,rtol=1e-2,atol=1e-3):
                     dv[j] = 1
                     g = f.jvp(i,dv,*x)
                     has_jvp = True
+                    if _scalar(v):
+                        dv = dv[0]
                     g_fd = finite_differences(lambda t:f.eval(*(x[:i]+[v+dv*t]+x[i+1:])),0,h)[:,0]
                     if g is 0:
                         g = np.zeros(g_fd.shape)
@@ -1268,6 +1289,8 @@ def check_derivatives(f,x,h=1e-6,rtol=1e-2,atol=1e-3):
                     dv[j] = np.random.uniform(-0.9,-0.05)
                     g = f.jvp(i,dv,*x)
                     has_jvp = True
+                    if _scalar(v):
+                        dv = dv[0]
                     g_fd = finite_differences(lambda t:f.eval(*(x[:i]+[v+dv*t]+x[i+1:])),0,h)[:,0]
                     if g is 0:
                         g = np.zeros(g_fd.shape)
@@ -1281,9 +1304,12 @@ def check_derivatives(f,x,h=1e-6,rtol=1e-2,atol=1e-3):
                         print("jvp Finite differences:",g_fd)
                         print("jvp:",g)
                         raise AssertionError("Jacobian-vector product of %s w.r.t. %s has an error of size %f"%(str(f),f.argname(i),np.linalg.norm(g-g_fd)))
+
                 dv = np.random.uniform(-1,-1,_size(v))
                 g = f.jvp(i,dv,*x)
                 has_jvp = True
+                if _scalar(v):
+                    dv = dv[0]
                 g_fd = finite_differences(lambda t:f.eval(*(x[:i]+[v+dv*t]+x[i+1:])),0,h)[:,0]
                 if g is 0:
                     g = np.zeros(g_fd.shape)
@@ -1300,7 +1326,7 @@ def check_derivatives(f,x,h=1e-6,rtol=1e-2,atol=1e-3):
             except NotImplementedError:
                 pass
             if not (has_derivative or has_jvp):
-                print("check_derivative: function",f,"has no derivative or jvp function defined")
+                print("check_derivative: function",f,"has no derivative or jvp function defined for arg",i)
 
             try:
                 H = f.gen_derivative([i,i],*x)
@@ -1312,7 +1338,7 @@ def check_derivatives(f,x,h=1e-6,rtol=1e-2,atol=1e-3):
                 if not np.allclose(H_fd,H,rtol,atol):
                     print("check_derivative",f,"failed with args",x,"@ argument",i)
                     print("Finite differences:",H_fd)
-                    print("Hessian:",H)
+                    print("gen_derivatives Hessian:",H)
                     raise AssertionError("gen_derivative of %s w.r.t. %s has an error of size %f"%(str(f),f.argname(i),np.linalg.norm(H-H_fd)))
             except NotImplementedError:
                 has_gen_derivative = False
@@ -1703,6 +1729,9 @@ class _ADSum(ADFunctionInterface):
 class _ADPow(ADFunctionInterface):
     def __str__(self):
         return 'pow'
+
+    def argname(self,arg):
+        return ['base','exp'][arg]
 
     def n_args(self):
         return 2
@@ -2183,6 +2212,120 @@ class _ADMaximum(ADFunctionInterface):
         return 0
 
 
+class _ADCond(ADFunctionInterface):
+    def __str__(self):
+        return 'cond'
+
+    def argname(self,arg):
+        return ['pred','posval','negval'][arg]
+
+    def n_args(self):
+        return 3
+
+    def n_in(self,arg):
+        return -1
+
+    def n_out(self):
+        return -1
+
+    def eval(self,pred,trueval,falseval):
+        if _scalar(pred):
+            if pred > 0:
+                return trueval
+            return falseval
+        else:
+            assert len(pred)==len(trueval)
+            assert len(pred)==len(falseval)
+            res = falseval.copy()
+            res[pred>0]=trueval[pred>0]
+            return res
+
+    def jvp(self,arg,darg,pred,trueval,falseval):
+        if arg==0:
+            return 0
+        if arg==1:
+            if _scalar(pred):
+                if pred > 0:
+                    return darg
+                return 0
+            else:
+                res = np.zeros(trueval.shape)
+                res[pred > 0] = darg[pred > 0]
+        else:
+            if _scalar(pred):
+                if pred > 0:
+                    return 0
+                return darg
+            else:
+                res = darg.copy()
+                res[pred > 0] = 0
+                return res
+
+
+class _ADCond3(ADFunctionInterface):
+    def __str__(self):
+        return 'cond3'
+
+    def argname(self,arg):
+        return ['pred','posval','zeroval','negval'][arg]
+
+    def n_args(self):
+        return 4
+
+    def n_in(self,arg):
+        return -1
+
+    def n_out(self):
+        return -1
+
+    def eval(self,pred,trueval,zeroval,falseval):
+        if _scalar(pred):
+            if pred > 0:
+                return trueval
+            elif pred == 0:
+                return zeroval
+            else:
+                return falseval
+        else:
+            assert len(pred)==len(trueval)
+            assert len(pred)==len(zeroval)
+            assert len(pred)==len(falseval)
+            res = falseval.copy()
+            res[pred>0]=trueval[pred>0]
+            res[pred==0]=zeroval[pred==0]
+            return res
+
+    def jvp(self,arg,darg,pred,trueval,zeroval,falseval):
+        if arg==0:
+            return 0
+        if arg==1:
+            if _scalar(pred):
+                if pred > 0:
+                    return darg
+                return 0
+            else:
+                res = np.zeros(trueval.shape)
+                res[pred > 0] = darg[pred > 0]
+        elif arg==2:
+            if _scalar(pred):
+                if pred == 0:
+                    return darg
+                return 0
+            else:
+                res = np.zeros(trueval.shape)
+                res[pred == 0] = darg[pred == 0]
+        else:
+            if _scalar(pred):
+                if pred >= 0:
+                    return 0
+                return darg
+            else:
+                res = darg.copy()
+                res[pred >= 0] = 0
+                return res
+
+
+
 add = _ADAdd()
 """Autodiff'ed function comparable to the addition operator +. Applied 
 automatically when the + operator is called on an ADTerminal or an
@@ -2243,4 +2386,19 @@ maximum = _ADMaximum()
 """Autodiff'ed function comparable to np.maximum. It acts like ndarray.max if
 only one item is provided, and otherwise it acts like np.maximum. If more than
 2 items are provided, they are applied elementwise and sequentially.
+"""
+
+cond = _ADCond()
+"""Autodiff'ed function that performs a conditional (pred,trueval,falseval).
+It returns trueval if pred > 0 and falseval otherwise.   If pred is an array,
+then it must have the same size as trueval and falseval, and performs the
+conditioning element-wise.
+"""
+
+cond3 = _ADCond3()
+"""Autodiff'ed function that performs a triple conditional
+(pred,trueval,zeroval,falseval). It returns trueval if pred > 0, zeroval if
+pred=0, and falseval otherwise.   If pred is an array, then it must have the
+same size as trueval, zeroval, and falseval, and performs the conditioning
+element-wise.
 """
