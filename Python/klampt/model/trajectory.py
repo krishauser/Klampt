@@ -499,11 +499,8 @@ class GeodesicTrajectory(Trajectory):
     def interpolate_state(self,a,b,u,dt):
         return self.geodesic.interpolate(a,b,u)
     def difference_state(self,a,b,u,dt):
-        if u > 0.5:
-            #do this from the b side
-            return vectorops.mul(self.difference_state(b,a,1.0-u,dt),-1.0/dt)
         x = self.interpolate_state(a,b,u,dt)
-        return vectorops.mul(self.geodesic.difference_state(x,b),1.0/(dt*(1.0-u)))
+        return vectorops.mul(vectorops.sub(self.geodesic.difference(b,x),self.geodesic.difference(a,x)),1.0/dt)
     def constructor(self):
         return lambda times,milestones:GeodesicTrajectory(self.geodesic,times,milestones)
     def length(self,metric=None):
@@ -866,6 +863,21 @@ class HermiteTrajectory(Trajectory):
         n = len(res.milestones[0])//2
         return Trajectory(res.times,[m[:n] for m in res.milestones])
 
+    def length(self):
+        """Returns an upper bound on length given by the Bezier property. 
+        Faster than calculating the true length.  To retrieve an approximation
+        of true length, use self.discretize(dt).length().
+        """
+        n = len(milestones[0])//2
+        third = 1.0/3.0
+        def distance(x,y):
+            cp0 = x[:n]
+            cp1 = vectorops.madd(cp0,x[n:],third)
+            cp3 = y[:n]
+            cp2 = vectorops.madd(cp3,y[n:],-third)
+            return third*vectorops.norm(x[n:]) + vectorops.distance(cp1,cp2) + third*vectorops.norm(y[n:])
+        return Trajectory.length(self,distance)
+
     def constructor(self):
         return HermiteTrajectory
 
@@ -1065,6 +1077,20 @@ class GeodesicHermiteTrajectory(Trajectory):
         self._skip_deriv = False
         n = self.geodesic.extrinsicDimension()
         return GeodesicTrajectory(self.geodesic,res.times,[m[:n] for m in res.milestones])
+    def length(self):
+        """Returns an upper bound on length given by the Bezier property. 
+        Faster than calculating the true length.  To retrieve an approximation
+        of true length, use self.discretize(dt).length().
+        """
+        n = self.geodesic.extrinsicDimension()
+        third = 1.0/3.0
+        def distance(x,y):
+            cp0 = x[:n]
+            cp1 = self.geodesic.integrate(cp0,vectorops.mul(x[n:],third))
+            cp3 = y[:n]
+            cp2 = self.geodesic.integrate(cp3,vectorops.mul(y[n:],-third))
+            return self.geodesic.distance(cp0,cp1) + self.geodesic.distance(cp1,cp2) + self.geodesic.distance(cp2,cp3)
+        return Trajectory.length(self,distance)
     def constructor(self):
         return lambda times,milestones:GeodesicHermiteTrajectory(self.geodesic,times,milestones)
     
