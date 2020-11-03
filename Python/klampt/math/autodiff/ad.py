@@ -1024,12 +1024,17 @@ def function(func,name='auto',argspec='auto',outspec=None,argnames=None,
     if argnames is not None:
         if len(argnames) != len(argspec):
             raise ValueError("Invalid number of argument names provided")
+    def run_if_not_none(f,*args):
+        if f is None:
+            raise NotImplementedError()
+        else:
+            return f(*args)
     if hasattr(derivative,'__iter__'):
         derivative_list = derivative
-        derivative = lambda arg,*args:derivative_list[arg](*args)
+        derivative = lambda arg,*args:run_if_not_none(derivative_list[arg],*args)
     if hasattr(jvp,'__iter__'):
         jvp_list = jvp
-        jvp = lambda arg,darg,*args:jvp_list[arg](darg,*args)
+        jvp = lambda arg,darg,*args:run_if_not_none(jvp_list[arg],darg,*args)
     if gen_derivative is None and order is not None:
         def default_gen_deriv(arg,*args):
             if len(arg) > order:
@@ -1057,6 +1062,8 @@ def function(func,name='auto',argspec='auto',outspec=None,argnames=None,
             if len(arg) == 1:
                 return derivative(arg[0],*args)
             if len(arg)-2 < len(gen_derivative_list):
+                if gen_derivative_list[len(arg)-1] is None: 
+                    raise NotImplementedError()
                 return gen_derivative_list[len(arg)-1](*args)
             if order is not None and len(tuple) > order:
                 return 0
@@ -1068,12 +1075,14 @@ def function(func,name='auto',argspec='auto',outspec=None,argnames=None,
     members['n_in'] = lambda self,arg:argspec[arg]
     if outspec is not None:
         members['n_out'] = lambda self:outspec
+    def toarray(res):
+        return res if _scalar(res) else np.asarray(res)
     if derivative is not None:
-        members['derivative'] = lambda self,arg,*args:np.asarray(derivative(arg,*args))
+        members['derivative'] = lambda self,arg,*args:toarray(derivative(arg,*args))
     if jvp is not None:
-        members['jvp'] = lambda self,arg,darg,*args:np.asarray(jvp(arg,darg,*args))
+        members['jvp'] = lambda self,arg,darg,*args:toarray(jvp(arg,darg,*args))
     if gen_derivative is not None:
-        members['gen_derivative'] = lambda self,arg,*args:np.asarray(gen_derivative(arg,*args))
+        members['gen_derivative'] = lambda self,arg,*args:toarray(gen_derivative(arg,*args))
     if argnames is not None:
         members['argname'] = lambda self,arg:argnames[arg]
     TempType = type("_ad_"+name,(ADFunctionInterface,),members)
@@ -1259,6 +1268,8 @@ def check_derivatives(f,x,h=1e-6,rtol=1e-2,atol=1e-3):
                     dv[j] = 1
                     g = f.jvp(i,dv,*x)
                     has_jvp = True
+                    if _scalar(v):
+                        dv = dv[0]
                     g_fd = finite_differences(lambda t:f.eval(*(x[:i]+[v+dv*t]+x[i+1:])),0,h)[:,0]
                     if g is 0:
                         g = np.zeros(g_fd.shape)
@@ -1278,6 +1289,8 @@ def check_derivatives(f,x,h=1e-6,rtol=1e-2,atol=1e-3):
                     dv[j] = np.random.uniform(-0.9,-0.05)
                     g = f.jvp(i,dv,*x)
                     has_jvp = True
+                    if _scalar(v):
+                        dv = dv[0]
                     g_fd = finite_differences(lambda t:f.eval(*(x[:i]+[v+dv*t]+x[i+1:])),0,h)[:,0]
                     if g is 0:
                         g = np.zeros(g_fd.shape)
@@ -1291,9 +1304,12 @@ def check_derivatives(f,x,h=1e-6,rtol=1e-2,atol=1e-3):
                         print("jvp Finite differences:",g_fd)
                         print("jvp:",g)
                         raise AssertionError("Jacobian-vector product of %s w.r.t. %s has an error of size %f"%(str(f),f.argname(i),np.linalg.norm(g-g_fd)))
+
                 dv = np.random.uniform(-1,-1,_size(v))
                 g = f.jvp(i,dv,*x)
                 has_jvp = True
+                if _scalar(v):
+                    dv = dv[0]
                 g_fd = finite_differences(lambda t:f.eval(*(x[:i]+[v+dv*t]+x[i+1:])),0,h)[:,0]
                 if g is 0:
                     g = np.zeros(g_fd.shape)
@@ -1310,7 +1326,7 @@ def check_derivatives(f,x,h=1e-6,rtol=1e-2,atol=1e-3):
             except NotImplementedError:
                 pass
             if not (has_derivative or has_jvp):
-                print("check_derivative: function",f,"has no derivative or jvp function defined")
+                print("check_derivative: function",f,"has no derivative or jvp function defined for arg",i)
 
             try:
                 H = f.gen_derivative([i,i],*x)
@@ -1322,7 +1338,7 @@ def check_derivatives(f,x,h=1e-6,rtol=1e-2,atol=1e-3):
                 if not np.allclose(H_fd,H,rtol,atol):
                     print("check_derivative",f,"failed with args",x,"@ argument",i)
                     print("Finite differences:",H_fd)
-                    print("Hessian:",H)
+                    print("gen_derivatives Hessian:",H)
                     raise AssertionError("gen_derivative of %s w.r.t. %s has an error of size %f"%(str(f),f.argname(i),np.linalg.norm(H-H_fd)))
             except NotImplementedError:
                 has_gen_derivative = False
