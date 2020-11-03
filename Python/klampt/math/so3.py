@@ -262,8 +262,12 @@ def distance(R1,R2):
 
 def error(R1,R2):
     """Returns a 3D "difference vector" that describes how far R1 is from R2.
-    More precisely, this is the Lie derivative, which is the rotation vector
-    representation of R1*R2^T."""
+    More precisely, this is the (local) Lie derivative, which is the rotation 
+    vector representation of R1*R2^T.
+
+    Fun fact: this is related to the derivative of interpolate(R2,R1,u) at u=0
+    by d/du interpolate(R2,R1,0) = mul(error(R1,R2),R2).
+    """
     R = mul(R1,inv(R2))
     return moment(R)
 
@@ -354,6 +358,21 @@ def interpolate(R1,R2,u):
     axis = vectorops.div(m,angle)
     return mul(R1,rotation(axis,angle*u))
 
+def interpolator(R1,R2):
+    """Returns a function of one parameter u that interpolates linearly
+    between the two rotations R1 and R2. After f(u) is constructed, calling
+    f(u) is about 2x faster than calling interpolate(R1,R2,u)."""
+    R = mul(inv(R1),R2)
+    m = moment(R)
+    angle = vectorops.norm(m)
+    if angle==0:
+        axis = [1,0,0]
+    else:
+        axis = vectorops.div(m,angle)
+    def f(u,R1=R1,axis=axis,angle=angle):
+        return mul(R1,rotation(axis,angle*u))
+    return f
+
 def det(R):
     """Returns the determinant of the 3x3 matrix R"""
     m = matrix(R)
@@ -368,7 +387,6 @@ def is_rotation(R,tol=1e-5):
     if det(R) < 0: 
         return False
     return True
-
 
 def sample():
     """Returns a uniformly distributed rotation matrix."""
