@@ -28,6 +28,8 @@
 #include <KrisLibrary/GLdraw/drawMesh.h>
 #include <KrisLibrary/GLdraw/Widget.h>
 #include <KrisLibrary/GLdraw/TransformWidget.h>
+#include <KrisLibrary/GLdraw/BoxWidget.h>
+#include <KrisLibrary/GLdraw/SphereWidget.h>
 #include <KrisLibrary/geometry/ConvexHull3D.h>
 #include <Klampt/View/ObjectPoseWidget.h>
 #include <Klampt/View/RobotPoseWidget.h>
@@ -5672,6 +5674,14 @@ void PointPoser::setAxes(const double R[9])
   tw->T.R.set(R);
 }
 
+void PointPoser::enableAxes(bool x,bool y,bool z)
+{
+  GLDraw::TransformWidget* tw=dynamic_cast<GLDraw::TransformWidget*>(widgets[index].widget.get());
+  tw->enableTranslationAxes[0]=x;
+  tw->enableTranslationAxes[1]=y;
+  tw->enableTranslationAxes[2]=z;
+}
+
 
 TransformPoser::TransformPoser()
   :Widget()
@@ -5783,8 +5793,115 @@ void RobotPoser::clearIKConstraints()
   tw->ikPoser.poseWidgets.clear();
 }
 
+AABBPoser::AABBPoser()
+  :Widget()
+{
+  AABB3D bb;
+  bb.bmin.set(0,0,0);
+  bb.bmax.set(1,1,1);
+  widgets[index].widget = make_shared<GLDraw::BoxWidget>(bb);
+}
 
+void AABBPoser::setFrame(const double R[9],const double t[3])
+{
+  GLDraw::BoxWidget* tw=dynamic_cast<GLDraw::BoxWidget*>(widgets[index].widget.get());
+  tw->T.R.set(R);
+  tw->T.t.set(t);
+  tw->transformWidget.T.R.set(R);
+  tw->transformWidget.T.t = 0.5*(tw->T*(tw->bb.bmin+tw->bb.bmax));
+}
 
+void AABBPoser::set(const double bmin[3],const double bmax[3])
+{
+  GLDraw::BoxWidget* tw=dynamic_cast<GLDraw::BoxWidget*>(widgets[index].widget.get());
+  tw->bb.bmin.set(bmin);
+  tw->bb.bmax.set(bmax);
+}
+
+void AABBPoser::get(double out[3],double out2[3])
+{
+  GLDraw::BoxWidget* tw=dynamic_cast<GLDraw::BoxWidget*>(widgets[index].widget.get());
+  tw->bb.bmin.get(out);
+  tw->bb.bmax.get(out2);
+}
+
+SpherePoser::SpherePoser()
+  :Widget()
+{
+  Sphere3D s;
+  s.center.set(0,0,0);
+  s.radius = 1;
+  widgets[index].widget = make_shared<GLDraw::SphereWidget>(s);
+}
+
+void SpherePoser::set(const double cr[4])
+{
+  GLDraw::SphereWidget* tw=dynamic_cast<GLDraw::SphereWidget*>(widgets[index].widget.get());
+  tw->transformWidget.T.t.set(cr);
+  tw->radius = cr[3];
+}
+
+void SpherePoser::get(double out[4])
+{
+  GLDraw::SphereWidget* tw=dynamic_cast<GLDraw::SphereWidget*>(widgets[index].widget.get());
+  tw->transformWidget.T.t.get(out);
+  out[3] = tw->radius;
+}
+
+BoxPoser::BoxPoser()
+  :Widget()
+{
+  Box3D bb;
+  bb.origin.setZero();
+  bb.xbasis.set(1,0,0);
+  bb.ybasis.set(0,1,0);
+  bb.zbasis.set(0,0,1);
+  bb.dims.set(1,1,1);
+  widgets[index].widget = make_shared<GLDraw::BoxWidget>(bb);
+}
+
+void BoxPoser::set(const double R[9],const double t[3],const double dims[3])
+{
+  GLDraw::BoxWidget* tw=dynamic_cast<GLDraw::BoxWidget*>(widgets[index].widget.get());
+  tw->T.R.set(R);
+  tw->T.t.set(t);
+  tw->bb.bmin.setZero();
+  tw->bb.bmax.set(dims);
+  tw->transformWidget.T.R.set(R);
+  tw->transformWidget.T.t = tw->T*(0.5*(tw->bb.bmin+tw->bb.bmax));
+}
+
+void BoxPoser::setTransform(const double R[9],const double t[3])
+{
+  GLDraw::BoxWidget* tw=dynamic_cast<GLDraw::BoxWidget*>(widgets[index].widget.get());
+  tw->T.R.set(R);
+  tw->T.t.set(t);
+  tw->transformWidget.T.R.set(R);
+  tw->transformWidget.T.t = tw->T*(0.5*(tw->bb.bmin+tw->bb.bmax));
+}
+
+void BoxPoser::setDims(const double dims[3])
+{
+  GLDraw::BoxWidget* tw=dynamic_cast<GLDraw::BoxWidget*>(widgets[index].widget.get());
+  tw->bb.bmin.setZero();
+  tw->bb.bmax = tw->bb.bmin + Vector3(dims);
+  tw->transformWidget.T.t = tw->T*(0.5*(tw->bb.bmin+tw->bb.bmax));
+}
+
+void BoxPoser::getTransform(double out[9],double out2[3])
+{
+  GLDraw::BoxWidget* tw=dynamic_cast<GLDraw::BoxWidget*>(widgets[index].widget.get());
+  tw->transformWidget.T.R.get(out);
+  Vector3 temp = tw->transformWidget.T * tw->bb.bmin;
+  temp.get(out2);
+}
+
+void BoxPoser::getDims(double out[3])
+{
+  GLDraw::BoxWidget* tw=dynamic_cast<GLDraw::BoxWidget*>(widgets[index].widget.get());
+  Vector3 temp = tw->bb.bmax - tw->bb.bmin;
+  temp.get(out);
+}
 
 
 

@@ -12,11 +12,13 @@ the ``resource`` module.  To use these, call::
 
 from . import glcommon
 from . import glinit
+from . import gldraw
 from . import visualization
 import time
 from ..math import vectorops,so3,se3
-from ..robotsim import WidgetSet,RobotPoser,ObjectPoser,TransformPoser,PointPoser,WorldModel,RobotModelLink,RigidObjectModel,IKObjective
+from ..robotsim import WidgetSet,RobotPoser,ObjectPoser,TransformPoser,PointPoser,AABBPoser,BoxPoser,SpherePoser,WorldModel,RobotModelLink,RigidObjectModel,TerrainModel,IKObjective,Appearance,Geometry3D
 from ..model.subrobot import SubRobotModel
+from ..model import trajectory
 from ..model import collide
 from OpenGL.GL import *
 
@@ -50,20 +52,19 @@ class VisualEditorBase(glcommon.GLWidgetPlugin):
     def addDialogItems(self,parent,ui='qt'):
         return
     def display_screen(self):
+        """
+        #for GLUT?
         glDisable(GL_LIGHTING)
         glColor3f(0,0,0)
         h = 30
-        """
-        if self.instructions() != None:
-            glRasterPos(20,h)
-            gldraw.glutBitmapString(GLUT_BITMAP_HELVETICA_12,"Instructions: "+self.instructions())
+        if self.instructions() is not None:
+            self.window.draw_text((20,h),"Instructions: "+self.instructions())
             h += 20
-        if self.description != None:
-            glRasterPos(20,h)
-            gldraw.glutBitmapString(GLUT_BITMAP_HELVETICA_12,"Description: "+self.description)
+        if self.description is not None:
+            self.window.draw_text((20,h),"Description: "+self.description)
             h += 20
         glRasterPos(20,h)
-        gldraw.glutBitmapString(GLUT_BITMAP_HELVETICA_12,"Press 'x' to exit without saving, 'q' to save+exit")
+        self.window.draw_text((20,h),"Press 'x' to exit without saving, 'q' to save+exit")
         """
         return True
 
@@ -243,14 +244,21 @@ class ConfigsEditor(VisualEditorBase):
         self.indexSpinBox.setValue(self.editingIndex)
         self.indexChanged(self.editingIndex)
 
+
 class TrajectoryEditor(VisualEditorBase):
     def __init__(self,name,value,description,world,robot=None):
         VisualEditorBase.__init__(self,name,value,description,world)
         if robot is None:
-            robot = world.robot(0)
-        if len(value.milestones) > 0:
-            robot.setConfig(value.milestones[0])
+            if isinstance(value,trajectory.RobotTrajectory):
+                robot = value.robot
+            elif isinstance(value,trajectory.SE3Trajectory):
+                pass
+            elif world.numRobots() > 0 and len(value.milestones) > 0 and len(value.milestones[0]) == world.robot(0).numLinks():
+                robot = world.robot(0)
         self.robot = robot
+        self.attachedObjects = []
+        self.attachedRelativePoses = []
+        self.attachedAppearances = []
         self.editingIndex = len(value.milestones)-1
         self.durations = []
         if len(value.times) > 0:
@@ -262,18 +270,76 @@ class TrajectoryEditor(VisualEditorBase):
         self.animating = False
         self.animSelectorValue = 0
         self.lastAnimTrajectoryTime = None
-        self.robotposer = RobotPoser(robot)
-        self.addWidget(self.robotposer)
+        if robot is not None:
+            if len(value.milestones) > 0:
+                qold = robot.getConfig()
+                robot.setConfig(value.milestones[self.editingIndex])
+            self.milestoneposer = RobotPoser(robot)
+            if len(value.milestones) > 0:
+                robot.setConfig(qold)
+        elif isinstance(value,trajectory.SE3Trajectory):
+            self.milestoneposer = TransformPoser()
+            if len(value.milestones) > 0:
+                self.milestone_to_poser(value.milestones[self.editingIndex])
+        elif len(value.milestones) > 0 and len(value.milestones[0])<=3:
+            self.ndims = len(value.milestones[0])
+            self.milestoneposer = PointPoser()
+            if self.ndims == 2:
+                self.milestoneposer.enableAxes(True,True,False)
+            elif self.ndims == 1:
+                self.milestoneposer.enableAxes(True,False,False)
+            else:
+                assert len(value.milestones[0])>0,"Need to have dimension >= 1"
+            self.milestone_to_poser(value.milestones[self.editingIndex])
+        else:
+            raise NotImplementedError("Can't edit trajectories except for robot trajectories, R^2, R^3, or SE(3) trajectories yet")
+        self.addWidget(self.milestoneposer)
         self.updateAnimTrajectory()
     
+    def attach(self,object,relativePose=None):
+        """For an SE3 trajectory, shows the given object relative to the edited transform trajectory"""
+        assert isinstance(object,(Geometry3D,RigidObjectModel,RobotModelLink,TerrainModel))
+        assert self.robot is None,"Can't attach items to an editor for a RobotTrajectory"
+        self.attachedObjects.append(object)
+        if relativePose is None:
+            self.attachedRelativePoses.append(se3.identity())
+        else:
+            self.attachedRelativePoses.append(relativePose)
+        if hasattr(object,'appearance'):
+            self.attachedAppearances.append(object.appearance())
+        else:
+            self.attachedAppearances.append(Appearance())
+        
+    def milestone_to_poser(self,m):
+        if self.robot is not None:
+            self.milestoneposer.set(m)
+        elif isinstance(self.value,trajectory.SE3Trajectory):
+            self.milestoneposer.set(*self.value.to_se3(m))
+        else:
+            assert len(m) == self.ndims
+            self.milestoneposer.set(m + [0]*(3-self.ndims))
+
+    def poser_to_milestone(self):
+        q = self.milestoneposer.get()
+        if self.robot is not None:
+            return q
+        elif isinstance(self.value,trajectory.SE3Trajectory):
+            return q[0] + q[1]
+        else:
+            return q[:self.ndims]
+
     def instructions(self):
-        return 'Right-click and drag on the robot links to pose the robot.\nKeyboard i: insert, d: delete, < to select previous, > to select next'
+        if self.robot is not None:
+            return 'Right-click and drag on the robot links to pose keyframes.\nKeyboard i: insert, d: delete, < to select previous, > to select next'
+        else:
+            return 'Right-click and drag on the poser to set keyframes.\nKeyboard i: insert, d: delete, < to select previous, > to select next'
 
     def addDialogItems(self,parent,ui='qt'):
         vlayout = QVBoxLayout(parent)
         #adding and editing keyframes
         self.indexSpinBox = QSpinBox()
         self.indexSpinBox.setRange(0,len(self.durations)-1)
+        self.indexSpinBox.setValue(self.editingIndex)
         self.durationSpinBox = QDoubleSpinBox()
         self.durationSpinBox.setRange(0,10.0)
         self.durationSpinBox.setSingleStep(0.01)
@@ -326,11 +392,12 @@ class TrajectoryEditor(VisualEditorBase):
         label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         layout.addWidget(label)
         layout.addWidget(self.animSelector)
+        self.indexChanged(self.editingIndex)
 
     def insert(self):
         if self.editingIndex < 0:
             self.value.times.append(0.0)
-            self.value.milestones.append(self.robotposer.get())
+            self.value.milestones.append(self.poser_to_milestone())
             self.editingIndex = len(self.durations)-1
         else:
             newdur = 1.0
@@ -346,7 +413,7 @@ class TrajectoryEditor(VisualEditorBase):
                 #subdivide time between milesones
                 newdur = self.value.times[self.editingIndex]-self.value.times[self.editingIndex-1]
             self.durations.insert(self.editingIndex+1,newdur)
-            self.value.milestones.insert(self.editingIndex+1,self.robotposer.get())
+            self.value.milestones.insert(self.editingIndex+1,self.poser_to_milestone())
             self.onDurationsChanged()
             self.editingIndex += 1
         if hasattr(self,'indexSpinBox'):
@@ -361,7 +428,7 @@ class TrajectoryEditor(VisualEditorBase):
             if self.editingIndex >= len(self.durations):
                 self.editingIndex = len(self.durations)-1
             if self.editingIndex >= 0:
-                self.robotposer.set(self.value.milestones[self.editingIndex])
+                self.milestone_to_poser(self.value.milestones[self.editingIndex])
             self.onDurationsChanged()
             print("Now has",len(self.durations),"configs, editing index",self.editingIndex)
         if hasattr(self,'indexSpinBox'):
@@ -375,7 +442,7 @@ class TrajectoryEditor(VisualEditorBase):
         self.editingIndex = index
         if index >= 0 and index < len(self.durations):
             self.durationSpinBox.setValue(self.durations[self.editingIndex])
-            self.robotposer.set(self.value.milestones[self.editingIndex]) 
+            self.milestone_to_poser(self.value.milestones[self.editingIndex]) 
             if not self.animating:
                 self.animTrajectoryTime = self.value.times[index]
                 self.timeDriver.setValue(int(1000*(self.animTrajectoryTime - self.value.times[0])/self.value.duration()))
@@ -403,7 +470,8 @@ class TrajectoryEditor(VisualEditorBase):
         if value:
             self.idlesleep(0)
         else:
-            self.idlesleep(float('inf'))
+            #self.idlesleep(float('inf'))
+            self.idlesleep(0.1)
 
     def onDurationsChanged(self):
         """Update the trajectory times"""
@@ -421,7 +489,10 @@ class TrajectoryEditor(VisualEditorBase):
     def updateAnimTrajectory(self):
         from ..model import trajectory
         if self.animSelectorValue == 1:
-            traj = trajectory.HermiteTrajectory()
+            if isinstance(self.value,trajectory.SE3Trajectory):
+                traj = trajectory.SE3HermiteTrajectory()
+            else:
+                traj = trajectory.HermiteTrajectory()
             traj.makeSpline(self.value)
             self.animTrajectory = traj
         else:
@@ -429,8 +500,8 @@ class TrajectoryEditor(VisualEditorBase):
             self.animTrajectory = self.value
 
     def mousefunc(self,button,state,x,y):
-        if self.editingIndex >= 0 and self.robotposer.hasFocus():
-            self.value.milestones[self.editingIndex] = self.robotposer.get()
+        if self.editingIndex >= 0 and self.milestoneposer.hasFocus():
+            self.value.milestones[self.editingIndex] = self.poser_to_milestone()
         return VisualEditorBase.mousefunc(self,button,state,x,y)
     
     def keyboardfunc(self,c,x,y):
@@ -459,26 +530,60 @@ class TrajectoryEditor(VisualEditorBase):
     def display(self):
         #Override display handler since the widget draws the robot
         #the next few lines draw everything but the robot
-        if self.world != None:
+        if self.world is not None:
             for i in range(self.world.numTerrains()):
                 self.world.terrain(i).drawGL()
             for i in range(self.world.numRigidObjects()):
                 self.world.rigidObject(i).drawGL()
             for i in range(self.world.numRobots()):
-                if i != self.robot.index:
+                if self.robot is None or i != self.robot.index:
                     self.world.robot(i).drawGL()
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
+        if self.robot is None:
+            glDisable(GL_LIGHTING)
 
         #draw animation, if available
         if self.animTrajectoryTime is not None:
-            for j in range(self.robot.numLinks()):
-                self.robot.link(j).appearance().setColor(1.0,1.0,0,0.5)
-            q = self.animTrajectory.eval(self.animTrajectoryTime,'loop')
-            self.robot.setConfig(q)
-            self.robot.drawGL()
-            for j in range(self.robot.numLinks()):
-                self.robot.link(j).appearance().setColor(0.5,0.5,0.5,1)
+            if self.robot is not None:
+                for j in range(self.robot.numLinks()):
+                    self.robot.link(j).appearance().setColor(1.0,1.0,0,0.5)
+                q = self.animTrajectory.eval(self.animTrajectoryTime,'loop')
+                self.robot.setConfig(q)
+                self.robot.drawGL()
+                for j in range(self.robot.numLinks()):
+                    self.robot.link(j).appearance().setColor(0.5,0.5,0.5,1)
+            elif isinstance(self.value,trajectory.SE3Trajectory):
+                T = self.animTrajectory.eval(self.animTrajectoryTime,'loop')
+                glEnable(GL_LIGHTING)
+                for (o,a,Trel) in zip(self.attachedObjects,self.attachedAppearances,self.attachedRelativePoses):
+                    if hasattr(o,'setCurrentTransform'):
+                        o.setCurrentTransform(*se3.mul(T,Trel))
+                        a.drawWorldGL(o)
+                    else:
+                        o.setTransform(*se3.mul(T,Trel))
+                        a.drawWorldGL(o.geometry())
+                length = 0.1
+                width = 0.01
+                fancy = True
+                gldraw.xform_widget(T,length,width,fancy)
+                glDisable(GL_LIGHTING)
+            else:
+                x = self.animTrajectory.eval(self.animTrajectoryTime,'loop')
+                pt = x + [0]*(3-self.ndims)
+                if len(self.attachedObjects) > 0:
+                    glEnable(GL_LIGHTING)
+                    for (o,a,Trel) in zip(self.attachedObjects,self.attachedAppearances,self.attachedRelativePoses):
+                        if hasattr(o,'setCurrentTransform'):
+                            o.setCurrentTransform(Trel[0],vectorops.add(pt,Trel[1]))
+                            a.drawWorldGL(o)
+                        else:
+                            o.setTransform(Trel[0],vectorops.add(pt,Trel[1]))
+                            a.drawWorldGL(o.geometry())
+                    glDisable(GL_LIGHTING)
+                glPointSize(7.0)
+                glColor3f(1,0.5,0)
+                gldraw.point(pt)
         
         #draw most opaque first
         order = []
@@ -493,17 +598,67 @@ class TrajectoryEditor(VisualEditorBase):
         for i in order:
             #draw transparent
             opacity = pow(0.5,abs(i-self.editingIndex))
-            for j in range(self.robot.numLinks()):
-                self.robot.link(j).appearance().setColor(0.5,0.5,0.5,opacity)
+            if opacity < 5e-3:
+                continue
+            if self.robot is not None:
+                for j in range(self.robot.numLinks()):
+                    self.robot.link(j).appearance().setColor(0.5,0.5,0.5,opacity)
             if i == self.editingIndex:
                 #this line will draw the robot at the current editing config
                 self.klamptwidgetmaster.drawGL(self.viewport())
+                if self.robot is None:
+                    if isinstance(self.value,trajectory.SE3Trajectory):
+                        T = self.value.to_se3(self.value.milestones[i])
+                        for (o,a,Trel) in zip(self.attachedObjects,self.attachedAppearances,self.attachedRelativePoses):
+                            if hasattr(o,'setCurrentTransform'):
+                                o.setCurrentTransform(*se3.mul(T,Trel))
+                                a.drawWorldGL(o)
+                            else:
+                                o.setTransform(*se3.mul(T,Trel))
+                                if self.world is None or self.world.index != o.world:
+                                    a.drawWorldGL(o.geometry())
+                    else:
+                        glEnable(GL_LIGHTING)
+                        for (o,a,Trel) in zip(self.attachedObjects,self.attachedAppearances,self.attachedRelativePoses):
+                            if hasattr(o,'setCurrentTransform'):
+                                o.setCurrentTransform(Trel[0],vectorops.add(pt,Trel[1]))
+                                a.drawWorldGL(o)
+                            else:
+                                o.setTransform(Trel[0],vectorops.add(pt,Trel[1]))
+                                if self.world is None or self.world.index != o.world:
+                                    a.drawWorldGL(o.geometry())
+                    glDisable(GL_LIGHTING)
             else:
-                self.robot.setConfig(self.value.milestones[i])
-                self.robot.drawGL()
-        for j in range(self.robot.numLinks()):
-            self.robot.link(j).appearance().setColor(0.5,0.5,0.5,1)
+                if self.robot is not None:
+                    self.robot.setConfig(self.value.milestones[i])
+                    self.robot.drawGL()
+                elif isinstance(self.value,trajectory.SE3Trajectory):
+                    T = self.value.to_se3(self.value.milestones[i])
+                    length = 0.1*opacity
+                    width = 0.01*opacity
+                    gldraw.xform_widget(T,length,width,False)
+                else:
+                    pt = self.value.milestones[i] + [0]*(3-self.ndims)
+                    glPointSize(5.0)
+                    glColor4f(1,0.5,0,opacity)
+                    gldraw.point(pt)
+
+        if self.robot is not None:
+            for j in range(self.robot.numLinks()):
+                self.robot.link(j).appearance().setColor(0.5,0.5,0.5,1)
+        elif len(self.value.milestones) > 1:
+            glColor3f(1,1,0)
+            glBegin(GL_LINE_STRIP)
+            for i in range(0,len(self.value.milestones)):
+                a = self.value.milestones[i]
+                if isinstance(self.value,trajectory.SE3Trajectory):
+                    glVertex3fv(a[9:12])
+                else:
+                    glVertex3fv(a + [0]*(3-self.ndims))
+            glEnd()
+
         glDisable(GL_BLEND)
+        glEnable(GL_LIGHTING)
 
     def idle(self):
         import time
@@ -568,7 +723,7 @@ class SelectionEditor(VisualEditorBase):
         self.refresh()
 
     def selectAll(self):
-        if self.robot == None:
+        if self.robot is None:
             #select all ids in the world
             self.value = list(range(self.world.numIDs()))
         else:
@@ -645,7 +800,7 @@ class SelectionEditor(VisualEditorBase):
 
     def mousefunc(self,button,state,x,y):
         if button==2 and state==0:
-            if self.robot == None:
+            if self.robot is None:
                 self.click_world(x,y)
             else:
                 self.click_robot(x,y)
@@ -706,10 +861,11 @@ class SelectionEditor(VisualEditorBase):
         for i in self.value:
             self.selectionList.setCurrentItem(self.selectionList.item(i),QItemSelectionModel.Select)
 
+
 class PointEditor(VisualEditorBase):
     def __init__(self,name,value,description,world,frame=None):
         VisualEditorBase.__init__(self,name,value,description,world)
-        self.frame = se3.identity() if frame==None else frame
+        self.frame = se3.identity() if frame is None else frame
         self.pointposer = PointPoser()
         self.pointposer.set(se3.apply(self.frame,value))
         self.pointposer.setAxes(self.frame[0])
@@ -731,7 +887,7 @@ class PointEditor(VisualEditorBase):
 class RigidTransformEditor(VisualEditorBase):
     def __init__(self,name,value,description,world,frame=None):
         VisualEditorBase.__init__(self,name,value,description,world)
-        self.frame = se3.identity() if frame==None else frame
+        self.frame = se3.identity() if frame is None else frame
         self.xformposer = TransformPoser()
         self.xformposer.set(*se3.mul(self.frame,value))
         self.xformposer.enableRotation(True)
@@ -739,6 +895,7 @@ class RigidTransformEditor(VisualEditorBase):
         self.addWidget(self.xformposer)
         self.attachedObjects = []
         self.attachedRelativePoses = []
+        self.attachedAppearances = []
         self.rotationEnabled = True
         self.translationEnabled = True
 
@@ -750,10 +907,20 @@ class RigidTransformEditor(VisualEditorBase):
         self.rotationEnabled = False
         self.xformposer.enableRotation(False)
 
-    def attach(self,object):
-        assert hasattr(object,'setTransform'),"Can only attach objects with setTransform and getTransform methods"
-        assert hasattr(object,'getTransform'),"Can only attach objects with setTransform and getTransform methods"
+    def attach(self,object,relativePose=None):
+        assert hasattr(object,'setTransform') or hasattr(object,'setCurrentTransform'),"Can only attach objects with setTransform and getTransform methods"
+        assert hasattr(object,'getTransform') or hasattr(object,'getCurrentTransform'),"Can only attach objects with setTransform and getTransform methods"
         self.attachedObjects.append(object)
+        self.attachedRelativePoses.append(se3.identity() if relativePose is None else relativePose)
+        if self.world is not None:
+            #check to see if the object is drawn in the world
+            if hasattr(object,'world') and object.world == self.world.index:
+                self.attachedAppearances.append(None)
+                return
+        if hasattr(object,'appearance'):
+            self.attachedAppearances.append(object.appearance())
+        else:
+            self.attachedAppearances.append(Appearance())
     
     def instructions(self):
         if self.rotationEnabled and self.translationEnabled:
@@ -766,9 +933,6 @@ class RigidTransformEditor(VisualEditorBase):
     def mousefunc(self,button,state,x,y):
         if VisualEditorBase.mousefunc(self,button,state,x,y):
             self.value = se3.mul(se3.inv(self.frame),self.xformposer.get())
-            if len(self.attachedRelativePoses) < len(self.attachedObjects):
-                for o in self.attachedObjects[len(self.attachedRelativePoses):]:
-                    self.attachedRelativePoses.append(se3.mul(se3.inv(self.xformposer.get()),o.getTransform()))
             return True
         return False
 
@@ -776,15 +940,133 @@ class RigidTransformEditor(VisualEditorBase):
         if self.xformposer.hasFocus():
             self.value = se3.mul(se3.inv(self.frame),self.xformposer.get())
             for o,p in zip(self.attachedObjects,self.attachedRelativePoses):
-                o.setTransform(*se3.mul(self.xformposer.get(),p))
+                if hasattr(o,'setCurrentTransform'):  #Geometry3D
+                    o.setCurrentTransform(*se3.mul(self.xformposer.get(),p))
+                else:
+                    o.setTransform(*se3.mul(self.xformposer.get(),p))
         return VisualEditorBase.motionfunc(self,x,y,dx,dy)
 
     def display(self):
         VisualEditorBase.display(self)
+        for (o,a,Trel) in zip(self.attachedObjects,self.attachedAppearances,self.attachedRelativePoses):
+            if a is None: continue
+            if hasattr(o,'geometry'):
+                a.drawWorldGL(o.geometry())
+            else:
+                a.drawWorldGL(o)
         return True
 
     def updateGuiFromValue(self):
         self.xformposer.set(*se3.mul(self.frame,self.value))
+        self.refresh()
+
+
+class AABBEditor(VisualEditorBase):
+    def __init__(self,name,value,description,world,frame=None):
+        VisualEditorBase.__init__(self,name,value,description,world)
+        self.aabbposer = AABBPoser()
+        self.aabbposer.set(value[0],value[1])
+        if frame is not None:
+            self.aabbposer.setFrame(frame[0],frame[1])
+        self.addWidget(self.aabbposer)
+   
+    def instructions(self):
+        return 'Right-click and drag on the widget to set the box'
+
+    def mousefunc(self,button,state,x,y):
+        if self.aabbposer.hasFocus():
+            self.value = self.aabbposer.get()
+        return VisualEditorBase.mousefunc(self,button,state,x,y)
+
+    def updateGuiFromValue(self):
+        self.aabbposer.set(self.value[0],self.value[1])
+        self.refresh()
+
+
+class SphereEditor(VisualEditorBase):
+    def __init__(self,name,value,description,world,frame=None):
+        VisualEditorBase.__init__(self,name,value,description,world)
+        self.frame = se3.identity() if frame is None else frame
+        self.sphereposer = SpherePoser()
+        self.sphereposer.set(se3.apply(frame,value[0])+[value[1]])
+        self.addWidget(self.sphereposer)
+   
+    def instructions(self):
+        return 'Right-click and drag on the widget to set the sphere'
+
+    def mousefunc(self,button,state,x,y):
+        if self.sphereposer.hasFocus():
+            cr = self.sphereposer.get()
+            self.value = (se3.apply(se3.inv(self.frame),cr[:3]),cr[3])
+        return VisualEditorBase.mousefunc(self,button,state,x,y)
+
+    def updateGuiFromValue(self):
+        self.sphereposer.set(se3.apply(self.frame,self.value[0])+[self.value[1]])
+        self.refresh()
+
+
+class GeometricPrimitiveEditor(VisualEditorBase):
+    def __init__(self,name,value,description,world,frame=None):
+        VisualEditorBase.__init__(self,name,value,description,world)
+        self.frame = se3.identity() if frame is None else frame
+        if value.type == 'Point':
+            self.poser = PointPoser()
+        elif value.type == 'Sphere':
+            self.poser = SpherePoser()
+        elif value.type == 'AABB':
+            self.poser = AABBPoser()
+        elif value.type == 'Box':
+            self.poser = BoxPoser()
+        else:
+            raise NotImplementedError("Can't edit GeometricPrimitive of type "+value.type+" yet")
+        self.updateGuiFromValue()
+        self.addWidget(self.poser)
+
+    def instructions(self):
+        return 'Right-click and drag on the widget to edit the primitive'
+
+    def mousefunc(self,button,state,x,y):
+        if self.poser.hasFocus():
+            if self.value.type == 'Point':
+                p = self.poser.get()
+                self.value.setPoint(se3.apply(se3.inv(self.frame),p))
+            elif self.value.type == 'Sphere':
+                cr = self.poser.get()
+                self.value.setSphere(se3.apply(se3.inv(self.frame),cr[:3]),cr[3])
+            elif self.value.type == 'AABB':
+                bmin,bmax = self.poser.get()
+                self.value.setAABB(bmin,bmax)
+            elif self.value.type == 'Box':
+                Tw = self.poser.getTransform()
+                Rl,tl = se3.mul(se3.inv(self.frame),Tw)
+                dims = self.poser.getDims()
+                self.value.setBox(tl,Rl,dims)
+            else:
+                raise NotImplementedError("Can't edit GeometricPrimitive of type "+value.type+" yet")
+        return VisualEditorBase.mousefunc(self,button,state,x,y)
+
+    def updateGuiFromValue(self):
+        if self.value.type == 'Point':
+            c = self.value.properties[0:3]
+            self.poser.set(se3.apply(self.frame,c))
+            self.poser.setAxes(self.frame[0])
+        elif self.value.type == 'Sphere':
+            c = self.value.properties[0:3]
+            r = self.value.properties[3]
+            self.poser.set(se3.apply(self.frame,c) + [r])
+        elif self.value.type == 'AABB':
+            bmin = self.value.properties[0:3]
+            bmax = self.value.properties[3:6]
+            self.poser.set(bmin,bmax)
+            self.poser.setFrame(self.frame[0],self.frame[1])
+        elif self.value.type == 'Box':
+            t = self.value.properties[0:3]
+            R = self.value.properties[3:12]
+            dims = self.value.properties[12:15]
+            Rw,tw = se3.mul(self.frame,(R,t))
+            self.poser.set(Rw,tw,dims)
+        else:
+            raise NotImplementedError("Can't edit GeometricPrimitive of type "+value.type+" yet")
         self.refresh()
 
 
@@ -939,7 +1221,7 @@ if _has_qt:
         def setEditor(self,editorObject):
             self.editorObject = editorObject
             self.setWindowTitle("Editing "+editorObject.name)
-            if editorObject.description==None:
+            if editorObject.description is None:
                 self.description.setText("")
             else:
                 self.description.setText(editorObject.description)
@@ -1018,7 +1300,7 @@ if _has_qt:
         global _vis_id, _my_dialog_res
 
         old_vis_window = visualization.getWindow()
-        if _vis_id == None:
+        if _vis_id is None:
             _vis_id = visualization.createWindow("Resource Editor")
         else:
             visualization.setWindow(_vis_id)

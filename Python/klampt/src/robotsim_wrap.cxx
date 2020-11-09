@@ -3009,86 +3009,89 @@ SWIG_Python_NonDynamicSetAttr(PyObject *obj, PyObject *name, PyObject *value) {
 
 /* -------- TYPES TABLE (BEGIN) -------- */
 
-#define SWIGTYPE_p_Appearance swig_types[0]
-#define SWIGTYPE_p_ContactParameters swig_types[1]
-#define SWIGTYPE_p_ContactQueryResult swig_types[2]
-#define SWIGTYPE_p_ControlledRobotSimulator swig_types[3]
-#define SWIGTYPE_p_ConvexHull swig_types[4]
-#define SWIGTYPE_p_DistanceQueryResult swig_types[5]
-#define SWIGTYPE_p_DistanceQuerySettings swig_types[6]
-#define SWIGTYPE_p_GeneralizedIKObjective swig_types[7]
-#define SWIGTYPE_p_GeneralizedIKSolver swig_types[8]
-#define SWIGTYPE_p_GeometricPrimitive swig_types[9]
-#define SWIGTYPE_p_Geometry3D swig_types[10]
-#define SWIGTYPE_p_IKGoal swig_types[11]
-#define SWIGTYPE_p_IKObjective swig_types[12]
-#define SWIGTYPE_p_IKSolver swig_types[13]
-#define SWIGTYPE_p_Mass swig_types[14]
-#define SWIGTYPE_p_ODEGeometry swig_types[15]
-#define SWIGTYPE_p_ObjectPoser swig_types[16]
-#define SWIGTYPE_p_PointCloud swig_types[17]
-#define SWIGTYPE_p_PointPoser swig_types[18]
-#define SWIGTYPE_p_RigidObject swig_types[19]
-#define SWIGTYPE_p_RigidObjectModel swig_types[20]
-#define SWIGTYPE_p_Robot swig_types[21]
-#define SWIGTYPE_p_RobotModel swig_types[22]
-#define SWIGTYPE_p_RobotModelDriver swig_types[23]
-#define SWIGTYPE_p_RobotModelLink swig_types[24]
-#define SWIGTYPE_p_RobotPoser swig_types[25]
-#define SWIGTYPE_p_SensorBase swig_types[26]
-#define SWIGTYPE_p_SimBody swig_types[27]
-#define SWIGTYPE_p_SimJoint swig_types[28]
-#define SWIGTYPE_p_SimRobotController swig_types[29]
-#define SWIGTYPE_p_SimRobotSensor swig_types[30]
-#define SWIGTYPE_p_Simulator swig_types[31]
-#define SWIGTYPE_p_Terrain swig_types[32]
-#define SWIGTYPE_p_TerrainModel swig_types[33]
-#define SWIGTYPE_p_TransformPoser swig_types[34]
-#define SWIGTYPE_p_TriangleMesh swig_types[35]
-#define SWIGTYPE_p_Viewport swig_types[36]
-#define SWIGTYPE_p_VolumeGrid swig_types[37]
-#define SWIGTYPE_p_Widget swig_types[38]
-#define SWIGTYPE_p_WidgetSet swig_types[39]
-#define SWIGTYPE_p_WorldModel swig_types[40]
-#define SWIGTYPE_p_WorldSimulation swig_types[41]
-#define SWIGTYPE_p__object swig_types[42]
-#define SWIGTYPE_p_allocator_type swig_types[43]
-#define SWIGTYPE_p_char swig_types[44]
-#define SWIGTYPE_p_difference_type swig_types[45]
-#define SWIGTYPE_p_double swig_types[46]
-#define SWIGTYPE_p_doubleArray swig_types[47]
-#define SWIGTYPE_p_dxBody swig_types[48]
-#define SWIGTYPE_p_dxJoint swig_types[49]
-#define SWIGTYPE_p_float swig_types[50]
-#define SWIGTYPE_p_floatArray swig_types[51]
-#define SWIGTYPE_p_int swig_types[52]
-#define SWIGTYPE_p_intArray swig_types[53]
-#define SWIGTYPE_p_key_type swig_types[54]
-#define SWIGTYPE_p_mapped_type swig_types[55]
-#define SWIGTYPE_p_p__object swig_types[56]
-#define SWIGTYPE_p_size_type swig_types[57]
-#define SWIGTYPE_p_std__allocatorT_double_t swig_types[58]
-#define SWIGTYPE_p_std__allocatorT_float_t swig_types[59]
-#define SWIGTYPE_p_std__allocatorT_int_t swig_types[60]
-#define SWIGTYPE_p_std__allocatorT_std__pairT_std__string_const_std__string_t_t swig_types[61]
-#define SWIGTYPE_p_std__allocatorT_std__string_t swig_types[62]
-#define SWIGTYPE_p_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t swig_types[63]
-#define SWIGTYPE_p_std__invalid_argument swig_types[64]
-#define SWIGTYPE_p_std__lessT_std__string_t swig_types[65]
-#define SWIGTYPE_p_std__mapT_std__string_std__string_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_std__string_t_t_t swig_types[66]
-#define SWIGTYPE_p_std__vectorT_GeneralizedIKObjective_std__allocatorT_GeneralizedIKObjective_t_t swig_types[67]
-#define SWIGTYPE_p_std__vectorT_IKObjective_std__allocatorT_IKObjective_t_t swig_types[68]
-#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t swig_types[69]
-#define SWIGTYPE_p_std__vectorT_float_std__allocatorT_float_t_t swig_types[70]
-#define SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t swig_types[71]
-#define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t swig_types[72]
-#define SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t swig_types[73]
-#define SWIGTYPE_p_std__vectorT_unsigned_char_std__allocatorT_unsigned_char_t_t swig_types[74]
-#define SWIGTYPE_p_swig__SwigPyIterator swig_types[75]
-#define SWIGTYPE_p_value_type swig_types[76]
-#define SWIGTYPE_p_void swig_types[77]
-static swig_type_info *swig_types[79];
-static swig_module_info swig_module = {swig_types, 78, 0, 0, 0, 0};
+#define SWIGTYPE_p_AABBPoser swig_types[0]
+#define SWIGTYPE_p_Appearance swig_types[1]
+#define SWIGTYPE_p_BoxPoser swig_types[2]
+#define SWIGTYPE_p_ContactParameters swig_types[3]
+#define SWIGTYPE_p_ContactQueryResult swig_types[4]
+#define SWIGTYPE_p_ControlledRobotSimulator swig_types[5]
+#define SWIGTYPE_p_ConvexHull swig_types[6]
+#define SWIGTYPE_p_DistanceQueryResult swig_types[7]
+#define SWIGTYPE_p_DistanceQuerySettings swig_types[8]
+#define SWIGTYPE_p_GeneralizedIKObjective swig_types[9]
+#define SWIGTYPE_p_GeneralizedIKSolver swig_types[10]
+#define SWIGTYPE_p_GeometricPrimitive swig_types[11]
+#define SWIGTYPE_p_Geometry3D swig_types[12]
+#define SWIGTYPE_p_IKGoal swig_types[13]
+#define SWIGTYPE_p_IKObjective swig_types[14]
+#define SWIGTYPE_p_IKSolver swig_types[15]
+#define SWIGTYPE_p_Mass swig_types[16]
+#define SWIGTYPE_p_ODEGeometry swig_types[17]
+#define SWIGTYPE_p_ObjectPoser swig_types[18]
+#define SWIGTYPE_p_PointCloud swig_types[19]
+#define SWIGTYPE_p_PointPoser swig_types[20]
+#define SWIGTYPE_p_RigidObject swig_types[21]
+#define SWIGTYPE_p_RigidObjectModel swig_types[22]
+#define SWIGTYPE_p_Robot swig_types[23]
+#define SWIGTYPE_p_RobotModel swig_types[24]
+#define SWIGTYPE_p_RobotModelDriver swig_types[25]
+#define SWIGTYPE_p_RobotModelLink swig_types[26]
+#define SWIGTYPE_p_RobotPoser swig_types[27]
+#define SWIGTYPE_p_SensorBase swig_types[28]
+#define SWIGTYPE_p_SimBody swig_types[29]
+#define SWIGTYPE_p_SimJoint swig_types[30]
+#define SWIGTYPE_p_SimRobotController swig_types[31]
+#define SWIGTYPE_p_SimRobotSensor swig_types[32]
+#define SWIGTYPE_p_Simulator swig_types[33]
+#define SWIGTYPE_p_SpherePoser swig_types[34]
+#define SWIGTYPE_p_Terrain swig_types[35]
+#define SWIGTYPE_p_TerrainModel swig_types[36]
+#define SWIGTYPE_p_TransformPoser swig_types[37]
+#define SWIGTYPE_p_TriangleMesh swig_types[38]
+#define SWIGTYPE_p_Viewport swig_types[39]
+#define SWIGTYPE_p_VolumeGrid swig_types[40]
+#define SWIGTYPE_p_Widget swig_types[41]
+#define SWIGTYPE_p_WidgetSet swig_types[42]
+#define SWIGTYPE_p_WorldModel swig_types[43]
+#define SWIGTYPE_p_WorldSimulation swig_types[44]
+#define SWIGTYPE_p__object swig_types[45]
+#define SWIGTYPE_p_allocator_type swig_types[46]
+#define SWIGTYPE_p_char swig_types[47]
+#define SWIGTYPE_p_difference_type swig_types[48]
+#define SWIGTYPE_p_double swig_types[49]
+#define SWIGTYPE_p_doubleArray swig_types[50]
+#define SWIGTYPE_p_dxBody swig_types[51]
+#define SWIGTYPE_p_dxJoint swig_types[52]
+#define SWIGTYPE_p_float swig_types[53]
+#define SWIGTYPE_p_floatArray swig_types[54]
+#define SWIGTYPE_p_int swig_types[55]
+#define SWIGTYPE_p_intArray swig_types[56]
+#define SWIGTYPE_p_key_type swig_types[57]
+#define SWIGTYPE_p_mapped_type swig_types[58]
+#define SWIGTYPE_p_p__object swig_types[59]
+#define SWIGTYPE_p_size_type swig_types[60]
+#define SWIGTYPE_p_std__allocatorT_double_t swig_types[61]
+#define SWIGTYPE_p_std__allocatorT_float_t swig_types[62]
+#define SWIGTYPE_p_std__allocatorT_int_t swig_types[63]
+#define SWIGTYPE_p_std__allocatorT_std__pairT_std__string_const_std__string_t_t swig_types[64]
+#define SWIGTYPE_p_std__allocatorT_std__string_t swig_types[65]
+#define SWIGTYPE_p_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t swig_types[66]
+#define SWIGTYPE_p_std__invalid_argument swig_types[67]
+#define SWIGTYPE_p_std__lessT_std__string_t swig_types[68]
+#define SWIGTYPE_p_std__mapT_std__string_std__string_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_std__string_t_t_t swig_types[69]
+#define SWIGTYPE_p_std__vectorT_GeneralizedIKObjective_std__allocatorT_GeneralizedIKObjective_t_t swig_types[70]
+#define SWIGTYPE_p_std__vectorT_IKObjective_std__allocatorT_IKObjective_t_t swig_types[71]
+#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t swig_types[72]
+#define SWIGTYPE_p_std__vectorT_float_std__allocatorT_float_t_t swig_types[73]
+#define SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t swig_types[74]
+#define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t swig_types[75]
+#define SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t swig_types[76]
+#define SWIGTYPE_p_std__vectorT_unsigned_char_std__allocatorT_unsigned_char_t_t swig_types[77]
+#define SWIGTYPE_p_swig__SwigPyIterator swig_types[78]
+#define SWIGTYPE_p_value_type swig_types[79]
+#define SWIGTYPE_p_void swig_types[80]
+static swig_type_info *swig_types[82];
+static swig_module_info swig_module = {swig_types, 81, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -31872,6 +31875,774 @@ SWIGINTERN PyObject *RobotPoser_swigregister(PyObject *SWIGUNUSEDPARM(self), PyO
   PyObject *obj;
   if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
   SWIG_TypeNewClientData(SWIGTYPE_p_RobotPoser, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
+SWIGINTERN PyObject *_wrap_new_AABBPoser(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  AABBPoser *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)":new_AABBPoser")) SWIG_fail;
+  {
+    try {
+      result = (AABBPoser *)new AABBPoser();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_AABBPoser, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_AABBPoser_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  AABBPoser *arg1 = (AABBPoser *) 0 ;
+  double *arg2 ;
+  double *arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  double temp3[3] ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:AABBPoser_set",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_AABBPoser, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "AABBPoser_set" "', argument " "1"" of type '" "AABBPoser *""'"); 
+  }
+  arg1 = reinterpret_cast< AABBPoser * >(argp1);
+  {
+    if (!convert_darray(obj1,temp2,3)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    if (!convert_darray(obj2,temp3,3)) {
+      return NULL;
+    }
+    arg3 = &temp3[0];
+  }
+  {
+    try {
+      (arg1)->set((double const (*))arg2,(double const (*))arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_AABBPoser_setFrame(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  AABBPoser *arg1 = (AABBPoser *) 0 ;
+  double *arg2 ;
+  double *arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[9] ;
+  double temp3[3] ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:AABBPoser_setFrame",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_AABBPoser, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "AABBPoser_setFrame" "', argument " "1"" of type '" "AABBPoser *""'"); 
+  }
+  arg1 = reinterpret_cast< AABBPoser * >(argp1);
+  {
+    if (!convert_darray(obj1,temp2,9)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    if (!convert_darray(obj2,temp3,3)) {
+      return NULL;
+    }
+    arg3 = &temp3[0];
+  }
+  {
+    try {
+      (arg1)->setFrame((double const (*))arg2,(double const (*))arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_AABBPoser_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  AABBPoser *arg1 = (AABBPoser *) 0 ;
+  double *arg2 ;
+  double *arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  double temp3[3] ;
+  PyObject * obj0 = 0 ;
+  
+  {
+    arg2 = &temp2[0];
+  }
+  {
+    arg3 = &temp3[0];
+  }
+  if (!PyArg_ParseTuple(args,(char *)"O:AABBPoser_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_AABBPoser, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "AABBPoser_get" "', argument " "1"" of type '" "AABBPoser *""'"); 
+  }
+  arg1 = reinterpret_cast< AABBPoser * >(argp1);
+  {
+    try {
+      (arg1)->get(arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg2,3);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg3,3);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_AABBPoser(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  AABBPoser *arg1 = (AABBPoser *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:delete_AABBPoser",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_AABBPoser, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_AABBPoser" "', argument " "1"" of type '" "AABBPoser *""'"); 
+  }
+  arg1 = reinterpret_cast< AABBPoser * >(argp1);
+  {
+    try {
+      delete arg1;
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *AABBPoser_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj;
+  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_AABBPoser, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
+SWIGINTERN PyObject *_wrap_new_BoxPoser(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  BoxPoser *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)":new_BoxPoser")) SWIG_fail;
+  {
+    try {
+      result = (BoxPoser *)new BoxPoser();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_BoxPoser, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_BoxPoser_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  BoxPoser *arg1 = (BoxPoser *) 0 ;
+  double *arg2 ;
+  double *arg3 ;
+  double *arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[9] ;
+  double temp3[3] ;
+  double temp4[3] ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOO:BoxPoser_set",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_BoxPoser, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BoxPoser_set" "', argument " "1"" of type '" "BoxPoser *""'"); 
+  }
+  arg1 = reinterpret_cast< BoxPoser * >(argp1);
+  {
+    if (!convert_darray(obj1,temp2,9)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    if (!convert_darray(obj2,temp3,3)) {
+      return NULL;
+    }
+    arg3 = &temp3[0];
+  }
+  {
+    if (!convert_darray(obj3,temp4,3)) {
+      return NULL;
+    }
+    arg4 = &temp4[0];
+  }
+  {
+    try {
+      (arg1)->set((double const (*))arg2,(double const (*))arg3,(double const (*))arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_BoxPoser_setTransform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  BoxPoser *arg1 = (BoxPoser *) 0 ;
+  double *arg2 ;
+  double *arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[9] ;
+  double temp3[3] ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:BoxPoser_setTransform",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_BoxPoser, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BoxPoser_setTransform" "', argument " "1"" of type '" "BoxPoser *""'"); 
+  }
+  arg1 = reinterpret_cast< BoxPoser * >(argp1);
+  {
+    if (!convert_darray(obj1,temp2,9)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    if (!convert_darray(obj2,temp3,3)) {
+      return NULL;
+    }
+    arg3 = &temp3[0];
+  }
+  {
+    try {
+      (arg1)->setTransform((double const (*))arg2,(double const (*))arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_BoxPoser_setDims(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  BoxPoser *arg1 = (BoxPoser *) 0 ;
+  double *arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:BoxPoser_setDims",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_BoxPoser, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BoxPoser_setDims" "', argument " "1"" of type '" "BoxPoser *""'"); 
+  }
+  arg1 = reinterpret_cast< BoxPoser * >(argp1);
+  {
+    if (!convert_darray(obj1,temp2,3)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    try {
+      (arg1)->setDims((double const (*))arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_BoxPoser_getTransform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  BoxPoser *arg1 = (BoxPoser *) 0 ;
+  double *arg2 ;
+  double *arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[9] ;
+  double temp3[3] ;
+  PyObject * obj0 = 0 ;
+  
+  {
+    arg2 = &temp2[0];
+  }
+  {
+    arg3 = &temp3[0];
+  }
+  if (!PyArg_ParseTuple(args,(char *)"O:BoxPoser_getTransform",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_BoxPoser, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BoxPoser_getTransform" "', argument " "1"" of type '" "BoxPoser *""'"); 
+  }
+  arg1 = reinterpret_cast< BoxPoser * >(argp1);
+  {
+    try {
+      (arg1)->getTransform(arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg2,9);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg3,3);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_BoxPoser_getDims(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  BoxPoser *arg1 = (BoxPoser *) 0 ;
+  double *arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  PyObject * obj0 = 0 ;
+  
+  {
+    arg2 = &temp2[0];
+  }
+  if (!PyArg_ParseTuple(args,(char *)"O:BoxPoser_getDims",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_BoxPoser, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "BoxPoser_getDims" "', argument " "1"" of type '" "BoxPoser *""'"); 
+  }
+  arg1 = reinterpret_cast< BoxPoser * >(argp1);
+  {
+    try {
+      (arg1)->getDims(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg2,3);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_BoxPoser(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  BoxPoser *arg1 = (BoxPoser *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:delete_BoxPoser",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_BoxPoser, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_BoxPoser" "', argument " "1"" of type '" "BoxPoser *""'"); 
+  }
+  arg1 = reinterpret_cast< BoxPoser * >(argp1);
+  {
+    try {
+      delete arg1;
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *BoxPoser_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj;
+  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_BoxPoser, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
+SWIGINTERN PyObject *_wrap_new_SpherePoser(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SpherePoser *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)":new_SpherePoser")) SWIG_fail;
+  {
+    try {
+      result = (SpherePoser *)new SpherePoser();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_SpherePoser, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SpherePoser_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SpherePoser *arg1 = (SpherePoser *) 0 ;
+  double *arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[4] ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:SpherePoser_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SpherePoser, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SpherePoser_set" "', argument " "1"" of type '" "SpherePoser *""'"); 
+  }
+  arg1 = reinterpret_cast< SpherePoser * >(argp1);
+  {
+    if (!convert_darray(obj1,temp2,4)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    try {
+      (arg1)->set((double const (*))arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SpherePoser_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SpherePoser *arg1 = (SpherePoser *) 0 ;
+  double *arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[4] ;
+  PyObject * obj0 = 0 ;
+  
+  {
+    arg2 = &temp2[0];
+  }
+  if (!PyArg_ParseTuple(args,(char *)"O:SpherePoser_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SpherePoser, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SpherePoser_get" "', argument " "1"" of type '" "SpherePoser *""'"); 
+  }
+  arg1 = reinterpret_cast< SpherePoser * >(argp1);
+  {
+    try {
+      (arg1)->get(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg2,4);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_SpherePoser(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SpherePoser *arg1 = (SpherePoser *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:delete_SpherePoser",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SpherePoser, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_SpherePoser" "', argument " "1"" of type '" "SpherePoser *""'"); 
+  }
+  arg1 = reinterpret_cast< SpherePoser * >(argp1);
+  {
+    try {
+      delete arg1;
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *SpherePoser_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj;
+  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_SpherePoser, SWIG_NewClientData(obj));
   return SWIG_Py_Void();
 }
 
@@ -61506,6 +62277,90 @@ static PyMethodDef SwigMethods[] = {
 		""},
 	 { (char *)"delete_RobotPoser", _wrap_delete_RobotPoser, METH_VARARGS, (char *)"delete_RobotPoser(RobotPoser self)"},
 	 { (char *)"RobotPoser_swigregister", RobotPoser_swigregister, METH_VARARGS, NULL},
+	 { (char *)"new_AABBPoser", _wrap_new_AABBPoser, METH_VARARGS, (char *)"\n"
+		"new_AABBPoser() -> AABBPoser\n"
+		"\n"
+		"\n"
+		"\n"
+		""},
+	 { (char *)"AABBPoser_set", _wrap_AABBPoser_set, METH_VARARGS, (char *)"\n"
+		"AABBPoser_set(AABBPoser self, double const [3] bmin, double const [3] bmax)\n"
+		"\n"
+		"\n"
+		"\n"
+		""},
+	 { (char *)"AABBPoser_setFrame", _wrap_AABBPoser_setFrame, METH_VARARGS, (char *)"\n"
+		"AABBPoser_setFrame(AABBPoser self, double const [9] R, double const [3] t)\n"
+		"\n"
+		"\n"
+		"\n"
+		""},
+	 { (char *)"AABBPoser_get", _wrap_AABBPoser_get, METH_VARARGS, (char *)"\n"
+		"AABBPoser_get(AABBPoser self)\n"
+		"\n"
+		"\n"
+		"\n"
+		""},
+	 { (char *)"delete_AABBPoser", _wrap_delete_AABBPoser, METH_VARARGS, (char *)"delete_AABBPoser(AABBPoser self)"},
+	 { (char *)"AABBPoser_swigregister", AABBPoser_swigregister, METH_VARARGS, NULL},
+	 { (char *)"new_BoxPoser", _wrap_new_BoxPoser, METH_VARARGS, (char *)"\n"
+		"new_BoxPoser() -> BoxPoser\n"
+		"\n"
+		"\n"
+		"\n"
+		""},
+	 { (char *)"BoxPoser_set", _wrap_BoxPoser_set, METH_VARARGS, (char *)"\n"
+		"BoxPoser_set(BoxPoser self, double const [9] R, double const [3] t, double const [3] dims)\n"
+		"\n"
+		"\n"
+		"\n"
+		""},
+	 { (char *)"BoxPoser_setTransform", _wrap_BoxPoser_setTransform, METH_VARARGS, (char *)"\n"
+		"BoxPoser_setTransform(BoxPoser self, double const [9] R, double const [3] t)\n"
+		"\n"
+		"\n"
+		"\n"
+		""},
+	 { (char *)"BoxPoser_setDims", _wrap_BoxPoser_setDims, METH_VARARGS, (char *)"\n"
+		"BoxPoser_setDims(BoxPoser self, double const [3] dims)\n"
+		"\n"
+		"\n"
+		"\n"
+		""},
+	 { (char *)"BoxPoser_getTransform", _wrap_BoxPoser_getTransform, METH_VARARGS, (char *)"\n"
+		"BoxPoser_getTransform(BoxPoser self)\n"
+		"\n"
+		"\n"
+		"\n"
+		""},
+	 { (char *)"BoxPoser_getDims", _wrap_BoxPoser_getDims, METH_VARARGS, (char *)"\n"
+		"BoxPoser_getDims(BoxPoser self)\n"
+		"\n"
+		"\n"
+		"\n"
+		""},
+	 { (char *)"delete_BoxPoser", _wrap_delete_BoxPoser, METH_VARARGS, (char *)"delete_BoxPoser(BoxPoser self)"},
+	 { (char *)"BoxPoser_swigregister", BoxPoser_swigregister, METH_VARARGS, NULL},
+	 { (char *)"new_SpherePoser", _wrap_new_SpherePoser, METH_VARARGS, (char *)"\n"
+		"new_SpherePoser() -> SpherePoser\n"
+		"\n"
+		"\n"
+		"\n"
+		""},
+	 { (char *)"SpherePoser_set", _wrap_SpherePoser_set, METH_VARARGS, (char *)"\n"
+		"SpherePoser_set(SpherePoser self, double const [4] cr)\n"
+		"\n"
+		"\n"
+		"\n"
+		""},
+	 { (char *)"SpherePoser_get", _wrap_SpherePoser_get, METH_VARARGS, (char *)"\n"
+		"SpherePoser_get(SpherePoser self)\n"
+		"\n"
+		"\n"
+		"\n"
+		""},
+	 { (char *)"delete_SpherePoser", _wrap_delete_SpherePoser, METH_VARARGS, (char *)"delete_SpherePoser(SpherePoser self)"},
+	 { (char *)"SpherePoser_swigregister", SpherePoser_swigregister, METH_VARARGS, NULL},
 	 { (char *)"new_Mass", _wrap_new_Mass, METH_VARARGS, (char *)"\n"
 		"new_Mass() -> Mass\n"
 		"\n"
@@ -65230,6 +66085,12 @@ static void *_p_doubleArrayTo_p_double(void *x, int *SWIGUNUSEDPARM(newmemory)) 
 static void *_p_floatArrayTo_p_float(void *x, int *SWIGUNUSEDPARM(newmemory)) {
     return (void *)((float *)  ((floatArray *) x));
 }
+static void *_p_AABBPoserTo_p_Widget(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((Widget *)  ((AABBPoser *) x));
+}
+static void *_p_SpherePoserTo_p_Widget(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((Widget *)  ((SpherePoser *) x));
+}
 static void *_p_ObjectPoserTo_p_Widget(void *x, int *SWIGUNUSEDPARM(newmemory)) {
     return (void *)((Widget *)  ((ObjectPoser *) x));
 }
@@ -65242,13 +66103,18 @@ static void *_p_PointPoserTo_p_Widget(void *x, int *SWIGUNUSEDPARM(newmemory)) {
 static void *_p_TransformPoserTo_p_Widget(void *x, int *SWIGUNUSEDPARM(newmemory)) {
     return (void *)((Widget *)  ((TransformPoser *) x));
 }
+static void *_p_BoxPoserTo_p_Widget(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((Widget *)  ((BoxPoser *) x));
+}
 static void *_p_WidgetSetTo_p_Widget(void *x, int *SWIGUNUSEDPARM(newmemory)) {
     return (void *)((Widget *)  ((WidgetSet *) x));
 }
 static void *_p_intArrayTo_p_int(void *x, int *SWIGUNUSEDPARM(newmemory)) {
     return (void *)((int *)  ((intArray *) x));
 }
+static swig_type_info _swigt__p_AABBPoser = {"_p_AABBPoser", "AABBPoser *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_Appearance = {"_p_Appearance", "Appearance *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_BoxPoser = {"_p_BoxPoser", "BoxPoser *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_ContactParameters = {"_p_ContactParameters", "ContactParameters *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_ContactQueryResult = {"_p_ContactQueryResult", "ContactQueryResult *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_ControlledRobotSimulator = {"_p_ControlledRobotSimulator", "ControlledRobotSimulator *", 0, 0, (void*)0, 0};
@@ -65280,6 +66146,7 @@ static swig_type_info _swigt__p_SimJoint = {"_p_SimJoint", "SimJoint *", 0, 0, (
 static swig_type_info _swigt__p_SimRobotController = {"_p_SimRobotController", "SimRobotController *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_SimRobotSensor = {"_p_SimRobotSensor", "SimRobotSensor *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_Simulator = {"_p_Simulator", "Simulator *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_SpherePoser = {"_p_SpherePoser", "SpherePoser *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_Terrain = {"_p_Terrain", "Terrain *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_TerrainModel = {"_p_TerrainModel", "TerrainModel *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_TransformPoser = {"_p_TransformPoser", "TransformPoser *", 0, 0, (void*)0, 0};
@@ -65328,7 +66195,9 @@ static swig_type_info _swigt__p_value_type = {"_p_value_type", "value_type *", 0
 static swig_type_info _swigt__p_void = {"_p_void", "void *", 0, 0, (void*)0, 0};
 
 static swig_type_info *swig_type_initial[] = {
+  &_swigt__p_AABBPoser,
   &_swigt__p_Appearance,
+  &_swigt__p_BoxPoser,
   &_swigt__p_ContactParameters,
   &_swigt__p_ContactQueryResult,
   &_swigt__p_ControlledRobotSimulator,
@@ -65360,6 +66229,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_SimRobotController,
   &_swigt__p_SimRobotSensor,
   &_swigt__p_Simulator,
+  &_swigt__p_SpherePoser,
   &_swigt__p_Terrain,
   &_swigt__p_TerrainModel,
   &_swigt__p_TransformPoser,
@@ -65408,7 +66278,9 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_void,
 };
 
+static swig_cast_info _swigc__p_AABBPoser[] = {  {&_swigt__p_AABBPoser, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Appearance[] = {  {&_swigt__p_Appearance, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_BoxPoser[] = {  {&_swigt__p_BoxPoser, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ContactParameters[] = {  {&_swigt__p_ContactParameters, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ContactQueryResult[] = {  {&_swigt__p_ContactQueryResult, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ControlledRobotSimulator[] = {  {&_swigt__p_ControlledRobotSimulator, 0, 0, 0},{0, 0, 0, 0}};
@@ -65440,13 +66312,14 @@ static swig_cast_info _swigc__p_SimJoint[] = {  {&_swigt__p_SimJoint, 0, 0, 0},{
 static swig_cast_info _swigc__p_SimRobotController[] = {  {&_swigt__p_SimRobotController, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_SimRobotSensor[] = {  {&_swigt__p_SimRobotSensor, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Simulator[] = {  {&_swigt__p_Simulator, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_SpherePoser[] = {  {&_swigt__p_SpherePoser, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Terrain[] = {  {&_swigt__p_Terrain, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_TerrainModel[] = {  {&_swigt__p_TerrainModel, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_TransformPoser[] = {  {&_swigt__p_TransformPoser, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_TriangleMesh[] = {  {&_swigt__p_TriangleMesh, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Viewport[] = {  {&_swigt__p_Viewport, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_VolumeGrid[] = {  {&_swigt__p_VolumeGrid, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_Widget[] = {  {&_swigt__p_ObjectPoser, _p_ObjectPoserTo_p_Widget, 0, 0},  {&_swigt__p_RobotPoser, _p_RobotPoserTo_p_Widget, 0, 0},  {&_swigt__p_PointPoser, _p_PointPoserTo_p_Widget, 0, 0},  {&_swigt__p_TransformPoser, _p_TransformPoserTo_p_Widget, 0, 0},  {&_swigt__p_WidgetSet, _p_WidgetSetTo_p_Widget, 0, 0},  {&_swigt__p_Widget, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_Widget[] = {  {&_swigt__p_AABBPoser, _p_AABBPoserTo_p_Widget, 0, 0},  {&_swigt__p_SpherePoser, _p_SpherePoserTo_p_Widget, 0, 0},  {&_swigt__p_ObjectPoser, _p_ObjectPoserTo_p_Widget, 0, 0},  {&_swigt__p_RobotPoser, _p_RobotPoserTo_p_Widget, 0, 0},  {&_swigt__p_PointPoser, _p_PointPoserTo_p_Widget, 0, 0},  {&_swigt__p_TransformPoser, _p_TransformPoserTo_p_Widget, 0, 0},  {&_swigt__p_BoxPoser, _p_BoxPoserTo_p_Widget, 0, 0},  {&_swigt__p_WidgetSet, _p_WidgetSetTo_p_Widget, 0, 0},  {&_swigt__p_Widget, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_WidgetSet[] = {  {&_swigt__p_WidgetSet, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_WorldModel[] = {  {&_swigt__p_WorldModel, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_WorldSimulation[] = {  {&_swigt__p_WorldSimulation, 0, 0, 0},{0, 0, 0, 0}};
@@ -65488,7 +66361,9 @@ static swig_cast_info _swigc__p_value_type[] = {  {&_swigt__p_value_type, 0, 0, 
 static swig_cast_info _swigc__p_void[] = {  {&_swigt__p_void, 0, 0, 0},{0, 0, 0, 0}};
 
 static swig_cast_info *swig_cast_initial[] = {
+  _swigc__p_AABBPoser,
   _swigc__p_Appearance,
+  _swigc__p_BoxPoser,
   _swigc__p_ContactParameters,
   _swigc__p_ContactQueryResult,
   _swigc__p_ControlledRobotSimulator,
@@ -65520,6 +66395,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_SimRobotController,
   _swigc__p_SimRobotSensor,
   _swigc__p_Simulator,
+  _swigc__p_SpherePoser,
   _swigc__p_Terrain,
   _swigc__p_TerrainModel,
   _swigc__p_TransformPoser,
