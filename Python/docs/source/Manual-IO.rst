@@ -31,6 +31,10 @@ Klamp't supports many types of I/O formats:
 -  POV-Ray: The :mod:`klampt.io.povray` module can export POV-Ray
    scripts for rendering.
 
+All native Klamp't file types can be read and visualized using the ``klampt_browser`` app
+that is distributed with Klampt.  See `the apps documentation <Manual-Apps.html#klampt-browser>`__
+for more details.
+
 Custom file formats in Klamp't
 ------------------------------
 

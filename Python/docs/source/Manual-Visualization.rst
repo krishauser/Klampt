@@ -12,6 +12,7 @@ The `klampt.vis <klampt.vis.html>`__ module features:
 - Unified interface to Jupyter notebooks and HTML output
 - Can draw most anything supported in Klampt, as well as text
 - One-line visual debugging with ``vis.debug()``
+- One-line visual editing with ``resource.edit()``
 - Automatic animations
 - Simple plotting
 - Multi-window management
@@ -23,12 +24,12 @@ The `klampt.vis <klampt.vis.html>`__ module features:
 Quick start
 -------------
 
-Ultra-quick start is to use ``vis.debug()``, which pops up a window to display
-the given items. For example::
+*Ultra-quick start*: use ``vis.debug()``, which pops up a window to display
+the given Klamp't objects. For example::
 
     from klampt import *
 
-    #some Klamp't code
+    #some Klamp't code to load a world with a robot
     w = WorldModel()
     w.readFile("Klampt-examples/data/tx90_scenario.xml")
     r = w.robot(0)
@@ -39,24 +40,75 @@ the given items. For example::
     #show it
     vis.debug(qrand,{'color':[1,0,0,0.5]},world=w)
 
-    #some more Klamp't code
+    #some more Klamp't code to load a geometry
     g = Geometry3D()
     g.loadFile("Klampt-examples/data/objects/srimugsmooth.off")
 
     #show it
     vis.debug(g)
 
-Basic use of the vis module is fairly straightforward:
+*Ultra-quick start2*: If you want to visually edit a Klamp't object, just call
+``io.resource.edit(name,object,...)``. 
+The :func:`klampt.io.resource.edit` function has many options to configure how the editor
+should be configured.  For example, to edit robot configurations and show objects around the
+robot, you would use ``io.resource.edit(name,config,world=world,referenceObject=robot)``.
+
+For any more advanced usage, you will want to manage a scene using the vis module. 
+The basic use of the module is straightforward:
 
 1. Add things to the visualization scene with ``vis.add(name,thing)``.  Worlds,
    geometries, points, transforms, trajectories, contact points, and more can
    be added in this manner.
-2. Modify the scene using modifier calls like
-   ``vis.setColor(name,r,g,b,a)``, ``vis.hide(name)``, or ``vis.remove(name).
+2. Modify the scene using modifier calls like aft
+   ``vis.setColor(name,r,g,b,a)``, ``vis.hide(name)``, or ``vis.remove(name)``.
 3. Launch visualization window(s)
 4. Continue adding, modifying, and removing things as you desire.
 5. You may then close the window when you are done, or wait until the user 
    closes the window.
+
+For example::
+
+    from klampt import *
+    from klampt.model.trajectory import RobotTrajectory
+    import time
+
+    #some Klamp't code
+    w = WorldModel()
+    w.readFile("Klampt-examples/data/tx90_scenario.xml")
+    r = w.robot(0)
+    q0 = r.getConfig()
+    r.randomizeConfig()
+    qrand = r.getConfig()
+    r.setConfig(q0)
+
+    #Google Colab users: uncomment this. Make sure to do this at the top of your program.
+    #vis.init('HTML')
+
+    #add a "world" item to the scene manager
+    vis.add("world",w)
+    #show qrand as a ghost configuration in transparent red
+    vis.add("qrand",qrand,color=(1,0,0,0.5))
+    #show a Trajectory between q0 and qrand
+    vis.add("path_to_qrand",RobotTrajectory(r,[0,1],[q0,qrand]))
+
+    #To control interaction / animation, launch the loop via one of the following:
+
+    #OpenGL on Linux / windows
+    vis.show()              #open the window
+    t0 = time.time()
+    while vis.shown():
+        #do something, e.g. the following
+        if time.time() > 5:
+            vis.setColor("qrand",0,1,1,0.5)  #sets qrand to show in cyan after 5 seconds
+        time.sleep(0.01)    #loop is called ~100x times per second
+    vis.kill()              #safe cleanup
+
+    #Mac OpenGL workaround: launch the vis loop and window in single-threaded mode
+    #vis.loop()
+
+    #for IPython, the screen is redrawn only after a cell is run, so you should just call
+    #vis.show() in this cell, and then the inner loop 
+
 
 More advanced functions allow you to dynamically launch multiple windows,
 capture user input, embed the visualization into Qt windows, and create
@@ -218,7 +270,6 @@ if you are writing cross-platform code, the main rule to remember is not to use
 ``vis.show()`` outside of a loop setup callback.
 
 
-
 The plugin stack
 ~~~~~~~~~~~~~~~~~
 
@@ -264,7 +315,7 @@ GUIs, to customize appearances, control animations, and other
 visualization functions. For more information see the documentation of
 `klampt.vis <klampt.vis.html>`__,
 and the example code in
-``Klampt-examples/Python3/demos/vistemplate.py``.
+`Klampt-examples/Python3/demos/vistemplate.py <https://github.com/krishauser/Klampt-examples/blob/0.8.3/Python3/demos/vis_template.py>`__.
 
 -  ``vis.add(name,item)``: adds a named item to the scene manager.
 -  ``vis.clear()``: clears all items.
@@ -341,13 +392,15 @@ Item path conventions and references
 For composite items like WorldModels, sub-items can be referred to by
 passing a tuple or list of strings as the ``name`` argument to any of
 these functions. For example, ``("world",robotname,linkname)`` refers
-to a given link of a given robot inside the "world" item.
+to a given link of a given robot inside the "world" item. 
 
 For example, if you've added a RobotWorld under the name ``'world'`` containing a
 robot called ``'myRobot'``, then ``setColor(('world','myRobot'),0,1,0)`` will
 turn the robot green. If ``'link5'`` is the robot's 5th link, then
 ``setColor(('world','myRobot','link5'),0,0,1)`` will turn the 5th
 link blue.
+
+To retrieve the path to a sub-item, ``vis.getItemName(object)`` can be used. [new in 0.8.3]
 
 Customizing item appearance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -380,6 +433,84 @@ elements, rigid objects, and robots.
    -  If newtime == None (default), this gets the animation time.
    -  If newtime != None, this sets a new animation time.
 
+
+Scene and camera control
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+The background color can be changed with :func:`klampt.vis.setBackgroundColor`. 
+
+If PyQTGraph is installed (``pip install pyqtgraph``), the menu has an "Edit appearance..." item that launches
+a GUI to edit colors and properties of the scene.
+
+Overall scene appearance can be saved/loaded using ``vis.saveJsonConfig`` and ``vis.loadJsonConfig``.
+
+The camera can be modified in several ways. 
+
+- :func:`~klampt.vis.getViewport` returns a :class:`~klampt.vis.glprogram.GLViewport` instance (in OpenGL)
+  or a JSON structure (In IPython / HTML) that can be modified.  Then, :func:`~klampt.vis.setViewport` can
+  be called to change the viewport.
+- You can save and load the viewport from files.  In PyQt, there are menu items for doing this, but in
+  other backends, this must be done using ``vis.getViewport().save_file(fn)`` (These are the same format
+  as the camera files used in the RobotTest, SimTest, and RobotPose apps.)
+- To auto-fit a scene, use :func:`~klampt.vis.autoFitCamera`.
+- To follow an object, use :func:`~klampt.vis.followCamera`.
+
+
+User interaction and customization
+-----------------------------------
+
+There are several ways to provide user interaction in the visualizer:
+
+- Items in the visualization world can be edited using ``vis.edit(itemname)``. 
+  To retrieve the object's configuration after or during editing, use ``vis.getItemConfig(itemname)``.
+
+  In OpenGL, the editing happens via mouse interaction. 
+
+  In Jupyter, a widget will be displayed after
+  the cell in which ``vis.edit`` was called.  (To customize Jupyter widgets further, you can create
+  them `manually <klampt.vis.ipython.html>`__.)
+
+- (OpenGL) Keyboard-triggered actions can be added with ``vis.addAction``. The calling
+  pattern is::
+
+      vis.addAction(lambda: [DO SOMETHING HERE], "My action",'k')
+
+  which will trigger the lambda function when 'k' is pressed or "My action" is selected from the
+  menu bar.  You can also use the prefix ``'Ctrl+'`` or ``'Shift+'`` to require modifiers to be held,
+  e.g. ``Ctrl+k``.
+  More information is available in the :func:`~klampt.vis.visualization.addAction` documentation.
+- (OpenGL) Add custom :class:`~klampt.vis.glinterface.GLPluginInterface` plugins to the visualization.
+  See the section below for more details.
+- (PyQt) Embed the visualizer into a Qt window, and add buttons, etc.  To use this, you will need to
+  define a hook that will capture the OpenGL window and add it into your main window, such as the
+  following code::
+
+      from klampt import *
+      from PyQt5.QtCore import *
+      from PyQt5.QtGui import *
+      from PyQt5.QtWidgets import *
+
+      #TODO: set up world
+
+      def make_gui(glwidget):
+          #place your Qt code here and place the glwidget where it needs to be
+          w = QMainWindow()
+          glwidget.setMaximumSize(4000,4000)
+          glwidget.setSizePolicy(QSizePolicy(QSizePolicy.Maximum,QSizePolicy.Maximum))
+          area = QWidget(w)
+          layout = QVBoxLayout()
+          layout.addWidget(glwidget)
+          layout.addWidget(QPushButton("Click me"))
+          area.setLayout(layout)
+          w.setCentralWidget(area)
+          return w
+
+      vis.customUI(make_gui)
+      vis.add("world",world)
+      vis.show()
+      vis.spin(float('inf'))
+
+Note that the HTML backend doesn't support any user interaction.
 
 
 Making your own plugins
@@ -421,8 +552,8 @@ visualization thread, and will not need to call the ``vis.lock()`` and
 -  ``plugin.motionfunc(x,y,dx,dy)``: called when the mouse is moved to
    (x,y) with delta (dx,dy) from its previous position.
 -  ``plugin.idle()``: called when the GUI is not working.
--  \`plugin.eventfunc(type,args=""): Generic hook for other events,
-   e.g., button presses, from the GUI.
+-  ``plugin.eventfunc(type,args=""): Generic hook for other events,
+   e.g., button presses, from the GUI.  Currently not used.
 -  ``plugin.closefunc()``: called before the viewport is closed.
 
 **Configuration functions** (these may be called during plugin setup,
