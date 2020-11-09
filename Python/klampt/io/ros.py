@@ -282,7 +282,8 @@ def to_JointTrajectory(klampt_traj,indices='auto',link_joint_names=None):
 
     Args:
         klampt_traj (Trajectory or RobotTrajectory): the trajectory
-        indices (str or list of ints): the indices to send (only valid with RobotTrajectory)
+        indices (str or list of ints): the indices to send (only valid with
+            RobotTrajectory)
         link_joint_names (list of str, optional): if given, the i'th link is
             mapped to the ROS joint name link_joint_names[i].
     """
