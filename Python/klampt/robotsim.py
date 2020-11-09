@@ -1983,7 +1983,7 @@ class Geometry3D(_object):
 
 
         Args:
-            arg2 (:obj:`ConvexHull` or :class:`~klampt.VolumeGrid` or :class:`~klampt.PointCloud` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.Geometry3D` or :class:`~klampt.TriangleMesh`, optional): 
+            arg2 (:class:`~klampt.GeometricPrimitive` or :class:`~klampt.PointCloud` or :class:`~klampt.TriangleMesh` or :obj:`ConvexHull` or :class:`~klampt.Geometry3D` or :class:`~klampt.VolumeGrid`, optional): 
         """
         this = _robotsim.new_Geometry3D(*args)
         try:
@@ -3580,6 +3580,170 @@ class RobotPoser(Widget):
     __del__ = lambda self: None
 RobotPoser_swigregister = _robotsim.RobotPoser_swigregister
 RobotPoser_swigregister(RobotPoser)
+
+class AABBPoser(Widget):
+    """
+
+
+    """
+
+    __swig_setmethods__ = {}
+    for _s in [Widget]:
+        __swig_setmethods__.update(getattr(_s, '__swig_setmethods__', {}))
+    __setattr__ = lambda self, name, value: _swig_setattr(self, AABBPoser, name, value)
+    __swig_getmethods__ = {}
+    for _s in [Widget]:
+        __swig_getmethods__.update(getattr(_s, '__swig_getmethods__', {}))
+    __getattr__ = lambda self, name: _swig_getattr(self, AABBPoser, name)
+    __repr__ = _swig_repr
+
+    def __init__(self):
+        """
+        """
+        this = _robotsim.new_AABBPoser()
+        try:
+            self.this.append(this)
+        except Exception:
+            self.this = this
+
+    def set(self, bmin, bmax):
+        """
+        Args:
+            bmin (:obj:`list of 3 floats`)
+            bmax (:obj:`list of 3 floats`)
+        """
+        return _robotsim.AABBPoser_set(self, bmin, bmax)
+
+
+    def setFrame(self, R, t):
+        """
+        Args:
+            R (:obj:`list of 9 floats (so3 element)`)
+            t (:obj:`list of 3 floats`)
+        """
+        return _robotsim.AABBPoser_setFrame(self, R, t)
+
+
+    def get(self):
+        """
+        """
+        return _robotsim.AABBPoser_get(self)
+
+    __swig_destroy__ = _robotsim.delete_AABBPoser
+    __del__ = lambda self: None
+AABBPoser_swigregister = _robotsim.AABBPoser_swigregister
+AABBPoser_swigregister(AABBPoser)
+
+class BoxPoser(Widget):
+    """
+
+
+    """
+
+    __swig_setmethods__ = {}
+    for _s in [Widget]:
+        __swig_setmethods__.update(getattr(_s, '__swig_setmethods__', {}))
+    __setattr__ = lambda self, name, value: _swig_setattr(self, BoxPoser, name, value)
+    __swig_getmethods__ = {}
+    for _s in [Widget]:
+        __swig_getmethods__.update(getattr(_s, '__swig_getmethods__', {}))
+    __getattr__ = lambda self, name: _swig_getattr(self, BoxPoser, name)
+    __repr__ = _swig_repr
+
+    def __init__(self):
+        """
+        """
+        this = _robotsim.new_BoxPoser()
+        try:
+            self.this.append(this)
+        except Exception:
+            self.this = this
+
+    def set(self, R, t, dims):
+        """
+        Args:
+            R (:obj:`list of 9 floats (so3 element)`)
+            t (:obj:`list of 3 floats`)
+            dims (:obj:`list of 3 floats`)
+        """
+        return _robotsim.BoxPoser_set(self, R, t, dims)
+
+
+    def setTransform(self, R, t):
+        """
+        Args:
+            R (:obj:`list of 9 floats (so3 element)`)
+            t (:obj:`list of 3 floats`)
+        """
+        return _robotsim.BoxPoser_setTransform(self, R, t)
+
+
+    def setDims(self, dims):
+        """
+        Args:
+            dims (:obj:`list of 3 floats`)
+        """
+        return _robotsim.BoxPoser_setDims(self, dims)
+
+
+    def getTransform(self):
+        """
+        """
+        return _robotsim.BoxPoser_getTransform(self)
+
+
+    def getDims(self):
+        """
+        """
+        return _robotsim.BoxPoser_getDims(self)
+
+    __swig_destroy__ = _robotsim.delete_BoxPoser
+    __del__ = lambda self: None
+BoxPoser_swigregister = _robotsim.BoxPoser_swigregister
+BoxPoser_swigregister(BoxPoser)
+
+class SpherePoser(Widget):
+    """
+
+
+    """
+
+    __swig_setmethods__ = {}
+    for _s in [Widget]:
+        __swig_setmethods__.update(getattr(_s, '__swig_setmethods__', {}))
+    __setattr__ = lambda self, name, value: _swig_setattr(self, SpherePoser, name, value)
+    __swig_getmethods__ = {}
+    for _s in [Widget]:
+        __swig_getmethods__.update(getattr(_s, '__swig_getmethods__', {}))
+    __getattr__ = lambda self, name: _swig_getattr(self, SpherePoser, name)
+    __repr__ = _swig_repr
+
+    def __init__(self):
+        """
+        """
+        this = _robotsim.new_SpherePoser()
+        try:
+            self.this.append(this)
+        except Exception:
+            self.this = this
+
+    def set(self, cr):
+        """
+        Args:
+            cr (:obj:`double const [4]`)
+        """
+        return _robotsim.SpherePoser_set(self, cr)
+
+
+    def get(self):
+        """
+        """
+        return _robotsim.SpherePoser_get(self)
+
+    __swig_destroy__ = _robotsim.delete_SpherePoser
+    __del__ = lambda self: None
+SpherePoser_swigregister = _robotsim.SpherePoser_swigregister
+SpherePoser_swigregister(SpherePoser)
 
 class Mass(_object):
     """
@@ -5852,7 +6016,7 @@ class WorldModel(_object):
 
 
         Args:
-            robot (int or str): 
+            robot (str or int): 
             index (int, optional): 
             name (str, optional): 
 
@@ -6738,7 +6902,7 @@ class IKSolver(_object):
             tol (float, optional): 
 
         Returns:
-            (:obj:`object` or bool):
+            (bool or :obj:`object`):
         """
         return _robotsim.IKSolver_solve(self, *args)
 
@@ -7049,7 +7213,7 @@ def SampleTransform(*args):
 
 
     Args:
-        obj (:obj:`IKObjective` or :obj:`GeneralizedIKObjective`): 
+        obj (:obj:`GeneralizedIKObjective` or :obj:`IKObjective`): 
     """
     return _robotsim.SampleTransform(*args)
 class SimRobotSensor(_object):
@@ -7102,7 +7266,7 @@ class SimRobotSensor(_object):
 
 
         Args:
-            robot (:class:`~klampt.SimRobotController` or :class:`~klampt.RobotModel`): 
+            robot (:class:`~klampt.RobotModel` or :class:`~klampt.SimRobotController`): 
             sensor (:obj:`SensorBase`, optional): 
             name (str, optional): 
             type (str, optional): 
@@ -8464,7 +8628,7 @@ class Simulator(_object):
 
 
         Args:
-            robot (int or :class:`~klampt.RobotModel`): 
+            robot (:class:`~klampt.RobotModel` or int): 
 
         Returns:
             (:class:`~klampt.SimRobotController`):

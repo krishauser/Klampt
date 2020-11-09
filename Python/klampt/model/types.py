@@ -10,7 +10,7 @@ from ..robotsim import WorldModel,RobotModel,RobotModelLink,RigidObjectModel,Ter
 
 _knownTypes = set(['Value','Vector2','Vector3','Matrix3','Point','Rotation','RigidTransform','Vector','Config',
                 'IntArray','StringArray',
-                'Configs','Trajectory','LinearPath','MultiPath',
+                'Configs','Trajectory','LinearPath','MultiPath','SE3Trajectory','SO3Trajectory',
                 'IKGoal','ContactPoint','Hold',
                 'TriangleMesh','PointCloud','VolumeGrid','GeometricPrimitive','ConvexHull','Geometry3D',
                 'WorldModel','RobotModel','RigidObjectModel','TerrainModel'])
@@ -30,6 +30,10 @@ def objectToTypes(object,world=None):
         return 'Hold'
     elif isinstance(object,IKObjective):
         return 'IKGoal'
+    elif isinstance(object,SE3Trajectory):
+        return ['SE3Trajectory','Trajectory']
+    elif isinstance(object,SO3Trajectory):
+        return ['SO3Trajectory','Trajectory']
     elif isinstance(object,Trajectory):
         return 'Trajectory'
     elif isinstance(object,MultiPath):
@@ -137,10 +141,14 @@ def make(type,object=None):
         return ContactPoint()
     elif type == 'Hold':
         return Hold()
-    elif type == 'Trajectory' or type == 'LinearPath':
+    elif type == 'LinearPath':
         return Trajectory()
     elif type == 'MultiPath':
         return MultiPath()
+    elif type == 'SO3Trajectory':
+        return SO3Trajectory()
+    elif type == 'SE3Trajectory':
+        return SE3Trajectory()
     elif type == 'Value':
         return 0
     elif type == 'Geometry3D':

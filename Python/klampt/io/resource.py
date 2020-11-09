@@ -588,8 +588,8 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,refe
         frame (optional): for Vector3, Matrix3, Point, Rotation, and
             RigidTransform types, the returned value will be given relative to
             this reference frame.  The reference frame can be either an element
-            of se3, an ObjectModel, a RobotModelLink, or a string indicating a
-            named rigid element of the world.
+            of se3, a RigidObjectModel, a RobotModelLink, or a string
+            indicating a named rigid element of the world.
 
     Returns:
         (tuple): A pair (save, result) containing:
@@ -644,6 +644,40 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,refe
         if value == None:
             raise RuntimeError("Don't know how to edit objects of type "+type)
 
+    def attach(objects,editor):
+        #attach visualization items to the transform
+        if isinstance(objects,RobotModelLink):
+            assert objects.index >= 0
+            r = objects.robot()
+            descendant = [False]*r.numLinks()
+            descendant[objects.index] = True
+            for i in range(r.numLinks()):
+                p = r.link(i).getParent()
+                if p >= 0 and descendant[p]: descendant[i]=True
+            for i in range(r.numLinks()):
+                if descendant[i]:
+                    editor.attach(r.link(i),se3.mul(se3.inv(objects.getTransform()),r.link(i).getTransform()))
+        elif hasattr(objects,'getTransform') or hasattr(objects,'getCurrentTransform'):
+            editor.attach(objects)
+        elif hasattr(objects,'__iter__') and len(objects) > 0:
+            editor.attach(objects[0])
+            if hasattr(objects[0],'getTransform'):
+                T0 = objects[0].getTransform()
+            elif hasattr(objects[0],'getCurrentTransform'):
+                T0 = objects[0].getCurrentTransform()
+            else:
+                T0 = None
+            for o in objects[1:]:
+                if hasattr(o,'getTransform'):
+                    To = o.getTransform()
+                elif hasattr(o,'getCurrentTransform'):
+                    To = o.getCurrentTransform()
+                else:
+                    To = None
+                if To is None or T0 is None:
+                    raise ValueError("Can't attach referenceObjects that have no transform defined?")
+                editor.attach(o,se3.mul(se3.inv(T0),To))
+
     if editor == 'console':
         return console_edit(name,value,type,description,world,frame)
     elif editor == 'visual':
@@ -654,8 +688,17 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,refe
             assert isinstance(referenceObject,RobotModel),"Can currently only edit Configs values with a RobotModel reference object"
             return editors.run(editors.ConfigsEditor(name,value,description,world,referenceObject))
         elif type == 'Trajectory':
-            assert isinstance(referenceObject,RobotModel),"Can currently only edit Trajectory values with a RobotModel reference object"
-            return editors.run(editors.TrajectoryEditor(name,value,description,world,referenceObject))
+            if len(value.milestones)==0 or len(value.milestones[0])>3:
+                assert hasattr(value,'robot') or isinstance(referenceObject,RobotModel),"Can currently only edit N>3 Trajectory values with a RobotModel reference object"
+                editor = editors.TrajectoryEditor(name,value,description,world,referenceObject)
+            else:
+                editor = editors.TrajectoryEditor(name,value,description,world)
+                attach(referenceObject,editor)
+            return editors.run(editor)
+        elif type == 'SE3Trajectory':
+            editor = editors.TrajectoryEditor(name,value,description,world)
+            attach(referenceObject,editor)
+            return editors.run(editor)
         elif type == 'Vector3' or type == 'Point':
             if hasattr(frame,'getTransform'):
                 frame = frame.getTransform()
@@ -672,30 +715,19 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,refe
             editor = editors.RigidTransformEditor(name,value,description,world,Tref)
             if type == 'Rotation':
                 editor.disableTranslation()
-            #attach visualization items to the transform
-            if isinstance(referenceObject,RobotModelLink):
-                assert referenceObject.index >= 0
-                r = referenceObject.robot()
-                descendant = [False]*r.numLinks()
-                descendant[referenceObject.index] = True
-                for i in range(r.numLinks()):
-                    p = r.link(i).getParent()
-                    if p >= 0 and descendant[p]: descendant[i]=True
-                for i in range(r.numLinks()):
-                    if descendant[i]:
-                        editor.attach(r.link(i))
-                editor.attach(referenceObject)
-            elif hasattr(referenceObject,'getTransform'):
-                editor.attach(referenceObject)
-            elif hasattr(referenceObject,'__iter__'):
-                for i in referenceObject:
-                    editor.attach(i)
+            attach(referenceObject,editor)
             #Run!
             if type == 'Rotation':
                 #convert from se3 to so3
                 return editors.run(editor)[0]
             else:
                 return editors.run(editor)
+        elif type == "GeometricPrimitive":
+            Tref = frame
+            if hasattr(frame,'getTransform'):
+                Tref = frame.getTransform()
+            editor = editors.GeometricPrimitiveEditor(name,value,description,world,Tref)
+            return editors.run(editor)
         elif type == 'WorldModel':
             return editors.run(editors.WorldEditor(name,value,description))
         else:

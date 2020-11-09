@@ -3706,6 +3706,205 @@ class RobotPoser(Widget):
 RobotPoser_swigregister = _robotsim.RobotPoser_swigregister
 RobotPoser_swigregister(RobotPoser)
 
+class AABBPoser(Widget):
+    """
+
+
+    """
+
+    __swig_setmethods__ = {}
+    for _s in [Widget]:
+        __swig_setmethods__.update(getattr(_s, '__swig_setmethods__', {}))
+    __setattr__ = lambda self, name, value: _swig_setattr(self, AABBPoser, name, value)
+    __swig_getmethods__ = {}
+    for _s in [Widget]:
+        __swig_getmethods__.update(getattr(_s, '__swig_getmethods__', {}))
+    __getattr__ = lambda self, name: _swig_getattr(self, AABBPoser, name)
+    __repr__ = _swig_repr
+
+    def __init__(self):
+        """
+        __init__(AABBPoser self) -> AABBPoser
+
+
+
+        """
+        this = _robotsim.new_AABBPoser()
+        try:
+            self.this.append(this)
+        except Exception:
+            self.this = this
+
+    def set(self, bmin, bmax):
+        """
+        set(AABBPoser self, double const [3] bmin, double const [3] bmax)
+
+
+
+        """
+        return _robotsim.AABBPoser_set(self, bmin, bmax)
+
+
+    def setFrame(self, R, t):
+        """
+        setFrame(AABBPoser self, double const [9] R, double const [3] t)
+
+
+
+        """
+        return _robotsim.AABBPoser_setFrame(self, R, t)
+
+
+    def get(self):
+        """
+        get(AABBPoser self)
+
+
+
+        """
+        return _robotsim.AABBPoser_get(self)
+
+    __swig_destroy__ = _robotsim.delete_AABBPoser
+    __del__ = lambda self: None
+AABBPoser_swigregister = _robotsim.AABBPoser_swigregister
+AABBPoser_swigregister(AABBPoser)
+
+class BoxPoser(Widget):
+    """
+
+
+    """
+
+    __swig_setmethods__ = {}
+    for _s in [Widget]:
+        __swig_setmethods__.update(getattr(_s, '__swig_setmethods__', {}))
+    __setattr__ = lambda self, name, value: _swig_setattr(self, BoxPoser, name, value)
+    __swig_getmethods__ = {}
+    for _s in [Widget]:
+        __swig_getmethods__.update(getattr(_s, '__swig_getmethods__', {}))
+    __getattr__ = lambda self, name: _swig_getattr(self, BoxPoser, name)
+    __repr__ = _swig_repr
+
+    def __init__(self):
+        """
+        __init__(BoxPoser self) -> BoxPoser
+
+
+
+        """
+        this = _robotsim.new_BoxPoser()
+        try:
+            self.this.append(this)
+        except Exception:
+            self.this = this
+
+    def set(self, R, t, dims):
+        """
+        set(BoxPoser self, double const [9] R, double const [3] t, double const [3] dims)
+
+
+
+        """
+        return _robotsim.BoxPoser_set(self, R, t, dims)
+
+
+    def setTransform(self, R, t):
+        """
+        setTransform(BoxPoser self, double const [9] R, double const [3] t)
+
+
+
+        """
+        return _robotsim.BoxPoser_setTransform(self, R, t)
+
+
+    def setDims(self, dims):
+        """
+        setDims(BoxPoser self, double const [3] dims)
+
+
+
+        """
+        return _robotsim.BoxPoser_setDims(self, dims)
+
+
+    def getTransform(self):
+        """
+        getTransform(BoxPoser self)
+
+
+
+        """
+        return _robotsim.BoxPoser_getTransform(self)
+
+
+    def getDims(self):
+        """
+        getDims(BoxPoser self)
+
+
+
+        """
+        return _robotsim.BoxPoser_getDims(self)
+
+    __swig_destroy__ = _robotsim.delete_BoxPoser
+    __del__ = lambda self: None
+BoxPoser_swigregister = _robotsim.BoxPoser_swigregister
+BoxPoser_swigregister(BoxPoser)
+
+class SpherePoser(Widget):
+    """
+
+
+    """
+
+    __swig_setmethods__ = {}
+    for _s in [Widget]:
+        __swig_setmethods__.update(getattr(_s, '__swig_setmethods__', {}))
+    __setattr__ = lambda self, name, value: _swig_setattr(self, SpherePoser, name, value)
+    __swig_getmethods__ = {}
+    for _s in [Widget]:
+        __swig_getmethods__.update(getattr(_s, '__swig_getmethods__', {}))
+    __getattr__ = lambda self, name: _swig_getattr(self, SpherePoser, name)
+    __repr__ = _swig_repr
+
+    def __init__(self):
+        """
+        __init__(SpherePoser self) -> SpherePoser
+
+
+
+        """
+        this = _robotsim.new_SpherePoser()
+        try:
+            self.this.append(this)
+        except Exception:
+            self.this = this
+
+    def set(self, cr):
+        """
+        set(SpherePoser self, double const [4] cr)
+
+
+
+        """
+        return _robotsim.SpherePoser_set(self, cr)
+
+
+    def get(self):
+        """
+        get(SpherePoser self)
+
+
+
+        """
+        return _robotsim.SpherePoser_get(self)
+
+    __swig_destroy__ = _robotsim.delete_SpherePoser
+    __del__ = lambda self: None
+SpherePoser_swigregister = _robotsim.SpherePoser_swigregister
+SpherePoser_swigregister(SpherePoser)
+
 class Mass(_object):
     """
 
