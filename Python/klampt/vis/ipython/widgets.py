@@ -227,32 +227,31 @@ class KlamptWidget(widgets.DOMWidget):
             else:
                 return self.add(name,item.milestones)
         elif type == 'Geometry3D':
-            g = item.convert('TriangleMesh')
-            tris = g.getTriangleMesh()
-            #Don't have Trimesh capability yet
-            verts = []
-            for i in range(0,len(tris.indices),3):
-                a,b,c = tris.indices[i],tris.indices[i+1],tris.indices[i+2]
-                verts += [tris.vertices[a*3],tris.vertices[a*3+1],tris.vertices[a*3+2]]
-                verts += [tris.vertices[b*3],tris.vertices[b*3+1],tris.vertices[b*3+2]]
-                verts += [tris.vertices[c*3],tris.vertices[c*3+1],tris.vertices[c*3+2]]
-            verts = tuple(verts)
-            self._extras[name] = ('Trilist',verts)
-            print("Vertex size",len(verts))
-            self._do_rpc({'type':'add_trilist','name':name,'verts':verts}) 
-            return [name]
+            if item.type() == 'PointCloud':
+                pc = item.getPointCloud()
+                self.add(name,pc,'PointCloud')
+                self.setTransform(name,*item.getCurrentTransform())
+            else:
+                g = item.convert('TriangleMesh')
+                tris = g.getTriangleMesh()
+                self.add(name,tris,'TriangleMesh')
+                self.setTransform(name,*item.getCurrentTransform())
         elif type == 'TriangleMesh':
             tris = item
-            #Don't have Trimesh capability yet
-            verts = []
-            for i in range(0,len(tris.indices),3):
-                a,b,c = tris.indices[i],tris.indices[i+1],tris.indices[i+2]
-                verts += [tris.vertices[a*3],tris.vertices[a*3+1],tris.vertices[a*3+2]]
-                verts += [tris.vertices[b*3],tris.vertices[b*3+1],tris.vertices[b*3+2]]
-                verts += [tris.vertices[c*3],tris.vertices[c*3+1],tris.vertices[c*3+2]]
-            verts = tuple(verts)
-            self._extras[name] = ('Trilist',verts)
-            self._do_rpc({'type':'add_trilist','name':name,'verts':verts}) 
+            data = ([v for v in tris.vertices],[i for i in tris.indices])
+            self._extras[name] = ('Trilist',data)
+            self._do_rpc({'type':'add_trimesh','name':name,'verts':data[0],'tris':data[1]} )
+            return [name]
+        elif type == 'PointCloud':
+            pc = item
+            from klampt.model import sensing
+            colors = sensing.point_cloud_colors(pc,'rgb')
+            data = ([v for v in pc.vertices],colors)
+            self._extras[name] = ('Points',data)
+            msg = {'type':'add_points','name':name,'verts':data[0],'size':0.01}
+            if colors is not None:
+                msg['colors'] = colors
+            self._do_rpc(msg) 
             return [name]
         elif type == 'WorldModel':
             if name != 'world' or self.world is not None:

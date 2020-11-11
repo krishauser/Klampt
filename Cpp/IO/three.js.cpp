@@ -70,6 +70,7 @@ void ThreeJSExport(WorldSimulation& sim,AnyCollection& out,ThreeJSCache& cache);
 void ThreeJSExport(const Robot& robot,AnyCollection& out,ThreeJSCache& cache);
 void ThreeJSExport(const RigidObject& object,AnyCollection& out,ThreeJSCache& cache);
 void ThreeJSExport(const Terrain& terrain,AnyCollection& out,ThreeJSCache& cache);
+void ThreeJSExport(const ManagedGeometry& geom,AnyCollection& out,ThreeJSCache& cache);
 void ThreeJSExportGeometry(const ManagedGeometry& geom,AnyCollection& out,ThreeJSCache& cache);
 void ThreeJSExportAppearance(const ManagedGeometry& geom,AnyCollection& out,ThreeJSCache& cache);
 void ThreeJSExport(const Geometry::AnyCollisionGeometry3D& geom,AnyCollection& out,ThreeJSCache& cache);
@@ -320,14 +321,7 @@ void ThreeJSExport(const Robot& robot,AnyCollection& out,ThreeJSCache& cache)
     llists[i] = &me;
     me["uuid"] = MakeRandomUUID();
     me["name"] = robot.LinkName(i);
-    if(robot.geomManagers[i].Empty()) {
-      me["type"] = "Group";
-    }
-    else {
-      me["type"] = "Mesh";
-      ThreeJSExportGeometry(robot.geomManagers[i],me["geometry"],cache);
-      ThreeJSExportAppearance(robot.geomManagers[i],me["material"],cache);
-    }
+    ThreeJSExport(robot.geomManagers[i],me,cache);
     RigidTransform Tparent,Trel;
     if(robot.parents[i] < 0) Tparent.setIdentity();
     else Tparent = robot.links[robot.parents[i]].T_World;
@@ -381,14 +375,7 @@ void ThreeJSExport(const RigidObject& object,AnyCollection& out,ThreeJSCache& ca
 {
   out["uuid"] = MakeRandomUUID();
   out["name"] = object.name;
-  if(object.geometry.Empty()) {
-    out["type"] = "Group";
-  }
-  else {
-    out["type"] = "Mesh";
-    ThreeJSExportGeometry(object.geometry,out["geometry"],cache);
-    ThreeJSExportAppearance(object.geometry,out["material"],cache);
-  }
+  ThreeJSExport(object.geometry,out,cache);
   ThreeJSExport(object.T,out["matrix"]);
 }
 
@@ -396,14 +383,6 @@ void ThreeJSExportTransforms(const RigidObject& object,AnyCollection& out)
 {
   //out["uuid"] = MakeRandomUUID();
   out["name"] = object.name;
-  if(object.geometry.Empty()) {
-    //out["type"] = "Group";
-  }
-  else {
-    //out["type"] = "Mesh";
-    //ThreeJSExportGeometry(object.geometry,out["geometry"],cache);
-    //ThreeJSExportAppearance(object.geometry,out["material"],cache);
-  }
   ThreeJSExport(object.T,out["matrix"]);
 }
 
@@ -411,14 +390,7 @@ void ThreeJSExport(const Terrain& terrain,AnyCollection& out,ThreeJSCache& cache
 {
   out["uuid"] = MakeRandomUUID();
   out["name"] = terrain.name;
-  if(terrain.geometry.Empty()) {
-    out["type"] = "Group";
-  }
-  else {
-    out["type"] = "Mesh";
-    ThreeJSExportGeometry(terrain.geometry,out["geometry"],cache);
-    ThreeJSExportAppearance(terrain.geometry,out["material"],cache);
-  }
+  ThreeJSExport(terrain.geometry,out,cache);
   RigidTransform T; T.setIdentity();
   ThreeJSExport(T,out["matrix"]);
 }
@@ -427,17 +399,26 @@ void ThreeJSExportTransforms(const Terrain& terrain,AnyCollection& out)
 {
   //out["uuid"] = MakeRandomUUID();
   out["name"] = terrain.name;
-  if(terrain.geometry.Empty()) {
-    //out["type"] = "Group";
-  }
-  else {
-    //out["type"] = "Mesh";
-    //ThreeJSExportGeometry(terrain.geometry,out["geometry"],cache);
-    //ThreeJSExportAppearance(terrain.geometry,out["material"],cache);
-  }
   RigidTransform T; T.setIdentity();
   ThreeJSExport(T,out["matrix"]);
 }
+
+
+void ThreeJSExport(const ManagedGeometry& geom,AnyCollection& out,ThreeJSCache& cache)
+{
+  if(geom.Empty()) {
+    out["type"] = "Group";
+  }
+  else {
+    if(geom->type == Geometry::AnyGeometry3D::PointCloud)
+      out["type"] = "Points";
+    else
+      out["type"] = "Mesh";
+    ThreeJSExport(*geom,out["geometry"],cache);
+    ThreeJSExport(*geom.Appearance(),*geom,out["material"],cache);
+  }
+}
+
 
 void ThreeJSExportGeometry(const ManagedGeometry& geom,AnyCollection& out,ThreeJSCache& cache)
 {
@@ -532,19 +513,21 @@ void ThreeJSExport(const Meshing::PointCloud3D& pc,AnyCollection& out)
     out["type"] = "BufferGeometry";
     AnyCollection attributes;
   #endif
-  AnyCollection vertices;
-  vertices.resize(pc.points.size()*3);
+  vector<float> vertices;
+  vertices.reserve(pc.points.size()*3);
   for(size_t i=0;i<pc.points.size();i++) {
-    vertices[int(i*3)] = float(pc.points[i].x);
-    vertices[int(i*3+1)] = float(pc.points[i].y);
-    vertices[int(i*3+2)] = float(pc.points[i].z);
+    if(IsFinite(pc.points[i].x) && IsFinite(pc.points[i].y) && IsFinite(pc.points[i].z)) {
+      vertices.push_back(float(pc.points[i].x));
+      vertices.push_back(float(pc.points[i].y));
+      vertices.push_back(float(pc.points[i].z));
+    }
   }
   #if THREE_JS_OLD_VERSION
-    out["data"]["position"] = vertices;
+    out["data"]["position"] = AnyCollection(vertices);
   #else
     AnyCollection vertarray;
     vertarray["type"] = "Float32Array";
-    vertarray["array"] = vertices;
+    vertarray["array"] = AnyCollection(vertices);
     vertarray["itemSize"] = 3;
     attributes["position"] = vertarray;
     out["data"]["position"] = vertarray;
@@ -554,25 +537,36 @@ void ThreeJSExport(const Meshing::PointCloud3D& pc,AnyCollection& out)
     AnyCollection colors;
     
     #if THREE_JS_OLD_VERSION
-      colors.resize(pc.points.size()*3);
+      colors.resize(vertices.size());
+      int k=0;
       for(size_t i=0;i<pc.points.size();i++) {
-        colors[int(i*3)] = float(rgba[i].x);
-        colors[int(i*3+1)] = float(rgba[i].y);
-        colors[int(i*3+2)] = float(rgba[i].z);
+        if(IsFinite(pc.points[i].x) && IsFinite(pc.points[i].y) && IsFinite(pc.points[i].z)) {
+          colors[int(k*3)] = float(rgba[i].x);
+          colors[int(k*3+1)] = float(rgba[i].y);
+          colors[int(k*3+2)] = float(rgba[i].z);
+          k ++;
+        }
       }
       out["data"]["color"] = colors;
     #else
-      colors.resize(pc.points.size()*4);
+      //TODO: partially transparent point clouds?
+      //colors.resize((vertices.size()/3)*4);
+      colors.resize(vertices.size()/3);
+      int k=0;
       for(size_t i=0;i<pc.points.size();i++) {
-        colors[int(i*3)] = int(rgba[i].x*255.0);
-        colors[int(i*3+1)] = int(rgba[i].y*255.0);
-        colors[int(i*3+2)] = int(rgba[i].z*255.0);
-        colors[int(i*3+3)] = int(rgba[i].w*255.0);
+        if(IsFinite(pc.points[i].x) && IsFinite(pc.points[i].y) && IsFinite(pc.points[i].z)) {
+          colors[int(k*3)] = int(rgba[i].x*255.0);
+          colors[int(k*3+1)] = int(rgba[i].y*255.0);
+          colors[int(k*3+2)] = int(rgba[i].z*255.0);
+          k ++;
+        }
       }
       AnyCollection colorarray;
       colorarray["type"] = "Uint8Array";
       colorarray["array"] = colors;
-      colorarray["itemSize"] = 4;
+      //colorarray["itemSize"] = 4;
+      colorarray["itemSize"] = 3;
+      colorarray["normalized"] = true;
       attributes["color"] = colorarray;
     #endif //THREE_JS_OLD_VERSION
   }
@@ -631,6 +625,22 @@ void ThreeJSExport(const Geometry::AnyCollisionGeometry3D& geom,AnyCollection& o
     out["uuid"] = cache.GetUUID(geom);
     ThreeJSExport(pc,out);
   }
+  else if(geom.type == Geometry::AnyCollisionGeometry3D::ConvexHull) {
+    Geometry::AnyGeometry3D mesh;
+    const AnyGeometry3D& ggeom = geom;
+    if(!ggeom.Convert(Geometry::AnyGeometry3D::TriangleMesh,mesh))
+      fprintf(stderr,"Unable to save geometries of type %s to three.js, problem exporting to TriangleMesh\n",geom.TypeName());
+    else
+      ThreeJSExport(mesh.AsTriangleMesh(),out);
+  }
+  else if(geom.type == Geometry::AnyCollisionGeometry3D::ImplicitSurface) {
+    Geometry::AnyGeometry3D mesh;
+    const AnyGeometry3D& ggeom = geom;
+    if(!ggeom.Convert(Geometry::AnyGeometry3D::TriangleMesh,mesh))
+      fprintf(stderr,"Unable to save geometries of type %s to three.js, problem exporting to TriangleMesh\n",geom.TypeName());
+    else
+      ThreeJSExport(mesh.AsTriangleMesh(),out);
+  }
   else {
     //can't export files of that type
     fprintf(stderr,"Unable to save geometries of type %s to three.js!\n",geom.TypeName());
@@ -659,12 +669,17 @@ void ThreeJSExport(const GLDraw::GeometryAppearance& app,const Geometry::AnyColl
     }
     else {
       out["type"] = "PointsMaterial";
-      int rgb = ToRGB32(app.vertexColor);
-      out["color"] = rgb;
-      out["emissive"] = 0;
-      if(app.vertexColor.rgba[3] != 1.0) {
-        out["transparent"] = true;
-        out["opacity"] = app.vertexColor.rgba[3];
+      out["size"] = 0.01;
+      if(geom.AsPointCloud().HasColor()) {
+        out["vertexColors"] = true;
+      }
+      else {
+        int rgb = ToRGB32(app.vertexColor);
+        out["color"] = rgb;
+        if(app.vertexColor.rgba[3] != 1.0) {
+          out["transparent"] = true;
+          out["opacity"] = app.vertexColor.rgba[3];
+        }
       }
     }
   }
@@ -713,6 +728,13 @@ void ThreeJSExport(const Terrain& terrain,AnyCollection& out)
 {
   ThreeJSCache cache;
   ThreeJSExport(terrain,out,cache);
+}
+///Exports geometry to a three.js scene Geometry instance.  The "uuid"
+///element of the output gives the unique ID number that can be used elsewhere
+void ThreeJSExport(const ManagedGeometry& geom,AnyCollection& out)
+{
+  ThreeJSCache cache;
+  ThreeJSExport(geom,out,cache);
 }
 ///Exports geometry to a three.js scene Geometry instance.  The "uuid"
 ///element of the output gives the unique ID number that can be used elsewhere

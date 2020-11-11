@@ -576,7 +576,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
 
         item.plugin.add("world",self.world)
         item.plugin.add(basename,obj)
-        item.plugin.addText("label",basename,(10,10))
+        item.plugin.addText("label",basename,position=(10,10))
         try:
             type = vis.objectToVisType(obj,self.world)
         except:

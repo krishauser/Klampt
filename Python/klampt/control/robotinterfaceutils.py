@@ -202,6 +202,9 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
         self._emulator.lastClock = None
         return True
 
+    def close(self):
+        return self._base.close()
+
     def startStep(self):
         assert not self._subRobot,"Can't do startStep on a sub-interface"
         self._try('startStep',[],lambda *args:0)
@@ -620,6 +623,14 @@ class MultiRobotInterface(RobotInterfaceBase):
                 print ("MultiRobotInterface: Part",p,"failed to initialize")
                 return False
         return True
+
+    def close(self):
+        res = True
+        for (p,c) in self._partInterfaces.items():
+            if not c.close():
+                print ("MultiRobotInterface: Part",p,"failed to close")
+                res = False
+        return res
 
     def startStep(self):
         for (p,c) in self._partInterfaces.items():
@@ -1666,3 +1677,4 @@ class _SubRobotInterfaceCompleter(RobotInterfaceCompleter):
 
     def destinationVelocity(self):
         return self._toPart(self._parent.destinationVelocity())
+

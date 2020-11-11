@@ -4,7 +4,12 @@ define(function(){
         console.info('Loading the klampt-jupyter-widget extension');
         //older version uses jupyter-js-widgets, not @jupyter-widgets/base
         define('klampt-jupyter-widget', ["@jupyter-widgets/base","nbextensions/klampt/KlamptFrontend"], function(widgets,KLAMPT) {
-
+            if(widgets===undefined) {
+                throw new Error("jupyter-widgets/base was not found")
+            }
+            if(KLAMPT===undefined) {
+                throw new Error("KlamptFrontend.js was not found")
+            }
             var KlamptModel = widgets.DOMWidgetModel.extend({
                 defaults: _.extend(widgets.DOMWidgetModel.prototype.defaults(), {
                     _model_name : 'KlamptModel',

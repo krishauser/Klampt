@@ -335,25 +335,21 @@ def colorize(object,value,colormap=None,feature=None,vrange=None,lighting=None):
             appearance.setProperties(hascolor+1,colors[:,1].tolist())
             appearance.setProperties(hascolor+2,colors[:,2].tolist())
         elif prop == 'rgb':
-            r = colors[:,0]*255.0
-            g = colors[:,1]*255.0
-            b = colors[:,2]*255.0
-            rgb = np.bitwise_or(np.bitwise_or(np.left_shift(r.astype(np.uint8),16),
-                                        np.left_shift(g.astype(np.uint8),8)),
-                                        b.astype(np.uint8))
+            r = (colors[:,0]*255.0).astype(np.uint32)
+            g = (colors[:,1]*255.0).astype(np.uint32)
+            b = (colors[:,2]*255.0).astype(np.uint32)
+            rgb = np.bitwise_or.reduce((np.left_shift(r,16),np.left_shift(g,8),b))
             appearance.setProperties(hascolor,rgb.tolist())
         elif prop == 'rgba':
-            r = colors[:,0]*255.0
-            g = colors[:,1]*255.0
-            b = colors[:,2]*255.0
+            r = (colors[:,0]*255.0).astype(np.uint32)
+            g = (colors[:,1]*255.0).astype(np.uint32)
+            b = (colors[:,2]*255.0).astype(np.uint32)
             if colors.shape[1] == 3:
-                a = np.full(colors.shape[0],255.0)
+                a = np.full(colors.shape[0],255,dtype=np.uint8)
             else:
-                a = colors[:,3]*255.0
-            rgba = np.bitwise_or(np.bitwise_or(np.left_shift(r.astype(np.uint32),16),
-                                    np.left_shift(g.astype(np.uint32),8)),
-                                np.bitwise_or(np.left_shift(a.astype(np.uint32),24),
-                                    b.astype(np.uint32)))
+                a = (colors[:,3]*255.0).astype(np.uint32)
+            rgba = np.bitwise_or.reduce((np.left_shift(r,16),np.left_shift(g,8),
+                                        np.left_shift(a,24),b))
             appearance.setProperties(hascolor,rgba.tolist())
         if isinstance(geometry,Geometry3D):
             #write it back to the geometry
