@@ -138,7 +138,7 @@ void URDFLinkNode::GetGeometryProperty(bool useVisGeom){
 		  	std::shared_ptr<urdf::Cylinder> cylinder = std::static_pointer_cast<urdf::Cylinder>(geom);
 		  	geomPrimitive = true;
 			Cylinder3D c;
-			c.center.setZero();
+			c.center.set(0,0,-cylinder->length*0.5);
 			c.axis.set(0,0,1);
 			c.radius = cylinder->radius;
 			c.height = cylinder->length;
