@@ -1103,7 +1103,7 @@ def edit(name,doedit=True):
     - Vector3 (3-list)
     - Matrix3 (9-list)
     - Config (n-list, where n is the # of robot links)
-    - RigidTransform (so3 object)
+    - RigidTransform (se3 object)
     - :class:`~klampt.robotsim.RobotModel`
     - :class:`~klampt.robotsim.RigidObjectModel`
     - :class:`~klampt.model.coordinate.Point`
@@ -1114,7 +1114,7 @@ def edit(name,doedit=True):
 
     - Vector3 (3-lists)
     - Config (n-list, where n is the # of robot links)
-    - RigidTransform (so3 objects)
+    - RigidTransform (se3 objects)
     - :class:`~klampt.robotsim.RobotModel`
     - :class:`~klampt.robotsim.RigidObjectModel`
     - :class:`~klampt.model.coordinate.Point`

@@ -1,6 +1,24 @@
 
 // File: index.xml
 
+// File: classAABBPoser.xml
+
+
+%feature("docstring") AABBPoser "
+";
+
+%feature("docstring") AABBPoser::set "
+";
+
+%feature("docstring") AABBPoser::get "
+";
+
+%feature("docstring") AABBPoser::AABBPoser "
+";
+
+%feature("docstring") AABBPoser::setFrame "
+";
+
 // File: classAppearance.xml
 
 
@@ -196,6 +214,30 @@ or off. feature can be ALL, VERTICES, EDGES, or FACES.
 ";
 
 %feature("docstring") Appearance::Appearance "
+";
+
+// File: classBoxPoser.xml
+
+
+%feature("docstring") BoxPoser "
+";
+
+%feature("docstring") BoxPoser::setDims "
+";
+
+%feature("docstring") BoxPoser::setTransform "
+";
+
+%feature("docstring") BoxPoser::set "
+";
+
+%feature("docstring") BoxPoser::getTransform "
+";
+
+%feature("docstring") BoxPoser::getDims "
+";
+
+%feature("docstring") BoxPoser::BoxPoser "
 ";
 
 // File: classContactParameters.xml
@@ -3715,6 +3757,21 @@ Returns a controller for the indicated robot, either by index or by RobotModel.
 %feature("docstring") Simulator::controller "
 
 Returns a controller for the indicated robot, either by index or by RobotModel.  
+";
+
+// File: classSpherePoser.xml
+
+
+%feature("docstring") SpherePoser "
+";
+
+%feature("docstring") SpherePoser::SpherePoser "
+";
+
+%feature("docstring") SpherePoser::set "
+";
+
+%feature("docstring") SpherePoser::get "
 ";
 
 // File: classTerrainModel.xml

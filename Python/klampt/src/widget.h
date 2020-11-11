@@ -66,6 +66,7 @@ class PointPoser : public Widget
   void get(double out[3]);
   ///Sets the reference axes (by default aligned to x,y,z)
   void setAxes(const double R[9]);
+  void enableAxes(bool x,bool y,bool z);
 };
 
 class TransformPoser : public Widget
@@ -77,7 +78,6 @@ class TransformPoser : public Widget
   void enableTranslation(bool);
   void enableRotation(bool);
 };
-
 
 class ObjectPoser : public Widget
 {
@@ -98,6 +98,35 @@ class RobotPoser : public Widget
   void addIKConstraint(const IKObjective& obj);
   void clearIKConstraints();
 };
+
+class AABBPoser : public Widget
+{
+ public:
+  AABBPoser();
+  void set(const double bmin[3],const double bmax[3]);
+  void setFrame(const double R[9],const double t[3]);
+  void get(double out[3],double out2[3]);
+};
+
+class BoxPoser : public Widget
+{
+ public:
+  BoxPoser();
+  void set(const double R[9],const double t[3],const double dims[3]);
+  void setTransform(const double R[9],const double t[3]);
+  void setDims(const double dims[3]);
+  void getTransform(double out[9],double out2[3]);
+  void getDims(double out[3]);
+};
+
+class SpherePoser : public Widget
+{
+ public:
+  SpherePoser();
+  void set(const double cr[4]);
+  void get(double out[4]);
+};
+
 
 
 #endif

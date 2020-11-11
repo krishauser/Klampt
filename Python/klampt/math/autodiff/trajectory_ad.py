@@ -5,10 +5,9 @@
  =====================  =============  ========================================
  hermite                Y              hermite(x1,v1,x2,v2,u) -> R^n
  GeodesicInterpolate    1(u)           ginterp[geodesic](a,b,u) -> R^n
- GeodesicDistance       1              gdist[geodesic](a,b) -> R^n
+ GeodesicDistance       1              gdist[geodesic](a,b) -> R
  TrajectoryEval         1              eval[Trajectory,endBehavior](t) -> R^n
  Trajectory             1              trajectory[n,end](ts,xs,t) -> R^n
-#HermiteTrajectory      1              hermiteTrajectory[n,end](ts,xs,vs,t) -> R^n
  =====================  =============  ========================================
 
 """
@@ -175,7 +174,14 @@ class GeodesicDistance(ADFunctionInterface):
 
 
 class TrajectoryEval(ADFunctionInterface):
-    """Autodiff wrapper of traj.eval(t).  traj can be any Trajectory class."""
+    """Autodiff wrapper of traj.eval(t). 
+
+    Args:
+        traj (Trajectory): the trajectory to evaluate. Can be any Trajectory
+            subclass.
+        endBehavior (string): how to evaluate out-of-domain times. Can be
+            'halt' or 'loop'.
+    """
     def __init__(self,traj,endBehavior='halt'):
         self.traj = traj
         if isinstance(self.traj,trajectory.SE3Trajectory) or isinstance(self.traj,trajectory.SE3HermiteTrajectory):
@@ -210,16 +216,25 @@ class Trajectory(ADFunctionInterface):
     """Autodiff piecewise linear interpolation traj(times,milestone_stack,t).  
     The dimensionality or a robot must be provided on initialization.
 
-    Also, t can be either a scalar or an array of times.  Providing an array
-    is faster.
+    ``milestone_stack`` is a flattened array of the trajectory's milestones.
+
+    Also, ``t`` can be either a scalar or an array of times.  Providing an 
+    array of times is faster than calling this repeatedly for multiple times.
+
+    Args:
+        n_or_robot (int or RobotModel): the dimension of the state, or the
+            robot. In this case the milestones must be robot configurations.
+        endBehavior (string): how to evaluate out-of-domain times. Can be
+            'halt' or 'loop'.
     """
-    def __init__(self,n_or_robot):
+    def __init__(self,n_or_robot,endBehavior='halt'):
         if isinstance(n_or_robot,RobotModel):
             self.robot = n_or_robot
             self.n = self.robot.numLinks()
         else:
             self.n = n
             self.robot = None
+        self.endBehavior = endBehavior
     def __str__(self):
         if self.robot is None:
             return "trajectory.Trajectory[%d]"%(self.n,)
@@ -239,9 +254,9 @@ class Trajectory(ADFunctionInterface):
         else:
             traj = trajectory.RobotTrajectory(self.robot,ts,xs.reshape(len(ts),self.n))
         if _scalar(t):
-            return np.array(traj.eval(t))
+            return np.array(traj.eval(t),self.endBehavior)
         else:
-            return np.array([traj.eval(v) for v in t])
+            return np.array([traj.eval(v,self.endBehavior) for v in t])
     def jvp(self,arg,darg,ts,xs,t):
         if xs.shape != (len(ts)*self.n,):
             raise ValueError("Invalid size of the xs array, must be a stacked vector of milestones of size %d x %d"%(len(ts),self.n))
@@ -251,16 +266,16 @@ class Trajectory(ADFunctionInterface):
             traj = trajectory.RobotTrajectory(self.robot,ts,xs.reshape(len(ts),self.n))
         if arg==2:
             if _scalar(t):
-                return np.array(traj.deriv(t))
+                return np.array(traj.deriv(t,self.endBehavior))
             else:
-                return np.array([traj.deriv(v) for v in t])
+                return np.array([traj.deriv(v,self.endBehavior) for v in t])
         else:
             if darg.shape != (self.n,):
                 raise ValueError("Invalid size of the darg array, must have size %d"%(self.n,))
             if _scalar(t):
-                segs = [traj.getSegment(t)]
+                segs = [traj.getSegment(t,self.endBehavior)]
             else:
-                segs = [traj.getSegment(v) for v in t]
+                segs = [traj.getSegment(v,self.endBehavior) for v in t]
             derivs = []
             for index,(i,u) in enumerate(segs):
                 if i<0 or i+1 >= len(ts): derivs.append(np.zeros(self.n))

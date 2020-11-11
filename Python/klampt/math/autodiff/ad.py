@@ -249,8 +249,8 @@ autodiff versions of many Klamp't functions are found in:
 
 import numpy as np
 
-#Resolution used for finite differences
 FINITE_DIFFERENCE_RES = 1e-6
+"""The resolution used for finite differences."""
 
 class ADFunctionInterface:
     """The base class for a new auto-differentiable function. 
@@ -319,7 +319,7 @@ class ADFunctionInterface:
 
         Args:
             args (list): a list of arguments, which are either ndarrays or
-            scalars.
+                scalars.
         """
         raise NotImplementedError()
 
