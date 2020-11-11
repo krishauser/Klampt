@@ -112,8 +112,8 @@ def set_sensor_xform(sensor,T,link=None):
 
     Args:
         sensor (SimRobotSensor)
-        T (se3 element or coordinates.Frame): desired local coordinates of the sensor
-            on its link.
+        T (se3 element or coordinates.Frame): desired local coordinates of the
+            sensor on its link.
         link (int or RobotModelLink, optional): if provided, the link of the
             sensor is modified. 
 
@@ -149,27 +149,32 @@ def set_sensor_xform(sensor,T,link=None):
 
 
 def camera_to_images(camera,image_format='numpy',color_format='channels'):
-    """Given a SimRobotSensor that is a CameraSensor, returns either the RGB image, the depth image, or both.
+    """Given a SimRobotSensor that is a CameraSensor, returns either the RGB
+    image, the depth image, or both.
 
     Args:
         camera (SimRobotSensor): a sensor that is of 'CameraSensor' type
         image_format (str): governs the return type.  Can be:
 
-            * 'numpy' (default): returns numpy arrays.  Depending on the value of color_format,
-                the RGB image either has shape (h,w,3) and dtype uint8 or (h,w) and dtype uint32. 
-                Depth images as numpy arrays with shape (h,w).  Will fall back to 'native' if numpy
-                is not available.
-            * 'native': returns list-of-lists arrays in the same format as above
+            * 'numpy' (default): returns numpy arrays.  Depending on the
+              value of color_format, the RGB image either has shape (h,w,3)
+              and dtype uint8 or (h,w) and dtype uint32. Depth images as
+              numpy arrays with shape (h,w).  Will fall back to 'native' if 
+              numpy is not available.
+            * 'native': returns list-of-lists arrays in the same format as
+              above
 
-        color_format (str): governs how pixels in the RGB result are packed.  Can be:
+        color_format (str): governs how pixels in the RGB result are packed. 
+        Can be:
 
-            * 'channels' (default): returns a 3D array with 3 channels corresponding to R, G, B
-                values in the range [0,255]. 
-            * 'rgb' returns a 2D array with a 32-bit integer channel, with R,G,B channels packed in
-                order XRGB.
-            * 'bgr': similar to 'rgb' but with order XBGR.
+            * 'channels' (default): returns a 3D array with 3 channels
+               corresponding to R, G, B values in the range [0,255]. 
+            * 'rgb' returns a 2D array with a 32-bit integer channel, with
+              R,G,B channels packed in hex format 0xrrggbb.
+            * 'bgr': similar to 'rgb' but with hex order 0xbbggrr.
 
-    (Note that image_format='native' takes up a lot of extra memory, especially with color_format='channels')
+    (Note that image_format='native' takes up a lot of extra memory, especially
+    with color_format='channels')
 
     Returns:
         tuple: (rgb, depth), which are either numpy arrays or list-of-lists
@@ -181,17 +186,17 @@ def camera_to_images(camera,image_format='numpy',color_format='channels'):
     """
     assert isinstance(camera,SimRobotSensor),"Must provide a SimRobotSensor instance"
     assert camera.type() == 'CameraSensor',"Must provide a camera sensor instance"
-    import time
-    t_1 = time.time()
+    #import time
+    #t_1 = time.time()
     w = int(camera.getSetting('xres'))
     h = int(camera.getSetting('yres'))
     has_rgb = int(camera.getSetting('rgb'))
     has_depth = int(camera.getSetting('depth'))
-    t0 = time.time()
-    print("camera.getSettings() time",t0-t_1)
+    #t0 = time.time()
+    #print("camera.getSettings() time",t0-t_1)
     measurements = camera.getMeasurements()
-    t1 = time.time()
-    print("camera.getMeasurements() time",t1-t0)
+    #t1 = time.time()
+    #print("camera.getMeasurements() time",t1-t0)
     if image_format == 'numpy':
         if not _try_numpy_import():
             image_format = 'native'
@@ -199,14 +204,14 @@ def camera_to_images(camera,image_format='numpy',color_format='channels'):
     depth = None
     if has_rgb:
         if image_format == 'numpy':
-            t0 = time.time()
+            #t0 = time.time()
             abgr = np.array(measurements[0:w*h]).reshape(h,w).astype(np.uint32)
-            t1 = time.time()
-            print("Numpy array creation time",t1-t0)
+            #t1 = time.time()
+            #print("Numpy array creation time",t1-t0)
             if color_format == 'bgr':
                 rgb = abgr
             elif color_format == 'rgb':
-                rgb = np.bitwise_or(np.bitwise_or(np.left_shift(np.bitwise_and(abgr,0x00000ff),16),
+                rgb = np.bitwise_or.reduce((np.left_shift(np.bitwise_and(abgr,0x00000ff),16),
                                         np.bitwise_and(abgr,0x000ff00)),
                                         np.right_shift(np.bitwise_and(abgr,0x0ff0000), 16))
             else:
@@ -214,8 +219,8 @@ def camera_to_images(camera,image_format='numpy',color_format='channels'):
                 rgb[:,:,0] =                np.bitwise_and(abgr,0x00000ff)
                 rgb[:,:,1] = np.right_shift(np.bitwise_and(abgr,0x00ff00), 8)
                 rgb[:,:,2] = np.right_shift(np.bitwise_and(abgr,0x0ff0000), 16)
-            t2 = time.time()
-            print("  Conversion time",t2-t1)
+            #t2 = time.time()
+            #print("  Conversion time",t2-t1)
         else:
             if color_format == 'bgr':
                 rgb = []
@@ -239,10 +244,10 @@ def camera_to_images(camera,image_format='numpy',color_format='channels'):
     if has_depth:
         start = (w*h if has_rgb else 0)
         if image_format == 'numpy':
-            t0 = time.time()
+            #t0 = time.time()
             depth = np.array(measurements[start:start+w*h]).reshape(h,w)
-            t1 = time.time()
-            print("Numpy array creation time",t1-t0)
+            #t1 = time.time()
+            #print("Numpy array creation time",t1-t0)
         else:
             depth = []
             for i in range(h):
@@ -257,32 +262,41 @@ def camera_to_images(camera,image_format='numpy',color_format='channels'):
 
 
 def camera_to_points(camera,points_format='numpy',all_points=False,color_format='channels'):
-    """Given a SimRobotSensor that is a CameraSensor, returns a point cloud associated with the current measurements.
+    """Given a SimRobotSensor that is a CameraSensor, returns a point cloud
+    associated with the current measurements.
 
-    Points are triangulated with respect to the camera's intrinsic coordinates, and are returned in the camera local frame
-    (+z backward, +x toward the right, +y toward up). 
+    Points are triangulated with respect to the camera's intrinsic coordinates,
+    and are returned in the camera local frame (+z backward, +x toward the
+    right, +y toward up). 
 
     The arguments 
 
     Args:
-        points_format (str, optional): configures the format of the return value. Can be:
+        points_format (str, optional): configures the format of the return
+            value. Can be:
 
-            * 'numpy' (default): either an Nx3, Nx4, or Nx6 numpy array, depending on whether color is requested
-                (and its format).  Will fall back to 'native' if numpy is not available.
-            * 'native': same as numpy, but in list-of-lists format rather than numpy arrays.
+            * 'numpy' (default): either an Nx3, Nx4, or Nx6 numpy array,
+              depending on whether color is requested (and its format).  Will
+              fall back to 'native' if numpy is not available.
+            * 'native': same as numpy, but in list-of-lists format rather than
+              numpy arrays.
             * 'PointCloud': a Klampt PointCloud object
             * 'Geometry3D': a Klampt Geometry3D point cloud object
 
-        all_points (bool, optional): configures whether bad points should be stripped out.  If False (default), this
-            strips out all pixels that don't have a good depth reading (i.e., the camera sensor's maximum reading.) 
-            If True, these pixels are all set to (0,0,0).
+        all_points (bool, optional): configures whether bad points should be
+            stripped out.  If False (default), this strips out all pixels that
+            don't have a good depth reading (i.e., the camera sensor's maximum
+            reading.)  If True, these pixels are all set to (0,0,0).
 
-        color_format (str):  If the sensor has an RGB component, then color channels may be produced.  This value
-            configures the output format, and can take on the values:
+        color_format (str):  If the sensor has an RGB component, then color
+            channels may be produced.  This value configures the output format,
+            and can take on the values:
 
-            * 'channels': produces individual R,G,B channels in the range [0,1]. (note this is different from the
-                interpretation of camera_to_images)
-            * 'rgb': produces a single 32-bit integer channel packing the 8-bit color channels together (actually BGR)
+            * 'channels': produces individual R,G,B channels in the range
+              [0,1]. (note this is different from the interpretation of
+              camera_to_images)
+            * 'rgb': produces a single 32-bit integer channel packing the 8-bit
+              color channels together in the format 0xrrggbb.
             * None: no color is produced.
 
     Returns:
@@ -529,13 +543,13 @@ def visible(camera,object,full=True,robot=None):
 
     Args:
         camera (SimRobotSensor or GLViewport): the camera.
-        object: a 3-vector, a (center,radius) pair indicating a sphere,
-            an axis-aligned bounding box (bmin,bmax), or a Geometry3D.
+        object: a 3-vector, a (center,radius) pair indicating a sphere, an
+            axis-aligned bounding box (bmin,bmax), or a Geometry3D.
         full (bool, optional): if True, the entire object must be in the
-            viewing frustum for it to be considered visible.  If False,
-            any part of the object can be in the viewing frustum.
-        robot (RobotModel): if camera is a SimRobotSensor, this will be
-            used to derive the transform.
+            viewing frustum for it to be considered visible.  If False, any
+            part of the object can be in the viewing frustum.
+        robot (RobotModel): if camera is a SimRobotSensor, this will be used to
+            derive the transform.
     """
     if isinstance(camera,SimRobotSensor):
         camera = camera_to_viewport(camera,robot)
@@ -865,3 +879,292 @@ def point_cloud_normals(pc,estimation_radius=None,estimation_knn=None,estimation
         if geom is not None:
             geom.setPointCloud(pc)
     return normals
+
+
+def _color_format_from_uint8_channels(format,r,g,b,a=None):
+    import numpy as np
+    if a is None:
+        a = 0xff
+    if format == 'rgb':
+        return np.bitwise_or.reduce((np.left_shift(r,16),np.left_shift(g,8),b)).tolist()
+    elif format == 'bgr':
+        return np.bitwise_or.reduce((np.left_shift(b,16),np.left_shift(g,8),r)).tolist()
+    elif format=='rgba':
+        return np.bitwise_or.reduce((np.left_shift(r,24),np.left_shift(g,16),np.left_shift(b,8),a)).tolist()
+    elif format=='bgra':
+        return np.bitwise_or.reduce((np.left_shift(g,24),np.left_shift(g,16),np.left_shift(r,8),a)).tolist()
+    elif format=='argb':
+        return np.bitwise_or.reduce((np.left_shift(a,24),np.left_shift(r,16),np.left_shift(g,8),b)).tolist()
+    elif format=='abgr':
+        return np.bitwise_or.reduce((np.left_shift(a,24),np.left_shift(b,16),np.left_shift(g,8),r)).tolist()
+    elif format=='channels':
+        if not hasattr(a,'__iter__'):
+            return (r*one_255).tolist(),(g*one_255).tolist(),(b*one_255).tolist()
+        else:
+            return (r*one_255).tolist(),(g*one_255).tolist(),(b*one_255).tolist(),(a*one_255).tolist()
+    elif format=='opacity':
+        if not hasattr(a,'__iter__'):
+            return [1.0]*pc.numPoints()
+        return (a*one_255).tolist()
+    elif tuple(format)==('r','g','b'):
+        return np.column_stack((r*one_255,g*one_255,b*one_255)).tolist()
+    elif tuple(format)==('r','g','b','a'):
+        if not hasattr(a,'__iter__'):
+            a = [a]*pc.numPoints()
+        return np.column_stack((r*one_255,g*one_255,b*one_255,a*one_255)).tolist()
+    else:
+        raise ValueError("Invalid format specifier "+str(format))
+
+
+def _color_format_to_uint8_channels(format,colors):
+    import numpy as np
+    if format=='channels':
+        return tuple((np.asarray(c)*255).astype(np.uint8).tolist() for c in colors)
+    colors = np.asarray(colors)
+    if format == 'rgb':
+        r,g,b = np.right_shift(np.bitwise_and(colors,0xff0000),16),np.right_shift(np.bitwise_and(colors,0xff00),8),np.bitwise_and(colors,0xff)
+        return r.tolist(),g.tolist(),b.tolist()
+    elif format == 'bgr':
+        b,g,r = np.right_shift(np.bitwise_and(colors,0xff0000),16),np.right_shift(np.bitwise_and(colors,0xff00),8),np.bitwise_and(colors,0xff)
+        return r.tolist(),g.tolist(),b.tolist()
+    elif format=='rgba':
+        r,g,b,a = np.right_shift(np.bitwise_and(colors,0xff000000),24),np.right_shift(np.bitwise_and(colors,0xff0000),16),np.right_shift(np.bitwise_and(colors,0xff00),8),np.bitwise_and(colors,0xff)
+        return r.tolist(),g.tolist(),b.tolist(),a.tolist()
+    elif format=='bgra':
+        b,g,r,a = np.right_shift(np.bitwise_and(colors,0xff000000),24),np.right_shift(np.bitwise_and(colors,0xff0000),16),np.right_shift(np.bitwise_and(colors,0xff00),8),np.bitwise_and(colors,0xff)
+        return r.tolist(),g.tolist(),b.tolist(),a.tolist()
+    elif format=='argb':
+        a,r,g,b = np.right_shift(np.bitwise_and(colors,0xff000000),24),np.right_shift(np.bitwise_and(colors,0xff0000),16),np.right_shift(np.bitwise_and(colors,0xff00),8),np.bitwise_and(colors,0xff)
+        return r.tolist(),g.tolist(),b.tolist(),a.tolist()
+    elif format=='abgr':
+        a,b,g,r = np.right_shift(np.bitwise_and(colors,0xff000000),24),np.right_shift(np.bitwise_and(colors,0xff0000),16),np.right_shift(np.bitwise_and(colors,0xff00),8),np.bitwise_and(colors,0xff)
+        return r.tolist(),g.tolist(),b.tolist(),a.tolist()
+    elif format=='opacity':
+        r = [0xff]*len(colors)
+        return r,r,r,(colors*255).astype(np.uint8).tolist()
+    elif tuple(format)==('r','g','b'):
+        colors = (colors*255).astype(np.uint8)
+        r = colors[:,0]
+        g = colors[:,1]
+        b = colors[:,2]
+        return r.tolist(),g.tolist(),b.tolist()
+    elif tuple(format)==('r','g','b','a'):
+        colors = (colors*255).astype(np.uint8)
+        r = colors[:,0]
+        g = colors[:,1]
+        b = colors[:,2]
+        a = colors[:,3]
+        return r.tolist(),g.tolist(),b.tolist(),a.tolist()
+    else:
+        raise ValueError("Invalid format specifier "+str(format))
+
+
+def point_cloud_colors(pc,format='rgb'):
+    """Returns the colors of the point cloud in the given format.  If the
+    point cloud has no colors, this returns None.  If the point cloud has no
+    colors but has opacity, this returns white colors.
+
+    Args:
+        pc (PointCloud): the point cloud
+        format: describes the output color format, either:
+
+            - 'rgb': packed 24bit int, with the hex format 0xrrggbb,
+            - 'bgr': packed 24bit int, with the hex format 0xbbggrr,
+            - 'rgba': packed 32bit int, with the hex format 0xrrggbbaa,
+            - 'bgra': packed 32bit int, with the hex format 0xbbggrraa,
+            - 'argb': packed 32bit int, with the hex format 0xaarrggbb,
+            - 'abgr': packed 32bit int, with the hex format 0xaabbggrr,
+            - ('r','g','b'): triple with each channel in range [0,1]
+            - ('r','g','b','a'): tuple with each channel in range [0,1]
+            - 'channels': returns a list of channels, in the form (r,g,b) or 
+                (r,g,b,a), where each value in the channel has range [0,1].
+            - 'opacity': returns opacity only, in the range [0,1].
+
+    Returns:
+        list: A list of pc.numPoints() colors corresponding to the points
+            in the point cloud.  If format='channels', the return value is
+            a tuple (r,g,b) or (r,g,b,a).
+    """
+    rgbchannels = []
+    alphachannel = None
+    for i,prop in enumerate(pc.propertyNames):
+        if prop in ['r','g','b','rgb']:
+            rgbchannels.append((prop,i))
+        elif prop == 'rgba':
+            rgbchannels.append((prop,i))
+            if alphachannel is not None:
+                alphachannel = (prop,i)
+        elif prop in ['opacity','a','c']:
+            if alphachannel is not None:
+                alphachannel = (prop,i)
+    if len(rgbchannels)==0 and alphachannel is None:
+        return
+    one_255 = 1.0/255.0
+    if len(rgbchannels)==1:
+        rgb = pc.getProperties(rgbchannels[0][1])
+        if format == rgbchannels[0][0]:
+            return rgb
+        import numpy as np
+        rgb = np.array(rgb,dtype=int)
+        r = np.right_shift(np.bitwise_and(rgb,0xff0000),16)
+        g = np.right_shift(np.bitwise_and(rgb,0xff00),8)
+        b = np.bitwise_and(rgb,0xff)
+        if alphachannel is not None:  #rgba
+            if alphachannel[0] == 'rgba':
+                a = np.right_shift(np.bitwise_and(rgb,0xff000000),24)
+            elif alphachannel[0] == 'opacity':
+                a = pc.getProperties(alphachannel[0][1])
+                a = (np.array(a)*255).astype(np.uint32)
+            elif alphachannel[0] == 'c':
+                a = pc.getProperties(alphachannel[0][1])
+            else:
+                raise ValueError("Weird type of alpha channel? "+alphachannel[0])
+            return _color_format_from_uint8_channels(format,r,g,b,a)
+        else:
+            return _color_format_from_uint8_channels(format,r,g,b)
+    elif len(rgbchannels) == 3:
+        r=None
+        g=None
+        b=None
+        for (name,index) in rgbchannels:
+            if name=='r':
+                r = pc.getProperties(index)
+            elif name=='g':
+                g = pc.getProperties(index)
+            elif name=='b':
+                b = pc.getProperties(index)
+            else:
+                raise ValueError("Strange, have some subset of r,g,b and other channels in point cloud? "+name)
+        if r is None or g is None or b is None:
+            raise ValueError("Strange, point cloud has some weird subset of r,g,b channels? "+','.join(v[0] for v in rgbchannels))
+        if alphachannel is None:
+            a = 1.0
+        elif alphachannel[0] == 'opacity':
+            a = pc.getProperties(alphachannel[0][1])
+        elif alphachannel[0] == 'c':
+            import numpy as np
+            a = (np.array(pc.getProperties(alphachannel[0][1]))*one_255).tolist()
+        else:
+            raise ValueError("Weird type of alpha channel? "+alphachannel[0])
+        if format=='channels':
+            if alphachannel is None:
+                return r,g,b
+            else:
+                return r,g,b,a
+        elif isinstance(format,(list,tuple)) and tuple(format)==('r','g','b'):
+            return list(zip(r,g,b))
+        elif isinstance(format,(list,tuple)) and tuple(format)==('r','g','b','a'):
+            if alphachannel is None:
+                a = [1.0]*pc.numPoints()
+            return list(zip(r,g,b,a))
+        
+        import numpy as np
+        r = (np.array(r)*255.0).astype(np.uint32)
+        g = (np.array(g)*255.0).astype(np.uint32)
+        b = (np.array(b)*255.0).astype(np.uint32)
+        if alphachannel is not None:
+            a = (np.array(a)*255.0).astype(np.uint32)
+            return _color_format_from_uint8_channels(format,r,g,b,a)
+        else:
+            return _color_format_from_uint8_channels(format,r,g,b)
+    elif len(rgbchannels)==0 and alphachannel is not None:
+        if alphachannel[0] == 'opacity':
+            a = pc.getProperties(alphachannel[0][1])
+            a = (np.array(a)*255).astype(np.uint32)
+        elif alphachannel[0] == 'c':
+            import numpy as np
+            a = pc.getProperties(alphachannel[0][1])
+        else:
+            raise ValueError("Weird type of alpha channel? "+alphachannel[0])
+        r = [0xff]*pc.numPoints()
+        return _color_format_from_uint8_channels(format,r,r,r,a)
+    else:
+        raise ValueError("Invalid colors in point cloud? found "+str(len(rgbchannels))+" color channels")
+
+
+def point_cloud_set_colors(pc,colors,color_format='rgb',pc_property='auto'):
+    """Sets the colors of a point cloud.
+
+    Args:
+        pc (PointCloud): the point cloud
+        colors (list): the list of colors, which can be either ints, tuples, or
+            channels, depending on color_format.
+        color_format: describes the format of each element of ``colors``, and
+            can be:
+
+            - 'rgb': packed 24bit int, with the hex format 0xrrggbb,
+            - 'bgr': packed 24bit int, with the hex format 0xbbggrr,
+            - 'rgba': packed 32bit int, with the hex format 0xrrggbbaa,
+            - 'bgra': packed 32bit int, with the hex format 0xbbggrraa,
+            - 'argb': packed 32bit int, with the hex format 0xaarrggbb,
+            - 'abgr': packed 32bit int, with the hex format 0xaabbggrr,
+            - ('r','g','b'): triple with each channel in range [0,1]
+            - ('r','g','b','a'): tuple with each channel in range [0,1]
+            - 'channels': ``colors`` is a list of channels, in the form (r,g,b)
+                (r,g,b,a), where each value in the channel has range [0,1].
+            - 'opacity': opacity only, in the range [0,1].
+
+        pc_property (str): describes to which property the colors should be
+            set.  'auto' determines chooses the property from the point cloud
+            if it's already colored, or color_format if not.  'channels' sets
+            the 'r', 'g', 'b', and optionally 'a' properties.
+
+    Returns:
+        None
+    """
+    rgbchannels = []
+    alphachannel = None
+    for i,prop in enumerate(pc.propertyNames):
+        if prop in ['r','g','b','rgb']:
+            rgbchannels.append((prop,i))
+        elif prop == 'rgba':
+            rgbchannels.append((prop,i))
+            if alphachannel is not None:
+                alphachannel = (prop,i)
+        elif prop in ['opacity','a','c']:
+            if alphachannel is not None:
+                alphachannel = (prop,i)
+    rgbdict = dict(rgbchannels)
+    if pc_property == 'auto':
+        if len(rgbchannels) == 0 and alphachannel is None:
+            if color_format=='channels' or isinstance(color_format,(list,tuple)):
+                pc_property = 'channels' 
+            else:
+                if 'a' in color_format:
+                    pc_property = 'rgba'
+                else:
+                    pc_property = 'rgb'
+        elif len(rgbchannels) == 3:
+            pc_property = 'channels'
+        elif len(rgbchannels) == 1:
+            if alphachannel is not None:
+                pc_property = 'rgba'
+            else:
+                pc_property = rgbchannels[0][0]
+    if color_format == pc_property:
+        if color_format == 'channels':
+            assert len(colors)==3 or len(colors)==4,'Channels must give a 3-tuple or 4-tuple'
+            for c,values in zip('rgb',colors):
+                if c in rgbdict:
+                    pc.setProperties(rgbdict[c],values)
+                else:
+                    pc.addProperties(c,values)
+            if len(colors)==4:
+                if alphachannel[0] == 'a':
+                    pc.setProperties(alphachannel[0],values)
+                else:
+                    pc.addProperties('a',values)
+        else:
+            if color_format in rgbdict:
+                pc.setProperties(rgbdict[color_format],colors)
+            else:
+                pc.addProperties(color_format,colors)
+    else:
+        channels = _color_format_to_uint8_channels(color_format,colors)
+        packed = _color_format_from_uint8_channels(pc_property,*channels)
+        if pc_property in rgbdict:
+            pc.setProperties(rgbdict[pc_property],packed)
+        elif alphachannel is not None and pc_property == alphachannel[0]:
+            pc.setProperties(alphachannel[1],packed)
+        else:
+            pc.addProperties(pc_property,packed)
