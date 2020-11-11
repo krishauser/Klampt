@@ -32,6 +32,7 @@ class RobotInterfaceBase(object):
             t1 = time.time()
             telapsed = t1 - t0
             [wait for time max(dt - telapsed,0)]
+        interface.close()   #cleanly shut down the interface
 
     To accept asynchronous commands, a :class:`RobotInterfaceBase` subclass
     can be passed to :class:`AsynchronousRobotInterface` or
@@ -102,6 +103,10 @@ class RobotInterfaceBase(object):
         """Tries to connect to the robot.  Returns true if ready to send
         commands.  This should probably be the first method called.
         """
+        return True
+
+    def close(self):
+        """Cleanly shuts down any resources acquired using initialize()."""
         return True
 
     def startStep(self):

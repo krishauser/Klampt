@@ -271,6 +271,9 @@ class RosRobotInterface(robotinterface.RobotInterfaceBase):
 
     initialize(False) will not start ROS. Instead, you'll have to do this 
     manually before calling initialize.
+
+    close() is optional to call before quitting. It must be called if
+    you'd like to re-initialize.
     """
     def __init__(self,robot,joint_state_sub_topic,joint_trajectory_pub_topic):
         self.robot = robot
@@ -291,7 +294,7 @@ class RosRobotInterface(robotinterface.RobotInterfaceBase):
             rospy.init_node('klampt_RosRobotInterface')
         self.joint_state_sub = rospy.Subscriber(self.joint_state_sub_topic, JointState,self.jointStateCallback)
         self.joint_trajectory_pub = rospy.Publisher(self.joint_trajectory_pub_topic, JointTrajectory)
-    def stop(self):
+    def close(self):
         self.joint_state_sub.unregister()
         self.joint_state_sub = None
         self.joint_state_pub.unregister()
