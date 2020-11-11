@@ -37,6 +37,8 @@ void ThreeJSExportTransforms(const RigidObject& object,AnyCollection& out);
 void ThreeJSExport(const Terrain& terrain,AnyCollection& out);
 void ThreeJSExportTransforms(const Terrain& terrain,AnyCollection& out);
 
+///Exports geometry to a three.js scene Mesh / Points instance. Preferable to exporting Geometry and Appearance separately.
+void ThreeJSExport(const ManagedGeometry& geom,AnyCollection& out);
 ///Exports geometry to a three.js scene Geometry instance.  The "uuid"
 ///element of the output gives the unique ID number that can be used elsewhere
 void ThreeJSExportGeometry(const ManagedGeometry& geom,AnyCollection& out);
