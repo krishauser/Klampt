@@ -562,9 +562,13 @@ def init(backends=None):
         backends = [backends]
     if _backend is not None:
         #already initialized
-        _window_manager.reset()
-        if _backend in backends:
+        if _backend in backends or _backend[:4] in backends:
+            if _backend in ['IPython','HTML']:
+                #force a reset for IPython / HTML
+                _window_manager.reset()
             return _backend
+        print("vis.init(): Trying to reset from backend",_backend,"to one of",backends)
+        _window_manager.reset()
         _window_manager = None
         _backend = None
     
@@ -589,7 +593,7 @@ def init(backends=None):
         elif len(trials)>0:
             res = glinit.init(trials)
             if res is not None:
-                _backend = res
+                _backend = glinit.active()
                 if glinit.active() == 'GLUT':
                     from .backends import vis_glut
                     _window_manager = vis_glut.GLUTWindowManager()

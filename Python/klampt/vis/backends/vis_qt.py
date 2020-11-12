@@ -333,7 +333,7 @@ class QtWindowManager(_ThreadedWindowManager):
                 _globalLock.acquire()
                 if w.glwindow is None:
                     print("vis: creating GL window")
-                    w.glwindow = _GLBackend.createWindow(w.name)
+                    w.glwindow = glinit._GLBackend.createWindow(w.name)
                     w.glwindow.setProgram(w.frontend)
                     w.glwindow.setParent(None)
                     w.glwindow.refresh()
