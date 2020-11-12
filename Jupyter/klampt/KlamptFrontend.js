@@ -8,12 +8,13 @@
 ///KlamptFrontend.reset_scene();         //deletes evertyhing in the scene
 ///KlamptFrontend.rpc(request);          //performs an RPC call from a kviz request object
 ///KlamptFrontend.get_camera();          ///returns the current camera
-///KlamptFrontend.set_camera(camdata);   ///sets the current camera
+///KlamptFrontend.reset_camera();
 ///
 ///RPC calls are designed to be idempotent.
 ///
 ///Current RPC calls:
 ///(note: ? that updates can be called with or without the given item.  =value indicates that a default value is used if the argument is not specified.)
+///- set_camera(position?,target?,up?,near?,far?);
 ///- clear_extras()
 ///- remove(object)
 ///- set_color(object,rgba)
@@ -828,7 +829,32 @@ function KlamptFrontend(dom_sceneArea) {
 
   this.rpc = function(request)
   {
-     if(request.type == "clear_extras")  {
+     if(request.type == 'set_camera') {
+      var data=request;
+      if(data.up !== undefined) {
+        this.camera.up.x = data.up.x;
+        this.camera.up.y = data.up.y;
+        this.camera.up.z = data.up.z;
+      }
+      if(data.target !== undefined) {
+        this.controls.target.x = data.target.x;
+        this.controls.target.y = data.target.y;
+        this.controls.target.z = data.target.z;
+      }
+      if(data.position !== undefined) {
+        this.camera.position.x = data.position.x;
+        this.camera.position.y = data.position.y;
+        this.camera.position.z = data.position.z;
+      }
+      if(data.near !== undefined) {
+        this.camera.near = data.near;
+      }
+      if(data.far !== undefined) {
+        this.camera.far = data.far;
+      }
+      this.controls.update();
+     }
+     else if(request.type == "clear_extras")  {
        //clear scene
        toclear = [];
        this.extras.traverse(function(child) {
@@ -849,7 +875,7 @@ function KlamptFrontend(dom_sceneArea) {
         }
       }
       for (i=0;i<overlayList.length;i++) {
-        console.log("Clearing text "+overlayList[i].id);
+        //console.log("Clearing text "+overlayList[i].id);
         this.sceneArea.removeChild(overlayList[i]);
       }
      }
@@ -1006,7 +1032,7 @@ function KlamptFrontend(dom_sceneArea) {
           var text2 = document.createElement('div');
           text2.style.position = 'absolute';
           text2.id="_text_overlay_"+request.name;
-          //text2.style.zIndex = 1;    // if you still don't see the label, try uncommenting this
+          text2.style.zIndex = 1;    // if you still don't see the label, try uncommenting this
           //text2.style.width = 100;
           //text2.style.height = 100;
           //text2.style.backgroundColor = "blue";
