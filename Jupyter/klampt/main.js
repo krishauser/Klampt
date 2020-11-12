@@ -16,8 +16,8 @@ define(function(){
                     _view_name : 'KlamptView',
                     _model_module : 'klampt-jupyter-widget',
                     _view_module : 'klampt-jupyter-widget',
-                    _model_module_version : '0.1.0',
-                    _view_module_version : '0.1.0',
+                    _model_module_version : '0.1.1',
+                    _view_module_version : '0.1.1',
                     _camera : {'camera is':'first time in javascript'}
                 })
             });
@@ -31,6 +31,7 @@ define(function(){
                 initialize: function(parameters) {
                     console.log("KlamptView.initialize "+parameters);
                     this.klampt = null;
+                    this.waitDraw = false;
                     widgets.DOMWidgetView.prototype.initialize.call(this, parameters);
                 },
                 createDiv: function(){
@@ -56,54 +57,41 @@ define(function(){
                     this.messageArea = document.createElement("div");
                     this.klampt.renderer.domElement.addEventListener( 'keydown', this.keydown, false );
                     this.el.appendChild(this.messageArea);
-                    //this.wait_for_dom();
                     this.model.on('change:scene', this.scene_changed, this);
                     this.model.on('change:transforms', this.transforms_changed, this);
                     this.model.on('change:rpc', this.rpc_changed, this);
-                    this.model.on("change:camera", this.camera_changed, this);
                     //this.klampt.resize(this.model.get('width'),this.model.get('height'));
 
                     //write initial camera to model
                     var cam = this.klampt.get_camera();
                     this.model.set('_camera',cam);
+                    var redraw = false;
                     if(!isEmpty(this.model.get('scene'))) {
                         console.log("KlamptView.render: scene not empty");
-                        this.scene_changed();
+                        //this.scene_changed();
+                        this.klampt.update_scene(this.model.get('scene'));
+                        redraw=true;
                     }
                     if(!isEmpty(this.model.get('transforms'))) {
-                      console.log("KlamptView.render: transforms not empty");
-                        this.transforms_changed();
+                        console.log("KlamptView.render: transforms not empty");
+                        //this.transforms_changed();
+                        this.klampt.update_scene(this.model.get('transforms'));
+                        redraw=true;
                     }
-                    if(!isEmpty(this.model.get('camera'))) {
-                        console.log("KlamptView.render: camera not empty");
-                        this.camera_changed();
-                    } 
                     if(!isEmpty(this.model.get('rpc'))) {
                         console.log("KlamptView.render: rpc not empty");
-                        this.rpc_changed();
+                        //this.rpc_changed();
+                        this.do_rpc(this,this.model.get('rpc'));
+                        redraw=true;
                     }
-                },
-                wait_for_dom: function() {
-                    var _this=this;
-                    setTimeout(function() {
-                          _this.klampt.resize(_this.model.get('width'),_this.model.get('height'));
-                          var cam = _this.klampt.get_camera();
-                          _this.model.set('_camera',cam);
-                          if(!isEmpty(_this.model.get('scene'))) {
-                              _this.scene_changed();
-                          }
-                          if(!isEmpty(_this.model.get('transforms'))) {
-                              _this.transforms_changed();
-                          }
-                          if(!isEmpty(_this.model.get('camera'))) {
-                              _this.camera_changed();
-                          } 
-                          if(!isEmpty(_this.model.get('rpc'))) {
-                              _this.rpc_changed();
-                          }
-                          _this.touch();
-                        },
-                        10);
+                    if(redraw) {
+                        var _this=this;
+                        setTimeout(function() { 
+                            _this.klampt.render();
+                            _this.model.set('drawn',1);
+                            _this.touch();
+                        },0);
+                    }
                 },
                 keydown : function(event) {
                     console.log("Got a keydown event "+event.keyCode);
@@ -114,34 +102,39 @@ define(function(){
                 },
                 scene_changed: function() {
                     var msg = this.model.get('scene');
-                    var _this = this;
                     console.log("Klamp't widget: setting scene");
-                    setTimeout(function() {
-                        _this.klampt.update_scene(msg);
-                        _this.klampt.render();
-                        _this.model.set('drawn',1);
-                        _this.touch();
-                        },0);
+                    if(this.waitDraw) {
+                        this.klampt.update_scene(msg);
+                    }
+                    else {
+                        var _this = this;
+                        this.waitDraw=true;
+                        setTimeout(function() {
+                            _this.klampt.update_scene(msg);
+                            _this.klampt.render();
+                            _this.model.set('drawn',1);
+                            _this.touch();
+                            _this.waitDraw=false;
+                            },0);
+                    }
                 },
                 transforms_changed: function() {
                     var msg = this.model.get('transforms');
-                    var _this = this;
-                    console.log("Klamp't widget: setting transforms");
-                    setTimeout(function() {
-                        _this.klampt.update_scene(msg);
-                        _this.klampt.render();
-                        _this.model.set('drawn',1);
-                        _this.touch();
-                        },0);
-                },
-                camera_changed: function() {
-                    var _this = this;
-                    setTimeout(function() {
-                        _this.klampt.set_camera(_this.model.get('camera'));
-                        _this.klampt.render();
-                        _this.model.set('drawn',1);
+                    //console.log("Klamp't widget: setting transforms");
+                    if(this.waitDraw) {
+                        this.klampt.update_scene(msg);
+                    }
+                    else {
+                        var _this = this;
+                        this.waitDraw=true;
+                        setTimeout(function() {
+                            _this.klampt.update_scene(msg);
+                            _this.klampt.render();
+                            _this.model.set('drawn',1);
                             _this.touch();
-                    },0);
+                            _this.waitDraw=false;
+                            },0);
+                    }
                 },
                 do_rpc : function(_this,msg) {
                     if(msg.type == 'multiple') {
@@ -150,28 +143,35 @@ define(function(){
                         }
                     }
                     else if(msg.type == 'reset_scene') {
-                        console.log("Klamp't widget: resetting scene");
+                        //console.log("Klamp't widget: resetting scene");
                         _this.klampt.reset_scene();
                     }
                     else if(msg.type == 'reset_camera') {
-                        console.log("Klamp't widget: calling reset_camera");
+                        //console.log("Klamp't widget: calling reset_camera");
                         _this.klampt.reset_camera();
                     }
                     else {
-                        console.log("Klamp't widget: calling rpc");
+                        //console.log("Klamp't widget: calling rpc "+msg);
                         _this.klampt.rpc(msg);
                     }
                 },
                 rpc_changed: function() {
                     var msg = this.model.get('rpc');
-                    console.log("rpc "+msg);
-                    var _this = this;
-                    setTimeout(function() { 
-                        _this.do_rpc(_this,msg); 
-                        _this.klampt.render();
-                        _this.model.set('drawn',1);
-                        _this.touch();
-                    },0);
+                    //console.log("rpc "+msg);
+                    if(this.waitDraw) {
+                        this.do_rpc(this,msg);
+                    }
+                    else {
+                        var _this = this;
+                        this.waitDraw=true;
+                        setTimeout(function() { 
+                            _this.do_rpc(_this,msg); 
+                            _this.klampt.render();
+                            _this.model.set('drawn',1);
+                            _this.touch();
+                            _this.waitDraw=false;
+                        },0);
+                    }
                 }
                 
             });

@@ -72,7 +72,7 @@ class HTMLSharePath:
         if any(v not in self.boilerplate_file for v in [_scene_id,_path_id,_rpc_id,_compressed_id,_dt_id,_frontend_load_id]):
             raise RuntimeError("Boilerplate file does not contain the right tags")
         self.fn = filename
-        self.scene = []
+        self.scene = 'null'
         self.transforms = {}
         self.rpc = []
         self.dt = 0
@@ -113,7 +113,7 @@ class HTMLSharePath:
             if self.world is not None:
                 transforms = json.loads(robotsim.ThreeJSGetTransforms(self.world))
             else:
-                transforms = []
+                transforms = {'object':[]}
             for update in transforms['object']:
                 n = update['name']
                 mat = make_fixed_precision(update['matrix'],4)
@@ -140,7 +140,11 @@ class HTMLSharePath:
             self.last_t += self.dt
         if numadd > 1:
             print("HTMLSharePath: Note, uneven time spacing, duplicating frame",numadd,"times")
-    def end(self):
+    def end(self,rpc=None):
+        if len(self.rpc)==0:
+            self.rpc = [rpc]
+        elif rpc is not None:
+            self.rpc[-1] += rpc
         data = self.boilerplate_file.replace(_title_id,self.name)
         data = data.replace(_scene_id,self.scene)
         data = data.replace(_path_id,json.dumps(self.transforms))

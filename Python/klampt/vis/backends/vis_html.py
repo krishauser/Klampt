@@ -3,6 +3,7 @@ from ..ipython import KlamptWidget
 from ...io.html import HTMLSharePath
 from IPython.display import display,HTML
 from ...robotsim import WorldModel
+import warnings
 import pkg_resources
 import math
 import time
@@ -28,7 +29,6 @@ class HTMLVisualizationScene(VisualizationScene):
         self.kw = KlamptWidget()
         self.animating = False
         self._textItems = set()
-        self.rpcs_this_frame = []
 
     def addAction(self,hook,short_text,key,description):
         raise NotImplementedError("Can't add actions to this frontend")
@@ -39,7 +39,6 @@ class HTMLVisualizationScene(VisualizationScene):
         self.kw = KlamptWidget()
         self.animating = False
         self._textItems = set()
-        self.rpcs_this_frame = []
         #reset the visualization clock
         self.startTime = None
         self.t = 0
@@ -47,39 +46,26 @@ class HTMLVisualizationScene(VisualizationScene):
     def clearText(self):
         VisualizationScene.clearText(self)
         if len(self._textItems) > 0:
-            self.kw.beginRpc()
             for t in self._textItems:
                 self.kw.remove(t)
-            self.rpcs_this_frame += self.kw._rpc_calls
-            self.kw.endRpc()
             self._textItems = set()
 
     def add(self,name,item,keepAppearance=False,**kwargs):
-        self.kw.beginRpc()
-        handled = False
-        if 'size' in kwargs:
-            if hasattr(item,'__iter__') and len(item)==3:
-                self.kw.addSphere(name,item[0],item[1],item[2],kwargs['size'])
-                handled = True
-        if not handled:
-            try:
-                self.kw.add(name,item)
-            except ValueError:
-                self.kw.endRpc()
-                raise ValueError("Can't draw items of type "+item.__class__.__name__+" in HTML form")
-        if 'color' in kwargs:
-            self.kw.setColor(name,*kwargs['color'])
         if name=='world' or name=='sim':
             self.sp.start(item)
-        self.rpcs_this_frame += self.kw._rpc_calls
-        self.kw.endRpc()
+        else:
+            try:
+                self.kw.add(name,item,**kwargs)
+            except ValueError:
+                raise ValueError("Can't draw items of type "+item.__class__.__name__+" in HTML form")
         
-        #VisualizationScene.add(self,name,item,keepAppearance,**kwargs)
-        VisualizationScene.add(self,name,item,keepAppearance)
+        VisualizationScene.add(self,name,item,keepAppearance,**kwargs)
 
-    def addText(self,name,text,pos=None):
+    def addText(self,name,text,position=None,**kwargs):
         self._textItems.add(name)
-        self.kw.addText(name,text,pos)
+        self.kw.addText(name,text,position)
+        if 'color' in kwargs:
+            self.kw.setColor(self,name,*kwargs['color'])
 
     def remove(self,name):
         VisualizationScene.remove(name)
@@ -99,19 +85,20 @@ class HTMLVisualizationScene(VisualizationScene):
         VisualizationScene.hide(self,name,hidden)
         self.kw.hide(name,hidden)
 
-    def _setAttribute(self,item,attr,value):
-        VisualizationScene._setAttribute(self,item,attr,value)
-        self.kw.beginRpc()
+    def setColor(self,name,r,g,b,a=1):
+        self.setAttribute(name,'color',(r,g,b,a))
+
+    def setAttribute(self,name,attr,value):
+        VisualizationScene.setAttribute(self,name,attr,value)
+        item = self.getItem(name)
         if attr == 'color':
             self.kw.setColor(item.name,*value)
         elif attr == 'size':
             #modify point size
             if hasattr(item.item,'__iter__') and len(item.item)==3:
-                self.kw.addSphere(name,item.item[0],item.item[1],item.item[2],value)
+                self.kw.addSphere(item.name,item.item[0],item.item[1],item.item[2],value)
             pass
         #can't handle any other attributes right now
-        self.rpcs_this_frame += self.kw._rpc_calls
-        self.kw.endRpc()
         
     def setDrawFunc(self,name,func):
         raise RuntimeError("IPython: can't set up custom draw functions")
@@ -123,17 +110,13 @@ class HTMLVisualizationScene(VisualizationScene):
 
     def setViewport(self,viewport):
         #TODO: convert from GLViewport to camera message
-        self.kw.beginRpc()
         self.kw.setCamera(viewport)
-        self.rpcs_this_frame += self.kw._rpc_calls
-        self.kw.endRpc()
-
+        
     def setBackgroundColor(self,r,g,b,a=1): 
         raise RuntimeError("IPython: can't yet change the background color")
 
     def stepAnimation(self,dt):
         VisualizationScene.stepAnimation(self,dt)
-        self.kw.beginRpc()
         self.updateCamera()
         #look through changed items and update them
         def updateItem(item):
@@ -149,21 +132,20 @@ class HTMLVisualizationScene(VisualizationScene):
                 updateItem(c)
         for k,v in self.items.items():
             updateItem(v)
-        self.rpcs_this_frame += self.kw._rpc_calls
-        self.kw.endRpc()
+        
         if "world" in self.items:
             for k,v in self.items["world"].subAppearances.items():
                 v.swapDrawConfig()
-        self.sp.animate(self.currentAnimationTime,rpc=self.rpcs_this_frame)
+        self.sp.animate(self.currentAnimationTime,rpc=self.kw._rpc_calls)
         if "world" in self.items:
             for k,v in self.items["world"].subAppearances.items():
                 v.swapDrawConfig()
-        self.rpcs_this_frame = []
+        self.kw.endRpc(strict=True)
+        self.kw.beginRpc(strict=True)
         self.updateTime(self.currentAnimationTime)
 
     def update(self):
         #self.kw.update()   #this isn't necessary
-        self.kw.beginRpc()
         self.updateCamera()
         #look through changed items and update them
         def updateItem(item):
@@ -177,8 +159,6 @@ class HTMLVisualizationScene(VisualizationScene):
                 updateItem(c)
         for k,v in self.items.items():
             updateItem(v)
-        self.rpcs_this_frame += self.kw._rpc_calls
-        self.kw.endRpc()
         t = time.time()
         if self.startTime is None:
             self.startTime = t
@@ -187,11 +167,12 @@ class HTMLVisualizationScene(VisualizationScene):
             if "world" in self.items:
                 for k,v in self.items["world"].subAppearances.items():
                     v.swapDrawConfig()
-            self.sp.animate(t,rpc=self.rpcs_this_frame)
+            self.sp.animate(t,rpc=self.kw._rpc_calls)
             if "world" in self.items:
                 for k,v in self.items["world"].subAppearances.items():
                     v.swapDrawConfig()
-            self.rpcs_this_frame = []
+            self.kw.endRpc(strict=True)
+            self.kw.beginRpc(strict=True)
             self.t = t
         self.updateTime(t)
 
@@ -204,11 +185,14 @@ class HTMLVisualizationScene(VisualizationScene):
             h = self.kw.height
         def html_escape_quotes(s):
             return s.replace('"','&quot;')
-        return '<iframe width="%d" height="%d" srcdoc="%s">'%(w,h,html_escape_quotes(self.page()))
+        return '<iframe width="%d" height="%d" srcdoc="%s"></iframe>'%(w,h,html_escape_quotes(self.page()))
 
     def __str__(self):
         """Returns the HTML representation of this scene"""
-        return self.sp.end()
+        if len(self.kw._rpc_calls) > 0:
+            return self.sp.end(self.kw._rpc_calls)
+        else:
+            return self.sp.end()
 
     def page(self):
         """Returns a full HTML page representing the scene"""
@@ -219,6 +203,11 @@ class HTMLVisualizationScene(VisualizationScene):
 
 class HTMLWindowManager(_WindowManager):
     def __init__(self):
+        self.windows = [HTMLVisualizationScene()]
+        self.current_window = 0
+        self.displayed = False
+        self.quit = False
+    def reset(self):
         self.windows = [HTMLVisualizationScene()]
         self.current_window = 0
         self.displayed = False
@@ -236,6 +225,9 @@ class HTMLWindowManager(_WindowManager):
         self.current_window = id
     def getWindow(self):
         return self.current_window
+    def resizeWindow(self,w,h):
+        self.frontend().kw.width = w
+        self.frontend().kw.height = h
     def setPlugin(self,plugin):
         raise NotImplementedError("HTML does not accept plugins")
     def pushPlugin(self,plugin):
@@ -274,7 +266,9 @@ class HTMLWindowManager(_WindowManager):
     def show(self):
         self.quit = False
         self.displayed = True
-        display(HTML(self.frontend().iframe()))
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            display(HTML(self.frontend().iframe()))
     def shown(self):
         return self.displayed and not self.quit
     def hide(self):

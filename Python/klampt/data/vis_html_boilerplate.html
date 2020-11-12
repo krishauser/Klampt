@@ -35,6 +35,10 @@
     klampt_frontend.update_scene(scene);
     klampt_frontend.set_shadow(true);
     klampt_frontend.rpc({type:'add_text',name:'time_display',x:5,y:5});
+    if(rpcs && rpcs[0]) {
+      for(let i=0;i<rpcs[0].length;i++) 
+        klampt_frontend.rpc(rpcs[0][i]);
+    }
     klampt_frontend.render();
     animationTime = 0;
     animate();
@@ -126,6 +130,7 @@
       }
       else {
         klampt_frontend.rpc({type:'clear_extras'});
+        klampt_frontend.rpc({type:'add_text',name:'time_display',text:"Time "+(animationTime*0.001).toFixed(2),x:5,y:5});
         for(let i = 0;i<=ind;i++) {
           if(rpcs[i]) {
             for(j=0;j<rpcs[i].length;j++)
@@ -196,10 +201,13 @@
     z-index: 1000;
  }
  .logo {
-   width:200px;
-   height:60px;
+   width:103px;
+   height:33px;
    display:flex;
-   margin-top:10px;
+   position:absolute;
+   top:5%;
+   left:85%;
+   z-index: 999;
  }
  @media screen and (max-width: 650px) {
     .controls {
@@ -222,11 +230,6 @@
         display: none !important;
     }
   }
- @media screen and (max-width: 1024px) {
-    .logo {
-        display: none !important;
-    }
-  }
 </style>
 
 <div id="center" style="width:100%; height:100%; min-height:100%; margin:0px; padding:0px;">
@@ -234,9 +237,8 @@
     <canvas id="reset" class="button" onclick="resetplay()"> </canvas> 
     <canvas id="play_pause" class="button" onclick="toggleplaypause()">  </canvas>
     <input id="slider" class="slider" type="range" name="duration" min="0" max="100" step="0.1" onchange="sliderdrag()" oninput="sliderdrag()"/>
-    <a href="http://klampt.org"><img src="http://motion.cs.illinois.edu/klampt/powered_by_klampt_transparent.jpg" class="logo"></a>
-
   </div>
+  <a href="http://klampt.org"><img src="http://motion.cs.illinois.edu/klampt/powered_by_klampt_transparent.png" class="logo"></a>
   <div id="canvas" style="position:absolute; top:0; left:0; display:block; width:100%; height:100%; margin:0px; padding:0px;"></div>
 </div>
             
@@ -361,6 +363,10 @@ baseObj[funcName] = function(callback, context) {
      
       if(klampt_frontend == null) {
         init();
+      }
+      if(Object.keys(animation).length == 0) {
+        var controls = document.getElementById("controls");
+        controls.style.display = 'none';
       }
    });
 

@@ -24,7 +24,9 @@ class KlamptWidgetAdaptor(KlamptWidget,VisualizationScene):
         KlamptWidget.clear(self)
         VisualizationScene.clear(self)
         self._textItems = set()
-        self._editors = []
+        self._editors = dict()
+        self.plot_axs = dict()
+        self.axs = None
 
     def clearText(self):
         VisualizationScene.clearText(self)
@@ -36,25 +38,18 @@ class KlamptWidgetAdaptor(KlamptWidget,VisualizationScene):
             self._textItems = set()
 
     def add(self,name,item,keepAppearance=False,**kwargs):
-        handled = False
-        if 'size' in kwargs:
-            if hasattr(item,'__iter__') and len(item)==3:
-                KlamptWidget.addSphere(self,name,item[0],item[1],item[2],kwargs['size'])
-                handled = True
-        if not handled:
-            try:
-                KlamptWidget.add(self,name,item)
-            except ValueError:
-                raise ValueError("Can't draw items of type "+item.__class__.__name__+" in Jupyter notebook")
+        try:
+            KlamptWidget.add(self,name,item,**kwargs)
+        except ValueError:
+            raise ValueError("Can't draw items of type "+item.__class__.__name__+" in Jupyter notebook")
+        
+        VisualizationScene.add(self,name,item,keepAppearance,**kwargs)
+
+    def addText(self,name,text,position=None,**kwargs):
+        self._textItems.add(name)
+        KlamptWidget.addText(self,name,text,position)
         if 'color' in kwargs:
             KlamptWidget.setColor(self,name,*kwargs['color'])
-        
-        #VisualizationScene.add(self,name,item,keepAppearance,**kwargs)
-        VisualizationScene.add(self,name,item,keepAppearance)
-
-    def addText(self,name,text,pos=None):
-        self._textItems.add(name)
-        KlamptWidget.addText(self,name,text,pos)
 
     def remove(self,name):
         VisualizationScene.remove(self,name)
@@ -153,8 +148,12 @@ class KlamptWidgetAdaptor(KlamptWidget,VisualizationScene):
         VisualizationScene.hide(self,name,hidden)
         KlamptWidget.hide(self,name,hidden)
 
-    def _setAttribute(self,item,attr,value):
-        VisualizationScene._setAttribute(self,item,attr,value)
+    def setColor(self,name,r,g,b,a=1):
+        self.setAttribute(name,'color',(r,g,b,a))
+
+    def setAttribute(self,name,attr,value):
+        VisualizationScene.setAttribute(self,name,attr,value)
+        item = self.getItem(name)
         if attr == 'color':
             KlamptWidget.setColor(self,item.name,*value)
         elif attr == 'size':
@@ -283,6 +282,11 @@ class IPythonWindowManager(_WindowManager):
         self.current_window = 0
         self.displayed = False
         self.quit = False
+    def reset(self):
+        self.windows = [KlamptWidgetAdaptor()]
+        self.current_window = 0
+        self.displayed = False
+        self.quit = False
     def frontend(self):
         return self.windows[self.current_window]
     def scene(self):
@@ -296,6 +300,9 @@ class IPythonWindowManager(_WindowManager):
         self.current_window = id
     def getWindow(self):
         return self.current_window
+    def resizeWindow(self,w,h):
+        self.frontend().width = w
+        self.frontend().height = h
     def setPlugin(self,plugin):
         raise NotImplementedError("IPython does not accept plugins")
     def pushPlugin(self,plugin):

@@ -1238,8 +1238,9 @@ if _has_qt:
             editorObject.addDialogItems(self.extraDialog,ui='qt')
 
         def closeEvent(self,event):
+            global _doexit
             reply = QMessageBox.question(self, 'Message',
-                 "Are you sure to quit the program?", QMessageBox.Yes | 
+                 "Are you sure you wish to quit the program?", QMessageBox.Yes | 
                  QMessageBox.No, QMessageBox.No)
 
             if reply == QMessageBox.Yes:
@@ -1313,12 +1314,13 @@ if _has_qt:
         visualization.customUI(makefunc)
         visualization.dialog()
         res,retVal = _my_dialog_res,editorObject.value
-        assert res is not None,"vis.editors.run(): There may be something wrong with the vis module not catching the customUI, or terminating from a prior dialog?"
-
+        
         if _doexit:
             visualization.kill()
             print("Exiting program.")
             exit(0)
+
+        assert res is not None,"vis.editors.run(): There may be something wrong with the vis module not catching the customUI, or terminating from a prior dialog?"
 
         visualization.setPlugin(None)
         visualization.customUI(None)

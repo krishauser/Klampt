@@ -258,35 +258,39 @@ class FileGetter:
         self.result = None
     def getOpen(self):
         from PyQt5.QtWidgets import QFileDialog
-        patterns = ""
-        if len(self.filetypes) == 0:
-            patterns = "All files (*.*)"
-        else:
-            patternlist = []
-            for (desc,exts) in self.filetypes:
-                pattern = desc + " ("
-                pattern = pattern + ' '.join("*"+ext for ext in exts) + ")"
-                patternlist.append(pattern)
-            #print("Pattern list:",patternlist)
-            patterns = ";;".join(patternlist)
-        self.result = QFileDialog.getOpenFileName(None, self.title, self.directory, patterns)
+        defaultpattern = None
+        patternlist = []
+        for (desc,exts) in self.filetypes:
+            if defaultpattern is None:
+                defaultpattern = exts[0]
+            pattern = desc + " ("
+            pattern = pattern + ' '.join("*"+ext for ext in exts) + ")"
+            patternlist.append(pattern)
+        patternlist.append("All files (*.*)")
+        if defaultpattern is None:
+            defaultpattern = '.txt'
+        #print("Pattern list:",patternlist)
+        patterns = ";;".join(patternlist)
+        self.result = QFileDialog.getOpenFileName(None, self.title, self.directory+'/untitled'+defaultpattern, patterns)
         print("Result from open dialog",self.result)
         if isinstance(self.result,tuple):
             self.result = self.result[0]
     def getSave(self):
         from PyQt5.QtWidgets import QFileDialog
-        patterns = ""
-        if len(self.filetypes) == 0:
-            patterns = "All files (*.*)"
-        else:
-            patternlist = []
-            for (desc,exts) in self.filetypes:
-                pattern = desc + " ("
-                pattern = pattern + ' '.join("*"+ext for ext in exts) + ")"
-                patternlist.append(pattern)
-            #print("Pattern list:",patternlist)
-            patterns = ";;".join(patternlist)
-        self.result = QFileDialog.getSaveFileName(None, self.title, self.directory, patterns)
+        defaultpattern = None
+        patternlist = []
+        for (desc,exts) in self.filetypes:
+            if defaultpattern is None:
+                defaultpattern = exts[0]
+            pattern = desc + " ("
+            pattern = pattern + ' '.join("*"+ext for ext in exts) + ")"
+            patternlist.append(pattern)
+        patternlist.append("All files (*.*)")
+        if defaultpattern is None:
+            defaultpattern = '.txt'
+        #print("Pattern list:",patternlist)
+        patterns = ";;".join(patternlist)
+        self.result = QFileDialog.getSaveFileName(None, self.title, self.directory+'/untitled'+defaultpattern, patterns)
         print("Result from save dialog",self.result)
         if isinstance(self.result,tuple):
             self.result = self.result[0]
