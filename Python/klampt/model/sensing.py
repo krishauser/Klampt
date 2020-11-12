@@ -898,17 +898,21 @@ def _color_format_from_uint8_channels(format,r,g,b,a=None):
     elif format=='abgr':
         return np.bitwise_or.reduce((np.left_shift(a,24),np.left_shift(b,16),np.left_shift(g,8),r)).tolist()
     elif format=='channels':
+        one_255 = 1.0/255.0
         if not hasattr(a,'__iter__'):
             return (r*one_255).tolist(),(g*one_255).tolist(),(b*one_255).tolist()
         else:
             return (r*one_255).tolist(),(g*one_255).tolist(),(b*one_255).tolist(),(a*one_255).tolist()
     elif format=='opacity':
+        one_255 = 1.0/255.0
         if not hasattr(a,'__iter__'):
             return [1.0]*pc.numPoints()
         return (a*one_255).tolist()
     elif tuple(format)==('r','g','b'):
+        one_255 = 1.0/255.0
         return np.column_stack((r*one_255,g*one_255,b*one_255)).tolist()
     elif tuple(format)==('r','g','b','a'):
+        one_255 = 1.0/255.0
         if not hasattr(a,'__iter__'):
             a = [a]*pc.numPoints()
         return np.column_stack((r*one_255,g*one_255,b*one_255,a*one_255)).tolist()
@@ -999,7 +1003,6 @@ def point_cloud_colors(pc,format='rgb'):
                 alphachannel = (prop,i)
     if len(rgbchannels)==0 and alphachannel is None:
         return
-    one_255 = 1.0/255.0
     if len(rgbchannels)==1:
         rgb = pc.getProperties(rgbchannels[0][1])
         if format == rgbchannels[0][0]:
@@ -1043,6 +1046,7 @@ def point_cloud_colors(pc,format='rgb'):
             a = pc.getProperties(alphachannel[0][1])
         elif alphachannel[0] == 'c':
             import numpy as np
+            one_255 = 1.0/255.0
             a = (np.array(pc.getProperties(alphachannel[0][1]))*one_255).tolist()
         else:
             raise ValueError("Weird type of alpha channel? "+alphachannel[0])
