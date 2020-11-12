@@ -1751,9 +1751,34 @@ function KlamptFrontend(dom_sceneArea) {
     return res;
   }
 
-  this.rpc = function(request)
+    this.rpc = function(request)
   {
-     if(request.type == "clear_extras")  {
+    if(request.type == 'set_camera') {
+      var data=request;
+      if(data.up !== undefined) {
+        this.camera.up.x = data.up.x;
+        this.camera.up.y = data.up.y;
+        this.camera.up.z = data.up.z;
+      }
+      if(data.target !== undefined) {
+        this.controls.target.x = data.target.x;
+        this.controls.target.y = data.target.y;
+        this.controls.target.z = data.target.z;
+      }
+      if(data.position !== undefined) {
+        this.camera.position.x = data.position.x;
+        this.camera.position.y = data.position.y;
+        this.camera.position.z = data.position.z;
+      }
+      if(data.near !== undefined) {
+        this.camera.near = data.near;
+      }
+      if(data.far !== undefined) {
+        this.camera.far = data.far;
+      }
+      this.controls.update();
+     }
+     else if(request.type == "clear_extras")  {
        //clear scene
        toclear = [];
        this.extras.traverse(function(child) {
@@ -1774,7 +1799,7 @@ function KlamptFrontend(dom_sceneArea) {
         }
       }
       for (i=0;i<overlayList.length;i++) {
-        console.log("Clearing text "+overlayList[i].id);
+        //console.log("Clearing text "+overlayList[i].id);
         this.sceneArea.removeChild(overlayList[i]);
       }
      }
@@ -1882,19 +1907,18 @@ function KlamptFrontend(dom_sceneArea) {
           if(object != null)
           { 
              var clone_object=object.clone(true);
-             
              clone_object.traverse( function ( child ) { 
                       if (!is_undefined_or_null(child.name)) {
                          child.name=prefix+child.name;
-                         console.log("changed name "+child.name);
                       }
                       //ghosts should not cast shadows
                       if (!is_undefined_or_null(child.castShadow)) {
-                         child.castShadow = False;
-                         child.receiveShadow = False;
+                         child.castShadow = false;
+                         child.receiveShadow = false;
                       }
              });
              addObject(prefix+object_name,clone_object);
+             console.log("KLAMPT.rpc: Added ghost with name "+prefix+object_name);
           }
           else {
              console.log("KLAMPT.rpc: The ghost of object " + object_name + " could not be made since the object was not found");
@@ -1932,7 +1956,7 @@ function KlamptFrontend(dom_sceneArea) {
           var text2 = document.createElement('div');
           text2.style.position = 'absolute';
           text2.id="_text_overlay_"+request.name;
-          //text2.style.zIndex = 1;    // if you still don't see the label, try uncommenting this
+          text2.style.zIndex = 1;    // if you still don't see the label, try uncommenting this
           //text2.style.width = 100;
           //text2.style.height = 100;
           //text2.style.backgroundColor = "blue";
@@ -2039,7 +2063,6 @@ function KlamptFrontend(dom_sceneArea) {
          var mesh= new THREE.Mesh( geom, new THREE.MeshPhongMaterial() );
          mesh.userData.customSharedMaterialSetup=true;
          addObject(request.name,mesh);
-         console.log(typeof getObject(request.name).userData.customSharedMaterialSetup);
         }
         else {
           if(request.verts.length != obj.geometry.vertices.length*3 || true) {
@@ -2065,6 +2088,117 @@ function KlamptFrontend(dom_sceneArea) {
               obj.geometry.vertices[i/3] = new THREE.Vector3(request.verts[i],request.verts[i+1],request.verts[i+2]);
            }
             obj.geometry.computeFaceNormals();
+         }
+       }
+     }
+     else if(request.type == 'add_trimesh')
+     {
+       var obj = getObject(request.name);
+       if(obj == null) {
+         var geom = new THREE.Geometry();
+         geom.dynamic = true;
+         for(var i=0;i<request.verts.length;i+=3) {
+            geom.vertices.push(new THREE.Vector3(request.verts[i],request.verts[i+1],request.verts[i+2]));
+         }
+         for(var i=0;i<request.tris.length;i+=3) {
+            geom.faces.push( new THREE.Face3( request.tris[i], request.tris[i+1], request.tris[i+2] ) );
+         }
+         geom.computeFaceNormals();
+         geom.castShadow = true;
+         var mesh= new THREE.Mesh( geom, new THREE.MeshPhongMaterial() );
+         mesh.userData.customSharedMaterialSetup=true;
+         addObject(request.name,mesh);
+        }
+        else {
+          if(request.verts.length != obj.geometry.vertices.length*3 || true) {
+            //might as well just completely recreate the geometry
+            obj.geometry.dispose();
+            var geom = new THREE.Geometry();
+            geom.dynamic = true;
+            for(var i=0;i<request.verts.length;i+=3) {
+              geom.vertices.push(new THREE.Vector3(request.verts[i],request.verts[i+1],request.verts[i+2]));
+            }
+            for(var i=0;i<request.tris.length;i+=3) {
+              geom.faces.push( new THREE.Face3( request.tris[i], request.tris[i+1], request.tris[i+2] ) );
+            }
+            geom.computeFaceNormals();
+            obj.geometry = geom;
+          }
+          else {
+            //for some reason this isn't working
+            //console.log("Updating trimesh vertices");
+            obj.geometry.dynamic = true;
+            obj.geometry.verticesNeedUpdate = true;
+            for(var i=0;i<request.verts.length;i+=3) {
+               obj.geometry.vertices[i/3] = new THREE.Vector3(request.verts[i],request.verts[i+1],request.verts[i+2]);
+            }
+            obj.geometry.computeFaceNormals();
+         }
+       }
+     }
+     else if(request.type == 'add_points')
+     {
+       var obj = getObject(request.name);
+       if(obj == null) {
+         var geom = new THREE.Geometry();
+         geom.dynamic = true;
+         for(var i=0;i<request.verts.length;i+=3) {
+            geom.vertices.push(new THREE.Vector3(request.verts[i],request.verts[i+1],request.verts[i+2]));
+         }
+         var mat=new THREE.PointsMaterial();
+         if(request.size)
+           mat.size = request.size;
+         else
+           mat.size = 1;
+         if(request.colors) {
+            mat.vertexColors = true;
+            for(var i=0;i<request.colors.length;i++) {
+              geom.colors.push(new THREE.Color(request.colors[i]));
+            }
+         }
+         else {
+            mat.color = new THREE.Color(0xffffff);
+         }
+         geom.castShadow = false;
+         var mesh= new THREE.Points( geom, mat );
+         mesh.userData.customSharedMaterialSetup=true;
+         addObject(request.name,mesh);
+        }
+        else {
+          if(request.verts.length != obj.geometry.vertices.length*3 || true) {
+            //might as well just completely recreate the geometry
+            obj.geometry.dispose();
+            var geom = new THREE.Geometry();
+            geom.dynamic = true;
+            for(var i=0;i<request.verts.length;i+=3) {
+              geom.vertices.push(new THREE.Vector3(request.verts[i],request.verts[i+1],request.verts[i+2]));
+            }
+            if(request.colors) {
+              obj.material.vertexColors = true;
+              for(var i=0;i<request.colors.length;i++) {
+                geom.colors.push(new THREE.Color(request.colors[i]));
+              }
+            }
+            else {
+              obj.material.vertexColors = false;
+            }
+            obj.geometry = geom;
+          }
+          else {
+            //for some reason this isn't working
+            //console.log("Updating point cloud vertices");
+            obj.geometry.dynamic = true;
+            obj.geometry.verticesNeedUpdate = true;
+            for(var i=0;i<request.verts.length;i+=3) {
+               obj.geometry.vertices[i/3] = new THREE.Vector3(request.verts[i],request.verts[i+1],request.verts[i+2]);
+            }
+            if(request.colors) {
+              obj.material.vertexColors = true;
+              for(var i=0;i<request.colors.length;i++) {
+                obj.geometry.colors[i] = new THREE.Color(request.colors[i]);
+              }
+              obj.geometry.colorsNeedUpdate = true;
+            }
          }
        }
      }

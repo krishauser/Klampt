@@ -79,15 +79,14 @@ class KlamptWidget(widgets.DOMWidget):
     _view_name = Unicode('KlamptView').tag(sync=True)
     _model_module = Unicode('klampt-jupyter-widget').tag(sync=True)
     _view_module = Unicode('klampt-jupyter-widget').tag(sync=True)
-    _model_module_version = Unicode('0.1.0').tag(sync=True)
-    _view_module_version = Unicode('0.1.0').tag(sync=True)
+    _model_module_version = Unicode('0.1.1').tag(sync=True)
+    _view_module_version = Unicode('0.1.1').tag(sync=True)
     width = Int(800).tag(sync=True)
     height = Int(600).tag(sync=True)
     scene = Dict().tag(sync=True)
     transforms = Dict().tag(sync=True)
     rpc = Dict().tag(sync=True)
     _camera = Dict().tag(sync=True)
-    camera = Dict().tag(sync=True)
     events = List().tag(sync=True)
     drawn = Int(0).tag(sync=True)
 
@@ -100,7 +99,13 @@ class KlamptWidget(widgets.DOMWidget):
         if world is not None:
             self.setWorld(world)
         self.rpc = {}
+        self.beginRpc(True)
         return
+
+    def __repr__(self):
+        if int(self.drawn) != 1:
+            self.endRpc(True)
+        return widgets.DOMWidget.__repr__(self)
     
     def setWorld(self,world):
         """Resets the world to a new WorldModel object. """
@@ -121,7 +126,12 @@ class KlamptWidget(widgets.DOMWidget):
     def clear(self):
         """Clears everything from the visualization, including the world."""
         self._extras = dict()
+        self._aggregating_rpc = 0
+        self._rpc_calls = []
         self._do_rpc({'type':'reset_scene'})
+        self.drawn = 0
+        self.beginRpc(True)
+        self.world = None
 
     def clearExtras(self):
         """Erases all ghosts, lines, points, text, etc from the visualization, but keeps the world."""
@@ -131,7 +141,7 @@ class KlamptWidget(widgets.DOMWidget):
     #TODO: implement this to be more similar to the vis API
     #def clearText(self):
 
-    def add(self,name,item,type='auto'):
+    def add(self,name,item,type='auto',**kwargs):
         """Adds the item to the world, and returns a list of identifiers associated with it.
 
         Args:
@@ -140,7 +150,8 @@ class KlamptWidget(widgets.DOMWidget):
             type (str, optional): either 'auto' (default) or a string describing the type of
                 ``item``, which can help disambiguate some types like 'Config' vs 'Vector3'
                 (see below)
-        
+            kwargs: possible attributes. Examples include color, size, length, and width
+
         Supports items of type:
 
         * Config, as a ghost (list, same size as robot)
@@ -180,11 +191,16 @@ class KlamptWidget(widgets.DOMWidget):
         if type == 'Config':
             res = self.addGhost(name)
             self.setGhostConfig(item,name=name)
+            if 'color' in kwargs:
+                self.setColor(res,*kwargs['color'])
             return [res]
         elif type == 'Configs':
             if len(item[0]) == 3:
                 #it's a polyline
-                return [self.addPolyline(name,item)]
+                self.addPolyline(name,item)
+                if 'color' in kwargs:
+                    self.setColor(name,*kwargs['color'])
+                return [name]
             else:
                 #it's a set of configurations
                 names = []
@@ -194,12 +210,16 @@ class KlamptWidget(widgets.DOMWidget):
                     self.setGhostConfig(q,name=iname)
                     names.append(iname)
                 self._extras[name] = ('Configs',names)
+                if 'color' in kwargs:
+                    self.setColor(name,*kwargs['color'])
                 return names
         elif type == 'Vector3':
-            self.addSphere(name,item[0],item[1],item[2],DEFAULT_POINT_RADIUS)
+            self.addSphere(name,item[0],item[1],item[2],kwargs.get('size',DEFAULT_POINT_RADIUS))
+            if 'color' in kwargs:
+                self.setColor(name,*kwargs['color'])
             return [name]
         elif type == 'RigidTransform':
-            self.addXform(name,length=DEFAULT_AXIS_LENGTH,width=DEFAULT_AXIS_WIDTH)
+            self.addXform(name,length=kwargs.get('length',DEFAULT_AXIS_LENGTH),width=kwargs.get('width',DEFAULT_AXIS_WIDTH))
             self.setTransform(name,R=item[0],t=item[1])
             return [name]
         elif type == 'Trajectory':
@@ -210,7 +230,7 @@ class KlamptWidget(widgets.DOMWidget):
                     T = item.to_se3(item.milestones[i])
                     res += self.add(name+"_milestone_"+str(i),T)
                     ttraj.append(T[1])
-                res += self.add(name,ttraj)
+                res += self.add(name,ttraj,**kwargs)
                 self._extras[name] = ('Trajectory',res)
                 return res
             elif isinstance(item,RobotTrajectory):
@@ -223,24 +243,31 @@ class KlamptWidget(widgets.DOMWidget):
                     self.setGhostConfig(q,iname,rindex)
                     names.append(iname)
                 self._extras[name] = ('Configs',names)
+                if 'color' in kwargs:
+                    for name in names:
+                        self.setColor(name,*kwargs['color'])
                 return names
             else:
-                return self.add(name,item.milestones)
+                return self.add(name,item.milestones,**kwargs)
         elif type == 'Geometry3D':
             if item.type() == 'PointCloud':
                 pc = item.getPointCloud()
-                self.add(name,pc,'PointCloud')
+                res = self.add(name,pc,'PointCloud',**kwargs)
                 self.setTransform(name,*item.getCurrentTransform())
+                return res
             else:
                 g = item.convert('TriangleMesh')
                 tris = g.getTriangleMesh()
-                self.add(name,tris,'TriangleMesh')
+                res = self.add(name,tris,'TriangleMesh',**kwargs)
                 self.setTransform(name,*item.getCurrentTransform())
+                return res
         elif type == 'TriangleMesh':
             tris = item
             data = ([v for v in tris.vertices],[i for i in tris.indices])
             self._extras[name] = ('Trilist',data)
             self._do_rpc({'type':'add_trimesh','name':name,'verts':data[0],'tris':data[1]} )
+            if 'color' in kwargs:
+                self.setColor(name,*kwargs['color'])
             return [name]
         elif type == 'PointCloud':
             pc = item
@@ -248,10 +275,12 @@ class KlamptWidget(widgets.DOMWidget):
             colors = sensing.point_cloud_colors(pc,'rgb')
             data = ([v for v in pc.vertices],colors)
             self._extras[name] = ('Points',data)
-            msg = {'type':'add_points','name':name,'verts':data[0],'size':0.01}
+            msg = {'type':'add_points','name':name,'verts':data[0],'size':kwargs.get('size',0.01)}
             if colors is not None:
                 msg['colors'] = colors
             self._do_rpc(msg) 
+            if 'color' in kwargs:
+                self.setColor(name,*kwargs['color'])
             return [name]
         elif type == 'WorldModel':
             if name != 'world' or self.world is not None:
@@ -283,7 +312,9 @@ class KlamptWidget(widgets.DOMWidget):
 
     def setCamera(self,cam):
         """Sets the current camera view"""
-        self.camera = cam
+        msg = dict(cam).copy()
+        msg['type'] = 'set_camera'
+        self._do_rpc(msg)
         marked = dict(cam).copy()
         marked['r'] = 1
         self._camera = marked
@@ -342,7 +373,7 @@ class KlamptWidget(widgets.DOMWidget):
                 except Exception:
                     found = False
                     for r in range(self.world.numRobots()):
-                        if self.world.robot(r).link(target) >= 0:
+                        if self.world.robot(r).link(target).index >= 0:
                             found = True
                             break
                     if not found:
@@ -567,7 +598,7 @@ class KlamptWidget(widgets.DOMWidget):
             self._do_rpc({'type':'add_billboard','name':name,'image':image,'size':size,'filter':filter,'colormap':colormap})
         self._extras[name] = ('Billboard',image)
 
-    def beginRpc(self,strict=True):
+    def beginRpc(self,strict=False):
         """Begins collecting a set of RPC calls to be sent at once, which is a bit faster than doing multiple
         addX or setX calls. 
 
@@ -594,7 +625,7 @@ class KlamptWidget(widgets.DOMWidget):
         else:
             self.rpc = msg
 
-    def endRpc(self,strict=True):
+    def endRpc(self,strict=False):
         """Ends collecting a set of RPC calls to be sent at once, and sends the accumulated message"""
         if self._aggregating_rpc <= 0 or (self._aggregating_rpc!=1 and strict):
             raise ValueError("Each beginRpc() call must be ended with an endRpc() call")

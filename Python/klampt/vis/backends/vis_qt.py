@@ -37,6 +37,14 @@ class QtWindowManager(_ThreadedWindowManager):
         self.window_title = "Klamp't visualizer (%s)"%(sys.argv[0],)
         #the current temp frontend if len(self.windows)=0, or windows[current_window].frontend
         _ThreadedWindowManager.__init__(self)
+
+    def reset(self):
+        _ThreadedWindowManager.reset(self)
+        self.cleanup()
+        self._frontend = GLVisualizationFrontend()
+        self.windows = []
+        self.current_window = None
+        self.window_title = "Klamp't visualizer (%s)"%(sys.argv[0],)
     
     def frontend(self):
         return self._frontend
@@ -50,6 +58,9 @@ class QtWindowManager(_ThreadedWindowManager):
     def setWindowName(self,title):
         self.window_title = title
         self.onFrontendChange()
+
+    def resizeWindow(self,w,h):
+        self._frontend.reshape(w,h)
     
     def createWindow(self,title):    
         if len(self.windows) == 0:

@@ -30,6 +30,10 @@ class GLUTWindowManager(_ThreadedWindowManager):
         #the current temp frontend if len(self.windows)=0, or windows[current_window].frontend
         _ThreadedWindowManager.__init__(self)
 
+    def reset(self):
+        _ThreadedWindowManager.reset(self)
+        self.cleanup()
+        
     def run_app_thread(self,callback=None):
         global _globalLock
         assert not self.vis_thread_running,"Can't run a new GLUT thread, a thread is already running"
@@ -88,6 +92,9 @@ class GLUTWindowManager(_ThreadedWindowManager):
     def setWindowName(self,title):
         self.window_title = title
         self.onFrontendChange()
+
+    def resizeWindow(self,w,h):
+        self._frontend.reshape(w,h)
     
     def createWindow(self,title):    
         if len(self.windows) == 0:

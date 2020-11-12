@@ -337,6 +337,8 @@ WINDOWING API
 - def nativeWindow(): returns the current window object used by the backend.
 - def setWindowTitle(title): sets the title of the visualization window.
 - def getWindowTitle(): returns the title of the visualization window.
+- def resizeWindow(w,h): resizes the window.  For OpenGL, this can be done
+  after the window is shown. Otherwise, it must take place before showing.
 - def scene(): returns the current :class:`VisualizationScene`
 - def setPlugin(plugin=None): sets the current plugin (a
   :class:`~klampt.vis.glinterface.GLPluginInterface` instance).  This plugin
@@ -458,7 +460,7 @@ Global appearance / camera control functions:
 - def setViewport(viewport): Sets the GLViewport for the currently active
   scene.  (This is also used to resize windows.)
 - def setBackgroundColor(r,g,b,a=1): Sets the background color for the active
-  scene.
+  view.
 - def autoFitCamera(zoom=True,rotate=True,scale=1.0): Automatically fits the 
   camera to all objects in the visualization.  A scale > 1 magnifies the zoom.
 - def followCamera(target,translate=True,rotate=False,center=False): Sets the 
@@ -551,9 +553,6 @@ def init(backends=None):
 
     """
     global _backend,_window_manager
-    if _backend is not None:
-        #already initialized
-        return _backend
     if backends is None:
         if _isnotebook():
             backends = ['IPython']
@@ -561,6 +560,14 @@ def init(backends=None):
             backends = ['PyQt','GLUT','HTML']
     if isinstance(backends,str):
         backends = [backends]
+    if _backend is not None:
+        #already initialized
+        _window_manager.reset()
+        if _backend in backends:
+            return _backend
+        _window_manager = None
+        _backend = None
+    
     OpenGLBackends = ['PyQt','PyQt4','PyQt5','GLUT']
     order = [[]]
     for backend in backends:
@@ -597,6 +604,8 @@ def init(backends=None):
     return None
 
 def _init():
+    if _backend is not None:
+        return
     if init() is None: 
         raise RuntimeError("Unable to initialize visualization")
 
@@ -871,6 +880,12 @@ def setWindowTitle(title):
 def getWindowTitle():
     global _window_manager
     return _window_manager.getWindowName()
+
+def resizeWindow(w,h):
+    """Resizes the current window.  For OpenGL, this can be done after the
+    window is shown. Otherwise, it must take place before showing."""
+    global _window_manager
+    return _window_manager.resizeWindow(w,h)
 
 def kill():
     """This should be called at the end of the calling program to cleanly terminate the
@@ -1497,7 +1512,9 @@ def objectToVisType(item,world):
         #ambiguous, still need to figure out what to draw
         validtypes = []
         for t in itypes:
-            if t == 'Config':
+            if t=='Vector3':
+                validtypes.append(t)
+            elif t == 'Config':
                 if world is not None:
                     match = False
                     for i in range(world.numRobots()):
@@ -1507,8 +1524,8 @@ def objectToVisType(item,world):
                             break
                     if not match and len(itypes) == 1:
                         print("Config-like item of length",len(item),"doesn't match any of the # links of robots in the world:",[world.robot(i).numLinks() for i in range(world.numRobots())])
-            elif t=='Vector3':
-                validtypes.append(t)
+                else:
+                    validtypes.append(t)
             elif t=='RigidTransform':
                 validtypes.append(t)
             elif t=='Geometry3D':
@@ -2093,7 +2110,7 @@ class VisAppearance:
     """The core class that governs all of the drawing of an object
     in the visualization.  Can accommodate any drawable Klampt type.
     """
-    def __init__(self,item,name = None):
+    def __init__(self,item,name = None, type=None):
         self.name = name
         self.useDefaultAppearance = True
         self.customAppearance = None
@@ -2103,7 +2120,7 @@ class VisAppearance:
         self.animation = None
         self.animationStartTime = 0
         self.animationSpeed = 1.0
-        self.attributes = _default_attributes(item)
+        self.attributes = _default_attributes(item,type)
         if not isinstance(self.attributes,_CascadingDict):
             self.attributes = _CascadingDict(self.attributes)
         if 'hide_label' not in self.attributes:
@@ -3159,7 +3176,8 @@ class VisualizationScene:
                 #need to erase prior item visualizer
                 if name in self.items:
                     self.items[name].destroy()
-                app = VisAppearance(item,name)
+                type = kwargs.get('type',None)
+                app = VisAppearance(item,name,type)
                 self.items[name] = app
             item = self.items[name]
             for (attr,value) in kwargs.items():
@@ -3750,7 +3768,15 @@ class _SimCamCameraController:
 
 
 class _WindowManager:
+    def reset(self):
+        raise NotImplementedError()
     def frontend(self):
+        raise NotImplementedError()
+    def createWindow(self,title):
+        raise NotImplementedError()
+    def setWindow(self,id):
+        raise NotImplementedError()
+    def getWindow(self):
         raise NotImplementedError()
     def scene(self):
         raise NotImplementedError()
@@ -3758,11 +3784,7 @@ class _WindowManager:
         raise NotImplementedError()
     def setWindowName(self,name):
         raise NotImplementedError()
-    def createWindow(self,title):
-        raise NotImplementedError()
-    def setWindow(self,id):
-        raise NotImplementedError()
-    def getWindow(self):
+    def resizeWindow(self,w,h):
         raise NotImplementedError()
     def setPlugin(self,plugin):
         raise NotImplementedError()
@@ -3814,6 +3836,11 @@ class _ThreadedWindowManager(_WindowManager):
         self.in_app_thread = False
         self.threadcalls = []
 
+    def reset(self):
+        self.kill()
+        self.in_app_thread = False
+        self.threadcalls = []
+
     def run_app_thread(self,callback):
         raise NotImplementedError()
 
@@ -3831,6 +3858,7 @@ class _ThreadedWindowManager(_WindowManager):
             return
         if self.vis_thread_running:
             self.vis_thread.join()
+            self.vis_thread = None
             assert self.vis_thread_running == False
 
         self.quit = False
