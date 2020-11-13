@@ -15,7 +15,7 @@ SET(TEMPOUTPUT CMakeFiles)
 FILE(GLOB DEPS klampt/src/*.h klampt/src/*.cpp klampt/*.py)
 SET(DEPS ${DEPS} ${KLAMPT_LIBRARIES} Klampt)
 
-IF(PYTHON)
+IF(PYTHON OR PYTHON3 OR PYTHON2)
 
   MESSAGE(STATUS "Configuring Python/setup.py from Python/setup.py.in")
   configure_file(setup.py.in setup.py)
