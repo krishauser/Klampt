@@ -23,9 +23,11 @@ To run a visualization, you will need PyOpenGL and PyQt5, as well as some exampl
 - `cd Klampt-examples/Python/demos`
 - `python gl_vis.py`
 
+If your system has both Python 2 and Python 3 installed, the Python 3 versions are preferable.  You may need to replace the commands above with `pip3` and `python3` instead.
+
 ## Linux, from binaries
 
-Compiled binary packages are not yet available for Klampt 0.8.0.
+Compiled binary packages are not available for Klampt 0.8.0+.
 
 
 ## Linux, from source (recommended)
@@ -35,7 +37,7 @@ The following commands will install Klamp't onto your system from source.  This 
 1. Make sure you have CMake, GLPK, and Qt5 (or Qt4) on your system. On systems with apt-get, the following command will do the trick:
 
     ```
-    sudo apt-get install g++ cmake git libglpk-dev python-dev python-opengl libxmu-dev libxi-dev qt5-default
+    sudo apt-get install g++ cmake git libglpk-dev python3-dev libxmu-dev libxi-dev qt5-default
     ```
 
 2. (recommended) Download and install Assimp using the following command line:
@@ -110,4 +112,6 @@ Or run a simulation from the Python API:
 cd Klampt-examples/Python/demos
 python kbdrive.py ../../data/tx90roll.xml
 ```
+
+Make sure to `pip install PyOpenGL` and `pip install PyQt5`.
 
