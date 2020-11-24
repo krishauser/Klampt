@@ -4818,6 +4818,7 @@ void SimJoint::makeFixed(const SimBody& a,const SimBody& b)
   this->b = &b;
   joint = dJointCreateFixed(a.sim->sim->odesim.world(),0);
   dJointAttach(joint,a.body,b.body);
+  dJointSetFixed(joint);
 }
 
 void SimJoint::destroy()
