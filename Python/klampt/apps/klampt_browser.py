@@ -47,10 +47,10 @@ class MyMultiViewportProgram(GLMultiViewportProgram):
     def startAnim(self):
         self.animating = True
         self.animationStartTime = time.time()
-        self.idlesleep(0)
+        #self.idlesleep(0)
     def stopAnim(self):
         self.animating = False
-        self.idlesleep(float('inf'))
+        #self.idlesleep(float('inf'))
     def setAnimTime(self,t):
         self.stopAnim()
         self.animationTime = t
