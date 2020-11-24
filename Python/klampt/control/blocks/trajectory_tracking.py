@@ -1,4 +1,4 @@
-from .controller import ControllerBlock,RobotControlIO
+from ..controller import ControllerBlock,RobotControllerIO
 from klampt.model import trajectory
 
 
@@ -56,7 +56,7 @@ class TrajectoryWithFeedforwardTorqueController(ControllerBlock):
         return ['qcmd','dqcmd','torquecmd']
 
     def advance(self,**inputs):
-        api = RobotControlIO(inputs)
+        api = RobotControllerIO(inputs)
         t = api.time()
         if self.startTime == None:
             self.startTime = t
