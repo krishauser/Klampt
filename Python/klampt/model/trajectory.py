@@ -459,6 +459,10 @@ class RobotTrajectory(Trajectory):
     """A trajectory that performs interpolation according to the robot's
     interpolation scheme."""
     def __init__(self,robot,times=None,milestones=None):
+        from klampt import RobotModel
+        from ..model.subrobot import SubRobotModel
+        if not isinstance(robot,(RobotModel,SubRobotModel)):
+            raise ValueError("RobotTrajectory must be provided with a RobotModel or SubRobotModel as first argument")
         Trajectory.__init__(self,times,milestones)
         self.robot = robot
     def interpolate_state(self,a,b,u,dt):
