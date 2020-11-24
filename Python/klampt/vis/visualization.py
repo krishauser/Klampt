@@ -858,7 +858,6 @@ def run(plugin=None):
     _init()
     setPlugin(plugin)
     _window_manager.run()
-    setPlugin(None)
     kill()
 
 def multithreaded():
