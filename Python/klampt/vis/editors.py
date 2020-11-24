@@ -1121,6 +1121,9 @@ class WorldEditor(VisualEditorBase):
     def loadable(self):
         return False
 
+    def savable(self):
+        return True
+
     def display(self):
         #Override display handler since the widget draws the rigid objects and transforms
         for i in range(self.world.numTerrains()):
@@ -1197,7 +1200,7 @@ if _has_qt:
             self.extraDialog.setSizePolicy(QSizePolicy(QSizePolicy.Minimum,QSizePolicy.Minimum))
             self.topBoxLayout.addWidget(self.extraDialog)
             self.layout = QVBoxLayout()
-            #self.layout.addWidget(self.topBox)
+            self.layout.addWidget(self.topBox)
             self.layout.addWidget(glwidget)
             self.layout.addWidget(self.description2)
             self.layout.setStretchFactor(glwidget,10)
@@ -1230,9 +1233,9 @@ if _has_qt:
             loadsavelayout = QHBoxLayout(self.loadsave)
             if editorObject.loadable():
                 loadsavelayout.addWidget(self.loadButton)
-            if editorObject.loadable():
+            if editorObject.savable():
                 loadsavelayout.addWidget(self.saveButton)
-            if editorObject.loadable() or editorObject.saveable():
+            if editorObject.loadable() or editorObject.savable():
                 self.topBoxLayout.addWidget(self.loadsave)
 
             editorObject.addDialogItems(self.extraDialog,ui='qt')
@@ -1325,8 +1328,10 @@ if _has_qt:
         visualization.setPlugin(None)
         visualization.customUI(None)
         if old_vis_window is not None:
+            print("Returning from editor to old window",old_vis_window)
             visualization.setWindow(old_vis_window)
         else:
+            print("Returning from editor to window 0")
             visualization.setWindow(0)
 
         print("vis.editors.run(): Result",res,"return value",retVal)

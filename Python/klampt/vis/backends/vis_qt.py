@@ -164,104 +164,112 @@ class QtWindowManager(_ThreadedWindowManager):
         res = None
         while not self.quit:
             _globalLock.acquire()
-            calls = self.threadcalls
-            self.threadcalls = []
-            for i,w in enumerate(self.windows):
-                if w.glwindow is None and w.mode != 'hidden':
-                    print("vis: creating GL window")
-                    w.glwindow = glinit._GLBackend.createWindow(w.name)
-                    w.glwindow.setProgram(w.frontend)
-                    w.glwindow.setParent(None)
-                    w.glwindow.refresh()
-                if w.doRefresh:
-                    if w.mode != 'hidden':
-                        w.glwindow.updateGL()
-                    w.doRefresh = False
-                if w.doReload and w.glwindow is not None:
-                    w.glwindow.setProgram(w.frontend)
-                    if w.guidata:
-                        w.guidata.setWindowTitle(w.name)
-                        w.guidata.glwidget = w.glwindow
-                        w.guidata.attachGLWindow()
-                    w.doReload = False
-                if w.mode == 'dialog':
-                    print("#########################################")
-                    print("klampt.vis: Dialog on window",i)
-                    print("#########################################")
-                    if w.custom_ui is None:
-                        dlg = _MyDialog(w)
-                    else:
-                        dlg = w.custom_ui(w.glwindow)
-                    if dlg is not None:
-                        w.glwindow.show()
-                        self.in_app_thread = True
-                        _globalLock.release()
-                        res = dlg.exec_()
-                        _globalLock.acquire()
+            try:  #to be nice to the other thread, we put everything in a try block in case something weird happens
+                calls = self.threadcalls
+                self.threadcalls = []
+                for i,w in enumerate(self.windows):
+                    if w.glwindow is None and w.mode != 'hidden':
+                        print("vis: creating GL window")
+                        w.glwindow = glinit._GLBackend.createWindow(w.name)
+                        w.glwindow.setProgram(w.frontend)
+                        w.glwindow.setParent(None)
+                        w.glwindow.refresh()
+                    if w.doRefresh:
+                        if w.mode != 'hidden':
+                            w.glwindow.updateGL()
+                        w.doRefresh = False
+                    if w.doReload and w.glwindow is not None:
+                        w.glwindow.setProgram(w.frontend)
+                        if w.guidata:
+                            w.guidata.setWindowTitle(w.name)
+                            w.guidata.glwidget = w.glwindow
+                            w.guidata.attachGLWindow()
+                        w.doReload = False
+                    if w.mode == 'dialog':
+                        print("#########################################")
+                        print("klampt.vis: Dialog on window",i)
+                        print("#########################################")
+                        if w.custom_ui is None:
+                            dlg = _MyDialog(w)
+                        else:
+                            dlg = w.custom_ui(w.glwindow)
+                        if dlg is not None:
+                            w.glwindow.show()
+                            self.in_app_thread = True
+                            _globalLock.release()
+                            res = dlg.exec_()
+                            _globalLock.acquire()
+                            w.glwindow.hide()
+                            w.glwindow.setParent(None)
+                                
+                            self.in_app_thread = False
+                        print("#########################################")
+                        print("klampt.vis: Dialog done on window",i)
+                        print("#########################################")
                         w.glwindow.hide()
                         w.glwindow.setParent(None)
-                            
-                        self.in_app_thread = False
-                    print("#########################################")
-                    print("klampt.vis: Dialog done on window",i)
-                    print("#########################################")
-                    w.glwindow.hide()
-                    w.glwindow.setParent(None)
-                    w.mode = 'hidden'
-                if w.mode == 'shown' and w.guidata is None:
-                    print("#########################################")
-                    print("klampt.vis: Making window",i)
-                    print("#########################################")
-                    if w.custom_ui is None:
-                        w.guidata = _MyWindow(w)
-                    else:
-                        w.guidata = w.custom_ui(w.glwindow)
-                    def closeMonkeyPatch(self,event,windowinfo=w,oldcloseevent=w.guidata.closeEvent):
-                        oldcloseevent(event)
-                        if not event.isAccepted():
-                            return
-                        windowinfo.mode='hidden'
-                        print("#########################################")
-                        print("klampt.vis: Window close")
-                        print("#########################################")
-                        _globalLock.acquire()
-                        w.glwindow.hide()
                         w.mode = 'hidden'
-                        w.glwindow.idlesleep()
-                        w.glwindow.setParent(None)
-                        _globalLock.release()
-                    w.guidata.closeEvent = closeMonkeyPatch.__get__(w.guidata, w.guidata.__class__)
-                    w.guidata.setWindowTitle(w.name)
-                    w.glwindow.show()
-                    w.guidata.show()
-                    if w.glwindow.initialized:
-                        #boot it back up again
-                        w.glwindow.idlesleep(0)
-                if w.mode == 'shown' and not w.guidata.isVisible():
-                    print("#########################################")
-                    print("klampt.vis: Showing window",i)
-                    print("#########################################")
-                    if hasattr(w.guidata,'attachGLWindow'):
-                        w.guidata.attachGLWindow()
-                    else:
-                        w.glwindow.setParent(w.guidata)
-                    w.glwindow.show()
-                    w.guidata.show()
-                if w.mode == 'hidden' and w.guidata is not None:
-                    #prevent deleting the GL window
-                    if hasattr(w.guidata,'detachGLWindow'):
-                        w.guidata.detachGLWindow()
-                    else:
-                        w.glwindow.setParent(None)
-                        w.guidata.setParent(None)
-                    if w.guidata.isVisible():
+                    if w.mode == 'shown' and w.guidata is None:
                         print("#########################################")
-                        print("klampt.vis: Hiding window",i)
+                        print("klampt.vis: Making window",i)
                         print("#########################################")
-                        w.glwindow.hide()
-                        w.guidata.hide()
-                    w.guidata.close()
-                    w.guidata = None
+                        if w.custom_ui is None:
+                            w.guidata = _MyWindow(w)
+                        else:
+                            w.guidata = w.custom_ui(w.glwindow)
+                        def closeMonkeyPatch(self,event,windowinfo=w,index=i,oldcloseevent=w.guidata.closeEvent):
+                            oldcloseevent(event)
+                            if not event.isAccepted():
+                                return
+                            windowinfo.mode='hidden'
+                            print("#########################################")
+                            print("klampt.vis: Window",index,"close")
+                            print("#########################################")
+                            _globalLock.acquire()
+                            w.glwindow.hide()
+                            w.mode = 'hidden'
+                            if w.glwindow.idleTimer is not None:
+                                w.glwindow.idlesleep()
+                            w.glwindow.setParent(None)
+                            _globalLock.release()
+                        w.guidata.closeEvent = closeMonkeyPatch.__get__(w.guidata, w.guidata.__class__)
+                        w.guidata.setWindowTitle(w.name)
+                        w.glwindow.show()
+                        w.guidata.show()
+                        if w.glwindow.initialized:
+                            #boot it back up again
+                            w.glwindow.idlesleep(0)
+                    if w.mode == 'shown' and not w.guidata.isVisible():
+                        print("#########################################")
+                        print("klampt.vis: Showing window",i)
+                        print("#########################################")
+                        if hasattr(w.guidata,'attachGLWindow'):
+                            w.guidata.attachGLWindow()
+                        else:
+                            w.glwindow.setParent(w.guidata)
+                        w.glwindow.show()
+                        w.guidata.show()
+                    if w.mode == 'hidden' and w.guidata is not None:
+                        #prevent deleting the GL window
+                        if hasattr(w.guidata,'detachGLWindow'):
+                            w.guidata.detachGLWindow()
+                        else:
+                            w.glwindow.setParent(None)
+                            w.guidata.setParent(None)
+                        if w.guidata.isVisible():
+                            print("#########################################")
+                            print("klampt.vis: Hiding window",i)
+                            print("#########################################")
+                            w.glwindow.hide()
+                            w.guidata.hide()
+                        w.guidata.close()
+                        w.guidata = None
+            except Exception:
+                print("Exception called in visualization thread; closing.")
+                _globalLock.release()
+                self.cleanup()
+                self.vis_thread_running = False
+                raise
             _globalLock.release()
             self.in_app_thread = True
             for c in calls:
@@ -355,6 +363,8 @@ class QtWindowManager(_ThreadedWindowManager):
                 w.glwindow.hide()
                 w.glwindow.setParent(None)
                 w.mode = 'hidden'
+                for i,w2 in enumerate(self.windows):
+                    print("Returning from dialog items",i,w2.mode)
                 _globalLock.release()
             return None
         else:
@@ -384,7 +394,8 @@ class QtWindowManager(_ThreadedWindowManager):
             self.windows.append(WindowInfo(self.window_title,self._frontend))
             self.current_window = 0
         self.windows[self.current_window].custom_ui = func
-        print("klampt.vis: setting custom ui on window",self.current_window)
+        if func is not None:
+            print("klampt.vis: setting custom ui on window",self.current_window)
         return
 
     def onFrontendChange(self):
