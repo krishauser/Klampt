@@ -13,6 +13,7 @@
 struct ODEObjectID;
 struct ODEContactList;
 struct ODEContactResult;
+struct ODEJoint;
 
 /** @ingroup Simulation
  * @brief Global simulator settings.
@@ -155,6 +156,17 @@ class ODESimulator
   ///Disables instability correction for the given object on the next time step. This should be done if you manually set an object's velocities, for example.
   void DisableInstabilityCorrection(const ODEObjectID& obj);
 
+  ///Adds a new joint between obj and the world. The returned ODEJoint must be set up using the MakeHinge, MakeSlider, or MakeFixed functions
+  ODEJoint* AddJoint(const ODEObjectID& obj);
+  ///Adds a new joint between a and b. The returned ODEJoint must be set up using the MakeHinge, MakeSlider, or MakeFixed functions
+  ODEJoint* AddJoint(const ODEObjectID& a,const ODEObjectID& b);
+  ///Removes a single joint
+  void RemoveJoint(ODEJoint*);
+  ///Removes all joints touching obj
+  void RemoveJoints(const ODEObjectID& obj);
+  ///Removes all joints between a and b
+  void RemoveJoints(const ODEObjectID& a,const ODEObjectID& b);
+
   //used internally
   bool ReadState_Internal(File& f);
   bool WriteState_Internal(File& f) const;
@@ -187,6 +199,8 @@ public:
   File lastState;
   Real lastStateTimestep;
   map<pair<ODEObjectID,ODEObjectID>,double> lastMarginsRemaining;
+  //joints
+  list<ODEJoint> joints;
 };
 
 
@@ -240,6 +254,49 @@ struct ODEContactList
   bool penetrating;   
 
   vector<int> feedbackIndices;           //internally used
+};
+
+/** @ingroup Simulation
+ * @brief A joint between two objects.
+ *
+ * Should be set up by the simulation using AddJoint.  o2 may be left uninitialized.
+ */
+struct ODEJoint
+{
+  ODEJoint();
+  ~ODEJoint();
+  ///Initializes a fixed joint at the objects' current poses
+  void MakeFixed();
+  ///Initializes a hinge joint at the objects' current poses, with world-space axis passing through pt with direction axis
+  void MakeHinge(const Vector3& pt,const Vector3& axis);
+  ///Initializes a slider joint at the objects' current poses, with world-space axis dir
+  void MakeSlider(const Vector3& dir);
+  ///Deallocates this joint. It can be re-allocated using MakeX
+  void Destroy();
+  
+  ///Returns the current position of this joint
+  Real GetPosition();
+  ///Returns the current velocity of this joint
+  Real GetVelocity();
+
+  ///Sets the joint limits
+  void SetLimits(Real min,Real max);
+  ///Sets the bounce parameter
+  void SetBounce(Real coeff);
+  ///Sets dry friction on this joint
+  void SetFriction(Real coeff);
+  ///Sets a fixed velocity motor with target velocity vel max force fmax
+  void SetFixedVelocity(Real vel,Real fmax);
+  ///Adds a force on this joint to be applied for the next time step
+  void AddForce(Real f);
+  ///Retrieves the solved constraint forces/torques from the prior time step.  These are all in world coordinates
+  void GetConstraintForces(Vector3& f1,Vector3& t1,Vector3& f2,Vector3& t2);
+
+  int type; //<-1 not initialized, 0 fixed, 1 hinge, 2 slider
+  ODEObjectID o1,o2;
+  ODESimulator* sim;
+  dJointID joint;
+  dJointFeedback feedback;
 };
 
 #endif

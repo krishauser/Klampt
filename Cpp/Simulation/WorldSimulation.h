@@ -188,19 +188,50 @@ class WrenchHook : public WorldSimulationHook
 };
 
 /** @ingroup Simulation
- * @brief A hook that acts as a Hookean spring to a given fixed target point.
+ * @brief A hook that acts as a Hookean (optionally damped) spring to a given fixed target point.
  */
 class SpringHook : public WorldSimulationHook
 {
  public:
-  SpringHook(dBodyID body,const Vector3& worldpt,const Vector3& target,Real k);
+  SpringHook(dBodyID body,const Vector3& worldpt,const Vector3& target,Real kP,Real kD=0);
   virtual void Step(Real dt);
   virtual bool ReadState(File& f);
   virtual bool WriteState(File& f) const;
 
   dBodyID body;
   Vector3 localpt,target;
-  Real k;
+  Real kP,kD;
+};
+
+/** @ingroup Simulation
+ * @brief A hook that adds a constant force to a joint
+ */
+class JointForceHook : public WorldSimulationHook
+{
+public:
+  JointForceHook(ODEJoint* joint,Real f);
+  virtual void Step(Real dt);
+  virtual bool ReadState(File& f);
+  virtual bool WriteState(File& f) const;
+
+  ODEJoint* joint;
+  Real f;
+};
+
+/** @ingroup Simulation
+ * @brief A hook that adds a constant force to a joint
+ */
+class JointSpringHook : public WorldSimulationHook
+{
+public:
+  JointSpringHook(ODEJoint* joint,Real target,Real kP,Real kD=0);
+  virtual void Step(Real dt);
+  virtual bool ReadState(File& f);
+  virtual bool WriteState(File& f) const;
+
+  ODEJoint* joint;
+  Real target;
+  Real kP,kD;
 };
 
 #endif

@@ -280,6 +280,7 @@ void ODESimulator::GetStatusHistory(vector<Status>& statuses,vector<Real>& statu
 
 ODESimulator::~ODESimulator()
 {
+  joints.resize(0);
   dJointGroupDestroy(contactGroupID);
   for(size_t i=0;i<terrainGeoms.size();i++)
     delete terrainGeoms[i];
@@ -1944,6 +1945,59 @@ void ODESimulator::ClearContactFeedback()
 }
 
 
+ODEJoint* ODESimulator::AddJoint(const ODEObjectID& obj)
+{
+  joints.push_back(ODEJoint());
+  joints.back().o1 = obj;
+  joints.back().sim = this;
+  return &joints.back();
+}
+
+ODEJoint* ODESimulator::AddJoint(const ODEObjectID& a,const ODEObjectID& b)
+{
+  joints.push_back(ODEJoint());
+  joints.back().o1 = a;
+  joints.back().o2 = b;
+  joints.back().sim = this;
+  return &joints.back();
+}
+
+void ODESimulator::RemoveJoint(ODEJoint* j)
+{
+  for(auto i=joints.begin();i!=joints.end();++i) {
+    if(j == &(*i)) {
+      auto k = i;
+      i--;
+      joints.erase(k);
+    }
+  }
+}
+
+void ODESimulator::RemoveJoints(const ODEObjectID& obj)
+{
+  for(auto i=joints.begin();i!=joints.end();++i) {
+    if(i->o1 == obj || i->o2 == obj) {
+      auto k = i;
+      i--;
+      joints.erase(k);
+    }
+  }
+}
+
+void ODESimulator::RemoveJoints(const ODEObjectID& a,const ODEObjectID& b)
+{
+  for(auto i=joints.begin();i!=joints.end();++i) {
+    if((i->o1 == a && i->o2 == b) || (i->o1 == b && i->o2 == a)) {
+      auto k = i;
+      i--;
+      joints.erase(k);
+    }
+  }
+}
+
+
+
+
 
 bool ODESimulator::ReadState_Internal(File& f)
 {
@@ -2003,4 +2057,156 @@ bool ODESimulator::WriteState_Internal(File& f) const
   for(size_t i=0;i<objects.size();i++) 
     if(!objects[i]->WriteState(f)) return false;
   return true;
+}
+
+
+
+
+
+
+
+ODEJoint::ODEJoint()
+:type(-1),sim(0),joint(0)
+{}
+
+ODEJoint::~ODEJoint()
+{
+  Destroy();
+}
+
+void ODEJoint::Destroy()
+{
+  if(joint)
+    dJointDestroy(joint);
+  joint = 0;
+  type = -1;
+}
+
+void ODEJoint::MakeFixed()
+{
+  Destroy();
+  dBodyID a = sim->ObjectBody(o1);
+  dBodyID b = sim->ObjectBody(o2);
+  if(a == NULL && b==NULL) return;
+  type = 0;
+  joint = dJointCreateFixed(sim->world(),0);
+  dJointAttach(joint,a,b);
+  dJointSetFeedback(joint,&feedback);
+  dJointSetFixed(joint);
+}
+
+void ODEJoint::MakeHinge(const Vector3& pt,const Vector3& axis)
+{
+  Destroy();
+  dBodyID a = sim->ObjectBody(o1);
+  dBodyID b = sim->ObjectBody(o2);
+  if(a == NULL && b==NULL) return;
+  type = 1;
+  joint = dJointCreateHinge(sim->world(),0);
+  dJointAttach(joint,a,b);
+  dJointSetFeedback(joint,&feedback);
+  dJointSetHingeAnchor(joint,pt[0],pt[1],pt[2]);
+  dJointSetHingeAxis(joint,axis[0],axis[1],axis[2]);
+  dJointSetHingeParam(joint,dParamBounce,0);
+  dJointSetHingeParam(joint,dParamFMax,0);
+}
+
+void ODEJoint::MakeSlider(const Vector3& dir)
+{
+  Destroy();
+  dBodyID a = sim->ObjectBody(o1);
+  dBodyID b = sim->ObjectBody(o2);
+  if(a == NULL && b==NULL) return;
+  type = 2;
+  joint = dJointCreateSlider(sim->world(),0);
+  dJointAttach(joint,a,b);
+  dJointSetFeedback(joint,&feedback);
+  dJointSetSliderAxis(joint,dir[0],dir[1],dir[2]);
+  dJointSetSliderParam(joint,dParamBounce,0);
+}
+
+Real ODEJoint::GetPosition()
+{
+  if(!joint) return 0;
+  if(type == 1)
+    return dJointGetHingeAngle(joint);
+  else if(type == 2)
+    return dJointGetSliderPosition(joint);
+  return 0;
+}
+
+Real ODEJoint::GetVelocity()
+{
+  if(!joint) return 0;
+  if(type == 1)
+    return dJointGetHingeAngleRate(joint);
+  else if(type == 2)
+    return dJointGetSliderPositionRate(joint);
+  return 0;
+}
+
+void ODEJoint::SetLimits(Real min,Real max)
+{
+  if(!joint) return;
+  if(type == 1) {
+    dJointSetHingeParam(joint,dParamLoStop,min);
+    dJointSetHingeParam(joint,dParamHiStop,max);
+  }
+  else if(type == 2) {
+    dJointSetSliderParam(joint,dParamLoStop,min);
+    dJointSetSliderParam(joint,dParamHiStop,max); 
+  }
+}
+
+
+void ODEJoint::AddForce(Real force)
+{
+  if(!joint) return;
+  if(type == 1) 
+    dJointAddHingeTorque(joint,force);
+  else if(type == 2)
+    dJointAddSliderForce(joint,force);
+}
+
+
+void ODEJoint::SetFriction(Real coeff)
+{
+  if(!joint) return;
+  if(type == 1) {
+    dJointSetHingeParam(joint,dParamVel,0);
+    dJointSetHingeParam(joint,dParamFMax,coeff);
+  }
+  else if(type == 2) {
+    dJointSetSliderParam(joint,dParamVel,0);
+    dJointSetSliderParam(joint,dParamFMax,coeff);
+  }
+}
+
+
+void ODEJoint::SetFixedVelocity(Real vel,Real tmax)
+{
+  if(!joint) return;
+  if(type == 1) {
+    dJointSetHingeParam(joint,dParamVel,vel);
+    dJointSetHingeParam(joint,dParamFMax,tmax);
+  }
+  else if(type == 2) {
+    dJointSetSliderParam(joint,dParamVel,vel);
+    dJointSetSliderParam(joint,dParamFMax,tmax);
+  }
+}
+
+void ODEJoint::GetConstraintForces(Vector3& f1,Vector3& t1,Vector3& f2,Vector3& t2)
+{
+  if(!joint) {
+    f1.setZero();
+    f2.setZero();
+    t1.setZero();
+    t2.setZero();
+    return;
+  }
+  f1.set(feedback.f1[0],feedback.f1[1],feedback.f1[2]);
+  t1.set(feedback.t1[0],feedback.t1[1],feedback.t1[2]);
+  f2.set(feedback.f2[0],feedback.f2[1],feedback.f2[2]);
+  t2.set(feedback.t2[0],feedback.t2[1],feedback.t2[2]);
 }

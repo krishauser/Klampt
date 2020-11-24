@@ -985,8 +985,8 @@ bool WrenchHook::WriteState(File& f) const
 
 
 
-SpringHook::SpringHook(dBodyID _body,const Vector3& _worldpt,const Vector3& _target,Real _k)
-  :body(_body),target(_target),k(_k)
+SpringHook::SpringHook(dBodyID _body,const Vector3& _worldpt,const Vector3& _target,Real _kP,Real _kD)
+  :body(_body),target(_target),kP(_kP),kD(_kD)
 {
   Matrix3 R;
   Vector3 t;
@@ -1003,7 +1003,9 @@ void SpringHook::Step(Real dt)
   CopyVector(t,dBodyGetPosition(body));
   CopyMatrix(R,dBodyGetRotation(body));
   wp = R*localpt+t;
-  f = k*(target-wp);
+  f = kP*(target-wp);
+  if(kD >= 0) {
+  }
   //LOG4CXX_INFO(GET_LOGGER(WorldSimulator),"Target "<<target<<", world point "<<wp<<", force "<<f<<"");
   dBodyAddForceAtPos(body,f.x,f.y,f.z,wp.x,wp.y,wp.z);
 }
@@ -1015,6 +1017,50 @@ bool SpringHook::ReadState(File& f)
 }
 
 bool SpringHook::WriteState(File& f) const
+{
+  FatalError("Not implemented yet");
+  return false;
+}
+
+JointForceHook::JointForceHook(ODEJoint* _joint,Real _f)
+:joint(_joint),f(_f)
+{}
+
+void JointForceHook::Step(Real dt)
+{
+  joint->AddForce(f);
+}
+
+bool JointForceHook::ReadState(File& f)
+{
+  FatalError("Not implemented yet");
+  return false;
+}
+
+bool JointForceHook::WriteState(File& f) const
+{
+  FatalError("Not implemented yet");
+  return false;
+}
+
+JointSpringHook::JointSpringHook(ODEJoint* _joint,Real _target,Real _kP,Real _kD)
+:joint(_joint),target(_target),kP(_kP),kD(_kD)
+{}
+  
+void JointSpringHook::Step(Real dt)
+{
+  Real p = joint->GetPosition();
+  Real v = joint->GetVelocity();
+  joint->AddForce(kP*(target-p) - kD*v);
+}
+
+bool JointSpringHook::ReadState(File& f)
+{
+  FatalError("Not implemented yet");
+  return false;
+}
+
+bool JointSpringHook::WriteState(File& f) const
 {
   FatalError("Not implemented yet");
   return false;
