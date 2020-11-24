@@ -40,10 +40,10 @@ class MyGLViewer(GLSimulationPlugin):
     def display_screen(self):
         glDisable(GL_LIGHTING)
         h = 20
-        self.draw_text((20,h),str(self.sim.getTime()),color=[1,1,1])
+        self.draw_text((20,h),"%.3f"%(self.sim.getTime(),),color=[1,1,1])
         h += 20
         for (t,s) in self.statusLog:
-            self.draw_text((20,h),"Sim status "+str(t)+": "+self.sim.getStatusString(s),color=[1,0,0])
+            self.draw_text((20,h),"Sim status "+"%.3f"%(t,)+": "+self.sim.getStatusString(s),color=[1,0,0])
             h += 20
         if self.sim.hadPenetration(-1,-1):
             self.draw_text((20,h),"Meshes penetrating, simulation may be unstable",color=[1,0,0])
@@ -133,7 +133,10 @@ def main():
     print("================================================================================")
     print(sys.argv[0]+": Simulates a robot file and Python controller")
     if len(sys.argv)<=1:
-        print("USAGE: klampt_sim [world_file] [trajectory (.traj) or controller (.py)]")
+        print("USAGE: klampt_sim [world_file] [trajectory (.traj/.path) or controller (.py)]")
+        print()
+        print("  Try: klampt_sim athlete_plane.xml motions/athlete_flex_opt.path ")
+        print("       [run from Klampt-examples/data/]")
     print("================================================================================")
     if len(sys.argv)<=1:
         exit()
@@ -160,10 +163,13 @@ def main():
 
     for i,c in enumerate(control_modules):
         if isinstance(c,str):
-            sys.path.append(os.path.abspath("../control"))
-            import trajectory_controller
+            from klampt.control.blocks import trajectory_tracking
+            from klampt.model.trajectory import RobotTrajectory
+            from klampt.io import loader
+            traj = loader.load('Trajectory',c)
+            rtraj = RobotTrajectory(world.robot(i),traj.times,traj.milestones)
             #it's a path file, try to load it
-            controller = trajectory_controller.make(world.robot(i),c)
+            controller = trajectory_tracking.TrajectoryPositionController(rtraj)
         else:
             try:
                 maker = c.make
