@@ -1219,18 +1219,20 @@ Geometry3D Geometry3D::convert(const char* destype,double param)
   else
     throw PyException("Invalid desired type specified, must be TriangleMesh, PointCloud, or VolumeGrid or ConvexHull");
 
-  if(srctype == destype2)
-    return *this;
   if(param < 0 && srctype != AnyGeometry3D::ImplicitSurface) throw PyException("Invalid conversion parameter, must be nonnegative");
 
   //do the conversion
-  geom->InitCollisionData();
-  if(geom->type == AnyGeometry3D::TriangleMesh) {
-    geom->TriangleMeshCollisionData().CalcTriNeighbors();
-  }
   Geometry3D res;
   shared_ptr<AnyCollisionGeometry3D>& resgeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(res.geomPtr);
   resgeom = make_shared<AnyCollisionGeometry3D>();
+  if(srctype == destype2 && param > 0)  {
+    if(!geom->Remesh(param,*resgeom)) {
+      stringstream ss;
+      ss<<"Cannot perform the geometry remeshiing "<<geom->TypeName()<<" at res "<<param;
+      throw PyException(ss.str().c_str());
+    }
+    return res;
+  }
   if(!geom->Convert(destype2,*resgeom,param)) {
     stringstream ss;
     ss<<"Cannot perform the geometry conversion "<<geom->TypeName()<<" -> "<<destype;
