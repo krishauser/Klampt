@@ -1527,8 +1527,6 @@ def objectToVisType(item,world):
                             break
                     if not match and len(itypes) == 1:
                         print("Config-like item of length",len(item),"doesn't match any of the # links of robots in the world:",[world.robot(i).numLinks() for i in range(world.numRobots())])
-                else:
-                    validtypes.append(t)
             elif t=='RigidTransform':
                 validtypes.append(t)
             elif t=='Geometry3D':
@@ -2711,7 +2709,7 @@ class VisAppearance:
                 if not hasattr(self,'geometry'):
                     self.geometry = Geometry3D(self.item)
                 geometry = self.geometry
-                if self.item.type not in ['Sphere','AABB']:
+                if self.item.type in ['Point','Segment']:
                     lighting = False
             elif isinstance(self.item,PointCloud):
                 if not hasattr(self,'geometry'):
@@ -2726,7 +2724,7 @@ class VisAppearance:
                 assert isinstance(self.item,Geometry3D)
                 if self.item.type() == 'GeometricPrimitive':
                     prim = self.item.getGeometricPrimitive()
-                    if prim.type not in ['Sphere','AABB']:
+                    if prim.type in ['Point','Segment']:
                         lighting = False
                 elif self.item.type() == 'PointCloud':
                     lighting = False
@@ -3179,7 +3177,12 @@ class VisualizationScene:
                 #need to erase prior item visualizer
                 if name in self.items:
                     self.items[name].destroy()
+
                 type = kwargs.get('type',None)
+                if type is None:
+                    world = self.items.get('world',None)
+                    if world is not None: world = world.item
+                    type = objectToVisType(item,world)
                 app = VisAppearance(item,name,type)
                 self.items[name] = app
             item = self.items[name]
