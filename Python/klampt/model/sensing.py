@@ -752,6 +752,23 @@ class PlaneFitter:
         index = np.argmin(w)
         self.normal = v[:,index]
         self.sse = self.count * np.dot(self.normal,np.dot(self.cov,self.normal))
+
+
+def point_cloud_simplify(pc,radius):
+    """Simplifies a point cloud by averaging points within neighborhoods. Uses 
+    a fast hash grid data structure.
+
+    Args:
+        pc (Geometry3D or PointCloud): the point cloud
+        radius (float): the neighborhood radius.
+    """
+    if radius <= 0:
+        raise ValueError("radius must be > 0")
+    if isinstance(pc,Geometry3D):
+        assert pc.type() == 'PointCloud',"Must provide a point cloud to point_cloud_simplify"
+        return pc.convert('PointCloud',radius)
+    else:
+        return Geometry3D(pc).convert('PointCloud',radius).getPointCloud()
  
 
 def point_cloud_normals(pc,estimation_radius=None,estimation_knn=None,estimation_viewpoint=None,add=True):
