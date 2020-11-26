@@ -90,7 +90,7 @@ class LaserRangeSensor : public SensorBase
  * The format of the measurements list is a list of rgb[i,j] pixels if rgb=true, 
  * then followed by a list of d[i,j] pixels giving depth in meters (or whatever unit
  * you are generally using) if depth=true.  The rgb pixels are given as casts from
- * unsigned integers in the pixel format ABGR to doubles.  The depth pixels are given
+ * unsigned integers in the pixel format 0xrrggbb to doubles.  The depth pixels are given
  * as floats.
  *
  * The list of measurements proceeds in scan-line order from the upper-left pixel.

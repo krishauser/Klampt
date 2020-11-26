@@ -286,7 +286,7 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
   else Tlink.setIdentity();
 
   if(useGLFramebuffers) {
-    if(!renderer.Setup(xres,yres)) {
+    if(!renderer.Setup(xres,yres,true,false)) {
       LOG4CXX_WARN(GET_LOGGER(Sensing),"CameraSensor: Couldn't initialize GLEW, falling back to slow mode");
       const GLubyte* glVersion = glGetString(GL_VERSION);
       if(glVersion) {
@@ -323,6 +323,7 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
     printf("CameraSensor: Draw GL world %f\n",timer.ElapsedTime());
     timer.Reset();
     #endif //DEBUG_GL_RENDER_TIMING
+    DEBUG_GL_ERRORS()
 
     //extract measurements
     measurements.resize(0);
@@ -390,7 +391,7 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
       timer.Reset();
       #endif //DEBUG_GL_RENDER_TIMING
     }
-    
+    DEBUG_GL_ERRORS()
   }
   else {
     //fallback will use ray casting: (slow!)
@@ -599,45 +600,6 @@ void CameraSensor::DrawGL(const Robot& robot,const vector<double>& measurements)
   if(link >= 0) 
     v.xform = robot.links[link].T_World*v.xform;
 
-  if(rgb && renderer.color_tex != 0) {
-    //debugging: draw image in frustum
-    glPushMatrix();
-    glMultMatrix((Matrix4)v.xform);
-    Real d = v.n;
-    Real aspectRatio = Real(xres)/Real(yres);
-    Real xmin = Real(v.x - v.w*0.5)/(Real(v.w)*0.5);
-    Real xmax = Real(v.x + v.w*0.5)/(Real(v.w)*0.5);
-    Real ymax = -Real(v.y - v.h*0.5)/(Real(v.h)*0.5);
-    Real ymin = -Real(v.y + v.h*0.5)/(Real(v.h)*0.5);
-    Real xscale = 0.5*d/v.scale;
-    Real yscale = xscale/aspectRatio;
-    xmin *= xscale;
-    xmax *= xscale;
-    ymin *= yscale;
-    ymax *= yscale;
-    glBindTexture(GL_TEXTURE_2D,renderer.color_tex);
-    glDisable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-    glColor4f(1,1,1,0.5);
-    glEnable(GL_TEXTURE_2D);
-    glDisable(GL_LIGHTING);
-    glBegin(GL_TRIANGLE_FAN);
-    glTexCoord2f(0,0);
-    glVertex3f(xmin,ymin,-d);
-    glTexCoord2f(1,0);
-    glVertex3f(xmax,ymin,-d);
-    glTexCoord2f(1,1);
-    glVertex3f(xmax,ymax,-d);
-    glTexCoord2f(0,1);
-    glVertex3f(xmin,ymax,-d);
-    glEnd();
-    glDisable(GL_TEXTURE_2D);
-    glDisable(GL_BLEND);
-    glEnable(GL_DEPTH_TEST);
-    glPopMatrix();
-  }
-
   size_t vstart = 0;
   if(rgb) vstart = xres*yres;
   if(depth && !measurements.empty()) {
@@ -709,8 +671,51 @@ void CameraSensor::DrawGL(const Robot& robot,const vector<double>& measurements)
     glPopMatrix();
   }
 
+  
+  if(rgb && renderer.color_tex != 0) {
+    //debugging: draw image in frustum
+    glPushMatrix();
+    glMultMatrix((Matrix4)v.xform);
+    Real d = v.n;
+    Real aspectRatio = Real(xres)/Real(yres);
+    Real xmin = Real(v.x - v.w*0.5)/(Real(v.w)*0.5);
+    Real xmax = Real(v.x + v.w*0.5)/(Real(v.w)*0.5);
+    Real ymax = -Real(v.y - v.h*0.5)/(Real(v.h)*0.5);
+    Real ymin = -Real(v.y + v.h*0.5)/(Real(v.h)*0.5);
+    Real xscale = 0.5*d/v.scale;
+    Real yscale = xscale/aspectRatio;
+    xmin *= xscale;
+    xmax *= xscale;
+    ymin *= yscale;
+    ymax *= yscale;
+    glBindTexture(GL_TEXTURE_2D,renderer.color_tex);
+    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+    glColor4f(1,1,1,0.5);
+    glEnable(GL_TEXTURE_2D);
+    glDisable(GL_LIGHTING);
+    glBegin(GL_TRIANGLE_FAN);
+    glTexCoord2f(0,0);
+    glVertex3f(xmin,ymin,-d);
+    glTexCoord2f(1,0);
+    glVertex3f(xmax,ymin,-d);
+    glTexCoord2f(1,1);
+    glVertex3f(xmax,ymax,-d);
+    glTexCoord2f(0,1);
+    glVertex3f(xmin,ymax,-d);
+    glEnd();
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
+    glPopMatrix();
+  }
+
+
   ViewCamera view;
   view.DrawGL(v);
+
+  DEBUG_GL_ERRORS()
 }
 
 
