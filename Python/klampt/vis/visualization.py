@@ -2711,6 +2711,8 @@ class VisAppearance:
                 geometry = self.geometry
                 if self.item.type in ['Point','Segment']:
                     lighting = False
+                    if self.item.type == 'Segment':
+                        glLineWidth(self.attributes.get('width',3.0))
             elif isinstance(self.item,PointCloud):
                 if not hasattr(self,'geometry'):
                     self.geometry = Geometry3D(self.item)
@@ -2726,6 +2728,8 @@ class VisAppearance:
                     prim = self.item.getGeometricPrimitive()
                     if prim.type in ['Point','Segment']:
                         lighting = False
+                        if prim.type == 'Segment':
+                            glLineWidth(self.attributes.get('width',3.0))
                 elif self.item.type() == 'PointCloud':
                     lighting = False
                 geometry = self.item
@@ -2734,6 +2738,8 @@ class VisAppearance:
             else:
                 glDisable(GL_LIGHTING)
             self.appearance.drawWorldGL(geometry)
+            if self.item.type == 'Segment':
+                glLineWidth(1.0)
             if name is not None:
                 bmin,bmax = geometry.getBB()
                 wp = vectorops.mul(vectorops.add(bmin,bmax),0.5)
@@ -3182,7 +3188,10 @@ class VisualizationScene:
                 if type is None:
                     world = self.items.get('world',None)
                     if world is not None: world = world.item
-                    type = objectToVisType(item,world)
+                    try:
+                        type = objectToVisType(item,world)
+                    except Exception:
+                        type = None
                 app = VisAppearance(item,name,type)
                 self.items[name] = app
             item = self.items[name]
