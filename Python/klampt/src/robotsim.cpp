@@ -14,6 +14,7 @@
 #include <Klampt/Planning/RobotCSpace.h>
 #include <Klampt/Simulation/WorldSimulation.h>
 #include <Klampt/Modeling/Interpolate.h>
+#include <Klampt/Modeling/Mass.h>
 #include <Klampt/Planning/RobotCSpace.h>
 #include <Klampt/IO/XmlWorld.h>
 #include <Klampt/IO/XmlODE.h>
@@ -2942,6 +2943,17 @@ Appearance RobotModelLink::appearance()
 Mass::Mass()
 : mass(1),com(3,0.0),inertia(3,1.0)
 {}
+
+void Mass::estimate(const Geometry3D& g,double mass,double surfaceFraction)
+{
+  shared_ptr<AnyCollisionGeometry3D>* gp = reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(g.geomPtr);
+  Vector3 com = CenterOfMass(**gp,surfaceFraction);
+  Matrix3 H = Inertia(**gp,com,mass,surfaceFraction);
+  this->mass = mass;
+  com.get(&this->com[0]);
+  this->inertia.resize(9);
+  H.get(&this->inertia[0]);
+}
 
 ContactParameters::ContactParameters()
 : kFriction(0.5),kRestitution(0),kStiffness(Inf),kDamping(Inf)

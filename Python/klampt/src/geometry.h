@@ -539,6 +539,7 @@ class Geometry3D
    *
    * Unsupported types:
    *
+   * - VolumeGrid - GeometricPrimitive [aabb, box, triangle, polygon]
    * - VolumeGrid - TriangleMesh
    * - VolumeGrid - VolumeGrid
    * - ConvexHull - anything else besides ConvexHull

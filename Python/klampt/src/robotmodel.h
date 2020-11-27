@@ -51,6 +51,11 @@ public:
   void setInertia(const std::vector<double>& _inertia) { inertia = _inertia; }
   ///Returns the inertia matrix as a list of 3 floats or 9 floats
   void getInertia(std::vector<double>& out) const { out=inertia; }
+  ///Estimates the com and inertia of a geometry, with a given total mass. 
+  ///
+  ///For TriangleMesh types, surfaceFraction dictates how much of the object's mass
+  ///is concentrated at the surface rather than the interior.
+  void estimate(const Geometry3D& g,double mass,double surfaceFraction=0);
 
   double mass;        //<mass
   std::vector<double> com;      //<local center of mass, size 3

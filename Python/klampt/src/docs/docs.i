@@ -811,6 +811,7 @@ Returns true if this geometry collides with the other.
 
 Unsupported types:  
 
+*   VolumeGrid - GeometricPrimitive [aabb, box, triangle, polygon]  
 *   VolumeGrid - TriangleMesh  
 *   VolumeGrid - VolumeGrid  
 *   ConvexHull - anything else besides ConvexHull  
@@ -1575,6 +1576,14 @@ Sets an inertia matrix.
 Returns the COM as a list of 3 floats.  
 ";
 
+%feature("docstring") Mass::estimate "
+
+Estimates the com and inertia of a geometry, with a given total mass.  
+
+For TriangleMesh types, surfaceFraction dictates how much of the object's mass
+is concentrated at the surface rather than the interior.  
+";
+
 %feature("docstring") Mass::getMass "
 ";
 
@@ -1903,6 +1912,9 @@ Sets all the points to the given list (a 3n-list)
 ";
 
 %feature("docstring") PointPoser::set "
+";
+
+%feature("docstring") PointPoser::enableAxes "
 ";
 
 %feature("docstring") PointPoser::PointPoser "

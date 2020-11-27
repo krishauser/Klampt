@@ -1983,7 +1983,7 @@ class Geometry3D(_object):
 
 
         Args:
-            arg2 (:class:`~klampt.GeometricPrimitive` or :class:`~klampt.PointCloud` or :class:`~klampt.TriangleMesh` or :obj:`ConvexHull` or :class:`~klampt.Geometry3D` or :class:`~klampt.VolumeGrid`, optional): 
+            arg2 (:class:`~klampt.PointCloud` or :class:`~klampt.TriangleMesh` or :class:`~klampt.GeometricPrimitive` or :obj:`ConvexHull` or :class:`~klampt.Geometry3D` or :class:`~klampt.VolumeGrid`, optional): 
         """
         this = _robotsim.new_Geometry3D(*args)
         try:
@@ -2401,6 +2401,7 @@ class Geometry3D(_object):
 
         Unsupported types:  
 
+        *   VolumeGrid - GeometricPrimitive [aabb, box, triangle, polygon]  
         *   VolumeGrid - TriangleMesh  
         *   VolumeGrid - VolumeGrid  
         *   ConvexHull - anything else besides ConvexHull  
@@ -3395,6 +3396,16 @@ class PointPoser(Widget):
         """
         return _robotsim.PointPoser_setAxes(self, R)
 
+
+    def enableAxes(self, x, y, z):
+        """
+        Args:
+            x (bool)
+            y (bool)
+            z (bool)
+        """
+        return _robotsim.PointPoser_enableAxes(self, x, y, z)
+
     __swig_destroy__ = _robotsim.delete_PointPoser
     __del__ = lambda self: None
 PointPoser_swigregister = _robotsim.PointPoser_swigregister
@@ -3834,6 +3845,27 @@ class Mass(_object):
 
         """
         return _robotsim.Mass_getInertia(self)
+
+
+    def estimate(self, g, mass, surfaceFraction=0):
+        """
+        Estimates the com and inertia of a geometry, with a given total mass.  
+
+        estimate (g,mass,surfaceFraction=0)
+
+        estimate (g,mass)
+
+
+        Args:
+            g (:class:`~klampt.Geometry3D`): 
+            mass (float): 
+            surfaceFraction (float, optional): default value 0
+
+        For TriangleMesh types, surfaceFraction dictates how much of the object's mass
+        is concentrated at the surface rather than the interior.  
+
+        """
+        return _robotsim.Mass_estimate(self, g, mass, surfaceFraction)
 
     __swig_setmethods__["mass"] = _robotsim.Mass_mass_set
     __swig_getmethods__["mass"] = _robotsim.Mass_mass_get
@@ -6016,7 +6048,7 @@ class WorldModel(_object):
 
 
         Args:
-            robot (str or int): 
+            robot (int or str): 
             index (int, optional): 
             name (str, optional): 
 
@@ -6172,7 +6204,7 @@ class WorldModel(_object):
             terrain (:obj:`TerrainModel`, optional): 
 
         Returns:
-            (:class:`~klampt.RigidObjectModel` or :class:`~klampt.RobotModel` or :obj:`TerrainModel`):
+            (:class:`~klampt.RigidObjectModel` or :obj:`TerrainModel` or :class:`~klampt.RobotModel`):
         """
         return _robotsim.WorldModel_add(self, *args)
 
@@ -6902,7 +6934,7 @@ class IKSolver(_object):
             tol (float, optional): 
 
         Returns:
-            (bool or :obj:`object`):
+            (:obj:`object` or bool):
         """
         return _robotsim.IKSolver_solve(self, *args)
 
@@ -7013,7 +7045,7 @@ class GeneralizedIKObjective(_object):
 
 
         Args:
-            obj (:class:`~klampt.RigidObjectModel` or :obj:`GeneralizedIKObjective`, optional): 
+            obj (:obj:`GeneralizedIKObjective` or :class:`~klampt.RigidObjectModel`, optional): 
             link (:class:`~klampt.RobotModelLink`, optional): 
             link2 (:class:`~klampt.RobotModelLink`, optional): 
             obj2 (:class:`~klampt.RigidObjectModel`, optional): 
@@ -7213,7 +7245,7 @@ def SampleTransform(*args):
 
 
     Args:
-        obj (:obj:`GeneralizedIKObjective` or :obj:`IKObjective`): 
+        obj (:obj:`IKObjective` or :obj:`GeneralizedIKObjective`): 
     """
     return _robotsim.SampleTransform(*args)
 class SimRobotSensor(_object):
@@ -7266,7 +7298,7 @@ class SimRobotSensor(_object):
 
 
         Args:
-            robot (:class:`~klampt.RobotModel` or :class:`~klampt.SimRobotController`): 
+            robot (:class:`~klampt.SimRobotController` or :class:`~klampt.RobotModel`): 
             sensor (:obj:`SensorBase`, optional): 
             name (str, optional): 
             type (str, optional): 
@@ -8628,7 +8660,7 @@ class Simulator(_object):
 
 
         Args:
-            robot (:class:`~klampt.RobotModel` or int): 
+            robot (int or :class:`~klampt.RobotModel`): 
 
         Returns:
             (:class:`~klampt.SimRobotController`):

@@ -2497,6 +2497,7 @@ class Geometry3D(_object):
 
         Unsupported types:  
 
+        *   VolumeGrid - GeometricPrimitive [aabb, box, triangle, polygon]  
         *   VolumeGrid - TriangleMesh  
         *   VolumeGrid - VolumeGrid  
         *   ConvexHull - anything else besides ConvexHull  
@@ -3482,6 +3483,16 @@ class PointPoser(Widget):
         """
         return _robotsim.PointPoser_setAxes(self, R)
 
+
+    def enableAxes(self, x, y, z):
+        """
+        enableAxes(PointPoser self, bool x, bool y, bool z)
+
+
+
+        """
+        return _robotsim.PointPoser_enableAxes(self, x, y, z)
+
     __swig_destroy__ = _robotsim.delete_PointPoser
     __del__ = lambda self: None
 PointPoser_swigregister = _robotsim.PointPoser_swigregister
@@ -4014,6 +4025,22 @@ class Mass(_object):
 
         """
         return _robotsim.Mass_getInertia(self)
+
+
+    def estimate(self, g, mass, surfaceFraction=0):
+        """
+        estimate(Mass self, Geometry3D g, double mass, double surfaceFraction=0)
+        estimate(Mass self, Geometry3D g, double mass)
+
+
+
+        Estimates the com and inertia of a geometry, with a given total mass.  
+
+        For TriangleMesh types, surfaceFraction dictates how much of the object's mass
+        is concentrated at the surface rather than the interior.  
+
+        """
+        return _robotsim.Mass_estimate(self, g, mass, surfaceFraction)
 
     __swig_setmethods__["mass"] = _robotsim.Mass_mass_set
     __swig_getmethods__["mass"] = _robotsim.Mass_mass_get
