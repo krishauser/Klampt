@@ -66,15 +66,17 @@ terrains, as well as simulation parameters. Follows the following
 schema.
 
 -  ``<world>``: top level element.
--  *Attributes*
+
+   *Attributes*
 
    -  ``background`` (``Vector4``, default light blue): sets the RGBA
       background color of the world. Each channel has the range [0,1]
 
--  *Children*
+   *Children*
 
    -  ``<robot>``: adds a robot to the world.
-   -  Attributes
+
+      *Attributes*
 
       -  ``name`` (string, optional, default "Robot"): a string to be
          used as an identifier.
@@ -87,7 +89,8 @@ schema.
    -  ``<rigidObject>``: adds a rigid object to the world. If the
       ``file`` attribute is not given, then the ``geometry`` child must
       be specified. Note: rotation attributes are applied in sequence.
-   -  *Attributes*
+
+      *Attributes*
 
       -  ``file`` (string, optional): the Rigid object (.obj) file to be
          loaded. May be relative or absolute path.
@@ -105,11 +108,12 @@ schema.
          with a rotation matrix derived from the given exponential map
          representation.
 
-   -  *Children*
+      *Children*
 
       -  ``<display>`` or ``<appearance>`` (optional): configures the OpenGL display of the
          object.
-      -  *Attributes*
+
+         *Attributes*
 
          -  ``color`` (``Vector3`` or ``Vector4``, optional): sets the RGB or RGBA color of the object.
          -  ``faceColor`` (``Vector3`` or ``Vector4``, optional): sets the RGB or RGBA color of the object's faces.
@@ -122,7 +126,8 @@ schema.
          -  ``texture_projection`` (string, optional): sets a texture projection.  Can be "xy", "z", or "conformal" at the moment.
 
       -  ``<geometry>``: sets the object's geometry (optional).
-      -  *Attributes*
+
+         *Attributes*
 
          -  ``file`` or ``mesh`` (string): the geometry file (.off, other mesh, or
             .pcd). May be relative or absolute path (Note: "mesh" is a
@@ -136,7 +141,8 @@ schema.
             boundary layer width.
 
       -  ``<physics>``: sets the physics parameters of the object.
-      -  *Attributes*
+
+         *Attributes*
 
          -  ``mass`` (Real, optional, default 1): the object’s mass.
          -  ``com`` (Vector3, optional, default (0,0,0)): the object’s
@@ -152,7 +158,8 @@ schema.
             set the constitutive parameters of the object.
 
    -  ``<terrain>``: adds a terrain to the world.
-   -  *Attributes*
+      
+      *Attributes*
 
       -  ``file``: see ``<world><rigidObject><geometry mesh>``
       -  ``scale``: see ``<world><rigidObject><geometry scale>``
@@ -162,15 +169,17 @@ schema.
       -  ``rotate*``: see ``<world><rigidObject><rotate*>``.
       -  ``kFriction``: see ``<world><rigidObject><physics kFriction>``.
 
-   -  *Children*
+      *Children*
 
       -  ``<display>`` or ``<appearance>`` (optional): configures the visualization of the terrain (see `<rigidObject><display>`).  Default color is light brown.
 
    -  ``<simulation>`` (optional): configures the simulation model.
-   -  *Children*
+      
+      *Children*
 
       -  ``<globals>`` (optional): global ODE simulation parameters.
-      -  *Attributes*
+      
+         *Attributes*
 
          -  ``gravity`` (``Vector3``, optional, default (0,0,-9.8)):
             sets the gravity vector
@@ -188,15 +197,18 @@ schema.
             activates robot to robot collision detection.
 
       -  ``<terrain>`` (optional): terrain configuration.
-      -  *Attributes*
+      
+         *Attributes*
 
-         -  ``index`` (int): the terrain index.
+         -  ``index`` (int): the terrain index.  Either index or name must be specified.
+         -  ``name`` (str): the terrain name.  Either index or name must be specified.
 
-      -  *Children*
+         *Children*
 
          -  ``<geometry>``: sets up the geometry and constitutive
             parameters
-         -  *Attributes*
+      
+            *Attributes*
 
             -  ``padding`` (float, optional, default 0 for terrains,
                0.0025 for everything else): sets the boundary layer
@@ -204,29 +216,33 @@ schema.
             -  ``kRestitution``, ``kFriction``, ``kStiffness``,
                ``kDamping``: see ``<world><rigidObject><physics k*>``
 
-      -  ``<object>`` (optional): rigid object configuration
-      -  *Attributes*
+      -  ``<rigidObject>`` (optional): rigid object configuration. Also referred to by ``<object>``
+      
+         *Attributes*
 
-         -  ``index`` (int): the rigid object index.
+         -  ``index`` (int): the rigid object index.  Either index or name must be specified.
+         -  ``name`` (str): the rigid object name.  Either index or name must be specified.
 
-      -  *Children*
+         *Children*
 
          -  ``<geometry>``: see ``<world><simulation><terrain><geometry>``.
 
       -  ``<robot>`` (optional): robot configuration
-      -  *Attributes*
+      
+         *Attributes*
 
-         -  ``index`` (int): the robot index.
+         -  ``index`` (int): the robot index.  Either index or name must be specified.
+         -  ``name`` (str): the robot name.  Either index or name must be specified.
          -  ``body`` (int, optional, default -1): the link index. -1
             applies the settings to the entire robot.
 
-      -  *Children*
+         *Children*
 
          -  ``<geometry>``: see ``<world><simulation><terrain><geometry>``.
          -  ``<controller>``: configures the robot's controller. Each
             controller type has a certain set of optional attributes
             that can be set here.
-         -  *Attributes*
+            *Attributes*
 
             -  ``type`` (string): the controller type. See the
                `controller
@@ -237,12 +253,25 @@ schema.
             -  ``timeStep`` (float, optional, default 0.01): 1/rate.
 
          -  ``<sensors>``: configures the robot's sensors.
-         -  *Children:* Any of the sensor types listed in the `sensor
+            *Children:* Any of the sensor types listed in the `sensor
             documentation <Manual-Sensors.html>`__
+
+      -  ``<joint>`` (optional): adds a custom joint to the simulator.
+      
+         *Attributes*
+
+            - ``type`` (str): the joint type, either "fixed", "hinge", or "slider"
+            - ``axis`` (3 floats): world space axis for "hinge" and "slider" joints 
+            - ``point`` (3 floats): world space position for "hinge" joints
+          
+         *Children*: one or two bodies to which the joint should be attached. If one body is specified, the body is attached to the world frame.
+
+            - ``<robot>`` or ``<rigidObject>`` or ``<terrain>``: an object to which the joint should be attached.  See ``<world><simulation><robot>`` or ``<rigidObject>`` or ``<terrain>``.
 
    -  ``<state>``: resumes the simulator from some other initial state.
 
-      -  *Attributes*
+      *Attributes*
+
       -  ``data`` (string): Base64 encoded data from a prior
          ``WorldSimulator.WriteState`` call. Other than simulation
          state, the world file must be otherwise identical to the one
@@ -393,10 +422,12 @@ can now read those attributes from URDF files with an extra ``<klampt>``
 XML element. The schema for defining this element is as follows:
 
 -  ``<robot>``: top level element. Follows URDF format as usual.
--  *Children*
+
+   *Children*
 
    -  ``<klampt>``: specifies Klamp't-specific parameters
-   -  *Attributes*
+
+      *Attributes*
 
       -  ``use_vis_geom`` (bool, optional, default false): use
          visualization geometry in imported model.
@@ -415,10 +446,11 @@ XML element. The schema for defining this element is as follows:
          optional, default 1e-8): default inertia matrix assigned to
          links not given mass parameters.
 
-   -  *Children*
+      *Children*
 
       -  ``<link>``: describes link parameters.
-      -  *Attributes*
+
+         *Attributes*
 
          -  ``name`` (string): identifies the link.
          -  ``physical`` (bool, optional, default true): if set to 0,
@@ -432,7 +464,8 @@ XML element. The schema for defining this element is as follows:
             default 0): sets the friction constants for this joint.
 
       -  ``<noselfcollision>``: turns off self collisions.
-      -  *Attributes*
+
+         *Attributes*
 
          -  ``pairs`` (string, optional): identifies one or more pairs
             of links for which self-collision should be turned off.
