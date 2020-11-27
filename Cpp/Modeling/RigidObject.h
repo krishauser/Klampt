@@ -23,7 +23,7 @@ public:
   ///
   ///If libcurl is available, can load from a URL
   bool LoadGeometry(const char* fn);
-  void SetMassFromGeometry(Real totalMass);
+  void SetMassFromGeometry(Real totalMass,Real surfaceFraction=1.0);
   void SetMassFromBB(Real totalMass);
   void InitCollisions();
   void UpdateGeometry(); ///< Call this before collision detection if the transform is changed

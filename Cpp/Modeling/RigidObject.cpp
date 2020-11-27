@@ -199,10 +199,13 @@ bool RigidObject::Load(const char* fn)
       f.erase("kDamping");
     }
     if(f.count("autoMass")!=0) {
+      Real surfaceFraction = 1.0;
+      if(f.CheckSize("autoMass",1,fn) && f.CheckType("autoMass",PrimitiveValue::Double,fn))
+        surfaceFraction = f.AsDouble("autoMass")[0];
       if(hasCOM) //com specified, compute inertia about given com
-        inertia = Inertia(*geometry,com,mass);
+        inertia = Inertia(*geometry,com,mass,surfaceFraction);
       else
-        SetMassFromGeometry(mass);
+        SetMassFromGeometry(mass,surfaceFraction);
       f.erase("autoMass");
     }
     if(!f.empty()) {
@@ -265,11 +268,11 @@ bool RigidObject::Save(const char* fn)
   return true;
 }
 
-void RigidObject::SetMassFromGeometry(Real totalMass)
+void RigidObject::SetMassFromGeometry(Real totalMass,Real surfaceFraction)
 {
   mass = totalMass;
-  com = CenterOfMass(*geometry);
-  inertia = Inertia(*geometry,com,mass);
+  com = CenterOfMass(*geometry,surfaceFraction);
+  inertia = Inertia(*geometry,com,mass,surfaceFraction);
 }
 
 void RigidObject::SetMassFromBB(Real totalMass)

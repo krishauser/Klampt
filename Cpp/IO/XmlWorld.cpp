@@ -318,12 +318,15 @@ bool XmlRigidObject::GetRigidObject(RigidObject& obj)
       obj.inertia = inertia;
 
     int automass=0;
-    if(phys->QueryValueAttribute("automass",&automass)==TIXML_SUCCESS)
-      ;
+    Real surfaceFraction=1.0;
+    if(phys->QueryValueAttribute("automass",&automass)==TIXML_SUCCESS) {
+      if(phys->QueryValueAttribute("automassSurfaceFraction",&surfaceFraction)==TIXML_SUCCESS)
+        ;
+    }
     else automass=0;
     
     if(automass) {
-      obj.SetMassFromGeometry(obj.mass);
+      obj.SetMassFromGeometry(obj.mass,surfaceFraction);
     }
     
     SafeQueryFloat(phys,"kRestitution",obj.kRestitution);

@@ -237,6 +237,7 @@ bool Robot::LoadRob(const char* fn) {
   vector<Real> geomscale;
   vector<Real> geommargin;
   bool autoMass = false;
+  Real surfaceFraction = 1.0;
   Real autoTorque = 0;
   vector<string> mountLinks;
   vector<string> mountFiles;
@@ -438,6 +439,9 @@ bool Robot::LoadRob(const char* fn) {
       }
     } else if (name == "automass") {
       autoMass = true;
+      Real temp;
+      ss >> temp;
+      if(ss) surfaceFraction = temp;
     } else if (name == "autotorque") {
       ss >> autoTorque;
     } else if (name == "geometry") {
@@ -1180,14 +1184,14 @@ bool Robot::LoadRob(const char* fn) {
     for (size_t i = 0; i < links.size(); i++) {
       if (comVec.empty()) {
         if (geometry[i] && !geometry[i]->Empty())
-          links[i].com = CenterOfMass(*geometry[i]);
+          links[i].com = CenterOfMass(*geometry[i],surfaceFraction);
         else
           links[i].com.setZero();
       }
       if (inertiaVec.empty()) {
         if (!IsGeometryEmpty(i) && links[i].mass != 0.0) {
           links[i].inertia = Inertia(*geometry[i], links[i].com,
-              links[i].mass);
+              links[i].mass,surfaceFraction);
           //check for infinity
           if(!links[i].inertia.isZero(1e300)) {
             LOG4CXX_INFO(GET_LOGGER(RobParser),"Huge automass inertia for "<<linkNames[i]<<": "<<links[i].inertia);
