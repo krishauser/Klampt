@@ -391,6 +391,20 @@ void GetCurrentCollisionStatus(ODESimulator* sim,
       CustomGeometryData* g1 = dGetCustomGeometryData(i->o1);
       CustomGeometryData* g2 = dGetCustomGeometryData(i->o2);
       double margin = g1->outerMargin + g2->outerMargin;
+      //some geometry types accept penetration depths -- don't roll back except for 
+      if(g1->geometry->type == Geometry::AnyCollisionGeometry3D::ImplicitSurface)
+        continue;
+      if(g1->geometry->type == Geometry::AnyCollisionGeometry3D::Primitive) {
+        if(g1->geometry->AsPrimitive().type == Math3D::GeometricPrimitive3D::Sphere)
+          continue;
+        if(g2->geometry->type == Geometry::AnyCollisionGeometry3D::Primitive)
+          continue;
+      }
+      if(g2->geometry->type == Geometry::AnyCollisionGeometry3D::ImplicitSurface)
+        continue;
+      if(g2->geometry->type == Geometry::AnyCollisionGeometry3D::Primitive)
+        if(g2->geometry->AsPrimitive().type == Math3D::GeometricPrimitive3D::Sphere)
+          continue;
       double depth = 0;
       string id1=sim->ObjectName(collpair.first),id2=sim->ObjectName(collpair.second);
       for(size_t j=0;j<i->contacts.size();j++)
