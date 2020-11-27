@@ -115,20 +115,23 @@ Structure: an XML v1.0 file, containing robots, rigid objects, and terrains, as 
             - `robotRobotCollisions` (bool, optional, default 0): activates robot to robot collision detection.
         - `<terrain>` (optional): terrain configuration.
           - _Attributes_
-            - `index` (int): the terrain index.
+            - `index` (int): the terrain index.  Either index or name must be specified.
+            - `name` (str): the terrain name.  Either index or name must be specified.
           - _Children_
             - `<geometry>`: sets up the geometry and constitutive parameters
               - _Attributes_
                 - `padding` (float, optional, default 0 for terrains, 0.0025 for everything else): sets the boundary layer thickness.
                 - `kRestitution`, `kFriction`, `kStiffness`, `kDamping`: see `<world><rigidObject><physics k*>`
-        - `<object>` (optional): rigid object configuration
+        - `<rigidObject>` (optional): rigid object configuration.  Also can be referred to by `<object>`
           - _Attributes_
-            - `index` (int): the rigid object index.
+            - `index` (int): the rigid object index.  Either index or name must be specified.
+            - `name` (str): the rigid object name.  Either index or name must be specified.
           - _Children_
             - `<geometry>`: see `<world><simulation><terrain><geometry>`.
         - `<robot>` (optional): robot configuration
           - _Attributes_
-            - `index` (int): the robot index.
+            - `index` (int): the robot index.  Either index or name must be specified.
+            - `name` (str): the robot name.  Either index or name must be specified.
             - `body` (int, optional, default -1): the link index. -1 applies the settings to the entire robot.
           - _Children_
             - `<geometry>`: see `<world><simulation><terrain><geometry>`.
@@ -139,6 +142,13 @@ Structure: an XML v1.0 file, containing robots, rigid objects, and terrains, as 
                 - `timeStep` (float, optional, default 0.01): 1/rate.
             - `<sensors>`: configures the robot's sensors.
               - _Children:_ Any of the sensor types listed in the [sensor documentation](Manual-Control.md#sensors)
+        - `<joint>` (optional): adds a custom joint to the simulator.
+          - _Attributes_
+            - `type` (str): the joint type, either "fixed", "hinge", or "slider"
+            - `axis` (3 floats): world space axis for "hinge" and "slider" joints 
+            - `point` (3 floats): world space position for "hinge" joints
+          - _Children_: one or two bodies to which the joint should be attached. If one body is specified, the body is attached to the world frame.
+            - `<robot>` or `<rigidObject>` or `<terrain>`: an object to which the joint should be attached.  See `<world><simulation><robot>` or `<rigidObject>` or `<terrain>`.
       - `<state>`: resumes the simulator from some other initial state.
         - _Attributes_
           - `data` (string): Base64 encoded data from a prior `WorldSimulator.WriteState` call. Other than simulation state, the world file must be otherwise identical to the one that produced this data.
