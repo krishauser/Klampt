@@ -205,28 +205,28 @@ def camera_to_images(camera,image_format='numpy',color_format='channels'):
     if has_rgb:
         if image_format == 'numpy':
             #t0 = time.time()
-            abgr = np.array(measurements[0:w*h]).reshape(h,w).astype(np.uint32)
+            argb = np.array(measurements[0:w*h]).reshape(h,w).astype(np.uint32)
             #t1 = time.time()
             #print("Numpy array creation time",t1-t0)
-            if color_format == 'bgr':
-                rgb = abgr
-            elif color_format == 'rgb':
-                rgb = np.bitwise_or.reduce((np.left_shift(np.bitwise_and(abgr,0x00000ff),16),
-                                        np.bitwise_and(abgr,0x000ff00)),
-                                        np.right_shift(np.bitwise_and(abgr,0x0ff0000), 16))
+            if color_format == 'rgb':
+                rgb = argb
+            elif color_format == 'bgr':
+                rgb = np.bitwise_or.reduce((np.left_shift(np.bitwise_and(argb,0x00000ff),16),
+                                        np.bitwise_and(argb,0x000ff00)),
+                                        np.right_shift(np.bitwise_and(argb,0x0ff0000), 16))
             else:
                 rgb = np.zeros((h,w,3),dtype=np.uint8)
-                rgb[:,:,0] =                np.bitwise_and(abgr,0x00000ff)
-                rgb[:,:,1] = np.right_shift(np.bitwise_and(abgr,0x00ff00), 8)
-                rgb[:,:,2] = np.right_shift(np.bitwise_and(abgr,0x0ff0000), 16)
+                rgb[:,:,0] = np.right_shift(np.bitwise_and(argb,0x0ff0000), 16)
+                rgb[:,:,1] = np.right_shift(np.bitwise_and(argb,0x00ff00), 8)
+                rgb[:,:,2] =                np.bitwise_and(argb,0x00000ff)
             #t2 = time.time()
             #print("  Conversion time",t2-t1)
         else:
-            if color_format == 'bgr':
+            if color_format == 'rgb':
                 rgb = []
                 for i in range(h):
                     rgb.append([int(v) for v in measurements[i*w:(i+1)*w]])
-            elif color_format == 'rgb':
+            elif color_format == 'bgr':
                 def bgr_to_rgb(pixel):
                     return ((pixel & 0x0000ff) << 16) | (pixel & 0x00ff00) | ((pixel & 0xff0000) >> 16)
                 rgb = []
@@ -239,7 +239,7 @@ def camera_to_images(camera,image_format='numpy',color_format='channels'):
                     row = []
                     for j in range(w):
                         pixel = int(measurements[start+j])
-                        row.append([pixel&0xff,(pixel>>8)&0xff,(pixel>>16)&0xff])
+                        row.append([(pixel>>16)&0xff,(pixel>>8)&0xff,pixel&0xff])
                     rgb.append(row)
     if has_depth:
         start = (w*h if has_rgb else 0)
