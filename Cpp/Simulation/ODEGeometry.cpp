@@ -204,6 +204,13 @@ AnyCollisionGeometry3D* _Preshrink(AnyCollisionGeometry3D* geom,Real padding) {
   if(padding==0) return geom;
   switch(geom->type) {
   case AnyCollisionGeometry3D::Primitive:
+    if(geom->AsPrimitive().type == GeometricPrimitive3D::Sphere) {
+      Sphere3D* s = AnyCast<Sphere3D>(&geom->AsPrimitive().data);
+      Sphere3D s2 = *s;
+      s2.radius -= padding;
+      AnyCollisionGeometry3D* res = new AnyCollisionGeometry3D(GeometricPrimitive3D(s2));
+      return res;
+    }
     fprintf(stderr,"SetPaddingWithPreshink: Cannot shrink geometric primitives\n");
     return geom;
   case AnyCollisionGeometry3D::PointCloud:
