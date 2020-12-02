@@ -487,11 +487,14 @@ class GLNavigationProgram(GLProgram):
         self.reshape(self.view.w,self.view.h)
     
     def prepare_GL(self):
+        """Prepares for OpenGL rendering with the current modelview matrix
+        and default lights."""
         GLProgram.prepare_GL(self)
-
         self.view.set_current_GL()
+        self.set_lights_GL()
 
-        # Default light source
+    def set_lights_GL(self):
+        """Sets the default OpenGL lights"""
         glLightfv(GL_LIGHT0,GL_POSITION,[0,-1,2,0])
         glLightfv(GL_LIGHT0,GL_DIFFUSE,[1,1,1,1])
         glLightfv(GL_LIGHT0,GL_SPECULAR,[1,1,1,1])
@@ -659,7 +662,7 @@ class GLPluginProgram(GLRealtimeProgram):
     def displayfunc(self):
         for plugin in self.plugins[::-1]:
             if plugin.displayfunc(): 
-                break
+                return
         GLRealtimeProgram.displayfunc(self)
     def display(self):
         for plugin in self.plugins:
