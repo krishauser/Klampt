@@ -657,7 +657,18 @@ def debug(*args,**kwargs):
         else:
             label = None
             if nextName is None:
-                name = 'item['+str(itemcount)+']'
+                if hasattr(arg,'getName'):
+                    name = arg.getName()
+                elif hasattr(arg,'name'):
+                    name = arg.name
+                else:
+                    try:
+                        type = types.objectToTypes(arg)
+                        if isinstance(type,list):
+                            type = type[0]
+                        name = type + '['+str(itemcount)+']'
+                    except ValueError:
+                        name = 'item['+str(itemcount)+']'
             else:
                 name = nextName
                 label = name
