@@ -90,6 +90,7 @@ Structure: an XML v1.0 file, containing robots, rigid objects, and terrains, as 
             - `com` (Vector3, optional, default (0,0,0)): the object’s center of mass, relative to the origin of its coordinate frame.
             - `inertia` (Matrix3, optional, default 0): the object’s inertia matrix.
             - `automass` (value "0" or "1", optional): the object’s COM and inertia matrix will be set automatically from the geometry.
+            - `automassSurfaceFraction` (float, optional): if automass = 1, the COM and inertia will imagine this fraction of the volume of the geometry to be concentrated at the surface.
             - `kRestitution`, `kFriction`, `kStiffness`, `kDamping` (Reals, optional, defaults 0.5, 0.5, inf, inf): set the constitutive parameters of the object.
     - `<terrain>`: adds a terrain to the world.
       - _Attributes_
@@ -179,7 +180,7 @@ A robot has N links, and D drivers.  Elements of each line are whitespace-separa
 **Dynamic specification items**:
 
 - `mass v[0] ... v[N-1]`: link masses.
-- `automass`: set the link centers of mass and inertia matrices automatically from the link geometry.
+- `automass`: set the link centers of mass and inertia matrices automatically from the link geometry.  Can also give `automass surfaceFraction` to specify that `surfaceFraction` fraction of the mass is concentrated at the geometry's surface.
 - `com v[0] ... v[N-1]`: link centers of mass, given in local (x,y,z) coordinates (3 values for each v).  May be omitted if automass is included.
 - `inertiadiag v[0] ... v[N-1]`:  link inertia matrix diagonals (Ixx, Iyy, Izz), assuming off-diagonal elements are all zero (3 values for each v).  May be omitted if `inertia` or `automass` is included.
 - `inertia v[0] ... v[N-1]`: link 3x3 inertia matrices (9 items for each `v`).  May be omitted if inertiadiag or automass is included.

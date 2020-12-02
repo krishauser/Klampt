@@ -153,6 +153,7 @@ schema.
          -  ``automass`` (value "0" or "1", optional): the object’s COM
             and inertia matrix will be set automatically from the
             geometry.
+         -  ``automassSurfaceFraction`` (float, optional): if automass = 1, the COM and inertia will imagine this fraction of the volume of the geometry to be concentrated at the surface.
          -  ``kRestitution``, ``kFriction``, ``kStiffness``,
             ``kDamping`` (Reals, optional, defaults 0.5, 0.5, inf, inf):
             set the constitutive parameters of the object.
@@ -325,7 +326,9 @@ Some items are optional, indicated by default values.
 
 -  ``mass v[0] ... v[N-1]``: link masses.
 -  ``automass``: set the link centers of mass and inertia matrices
-   automatically from the link geometry.
+   automatically from the link geometry.  Can also give
+   ``automass surfaceFraction`` to specify that ``surfaceFraction``
+   fraction of the mass is concentrated at the geometry's surface.
 -  ``com v[0] ... v[N-1]``: link centers of mass, given in local (x,y,z)
    coordinates (3 values for each v). May be omitted if automass is
    included.
