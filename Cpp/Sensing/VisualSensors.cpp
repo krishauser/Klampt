@@ -432,7 +432,7 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
             //TODO: lighting
             RobotWorld::AppearancePtr app = world.GetAppearance(obj);
             const float* rgba = app->faceColor.rgba;
-            measurements[k] = double(((unsigned char)(rgba[3]*255.0) << 24) | ((unsigned char)(rgba[2]*255.0) << 16) | ((unsigned char)(rgba[1]*255.0) << 8) | ((unsigned char)(rgba[0]*255.0)));
+            measurements[k] = double(((unsigned char)(rgba[3]*255.0) << 24) | ((unsigned char)(rgba[0]*255.0) << 16) | ((unsigned char)(rgba[1]*255.0) << 8) | ((unsigned char)(rgba[2]*255.0)));
           }
           Real d = vfwd.dot(pt - vsrc);
           d = Min(d,zmax);
