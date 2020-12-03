@@ -277,7 +277,7 @@ def image_to_points(depth,color,xfov,yfov=None,depth_scale=None,depth_range=None
             absolute depth values.
         depth_range (pair of floats, optional): if given, only points within 
             this depth range (non-inclusive) will be extracted.  If
-            structured=False, points that fail the range test will be stripped
+            all_points=False, points that fail the range test will be stripped
             from the output.  E.g., (0.5,8.0) only extracts points with
             z > 0.5 and z < 8 units.
         color_format (str): governs how pixels in the RGB result are packed. 
@@ -331,9 +331,9 @@ def image_to_points(depth,color,xfov,yfov=None,depth_scale=None,depth_range=None
     if depth_scale is not None:
         depth *= depth_scale
     if depth_range is not None:
-        valid = np.logical_and((depth > depth_range[0]),(depth < depth_range[0]))
-        if structured:
-            depth[not valid] = 0
+        valid = np.logical_and((depth > depth_range[0]),(depth < depth_range[1]))
+        if all_points:
+            depth[~valid] = 0
         valid = (depth > 0)
     else:
         valid = (depth > 0)
