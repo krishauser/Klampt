@@ -261,6 +261,142 @@ def camera_to_images(camera,image_format='numpy',color_format='channels'):
     return None
 
 
+def image_to_points(depth,color,xfov,yfov=None,depth_scale=None,depth_range=None,color_format='auto',points_format='numpy',all_points=False):
+    """Given a depth and optionally color image, returns a point cloud
+    representing the depth or RGB-D scene.  
+
+    Args:
+        depth (list of lists or numpy array): the w x h depth image (rectified).
+        color (list of lists or numpy array, optional): the w x h color image. 
+            Assumed that color maps directly onto depth pixels.  If None,
+            an uncolored point cloud will be produced. 
+        xfov (float): horizontal field of view, in radians.
+        yfov (float, optional): vertical field of view, in radians.  If not
+            given, square pixels are assumed.
+        depth_scale (float, optional): a scaling from depth image values to
+            absolute depth values.
+        depth_range (pair of floats, optional): if given, only points within 
+            this depth range (non-inclusive) will be extracted.  If
+            structured=False, points that fail the range test will be stripped
+            from the output.  E.g., (0.5,8.0) only extracts points with
+            z > 0.5 and z < 8 units.
+        color_format (str): governs how pixels in the RGB result are packed. 
+            Can be:
+
+            * 'auto' (default): if it's a 3D array, it assumes elements are in
+              'channels' format, otherwise it assumes 'rgb'.
+            * 'channels': a 3D array with 3 channels corresponding to R, G,
+              B values in the range [0,255] if uint8 type, otherwise in the
+              range [0,1]. 
+            * 'rgb' a 2D array with a 32-bit integer channel, with
+              R,G,B channels packed in hex format 0xrrggbb.
+
+        points_format (str, optional): configures the format of the return
+            value. Can be:
+
+            * 'numpy' (default): either an Nx3, Nx4, or Nx6 numpy array,
+              depending on whether color is requested (and its format).  Will
+              fall back to 'native' if numpy is not available.
+            * 'native': same as numpy, but in list-of-lists format rather than
+              numpy arrays.
+            * 'PointCloud': a Klampt PointCloud object
+            * 'Geometry3D': a Klampt Geometry3D point cloud object
+
+        all_points (bool, optional): configures whether bad points should be
+            stripped out.  If False (default), this strips out all pixels that
+            don't have a good depth reading (i.e., the camera sensor's maximum
+            reading.)  If True, these pixels are all set to (0,0,0).
+
+    Returns:
+        numpy ndarray or Geometry3D: the point cloud.  Represented as being local to the standard
+        camera frame with +x to the right, +y down, +z forward.
+
+    """
+    has_numpy = _try_numpy_import()
+    if not has_numpy:
+        raise NotImplementedError("TODO image_to_points without numpy")
+    depth = np.asarray(depth)
+    assert len(depth.shape)==2
+    h,w = depth.shape
+    if color is not None:
+        color = np.asarray(color)
+        if h != color.shape[0] or w != color.shape[1]:
+            raise ValueError("color and depth need to have same dimensions")
+        if color_format == 'auto':
+            if len(color.shape)==3:
+                color_format = 'channels'
+            else:
+                assert len(color.shape)==2
+                color_format = 'rgb'
+    if depth_scale is not None:
+        depth *= depth_scale
+    if depth_range is not None:
+        valid = np.logical_and((depth > depth_range[0]),(depth < depth_range[0]))
+        if structured:
+            depth[not valid] = 0
+        valid = (depth > 0)
+    else:
+        valid = (depth > 0)
+
+    xshift = -w*0.5
+    yshift = -h*0.5
+    xscale = math.tan(xfov*0.5)/(w*0.5)
+    if yfov is not None:
+        yscale = -1.0/(math.tan(yfov*0.5)*h/2)
+    else:
+        yscale = xscale #square pixels are assumed
+    xs = [(j+xshift)*xscale for j in range(w)]
+    ys = [(i+yshift)*yscale for i in range(h)]
+    if color_format == 'channels' and color.dtype == np.uint8:
+        #scale to range [0,1]
+        color = color*(1.0/255.0)
+
+    xgrid = np.repeat(np.array(xs).reshape((1,w)),h,0)
+    ygrid = np.repeat(np.array(ys).reshape((h,1)),w,1)
+    assert xgrid.shape == (h,w)
+    assert ygrid.shape == (h,w)
+    pts = np.dstack((np.multiply(xgrid,depth),np.multiply(ygrid,depth),depth))
+    assert pts.shape == (h,w,3)
+    if color_format is not None:
+        if len(color.shape) == 2:
+            color = color.reshape(color.shape[0],color.shape[1],1)
+        pts = np.concatenate((pts,color),2)
+    #now have a nice array containing all points, shaped h x w x (3+c)
+    #extract out the valid points from this array
+    if all_points:
+        pts = pts.reshape(w*h,pts.shape[2])
+    else:
+        pts = pts[valid]
+
+    if points_format == 'native':
+        return pts.tolist()
+    elif points_format == 'numpy':
+        return pts
+    elif points_format == 'PointCloud' or points_format == 'Geometry3D':
+        res = PointCloud()
+        if all_points:
+            res.setSetting('width',str(w))
+            res.setSetting('height',str(h))
+        res.setPoints(pts.shape[0],pts[:,0:3].flatten().tolist())
+        if color_format == 'rgb':
+            res.addProperty('rgb')
+            res.setProperties(pts[:,3].flatten().tolist())
+        elif color_format == 'channels':
+            res.addProperty('r')
+            res.addProperty('g')
+            res.addProperty('b')
+            res.setProperties(pts[:,3:6].flatten().tolist())
+        if points_format == 'PointCloud':
+            return res
+        else:
+            from klampt import Geometry3D
+            g = Geometry3D()
+            g.setPointCloud(res)
+            return g
+    else:
+        raise ValueError("Invalid points_format, must be either native, numpy, PointCloud, or Geometry3D")
+
+
 def camera_to_points(camera,points_format='numpy',all_points=False,color_format='channels'):
     """Given a SimRobotSensor that is a CameraSensor, returns a point cloud
     associated with the current measurements.
@@ -493,6 +629,7 @@ def viewport_to_camera(viewport,camera,robot):
     camera.setSetting('zmax',str(zmax))
     return camera
 
+
 def camera_ray(camera,robot,x,y):
     """Returns the (source,direction) of a ray emanating from the
     SimRobotSensor at pixel coordinates (x,y).
@@ -510,6 +647,7 @@ def camera_ray(camera,robot,x,y):
         (source,direction): world-space ray source/direction.
     """
     return camera_to_viewport(camera,robot).click_ray(x,y)
+
 
 def camera_project(camera,robot,pt,clip=True):
     """Given a point in world space, returns the (x,y,z) coordinates of the
@@ -535,6 +673,7 @@ def camera_project(camera,robot,pt,clip=True):
     """
     return camera_to_viewport(camera,robot).project(pt,clip)
 
+
 def visible(camera,object,full=True,robot=None):
     """Tests whether the given object is visible in a SimRobotSensor or a
     GLViewport. 
@@ -544,7 +683,8 @@ def visible(camera,object,full=True,robot=None):
     Args:
         camera (SimRobotSensor or GLViewport): the camera.
         object: a 3-vector, a (center,radius) pair indicating a sphere, an
-            axis-aligned bounding box (bmin,bmax), or a Geometry3D.
+            axis-aligned bounding box (bmin,bmax), a Geometry3D, or an object
+            that has a geometry() method, e.g., RigidObjectModel, RobotModelLink.
         full (bool, optional): if True, the entire object must be in the
             viewing frustum for it to be considered visible.  If False, any
             part of the object can be in the viewing frustum.
@@ -553,6 +693,8 @@ def visible(camera,object,full=True,robot=None):
     """
     if isinstance(camera,SimRobotSensor):
         camera = camera_to_viewport(camera,robot)
+    if hasattr(object,'geometry'):
+        return visible(camera,object.geometry(),full,robot)
     if hasattr(object,'__iter__'):
         if not hasattr(object[0],'__iter__'):
             #vector
