@@ -1,6 +1,6 @@
 # Klamp't C++ Manual
 
-## v 0.8.0
+## v 0.8.4
 
 This manual documents the following main components of the Klampt C++ API:
 

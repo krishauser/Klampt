@@ -83,7 +83,14 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 
 ## Version history
 
-**0.8.3  Latest version** (10/24/2020)
+**0.8.4  Bugfix version** (10/24/2020)
+-   Fixed a few bad bugs in the pip release (klampt_browser crash; resource editor crash; HTML output with no animation; HTML output with custom entities).
+-   More thorough integration of custom joints into the simulation, including reading from XML world files (see [Klampt-examples/data/simulation_test_worlds/jointtest.xml](https://github.com/krishauser/Klampt-examples/blob/master/data/simulation_test_worlds/jointtest.xml).
+-   XML world files' simulation tags can now refer to named robots, rigid objects, and terrains.
+-   Conversions from geometries to VolumeGrids now respect the geometry's collision margin.
+-   Python API: Can now remesh triangle meshes, point clouds, and volume grids using `Geometry3D.convert(self.type(),resolution)`.
+
+**0.8.3 ** (10/24/2020)
 -   Convex hulls are a new geometry type.  They support conversion from multiple geometry types and conversion to meshes, visualization, and fast convex hull-convex hull proximity queries.  (Queries are not yet supported for convex hull vs anything else.)
 -   Python API: Python 3 is now the default version used by Klamp't, and all further feature development will be focused on Python 3.  The Python 2 version will receive occasional bug fixes but will be deprecated by the next version.
 -   Python API: The visualization API has a unified interface between PyQT, PyOpenGL, Jupyter notebooks, and HTML output. This makes it easy to convert your OpenGL visualizations into shareable, animated web pages (with some caveats).  Use vis.init() to select which visualization backend to use.
