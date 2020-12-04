@@ -88,6 +88,7 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 -   More thorough integration of custom joints into the simulation, including reading from XML world files (see [Klampt-examples/data/simulation_test_worlds/jointtest.xml](https://github.com/krishauser/Klampt-examples/blob/master/data/simulation_test_worlds/jointtest.xml).
 -   XML world files' simulation tags can now refer to named robots, rigid objects, and terrains.
 -   Conversions from geometries to VolumeGrids now respect the geometry's collision margin.
+-   Supports emissive and specular colors in OpenGL views and XML files now.
 -   Python API: Can now remesh triangle meshes, point clouds, and volume grids using `Geometry3D.convert(self.type(),resolution)`.
 
 **0.8.3 ** (10/24/2020)
