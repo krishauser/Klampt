@@ -111,6 +111,28 @@ void ViewRobot::SetColor(int link,const GLColor& c)
   }
 }
 
+void ViewRobot::BlendColors(const GLColor& c,Real fraction)
+{
+  if(robot) {
+    for(size_t i=0;i<robot->links.size();i++) {
+      const GLDraw::GeometryAppearance& alast = LastAppearance(i);
+      GLDraw::GeometryAppearance& a = Appearance(i);
+      a.CopyMaterial(alast);
+      a.ModulateColor(c,fraction);
+    }
+  }
+}
+
+void ViewRobot::BlendColor(int link,const GLColor& c,Real fraction)
+{
+  if(robot) {
+    const GLDraw::GeometryAppearance& alast = LastAppearance(link);
+    GLDraw::GeometryAppearance& a = Appearance(link);
+    a.CopyMaterial(alast);
+    a.ModulateColor(c,fraction);
+  }
+}
+
 void ViewRobot::SetGrey() { SetColors(grey); }
 
 void ViewRobot::Draw() 
@@ -290,6 +312,15 @@ GLDraw::GeometryAppearance& ViewRobot::Appearance(int link)
     return *robot->geomManagers[link].Appearance();
   }
   return appearanceStack.back()[link];
+}
+
+GLDraw::GeometryAppearance& ViewRobot::LastAppearance(int link)
+{
+  Assert(robot!=NULL);
+  if(appearanceStack.size() <= 1) {
+    return Appearance(link);
+  }
+  return appearanceStack[appearanceStack.size()-1][link];
 }
 
 void ViewRobot::PushAppearance()

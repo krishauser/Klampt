@@ -31,9 +31,13 @@ struct ViewRobot
   void SetColors(const GLDraw::GLColor& c);
   void SetColor(int i,const GLDraw::GLColor& c);
   void SetGrey();
+  void BlendColors(const GLDraw::GLColor& c,Real fraction);
+  void BlendColor(int i,const GLDraw::GLColor& c,Real fraction);
   void SetTorqueColors(const Vector& t);
   ///gets the currently active appearance
   GLDraw::GeometryAppearance& Appearance(int link);
+  ///gets the appearance that you'd get if you would run PopAppearance()
+  GLDraw::GeometryAppearance& LastAppearance(int link);
   ///pushes a new active appearance
   void PushAppearance();
   ///pops the last active appearance
