@@ -429,6 +429,28 @@ class XmlAppearance
       else
         geom.Appearance()->drawFaces = true;
     }
+    if(e->Attribute("emissiveColor")) {
+      Vector3 rgb;
+      stringstream ss(e->Attribute("emissiveColor"));
+      ss >> rgb;
+      Real a=1.0;
+      if(ss >> a) { }
+      else a=1.0;
+      geom.Appearance()->emissiveColor.set(rgb.x,rgb.y,rgb.z,a);
+    }
+    if(e->Attribute("shininess")) {
+      stringstream ss(e->Attribute("shininess"));
+      ss >> geom.Appearance()->shininess;
+    }
+    if(e->Attribute("specularColor")) {
+      Vector3 rgb;
+      stringstream ss(e->Attribute("specularColor"));
+      ss >> rgb;
+      Real a=1.0;
+      if(ss >> a) { }
+      else a=1.0;
+      geom.Appearance()->specularColor.set(rgb.x,rgb.y,rgb.z,a);
+    }
     if(e->Attribute("vertexSize")) {
       Real vertexSize;
       stringstream ss(e->Attribute("vertexSize"));

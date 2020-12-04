@@ -147,6 +147,14 @@ void GetAccMax(const Robot& robot, Vector& accMax) {
   }
 }
 
+void SetDefaultAppearance(shared_ptr<GLDraw::GeometryAppearance> app)
+{
+  app->faceColor.set(0.5,0.5,0.5);
+  app->specularColor.set(0.2,0.2,0.2);
+  app->shininess = 20;
+}
+
+
 int RobotJointDriver::NumControls() const {
   return 1;
 }
@@ -199,6 +207,7 @@ bool Robot::Load(const char* fn) {
   else {
     LOG4CXX_ERROR(GET_LOGGER(Robot),"Robot::Load("<<fn<<"): unknown extenion "<<ext <<", only .rob or .urdf supported");
   }
+
   return res;
 }
 
@@ -1368,9 +1377,9 @@ bool Robot::LoadGeometry(int i,const char* file)
   if(i >= (int)geomManagers.size())
     geomManagers.resize(geometry.size());
   //make the default appearance be grey, so that loader may override it
-  geomManagers[i].Appearance()->faceColor.set(0.5,0.5,0.5);
   if(geomManagers[i].Load(file)) {
     geometry[i] = geomManagers[i];
+    SetDefaultAppearance(geomManagers[i].Appearance());
     return true;
   }
   return false;
@@ -1796,6 +1805,7 @@ void Robot::Mount(int link, const Geometry::AnyGeometry3D& mesh,
     geomManagers[link]->Transform(Matrix4(T));
     geometry[link] = geomManagers[link];
     geomManagers[link].Appearance()->Set(*geometry[link]);
+    SetDefaultAppearance(geomManagers[link].Appearance());
   }
   else {
     vector<Geometry::AnyGeometry3D> mergeMeshes(2);
@@ -3113,7 +3123,7 @@ bool Robot::LoadURDF(const char* fn)
         geomManagers[link_index].CreateEmpty();
         *geomManagers[link_index] = meshGeom;
         //make the default appearance be grey
-        geomManagers[link_index].Appearance()->faceColor.set(0.5,0.5,0.5);
+        SetDefaultAppearance(geomManagers[link_index].Appearance());
         geometry[link_index] = geomManagers[link_index];
       }
     }
@@ -3124,7 +3134,8 @@ bool Robot::LoadURDF(const char* fn)
       if(linkNode->link->visual && linkNode->link->visual->material) {
         urdf::Color c=linkNode->link->visual->material->color;
         this->geomManagers[link_index].SetUniqueAppearance();
-        this->geomManagers[link_index].Appearance()->SetColor(c.r,c.g,c.b,c.a);
+        printf("Setting face color %d: %f %f %f\n",link_index,c.r,c.g,c.b);
+        this->geomManagers[link_index].Appearance()->faceColor.set(c.r,c.g,c.b,c.a);
       }
       Matrix4 ident; ident.setIdentity();
       if(!linkNode->geomScale.isEqual(ident)) {

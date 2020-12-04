@@ -76,6 +76,7 @@ bool Terrain::LoadGeometry(const char* fn)
     if(!geometry.Appearance()->tex1D && !geometry.Appearance()->tex2D) {
       geometry.Appearance()->faceColor.set(0.8f,0.6f,0.2f);
       geometry.Appearance()->texWrap = true;
+      geometry.Appearance()->shininess = 0;
       Texturizer tex;
       tex.texture = "checker";
       tex.Set(geometry);

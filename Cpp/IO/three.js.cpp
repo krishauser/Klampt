@@ -661,7 +661,14 @@ void ThreeJSExport(const GLDraw::GeometryAppearance& app,const Geometry::AnyColl
       out["type"] = "MeshPhongMaterial";
       int rgb = ToRGB32(app.faceColor);
       out["color"] = rgb;
-      out["emissive"] = 0;
+      rgb = ToRGB32(app.emissiveColor);
+      out["emissive"] = rgb;
+      out["shininess"] = app.shininess;
+      if(app.shininess > 0)
+        rgb = ToRGB32(app.specularColor);
+      else
+        rgb = 0;
+      out["specular"] = rgb;
       if(app.faceColor.rgba[3] != 1.0) {
         out["transparent"] = true;
         out["opacity"] = app.faceColor.rgba[3];
