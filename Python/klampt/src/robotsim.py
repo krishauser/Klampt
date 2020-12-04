@@ -2782,6 +2782,8 @@ class Appearance(_object):
     VERTICES = _robotsim.Appearance_VERTICES
     EDGES = _robotsim.Appearance_EDGES
     FACES = _robotsim.Appearance_FACES
+    EMISSIVE = _robotsim.Appearance_EMISSIVE
+    SPECULAR = _robotsim.Appearance_SPECULAR
 
     def __init__(self, *args):
         """
@@ -2945,6 +2947,33 @@ class Appearance(_object):
 
         """
         return _robotsim.Appearance_setColors(self, feature, colors, alpha)
+
+
+    def setShininess(self, shininess, strength=-1):
+        """
+        setShininess(Appearance self, float shininess, float strength=-1)
+        setShininess(Appearance self, float shininess)
+
+
+
+        Sets the specular highlight shininess and strength. To turn off, use
+        `setShininess(0)`. The specular strength can be set via the second argument.
+        `setShininess(20,0.1)`. Note that this changes the specular color.  
+
+        """
+        return _robotsim.Appearance_setShininess(self, shininess, strength)
+
+
+    def getShininess(self):
+        """
+        getShininess(Appearance self) -> float
+
+
+
+        Retrieves the specular highlight shininess.  
+
+        """
+        return _robotsim.Appearance_getShininess(self)
 
 
     def setElementColor(self, feature, element, r, g, b, a=1):

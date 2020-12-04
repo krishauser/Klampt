@@ -642,7 +642,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
                     self.glviewportManager.addView(item.plugin)
                     item.program = self.glviewportManager.views[-1]
                     if self.autoFitCameraButton.isChecked():
-                        item.plugin.autoFitViewport(item.program.view,[self.world,item.obj])
+                        vis.autoFitViewport(item.program.view,[self.world,item.obj])
                     else:
                         copyCamera(self.emptyVisProgram.view.camera,item.program.view.camera)
                 if len(self.glviewportManager.views) >= self.maxGridItems.value()**2:

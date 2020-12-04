@@ -496,6 +496,7 @@ class GLNavigationProgram(GLProgram):
     def set_lights_GL(self):
         """Sets the default OpenGL lights"""
         glLightfv(GL_LIGHT0,GL_POSITION,[0,-1,2,0])
+        glLightfv(GL_LIGHT0,GL_AMBIENT,[0.05,0.05,0.05,1])
         glLightfv(GL_LIGHT0,GL_DIFFUSE,[1,1,1,1])
         glLightfv(GL_LIGHT0,GL_SPECULAR,[1,1,1,1])
         glEnable(GL_LIGHT0)

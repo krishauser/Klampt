@@ -1634,6 +1634,30 @@ void Appearance::setColor(float r,float g,float b,float a)
   app->SetColor(r,g,b,a);
 }
 
+void Appearance::setShininess(float shininess,float strength)
+{
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) return;
+  if(!isStandalone()) {
+    RobotWorld& world=*worlds[this->world]->world;
+    ManagedGeometry& geom = GetManagedGeometry(world,id);
+    if(geom.IsAppearanceShared()) {
+      geom.SetUniqueAppearance();
+      app = geom.Appearance();
+    }
+  }
+  app->shininess = shininess;
+  if(strength >= 0)
+    app->specularColor.set(strength,strength,strength);
+}
+
+float Appearance::getShininess()
+{
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) throw PyException("Invalid appearance");
+  return app->shininess;
+}
+
 void Appearance::setColor(int feature,float r,float g,float b,float a)
 {
   shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
@@ -1667,6 +1691,14 @@ void Appearance::setColor(int feature,float r,float g,float b,float a)
       app->Refresh();
     }
     break;
+  case EMISSIVE:
+    app->emissiveColor.set(r,g,b,a);
+    break;
+  case SPECULAR:
+    app->specularColor.set(r,g,b,a);
+    break;
+  default:
+    throw PyException("Invalid feature");
   }
 }
 
@@ -1691,6 +1723,12 @@ void Appearance::getColor(int feature,float out[4])
     break;
   case EDGES:
     c = app->edgeColor;
+    break;
+  case EMISSIVE:
+    c = app->emissiveColor;
+    break;
+  case SPECULAR:
+    c = app->specularColor;
     break;
   default:
     throw PyException("Invalid feature");

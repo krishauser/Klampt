@@ -22,8 +22,8 @@
 class Appearance
 {
  public:
-  ///Geometry feature types
-  enum { ALL=0,VERTICES=1,EDGES=2,FACES=3};
+  ///Geometry feature types + EMISSIVE / SPECULAR
+  enum { ALL=0,VERTICES=1,EDGES=2,FACES=3, EMISSIVE=4,SPECULAR=5};
 
   Appearance();
   Appearance(const Appearance& app);
@@ -75,6 +75,12 @@ class Appearance
   ///Otherwise they are assumed to be 3*N rgb values.  Only supports feature=VERTICES
   ///and feature=FACES
   void setColors(int feature,const std::vector<float>& colors,bool alpha=false);
+  ///Sets the specular highlight shininess and strength.  To turn off, use
+  ///``setShininess(0)``.  The specular strength can be set via the second argument.
+  ///``setShininess(20,0.1)``.  Note that this changes the specular color
+  void setShininess(float shininess,float strength=-1);
+  ///Retrieves the specular highlight shininess.
+  float getShininess();
   ///Sets the per-element color for the given feature
   void setElementColor(int feature,int element,float r,float g,float b,float a=1);
   ///Gets the per-element color for the given feature

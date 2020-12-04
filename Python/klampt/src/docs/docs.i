@@ -197,6 +197,11 @@ For meshes sets a silhouette radius and color. Set the radius to 0 to disable
 silhouette drawing.  
 ";
 
+%feature("docstring") Appearance::getShininess "
+
+Retrieves the specular highlight shininess.  
+";
+
 %feature("docstring") Appearance::setDraw "
 ";
 
@@ -214,6 +219,13 @@ or off. feature can be ALL, VERTICES, EDGES, or FACES.
 ";
 
 %feature("docstring") Appearance::Appearance "
+";
+
+%feature("docstring") Appearance::setShininess "
+
+Sets the specular highlight shininess and strength. To turn off, use
+`setShininess(0)`. The specular strength can be set via the second argument.
+`setShininess(20,0.1)`. Note that this changes the specular color.  
 ";
 
 // File: classBoxPoser.xml

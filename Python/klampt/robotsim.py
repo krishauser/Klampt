@@ -1983,7 +1983,7 @@ class Geometry3D(_object):
 
 
         Args:
-            arg2 (:class:`~klampt.PointCloud` or :class:`~klampt.TriangleMesh` or :class:`~klampt.GeometricPrimitive` or :obj:`ConvexHull` or :class:`~klampt.Geometry3D` or :class:`~klampt.VolumeGrid`, optional): 
+            arg2 (:class:`~klampt.VolumeGrid` or :obj:`ConvexHull` or :class:`~klampt.TriangleMesh` or :class:`~klampt.Geometry3D` or :class:`~klampt.PointCloud` or :class:`~klampt.GeometricPrimitive`, optional): 
         """
         this = _robotsim.new_Geometry3D(*args)
         try:
@@ -2712,6 +2712,8 @@ class Appearance(_object):
     VERTICES = _robotsim.Appearance_VERTICES
     EDGES = _robotsim.Appearance_EDGES
     FACES = _robotsim.Appearance_FACES
+    EMISSIVE = _robotsim.Appearance_EMISSIVE
+    SPECULAR = _robotsim.Appearance_SPECULAR
 
     def __init__(self, *args):
         """
@@ -2894,6 +2896,34 @@ class Appearance(_object):
 
         """
         return _robotsim.Appearance_setColors(self, feature, colors, alpha)
+
+
+    def setShininess(self, shininess, strength=-1):
+        """
+        Sets the specular highlight shininess and strength. To turn off, use
+        `setShininess(0)`. The specular strength can be set via the second argument.
+        `setShininess(20,0.1)`. Note that this changes the specular color.  
+
+        setShininess (shininess,strength=-1)
+
+        setShininess (shininess)
+
+
+        Args:
+            shininess (float): 
+            strength (float, optional): default value -1
+        """
+        return _robotsim.Appearance_setShininess(self, shininess, strength)
+
+
+    def getShininess(self):
+        """
+        Retrieves the specular highlight shininess.  
+
+        Returns:
+            (float):
+        """
+        return _robotsim.Appearance_getShininess(self)
 
 
     def setElementColor(self, feature, element, r, g, b, a=1):
@@ -6048,7 +6078,7 @@ class WorldModel(_object):
 
 
         Args:
-            robot (int or str): 
+            robot (str or int): 
             index (int, optional): 
             name (str, optional): 
 
@@ -6204,7 +6234,7 @@ class WorldModel(_object):
             terrain (:obj:`TerrainModel`, optional): 
 
         Returns:
-            (:class:`~klampt.RigidObjectModel` or :obj:`TerrainModel` or :class:`~klampt.RobotModel`):
+            (:obj:`TerrainModel` or :class:`~klampt.RigidObjectModel` or :class:`~klampt.RobotModel`):
         """
         return _robotsim.WorldModel_add(self, *args)
 

@@ -27827,6 +27827,191 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Appearance_setShininess__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
+  float arg2 ;
+  float arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  float val2 ;
+  int ecode2 = 0 ;
+  float val3 ;
+  int ecode3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:Appearance_setShininess",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_setShininess" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  ecode2 = SWIG_AsVal_float(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Appearance_setShininess" "', argument " "2"" of type '" "float""'");
+  } 
+  arg2 = static_cast< float >(val2);
+  ecode3 = SWIG_AsVal_float(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Appearance_setShininess" "', argument " "3"" of type '" "float""'");
+  } 
+  arg3 = static_cast< float >(val3);
+  {
+    try {
+      (arg1)->setShininess(arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_setShininess__SWIG_1(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
+  float arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  float val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:Appearance_setShininess",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_setShininess" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  ecode2 = SWIG_AsVal_float(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Appearance_setShininess" "', argument " "2"" of type '" "float""'");
+  } 
+  arg2 = static_cast< float >(val2);
+  {
+    try {
+      (arg1)->setShininess(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_setShininess(PyObject *self, PyObject *args) {
+  Py_ssize_t argc;
+  PyObject *argv[4] = {
+    0
+  };
+  Py_ssize_t ii;
+  
+  if (!PyTuple_Check(args)) SWIG_fail;
+  argc = args ? PyObject_Length(args) : 0;
+  for (ii = 0; (ii < 3) && (ii < argc); ii++) {
+    argv[ii] = PyTuple_GET_ITEM(args,ii);
+  }
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Appearance, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_float(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        return _wrap_Appearance_setShininess__SWIG_1(self, args);
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Appearance, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_float(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        {
+          int res = SWIG_AsVal_float(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          return _wrap_Appearance_setShininess__SWIG_0(self, args);
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'Appearance_setShininess'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    Appearance::setShininess(float,float)\n"
+    "    Appearance::setShininess(float)\n");
+  return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_getShininess(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  float result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:Appearance_getShininess",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_getShininess" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  {
+    try {
+      result = (float)(arg1)->getShininess();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_float(static_cast< float >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_Appearance_setElementColor__SWIG_0(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Appearance *arg1 = (Appearance *) 0 ;
@@ -62122,6 +62307,25 @@ static PyMethodDef SwigMethods[] = {
 		"and feature=FACES  \n"
 		"\n"
 		""},
+	 { (char *)"Appearance_setShininess", _wrap_Appearance_setShininess, METH_VARARGS, (char *)"\n"
+		"setShininess(float shininess, float strength=-1)\n"
+		"Appearance_setShininess(Appearance self, float shininess)\n"
+		"\n"
+		"\n"
+		"\n"
+		"Sets the specular highlight shininess and strength. To turn off, use\n"
+		"`setShininess(0)`. The specular strength can be set via the second argument.\n"
+		"`setShininess(20,0.1)`. Note that this changes the specular color.  \n"
+		"\n"
+		""},
+	 { (char *)"Appearance_getShininess", _wrap_Appearance_getShininess, METH_VARARGS, (char *)"\n"
+		"Appearance_getShininess(Appearance self) -> float\n"
+		"\n"
+		"\n"
+		"\n"
+		"Retrieves the specular highlight shininess.  \n"
+		"\n"
+		""},
 	 { (char *)"Appearance_setElementColor", _wrap_Appearance_setElementColor, METH_VARARGS, (char *)"\n"
 		"setElementColor(int feature, int element, float r, float g, float b, float a=1)\n"
 		"Appearance_setElementColor(Appearance self, int feature, int element, float r, float g, float b)\n"
@@ -67402,6 +67606,8 @@ SWIG_init(void) {
   SWIG_Python_SetConstant(d, "Appearance_VERTICES",SWIG_From_int(static_cast< int >(Appearance::VERTICES)));
   SWIG_Python_SetConstant(d, "Appearance_EDGES",SWIG_From_int(static_cast< int >(Appearance::EDGES)));
   SWIG_Python_SetConstant(d, "Appearance_FACES",SWIG_From_int(static_cast< int >(Appearance::FACES)));
+  SWIG_Python_SetConstant(d, "Appearance_EMISSIVE",SWIG_From_int(static_cast< int >(Appearance::EMISSIVE)));
+  SWIG_Python_SetConstant(d, "Appearance_SPECULAR",SWIG_From_int(static_cast< int >(Appearance::SPECULAR)));
   SWIG_Python_SetConstant(d, "Simulator_STATUS_NORMAL",SWIG_From_int(static_cast< int >(Simulator::STATUS_NORMAL)));
   SWIG_Python_SetConstant(d, "Simulator_STATUS_ADAPTIVE_TIME_STEPPING",SWIG_From_int(static_cast< int >(Simulator::STATUS_ADAPTIVE_TIME_STEPPING)));
   SWIG_Python_SetConstant(d, "Simulator_STATUS_CONTACT_UNRELIABLE",SWIG_From_int(static_cast< int >(Simulator::STATUS_CONTACT_UNRELIABLE)));
