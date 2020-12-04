@@ -42,7 +42,7 @@ Klamp't is written in C++, and using C++ will give you full access to its functi
 Here are some conventions and suggestions for programming C++ apps that use Klamp't.
 
 - Use a debugger (e.g., GDB) to debug crashes.
-- Use STL and smart pointers ([KrisLibrary/utils/SmartPointer.h](http://github.com/krishauser/KrisLibrary/utils/SmartPointer.h)) rather than managing memory yourself.
+- Use STL and smart pointers ([KrisLibrary/utils/SmartPointer.h](https://github.com/krishauser/KrisLibrary/blob/master/utils/SmartPointer.h)) rather than managing memory yourself.
 - `KrisLibrary` contains a lot of functionality, including linear algebra routines, 3D math, optimization, geometric routines, OpenGL drawing, statistics, and graph structures. Browse [KrisLibrary](http://github.com/krishauser/KrisLibrary) before you reinvent the wheel.
 - Avoid hard-coding. A much better practice is to place all settings into a class (e.g., with a `robotLeftHandXOffsetAmount` member) that gets initialized to a default value in the class' constructor. If you need to hard-code values, define them as const static variables or `#define`s at the top of your file. Name them descriptively, e.g., `gRobotLeftHandXOffsetAmount` is much better than `shift` or (God forbid) `thatStupidVariable`, when you come back to the file a month from now.
 - The `main()` function in [Klampt/Main/simtest.cpp](../Main/simtest.cpp) is a good reference for setting up a world and a simulation from command-line arguments.
