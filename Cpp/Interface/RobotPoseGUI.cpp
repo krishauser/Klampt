@@ -172,7 +172,8 @@ void RobotPoseBackend::RenderWorld()
       GLColor selfcolliding(settings["selfCollideColor"][0],settings["selfCollideColor"][1],settings["selfCollideColor"][2],settings["selfCollideColor"][3]);
       GLColor envcolliding(settings["envCollideColor"][0],settings["envCollideColor"][1],settings["envCollideColor"][2],settings["envCollideColor"][3]);
 
-      viewRobot.SetColors(robotColor);
+      viewRobot.PushAppearance();
+      //viewRobot.SetColors(robotColor);
       for(size_t i=0;i<robot->links.size();i++) {
         if(self_colliding[i]) viewRobot.SetColor(i,selfcolliding);
         if(env_colliding[i]) viewRobot.SetColor(i,envcolliding);
@@ -183,6 +184,7 @@ void RobotPoseBackend::RenderWorld()
         allWidgets.DrawGL(viewport);
       else
         viewRobot.Draw();
+      viewRobot.PopAppearance();
     }
     else {
       if(draw_frame && draw_poser) {

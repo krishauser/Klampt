@@ -231,36 +231,41 @@ void SimViewProgram::RenderWorld()
     world->robotViews[i].PushAppearance();
     for(size_t j=0;j<world->robots[i]->links.size();j++) {
       sim.odesim.robot(i)->GetLinkTransform(j,world->robots[i]->links[j].T_World);
-      float color[4] = {0.5,0.5,0.5,1.0};
       if(i==0) {
+        float amount = 0;
+        float color[4] = {0.5,0.5,0.5,1.0};
         Real kg=sim.ContactForce(world->RobotLinkID(i,j)).norm()/9.8;
         Assert(!(kg < 0.0));
         kg /= world->robots[i]->GetTotalMass();
         Real green = 0.1, yellow = 1.0, red = 1.5; 
         if(kg < green) { //grey->green
-          color[0]=0.5-0.5*kg/green;
-          color[1]=0.5+0.5*kg/green;
-          color[2]=0.5-0.5*kg/green;
+          amount = kg/green;
+          color[0]=float(0.5-0.5*amount);
+          color[1]=float(0.5+0.5*amount);
+          color[2]=float(0.5-0.5*amount);
         }
         else if(kg < yellow) { //green->yellow
+          amount = 1;
           Real u=(kg-green)/(yellow-green);
           color[0]=u;
           color[1]=1.0;
           color[2]=0;
         }
         else if(kg < red) { //yellow->red
+          amount = 1;
           Real u=(kg-yellow)/(red-yellow);
           color[0]=u;
           color[1]=1.0-u;
           color[2]=0;
         }
         else {
+          amount = 1;
           color[0]=1.0;
           color[1]=0;
           color[2]=0;
         }
+        world->robotViews[i].BlendColor(j,GLColor(color),amount);
       }
-      world->robotViews[i].SetColor(j,GLColor(color));
       world->robotViews[i].DrawLink_World(j);
     }
     world->robotViews[i].PopAppearance();
