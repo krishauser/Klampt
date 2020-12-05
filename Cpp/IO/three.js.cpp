@@ -146,47 +146,91 @@ void ThreeJSExport(const RobotWorld& world,AnyCollection& out,ThreeJSCache& cach
   for(size_t i=0;i<world.terrains.size();i++) 
     ThreeJSExport(*world.terrains[i],clist[clist.size()],cache);
 
-  AnyCollection light;
-  light["uuid"] = MakeRandomUUID();
-  light["name"] = "DirectionalLight 1";
-  light["type"] = "DirectionalLight";
-  light["color"] = 16777215;
-  light["intensity"]=1;
+  vector<GLDraw::GLLight> lights = world.lights;
+  if(lights.empty()) {
+    lights.resize(1);
+    lights[0].setColor(GLDraw::GLColor(1,1,1));
+    lights[0].setDirectionalLight(Vector3(0.2,0.4,-1));
+  }
+  for(size_t i=0;i<lights.size();i++) {
+    AnyCollection light;
+    light["uuid"] = MakeRandomUUID();
+    stringstream ss;
+    ss<<"Light "<<i+1;
+    light["name"] = ss.str();
+    light["color"] = ToRGB32(lights[i].diffuse);
+    printf("Color %x\n",ToRGB32(lights[i].diffuse));
+    light["intensity"]=1;
+    if(lights[i].position[3] == 0) {
+      light["type"] = "DirectionalLight";
+      AnyCollection pos;
+      pos.resize(3);
+      pos[0] = -lights[i].position[0];
+      pos[1] = -lights[i].position[1];
+      pos[2] = -lights[i].position[2];
+      AnyCollection zero;
+      zero.resize(3);
+      zero[0] = 0;
+      zero[1] = 0;
+      zero[2] = 0;
+      light["position"] = pos;
+      light["target"]["position"] = zero;
+    }
+    else if(lights[i].spot_exponent > 0) {
+      light["type"] = "SpotLight";
+      AnyCollection pos;
+      pos.resize(3);
+      pos[0] = lights[i].position[0];
+      pos[1] = lights[i].position[1];
+      pos[2] = lights[i].position[2];
+      AnyCollection zero;
+      zero.resize(3);
+      zero[0] = lights[i].position[0] + lights[i].spot_direction[0];
+      zero[1] = lights[i].position[1] + lights[i].spot_direction[1];
+      zero[2] = lights[i].position[2] + lights[i].spot_direction[2];
+      light["position"] = pos;
+      light["angle"] = lights[i].spot_cutoff;
+      light["penumbra"] = 1.0-Exp(-lights[i].spot_exponent);
+      light["target"]["position"] = zero;
+    }
+    else {
+      light["type"] = "PointLight";
+      AnyCollection pos;
+      pos.resize(3);
+      pos[0] = lights[i].position[0];
+      pos[1] = lights[i].position[1];
+      pos[2] = lights[i].position[2];
+      AnyCollection zero;
+      zero.resize(3);
+      zero[0] = 0;
+      zero[1] = 0;
+      zero[2] = 0;
+      light["position"] = pos;
+      light["target"]["position"] = zero;
+    }
+      /*
+      AnyCollection lightMatrix;
+      lightMatrix[0]=1;
+      lightMatrix[1]=0;
+      lightMatrix[2]=0;
+      lightMatrix[3]=0;
+      lightMatrix[4]=0;
+      lightMatrix[5]=1;
+      lightMatrix[6]=0;
+      lightMatrix[7]=0;
+      lightMatrix[8]=0;
+      lightMatrix[9]=0;
+      lightMatrix[10]=1;
+      lightMatrix[11]=0;
+      lightMatrix[12]=2;
+      lightMatrix[13]=0;
+      lightMatrix[14]=9;
+      lightMatrix[15]=1;
 
-  /*
-  AnyCollection lightMatrix;
-  lightMatrix[0]=1;
-  lightMatrix[1]=0;
-  lightMatrix[2]=0;
-  lightMatrix[3]=0;
-  lightMatrix[4]=0;
-  lightMatrix[5]=1;
-  lightMatrix[6]=0;
-  lightMatrix[7]=0;
-  lightMatrix[8]=0;
-  lightMatrix[9]=0;
-  lightMatrix[10]=1;
-  lightMatrix[11]=0;
-  lightMatrix[12]=2;
-  lightMatrix[13]=0;
-  lightMatrix[14]=9;
-  lightMatrix[15]=1;
-
-  light["matrix"]=lightMatrix;
-  */
-  AnyCollection above;
-  above.resize(3);
-  above[0] = 2;
-  above[1] = -3;
-  above[2] = 9;
-  AnyCollection zero;
-  zero.resize(3);
-  zero[0] = 0;
-  zero[1] = 0;
-  zero[2] = 0;
-  light["position"] = above;
-  light["target"]["position"] = zero;
-  clist[clist.size()]=light;
+      light["matrix"]=lightMatrix;
+      */
+    clist[clist.size()]=light;
+  }
 
   AnyCollection sceneMatrix; //adjust to match view in three.js
   sceneMatrix[0]=1;
@@ -659,6 +703,7 @@ void ThreeJSExport(const GLDraw::GeometryAppearance& app,const Geometry::AnyColl
     if(geom.type != Geometry::AnyGeometry3D::PointCloud) {
       //out["type"] = "MeshStandardMaterial";
       out["type"] = "MeshPhongMaterial";
+      out["flatShading"] = 1;
       int rgb = ToRGB32(app.faceColor);
       out["color"] = rgb;
       rgb = ToRGB32(app.emissiveColor);

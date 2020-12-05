@@ -721,7 +721,7 @@ function KlamptFrontend(dom_sceneArea) {
         child.castShadow = true;
         //child.shadow.darkness = 0.3;
         if(child instanceof THREE.DirectionalLight) {
-          child.position.set( 0, 0, 10 ); 
+          //child.position.set( 0, 0, 10 ); 
           //child.shadow.camera.fov = 50;
           child.shadow.bias = -0.00001;
           child.shadow.mapSize.x = 1024;

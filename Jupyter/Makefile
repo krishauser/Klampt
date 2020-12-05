@@ -1,7 +1,7 @@
 .PHONY: install install-user install-wurlitzer
 
 all: install
-	;
+	echo "done";
 
 install:
 	jupyter nbextension install klampt/
