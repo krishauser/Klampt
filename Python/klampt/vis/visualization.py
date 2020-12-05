@@ -3409,6 +3409,8 @@ class VisualizationScene:
         global _globalLock
         with _globalLock:
             item = self.getItem(name)
+            if item is None:
+                raise ValueError("Item "+str(name)+" doesn't exist in scene")
             self._setAttribute(item,attr,value)
             self.doRefresh = True
 

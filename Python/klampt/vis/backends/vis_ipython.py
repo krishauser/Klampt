@@ -3,7 +3,7 @@ from ..ipython import KlamptWidget,EditPoint,EditTransform,EditConfig
 from ...model import coordinates
 from ...model.subrobot import SubRobotModel
 from ...robotsim import WorldModel,RobotModel,RigidObjectModel
-from IPython.display import display
+from IPython.display import display,HTML
 import math
 import weakref
 
@@ -38,12 +38,11 @@ class KlamptWidgetAdaptor(KlamptWidget,VisualizationScene):
             self._textItems = set()
 
     def add(self,name,item,keepAppearance=False,**kwargs):
+        VisualizationScene.add(self,name,item,keepAppearance,**kwargs)
         try:
             KlamptWidget.add(self,name,item,**kwargs)
         except ValueError:
             raise ValueError("Can't draw items of type "+item.__class__.__name__+" in Jupyter notebook")
-        
-        VisualizationScene.add(self,name,item,keepAppearance,**kwargs)
 
     def addText(self,name,text,position=None,**kwargs):
         self._textItems.add(name)
@@ -139,6 +138,9 @@ class KlamptWidgetAdaptor(KlamptWidget,VisualizationScene):
             self.make_editor(obj,world)
             if obj.editor is not None:
                 self._editors[name] = obj.editor
+                if self.displayed:
+                    display(HTML('<h3>'+name+'</h3>'))
+                    display(obj.editor)
         else:
             if obj.editor:
                 del self._editors[name]
@@ -343,6 +345,7 @@ class IPythonWindowManager(_WindowManager):
         self.displayed = True
         display(self.frontend())
         for k,v in self.frontend()._editors.items():
+            display(HTML('<h3>'+k+'</h3>'))
             display(v)
         self.frontend().display_plots()
     def shown(self):

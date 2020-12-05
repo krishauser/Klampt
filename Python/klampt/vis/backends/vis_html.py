@@ -23,8 +23,9 @@ _VIS_HTML_BOILERPLATE = pkg_resources.resource_filename('klampt','data/vis_html_
 
 class HTMLVisualizationScene(VisualizationScene):
     """Handles the conversion between vis calls and the html output."""
-    def __init__(self):
+    def __init__(self,title='Klampt HTML output'):
         VisualizationScene.__init__(self)
+        self.title = title
         self.sp = HTMLSharePath(filename=None,boilerplate=_VIS_HTML_BOILERPLATE)
         self.kw = KlamptWidget()
         self.animating = False
@@ -51,6 +52,7 @@ class HTMLVisualizationScene(VisualizationScene):
             self._textItems = set()
 
     def add(self,name,item,keepAppearance=False,**kwargs):
+        VisualizationScene.add(self,name,item,keepAppearance,**kwargs)
         if name=='world' or name=='sim':
             self.sp.start(item)
         else:
@@ -59,8 +61,6 @@ class HTMLVisualizationScene(VisualizationScene):
             except ValueError:
                 raise ValueError("Can't draw items of type "+item.__class__.__name__+" in HTML form")
         
-        VisualizationScene.add(self,name,item,keepAppearance,**kwargs)
-
     def addText(self,name,text,position=None,**kwargs):
         self._textItems.add(name)
         self.kw.addText(name,text,position)
@@ -196,7 +196,7 @@ class HTMLVisualizationScene(VisualizationScene):
 
     def page(self):
         """Returns a full HTML page representing the scene"""
-        return _PAGE_TEMPLATE%(str(self),)
+        return _PAGE_TEMPLATE.replace('__TITLE__',self.title)%(str(self),)
         
 
 
@@ -217,7 +217,7 @@ class HTMLWindowManager(_WindowManager):
     def scene(self):
         return self.windows[self.current_window]
     def createWindow(self,title):
-        self.windows.append(HTMLVisualizationScene())
+        self.windows.append(HTMLVisualizationScene(title))
         self.current_window = len(self.windows)-1
         return self.current_window
     def setWindow(self,id):

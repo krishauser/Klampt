@@ -99,11 +99,12 @@ class KlamptWidget(widgets.DOMWidget):
         if world is not None:
             self.setWorld(world)
         self.rpc = {}
+        self.displayed = False
         self.beginRpc(True)
         return
 
     def __repr__(self):
-        if int(self.drawn) != 1:
+        if not self.displayed:
             self.endRpc(True)
         return widgets.DOMWidget.__repr__(self)
     
@@ -130,6 +131,7 @@ class KlamptWidget(widgets.DOMWidget):
         self._rpc_calls = []
         self._do_rpc({'type':'reset_scene'})
         self.drawn = 0
+        self.displayed = False
         self.beginRpc(True)
         self.world = None
 
@@ -192,14 +194,14 @@ class KlamptWidget(widgets.DOMWidget):
             res = self.addGhost(name)
             self.setGhostConfig(item,name=name)
             if 'color' in kwargs:
-                self.setColor(res,*kwargs['color'])
+                KlamptWidget.setColor(self,res,*kwargs['color'])
             return [res]
         elif type == 'Configs':
             if len(item[0]) == 3:
                 #it's a polyline
                 self.addPolyline(name,item)
                 if 'color' in kwargs:
-                    self.setColor(name,*kwargs['color'])
+                    KlamptWidget.setColor(self,name,*kwargs['color'])
                 return [name]
             else:
                 #it's a set of configurations
@@ -211,12 +213,12 @@ class KlamptWidget(widgets.DOMWidget):
                     names.append(iname)
                 self._extras[name] = ('Configs',names)
                 if 'color' in kwargs:
-                    self.setColor(name,*kwargs['color'])
+                    KlamptWidget.setColor(self,name,*kwargs['color'])
                 return names
         elif type == 'Vector3':
             self.addSphere(name,item[0],item[1],item[2],kwargs.get('size',DEFAULT_POINT_RADIUS))
             if 'color' in kwargs:
-                self.setColor(name,*kwargs['color'])
+                KlamptWidget.setColor(self,name,*kwargs['color'])
             return [name]
         elif type == 'RigidTransform':
             self.addXform(name,length=kwargs.get('length',DEFAULT_AXIS_LENGTH),width=kwargs.get('width',DEFAULT_AXIS_WIDTH))
@@ -245,7 +247,7 @@ class KlamptWidget(widgets.DOMWidget):
                 self._extras[name] = ('Configs',names)
                 if 'color' in kwargs:
                     for name in names:
-                        self.setColor(name,*kwargs['color'])
+                        KlamptWidget.setColor(self,name,*kwargs['color'])
                 return names
             else:
                 return self.add(name,item.milestones,**kwargs)
@@ -267,7 +269,7 @@ class KlamptWidget(widgets.DOMWidget):
             self._extras[name] = ('Trilist',data)
             self._do_rpc({'type':'add_trimesh','name':name,'verts':data[0],'tris':data[1]} )
             if 'color' in kwargs:
-                self.setColor(name,*kwargs['color'])
+                KlamptWidget.setColor(self,name,*kwargs['color'])
             return [name]
         elif type == 'PointCloud':
             pc = item
@@ -280,7 +282,7 @@ class KlamptWidget(widgets.DOMWidget):
                 msg['colors'] = colors
             self._do_rpc(msg) 
             if 'color' in kwargs:
-                self.setColor(name,*kwargs['color'])
+                KlamptWidget.setColor(self,name,*kwargs['color'])
             return [name]
         elif type == 'WorldModel':
             if name != 'world' or self.world is not None:
@@ -362,7 +364,7 @@ class KlamptWidget(widgets.DOMWidget):
                     #it's a group set everything under the group
                     self.beginRpc(strict=False)
                     for subitem in data:
-                        self.setColor(subitem,r,g,b,a)
+                        KlamptWidget.setColor(self,subitem,r,g,b,a)
                     self.endRpc(strict=False)
                     return
             else:
@@ -654,6 +656,7 @@ class KlamptWidget(widgets.DOMWidget):
     @observe('drawn')
     def _recv_drawn(self,drawn):
         self.drawn = 0
+        self.displayed = True
         #print("Klampt widget received 'drawn' message")
 
     def on_event(self,e):
