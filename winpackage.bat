@@ -5,9 +5,9 @@
 :: (assumes zip and pscp command line tools are available.  See the GnuWin32 zip tool and PuTTy)
 
 :: configuration variables
-SET klamptversion=0.8.3
+SET klamptversion=0.8.4
 :: dependency libraries may be kept back to a prior version
-SET klamptdepversion=0.8.3
+SET klamptdepversion=0.8.4
 ::    this is used for Python build (VS 2015)
 SET VS90COMNTOOLS=%VS140COMNTOOLS%
 SET PYTHON27_32=D:\Python27\python.exe
@@ -20,8 +20,10 @@ SET PYTHON37_32=D:\Python37-32\python.exe
 SET PYTHON37_64=D:\Python37\python.exe
 SET PYTHON38_32=D:\Python38-32\python.exe
 SET PYTHON38_64=D:\Python38\python.exe
-SET PYTHON_32_VERSIONS=%PYTHON27_32% %PYTHON35_32% %PYTHON36_32% %PYTHON37_32% %PYTHON38_32%
-SET PYTHON_64_VERSIONS=%PYTHON27_64% %PYTHON35_64% %PYTHON36_64% %PYTHON37_64% %PYTHON38_64%
+SET PYTHON39_32=D:\Python39-32\python.exe
+SET PYTHON39_64=D:\Python39\python.exe
+SET PYTHON_32_VERSIONS=%PYTHON27_32% %PYTHON35_32% %PYTHON36_32% %PYTHON37_32% %PYTHON38_32% %PYTHON39_32%
+SET PYTHON_64_VERSIONS=%PYTHON27_64% %PYTHON35_64% %PYTHON36_64% %PYTHON37_64% %PYTHON38_64% %PYTHON39_32%
 
 for %%P in (%PYTHON_32_VERSIONS%) do (
   %%P --version
@@ -62,19 +64,17 @@ devenv %buildfolder%\Klampt.sln /build Release /project PACKAGE
 SET errorlevel=0
 
 :: build Klamp't Python bindings
+copy /y %buildfolder%\Python\setup.py Python\
+cd Python
 for %%P in (%PYTHON_32_VERSIONS%) do (
-    copy /y %buildfolder%\Python\setup.py Python\
-	cd Python
     %%P setup.py build_ext
     if %errorlevel% neq 0 exit /b %errorlevel%
     %%P setup.py install
     if %errorlevel% neq 0 exit /b %errorlevel%
     %%P setup.py bdist_wheel
     if %errorlevel% neq 0 exit /b %errorlevel%
-    cd ..
   )
-
-
+cd ..
 
 :: 64 bit build
 SET buildfolder=msvc64
@@ -97,26 +97,24 @@ devenv %buildfolder%\Klampt.sln /build Release /project Klampt
 :: (python doesnt build right here...) if %errorlevel% neq 0 exit /b %errorlevel%
 
 :: build Klamp't Python bindings
+copy /y %buildfolder%\Python\setup.py Python\
+cd Python
 for %%P in (%PYTHON_64_VERSIONS%) do (
-    copy /y %buildfolder%\Python\setup.py Python\
-	cd Python
     %%P setup.py build_ext
     if %errorlevel% neq 0 exit /b %errorlevel%
     %%P setup.py install
     if %errorlevel% neq 0 exit /b %errorlevel%
     %%P setup.py bdist_wheel
     if %errorlevel% neq 0 exit /b %errorlevel%
-    cd ..
   )
-
-
+cd ..
 
 :: zip dependency libraries
 ::   release
 set depfolder=Klampt-%klamptdepversion%.win32-deps-vs2015
 mkdir %depfolder%
 cd Cpp\Dependencies
-for %%I in (assimp--3.0.1270-sdk\lib\assimp_release-dll_win32\* Assimp32.dll glpk_4_61.dll glpk_4_61.lib glew32.dll glew32.lib KrisLibrary.lib ode_double.lib tinyxml_STL.lib libcurl.lib) do copy /Y %%I ..\..\%depfolder%
+for %%I in (assimp.dll glpk_4_61.dll glpk_4_61.lib glew32.dll glew32.lib KrisLibrary.lib ode_double.lib tinyxml_STL.lib libcurl.lib) do copy /Y %%I ..\..\%depfolder%
 if %errorlevel% neq 0 exit /b %errorlevel%
 cd ..\..
 cd %depfolder%
@@ -128,7 +126,7 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 set depfolder=Klampt-%klamptdepversion%.win32-deps-vs2015d
 mkdir %depfolder%
 cd Cpp\Dependencies
-for %%I in (assimp--3.0.1270-sdk\lib\assimp_debug-dll_win32\* Assimp32d.dll  glpk_4_61.dll glpk_4_61.lib glew32.dll glew32.lib KrisLibraryd.lib ode_doubled.lib ode-0.14\lib\DebugDoubleLib\ode.pdb tinyxmld_STL.lib libcurl.lib) do copy /Y %%I ..\..\%depfolder%
+for %%I in (assimpd.dll  glpk_4_61.dll glpk_4_61.lib glew32.dll glew32.lib KrisLibraryd.lib ode_doubled.lib ode-0.14\lib\DebugDoubleLib\ode.pdb tinyxmld_STL.lib libcurl.lib) do copy /Y %%I ..\..\%depfolder%
 if %errorlevel% neq 0 exit /b %errorlevel%
 cd ..\..
 cd %depfolder%
@@ -140,7 +138,7 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 set depfolder=Klampt-%klamptdepversion%.win64-deps-vs2015
 mkdir %depfolder%
 cd Cpp\Dependencies
-for %%I in (assimp--3.0.1270-sdk\lib\assimp_release-dll_x64\* x64\Assimp64.dll glpk_4_61.dll glpk_4_61.lib glew32.dll glew32.lib x64\KrisLibrary.lib x64\ode_double.lib x64\tinyxml_STL.lib x64\libcurl.lib ) do copy /Y %%I ..\..\%depfolder%
+for %%I in (x64\assimp.dll glpk_4_61.dll glpk_4_61.lib glew32.dll glew32.lib x64\KrisLibrary.lib x64\ode_double.lib x64\tinyxml_STL.lib x64\libcurl.lib ) do copy /Y %%I ..\..\%depfolder%
 if %errorlevel% neq 0 exit /b %errorlevel%
 cd ..\..
 cd %depfolder%
@@ -152,7 +150,7 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 set depfolder=Klampt-%klamptdepversion%.win64-deps-vs2015d
 mkdir %depfolder%
 cd Cpp\Dependencies
-for %%I in (assimp--3.0.1270-sdk\lib\assimp_release-dll_x64\* x64\Assimp64d.dll glpk_4_61.dll glpk_4_61.lib glew32.dll glew32.lib x64\KrisLibraryd.lib x64\ode_doubled.lib x64\tinyxmld_STL.lib x64\libcurl.lib ) do copy /Y %%I ..\..\%depfolder%
+for %%I in (x64\assimpd.dll glpk_4_61.dll glpk_4_61.lib glew32.dll glew32.lib x64\KrisLibraryd.lib x64\ode_doubled.lib x64\tinyxmld_STL.lib x64\libcurl.lib ) do copy /Y %%I ..\..\%depfolder%
 if %errorlevel% neq 0 exit /b %errorlevel%
 cd ..\..
 cd %depfolder%
