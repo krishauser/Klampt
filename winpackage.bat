@@ -37,23 +37,23 @@ for %%P in (%PYTHON_64_VERSIONS%) do (
 :: if %errorlevel% neq 0 exit /b %errorlevel%
 
 :: update KrisLibrary
-cd Cpp\Dependencies\KrisLibrary
+pushd Cpp\Dependencies\KrisLibrary
 :: git pull
 if %errorlevel% neq 0 exit /b %errorlevel%
-cd ..\..\..\
+popd
 
 :: 32 bit build
 SET buildfolder=msvc
 
 :: build KrisLibrary, both release and debug and copy into Cpp/Dependencies directory
-cd Cpp\Dependencies\KrisLibrary
+pushd Cpp\Dependencies\KrisLibrary
 devenv %buildfolder%\KrisLibrary.sln /build Release
 if %errorlevel% neq 0 exit /b %errorlevel%
 devenv %buildfolder%\KrisLibrary.sln /build Debug
 if %errorlevel% neq 0 exit /b %errorlevel%
 copy /Y %buildfolder%\lib\Release\KrisLibrary.lib ..\
 copy /Y %buildfolder%\lib\Debug\KrisLibraryd.lib ..\
-cd ..\..\..\
+popd
 
 :: build Klamp't
 devenv %buildfolder%\Klampt.sln /build Release
@@ -65,6 +65,7 @@ SET errorlevel=0
 
 :: build Klamp't Python bindings
 copy /y %buildfolder%\Python\setup.py Python\
+pushd
 cd Python
 for %%P in (%PYTHON_32_VERSIONS%) do (
     %%P setup.py build_ext
@@ -74,20 +75,20 @@ for %%P in (%PYTHON_32_VERSIONS%) do (
     %%P setup.py bdist_wheel
     if %errorlevel% neq 0 exit /b %errorlevel%
   )
-cd ..
+popd
 
 :: 64 bit build
 SET buildfolder=msvc64
 
 :: build KrisLibrary, both release and debug and copy into Cpp/Dependencies directory
-cd Cpp\Dependencies\KrisLibrary
+pushd Cpp\Dependencies\KrisLibrary
 devenv %buildfolder%\KrisLibrary.sln /build Release
 if %errorlevel% neq 0 exit /b %errorlevel%
 devenv %buildfolder%\KrisLibrary.sln /build Debug
 if %errorlevel% neq 0 exit /b %errorlevel%
 copy /Y %buildfolder%\lib\Release\KrisLibrary.lib ..\x64
 copy /Y %buildfolder%\lib\Debug\KrisLibraryd.lib ..\x64
-cd ..\..\..\
+popd
 
 :: build Klampt
 :: Qt5 doesn't have a 64-bit build, don't build apps
@@ -98,7 +99,7 @@ devenv %buildfolder%\Klampt.sln /build Release /project Klampt
 
 :: build Klamp't Python bindings
 copy /y %buildfolder%\Python\setup.py Python\
-cd Python
+pushd Python
 for %%P in (%PYTHON_64_VERSIONS%) do (
     %%P setup.py build_ext
     if %errorlevel% neq 0 exit /b %errorlevel%
@@ -107,55 +108,57 @@ for %%P in (%PYTHON_64_VERSIONS%) do (
     %%P setup.py bdist_wheel
     if %errorlevel% neq 0 exit /b %errorlevel%
   )
-cd ..
+popd
+
 
 :: zip dependency libraries
 ::   release
 set depfolder=Klampt-%klamptdepversion%.win32-deps-vs2015
 mkdir %depfolder%
-cd Cpp\Dependencies
+pushd Cpp\Dependencies
 for %%I in (assimp.dll glpk_4_61.dll glpk_4_61.lib glew32.dll glew32.lib KrisLibrary.lib ode_double.lib tinyxml_STL.lib libcurl.lib) do copy /Y %%I ..\..\%depfolder%
 if %errorlevel% neq 0 exit /b %errorlevel%
-cd ..\..
+popd
+pushd
 cd %depfolder%
 zip ..\%depfolder%.zip *
-cd ..
+popd
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 ::   debug
 set depfolder=Klampt-%klamptdepversion%.win32-deps-vs2015d
 mkdir %depfolder%
-cd Cpp\Dependencies
+pushd Cpp\Dependencies
 for %%I in (assimpd.dll  glpk_4_61.dll glpk_4_61.lib glew32.dll glew32.lib KrisLibraryd.lib ode_doubled.lib ode-0.14\lib\DebugDoubleLib\ode.pdb tinyxmld_STL.lib libcurl.lib) do copy /Y %%I ..\..\%depfolder%
 if %errorlevel% neq 0 exit /b %errorlevel%
-cd ..\..
-cd %depfolder%
+popd
+pushd %depfolder%
 zip ..\%depfolder%.zip *
-cd ..
+popd
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 ::   release x64
 set depfolder=Klampt-%klamptdepversion%.win64-deps-vs2015
 mkdir %depfolder%
-cd Cpp\Dependencies
+pushd Cpp\Dependencies
 for %%I in (x64\assimp.dll glpk_4_61.dll glpk_4_61.lib glew32.dll glew32.lib x64\KrisLibrary.lib x64\ode_double.lib x64\tinyxml_STL.lib x64\libcurl.lib ) do copy /Y %%I ..\..\%depfolder%
 if %errorlevel% neq 0 exit /b %errorlevel%
-cd ..\..
-cd %depfolder%
+popd
+pushd %depfolder%
 zip ..\%depfolder%.zip *
-cd ..
+popd
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 ::   debug x64
 set depfolder=Klampt-%klamptdepversion%.win64-deps-vs2015d
 mkdir %depfolder%
-cd Cpp\Dependencies
+pushd Cpp\Dependencies
 for %%I in (x64\assimpd.dll glpk_4_61.dll glpk_4_61.lib glew32.dll glew32.lib x64\KrisLibraryd.lib x64\ode_doubled.lib x64\tinyxmld_STL.lib x64\libcurl.lib ) do copy /Y %%I ..\..\%depfolder%
 if %errorlevel% neq 0 exit /b %errorlevel%
-cd ..\..
-cd %depfolder%
+popd
+pushd %depfolder%
 zip ..\%depfolder%.zip *
-cd ..
+popd
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 
