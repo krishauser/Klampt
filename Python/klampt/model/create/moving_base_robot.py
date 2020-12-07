@@ -88,7 +88,7 @@ mount 5 "%s" 1 0 0   0 1 0   0 0 1   0 0 0 as "%s"
 	for i in range(robot.numLinks()):
 		m = robot.link(i).getMass()
 		inertia += (vectorops.normSquared(m.com)*m.mass + max(m.inertia))
-	tmax = robot.getTorqueLimits()
+	tmax = robot.getTorqueMax()
 	tmax[0] = tmax[1] = tmax[2] = mass*9.8*5
 	tmax[3] = tmax[4] = tmax[5] = inertia*9.8*5
 	robot.setName("moving-base["+robotname+"]")
