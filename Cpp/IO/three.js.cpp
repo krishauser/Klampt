@@ -159,7 +159,6 @@ void ThreeJSExport(const RobotWorld& world,AnyCollection& out,ThreeJSCache& cach
     ss<<"Light "<<i+1;
     light["name"] = ss.str();
     light["color"] = ToRGB32(lights[i].diffuse);
-    printf("Color %x\n",ToRGB32(lights[i].diffuse));
     light["intensity"]=1;
     if(lights[i].position[3] == 0) {
       light["type"] = "DirectionalLight";
