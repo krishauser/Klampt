@@ -707,6 +707,63 @@ function KlamptFrontend(dom_sceneArea) {
      var newItems = [];
      this.scene.traverse( function (child) {
       if(!(child instanceof THREE.Light)) {
+        if ( !is_undefined_or_null(child.geometry) ) {
+          if(child.geometry instanceof THREE.Geometry) {
+            child.geometry.computeFaceNormals();
+            console.log("Geometry: normals of "+child.name+" calculated\n");
+          }
+          else if(child.geometry instanceof THREE.BufferGeometry) {
+            if(is_undefined_or_null(child.geometry.attributes.normal)) {  //need to compute normals
+              console.log("BufferGeometry: Computing normals of "+child.name+" from triangles\n");
+              var positions = child.geometry.attributes["position"];
+              var indices = child.geometry.index.array;
+              var normals = new Float32Array(positions.array.length);
+              for(var i=0;i<positions.array.length;i++)
+                normals[i] = 0.0;
+              var vba = new THREE.Vector3();
+              var vca = new THREE.Vector3();
+              var vn = new THREE.Vector3();
+              for(var tri=0;tri<indices.length;tri+=3) {
+                var a=indices[tri];
+                var b=indices[tri+1];
+                var c=indices[tri+2];
+                vba.x = positions.array[b*3]-positions.array[a*3];
+                vba.y = positions.array[b*3+1]-positions.array[a*3+1];
+                vba.z = positions.array[b*3+2]-positions.array[a*3+2];
+                vca.x = positions.array[c*3]-positions.array[a*3];
+                vca.y = positions.array[c*3+1]-positions.array[a*3+1];
+                vca.z = positions.array[c*3+2]-positions.array[a*3+2];
+                vn.crossVectors(vba,vca);
+                vn.normalize();
+                normals[a*3] += vn.x;
+                normals[a*3+1] += vn.y;
+                normals[a*3+2] += vn.z;
+                normals[b*3] += vn.x;
+                normals[b*3+1] += vn.y;
+                normals[b*3+2] += vn.z;
+                normals[c*3] += vn.x;
+                normals[c*3+1] += vn.y;
+                normals[c*3+2] += vn.z;
+              }
+              for(var i=0;i<positions.array.length;i+=3) {
+                vn.x = normals[i];
+                vn.y = normals[i+1];
+                vn.z = normals[i+2];
+                vn.normalize();
+                normals[i] = vn.x;
+                normals[i+1] = vn.y;
+                normals[i+2] = vn.z;
+              }
+              child.geometry.setAttribute( 'normal', new THREE.BufferAttribute( normals, 3 ) );
+            }
+            else {
+              console.log("BufferGeometry Item "+child.name+" already has normals\n");
+            }
+          }
+          else {
+            console.log("Item "+child.name+" is neither a geometry or THREE.BufferGeometry\n");
+          }
+        }
         if(child.name == "Terrain") {
           child.receiveShadow = true;
           child.castShadow = true;
@@ -715,6 +772,7 @@ function KlamptFrontend(dom_sceneArea) {
           child.receiveShadow = true;
           child.castShadow = true;
         }
+
       }
       else if(child instanceof THREE.DirectionalLight || child instanceof THREE.SpotLight) {
         child.intensity *= 0.8;

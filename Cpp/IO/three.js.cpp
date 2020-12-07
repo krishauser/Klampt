@@ -164,9 +164,9 @@ void ThreeJSExport(const RobotWorld& world,AnyCollection& out,ThreeJSCache& cach
       light["type"] = "DirectionalLight";
       AnyCollection pos;
       pos.resize(3);
-      pos[0] = -lights[i].position[0];
-      pos[1] = -lights[i].position[1];
-      pos[2] = -lights[i].position[2];
+      pos[0] = -lights[i].position[0]*20;
+      pos[1] = -lights[i].position[1]*20;
+      pos[2] = -lights[i].position[2]*20;
       AnyCollection zero;
       zero.resize(3);
       zero[0] = 0;
@@ -184,9 +184,9 @@ void ThreeJSExport(const RobotWorld& world,AnyCollection& out,ThreeJSCache& cach
       pos[2] = lights[i].position[2];
       AnyCollection zero;
       zero.resize(3);
-      zero[0] = lights[i].position[0] + lights[i].spot_direction[0];
-      zero[1] = lights[i].position[1] + lights[i].spot_direction[1];
-      zero[2] = lights[i].position[2] + lights[i].spot_direction[2];
+      zero[0] = lights[i].position[0] + lights[i].spot_direction[0]*20;
+      zero[1] = lights[i].position[1] + lights[i].spot_direction[1]*20;
+      zero[2] = lights[i].position[2] + lights[i].spot_direction[2]*20;
       light["position"] = pos;
       light["angle"] = lights[i].spot_cutoff;
       light["penumbra"] = 1.0-Exp(-lights[i].spot_exponent);
@@ -509,6 +509,7 @@ void ThreeJSExport(const Meshing::TriMesh& mesh,AnyCollection& out)
     out["data"]["position"] = vertices;
     out["data"]["index"] = faces;
   #else
+    /*
     AnyCollection normals;
     normals.resize(mesh.verts.size()*3);
     vector<Vector3> vnormals(mesh.verts.size(),Vector3(0.0));
@@ -527,23 +528,26 @@ void ThreeJSExport(const Meshing::TriMesh& mesh,AnyCollection& out)
       normals[k+1] = int(vnormals[i].y*32767);
       normals[k+2] = int(vnormals[i].z*32767);
     }
+    */
 
     AnyCollection vertarray,normalarray,facearray;
     vertarray["type"] = "Float32Array";
     vertarray["array"] = vertices;
     vertarray["itemSize"] = 3;
+    /*
     normalarray["type"] = "Int16Array";
     normalarray["array"] = normals;
     normalarray["itemSize"] = 3;
     normalarray["normalized"] = true;
-    if(mesh.tris.size() > 0xffff)
+    */
+    if(mesh.verts.size() > 0xffff)
       facearray["type"] = "Uint32Array";
     else
       facearray["type"] = "Uint16Array";
     facearray["array"] = faces;
     facearray["itemSize"] = 1;
     attributes["position"] = vertarray;
-    attributes["normal"] = normalarray;
+    //attributes["normal"] = normalarray;
     out["data"]["attributes"] = attributes;
     out["data"]["index"] = facearray;
   #endif //THREE_JS_OLD_VERSION
