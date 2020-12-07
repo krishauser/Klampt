@@ -17,12 +17,9 @@ install:
 before_script:
   - echo $LD_LIBRARY_PATH
   - sudo ldconfig
-  # Prepare build
-  #- cd Klampt
 
 script:
   - cd Cpp/Dependencies && make unpack-deps
-  #using KrisLibrary's devel branch
   - cd KrisLibrary && cd ..
   - make deps && cd ../..
   - cmake . -DKLAMPT_COMPILE_TESTS:BOOL=True
@@ -39,6 +36,7 @@ script:
 branches:
   only:
   - master
+  - 0.8.4
   - 0.8.3
   - 0.8.2
   - 0.8.1
