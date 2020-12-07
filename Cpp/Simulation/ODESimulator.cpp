@@ -835,6 +835,11 @@ void ODESimulator::Step(Real dt)
     SetupContactResponse();
     lastStateTimestep = dt;
     StepDynamics(dt);
+
+#if DO_TIMING
+    stepTime = timer.ElapsedTime();
+    timer.Reset();
+#endif // DO_TIMING
   }
   else {
     //plain old constant time-stepping
