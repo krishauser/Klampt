@@ -8,7 +8,6 @@ It can be installed using pip as follows:
 """
 
 import open3d
-import numpy as np
 from klampt import PointCloud,TriangleMesh,VolumeGrid,Geometry3D
 
 def to_open3d(obj):
@@ -78,6 +77,7 @@ def from_open3d(obj):
     """
     if isinstance(obj,open3d.geometry.PointCloud):
         pc = PointCloud()
+        import numpy as np
         for p in obj.points:
             pc.vertices.append(p[0])
             pc.vertices.append(p[1])
