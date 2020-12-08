@@ -8,6 +8,7 @@ It can be installed using pip as follows:
 """
 
 import open3d
+import numpy as np
 from klampt import PointCloud,TriangleMesh,VolumeGrid,Geometry3D
 
 def to_open3d(obj):
@@ -81,7 +82,14 @@ def from_open3d(obj):
             pc.vertices.append(p[0])
             pc.vertices.append(p[1])
             pc.vertices.append(p[2])
-        #TODO: other properties
+        if obj.has_colors():
+            pc.addProperty('rgb')
+            colors = np.array(obj.colors)
+            r = (colors[:,0]*255.0).astype(np.uint32)
+            g = (colors[:,1]*255.0).astype(np.uint32)
+            b = (colors[:,2]*255.0).astype(np.uint32)
+            rgb = np.bitwise_or.reduce((np.left_shift(r,16),np.left_shift(g,8),b))
+            pc.setProperties(pc.numProperties()-1,rgb.tolist())
         return pc
     elif isinstance(obj,open3d.geometry.TriangleMesh):
         m = TriangleMesh()
