@@ -23,10 +23,31 @@ def to_open3d(obj):
     """
     if isinstance(obj,PointCloud):
         pc = open3d.geometry.PointCloud()
+        import numpy as np
         for i in range(obj.numPoints()):
             k = i*3
             pc.points.append((obj.vertices[k],obj.vertices[k+1],obj.vertices[k+2]))
-        #TODO: other properties
+        
+        hascolor = -1
+        prop = None
+        for i in range(obj.numProperties()):
+            if obj.propertyNames[i] in ['rgb','rgba','r']:
+                hascolor = i
+                prop = obj.propertyNames[i]
+                break
+        if prop == 'r':
+            assert obj.propertyNames[hascolor+1] == 'g'
+            assert obj.propertyNames[hascolor+2] == 'b'
+            r = obj.getProperties(hascolor)
+            g = obj.getProperties(hascolor+1)
+            b = obj.getProperties(hascolor+2)
+            for i in range(obj.numPoints()):
+                pc.colors.append((r[i],g[i],b[i]))
+        if prop == 'rgb' or prop == 'rgba':
+            rgb = obj.getProperties(hascolor)
+            for i in range(obj.numPoints()):
+                r,g,b = np.bitwise_and(np.right_shift(np.uint(rgb[i]), [16, 8, 0]), 255)
+                pc.colors.append((r/255.0,g/255.0,b/255.0))
         return pc
     elif isinstance(obj,TriangleMesh):
         m = open3d.geometry.TriangleMesh()
