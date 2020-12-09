@@ -2772,6 +2772,7 @@ class VisAppearance:
             wp = None
             geometry = None
             lighting = True
+            restoreLineWidth = False
             if isinstance(self.item,GeometricPrimitive):
                 if not hasattr(self,'geometry'):
                     self.geometry = Geometry3D(self.item)
@@ -2780,6 +2781,7 @@ class VisAppearance:
                     lighting = False
                     if self.item.type == 'Segment':
                         glLineWidth(self.attributes.get('width',3.0))
+                        restoreLineWidth = True
             elif isinstance(self.item,PointCloud):
                 if not hasattr(self,'geometry'):
                     self.geometry = Geometry3D(self.item)
@@ -2797,6 +2799,7 @@ class VisAppearance:
                         lighting = False
                         if prim.type == 'Segment':
                             glLineWidth(self.attributes.get('width',3.0))
+                            restoreLineWidth = True
                 elif self.item.type() == 'PointCloud':
                     lighting = False
                 geometry = self.item
@@ -2805,7 +2808,7 @@ class VisAppearance:
             else:
                 glDisable(GL_LIGHTING)
             self.appearance.drawWorldGL(geometry)
-            if self.item.type == 'Segment':
+            if restoreLineWidth:
                 glLineWidth(1.0)
             if name is not None:
                 bmin,bmax = geometry.getBB()
