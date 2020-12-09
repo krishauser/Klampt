@@ -2,6 +2,7 @@ from ..visualization import _WindowManager,_ThreadedWindowManager,_globalLock
 from .vis_gl import GLVisualizationFrontend,GLVisualizationPlugin,WindowInfo
 from .. import glinit,gldraw,glcommon
 from ...robotsim import WorldModel
+import threading
 
 if not glinit.available('GLUT'):
     raise ImportError("Can't import vis_glut without first calling glinit.init()")
@@ -361,13 +362,48 @@ class GLUTWindowManager(_ThreadedWindowManager):
                     w.glwindow = None
             return
 
+        self.in_app_thread = True
         calls = self.threadcalls
         self.threadcalls = []
         for c in calls:
             c()
         if self.callback:
             self.callback()
+        self.in_app_thread = False
         return
+
+    def screenshot(self,format,want_depth):
+        if threading.current_thread().__class__.__name__ != '_MainThread':
+            #already in visualization loop -- just get the image
+            return self._frontend.get_screen(format,want_depth)
+        return_values = []
+        def storeScreenshot(img,depth=None,return_values=return_values):
+            return_values.append((img,depth))
+        self.screenshotCallback(storeScreenshot,format,want_depth)
+        #wait for the vis thread to call the function
+        while len(return_values)==0:
+            time.sleep(0.01)
+        res = return_values[0]
+        if not want_depth:
+            return res[0]
+        else:
+            return res
+
+    def screenshotCallback(self,fn,format,want_depth):
+        if threading.current_thread().__class__.__name__ != '_MainThread':
+            #already in visualization loop -- just get the image
+            res = self._frontend.get_screen(format,want_depth)
+            if want_depth:
+                fn(*res)
+            else:
+                fn(res)
+        def do_screenshot_callback(fn=fn,format=format,want_depth=want_depth):
+            res = self._frontend.get_screen(format,want_depth)
+            if want_depth:
+                fn(*res)
+            else:
+                fn(res)
+        self.threadCall(do_screenshot_callback)
 
 
 class GLUTVisualizationFrontend(GLVisualizationFrontend):
@@ -395,16 +431,29 @@ class GLUTVisualizationFrontend(GLVisualizationFrontend):
         if self.inSubwindow: 
             return
         glColor3f(1,1,1)
-        glRasterPos(20,50)
+        y = 30
+        glRasterPos(20,y)
         gldraw.glutBitmapString(GLUT_BITMAP_HELVETICA_18,"(Do not close this window except to quit)")
+        y += 25
         if self.inDialog:
             glColor3f(1,1,0)
-            glRasterPos(20,80)
+            glRasterPos(20,y)
             gldraw.glutBitmapString(GLUT_BITMAP_HELVETICA_18,"In Dialog mode. Press 'Esc' to return to normal mode")
+            y += 25
         else:
             glColor3f(1,1,0)
-            glRasterPos(20,80)
+            glRasterPos(20,y)
             gldraw.glutBitmapString(GLUT_BITMAP_HELVETICA_18,"In Window mode. Press 'Esc' to hide window")
+            y += 25
+        for a in self.actions:
+            if a.key is not None:
+                glColor3f(0,0,0)
+                glRasterPos(20,y)
+                desc = a.short_text 
+                if a.description is not None and a.description != a.short_text:
+                    desc = desc + ". "+a.description
+                gldraw.glutBitmapString(GLUT_BITMAP_HELVETICA_12,a.key+": "+desc)
+                y += 14
     def keyboardfunc(self,c,x,y):
         if not self.inSubwindow: 
             if len(c)==1 and ord(c)==27:
@@ -418,6 +467,22 @@ class GLUTVisualizationFrontend(GLVisualizationFrontend):
                 self.windowinfo.mode = 'hidden'
                 _globalLock.release()
                 return True
+            c = c.decode('utf-8')
+            for a in self.actions:
+                if a.key.startswith('Ctrl'):
+                    if 'ctrl' in self.modifiers():
+                        if a.key[5:] == c:
+                            a.hook()
+                elif a.key.startswith('Shift'):
+                    if 'shift' in self.modifiers():
+                        if a.key[6:] == c:
+                            a.hook()
+                elif a.key.startswith('Alt'):
+                    if 'alt' in self.modifiers():
+                        if a.key[4:] == c:
+                            a.hook()
+                elif a.key == c:
+                    a.hook()
         else:
             return GLVisualizationFrontend.keyboardfunc(self,c,x,y)
     

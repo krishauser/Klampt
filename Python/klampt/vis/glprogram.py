@@ -433,6 +433,56 @@ class GLProgram:
         """Called by the window when it is closed"""
         return True
 
+    def get_screen(self,format='auto',want_depth=False):
+        """Retrieves a screenshot"""
+        if hasattr(self.window,'makeCurrent'):
+            self.window.makeCurrent()
+        glReadBuffer(GL_FRONT);
+        x,y,w,h = self.view.x*self.view.screenDeviceScale,self.view.y*self.view.screenDeviceScale,self.view.w*self.view.screenDeviceScale,self.view.h*self.view.screenDeviceScale
+        screenshot = glReadPixels( x, y, w, h, GL_RGB, GL_UNSIGNED_BYTE)
+        if format == 'auto':
+            try:
+                import numpy as np
+                format = 'numpy'
+            except ImportError:
+                try:
+                    from PIL import Image
+                    format = 'Image'
+                except ImportError:
+                    format = 'bytes'
+        if format == 'numpy':
+            import numpy as np
+            rgb = np.frombuffer(screenshot,dtype=np.uint8).reshape((h,w,3))
+            rgb = np.flip(rgb,0)
+        elif format == 'Image':
+            from PIL import Image
+            rgb = Image.frombuffer("RGB", (w, h), screenshot, "raw", "RGB", 0, 0)
+            rgb = rgb.transpose(Image.FLIP_TOP_BOTTOM)
+        else:
+            rgb = (w,h,screenshot)
+        if want_depth:
+            n,f = self.view.clippingplanes
+            depthdata = glReadPixels( x, y, w, h, GL_DEPTH_COMPONENT, GL_FLOAT)
+            if format == 'numpy':
+                import numpy as np
+                depth = np.frombuffer(depthdata,dtype=np.float32).reshape((h,w))
+                depth = np.flip(depth,0)
+                depth = (n*f)/(f - depth*(f-n))
+            elif format == 'Image':
+                from PIL import Image,ImageMath
+                depth = Image.frombuffer("F", (w, h), depthdata, "raw", "F", 0, 0)
+                depth = depth.transpose(Image.FLIP_TOP_BOTTOM)
+                depth = ImageMath.eval("%f / (%f - a*%f)"%(n*f,f,f-n),a=depth)
+            else:
+                import struct
+                deptharray = [struct.unpack("<f",depthdata[i:i+4]) for i in range(0,w*h*4,4)] 
+                for i in range(w*h):
+                    deptharray[i] = n*f/(f - deptharray[i]*(f-n))
+                depth = (w,h,deptharray)
+            return (rgb,depth)
+        else:
+            return rgb
+
     def save_screen(self,fn,multithreaded=True):
         """Saves a screenshot"""
         try:
@@ -443,12 +493,7 @@ class GLProgram:
             except ImportError:
                 print("Cannot save screens to disk, the Python Imaging Library is not installed")
                 return
-        if hasattr(self.window,'makeCurrent'):
-            self.window.makeCurrent()
-        glReadBuffer(GL_FRONT);
-        x,y,w,h = self.view.x*self.view.screenDeviceScale,self.view.y*self.view.screenDeviceScale,self.view.w*self.view.screenDeviceScale,self.view.h*self.view.screenDeviceScale
-        screenshot = glReadPixels( x, y, w, h, GL_RGBA, GL_UNSIGNED_BYTE)
-        im = Image.frombuffer("RGBA", (w, h), screenshot, "raw", "RGBA", 0, 0)
+        im = self.get_screen('Image')
         print("Saving screen to",fn)
         if not multithreaded:
             im.save(fn)
