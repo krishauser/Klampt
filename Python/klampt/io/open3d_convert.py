@@ -9,6 +9,7 @@ It can be installed using pip as follows:
 
 import open3d
 from klampt import PointCloud,TriangleMesh,VolumeGrid,Geometry3D
+from ..model import geometry
 
 def to_open3d(obj):
     """Converts Klamp't geometry to an open3d geometry.
@@ -27,6 +28,10 @@ def to_open3d(obj):
             k = i*3
             pc.points.append((obj.vertices[k],obj.vertices[k+1],obj.vertices[k+2]))
         #TODO: other properties
+        colors = geometry.point_cloud_colors(obj,('r','g','b'))
+        if colors is not None:
+            for i in range(obj.numPoints()):
+                pc.colors.append(colors[i])
         return pc
     elif isinstance(obj,TriangleMesh):
         m = open3d.geometry.TriangleMesh()
@@ -81,6 +86,8 @@ def from_open3d(obj):
             pc.vertices.append(p[0])
             pc.vertices.append(p[1])
             pc.vertices.append(p[2])
+        if obj.has_colors():
+            geometry.point_cloud_set_colors(pc,obj.colors,('r','g','b'),'rgb')
         #TODO: other properties
         return pc
     elif isinstance(obj,open3d.geometry.TriangleMesh):
