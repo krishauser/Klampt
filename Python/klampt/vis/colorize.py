@@ -49,8 +49,8 @@ def colorize(object,value,colormap=None,feature=None,vrange=None,lighting=None):
             :class:`~klampt.robotsim.Appearance`.
 
             - In the first case, the associated appearance is updated.
-            - For PointClouds, the 'color' attribute is added, if not already
-              present.
+            - For PointClouds, color attributes are added as an 'rgb' or 'rgba'
+              channel, if color information is not already present.
             - For Geometry3Ds, the return value is an Appearance that can be
               used via Appearance.drawGL(object).
             - For Appearances, the face/vertex colors are assigned. Note that
