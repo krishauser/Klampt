@@ -89,6 +89,8 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 -   XML world files' simulation tags can now refer to named robots, rigid objects, and terrains.
 -   Conversions from geometries to VolumeGrids now respect the geometry's collision margin.
 -   Supports emissive and specular colors in OpenGL views and XML world files now.
+-   The "automass" signal in .rob files and .obj (rigid object) files can now accept a parameter indicating how much mass is concentrated at the surface vs the interior of the object.  
+-   A bug in the earlier automass inertia matrix calculation made inertias much larger than they should have been!  This may require re-calibrating robot PID constants to avoid jittering.  (This bug will not affect robot / object files that specify inertias matrices.)
 -   Python API: Can now remesh triangle meshes, point clouds, and volume grids using `Geometry3D.convert(self.type(),resolution)`.
 -   Python API: Easy vis.snapshot API added.
 
