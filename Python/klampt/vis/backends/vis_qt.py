@@ -270,6 +270,12 @@ class QtWindowManager(_ThreadedWindowManager):
                 self.cleanup()
                 self.vis_thread_running = False
                 raise
+            except RuntimeError:
+                print("RuntimeError called in visualization thread; assuming this is exception in main thread. Thread closing.")
+                _globalLock.release()
+                self.cleanup()
+                self.vis_thread_running = False
+                return
             _globalLock.release()
             self.in_app_thread = True
             for c in calls:
@@ -383,7 +389,7 @@ class QtWindowManager(_ThreadedWindowManager):
                 print("klampt.vis: Running single-threaded dialog")
                 self.in_vis_loop = True
                 res = self.run_app_thread()
-                self._in_vis_loop = False
+                self.in_vis_loop = False
                 print("klampt.vis: ... dialog done.")
                 print("#########################################")
                 return res
@@ -412,9 +418,13 @@ class QtWindowManager(_ThreadedWindowManager):
         for w in self.windows:
             w.frontend.scene.clear()
             if w.glwindow:
-                w.glwindow.setParent(None)
-                w.glwindow.close()
-                #must be explicitly deleted for some reason in PyQt5...
+                try: 
+                    w.glwindow.setParent(None)
+                    w.glwindow.close()
+                    #must be explicitly deleted for some reason in PyQt5...
+                except RuntimeError:
+                    #already deleted?
+                    pass
                 del w.glwindow
         glinit._GLBackend.app.processEvents()
 
@@ -422,7 +432,43 @@ class QtWindowManager(_ThreadedWindowManager):
         del glinit._GLBackend.app
         glinit._GLBackend.app = None
 
+    def screenshot(self,format,want_depth):
+        if not self.multithreaded() or self.in_vis_loop or self.in_app_thread:
+            #already in visualization loop -- just get the image
+            return self._frontend.get_screen(format,want_depth)
+        if not self.vis_thread_running:
+            raise RuntimeError("Can't call screenshot until the thread is running")
+        return_values = []
+        def storeScreenshot(img,depth=None,return_values=return_values):
+            return_values.append((img,depth))
+        self.screenshotCallback(storeScreenshot,format,want_depth)
+        #wait for the vis thread to call the function
+        while len(return_values)==0:
+            time.sleep(0.01)
+        res = return_values[0]
+        if not want_depth:
+            return res[0]
+        else:
+            return res
 
+    def screenshotCallback(self,fn,format,want_depth):
+        if not self.multithreaded() or self.in_vis_loop or self.in_app_thread:
+            #already in visualization loop -- just get the image
+            res = self._frontend.get_screen(format,want_depth)
+            if want_depth:
+                fn(*res)
+            else:
+                fn(res)
+        def do_screenshot_callback(fn=fn,format=format,want_depth=want_depth):
+            if not self._frontend.rendered:
+                self.threadCall(do_screenshot_callback)
+                return
+            res = self._frontend.get_screen(format,want_depth)
+            if want_depth:
+                fn(*res)
+            else:
+                fn(res)
+        self.threadCall(do_screenshot_callback)
 
 #Qt specific startup
 #need to set up a QDialog and an QApplication
@@ -522,7 +568,7 @@ class _MyWindow(QMainWindow):
             return None
         if isinstance(self.glwidget.program,GLVisualizationFrontend):
             scene = self.glwidget.program.scene
-            sim = scene.get('sim',None)
+            sim = scene.items.get('sim',None)
             if sim is not None: return sim.item
         for p in self.glwidget.program.plugins:
             if hasattr(p,'sim'):

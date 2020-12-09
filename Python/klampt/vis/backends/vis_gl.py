@@ -27,9 +27,14 @@ class GLVisualizationFrontend(glcommon.GLPluginProgram):
         self.scene = GLVisualizationPlugin()
         self.setPlugin(self.scene)
         self.scene.program = weakref.proxy(self)
+        self.rendered = False
 
     def addAction(self,hook,short_text,key,description):
         self.add_action(hook,short_text,key,description)
+
+    def displayfunc(self):
+        glcommon.GLPluginProgram.displayfunc(self)
+        self.rendered = True
 
 
 class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
@@ -134,7 +139,6 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
         #restore any reference objects
         self.updateCamera()
         self.renderGL(self.view)
-
         _globalLock.release()
 
     def setBackgroundImage(self,img,format='auto',rows='auto'):

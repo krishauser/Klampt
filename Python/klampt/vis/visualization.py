@@ -465,13 +465,20 @@ Global appearance / camera control functions:
   camera to all objects in the visualization.  A scale > 1 magnifies the zoom.
 - def followCamera(target,translate=True,rotate=False,center=False): Sets the 
   camera to follow a target.
-- saveJsonConfig() / saveJsonConfig(fn): Saves the configuration to a JSON
+- def saveJsonConfig() / saveJsonConfig(fn): Saves the configuration to a JSON
   object or JSON file.
-- loadJsonConfig(jsonObj) / loadJsonConfig(fn): Loads the configuration from a
-  JSON object or JSON file.
+- def loadJsonConfig(jsonObj) / loadJsonConfig(fn): Loads the configuration 
+  from a JSON object or JSON file.
+- def screenshot(format='auto',want_depth=False): returns a screenshot of the
+  scene. 
+- def screenshotCallback(fn,format='auto',want_depth=False): sets a callback 
+  that will receive a screenshot of the scene after rendering is done.
 
 Utility functions:
 
+- def objectToVisType(object,world=None): Auto-determines the type of object
+used
+  that will be interpreted 
 - def autoFitViewport(viewport,objects,zoom=True,rotate=True): Automatically 
   fits a viewport's camera to see all the given objects.
 
@@ -486,13 +493,19 @@ item name (a string) or a sub-item (a sequence of strings, given a path from
 the root to the leaf). For example, if you've added a RobotWorld under the
 name 'world' containing a robot called 'myRobot', then::
 
-    setColor(('world','myRobot'),0,1,0)
+    vis.setColor(('world','myRobot'),0,1,0)
 
 will turn the robot green.  If 'link5' is the robot's 5th link, then::
 
-    setColor(('world','myRobot','link5'),0,0,1)
+    vis.setColor(('world','myRobot','link5'),0,0,1)
 
 will turn the 5th link blue.
+
+A shortcut is to use the :func:`getItemName` function on the given robot,
+e.g.::
+
+    robot = world.robot(0)
+    vis.setColor(vis.getItemName(robot),0,0,1)
 
 """
 
@@ -1518,6 +1531,49 @@ def loadJsonConfig(jsonobj_or_fn):
     or a str indicating a filename (previously saved using saveJsonConfig.)
     """
     return scene().loadJsonConfig(jsonobj_or_fn)
+
+def screenshot(format='auto',want_depth=False):
+    """Returns a screenshot of the scene. Currently only available in OpenGL modes
+    (PyQt, GLUT). 
+
+    ``format`` describes the desired image format.
+
+    - 'auto': equivalent to 'numpy' if numpy is available, 'Image' if PIL is
+      available, or 'bytes' otherwise. 
+    - 'numpy': the image will be a numpy uint8 array of shape (h,w,3). 
+    - 'Image': the image will be a PIL Image if Python Imaging Library is
+      available.
+    - 'bytes': the image will be in the form ``(w,h,bytes)`` where ``bytes`` is a
+      raw bytes array of length 4*w*h.  The buffer follows OpenGL convention with
+      the start in the lower-left corner.
+
+    Can also provide a depth image if want_depth=True.  The format will a (w,h)
+    numpy float array, a 'F' (float) Image, or (w,h,array) an array of floats.
+
+    In multithreaded mode, this will block until rendering is
+    complete.
+    """
+    global _window_manager
+    if _window_manager is None:
+        return None
+    return _window_manager.screenshot(format,want_depth)
+
+def screenshotCallback(fn,format='auto',want_depth=False):
+    """Sets a callback ``fn`` that will receive a screenshot of the scene when
+    rendering is done.
+
+    See :func:`screenshot` for a description of the ``format`` and ``want_depth``
+    arguments.
+
+    Currently only available in OpenGL modes (PyQt, GLUT). 
+
+    To repeatedly receive screenshots, ``fn`` can call
+    ``vis.screenshotCallback(fn)`` again.
+    """
+    global _window_manager
+    if _window_manager is None:
+        return None
+    return _window_manager.screenshotCallback(fn,format,want_depth)
 
 def objectToVisType(item,world):
     """Returns the default type for the given item in the current world"""
@@ -3852,6 +3908,10 @@ class _WindowManager:
         pass
     def threadCall(self,func):
         func()
+    def screenshot(self,*args):
+        raise NotImplementedError()
+    def screenshotCallback(self,fn,*args):
+        raise NotImplementedError()
 
 
 class _ThreadedWindowManager(_WindowManager):
