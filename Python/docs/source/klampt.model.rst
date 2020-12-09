@@ -9,6 +9,7 @@ klampt.model package
     ~klampt.model.contact
     ~klampt.model.coordinates
     ~klampt.model.create
+    ~klampt.model.geometry
     ~klampt.model.ik
     ~klampt.model.multipath
     ~klampt.model.sensing
@@ -27,6 +28,7 @@ klampt.model package
     klampt.model.contact
     klampt.model.coordinates
     klampt.model.create
+    klampt.model.geometry
     klampt.model.ik
     klampt.model.multipath
     klampt.model.sensing

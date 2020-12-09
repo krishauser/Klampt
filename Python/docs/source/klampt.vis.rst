@@ -8,18 +8,19 @@ Commonly used submodules
     ~klampt.vis.glinterface
     ~klampt.vis.colorize
     ~klampt.vis.editors
-    ~klampt.vis.gldraw
+    ~klampt.vis.glviewport
     ~klampt.vis.ipython
-    ~klampt.vis.glcommon
-    ~klampt.vis.glrobotprogram
 
-Internally used submodules
----------------------------
+Utility / infrequently used submodules
+--------------------------------------
 
 .. autosummary::
     ~klampt.vis.camera
+    ~klampt.vis.gldraw
+    ~klampt.vis.glcommon
     ~klampt.vis.glinit
     ~klampt.vis.glprogram
+    ~klampt.vis.glrobotprogram
     ~klampt.vis.backends.qtbackend
     ~klampt.vis.backends.glutbackend
 
@@ -60,6 +61,7 @@ All submodules
     klampt.vis.glinterface
     klampt.vis.glprogram
     klampt.vis.glrobotprogram
+    klampt.vis.glviewport
     klampt.vis.ipython
     klampt.vis.backends.qtbackend
     klampt.vis.backends.glutbackend
