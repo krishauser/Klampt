@@ -200,7 +200,7 @@ bool RigidObject::Load(const char* fn)
     }
     if(f.count("autoMass")!=0) {
       Real surfaceFraction = 1.0;
-      if(f.CheckSize("autoMass",1,fn) && f.CheckType("autoMass",PrimitiveValue::Double,fn))
+      if(f.CheckSize("autoMass",1,fn,0) && f.CheckType("autoMass",PrimitiveValue::Double,fn,0))
         surfaceFraction = f.AsDouble("autoMass")[0];
       if(hasCOM) //com specified, compute inertia about given com
         inertia = Inertia(*geometry,com,mass,surfaceFraction);
