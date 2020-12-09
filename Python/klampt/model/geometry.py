@@ -522,7 +522,7 @@ def point_cloud_set_colors(pc,colors,color_format='rgb',pc_property='auto'):
             - ('r','g','b'): triple with each channel in range [0,1]
             - ('r','g','b','a'): tuple with each channel in range [0,1]
             - 'channels': ``colors`` is a list of channels, in the form (r,g,b)
-                (r,g,b,a), where each value in the channel has range [0,1].
+               or (r,g,b,a), where each value in the channel has range [0,1].
             - 'opacity': opacity only, in the range [0,1].
 
         pc_property (str): describes to which property the colors should be
@@ -569,17 +569,17 @@ def point_cloud_set_colors(pc,colors,color_format='rgb',pc_property='auto'):
                 if c in rgbdict:
                     pc.setProperties(rgbdict[c],values)
                 else:
-                    pc.addProperties(c,values)
+                    pc.addProperty(c,values)
             if len(colors)==4:
                 if alphachannel[0] == 'a':
                     pc.setProperties(alphachannel[0],values)
                 else:
-                    pc.addProperties('a',values)
+                    pc.addProperty('a',values)
         else:
             if color_format in rgbdict:
                 pc.setProperties(rgbdict[color_format],colors)
             else:
-                pc.addProperties(color_format,colors)
+                pc.addProperty(color_format,colors)
     else:
         channels = _color_format_to_uint8_channels(color_format,colors)
         packed = _color_format_from_uint8_channels(pc_property,*channels)
@@ -588,4 +588,4 @@ def point_cloud_set_colors(pc,colors,color_format='rgb',pc_property='auto'):
         elif alphachannel is not None and pc_property == alphachannel[0]:
             pc.setProperties(alphachannel[1],packed)
         else:
-            pc.addProperties(pc_property,packed)
+            pc.addProperty(pc_property,packed)
