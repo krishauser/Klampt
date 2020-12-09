@@ -63,9 +63,17 @@ class Appearance
   ///If 3 or 4 arguments are given, changes the object color.
   ///
   ///If 5 arguments are given, changes the color of the given
-  ///feature.  feature can be ALL, VERTICES, EDGES, or FACES.
+  ///feature.  feature can be ALL, VERTICES, EDGES, FACES, EMISSIVE,
+  ///or SPECULAR.
   void setColor(int feature,float r,float g, float b,float a);
   void getColor(float out[4]);
+  ///Gets color of the object or a feature
+  ///
+  ///If 0 arguments are given, retrieves the main object color.
+  ///
+  ///If 1 arguments are given, returns the color of the given feature.
+  ///feature.  feature can be ALL, VERTICES, EDGES, FACES, EMISSIVE,
+  ///or SPECULAR.
   void getColor(int feature,float out[4]);
   ///Sets per-element color for elements of the given feature type.
   ///

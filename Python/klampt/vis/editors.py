@@ -23,7 +23,9 @@ from ..model import collide
 from OpenGL.GL import *
 
 class VisualEditorBase(glcommon.GLWidgetPlugin):
-    """A base class for editing resources."""
+    """A base class for editing resources.  Used in conjunction with
+    :func:`run`.
+    """
     
     def __init__(self,name,value,description,world):
         glcommon.GLWidgetPlugin.__init__(self)
@@ -52,6 +54,7 @@ class VisualEditorBase(glcommon.GLWidgetPlugin):
     def addDialogItems(self,parent,ui='qt'):
         return
     def display_screen(self):
+        pass
         """
         #for GLUT?
         glDisable(GL_LIGHTING)

@@ -566,11 +566,11 @@ def camera_to_viewport(camera,robot):
             local coordinates.
 
     Returns:
-        GLViewport: matches the camera's viewport.
+        :class:`GLViewport`: matches the camera's viewport.
     """
     assert isinstance(camera,SimRobotSensor),"Must provide a SimRobotSensor instance"
     assert camera.type() == 'CameraSensor',"Must provide a camera sensor instance"
-    from ..vis.glprogram import GLViewport
+    from ..vis.glviewport import GLViewport
     xform = get_sensor_xform(camera,robot)
     w = int(camera.getSetting('xres'))
     h = int(camera.getSetting('yres'))

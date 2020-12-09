@@ -1211,7 +1211,8 @@ class PointCloud(_object):
 
     To get all properties as a n x k numpy array::  
 
-    properties = np.array(pc.properties).reshape((p.numPoints(),p.numProperties()))  
+        properties =
+    np.array(pc.properties).reshape((p.numPoints(),p.numProperties()))  
 
     (Or use the convenience functions in :mod:`klampt.io.numpy_convert`)  
 
@@ -1475,10 +1476,11 @@ class GeometricPrimitive(_object):
 
     Attributes:  
 
-    type (str): Can be "Point", "Sphere", "Segment", "Triangle",
-    "Polygon", "AABB", and "Box". Semi-supported types include "Ellipsoid",
-    and "Cylinder". properties (SWIG vector): a list of parameters defining the
-    primitive. The interpretation is type-specific.  
+        type (str): Can be "Point", "Sphere", "Segment", "Triangle",
+            "Polygon", "AABB", and "Box".  Semi-supported types include
+            "Ellipsoid", and "Cylinder".
+        properties (SWIG vector): a list of parameters defining the
+            primitive. The interpretation is type-specific.  
 
     C++ includes: geometry.h
 
@@ -1928,42 +1930,86 @@ class Geometry3D(_object):
     """
 
 
-    A three-D geometry. Can either be a reference to a world item's geometry, in
-    which case modifiers change the world item's geometry, or it can be a standalone
-    geometry.  
+    The three-D geometry container used throughout Klampt.  
 
     There are five currently supported types of geometry:  
 
-    *   primitives (GeometricPrimitive)  
-    *   triangle meshes (TriangleMesh)  
-    *   point clouds (PointCloud)  
-    *   volumetric grids (VolumeGrid)  
-    *   groups (Group)  
-    *   convex hulls (ConvexHull)  
+    *   primitives (:class:`GeometricPrimitive`)  
+    *   triangle meshes (:class:`TriangleMesh`)  
+    *   point clouds (:class:`PointCloud`)  
+    *   volumetric grids (:class:`VolumeGrid`)  
+    *   groups ("Group" type)  
+    *   convex hulls (:class:`ConvexHull`)  
 
     This class acts as a uniform container of all of these types.  
 
+    There are two modes in which a Geometry3D can be used. It can be a standalone
+    geometry, which means it is a container of geometry data, or it can be a
+    reference to a world item's geometry. For references, modifiers change the world
+    item's geometry.  
+
+    **Current transform**  
+
     Each geometry stores a "current" transform, which is automatically updated for
-    world items' geometries. The proximity queries are performed with respect to the
-    transformed geometries (note the underlying geometry is not changed, which could
-    be computationally expensive. The query is performed, however, as though they
-    were).  
+    world items' geometries. Proximity queries are then performed *with respect to
+    the transformed geometries*. Crucially, the underlying geometry is not changed,
+    because that could be computationally expensive.  
 
-    If you want to set a world item's geometry to be equal to a standalone geometry,
-    use the set(rhs) function rather than the assignment (=) operator.  
+    **Creating / modifying the geometry**  
 
-    Modifiers include any setX() functions, translate(), and transform().  
+    Use the constructor, the :meth:`set`, or the set[TYPE]() methods to completely
+    change the geometry's data.  
 
-    Proximity queries include collides(), withinDistance(), distance(),
-    closestPoint(), and rayCast(). For some geometry types (TriangleMesh,
-    PointCloud), the first time you perform a query, some collision detection data
-    structures will be initialized. This preprocessing step can take some time for
-    complex geometries.  
+    Note: if you want to set a world item's geometry to be equal to a standalone
+    geometry, use the set(rhs) function rather than the assignment (=) operator.  
+
+    Modifiers include:  
+
+    *   :meth:`setCurrentTransform`: updates the current transform. (This call is
+        very fast.)  
+    *   :meth:`translate`, :meth:`scale`, :meth:`rotate`, and :meth:`transform`
+        transform the underlying geometry. Any collision data structures will be
+        recomputed after transformation.  
+    *   :meth:`loadFile`: load from OFF, OBJ, STL, PCD, etc. Also supports native
+        Klamp't types .geom and .vol.  
+
+    .. note:: Avoid the use of translate, rotate, and transform to represent object
+    movement. Use setCurrentTransform instead.  
+
+    **Proximity queries**  
+
+    *   :meth:`collides`: boolean collision query.  
+    *   :meth:`withinDistance`: boolean proximity query.  
+    *   :meth:`distance` and :meth:`distance_ext`: numeric-valued distance query.
+        The distance may be negative to indicate signed distance, available for
+        certain geometry types. Also returns closest points for certain geometry
+        types.  
+    *   :meth:`distance_point` and :meth:`distance_point_ext`: numeric valued
+        distance-to-point queries.  
+    *   :meth:`contacts`: estimates the contact region between two objects.  
+    *   :meth:`rayCast` and :meth:`rayCast_ext`: ray-cast queries.  
+
+    For most geometry types (TriangleMesh, PointCloud, ConvexHull), the first time
+    you perform a query, some collision detection data structures will be
+    initialized. This preprocessing step can take some time for complex geometries.  
+
+    **Collision margins**  
 
     Each object also has a "collision margin" which may virtually fatten the
     object, as far as proximity queries are concerned. This is useful for setting
-    collision avoidance margins in motion planning. By default it is zero. (Note
-    that this is NOT the same thing as simulation body collision padding!)  
+    collision avoidance margins in motion planning. Use the
+    :meth:`setCollisionMargin` and :meth:`getCollisionMargin` methods to access the
+    margin. By default the margin is zero.  
+
+    .. note:: The geometry margin is NOT the same thing as simulation body collision
+    padding! All proximity queries are affected by the collision padding, inside or
+    outside of simulation.  
+
+    **Conversions**  
+
+    Many geometry types can be converted to and from one another using the
+    :meth:`convert` method. This can also be used to remesh TriangleMesh objects and
+    PointCloud objects.  
 
     C++ includes: geometry.h
 
@@ -1983,7 +2029,7 @@ class Geometry3D(_object):
 
 
         Args:
-            arg2 (:class:`~klampt.VolumeGrid` or :obj:`ConvexHull` or :class:`~klampt.TriangleMesh` or :class:`~klampt.Geometry3D` or :class:`~klampt.PointCloud` or :class:`~klampt.GeometricPrimitive`, optional): 
+            arg2 (:obj:`ConvexHull` or :class:`~klampt.Geometry3D` or :class:`~klampt.TriangleMesh` or :class:`~klampt.VolumeGrid` or :class:`~klampt.PointCloud` or :class:`~klampt.GeometricPrimitive`, optional): 
         """
         this = _robotsim.new_Geometry3D(*args)
         try:
@@ -2855,7 +2901,7 @@ class Appearance(_object):
         If 3 or 4 arguments are given, changes the object color.  
 
         If 5 arguments are given, changes the color of the given feature. feature can be
-        ALL, VERTICES, EDGES, or FACES.  
+        ALL, VERTICES, EDGES, FACES, EMISSIVE, or SPECULAR.  
 
         """
         return _robotsim.Appearance_setColor(self, *args)
@@ -2863,6 +2909,8 @@ class Appearance(_object):
 
     def getColor(self, *args):
         """
+        Gets color of the object or a feature.  
+
         getColor ()
 
         getColor (feature)
@@ -2870,6 +2918,12 @@ class Appearance(_object):
 
         Args:
             feature (int, optional): 
+
+        If 0 arguments are given, retrieves the main object color.  
+
+        If 1 arguments are given, returns the color of the given feature. feature.
+        feature can be ALL, VERTICES, EDGES, FACES, EMISSIVE, or SPECULAR.  
+
         """
         return _robotsim.Appearance_getColor(self, *args)
 
@@ -6078,7 +6132,7 @@ class WorldModel(_object):
 
 
         Args:
-            robot (str or int): 
+            robot (int or str): 
             index (int, optional): 
             name (str, optional): 
 
@@ -6234,7 +6288,7 @@ class WorldModel(_object):
             terrain (:obj:`TerrainModel`, optional): 
 
         Returns:
-            (:obj:`TerrainModel` or :class:`~klampt.RigidObjectModel` or :class:`~klampt.RobotModel`):
+            (:obj:`TerrainModel` or :class:`~klampt.RobotModel` or :class:`~klampt.RigidObjectModel`):
         """
         return _robotsim.WorldModel_add(self, *args)
 
@@ -6964,7 +7018,7 @@ class IKSolver(_object):
             tol (float, optional): 
 
         Returns:
-            (:obj:`object` or bool):
+            (bool or :obj:`object`):
         """
         return _robotsim.IKSolver_solve(self, *args)
 
@@ -7328,7 +7382,7 @@ class SimRobotSensor(_object):
 
 
         Args:
-            robot (:class:`~klampt.SimRobotController` or :class:`~klampt.RobotModel`): 
+            robot (:class:`~klampt.RobotModel` or :class:`~klampt.SimRobotController`): 
             sensor (:obj:`SensorBase`, optional): 
             name (str, optional): 
             type (str, optional): 

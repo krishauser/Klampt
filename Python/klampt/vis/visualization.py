@@ -27,8 +27,8 @@ Main features include:
     - HTML loses plugins, resource editing, custom drawing, and advanced 
       windowing functionality.
 
-The resource editing functionality in the klampt.io.resource module (based on 
-klampt.vis.editors) use this module as well.
+The resource editing functionality in the :mod:`klampt.io.resource` module
+(which uses the widgets in :mod:`klampt.vis.editors`) use this module as well.
 
 
 INSTRUCTIONS
@@ -326,36 +326,36 @@ To turn a Simulator into a WebGL animation, use this code::
 WINDOWING API
 --------------
 
-- def debug(*args,**kwargs): a super easy way to visualize Klamp't items.
-- def init(backends=None): initializes the visualization.  Can configure here
+- :func:`debug`: a super easy way to visualize Klamp't items.
+- :func:`init`: initializes the visualization.  Can configure here
   what backend(s) to use.
-- def createWindow(title): creates a new visualization window and returns an
+- :func:`createWindow`: creates a new visualization window and returns an
   integer identifier.
-- def setWindow(id): sets the active window for all subsequent calls.  ID 0 is
+- :func:`setWindow`: sets the active window for all subsequent calls.  ID 0 is
   the default visualization window.
-- def getWindow(): gets the active window ID.
-- def nativeWindow(): returns the current window object used by the backend.
-- def setWindowTitle(title): sets the title of the visualization window.
-- def getWindowTitle(): returns the title of the visualization window.
-- def resizeWindow(w,h): resizes the window.  For OpenGL, this can be done
+- :func:`getWindow`: gets the active window ID.
+- :func:`nativeWindow`: returns the current window object used by the backend.
+- :func:`setWindowTitle`: sets the title of the visualization window.
+- :func:`getWindowTitle`: returns the title of the visualization window.
+- :func:`resizeWindow`: resizes the window.  For OpenGL, this can be done
   after the window is shown. Otherwise, it must take place before showing.
-- def scene(): returns the current :class:`VisualizationScene`
-- def setPlugin(plugin=None): sets the current plugin (a
+- :func:`scene`: returns the current :class:`VisualizationScene`
+- :func:`setPlugin`: sets the current plugin (a
   :class:`~klampt.vis.glinterface.GLPluginInterface` instance).  This plugin
   will now capture input from the visualization and can override any of the
   default behavior of the visualizer. Set plugin=None if you want to return to
   the default visualization.
-- def pushPlugin(plugin): adds a new plugin (e.g., to capture input) on top of
+- :func:`pushPlugin`: adds a new plugin (e.g., to capture input) on top of
   the old one.
-- def splitView(plugin=None): adds a second scene / viewport to the current
+- :func:`splitView`: adds a second scene / viewport to the current
   window. If a plugin is provided (a :class:`GLPluginInterface` instance) then
   the new view is set to use this plugin.
-- def run([plugin]): pops up a dialog and then kills the program afterwards.
-- def kill(): kills all previously launched visualizations and terminates the
+- :func:`run`: pops up a dialog and then kills the program afterwards.
+- :func:`kill`: kills all previously launched visualizations and terminates the
   visualization thread. Afterwards, you may not be able to start new windows.
   Call this to cleanly quit.
-- def multithreaded(): returns true if multithreading is available.
-- def loop(setup=None,callback=None,cleanup=None): Runs the visualization
+- :func:`multithreaded`: returns true if multithreading is available.
+- :func:`loop`: Runs the visualization
   thread inline with the main thread.  The setup() function is called at the
   start, the callback() function is run every time the event thread is idle,
   and the cleanup() function is called on termination.
@@ -364,123 +364,170 @@ WINDOWING API
   Mac, so the ``loop`` function must be used rather than ``show``/``spin``.
 
   NOTE FOR GLUT USERS: this may only be run once.
-- def dialog(): pops up a dialog box (does not return to calling thread until
+- :func:`dialog`: pops up a dialog box (does not return to calling thread until
   closed).  
-- def show(display=True): shows/hides a visualization window.  If not called 
+- :func:`show`: shows/hides a visualization window.  If not called 
   from the visualization loop, a new visualization thread is run in parallel
   with the calling script. 
-- def spin(duration): shows the visualization window for the desired amount
+- :func:`spin`: shows the visualization window for the desired amount
   of time before returning, or until the user closes the window.
-- def shown(): returns true if the window is shown.
-- def lock(): locks the visualization world for editing.  The visualization will
-  be paused until unlock() is called.
-- def unlock(): unlocks the visualization world.  Must only be called once
+- :func:`shown`: returns true if the window is shown.
+- :func:`lock`: locks the visualization scene for editing.  The visualization 
+  will be paused until unlock() is called.
+- :func:`unlock` unlocks the visualization world.  Must only be called once
   after every lock().
-- def update(): manually triggers a redraw of the current scene.
-- def threadCall(func): Call `func` inside the visualization thread. This is 
-  useful for some odd calls that are incompatible with being run outside the Qt
-  or OpenGL thread.
-- def customUI(make_func): launches a user-defined UI window by calling
-  `make_func(gl_backend)` in the visualization thread.  This can be used to
-  build custom editors and windows that are compatible with other
-  visualization functionality.  Here make_func takes in an object of type
-  QtGLWidget, instantiated for the current plugin, and returns either a
-  QDialog or QMainWindow.  If a QDialog is returned, you should launch the
-  window via dialog(). Otherwise, you should launch the window via show().
+- :func:`update`: manually triggers a redraw of the current scene.
+- :func:`threadCall`: Call a user-defined function inside the visualization
+  thread. Advanced users may wish to inject calls that are incompatible with 
+  being run outside the Qt or OpenGL thread.
+- :func:`customUI`: launches a user-defined UI window with the OpenGL window
+  embedded into it (Qt only).
 
 SCENE MODIFICATION API
 ------------------------
 
-The following VisualizationScene methods are also added to the klampt.vis
-namespace and operate on the current scene (as returned from :func:`scene`).
-If you are calling these methods from an external loop (as opposed to inside
-a plugin) be sure to lock/unlock the visualization before/after calling these
-methods.
+The following methods operate on the current scene (as returned from
+:func:`scene`). 
 
-Scene management functions:
+Objects accepted by :func:`add` include:
 
-- def add(name,item,keepAppearance=False,**kwargs): adds an item to the 
+- text (str)
+- Vector3 (3-list)
+- Matrix3 (:mod:`klampt.math.so3` item)
+- RigidTransform (:mod:`klampt.math.se3` item)
+- Config (n-list): n must match the number of links of a RobotModel in "world"
+- Configs (list of n-lists)
+- :class:`Trajectory` and its subclasses
+- polylines (use :class:`Trajectory` type)
+- :class:`WorldModel`
+- :class:`RobotModel`
+- :class:`RobotModelLink`
+- :class:`RigidObjectModel`
+- :class:`TerrainModel`
+- :class:`Geometry3D`
+- :class:`GeometricPrimitive`
+- :class:`PointCloud`
+- :class:`TriangleMesh`
+- :class:`Simulator`
+- :class:`ContactPoint`
+- objects from the :mod:`~klampt.model.coordinates` module.
+
+See func:`setAttribute` for a list of attributes that can be used to customize
+an object's appearance. Common attributes include ``color``, ``hide_label``,
+``type``, ``position`` (for text) and ``size`` (for points).
+
+In OpenGL modes and IPython mode, many objects can be edited using the
+:func:`edit` function.  In OpenGL, this will provide a visual editing widget,
+while in IPython this will pop up IPython widgets.
+
+If you are modifying the internal data of an object in an external loop
+(as opposed to inside a plugin) be sure to call :func:`lock`/:func:`unlock` 
+before/after doing so to prevent the visualization from accessing the
+object's data .
+
+Scene management functions
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- :func:`add`: adds an item to the 
   visualization.  name is a unique identifier.  If an item with the same name
-  already exists, it will no longer be shown.
-- def clear(): clears the visualization world.
-- def listItems(): prints out all names of visualization objects
-- def listItems(name): prints out all names of visualization objects under the
-  given name
-- def getItemName(object): retrieves the name / path of a given object in the
+  already exists, it will no longer be shown.  Keyword attributes can be
+  given to customize the appearance of the object (see :func:`setAttribute`.)
+- :func:`clear`: clears the visualization world.
+- :func:`listItems`: prints out all names of visualization objects in the scene
+  or under a given object
+- :func:`getItemName`: retrieves the name / path of a given object in the
   scene, or returns None if the object doesnt exist.
-- def dirty(item_name='all'): marks the given item as dirty and recreates the
-  OpenGL display lists.  You may need to call this if you modify an item's 
-  geometry, for example.
-- def remove(name): removes an item from the visualization.
-- def setItemConfig(name,vector): sets the configuration of a named item.
-- def getItemConfig(name): returns the configuration of a named item.
-- def hide(name,hidden=True): hides/unhides an item.  The item is not removed,
-  it just becomes invisible.
-- def edit(name,doedit=True): turns on/off visual editing of some item.  Only 
-  points, transforms, coordinate.Point's, coordinate.Transform's, 
-  coordinate.Frame's, robots, and objects are currently accepted.
-- def hideLabel(name,hidden=True): hides/unhides an item's text label.
-- def setLabel(name,text): changes an item's text label from its name to a
-  custom string.
-- def setAppearance(name,appearance): changes the Appearance of an item.
-- def revertAppearance(name): restores the Appearance of an item
-- def setAttribute(name,attribute,value): sets an attribute of an item's
-  appearance.
-- def getAttribute(name,attribute): gets an attribute of an item's appearance.
-- def getAttributes(name): gets all relevant attributes of an item's
-  appearance.
-- def setColor(name,r,g,b,a=1.0): changes the color of an item.
-- def setDrawFunc(name,func): sets a custom OpenGL drawing function for an
-  item.
-- def animate(name,animation,speed=1.0,endBehavior='loop'): Sends an animation
-  to the object. May be a Trajectory or a list of configurations.  Works with 
-  points, so3 elements, se3 elements, rigid objects, or robots. 
-- def pauseAnimation(paused=True): Turns animation on/off.
-- def stepAnimation(amount): Moves forward the animation time by the given 
+- :func:`dirty`: marks the given item as dirty and recreates the OpenGL display
+  lists.  You may need to call this if you modify an item's  geometry, for example.
+- :func:`remove`: removes an item from the visualization.
+- :func:`setItemConfig`: sets the configuration of a named item.
+- :func:`getItemConfig`: returns the configuration of a named item.
+- :func:`hide`: hides/unhides an item.  The item is not removed, it just
+  becomes invisible.
+- :func:`edit`: turns on/off visual editing of some item.  Points, transforms,
+  ``coordinates.Point``, ``coordinates.Transform``, ``coordinates.Frame``,
+  :class:`RobotModel`, and :class:`RigidObjectModel` are currently accepted.
+- :func:`hideLabel`: hides/unhides an item's text label.
+- :func:`setLabel`: changes an item's text label from its name to a custom
+  string.
+- :func:`setAppearance`: changes the Appearance of an item.
+- :func:`revertAppearance`: restores the Appearance of an item
+- :func:`setAttribute`: sets an attribute to change an item's appearance.
+- :func:`getAttribute`: gets an attribute of an item's appearance.
+- :func:`getAttributes`: gets all relevant attributes of an item's appearance.
+- :func:`setColor`: changes the color of an item.
+- :func:`setDrawFunc`: sets a custom OpenGL drawing function for an item.
+
+
+Animation functions
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- :func:`animate` Starts an animation on an item. The animation be a
+  :class:`Trajectory` or a list of configurations.  Works with points, so3
+  elements, se3 elements, rigid objects, or robots. 
+- :func:`pauseAnimation`: Turns animation on/off.
+- :func:`stepAnimation`: Moves forward the animation time by the given 
   amount, in seconds.
-- def animationTime(newtime=None): Gets/sets the current animation time
-- def addText(name,text,position=None,**kwargs): adds text to the visualizer.
-- def clearText(): clears all previously added text.
-- def addPlot(name): creates a new empty plot.
-- def addPlotItem(name,itemname): adds a visualization item to a plot.
-- def logPlot(name,itemname,value): logs a custom visualization item to a plot
-- def logPlotEvent(name,eventname,color=None): logs an event on the plot.
-- def hidePlotItem(name,itemname,hidden=True): hides an item in the plot. 
-- def setPlotDuration(name,time): sets the plot duration.
-- def setPlotRange(name,vmin,vmax): sets the y range of a plot.
-- def setPlotPosition(name,x,y): sets the upper left position of the plot on
-  the screen.
-- def setPlotSize(name,w,h): sets the width and height of the plot.
-- def savePlot(name,fn): saves a plot to a CSV (extension .csv) or Trajectory 
+- :func:`animationTime`: Gets/sets the current animation time
+
+Text and plots
+~~~~~~~~~~~~~~~~
+
+Like other items in the visualization scene, text and plots are referred to by
+string identifiers. 
+
+Text is usually attached to 2D pixel coordinates, but in OpenGL mode can also
+be attached to 3D points.  Use the ``position`` attribute to control where the
+text is located and the ``size`` attribute to control its size.
+
+Plots are added to the scene and then items are added to the plot.  The
+configuration of a visualization item is then shown as a live display (OpenGL).
+You may also log custom numeric data with :func:`logPlot` and event data using
+:func:`logPlotEvent`.
+
+- :func:`addText`: adds text to the visualizer.
+- :func:`clearText`: clears all previously added text.
+- :func:`addPlot`: creates a new empty plot.
+- :func:`addPlotItem`: adds a visualization item to a plot.
+- :func:`logPlot`: logs a custom visualization item to a plot
+- :func:`logPlotEvent`: logs an event on the plot.
+- :func:`hidePlotItem`: hides an item in the plot. 
+- :func:`setPlotDuration`: sets the plot duration.
+- :func:`setPlotRange`: sets the y range of a plot.
+- :func:`setPlotPosition`: sets the upper left position of the plot on the screen.
+- :func:`setPlotSize`: sets the width and height of the plot.
+- :func:`savePlot`: saves a plot to a CSV (extension .csv) or Trajectory 
   (extension .traj) file.
 
-Global appearance / camera control functions:
+Global appearance / camera control functions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-- def getViewport(): Returns the GLViewport for the currently active view.
-- def setViewport(viewport): Sets the GLViewport for the currently active
-  scene.  (This is also used to resize windows.)
-- def setBackgroundColor(r,g,b,a=1): Sets the background color for the active
+- :func:`getViewport`: Returns the :class:`GLViewport` for the currently active
   view.
-- def autoFitCamera(zoom=True,rotate=True,scale=1.0): Automatically fits the 
-  camera to all objects in the visualization.  A scale > 1 magnifies the zoom.
-- def followCamera(target,translate=True,rotate=False,center=False): Sets the 
-  camera to follow a target.
-- def saveJsonConfig() / saveJsonConfig(fn): Saves the configuration to a JSON
-  object or JSON file.
-- def loadJsonConfig(jsonObj) / loadJsonConfig(fn): Loads the configuration 
-  from a JSON object or JSON file.
-- def screenshot(format='auto',want_depth=False): returns a screenshot of the
-  scene. 
-- def screenshotCallback(fn,format='auto',want_depth=False): sets a callback 
-  that will receive a screenshot of the scene after rendering is done.
+- :func:`setViewport`: Sets the :class:`GLViewport` for the currently active
+  scene.  (This may also be used to resize windows.)
+- :func:`setBackgroundColor`: Sets the background color for the active
+  view.
+- :func:`autoFitCamera`: Automatically fits the camera to all objects in the
+  visualization.  A scale > 1 magnifies the zoom.
+- :func:`followCamera`: Sets the camera to follow a target.
+- :func:`saveJsonConfig`: Saves the configuration to a JSON object or JSON
+  file.
+- :func:`loadJsonConfig`: Loads the configuration from a JSON object or JSON
+  file.
+- :func:`screenshot`: returns a screenshot of the scene.  Can retrieve depth,
+  as well.
+- :func:`screenshotCallback`: sets a callback that will receive a screenshot
+  of the scene after rendering is done.
 
-Utility functions:
+Utility functions
+~~~~~~~~~~~~~~~~~
 
-- def objectToVisType(object,world=None): Auto-determines the type of object
-used
-  that will be interpreted 
-- def autoFitViewport(viewport,objects,zoom=True,rotate=True): Automatically 
-  fits a viewport's camera to see all the given objects.
+- :func:`objectToVisType` Auto-determines a type of object compatible with the
+  visualizer.
+- :func:`autoFitViewport`: Automatically fits a :class:`GLViewport` to see all
+  the given objects.
+
 
 NAMING CONVENTION
 -----------------
@@ -506,6 +553,10 @@ e.g.::
 
     robot = world.robot(0)
     vis.setColor(vis.getItemName(robot),0,0,1)
+
+If there's a Simulator instance added to the scene under the name 'sim' or
+'simulator', the animation timing for Qt movie saving  and HTML animations
+will follow the simulation time rather than wall clock time.
 
 """
 
@@ -987,15 +1038,18 @@ def shown():
     return res
 
 def customUI(func):
-    """Tells the next created window/dialog to use a custom UI function. 
+    """Tells the next created window/dialog to use a custom UI function. Only
+    available in PyQT mode.
+
+    This is used to build custom editors and windows that are compatible with
+    other UI functionality.  
 
     Args:
         func (function): a 1-argument function that takes a configured Klamp't 
             QtWindow as its argument and returns a QDialog, QMainWindow, or
             QWidget.
 
-            (Could also be used with GLUT, but what would you do with a
-            GLUTWindow?)
+    (Could also be used with GLUT, but what would you do with a GLUTWindow?)
     """
     global _globalLock,_window_manager
     _init()
@@ -1003,11 +1057,12 @@ def customUI(func):
         _window_manager.set_custom_ui(func)
 
 def threadCall(func):
-    """Call `func` inside the visualization thread. This is 
-    useful for some odd calls that are incompatible with being run outside the Qt
-    or OpenGL thread.
+    """Call `func` inside the visualization thread. This is useful for some
+    odd calls that are incompatible with being run outside the Qt or OpenGL
+    thread.
 
-    Most often used with OpenGL camera simulation.
+    Possible use cases include performing extra OpenGL draws for camera
+    simulation.
     """
     global _globalLock,_window_manager
     with _globalLock:
@@ -1148,9 +1203,9 @@ def edit(name,doedit=True):
     - RigidTransform (se3 object)
     - :class:`~klampt.robotsim.RobotModel`
     - :class:`~klampt.robotsim.RigidObjectModel`
-    - :class:`~klampt.model.coordinate.Point`
-    - :class:`~klampt.model.coordinate.Transform`
-    - :class:`~klampt.model.coordinate.Frame`
+    - :class:`~klampt.model.coordinates.Point`
+    - :class:`~klampt.model.coordinates.Transform`
+    - :class:`~klampt.model.coordinates.Frame`
 
     In IPython mode, currently accepts items of type:
 
@@ -1159,9 +1214,9 @@ def edit(name,doedit=True):
     - RigidTransform (se3 objects)
     - :class:`~klampt.robotsim.RobotModel`
     - :class:`~klampt.robotsim.RigidObjectModel`
-    - :class:`~klampt.model.coordinate.Point`
-    - :class:`~klampt.model.coordinate.Transform`
-    - :class:`~klampt.model.coordinate.Frame`
+    - :class:`~klampt.model.coordinates.Point`
+    - :class:`~klampt.model.coordinates.Transform`
+    - :class:`~klampt.model.coordinates.Frame`
 
     """
     scene().edit(name,doedit)
@@ -1189,18 +1244,18 @@ def setAttribute(name,attr,value):
     - 'width': the width of axes and trajectory curves
     - 'duration': the duration of a plot
     - 'pointSize': for a trajectory, the size of points (default None, set to 0
-       to disable drawing points)
+      to disable drawing points)
     - 'pointColor': for a trajectory, the size of points (default None)
     - 'endeffectors': for a RobotTrajectory, the list of end effectors to plot
-       (default the last link).
+      (default the last link).
     - 'maxConfigs': for a Configs resource, the maximum number of drawn
-       configurations (default 10)
-    - 'fancy': for RigidTransform objects, whether the axes are drawn with boxes
-       or lines (default False)
+      configurations (default 10)
+    - 'fancy': for RigidTransform objects, whether the axes are drawn with
+      boxes or lines (default False)
     - 'type': for ambiguous items, like a 3-item list when the robot has 3
-       links, specifies the type to be used.  For example, 'Config' draws the
-       item as a robot configuration, while 'Vector3' or 'Point' draws it as a
-       point.
+      links, specifies the type to be used.  For example, 'Config' draws the
+      item as a robot configuration, while 'Vector3' or 'Point' draws it as a
+      point.
     - 'label': a replacement label (str)
     - 'hide_label': if True, the label will be hidden
 

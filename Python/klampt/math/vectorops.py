@@ -92,6 +92,7 @@ def norm_Linf(a):
     return max(abs(ai) for ai in a)
 
 def distanceSquared(a,b):
+    """Squared L2 distance"""
     if len(a)!=len(b): raise RuntimeError('Vector dimensions not equal')
     sum=0
     for i in range(len(a)):
@@ -99,6 +100,7 @@ def distanceSquared(a,b):
     return sum
 
 def distance(a,b):
+    """L2 distance"""
     return math.sqrt(distanceSquared(a,b));
 
 def cross(a,b):

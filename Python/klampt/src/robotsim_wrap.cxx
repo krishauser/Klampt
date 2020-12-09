@@ -62282,7 +62282,7 @@ static PyMethodDef SwigMethods[] = {
 		"If 3 or 4 arguments are given, changes the object color.  \n"
 		"\n"
 		"If 5 arguments are given, changes the color of the given feature. feature can be\n"
-		"ALL, VERTICES, EDGES, or FACES.  \n"
+		"ALL, VERTICES, EDGES, FACES, EMISSIVE, or SPECULAR.  \n"
 		"\n"
 		""},
 	 { (char *)"Appearance_getColor", _wrap_Appearance_getColor, METH_VARARGS, (char *)"\n"
@@ -62290,6 +62290,13 @@ static PyMethodDef SwigMethods[] = {
 		"Appearance_getColor(Appearance self, int feature)\n"
 		"\n"
 		"\n"
+		"\n"
+		"Gets color of the object or a feature.  \n"
+		"\n"
+		"If 0 arguments are given, retrieves the main object color.  \n"
+		"\n"
+		"If 1 arguments are given, returns the color of the given feature. feature.\n"
+		"feature can be ALL, VERTICES, EDGES, FACES, EMISSIVE, or SPECULAR.  \n"
 		"\n"
 		""},
 	 { (char *)"Appearance_setColors", _wrap_Appearance_setColors, METH_VARARGS, (char *)"\n"

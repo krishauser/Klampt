@@ -464,6 +464,7 @@ class QtWindowManager(_ThreadedWindowManager):
                 self.threadCall(do_screenshot_callback)
                 return
             res = self._frontend.get_screen(format,want_depth)
+            self._frontend.rendered = False  #don't do this callback until another frame is drawn
             if want_depth:
                 fn(*res)
             else:
