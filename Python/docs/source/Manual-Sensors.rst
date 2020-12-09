@@ -218,8 +218,9 @@ Settings are:
 -  ``xfov``, ``yfov`` (float): the x and y field of view, in radians.
 -  ``zmin``, ``zmax`` (float): minimum and maximum range of the depth
    sensor.
--  ``T`` (RigidTransform): the camera's transform on the designated link.  Z is
-   forward, X is right, and Y is down.
+-  ``zresolution`` (float): the resolution of the depth sensor. 0 indicates no quantization.
+-  ``zvarianceLinear``, ``zvarianceConstant`` (float): the simulated noise of the depth sensor has variance ``zvarianceLinear * depth + zvarianceConstant``
+-  ``Tsensor`` (RigidTransform): the camera's transform on the designated link.  Z is forward, X is right, and Y is down.
    Use :func:`~klampt.model.sensing.set_sensor_xform` and
    :func:`~klampt.model.sensing.get_sensor_xform` to easily set and get this value.
 
