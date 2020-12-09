@@ -56,8 +56,13 @@ General
    library.
 -  Practice *self-documenting code*. Name files, functions, classes, and
    variables descriptively. Comment as you go.
--  Use *visual debugging* to debug your algorithms. For many objects, you
-   may call ``klampt.io.resource.edit()`` to pop up a window for editing.
+-  Use *visual debugging* to debug your algorithms. :func:`klampt.vis.debug`
+   is your friend.  Also, for many objects, you may call :func:`klampt.io.resource.edit`
+   to pop up a window for editing.
+-  *Save to disk*. Most Klamp't objects can be saved / loaded to disk using
+   the functions in the :mod:`klampt.io.loader` module, or better yet,
+   :func:`klampt.io.resource.set` and :func:`klampt.io.resource.get`.  The
+   files can later be inspected using ``klampt_browser`` and other tools.
 -  *Think statefully*. Decompose your programs into algorithms, state,
    parameters, and data. State is what the algorithm changes during its
    running. Parameters are values that are given as input to the
@@ -76,8 +81,6 @@ The Python API is much cleaner and easier to work with than the C++
 API.  However, it does not contain all of the functionality of the C++ API.
 Missing features include:
 
--  Advanced IK constraint types
--  Trajectory optimization
 -  Some contact processing algorithms
 -  Robot reachability bound determination
 -  Advanced force/torque balance solvers

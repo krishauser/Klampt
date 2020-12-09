@@ -2029,7 +2029,7 @@ class Geometry3D(_object):
 
 
         Args:
-            arg2 (:obj:`ConvexHull` or :class:`~klampt.Geometry3D` or :class:`~klampt.TriangleMesh` or :class:`~klampt.VolumeGrid` or :class:`~klampt.PointCloud` or :class:`~klampt.GeometricPrimitive`, optional): 
+            arg2 (:class:`~klampt.PointCloud` or :class:`~klampt.TriangleMesh` or :class:`~klampt.GeometricPrimitive` or :obj:`ConvexHull` or :class:`~klampt.Geometry3D` or :class:`~klampt.VolumeGrid`, optional): 
         """
         this = _robotsim.new_Geometry3D(*args)
         try:
@@ -6132,7 +6132,7 @@ class WorldModel(_object):
 
 
         Args:
-            robot (int or str): 
+            robot (str or int): 
             index (int, optional): 
             name (str, optional): 
 
@@ -6288,7 +6288,7 @@ class WorldModel(_object):
             terrain (:obj:`TerrainModel`, optional): 
 
         Returns:
-            (:obj:`TerrainModel` or :class:`~klampt.RobotModel` or :class:`~klampt.RigidObjectModel`):
+            (:class:`~klampt.RigidObjectModel` or :obj:`TerrainModel` or :class:`~klampt.RobotModel`):
         """
         return _robotsim.WorldModel_add(self, *args)
 
@@ -7018,7 +7018,7 @@ class IKSolver(_object):
             tol (float, optional): 
 
         Returns:
-            (bool or :obj:`object`):
+            (:obj:`object` or bool):
         """
         return _robotsim.IKSolver_solve(self, *args)
 
@@ -7129,7 +7129,7 @@ class GeneralizedIKObjective(_object):
 
 
         Args:
-            obj (:obj:`GeneralizedIKObjective` or :class:`~klampt.RigidObjectModel`, optional): 
+            obj (:class:`~klampt.RigidObjectModel` or :obj:`GeneralizedIKObjective`, optional): 
             link (:class:`~klampt.RobotModelLink`, optional): 
             link2 (:class:`~klampt.RobotModelLink`, optional): 
             obj2 (:class:`~klampt.RigidObjectModel`, optional): 
@@ -7329,7 +7329,7 @@ def SampleTransform(*args):
 
 
     Args:
-        obj (:obj:`IKObjective` or :obj:`GeneralizedIKObjective`): 
+        obj (:obj:`GeneralizedIKObjective` or :obj:`IKObjective`): 
     """
     return _robotsim.SampleTransform(*args)
 class SimRobotSensor(_object):
@@ -7382,7 +7382,7 @@ class SimRobotSensor(_object):
 
 
         Args:
-            robot (:class:`~klampt.RobotModel` or :class:`~klampt.SimRobotController`): 
+            robot (:class:`~klampt.SimRobotController` or :class:`~klampt.RobotModel`): 
             sensor (:obj:`SensorBase`, optional): 
             name (str, optional): 
             type (str, optional): 
@@ -8744,7 +8744,7 @@ class Simulator(_object):
 
 
         Args:
-            robot (int or :class:`~klampt.RobotModel`): 
+            robot (:class:`~klampt.RobotModel` or int): 
 
         Returns:
             (:class:`~klampt.SimRobotController`):
