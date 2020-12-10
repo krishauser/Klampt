@@ -1,7 +1,7 @@
 from ..visualization import _WindowManager,_ThreadedWindowManager,_globalLock
 from .vis_gl import GLVisualizationFrontend,GLVisualizationPlugin,WindowInfo
 from .. import glinit,gldraw,glcommon
-from ...robotsim import WorldModel
+from ...robotsim import WorldModel,RobotModel
 import threading
 
 if not glinit.available('GLUT'):
@@ -16,9 +16,8 @@ import weakref
 class GLUTWindowManager(_ThreadedWindowManager):
     def __init__(self):
         self._frontend = GLUTVisualizationFrontend(None)
-        #a list of WorldModel's in the current window.  A world cannot be used in multiple simultaneous
+        #a list of WorldModel indices in the current window.  A world cannot be used in multiple simultaneous
         #windows in GLUT.  If a world is reused with a different window, its display lists will be refreshed.
-        #Note: must be proxies to allow for deletion via garbage collector
         self.current_worlds = []
         #list of WindowInfo's
         self.windows = []
@@ -48,7 +47,7 @@ class GLUTWindowManager(_ThreadedWindowManager):
             winfo.active_worlds = self.current_worlds[:]
         glinit._GLBackend.initialize("Klamp't visualization")
         winfo = self.windows[self.current_window]
-        print("GLUTWindowManager.run_app_thread: creating window with name",winfo.name)
+        print("GLUTWindowManager.run_app_thread: creating window with name",winfo.name,"and status",winfo.mode)
         w = glinit._GLBackend.createWindow(winfo.name)
         self._frontend.windowinfo = weakref.proxy(winfo)
         self._frontend.window_manager = weakref.proxy(self)
@@ -56,6 +55,7 @@ class GLUTWindowManager(_ThreadedWindowManager):
         w.setProgram(self._frontend)
         winfo.glwindow = w
         self.callback = callback
+        print("Windows",[winfo.name for winfo in self.windows])
         glinit._GLBackend.run()
         print("GLUTWindowManager.run_app_thread: Visualization thread closing...")
         self.cleanup()
@@ -107,9 +107,10 @@ class GLUTWindowManager(_ThreadedWindowManager):
             title = "Window "+str(len(self.windows))
         #make a new window
         self._frontend = GLUTVisualizationFrontend(None)
+        self._frontend.window_manager = weakref.proxy(self)
         self.windows.append(WindowInfo(title,self._frontend))
         self.window_title = title
-        print("GLUTWindowManager.createWindow: window title",self.window_title,self.windows[-1].name)
+        print("GLUTWindowManager.createWindow: window title",self.window_title,", id",len(self.windows)-1)
         self.current_worlds = []
         id = len(self.windows)-1
         self.current_window = id
@@ -127,8 +128,9 @@ class GLUTWindowManager(_ThreadedWindowManager):
         #refresh all worlds' display lists that were once active.
         for w in self.current_worlds:
             if w in self.windows[self.current_window].active_worlds:
-                print("klampt.vis.setWindow(): world",w().index,"becoming active in the new window",id)
-                self._refreshDisplayLists(w())
+                print("klampt.vis.setWindow(): world",w,"becoming active in the new window",id)
+                for item in self.windows[current_window].worldDisplayListItems[w]:
+                    self._refreshDisplayLists(item)
                 self.windows[self.current_window].active_worlds.remove(w)
         self.windows[id].active_worlds = self.current_worlds[:]
         self.current_window = id
@@ -233,7 +235,8 @@ class GLUTWindowManager(_ThreadedWindowManager):
         if self.multithreaded():
             print("#########################################")
             print("klampt.vis: Running multi-threaded dialog, waiting to complete...")
-            self._start_app_thread()
+            if not self.vis_thread_running:
+                self._start_app_thread()
             while w.mode == 'dialog':
                 time.sleep(0.1)
             print("klampt.vis: ... dialog done.")
@@ -283,30 +286,46 @@ class GLUTWindowManager(_ThreadedWindowManager):
             for i in range(item.numLinks()):
                 self._refreshDisplayLists(item.link(i))
         elif hasattr(item,'appearance'):
-            self.item.appearance().refresh(False)
+            item.appearance().refresh(False)
 
     def _checkWindowCurrent(self,item):
-        if isinstance(item,int):
-            if not all(w().index != item for w in self.current_worlds):
-                print("klampt.vis: item appears to be in a new world, but doesn't have a full WorldModel instance")
+        #print("Checking whether item",item,"is current in the context of window",self.current_window)
+        #print("Current worlds",self.current_worlds)
+        #print("Current window's active worlds",self.windows[self.current_window].active_worlds)
         if isinstance(item,WorldModel):
-            #print "Worlds active in current window",self.current_window,":",[w().index for w in self.current_worlds]
-            if all(item != w() for w in self.current_worlds):
+            if item.index not in self.current_worlds:
                 #PyQt interface allows sharing display lists but GLUT does not.
                 #refresh all worlds' display lists that will be shifted to the current window.
                 for i,win in enumerate(self.windows):
-                    #print "Window",i,"active worlds",[w().index for w in win.active_worlds]
-                    if any(item == w() for w in win.active_worlds):
+                    #print("Window",i,"active worlds",win.active_worlds)
+                    if item.index in win.active_worlds:
                         #GLUT SPECIFIC
                         print("klampt.vis: world",item.index,"was shown in a different window, now refreshing display lists")
                         self._refreshDisplayLists(item)
-                        win.active_worlds.remove(weakref.ref(item))
-                self.current_worlds.append(weakref.ref(item))
-                #print "klampt.vis: world added to the visualization's world (items:",[w().index for w in self.current_worlds],")"
+                        win.active_worlds.remove(item.index)
+                self.current_worlds.append(item.index)
+                self.windows[self.current_window].worldDisplayListItems[item.index].append(weakref.proxy(item))
+                #print("klampt.vis: world added to the visualization's world (items:",self.current_worlds,")")
             #else:
-            #    print "klampt.vis: world",item,"is already in the current window's world"
+            #    print("klampt.vis: world",item,"is already in the current window's world")
         elif hasattr(item,'world'):
-            self._checkWindowCurrent(item.world)
+            if isinstance(item.world,WorldModel):
+                return self._checkWindowCurrent(item.world)
+            if isinstance(item.world,int):
+                if item.world < 0:
+                    return
+                if item.world not in self.current_worlds:
+                    for i,win in enumerate(self.windows):
+                        #print("Window",i,"active worlds",win.active_worlds)
+                        if item.world in win.active_worlds:
+                            #GLUT SPECIFIC
+                            print("klampt.vis: world",item.index,"was shown in a different window, now refreshing display lists")
+                            self._refreshDisplayLists(item)
+                            win.active_worlds.remove(item.world)
+                    self.current_worlds.append(item.world)
+                    self.windows[self.current_window].worldDisplayListItems[item.index].append(weakref.proxy(item))
+                    #print("klampt.vis: world added to the visualization's world (items:",self.current_worlds,")")
+            
 
     def do_idle_checks(self):
         #print("GLUTWindowManager.idle checks")
@@ -320,7 +339,7 @@ class GLUTWindowManager(_ThreadedWindowManager):
             return
         for windex,winfo in enumerate(self.windows):
             #print(winfo.name,winfo.glwindow,winfo.mode)
-            if winfo.glwindow is None and winfo.mode == 'shown':
+            if winfo.glwindow is None and winfo.mode in ['shown','dialog']:
                 print("GLUTWindowManager: Launching window %d inside vis thread"%(windex,))
                 w = glinit._GLBackend.createWindow(winfo.name)
                 self._frontend.windowinfo = weakref.proxy(winfo)
@@ -331,20 +350,21 @@ class GLUTWindowManager(_ThreadedWindowManager):
                 w.initialize()
             if not winfo.frontend.hidden:
                 if winfo.mode == 'hidden':
-                    print("GLUTWindowManager: hiding window %d"%(windex,))
+                    print("GLUTWindowManager: hiding window %d (%s)"%(windex,winfo.name))
                     winfo.frontend.hidden = True
-                    glutSetWindow(winfo.glwindow.glutWindowID)
-                    glutHideWindow()
+                    if winfo.glwindow is not None:
+                        glutSetWindow(winfo.glwindow.glutWindowID)
+                        glutHideWindow()
             else:
                 #print("hidden, waiting...",self.windowinfo.mode)
                 if winfo.mode == 'shown':
-                    print("GLUTWindowManager: showing window %d"%(windex,))
+                    print("GLUTWindowManager: showing window %d (%s)"%(windex,winfo.name))
                     print("GLUT ID",winfo.glwindow.glutWindowID)
                     glutSetWindow(winfo.glwindow.glutWindowID)
                     glutShowWindow()
                     winfo.frontend.hidden = False
                 elif winfo.mode == 'dialog':
-                    print("GLUTWindowManager: showing window %d in dialog mode"%(windex,))
+                    print("GLUTWindowManager: showing window %d (%s) in dialog mode"%(windex,winfo.name))
                     print("GLUT ID",winfo.glwindow.glutWindowID)
                     winfo.frontend.inDialog = True
                     glutSetWindow(winfo.glwindow.glutWindowID)
@@ -469,6 +489,8 @@ class GLUTVisualizationFrontend(GLVisualizationFrontend):
                 return True
             c = c.decode('utf-8')
             for a in self.actions:
+                if a.key is None:
+                    continue
                 if a.key.startswith('Ctrl'):
                     if 'ctrl' in self.modifiers():
                         if a.key[5:] == c:

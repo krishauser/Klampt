@@ -2,6 +2,7 @@ from ..visualization import _globalLock,VisualizationScene
 from .. import glcommon
 import weakref
 import time
+from collections import defaultdict
 
 from OpenGL.GL import *
 
@@ -19,6 +20,7 @@ class WindowInfo:
         #needed for GLUT to work properly with multiple windows
         self.worlds = []
         self.active_worlds = []
+        self.worldDisplayListItems = defaultdict(list)
 
 
 class GLVisualizationFrontend(glcommon.GLPluginProgram):

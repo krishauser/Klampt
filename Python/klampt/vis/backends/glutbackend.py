@@ -132,7 +132,6 @@ class GLUTWindow:
 
     def reshape(self,w,h):
         """Resizes the GL window. Called by frontend."""
-        print("GLUTWindow.reshape(",w,h,")")
         self.width,self.height = w,h
         if self.initialized:
             glutReshapeWindow(self.width,self.height)

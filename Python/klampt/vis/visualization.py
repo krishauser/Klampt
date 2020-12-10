@@ -700,7 +700,7 @@ def debug(*args,**kwargs):
     """
     oldWindow = getWindow()
     if oldWindow is None:
-        oldWindow = createWindow()
+        oldWindow = 0
     myWindow = createWindow()
     nextName = None
     lastName = None
