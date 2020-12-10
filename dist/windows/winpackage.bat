@@ -5,9 +5,9 @@
 :: (assumes the zip command line tool is available.  See GnuWin32 zip.)
 
 :: configuration variables
-SET klamptversion=0.8.4
+SET klamptversion=0.8.5
 :: dependency libraries may be kept back to a prior version
-SET klamptdepversion=0.8.4
+SET klamptdepversion=0.8.5
 ::    this is used for Python build (VS 2015)
 SET VS90COMNTOOLS=%VS140COMNTOOLS%
 SET PYTHON27_32=D:\Python27\python.exe
@@ -65,8 +65,7 @@ SET errorlevel=0
 
 :: build Klamp't Python bindings
 copy /y %buildfolder%\Python\setup.py Python\
-pushd
-cd Python
+pushd Python
 for %%P in (%PYTHON_32_VERSIONS%) do (
     %%P setup.py build_ext
     if %errorlevel% neq 0 exit /b %errorlevel%
@@ -119,8 +118,7 @@ pushd Cpp\Dependencies
 for %%I in (assimp.dll glpk_4_61.dll glpk_4_61.lib glew32.dll glew32.lib KrisLibrary.lib ode_double.lib tinyxml_STL.lib libcurl.lib) do copy /Y %%I ..\..\%depfolder%
 if %errorlevel% neq 0 exit /b %errorlevel%
 popd
-pushd
-cd %depfolder%
+pushd %depfolder%
 zip ..\%depfolder%.zip *
 popd
 if %errorlevel% neq 0 exit /b %errorlevel%
