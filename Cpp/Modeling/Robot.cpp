@@ -1983,7 +1983,7 @@ void Robot::Mount(int link, const Robot& subchain, const RigidTransform& T,const
         stringstream ss1(properties["sensors"]);
         ss1 >> emaster;
         if(!ss1) {
-          printf("Robot::Mount: Warning, base robot's sensors couldn't be loaded %s\n",properties["sensors"].c_str());
+          LOG4CXX_WARN(GET_LOGGER(Robot),"Robot::Mount: Warning, base robot's sensors couldn't be loaded "<<properties["sensors"]);
           continue;
         }
         TiXmlElement* c = e.FirstChildElement();
@@ -2003,7 +2003,7 @@ void Robot::Mount(int link, const Robot& subchain, const RigidTransform& T,const
 
     }
     else if(i->first == "controller") {
-      printf("Robot::Mount: Warning, mounted robot will not preserve controller %s\n",i->second.c_str());
+      LOG4CXX_WARN(GET_LOGGER(Robot),"Robot::Mount: Warning, mounted robot will not preserve controller "<<i->second);
     }
   }
 }
@@ -3134,7 +3134,6 @@ bool Robot::LoadURDF(const char* fn)
       if(linkNode->link->visual && linkNode->link->visual->material) {
         urdf::Color c=linkNode->link->visual->material->color;
         this->geomManagers[link_index].SetUniqueAppearance();
-        printf("Setting face color %d: %f %f %f\n",link_index,c.r,c.g,c.b);
         this->geomManagers[link_index].Appearance()->faceColor.set(c.r,c.g,c.b,c.a);
       }
       Matrix4 ident; ident.setIdentity();
