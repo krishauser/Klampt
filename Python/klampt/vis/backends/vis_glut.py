@@ -304,7 +304,8 @@ class GLUTWindowManager(_ThreadedWindowManager):
                         self._refreshDisplayLists(item)
                         win.active_worlds.remove(item.index)
                 self.current_worlds.append(item.index)
-                self.windows[self.current_window].worldDisplayListItems[item.index].append(weakref.proxy(item))
+                if self.current_window is not None:
+                    self.windows[self.current_window].worldDisplayListItems[item.index].append(weakref.proxy(item))
                 #print("klampt.vis: world added to the visualization's world (items:",self.current_worlds,")")
             #else:
             #    print("klampt.vis: world",item,"is already in the current window's world")
@@ -323,7 +324,8 @@ class GLUTWindowManager(_ThreadedWindowManager):
                             self._refreshDisplayLists(item)
                             win.active_worlds.remove(item.world)
                     self.current_worlds.append(item.world)
-                    self.windows[self.current_window].worldDisplayListItems[item.index].append(weakref.proxy(item))
+                    if self.current_window is not None:
+                        self.windows[self.current_window].worldDisplayListItems[item.index].append(weakref.proxy(item))
                     #print("klampt.vis: world added to the visualization's world (items:",self.current_worlds,")")
             
 
@@ -450,6 +452,7 @@ class GLUTVisualizationFrontend(GLVisualizationFrontend):
         _globalLock.release()
         if self.inSubwindow: 
             return
+        glDisable(GL_LIGHTING)
         glColor3f(1,1,1)
         y = 30
         glRasterPos(20,y)
@@ -487,7 +490,8 @@ class GLUTVisualizationFrontend(GLVisualizationFrontend):
                 self.windowinfo.mode = 'hidden'
                 _globalLock.release()
                 return True
-            c = c.decode('utf-8')
+            if isinstance(c,bytes):
+                c = c.decode('utf-8')
             for a in self.actions:
                 if a.key is None:
                     continue
@@ -531,6 +535,7 @@ class GLUTMultiWindowVisualizationFrontend(glcommon.GLMultiViewportProgram):
     def display_screen(self):
         glcommon.GLMultiViewportProgram.display_screen(self)
         if not self.inSubwindow:
+            glDisable(GL_LIGHTING)
             glColor3f(1,1,1)
             glRasterPos(20,50)
             gldraw.glutBitmapString(GLUT_BITMAP_HELVETICA_18,"(Do not close this window except to quit)")
