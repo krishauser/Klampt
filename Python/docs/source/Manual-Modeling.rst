@@ -540,10 +540,10 @@ after the world has been loaded, but before it is drawn.
     if not w.readFile("myworld.xml"):
         raise RuntimeError("Couldn't read the world file")
 
-    shelf = make_shelf(world,*shelf_dims)
+    shelf = make_shelf(w,*shelf_dims)
     shelf.geometry().translate((shelf_offset_x,shelf_offset_y,shelf_height))
 
-    vis.add("world",world)
+    vis.add("world",w)
     vis.run()
 
 Running this script again, you can see that on top of what was in the world XML file,
