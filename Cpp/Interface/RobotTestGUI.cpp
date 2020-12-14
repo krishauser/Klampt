@@ -1,6 +1,7 @@
 #include "RobotTestGUI.h"
 #include <KrisLibrary/GLdraw/drawMesh.h>
 #include <KrisLibrary/GLdraw/drawgeometry.h>
+#include <KrisLibrary/GLdraw/GLView.h>
 #include "IO/ROS.h"
 #include <string.h>
 #include <sstream>
@@ -88,6 +89,8 @@ void RobotTestBackend::UpdateConfig()
     }
   }
   */
+  if(draw_sensors)
+    RefreshSensors();
   //tell the front end that the configuration is updated
   SendCommand("update_config","");
 
@@ -115,9 +118,16 @@ void RobotTestBackend::RenderWorld()
     }
     for(size_t i=0;i<robotSensors.sensors.size();i++) {
       vector<double> measurements;
-      if(0 == strcmp(robotSensors.sensors[i]->Type(),"CameraSensor")) {
-        robotSensors.sensors[i]->SimulateKinematic(*robot,*world);
+      if(0 == strcmp(robotSensors.sensors[i]->Type(),"CameraSensor") || 0 == strcmp(robotSensors.sensors[i]->Type(),"LaserSensor")) {
         robotSensors.sensors[i]->GetMeasurements(measurements);
+        if(measurements.empty()) {
+          RefreshSensors(); //this might mess up the view... reset it
+          glMatrixMode(GL_MODELVIEW);
+          glLoadIdentity();
+          GLDraw::GLView view;
+          view.setViewport(viewport);
+          view.setCurrentGL();
+        }
       }
       robotSensors.sensors[i]->DrawGL(*robot,measurements);
     }
@@ -197,6 +207,21 @@ void RobotTestBackend::RenderWorld()
       bbox.getBasis(basis);
       glColor3f(1,0,0);
       drawOrientedWireBox(bbox.dims.x,bbox.dims.y,bbox.dims.z,basis);
+    }
+  }
+}
+
+void RobotTestBackend::RefreshSensors()
+{
+  if(draw_sensors) {
+    if(robotSensors.sensors.empty()) {
+      robotSensors.MakeDefault(robot);
+    }
+    for(size_t i=0;i<robotSensors.sensors.size();i++) {
+      vector<double> measurements;
+      if(0 == strcmp(robotSensors.sensors[i]->Type(),"CameraSensor") || 0 == strcmp(robotSensors.sensors[i]->Type(),"LaserSensor")) {
+        robotSensors.sensors[i]->SimulateKinematic(*robot,*world);
+      }
     }
   }
 }

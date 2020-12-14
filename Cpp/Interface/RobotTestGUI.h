@@ -80,6 +80,7 @@ public:
   virtual void BeginDrag(int x,int y,int button,int modifiers);
   virtual void EndDrag(int x,int y,int button,int modifiers);
   virtual void DoFreeDrag(int dx,int dy,int button);
+  void RefreshSensors();
   void SetDrawExpanded(int value);
 };
 
