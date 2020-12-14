@@ -366,7 +366,7 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
         int k=0;
         for(int j=0;j<yres;j++) {
           for(int i=0;i<xres;i++,k++) {
-            if(floats[k] <= zmax) {
+            if(floats[k] < zmax) {
               floats[k] = (float)Discretize2(floats[k],zresolution,invzresolution,zstdev);
             }
             measurements[vstart+k] = floats[k];
@@ -377,7 +377,7 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
         int k=0;
         for(int j=0;j<yres;j++) {
           for(int i=0;i<xres;i++,k++) {
-            if(floats[k] <= zmax) {
+            if(floats[k] < zmax) {
               floats[k] = (float)Discretize2(floats[k],zresolution,invzresolution,Sqrt(zvarianceLinear*floats[k] + zvarianceConstant));
               //TEMP: testing simpler discretization
               //floats[k] = (float)Discretize2(floats[k],zresolution,invzresolution,zstdev);
@@ -436,7 +436,7 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
           }
           Real d = vfwd.dot(pt - vsrc);
           d = Min(d,zmax);
-          if(depth) measurements[dstart+k] = Discretize(d,zresolution,zvarianceLinear*d + zvarianceConstant);
+          if(depth && d < zmax) measurements[dstart+k] = Discretize(d,zresolution,zvarianceLinear*d + zvarianceConstant);
         }
         else {
           //no reading
@@ -676,7 +676,7 @@ void CameraSensor::DrawGL(const Robot& robot,const vector<double>& measurements)
     //debugging: draw image in frustum
     glPushMatrix();
     glMultMatrix((Matrix4)v.xform);
-    Real d = v.n;
+    Real d = Max(v.n,0.25f);
     Real aspectRatio = Real(xres)/Real(yres);
     Real xmin = Real(v.x - v.w*0.5)/(Real(v.w)*0.5);
     Real xmax = Real(v.x + v.w*0.5)/(Real(v.w)*0.5);
