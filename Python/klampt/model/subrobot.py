@@ -295,7 +295,7 @@ class SubRobotModel:
         return any(self_collision_iter(geoms,dotest))
     def drawGL(self,keepAppearance=True):
         for i in self._links:
-            self._robot.link(i).drawGL(keepAppearance)
+            self._robot.link(i).drawWorldGL(keepAppearance)
 
 class SubRobotModelLink:
     """A helper that lets you treat links of a subrobot just like a normal
