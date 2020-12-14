@@ -83,7 +83,7 @@ Quick start
 
         vis.dialog()
         ... do stuff afterwards ... 
-        vis.kill()
+        vis.kill()   #cleanup, not strictly needed but good practice
 
 - To show the visualization and run a script alongside it until the user
   closes the window (multithreaded mode)::
@@ -96,7 +96,7 @@ Quick start
             vis.unlock()
             time.sleep(dt)
         ... do stuff afterwards ...
-        vis.kill()
+        vis.kill()   #cleanup, not strictly needed but good practice
 
 - To show the visualization and run python commands until the user closes
   the window (single-threaded mode)::
@@ -105,7 +105,7 @@ Quick start
             ... do stuff ...
             [to exit the loop manually call vis.show(False)]
         vis.loop(setup=vis.show,callback=callback)
-        vis.kill()
+        vis.kill()   #cleanup, not strictly needed but good practice
 
 - To run a window with a custom plugin (GLPluginInterface) and terminate on
   closure::
@@ -668,6 +668,9 @@ def init(backends=None):
                 else:
                     from .backends import vis_qt
                     _window_manager = vis_qt.QtWindowManager()
+
+                import atexit
+                atexit.register(kill)
                 return res
     return None
 
