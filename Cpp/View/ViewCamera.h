@@ -21,6 +21,8 @@ public:
 	bool drawIcon,drawIconWireframe;
 	double iconSize;
 	bool drawFrustum;
+    bool drawCoords;
+    double coordsLen;
     GLDraw::GLColor iconColor,frustumColor;
 };
 

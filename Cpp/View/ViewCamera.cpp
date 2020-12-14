@@ -8,7 +8,7 @@ using namespace GLDraw;
 
 ViewCamera::ViewCamera()
 :drawIcon(true),drawIconWireframe(false),iconSize(0.05),
- drawFrustum(true)
+ drawFrustum(true),drawCoords(true),coordsLen(0.1)
 {
   iconColor.set(0.3f,0.3f,0.3f);
   frustumColor.set(1,1,0,0.5);
@@ -20,6 +20,7 @@ void ViewCamera::DrawGL(const Camera::Viewport& v) const
 	Real aspectRatio = Real(v.w)/Real(v.h);
 	glPushMatrix();
 	glMultMatrix(Matrix4(v.xform));
+	//note that +z is *backward* in the camera view
 	if(drawIcon) {
 		Real pyr_h = iconSize*v.scale;
 		Real pyr_base = -pyr_h + iconSize*0.25;
@@ -93,6 +94,17 @@ void ViewCamera::DrawGL(const Camera::Viewport& v) const
 		if(frustumColor.rgba[3] != 1.0) {
 			glDisable(GL_BLEND);
 		}
+	}
+	if(drawCoords) {
+		glPushMatrix();
+		Matrix3 flipYZ;
+		flipYZ.setZero();
+		flipYZ(0,0) = 1;
+		flipYZ(1,1) = -1;
+		flipYZ(2,2) = -1;
+		glMultMatrix(Matrix4(flipYZ));
+		GLDraw::drawCoords(coordsLen);
+		glPopMatrix();
 	}
 	glPopMatrix();
 }
