@@ -85,7 +85,7 @@ class LaserRangeSensor : public SensorBase
  * Camera is assumed to be centered at middle of image.  The image
  * is also rectified and depth values are converted to meters (or whatever unit
  * you are generally using).  The coordinate convention is Z forward, X right, Y *down*
- * following ROS and other camera standards.
+ * following OpenCV, ROS and other camera standards.
  *
  * The format of the measurements list is a list of rgb[i,j] pixels if rgb=true, 
  * then followed by a list of d[i,j] pixels giving depth in meters (or whatever unit
@@ -125,7 +125,9 @@ class CameraSensor : public SensorBase
   virtual bool GetSetting(const string& name,string& str) const;
   virtual bool SetSetting(const string& name,const string& str);
   virtual void DrawGL(const Robot& robot,const vector<double>& measurements);
+  ///Gets the OpenGL view associated with the camera.  Note that in OpenGL views, Z is backward, and Y is up.
   void GetViewport(Camera::Viewport& view) const;
+  ///Sets the camera to match the OpenGL view.  Note that in OpenGL views, Z is backward, and Y is up.
   void SetViewport(const Camera::Viewport& view);
 
   int link;
