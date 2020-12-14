@@ -123,7 +123,11 @@ class ConfigsEditor(VisualEditorBase):
             robot.setConfig(value[0])
         self.robot = robot
         self.editingIndex = len(value)-1
-        self.robotposer = RobotPoser(robot)
+        if isinstance(robot,SubRobotModel):
+            self.robotposer = RobotPoser(robot._robot)
+            self.robotposer.setActiveDofs(robot._links)
+        else:
+            self.robotposer = RobotPoser(robot)
         self.addWidget(self.robotposer)
     
     def instructions(self):
@@ -163,7 +167,11 @@ class ConfigsEditor(VisualEditorBase):
             if self.editingIndex >= len(self.value):
                 self.editingIndex = len(self.value)-1
             if self.editingIndex >= 0:
-                self.robotposer.set(self.value[self.editingIndex])
+                if isinstance(self.robot,SubRobotModel):
+                    self.robot.setConfig(self.value[self.editingIndex])
+                    self.robotposer.set(self.robot._robot.getConfig())
+                else:
+                    self.robotposer.set(self.value[self.editingIndex])
             print("Now has",len(self.value),"configs, editing index",self.editingIndex)
         if hasattr(self,'indexSpinBox'):
             self.indexSpinBox.setRange(0,len(self.value)-1)
@@ -173,13 +181,21 @@ class ConfigsEditor(VisualEditorBase):
     def indexChanged(self,index):
         self.editingIndex = index
         if index >= 0 and index < len(self.value):
-            self.robotposer.set(self.value[self.editingIndex]) 
+            if isinstance(self.robot,SubRobotModel):
+                self.robot.setConfig(self.value[self.editingIndex])
+                self.robotposer.set(self.robot._robot.getConfig())
+            else:
+                self.robotposer.set(self.value[self.editingIndex]) 
         self.refresh()
 
     def mousefunc(self,button,state,x,y):
         if self.editingIndex >= 0 and self.robotposer.hasFocus():
             #mouse release
-            self.value[self.editingIndex] = self.robotposer.get()
+            if isinstance(self.robot,SubRobotModel):
+                self.robot._robot.setConfig(self.robotposer.get())
+                self.value[self.editingIndex] = self.robot.getConfig()
+            else:
+                self.value[self.editingIndex] = self.robotposer.get()
         return VisualEditorBase.mousefunc(self,button,state,x,y)
     
     def keyboardfunc(self,c,x,y):
@@ -226,11 +242,16 @@ class ConfigsEditor(VisualEditorBase):
             for i in range(1,n+1):
                 if self.editingIndex + i < len(self.value): order.append(self.editingIndex +i)
                 if self.editingIndex - i >= 0: order.append(self.editingIndex -i)
+        oldAppearances = [self.robot.link(j).appearance().clone() for j in range(self.robot.numLinks())]
         for i in order:
             #draw transparent
             opacity = pow(0.5,abs(i-self.editingIndex))
             for j in range(self.robot.numLinks()):
                 self.robot.link(j).appearance().setColor(0.5,0.5,0.5,opacity)
+                if opacity == 1:
+                    self.robot.link(j).appearance().setSilhouette(0.004)
+                else:
+                    self.robot.link(j).appearance().setSilhouette(0)
             if i == self.editingIndex:
                 #this line will draw the robot at the current editing config
                 self.klamptwidgetmaster.drawGL(self.viewport())
@@ -238,7 +259,7 @@ class ConfigsEditor(VisualEditorBase):
                 self.robot.setConfig(self.value[i])
                 self.robot.drawGL()
         for j in range(self.robot.numLinks()):
-            self.robot.link(j).appearance().setColor(0.5,0.5,0.5,1)
+            self.robot.link(j).appearance().set(oldAppearances[j])
         glDisable(GL_BLEND)
 
     def updateGuiFromValue(self):
@@ -277,7 +298,11 @@ class TrajectoryEditor(VisualEditorBase):
             if len(value.milestones) > 0:
                 qold = robot.getConfig()
                 robot.setConfig(value.milestones[self.editingIndex])
-            self.milestoneposer = RobotPoser(robot)
+            if isinstance(robot,SubRobotModel):
+                self.milestoneposer = RobotPoser(robot._robot)
+                self.milestoneposer.setActiveDofs(robot._links)
+            else:
+                self.milestoneposer = RobotPoser(robot)
             if len(value.milestones) > 0:
                 robot.setConfig(qold)
         elif isinstance(value,trajectory.SE3Trajectory):
@@ -315,7 +340,11 @@ class TrajectoryEditor(VisualEditorBase):
         
     def milestone_to_poser(self,m):
         if self.robot is not None:
-            self.milestoneposer.set(m)
+            if isinstance(self.robot,SubRobotModel):
+                self.robot.setConfig(m)
+                self.milestoneposer.set(self.robot._robot.getConfig())
+            else:
+                self.milestoneposer.set(m)
         elif isinstance(self.value,trajectory.SE3Trajectory):
             self.milestoneposer.set(*self.value.to_se3(m))
         else:
@@ -325,7 +354,11 @@ class TrajectoryEditor(VisualEditorBase):
     def poser_to_milestone(self):
         q = self.milestoneposer.get()
         if self.robot is not None:
-            return q
+            if isinstance(self.robot,SubRobotModel):
+                self.robot._robot.setConfig(q)
+                return self.robot.getConfig()
+            else:
+                return q
         elif isinstance(self.value,trajectory.SE3Trajectory):
             return q[0] + q[1]
         else:
@@ -546,6 +579,9 @@ class TrajectoryEditor(VisualEditorBase):
         if self.robot is None:
             glDisable(GL_LIGHTING)
 
+        if self.robot is not None:
+            oldAppearances = [self.robot.link(j).appearance().clone() for j in range(self.robot.numLinks())]
+
         #draw animation, if available
         if self.animTrajectoryTime is not None:
             if self.robot is not None:
@@ -555,7 +591,7 @@ class TrajectoryEditor(VisualEditorBase):
                 self.robot.setConfig(q)
                 self.robot.drawGL()
                 for j in range(self.robot.numLinks()):
-                    self.robot.link(j).appearance().setColor(0.5,0.5,0.5,1)
+                    self.robot.link(j).appearance().set(oldAppearances[j])
             elif isinstance(self.value,trajectory.SE3Trajectory):
                 T = self.animTrajectory.eval(self.animTrajectoryTime,'loop')
                 glEnable(GL_LIGHTING)
@@ -598,6 +634,7 @@ class TrajectoryEditor(VisualEditorBase):
             for i in range(1,n+1):
                 if self.editingIndex + i < len(self.durations): order.append(self.editingIndex +i)
                 if self.editingIndex - i >= 0: order.append(self.editingIndex -i)
+
         for i in order:
             #draw transparent
             opacity = pow(0.5,abs(i-self.editingIndex))
@@ -606,6 +643,10 @@ class TrajectoryEditor(VisualEditorBase):
             if self.robot is not None:
                 for j in range(self.robot.numLinks()):
                     self.robot.link(j).appearance().setColor(0.5,0.5,0.5,opacity)
+                    if opacity == 1:
+                        self.robot.link(j).appearance().setSilhouette(0.004)
+                    else:
+                        self.robot.link(j).appearance().setSilhouette(0)
             if i == self.editingIndex:
                 #this line will draw the robot at the current editing config
                 self.klamptwidgetmaster.drawGL(self.viewport())
@@ -648,7 +689,7 @@ class TrajectoryEditor(VisualEditorBase):
 
         if self.robot is not None:
             for j in range(self.robot.numLinks()):
-                self.robot.link(j).appearance().setColor(0.5,0.5,0.5,1)
+                self.robot.link(j).appearance().set(oldAppearances[j])
         elif len(self.value.milestones) > 1:
             glColor3f(1,1,0)
             glBegin(GL_LINE_STRIP)

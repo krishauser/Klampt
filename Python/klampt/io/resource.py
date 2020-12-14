@@ -32,6 +32,7 @@ from ..math import vectorops,se3,so3
 import os
 import time
 from ..robotsim import WorldModel,RobotModel,RobotModelLink,RigidObjectModel,IKObjective
+from ..model.subrobot import SubRobotModel
 from ..model.contact import ContactPoint
 from ..model.contact import Hold
 from .. import vis
@@ -686,14 +687,14 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,refe
         return console_edit(name,value,type,description,world,frame)
     elif editor == 'visual':
         if type == 'Config':
-            assert isinstance(referenceObject,RobotModel),"Can currently only edit Config values with a RobotModel reference object"
+            assert isinstance(referenceObject,(RobotModel,SubRobotModel)),"Can currently only edit Config values with a RobotModel reference object"
             return editors.run(editors.ConfigEditor(name,value,description,world,referenceObject))
         elif type == 'Configs':
-            assert isinstance(referenceObject,RobotModel),"Can currently only edit Configs values with a RobotModel reference object"
+            assert isinstance(referenceObject,(RobotModel,SubRobotModel)),"Can currently only edit Configs values with a RobotModel reference object"
             return editors.run(editors.ConfigsEditor(name,value,description,world,referenceObject))
         elif type == 'Trajectory':
             if len(value.milestones)==0 or len(value.milestones[0])>3:
-                assert hasattr(value,'robot') or isinstance(referenceObject,RobotModel),"Can currently only edit N>3 Trajectory values with a RobotModel reference object"
+                assert hasattr(value,'robot') or isinstance(referenceObject,(RobotModel,SubRobotModel)),"Can currently only edit N>3 Trajectory values with a RobotModel reference object"
                 editor = editors.TrajectoryEditor(name,value,description,world,referenceObject)
             else:
                 editor = editors.TrajectoryEditor(name,value,description,world)
