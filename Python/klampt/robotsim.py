@@ -1973,8 +1973,10 @@ class Geometry3D(_object):
     *   :meth:`loadFile`: load from OFF, OBJ, STL, PCD, etc. Also supports native
         Klamp't types .geom and .vol.  
 
-    .. note:: Avoid the use of translate, rotate, and transform to represent object
-    movement. Use setCurrentTransform instead.  
+    .. note::  
+
+    Avoid the use of translate, rotate, and transform to represent object movement.
+    Use setCurrentTransform instead.  
 
     **Proximity queries**  
 
@@ -2001,9 +2003,11 @@ class Geometry3D(_object):
     :meth:`setCollisionMargin` and :meth:`getCollisionMargin` methods to access the
     margin. By default the margin is zero.  
 
-    .. note:: The geometry margin is NOT the same thing as simulation body collision
-    padding! All proximity queries are affected by the collision padding, inside or
-    outside of simulation.  
+    .. note::  
+
+    The geometry margin is NOT the same thing as simulation body collision padding!
+    All proximity queries are affected by the collision padding, inside or outside
+    of simulation.  
 
     **Conversions**  
 
@@ -2029,7 +2033,7 @@ class Geometry3D(_object):
 
 
         Args:
-            arg2 (:class:`~klampt.PointCloud` or :class:`~klampt.TriangleMesh` or :class:`~klampt.GeometricPrimitive` or :obj:`ConvexHull` or :class:`~klampt.Geometry3D` or :class:`~klampt.VolumeGrid`, optional): 
+            arg2 (:class:`~klampt.PointCloud` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.VolumeGrid` or :class:`~klampt.Geometry3D` or :obj:`ConvexHull` or :class:`~klampt.TriangleMesh`, optional): 
         """
         this = _robotsim.new_Geometry3D(*args)
         try:
@@ -6132,7 +6136,7 @@ class WorldModel(_object):
 
 
         Args:
-            robot (str or int): 
+            robot (int or str): 
             index (int, optional): 
             name (str, optional): 
 
@@ -6288,7 +6292,7 @@ class WorldModel(_object):
             terrain (:obj:`TerrainModel`, optional): 
 
         Returns:
-            (:class:`~klampt.RigidObjectModel` or :obj:`TerrainModel` or :class:`~klampt.RobotModel`):
+            (:class:`~klampt.RigidObjectModel` or :class:`~klampt.RobotModel` or :obj:`TerrainModel`):
         """
         return _robotsim.WorldModel_add(self, *args)
 
@@ -7018,7 +7022,7 @@ class IKSolver(_object):
             tol (float, optional): 
 
         Returns:
-            (:obj:`object` or bool):
+            (bool or :obj:`object`):
         """
         return _robotsim.IKSolver_solve(self, *args)
 
@@ -7129,7 +7133,7 @@ class GeneralizedIKObjective(_object):
 
 
         Args:
-            obj (:class:`~klampt.RigidObjectModel` or :obj:`GeneralizedIKObjective`, optional): 
+            obj (:obj:`GeneralizedIKObjective` or :class:`~klampt.RigidObjectModel`, optional): 
             link (:class:`~klampt.RobotModelLink`, optional): 
             link2 (:class:`~klampt.RobotModelLink`, optional): 
             obj2 (:class:`~klampt.RigidObjectModel`, optional): 
@@ -8744,7 +8748,7 @@ class Simulator(_object):
 
 
         Args:
-            robot (:class:`~klampt.RobotModel` or int): 
+            robot (int or :class:`~klampt.RobotModel`): 
 
         Returns:
             (:class:`~klampt.SimRobotController`):
