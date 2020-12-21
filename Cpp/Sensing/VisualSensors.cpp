@@ -110,7 +110,16 @@ void LaserRangeSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
     ray.direction = T.R*Vector3(x,y,z);
     Vector3 pt;
     //need to ignore the robot's link geometry
-    int obj = world.RayCast(ray,pt);
+    vector<int> ignoreLinkIDs;
+    int robotIndex = -1;
+    for(size_t i=0;i<world.robots.size();i++)
+      if(world.robots[i].get() == &robot) {
+        robotIndex = (int)i;
+        break;
+      }
+    if(robotIndex >= 0)
+      ignoreLinkIDs.push_back(world.RobotLinkID(robotIndex,link));
+    int obj = world.RayCastIgnore(ray,ignoreLinkIDs,pt);
     if (obj >= 0) 
       depthReadings[i] = pt.distance(ray.source) + depthMinimum;
     else 
@@ -214,50 +223,62 @@ bool LaserRangeSensor::SetSetting(const string& name,const string& str)
 
 void LaserRangeSensor::DrawGL(const Robot& robot,const vector<double>& measurements) 
 {
-  glDisable(GL_LIGHTING);
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA,GL_ONE);
-  glBegin(GL_LINES);
-  //need to make sure that the sawtooth pattern hits the last measurement: scale the time domain so last measurement before
-  //loop gets 1
-  Real xscale = 1, yscale = 1;
-  if(xSweepType == SweepSawtooth && last_dt > 0 && measurementCount > 1) 
-    xscale =  1.0 + 1.0/Real(measurementCount-1);
-  if(ySweepType == SweepSawtooth && last_dt > 0 && measurementCount > 1) 
-    xscale =  1.0 + 1.0/Real(measurementCount-1);
-  Real ux0 = (xSweepPeriod == 0 ? 0 : (last_t - last_dt + xSweepPhase)/(xSweepPeriod));
-  Real ux1 = (xSweepPeriod == 0 ? 1 : (last_t + xSweepPhase)/(xSweepPeriod));
-  Real uy0 = (ySweepPeriod == 0 ? 0 : (last_t - last_dt + ySweepPhase)/(ySweepPeriod));
-  Real uy1 = (ySweepPeriod == 0 ? 1.0 : (last_t + ySweepPhase)/(ySweepPeriod));
-  if(xSweepPeriod != 0) ux0 += (ux1-ux0)/(measurementCount);
-  if(ySweepPeriod != 0) uy0 += (uy1-uy0)/(measurementCount);
   RigidTransform T = (link >= 0 ? robot.links[link].T_World*Tsensor : Tsensor);
-  for(int i=0;i<measurementCount;i++) {
-    if(!measurements.empty())
-      if(IsInf(depthReadings[i])) continue;
-    Real xtheta,ytheta;
-    if(i+1 < measurementCount) {
-      xtheta = xSweepMagnitude*EvalPattern(xSweepType,(ux0+Real(i)/Real(measurementCount-1)*(ux1-ux0)),xscale);
-      ytheta = ySweepMagnitude*EvalPattern(ySweepType,(uy0+Real(i)/Real(measurementCount-1)*(uy1-uy0)),yscale);
+  glPushMatrix();
+  glMultMatrix(Matrix4(T));
+    glDisable(GL_LIGHTING);
+    GLDraw::drawCoords(0.1);
+    
+    glEnable(GL_BLEND);
+    glDepthMask(GL_FALSE);
+    glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+    glBegin(GL_LINES);
+    //glBegin(GL_TRIANGLE_STRIP);
+    //need to make sure that the sawtooth pattern hits the last measurement: scale the time domain so last measurement before
+    //loop gets 1
+    Real xscale = 1, yscale = 1;
+    if(xSweepType == SweepSawtooth && last_dt > 0 && measurementCount > 1) 
+      xscale =  1.0 + 1.0/Real(measurementCount-1);
+    if(ySweepType == SweepSawtooth && last_dt > 0 && measurementCount > 1) 
+      xscale =  1.0 + 1.0/Real(measurementCount-1);
+    Real ux0 = (xSweepPeriod == 0 ? 0 : (last_t - last_dt + xSweepPhase)/(xSweepPeriod));
+    Real ux1 = (xSweepPeriod == 0 ? 1 : (last_t + xSweepPhase)/(xSweepPeriod));
+    Real uy0 = (ySweepPeriod == 0 ? 0 : (last_t - last_dt + ySweepPhase)/(ySweepPeriod));
+    Real uy1 = (ySweepPeriod == 0 ? 1.0 : (last_t + ySweepPhase)/(ySweepPeriod));
+    if(xSweepPeriod != 0) ux0 += (ux1-ux0)/(measurementCount);
+    if(ySweepPeriod != 0) uy0 += (uy1-uy0)/(measurementCount);
+    int skip = 1;
+    if(measurementCount > 250)
+      skip = measurementCount/250;
+    for(int i=0;i<measurementCount;i+=skip) {
+      if(!measurements.empty())
+        if(IsInf(depthReadings[i])) continue;
+      Real u=Real(i)/Real(measurementCount-1);
+      Real xtheta,ytheta;
+      if(i+1 < measurementCount) {
+        xtheta = xSweepMagnitude*EvalPattern(xSweepType,(ux0+u*(ux1-ux0)),xscale);
+        ytheta = ySweepMagnitude*EvalPattern(ySweepType,(uy0+u*(uy1-uy0)),yscale);
+      }
+      else {
+        xtheta = xSweepMagnitude*EvalPattern(xSweepType,ux1,xscale);
+        ytheta = ySweepMagnitude*EvalPattern(ySweepType,uy1,yscale);
+      }
+      Real x = Sin(xtheta);
+      Real y = Cos(xtheta)*Sin(ytheta);
+      Real z = Cos(xtheta)*Cos(ytheta);
+      Vector3 dir = Vector3(x,y,z);
+      glColor4f(1,0,0,0);
+      glVertex3v(depthMinimum*dir);
+      glColor4f(1,0,0,1);
+      if(measurements.empty()) 
+        glVertex3v(depthMaximum*dir);
+      else
+        glVertex3v(depthReadings[i]*dir);
     }
-    else {
-      xtheta = xSweepMagnitude*EvalPattern(xSweepType,ux1,xscale);
-      ytheta = ySweepMagnitude*EvalPattern(ySweepType,uy1,yscale);
-    }
-    Real x = Sin(xtheta);
-    Real y = Cos(xtheta)*Sin(ytheta);
-    Real z = Cos(xtheta)*Cos(ytheta);
-    Vector3 dir = T.R*Vector3(x,y,z);
-    glColor4f(1,0,0,0);
-    glVertex3v(T.t + depthMinimum*dir);
-    glColor4f(1,0,0,1);
-    if(measurements.empty())
-      glVertex3v(T.t + depthMaximum*dir);
-    else
-      glVertex3v(T.t + depthReadings[i]*dir);
-  }
-  glEnd();
-  glDisable(GL_BLEND);
+    glEnd();
+    glDepthMask(GL_TRUE);
+    glDisable(GL_BLEND);
+  glPopMatrix();
 }
 
 

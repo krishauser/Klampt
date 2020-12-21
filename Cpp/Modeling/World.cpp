@@ -479,6 +479,150 @@ int RobotWorld::RayCast(const Ray3D& r,Vector3& worldpt)
   return closestBody;
 }
 
+int RobotWorld::RayCastIgnore(const Ray3D& r,const vector<int>& ignoreIDList,Vector3& worldpt)
+{
+  vector<bool> ignoreIDs(NumIDs(),false);
+  for(auto i:ignoreIDList)
+    ignoreIDs[i] = true;
+  int idBase = 0;
+  for(size_t j=0;j<robots.size();j++) {
+    if(ignoreIDs[RobotID((int)j)]) continue;
+    robots[j]->InitCollisions();
+  }
+  idBase = RigidObjectID(0);
+  for(size_t j=0;j<rigidObjects.size();j++) {
+    if(ignoreIDs[idBase+(int)j]) continue;
+    rigidObjects[j]->InitCollisions();
+  }
+  idBase = TerrainID(0);
+  for(size_t j=0;j<terrains.size();j++) {
+    if(ignoreIDs[idBase+(int)j]) continue;
+    terrains[j]->InitCollisions();
+  }
+  int closestBody = -1;
+  Real closestDist = Inf;
+  Vector3 closestPoint;
+  for(size_t j=0;j<robots.size();j++) {
+    if(ignoreIDs[RobotID((int)j)]) continue;
+    Robot* robot = robots[j].get();
+    robot->UpdateGeometry();
+    idBase = RobotLinkID((int)j,0);
+    for(size_t i=0;i<robot->links.size();i++) {
+      if(ignoreIDs[idBase+(int)i]) continue;
+      if(robot->IsGeometryEmpty(i)) continue;
+      Real dist;
+      if(robot->geometry[i]->RayCast(r,&dist)) {
+        if(dist < closestDist) {
+          closestDist = dist;
+          closestPoint = r.source + dist*r.direction;
+          closestBody = RobotLinkID(j,i);
+        }
+      }
+    }
+  }
+  idBase = RigidObjectID(0);
+  for(size_t j=0;j<rigidObjects.size();j++) {
+    if(ignoreIDs[idBase+(int)j]) continue;
+    RigidObject* obj = rigidObjects[j].get();
+    obj->geometry->SetTransform(obj->T);
+    Real dist;
+    if(obj->geometry->RayCast(r,&dist)) {
+      if(dist < closestDist) {
+        closestDist = dist;
+        closestPoint = r.source+dist*r.direction;
+        closestBody = RigidObjectID(j);
+      }
+    }
+  }
+  idBase = TerrainID(0);
+  for(size_t j=0;j<terrains.size();j++) {
+    if(ignoreIDs[idBase+(int)j]) continue;
+    Terrain* ter = terrains[j].get();
+    Real dist;
+    if(ter->geometry->RayCast(r,&dist)) {
+      if(dist < closestDist) {
+        closestDist = dist;
+        closestPoint = r.source+dist*r.direction;
+        closestBody = TerrainID(j);
+      }
+    }
+  }
+  worldpt = closestPoint;
+  return closestBody;
+}
+
+int RobotWorld::RayCastSelected(const Ray3D& r,const vector<int>& selectIDList,Vector3& worldpt)
+{
+  vector<bool> ignoreIDs(NumIDs(),true);
+  for(auto i:selectIDList)
+    ignoreIDs[i] = false;
+  int idBase = 0;
+  for(size_t j=0;j<robots.size();j++) {
+    if(ignoreIDs[RobotID((int)j)]) continue;
+    robots[j]->InitCollisions();
+  }
+  idBase = RigidObjectID(0);
+  for(size_t j=0;j<rigidObjects.size();j++) {
+    if(ignoreIDs[idBase+(int)j]) continue;
+    rigidObjects[j]->InitCollisions();
+  }
+  idBase = TerrainID(0);
+  for(size_t j=0;j<terrains.size();j++) {
+    if(ignoreIDs[idBase+(int)j]) continue;
+    terrains[j]->InitCollisions();
+  }
+  int closestBody = -1;
+  Real closestDist = Inf;
+  Vector3 closestPoint;
+  for(size_t j=0;j<robots.size();j++) {
+    if(ignoreIDs[RobotID((int)j)]) continue;
+    Robot* robot = robots[j].get();
+    robot->UpdateGeometry();
+    idBase = RobotLinkID((int)j,0);
+    for(size_t i=0;i<robot->links.size();i++) {
+      if(ignoreIDs[idBase+(int)i]) continue;
+      if(robot->IsGeometryEmpty(i)) continue;
+      Real dist;
+      if(robot->geometry[i]->RayCast(r,&dist)) {
+        if(dist < closestDist) {
+          closestDist = dist;
+          closestPoint = r.source + dist*r.direction;
+          closestBody = RobotLinkID(j,i);
+        }
+      }
+    }
+  }
+  idBase = RigidObjectID(0);
+  for(size_t j=0;j<rigidObjects.size();j++) {
+    if(ignoreIDs[idBase+(int)j]) continue;
+    RigidObject* obj = rigidObjects[j].get();
+    obj->geometry->SetTransform(obj->T);
+    Real dist;
+    if(obj->geometry->RayCast(r,&dist)) {
+      if(dist < closestDist) {
+        closestDist = dist;
+        closestPoint = r.source+dist*r.direction;
+        closestBody = RigidObjectID(j);
+      }
+    }
+  }
+  idBase = TerrainID(0);
+  for(size_t j=0;j<terrains.size();j++) {
+    if(ignoreIDs[idBase+(int)j]) continue;
+    Terrain* ter = terrains[j].get();
+    Real dist;
+    if(ter->geometry->RayCast(r,&dist)) {
+      if(dist < closestDist) {
+        closestDist = dist;
+        closestPoint = r.source+dist*r.direction;
+        closestBody = TerrainID(j);
+      }
+    }
+  }
+  worldpt = closestPoint;
+  return closestBody;
+}
+
 Robot* RobotWorld::RayCastRobot(const Ray3D& r,int& body,Vector3& localpt)
 {
   //doing it this way rather than dynamic initialization gives better 

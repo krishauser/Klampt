@@ -53,21 +53,31 @@ class LaserRangeSensor : public SensorBase
   virtual void DrawGL(const Robot& robot,const vector<double>& measurements);
 
   int link;
-  RigidTransform Tsensor; ///< z is forward
+  RigidTransform Tsensor; ///< z is forward, x points left, y points up
   int measurementCount;   ///< number of readings per cycle
   double depthResolution; ///<resolution of the depth measurement
   double depthMinimum,depthMaximum;    ///<minimum / maximum depth
   double depthVarianceLinear,depthVarianceConstant;
   ///enum defining a pattern of the sweep.
-  ///-Sinusoid is sin(x*2pi),
-  ///-Triangular is 2*(1+abs(x mod 2 - 1))-1 (range is [-1,1])
-  ///-Sawtooth is 2*(x mod 1)-1 (range is [-1,1])
+  ///
+  ///- Sinusoid is sin(u*2pi),
+  ///- Triangular is 2*(1+abs(u mod 2 - 1))-1 (range is [-1,1])
+  ///- Sawtooth is 2*(u mod 1)-1 (range is [-1,1])
+  ///
+  ///To do a continuously rotating sensor, do a sawtooth with magnitude 2pi
   enum { SweepSinusoid, SweepTriangular, SweepSawtooth};
-  ///left-right angle (rotation about z axis) at time t is magnitude*f((t+phase)/period) where f is the sweep type.
-  ///A measurement is produced every 2 * magnitude / measurementCount radians
-  ///If period = 0, measurement sweeps over range of [-magnitude,magnitude]
+  ///if period != 0:
+  ///   yaw angle (rotation about y axis) at time t is magnitude*f((t+phase)/period) where f is the sweep type.
+  ///   A measurement is produced every 2 * magnitude / measurementCount radians.
+  ///If period = 0:
+  ///   measurement sweeps over range of [-magnitude,magnitude]
   Real xSweepMagnitude,xSweepPeriod,xSweepPhase;
   int xSweepType;
+  ///If period != 0:
+  ///    pitch angle (rotation about x axis) at time t is magnitude*f((t+phase)/period) where f is the sweep type.
+  ///    A measurement is produced every 2 * magnitude / measurementCount radians.
+  ///If period = 0:
+  ///    measurement sweeps over range of [-magnitude,magnitude]
   Real ySweepMagnitude,ySweepPeriod,ySweepPhase;
   int ySweepType; 
 

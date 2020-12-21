@@ -118,7 +118,7 @@ void RobotTestBackend::RenderWorld()
     }
     for(size_t i=0;i<robotSensors.sensors.size();i++) {
       vector<double> measurements;
-      if(0 == strcmp(robotSensors.sensors[i]->Type(),"CameraSensor") || 0 == strcmp(robotSensors.sensors[i]->Type(),"LaserSensor")) {
+      if(0 == strcmp(robotSensors.sensors[i]->Type(),"CameraSensor") || 0 == strcmp(robotSensors.sensors[i]->Type(),"LaserRangeSensor")) {
         robotSensors.sensors[i]->GetMeasurements(measurements);
         if(measurements.empty()) {
           RefreshSensors(); //this might mess up the view... reset it
@@ -219,7 +219,7 @@ void RobotTestBackend::RefreshSensors()
     }
     for(size_t i=0;i<robotSensors.sensors.size();i++) {
       vector<double> measurements;
-      if(0 == strcmp(robotSensors.sensors[i]->Type(),"CameraSensor") || 0 == strcmp(robotSensors.sensors[i]->Type(),"LaserSensor")) {
+      if(0 == strcmp(robotSensors.sensors[i]->Type(),"CameraSensor") || 0 == strcmp(robotSensors.sensors[i]->Type(),"LaserRangeSensor")) {
         robotSensors.sensors[i]->SimulateKinematic(*robot,*world);
       }
     }

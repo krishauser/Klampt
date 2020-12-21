@@ -75,9 +75,15 @@ class RobotWorld
   void DeleteRigidObject(const string& name);
   RigidObject* GetRigidObject(const string& name);
 
-  ///Returns the ID of the entity the ray hits, or -1 if nothing was hit
+  ///Returns the ID of the entity the ray hits, or -1 if nothing was hit.  Returns hit point *in world frame*.
   int RayCast(const Ray3D& r,Vector3& worldpt);
+  ///Same as RayCast but ignores some IDs (see TerrainID, RigidObjectID, RobotID, RobotLinkID)
+  int RayCastIgnore(const Ray3D& r,const vector<int>& ignoreIDs,Vector3& worldpt);
+  ///Same as RayCast but only checks specified IDs (see TerrainID, RigidObjectID, RobotID, RobotLinkID)
+  int RayCastSelected(const Ray3D& r,const vector<int>& selectedIDs,Vector3& worldpt);
+  ///Ray casts only robots.  Returns hit robot, link, and point *in local frame*.
   Robot* RayCastRobot(const Ray3D& r,int& body,Vector3& localpt);
+  ///Ray casts only objects.  Returns hit object and point *in local frame*.
   RigidObject* RayCastObject(const Ray3D& r,Vector3& localpt);
 
   ///Loads an element from the file fn, using its extension to figure out
