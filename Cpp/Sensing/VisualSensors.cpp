@@ -88,11 +88,31 @@ void LaserRangeSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
     T = Tsensor;
   Real xmin=0,xmax=0;
   Real ymin=0,ymax=0;
+  Real step = 1.0/Real(measurementCount-1);
+  //need to ignore the robot's link geometry
+  vector<int> ignoreLinkIDs;
+  int robotIndex = -1;
+  for(size_t i=0;i<world.robots.size();i++)
+    if(world.robots[i]->name == robot.name) {
+      robotIndex = (int)i;
+      break;
+    }
+  if(robotIndex >= 0) {
+    ignoreLinkIDs.push_back(world.RobotLinkID(robotIndex,link));
+  }
+  else {
+    /*
+    printf("LaserRangeSensor::SimulateKinematic: Hmm... couldn't find world robot? %s?\n",robot.name.c_str());
+    printf("World has %d robots\n",world.robots.size());
+    for(size_t i=0;i<world.robots.size();i++)
+      printf("  Name %d: %s\n",i,world.robots[i]->name.c_str());
+    */
+  }
   for(int i=0;i<measurementCount;i++) {
     Real xtheta,ytheta;
     if(i+1 < measurementCount) {
-      xtheta = xSweepMagnitude*EvalPattern(xSweepType,(ux0+Real(i)/Real(measurementCount-1)*(ux1-ux0)),xscale);
-      ytheta = ySweepMagnitude*EvalPattern(ySweepType,(uy0+Real(i)/Real(measurementCount-1)*(uy1-uy0)),yscale);
+      xtheta = xSweepMagnitude*EvalPattern(xSweepType,(ux0+Real(i)*step*(ux1-ux0)),xscale);
+      ytheta = ySweepMagnitude*EvalPattern(ySweepType,(uy0+Real(i)*step*(uy1-uy0)),yscale);
     }
     else {
       xtheta = xSweepMagnitude*EvalPattern(xSweepType,ux1,xscale);
@@ -109,16 +129,6 @@ void LaserRangeSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
     ray.source = T*(Vector3(x,y,z)*depthMinimum);
     ray.direction = T.R*Vector3(x,y,z);
     Vector3 pt;
-    //need to ignore the robot's link geometry
-    vector<int> ignoreLinkIDs;
-    int robotIndex = -1;
-    for(size_t i=0;i<world.robots.size();i++)
-      if(world.robots[i].get() == &robot) {
-        robotIndex = (int)i;
-        break;
-      }
-    if(robotIndex >= 0)
-      ignoreLinkIDs.push_back(world.RobotLinkID(robotIndex,link));
     int obj = world.RayCastIgnore(ray,ignoreLinkIDs,pt);
     if (obj >= 0) 
       depthReadings[i] = pt.distance(ray.source) + depthMinimum;
@@ -250,10 +260,11 @@ void LaserRangeSensor::DrawGL(const Robot& robot,const vector<double>& measureme
     int skip = 1;
     if(measurementCount > 250)
       skip = measurementCount/250;
+    Real step = 1.0/Real(measurementCount-1);
     for(int i=0;i<measurementCount;i+=skip) {
       if(!measurements.empty())
         if(IsInf(depthReadings[i])) continue;
-      Real u=Real(i)/Real(measurementCount-1);
+      Real u=Real(i)*step;
       Real xtheta,ytheta;
       if(i+1 < measurementCount) {
         xtheta = xSweepMagnitude*EvalPattern(xSweepType,(ux0+u*(ux1-ux0)),xscale);
