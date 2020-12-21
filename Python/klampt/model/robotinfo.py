@@ -99,7 +99,7 @@ class RobotInfo:
 
     def partAsSubrobot(self,part):
         from klampt.model.subrobot import SubRobotModel
-        partLinks = self.partLinks(part)
+        partLinks = self.partLinkIndices(part)
         model = self.klamptModel()
         return SubRobotModel(model,partLinks)
 
