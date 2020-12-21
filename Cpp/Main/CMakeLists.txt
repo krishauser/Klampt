@@ -40,11 +40,7 @@ IF(USE_QT5_APPS)
 			      DESTINATION bin/imageformats
 			      COMPONENT apps)
 	ENDIF(WIN32)
-	ADD_DEPENDENCIES(RobotTest Klampt)
-	ADD_DEPENDENCIES(SimTest Klampt)
-	ADD_DEPENDENCIES(RobotPose Klampt)
-	ADD_DEPENDENCIES(MotorCalibrate Klampt)
-	ADD_DEPENDENCIES(URDFtoRob Klampt)
+	SET(APPS RobotTest SimTest RobotPose MotorCalibrate URDFtoRob)
 ELSEIF(USE_QT4_APPS)
 	MESSAGE(STATUS "Using Qt versions of main apps")
 	ADD_SUBDIRECTORY( RobotTestQt )
@@ -68,11 +64,7 @@ ELSEIF(USE_QT4_APPS)
 			      DESTINATION bin/imageformats
 			      COMPONENT apps)
 	ENDIF(WIN32)
-	ADD_DEPENDENCIES(RobotTest Klampt)
-	ADD_DEPENDENCIES(SimTest Klampt)
-	ADD_DEPENDENCIES(RobotPose Klampt)
-	ADD_DEPENDENCIES(MotorCalibrate Klampt)
-	ADD_DEPENDENCIES(URDFtoRob Klampt)
+	SET(APPS RobotTest SimTest RobotPose MotorCalibrate URDFtoRob)
 ELSEIF(GLUI_FOUND)
 	#GLUI GUIs
 	MESSAGE(STATUS "Using GLUI/console versions of main apps")
@@ -81,12 +73,12 @@ ELSEIF(GLUI_FOUND)
 	ADD_EXECUTABLE(RobotPose pose.cpp)
 	ADD_EXECUTABLE(MotorCalibrate motorcalibrate.cpp)
 	ADD_EXECUTABLE(URDFtoRob urdftorob.cpp)
-	SET(APPS ${APPS} RobotTest SimTest RobotPose MotorCalibrate URDFtoRob)
+	SET(MAINAPPS RobotTest SimTest RobotPose MotorCalibrate URDFtoRob)
 ELSE(USE_QT5_APPS)
 	MESSAGE(STATUS "No visualization framework (Qt/GLUI) available, using console versions of main apps")
 	ADD_EXECUTABLE(MotorCalibrate motorcalibrate.cpp)
 	ADD_EXECUTABLE(URDFtoRob urdftorob.cpp)
-	SET(APPS ${APPS} MotorCalibrate URDFtoRob)
+	SET(MAINAPPS MotorCalibrate URDFtoRob)
 ENDIF(USE_QT5_APPS)
 
 #command line utilities, no need for GUI
@@ -94,14 +86,19 @@ ADD_EXECUTABLE(Pack pack.cpp)
 ADD_EXECUTABLE(Merge merge.cpp)
 ADD_EXECUTABLE(TrajOpt trajopt.cpp)
 ADD_EXECUTABLE(SimUtil simutil.cpp)
-SET(APPS ${APPS} Pack Merge TrajOpt SimUtil)
+SET(MAINAPPS ${MAINAPPS} Pack Merge TrajOpt SimUtil)
 
-foreach(app ${APPS})
-  ADD_DEPENDENCIES(${app} Klampt)
+foreach(app ${MAINAPPS}) 
   TARGET_LINK_LIBRARIES(${app} ${KLAMPT_LIBRARIES})
   install(TARGETS ${app}
 	DESTINATION bin
 	COMPONENT apps)
+endforeach()
+
+SET(APPS ${APPS} ${MAINAPPS})
+
+foreach(app ${APPS})
+  ADD_DEPENDENCIES(${app} Klampt)
 endforeach()
 
 ADD_CUSTOM_TARGET(apps ALL
