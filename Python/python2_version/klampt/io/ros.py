@@ -26,6 +26,7 @@ from sensor_msgs.msg import JointState
 from sensor_msgs.msg import PointCloud2
 from sensor_msgs.msg import Image
 from sensor_msgs.msg import CameraInfo
+from sensor_msgs.msg import LaserScan
 from klampt.math import so3,se3
 import math
 
@@ -602,11 +603,12 @@ def to_SensorMsg(klampt_sensor,frame=None,frame_prefix='klampt',stamp='now'):
         frame = ""
         if frame_prefix is not None:
             frame = frame_prefix + '/'
-        frame = frame + klampt_sensor.robot.getName()
+        frame = frame + klampt_sensor.robot().getName()
         link = int(klampt_sensor.getSetting("link"))
-        frame += '/' + klampt_sensor.robot.link(link).getName()
+        frame += '/' + klampt_sensor.robot().link(link).getName()
 
-    if klampt_sensor.type() == 'CameraSensor':
+    stype = klampt_sensor.type()
+    if stype == 'CameraSensor':
         import numpy 
         import sys
 
@@ -647,7 +649,7 @@ def to_SensorMsg(klampt_sensor,frame=None,frame_prefix='klampt',stamp='now'):
             msg.data = abgr.tostring()
             msgs.append(msg)
         return msgs
-    elif klampt_sensor.type() == 'ForceTorqueSensor':
+    elif stype == 'ForceTorqueSensor':
         measurements = klampt_sensor.getMeasurements()
         if len(measurements)==0:
             measurements = [0.0]*6
@@ -665,6 +667,25 @@ def to_SensorMsg(klampt_sensor,frame=None,frame_prefix='klampt',stamp='now'):
         res.wrench.torque.x = measurements[3]
         res.wrench.torque.y = measurements[4]
         res.wrench.torque.z = measurements[5]
+        return res
+    elif stype == 'LaserRangeSensor':
+        measurements = klampt_sensor.getMeasurements()
+        res = LaserScan()
+        if stamp=='now':
+            stamp = rospy.Time.now()
+        elif isinstance(stamp,(int,float)):
+            stamp = rospy.Time(stamp)
+        res.header.frame_id = frame
+        res.header.stamp = stamp
+        res.angle_max = float(klampt_sensor.getSetting("xSweepMagnitude"))
+        res.angle_min = -1.0 * res.angle_max
+        measurement_count = float(klampt_sensor.getSetting("measurementCount"))
+        res.angle_increment = (res.angle_max - res.angle_min)/measurement_count
+        res.time_increment = float(klampt_sensor.getSetting("xSweepPeriod"))
+        res.range_min = float(klampt_sensor.getSetting("depthMinimum"))
+        res.range_max = float(klampt_sensor.getSetting("depthMaximum"))
+        res.ranges = measurements
+        res.intensities = []
         return res
     else:
         measurements = klampt_sensor.getMeasurements()
@@ -763,8 +784,10 @@ class KlamptROSPublisher(rospy.Publisher):
             else:
                 now = rospy.Time.now()
                 rosobj.header.seq = self.seq_no
-                rosobj.header.stamp = now        
-                rosobj.header.frame_id = '0'
+                if rosobj.header.stamp == 0:
+                    rosobj.header.stamp = now
+                if len(rosobj.header.frame_id)==0:
+                    rosobj.header.frame_id = '0'
         rospy.Publisher.publish(self,rosobj)
 
 class KlamptROSCameraPublisher:
@@ -831,18 +854,24 @@ class KlamptROSCameraPublisher:
             
 
 def publisher_SimRobotSensor(topic,klampt_sensor,convert_kwargs=None,**kwargs):
-    if klampt_sensor.type() == 'CameraSensor':
+    stype = klampt_sensor.type()
+    if stype == 'CameraSensor':
         frame_id = None
         frame_prefix = None
         if convert_kwargs is not None:
             frame_id = convert_kwargs.get('frame',None)  
             frame_prefix = convert_kwargs.get('frame_prefix',None)
         return KlamptROSCameraPublisher(topic,frame_id,frame_prefix,**kwargs)
-    elif klampt_sensor.type() == 'ForceTorqueSensor':
+    elif stype == 'ForceTorqueSensor':
         ros_type = 'WrenchStamped'
+    elif stype == 'LaserRangeSensor':
+        ros_type = 'LaserScan'
     else:
         ros_type = 'Float32MultiArray'
-    return publisher(topic,'SimRobotSensor',convert_kwargs,ros_type=ros_type,**kwargs)
+    converter = to_SensorMsg
+    ros_msg_class = globals()[ros_type]
+    return KlamptROSPublisher((lambda rosobj,converter=converter,kwargs=convert_kwargs:converter(rosobj,**kwargs)),
+        topic,ros_msg_class,**kwargs)
 
 def publisher(topic,klampt_type,convert_kwargs=None,ros_type=None,**kwargs):
     """Convenience function. The publisher can be called in the form
@@ -863,7 +892,6 @@ def publisher(topic,klampt_type,convert_kwargs=None,ros_type=None,**kwargs):
     converter = 'to_' + ros_type
     assert converter in globals(),"Can't convert from ROS message type "+ros_type
     converter = globals()[converter]
-    #auto-detect sensor message class
     ros_msg_class = globals()[ros_type]
     return KlamptROSPublisher((lambda rosobj,converter=converter,kwargs=convert_kwargs:converter(rosobj,**kwargs)),
         topic,ros_msg_class,**kwargs)
@@ -872,7 +900,7 @@ def object_publisher(topic,klampt_object,convert_kwargs=None,**kwargs):
     """Convenience function.  If klampt_object is an object, this sets up
     the publisher to be of the correct type.  You can then call publish on
     the returned publisher  using the same klampt_object (or another
-    compatible Klampt objects).
+    compatible Klampt object).
 
     SimRobotSensors (particularly, cameras) can be published to multiple
     topics of the form [topic]/[subtopic].
@@ -882,7 +910,7 @@ def object_publisher(topic,klampt_object,convert_kwargs=None,**kwargs):
     """
     from klampt import SimRobotSensor,Geometry3D
     if isinstance(klampt_object,SimRobotSensor):
-        return publisher_SimRobotSensor(topic,klampt_type,convert_kwargs,**kwargs)
+        return publisher_SimRobotSensor(topic,klampt_object,convert_kwargs,**kwargs)
     ros_type = None
     if isinstance(klampt_object,Geometry3D):
         if klampt_object.type() == 'PointCloud':
@@ -1003,7 +1031,7 @@ def broadcast_tf(broadcaster,klampt_obj,frameprefix="klampt",root="world",stamp=
         for i in xrange(world.numRigidObjects()):
             T = world.rigidObject(i).getTransform()
             q = so3.quaternion(T[0])
-            broadcaster.sendTransform(T[1],(q[1],q[2],q[3],q[0]),stamp,root,prefix+"/"+world.rigidObject(i).getName())
+            broadcaster.sendTransform(T[1],(q[1],q[2],q[3],q[0]),stamp,prefix+"/"+world.rigidObject(i).getName(),root)
         for i in xrange(world.numRobots()):
             robot = world.robot(i)
             rprefix = prefix+"/"+robot.getName()
@@ -1022,11 +1050,11 @@ def broadcast_tf(broadcaster,klampt_obj,frameprefix="klampt",root="world",stamp=
             if p < 0:
                 T = robot.link(j).getTransform()
                 q = so3.quaternion(T[0])
-                broadcaster.sendTransform(T[1],(q[1],q[2],q[3],q[0]),stamp,root,rprefix+"/"+robot.link(j).getName())
+                broadcaster.sendTransform(T[1],(q[1],q[2],q[3],q[0]),stamp,rprefix+"/"+robot.link(j).getName(),root)
             else:
                 Tparent = se3.mul(se3.inv(robot.link(p).getTransform()),robot.link(j).getTransform())
                 q = so3.quaternion(Tparent[0])
-                broadcaster.sendTransform(Tparent[1],(q[1],q[2],q[3],q[0]),stamp,rprefix+"/"+robot.link(p).getName(),rprefix+"/"+robot.link(j).getName())
+                broadcaster.sendTransform(Tparent[1],(q[1],q[2],q[3],q[0]),stamp,rprefix+"/"+robot.link(j).getName(),rprefix+"/"+robot.link(p).getName())
         return
     transform = None
     if isinstance(klampt_obj,(list,tuple)):
@@ -1040,7 +1068,7 @@ def broadcast_tf(broadcaster,klampt_obj,frameprefix="klampt",root="world",stamp=
         raise ValueError("Invalid type given to broadcast_tf: ",klampt_obj.__class__.__name__)
 
     q = so3.quaternion(transform[0])
-    broadcaster.sendTransform(transform[1],(q[1],q[2],q[3],q[0]),stamp,root,frameprefix)
+    broadcaster.sendTransform(transform[1],(q[1],q[2],q[3],q[0]),stamp,frameprefix,root)
     return
 
 def listen_tf(listener,klampt_obj,frameprefix="klampt",root="world",onerror=None):
@@ -1102,15 +1130,15 @@ def listen_tf(listener,klampt_obj,frameprefix="klampt",root="world",onerror=None
                     robot.link(j).setTransform(*se3.mul(robot.link(p).getTransform(),T))
         return
     elif hasattr(klampt_obj,'setTransform'):
-        T = dolookup(frameprefix,root)
+        T = do_lookup(frameprefix,root)
         if T:
             klampt_obj.setTransform(*T)
     elif hasattr(klampt_obj,'setCurrentTransform'):
-        T = dolookup(frameprefix,root)
+        T = do_lookup(frameprefix,root)
         if T:
             klampt_obj.setCurrentTransform(*T)
     elif klampt_obj is None:
-        return dolookup(frameprefix,root)
+        return do_lookup(frameprefix,root)
     else:
         raise ValueError("Invalid type given to listen_tf: ",klampt_obj.__class__.__name__)
 
