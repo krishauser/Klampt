@@ -579,7 +579,7 @@ def from_CameraInfo(ros_ci,klampt_obj):
 def to_SensorMsg(klampt_sensor,frame=None,frame_prefix='klampt',stamp='now'):
     """Converts a sensor's measurements to a ROS message(s).
 
-    Special types are CameraSensor and ForceTorqueSensor.
+    Special types are CameraSensor, ForceTorqueSensor, and LaserRangeSensor.
 
     * CameraSensor is converted to up to three messages: CameraInfo,
       Image (rgb, optional), and Image (depth, optional).
@@ -596,17 +596,21 @@ def to_SensorMsg(klampt_sensor,frame=None,frame_prefix='klampt',stamp='now'):
         stamp (str, float, or rospy.Time, optional): can be 'now', a float,
             or a rospy.Time.  Will be set in the ROS message header.
 
-    The ROS frame_id will be determined by `frame`, if given, or otherwise
-    it will be set to [frame_prefix]/[robot_name]/[sensor_name].  If
-    frame_prefix is None, then it will be set to [robot_name]/[sensor_name].
+    The ROS ``frame_id`` is set as follows
+    - If frame!=None, then ``frame_id=frame``.
+    - If frame==None and frame_prefix==None, then
+      ``frame_id = [robot_name]/[sensor_name]``.
+    - Otherwise,
+      ``frame_id = [frame_prefix]/[robot_name]/[sensor_name]``.
+
     """
     if frame is None:
         frame = ""
         if frame_prefix is not None:
             frame = frame_prefix + '/'
-        frame = frame + klampt_sensor.robot().getName()
-        link = int(klampt_sensor.getSetting("link"))
-        frame += '/' + klampt_sensor.robot().link(link).getName()
+        else:
+            frame = '.'
+        frame += klampt_sensor.robot().getName()+'/' + klampt_sensor.name()
 
     stype = klampt_sensor.type()
     if stype == 'CameraSensor':
@@ -1056,6 +1060,19 @@ def broadcast_tf(broadcaster,klampt_obj,frameprefix="klampt",root="world",stamp=
                 Tparent = se3.mul(se3.inv(robot.link(p).getTransform()),robot.link(j).getTransform())
                 q = so3.quaternion(Tparent[0])
                 broadcaster.sendTransform(Tparent[1],(q[1],q[2],q[3],q[0]),stamp,rprefix+"/"+robot.link(j).getName(),rprefix+"/"+robot.link(p).getName())
+        return
+    if isinstance(klampt_obj,SimRobotSensor):
+        from ..model import sensing
+        Tsensor_link = sensing.get_sensor_xform(klampt_obj)
+        link = int(klampt_obj.get_setting('link'))
+        if klampt_obj.type() == 'LaserRangeSensor': #the convention between Klampt and ROS is different
+            klampt_to_ros_lidar = so3.from_matrix([[0,1,0],
+                                                   [0,0,1],
+                                                   [1,0,0]])
+            Tsensor_link = (so3.mul(Tsensor_link[0],klampt_to_ros_lidar),Tsensor_link[1])
+        q = so3.quaternion(Tsensor_link[0])
+        robot = klampt_obj.robot()
+        broadcaster.sendTransform(Tsensor_link[1],(q[1],q[2],q[3],q[0]),stamp,frameprefix+"/"+klampt_obj.name(),frameprefix+"/"+robot.link(link).getName())
         return
     transform = None
     if isinstance(klampt_obj,(list,tuple)):
