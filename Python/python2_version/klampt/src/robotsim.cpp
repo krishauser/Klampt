@@ -4906,7 +4906,7 @@ void SimRobotSensor::kinematicSimulate(double dt)
 void SimRobotSensor::kinematicSimulate(WorldModel& world,double dt)
 {
   if(!sensor) return;
-  sensor->SimulateKinematic(*robotModel.robot,*worlds[robotModel.index]->world);
+  sensor->SimulateKinematic(*robotModel.robot,*worlds[world.index]->world);
   sensor->Advance(dt);
 }
 
