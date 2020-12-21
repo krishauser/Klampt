@@ -2467,7 +2467,26 @@ class VisAppearance:
                     elif "color" in app.attributes:
                         app.item.appearance().setColor(*app.attributes["color"])
 
+                if isinstance(self.editor,RobotPoser) and isinstance(self.item,(list,tuple)) and world is not None:
+                    #KLUDGE: config editor; make sure that the robot in the world model is restored
+                    #use the 
+                    robot = world.robot(0)
+                    oldconfig = robot.getConfig()
+                    oldAppearances = []
+                    if "color" in self.attributes:
+                        for i in range(robot.numLinks()):
+                            oldAppearances.append(robot.link(i).appearance().clone())
+                            robot.link(i).appearance().setColor(*self.attributes['color'])
+                else:
+                    oldconfig = None
+
                 self.editor.drawGL(viewport)
+
+                if oldconfig is not None:
+                    world.robot(0).setConfig(oldconfig)
+                    if len(oldAppearances) > 0:
+                        for i in range(robot.numLinks()):
+                            robot.link(i).appearance().set(oldAppearances[i])
 
                 #Restore sub-appearances
                 for n,app in self.subAppearances.items():
@@ -2476,6 +2495,7 @@ class VisAppearance:
                     app.item.appearance().set(app.oldAppearance)
             if isinstance(self.editor,RobotPoser):
                 #the widget took care of everything, dont continue drawing the item
+                #revert the robot's actual pose
                 #revert appearance if necessary
                 if not self.useDefaultAppearance and hasattr(item,'appearance'):
                     item.appearance().set(self.oldAppearance)
