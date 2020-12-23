@@ -813,8 +813,10 @@ Modifiers include:
 *   :meth:`loadFile`: load from OFF, OBJ, STL, PCD, etc. Also supports native
     Klamp't types .geom and .vol.  
 
-.. note:: Avoid the use of translate, rotate, and transform to represent object
-movement. Use setCurrentTransform instead.  
+.. note::  
+
+Avoid the use of translate, rotate, and transform to represent object movement.
+Use setCurrentTransform instead.  
 
 **Proximity queries**  
 
@@ -841,9 +843,11 @@ collision avoidance margins in motion planning. Use the
 :meth:`setCollisionMargin` and :meth:`getCollisionMargin` methods to access the
 margin. By default the margin is zero.  
 
-.. note:: The geometry margin is NOT the same thing as simulation body collision
-padding! All proximity queries are affected by the collision padding, inside or
-outside of simulation.  
+.. note::  
+
+The geometry margin is NOT the same thing as simulation body collision padding!
+All proximity queries are affected by the collision padding, inside or outside
+of simulation.  
 
 **Conversions**  
 
@@ -3375,6 +3379,11 @@ configuration after time dt.
 q has size model().numLinks(). dt must be > 0.  
 ";
 
+%feature("docstring") SimRobotController::settings "
+
+Returns all valid setting names.  
+";
+
 %feature("docstring") SimRobotController::addLinear "
 
 Same as setLinear but appends an interpolant onto the motion queue.  
@@ -3518,6 +3527,11 @@ Returns the type of the sensor.
 %feature("docstring") SimRobotSensor::SimRobotSensor "
 ";
 
+%feature("docstring") SimRobotSensor::settings "
+
+Returns all setting names.  
+";
+
 %feature("docstring") SimRobotSensor::kinematicSimulate "
 
 simulates / advances the kinematic simulation  
@@ -3540,15 +3554,15 @@ kinematicSimulate) timestep.
 %feature("docstring") SimRobotSensor::drawGL "
 
 Draws a sensor indicator using OpenGL. If measurements are given, the indicator
-is drawn as though these are the latest measurements, otherwise the last
-measurements are given.  
+is drawn as though these are the latest measurements, otherwise only an
+indicator is drawn.  
 ";
 
 %feature("docstring") SimRobotSensor::drawGL "
 
 Draws a sensor indicator using OpenGL. If measurements are given, the indicator
-is drawn as though these are the latest measurements, otherwise the last
-measurements are given.  
+is drawn as though these are the latest measurements, otherwise only an
+indicator is drawn.  
 ";
 
 %feature("docstring") SimRobotSensor::measurementNames "
@@ -3604,6 +3618,11 @@ XML file, then the simulation setup is loaded from it.
 %feature("docstring") Simulator::meanContactForce "
 
 Returns the average contact force on object a over the last simulate() call.  
+";
+
+%feature("docstring") Simulator::settings "
+
+Returns all setting names.  
 ";
 
 %feature("docstring") Simulator::getActualVelocity "

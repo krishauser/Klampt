@@ -2015,8 +2015,10 @@ class Geometry3D(_object):
     *   :meth:`loadFile`: load from OFF, OBJ, STL, PCD, etc. Also supports native
         Klamp't types .geom and .vol.  
 
-    .. note:: Avoid the use of translate, rotate, and transform to represent object
-    movement. Use setCurrentTransform instead.  
+    .. note::  
+
+    Avoid the use of translate, rotate, and transform to represent object movement.
+    Use setCurrentTransform instead.  
 
     **Proximity queries**  
 
@@ -2043,9 +2045,11 @@ class Geometry3D(_object):
     :meth:`setCollisionMargin` and :meth:`getCollisionMargin` methods to access the
     margin. By default the margin is zero.  
 
-    .. note:: The geometry margin is NOT the same thing as simulation body collision
-    padding! All proximity queries are affected by the collision padding, inside or
-    outside of simulation.  
+    .. note::  
+
+    The geometry margin is NOT the same thing as simulation body collision padding!
+    All proximity queries are affected by the collision padding, inside or outside
+    of simulation.  
 
     **Conversions**  
 
@@ -7860,6 +7864,18 @@ class SimRobotSensor(_object):
         return _robotsim.SimRobotSensor_getMeasurements(self)
 
 
+    def settings(self):
+        """
+        settings(SimRobotSensor self) -> stringVector
+
+
+
+        Returns all setting names.  
+
+        """
+        return _robotsim.SimRobotSensor_settings(self)
+
+
     def getSetting(self, name):
         """
         getSetting(SimRobotSensor self, std::string const & name) -> std::string
@@ -7893,8 +7909,8 @@ class SimRobotSensor(_object):
 
 
         Draws a sensor indicator using OpenGL. If measurements are given, the indicator
-        is drawn as though these are the latest measurements, otherwise the last
-        measurements are given.  
+        is drawn as though these are the latest measurements, otherwise only an
+        indicator is drawn.  
 
         """
         return _robotsim.SimRobotSensor_drawGL(self, *args)
@@ -8173,6 +8189,18 @@ class SimRobotController(_object):
 
         """
         return _robotsim.SimRobotController_sendCommand(self, name, args)
+
+
+    def settings(self):
+        """
+        settings(SimRobotController self) -> stringVector
+
+
+
+        Returns all valid setting names.  
+
+        """
+        return _robotsim.SimRobotController_settings(self)
 
 
     def getSetting(self, name):
@@ -9317,6 +9345,18 @@ class Simulator(_object):
 
         """
         return _robotsim.Simulator_setSimStep(self, dt)
+
+
+    def settings(self):
+        """
+        settings(Simulator self) -> stringVector
+
+
+
+        Returns all setting names.  
+
+        """
+        return _robotsim.Simulator_settings(self)
 
 
     def getSetting(self, name):

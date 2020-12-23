@@ -51414,6 +51414,40 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_SimRobotSensor_settings(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SimRobotSensor *arg1 = (SimRobotSensor *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::vector< std::string,std::allocator< std::string > > result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:SimRobotSensor_settings",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SimRobotSensor, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotSensor_settings" "', argument " "1"" of type '" "SimRobotSensor *""'"); 
+  }
+  arg1 = reinterpret_cast< SimRobotSensor * >(argp1);
+  {
+    try {
+      result = (arg1)->settings();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = swig::from(static_cast< std::vector< std::string,std::allocator< std::string > > >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_SimRobotSensor_getSetting(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   SimRobotSensor *arg1 = (SimRobotSensor *) 0 ;
@@ -52730,6 +52764,40 @@ SWIGINTERN PyObject *_wrap_SimRobotController_sendCommand(PyObject *SWIGUNUSEDPA
 fail:
   if (SWIG_IsNewObj(res2)) delete arg2;
   if (SWIG_IsNewObj(res3)) delete arg3;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SimRobotController_settings(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SimRobotController *arg1 = (SimRobotController *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::vector< std::string,std::allocator< std::string > > result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:SimRobotController_settings",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_SimRobotController, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotController_settings" "', argument " "1"" of type '" "SimRobotController *""'"); 
+  }
+  arg1 = reinterpret_cast< SimRobotController * >(argp1);
+  {
+    try {
+      result = (arg1)->settings();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = swig::from(static_cast< std::vector< std::string,std::allocator< std::string > > >(result));
+  return resultobj;
+fail:
   return NULL;
 }
 
@@ -58642,6 +58710,40 @@ SWIGINTERN PyObject *_wrap_Simulator_setSimStep(PyObject *SWIGUNUSEDPARM(self), 
     }
   }
   resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Simulator_settings(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Simulator *arg1 = (Simulator *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  std::vector< std::string,std::allocator< std::string > > result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:Simulator_settings",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_Simulator, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Simulator_settings" "', argument " "1"" of type '" "Simulator *""'"); 
+  }
+  arg1 = reinterpret_cast< Simulator * >(argp1);
+  {
+    try {
+      result = (arg1)->settings();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = swig::from(static_cast< std::vector< std::string,std::allocator< std::string > > >(result));
   return resultobj;
 fail:
   return NULL;
@@ -65186,6 +65288,14 @@ static PyMethodDef SwigMethods[] = {
 		"kinematicSimulate) timestep.  \n"
 		"\n"
 		""},
+	 { (char *)"SimRobotSensor_settings", _wrap_SimRobotSensor_settings, METH_VARARGS, (char *)"\n"
+		"SimRobotSensor_settings(SimRobotSensor self) -> stringVector\n"
+		"\n"
+		"\n"
+		"\n"
+		"Returns all setting names.  \n"
+		"\n"
+		""},
 	 { (char *)"SimRobotSensor_getSetting", _wrap_SimRobotSensor_getSetting, METH_VARARGS, (char *)"\n"
 		"SimRobotSensor_getSetting(SimRobotSensor self, std::string const & name) -> std::string\n"
 		"\n"
@@ -65210,8 +65320,8 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Draws a sensor indicator using OpenGL. If measurements are given, the indicator\n"
-		"is drawn as though these are the latest measurements, otherwise the last\n"
-		"measurements are given.  \n"
+		"is drawn as though these are the latest measurements, otherwise only an\n"
+		"indicator is drawn.  \n"
 		"\n"
 		""},
 	 { (char *)"SimRobotSensor_kinematicSimulate", _wrap_SimRobotSensor_kinematicSimulate, METH_VARARGS, (char *)"\n"
@@ -65349,6 +65459,14 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"sends a custom string command to the controller  \n"
+		"\n"
+		""},
+	 { (char *)"SimRobotController_settings", _wrap_SimRobotController_settings, METH_VARARGS, (char *)"\n"
+		"SimRobotController_settings(SimRobotController self) -> stringVector\n"
+		"\n"
+		"\n"
+		"\n"
+		"Returns all valid setting names.  \n"
 		"\n"
 		""},
 	 { (char *)"SimRobotController_getSetting", _wrap_SimRobotController_getSetting, METH_VARARGS, (char *)"\n"
@@ -66091,6 +66209,14 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Sets the internal simulation substep. Values < 0.01 are recommended.  \n"
+		"\n"
+		""},
+	 { (char *)"Simulator_settings", _wrap_Simulator_settings, METH_VARARGS, (char *)"\n"
+		"Simulator_settings(Simulator self) -> stringVector\n"
+		"\n"
+		"\n"
+		"\n"
+		"Returns all setting names.  \n"
 		"\n"
 		""},
 	 { (char *)"Simulator_getSetting", _wrap_Simulator_getSetting, METH_VARARGS, (char *)"\n"

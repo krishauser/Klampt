@@ -68,17 +68,19 @@ class SimRobotSensor
   std::vector<std::string> measurementNames();
   ///Returns a list of measurements from the previous simulation (or kinematicSimulate) timestep
   void getMeasurements(std::vector<double>& out);
+  ///Returns all setting names
+  std::vector<std::string> settings();
   ///Returns the value of the named setting (you will need to manually parse this)
   std::string getSetting(const std::string& name);
   ///Sets the value of the named setting (you will need to manually cast an int/float/etc to a str)
   void setSetting(const std::string& name,const std::string& val);
   //note: only the last overload docstring is added to the documentation
   ///Draws a sensor indicator using OpenGL.  If measurements are given, the indicator is drawn as though
-  ///these are the latest measurements, otherwise the last measurements are given
+  ///these are the latest measurements, otherwise only an indicator is drawn.
   void drawGL();
   //note: only the last overload docstring is added to the documentation
   ///Draws a sensor indicator using OpenGL.  If measurements are given, the indicator is drawn as though
-  ///these are the latest measurements, otherwise the last measurements are given
+  ///these are the latest measurements, otherwise only an indicator is drawn.
   void drawGL(const std::vector<double>& measurements);
 
   ///simulates / advances the kinematic simulation
@@ -198,6 +200,8 @@ class SimRobotController
   /// sends a custom string command to the controller
   bool sendCommand(const std::string& name,const std::string& args);
 
+  ///Returns all valid setting names
+  std::vector<std::string> settings();
   /// gets a setting of the controller
   std::string getSetting(const std::string& name);
   /// sets a setting of the controller
@@ -532,6 +536,8 @@ class Simulator
   void setGravity(const double g[3]);
   /// Sets the internal simulation substep.  Values < 0.01 are recommended.
   void setSimStep(double dt);
+  ///Returns all setting names
+  std::vector<std::string> settings();
   /** @brief Retrieves some simulation setting. 
    * 
    * Valid names are:

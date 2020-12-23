@@ -2033,7 +2033,7 @@ class Geometry3D(_object):
 
 
         Args:
-            arg2 (:class:`~klampt.PointCloud` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.VolumeGrid` or :class:`~klampt.Geometry3D` or :obj:`ConvexHull` or :class:`~klampt.TriangleMesh`, optional): 
+            arg2 (:class:`~klampt.Geometry3D` or :obj:`ConvexHull` or :class:`~klampt.TriangleMesh` or :class:`~klampt.PointCloud` or :class:`~klampt.VolumeGrid` or :class:`~klampt.GeometricPrimitive`, optional): 
         """
         this = _robotsim.new_Geometry3D(*args)
         try:
@@ -6136,7 +6136,7 @@ class WorldModel(_object):
 
 
         Args:
-            robot (int or str): 
+            robot (str or int): 
             index (int, optional): 
             name (str, optional): 
 
@@ -6292,7 +6292,7 @@ class WorldModel(_object):
             terrain (:obj:`TerrainModel`, optional): 
 
         Returns:
-            (:class:`~klampt.RigidObjectModel` or :class:`~klampt.RobotModel` or :obj:`TerrainModel`):
+            (:class:`~klampt.RobotModel` or :obj:`TerrainModel` or :class:`~klampt.RigidObjectModel`):
         """
         return _robotsim.WorldModel_add(self, *args)
 
@@ -7133,7 +7133,7 @@ class GeneralizedIKObjective(_object):
 
 
         Args:
-            obj (:obj:`GeneralizedIKObjective` or :class:`~klampt.RigidObjectModel`, optional): 
+            obj (:class:`~klampt.RigidObjectModel` or :obj:`GeneralizedIKObjective`, optional): 
             link (:class:`~klampt.RobotModelLink`, optional): 
             link2 (:class:`~klampt.RobotModelLink`, optional): 
             obj2 (:class:`~klampt.RigidObjectModel`, optional): 
@@ -7386,7 +7386,7 @@ class SimRobotSensor(_object):
 
 
         Args:
-            robot (:class:`~klampt.SimRobotController` or :class:`~klampt.RobotModel`): 
+            robot (:class:`~klampt.RobotModel` or :class:`~klampt.SimRobotController`): 
             sensor (:obj:`SensorBase`, optional): 
             name (str, optional): 
             type (str, optional): 
@@ -7446,6 +7446,16 @@ class SimRobotSensor(_object):
         return _robotsim.SimRobotSensor_getMeasurements(self)
 
 
+    def settings(self):
+        """
+        Returns all setting names.  
+
+        Returns:
+            (:obj:`stringVector`):
+        """
+        return _robotsim.SimRobotSensor_settings(self)
+
+
     def getSetting(self, name):
         """
         Returns the value of the named setting (you will need to manually parse this)  
@@ -7473,8 +7483,8 @@ class SimRobotSensor(_object):
     def drawGL(self, *args):
         """
         Draws a sensor indicator using OpenGL. If measurements are given, the indicator
-        is drawn as though these are the latest measurements, otherwise the last
-        measurements are given.  
+        is drawn as though these are the latest measurements, otherwise only an
+        indicator is drawn.  
 
         drawGL ()
 
@@ -7731,6 +7741,16 @@ class SimRobotController(_object):
             (bool):
         """
         return _robotsim.SimRobotController_sendCommand(self, name, args)
+
+
+    def settings(self):
+        """
+        Returns all valid setting names.  
+
+        Returns:
+            (:obj:`stringVector`):
+        """
+        return _robotsim.SimRobotController_settings(self)
 
 
     def getSetting(self, name):
@@ -8748,7 +8768,7 @@ class Simulator(_object):
 
 
         Args:
-            robot (int or :class:`~klampt.RobotModel`): 
+            robot (:class:`~klampt.RobotModel` or int): 
 
         Returns:
             (:class:`~klampt.SimRobotController`):
@@ -8808,6 +8828,16 @@ class Simulator(_object):
             dt (float)
         """
         return _robotsim.Simulator_setSimStep(self, dt)
+
+
+    def settings(self):
+        """
+        Returns all setting names.  
+
+        Returns:
+            (:obj:`stringVector`):
+        """
+        return _robotsim.Simulator_settings(self)
 
 
     def getSetting(self, name):

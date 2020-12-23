@@ -4541,10 +4541,27 @@ void Simulator::setSimStep(double dt)
   sim->simStep = dt;
 }
 
-  /// Retreives some simulation setting.  Valid names are gravity,
-  /// simStep, boundaryLayerCollisions, rigidObjectCollisions, robotSelfCollisions,
-  /// robotRobotCollisions, adaptiveTimeStepping, maxContacts,
-  /// clusterNormalScale, errorReductionParameter, and dampedLeastSquaresParameter
+std::vector<std::string> Simulator::settings()
+{
+  std::vector<std::string> res; res.reserve(17);
+  res.push_back("gravity");
+  res.push_back("autoDisable");
+  res.push_back("boundaryLayerCollisions");
+  res.push_back("rigidObjectCollisions");
+  res.push_back("robotSelfCollisions");
+  res.push_back("robotRobotCollisions");
+  res.push_back("adaptiveTimeStepping");
+  res.push_back("minimumAdaptiveTimeStep");
+  res.push_back("maxContacts");
+  res.push_back("clusterNormalScale");
+  res.push_back("errorReductionParameter");
+  res.push_back("dampedLeastSquaresParameter");
+  res.push_back("instabilityConstantEnergyThreshold");
+  res.push_back("instabilityLinearEnergyThreshold");
+  res.push_back("instabilityMaxEnergyThreshold");
+  res.push_back("instabilityPostCorrectionEnergy");
+}
+
 std::string Simulator::getSetting(const std::string& name)
 {
   ODESimulatorSettings& settings = sim->odesim.GetSettings();
@@ -4599,6 +4616,8 @@ void Simulator::setSetting(const std::string& name,const std::string& value)
 
 SimRobotController Simulator::controller(int robot)
 {
+  if(robot < 0 || robot > sim->controlSimulators.size())
+    throw PyException("Invalid robot index");
   SimRobotController c;
   c.sim = this;
   c.controller = &sim->controlSimulators[robot];
@@ -4609,6 +4628,8 @@ SimRobotController Simulator::controller(int robot)
 
 SimRobotController Simulator::controller(const RobotModel& robot)
 {
+  if(robot.index < 0 || robot.index > sim->controlSimulators.size())
+    throw PyException("Invalid robot index");
   SimRobotController c;
   c.sim = this;
   c.controller = &sim->controlSimulators[robot.index];
@@ -4992,16 +5013,19 @@ RobotModel SimRobotController::model()
 
 void SimRobotController::setRate(double dt)
 {
+  if(!controller) throw PyException("Invalid SimRobotController");
   controller->controlTimeStep = dt;
 }
 
 double SimRobotController::getRate()
 {
+  if(!controller) throw PyException("Invalid SimRobotController");
   return controller->controlTimeStep;
 }
 
 void SimRobotController::getCommandedConfig(vector<double>& q)
 {
+  if(!controller) throw PyException("Invalid SimRobotController");
   Vector qv;
   controller->GetCommandedConfig(qv);
   q.resize(qv.n);
@@ -5010,6 +5034,7 @@ void SimRobotController::getCommandedConfig(vector<double>& q)
 
 void SimRobotController::getCommandedVelocity(vector<double>& dq)
 {
+  if(!controller) throw PyException("Invalid SimRobotController");
   Vector qv;
   controller->GetCommandedVelocity(qv);
   dq.resize(qv.n);
@@ -5018,6 +5043,7 @@ void SimRobotController::getCommandedVelocity(vector<double>& dq)
 
 void SimRobotController::getCommandedTorque(std::vector<double>& t)
 {
+  if(!controller) throw PyException("Invalid SimRobotController");
   RobotMotorCommand& command = controller->command;
   //Robot* robot=sim->sim->controlSimulators[index];
   t.resize(command.actuators.size());
@@ -5027,6 +5053,7 @@ void SimRobotController::getCommandedTorque(std::vector<double>& t)
 
 void SimRobotController::getSensedConfig(vector<double>& q)
 {
+  if(!controller) throw PyException("Invalid SimRobotController");
   Vector qv;
   controller->GetSensedConfig(qv);
   if(!qv.empty()) {
@@ -5037,6 +5064,7 @@ void SimRobotController::getSensedConfig(vector<double>& q)
 
 void SimRobotController::getSensedVelocity(vector<double>& dq)
 {
+  if(!controller) throw PyException("Invalid SimRobotController");
   Vector qv;
   controller->GetSensedVelocity(qv);
   if(!qv.empty()) {
@@ -5047,6 +5075,7 @@ void SimRobotController::getSensedVelocity(vector<double>& dq)
 
 void SimRobotController::getSensedTorque(std::vector<double>& t)
 {
+  if(!controller) throw PyException("Invalid SimRobotController");
   DriverTorqueSensor* s = controller->sensors.GetTypedSensor<DriverTorqueSensor>();
   if(s==NULL){
       throw PyException("Robot has no torque sensor");
@@ -5116,6 +5145,16 @@ void SimRobotSensor::getMeasurements(std::vector<double>& out)
   sensor->GetMeasurements(out);
 }
 
+std::vector<std::string> SimRobotSensor::settings()
+{
+  std::vector<std::string> res;
+  if(!sensor) return res;
+  std::map<std::string,std::string> s = sensor->Settings();
+  for(auto& i:s)
+    res.push_back(i.first);
+  return res;
+}
+
 std::string SimRobotSensor::getSetting(const std::string& name)
 {
   if(!sensor) return std::string();
@@ -5165,6 +5204,7 @@ void SimRobotSensor::kinematicReset()
 
 SimRobotSensor SimRobotController::sensor(int sensorIndex)
 {
+  if(!controller) throw PyException("Invalid SimRobotController");
   RobotSensors& sensors = controller->sensors;
   if(sensorIndex < 0 || sensorIndex >= (int)sensors.sensors.size()) 
     return SimRobotSensor(RobotModel(),NULL);
@@ -5173,6 +5213,7 @@ SimRobotSensor SimRobotController::sensor(int sensorIndex)
 
 SimRobotSensor SimRobotController::sensor(const char* name)
 {
+  if(!controller) throw PyException("Invalid SimRobotController");
   RobotSensors& sensors = controller->sensors;
   shared_ptr<SensorBase> sensor = sensors.GetNamedSensor(name);
   if(sensor==NULL) {
@@ -5183,11 +5224,13 @@ SimRobotSensor SimRobotController::sensor(const char* name)
 
 std::vector<std::string> SimRobotController::commands()
 {
+  if(!controller) throw PyException("Invalid SimRobotController");
   return controller->controller->Commands();
 }
 
 void SimRobotController::setManualMode(bool enabled)
 {
+  if(!controller) throw PyException("Invalid SimRobotController");
   RobotController* c=sim->sim->robotControllers[index].get();
   MyController* mc=reinterpret_cast<MyController*>(c);
   if(mc)
@@ -5200,6 +5243,7 @@ void SimRobotController::setManualMode(bool enabled)
 
 std::string SimRobotController::getControlType()
 {
+  if(!controller) throw PyException("Invalid SimRobotController");
   std::vector<int> res;
   typedef std::vector<ActuatorCommand>::iterator it_ac;
   RobotMotorCommand& command = controller->command;
@@ -5230,6 +5274,16 @@ std::string SimRobotController::getControlType()
 bool SimRobotController::sendCommand(const std::string& name,const std::string& args)
 {
   return controller->controller->SendCommand(name,args);
+}
+
+std::vector<std::string> SimRobotController::settings()
+{
+  std::vector<std::string> res;
+  if(!controller) return res;
+  std::map<std::string,std::string> s = controller->controller->Settings();
+  for(auto& i:s)
+    res.push_back(i.first);
+  return res;
 }
 
 std::string SimRobotController::getSetting(const std::string& name)
