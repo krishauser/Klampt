@@ -49,7 +49,7 @@ class VisualEditorBase(glcommon.GLWidgetPlugin):
         """Called when the value is externally changed (from Load...)"""
         return
     def updateValueFromGui(self):
-        """Called the value is requested (from Save... and OK)"""
+        """Called when the value is requested (from Save... and OK)"""
         return
     def addDialogItems(self,parent,ui='qt'):
         return
@@ -1115,6 +1115,7 @@ class GeometricPrimitiveEditor(VisualEditorBase):
 
 
 class ObjectTransformEditor(VisualEditorBase):
+    """Edits rigid objects"""
     def __init__(self,name,value,description,world,object):
         VisualEditorBase.__init__(self,name,value,description,world)
         self.object = object
@@ -1195,6 +1196,123 @@ class WorldEditor(VisualEditorBase):
                 self.world.terrain(i).geometry().setCurrentTransform(Tw[0],vectorops.sub(Tw[1],so3.apply(Tw[0],gcloc)))
         return VisualEditorBase.motionfunc(self,button,state,x,y)
 
+
+class SensorEditor(RigidTransformEditor):
+    """Edits a SimRobotSensor.
+    """
+    def __init__(self,name,value,description,world):
+        from klampt import SimRobotSensor
+        from ..model import sensing
+        assert isinstance(value,SimRobotSensor),"Need to provide SensorEditor with a SimRobotSensor"
+        T = sensing.get_sensor_xform(value)
+        link_frame = None
+        if world is not None:
+            robot = world.robot(0)
+            link = int(value.getSetting('link'))
+            link_frame = robot.link(link).getTransform()
+
+        RigidTransformEditor.__init__(self,name,T,description,world,frame=link_frame)
+        self.value = value
+        self.measurements = []
+        
+    def initialize(self):
+        res = RigidTransformEditor.initialize(self)
+        self.refreshVisualization()
+        return res
+
+    def loadable(self):
+        return False
+    def savable(self):
+        return False
+    
+    def addDialogItems(self,parent,ui='qt'):
+        layout = QHBoxLayout(parent)
+        self.selectionList = QListWidget()
+        settings = self.value.settings()
+        self.settingsOrder = sorted([k for k in settings if k not in ['Tsensor','rate']])
+        for k in self.settingsOrder:
+            self.selectionList.addItem(k)
+        self.selectionList.currentRowChanged.connect(self.onSettingSelected)
+        self.editBox = QLineEdit("value")
+        self.editBox.editingFinished.connect(self.onSettingEdited)
+        self.onSettingSelected()
+        layout.addWidget(self.selectionList)
+        layout.addWidget(self.editBox)
+        
+    def refreshVisualization(self):
+        self.value.kinematicSimulate(0.01)
+        self.measurements = self.value.getMeasurements()
+        self.refresh()
+    
+    def display(self):
+        from ..model import sensing
+        sensor = self.value
+        self.value = sensing.get_sensor_xform(sensor)
+        RigidTransformEditor.display(self)
+        self.value = sensor
+
+        self.value.drawGL(self.measurements)
+
+    def onSettingSelected(self):
+        if self.selectionList.currentRow() < 0:
+            self.editBox.setText('')
+            return
+        item = self.settingsOrder[self.selectionList.currentRow()]
+        value = self.value.getSetting(item)
+        self.editBox.setText(value)
+
+    def onSettingEdited(self):
+        if self.selectionList.currentRow() < 0:
+            return
+        value = str(self.editBox.text())
+        item = self.settingsOrder[self.selectionList.currentRow()]
+        try:
+            self.value.setSetting(item,value)
+            self.refreshVisualization()
+        except Exception as e:
+            QMessageBox.warning(self,"Invalid sensor setting","Sensor does not accept setting: "+str(e))
+            self.editBox.setText(self.value.getSetting(item))
+
+
+    def instructions(self):
+        return 'Right-click and drag on the widget to pose the sensor'
+
+    def mousefunc(self,button,state,x,y):
+        from ..model import sensing
+        sensor = self.value
+        self.value = sensing.get_sensor_xform(sensor)
+        res = RigidTransformEditor.mousefunc(self,button,state,x,y)
+        if res:
+            sensing.set_sensor_xform(sensor,self.value)
+            self.value = sensor
+            self.refreshVisualization()
+            return True
+        self.value = sensor
+        return False
+
+    def motionfunc(self,x,y,dx,dy):
+        from ..model import sensing
+        sensor = self.value
+        self.value = sensing.get_sensor_xform(sensor)
+        res = RigidTransformEditor.motionfunc(self,x,y,dx,dy)
+        sensing.set_sensor_xform(sensor,self.value)
+        self.value = sensor
+        return res
+
+    def updateValueFromGui(self):
+        sensor = self.value
+        from ..model import sensing
+        self.value = sensing.get_sensor_xform(sensor)
+        RigidTransformEditor.updateValueFromGui(self)
+        sensing.set_sensor_xform(sensor,self.value)
+        self.value = sensor
+
+    def updateGuiFromValue(self):
+        sensor = self.value
+        from ..model import sensing
+        self.value = sensing.get_sensor_xform(sensor)
+        RigidTransformEditor.updateGuiFromValue(self)
+        self.value = sensor
 
 
 #Qt stuff
