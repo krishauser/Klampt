@@ -83,6 +83,13 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 
 ## Version history
 
+**0.8.5 master** (Latest updates 12/21/2020)
+-   Fixed bug drawing Group geometries.
+-   Python API: klampt.io.ros integration with LaserScan messages and SimCameraSensor publishing. 
+-   Python API: klampt.io.ros can now broadcast SimCameraSensor frames to ros.broadcast_tf.
+-   Python API: Bug fix with SimRobotSensor.kinematicSimulate and multiple worlds.
+-   Python API: Added visual editor for SimRobotSensor.
+
 **0.8.5  Bugfix version** (12/7/2020)
 -   Fixed a few bad bugs in the pip release (klampt_browser crash; resource editor crash; HTML output with no animation; HTML output with custom entities).
 -   More thorough integration of custom joints into the simulation, including reading from XML world files (see [Klampt-examples/data/simulation_test_worlds/jointtest.xml](https://github.com/krishauser/Klampt-examples/blob/master/data/simulation_test_worlds/jointtest.xml).
