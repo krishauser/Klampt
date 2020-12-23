@@ -107,6 +107,7 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
         if self.backgroundImageTexture is not None:
             self.program.prepare_GL()
             glMatrixMode(GL_PROJECTION)
+            glDisable(GL_CULL_FACE)
             glLoadIdentity()
             glOrtho(0,1,1,0,-1,1);
             glMatrixMode(GL_MODELVIEW)
@@ -116,8 +117,10 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
             glEnable(GL_TEXTURE_2D)
             glDisable(GL_LIGHTING)
             glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
-            self.backgroundImageDisplayList.draw(self.drawBackgroundImage)
+            if self.backgroundImageDisplayList is not None:
+                self.backgroundImageDisplayList.draw(self.drawBackgroundImage)
             glDisable(GL_TEXTURE_2D)
+            glEnable(GL_CULL_FACE)
             glEnable(GL_LIGHTING)
             glEnable(GL_DEPTH_TEST)
             glDepthMask(GL_TRUE)
@@ -134,14 +137,13 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
 
     def display(self):
         global _globalLock
-        _globalLock.acquire()
-        #for items currently being edited AND having the appearance changed, draw the reference object
-        #according to the vis settings
-        #glcommon.GLWidgetPlugin.display(self)
-        #restore any reference objects
-        self.updateCamera()
-        self.renderGL(self.view)
-        _globalLock.release()
+        with _globalLock:
+            #for items currently being edited AND having the appearance changed, draw the reference object
+            #according to the vis settings
+            #glcommon.GLWidgetPlugin.display(self)
+            #restore any reference objects
+            self.updateCamera()
+            self.renderGL(self.view)
 
     def setBackgroundImage(self,img,format='auto',rows='auto'):
         """Sets an image to go underneath the OpenGL rendering.
@@ -150,7 +152,21 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
         is assumed to have rgb information as channels.  If it has shape w x h, it
         is assumed to have rgb information as integers 0xrrggbb by default. 
         If format='bgr', then the rgb information is assumed to be integers 0xbbggrr.
+
+        If img == None, then the background image is cleared
         """
+        global _globalLock
+        if img is None:
+            with _globalLock:
+                self.backgroundImage = None
+                if self.backgroundImageDisplayList is not None:
+                    self.backgroundImageDisplayList.destroy()
+                self.backgroundImageDisplayList = None
+                if self.backgroundImageTexture is not None:
+                    glDeleteTextures([self.backgroundImageTexture])
+                self.backgroundImageTexture = None
+            return
+            
         pixformat = GL_RGBA
         if hasattr(img,'shape'):
             import numpy as np
@@ -184,12 +200,13 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
                 pixsize = 4
                 pixformat = GL_BGRA
             cols = len(img) // (rows*pixsize)
-        self.backgroundImage = (img,rows,cols,pixformat)
 
-        if self.backgroundImageDisplayList is None:
-            self.backgroundImageDisplayList = glcommon.CachedGLObject()
-        else:
-            self.backgroundImageDisplayList.markChanged()
+        with _globalLock:
+            self.backgroundImage = (img,rows,cols,pixformat)
+            if self.backgroundImageDisplayList is None:
+                self.backgroundImageDisplayList = glcommon.CachedGLObject()
+            else:
+                self.backgroundImageDisplayList.markChanged()
 
     def drawBackgroundImage(self):
         glEnable(GL_TEXTURE_2D)
