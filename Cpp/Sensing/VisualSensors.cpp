@@ -393,13 +393,18 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
       #endif //DEBUG_GL_RENDER_TIMING
       
       double invzresolution = 1.0/zresolution;
+      float fzlim = float(zmax)-1e-4f;
+      float fzmax = float(zmax);
       if(zvarianceLinear == 0) {
         Real zstdev = Sqrt(zvarianceConstant);
         int k=0;
         for(int j=0;j<yres;j++) {
           for(int i=0;i<xres;i++,k++) {
-            if(floats[k] < zmax) {
+            if(floats[k] < fzlim) {
               floats[k] = (float)Discretize2(floats[k],zresolution,invzresolution,zstdev);
+            }
+            else {
+              floats[k] = fzmax;  //assume within numerical error
             }
             measurements[vstart+k] = floats[k];
           }
@@ -409,10 +414,13 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
         int k=0;
         for(int j=0;j<yres;j++) {
           for(int i=0;i<xres;i++,k++) {
-            if(floats[k] < zmax) {
+            if(floats[k] < fzlim) {
               floats[k] = (float)Discretize2(floats[k],zresolution,invzresolution,Sqrt(zvarianceLinear*floats[k] + zvarianceConstant));
               //TEMP: testing simpler discretization
               //floats[k] = (float)Discretize2(floats[k],zresolution,invzresolution,zstdev);
+            }
+            else {
+              floats[k] = fzmax;  //assume within numerical error
             }
             measurements[vstart+k] = floats[k];
           }
@@ -514,6 +522,7 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
     printf("CameraSensor: Software texture setup %f\n",timer.ElapsedTime());
     #endif //DEBUG_GL_RENDER_TIMING
   }
+  depthDisplayList.erase();
 }
 
 void CameraSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
@@ -638,73 +647,92 @@ void CameraSensor::DrawGL(const Robot& robot,const vector<double>& measurements)
     glPushMatrix();
     glMultMatrix((Matrix4)v.xform);
 
-    glEnable(GL_LIGHTING);
-    float white[4]={1,1,1,1};
-    glMaterialfv(GL_FRONT,GL_AMBIENT_AND_DIFFUSE,white);
-    Real vscale = 0.5/Tan(xfov*0.5);
-    Real xscale = (0.5/vscale)/(xres/2);
-    //Real aspectRatio = Real(xres)/Real(yres);
-    Real yscale = xscale;
-    vector<Vector3> pts(xres*yres);
-    int k=0;
-    for(int i=0;i<yres;i++)
-      for(int j=0;j<xres;j++,k++) {
-        double d = measurements[vstart+k];
-        double u = Real(j-xres/2);
-        double v = -Real(i-yres/2);
-        double x = xscale*d*u;
-        double y = yscale*d*v;
-        pts[k].set(x,y,-d);
-      }
-    glBegin(GL_TRIANGLES);
-    k=0;
-    for(int i=0;i<yres;i++) {
-      for(int j=0;j<xres;j++,k++) {
-        if(i+1 >= yres || j+1 >= xres) continue;
-        //decide on discontinuities in this cell
-        int v11 = k;
-        int v12 = k+1;
-        int v21 = k+xres;
-        int v22 = k+xres+1;
-        double z11 = -pts[v11].z;
-        double z12 = -pts[v12].z;
-        double z21 = -pts[v21].z;
-        double z22 = -pts[v22].z;
-        bool d1x = (z11 >= zmax || z12 >= zmax || Abs(z11 - z12) > 0.02*(z11+z12));
-        bool d1y = (z11 >= zmax || z21 >= zmax || Abs(z11 - z21) > 0.02*(z11+z21));
-        bool d2x = (z22 >= zmax || z21 >= zmax || Abs(z22 - z21) > 0.02*(z22+z21));
-        bool d2y = (z22 >= zmax || z12 >= zmax || Abs(z22 - z12) > 0.02*(z22+z12));
-        bool dupperleft = (d1x || d1y);
-        bool dupperright = (d1x || d2y);
-        bool dlowerleft = (d2x || d1y);
-        bool dlowerright = (d2x || d2y);
+    //check whether this is the same measurements as before
+    unsigned int hash = 0;
+    for(size_t i=0;i<measurements.size();i+=measurements.size()/100) {
+      auto mptr = (const unsigned int*)&measurements[i];
+      hash ^= mptr[0];
+      hash ^= mptr[1];
+    }
+    if(depthDisplayHash != hash) {
+      depthDisplayList.erase();
+      depthDisplayHash = hash;
+    }
+
+    if(!depthDisplayList) {
+      depthDisplayList.beginCompileAndExecute();
+      glEnable(GL_LIGHTING);
+      float white[4]={1,1,1,1};
+      glMaterialfv(GL_FRONT,GL_AMBIENT_AND_DIFFUSE,white);
+      Real vscale = 0.5/Tan(xfov*0.5);
+      Real xscale = (0.5/vscale)/(xres/2);
+      //Real aspectRatio = Real(xres)/Real(yres);
+      Real yscale = xscale;
+      vector<Vector3> pts(xres*yres);
+      int k=0;
+      for(int i=0;i<yres;i++)
+        for(int j=0;j<xres;j++,k++) {
+          double d = measurements[vstart+k];
+          double u = Real(j-xres/2);
+          double v = -Real(i-yres/2);
+          double x = xscale*d*u;
+          double y = yscale*d*v;
+          pts[k].set(x,y,-d);
+        }
+      glBegin(GL_TRIANGLES);
+      k=0;
+      for(int i=0;i<yres;i++) {
+        for(int j=0;j<xres;j++,k++) {
+          if(i+1 >= yres || j+1 >= xres) continue;
+          //decide on discontinuities in this cell
+          int v11 = k;
+          int v12 = k+1;
+          int v21 = k+xres;
+          int v22 = k+xres+1;
+          double z11 = -pts[v11].z;
+          double z12 = -pts[v12].z;
+          double z21 = -pts[v21].z;
+          double z22 = -pts[v22].z;
+          bool d1x = (z11 >= zmax || z12 >= zmax || Abs(z11 - z12) > 0.02*(z11+z12));
+          bool d1y = (z11 >= zmax || z21 >= zmax || Abs(z11 - z21) > 0.02*(z11+z21));
+          bool d2x = (z22 >= zmax || z21 >= zmax || Abs(z22 - z21) > 0.02*(z22+z21));
+          bool d2y = (z22 >= zmax || z12 >= zmax || Abs(z22 - z12) > 0.02*(z22+z12));
+          bool dupperleft = (d1x || d1y);
+          bool dupperright = (d1x || d2y);
+          bool dlowerleft = (d2x || d1y);
+          bool dlowerright = (d2x || d2y);
 
 
-        if(dupperleft && !dlowerright) 
-          //only draw lower right corner
-          doTriangle(pts[v12],pts[v21],pts[v22]);
-        else if(!dupperleft && dlowerright) 
-          //only draw upper left corner
-          doTriangle(pts[v11],pts[v21],pts[v12]);
-        else if(!dupperright && dlowerleft) 
-          //only draw upper right corner
-          doTriangle(pts[v11],pts[v22],pts[v12]);
-        else if(dupperright && !dlowerleft) 
-          //only draw lower left corner
-          doTriangle(pts[v11],pts[v21],pts[v22]);
-        else if (!dupperleft && !dlowerright) {
-          //fully connected -- should draw better conditioned edge, but whatever
-          doTriangle(pts[v12],pts[v21],pts[v22]);
-          doTriangle(pts[v11],pts[v21],pts[v12]);
+          if(dupperleft && !dlowerright) 
+            //only draw lower right corner
+            doTriangle(pts[v12],pts[v21],pts[v22]);
+          else if(!dupperleft && dlowerright) 
+            //only draw upper left corner
+            doTriangle(pts[v11],pts[v21],pts[v12]);
+          else if(!dupperright && dlowerleft) 
+            //only draw upper right corner
+            doTriangle(pts[v11],pts[v22],pts[v12]);
+          else if(dupperright && !dlowerleft) 
+            //only draw lower left corner
+            doTriangle(pts[v11],pts[v21],pts[v22]);
+          else if (!dupperleft && !dlowerright) {
+            //fully connected -- should draw better conditioned edge, but whatever
+            doTriangle(pts[v12],pts[v21],pts[v22]);
+            doTriangle(pts[v11],pts[v21],pts[v12]);
+          }
         }
       }
+      glEnd();
+      depthDisplayList.endCompile();
     }
-    glEnd();
+    else {
+      depthDisplayList.call();
+    }
     glPopMatrix();
   }
 
   
-  if(rgb && renderer.color_tex != 0) {
+  if(rgb && !measurements.empty() && renderer.color_tex != 0) {
     //debugging: draw image in frustum
     glPushMatrix();
     glMultMatrix((Matrix4)v.xform);
