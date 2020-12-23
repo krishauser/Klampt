@@ -4026,8 +4026,12 @@ class _ThreadedWindowManager(_WindowManager):
                 self.cleanup()
             return
         if self.vis_thread_running:
-            self.vis_thread.join()
-            self.vis_thread = None
+            if self.vis_thread is not None:
+                self.vis_thread.join()
+                self.vis_thread = None
+            else:
+                #should we be tolerant to weird things that happen with kill?
+                self.vis_thread_running = False
             assert self.vis_thread_running == False
 
         self.quit = False
