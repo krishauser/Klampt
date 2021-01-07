@@ -30,9 +30,9 @@ class HTMLVisualizationScene(VisualizationScene):
         self.kw = KlamptWidget()
         self.animating = False
         self._textItems = set()
-
+        
     def addAction(self,hook,short_text,key,description):
-        raise NotImplementedError("Can't add actions to this frontend")
+        raise NotImplementedError("Can't add actions to HTML frontends")
 
     def clear(self):
         VisualizationScene.clear(self)
@@ -57,6 +57,10 @@ class HTMLVisualizationScene(VisualizationScene):
         VisualizationScene.add(self,name,item,keepAppearance,**kwargs)
         if name=='world' or name=='sim':
             self.sp.start(item)
+            if name == 'world':
+                self.kw.world = item
+            else:
+                self.kw.world = item.world
         else:
             try:
                 self.kw.add(name,item,**kwargs)
@@ -128,8 +132,14 @@ class HTMLVisualizationScene(VisualizationScene):
             if isinstance(item.item,WorldModel):
                 return
             if item.transformChanged:
-                raise NotImplementedError("TODO: update moved things of type",item.item.__class__.__name__)
-                self.kw.setTransform()
+                if isinstance(item.item,list):
+                    #it's either a ghost, a point, or an se3 item
+                    item.swapDrawConfig()
+                    self.kw.add(item.name,item.item)
+                    item.swapDrawConfig()
+                else:
+                    raise NotImplementedError("TODO: update moved things of type",item.item.__class__.__name__)
+                    #self.kw.setTransform(...)
                 item.transformChanged = False
             for k,c in item.subAppearances.items():
                 updateItem(c)
@@ -220,12 +230,16 @@ class HTMLWindowManager(_WindowManager):
     def scene(self):
         return self.windows[self.current_window]
     def createWindow(self,title):
+        if title is None:
+            title = "Klampt HTML output"
         self.windows.append(HTMLVisualizationScene(title))
         self.current_window = len(self.windows)-1
         return self.current_window
     def setWindow(self,id):
         assert id >= 0 and id < len(self.windows)
         self.current_window = id
+    def setWindowName(self,name):
+        self.windows[self.current_window].title = name
     def getWindow(self):
         return self.current_window
     def resizeWindow(self,w,h):
@@ -251,14 +265,19 @@ class HTMLWindowManager(_WindowManager):
         self.show()
     def loop(self,setup,callback,cleanup):
         setup()
-        t = 0
         self.quit = False
-        while t < duration:
-            if not self.shown(): break
+        iters = 0
+        while not self.quit:
             callback()
+            iters += 1
+            if iters > 5000:
+                print("HTML visualization window run for more than 5000 iterations... breaking loop")
+                self.quit = True
         self.show()
         cleanup()
     def spin(self,duration):
+        assert not math.isinf(duration),"Can't spin HTML visualization windows for an infinite amount of time"
+        assert duration < 300,"Can't spin HTML visualization windows for more than 5 minutes (performance issue)"
         t = 0
         self.quit = False
         while t < duration:

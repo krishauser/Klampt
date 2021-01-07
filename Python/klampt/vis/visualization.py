@@ -678,6 +678,7 @@ def init(backends=None):
     return None
 
 def _init():
+    global _backend
     if _backend is not None:
         return
     if init() is None: 
@@ -695,7 +696,7 @@ def debug(*args,**kwargs):
     Keyword arguments may include:
 
     - title: the window title
-    - animation: if only one item is given, can set a looping the animation
+    - animation: if only one item is given, sets a looping animation
     - centerCamera: the name of the item that the camera should look at, or
       True to center on the whole scene.
     - followCamera: the name of the item that the camera will follow if
@@ -703,7 +704,10 @@ def debug(*args,**kwargs):
     - dialog: True if a dialog should be shown (default), False if a standard
       show() should be used.
     - anything else: Treated as named klamp't item.
+
     """
+    global _backend
+    _init()
     oldWindow = getWindow()
     if oldWindow is None:
         oldWindow = 0
@@ -713,25 +717,36 @@ def debug(*args,**kwargs):
     itemcount = 0
     if 'world' in kwargs:
         add('world',kwargs['world'])
+        del kwargs['world']
+    animationDuration = 0
     for i,arg in enumerate(args):
         if isinstance(arg,str):
             nextName = arg
         elif isinstance(arg,dict):
-            if i==0:
+            if lastName is None:
+                print("vis.debug(): dict of attributes must follow an object")
                 continue
             for (k,v) in arg.items():
-                try:
-                    setAttribute(lastName,k,v)
-                except Exception:
-                    print("vis.debug(): Couldn't set attribute",k,"of item",lastName)
+                if k == 'animation':
+                    animate(lastName,v)
+                    animationDuration = max(animationDuration,v.endTime())
+                else:
+                    try:
+                        setAttribute(lastName,k,v)
+                    except Exception:
+                        print("vis.debug(): Couldn't set attribute",k,"of item",lastName)
         else:
             label = None
             if nextName is None:
+                name = None
                 if hasattr(arg,'getName'):
-                    name = arg.getName()
-                elif hasattr(arg,'name'):
+                    try:
+                        name = arg.getName()
+                    except Exception:
+                        pass
+                if hasattr(arg,'name') and isinstance(arg.name,str):
                     name = arg.name
-                else:
+                if name is None:
                     try:
                         type = types.objectToTypes(arg)
                         if isinstance(type,list):
@@ -802,12 +817,42 @@ def debug(*args,**kwargs):
             if followCameraItem is None:
                 print("vis.debug(): could not follow camera, invalid object name")
             followCamera(followCameraItem,center=True)
-    if doDialog:
-        dialog()
-        setWindow(oldWindow)
-    else:
+    if _backend == 'HTML':
+        #dump out the animation
+        if animation is not None:
+            animationDuration = max(animationDuration,animation.endTime())
+        if animationDuration > 0:
+            dt = 1.0/30.0
+            t = 0
+            while t < animationDuration:
+                stepAnimation(dt)
+                t += dt
         show()
-        #open ended...
+        setWindow(oldWindow)
+    elif _backend == 'IPython':
+        #setup a Playback widget from the animation
+        if animation is not None:
+            animationDuration = max(animationDuration,animation.endTime())
+        if animationDuration > 0:
+            framerate = 30
+            my_scene = scene()
+            def advance():
+                my_scene.stepAnimation(1.0/framerate)
+                my_scene.update()
+            def reset():
+                my_scene.animationTime(0)
+            from .ipython.widgets import Playback
+            playback = Playback(nativeWindow(),advance=advance,reset=reset,maxframes=int(animationDuration*framerate),framerate=framerate)
+            from IPython.display import display
+            display(playback)
+        show()
+    else:
+        if doDialog:
+            dialog()
+            setWindow(oldWindow)
+        else:
+            show()
+            #open ended...
     
 
 

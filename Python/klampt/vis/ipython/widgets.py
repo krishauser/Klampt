@@ -714,13 +714,14 @@ def EditConfig(robot,klampt_widget=None,ghost=None,link_selector='slider',link_s
             #restore old colors
             klampt_widget.beginRpc()
             for i in link_subset:
-                klampt_widget.setColor(i,*robot.link(link).appearance().getColor())
+                ilink = robot.link(i)
+                KlamptWidget.setColor(klampt_widget,ilink,*ilink.appearance().getColor())
             #change new color
             color = robot.link(link).appearance().getColor()
             r,g,b,a = color
             r = 1.0-(1.0-r)*0.5
             g = 1.0-(1.0-g)*0.5
-            klampt_widget.setColor(link,r,g,b,a)
+            KlamptWidget.setColor(klampt_widget,link,r,g,b,a)
             klampt_widget.endRpc()
 
     def _dochange(link,value):
@@ -915,8 +916,6 @@ class Playback(widgets.VBox):
         playbutton, stepbutton, pausebutton, resetbutton (Button): the Button widgets
     """
     def __init__(self,klampt_widget=None,advance=None,reset=None,pause=None,maxframes=None,framerate=None,quiet=False):
-        """Arguments are the same as the members"""
-
         self.klampt_widget = klampt_widget
         self.advance = advance
         self.reset = reset

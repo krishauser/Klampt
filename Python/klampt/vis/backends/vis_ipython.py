@@ -143,7 +143,7 @@ class KlamptWidgetAdaptor(KlamptWidget,VisualizationScene):
             if obj.editor is not None:
                 self._editors[name] = obj.editor
                 if self.displayed:
-                    display(HTML('<h3>'+name+'</h3>'))
+                    display(HTML('<h3>'+obj.name+'</h3>'))
                     display(obj.editor)
         else:
             if obj.editor:
@@ -158,7 +158,11 @@ class KlamptWidgetAdaptor(KlamptWidget,VisualizationScene):
         self.setAttribute(name,'color',(r,g,b,a))
 
     def setAttribute(self,name,attr,value):
-        VisualizationScene.setAttribute(self,name,attr,value)
+        try:
+            VisualizationScene.setAttribute(self,name,attr,value)
+        except Exception:
+            #hack -- config edit widgets access things that aren't in the scene
+            pass
         item = self.getItem(name)
         if attr == 'color':
             KlamptWidget.setColor(self,item.name,*value)
@@ -200,8 +204,14 @@ class KlamptWidgetAdaptor(KlamptWidget,VisualizationScene):
             if isinstance(item.item,WorldModel):
                 return
             if item.transformChanged:
-                raise NotImplementedError("TODO: update moved things of type",item.item.__class__.__name__)
-                KlamptWidget.setTransform()
+                if isinstance(item.item,list):
+                    #it's either a ghost, a point, or an se3 item
+                    item.swapDrawConfig()
+                    KlamptWidget.add(self,item.name,item.item)
+                    item.swapDrawConfig()
+                else:
+                    raise NotImplementedError("TODO: update moved things of type",item.item.__class__.__name__)
+                    #KlamptWidget.setTransform()
                 item.transformChanged = False
             for k,c in item.subAppearances.items():
                 updateItem(c)
@@ -306,6 +316,9 @@ class IPythonWindowManager(_WindowManager):
         self.current_window = id
     def getWindow(self):
         return self.current_window
+    def setWindowName(self,name):
+        print("IPython does not accept window names, skipping")
+        pass
     def resizeWindow(self,w,h):
         self.frontend().width = w
         self.frontend().height = h
