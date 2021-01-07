@@ -1,31 +1,54 @@
 """Utilities for Cartesian IK solving, interpolation, and path adjustment.
 
-Uses a unified representation of the workspace of one or more IK constraints
-given by ``config.getConfig(constraints)``.  See the
-:mod:`~klampt.model.config` module for details.
+To generate a path that moves to a Cartesian target, the
+:func:`cartesian_move_to` function is the most convenient.
+
+To interpolate between two Cartesian task space points,
+:func:`cartesian_interpolate_linear` and :func:`cartesian_interpolate_bisect`
+are approximately equivalent.
+
+To interpolate along a Cartesian task space path, the
+:func:`cartesian_path_interpolate` function implements two methods for solving
+for a feasible robot path.  A pointwise approach moves greedily along the path,
+while a roadmap approach gives a probabilistically complete solver for the
+redundancy resolution. 
+
+To move an existing joint-space path by a cartesian offset, the
+:func:`cartesian_bump` is used. This is useful for adapting motion primitives
+to new sensor data.
+
+All the classes in this module use a unified representation of the workspace of
+one or more :class:`IKObjective` constraints, which is retrieved by
+``config.getConfig(constraints)``.  For example, the workspace of a position-
+only constraint is its 3D world-space target coordinates.  The workspace of a 
+fixed transform constraint is the 12D concatenation of the rotation matrix and
+translation vector.  See the :mod:`~klampt.model.config` module for details.
 """
 
 from .trajectory import *
+from ..robotsim import IKObjective
 from . import ik
 from . import config
 from collections import deque
 import math
 
 def set_cartesian_constraints(x,constraints,solver):
-    """For x a workspace parameter setting (achieved via
-    ``config.getConfig(constraints)``), a set of constraints, and a IKSolver
-    object, modifies the constraints and the solver so that the solver is setup
-    to match the workspace parameter setting x."""
+    """For ``x`` a workspace parameter setting (obtained via
+    ``config.getConfig(constraints)``), a set of constraints, and a
+    :class:`IKSolver` object, modifies the constraints and the solver so that
+    the solver is setup to match the workspace parameter setting x.
+    """
     config.setConfig(constraints,x)
     solver.clear()
     for c in constraints:
         solver.add(c)
 
 def solve_cartesian(x,constraints,solver):
-    """For x a workspace parameter setting (achieved via
+    """For ``x`` a workspace parameter setting (obtained via
     ``config.getConfig(constraints)``), a set of constraints, and a IKSolver
     object, returns True if the solver can find a solution, starting from the
-    robot's current configuration). Returns True if successful."""
+    robot's current configuration). Returns True if successful.
+    """
     set_cartesian_constraints(x,constraints,solver)
     return  solver.solve()
 
@@ -78,8 +101,8 @@ def cartesian_interpolate_linear(robot,a,b,constraints,
             Assumed derived from config.getConfig(constraints)
         b (list of floats): start point of the Cartesian trajectory.
             Assumed derived from config.getConfig(constraints)
-        constraints: one or more link indices, link names, or IKObjective's
-            giving the manner in which the Cartesian space is defined. 
+        constraints: one or more link indices, link names, or
+            :class:`IKObjective` objects specifying the Cartesian task.
             Interpreted as follows:
 
             * int or str: the specified link's entire pose is constrained
@@ -256,8 +279,8 @@ def cartesian_interpolate_bisect(robot,a,b,constraints,
             Assumed derived from config.getConfig(constraints)
         b (list of floats): start point of the Cartesian trajectory.
             Assumed derived from config.getConfig(constraints)
-        constraints: one or more link indices, link names, or IKObjective's
-            giving the manner in which the Cartesian space is defined. 
+        constraints: one or more link indices, link names, or
+            :class:`IKObjective` objects specifying the Cartesian task space. 
             Interpreted as follows:
 
             * int or str: the specified link's entire pose is constrained
@@ -394,17 +417,25 @@ def cartesian_path_interpolate(robot,path,constraints,
     """Resolves a continuous robot trajectory that follows a cartesian path 
     for one or more links of a robot.
 
-    Note:
+    .. note::
+
         The output path is only a kinematic resolution, and may not respect
         the robot's velocity / acceleration limits.
+
+    .. note::
+
+        Only compatible with :class:`Trajectory`, not
+        :class:`HermiteTrajectory`.  If a single link is provided, an
+        :class:`SE3Trajectory` can be provided (but not
+        :class:`SE3HermiteTrajectory`.)
 
     Args:
         robot (RobotModel or SubRobotModel): the robot.
         path (Trajectory or list of milestones): a cartesian path for the
             parameters of the the given constraints.  If only milestones are
             given, the milestones are spaced 1s apart in time.
-        constraints: one or more link indices, link names, or IKObjective's
-            giving the manner in which the Cartesian space is defined. 
+        constraints: one or more link indices, link names, or or
+            :class:`IKObjective` objects specifying the Cartesian task space. 
             Interpreted as follows:
 
             * int or str: the specified link's entire pose is constrained
@@ -750,7 +781,8 @@ def cartesian_bump(robot,js_path,constraints,bump_paths,
             applied.  
         js_path (Trajectory or RobotTrajectory): the reference joint space
             Trajectory of the robot.
-        constraints: one or more link indices, link names, or IKObjective's
+        constraints: one or more link indices, link names, or
+            :class:`IKObjective` objects specifying the Cartesian task space. 
             giving the manner in which the Cartesian space is defined. 
             Interpreted as follows:
 
@@ -930,22 +962,20 @@ def cartesian_bump(robot,js_path,constraints,bump_paths,
 
 def cartesian_move_to(robot,constraints,
     delta=1e-2,
-    method='any',
     solver=None,
     feasibilityTest=None,
-    numSamples=1000,
     maximize=False):
     """A convenience function that generates a path that performs a linear
     cartesian interpolation starting from the robot's current configuration
     and ending at the desired IK constraints.
 
-    This is a bit more convenient than :meth:`cartesian_interpolate_linear`
+    This is a bit more convenient than :func:`cartesian_interpolate_linear`
     since you only need to pass in the target objective, rather than the
     start and end Cartesian parameters as well. 
 
-    Usage:
+    Usage::
 
-        path = cartesian_move_to(robot,goal). 
+        path = cartesian_move_to(robot,goal)
 
     Other arguments are equivalent to those in cartesian_interpolate_linear.
     """
@@ -959,9 +989,9 @@ def cartesian_move_to(robot,constraints,
     for c in constraints:
         xforml = robot.link(c.link()).getTransform()
         xformr = robot.link(c.destLink()).getTransform() if c.destLink() >= 0 else se3.identity()
-        c.matchDestination(se3.mul(se3.inv(xformr),xforml))
+        c.matchDestination(*se3.mul(se3.inv(xformr),xforml))
     taskStart = config.getConfig(constraints)
     #just call the solver
-    return cartesian_interpolate_linear(robot,taskStart,taskEnd,
-        delta=delta,method=method,solver=solver,feasibilityTest=feasibilityTest,
-        numSamples=numSamples,maximize=maximize)
+    return cartesian_interpolate_linear(robot,taskStart,taskEnd,constraints,
+        delta=delta,solver=solver,feasibilityTest=feasibilityTest,
+        maximize=maximize)
