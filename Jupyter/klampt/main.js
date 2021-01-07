@@ -32,6 +32,7 @@ define(function(){
                     console.log("KlamptView.initialize "+parameters);
                     this.klampt = null;
                     this.waitDraw = false;
+                    this.pendingRpcs = [];
                     widgets.DOMWidgetView.prototype.initialize.call(this, parameters);
                 },
                 createDiv: function(){
@@ -159,13 +160,16 @@ define(function(){
                     var msg = this.model.get('rpc');
                     //console.log("rpc "+msg);
                     if(this.waitDraw) {
-                        this.do_rpc(this,msg);
+                        this.pendingRpcs.push(msg);
                     }
                     else {
                         var _this = this;
                         this.waitDraw=true;
                         setTimeout(function() { 
                             _this.do_rpc(_this,msg); 
+                            for(var i=0;i<_this.pendingRpcs.length;i++)
+                                _this.do_rpc(_this,_this.pendingRpcs[i]);
+                            _this.pendingRpcs = []
                             _this.klampt.render();
                             _this.model.set('drawn',1);
                             _this.touch();
