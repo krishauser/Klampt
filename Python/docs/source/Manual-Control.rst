@@ -70,7 +70,7 @@ actuator with a simulated PID loop at the controller level.
    the physical actuators, nor will it complain if such errors are made.
 
 
-Default motion queue controller
+Default Motion Queue Controller
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 |Motion queue illustration|
@@ -177,6 +177,113 @@ the commanded configuration by 1 radian / sec over 10 seconds.
 In general, your control loop can make use of sensors and planners. There
 are countless ways to implement robot behaviors, and you are only limited by
 your imagination.
+
+
+
+
+
+Cartesian Control
+------------------
+
+Smooth Cartesian velocity control can be generated using the :class:`~klampt.control.cartesian\_drive.CartesianDriveSolver` class.
+Its :meth:`~klampt.control.cartesian\_drive.CartesianDriveSolver.drive` method is called repeatedly to incrementally drive the
+end effector (or end effectors) along desired translational and angular velocities.   At each time
+step, a precise Cartesian motion (a screw motion) is executed, where possible. 
+
+CartesianDriveSolver is better than using an IK solver to solve for each velocity increment, because the
+errors of an IK solver will accumulate, causing a drift from the desired motion.  Instead, the solver
+maintains a Cartesian "marker" that designates the desired pose, and its position is incremented via 
+integration along the desired screw motion.  (There may be slight numerical errors due to the limits of
+machine precision, but they will be imperceptable even at sub-millimeter resolutions.)
+
+Some Cartesian velocities are not possible due to joint limits, velocity limits, and kinematic
+constraints.  If a non-realizable velocity is commanded, then the solver moves the marker as far as possible
+along the commanded screw motion.  Future commands will drive the marker from whatever pose was
+achieved.  This means the robot can recover from being driven to singularities by driving the marker back
+toward the reachable space.  (Note that it can still be challenging to recover from joint limits,
+since the fraction of directions that lead back to the reachable set is reduced by each constraint met.)
+
+The usage pattern with a simulated robot is as follows:
+
+.. code:: python
+
+    import klampt
+    from klampt.control.cartesian_drive import CartesianDriveSolver
+
+    world = klampt.WorldModel()
+    world.readFile("my_world_file.xml")
+    robot = world.robot(0)
+    sim = klampt.Simulator(world)
+    controller = sim.controller(0)
+
+    #configure the solver
+    driver = CartesianDriveSolver(robot)
+    ee_link = robot.numLinks()-1  #what's the end effector link?
+    tool_position = [0,0,0]   #local position of the tool center point on the end effector
+    driver.start(controller.getCommandedConfig(),ee_link,endEffectorPositions=tool_position)
+
+    #begin the loop
+    dt = 0.01
+    while sim.getTime() < 10:
+        #TODO put your control code here
+        q = controller.getCommandedConfig()
+        ang_vel = [0,0,0]      #angular velocity
+        lin_vel = [0.1,0,0]    #lin_vel
+        (progress,qnext) = driver.drive(q,ang_vel,lin_vel,dt)
+        controlller.setPIDCommand(qnext,[0]*len(q))
+        if progress < 0:
+            print("Progress stopped?")
+
+        #advance the simulation
+        sim.simulate(dt)
+    print("End configuration:",controller.getSensedConfig())
+
+
+This approach is local, and does not verify whether a path is executable or not.  Another approach
+to Cartesian control is to convert from a Cartesian path to a joint-space path using the utilities
+in :mod:`~klampt.model.cartesian_trajectory`.  Straight-line paths can be executed using
+:meth:`~klampt.model.cartesian_trajectory.cartesian_move_to`.  For example, this code generates
+a linear Cartesian path (0.25m forward in the X direction) that can be executed by joint-space motions::
+
+    from klampt.model.cartesian_trajectory import cartesian_move_to
+    from klampt.model.trajectory import path_to_trajectory,execute_trajectory
+    from klampt.model import config,ik
+    from klampt.math import vectorops
+    
+    ...setup world, robot, and controller as before
+
+    # Now we set up a target
+    ee_link = robot.numLinks()-1
+    T0 = robot.link(ee_link).getTransform()
+    goal = ik.objective(robot.link(ee_link),R=T0[0],t=vectorops.add(T0[1],[0.25,0,0]))
+    # Calling this function will generate a path from the current e.e. transform to goal
+    path = cartesian_move_to(robot,goal)
+    if path is None:
+        print("Couldn't find a path!")
+    else:
+        # Now the path can be executed on a controller... note that it's untimed,
+        # so a little work needs to be done to make it timed.  The path_to_trajectory
+        # utility function helps a lot here!  It has many options so please consult
+        # the documentation...
+        traj = path_to_trajectory(path,smoothing=None,timing='Linf')
+        speed = 1.0   #can vary the execution speed here or in path_to_trajectory.
+        execute_trajectory(traj,controller,speed=speed)
+
+    while sim.getTime() < 10:
+        #advance the simulation
+        sim.simulate(dt)
+
+Importantly, the ``feasibilityTest`` argument can be used to verify constraints, such as
+self collision::
+
+    def feasibilityTest(q):
+        robot.setConfig(q)
+        return not robot.selfCollision()
+    path = cartesian_move_to(robot,goal,feasibilityTest=feasibilityTest)
+
+
+See the `Paths and Trajectories <Manual-Paths.html#trajectory-execution>`__ manual for more
+detail about the :func:`~klampt.model.trajectory.path_to_trajectory` and :func:`~klampt.model.trajectory.execute_trajectory` functions. 
 
 
 Experimental Robot Interface Layer

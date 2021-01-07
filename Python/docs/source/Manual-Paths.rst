@@ -158,7 +158,7 @@ Conversions between path types are found in
 
 In particular the :meth:`~klampt.model.trajectory.path_to_trajectory` method
 converts an untimed path into a timed trajectory.  This has many options, and
-the example program `path_test.py <https://github.com/krishauser/Klampt-examples/blob/0.8.3/Python3/demos/path_test.py>`__
+the example program `path_test.py <https://github.com/krishauser/Klampt-examples/blob/master/Python3/demos/path_test.py>`__
 demos several of these options.
 
 To convert from a cubic trajectory to an approximate linear trajectory, the
@@ -268,6 +268,40 @@ get the results that you want.
     vis.spin(float('inf'))
 
 
+Visual keyframe editing
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Trajectories can be edited as keyframes in ``klampt_browser`` or Python code.  
+
+As an example of using ``klampt_browser``, run the following script in a command-line terminal:
+
+.. code:: sh 
+
+    cd Klampt-examples/data
+    klampt_browser athlete_plane.xml
+
+Then expand the "motions" directory and click on one of the motions, such as ``athlete_flex.path``. 
+Then, click the ``Edit`` button.  You may modify milestones and timing by hand, and save the edited
+path back to disk.
+
+In Python code, the same effect is achieved by the :func:`klampt.io.resource.edit` function.
+
+.. code:: python
+
+    from klampt.io import resource
+    
+    save,result = resource.edit("my trajectory",traj,world=world)
+    if save:
+        #the user pressed 'OK'
+        traj = result
+        #do something with the result, e.g., save it to disk
+        from klampt.io import loader
+        loader.save(traj,'Trajectory','mytraj.path')
+    else:
+        #the user pressed 'Cancel'.  result is the last state of the edited trajectory
+        pass
+
+
 Multipaths
 ----------
 
@@ -320,14 +354,16 @@ Also, you may see the utility scripts in
 
   ``Klampt-examples/Python3/utils/multipath\_to\_timed\_path.py``
 
-for an example of assigning times to a multipath
-.
+for an example of assigning times to a multipath.
 
 Cartesian Trajectories
 ----------------------
 
-TODO: see the
-`cartesian\_trajectory <klampt.model.cartesian_trajectory.html>`__ module.
+A number of Cartesian path generation functions are available in the `cartesian\_trajectory <klampt.model.cartesian_trajectory.html>`__ module.
+
+See the `Control <Manual-Control.html#cartesian-control>`__ manual for more detail about Cartesian motion execution. 
+
+
 
 
 Trajectory Execution
@@ -345,8 +381,16 @@ For greater control, you may either run an ``eval(t)`` loop to send position
 commands, or use the `controller motion queuing process <Manual-Control.html#default-motion-queue-controller>`__.
 
 If you have built or installed the Klampt binaries, you may use the SimTest
-program to observe a trajectory in simulation.  Save the file to disk as
-a ``LinearPath`` and the starting ``Config``, then run
+program to observe a trajectory in simulation.  Save the trajectory to disk as
+a ``Trajectory`` file and the starting ``Config`` as follows:
+
+.. code:: python
+  
+    from klampt.io import loader
+    loader.save(traj,'Trajectory','my_traj.path')
+    loader.save(traj.milestones[0],'Config','my_traj_start.config')
+
+then run
 
 .. code:: sh
 
@@ -355,12 +399,13 @@ a ``LinearPath`` and the starting ``Config``, then run
 Sending to a real robot
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-To send paths to your own robot, you will most likely have to build your own
-control loop. 
+To send a Trajectory to your own robot, you can either 1) build your own
+control loop or 2) build a `Robot Interface Layer <Manual-Control.html#experimental-robot-interface-layer>`__
+object.
 
 **If your robot accepts PID commands**
 
-First, convert the path to a Trajectory.  Then, run something like this:
+Set up a while loop to advance time forward and manually send PID commands, like this:
 
 .. code:: python
 
@@ -400,7 +445,7 @@ First, convert the path to a Trajectory.  Then, run something like this:
 
 **If your robot accepts queued, timed waypoints**
 
-First, convert the path to a Trajectory.  Then, run something like this:
+Feed each of the trajectory milestones to the robot's queue, like this:
 
 .. code:: python
 
@@ -414,4 +459,29 @@ First, convert the path to a Trajectory.  Then, run something like this:
             queue_move(q,t-lastt)
         lastt = t
 
-You can also build your own ROS ``JointTrajectory`` messages.
+**If your robot uses ROS JointTrajectory messages**
+
+Set up a ROS publisher, and run the conversion utilities in :mod:`klampt.io.ros`:
+
+.. code:: python
+
+    import rospy
+    from klampt import io
+
+    ros_publisher = rospy.Publisher(TOPIC,...args...)
+    link_joint_names = [... the list of ROS joints corresponding to Klamp't DOFs...]
+    msg = io.ros.to_JointTrajectory(traj,link_joint_names=link_joint_names)
+    ros_publisher.publish(msg)
+
+
+**If you have a Robot Interface Layer class**
+
+Use the :meth:`~klampt.control.robotinterface.RobotInterfaceBase.setPiecewiseLinear` function, as follows:
+
+.. code:: python
+
+    ril = MyRobotInterfaceLayer()
+    if not ril.initialize():
+        raise RuntimeError("Couldn't initialize my robot")
+    ril.setPiecewiseLinear(traj.times,traj.milestones)
+
