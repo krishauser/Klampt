@@ -33,11 +33,13 @@ class KlamptWidgetAdaptor(KlamptWidget,VisualizationScene):
         if len(self._textItems) > 0:
             self.beginRpc()
             for t in self._textItems:
-                self.remove(t)
+                KlamptWidget.remove(self,t)
             self.endRpc()
             self._textItems = set()
 
     def add(self,name,item,keepAppearance=False,**kwargs):
+        if isinstance(item,str):
+            return self.addText(name,item,**kwargs)
         VisualizationScene.add(self,name,item,keepAppearance,**kwargs)
         try:
             KlamptWidget.add(self,name,item,**kwargs)
@@ -51,10 +53,12 @@ class KlamptWidgetAdaptor(KlamptWidget,VisualizationScene):
             KlamptWidget.setColor(self,name,*kwargs['color'])
 
     def remove(self,name):
-        VisualizationScene.remove(self,name)
-        KlamptWidget.remove(self,name)
         if name in self._textItems:
             self._textItems.remove(name)
+            KlamptWidget.remove(self,name)
+        else:
+            VisualizationScene.remove(self,name)
+            KlamptWidget.remove(self,name)
         if name in self._editors:
             del self._editors[name]
 

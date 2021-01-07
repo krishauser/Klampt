@@ -52,6 +52,8 @@ class HTMLVisualizationScene(VisualizationScene):
             self._textItems = set()
 
     def add(self,name,item,keepAppearance=False,**kwargs):
+        if isinstance(item,str):
+            return self.addText(name,item,**kwargs)
         VisualizationScene.add(self,name,item,keepAppearance,**kwargs)
         if name=='world' or name=='sim':
             self.sp.start(item)
@@ -62,6 +64,7 @@ class HTMLVisualizationScene(VisualizationScene):
                 raise ValueError("Can't draw items of type "+item.__class__.__name__+" in HTML form")
         
     def addText(self,name,text,position=None,**kwargs):
+        VisualizationScene.addText(self,name,text,position,**kwargs)
         self._textItems.add(name)
         self.kw.addText(name,text,position)
         if 'color' in kwargs:

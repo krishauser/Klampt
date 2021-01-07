@@ -619,7 +619,10 @@ def init(backends=None):
     global _backend,_window_manager
     if backends is None:
         if _isnotebook():
-            backends = ['IPython']
+            if 'google.colab' in sys.modules:
+                backends = ['HTML']
+            else:
+                backends = ['IPython']
         else:
             backends = ['PyQt','GLUT','HTML']
     if isinstance(backends,str):
@@ -1480,14 +1483,21 @@ def clearText():
     scene().clearText()
 
 def addPlot(name):
-    """Creates a new empty plot.."""
+    """Creates a new empty plot with the identifier ``name``."""
     add(name,VisPlot())
 
 def addPlotItem(name,itemname):
+    """Adds a scene item named ``itemname`` to the plot.  All of the item's
+    configuration variables will be plotted by default, see
+    :func:`hidePlotItem` to turn off drawing some of these channels.
+    """
     scene().addPlotItem(name,itemname)
 
 def logPlot(name,itemname,value):
-    """Logs a custom visualization item to a plot"""
+    """Logs a custom visualization item to a plot.  ``itemname`` can be an
+    arbitrary identifier; future logPlot calls with this itemname will add
+    values to the plotted curve.
+    """
     scene().logPlot(name,itemname,value)
 
 def logPlotEvent(name,eventname,color=None):
@@ -1496,13 +1506,13 @@ def logPlotEvent(name,eventname,color=None):
 
 def hidePlotItem(name,itemname,hidden=True):
     """Hides an item in the plot.  To hide a particular channel of a given item
-    pass a pair (itemname,channelindex). 
+    pass a pair ``(itemname,channelindex)``. 
 
-    Examples:
-        To hide configurations 0-5 of 'robot', call::
-            hidePlotItem('plot',('robot',0))
-            ...
-            hidePlotItem('plot',('robot',5))
+    For example, to hide configurations 0-5 of 'robot', call::
+    
+        hidePlotItem('plot',('robot',0))
+        ...
+        hidePlotItem('plot',('robot',5))
 
     """
     scene().hidePlotItem(name,itemname,hidden)

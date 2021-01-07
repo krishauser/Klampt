@@ -273,8 +273,8 @@ class KlamptWidget(widgets.DOMWidget):
             return [name]
         elif type == 'PointCloud':
             pc = item
-            from klampt.model import sensing
-            colors = sensing.point_cloud_colors(pc,'rgb')
+            from klampt.model import geometry
+            colors = geometry.point_cloud_colors(pc,'rgb')
             data = ([v for v in pc.vertices],colors)
             self._extras[name] = ('Points',data)
             msg = {'type':'add_points','name':name,'verts':data[0],'size':kwargs.get('size',0.01)}
@@ -395,7 +395,7 @@ class KlamptWidget(widgets.DOMWidget):
         """Sets the transform of the target object.  If matrix is given, it's a 16-element 
         array giving the 4x4 homogeneous transform matrix, in row-major format.  Otherwise,
         R and t are the 9-element klampt.so3 rotation and 3-element translation."""
-        if matrix != None:
+        if matrix is not None:
             self._do_rpc({'type':'set_transform','object':name,'matrix':matrix})
         else:
             self._do_rpc({'type':'set_transform','object':name,'matrix':[R[0],R[3],R[6],t[0],R[1],R[4],R[7],t[1],R[2],R[5],R[8],t[2],0,0,0,1]})
