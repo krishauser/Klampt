@@ -83,12 +83,15 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 
 ## Version history
 
-**0.8.5 master** (Latest updates 12/21/2020)
+**0.8.5 master** (Latest updates 1/6/2020)
 -   Fixed bug drawing Group geometries.
+-   RGBD sensors now have a long range for RGB information like actual cameras do, rather than clipping to the sensor's specified depth range.
+-   Python API: moved some recently added routines from klampt.model.sensor to klampt.model.geometry.
 -   Python API: klampt.io.ros integration with LaserScan messages and SimCameraSensor publishing. 
 -   Python API: klampt.io.ros can now broadcast SimCameraSensor frames to ros.broadcast_tf.
 -   Python API: Bug fix with SimRobotSensor.kinematicSimulate and multiple worlds.
--   Python API: Added visual editor for SimRobotSensor.
+-   Python API: Added visual editor for SimRobotSensor, Trajectory editor now has option to use RobotTrajectory interpolation.
+-   Python API: Bug fixes for HTML and IPython visualizations.  vis.debug() now works for these modes, and removing text now works.  Misc bugs are also fixed in the Jupyter extension.
 
 **0.8.5  Bugfix version** (12/7/2020)
 -   Fixed a few bad bugs in the pip release (klampt_browser crash; resource editor crash; HTML output with no animation; HTML output with custom entities).
