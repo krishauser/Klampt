@@ -414,6 +414,8 @@ class TrajectoryEditor(VisualEditorBase):
         self.animSelector = QComboBox()
         self.animSelector.addItem("Linear")
         self.animSelector.addItem("Spline")
+        if self.robot is not None and not isinstance(self.value,trajectory.RobotTrajectory):
+            self.animSelector.addItem("Linear (RobotTrajectory)")
         #self.animSelector.addItem("Retimed")
         #self.animSelector.addItem("Retimed-spline")
         self.animSelector.currentIndexChanged.connect(self.animSelectorChanged)
@@ -531,6 +533,8 @@ class TrajectoryEditor(VisualEditorBase):
                 traj = trajectory.HermiteTrajectory()
             traj.makeSpline(self.value)
             self.animTrajectory = traj
+        elif self.animSelectorValue == 2:
+            self.animTrajectory = trajectory.RobotTrajectory(self.robot,self.value.times,self.value.milestones)
         else:
             #TODO: other selections
             self.animTrajectory = self.value
