@@ -684,7 +684,13 @@ function KlamptFrontend(dom_sceneArea) {
        obj.parent.remove(obj);
     }
     else {
-      console.log("KLAMPT.rpc: Item to be removed "+name+" not found");
+      obj = _this.sceneArea.querySelector("#_text_overlay_"+name);
+      if(obj) {
+        obj.parentNode.removeChild(obj);
+      }
+      else {
+        console.log("KLAMPT.rpc: Item to be removed "+name+" not found");
+      }
     }
   }
 
@@ -1073,7 +1079,6 @@ function KlamptFrontend(dom_sceneArea) {
             object.matrixWorldNeedsUpdate=true;
           
             var m=request.matrix;
-            //console.log(m);
             object.matrix.set(m[0],m[1],m[2],m[3],m[4],m[5],m[6],m[7],m[8],m[9],m[10],m[11],m[12],m[13],m[14],m[15]);
           } 
           else 
