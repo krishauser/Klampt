@@ -208,6 +208,7 @@ bool LaserRangeSensor::GetSetting(const string& name,string& str) const
   GET_SENSOR_SETTING(ySweepPeriod);
   GET_SENSOR_SETTING(ySweepPhase);
   GET_SENSOR_SETTING(ySweepType);
+  if(SensorBase::GetSetting(name,str)) return true;
   return false;
 }
 bool LaserRangeSensor::SetSetting(const string& name,const string& str)
@@ -228,6 +229,7 @@ bool LaserRangeSensor::SetSetting(const string& name,const string& str)
   SET_SENSOR_SETTING(ySweepPeriod);
   SET_SENSOR_SETTING(ySweepPhase);
   SET_SENSOR_SETTING(ySweepType);
+  if(SensorBase::SetSetting(name,str)) return true;
   return false;
 }
 
@@ -339,6 +341,8 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
     Camera::Viewport vp;
     GetViewport(vp);
     vp.xform = Tlink*vp.xform;
+    vp.n = Min(0.1f,vp.n);
+    vp.f = Max(100.f,vp.f);
     renderer.Begin(vp);
     //-------------------------
     glDisable(GL_TEXTURE_2D);
@@ -453,10 +457,10 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
     if(rgb) measurements.resize(xres*yres);
     if(depth) {
       dstart = (int)measurements.size();
-      measurements.resize(measurements.size()+xres*yres);
+      measurements.resize(measurements.size()+xres*yres,zmax);
     }
     int k=0;
-    double background = double(0xffffaa96);
+    double background = double(0xff96aaff);
     Vector3 pt;
     for(int j=0;j<yres;j++) {
       Real v = 0.5*yres - Real(j);
@@ -603,6 +607,7 @@ bool CameraSensor::GetSetting(const string& name,string& str) const
   GET_SENSOR_SETTING(zmax);
   GET_SENSOR_SETTING(zvarianceLinear);
   GET_SENSOR_SETTING(zvarianceConstant);
+  if(SensorBase::GetSetting(name,str)) return true;
   return false;
 }
 bool CameraSensor::SetSetting(const string& name,const string& str)
@@ -620,6 +625,7 @@ bool CameraSensor::SetSetting(const string& name,const string& str)
   SET_SENSOR_SETTING(zmax);
   SET_SENSOR_SETTING(zvarianceLinear);
   SET_SENSOR_SETTING(zvarianceConstant);
+  if(SensorBase::SetSetting(name,str)) return true;
   return false;
 }
 
