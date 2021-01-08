@@ -398,6 +398,7 @@ class RobotModel
   ///    The world ID is not the same as the robot index.
   int getID() const;
   const char* getName() const;
+  ///Sets the name of the robot
   void setName(const char* name);
   ///Returns the number of links = number of DOF's.
   int numLinks();
@@ -730,8 +731,16 @@ class TerrainModel
 /** @brief The main world class, containing robots, rigid objects, and static
  * environment geometry.
  *
- * Note that this is just a model and can be changed at will -- in fact 
- * planners and simulators will make use of a model to "display" computed
+ * .. note:
+ *     Although a WorldModel instance is typically called a "world" it is
+ *     just a model and does not have to reflect the state of a physical world.
+ *     The state of robots and objects in the world can be changed at will --
+ *     in fact planners and simulators will query and modify the state of a
+ *     WorldModel during their operation.
+ * 
+ *     To keep around some "authoritative" world, you can keep around a copy
+ *     (use ``WorldModel.copy()``) or ``config.getConfig(world)`` using the
+ *     :mod:`klampt.model.config` module.
  *
  * Every robot/robot link/terrain/rigid object is given a unique ID in the
  * world.  This is potentially a source of confusion because some functions
@@ -779,10 +788,15 @@ class WorldModel
   ///will be saved there.  Otherwise they will be saved to a folder with the same base
   ///name as fn (without the trailing .xml)
   bool saveFile(const char* fn,const char* elementDir=NULL);
+  ///Returns the number of robots
   int numRobots();
+  ///Returns the number of links on the given robot
   int numRobotLinks(int robot);
+  ///Returns the number of rigid objects
   int numRigidObjects();
+  ///Returns the number of terrains
   int numTerrains();
+  ///Returns the total number of world ids
   int numIDs();
   ///Returns a RobotModel in the world by index or name.
   RobotModel robot(int index);

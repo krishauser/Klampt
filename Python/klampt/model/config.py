@@ -1,15 +1,13 @@
 """A uniform interface for getting/setting configurations of arbitrary objects.
 A configuration is a flattened list of floats describing the physical pose of
-an object.  Supported objects include world entities, mathematical objects, 
+an object. 
+
+Supported objects include world entities, mathematical objects, 
 and IK goals.  You can also set a configuration of a set of objects, or a
 world, in which case the configuration is the concatenation of the
 configurations of each object.
 
-Notably, used in the :meth:`klampt.vis.visualization.setItemConfig`, 
-:meth:`klampt.vis.visualization.getItemConfig`, and
-:meth:`klampt.vis.visualization.animate` methods.
-
-Supported objects include
+Supported objects include:
 
 - WorldModel
 - RobotModel
@@ -20,6 +18,33 @@ Supported objects include
 - coordinates module objects
 - IKObjective 
 - lists containing multiple objects (including nested lists)
+
+Notably, used in the :meth:`klampt.vis.visualization.setItemConfig`, 
+:meth:`klampt.vis.visualization.getItemConfig`, and
+:meth:`klampt.vis.visualization.animate` methods.  Also used in Cartesian
+interpolation in the :mod:`cartesian_trajectory` module.
+
+Module summary
+==============
+
+API
+----
+
+.. autosummary::
+    getConfig
+    setConfig
+    getConfigNames
+    numConfigParams
+    distance
+    interpolate
+
+Helpers 
+-------
+
+.. autosummary::
+    isCompound
+    components
+    componentNames
 
 """
 

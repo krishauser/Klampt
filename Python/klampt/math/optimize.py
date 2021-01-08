@@ -5,7 +5,16 @@ problems.
 Supports local and global optimization.  Wraps around scipy, pyOpt, or
 DIRECT (for now).
 
-Works well with the klampt.math.symbolic module.
+Works well with the :mod:`klampt.math.symbolic` module.
+
+Module summary
+--------------
+
+.. autosummary::
+    OptimizationProblem
+    OptimizationProblemBuilder
+    GlobalOptimizer
+
 """
 
 import numpy as np

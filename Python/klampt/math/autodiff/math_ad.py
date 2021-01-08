@@ -402,6 +402,9 @@ exp = _ADExp()
 log = _ADLog()
 """Autodiff'ed function comparable to np.log.  First derivative is implemented."""
 
+sqrt = _ADSqrt()
+"""Autodiff'ed function comparable to np.sqrt.  First derivative is implemented."""
+
 sin = _ADSin()
 """Autodiff'ed function comparable to np.sin.  All derivatives are implemented."""
 

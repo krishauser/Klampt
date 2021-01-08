@@ -2,12 +2,6 @@
 set of parts, a base (either fixed or moving), end effectors, and other
 assorted properties.  This module provides utilities to help build generalized
 code.
-
-- :class:`RobotInfo` represents the semantic properties of a robot.
-- :func:`register` saves to the global registry.
-- :func:`get` retrieves from the global registry.
-- :func:`load` reads a RobotInfo JSON file to the global registry.
-
 """
 
 class EndEffectorInfo:
@@ -187,12 +181,12 @@ class RobotInfo:
 allRobots = dict()
 
 def register(robotInfo):
-    """Registers a RobotInfo."""
+    """Registers a RobotInfo to the global reigstry."""
     global allRobots
     allRobots[robotInfo.name()] = robotInfo
 
 def load(fn):
-    """Loads a RobotInfo from a file."""
+    """Loads / registers a RobotInfo from a JSON file previously saved to disk."""
     res = RobotInfo()
     with open(fn,'r') as f:
         res.load(f)
@@ -200,6 +194,6 @@ def load(fn):
     return res
 
 def get(name):
-    """Retrieves a registered RobotInfo."""
+    """Retrieves a registered RobotInfo from the global registry."""
     global allRobots
     return allRobots[name]

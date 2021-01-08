@@ -63595,6 +63595,8 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
+		"Sets the name of the robot.  \n"
+		"\n"
 		""},
 	 { (char *)"RobotModel_numLinks", _wrap_RobotModel_numLinks, METH_VARARGS, (char *)"\n"
 		"RobotModel_numLinks(RobotModel self) -> int\n"
@@ -64429,11 +64431,15 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
+		"Returns the number of robots.  \n"
+		"\n"
 		""},
 	 { (char *)"WorldModel_numRobotLinks", _wrap_WorldModel_numRobotLinks, METH_VARARGS, (char *)"\n"
 		"WorldModel_numRobotLinks(WorldModel self, int robot) -> int\n"
 		"\n"
 		"\n"
+		"\n"
+		"Returns the number of links on the given robot.  \n"
 		"\n"
 		""},
 	 { (char *)"WorldModel_numRigidObjects", _wrap_WorldModel_numRigidObjects, METH_VARARGS, (char *)"\n"
@@ -64441,17 +64447,23 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"\n"
+		"Returns the number of rigid objects.  \n"
+		"\n"
 		""},
 	 { (char *)"WorldModel_numTerrains", _wrap_WorldModel_numTerrains, METH_VARARGS, (char *)"\n"
 		"WorldModel_numTerrains(WorldModel self) -> int\n"
 		"\n"
 		"\n"
 		"\n"
+		"Returns the number of terrains.  \n"
+		"\n"
 		""},
 	 { (char *)"WorldModel_numIDs", _wrap_WorldModel_numIDs, METH_VARARGS, (char *)"\n"
 		"WorldModel_numIDs(WorldModel self) -> int\n"
 		"\n"
 		"\n"
+		"\n"
+		"Returns the total number of world ids.  \n"
 		"\n"
 		""},
 	 { (char *)"WorldModel_robot", _wrap_WorldModel_robot, METH_VARARGS, (char *)"\n"

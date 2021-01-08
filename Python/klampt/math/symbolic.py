@@ -572,6 +572,121 @@ Wish list
 - Compiled code generation on vectors/matrices -- maybe integration with
   TensorFlow / PyTorch?
 
+===============================================================================
+Module summary
+===============================================================================
+
+
+External interface
+-----------------------
+
+.. autosummary::
+    expr
+    Type
+    deriv
+    simplify
+    supertype
+    type_of
+    const
+    is_const
+    to_const
+    is_scalar
+    to_scalar
+    is_zero
+    is_var
+    to_var
+    is_expr
+    is_op
+    is_sparse
+    to_monomial
+    to_polynomial
+
+Internal implementation
+-----------------------
+
+.. autosummary::
+    Type
+    Context
+    Function
+    Variable
+    Wildcard
+    Expression
+    ConstantExpression
+    UserDataExpression
+    VariableExpression
+    OperatorExpression
+
+
+Symbolic standard functions
+---------------------------
+
+.. autosummary::
+    range_
+    len_
+    count
+    shape
+    reshape
+    transpose
+    transpose2
+    dims
+    eye
+    basis
+    zero
+    diag
+    eq
+    ne
+    le
+    ge
+    not_
+    or_
+    and_
+    neg
+    abs_
+    sign
+    add
+    sub
+    mul
+    div
+    pow_
+    dot
+    outer
+    tensordot
+    if_
+    max_
+    min_
+    argmax
+    argmin
+    cos
+    sin
+    tan
+    arccos
+    arcsin
+    arctan
+    arctan2
+    sqrt
+    exp
+    log
+    ln
+    sum_
+    any_
+    all_
+    getitem
+    setitem
+    getattr_
+    setattr_
+    flatten
+    row_stack
+    column_stack
+    array
+    list_
+    tuple_
+    zip_
+    weightedsum
+    subs
+    map_
+    forall
+    forsome
+    summation
 
 """
 
@@ -1561,7 +1676,7 @@ class Context:
         return np.hstack([v.value.flatten() if isinstance(v,np.ndarray) else v for v in varorder])
 
 
-class Function:
+class Function(object):
     """A symbolic function.  Contains optional specifications of argument and
     return types, as well as derivatives.
 
@@ -1735,6 +1850,12 @@ class Function:
         self.simplifierDict = dict()
         self.properties = dict()
         self.printers = dict()
+
+    def __getattribute__(self,name):
+        if name=='__doc__':
+            return self.info()
+        else:
+            return object.__getattribute__(self, name)
     
     def __call__(self,*args):
         if self.argNames is not None:
@@ -2171,6 +2292,8 @@ class Function:
                 argHelp = [str(self.argDescriptions)]
             else:
                 argHelp= []
+                if self.argTypes is not None:
+                    assert len(self.argNames) == len(self.argTypes),"invalid arg specification for function %s, %d args != %d types"%(str(self.func),len(self.argNames),len(self.argTypes))
                 for i,name in enumerate(self.argNames):
                     type = None if self.argTypes is None else self.argTypes[i]
                     desc = None if self.argDescriptions is None else self.argDescriptions[i]
@@ -2213,7 +2336,7 @@ class Function:
                         deval = self.deriv(vars,dvars)
                     except Exception:
                         pass
-                if deval:
+                if deval is not None:
                     derivHelp.append('- derivative is '+str(deval))
                 else:
                     derivHelp.append('- derivative is a total derivative function')
@@ -7550,6 +7673,7 @@ map_.returnTypeFunc = _map_returnType
 map_.deriv = _map_deriv
 summation.argTypes = [Type(None),Type('U'),Type('L')]
 summation.deriv = _summation_deriv
+
 
 def _run_basic_test():
     print("Type of 0.4",type_of(0.4))

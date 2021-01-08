@@ -10,6 +10,58 @@ support URLs
 
 Json serialization/deserialization are handled using the :func:`toJson` and
 :func:`fromJson` functions.
+
+Module summary
+==============
+
+High level interface
+--------------------
+
+.. autosummary::
+    write
+    read
+    load
+    save
+    toJson
+    fromJson
+    extensionToTypes
+    typeToExtensions
+    unsupportedJsonTypes
+    filenameToTypes
+    filenameToType
+
+Implementation
+--------------
+
+.. autosummary::
+    readVector
+    writeVector
+    readVectorRaw
+    writeVectorRaw
+    readVectorList
+    writeVectorList
+    readMatrix
+    writeMatrix
+    readMatrix3
+    writeMatrix3
+    readIntArray
+    readStringArray
+    readSo3
+    writeSo3
+    readSe3
+    writeSe3
+    readIKObjective
+    writeIKObjective
+    readContactPoint
+    writeContactPoint
+    readHold
+    writeHold
+    loadWorldModel
+    loadGeometry3D
+    loadTrajectory
+    loadMultiPath
+    loadDynamicXML
+
 """
 from ..robotsim import *
 from ..math import so3,vectorops
@@ -43,11 +95,14 @@ extensionToTypes = {'.config':['Config'],
                    '.env':['TerrainModel'],
                    '.xml':['WorldModel','MultiPath']
                    }
+"""dict mapping file extensions to lists of compatible Klampt types."""
 
 unsupportedJsonTypes = ['Geometry3D','TriangleMesh','PointCloud','GeometricPrimitive','VolumeGrid',
     'RobotModel','RigidObjectModel','TerrainModel','WorldModel']
+"""List of Klampt types that cannot currently be exported to JSON"""
 
 typeToExtensions = dict()
+"""dict mapping Klamp't types to lists of compatible file extensions."""
 for (k,v) in list(extensionToTypes.items()):
     for t in v:
         if t in typeToExtensions:

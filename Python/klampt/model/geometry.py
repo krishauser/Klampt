@@ -1,7 +1,9 @@
 """Utility functions for operating on  geometry.  See the :class:`Geometry3D`
 documentation for the core geometry class. 
 
-[new in 0.8.6, functions moved here from :mod:`klampt.model.sensing`]
+.. versionadded:: 0.8.6
+
+[functions moved here from :mod:`klampt.model.sensing`]
 
 Working with geometric primitives
 =================================

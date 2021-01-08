@@ -293,6 +293,8 @@ def planToCartesianObjective(world,robot,iktargets,iktolerance=1e-3,
                              movingSubset=None,
                              **planOptions):
     """
+    Plans a path to reach one or more IK targets.
+
     Args:
         world (WorldModel): same as planToConfig
         iktargets (list of :class:`IKObjective`): a list of IKObjective

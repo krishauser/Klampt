@@ -1,3 +1,6 @@
+"""General utilities for creating and operating with C-spaces.
+"""
+
 import math
 import time
 from ..math import vectorops
@@ -15,7 +18,7 @@ def default_distance(a,b):
 def default_interpolate(a,b,u):
     return vectorops.interpolate(a,b,u)
 
-def makedefault(space):
+def make_default(space):
     """Helper: makes a space's callbacks perform the default Cartesian space
     operations."""
     space.sampleneighborhood = default_sampleneighborhood

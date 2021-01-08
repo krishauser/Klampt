@@ -2017,8 +2017,8 @@ class Geometry3D(_object):
 
     .. note::  
 
-    Avoid the use of translate, rotate, and transform to represent object movement.
-    Use setCurrentTransform instead.  
+        Avoid the use of translate, rotate, and transform to represent object
+        movement.  Use setCurrentTransform instead.  
 
     **Proximity queries**  
 
@@ -2047,9 +2047,9 @@ class Geometry3D(_object):
 
     .. note::  
 
-    The geometry margin is NOT the same thing as simulation body collision padding!
-    All proximity queries are affected by the collision padding, inside or outside
-    of simulation.  
+        The geometry margin is NOT the same thing as simulation body collision
+        padding!  All proximity queries are affected by the collision padding,
+        inside or outside of simulation.  
 
     **Conversions**  
 
@@ -5138,6 +5138,8 @@ class RobotModel(_object):
 
 
 
+        Sets the name of the robot.  
+
         """
         return _robotsim.RobotModel_setName(self, name)
 
@@ -6293,8 +6295,15 @@ class WorldModel(_object):
     The main world class, containing robots, rigid objects, and static environment
     geometry.  
 
-    Note that this is just a model and can be changed at will -- in fact planners
-    and simulators will make use of a model to "display" computed  
+    .. note: Although a WorldModel instance is typically called a "world" it is
+    just a model and does not have to reflect the state of a physical world. The
+    state of robots and objects in the world can be changed at will -- in fact
+    planners and simulators will query and modify the state of a WorldModel during
+    their operation.  
+
+    To keep around some "authoritative" world, you can keep around a copy (use
+    `WorldModel.copy()`) or `config.getConfig(world)` using the
+    :mod:`klampt.model.config` module.  
 
     Every robot/robot link/terrain/rigid object is given a unique ID in the world.
     This is potentially a source of confusion because some functions take IDs and
@@ -6405,6 +6414,8 @@ class WorldModel(_object):
 
 
 
+        Returns the number of robots.  
+
         """
         return _robotsim.WorldModel_numRobots(self)
 
@@ -6414,6 +6425,8 @@ class WorldModel(_object):
         numRobotLinks(WorldModel self, int robot) -> int
 
 
+
+        Returns the number of links on the given robot.  
 
         """
         return _robotsim.WorldModel_numRobotLinks(self, robot)
@@ -6425,6 +6438,8 @@ class WorldModel(_object):
 
 
 
+        Returns the number of rigid objects.  
+
         """
         return _robotsim.WorldModel_numRigidObjects(self)
 
@@ -6435,6 +6450,8 @@ class WorldModel(_object):
 
 
 
+        Returns the number of terrains.  
+
         """
         return _robotsim.WorldModel_numTerrains(self)
 
@@ -6444,6 +6461,8 @@ class WorldModel(_object):
         numIDs(WorldModel self) -> int
 
 
+
+        Returns the total number of world ids.  
 
         """
         return _robotsim.WorldModel_numIDs(self)

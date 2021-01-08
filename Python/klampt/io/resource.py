@@ -15,7 +15,7 @@ Use :meth:`~klampt.io.resource.getDirectory` and
 stored  Alternatively, the ``directory=[DIRNAME]`` keyword
 argument can be provided to get, set, load, and save.
 
-Warning:
+.. warning::
 
     Don't use ``from klampt.io.resource import *``, because this will
     override the built-in set class.

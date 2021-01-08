@@ -1,5 +1,6 @@
-"""Defines the ``SubRobotModel`` class, which is ``RobotModel``-like but
-only modifies selected degrees of freedom of the robot (e.g., an arm, a leg).
+"""Defines the :class:`SubRobotModel` class, which is :class:`RobotModel`-like 
+but only modifies selected degrees of freedom of the robot (e.g., an arm, a
+leg).
 
 Many, but not all, ``klampt`` module functions accept SubRobotModel in
 the place of RobotModel.

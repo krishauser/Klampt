@@ -9,6 +9,7 @@ from ..model import types
 supportedTypes = set(['Vector3','Point','Matrix3','Rotation','RigidTransform',
         'Config','Configs','Trajectory',
         'TriangleMesh','PointCloud','VolumeGrid','Geometry3D' ])
+"""set of supported types for numpy I/O"""
 
 def to_numpy(obj,type='auto'):
     """Converts a Klamp't object to a numpy array or multiple numpy arrays.

@@ -815,8 +815,8 @@ Modifiers include:
 
 .. note::  
 
-Avoid the use of translate, rotate, and transform to represent object movement.
-Use setCurrentTransform instead.  
+    Avoid the use of translate, rotate, and transform to represent object
+    movement.  Use setCurrentTransform instead.  
 
 **Proximity queries**  
 
@@ -845,9 +845,9 @@ margin. By default the margin is zero.
 
 .. note::  
 
-The geometry margin is NOT the same thing as simulation body collision padding!
-All proximity queries are affected by the collision padding, inside or outside
-of simulation.  
+    The geometry margin is NOT the same thing as simulation body collision
+    padding!  All proximity queries are affected by the collision padding,
+    inside or outside of simulation.  
 
 **Conversions**  
 
@@ -2182,6 +2182,8 @@ appearances is to set the link Appearance's directly.
 ";
 
 %feature("docstring") RobotModel::setName "
+
+Sets the name of the robot.  
 ";
 
 %feature("docstring") RobotModel::reduce "
@@ -4145,8 +4147,15 @@ C++ includes: geometry.h
 The main world class, containing robots, rigid objects, and static environment
 geometry.  
 
-Note that this is just a model and can be changed at will -- in fact planners
-and simulators will make use of a model to \"display\" computed  
+.. note: Although a WorldModel instance is typically called a \"world\" it is
+just a model and does not have to reflect the state of a physical world. The
+state of robots and objects in the world can be changed at will -- in fact
+planners and simulators will query and modify the state of a WorldModel during
+their operation.  
+
+To keep around some \"authoritative\" world, you can keep around a copy (use
+`WorldModel.copy()`) or `config.getConfig(world)` using the
+:mod:`klampt.model.config` module.  
 
 Every robot/robot link/terrain/rigid object is given a unique ID in the world.
 This is potentially a source of confusion because some functions take IDs and
@@ -4165,6 +4174,8 @@ C++ includes: robotmodel.h
 ";
 
 %feature("docstring") WorldModel::numRobotLinks "
+
+Returns the number of links on the given robot.  
 ";
 
 %feature("docstring") WorldModel::geometry "
@@ -4212,6 +4223,8 @@ base name as fn (without the trailing .xml)
 ";
 
 %feature("docstring") WorldModel::numIDs "
+
+Returns the total number of world ids.  
 ";
 
 %feature("docstring") WorldModel::add "
@@ -4239,6 +4252,8 @@ shared, so this is very quick.
 ";
 
 %feature("docstring") WorldModel::numRigidObjects "
+
+Returns the number of rigid objects.  
 ";
 
 %feature("docstring") WorldModel::makeTerrain "
@@ -4257,6 +4272,8 @@ Returns a RobotModelLink of some RobotModel in the world by index or name.
 ";
 
 %feature("docstring") WorldModel::numRobots "
+
+Returns the number of robots.  
 ";
 
 %feature("docstring") WorldModel::drawGL "
@@ -4341,6 +4358,8 @@ Creates a WorldModel.
 ";
 
 %feature("docstring") WorldModel::numTerrains "
+
+Returns the number of terrains.  
 ";
 
 %feature("docstring") WorldModel::makeRigidObject "

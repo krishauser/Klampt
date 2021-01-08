@@ -596,7 +596,8 @@ def to_SensorMsg(klampt_sensor,frame=None,frame_prefix='klampt',stamp='now'):
         stamp (str, float, or rospy.Time, optional): can be 'now', a float,
             or a rospy.Time.  Will be set in the ROS message header.
 
-    The ROS ``frame_id`` is set as follows
+    The ROS ``frame_id`` is set as follows:
+    
     - If frame!=None, then ``frame_id=frame``.
     - If frame==None and frame_prefix==None, then
       ``frame_id = [robot_name]/[sensor_name]``.

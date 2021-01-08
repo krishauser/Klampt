@@ -1,3 +1,6 @@
+"""Common interface for geodesic interpolation and distances on manifolds.
+"""
+
 from . import vectorops, so2, so3, se3
 import math
 

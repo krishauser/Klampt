@@ -1,3 +1,6 @@
+"""I/O from symbolic expressions.
+"""
+
 from .symbolic import *
 from .symbolic import _infix_operators,_prefix_operators,_builtin_functions
 from ..io import loader

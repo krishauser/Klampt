@@ -12,7 +12,6 @@ This can be used standalone, but is more powerful in conjunction with
 PyTorch or CadADi. Use the functions in :mod:`pytorch` and :mod:`casadi`
 to convert these Klamp't functions to PyTorch or CasADi functions.
 
-
 Calling and evaluating functions
 ================================
 

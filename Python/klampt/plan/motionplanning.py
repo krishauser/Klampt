@@ -406,7 +406,7 @@ def getPlanJSONString():
     Saves planner values to a JSON string.  
 
     Returns:
-        (str):
+        str:
     """
     return _motionplanning.getPlanJSONString()
 
@@ -636,7 +636,7 @@ class CSpaceInterface(_object):
         Args:
             key (str)
         Returns:
-            (str):
+            str:
         """
         return _motionplanning.CSpaceInterface_getProperty(self, key)
 
@@ -648,7 +648,7 @@ class CSpaceInterface(_object):
         Args:
             q (:obj:`object`)
         Returns:
-            (bool):
+            bool:
         """
         return _motionplanning.CSpaceInterface_isFeasible(self, q)
 
@@ -661,7 +661,7 @@ class CSpaceInterface(_object):
             a (:obj:`object`)
             b (:obj:`object`)
         Returns:
-            (bool):
+            bool:
         """
         return _motionplanning.CSpaceInterface_isVisible(self, a, b)
 
@@ -675,7 +675,7 @@ class CSpaceInterface(_object):
             name (str)
             q (:obj:`object`)
         Returns:
-            (bool):
+            bool:
         """
         return _motionplanning.CSpaceInterface_testFeasibility(self, name, q)
 
@@ -690,7 +690,7 @@ class CSpaceInterface(_object):
             a (:obj:`object`)
             b (:obj:`object`)
         Returns:
-            (bool):
+            bool:
         """
         return _motionplanning.CSpaceInterface_testVisibility(self, name, a, b)
 
@@ -702,7 +702,7 @@ class CSpaceInterface(_object):
         Args:
             q (:obj:`object`)
         Returns:
-            (:obj:`object`):
+            :obj:`object`:
         """
         return _motionplanning.CSpaceInterface_feasibilityFailures(self, q)
 
@@ -715,7 +715,7 @@ class CSpaceInterface(_object):
             a (:obj:`object`)
             b (:obj:`object`)
         Returns:
-            (:obj:`object`):
+            :obj:`object`:
         """
         return _motionplanning.CSpaceInterface_visibilityFailures(self, a, b)
 
@@ -725,7 +725,7 @@ class CSpaceInterface(_object):
         Samples a configuration.  
 
         Returns:
-            (:obj:`object`):
+            :obj:`object`:
         """
         return _motionplanning.CSpaceInterface_sample(self)
 
@@ -738,7 +738,7 @@ class CSpaceInterface(_object):
             a (:obj:`object`)
             b (:obj:`object`)
         Returns:
-            (float):
+            float:
         """
         return _motionplanning.CSpaceInterface_distance(self, a, b)
 
@@ -752,7 +752,7 @@ class CSpaceInterface(_object):
             b (:obj:`object`)
             u (float)
         Returns:
-            (:obj:`object`):
+            :obj:`object`:
         """
         return _motionplanning.CSpaceInterface_interpolate(self, a, b, u)
 
@@ -763,7 +763,7 @@ class CSpaceInterface(_object):
         of testing feasibility / visibility using empirical estimates. Off by default.  
 
         Returns:
-            (bool):
+            bool:
         """
         return _motionplanning.CSpaceInterface_adaptiveQueriesEnabled(self)
 
@@ -866,7 +866,7 @@ class CSpaceInterface(_object):
         Args:
             name (str)
         Returns:
-            (float):
+            float:
         """
         return _motionplanning.CSpaceInterface_feasibilityCost(self, name)
 
@@ -878,7 +878,7 @@ class CSpaceInterface(_object):
         Args:
             name (str)
         Returns:
-            (float):
+            float:
         """
         return _motionplanning.CSpaceInterface_feasibilityProbability(self, name)
 
@@ -890,7 +890,7 @@ class CSpaceInterface(_object):
         Args:
             name (str)
         Returns:
-            (float):
+            float:
         """
         return _motionplanning.CSpaceInterface_visibilityCost(self, name)
 
@@ -902,7 +902,7 @@ class CSpaceInterface(_object):
         Args:
             name (str)
         Returns:
-            (float):
+            float:
         """
         return _motionplanning.CSpaceInterface_visibilityProbability(self, name)
 
@@ -912,7 +912,7 @@ class CSpaceInterface(_object):
         Retrieves the current order of feasibility tests.  
 
         Returns:
-            (:obj:`object`):
+            :obj:`object`:
         """
         return _motionplanning.CSpaceInterface_feasibilityQueryOrder(self)
 
@@ -922,7 +922,7 @@ class CSpaceInterface(_object):
         Retrieves the current order of visibility tests.  
 
         Returns:
-            (:obj:`object`):
+            :obj:`object`:
         """
         return _motionplanning.CSpaceInterface_visibilityQueryOrder(self)
 
@@ -933,7 +933,7 @@ class CSpaceInterface(_object):
         returns the stats on each constraint.  
 
         Returns:
-            (:obj:`object`):
+            :obj:`object`:
         """
         return _motionplanning.CSpaceInterface_getStats(self)
 
@@ -1024,7 +1024,7 @@ class PlannerInterface(_object):
             start (:obj:`object`)
             goal (:obj:`object`)
         Returns:
-            (bool):
+            bool:
         """
         return _motionplanning.PlannerInterface_setEndpoints(self, start, goal)
 
@@ -1068,7 +1068,7 @@ class PlannerInterface(_object):
         Args:
             milestone (:obj:`object`)
         Returns:
-            (int):
+            int:
         """
         return _motionplanning.PlannerInterface_addMilestone(self, milestone)
 
@@ -1078,7 +1078,7 @@ class PlannerInterface(_object):
         Args:
             config (:obj:`object`)
         Returns:
-            (int):
+            int:
         """
         return _motionplanning.PlannerInterface_getClosestMilestone(self, config)
 
@@ -1088,7 +1088,7 @@ class PlannerInterface(_object):
         Args:
             arg2 (int)
         Returns:
-            (:obj:`object`):
+            :obj:`object`:
         """
         return _motionplanning.PlannerInterface_getMilestone(self, arg2)
 
@@ -1104,7 +1104,7 @@ class PlannerInterface(_object):
     def getSolutionPath(self):
         """
         Returns:
-            (:obj:`object`):
+            :obj:`object`:
         """
         return _motionplanning.PlannerInterface_getSolutionPath(self)
 
@@ -1133,7 +1133,7 @@ class PlannerInterface(_object):
         Args:
             setting (str)
         Returns:
-            (float):
+            float:
         """
         return _motionplanning.PlannerInterface_getData(self, setting)
 
@@ -1141,7 +1141,7 @@ class PlannerInterface(_object):
     def getStats(self):
         """
         Returns:
-            (:obj:`object`):
+            :obj:`object`:
         """
         return _motionplanning.PlannerInterface_getStats(self)
 
@@ -1149,7 +1149,7 @@ class PlannerInterface(_object):
     def getRoadmap(self):
         """
         Returns:
-            (:obj:`object`):
+            :obj:`object`:
         """
         return _motionplanning.PlannerInterface_getRoadmap(self)
 

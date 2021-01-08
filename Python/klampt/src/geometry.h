@@ -414,8 +414,8 @@ public:
  * 
  * .. note::
  *
- *    Avoid the use of translate, rotate, and transform to represent object
- *    movement.  Use setCurrentTransform instead.
+ *     Avoid the use of translate, rotate, and transform to represent object
+ *     movement.  Use setCurrentTransform instead.
  *
  * **Proximity queries**
  * 
@@ -445,9 +445,9 @@ public:
  *
  * .. note::
  *
- *    The geometry margin is NOT the same thing as simulation body collision
- *    padding!  All proximity queries are affected by the collision padding,
- *    inside or outside of simulation.
+ *     The geometry margin is NOT the same thing as simulation body collision
+ *     padding!  All proximity queries are affected by the collision padding,
+ *     inside or outside of simulation.
  *
  * **Conversions**
  *

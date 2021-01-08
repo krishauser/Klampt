@@ -459,6 +459,16 @@ class RobotTrajectory(Trajectory):
     """A trajectory that performs interpolation according to the robot's
     interpolation scheme."""
     def __init__(self,robot,times=None,milestones=None):
+        """Args:
+            robot (RobotModel or SubRobotModel): the robot whose configuration
+                should follow this trajectory.
+            times (list of floats, optional): if provided, initializes the
+                self.times attribute.  If milestones is provided, a uniform
+                timing is set.  Otherwise self.times is empty.
+            milestones (list of Configs, optional): if provided, initializes
+                the self.milestones attribute.  Otherwise milestones is empty.
+
+        """
         from klampt import RobotModel
         from ..model.subrobot import SubRobotModel
         if not isinstance(robot,(RobotModel,SubRobotModel)):

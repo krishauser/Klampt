@@ -55,14 +55,18 @@ klampt.robotsim.IKSolver)
        stuck in local minima.  As a result you may wish to choose random
        initial configurations if the first solve fails.
 
-Note: IK solving with constraints between robot links and rigid objects
-is not yet implemented and will result in a thrown exception.
+.. note::
+    IK solving with constraints between robot links and rigid objects
+    (GeneralizedIKObjective and GeneralizedIKSolver)
+    is not yet implemented and will result in an exception.
+    This functionality may be supported in the future but is not on the
+    current development path.
+
 """
 
 from ..robotsim import *
 from ..math import so3,se3
 from .subrobot import SubRobotModel
-from .coordinates import Point,Direction,Frame,Transform
 
 def objective(body,ref=None,local=None,world=None,R=None,t=None):
     """Returns an IKObjective for a given body.

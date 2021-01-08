@@ -1,4 +1,6 @@
-"""Defines the symbolic functions:
+"""Defines symbolic linear algebra functions.
+
+Function list: 
 
 - norm(x): returns the L-2 norm of a vector
 - norm2(x): returns the squared L-2 norm of a vector
@@ -47,9 +49,35 @@ Function           Derivative     Simplification
   bilinear         Y,Y,N                          
   bound_contains   N/A                            
   bound_margin                                    
-  bound_overlabs   N/A                            
+  bound_overlaps   N/A                            
 =================  =============  ==============
 
+Module contents
+---------------------------
+
+.. autosummary::
+    norm
+    norm2
+    norm_L1
+    norm_Linf
+    norm_fro
+    distance
+    distance2
+    distance_L1
+    distance_Linf
+    mahalanobis_distance
+    mahalanobis_distance2
+    unit
+    inv
+    pinv
+    linear
+    quadratic
+    bilinear
+    bound_contains
+    bound_margin
+    bound_overlaps
+    LinAlgContext
+  
 """
 
 from .symbolic import *
@@ -61,6 +89,7 @@ _x = Variable("x","V")
 _y = Variable("y","V")
 _A = Variable("A","M")
 norm = Function('norm',np.linalg.norm,['x'],returnType='N')
+norm.description = "Returns the L-2 norm of a vector"
 norm2 = Function('norm2',dot(_x,_x),['x'],returnType='N')
 norm_L1 = Function('norm_L1',lambda x:np.linalg.norm(x,ord=1),returnType='N')
 _inf = float('inf')
@@ -170,7 +199,7 @@ def _bound_margin(xmin,xmax,x):
     return min(min(v-a,b-v) for v,a,b in zip(x,xmin,xmax))
 bound_contains = Function('bound_contains',_bound_contains,returnType = 'B')
 bound_overlaps = Function('bound_overlaps',_bound_overlaps,returnType = 'B')
-bound_margin = Function('bound_margin',_bound_overlaps,returnType = 'N')
+bound_margin = Function('bound_margin',_bound_margin,returnType = 'N')
 bound_contains.argTypes = [Vector]*3
 bound_overlaps.argTypes = [Vector]*4
 bound_margin.argTypes = [Vector]*3

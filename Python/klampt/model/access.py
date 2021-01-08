@@ -25,6 +25,7 @@ Which is a shortcut to::
     q = world.robot(0).getConfig()
     q[4] = 3.5
     world.robot(0).setConfig(q)
+    
 """
 
 from ..robotsim import *

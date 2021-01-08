@@ -27,7 +27,7 @@ the ``se3_ad.rotation`` and ``se3_ad.translation`` functions.
  error                 N
  ====================  =============  ====================================
  
-.. note:
+.. note::
     To do gradient descent on se3 elements, you will need to either project to
     the se3 submanifold or use a non-redundant representation.  The rotation 
     vector representation (see so3_ad.rotation_vector and
@@ -44,7 +44,7 @@ from .ad import ADFunctionInterface,function
 from .. import se3
 
 SIZE = 12
-"""Constant giving the dimension of an so3_ad element"""
+"""Constant giving the dimension of an se3_ad element"""
 
 def _rotation(T):
     return T[:9]

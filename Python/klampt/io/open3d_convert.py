@@ -1,9 +1,9 @@
 """Conversions to and from the Open3D library.
 
 Open3D is useful for doing various point cloud processing routines.
-It can be installed using pip as follows:
+It can be installed using pip as follows::
 
-   pip install open3d-python
+    pip install open3d-python
 
 """
 
