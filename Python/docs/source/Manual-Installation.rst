@@ -120,6 +120,25 @@ To get started using Klamp't in Jupyter, browse the examples in the Jupyter dire
 the `Klampt-examples <https://github.com/krishauser/Klampt-examples>`__ repository.
 
 
+Ready-to-use web interfaces
+---------------------------
+Klamp't works best when it is installed on your local machine, but it can also be run online through your web browser using Google Colab or Binder (or any other Jupyterhub server).
+
+- Google Colab |colab_badge|
+- Binder |binder_badge|
+
+
+.. |colab_badge| image:: https://colab.research.google.com/assets/colab-badge.svg
+   :target: https://colab.research.google.com/gist/krishauser/1a518571493d2582f8bda908d9db02fb/klamptcolab.ipynb
+   :alt: Open in Colab
+
+.. |binder_badge| image:: https://mybinder.org/badge_logo.svg
+   :target: https://mybinder.org/v2/gh/krishauser/Klampt-examples/binder?filepath=Jupyter%2FBasicKlamptDemo.ipynb
+   :alt: Open in Binder
+
+Note that the UI functionality is drastically limited compared to a local installation.
+
+
 Should I build from source?
 ----------------------------
 

@@ -64,16 +64,27 @@ The Klamp't Python API is organized as follows:
    objects. Supports JSON formats for some objects as well. Resource
    loading, saving, and visual editing.
 -  ``klampt.vis``: Visualization.
--  ``Klampt/Python/control``: custom control modules.
+-  ``Klampt.control``: control modules.
 
 You should also obtain the `Klampt-examples Github project <https://github.com/krishauser/Klampt-examples>`_ 
-for examples of how to run the Klampt Python API.  Python exampels are found in Klampt-examples/Python, and include:
+for examples of how to run the Klampt Python API.  Klampt files are stored in the ``Klampt-examples/data``,
+and include
 
--  ``demos``: demonstrations about how to use various
+- ``data``: example world XML files
+- ``data/robots``: example robot files 
+- ``data/objects``: example rigid object files
+- ``data/terrains``: example terrain files
+- ``data/motions``: example motions
+- ``data/resources``: an example resource collision
+- ``data/simulation_test_worlds``: example worlds to test simulator functionality
+
+Python code examples are found in ``Klampt-examples/Python3``, and include:
+
+-  ``Python3/demos``: demonstrations about how to use various
    aspects of the Python klampt API.
--  ``exercises``: exercises for implementing basic
+-  ``Python3/exercises``: exercises for implementing basic
    concepts in Klamp't.
--  ``utils``: utility programs.
+-  ``Python3/utils``: utility programs.
 
 
 Klampt project source

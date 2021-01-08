@@ -174,7 +174,7 @@ have the suffix ``_ext`` and accept a :class:`~klampt.DistanceQuerySettings` obj
 -  ``geom.distance_ext(geom2,settings)``
 -  ``geom.distance_point_ext(pt,settings)``
 
-The following :class:`~klampt.collide.WorldCollider` methods are used most often:
+The following :class:`~klampt.model.collide.WorldCollider` methods are used most often:
 
 -  ``collisions()``: checks for all collisions.
 -  ``collisions(filter)``: checks for all collisions between objects for

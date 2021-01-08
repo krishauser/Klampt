@@ -71,7 +71,7 @@ API summary
 ~~~~~~~~~~~
 
 The core functionality is contained in the
-:class:`IKObjective`
+:class:`~klampt.IKObjective`
 class, but there are more convenient methods in
 the `klampt.model.ik <klampt.model.html#module-klampt.model.ik>`__
 module. The following assume that you have first run
@@ -256,7 +256,7 @@ API summary
 ~~~~~~~~~~~
 
 The solver code is contained in the
-:class:`IKSolver` class, but there are more convenient methods in
+:class:`~klampt.IKSolver` class, but there are more convenient methods in
 the `klampt.model.ik <klampt.model.ik.html>`__
 module.
 
