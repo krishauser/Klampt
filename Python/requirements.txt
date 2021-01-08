@@ -1,0 +1,2 @@
+# klampt Python package dependencies
+PyOpenGL
