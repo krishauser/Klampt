@@ -9,9 +9,9 @@
  sin                Y
  cos                Y
  dot                Y
- linear             Y              Produces A*x for a fixed A
- quadratric         Y              Produces x^T*A*x for a fixed A
- bilinear           Y              Produces x^T*A*y for a fixed A
+ linear             Y              Produces :math:`A x` for a fixed A
+ quadratric         Y              Produces :math:`x^T A x` for a fixed A
+ bilinear           Y              Produces :math:`x^T A y` for a fixed A
  ShapedDot          Y              Reshapes a vector before performing dot
  norm               1              Standard L2 norm
  normSquared        Y
@@ -21,6 +21,28 @@
  cross              1 
  interpolate        1
  =================  =============  ===================================
+
+Module contents
+~~~~~~~~~~~~~~~
+
+.. autosummary::
+    exp
+    log
+    sqrt
+    sin
+    cos
+    dot
+    linear
+    quadratric
+    bilinear
+    ShapedDot
+    norm
+    normSquared
+    distance
+    distanceSquared
+    unit
+    cross
+    interpolate
 
 """
 
@@ -356,14 +378,14 @@ class _ADDistanceL2(ADFunctionInterface):
         return np.linalg.norm(a-b)
     def derivative(self,arg,a,b):
         if arg==0:
-            return distance_derivative_a(a,b)[np.newaxis,:]
+            return _distance_derivative_a(a,b)[np.newaxis,:]
         else:
-            return distance_derivative_a(b,a)[np.newaxis,:]
+            return _distance_derivative_a(b,a)[np.newaxis,:]
     def jvp(self,arg,darg,a,b):
         if arg==0:
-            return distance_jvp_a(darg,a,b)
+            return _distance_jvp_a(darg,a,b)
         else:
-            return distance_jvp_a(darg,b,a)
+            return _distance_jvp_a(darg,b,a)
     
 
 class _ADDistanceSquared(ADFunctionInterface):
@@ -429,25 +451,25 @@ def bilinear(x,A,y):
     constant, 2D np.array.  x and y may be expressions."""
     return _ADBilinear(A)(x,y)
 
-def norm_derivative(x):
+def _norm_derivative(x):
     return np.asarray(x)/np.linalg.norm(x)
 
-def norm_jvp(dx,x):
+def _norm_jvp(dx,x):
     return np.dot(x,dx)/np.linalg.norm(x)
 
-def distance_derivative_a(a,b):
+def _distance_derivative_a(a,b):
     a = np.asarray(a)
     b = np.asarray(b)
     return (a-b) / np.linalg.norm(a-b)
 
-def distance_jvp_a(da,a,b):
+def _distance_jvp_a(da,a,b):
     a = np.asarray(a)
     b = np.asarray(b)
     return np.dot(a - b,da) / np.linalg.norm(a-b)
 
 norm = function(np.linalg.norm,'norm',[-1],1,
-    derivative=[lambda x:norm_derivative(x)[np.newaxis,:]],
-    jvp=[norm_jvp])
+    derivative=[lambda x:_norm_derivative(x)[np.newaxis,:]],
+    jvp=[_norm_jvp])
 """Autodiff'ed function comparable to np.linalg.norm.  First derivative is
 implemented."""
 
@@ -469,14 +491,14 @@ def _unit(x):
     if n > 1e-7:
         return x/n
     return n*0
-def unit_jvp(dx,x):
+def _unit_jvp(dx,x):
     n = np.linalg.norm(x)
     dn = norm_jvp(dx,x)
     if n > 1e-7:
         return dx/n - x*(dn/n**2)
     return np.linalg.norm(dx)
 unit = function(_unit,'unit',[-1],-1,
-    jvp=[unit_jvp])
+    jvp=[_unit_jvp])
 """Autodiff'ed function comparable to x/norm(x).  First derivative is
 implemented."""
 

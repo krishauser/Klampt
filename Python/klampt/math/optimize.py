@@ -7,14 +7,6 @@ DIRECT (for now).
 
 Works well with the :mod:`klampt.math.symbolic` module.
 
-Module summary
---------------
-
-.. autosummary::
-    OptimizationProblem
-    OptimizationProblemBuilder
-    GlobalOptimizer
-
 """
 
 import numpy as np
@@ -43,19 +35,21 @@ class OptimizationProblem:
         inequalities (list of functions): inequality functions requiring math:`h(x) \leq 0`
             for a feasible solution.
         inequalityGrads (list of functions): a list of gradient/Jacobian functions
-            :math:`\\frac{partial h}{\partial x}(x)` of each inequality function.
+            :math:`\\frac{\partial h}{\partial x}(x)` of each inequality function.
         feasibilityTests (list of functions): boolean black-box predicates that must
             be true  of the solution
 
-    Suitable for use with the symbolic module.  Once a Context is created, and
-    appropriate Variables, Functions, Expressions are declared, the
-    setSymbolicObjective and addSymbolicConstraint methods automatically determine
-    the standard Python function forms. I.e., context.makeFlatFunction(f,varorder)
+    Suitable for use with the :mod:`~klampt.math.symbolic` module.  Once a
+    :class:`~klampt.math.symbolic.Context` is created, and appropriate Variables,
+    Functions, and Expressions are declared, the
+    :meth:`setSymbolicObjective` and :meth:`addSymbolicConstraint` methods
+    automatically determine the standard Python function forms. i.e.,
+    ``context.makeFlatFunction(f,varorder)``
     where varorder = None for the default variable ordering. 
 
-    The OptimizationProblemBuilder class is more closely tied with the symbolic
-    module and is more convenient to use.  It performs automatic simplification
-    and differentiation, and can be saved / loaded to disk.
+    The :class:`OptimizationProblemBuilder` class is more closely tied with the
+    symbolic module and is more convenient to use.  It performs automatic
+    simplification and differentiation, and can be saved / loaded to disk.
     """
     def __init__(self):
         self.objective = None

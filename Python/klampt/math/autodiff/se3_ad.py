@@ -37,6 +37,24 @@ the ``se3_ad.rotation`` and ``se3_ad.translation`` functions.
     convert from a 6-element vector x (first 3 elements encoding the rotation
     vector, final 3 elements encoding the translation) to a se3 element.
 
+Module contents
+~~~~~~~~~~~~~~~
+
+.. autosummary::
+    join
+    identity
+    apply
+    apply_rotation
+    mul
+    inv
+    rotation
+    from_rotation
+    translation
+    from_translation
+    distance
+    interpolate
+    error
+
 """
 
 import numpy as np 

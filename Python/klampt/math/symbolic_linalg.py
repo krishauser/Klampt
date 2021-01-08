@@ -11,14 +11,14 @@ Function list:
 - distance2(x,y): returns the squared L-2 distance between two vectors
 - distance_L1(x,y): returns the L-1 distance between two vectors
 - distance_Linf(x,y): returns the L-infinity distance between two vectors
-- mahalanobis_distance(x,y,A): returns the mahalanobis distance between two vectors weighted by A, i.e. sqrt((x-y)^T A (x-y))
+- mahalanobis_distance(x,y,A): returns the mahalanobis distance between two vectors weighted by A, i.e. :math:`\sqrt((x-y)^T A (x-y))`
 - mahalanobis_distance2(x,y,A): returns the squared mahalanobis distance between two vectors weighted by A
 - unit(x): returns the unit vector in the direction x
 - inv(A): returns the inverse of a matrix
 - pinv(A): returns the pseudoinverse of a matrix
-- linear(x,A): the linear function A*x
-- quadratic(x,A): the quadratic function x^T*A*x
-- bilinear(x,y,A): the bilinear function x^T*A*y
+- linear(x,A): the linear function :math:`A x`
+- quadratic(x,A): the quadratic function :math:`x^T A x`
+- bilinear(x,y,A): the bilinear function :math:`x^T A y`
 - bound_contains(xmin,xmax,x): returns True if xmin <= x <= xmax element-wise
 - bound_margin(xmin,xmax,x): returns the distance from x to boundaries of the bounding box [xmin,xmax], if inside (positive is inside)
 - bound_overlaps(xmin,xmax,ymin,ymax): returns True if xmin <= x <= xmax element-wise
@@ -53,7 +53,7 @@ Function           Derivative     Simplification
 =================  =============  ==============
 
 Module contents
----------------------------
+~~~~~~~~~~~~~~~
 
 .. autosummary::
     norm

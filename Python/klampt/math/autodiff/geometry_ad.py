@@ -269,9 +269,9 @@ class GeomPointDistance(ADFunctionInterface):
                     Tinv = se3.inv(Tnative)
                     dR,dt = se3_ad.to_klampt(darg)
                     pgeom_loc = se3.apply(Tinv,self.eval_res.cp1)
-                    return math_ad.distance_jvp_a(se3.apply((dR,dt),pgeom_loc),self.eval_res.cp1,x)
+                    return math_ad._distance_jvp_a(se3.apply((dR,dt),pgeom_loc),self.eval_res.cp1,x)
                 else:
-                    return math_ad.distance_jvp_a(darg,x,self.eval_res.cp1)
+                    return math_ad._distance_jvp_a(darg,x,self.eval_res.cp1)
         elif self.shape_dims == 1:
             pass
         elif self.shape_dims == 2:
@@ -477,21 +477,21 @@ class GeomGeomDistance(ADFunctionInterface):
             if arg == 0:
                 p1loc = se3.apply(T1inv,self.eval_res.cp1)
                 dp1 = se3.apply(se3_ad.to_klampt(darg),p1loc)
-                return math_ad.distance_jvp_a(dp1,self.eval_res.cp1,self.eval_res.cp2)
+                return math_ad._distance_jvp_a(dp1,self.eval_res.cp1,self.eval_res.cp2)
             else:
                 p2loc = se3.apply(T2inv,self.eval_res.cp2)
                 dp2 = se3.apply(se3_ad.to_klampt(darg),p2loc)
-                return math_ad.distance_jvp_a(dp2,self.eval_res.cp2,self.eval_res.cp1)
+                return math_ad._distance_jvp_a(dp2,self.eval_res.cp2,self.eval_res.cp1)
         elif self.shape_dims1 == 2 and self.shape_dims2 == 2:
             #hmm... how to approximate local geometry?
             if arg == 0:
                 p1loc = se3.apply(T1inv,self.eval_res.cp1)
                 dp1 = se3.apply(se3_ad.to_klampt(darg),p1loc)
-                return math_ad.distance_jvp_a(dp1,self.eval_res.cp1,self.eval_res.cp2)
+                return math_ad._distance_jvp_a(dp1,self.eval_res.cp1,self.eval_res.cp2)
             else:
                 p2loc = se3.apply(T2inv,self.eval_res.cp2)
                 dp2 = se3.apply(se3_ad.to_klampt(darg),p2loc)
-                return math_ad.distance_jvp_a(dp2,self.eval_res.cp2,self.eval_res.cp1)
+                return math_ad._distance_jvp_a(dp2,self.eval_res.cp2,self.eval_res.cp1)
         elif self.shape_dims2 == 0:
             #approximate shape 2 as a point, shape 1 as a plane
             if not self.eval_res.hasGradients:

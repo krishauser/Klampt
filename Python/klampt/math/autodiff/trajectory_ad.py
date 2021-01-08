@@ -10,6 +10,16 @@
  Trajectory             1              trajectory[n,end](ts,xs,t) -> R^n
  =====================  =============  ========================================
 
+Module summary
+~~~~~~~~~~~~~~
+
+.. autosummary::
+    hermite
+    GeodesicInterpolate
+    GeodesicDistance
+    TrajectoryEval
+    Trajectory
+
 """
 
 

@@ -244,6 +244,7 @@ autodiff versions of many Klamp't functions are found in:
 - :mod:`geometry_ad` geometry derivative functions.
 - :mod:`dynamics_ad` dynamics derivative functions.
 - :mod:`trajectory_ad` trajectory derivative functions.
+
 """
 
 import numpy as np
