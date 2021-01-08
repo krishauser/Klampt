@@ -5,6 +5,7 @@ klampt.math.geodesic module
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: klampt.math.geodesic
+    :autosummary:
     :members:
     :undoc-members:
     :show-inheritance:

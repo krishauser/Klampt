@@ -34,6 +34,7 @@ klampt.io.resource module
 -------------------------
 
 .. automodule:: klampt.io.resource
+    :autosummary:
     :members:
     :undoc-members:
     :show-inheritance:
@@ -42,6 +43,7 @@ klampt.io.ros module
 -------------------------
 
 .. automodule:: klampt.io.ros
+    :autosummary:
     :members:
     :undoc-members:
     :show-inheritance:
@@ -50,6 +52,7 @@ klampt.io.numpy_convert module
 ------------------------------
 
 .. automodule:: klampt.io.numpy_convert
+    :autosummary:
     :members:
     :undoc-members:
     :show-inheritance:
@@ -58,6 +61,7 @@ klampt.io.open3d_convert module
 -------------------------------
 
 .. automodule:: klampt.io.open3d_convert
+    :autosummary:
     :members:
     :undoc-members:
     :show-inheritance:
@@ -66,6 +70,7 @@ klampt.io.povray module
 -----------------------
 
 .. automodule:: klampt.io.povray
+    :autosummary:
     :members:
     :undoc-members:
     :show-inheritance:

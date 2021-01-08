@@ -120,6 +120,7 @@ Module contents
 ----------------
 
 .. automodule:: klampt
+    :autosummary:
     :members:
     :undoc-members:
     :show-inheritance:

@@ -7,6 +7,7 @@ joint-space paths to achieve a task-space displacement.
 
 
 .. automodule:: klampt.model.cartesian_trajectory
+    :autosummary:
     :members:
     :undoc-members:
     :show-inheritance:

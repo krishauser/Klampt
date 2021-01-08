@@ -552,7 +552,7 @@ visualization thread, and will not need to call the ``vis.lock()`` and
 -  ``plugin.motionfunc(x,y,dx,dy)``: called when the mouse is moved to
    (x,y) with delta (dx,dy) from its previous position.
 -  ``plugin.idle()``: called when the GUI is not working.
--  ``plugin.eventfunc(type,args=""): Generic hook for other events,
+-  ``plugin.eventfunc(type,args="")``: Generic hook for other events,
    e.g., button presses, from the GUI.  Currently not used.
 -  ``plugin.closefunc()``: called before the viewport is closed.
 
