@@ -75,7 +75,7 @@ and include
 - ``data/objects``: example rigid object files
 - ``data/terrains``: example terrain files
 - ``data/motions``: example motions
-- ``data/resources``: an example resource collision
+- ``data/resources``: an example resource collection
 - ``data/simulation_test_worlds``: example worlds to test simulator functionality
 
 Python code examples are found in ``Klampt-examples/Python3``, and include:
