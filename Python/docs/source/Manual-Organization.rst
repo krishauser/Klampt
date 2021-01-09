@@ -122,7 +122,7 @@ Build and temporary files
    ``cmake_install.cmake``, ``cmake_uninstall.cmake``: temporary build
    files. These can be safely deleted after a successful build.
 -  ``tests``: A few basic test programs, built on ``make test``.
--  \`lib/libKlampt.a': the main Klamp't library file to be included into
+-  ``lib/libKlampt.a``: the main Klamp't library file to be included into
    new projects.
 -  ``doxygen.conf``: documentation build file.
 -  ``update.sh``: Linux script to cleanly update all of Klampt and
