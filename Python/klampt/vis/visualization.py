@@ -2372,6 +2372,9 @@ class VisAppearance:
         if len(point) != 3:
             print("WARNING drawText INCORRECT POINT SIZE",point,text)
             return
+        if not all(math.isfinite(v) for v in point):
+            print("WARNING drawText INVALID POINT",point,text)
+            return
         self.widget.addLabel(text,point[:],[0,0,0])
 
     def updateAnimation(self,t):
