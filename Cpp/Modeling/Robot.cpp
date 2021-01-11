@@ -2752,6 +2752,9 @@ bool Robot::LoadURDF(const char* fn)
         if(e->Attribute("prefix")) {
           prefix = e->Attribute("prefix");
         }
+        if(e->Attribute("as")) {
+          prefix = e->Attribute("as");
+        }
         mountLinks.push_back(link);
         mountFiles.push_back(file);
         mountT.push_back(T);
