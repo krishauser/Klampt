@@ -261,7 +261,7 @@ def point_cloud_normals(pc,estimation_radius=None,estimation_knn=None,estimation
             raise ValueError("Without scipy, can't do a k-NN plane estimation")
         #do a spatial hash
         normals = np.zeros((N,3))
-        indices = (positions / estimation_radius).astype(int)
+        indices = (positions * (1.0/estimation_radius)).astype(int)
         from collections import defaultdict
         pt_hash = defaultdict(list)
         for i,(ind,p) in enumerate(zip(indices,positions)):
@@ -300,6 +300,45 @@ def point_cloud_normals(pc,estimation_radius=None,estimation_knn=None,estimation
         if geom is not None:
             geom.setPointCloud(pc)
     return normals
+
+
+def fit_plane3(point1,point2,point3):
+    """Returns a 3D plane equation fitting the 3 points.
+  
+    The result is (a,b,c,d) with the plane equation ax+by+cz+d=0
+    """
+    _try_numpy_import()
+    normal = np.cross(point2-point1,point3-point1)
+    nlen = np.linalg.norm(normal)
+    if nlen < 1e-4:
+        #degenerate
+        raise ValueError("Points are degenerate")
+    normal = normal / nlen
+    offset = -np.dot(normal,point1)
+    return (normal[0],normal[1],normal[2],offset)
+
+
+def fit_plane(points):
+    """Returns a 3D plane equation that is a least squares fit
+    through the points (len(points) >= 3)."""
+    normal,centroid = fit_plane_centroid(points)
+    return normal[0],normal[1],normal[2],-vectorops.dot(centroid,normal)
+
+
+def fit_plane_centroid(points):
+    """Similar to :func:`fit_plane`, but returns a (centroid,normal) pair."""
+    if len(points)<3:
+        raise ValueError("Need to have at least 3 points to fit a plane")
+    #if len(points)==3:
+    #    return fit_plane3(points[0],points[1],points[2])
+    _try_numpy_import()
+    points = np.asarray(points)
+    centroid = np.average(points,axis=0)
+    U,W,Vt = np.linalg.svd(points-[centroid]*len(points),full_matrices=False)
+    if np.sum(W<1e-6) > 1:
+        raise ValueError("Point set is degenerate")
+    normal = Vt[2,:]
+    return centroid.tolist(),normal.tolist()
 
 
 def _color_format_from_uint8_channels(format,r,g,b,a=None):
