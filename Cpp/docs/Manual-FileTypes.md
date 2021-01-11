@@ -32,9 +32,9 @@ A Config (robot configuration) file is serialized to a whitespace-delimited stri
 
 A Vector3 or Vector4 is serialized to a whitespace-delimited string in the form `x y z` or `x y z w` respectively.
 
-A Matrix3 or Matrix4 is serialized to a whitespace-delimited string in column-major order, unless otherwise specified.  I.e., `r11 r21 r31 r12 r22 r32 r13 r23 r33`
+A Matrix3 or Matrix4 is serialized to a whitespace-delimited string in row-major order, unless otherwise specified.  I.e., `r11 r12 r13 r21 r22 r23 r31 r32 r33`
 
-A RigidTransform is serialized to a whitespace-delimited string with the rotation matrix column-major order, followed by the translation.  I.e., `r11 r21 r31 r12 r22 r32 r13 r23 r33 t1 t2 t3`
+A RigidTransform is serialized to a whitespace-delimited string with the rotation matrix in row-major order, followed by the translation.  I.e., `r11 r12 r13 r21 r22 r23 r31 r32 r33 t1 t2 t3`
 
 ## Geometry file formats
 
@@ -166,16 +166,21 @@ A robot has N links, and D drivers.  Elements of each line are whitespace-separa
 - `links LinkName[0] ... LinkName[N-1]`: link names, names with spaces can be enclosed in quotes.
 - `parents parent[0] ... parent[N-1]`: link parent indices.  -1 indicates that a link's parent is the world frame.
 - `jointtype v[0] ... v[N-1]`: DOF motion type, can be r for revolute or p for prismatic.
-- `tparent T[0] ... T[N-1]`: relative rigid transforms between each link and its parent.  Each T[i] is a list of column vectors of the rotation matrix, followed by the translation (12 values for each T).
+- `tparent T[0] ... T[N-1]`: relative rigid transforms between each link and its parent.  Each T[i] is a row-major list of entries of the rotation matrix, followed by the translation (12 values for each T).
 - `{alpha, a, d, theta} v[0] ... v[N-1]`: Denavit-Hartenberg parameters. Either tparent or D-H parameters must be specified.  `alphadeg` is equivalent to `alpha` and `thetadeg` is equivalent to `theta`, but in degrees.
 - `axis a[0] ... a[N-1]`: DOF axes, in the local frame of the link (3 values for each a).  Default: z axis (0,0,1).
 - `qmin v[0] ... v[N-1]`: configuration lower limits, in radians.  `qmindeg` is equivalent, but in degrees. Default: -inf.
 - `qmax v[0] ... v[N-1]`: configuration upper limits, in radians. `qmaxdeg` is equivalent, but in degrees. Default: inf.
 - `q v[0] ... v[N-1]`: initial configuration values, in radians. `qdeg` is equivalent, but in degrees. Default: 0.
 - `translation`: a shift of link 0. Default: (0, 0, 0).
-- `rotation`: a rotation of link 0, given by columns of a 3x3 rotation matrix.  Default: identity.
+- `rotation`: a rotation of link 0, given by a row-major list of entries of a 3x3 rotation matrix.  Default: identity.
 - `scale`: scales the entire robot model.
-- `mount link fn [optional transform T]`: mounts the sub-robot file in `fn` as a child of link `link`.  If `T` is provided, this is the relative transform of the sub-robot given by columns of a 3x3 rotation matrix followed by the translation (12 values in `T`).
+- `mount link fn [optional transform T] [optional "as X"]`: mounts the sub-robot file in `fn` as a child of link `link`. 
+
+  If `T` is provided, this is the relative transform of the sub-robot given by a row-major list of entries of rotation matrix followed by the translation (12 values in `T`).
+
+
+  If `as X` is provided, with X a string, then all link names of the mounted sub-robot will be prefixed with "X:".
 
 **Dynamic specification items**:
 
@@ -260,8 +265,8 @@ URDF (Unified Robot Description Format) is a widely used XML-based robot format 
           - _Attributes_
             - `link` (string): the name or integer index of the link.
             - `file` (string): the absolute path / relative path / URL of a geometry file (OFF, OBJ, STL, etc) or other robot file (.urdf or .rob).
-            - `transform` (12 floats, optional): a 3x3 rotation matrix R and 3D translation vector t of the mounted object relative to the link. The rotation matrix is given in column-major order so the string has the form "r11 r21 r31 r12 r22 r32 r13 r23 r33 t1 t2 t3" giving
-            - `as` (string, optional): an alternative identifier for the sub-robot, prefixed to all of its links.
+            - `transform` (12 floats, optional): if provided, the relative transform of the sub-robot given by a row-major list of entries of rotation matrix followed by the translation (12 values in `T`).
+            - `prefix` or `as` (string, optional): an alternative identifier X for the sub-robot.  If provided, then "X:" is prepended to all of its link names. (`as` added in 0.8.6)
 
 ## Piecewise Linear Path (.path) files
 

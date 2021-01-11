@@ -35,12 +35,12 @@ A Vector3 or Vector4 is serialized to a whitespace-delimited string in
 the form ``x y z`` or ``x y z w`` respectively.
 
 A Matrix3 or Matrix4 is serialized to a whitespace-delimited string in
-column-major order, unless otherwise specified. I.e.,
-``r11 r21 r31 r12 r22 r32 r13 r23 r33``
+row-major order, unless otherwise specified. I.e.,
+``r11 r12 r13 r21 r22 r23 r31 r32 r33``
 
 A RigidTransform is serialized to a whitespace-delimited string with the
-rotation matrix column-major order, followed by the translation. I.e.,
-``r11 r21 r31 r12 r22 r32 r13 r23 r33 t1 t2 t3``
+rotation matrix in row-major order, followed by the translation. I.e.,
+``r11 r12 r13 r21 r22 r23 r31 r32 r33 t1 t2 t3``
 
 Geometry file formats
 ---------------------
@@ -299,7 +299,7 @@ Some items are optional, indicated by default values.
 -  ``jointtype v[0] ... v[N-1]``: DOF motion type, can be r for revolute
    or p for prismatic.
 -  ``tparent T[0] ... T[N-1]``: relative rigid transforms between each
-   link and its parent. Each T[i] is a list of column vectors of the
+   link and its parent. Each T[i] is a row-major list of entries of the
    rotation matrix, followed by the translation (12 values for each T).
 -  ``{alpha, a, d, theta} v[0] ... v[N-1]``: Denavit-Hartenberg
    parameters. Either tparent or D-H parameters must be specified.
@@ -314,13 +314,18 @@ Some items are optional, indicated by default values.
 -  ``q v[0] ... v[N-1]``: initial configuration values, in radians.
    ``qdeg`` is equivalent, but in degrees. Default: 0.
 -  ``translation``: a shift of link 0. Default: (0, 0, 0).
--  ``rotation``: a rotation of link 0, given by columns of a 3x3
+-  ``rotation``: a rotation of link 0, given by rows of a 3x3
    rotation matrix. Default: identity.
 -  ``scale``: scales the entire robot model.
--  ``mount link fn [optional transform T]``: mounts the sub-robot file
-   in ``fn`` as a child of link ``link``. If ``T`` is provided, this is
-   the relative transform of the sub-robot given by columns of a 3x3
-   rotation matrix followed by the translation (12 values in ``T``).
+-  ``mount link fn [optional transform T] [optional "as X"]``: mounts
+   the sub-robot file or geometry in ``fn`` as a child of link ``link``.
+
+   If ``T`` is provided, this is the relative transform of the sub-robot,
+   given by a row-major list of the entries of the 3x3 rotation matrix
+   followed by the translation (12 values in ``T``).
+
+   If ``as X`` is provided, with X a string, then all link names of the
+   mounted sub-robot will be prefixed with "X:".
 
 **Dynamic specification items**:
 
@@ -488,6 +493,14 @@ XML element. The schema for defining this element is as follows:
          See the World XML format above or the `sensor
          documentation <Manual-Sensors.html>`__ for more details
          on the XML format of this element.
+      -  ``<mount>``: mounts a geometry or another robot to a link.
+          
+         *Attributes*
+
+         - ``link`` (string): the name or integer index of the link.
+         - ``file`` (string): the absolute path / relative path / URL of a geometry file (OFF, OBJ, STL, etc) or other robot file (.urdf or .rob).
+         - ``transform`` (12 floats, optional):  the relative transform of the sub-robot, given by a row-major list of the entries of the 3x3 rotation matrix followed by the translation (12 values in ``T``).
+         - `prefix` or `as` (string, optional): an alternative identifier X for the sub-robot.  If provided, then "X:" is prepended to all of its link names. (`as` added in 0.8.6)
 
 Piecewise Linear Path (.path) files
 -----------------------------------
