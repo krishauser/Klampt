@@ -84,7 +84,7 @@ void RobotTestBackend::UpdateConfig()
   for(size_t i=0;i<robot->links.size();i++) {
     for(size_t j=i+1;j<robot->links.size();j++) {
       if(robot->SelfCollision(i,j)) {
-	self_colliding[i]=self_colliding[j]=true;
+        self_colliding[i]=self_colliding[j]=true;
       }
     }
   }
@@ -144,16 +144,16 @@ void RobotTestBackend::RenderWorld()
     for(size_t i=0;i<robot->links.size();i++) {
       if(self_colliding[i]) viewRobot.SetColor(i,colliding);
       if((int)i == cur_link)
-	viewRobot.SetColor(i,highlight); 
+        viewRobot.SetColor(i,highlight); 
       else if(cur_driver >= 0 && cur_driver < (int)robot->drivers.size() &&
-	      robot->DoesDriverAffect(cur_driver,i))
-	viewRobot.SetColor(i,driven); 
+              robot->DoesDriverAffect(cur_driver,i))
+        viewRobot.SetColor(i,driven); 
       if(draw_self_collision_tests) {
-	//draw a little blue
-    	if(robot->selfCollisions(i,cur_link) || robot->selfCollisions(cur_link,i) )  {
-	  GLDraw::GeometryAppearance &app  = viewRobot.Appearance(i);
-    app.ModulateColor(blue,0.5);
-	}
+        //draw a little blue
+        if(robot->selfCollisions(i,cur_link) || robot->selfCollisions(cur_link,i) )  {
+          GLDraw::GeometryAppearance &app  = viewRobot.Appearance(i);
+          app.ModulateColor(blue,0.5);
+        }
       }
     }
     //this will set the hover colors
@@ -190,11 +190,11 @@ void RobotTestBackend::RenderWorld()
     for(size_t i=0;i<robot->links.size();i++) {
       Vector3 comi = robot->links[i].T_World*robot->links[i].com;
       for(size_t j=0;j<robot->links.size();j++) {
-	if(robot->selfCollisions(i,j)) {
-	  Vector3 comj = robot->links[j].T_World*robot->links[j].com;
-	  glVertex3v(comi);
-	  glVertex3v(comj);
-	}
+        if(robot->selfCollisions(i,j)) {
+          Vector3 comj = robot->links[j].T_World*robot->links[j].com;
+          glVertex3v(comi);
+          glVertex3v(comj);
+        }
       }
     }
     glEnd();
@@ -236,14 +236,14 @@ bool RobotTestBackend::OnButtonPress(const string& button)
     printf("Self-colliding:\n");
     for(size_t i=0;i<robot->links.size();i++) {
       if(self_colliding[i]) {
-	bool printed=false;
-	for(size_t j=i;j<robot->links.size();j++) {
-	  if(self_colliding[j] && robot->SelfCollision(i,j)) {
-	    printf("%d %d\t",i,j);
-	    printed = true;
-	  }
-	}
-	if(printed) printf("\n");
+        bool printed=false;
+        for(size_t j=i;j<robot->links.size();j++) {
+          if(self_colliding[j] && robot->SelfCollision(i,j)) {
+            printf("%d %d\t",i,j);
+            printed = true;
+          }
+        }
+        if(printed) printf("\n");
       }
     }
     return true;
@@ -252,14 +252,14 @@ bool RobotTestBackend::OnButtonPress(const string& button)
     stringstream ss;
     for(size_t i=0;i<robot->links.size();i++) {
       if(self_colliding[i]) {
-	bool printed=false;
-	for(size_t j=i;j<robot->links.size();j++) {
-	  if(self_colliding[j] && robot->SelfCollision(i,j)) {
-	    ss<<i<<" "<<j<<" ";
-	    printed = true;
-	  }
-	}
-	if(printed) ss<<"\n";
+        bool printed=false;
+        for(size_t j=i;j<robot->links.size();j++) {
+          if(self_colliding[j] && robot->SelfCollision(i,j)) {
+            ss<<i<<" "<<j<<" ";
+            printed = true;
+          }
+        }
+        if(printed) ss<<"\n";
       }
     }
     SendCommand("return_self_collisions",ss.str());
@@ -424,9 +424,9 @@ void RobotTestBackend::DoFreeDrag(int dx,int dy,int button)
     if(allWidgets.hasFocus) {
       allWidgets.Drag(dx,-dy,viewport);
       if(allWidgets.requestRedraw) {
-	allWidgets.requestRedraw = false;
-	SendRefresh();
-	UpdateConfig();
+        allWidgets.requestRedraw = false;
+        SendRefresh();
+        UpdateConfig();
       }
     }
   }
@@ -442,15 +442,15 @@ void RobotTestBackend::SetDrawExpanded(int value)
     for(size_t j=0;j<robot->links.size();j++) {
       originalDisplayLists[j]=robot->geomManagers[j].Appearance()->faceDisplayList;
       if(!robot->IsGeometryEmpty(j)) {
-	Real p=robot->geometry[j]->margin;
-	if(p > 0) {
-	  //draw the expanded mesh
-	  expandedDisplayLists[j].beginCompile();
-	  drawExpanded(*robot->geometry[j],p);
-	  expandedDisplayLists[j].endCompile();
-	}
-	else
-	  expandedDisplayLists[j] = originalDisplayLists[j];
+        Real p=robot->geometry[j]->margin;
+        if(p > 0) {
+          //draw the expanded mesh
+          expandedDisplayLists[j].beginCompile();
+          drawExpanded(*robot->geometry[j],p);
+          expandedDisplayLists[j].endCompile();
+        }
+        else
+          expandedDisplayLists[j] = originalDisplayLists[j];
       }
     }
   }
@@ -538,9 +538,9 @@ bool GLUIRobotTestGUI::Initialize()
   UpdateGUI();
 
   const char* rules = "[ \
-[{type:key_down,key:c}, {type:command,cmd:constrain_current_link,args:\"\"}],	\
+[{type:key_down,key:c}, {type:command,cmd:constrain_current_link,args:\"\"}],   \
 [{type:key_down,key:d}, {type:command,cmd:delete_current_constraint,args:\"\"}], \
-[{type:key_down,key:p}, {type:command,cmd:print_pose,args:\"\"}],	\
+[{type:key_down,key:p}, {type:command,cmd:print_pose,args:\"\"}],       \
 [{type:key_down,key:z}, {type:command,cmd:undo_pose,args:\"\"}], \
 [{type:button_press,button:print_config}, {type:command,cmd:print_pose,args:\"\"}], \
 [{type:button_toggle,button:pose_ik,checked:1}, {type:command,cmd:constrain_point_mode,args:\"\"}], \
