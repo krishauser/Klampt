@@ -13,17 +13,22 @@ QKlamptGUIBase::QKlamptGUIBase(QKlamptDisplay* _display,GenericBackendBase *_bac
 
 void QKlamptGUIBase::OnIdleTimer()
 {
-  SendIdle();
+  //printf("Idle.\n");
   idle_timer.start(0);
+  SendIdle();
 }
 
 
 bool QKlamptGUIBase::OnPauseIdle(double secs) 
 {
-  if(secs > 10000000)
+  if(secs > 10000000) {
     idle_timer.stop();
-  else
+    //printf("Pause idle.\n",secs);
+  }
+  else {
     idle_timer.start(int(secs*1000));
+    //printf("Pause idle %g.\n",secs);
+  }
   return true;
 }
 
