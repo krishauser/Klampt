@@ -1,6 +1,5 @@
 """
-Implementation of TrajOpt algorithm with klampt and pysolid.
-With those distances stuff ready, this should be pretty straightforward.
+Implementation of TrajOpt algorithm in klampt.
 """
 from collections import Iterable
 import numpy as np
@@ -14,7 +13,7 @@ from .trajopt_task_space import PoseConstraint, DirectionConstraint, PositionCon
 
 
 class TrajOptSettings(object):
-    """Defines some settings of the KineTrajOpt solver."""
+    """Defines settings of the KineTrajOpt solver."""
     def __init__(self, **kw):
         self.dsafe = kw.get('dsafe', 0.05)  # safe distance one has to keep
         self.dcheck = kw.get('dcheck', 0.1)  # distance that trigers constraint consideration

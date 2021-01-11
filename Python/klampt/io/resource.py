@@ -122,10 +122,7 @@ def get(name,type='auto',directory=None,default=None,doedit='auto',description=N
     Stance, MultiPath, Trajectory/LinearPath, and ContactPoint, or any of
     the basic Klampt object types, geometry types, and math types.
 
-    Resources can also be edited using RobotPose.
-
-    Returns default if the object doesn't exist and doedit=False, or the 
-    object doesn't exist and the user canceled the editor.
+    Resources can also be edited using ``klampt_browser`` and RobotPose.
 
     Args:
         name (str): the resource name.  If type='auto', this is assumed to have
@@ -158,6 +155,12 @@ def get(name,type='auto',directory=None,default=None,doedit='auto',description=N
           reference frame in which the quantity is represented.  This is an 
           element of se3, or an ObjectModel, or a RobotModelLink, or a string 
           indicating a named rigid element of the world.
+
+    Returns:
+        Klampt object or None: If the named resource exists, loads and returns 
+        a Klampt object.  If the object doesn't exist and ``doedit=True`` and
+        the user presses OK on the editor, then the object will be saved as the
+        resource ``name``.  Otherwise, ``default`` will be returned.
     """
     if name==None:
         if doedit==False:
@@ -229,7 +232,7 @@ def set(name,value,type='auto',directory=None):
             determined by the value.
 
     Returns:
-        (bool): True on success, False otherwise
+        bool: True on success, False otherwise
     """
     if type == 'auto':
         try:
@@ -308,7 +311,7 @@ def load(type=None,directory=None):
             directory.
 
     Returns:
-        (tuple or None): a (filename,value) pair if OK is pressed, or
+        tuple or None: a (filename,value) pair if OK is pressed, or
         None if the operation was canceled
     """
     
@@ -352,7 +355,7 @@ def save(value,type='auto',directory=None):
             directory.
 
     Returns:
-        (str or None): the file saved to, if OK is pressed, or
+        str or None: the file saved to, if OK is pressed, or
         None if the operation was canceled.
     """
     fg = FileGetter('Save resource')
@@ -435,7 +438,7 @@ def thumbnail(value,size,type='auto',world=None,frame=None):
             frame.
 
     Returns:
-        (Image or bytes): A PIL Image if PIL is available, or just a raw RGBA
+        Image or bytes: A PIL Image if PIL is available, or just a raw RGBA
         memory buffer otherwise.
 
     """
@@ -597,10 +600,10 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,refe
             indicating a named rigid element of the world.
 
     Returns:
-        (tuple): A pair (save, result) containing:
+        tuple: A pair (save, result) containing:
 
             * save (bool): True if the user pressed OK, False if Cancel or the
-                close box where chosen.
+              close box were chosen.
             * result: the edited value.
 
     """

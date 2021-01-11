@@ -1,4 +1,5 @@
-"""Implement trajopt with a target in task space. It cleverly uses autograd functions and the general framework.
+"""Defines task space constraints for use in
+:class:`~klampt.plan.kinetrajopt.KineTrajOpt`. 
 """
 import numpy as np
 
