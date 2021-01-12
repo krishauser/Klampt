@@ -13,13 +13,12 @@ import math
 def _get_bound(objects):
     """Obtains the tight outer bounds of the object(s) at their current transforms, in world coordinates."""
     if hasattr(objects,'__iter__'):
-        bbs = [bound(o) for o in objects]
+        bbs = [_get_bound(o) for o in objects]
         if len(bbs) == 1:
             return bbs[0]
-        return bb_union(*bbs)
+        return collide.bb_union(*bbs)
     else:
         return objects.geometry().getBBTight()
-
 
 def xy_randomize(obj,bmin,bmax):
     """Randomizes the xy position and z orientation of an object inside of a bounding box bmin->bmax.
@@ -140,7 +139,7 @@ def make_object_arrangement(world,container,objects,container_wall_thickness=0.0
         t[2] = container_inner_bb[0][2] - zmin + collision_margin
         object.setTransform(R,t)
 
-    failures = xy_jiggle(world,objects,[container],container_inner_bb[0],container_inner_bb[1],max_iterations)
+    failures = xy_jiggle(world,objects,[container],container_inner_bb[0],container_inner_bb[1],max_iterations,verbose=1)
     if len(failures) > 0:
         if remove_failures:
             removeIDs = [objects[i].index for i in failures]
@@ -152,7 +151,8 @@ def make_object_arrangement(world,container,objects,container_wall_thickness=0.0
 
 def make_object_pile(world,container,objects,container_wall_thickness=0.01,randomize_orientation=True,
     visualize=False,verbose=0):
-    """For a given container and a list of objects in the world, drops the objects inside the container and simulates until stable.
+    """For a given container and a list of objects in the world, drops the
+    objects inside the container and simulates until stable.
 
     Args:
         world (WorldModel): the world containing the objects and obstacles
@@ -170,8 +170,6 @@ def make_object_pile(world,container,objects,container_wall_thickness=0.01,rando
             show the progress of the pile
         verbose (int, optional): if > 0, prints progress of the pile.
     
-    Side effect: the positions of objects in world are modified.
-
     Returns:
         tuple: (world,sim), containing
 
@@ -181,27 +179,17 @@ def make_object_pile(world,container,objects,container_wall_thickness=0.01,rando
 
     .. note::
 
-        Since world is modified in-place, if you wish to make multiple worlds with
-        piles of the same objects, you should use world.copy() to store the
-        configuration of the objects. You may also wish to randomize the object
-        ordering using ``random.shuffle(objects)`` between instances.
+        If you wish to make multiple worlds with piles of the same objects, you
+        may wish to randomize the object ordering using
+        ``random.shuffle(objects)`` between instances.
 
     """
     container_outer_bb = _get_bound(container)
     container_inner_bb = (vectorops.add(container_outer_bb[0],[container_wall_thickness]*3),vectorops.sub(container_outer_bb[1],[container_wall_thickness]*3))
     spawn_area = (container_inner_bb[0][:],container_inner_bb[1][:])
     collision_margin = 0.0025
-    if visualize:
-        from klampt import vis
-        from klampt.model import config
-        import time
-        oldwindow = vis.getWindow()
-        newwindow = vis.createWindow("make_object_pile dynamic visualization")
-        vis.setWindow(newwindow)
-        vis.show()
-        visworld = world.copy()
-        vis.add("world",visworld)
 
+    """
     sim = Simulator(world)
     sim.setSetting("maxContacts","20")
     sim.setSetting("adaptiveTimeStepping","0")
@@ -213,10 +201,24 @@ def make_object_pile(world,container,objects,container_wall_thickness=0.01,rando
         sim.body(object).enable(False)
     if verbose: 
         print("Spawn area",spawn_area)
+    """
+    """
     if visualize:
-        vis.lock()
+        from klampt import vis
+        from klampt.model import config
+        import time
+        oldwindow = vis.getWindow()
+        if oldwindow == None:
+            vis.createWindow()
+            oldwindow = vis.getWindow()
+        newwindow = vis.createWindow("make_object_pile dynamic visualization")
+        vis.setWindow(newwindow)
+        visworld = world.copy()
+        vis.add("world",visworld)
+        vis.addText("time","Time: 0",position=(20,20))
         config.setConfig(visworld,config.getConfig(world))
-        vis.unlock()
+        vis.show()
+    """
     for index in range(len(objects)):
         #always spawn above the current height of the pile 
         if index > 0:
@@ -227,15 +229,16 @@ def make_object_pile(world,container,objects,container_wall_thickness=0.01,rando
             spawn_area[0][2] += zshift
             spawn_area[1][2] += zshift
         object = objects[index]
+        R0,t0 = object.getTransform()
+        object.setTransform(R0,[0,0,0])
         obb = _get_bound(object)
         zmin = obb[0][2]
-        R0,t0 = object.getTransform()
         feasible = False
         for sample in range(1000):
             R,t = R0[:],t0[:]
             if randomize_orientation == True:
                 R = so3.sample()
-            t[2] = spawn_area[1][2] - zmin + t0[2] + collision_margin
+            t[2] = spawn_area[1][2] - zmin + collision_margin + 0.2
             object.setTransform(R,t)
             xy_randomize(object,spawn_area[0],spawn_area[1])
             if verbose: 
@@ -245,6 +248,9 @@ def make_object_pile(world,container,objects,container_wall_thickness=0.01,rando
                 object.setTransform(R,t)
 
             #object spawned, now settle
+            feasible = True
+            break
+            """
             sobject = sim.body(object)
             sobject.enable(True)
             sobject.setTransform(*object.getTransform())
@@ -264,18 +270,39 @@ def make_object_pile(world,container,objects,container_wall_thickness=0.01,rando
                         break
                 sim.updateWorld()
                 break
+            """
         if not feasible:
             if verbose: 
                 print("Failed to place object",object.getName())
             return None
+        """
         if visualize:
             vis.lock()
             config.setConfig(visworld,config.getConfig(world))
             vis.unlock()
             time.sleep(0.1)
+        """
     
     if verbose: 
         print("Beginning to simulate")
+    from klampt.sim import settle
+    for i,obj in enumerate(objects):
+        if i > 0:
+            objects_bound = _get_bound(objects[:i])
+            zothers = objects_bound[1][2]
+        else:
+            zothers = container_inner_bb[0][2]
+        R,t = obj.getTransform()
+        obj.setTransform(R,[0,0,0])
+        obb = _get_bound(obj)
+        zmin = obb[0][2]
+        t[2] = zothers - zmin + collision_margin
+        obj.setTransform(R,t)
+        print("Simulating object",obj.getName())
+        xform,touched = settle.settle(world,obj,debug=visualize)
+        obj.setTransform(*xform)
+    return (world,None)
+    """
     #start letting everything  fall
     for firstfall in range(10):
         sim.simulate(0.01)
@@ -291,9 +318,21 @@ def make_object_pile(world,container,objects,container_wall_thickness=0.01,rando
     vdamping = -0.1
     while t < maxT:
         settled = True
+        maxw = 0
+        maxv = 0
         for object in objects:
             sobject = sim.body(object)
+            if not collide.bb_contains((container_outer_bb[0][:2],container_outer_bb[1][:2]),object.getTransform()[1][:2]):
+                if verbose:
+                    print("Object",object.getName(),"fell out of container area")
+                continue
+            if object.getTransform()[1][2] + 1 < container_outer_bb[0][2]:
+                if verbose:
+                    print("Object",object.getName(),"fell out of container area")
+                continue
             w,v = sobject.getVelocity()
+            maxw = max(maxw,vectorops.norm(w))
+            maxv = max(maxv,vectorops.norm(v))
             sobject.applyWrench(vectorops.mul(v,vdamping),vectorops.mul(w,wdamping))
             if vectorops.norm(w) + vectorops.norm(v) > 1e-4:
                 #settled
@@ -306,6 +345,8 @@ def make_object_pile(world,container,objects,container_wall_thickness=0.01,rando
         sim.simulate(dt)
         if visualize:
             vis.lock()
+            vis.addText("time","Time: %.3f"%(t,),position=(20,20))
+            vis.addText("velocities","Ang vel %.3f, vel %.3f"%(maxw,maxv),position=(20,35))
             config.setConfig(visworld,config.getConfig(world))
             vis.unlock()
             time.sleep(max(0.0,dt-(time.time()-t0)))
@@ -314,3 +355,4 @@ def make_object_pile(world,container,objects,container_wall_thickness=0.01,rando
         vis.show(False)
         vis.setWindow(oldwindow)
     return (world,sim)
+    """
