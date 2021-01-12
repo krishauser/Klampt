@@ -20,33 +20,39 @@ def settle(world,obj,
     An exception is raised if the object is already colliding with the world.
 
     Args:
-        world (WorldModel): the world containing other static and moving objects
-        obj: a RigidObjectModel, RobotModelLink, or floating-base Robot that will
-            be settled.
-        forcedir (list of 3 floats, optional): a vector parallel to the direction
-            of force whose magnitude is the maximum distance this procedure will
-            try to move the object.
-        forcept (list of 3 floats, optional): local coordinates of the center of force
-            application.
-        settletol (float, optional): the simulation will stop when two subsequent transforms
-            lie within this tolerance.
-        orientationDamping (float, optional): a virtual spring will attempt to keep the
-            initial orientation with this torsional spring constant 
-        perturb (float, optional): if nonzero, the application force will be perturbed at
-            random by this amount every step.  If equal to 1, this means the force is
-            sampled from a 45 degree cone in the direction forcedir.
-        margin (float, optional): the collision detection margin used in simulation.  If None,
-            uses the Simulator default.  Otherwise, overrides the default.  Must be at least settletol.
-        debug (bool, optional): if True, uses the visualization to debug the settling process
+        world (WorldModel): the world containing other static and moving
+            objects
+        obj: a RigidObjectModel, RobotModelLink, or floating-base Robot that 
+            will be settled.
+        forcedir (list of 3 floats, optional): a vector parallel to the
+            direction of force whose magnitude is the maximum distance this 
+            procedure will try to move the object.
+        forcept (list of 3 floats, optional): local coordinates of the center
+            of force application.
+        settletol (float, optional): the simulation will stop when two
+            subsequent transforms lie within this tolerance.
+        orientationDamping (float, optional): a virtual spring will attempt 
+            to keep the initial orientation with this torsional spring constant 
+        perturb (float, optional): if nonzero, the application force will be 
+            perturbed at random by this amount every step.  If equal to 1, this
+            means the force is sampled from a 45 degree cone in the direction
+            forcedir.
+        margin (float, optional): the collision detection margin used in
+            simulation.  If None, uses the Simulator default.  Otherwise,
+            overrides the default.  Must be at least settletol.
+        debug (bool, optional): if True, uses the visualization to debug the
+            settling process
 
     Returns:
-        (tuple): A pair (transform,touched) with:
+        tuple: A pair (transform,touched) with:
 
-            - transform (se3 transform): The resulting se3 transform of the object, or None if the
-              object didn't hit anything by the time it translated by ||forcedir|| units
-            - touched (dict): a dictionary whose keys are object IDs touched by the object at the
-              final transform, and whose values are lists of ContactPoints (see klampt.model.contact)
-              giving the contacts between obj and the touched object. 
+            - transform (se3 transform): The resulting se3 transform of the
+              object, or None if the object didn't hit anything by the time it
+              translated by ||forcedir|| units.
+            - touched (dict): a dictionary whose keys are object IDs touched by
+              the object at the final transform, and whose values are lists of
+              ContactPoints (see :mod:`klampt.model.contact`) giving the
+              contacts between obj and the touched object. 
 
               To convert the result to a hold, call::
 
@@ -203,8 +209,10 @@ def settle(world,obj,
             print("  pulling back failed.")
             return (None,[])
     if debug:
+        vis.createWindow("settle")
         vis.add("world",world)
         vis.show()
+        time.sleep(1.0)
     springanchorworld = se3.apply(obj.getTransform(),forcept)
     Rspringanchor = obj.getTransform()[0]
     numSettled = 0
@@ -242,6 +250,7 @@ def settle(world,obj,
             sim.updateWorld()
             vis.unlock()
             time.sleep(0)
+            time.sleep(0.1)
         else:
             sim.simulate(dt)
             sim.updateWorld()
@@ -263,12 +272,16 @@ def settle(world,obj,
             tdict = dict()
             for id,cplist in zip(touched,cps):
                 tdict[id] = [ContactPoint(ci[0:3],ci[3:6],ci[6]) for ci in cplist]
+            if debug:
+                vis.show(False)
             return (body.getObjectTransform(),tdict)
         #apply drag
         body.setVelocity(vectorops.mul(w,0.8),vectorops.mul(v,0.8))
         Told = T
         springanchorworld = vectorops.madd(springanchorworld,forcedir,dt*movedist)
         t += dt
+    if debug:
+        vis.show(False)
     print("Failed to settle? Final velocity",body.getVelocity())
     touched = [id for id in otherids if sim.inContact(obj.getID(),id)]
     cps = [sim.getContacts(obj.getID(),id) for id in touched]
