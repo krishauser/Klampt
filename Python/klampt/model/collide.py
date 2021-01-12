@@ -42,11 +42,11 @@ def bb_intersect(a,b):
 def bb_intersection(*bbs):
     """Returns the bounding box representing the intersection the given bboxes.
     The result may be empty."""
-    return [max(*x) for x in zip(*[b[0] for b in bbs])],[min(*x) for x in zip(*[b[1] for b in bbs])]
+    return [max(x) for x in zip(*[b[0] for b in bbs])],[min(x) for x in zip(*[b[1] for b in bbs])]
 
 def bb_union(*bbs):
     """Returns the smallest bounding box containing the given bboxes"""
-    return [min(*x) for x in zip(*[b[0] for b in bbs])],[max(*x) for x in zip(*[b[1] for b in bbs])]
+    return [min(x) for x in zip(*[b[0] for b in bbs])],[max(x) for x in zip(*[b[1] for b in bbs])]
 
 
 def self_collision_iter(geomlist,pairs='all'):
