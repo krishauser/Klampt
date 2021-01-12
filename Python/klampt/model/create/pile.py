@@ -1,6 +1,7 @@
 """Utility functions for making arrangments / piles of objects.
 
-Key functions are make_object_arrangement and make_object_pile.
+Main functions are :func:`make_object_arrangement` and
+:func:`make_object_pile`.
 """
 
 from klampt import *
@@ -15,7 +16,6 @@ def _get_bound(objects):
         bbs = [bound(o) for o in objects]
         if len(bbs) == 1:
             return bbs[0]
-        print(bbs)
         return bb_union(*bbs)
     else:
         return objects.geometry().getBBTight()
@@ -27,6 +27,8 @@ def xy_randomize(obj,bmin,bmax):
     """
     R,t = obj.getTransform()
     R = so3.mul(so3.rotation([0,0,1],random.uniform(0,math.pi*2)),R)
+    t[0] = 0
+    t[1] = 0
     obj.setTransform(R,t)
     obmin,obmax = obj.geometry().getBB()
     t[0] = random.uniform(bmin[0]-obmin[0],bmax[0]-obmax[0])
@@ -43,20 +45,22 @@ def xy_jiggle(world,objects,fixed_objects,bmin,bmax,iters,randomize=True,
     if randomize:
         for obj in objects:
             xy_randomize(obj,bmin,bmax)
+    object_geometries = [o.geometry() for o in objects]
+    fixed_geometries = [o.geometry() for o in fixed_objects]
     inner_iters = 10
     while iters > 0:
         numConflicts = [0]*len(objects)
-        for (i,j) in collide.self_collision_iter([o.geometry() for o in objects]):
+        for (i,j) in collide.self_collision_iter(object_geometries):
             numConflicts[i] += 1
             numConflicts[j] += 1
-        for (i,j) in collide.group_collision_iter([o.geometry() for o in objects],[o.geometry() for o in fixed_objects]):
+        for (i,j) in collide.group_collision_iter(object_geometries,fixed_geometries):
             numConflicts[i] += 1
         
         amax = max((c,i) for (i,c) in enumerate(numConflicts))[1]
         cmax = numConflicts[amax]
         if cmax == 0:
             #conflict free
-            return
+            return []
         if verbose: 
             print(cmax,"conflicts with object",objects[amax].getName())
         other_geoms = [o.geometry() for o in objects[:amax]+objects[amax+1:]+fixed_objects]
@@ -70,10 +74,10 @@ def xy_jiggle(world,objects,fixed_objects,bmin,bmax,iters,randomize=True,
             print("Now",nc,"conflicts with object",objects[amax].getName())
 
     numConflicts = [0]*len(objects)
-    for (i,j) in collide.self_collision_iter([o.geometry() for o in objects]):
+    for (i,j) in collide.self_collision_iter(object_geometries):
         numConflicts[i] += 1
         numConflicts[j] += 1
-    for (i,j) in collide.group_collision_iter([o.geometry() for o in objects],[o.geometry() for o in fixed_objects]):
+    for (i,j) in collide.group_collision_iter(object_geometries,fixed_geometries):
         numConflicts[i] += 1
     removed = []
     while max(numConflicts) > 0:
@@ -85,12 +89,12 @@ def xy_jiggle(world,objects,fixed_objects,bmin,bmax,iters,randomize=True,
 
         #revise # of conflicts -- this could be faster, but whatever...
         numConflicts = [0]*len(objects)
-        for (i,j) in collide.self_collision_iter([o.geometry() for o in objects]):
+        for (i,j) in collide.self_collision_iter(object_geometries):
             if i in removed or j in removed:
                 continue
             numConflicts[i] += 1
             numConflicts[j] += 1
-        for (i,j) in collide.group_collision_iter([o.geometry() for o in objects],[o.geometry() for o in fixed_objects]):
+        for (i,j) in collide.group_collision_iter(object_geometries,fixed_geometries):
             if i in removed:
                 continue
             numConflicts[i] += 1
@@ -114,14 +118,16 @@ def make_object_arrangement(world,container,objects,container_wall_thickness=0.0
             failure, the objects that fail placement are removed from the world.
     
     Returns:
-        (WorldModel): if successful, the positions of objects in world are
+        WorldModel: if successful, the positions of objects in world are
         modified and world is returned. On failure, None is returned.
 
-    Note:
+    .. note::
+
         Since world is modified in-place, if you wish to make multiple worlds with
         piles of the same objects, you should use world.copy() to store the
         configuration of the objects. You may also wish to randomize the object
         ordering using random.shuffle(objects) between instances.
+
     """
     container_outer_bb = _get_bound(container)
     container_inner_bb = (vectorops.add(container_outer_bb[0],[container_wall_thickness]*3),vectorops.sub(container_outer_bb[1],[container_wall_thickness]*3))
@@ -131,10 +137,10 @@ def make_object_arrangement(world,container,objects,container_wall_thickness=0.0
         obb = _get_bound(object)
         zmin = obb[0][2]
         R,t = object.getTransform()
-        t[2] = container_inner_bb[2] - zmin + collision_margin
+        t[2] = container_inner_bb[0][2] - zmin + collision_margin
         object.setTransform(R,t)
 
-    failures = xy_jiggle(world,rigid_objects,[container],container_inner_bb[0],container_inner_bb[1],max_iterations)
+    failures = xy_jiggle(world,objects,[container],container_inner_bb[0],container_inner_bb[1],max_iterations)
     if len(failures) > 0:
         if remove_failures:
             removeIDs = [objects[i].index for i in failures]
@@ -164,20 +170,22 @@ def make_object_pile(world,container,objects,container_wall_thickness=0.01,rando
             show the progress of the pile
         verbose (int, optional): if > 0, prints progress of the pile.
     
-    Side effect: the positions of objects in world are modified
+    Side effect: the positions of objects in world are modified.
 
     Returns:
-        (tuple): (world,sim), containing
+        tuple: (world,sim), containing
 
             - world (WorldModel): the original world
             - sim (Simulator): the Simulator instance at the state used to obtain
               the stable placement of the objects.
 
-    Note:
+    .. note::
+
         Since world is modified in-place, if you wish to make multiple worlds with
         piles of the same objects, you should use world.copy() to store the
         configuration of the objects. You may also wish to randomize the object
-        ordering using random.shuffle(objects) between instances.
+        ordering using ``random.shuffle(objects)`` between instances.
+
     """
     container_outer_bb = _get_bound(container)
     container_inner_bb = (vectorops.add(container_outer_bb[0],[container_wall_thickness]*3),vectorops.sub(container_outer_bb[1],[container_wall_thickness]*3))
