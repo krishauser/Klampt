@@ -1,3 +1,7 @@
+"""Utilities for creating geometric primitives (and world entities made out
+of them).
+"""
+
 from klampt import *
 
 def box(width,depth,height,center=None,R=None,t=None,world=None,name=None,mass=float('inf'),type='TriangleMesh'):
@@ -23,8 +27,9 @@ def box(width,depth,height,center=None,R=None,t=None,world=None,name=None,mass=f
             but also 'GeometricPrimitive' and 'VolumeGrid' are accepted.
 
     Returns:
-        box: either a Geometry3D, RigidObjectModel, or TerrainModel.  In the latter
-        two cases, the box is added to the world.
+        Geometry3D, RigidObjectModel, or TerrainModel: A representation
+        of the box.  If a world is given, then either a RigidObjectModel
+        or TerrainModel is added to the world and returned.
     """
     if center is None:
         center = [0,0,0]
@@ -80,8 +85,9 @@ def sphere(radius,center=None,R=None,t=None,world=None,name=None,mass=float('inf
             but also 'GeometricPrimitive' and 'VolumeGrid' are accepted.
 
     Returns:
-        sphere: either a Geometry3D, RigidObjectModel, or TerrainModel.  In the latter
-        two cases, the sphere is added to the world.
+        Geometry3D, RigidObjectModel, or TerrainModel: A representation
+        of the sphere.  If a world is given, then either a RigidObjectModel
+        or TerrainModel is added to the world and returned.
     """
     if center is None:
         center = [0,0,0]
