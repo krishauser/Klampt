@@ -324,7 +324,7 @@ and the example code in
 
    .. note::
       ``vis.show()`` doesn't do the opposite of ``vis.hide()``.  To
-      show an item, call ``vis.hide(False)``.
+      un-hide an item, call ``vis.hide(False)``.
 
 -  ``vis.edit(name,doedit=True)``: turns on/off visual editing, if the
    item allows it.
@@ -427,7 +427,7 @@ elements, rigid objects, and robots.
 -  ``vis.pauseAnimation(paused=True)``: Turns on/off animation globally.
 -  ``vis.stepAnimation(amount)``: Moves forward the animation time by
    the given amount, in seconds.
--  \`vis.animationTime(newtime=None): Gets/sets the current animation
+-  ``vis.animationTime(newtime=None)``: Gets/sets the current animation
    time
 
    -  If newtime == None (default), this gets the animation time.
@@ -437,7 +437,8 @@ elements, rigid objects, and robots.
 Scene and camera control
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-The background color can be changed with :func:`klampt.vis.setBackgroundColor`. 
+The background color can be changed with ``vis.setBackgroundColor``. In OpenGL modes, a
+background image can be set using ``klampt.vis.scene().setBackgroundImage``
 
 If PyQTGraph is installed (``pip install pyqtgraph``), the menu has an "Edit appearance..." item that launches
 a GUI to edit colors and properties of the scene.
@@ -446,14 +447,14 @@ Overall scene appearance can be saved/loaded using ``vis.saveJsonConfig`` and ``
 
 The camera can be modified in several ways. 
 
-- :func:`~klampt.vis.getViewport` returns a :class:`~klampt.vis.glprogram.GLViewport` instance (in OpenGL)
-  or a JSON structure (In IPython / HTML) that can be modified.  Then, :func:`~klampt.vis.setViewport` can
+- :func:`~klampt.vis.visualization.getViewport` returns a :class:`~klampt.vis.glviewport.GLViewport` instance (in OpenGL)
+  or a JSON structure (In IPython / HTML) that can be modified.  Then, :func:`~klampt.vis.visualization.setViewport` can
   be called to change the viewport.
 - You can save and load the viewport from files.  In PyQt, there are menu items for doing this, but in
   other backends, this must be done using ``vis.getViewport().save_file(fn)`` (These are the same format
   as the camera files used in the RobotTest, SimTest, and RobotPose apps.)
-- To auto-fit a scene, use :func:`~klampt.vis.autoFitCamera`.
-- To follow an object, use :func:`~klampt.vis.followCamera`.
+- To auto-fit a scene, use :func:`~klampt.vis.visualization.autoFitCamera`.
+- To follow an object, use :func:`~klampt.vis.visualization.followCamera`.
 
 
 User interaction and customization
@@ -466,7 +467,7 @@ There are several ways to provide user interaction in the visualizer:
 
   In OpenGL, the editing happens via mouse interaction. 
 
-  In Jupyter, a widget will be displayed after
+  In Jupyter, a widget will be displayed in the output of
   the cell in which ``vis.edit`` was called.  (To customize Jupyter widgets further, you can create
   them `manually <klampt.vis.ipython.html>`__.)
 
@@ -523,7 +524,7 @@ information, see the :class:`~klampt.vis.glinterface.GLPluginInterface` document
 and the simple example file
 ``Klampt-examples/Python3/demos/gl_vis.py``.
 
-For each GUI event (display, mousefunc, etc), the event cascades through
+For each GUI event (``display``, ``mousefunc``, etc), the event cascades through
 the plugin stack until one plugin's handler catches it by returning
 True. Note: when implementing a plugin, you should not call any handler
 functions yourself. Instead, the GUI will call these in response to OS
@@ -582,10 +583,11 @@ Drawing your own world
 You can completely override the standard vis scene manager using your own plugin,
 but you will be responsible for all UI and OpenGL drawing functions.
 Klampt provides convenience plugin base classes that show worlds and simulations in
-the `klampt.vis.glrobotprogram <klampt.vis.glrobotprogram.html>`__ module. 
+the :mod:`klampt.vis.glrobotprogram` module. 
 
 The following code shows how to subclass the :class:`~klampt.vis.glrobotprogram.GLWorldPlugin`
-class, as well as the *mousefunc* and *motionfunc* callbacks to capture mouse clicks.
+class, as well as the *mousefunc* and *motionfunc* callbacks to capture objects clicked on
+by the mouse.
 
 .. code:: python
 

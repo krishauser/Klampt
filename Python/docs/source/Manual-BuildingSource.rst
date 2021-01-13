@@ -19,7 +19,7 @@ machine:
 -  CMake (version >= 2.6)
 -  GLPK, the GNU Linear Programming Kit
 -  Python, if you wish to build the Python bindings (compatible with
-   Python 2.6, 2.7 and 3.x).
+   Python 2.7 and 3.x).
 -  (recommended) Assimp, if you wish to load STL, DAE and other geometry
    file formats. (Only OBJ and OFF are natively supported in Klampt.)
 -  (recommended) Qt5, if you wish to use nicer GUIs for the core
@@ -58,10 +58,8 @@ To configure the dependencies, consider the following notes:
 **Enabling Assimp support (optional).** To load a larger variety of 3D
 meshes, Klamp't can be configured to use the Asset Importer (
 `Assimp <http://assimp.sourceforge.net/>`__) library. Once Assimp
-3.0.1270 is installed on your system (if
-Klampt/Cpp/Depdencies/assimp--3.0.1270-sdk or /usr/lib/libassimp.so
-exists), KrisLibrary and Klampt should automatically detect it when
-built.
+4.0.x is installed on your system, KrisLibrary and Klampt should
+automatically detect it when ``cmake`` is run.
 
 **Run CMake to build Klamp't Makefiles.** Run "cmake ." to build the
 Klamp't makefiles.
@@ -149,14 +147,6 @@ to the ``Klampt/Python`` directory. Finally, open a Visual Studio
 Command Prompt in *Administrative Mode*, and depending on your VS
 version, run:
 
-VS 2008: ``python setup.py install``
-
-VS 2010:
-
-.. code:: sh
-
-    set VS90COMNTOOLS=%VS100COMNTOOLS%
-    python setup.py install
 
 VS 2012:
 
@@ -184,12 +174,12 @@ Multithreaded Debug DLL.
 The general procedure is as follows:
 
 #. Acquire GLEW and optionally (but recommended) WinGLPK 4.61 and/or
-   Assimp 3.0.1270. Place the glew32.lib, glpk\_4\_61.lib files in
+   Assimp 4.0.x. Place the glew32.lib, glpk\_4\_61.lib files in
    Klampt/Cpp/Dependencies or in your Visual Studio path. Place the
    Assimp folder in Klampt/Cpp/Dependencies.
 #. Configure and edit dependencies as follows:
 
-   #. ODE: Set up build files with premake4 vs2010.
+   #. ODE: Set up build files with ``premake4 vs2012`` or ``premake4 vs2015``.
 
 #. Compile all dependencies except for KrisLibrary. Place all generated
    .lib files into the Klampt/Cpp/Dependencies directory.

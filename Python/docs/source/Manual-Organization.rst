@@ -67,16 +67,16 @@ The Klamp't Python API is organized as follows:
 -  ``Klampt.control``: control modules.
 
 You should also obtain the `Klampt-examples Github project <https://github.com/krishauser/Klampt-examples>`_ 
-for examples of how to run the Klampt Python API.  Klampt files are stored in the ``Klampt-examples/data``,
+for examples of how to run the Klampt Python API.  Example Klampt data files are stored in the ``Klampt-examples/data``,
 and include
 
-- ``data``: example world XML files
-- ``data/robots``: example robot files 
-- ``data/objects``: example rigid object files
-- ``data/terrains``: example terrain files
-- ``data/motions``: example motions
+- ``data``: world XML files
+- ``data/robots``: robot files 
+- ``data/objects``: rigid object files
+- ``data/terrains``: terrain files
+- ``data/motions``: motions
 - ``data/resources``: an example resource collection
-- ``data/simulation_test_worlds``: example worlds to test simulator functionality
+- ``data/simulation_test_worlds``: worlds to test simulator functionality
 
 Python code examples are found in ``Klampt-examples/Python3``, and include:
 
@@ -112,23 +112,31 @@ Once the apps are built, they will be found in the Klampt/bin/ folder.
 Build and temporary files
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Build files
+
 -  ``CMakeFiles.txt``: CMake main file describing the build
    configuration.
--  ``CMakeModules/``: Auxiliary CMake files.  If you are building other projects using Klampt, the``\ KlamptDependencies.cmake\`
+-  ``CMakeModules/``: Auxiliary CMake files.  If you are building other projects using Klampt, the ``KlamptDependencies.cmake``
    file will be useful to include.
+-  ``tests``: A few basic test programs, built on ``make test``.
+-  ``Cpp/Documentation/doxygen.conf``: C++ documentation build file (uses Doxygen)
+-  ``Python/docs/``: Python documentation build files (uses Sphinx)
+-  ``update.sh``: Linux script to cleanly update all of Klampt and
+   KrisLibrary.
+-  ``dist/linux_Python``: Docker-based scripts to build Python wheels.
+-  ``dist/windows``: Windows script to cleanly update, build, and package all of Klampt and
+   KrisLibrary.
+
+Temporary files
+
+-  ``lib/libKlampt.a``: Once built, the main Klamp't library file will be stored
+   here to be included into new projects.
 -  ``CMakeCache.txt``: CMake cache file. May need to be deleted if you
    are having build problems.
 -  ``CMakeFiles/``, ``Python/build``, ``Makefile``
    ``cmake_install.cmake``, ``cmake_uninstall.cmake``: temporary build
    files. These can be safely deleted after a successful build.
--  ``tests``: A few basic test programs, built on ``make test``.
--  ``lib/libKlampt.a``: the main Klamp't library file to be included into
-   new projects.
--  ``doxygen.conf``: documentation build file.
--  ``update.sh``: Linux script to cleanly update all of Klampt and
-   KrisLibrary.
--  ``winpackage.bat``: Windows script to cleanly update, build, and package all of Klampt and
-   KrisLibrary.
+
 
 .. |Organization of library| image:: _static/images/concepts-overview.png
 

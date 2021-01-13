@@ -80,10 +80,10 @@ this to get started.
 World files for different robots and problem setups are available in the
 Klampt-examples/data subdirectory:
 
--  ``hubo\*.xml``: the KAIST Hubo humanoid.
--  ``puma\*.xml``: the Puma 760 industrial robot.
--  ``tx90\*.xml``: the Staubli TX90L industrial robot.
--  ``baxter\*.xml``: the Rethink Robotics Baxter robot.
+-  ``hubo*.xml``: the KAIST Hubo humanoid.
+-  ``puma*.xml``: the Puma 760 industrial robot.
+-  ``tx90*.xml``: the Staubli TX90L industrial robot.
+-  ``baxter*.xml``: the Rethink Robotics Baxter robot.
 
 Other test robots, objects, and environments are available in the
 ``Klampt-examples/data/{robots,objects,terrains}`` subdirectories. Some files of

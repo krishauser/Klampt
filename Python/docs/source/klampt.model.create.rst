@@ -1,8 +1,24 @@
 klampt.model.create package
 ===========================
 
+
+.. Module contents
+.. ---------------
+
+.. automodule:: klampt.model.create
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
 Submodules
 ----------
+
+.. autosummary::
+    ~klampt.model.create.moving_base_robot
+    ~klampt.model.create.pile
+    ~klampt.model.create.primitives
+
 
 klampt.model.create.moving\_base\_robot module
 ----------------------------------------------
@@ -28,11 +44,3 @@ klampt.model.create.primitives module
     :undoc-members:
     :show-inheritance:
 
-
-Module contents
----------------
-
-.. automodule:: klampt.model.create
-    :members:
-    :undoc-members:
-    :show-inheritance:
