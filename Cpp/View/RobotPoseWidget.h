@@ -103,7 +103,7 @@ public:
   ///most closely matches qref (useful for spin joints)
   Config Pose_Conditioned(const Config& qref) const;
   ///Enables / disables editing certain joints
-  void SetActiveDofs(const vector<int>& activeDofs) { linkPoser.SetActiveDofs(activeDofs); }
+  void SetActiveDofs(const vector<int>& activeDofs);
   ///Adds a pos/rot constraint on the currently hovered link
   bool FixCurrent();
   ///Adds a point constraint on the currently hovered link

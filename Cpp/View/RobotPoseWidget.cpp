@@ -690,6 +690,25 @@ void RobotPoseWidget::Set(Robot* robot,ViewRobot* viewRobot)
   }
 }
 
+void RobotPoseWidget::SetActiveDofs(const vector<int>& activeDofs)
+{
+  if(useBase) {
+    bool use_trans[3]={false,false,false};
+    bool use_rot[3]={false,false,false};
+    for(auto i:activeDofs) {
+      if(i<3) use_trans[i] = true;
+      else if (i<6) use_rot[i-3] = true;
+    }
+    for(int i=0;i<3;i++) basePoser.enableTranslationAxes[i] = use_trans[i];
+    for(int i=0;i<3;i++) basePoser.enableRotationAxes[i] = use_rot[i];
+    if(!use_trans[0] || !use_trans[1] || !use_trans[2]) 
+      basePoser.enableOriginTranslation = false;
+    if(!use_rot[0] || !use_rot[1] || !use_rot[2]) 
+      basePoser.enableOuterRingRotation = false;
+  }
+  linkPoser.SetActiveDofs(activeDofs);
+}
+
 Config RobotPoseWidget::Pose_Conditioned(const Config& qref) const
 {
   Robot* robot = linkPoser.robot;
