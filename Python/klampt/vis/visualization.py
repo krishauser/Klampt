@@ -3152,7 +3152,7 @@ class VisAppearance:
             res = RobotPoser(item)
         elif isinstance(item,SubRobotModel):
             res = RobotPoser(item._robot)
-            res.setActiveDofs(item.links);
+            res.setActiveDofs(item._links);
         elif isinstance(item,RigidObjectModel):
             res = ObjectPoser(item)
         elif isinstance(item,(list,tuple)):
