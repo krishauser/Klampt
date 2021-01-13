@@ -39,6 +39,10 @@ def bb_intersect(a,b):
     bmin,bmax=b
     return not any(q < u or v < p for (p,q,u,v) in zip(amin,amax,bmin,bmax))
 
+def bb_contains(bb,x):
+    """Returns true if x is inside the bounding box bb"""
+    return not any(v < p or v > q for (p,q,v) in zip(bb[0],bb[1],x))
+
 def bb_intersection(*bbs):
     """Returns the bounding box representing the intersection the given bboxes.
     The result may be empty."""
