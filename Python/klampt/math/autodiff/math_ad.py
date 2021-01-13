@@ -135,7 +135,7 @@ class _ADSin(ADFunctionInterface):
     def gen_derivative(self,arg,x):
         if len(arg) == 1:
             return self.derivative(arg[0],x)
-        if not _scalar(args[arg]):
+        if not _scalar(x):
             raise NotImplementedError()
         if len(arg)%2 == 1:
             base = np.cos(x)
@@ -165,7 +165,7 @@ class _ADCos(ADFunctionInterface):
     def gen_derivative(self,arg,x):
         if len(arg) == 1:
             return self.derivative(arg[0],x)
-        if not _scalar(args[arg]):
+        if not _scalar(x):
             raise NotImplementedError()
         if len(arg)%2 == 1:
             base = np.sin(x)
@@ -493,7 +493,7 @@ def _unit(x):
     return n*0
 def _unit_jvp(dx,x):
     n = np.linalg.norm(x)
-    dn = norm_jvp(dx,x)
+    dn = _norm_jvp(dx,x)
     if n > 1e-7:
         return dx/n - x*(dn/n**2)
     return np.linalg.norm(dx)

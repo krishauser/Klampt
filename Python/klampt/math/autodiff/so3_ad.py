@@ -115,7 +115,7 @@ def _from_rotation_vector_jvp(dw,w):
     if length < 1e-7: return so3.cross_product(dw)
     axis = w/length
     daxis = math_ad._unit_jvp(dw,w)
-    return from_axis_angle_jvp_axis(daxis,axis,length) + from_axis_angle_jvp_angle(dlength,length)
+    return _from_axis_angle_jvp_axis(daxis,axis,length) + _from_axis_angle_jvp_angle(dlength,length)
 from_rotation_vector = function(so3.from_rotation_vector,'so3.from_rotation_vector',(3,),9,
     jvp = [_from_rotation_vector_jvp])
 """Autodiff'ed version of so3.from_rotation_vector. First derivatives are
@@ -123,7 +123,7 @@ implemented."""
 
 def _rotation_vector_jvp(dR,R):
     theta = so3.angle(R)
-    dtheta = angle_jvp(dR,R)
+    dtheta = _angle_jvp(dR,R)
     #normal
     scale = 0.5
     dscale = -0.5*dtheta
@@ -176,7 +176,7 @@ implemented."""
 
 def _axis_jvp(dR,R):
     w = np.array(so3.rotation_vector(R))
-    dw = rotation_vector_jvp(dR,R)
+    dw = _rotation_vector_jvp(dR,R)
     return math_ad._unit_jvp(dw,w)
 axis = function(lambda R:vectorops.unit(so3.rotation_vector(R)),'axis',(9,),3,
     jvp=[_axis_jvp])
@@ -187,7 +187,7 @@ def _angle_jvp(dR,R):
     cosangle = (so3.trace(R) - 1)*0.5
     cosangle = max(min(cosangle,1.0),-1.0)
     if cosangle == 1:
-        return vectorops.norm([dR[1],dr[2],dr[5]])
+        return vectorops.norm([dR[1],dR[2],dR[5]])
     #dangle / dR[0] = -1.0/sqrt(1-cosangle**2) * dcosangle/dR[0]
     dacos = -1.0/math.sqrt(1-cosangle**2)
     return so3.trace(dR)*0.5*dacos
@@ -202,9 +202,9 @@ def _error_jvp_Ra(dRa,Ra,Rb):
     Rbinv = so3.inv(Rb)
     Rrel = so3.mul(Ra,Rbinv)
     dRrel = so3.mul(dRa,Rbinv)
-    return rotation_vector_jvp(dRrel,Rrel)
+    return _rotation_vector_jvp(dRrel,Rrel)
 def _error_jvp_Rb(dRb,Ra,Rb):
-    return -error_jvp_Ra(dRb,Rb,Ra)
+    return -_error_jvp_Ra(dRb,Rb,Ra)
 error = function(so3.error,'so3.error',(9,9),3,
     jvp=[_error_jvp_Ra,_error_jvp_Rb])
 """Autodiff'ed version of so3.error. First derivatives are

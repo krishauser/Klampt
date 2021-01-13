@@ -1844,7 +1844,7 @@ void Appearance::setTexture1D(int w,const char* format,const std::vector<unsigne
   throw PyException("Python API for textures not implemented yet");
 }
 
-void Appearance::setTexture2D(int w,int h,const char* format,const std::vector<unsigned char>& bytes)
+void Appearance::setTexture2D(int w,int h,const char* format,const std::vector<unsigned char>& bytes,bool topdown)
 {
  throw PyException("Python API for textures not implemented yet");
 }

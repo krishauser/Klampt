@@ -155,7 +155,7 @@ class RobotInfo:
         jsonobj = json.load(f)
         for attr in ['name','fn','parts','freeBase','endEffectors','properties']:
             if attr not in jsonobj:
-                raise IOError("Loaded JSON object doesn't contain '"+name+"' key")
+                raise IOError("Loaded JSON object doesn't contain '"+attr+"' key")
             setattr(self,attr,jsonobj[attr])
         ees = dict()
         for (k,v) in self.endEffectors.items():

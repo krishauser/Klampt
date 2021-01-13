@@ -48,7 +48,7 @@ class CenterOfMass(ADFunctionInterface):
     def jvp(self,arg,darg,q):
         assert arg == 0
         self.robot.setConfig(q.tolist())
-        self.robot.setVelocity(dq.tolist())
+        self.robot.setVelocity(darg.tolist())
         return np.array(self.robot.getComVelocity())
 
 
@@ -220,8 +220,8 @@ class ForwardDynamics(ADFunctionInterface):
         return self.robot.numLinks()
     def n_out(self):
         return self.robot.numLinks()
-    def argname(self,t):
-        return ['q','dq','t'][i]
+    def argname(self,arg):
+        return ['q','dq','t'][arg]
     def eval(self,q,dq,t):
         self.robot.setConfig(q.tolist())
         self.robot.setVelocity(dq.tolist())
@@ -250,7 +250,7 @@ class InverseDynamics(ADFunctionInterface):
     def eval(self,q,dq,ddq):
         self.robot.setConfig(q.tolist())
         self.robot.setVelocity(dq.tolist())
-        return self.robot.accelToTorques(t)
+        return self.robot.accelToTorques(ddq)
 
 
 class PointForceTorques(ADFunctionInterface):
@@ -311,7 +311,7 @@ class PointWrenchTorques(ADFunctionInterface):
         if arg==0:
             Ho = np.array(self.link.getOrientationHessian()) #tensor of size 3 x n x n
             Hp = np.array(self.link.getPositionHessian(self.localpt)) #tensor of size 3 x n x n
-            return np.dot(f,np.dot(Ho,darg[:3]))+np.dot(f,np.dot(Hp,darg[3:]))
+            return np.dot(w[:3],np.dot(Ho,darg[:3]))+np.dot(w[3:],np.dot(Hp,darg[3:]))
         else:
             return np.dot(np.array(self.link.getJacobian(self.localpt)).T,darg)
         

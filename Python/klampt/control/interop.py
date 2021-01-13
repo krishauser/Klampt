@@ -87,9 +87,9 @@ class SimRobotControllerToInterface(object):
     def addMilestoneLinear(self,q):
         raise NotImplementedError("addMilestoneLinear() may not be called")
     def setLinear(self,q,dt):
-        self.robotInterface.setPiecewiseLinear([dt],[robotInterface.configFromKlampt(q)])
+        self.robotInterface.setPiecewiseLinear([dt],[self.robotInterface.configFromKlampt(q)])
     def setCubic(self,q,v,dt):
-        self.robotInterface.setPiecewiseCubic([dt],[robotInterface.configFromKlampt(q)],[robotInterface.velocityFromKlampt(v)])
+        self.robotInterface.setPiecewiseCubic([dt],[self.robotInterface.configFromKlampt(q)],[self.robotInterface.velocityFromKlampt(v)])
     def addLinear(self,q,dt):
         raise NotImplementedError("addLinear() may not be called")
     def addCubic(self,q,dt):
@@ -103,7 +103,7 @@ class SimRobotControllerToInterface(object):
     def setTorque(self,t):
         self.robotInterface.setTorque(t)
     def setPIDCommand(self,qdes,dqdes,tfeedforward=None):
-        self.robotInterface.setPIDCommand(robotInterface.configFromKlampt(qdes),robotInterface.velocityFromKlampt(dqdes),tfeedforward)
+        self.robotInterface.setPIDCommand(self.robotInterface.configFromKlampt(qdes),self.robotInterface.velocityFromKlampt(dqdes),tfeedforward)
     def setManualMode(self,enabled):
         pass
 
@@ -130,7 +130,7 @@ class _SimRobotSensorFromInterface(object):
         return self.iface.klamptModel()
     def measurementNames(self):
         if self._name is None: return []
-        return self.robot().sensor(name).measurementNames()
+        return self.robot().sensor(self._name).measurementNames()
     def getMeasurements(self):
         if self._name is None: return []
         return self.iface.sensorMeasurements(self._name)

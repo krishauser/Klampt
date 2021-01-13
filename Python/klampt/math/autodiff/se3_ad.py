@@ -59,7 +59,7 @@ Module contents
 
 import numpy as np 
 from .ad import ADFunctionInterface,function
-from .. import se3
+from .. import so3,se3
 
 SIZE = 12
 """Constant giving the dimension of an se3_ad element"""

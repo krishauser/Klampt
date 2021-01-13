@@ -122,7 +122,7 @@ class OptimizationProblem:
                 n = indices[-1]
                 if self.bounds is None:
                     self.bounds = (np.array([-float('inf')]*n),np.array([float('inf')]*n))
-                self.bounds[0][ai:bi] = np.maximum(self.bounds[0][ai:bi],a)
+                self.bounds[0][ai:bi] = np.maximum(self.bounds[0][ai:bi],xmin)
             else:
                 h = symbolic.simplify(func.args[0]-func.args[1])
                 if func.args[0].returnType().is_scalar() and func.args[1].returnType().is_scalar():
@@ -218,7 +218,7 @@ class OptimizationProblem:
                 if any(not f(x) for f in self.feasibilityTests):
                     return float('inf')
                 return self.objective(x)
-            res = Problem()
+            res = OptimizationProblem()
             res.setObjective(flatObjective,self.objectiveGrad)
             res.bounds = self.bounds
             return res
@@ -238,7 +238,7 @@ class OptimizationProblem:
                 f += objective_scale*self.objective(x)
             return f
         
-        res = Problem()
+        res = OptimizationProblem()
         res.setObjective(flatObjective,None)
         res.bounds = self.bounds
         return res
@@ -260,7 +260,7 @@ class LocalOptimizer:
     def __init__(self,method='auto'):
         if method == 'auto':
             try:
-                import pyopt
+                import pyOpt
                 method = 'pyOpt'
             except ImportError:
                 method = 'scipy'
@@ -312,6 +312,7 @@ class LocalOptimizer:
             return methods
         elif problem.bounds is not None:
             #only can do bounded problems
+            methods = []
             for m in LocalOptimizer.methodsAvailable():
                 if m=='scipy' or m=='pyOpt':
                     methods.append(m)
@@ -539,7 +540,7 @@ class LocalOptimizer:
                         print("  Inequality has residual",max(v for v in h),"> 0")
                         print("  Residual vector",g)
                     if not boundfeasible:
-                        for i,(v,a,b) in enumerate(zip(x,bmin,bmax)):
+                        for i,(v,a,b) in enumerate(zip(xstr,bmin,bmax)):
                             if v < a or v > b:
                                 print("  Bound %d: %f <= %f <= %f violated"%(i,a,v,b))
                     input("Press enter to continue >")
@@ -844,7 +845,7 @@ class OptimizationProblemBuilder:
             return self.objectives[-1]
     def addInequality(self,f,weight=None):
         """Adds an inequality f(x) <= 0."""
-        if isinstance(obj,symbolic.Function):
+        if isinstance(f,symbolic.Function):
             assert len(self.optimizationVariables) > 0,"To add functions to constraints, the optimizationVariables object must be set"
             return self.addInequality(self.context.bindFunction(f,self.optimizationVariables),weight)
         else:
@@ -883,10 +884,9 @@ class OptimizationProblemBuilder:
         for (k,v) in kwargs:
             self.context.variableDict[k].bind(v)
     def unbind(self,**kwargs):
-        """Binds the variables specified by the keyword arguments"""
+        """Unbinds the variables specified by the keyword arguments"""
         for (k,v) in kwargs:
             self.context.variableDict[k].unbind()
-        return res
     def bindVars(self,*args):
         for x,v in zip(self.optimizationVariables,args):
             x.bind(v)
@@ -928,7 +928,7 @@ class OptimizationProblemBuilder:
                 if var.type.is_scalar():
                     var.bind(sample_range(*infbnd))
                 else:
-                    assert v.type.char == 'V',"TODO: handle matrix/array variables"
+                    assert var.type.char == 'V',"TODO: handle matrix/array variables"
                     assert var.type.size >= 0
                     var.bind([sample_range(*infbnd) for i in range(var.type.size)])
 
@@ -1122,7 +1122,7 @@ class OptimizationProblemBuilder:
         evaluates to True the configuration meets bound constraints"""
         exprs = []
         for k,bnd in self.variableBounds.items():
-            exprs.append(self.context.linalg.bound_contains(qmin,qmax,self.context.get(k)))
+            exprs.append(self.context.linalg.bound_contains(bnd[0],bnd[1],self.context.get(k)))
         return symbolic.all_(*exprs)
 
     def isFeasibleSymbolic(self,eqTol=1e-3):
@@ -1138,11 +1138,11 @@ class OptimizationProblemBuilder:
         if eqWeight != 0:
             res = self.equalityResidual()
             if len(res) > 0:
-                c += eqWeight*vectorops.norm(res)
+                c += eqWeight*np.linalg.norm(res)
         if ineqWeight != 0:
             res = self.inequalityResidual()
             if len(res) > 0:
-                c += ineqWeight*vectorops.norm(res)
+                c += ineqWeight*np.linalg.norm(res)
         if infeasWeight != 0:
             for obj in self.objectives:
                 if obj == 'feas' and not obj.soft:
@@ -1201,7 +1201,7 @@ class OptimizationProblemBuilder:
             if prettyPrintExprs:
                 ojson = {'expr':symbolic_io.exprToStr(o.expr,parseCompatible=True),'type':o.type,'soft':o.soft,'weight':o.weight,'name':o.name} 
             else:
-                ojson = {'expr':symbolic_io.exprToJson(expr),'type':o.type,'soft':o.soft,'weight':o.weight,'name':o.name} 
+                ojson = {'expr':symbolic_io.exprToJson(o.expr),'type':o.type,'soft':o.soft,'weight':o.weight,'name':o.name} 
             objectivesJson.append(ojson)
         res['objectives'] = objectivesJson
         res['optimizationVariables'] = [v.name for v in self.optimizationVariables]

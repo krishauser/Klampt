@@ -606,18 +606,18 @@ def viewport_to_camera(viewport,camera,robot):
     assert isinstance(viewport,GLViewport)
     assert isinstance(camera,SimRobotSensor),"Must provide a SimRobotSensor instance"
     assert camera.type() == 'CameraSensor',"Must provide a camera sensor instance"
-    xform = view.getTransform()
+    xform = viewport.getTransform()
     link = int(camera.getSetting('link'))
     if link < 0 or robot is None:
         rlink = None
     else:
         rlink = robot.link(link)
     set_sensor_xform(camera,xform,rlink)
-    (zmin,zmax) = view.clippingplanes
-    xfov = math.radians(view.fov)
-    yfov = xfov*view.h/view.w
-    camera.setSetting('xres',str(view.w))
-    camera.setSetting('yres',str(view.h))
+    (zmin,zmax) = viewport.clippingplanes
+    xfov = math.radians(viewport.fov)
+    yfov = xfov*viewport.h/viewport.w
+    camera.setSetting('xres',str(viewport.w))
+    camera.setSetting('yres',str(viewport.h))
     camera.setSetting('xfov',str(xfov))
     camera.setSetting('yfov',str(yfov))
     camera.setSetting('zmin',str(zmin))

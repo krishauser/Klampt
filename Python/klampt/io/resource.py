@@ -177,8 +177,8 @@ def get(name,type='auto',directory=None,default=None,doedit='auto',description=N
     if type == 'auto':
         type = loader.filenameToType(name)
     value = None
+    fn = os.path.join(directory,name)
     try:
-        fn = os.path.join(directory,name)
         try:
             value = loader.load(type,fn)
         except IOError:

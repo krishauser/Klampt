@@ -97,7 +97,7 @@ def _hermite_gen_deriv(args,x1,v1,x2,v2,u):
         res = None
         for a in args:
             if a!=4:
-                res = np.diag([coeffs[a]]*len(x))
+                res = np.diag([coeffs[a]]*len(x1))
         assert res is not None,"This code should not be reached"
         uhit = False
         for a in args:
@@ -117,7 +117,7 @@ def _hermite_gen_deriv(args,x1,v1,x2,v2,u):
         res = None
         for a in args:
             if a!=4:
-                res = np.diag([coeffs[a]]*len(x))
+                res = np.diag([coeffs[a]]*len(x1))
         assert res is not None,"This code should not be reached"
         uhit = False
         for a in args:
@@ -242,7 +242,7 @@ class Trajectory(ADFunctionInterface):
             self.robot = n_or_robot
             self.n = self.robot.numLinks()
         else:
-            self.n = n
+            self.n = n_or_robot
             self.robot = None
         self.endBehavior = endBehavior
     def __str__(self):

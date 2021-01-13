@@ -2033,7 +2033,7 @@ class Geometry3D(_object):
 
 
         Args:
-            arg2 (:class:`~klampt.VolumeGrid` or :class:`~klampt.TriangleMesh` or :class:`~klampt.Geometry3D` or :obj:`ConvexHull` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.PointCloud`, optional): 
+            arg2 (:class:`~klampt.PointCloud` or :class:`~klampt.VolumeGrid` or :class:`~klampt.TriangleMesh` or :class:`~klampt.GeometricPrimitive` or :obj:`ConvexHull` or :class:`~klampt.Geometry3D`, optional): 
         """
         this = _robotsim.new_Geometry3D(*args)
         try:
@@ -3026,27 +3026,43 @@ class Appearance(_object):
             bytes (:obj:`std::allocator< unsigned char > >`)
 
         *   "": turn off texture mapping  
-        *   rgb8: unsigned byte RGB colors with red in the most significant byte  
-        *   argb8: unsigned byte RGBA colors with alpha in the most significant byte  
+        *   rgb8: unsigned byte RGB colors with red in the 1st byte, green in the 2nd,
+            blue in the 3rd  
+        *   bgr8: unsigned byte RGB colors with blue in the 1st byte, green in the 2nd,
+            green in the 3rd  
+        *   rgba8: unsigned byte RGBA colors with red in the 1st byte and alpha in the
+            4th  
+        *   bgra8: unsigned byte RGBA colors with blue in the 1st byte and alpha in the
+            4th  
         *   l8: unsigned byte grayscale colors  
 
         """
         return _robotsim.Appearance_setTexture1D(self, w, format, bytes)
 
 
-    def setTexture2D(self, w, h, format, bytes):
+    def setTexture2D(self, w, h, format, bytes, topdown=True):
         """
-        Sets a 2D texture of the given width/height. See setTexture1D for valid format
-        strings.  
+        Sets a 2D texture of the given width/height. See :func:`setTexture1D` for valid
+        format strings.  
+
+        setTexture2D (w,h,format,char,bytes,topdown=True)
+
+        setTexture2D (w,h,format,char,bytes)
+
 
         Args:
-            w (int)
-            h (int)
-            format (str)
-            char (:obj:`std::vector< unsigned`)
-            bytes (:obj:`std::allocator< unsigned char > >`)
+            w (int): 
+            h (int): 
+            format (str): 
+            char (:obj:`std::vector< unsigned`): 
+            bytes (:obj:`std::allocator< unsigned char > >`): 
+            topdown (bool, optional): default value True
+
+        bytes is is given in order left to right, top to bottom if `topdown==True`.
+        Otherwise, it is given in order left to right, bottom to top.  
+
         """
-        return _robotsim.Appearance_setTexture2D(self, w, h, format, bytes)
+        return _robotsim.Appearance_setTexture2D(self, w, h, format, bytes, topdown)
 
 
     def setTexcoords(self, uvs):
@@ -6311,7 +6327,7 @@ class WorldModel(_object):
             terrain (:obj:`TerrainModel`, optional): 
 
         Returns:
-            (:class:`~klampt.RigidObjectModel` or :obj:`TerrainModel` or :class:`~klampt.RobotModel`):
+            (:class:`~klampt.RobotModel` or :class:`~klampt.RigidObjectModel` or :obj:`TerrainModel`):
         """
         return _robotsim.WorldModel_add(self, *args)
 
@@ -6762,6 +6778,18 @@ class IKObjective(_object):
         return _robotsim.IKObjective_matchDestination(self, R, t)
 
 
+    def closestMatch(self, R, t):
+        """
+        Gets the transform T that's closest to the transform (R,t) and that satisfies
+        the IK goal's constraints.  
+
+        Args:
+            R (:obj:`list of 9 floats (so3 element)`)
+            t (:obj:`list of 3 floats`)
+        """
+        return _robotsim.IKObjective_closestMatch(self, R, t)
+
+
     def loadString(self, str):
         """
         Loads the objective from a Klamp't-native formatted string. For a more readable
@@ -7152,7 +7180,7 @@ class GeneralizedIKObjective(_object):
 
 
         Args:
-            obj (:class:`~klampt.RigidObjectModel` or :obj:`GeneralizedIKObjective`, optional): 
+            obj (:obj:`GeneralizedIKObjective` or :class:`~klampt.RigidObjectModel`, optional): 
             link (:class:`~klampt.RobotModelLink`, optional): 
             link2 (:class:`~klampt.RobotModelLink`, optional): 
             obj2 (:class:`~klampt.RigidObjectModel`, optional): 
@@ -7352,7 +7380,7 @@ def SampleTransform(*args):
 
 
     Args:
-        obj (:obj:`IKObjective` or :obj:`GeneralizedIKObjective`): 
+        obj (:obj:`GeneralizedIKObjective` or :obj:`IKObjective`): 
     """
     return _robotsim.SampleTransform(*args)
 class SimRobotSensor(_object):

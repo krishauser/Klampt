@@ -244,7 +244,7 @@ def saveStateHeaderCSV(state,f):
         else:
             for i in range(len(v)):
                 itemNames.append(k+'['+str(i)+']')
-    f.write(','.join(items))
+    f.write(','.join(itemNames))
     f.write('\n')
 
 

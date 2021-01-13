@@ -749,7 +749,7 @@ class ADFunctionCall:
                 for col in range(mat.shape[1]):
                     columns.append(self.func.jvp(arg,mat[:,col],*args))
                     if no >= 0 and _size(columns[-1]) != no:
-                        raise ValueError("Function %s.jvp result has wrong size? Context is %s, expects %d, result has size %d"%(str(self.func),str(self),no,_size(dcol)))
+                        raise ValueError("Function %s.jvp result has wrong size? Context is %s, expects %d, result has size %d"%(str(self.func),str(self),no,_size(columns[-1])))
                 return np.column_stack(columns)
             except NotImplementedError:
                 pass
@@ -812,7 +812,7 @@ class ADFunctionCall:
                 da = arg._hessian(callStack,darg1,darg2,kwargs)
                 if da is 0:
                     continue
-                inc = np.empty((_size(eval_result),_size(kwargs[darg1]),_size(kwargs[darg12])))
+                inc = np.empty((_size(eval_result),_size(kwargs[darg1]),_size(kwargs[darg2])))
                 for i in range(da.shape[-1]):
                     inc[:,:,i] = self._deriv_jacobian_array_product(i,da[:,:,i],eval_args)
                 print("Deriv * hessian",arg," = ",inc)
@@ -848,7 +848,7 @@ class ADFunctionCall:
                 try:
                     ddf = self.func.gen_derivative([i,j],*eval_args)
                 except NotImplementedError:
-                    finite_differences()
+                    return finite_differences()
                 #print("d^2/d",i,j,"of func",self.func,"is",ddf)
                 if ddf is 0:
                     continue
@@ -1878,7 +1878,7 @@ class _ADGetItem(ADFunctionInterface):
         if argval is None:
             return -1
         if isinstance(self.indices,slice):
-            start, stop, step = self.indices.indices(size)
+            start, stop, step = self.indices.indices(len(argval))
             return (stop-start)//step
         elif hasattr(self.indices,'__iter__'):
             return len(self.indices)

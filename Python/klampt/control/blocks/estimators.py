@@ -1,6 +1,7 @@
 from klampt.math import vectorops
 from ..controller import ControllerBlock
 from .utils import LambdaBlock
+from collections import deque
 
 class DerivativeEstimator(ControllerBlock):
     """An estimator computes the derivative of some input (typically 'q') using

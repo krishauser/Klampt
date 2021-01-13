@@ -527,7 +527,7 @@ def typeToJson(type):
         elif isinstance(type.subtype,list):
             res['subtype'] = [typeToJson(st) for st in type.subtype]
         else:
-            res[subtype] = typeToJson(type.subtype)
+            res['subtype'] = typeToJson(type.subtype)
     return res
 
 def typeFromJson(jsonObj):

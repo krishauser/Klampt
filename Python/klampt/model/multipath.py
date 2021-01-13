@@ -7,6 +7,8 @@ from ..math import vectorops
 import xml.etree.ElementTree as ET
 from xml.sax.saxutils import escape
 from xml.dom import minidom
+import math
+import bisect
 
 class MultiPath:
     """A sophisticated path representation that allows timed/untimed paths, attached
@@ -387,8 +389,8 @@ class MultiPath:
         if len(sec.times)==0:
             usec = t*len(self.sections)-s
             tsec = (len(sec.milestones)-1)*usec
-            i = int(math.floor(tseg))
-            u = tseg - i
+            i = int(math.floor(tsec))
+            u = tsec - i
             return (s,i,u)
         else:
             i = bisect.bisect_left(sec.times,t)

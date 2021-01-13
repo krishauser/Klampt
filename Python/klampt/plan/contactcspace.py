@@ -1,4 +1,4 @@
-from .. import robotsim
+from .. import ContactPoint,TerrainModel,RobotModel
 from ..model import contact,collide
 from ..math import vectorops
 from .cspaceutils import CompositeCSpace
@@ -125,11 +125,18 @@ class MultiContactCSpace(CompositeCSpace):
             self.contactMap = contact.contactMap(contacts,lambda x:x is None or isinstance(x,TerrainModel))
             self.holds = contact.contactMapHolds(self.contactMap)
         else:
+            self.contactMap = dict()
             self.holds = contacts
         ikobjectives = [h.ikObjective for h in self.holds]
         self.robotCSpace = ClosedLoopRobotCSpace(robot,ikobjectives,collider)
         self.objectCSpaces = []
         numRobots = 0
+        objs = set()
+        for (obj1,obj2) in self.contactMap():
+            if obj1 is not None and not isinstance(obj1,TerrainModel):
+                objs.add(obj1)
+            if obj2 is not None and not isinstance(obj2,TerrainModel):
+                objs.add(obj2)
         for o in objs:
             if isinstance(o,RobotModel):
                 numRobots+=1

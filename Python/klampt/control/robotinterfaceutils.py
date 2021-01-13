@@ -513,12 +513,12 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
         return self._base.fromKlamptConfig(klamptConfig,part=None,joint_idx=None)
 
     def fromKlamptVelocity(self,klamptVelocity,part=None,joint_idx=None):
-        return self._base.fromKlamptVelocity(klamptConfig,part=None,joint_idx=None)
+        return self._base.fromKlamptVelocity(klamptVelocity,part=None,joint_idx=None)
 
     def toKlamptConfig(self,config,klamptConfig=None,part=None,joint_idx=None):
         return self._base.toKlamptConfig(config,klamptConfig,part=None,joint_idx=None)
 
-    def toKlamptVelocity(self,config,klamptVelocity,part=None,joint_idx=None):
+    def toKlamptVelocity(self,velocity,klamptVelocity,part=None,joint_idx=None):
         return self._base.toKlamptVelocity(velocity,klamptVelocity,part=None,joint_idx=None)
 
     def print_status(self):
@@ -862,7 +862,7 @@ class _JointInterfaceEmulatorData:
             self.commandedPosition = self.pidCmd[0]
             self.commandedVelocity = self.pidCmd[1]
             self.commandedTorque = self.pidCmd[2]
-            self.pidIntegralError[i] += (self.commandedPosition-q)*dt
+            self.pidIntegralError += (self.commandedPosition-q)*dt
             self.commandTTL = dt*5
         elif self.controlMode == 'pwl' or self.controlMode == 'pwc':
             self.commandedPosition,self.commandedVelocity = self.evalTrajectory(t)
@@ -921,7 +921,7 @@ class _JointInterfaceEmulatorData:
                 t_pid = kp*(qdes-self.sensedPosition) + kd*(vdes-self.sensedVelocity) + ki*self.pidIntegralError + tdes
                 #if abs(self.pidIntegralError[i]*ki) > tmax:
                 #cap integral error to prevent wind-up
-                return self.commandedTorque,self.commandTTL
+                return t_pid,self.commandTTL
             else:
                 assert self.controlMode == 't',"Can't emulate torque control with any command type except for PID and torque control"
                 return self.commandedTorque,self.commandTTL

@@ -1,4 +1,4 @@
-from ..visualization import _WindowManager,_ThreadedWindowManager,_globalLock
+from ..visualization import _WindowManager,_ThreadedWindowManager,_globalLock,VisualizationScene
 from .vis_gl import GLVisualizationFrontend,GLVisualizationPlugin,WindowInfo
 from .. import glinit,gldraw,glcommon
 from ...robotsim import WorldModel,RobotModel
@@ -129,7 +129,7 @@ class GLUTWindowManager(_ThreadedWindowManager):
         for w in self.current_worlds:
             if w in self.windows[self.current_window].active_worlds:
                 print("klampt.vis.setWindow(): world",w,"becoming active in the new window",id)
-                for item in self.windows[current_window].worldDisplayListItems[w]:
+                for item in self.windows[self.current_window].worldDisplayListItems[w]:
                     self._refreshDisplayLists(item)
                 self.windows[self.current_window].active_worlds.remove(w)
         self.windows[id].active_worlds = self.current_worlds[:]
@@ -379,7 +379,8 @@ class GLUTWindowManager(_ThreadedWindowManager):
                 glutLeaveMainLoop()
             else:
                 while glutGetWindow():
-                    w.close()
+                    for w in self.windows:
+                        w.close()
                 for w in self.windows:
                     w.glwindow = None
             return

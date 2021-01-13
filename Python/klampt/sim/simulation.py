@@ -333,7 +333,7 @@ class SimpleSimulator (Simulator):
                 for a in args:
                     if isinstance(a,str):
                         if a=='time':
-                            resolvedArgs.append(sim.getTime())
+                            resolvedArgs.append(self.sim.getTime())
                         elif a=='dt':
                             resolvedArgs.append(substep)
                         else:

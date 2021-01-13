@@ -92,6 +92,10 @@ class IKObjective
   ///current position/rotation constraint types are kept.
   void matchDestination(const double R[9],const double t[3]);
 
+  ///Gets the transform T that's closest to the transform (R,t) and 
+  ///that satisfies the IK goal's constraints.
+  void closestMatch(const double R[9],const double t[3],double out[9],double out2[3]);
+
   ///Loads the objective from a Klamp't-native formatted string. For a
   ///more readable but verbose format, try the JSON IO routines
   ///:meth:`klampt.io.loader.toJson` / :meth:`klampt.io.loader.fromJson`

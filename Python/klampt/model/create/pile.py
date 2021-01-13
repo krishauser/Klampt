@@ -63,6 +63,7 @@ def xy_jiggle(world,objects,fixed_objects,bmin,bmax,iters,randomize=True,
         if verbose: 
             print(cmax,"conflicts with object",objects[amax].getName())
         other_geoms = [o.geometry() for o in objects[:amax]+objects[amax+1:]+fixed_objects]
+        nc = 0
         for it in range(inner_iters):
             xy_randomize(objects[amax],bmin,bmax)
             nc = sum([1 for p in collide.group_collision_iter([objects[amax].geometry()],other_geoms)])

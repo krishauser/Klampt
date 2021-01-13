@@ -1,5 +1,5 @@
 from ..controller import ControllerBlock
-from ..cartesian_driver import CartesianDriveSolver
+from ..cartesian_drive import CartesianDriveSolver
 
 
 class CartesianDriveController(ControllerBlock):
@@ -39,7 +39,7 @@ class CartesianDriveController(ControllerBlock):
             self.solver.start(self._qcmd,self.links,self.baseLinks,self.endEffectorPositions)
             self.start=False
         
-        progress,qcmd = solver.drive(self._qcmd,inputs['wdes'],inputs['vdes'],inputs['dt'])
+        progress,qcmd = self.solver.drive(self._qcmd,inputs['wdes'],inputs['vdes'],inputs['dt'])
         self._qcmd = qcmd
         return {'progress':progress,'qcmd':qcmd}
 

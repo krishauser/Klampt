@@ -127,8 +127,8 @@ def _norm_Linf_deriv(x,dx):
     imax = argmax(abs_(x))
     return sign(x[imax])*dx[imax]
 norm_Linf.setDeriv(0,_norm_Linf_deriv,asExpr=True,stackable=True)
-norm_fro.setDeriv(0,(lambda A,dA:multiply(A,dA)/norm_fro(A)),asExpr=True,stackable=True)
-norm2_fro.setDeriv(0,(lambda A,dA:multiply(A,dA)*2),asExpr=True,stackable=True)
+norm_fro.setDeriv(0,(lambda A,dA:mul(A,dA)/norm_fro(A)),asExpr=True,stackable=True)
+norm2_fro.setDeriv(0,(lambda A,dA:mul(A,dA)*2),asExpr=True,stackable=True)
 distance.argTypes = [Vector,Vector]
 distance2.argTypes = [Vector,Vector]
 distance_L1.argTypes = [Vector,Vector]
@@ -148,7 +148,7 @@ distance_Linf.addSimplifier([None,'zero'],lambda x,y:norm_Linf(x))
 distance.setDeriv(0,(lambda x,y,dx:dot(x-y,dx)/distance(x,y)),asExpr=True,stackable=True)
 distance.setDeriv(1,(lambda x,y,dy:dot(x-y,dy)/distance(x,y)),asExpr=True,stackable=True)
 distance2.setDeriv(0,(lambda x,y,dx:dot(x-y,dx)*2),asExpr=True,stackable=True)
-distance2.setDeriv(1,(lambda x,y,dx:dot(y-x,dy)*2),asExpr=True,stackable=True)
+distance2.setDeriv(1,(lambda x,y,dy:dot(y-x,dy)*2),asExpr=True,stackable=True)
 distance_L1.autoSetJacobians()
 distance_Linf.autoSetJacobians()
 linear = Function('linear',dot(_A,_x),["x","A"])

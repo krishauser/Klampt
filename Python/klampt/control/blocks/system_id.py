@@ -1,4 +1,4 @@
-from ..control import ControllerBlock
+from ..controller import ControllerBlock
 from ..system_id import LinearSystemID
 
 class LinearSystemIDBlock(ControllerBlock):

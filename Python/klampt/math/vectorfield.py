@@ -70,7 +70,7 @@ class CompositeVectorFieldFunction(VectorFieldFunction):
     def eval(self, x):
         res = []
         for f in self.fns:
-            res += f.eval(x, i)
+            res += f.eval(x)
         return res
             
     def eval_i(self, x, i):

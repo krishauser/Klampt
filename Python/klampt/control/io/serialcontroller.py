@@ -5,7 +5,7 @@ import asyncore,socket
 import errno
 import json
 import time
-import controller
+from .. import controller
 
 headerlen = 4
 
@@ -257,7 +257,8 @@ class JsonSerialController(controller.ControllerBlock):
 
 if __name__ == "__main__":
     import sys
-    import trajectory_controller
+    from ..blocks import trajectory_tracking
+    from klampt import io
 
     host = 'localhost'
     port = 3456
@@ -269,9 +270,10 @@ if __name__ == "__main__":
         
     #by default, runs a trajectory controller
     pathfn = sys.argv[1]
-    pycontroller = trajectory_controller.make(None,pathfn)
+    traj = io.load(pathfn)
+    pycontroller = trajectory_tracking.TrajectoryPositionController(traj)
     s = ControllerClient((host,port),pycontroller)
     asyncore.loop()
 
 def make(robot):
-    return SerialController()
+    return JsonSerialController()

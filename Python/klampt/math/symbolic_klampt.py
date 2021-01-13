@@ -18,7 +18,8 @@ from .symbolic import *
 from .symbolic_linalg import *
 from .. import *
 from . import so3,se3
-from ..model import ik
+from ..model import ik,collide
+from ..io import loader
 import weakref
 
 def _so3_rotation(axis,angle):
@@ -334,7 +335,7 @@ class IKContext(Context):
             assert hasattr(ikobj,"robot"),"IKObjective must be initialized with a RobotModel instance"
             assert ikobj.robot.index == robot.index
             localPos = ikobj.getPosition()[0]
-            return robot.link(ikobj.link()).getPositionJacobian(localPosition)
+            return robot.link(ikobj.link()).getPositionJacobian(localPos)
         def _worldRot(ikobj,robot):
             assert hasattr(ikobj,"robot"),"IKObjective must be initialized with a RobotModel instance"
             assert ikobj.robot.index == robot.index

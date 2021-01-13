@@ -288,7 +288,7 @@ class RobotControllerIO:
         self.retval['dqcmd'] = dq
         self.retval['torquecmd'] = torque
     def setVelocityCommand(self,v,dt):
-        self.retval['dqcmd'] = value
+        self.retval['dqcmd'] = v
         self.retval['tcmd'] = dt
     def setTorqueCommand(self,torque):
         self.retval['torquecmd'] = torque
@@ -298,7 +298,7 @@ class RobotControllerIO:
         if 'qcmd' in self.retval:
             self.retval['qcmd'][index] = value
         elif 'dqcmd' in self.retval:
-            self.retval['dqcmd'][index] = (value - self.inputs['qcmd'][index]) / inputs['dt']
+            self.retval['dqcmd'][index] = (value - self.inputs['qcmd'][index]) / self.inputs['dt']
             self.retval['tcmd']=self.inputs['dt']
         elif 'torquecmd' in self.retval:
             print("Cannot combine joint position commands with joint torque commands")

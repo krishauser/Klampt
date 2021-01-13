@@ -160,7 +160,7 @@ class RosRobotController(controller.RobotControllerBase):
                     if self.currentPhaseTrajectory == None:
                         self.currentPhaseTrajectory = traj
                     else:
-                        self.currentPhaseTrajectory=self.currentPhaseTrajectory.splice(traj,time=splicetime,relative=True,jumpPolicy='blend')
+                        self.currentPhaseTrajectory=self.currentPhaseTrajectory.splice(traj,time=starttime,relative=True,jumpPolicy='blend')
                 else:
                     #linear interpolation
                     self.currentPhaseTrajectory = None
@@ -168,7 +168,7 @@ class RosRobotController(controller.RobotControllerBase):
                     if self.currentPositionTrajectory == None:
                         self.currentPositionTrajectory = traj
                     else:
-                        self.currentPositionTrajectory = self.currentPositionTrajectory.splice(traj,time=splicetime,relative=True,jumpPolicy='blend')
+                        self.currentPositionTrajectory = self.currentPositionTrajectory.splice(traj,time=starttime,relative=True,jumpPolicy='blend')
             else:
                 self.currentPositionTrajectory = None
                 self.currentPhaseTrajectory = None
@@ -178,7 +178,7 @@ class RosRobotController(controller.RobotControllerBase):
                     if self.currentVelocityTrajectory == None:
                         self.currentVelocityTrajectory = traj
                     else:
-                        self.currentVelocityTrajectory = self.currentVelocityTrajectory.splice(traj,time=splicetime,relative=True,jumpPolicy='blend')
+                        self.currentVelocityTrajectory = self.currentVelocityTrajectory.splice(traj,time=starttime,relative=True,jumpPolicy='blend')
                 else:
                     self.currentVelocityTrajectory = None
             if all(len(x) != 0 for x in efforts):
@@ -186,7 +186,7 @@ class RosRobotController(controller.RobotControllerBase):
                 if self.currentEffortTrajectory == None:
                     self.currentEffortTrajectory = traj
                 else:
-                    self.currentEffortTrajectory.splice(traj,time=splicetime,relative=True,jumpPolicy='blend')
+                    self.currentEffortTrajectory.splice(traj,time=starttime,relative=True,jumpPolicy='blend')
             else:
                 self.currentEffortTrajectory = None
         #clear the message queue
@@ -302,8 +302,9 @@ class RosRobotInterface(robotinterface.RobotInterfaceBase):
     def jointStateCallback(self,jointState):
         if len(jointState.names) > self.robot.numLinks():
             raise RuntimeError("Invalid number of links")
-        if any(n not in self.link_dict):
-            raise RuntimeError("Invalid link "+n+", must match Klamp't model")
+        for n in jointState.names:
+            if n not in self.link_dict:
+                raise RuntimeError("Invalid link "+n+", must match Klamp't model")
         self.last_joint_state = jointState
     def klamptModel(self):
         return self.robot
@@ -332,7 +333,7 @@ class RosRobotInterface(robotinterface.RobotInterfaceBase):
         js = self.last_joint_state
         if js is None: return None
         if len(js.effort) == 0: return None
-        t = [0.0]*robot.numLinks()
+        t = [0.0]*self.robot.numLinks()
         for (v,n) in zip(js.effort,js.names):
             t[self.link_dict[n]] = v
         return self.velocityFromKlampt(t)

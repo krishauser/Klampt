@@ -366,7 +366,7 @@ def _color_format_from_uint8_channels(format,r,g,b,a=None):
     elif format=='opacity':
         one_255 = 1.0/255.0
         if not hasattr(a,'__iter__'):
-            return [1.0]*pc.numPoints()
+            return np.ones(len(r))
         return (a*one_255).tolist()
     elif tuple(format)==('r','g','b'):
         one_255 = 1.0/255.0
@@ -374,7 +374,7 @@ def _color_format_from_uint8_channels(format,r,g,b,a=None):
     elif tuple(format)==('r','g','b','a'):
         one_255 = 1.0/255.0
         if not hasattr(a,'__iter__'):
-            a = [a]*pc.numPoints()
+            a = np.full(len(r),a)
         return np.column_stack((r*one_255,g*one_255,b*one_255,a*one_255)).tolist()
     else:
         raise ValueError("Invalid format specifier "+str(format))
@@ -533,6 +533,7 @@ def point_cloud_colors(pc,format='rgb'):
             return _color_format_from_uint8_channels(format,r,g,b)
     elif len(rgbchannels)==0 and alphachannel is not None:
         if alphachannel[0] == 'opacity':
+            import numpy as np
             a = pc.getProperties(alphachannel[0][1])
             a = (np.array(a)*255).astype(np.uint32)
         elif alphachannel[0] == 'c':
@@ -615,9 +616,9 @@ def point_cloud_set_colors(pc,colors,color_format='rgb',pc_property='auto'):
                     pc.addProperty(c,values)
             if len(colors)==4:
                 if alphachannel[0] == 'a':
-                    pc.setProperties(alphachannel[0],values)
+                    pc.setProperties(alphachannel[1],colors[3])
                 else:
-                    pc.addProperty('a',values)
+                    pc.addProperty('a',colors[3])
         else:
             if color_format in rgbdict:
                 pc.setProperties(rgbdict[color_format],colors)

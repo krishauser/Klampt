@@ -163,16 +163,16 @@ def _make_sympy_adaptor(func):
         if f.deriv is None: 
             raise ArgumentIndexError(self, argindex)
         if _is_exactly(f.deriv,0):
-            return S(0)
+            return sympy.S(0)
         argindex -= 1
         if f.jacobian is not None and f.jacobian[argindex] is not None:
             assert isinstance(f.jacobian[argindex],Function)
-            return make_sympy_adaptor(f.jacobian[argindex])(*self.args)
+            return _make_sympy_adaptor(f.jacobian[argindex])(*self.args)
         if callable(f.deriv):
             raise NotImplementedError("Can't adapt a callable derivative to sympy yet")
         assert argindex >= 0 and argindex < len(f.deriv),"Invalid derivative argument index? 0 <= %d < %d"%(argindex,len(f.deriv))
         if _is_exactly(f.deriv[argindex],0):
-            return S(0)
+            return sympy.S(0)
         if f.deriv[argindex] is None:
             raise ArgumentIndexError(self, argindex)
         return _make_sympy_adaptor(f.deriv[argindex])(*(self.args+(1,)))
@@ -300,7 +300,7 @@ def exprFromSympy(context,sexpr,addFuncs=True):
         sentries = sexpr._mat
         if cols == 1: #interpret as a vector
             entries = [exprFromSympy(context,s) for s in sentries]
-            return stack(*entries)
+            return flatten(*entries)
         else:
             #it's a matrix
             k = 0

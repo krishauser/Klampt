@@ -5,6 +5,7 @@ from klampt import vis
 from klampt.math import vectorops,so3,se3
 from klampt.vis.glrobotprogram import *
 import importlib
+import time
 
 SPLIT_SCREEN_TEST = False
 

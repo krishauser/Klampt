@@ -26,7 +26,7 @@ translation vector.  See the :mod:`~klampt.model.config` module for details.
 """
 
 from .trajectory import *
-from ..robotsim import IKObjective
+from ..robotsim import IKObjective,IKSolver
 from . import ik
 from . import config
 from collections import deque

@@ -1,3 +1,5 @@
+import os
+
 def make(n,world,link_length=1,tempname="temp.rob",debug=False):
     """Creates a simple ND planar robot with unit length links, and loads it
     into the given world.
@@ -37,7 +39,7 @@ def make(n,world,link_length=1,tempname="temp.rob",debug=False):
 
     f = open(tempname,'w')
     f.write(intro)
-    for i in xrange(n-1):
+    for i in range(n-1):
         f.write(trans)
     f.write('\\n')
     f.write("axis\t"+"\t".join([axis]*n))
@@ -64,7 +66,7 @@ def make(n,world,link_length=1,tempname="temp.rob",debug=False):
     f.write('\n')
     f.write("velMax\t"+" ".join([velMax]*n))
     f.write('\n')
-    for i in xrange(n):
+    for i in range(n):
         f.write(joint+" "+str(i)+'\n')
     f.write("servoP\t"+" ".join([servoP]*n))
     f.write('\n')

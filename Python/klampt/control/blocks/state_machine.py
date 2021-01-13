@@ -103,7 +103,7 @@ class TransitionStateMachine(StateMachineBase):
     """
     def __init__(self,controllers,transitions=None,start=0):
 
-        StateMachine.__init__(self,controllers,start)
+        StateMachineBase.__init__(self,controllers,start)
         if transitions is None:
             self.transitions = [dict() for c in self.controllers]
         else:

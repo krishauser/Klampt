@@ -82,7 +82,7 @@ def to_Transform(klampt_se3):
 
 def from_PoseStamped(ros_pose):
     """From ROS PoseStamped to Klamp't se3 element"""
-    return (from_Quaternion(pose.orientation),from_Point(pose.position))
+    return (from_Quaternion(ros_pose.orientation),from_Point(ros_pose.position))
 
 def to_PoseStamped(klampt_se3,stamp='now'):
     """From Klamp't se3 element to ROS PoseStamped
@@ -230,7 +230,7 @@ def to_JointState(robot,q='current',dq='current',effort=None,indices='auto',link
 
 def from_Float32MultiArray(ros_msg):
     """From ROS Float32MultiArray to Klamp't Config"""
-    return [v for v in msg.data]
+    return [v for v in ros_msg.data]
 
 def to_Float32MultiArray(klampt_config):
     res = Float32MultiArray()
@@ -649,8 +649,10 @@ def to_SensorMsg(klampt_sensor,frame=None,frame_prefix='klampt',stamp='now'):
             msg.is_bigendian = (numpy.uint32.byteorder == '>' or (numpy.float32.byteorder == '=' and sys_bigendian))
             msg.step = msg.width*4
             ofs = 0
+            w = int(camera.getSetting('xres'))
+            h = int(camera.getSetting('yres'))
             if int(camera.getSetting('rgb')):
-                ofs = int(camera.getSetting(xres))*int(camera.getSetting(yres))
+                ofs = w*h
             abgr = numpy.array(measurements[ofs:ofs+w*h]).reshape(h,w).astype(numpy.float32)
             msg.data = abgr.tostring()
             msgs.append(msg)
@@ -828,7 +830,7 @@ class KlamptROSCameraPublisher:
         if self.frame_id is None:
             frame = ""
             if self.frame_prefix is not None:
-                frame = frame_prefix + '/'
+                frame = self.frame_prefix + '/'
             frame = frame + camera.robot.getName()
             link = int(camera.getSetting("link"))
             frame += '/' + camera.robot.link(link).getName()
@@ -840,21 +842,21 @@ class KlamptROSCameraPublisher:
             return
         self.num_msgs += 1
         for i in range(1,len(msgs)):
-            msgs[i].header.stamp = Time.now()
+            msgs[i].header.stamp = rospy.Time.now()
             msgs[i].header.seq = self.num_msgs
         
         offset = 1
         if int(camera.getSetting('rgb')):
             if self.rgbpub is None:
-                self.rgbpubinfo = rospy.Publisher(topic,CameraInfo,topic+'/rgb/camera_info',*self.pubargs,**self.pubkwargs)
-                self.rgbpub = rospy.Publisher(topic,Image,topic+'/rgb/image_rect_color',*self.pubargs,**self.pubkwargs)
+                self.rgbpubinfo = rospy.Publisher(self.topic+'/rgb/camera_info',CameraInfo,*self.pubargs,**self.pubkwargs)
+                self.rgbpub = rospy.Publisher(self.topic+'/rgb/image_rect_color',Image,*self.pubargs,**self.pubkwargs)
             self.rgbpubinfo.publish(msgs[0])
             self.rgbpub.publish(msgs[1])
             offset = 2
         if int(camera.getSetting('depth')):
             if self.dpub is None:
-                self.dpubinfo = rospy.Publisher(topic,CameraInfo,topic+'/depth_registered/camera_info',*self.pubargs,**self.pubkwargs)
-                self.dpub = rospy.Publisher(topic,Image,topic+'/depth_registered/image_rect',*self.pubargs,**self.pubkwargs)
+                self.dpubinfo = rospy.Publisher(self.topic+'/depth_registered/camera_info',CameraInfo,*self.pubargs,**self.pubkwargs)
+                self.dpub = rospy.Publisher(self.topic+'/depth_registered/image_rect',Image,*self.pubargs,**self.pubkwargs)
             self.dpubinfo.publish(msgs[0])
             self.dpub.publish(msgs[offset])
             

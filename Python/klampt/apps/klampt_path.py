@@ -129,7 +129,7 @@ class GeneralizedPath:
             return
         else:
             self.toTrajectory()
-            self.data.times = list(range(len(milestones)))
+            self.data.times = list(range(len(self.data.milestones)))
             self.type = 'Configs'
     def concat(self,other):
         """Warning: destructive"""

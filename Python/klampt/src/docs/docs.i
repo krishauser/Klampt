@@ -64,8 +64,14 @@ Sets the per-element color for the given feature.
 Sets a 1D texture of the given width. Valid format strings are.  
 
 *   \"\": turn off texture mapping  
-*   rgb8: unsigned byte RGB colors with red in the most significant byte  
-*   argb8: unsigned byte RGBA colors with alpha in the most significant byte  
+*   rgb8: unsigned byte RGB colors with red in the 1st byte, green in the 2nd,
+    blue in the 3rd  
+*   bgr8: unsigned byte RGB colors with blue in the 1st byte, green in the 2nd,
+    green in the 3rd  
+*   rgba8: unsigned byte RGBA colors with red in the 1st byte and alpha in the
+    4th  
+*   bgra8: unsigned byte RGBA colors with blue in the 1st byte and alpha in the
+    4th  
 *   l8: unsigned byte grayscale colors  
 ";
 
@@ -166,8 +172,11 @@ feature can be ALL, VERTICES, EDGES, FACES, EMISSIVE, or SPECULAR.
 
 %feature("docstring") Appearance::setTexture2D "
 
-Sets a 2D texture of the given width/height. See setTexture1D for valid format
-strings.  
+Sets a 2D texture of the given width/height. See :func:`setTexture1D` for valid
+format strings.  
+
+bytes is is given in order left to right, top to bottom if `topdown==True`.
+Otherwise, it is given in order left to right, bottom to top.  
 ";
 
 %feature("docstring") Appearance::getDraw "
@@ -1283,6 +1292,12 @@ C++ includes: robotik.h
 %feature("docstring") IKObjective::setFixedPoint "
 
 Sets a fixed-point constraint.  
+";
+
+%feature("docstring") IKObjective::closestMatch "
+
+Gets the transform T that's closest to the transform (R,t) and that satisfies
+the IK goal's constraints.  
 ";
 
 %feature("docstring") IKObjective::IKObjective "

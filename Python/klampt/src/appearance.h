@@ -96,15 +96,19 @@ class Appearance
   ///Sets a 1D texture of the given width.  Valid format strings are
   ///
   /// - "": turn off texture mapping
-  /// - rgb8: unsigned byte RGB colors with red in the most significant byte
-  /// - argb8: unsigned byte RGBA colors with alpha in the most significant
-  ///          byte
+  /// - rgb8: unsigned byte RGB colors with red in the 1st byte, green in the 2nd, blue in the 3rd
+  /// - bgr8: unsigned byte RGB colors with blue in the 1st byte, green in the 2nd, green in the 3rd
+  /// - rgba8: unsigned byte RGBA colors with red in the 1st byte and alpha in the 4th
+  /// - bgra8: unsigned byte RGBA colors with blue in the 1st byte and alpha in the 4th
   /// - l8: unsigned byte grayscale colors
   ///
   void setTexture1D(int w,const char* format,const std::vector<unsigned char>& bytes);
-  ///Sets a 2D texture of the given width/height.  See setTexture1D for 
+  ///Sets a 2D texture of the given width/height.  See :func:`setTexture1D` for 
   ///valid format strings.
-  void setTexture2D(int w,int h,const char* format,const std::vector<unsigned char>& bytes);
+  ///
+  ///bytes is is given in order left to right, top to bottom if ``topdown==True``.
+  ///Otherwise, it is given in order left to right, bottom to top.
+  void setTexture2D(int w,int h,const char* format,const std::vector<unsigned char>& bytes,bool topdown=true);
   ///Sets per-vertex texture coordinates. 
   ///
   ///If the texture is 1D, uvs is an array of length n containing 1D texture coordinates. 

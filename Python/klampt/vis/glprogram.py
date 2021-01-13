@@ -43,7 +43,6 @@ class GLProgram:
             add_action before init().
     """
     def __init__(self,name="OpenGL Program"):
-        global _GLBackend
         self.window = None
         self.name = name
         self.view = GLViewport()

@@ -785,7 +785,7 @@ def debug(*args,**kwargs):
             lastName = k
             itemcount += 1
     if title is not None:
-        setWindowTitle(v)
+        setWindowTitle(title)
     else:
         setWindowTitle("Klampt debugging: "+','.join(scene().items.keys()))
     if animation is not None:
@@ -1321,10 +1321,7 @@ def getAttribute(name,attr):
         name (str): the name of the item
         attr (str): the name of the attribute (see :func:`setAttribute`)
     """
-    global _vis
-    if _vis is None:
-        return
-    return _vis.getAttribute(name,attr)
+    return scene().getAttribute(name,attr)
 
 def getAttributes(name):
     """Gets a dictionary of all relevant attributes of an item's appearance. 
@@ -1333,10 +1330,7 @@ def getAttributes(name):
     Args:
         name (str): the name of the item
     """
-    global _vis
-    if _vis is None:
-        return
-    return _vis.getAttributes(name)
+    return scene().getAttributes(name)
 
 def revertAppearance(name):
     scene().revertAppearance(name)
@@ -1952,7 +1946,7 @@ class VisPlot:
                     if t < tmax-duration: continue
                     labelx = (t - (tmax-duration))/duration
                     labelx = x + w*labelx
-                    
+                    c = self.eventColors[e]
                     glColor4f(c[0],c[1],c[2],c[3]*0.5)
                     glVertex2f(labelx,y)
                     glVertex2f(labelx,y+h)
@@ -3975,7 +3969,7 @@ class _TrajectoryCameraController:
         else:
             trans = self.trajectory.eval(t,'loop')
             T = self.vp.getTransform()
-            ofs = vectorops(vp.tgt,T[0])
+            ofs = vectorops(self.vp.tgt,T[0])
             self.vp.camera.tgt = vectorops.add(trans,ofs)
         return self.vp
 

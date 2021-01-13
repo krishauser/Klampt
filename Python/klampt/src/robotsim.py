@@ -3067,25 +3067,35 @@ class Appearance(_object):
         Sets a 1D texture of the given width. Valid format strings are.  
 
         *   "": turn off texture mapping  
-        *   rgb8: unsigned byte RGB colors with red in the most significant byte  
-        *   argb8: unsigned byte RGBA colors with alpha in the most significant byte  
+        *   rgb8: unsigned byte RGB colors with red in the 1st byte, green in the 2nd,
+            blue in the 3rd  
+        *   bgr8: unsigned byte RGB colors with blue in the 1st byte, green in the 2nd,
+            green in the 3rd  
+        *   rgba8: unsigned byte RGBA colors with red in the 1st byte and alpha in the
+            4th  
+        *   bgra8: unsigned byte RGBA colors with blue in the 1st byte and alpha in the
+            4th  
         *   l8: unsigned byte grayscale colors  
 
         """
         return _robotsim.Appearance_setTexture1D(self, w, format, bytes)
 
 
-    def setTexture2D(self, w, h, format, bytes):
+    def setTexture2D(self, w, h, format, bytes, topdown=True):
         """
+        setTexture2D(Appearance self, int w, int h, char const * format, std::vector< unsigned char,std::allocator< unsigned char > > const & bytes, bool topdown=True)
         setTexture2D(Appearance self, int w, int h, char const * format, std::vector< unsigned char,std::allocator< unsigned char > > const & bytes)
 
 
 
-        Sets a 2D texture of the given width/height. See setTexture1D for valid format
-        strings.  
+        Sets a 2D texture of the given width/height. See :func:`setTexture1D` for valid
+        format strings.  
+
+        bytes is is given in order left to right, top to bottom if `topdown==True`.
+        Otherwise, it is given in order left to right, bottom to top.  
 
         """
-        return _robotsim.Appearance_setTexture2D(self, w, h, format, bytes)
+        return _robotsim.Appearance_setTexture2D(self, w, h, format, bytes, topdown)
 
 
     def setTexcoords(self, uvs):
@@ -7110,6 +7120,19 @@ class IKObjective(_object):
 
         """
         return _robotsim.IKObjective_matchDestination(self, R, t)
+
+
+    def closestMatch(self, R, t):
+        """
+        closestMatch(IKObjective self, double const [9] R, double const [3] t)
+
+
+
+        Gets the transform T that's closest to the transform (R,t) and that satisfies
+        the IK goal's constraints.  
+
+        """
+        return _robotsim.IKObjective_closestMatch(self, R, t)
 
 
     def loadString(self, str):

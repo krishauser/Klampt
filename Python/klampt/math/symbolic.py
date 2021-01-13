@@ -806,7 +806,7 @@ class Type:
                 else:
                     stsh = self.subtype.shape()
                     for i in range(self.size):
-                        res[i] = shsh
+                        res[i] = stsh
                 return res
         raise ValueError("Item of type "+self.char+" does not map to a Numpy shape")
     def len(self):
@@ -3015,7 +3015,7 @@ class UserDataExpression(Expression):
         else:
             return context.userData[self.name]
     def _deriv(self,var,context,rows):
-        print("Attempting derivative of user data expression",name,"w.r.t.",var)
+        print("Attempting derivative of user data expression",self.name,"w.r.t.",var)
         if isinstance(var,dict):
             return var.get(self.name,0)
         else:
@@ -4238,8 +4238,8 @@ class OperatorExpression(Expression):
                     newargs = newargs2
         if simplified:
             if _DEBUG_SIMPLIFY:
-                print(" "*mydepth,"Constant expansion of",self)
-                print(" "*mydepth,"   with arguments",[str(a) for a in newargs])
+                print(" "*depth,"Constant expansion of",self)
+                print(" "*depth,"   with arguments",[str(a) for a in newargs])
                 #print "Evaluated arguments",[str(a) for a in aconst]
             if self.functionInfo.simplifier != None:
                 for i,a in enumerate(newargs):
@@ -4268,7 +4268,7 @@ class OperatorExpression(Expression):
                     raise
                     return None
             if _DEBUG_SIMPLIFY:
-                print(" "*mydepth,"=>",OperatorExpression(self.functionInfo,newargs,self.op))
+                print(" "*depth,"=>",OperatorExpression(self.functionInfo,newargs,self.op))
             self._cache['simplified'] = OperatorExpression(self.functionInfo,newargs,self.op)
             return self._cache['simplified']
         return None
@@ -6872,7 +6872,7 @@ def _subs_deriv(context,expr,var,value,derivs,rows):
         expr._clearCache('deriv',deep=True)
         if dxexpr is None or any(v is None for v in dvexprs):
             return None
-        return subs(dxexpr+sum_(dvxprs),var,value)
+        return subs(dxexpr+sum_(dvexprs),var,value)
     else:
         vderiv = value._deriv(derivs,context,rows)
         varname = var.name if isinstance(var,(Variable,UserDataExpression)) else var
@@ -7296,7 +7296,7 @@ def _dot_const_simplify(x,y):
                             entry = val[yind]
                             if isinstance(entry,ConstantExpression):
                                 entry = entry.value
-                        newx[dpindex+yind] += entry
+                            newx[dpindex+yind] += entry
                 #raw_input()
                 return array(*newx.tolist())
 def _dot_const_simplify2(x,y):
@@ -7356,7 +7356,7 @@ dot.addSimplifier([None,'_const'],_dot_const_simplify2)
 dot.properties['associative'] = True
 #dot.properties['foldable'] = True
 outer.argTypes = [Type('V'),Type('V')]
-outer.deriv = [lambda x,y,dx:outer(dx,y),lambda x,y,dy:outer(y,dx)]
+outer.deriv = [lambda x,y,dx:outer(dx,y),lambda x,y,dy:outer(y,dy)]
 outer.rowstackderiv = [lambda x,y,dx:dot(dx,y),None]
 outer.colstackderiv = [None,lambda x,y,dy:outer(x,dy)]
 def _outer_returnType(x,y):
@@ -7374,7 +7374,7 @@ outer.addSimplifier(['neg',None],lambda x,y:-outer(x.args[0],y))
 outer.addSimplifier(['zero',None],lambda x,y:zero._call(array._call(len_._call(x),len_._call(y))))
 outer.addSimplifier([None,'zero'],lambda x,y:zero._call(array._call(len_._call(x),len_._call(y))))
 tensordot.argTypes = [Type('V'),Type('V'),Type('X')]
-tensordot.deriv = [lambda x,y,dx:tensordot(dx,y,axes),lambda x,y,axes,dy:tensordot(y,dx,axes),None]
+tensordot.deriv = [lambda x,y,axes,dx:tensordot(dx,y,axes),lambda x,y,axes,dy:tensordot(y,dy,axes),None]
 tensordot.rowstackderiv = [lambda x,y,axes,dx:tensordot(dx,y,axes),None,None]
 tensordot.colstackderiv = [None,lambda x,y,axes,dy:tensordot(x,dy,axes),None]        
 tensordot.returnTypeFunc = _tensordot_returnType

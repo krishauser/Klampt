@@ -21,8 +21,9 @@ Contains the following helper controllers:
 - :class:`SinkBlock`: a block that reads from the ControllerBlock
   architecture.
 """
-from state_machine import TransitionStateMachine
-
+from .state_machine import TransitionStateMachine
+from ..controller import ControllerBlock
+from klampt.math import vectorops
 
 class RemappedBlock(ControllerBlock):
     """A remapping of a block's inputs and outputs"""
@@ -315,6 +316,7 @@ class LinearBlock(ControllerBlock):
     def setConstant(self,offset):
         self.offset = offset
     def advance(self,**inputs):
+        import numpy as np
         res = self.offset
         for (x,K) in self.gains.iteritems():
             if x not in inputs:
@@ -324,7 +326,7 @@ class LinearBlock(ControllerBlock):
                 res = np.dot(K,inputs[x])
             else:
                 res += np.dot(K,inputs[x])
-        return {outputType:res}
+        return {self.outputType:res}
 
 
 class CounterBlock(ControllerBlock):
@@ -393,7 +395,7 @@ class TimedSequenceBlock(TransitionStateMachine):
     def __init__(self,controllers,times):
         assert len(times)==len(controllers)
         trans = [{} for c in controllers]
-        for i in xrange(len(controllers)-1):
+        for i in range(len(controllers)-1):
             trans[i][i+1] = lambda input:input['t'] >= times[i]
         trans[-1][-1] = lambda input:input['t'] >= times[-1]
         TransitionStateMachine.__init__(self,controllers,trans)

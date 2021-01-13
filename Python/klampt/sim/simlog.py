@@ -219,7 +219,7 @@ class SimLogPlayback:
         if contact_fn != None:
             print("SimLogPlayback: Loading contacts from",contact_fn)
             self.f_contact = open(contact_fn,'r')
-            reader = csv.reader(f)
+            reader = csv.reader(self.f_contact)
             rowno = 0
             for row in reader:
                 if rowno == 0:
@@ -232,7 +232,7 @@ class SimLogPlayback:
                         print("Error in CSV file",contact_fn,"on line",rowno+1,"value is not a float")
                         raise
                 rowno += 1
-            f.close()
+            self.f_contact.close()
         #check that the simulation matches the log
         warned = False
         self.robot_indices = []
@@ -296,11 +296,13 @@ class SimLogPlayback:
             except IndexError:
                 raise ValueError("'time' column is not present in playback file, can't update by time")
             timelist = [v[timeindex] for v in self.state_array]
+            timeindex = 0
             for i in range(len(timelist)-1):
                 if time < timelist[i]:
+                    timeindex = i
                     break
             #print("Time",time,"Time step",timestep)
-            self.updateSim(timestep = i)
+            self.updateSim(timestep = timeindex)
             return
         if timestep >= len(self.state_array):
             timestep = len(self.state_array)-1

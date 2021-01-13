@@ -148,7 +148,7 @@ def settle(world,obj,
     movedist = vectorops.norm(forcedir)
     if movedist < settletol:
         print("sim.settle(): warning, force movement distance less than settletol.  Was this intended?")
-        return (body.getTransform(),[])
+        return (obj.getTransform(),[])
     forcedir = vectorops.div(forcedir,movedist)
     forceamt = obj.getMass().mass 
 

@@ -237,6 +237,16 @@ void IKObjective::matchDestination(const double R[9],const double t[3])
   goal.MatchGoalTransform(T);
 }
 
+void IKObjective::closestMatch(const double R[9],const double t[3],double out[9],double out2[3])
+{
+  RigidTransform T,Tout;
+  T.R = Matrix3(R);
+  T.t = Vector3(t);
+  goal.GetClosestGoalTransform(T,Tout);
+  Tout.R.get(out);
+  Tout.t.get(out2);
+}
+
 bool IKObjective::loadString(const char* str)
 {
   stringstream ss(str);

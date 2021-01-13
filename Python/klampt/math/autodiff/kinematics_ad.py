@@ -261,12 +261,12 @@ class DriversToLinks(ADFunctionInterface):
     def eval(self,qdriver):
         for driver,q in zip(self.drivers,qdriver):
             driver.setValue(q)
-        return np.array(robot.getConfig())
+        return np.array(self.robot.getConfig())
     def jvp(self,arg,dqdriver,qdriver):
         for driver,q,v in zip(self.drivers,qdriver,dqdriver):
             driver.setValue(q)
             driver.setVelocity(v)
-        return np.array(robot.getVelocity())
+        return np.array(self.robot.getVelocity())
 
 
 class DriverDerivsToLinks(ADFunctionInterface):
@@ -285,11 +285,11 @@ class DriverDerivsToLinks(ADFunctionInterface):
     def eval(self,vdriver):
         for driver,v in zip(self.drivers,vdriver):
             driver.setVelocity(v)
-        return np.array(robot.getConfig())
+        return np.array(self.robot.getConfig())
     def jvp(self,arg,dvdriver,vdriver):
         for driver,q,v in zip(self.drivers,vdriver,dvdriver):
             driver.setVelocity(v)
-        return np.array(robot.getVelocity())
+        return np.array(self.robot.getVelocity())
 
 
 class LinksToDrivers(ADFunctionInterface):
@@ -350,7 +350,7 @@ class ConfigInterpolate(ADFunctionInterface):
     def n_out(self):
         return self.robot.numLinks()
     def eval(self,a,b,u):
-        return np.array(robot.interpolate(a,b,u))
+        return np.array(self.robot.interpolate(a,b,u))
     
 
 def _cross_product_twiddle(J):
@@ -546,7 +546,7 @@ class KinematicsBuilder:
         link = self._link_index(link)
         if localPos is None:
             return self.link_velocities[link]
-        return self.link_velocities[link] + so3.apply(self.link_rotations[link],math_ad.cross(self.axes[i],localPos))
+        return self.link_velocities[link] + so3.apply(self.link_rotations[link],math_ad.cross(self.axes[link],localPos))
 
     def world_angular_velocity(self,link):
         """Returns an autodiff expression for the world angular velocity of the

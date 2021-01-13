@@ -28,8 +28,9 @@ a face, then it depends on the face's normal.  Future versions may support such
 reasoning.
 """
 
+from inspect import indentsize
 import numpy as np 
-from .ad import ADFunctionInterface,function,minimum,maximum
+from .ad import ADFunctionInterface,function,minimum,maximum,stack
 from . import math_ad,so3_ad,se3_ad
 from .. import vectorops,so3,se3
 from ...robotsim import Geometry3D,DistanceQuerySettings
@@ -558,7 +559,7 @@ class GeomRayCast(ADFunctionInterface):
     def argname(self,arg):
         return ['T','s','d'][arg]
     def eval(self,T,s,d):
-        if not np.array_equal(self.eval_args[0],T1):
+        if not np.array_equal(self.eval_args[0],T):
             self.geom.setCurrentTransform(*se3_ad.to_klampt(T))
         self.eval_args = _array_list_copy((T,s,d))
         self.eval_res = self.geom.rayCast(s.tolist(),d.tolist())
@@ -567,7 +568,7 @@ class GeomRayCast(ADFunctionInterface):
         else:
             return np.dot(d,np.array(self.eval_res[1])-s)
     def jvp(self,arg,darg,T,s,d):
-        if not _array_list_equal(self,eval_args,[T,s,d]):
+        if not _array_list_equal(self.eval_args,[T,s,d]):
             self.eval(T,s,d)
         if not self.eval_res[0]:
             #not hit
@@ -790,12 +791,14 @@ class MinDistance(ADFunctionInterface):
         if self.closest is None:
             #upper bound is hit
             return 0
-        i,j = self.pairs[self.closest]
+        ind = self.closest
+        i,j = self.pairs[ind]
         if arg != i and arg != j:
             #irrelevant argument
             return 0
         arg1 = [args[i]]
         arg2 = [args[j]]
+        g1,g2 = self.geometries[i],self.geometries[j]
         if g1 == 'sphere':
             arg1 = [args[i][:3],args[i][3]]
         if g2 == 'sphere':

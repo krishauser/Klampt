@@ -2,6 +2,7 @@
 """
 
 
+from OpenGL.raw.GL.VERSION.GL_1_1 import GL_NONE
 from ..robotsim import *
 from ..math import vectorops
 try:
@@ -138,6 +139,7 @@ def colorize(object,value,colormap=None,feature=None,vrange=None,lighting=None):
     #figure out if the number of faces is appropriate
     if feature not in ['vertices','faces',None]:
         raise ValueError("Invalid feature specified")
+    N = 0
     if feature == 'vertices':
         N = len(geometrydata.vertices)//3
     elif feature == 'faces':
@@ -204,12 +206,12 @@ def colorize(object,value,colormap=None,feature=None,vrange=None,lighting=None):
         #need positions / normals -- compute them for the indicated features
         positions = np.array(geometrydata.vertices)
         positions = positions.reshape((positions.shape[0]//3,3))
+        normals = None
         if lighting is not None or value in ['n','normal','nx','ny','nz']:
             if isinstance(geometrydata,PointCloud):
                 #get normals from point cloud
                 from ..model import sensing
                 normals = np.asarray(sensing.point_cloud_normals(geometrydata,estimation_viewpoint=[0,0,0]))
-
             else:
                 if feature == 'vertices':
                     #compute normals by averaging triangle vertices

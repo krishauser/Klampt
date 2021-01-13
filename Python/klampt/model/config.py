@@ -307,7 +307,7 @@ def getConfigNames(item):
         cnames = componentNames(item)
         comps = components(item)
         for (cname,comp) in zip(cnames,comps):
-            for n in getConfigNames(c):
+            for n in getConfigNames(comp):
                 res.append(cname+'.'+n)
         return res
     elif hasattr(item,'__iter__'):

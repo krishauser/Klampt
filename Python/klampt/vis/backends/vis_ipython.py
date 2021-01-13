@@ -1,4 +1,4 @@
-from ..visualization import _WindowManager,VisualizationScene,VisPlot,objectToVisType
+from ..visualization import _WindowManager,VisualizationScene,VisPlot,objectToVisType,_globalLock
 from ..ipython import KlamptWidget,EditPoint,EditTransform,EditConfig
 from ...model import coordinates
 from ...model.subrobot import SubRobotModel
@@ -6,6 +6,7 @@ from ...robotsim import WorldModel,RobotModel,RigidObjectModel
 from IPython.display import display,HTML
 import math
 import weakref
+import time
 
 class KlamptWidgetAdaptor(KlamptWidget,VisualizationScene):
     """Handles the conversion between vis calls and the KlamptWidget."""
@@ -242,6 +243,7 @@ class KlamptWidgetAdaptor(KlamptWidget,VisualizationScene):
             print("Unable to redo plot layout")
         #render plots
         for (k,v) in plots.items():
+            vmin,vmax = v.autoRange()
             pos = v.attributes['position']
             duration = v.attributes['duration']
             vrange = v.attributes['range']
@@ -256,8 +258,8 @@ class KlamptWidgetAdaptor(KlamptWidget,VisualizationScene):
                     if len(trace)==0: continue
                     tmax = max(tmax,trace[-1][0])
             #plot 
-            for i in v.items:
-                for trace in i.traces:
+            for item in v.items:
+                for j,trace in enumerate(item.traces):
                     if len(trace)==0: continue
                     if len(item.name)==0:
                         label = item.itemnames[j]
@@ -344,9 +346,10 @@ class IPythonWindowManager(_WindowManager):
         setup()
         self.show()
         t = 0
-        while t < duration:
+        while True:
             if not self.shown(): break
             callback()
+            self.frontend().update()
         self.show(False)
         cleanup()
     def spin(self,duration):

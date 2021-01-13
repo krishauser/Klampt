@@ -48,7 +48,6 @@ class TrajectoryWithFeedforwardTorqueController(ControllerBlock):
         self.traj = traj
         self.torquetraj = torquetraj
         self.startTime = None
-        self.realStartTime = time.time()
     def inputNames(self):
         return ['t']
 

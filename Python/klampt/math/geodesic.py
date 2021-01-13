@@ -48,9 +48,9 @@ class MultiGeodesicSpace(GeodesicSpace):
         self.components = components
         self.componentWeights = [1]*len(self.components)
     def intrinsicDimension(self):
-        return sum(c.intrinsicDimension() for c in components)
+        return sum(c.intrinsicDimension() for c in self.components)
     def extrinsicDimension(self):
-        return sum(c.extrinsicDimension() for c in components)
+        return sum(c.extrinsicDimension() for c in self.components)
     def split(self,x):
         i = 0
         res = []

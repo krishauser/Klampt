@@ -205,7 +205,7 @@ def fixed_objective(link,ref=None,local=None,world=None):
     elif local is None:
         #fixed point, given by world coordinates
         Trelinv = se3.inv(Trel)
-        local = [se3.apply(trelinv,p) for p in world]
+        local = [se3.apply(Trelinv,p) for p in world]
         return objective(link,ref,local=local,world=world)
     elif world is None:
         #fixed point, given by local coordinates

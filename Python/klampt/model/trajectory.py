@@ -550,7 +550,7 @@ class SO3Trajectory(GeodesicTrajectory):
     def getPointTrajectory(self,localPt):
         """Returns a Trajectory describing the movement of the point localPt
         attached to this rotating frame. """
-        return Trajectory(self.times,[so3.apply(m,pt) for m in self.milestones])
+        return Trajectory(self.times,[so3.apply(m,localPt) for m in self.milestones])
     def constructor(self):
         return SO3Trajectory
 
@@ -882,7 +882,7 @@ class HermiteTrajectory(Trajectory):
         Faster than calculating the true length.  To retrieve an approximation
         of true length, use self.discretize(dt).length().
         """
-        n = len(milestones[0])//2
+        n = len(self.milestones[0])//2
         third = 1.0/3.0
         def distance(x,y):
             cp0 = x[:n]
@@ -1068,9 +1068,10 @@ class GeodesicHermiteTrajectory(Trajectory):
         """Upper bound on the length"""
         if metric is None:
             metric = self.geodesic.distance
+        n = self.geodesic.extrinsicDimension()
         l = 0
         for i,(a,b) in enumerate(zip(self.milestones[:-1],self.milestones[1:])):
-            dt = times[i+1]-times[i]
+            dt = self.times[i+1]-self.times[i]
             c0 = a[:n]
             v0 = vectorops.mul(a[n:],dt)
             c3 = b[:n]

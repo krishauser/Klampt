@@ -186,7 +186,7 @@ class SubRobotModel:
         q = self._robot.getVelocityLimits()
         return [q[i] for i in self._links]
     def setVelocityLimits(self,vmax):
-        assert len(q) == len(self._links)
+        assert len(vmax) == len(self._links)
         qfull = self._robot.getVelocityLimits()
         for i,v in zip(self._links,vmax):
             qfull[i] = v
@@ -195,7 +195,7 @@ class SubRobotModel:
         q = self._robot.getAccelerationLimits()
         return [q[i] for i in self._links]
     def setAccelerationLimits(self,amax):
-        assert len(q) == len(self._links)
+        assert len(amax) == len(self._links)
         qfull = self._robot.getAccelerationLimits()
         for i,v in zip(self._links,amax):
             qfull[i] = v

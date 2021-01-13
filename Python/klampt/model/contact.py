@@ -234,7 +234,7 @@ def contactMap(contacts,fixed=None):
         assert(c.object1.world == c.object2.world),"Contacts need to be in the same world"
         worlds.insert(c.object1.world)
     assert(len(worlds)<=1),"Only one world is supported"
-    if len(worlds)==0: return []
+    if len(worlds)==0: return dict()
 
     for c in contacts:
         if hasattr(c.object1,'robot'):
@@ -251,14 +251,14 @@ def contactMap(contacts,fixed=None):
     #first sort out all the collision pairs
     paircontacts = dict()
     for c in contacts:
-        reverse = False
+        reflect = False
         #treat all non RigidObjectModel or RobotModelLink objects as fixed
         o1 = c.object1 if not fixed(c.object1) else None
         o2 = c.object2 if not fixed(c.object2) else None
         if hasattr(o1,'getID'):
             if hasattr(o2,'getID'):
                 if o2.getID() < o1.getID():
-                    reverse=True
+                    reflect=True
                 elif o2.getID() == o1.getID():
                     raise RuntimeError("Contacts specified on object to itself")
         elif hasattr(o2,'getID'):

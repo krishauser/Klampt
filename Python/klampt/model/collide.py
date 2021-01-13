@@ -325,7 +325,7 @@ class WorldCollider:
             for r2 in self.robots[0:i]:
                 for l1 in r:
                     for l2 in r2:
-                        if l < 0 or l2 < 0: continue
+                        if l1 < 0 or l2 < 0: continue
                         self.mask[l1].add(l2)
                         self.mask[l2].add(l1)
             #robot self-collision
@@ -674,7 +674,7 @@ class WorldCollider:
         for g in geoms:
             (coll,pt) = g[1].rayCast(s,d)
             if coll:
-                dist = vectorops.dot(d,vectorops,sub(pt,s))
+                dist = vectorops.dot(d,vectorops.sub(pt,s))
                 if dist < dmin:
                     dmin,res = dist,(g[0],pt)
         return res

@@ -246,7 +246,7 @@ def readSe3(text):
 
 def writeMatrix3(x):
     """Writes a 3x3 matrix to a string"""
-    return writeSo3(so3.from_matrix(text))
+    return writeSo3(so3.from_matrix(x))
 
 def readMatrix3(text):
     """Reads a 3x3 matrix from a string"""
@@ -462,7 +462,7 @@ def writeHold(h):
     elif h.ikConstraint.numRotDims()==1:
         locAxis,worldAxis = h.ikConstraint.getRotationAxis()
         text += "axis = "+" ".join(str(v) for v in locAxis)+"  \\\n"
-        text += "    "+" ".join(str(v) for v in worldaxis)+"\n"
+        text += "    "+" ".join(str(v) for v in worldAxis)+"\n"
     text += "end"
     return text
 
@@ -808,7 +808,7 @@ def toJson(obj,type='auto'):
     elif type == 'RigidTransform':
         return obj
     elif type == 'ContactPoint':
-        return {'x':obj.x,'n':obj.n,'kFriction':kFriction}
+        return {'x':obj.x,'n':obj.n,'kFriction':obj.kFriction}
     elif type == 'Trajectory' or type == 'LinearPath':
         return {'times':obj.times,'milestones':obj.milestones}
     elif type.endswith('Trajectory'):

@@ -15,7 +15,7 @@ in/out using :meth:`setManager`.
 """
 
 from ..math import so3,se3,vectorops
-from ..robotsim import RobotModelLink,RigidObjectModel
+from ..robotsim import RobotModelLink,RigidObjectModel,SimRobotController
 from . import ik
 from collections import defaultdict
 
@@ -276,16 +276,18 @@ class Group:
         robot = controller.robot()
         robot.setConfig(controller.getCommandedConfig())
         for i in range(robot.numLinks()):
+            p = robot.link(i).getParent()
             if p >= 0:
-                Fp = self.frames[robotModel.link(p).getName()+"_commanded"]
+                Fp = self.frames[robot.link(p).getName()+"_commanded"]
             else:
                 Fp = root
             f = self.addFrame(robot.link(i).getName()+"_commanded",worldCoordinates=robot.link(i).getTransform(),parent=Fp)
             f._data = (controller,i,'commanded')
         robot.setConfig(controller.getSensedConfig())
         for i in range(robot.numLinks()):
+            p = robot.link(i).getParent()
             if p >= 0:
-                Fp = self.frames[robotModel.link(p).getName()+"_commanded"]
+                Fp = self.frames[robot.link(p).getName()+"_commanded"]
             else:
                 Fp = root
             f = self.addFrame(robot.link(i).getName()+"_sensed",worldCoordinates=robot.link(i).getTransform(),parent=Fp)
@@ -401,8 +403,8 @@ class Group:
                 p._localCoordinates = p.worldCoordinates()
                 p._parent = self.frames['root']
         for c in self.childLists[name]:
-            p._relativeCoordinates = p._worldCoordinates
-            p._parent = self.frames['root']
+            c._relativeCoordinates = c._worldCoordinates
+            c._parent = self.frames['root']
         del self.frames[name]
         del self.childLists[name]
     def deletePoint(self,name):
@@ -497,7 +499,7 @@ class Group:
     def transform(self,sourceFrame,destFrame='root'):
         """Makes a Transform object from the source frame to the destination
         frame. """
-        return Transform(self.frame(sourceFrame),self.frame(testFrame))
+        return Transform(self.frame(sourceFrame),self.frame(destFrame))
     def point(self,coordinates=[0,0,0],frame='root'):
         """Makes a Point object with the given local coordinates in the given 
         frame. Does not add it to the list of managed points."""

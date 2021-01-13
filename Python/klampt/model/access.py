@@ -157,11 +157,11 @@ class map:
             if name == 'robots':
                 return _index_name_map([self.obj.robot(i) for i in range(self.obj.numRobots())])
             elif name == 'rigidObjects':
-                return _index_name_map([self.obj.rigidObject(i) for r in range(self.obj.numRigidObjects())])
+                return _index_name_map([self.obj.rigidObject(i) for i in range(self.obj.numRigidObjects())])
             elif name == 'terrains':
-                return _index_name_map([self.obj.terrain(i) for r in range(self.obj.numTerrains())])
+                return _index_name_map([self.obj.terrain(i) for i in range(self.obj.numTerrains())])
             elif name == 'elements':
-                elements = [self.obj.terrain(i) for r in range(self.obj.numTerrains())]+[self.obj.rigidObjects(i) for r in range(self.obj.numRigidObjects())]
+                elements = [self.obj.terrain(i) for i in range(self.obj.numTerrains())]+[self.obj.rigidObjects(i) for i in range(self.obj.numRigidObjects())]
                 for i in range(self.obj.numRobots()):
                     elements.append(self.obj.robot(i))
                     for j in self.obj.robot(i).numLinks():
