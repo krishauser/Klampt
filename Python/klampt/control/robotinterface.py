@@ -61,7 +61,7 @@ class RobotInterfaceBase(object):
 
     There are a few functions your subclass will need to fill out:
 
-    * :meth:`numDOFs` or :meth:`klamptModel`
+    * :meth:`numJoints` or :meth:`klamptModel`
     * Either :meth:`clock` or :meth:`controlRate`
     * Either :meth:`setPosition`, :meth:`moveToPosition`, :meth:`setVelocity`, 
       :meth:`setTorque`, or :meth:`setPID`
@@ -117,8 +117,8 @@ class RobotInterfaceBase(object):
         """This is called after the commands sent at each time step"""
         pass
 
-    def numDOFs(self,part=None):
-        """Returns the number of DOFs of the given part.  By default, this
+    def numJoints(self,part=None):
+        """Returns the number of joints of the given part.  By default, this
         returns the number of actuated DOFs in the Klamp't model. 
         """
         if part is None:
@@ -136,7 +136,7 @@ class RobotInterfaceBase(object):
         Since this will be used a lot, make sure to declare your override with
         @functools.lru_cache.
         """
-        return {None:list(range(self.numDOFs()))}
+        return {None:list(range(self.numJoints()))}
 
     def indices(self,part=None,joint_idx=None):
         """Helper: returns a list of indices for the given part / joint index"""

@@ -85,10 +85,10 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
     def __str__(self):
         return "Completer("+str(self._base)+')'
 
-    def numDOFs(self,part=None):
+    def numJoints(self,part=None):
         if self._parts is not None and part in self._parts:
             return len(self._parts[part])
-        return self._base.numDOFs(part)
+        return self._base.numJoints(part)
 
     def parts(self):
         if self._parts is None: #pre-initialization
@@ -196,7 +196,7 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
         if not self._has['sensedPosition'] and not self._has['commandedPosition']:
             print ("RobotInterfaceCompleter(%s): Need at least one of sensedPosition() and commandedPosition() to be implemented"%(str(self._base),))
             return False
-        self._emulator = _RobotInterfaceEmulatorData(self._base.numDOFs(),self._base.klamptModel())
+        self._emulator = _RobotInterfaceEmulatorData(self._base.numJoints(),self._base.klamptModel())
         self._emulator.curClock = curclock
         assert curclock is not None
         self._emulator.lastClock = None
@@ -580,7 +580,7 @@ class MultiRobotInterface(RobotInterfaceBase):
         self._partNames.append(partName)
         self._partInterfaces[partName] = partInterface
 
-        part_ndof = partInterface.numDOFs()
+        part_ndof = partInterface.numJoints()
         partdofs = list(range(len(self._jointToPart),len(self._jointToPart)+part_ndof))
         for i,d in enumerate(partdofs):
             self._jointToPart.append((partName,i))
@@ -608,7 +608,7 @@ class MultiRobotInterface(RobotInterfaceBase):
             assert klamptModel is not None,"Need to specify a Klamp't model"
             self._klamptParts[partName] = klamptIndices
 
-    def numDOFs(self,part=None):
+    def numJoints(self,part=None):
         return len(self._parts[part])
 
     def parts(self):
