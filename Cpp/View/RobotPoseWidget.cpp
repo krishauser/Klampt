@@ -265,7 +265,7 @@ void RobotLinkPoseWidget::DrawGL(Camera::Viewport& viewport)
   if(hasHighlight || hasFocus) {
     for(size_t i=0;i<highlightedLinks.size();i++) {
       viewRobot->Appearance(highlightedLinks[i]).ModulateColor(highlightColor,0.5);
-      const auto& app = viewRobot->Appearance(highlightedLinks[i]);
+      //const auto& app = viewRobot->Appearance(highlightedLinks[i]);
     }
   }
   if(!activeDofs.empty()) {
@@ -290,22 +290,41 @@ void RobotLinkPoseWidget::DrawGL(Camera::Viewport& viewport)
     int i = affectedDriver;
     if(i >= 0) {
       if(robot->drivers[i].type == RobotJointDriver::Normal) {
-        Vector3 center;
-        if(robot->parents[affectedLink] < 0) center=robot->links[affectedLink].T0_Parent.t;
-        else center=robot->links[robot->parents[affectedLink]].T_World*robot->links[affectedLink].T0_Parent.t;
-        Vector3 worldAxis = robot->links[affectedLink].T_World.R*robot->links[affectedLink].w;
+        RigidTransform Tbase;
+        if(robot->parents[affectedLink] >= 0) 
+          Tbase = robot->links[robot->parents[affectedLink]].T_World*robot->links[affectedLink].T0_Parent;
+        else 
+          Tbase = robot->links[affectedLink].T0_Parent;
+        
+        Vector3 axis = robot->links[affectedLink].w;
         Vector3 x,y;
-        GetCanonicalBasis(worldAxis,x,y);
+        GetCanonicalBasis(robot->links[affectedLink].w,x,y);
         Real q1 = robot->qMin(affectedLink);
         Real q2 = robot->qMax(affectedLink);
+        Real zscale = 0.0;
+        if (q2 > q1+Pi*3/2)
+          zscale = 0.01;
+        if(IsInf(q1)  || IsInf(q2)) {
+          for(size_t j=0;j<robot->joints.size();j++) {
+            if(robot->drivers[i].Affects(robot->joints[j].linkIndex) && robot->joints[j].type == RobotJoint::Spin) {
+              q1 = 0;
+              q2 = TwoPi;
+              zscale = 0;
+            }
+          }
+        }
         if(!IsInf(q1) && !IsInf(q2) && q1 != q2) {
+          glPushMatrix();
+          glMultMatrix(Matrix4(Tbase));
           if(robot->links[affectedLink].type == RobotLink3D::Revolute) {
+            if(q2 > q1 + TwoPi*5) { //really long, just draw as a circle
+              q1 = 0;
+              q2 = TwoPi;
+              zscale = 0;
+            }
             //rotational joint, draw a strip arc
             Real r1 = 0.1;
             Real r2 = 0.12;
-            Real zscale = 0.0;
-            if (q2 > q1+Pi*3/2)
-              zscale = 0.01;
             Real dq = 0.1;
             Real q = q1;
             glBegin(GL_TRIANGLE_STRIP);
@@ -314,9 +333,9 @@ void RobotLinkPoseWidget::DrawGL(Camera::Viewport& viewport)
               glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,col);
               Real c = Cos(q);
               Real s = Sin(q);
-              Vector3 p1 = center+worldAxis*zscale*q + c*r1*x + s*r1*y;
-              Vector3 p2 = center+worldAxis*zscale*q + c*r2*x + s*r2*y;
-              glNormal3v(worldAxis);
+              Vector3 p1 = axis*zscale*q + c*r1*x + s*r1*y;
+              Vector3 p2 = axis*zscale*q + c*r2*x + s*r2*y;
+              glNormal3v(axis);
               glVertex3v(p1);
               glVertex3v(p2);
               q += dq;
@@ -325,9 +344,9 @@ void RobotLinkPoseWidget::DrawGL(Camera::Viewport& viewport)
             GLColor col(1,0.5,0);
             Real c = Cos(q);
             Real s = Sin(q);
-            glNormal3v(worldAxis);
-            Vector3 p1 = center+worldAxis*zscale*q + c*r1*x + s*r1*y;
-            Vector3 p2 = center+worldAxis*zscale*q + c*r2*x + s*r2*y;
+            glNormal3v(axis);
+            Vector3 p1 = axis*zscale*q + c*r1*x + s*r1*y;
+            Vector3 p2 = axis*zscale*q + c*r2*x + s*r2*y;
             glVertex3v(p1);
             glVertex3v(p2);
             glEnd();
@@ -336,7 +355,7 @@ void RobotLinkPoseWidget::DrawGL(Camera::Viewport& viewport)
             c = Cos(q);
             s = Sin(q);
             glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,col);
-            Vector3 pt = center+worldAxis*zscale*q + c*rmid*x + s*rmid*y;
+            Vector3 pt = axis*zscale*q + c*rmid*x + s*rmid*y;
             glPushMatrix();
             glTranslate(pt);
             drawSphere(0.02f,16,8);
@@ -345,25 +364,26 @@ void RobotLinkPoseWidget::DrawGL(Camera::Viewport& viewport)
           else {
             //translational joint, draw a strip
             glBegin(GL_TRIANGLE_STRIP);
-            Vector3 p1 = center+worldAxis*q1 - x*0.01;
-            Vector3 p2 = center+worldAxis*q1 + x*0.01;
+            Vector3 p1 = axis*q1 - x*0.01;
+            Vector3 p2 = axis*q1 + x*0.01;
             GLColor col(1,1,0);
             glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,col);
             glVertex3v(p1);
             glVertex3v(p2);
-            p1 = center+worldAxis*q2 - x*0.01;
-            p2 = center+worldAxis*q2 + x*0.01;
+            p1 = axis*q2 - x*0.01;
+            p2 = axis*q2 + x*0.01;
             col.rgba[1] = 0.5;
             glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,col);
             glVertex3v(p1);
             glVertex3v(p2);
             glEnd();
-            p1 = center+worldAxis*robot->q(affectedLink);
+            p1 = axis*robot->q(affectedLink);
             glPushMatrix();
             glTranslate(p1);
             drawSphere(0.02f,16,8);
             glPopMatrix();
           }
+          glPopMatrix();
         }
       }
     }
