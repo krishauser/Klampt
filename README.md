@@ -63,7 +63,7 @@ Installation instructions are also available for
 
 Klamp't works best when it is installed on your local machine, but it can also be run online through your web browser using Google Colab or Binder (or any other Jupyterhub server).
 
-- Google Colab [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)]](https://colab.research.google.com/gist/krishauser/1a518571493d2582f8bda908d9db02fb/klamptcolab.ipynb)
+- Google Colab [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/gist/krishauser/1a518571493d2582f8bda908d9db02fb/klamptcolab.ipynb)
 - Binder [![Open in Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/krishauser/Klampt-examples/binder?filepath=Jupyter%2FBasicKlamptDemo.ipynb)
 
 Note that the UI functionality is drastically limited compared to a local installation.
