@@ -3013,6 +3013,10 @@ bool Robot::LoadURDF(const char* fn)
         this->accMax[link_index] = customAccMax[linkNode->link->name];
       else
         this->accMax[link_index] = default_acc_max;
+      if(this->joints[joint_index].type == RobotJoint::Spin) {
+          this->qMax[link_index] = Inf;
+          this->qMin[link_index] = -Inf;
+      }
       if(this->joints[joint_index].type == RobotJoint::Weld){
         qMin[link_index] = 0;
         qMax[link_index] = 0;
