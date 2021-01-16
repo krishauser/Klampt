@@ -873,7 +873,7 @@ bool Robot::LoadRob(const char* fn) {
     linkNames.resize(links.size());
     for (size_t i = 0; i < links.size(); i++) {
       char buf[64];
-      snprintf(buf,64, "Link %d", (int)i);
+      snprintf(buf,64, "Link_%d", (int)i);
       linkNames[i] = buf;
     }
   }
