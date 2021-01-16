@@ -63,7 +63,7 @@ Installation instructions are also available for
 
 Klamp't works best when it is installed on your local machine, but it can also be run online through your web browser using Google Colab or Binder (or any other Jupyterhub server).
 
-- Google Colab [[Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)]](https://colab.research.google.com/gist/krishauser/1a518571493d2582f8bda908d9db02fb/klamptcolab.ipynb)
+- Google Colab [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)]](https://colab.research.google.com/gist/krishauser/1a518571493d2582f8bda908d9db02fb/klamptcolab.ipynb)
 - Binder [![Open in Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/krishauser/Klampt-examples/binder?filepath=Jupyter%2FBasicKlamptDemo.ipynb)
 
 Note that the UI functionality is drastically limited compared to a local installation.
@@ -86,15 +86,18 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 
 ## Version history
 
-**0.8.5 master** (Latest updates 1/6/2020)
+**0.8.5 master** (Latest updates 1/12/2020)
 -   Fixed bug drawing Group geometries.
 -   RGBD sensors now have a long range for RGB information like actual cameras do, rather than clipping to the sensor's specified depth range.
+-   Fixed bug loading non-square textures.
+-   Fixed bug with SubRobotModel editing in vis.
 -   Python API: moved some recently added routines from klampt.model.sensor to klampt.model.geometry.
 -   Python API: klampt.io.ros integration with LaserScan messages and SimCameraSensor publishing. 
 -   Python API: klampt.io.ros can now broadcast SimCameraSensor frames to ros.broadcast_tf.
 -   Python API: Bug fix with SimRobotSensor.kinematicSimulate and multiple worlds.
 -   Python API: Added visual editor for SimRobotSensor, Trajectory editor now has option to use RobotTrajectory interpolation.
 -   Python API: Bug fixes for HTML and IPython visualizations.  vis.debug() now works for these modes, and removing text now works.  Misc bugs are also fixed in the Jupyter extension.
+-   Python API: Used Pylance to squash lots of small bugs in infrequently used branches of the code
 
 **0.8.5  Bugfix version** (12/7/2020)
 -   Fixed a few bad bugs in the pip release (klampt_browser crash; resource editor crash; HTML output with no animation; HTML output with custom entities).
