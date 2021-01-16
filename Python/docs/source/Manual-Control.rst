@@ -346,21 +346,6 @@ process, in which all commands and queries at a given time step are placed withi
         telapsed = t1 - t0
         [wait for time max(dt - telapsed,0)]
 
-DOFs and Parts
-^^^^^^^^^^^^^^
-
-The number of DOFs in RIL is assumed equal to the number of joint actuators / 
-encoders.  If the robot has fewer actuators than encoders, the commands for 
-unactuated joints should just be ignored.  If the robot corresponds to a Klampt
-model (typical), then the number of DOFs should be ``model.numDrivers()``.
-
-A robot can have "parts", which are named groups of DOFs.  For example, a
-robot with a gripper can have parts "arm" and "gripper", which can be controlled
-separately.  You may retrieve part names using  ``interface.parts()``,
-part indices using ``interface.indices(part)``, and access a RIL interface
-to a part using ``interface.partController(part)``.
-
-
 Status Management
 ^^^^^^^^^^^^^^^^^
 
@@ -375,6 +360,35 @@ Status Management
 - ``interface.estop()``: triggers an emergency stop.  Default just does a soft stop.
 - ``interface.softStop()``: triggers a soft stop.
 
+DOFs, Joints, and Parts
+^^^^^^^^^^^^^^^^^^^^^^^
+
+The number of DOFs in RIL is assumed equal to the number of joints with actuators / 
+encoders.  If the robot has fewer actuators than encoders, the commands for 
+unactuated joints should just be ignored.  If the robot corresponds to a Klampt
+model (typical), then the number of DOFs should be ``model.numDrivers()``.
+
+**DOF Accessors**
+
+- ``interface.numJoints()``: returns the # of DOFs.
+- ``interface.indices()``: returns a list of indices of all the robot's DOFs (equivalent to ``list(range(numDOFs()))``.
+- ``interface.indices(joint_idx=j)``: returns the index of the given DOF index (equivalent to ``numDOFs()+j``).
+- ``interface.jointName(j)``: returns the name of the j'th joint.
+
+A robot can have "parts", which are named groups of DOFs.  For example, a
+robot with a gripper can have parts "arm" and "gripper", which can be controlled
+separately.  
+
+**Part Accessors**
+
+- ``interface.parts()``: retrieves the list of part names.
+- ``interface.indices(part)``: retrieves the indices of this robot accessed by
+  part ``part``.
+- ``interface.indices(part,j)``: retrieves the index on this robot accessed by
+  joint j on part ``part``.
+- ``interface.partController(part)``: access a RIL interface to a part.
+
+
 Command types
 ^^^^^^^^^^^^^^
 
@@ -383,10 +397,10 @@ Keep in mind that almost all robots will only implement a subset of these native
 **Basic control**
 
 - ``interface.setPosition(q)``: Immediate position control.
-- ``interface.moveTo(q,speed=1)``: Smooth position control.
-- ``interface.setVelocity(v,ttl=None)``: Immediate velocity control, with an optimal time-to-live.
-- ``interface.setTorque(t,ttl=None)``: Torque control, with an optimal time-to-live.
-- ``interface.setVelocity(v,ttl=None)``: Immediate velocity control, with an optimal time-to-live.
+- ``interface.moveToPosition(q,speed=1)``: Smooth position control.
+- ``interface.setVelocity(v,ttl=None)``: Immediate velocity control, with an optional time-to-live.
+- ``interface.setTorque(t,ttl=None)``: Torque control, with an optional time-to-live.
+- ``interface.setVelocity(v,ttl=None)``: Immediate velocity control, with an optional time-to-live.
 - ``interface.setPID(q,dq,t_feedforward=None)``: PID command, with optional feedforward torque.
 - ``interface.setPiecewiseLinear(times,milestones,relative=True)``: initiates a piecewise linear
   trajectory between the given times and milestones.  If relative=True, time 0 is the current time,
@@ -398,8 +412,29 @@ Keep in mind that almost all robots will only implement a subset of these native
 **Cartesian control**
 
 Each RIL robot has at most one end effector.  If you have a robot with multiple end effectors,
+you will need to create a `part <#dofs-joints-and-parts>`__ for each end effector.
+
+All Cartesian items refer to the robot's base frame, which may not be the same as a
+Klamp't world frame.  The task space is robot dependent.  However, for 6DOF robots,
+the task space should be SE(3) (:mod:`klampt.math.se3` element). For 3DOF robots
+the task space is likely to be 3D.
 
 - ``interface.setToolCoordinates(x)``: sets the tool center point
+- ``interface.getToolCoordinates()``: gets the tool center point 
+- ``interface.setGravityCompensation(gravity=[0,0,-9.8],load=0,load_com=[0,0,0])``:
+  sets the gravity compensation vector, load, and load position relative to the
+  base frame of the robot.
+- ``interface.setCartesianPosition(x)``: sets an immediate position command to the
+  position x.
+- ``interface.moveToCartesianPosition(x,speed=1.0)``: sets a move-to cartesian
+  command.  This is not necessarily a straight line motion.
+- ``interface.setCartesianVelocity(dx,ttl=None)``: sets an immediate velocity command
+  with the task space velocity dx.  For an SE(3) task space, ``dx=(w,v)`` with ``w``
+  the angular velocity and ``v`` is the translational velocity (in the robot base
+  coordinate frame )
+- ``interface.setCartesianForce(fparams,ttl=None)``: sets a Cartesian force command.  For
+  an SE(3) task space, ``fparams=(torque,force)`` gives the wrench acting on the end
+  effector.
 
 Writing RIL Implementations for Your Robot
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
