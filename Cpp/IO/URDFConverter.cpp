@@ -37,7 +37,7 @@ RobotJoint::Type URDFConverter::jointType_URDF2ROB(int type) {
 	RobotJoint::Type robtype = RobotJoint::Weld;
 	if (type == urdf::Joint::REVOLUTE)
 		robtype = RobotJoint::Normal;
-	if (type == urdf::Joint::CONTINUOUS)
+	else if (type == urdf::Joint::CONTINUOUS)
 		robtype = RobotJoint::Spin;
 	else if (type == urdf::Joint::FIXED)
 		robtype = RobotJoint::Weld;
