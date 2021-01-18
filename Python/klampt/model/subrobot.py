@@ -9,6 +9,7 @@ the place of RobotModel.
 from ..robotsim import *
 from .collide import self_collision_iter
 from .trajectory import Trajectory,HermiteTrajectory
+import warnings
 
 class SubRobotModel:
     """A helper that lets you conveniently set/get quantities for a subset
@@ -35,8 +36,7 @@ class SubRobotModel:
         self.index = robot.index
         self.world = robot.world
         if isinstance(robot,SubRobotModel):
-            print("Warning, taking sub-robot of sub-robot... not tested yet")
-            input("Press enter to continue...")         
+            warnings.warn("Taking sub-robot of sub-robot... not tested yet")
         for i,l in enumerate(self._links):
             if isinstance(l,str):
                 self._links[i] = robot.link(l).getIndex()
@@ -204,7 +204,7 @@ class SubRobotModel:
         q = self._robot.getTorqueLimits()
         return [q[i] for i in self._links]
     def setTorqueLimits(self,tmax):
-        assert len(q) == len(self._links)
+        assert len(tmax) == len(self._links)
         qfull = self._robot.getTorqueLimits()
         for i,v in zip(self._links,tmax):
             qfull[i] = v

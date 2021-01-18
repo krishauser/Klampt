@@ -264,17 +264,20 @@ class HTMLWindowManager(_WindowManager):
     def run(self):
         self.show()
     def loop(self,setup,callback,cleanup):
-        setup()
+        if setup is not None:
+            setup()
         self.quit = False
         iters = 0
         while not self.quit:
-            callback()
+            if callback is not None:
+                callback()
             iters += 1
             if iters > 5000:
                 print("HTML visualization window run for more than 5000 iterations... breaking loop")
                 self.quit = True
         self.show()
-        cleanup()
+        if cleanup is not None:
+            cleanup()
     def spin(self,duration):
         assert not math.isinf(duration),"Can't spin HTML visualization windows for an infinite amount of time"
         assert duration < 300,"Can't spin HTML visualization windows for more than 5 minutes (performance issue)"

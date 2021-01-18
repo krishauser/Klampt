@@ -9,6 +9,7 @@ from xml.sax.saxutils import escape
 from xml.dom import minidom
 import math
 import bisect
+import warnings
 
 class MultiPath:
     """A sophisticated path representation that allows timed/untimed paths, attached
@@ -421,7 +422,7 @@ class MultiPath:
         if robot is not None:
             res = trajectory.RobotTrajectory(robot)
             if self.sections[0].velocities is not None:
-                print("MultiPath.getTrajectory: Warning, can't discretize IK constraints with velocities specified")
+                warnings.warn("MultiPath.getTrajectory: can't discretize IK constraints with velocities specified")
         elif self.sections[0].velocities is not None:
             res = trajectory.HermiteTrajectory()
 

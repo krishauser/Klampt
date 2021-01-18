@@ -8,6 +8,7 @@ import json
 from json import encoder
 import weakref
 import sys
+import warnings
 
 VAR_PREFIX = ''
 USER_DATA_PREFIX = '$'
@@ -576,11 +577,11 @@ def contextFromJson(context,jsonObj):
     if 'userData' in jsonObj:
         for d in jsonObj['userData']:
             if d not in context.userData:
-                print("Context.fromJson(): Warning, item",d,"is not yet in userData")
+                warnings.warn("Context.fromJson(): item {} is not yet in userData".format(d))
     if 'customFunctions' in jsonObj:
         for d in jsonObj['customFunctions']:
             if d not in context.customFunctions:
-                print("Context.fromJson(): Warning, item",d,"is not yet in customFunctions")
+                warnings.warn("Context.fromJson(): item {} is not yet in customFunctions".format(d))
     context.variables = []
     context.variableDict = dict()
     context.expressions = dict()

@@ -17,9 +17,12 @@ class RobotCSpace(CSpace):
 
             If this is not provided, then only self-collisions will be checked.
 
-    Warning: if your robot has non-standard joints, like a free-
-    floating base or continuously rotating (spin) joints, you will need to
-    overload the :meth:`sample` method.
+    .. warning::
+
+        If your robot has non-standard joints, like a free-
+        floating base or continuously rotating (spin) joints, you will need to
+        overload the :meth:`sample` method.
+        
     """
     def __init__(self,robot,collider=None):
         CSpace.__init__(self)

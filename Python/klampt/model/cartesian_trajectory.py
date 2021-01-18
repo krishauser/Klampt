@@ -31,6 +31,7 @@ from . import ik
 from . import config
 from collections import deque
 import math
+import warnings
 
 def set_cartesian_constraints(x,constraints,solver):
     """For ``x`` a workspace parameter setting (obtained via
@@ -138,22 +139,22 @@ def cartesian_interpolate_linear(robot,a,b,constraints,
     set_cartesian_constraints(a,constraints,solver)
     if not solver.isSolved():
         if not solver.solve():
-            print("cartesian_interpolate_linear(): Error, initial configuration cannot be solved to match initial Cartesian coordinates, residual",solver.getResidual())
+            warnings.warn("cartesian_interpolate_linear(): initial configuration cannot be solved to match initial Cartesian coordinates, residual {}".format(solver.getResidual()),RuntimeWarning)
             return None
-        print("cartesian_interpolate_linear(): Warning, initial configuration does not match initial Cartesian coordinates, solving")
+        warnings.warn("cartesian_interpolate_linear(): Warning, initial configuration does not match initial Cartesian coordinates, solving")
         startConfig = robot.getConfig()
     if feasibilityTest is not None and not feasibilityTest(startConfig):
-        print("Error: initial configuration is infeasible")
+        warnings.warn("cartesian_interpolate_linear(): initial configuration is infeasible",RuntimeWarning)
         return None
     if endConfig is not None:
         #doing endpoint-constrained cartesian interpolation
         set_cartesian_constraints(b,constraints,solver)
         robot.setConfig(endConfig)
         if not solver.isSolved():
-            print("cartesian_interpolate_linear(): Error, end configuration does not match final Cartesian coordinates, residual",solver.getResidual())
+            warnings.warn("cartesian_interpolate_linear(): Error, end configuration does not match final Cartesian coordinates, residual {}".format(solver.getResidual()),RuntimeWarning)
             return None
         if feasibilityTest is not None and not feasibilityTest(startConfig):
-            print("cartesian_interpolate_linear(): Error: final configuration is infeasible")
+            warnings.warn("cartesian_interpolate_linear(): Error: final configuration is infeasible")
             return None
 
     res = RobotTrajectory(robot)
@@ -210,7 +211,7 @@ def cartesian_interpolate_linear(robot,a,b,constraints,
                         break
                     solver.setTolerance(tol0*0.1)
         if not tookstep:
-            print("cartesian_interpolate_linear(): Failed to take a valid step along straight line path at time",res.times[-1],"residual",solver.getResidual())
+            warnings.warn("cartesian_interpolate_linear(): Failed to take a valid step along straight line path at time {} residual {}".format(res.times[-1],solver.getResidual()),RuntimeWarning)
             #x = config.interpolate(constraints,a,b,res.times[-1])
             #set_cartesian_constraints(x,constraints,solver)
             #robot.setConfig(res.milestones[-1])
@@ -225,7 +226,7 @@ def cartesian_interpolate_linear(robot,a,b,constraints,
             return None
         x = robot.getConfig()
         if feasibilityTest is not None and not feasibilityTest(x):
-            print("cartesian_interpolate_linear(): Infeasibility at time",tend)
+            warnings.warn("cartesian_interpolate_linear(): Infeasibility at time {}".format(tend),RuntimeWarning)
             solver.setJointLimits(qmin0,qmax0)
             solver.setTolerance(tol0)
             if maximize:
@@ -318,30 +319,30 @@ def cartesian_interpolate_bisect(robot,a,b,constraints,
         #find an end point
         robot.setConfig(startConfig)
         if not solve_cartesian(b,constraints,solver):
-            print("cartesian_interpolate_bisect(): Error, could not find an end configuration to match final Cartesian coordinates")
+            warnings.warn("cartesian_interpolate_bisect(): could not find an end configuration to match final Cartesian coordinates")
             return None
         endConfig = robot.getConfig()
     robot.setConfig(startConfig)
     set_cartesian_constraints(a,constraints,solver)
     if not solver.isSolved():
         if not solver.solve():
-            print("Error, initial configuration cannot be solved to match initial Cartesian coordinates, residual",solver.getResidual())
+            warnings.warn("cartesian_interpolate_bisect(): initial configuration cannot be solved to match initial Cartesian coordinates, residual {}".format(solver.getResidual()),RuntimeWarning)
             return None
-        print("Warning, initial configuration does not match initial Cartesian coordinates, solving")
+        warnings.warn("cartesian_interpolate_bisect(): initial configuration does not match initial Cartesian coordinates, solving")
         startConfig = robot.getConfig() 
     robot.setConfig(endConfig)
     set_cartesian_constraints(b,constraints,solver)
     if not solver.isSolved():
         if not solver.solve():
-            print("cartesian_interpolate_bisect(): Error, final configuration cannot be solved to match final Cartesian coordinates, residual",solver.getResidual())
+            warnings.warn("cartesian_interpolate_bisect(): final configuration cannot be solved to match final Cartesian coordinates, residual {}".format(solver.getResidual()),RuntimeWarning)
             return None
-        print("Warning, final configuration does not match final Cartesian coordinates, solving")
+        warnings.warn("cartesian_interpolate_bisect(): final configuration does not match final Cartesian coordinates, solving")
         endConfig = robot.getConfig()   
     if feasibilityTest is not None and not feasibilityTest(startConfig):
-        print("cartesian_interpolate_bisect(): Error: initial configuration is infeasible")
+        warnings.warn("cartesian_interpolate_bisect(): initial configuration is infeasible",RuntimeWarning)
         return None
     if feasibilityTest is not None and not feasibilityTest(endConfig):
-        print("cartesian_interpolate_bisect(): Error: final configuration is infeasible")
+        warnings.warn("cartesian_interpolate_bisect(): Error: final configuration is infeasible",RuntimeWarning)
         return None
     root = _BisectNode(a,b,0,1,startConfig,endConfig)
     root.d = robot.distance(startConfig,endConfig)
@@ -362,7 +363,7 @@ def cartesian_interpolate_bisect(robot,a,b,constraints,
         solver.setBiasConfig(qm)
         if not solve_cartesian(m,constraints,solver):
             solver.setBiasConfig([])
-            print("cartesian_interpolate_bisect(): Failed to solve at point",um)
+            warnings.warn("cartesian_interpolate_bisect(): Failed to solve at point {}".format(um),RuntimeWarning)
             return None
         solver.setBiasConfig([])
         d1 = robot.distance(n.qa,qm)
@@ -374,13 +375,13 @@ def cartesian_interpolate_bisect(robot,a,b,constraints,
         d2 = robot.distance(qm,n.qb)
         dtotal += d1+d2 - d0 
         if dtotal > dorig*growthTol or (d1 > scalecond*d0) or (d2 > scalecond*d0):
-            print("cartesian_interpolate_bisect(): Excessive growth condition reached",d0,d1,d2,"at point",um)
-            print(n.qa)
-            print(qm)
-            print(n.qb)
+            warnings.warn("cartesian_interpolate_bisect(): Excessive growth condition reached {} {} {} at point {}".format(d0,d1,d2,um),RuntimeWarning)
+            #print(n.qa)
+            #print(qm)
+            #print(n.qb)
             return None
         if feasibilityTest and not feasibilityTest(qm):
-            print("cartesian_interpolate_bisect(): Violation of feasibility test","at point",um)
+            warnings.warn("cartesian_interpolate_bisect(): Violation of feasibility test at point {}".format(um),RuntimeWarning)
             return None
         n.left = _BisectNode(n.a,m,n.ua,um,n.qa,qm)
         n.left.d = d1
@@ -476,18 +477,18 @@ def cartesian_path_interpolate(robot,path,constraints,
         set_cartesian_constraints(path.milestones[0],constraints,solver)
         if not solver.isSolved():
             if not solver.solve():
-                print("cartesian_path_interpolate(): Error, initial configuration cannot be solved to match initial Cartesian coordinates")
+                warnings.warn("cartesian_path_interpolate(): initial configuration cannot be solved to match initial Cartesian coordinates")
                 return None
-            print("cartesian_path_interpolate(): Warning, initial configuration does not match initial Cartesian coordinates, solving")
+            warnings.warn("cartesian_path_interpolate(): Warning, initial configuration does not match initial Cartesian coordinates, solving",RuntimeWarning)
             startConfig = robot.getConfig() 
     if endConfig:
         robot.setConfig(endConfig)
         set_cartesian_constraints(path.milestones[-1],constraints,solver)
         if not solver.isSolved():
             if not solver.solve():
-                print("cartesian_path_interpolate(): Error, final configuration cannot be solved to match final Cartesian coordinates")
+                warnings.warn("cartesian_path_interpolate(): final configuration cannot be solved to match final Cartesian coordinates")
                 return None
-            print("cartesian_path_interpolate(): Warning, final configuration does not match final Cartesian coordinates, solving")
+            warnings.warn("cartesian_path_interpolate(): final configuration does not match final Cartesian coordinates, solving",RuntimeWarning)
             endConfig = robot.getConfig()   
 
     #now we're at a canonical setup
@@ -497,7 +498,7 @@ def cartesian_path_interpolate(robot,path,constraints,
             if ik.solve_global(constraints,solver.getMaxIters(),solver.getTolerance(),solver.getActiveDofs(),max(100,numSamples),feasibilityTest):
                 startConfig = robot.getConfig()
             else:
-                print("cartesian_path_interpolate(): Error: could not solve for start configuration")
+                warnings.warn("cartesian_path_interpolate(): could not solve for start configuration")
                 return None
         res = RobotTrajectory(robot)
         res.times.append(path.times[0])
@@ -519,7 +520,7 @@ def cartesian_path_interpolate(robot,path,constraints,
                 seg = cartesian_interpolate_bisect(robot,path.milestones[i],path.milestones[i+1],constraints,
                     startConfig=res.milestones[-1],endConfig=segEnd,delta=delta,solver=solver,feasibilityTest=feasibilityTest)
             if not seg:
-                print("cartesian_path_interpolate(): Found infeasible cartesian interpolation segment at time",path.times[i+1])
+                warnings.warn("cartesian_path_interpolate(): Found infeasible cartesian interpolation segment at time {}".format(path.times[i+1]))
                 infeasible = True
                 break
             #concatenate
@@ -590,7 +591,7 @@ def cartesian_path_interpolate(robot,path,constraints,
                         endConfig = robot.getConfig()
                         break
         if startConfig is None or endConfig is None:
-            print("cartesian_path_interpolate(): Exhausted all samples, perhaps endpoints are unreachable")
+            warnings.warn("cartesian_path_interpolate(): Exhausted all samples, perhaps endpoints are unreachable",RuntimeWarning)
             return None
         selfMotionManifolds = [[] for i in path.milestones]
         nodes = []
@@ -617,7 +618,7 @@ def cartesian_path_interpolate(robot,path,constraints,
                         continue
                     parent[c] = n
                     if nodes[c][0] == depth:
-                        print("cartesian_path_interpolate(): Found a path using roadmap after",samp,"samples")
+                        warnings.warn("cartesian_path_interpolate(): Found a path using roadmap after {} samples".format(samp),RuntimeWarning)
                         #arrived at goal node, trace parent list back
                         npath = []
                         n = c
@@ -625,7 +626,7 @@ def cartesian_path_interpolate(robot,path,constraints,
                             npath.append(c)
                             c = parent[c]
                         npath = [n for n in reversed(npath)]
-                        print(' '.join(str(nodes[n]) for n in npath))
+                        warnings.warn(' '.join(str(nodes[n]) for n in npath),RuntimeWarning)
                         assert nodes[npath[0]][0] == 0,"Didnt end up at a start configuration?"
                         res = RobotTrajectory(robot)
                         res.times.append(path.times[0])
@@ -643,7 +644,7 @@ def cartesian_path_interpolate(robot,path,constraints,
                             assert found,"Internal error? "+str(nodes[npath[i]])+" -> "+str(nodes[npath[i+1]])
                         return res
                     q.append(c)
-            print("cartesian_path_interpolate(): Path to depth",depth,"could not be found")
+            warnings.warn("cartesian_path_interpolate(): Path to depth {} could not be found".format(depth),RuntimeWarning)
             return None
         selfMotionManifolds[0].append(0)
         configs.append(startConfig)
@@ -680,7 +681,7 @@ def cartesian_path_interpolate(robot,path,constraints,
                 dist = robot.distance(x,configs[i])
                 d.append((dist,i))
             k = min(k,len(d))
-            print("cartesian_path_interpolate(): Sampled at time point",irand,"checking",k,"potential connections")
+            #warnings.warn("cartesian_path_interpolate(): Sampled at time point {} checking {} potential connections".format(irand,k),RuntimeWarning)
             totest = [v[1] for v in sorted(d)[:k]]
             for n in totest:
                 i = irand
@@ -702,10 +703,10 @@ def cartesian_path_interpolate(robot,path,constraints,
                     startConfig=qi,endConfig=qj,delta=delta,method='pointwise',solver=solver,feasibilityTest=feasibilityTest)
                 #t = cartesian_interpolate_bisect(robot,path.milestones[i],path.milestones[j],constraints,qi,qj,delta=delta,solver=solver,feasibilityTest=feasibilityTest)
                 if t is None:
-                    print("  Failed edge",nodes[ni],"->",nodes[nj])
+                    #warnings.warn("  Failed edge {} -> {}".format(nodes[ni],nodes[nj]),RuntimeWarning)
                     continue
                 #t.times = [path.times[i] + v*(path.times[j]-path.times[i]) for v in t.times]
-                print("  Added edge",nodes[ni],"->",nodes[nj])
+                #warnings.warn("  Added edge {} -> {}".format(nodes[ni],nodes[nj]),RuntimeWarning)
                 edges.append((ni,nj,t))
                 if ccs[ni] != ccs[nj]:
                     #not in same connected component, collapse ccs
@@ -730,7 +731,7 @@ def cartesian_path_interpolate(robot,path,constraints,
                         return findpath(len(path.milestones)-1)
             if ccs[-1] != 0 and ccs[-1] != 1 and False:
                 #didn't connect to either start or goal... delete isolated points?
-                print("cartesian_path_interpolate(): Isolated node, removing...")
+                warnings.warn("cartesian_path_interpolate(): Isolated node, removing...",RuntimeWarning)
                 edges = [(i,j,t) for (i,j,t) in edges if i != nx and j == nx]
                 selfMotionManifolds[irand].pop(-1)
                 nodes.pop(-1)
@@ -748,13 +749,13 @@ def cartesian_path_interpolate(robot,path,constraints,
                 if nodes[i][0] > maxdepth and cc in startccs:
                     maxdepth = nodes[i][0]
                     maxnode = i
-            print("cartesian_path_interpolate(): Connected components:")
+            warnings.warn("cartesian_path_interpolate(): Connected components:",RuntimeWarning)
             for n,cc in zip(nodes,ccs):
-                print("  ",n,":",cc)
-            print("cartesian_path_interpolate(): Got to depth",maxdepth)
+                warnings.warn("  {}:{}".format(n,cc),RuntimeWarning)
+            warnings.warn("cartesian_path_interpolate(): Got to depth {}".format(maxdepth),RuntimeWarning)
             return findpath(maxdepth)
-        print("cartesian_path_interpolate(): Unable to find a feasible path within",numSamples,"iterations")
-        print("cartesian_path_interpolate(): Number of feasible samples per time instance:")
+        warnings.warn("cartesian_path_interpolate(): Unable to find a feasible path within {} iterations".format(numSamples),RuntimeWarning)
+        warnings.warn("cartesian_path_interpolate(): Number of feasible samples per time instance:")
         return None
     return None
 
@@ -883,7 +884,7 @@ def cartesian_bump(robot,js_path,constraints,bump_paths,
             qmax = [min(v+d,vmax) for (v,d,vmax) in zip(q,maxDeviation,qmax0)]
             solver.setJointLimits(qmin,qmax)
         if not solver.solve():
-            print("cartesian_bump(): Unable to perform Cartesian solve on milestone at time",t)
+            warnings.warn("cartesian_bump(): Unable to perform Cartesian solve on milestone at time {}".format(t),RuntimeWarning)
             if not closest:
                 if maximize:
                     #going as far as possible, just clip the result
@@ -898,7 +899,7 @@ def cartesian_bump(robot,js_path,constraints,bump_paths,
         else:
             numsolved += 1
         res.milestones.append(robot.getConfig())
-    print("cartesian_bump(): Solved %d/%d milestone configurations along path, now interpolating paths..."%(numsolved,len(res.milestones)))
+    warnings.warn("cartesian_bump(): Solved %d/%d milestone configurations along path, now interpolating paths..."%(numsolved,len(res.milestones)),RuntimeWarning)
     numResolved = 0
     numTotalEdges = len(res.milestones)-1
     solver.setJointLimits(qmin0,qmax0)
@@ -929,7 +930,7 @@ def cartesian_bump(robot,js_path,constraints,bump_paths,
                 startConfig=q,endConfig=qnext,
                 delta=delta,solver=solver)
             if newseg == None:
-                print("cartesian_bump(): Unable to complete bump while subdividing segment at time",ta)
+                warnings.warn("cartesian_bump(): Unable to complete bump while subdividing segment at time {}".format(ta),RuntimeWarning)
                 if closest:
                     i += 1
                     continue
@@ -957,7 +958,7 @@ def cartesian_bump(robot,js_path,constraints,bump_paths,
             #print "Skipping",i
             numResolved += 1
         i += 1
-    print("cartesian_bump(): Resolved %d/%d bumped edges"%(numResolved,numTotalEdges))
+    warnings.warn("cartesian_bump(): Resolved %d/%d bumped edges"%(numResolved,numTotalEdges),RuntimeWarning)
     return res
 
 def cartesian_move_to(robot,constraints,

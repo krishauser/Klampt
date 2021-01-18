@@ -29,6 +29,7 @@ from sensor_msgs.msg import CameraInfo
 from sensor_msgs.msg import LaserScan
 from klampt.math import so3,se3
 import math
+import warnings
 
 def from_Vector3(ros_v):
     """From ROS Vector3 to Klamp't point"""
@@ -562,7 +563,7 @@ def from_CameraInfo(ros_ci,klampt_obj):
         klampt_obj.w = w
         klampt_obj.h = h
         if fx != fy:
-            print("from_CameraInfo: Warning, can't handle non-square pixels in Viewport")
+            warnings.warn("from_CameraInfo: can't handle non-square pixels in Viewport")
         klampt_obj.scale = fx
     elif hasattr(klampt_obj,'toViewport'):
         klampt_obj.x = x
@@ -570,7 +571,7 @@ def from_CameraInfo(ros_ci,klampt_obj):
         klampt_obj.w = w
         klampt_obj.h = h
         if fx != fy:
-            print("from_CameraInfo: Warning, can't handle non-square pixels in GLViewport")
+            warnings.warn("from_CameraInfo: can't handle non-square pixels in GLViewport")
         klampt_obj.xfov = 2*math.atan(0.5*w/fx)
     else:
         raise ValueError("Invalid object type: "+klampt_obj.__class__.__name__)
@@ -1023,7 +1024,7 @@ def broadcast_tf(broadcaster,klampt_obj,frameprefix="klampt",root="world",stamp=
         If klampt_obj is a Simulator or SimRobotController, then its
         corresponding model will be updated.
     """
-    from klampt import WorldModel,Simulator,RobotModel,SimRobotController
+    from klampt import WorldModel,Simulator,RobotModel,SimRobotController,SimRobotSensor
     if stamp == 'now':
         stamp = rospy.Time.now()
     elif isinstance(stamp,(int,float)):

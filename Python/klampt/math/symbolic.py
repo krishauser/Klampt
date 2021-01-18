@@ -697,6 +697,7 @@ import numpy as np
 import math
 import copy
 import itertools
+import warnings
 from builtins import object
 
 _DEBUG_CACHE = False
@@ -1812,7 +1813,7 @@ class Function(object):
             (argNames,varargs,keywords,defaults) = inspect.getargspec(func)
             if varargs != None or keywords != None:
                 #variable number of arguments
-                print("symbolic.py: Note that Function",name,"is declared with variable arguments, pass '...' as argNames to suppress this warning")
+                warnings.warn("symbolic.py: Note that Function {} is declared with variable arguments, pass '...' as argNames to suppress this warning".format(name))
                 pass
             else:
                 self.argNames = argNames
@@ -2061,9 +2062,9 @@ class Function(object):
             self_irregular =  isinstance(self.returnType,Type) and self.returnType.char not in SCALAR_TYPES+ARRAY_TYPES
             var_irregular = self.argTypes is not None and isinstance(self.argTypes[aindex],Type) and self.argTypes[aindex].char not in SCALAR_TYPES+ARRAY_TYPES
             if self_irregular:
-                print("symbolic.autoSetJacobians: Warning, setting Jacobian of a non-array function. Will flatten.")
+                warnings.warn("symbolic.autoSetJacobians: setting Jacobian of a non-array function. Will flatten.")
             if var_irregular:
-                print("symbolic.autoSetJacobians: Warning, setting Jacobian of a non-array argument. Will flatten.")
+                warnings.warn("symbolic.autoSetJacobians: setting Jacobian of a non-array argument. Will flatten.")
         if self.deriv is None:
             self.deriv = [None]*len(self.argNames)
         if self.jacobian is None:
@@ -2204,9 +2205,9 @@ class Function(object):
                         if to_const(shres) is not None:
                             shself = self.__call__(*args).returnType().shape()
                             if to_const(shself) is None or to_const(shres) != to_const(shself):
-                                print("symbolic.simplify: Warning, simplified version of",self.functionInfo.name,"doesn't have same size:",shself,"->",shres)
-                                print("Args:",args)
-                                print("Simplified",res)
+                                warnings.warn("symbolic.simplify: simplified version of {} doesn't have same size: {} -> {}".format(self.functionInfo.name,shself,shres))
+                                warnings.warn("Args: {}".format(args))
+                                warnings.warn("Simplified {}".format(res))
                     except Exception:
                         pass
                 return res
@@ -2271,9 +2272,9 @@ class Function(object):
                         if to_const(shres) is not None:
                             shself = self.__call__(*args).returnType().shape()
                             if to_const(shself) is None or to_const(shres) != to_const(shself):
-                                print("symbolic.simplify: Warning, simplified version of",self.name,"doesn't have same size:",shself,"->",shres)
-                                print("Args:",passedArgs)
-                                print("Simplified",res)
+                                warnings.warn("symbolic.simplify: simplified version of {} doesn't have same size: {} -> {}".format(self.name,shself,shres))
+                                warnings.warn("Args: {}".format(passedArgs))
+                                warnings.warn("Simplified {}".format(res))
                     except Exception:
                         pass
                 return res
@@ -3267,7 +3268,7 @@ class OperatorExpression(Expression):
                 else:
                     ud = self.find(UserDataExpression(name))
                     if ud is not None:
-                        print("symbolic.deriv: Warning, taking the derivative w.r.t. user data "+var+", assuming a numeric value")
+                        warnings.warn("symbolic.deriv: taking the derivative w.r.t. user data {}, assuming a numeric value".format(var))
                         var = VariableExpression(Variable(var,'N'))
                     else:
                         raise ValueError("Can't take the derivative w.r.t. undefined variable "+var)
@@ -3356,11 +3357,11 @@ class OperatorExpression(Expression):
         self_dims = dims.optimized(self) if self_type is None else self_type.dims()
         if not is_const(self_dims):
             if _DEBUG_DERIVATIVES:
-                print("symbolic.deriv: warning, can't determine dimensions of self, trying eval")
+                warnings.warn("symbolic.deriv: can't determine dimensions of self, trying eval")
             self_dims = dims.optimized(self.eval(context))
             if _DEBUG_DERIVATIVES:
                 if not is_const(self_dims):
-                    print("   ... really cannot determine dimensions of self. Proceeding as though non-scalar")
+                    warnings.warn("   ... really cannot determine dimensions of self. Proceeding as though non-scalar")
         self_scalar = is_scalar(self_dims,0)
         if not var_scalar and not self_scalar:
             if to_const(self_dims+1) == 2:
@@ -3479,7 +3480,7 @@ class OperatorExpression(Expression):
                                 print("    ",simplify(v))
                         res = 0
                     else:
-                        print("symbolic.deriv: Warning, no derivative for function",node.functionInfo.name)
+                        warnings.warn("symbolic.deriv: No derivative for function {}".format(node.functionInfo.name))
                         return True,None
                 elif all(_is_exactly(v,0) or is_zero(v) for v in cvals): 
                     if _DEBUG_DERIVATIVES:
@@ -3518,11 +3519,9 @@ class OperatorExpression(Expression):
                     outshape = _jacobian_shape(node)
                     if not is_const(rshape) or not is_const(outshape):
                         if not rshape.match(outshape):
-                            print("symbolic.deriv: Warning, had to reshape result of derivative of",node)
-                            print("   had type",res.returnType(),"need shape",outshape)
+                            warnings.warn("symbolic.deriv: had to reshape result of derivative of {}\n   had type {} need shape {}".format(node,res.returnType(),outshape))
                     elif not np.array_equal(to_const(rshape),to_const(outshape)):
-                        print("symbolic.deriv: Warning, had to reshape result of derivative of",node)
-                        print("   had shape",rshape,"need shape",outshape)
+                        warnings.warn("symbolic.deriv: had to reshape result of derivative of {}\n   had type {} need shape {}".format(node,rshape,outshape))
                         res = reshape.optimized(res,outshape)
             if _is_exactly(res,0) and not _is_exactly(_jacobian_shape(node),()):
                 #no derivative
@@ -3793,8 +3792,8 @@ class OperatorExpression(Expression):
                             assert Jconst.shape[-1] == to_const(da_cols),"Invalid jacobian size for %s argument %d"%(self.functionInfo.name,index)
                     inc = dot(J,da)
                 else:
-                    print("symbolic.deriv: No partial derivative for function %s argument %d (%s)"%(self.functionInfo.name,index+1,self.functionInfo.argNames[index]))
-                    print("  Derivative with respect to argument is",da)
+                    warnings.warn("symbolic.deriv: No partial derivative for function %s argument %d (%s)"%(self.functionInfo.name,index+1,self.functionInfo.argNames[index]))
+                    warnings.warn("  Derivative with respect to argument is {}".format(da))
                     return None
             else:
                 arg = self.args[index]
@@ -3820,8 +3819,8 @@ class OperatorExpression(Expression):
             resshape = to_const(shape.optimized(res))
             if myshape is not None and resshape is not None:
                 if myshape != resshape:
-                    print("symbolic.deriv: WARNING! derivative doesn't match my shape? derivative shape %s = shape(%s)"%(resshape,simplify(res)))
-                    print("  compared to self's shape %s = shape(%s)"%(myshape,simplify(self)))
+                    warnings.warn("symbolic.deriv: derivative doesn't match my shape? derivative shape %s = shape(%s)"%(resshape,simplify(res)))
+                    warnings.warn("  compared to self's shape %s = shape(%s)"%(myshape,simplify(self)))
         return res
 
     def vars(self,context=None,bound=False):
@@ -4245,7 +4244,7 @@ class OperatorExpression(Expression):
                 for i,a in enumerate(newargs):
                     if not isinstance(a,Expression):
                         if a is not 0:
-                            print("symbolic.simplify: warning, function %s shouldn't simplify to constant: %s"%(self.functionInfo.name,a))
+                            warnings.warn("symbolic.simplify: function %s shouldn't simplify to constant: %s"%(self.functionInfo.name,a))
                         newargs[i] = expr(a)
                 try:
                     res = self.functionInfo.simplifier(*newargs)
@@ -4755,7 +4754,7 @@ def _reshape(x,s):
 def _transpose(v):
     if not hasattr(v,'__iter__'): return v
     if hasattr(v,'shape') and len(v.shape) >= 3:
-        print("symbolic.transpose: Warning, being applied to tensor? You probably want transpose2")
+        warnings.warn("symbolic.transpose: being applied to tensor? You probably want transpose2")
     return np.transpose(v)
 
 def _diag(v):
@@ -4897,7 +4896,7 @@ def _lazy_getitem(context,vector,index):
                     #return flatten(*[vector[i] for i in eindex]).eval(context)
                 return [evector[i] for i in eindex]
             return evector[eindex]
-        print("WARNING: Non-constant getitem?",eindex,"class",eindex.__class__.__name__)
+        warnings.warn("Non-constant getitem? {} class {}".format(eindex,eindex.__class__.__name__))
         return evector[eindex]
 
 def _elementary_basis(n,index):

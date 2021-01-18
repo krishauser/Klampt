@@ -55,8 +55,10 @@ def _try_numpy_import():
     try:
         import numpy as np
         _has_numpy = True
+        #sys.modules['numpy'] = numpy
     except ImportError:
-        print("klampt.model.geometry.py: Warning, numpy not available.")
+        import warnings
+        warnings.warn("klampt.model.geometry.py: numpy not available.",ImportWarning)
         _has_numpy = False
     return _has_numpy
 
@@ -69,8 +71,10 @@ def _try_scipy_import():
     try:
         import scipy as sp
         _has_scipy = True
+        #sys.modules['scipy'] = scipy
     except ImportError:
-        print("klampt.model.geometry.py: Warning, scipy not available.")
+        import warnings
+        warnings.warn("klampt.model.geometry.py: scipy not available.",ImportWarning)
         _has_scipy = False
     return _has_scipy
 

@@ -60,7 +60,8 @@ def _try_numpy_import():
         _has_numpy = True
         #sys.modules['numpy'] = numpy
     except ImportError:
-        print("klampt.model.sensing.py: Warning, numpy not available.")
+        import warnings
+        warnings.warn("klampt.model.sensing.py: numpy not available.",ImportWarning)
         _has_numpy = False
     return _has_numpy
 
@@ -75,7 +76,8 @@ def _try_scipy_import():
         _has_scipy = True
         #sys.modules['scipy'] = scipy
     except ImportError:
-        print("klampt.model.sensing.py: Warning, scipy not available.")
+        import warnings
+        warnings.warn("klampt.model.sensing.py: scipy not available.",ImportWarning)
         _has_scipy = False
     return _has_scipy
 

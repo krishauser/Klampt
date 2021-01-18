@@ -344,7 +344,8 @@ class IPythonWindowManager(_WindowManager):
     def run(self):
         self.spin(float('inf'))
     def loop(self,setup,callback,cleanup):
-        setup()
+        if setup is not None:
+            setup()
         playback = Playback(self.scene())
         playback.quiet = False
         playback.reset = setup

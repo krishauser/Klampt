@@ -2624,6 +2624,7 @@ class VisAppearance:
             if robot is not None and item.numSections() > 0:
                 if len(item.sections[0].configs[0]) == robot.numLinks():
                     ees = self.attributes.get("endeffectors",[-1])
+                    centroid = None
                     if len(ees) > 0:
                         for i,ee in enumerate(ees):
                             if ee < 0: ees[i] = robot.numLinks()-1
@@ -2640,7 +2641,7 @@ class VisAppearance:
                             drawRobotTrajectory(s.configs,robot,ees,width,(color if i%2 == 0 else color2),pointSize,pointColor)
                     #draw it!
                     self.displayCache[0].draw(drawRaw)
-                    if name is not None:
+                    if name is not None and centroid is not None:
                         self.drawText(name,centroid)
         elif isinstance(item,coordinates.Point):
             def drawRaw():
@@ -3189,13 +3190,13 @@ class VisAppearance:
                     res = RobotPoser(world.robot(0))
                     world.robot(0).setConfig(oldconfig)
                 else:
-                    warning.warn("VisAppearance.make_editor(): Warning, editor for object of type {} cannot be associated with a robot".format(itype))
+                    warnings.warn("VisAppearance.make_editor(): Editor for object of type {} cannot be associated with a robot".format(itype))
                     return
             else:
-                warning.warn("VisAppearance.make_editor(): Warning, editor for object of type {} not defined".format(itype))
+                warnings.warn("VisAppearance.make_editor(): Editor for object of type {} not defined".format(itype))
                 return
         else:
-            warning.warn("VisAppearance.make_editor(): Warning, editor for object of type {} not defined".format(item.__class__.__name__))
+            warnings.warn("VisAppearance.make_editor(): Editor for object of type {} not defined".format(item.__class__.__name__))
             return
         self.editor = res
 
@@ -3881,17 +3882,17 @@ class VisualizationScene:
             elif isinstance(js,list):
                 for val in js:
                     if not isinstance(val,dict) or "name" not in val or "appearance" not in val:
-                        print("Warning, JSON object",js,"does not contain a valid subappearance")
+                        warnings.warn("JSON object {} does not contain a valid subappearance".format(js))
                     name = val["name"]
                     jsapp = val["appearance"]
                     if isinstance(name,list):
                         name = tuple(name)
                     if name not in app.subAppearances:
-                        print("Warning, JSON object",js,"subappearance",name,"not in visualization")
+                        warnings.warn("JSON object {} subappearance {} not in visualization".format(js,name))
                     else:
                         parseitem(jsapp,app.subAppearances[name])
             else:
-                print("Warning, JSON object",js,"does not contain a dict of attributes or list of sub-appearances")
+                warnings.warn("JSON object {} does not contain a dict of attributes or list of sub-appearances".format(js))
 
         parsed = set()
         for (k,v) in self.items.items():
@@ -3899,10 +3900,10 @@ class VisualizationScene:
                 parsed.add(k)
                 parseitem(jsonobj[k],v)
             else:
-                print("Warning, visualization object",k,"not in JSON object")
+                warnings.warn("Visualization object {} not in JSON object".format(k))
         for (k,v) in jsonobj.items():
             if k not in parsed:
-                print("Warning, JSON object",k,"not in visualization")
+                warnings.warn("JSON object {} not in visualization".format(k))
 
 def _camera_translate(vp,tgt):
     vp.camera.tgt = tgt

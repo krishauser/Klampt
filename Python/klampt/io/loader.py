@@ -69,6 +69,7 @@ from ..model.contact import ContactPoint, Hold
 from ..model.trajectory import Trajectory,HermiteTrajectory,SO3Trajectory,SE3Trajectory
 from ..model import types
 import os
+import warnings
 
 extensionToTypes = {'.config':['Config'],
                    '.configs':['Configs'],
@@ -143,7 +144,7 @@ def filenameToType(name):
     elif fileExtension in extensionToTypes:
         ftypes = extensionToTypes[fileExtension]
         if len(ftypes) > 1 and fileExtension not in ['.path'] and (ftypes[0] != 'Geometry3D' and len(ftypes) > 2):
-            print("loader.filenameToType(): Warning: filename",name,"is ambiguous, matches types",', '.join(ftypes))
+            warnings.warn("loader.filenameToType(): filename {} is ambiguous, matches types {}".format(name,', '.join(ftypes)))
         return ftypes[0]
     else:
         raise RuntimeError("Cannot determine type of object from filename "+name)
