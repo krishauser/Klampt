@@ -1,5 +1,5 @@
 from ..visualization import _WindowManager,VisualizationScene,VisPlot,objectToVisType,_globalLock
-from ..ipython import KlamptWidget,EditPoint,EditTransform,EditConfig
+from ..ipython import KlamptWidget,EditPoint,EditTransform,EditConfig,Playback
 from ...model import coordinates
 from ...model.subrobot import SubRobotModel
 from ...robotsim import WorldModel,RobotModel,RigidObjectModel
@@ -7,6 +7,7 @@ from IPython.display import display,HTML
 import math
 import weakref
 import time
+import warnings
 
 class KlamptWidgetAdaptor(KlamptWidget,VisualizationScene):
     """Handles the conversion between vis calls and the KlamptWidget."""
@@ -104,7 +105,7 @@ class KlamptWidgetAdaptor(KlamptWidget,VisualizationScene):
             if itype == 'Vector3':
                 res = EditPoint(item,klampt_widget=weakref.proxy(self),point_name=obj.name)
             elif itype == 'Matrix3':
-                print("vis_ipython.make_editor(): Warning, editor for object of type",itype,"not defined")
+                warnings.warn("vis_ipython.make_editor(): Editor for object of type %s not defined"%(itype,))
                 return
             elif itype == 'RigidTransform':
                 res = EditTransform(item,klampt_widget=weakref.proxy(self),xform_name=obj.name)
@@ -121,13 +122,13 @@ class KlamptWidgetAdaptor(KlamptWidget,VisualizationScene):
                     res = EditConfig(world.robot(0),ghost=obj.name,klampt_widget=weakref.proxy(self),link_selector=link_selector)
                     world.robot(0).setConfig(oldconfig)
                 else:
-                    print("vis_ipython.make_editor(): Warning, editor for object of type",itype,"cannot be associated with a robot")
+                    warnings.warn("vis_ipython.make_editor(): Editor for object of type %s cannot be associated with a robot"%(itype,))
                     return
             else:
-                print("vis_ipython.make_editor(): Warning, editor for object of type",itype,"not defined")
+                warnings.warn("vis_ipython.make_editor(): Editor for object of type %s not defined"%(itype,))
                 return
         else:
-            print("vis_ipython.make_editor(): Warning, editor for object of type",item.__class__.__name__,"not defined")
+            warnings.warn("vis_ipython.make_editor(): Editor for object of type %s not defined"%(item.__class__.__name__,))
             return
         obj.editor = res
 
@@ -240,7 +241,7 @@ class KlamptWidgetAdaptor(KlamptWidget,VisualizationScene):
                 self.plot_axs[k] = self.axs[plotcnt//cols][plotcnt%cols]
                 plotcnt += 1
         if len(plots) != len(self.plot_axs):
-            print("Unable to redo plot layout")
+            warnings.warn("vis_ipython: Unable to redo plot layout")
         #render plots
         for (k,v) in plots.items():
             vmin,vmax = v.autoRange()
@@ -319,7 +320,7 @@ class IPythonWindowManager(_WindowManager):
     def getWindow(self):
         return self.current_window
     def setWindowName(self,name):
-        print("IPython does not accept window names, skipping")
+        warnings.warn("IPython does not accept window names, skipping")
         pass
     def resizeWindow(self,w,h):
         self.frontend().width = w
@@ -344,14 +345,14 @@ class IPythonWindowManager(_WindowManager):
         self.spin(float('inf'))
     def loop(self,setup,callback,cleanup):
         setup()
+        playback = Playback(self.scene())
+        playback.quiet = False
+        playback.reset = setup
+        playback.advance = callback
+        if cleanup is not None:
+            warnings.warn("vis_ipython: An IPython visualization will run forever, and cleanup() will never be called")
         self.show()
-        t = 0
-        while True:
-            if not self.shown(): break
-            callback()
-            self.frontend().update()
-        self.show(False)
-        cleanup()
+        display(playback)
     def spin(self,duration):
         self.show()
         t = 0
