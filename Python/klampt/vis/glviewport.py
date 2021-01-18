@@ -1,5 +1,9 @@
-from OpenGL.GL import *
-from OpenGL.GLU import *
+try:
+    from OpenGL import GL,GLU
+    _HAS_OPENGL = True
+except:
+    _HAS_OPENGL = False
+
 from . import camera
 from ..math import so3,se3,vectorops
 from ..robotsim import Viewport
@@ -153,29 +157,32 @@ class GLViewport:
 
     def setCurrentGL(self):
         """Deprecated soon: use set_current_GL"""
+        warnings.warn("setCurrentGL will be deprecated in the next version of Klampt",DeprecationWarning)
         self.set_current_GL()
 
     def set_current_GL(self):
         """Sets up the view in the current OpenGL context"""
+        if not _HAS_OPENGL:
+            raise RuntimeError("PyOpenGL is not installed, cannot use set_current_gl")
         # Projection
-        glMatrixMode(GL_PROJECTION)
-        glLoadIdentity()
+        GL.glMatrixMode(GL.GL_PROJECTION)
+        GL.glLoadIdentity()
         aspect = float(self.w)/float(self.h)
         n,f = self.clippingplanes
         if self.camera.dist*1.05 > f:
             #allow super zoomed-out views to work without adjusting far plane
             f = self.camera.dist*1.05
-        gluPerspective (self.fov/aspect,aspect,n,f)
+        GLU.gluPerspective (self.fov/aspect,aspect,n,f)
 
         # Initialize ModelView matrix
-        glMatrixMode(GL_MODELVIEW)
-        glLoadIdentity()
+        GL.glMatrixMode(GL.GL_MODELVIEW)
+        GL.glLoadIdentity()
         
         # View transformation
         mat = se3.homogeneous(se3.inv(self.camera.matrix()))
         cols = list(zip(*mat))
         pack = sum((list(c) for c in cols),[])
-        glMultMatrixf(pack)
+        GL.glMultMatrixf(pack)
 
     def save_file(self,fn):
         """Saves to a viewport txt file. The file format is compatible with
