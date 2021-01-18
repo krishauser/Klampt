@@ -583,6 +583,7 @@ from ..model.trajectory import *
 from ..model.multipath import MultiPath
 from ..model.contact import ContactPoint,Hold
 from ..model.collide import bb_empty,bb_create,bb_union
+import warnings
 
 #the global lock for all visualization calls
 _globalLock = threading.RLock()
@@ -664,10 +665,7 @@ def init(backends=None):
                 if glinit.active() == 'GLUT':
                     from .backends import vis_glut
                     _window_manager = vis_glut.GLUTWindowManager()
-                    print("klampt.visualization: QT is not available, falling back to poorer")
-                    print("GLUT interface.  Returning to another GLUT thread will not work")
-                    print("properly.")
-                    print("")
+                    warnings.warn("klampt.visualization: QT is not available, falling back to poorer\nGLUT interface.  Returning to another GLUT thread will not work\nproperly.")
                 else:
                     from .backends import vis_qt
                     _window_manager = vis_qt.QtWindowManager()
@@ -724,7 +722,7 @@ def debug(*args,**kwargs):
             nextName = arg
         elif isinstance(arg,dict):
             if lastName is None:
-                print("vis.debug(): dict of attributes must follow an object")
+                warnings.warn("vis.debug(): dict of attributes must follow an object")
                 continue
             for (k,v) in arg.items():
                 if k == 'animation':
@@ -734,7 +732,7 @@ def debug(*args,**kwargs):
                     try:
                         setAttribute(lastName,k,v)
                     except Exception:
-                        print("vis.debug(): Couldn't set attribute",k,"of item",lastName)
+                        warnings.warn("vis.debug(): Couldn't set attribute {} of item {}".format(k,lastName))
         else:
             label = None
             if nextName is None:
@@ -798,7 +796,7 @@ def debug(*args,**kwargs):
         elif not isinstance(centerCamera,(str,tuple)):
             centerCamera = getItemName(centerCamera)
         if centerCamera is None:
-            print("vis.debug(): could not center camera, invalid object named")
+            warnings.warn("vis.debug(): could not center camera, invalid object name")
         else:
             vp = getViewport()
             try:
@@ -815,7 +813,7 @@ def debug(*args,**kwargs):
             if not isinstance(followCameraItem,(str,tuple)):
                 followCameraItem = getItemName(followCameraItem)
             if followCameraItem is None:
-                print("vis.debug(): could not follow camera, invalid object name")
+                warnings.warn("vis.debug(): could not follow camera, invalid object name")
             followCamera(followCameraItem,center=True)
     if _backend == 'HTML':
         #dump out the animation
@@ -1433,8 +1431,8 @@ def autoFitViewport(viewport,objects,zoom=True,rotate=True):
     if len(ofs) == 0:
         return
 
-    print(pts)
-    print(ofs)
+    #print(pts)
+    #print(ofs)
     pts = pts + ofs # just in case
 
     bb = bb_create(*pts)
@@ -1700,17 +1698,16 @@ def objectToVisType(item,world):
                             match = True
                             break
                     if not match and len(itypes) == 1:
-                        print("Config-like item of length",len(item),"doesn't match any of the # links of robots in the world:",[world.robot(i).numLinks() for i in range(world.numRobots())])
+                        warnings.warn("Config-like item of length {} doesn't match any of the # links of robots in the world: {}".format(len(item),[world.robot(i).numLinks() for i in range(world.numRobots())]))
             elif t=='RigidTransform':
                 validtypes.append(t)
             elif t=='Geometry3D':
                 validtypes.append(t)
         if len(validtypes) > 1:
-            print("Unable to draw item of ambiguous types",validtypes)
-            print("  (Try vis.setAttribute(item,'type',desired_type_str) to disambiguate)")
+            warnings.warn("Unable to draw item of ambiguous types {}\n  (Try vis.setAttribute(item,'type',desired_type_str) to disambiguate)".format(validtypes))
             return
         if len(validtypes) == 0:
-            print("Unable to draw any of types",itypes)
+            warnings.warn("Unable to draw any of types {}".format(itypes))
             return
         return validtypes[0]
     return itypes
@@ -2263,7 +2260,7 @@ def _default_attributes(item,type=None):
                 print("visualization.py: Unsupported object type",item,"of type:",item.__class__.__name__)
                 return
         if itypes is None:
-            print("Unable to convert item",item,"to drawable")
+            warnings.warn("Unable to convert item {} to drawable".format(str(item)))
             return
         elif itypes == 'Config':
             pass
@@ -2274,8 +2271,7 @@ def _default_attributes(item,type=None):
         elif itypes == 'RigidTransform':
             return _default_RigidTransform_attributes
         else:
-            print("klampt.vis: Unable to draw item of type \"%s\""%(str(itypes),))
-            input("Press enter to continue...")
+            warnings.warn("klampt.vis: Unable to draw item of type \"%s\""%(str(itypes),))
             res['hidden'] = True
             res['hide_label'] = True
     return res
@@ -2364,10 +2360,10 @@ class VisAppearance:
     def drawText(self,text,point):
         """Draws the given text at the given point"""
         if len(point) != 3:
-            print("WARNING drawText INCORRECT POINT SIZE",point,text)
+            warnings.warn("drawText INCORRECT POINT SIZE {} {}".format(point,text))
             return
         if not all(math.isfinite(v) for v in point):
-            print("WARNING drawText INVALID POINT",point,text)
+            warnings.warn("drawText INVALID POINT {} {}".format(point,text))
             return
         self.widget.addLabel(text,point[:],[0,0,0])
 
@@ -2405,11 +2401,11 @@ class VisAppearance:
             try:
                 newDrawConfig = config.getConfig(self.item)
                 if len(newDrawConfig) != len(self.drawConfig):
-                    print("Incorrect length of draw configuration?",len(self.drawConfig),'vs',len(newDrawConfig))
+                    warnings.warn("Incorrect length of draw configuration? {} vs {}".format(len(self.drawConfig),len(newDrawConfig)))
                 config.setConfig(self.item,self.drawConfig)
                 self.drawConfig = newDrawConfig
             except Exception as e:
-                print("Warning, exception thrown during animation update.  Probably have incorrect length of configuration")
+                warnings.warn("Exception thrown during animation update.  Probably have incorrect length of configuration")
                 import traceback
                 traceback.print_exc()
                 self.animation = None
@@ -2609,7 +2605,6 @@ class VisAppearance:
             if doDraw:
                 assert len(centroid)==3
                 def drawRaw():
-                    pointTrajectories = []
                     width = self.attributes["width"]
                     color = self.attributes["color"]
                     pointSize = self.attributes["pointSize"]
@@ -2957,14 +2952,14 @@ class VisAppearance:
                     print("visualization.py: Unsupported object type",item,"of type:",item.__class__.__name__)
                     return
             if itypes is None:
-                print("Unable to convert item",item,"to drawable")
+                warnings.warn("Unable to convert item {} to drawable".format(str(item)))
                 return
             elif itypes == 'Config':
                 rindex = self.attributes.get("robot",0)
                 if world and rindex < world.numRobots():
                     robot = world.robot(rindex)
                     if robot.numLinks() != len(item):
-                        print("Unable to draw Config, does not have the same # of DOFs as the robot: %d != %d"%(robot.numLinks(),len(item)))
+                        warnings.warn("Unable to draw Config, does not have the same # of DOFs as the robot: %d != %d"%(robot.numLinks(),len(item)))
                     else:
                         if not self.useDefaultAppearance:
                             oldAppearance = [robot.link(i).appearance().clone() for i in range(robot.numLinks())]
@@ -2982,11 +2977,27 @@ class VisAppearance:
                             for (i,app) in enumerate(oldAppearance):
                                 robot.link(i).appearance().set(app)
                 else:
-                    print("Unable to draw Config items without a world or robot")
+                    warnings.warn("Unable to draw Config items without a world or robot")
             elif itypes == 'Configs':
-                if world and world.numRobots() >= 1:
+                def drawAsTrajectory():
+                    width = self.attributes.get("width",3.0)
+                    color = self.attributes["color"]
+                    pointSize = self.attributes.get("pointSize",None)
+                    pointColor = self.attributes.get("pointColor",None)
+                    drawTrajectory(Trajectory(list(range(len(item))),item),width,color,pointSize,pointColor)
+                if len(item) == 0:
+                    pass
+                elif world and world.numRobots() >= 1:
                     maxConfigs = self.attributes.get("maxConfigs",min(10,len(item)))
                     robot = world.robot(self.attributes.get("robot",0))
+                    if robot.numLinks() != len(item[0]):
+                        if len(item[0]) in [2,3]: #interpret as a trajectory
+                            self.displayCache[0].draw(drawAsTrajectory)
+                            centroid = item[0] + [0]*(3-len(item[0]))
+                            if name is not None:
+                                self.drawText(name,centroid)
+                        else:
+                            warnings.warn("Configs items aren't the right size for the robot")
                     if not self.useDefaultAppearance:
                         oldAppearance = [robot.link(i).appearance().clone() for i in range(robot.numLinks())]
                         for i in range(robot.numLinks()):
@@ -3004,8 +3015,13 @@ class VisAppearance:
                     if not self.useDefaultAppearance:
                         for (i,app) in enumerate(oldAppearance):
                             robot.link(i).appearance().set(app)
+                elif len(item[0]) in [2,3]: #interpret as a trajectory
+                    self.displayCache[0].draw(drawAsTrajectory)
+                    centroid = item[0] + [0]*(3-len(item[0]))
+                    if name is not None:
+                        self.drawText(name,centroid)
                 else:
-                    print("Unable to draw Configs items without a world or robot")
+                    warnings.warn("Unable to draw Configs items without a world or robot")
             elif itypes == 'Vector3':
                 def drawRaw():
                     glDisable(GL_LIGHTING)
@@ -3028,7 +3044,7 @@ class VisAppearance:
                 if name is not None:
                     self.drawText(name,item[1])
             else:
-                print("Unable to draw item of type \"%s\""%(str(itypes),))
+                warnings.warn("Unable to draw item of type \"%s\""%(str(itypes),))
 
         #revert appearance
         if not self.useDefaultAppearance and hasattr(item,'appearance'):
@@ -3078,7 +3094,7 @@ class VisAppearance:
             except Exception:
                 raise
                 pass
-            print("Empty bound for object",self.name,"type",self.item.__class__.__name__)
+            warnings.warn("Empty bound for object {} type {}".format(self.name,self.item.__class__.__name__))
         return bb_create()
 
     def getCenter(self):
@@ -3173,13 +3189,13 @@ class VisAppearance:
                     res = RobotPoser(world.robot(0))
                     world.robot(0).setConfig(oldconfig)
                 else:
-                    print("VisAppearance.make_editor(): Warning, editor for object of type",itype,"cannot be associated with a robot")
+                    warning.warn("VisAppearance.make_editor(): Warning, editor for object of type {} cannot be associated with a robot".format(itype))
                     return
             else:
-                print("VisAppearance.make_editor(): Warning, editor for object of type",itype,"not defined")
+                warning.warn("VisAppearance.make_editor(): Warning, editor for object of type {} not defined".format(itype))
                 return
         else:
-            print("VisAppearance.make_editor(): Warning, editor for object of type",item.__class__.__name__,"not defined")
+            warning.warn("VisAppearance.make_editor(): Warning, editor for object of type {} not defined".format(item.__class__.__name__))
             return
         self.editor = res
 
@@ -3245,7 +3261,7 @@ class VisAppearance:
                 if not setList(self.item,v):
                     self.item = v
             elif isinstance(self.item,tuple):
-                print("Edited a tuple... maybe a point or an xform? can't actually edit")
+                warnings.warn("Edited a tuple... maybe a point or an xform? can't actually edit")
                 self.item = self.editor.get()
             else:
                 raise RuntimeError("Uh... unsupported type with an editor?")
@@ -3340,7 +3356,7 @@ class VisualizationScene:
             if robpath:
                 return robpath + (name,)
             else:
-                print("Couldnt find link",name,"under robot")
+                warnings.warn("Couldnt find link {} under robot".format(name))
         def objectPath(app,obj,name):
             if app.item == object:
                 return ()
@@ -3359,7 +3375,7 @@ class VisualizationScene:
                 if p is not None:
                     return ('world',)+p
                 else:
-                    print("Couldnt find object",name,"under world")
+                    warnings.warn("Couldnt find object {} under world".format(name))
         for (k,v) in self.items.items():
             p = objectPath(v,object,name)
             if p is not None:
@@ -3367,7 +3383,7 @@ class VisualizationScene:
                     return k
                 return (k,)+p
             else:
-                print("Couldnt find object",name,"under",k)
+                warnings.warn("Couldnt find object {} under {}".format(name,k))
         return None
 
     def add(self,name,item,keepAppearance=False,**kwargs):
