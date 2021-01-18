@@ -355,10 +355,11 @@ Here are the accepted types in the scene manager.
 +-----------------------------+------------------------------------------+------------------------------------------+
 | ``Config``                  | Shows a ghost of the robot               | ``robot`` (0)                            |
 +-----------------------------+------------------------------------------+------------------------------------------+
-| ``Configs``                 |                                          | ``robot`` (0), ``maxConfigs`` (20)       |
+| ``Configs``                 | If contains 2D or 3D points, draws a     | ``robot`` (0), ``maxConfigs`` (20)       |
+|                             | polyline (& uses Trajectory attributes)  |                                          |
 +-----------------------------+------------------------------------------+------------------------------------------+
-| ``Trajectory``              | Draws 3D, SE(3), or end-effector paths   | ``robot`` (0), ``width`` (3),            |
-|                             |                                          | ``pointSize`` (None), ``pointColor``     |
+| ``Trajectory``              | Draws 2D, 3D, SE(3), or end-effector     | ``robot`` (0), ``width`` (3),            |
+|                             | paths                                    | ``pointSize`` (None), ``pointColor``     |
 |                             |                                          | (None), ``endeffectors`` (all terminal   |
 |                             |                                          | links)                                   |
 +-----------------------------+------------------------------------------+------------------------------------------+
