@@ -957,12 +957,12 @@ class Playback(widgets.VBox):
         self.out = widgets.Output()
 
         def play_thread_func(lock,playdata):
-            #print "Starting play thread"
             if self.framerate is None:
                 dt = 0
             else:
                 dt = 1.0/self.framerate
             playdata['stop'] = 0
+            playdata['last_frame_time'] = time.time()
 
             def do_advance(drawn=False):
                 if playdata['stop']:
@@ -980,10 +980,12 @@ class Playback(widgets.VBox):
                 self.frame += 1
                 lock.release()
 
-            if self.klampt_widget:
+            if self.klampt_widget and dt==0:
                 self.klampt_widget.observe(do_advance,'drawn')
+                #kick it off with an update
+                do_advance()
+
             t0 = time.time()
-            do_advance()
             while True:
                 if playdata['stop']:
                     break
@@ -996,12 +998,14 @@ class Playback(widgets.VBox):
                     lock.release()
                     break
                 lock.release()
-                if not self.klampt_widget:
+                if self.klampt_widget and dt==0:
+                    time.sleep(0.05)
+                else:
                     do_advance()
-                t1 = time.time()
-                time.sleep(max(dt-(t1-t0),0))
-                t0 = t1
-            if self.klampt_widget:
+                    t1 = time.time()
+                    time.sleep(max(dt-(t1-t0),0))
+                    t0 = time.time()
+            if self.klampt_widget and dt==0:
                 self.klampt_widget.unobserve(do_advance,'drawn')
             playdata['thread'] = None
             return
@@ -1050,7 +1054,6 @@ class Playback(widgets.VBox):
             playdata['stop'] = 0
             self.pausebutton.disabled = True
             self.playbutton.disabled = False
-        
 
     def _advance(self):
         if self.advance:
