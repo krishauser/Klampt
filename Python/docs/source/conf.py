@@ -25,9 +25,9 @@ copyright = '2020, Intelligent Motion Lab'
 author = 'Kris Hauser'
 
 # The short X.Y version
-version = ''
+version = '.'.join(klampt.__version__.split('.')[:2])
 # The full version, including alpha/beta/rc tags
-release = '0.8.5'
+release = klampt.__version__
 
 
 # -- General configuration ---------------------------------------------------
@@ -51,18 +51,13 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.mathjax',
     'sphinx_automodapi.automodapi',
-    'sphinxcontrib.napoleon',
-    'autodocsumm'
+    'sphinxcontrib.napoleon'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
 autosummary_generate = True
-
-#autodoc_default_options = {
-#    'autosummary': True,
-#}
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
@@ -207,38 +202,3 @@ epub_exclude_files = ['search.html']
 # -- Extension configuration -------------------------------------------------
 
 autoclass_content = 'both'
-
-
-
-
-
-
-# KH: Added 1/8/2021
-# ClassDocumenter.add_directive_header uses ClassDocumenter.add_line to
-#   write the class documentation.
-# We'll monkeypatch the add_line method and intercept lines that begin
-#   with "Bases:".
-# In order to minimize the risk of accidentally intercepting a wrong line,
-#   we'll apply this patch inside of the add_directive_header method.
-
-from sphinx.ext.autodoc import ClassDocumenter, _
-
-add_line = ClassDocumenter.add_line
-line_to_delete = _(u'Bases: %s') % u':class:`object`'
-
-def add_line_no_object_base(self, text, *args, **kwargs):
-    if text.strip() == line_to_delete:
-        return
-    add_line(self, text, *args, **kwargs)
-
-add_directive_header = ClassDocumenter.add_directive_header
-
-def add_directive_header_no_object_base(self, *args, **kwargs):
-    self.add_line = add_line_no_object_base.__get__(self)
-    result = add_directive_header(self, *args, **kwargs)
-    del self.add_line
-    return result
-
-ClassDocumenter.add_directive_header = add_directive_header_no_object_base
-
-
