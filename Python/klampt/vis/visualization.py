@@ -630,6 +630,7 @@ def init(backends=None):
                 backends = ['IPython']
         else:
             backends = ['PyQt','GLUT','HTML']
+        print("vis.init(): Auto-detected backends",backends)
     if isinstance(backends,str):
         backends = [backends]
     if _backend is not None:
