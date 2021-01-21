@@ -444,7 +444,7 @@ def setPlanSetting(*args):
 
     Args:
         setting (str): 
-        value (str or float): 
+        value (float or str): 
 
     Valid numeric values are:  
 

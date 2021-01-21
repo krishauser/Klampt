@@ -2033,7 +2033,7 @@ class Geometry3D(_object):
 
 
         Args:
-            arg2 (:class:`~klampt.PointCloud` or :class:`~klampt.VolumeGrid` or :class:`~klampt.TriangleMesh` or :class:`~klampt.GeometricPrimitive` or :obj:`ConvexHull` or :class:`~klampt.Geometry3D`, optional): 
+            arg2 (:class:`~klampt.VolumeGrid` or :class:`~klampt.TriangleMesh` or :class:`~klampt.PointCloud` or :class:`~klampt.GeometricPrimitive` or :obj:`ConvexHull` or :class:`~klampt.Geometry3D`, optional): 
         """
         this = _robotsim.new_Geometry3D(*args)
         try:
@@ -6171,7 +6171,7 @@ class WorldModel(_object):
 
 
         Args:
-            robot (str or int): 
+            robot (int or str): 
             index (int, optional): 
             name (str, optional): 
 
@@ -7180,7 +7180,7 @@ class GeneralizedIKObjective(_object):
 
 
         Args:
-            obj (:obj:`GeneralizedIKObjective` or :class:`~klampt.RigidObjectModel`, optional): 
+            obj (:class:`~klampt.RigidObjectModel` or :obj:`GeneralizedIKObjective`, optional): 
             link (:class:`~klampt.RobotModelLink`, optional): 
             link2 (:class:`~klampt.RobotModelLink`, optional): 
             obj2 (:class:`~klampt.RigidObjectModel`, optional): 
@@ -7380,7 +7380,7 @@ def SampleTransform(*args):
 
 
     Args:
-        obj (:obj:`GeneralizedIKObjective` or :obj:`IKObjective`): 
+        obj (:obj:`IKObjective` or :obj:`GeneralizedIKObjective`): 
     """
     return _robotsim.SampleTransform(*args)
 class SimRobotSensor(_object):
