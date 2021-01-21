@@ -630,7 +630,6 @@ def init(backends=None):
                 backends = ['IPython']
         else:
             backends = ['PyQt','GLUT','HTML']
-        print("vis.init(): Auto-detected backends",backends)
     if isinstance(backends,str):
         backends = [backends]
     if _backend is not None:
@@ -663,6 +662,7 @@ def init(backends=None):
             _backend = 'HTML'
             from .backends import vis_html
             _window_manager = vis_html.HTMLWindowManager()
+            return _backend
         elif len(trials)>0:
             res = glinit.init(trials)
             if res is not None:
