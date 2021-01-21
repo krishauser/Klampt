@@ -599,6 +599,10 @@ def _isnotebook():
             return True   # Jupyter notebook or qtconsole
         elif shell == 'TerminalInteractiveShell':
             return False  # Terminal running IPython
+        elif shell == 'Shell':
+            if 'google.colab' in sys.modules:
+                return True
+            return False  # Other type (?)
         else:
             return False  # Other type (?)
     except NameError:
