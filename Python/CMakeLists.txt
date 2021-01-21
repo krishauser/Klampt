@@ -19,9 +19,9 @@ IF(PYTHON OR PYTHON3 OR PYTHON2)
 
   MESSAGE(STATUS "Configuring Python/setup.py from Python/setup.py.in")
   configure_file(setup.py.in setup.py)
-  MESSAGE(STATUS "Configuring Python/docs/source/conf.py from Python/docs/source/conf.py.in")
-  configure_file(docs/source/conf.py.in docs/source/conf.py.in @ONLY)
   SET(OUTPUT CMakeFiles)
+  MESSAGE(STATUS "Setting up Python/klampt/version.py to ${KLAMPT_VERSION}")
+  FILE(WRITE klampt/version.py "__version__ = '${KLAMPT_VERSION}'")
 
   add_custom_command(
     OUTPUT ${OUTPUT}/python_timestamp
