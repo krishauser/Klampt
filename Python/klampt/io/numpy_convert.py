@@ -167,10 +167,11 @@ def from_numpy(obj,type='auto',template=None):
         vflat = obj[0].flatten()
         res.vertices.resize(len(vflat))
         for i,v in enumerate(vflat):
-            res.vertices[i] = v
+            res.vertices[i] = float(v)
         iflat = obj[1].flatten()
+        res.indices.resize(len(iflat))
         for i,v in enumerate(iflat):
-            res.indices[i] = v
+            res.indices[i] = int(v)
         return res
     elif type == 'PointCloud':
         from klampt import PointCloud
