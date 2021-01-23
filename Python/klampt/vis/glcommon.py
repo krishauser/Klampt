@@ -8,6 +8,7 @@ from .glprogram import GLProgram,GLPluginProgram
 import math
 from OpenGL.GL import *
 import weakref
+import warnings
 
 class GLWidgetPlugin(GLPluginInterface):
     """A GL plugin that sends user events to one or more Klamp't widgets.
@@ -198,7 +199,7 @@ class GLMultiViewportProgram(GLProgram):
                 if p.displayfunc():
                     anyTrue = True
             except Exception:
-                print("Error running displayfunc() for plugin",p.__class__.__name__)
+                warnings.warn("Error running displayfunc() for plugin {}".format(p.__class__.__name__))
                 raise
         return anyTrue
     def display(self):
@@ -208,7 +209,7 @@ class GLMultiViewportProgram(GLProgram):
                 if p.display():
                     anyTrue = True
             except Exception:
-                print("Error running display() for plugin",p.__class__.__name__)
+                warnings.warn("Error running display() for plugin {}".format(p.__class__.__name__))
                 raise
         return anyTrue
     def display_screen(self):

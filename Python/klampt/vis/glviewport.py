@@ -8,6 +8,7 @@ from . import camera
 from ..math import so3,se3,vectorops
 from ..robotsim import Viewport
 import math
+import warnings
 
 class GLViewport:
     """
@@ -223,13 +224,13 @@ class GLViewport:
                 continue
             else:
                 if not read_viewport:
-                    print("File does not appear to be a valid viewport file, must start with VIEWPORT")
+                    warnings.warn("File does not appear to be a valid viewport file, must start with VIEWPORT")
                     break
             if kw == 'FRAME':
                 self.x,self.y,self.w,self.h = [int(x) for x in args]
             elif kw == 'PERSPECTIVE':
                 if args[0] != '1':
-                    print("WARNING: CANNOT CHANGE TO ORTHO MODE IN PYTHON VISUALIZATION")
+                    warnings.warn("CANNOT CHANGE TO ORTHO MODE IN PYTHON VISUALIZATION")
             elif kw == 'SCALE':
                 scale = float(args[0])
                 aspect = float(self.w)/float(self.h)

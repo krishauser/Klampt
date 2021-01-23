@@ -1551,7 +1551,7 @@ class Context:
                 vnames = set(v.name for v in varorder)
                 for v in rvars:
                     if v.name not in vnames:
-                        print("Error while creating Python function corresponding to",res)
+                        warnings.warn("Error while creating Python function corresponding to",res)
                         raise ValueError("Unbound variable "+v.name+" not in given variable order "+",".join([var.name for var in varorder]))
             def f(*args):
                 #print("Evaluating with order",[str(v) for v in varorder],args)
@@ -1614,7 +1614,7 @@ class Context:
         for v in varorder:
             dv = expr.deriv(v)
             if dv is None:
-                print("makeFlatFunctionDeriv: Derivative with respect to",v.name,"is undefined, returning None")
+                warnings.warn("makeFlatFunctionDeriv: Derivative with respect to {} is undefined, returning None".format(v.name))
                 return None,varorder
             if not isinstance(dv,Expression):
                 if _is_exactly(dv,0) and not v.type.is_scalar():
@@ -1627,7 +1627,7 @@ class Context:
         if len(dvs) > 1:
             rt = expr.returnType()
             if rt is None or rt.char is None:
-                print("makeFlatFunctionDeriv: no return type inferred, assuming vector")
+                warnings.warn("makeFlatFunctionDeriv: no return type inferred, assuming vector")
                 rt = Type('V')
             if rt.is_scalar():
                 dflist,varorder = self.makePyFunction(flatten(*dvs),varorder)
@@ -1635,7 +1635,7 @@ class Context:
             elif rt.char == 'V':
                 df,varorder = self.makePyFunction(column_stack(*dvs),varorder)
             else:
-                print("Expression",expr,"has return type",rt)
+                warnings.warn("Expression {} has return type {}".format(expr,rt))
                 raise NotImplementedError("Can't make flat function of non-numeric or non-vector types: "+str(rt))
         else:
             df,varorder = self.makePyFunction(dvs[0],varorder)
@@ -5979,14 +5979,14 @@ def _mul_deriv(args,dargs):
 def _mul_presimplifier(*args):
     if any(is_op(x,'basis') for x in args):
         #pull out the basis term
-        print("TRYING TO PULL OUT MUL BASIS TERM")
+        #print("TRYING TO PULL OUT MUL BASIS TERM")
         entry = None
         basisTerm = None
         for x in args:
             if is_op(x,'basis'):
                 if entry is not None:
                     if not entry.matches(x.args[0]):
-                        print("mul(basis(%s),basis(%s)) simplifies to zero?"%(entry,x.args[0]))
+                        #print("mul(basis(%s),basis(%s)) simplifies to zero?"%(entry,x.args[0]))
                         return zero(x.args[1])
                 entry = x.args[0]
                 basisTerm = x
@@ -6685,7 +6685,7 @@ def _getitem_deriv(context,v,index,dvars,rows):
                 return array(*[getitem.optimized(res,i)[eindex] for i in range(int(crows))])
             else:   
                 #this returns a list...
-                print("Mapping derivative with",rows,"rows and indexed columns",eindex)
+                #print("Mapping derivative with",rows,"rows and indexed columns",eindex)
                 return getitem(array.optimized(map_(getitem.optimized(res,"i")[eindex],"i",range_(rows))),0)
         else:
             return res[eindex]
@@ -7233,9 +7233,9 @@ def _dot_const_simplify(x,y):
     try:
         iszero = np.all(x==0)
     except Exception:
-        print("dot(constant,y): Weird case, x can't be tested for equality to 0?")
-        print(x.__class__.__name__)
-        print(x)
+        warnings.warn("dot(constant,y): Weird case, x can't be tested for equality to 0?")
+        warnings.warn(x.__class__.__name__)
+        warnings.warn(str(x))
         raise
     if iszero:
         return zero(dotshape(x,y))
