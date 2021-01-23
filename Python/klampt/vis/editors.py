@@ -184,7 +184,7 @@ class ConfigsEditor(VisualEditorBase):
                     self.robotposer.set(self.robot._robot.getConfig())
                 else:
                     self.robotposer.set(self.value[self.editingIndex])
-            print("Now has",len(self.value),"configs, editing index",self.editingIndex)
+            #print("Now has",len(self.value),"configs, editing index",self.editingIndex)
         if hasattr(self,'indexSpinBox'):
             self.indexSpinBox.setRange(0,len(self.value)-1)
             self.indexSpinBox.setValue(self.editingIndex)
@@ -486,7 +486,7 @@ class TrajectoryEditor(VisualEditorBase):
             if self.editingIndex >= 0:
                 self.milestone_to_poser(self.value.milestones[self.editingIndex])
             self.onDurationsChanged()
-            print("Now has",len(self.durations),"configs, editing index",self.editingIndex)
+            #print("Now has",len(self.durations),"configs, editing index",self.editingIndex)
         if hasattr(self,'indexSpinBox'):
             self.indexSpinBox.setRange(0,len(self.durations)-1)
             self.indexSpinBox.setValue(self.editingIndex)
