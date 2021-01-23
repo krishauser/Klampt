@@ -189,6 +189,8 @@ def from_numpy(obj,type='auto',template=None):
         else:
             for i in range(properties.shape[1]):
                 res.propertyNames.append('property %d'%(i+1))
+        if len(res.propertyNames) > 0:
+            res.properties.resize(len(res.propertyNames)*points.shape[0])
         if obj.shape[1] >= 3:
             res.setProperties(properties.flatten())
         return res
