@@ -10,6 +10,7 @@ import bisect
 from ..math import so3,se3,vectorops
 from ..math import spline
 from ..math.geodesic import *
+import warnings
 
 class Trajectory:
     """A basic piecewise-linear trajectory class, which can be overloaded
@@ -454,6 +455,57 @@ class Trajectory:
             assert newtimes[i] == res.times[idx]
         return (res,resindices)
 
+    def extractDofs(self,dofs):
+        """Returns a trajectory just over the given DOFs.
+
+        Args:
+            dofs (list of int): the indices to extract.
+
+        Returns:
+            Trajectory: a copy of this trajectory but only over the given DOFs.
+        """
+        if len(self.times)==0:
+            return self.constructor()
+        n = len(self.milestones[0])
+        for d in dofs:
+            if abs(d) >= n:
+                raise ValueError("Invalid dof")
+        return self.constructor([t for t in self.times],[[m[j] for j in dofs] for m in self.milestones])
+
+    def stackDofs(self,trajs,strict=True):
+        """Stacks the degrees of freedom of multiple trajectories together.
+        The result is contained in self.
+
+        All evaluations are assumed to take place with the 'halt' endBehavior.
+
+        Args:
+            trajs (list or tuple of Trajectory): the trajectories to stack
+            strict (bool, optional): if True, will warn if the classes of the
+                trajectories do not match self.
+
+        Returns:
+            None
+        """
+        if not isinstance(trajs,(list,tuple)):
+            raise ValueError("Trajectory.stackDofs takes in a list of trajectories as input")
+        warned = not strict
+        for traj in trajs:
+            if traj.__class__ != self.__class__:
+                if not warned:
+                    warnings.warn("Trajectory.stackDofs is merging trajectories of different classes?")
+                    warned = True
+        alltimes = set()
+        for traj in trajs:
+            for t in traj.times:
+                alltimes.add(t)
+        self.times = sorted(alltimes)
+        stacktrajs = [traj.remesh(self.times) for traj in trajs]
+        for traj in stacktrajs:
+            assert len(traj.milestones) == len(self.times)
+        self.milestones = []
+        for i,t in enumerate(self.times):
+            self.milestones.append(sum([list(traj.milestones[i]) for traj in stacktrajs],[]))
+
 
 class RobotTrajectory(Trajectory):
     """A trajectory that performs interpolation according to the robot's
@@ -502,6 +554,30 @@ class RobotTrajectory(Trajectory):
             return Trajectory.length(self,self.robot.distance)
         else:
             return Trajectory.length(self,metric)
+    def checkValid(self):
+        Trajectory.checkValid(self)
+        for m in self.milestones:
+            if len(m) != self.robot.numLinks():
+                raise ValueError("Invalid length of milestone: {} != {}".format(len(m),self.robot.numLinks()))
+    def extractDofs(self,dofs):
+        """Returns a RobotTrajectory just over the given DOFs.
+
+        Args:
+            dofs (list of int or str): the indices to extract
+
+        Returns:
+            RobotTrajectory: a copy of this trajectory but over a
+            SubRobotModel.
+        """
+        from .subrobot import SubRobotModel
+        subrob = SubRobotModel(self.robot,dofs)
+        if len(self.times)==0:
+            return RobotTrajectory(subrob)
+        return RobotTrajectory(subrob,[t for t in self.times],[[m[j] for j in subrob._links] for m in self.milestones])
+    def stackDofs(self,trajs):
+        Trajectory.stackDofs(self,trajs,strict=False)
+        if len(self.milestones) > 0 and len(self.milestones[0]) != self.robot.numDofs():
+            warnings.warn("RobotTrajectory.stackDofs: the result doesn't match the robot's #DOF")
 
 
 class GeodesicTrajectory(Trajectory):
@@ -522,6 +598,24 @@ class GeodesicTrajectory(Trajectory):
             return Trajectory.length(self,self.geodesic.distance)
         else:
             return Trajectory.length(self,metric)
+    def checkValid(self):
+        Trajectory.checkValid(self)
+        try:
+            d = self.geodesic.extrinsicDimension()
+            for m in self.milestones:
+                if len(m) != d:
+                    raise ValueError("Milestone length doesn't match geodesic space's dimension: {} != {}".format(len(m),d))
+        except NotImplementedError:
+            pass
+    def extractDofs(self,dofs):
+        """Invalid for GeodesicTrajectory."""
+        raise ValueError("Cannot extract DOFs from a GeodesicTrajectory")
+    def stackDofs(self,trajs):
+        Trajectory.stackDofs(self,trajs,strict=False)
+        try:
+            self.checkValid()
+        except ValueError:
+            warnings.warn("GeodesicTrajectory.stackDofs: the result doesn't match the geodesic's dimension")
 
 
 class SO3Trajectory(GeodesicTrajectory):
@@ -551,6 +645,11 @@ class SO3Trajectory(GeodesicTrajectory):
         """Returns a Trajectory describing the movement of the point localPt
         attached to this rotating frame. """
         return Trajectory(self.times,[so3.apply(m,localPt) for m in self.milestones])
+    def checkValid(self):
+        Trajectory.checkValid(self)
+        for m in self.milestones:
+            if len(m) != 9:
+                raise ValueError("Invalid length of milestone: {} != 9".format(len(m)))
     def constructor(self):
         return SO3Trajectory
 
@@ -615,6 +714,19 @@ class SE3Trajectory(GeodesicTrajectory):
             return Trajectory(self.times,[m[9:] for m in self.milestones])
         else:
             return Trajectory(self.times,[se3.apply(self.to_se3(m),localPt) for m in self.milestones])
+    def checkValid(self):
+        Trajectory.checkValid(self)
+        for m in self.milestones:
+            if len(m) != 9:
+                raise ValueError("Invalid length of milestone: {} != 12".format(len(m)))
+    def extractDofs(self,dofs):
+        if list(dofs) == list(range(9)):
+            traj = Trajectory.extractDofs(self,dofs)
+            return SO3Trajectory(traj.times.traj.milestones)
+        elif all(d >= 9 for d in dofs):
+            return Trajectory.extractDofs(self,dofs)
+        else:
+            raise ValueError("Cannot extract DOFs from a SE3Trajectory")
     def constructor(self):
         return SE3Trajectory
 
@@ -822,16 +934,6 @@ class HermiteTrajectory(Trajectory):
             self.__init__(newtimes,newmilestones,newvelocities)
 
     def waypoint(self,state):
-        """Returns a list of points (in the primary space) through which this
-        trajectory passes.
-
-        This is usually the same as ``self.milestones`` but for some
-        trajectories, specifically Hermite curves, these are not identically
-        the same.
-        """
-        return self.milestones
-
-    def waypoint(self,state):
         return state[:len(state)//2]
 
     def eval_state(self,t,endBehavior='halt'):
@@ -891,6 +993,69 @@ class HermiteTrajectory(Trajectory):
             cp2 = vectorops.madd(cp3,y[n:],-third)
             return third*vectorops.norm(x[n:]) + vectorops.distance(cp1,cp2) + third*vectorops.norm(y[n:])
         return Trajectory.length(self,distance)
+
+    def checkValid(self):
+        Trajectory.checkValid(self)
+        for m in self.milestones:
+            if len(m)%2 != 0:
+                raise ValueError("Milestone length isn't even?: {} != {}".format(len(m)))
+
+    def extractDofs(self,dofs):
+        """Returns a trajectory just over the given DOFs.
+
+        Args:
+            dofs (list of int): the (primary) indices to extract. Each entry
+            must be < len(milestones[0])/2.
+
+        Returns:
+            HermiteTrajectory: a copy of this trajectory but only over the
+            given DOFs.
+        """
+        if len(self.times)==0:
+            return self.constructor()
+        n = len(self.milestones[0])//2
+        for d in dofs:
+            if abs(d) >= n:
+                raise ValueError("Invalid dof")
+        return self.constructor([t for t in self.times],[[m[j] for j in dofs] + [m[n+j] for j in dofs] for m in self.milestones])
+
+    def stackDofs(self,trajs,strict=True):
+        """Stacks the degrees of freedom of multiple trajectories together.
+        The result is contained in self.
+
+        All evaluations are assumed to take place with the 'halt' endBehavior.
+
+        Args:
+            trajs (list or tuple of HermiteTrajectory): the trajectories to 
+                stack
+            strict (bool, optional): ignored. Will always warn for invalid
+                classes.
+
+        Returns:
+            None
+        """
+        if not isinstance(trajs,(list,tuple)):
+            raise ValueError("HermiteTrajectory.stackDofs takes in a list of trajectories as input")
+        for traj in trajs:
+            if not isinstance(traj,HermiteTrajectory):
+                raise ValueError("Can't stack non-HermiteTrajectory objects into a HermiteTrajectory")
+        alltimes = set()
+        for traj in trajs:
+            for t in traj.times:
+                alltimes.add(t)
+        self.times = sorted(alltimes)
+        stacktrajs = [traj.remesh(self.times) for traj in trajs]
+        for traj in stacktrajs:
+            assert len(traj.milestones) == len(self.times)
+        self.milestones = []
+        for i,t in enumerate(self.times):
+            q = []
+            v = []
+            for traj in stacktrajs:
+                n = len(traj.milestones[i])//2
+                q += list(traj.milestones[i][:n])
+                v += list(traj.milestones[i][n:])
+            self.milestones.append(q + v)
 
     def constructor(self):
         return HermiteTrajectory
@@ -1106,6 +1271,17 @@ class GeodesicHermiteTrajectory(Trajectory):
             cp2 = self.geodesic.integrate(cp3,vectorops.mul(y[n:],-third))
             return self.geodesic.distance(cp0,cp1) + self.geodesic.distance(cp1,cp2) + self.geodesic.distance(cp2,cp3)
         return Trajectory.length(self,distance)
+    def checkValid(self):
+        Trajectory.checkValid(self)
+        n = self.geodesic.extrinsicDimension()
+        for m in self.milestones:
+            if len(m) != n*2:
+                raise ValueError("Invalid length of milestone: {} != {}*2".format(len(m),n))
+    def extractDofs(self,dofs):
+        """Invalid for GeodesicHermiteTrajectory."""
+        raise ValueError("Cannot extract DOFs from a GeodesicHermiteTrajectory")
+    def stackDofs(self,trajs,strict=True):
+        raise ValueError("Cannot stack DOFs for a GeodesicHermiteTrajectory")
     def constructor(self):
         return lambda times,milestones:GeodesicHermiteTrajectory(self.geodesic,times,milestones)
     
