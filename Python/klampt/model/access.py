@@ -250,8 +250,8 @@ class map:
                         return (map(_SimRobot(self.obj,obj.obj.index)))
                     return (map(self.obj.body(obj.obj)))
                 except Exception as e:
-                    print("Exception raised on Simulator.",name,":",e)
-                    print("Simulator has no object",name)
+                    warnings.warn("Exception raised on Simulator.{}: {}".format(name,e))
+                    warnings.warn("Simulator has no object {}".format(name))
                     pass
         elif isinstance(self.obj,_SimRobot):
             if name=='links':
@@ -291,7 +291,7 @@ class map:
                     index += 1
                 return _index_name_map(sensors,[s.name() for s in sensors])
         elif isinstance(self.obj,(list,tuple,dict)):
-            print("Accessing",name,"from",self.obj)
+            #print("Accessing",name,"from",self.obj)
             return self.obj[name]
 
         #now do the default
