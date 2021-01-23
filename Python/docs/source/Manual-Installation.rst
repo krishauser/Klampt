@@ -71,7 +71,6 @@ Most of the examples in this manual require Klampt-examples to be downloaded to 
 Troubleshooting
 ---------------
 
-
 If you have multiple versions of Python installed on your machine,
 you will need to be aware of which version is currently referred to by `pip` and `python` commands.  You
 may need to use `python3`, `python2`, `pip3`, or `pip2` to get the right version.  You may consider using a
@@ -137,6 +136,25 @@ Klamp't works best when it is installed on your local machine, but it can also b
    :alt: Open in Binder
 
 Note that the UI functionality is drastically limited compared to a local installation.
+
+
+Grabbing the latest updates
+---------------------------
+
+To grab the latest Python API updates on top of a pip install without having to
+configure your environment to build from source, you can use the
+``patch_a_pip_install.py`` script as follows:
+
+.. code:: sh
+
+    pip install --upgrade klampt
+    git clone --depth 1 https://github.com/krishauser/Klampt
+    cd Klampt/Python
+    python patch_a_pip_install.py
+
+Note that this will not fix any bugs in the underlying C++ API.  Please see the
+`release notes <https://github.com/krishauser/Klampt#version-history>`__ to check
+which updates are available in the Python API only.  
 
 
 Should I build from source?
