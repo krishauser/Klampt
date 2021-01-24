@@ -15,8 +15,12 @@ import site
 import glob
 pip_klampt_version = '0.8.5'
 py_version = '%d.%d'%(sys.version_info[0],sys.version_info[1])
-klampt_path = os.path.join(site.getsitepackages()[0],'klampt')
-if not os.path.exists(klampt_path):
+klampt_path = None
+for path in site.getsitepackages():
+    if os.path.exists(os.path.join(path,'klampt')):
+        klampt_path = os.path.join(path,'klampt')
+        break
+if klampt_path is None:
     print("Klampt",pip_klampt_version,"wasn't installed by pip?")
     exit(1)
 import shutil
