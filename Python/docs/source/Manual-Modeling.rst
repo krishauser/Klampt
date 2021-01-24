@@ -193,7 +193,7 @@ highlighted link is drawn with longer axes.
 API summary
 ~~~~~~~~~~~
 
-The link functionality is given in the :class:`RobotModelLink` class. Changing from
+The link functionality is given in the :class:`~klampt.RobotModelLink` class. Changing from
 revolute to prismatic types is not supported at the moment. 
 
 Configuration-independent functions that define the kinematic structure
@@ -386,7 +386,7 @@ the dynamic parameters are set to default values (e.g., ``mass = 1``).
 API summary
 ~~~~~~~~~~~
 
-See the :class:`RigidObjectModel` class.
+See the :class:`~klampt.RigidObjectModel` class.
 
 Terrain Models
 --------------
@@ -399,7 +399,7 @@ assigned (set to 0.5).
 API summary
 ~~~~~~~~~~~
 
-See the `TerrainModel <klampt.robotsim.html#klampt.TerrainModel>`_ class.
+See the :class:`~klampt.TerrainModel` class.
 
 
 World Creation Example
