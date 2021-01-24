@@ -3495,7 +3495,10 @@ class VisualizationScene:
         global _globalLock
         with _globalLock:
             item = self.getItem(name)
-            if isinstance(item.item,(list,tuple,str)):
+            if isinstance(item.item,(list,tuple)):
+                #TODO: broadcast value to the shape of item
+                item.item = value
+            elif isinstance(item.item,str):
                 item.item = value
             else:
                 config.setConfig(item.item,value)
