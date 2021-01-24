@@ -1,5 +1,6 @@
-from .. import ContactPoint,TerrainModel,RobotModel
+from .. import TerrainModel,RobotModel
 from ..model import contact,collide
+from ..model.contact import ContactPoint,Hold
 from ..math import vectorops
 from .cspaceutils import CompositeCSpace
 from .robotcspace import ClosedLoopRobotCSpace
