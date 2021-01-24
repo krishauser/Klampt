@@ -152,6 +152,13 @@ class KlamptWidgetAdaptor(KlamptWidget,VisualizationScene):
                 del self._editors[name]
         self.doRefresh = True
 
+    def setGhostConfig(self,q,name="ghost",robot=0):
+        """Needed for EditConfig to work on ghosts"""
+        KlamptWidget.setGhostConfig(self,q,name,robot)
+        obj = self.getItem(name)
+        if obj is not None:
+            obj.item = q
+
     def hide(self,name,hidden=True):
         VisualizationScene.hide(self,name,hidden)
         KlamptWidget.hide(self,name,hidden)
@@ -363,6 +370,9 @@ class IPythonWindowManager(_WindowManager):
             t += 0.04
         self.show(False)
     def show(self):
+        if self.displayed:
+            warnings.warn("vis_ipython: widgets can only be shown once")
+            return
         self.quit = False
         self.displayed = True
         display(self.frontend())

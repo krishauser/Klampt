@@ -742,6 +742,7 @@ def EditConfig(robot,klampt_widget=None,ghost=None,link_selector='slider',link_s
     if link_selector == 'slider':
         link_slider=widgets.IntSlider(description='Link',min=0,max=len(link_subset)-1,value=0)
         joint_slider=widgets.FloatSlider(description='Value',min=0,max=1,value=0.5,step=0.001)
+        _dochange_link(link_subset[0])
 
         @interact(index=link_slider)
         def change_link(index):
@@ -757,6 +758,7 @@ def EditConfig(robot,klampt_widget=None,ghost=None,link_selector='slider',link_s
     elif link_selector == 'dropdown':
         link_dropdown=widgets.Dropdown(description='Link',options=[robot.link(i).getName() for i in link_subset],value=robot.link(link_subset[0]).getName())
         joint_slider=widgets.FloatSlider(description='Value',min=0,max=1,value=0.5,step=0.001)
+        _dochange_link(link_subset[0])
 
         def change_link(name):
             link = robot.link(name).index
