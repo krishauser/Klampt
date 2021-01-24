@@ -47,6 +47,7 @@ from ipywidgets import interact, interactive, fixed, interact_manual
 from traitlets import Unicode, Dict, List, Int, validate, observe
 import traitlets
 import threading
+import warnings
 
 DEFAULT_POINT_RADIUS = 0.05
 DEFAULT_AXIS_LENGTH = 0.2
@@ -286,7 +287,7 @@ class KlamptWidget(widgets.DOMWidget):
             return [name]
         elif type == 'WorldModel':
             if name != 'world' or self.world is not None:
-                print("KlamptWidget.add: Warning, only one world is supported, and should be added as world")
+                warnings.warn("KlamptWidget.add: only one world is supported, and should be added as world")
             self.world = item
             s = ThreeJSGetScene(self.world)
             self.scene = json.loads(s)
