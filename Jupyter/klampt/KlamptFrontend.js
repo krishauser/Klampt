@@ -718,6 +718,9 @@ function KlamptFrontend(dom_sceneArea) {
             child.geometry.computeFaceNormals();
             console.log("Geometry: normals of "+child.name+" calculated\n");
           }
+          else if(child instanceof THREE.Points) {
+            //no normals needed here
+          }
           else if(child.geometry instanceof THREE.BufferGeometry) {
             if(is_undefined_or_null(child.geometry.attributes.normal)) {  //need to compute normals
               console.log("BufferGeometry: Computing normals of "+child.name+" from triangles\n");
@@ -973,10 +976,10 @@ function KlamptFrontend(dom_sceneArea) {
                   obj.userData.customSharedMaterialSetup=true;
                 }
                 else if(shared)
-                 {
-                    obj.material = clone_material(obj.material);                  
-                    obj.userData.customSharedMaterialSetup=true;
-                 }
+                {
+                  obj.material = clone_material(obj.material);                  
+                  obj.userData.customSharedMaterialSetup=true;
+                }
                 obj.traverse( function ( child ) { 
                   if (!is_undefined_or_null(child.material)) {
                     var cshared = (is_undefined_or_null(child.userData.customSharedMaterialSetup));
@@ -992,10 +995,10 @@ function KlamptFrontend(dom_sceneArea) {
                   obj.userData.customSingleMaterialSetup=true;
                 }
                 else if(shared)
-                 { 
-                    obj.material=clone_material(obj.material);
-                    obj.userData.customSingleMaterialSetup=true;
-                 }
+                { 
+                  obj.material=clone_material(obj.material);
+                  obj.userData.customSingleMaterialSetup=true;
+                }
               }
               
 

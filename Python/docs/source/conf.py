@@ -14,20 +14,20 @@
 #
 # import os
 # import sys
-import klampt
 # sys.path.insert(0, os.path.abspath('.'))
 
 
 # -- Project information -----------------------------------------------------
 
 project = 'Klampt Python API'
-copyright = '2020, Intelligent Motion Lab'
+copyright = '2021, Intelligent Motion Lab'
 author = 'Kris Hauser'
 
+from klampt import __version__
 # The short X.Y version
-version = '.'.join(klampt.__version__.split('.')[:2])
+version = '.'.join(__version__.split('.')[:2])
 # The full version, including alpha/beta/rc tags
-release = klampt.__version__
+release = __version__
 
 
 # -- General configuration ---------------------------------------------------
@@ -39,7 +39,7 @@ release = klampt.__version__
 nitpicky = False
 ignore_missing_types = ['bool','int','float','str','list','dict','tuple','function','None'
     'list of ints','list of strs','list of floats','list of 3 floats','list of 4 floats','list of 9 floats',
-    'optional',
+    'optional','object',
     'pair','pair of floats']
 nitpick_ignore = [('py:class',t) for t in ignore_missing_types]
 
@@ -51,7 +51,8 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.mathjax',
     'sphinx_automodapi.automodapi',
-    'sphinxcontrib.napoleon'
+    'sphinxcontrib.napoleon',
+    'autodocsumm'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -202,3 +203,4 @@ epub_exclude_files = ['search.html']
 # -- Extension configuration -------------------------------------------------
 
 autoclass_content = 'both'
+

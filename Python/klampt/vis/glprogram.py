@@ -251,7 +251,7 @@ class GLProgram:
             try:
                 import Image
             except ImportError:
-                print("Cannot save screens to disk, the Python Imaging Library is not installed")
+                warnings.warn("Cannot save screens to disk, the Python Imaging Library is not installed")
                 return
         im = self.get_screen('Image')
         print("Saving screen to",fn)
@@ -429,7 +429,7 @@ class GLPluginProgram(GLRealtimeProgram):
         for plugin in self.plugins:
             plugin.window = self.window
             if not plugin.initialize():
-                print("GLPluginProgram.initialize(): Plugin of type",plugin.__class__.__name__,"Did not initialize")
+                warnings.warn("GLPluginProgram.initialize(): Plugin of type",plugin.__class__.__name__,"Did not initialize")
                 return False
             if hasattr(plugin,'actions'):
                 #print "Adding",len(plugin.actions),"actions for plugin",plugin.__class__.__name__

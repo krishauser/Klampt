@@ -244,8 +244,8 @@ def point_cloud_normals(pc,estimation_radius=None,estimation_knn=None,estimation
         estimation_radius = 3*R/math.sqrt(N)
     if estimation_knn is None or estimation_knn < 4:
         estimation_knn = 4
+    normals = []
     if _has_scipy:
-        normals = []
         import scipy.spatial
         tree = scipy.spatial.cKDTree(positions)
         if estimation_radius is not None:
@@ -289,9 +289,10 @@ def point_cloud_normals(pc,estimation_radius=None,estimation_knn=None,estimation
             if np.dot(n,d) < 0:
                 normals[i,:] = -n
     else:
-        #flip back-facing normals
+        #flip back-facing normals assuming centroid is interior
+        centroid = np.average(positions,axis=0)
         for i,(n,p) in enumerate(zip(normals,positions)):
-            if np.dot(n,p) < 0:
+            if np.dot(n,p-centroid) < 0:
                 normals[i,:] = -n
 
     if add:
@@ -325,7 +326,7 @@ def fit_plane3(point1,point2,point3):
 def fit_plane(points):
     """Returns a 3D plane equation that is a least squares fit
     through the points (len(points) >= 3)."""
-    normal,centroid = fit_plane_centroid(points)
+    centroid,normal = fit_plane_centroid(points)
     return normal[0],normal[1],normal[2],-vectorops.dot(centroid,normal)
 
 

@@ -105,7 +105,7 @@ Imported into the ``klampt.io`` package
 Visualization
 --------------
 
-For use in :class:`~klampt.vis.glcommon.GLWidgetProgram`.
+For use in :class:`~klampt.vis.glcommon.GLWidgetPlugin`.
 
 .. autosummary::
     ~klampt.robotsim.Widget

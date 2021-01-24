@@ -5,6 +5,7 @@ classes.
 
 from . import motionplanning
 import random
+import warnings
 
 class CSpace:
     """Used alongside :class:`MotionPlan` to define a configuration space for
@@ -106,7 +107,7 @@ class CSpace:
         a warning message will be printed.  Set it to True to suppress this message."""
         if self.cspace is not None:
             if not reinit:
-                print("CSpace.setup(): Performance warning, called twice, destroying previous CSpaceInterface object")
+                warnings.warn("CSpace.setup(): Performance warning, called twice, destroying previous CSpaceInterface object")
             self.cspace.destroy()
         self.cspace = motionplanning.CSpaceInterface()
         if self.feasibilityTests is not None:
@@ -511,13 +512,13 @@ def configurePlanner(space,start,goal,edgeCost=None,terminalCost=None,optimizing
     isgoalset = callable(goal) or callable(goal[0])
     optimizingPlanner = (type in optimizingPlanners) or shortcut or restart or isgoalset
     if optimizingPlanner != optimizing:
-        print("WARNING: returned planner is %soptimizing but requested a %soptimizing planner"%(('' if optimizingPlanner else 'not '),('' if optimizing else 'not ')))
+        warnings.warn("Returned planner is %soptimizing but requested a %soptimizing planner"%(('' if optimizingPlanner else 'not '),('' if optimizing else 'not ')))
     if edgeCost is not None or terminalCost is not None:
         if not shortcut and not restart and type not in costAcceptingPlanners:
-            print("WARNING: planner",type,"does not accept cost functions")
+            warnings.warn("Planner %s does not accept cost functions"%(type,))
     if isgoalset:
         if type in ['prm*','rrt*','lazyprm*','lazyrrg*']:
-            print("WARNING: planner",type,"is fairly inefficient when the goal is a set... have not implemented multi-goal versions")
+            warnings.warn("Planner {} is fairly inefficient when the goal is a set... have not implemented multi-goal versions".format(type))
 
     args = { 'type':type }
     #PRM planner
@@ -532,14 +533,14 @@ def configurePlanner(space,start,goal,edgeCost=None,terminalCost=None,optimizing
         #FMM* planner
         args['gridResolution']=stepsize
         if not cartesian:
-            print("WARNING: planner",type,"does not support the topology of non-Cartesian spaces")
+            warnings.warn("Planner {} does not support the topology of non-Cartesian spaces".format(type))
         if infinite:
             raise ValueError("Cannot use planner "+type+" with infinite spaces")
     elif type == 'fmm':
         #FMM planner
         args['gridResolution']=stepsize
         if not cartesian:
-            print("WARNING: planner",type,"does not support the topology of non-Cartesian spaces")
+            warnings.warn("Planner {} does not support the topology of non-Cartesian spaces".format(type))
         if infinite:
             raise ValueError("Cannot use planner "+type+" with infinite spaces")
     elif type == 'rrt':
@@ -580,37 +581,36 @@ def configurePlanner(space,start,goal,edgeCost=None,terminalCost=None,optimizing
     #do some checking of the terminal conditions
     if not space.isFeasible(start):
         sfailures = space.cspace.feasibilityFailures(start)
-        print("WARNING: Start configuration fails constraints",sfailures)
+        warnings.warn("Start configuration fails constraints {}".format(sfailures))
 
     if hasattr(goal,'__iter__'):
         if not callable(goal[0]):
             if not space.isFeasible(goal):
                 gfailures = space.cspace.feasibilityFailures(goal)
-                print("WARNING: Goaconfiguration fails constraints",gfailures)
+                warnings.warn("Goal configuration fails constraints {}".format(gfailures))
         else:
             if not callable(goal[1]):
                 raise TypeError("goal sampler is not callable")
             try:
                 goal[0](start)
             except Exception:
-                print("WARNING: goal test doesn't seem to work properly")
+                warnings.warn("Goal test doesn't seem to work properly")
             try:
                 qg = goal[1]()
                 if len(qg) != len(start):
-                    print("WARNING: goal sampler doesn't seem to produce a properly-sized object")
+                    warnings.warn("Goal sampler doesn't seem to produce a properly-sized object")
             except Exception:
-                print("WARNING: goal sampler doesn't seem to work properly")
+                warnings.warn("Goal sampler doesn't seem to work properly")
     else:
         if not callable(goal):
             raise TypeError("goal is not a configuration or callable")
         try:
             goal(start)
         except Exception:
-            print("WARNING: goal test doesn't seem to work properly")
+            warnings.warn("Goal test doesn't seem to work properly")
         
     planner.setEndpoints(start,goal)
     if edgeCost or terminalCost:
-        #print("SETTING COST FUNCTION FROM PYTHON")
         planner.setCostFunction(edgeCost,terminalCost)
     return planner,args
 

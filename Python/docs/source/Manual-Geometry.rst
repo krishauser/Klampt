@@ -167,6 +167,8 @@ The :class:`~klampt.Geometry3D` methods may be used for performing collision det
 -  ``geom.distance_point(pt)``: returns the distance / signed distance between the
    object and a point.
 -  ``geom.rayCast(source,direction)``: casts a ray with a given source and direction.
+-  ``geom.rayCast_ext(source,direction)``: same as rayCast, but returns the index of the
+   first intersected element.
 
 For more control over distance queries, you may use the following functions, which
 have the suffix ``_ext`` and accept a :class:`~klampt.DistanceQuerySettings` object: 

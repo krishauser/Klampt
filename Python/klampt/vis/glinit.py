@@ -18,7 +18,7 @@ def init(backends=['PyQt','GLUT']):
     global _BackendStatus,_BackendString,_GLBackend
     if _GLBackend is not None:
         return _GLBackend
-    print("glinit TRYING BACKENDS",backends)
+    #print("glinit TRYING BACKENDS",backends)
     for backend in backends:
         if tried(backend): continue
         if backend == 'PyQt':

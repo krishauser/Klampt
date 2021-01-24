@@ -808,7 +808,7 @@ def debug(*args,**kwargs):
                 autoFitViewport(vp,[scene().getItem(centerCamera)],rotate=False)
                 setViewport(vp)
             except Exception:
-                print("vis.debug(): Centering camera failed")
+                warnings.warn("vis.debug(): Centering camera failed")
                 import traceback
                 traceback.print_exc()
     if followCameraItem is not None:
@@ -1456,12 +1456,9 @@ def autoFitViewport(viewport,objects,zoom=True,rotate=True):
             try:
                 centroid,normal = fit_plane_centroid(pts)
             except Exception as e:
-                print("Exception occurred during fitting to points")
-                print(e)
+                warnings.warn("Exception occurred during fitting to points")
                 import traceback
                 traceback.print_exc()
-                #print(ofs)
-                #print(pts)
                 raise
                 return
         if normal[2] > 0:
@@ -1470,20 +1467,16 @@ def autoFitViewport(viewport,objects,zoom=True,rotate=True):
         roll = 0
         yaw = math.atan2(normal[0],normal[1])
         pitch = math.atan2(-normal[2],vectorops.norm(normal[0:2]))
-        #print("Roll pitch and yaw",roll,pitch,yaw)
-        #print("Distance",viewport.camera.dist)
         viewport.camera.rot = [roll,pitch,yaw]
     else:
         x = [1,0,0]
         y = [0,0,1]
         z = [0,1,0]
-    #print(z,x,y)
     if zoom:
         radius = max([abs(vectorops.dot(x,vectorops.sub(center,pt))) for pt in pts] + [abs(vectorops.dot(y,vectorops.sub(center,pt)))*viewport.w/viewport.h for pt in pts])
         radius = max(radius,0.25)
         zmin = min([vectorops.dot(z,vectorops.sub(center,pt)) for pt in pts])
         zmax = max([vectorops.dot(z,vectorops.sub(center,pt)) for pt in pts])
-        #print("Viewing direction",normal,"at point",center,"with scene size",radius)
         #orient camera to point along normal direction
         viewport.camera.tgt = center
         viewport.camera.dist = 1.2*radius / math.tan(math.radians(viewport.fov*0.5))
@@ -2261,8 +2254,8 @@ def _default_attributes(item,type=None):
                 itypes = objectToVisType(item,None)
                 res["type"]=itypes
             except Exception as e:
-                print(e)
-                print("visualization.py: Unsupported object type",item,"of type:",item.__class__.__name__)
+                warnings.warn(str(e))
+                warnings.warn("Unsupported object type {} of type {}".format(item,item.__class__.__name__))
                 return
         if itypes is None:
             warnings.warn("Unable to convert item {} to drawable".format(str(item)))
@@ -2954,8 +2947,7 @@ class VisAppearance:
                 except Exception as e:
                     import traceback
                     traceback.print_exc()
-                    print(e)
-                    print("visualization.py: Unsupported object type",item,"of type:",item.__class__.__name__)
+                    warnings.warn("Unsupported object type {} of type {}".format(item,item.__class__.__name__))
                     return
             if itypes is None:
                 warnings.warn("Unable to convert item {} to drawable".format(str(item)))
@@ -3672,10 +3664,9 @@ class VisualizationScene:
             vp.camera.dist /= scale
             self.setViewport(vp)
         except Exception as e:
-            print("Unable to auto-fit camera")
+            warnings.warn("Unable to auto-fit camera")
             import traceback
             traceback.print_exc()
-            #print(e)
 
     def followCamera(self,target,translate,rotate,center):
         if target is None:
