@@ -509,7 +509,7 @@ this is to just perform random restarts on the start configuration:
 
             numRestarts = 100
             solved = False
-            for i in xrange(numRestarts):
+            for i in range(numRestarts):
                     s.sampleInitial()
                     s.setMaxIters(100)
                     s.setTolerance(1e-3)

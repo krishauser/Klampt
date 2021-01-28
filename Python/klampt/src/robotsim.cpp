@@ -2804,6 +2804,8 @@ void WorldModel::remove(const RobotModel& obj)
   if(obj.world != index) 
     throw PyException("Robot does not belong to this world");
   RobotWorld& world = *worlds[index]->world;
+  if(obj.index < 0 || obj.index >= (int)world.robots.size())
+    throw PyException("Invalid robot index");
   world.robots.erase(world.robots.begin()+obj.index);
 }
 
@@ -2812,14 +2814,18 @@ void WorldModel::remove(const RigidObjectModel& obj)
   if(obj.world != index) 
     throw PyException("Rigid object does not belong to this world");
   RobotWorld& world = *worlds[index]->world;
+  if(obj.index < 0 || obj.index >= (int)world.rigidObjects.size())
+    throw PyException("Invalid rigid object index");
   world.rigidObjects.erase(world.rigidObjects.begin()+obj.index);
 }
 
 void WorldModel::remove(const TerrainModel& obj)
 {
   if(obj.world != index) 
-    throw PyException("Rigid object does not belong to this world");
+    throw PyException("Terrain does not belong to this world");
   RobotWorld& world = *worlds[index]->world;
+  if(obj.index < 0 || obj.index >= (int)world.terrains.size())
+    throw PyException("Invalid terrain index");
   world.terrains.erase(world.terrains.begin()+obj.index);
 }
 
@@ -4701,6 +4707,7 @@ std::vector<std::string> Simulator::settings()
   res.push_back("instabilityLinearEnergyThreshold");
   res.push_back("instabilityMaxEnergyThreshold");
   res.push_back("instabilityPostCorrectionEnergy");
+  return res;
 }
 
 std::string Simulator::getSetting(const std::string& name)
@@ -4769,7 +4776,7 @@ SimRobotController Simulator::controller(int robot)
 
 SimRobotController Simulator::controller(const RobotModel& robot)
 {
-  if(robot.index < 0 || robot.index > sim->controlSimulators.size())
+  if(robot.index < 0 || robot.index >= (int)sim->controlSimulators.size())
     throw PyException("Invalid robot index");
   SimRobotController c;
   c.sim = this;

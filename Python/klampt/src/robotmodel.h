@@ -732,6 +732,7 @@ class TerrainModel
  * environment geometry.
  *
  * .. note:
+ * 
  *     Although a WorldModel instance is typically called a "world" it is
  *     just a model and does not have to reflect the state of a physical world.
  *     The state of robots and objects in the world can be changed at will --

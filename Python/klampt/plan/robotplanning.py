@@ -88,6 +88,57 @@ def makeSpace(world,robot,
     for c in extraConstraints:
         space.addConstraint(c)
 
+    #New in 0.8.6: configuration spaces with affine drivers
+    has_affine = False
+    for d in range(robot.numDrivers()):
+        dr = robot.driver(d)
+        if dr.type() == 'affine':
+            if subset is not None and len(subset) < robot.numLinks():
+                if any(l in subset for l in dr.affectedLinks()):
+                    has_affine = True
+                    break
+            else:
+                has_affine = True
+                break
+    if has_affine:
+        if not isinstance(space,robotcspace.RobotCSpace):
+            raise ValueError("Robot is affected by affine links, but closed-chain constraints are specified. Can't handle this combination of constraints yet")
+        affected_drivers = []
+        affected_links = set(list(range(robot.numLinks())) if subset is None else subset)
+        for d in range(robot.numDrivers()):
+            dr = robot.driver(d)
+            for l in dr.affectedLinks():
+                if l in affected_links:
+                    affected_drivers.append(d)
+                    break
+        embedded_space = cspaceutils.fromRobotDrivers(robot,space,affected_drivers)
+
+        #copy and paste from EmbeddedRobotCSpace
+        active = [False]*robot.numLinks()
+        for i in affected_links:
+            active[i] = True
+        for i in range(robot.numLinks()):
+            if active[robot.link(i).getParent()]:
+                active[i] = True
+        inactive = []
+        for i in range(robot.numLinks()):
+            if not active[i]:
+                inactive.append(i)
+        #disable self-collisions for inactive objects
+        for i in inactive:
+            rindices = collider.robots[robot.index]
+            rindex = rindices[i]
+            if rindex < 0:
+                continue
+            newmask = set()
+            for j in range(robot.numLinks()):
+                if rindices[j] in collider.mask[rindex] and active[j]:
+                    newmask.add(rindices[j])
+            collider.mask[rindex] = newmask
+
+        embedded_space.setup()
+        return embedded_space
+
     if subset is not None and len(subset) < robot.numLinks():
         #choose a subset
         sspace = robotcspace.EmbeddedRobotCSpace(space,subset,xinit=robot.getConfig())
