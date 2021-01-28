@@ -86,3 +86,6 @@ Cpp/Dependencies/KrisLibrary/
 Cpp/Dependencies/glui*
 Cpp/Dependencies/glew*
 Cpp/Dependencies/ode*
+
+#visual studio code
+.vscode
