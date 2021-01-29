@@ -4111,8 +4111,6 @@ class _ThreadedWindowManager(_WindowManager):
         try:
             if setup is not None:
                 setup()
-            else: #make sure that some window is shown
-                self.show()
             self.quit = False
             self.run_app_thread(callback)
             if cleanup is not None:
