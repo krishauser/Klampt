@@ -158,7 +158,8 @@ class QtWindowManager(_ThreadedWindowManager):
             self.windows.append(WindowInfo(self.window_title,self._frontend)) 
             self.current_window = 0
             self.windows[self.current_window].mode = 'shown'
-
+        else:
+            self.windows[self.current_window].mode = 'shown'
         glinit._GLBackend.initialize("Klamp't visualization")
         
         res = None

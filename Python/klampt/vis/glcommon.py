@@ -168,6 +168,7 @@ class GLMultiViewportProgram(GLProgram):
             for i,p in enumerate(self.views):
                 col = i % rowlen
                 row = int(i / rowlen)
+                p.view.screenDeviceScale = self.view.screenDeviceScale
                 p.view.x = float(self.view.w)*float(cumcolwidths[col])/float(cumcolwidths[-1])
                 p.view.y = float(self.view.h)*float(cumrowheights[row])/float(cumrowheights[-1])
                 p.view.w = float(self.view.w)*float(colwidths[col]) / float(cumcolwidths[-1])
@@ -191,7 +192,7 @@ class GLMultiViewportProgram(GLProgram):
     def displayfunc(self):
         anyTrue = False
         glClearColor(0,0,0,0)
-        glScissor(0,0,self.view.w,self.view.h)
+        glScissor(0,0,self.view.w*self.view.screenDeviceScale,self.view.h*self.view.screenDeviceScale)
         glEnable(GL_SCISSOR_TEST);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         for p in self.views:

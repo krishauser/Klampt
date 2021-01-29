@@ -4137,7 +4137,7 @@ class _ThreadedWindowManager(_WindowManager):
                 t1 = time.time()
                 if t1 - t0 >= duration:
                     self.hide()
-            self.loop(callback=timed_break,setup=lambda:self.show())
+            self.loop(callback=timed_break,setup=lambda:self.show(),cleanup=None)
         return
 
     def run(self):
