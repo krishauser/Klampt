@@ -40,7 +40,7 @@ class GLViewport:
         #x field of view in degrees
         self.fov = 30
         #near and far clipping planes
-        self.clippingplanes = (0.2,20)
+        self.clippingplanes = (0.2,100)
 
     def contains(self,x,y):
         return x >= self.x and y >= self.y and x < self.x + self.w and y < self.y + self.h

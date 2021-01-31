@@ -159,7 +159,8 @@ class QtWindowManager(_ThreadedWindowManager):
             self.current_window = 0
             self.windows[self.current_window].mode = 'shown'
         else:
-            self.windows[self.current_window].mode = 'shown'
+            if self.windows[self.current_window].mode == 'hidden':
+                self.windows[self.current_window].mode = 'shown'
         glinit._GLBackend.initialize("Klamp't visualization")
         
         res = None
@@ -339,9 +340,12 @@ class QtWindowManager(_ThreadedWindowManager):
 
             if not self.in_app_thread or threading.current_thread().__class__.__name__ == '_MainThread':
                 print("vis.dialog(): Waiting for dialog on window",self.current_window,"to complete....")
+                assert w.mode == 'dialog'
                 while w.mode == 'dialog':
                     time.sleep(0.1)
-                print("vis.dialog(): ... dialog done, status is now",w.mode)
+                if w.mode == 'shown':
+                    print("klampt.vis: warning, dialog changed from 'dialog' to 'shown' mode?")
+                print("vis.dialog(): ... dialog done")
             else:
                 #called from another dialog or window!
                 print("vis: Creating a dialog from within another dialog or window")
@@ -380,9 +384,12 @@ class QtWindowManager(_ThreadedWindowManager):
                 print("#########################################")
                 print("klampt.vis: Running multi-threaded dialog, waiting to complete...")
                 self._start_app_thread()
+                assert w.mode == 'dialog'
                 while w.mode == 'dialog':
                     time.sleep(0.1)
-                print("klampt.vis: ... dialog done.")
+                if w.mode == 'shown':
+                    print("klampt.vis: warning, dialog changed from 'dialog' to 'shown' mode?")
+                print("klampt.vis: ... dialog done")
                 print("#########################################")
                 return None
             else:

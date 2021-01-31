@@ -561,13 +561,11 @@ will follow the simulation time rather than wall clock time.
 """
 
 
-from OpenGL.GL import *
 import threading
 from ..robotsim import *
 from ..math import vectorops,so3,se3
 from . import gldraw
 from . import glinit
-from .glinit import _GLBackend
 from .glinterface import GLPluginInterface
 from .glprogram import GLPluginProgram
 from . import glcommon
@@ -591,6 +589,8 @@ _globalLock = threading.RLock()
 _backend = None
 #the _WindowManager instance
 _window_manager = None
+#the OpenGL module (will be taken from glinit.init())
+GL = None
 
 def _isnotebook():
     try:
@@ -621,7 +621,7 @@ def init(backends=None):
     - 'HTML': outputs an HTML / Javascript widget
 
     """
-    global _backend,_window_manager
+    global _backend,_window_manager,GL
     if backends is None:
         if _isnotebook():
             if 'google.colab' in sys.modules:
@@ -665,6 +665,7 @@ def init(backends=None):
             return _backend
         elif len(trials)>0:
             res = glinit.init(trials)
+            GL = glinit.GL()
             if res is not None:
                 _backend = glinit.active()
                 if glinit.active() == 'GLUT':
@@ -1871,6 +1872,7 @@ class VisPlot:
         return (float(vmin),float(vmax))
 
     def renderGL(self,window,x,y,w,h,duration,vmin=None,vmax=None):
+        if GL is None: raise RuntimeError("OpenGL wasn't initialized yet?")
         if vmin is None:
             vmin,vmax = self.autoRange()
         import random
@@ -1878,13 +1880,13 @@ class VisPlot:
             c = (random.uniform(0.01,1),random.uniform(0.01,1),random.uniform(0.01,1))
             c = vectorops.mul(c,1.0/max(c))
             self.colors.append(c)
-        glColor3f(0,0,0)
-        glBegin(GL_LINE_LOOP)
-        glVertex2f(x,y)
-        glVertex2f(x+w,y)
-        glVertex2f(x+w,y+h)
-        glVertex2f(x,y+h)
-        glEnd()
+        GL.glColor3f(0,0,0)
+        GL.glBegin(GL.GL_LINE_LOOP)
+        GL.glVertex2f(x,y)
+        GL.glVertex2f(x+w,y)
+        GL.glVertex2f(x+w,y+h)
+        GL.glVertex2f(x,y+h)
+        GL.glEnd()
         window.draw_text((x-18,y+4),'%.2f'%(vmax,),9)
         window.draw_text((x-18,y+h+4),'%.2f'%(vmin,),9)
         tmax = 0
@@ -1902,9 +1904,9 @@ class VisPlot:
                     label = str(item.name) + '.' + item.itemnames[j]
                 labelheight = (labelheight - vmin)/(vmax-vmin)
                 labelheight = y + h - h*labelheight
-                glColor3fv(vectorops.mul(self.colors[i],item.luminosity[j]))
+                GL.glColor3fv(vectorops.mul(self.colors[i],item.luminosity[j]))
                 window.draw_text((x+w+3,labelheight+4),label,9)
-                glBegin(GL_LINE_STRIP)
+                GL.glBegin(GL.GL_LINE_STRIP)
                 for k in range(len(trace)-1):
                     if trace[k+1][0] > tmax-duration:
                         u,v = trace[k]
@@ -1917,12 +1919,12 @@ class VisPlot:
                             u = (tmax-duration)
                         u = (u-(tmax-duration))/duration
                         v = (v-vmin)/(vmax-vmin)
-                        glVertex2f(x+w*u,y+(1-v)*h)
+                        GL.glVertex2f(x+w*u,y+(1-v)*h)
                 u,v = trace[-1]
                 u = (u-(tmax-duration))/duration
                 v = (v-vmin)/(vmax-vmin)
-                glVertex2f(x+w*u,y+(1-v)*h)
-                glEnd()
+                GL.glVertex2f(x+w*u,y+(1-v)*h)
+                GL.glEnd()
 
         if len(self.events) > 0:
             for e,times in self.events.items():
@@ -1931,22 +1933,22 @@ class VisPlot:
                     labelx = (t - (tmax-duration))/duration
                     labelx = x + w*labelx
                     c = self.eventColors[e]
-                    glColor4f(c[0]*0.5,c[1]*0.5,c[2]*0.5,c[3])
+                    GL.glColor4f(c[0]*0.5,c[1]*0.5,c[2]*0.5,c[3])
                     window.draw_text((labelx,y+h+12),e,9)
-            glEnable(GL_BLEND)
-            glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
-            glBegin(GL_LINES)
+            GL.glEnable(GL.GL_BLEND)
+            GL.glBlendFunc(GL.GL_SRC_ALPHA,GL.GL_ONE_MINUS_SRC_ALPHA)
+            GL.glBegin(GL.GL_LINES)
             for e,times in self.events.items():
                 for t in times:
                     if t < tmax-duration: continue
                     labelx = (t - (tmax-duration))/duration
                     labelx = x + w*labelx
                     c = self.eventColors[e]
-                    glColor4f(c[0],c[1],c[2],c[3]*0.5)
-                    glVertex2f(labelx,y)
-                    glVertex2f(labelx,y+h)
-            glEnd()
-            glDisable(GL_BLEND)
+                    GL.glColor4f(c[0],c[1],c[2],c[3]*0.5)
+                    GL.glVertex2f(labelx,y)
+                    GL.glVertex2f(labelx,y+h)
+            GL.glEnd()
+            GL.glDisable(GL.GL_BLEND)
 
     def beginSave(self,fn):
         import os
@@ -2042,33 +2044,34 @@ def drawTrajectory(traj,width,color,pointSize=None,pointColor=None):
     By default draws points along the trajectory.  To turn this off, set 
     pointSize = 0.
     """
+    if GL is None: raise RuntimeError("OpenGL not initialized?")
     if isinstance(traj,list):
         if pointSize is None:
             pointSize = width+2
         if pointColor is None:
             pointColor = (color[0]*0.75,color[1]*0.75,color[2]*0.75,color[3])
         #R3 trajectory
-        glDisable(GL_LIGHTING)
-        glColor4f(*color)
+        GL.glDisable(GL.GL_LIGHTING)
+        GL.glColor4f(*color)
         if len(traj) == 1:
-            glPointSize(max(width,pointSize))
-            glBegin(GL_POINTS)
-            glVertex3fv(traj[0])
-            glEnd()
+            GL.glPointSize(max(width,pointSize))
+            GL.glBegin(GL.GL_POINTS)
+            GL.glVertex3fv(traj[0])
+            GL.glEnd()
         if len(traj) >= 2 and width > 0:
-            glLineWidth(width)
-            glBegin(GL_LINE_STRIP)
+            GL.glLineWidth(width)
+            GL.glBegin(GL.GL_LINE_STRIP)
             for p in traj:
-                glVertex3fv(p)
-            glEnd()
-            glLineWidth(1.0)
+                GL.glVertex3fv(p)
+            GL.glEnd()
+            GL.glLineWidth(1.0)
         if len(traj) >= 2 and pointSize > 0:
-            glColor4f(*pointColor)
-            glPointSize(pointSize)
-            glBegin(GL_POINTS)
+            GL.glColor4f(*pointColor)
+            GL.glPointSize(pointSize)
+            GL.glBegin(GL.GL_POINTS)
             for p in traj:
-                glVertex3fv(p)
-            glEnd()
+                GL.glVertex3fv(p)
+            GL.glEnd()
     elif isinstance(traj,SE3Trajectory):
         pointTraj = []
         for m in traj.milestones:
@@ -2254,6 +2257,9 @@ def _default_attributes(item,type=None):
                 itypes = objectToVisType(item,None)
                 res["type"]=itypes
             except Exception as e:
+                if hasattr(item,'drawGL'):
+                    #assume it's a SimRobotSensor, Appearance, or SubRobotModel
+                    return
                 warnings.warn(str(e))
                 warnings.warn("Unsupported object type {} of type {}".format(item,item.__class__.__name__))
                 return
@@ -2643,31 +2649,31 @@ class VisAppearance:
                         self.drawText(name,centroid)
         elif isinstance(item,coordinates.Point):
             def drawRaw():
-                glDisable(GL_LIGHTING)
-                glEnable(GL_POINT_SMOOTH)
-                glPointSize(self.attributes["size"])
-                glColor4f(*self.attributes["color"])
-                glBegin(GL_POINTS)
-                glVertex3f(0,0,0)
-                glEnd()
+                GL.glDisable(GL.GL_LIGHTING)
+                GL.glEnable(GL.GL_POINT_SMOOTH)
+                GL.glPointSize(self.attributes["size"])
+                GL.glColor4f(*self.attributes["color"])
+                GL.glBegin(GL.GL_POINTS)
+                GL.glVertex3f(0,0,0)
+                GL.glEnd()
                 #write name
-            glDisable(GL_DEPTH_TEST)
+            GL.glDisable(GL.GL_DEPTH_TEST)
             self.displayCache[0].draw(drawRaw,[so3.identity(),item.worldCoordinates()])
-            glEnable(GL_DEPTH_TEST)
+            GL.glEnable(GL.GL_DEPTH_TEST)
             if name is not None:
                 self.drawText(name,item.worldCoordinates())
         elif isinstance(item,coordinates.Direction):
             def drawRaw():
-                glDisable(GL_LIGHTING)
-                glDisable(GL_DEPTH_TEST)
+                GL.glDisable(GL.GL_LIGHTING)
+                GL.glDisable(GL.GL_DEPTH_TEST)
                 L = self.attributes["length"]
                 source = [0,0,0]
-                glColor4f(*self.attributes["color"])
-                glBegin(GL_LINES)
-                glVertex3f(*source)
-                glVertex3f(*vectorops.mul(item.localCoordinates(),L))
-                glEnd()
-                glEnable(GL_DEPTH_TEST)
+                GL.glColor4f(*self.attributes["color"])
+                GL.glBegin(GL.GL_LINES)
+                GL.glVertex3f(*source)
+                GL.glVertex3f(*vectorops.mul(item.localCoordinates(),L))
+                GL.glEnd()
+                GL.glEnable(GL.GL_DEPTH_TEST)
                 #write name
             self.displayCache[0].draw(drawRaw,item.frame().worldCoordinates(),parameters = item.localCoordinates())
             if name is not None:
@@ -2680,32 +2686,32 @@ class VisAppearance:
                 tp = se3.identity()
             tlocal = item.relativeCoordinates()
             def drawRaw():
-                glDisable(GL_DEPTH_TEST)
-                glDisable(GL_LIGHTING)
-                glLineWidth(2.0)
+                GL.glDisable(GL.GL_DEPTH_TEST)
+                GL.glDisable(GL.GL_LIGHTING)
+                GL.glLineWidth(2.0)
                 gldraw.xform_widget(tlocal,self.attributes["length"],self.attributes["width"])
-                glLineWidth(1.0)
+                GL.glLineWidth(1.0)
                 #draw curve between frame and parent
                 if item.parent() is not None:
                     d = vectorops.norm(tlocal[1])
                     vlen = d*0.5
                     v1 = so3.apply(tlocal[0],[-vlen]*3)
                     v2 = [vlen]*3
-                    #glEnable(GL_BLEND)
-                    #glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
-                    #glColor4f(1,1,0,0.5)
-                    glColor3f(1,1,0)
+                    #GL.glEnable(GL.GL_BLEND)
+                    #GL.glBlendFunc(GL.GL_SRC_ALPHA,GL.GL_ONE_MINUS_SRC_ALPHA)
+                    #GL.glColor4f(1,1,0,0.5)
+                    GL.glColor3f(1,1,0)
                     gldraw.hermite_curve(tlocal[1],v1,[0,0,0],v2,0.03*max(0.1,vectorops.norm(tlocal[1])))
-                    #glDisable(GL_BLEND)
-                glEnable(GL_DEPTH_TEST)
+                    #GL.glDisable(GL.GL_BLEND)
+                GL.glEnable(GL.GL_DEPTH_TEST)
 
             #For some reason, cached drawing is causing OpenGL problems
             #when the frame is rapidly changing
             self.displayCache[0].draw(drawRaw,transform=tp, parameters = tlocal)
-            #glPushMatrix()
-            #glMultMatrixf(sum(zip(*se3.homogeneous(tp)),()))
+            #GL.glPushMatrix()
+            #GL.glMultMatrixf(sum(zip(*se3.homogeneous(tp)),()))
             #drawRaw()
-            #glPopMatrix()
+            #GL.glPopMatrix()
             #write name
             if name is not None:
                 self.drawText(name,t[1])
@@ -2721,11 +2727,11 @@ class VisAppearance:
             v1 = so3.apply(t1[0],[-vlen]*3)
             v2 = so3.apply(t2[0],[vlen]*3)
             def drawRaw():
-                glDisable(GL_DEPTH_TEST)
-                glDisable(GL_LIGHTING)
-                glColor3f(1,1,1)
+                GL.glDisable(GL.GL_DEPTH_TEST)
+                GL.glDisable(GL.GL_LIGHTING)
+                GL.glColor3f(1,1,1)
                 gldraw.hermite_curve(t1[1],v1,t2[1],v2,0.03)
-                glEnable(GL_DEPTH_TEST)
+                GL.glEnable(GL.GL_DEPTH_TEST)
                 #write name at curve
             self.displayCache[0].draw(drawRaw,transform=None,parameters = (t1,t2))
             if name is not None:
@@ -2734,18 +2740,18 @@ class VisAppearance:
             pass
         elif isinstance(item,ContactPoint):
             def drawRaw():
-                glDisable(GL_LIGHTING)
-                glEnable(GL_POINT_SMOOTH)
-                glPointSize(self.attributes["size"])
+                GL.glDisable(GL.GL_LIGHTING)
+                GL.glEnable(GL.GL_POINT_SMOOTH)
+                GL.glPointSize(self.attributes["size"])
                 l = self.attributes["length"]
-                glColor4f(*self.attributes["color"])
-                glBegin(GL_POINTS)
-                glVertex3f(0,0,0)
-                glEnd()
-                glBegin(GL_LINES)
-                glVertex3f(0,0,0)
-                glVertex3f(l,0,0)
-                glEnd()
+                GL.glColor4f(*self.attributes["color"])
+                GL.glBegin(GL.GL_POINTS)
+                GL.glVertex3f(0,0,0)
+                GL.glEnd()
+                GL.glBegin(GL.GL_LINES)
+                GL.glVertex3f(0,0,0)
+                GL.glVertex3f(l,0,0)
+                GL.glEnd()
             self.displayCache[0].draw(drawRaw,[so3.canonical(item.n),item.x])
         elif isinstance(item,Hold):
             pass
@@ -2792,13 +2798,13 @@ class VisAppearance:
                         v2 = so3.apply(t2[0],[vlen]*3)
                     elif item.numRotDims()==0: #point constraint
                         def drawRaw():
-                            glDisable(GL_LIGHTING)
-                            glEnable(GL_POINT_SMOOTH)
-                            glPointSize(self.attributes["size"])
-                            glColor4f(*self.attributes["color"])
-                            glBegin(GL_POINTS)
-                            glVertex3f(0,0,0)
-                            glEnd()
+                            GL.glDisable(GL.GL_LIGHTING)
+                            GL.glEnable(GL.GL_POINT_SMOOTH)
+                            GL.glPointSize(self.attributes["size"])
+                            GL.glColor4f(*self.attributes["color"])
+                            GL.glBegin(GL.GL_POINTS)
+                            GL.glVertex3f(0,0,0)
+                            GL.glEnd()
                         self.displayCache[0].draw(drawRaw,transform=(so3.identity(),p1))
                         self.displayCache[1].draw(drawRaw,transform=(so3.identity(),p2))
                         #set up the connecting curve
@@ -2811,20 +2817,20 @@ class VisAppearance:
                         p = [0,0,0]
                         d = [0,0,0]
                         def drawRawLine():
-                            glDisable(GL_LIGHTING)
-                            glEnable(GL_POINT_SMOOTH)
-                            glPointSize(self.attributes["size"])
-                            glColor4f(*self.attributes["color"])
-                            glBegin(GL_POINTS)
-                            glVertex3f(*p)
-                            glEnd()
-                            glColor4f(*self.attributes["color"])
-                            glLineWidth(self.attributes["width"])
-                            glBegin(GL_LINES)
-                            glVertex3f(*p)
-                            glVertex3f(*vectorops.madd(p,d,self.attributes["length"]))
-                            glEnd()
-                            glLineWidth(1.0)
+                            GL.glDisable(GL.GL_LIGHTING)
+                            GL.glEnable(GL.GL_POINT_SMOOTH)
+                            GL.glPointSize(self.attributes["size"])
+                            GL.glColor4f(*self.attributes["color"])
+                            GL.glBegin(GL.GL_POINTS)
+                            GL.glVertex3f(*p)
+                            GL.glEnd()
+                            GL.glColor4f(*self.attributes["color"])
+                            GL.glLineWidth(self.attributes["width"])
+                            GL.glBegin(GL.GL_LINES)
+                            GL.glVertex3f(*p)
+                            GL.glVertex3f(*vectorops.madd(p,d,self.attributes["length"]))
+                            GL.glEnd()
+                            GL.glLineWidth(1.0)
                         ld,wd = item.getRotationAxis()
                         p = lp
                         d = ld
@@ -2838,15 +2844,15 @@ class VisAppearance:
                         #curve in the destination
                         v2 = vectorops.cross((0,0,0.5),d)
                     def drawConnection():
-                        glDisable(GL_LIGHTING)
-                        glDisable(GL_DEPTH_TEST)
-                        glColor3f(1,0.5,0)
+                        GL.glDisable(GL.GL_LIGHTING)
+                        GL.glDisable(GL.GL_DEPTH_TEST)
+                        GL.glColor3f(1,0.5,0)
                         gldraw.hermite_curve(p1,v1,p2,v2,0.03*max(0.1,vectorops.distance(p1,p2)))
-                        #glBegin(GL_LINES)
-                        #glVertex3f(*p1)
-                        #glVertex3f(*p2)
-                        #glEnd()
-                        glEnable(GL_DEPTH_TEST)
+                        #GL.glBegin(GL.GL_LINES)
+                        #GL.glVertex3f(*p1)
+                        #GL.glVertex3f(*p2)
+                        #GL.glEnd()
+                        GL.glEnable(GL.GL_DEPTH_TEST)
                     #TEMP for some reason the cached version sometimes gives a GL error
                     self.displayCache[2].draw(drawConnection,transform=None,parameters = (p1,v1,p2,v2))
                     #drawConnection()
@@ -2864,14 +2870,14 @@ class VisAppearance:
                         #axis constraint
                         d = [0,0,0]
                         def drawRawLine():
-                            glDisable(GL_LIGHTING)
-                            glColor4f(*self.attributes["axis_color"])
-                            glLineWidth(self.attributes["axis_width"])
-                            glBegin(GL_LINES)
-                            glVertex3f(0,0,0)
-                            glVertex3f(*vectorops.mul(d,self.attributes["axis_length"]))
-                            glEnd()
-                            glLineWidth(1.0)
+                            GL.glDisable(GL.GL_LIGHTING)
+                            GL.glColor4f(*self.attributes["axis_color"])
+                            GL.glLineWidth(self.attributes["axis_width"])
+                            GL.glBegin(GL.GL_LINES)
+                            GL.glVertex3f(0,0,0)
+                            GL.glVertex3f(*vectorops.mul(d,self.attributes["axis_length"]))
+                            GL.glEnd()
+                            GL.glLineWidth(1.0)
                         ld,wd = item.getRotationAxis()
                         d = ld
                         self.displayCache[0].draw(drawRawLine,transform=link.getTransform(),parameters=d)
@@ -2904,7 +2910,7 @@ class VisAppearance:
                 if self.item.type in ['Point','Segment']:
                     lighting = False
                     if self.item.type == 'Segment':
-                        glLineWidth(self.attributes.get('width',3.0))
+                        GL.glLineWidth(self.attributes.get('width',3.0))
                         restoreLineWidth = True
             elif isinstance(self.item,PointCloud):
                 if not hasattr(self,'geometry'):
@@ -2922,18 +2928,18 @@ class VisAppearance:
                     if prim.type in ['Point','Segment']:
                         lighting = False
                         if prim.type == 'Segment':
-                            glLineWidth(self.attributes.get('width',3.0))
+                            GL.glLineWidth(self.attributes.get('width',3.0))
                             restoreLineWidth = True
                 elif self.item.type() == 'PointCloud':
                     lighting = False
                 geometry = self.item
             if lighting:
-                glEnable(GL_LIGHTING)
+                GL.glEnable(GL.GL_LIGHTING)
             else:
-                glDisable(GL_LIGHTING)
+                GL.glDisable(GL.GL_LIGHTING)
             self.appearance.drawWorldGL(geometry)
             if restoreLineWidth:
-                glLineWidth(1.0)
+                GL.glLineWidth(1.0)
             if name is not None:
                 bmin,bmax = geometry.getBB()
                 wp = vectorops.mul(vectorops.add(bmin,bmax),0.5)
@@ -3022,21 +3028,21 @@ class VisAppearance:
                     warnings.warn("Unable to draw Configs items without a world or robot")
             elif itypes == 'Vector3':
                 def drawRaw():
-                    glDisable(GL_LIGHTING)
-                    glEnable(GL_POINT_SMOOTH)
-                    glPointSize(self.attributes.get("size",5.0))
-                    glColor4f(*self.attributes.get("color",[0,0,0,1]))
-                    glBegin(GL_POINTS)
-                    glVertex3f(0,0,0)
-                    glEnd()
+                    GL.glDisable(GL.GL_LIGHTING)
+                    GL.glEnable(GL.GL_POINT_SMOOTH)
+                    GL.glPointSize(self.attributes.get("size",5.0))
+                    GL.glColor4f(*self.attributes.get("color",[0,0,0,1]))
+                    GL.glBegin(GL.GL_POINTS)
+                    GL.glVertex3f(0,0,0)
+                    GL.glEnd()
                 self.displayCache[0].draw(drawRaw,[so3.identity(),item])
                 if name is not None:
                     self.drawText(name,item)
             elif itypes == 'RigidTransform':
                 def drawRaw():
                     fancy = self.attributes.get("fancy",False)
-                    if fancy: glEnable(GL_LIGHTING)
-                    else: glDisable(GL_LIGHTING)
+                    if fancy: GL.glEnable(GL.GL_LIGHTING)
+                    else: GL.glDisable(GL.GL_LIGHTING)
                     gldraw.xform_widget(se3.identity(),self.attributes.get("length",0.1),self.attributes.get("width",0.01),fancy=fancy)
                 self.displayCache[0].draw(drawRaw,transform=item)
                 if name is not None:
@@ -3780,8 +3786,8 @@ class VisualizationScene:
     def renderScreenGL(self,view,window):
         cx = 20
         cy = 20
-        glDisable(GL_LIGHTING)
-        glDisable(GL_DEPTH_TEST)
+        GL.glDisable(GL.GL_LIGHTING)
+        GL.glDisable(GL.GL_DEPTH_TEST)
         for (k,v) in self.items.items():
             if isinstance(v.item,VisPlot) and not v.attributes['hidden']:
                 pos = v.attributes['position']
@@ -3816,7 +3822,7 @@ class VisualizationScene:
                     if y < 0:
                         y = view.h + y
                     window.draw_text((x,y+size),v.item,size,col)
-        glEnable(GL_DEPTH_TEST)
+        GL.glEnable(GL.GL_DEPTH_TEST)
 
 
     def _renderGLLabelRaw(self,view,point,textList,colorList):
@@ -3831,11 +3837,11 @@ class VisualizationScene:
                 d = float(12)/float(view.w)*projpt[2]*0.7
                 point = vectorops.add(point,so3.apply(invCameraRot,(0,-d,0)))
 
-            glDisable(GL_LIGHTING)
-            glDisable(GL_DEPTH_TEST)
-            glColor3f(*c)
+            GL.glDisable(GL.GL_LIGHTING)
+            GL.glDisable(GL.GL_DEPTH_TEST)
+            GL.glColor3f(*c)
             self.draw_text(point,text,size=12)
-            glEnable(GL_DEPTH_TEST)
+            GL.glEnable(GL.GL_DEPTH_TEST)
             
     def clearDisplayLists(self):
         for i in self.items.values():

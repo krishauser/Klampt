@@ -2,6 +2,7 @@
 classes for your own plugins.
 """
 
+from . import glinit
 from OpenGL.GL import *
 from ..robotsim import WidgetSet,RobotPoser
 from .glinterface import GLPluginInterface

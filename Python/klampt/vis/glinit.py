@@ -1,9 +1,38 @@
 import sys
-global _BackendStatus,_GLBackend
+global _GLAvailable,_GLModule,_BackendStatus,_GLBackend
+_GLAvailable = None
+_GLModule = None
 _BackendStatus = dict()
 _GLBackend = None
 _BackendString = None
 _PIP_String = 'pip' if sys.version_info[0] < 3 else 'pip3'
+
+#compatibility with MacOS X 11.x
+try:
+    import OpenGL.GL   # this fails in <=2020 versions of Python on OS X 11.x
+    _GLAvailable = True
+    _GLModule = OpenGL.GL
+except ImportError:
+    import sys
+    if sys.platform == 'darwin':
+        print("Couldn't import OpenGL, trying patch for Big Sur")
+        from ctypes import util
+        orig_util_find_library = util.find_library
+        def new_util_find_library( name ):
+            res = orig_util_find_library( name )
+            if res: return res
+            return '/System/Library/Frameworks/'+name+'.framework/'+name
+        util.find_library = new_util_find_library
+        try:
+            import OpenGL.GL
+            _GLAvailable = True
+            _GLModule = OpenGL.GL
+        except ImportError:
+            print("Couldn't import OpenGL, try running pip install PyOpenGL")
+            _GLAvailable = False
+    else:
+        print("Couldn't import OpenGL, try running pip install PyOpenGL")
+        _GLAvailable = False
 
 def init(backends=['PyQt','GLUT']):
     """Initializes the OpenGL system with one of the backends provided in the
@@ -15,7 +44,9 @@ def init(backends=['PyQt','GLUT']):
     Returns:
         QtBackend, GLUTBackend, or None
     """
-    global _BackendStatus,_BackendString,_GLBackend
+    global _GLAvailable,_BackendStatus,_BackendString,_GLBackend
+    if _GLAvailable == False:
+        return None
     if _GLBackend is not None:
         return _GLBackend
     #print("glinit TRYING BACKENDS",backends)
@@ -97,6 +128,10 @@ def init(backends=['PyQt','GLUT']):
     print("Neither QT nor GLUT are available... visualization disabled")
     print(_BackendStatus)
     return None
+
+def GL():
+    global _GLModule
+    return _GLModule
 
 def active():
     global _BackendString

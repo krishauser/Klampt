@@ -4,6 +4,7 @@ import weakref
 import time
 from collections import defaultdict
 
+from .. import glinit
 from OpenGL.GL import *
 
 class WindowInfo:
