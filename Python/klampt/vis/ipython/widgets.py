@@ -375,8 +375,8 @@ class KlamptWidget(widgets.DOMWidget):
                     recursive = True
                 except Exception:
                     found = False
-                    for r in range(self.world.numRobots()):
-                        if self.world.robot(r).link(target).index >= 0:
+                    for i in range(self.world.numRobots()):
+                        if self.world.robot(i).link(target).index >= 0:
                             found = True
                             break
                     if not found:
