@@ -3119,6 +3119,12 @@ bool Robot::LoadURDF(const char* fn)
       drivers[d].affOffset.push_back(affineJointOffsets[i]);
     }
   }
+
+  //double check links are specified properly
+  for(auto kpi: kP) {
+    if(LinkIndex(kpi.first.c_str()) < 0)
+      LOG4CXX_WARN(GET_LOGGER(URDFParser),"Invalid <klampt><link> element named "<<kpi.first);
+  }
   
   UpdateFrames();
   for (size_t i = start; i < linkNodes.size(); i++) {
@@ -3456,7 +3462,7 @@ void Robot::Reduce(Robot& reduced,vector<int>& dofMap)
     else {
       fixedParent[i] = i;
     }
-    int p=parents[i];
+    //int p=parents[i];
     //printf("Attaching link %d, %s (%s, normal parent %d) to %d\n",i,linkNames[i].c_str(),(fixedLink[i]?"fixed":"free"),p,fixedParent[i]);
   }
   vector<vector<int> > children(q.n);
