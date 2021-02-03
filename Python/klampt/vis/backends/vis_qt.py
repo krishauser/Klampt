@@ -655,7 +655,7 @@ class _MyWindow(QMainWindow):
             dlg =  QInputDialog(self)                 
             dlg.setInputMode( QInputDialog.TextInput) 
             dlg.setLabelText("Command")
-            dlg.setTextValue('ffmpeg -y -f image2 -i image%04d.png -vcodec libx264 -pix_fmt yuv420p klampt_record.mp4')
+            dlg.setTextValue('ffmpeg -y -i image%04d.png -vcodec libx264 -pix_fmt yuv420p klampt_record.mp4')
             dlg.resize(600,100)                             
             ok = dlg.exec_()                                
             cmd = dlg.textValue()
