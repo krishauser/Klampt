@@ -86,6 +86,11 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 
 ## Version history
 
+**Master** (1/31/2021)
+-   Fixed bug in simulation of affine joints when the joint angle can go negative. Also, internal affine transmission coupling is simulated in a fashion that's sensitive to the driver's PID constants.
+-   Python API: Workaround for Mac OSX Big Sur dropping support for OpenGL when importing PyOpenGL.
+-   Minor bug fixes.
+
 **0.8.6** (1/27/2021)
 -   Fixed bug drawing Group geometries.
 -   RGBD sensors now have a long range for RGB information like actual cameras do, rather than clipping to the sensor's specified depth range.

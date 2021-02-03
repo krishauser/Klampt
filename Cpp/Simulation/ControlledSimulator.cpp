@@ -1,5 +1,6 @@
 #include "ControlledSimulator.h"
 #include "Sensing/JointSensors.h"
+#include <KrisLibrary/math/angle.h>
 DEFINE_LOGGER(ControlledRobotSimulator)
 
 //Set these values to 0 to get all warnings
@@ -254,8 +255,8 @@ void ControlledRobotSimulator::Step(Real dt,WorldSimulation* sim)
       RobotJointDriver& d=robot->drivers[i];
       ActuatorCommand& cmd=command.actuators[i];
       if(cmd.mode == ActuatorCommand::LOCKED_VELOCITY) {
-    //TODO: clamp to braking velocitiy?
-    oderobot->SetDriverFixedVelocity(i,cmd.desiredVelocity,cmd.torque);
+        //TODO: clamp to braking velocitiy?
+        oderobot->SetDriverFixedVelocity(i,cmd.desiredVelocity,cmd.torque);
       }
       else {
 	if(d.type == RobotJointDriver::Normal || d.type == RobotJointDriver::Translation || d.type == RobotJointDriver::Rotation) {
@@ -270,22 +271,31 @@ void ControlledRobotSimulator::Step(Real dt,WorldSimulation* sim)
 	  //robot joints now have desired q and dq
 	  robot->SetDriverValue(i,q);
 	  robot->SetDriverVelocity(i,dq);
-	  //TODO: don't hard-code these!  But how to encode arbitrary drive
-	  //trains?
-	  Real mechStiffness = 20;
-	  Real mechDamping = 0.2;
-	  Real mechMaxTorque = 2;
+	  //TODO: don't hard-code these!  But how to encode arbitrarily geared / tendon-driven transmissions?
+	  Real mechStiffness = 0.25*d.servoP;
+	  Real mechDamping = 0.001*d.servoP;
+          Real mechMaxTorque = 0;
+          //printf("Affine joint errors: ");
 	  for(size_t j=0;j<d.linkIndices.size();j++) {
 	    int link = d.linkIndices[j];
+            mechMaxTorque = Max(mechMaxTorque,robot->torqueMax(link)*10);  //10x stronger mechanism than the motor's torque limit?
 	    driverBasis[j] = d.affScaling[j]; //todo: should be a transmission parameter in the joint driver
-	    tjoints[j] = mechStiffness*(robot->q(link)-oderobot->GetLinkAngle(link)) + mechDamping*(robot->dq(link)-oderobot->GetLinkVelocity(link));
+            Real q = oderobot->GetLinkAngle(link);
+            Real qdes = robot->q(link);
+            Real deltaq = qdes-q;
+            if(Abs(deltaq) > Pi && robot->links[link].type == RobotLink3D::Revolute)
+                deltaq = AngleDiff(qdes,q);
+	    //printf("%f ",deltaq);
+            tjoints[j] = mechStiffness*deltaq + mechDamping*(robot->dq(link)-oderobot->GetLinkVelocity(link));
 	  }
-	  tjoints.madd(driverBasis,-tjoints.dot(driverBasis)/driverBasis.normSquared());
+          //printf("\n");
+          //printf("Affine mechanism %d stiffness %f damping %f max %f\n",i,mechStiffness,mechDamping,mechMaxTorque);
+          
+          tjoints.madd(driverBasis,-tjoints.dot(driverBasis)/driverBasis.normSquared());
 	  if(tjoints.norm() > mechMaxTorque)
 	    tjoints *= mechMaxTorque/tjoints.norm();
-	  //cout<<"Stabilizing torques: "<<tjoints<<endl;
+          //cout<<"Affine driver corrective torques "<<tjoints<<endl;
 	  tjoints.madd(driverBasis,t[i]);
-	  //cout<<"Torques: "<<tjoints<<endl;
 	  for(size_t j=0;j<d.linkIndices.size();j++) 
 	    oderobot->AddLinkTorque(d.linkIndices[j],tjoints[j]);
 	}
@@ -294,11 +304,11 @@ void ControlledRobotSimulator::Step(Real dt,WorldSimulation* sim)
 	}
       }
       if(cmd.mode == ActuatorCommand::PID) {
-    //advance PID controller
-    Real q=oderobot->GetDriverValue(i);
-    cmd.IntegratePID(q,dt);
-    if(cmd.kI*cmd.iterm > d.tmax) { cmd.iterm = d.tmax/cmd.kI; }
-    else if(cmd.kI*cmd.iterm < d.tmin) { cmd.iterm = d.tmin/cmd.kI; }
+        //advance PID controller
+        Real q=oderobot->GetDriverValue(i);
+        cmd.IntegratePID(q,dt);
+        if(cmd.kI*cmd.iterm > d.tmax) { cmd.iterm = d.tmax/cmd.kI; }
+        else if(cmd.kI*cmd.iterm < d.tmin) { cmd.iterm = d.tmin/cmd.kI; }
       }
     }
   }
