@@ -264,6 +264,13 @@ class KinematicSimControlInterface(RobotInterfaceBase):
         q0 = robot.getConfig()
         self.q = self.configFromKlampt(robot.getConfig())
         qmin,qmax = robot.getJointLimits()
+        for i in range(robot.numDrivers()):
+            if robot.driver(i).getType() == 'affine':
+                links = robot.driver(i).getAffectedLinks()
+                scale,offset = robot.driver(i).getAffineCoeffs()
+                for l,s in zip(links,scale):
+                    if s < 0:
+                        qmin[l],qmax[l] = qmax[l],qmin[l]
         self.qmin,self.qmax = self.configFromKlampt(qmin),self.configFromKlampt(qmax)
         robot.setConfig(q0)
         RobotInterfaceBase.__init__(self,name=self.__class__.__name__)
