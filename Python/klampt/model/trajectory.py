@@ -355,7 +355,7 @@ class Trajectory:
         """
         if metric is None:
             metric = vectorops.distance
-        return sum(vectorops.norm(a,b) for a,b in zip(self.milestones[:-1],self.milestones[1:]))
+        return sum(metric(a,b) for a,b in zip(self.milestones[:-1],self.milestones[1:]))
 
     def discretize_state(self,dt):
         """Returns a copy of this but with uniformly defined milestones at
