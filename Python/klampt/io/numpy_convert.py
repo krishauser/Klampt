@@ -213,7 +213,7 @@ def from_numpy(obj,type='auto',template=None):
         res.dims.append(values.shape[2])
         vflat = values.flatten()
         res.values.resize(len(vflat))
-        for i,v in vflat:
+        for i,v in enumerate(vflat):
             res.values[i] = v
         return res
     elif type == 'Group':
