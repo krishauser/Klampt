@@ -101,40 +101,45 @@ define(function(){
                     this.model.set('event',events);
                     this.touch();
                 },
+                update_view: function(_this) {
+                    for(var i=0;i<_this.pendingRpcs.length;i++)
+                        _this.do_rpc(_this,_this.pendingRpcs[i]);
+                    _this.pendingRpcs = []
+                    _this.klampt.render();
+                    _this.model.set('drawn',1);
+                    _this.touch();
+                    _this.waitDraw=false;
+                },
                 scene_changed: function() {
                     var msg = this.model.get('scene');
-                    console.log("Klamp't widget: setting scene");
+                    //console.log("Klamp't widget: setting scene");
                     if(this.waitDraw) {
-                        this.klampt.update_scene(msg);
+                        for(var i=0;i<this.pendingRpcs.length;i++)
+                            if(this.pendingRpcs[i]['type'] == 'update_scene' || this.pendingRpcs[i]['type'] == 'update_transforms')
+                                this.pendingRpcs.splice(i,1);
+                        this.pendingRpcs.push({'type':'update_scene','data':msg});
                     }
                     else {
-                        var _this = this;
+                        var _this=this;
                         this.waitDraw=true;
-                        setTimeout(function() {
-                            _this.klampt.update_scene(msg);
-                            _this.klampt.render();
-                            _this.model.set('drawn',1);
-                            _this.touch();
-                            _this.waitDraw=false;
-                            },0);
+                        this.pendingRpcs.push({'type':'update_scene','data':msg});
+                        setTimeout(function() { _this.update_view(_this); },0);
                     }
                 },
                 transforms_changed: function() {
                     var msg = this.model.get('transforms');
                     //console.log("Klamp't widget: setting transforms");
                     if(this.waitDraw) {
-                        this.klampt.update_scene(msg);
+                        for(var i=0;i<this.pendingRpcs.length;i++)
+                            if(this.pendingRpcs[i]['type'] == 'update_transforms')
+                                this.pendingRpcs.splice(i,1);
+                        this.pendingRpcs.push({'type':'update_transforms','data':msg});
                     }
                     else {
                         var _this = this;
                         this.waitDraw=true;
-                        setTimeout(function() {
-                            _this.klampt.update_scene(msg);
-                            _this.klampt.render();
-                            _this.model.set('drawn',1);
-                            _this.touch();
-                            _this.waitDraw=false;
-                            },0);
+                        this.pendingRpcs.push({'type':'update_transforms','data':msg});
+                        setTimeout(function() { _this.update_view(_this); },0);
                     }
                 },
                 do_rpc : function(_this,msg) {
@@ -151,6 +156,14 @@ define(function(){
                         //console.log("Klamp't widget: calling reset_camera");
                         _this.klampt.reset_camera();
                     }
+                    else if(msg.type == 'update_scene') {
+                        //console.log("Klamp't widget: calling update_scene");
+                        _this.klampt.update_scene(msg['data']);
+                    }
+                    else if(msg.type == 'update_transforms') {
+                        //console.log("Klamp't widget: calling update_transforms");
+                        _this.klampt.update_scene(msg['data']);
+                    }
                     else {
                         //console.log("Klamp't widget: calling rpc "+msg);
                         _this.klampt.rpc(msg);
@@ -165,16 +178,8 @@ define(function(){
                     else {
                         var _this = this;
                         this.waitDraw=true;
-                        setTimeout(function() { 
-                            _this.do_rpc(_this,msg); 
-                            for(var i=0;i<_this.pendingRpcs.length;i++)
-                                _this.do_rpc(_this,_this.pendingRpcs[i]);
-                            _this.pendingRpcs = []
-                            _this.klampt.render();
-                            _this.model.set('drawn',1);
-                            _this.touch();
-                            _this.waitDraw=false;
-                        },0);
+                        this.pendingRpcs.push(msg);
+                        setTimeout(function() { _this.update_view(_this); },0);
                     }
                 }
                 

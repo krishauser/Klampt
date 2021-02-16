@@ -224,6 +224,10 @@ bool SimGUIBackend::LoadAndInitSim(int argc,const char** argv)
     }
     else {
       const char* ext=FileExtension(argv[i]);
+      if(!ext) {
+        printf("Error loading file %s, no extension provided\n",argv[i]);
+        return false;
+      }
       if(0==strcmp(ext,"xml")) {
         if(!xmlWorld.Load(argv[i])) {
           printf("Error loading world file %s\n",argv[i]);
@@ -497,6 +501,10 @@ void SimGUIBackend::DrawWrenches(Real fscale)
 bool SimGUIBackend::LoadFile(const char* fn)
 {
   const char* ext = FileExtension(fn);
+  if(!ext) {
+    printf("SimGUIBackend::LoadFile: Error loading file %s, no extension provided\n",fn);
+    return false;
+  }
   if(0==strcmp(ext,"state"))
     return LoadState(fn);
   else if(0==strcmp(ext,"milestones"))

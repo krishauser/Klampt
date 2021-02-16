@@ -69,6 +69,10 @@ bool ResourceGUIBackend::LoadCommandLine(int argc,const char** argv)
     }
     else {
       const char* ext=FileExtension(argv[i]);
+      if(!ext) {
+        printf("Error loading file %s, no extension provided\n",argv[i]);
+        return false;
+      }
       if(0==strcmp(ext,"xml")) {
 	TiXmlDocument doc;
 	if(!doc.LoadFile(argv[i])) {

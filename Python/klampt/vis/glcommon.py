@@ -389,7 +389,7 @@ class CachedGLObject:
             self.makingDisplayList = True
             try:
                 renderFunction(*args)
-            except GLError:
+            except GL.GLError:
                 import traceback
                 print("Error encountered during draw, display list",self.glDisplayList)
                 traceback.print_exc()

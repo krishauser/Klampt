@@ -980,6 +980,11 @@ class Playback(widgets.VBox):
                     playdata['stop'] = 1
                     lock.release()
                     return
+                if self.klampt_widget and dt==0:
+                    self.klampt_widget.beginRpc()
+                    self.klampt_widget.add("__temp",[time.time(),0,0])
+                    self.klampt_widget.remove("__temp")
+                    self.klampt_widget.endRpc()
                 self.frame += 1
                 lock.release()
 

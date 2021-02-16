@@ -521,22 +521,20 @@ Real ODERobot::GetLinkAngle(int i) const
   if(robot.links[i].type == RobotLink3D::Revolute) {
     Real val=dJointGetHingeAngle(jointID[i]);
     //normalize angle
-    if(robot.links[i].type == RobotLink3D::Revolute) {
-      Real qi = AngleNormalize(val);
-      if(qi > robot.qMax(i)) {
-        if(qi - TwoPi >= robot.qMin(i)) 
-          qi -= TwoPi;
-        else if(Abs(qi - TwoPi - robot.qMin(i)) < Abs(qi - robot.qMax(i)))
-          qi -= TwoPi;
-      }
-      if(qi < robot.qMin(i)) {
-        if(qi + TwoPi <= robot.qMax(i))
-          qi += TwoPi;
-        else if(Abs(qi + TwoPi - robot.qMax(i)) < Abs(qi - robot.qMin(i)))
-          qi += TwoPi;
-      }
-      val = qi;
+    Real qi = AngleNormalize(val);
+    if(qi > robot.qMax(i)) {
+      if(qi - TwoPi >= robot.qMin(i)) 
+        qi -= TwoPi;
+      else if(Abs(qi - TwoPi - robot.qMin(i)) < Abs(qi - robot.qMax(i)))
+        qi -= TwoPi;
     }
+    if(qi < robot.qMin(i)) {
+      if(qi + TwoPi <= robot.qMax(i))
+        qi += TwoPi;
+      else if(Abs(qi + TwoPi - robot.qMax(i)) < Abs(qi - robot.qMin(i)))
+        qi += TwoPi;
+    }
+    val = qi;
     return val;
   }
   else {
@@ -859,8 +857,21 @@ Real ODERobot::GetDriverValue(int driver) const
   case RobotJointDriver::Affine: 
     {
       Real vavg=0;
-      for(size_t i=0;i<d.linkIndices.size();i++)
-        vavg += (GetLinkAngle(d.linkIndices[i])-d.affOffset[i])/d.affScaling[i];
+      for(size_t i=0;i<d.linkIndices.size();i++) {
+        Real q1 = GetLinkAngle(d.linkIndices[i]);
+        if(robot.links[d.linkIndices[i]].type == RobotLink3D::Revolute) {
+          //resolve ambiguity of wrapped joint angle
+          Real vref = vavg + d.affOffset[i];
+          if (i > 0) vref = vavg*d.affScaling[i] / i;
+          Real q2 = (q1 > 0? q1-TwoPi : q1+TwoPi);
+          if(Abs(vref - q1) > Abs(vref - q2)) 
+            vavg += (q2-d.affOffset[i])/d.affScaling[i];
+          else
+            vavg += (q1-d.affOffset[i])/d.affScaling[i];
+        }
+        else 
+          vavg += (q1-d.affOffset[i])/d.affScaling[i];
+      }
       return vavg / d.linkIndices.size();
     }
     break;
