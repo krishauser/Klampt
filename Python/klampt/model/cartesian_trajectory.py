@@ -544,21 +544,27 @@ def cartesian_path_interpolate(robot,path,constraints,
             milestones = [path.milestones[0]]
             for t in divpts:
                 s,u = path.getSegment(t)
+                if s < 0:
+                    s = 0
                 if s+1 >= len(path.milestones):
                     s = len(path.milestones)-2
                     u = 1
                 if s == oldseg:
                     if u != oldu:
+                        assert t > times[-1]
                         times.append(t)
                         milestones.append(config.interpolate(constraints,path.milestones[s],path.milestones[s+1],u))
                 else:
                     for i in range(oldseg+1,s+1):
+                        assert path.times[i] > times[-1]
                         times.append(path.times[i])
                         milestones.append(path.milestones[i])
                     times.append(t)
-                    print(s,u)
+                    #print(s,u)
                     milestones.append(config.interpolate(constraints,path.milestones[s],path.milestones[s+1],u))
                 oldseg,oldu = s,u
+            for i in range(len(times)-1):
+                assert times[i] < times[i+1]
             path = path.constructor()(times,milestones)
         import random
         #mark whether we need to sample the end or start
