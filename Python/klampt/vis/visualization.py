@@ -438,7 +438,8 @@ Scene management functions
 - :func:`getItemName`: retrieves the name / path of a given object in the
   scene, or returns None if the object doesnt exist.
 - :func:`dirty`: marks the given item as dirty and recreates the OpenGL display
-  lists.  You may need to call this if you modify an item's  geometry, for example.
+  lists.  You may need to call this if you modify an item's geometry, for
+  example.
 - :func:`remove`: removes an item from the visualization.
 - :func:`setItemConfig`: sets the configuration of a named item.
 - :func:`getItemConfig`: returns the configuration of a named item.
@@ -469,6 +470,9 @@ Animation functions
 - :func:`stepAnimation`: Moves forward the animation time by the given 
   amount, in seconds.
 - :func:`animationTime`: Gets/sets the current animation time
+- :func:`setTimeCallback`: sets a function that will return the global time
+   used by the animation timing, visualization plots, and movie-saving
+   functions.  This must be monotonically non-decreasing.
 
 Text and plots
 ~~~~~~~~~~~~~~~~
@@ -1208,6 +1212,19 @@ def animationTime(newtime=None):
     """
     return scene().animationTime(newtime)
 
+def setTimeCallback(timefunc=None):
+    """Sets a function that will return the window's global time.  This
+    will be used by the animation timing, visualization plots, and movie-saving
+    functions.
+    
+    Args:
+        timefunc (callable): returns a monotonically non-decreasing float.
+            If None, reverts back to using time.time().
+    """
+    _init()
+    scene().setTimeCallback(timefunc)
+    
+
 def remove(name):
     """Removes an item from the visualization"""
     return scene().remove(name)
@@ -1712,7 +1729,8 @@ def objectToVisType(item,world):
     return itypes
 
 
-_defaultCompressThreshold = 1e-2
+#_defaultCompressThreshold = 1e-2
+_defaultCompressThreshold = 1e-3
 
 class VisPlotItem:
     def __init__(self,itemname,linkitem):
@@ -3283,6 +3301,7 @@ class VisualizationScene:
         self.items = {}
         self.labels = []
         self.t = 0
+        self.timeCallback = None
         self.startTime = None
         self.animating = True
         self.currentAnimationTime = 0
@@ -3552,15 +3571,26 @@ class VisualizationScene:
             if customIndex < 0:
                 customIndex = len(plot.items)
                 plot.items.append(VisPlotItem('',None))
+            t = self.t
+            if self.startTime is not None:
+                t = self.timeCallback() - self.startTime
+            else:
+                t = 0
             plot.items[customIndex].compressThreshold = compress
-            plot.items[customIndex].customUpdate(itemname,self.t,value)
+            plot.items[customIndex].customUpdate(itemname,t,value)
 
     def logPlotEvent(self,plotname,eventname,color):
         global _globalLock
         with _globalLock:
             plot = self.getItem(plotname)
             assert plot is not None and isinstance(plot.item,VisPlot),(plotname+" is not a valid plot")
-            plot.item.addEvent(eventname,self.t,color)
+            t = self.t
+            if self.timeCallback is not None:
+                if self.startTime is not None:
+                    t = self.timeCallback() - self.startTime
+                else:
+                    t = 0
+            plot.item.addEvent(eventname,t,color)
 
     def hidePlotItem(self,plotname,itemname,hidden=True):
         global _globalLock
@@ -3708,16 +3738,28 @@ class VisualizationScene:
         else:
             raise ValueError("Invalid value for target, must either be str or a Trajectory")
 
-    def updateTime(self,t):
+    def setTimeCallback(self,cb):
+        """Sets a callback in updateTime() to set the current time"""
+        self.timeCallback = cb
+
+    def updateTime(self,t=None):
         """The backend will call this during an idle loop to update the
         visualization time.  This may also update animations if currently
         animating."""
+        if t is None:
+            if self.timeCallback is None:
+                t = time.time()
+            else:
+                t = self.timeCallback()
         if self.startTime is None:
           self.startTime = t
         oldt = self.t
         self.t = t-self.startTime
+        if self.t - oldt < 0:
+            warnings.warn("Time is going negative?")
         if self.animating:
-            self.stepAnimation(self.t - oldt)
+            if self.t - oldt > 0:
+                self.stepAnimation(self.t - oldt)
         for (k,v) in self.items.items():
             #do other updates
             v.updateTime(self.t)

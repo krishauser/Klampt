@@ -101,7 +101,7 @@ def sphere(radius,center=None,R=None,t=None,world=None,name=None,mass=float('inf
         bmass = Mass()
         bmass.setMass(mass)
         bmass.setCom(center)
-        bmass.setInertia([0.4*mass*radius**2])
+        bmass.setInertia([0.4*mass*radius**2]*3)
         robj = world.makeRigidObject(name)
         robj.geometry().set(geom)
         robj.setMass(bmass)

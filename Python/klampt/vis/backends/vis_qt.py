@@ -567,27 +567,33 @@ class _MyWindow(QMainWindow):
             scene = self.glwidget.program.scene
             world = scene.items.get('world',None)
             if world is not None: return world.item
+            sim = scene.items.get('sim',None)
+            if sim is not None: return sim.world
         for p in self.glwidget.program.plugins:
             if hasattr(p,'world'):
                 return p.world
+            if hasattr(p,'sim'):
+                return p.sim.world
+            if hasattr(p,'simulator'):
+                return p.simulator.world
         return None
     
-    def getSimulator(self):
+    def getTimeSource(self):
         if not hasattr(self.glwidget.program,'plugins'):
             return None
         if isinstance(self.glwidget.program,GLVisualizationFrontend):
             scene = self.glwidget.program.scene
-            sim = scene.items.get('sim',None)
-            if sim is not None: return sim.item
+            if scene.timeCallback is not None:
+                return scene.timeCallback
         for p in self.glwidget.program.plugins:
             if hasattr(p,'sim'):
-                return p.sim
+                return lambda :p.sim.getTime()
             if hasattr(p,'simulator'):
-                return p.simulator
+                return lambda :p.simulator.getTime()
         return None
     
     def save_camera(self):
-        if not hasattr(self.glwidget.program,'get_view'):
+        if not hasattr(self.glwidget.program.scene,'getViewport'):
             print("Program does not appear to have a camera")
             return
         scene = self.glwidget.program.scene
@@ -597,12 +603,12 @@ class _MyWindow(QMainWindow):
             fn = fn[0]
         if fn is None:
             return
-        v = scene.get_view()
+        v = scene.getViewport()
         v.save_file(fn)
     
     def load_camera(self):
         scene = self.glwidget.program.scene
-        v = scene.get_view()
+        v = scene.getViewport()
         #fn = QFileDialog.getOpenFileName(caption="Viewport file (*.txt)",filter="Viewport file (*.txt);;All files (*.*)",options=QFileDialog.DontUseNativeDialog)
         fn = QFileDialog.getOpenFileName(caption="Viewport file (*.txt)",filter="Viewport file (*.txt);;All files (*.*)")
         if isinstance(fn,tuple):
@@ -610,7 +616,7 @@ class _MyWindow(QMainWindow):
         if fn is None:
             return
         v.load_file(fn)
-        scene.set_view(v)
+        scene.setViewport(v)
 
     
     def save_world(self):
@@ -647,9 +653,9 @@ class _MyWindow(QMainWindow):
         self.saving_movie = not self.saving_movie
         if self.saving_movie:
             self.movie_timer.start(33)
-            sim = self.getSimulator()
-            if sim is not None:
-                self.movie_time_last = sim.getTime()
+            time_source = self.getTimeSource()
+            if time_source is not None:
+                self.movie_time_last = time_source()
         else:
             self.movie_timer.stop()
             dlg =  QInputDialog(self)                 
@@ -668,9 +674,10 @@ class _MyWindow(QMainWindow):
                     os.remove(fn)
     
     def movie_update(self):
-        sim = self.getSimulator()
-        if sim is not None:
-            while sim.getTime() >= self.movie_time_last + 1.0/30.0:
+        time_source = self.getTimeSource()
+        if time_source is not None:
+            tnow = time_source()
+            while tnow >= self.movie_time_last + 1.0/30.0:
                 self.glwidget.program.save_screen('image%04d.png'%(self.movie_frame))
                 self.movie_frame += 1
                 self.movie_time_last += 1.0/30.0
@@ -681,9 +688,7 @@ class _MyWindow(QMainWindow):
     def toggle_html_mode(self):
         self.saving_html = not self.saving_html
         if self.saving_html:
-            world = self.getSimulator()
-            if world is None:
-                world = self.getWorld()
+            world = self.getWorld()
             if world is None:
                 print("There is no world in the current plugin, can't save")
                 self.saving_html = False
