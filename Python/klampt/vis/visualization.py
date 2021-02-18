@@ -2103,6 +2103,8 @@ def drawTrajectory(traj,width,color,pointSize=None,pointColor=None):
             velTraj.append(m[21:24])
         drawTrajectory(HermiteTrajectory(traj.times,pointTraj,velTraj),width,color,pointSize,pointColor)
     else:
+        if len(traj.milestones)==0:
+            return
         wp = traj.waypoint(traj.milestones[0])
         if len(wp) == 3:
             if len(wp) == len(traj.milestones[0]):   
