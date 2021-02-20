@@ -3573,7 +3573,10 @@ class VisualizationScene:
                 plot.items.append(VisPlotItem('',None))
             t = self.t
             if self.startTime is not None:
-                t = self.timeCallback() - self.startTime
+                if self.timeCallback is None:
+                    t = time.time() - self.startTime
+                else:
+                    t = self.timeCallback() - self.startTime
             else:
                 t = 0
             plot.items[customIndex].compressThreshold = compress
@@ -3585,11 +3588,13 @@ class VisualizationScene:
             plot = self.getItem(plotname)
             assert plot is not None and isinstance(plot.item,VisPlot),(plotname+" is not a valid plot")
             t = self.t
-            if self.timeCallback is not None:
-                if self.startTime is not None:
-                    t = self.timeCallback() - self.startTime
+            if self.startTime is not None:
+                if self.timeCallback is None:
+                    t = time.time() - self.startTime
                 else:
-                    t = 0
+                    t = self.timeCallback() - self.startTime
+            else:
+                t = 0
             plot.item.addEvent(eventname,t,color)
 
     def hidePlotItem(self,plotname,itemname,hidden=True):
