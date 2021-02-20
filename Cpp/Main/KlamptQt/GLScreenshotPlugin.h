@@ -38,7 +38,7 @@ public:
   GLScreenshotPlugin()
   {
     saveMovie = false;
-    lastScreenshotTime = 0;
+    lastScreenshotTime = -1;
     frameTime = 1.000/30.0;
     screenshotFile = "image0000.ppm";
     verbose = 1;
