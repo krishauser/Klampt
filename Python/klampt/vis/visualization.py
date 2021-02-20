@@ -1719,6 +1719,8 @@ def objectToVisType(item,world):
                 validtypes.append(t)
             elif t=='Geometry3D':
                 validtypes.append(t)
+            elif t=='Trajectory':
+                validtypes.append(t)
         if len(validtypes) > 1:
             warnings.warn("Unable to draw item of ambiguous types {}\n  (Try vis.setAttribute(item,'type',desired_type_str) to disambiguate)".format(validtypes))
             return
@@ -2597,6 +2599,8 @@ class VisAppearance:
         elif isinstance(item,Trajectory):
             doDraw = False
             centroid = None
+            if len(item.milestones) == 0:
+                return
             robot = (world.robot(self.attributes["robot"]) if world is not None and world.numRobots() > 0 else None)
             if robot is not None:
                 robotConfig = robot.getConfig()
