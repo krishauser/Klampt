@@ -228,21 +228,24 @@ def colorize(object,value,colormap=None,feature=None,vrange=None,lighting=None):
                         if l > 0:
                             normals[i] *= 1.0/l
                 else:
-                    normals = np.zeros((N,3))
-                    for i in range(0,len(geometrydata.indices),3):
-                        a,b,c = geometrydata.indices[i],geometrydata.indices[i+1],geometrydata.indices[i+2]
-                        n = vectorops.cross(positions[b]-positions[a],positions[c]-positions[a])
-                        normals[i//3] = np.array(vectorops.unit(n))
+                    indices = np.array(geometrydata.indices).reshape(-1,3)
+                    a = positions[indices[:,0]]
+                    b = positions[indices[:,1]]
+                    c = positions[indices[:,2]]
+                    normals = np.cross(b-a,c-a)
+                    norms = np.linalg.norm(normals,axis = 1)
+                    mask = norms!=0
+                    normals[mask] = normals[mask]/norms[mask].reshape(-1,1)
+                    normals = normals/np.linalg.norm(normals,axis = 1).reshape(-1,1)
         if feature == 'faces':
             if lighting is not None or value in ['position','x','y','z']:
                 #compute positions = triangle centroids
                 assert not isinstance(geometrydata,PointCloud)
-                tris = np.array(geometrydata.indices,dtype=np.uint32)
-                tris = tris.reshape((tris.shape[0]//3,3))
-                tpositions = np.zeros((N,3))
-                for i,t in enumerate(tris):
-                    tpositions[i] = np.average(positions[t,:],axis=0)
-                positions = tpositions
+                tris = np.array(geometrydata.indices,dtype=np.uint32).reshape(-1,3)
+                A = positions[tris[:,0]]
+                B = positions[tris[:,1]]
+                C = positions[tris[:,2]]
+                positions = (A+B+C)/3
             
         if isinstance(value,str):
             if value == 'p' or value == 'position':
