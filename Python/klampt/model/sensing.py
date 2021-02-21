@@ -189,66 +189,122 @@ def camera_to_images(camera,image_format='numpy',color_format='channels'):
     h = int(camera.getSetting('yres'))
     has_rgb = int(camera.getSetting('rgb'))
     has_depth = int(camera.getSetting('depth'))
-    #t0 = time.time()
-    #print("camera.getSettings() time",t0-t_1)
-    measurements = camera.getMeasurements()
-    #t1 = time.time()
-    #print("camera.getMeasurements() time",t1-t0)
+
     if image_format == 'numpy':
         if not _try_numpy_import():
             image_format = 'native'
     rgb = None
     depth = None
-    if has_rgb:
-        if image_format == 'numpy':
-            #t0 = time.time()
-            argb = np.array(measurements[0:w*h]).reshape(h,w).astype(np.uint32)
-            #t1 = time.time()
-            #print("Numpy array creation time",t1-t0)
-            if color_format == 'rgb':
-                rgb = argb
-            elif color_format == 'bgr':
-                rgb = np.bitwise_or.reduce((np.left_shift(np.bitwise_and(argb,0x00000ff),16),
-                                        np.bitwise_and(argb,0x000ff00)),
-                                        np.right_shift(np.bitwise_and(argb,0x0ff0000), 16))
-            else:
-                rgb = np.zeros((h,w,3),dtype=np.uint8)
-                rgb[:,:,0] = np.right_shift(np.bitwise_and(argb,0x0ff0000), 16)
-                rgb[:,:,1] = np.right_shift(np.bitwise_and(argb,0x00ff00), 8)
-                rgb[:,:,2] =                np.bitwise_and(argb,0x00000ff)
-            #t2 = time.time()
-            #print("  Conversion time",t2-t1)
-        else:
-            if color_format == 'rgb':
-                rgb = []
-                for i in range(h):
-                    rgb.append([int(v) for v in measurements[i*w:(i+1)*w]])
-            elif color_format == 'bgr':
-                def bgr_to_rgb(pixel):
-                    return ((pixel & 0x0000ff) << 16) | (pixel & 0x00ff00) | ((pixel & 0xff0000) >> 16)
-                rgb = []
-                for i in range(h):
-                    rgb.append([bgr_to_rgb(int(v)) for v in measurements[i*w:(i+1)*w]])
+
+    #t0 = time.time()
+    #print("camera.getSettings() time",t0-t_1)
+    if hasattr(camera,'getMeasurementsBytes'):
+        buf = bytearray(w*h*((3 if has_rgb else 0) + (4 if has_depth else 0)))
+        camera.getMeasurementsBytes(buf)
+        dstart = 0
+        if has_rgb:
+            dstart = w*h*3
+            if image_format=='numpy':
+                nprgb = np.frombuffer(buf,count=(w*h*3),dtype=np.uint8).reshape((h,w,3))
+                if color_format == 'channels':
+                    rgb = nprgb
+                elif color_format == 'rgb':
+                    rgb = np.bitwise_or.reduce(np.left_shift(nprgb[:,:,0].astype(np.uint32),16),np.left_shift(nprgb[:,:,1].astype(np.uint32),8),nprgb[:,:,2].astype(np.uint32))
+                else:
+                    rgb = np.bitwise_or.reduce(np.left_shift(nprgb[:,:,2].astype(np.uint32),16),np.left_shift(nprgb[:,:,1].astype(np.uint32),8),nprgb[:,:,0].astype(np.uint32))
             else:
                 rgb = []
+                if color_format == 'channels':
+                    for i in range(h):
+                        start = i*w*3
+                        row = []
+                        for j in range(w):
+                            pix = start+j*3
+                            row.append([buf[pix],buf[pix+1],buf[pix+2]])
+                        rgb.append(row)
+                elif color_format == 'bgr':
+                    for i in range(h):
+                        start = i*w*3
+                        row = []
+                        for j in range(w):
+                            pix = start+j*3
+                            row.append(int(buf[pix]) | (int(buf[pix+1]) << 8) | (int(buf[pix+2]) << 16))
+                        rgb.append(row)
+                else:
+                    for i in range(h):
+                        start = i*w*3
+                        row = []
+                        for j in range(w):
+                            pix = start+j*3
+                            row.append(int(buf[pix+2]) | (int(buf[pix+1]) << 8) | (int(buf[pix]) << 16))
+                        rgb.append(row)
+        if has_depth:
+            if image_format=='numpy':
+                depth = np.frombuffer(buf,offset=dstart,count=(w*h),dtype=np.float32).reshape((h,w))
+            else:
+                import struct
+                depth = []
                 for i in range(h):
-                    start = i*w
-                    row = []
-                    for j in range(w):
-                        pixel = int(measurements[start+j])
-                        row.append([(pixel>>16)&0xff,(pixel>>8)&0xff,pixel&0xff])
-                    rgb.append(row)
-    if has_depth:
-        start = (w*h if has_rgb else 0)
-        if image_format == 'numpy':
-            #t0 = time.time()
-            depth = np.array(measurements[start:start+w*h]).reshape(h,w)
-            #t1 = time.time()
-            #print("Numpy array creation time",t1-t0)
-        else:
-            depth = []
-            for i in range(h):
-                depth.append(measurements[start+i*w:start+(i+1)*w])
+                    #TODO: little or big endian?
+                    start = dstart + i*w*4
+                    depth.append([struct.unpack('<f', buf[start+j*4:start+j*4+4]) for j in range(w)])
+    else:
+        measurements = camera.getMeasurements()
+        #t1 = time.time()
+        #print("camera.getMeasurements() time",t1-t0)
+        #t0 = time.time()
+        #TESTING
+        
+        if has_rgb:
+            if image_format == 'numpy':
+                #t0 = time.time()
+                argb = np.array(measurements[0:w*h]).reshape(h,w).astype(np.uint32)
+                #t1 = time.time()
+                #print("Numpy array creation time",t1-t0)
+                if color_format == 'rgb':
+                    rgb = argb
+                elif color_format == 'bgr':
+                    rgb = np.bitwise_or.reduce((np.left_shift(np.bitwise_and(argb,0x00000ff),16),
+                                            np.bitwise_and(argb,0x000ff00)),
+                                            np.right_shift(np.bitwise_and(argb,0x0ff0000), 16))
+                else:
+                    rgb = np.zeros((h,w,3),dtype=np.uint8)
+                    rgb[:,:,0] = np.right_shift(np.bitwise_and(argb,0x0ff0000), 16)
+                    rgb[:,:,1] = np.right_shift(np.bitwise_and(argb,0x00ff00), 8)
+                    rgb[:,:,2] =                np.bitwise_and(argb,0x00000ff)
+                #t2 = time.time()
+                #print("  Conversion time",t2-t1)
+            else:
+                if color_format == 'rgb':
+                    rgb = []
+                    for i in range(h):
+                        rgb.append([int(v) for v in measurements[i*w:(i+1)*w]])
+                elif color_format == 'bgr':
+                    def bgr_to_rgb(pixel):
+                        return ((pixel & 0x0000ff) << 16) | (pixel & 0x00ff00) | ((pixel & 0xff0000) >> 16)
+                    rgb = []
+                    for i in range(h):
+                        rgb.append([bgr_to_rgb(int(v)) for v in measurements[i*w:(i+1)*w]])
+                else:
+                    rgb = []
+                    for i in range(h):
+                        start = i*w
+                        row = []
+                        for j in range(w):
+                            pixel = int(measurements[start+j])
+                            row.append([(pixel>>16)&0xff,(pixel>>8)&0xff,pixel&0xff])
+                        rgb.append(row)
+        if has_depth:
+            start = (w*h if has_rgb else 0)
+            if image_format == 'numpy':
+                #t0 = time.time()
+                depth = np.array(measurements[start:start+w*h]).reshape(h,w)
+                #t1 = time.time()
+                #print("Numpy array creation time",t1-t0)
+            else:
+                depth = []
+                for i in range(h):
+                    depth.append(measurements[start+i*w:start+(i+1)*w])
     if has_rgb and has_depth:
         return rgb,depth
     elif has_rgb:
@@ -770,3 +826,40 @@ def visible(camera,object,full=True,robot=None):
         raise ValueError("Object must be a point, sphere, bounding box, or Geometry3D")
     return visible(camera,object.getBB(),full,robot)
 
+
+
+def laser_to_points(sensor, robot=None, scan=None):
+    """Converts laser readings to a PointCloud.
+
+    Args:
+        sensor (SimRobotSensor): the sensor
+        robot (RobotModel, optional): the robot, placed in its current
+            configuration.  If given, the result is in world coordinates.
+        scan (list of float, optional): the results from
+            sensor.getMeasurements(). Otherwise, sensor.getMeasurements()
+            is called
+    
+    Returns:
+        PointCloud: the point cloud.  Given in world coordinates if robot!=None
+        or in link-local coordinates if robot=None.
+    
+    Note: only works with planar laser scanners, for now.
+    """
+    link_pose = get_sensor_xform(sensor,robot)
+    if scan is None:
+        scan = sensor.getMeasurements()
+
+    angle_range = float(sensor.getSetting("xSweepMagnitude"))
+
+    points = []
+    for i in range(len(scan)):
+        u = float(i)/float(len(scan)+1)
+        # If period = 0, measurement sweeps over range of [-magnitude,magnitude]
+        angle = so2.interpolate(-angle_range, angle_range, u)
+        pt = [math.cos(angle)*scan[i], math.sin(angle)*scan[i],0]
+        pt = so3.apply(link_pose, pt)
+        points += pt
+
+    rv = PointCloud()
+    rv.setPoints(len(scan),points)
+    return rv
