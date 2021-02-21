@@ -485,13 +485,13 @@ class QtWindowManager(_ThreadedWindowManager):
             return res
 
     def screenshotCallback(self,fn,format,want_depth):
-        if not self.multithreaded() or self.in_vis_loop or self.in_app_thread:
-            #already in visualization loop -- just get the image
-            res = self._frontend.get_screen(format,want_depth)
-            if want_depth:
-                fn(*res)
-            else:
-                fn(res)
+        # if not self.multithreaded() or self.in_vis_loop:
+        #     #already in visualization loop -- just get the image
+        #     res = self._frontend.get_screen(format,want_depth)
+        #     if want_depth:
+        #         fn(*res)
+        #     else:
+        #         fn(res)
         def do_screenshot_callback(fn=fn,format=format,want_depth=want_depth):
             if not self._frontend.rendered:
                 self.threadCall(do_screenshot_callback)
