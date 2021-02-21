@@ -68,6 +68,13 @@ class SimRobotSensor
   std::vector<std::string> measurementNames();
   ///Returns a list of measurements from the previous simulation (or kinematicSimulate) timestep
   void getMeasurements(std::vector<double>& out);
+  ///Copies measurements into a raw byte array.  For camera sensors, this gives the image as
+  ///24-bit RGB pixels followed by the depths as floats.  For other sensors, size must be
+  ///len(getMeasurements()*8) and they are stored as floats.
+  #if defined(SWIG)
+    %pybuffer_mutable_binary(char *buf, size_t size);
+  #endif //SWIG
+  void getMeasurementsBytes(char* buf,size_t size);
   ///Returns all setting names
   std::vector<std::string> settings();
   ///Returns the value of the named setting (you will need to manually parse this)

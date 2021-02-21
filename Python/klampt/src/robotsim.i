@@ -16,6 +16,7 @@
 %include "std_string.i"
 %include "std_vector.i"
 %include "std_map.i"
+%include "pybuffer.i"
 
 %array_class(double, doubleArray);
 %array_class(float, floatArray);
@@ -399,6 +400,7 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 %feature("autodoc","1");
 %include "docs/docs.i"
 
+
 %extend IKObjective {
 %pythoncode {
     def __reduce__(self):
@@ -471,3 +473,4 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 %include "robotsim.h"
 %include "robotio.h"
 %include "stability.h"
+

@@ -229,6 +229,18 @@ class RobotModelLink
   ///    The orientation jacobian is given in the first 3 rows, and is stacked
   ///    on the position jacobian, which is given in the last 3 rows.
   void getJacobian(const double plocal[3],std::vector<std::vector<double> >& out);
+  ///Returns the total jacobian of a point on this link w.r.t. some entries of 
+  ///the robot's configuration q.
+  ///
+  ///
+  ///Returns:
+  ///
+  ///    (list of 6 lists of floats): the 6xlen(links) total Jacobian matrix of 
+  ///    the point given by local coordinates plocal.  The matrix is row-major.
+  ///
+  ///    The orientation jacobian is given in the first 3 rows, and is stacked
+  ///    on the position jacobian, which is given in the last 3 rows.
+  void getJacobian2(const double plocal[3],const std::vector<int>& links,std::vector<std::vector<double> >& out);
   ///Returns the position jacobian of a point on this link  w.r.t. the robot's
   ///configuration q.
   ///
@@ -240,6 +252,17 @@ class RobotModelLink
   ///    This matrix J gives the point's velocity (in world coordinates) via
   ///    np.dot(J,dq), where dq is the robot's joint velocities.
   void getPositionJacobian(const double plocal[3],std::vector<std::vector<double> >& out);
+  ///Returns the position jacobian of a point on this link  w.r.t. some entries of 
+  ///the robot's configuration q.
+  ///
+  ///Returns:
+  ///
+  ///    (list of 3 lists of floats): the 3xlen(links) Jacobian matrix of the
+  ///    point given by local coordinates plocal.  The matrix is row-major.
+  ///
+  ///    This matrix J gives the point's velocity (in world coordinates) via
+  ///    np.dot(J,dq), where dq is the robot's joint velocities.
+  void getPositionJacobian2(const double plocal[3],const std::vector<int>& links,std::vector<std::vector<double> >& out);
   ///Returns the orientation jacobian of this link  w.r.t. the robot's
   ///configuration q.
   ///
@@ -251,6 +274,17 @@ class RobotModelLink
   ///    This matrix J gives the link's angular velocity (in world coordinates)
   ///    via np.dot(J,dq), where dq is the robot's joint velocities.
   void getOrientationJacobian(std::vector<std::vector<double> >& out);
+  ///Returns the orientation jacobian of this link  w.r.t. some entries of 
+  ///the robot's configuration q.
+  ///
+  ///Returns:
+  ///
+  ///    (list of 3 lists of floats): the 3xlen(links) orientation Jacobian matrix of 
+  ///    the link.  The matrix is row-major. 
+  ///
+  ///    This matrix J gives the link's angular velocity (in world coordinates)
+  ///    via np.dot(J,dq), where dq is the robot's joint velocities.
+  void getOrientationJacobian2(const std::vector<int>& links,std::vector<std::vector<double> >& out);
   ///Returns the acceleration of the link origin given the robot's current
   ///joint configuration and velocities, and the joint accelerations ddq.
   ///
@@ -475,8 +509,16 @@ class RobotModel
   ///Returns:
   ///
   ///    (list of 3 lists): a 3xn matrix J such that np.dot(J,dq) gives the
-  ///    COM velocity at the currene configuration
+  ///    COM velocity at the current configuration
   void getComJacobian(std::vector<std::vector<double> >& out);
+  ///Returns the Jacobian matrix of the current center of mass w.r.t. some
+  ///links of the robot
+  ///
+  ///Returns:
+  ///
+  ///    (list of 3 lists): a 3xlen(links) matrix J such that np.dot(J,dq)
+  ///    gives the COM velocity at the current configuration
+  void getComJacobian2(const std::vector<int>& links,std::vector<std::vector<double> >& out);
   ///Returns the 3D linear momentum vector
   void getLinearMomentum(double out[3]);
   ///Returns the 3D angular momentum vector

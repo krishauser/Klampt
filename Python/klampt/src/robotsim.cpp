@@ -11,6 +11,7 @@
 #include <Klampt/Control/FeedforwardController.h>
 #include <Klampt/Control/LoggingController.h>
 #include <Klampt/Sensing/JointSensors.h>
+#include <Klampt/Sensing/VisualSensors.h>
 #include <Klampt/Planning/RobotCSpace.h>
 #include <Klampt/Simulation/WorldSimulation.h>
 #include <Klampt/Modeling/Interpolate.h>
@@ -3177,6 +3178,15 @@ void RobotModelLink::getJacobian(const double p[3],vector<vector<double> >& J)
   copy(Jmat,J);
 }
 
+void RobotModelLink::getJacobian2(const double p[3],const vector<int>& links,vector<vector<double> >& J)
+{
+  if(index < 0)
+    throw PyException("RobotModelLink is invalid");
+  Matrix Jmat;
+  robotPtr->GetFullJacobian(Vector3(p),index,links,Jmat);
+  copy(Jmat,J);
+}
+
 void RobotModelLink::getPositionJacobian(const double p[3],vector<vector<double> >& J)
 {
   if(index < 0)
@@ -3186,18 +3196,49 @@ void RobotModelLink::getPositionJacobian(const double p[3],vector<vector<double>
   copy(Jmat,J);
 }
 
+void RobotModelLink::getPositionJacobian2(const double p[3],const vector<int>& links,vector<vector<double> >& J)
+{
+  if(index < 0)
+    throw PyException("RobotModelLink is invalid");
+  Matrix Jmat;
+  robotPtr->GetPositionJacobian(Vector3(p),index,links,Jmat);
+  copy(Jmat,J);
+}
+
+
 void RobotModelLink::getOrientationJacobian(vector<vector<double> >& J)
 {
   if(index < 0)
     throw PyException("RobotModelLink is invalid");
   Matrix Jmat;
-  Jmat.resize(3,robotPtr->links.size(),Zero);
+  robotPtr->GetOrientationJacobian(index,Jmat);
+  copy(Jmat,J);
+}
+
+void RobotModelLink::getOrientationJacobian2(const vector<int>& links,vector<vector<double> >& J)
+{
+  if(index < 0)
+    throw PyException("RobotModelLink is invalid");
+  Matrix Jmat;
+  Jmat.resize(3,links.size(),Zero);
+  map<int,int> linkmap;
+  int minlink = links[0];
+  for(size_t i=0;i<links.size();i++) {
+    linkmap[links[i]] = (int)i;
+    if(links[i] < minlink)
+      minlink = links[i];
+  }
   int j=index;
   while(j!=-1) {
-    Vector3 w;
-    robotPtr->GetOrientationJacobian(index,j,w);
-    Jmat(0,j)=w.x; Jmat(1,j)=w.y; Jmat(2,j)=w.z;
+    if(linkmap.count(j)) {
+      int col=linkmap[j];
+      Vector3 w;
+      robotPtr->GetOrientationJacobian(index,j,w);
+      Jmat(0,col)=w.x; Jmat(1,col)=w.y; Jmat(2,col)=w.z;
+    }
     j=robotPtr->parents[j];
+    if(j < minlink)
+      break;
   }
   copy(Jmat,J);
 }
@@ -3892,6 +3933,16 @@ void RobotModel::getComVelocity(double out[3])
 void RobotModel::getComJacobian(std::vector<std::vector<double> >& out)
 {
   if(!robot) throw PyException("RobotModel is empty");
+  Matrix J;
+  robot->GetCOMJacobian(J);
+  copy(J,out);
+}
+
+
+void RobotModel::getComJacobian2(const std::vector<int>& links,std::vector<std::vector<double> >& out)
+{
+  if(!robot) throw PyException("RobotModel is empty");
+  throw PyException("NOT IMPLEMENTED YET");
   Matrix J;
   robot->GetCOMJacobian(J);
   copy(J,out);
@@ -5291,6 +5342,34 @@ void SimRobotSensor::getMeasurements(std::vector<double>& out)
   out.resize(0);
   if(!sensor) return;
   sensor->GetMeasurements(out);
+}
+
+void SimRobotSensor::getMeasurementsBytes(char* buf,size_t size)
+{
+  if(!sensor)
+    throw PyException("SimRobotSensor is not initialized");
+  if(0 == strcmp(sensor->Type(),"CameraSensor")) {
+    CameraSensor* cam = dynamic_cast<CameraSensor*>(sensor);
+    if(size < cam->pixels.size() + cam->floats.size()*sizeof(float)) {
+      throw PyException("Buffer is too small to receive measurements");
+    }
+    size_t start = 0;
+    if(!cam->pixels.empty()) {
+      memcpy(buf,&cam->pixels[0],cam->pixels.size());
+      start += cam->pixels.size();
+    }
+    if(!cam->floats.empty()) {
+      memcpy(buf+start,&cam->floats[0],cam->floats.size()*sizeof(float));
+    }
+  }
+  else {
+    vector<double> measurements;
+    sensor->GetMeasurements(measurements);
+    if(size < measurements.size()*sizeof(double)) {
+      throw PyException("Buffer is too small to receive measurements");
+    }
+    memcpy(buf,&measurements[0],measurements.size()*sizeof(double));
+  }
 }
 
 std::vector<std::string> SimRobotSensor::settings()
