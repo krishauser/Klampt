@@ -501,7 +501,10 @@ class TrajectoryEditor(VisualEditorBase):
             self.milestone_to_poser(self.value.milestones[self.editingIndex]) 
             if not self.animating:
                 self.animTrajectoryTime = self.value.times[index]
-                self.timeDriver.setValue(int(1000*(self.animTrajectoryTime - self.value.times[0])/self.value.duration()))
+                if self.value.duration()==0:
+                    self.timeDriver.setValue(0)
+                else:
+                    self.timeDriver.setValue(int(1000*(self.animTrajectoryTime - self.value.times[0])/self.value.duration()))
         self.refresh()
 
     def durationChanged(self,value):

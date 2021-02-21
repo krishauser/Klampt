@@ -136,9 +136,11 @@ class CameraSensor : public SensorBase
   virtual bool GetSetting(const string& name,string& str) const;
   virtual bool SetSetting(const string& name,const string& str);
   virtual void DrawGL(const Robot& robot,const vector<double>& measurements);
-  ///Gets the OpenGL view associated with the camera.  Note that in OpenGL views, Z is backward, and Y is up.
+  ///Gets the OpenGL view associated with the camera.  The result is in the link's local frame.
+  ///Note that in OpenGL views, Z is backward, and Y is up.
   void GetViewport(Camera::Viewport& view) const;
-  ///Sets the camera to match the OpenGL view.  Note that in OpenGL views, Z is backward, and Y is up.
+  ///Sets the camera to match the OpenGL view.  The view is assumed to be in the link's local frame.
+  ///Note that in OpenGL views, Z is backward, and Y is up.
   void SetViewport(const Camera::Viewport& view);
 
   int link;
@@ -157,7 +159,6 @@ class CameraSensor : public SensorBase
   //last measurements
   vector<unsigned char> pixels;
   vector<float> floats;
-  vector<double> measurements;
   //visualization state
   GLDraw::GLDisplayList depthDisplayList;
   unsigned int depthDisplayHash;

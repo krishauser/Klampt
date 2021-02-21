@@ -2149,7 +2149,9 @@ void PointCloud::setProperties(const vector<double>& vproperties)
   if(vproperties.size() < n*m) {
     throw PyException("Invalid size of properties list, must have size at least #points * #properties");
   }
-  assert(properties.size() == n*m);
+  if(properties.size() != n*m) {
+    throw PyException("Internal error, properties doesn't contain #points * #properties items?"); 
+  }
   copy(vproperties.begin(),vproperties.begin()+m*n,properties.begin());
 }
 
@@ -2158,7 +2160,9 @@ void PointCloud::setProperties(int pindex,const vector<double>& vproperties)
   if(pindex < 0 || pindex >= (int)propertyNames.size())
     throw PyException("Invalid property index"); 
   int n = numPoints();
-  assert((int)vproperties.size() >= n);
+  if((int)vproperties.size() < n) {
+    throw PyException("Invalid size of properties vector, needs to have size #points"); 
+  }
   size_t k=pindex;
   for(int i=0;i<n;i++,k+=propertyNames.size())
     properties[k] = vproperties[i];
@@ -2800,6 +2804,8 @@ void WorldModel::remove(const RobotModel& obj)
   if(obj.world != index) 
     throw PyException("Robot does not belong to this world");
   RobotWorld& world = *worlds[index]->world;
+  if(obj.index < 0 || obj.index >= (int)world.robots.size())
+    throw PyException("Invalid robot index");
   world.robots.erase(world.robots.begin()+obj.index);
 }
 
@@ -2808,14 +2814,18 @@ void WorldModel::remove(const RigidObjectModel& obj)
   if(obj.world != index) 
     throw PyException("Rigid object does not belong to this world");
   RobotWorld& world = *worlds[index]->world;
+  if(obj.index < 0 || obj.index >= (int)world.rigidObjects.size())
+    throw PyException("Invalid rigid object index");
   world.rigidObjects.erase(world.rigidObjects.begin()+obj.index);
 }
 
 void WorldModel::remove(const TerrainModel& obj)
 {
   if(obj.world != index) 
-    throw PyException("Rigid object does not belong to this world");
+    throw PyException("Terrain does not belong to this world");
   RobotWorld& world = *worlds[index]->world;
+  if(obj.index < 0 || obj.index >= (int)world.terrains.size())
+    throw PyException("Invalid terrain index");
   world.terrains.erase(world.terrains.begin()+obj.index);
 }
 
@@ -2902,9 +2912,8 @@ const char* RobotModelLink::getName() const
 
 void RobotModelLink::setName(const char* name)
 {
-  if(index < 0) {
-    throw PyException("Cannot set the name of an empty link");
-  }
+  if(index < 0)
+    throw PyException("RobotModelLink is invalid");
   robotPtr->linkNames[index] = name;
 }
 
@@ -2915,11 +2924,15 @@ int RobotModelLink::getIndex()
 
 int RobotModelLink::getParent()
 {
+  if(index < 0)
+    throw PyException("RobotModelLink is invalid");
   return robotPtr->parents[index];
 }
 
 RobotModelLink RobotModelLink::parent()
 {
+  if(index < 0)
+    throw PyException("RobotModelLink is invalid");
   if(robotPtr->parents[index] < 0) return RobotModelLink();
   else {
     RobotModelLink res;
@@ -2935,7 +2948,8 @@ void RobotModelLink::setParent(int p)
 {
   if(p < 0 || p >= (int)robotPtr->links.size())
     throw PyException("Invalid parent index");
-
+  if(index < 0)
+    throw PyException("RobotModelLink is invalid");
   //TODO: check for circular references
   robotPtr->parents[index] = p;
 }
@@ -2953,6 +2967,7 @@ void RobotModelLink::setParent(const RobotModelLink& link)
 
 int RobotModelLink::getID() const
 {
+  if(index < 0) return -1;
   RobotWorld& world = *worlds[this->world]->world;
   return world.RobotLinkID(robotIndex,index);
 }
@@ -2962,7 +2977,8 @@ Geometry3D RobotModelLink::geometry()
   Geometry3D res;
   res.world = world;
   res.id = getID();
-  assert(res.id >= 0);
+  if(res.id < 0)
+    throw PyException("RobotModelLink is invalid");
   *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(res.geomPtr) = worlds[world]->world->GetGeometry(res.id); 
   return res;
 }
@@ -2972,7 +2988,8 @@ Appearance RobotModelLink::appearance()
   Appearance res;
   res.world = world;
   res.id = getID();
-  assert(res.id >= 0);
+  if(res.id < 0)
+    throw PyException("RobotModelLink is invalid");
   *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(res.appearancePtr) = worlds[world]->world->GetAppearance(res.id);
   return res;
 }
@@ -2999,6 +3016,8 @@ ContactParameters::ContactParameters()
 
 Mass RobotModelLink::getMass()
 {
+  if(index < 0)
+    throw PyException("RobotModelLink is invalid");
   Mass mass;
   const RobotLink3D& link=robotPtr->links[index];
   mass.mass=link.mass;
@@ -3011,6 +3030,8 @@ Mass RobotModelLink::getMass()
 
 void RobotModelLink::setMass(const Mass& mass)
 {
+  if(index < 0)
+    throw PyException("RobotModelLink is invalid");
   if(mass.com.size()!=3) {
     throw PyException("Mass com does not have length 3");
   }
@@ -3034,18 +3055,24 @@ void RobotModelLink::setMass(const Mass& mass)
 
 void RobotModelLink::getWorldPosition(const double plocal[3],double pworld[3])
 {
+  if(index < 0)
+    throw PyException("RobotModelLink is invalid");
   RobotLink3D& link=robotPtr->links[index];
   (link.T_World*Vector3(plocal)).get(pworld);
 }
 
 void RobotModelLink::getWorldDirection(const double vlocal[3],double vworld[3])
 {
+  if(index < 0)
+    throw PyException("RobotModelLink is invalid");
   RobotLink3D& link=robotPtr->links[index];
   (link.T_World.R*Vector3(vlocal)).get(vworld);
 }
 
 void RobotModelLink::getLocalPosition(const double pworld[3],double plocal[3])
 {
+  if(index < 0)
+    throw PyException("RobotModelLink is invalid");
   RobotLink3D& link=robotPtr->links[index];
   Vector3 temp;
   link.T_World.mulInverse(Vector3(pworld),temp);
@@ -3054,6 +3081,8 @@ void RobotModelLink::getLocalPosition(const double pworld[3],double plocal[3])
 
 void RobotModelLink::getLocalDirection(const double vworld[3],double vlocal[3])
 {
+  if(index < 0)
+    throw PyException("RobotModelLink is invalid");
   RobotLink3D& link=robotPtr->links[index];
   Vector3 temp;
   link.T_World.R.mulTranspose(Vector3(vworld),temp);
@@ -3063,6 +3092,8 @@ void RobotModelLink::getLocalDirection(const double vworld[3],double vlocal[3])
 
 void RobotModelLink::getTransform(double R[9],double t[3])
 {
+  if(index < 0)
+    throw PyException("RobotModelLink is invalid");
   const RobotLink3D& link=robotPtr->links[index];
   link.T_World.R.get(R);
   link.T_World.t.get(t);
@@ -3070,6 +3101,8 @@ void RobotModelLink::getTransform(double R[9],double t[3])
 
 void RobotModelLink::setTransform(const double R[9],const double t[3])
 {
+  if(index < 0)
+    throw PyException("RobotModelLink is invalid");
   RobotLink3D& link=robotPtr->links[index];
   link.T_World.R.set(R);
   link.T_World.t.set(t);
@@ -3079,6 +3112,8 @@ void RobotModelLink::setTransform(const double R[9],const double t[3])
 
 void RobotModelLink::getParentTransform(double R[9],double t[3])
 {
+  if(index < 0)
+    throw PyException("RobotModelLink is invalid");
   const RobotLink3D& link=robotPtr->links[index];
   link.T0_Parent.R.get(R);
   link.T0_Parent.t.get(t);
@@ -3086,6 +3121,8 @@ void RobotModelLink::getParentTransform(double R[9],double t[3])
 
 void RobotModelLink::setParentTransform(const double R[9],const double t[3])
 {
+  if(index < 0)
+    throw PyException("RobotModelLink is invalid");
   RobotLink3D& link=robotPtr->links[index];
   link.T0_Parent.R.set(R);
   link.T0_Parent.t.set(t);
@@ -3093,36 +3130,48 @@ void RobotModelLink::setParentTransform(const double R[9],const double t[3])
 
 void RobotModelLink::getAxis(double axis[3])
 {
+  if(index < 0)
+    throw PyException("RobotModelLink is invalid");
   const RobotLink3D& link=robotPtr->links[index];
   link.w.get(axis);
 }
 
 void RobotModelLink::setAxis(const double axis[3])
 {
+  if(index < 0)
+    throw PyException("RobotModelLink is invalid");
   RobotLink3D& link=robotPtr->links[index];
   link.w.set(axis);
 }
 
 bool RobotModelLink::isPrismatic()
 {
+  if(index < 0)
+    throw PyException("RobotModelLink is invalid");
   RobotLink3D& link=robotPtr->links[index];
   return link.type == RobotLink3D::Prismatic;
 }
 
 bool RobotModelLink::isRevolute()
 {
+  if(index < 0)
+    throw PyException("RobotModelLink is invalid");
   RobotLink3D& link=robotPtr->links[index];
   return link.type == RobotLink3D::Revolute;
 }
 
 void RobotModelLink::setPrismatic(bool prismatic)
 {
+  if(index < 0)
+    throw PyException("RobotModelLink is invalid");
   RobotLink3D& link=robotPtr->links[index];
   link.type = (prismatic ? RobotLink3D::Prismatic : RobotLink3D::Revolute);
 }
 
 void RobotModelLink::getJacobian(const double p[3],vector<vector<double> >& J)
 {
+  if(index < 0)
+    throw PyException("RobotModelLink is invalid");
   Matrix Jmat;
   robotPtr->GetFullJacobian(Vector3(p),index,Jmat);
   copy(Jmat,J);
@@ -3130,6 +3179,8 @@ void RobotModelLink::getJacobian(const double p[3],vector<vector<double> >& J)
 
 void RobotModelLink::getPositionJacobian(const double p[3],vector<vector<double> >& J)
 {
+  if(index < 0)
+    throw PyException("RobotModelLink is invalid");
   Matrix Jmat;
   robotPtr->GetPositionJacobian(Vector3(p),index,Jmat);
   copy(Jmat,J);
@@ -3137,6 +3188,8 @@ void RobotModelLink::getPositionJacobian(const double p[3],vector<vector<double>
 
 void RobotModelLink::getOrientationJacobian(vector<vector<double> >& J)
 {
+  if(index < 0)
+    throw PyException("RobotModelLink is invalid");
   Matrix Jmat;
   Jmat.resize(3,robotPtr->links.size(),Zero);
   int j=index;
@@ -3151,6 +3204,8 @@ void RobotModelLink::getOrientationJacobian(vector<vector<double> >& J)
 
 void RobotModelLink::getVelocity(double out[3])
 {
+  if(index < 0)
+    throw PyException("RobotModelLink is invalid");
   Vector3 v;
   robotPtr->GetWorldVelocity(Vector3(Zero),index,robotPtr->dq,v);
   v.get(out);
@@ -3158,6 +3213,8 @@ void RobotModelLink::getVelocity(double out[3])
 
 void RobotModelLink::getAngularVelocity(double out[3])
 {
+  if(index < 0)
+    throw PyException("RobotModelLink is invalid");
   Vector3 v;
   robotPtr->GetWorldAngularVelocity(index,robotPtr->dq,v);
   v.get(out);
@@ -3165,6 +3222,8 @@ void RobotModelLink::getAngularVelocity(double out[3])
 
 void RobotModelLink::getPointVelocity(const double plocal[3],double out[3])
 {
+  if(index < 0)
+    throw PyException("RobotModelLink is invalid");
   Vector3 v;
   robotPtr->GetWorldVelocity(Vector3(plocal),index,robotPtr->dq,v);
   v.get(out);
@@ -3178,6 +3237,8 @@ void RobotModelLink::getAcceleration(const std::vector<double>& ddq,double out[3
 
 void RobotModelLink::getPointAcceleration(const double plocal[3],const std::vector<double>& ddq,double out[3])
 {
+  if(index < 0)
+    throw PyException("RobotModelLink is invalid");
   Vector3 dw,dv;
   if(ddq.empty()) {
     robotPtr->GetResidualAcceleration(Vector3(plocal),index,dw,dv);
@@ -3192,6 +3253,8 @@ void RobotModelLink::getPointAcceleration(const double plocal[3],const std::vect
 
 void RobotModelLink::getAngularAcceleration(const std::vector<double>& ddq,double out[3])
 {
+  if(index < 0)
+    throw PyException("RobotModelLink is invalid");
   Vector3 dw,dv;
   if(ddq.empty()) {
     robotPtr->GetResidualAcceleration(Vector3(0.0),index,dw,dv);
@@ -3206,6 +3269,8 @@ void RobotModelLink::getAngularAcceleration(const std::vector<double>& ddq,doubl
 
 void RobotModelLink::getPositionHessian(const double p[3],std::vector<std::vector<double> >& out,std::vector<std::vector<double> >& out2,std::vector<std::vector<double> >& out3)
 {
+  if(index < 0)
+    throw PyException("RobotModelLink is invalid");
   Matrix Hx,Hy,Hz;
   Matrix* H[3] = {&Hx,&Hy,&Hz};
   robotPtr->GetPositionHessian(Vector3(p),index,H);
@@ -3216,6 +3281,8 @@ void RobotModelLink::getPositionHessian(const double p[3],std::vector<std::vecto
 
 void RobotModelLink::getOrientationHessian(std::vector<std::vector<double> >& out,std::vector<std::vector<double> >& out2,std::vector<std::vector<double> >& out3)
 {
+  if(index < 0)
+    throw PyException("RobotModelLink is invalid");
   Matrix Hx,Hy,Hz;
   Matrix* H[3] = {&Hx,&Hy,&Hz};
   Matrix Hwx,Hwy,Hwz;
@@ -3228,6 +3295,8 @@ void RobotModelLink::getOrientationHessian(std::vector<std::vector<double> >& ou
 
 void RobotModelLink::drawLocalGL(bool keepAppearance)
 {
+  if(index < 0)
+    throw PyException("RobotModelLink is invalid");
   RobotWorld& world = *worlds[this->world]->world;
   if(keepAppearance) {
     world.robotViews[robotIndex].DrawLink_Local(index);
@@ -3238,6 +3307,8 @@ void RobotModelLink::drawLocalGL(bool keepAppearance)
 
 void RobotModelLink::drawWorldGL(bool keepAppearance)
 {
+  if(index < 0)
+    throw PyException("RobotModelLink is invalid");
   glMatrixMode(GL_MODELVIEW);
   glPushMatrix();
   GLDraw::glMultMatrix(Matrix4(robotPtr->links[index].T_World));
@@ -3339,17 +3410,13 @@ RobotModel::RobotModel()
 
 bool RobotModel::loadFile(const char* fn)
 {
-  if(index < 0) {
-    throw PyException("Cannot load an empty robot, this needs to be part of a world");
-  }
+  if(!robot) throw PyException("RobotModel is empty");
   return robot->Load(fn);
 }
 
 bool RobotModel::saveFile(const char* fn,const char* geometryPrefix)
 {
-  if(index < 0) {
-    throw PyException("Cannot save an empty robot");
-  }
+  if(!robot) throw PyException("RobotModel is empty");
   if(!robot->Save(fn)) return false;
   if(geometryPrefix) {
     for(size_t i=0;i<robot->links.size();i++) {
@@ -3364,16 +3431,14 @@ bool RobotModel::saveFile(const char* fn,const char* geometryPrefix)
 
 const char* RobotModel::getName() const
 {
-  if(index < 0) throw PyException("Robot is empty");
+  if(!robot) throw PyException("RobotModel is empty");
   RobotWorld& world = *worlds[this->world]->world;
   return world.robots[index]->name.c_str();
 }
 
 void RobotModel::setName(const char* name)
 {
-  if(index < 0) {
-    throw PyException("Cannot set the name of an empty robot");
-  }
+  if(!robot) throw PyException("RobotModel is empty");
   RobotWorld& world = *worlds[this->world]->world;
   world.robots[index]->name = name;
 }
@@ -3381,19 +3446,20 @@ void RobotModel::setName(const char* name)
 
 int RobotModel::getID() const
 {
-  if(index < 0) return -1;
+  if(!robot) return -1;
   RobotWorld& world = *worlds[this->world]->world;
   return world.RobotID(index);
 }
 
 int RobotModel::numLinks()
 {
-  if(index < 0) return -1;
+  if(!robot) return -1;
   return robot->links.size();
 }
 
 RobotModelLink RobotModel::link(int linkindex)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   RobotModelLink link;
   link.world = world;
   link.robotIndex = index;
@@ -3404,6 +3470,7 @@ RobotModelLink RobotModel::link(int linkindex)
 
 RobotModelLink RobotModel::link(const char* name)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   string sname(name);
   for(size_t i=0;i<robot->linkNames.size();i++)
     if(sname == robot->linkNames[i]) {
@@ -3420,12 +3487,13 @@ RobotModelLink RobotModel::link(const char* name)
 
 int RobotModel::numDrivers()
 {
-  if(index < 0) return -1;
+  if(!robot) return -1;
   return robot->drivers.size();
 }
 
 RobotModelDriver RobotModel::driver(int driverindex)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   RobotModelDriver link;
   link.world = world;
   link.robotIndex = index;
@@ -3436,6 +3504,7 @@ RobotModelDriver RobotModel::driver(int driverindex)
 
 RobotModelDriver RobotModel::driver(const char* name)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   string sname(name);
   for(size_t i=0;i<robot->driverNames.size();i++)
     if(sname == robot->driverNames[i]) {
@@ -3451,7 +3520,7 @@ RobotModelDriver RobotModel::driver(const char* name)
 
 const char* RobotModel::getJointType(int dofIndex)
 {
-  if(index < 0) throw PyException("Empty robot");
+  if(!robot) throw PyException("RobotModel is empty");
   for(size_t i=0;i<robot->joints.size();i++) {
     if(robot->DoesJointAffect((int)i,dofIndex)) {
       switch(robot->joints[i].type) {
@@ -3471,6 +3540,7 @@ const char* RobotModel::getJointType(int dofIndex)
 
 const char* RobotModel::getJointType(const char* name)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   RobotModelLink l = link(name);
   if(l.index < 0) throw PyException("Invalid DOF named");
   return getJointType(l.index);
@@ -3479,18 +3549,21 @@ const char* RobotModel::getJointType(const char* name)
 
 void RobotModel::getConfig(vector<double>& q)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   q.resize(robot->q.n);
   robot->q.getCopy(&q[0]);
 }
 
 void RobotModel::getVelocity(vector<double>& dq)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   dq.resize(robot->dq.n);
   robot->dq.getCopy(&dq[0]);
 }
 
 void RobotModel::setConfig(const vector<double>& q)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   if(robot->links.size() != q.size()) {
     throw PyException("Invalid size of configuration");
   }
@@ -3502,6 +3575,7 @@ void RobotModel::setConfig(const vector<double>& q)
 
 void RobotModel::setVelocity(const vector<double>& dq)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   if(robot->links.size() != dq.size()) {
     throw PyException("Invalid size of velocity");
   }
@@ -3511,6 +3585,7 @@ void RobotModel::setVelocity(const vector<double>& dq)
 
 void RobotModel::getJointLimits(vector<double>& qmin,vector<double>& qmax)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   qmin.resize(robot->q.n);
   qmax.resize(robot->q.n);
   robot->qMin.getCopy(&qmin[0]);
@@ -3519,6 +3594,7 @@ void RobotModel::getJointLimits(vector<double>& qmin,vector<double>& qmax)
 
 void RobotModel::setJointLimits(const vector<double>& qmin,const vector<double>& qmax)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   if(robot->links.size() != qmin.size()) {
     throw PyException("Invalid size of joint limit");
   }
@@ -3538,12 +3614,14 @@ void RobotModel::setJointLimits(const vector<double>& qmin,const vector<double>&
 
 void RobotModel::getVelocityLimits(vector<double>& vmax)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   vmax.resize(robot->q.n);
   robot->velMax.getCopy(&vmax[0]);
 }
 
 void RobotModel::setVelocityLimits(const vector<double>& vmax)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   if(robot->links.size() != vmax.size()) {
     throw PyException("Invalid size of velocity limit");
   }
@@ -3559,12 +3637,14 @@ void RobotModel::setVelocityLimits(const vector<double>& vmax)
 
 void RobotModel::getAccelerationLimits(vector<double>& amax)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   amax.resize(robot->q.n);
   robot->accMax.getCopy(&amax[0]);
 }
 
 void RobotModel::setAccelerationLimits(const vector<double>& amax)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   if(robot->links.size() != amax.size()) {
     throw PyException("Invalid size of acceleration limit");
   }
@@ -3580,12 +3660,14 @@ void RobotModel::setAccelerationLimits(const vector<double>& amax)
 
 void RobotModel::getTorqueLimits(vector<double>& tmax)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   tmax.resize(robot->q.n);
   robot->torqueMax.getCopy(&tmax[0]);
 }
 
 void RobotModel::setTorqueLimits(const vector<double>& tmax)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   if(robot->links.size() != tmax.size()) {
     throw PyException("Invalid size of torque limits");
   }
@@ -3601,6 +3683,7 @@ void RobotModel::setTorqueLimits(const vector<double>& tmax)
 
 void RobotModel::setDOFPosition(int i,double qi)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   if(i < 0 || i >= (int)robot->links.size()) {
     throw PyException("Invalid joint index");
   }
@@ -3610,6 +3693,7 @@ void RobotModel::setDOFPosition(int i,double qi)
 
 void RobotModel::setDOFPosition(const char* name,double qi)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   string sname(name);
   for(size_t i=0;i<robot->linkNames.size();i++)
     if(sname == robot->linkNames[i]) {
@@ -3622,11 +3706,13 @@ void RobotModel::setDOFPosition(const char* name,double qi)
 
 double RobotModel::getDOFPosition(int i)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   return robot->q(i);
 }
 
 double RobotModel::getDOFPosition(const char* name)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   string sname(name);
   for(size_t i=0;i<robot->linkNames.size();i++)
     if(sname == robot->linkNames[i]) {
@@ -3639,6 +3725,7 @@ double RobotModel::getDOFPosition(const char* name)
 
 void RobotModel::interpolate(const std::vector<double>& a,const std::vector<double>& b,double u,std::vector<double>& out)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   Vector va(a),vb(b),vout;
   Interpolate(*robot,va,vb,u,vout);
   out = vout;
@@ -3646,6 +3733,7 @@ void RobotModel::interpolate(const std::vector<double>& a,const std::vector<doub
 
 double RobotModel::distance(const std::vector<double>& a,const std::vector<double>& b)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   if(robot->links.size() != a.size()) 
     throw PyException("Invalid size of configuration");
   if(robot->links.size() != b.size()) 
@@ -3656,6 +3744,7 @@ double RobotModel::distance(const std::vector<double>& a,const std::vector<doubl
 
 void RobotModel::interpolateDeriv(const std::vector<double>& a,const std::vector<double>& b,std::vector<double>& dout)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   if(robot->links.size() != a.size()) 
     throw PyException("Invalid size of configuration");
   if(robot->links.size() != b.size()) 
@@ -3667,13 +3756,19 @@ void RobotModel::interpolateDeriv(const std::vector<double>& a,const std::vector
 
 bool RobotModel::selfCollisionEnabled(int link1,int link2)
 {
-  if (link1 > link2) swap(link1,link2);
+  if(!robot) throw PyException("RobotModel is empty");
+  if(link1 > link2) swap(link1,link2);
+  if(link1 < 0 || link2 >= (int)robot->links.size())
+    throw PyException("Invalid link(s) specified");
   return (robot->selfCollisions(link1,link2) != NULL);
 }
 
 void RobotModel::enableSelfCollision(int link1,int link2,bool value)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   if (link1 > link2) swap(link1,link2);
+  if(link1 < 0 || link2 >= (int)robot->links.size())
+    throw PyException("Invalid link(s) specified");
   if(value) {
     if(!robot->selfCollisions(link1,link2))
       robot->InitSelfCollisionPair(link1,link2);
@@ -3686,6 +3781,7 @@ void RobotModel::enableSelfCollision(int link1,int link2,bool value)
 
 bool RobotModel::selfCollides()
 {
+  if(!robot) throw PyException("RobotModel is empty");
   /* old version
   for(size_t i=0;i<robot->links.size();i++)
     for(size_t j=0;j<robot->links.size();j++)
@@ -3697,6 +3793,7 @@ bool RobotModel::selfCollides()
 
 void RobotModel::randomizeConfig(double unboundedStdDeviation)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   RobotCSpace space(*robot);
   space.Sample(robot->q);
   for(size_t i=0;i<robot->joints.size();i++)
@@ -3717,6 +3814,7 @@ void RobotModel::randomizeConfig(double unboundedStdDeviation)
 
 void RobotModel::configToDrivers(const std::vector<double>& config,std::vector<double>& out)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   if(config.size() != robot->links.size()) throw PyException("Invalid size of configuration");
   Config oldq = robot->q;
   robot->q.copy(&config[0]);
@@ -3728,6 +3826,7 @@ void RobotModel::configToDrivers(const std::vector<double>& config,std::vector<d
 
 void RobotModel::velocityToDrivers(const std::vector<double>& velocities,std::vector<double>& out)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   if(velocities.size() != robot->links.size()) throw PyException("Invalid size of configuration");
   Config oldq = robot->dq;
   robot->dq.copy(&velocities[0]);
@@ -3739,6 +3838,7 @@ void RobotModel::velocityToDrivers(const std::vector<double>& velocities,std::ve
 
 void RobotModel::configFromDrivers(const std::vector<double>& driverValues,std::vector<double>& out)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   if(driverValues.size() != robot->drivers.size()) throw PyException("Invalid size of driver value vector");
   Config oldq = robot->q;
   for(size_t i=0;i<robot->drivers.size();i++) 
@@ -3750,6 +3850,7 @@ void RobotModel::configFromDrivers(const std::vector<double>& driverValues,std::
 
 void RobotModel::velocityFromDrivers(const std::vector<double>& driverVelocities,std::vector<double>& out)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   if(driverVelocities.size() != robot->drivers.size()) throw PyException("Invalid size of driver velocity vector");
   Config oldq = robot->dq;
   for(size_t i=0;i<robot->drivers.size();i++) 
@@ -3761,6 +3862,7 @@ void RobotModel::velocityFromDrivers(const std::vector<double>& driverVelocities
 
 void RobotModel::drawGL(bool keepAppearance)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   if(!worlds[this->world]) throw PyException("RobotModel is associated with a deleted world");
   RobotWorld& world = *worlds[this->world]->world;
   if(keepAppearance) {
@@ -3774,12 +3876,14 @@ void RobotModel::drawGL(bool keepAppearance)
 
 void RobotModel::getCom(double out[3])
 {
+  if(!robot) throw PyException("RobotModel is empty");
   Vector3 com = robot->GetCOM();
   com.get(out);
 }
 
 void RobotModel::getComVelocity(double out[3])
 {
+  if(!robot) throw PyException("RobotModel is empty");
   Vector3 h = robot->GetLinearMomentum();
   Vector3 dcm = h / robot->GetTotalMass();
   dcm.get(out);
@@ -3787,6 +3891,7 @@ void RobotModel::getComVelocity(double out[3])
 
 void RobotModel::getComJacobian(std::vector<std::vector<double> >& out)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   Matrix J;
   robot->GetCOMJacobian(J);
   copy(J,out);
@@ -3794,23 +3899,27 @@ void RobotModel::getComJacobian(std::vector<std::vector<double> >& out)
 
 void RobotModel::getLinearMomentum(double out[3])
 {
+  if(!robot) throw PyException("RobotModel is empty");
   Vector3 h = robot->GetLinearMomentum();
   h.get(out);
 }
 
 void RobotModel::getAngularMomentum(double out[3])
 {
+  if(!robot) throw PyException("RobotModel is empty");
   Vector3 k = robot->GetAngularMomentum();
   k.get(out);
 }
 
 double RobotModel::getKineticEnergy()
 {
+  if(!robot) throw PyException("RobotModel is empty");
   return robot->GetKineticEnergy();
 }
 
 void RobotModel::getTotalInertia(std::vector<std::vector<double> >& out)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   Matrix3 H = robot->GetTotalInertia();
   out.resize(3);
   for(int i=0;i<3;i++) {
@@ -3822,6 +3931,7 @@ void RobotModel::getTotalInertia(std::vector<std::vector<double> >& out)
 
 void RobotModel::getMassMatrix(std::vector<std::vector<double> >& B)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   Matrix Bmat;
   /*
   if(dirty_dynamics) {
@@ -3837,6 +3947,7 @@ void RobotModel::getMassMatrix(std::vector<std::vector<double> >& B)
 
 void RobotModel::getMassMatrixInv(std::vector<std::vector<double> >& Binv)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   Matrix Bmatinv;
   /*
   if(dirty_dynamics) {
@@ -3856,6 +3967,7 @@ void RobotModel::getMassMatrixInv(std::vector<std::vector<double> >& Binv)
 
 void RobotModel::getMassMatrixDeriv(int i,std::vector<std::vector<double> >& out)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   Matrix Bmat;
   if(dirty_dynamics) {
     robot->UpdateDynamics();
@@ -3867,6 +3979,7 @@ void RobotModel::getMassMatrixDeriv(int i,std::vector<std::vector<double> >& out
 
 void RobotModel::getMassMatrixTimeDeriv(std::vector<std::vector<double> >& out)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   Matrix Bmat;
   if(dirty_dynamics) {
     robot->UpdateDynamics();
@@ -3878,6 +3991,7 @@ void RobotModel::getMassMatrixTimeDeriv(std::vector<std::vector<double> >& out)
 
 void RobotModel::getCoriolisForceMatrix(std::vector<std::vector<double> >& C)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   Matrix Cmat;
   robot->UpdateDynamics();
   robot->GetCoriolisForceMatrix(Cmat);
@@ -3886,6 +4000,7 @@ void RobotModel::getCoriolisForceMatrix(std::vector<std::vector<double> >& C)
 
 void RobotModel::getCoriolisForces(std::vector<double>& C)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   Vector Cvec;
   if(robot->links.size() > 6) {
     NewtonEulerSolver ne(*robot);
@@ -3900,6 +4015,7 @@ void RobotModel::getCoriolisForces(std::vector<double>& C)
 
 void RobotModel::getGravityForces(const double g[3],std::vector<double>& G)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   Vector Gvec;
   robot->GetGravityTorques(Vector3(g),Gvec);
   copy(Gvec,G);
@@ -3907,6 +4023,7 @@ void RobotModel::getGravityForces(const double g[3],std::vector<double>& G)
 
 void RobotModel::torquesFromAccel(const std::vector<double>& ddq,std::vector<double>& out)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   Vector ddqvec,tvec;
   copy(ddq,ddqvec);
   if(robot->links.size() > 6) {
@@ -3925,6 +4042,7 @@ void RobotModel::torquesFromAccel(const std::vector<double>& ddq,std::vector<dou
 
 void RobotModel::accelFromTorques(const std::vector<double>& t,std::vector<double>& out)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   Vector ddqvec,tvec;
   if(robot->links.size() > 6) {
     copy(t,tvec);
@@ -3945,11 +4063,13 @@ void RobotModel::accelFromTorques(const std::vector<double>& t,std::vector<doubl
 
 void RobotModel::reduce(const RobotModel& fullRobot,std::vector<int>& out)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   fullRobot.robot->Reduce(*robot,out);
 }
 
 void RobotModel::mount(int link,const RobotModel& subRobot,const double R[9],const double t[3])
 {
+  if(!robot) throw PyException("RobotModel is empty");
   RigidTransform T;
   T.R.set(R);
   T.t.set(t);
@@ -3963,6 +4083,7 @@ void RobotModel::mount(int link,const RobotModel& subRobot,const double R[9],con
 
 SimRobotSensor RobotModel::sensor(int sensorIndex)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   shared_ptr<WorldData> worldData = worlds[this->world];
   if(index >= (int)worldData->robotSensors.size())
     worldData->robotSensors.resize(index+1);
@@ -3979,6 +4100,7 @@ SimRobotSensor RobotModel::sensor(int sensorIndex)
 
 SimRobotSensor RobotModel::sensor(const char* name)
 {
+  if(!robot) throw PyException("RobotModel is empty");
   shared_ptr<WorldData> worldData = worlds[this->world];
   if(index >= (int)worldData->robotSensors.size())
     worldData->robotSensors.resize(index+1);
@@ -4001,7 +4123,7 @@ RigidObjectModel::RigidObjectModel()
 
 bool RigidObjectModel::loadFile(const char* fn)
 {
-  if(index < 0) {
+  if(!object) {
     throw PyException("Cannot load an empty rigid object, this needs to be part of a world");
   }
   return object->Load(fn);
@@ -4009,6 +4131,7 @@ bool RigidObjectModel::loadFile(const char* fn)
 
 bool RigidObjectModel::saveFile(const char* fn,const char* geometryName)
 {
+  if(!object) throw PyException("RigidObjectModel is invalid");
   if(!object->Save(fn)) return false;
   if(geometryName)
     if(!object->geometry->Save(geometryName)) return false;
@@ -4017,6 +4140,7 @@ bool RigidObjectModel::saveFile(const char* fn,const char* geometryName)
 
 const char* RigidObjectModel::getName() const
 {
+  if(!object) return "";
   if(!worlds[this->world]) throw PyException("RigidObjectModel is associated with a deleted world");
   RobotWorld& world = *worlds[this->world]->world;
   return world.rigidObjects[index]->name.c_str();
@@ -4024,9 +4148,7 @@ const char* RigidObjectModel::getName() const
 
 void RigidObjectModel::setName(const char* name)
 {
-  if(index < 0) {
-    throw PyException("Cannot set the name of an empty rigid object");
-  }
+  if(!object) throw PyException("RigidObjectModel is invalid");
   if(!worlds[this->world]) throw PyException("RigidObjectModel is associated with a deleted world");
   RobotWorld& world = *worlds[this->world]->world;
   world.rigidObjects[index]->name = name;
@@ -4034,6 +4156,7 @@ void RigidObjectModel::setName(const char* name)
 
 int RigidObjectModel::getID() const
 {
+  if(!object) throw PyException("RigidObjectModel is invalid");
   if(!worlds[this->world]) throw PyException("RigidObjectModel is associated with a deleted world");
   RobotWorld& world = *worlds[this->world]->world;
   return world.RigidObjectID(index);
@@ -4041,6 +4164,7 @@ int RigidObjectModel::getID() const
 
 Geometry3D RigidObjectModel::geometry()
 {
+  if(!object) throw PyException("RigidObjectModel is invalid");
   Geometry3D res;
   res.world = world;
   res.id = getID();
@@ -4051,6 +4175,7 @@ Geometry3D RigidObjectModel::geometry()
 
 Appearance RigidObjectModel::appearance()
 {
+  if(!object) throw PyException("RigidObjectModel is invalid");
   Appearance res;
   res.world = world;
   res.id = getID();
@@ -4061,6 +4186,7 @@ Appearance RigidObjectModel::appearance()
 
 Mass RigidObjectModel::getMass()
 {
+  if(!object) throw PyException("RigidObjectModel is invalid");
   Mass mass;
   RigidObject* obj=object;
   mass.mass = obj->mass;
@@ -4073,6 +4199,7 @@ Mass RigidObjectModel::getMass()
 
 void RigidObjectModel::setMass(const Mass& mass)
 {
+  if(!object) throw PyException("RigidObjectModel is invalid");
   if(mass.com.size()!=3) {
     throw PyException("Mass com does not have length 3");
   }
@@ -4095,6 +4222,7 @@ void RigidObjectModel::setMass(const Mass& mass)
 
 ContactParameters RigidObjectModel::getContactParameters()
 {
+  if(!object) throw PyException("RigidObjectModel is invalid");
   ContactParameters params;
   RigidObject* obj=object;
   params.kFriction = obj->kFriction;
@@ -4106,6 +4234,7 @@ ContactParameters RigidObjectModel::getContactParameters()
 
 void RigidObjectModel::setContactParameters(const ContactParameters& params)
 {
+  if(!object) throw PyException("RigidObjectModel is invalid");
   RigidObject* obj=object;
   obj->kFriction = params.kFriction;
   obj->kRestitution = params.kRestitution;
@@ -4115,6 +4244,7 @@ void RigidObjectModel::setContactParameters(const ContactParameters& params)
 
 void RigidObjectModel::getTransform(double R[9],double t[3])
 {
+  if(!object) throw PyException("RigidObjectModel is invalid");
   RigidObject* obj=object;
   obj->T.R.get(R);
   obj->T.t.get(t);
@@ -4122,6 +4252,7 @@ void RigidObjectModel::getTransform(double R[9],double t[3])
 
 void RigidObjectModel::setTransform(const double R[9],const double t[3])
 {
+  if(!object) throw PyException("RigidObjectModel is invalid");
   RigidObject* obj=object;
   obj->T.R.set(R);
   obj->T.t.set(t);
@@ -4130,6 +4261,7 @@ void RigidObjectModel::setTransform(const double R[9],const double t[3])
 
 void RigidObjectModel::getVelocity(double out[3],double out2[3])
 {
+  if(!object) throw PyException("RigidObjectModel is invalid");
   RigidObject* obj=object;
   obj->w.get(out);
   obj->v.get(out2);
@@ -4137,6 +4269,7 @@ void RigidObjectModel::getVelocity(double out[3],double out2[3])
 
 void RigidObjectModel::setVelocity(const double angularVelocity[3],const double velocity[3])
 {
+  if(!object) throw PyException("RigidObjectModel is invalid");
   RigidObject* obj=object;
   obj->w.set(angularVelocity);
   obj->v.set(velocity);
@@ -4144,6 +4277,7 @@ void RigidObjectModel::setVelocity(const double angularVelocity[3],const double 
 
 void RigidObjectModel::drawGL(bool keepAppearance)
 {
+  if(!object) throw PyException("RigidObjectModel is invalid");
   if(!worlds[this->world]) throw PyException("RigidObjectModel is associated with a deleted world");
   RobotWorld& world = *worlds[this->world]->world;
   if(keepAppearance) {
@@ -4167,14 +4301,15 @@ TerrainModel::TerrainModel()
 
 bool TerrainModel::loadFile(const char* fn)
 {
-  if(index < 0) {
-    throw PyException("Cannot load an empty terrain, this needs to be part of a world");
-  }
+  if(!terrain) {
+    throw PyException("Cannot load an empty TerrainModel; it must be part of a world.");
+  } 
   return terrain->Load(fn);
 }
 
 bool TerrainModel::saveFile(const char* fn,const char* geometryName)
 {
+  if(!terrain) throw PyException("TerrainModel is invalid");
   if(!terrain->Save(fn)) return false;
   if(geometryName)
     if(!terrain->geometry->Save(geometryName)) return false;
@@ -4183,6 +4318,7 @@ bool TerrainModel::saveFile(const char* fn,const char* geometryName)
 
 const char* TerrainModel::getName() const
 {
+  if(!terrain) throw PyException("TerrainModel is invalid");
   if(!worlds[this->world]) throw PyException("TerrainModel is associated with a deleted world");
   RobotWorld& world = *worlds[this->world]->world;
   return world.terrains[index]->name.c_str();
@@ -4190,9 +4326,7 @@ const char* TerrainModel::getName() const
 
 void TerrainModel::setName(const char* name)
 {
-  if(index < 0) {
-    throw PyException("Cannot set the name of an empty rigid object");
-  }
+  if(!terrain) throw PyException("TerrainModel is invalid");
   if(!worlds[this->world]) throw PyException("TerrainModel is associated with a deleted world");
   RobotWorld& world = *worlds[this->world]->world;
   world.terrains[index]->name = name;
@@ -4201,6 +4335,7 @@ void TerrainModel::setName(const char* name)
 
 int TerrainModel::getID() const
 {
+  if(!terrain) throw PyException("TerrainModel is invalid");
   if(!worlds[this->world]) throw PyException("TerrainModel is associated with a deleted world");
   RobotWorld& world = *worlds[this->world]->world;
   return world.TerrainID(index);
@@ -4208,6 +4343,7 @@ int TerrainModel::getID() const
 
 Geometry3D TerrainModel::geometry()
 {
+  if(!terrain) throw PyException("TerrainModel is invalid");
   Geometry3D res;
   res.world = world;
   res.id = getID();
@@ -4219,6 +4355,7 @@ Geometry3D TerrainModel::geometry()
 
 Appearance TerrainModel::appearance()
 {
+  if(!terrain) throw PyException("TerrainModel is invalid");
   Appearance res;
   res.world = world;
   res.id = getID();
@@ -4229,11 +4366,13 @@ Appearance TerrainModel::appearance()
 
 void TerrainModel::setFriction(double friction)
 {
+  if(!terrain) throw PyException("TerrainModel is invalid");
   terrain->SetUniformFriction(friction);
 }
 
 void TerrainModel::drawGL(bool keepAppearance)
 {
+  if(!terrain) throw PyException("TerrainModel is invalid");
   if(!worlds[this->world]) throw PyException("TerrainModel is associated with a deleted world");
   RobotWorld& world = *worlds[this->world]->world;
   if(keepAppearance) {
@@ -4376,6 +4515,8 @@ void Simulator::updateWorld()
 
 void Simulator::getActualConfig(int robot,std::vector<double>& out)
 {
+  if(robot < 0 || robot>= (int)sim->controlSimulators.size()) 
+    throw PyException("Invalid robot index, out of bounds");
   Vector qv;
   sim->controlSimulators[robot].GetSimulatedConfig(qv);
   out = qv;
@@ -4383,6 +4524,8 @@ void Simulator::getActualConfig(int robot,std::vector<double>& out)
 
 void Simulator::getActualVelocity(int robot,std::vector<double>& out)
 {
+  if(robot < 0 || robot>= (int)sim->controlSimulators.size()) 
+    throw PyException("Invalid robot index, out of bounds");
   Vector qv;
   sim->controlSimulators[robot].GetSimulatedVelocity(qv);
   out = qv;
@@ -4390,6 +4533,8 @@ void Simulator::getActualVelocity(int robot,std::vector<double>& out)
 
 void Simulator::getActualTorque(int robot,std::vector<double>& out)
 {
+  if(robot < 0 || robot>= (int)sim->controlSimulators.size()) 
+    throw PyException("Invalid robot index, out of bounds");
   Vector t;
   sim->controlSimulators[robot].GetActuatorTorques(t);
   out = t;
@@ -4397,6 +4542,8 @@ void Simulator::getActualTorque(int robot,std::vector<double>& out)
 
 void Simulator::getActualTorques(int robot,std::vector<double>& out)
 {
+  if(robot < 0 || robot>= (int)sim->controlSimulators.size()) 
+    throw PyException("Invalid robot index, out of bounds");
   static bool warned=false;
   if(!warned) {
     fprintf(stderr,"Warning: Simulator.getActualTorques will be deprecated. Use getActualTorque instead\n");
@@ -4560,6 +4707,7 @@ std::vector<std::string> Simulator::settings()
   res.push_back("instabilityLinearEnergyThreshold");
   res.push_back("instabilityMaxEnergyThreshold");
   res.push_back("instabilityPostCorrectionEnergy");
+  return res;
 }
 
 std::string Simulator::getSetting(const std::string& name)
@@ -4616,7 +4764,7 @@ void Simulator::setSetting(const std::string& name,const std::string& value)
 
 SimRobotController Simulator::controller(int robot)
 {
-  if(robot < 0 || robot > sim->controlSimulators.size())
+  if(robot < 0 || robot >= (int)sim->controlSimulators.size())
     throw PyException("Invalid robot index");
   SimRobotController c;
   c.sim = this;
@@ -4628,7 +4776,7 @@ SimRobotController Simulator::controller(int robot)
 
 SimRobotController Simulator::controller(const RobotModel& robot)
 {
-  if(robot.index < 0 || robot.index > sim->controlSimulators.size())
+  if(robot.index < 0 || robot.index >= (int)sim->controlSimulators.size())
     throw PyException("Invalid robot index");
   SimRobotController c;
   c.sim = this;

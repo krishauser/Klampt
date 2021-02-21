@@ -193,7 +193,7 @@ highlighted link is drawn with longer axes.
 API summary
 ~~~~~~~~~~~
 
-The link functionality is given in the :class:`RobotModelLink` class. Changing from
+The link functionality is given in the :class:`~klampt.RobotModelLink` class. Changing from
 revolute to prismatic types is not supported at the moment. 
 
 Configuration-independent functions that define the kinematic structure
@@ -386,7 +386,7 @@ the dynamic parameters are set to default values (e.g., ``mass = 1``).
 API summary
 ~~~~~~~~~~~
 
-See the :class:`RigidObjectModel` class.
+See the :class:`~klampt.RigidObjectModel` class.
 
 Terrain Models
 --------------
@@ -399,7 +399,7 @@ assigned (set to 0.5).
 API summary
 ~~~~~~~~~~~
 
-See the `TerrainModel <klampt.robotsim.html#klampt.TerrainModel>`_ class.
+See the :class:`~klampt.TerrainModel` class.
 
 
 World Creation Example
@@ -438,30 +438,33 @@ as terrain to the world:
 
 .. code:: python
 
+    from klampt.model.create import primitives
+
     #you will need to change this to the absolute or relative path to Klampt-examples
     KLAMPT_EXAMPLES = 'Klampt-examples'
 
     def make_shelf(world,width,depth,height,wall_thickness=0.005):
         """Makes a new axis-aligned "shelf" centered at the origin with
         dimensions width x depth x height. Walls have thickness wall_thickness. 
-        If mass=inf, then the box is a Terrain, otherwise it's a RigidObject
-        with automatically determined inertia.
         """
         left = Geometry3D()
         right = Geometry3D()
         back = Geometry3D()
         bottom = Geometry3D()
         top = Geometry3D()
+        #method 1
         left.loadFile(KLAMPT_EXAMPLES+"/data/objects/cube.off")
-        right.loadFile(KLAMPT_EXAMPLES+"/data/objects/cube.off")
-        back.loadFile(KLAMPT_EXAMPLES+"/data/objects/cube.off")
-        bottom.loadFile(KLAMPT_EXAMPLES+"/data/objects/cube.off")
-        top.loadFile(KLAMPT_EXAMPLES+"/data/objects/cube.off")
         left.transform([wall_thickness,0,0,0,depth,0,0,0,height],[-width*0.5,-depth*0.5,0])
+        right.loadFile(KLAMPT_EXAMPLES+"/data/objects/cube.off")
         right.transform([wall_thickness,0,0,0,depth,0,0,0,height],[width*0.5,-depth*0.5,0])
-        back.transform([width,0,0,0,wall_thickness,0,0,0,height],[-width*0.5,depth*0.5,0])
-        bottom.transform([width,0,0,0,depth,0,0,0,wall_thickness],[-width*0.5,-depth*0.5,0])
-        top.transform([width,0,0,0,depth,0,0,0,wall_thickness],[-width*0.5,-depth*0.5,height-wall_thickness])
+        #method 2
+        back.loadFile(KLAMPT_EXAMPLES+"/data/objects/cube.off")
+        back.scale(width,wall_thickness,height)
+        back.translate([-width*0.5,depth*0.5,0])
+        #equivalent to back.transform([width,0,0,0,wall_thickness,0,0,0,height],[-width*0.5,depth*0.5,0])
+        #method 3
+        bottom = primitives.box(width,depth,wall_thickness,center=[0,0,0])
+        top = primitives.box(width,depth,wall_thickness,center=[0,0,height-wall_thickness*0.5])
         shelfgeom = Geometry3D()
         shelfgeom.setGroup()
         for i,elem in enumerate([left,right,back,bottom,top]):
@@ -472,30 +475,34 @@ as terrain to the world:
         shelf.appearance().setColor(0.2,0.6,0.3,1.0)
         return shelf
 
-The code first create the left, right, back, bottom and top pieces of
-the shelf as a Geometry3D. A three-D geometry can either be a reference to
+The code first creates the left, right, back, bottom and top pieces of
+the shelf as a Geometry3D. A Geometry3D can either be a reference to
 a world item's geometry, in which case modifiers change the world item's
 geometry, or it can be a standalone geometry.  See the :class:`~klampt.Geometry3D`
-documentation for more details.
+documentation for more details.  This example shows three ways of creating the geometry:
 
-The next step is to load the 3D geometry, in this case ``cube.off`` located
-in ``Klampt-examples/data/objects``. Each of these are set up by scaling and
-translating each of them, similar to the steps when editing XML. Each geometry
-stores a "current" transform, which is automatically updated for world
-items' geometries. The proximity queries are performed with respect to
-the transformed geometries.
+1. Loading a mesh from disk and using the ``transform`` function.  The ``cube.off`` file
+   in ``Klampt-examples/data/objects`` defines a unit cube.  The cube is then scaled
+   with a scaling matrix and translated with some offset, similar to the steps used
+   when building the world from XML.
+2. Loading a mesh from disk and using the ``scale``, ``translate``, and ``rotate`` functions.
+   This is often more convenient than defining the full transform matrix.
+3. Using the helpers in :mod:`klampt.model.create.primitives` module. 
 
-Lastly, the function groups the seperate pieces together and
-combine it as one terrain named "shelf" and assign a color to the shelf.
+Lastly, the function groups the seperate pieces together,
+combines it as one terrain named "shelf", and assigns a color to the
+shelf.
 
 We now make changes to ``world_create_test.py`` to include the
-``make_shelf`` function, add shelf parameters and call the function
-after the world has been loaded, but before it is drawn.
+``make_shelf`` function.  Note that the function should be called after the
+world has been loaded, but before it is drawn.
 
 ::
 
     from klampt import WorldModel,Geometry3D
     from klampt import vis
+    from klampt.math import vectorops,so3,se3
+    from klampt.model.create import primitives
 
     #you will need to change this to the absolute or relative path to Klampt-examples
     KLAMPT_EXAMPLES = 'Klampt-examples'
@@ -508,24 +515,25 @@ after the world has been loaded, but before it is drawn.
     def make_shelf(world,width,depth,height,wall_thickness=0.005):
         """Makes a new axis-aligned "shelf" centered at the origin with
         dimensions width x depth x height. Walls have thickness wall_thickness. 
-        If mass=inf, then the box is a Terrain, otherwise it's a RigidObject
-        with automatically determined inertia.
         """
         left = Geometry3D()
         right = Geometry3D()
         back = Geometry3D()
         bottom = Geometry3D()
         top = Geometry3D()
+        #method 1
         left.loadFile(KLAMPT_EXAMPLES+"/data/objects/cube.off")
-        right.loadFile(KLAMPT_EXAMPLES+"/data/objects/cube.off")
-        back.loadFile(KLAMPT_EXAMPLES+"/data/objects/cube.off")
-        bottom.loadFile(KLAMPT_EXAMPLES+"/data/objects/cube.off")
-        top.loadFile(KLAMPT_EXAMPLES+"/data/objects/cube.off")
         left.transform([wall_thickness,0,0,0,depth,0,0,0,height],[-width*0.5,-depth*0.5,0])
+        right.loadFile(KLAMPT_EXAMPLES+"/data/objects/cube.off")
         right.transform([wall_thickness,0,0,0,depth,0,0,0,height],[width*0.5,-depth*0.5,0])
-        back.transform([width,0,0,0,wall_thickness,0,0,0,height],[-width*0.5,depth*0.5,0])
-        bottom.transform([width,0,0,0,depth,0,0,0,wall_thickness],[-width*0.5,-depth*0.5,0])
-        top.transform([width,0,0,0,depth,0,0,0,wall_thickness],[-width*0.5,-depth*0.5,height-wall_thickness])
+        #method 2
+        back.loadFile(KLAMPT_EXAMPLES+"/data/objects/cube.off")
+        back.scale(width,wall_thickness,height)
+        back.translate([-width*0.5,depth*0.5,0])
+        #equivalent to back.transform([width,0,0,0,wall_thickness,0,0,0,height],[-width*0.5,depth*0.5,0])
+        #method 3
+        bottom = primitives.box(width,depth,wall_thickness,center=[0,0,0])
+        top = primitives.box(width,depth,wall_thickness,center=[0,0,height-wall_thickness*0.5])
         shelfgeom = Geometry3D()
         shelfgeom.setGroup()
         for i,elem in enumerate([left,right,back,bottom,top]):
@@ -546,12 +554,122 @@ after the world has been loaded, but before it is drawn.
     vis.add("world",w)
     vis.run()
 
-Running this script again, you can see that on top of what was in the world XML file,
+Running this script again, you can see that in addition to what was in the world XML file,
 there should be a new shelf lying on the table surface:
 
 .. image:: _static/images/shelf.png
 
 
+Now we can add some rigid objects to the scene, which can be moved and simulated.  To make
+things interesting, let's load a point cloud object from a PCD file.
+
+::
+
+    obj = w.makeRigidObject("point_cloud_object")
+    obj.geometry().loadFile(KLAMPT_EXAMPLES+"/data/objects/apc/genuine_joe_stir_sticks.pcd")
+    #set up a "reasonable" inertial parameter estimate for a 200g object
+    m = obj.getMass()
+    m.estimate(obj.geometry(),0.200)
+    obj.setMass(m)
+    #move the object into the shelf, slightly away from the coffee cup
+    obj.setTransform(so3.identity(),[shelf_offset_x+0.05,shelf_offset_y,shelf_height+0.01])
+
+Each Geometry3D and RigidObjectModel also stores a "current" transform, which poses it
+in space without modifying the underlying geometry data.  All collision queries (including
+those used in physics simulation) are performed with respect to the transformed geometry,
+rather than the underlying geometry.  For a stand-alone geometry, you set it using ``Geometry3D.setCurrentTransform``
+and for RigidObjectModels you set it using the ``RigidObjectModel.setTransform`` function.
+(Setting RigidObjectModel transforms automatically updates the geometry's current transform,
+as does setting a RobotModel's configuration.)
+
+With this setup, you'll see the object near the coffee cup like the following image:
+
+.. image:: _static/images/shelf_with_objects.png
+
+Just for fun, we can make a little adjustment to the visualizer to set up a simulation
+that gives you control over a mouse-controlled "ghost" configuration, shown in green.
+Right click on the robot's joints to drive the robot around.  Have fun trying to pick
+up the box!  It can be done...
+
+::
+
+    from klampt import WorldModel,Geometry3D
+    from klampt import vis
+    from klampt.math import vectorops,so3,se3
+    from klampt.model.create import primitives
+
+    #you will need to change this to the absolute or relative path to Klampt-examples
+    KLAMPT_EXAMPLES = '.'
+
+    shelf_dims = (0.4,0.4,0.3)
+    shelf_offset_x=0.8
+    shelf_offset_y = 0.1
+    shelf_height = 0.65
+
+    def make_shelf(world,width,depth,height,wall_thickness=0.005):
+        """Makes a new axis-aligned "shelf" centered at the origin with
+        dimensions width x depth x height. Walls have thickness wall_thickness. 
+        """
+        left = Geometry3D()
+        right = Geometry3D()
+        back = Geometry3D()
+        bottom = Geometry3D()
+        top = Geometry3D()
+        #method 1
+        left.loadFile(KLAMPT_EXAMPLES+"/data/objects/cube.off")
+        left.transform([wall_thickness,0,0,0,depth,0,0,0,height],[-width*0.5,-depth*0.5,0])
+        right.loadFile(KLAMPT_EXAMPLES+"/data/objects/cube.off")
+        right.transform([wall_thickness,0,0,0,depth,0,0,0,height],[width*0.5,-depth*0.5,0])
+        #method 2
+        back.loadFile(KLAMPT_EXAMPLES+"/data/objects/cube.off")
+        back.scale(width,wall_thickness,height)
+        back.translate([-width*0.5,depth*0.5,0])
+        #equivalent to back.transform([width,0,0,0,wall_thickness,0,0,0,height],[-width*0.5,depth*0.5,0])
+        #method 3
+        bottom = primitives.box(width,depth,wall_thickness,center=[0,0,0])
+        top = primitives.box(width,depth,wall_thickness,center=[0,0,height-wall_thickness*0.5])
+        shelfgeom = Geometry3D()
+        shelfgeom.setGroup()
+        for i,elem in enumerate([left,right,back,bottom,top]):
+            g = Geometry3D(elem)
+            shelfgeom.setElement(i,g)
+        shelf = world.makeTerrain("shelf")
+        shelf.geometry().set(shelfgeom)
+        shelf.appearance().setColor(0.2,0.6,0.3,1.0)
+        return shelf
+
+    w = WorldModel()
+    if not w.readFile("myworld.xml"):
+        raise RuntimeError("Couldn't read the world file")
+
+    shelf = make_shelf(w,*shelf_dims)
+    shelf.geometry().translate((shelf_offset_x,shelf_offset_y,shelf_height))
+
+    obj = w.makeRigidObject("point_cloud_object")
+    obj.geometry().loadFile(KLAMPT_EXAMPLES+"/data/objects/apc/genuine_joe_stir_sticks.pcd")
+    #set up a "reasonable" inertial parameter estimate for a 200g object
+    m = obj.getMass()
+    m.estimate(obj.geometry(),0.200)
+    obj.setMass(m)
+    #we'll move the box slightly forward so the robot can reach it
+    obj.setTransform(so3.identity(),[shelf_offset_x-0.05,shelf_offset_y-0.3,shelf_height+0.01])
+
+
+    vis.add("world",w)
+    vis.add("ghost",w.robot(0).getConfig(),color=(0,1,0,0.5))
+    vis.edit("ghost")
+    from klampt import Simulator
+
+    sim = Simulator(w)
+    def setup():
+        vis.show()
+
+    def callback():
+        sim.controller(0).setPIDCommand(vis.getItemConfig("ghost"),[0]*w.robot(0).numLinks())
+        sim.simulate(0.01)
+        sim.updateWorld()
+
+    vis.loop(setup=setup,callback=callback)
 
 
 .. |World elements illustration| image:: _static/images/modeling-world.png

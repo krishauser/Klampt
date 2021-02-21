@@ -6,8 +6,8 @@
   constant time step.
 """
 
-from OpenGL.GL import *
-from OpenGL.GLU import *
+from . import glinit
+from OpenGL import GL
 from .glviewport import GLViewport
 from ..math import so3,se3,vectorops
 import math
@@ -160,26 +160,26 @@ class GLProgram:
         # Viewport
         view = self.view
         ydevice = (self.window.height - view.y - view.h)
-        glViewport(view.x*view.screenDeviceScale,ydevice*view.screenDeviceScale,view.w*view.screenDeviceScale,view.h*view.screenDeviceScale)
+        GL.glViewport(view.x*view.screenDeviceScale,ydevice*view.screenDeviceScale,view.w*view.screenDeviceScale,view.h*view.screenDeviceScale)
         
         # Initialize
-        glClearColor(*self.clearColor)
-        glScissor(view.x*view.screenDeviceScale,ydevice*view.screenDeviceScale,view.w*view.screenDeviceScale,view.h*view.screenDeviceScale)
-        glEnable(GL_SCISSOR_TEST);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glEnable(GL_DEPTH_TEST)
-        glEnable(GL_LIGHTING)
-        glEnable(GL_NORMALIZE)
-        glShadeModel(GL_FLAT)
+        GL.glClearColor(*self.clearColor)
+        GL.glScissor(view.x*view.screenDeviceScale,ydevice*view.screenDeviceScale,view.w*view.screenDeviceScale,view.h*view.screenDeviceScale)
+        GL.glEnable(GL.GL_SCISSOR_TEST);
+        GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+        GL.glEnable(GL.GL_DEPTH_TEST)
+        GL.glEnable(GL.GL_LIGHTING)
+        GL.glEnable(GL.GL_NORMALIZE)
+        GL.glShadeModel(GL.GL_FLAT)
 
     def prepare_screen_GL(self):
         """Prepare drawing on screen
         """
-        glMatrixMode(GL_PROJECTION)
-        glLoadIdentity()
-        glOrtho(0,self.view.w*self.view.screenDeviceScale,self.view.h*self.view.screenDeviceScale,0,-1,1);
-        glMatrixMode(GL_MODELVIEW)
-        glLoadIdentity()
+        GL.glMatrixMode(GL.GL_PROJECTION)
+        GL.glLoadIdentity()
+        GL.glOrtho(0,self.view.w*self.view.screenDeviceScale,self.view.h*self.view.screenDeviceScale,0,-1,1);
+        GL.glMatrixMode(GL.GL_MODELVIEW)
+        GL.glLoadIdentity()
        
     def display(self):
         """Do drawing of objects in world"""
@@ -197,9 +197,9 @@ class GLProgram:
         """Retrieves a screenshot"""
         if hasattr(self.window,'makeCurrent'):
             self.window.makeCurrent()
-        glReadBuffer(GL_FRONT);
+        GL.glReadBuffer(GL.GL_FRONT);
         x,y,w,h = self.view.x*self.view.screenDeviceScale,self.view.y*self.view.screenDeviceScale,self.view.w*self.view.screenDeviceScale,self.view.h*self.view.screenDeviceScale
-        screenshot = glReadPixels( x, y, w, h, GL_RGB, GL_UNSIGNED_BYTE)
+        screenshot = GL.glReadPixels( x, y, w, h, GL.GL_RGB, GL.GL_UNSIGNED_BYTE)
         if format == 'auto':
             try:
                 import numpy as np
@@ -222,7 +222,7 @@ class GLProgram:
             rgb = (w,h,screenshot)
         if want_depth:
             n,f = self.view.clippingplanes
-            depthdata = glReadPixels( x, y, w, h, GL_DEPTH_COMPONENT, GL_FLOAT)
+            depthdata = GL.glReadPixels( x, y, w, h, GL.GL_DEPTH_COMPONENT, GL.GL_FLOAT)
             if format == 'numpy':
                 import numpy as np
                 depth = np.frombuffer(depthdata,dtype=np.float32).reshape((h,w))
@@ -300,16 +300,16 @@ class GLNavigationProgram(GLProgram):
 
     def set_lights_GL(self):
         """Sets the default OpenGL lights"""
-        glLightfv(GL_LIGHT0,GL_POSITION,[0,-1,2,0])
-        glLightfv(GL_LIGHT0,GL_AMBIENT,[0.05,0.05,0.05,1])
-        glLightfv(GL_LIGHT0,GL_DIFFUSE,[1,1,1,1])
-        glLightfv(GL_LIGHT0,GL_SPECULAR,[1,1,1,1])
-        glEnable(GL_LIGHT0)
+        GL.glLightfv(GL.GL_LIGHT0,GL.GL_POSITION,[0,-1,2,0])
+        GL.glLightfv(GL.GL_LIGHT0,GL.GL_AMBIENT,[0.05,0.05,0.05,1])
+        GL.glLightfv(GL.GL_LIGHT0,GL.GL_DIFFUSE,[1,1,1,1])
+        GL.glLightfv(GL.GL_LIGHT0,GL.GL_SPECULAR,[1,1,1,1])
+        GL.glEnable(GL.GL_LIGHT0)
 
-        glLightfv(GL_LIGHT1,GL_POSITION,[-1,2,1,0])
-        glLightfv(GL_LIGHT1,GL_DIFFUSE,[0.5,0.5,0.5,1])
-        glLightfv(GL_LIGHT1,GL_SPECULAR,[0.5,0.5,0.5,1])
-        glEnable(GL_LIGHT1)
+        GL.glLightfv(GL.GL_LIGHT1,GL.GL_POSITION,[-1,2,1,0])
+        GL.glLightfv(GL.GL_LIGHT1,GL.GL_DIFFUSE,[0.5,0.5,0.5,1])
+        GL.glLightfv(GL.GL_LIGHT1,GL.GL_SPECULAR,[0.5,0.5,0.5,1])
+        GL.glEnable(GL.GL_LIGHT1)
 
     def motionfunc(self,x,y,dx,dy):
         if self.dragging:

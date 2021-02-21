@@ -3,10 +3,11 @@ are used by the core visualization module.  They may be useful for writing
 your own GLPluginInterface classes, too.
 """
 
+from . import glinit
+from OpenGL import GL
 from .glinterface import GLPluginInterface
 from .glprogram import GLProgram,GLPluginProgram
 import math
-from OpenGL.GL import *
 import weakref
 import warnings
 
@@ -168,6 +169,7 @@ class GLMultiViewportProgram(GLProgram):
             for i,p in enumerate(self.views):
                 col = i % rowlen
                 row = int(i / rowlen)
+                p.view.screenDeviceScale = self.view.screenDeviceScale
                 p.view.x = float(self.view.w)*float(cumcolwidths[col])/float(cumcolwidths[-1])
                 p.view.y = float(self.view.h)*float(cumrowheights[row])/float(cumrowheights[-1])
                 p.view.w = float(self.view.w)*float(colwidths[col]) / float(cumcolwidths[-1])
@@ -190,10 +192,10 @@ class GLMultiViewportProgram(GLProgram):
         return True
     def displayfunc(self):
         anyTrue = False
-        glClearColor(0,0,0,0)
-        glScissor(0,0,self.view.w,self.view.h)
-        glEnable(GL_SCISSOR_TEST);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        GL.glClearColor(0,0,0,0)
+        GL.glScissor(0,0,self.view.w*self.view.screenDeviceScale,self.view.h*self.view.screenDeviceScale)
+        GL.glEnable(GL.GL_SCISSOR_TEST);
+        GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
         for p in self.views:
             try:
                 if p.displayfunc():
@@ -336,7 +338,7 @@ class CachedGLObject:
             global _CACHED_DELETED_LISTS,_CACHED_DISPLAY_LISTS
             if len(_CACHED_DELETED_LISTS) > 100:
                 for dl in _CACHED_DELETED_LISTS:
-                    glDeleteLists(dl,1)
+                    GL.glDeleteLists(dl,1)
                 _CACHED_DELETED_LISTS = list()
             else:
                 _CACHED_DELETED_LISTS.append(self.glDisplayList)
@@ -373,33 +375,33 @@ class CachedGLObject:
                     self.glDisplayList = _CACHED_DELETED_LISTS[-1]
                     _CACHED_DELETED_LISTS.pop(-1)
                 else:
-                    self.glDisplayList = glGenLists(1)
+                    self.glDisplayList = GL.glGenLists(1)
                 _CACHED_DISPLAY_LISTS.add(self.glDisplayList)
                 if len(_CACHED_DISPLAY_LISTS) > _CACHED_WARN_THRESHOLD:
                     print("GLCachedObject: Creating",len(_CACHED_DISPLAY_LISTS),"GL objects",self.glDisplayList,"watch me for memory usage...")
                     _CACHED_WARN_THRESHOLD += 1000
             #print "Compiling display list",self.name
             if transform:
-                glPushMatrix()
-                glMultMatrixf(sum(list(zip(*se3.homogeneous(transform))),()))
+                GL.glPushMatrix()
+                GL.glMultMatrixf(sum(list(zip(*se3.homogeneous(transform))),()))
             
-            glNewList(self.glDisplayList,GL_COMPILE_AND_EXECUTE)
+            GL.glNewList(self.glDisplayList,GL.GL_COMPILE_AND_EXECUTE)
             self.makingDisplayList = True
             try:
                 renderFunction(*args)
-            except GLError:
+            except GL.GLError:
                 import traceback
                 print("Error encountered during draw, display list",self.glDisplayList)
                 traceback.print_exc()
             self.makingDisplayList = False
-            glEndList()
+            GL.glEndList()
 
             if transform:
-                glPopMatrix()
+                GL.glPopMatrix()
         else:
             if transform:
-                glPushMatrix()
-                glMultMatrixf(sum(list(zip(*se3.homogeneous(transform))),()))
-            glCallList(self.glDisplayList)
+                GL.glPushMatrix()
+                GL.glMultMatrixf(sum(list(zip(*se3.homogeneous(transform))),()))
+            GL.glCallList(self.glDisplayList)
             if transform:
-                glPopMatrix()
+                GL.glPopMatrix()

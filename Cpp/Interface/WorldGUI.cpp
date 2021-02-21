@@ -70,6 +70,10 @@ bool WorldGUIBackend::OnMouseWheel(int dwheel)
 bool WorldGUIBackend::LoadFile(const char* fn)
 {
     const char* ext=FileExtension(fn);
+    if(!ext) {
+      printf("Error loading file %s, no extension provided\n",fn);
+      return false;
+    }
     if(0==strcmp(ext,"xml")) {
       if(!world->LoadXML(fn)) {
 	printf("Error loading world file %s\n",fn);
@@ -86,8 +90,12 @@ bool WorldGUIBackend::LoadFile(const char* fn)
 
 bool WorldGUIBackend::ReloadFile(const char* fn)
 {
-  printf("Reloading %s\n",fn);
   const char* ext=FileExtension(fn);
+  if(!ext) {
+    printf("WorldGUIBackend:: Error loading file %s, no extension provided\n",fn);
+    return false;
+  }
+  printf("Reloading %s\n",fn);
     if(0==strcmp(ext,"xml")) {
       if(!world->LoadXML(fn)) {
   printf("WorldGUIBackend::ReloadFile: Error loading world file %s\n",fn);
@@ -186,6 +194,10 @@ bool WorldGUIBackend::LoadCommandLine(int argc,const char** argv)
     }
     else {
       const char* ext=FileExtension(argv[i]);
+      if(!ext) {
+        printf("Error loading file %s, no extension provided\n",argv[i]);
+        return false;
+      }
       if(0==strcmp(ext,"xml")) {
 	if(!world->LoadXML(argv[i])) {
 	  printf("Error loading world from %s\n",argv[i]);

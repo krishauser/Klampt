@@ -20,8 +20,9 @@ class RobotCSpace(CSpace):
     .. warning::
 
         If your robot has non-standard joints, like a free-
-        floating base or continuously rotating (spin) joints, you will need to
-        overload the :meth:`sample` method.
+        floating base or continuously rotating (spin) joints, you may need to
+        overload the :meth:`sample` method.  The default implementation
+        assumes that everything with unbounded limits is a rotational joint.
         
     """
     def __init__(self,robot,collider=None):
@@ -123,73 +124,6 @@ class RobotCSpace(CSpace):
         a fully actuated robot)."""
         controller.setMilestone(path[0])
         for q in path[1:]:
-            controller.appendMilestoneLinear(q)
-
-
-class RobotSubsetCSpace(EmbeddedCSpace):
-    """A basic robot cspace that allows collision free motion of a *subset*
-    of joints.  The subset is given by the indices in the list "subset"
-    provided to the constructor.  The configuration space is R^k where k
-    is the number of DOFs in the subset.
-
-    This class will automatically disable all collisions for inactive robot links
-    in the collider.
-
-    .. note::
-        To convert from start/goal robot configurations to the CSpace, call
-        the `project(qrobot)` method for the start and goal.
-        (see :meth:`EmbeddedCSpace.project`)
-
-    .. note::
-        To convert from a planned path back to the robot's full configuration space,
-        you will need to call the `lift(q)` method for all configurations q in the
-        planned path. (see :meth:`EmbeddedCSpace.lift`) 
-
-    .. warning::
-        If your robot has non-standard joints, like a free-floating base or
-        continuously rotating (spin) joints, you will need to overload the
-        :meth:`sample` method.
-
-    Note: Considering deprecating this in favor of EmbeddedRobotCSpace, which
-    is adaptable to ClosedLoopRobotCSpace and ImplicitManifoldRobotCSpace.
-    """
-    def __init__(self,robot,subset,collider=None):
-        EmbeddedCSpace.__init__(self,RobotCSpace(robot,collider),subset,xinit=robot.getConfig())
-        self.collider = collider
-        if self.collider:
-            #determine moving objects, which includes all links in the subset and descendants
-            moving = [False]*robot.numLinks()
-            for i in range(robot.numLinks()):
-                if i in subset: moving[i] = True
-                else:
-                    p = robot.link(i).getParent()
-                    if p >= 0 and moving[p]: moving[i]=True
-            #disable self-collisions for non moving objects
-            for i,mv in enumerate(moving):
-                if not mv:
-                    rindices = self.collider.robots[robot.index]
-                    rindex = rindices[i]
-                    if rindex < 0:
-                        continue
-                    newmask = set()
-                    for j in range(robot.numLinks()):
-                        if rindices[j] in self.collider.mask[rindex] and moving[j]:
-                            newmask.add(rindices[j])
-                    self.collider.mask[rindex] = newmask
-
-    def sendPathToController(self,path,controller):
-        """Given a planned :class:`CSpace` path ``path`` and a
-        :class:`SimRobotController` ``controller``, sends the path so that it
-        is executed correctly by the controller.
-
-        .. note:
-            This assumes a fully actuated robot.  It won't work for robots with
-            free-floating bases.
-
-        """
-        lpath = self.liftPath(path)
-        controller.setMilestone(lpath[0])
-        for q in lpath[1:]:
             controller.appendMilestoneLinear(q)
 
 
@@ -324,6 +258,7 @@ class ClosedLoopRobotCSpace(RobotCSpace):
                     dt = max(dt,abs(a[i]-b[i])/vmax[i])
             #this does a piecewise lienar interpolation
             controller.appendLinear(dt,b)
+
 
 class ImplicitManifoldRobotCSpace(RobotCSpace):
     """A closed loop cspace with an arbitrary numerical manifold f(q)=0
@@ -477,5 +412,82 @@ class EmbeddedRobotCSpace(EmbeddedCSpace):
         if len(path[0]) == len(self.mapping):
             path = self.liftPath(path)
         if hasattr(self.ambientspace,'discretizePath'):
-            path = self.discretizePath(path)
+            path = self.ambientspace.discretizePath(path)
         self.ambientspace.sendPathToController(path,controller)
+
+
+
+class RobotSubsetCSpace(EmbeddedCSpace):
+    """A basic robot cspace that allows collision free motion of a *subset*
+    of joints.  The subset is given by the indices in the list "subset"
+    provided to the constructor.  The configuration space is R^k where k
+    is the number of DOFs in the subset.
+
+    This class will automatically disable all collisions for inactive robot 
+    links in the collider.
+
+    .. note::
+        To convert from start/goal robot configurations to the CSpace, call
+        the `project(qrobot)` method for the start and goal.
+        (see :meth:`EmbeddedCSpace.project`)
+
+    .. note::
+        To convert from a planned path back to the robot's full configuration
+        space, you will need to call the `lift(q)` method for all
+        configurations q in the planned path. (see :meth:`EmbeddedCSpace.lift`) 
+
+    .. warning::
+        If your robot has non-standard joints, like a free-floating base or
+        continuously rotating (spin) joints, you will need to overload the
+        :meth:`sample` method.
+
+    .. deprecated:: 0.8.6
+
+        Deprecated this in favor of EmbeddedRobotCSpace, which is adaptable
+        to ClosedLoopRobotCSpace and ImplicitManifoldRobotCSpace.  To convert
+        code to EmbeddedRobotCSpace, convert
+
+        ``space = RobotSubsetCSpace(robot,subset,collider)`` to
+
+        ``space = EmbeddedCSpace(RobotCSpace(robot,collider),subset);``
+        ``space.disableInactiveCollisions()``
+
+    """
+    def __init__(self,robot,subset,collider=None):
+        EmbeddedCSpace.__init__(self,RobotCSpace(robot,collider),subset,xinit=robot.getConfig())
+        self.collider = collider
+        if self.collider:
+            #determine moving objects, which includes all links in the subset and descendants
+            moving = [False]*robot.numLinks()
+            for i in range(robot.numLinks()):
+                if i in subset: moving[i] = True
+                else:
+                    p = robot.link(i).getParent()
+                    if p >= 0 and moving[p]: moving[i]=True
+            #disable self-collisions for non moving objects
+            for i,mv in enumerate(moving):
+                if not mv:
+                    rindices = self.collider.robots[robot.index]
+                    rindex = rindices[i]
+                    if rindex < 0:
+                        continue
+                    newmask = set()
+                    for j in range(robot.numLinks()):
+                        if rindices[j] in self.collider.mask[rindex] and moving[j]:
+                            newmask.add(rindices[j])
+                    self.collider.mask[rindex] = newmask
+
+    def sendPathToController(self,path,controller):
+        """Given a planned :class:`CSpace` path ``path`` and a
+        :class:`SimRobotController` ``controller``, sends the path so that it
+        is executed correctly by the controller.
+
+        .. note:
+            This assumes a fully actuated robot.  It won't work for robots with
+            free-floating bases.
+
+        """
+        lpath = self.liftPath(path)
+        controller.setMilestone(lpath[0])
+        for q in lpath[1:]:
+            controller.appendMilestoneLinear(q)

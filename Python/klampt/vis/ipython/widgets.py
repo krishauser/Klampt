@@ -47,6 +47,7 @@ from ipywidgets import interact, interactive, fixed, interact_manual
 from traitlets import Unicode, Dict, List, Int, validate, observe
 import traitlets
 import threading
+import warnings
 
 DEFAULT_POINT_RADIUS = 0.05
 DEFAULT_AXIS_LENGTH = 0.2
@@ -286,7 +287,7 @@ class KlamptWidget(widgets.DOMWidget):
             return [name]
         elif type == 'WorldModel':
             if name != 'world' or self.world is not None:
-                print("KlamptWidget.add: Warning, only one world is supported, and should be added as world")
+                warnings.warn("KlamptWidget.add: only one world is supported, and should be added as world")
             self.world = item
             s = ThreeJSGetScene(self.world)
             self.scene = json.loads(s)
@@ -374,8 +375,8 @@ class KlamptWidget(widgets.DOMWidget):
                     recursive = True
                 except Exception:
                     found = False
-                    for r in range(self.world.numRobots()):
-                        if self.world.robot(r).link(target).index >= 0:
+                    for i in range(self.world.numRobots()):
+                        if self.world.robot(i).link(target).index >= 0:
                             found = True
                             break
                     if not found:
@@ -742,6 +743,7 @@ def EditConfig(robot,klampt_widget=None,ghost=None,link_selector='slider',link_s
     if link_selector == 'slider':
         link_slider=widgets.IntSlider(description='Link',min=0,max=len(link_subset)-1,value=0)
         joint_slider=widgets.FloatSlider(description='Value',min=0,max=1,value=0.5,step=0.001)
+        _dochange_link(link_subset[0])
 
         @interact(index=link_slider)
         def change_link(index):
@@ -757,6 +759,7 @@ def EditConfig(robot,klampt_widget=None,ghost=None,link_selector='slider',link_s
     elif link_selector == 'dropdown':
         link_dropdown=widgets.Dropdown(description='Link',options=[robot.link(i).getName() for i in link_subset],value=robot.link(link_subset[0]).getName())
         joint_slider=widgets.FloatSlider(description='Value',min=0,max=1,value=0.5,step=0.001)
+        _dochange_link(link_subset[0])
 
         def change_link(name):
             link = robot.link(name).index
@@ -977,6 +980,11 @@ class Playback(widgets.VBox):
                     playdata['stop'] = 1
                     lock.release()
                     return
+                if self.klampt_widget and dt==0:
+                    self.klampt_widget.beginRpc()
+                    self.klampt_widget.add("__temp",[time.time(),0,0])
+                    self.klampt_widget.remove("__temp")
+                    self.klampt_widget.endRpc()
                 self.frame += 1
                 lock.release()
 

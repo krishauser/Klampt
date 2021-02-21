@@ -1339,16 +1339,29 @@ class _RobotInterfaceEmulatorData:
         else:
             #move to command emulation using fixed-velocity
             qmin,qmax = model.getJointLimits()
+            vmax = model.getVelocityLimits()
+            amax = model.getAccelerationLimits()
+            for i in range(model.numDrivers()):
+                if model.driver(i).getType() == 'affine':
+                    links = model.driver(i).getAffectedLinks()
+                    scale,offset = model.driver(i).getAffineCoeffs()
+                    for l,s in zip(links,scale):
+                        if s < 0:
+                            qmin[l],qmax[l] = qmax[l],qmin[l]
+                            vmax[l] *= -1
+                            amax[l] *= -1
             xmin = model.configToDrivers(qmin)
             xmax = model.configToDrivers(qmax)
-            vmax = model.velocityToDrivers(model.getVelocityLimits())
-            amax = model.velocityToDrivers(model.getAccelerationLimits())
+            vmax = model.velocityToDrivers(vmax)
+            amax = model.velocityToDrivers(amax)
             xmin = [xmin[i] for i in indices]
             xmax = [xmax[i] for i in indices]
             vmax = [vmax[i] for i in indices]
             amax = [amax[i] for i in indices]
-            qcmd = [self.jointData[i].commandedPosition if self.jointData[i].commandedPosition is not None else self.jointData[i].sensedPosition for i in indices]
-            dqcmd = [self.jointData[i].commandedVelocity if self.jointData[i].commandedVelocity is not None else self.jointData[i].sensedVelocity for i in indices]
+            assert all(v >= 0 for v in vmax)
+            assert all(v >= 0 for v in amax)
+            qcmd = [(self.jointData[i].commandedPosition if self.jointData[i].commandedPosition is not None else self.jointData[i].sensedPosition) for i in indices]
+            dqcmd = [(self.jointData[i].commandedVelocity if self.jointData[i].commandedVelocity is not None else self.jointData[i].sensedVelocity) for i in indices]
             ts,xs,vs = motionplanning.interpolateNDMinTime(qcmd,dqcmd,q,[0]*len(q),xmin,xmax,vmax,amax)
             ts,xs,vs = motionplanning.combineNDCubic(ts,xs,vs)
             self.setPiecewiseCubic(indices,ts,xs,vs,True)

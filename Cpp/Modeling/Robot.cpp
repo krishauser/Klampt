@@ -2925,6 +2925,9 @@ bool Robot::LoadURDF(const char* fn)
   URDFConverter::setJointforNodes(urdfJoints, linkNodes);
   URDFConverter::processTParentTransformations(linkNodes);
 
+  vector<int> affineJointParents(links_size,-1);
+  vector<double> affineJointOffsets(links_size,0);
+  vector<double> affineJointScales(links_size,1);  
   size_t start = (floating ? 0 : 1);
   for (size_t i = start; i < linkNodes.size(); i++) {
     URDFLinkNode* linkNode = &linkNodes[i];
@@ -3026,6 +3029,20 @@ bool Robot::LoadURDF(const char* fn)
         //torque max will be infinite...
         //torqueMax[link_index] = 0;
       }
+      //parse mimic joints
+      if(joint->mimic) {
+        if(parser->joints_.count(joint->mimic->joint_name)) {
+          auto joint_parent = parser->joints_[joint->mimic->joint_name];
+          affineJointParents[link_index] = LinkIndex(joint_parent->child_link_name.c_str());
+          if(affineJointParents[link_index] < 0)
+            LOG4CXX_WARN(GET_LOGGER(URDFParser), "Couldn't load mimic joint "<<joint->name);
+          affineJointScales[link_index] = joint->mimic->multiplier;
+          affineJointOffsets[link_index] = joint->mimic->offset;
+        }
+        else {
+          LOG4CXX_WARN(GET_LOGGER(URDFParser), "Couldn't load mimic joint "<<joint->name);
+        }
+      }
       if (this->joints[joint_index].type == RobotJoint::Normal
           || this->joints[joint_index].type == RobotJoint::Spin) {
         int linkI = this->joints[joint_index].linkIndex;
@@ -3063,6 +3080,50 @@ bool Robot::LoadURDF(const char* fn)
         drivers.push_back(driver);
       }
     }
+  }
+  //compress the affine joints into single drivers
+  for(size_t i=0;i<affineJointParents.size();i++) {
+    if(affineJointParents[i] >= 0) {
+      int p=affineJointParents[i];
+      if(affineJointParents[p] >= 0) {
+        affineJointParents[i] = affineJointParents[p];
+        affineJointOffsets[i] += affineJointScales[i]*affineJointOffsets[p];
+        affineJointScales[i] *= affineJointScales[p];
+      }
+    }
+  }
+  //delete normal drivers
+  map<int,int> linkToDriver;
+  size_t i=0;
+  while(i<drivers.size()) {
+    linkToDriver[drivers[i].linkIndices[0]] = i;
+    if(affineJointParents[drivers[i].linkIndices[0]] >= 0) { 
+      drivers.erase(drivers.begin()+i);
+      driverNames.erase(driverNames.begin()+i);
+    }
+    else
+      i++;
+  }
+  //now convert parents to affine drivers
+  for(size_t i=0;i<affineJointParents.size();i++) {
+    if(affineJointParents[i] >= 0) {
+      Assert(linkToDriver.count(affineJointParents[i]) > 0);
+      int d=linkToDriver[affineJointParents[i]];
+      drivers[d].type = RobotJointDriver::Affine;
+      if(drivers[d].affScaling.empty()) {
+        drivers[d].affScaling.push_back(1);
+        drivers[d].affOffset.push_back(0);
+      }
+      drivers[d].linkIndices.push_back(i);
+      drivers[d].affScaling.push_back(affineJointScales[i]);
+      drivers[d].affOffset.push_back(affineJointOffsets[i]);
+    }
+  }
+
+  //double check links are specified properly
+  for(auto kpi: kP) {
+    if(LinkIndex(kpi.first.c_str()) < 0)
+      LOG4CXX_WARN(GET_LOGGER(URDFParser),"Invalid <klampt><link> element named "<<kpi.first);
   }
   
   UpdateFrames();
@@ -3401,7 +3462,7 @@ void Robot::Reduce(Robot& reduced,vector<int>& dofMap)
     else {
       fixedParent[i] = i;
     }
-    int p=parents[i];
+    //int p=parents[i];
     //printf("Attaching link %d, %s (%s, normal parent %d) to %d\n",i,linkNames[i].c_str(),(fixedLink[i]?"fixed":"free"),p,fixedParent[i]);
   }
   vector<vector<int> > children(q.n);

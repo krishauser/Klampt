@@ -6305,15 +6305,17 @@ class WorldModel(_object):
     The main world class, containing robots, rigid objects, and static environment
     geometry.  
 
-    .. note: Although a WorldModel instance is typically called a "world" it is
-    just a model and does not have to reflect the state of a physical world. The
-    state of robots and objects in the world can be changed at will -- in fact
-    planners and simulators will query and modify the state of a WorldModel during
-    their operation.  
+    .. note:  
 
-    To keep around some "authoritative" world, you can keep around a copy (use
-    `WorldModel.copy()`) or `config.getConfig(world)` using the
-    :mod:`klampt.model.config` module.  
+        Although a WorldModel instance is typically called a "world" it is
+        just a model and does not have to reflect the state of a physical world.
+        The state of robots and objects in the world can be changed at will --
+        in fact planners and simulators will query and modify the state of a
+        WorldModel during their operation.
+
+        To keep around some "authoritative" world, you can keep around a copy
+        (use ``WorldModel.copy()``) or ``config.getConfig(world)`` using the
+        :mod:`klampt.model.config` module.  
 
     Every robot/robot link/terrain/rigid object is given a unique ID in the world.
     This is potentially a source of confusion because some functions take IDs and

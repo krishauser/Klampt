@@ -27,7 +27,7 @@ colors from a PointCloud.
 
 """
 
-from ..robotsim import Geometry3D,PointCloud
+from ..robotsim import Geometry3D,PointCloud,TriangleMesh
 import math
 from .create import primitives
 from ..math import vectorops,so3,se3
@@ -244,8 +244,8 @@ def point_cloud_normals(pc,estimation_radius=None,estimation_knn=None,estimation
         estimation_radius = 3*R/math.sqrt(N)
     if estimation_knn is None or estimation_knn < 4:
         estimation_knn = 4
+    normals = []
     if _has_scipy:
-        normals = []
         import scipy.spatial
         tree = scipy.spatial.cKDTree(positions)
         if estimation_radius is not None:
@@ -289,9 +289,10 @@ def point_cloud_normals(pc,estimation_radius=None,estimation_knn=None,estimation
             if np.dot(n,d) < 0:
                 normals[i,:] = -n
     else:
-        #flip back-facing normals
+        #flip back-facing normals assuming centroid is interior
+        centroid = np.average(positions,axis=0)
         for i,(n,p) in enumerate(zip(normals,positions)):
-            if np.dot(n,p) < 0:
+            if np.dot(n,p-centroid) < 0:
                 normals[i,:] = -n
 
     if add:
@@ -325,7 +326,7 @@ def fit_plane3(point1,point2,point3):
 def fit_plane(points):
     """Returns a 3D plane equation that is a least squares fit
     through the points (len(points) >= 3)."""
-    normal,centroid = fit_plane_centroid(points)
+    centroid,normal = fit_plane_centroid(points)
     return normal[0],normal[1],normal[2],-vectorops.dot(centroid,normal)
 
 
@@ -637,3 +638,29 @@ def point_cloud_set_colors(pc,colors,color_format='rgb',pc_property='auto'):
             pc.setProperties(alphachannel[1],packed)
         else:
             pc.addProperty(pc_property,packed)
+
+
+def triangle_normals(trimesh):
+    """
+    Returns a list or numpy array of (outward) triangle normals for the
+    triangle mesh defined by vertices verts and triangles tris.
+    
+    Args:
+        trimesh (TriangleMesh or Geometry3D)
+    """
+    if isinstance(trimesh,Geometry3D):
+        assert trimesh.type() == 'TriangleMesh',"Must provide a TriangleMesh to triangle_normals"
+        trimesh = trimesh.getTriangleMesh()
+    assert isinstance(trimesh,TriangleMesh)
+
+    import numpy as np
+    from ..io import numpy_convert
+    
+    verts,tris = numpy_convert.to_numpy(trimesh)
+    normals = np.zeros(tris.shape)
+    dba = verts[tris[:,1]]-verts[tris[:,0]]
+    dca = verts[tris[:,2]]-verts[tris[:,0]]
+    n = np.cross(dba,dca)
+    norms = np.linalg.norm(n,axis=1)[:, np.newaxis]
+    n = np.divide(n,norms,where=norms!=0)
+    return n

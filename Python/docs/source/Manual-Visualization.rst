@@ -81,9 +81,6 @@ For example::
     qrand = r.getConfig()
     r.setConfig(q0)
 
-    #Google Colab users: uncomment this. Make sure to do this at the top of your program.
-    #vis.init('HTML')
-
     #add a "world" item to the scene manager
     vis.add("world",w)
     #show qrand as a ghost configuration in transparent red
@@ -378,7 +375,8 @@ Here are the accepted types in the scene manager.
 
 \* denotes a mandatory attribute.  Values in parentheses are defaults.
 
-Note: ``color`` is always an accepted attribute.
+Note: ``color``, ``label``, and ``hide_label`` are always accepted attributes.
+
 
 Item path conventions and references
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -620,3 +618,42 @@ by the mouse.
     vis.run(MyPlugin(world))
 
 
+Compatibility
+~~~~~~~~~~~~~
+
+**OpenGL mode**
+
+* Drawable: All of the items listed above, plus SimRobotSensor, SubRobotModel, and Appearance.
+* Editable: RobotModel, RigidObjectModel, Vector3, RigidTransform, Config, coordinates.Point, coordinates.Frame, coordinates.Transform
+* Quirks:
+    * All items by default except for WorldModel, RobotModel, RigidObjectModel, and TerrainModel have their labels drawn.
+    * "size" attribute of points is in pixels.
+    * No shadow mapping.
+
+**IPython mode**
+
+* Drawable: all of the items listed above.
+* Editable: RobotModel, RigidObjectModel, Vector3, RigidTransform, Config, coordinates.Point, coordinates.Frame, coordinates.Transform
+* Quirks:
+    * Hiding windows and re-showing windows is disabled.
+    * ``vis.update()`` must be called to receive changes in world object configurations.
+    * Does not support plugins.
+    * Scene viewports are in a JSON structure format that is incompatible with OpenGL viewports. This will be changed in a future release.
+    * Entities in the scene need to have unique identifiers, or else they will not be drawn.
+    * Label drawing is disabled. 
+    * Texture mapping doesn't work.
+    * "size" attribute of points is in absolute units. 
+    * RigidTransform doesn't support "fancy" mode.
+    * Configs doesn't support "maxConfigs". 
+    * RobotTrajectory does not show end effector trajectories.
+    * Curves aren't drawn between coordinate frames and their parents.
+    * setItemConfig doesn't update the visualization except for WorldModel items.  Workaround: either re-add the item, or use ``vis.nativeWindow().setTransform()``.
+
+**HTML mode**
+
+* Drawable: all of the items listed above.
+* Editable: no user interaction is possible.
+* Quirks: all the quirks from IPython mode, plus the caveats listed in the `klampt.vis documentation <klampt.vis.html#html>`__ .
+
+The most compatible way to launch visualizations is to either use ``vis.run()``,
+``vis.debug()``, or ``vis.loop()``.

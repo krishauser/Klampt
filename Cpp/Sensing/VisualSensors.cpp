@@ -362,34 +362,15 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
     DEBUG_GL_ERRORS()
 
     //extract measurements
-    measurements.resize(0);
     if(rgb) {
-      measurements.resize(xres*yres);
       //renderer.GetRGBA(pixels);
       renderer.GetRGB(pixels);
       #if DEBUG_GL_RENDER_TIMING
       printf("CameraSensor: Download RGBA %f\n",timer.ElapsedTime());
       timer.Reset();
       #endif //DEBUG_GL_RENDER_TIMING
-      int l=0;
-      int k=0;
-      for(int j=0;j<yres;j++) {
-        //for(int i=0;i<xres;i++,k+=4) {
-          //unsigned int pix = (pixels[k] << 24 ) | (pixels[k+1] << 16 ) | (pixels[k+2] << 8 ) | (pixels[k+3]);
-        for(int i=0;i<xres;i++,k+=3) {
-          unsigned int pix = (pixels[k] << 16 | pixels[k+1] << 8 | pixels[k+2]);
-          measurements[l++] = double(pix);
-        }
-      }
-      #if DEBUG_GL_RENDER_TIMING
-      printf("CameraSensor: Extract measurements %f\n",timer.ElapsedTime());
-      timer.Reset();
-      #endif //DEBUG_GL_RENDER_TIMING
     }
     if(depth) {
-      size_t vstart = measurements.size();
-      measurements.resize(measurements.size() + xres*yres); 
-      
       renderer.GetDepth(vp,floats);
       #if DEBUG_GL_RENDER_TIMING
       printf("CameraSensor: Download depth %f\n",timer.ElapsedTime());
@@ -410,7 +391,6 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
             else {
               floats[k] = fzmax;  //assume within numerical error
             }
-            measurements[vstart+k] = floats[k];
           }
         }
       }
@@ -426,12 +406,11 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
             else {
               floats[k] = fzmax;  //assume within numerical error
             }
-            measurements[vstart+k] = floats[k];
           }
         }
       }
       #if DEBUG_GL_RENDER_TIMING
-      printf("CameraSensor: Extract measurements %f\n",timer.ElapsedTime());
+      printf("CameraSensor: Discretize depths %f\n",timer.ElapsedTime());
       timer.Reset();
       #endif //DEBUG_GL_RENDER_TIMING
     }
@@ -452,15 +431,13 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
     dx *= 1.0/(vp.w*vp.scale);
     dy = Vector3(vp.yDir());
     dy *= 1.0/(vp.w*vp.scale);
-    measurements.resize(0);
-    int dstart = 0;
-    if(rgb) measurements.resize(xres*yres);
-    if(depth) {
-      dstart = (int)measurements.size();
-      measurements.resize(measurements.size()+xres*yres,zmax);
-    }
+    if(rgb)
+      pixels.resize(xres*yres*3);
+    if(depth)
+      floats.resize(xres*yres);
     int k=0;
-    double background = double(0xff96aaff);
+    unsigned char bg_r=0x96, bg_g=0xaa, bg_b = 0xff;
+    float fzmax = (float)zmax;
     Vector3 pt;
     for(int j=0;j<yres;j++) {
       Real v = 0.5*yres - Real(j);
@@ -476,16 +453,22 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
             //TODO: lighting
             RobotWorld::AppearancePtr app = world.GetAppearance(obj);
             const float* rgba = app->faceColor.rgba;
-            measurements[k] = double(((unsigned char)(rgba[3]*255.0) << 24) | ((unsigned char)(rgba[0]*255.0) << 16) | ((unsigned char)(rgba[1]*255.0) << 8) | ((unsigned char)(rgba[2]*255.0)));
+            pixels[k*3] = (unsigned char)(rgba[0]*255.0);
+            pixels[k*3+1] = (unsigned char)(rgba[1]*255.0);
+            pixels[k*3+2] = (unsigned char)(rgba[2]*255.0);
           }
           Real d = vfwd.dot(pt - vsrc);
           d = Min(d,zmax);
-          if(depth && d < zmax) measurements[dstart+k] = Discretize(d,zresolution,zvarianceLinear*d + zvarianceConstant);
+          if(depth && d < zmax) floats[k] = (float)Discretize(d,zresolution,zvarianceLinear*d + zvarianceConstant);
         }
         else {
           //no reading
-          if(rgb) measurements[k] = background;
-          if(depth) measurements[dstart+k] = zmax;
+          if(rgb) {
+            pixels[k*3] = bg_r;
+            pixels[k*3+1] = bg_g;
+            pixels[k*3+2] = bg_b;
+          }
+          if(depth) floats[k] = fzmax;
         }
       }
     }
@@ -514,13 +497,12 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
     if(renderer.color_tex != 0) {
       glBindTexture(GL_TEXTURE_2D, renderer.color_tex);
       //copy measurements into buffer -- don't forget y flip
-      vector<unsigned int> image(xres*yres);
+      vector<unsigned char> image(xres*yres*3);
       int k=0;
       for(int j=0;j<yres;j++)
-        for(int i=0;i<xres;i++,k++)
-          image[(yres-j-1)*xres + i] = (unsigned int)measurements[k];
+        memcpy(&image[(yres-j-1)*xres*3],&pixels[j*xres*3],xres*3);
       //NULL means reserve texture memory, but texels are undefined
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, xres, yres, 0, GL_BGRA, GL_UNSIGNED_BYTE, &image[0]);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, xres, yres, 0, GL_BGRA, GL_UNSIGNED_BYTE, &image[0]);
     }
     #if DEBUG_GL_RENDER_TIMING
     printf("CameraSensor: Software texture setup %f\n",timer.ElapsedTime());
@@ -563,14 +545,47 @@ void CameraSensor::MeasurementNames(vector<string>& names) const
   }
 }
 
-void CameraSensor::GetMeasurements(vector<double>& values) const
+void CameraSensor::GetMeasurements(vector<double>& measurements) const
 {
-  values = measurements;
+  if(pixels.empty()) {
+    measurements.resize(0);
+    return;
+  }
+  #if DEBUG_GL_RENDER_TIMING
+  Timer timer;
+  #endif //DEBUG_GL_RENDER_TIMING
+  measurements.resize((rgb ? xres*yres : 0) + (depth? xres*yres : 0));
+  size_t dstart = (rgb ? xres*yres : 0);
+  if(rgb) {
+    int l=0;
+    int k=0;
+    for(int j=0;j<yres;j++) {
+      //for(int i=0;i<xres;i++,k+=4) {
+        //unsigned int pix = (pixels[k] << 24 ) | (pixels[k+1] << 16 ) | (pixels[k+2] << 8 ) | (pixels[k+3]);
+      for(int i=0;i<xres;i++,k+=3) {
+        unsigned int pix = (pixels[k] << 16 | pixels[k+1] << 8 | pixels[k+2]);
+        measurements[l++] = double(pix);
+      }
+    }
+  }
+  if(depth) {
+    int k=0;
+    for(int j=0;j<yres;j++) {
+      for(int i=0;i<xres;i++,k++) {
+        measurements[dstart+k] = floats[k];
+      }
+    }
+  }
+  #if DEBUG_GL_RENDER_TIMING
+  printf("CameraSensor: Extract measurements %f\n",timer.ElapsedTime());
+  timer.Reset();
+  #endif //DEBUG_GL_RENDER_TIMING
 }
 
 void CameraSensor::SetMeasurements(const vector<double>& values)
 {
-  measurements = values;
+  fprintf(stderr,"CameraSensor::SetMeasurements: not implemented yet\n");
+  //measurements = values;
   //TODO: copy back into pixel buffers?
 }
 

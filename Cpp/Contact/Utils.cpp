@@ -41,6 +41,9 @@ void GetFlatContacts(RobotWithGeometry& robot,Real tol,ContactFormation& contact
     case AnyGeometry3D::Group:
       FatalError("Can't get flat contacts for geometry group");
       break;
+    case AnyGeometry3D::ConvexHull:
+      FatalError("Can't get flat contacts for convex hull");
+      break;
     case AnyGeometry3D::TriangleMesh:
       {
 	const TriMesh& m=robot.geometry[k]->AsTriangleMesh();
@@ -139,6 +142,9 @@ void GetFlatContacts(RobotWithGeometry& robot,int link,Real tol,vector<ContactPo
     break;
   case AnyGeometry3D::Group:
     FatalError("Can't get flat contacts for geometry group");
+    break;
+  case AnyGeometry3D::ConvexHull:
+    FatalError("Can't get flat contacts for convex hull");
     break;
   case AnyGeometry3D::TriangleMesh:
     points = &robot.geometry[link]->AsTriangleMesh().verts;

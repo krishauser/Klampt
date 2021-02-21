@@ -703,10 +703,8 @@ where the items are world, robot, terrain, object, or geometry files.
             browser.emptyVisPlugin.add("world",browser.world)
         return browser
     vis.customUI(makefunc)
-    vis.show()
     vis.setWindowTitle("Klamp't Resource Browser")
-    vis.spin(float('inf'))
-    vis.kill()
+    vis.run()
     del g_browser
     return
 

@@ -4,6 +4,7 @@ from ...model import coordinates
 from ...model.subrobot import SubRobotModel
 from ...robotsim import WorldModel,RobotModel,RigidObjectModel
 from IPython.display import display,HTML
+import ipywidgets as widgets
 import math
 import weakref
 import time
@@ -18,9 +19,13 @@ class KlamptWidgetAdaptor(KlamptWidget,VisualizationScene):
         self.plot_axs = dict()
         self.axs = None
         self._editors = dict()
+        self._buttons = []
 
     def addAction(self,hook,short_text,key,description):
-        raise NotImplementedError("Can't add actions to this frontend")
+        w = max(75,9*len(short_text))
+        item_layout = widgets.Layout(min_width=str(w)+'px')
+        self._buttons.append(widgets.Button(description=short_text,layout=item_layout))
+        self._buttons[-1].on_click(lambda _:hook())
 
     def clear(self):
         KlamptWidget.clear(self)
@@ -152,6 +157,13 @@ class KlamptWidgetAdaptor(KlamptWidget,VisualizationScene):
                 del self._editors[name]
         self.doRefresh = True
 
+    def setGhostConfig(self,q,name="ghost",robot=0):
+        """Needed for EditConfig to work on ghosts"""
+        KlamptWidget.setGhostConfig(self,q,name,robot)
+        obj = self.getItem(name)
+        if obj is not None:
+            obj.item = q
+
     def hide(self,name,hidden=True):
         VisualizationScene.hide(self,name,hidden)
         KlamptWidget.hide(self,name,hidden)
@@ -222,6 +234,20 @@ class KlamptWidgetAdaptor(KlamptWidget,VisualizationScene):
         for k,v in self.items.items():
             updateItem(v)
         self.endRpc()
+
+    def display_widgets(self):
+        if self._buttons:
+            if len(self._buttons) > 8:
+                box_layout = widgets.Layout(overflow='scroll',
+                        flex_flow='row',
+                        display='flex')
+                carousel = widgets.Box(children=self._buttons, layout=box_layout)
+                display(carousel)
+            else:
+                display(widgets.HBox(children=self._buttons))
+        for k,v in self._editors.items():
+            display(HTML('<h3>'+k+'</h3>'))
+            display(v)
 
     def display_plots(self):
         plots = dict()
@@ -326,7 +352,8 @@ class IPythonWindowManager(_WindowManager):
         self.frontend().width = w
         self.frontend().height = h
     def setPlugin(self,plugin):
-        raise NotImplementedError("IPython does not accept plugins")
+        if plugin is not None:
+            raise NotImplementedError("IPython does not accept plugins")
     def pushPlugin(self,plugin):
         raise NotImplementedError("IPython does not accept plugins")
     def popPlugin(self):
@@ -363,12 +390,12 @@ class IPythonWindowManager(_WindowManager):
             t += 0.04
         self.show(False)
     def show(self):
+        if self.displayed:
+            warnings.warn("vis_ipython: showing widgets more than once can result in unexpected behavior")
         self.quit = False
         self.displayed = True
         display(self.frontend())
-        for k,v in self.frontend()._editors.items():
-            display(HTML('<h3>'+k+'</h3>'))
-            display(v)
+        self.frontend().display_widgets()
         self.frontend().display_plots()
     def shown(self):
         return self.displayed and not self.quit

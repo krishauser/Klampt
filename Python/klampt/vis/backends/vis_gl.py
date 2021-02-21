@@ -1,9 +1,9 @@
 from ..visualization import _globalLock,VisualizationScene
 from .. import glcommon
 import weakref
-import time
 from collections import defaultdict
 
+from .. import glinit
 from OpenGL.GL import *
 
 class WindowInfo:
@@ -273,7 +273,7 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
     def idle(self):
         global _globalLock
         _globalLock.acquire()
-        VisualizationScene.updateTime(self,time.time())
+        VisualizationScene.updateTime(self)
         _globalLock.release()
         return False
 

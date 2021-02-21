@@ -158,7 +158,9 @@ class QtWindowManager(_ThreadedWindowManager):
             self.windows.append(WindowInfo(self.window_title,self._frontend)) 
             self.current_window = 0
             self.windows[self.current_window].mode = 'shown'
-
+        else:
+            if self.windows[self.current_window].mode == 'hidden':
+                self.windows[self.current_window].mode = 'shown'
         glinit._GLBackend.initialize("Klamp't visualization")
         
         res = None
@@ -326,7 +328,32 @@ class QtWindowManager(_ThreadedWindowManager):
         if self.vis_thread_running:
             if self.in_vis_loop:
                 #single threaded
-                raise RuntimeError("Can't call dialog() inside loop().  Try dialogInLoop() instead.")
+                w.mode = 'dialog'
+                if w.glwindow is None:
+                    print("vis: creating GL window")
+                    w.glwindow = glinit._GLBackend.createWindow(w.name)
+                    w.glwindow.setProgram(w.frontend)
+                    w.glwindow.setParent(None)
+                    w.glwindow.refresh()
+                if w.custom_ui is None:
+                    dlg = _MyDialog(w)
+                else:
+                    dlg = w.custom_ui(w.glwindow)
+                print("#########################################")
+                print("klampt.vis: Dialog starting on window",self.current_window)
+                print("#########################################")
+                res = None
+                if dlg is not None:
+                    w.glwindow.show()
+                    res = dlg.exec_()
+                print("#########################################")
+                print("klampt.vis: Dialog done on window",self.current_window)
+                print("#########################################")
+                w.glwindow.hide()
+                w.glwindow.setParent(None)
+                w.mode = 'hidden'
+                return res
+                raise RuntimeError("Can't call dialog() inside loop().")
             #just show the dialog and let the thread take over
             assert w.mode == 'hidden',"dialog() called inside dialog?"
             print("#########################################")
@@ -338,9 +365,12 @@ class QtWindowManager(_ThreadedWindowManager):
 
             if not self.in_app_thread or threading.current_thread().__class__.__name__ == '_MainThread':
                 print("vis.dialog(): Waiting for dialog on window",self.current_window,"to complete....")
+                assert w.mode == 'dialog'
                 while w.mode == 'dialog':
                     time.sleep(0.1)
-                print("vis.dialog(): ... dialog done, status is now",w.mode)
+                if w.mode == 'shown':
+                    print("klampt.vis: warning, dialog changed from 'dialog' to 'shown' mode?")
+                print("vis.dialog(): ... dialog done")
             else:
                 #called from another dialog or window!
                 print("vis: Creating a dialog from within another dialog or window")
@@ -379,9 +409,12 @@ class QtWindowManager(_ThreadedWindowManager):
                 print("#########################################")
                 print("klampt.vis: Running multi-threaded dialog, waiting to complete...")
                 self._start_app_thread()
+                assert w.mode == 'dialog'
                 while w.mode == 'dialog':
                     time.sleep(0.1)
-                print("klampt.vis: ... dialog done.")
+                if w.mode == 'shown':
+                    print("klampt.vis: warning, dialog changed from 'dialog' to 'shown' mode?")
+                print("klampt.vis: ... dialog done")
                 print("#########################################")
                 return None
             else:
@@ -452,13 +485,13 @@ class QtWindowManager(_ThreadedWindowManager):
             return res
 
     def screenshotCallback(self,fn,format,want_depth):
-        if not self.multithreaded() or self.in_vis_loop or self.in_app_thread:
-            #already in visualization loop -- just get the image
-            res = self._frontend.get_screen(format,want_depth)
-            if want_depth:
-                fn(*res)
-            else:
-                fn(res)
+        # if not self.multithreaded() or self.in_vis_loop:
+        #     #already in visualization loop -- just get the image
+        #     res = self._frontend.get_screen(format,want_depth)
+        #     if want_depth:
+        #         fn(*res)
+        #     else:
+        #         fn(res)
         def do_screenshot_callback(fn=fn,format=format,want_depth=want_depth):
             if not self._frontend.rendered:
                 self.threadCall(do_screenshot_callback)
@@ -559,27 +592,33 @@ class _MyWindow(QMainWindow):
             scene = self.glwidget.program.scene
             world = scene.items.get('world',None)
             if world is not None: return world.item
+            sim = scene.items.get('sim',None)
+            if sim is not None: return sim.world
         for p in self.glwidget.program.plugins:
             if hasattr(p,'world'):
                 return p.world
+            if hasattr(p,'sim'):
+                return p.sim.world
+            if hasattr(p,'simulator'):
+                return p.simulator.world
         return None
     
-    def getSimulator(self):
+    def getTimeSource(self):
         if not hasattr(self.glwidget.program,'plugins'):
             return None
         if isinstance(self.glwidget.program,GLVisualizationFrontend):
             scene = self.glwidget.program.scene
-            sim = scene.items.get('sim',None)
-            if sim is not None: return sim.item
+            if scene.timeCallback is not None:
+                return scene.timeCallback
         for p in self.glwidget.program.plugins:
             if hasattr(p,'sim'):
-                return p.sim
+                return lambda :p.sim.getTime()
             if hasattr(p,'simulator'):
-                return p.simulator
+                return lambda :p.simulator.getTime()
         return None
     
     def save_camera(self):
-        if not hasattr(self.glwidget.program,'get_view'):
+        if not hasattr(self.glwidget.program.scene,'getViewport'):
             print("Program does not appear to have a camera")
             return
         scene = self.glwidget.program.scene
@@ -589,12 +628,12 @@ class _MyWindow(QMainWindow):
             fn = fn[0]
         if fn is None:
             return
-        v = scene.get_view()
+        v = scene.getViewport()
         v.save_file(fn)
     
     def load_camera(self):
         scene = self.glwidget.program.scene
-        v = scene.get_view()
+        v = scene.getViewport()
         #fn = QFileDialog.getOpenFileName(caption="Viewport file (*.txt)",filter="Viewport file (*.txt);;All files (*.*)",options=QFileDialog.DontUseNativeDialog)
         fn = QFileDialog.getOpenFileName(caption="Viewport file (*.txt)",filter="Viewport file (*.txt);;All files (*.*)")
         if isinstance(fn,tuple):
@@ -602,7 +641,7 @@ class _MyWindow(QMainWindow):
         if fn is None:
             return
         v.load_file(fn)
-        scene.set_view(v)
+        scene.setViewport(v)
 
     
     def save_world(self):
@@ -639,15 +678,15 @@ class _MyWindow(QMainWindow):
         self.saving_movie = not self.saving_movie
         if self.saving_movie:
             self.movie_timer.start(33)
-            sim = self.getSimulator()
-            if sim is not None:
-                self.movie_time_last = sim.getTime()
+            time_source = self.getTimeSource()
+            if time_source is not None:
+                self.movie_time_last = time_source()
         else:
             self.movie_timer.stop()
             dlg =  QInputDialog(self)                 
             dlg.setInputMode( QInputDialog.TextInput) 
             dlg.setLabelText("Command")
-            dlg.setTextValue('ffmpeg -y -f image2 -i image%04d.png -vcodec libx264 -pix_fmt yuv420p klampt_record.mp4')
+            dlg.setTextValue('ffmpeg -y -i image%04d.png -vcodec libx264 -pix_fmt yuv420p klampt_record.mp4')
             dlg.resize(600,100)                             
             ok = dlg.exec_()                                
             cmd = dlg.textValue()
@@ -660,9 +699,10 @@ class _MyWindow(QMainWindow):
                     os.remove(fn)
     
     def movie_update(self):
-        sim = self.getSimulator()
-        if sim is not None:
-            while sim.getTime() >= self.movie_time_last + 1.0/30.0:
+        time_source = self.getTimeSource()
+        if time_source is not None:
+            tnow = time_source()
+            while tnow >= self.movie_time_last + 1.0/30.0:
                 self.glwidget.program.save_screen('image%04d.png'%(self.movie_frame))
                 self.movie_frame += 1
                 self.movie_time_last += 1.0/30.0
@@ -673,9 +713,7 @@ class _MyWindow(QMainWindow):
     def toggle_html_mode(self):
         self.saving_html = not self.saving_html
         if self.saving_html:
-            world = self.getSimulator()
-            if world is None:
-                world = self.getWorld()
+            world = self.getWorld()
             if world is None:
                 print("There is no world in the current plugin, can't save")
                 self.saving_html = False

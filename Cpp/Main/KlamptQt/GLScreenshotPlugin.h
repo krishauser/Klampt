@@ -38,12 +38,12 @@ public:
   GLScreenshotPlugin()
   {
     saveMovie = false;
-    lastScreenshotTime = 0;
+    lastScreenshotTime = -1;
     frameTime = 1.000/30.0;
     screenshotFile = "image0000.ppm";
     verbose = 1;
     moviefile="klampt_record.mp4";
-    video_encoding_command = "ffmpeg -y -qscale 2 -f image2 -i image%04d.ppm";
+    video_encoding_command = "ffmpeg -y -c:v libx264 -vf fps=30 -pix_fmt yuv420p -crf 18 -i image%04d.ppm";
     stop_encode=true;
   }
 
@@ -60,7 +60,7 @@ public:
   void StartMovie()
   {
     saveMovie = true;
-    lastScreenshotTime = 0;
+    lastScreenshotTime = -1;
     timer.Reset();
   }
 
@@ -108,7 +108,10 @@ public:
 	while(lastScreenshotTime+frameTime < t) {
 	  SaveScreenshot();
 	  IncrementStringDigits(screenshotFile);
-	  lastScreenshotTime += frameTime;
+    if(lastScreenshotTime < 0)
+      lastScreenshotTime = t;
+    else
+  	  lastScreenshotTime += frameTime;
 	}
       }
     }
