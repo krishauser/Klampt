@@ -1283,9 +1283,15 @@ class _RobotInterfaceEmulatorData:
             for i in range(len(unifiedTimes)):
                 unifiedMilestones.append([traj[1][i] for traj in res])
             t0 = self.curClock-self.dt if self.curClock is not None else 0
-            if any(t < t0 for t in unifiedTimes[1:]):
-                print("Uh... have some times that are before current time",t0,"?",min(unifiedTimes[1:]))
-            return [t-t0 for t in unifiedTimes][1:],unifiedMilestones[1:]
+            futureTimes = []
+            futureMilestones = []
+            for i,t in enumerate(unifiedTimes):
+                if t > t0:
+                    futureTimes.append(t-t0)
+                    futureMilestones.append(unifiedMilestones[i])
+            if len(futureTimes)==0:
+                print("WARNING: getCommand is returning empty command because no times are after current time???")
+            return futureTimes,futureMilestones
         if commandType == 'pwc':
             unifiedTimes = None
             for times,positions,velocities in res:
@@ -1300,12 +1306,17 @@ class _RobotInterfaceEmulatorData:
             for i in range(len(unifiedTimes)):
                 unifiedVelocities.append([traj[2][i] for traj in res])
             t0 = self.curClock if self.curClock is not None else 0
-            istart = 0
-            while istart < len(unifiedTimes) and unifiedTimes[istart] < t0:
-                istart += 1
-            if istart==len(unifiedTimes):
+            futureTimes = []
+            futureMilestones = []
+            futureVelocities = []
+            for i,t in enumerate(unifiedTimes):
+                if t > t0:
+                    futureTimes.append(t-t0)
+                    futureMilestones.append(unifiedMilestones[i])
+                    futureVelocities.append(unifiedVelocities[i])
+            if len(futureTimes)==0:
                 print("WARNING: getCommand is returning empty command because no times are after current time???")
-            return [t-t0 for t in unifiedTimes][istart:],unifiedMilestones[istart:],unifiedVelocities[istart:]
+            return futureTimes,futureMilestones,futureVelocities
         return list(zip(*res))
 
     def promote(self,indices,controlType):
