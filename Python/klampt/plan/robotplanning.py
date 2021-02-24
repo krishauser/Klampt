@@ -1,8 +1,9 @@
 from .cspace import *
-from .cspaceutils import *
+from .cspaceutils import EmbeddedCSpace,AffineEmbeddedCSpace,EmbeddedMotionPlan
 from . import robotcspace
 from ..model import collide
 from ..robotsim import IKObjective
+import warnings
 
 def preferredPlanOptions(robot,movingSubset=None,optimizing=False):
     """Returns some options that might be good for your given robot, and
@@ -58,7 +59,7 @@ def makeSpace(world,robot,
         CSpace: a C-space instance that describes the robot's feasible space.
             This can be used for planning by creating a :class:`cspace.MotionPlan`
             object.  Note that if an EmbeddedCSpace is returned, you should
-            create a SubsetMotionPlan for greater convenience.
+            create a EmbeddedMotionPlan for greater convenience.
     """
     subset = []
     if movingSubset == 'auto' or movingSubset == 'all' or movingSubset == None:
@@ -67,7 +68,7 @@ def makeSpace(world,robot,
         subset = movingSubset
         
     collider = collide.WorldCollider(world,ignore=ignoreCollisions)
-
+    
     implicitManifold = []
     for c in equalityConstraints:
         if not isinstance(c,IKObjective):
@@ -92,9 +93,9 @@ def makeSpace(world,robot,
     has_affine = False
     for d in range(robot.numDrivers()):
         dr = robot.driver(d)
-        if dr.type() == 'affine':
+        if dr.getType() == 'affine':
             if subset is not None and len(subset) < robot.numLinks():
-                if any(l in subset for l in dr.affectedLinks()):
+                if any(l in subset for l in dr.getAffectedLinks()):
                     has_affine = True
                     break
             else:
@@ -107,11 +108,11 @@ def makeSpace(world,robot,
         affected_links = set(list(range(robot.numLinks())) if subset is None else subset)
         for d in range(robot.numDrivers()):
             dr = robot.driver(d)
-            for l in dr.affectedLinks():
+            for l in dr.getAffectedLinks():
                 if l in affected_links:
                     affected_drivers.append(d)
                     break
-        embedded_space = cspaceutils.fromRobotDrivers(robot,space,affected_drivers)
+        embedded_space = AffineEmbeddedCSpace.fromRobotDrivers(robot,space,affected_drivers)
 
         #copy and paste from EmbeddedRobotCSpace
         active = [False]*robot.numLinks()
@@ -135,7 +136,6 @@ def makeSpace(world,robot,
                 if rindices[j] in collider.mask[rindex] and active[j]:
                     newmask.add(rindices[j])
             collider.mask[rindex] = newmask
-
         embedded_space.setup()
         return embedded_space
 
@@ -226,16 +226,19 @@ def planToConfig(world,robot,target,
                       ignoreCollisions=ignoreCollisions,
                       movingSubset=subset)
     
-    plan = SubsetMotionPlan(space,subset,q0,**planOptions)
+    if hasattr(space,'lift'):  #the planning takes place in a space of lower dimension than #links
+        plan = EmbeddedMotionPlan(space,q0,**planOptions)
+    else:
+        plan = MotionPlan(space,q0,**planOptions)
     try:
         plan.setEndpoints(q0,target)
     except RuntimeError:
         #one of the endpoints is infeasible, print it out
         if space.cspace==None: space.setup()
-        sfailures = space.cspace.feasibilityFailures([q0[s] for s in subset])
-        gfailures = space.cspace.feasibilityFailures([target[s] for s in subset])
-        print("Start configuration fails",sfailures)
-        print("Goal configuration fails",gfailures)
+        sfailures = space.cspace.feasibilityFailures(plan.space.project(q0))
+        gfailures = space.cspace.feasibilityFailures(plan.space.project(target))
+        warnings.warn("Start configuration fails {}".format(sfailures))
+        warnings.warn("Goal configuration fails {}".format(gfailures))
         return None
     return plan
 
@@ -315,7 +318,10 @@ def planToSet(world,robot,target,
                       ignoreCollisions=ignoreCollisions,
                       movingSubset=subset)
 
-    plan = SubsetMotionPlan(space,subset,q0,**planOptions)
+    if hasattr(space,'lift'):  #the planning takes place in a space of lower dimension than #links
+        plan = EmbeddedMotionPlan(space,q0,**planOptions)
+    else:
+        plan = MotionPlan(space,q0,**planOptions)
 
     #convert target to a (test,sample) pair if it's a cspace
     if isinstance(target,CSpace):
@@ -331,8 +337,8 @@ def planToSet(world,robot,target,
     except RuntimeError:
         #the start configuration is infeasible, print it out
         if space.cspace==None: space.setup()
-        sfailures = space.cspace.feasibilityFailures([q0[s] for s in subset])
-        print("Start configuration fails",sfailures)
+        sfailures = space.cspace.feasibilityFailures(plan.space.project(q0))
+        warnings.warn("Start configuration fails {}".format(sfailures))
         raise
     return plan
 

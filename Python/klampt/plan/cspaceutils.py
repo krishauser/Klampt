@@ -234,11 +234,13 @@ class AffineEmbeddedCSpace(CSpace):
         self.ambientspace = ambientspace
         n = len(ambientspace.sample())
         self.A = A
-        if len(self.A) != n:
-            raise ValueError("Coefficient matrix must have n rows")
         if hasattr(A,'shape'):  #numpy array or scipy.sparse matrix
             m = A.shape[1]
+            if self.A.shape[0] != n:
+                raise ValueError("Coefficient matrix must have n rows")
         else:
+            if len(self.A) != n:
+                raise ValueError("Coefficient matrix must have n rows")
             m = 0
             for row in A:
                 if not isinstance(row,dict):
@@ -250,6 +252,7 @@ class AffineEmbeddedCSpace(CSpace):
             if m >= n:
                 warnings.warn("Embedded space has more DOFs than ambient space?")
         self.m = m
+        self.n = n
 
         #start at the zero config if no offset is given
         if b==None:
@@ -278,12 +281,13 @@ class AffineEmbeddedCSpace(CSpace):
         if hasattr(ambientspace,'interpolate'):
             self.interpolate = interpolate
         self.eps = self.ambientspace.eps
+        inf = float('inf')
         self.bound = [[-inf,inf] for i in range(m)]
         #set naive bounds
         Aentries = []
         if hasattr(A,'tocoo'):
             Acoo = A.tocoo()
-            Aentries = itertools.izip(Acoo.row,Acoo.col,Acoo.data)
+            Aentries = zip(Acoo.row,Acoo.col,Acoo.data)
         elif hasattr(A,'dot'):
             import numpy as np
             Aentries = [(i,j,v) for (i,j),v in np.ndenumerate(A) if v != 0]
@@ -306,6 +310,7 @@ class AffineEmbeddedCSpace(CSpace):
             self.feasibilityTests = [(lambda x,f=f:f(self.lift(x))) for f in self.ambientspace.feasibilityTests]
             self.feasibilityTestNames = self.ambientspace.feasibilityTestNames[:]
             self.feasibilityTestDependencies = self.ambientspace.feasibilityTestDependencies[:]
+        print("AffineEmbeddedCSpace projects from dimension",self.m,"to",self.n)
 
     @staticmethod
     def fromRobotDrivers(robot,ambientspace,drivers=None):
@@ -332,7 +337,7 @@ class AffineEmbeddedCSpace(CSpace):
             for i,dind in enumerate(drivers):
                 d = robot.driver(dind)
                 links = d.getAffectedLinks()
-                if d.type() != 'affine':
+                if d.getType() != 'affine':
                     data.append(1)
                     rows.append(links[0])
                     cols.append(i)
@@ -350,7 +355,7 @@ class AffineEmbeddedCSpace(CSpace):
             for i,dind in enumerate(drivers):
                 d = robot.driver(dind)
                 links = d.getAffectedLinks()
-                if d.type() != 'affine':
+                if d.getType() != 'affine':
                     A[links[0]][i] = 1
                 else:
                     scale,offset = d.getAffineCoeffs()
@@ -367,27 +372,29 @@ class AffineEmbeddedCSpace(CSpace):
         #xamb = A*xemb + b
         if hasattr(self.A,'todense'):
             import scipy.sparse.linalg
-            xemb = scipy.sparse.linalg.lsqr(self.A,np.asarray(self.b)-np.asarray(xamb))[0].tolist()
+            xemb = scipy.sparse.linalg.lsqr(self.A,np.asarray(xamb)-np.asarray(self.b))[0].tolist()
         elif hasattr(self.A,'dot'):
-            xemb = np.linalg.lstsq(self.A,np.asarray(self.b)-np.asarray(xamb))[0].tolist()
+            xemb = np.linalg.lstsq(self.A,np.asarray(xamb)-np.asarray(self.b))[0].tolist()
         else:
             import scipy.sparse
-            A = scipy.sparse.lil_matrix((len(self.A),self.m))
+            A = scipy.sparse.lil_matrix((self.A.shape[0],self.m))
             for i,row in enumerate(self.A):
                 for j,v in row.items():
                     A.rows[i].append(j)
                     A.data[i].append(v)
-            xemb = scipy.sparse.linalg.lsqr(A.tocsr(),np.asarray(self.b)-np.asarray(xamb))[0].tolist()
+            xemb = scipy.sparse.linalg.lsqr(A.tocsr(),np.asarray(xamb)-np.asarray(self.b))[0].tolist()
+        assert len(xemb)==self.m
         return xemb
 
     def lift(self,xemb):
         """Embedded space -> ambient space"""
-        if len(xemb) != len(self.A):
-            raise ValueError("Invalid length of embedded space vector: %d should be %d"%(len(xemb),len(self.A)))
-        xamb = self.b[:]
+        if len(xemb) != self.m:
+            raise ValueError("Invalid length of embedded space vector: %d should be %d"%(len(xemb),self.m))
+        
         if hasattr(self.A,'dot'):  #numpy array or scipy.sparse matrix
-            xamb = vectorops.add(xamb,self.A.dot(xemb))
+            xamb = vectorops.add(self.b,self.A.dot(xemb))
         else:
+            xamb = [v for v in self.b]
             #list of dicts
             for (i,dofs) in enumerate(self.A):
                 for j,c in dofs.items():
@@ -418,7 +425,7 @@ class SubsetMotionPlan (MotionPlan):
         MotionPlan.__init__(self,space,type,**options)
         self.subset = subset
         self.q0 = q0
-
+        
     def project(self,xamb):
         """Ambient space -> embedded space"""
         if len(xamb) != len(self.q0):
@@ -517,7 +524,7 @@ class EmbeddedMotionPlan (MotionPlan):
                 return goal(self.space.lift(x))
             embgoal = goaltest
         MotionPlan.setEndpoints(self,embstart,embgoal)
-
+        
     def addMilestone(self,x):
         """Manually adds a milestone from the ambient space, and returns its index"""
         return MotionPlan.addMilestone(self,self.space.project(x))

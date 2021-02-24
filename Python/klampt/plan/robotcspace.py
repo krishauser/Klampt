@@ -85,7 +85,7 @@ class RobotCSpace(CSpace):
 
     def inJointLimits(self,x):
         """Checks joint limits of the configuration x"""
-        for (xi,bi) in zip(x,self.bound):
+        for xi,bi in zip(x,self.bound):
             if xi < bi[0] or xi > bi[1]:
                 return False
         return True
