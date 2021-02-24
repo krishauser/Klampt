@@ -328,7 +328,32 @@ class QtWindowManager(_ThreadedWindowManager):
         if self.vis_thread_running:
             if self.in_vis_loop:
                 #single threaded
-                raise RuntimeError("Can't call dialog() inside loop().  Try dialogInLoop() instead.")
+                w.mode = 'dialog'
+                if w.glwindow is None:
+                    print("vis: creating GL window")
+                    w.glwindow = glinit._GLBackend.createWindow(w.name)
+                    w.glwindow.setProgram(w.frontend)
+                    w.glwindow.setParent(None)
+                    w.glwindow.refresh()
+                if w.custom_ui is None:
+                    dlg = _MyDialog(w)
+                else:
+                    dlg = w.custom_ui(w.glwindow)
+                print("#########################################")
+                print("klampt.vis: Dialog starting on window",self.current_window)
+                print("#########################################")
+                res = None
+                if dlg is not None:
+                    w.glwindow.show()
+                    res = dlg.exec_()
+                print("#########################################")
+                print("klampt.vis: Dialog done on window",self.current_window)
+                print("#########################################")
+                w.glwindow.hide()
+                w.glwindow.setParent(None)
+                w.mode = 'hidden'
+                return res
+                raise RuntimeError("Can't call dialog() inside loop().")
             #just show the dialog and let the thread take over
             assert w.mode == 'hidden',"dialog() called inside dialog?"
             print("#########################################")
@@ -460,13 +485,13 @@ class QtWindowManager(_ThreadedWindowManager):
             return res
 
     def screenshotCallback(self,fn,format,want_depth):
-        if not self.multithreaded() or self.in_vis_loop or self.in_app_thread:
-            #already in visualization loop -- just get the image
-            res = self._frontend.get_screen(format,want_depth)
-            if want_depth:
-                fn(*res)
-            else:
-                fn(res)
+        # if not self.multithreaded() or self.in_vis_loop:
+        #     #already in visualization loop -- just get the image
+        #     res = self._frontend.get_screen(format,want_depth)
+        #     if want_depth:
+        #         fn(*res)
+        #     else:
+        #         fn(res)
         def do_screenshot_callback(fn=fn,format=format,want_depth=want_depth):
             if not self._frontend.rendered:
                 self.threadCall(do_screenshot_callback)

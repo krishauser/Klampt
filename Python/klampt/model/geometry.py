@@ -27,7 +27,7 @@ colors from a PointCloud.
 
 """
 
-from ..robotsim import Geometry3D,PointCloud
+from ..robotsim import Geometry3D,PointCloud,TriangleMesh
 import math
 from .create import primitives
 from ..math import vectorops,so3,se3
@@ -638,3 +638,29 @@ def point_cloud_set_colors(pc,colors,color_format='rgb',pc_property='auto'):
             pc.setProperties(alphachannel[1],packed)
         else:
             pc.addProperty(pc_property,packed)
+
+
+def triangle_normals(trimesh):
+    """
+    Returns a list or numpy array of (outward) triangle normals for the
+    triangle mesh defined by vertices verts and triangles tris.
+    
+    Args:
+        trimesh (TriangleMesh or Geometry3D)
+    """
+    if isinstance(trimesh,Geometry3D):
+        assert trimesh.type() == 'TriangleMesh',"Must provide a TriangleMesh to triangle_normals"
+        trimesh = trimesh.getTriangleMesh()
+    assert isinstance(trimesh,TriangleMesh)
+
+    import numpy as np
+    from ..io import numpy_convert
+    
+    verts,tris = numpy_convert.to_numpy(trimesh)
+    normals = np.zeros(tris.shape)
+    dba = verts[tris[:,1]]-verts[tris[:,0]]
+    dca = verts[tris[:,2]]-verts[tris[:,0]]
+    n = np.cross(dba,dca)
+    norms = np.linalg.norm(n,axis=1)[:, np.newaxis]
+    n = np.divide(n,norms,where=norms!=0)
+    return n

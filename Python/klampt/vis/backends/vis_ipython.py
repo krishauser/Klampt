@@ -352,7 +352,8 @@ class IPythonWindowManager(_WindowManager):
         self.frontend().width = w
         self.frontend().height = h
     def setPlugin(self,plugin):
-        raise NotImplementedError("IPython does not accept plugins")
+        if plugin is not None:
+            raise NotImplementedError("IPython does not accept plugins")
     def pushPlugin(self,plugin):
         raise NotImplementedError("IPython does not accept plugins")
     def popPlugin(self):

@@ -1719,6 +1719,8 @@ def objectToVisType(item,world):
                 validtypes.append(t)
             elif t=='Geometry3D':
                 validtypes.append(t)
+            elif t=='Trajectory':
+                validtypes.append(t)
         if len(validtypes) > 1:
             warnings.warn("Unable to draw item of ambiguous types {}\n  (Try vis.setAttribute(item,'type',desired_type_str) to disambiguate)".format(validtypes))
             return
@@ -2597,6 +2599,8 @@ class VisAppearance:
         elif isinstance(item,Trajectory):
             doDraw = False
             centroid = None
+            if len(item.milestones) == 0:
+                return
             robot = (world.robot(self.attributes["robot"]) if world is not None and world.numRobots() > 0 else None)
             if robot is not None:
                 robotConfig = robot.getConfig()
@@ -3573,7 +3577,10 @@ class VisualizationScene:
                 plot.items.append(VisPlotItem('',None))
             t = self.t
             if self.startTime is not None:
-                t = self.timeCallback() - self.startTime
+                if self.timeCallback is None:
+                    t = time.time() - self.startTime
+                else:
+                    t = self.timeCallback() - self.startTime
             else:
                 t = 0
             plot.items[customIndex].compressThreshold = compress
@@ -3585,11 +3592,13 @@ class VisualizationScene:
             plot = self.getItem(plotname)
             assert plot is not None and isinstance(plot.item,VisPlot),(plotname+" is not a valid plot")
             t = self.t
-            if self.timeCallback is not None:
-                if self.startTime is not None:
-                    t = self.timeCallback() - self.startTime
+            if self.startTime is not None:
+                if self.timeCallback is None:
+                    t = time.time() - self.startTime
                 else:
-                    t = 0
+                    t = self.timeCallback() - self.startTime
+            else:
+                t = 0
             plot.item.addEvent(eventname,t,color)
 
     def hidePlotItem(self,plotname,itemname,hidden=True):
