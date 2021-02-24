@@ -647,6 +647,9 @@ def triangle_normals(trimesh):
     
     Args:
         trimesh (TriangleMesh or Geometry3D)
+
+    Returns:
+        list of lists or numpy array: an n x 3 matrix of triangle normals.
     """
     if isinstance(trimesh,Geometry3D):
         assert trimesh.type() == 'TriangleMesh',"Must provide a TriangleMesh to triangle_normals"
@@ -655,7 +658,7 @@ def triangle_normals(trimesh):
 
     import numpy as np
     from ..io import numpy_convert
-    
+
     verts,tris = numpy_convert.to_numpy(trimesh)
     normals = np.zeros(tris.shape)
     dba = verts[tris[:,1]]-verts[tris[:,0]]
