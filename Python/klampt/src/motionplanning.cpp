@@ -1191,10 +1191,10 @@ bool PlannerInterface::setEndpoints(PyObject* start,PyObject* goal)
   if(istart != 0) {
     throw PyException("Plan already initialized?");
   }
-
+  
   res=PyListToConfig(goal,qgoal);
   if(!res) 
-    throw PyException("Invalid start endpoint");
+    throw PyException("Invalid goal endpoint");
   if(!s->IsFeasible(qgoal)) {
     throw PyException("Goal configuration is infeasible");
   }
