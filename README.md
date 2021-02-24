@@ -92,6 +92,7 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 -   Python API: substantial performance improvements to camera image retrieval (camera_to_images).
 -   Python API: new calls for getting subset of Jacobian columns.
 -   Python API: Workaround for Mac OSX Big Sur dropping support for OpenGL when importing PyOpenGL.
+-   Python API: Bug fixes for planning with affine joints.
 -   Minor bug fixes.
 
 **0.8.6** (1/27/2021)
