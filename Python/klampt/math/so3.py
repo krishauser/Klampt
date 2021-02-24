@@ -321,7 +321,7 @@ def canonical(v):
         return R
     R = list(v) + [0.]*6
     x,y,z = v
-    scale = (1.0-x)/(1.0-x*x);
+    scale = 1.0/(1.0+x);
     R[3]= -y;
     R[4]= x + scale*z*z;
     R[5]= -scale*y*z;
@@ -329,6 +329,27 @@ def canonical(v):
     R[7]= -scale*y*z;
     R[8]= x + scale*y*y;
     return R
+
+def align(a,b):
+    """Returns a rotation that aligns the vector a to align with the vector b."""
+    an = vectorops.norm(a)
+    bn = vectorops.norm(b)
+    if abs(an) < 1e-5 or abs(bn) < 1e-5:
+        return identity()
+    a = vectorops.mul(a,1.0/an)
+    b = vectorops.mul(b,1.0/bn)
+    v = vectorops.cross(a,b)
+    c = vectorops.dot(a,b)
+    if abs(c+1)<1e-5: #rotation of pi
+        v = vectorops.cross(a,[0,0,1])
+        vn = vectorops.norm(v)
+        if vn < 1e-5:
+            v = vectorops.cross(a,[0,1,0])
+            vn = vectorops.norm(v)
+        return rotation(vectorops.mul(v,1.0/vn),math.pi)
+    vhat = cross_product(v)
+    vhat2 = mul(vhat,vhat)
+    return vectorops.madd(vectorops.add(identity(),vhat),vhat2,1.0/(1.0+c))
 
 def vector_rotation(v1,v2):
     """Finds the minimal-angle matrix that rotates v1 to v2.  v1 and v2
