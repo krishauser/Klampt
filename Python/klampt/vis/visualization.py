@@ -4165,6 +4165,21 @@ class _ThreadedWindowManager(_WindowManager):
 
     def loop(self,setup,callback,cleanup):
         if self.vis_thread_running or self.in_vis_loop:
+            if setup is not None:
+                setup()
+            self.show()
+            dt = 1.0/30.0
+            while self.shown():
+                t0 = time.time()
+                if callback is not None:
+                    self.lock()
+                    callback()
+                    self.unlock()
+                t1 = time.time()
+                time.sleep(max(0,dt-(t1-t0)))
+            if cleanup is not None:
+                cleanup()
+            return
             raise RuntimeError("Cannot call loop() after show(), inside dialog(), or inside loop() callbacks")
         self.in_vis_loop = True
         try:
