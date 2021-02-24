@@ -1170,6 +1170,9 @@ def listItems(name=None,indent=0):
     scene().listItems(name,indent)
 
 def getItemName(object):
+    """Retrieves the name / path of a given object in the scene, or returns
+    None if the object doesnt exist.
+    """
     if _backend is None:
         return None
     return scene().getItemName(object)
