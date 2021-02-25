@@ -984,8 +984,8 @@ def fromJson(jsonobj,type='auto'):
         elif rotConstraint == 'axis':
             obj = IKObjective()
             h = 0.1
-            lpts = [localPosition,vectorops.madd(localPosition,localAxis,h)]
-            wpts = [endPosition,vectorops.madd(endPosition,endRotation,h)]
+            lpts = [vectorops.madd(localPosition,localAxis,-h),vectorops.madd(localPosition,localAxis,h)]
+            wpts = [vectorops.madd(endPosition,endRotation,-h),vectorops.madd(endPosition,endRotation,h)]
             if destlink >= 0:
                 obj.setRelativePoints(link,destlink,lpts,wpts)
             else:
