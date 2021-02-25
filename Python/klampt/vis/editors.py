@@ -115,7 +115,7 @@ class ConfigEditor(VisualEditorBase):
         return False
 
     def updateGuiFromValue(self):
-        self.robotPoser.set(self.value)
+        self.robotposer.set(self.value)
         self.refresh()
 
 
