@@ -364,22 +364,35 @@ def _color_format_from_uint8_channels(format,r,g,b,a=None):
         return np.bitwise_or.reduce((np.left_shift(a,24),np.left_shift(b,16),np.left_shift(g,8),r)).tolist()
     elif format=='channels':
         one_255 = 1.0/255.0
+        r = np.asarray(r)
+        g = np.asarray(g)
+        b = np.asarray(b)
         if not hasattr(a,'__iter__'):
             return (r*one_255).tolist(),(g*one_255).tolist(),(b*one_255).tolist()
         else:
+            a = np.asarray(a)
             return (r*one_255).tolist(),(g*one_255).tolist(),(b*one_255).tolist(),(a*one_255).tolist()
     elif format=='opacity':
         one_255 = 1.0/255.0
         if not hasattr(a,'__iter__'):
             return np.ones(len(r))
+        a = np.asarray(a)
         return (a*one_255).tolist()
     elif tuple(format)==('r','g','b'):
         one_255 = 1.0/255.0
+        r = np.asarray(r)
+        g = np.asarray(g)
+        b = np.asarray(b)
         return np.column_stack((r*one_255,g*one_255,b*one_255)).tolist()
     elif tuple(format)==('r','g','b','a'):
         one_255 = 1.0/255.0
         if not hasattr(a,'__iter__'):
             a = np.full(len(r),a)
+        else:
+            a = np.asarray(a)
+        r = np.asarray(r)
+        g = np.asarray(g)
+        b = np.asarray(b)
         return np.column_stack((r*one_255,g*one_255,b*one_255,a*one_255)).tolist()
     else:
         raise ValueError("Invalid format specifier "+str(format))
@@ -412,17 +425,15 @@ def _color_format_to_uint8_channels(format,colors):
         r = [0xff]*len(colors)
         return r,r,r,(colors*255).astype(np.uint8).tolist()
     elif tuple(format)==('r','g','b'):
-        colors = (colors*255).astype(np.uint8)
-        r = colors[:,0]
-        g = colors[:,1]
-        b = colors[:,2]
+        r = (np.asarray(colors[0])*255).astype(np.uint8)
+        b = (np.asarray(colors[1])*255).astype(np.uint8)
+        g = (np.asarray(colors[2])*255).astype(np.uint8)
         return r.tolist(),g.tolist(),b.tolist()
     elif tuple(format)==('r','g','b','a'):
-        colors = (colors*255).astype(np.uint8)
-        r = colors[:,0]
-        g = colors[:,1]
-        b = colors[:,2]
-        a = colors[:,3]
+        r = (np.asarray(colors[0])*255).astype(np.uint8)
+        b = (np.asarray(colors[1])*255).astype(np.uint8)
+        g = (np.asarray(colors[2])*255).astype(np.uint8)
+        a = (np.asarray(colors[3])*255).astype(np.uint8)
         return r.tolist(),g.tolist(),b.tolist(),a.tolist()
     else:
         raise ValueError("Invalid format specifier "+str(format))
@@ -473,7 +484,7 @@ def point_cloud_colors(pc,format='rgb'):
         if format == rgbchannels[0][0]:
             return rgb
         import numpy as np
-        rgb = np.array(rgb,dtype=int)
+        rgb = np.array(rgb,dtype=np.uint32)
         r = np.right_shift(np.bitwise_and(rgb,0xff0000),16)
         g = np.right_shift(np.bitwise_and(rgb,0xff00),8)
         b = np.bitwise_and(rgb,0xff)
@@ -636,6 +647,12 @@ def point_cloud_set_colors(pc,colors,color_format='rgb',pc_property='auto'):
             pc.setProperties(rgbdict[pc_property],packed)
         elif alphachannel is not None and pc_property == alphachannel[0]:
             pc.setProperties(alphachannel[1],packed)
+        elif pc_property == 'channels':
+            pc.addProperty('r',packed[0])
+            pc.addProperty('g',packed[1])
+            pc.addProperty('b',packed[2])
+            if len(packed)==4:
+                pc.addProperty('a',packed[3])
         else:
             pc.addProperty(pc_property,packed)
 
