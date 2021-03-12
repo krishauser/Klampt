@@ -136,6 +136,8 @@ def print_signature(siglist,indent0,docstring):
         sargs = s[s.find("(")+1:s.find(")")]
         if len(sargs.strip()) > 0:
             for arg in sargs.split(','):
+                if arg=='self':
+                    continue
                 try:
                     atype,aname = arg.rsplit(' ',1)
                 except Exception:
@@ -244,7 +246,7 @@ if __name__ == '__main__':
     for line,ln in enumerate(f.readlines()):
         ln = ln[:-1]  #strip endline
         first_nw = len(ln) - len(ln.lstrip())
-        quote = (ln[first_nw:first_nw+3]=='"""')
+        quote = (ln[first_nw:first_nw+3]=='"""' or ln[first_nw:first_nw+4]=='r"""')
         if reading_docstring:
             if quote:
                 #end parsing
