@@ -240,6 +240,10 @@ void PolynomialMotionQueue::AppendRamp(const Config& x,const Vector& v)
       if(Abs(dmilestones[0][i]) > velMax[i]) {
         LOG4CXX_WARN(KrisLibrary::logger(),"  Reason: current vel["<<i<<"] is out of velMax limits: |"<<dmilestones[0][i]<<"| <= "<<velMax[i]<<", clamping");
       }
+    for(int i=0;i<v.n;i++)
+      if(accMax[i] == 0) {
+        LOG4CXX_WARN(KrisLibrary::logger(),"  Reason: accMax["<<i<<"] is zero?");
+      }
   }
   else {
     if(path.EndTime() < pathOffset) {
