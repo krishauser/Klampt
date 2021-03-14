@@ -8,8 +8,8 @@ from .robotinterfaceutils import RobotInterfaceCompleter
 
 class SimRobotControllerToInterface(object):
     """A class that provides an API like :class:`SimRobotController` so that
-    simulation control code can be ported easily to a :class:`RobotInterfaceBase`
-    Robot Interface Layer API.
+    simulation control code can be ported easily to a 
+    :class:`RobotInterfaceBase` Robot Interface Layer API.
 
     Missing:
 
@@ -158,51 +158,80 @@ class RobotControllerToInterface(object):
     """
     def __init__(self,controller,robotInterface,controllerRateRatio=1):
         if not isinstance(robotInterface,RobotInterfaceCompleter):
-            robotInterface = RobotInterfaceCompleter(robotInterface)
+            assert isinstance(robotInterface,RobotInterfaceBase),"robotInterface must be a RobotInterfaceBase"
+            robotInterface = RobotInterfaceCompleter(robotInterface,base_initialized=True)
+            robotInterface.initialize()
+        assert isinstance(controller,ControllerBlock),"controller must be a ControllerBlock"
         self.robotInterface = robotInterface
         self.controller = controller
         self.controllerRateRatio = controllerRateRatio
         self.lastInputs = None
         self.lastOutputs = None
 
-    def advance(self):
+    def advance(self,step_interface=False):
+        """Moves forward the controller and interface one step.
+
+        If step_interface = True the robotInterface will also be
+        stepped.  Otherwise, make sure you call startStep()/endStep() like::
+        
+            c2i = RobotControllerToInterface(...)
+            c2i.robotInterface.startStep()
+            c2i.advance()
+            c2i.robotInterface.endStep()
+        """
         if self.controllerRateRatio != 1:
             raise NotImplementedError("Can't do controller / robotInterface time step ratio != 1")
-        self.robotInterface.startStep()
+        if step_interface:
+            self.robotInterface.startStep()
+        #sensing
         inputs = dict()
         inputs['t'] = self.robotInterface.clock()
         inputs['dt'] = 1.0/self.robotInterface.controlRate()
-        inputs['q'] = self.robotInterface.sensedPosition()
-        inputs['dq'] = self.robotInterface.sensedVelocity()
+        inputs['q'] = self.robotInterface.configToKlampt(self.robotInterface.sensedPosition())
+        inputs['dq'] = self.robotInterface.velocityToKlampt(self.robotInterface.sensedVelocity())
         try:
-            inputs['torque'] = self.robotInterface.sensedTorque()
+            inputs['torque'] = self.robotInterface.velocityToKlampt(self.robotInterface.sensedTorque())
         except NotImplementedError:
             pass
         for s in self.robotInterface.enabledSensors():
-            inputs[s] = self.robotInterface.sensorMeasurements(s)
+            try:
+                inputs[s] = self.robotInterface.sensorMeasurements(s)
+            except Exception as e:
+                import traceback
+                print("Uh... can't read sensor",s)
+                traceback.print_exc()
+        #plan
         res = self.controller.advance(**inputs)
+        #act
         if 'qcmd' in res:
-            dqcmd = res['dqcmd'] if 'dqcmd' in res else [0.0]*len(res['qcmd'])
-            if 'torquecmd' in res:
-                self.robotInterface.setPID(res['qcmd'],dqcmd,res['torquecmd'])
+            qcmd = self.robotInterface.configFromKlampt(res['qcmd'])
+            if 'dqcmd' in res:
+                dqcmd = self.robotInterface.velocityFromKlampt(res['dqcmd'])
+                if 'torquecmd' in res:
+                    tcmd = self.robotInterface.velocityFromKlampt(res['torquecmd'])
+                    self.robotInterface.setPID(qcmd,dqcmd,tcmd)
+                else:
+                    self.robotInterface.setPID(qcmd,dqcmd)
             else:
-                self.robotInterface.setPID(res['qcmd'],dqcmd)
+                self.robotInterface.setPosition(qcmd)
         elif 'dqcmd' in res:
             assert 'tcmd' in res
-            self.robotInterface.setVelocity(res['dqcmd'],res['tcmd'])
+            dqcmd = self.robotInterface.velocityFromKlampt(res['dqcmd'])
+            self.robotInterface.setVelocity(dqcmd,res['tcmd'])
         elif 'torquecmd' in res:
-            self.robotInterface.setTorque(res['torquecmd'])
-        self.robotInterface.endStep()
+            tcmd = self.robotInterface.velocityFromKlampt(res['torquecmd'])
+            self.robotInterface.setTorque(tcmd)
+        if step_interface:
+            self.robotInterface.endStep()
         self.lastInputs = inputs
         self.lastOutputs = res
     
 
 class RobotInterfacetoVis(object):
-    """A class that manages connections between the sensor readings of a
-    :class:`RobotInterfaceBase` Robot Interface Layer API to the Klamp't vis
-    module.
+    """A class that produces a standard klampt.vis display to monitor a 
+    :class:`RobotInterfaceBase` Robot Interface Layer API.
 
-    This assumes that ``vis`` has been set up with an appropriate world.
+    Note: this assumes that ``vis`` has been set up with an appropriate world.
     """
     def __init__(self,robotInterface,visRobotIndex=0):
         self.interface = robotInterface
