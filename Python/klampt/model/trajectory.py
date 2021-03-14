@@ -405,20 +405,22 @@ class Trajectory:
         res.times.append(sorter[0][0])
         res.milestones.append(self.milestones[0])
         #maybe a constant first section
+        resindices = []
         i = 0
         while sorter[i][0] < self.startTime():
+            if sorter[i][1] >= 0:
+                resindices.append(0)
             i += 1
         if i != 0:
             res.times.append(self.startTime())
             res.milestones.append(self.milestones[0])
-        resindices = []
         firstold = 0
         lastold = 0
         while i < len(sorter):
             #check if we should add this
             t,idx = sorter[i]
             i+=1
-            if idx >= 0:
+            if idx >= 0:  #new time
                 if t == res.times[-1]:
                     resindices.append(len(res.times)-1)
                     continue
@@ -452,7 +454,7 @@ class Trajectory:
         for i in range(len(res.times)-1):
             assert res.times[i] < res.times[i+1]
         for i,idx in enumerate(resindices):
-            assert newtimes[i] == res.times[idx]
+            assert newtimes[i] == res.times[idx],"Resindices mismatch? {} should index {} to {}".format(resindices,newtimes,res.times)
         return (res,resindices)
 
     def extractDofs(self,dofs):
