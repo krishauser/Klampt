@@ -17,7 +17,7 @@ Logging... TODO
 """
 
 from .robotinterface import *
-from ..math import vectorops,so3,se3,spline
+from ..math import vectorops,so2,so3,se3,spline
 from ..plan import motionplanning
 from ..model.trajectory import Trajectory,HermiteTrajectory
 from .cartesian_drive import CartesianDriveSolver
@@ -1035,6 +1035,7 @@ class _JointInterfaceEmulatorData:
         self.commandedVelocity = None
         self.commandedTorque = None
         self.commandTTL = None
+        self.continuousRotation = False
         self.lastCommandedPosition = None
         self.commandParametersChanged = False
         self.pidCmd = None
@@ -1045,12 +1046,18 @@ class _JointInterfaceEmulatorData:
         self.trajectoryVelocities = None
         self.externalController = None
 
+    def _positionDifference(self,a,b):
+        if self.continuousRotation:
+            return so2.diff(a,b)
+        else:
+            return a-b
+
     def update(self,t,q,v,dt):
         if v is None:
             if self.sensedPosition is None:
                 self.sensedVelocity = 0
             else:
-                self.sensedVelocity = (q-self.sensedPosition)/dt
+                self.sensedVelocity = self._positionDifference(q,self.sensedPosition)/dt
             v = self.sensedVelocity
         else:
             self.sensedVelocity = v
@@ -1064,7 +1071,7 @@ class _JointInterfaceEmulatorData:
             self.commandedPosition = self.pidCmd[0]
             self.commandedVelocity = self.pidCmd[1]
             self.commandedTorque = self.pidCmd[2]
-            self.pidIntegralError += (self.commandedPosition-q)*dt
+            self.pidIntegralError += self._positionDifference(self.commandedPosition,q)*dt
             self.commandTTL = dt*5
         elif self.controlMode == 'pwl' or self.controlMode == 'pwc':
             self.commandedPosition,self.commandedVelocity = self.evalTrajectory(t)
@@ -1115,7 +1122,7 @@ class _JointInterfaceEmulatorData:
                 #construct interpolant... should we do it in 1 time step or stretch it out?
                 if self.commandedVelocity == 0:
                     return [0],[self.commandedPosition]
-                dt = (self.commandedPosition - self.lastCommandedPosition)/self.commandedVelocity
+                dt = self.positionDifference(self.commandedPosition,self.lastCommandedPosition)/self.commandedVelocity
                 return [dt],[self.commandedPosition]
             elif self.controlMode == 'v':
                 #construct interpolant
@@ -1130,7 +1137,7 @@ class _JointInterfaceEmulatorData:
                     raise RuntimeError("Can't emulate PID control for joint {} using torque control, no gains are set".format(self.name))
                 qdes,vdes,tdes = self.pidCmd
                 kp,ki,kd = self.pidGains
-                t_pid = kp*(qdes-self.sensedPosition) + kd*(vdes-self.sensedVelocity) + ki*self.pidIntegralError + tdes
+                t_pid = kp*self._positionDifference(qdes,self.sensedPosition) + kd*(vdes-self.sensedVelocity) + ki*self.pidIntegralError + tdes
                 #if abs(self.pidIntegralError[i]*ki) > tmax:
                 #cap integral error to prevent wind-up
                 return t_pid,self.commandTTL
@@ -1236,7 +1243,7 @@ class _JointInterfaceEmulatorData:
         dt = self.trajectoryTimes[i+1]-self.trajectoryTimes[i]
         if self.trajectoryVelocities is None:
             #piecewise linear
-            dp = self.trajectoryMilestones[i+1]-self.trajectoryMilestones[i]
+            dp = self._positionDifference(self.trajectoryMilestones[i+1],self.trajectoryMilestones[i])
             pos = self.trajectoryMilestones[i] + u*dp
             if dt == 0:
                 #discontinuity?
@@ -1249,6 +1256,7 @@ class _JointInterfaceEmulatorData:
             assert len(self.trajectoryTimes) == len(self.trajectoryVelocities)
             x1,v1 = [self.trajectoryMilestones[i]],[self.trajectoryVelocities[i]*dt]
             x2,v2 = [self.trajectoryMilestones[i+1]],[self.trajectoryVelocities[i+1]*dt]
+            x2 = x1 + self._positionDifference(x2-x1)  #handle continuous rotation joints
             x = spline.hermite_eval(x1,v1,x2,v2,u)
             dx = vectorops.mul(spline.hermite_deriv(x1,v1,x2,v2,u),1.0/dt)
             return x[0],dx[0]
@@ -1456,6 +1464,15 @@ class _RobotInterfaceEmulatorData:
         self.lastClock = None
         self.dt = None
         self.jointData = [_JointInterfaceEmulatorData('Joint '+str(i)) for i in range(nd)]
+        if klamptModel is not None:
+            #find any continuous rotation joints
+            for i in range(nd):
+                d = klamptModel.driver(i)
+                if len(d.getAffectedLinks())==1:
+                    link = d.getAffectedLinks()[0]
+                    if klamptModel.getJointType(link)=='spin':
+                        #print("_RobotInterfaceEmulatorData: Interpreting joint",i," as a spin joint")
+                        self.jointData[i].continuousRotation = True
         self.cartesianInterfaces = dict()
         self.commandSent = False
 
