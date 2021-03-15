@@ -1,9 +1,10 @@
 #if defined (__APPLE__) || defined (MACOSX)
   #include "mac_fixes.h"
-#endif //Mac fixes 
+#endif //Mac fixes
 
 #include <string>
 #include <vector>
+#include <algorithm>
 #include "robotik.h"
 #include <KrisLibrary/robotics/IKFunctions.h>
 #include <KrisLibrary/math/random.h>
@@ -91,9 +92,9 @@ void IKObjective::setRelativePoint(int link1,int link2,const double p1[3],const 
 void IKObjective::setRelativePoints(int link1,int link2,PyObject* p1s,PyObject* p2s)
 {
   vector<Vector3> localPos,worldPos;
-  if(!PySequence_ToVector3Array(p1s,localPos)) 
+  if(!PySequence_ToVector3Array(p1s,localPos))
     throw PyException("Unable to convert local point array");
-  if(!PySequence_ToVector3Array(p2s,worldPos)) 
+  if(!PySequence_ToVector3Array(p2s,worldPos))
     throw PyException("Unable to convert target point array");
   if(localPos.size() != worldPos.size())
     throw PyException("Point array size mismatch");
@@ -221,7 +222,7 @@ void IKObjective::transform(const double R[9],const double t[3])
   goal.Transform(T);
 }
 
-void IKObjective::transformLocal(const double R[9],const double t[3]) 
+void IKObjective::transformLocal(const double R[9],const double t[3])
 {
   RigidTransform T;
   T.R = Matrix3(R);
@@ -306,9 +307,9 @@ void GeneralizedIKObjective::setPoint(const double p1[3],const double p2[3])
 void GeneralizedIKObjective::setPoints(PyObject* p1s,PyObject* p2s)
 {
   vector<Vector3> localPos,worldPos;
-  if(!PySequence_ToVector3Array(p1s,localPos)) 
+  if(!PySequence_ToVector3Array(p1s,localPos))
     throw PyException("Unable to convert local point array");
-  if(!PySequence_ToVector3Array(p2s,worldPos)) 
+  if(!PySequence_ToVector3Array(p2s,worldPos))
     throw PyException("Unable to convert target point array");
   if(localPos.size() != worldPos.size())
     throw PyException("Point array size mismatch");
@@ -507,7 +508,7 @@ PyObject* IKSolver::solve(int iters,double tol)
     getJointLimits(qmin,qmax);
     for(size_t i=0;i<qmin.size();i++) {
       if(robot.robot->q(i) < qmin[i] || robot.robot->q(i) > qmax[i]) {
-        if(robot.robot->q(i) < qmin[i]-Epsilon || robot.robot->q(i) > qmax[i]+Epsilon) 
+        if(robot.robot->q(i) < qmin[i]-Epsilon || robot.robot->q(i) > qmax[i]+Epsilon)
           printf("Joint limits %f < %f <%f exceeded on joint %i. Clamping to limit...\n", qmin[i],robot.robot->q(i),qmax[i],i);
         if(robot.robot->q(i) < qmin[i]) {
           robot.robot->q(i) = qmin[i];
@@ -535,8 +536,8 @@ PyObject* IKSolver::solve(int iters,double tol)
     if(qmin.empty())
       solver.UseJointLimits();
     else {
-      if(qmin.size() != robot.robot->links.size()) throw PyException("Invalid size on qmin");
-      if(qmax.size() != robot.robot->links.size()) throw PyException("Invalid size on qmax");
+      if(qmin.size() != activeDofs.size()) throw PyException("Invalid size on qmin");
+      if(qmax.size() != activeDofs.size()) throw PyException("Invalid size on qmax");
       solver.UseJointLimits(Vector(qmin),Vector(qmax));
     }
   }
@@ -553,13 +554,18 @@ PyObject* IKSolver::solve(int iters,double tol)
 bool IKSolver::solve()
 {
   if(useJointLimits) {
-    const Real* usedQmin = (qmin.empty() ? &robot.robot->qMin[0] : &qmin[0]);
-    const Real* usedQmax = (qmax.empty() ? &robot.robot->qMax[0] : &qmax[0]);
     for(size_t i=0;i<robot.robot->q.size();i++) {
-      if(robot.robot->q(i) < usedQmin[i] || robot.robot->q(i) > usedQmax[i]) {
-        if(robot.robot->q(i) < usedQmin[i]-Epsilon || robot.robot->q(i) > usedQmax[i] + Epsilon) 
-          printf("IKSolver:: Joint limits on joint %i exceeded: %g <= %g <= %g. Clamping to limits...\n", i,usedQmin[i],robot.robot->q(i),usedQmax[i]);
-        robot.robot->q(i) = Clamp(robot.robot->q(i),usedQmin[i],usedQmax[i]);
+      Real usedQmin = robot.robot->qMin[i];
+      auto active_it = std::find(activeDofs.begin(), activeDofs.end(), i);
+      if(active_it != activeDofs.end() && qmin[active_it - activeDofs.begin()] > usedQmin)
+        usedQmin = qmin[active_it - activeDofs.begin()];
+      Real usedQmax = robot.robot->qMax[i];
+      if(active_it != activeDofs.end() && qmax[active_it - activeDofs.begin()] < usedQmax)
+        usedQmax = qmax[active_it - activeDofs.begin()];
+      if(robot.robot->q(i) < usedQmin || robot.robot->q(i) > usedQmax) {
+        if(robot.robot->q(i) < usedQmin-Epsilon || robot.robot->q(i) > usedQmax + Epsilon)
+          printf("IKSolver:: Joint limits on joint %i exceeded: %g <= %g <= %g. Clamping to limits...\n", i,usedQmin,robot.robot->q(i),usedQmax);
+        robot.robot->q(i) = Clamp(robot.robot->q(i),usedQmin,usedQmax);
       }
     }
   }
@@ -581,8 +587,8 @@ bool IKSolver::solve()
     if(qmin.empty())
       solver.UseJointLimits();
     else {
-      if(qmin.size() != robot.robot->links.size()) throw PyException("Invalid size on qmin");
-      if(qmax.size() != robot.robot->links.size()) throw PyException("Invalid size on qmax");
+      if(qmin.size() != activeDofs.size()) throw PyException("Invalid size on qmin");
+      if(qmax.size() != activeDofs.size()) throw PyException("Invalid size on qmax");
       solver.UseJointLimits(Vector(qmin),Vector(qmax));
     }
   }
