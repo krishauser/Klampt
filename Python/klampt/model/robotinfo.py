@@ -26,11 +26,15 @@ class RobotInfo:
     """Stores common semantic properties for a robot.
 
     Attributes:
-        - name (str): a string identifying this robot
-        - fn (fn, optional): a file pointing to the Klamp't model.
-        - endEffectors (dict str->EndEffectorInfo): a set of named end
+        name (str): a string identifying this robot
+        fn (fn, optional): a file pointing to the Klamp't model.
+        freeBase (bool): whether the robot has a mobile or floating base.
+        endEffectors (dict str->EndEffectorInfo): a set of named end
             effectors.
-        - parts (dict str->list): a set of named parts
+        parts (dict str->list): a set of named parts.  Each part consists
+            of a list of link names or indices.
+        robotModel (RobotModel): a robot model, loaded upon calling
+            klamptModel().
     """
     def __init__(self,name,fn=None,
                 freeBase=False,
