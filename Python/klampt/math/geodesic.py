@@ -90,7 +90,7 @@ class MultiGeodesicSpace(GeodesicSpace):
         i = 0
         res = [0]*len(x)
         for c in self.components:
-            d = c.dimension()
+            d = c.extrinsicDimension()
             res[i:i+d] = c.difference(x[i:i+d],diff[i:i+d])
             i += d
         return res
