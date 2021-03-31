@@ -284,14 +284,23 @@ class RobotInterfacetoVis(object):
         except NotImplementedError:
             qsns = None
         try:
-            qcmd = self.interface.configToKlampt(self.interface.commandedPosition())
-            if qcmd != qsns:
-                vis.add(self.tag+"q_cmd",qcmd,robot=self.visRobotIndex,color=(1,1,0,0.5))
+            jcmd = self.interface.commandedPosition()
+            if all(j is not None for j in jcmd):
+                qcmd = self.interface.configToKlampt(jcmd)
+                if qcmd != qsns:
+                    vis.add(self.tag+"q_cmd",qcmd,robot=self.visRobotIndex,color=(1,1,0,0.5))
+            else:
+                try:
+                    vis.remove(self.tag+"q_cmd")
+                except Exception:
+                    pass
         except NotImplementedError:
             pass
         try:
             if moving and endTime > t:
-                qdes = self.interface.configToKlampt(self.interface.destinationPosition())
+                jdes = self.interface.destinationPosition()
+                assert all(j is not None for j in jdes)
+                qdes = self.interface.configToKlampt(jdes)
                 vis.add(self.tag+"q_dest",qdes,robot=self.visRobotIndex,color=(1,0,0,0.5))
             else:
                 try:
