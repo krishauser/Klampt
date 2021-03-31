@@ -87,7 +87,7 @@ class GLPluginInterface:
         return self.view.click_ray(x,y)
     def viewport(self):
         """Returns the :class:`~klampt.robotsim.Viewport` instance associated
-        with the current GL view.
+        with the current GL view.  Used for interfacing with C++ widgets.
         """
         if self.view is None:
             raise RuntimeError("Can't get viewport for a GLPluginInterface that's not bound to a GLProgram")
