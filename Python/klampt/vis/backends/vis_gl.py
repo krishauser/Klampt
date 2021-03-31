@@ -148,12 +148,19 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
     def setBackgroundImage(self,img,format='auto',rows='auto'):
         """Sets an image to go underneath the OpenGL rendering.
 
-        img must be a list of bytes or numpy array.  If it has shape w x h x 3, it
-        is assumed to have rgb information as channels.  If it has shape w x h, it
-        is assumed to have rgb information as integers 0xrrggbb by default. 
-        If format='bgr', then the rgb information is assumed to be integers 0xbbggrr.
+        img must be a list of bytes or numpy array.  If bytes, then
+        format can be either 'rgb' (same as 'auto'), 'bgr', 'rgba', or 'bgra',
+        corresponding to the OpenGL format constant.
 
-        If img == None, then the background image is cleared
+        If img is a numpy array with shape w x h x 3, it is assumed to have rgb
+        information as channels.  If dtype=uint8, they are assumed to be
+        bytes, and otherwise they are assumed to be floats in the range [0,1]
+
+        If img has shape w x h, it is assumed to have rgb information as 
+        integers 0x00rrggbb by default.  If format='bgr', then the rgb
+        information is assumed to be integers 0xbbggrr.
+
+        If img == None, then the background image is cleared.
         """
         global _globalLock
         if img is None:
@@ -183,6 +190,8 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
                 assert len(img.shape)==2
                 rows = img.shape[0]
                 cols = img.shape[1]
+                if img.dtype != np.uint32:
+                    img = img.astype(np.uint32)
                 img = img.tobytes()
                 if format == 'bgr':
                     pixformat = GL_BGRA

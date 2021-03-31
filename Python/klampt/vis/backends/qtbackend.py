@@ -12,6 +12,7 @@ except ImportError:
 import sys
 import math
 import weakref
+import signal
 
 GLUT_UP = 1
 GLUT_DOWN = 0
@@ -144,12 +145,12 @@ class QtGLWindow(QGLWidget):
         if self.initialized:
             program.initialize()
             program.reshapefunc(self.width,self.height)
-            def f():
+            def idleCallback():
                 self.nextIdleEvent = 0
                 if self.program: self.program.idlefunc()
                 if self.nextIdleEvent == 0:
                     self.idleTimer.start(0)
-            self.idleTimer.timeout.connect(f)
+            self.idleTimer.timeout.connect(idleCallback)
         else:
             self.reshape(program.view.w,program.view.h)
 
@@ -167,13 +168,13 @@ class QtGLWindow(QGLWidget):
             pass
         self.setMouseTracking(True)
         self.setFocusPolicy(Qt.StrongFocus)
-        def f():
+        def idleCallback():
             self.nextIdleEvent = 0
             if self.program: self.program.idlefunc()
             if self.nextIdleEvent == 0:
                 self.idleTimer.start(0)
         self.idleTimer = QTimer(self)
-        self.idleTimer.timeout.connect(f)
+        self.idleTimer.timeout.connect(idleCallback)
         self.idleTimer.setSingleShot(True)
         self.idleTimer.start(0)
         #init function

@@ -1,4 +1,4 @@
-from ..controller import RobotControlIO,RobotControllerBase
+from ..controller import RobotControllerIO,RobotControllerBase
 import math
 
 class BigWiggleController(RobotControllerBase):
@@ -7,6 +7,10 @@ class BigWiggleController(RobotControllerBase):
     def __init__(self,robot,period=2):
         self.robot = robot
         self.qmin,self.qmax = robot.getJointLimits()
+        for i in range(len(self.qmin)):
+            if self.qmax[i]-self.qmin[i] > math.pi*2:
+                self.qmax[i] = min(self.qmax[i],math.pi)
+                self.qmin[i] = max(self.qmin[i],-math.pi)
         self.q = robot.getConfig()
         self.index = 0
         self.startTime = None
@@ -26,7 +30,7 @@ class BigWiggleController(RobotControllerBase):
         self.startTime=state['startTime']
         
     def advance(self,**inputs):
-        api = RobotControlIO(inputs)
+        api = RobotControllerIO(inputs)
         t = api.time()
         if self.startTime == None:
             self.startTime = t
@@ -87,7 +91,7 @@ class OneJointWiggleController(RobotControllerBase):
         self.startTime=state['startTime']
         
     def advance(self,**inputs):
-        api = RobotControlIO(inputs)
+        api = RobotControllerIO(inputs)
         t = api.time()
         if self.startTime == None:
             self.startTime = t

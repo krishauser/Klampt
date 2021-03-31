@@ -4,7 +4,8 @@
 #include <KrisLibrary/errors.h>
 
 ActuatorCommand::ActuatorCommand()
-  :mode(OFF),measureAngleAbsolute(true),qmin(-Inf),qmax(Inf),
+  :mode(OFF),revolute(false),measureAngleAbsolute(true),
+  qmin(-Inf),qmax(Inf),
    kP(0),kI(0),kD(0),qdes(0),dqdes(0),iterm(0),
   torque(0),desiredVelocity(0)
 {}
@@ -42,20 +43,24 @@ void ActuatorCommand::SetLockedVelocity(Real vel,Real torqueMax)
 Real ActuatorCommand::GetPIDTorque(Real q,Real dq) const
 {
   Real deltaq,deltadq;
-  if(measureAngleAbsolute) {
+  if(measureAngleAbsolute || !revolute) {
     deltaq=qdes-q;
-    if(q < qmin || q > qmax) {
-      if(Abs(AngleDiff(qdes,q)) < Abs(deltaq*0.5)) {
-        printf("Command.cpp: Warning, PID loop has a possible angle encoder error, using AngleDiff\n");
-        printf("  qdes = %g, q = %g\n",qdes,q);
-        printf("  AngleDiff %g, sub %g\n",AngleDiff(qdes,q),deltaq);
-        //getchar();
-        deltaq = AngleDiff(qdes,q);
+    if(revolute) {
+      if(q < qmin || q > qmax) {
+        if(Abs(AngleDiff(qdes,q)) < Abs(deltaq*0.5)) {
+          printf("Command.cpp: Warning, PID loop has a possible angle encoder error, using AngleDiff\n");
+          printf("  qdes = %g, q = %g\n",qdes,q);
+          printf("  AngleDiff %g, sub %g\n",AngleDiff(qdes,q),deltaq);
+          //getchar();
+          deltaq = AngleDiff(AngleNormalize(qdes),AngleNormalize(q));
+        }
       }
     }
   }
-  else
-    deltaq=AngleDiff(qdes,q);
+  else {
+    Assert(revolute);
+    deltaq=AngleDiff(AngleNormalize(qdes),AngleNormalize(q));
+  }
   deltadq=dqdes-dq;
   //printf("P torque: %g, D torque: %g, I torque %g, FF torque %g\n",kP*deltaq,kD*deltadq,kI*iterm,torque);
   return kP*deltaq+kD*deltadq+kI*iterm+torque;
@@ -63,14 +68,16 @@ Real ActuatorCommand::GetPIDTorque(Real q,Real dq) const
 
 void ActuatorCommand::IntegratePID(Real q,Real dt)
 {
-  if(measureAngleAbsolute) {
-    if(Abs(AngleDiff(qdes,q)) < Abs((qdes-q)*0.5)) 
-      iterm += AngleDiff(qdes,q)*dt;      
+  if(measureAngleAbsolute || !revolute) {
+    if(revolute && Abs(AngleDiff(AngleNormalize(qdes),AngleNormalize(q))) < Abs((qdes-q)*0.5)) 
+      iterm += AngleDiff(AngleNormalize(qdes),AngleNormalize(q))*dt;      
     else
       iterm += (qdes-q)*dt;
   }
-  else
-    iterm += AngleDiff(qdes,q)*dt;
+  else {
+    Assert(revolute);
+    iterm += AngleDiff(AngleNormalize(qdes),AngleNormalize(q))*dt;
+  }
 
   //integrate qdes
   if(mode == LOCKED_VELOCITY)

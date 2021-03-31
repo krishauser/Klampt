@@ -1165,8 +1165,13 @@ bool Robot::LoadRob(const char* fn) {
   for (size_t i = 0; i < mountLinks.size(); i++) {
     int linkIndex = LinkIndex(mountLinks[i].c_str());
     if(linkIndex < 0 || linkIndex >= (int)links.size()) {
-      LOG4CXX_ERROR(GET_LOGGER(RobParser),"   Invalid mount link "<<mountLinks[i]<<", out of range");
-      return false;
+      if(mountLinks[i]=="-1") {
+        //pass
+      }
+      else {
+        LOG4CXX_ERROR(GET_LOGGER(RobParser),"   Invalid mount link "<<mountLinks[i]<<", out of range");
+        return false;
+      }
     }
     mountLinkIndices[i] = linkIndex;
   }
@@ -2530,7 +2535,7 @@ bool Robot::LoadURDF(const char* fn)
   //      mounts a geometry or another URDF / .rob file to a link.
   double default_mass = 0.0001;
   Matrix3 default_inertia; default_inertia.setIdentity(); default_inertia *= 1e-8;  
-  double default_acc_max = 100;
+  double default_acc_max = 10;
   int freezeRootLink = 0;
   string worldFrame = "world";
   vector<pair<string, string> > selfCollision;

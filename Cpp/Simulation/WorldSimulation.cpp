@@ -269,8 +269,9 @@ void WorldSimulation::Init(RobotWorld* _world)
   command.actuators[j].qmin = robot->qMin(k);
   command.actuators[j].qmax = robot->qMax(k);
 	if(robot->links[k].type == RobotLink3D::Revolute) {
+    command.actuators[j].revolute = true;
 	  //ODE has problems with joint angles > 2pi
-	  if(robot->qMax(k)-robot->qMin(k) >= TwoPi) {
+	  if(!IsFinite(robot->qMax(k)-robot->qMin(k)) || robot->qMax(k)-robot->qMin(k) >= TwoPi) {
 	    command.actuators[j].measureAngleAbsolute=false;
 	    LOG4CXX_INFO(GET_LOGGER(WorldSimulator),"WorldSimulation: Link "<<k<<" ("<< robot->LinkName(k).c_str()<<") can make complete turn, using relative encoding");
     }

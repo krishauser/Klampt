@@ -86,13 +86,13 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 
 ## Version history
 
-**Devel** (2/21/2021)
+**Devel** (2/22/2021)
 -   Fixed bug in simulation of affine joints when the joint angle can go negative. Also, internal affine transmission coupling is simulated in a fashion that's sensitive to the driver's PID constants.
 -   Minor performance improvements to IK; API for getting subset of Jacobian columns.
 -   Python API: substantial performance improvements to camera image retrieval (camera_to_images).
 -   Python API: new calls for getting subset of Jacobian columns.
 -   Python API: Workaround for Mac OSX Big Sur dropping support for OpenGL when importing PyOpenGL.
--   Python API: Bug fixes for planning with affine joints.
+-   Python API: bug fixes for motion planning with affine drivers.
 -   Minor bug fixes.
 
 **0.8.6** (1/27/2021)

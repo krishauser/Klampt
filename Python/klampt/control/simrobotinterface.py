@@ -190,8 +190,8 @@ class SimFullControlInterface(_SimControlInterface):
     def setPiecewiseLinear(self,ts,qs,relative=True):
         if not relative:
             raise NotImplementedError("Can't accept absolute-time piecewise linear commands")
-        assert len(ts) > 0
-        assert ts[0] >= 0
+        if len(ts)==0: return
+        assert ts[0] >= 0,"First timing needs to be nonnegative"
         self.sim_controller.setLinear(self.configToKlampt(qs[0]),ts[0])
         tlast = ts[0]
         for (t,q) in zip(ts[1:],qs[1:]):
@@ -202,8 +202,8 @@ class SimFullControlInterface(_SimControlInterface):
     def setPiecewiseCubic(self,ts,qs,vs,relative=True):
         if not relative:
             raise NotImplementedError("Can't accept absolute-time piecewise cubic commands")
-        assert len(ts) > 0
-        assert ts[0] >= 0
+        if len(ts)==0: return
+        assert ts[0] >= 0,"First timing needs to be nonnegative"
         self.sim_controller.setCubic(self.configToKlampt(qs[0]),self.velocityToKlampt(vs[0]),ts[0])
         tlast = ts[0]
         for (t,q,v) in zip(ts[1:],qs[1:],vs[1:]):

@@ -990,7 +990,8 @@ def run(plugin=None):
     """
     global _window_manager
     _init()
-    setPlugin(plugin)
+    if plugin is not None:
+        setPlugin(plugin)
     _window_manager.run()
     kill()
 

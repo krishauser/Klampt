@@ -42,7 +42,7 @@ public:
   PyCSpace()
     :sample(NULL),sampleNeighborhood(NULL),
      distance(NULL),interpolate(NULL),edgeResolution(0.001),
-     cacheq(NULL),cacheq2(NULL),cachex(NULL),cachex2(NULL),
+     cachex(NULL),cachex2(NULL),
      visibleDistance(0),notVisibleDistance(0)
   {
     feasibleStats.cost = 0;
@@ -66,17 +66,17 @@ public:
 
   PyObject* UpdateTempConfig(const Config& q) {
     //PROBLEM when the values of q change, its address doesnt! we still have to re-make it
-    if(&q == cacheq) return cachex;
+    if(q == cacheq) return cachex;
     Py_XDECREF(cachex);
-    cacheq = &q;
+    cacheq = q;
     cachex = PyListFromConfig(q);
     return cachex;
   }
   PyObject* UpdateTempConfig2(const Config& q) {
     //PROBLEM when the values of q change, its address doesnt! we still have to re-make it
-    if(&q == cacheq2) return cachex2;
+    if(q == cacheq2) return cachex2;
     Py_XDECREF(cachex2);
-    cacheq2 = &q;
+    cacheq2 = q;
     cachex2 = PyListFromConfig(q);
     return cachex2;
   }
@@ -259,7 +259,7 @@ public:
   double edgeResolution;
   PropertyMap properties;
 
-  const Config *cacheq,*cacheq2;
+  Config cacheq,cacheq2;
   PyObject *cachex,*cachex2;
   AdaptiveCSpace::PredicateStats feasibleStats,visibleStats;
   double visibleDistance,notVisibleDistance;
@@ -1472,6 +1472,14 @@ void interpolate1DMinTime(double x0,double v0,double x1,double v1,
              double xmin,double xmax,double vmax,double amax,
              vector<double>& out,vector<double>& out2,vector<double>& out3)
 {
+  if(x0 < xmin || x0 > xmax) throw PyException("Initial position out of joint limits");
+  if(x1 < xmin || x1 > xmax) throw PyException("Final position out of joint limits");
+  if(Abs(v0) > vmax) throw PyException("Initial velocity out of velocity limits");
+  if(Abs(v1) > vmax) throw PyException("Final velocity out of velocity limits");
+  if(amax <= 0) {
+    if(x0 != x1 || v0 != 0 || v1 != 0)
+      throw PyException("Invalid value for acceleration maximum");
+  }
   ParabolicRamp::ParabolicRamp1D ramp;
   bool res=ParabolicRamp::SolveMinTimeBounded(x0,v0,x1,v1,amax,vmax,xmin,xmax,ramp);
   out.resize(0);
@@ -1488,6 +1496,11 @@ void interpolate1DMinAccel(double x0,double v0,double x1,double v1,
               double endTime,double xmin,double xmax,double vmax,
               vector<double>& out,vector<double>& out2,vector<double>& out3)
 {
+  if(x0 < xmin || x0 > xmax) throw PyException("Initial position out of joint limits");
+  if(x1 < xmin || x1 > xmax) throw PyException("Final position out of joint limits");
+  if(Abs(v0) > vmax) throw PyException("Initial velocity out of velocity limits");
+  if(Abs(v1) > vmax) throw PyException("Final velocity out of velocity limits");
+  if(endTime <= 0) throw PyException("endTime must be positive");
   vector<ParabolicRamp::ParabolicRamp1D> ramps;
   bool res=ParabolicRamp::SolveMinAccelBounded(x0,v0,x1,v1,endTime,vmax,xmin,xmax,ramps);
   out.resize(0);
@@ -1505,6 +1518,23 @@ void interpolateNDMinTime(const vector<double>& x0,const vector<double>& v0,cons
              const vector<double>& xmin,const vector<double>& xmax,const vector<double>& vmax,const vector<double>& amax,
              vector<vector<double> >& out,vector<vector<double> >& out2,vector<vector<double> >& out3)
 {
+  if(x0.size() != v0.size()) throw PyException("v0 is wrong length");
+  if(x0.size() != x1.size()) throw PyException("x1 is wrong length");
+  if(x0.size() != v1.size()) throw PyException("v1 is wrong length");
+  if(x0.size() != xmin.size()) throw PyException("xmin is wrong length");
+  if(x0.size() != xmax.size()) throw PyException("xmax is wrong length");
+  if(x0.size() != vmax.size()) throw PyException("vmax is wrong length");
+  if(x0.size() != amax.size()) throw PyException("amax is wrong length");
+  for(size_t i=0;i<x0.size();i++) {
+    if(x0[i] < xmin[i] || x0[i] > xmax[i]) throw PyException("Initial position out of joint limits");
+    if(x1[i] < xmin[i] || x1[i] > xmax[i]) throw PyException("Final position out of joint limits");
+    if(Abs(v0[i]) > vmax[i]) throw PyException("Initial velocity out of velocity limits");
+    if(Abs(v1[i]) > vmax[i]) throw PyException("Final velocity out of velocity limits");
+    if(amax[i] <= 0) {
+      if(x0[i] != x1[i] || v0[i] != 0 || v1[i] != 0)
+        throw PyException("Invalid value for acceleration maximum");
+    }
+  }
   vector<vector<ParabolicRamp::ParabolicRamp1D> > ramps;
   bool res=ParabolicRamp::SolveMinTimeBounded(x0,v0,x1,v1,amax,vmax,xmin,xmax,ramps);
   if(!res) {
@@ -1534,6 +1564,19 @@ void interpolateNDMinAccel(const vector<double>& x0,const vector<double>& v0,con
              double endTime,const vector<double>& xmin,const vector<double>& xmax,const vector<double>& vmax,
              vector<vector<double> >& out,vector<vector<double> >& out2,vector<vector<double> >& out3)
 {
+  if(x0.size() != v0.size()) throw PyException("v0 is wrong length");
+  if(x0.size() != x1.size()) throw PyException("x1 is wrong length");
+  if(x0.size() != v1.size()) throw PyException("v1 is wrong length");
+  if(x0.size() != xmin.size()) throw PyException("xmin is wrong length");
+  if(x0.size() != xmax.size()) throw PyException("xmax is wrong length");
+  if(x0.size() != vmax.size()) throw PyException("vmax is wrong length");
+  for(size_t i=0;i<x0.size();i++) {
+    if(x0[i] < xmin[i] || x0[i] > xmax[i]) throw PyException("Initial position out of joint limits");
+    if(x1[i] < xmin[i] || x1[i] > xmax[i]) throw PyException("Final position out of joint limits");
+    if(Abs(v0[i]) > vmax[i]) throw PyException("Initial velocity out of velocity limits");
+    if(Abs(v1[i]) > vmax[i]) throw PyException("Final velocity out of velocity limits");
+  }
+  if(endTime <= 0) throw PyException("endTime must be positive");
   vector<vector<ParabolicRamp::ParabolicRamp1D> > ramps;
   bool res=ParabolicRamp::SolveMinAccelBounded(x0,v0,x1,v1,endTime,vmax,xmin,xmax,ramps);
   if(!res) {
@@ -1558,6 +1601,16 @@ void interpolateNDMinTimeLinear(const vector<double>& x0,const vector<double>& x
              const vector<double>& vmax,const vector<double>& amax,
              vector<double>& out,vector<vector<double> >& out2,vector<vector<double> >& out3)
 {
+  for(size_t i=0;i<x0.size();i++) {
+    if(vmax[i] <= 0) {
+      if(x0[i] != x1[i])
+        throw PyException("Invalid value for velocity maximum");
+    }
+    if(amax[i] <= 0) {
+      if(x0[i] != x1[i])
+        throw PyException("Invalid value for acceleration maximum");
+    }
+  }
   ParabolicRamp::ParabolicRampND ramp;
   ramp.x0 = x0;
   ramp.x1 = x1;

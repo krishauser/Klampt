@@ -7,6 +7,9 @@
 """
 
 import bisect
+
+from ..control.robotinterface import RobotInterfaceBase
+from ..robotsim import SimRobotController
 from ..math import so3,se3,vectorops
 from ..math import spline
 from ..math.geodesic import *
@@ -207,7 +210,15 @@ class Trajectory:
     def difference_state(self,a,b,u,dt):
         """Subclasses can override this to implement non-Cartesian
         spaces.  Returns the time derivative along the geodesic from b to
-        a.  dt is the duration of the segment form a to b"""
+        a, with time domain [0,dt].  In cartesian spaces, this is (a-b)/dt.
+        
+        Args:
+            a (vector): the end point of the segment
+            b (vector): the start point of the segment.
+            u (float): the evaluation point of the derivative along the
+                segment, with 0 indicating b and 1 indicating a
+            dt (float): the duration of the segment from b to a.
+        """
         return vectorops.mul(vectorops.sub(a,b),1.0/dt)
     
     def concat(self,suffix,relative=False,jumpPolicy='strict'):
@@ -405,20 +416,22 @@ class Trajectory:
         res.times.append(sorter[0][0])
         res.milestones.append(self.milestones[0])
         #maybe a constant first section
+        resindices = []
         i = 0
         while sorter[i][0] < self.startTime():
+            if sorter[i][1] >= 0:
+                resindices.append(0)
             i += 1
         if i != 0:
             res.times.append(self.startTime())
             res.milestones.append(self.milestones[0])
-        resindices = []
         firstold = 0
         lastold = 0
         while i < len(sorter):
             #check if we should add this
             t,idx = sorter[i]
             i+=1
-            if idx >= 0:
+            if idx >= 0:  #new time
                 if t == res.times[-1]:
                     resindices.append(len(res.times)-1)
                     continue
@@ -434,7 +447,7 @@ class Trajectory:
                     if self.times[j] == t:
                         continue
                     x = res.eval_state(self.times[j])
-                    if vectorops.norm(self.difference_state(x,self.milestones[j],0,1.0)) > tol:
+                    if vectorops.norm(self.difference_state(x,self.milestones[j],1.0,1.0)) > tol:
                         #add it
                         res.times[-1] = self.times[j]
                         res.milestones[-1] = self.milestones[j]
@@ -452,7 +465,7 @@ class Trajectory:
         for i in range(len(res.times)-1):
             assert res.times[i] < res.times[i+1]
         for i,idx in enumerate(resindices):
-            assert newtimes[i] == res.times[idx]
+            assert newtimes[i] == res.times[idx],"Resindices mismatch? {} should index {} to {}".format(resindices,newtimes,res.times)
         return (res,resindices)
 
     def extractDofs(self,dofs):
@@ -533,6 +546,7 @@ class RobotTrajectory(Trajectory):
     def difference_state(self,a,b,u,dt):
         assert len(a) == self.robot.numLinks(),"Invalid config "+str(a)+" should have length "+str(self.robot.numLinks())
         assert len(b) == self.robot.numLinks(),"Invalid config "+str(b)+" should have length "+str(self.robot.numLinks())
+        #TODO: evaluate at u units from b to a
         return vectorops.mul(self.robot.interpolateDeriv(b,a),1.0/dt)
     def constructor(self):
         return lambda times=None,milestones=None: RobotTrajectory(self.robot,times,milestones)
@@ -590,8 +604,8 @@ class GeodesicTrajectory(Trajectory):
     def interpolate_state(self,a,b,u,dt):
         return self.geodesic.interpolate(a,b,u)
     def difference_state(self,a,b,u,dt):
-        x = self.interpolate_state(a,b,u,dt)
-        return vectorops.mul(vectorops.sub(self.geodesic.difference(b,x),self.geodesic.difference(a,x)),1.0/dt)
+        x = self.interpolate_state(b,a,u,dt)
+        return vectorops.mul(vectorops.sub(self.geodesic.difference(a,x),self.geodesic.difference(b,x)),1.0/dt)
     def constructor(self):
         return lambda times,milestones:GeodesicTrajectory(self.geodesic,times,milestones)
     def length(self,metric=None):
@@ -1881,29 +1895,46 @@ def execute_path(path,controller,speed=1.0,smoothing=None,activeDofs=None):
     Args:
         path (list of Configs): a list of milestones
 
-        controller (SimRobotController): the controller to execute the path
+        controller (SimRobotController or RobotInterfaceBase): the controller
+            to execute the path.
 
         speed (float, optional): if given, changes the execution speed of the
             path.  Not valid with smoothing=None or 'ramp'.
 
-        smoothing (str, optional): any smoothing applied to the path.  Valid values are:
+        smoothing (str, optional): any smoothing applied to the path.  Valid
+            values are:
 
-          - None: starts / stops at each milestone, moves in linear joint-space paths.
-            Trapezoidal velocity profile used.
-          - 'linear': interpolates milestones linearly with fixed duration.  Constant velocity
-            profile used.
-          - 'cubic': interpolates milestones with cubic spline with fixed duration.  Parabolic
-            velocity profile used.  Starts/stops at each milestone.
-          - 'spline': interpolates milestones smoothly with some differenced velocity.
-          - 'ramp': starts / stops at each milestone, moves in minimum-time / minimum-
-            acceleration paths.  Trapezoidal velocity profile used.
+          - None: starts / stops at each milestone, moves in linear joint-space
+            paths. Trapezoidal velocity profile used.  This is most useful for
+            executing paths coming from a kinematic motion planner.
+          - 'linear': interpolates milestones linearly with fixed duration.  
+            Constant velocity profile used.
+          - 'cubic': interpolates milestones with cubic spline with fixed 
+            duration.  Parabolic velocity profile used.  Starts/stops at each 
+            milestone.
+          - 'spline': interpolates milestones smoothly with some differenced
+            velocity.
+          - 'ramp': starts / stops at each milestone, moves in minimum-time / 
+            minimum-acceleration paths.  Trapezoidal velocity profile used.
 
-        activeDofs (list, optional): if not None, a list of dofs that are moved by the trajectory. 
-            Each entry may be an integer or a string.
+        activeDofs (list, optional): if not None, a list of dofs that are moved
+            by the trajectory. Each entry may be an integer or a string.
     """
-    if activeDofs is not None:
-        indices = [controller.model().link(d).getIndex for d in activeDofs]
+    if len(path)==0: return  #be tolerant of empty paths?
+    if speed <= 0: raise ValueError("Speed must be positive")
+    if isinstance(controller,SimRobotController):
+        robot_model = controller.model()
         q0 = controller.getCommandedConfig()
+    elif isinstance(controller,RobotInterfaceBase):
+        robot_model = controller.klamptModel()
+        cq0 = controller.commandedPosition()
+        if cq0[0] is None:
+            cq0 = controller.sensedPosition()
+        q0 = controller.configFromKlampt(cq0)
+    else:
+        raise ValueError("Invalid type of controller, must be SimRobotController or RobotInterfaceBase")
+    if activeDofs is not None:
+        indices = [robot_model.link(d).getIndex for d in activeDofs]
         liftedMilestones = []
         for m in path:
             assert(len(m)==len(indices))
@@ -1914,34 +1945,93 @@ def execute_path(path,controller,speed=1.0,smoothing=None,activeDofs=None):
         return execute_path(liftedMilestones,controller,speed,smoothing)
 
     if smoothing == None:
-        if speed != 1.0: raise ValueError("Can't specify speed with no smoothing")
-        controller.setMilestone(path[0])
-        for i in range(1,len(path)):
-            controller.addMilestoneLinear(path[i])
+        if isinstance(controller,SimRobotController):
+            if speed != 1.0: raise ValueError("Can't specify speed with no smoothing")
+            controller.setMilestone(path[0])
+            for i in range(1,len(path)):
+                controller.addMilestoneLinear(path[i])
+        else:
+            vmax = robot_model.getVelocityLimits()
+            amax = robot_model.getAccelerationLimits()
+            if speed != 1.0:
+                vmax = vectorops.mul(vmax,speed)
+                amax = vectorops.mul(amax,speed**2)
+            htraj = HermiteTrajectory()
+            if q0 != path[0]:
+                mpath = [q0] + path
+            else:
+                mpath = path
+            htraj.makeMinTimeSpline(mpath,vmax=vmax,amax=amax)
+            return execute_trajectory(htraj,controller)
     elif smoothing == 'linear':
         dt = 1.0/speed
-        controller.setLinear(dt,path[0])
-        for i in range(1,len(path)):
-            controller.addLinear(dt,path[i])
+        if isinstance(controller,SimRobotController):
+            controller.setLinear(dt,path[0])
+            for i in range(1,len(path)):
+                controller.addLinear(dt,path[i])
+        else:
+            traj = Trajectory()
+            traj.times,traj.milestones = [0],[q0]
+            for i in range(len(path)):
+                if i==0 and q0 == path[i]: continue  #skip first milestone
+                traj.times.append(traj.times[-1]+dt)
+                traj.milestones.append(path[i])
+            return execute_trajectory(traj,controller)
     elif smoothing == 'cubic':
         dt = 1.0/speed
-        zero = [0.0]*len(path[0])
-        controller.addCubic(dt,path[0],zero)
-        for i in range(1,len(path)):
-            controller.addCubic(dt,path[i],zero)
+        if isinstance(controller,SimRobotController):
+            zero = [0.0]*len(path[0])
+            controller.setCubic(dt,path[0],zero)
+            for i in range(1,len(path)):
+                controller.addCubic(dt,path[i],zero)
+        else:
+            zero = [0.0]*controller.numJoints()
+            times,milestones = [0],[q0]
+            for i in range(len(path)):
+                if i==0 and q0 == path[i]: continue  #skip first milestone
+                times.append(times[-1]+dt)
+                milestones.append(path[i])
+            htraj = HermiteTrajectory(times,milestones,[zero]*len(milestones))
+            return execute_trajectory(htraj,controller)
     elif smoothing == 'spline':
+        dt = 1.0/speed
+        times = [0]
+        mpath = [q0]
+        for i in range(len(path)):
+            if i==0 and path[0]==q0: continue
+            times.append(times[-1]+dt)
+            mpath.append(path[i])
         hpath = HermiteTrajectory()
-        hpath.makeSpline(Trajectory(list(range(len(path))),path))
-        dt = controller.getRate()
-        traj = hpath.discretize(dt)
-        controller.setLinear(dt,traj.milestones[0])
-        for i in range(1,len(traj.milestones)):
-            controller.addLinear(dt,traj.milestones[i])
+        hpath.makeSpline(Trajectory(times,mpath))
+        return execute_trajectory(hpath,controller)
     elif smoothing == 'ramp':
-        if speed != 1.0: raise ValueError("Can't specify speed with ramp smoothing")
-        controller.setMilestone(path[0])
-        for i in range(1,len(path)):
-            controller.addMilestone(path[i])
+        if isinstance(controller,SimRobotController):
+            if speed != 1.0: raise ValueError("Can't specify speed with ramp smoothing")
+            controller.setMilestone(path[0])
+            for i in range(1,len(path)):
+                controller.addMilestone(path[i])
+        else:
+            cv0 = controller.commandedVelocity()
+            if cv0[0] == None:
+                cv0 = controller.sensedVelocity()
+            v0 = controller.velocityFromKlampt(cv0)
+            xmin,xmax = robot_model.getJointLimits()
+            vmax = robot_model.getVelocityLimits()
+            amax = robot_model.getAccelerationLimits()
+            if speed != 1.0:
+                vmax = vectorops.mul(vmax,speed)
+                amax = vectorops.mul(amax,speed**2)
+            zero = [0.0]*len(q0)
+            if q0 != path[0]:
+                mpath = [q0] + path
+                mvels = [v0] + [zero]*len(path)
+            else:
+                mpath = path
+                mvels = [v0] + [zero]*(len(path)-1)
+            zero = [0.0]*len(q0)
+            htraj = HermiteTrajectory()
+            htraj.makeMinTimeSpline(mpath,mvels,xmin=xmin,xmax=xmax,vmax=vmax,amax=amax)
+            return execute_trajectory(htraj,controller)
     else:
         raise ValueError("Invalid smoothing method specified")
 
@@ -1950,22 +2040,36 @@ def execute_trajectory(trajectory,controller,speed=1.0,smoothing=None,activeDofs
     """Sends a timed trajectory to a controller.
 
     Args:
-        trajectory (Trajectory): a Trajectory, RobotTrajectory, or HermiteTrajectory instance
-        controller (SimRobotController): the controller to execute the trajectory
+        trajectory (Trajectory): a Trajectory, RobotTrajectory, or
+            HermiteTrajectory instance.
+        controller (SimRobotController or RobotInterfaceBase): the controller
+            to execute the trajectory.
         speed (float, optional): modulates the speed of the path.
-        smoothing (str, optional): any smoothing applied to the path.  Only valid for piecewise
-            linear trajectories.  Valid values are
+        smoothing (str, optional): any smoothing applied to the path.  Only
+            valid for piecewise linear trajectories.  Valid values are
 
             * None: no smoothing, just do a piecewise linear trajectory
             * 'spline': interpolate tangents to the curve
             * 'pause': smoothly speed up and slow down
 
-        activeDofs (list, optional): if not None, a list of dofs that are moved by the trajectory.  Each
-            entry may be an integer or a string.
+        activeDofs (list, optional): if not None, a list of dofs that are moved
+            by the trajectory.  Each entry may be an integer or a string.
     """
-    if activeDofs is not None:
-        indices = [controller.model().link(d).getIndex for d in activeDofs]
+    if len(trajectory.times)==0: return  #be tolerant of empty paths?
+    if speed <= 0: raise ValueError("Speed must be positive")
+    if isinstance(controller,SimRobotController):
+        robot_model = controller.model()
         q0 = controller.getCommandedConfig()
+    elif isinstance(controller,RobotInterfaceBase):
+        robot_model = controller.klamptModel()
+        cq0 = controller.commandedPosition()
+        if cq0[0] is None:
+            cq0 = controller.sensedPosition()
+        q0 = controller.configFromKlampt(cq0)
+    else:
+        raise ValueError("Invalid type of controller, must be SimRobotController or RobotInterfaceBase")
+    if activeDofs is not None:
+        indices = [robot_model.link(d).getIndex for d in activeDofs]
         liftedMilestones = []
         assert not isinstance(trajectory,HermiteTrajectory),"TODO: hermite trajectory lifting"
         for m in trajectory.milestones:
@@ -1980,28 +2084,58 @@ def execute_trajectory(trajectory,controller,speed=1.0,smoothing=None,activeDofs
     if isinstance(trajectory,HermiteTrajectory):
         assert smoothing == None,"Smoothing cannot be applied to hermite trajectories"
         ts = trajectory.startTime()
-        controller.setMilestone(trajectory.eval(ts),trajectory.deriv(ts))
-        n = len(trajectory.milestones[0])//2
-        for i in range(1,len(trajectory.times)):
-            q,v = trajectory.milestones[i][:n],trajectory.milestones[i][n:]
-            controller.addCubic(q,v,(trajectory.times[i]-trajectory.times[i-1])/speed)
+        n = len(q0)
+        if isinstance(controller,SimRobotController):
+            controller.setMilestone(trajectory.eval(ts),vectorops.mul(trajectory.deriv(ts),speed))
+            n = len(trajectory.milestones[0])//2
+            for i in range(1,len(trajectory.times)):
+                q,v = trajectory.milestones[i][:n],trajectory.milestones[i][n:]
+                controller.addCubic(q,vectorops.mul(v,speed),(trajectory.times[i]-trajectory.times[i-1])/speed)
+        else:
+            cv0 = controller.commandedVelocity()
+            if cv0[0] is None:
+                cv0 = controller.sensedVelocity()
+            v0 = controller.velocityFromKlampt(cv0)
+            times,positions,velocities = [0],[q0],[v0]
+            start = 1 if trajectory.times[0]==0 else 0
+            #TODO: move to start?
+            for i in range(1,len(trajectory.milestones)):
+                times.append(trajectory.times[i]/speed)
+                positions.append(trajectory.milestones[i][:n])
+                velocities.append(trajectory.milestones[i][n:])
+            controller.setPiecewiseCubic(times,positions,velocities)
     else:
         if smoothing == None:
             ts = trajectory.startTime()
-            controller.setMilestone(trajectory.eval(ts))
-            for i in range(1,len(trajectory.times)):
-                q = trajectory.milestones[i]
-                controller.addLinear(q,(trajectory.times[i]-trajectory.times[i-1])/speed)
+            if isinstance(controller,SimRobotController):
+                controller.setMilestone(trajectory.eval(ts))
+                for i in range(1,len(trajectory.times)):
+                    q = trajectory.milestones[i]
+                    controller.addLinear(q,(trajectory.times[i]-trajectory.times[i-1])/speed)
+            else:
+                #TODO: move to start?
+                times,positions = [0],[q0]
+                start = 1 if 0==trajectory.times[0] else 0
+                for i in range(start,len(trajectory.milestones)):
+                    times.append(trajectory.times[i]/speed)
+                    positions.append(trajectory.milestones[i])
+                controller.setPiecewiseLinear(times,[controller.configFromKlampt(q) for q in positions])
         elif smoothing == 'spline':
             t = HermiteTrajectory()
             t.makeSpline(trajectory)
             return execute_trajectory(t,controller)
         elif smoothing == 'pause':
-            ts = trajectory.startTime()
-            controller.setMilestone(trajectory.eval(ts))
-            zero = [0.0]*len(trajectory.milestones[0])
-            for i in range(1,len(trajectory.times)):
-                q = trajectory.milestones[i]
-                controller.addCubic(q,zero,(trajectory.times[i]-trajectory.times[i-1])/speed)
+            if isinstance(controller,SimRobotController):
+                ts = trajectory.startTime()
+                controller.setMilestone(trajectory.eval(ts))
+                zero = [0.0]*len(trajectory.milestones[0])
+                for i in range(1,len(trajectory.times)):
+                    q = trajectory.milestones[i]
+                    controller.addCubic(q,zero,(trajectory.times[i]-trajectory.times[i-1])/speed)
+            else:
+                #TODO: move to start?
+                zero = [.0]*len(q0)
+                t = HermiteTrajectory(trajectory.times,trajectory.milestones,[zero]*len(trajectory.milestones))
+                return execute_trajectory(t,controller)
         else:
             raise ValueError("Invalid smoothing method specified")

@@ -742,14 +742,22 @@ TiXmlElement* XmlWorld::GetElement(const string& name,int index)
   return e;
 }
 
+bool IsAbsolutePath(const std::string& path)
+{
+  #ifdef _WIN32
+    return path.length() >= 2 && path[1] == ':';
+  #else
+    return path.length() >= 1 && path[0] == '/';
+  #endif //_WIN32
+}
+
 string GetRelativeFilename(const std::string& filename,const std::string& path)
 {
-  //TODO: this doesn't work on windows
-  if(filename[0] == '/' && path[0] != '/') {
+  if(IsAbsolutePath(filename) && !IsAbsolutePath(path)) {
     string cwd = FileUtils::GetWorkingDirectory();
     return GetRelativeFilename(filename,cwd+"/"+path);
   }
-  if(filename[0] != '/' && path[0] == '/') {
+  if(!IsAbsolutePath(filename) && IsAbsolutePath(path)) {
     string cwd = FileUtils::GetWorkingDirectory();
     return GetRelativeFilename(cwd+"/"+filename,path);
   }
@@ -762,6 +770,8 @@ string GetRelativeFilename(const std::string& filename,const std::string& path)
     if(fcomponents[i] != pcomponents[i]) break;
     start=i+1;
   }
+  if(start==0 && IsAbsolutePath(filename))
+    return filename;
   //path shared from start-1 and before. The relative path starts at start
   std::vector<std::string> res;
   for(size_t i=start;i<pcomponents.size();i++)
@@ -866,7 +876,9 @@ bool XmlWorld::Save(RobotWorld& world,const string& fn,string itempath)
         string geomdir = robotFileNames[i];
         StripExtension(geomdir);
         if(!FileUtils::IsDirectory(((relpath)+geomdir).c_str()))
-          FileUtils::MakeDirectory((relpath+geomdir).c_str());
+          if(!FileUtils::MakeDirectory((relpath+geomdir).c_str())) {
+            LOG4CXX_ERROR(GET_LOGGER(XmlParser),"Unable to make directory "<<relpath+geomdir);
+          }
         world.robots[i]->geomFiles[j] = geomdir + "/" + FileUtils::SafeFileName(world.robots[i]->linkNames[j]) + DefaultFileExtension(*world.robots[i]->geomManagers[j]);
         LOG4CXX_INFO(GET_LOGGER(XmlParser),"  Saving modified geometry for link "<<world.robots[i]->linkNames[j]<<" to "<<relpath + world.robots[i]->geomFiles[j]);
         world.robots[i]->geomManagers[j]->Save((relpath + world.robots[i]->geomFiles[j]).c_str());
@@ -886,7 +898,9 @@ bool XmlWorld::Save(RobotWorld& world,const string& fn,string itempath)
       string geomdir = objectFileNames[i];
       StripExtension(geomdir);
       if(!FileUtils::IsDirectory((relpath+geomdir).c_str()))
-        FileUtils::MakeDirectory((relpath+geomdir).c_str());
+        if(!FileUtils::MakeDirectory((relpath+geomdir).c_str())) {
+          LOG4CXX_ERROR(GET_LOGGER(XmlParser),"Unable to make directory "<<relpath+geomdir);
+        }
       world.rigidObjects[i]->geomFile = geomdir + "/" + FileUtils::SafeFileName(world.rigidObjects[i]->name) + DefaultFileExtension(*world.rigidObjects[i]->geometry);
       LOG4CXX_INFO(GET_LOGGER(XmlParser),"  Saving modified geometry for rigid object "<<world.rigidObjects[i]->name<<" to "<<relpath + world.rigidObjects[i]->geomFile);
       world.rigidObjects[i]->geometry->Save((relpath + world.rigidObjects[i]->geomFile).c_str());
@@ -905,7 +919,9 @@ bool XmlWorld::Save(RobotWorld& world,const string& fn,string itempath)
       string geomdir = terrainFileNames[i];
       StripExtension(geomdir);
       if(!FileUtils::IsDirectory((relpath+geomdir).c_str()))
-        FileUtils::MakeDirectory((relpath+geomdir).c_str());
+        if(!FileUtils::MakeDirectory((relpath+geomdir).c_str())) {
+          LOG4CXX_ERROR(GET_LOGGER(XmlParser),"Unable to make directory "<<relpath+geomdir);
+        }
       world.terrains[i]->geomFile = geomdir + "/" + FileUtils::SafeFileName(world.terrains[i]->name) + DefaultFileExtension(*world.terrains[i]->geometry);
       LOG4CXX_INFO(GET_LOGGER(XmlParser),"  Saving modified geometry for terrain "<<world.terrains[i]->name<<" to "<<relpath + world.terrains[i]->geomFile);
       world.terrains[i]->geometry->Save((relpath + world.terrains[i]->geomFile).c_str());

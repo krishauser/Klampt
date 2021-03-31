@@ -26,7 +26,7 @@ struct ActuatorCommand
 
   //setup
   int mode;
-  bool measureAngleAbsolute;
+  bool revolute,measureAngleAbsolute;
   Real qmin,qmax;
   Real kP,kI,kD;
   //desired position and velocity

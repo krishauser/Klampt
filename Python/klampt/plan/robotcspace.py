@@ -68,6 +68,7 @@ class RobotCSpace(CSpace):
             self.addFeasibilityTest(setconfig,"setconfig")
             self.addFeasibilityTest((lambda x: not self.selfCollision()),"self collision",dependencies="setconfig")
 
+        self.joint_limit_failures = [0]*len(self.bound)
         self.properties['geodesic'] = 1
 
     def addConstraint(self,checker,name=None):
@@ -85,8 +86,9 @@ class RobotCSpace(CSpace):
 
     def inJointLimits(self,x):
         """Checks joint limits of the configuration x"""
-        for xi,bi in zip(x,self.bound):
+        for i,(xi,bi) in enumerate(zip(x,self.bound)):
             if xi < bi[0] or xi > bi[1]:
+                self.joint_limit_failures[i] += 1
                 return False
         return True
 
@@ -106,10 +108,10 @@ class RobotCSpace(CSpace):
         if x is not None: self.robot.setConfig(x)
         for o in range(self.collider.world.numRigidObjects()):
             if any(self.collider.robotObjectCollisions(self.robot.index,o)):
-                return True;
+                return True
         for o in range(self.collider.world.numTerrains()):
             if any(self.collider.robotTerrainCollisions(self.robot.index,o)):
-                return True;
+                return True
         return False
 
     def interpolate(self,a,b,u):

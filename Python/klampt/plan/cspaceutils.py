@@ -394,7 +394,7 @@ class AffineEmbeddedCSpace(CSpace):
         if hasattr(self.A,'dot'):  #numpy array or scipy.sparse matrix
             xamb = vectorops.add(self.b,self.A.dot(xemb))
         else:
-            xamb = [v for v in self.b]
+            xamb = self.b[:]
             #list of dicts
             for (i,dofs) in enumerate(self.A):
                 for j,c in dofs.items():
