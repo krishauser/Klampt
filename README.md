@@ -93,6 +93,8 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 -   Python API: new calls for getting subset of Jacobian columns.
 -   Python API: Workaround for Mac OSX Big Sur dropping support for OpenGL when importing PyOpenGL.
 -   Python API: bug fixes for motion planning with affine drivers.
+-   Python API: Added a function `klampt.model.types.transfer()` which transfers objects from one robot to another.
+-   Python API: Added convenience functions in `klampt.model.sensing` for converting camera intrinsics between Klamp't cameras and openCV and numpy formats.
 -   Minor bug fixes.
 
 **0.8.6** (1/27/2021)
