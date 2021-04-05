@@ -90,6 +90,8 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 -   Fixed bug in simulation of affine joints when the joint angle can go negative. Also, internal affine transmission coupling is simulated in a fashion that's sensitive to the driver's PID constants.
 -   Python API: Workaround for Mac OSX Big Sur dropping support for OpenGL when importing PyOpenGL.
 -   Python API: bug fixes for motion planning with affine drivers.
+-   Python API: Added a function `klampt.model.types.transfer()` which transfers objects from one robot to another.
+-   Python API: Added convenience functions in `klampt.model.sensing` for converting camera intrinsics between Klamp't cameras and openCV and numpy formats.
 -   Minor bug fixes.
 
 **0.8.6** (1/27/2021)

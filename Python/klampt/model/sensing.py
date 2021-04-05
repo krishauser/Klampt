@@ -24,9 +24,12 @@ point cloud, given camera intrinsic information.
 Working with cameras
 ====================
 
-The :class:`ProjectiveCameraModel`, :func:`camera_to_viewport`, and
-:func:`camera_from_viewport` help with converting to and from the
-:class:`klampt.vis.glprogram.GLViewport` class used in :mod:`klampt.vis`.
+The :func:`camera_to_viewport` and :func:`viewport_to_camera` functions help 
+with converting to and from the :class:`klampt.vis.glprogram.GLViewport` class
+used in :mod:`klampt.vis`.
+
+The :func:`camera_to_intrinsics` and :func:`intrinsics_to_camera` functions
+convert between intrinsics definitions.
 
 :func:`camera_ray`, and :func:`camera_project` convert to/from image points.
 :func:`visible` determines whether a point or object is visible from a camera.
@@ -625,6 +628,166 @@ def viewport_to_camera(viewport,camera,robot):
     camera.setSetting('zmin',str(zmin))
     camera.setSetting('zmax',str(zmax))
     return camera
+
+
+def camera_to_intrinsics(camera,format='opencv',fn=None):
+    """Returns the camera's intrinsics and/or saves them to a file under the
+    given format.
+
+    Args:
+        camera (SimRobotSensor): the camera instance.
+        format (str): either 'opencv', 'numpy', 'ros', or 'json' describing the 
+            desired type
+        fn (str, optional): the file to save to (must be .json, .xml, or .yml).
+        
+    Returns:
+        varies: If format='opencv', the (projection, distortion) matrix is
+        returned. If format='numpy', just the projection matrix is returned. 
+        If format=='json', a dict of the fx, fy, cx, cy values is returned
+    """
+    assert isinstance(camera,SimRobotSensor),"Must provide a SimRobotSensor instance"
+    assert camera.type() == 'CameraSensor',"Must provide a camera sensor instance"
+    w = int(camera.getSetting('xres'))
+    h = int(camera.getSetting('yres'))
+    xfov = float(camera.getSetting('xfov'))
+    yfov = float(camera.getSetting('yfov'))
+    fx = 0.5*w/math.tan(xfov*0.5);
+    fy = 0.5*h/math.tan(yfov*0.5);
+    cx = w*0.5
+    cy = h*0.5
+    if format == 'json':
+        jsonobj = {'fx':fx,'fy':fy,'cx':cy,'model':None,'coeffs':[]}
+        if fn is not None:
+            import json
+            with open(fn,'w') as f:
+                json.dump(jsonobj,f)
+        return jsonobj
+    elif format == 'numpy':
+        import numpy as np
+        res = np.zeros((3,3))
+        res[0,0] = fx
+        res[1,1] = fy
+        res[0,2] = cx
+        res[1,2] = cy
+        res[2,2] = 1
+        if fn is not None:
+            np.save(fn,res)
+        return res
+    elif format == 'ros':
+        from ..io import ros
+        return ros.to_CameraInfo(camera)
+    elif format == 'opencv':
+        import numpy as np
+        res = np.zeros((3,3))
+        dist = np.zeros(5)
+        res[0,0] = fx
+        res[1,1] = fy
+        res[0,2] = cx
+        res[1,2] = cy
+        res[2,2] = 1
+        if fn is not None:
+            if fn.endswith('yml'):
+                #write as YAML
+                with open(fn,'w') as f:
+                    w.write("""%YAML:1.0
+image_width: {}
+image_height: {}
+camera_matrix: !!opencv-matrix
+   rows: 3
+   cols: 3
+   dt: d
+   data: [ {}, 0., {}, 0.,
+       {}, {}, 0., 0., 1. ]
+distortion_coefficients: !!opencv-matrix
+   rows: 1
+   cols: 5
+   dt: d
+   data: [ 0 0 0 0 0 ]""".format(w,h,fx,cx,fy,cy))
+            else:
+                #write as XML
+                with open(fn,'w') as f:
+                    w.write("""<opencv_storage>
+<cameraResolution>
+{} {}</cameraResolution>
+<cameraMatrix type_id="opencv-matrix">
+  <rows>3</rows>
+  <cols>3</cols>
+  <dt>d</dt>
+  <data>
+    {} 0 {} 0 {} {} 0 0 1</data></cameraMatrix>
+<dist_coeffs type_id="opencv-matrix">
+  <rows>1</rows>
+  <cols>5</cols>
+  <dt>d</dt>
+  <data>
+    0 0 0. 0. 0</data></dist_coeffs>""".format(w,h,fx,cx,fy,cy))
+            
+        return res,dist
+    else:
+        raise ValueError("Invalid format, only opencv, numpy, ros, and json are supported")
+
+
+def intrinsics_to_camera(data,camera,format='opencv'):
+    """Fills in a simulated camera's settings to match given intrinsics.  Note:
+    all distortions are dropped.
+
+    Args:
+        data: the file or data to set. Interpretation varies depending on format.
+        camera (SimRobotSensor): the viewport will be output to this sensor
+        format (str): either 'opencv', 'numpy', 'ros', or 'json'
+
+    """
+    assert isinstance(camera,SimRobotSensor),"Must provide a SimRobotSensor instance"
+    assert camera.type() == 'CameraSensor',"Must provide a camera sensor instance"
+    if isinstance(data,str):
+        with open(data,'r') as f:
+            if format == 'opencv':
+                raise NotImplementedError("TODO: read from OpenCV calibrations")
+            elif format == 'numpy':
+                import numpy as np
+                return intrinsics_to_camera(np.load(data),camera,format)
+            elif format == 'json':
+                import json
+                with open(data,'r') as f:
+                    jsonobj = json.load(f)
+                    return intrinsics_to_camera(jsonobj,camera,format)
+            else:
+                raise ValueError("Invalid format, only opencv, numpy, and json are supported to load from disk")
+    if format == 'ros':
+        from ..io import ros
+        return ros.from_CameraInfo(data,camera)
+    elif format == 'numpy':
+        if data.shape != (3,3):
+            raise ValueError("data must be a 3x3 numpy matrix")
+        fx = data[0,0]
+        fy = data[1,1]
+        cx = data[0,2]
+        cy = data[1,2]
+    elif format == 'opencv':
+        proj,dist = data
+        if proj.shape != (3,3):
+            raise ValueError("projection matrix must be a 3x3 numpy matrix")
+        fx = proj[0,0]
+        fy = proj[1,1]
+        cx = proj[0,2]
+        cy = proj[1,2]
+    elif format == 'json':
+        fx = data['fx']
+        fy = data['fy']
+        cx = data['cx']
+        cy = data['cy']
+    else:
+        raise ValueError("Invalid format, only opencv, numpy, ros, and json are supported")
+    w = int(cx*2)
+    h = int(cy*2)
+    xfov = math.atan(fx/w*2)*2
+    yfov = math.atan(fy/h*2)*2
+    camera.setSetting('xres',str(w))
+    camera.setSetting('yres',str(h))
+    camera.setSetting('xfov',str(xfov))
+    camera.setSetting('yfov',str(yfov))
+    return camera
+
 
 
 def camera_ray(camera,robot,x,y):
