@@ -64,13 +64,24 @@ def objectToTypes(object,world=None):
     #        return object.type()
     #    return object.type
     elif hasattr(object,'__iter__'):
-        if hasattr(object[0],'__iter__'):
+        if len(object)>0 and hasattr(object[0],'__iter__'):
+            if isinstance(object[0],str):
+                if not all(isinstance(v,str) for v in object):
+                    raise ValueError("Mixing string and other items in sequence?")
+                return 'StringArray'
             #list of lists or tuples
             if len(object)==2:
                 if len(object[0])==9 and len(object[1])==3:
                     #se3
                     return 'RigidTransform'
-            return 'Configs'
+            allequal = True
+            for entry in object:
+                if len(entry) != len(object[0]):
+                    allequal = False
+                    break
+            if allequal:
+                return 'Configs'
+            raise ValueError("Sequence of unequal-length types passed to objectToTypes")
         else:
             dtypes = []
             if any(isinstance(v,int) for v in object):
@@ -93,11 +104,15 @@ def objectToTypes(object,world=None):
                 elif len(object)==9:
                     #so3 or 9d point?
                     vtypes.append('Matrix3')
+                    if vectorops.distance(so3.mul(so3.inv(object),object),so3.identity())<1e-5:
+                        vtypes.append('Rotation')
             else:
                 vtypes.append("StringArray")
             if len(vtypes)==1:
                 return vtypes[0]
             return vtypes
+    elif isinstance(object,(int,float)):
+        return 'Value'
     else:
         raise ValueError("Unknown object of type %s passed to objectToTypes"%(object.__class__.__name__,))
 
@@ -119,7 +134,9 @@ def make(type,object=None):
     elif type == 'Configs':
         return [make('Config',object)]
     elif type == 'Trajectory':
-        if isinstance(object,RobotModel):
+        if object is None:
+            return Trajectory()
+        elif isinstance(object,RobotModel):
             return RobotTrajectory(object,[0.0],make('Configs',object))
         else:
             types = objectToTypes(object)
@@ -131,8 +148,10 @@ def make(type,object=None):
                 return Trajectory([0.0],make('Configs',object))
     elif type == 'IKGoal':
         return IKObjective()
+    elif type == 'Vector2':
+        return [0.,0.]
     elif type == 'Vector3' or type == 'Point':
-        return [0,0,0]
+        return [0.,0.,0.]
     elif type == 'Rotation' or type == 'Matrix3':
         return so3.identity()
     elif type == 'RigidTransform':
@@ -165,10 +184,144 @@ def make(type,object=None):
         return VolumeGrid()
     elif type == 'ConvexHull':
         return ConvexHull()
-    elif isinstance(object,WorldModel):
+    elif type == 'IntArray':
+        return [0]
+    elif type == 'StringArray':
+        return ['']
+    elif type == 'WorldModel':
         return WorldModel()
-    elif isinstance(object,(RobotModel,RigidObjectModel,TerrainModel)):
+    elif type in ['RobotModel','RigidObjectModel','TerrainModel']:
+        if isinstance(object,WorldModel):
+            if type == 'RobotModel':
+                return object.makeRobot('Untitled')
+            elif type == 'RigidObjectModel':
+                return object.makeRigidObject('Untitled')
+            else:
+                return object.makeTerrain('Untitled')
         raise ValueError("Can't make an independent robot, rigid object, or terrain")
     else:
         raise ValueError("Can't make a Klamp't object of type %s"%(type,))
     return None
+
+
+def transfer(object,source_robot,target_robot,link_map=None):
+    """Converts a Klampt object that refers to a source robot to an object that
+    refers to a target robot, assuming matched link names.
+
+    Args:
+        object: any Klampt object. This is only meaningful for int, list of int
+            (IntArray), vector (Config), list of vector (Configs),
+            Trajectory, IKGoal, RobotModelLink, or SubRobotModel types.
+        source_robot (str or RobotModel): the robot for which ``object`` is
+            meaningful.  If str, this is the filename of the source robot.
+        target_robot (str or RobotModel): the robot that will use the return
+            result.  If str, this is the filename of the target robot.
+        link_map (dict, optional): if given, maps source link names to target
+            link names, or source link indices to target link indices.  This
+            can also be a 1-element dict {'*':'prefix:*'} indicating that the
+            links of source_robot map to 'prefix:'+[LINK_NAME], or a dict
+            {'prefix:*':'*'} indicating the reverse.
+    Returns:
+        same type as object: the object, with links mapped to the target robot.
+
+    """
+    from ..robotsim import WorldModel,RobotModelLink
+    from .subrobot import SubRobotModel
+    temp_world = None
+    if isinstance(source_robot,str):
+        temp_world = WorldModel()
+        if not temp_world.readFile(source_robot):
+            raise ValueError("Couldn't load source robot model "+source_robot)
+        source_robot = temp_world.robot(0)
+    if isinstance(source_robot,str):
+        if temp_world is None:
+            temp_world = WorldModel()
+        if not temp_world.readFile(target_robot):
+            raise ValueError("Couldn't load target robot model "+target_robot)
+        target_robot = temp_world.robot(temp_world.numRobots()-1)
+    if link_map is None:
+        link_map = dict()
+        for i in range(source_robot.numLinks()):
+            sname = source_robot.link(i).getName()
+            tlink = target_robot.link(sname)
+            if tlink.index >= 0:
+                link_map[i] = tlink.index
+    if len(link_map)==1:
+        items = list(link_map.items())
+        if items[0][0] =='*':
+            if not items[0][1].endswith('*'):
+                if '*' not in items[0][1]:
+                    raise NotImplementedError("TODO: match * inside target string")
+                raise ValueError("Invalid wildcard match string")
+            prefix = items[0][1][:-1]
+            link_map = dict()
+            for i in range(source_robot.numLinks()):
+                sname = source_robot.link(i).getName()
+                tlink = target_robot.link(prefix+sname)
+                if tlink.index >= 0:
+                    link_map[i] = tlink.index
+        elif items[0][1] == '*':
+            if not items[0][0].endswith('*'):
+                if '*' not in items[0][0]:
+                    raise NotImplementedError("TODO: match * inside source string")
+                raise ValueError("Invalid wildcard match string")
+            prefix = items[0][0][:-1]
+            link_map = dict()
+            for i in range(target_robot.numLinks()):
+                tname = target_robot.link(i).getName()
+                slink = source_robot.link(prefix+tname)
+                if slink.index >= 0:
+                    link_map[slink.index] = i
+    if len(link_map)==0:
+        raise ValueError("The source and target robot have no links in common")
+    #convert to indices    
+    link_map_indices = dict()
+    for (k,v) in link_map.items():
+        if isinstance(k,str):
+            k = source_robot.link(k).index
+            if k < 0:
+                raise ValueError("Invalid source link "+k)
+        if isinstance(v,str):
+            v = target_robot.link(v).index
+            if v < 0:
+                raise ValueError("Invalid target link "+k)
+        link_map_indices[k]=v
+    if isinstance(object,int):
+        return link_map_indices.get(object,-1)
+    elif isinstance(object,RobotModelLink):
+        return target_robot.link(link_map_indices.get(object.index,-1))
+    elif isinstance(object,SubRobotModel):
+        assert object._robot is source_robot,"Incorrect source robot for transferring SubRobotModel"
+        tlinks = transfer(object._links,source_robot,target_robot,link_map_indices)
+        if any(v < 0 for v in tlinks):
+            raise ValueError("Can't transfer SubRobotModel; one or more links of the source subrobot does not appear in the target robot")
+        return SubRobotModel(target_robot,tlinks)
+
+    try:
+        otypes = objectToTypes(object,temp_world)
+    except ValueError:
+        return object
+    if 'IntArray' in otypes:
+        return [link_map_indices.get(ind,-1) for ind in object]
+    elif 'Config' in otypes:
+        qres = target_robot.getConfig()
+        for i,j in link_map_indices.items():
+            qres[j] = object[i]
+        return qres
+    elif 'Configs' in otypes:
+        res = []
+        qres = target_robot.getConfig()
+        for q in object:
+            for i,j in link_map_indices.items():
+                qres[j] = q[i]
+            res.append([v for v in qres])
+        return res
+    elif 'IKGoal' in otypes:
+        source_link,dest_link = object.link(),object.destLink()
+        res = object.copy()
+        res.setLinks(source_link,dest_link)
+        return res
+    elif 'Trajectory' in otypes:
+        return object.constructor(object.times,transfer(object.milestones,source_robot,target_robot,link_map_indices))
+    else:
+        return object
