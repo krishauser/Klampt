@@ -305,7 +305,7 @@ class Trajectory:
             return self.constructor()([time],[self.milestones[0]]),self.constructor()([time]+self.times,[self.milestones[0]]+self.milestones)
         elif time >= self.times[-1]:
             #split after end of trajectory
-            return self.constructor()(self.times+[time],self.milestones+[self.milestones[-1]]),self.constructor()([time],self.milestones[-1])
+            return self.constructor()(self.times+[time],self.milestones+[self.milestones[-1]]),self.constructor()([time],[self.milestones[-1]])
         i,u = self.getSegment(time)
         assert i >= 0,"getSegment returned -1? something must be wrong with the times"
         #split in middle of trajectory
