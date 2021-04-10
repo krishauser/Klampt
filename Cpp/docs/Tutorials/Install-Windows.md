@@ -15,10 +15,10 @@ Time: 10-30 minutes
 
 To install the Klamp't Python bindings:
 
-1. Install Python 2.7.x or 3.7.x from [http://www.python.org/getit/](http://www.python.org/getit/).  Both 32-bit (x86) and 64-bit (x64) versions are supported.
+1. Install Python 2.7+ or 3.7+ from [http://www.python.org/getit/](http://www.python.org/getit/).  Both 32-bit (x86) and 64-bit (x64) versions are supported.
 2. Install Klampt using `pip install klampt`
 3. Install PyOpenGL using `pip install PyOpenGL`, or use the Win32 installer from https://pypi.python.org/pypi/PyOpenGL/.
-4. Install PyQt5 or PyQt4.  In Python 3.7 this is easy as `pip install PyQt5`, but users of Python 2.7 will need to [download the appropriate unofficial PyQt4 build here](https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyqt4).
+4. Install PyQt5 or PyQt4.  In Python 3.x this is easy as `pip install PyQt5`, but users of Python 2.x will need to [download the appropriate unofficial PyQt4 build here](https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyqt4).
 
 You're done! As a test, run "cmd" from the start menu, 
 
@@ -33,7 +33,7 @@ python gl_vis.py
 To run apps and obtain the C++ include/static library files:
 
 1. First, install the *x86 version* of the [Visual Studio 2015 Runtime](https://www.microsoft.com/en-us/download/details.aspx?id=48145).
-2. Run the [Klamp't installer](http://motion.cs.illinois.edu/software/Klampt-0.8.1-win32.msi). 
+2. Run the [Klamp't installer](http://motion.cs.illinois.edu/software/klampt/0.8/Klampt-0.8.6-win32.msi). 
 3. Optionally, install [ffmpeg from this binary build](http://ffmpeg.zeranoe.com/builds/win32/static/ffmpeg-20140609-git-6d40849-win32-static.7z), which will help you compile animations into MPEG movies.
 
 
