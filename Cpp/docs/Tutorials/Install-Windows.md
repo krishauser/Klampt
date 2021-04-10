@@ -39,15 +39,17 @@ To run apps and obtain the C++ include/static library files:
 
 # Windows, from source
 
+Due to the complexities of dependency management on Windows, building from source is much more challenging and not recommended unless you have extensive experience building packages on Windows via CMake.  These instructions are also bound to go out of date occasionally.
+
 1. Install [CMake](http://www.cmake.org/).
 2. Obtain Visual Studio 2015.
 3. Visit https://github.com/krishauser/Klampt and click "Clone on Desktop". Follow the on-screen instructions to download Git, if necesary, and clone the Klamp't Git repository.
-4. Following the same steps as above, clone the KrisLibrary Git repository from https://github.com/krishauser/KrisLibrary to the Klampt/Library folder as the target location.
-5. From http://klampt.org, download the appropriate Win32 Klamp't dependencies for your Visual Studio version (both Release and Debug are recommended). Unpack into Klampt/Library.
+4. Following the same steps as above, clone the KrisLibrary Git repository from https://github.com/krishauser/KrisLibrary to the Klampt/Cpp/Dependencies folder as the target location.
+5. From http://klampt.org, download the appropriate Win32 Klamp't dependencies for your Visual Studio version (both Release and Debug are recommended). Unpack into Klampt/Cpp/Dependencies.
 6. Run cmake-gui in your Klamp't folder, and set the build directory to Klampt/msvc. Correct any paths that cannot be found, and generate the Visual Studio project files.
 7. Open Klampt/msvc/Klampt.sln and build the "Klampt" and "apps" projects in Visual Studio.
 8. To build the Python bindings:
    1. Copy Klampt/msvc/Python/setup.py into your Klampt/Python folder. 
    2. Run the Visual Studio Command prompt as an administrator and navigate to Klampt/Python. 
-   3. VS 2015 you must first enter "set VS90COMNTOOLS=%VS140COMNTOOLS%". 
+   3. For VS 2015 you must first enter "set VS90COMNTOOLS=%VS140COMNTOOLS%". 
    4. Run "python setup.py install".
