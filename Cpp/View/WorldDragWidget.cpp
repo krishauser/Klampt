@@ -102,6 +102,7 @@ void WorldDragWidget::EndDrag()
 void WorldDragWidget::DrawGL(Camera::Viewport& viewport)
 {
   if(hoverID < 0) return;
+  requestRedraw = false;
   if(hasFocus) {
     auto geom = world->GetGeometry(hoverID);
     glDisable(GL_LIGHTING);
