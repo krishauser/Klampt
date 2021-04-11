@@ -326,7 +326,7 @@ class KlamptWidget(widgets.DOMWidget):
         """Changes the visibility status of a certain named target"""
         target_name = name
         if name in self._extras:
-            type,data = self._extras[target]
+            type,data = self._extras[name]
             if type == 'Config':
                 target_name = data
             elif type == 'Configs' or type == 'Trajectory':
