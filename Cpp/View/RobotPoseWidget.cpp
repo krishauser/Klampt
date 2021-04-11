@@ -210,7 +210,9 @@ bool RobotLinkPoseWidget::Hover(int x,int y,Camera::Viewport& viewport,double& d
         break;
       }
   }
-  if(hoverLink != oldHoverLink) Refresh();
+  if(hoverLink != oldHoverLink) {
+    Refresh();
+  }
   return (hoverLink != -1);
 }
 
@@ -256,6 +258,7 @@ void RobotLinkPoseWidget::InitDefaultAppearance()
 void RobotLinkPoseWidget::DrawGL(Camera::Viewport& viewport) 
 {
   if(!draw) return;
+  requestRedraw = false;
   robot->UpdateConfig(poseConfig);
   viewRobot->PushAppearance();
   for(size_t i=0;i<poserAppearance.size();i++) { 
@@ -552,6 +555,7 @@ bool RobotIKPoseWidget::BeginDrag(int x,int y,Camera::Viewport& viewport,double&
 void RobotIKPoseWidget::DrawGL(Camera::Viewport& viewport) 
 {
   WidgetSet::DrawGL(viewport);
+  requestRedraw = false;
   glPolygonOffset(0,-1000);
   glEnable(GL_POLYGON_OFFSET_FILL);
   for(size_t i=0;i<poseGoals.size();i++) {
