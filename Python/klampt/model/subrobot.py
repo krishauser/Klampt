@@ -267,10 +267,10 @@ class SubRobotModel:
         afull = self.tofull(a)
         bfull = self.tofull(b)
         return self._robot.distance(afull,bfull)
-    def interpolate_deriv(self,a,b):
+    def interpolateDeriv(self,a,b):
         afull = self.tofull(a)
         bfull = self.tofull(b)
-        q = self._robot.interpolate_deriv(afull,bfull)
+        q = self._robot.interpolateDeriv(afull,bfull)
         return [q[i] for i in self._links]
     def randomizeConfig(self,unboundedScale=1.0):
         oldfull = self._robot.getConfig()
