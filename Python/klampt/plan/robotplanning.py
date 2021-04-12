@@ -15,7 +15,7 @@ def preferredPlanOptions(robot,movingSubset=None,optimizing=False):
     if optimizing:
         return { 'type':"rrt", 'perturbationRadius':0.5, 'bidirectional':1, 'shortcut':1, 'restart':1, 'restartTermCond':"{foundSolution:1,maxIters:1000}" }
     else:
-        return { 'type':"sbl", 'perturbationRadius':0.5, 'randomizeFrequency':1000, shortcut:1 }
+        return { 'type':"sbl", 'perturbationRadius':0.5, 'randomizeFrequency':1000, 'shortcut':1 }
 
 
 def makeSpace(world,robot,
@@ -184,15 +184,17 @@ def planToConfig(world,robot,target,
             function, in which all entries of the vector must be 0.
         equalityTolerance (float, optional): a tolerance to which all the
             equality constraints must be satisfied.
-        ignoreCollisions (list): a list of ignored collisions. Each element may be
-            a body in the world, or a pair (a,b) where a, b are bodies in the world.
+        ignoreCollisions (list): a list of ignored collisions. Each element may
+            be a body in the world, or a pair (a,b) where a, b are bodies in
+            the world.
         movingSubset (optional): if 'auto' (default), only the links that are
             different between the robot's current config and target config will
-            be allowed to move.  Otherwise, if this is None or 'all', all joints
-            will be allowed to move.  If this is a list, then only these joint
-            indices will be allowed to move.
-        planOptions (keywords): keyword options that will be sent to the planner.  See
-            the documentation for MotionPlan.setOptions for more details.
+            be allowed to move.  Otherwise, if this is None or 'all', all
+            joints will be allowed to move.  If this is a list, then only these
+            joint indices will be allowed to move.
+        planOptions (keywords): keyword options that will be sent to the
+            planner.  See the documentation for MotionPlan.setOptions for more
+            details.
     
     Returns: 
         MotionPlan: a planner instance that can be called to get a
@@ -229,7 +231,7 @@ def planToConfig(world,robot,target,
     if hasattr(space,'lift'):  #the planning takes place in a space of lower dimension than #links
         plan = EmbeddedMotionPlan(space,q0,**planOptions)
     else:
-        plan = MotionPlan(space,q0,**planOptions)
+        plan = MotionPlan(space,**planOptions)
     try:
         plan.setEndpoints(q0,target)
     except RuntimeError:
