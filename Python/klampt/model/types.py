@@ -233,7 +233,7 @@ def transfer(object,source_robot,target_robot,link_map=None):
         if not temp_world.readFile(source_robot):
             raise ValueError("Couldn't load source robot model "+source_robot)
         source_robot = temp_world.robot(0)
-    if isinstance(source_robot,str):
+    if isinstance(target_robot,str):
         if temp_world is None:
             temp_world = WorldModel()
         if not temp_world.readFile(target_robot):
@@ -278,13 +278,19 @@ def transfer(object,source_robot,target_robot,link_map=None):
     link_map_indices = dict()
     for (k,v) in link_map.items():
         if isinstance(k,str):
-            k = source_robot.link(k).index
-            if k < 0:
+            kindex = source_robot.link(k).index
+            if kindex < 0:
                 raise ValueError("Invalid source link "+k)
+            k = kindex
+        elif k < 0 or k >= source_robot.numLinks():
+            raise ValueError("Invalid source link {}".format(k))
         if isinstance(v,str):
-            v = target_robot.link(v).index
-            if v < 0:
-                raise ValueError("Invalid target link "+k)
+            vindex = target_robot.link(v).index
+            if vindex < 0:
+                raise ValueError("Invalid target link "+v)
+            v = vindex
+        elif k < 0 or k >= target_robot.numLinks():
+            raise ValueError("Invalid target link {}".format(k))
         link_map_indices[k]=v
     if isinstance(object,int):
         return link_map_indices.get(object,-1)
@@ -299,6 +305,8 @@ def transfer(object,source_robot,target_robot,link_map=None):
 
     try:
         otypes = objectToTypes(object,temp_world)
+        if isinstance(otypes,str):
+            otypes = [otypes]
     except ValueError:
         return object
     if 'IntArray' in otypes:
@@ -322,6 +330,8 @@ def transfer(object,source_robot,target_robot,link_map=None):
         res.setLinks(source_link,dest_link)
         return res
     elif 'Trajectory' in otypes:
+        if isinstance(object,RobotTrajectory):
+            return RobotTrajectory(target_robot,object.times,transfer(object.milestones,source_robot,target_robot,link_map_indices))
         return object.constructor(object.times,transfer(object.milestones,source_robot,target_robot,link_map_indices))
     else:
         return object
