@@ -86,6 +86,26 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
                 obj.remove_editor()
         self.doRefresh = True
         _globalLock.release()
+    
+    def hide(self,name,hidden=True):
+        global _globalLock
+        with _globalLock:
+            item = self.getItem(name)
+            item.attributes['hidden'] = hidden
+            if item.editor is not None:
+                if hidden:
+                    self.klamptwidgetmaster.remove(item.editor)
+                else:
+                    self.klamptwidgetmaster.add(item.editor)
+            self.doRefresh = True
+        
+    def remove(self,name):
+        global _globalLock
+        with _globalLock:
+            item = self.getItem(name)
+            if item.editor is not None:
+                self.klamptwidgetmaster.remove(item.editor)
+        VisualizationScene.remove(self,name)
 
     def displayfunc(self):
         if self.backgroundImage is not None:
