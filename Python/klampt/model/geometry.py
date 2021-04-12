@@ -252,14 +252,22 @@ def point_cloud_normals(pc,estimation_radius=None,estimation_knn=None,estimation
             neighbors = tree.query_ball_point(positions,estimation_radius)
             for n in neighbors:
                 if len(n) < estimation_knn:
-                    normals.append([0,0,0])
+                    normal = [0,0,0]
                 else:
-                    #fit a plane to neighbors
-                    normals.append(fit_plane([positions[i] for i in n])[:3])
+                    try:
+                        #fit a plane to neighbors
+                        normal = fit_plane([positions[i] for i in n])[:3]
+                    except ValueError:
+                        normal = [0,0,0]
+                normals.append(normal)
         else:
             d,neighbors = tree.query(positions,estimation_knn)
             for n in neighbors:
-                normals.append(fit_plane([positions[i] for i in n])[:3])
+                try:
+                    normal = fit_plane([positions[i] for i in n])[:3]
+                except ValueError:
+                    normal = [0,0,0]
+                normals.append(normal)
     else:
         if estimation_radius is None:
             raise ValueError("Without scipy, can't do a k-NN plane estimation")
@@ -277,7 +285,10 @@ def point_cloud_normals(pc,estimation_radius=None,estimation_knn=None,estimation
             else:
                 pindices = [ip[0] for ip in iplist]
                 pts = [ip[1] for ip in iplist]
-                n = fit_plane(pts)[:3]
+                try:
+                    n = fit_plane(pts)[:3]
+                except ValueError:
+                    n = [0,0,0]
                 normals[pindices,:] = n
                 successful += len(pindices)
     normals = np.asarray(normals)
