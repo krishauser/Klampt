@@ -33,6 +33,7 @@ class SubRobotModel:
         assert isinstance(robot,(RobotModel,SubRobotModel)),"SubRobotModel constructor must be given a RobotModel or SubRobotModel as first argument"
         self._robot = robot
         self._links = links[:]
+        self._drivers = None
         self.index = robot.index
         self.world = robot.world
         if isinstance(robot,SubRobotModel):
@@ -143,11 +144,26 @@ class SubRobotModel:
         else:
             return SubRobotModelLink(self._robot.link(self._links[index]),self)
 
+    def _computeDrivers(self):
+        self._drivers = []
+        for i in range(self._robot.numDrivers()):
+            d = self._robot.driver(i)
+            for l in d.getAffectedLinks():
+                if l in self._links:
+                    self._drivers.append(d)
+
     def numDrivers(self):
-        raise NotImplementedError("TODO Accessing number of drivers in sub-robot")
+        if self._drivers is None:
+            self._computeDrivers()
+        return len(self._drivers)
 
     def driver(self,index):
-        raise NotImplementedError("TODO Accessing drivers in sub-robot")
+        if self._drivers is None:
+            self._computeDrivers()
+        if index < 0 or index >= len(self._drivers):
+            raise ValueError("Invalid driver index, must be between {} and {}".format(0,len(self._drivers)-1))
+        dindex = self._drivers[index]
+        return SubRobotModelDriver(self._robot.driver(index),self)
   
     def getConfig(self):
         q = self._robot.getConfig()
@@ -376,3 +392,29 @@ class SubRobotModelLink:
     def getOrientationJacobian(self):
         self._robot.fromfull(self._link.getOrientationJacobian())
 
+
+class SubRobotModelDriver:
+    """A helper that lets you treat drivers of a subrobot just like a normal
+    RobotModelDriver.
+    """
+    def __init__(self,driver,robot):
+        self._driver = driver
+        self._robot = robot
+        self.getName = driver.getName
+        self.getType = driver.getType
+        self.getAffineCoeffs = driver.getAffineCoeffs
+        self.setValue = driver.setValue
+        self.getValue = driver.getValue
+        self.setVelocity = driver.setVelocity
+        self.getVelocity = driver.getVelocity
+    
+    def robot(self):
+        return self._robot
+  
+    def getAffectedLink(self):
+        origLink = self._driver.getAffectedLink()
+        return self._robot._inv_links[origLink]
+
+    def getAffectedLinks(self):
+        origLinks = self._driver.getAffectedLinks()
+        return [self._robot._inv_links[origLink] for origLink in origLinks]
