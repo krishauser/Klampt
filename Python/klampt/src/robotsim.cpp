@@ -2946,7 +2946,7 @@ RobotModelLink RobotModelLink::parent()
 
 void RobotModelLink::setParent(int p)
 {
-  if(p < 0 || p >= (int)robotPtr->links.size())
+  if(p < -1 || p >= (int)robotPtr->links.size())
     throw PyException("Invalid parent index");
   if(index < 0)
     throw PyException("RobotModelLink is invalid");
