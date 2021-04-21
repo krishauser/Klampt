@@ -424,18 +424,16 @@ bool parseLink(Link &link, TiXmlElement* config)
     vis.reset(new Visual());
     if (parseVisual(*vis, vis_xml))
     {
-      std::shared_ptr<std::vector<std::shared_ptr<Visual > > > viss = link.getVisuals(vis->group_name);
-      if (!viss)
+      if(link.visual_groups.count(vis->group_name)==0)
       {
         // group does not exist, create one and add to map
-        viss.reset(new std::vector<std::shared_ptr<Visual > >);
         // new group name, create vector, add vector to map and add Visual to the vector
-        link.visual_groups.insert(make_pair(vis->group_name,viss));
+        link.visual_groups[vis->group_name] = std::make_shared<std::vector<std::shared_ptr<Visual > > >();
         if(debug) printf ("successfully added a new visual group name '%s' \n",vis->group_name.c_str());
       }
       
       // group exists, add Visual to the vector in the map
-      viss->push_back(vis);
+      link.visual_groups[vis->group_name]->push_back(vis);
       if(debug) printf ("successfully added a new visual under group name '%s' \n",vis->group_name.c_str());
     }
     else
@@ -449,17 +447,17 @@ bool parseLink(Link &link, TiXmlElement* config)
   // Visual (optional)
   // Assign one single default visual pointer from the visual_groups map
   link.visual.reset();
-  std::shared_ptr<std::vector<std::shared_ptr<Visual > > > default_visual = link.getVisuals("default");
-  if (!default_visual)
+  if (link.visual_groups.count("default")==0)
   {
     //("No 'default' visual group for Link '%s'", this->name.c_str());
   }
-  else if (default_visual->empty())
+  else if (link.visual_groups["default"]->empty())
   {
     //("'default' visual group is empty for Link '%s'", this->name.c_str());
   }
   else
   {
+    auto& default_visual = link.visual_groups["default"];
     if (default_visual->size() > 1)
     {
       //("'default' visual group has %d visuals for Link '%s', taking the first one as default",(int)default_visual->size(), this->name.c_str());
@@ -474,20 +472,17 @@ bool parseLink(Link &link, TiXmlElement* config)
     std::shared_ptr<Collision> col;
     col.reset(new Collision());
     if (parseCollision(*col, col_xml))
-    {      
-      std::shared_ptr<std::vector<std::shared_ptr<Collision > > > cols = link.getCollisions(col->group_name);  
-      
-      if (!cols)
+    {            
+      if (link.collision_groups.count(col->group_name) == 0)
       {
         // group does not exist, create one and add to map
-        cols.reset(new std::vector<std::shared_ptr<Collision > >);
         // new group name, create vector, add vector to map and add Collision to the vector
-        link.collision_groups.insert(make_pair(col->group_name,cols));
+        link.collision_groups[col->group_name] = std::make_shared<std::vector<std::shared_ptr<Collision > > >();
         if(debug) printf ("successfully added a new collision group name '%s' \n",col->group_name.c_str());
       }
 
       // group exists, add Collision to the vector in the map
-      cols->push_back(col);
+      link.collision_groups[col->group_name]->push_back(col);
       if(debug) printf ("successfully added a new collision under group name '%s' \n",col->group_name.c_str());
     }
     else
@@ -501,18 +496,18 @@ bool parseLink(Link &link, TiXmlElement* config)
   // Collision (optional)
   // Assign one single default collision pointer from the collision_groups map
   link.collision.reset();
-  std::shared_ptr<std::vector<std::shared_ptr<Collision > > > default_collision = link.getCollisions("default");
 
-  if (!default_collision)
+  if (link.collision_groups.count("default")==0)
   {
     if(debug) printf ("No 'default' collision group for Link '%s' \n", link.name.c_str());
   }
-  else if (default_collision->empty())
+  else if (link.collision_groups["default"]->empty())
   {
     if(debug) printf ("'default' collision group is empty for Link '%s' \n", link.name.c_str());
   }
   else
   {
+    auto& default_collision = link.collision_groups["default"];
     if (default_collision->size() > 1)
     {
       LOG4CXX_DEBUG(GET_LOGGER(URDFParser), "'default' collision group has "<< default_collision->size()<< "collisions for Link '"<< link.name.c_str()<<"', taking the first one as default");

@@ -30,9 +30,8 @@ public:
 	RigidTransform T_link_to_colgeom;
 	RigidTransform T_parent;
 	Vector3 axis;
-	bool geomPrimitive;
-	string geomName;
-	string geomData;   //Stores the primitive data if it's a primitive
+	string geomName;   //if empty, the geometry is loaded in geomData
+	Geometry::AnyGeometry3D geomData;
 	Matrix4 geomScale;
 	urdf::Joint* joint;
 };
@@ -44,7 +43,6 @@ public:
 	static void DFSLinkTree( URDFLinkNode& root, vector<URDFLinkNode>& linkNodes);
 	static void setJointforNodes(vector< std::shared_ptr<urdf::Joint> >& joints, vector<URDFLinkNode>& linkNodes);
 	static Math3D::Matrix3 convertInertial( urdf::Inertial& I);
-	static void QuatToRotationMat(const Vector4& aa, Matrix3& mat);
 	static void processTParentTransformations(vector<URDFLinkNode>& linkNodes);
 
 	//The location for package:// directives

@@ -275,27 +275,50 @@ namespace urdf{
       this->collision_groups.clear();
     };
     
-    std::shared_ptr<std::vector<std::shared_ptr<Visual > > > getVisuals(const std::string& group_name) const
+      std::vector<std::shared_ptr<Geometry > > getVisualGeoms(const std::string& group_name) const
       {
-	if (this->visual_groups.find(group_name) != this->visual_groups.end())
-	  return this->visual_groups.at(group_name);
-	return std::shared_ptr<std::vector<std::shared_ptr<Visual > > >();
+        std::vector<std::shared_ptr<Geometry > > geoms;
+        if (this->visual_groups.find(group_name) != this->visual_groups.end()) {
+          const auto& vs = this->visual_groups.at(group_name);
+          for(const auto& vis : *vs)
+            geoms.push_back(vis->geometry);
+        }
+        return geoms;
       }
 
-    std::shared_ptr<std::vector<std::shared_ptr<Collision > > > getCollisions(const std::string& group_name) const
+      std::vector<Pose> getVisualPoses(const std::string& group_name) const
       {
-	if (this->collision_groups.find(group_name) != this->collision_groups.end())
-	  return this->collision_groups.at(group_name);
-	return std::shared_ptr<std::vector<std::shared_ptr<Collision > > >();
+        std::vector<Pose> poses;
+        if (this->visual_groups.find(group_name) != this->visual_groups.end()) {
+          const auto& vs = this->visual_groups.at(group_name);
+          for(const auto& vis : *vs)
+            poses.push_back(vis->origin);
+        }
+        return poses;
+      }
+
+      std::vector<std::shared_ptr<Geometry > > getCollisionGeoms(const std::string& group_name) const
+      {
+        std::vector<std::shared_ptr<Geometry > > geoms;
+        if (this->collision_groups.find(group_name) != this->collision_groups.end()) {
+          const auto& vs = this->collision_groups.at(group_name);
+          for(const auto& vis : *vs)
+            geoms.push_back(vis->geometry);
+        }
+        return geoms;
+      }
+
+      std::vector<Pose> getCollisionPoses(const std::string& group_name) const
+      {
+        std::vector<Pose> poses;
+        if (this->collision_groups.find(group_name) != this->collision_groups.end()) {
+          const auto& vs = this->collision_groups.at(group_name);
+          for(const auto& vis : *vs)
+            poses.push_back(vis->origin);
+        }
+        return poses;
       }
     
-    /*
-      void setParentJoint(std::shared_ptr<Joint> child);
-      void addChild(std::shared_ptr<Link> child);
-      void addChildJoint(std::shared_ptr<Joint> child);
-      
-      
-    */
   private:
     std::weak_ptr<Link> parent_link_;
     
