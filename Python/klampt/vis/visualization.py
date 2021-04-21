@@ -2070,6 +2070,8 @@ def drawTrajectory(traj,width,color,pointSize=None,pointColor=None):
     """
     if GL is None: raise RuntimeError("OpenGL not initialized?")
     if isinstance(traj,list):
+        if len(traj)==0:
+            return
         if pointSize is None:
             pointSize = width+2
         if pointColor is None:
