@@ -404,7 +404,7 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
     def __reduce__(self):
         from klampt.io import loader
         jsonobj = loader.toJson(self,'IKObjective')
-        return (loaderfromJson,(jsonobj,'IKObjective'))
+        return (loader.fromJson,(jsonobj,'IKObjective'))
 }
 }
 
