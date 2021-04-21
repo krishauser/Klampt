@@ -88,6 +88,7 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 
 **Master** (2/22/2021)
 -   Fixed bug in simulation of affine joints when the joint angle can go negative. Also, internal affine transmission coupling is simulated in a fashion that's sensitive to the driver's PID constants.
+-   URDF import can now import multiple collision and visual geometries.
 -   Python API: Workaround for Mac OSX Big Sur dropping support for OpenGL when importing PyOpenGL.
 -   Python API: bug fixes for motion planning with affine drivers.
 -   Python API: Added a function `klampt.model.types.transfer()` which transfers objects from one robot to another.
