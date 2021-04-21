@@ -6,6 +6,7 @@
 	#include "interpolate.h"
 %}
 
+%include "std_string.i"
 %include "std_vector.i"
 	
 namespace std {
