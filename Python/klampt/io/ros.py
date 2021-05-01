@@ -382,14 +382,18 @@ def from_Mesh(ros_mesh):
     """From a ROS Mesh to a Klampt TriangleMesh"""
     from klampt import TriangleMesh
     mesh = TriangleMesh()
-    for v in ros_mesh.vertices:
-        mesh.vertices.append(v.x)
-        mesh.vertices.append(v.y)
-        mesh.vertices.append(v.z)
-    for t in ros_mesh.triangles:
-        mesh.indices.append(t.vertex_indices[0])
-        mesh.indices.append(t.vertex_indices[1])
-        mesh.indices.append(t.vertex_indices[2])
+    mesh.vertices.resize(len(ros_mesh.vertices)*3)
+    mesh.indices.resize(len(ros_mesh.triangles)*3)
+    for i,v in enumerate(ros_mesh.vertices):
+        k=i*3
+        mesh.vertices[k] = v.x
+        mesh.vertices[k+1] = v.y
+        mesh.vertices[k+2] = v.z
+    for i,t in enumerate(ros_mesh.triangles):
+        k=i*3
+        mesh.indices[k] = t.vertex_indices[0]
+        mesh.indices[k+1] = t.vertex_indices[1]
+        mesh.indices[k+2] = t.vertex_indices[2]
     return mesh
 
 def to_Mesh(klampt_mesh):
@@ -512,8 +516,8 @@ def to_CameraInfo(klampt_obj):
         msg.height = klampt_obj.h
         fx = klampt_obj.scale
         fy = klampt_obj.scale
-    elif hasattr(klampt_obj,'toViewport'):
-        vp = klampt_obj.toViewport()
+    elif hasattr(klampt_obj,'to_viewport'):
+        vp = klampt_obj.to_viewport()
         msg.width = vp.w
         msg.height = vp.h
         fx = vp.scale
@@ -565,7 +569,7 @@ def from_CameraInfo(ros_ci,klampt_obj):
         if fx != fy:
             warnings.warn("from_CameraInfo: can't handle non-square pixels in Viewport")
         klampt_obj.scale = fx
-    elif hasattr(klampt_obj,'toViewport'):
+    elif hasattr(klampt_obj,'to_viewport'):
         klampt_obj.x = x
         klampt_obj.y = y
         klampt_obj.w = w
@@ -731,16 +735,12 @@ def _compatibleKlamptType(klampt_obj):
     from ..model import types
     if klampt_obj.__class__.__name__ in supportedKlamptTypes:
         return klampt_obj.__class__.__name__
-    otypes = types.objectToTypes(klampt_obj)
-    if isinstance(otypes,list):
-        for t in otypes:
-            if t in supportedKlamptTypes:
-                return t
+    otype = types.object_to_type(klampt_obj,supportedKlamptTypes)
+    if otype is None:
         raise ValueError("Don't know how to convert Klampt objects of type "+",".join(otypes))
-    else:
-        if otypes not in supportedKlamptTypes:
-            raise ValueError("Don't know how to convert Klampt objects of type "+otypes)
-        return otypes
+    if otype not in supportedKlamptTypes:
+        raise ValueError("Don't know how to convert Klampt objects of type "+otype)
+    return otype
 
 def _from_converter(ros_obj):
     converter = 'from_'+ros_obj.__class__.__name__

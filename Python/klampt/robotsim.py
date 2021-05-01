@@ -154,6 +154,33 @@ _robotsim.doubleArray_swigregister(doubleArray)
 def doubleArray_frompointer(t):
     return _robotsim.doubleArray_frompointer(t)
 
+class floatArray(object):
+    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
+    __repr__ = _swig_repr
+
+    def __init__(self, nelements):
+        _robotsim.floatArray_swiginit(self, _robotsim.new_floatArray(nelements))
+    __swig_destroy__ = _robotsim.delete_floatArray
+
+    def __getitem__(self, index):
+        return _robotsim.floatArray___getitem__(self, index)
+
+    def __setitem__(self, index, value):
+        return _robotsim.floatArray___setitem__(self, index, value)
+
+    def cast(self):
+        return _robotsim.floatArray_cast(self)
+
+    @staticmethod
+    def frompointer(t):
+        return _robotsim.floatArray_frompointer(t)
+
+# Register floatArray in _robotsim:
+_robotsim.floatArray_swigregister(floatArray)
+
+def floatArray_frompointer(t):
+    return _robotsim.floatArray_frompointer(t)
+
 class intArray(object):
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
@@ -605,6 +632,112 @@ class intVector(object):
 # Register intVector in _robotsim:
 _robotsim.intVector_swigregister(intVector)
 
+class doubleMatrix(object):
+    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
+    __repr__ = _swig_repr
+
+    def iterator(self):
+        return _robotsim.doubleMatrix_iterator(self)
+    def __iter__(self):
+        return self.iterator()
+
+    def __nonzero__(self):
+        return _robotsim.doubleMatrix___nonzero__(self)
+
+    def __bool__(self):
+        return _robotsim.doubleMatrix___bool__(self)
+
+    def __len__(self):
+        return _robotsim.doubleMatrix___len__(self)
+
+    def __getslice__(self, i, j):
+        return _robotsim.doubleMatrix___getslice__(self, i, j)
+
+    def __setslice__(self, *args):
+        return _robotsim.doubleMatrix___setslice__(self, *args)
+
+    def __delslice__(self, i, j):
+        return _robotsim.doubleMatrix___delslice__(self, i, j)
+
+    def __delitem__(self, *args):
+        return _robotsim.doubleMatrix___delitem__(self, *args)
+
+    def __getitem__(self, *args):
+        return _robotsim.doubleMatrix___getitem__(self, *args)
+
+    def __setitem__(self, *args):
+        return _robotsim.doubleMatrix___setitem__(self, *args)
+
+    def pop(self):
+        return _robotsim.doubleMatrix_pop(self)
+
+    def append(self, x):
+        return _robotsim.doubleMatrix_append(self, x)
+
+    def empty(self):
+        return _robotsim.doubleMatrix_empty(self)
+
+    def size(self):
+        return _robotsim.doubleMatrix_size(self)
+
+    def swap(self, v):
+        return _robotsim.doubleMatrix_swap(self, v)
+
+    def begin(self):
+        return _robotsim.doubleMatrix_begin(self)
+
+    def end(self):
+        return _robotsim.doubleMatrix_end(self)
+
+    def rbegin(self):
+        return _robotsim.doubleMatrix_rbegin(self)
+
+    def rend(self):
+        return _robotsim.doubleMatrix_rend(self)
+
+    def clear(self):
+        return _robotsim.doubleMatrix_clear(self)
+
+    def get_allocator(self):
+        return _robotsim.doubleMatrix_get_allocator(self)
+
+    def pop_back(self):
+        return _robotsim.doubleMatrix_pop_back(self)
+
+    def erase(self, *args):
+        return _robotsim.doubleMatrix_erase(self, *args)
+
+    def __init__(self, *args):
+        _robotsim.doubleMatrix_swiginit(self, _robotsim.new_doubleMatrix(*args))
+
+    def push_back(self, x):
+        return _robotsim.doubleMatrix_push_back(self, x)
+
+    def front(self):
+        return _robotsim.doubleMatrix_front(self)
+
+    def back(self):
+        return _robotsim.doubleMatrix_back(self)
+
+    def assign(self, n, x):
+        return _robotsim.doubleMatrix_assign(self, n, x)
+
+    def resize(self, *args):
+        return _robotsim.doubleMatrix_resize(self, *args)
+
+    def insert(self, *args):
+        return _robotsim.doubleMatrix_insert(self, *args)
+
+    def reserve(self, n):
+        return _robotsim.doubleMatrix_reserve(self, n)
+
+    def capacity(self):
+        return _robotsim.doubleMatrix_capacity(self)
+    __swig_destroy__ = _robotsim.delete_doubleMatrix
+
+# Register doubleMatrix in _robotsim:
+_robotsim.doubleMatrix_swigregister(doubleMatrix)
+
 class stringMap(object):
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
@@ -764,6 +897,38 @@ class TriangleMesh(object):
         """
         _robotsim.TriangleMesh_swiginit(self, _robotsim.new_TriangleMesh())
 
+    def getVertices(self):
+        r"""
+        Retrieves a view of the vertices as an nx3 array.  
+
+        """
+        return _robotsim.TriangleMesh_getVertices(self)
+
+    def setVertices(self, np_array2):
+        r"""
+        Sets all vertices to the given nx3 array.  
+
+        Args:
+            np_array2 (:obj:`2D Numpy array of floats`)
+        """
+        return _robotsim.TriangleMesh_setVertices(self, np_array2)
+
+    def getIndices(self):
+        r"""
+        Retrieves a view of the vertices as an mx3 array.  
+
+        """
+        return _robotsim.TriangleMesh_getIndices(self)
+
+    def setIndices(self, np_array2):
+        r"""
+        Sets all indices to the given mx3 array.  
+
+        Args:
+            np_array2 (:obj:`2D Numpy array of ints`)
+        """
+        return _robotsim.TriangleMesh_setIndices(self, np_array2)
+
     def translate(self, t):
         r"""
         Translates all the vertices by v=v+t.  
@@ -778,7 +943,7 @@ class TriangleMesh(object):
         Transforms all the vertices by the rigid transform v=R*v+t.  
 
         Args:
-            R (:obj:`double const [3][3]`)
+            R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
         """
         return _robotsim.TriangleMesh_transform(self, R, t)
@@ -829,6 +994,22 @@ class ConvexHull(object):
         """
         return _robotsim.ConvexHull_numPoints(self)
 
+    def getPoints(self):
+        r"""
+        Retrieves a view of the points as an nx3 array.  
+
+        """
+        return _robotsim.ConvexHull_getPoints(self)
+
+    def setPoints(self, np_array2):
+        r"""
+        Sets all points to the given nx3 array.  
+
+        Args:
+            np_array2 (:obj:`2D Numpy array of floats`)
+        """
+        return _robotsim.ConvexHull_setPoints(self, np_array2)
+
     def addPoint(self, pt):
         r"""
         Adds a point.  
@@ -861,7 +1042,7 @@ class ConvexHull(object):
         Transforms all the vertices by the rigid transform v=R*v+t.  
 
         Args:
-            R (:obj:`double const [3][3]`)
+            R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
         """
         return _robotsim.ConvexHull_transform(self, R, t)
@@ -990,7 +1171,7 @@ class PointCloud(object):
 
     def getPoints(self):
         r"""
-        Retrieves all the points as an nx3 array.  
+        Retrieves a view of the points as an nx3 array.  
 
         """
         return _robotsim.PointCloud_getPoints(self)
@@ -1000,7 +1181,7 @@ class PointCloud(object):
         Sets all the points to the given nx3 array.  
 
         Args:
-            np_array2 (float)
+            np_array2 (:obj:`2D Numpy array of floats`)
         """
         return _robotsim.PointCloud_setPoints(self, np_array2)
 
@@ -1130,7 +1311,7 @@ class PointCloud(object):
         Transforms all the points by the rigid transform v=R*v+t.  
 
         Args:
-            R (:obj:`double const [3][3]`)
+            R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
         """
         return _robotsim.PointCloud_transform(self, R, t)
@@ -1258,7 +1439,7 @@ class GeometricPrimitive(object):
         r"""
         Args:
             ori (:obj:`list of 3 floats`)
-            R (:obj:`double const [3][3]`)
+            R (:obj:`list of 9 floats (so3 element)`)
             dims (:obj:`list of 3 floats`)
         """
         return _robotsim.GeometricPrimitive_setBox(self, ori, R, dims)
@@ -1383,7 +1564,7 @@ class VolumeGrid(object):
     def setValues(self, np_array3):
         r"""
         Args:
-            np_array3 (float)
+            np_array3 (:obj:`3D Numpy array of floats`)
         """
         return _robotsim.VolumeGrid_setValues(self, np_array3)
     bbox = property(_robotsim.VolumeGrid_bbox_get, _robotsim.VolumeGrid_bbox_set, doc=r"""bbox : std::vector<(double,std::allocator<(double)>)>""")
@@ -1640,7 +1821,7 @@ class Geometry3D(object):
 
 
         Args:
-            arg2 (:class:`~klampt.Geometry3D` or :class:`~klampt.VolumeGrid` or :class:`~klampt.PointCloud` or :obj:`ConvexHull` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.TriangleMesh`, optional): 
+            arg2 (:class:`~klampt.TriangleMesh` or :class:`~klampt.PointCloud` or :obj:`ConvexHull` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.VolumeGrid` or :class:`~klampt.Geometry3D`, optional): 
         """
         _robotsim.Geometry3D_swiginit(self, _robotsim.new_Geometry3D(*args))
     __swig_destroy__ = _robotsim.delete_Geometry3D
@@ -1869,7 +2050,7 @@ class Geometry3D(object):
         Sets the current transformation (not modifying the underlying data)  
 
         Args:
-            R (:obj:`double const [3][3]`)
+            R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
         """
         return _robotsim.Geometry3D_setCurrentTransform(self, R, t)
@@ -1915,7 +2096,7 @@ class Geometry3D(object):
         collision data structures.  
 
         Args:
-            R (:obj:`double const [3][3]`)
+            R (:obj:`list of 9 floats (so3 element)`)
         """
         return _robotsim.Geometry3D_rotate(self, R)
 
@@ -1925,7 +2106,7 @@ class Geometry3D(object):
         resets any collision data structures.  
 
         Args:
-            R (:obj:`double const [3][3]`)
+            R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
         """
         return _robotsim.Geometry3D_transform(self, R, t)
@@ -2445,17 +2626,18 @@ class Appearance(object):
 
     def setColors(self, feature, np_array2):
         r"""
-        Sets per-element color for elements of the given feature type.  
+        Sets per-element color for elements of the given feature type. Must be an mxn
+        array. m is the number of features of that type, and n is either 3 or 4.  
 
         Args:
             feature (int)
-            np_array2 (float)
+            np_array2 (:obj:`2D Numpy array of np.float32`)
 
-        If alpha=True, colors are assumed to be 4*N rgba values, where N is the number
-        of features of that type.  
+        If n == 4, they are assumed to be rgba values, and  
 
-        Otherwise they are assumed to be 3*N rgb values. Only supports feature=VERTICES
-        and feature=FACES  
+        If n == 3, each row is an rgb value.  
+
+        Only supports feature=VERTICES and feature=FACES  
 
         """
         return _robotsim.Appearance_setColors(self, feature, np_array2)
@@ -2511,7 +2693,7 @@ class Appearance(object):
 
         Args:
             format (str)
-            np_array (:obj:`unsigned char`)
+            np_array (:obj:`unsigned char *`)
 
         *   "": turn off texture mapping  
         *   rgb8: unsigned byte RGB colors with red in the 1st byte, green in the 2nd,
@@ -2534,11 +2716,11 @@ class Appearance(object):
 
         Args:
             format (str)
-            np_array2 (:obj:`unsigned char`)
+            np_array2 (:obj:`unsigned char *`)
             topdown (bool, optional): default value True
 
-        bytes is is given in order left to right, top to bottom if `topdown==True`.
-        Otherwise, it is given in order left to right, bottom to top.  
+        bytes is given in top to bottom order if `topdown==True`. Otherwise, it is given
+        in order bottom to top.  
 
         """
         return _robotsim.Appearance_setTexture2D(self, format, np_array2, topdown)
@@ -2669,7 +2851,7 @@ class Viewport(object):
     def setRigidTransform(self, R, t):
         r"""
         Args:
-            R (:obj:`double const [3][3]`)
+            R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
         """
         return _robotsim.Viewport_setRigidTransform(self, R, t)
@@ -2863,7 +3045,7 @@ class PointPoser(Widget):
         Sets the reference axes (by default aligned to x,y,z)  
 
         Args:
-            R (:obj:`double const [3][3]`)
+            R (:obj:`list of 9 floats (so3 element)`)
         """
         return _robotsim.PointPoser_setAxes(self, R)
 
@@ -2897,7 +3079,7 @@ class TransformPoser(Widget):
     def set(self, R, t):
         r"""
         Args:
-            R (:obj:`double const [3][3]`)
+            R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
         """
         return _robotsim.TransformPoser_set(self, R, t)
@@ -2944,7 +3126,7 @@ class ObjectPoser(Widget):
     def set(self, R, t):
         r"""
         Args:
-            R (:obj:`double const [3][3]`)
+            R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
         """
         return _robotsim.ObjectPoser_set(self, R, t)
@@ -3041,7 +3223,7 @@ class AABBPoser(Widget):
     def setFrame(self, R, t):
         r"""
         Args:
-            R (:obj:`double const [3][3]`)
+            R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
         """
         return _robotsim.AABBPoser_setFrame(self, R, t)
@@ -3072,7 +3254,7 @@ class BoxPoser(Widget):
     def set(self, R, t, dims):
         r"""
         Args:
-            R (:obj:`double const [3][3]`)
+            R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
             dims (:obj:`list of 3 floats`)
         """
@@ -3081,7 +3263,7 @@ class BoxPoser(Widget):
     def setTransform(self, R, t):
         r"""
         Args:
-            R (:obj:`double const [3][3]`)
+            R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
         """
         return _robotsim.BoxPoser_setTransform(self, R, t)
@@ -3448,7 +3630,7 @@ class RobotModelLink(object):
         Sets transformation (R,t) to the parent link.  
 
         Args:
-            R (:obj:`double const [3][3]`)
+            R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
         """
         return _robotsim.RobotModelLink_setParentTransform(self, R, t)
@@ -3571,7 +3753,7 @@ class RobotModelLink(object):
         Sets the link's current transformation (R,t) to the world frame.  
 
         Args:
-            R (:obj:`double const [3][3]`)
+            R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
 
         Note:  
@@ -3785,6 +3967,15 @@ class RobotModelLink(object):
     robotIndex = property(_robotsim.RobotModelLink_robotIndex_get, _robotsim.RobotModelLink_robotIndex_set, doc=r"""robotIndex : int""")
     robotPtr = property(_robotsim.RobotModelLink_robotPtr_get, _robotsim.RobotModelLink_robotPtr_set, doc=r"""robotPtr : p.Robot""")
     index = property(_robotsim.RobotModelLink_index_get, _robotsim.RobotModelLink_index_set, doc=r"""index : int""")
+
+    name = property(getName, setName)
+    parent = property(getParent, setParent)
+    mass = property(getMass, setMass)
+    parentTransform = property(getParentTransform, setParentTransform)
+    axis = property(getAxis,setAxis)
+    prismatic = property(isPrismatic,setPrismatic)
+    transform = property(getTransform,setTransform)
+
     __swig_destroy__ = _robotsim.delete_RobotModelLink
 
 # Register RobotModelLink in _robotsim:
@@ -3820,6 +4011,15 @@ class RobotModelDriver(object):
             str:
         """
         return _robotsim.RobotModelDriver_getName(self)
+
+    def setName(self, name):
+        r"""
+        Sets the name of the driver.  
+
+        Args:
+            name (str)
+        """
+        return _robotsim.RobotModelDriver_setName(self, name)
 
     def robot(self):
         r"""
@@ -3906,6 +4106,14 @@ class RobotModelDriver(object):
     robotIndex = property(_robotsim.RobotModelDriver_robotIndex_get, _robotsim.RobotModelDriver_robotIndex_set, doc=r"""robotIndex : int""")
     robotPtr = property(_robotsim.RobotModelDriver_robotPtr_get, _robotsim.RobotModelDriver_robotPtr_set, doc=r"""robotPtr : p.Robot""")
     index = property(_robotsim.RobotModelDriver_index_get, _robotsim.RobotModelDriver_index_set, doc=r"""index : int""")
+
+    name = property(getName, setName)
+    type = property(getType)
+    affectedLink = property(getAffectedLink)
+    affectedLinks = property(getAffectedLinks)
+    value = property(getValue, setValue)
+    velocity = property(getVelocity, setVelocity)
+
     __swig_destroy__ = _robotsim.delete_RobotModelDriver
 
 # Register RobotModelDriver in _robotsim:
@@ -4572,7 +4780,7 @@ class RobotModel(object):
         Args:
             link (int)
             subRobot (:class:`~klampt.RobotModel`)
-            R (:obj:`double const [3][3]`)
+            R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
         """
         return _robotsim.RobotModel_mount(self, link, subRobot, R, t)
@@ -4600,6 +4808,13 @@ class RobotModel(object):
     index = property(_robotsim.RobotModel_index_get, _robotsim.RobotModel_index_set, doc=r"""index : int""")
     robot = property(_robotsim.RobotModel_robot_get, _robotsim.RobotModel_robot_set, doc=r"""robot : p.Robot""")
     dirty_dynamics = property(_robotsim.RobotModel_dirty_dynamics_get, _robotsim.RobotModel_dirty_dynamics_set, doc=r"""dirty_dynamics : bool""")
+
+    name = property(getName, setName)
+    id = property(getID)
+    config = property(getConfig,setConfig)
+    velocity = property(getVelocity,setVelocity)
+
+
     __swig_destroy__ = _robotsim.delete_RobotModel
 
 # Register RobotModel in _robotsim:
@@ -4759,7 +4974,7 @@ class RigidObjectModel(object):
         Sets the rotation / translation (R,t) of the rigid object.  
 
         Args:
-            R (:obj:`double const [3][3]`)
+            R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
         """
         return _robotsim.RigidObjectModel_setTransform(self, R, t)
@@ -4980,7 +5195,7 @@ class WorldModel(object):
 
 
         Args:
-            ptrRobotWorld (:obj:`void`, optional): 
+            ptrRobotWorld (:obj:`void *`, optional): 
             w (:class:`~klampt.WorldModel`, optional): 
             fn (str, optional): 
 
@@ -5117,7 +5332,7 @@ class WorldModel(object):
 
 
         Args:
-            robot (str or int): 
+            robot (int or str): 
             index (int, optional): 
             name (str, optional): 
 
@@ -5263,7 +5478,7 @@ class WorldModel(object):
             terrain (:obj:`TerrainModel`, optional): 
 
         Returns:
-            (:class:`~klampt.RigidObjectModel` or :class:`~klampt.RobotModel` or :obj:`TerrainModel`):
+            (:class:`~klampt.RobotModel` or :obj:`TerrainModel` or :class:`~klampt.RigidObjectModel`):
         """
         return _robotsim.WorldModel_add(self, *args)
 
@@ -5461,8 +5676,8 @@ class IKObjective(object):
 
         Args:
             link (int)
-            plocals (:obj:`object`)
-            pworlds (:obj:`object`)
+            plocals (:obj:`PyObject *`)
+            pworlds (:obj:`PyObject *`)
         """
         return _robotsim.IKObjective_setFixedPoints(self, link, plocals, pworlds)
 
@@ -5472,7 +5687,7 @@ class IKObjective(object):
 
         Args:
             link (int)
-            R (:obj:`double const [3][3]`)
+            R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
         """
         return _robotsim.IKObjective_setFixedTransform(self, link, R, t)
@@ -5496,8 +5711,8 @@ class IKObjective(object):
         Args:
             link1 (int)
             link2 (int)
-            p1s (:obj:`object`)
-            p2s (:obj:`object`)
+            p1s (:obj:`PyObject *`)
+            p2s (:obj:`PyObject *`)
         """
         return _robotsim.IKObjective_setRelativePoints(self, link1, link2, p1s, p2s)
 
@@ -5508,7 +5723,7 @@ class IKObjective(object):
         Args:
             link (int)
             linkTgt (int)
-            R (:obj:`double const [3][3]`)
+            R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
         """
         return _robotsim.IKObjective_setRelativeTransform(self, link, linkTgt, R, t)
@@ -5582,7 +5797,7 @@ class IKObjective(object):
         Manual: Sets a fixed rotation constraint.  
 
         Args:
-            R (:obj:`double const [3][3]`)
+            R (:obj:`list of 9 floats (so3 element)`)
         """
         return _robotsim.IKObjective_setFixedRotConstraint(self, R)
 
@@ -5636,7 +5851,7 @@ class IKObjective(object):
         Tranforms the target position/rotation of this IK constraint by transform (R,t)  
 
         Args:
-            R (:obj:`double const [3][3]`)
+            R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
         """
         return _robotsim.IKObjective_transform(self, R, t)
@@ -5646,7 +5861,7 @@ class IKObjective(object):
         Tranforms the local position/rotation of this IK constraint by transform (R,t)  
 
         Args:
-            R (:obj:`double const [3][3]`)
+            R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
         """
         return _robotsim.IKObjective_transformLocal(self, R, t)
@@ -5659,7 +5874,7 @@ class IKObjective(object):
         current position/rotation constraint types are kept.  
 
         Args:
-            R (:obj:`double const [3][3]`)
+            R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
         """
         return _robotsim.IKObjective_matchDestination(self, R, t)
@@ -5670,7 +5885,7 @@ class IKObjective(object):
         the IK goal's constraints.  
 
         Args:
-            R (:obj:`double const [3][3]`)
+            R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
         """
         return _robotsim.IKObjective_closestMatch(self, R, t)
@@ -5911,7 +6126,7 @@ class IKSolver(object):
 
         solve (): bool
 
-        solve (iters,tol): :obj:`object`
+        solve (iters,tol): :obj:`PyObject *`
 
 
         Args:
@@ -5919,7 +6134,7 @@ class IKSolver(object):
             tol (float, optional): 
 
         Returns:
-            (:obj:`object` or bool):
+            (bool or :obj:`PyObject *`):
         """
         return _robotsim.IKSolver_solve(self, *args)
 
@@ -6012,15 +6227,15 @@ class GeneralizedIKObjective(object):
     def setPoints(self, p1s, p2s):
         r"""
         Args:
-            p1s (:obj:`object`)
-            p2s (:obj:`object`)
+            p1s (:obj:`PyObject *`)
+            p2s (:obj:`PyObject *`)
         """
         return _robotsim.GeneralizedIKObjective_setPoints(self, p1s, p2s)
 
     def setTransform(self, R, t):
         r"""
         Args:
-            R (:obj:`double const [3][3]`)
+            R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
         """
         return _robotsim.GeneralizedIKObjective_setTransform(self, R, t)
@@ -6187,8 +6402,8 @@ class SimRobotSensor(object):
 
 
         Args:
-            robot (:class:`~klampt.SimRobotController` or :class:`~klampt.RobotModel`): 
-            sensor (:obj:`SensorBase`, optional): 
+            robot (:class:`~klampt.RobotModel` or :class:`~klampt.SimRobotController`): 
+            sensor (:obj:`SensorBase *`, optional): 
             name (str, optional): 
             type (str, optional): 
         """
@@ -6836,7 +7051,7 @@ class SimBody(object):
         of-mass centered coordinates).  
 
         Args:
-            R (:obj:`double const [3][3]`)
+            R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
         """
         return _robotsim.SimBody_setTransform(self, R, t)
@@ -6855,7 +7070,7 @@ class SimBody(object):
         native coordinates)  
 
         Args:
-            R (:obj:`double const [3][3]`)
+            R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
         """
         return _robotsim.SimBody_setObjectTransform(self, R, t)
@@ -7389,7 +7604,7 @@ class Simulator(object):
 
 
         Args:
-            robot (int or :class:`~klampt.RobotModel`): 
+            robot (:class:`~klampt.RobotModel` or int): 
 
         Returns:
             (:class:`~klampt.SimRobotController`):
@@ -7648,9 +7863,9 @@ def forceClosure(*args):
     r"""
     Returns true if the list of contact points has force closure.  
 
-    forceClosure (double,>,double,contacts): bool
+    forceClosure (contacts,m,n): bool
 
-    forceClosure (double,>,double,contactPositions,double,>,double,frictionCones): bool
+    forceClosure (contactPositions,frictionCones): bool
 
 
     Returns:
@@ -7689,9 +7904,9 @@ def forceClosure2D(*args):
     r"""
     Returns true if the list of 2D contact points has force closure.  
 
-    forceClosure2D (double,>,double,contacts): bool
+    forceClosure2D (contacts,m,n): bool
 
-    forceClosure2D (double,>,double,contactPositions,double,>,double,frictionCones): bool
+    forceClosure2D (contactPositions,frictionCones): bool
 
 
     Returns:
@@ -7729,9 +7944,9 @@ def comEquilibrium(*args):
     Tests whether the given COM com is stable for the given contacts and the given
     external force fext.  
 
-    comEquilibrium (double,>,double,contacts,fext,com): :obj:`object`
+    comEquilibrium (contacts,m,n,fext,com): :obj:`object`
 
-    comEquilibrium (double,>,double,contactPositions,double,>,double,frictionCones,fext,com): :obj:`object`
+    comEquilibrium (contactPositions,frictionCones,fext,com): :obj:`PyObject *`
 
 
     The 2-argument version is a "fancy" version that allows more control over the
@@ -7772,9 +7987,9 @@ def comEquilibrium2D(*args):
     Tests whether the given COM com is stable for the given contacts and the given
     external force fext.  
 
-    comEquilibrium2D (double,>,double,contacts,fext,com): :obj:`object`
+    comEquilibrium2D (contacts,m,n,fext,com): :obj:`object`
 
-    comEquilibrium2D (double,>,double,contactPositions,double,>,double,frictionCones,fext,com): :obj:`object`
+    comEquilibrium2D (contactPositions,frictionCones,fext,com): :obj:`PyObject *`
 
 
     The 2-argument version is a "fancy" version that allows more control over the
@@ -7818,9 +8033,9 @@ def supportPolygon(*args):
     Calculates the support polygon for a given set of contacts and a downward
     external force (0,0,-g).  
 
-    supportPolygon (double,>,double,contacts): :obj:`object`
+    supportPolygon (contacts,m,n): :obj:`object`
 
-    supportPolygon (double,>,double,contactPositions,double,>,double,frictionCones): :obj:`object`
+    supportPolygon (contactPositions,frictionCones): :obj:`PyObject *`
 
 
     In the 1-argument version, a contact point is given by a list of 7 floats,
@@ -7869,9 +8084,9 @@ def supportPolygon2D(*args):
     Calculates the support polygon (interval) for a given set of contacts and a
     downward external force (0,-g).  
 
-    supportPolygon2D (double,>,double,contacts): :obj:`object`
+    supportPolygon2D (contacts,m,n): :obj:`object`
 
-    supportPolygon2D (double,>,double,contacts,double,>,double,frictionCones): :obj:`object`
+    supportPolygon2D (contacts,frictionCones): :obj:`PyObject *`
 
 
     The 2-argument version is a "fancy" version that allows more control over the
@@ -7906,9 +8121,9 @@ def equilibriumTorques(*args):
     r"""
     Solves for the torques / forces that keep the robot balanced against gravity.  
 
-    equilibriumTorques (robot,double,>,double,contacts,links,fext,norm=0): :obj:`object`
+    equilibriumTorques (robot,contacts,m,n,links,fext,norm=0): :obj:`object`
 
-    equilibriumTorques (robot,double,>,double,contacts,links,fext,internalTorques,norm=0): :obj:`object`
+    equilibriumTorques (robot,contacts,m,n,links,fext,internalTorques,norm=0): :obj:`object`
 
 
     The problem being solved is  
@@ -7924,7 +8139,7 @@ def equilibriumTorques(*args):
     Args:  
 
         robot (RobotModel): the robot, posed in its current configuration
-        contacts (list of N 7-lists): a list of contact points, given as 7-lists
+        contacts (ndarray): an N x 7 array of contact points, each given as 7-lists
             [x,y,z,nx,ny,nz,kFriction]
         links (list of N ints): a list of the links on which those contact points
             lie

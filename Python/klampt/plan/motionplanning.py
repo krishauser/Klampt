@@ -398,7 +398,7 @@ def setPlanSetting(*args):
 
     Args:
         setting (str): 
-        value (str or float): 
+        value (float or str): 
 
     Valid numeric values are:  
 
@@ -496,7 +496,7 @@ class CSpaceInterface(object):
     def setFeasibility(self, pyFeas):
         r"""
         Args:
-            pyFeas (:obj:`object`)
+            pyFeas (:obj:`PyObject *`)
         """
         return _motionplanning.CSpaceInterface_setFeasibility(self, pyFeas)
 
@@ -504,14 +504,14 @@ class CSpaceInterface(object):
         r"""
         Args:
             name (str)
-            pyFeas (:obj:`object`)
+            pyFeas (:obj:`PyObject *`)
         """
         return _motionplanning.CSpaceInterface_addFeasibilityTest(self, name, pyFeas)
 
     def setVisibility(self, pyVisible):
         r"""
         Args:
-            pyVisible (:obj:`object`)
+            pyVisible (:obj:`PyObject *`)
         """
         return _motionplanning.CSpaceInterface_setVisibility(self, pyVisible)
 
@@ -519,7 +519,7 @@ class CSpaceInterface(object):
         r"""
         Args:
             name (str)
-            pyVisible (:obj:`object`)
+            pyVisible (:obj:`PyObject *`)
         """
         return _motionplanning.CSpaceInterface_addVisibilityTest(self, name, pyVisible)
 
@@ -533,28 +533,28 @@ class CSpaceInterface(object):
     def setSampler(self, pySamp):
         r"""
         Args:
-            pySamp (:obj:`object`)
+            pySamp (:obj:`PyObject *`)
         """
         return _motionplanning.CSpaceInterface_setSampler(self, pySamp)
 
     def setNeighborhoodSampler(self, pySamp):
         r"""
         Args:
-            pySamp (:obj:`object`)
+            pySamp (:obj:`PyObject *`)
         """
         return _motionplanning.CSpaceInterface_setNeighborhoodSampler(self, pySamp)
 
     def setDistance(self, pyDist):
         r"""
         Args:
-            pyDist (:obj:`object`)
+            pyDist (:obj:`PyObject *`)
         """
         return _motionplanning.CSpaceInterface_setDistance(self, pyDist)
 
     def setInterpolate(self, pyInterp):
         r"""
         Args:
-            pyInterp (:obj:`object`)
+            pyInterp (:obj:`PyObject *`)
         """
         return _motionplanning.CSpaceInterface_setInterpolate(self, pyInterp)
 
@@ -580,7 +580,7 @@ class CSpaceInterface(object):
         Queries whether a given configuration is feasible.  
 
         Args:
-            q (:obj:`object`)
+            q (:obj:`PyObject *`)
         Returns:
             bool:
         """
@@ -591,8 +591,8 @@ class CSpaceInterface(object):
         Queries whether two configurations are visible.  
 
         Args:
-            a (:obj:`object`)
-            b (:obj:`object`)
+            a (:obj:`PyObject *`)
+            b (:obj:`PyObject *`)
         Returns:
             bool:
         """
@@ -605,7 +605,7 @@ class CSpaceInterface(object):
 
         Args:
             name (str)
-            q (:obj:`object`)
+            q (:obj:`PyObject *`)
         Returns:
             bool:
         """
@@ -618,8 +618,8 @@ class CSpaceInterface(object):
 
         Args:
             name (str)
-            a (:obj:`object`)
-            b (:obj:`object`)
+            a (:obj:`PyObject *`)
+            b (:obj:`PyObject *`)
         Returns:
             bool:
         """
@@ -630,9 +630,9 @@ class CSpaceInterface(object):
         Returns a list of all failed feasibility constraints.  
 
         Args:
-            q (:obj:`object`)
+            q (:obj:`PyObject *`)
         Returns:
-            :obj:`object`:
+            :obj:`PyObject *`:
         """
         return _motionplanning.CSpaceInterface_feasibilityFailures(self, q)
 
@@ -641,10 +641,10 @@ class CSpaceInterface(object):
         Returns a list of all failed visibility constraints.  
 
         Args:
-            a (:obj:`object`)
-            b (:obj:`object`)
+            a (:obj:`PyObject *`)
+            b (:obj:`PyObject *`)
         Returns:
-            :obj:`object`:
+            :obj:`PyObject *`:
         """
         return _motionplanning.CSpaceInterface_visibilityFailures(self, a, b)
 
@@ -653,7 +653,7 @@ class CSpaceInterface(object):
         Samples a configuration.  
 
         Returns:
-            :obj:`object`:
+            :obj:`PyObject *`:
         """
         return _motionplanning.CSpaceInterface_sample(self)
 
@@ -662,8 +662,8 @@ class CSpaceInterface(object):
         Returns the distance between two configurations.  
 
         Args:
-            a (:obj:`object`)
-            b (:obj:`object`)
+            a (:obj:`PyObject *`)
+            b (:obj:`PyObject *`)
         Returns:
             float:
         """
@@ -674,11 +674,11 @@ class CSpaceInterface(object):
         Interpolates between two configurations.  
 
         Args:
-            a (:obj:`object`)
-            b (:obj:`object`)
+            a (:obj:`PyObject *`)
+            b (:obj:`PyObject *`)
             u (float)
         Returns:
-            :obj:`object`:
+            :obj:`PyObject *`:
         """
         return _motionplanning.CSpaceInterface_interpolate(self, a, b, u)
 
@@ -803,7 +803,7 @@ class CSpaceInterface(object):
         Retrieves the current order of feasibility tests.  
 
         Returns:
-            :obj:`object`:
+            :obj:`PyObject *`:
         """
         return _motionplanning.CSpaceInterface_feasibilityQueryOrder(self)
 
@@ -812,7 +812,7 @@ class CSpaceInterface(object):
         Retrieves the current order of visibility tests.  
 
         Returns:
-            :obj:`object`:
+            :obj:`PyObject *`:
         """
         return _motionplanning.CSpaceInterface_visibilityQueryOrder(self)
 
@@ -822,7 +822,7 @@ class CSpaceInterface(object):
         returns the stats on each constraint.  
 
         Returns:
-            :obj:`object`:
+            :obj:`PyObject *`:
         """
         return _motionplanning.CSpaceInterface_getStats(self)
     index = property(_motionplanning.CSpaceInterface_index_get, _motionplanning.CSpaceInterface_index_set, doc=r"""index : int""")
@@ -898,8 +898,8 @@ class PlannerInterface(object):
     def setEndpoints(self, start, goal):
         r"""
         Args:
-            start (:obj:`object`)
-            goal (:obj:`object`)
+            start (:obj:`PyObject *`)
+            goal (:obj:`PyObject *`)
         Returns:
             bool:
         """
@@ -908,9 +908,9 @@ class PlannerInterface(object):
     def setEndpointSet(self, start, goal, goalSample=None):
         r"""
         Args:
-            start (:obj:`object`)
-            goal (:obj:`object`)
-            goalSample (:obj:`object`, optional): default value None
+            start (:obj:`PyObject *`)
+            goal (:obj:`PyObject *`)
+            goalSample (:obj:`PyObject *`, optional): default value None
         Returns:
             bool:
         """
@@ -919,15 +919,15 @@ class PlannerInterface(object):
     def setCostFunction(self, edgeCost=None, terminalCost=None):
         r"""
         Args:
-            edgeCost (:obj:`object`, optional): default value None
-            terminalCost (:obj:`object`, optional): default value None
+            edgeCost (:obj:`PyObject *`, optional): default value None
+            terminalCost (:obj:`PyObject *`, optional): default value None
         """
         return _motionplanning.PlannerInterface_setCostFunction(self, edgeCost, terminalCost)
 
     def addMilestone(self, milestone):
         r"""
         Args:
-            milestone (:obj:`object`)
+            milestone (:obj:`PyObject *`)
         Returns:
             int:
         """
@@ -936,7 +936,7 @@ class PlannerInterface(object):
     def getClosestMilestone(self, config):
         r"""
         Args:
-            config (:obj:`object`)
+            config (:obj:`PyObject *`)
         Returns:
             int:
         """
@@ -947,7 +947,7 @@ class PlannerInterface(object):
         Args:
             arg2 (int)
         Returns:
-            :obj:`object`:
+            :obj:`PyObject *`:
         """
         return _motionplanning.PlannerInterface_getMilestone(self, arg2)
 
@@ -961,7 +961,7 @@ class PlannerInterface(object):
     def getSolutionPath(self):
         r"""
         Returns:
-            :obj:`object`:
+            :obj:`PyObject *`:
         """
         return _motionplanning.PlannerInterface_getSolutionPath(self)
 
@@ -969,7 +969,7 @@ class PlannerInterface(object):
         r"""
         getPath (milestone1,milestone2): :obj:`object`
 
-        getPath (milestone1,int,goalMilestones): :obj:`object`
+        getPath (milestone1,int,goalMilestones): :obj:`PyObject *`
 
 
         Args:
@@ -979,7 +979,7 @@ class PlannerInterface(object):
             goalMilestones (:obj:`std::allocator< int > >`, optional): 
 
         Returns:
-            (:obj:`object`):
+            (:obj:`PyObject *` or :obj:`object`):
         """
         return _motionplanning.PlannerInterface_getPath(self, *args)
 
@@ -995,14 +995,14 @@ class PlannerInterface(object):
     def getStats(self):
         r"""
         Returns:
-            :obj:`object`:
+            :obj:`PyObject *`:
         """
         return _motionplanning.PlannerInterface_getStats(self)
 
     def getRoadmap(self):
         r"""
         Returns:
-            :obj:`object`:
+            :obj:`PyObject *`:
         """
         return _motionplanning.PlannerInterface_getRoadmap(self)
 

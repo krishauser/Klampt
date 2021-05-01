@@ -330,17 +330,17 @@ class SimBody
 
   /// Sets the body's transformation at the current
   /// simulation time step (in center-of-mass centered coordinates).
-  void setTransform(const double R[3][3],const double t[3]);
+  void setTransform(const double R[9],const double t[3]);
   /// Gets the body's transformation at the current
   /// simulation time step (in center-of-mass centered coordinates).
-  void getTransform(double out[3][3],double out2[3]);
+  void getTransform(double out[9],double out2[3]);
 
   /// Sets the body's transformation at the current
   /// simulation time step (in object-native coordinates)
-  void setObjectTransform(const double R[3][3],const double t[3]);
+  void setObjectTransform(const double R[9],const double t[3]);
   /// Gets the body's transformation at the current
   /// simulation time step (in object-native coordinates).
-  void getObjectTransform(double out[3][3],double out2[3]);
+  void getObjectTransform(double out[9],double out2[3]);
 
   /// Sets the angular velocity and translational velocity at the current
   /// simulation time step.

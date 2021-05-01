@@ -23,17 +23,18 @@ and ``klampt.io.loader.readSe3()``.
 
 from . import vectorops
 from . import so3
-import numpy as np
 
 def identity():
     """Returns the identity transformation."""
-    return (so3.identity(),[0.,0.,0.])
+    return ([1.,0.,0.,0.,1.,0.,0.,0.,1.],[0.,0.,0.])
 
 def inv(T):
     """Returns the inverse of the transformation."""
     (R,t) = T
     Rinv = so3.inv(R)
-    tinv = -Rinv.dot(t)
+    tinv = [-Rinv[0]*t[0]-Rinv[3]*t[1]-Rinv[6]*t[2],
+            -Rinv[1]*t[0]-Rinv[4]*t[1]-Rinv[7]*t[2],
+            -Rinv[2]*t[0]-Rinv[5]*t[1]-Rinv[8]*t[2]]
     return (Rinv,tinv)
 
 def apply(T,point):
@@ -66,15 +67,15 @@ def from_translation(t):
 def homogeneous(T):
     """Returns the 4x4 homogeneous transform corresponding to T"""
     (R,t) = T
-    return np.array([[R[0,0],R[0,1],R[0,2],t[0]],
-                    [R[1,0],R[1,1],R[1,2],t[1]],
-                    [R[2,0],R[2,1],R[2,2],t[2]],
-                    [0.,0.,0.,1.]])
+    return [[R[0],R[3],R[6],t[0]],
+            [R[1],R[4],R[7],t[1]],
+            [R[2],R[5],R[8],t[2]],
+            [0.,0.,0.,1.]]
 
 def from_homogeneous(mat):
     """Returns a T corresponding to the 4x4 homogeneous transform mat"""
     t = [mat[0][3],mat[1][3],mat[2][3]]
-    R = mat[:3,:3]
+    R = [mat[0][0],mat[1][0],mat[2][0],mat[0][1],mat[1][1],mat[2][1],mat[0][2],mat[1][2],mat[2][2]]
     return (R,t)
 
 def mul(T1,T2):

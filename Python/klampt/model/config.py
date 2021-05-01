@@ -31,10 +31,10 @@ API
 ----
 
 .. autosummary::
-    getConfig
-    setConfig
-    getConfigNames
-    numConfigParams
+    get_config
+    set_config
+    get_config_names
+    num_config_params
     distance
     interpolate
 
@@ -42,17 +42,18 @@ Helpers
 -------
 
 .. autosummary::
-    isCompound
+    is_compound
     components
-    componentNames
+    component_names
 
 """
 
 from ..robotsim import WorldModel,RobotModel,RobotModelLink,RigidObjectModel,IKObjective
 from ..math import vectorops,so3,se3
 from . import coordinates
+import warnings
 
-def isCompound(item):
+def is_compound(item):
     if isinstance(item,WorldModel):
         return True
     elif isinstance(item,coordinates.Group):
@@ -82,7 +83,7 @@ def components(item):
         return sum([components(v) for v in item],[])
     return [item]
 
-def componentNames(item):
+def component_names(item):
     """For compound items returns a list of names of all component sub-items.
     For non-compound items, returns a singular name."""
     if isinstance(item,WorldModel):
@@ -93,19 +94,19 @@ def componentNames(item):
         res = list(item.frames.keys())
         res += list(item.points.keys())
         res += list(item.directions.keys())
-        res += [componentNames(g) for g in item.subgroups.keys()]
+        res += [component_names(g) for g in item.subgroups.keys()]
         return res
     elif hasattr(item,'__iter__'):
         if all(isinstance(v,(bool,int,float,str)) for v in item):
             return ''
-        return sum(['['+str(i)+']'+componentNames(v) for i,v in enumerate(item)],[])
+        return sum(['['+str(i)+']'+component_names(v) for i,v in enumerate(item)],[])
     if hasattr(item,'getName'):
         return [item.getName()]
     if hasattr(item,'name'):
         return [item.name]
     return ['']
 
-def numConfigParams(item):
+def num_config_params(item):
     """Returns the number of free parameters in the flattened version of the configuration
     of the given item. Nearly all Klamp't objects are recognized, including RobotModel's,
     RigidObjectModel's, WorldModel's, IKObjectives, and all variable types in the
@@ -134,13 +135,13 @@ def numConfigParams(item):
         elif item.numRotDims() == 2:
             return 6+start
         return start
-    elif isCompound(item):
-        return sum(numConfigParams(v) for v in components(item))
+    elif is_compound(item):
+        return sum(num_config_params(v) for v in components(item))
     elif hasattr(item,'__iter__'):
         return len(item)
     return 0
 
-def getConfig(item):
+def get_config(item):
     """Returns a flattened version of the configuration of the given item.
     Nearly all Klamp't objects are recognized, including RobotModel's,
     RigidObjectModel's, WorldModel's, IKObjectives, and all variable types in the
@@ -185,17 +186,17 @@ def getConfig(item):
             loc,wor = item.getRotationAxis()
             x += loc + wor
         return x
-    elif isCompound(item):
-        return sum([getConfig(v) for v in components(item)],[])
+    elif is_compound(item):
+        return sum([get_config(v) for v in components(item)],[])
     elif hasattr(item,'__iter__'):
         if isinstance(item[0],(bool,int,float,str)):
             return item[:]
         else:
-            return sum([getConfig(v) for v in item],[])
+            return sum([get_config(v) for v in item],[])
     else:
         return []
 
-def setConfig(item,vector):
+def set_config(item,vector):
     """Sets the configuration of the given item to the given vector.
     Nearly all Klamp't objects are recognized, including RobotModel's,
     RigidObjectModel's, WorldModel's, IKObjectives, and all variable types in the
@@ -251,14 +252,14 @@ def setConfig(item,vector):
             assert len(vector) == 6+start
             loc,wor = vector[start:start+3],vector[start+3:start+6]
             item.setAxialRotConstraint(loc,wor)
-    elif isCompound(item):
+    elif is_compound(item):
         subitems = components(item)
         lengths = []
         for s in subitems:
-            lengths.append(numConfigParams(s))
+            lengths.append(num_config_params(s))
         k = 0
         for (s,l) in zip(subitems,lengths):
-            setConfig(s,vector[k:k+l])
+            set_config(s,vector[k:k+l])
             k += l
     elif hasattr(item,'__iter__'):
         assert isinstance(item[0],(bool,float,int))
@@ -271,7 +272,7 @@ _so3Names = ['R11','R21','R31','R12','R22','R32','R13','R23','R33']
 _pointNames = ['x','y','z']
 _se3Names = _so3Names + ['tx','ty','tz']
 
-def getConfigNames(item):
+def get_config_names(item):
     """Returns a list giving string names for each configuration dimension of given
     item. Nearly all Klamp't objects are recognized, including RobotModel's,
     RigidObjectModel's, WorldModel's, IKObjectives, and all variable types in the
@@ -302,7 +303,7 @@ def getConfigNames(item):
         elif item.numRotDims() == 2:
             x += ['local_axis_x','local_axis_y','local_axis_z','world_axis_x','world_axis_y','world_axis_z']
         return x
-    elif isCompound(item):
+    elif is_compound(item):
         res = []
         cnames = componentNames(item)
         comps = components(item)
@@ -337,11 +338,11 @@ def distance(item,a,b):
         if item.numPosDims() == 3 and item.numRotDims() == 3:
             return se3.distance((a[:9],a[9:]),(b[:9],b[9:]))
         #TODO: geodesic non-fixed orientation distances?
-    elif isCompound(item):
+    elif is_compound(item):
         subitems = components(item)
         lengths = []
         for s in subitems:
-            lengths.append(numConfigParams(s))
+            lengths.append(num_config_params(s))
         d = 0
         k = 0
         for (s,l) in zip(subitems,lengths):
@@ -364,11 +365,11 @@ def interpolate(item,a,b,u):
             T = se3.interpolate((a[:9],a[9:]),(b[:9],b[9:]),u)
             return T[0]+T[1]
         #TODO: geodesic non-fixed orientation distances?
-    elif isCompound(item):
+    elif is_compound(item):
         subitems = components(item)
         lengths = []
         for s in subitems:
-            lengths.append(numConfigParams(s))
+            lengths.append(num_config_params(s))
         res = []
         k = 0
         for (s,l) in zip(subitems,lengths):
@@ -378,3 +379,20 @@ def interpolate(item,a,b,u):
             k += l
         return res
     return vectorops.interpolate(a,b,u)
+
+
+def _deprecated_func(oldName,newName):
+    import sys
+    mod = sys.modules[__name__]
+    f = getattr(mod,newName)
+    def depf(*args,**kwargs):
+        warnings.warn("{} will be deprecated in favor of {} in a future version of Klampt".format(oldName,newName),DeprecationWarning)
+        return f(*args,**kwargs)
+    setattr(mod,oldName,depf)
+    
+_deprecated_func("isCompound","is_compound")
+_deprecated_func("getConfig","get_config")
+_deprecated_func("setConfig","set_config")
+_deprecated_func("getConfigNames","get_config_names")
+_deprecated_func("numConfigParams","num_config_params")
+_deprecated_func("componentNames","component_names")

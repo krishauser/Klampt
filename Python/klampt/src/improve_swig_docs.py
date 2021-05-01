@@ -50,19 +50,34 @@ to_python_types = { 'char const *':'str',
     'std::vector< unsigned char,std::allocator< unsigned char > > const':'bytes',
     'std::vector<(float,std::allocator<(float)>)>':'list of floats',
     'std::vector<(double,std::allocator<(double)>)>':'list of floats',
+    'unsigned_char * np_array':'1D Numpy array of np.uint8',
+    'unsigned_char * np_array2':'2D Numpy array of np.uint8',
+    'int * np_array':'1D Numpy array of ints',
+    'int * np_array2':'2D Numpy array of ints',
+    'float * np_array':'1D Numpy array of np.float32',
+    'float * np_array2':'2D Numpy array of np.float32',
+    'float * np_array3':'3D Numpy array of np.float32',
+    'double * np_array':'1D Numpy array of floats',
+    'double * np_array2':'2D Numpy array of floats',
+    'double * np_array3':'3D Numpy array of floats',
     'PyObject': "object"
 }
 
 to_python_defaults = {'NULL':"None"}
 
-def parse_type(typestr):
+def parse_type(typestr,argname=None):
     typestr = typestr.strip()
     try:
         return to_python_types[typestr]
     except KeyError:
         pass
+    if argname is not None:
+        try:
+            return to_python_types[typestr+' '+argname]
+        except KeyError:
+            pass
     processed = False
-    if typestr.endswith('&') or typestr.endswith('*'):
+    if typestr.endswith('&'):
         typestr = typestr[:-1].strip()
         processed = True
     if typestr.endswith('const'):
@@ -151,9 +166,9 @@ def print_signature(siglist,indent0,docstring):
                 aparts = aname.split('=',2)
                 if len(aparts)>1:
                     eprint("Parts",aparts[0],aparts[1])
-                    args[-1].append((aparts[0],parse_type(atype),parse_default(aparts[1])))
+                    args[-1].append((aparts[0],parse_type(atype,aparts[0]),parse_default(aparts[1])))
                 else:
-                    args[-1].append((aname,parse_type(atype),None))
+                    args[-1].append((aname,parse_type(atype,aname),None))
 
         #parse return value
         if len(parts) == 2:

@@ -154,6 +154,33 @@ _robotsim.doubleArray_swigregister(doubleArray)
 def doubleArray_frompointer(t):
     return _robotsim.doubleArray_frompointer(t)
 
+class floatArray(object):
+    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
+    __repr__ = _swig_repr
+
+    def __init__(self, nelements):
+        _robotsim.floatArray_swiginit(self, _robotsim.new_floatArray(nelements))
+    __swig_destroy__ = _robotsim.delete_floatArray
+
+    def __getitem__(self, index):
+        return _robotsim.floatArray___getitem__(self, index)
+
+    def __setitem__(self, index, value):
+        return _robotsim.floatArray___setitem__(self, index, value)
+
+    def cast(self):
+        return _robotsim.floatArray_cast(self)
+
+    @staticmethod
+    def frompointer(t):
+        return _robotsim.floatArray_frompointer(t)
+
+# Register floatArray in _robotsim:
+_robotsim.floatArray_swigregister(floatArray)
+
+def floatArray_frompointer(t):
+    return _robotsim.floatArray_frompointer(t)
+
 class intArray(object):
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
@@ -605,6 +632,112 @@ class intVector(object):
 # Register intVector in _robotsim:
 _robotsim.intVector_swigregister(intVector)
 
+class doubleMatrix(object):
+    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
+    __repr__ = _swig_repr
+
+    def iterator(self):
+        return _robotsim.doubleMatrix_iterator(self)
+    def __iter__(self):
+        return self.iterator()
+
+    def __nonzero__(self):
+        return _robotsim.doubleMatrix___nonzero__(self)
+
+    def __bool__(self):
+        return _robotsim.doubleMatrix___bool__(self)
+
+    def __len__(self):
+        return _robotsim.doubleMatrix___len__(self)
+
+    def __getslice__(self, i, j):
+        return _robotsim.doubleMatrix___getslice__(self, i, j)
+
+    def __setslice__(self, *args):
+        return _robotsim.doubleMatrix___setslice__(self, *args)
+
+    def __delslice__(self, i, j):
+        return _robotsim.doubleMatrix___delslice__(self, i, j)
+
+    def __delitem__(self, *args):
+        return _robotsim.doubleMatrix___delitem__(self, *args)
+
+    def __getitem__(self, *args):
+        return _robotsim.doubleMatrix___getitem__(self, *args)
+
+    def __setitem__(self, *args):
+        return _robotsim.doubleMatrix___setitem__(self, *args)
+
+    def pop(self):
+        return _robotsim.doubleMatrix_pop(self)
+
+    def append(self, x):
+        return _robotsim.doubleMatrix_append(self, x)
+
+    def empty(self):
+        return _robotsim.doubleMatrix_empty(self)
+
+    def size(self):
+        return _robotsim.doubleMatrix_size(self)
+
+    def swap(self, v):
+        return _robotsim.doubleMatrix_swap(self, v)
+
+    def begin(self):
+        return _robotsim.doubleMatrix_begin(self)
+
+    def end(self):
+        return _robotsim.doubleMatrix_end(self)
+
+    def rbegin(self):
+        return _robotsim.doubleMatrix_rbegin(self)
+
+    def rend(self):
+        return _robotsim.doubleMatrix_rend(self)
+
+    def clear(self):
+        return _robotsim.doubleMatrix_clear(self)
+
+    def get_allocator(self):
+        return _robotsim.doubleMatrix_get_allocator(self)
+
+    def pop_back(self):
+        return _robotsim.doubleMatrix_pop_back(self)
+
+    def erase(self, *args):
+        return _robotsim.doubleMatrix_erase(self, *args)
+
+    def __init__(self, *args):
+        _robotsim.doubleMatrix_swiginit(self, _robotsim.new_doubleMatrix(*args))
+
+    def push_back(self, x):
+        return _robotsim.doubleMatrix_push_back(self, x)
+
+    def front(self):
+        return _robotsim.doubleMatrix_front(self)
+
+    def back(self):
+        return _robotsim.doubleMatrix_back(self)
+
+    def assign(self, n, x):
+        return _robotsim.doubleMatrix_assign(self, n, x)
+
+    def resize(self, *args):
+        return _robotsim.doubleMatrix_resize(self, *args)
+
+    def insert(self, *args):
+        return _robotsim.doubleMatrix_insert(self, *args)
+
+    def reserve(self, n):
+        return _robotsim.doubleMatrix_reserve(self, n)
+
+    def capacity(self):
+        return _robotsim.doubleMatrix_capacity(self)
+    __swig_destroy__ = _robotsim.delete_doubleMatrix
+
+# Register doubleMatrix in _robotsim:
+_robotsim.doubleMatrix_swigregister(doubleMatrix)
+
 class stringMap(object):
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
@@ -767,6 +900,46 @@ class TriangleMesh(object):
         """
         _robotsim.TriangleMesh_swiginit(self, _robotsim.new_TriangleMesh())
 
+    def getVertices(self):
+        r"""
+        getVertices(TriangleMesh self)
+
+
+        Retrieves a view of the vertices as an nx3 array.  
+
+        """
+        return _robotsim.TriangleMesh_getVertices(self)
+
+    def setVertices(self, np_array2):
+        r"""
+        setVertices(TriangleMesh self, double * np_array2)
+
+
+        Sets all vertices to the given nx3 array.  
+
+        """
+        return _robotsim.TriangleMesh_setVertices(self, np_array2)
+
+    def getIndices(self):
+        r"""
+        getIndices(TriangleMesh self)
+
+
+        Retrieves a view of the vertices as an mx3 array.  
+
+        """
+        return _robotsim.TriangleMesh_getIndices(self)
+
+    def setIndices(self, np_array2):
+        r"""
+        setIndices(TriangleMesh self, int * np_array2)
+
+
+        Sets all indices to the given mx3 array.  
+
+        """
+        return _robotsim.TriangleMesh_setIndices(self, np_array2)
+
     def translate(self, t):
         r"""
         translate(TriangleMesh self, double const [3] t)
@@ -779,7 +952,7 @@ class TriangleMesh(object):
 
     def transform(self, R, t):
         r"""
-        transform(TriangleMesh self, double const [3][3] R, double const [3] t)
+        transform(TriangleMesh self, double const [9] R, double const [3] t)
 
 
         Transforms all the vertices by the rigid transform v=R*v+t.  
@@ -837,6 +1010,26 @@ class ConvexHull(object):
         """
         return _robotsim.ConvexHull_numPoints(self)
 
+    def getPoints(self):
+        r"""
+        getPoints(ConvexHull self)
+
+
+        Retrieves a view of the points as an nx3 array.  
+
+        """
+        return _robotsim.ConvexHull_getPoints(self)
+
+    def setPoints(self, np_array2):
+        r"""
+        setPoints(ConvexHull self, double * np_array2)
+
+
+        Sets all points to the given nx3 array.  
+
+        """
+        return _robotsim.ConvexHull_setPoints(self, np_array2)
+
     def addPoint(self, pt):
         r"""
         addPoint(ConvexHull self, double const [3] pt)
@@ -869,7 +1062,7 @@ class ConvexHull(object):
 
     def transform(self, R, t):
         r"""
-        transform(ConvexHull self, double const [3][3] R, double const [3] t)
+        transform(ConvexHull self, double const [9] R, double const [3] t)
 
 
         Transforms all the vertices by the rigid transform v=R*v+t.  
@@ -1009,7 +1202,7 @@ class PointCloud(object):
         getPoints(PointCloud self)
 
 
-        Retrieves all the points as an nx3 array.  
+        Retrieves a view of the points as an nx3 array.  
 
         """
         return _robotsim.PointCloud_getPoints(self)
@@ -1122,7 +1315,7 @@ class PointCloud(object):
 
     def transform(self, R, t):
         r"""
-        transform(PointCloud self, double const [3][3] R, double const [3] t)
+        transform(PointCloud self, double const [9] R, double const [3] t)
 
 
         Transforms all the points by the rigid transform v=R*v+t.  
@@ -1255,7 +1448,7 @@ class GeometricPrimitive(object):
 
     def setBox(self, ori, R, dims):
         r"""
-        setBox(GeometricPrimitive self, double const [3] ori, double const [3][3] R, double const [3] dims)
+        setBox(GeometricPrimitive self, double const [3] ori, double const [9] R, double const [3] dims)
 
 
         """
@@ -1892,7 +2085,7 @@ class Geometry3D(object):
 
     def setCurrentTransform(self, R, t):
         r"""
-        setCurrentTransform(Geometry3D self, double const [3][3] R, double const [3] t)
+        setCurrentTransform(Geometry3D self, double const [9] R, double const [3] t)
 
 
         Sets the current transformation (not modifying the underlying data)  
@@ -1935,7 +2128,7 @@ class Geometry3D(object):
 
     def rotate(self, R):
         r"""
-        rotate(Geometry3D self, double const [3][3] R)
+        rotate(Geometry3D self, double const [9] R)
 
 
         Rotates the geometry data. Permanently modifies the data and resets any
@@ -1946,7 +2139,7 @@ class Geometry3D(object):
 
     def transform(self, R, t):
         r"""
-        transform(Geometry3D self, double const [3][3] R, double const [3] t)
+        transform(Geometry3D self, double const [9] R, double const [3] t)
 
 
         Translates/rotates/scales the geometry data. Permanently modifies the data and
@@ -2431,13 +2624,14 @@ class Appearance(object):
         setColors(Appearance self, int feature, float * np_array2)
 
 
-        Sets per-element color for elements of the given feature type.  
+        Sets per-element color for elements of the given feature type. Must be an mxn
+        array. m is the number of features of that type, and n is either 3 or 4.  
 
-        If alpha=True, colors are assumed to be 4*N rgba values, where N is the number
-        of features of that type.  
+        If n == 4, they are assumed to be rgba values, and  
 
-        Otherwise they are assumed to be 3*N rgb values. Only supports feature=VERTICES
-        and feature=FACES  
+        If n == 3, each row is an rgb value.  
+
+        Only supports feature=VERTICES and feature=FACES  
 
         """
         return _robotsim.Appearance_setColors(self, feature, np_array2)
@@ -2513,8 +2707,8 @@ class Appearance(object):
         Sets a 2D texture of the given width/height. See :func:`setTexture1D` for valid
         format strings.  
 
-        bytes is is given in order left to right, top to bottom if `topdown==True`.
-        Otherwise, it is given in order left to right, bottom to top.  
+        bytes is given in top to bottom order if `topdown==True`. Otherwise, it is given
+        in order bottom to top.  
 
         """
         return _robotsim.Appearance_setTexture2D(self, format, np_array2, topdown)
@@ -2640,7 +2834,7 @@ class Viewport(object):
 
     def setRigidTransform(self, R, t):
         r"""
-        setRigidTransform(Viewport self, double const [3][3] R, double const [3] t)
+        setRigidTransform(Viewport self, double const [9] R, double const [3] t)
 
 
         """
@@ -2857,7 +3051,7 @@ class PointPoser(Widget):
 
     def setAxes(self, R):
         r"""
-        setAxes(PointPoser self, double const [3][3] R)
+        setAxes(PointPoser self, double const [9] R)
 
 
         Sets the reference axes (by default aligned to x,y,z)  
@@ -2896,7 +3090,7 @@ class TransformPoser(Widget):
 
     def set(self, R, t):
         r"""
-        set(TransformPoser self, double const [3][3] R, double const [3] t)
+        set(TransformPoser self, double const [9] R, double const [3] t)
 
 
         """
@@ -2949,7 +3143,7 @@ class ObjectPoser(Widget):
 
     def set(self, R, t):
         r"""
-        set(ObjectPoser self, double const [3][3] R, double const [3] t)
+        set(ObjectPoser self, double const [9] R, double const [3] t)
 
 
         """
@@ -3063,7 +3257,7 @@ class AABBPoser(Widget):
 
     def setFrame(self, R, t):
         r"""
-        setFrame(AABBPoser self, double const [3][3] R, double const [3] t)
+        setFrame(AABBPoser self, double const [9] R, double const [3] t)
 
 
         """
@@ -3100,7 +3294,7 @@ class BoxPoser(Widget):
 
     def set(self, R, t, dims):
         r"""
-        set(BoxPoser self, double const [3][3] R, double const [3] t, double const [3] dims)
+        set(BoxPoser self, double const [9] R, double const [3] t, double const [3] dims)
 
 
         """
@@ -3108,7 +3302,7 @@ class BoxPoser(Widget):
 
     def setTransform(self, R, t):
         r"""
-        setTransform(BoxPoser self, double const [3][3] R, double const [3] t)
+        setTransform(BoxPoser self, double const [9] R, double const [3] t)
 
 
         """
@@ -3512,7 +3706,7 @@ class RobotModelLink(object):
 
     def setParentTransform(self, R, t):
         r"""
-        setParentTransform(RobotModelLink self, double const [3][3] R, double const [3] t)
+        setParentTransform(RobotModelLink self, double const [9] R, double const [3] t)
 
 
         Sets transformation (R,t) to the parent link.  
@@ -3644,7 +3838,7 @@ class RobotModelLink(object):
 
     def setTransform(self, R, t):
         r"""
-        setTransform(RobotModelLink self, double const [3][3] R, double const [3] t)
+        setTransform(RobotModelLink self, double const [9] R, double const [3] t)
 
 
         Sets the link's current transformation (R,t) to the world frame.  
@@ -3869,6 +4063,15 @@ class RobotModelLink(object):
     robotIndex = property(_robotsim.RobotModelLink_robotIndex_get, _robotsim.RobotModelLink_robotIndex_set, doc=r"""robotIndex : int""")
     robotPtr = property(_robotsim.RobotModelLink_robotPtr_get, _robotsim.RobotModelLink_robotPtr_set, doc=r"""robotPtr : p.Robot""")
     index = property(_robotsim.RobotModelLink_index_get, _robotsim.RobotModelLink_index_set, doc=r"""index : int""")
+
+    name = property(getName, setName)
+    parent = property(getParent, setParent)
+    mass = property(getMass, setMass)
+    parentTransform = property(getParentTransform, setParentTransform)
+    axis = property(getAxis,setAxis)
+    prismatic = property(isPrismatic,setPrismatic)
+    transform = property(getTransform,setTransform)
+
     __swig_destroy__ = _robotsim.delete_RobotModelLink
 
 # Register RobotModelLink in _robotsim:
@@ -3908,6 +4111,16 @@ class RobotModelDriver(object):
 
         """
         return _robotsim.RobotModelDriver_getName(self)
+
+    def setName(self, name):
+        r"""
+        setName(RobotModelDriver self, char const * name)
+
+
+        Sets the name of the driver.  
+
+        """
+        return _robotsim.RobotModelDriver_setName(self, name)
 
     def robot(self):
         r"""
@@ -4006,6 +4219,14 @@ class RobotModelDriver(object):
     robotIndex = property(_robotsim.RobotModelDriver_robotIndex_get, _robotsim.RobotModelDriver_robotIndex_set, doc=r"""robotIndex : int""")
     robotPtr = property(_robotsim.RobotModelDriver_robotPtr_get, _robotsim.RobotModelDriver_robotPtr_set, doc=r"""robotPtr : p.Robot""")
     index = property(_robotsim.RobotModelDriver_index_get, _robotsim.RobotModelDriver_index_set, doc=r"""index : int""")
+
+    name = property(getName, setName)
+    type = property(getType)
+    affectedLink = property(getAffectedLink)
+    affectedLinks = property(getAffectedLinks)
+    value = property(getValue, setValue)
+    velocity = property(getVelocity, setVelocity)
+
     __swig_destroy__ = _robotsim.delete_RobotModelDriver
 
 # Register RobotModelDriver in _robotsim:
@@ -4688,7 +4909,7 @@ class RobotModel(object):
 
     def mount(self, link, subRobot, R, t):
         r"""
-        mount(RobotModel self, int link, RobotModel subRobot, double const [3][3] R, double const [3] t)
+        mount(RobotModel self, int link, RobotModel subRobot, double const [9] R, double const [3] t)
 
 
         Mounts a sub-robot onto a link, with its origin at a given local transform
@@ -4715,6 +4936,13 @@ class RobotModel(object):
     index = property(_robotsim.RobotModel_index_get, _robotsim.RobotModel_index_set, doc=r"""index : int""")
     robot = property(_robotsim.RobotModel_robot_get, _robotsim.RobotModel_robot_set, doc=r"""robot : p.Robot""")
     dirty_dynamics = property(_robotsim.RobotModel_dirty_dynamics_get, _robotsim.RobotModel_dirty_dynamics_set, doc=r"""dirty_dynamics : bool""")
+
+    name = property(getName, setName)
+    id = property(getID)
+    config = property(getConfig,setConfig)
+    velocity = property(getVelocity,setVelocity)
+
+
     __swig_destroy__ = _robotsim.delete_RobotModel
 
 # Register RobotModel in _robotsim:
@@ -4879,7 +5107,7 @@ class RigidObjectModel(object):
 
     def setTransform(self, R, t):
         r"""
-        setTransform(RigidObjectModel self, double const [3][3] R, double const [3] t)
+        setTransform(RigidObjectModel self, double const [9] R, double const [3] t)
 
 
         Sets the rotation / translation (R,t) of the rigid object.  
@@ -5538,7 +5766,7 @@ class IKObjective(object):
 
     def setFixedTransform(self, link, R, t):
         r"""
-        setFixedTransform(IKObjective self, int link, double const [3][3] R, double const [3] t)
+        setFixedTransform(IKObjective self, int link, double const [9] R, double const [3] t)
 
 
         Sets a fixed-transform constraint (R,t)  
@@ -5568,7 +5796,7 @@ class IKObjective(object):
 
     def setRelativeTransform(self, link, linkTgt, R, t):
         r"""
-        setRelativeTransform(IKObjective self, int link, int linkTgt, double const [3][3] R, double const [3] t)
+        setRelativeTransform(IKObjective self, int link, int linkTgt, double const [9] R, double const [3] t)
 
 
         Sets a fixed-transform constraint (R,t) relative to linkTgt.  
@@ -5649,7 +5877,7 @@ class IKObjective(object):
 
     def setFixedRotConstraint(self, R):
         r"""
-        setFixedRotConstraint(IKObjective self, double const [3][3] R)
+        setFixedRotConstraint(IKObjective self, double const [9] R)
 
 
         Manual: Sets a fixed rotation constraint.  
@@ -5719,7 +5947,7 @@ class IKObjective(object):
 
     def transform(self, R, t):
         r"""
-        transform(IKObjective self, double const [3][3] R, double const [3] t)
+        transform(IKObjective self, double const [9] R, double const [3] t)
 
 
         Tranforms the target position/rotation of this IK constraint by transform (R,t)  
@@ -5729,7 +5957,7 @@ class IKObjective(object):
 
     def transformLocal(self, R, t):
         r"""
-        transformLocal(IKObjective self, double const [3][3] R, double const [3] t)
+        transformLocal(IKObjective self, double const [9] R, double const [3] t)
 
 
         Tranforms the local position/rotation of this IK constraint by transform (R,t)  
@@ -5739,7 +5967,7 @@ class IKObjective(object):
 
     def matchDestination(self, R, t):
         r"""
-        matchDestination(IKObjective self, double const [3][3] R, double const [3] t)
+        matchDestination(IKObjective self, double const [9] R, double const [3] t)
 
 
         Sets the destination coordinates of this constraint to fit the given target
@@ -5752,7 +5980,7 @@ class IKObjective(object):
 
     def closestMatch(self, R, t):
         r"""
-        closestMatch(IKObjective self, double const [3][3] R, double const [3] t)
+        closestMatch(IKObjective self, double const [9] R, double const [3] t)
 
 
         Gets the transform T that's closest to the transform (R,t) and that satisfies
@@ -6116,7 +6344,7 @@ class GeneralizedIKObjective(object):
 
     def setTransform(self, R, t):
         r"""
-        setTransform(GeneralizedIKObjective self, double const [3][3] R, double const [3] t)
+        setTransform(GeneralizedIKObjective self, double const [9] R, double const [3] t)
 
 
         """
@@ -6947,7 +7175,7 @@ class SimBody(object):
 
     def setTransform(self, R, t):
         r"""
-        setTransform(SimBody self, double const [3][3] R, double const [3] t)
+        setTransform(SimBody self, double const [9] R, double const [3] t)
 
 
         Sets the body's transformation at the current simulation time step (in center-
@@ -6969,7 +7197,7 @@ class SimBody(object):
 
     def setObjectTransform(self, R, t):
         r"""
-        setObjectTransform(SimBody self, double const [3][3] R, double const [3] t)
+        setObjectTransform(SimBody self, double const [9] R, double const [3] t)
 
 
         Sets the body's transformation at the current simulation time step (in object-
@@ -7777,8 +8005,8 @@ def setFrictionConeApproximationEdges(numEdges):
 
 def forceClosure(*args):
     r"""
-    forceClosure(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const & contacts) -> bool
-    forceClosure(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const & contactPositions, std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const & frictionCones) -> bool
+    forceClosure(double * contacts, int m, int n) -> bool
+    forceClosure(doubleMatrix contactPositions, doubleMatrix frictionCones) -> bool
 
 
     Returns true if the list of contact points has force closure.  
@@ -7814,8 +8042,8 @@ def forceClosure(*args):
 
 def forceClosure2D(*args):
     r"""
-    forceClosure2D(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const & contacts) -> bool
-    forceClosure2D(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const & contactPositions, std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const & frictionCones) -> bool
+    forceClosure2D(double * contacts, int m, int n) -> bool
+    forceClosure2D(doubleMatrix contactPositions, doubleMatrix frictionCones) -> bool
 
 
     Returns true if the list of 2D contact points has force closure.  
@@ -7849,8 +8077,8 @@ def forceClosure2D(*args):
 
 def comEquilibrium(*args):
     r"""
-    comEquilibrium(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const & contacts, doubleVector fext, PyObject * com) -> PyObject
-    comEquilibrium(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const & contactPositions, std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const & frictionCones, doubleVector fext, PyObject * com) -> PyObject *
+    comEquilibrium(double * contacts, int m, int n, doubleVector fext, PyObject * com) -> PyObject
+    comEquilibrium(doubleMatrix contactPositions, doubleMatrix frictionCones, doubleVector fext, PyObject * com) -> PyObject *
 
 
     Tests whether the given COM com is stable for the given contacts and the given
@@ -7891,8 +8119,8 @@ def comEquilibrium(*args):
 
 def comEquilibrium2D(*args):
     r"""
-    comEquilibrium2D(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const & contacts, doubleVector fext, PyObject * com) -> PyObject
-    comEquilibrium2D(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const & contactPositions, std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const & frictionCones, doubleVector fext, PyObject * com) -> PyObject *
+    comEquilibrium2D(double * contacts, int m, int n, doubleVector fext, PyObject * com) -> PyObject
+    comEquilibrium2D(doubleMatrix contactPositions, doubleMatrix frictionCones, doubleVector fext, PyObject * com) -> PyObject *
 
 
     Tests whether the given COM com is stable for the given contacts and the given
@@ -7936,8 +8164,8 @@ def comEquilibrium2D(*args):
 
 def supportPolygon(*args):
     r"""
-    supportPolygon(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const & contacts) -> PyObject
-    supportPolygon(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const & contactPositions, std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const & frictionCones) -> PyObject *
+    supportPolygon(double * contacts, int m, int n) -> PyObject
+    supportPolygon(doubleMatrix contactPositions, doubleMatrix frictionCones) -> PyObject *
 
 
     Calculates the support polygon for a given set of contacts and a downward
@@ -7986,8 +8214,8 @@ def supportPolygon(*args):
 
 def supportPolygon2D(*args):
     r"""
-    supportPolygon2D(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const & contacts) -> PyObject
-    supportPolygon2D(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const & contacts, std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const & frictionCones) -> PyObject *
+    supportPolygon2D(double * contacts, int m, int n) -> PyObject
+    supportPolygon2D(doubleMatrix contacts, doubleMatrix frictionCones) -> PyObject *
 
 
     Calculates the support polygon (interval) for a given set of contacts and a
@@ -8023,8 +8251,8 @@ def supportPolygon2D(*args):
 
 def equilibriumTorques(*args):
     r"""
-    equilibriumTorques(RobotModel robot, std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const & contacts, intVector links, doubleVector fext, double norm=0) -> PyObject
-    equilibriumTorques(RobotModel robot, std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const & contacts, intVector links, doubleVector fext, doubleVector internalTorques, double norm=0) -> PyObject
+    equilibriumTorques(RobotModel robot, double * contacts, int m, int n, intVector links, doubleVector fext, double norm=0) -> PyObject
+    equilibriumTorques(RobotModel robot, double * contacts, int m, int n, intVector links, doubleVector fext, doubleVector internalTorques, double norm=0) -> PyObject
 
 
     Solves for the torques / forces that keep the robot balanced against gravity.  
@@ -8042,7 +8270,7 @@ def equilibriumTorques(*args):
     Args:  
 
         robot (RobotModel): the robot, posed in its current configuration
-        contacts (list of N 7-lists): a list of contact points, given as 7-lists
+        contacts (ndarray): an N x 7 array of contact points, each given as 7-lists
             [x,y,z,nx,ny,nz,kFriction]
         links (list of N ints): a list of the links on which those contact points
             lie

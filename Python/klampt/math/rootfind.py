@@ -87,7 +87,7 @@ def setVectorField(pVFObj):
     Sets the vector field object.  
 
     Args:
-        pVFObj (:obj:`object`)
+        pVFObj (:obj:`PyObject *`)
 
     Returns:  
 
@@ -104,7 +104,7 @@ def findRoots(startVals, iter):
     Performs unconstrained root finding for up to iter iterations  
 
     Args:
-        startVals (:obj:`object`)
+        startVals (:obj:`PyObject *`)
         iter (int)
 
     Returns:  
@@ -129,11 +129,11 @@ def findRootsBounded(startVals, boundVals, iter):
     Same as findRoots, but with given bounds (xmin,xmax)  
 
     Args:
-        startVals (:obj:`object`)
-        boundVals (:obj:`object`)
+        startVals (:obj:`PyObject *`)
+        boundVals (:obj:`PyObject *`)
         iter (int)
     Returns:
-        :obj:`object`:
+        :obj:`PyObject *`:
     """
     return _rootfind.findRootsBounded(startVals, boundVals, iter)
 

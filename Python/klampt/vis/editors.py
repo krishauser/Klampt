@@ -1514,9 +1514,7 @@ if _has_qt:
         def load(self):
             from ..io import resource
             from ..model import types
-            type = types.objectToTypes(self.editorObject.value)
-            if isinstance(type,list):
-                type = type[0]
+            type = types.object_to_type(self.editorObject.value)
             res = resource.load(type,'.')
             if res is not None:
                 #TODO: check compatibility with world

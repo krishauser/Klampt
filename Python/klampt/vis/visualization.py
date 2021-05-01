@@ -756,9 +756,7 @@ def debug(*args,**kwargs):
                     name = arg.name
                 if name is None:
                     try:
-                        type = types.objectToTypes(arg)
-                        if isinstance(type,list):
-                            type = type[0]
+                        type = types.object_to_type(arg)
                         name = type + '['+str(itemcount)+']'
                     except ValueError:
                         name = 'item['+str(itemcount)+']'
@@ -1702,7 +1700,7 @@ def screenshotCallback(fn,format='auto',want_depth=False):
 
 def objectToVisType(item,world):
     """Returns the default type for the given item in the current world"""
-    itypes = types.objectToTypes(item,world)
+    itypes = types.object_to_types(item,world)
     if isinstance(itypes,(list,tuple)):
         #ambiguous, still need to figure out what to draw
         validtypes = []
@@ -3801,7 +3799,7 @@ class VisualizationScene:
 
     def renderGL(self,view):
         """Renders the scene in OpenGL"""
-        vp = view.toViewport()
+        vp = view.to_viewport()
         self.labels = []
         world = self.items.get('world',None)
         if world is not None: world=world.item

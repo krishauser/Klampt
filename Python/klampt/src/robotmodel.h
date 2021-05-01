@@ -141,9 +141,9 @@ class RobotModelLink
   ///    (se3 object): a pair (R,t), with R a 9-list and t a 3-list of floats,
   ///    giving the local transform from this link to its parent, in the
   ///    reference (zero) configuration.
-  void getParentTransform(double out[3][3],double out2[3]);
+  void getParentTransform(double out[9],double out2[3]);
   ///Sets transformation (R,t) to the parent link
-  void setParentTransform(const double R[3][3],const double t[3]);
+  void setParentTransform(const double R[9],const double t[3]);
   ///Gets the local rotational / translational axis
   void getAxis(double out[3]);
   ///Sets the local rotational / translational axis
@@ -186,14 +186,14 @@ class RobotModelLink
   ///Returns:
   ///
   ///    (se3 object): a pair (R,t), with R a 9-list and t a 3-list of floats.
-  void getTransform(double out[3][3],double out2[3]);
+  void getTransform(double out[9],double out2[3]);
   ///Sets the link's current transformation (R,t) to the world frame. 
   ///
   ///Note:
   ///
   ///    This does NOT perform inverse kinematics.  The transform is
   ///    overwritten when the robot's setConfig() method is called.
-  void setTransform(const double R[3][3],const double t[3]);
+  void setTransform(const double R[9],const double t[3]);
   ///Returns the velocity of the link's origin given the robot's current joint
   ///configuration and velocities.  Equivalent to getPointVelocity([0,0,0]).
   ///
@@ -318,6 +318,8 @@ class RobotModelDriver
  public:
   RobotModelDriver();
   const char* getName() const;
+  ///Sets the name of the driver
+  void setName(const char* name);
   ///Returns a reference to the driver's robot.
   RobotModel robot();
   ///Currently can be "normal", "affine", "rotation", "translation", or "custom"
@@ -483,7 +485,7 @@ class RobotModel
   ///Returns the kinetic energy at the current config / velocity
   double getKineticEnergy();
   ///Calculates the 3x3 total inertia matrix of the robot
-  void getTotalInertia(double out[3][3]);
+  void getTotalInertia(double** np_out2,int* m,int* n);
   ///Returns the nxn mass matrix B(q).  Takes O(n^2) time
   void getMassMatrix(double** np_out2,int* m,int* n);
   ///Returns the inverse of the nxn mass matrix B(q)^-1. Takes O(n^2) time,
@@ -598,7 +600,7 @@ class RobotModel
   ///Mounts a sub-robot onto a link, with its origin at a given local transform (R,t).
   ///The sub-robot's links will be renamed to subRobot.getName() + ':' + link.getName()
   ///unless subRobot.getName() is '', in which case the link names are preserved.
-  void mount(int link,const RobotModel& subRobot,const double R[3][3],const double t[3]);
+  void mount(int link,const RobotModel& subRobot,const double R[9],const double t[3]);
 
   /// Returns a sensor by index or by name.  If out of bounds or unavailable,
   /// a null sensor is returned (i.e., SimRobotSensor.name() or
@@ -665,9 +667,9 @@ class RigidObjectModel
   ///
   ///    (se3 object): a pair (R,t), with R a 9-list and t a 3-list of floats,
   ///    giving the transform to world coordinates.
-  void getTransform(double out[3][3],double out2[3]);
+  void getTransform(double out[9],double out2[3]);
   ///Sets the rotation / translation (R,t) of the rigid object
-  void setTransform(const double R[3][3],const double t[3]);
+  void setTransform(const double R[9],const double t[3]);
   ///Retrieves the (angular velocity, velocity) of the rigid object.
   ///
   ///Returns:

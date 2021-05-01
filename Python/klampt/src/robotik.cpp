@@ -80,7 +80,7 @@ void IKObjective::setFixedPoints(int link,PyObject* plocals,PyObject* pworlds)
   setRelativePoints(link,-1,plocals,pworlds);
 }
 
-void IKObjective::setFixedTransform(int link,const double R[3][3],const double t[3])
+void IKObjective::setFixedTransform(int link,const double R[9],const double t[3])
 {
   setRelativeTransform(link,-1,R,t);
 }
@@ -109,7 +109,7 @@ void IKObjective::setRelativePoints(int link1,int link2,PyObject* p1s,PyObject* 
   goal.SetFromPoints(localPos,worldPos);
 }
 
-void IKObjective::setRelativeTransform(int link,int linkTgt,const double R[3][3],const double t[3])
+void IKObjective::setRelativeTransform(int link,int linkTgt,const double R[9],const double t[3])
 {
   goal.link = link;
   goal.destLink = linkTgt;
@@ -158,7 +158,7 @@ void IKObjective::setFreeRotConstraint()
   goal.SetFreeRotation();
 }
 
-void IKObjective::setFixedRotConstraint(const double R[3][3])
+void IKObjective::setFixedRotConstraint(const double R[9])
 {
   goal.SetFixedRotation(Matrix3(R));
 }
@@ -189,7 +189,7 @@ void IKObjective::getPositionDirection(double out[3]) const
   goal.direction.get(out);
 }
 
-void IKObjective::getRotation(double out[3][3]) const
+void IKObjective::getRotation(double out[9]) const
 {
   if(goal.rotConstraint == IKGoal::RotFixed) {
     Matrix3 R;
@@ -207,7 +207,7 @@ void IKObjective::getRotationAxis(double out[3],double out2[3]) const
   goal.endRotation.get(out2);
 }
 
-void IKObjective::getTransform(double out[3][3],double out2[3]) const
+void IKObjective::getTransform(double out[9],double out2[3]) const
 {
   if(goal.posConstraint == IKGoal::PosFixed && goal.rotConstraint == IKGoal::RotFixed) {
     RigidTransform T;
@@ -219,7 +219,7 @@ void IKObjective::getTransform(double out[3][3],double out2[3]) const
     PyException("getTransform called on non-fixed transform");
   }
 }
-void IKObjective::transform(const double R[3][3],const double t[3])
+void IKObjective::transform(const double R[9],const double t[3])
 {
   RigidTransform T;
   T.R = Matrix3(R);
@@ -227,7 +227,7 @@ void IKObjective::transform(const double R[3][3],const double t[3])
   goal.Transform(T);
 }
 
-void IKObjective::transformLocal(const double R[3][3],const double t[3]) 
+void IKObjective::transformLocal(const double R[9],const double t[3]) 
 {
   RigidTransform T;
   T.R = Matrix3(R);
@@ -235,7 +235,7 @@ void IKObjective::transformLocal(const double R[3][3],const double t[3])
   goal.TransformLocal(T);
 }
 
-void IKObjective::matchDestination(const double R[3][3],const double t[3])
+void IKObjective::matchDestination(const double R[9],const double t[3])
 {
   RigidTransform T;
   T.R = Matrix3(R);
@@ -243,7 +243,7 @@ void IKObjective::matchDestination(const double R[3][3],const double t[3])
   goal.MatchGoalTransform(T);
 }
 
-void IKObjective::closestMatch(const double R[3][3],const double t[3],double out[3][3],double out2[3])
+void IKObjective::closestMatch(const double R[9],const double t[3],double out[9],double out2[3])
 {
   RigidTransform T,Tout;
   T.R = Matrix3(R);
@@ -322,7 +322,7 @@ void GeneralizedIKObjective::setPoints(PyObject* p1s,PyObject* p2s)
   goal.SetFromPoints(localPos,worldPos);
 }
 
-void GeneralizedIKObjective::setTransform(const double R[3][3],const double t[3])
+void GeneralizedIKObjective::setTransform(const double R[9],const double t[3])
 {
   goal.localPosition.setZero();
   goal.SetFixedPosition(Vector3(t));
@@ -689,7 +689,7 @@ void SampleTransform(const IKGoal& goal,RigidTransform& T)
   }
 }
 
-void SampleTransform(const IKObjective& obj,double out[3][3],double out2[3])
+void SampleTransform(const IKObjective& obj,double out[9],double out2[3])
 {
   RigidTransform T;
   SampleTransform(obj.goal,T);
@@ -697,7 +697,7 @@ void SampleTransform(const IKObjective& obj,double out[3][3],double out2[3])
   T.t.get(out2);
 }
 
-void SampleTransform(const GeneralizedIKObjective& obj,double out[3][3],double out2[3])
+void SampleTransform(const GeneralizedIKObjective& obj,double out[9],double out2[3])
 {
   RigidTransform T;
   SampleTransform(obj.goal,T);

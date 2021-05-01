@@ -32,16 +32,9 @@ def to_numpy(obj,type='auto'):
     """
     global supportedTypes 
     if type == 'auto':
-        otype = types.objectToTypes(obj)
-        if isinstance(otype,(list,tuple)):
-            for t in otype:
-                if t in supportedTypes:
-                    type = t
-                    break
-            if type == 'auto':
+        otype = types.object_to_type(obj,supportedTypes)
+        if otype is None and type=='auto':
                 raise ValueError('obj is not a supported type: '+', '.join(otype))
-        else:
-            type = otype
     if type not in supportedTypes:
         raise ValueError(type+' is not a supported type')
     if type == 'RigidTransform':
@@ -57,7 +50,7 @@ def to_numpy(obj,type='auto'):
             R = to_numpy(obj.getCurrentTransform()[0],'Matrix3')
             t = to_numpy(obj.getCurrentTransform()[1],'Vector3')
             return (np.dot(R,res[0])+t,res[1])
-        return (np.array(obj.vertices).reshape((len(obj.vertices)//3,3)),np.array(obj.indices,dtype=np.int32).reshape((len(obj.indices)//3,3)))
+        return (obj.getVertices(),obj.getIndices())
     elif type == 'PointCloud':
         from klampt import Geometry3D
         if isinstance(obj,Geometry3D):
@@ -66,7 +59,7 @@ def to_numpy(obj,type='auto'):
             t = to_numpy(obj.getCurrentTransform()[1],'Vector3')
             res[:,:3] = np.dot(R,res[:,:3])+t
             return res
-        points = np.array(obj.vertices).reshape((obj.numPoints(),3))
+        points = obj.getPoints()
         if obj.numProperties() == 0:
             return points
         properties = np.array(obj.properties).reshape((obj.numPoints(),obj.numProperties()))
@@ -74,7 +67,7 @@ def to_numpy(obj,type='auto'):
     elif type == 'VolumeGrid':
         bmin = np.array(obj.bbox)[:3]
         bmax = np.array(obj.bbox)[3:]
-        values = np.array(obj.values).reshape((obj.dims[0],obj.dims[1],obj.dims[2]))
+        values = obj.getValues()
         return (bmin,bmax,values)
     elif type == 'Geometry3D':
         if obj.type() == 'PointCloud':
@@ -109,7 +102,7 @@ def from_numpy(obj,type='auto',template=None):
     """
     global supportedTypes 
     if type == 'auto' and template is not None:
-        otype = types.objectToTypes(template)
+        otype = types.object_to_types(template)
         if isinstance(otype,(list,tuple)):
             for t in otype:
                 if t in supportedTypes:
@@ -164,14 +157,8 @@ def from_numpy(obj,type='auto',template=None):
     elif type == 'TriangleMesh':
         from klampt import TriangleMesh
         res = TriangleMesh()
-        vflat = obj[0].flatten()
-        res.vertices.resize(len(vflat))
-        for i,v in enumerate(vflat):
-            res.vertices[i] = float(v)
-        iflat = obj[1].flatten()
-        res.indices.resize(len(iflat))
-        for i,v in enumerate(iflat):
-            res.indices[i] = int(v)
+        res.setVertices(obj[0])
+        res.setIndices(obj[1])
         return res
     elif type == 'PointCloud':
         from klampt import PointCloud
@@ -180,7 +167,7 @@ def from_numpy(obj,type='auto',template=None):
         points = obj[:,:3]
         properties = obj[:,3:]
         res = PointCloud()
-        res.setPoints(points.shape[0],points.flatten())
+        res.setPoints(points)
         if template is not None:
             if len(template.propertyNames) != properties.shape[1]:
                 raise ValueError("Template object doesn't have the same properties as the numpy object")
@@ -211,10 +198,7 @@ def from_numpy(obj,type='auto',template=None):
         res.dims.append(values.shape[0])
         res.dims.append(values.shape[1])
         res.dims.append(values.shape[2])
-        vflat = values.flatten()
-        res.values.resize(len(vflat))
-        for i,v in enumerate(vflat):
-            res.values[i] = v
+        res.setValues(values)
         return res
     elif type == 'Group':
         from klampt import Geometry3D

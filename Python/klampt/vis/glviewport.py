@@ -45,14 +45,6 @@ class GLViewport:
     def contains(self,x,y):
         return x >= self.x and y >= self.y and x < self.x + self.w and y < self.y + self.h
 
-    def setTransform(self,T,convention='standard'):
-        """Deprecated soon: use set_transform"""
-        self.set_transform(T,convention)
-
-    def getTransform(self,convention='standard'):
-        """Deprecated soon: use get_transform"""
-        return self.get_transform(convention)
-
     def set_transform(self,T,convention='standard'):
         """Sets the pose of the camera, with T given in world coordinates.
 
@@ -67,7 +59,6 @@ class GLViewport:
         else:
             xzflip = [1,0,0,  0,-1,0,  0,0,-1]
             self.camera.set_matrix((so3.mul(T[0],xzflip),T[1]))
-
 
     def get_transform(self,convention='standard'):
         """Gets the pose of the camera, with T given in world coordinates.
@@ -96,10 +87,6 @@ class GLViewport:
         if radius*3 > self.clippingplanes[1]:
             zmax =radius*3.5
         self.clippingplanes = (zmin,zmax)
-
-    def toViewport(self):
-        """Deprecated soon: use to_viewport."""
-        return self.to_viewport()
 
     def to_viewport(self):
         """Returns a Klampt C++ Viewport() instance corresponding to this view.
@@ -155,11 +142,6 @@ class GLViewport:
         x = u*self.w + (self.x + self.w/2)
         y = (self.y + self.h/2) - v*self.w
         return (x,y,-ploc[2])
-
-    def setCurrentGL(self):
-        """Deprecated soon: use set_current_GL"""
-        warnings.warn("setCurrentGL will be deprecated in the next version of Klampt",DeprecationWarning)
-        self.set_current_GL()
 
     def set_current_GL(self):
         """Sets up the view in the current OpenGL context"""

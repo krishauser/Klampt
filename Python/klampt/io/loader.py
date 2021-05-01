@@ -543,30 +543,6 @@ writers = {'Config':writeVector,
            'StringArray':writeVector,
            }
 
-def autoType(obj,validTypes):
-    """Returns a type string for the Klamp't object obj, restricted
-    to the set of validTypes.  If there are multiple interpretations,
-    the first type in objectToTypes that matches a valid type is
-    returned.
-
-    Args:
-        obj: A Klamp't-compatible object
-        validTypes: a set or dict of possible valid types
-
-    Returns:
-        str or None: The type of the object, or None if no valid type
-        was found
-    """
-    otypes = types.objectToTypes(obj)
-    if isinstance(otypes,list):
-        for otype in otypes:
-            if otype in validTypes:
-                return otype
-        return None
-    else:
-        #only one type
-        return otypes
-
 def write(obj,type):
     """General-purpose write of an arbitrary Klampt object to a str.
 
@@ -580,7 +556,7 @@ def write(obj,type):
     """
     global writers
     if type == 'auto':
-        type = autoType(obj,writers)
+        type = types.object_to_type(obj,writers)
         if type is None:
             raise ValueError("Can't determine a writable type for object of type "+obj.__class__.__name__)
     elif type == 'json':
@@ -681,7 +657,7 @@ def save(obj,type,fn):
 
     if type == 'auto':
         savers_and_writers = list(savers.keys()) + list(writers.keys())
-        type = autoType(obj,savers_and_writers)
+        type = types.object_to_type(obj,savers_and_writers)
         if type is None:
             raise ValueError("Can't determine a savable type for object of type "+obj.__class__.__name__)
     elif type == 'json':

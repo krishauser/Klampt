@@ -210,6 +210,7 @@ class CSpace:
         if self.cspace is None: return {}
         return self.cspace.getStats()
 
+
 class MotionPlan:
     """A motion planner instantiated on a space.  Currently supports
     only kinematic, point-to-point, or point-to-set plans.
@@ -435,8 +436,11 @@ costAcceptingPlanners = set(['prm','rrt','rrt*','prm*','lazyprm*','lazyrrg*'])
 Goal set planners, random-restart, and shortcut planners also support costs.
 """
 
+def configurePlanner(*args,**kwargs):
+    warnings.warn("configurePlanner will be renamed configure_planner in a future version of Klampt",DeprecationWarning)
+    return configure_planner(*args,**kwargs)
 
-def configurePlanner(space,start,goal,edgeCost=None,terminalCost=None,optimizing=True,
+def configure_planner(space,start,goal,edgeCost=None,terminalCost=None,optimizing=True,
     type='auto',stepsize=None,knn=10,
     shortcut='auto',restart='auto',restartIters=1000,pointLocation='auto',
     **otherSettings):

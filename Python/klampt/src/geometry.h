@@ -45,10 +45,18 @@
 struct TriangleMesh
 {
   TriangleMesh();
+  ///Retrieves a view of the vertices as an nx3 Numpy array
+  void getVertices(double** np_view2, int* m, int* n);
+  ///Sets all vertices to the given nx3 Numpy array
+  void setVertices(double* np_array2, int m, int n);
+  ///Retrieves a view of the vertices as an mx3 Numpy array
+  void getIndices(int** np_view2, int* m, int* n);
+  ///Sets all indices to the given mx3 Numpy array
+  void setIndices(int* np_array2, int m, int n);
   ///Translates all the vertices by v=v+t
   void translate(const double t[3]);
   ///Transforms all the vertices by the rigid transform v=R*v+t
-  void transform(const double R[3][3],const double t[3]);
+  void transform(const double R[9],const double t[3]);
 
   std::vector<int> indices;
   std::vector<double> vertices;
@@ -69,6 +77,10 @@ struct ConvexHull
   ConvexHull();
   ///Returns the # of points
   int numPoints() const; 
+  ///Retrieves a view of the points as an nx3 Numpy array
+  void getPoints(double** np_view2, int* m, int* n);
+  ///Sets all points to the given nx3 Numpy array
+  void setPoints(double* np_array2, int m, int n);
   ///Adds a point
   void addPoint(const double pt[3]);
   ///Retrieves a point
@@ -76,7 +88,7 @@ struct ConvexHull
   ///Translates all the vertices by v=v+t
   void translate(const double t[3]);
   ///Transforms all the vertices by the rigid transform v=R*v+t
-  void transform(const double R[3][3],const double t[3]);
+  void transform(const double R[9],const double t[3]);
 
   std::vector<double> points;
 };
@@ -164,9 +176,9 @@ struct PointCloud
   int numPoints() const;
   ///Returns the number of properties
   int numProperties() const;
-  ///Retrieves all the points as an nx3 array
+  ///Retrieves a view of the points as an nx3 Numpy array
   void getPoints(double** np_view2, int* m, int* n);
-  ///Sets all the points to the given nx3 array
+  ///Sets all the points to the given nx3 Numpy array
   void setPoints(double* np_array2, int m, int n);
   ///Adds a point. Sets all its properties to 0.  Returns the index.
   int addPoint(const double p[3]);
@@ -197,7 +209,7 @@ struct PointCloud
   ///Translates all the points by v=v+t
   void translate(const double t[3]);
   ///Transforms all the points by the rigid transform v=R*v+t
-  void transform(const double R[3][3],const double t[3]);
+  void transform(const double R[9],const double t[3]);
   ///Adds the given point cloud to this one.  They must share the same
   ///properties or else an exception is raised
   void join(const PointCloud& pc);
@@ -233,7 +245,7 @@ struct GeometricPrimitive
   void setTriangle(const double a[3],const double b[3],const double c[3]);
   void setPolygon(const std::vector<double>& verts);
   void setAABB(const double bmin[3],const double bmax[3]);
-  void setBox(const double ori[3],const double R[3][3],const double dims[3]);
+  void setBox(const double ori[3],const double R[9],const double dims[3]);
   bool loadString(const char* str);
   std::string saveString() const;
 
@@ -271,6 +283,7 @@ public:
   void set(int i,int j,int k,double value);
   double get(int i,int j,int k);
   void shift(double dv);
+  ///Returns a 3D Numpy array view of the values
   void getValues(double** np_view3, int* m, int* n, int* p);
   void setValues(double* np_array3, int m, int n, int p);
 
@@ -530,9 +543,9 @@ class Geometry3D
   ///supported.
   bool saveFile(const char* fn);
   ///Sets the current transformation (not modifying the underlying data)
-  void setCurrentTransform(const double R[3][3],const double t[3]);
+  void setCurrentTransform(const double R[9],const double t[3]);
   ///Gets the current transformation 
-  void getCurrentTransform(double out[3][3],double out2[3]);
+  void getCurrentTransform(double out[9],double out2[3]);
   ///Translates the geometry data.
   ///Permanently modifies the data and resets any collision data structures.
   void translate(const double t[3]);
@@ -544,10 +557,10 @@ class Geometry3D
   void scale(double sx,double sy,double sz);
   ///Rotates the geometry data.
   ///Permanently modifies the data and resets any collision data structures.
-  void rotate(const double R[3][3]);
+  void rotate(const double R[9]);
   ///Translates/rotates/scales the geometry data.
   ///Permanently modifies the data and resets any collision data structures.
-  void transform(const double R[3][3],const double t[3]);
+  void transform(const double R[9],const double t[3]);
   ///Sets a padding around the base geometry which affects the results of
   ///proximity queries
   void setCollisionMargin(double margin);

@@ -7,6 +7,7 @@ from ..model.trajectory import Trajectory,RobotTrajectory,SO3Trajectory,SE3Traje
 from ..model.multipath import MultiPath
 from ..math import vectorops,so3,se3
 from ..robotsim import WorldModel,RobotModel,RobotModelLink,RigidObjectModel,TerrainModel,IKObjective,Geometry3D,TriangleMesh,PointCloud,GeometricPrimitive,ConvexHull,VolumeGrid
+import warnings
 
 _knownTypes = set(['Value','Vector2','Vector3','Matrix3','Point','Rotation','RigidTransform','Vector','Config',
                 'IntArray','StringArray',
@@ -15,12 +16,12 @@ _knownTypes = set(['Value','Vector2','Vector3','Matrix3','Point','Rotation','Rig
                 'TriangleMesh','PointCloud','VolumeGrid','GeometricPrimitive','ConvexHull','Geometry3D',
                 'WorldModel','RobotModel','RigidObjectModel','TerrainModel'])
 
-def knownTypes():
+def known_types():
     """Returns a set of all known Klampt types"""
     global _knownTypes
     return _knownTypes
 
-def objectToTypes(object,world=None):
+def object_to_types(object,world=None):
     """Returns a string defining the type of the given Python Klamp't object.
     If multiple types could be associated with it, then it returns a list of all
     possible valid types."""
@@ -81,7 +82,7 @@ def objectToTypes(object,world=None):
                     break
             if allequal:
                 return 'Configs'
-            raise ValueError("Sequence of unequal-length types passed to objectToTypes")
+            raise ValueError("Sequence of unequal-length types passed to object_to_types")
         else:
             dtypes = []
             if any(isinstance(v,int) for v in object):
@@ -114,7 +115,35 @@ def objectToTypes(object,world=None):
     elif isinstance(object,(int,float)):
         return 'Value'
     else:
-        raise ValueError("Unknown object of type %s passed to objectToTypes"%(object.__class__.__name__,))
+        raise ValueError("Unknown object of type %s passed to object_to_types"%(object.__class__.__name__,))
+
+def object_to_type(obj,validTypes=None,world=None):
+    """Returns a type string for the Klamp't object obj, restricted
+    to the set of validTypes.  If there are multiple interpretations,
+    the first type in object_to_types that matches a valid type is
+    returned.
+
+    Args:
+        obj: A Klamp't-compatible object
+        validTypes (set, dict, or None): a set or dict of possible valid types.
+            If None, any type is accepted
+
+    Returns:
+        str or None: The type of the object, or None if no valid type
+        was found
+    """
+    otypes = object_to_types(obj,world)
+    if isinstance(otypes,list):
+        if validTypes is None:
+            return otypes[0]
+        for otype in otypes:
+            if otype in validTypes:
+                return otype
+        return None
+    else:
+        #only one type
+        return otypes
+
 
 def make(type,object=None):
     """Makes a default instance of the given type.
@@ -139,8 +168,8 @@ def make(type,object=None):
         elif isinstance(object,RobotModel):
             return RobotTrajectory(object,[0.0],make('Configs',object))
         else:
-            types = objectToTypes(object)
-            if types == 'Transform':
+            types = object_to_types(object)
+            if types == 'RigidTransform':
                 return SE3Trajectory([0.0],make('Configs',object))
             elif 'Matrix3' in types:
                 return SO3Trajectory([0.0],make('Configs',object))
@@ -304,7 +333,7 @@ def transfer(object,source_robot,target_robot,link_map=None):
         return SubRobotModel(target_robot,tlinks)
 
     try:
-        otypes = objectToTypes(object,temp_world)
+        otypes = object_to_types(object,temp_world)
         if isinstance(otypes,str):
             otypes = [otypes]
     except ValueError:
@@ -335,3 +364,17 @@ def transfer(object,source_robot,target_robot,link_map=None):
         return object.constructor(object.times,transfer(object.milestones,source_robot,target_robot,link_map_indices))
     else:
         return object
+
+
+
+def _deprecated_func(oldName,newName):
+    import sys
+    mod = sys.modules[__name__]
+    f = getattr(mod,newName)
+    def depf(*args,**kwargs):
+        warnings.warn("{} will be deprecated in favor of {} in a future version of Klampt".format(oldName,newName),DeprecationWarning)
+        return f(*args,**kwargs)
+    setattr(mod,oldName,depf)
+
+_deprecated_func("knownTypes","known_types")
+_deprecated_func("objectToTypes","object_to_types")

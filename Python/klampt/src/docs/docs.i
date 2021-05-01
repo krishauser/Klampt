@@ -87,13 +87,14 @@ Gets the per-element color for the given feature.
 
 %feature("docstring") Appearance::setColors "
 
-Sets per-element color for elements of the given feature type.  
+Sets per-element color for elements of the given feature type. Must be an mxn
+array. m is the number of features of that type, and n is either 3 or 4.  
 
-If alpha=True, colors are assumed to be 4*N rgba values, where N is the number
-of features of that type.  
+If n == 4, they are assumed to be rgba values, and  
 
-Otherwise they are assumed to be 3*N rgb values. Only supports feature=VERTICES
-and feature=FACES  
+If n == 3, each row is an rgb value.  
+
+Only supports feature=VERTICES and feature=FACES  
 ";
 
 %feature("docstring") Appearance::drawGL "
@@ -175,8 +176,8 @@ feature can be ALL, VERTICES, EDGES, FACES, EMISSIVE, or SPECULAR.
 Sets a 2D texture of the given width/height. See :func:`setTexture1D` for valid
 format strings.  
 
-bytes is is given in order left to right, top to bottom if `topdown==True`.
-Otherwise, it is given in order left to right, bottom to top.  
+bytes is given in top to bottom order if `topdown==True`. Otherwise, it is given
+in order bottom to top.  
 ";
 
 %feature("docstring") Appearance::getDraw "
@@ -340,6 +341,11 @@ Attributes:
 C++ includes: geometry.h
 ";
 
+%feature("docstring") ConvexHull::setPoints "
+
+Sets all points to the given nx3 array.  
+";
+
 %feature("docstring") ConvexHull::translate "
 
 Translates all the vertices by v=v+t.  
@@ -358,6 +364,11 @@ Transforms all the vertices by the rigid transform v=R*v+t.
 %feature("docstring") ConvexHull::getPoint "
 
 Retrieves a point.  
+";
+
+%feature("docstring") ConvexHull::getPoints "
+
+Retrieves a view of the points as an nx3 array.  
 ";
 
 %feature("docstring") ConvexHull::ConvexHull "
@@ -1988,7 +1999,7 @@ Sets all the points to the given nx3 array.
 
 %feature("docstring") PointCloud::getPoints "
 
-Retrieves all the points as an nx3 array.  
+Retrieves a view of the points as an nx3 array.  
 ";
 
 // File: classPointPoser.xml
@@ -2603,6 +2614,11 @@ C++ includes: robotmodel.h
 Returns the indices of the driver's affected links.  
 ";
 
+%feature("docstring") RobotModelDriver::setVelocity "
+
+Sets the robot's velocity to correspond to the given driver velocity value.  
+";
+
 %feature("docstring") RobotModelDriver::setValue "
 
 Sets the robot's config to correspond to the given driver value.  
@@ -2618,9 +2634,9 @@ Gets the current driver value from the robot's config.
 Returns the single affected link for \"normal\" links.  
 ";
 
-%feature("docstring") RobotModelDriver::setVelocity "
+%feature("docstring") RobotModelDriver::setName "
 
-Sets the robot's velocity to correspond to the given driver velocity value.  
+Sets the name of the driver.  
 ";
 
 %feature("docstring") RobotModelDriver::getName "
@@ -4018,6 +4034,11 @@ To get all indices as a numpy array::
 C++ includes: geometry.h
 ";
 
+%feature("docstring") TriangleMesh::setVertices "
+
+Sets all vertices to the given nx3 array.  
+";
+
 %feature("docstring") TriangleMesh::TriangleMesh "
 ";
 
@@ -4026,9 +4047,24 @@ C++ includes: geometry.h
 Translates all the vertices by v=v+t.  
 ";
 
+%feature("docstring") TriangleMesh::getIndices "
+
+Retrieves a view of the vertices as an mx3 array.  
+";
+
 %feature("docstring") TriangleMesh::transform "
 
 Transforms all the vertices by the rigid transform v=R*v+t.  
+";
+
+%feature("docstring") TriangleMesh::getVertices "
+
+Retrieves a view of the vertices as an nx3 array.  
+";
+
+%feature("docstring") TriangleMesh::setIndices "
+
+Sets all indices to the given mx3 array.  
 ";
 
 // File: classViewport.xml
@@ -4697,8 +4733,8 @@ destroys internal data structures
 %feature("docstring") forceClosure2D "
 
 Returns true if the list of 2D contact points has force closure. A contact point
-is given by a list of 4 floats, [x,y,theta,k] where (x,y) is the position, theta
-is the normal angle, and k is the coefficient of friction (>= 0)  
+is given by a list of n=4 floats, [x,y,theta,k] where (x,y) is the position,
+theta is the normal angle, and k is the coefficient of friction (>= 0)  
 ";
 
 %feature("docstring") forceClosure2D "
@@ -4737,7 +4773,7 @@ Solves for the torques / forces that keep the robot balanced against gravity.
 Args:  
 
 *   robot: the robot model, posed in its current configuration  
-*   contacts: a list of contact points, given as 7-lists
+*   contacts: an nx7 array of contact points, each given as 7-lists
     [x,y,z,nx,ny,nz,kFriction]  
 *   links: a list of the links on which those contact points lie  
 *   fext: the external force (e.g., gravity)  
@@ -4768,7 +4804,7 @@ The problem being solved is
 Args:  
 
     robot (RobotModel): the robot, posed in its current configuration
-    contacts (list of N 7-lists): a list of contact points, given as 7-lists
+    contacts (ndarray): an N x 7 array of contact points, each given as 7-lists
         [x,y,z,nx,ny,nz,kFriction]
     links (list of N ints): a list of the links on which those contact points
         lie
@@ -4952,9 +4988,9 @@ Returns:
 
 %feature("docstring") forceClosure "
 
-Returns true if the list of contact points has force closure. A contact point is
-given by a list of 7 floats, [x,y,z,nx,ny,nz,k] where (x,y,z) is the position,
-(nx,ny,nz) is the normal, and k is the coefficient of friction (>= 0)  
+Returns true if the array of contact points has force closure. A contact point
+is given by a list of n=7 floats, [x,y,z,nx,ny,nz,k] where (x,y,z) is the
+position, (nx,ny,nz) is the normal, and k is the coefficient of friction (>= 0)  
 ";
 
 %feature("docstring") forceClosure "

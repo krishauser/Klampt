@@ -534,14 +534,12 @@ void GeometricPrimitive::setAABB(const double bmin[3],const double bmax[3])
   copy(bmax,bmax+3,properties.begin()+3);
 }
 
-void GeometricPrimitive::setBox(const double ori[3],const double R[3][3],const double dims[3])
+void GeometricPrimitive::setBox(const double ori[3],const double R[9],const double dims[3])
 {
   type = "Box";
   properties.resize(15);
   copy(ori,ori+3,properties.begin());
-  for(int i=0;i<3;i++)
-    for(int j=0;j<3;j++)
-      properties[3+i*3+j] = R[i][j];
+  copy(R,R+9,properties.begin()+3);
   copy(dims,dims+3,properties.begin()+12);
 }
 
@@ -1097,7 +1095,7 @@ bool Geometry3D::saveFile(const char* fn)
   return geom->Save(fn);
 }
 
-void Geometry3D::setCurrentTransform(const double R[3][3],const double t[3])
+void Geometry3D::setCurrentTransform(const double R[9],const double t[3])
 {
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   if(!geom) return;
@@ -1107,7 +1105,7 @@ void Geometry3D::setCurrentTransform(const double R[3][3],const double t[3])
   geom->SetTransform(T);
 }
 
-void Geometry3D::getCurrentTransform(double out[3][3],double out2[3])
+void Geometry3D::getCurrentTransform(double out[9],double out2[3])
 {
   RigidTransform T;
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
@@ -1128,12 +1126,12 @@ void Geometry3D::scale(double s)
 
 void Geometry3D::scale(double sx,double sy,double sz)
 {
-  double R[3][3]={{sx,0,0},{0,sy,0},{0,0,sz}};
+  double R[9]={sx,0,0,0,sy,0,0,0,sz};
   const double t[3]={0,0,0};
   transform(R,t);
 }
 
-void Geometry3D::rotate(const double R[3][3])
+void Geometry3D::rotate(const double R[9])
 {
   const double t[3]={0,0,0};
   transform(R,t);
@@ -1141,11 +1139,11 @@ void Geometry3D::rotate(const double R[3][3])
 
 void Geometry3D::translate(const double t[3])
 {
-  const double R[3][3]={{1,0,0},{0,1,0},{0,0,1}};
+  const double R[9]={1,0,0,0,1,0,0,0,1};
   transform(R,t);
 }
 
-void Geometry3D::transform(const double R[3][3],const double t[3])
+void Geometry3D::transform(const double R[9],const double t[3])
 {
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   RigidTransform T;
@@ -1760,7 +1758,7 @@ void Appearance::setColors(int feature,float* colors,int m,int n)
       app->faceColors.resize(m,app->faceColor);
       for(int i=0;i<m;i++) {
         for(int k=0;k<n;k++)
-          app->faceColors[i].rgba[k] = colors[i*m+k];
+          app->faceColors[i].rgba[k] = colors[i*n+k];
       }
     }
     break;
@@ -1999,6 +1997,47 @@ void copy(const Matrix& mat,vector<vector<double> >& v)
 TriangleMesh::TriangleMesh()
 {}
 
+void TriangleMesh::getVertices(double** np_view2, int* m, int* n)
+{
+  if(vertices.empty()) {
+    *np_view2 = 0;
+    *m = 0;
+    *n = 0;
+    return;
+  }
+  *np_view2 = &vertices[0];
+  *m = vertices.size()/3;
+  *n = 3;
+}
+
+void TriangleMesh::setVertices(double* np_array2, int m, int n)
+{
+  if(n != 3) throw PyException("Vertex array must be nx3");
+  vertices.resize(m*n);
+  copy(np_array2,np_array2+m*n,&vertices[0]);
+}
+
+void TriangleMesh::getIndices(int** np_view2, int* m, int* n)
+{
+  if(indices.empty()) {
+    *np_view2 = 0;
+    *m = 0;
+    *n = 0;
+    return;
+  }
+  *np_view2 = &indices[0];
+  *m = indices.size()/3;
+  *n = 3;
+}
+
+void TriangleMesh::setIndices(int* np_array2, int m, int n)
+{
+  if(n != 3) throw PyException("Index array must be nx3");
+  indices.resize(m*n);
+  copy(np_array2,np_array2+m*n,&indices[0]);
+}
+
+
 void TriangleMesh::translate(const double t[3])
 {
   for(size_t i=0;i<vertices.size();i+=3) {
@@ -2008,7 +2047,7 @@ void TriangleMesh::translate(const double t[3])
   }
 }
 
-void TriangleMesh::transform(const double R[3][3],const double t[3])
+void TriangleMesh::transform(const double R[9],const double t[3])
 {
   RigidTransform T;
   T.R.set(R);
@@ -2028,6 +2067,27 @@ int ConvexHull::numPoints() const
 {
   return points.size()/3;
 }
+
+void ConvexHull::getPoints(double** np_view2, int* m, int* n)
+{
+  if(points.empty()) {
+    *np_view2 = 0;
+    *m = 0;
+    *n = 0;
+    return;
+  }
+  *np_view2 = &points[0];
+  *m = points.size()/3;
+  *n = 3;
+}
+
+void ConvexHull::setPoints(double* np_array2, int m, int n)
+{
+  if(n != 3) throw PyException("Vertex array must be nx3");
+  points.resize(m*n);
+  copy(np_array2,np_array2+m*n,&points[0]);
+}
+
 
 void ConvexHull::addPoint(const double pt[3])
 {
@@ -2055,7 +2115,7 @@ void ConvexHull::translate(const double t[3])
   }
 }
 
-void ConvexHull::transform(const double R[3][3],const double t[3])
+void ConvexHull::transform(const double R[9],const double t[3])
 {
   RigidTransform T;
   T.R.set(R);
@@ -2094,7 +2154,7 @@ void PointCloud::getPoints(double** pview,int* m,int *n)
   }
   *m = vertices.size()/3;
   *n = 3;
-  *pview = &properties[0];
+  *pview = &vertices[0];
 }
 
 int PointCloud::addPoint(const double p[3])
@@ -2137,7 +2197,9 @@ void PointCloud::addProperty(const std::string& pname,const std::vector<double> 
 {
   int n = numPoints();
   if(int(values.size()) != n) {
-    throw PyException("Invalid size of properties list, must have size #points");
+    stringstream ss;
+    ss<<"Invalid size "<<values.size()<<" of properties list, must have size #points = "<<n;
+    throw PyException(ss.str().c_str());
   }
   assert(values.size() == n);
   size_t m=propertyNames.size();
@@ -2279,7 +2341,7 @@ void PointCloud::translate(const double t[3])
   }
 }
 
-void PointCloud::transform(const double R[3][3],const double t[3])
+void PointCloud::transform(const double R[9],const double t[3])
 {
   RigidTransform T;
   T.R.set(R);
@@ -3119,7 +3181,7 @@ void RobotModelLink::getLocalDirection(const double vworld[3],double vlocal[3])
 }
 
 
-void RobotModelLink::getTransform(double R[3][3],double t[3])
+void RobotModelLink::getTransform(double R[9],double t[3])
 {
   if(index < 0)
     throw PyException("RobotModelLink is invalid");
@@ -3128,7 +3190,7 @@ void RobotModelLink::getTransform(double R[3][3],double t[3])
   link.T_World.t.get(t);
 }
 
-void RobotModelLink::setTransform(const double R[3][3],const double t[3])
+void RobotModelLink::setTransform(const double R[9],const double t[3])
 {
   if(index < 0)
     throw PyException("RobotModelLink is invalid");
@@ -3139,7 +3201,7 @@ void RobotModelLink::setTransform(const double R[3][3],const double t[3])
     robotPtr->geometry[index]->SetTransform(link.T_World);
 }
 
-void RobotModelLink::getParentTransform(double R[3][3],double t[3])
+void RobotModelLink::getParentTransform(double R[9],double t[3])
 {
   if(index < 0)
     throw PyException("RobotModelLink is invalid");
@@ -3148,7 +3210,7 @@ void RobotModelLink::getParentTransform(double R[3][3],double t[3])
   link.T0_Parent.t.get(t);
 }
 
-void RobotModelLink::setParentTransform(const double R[3][3],const double t[3])
+void RobotModelLink::setParentTransform(const double R[9],const double t[3])
 {
   if(index < 0)
     throw PyException("RobotModelLink is invalid");
@@ -3373,7 +3435,6 @@ const char* RobotModelDriver::getName() const
   return robotPtr->driverNames[index].c_str();
 }
 
-/*
 void RobotModelDriver::setName(const char* name)
 {
   if(index < 0) {
@@ -3381,8 +3442,6 @@ void RobotModelDriver::setName(const char* name)
   }
   robotPtr->driverNames[index] = name;
 }
-*/
-
 
 const char* RobotModelDriver::getType()
 {
@@ -3955,13 +4014,14 @@ double RobotModel::getKineticEnergy()
   return robot->GetKineticEnergy();
 }
 
-void RobotModel::getTotalInertia(double out[3][3])
+void RobotModel::getTotalInertia(double** np_out2,int* m,int* n)
 {
-  if(!robot) throw PyException("RobotModel is empty");
+  Matrix Htemp;
+  MakeNumpyArray(np_out2,m,n,3,3,Htemp);
   Matrix3 H = robot->GetTotalInertia();
   for(int i=0;i<3;i++) {
     for(int j=0;j<3;j++) 
-      out[i][j] = H(i,j);
+      Htemp(i,j) = H(i,j);
   }
 }
 
@@ -4103,7 +4163,7 @@ void RobotModel::reduce(const RobotModel& fullRobot,std::vector<int>& out)
   fullRobot.robot->Reduce(*robot,out);
 }
 
-void RobotModel::mount(int link,const RobotModel& subRobot,const double R[3][3],const double t[3])
+void RobotModel::mount(int link,const RobotModel& subRobot,const double R[9],const double t[3])
 {
   if(!robot) throw PyException("RobotModel is empty");
   RigidTransform T;
@@ -4278,7 +4338,7 @@ void RigidObjectModel::setContactParameters(const ContactParameters& params)
   obj->kDamping = params.kDamping;
 }
 
-void RigidObjectModel::getTransform(double R[3][3],double t[3])
+void RigidObjectModel::getTransform(double R[9],double t[3])
 {
   if(!object) throw PyException("RigidObjectModel is invalid");
   RigidObject* obj=object;
@@ -4286,7 +4346,7 @@ void RigidObjectModel::getTransform(double R[3][3],double t[3])
   obj->T.t.get(t);
 }
 
-void RigidObjectModel::setTransform(const double R[3][3],const double t[3])
+void RigidObjectModel::setTransform(const double R[9],const double t[3])
 {
   if(!object) throw PyException("RigidObjectModel is invalid");
   RigidObject* obj=object;
@@ -4903,7 +4963,7 @@ void SimBody::getVelocity(double out[3],double out2[3])
   for(int i=0;i<3;i++) out2[i] = v[i];
 }
 
-void SimBody::setTransform(const double R[3][3],const double t[3])
+void SimBody::setTransform(const double R[9],const double t[3])
 {
   //out matrix is 3x3 column major, ODE matrices are 4x4 row major
   if(!body) return;
@@ -4911,17 +4971,17 @@ void SimBody::setTransform(const double R[3][3],const double t[3])
   dMatrix3 rot;
   for(int i=0;i<3;i++)
     for(int j=0;j<3;j++)
-      rot[i*4+j] = R[i][j];
+      rot[i*4+j] = R[i+j*3];
   dBodySetRotation(body,rot);
 }
 
-void SimBody::getTransform(double out[3][3],double out2[3])
+void SimBody::getTransform(double out[9],double out2[3])
 {
   //out matrix is 3x3 column major, ODE matrices are 4x4 row major
   if(!body) {
-    for(int i=0;i<3;i++) 
-      for(int j=0;j<3;j++) out[i][j]=Delta(i,j);
+    for(int i=0;i<9;i++) out[i]=0;
     for(int i=0;i<3;i++) out2[i]=0;
+    out[0] = out[4] = out[8] = 1.0;
     return;
   }
   const dReal* t=dBodyGetPosition(body);
@@ -4929,10 +4989,10 @@ void SimBody::getTransform(double out[3][3],double out2[3])
   for(int i=0;i<3;i++) out2[i] = t[i];
   for(int i=0;i<3;i++)
     for(int j=0;j<3;j++)
-      out[i][j] = R[i*4+j];
+      out[i+j*3] = R[i*4+j];
 }
 
-void SimBody::setObjectTransform(const double R[3][3],const double t[3])
+void SimBody::setObjectTransform(const double R[9],const double t[3])
 {
   ODEObjectID id = sim->sim->WorldToODEID(objectID);
   if(id.IsRigidObject()) sim->sim->odesim.object(id.index)->SetTransform(RigidTransform(Matrix3(R),Vector3(t)));
@@ -4940,7 +5000,7 @@ void SimBody::setObjectTransform(const double R[3][3],const double t[3])
   else setTransform(R,t);
 }
 
-void SimBody::getObjectTransform(double out[3][3],double out2[3])
+void SimBody::getObjectTransform(double out[9],double out2[3])
 {
   ODEObjectID id = sim->sim->WorldToODEID(objectID);
   if(id.IsRigidObject()) {
@@ -5765,7 +5825,7 @@ void Viewport::setModelviewMatrix(const double M[16])
   copy(&M[0],&M[0]+16,xform.begin());
 }
 
-void Viewport::setRigidTransform(const double R[3][3],const double t[3])
+void Viewport::setRigidTransform(const double R[9],const double t[3])
 {
   RigidTransform T;
   T.R.set(R);
@@ -5775,7 +5835,7 @@ void Viewport::setRigidTransform(const double R[3][3],const double t[3])
   m.get(&xform[0]);
 }
 
-void Viewport::getRigidTransform(double out[3][3],double out2[3])
+void Viewport::getRigidTransform(double out[9],double out2[3])
 {
   Matrix4 m;
   m.set(&xform[0]);
@@ -5963,7 +6023,7 @@ void PointPoser::get(double out[3])
 }
 
 
-void PointPoser::setAxes(const double R[3][3])
+void PointPoser::setAxes(const double R[9])
 {
   GLDraw::TransformWidget* tw=dynamic_cast<GLDraw::TransformWidget*>(widgets[index].widget.get());
   tw->T.R.set(R);
@@ -5984,14 +6044,14 @@ TransformPoser::TransformPoser()
   widgets[index].widget = make_shared<GLDraw::TransformWidget>();
 }
 
-void TransformPoser::set(const double R[3][3],const double t[3])
+void TransformPoser::set(const double R[9],const double t[3])
 {
   GLDraw::TransformWidget* tw=dynamic_cast<GLDraw::TransformWidget*>(widgets[index].widget.get());
   tw->T.R.set(R);
   tw->T.t.set(t);
 }
 
-void TransformPoser::get(double out[3][3],double out2[3])
+void TransformPoser::get(double out[9],double out2[3])
 {
   GLDraw::TransformWidget* tw=dynamic_cast<GLDraw::TransformWidget*>(widgets[index].widget.get());
   tw->T.R.get(out);
@@ -6018,7 +6078,7 @@ ObjectPoser::ObjectPoser(RigidObjectModel& object)
   widgets[index].widget = make_shared<RigidObjectPoseWidget>(obj);
 }
 
-void ObjectPoser::set(const double R[3][3],const double t[3])
+void ObjectPoser::set(const double R[9],const double t[3])
 {
   RigidObjectPoseWidget* tw=dynamic_cast<RigidObjectPoseWidget*>(widgets[index].widget.get());
   RigidTransform T;
@@ -6027,7 +6087,7 @@ void ObjectPoser::set(const double R[3][3],const double t[3])
   tw->SetPose(T);
 }
 
-void ObjectPoser::get(double out[3][3],double out2[3])
+void ObjectPoser::get(double out[9],double out2[3])
 {
   RigidObjectPoseWidget* tw=dynamic_cast<RigidObjectPoseWidget*>(widgets[index].widget.get());
   RigidTransform T = tw->Pose();
@@ -6097,7 +6157,7 @@ AABBPoser::AABBPoser()
   widgets[index].widget = make_shared<GLDraw::BoxWidget>(bb);
 }
 
-void AABBPoser::setFrame(const double R[3][3],const double t[3])
+void AABBPoser::setFrame(const double R[9],const double t[3])
 {
   GLDraw::BoxWidget* tw=dynamic_cast<GLDraw::BoxWidget*>(widgets[index].widget.get());
   tw->T.R.set(R);
@@ -6155,7 +6215,7 @@ BoxPoser::BoxPoser()
   widgets[index].widget = make_shared<GLDraw::BoxWidget>(bb);
 }
 
-void BoxPoser::set(const double R[3][3],const double t[3],const double dims[3])
+void BoxPoser::set(const double R[9],const double t[3],const double dims[3])
 {
   GLDraw::BoxWidget* tw=dynamic_cast<GLDraw::BoxWidget*>(widgets[index].widget.get());
   tw->T.R.set(R);
@@ -6166,7 +6226,7 @@ void BoxPoser::set(const double R[3][3],const double t[3],const double dims[3])
   tw->transformWidget.T.t = tw->T*(0.5*(tw->bb.bmin+tw->bb.bmax));
 }
 
-void BoxPoser::setTransform(const double R[3][3],const double t[3])
+void BoxPoser::setTransform(const double R[9],const double t[3])
 {
   GLDraw::BoxWidget* tw=dynamic_cast<GLDraw::BoxWidget*>(widgets[index].widget.get());
   tw->T.R.set(R);
@@ -6183,7 +6243,7 @@ void BoxPoser::setDims(const double dims[3])
   tw->transformWidget.T.t = tw->T*(0.5*(tw->bb.bmin+tw->bb.bmax));
 }
 
-void BoxPoser::getTransform(double out[3][3],double out2[3])
+void BoxPoser::getTransform(double out[9],double out2[3])
 {
   GLDraw::BoxWidget* tw=dynamic_cast<GLDraw::BoxWidget*>(widgets[index].widget.get());
   tw->transformWidget.T.R.get(out);
@@ -6208,27 +6268,28 @@ void setFrictionConeApproximationEdges(int numEdges)
   gStabilityNumFCEdges = numEdges;
 }
 
-void Convert(const std::vector<std::vector<double > >& contacts,vector<ContactPoint>& cps)
+void Convert(const double* contacts,int m,int n,vector<ContactPoint>& cps)
 {
-  cps.resize(contacts.size());
-  for(size_t i=0;i<contacts.size();i++) {
-    if(contacts[i].size() != 7) throw PyException("Invalid size of contact point, must be in the format (x,y,z,nx,ny,nz,kFriction)");
-    if(contacts[i][6] < 0) throw PyException("Invalid contact point, negative friction coefficient");
-    cps[i].x.set(contacts[i][0],contacts[i][1],contacts[i][2]);
-    cps[i].n.set(contacts[i][3],contacts[i][4],contacts[i][5]);
-    cps[i].kFriction = contacts[i][6];
+  if(n != 7)  throw PyException("Invalid size of contact point, must be in the format (x,y,z,nx,ny,nz,kFriction)");
+  cps.resize(m);
+  for(int i=0;i<m;i+=n) {
+    if(contacts[i+6] < 0) throw PyException("Invalid contact point, negative friction coefficient");
+    cps[i].x.set(contacts[i+0],contacts[i+1],contacts[i+2]);
+    cps[i].n.set(contacts[i+3],contacts[i+4],contacts[i+5]);
+    if(!FuzzyEquals(cps[i].n.normSquared(),1.0,1e-5)) throw PyException("Invalid contact point, non-unit normal");
+    cps[i].kFriction = contacts[i+6];
   }
 }
 
-void Convert(const std::vector<std::vector<double > >& contacts,vector<ContactPoint2D>& cps)
+void Convert(const double* contacts,int m,int n,vector<ContactPoint2D>& cps)
 {
-  cps.resize(contacts.size());
-  for(size_t i=0;i<contacts.size();i++) {
-    if(contacts[i].size() != 4) throw PyException("Invalid size of contact point, must be in the format (x,y,angle,kFriction)");
-    if(contacts[i][3] < 0) throw PyException("Invalid contact point, negative friction coefficient");
-    cps[i].x.set(contacts[i][0],contacts[i][1]);
-    cps[i].n.set(Cos(contacts[i][2]),Sin(contacts[i][2]));
-    cps[i].kFriction = contacts[i][3];
+  if(n != 4) throw PyException("Invalid size of contact point, must be in the format (x,y,angle,kFriction)");
+  cps.resize(m);
+  for(int i=0;i<m;i+=n) {
+    if(contacts[i+3] < 0) throw PyException("Invalid contact point, negative friction coefficient");
+    cps[i].x.set(contacts[i+0],contacts[i+1]);
+    cps[i].n.set(Cos(contacts[i+2]),Sin(contacts[i+2]));
+    cps[i].kFriction = contacts[i+3];
   }
 }
 
@@ -6271,10 +6332,10 @@ void Convert(const std::vector<std::vector<double > >& contactPositions,const st
   }
 }
 
-bool forceClosure(const std::vector<std::vector<double > >& contacts)
+bool forceClosure(double* contacts,int m,int n)
 {
   vector<ContactPoint> cps;
-  Convert(contacts,cps);
+  Convert(contacts,m,n,cps);
   return TestForceClosure(cps,gStabilityNumFCEdges);
 }
 
@@ -6285,10 +6346,10 @@ bool forceClosure(const std::vector<std::vector<double> >& contactPositions,cons
   return TestForceClosure(cps);
 }
 
-bool forceClosure2D(const std::vector<std::vector<double > >& contacts)
+bool forceClosure2D(double* contacts,int m,int n)
 {
   vector<ContactPoint2D> cps;
-  Convert(contacts,cps);
+  Convert(contacts,m,n,cps);
   return TestForceClosure(cps);
 }
 
@@ -6346,11 +6407,11 @@ PyObject* ToPy2(const vector<Vector2>& x)
 }
 
 
-PyObject* comEquilibrium(const std::vector<std::vector<double> >& contacts,const vector<double>& fext,PyObject* com)
+PyObject* comEquilibrium(double* contacts,int m,int n,const vector<double>& fext,PyObject* com)
 {
   if(fext.size() != 3) throw PyException("Invalid external force, must be a 3-list");
   vector<ContactPoint> cps;
-  Convert(contacts,cps);
+  Convert(contacts,m,n,cps);
   if(com == Py_None) {
     //test all 
     bool res=TestAnyCOMEquilibrium(cps,Vector3(fext[0],fext[1],fext[2]),gStabilityNumFCEdges);
@@ -6391,11 +6452,11 @@ PyObject* comEquilibrium(const std::vector<std::vector<double> >& contactPositio
 }
 
 
-PyObject* comEquilibrium2D(const std::vector<std::vector<double> >& contacts,const vector<double>& fext,PyObject* com)
+PyObject* comEquilibrium2D(double* contacts,int m,int n,const vector<double>& fext,PyObject* com)
 {
   if(fext.size() != 2) throw PyException("Invalid external force, must be a 2-list");
   vector<ContactPoint2D> cps;
-  Convert(contacts,cps);
+  Convert(contacts,m,n,cps);
   if(com == Py_None) {
     //test all 
     bool res=TestAnyCOMEquilibrium(cps,Vector2(fext[0],fext[1]));
@@ -6436,10 +6497,10 @@ PyObject* comEquilibrium2D(const std::vector<std::vector<double> >& contactPosit
 }
 
 
-PyObject* supportPolygon(const std::vector<std::vector<double> >& contacts)
+PyObject* supportPolygon(double* contacts,int m,int n)
 {
   vector<ContactPoint> cps;
-  Convert(contacts,cps);
+  Convert(contacts,m,n,cps);
   SupportPolygon sp;
   if(!sp.Set(cps,Vector3(0,0,-1),gStabilityNumFCEdges)) throw PyException("Numerical problem calculating support polygon?");
   if(sp.vertices.empty()) {
@@ -6494,7 +6555,7 @@ PyObject* supportPolygon(const std::vector<std::vector<double> >& contactPositio
 /// 
 /// The return value is a 2-tuple giving the min / max extents of the support polygon.
 /// If they are both infinite, the support polygon is empty.
-PyObject* supportPolygon2D(const std::vector<std::vector<double> >& contacts)
+PyObject* supportPolygon2D(double* contacts,int m,int n)
 {
   throw PyException("2D support polygons not implemented yet");
 }
@@ -6504,7 +6565,7 @@ PyObject* supportPolygon2D(const std::vector<std::vector<double> >& contacts,con
   throw PyException("2D support polygons not implemented yet");
 }
 
-PyObject* equilibriumTorques(const RobotModel& robot,const std::vector<std::vector<double> >& contacts,const std::vector<int>& links,const std::vector<double>& fext,const std::vector<double>& internalTorques,double norm)
+PyObject* equilibriumTorques(const RobotModel& robot,double* contacts,int m,int n,const std::vector<int>& links,const std::vector<double>& fext,const std::vector<double>& internalTorques,double norm)
 {
   if(robot.robot == NULL) throw PyException("Called with empty robot");
   if(fext.size() != 3) throw PyException("Invalid external force, must be a 3-list");
@@ -6514,7 +6575,7 @@ PyObject* equilibriumTorques(const RobotModel& robot,const std::vector<std::vect
   }
   vector<ContactPoint> cps;
   CustomContactFormation formation;
-  Convert(contacts,cps);
+  Convert(contacts,m,n,cps);
   formation.links = links;
   formation.contacts.resize(cps.size());
   for(size_t i=0;i<cps.size();i++)
@@ -6532,10 +6593,10 @@ PyObject* equilibriumTorques(const RobotModel& robot,const std::vector<std::vect
   return Py_BuildValue("(NN)",ToPy(ts.t),ToPy(ts.f));
 }
 
-PyObject* equilibriumTorques(const RobotModel& robot,const std::vector<std::vector<double> >& contacts,const std::vector<int>& links,const vector<double>& fext,double norm)
+PyObject* equilibriumTorques(const RobotModel& robot,double* contacts,int m,int n,const std::vector<int>& links,const vector<double>& fext,double norm)
 {
   vector<double> internalTorques;
-  return ::equilibriumTorques(robot,contacts,links,fext,internalTorques,norm);
+  return ::equilibriumTorques(robot,contacts,m,n,links,fext,internalTorques,norm);
 }
 
 
