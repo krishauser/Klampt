@@ -11,18 +11,17 @@ const static Real third = 1.0/3.0;
 //m = m+xy^t
 inline void AddOuterProduct(Matrix3& m,const Vector3& x,const Vector3& y)
 {
-  //note that the matrix data variable is column-major, not row major
-  m.data[0][0]+=x.x*y.x;
-  m.data[0][1]+=x.y*y.x;
-  m.data[0][2]+=x.z*y.x;
-
-  m.data[1][0]+=x.x*y.y;
-  m.data[1][1]+=x.y*y.y;
-  m.data[1][2]+=x.z*y.y;
-
-  m.data[2][0]+=x.x*y.z;
-  m.data[2][1]+=x.y*y.z;
-  m.data[2][2]+=x.z*y.z;
+  m(0,0)+=x.x*y.x;
+  m(0,1)+=x.x*y.y;
+  m(0,2)+=x.x*y.z;
+  
+  m(1,0)+=x.y*y.x;
+  m(1,1)+=x.y*y.y;
+  m(1,2)+=x.y*y.z;
+  
+  m(2,0)+=x.z*y.x;
+  m(2,1)+=x.z*y.y;
+  m(2,2)+=x.z*y.z;
 }
 
 
