@@ -413,6 +413,7 @@ void RobotTestBackend::EndDrag(int x,int y,int button,int modifiers)
     if(allWidgets.hasFocus) {
       allWidgets.EndDrag();
       allWidgets.SetFocus(false);
+      if(allWidgets.requestRedraw) { SendRefresh(); allWidgets.requestRedraw=false; }
     }
   }
 }

@@ -216,6 +216,12 @@ bool RobotLinkPoseWidget::Hover(int x,int y,Camera::Viewport& viewport,double& d
   return (hoverLink != -1);
 }
 
+void RobotLinkPoseWidget::SetHighlight(bool active)
+{
+  Widget::SetHighlight(active);
+  if(!active) hoverLink = -1;
+}
+
 bool RobotLinkPoseWidget::BeginDrag(int x,int y,Camera::Viewport& viewport,double& distance) 
 { 
   if(!Hover(x,y,viewport,distance)) return false;
