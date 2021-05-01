@@ -2,7 +2,8 @@
 of them).
 """
 
-from klampt import *
+from klampt import Geometry3D,GeometricPrimitive
+from klampt.math import vectorops
 
 def box(width,depth,height,center=None,R=None,t=None,world=None,name=None,mass=float('inf'),type='TriangleMesh'):
     """Makes a box with dimensions width x depth x height.  The box is centered
@@ -121,3 +122,30 @@ def sphere(radius,center=None,R=None,t=None,world=None,name=None,mass=float('inf
             geom.transform(R,t)
         tobj.geometry().set(geom)
         return tobj
+
+def bbox(bmin,bmax,R=None,t=None,world=None,name=None,mass=float('inf'),type='TriangleMesh'):
+    """Makes a box from bounds [bmin,bmax].
+
+    Args:
+        bmin (list of 3 floats): the lower corner of the box
+        center (list of 3 floats): the upper corner of the box
+        R,t (se3 transform, optional): if given, the box's world coordinates
+            will be rotated and shifted by this transform.
+        world (WorldModel, optional): If given, then the box will be a
+            RigidObjectModel or TerrainModel will be created in this world
+        name (str, optional): If world is given, this is the name of the object. 
+            Default is 'box'.
+        mass (float, optional): If world is given and this is inf, then a
+            TerrainModel will be created. Otherwise, a RigidObjectModel
+            will be created with automatically determined inertia.
+        type (str, optional): the geometry type.  Defaults to 'TriangleMesh',
+            but also 'GeometricPrimitive' and 'VolumeGrid' are accepted.
+
+    Returns:
+        Geometry3D, RigidObjectModel, or TerrainModel: A representation
+        of the box.  If a world is given, then either a RigidObjectModel
+        or TerrainModel is added to the world and returned.
+    """
+    w,d,h = vectorops.sub(bmax,bmin)
+    center = vectorops.interpolate(bmin,bmax,0.5)
+    return box(w,d,h,center,R,t,world,name,mass,type)
