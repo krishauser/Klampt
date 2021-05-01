@@ -330,17 +330,17 @@ class SimBody
 
   /// Sets the body's transformation at the current
   /// simulation time step (in center-of-mass centered coordinates).
-  void setTransform(const double R[9],const double t[3]);
+  void setTransform(const double R[3][3],const double t[3]);
   /// Gets the body's transformation at the current
   /// simulation time step (in center-of-mass centered coordinates).
-  void getTransform(double out[9],double out2[3]);
+  void getTransform(double out[3][3],double out2[3]);
 
   /// Sets the body's transformation at the current
   /// simulation time step (in object-native coordinates)
-  void setObjectTransform(const double R[9],const double t[3]);
+  void setObjectTransform(const double R[3][3],const double t[3]);
   /// Gets the body's transformation at the current
   /// simulation time step (in object-native coordinates).
-  void getObjectTransform(double out[9],double out2[3]);
+  void getObjectTransform(double out[3][3],double out2[3]);
 
   /// Sets the angular velocity and translational velocity at the current
   /// simulation time step.
@@ -482,12 +482,13 @@ class Simulator
   /// contact on the current time step.  You can set bid=-1 to tell if object 
   /// ``a`` is in contact with any object. 
   bool inContact(int aid,int bid);
-  /// Returns the list of contacts (x,n,kFriction) at the last time step.
-  /// Normals point into object ``a``.  The contact point (x,n,kFriction) is 
+  /// Returns the nx7 list of contacts (x,n,kFriction) at the last time step.
+  /// Normals point into object ``a``.  Each contact point (x,n,kFriction) is 
   /// represented as a 7-element vector
-  void getContacts(int aid,int bid,std::vector<std::vector<double> >& out);
-  /// Returns the list of contact forces on object a at the last time step
-  void getContactForces(int aid,int bid,std::vector<std::vector<double> >& out);
+  void getContacts(int aid,int bid,double** np_out2,int* m,int* n);
+  /// Returns the list of contact forces on object a at the last time step. Result
+  /// is an nx3 array.
+  void getContactForces(int aid,int bid,double** np_out2,int* m,int* n);
   /// Returns the contact force on object a at the last time step.  You can set
   /// bid to -1 to get the overall contact force on object a.
   void contactForce(int aid,int bid,double out[3]);

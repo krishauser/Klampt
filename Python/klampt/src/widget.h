@@ -17,8 +17,8 @@ class Viewport
   bool fromJson(const std::string& str);
   std::string toJson() const;
   void setModelviewMatrix(const double M[16]);
-  void setRigidTransform(const double R[9],const double t[3]);
-  void getRigidTransform(double out[9],double out2[3]);
+  void setRigidTransform(const double R[3][3],const double t[3]);
+  void getRigidTransform(double out[3][3],double out2[3]);
 
   bool perspective;
   float scale;
@@ -65,7 +65,7 @@ class PointPoser : public Widget
   void set(const double t[3]);
   void get(double out[3]);
   ///Sets the reference axes (by default aligned to x,y,z)
-  void setAxes(const double R[9]);
+  void setAxes(const double R[3][3]);
   void enableAxes(bool x,bool y,bool z);
 };
 
@@ -73,8 +73,8 @@ class TransformPoser : public Widget
 {
  public:
   TransformPoser();
-  void set(const double R[9],const double t[3]);
-  void get(double out[9],double out2[3]);
+  void set(const double R[3][3],const double t[3]);
+  void get(double out[3][3],double out2[3]);
   void enableTranslation(bool);
   void enableRotation(bool);
 };
@@ -83,8 +83,8 @@ class ObjectPoser : public Widget
 {
  public:
   ObjectPoser(RigidObjectModel& object);
-  void set(const double R[9],const double t[3]);
-  void get(double out[9],double out2[3]);
+  void set(const double R[3][3],const double t[3]);
+  void get(double out[3][3],double out2[3]);
 };
 
 class RobotPoser : public Widget
@@ -104,7 +104,7 @@ class AABBPoser : public Widget
  public:
   AABBPoser();
   void set(const double bmin[3],const double bmax[3]);
-  void setFrame(const double R[9],const double t[3]);
+  void setFrame(const double R[3][3],const double t[3]);
   void get(double out[3],double out2[3]);
 };
 
@@ -112,10 +112,10 @@ class BoxPoser : public Widget
 {
  public:
   BoxPoser();
-  void set(const double R[9],const double t[3],const double dims[3]);
-  void setTransform(const double R[9],const double t[3]);
+  void set(const double R[3][3],const double t[3],const double dims[3]);
+  void setTransform(const double R[3][3],const double t[3]);
   void setDims(const double dims[3]);
-  void getTransform(double out[9],double out2[3]);
+  void getTransform(double out[3][3],double out2[3]);
   void getDims(double out[3]);
 };
 

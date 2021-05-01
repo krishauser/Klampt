@@ -45,6 +45,14 @@
 #include <unistd.h>
 #endif //WIN32
 
+inline void MakeNumpyArray(double** out,int* m,int* n,int _m,int _n,Matrix& ref)
+{
+  *m = _m;
+  *n = _n;
+  *out = (double*)malloc(_m*_n*sizeof(double));
+  ref.setRef(*out,_m*_n,0,_n,1,_m,_n);
+}
+
 /***************************  GLOBALS: REFERENCING TO KLAMPT C++ CODE ***************************************/
 
 /// Internally used.
@@ -526,12 +534,14 @@ void GeometricPrimitive::setAABB(const double bmin[3],const double bmax[3])
   copy(bmax,bmax+3,properties.begin()+3);
 }
 
-void GeometricPrimitive::setBox(const double ori[3],const double R[9],const double dims[3])
+void GeometricPrimitive::setBox(const double ori[3],const double R[3][3],const double dims[3])
 {
   type = "Box";
   properties.resize(15);
   copy(ori,ori+3,properties.begin());
-  copy(R,R+9,properties.begin()+3);
+  for(int i=0;i<3;i++)
+    for(int j=0;j<3;j++)
+      properties[3+i*3+j] = R[i][j];
   copy(dims,dims+3,properties.begin()+12);
 }
 
@@ -1087,7 +1097,7 @@ bool Geometry3D::saveFile(const char* fn)
   return geom->Save(fn);
 }
 
-void Geometry3D::setCurrentTransform(const double R[9],const double t[3])
+void Geometry3D::setCurrentTransform(const double R[3][3],const double t[3])
 {
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   if(!geom) return;
@@ -1097,7 +1107,7 @@ void Geometry3D::setCurrentTransform(const double R[9],const double t[3])
   geom->SetTransform(T);
 }
 
-void Geometry3D::getCurrentTransform(double out[9],double out2[3])
+void Geometry3D::getCurrentTransform(double out[3][3],double out2[3])
 {
   RigidTransform T;
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
@@ -1118,16 +1128,12 @@ void Geometry3D::scale(double s)
 
 void Geometry3D::scale(double sx,double sy,double sz)
 {
-  Matrix3 R;
-  R.setZero();
-  R(0,0) = sx;
-  R(1,1) = sy;
-  R(2,2) = sz;
+  double R[3][3]={{sx,0,0},{0,sy,0},{0,0,sz}};
   const double t[3]={0,0,0};
   transform(R,t);
 }
 
-void Geometry3D::rotate(const double R[9])
+void Geometry3D::rotate(const double R[3][3])
 {
   const double t[3]={0,0,0};
   transform(R,t);
@@ -1135,12 +1141,11 @@ void Geometry3D::rotate(const double R[9])
 
 void Geometry3D::translate(const double t[3])
 {
-  Matrix3 R;
-  R.setIdentity();
+  const double R[3][3]={{1,0,0},{0,1,0},{0,0,1}};
   transform(R,t);
 }
 
-void Geometry3D::transform(const double R[9],const double t[3])
+void Geometry3D::transform(const double R[3][3],const double t[3])
 {
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   RigidTransform T;
@@ -1735,31 +1740,27 @@ void Appearance::getColor(int feature,float out[4])
   }
   for(int i=0;i<4;i++) out[i] = c.rgba[i];
 }
-void Appearance::setColors(int feature,const std::vector<float>& colors,bool alpha)
+void Appearance::setColors(int feature,float* colors,int m,int n)
 {
   shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
   if(!app) throw PyException("Invalid appearance");
-  size_t nchannels = 3;
-  if(alpha) nchannels = 4;
-  if(colors.size()%nchannels != 0) 
-    throw PyException("An invalid number of color channels is specified, must be a multiple of 3 or 4 (depending on value of alpha)");
-  size_t n = colors.size()/nchannels;
+  if(n != 3 && n != 4) throw PyException("Color array must have size N x 3 or N x 4");
   switch(feature) {
   case VERTICES:
     {
-      app->vertexColors.resize(n,app->vertexColor);
-      for(size_t i=0;i<n;i++) {
-        for(size_t k=0;k<nchannels;k++)
-          app->vertexColors[i].rgba[k] = colors[i*nchannels+k];
+      app->vertexColors.resize(m,app->vertexColor);
+      for(int i=0;i<m;i++) {
+        for(int k=0;k<n;k++)
+          app->vertexColors[i].rgba[k] = colors[i*n+k];
       }
     }
     break;
   case FACES:
     {
-      app->faceColors.resize(n,app->faceColor);
-      for(size_t i=0;i<n;i++) {
-        for(size_t k=0;k<nchannels;k++)
-          app->faceColors[i].rgba[k] = colors[i*nchannels+k];
+      app->faceColors.resize(m,app->faceColor);
+      for(int i=0;i<m;i++) {
+        for(int k=0;k<n;k++)
+          app->faceColors[i].rgba[k] = colors[i*m+k];
       }
     }
     break;
@@ -1839,12 +1840,12 @@ void Appearance::getElementColor(int feature,int element,float out[4])
     throw PyException("Invalid feature, can only do per-element colors for VERTICES or FACES");
   }
 }
-void Appearance::setTexture1D(int w,const char* format,const std::vector<unsigned char>& bytes)
+void Appearance::setTexture1D(const char* format,unsigned char* bytes,int m)
 {
   throw PyException("Python API for textures not implemented yet");
 }
 
-void Appearance::setTexture2D(int w,int h,const char* format,const std::vector<unsigned char>& bytes,bool topdown)
+void Appearance::setTexture2D(const char* format,unsigned char* bytes,int m,int n,bool topdown)
 {
  throw PyException("Python API for textures not implemented yet");
 }
@@ -2007,7 +2008,7 @@ void TriangleMesh::translate(const double t[3])
   }
 }
 
-void TriangleMesh::transform(const double R[9],const double t[3])
+void TriangleMesh::transform(const double R[3][3],const double t[3])
 {
   RigidTransform T;
   T.R.set(R);
@@ -2054,7 +2055,7 @@ void ConvexHull::translate(const double t[3])
   }
 }
 
-void ConvexHull::transform(const double R[9],const double t[3])
+void ConvexHull::transform(const double R[3][3],const double t[3])
 {
   RigidTransform T;
   T.R.set(R);
@@ -2074,13 +2075,26 @@ PointCloud::PointCloud()
 {}
 int PointCloud::numPoints() const { return vertices.size()/3; }
 int PointCloud::numProperties() const { return propertyNames.size(); }
-void PointCloud::setPoints(int num,const vector<double>& plist)
+void PointCloud::setPoints(double* parray,int m,int n)
 {
+  if(n!=3) throw PyException("Array must be size nx3");
+  int num = m;
   vertices.resize(num*3);
-  assert(plist.size() >= num+3);
-  copy(plist.begin(),plist.begin()+num*3,&vertices[0]);
+  copy(parray,parray+num*3,&vertices[0]);
   properties.resize(num*propertyNames.size());
   fill(properties.begin(),properties.end(),0.0);
+}
+void PointCloud::getPoints(double** pview,int* m,int *n)
+{
+  if(vertices.size()==0) {
+    *m=0;
+    *n=0;
+    *pview=NULL;
+    return;
+  }
+  *m = vertices.size()/3;
+  *n = 3;
+  *pview = &properties[0];
 }
 
 int PointCloud::addPoint(const double p[3])
@@ -2265,7 +2279,7 @@ void PointCloud::translate(const double t[3])
   }
 }
 
-void PointCloud::transform(const double R[9],const double t[3])
+void PointCloud::transform(const double R[3][3],const double t[3])
 {
   RigidTransform T;
   T.R.set(R);
@@ -2373,6 +2387,21 @@ void VolumeGrid::shift(double dv)
 {
   for(vector<double>::iterator i=values.begin();i!=values.end();i++)
     *i += dv;
+}
+
+void VolumeGrid::getValues(double** out, int* m, int* n, int* p)
+{
+  if(dims.empty()) throw PyException("VolumeGrid was not initialized yet");
+  *m = dims[0];
+  *n = dims[1];
+  *p = dims[2];
+  *out = &values[0];
+}
+
+void VolumeGrid::setValues(double* in, int m, int n, int p)
+{
+  resize(m,n,p);
+  copy(in,in+m*n*p,&values[0]);
 }
 
 
@@ -3090,7 +3119,7 @@ void RobotModelLink::getLocalDirection(const double vworld[3],double vlocal[3])
 }
 
 
-void RobotModelLink::getTransform(double R[9],double t[3])
+void RobotModelLink::getTransform(double R[3][3],double t[3])
 {
   if(index < 0)
     throw PyException("RobotModelLink is invalid");
@@ -3099,7 +3128,7 @@ void RobotModelLink::getTransform(double R[9],double t[3])
   link.T_World.t.get(t);
 }
 
-void RobotModelLink::setTransform(const double R[9],const double t[3])
+void RobotModelLink::setTransform(const double R[3][3],const double t[3])
 {
   if(index < 0)
     throw PyException("RobotModelLink is invalid");
@@ -3110,7 +3139,7 @@ void RobotModelLink::setTransform(const double R[9],const double t[3])
     robotPtr->geometry[index]->SetTransform(link.T_World);
 }
 
-void RobotModelLink::getParentTransform(double R[9],double t[3])
+void RobotModelLink::getParentTransform(double R[3][3],double t[3])
 {
   if(index < 0)
     throw PyException("RobotModelLink is invalid");
@@ -3119,7 +3148,7 @@ void RobotModelLink::getParentTransform(double R[9],double t[3])
   link.T0_Parent.t.get(t);
 }
 
-void RobotModelLink::setParentTransform(const double R[9],const double t[3])
+void RobotModelLink::setParentTransform(const double R[3][3],const double t[3])
 {
   if(index < 0)
     throw PyException("RobotModelLink is invalid");
@@ -3168,30 +3197,31 @@ void RobotModelLink::setPrismatic(bool prismatic)
   link.type = (prismatic ? RobotLink3D::Prismatic : RobotLink3D::Revolute);
 }
 
-void RobotModelLink::getJacobian(const double p[3],vector<vector<double> >& J)
+void RobotModelLink::getJacobian(const double p[3],double** np_out2,int* m,int* n)
 {
   if(index < 0)
     throw PyException("RobotModelLink is invalid");
+
   Matrix Jmat;
+  MakeNumpyArray(np_out2,m,n,6,int(robotPtr->links.size()),Jmat);
   robotPtr->GetFullJacobian(Vector3(p),index,Jmat);
-  copy(Jmat,J);
 }
 
-void RobotModelLink::getPositionJacobian(const double p[3],vector<vector<double> >& J)
+void RobotModelLink::getPositionJacobian(const double p[3],double** np_out2,int* m,int* n)
 {
   if(index < 0)
     throw PyException("RobotModelLink is invalid");
   Matrix Jmat;
+  MakeNumpyArray(np_out2,m,n,3,int(robotPtr->links.size()),Jmat);
   robotPtr->GetPositionJacobian(Vector3(p),index,Jmat);
-  copy(Jmat,J);
 }
 
-void RobotModelLink::getOrientationJacobian(vector<vector<double> >& J)
+void RobotModelLink::getOrientationJacobian(double** np_out2,int* m,int* n)
 {
   if(index < 0)
     throw PyException("RobotModelLink is invalid");
   Matrix Jmat;
-  Jmat.resize(3,robotPtr->links.size(),Zero);
+  MakeNumpyArray(np_out2,m,n,3,int(robotPtr->links.size()),Jmat);
   int j=index;
   while(j!=-1) {
     Vector3 w;
@@ -3199,7 +3229,6 @@ void RobotModelLink::getOrientationJacobian(vector<vector<double> >& J)
     Jmat(0,j)=w.x; Jmat(1,j)=w.y; Jmat(2,j)=w.z;
     j=robotPtr->parents[j];
   }
-  copy(Jmat,J);
 }
 
 void RobotModelLink::getVelocity(double out[3])
@@ -3267,30 +3296,39 @@ void RobotModelLink::getAngularAcceleration(const std::vector<double>& ddq,doubl
   dw.get(out);
 }
 
-void RobotModelLink::getPositionHessian(const double p[3],std::vector<std::vector<double> >& out,std::vector<std::vector<double> >& out2,std::vector<std::vector<double> >& out3)
+void RobotModelLink::getPositionHessian(const double plocal[3],double** out,int* m, int* n, int* p)
 {
   if(index < 0)
     throw PyException("RobotModelLink is invalid");
+
+  *m = 3;
+  *n = (int)robotPtr->links.size();
+  *p = *n;
+  *out = (double*)malloc(3*(*n)*(*p)*sizeof(double));
   Matrix Hx,Hy,Hz;
+  Hx.setRef(*out,(*n)*(*p),0,*p,1,*n,*p);
+  Hy.setRef(*out + (*n)*(*p),(*n)*(*p),0,*p,1,*n,*p);
+  Hz.setRef(*out + 2*(*n)*(*p),(*n)*(*p),0,*p,1,*n,*p);
   Matrix* H[3] = {&Hx,&Hy,&Hz};
-  robotPtr->GetPositionHessian(Vector3(p),index,H);
-  copy(Hx,out);
-  copy(Hy,out2);
-  copy(Hz,out3);
+  robotPtr->GetPositionHessian(Vector3(plocal),index,H);
 }
 
-void RobotModelLink::getOrientationHessian(std::vector<std::vector<double> >& out,std::vector<std::vector<double> >& out2,std::vector<std::vector<double> >& out3)
+void RobotModelLink::getOrientationHessian(double** out,int* m, int* n, int* p)
 {
   if(index < 0)
     throw PyException("RobotModelLink is invalid");
   Matrix Hx,Hy,Hz;
   Matrix* H[3] = {&Hx,&Hy,&Hz};
   Matrix Hwx,Hwy,Hwz;
+  *m = 3;
+  *n = (int)robotPtr->links.size();
+  *p = *n;
+  *out = (double*)malloc(3*(*n)*(*p)*sizeof(double));
+  Hwx.setRef(*out,(*n)*(*p),0,*p,1,*n,*p);
+  Hwy.setRef(*out + (*n)*(*p),(*n)*(*p),0,*p,1,*n,*p);
+  Hwz.setRef(*out + 2*(*n)*(*p),(*n)*(*p),0,*p,1,*n,*p);
   Matrix* Hw[3] = {&Hwx,&Hwy,&Hwz};
   robotPtr->GetJacobianDeriv(Vector3(0.0),index,Hw,H);
-  copy(Hwx,out);
-  copy(Hwy,out2);
-  copy(Hwz,out3);
 }
 
 void RobotModelLink::drawLocalGL(bool keepAppearance)
@@ -3889,12 +3927,12 @@ void RobotModel::getComVelocity(double out[3])
   dcm.get(out);
 }
 
-void RobotModel::getComJacobian(std::vector<std::vector<double> >& out)
+void RobotModel::getComJacobian(double** out,int* m,int* n)
 {
   if(!robot) throw PyException("RobotModel is empty");
   Matrix J;
+  MakeNumpyArray(out,m,n,3,(int)robot->links.size(),J);
   robot->GetCOMJacobian(J);
-  copy(J,out);
 }
 
 void RobotModel::getLinearMomentum(double out[3])
@@ -3917,22 +3955,21 @@ double RobotModel::getKineticEnergy()
   return robot->GetKineticEnergy();
 }
 
-void RobotModel::getTotalInertia(std::vector<std::vector<double> >& out)
+void RobotModel::getTotalInertia(double out[3][3])
 {
   if(!robot) throw PyException("RobotModel is empty");
   Matrix3 H = robot->GetTotalInertia();
-  out.resize(3);
   for(int i=0;i<3;i++) {
-    out[i].resize(3);
     for(int j=0;j<3;j++) 
       out[i][j] = H(i,j);
   }
 }
 
-void RobotModel::getMassMatrix(std::vector<std::vector<double> >& B)
+void RobotModel::getMassMatrix(double** B,int* m,int* n)
 {
   if(!robot) throw PyException("RobotModel is empty");
   Matrix Bmat;
+  MakeNumpyArray(B,m,n,(int)robot->links.size(),(int)robot->links.size(),Bmat);
   /*
   if(dirty_dynamics) {
     robot->UpdateDynamics();
@@ -3942,13 +3979,13 @@ void RobotModel::getMassMatrix(std::vector<std::vector<double> >& B)
   */
   NewtonEulerSolver ne(*robot);
   ne.CalcKineticEnergyMatrix(Bmat);
-  copy(Bmat,B);
 }
 
-void RobotModel::getMassMatrixInv(std::vector<std::vector<double> >& Binv)
+void RobotModel::getMassMatrixInv(double** Binv,int* m,int* n)
 {
   if(!robot) throw PyException("RobotModel is empty");
   Matrix Bmatinv;
+  MakeNumpyArray(Binv,m,n,(int)robot->links.size(),(int)robot->links.size(),Bmatinv);
   /*
   if(dirty_dynamics) {
     robot->UpdateDynamics();
@@ -3962,40 +3999,39 @@ void RobotModel::getMassMatrixInv(std::vector<std::vector<double> >& Binv)
   */
   NewtonEulerSolver ne(*robot);
   ne.CalcKineticEnergyMatrixInverse(Bmatinv);
-  copy(Bmatinv,Binv);
 }
 
-void RobotModel::getMassMatrixDeriv(int i,std::vector<std::vector<double> >& out)
+void RobotModel::getMassMatrixDeriv(int i,double** dB,int* m,int* n)
 {
   if(!robot) throw PyException("RobotModel is empty");
   Matrix Bmat;
+  MakeNumpyArray(dB,m,n,(int)robot->links.size(),(int)robot->links.size(),Bmat);
   if(dirty_dynamics) {
     robot->UpdateDynamics();
     dirty_dynamics = false;
   }
   robot->GetKineticEnergyMatrixDeriv(i,Bmat);
-  copy(Bmat,out);
 }
 
-void RobotModel::getMassMatrixTimeDeriv(std::vector<std::vector<double> >& out)
+void RobotModel::getMassMatrixTimeDeriv(double** dB,int* m,int* n)
 {
   if(!robot) throw PyException("RobotModel is empty");
   Matrix Bmat;
+  MakeNumpyArray(dB,m,n,(int)robot->links.size(),(int)robot->links.size(),Bmat);
   if(dirty_dynamics) {
     robot->UpdateDynamics();
     dirty_dynamics = false;
   }
   robot->GetKineticEnergyMatrixTimeDeriv(Bmat);
-  copy(Bmat,out);
 }
 
-void RobotModel::getCoriolisForceMatrix(std::vector<std::vector<double> >& C)
+void RobotModel::getCoriolisForceMatrix(double** C,int* m,int* n)
 {
   if(!robot) throw PyException("RobotModel is empty");
   Matrix Cmat;
+  MakeNumpyArray(C,m,n,(int)robot->links.size(),(int)robot->links.size(),Cmat);
   robot->UpdateDynamics();
   robot->GetCoriolisForceMatrix(Cmat);
-  copy(Cmat,C);
 }
 
 void RobotModel::getCoriolisForces(std::vector<double>& C)
@@ -4067,7 +4103,7 @@ void RobotModel::reduce(const RobotModel& fullRobot,std::vector<int>& out)
   fullRobot.robot->Reduce(*robot,out);
 }
 
-void RobotModel::mount(int link,const RobotModel& subRobot,const double R[9],const double t[3])
+void RobotModel::mount(int link,const RobotModel& subRobot,const double R[3][3],const double t[3])
 {
   if(!robot) throw PyException("RobotModel is empty");
   RigidTransform T;
@@ -4242,7 +4278,7 @@ void RigidObjectModel::setContactParameters(const ContactParameters& params)
   obj->kDamping = params.kDamping;
 }
 
-void RigidObjectModel::getTransform(double R[9],double t[3])
+void RigidObjectModel::getTransform(double R[3][3],double t[3])
 {
   if(!object) throw PyException("RigidObjectModel is invalid");
   RigidObject* obj=object;
@@ -4250,7 +4286,7 @@ void RigidObjectModel::getTransform(double R[9],double t[3])
   obj->T.t.get(t);
 }
 
-void RigidObjectModel::setTransform(const double R[9],const double t[3])
+void RigidObjectModel::setTransform(const double R[3][3],const double t[3])
 {
   if(!object) throw PyException("RigidObjectModel is invalid");
   RigidObject* obj=object;
@@ -4568,42 +4604,46 @@ void Simulator::contactTorque(int aid,int bid,double res[3])
 }
 
 
-void Simulator::getContacts(int aid,int bid,std::vector<std::vector<double> >& out)
+void Simulator::getContacts(int aid,int bid,double** out,int* m,int* n)
 {
   ODEContactList* c=sim->GetContactList(aid,bid);
   if(!c) {
-    out.resize(0);
+    *out = NULL;
+    *m = 0;
+    *n = 0;
     return;
   }
-  out.resize(c->points.size());
+  Matrix temp;
+  MakeNumpyArray(out,m,n,c->points.size(),7,temp);
   for(size_t i=0;i<c->points.size();i++) {
-    out[i].resize(7);
-    c->points[i].x.get(out[i][0],out[i][1],out[i][2]);
-    c->points[i].n.get(out[i][3],out[i][4],out[i][5]);
-    out[i][6] = c->points[i].kFriction;
+    c->points[i].x.get(temp(i,0),temp(i,1),temp(i,2));
+    c->points[i].n.get(temp(i,3),temp(i,4),temp(i,5));
+    temp(i,6) = c->points[i].kFriction;
     if(bid < aid) {
-      out[i][3] = -out[i][3];
-      out[i][4] = -out[i][4];
-      out[i][5] = -out[i][5];
+      temp(i,3) = -temp(i,3);
+      temp(i,4) = -temp(i,4);
+      temp(i,5) = -temp(i,5);
     }
   }
 }
 
-void Simulator::getContactForces(int aid,int bid,std::vector<std::vector<double> >& out)
+void Simulator::getContactForces(int aid,int bid,double** out,int* m,int* n)
 {
   ODEContactList* c=sim->GetContactList(aid,bid);
   if(!c) {
-    out.resize(0);
+    *out = NULL;
+    *m = 0;
+    *n = 0;
     return;
   }
-  out.resize(c->forces.size());
+  Matrix temp;
+  MakeNumpyArray(out,m,n,c->forces.size(),3,temp);
   for(size_t i=0;i<c->forces.size();i++) {
-    out[i].resize(3);
-    c->forces[i].get(out[i][0],out[i][1],out[i][2]);
+    c->forces[i].get(temp(i,0),temp(i,1),temp(i,2));
     if(bid < aid) {
-      out[i][0] = -out[i][0];
-      out[i][1] = -out[i][1];
-      out[i][2] = -out[i][2];
+      temp(i,0) = -temp(i,0);
+      temp(i,1) = -temp(i,1);
+      temp(i,2) = -temp(i,2);
     }
   }
 }
@@ -4863,7 +4903,7 @@ void SimBody::getVelocity(double out[3],double out2[3])
   for(int i=0;i<3;i++) out2[i] = v[i];
 }
 
-void SimBody::setTransform(const double R[9],const double t[3])
+void SimBody::setTransform(const double R[3][3],const double t[3])
 {
   //out matrix is 3x3 column major, ODE matrices are 4x4 row major
   if(!body) return;
@@ -4871,17 +4911,17 @@ void SimBody::setTransform(const double R[9],const double t[3])
   dMatrix3 rot;
   for(int i=0;i<3;i++)
     for(int j=0;j<3;j++)
-      rot[i*4+j] = R[i+j*3];
+      rot[i*4+j] = R[i][j];
   dBodySetRotation(body,rot);
 }
 
-void SimBody::getTransform(double out[9],double out2[3])
+void SimBody::getTransform(double out[3][3],double out2[3])
 {
   //out matrix is 3x3 column major, ODE matrices are 4x4 row major
   if(!body) {
-    for(int i=0;i<9;i++) out[i]=0;
+    for(int i=0;i<3;i++) 
+      for(int j=0;j<3;j++) out[i][j]=Delta(i,j);
     for(int i=0;i<3;i++) out2[i]=0;
-    out[0] = out[4] = out[8] = 1.0;
     return;
   }
   const dReal* t=dBodyGetPosition(body);
@@ -4889,10 +4929,10 @@ void SimBody::getTransform(double out[9],double out2[3])
   for(int i=0;i<3;i++) out2[i] = t[i];
   for(int i=0;i<3;i++)
     for(int j=0;j<3;j++)
-      out[i+j*3] = R[i*4+j];
+      out[i][j] = R[i*4+j];
 }
 
-void SimBody::setObjectTransform(const double R[9],const double t[3])
+void SimBody::setObjectTransform(const double R[3][3],const double t[3])
 {
   ODEObjectID id = sim->sim->WorldToODEID(objectID);
   if(id.IsRigidObject()) sim->sim->odesim.object(id.index)->SetTransform(RigidTransform(Matrix3(R),Vector3(t)));
@@ -4900,7 +4940,7 @@ void SimBody::setObjectTransform(const double R[9],const double t[3])
   else setTransform(R,t);
 }
 
-void SimBody::getObjectTransform(double out[9],double out2[3])
+void SimBody::getObjectTransform(double out[3][3],double out2[3])
 {
   ODEObjectID id = sim->sim->WorldToODEID(objectID);
   if(id.IsRigidObject()) {
@@ -5725,7 +5765,7 @@ void Viewport::setModelviewMatrix(const double M[16])
   copy(&M[0],&M[0]+16,xform.begin());
 }
 
-void Viewport::setRigidTransform(const double R[9],const double t[3])
+void Viewport::setRigidTransform(const double R[3][3],const double t[3])
 {
   RigidTransform T;
   T.R.set(R);
@@ -5735,7 +5775,7 @@ void Viewport::setRigidTransform(const double R[9],const double t[3])
   m.get(&xform[0]);
 }
 
-void Viewport::getRigidTransform(double out[9],double out2[3])
+void Viewport::getRigidTransform(double out[3][3],double out2[3])
 {
   Matrix4 m;
   m.set(&xform[0]);
@@ -5923,7 +5963,7 @@ void PointPoser::get(double out[3])
 }
 
 
-void PointPoser::setAxes(const double R[9])
+void PointPoser::setAxes(const double R[3][3])
 {
   GLDraw::TransformWidget* tw=dynamic_cast<GLDraw::TransformWidget*>(widgets[index].widget.get());
   tw->T.R.set(R);
@@ -5944,14 +5984,14 @@ TransformPoser::TransformPoser()
   widgets[index].widget = make_shared<GLDraw::TransformWidget>();
 }
 
-void TransformPoser::set(const double R[9],const double t[3])
+void TransformPoser::set(const double R[3][3],const double t[3])
 {
   GLDraw::TransformWidget* tw=dynamic_cast<GLDraw::TransformWidget*>(widgets[index].widget.get());
   tw->T.R.set(R);
   tw->T.t.set(t);
 }
 
-void TransformPoser::get(double out[9],double out2[3])
+void TransformPoser::get(double out[3][3],double out2[3])
 {
   GLDraw::TransformWidget* tw=dynamic_cast<GLDraw::TransformWidget*>(widgets[index].widget.get());
   tw->T.R.get(out);
@@ -5978,7 +6018,7 @@ ObjectPoser::ObjectPoser(RigidObjectModel& object)
   widgets[index].widget = make_shared<RigidObjectPoseWidget>(obj);
 }
 
-void ObjectPoser::set(const double R[9],const double t[3])
+void ObjectPoser::set(const double R[3][3],const double t[3])
 {
   RigidObjectPoseWidget* tw=dynamic_cast<RigidObjectPoseWidget*>(widgets[index].widget.get());
   RigidTransform T;
@@ -5987,7 +6027,7 @@ void ObjectPoser::set(const double R[9],const double t[3])
   tw->SetPose(T);
 }
 
-void ObjectPoser::get(double out[9],double out2[3])
+void ObjectPoser::get(double out[3][3],double out2[3])
 {
   RigidObjectPoseWidget* tw=dynamic_cast<RigidObjectPoseWidget*>(widgets[index].widget.get());
   RigidTransform T = tw->Pose();
@@ -6057,7 +6097,7 @@ AABBPoser::AABBPoser()
   widgets[index].widget = make_shared<GLDraw::BoxWidget>(bb);
 }
 
-void AABBPoser::setFrame(const double R[9],const double t[3])
+void AABBPoser::setFrame(const double R[3][3],const double t[3])
 {
   GLDraw::BoxWidget* tw=dynamic_cast<GLDraw::BoxWidget*>(widgets[index].widget.get());
   tw->T.R.set(R);
@@ -6115,7 +6155,7 @@ BoxPoser::BoxPoser()
   widgets[index].widget = make_shared<GLDraw::BoxWidget>(bb);
 }
 
-void BoxPoser::set(const double R[9],const double t[3],const double dims[3])
+void BoxPoser::set(const double R[3][3],const double t[3],const double dims[3])
 {
   GLDraw::BoxWidget* tw=dynamic_cast<GLDraw::BoxWidget*>(widgets[index].widget.get());
   tw->T.R.set(R);
@@ -6126,7 +6166,7 @@ void BoxPoser::set(const double R[9],const double t[3],const double dims[3])
   tw->transformWidget.T.t = tw->T*(0.5*(tw->bb.bmin+tw->bb.bmax));
 }
 
-void BoxPoser::setTransform(const double R[9],const double t[3])
+void BoxPoser::setTransform(const double R[3][3],const double t[3])
 {
   GLDraw::BoxWidget* tw=dynamic_cast<GLDraw::BoxWidget*>(widgets[index].widget.get());
   tw->T.R.set(R);
@@ -6143,7 +6183,7 @@ void BoxPoser::setDims(const double dims[3])
   tw->transformWidget.T.t = tw->T*(0.5*(tw->bb.bmin+tw->bb.bmax));
 }
 
-void BoxPoser::getTransform(double out[9],double out2[3])
+void BoxPoser::getTransform(double out[3][3],double out2[3])
 {
   GLDraw::BoxWidget* tw=dynamic_cast<GLDraw::BoxWidget*>(widgets[index].widget.get());
   tw->transformWidget.T.R.get(out);

@@ -48,6 +48,8 @@ to_python_types = { 'char const *':'str',
     'double const [9]': "list of 9 floats (so3 element)",
     'double [9]': "list of 9 floats (so3 element)",
     'std::vector< unsigned char,std::allocator< unsigned char > > const':'bytes',
+    'std::vector<(float,std::allocator<(float)>)>':'list of floats',
+    'std::vector<(double,std::allocator<(double)>)>':'list of floats',
     'PyObject': "object"
 }
 

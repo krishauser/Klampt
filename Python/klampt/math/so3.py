@@ -1,21 +1,9 @@
 """Operations for rigid rotations in Klampt.  All rotations are
-represented by a 9-list specifying the entries of the rotation matrix
-in column major form.
-
-In other words, given a 3x3 matrix::
-
-    [a11,a12,a13]
-    [a21,a22,a23]
-    [a31,a32,a33],
-
-Klamp't represents the matrix as a list [a11,a21,a31,a12,a22,a32,a13,a23,a33].
-
-The reasons for this representation are 1) simplicity, and 2) a more
-convenient interface with C code.
-
+represented by a 3x3 numpy array specifying the entries of the rotation matrix.
 """
 
 import math
+import numpy as np
 from . import vectorops
 
 def __str__(R):
@@ -24,44 +12,31 @@ def __str__(R):
 
 def identity():
     """Returns the identity rotation"""
-    return [1.,0.,0.,0.,1.,0.,0.,0.,1.]
+    return np.eye(3)
 
 def inv(R):
     """Inverts the rotation"""
-    Rinv = [R[0],R[3],R[6],R[1],R[4],R[7],R[2],R[5],R[8]]
-    return Rinv
+    return R.T
 
 def apply(R,point):
     """Applies the rotation to a point"""
-    return (R[0]*point[0]+R[3]*point[1]+R[6]*point[2],
-            R[1]*point[0]+R[4]*point[1]+R[7]*point[2],
-            R[2]*point[0]+R[5]*point[1]+R[8]*point[2])
+    return R.dot(point)
 
 def matrix(R):
     """Returns the 3x3 rotation matrix corresponding to R"""
-    return [[R[0],R[3],R[6]],
-            [R[1],R[4],R[7]],
-            [R[2],R[5],R[8]]]
+    return R
 
 def from_matrix(mat):
     """Returns an R corresponding to the 3x3 rotation matrix mat"""
-    R = [mat[0][0],mat[1][0],mat[2][0],mat[0][1],mat[1][1],mat[2][1],mat[0][2],mat[1][2],mat[2][2]]
-    return R
+    return mat
 
 def mul(R1,R2):
     """Multiplies two rotations."""
-    m1=matrix(R1)
-    m2T=matrix(inv(R2))
-    mres = matrix(identity())
-    for i in range(3):
-        for j in range(3):
-            mres[i][j] = vectorops.dot(m1[i],m2T[j])
-    R = from_matrix(mres)
-    return R
+    return np.dot(R1,R2)
 
 def trace(R):
     """Computes the trace of the rotation matrix."""
-    return R[0]+R[4]+R[8]
+    return np.trace(R)
 
 def angle(R):
     """Returns absolute deviation of R from identity"""
@@ -212,13 +187,15 @@ def from_quaternion(q):
     a31 = xz - wy
     a32 = yz + wx
     a33 = 1.0 - (xx + yy)
-    return [a11,a21,a31,a12,a22,a32,a13,a23,a33]
+    return np.array([[a11,a12,a13],[a21,a22,a23],[a31,a32,a33]])
 
 def quaternion(R):
     """Given a Klamp't rotation representation, produces the corresponding
     unit quaternion (w,x,y,z)."""
     tr = trace(R) + 1.0;
-    a11,a21,a31,a12,a22,a32,a13,a23,a33 = R
+    a11,a12,a13 = R[0]
+    a21,a22,a23 = R[1]
+    a31,a32,a33 = R[2]
 
     #If the trace is nonzero, it's a nondegenerate rotation
     if tr > 1e-5:
@@ -277,17 +254,17 @@ def cross_product(w):
     The matrix [w]R is the derivative of the matrix R as it rotates about
     the axis w/||w|| with angular velocity ||w||.
     """
-    return [0.,w[2],-w[1],  -w[2],0.,w[0],  w[1],-w[0],0.]
+    return np.array([[0.,-w[2],w[1]],[w[2],0.,-w[0]],[-w[1],w[0],0.]])
 
 def diag(R):
     """Returns the diagonal of the 3x3 matrix reprsenting the so3 element R."""
-    return [R[0],R[4],R[8]]
+    return np.diag(R)
 
 def deskew(R):
     """If R is a (flattened) cross-product matrix of the 3-vector w, this will
     return w.  Otherwise, it will return a representation w of (R-R^T)/2 (off
     diagonals of R) such that (R-R^T)/2 = cross_product(w). """
-    return [0.5*(R[5]-R[7]),0.5*(R[6]-R[2]),0.5*(R[1]-R[3])]
+    return np.array([0.5*(R[2,1]-R[1,2]),0.5*(R[0,2]-R[2,0]),0.5*(R[1,0]-R[0,1])])
 
 def rotation(axis,angle):
     """Given a unit axis and an angle in radians, returns the rotation
@@ -296,13 +273,13 @@ def rotation(axis,angle):
     sm = math.sin(angle)
 
     #m = s[r]-c[r][r]+rrt = s[r]-c(rrt-I)+rrt = cI + rrt(1-c) + s[r]
-    R = vectorops.mul(cross_product(axis),sm)
+    R = cross_product(axis)*sm
     for i in range(3):
         for j in range(3):
-            R[i*3+j] += axis[i]*axis[j]*(1.-cm)
-    R[0] += cm
-    R[4] += cm
-    R[8] += cm
+            R[i,j] += axis[i]*axis[j]*(1.-cm)
+    R[0,0] += cm
+    R[1,1] += cm
+    R[2,2] += cm
     return R
 
 def canonical(v):
@@ -316,18 +293,19 @@ def canonical(v):
     elif abs(v[0]+1.0) < 1e-5:
         #flip of basis
         R = identity()
-        R[0] = -1.0
-        R[4] = -1.0
+        R[0,0] = -1.0
+        R[1,1] = -1.0
         return R
-    R = list(v) + [0.]*6
+    R = np.empty((3,3))
+    R[:,0] = vlist(v)
     x,y,z = v
     scale = 1.0/(1.0+x);
-    R[3]= -y;
-    R[4]= x + scale*z*z;
-    R[5]= -scale*y*z;
-    R[6]= -z;
-    R[7]= -scale*y*z;
-    R[8]= x + scale*y*y;
+    R[0,1]= -y;
+    R[1,1]= x + scale*z*z;
+    R[2,1]= -scale*y*z;
+    R[0,2]= -z;
+    R[1,2]= -scale*y*z;
+    R[2,2]= x + scale*y*y;
     return R
 
 def align(a,b):
@@ -349,7 +327,7 @@ def align(a,b):
         return rotation(vectorops.mul(v,1.0/vn),math.pi)
     vhat = cross_product(v)
     vhat2 = mul(vhat,vhat)
-    return vectorops.madd(vectorops.add(identity(),vhat),vhat2,1.0/(1.0+c))
+    return identity()+vhat+vhat2*(1.0/(1.0+c))
 
 def vector_rotation(v1,v2):
     """Finds the minimal-angle matrix that rotates v1 to v2.  v1 and v2
@@ -396,14 +374,13 @@ def interpolator(R1,R2):
 
 def det(R):
     """Returns the determinant of the 3x3 matrix R"""
-    m = matrix(R)
-    return m[0][0]*m[1][1]*m[2][2]+m[0][1]*m[1][2]*m[2][0]+m[0][2]*m[1][0]*m[2][1]-m[0][0]*m[1][2]*m[2][1]-m[0][1]*m[1][0]*m[2][2]-m[0][2]*m[1][1]*m[2][0]
+    return np.det(R)
 
 def is_rotation(R,tol=1e-5):
     """Returns true if R is a rotation matrix, i.e. is orthogonal to the given tolerance and has + determinant"""
     RRt = mul(R,inv(R))
-    err = vectorops.sub(RRt,identity())
-    if any(abs(v) > tol for v in err):
+    err = RRt-identity()
+    if any(abs(v) > tol for v in err.flatten()):
         return False
     if det(R) < 0: 
         return False

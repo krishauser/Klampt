@@ -239,8 +239,24 @@ def planToConfig(world,robot,target,
         if space.cspace==None: space.setup()
         sfailures = space.cspace.feasibilityFailures(plan.space.project(q0))
         gfailures = space.cspace.feasibilityFailures(plan.space.project(target))
-        warnings.warn("Start configuration fails {}".format(sfailures))
-        warnings.warn("Goal configuration fails {}".format(gfailures))
+        if sfailures:
+            warnings.warn("Start configuration fails {}".format(sfailures))
+            if 'self collision' in sfailures:
+                robot.setConfig(q0)
+                for i in range(robot.numLinks()):
+                    for j in range(i):
+                        if robot.selfCollisionEnabled(i,j):
+                            if robot.link(i).geometry().collides(robot.link(j).geometry()):
+                                print("  Links {} and {} collide".format(robot.link(i).getName(),robot.link(j).getName()))
+        if gfailures:
+            warnings.warn("Goal configuration fails {}".format(gfailures))
+            if 'self collision' in gfailures:
+                robot.setConfig(target)
+                for i in range(robot.numLinks()):
+                    for j in range(i):
+                        if robot.selfCollisionEnabled(i,j):
+                            if robot.link(i).geometry().collides(robot.link(j).geometry()):
+                                print("  Links {} and {} collide".format(robot.link(i).getName(),robot.link(j).getName()))
         return None
     return plan
 

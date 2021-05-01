@@ -15,7 +15,13 @@
 #include "pyconvert.h"
 
 //defined in robotsim.cpp
-void copy(const Matrix& mat,vector<vector<double> >& v);
+inline void MakeNumpyArray(double** out,int* m,int* n,int _m,int _n,Matrix& ref)
+{
+  *m = _m;
+  *n = _n;
+  *out = (double*)malloc(_m*_n*sizeof(double));
+  ref.setRef(*out,_m*_n,0,_n,1,_m,_n);
+}
 
 bool PySequence_ToVector3(PyObject* seq,Vector3& val)
 {
@@ -74,7 +80,7 @@ void IKObjective::setFixedPoints(int link,PyObject* plocals,PyObject* pworlds)
   setRelativePoints(link,-1,plocals,pworlds);
 }
 
-void IKObjective::setFixedTransform(int link,const double R[9],const double t[3])
+void IKObjective::setFixedTransform(int link,const double R[3][3],const double t[3])
 {
   setRelativeTransform(link,-1,R,t);
 }
@@ -103,7 +109,7 @@ void IKObjective::setRelativePoints(int link1,int link2,PyObject* p1s,PyObject* 
   goal.SetFromPoints(localPos,worldPos);
 }
 
-void IKObjective::setRelativeTransform(int link,int linkTgt,const double R[9],const double t[3])
+void IKObjective::setRelativeTransform(int link,int linkTgt,const double R[3][3],const double t[3])
 {
   goal.link = link;
   goal.destLink = linkTgt;
@@ -152,7 +158,7 @@ void IKObjective::setFreeRotConstraint()
   goal.SetFreeRotation();
 }
 
-void IKObjective::setFixedRotConstraint(const double R[9])
+void IKObjective::setFixedRotConstraint(const double R[3][3])
 {
   goal.SetFixedRotation(Matrix3(R));
 }
@@ -183,7 +189,7 @@ void IKObjective::getPositionDirection(double out[3]) const
   goal.direction.get(out);
 }
 
-void IKObjective::getRotation(double out[9]) const
+void IKObjective::getRotation(double out[3][3]) const
 {
   if(goal.rotConstraint == IKGoal::RotFixed) {
     Matrix3 R;
@@ -201,7 +207,7 @@ void IKObjective::getRotationAxis(double out[3],double out2[3]) const
   goal.endRotation.get(out2);
 }
 
-void IKObjective::getTransform(double out[9],double out2[3]) const
+void IKObjective::getTransform(double out[3][3],double out2[3]) const
 {
   if(goal.posConstraint == IKGoal::PosFixed && goal.rotConstraint == IKGoal::RotFixed) {
     RigidTransform T;
@@ -213,7 +219,7 @@ void IKObjective::getTransform(double out[9],double out2[3]) const
     PyException("getTransform called on non-fixed transform");
   }
 }
-void IKObjective::transform(const double R[9],const double t[3])
+void IKObjective::transform(const double R[3][3],const double t[3])
 {
   RigidTransform T;
   T.R = Matrix3(R);
@@ -221,7 +227,7 @@ void IKObjective::transform(const double R[9],const double t[3])
   goal.Transform(T);
 }
 
-void IKObjective::transformLocal(const double R[9],const double t[3]) 
+void IKObjective::transformLocal(const double R[3][3],const double t[3]) 
 {
   RigidTransform T;
   T.R = Matrix3(R);
@@ -229,7 +235,7 @@ void IKObjective::transformLocal(const double R[9],const double t[3])
   goal.TransformLocal(T);
 }
 
-void IKObjective::matchDestination(const double R[9],const double t[3])
+void IKObjective::matchDestination(const double R[3][3],const double t[3])
 {
   RigidTransform T;
   T.R = Matrix3(R);
@@ -237,7 +243,7 @@ void IKObjective::matchDestination(const double R[9],const double t[3])
   goal.MatchGoalTransform(T);
 }
 
-void IKObjective::closestMatch(const double R[9],const double t[3],double out[9],double out2[3])
+void IKObjective::closestMatch(const double R[3][3],const double t[3],double out[3][3],double out2[3])
 {
   RigidTransform T,Tout;
   T.R = Matrix3(R);
@@ -316,7 +322,7 @@ void GeneralizedIKObjective::setPoints(PyObject* p1s,PyObject* p2s)
   goal.SetFromPoints(localPos,worldPos);
 }
 
-void GeneralizedIKObjective::setTransform(const double R[9],const double t[3])
+void GeneralizedIKObjective::setTransform(const double R[3][3],const double t[3])
 {
   goal.localPosition.setZero();
   goal.SetFixedPosition(Vector3(t));
@@ -345,7 +351,7 @@ void IKSolver::add(const IKObjective& objective)
 
 void IKSolver::set(int i,const IKObjective& objective)
 {
-  if(i < 0 || i >= objectives.size()) throw PyException("Invalid index specified in set");
+  if(i < 0 || i >= (int)objectives.size()) throw PyException("Invalid index specified in set");
   objectives[i] = objective;
 }
 
@@ -476,7 +482,7 @@ void IKSolver::getResidual(std::vector<double>& out)
   }
 }
 
-void IKSolver::getJacobian(std::vector<std::vector<double> >& out)
+void IKSolver::getJacobian(double** out,int* m,int* n)
 {
   RobotIKFunction f(*robot.robot);
   vector<IKGoal> goals(objectives.size());
@@ -487,13 +493,10 @@ void IKSolver::getJacobian(std::vector<std::vector<double> >& out)
   else f.activeDofs.mapping = activeDofs;
 
   Vector x(f.activeDofs.Size());
-  Matrix J;
   f.GetState(x);
-  J.resize(f.NumDimensions(),x.n);
+  Matrix J;
+  MakeNumpyArray(out,m,n,f.NumDimensions(),x.n,J);
   f.Jacobian(x,J);
-
-  //copy to out
-  ::copy(J,out);
 }
 
 PyObject* IKSolver::solve(int iters,double tol)
@@ -555,7 +558,7 @@ bool IKSolver::solve()
   if(useJointLimits) {
     const Real* usedQmin = (qmin.empty() ? &robot.robot->qMin[0] : &qmin[0]);
     const Real* usedQmax = (qmax.empty() ? &robot.robot->qMax[0] : &qmax[0]);
-    for(size_t i=0;i<robot.robot->q.size();i++) {
+    for(int i=0;i<robot.robot->q.size();i++) {
       if(robot.robot->q(i) < usedQmin[i] || robot.robot->q(i) > usedQmax[i]) {
         if(robot.robot->q(i) < usedQmin[i]-Epsilon || robot.robot->q(i) > usedQmax[i] + Epsilon) 
           printf("IKSolver:: Joint limits on joint %i exceeded: %g <= %g <= %g. Clamping to limits...\n", i,usedQmin[i],robot.robot->q(i),usedQmax[i]);
@@ -651,7 +654,7 @@ void GeneralizedIKSolver::getResidual(std::vector<double>& out)
   throw PyException("Not implemented yet");
 }
 
-void GeneralizedIKSolver::getJacobian(std::vector<std::vector<double> >& out)
+void GeneralizedIKSolver::getJacobian(double** out,int* m, int* n)
 {
   throw PyException("Not implemented yet");
 }
@@ -686,7 +689,7 @@ void SampleTransform(const IKGoal& goal,RigidTransform& T)
   }
 }
 
-void SampleTransform(const IKObjective& obj,double out[9],double out2[3])
+void SampleTransform(const IKObjective& obj,double out[3][3],double out2[3])
 {
   RigidTransform T;
   SampleTransform(obj.goal,T);
@@ -694,7 +697,7 @@ void SampleTransform(const IKObjective& obj,double out[9],double out2[3])
   T.t.get(out2);
 }
 
-void SampleTransform(const GeneralizedIKObjective& obj,double out[9],double out2[3])
+void SampleTransform(const GeneralizedIKObjective& obj,double out[3][3],double out2[3])
 {
   RigidTransform T;
   SampleTransform(obj.goal,T);

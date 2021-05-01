@@ -44,13 +44,13 @@ class IKObjective
   ///Sets a multiple fixed-point constraint
   void setFixedPoints(int link,PyObject* plocals,PyObject* pworlds);
   ///Sets a fixed-transform constraint (R,t)
-  void setFixedTransform(int link,const double R[9],const double t[3]);
+  void setFixedTransform(int link,const double R[3][3],const double t[3]);
   ///Sets a fixed-point constraint relative to link2
   void setRelativePoint(int link1,int link2,const double p1[3],const double p2[3]);
   ///Sets a multiple fixed-point constraint relative to link2
   void setRelativePoints(int link1,int link2,PyObject* p1s,PyObject* p2s);
   ///Sets a fixed-transform constraint (R,t) relative to linkTgt
-  void setRelativeTransform(int link,int linkTgt,const double R[9],const double t[3]);
+  void setRelativeTransform(int link,int linkTgt,const double R[3][3],const double t[3]);
   ///Manual construction
   void setLinks(int link,int link2=-1);
   ///Deprecated: use setFreePosConstraint
@@ -68,7 +68,7 @@ class IKObjective
   ///Manual: Sets a free rotation constraint
   void setFreeRotConstraint();
   ///Manual: Sets a fixed rotation constraint
-  void setFixedRotConstraint(const double R[9]);
+  void setFixedRotConstraint(const double R[3][3]);
   ///Manual: Sets an axial rotation constraint
   void setAxialRotConstraint(const double alocal[3],const double aworld[3]);
   ///Returns the local and global position of the position constraint
@@ -76,25 +76,25 @@ class IKObjective
   ///For linear and planar constraints, returns the direction
   void getPositionDirection(double out[3]) const;
   ///For fixed rotation constraints, returns the orientation
-  void getRotation(double out[9]) const;
+  void getRotation(double out[3][3]) const;
   ///For axis rotation constraints, returns the local and global axes
   void getRotationAxis(double out[3],double out2[3]) const;
   ///For fixed-transform constraints, returns the transform (R,t)
-  void getTransform(double out[9],double out2[3]) const;
+  void getTransform(double out[3][3],double out2[3]) const;
   ///Tranforms the target position/rotation of this IK constraint by transform (R,t)
-  void transform(const double R[9],const double t[3]);
+  void transform(const double R[3][3],const double t[3]);
   ///Tranforms the local position/rotation of this IK constraint by transform (R,t)
-  void transformLocal(const double R[9],const double t[3]);
+  void transformLocal(const double R[3][3],const double t[3]);
 
   ///Sets the destination coordinates of this constraint to fit the given target 
   ///transform.  In other words, if (R,t) is the current link transform, this sets the 
   ///destination position / orientation so that this objective has zero error.  The
   ///current position/rotation constraint types are kept.
-  void matchDestination(const double R[9],const double t[3]);
+  void matchDestination(const double R[3][3],const double t[3]);
 
   ///Gets the transform T that's closest to the transform (R,t) and 
   ///that satisfies the IK goal's constraints.
-  void closestMatch(const double R[9],const double t[3],double out[9],double out2[3]);
+  void closestMatch(const double R[3][3],const double t[3],double out[3][3],double out2[3]);
 
   ///Loads the objective from a Klamp't-native formatted string. For a
   ///more readable but verbose format, try the JSON IO routines
@@ -173,7 +173,7 @@ class IKSolver
   void getResidual(std::vector<double>& out);
   /// Returns a matrix describing the instantaneous derivative of the objective
   /// with respect to the active Dofs
-  void getJacobian(std::vector<std::vector<double> >& out);
+  void getJacobian(double** np_out2,int* m,int* n);
 
   /** Tries to find a configuration that satifies all simultaneous objectives
    * up to the desired tolerance.
@@ -232,7 +232,7 @@ class GeneralizedIKObjective
   GeneralizedIKObjective(const RigidObjectModel& obj,const RigidObjectModel& obj2);
   void setPoint(const double p1[3],const double p2[3]);
   void setPoints(PyObject* p1s,PyObject* p2s);
-  void setTransform(const double R[9],const double t[3]);
+  void setTransform(const double R[3][3],const double t[3]);
 
   RobotModelLink link1,link2;
   RigidObjectModel obj1,obj2;
@@ -261,7 +261,7 @@ class GeneralizedIKSolver
   void getResidual(std::vector<double>& out);
   /// Returns a matrix describing the instantaneous derivative of the objective
   /// with respect to the active parameters
-  void getJacobian(std::vector<std::vector<double> >& out);
+  void getJacobian(double** np_out2,int* m,int* n);
 
   /** Tries to find a configuration that satifies all simultaneous objectives
    * up to the desired tolerance.  
@@ -284,9 +284,9 @@ class GeneralizedIKSolver
 
 ///Returns a transformation (R,t) from link relative to link2, sampled at random from
 ///the space of transforms that satisfies the objective obj.
-void SampleTransform(const IKObjective& obj,double out[9],double out2[3]);
+void SampleTransform(const IKObjective& obj,double out[3][3],double out2[3]);
 ///Returns a transformation (R,t) from link relative to link2, sampled at random from
 ///the space of transforms that satisfies the objective obj.
-void SampleTransform(const GeneralizedIKObjective& obj,double out[9],double out2[3]);
+void SampleTransform(const GeneralizedIKObjective& obj,double out[3][3],double out2[3]);
 
 #endif

@@ -30,9 +30,9 @@ class Robot;
  * Attributes:
  *
  *     mass (float): the actual mass (typically in kg)
- *     com (SWIG-based list of 3 floats): the center of mass position, in
- *         local coordinates.  (Better to use setCom/getCom)
- *     inertia (SWIG-based list of 3 floats or 9 floats): the inertia matrix
+ *     com (list of 3 floats): the center of mass position, in
+ *         local coordinates.
+ *     inertia (list of 3 floats or 9 floats): the inertia matrix
  *         in local coordinates.  If 3 floats, this is a diagonal matrix.
  *         If 9 floats, this gives all entries of the 3x3 inertia matrix
  *         (in column major or row major order, it doesn't matter since
@@ -141,9 +141,9 @@ class RobotModelLink
   ///    (se3 object): a pair (R,t), with R a 9-list and t a 3-list of floats,
   ///    giving the local transform from this link to its parent, in the
   ///    reference (zero) configuration.
-  void getParentTransform(double out[9],double out2[3]);
+  void getParentTransform(double out[3][3],double out2[3]);
   ///Sets transformation (R,t) to the parent link
-  void setParentTransform(const double R[9],const double t[3]);
+  void setParentTransform(const double R[3][3],const double t[3]);
   ///Gets the local rotational / translational axis
   void getAxis(double out[3]);
   ///Sets the local rotational / translational axis
@@ -186,14 +186,14 @@ class RobotModelLink
   ///Returns:
   ///
   ///    (se3 object): a pair (R,t), with R a 9-list and t a 3-list of floats.
-  void getTransform(double out[9],double out2[3]);
+  void getTransform(double out[3][3],double out2[3]);
   ///Sets the link's current transformation (R,t) to the world frame. 
   ///
   ///Note:
   ///
   ///    This does NOT perform inverse kinematics.  The transform is
   ///    overwritten when the robot's setConfig() method is called.
-  void setTransform(const double R[9],const double t[3]);
+  void setTransform(const double R[3][3],const double t[3]);
   ///Returns the velocity of the link's origin given the robot's current joint
   ///configuration and velocities.  Equivalent to getPointVelocity([0,0,0]).
   ///
@@ -223,34 +223,33 @@ class RobotModelLink
   ///
   ///Returns:
   ///
-  ///    (list of 6 lists of floats): the 6xn total Jacobian matrix of the
-  ///    point given by local coordinates plocal.  The matrix is row-major.
+  ///    (6xn array): the 6xn total Jacobian matrix of the
+  ///    point given by local coordinates plocal.  
   ///
   ///    The orientation jacobian is given in the first 3 rows, and is stacked
   ///    on the position jacobian, which is given in the last 3 rows.
-  void getJacobian(const double plocal[3],std::vector<std::vector<double> >& out);
+  void getJacobian(const double plocal[3],double** np_out2,int* m,int* n);
   ///Returns the position jacobian of a point on this link  w.r.t. the robot's
   ///configuration q.
   ///
   ///Returns:
   ///
-  ///    (list of 3 lists of floats): the 3xn Jacobian matrix of the
-  ///    point given by local coordinates plocal.  The matrix is row-major.
+  ///    (3xn array): the 3xn Jacobian matrix of the
+  ///    point given by local coordinates plocal.  
   ///
   ///    This matrix J gives the point's velocity (in world coordinates) via
   ///    np.dot(J,dq), where dq is the robot's joint velocities.
-  void getPositionJacobian(const double plocal[3],std::vector<std::vector<double> >& out);
+  void getPositionJacobian(const double plocal[3],double** np_out2,int* m,int* n);
   ///Returns the orientation jacobian of this link  w.r.t. the robot's
   ///configuration q.
   ///
   ///Returns:
   ///
-  ///    (list of 3 lists of floats): the 3xn orientation Jacobian matrix of 
-  ///    the link.  The matrix is row-major. 
+  ///    (3xn array):: the 3xn orientation Jacobian matrix of the link.  
   ///
   ///    This matrix J gives the link's angular velocity (in world coordinates)
   ///    via np.dot(J,dq), where dq is the robot's joint velocities.
-  void getOrientationJacobian(std::vector<std::vector<double> >& out);
+  void getOrientationJacobian(double** np_out2,int* m,int* n);
   ///Returns the acceleration of the link origin given the robot's current
   ///joint configuration and velocities, and the joint accelerations ddq.
   ///
@@ -283,17 +282,17 @@ class RobotModelLink
   ///
   ///Returns: 
   ///
-  ///    (3-tuple): a triple (Hx,Hy,Hz) of of nxn matrices corresponding,
-  ///    respectively, to the (x,y,z) components of the Hessian.
-  void getPositionHessian(const double plocal[3],std::vector<std::vector<double> >& out,std::vector<std::vector<double> >& out2,std::vector<std::vector<double> >& out3);
+  ///    (3-D array): a 3xnxn array with each of the elements in the first axis
+  ///    corresponding respectively, to the (x,y,z) components of the Hessian.
+  void getPositionHessian(const double plocal[3],double** np_out3,int* m,int* n,int* p);
   ///Returns the Hessians of each orientation component of the link w.r.t the
   ///robot's configuration q.  
   ///
   ///Returns: 
   ///
-  ///    (3-tuple): a triple (Hx,Hy,Hz) of of nxn matrices corresponding,
-  ///    respectively, to the (wx,wy,wz) components of the Hessian.
-  void getOrientationHessian(std::vector<std::vector<double> >& out,std::vector<std::vector<double> >& out2,std::vector<std::vector<double> >& out3);
+  ///    (3-D array): a 3xnxn array with each of the elements in the first axis
+  ///    corresponding, respectively, to the (wx,wy,wz) components of the Hessian.
+  void getOrientationHessian(double** np_out3,int* m,int* n,int* p);
   ///Draws the link's geometry in its local frame.  If keepAppearance=true, the
   ///current Appearance is honored.  Otherwise, just the geometry is drawn.
   void drawLocalGL(bool keepAppearance=true);
@@ -474,9 +473,9 @@ class RobotModel
   ///
   ///Returns:
   ///
-  ///    (list of 3 lists): a 3xn matrix J such that np.dot(J,dq) gives the
+  ///    (3xn array): a 3xn matrix J such that np.dot(J,dq) gives the
   ///    COM velocity at the currene configuration
-  void getComJacobian(std::vector<std::vector<double> >& out);
+  void getComJacobian(double** np_out2,int* m,int* n);
   ///Returns the 3D linear momentum vector
   void getLinearMomentum(double out[3]);
   ///Returns the 3D angular momentum vector
@@ -484,21 +483,21 @@ class RobotModel
   ///Returns the kinetic energy at the current config / velocity
   double getKineticEnergy();
   ///Calculates the 3x3 total inertia matrix of the robot
-  void getTotalInertia(std::vector<std::vector<double> >& out);
+  void getTotalInertia(double out[3][3]);
   ///Returns the nxn mass matrix B(q).  Takes O(n^2) time
-  void getMassMatrix(std::vector<std::vector<double> >& out);
+  void getMassMatrix(double** np_out2,int* m,int* n);
   ///Returns the inverse of the nxn mass matrix B(q)^-1. Takes O(n^2) time,
   ///which is much faster than inverting the result of getMassMatrix
-  void getMassMatrixInv(std::vector<std::vector<double> >& out);
+  void getMassMatrixInv(double** np_out2,int* m,int* n);
   ///Returns the derivative of the nxn mass matrix with respect to q_i. Takes
   ///O(n^3) time
-  void getMassMatrixDeriv(int i,std::vector<std::vector<double> >& out);
+  void getMassMatrixDeriv(int i,double** np_out2,int* m,int* n);
   ///Returns the derivative of the nxn mass matrix with respect to t, given the
   ///robot's current velocity. Takes O(n^4) time
-  void getMassMatrixTimeDeriv(std::vector<std::vector<double> >& out);
+  void getMassMatrixTimeDeriv(double** np_out2,int* m,int* n);
   ///Returns the Coriolis force matrix C(q,dq) for current config and velocity.
   ///Takes O(n^2) time
-  void getCoriolisForceMatrix(std::vector<std::vector<double> >& out);
+  void getCoriolisForceMatrix(double** np_out2,int* m,int* n);
   ///Returns the Coriolis forces C(q,dq)*dq for current config and velocity.
   ///Takes O(n) time, which is faster than computing matrix and doing product.
   ///("Forces" is somewhat of a misnomer; the result is a joint torque vector)
@@ -599,7 +598,7 @@ class RobotModel
   ///Mounts a sub-robot onto a link, with its origin at a given local transform (R,t).
   ///The sub-robot's links will be renamed to subRobot.getName() + ':' + link.getName()
   ///unless subRobot.getName() is '', in which case the link names are preserved.
-  void mount(int link,const RobotModel& subRobot,const double R[9],const double t[3]);
+  void mount(int link,const RobotModel& subRobot,const double R[3][3],const double t[3]);
 
   /// Returns a sensor by index or by name.  If out of bounds or unavailable,
   /// a null sensor is returned (i.e., SimRobotSensor.name() or
@@ -666,9 +665,9 @@ class RigidObjectModel
   ///
   ///    (se3 object): a pair (R,t), with R a 9-list and t a 3-list of floats,
   ///    giving the transform to world coordinates.
-  void getTransform(double out[9],double out2[3]);
+  void getTransform(double out[3][3],double out2[3]);
   ///Sets the rotation / translation (R,t) of the rigid object
-  void setTransform(const double R[9],const double t[3]);
+  void setTransform(const double R[3][3],const double t[3]);
   ///Retrieves the (angular velocity, velocity) of the rigid object.
   ///
   ///Returns:

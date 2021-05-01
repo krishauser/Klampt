@@ -1630,9 +1630,9 @@ Stores mass information for a rigid body or robot link.
 Attributes:  
 
     mass (float): the actual mass (typically in kg)
-    com (SWIG-based list of 3 floats): the center of mass position, in
-        local coordinates.  (Better to use setCom/getCom)
-    inertia (SWIG-based list of 3 floats or 9 floats): the inertia matrix
+    com (list of 3 floats): the center of mass position, in
+        local coordinates.
+    inertia (list of 3 floats or 9 floats): the inertia matrix
         in local coordinates.  If 3 floats, this is a diagonal matrix.
         If 9 floats, this gives all entries of the 3x3 inertia matrix
         (in column major or row major order, it doesn't matter since
@@ -1891,9 +1891,9 @@ Sets property pindex of all points to the given list (a n-list)
 Transforms all the points by the rigid transform v=R*v+t.  
 ";
 
-%feature("docstring") PointCloud::numPoints "
+%feature("docstring") PointCloud::setPoint "
 
-Returns the number of points.  
+Sets the position of the point at the given index to p.  
 ";
 
 %feature("docstring") PointCloud::translate "
@@ -1917,9 +1917,9 @@ given list (a n-list)
 Retrieves the position of the point at the given index.  
 ";
 
-%feature("docstring") PointCloud::setPoint "
+%feature("docstring") PointCloud::numPoints "
 
-Sets the position of the point at the given index to p.  
+Returns the number of points.  
 ";
 
 %feature("docstring") PointCloud::addPoint "
@@ -1983,7 +1983,12 @@ Sets the given setting.
 
 %feature("docstring") PointCloud::setPoints "
 
-Sets all the points to the given list (a 3n-list)  
+Sets all the points to the given nx3 array.  
+";
+
+%feature("docstring") PointCloud::getPoints "
+
+Retrieves all the points as an nx3 array.  
 ";
 
 // File: classPointPoser.xml
@@ -2270,7 +2275,7 @@ Returns the Jacobian matrix of the current center of mass.
 
 Returns:  
 
-    (list of 3 lists): a 3xn matrix J such that np.dot(J,dq) gives the
+    (3xn array): a 3xn matrix J such that np.dot(J,dq) gives the
     COM velocity at the currene configuration  
 ";
 
@@ -2679,8 +2684,7 @@ q.
 
 Returns:  
 
-    (list of 3 lists of floats): the 3xn orientation Jacobian matrix of
-    the link.  The matrix is row-major.
+    (3xn array):: the 3xn orientation Jacobian matrix of the link.  
 
     This matrix J gives the link's angular velocity (in world coordinates)
     via np.dot(J,dq), where dq is the robot's joint velocities.  
@@ -2740,8 +2744,8 @@ configuration q.
 
 Returns:  
 
-    (list of 3 lists of floats): the 3xn Jacobian matrix of the
-    point given by local coordinates plocal.  The matrix is row-major.
+    (3xn array): the 3xn Jacobian matrix of the
+    point given by local coordinates plocal.  
 
     This matrix J gives the point's velocity (in world coordinates) via
     np.dot(J,dq), where dq is the robot's joint velocities.  
@@ -2881,8 +2885,8 @@ configuration q.
 
 Returns:  
 
-    (3-tuple): a triple (Hx,Hy,Hz) of of nxn matrices corresponding,
-    respectively, to the (x,y,z) components of the Hessian.  
+    (3-D array): a 3xnxn array with each of the elements in the first axis
+    corresponding respectively, to the (x,y,z) components of the Hessian.  
 ";
 
 %feature("docstring") RobotModelLink::setMass "
@@ -2903,8 +2907,8 @@ configuration q.
 
 Returns:  
 
-    (list of 6 lists of floats): the 6xn total Jacobian matrix of the
-    point given by local coordinates plocal.  The matrix is row-major.
+    (6xn array): the 6xn total Jacobian matrix of the
+    point given by local coordinates plocal.  
 
     The orientation jacobian is given in the first 3 rows, and is stacked
     on the position jacobian, which is given in the last 3 rows.  
@@ -2967,8 +2971,8 @@ configuration q.
 
 Returns:  
 
-    (3-tuple): a triple (Hx,Hy,Hz) of of nxn matrices corresponding,
-    respectively, to the (wx,wy,wz) components of the Hessian.  
+    (3-D array): a 3xnxn array with each of the elements in the first axis
+    corresponding, respectively, to the (wx,wy,wz) components of the Hessian.  
 ";
 
 %feature("docstring") RobotModelLink::isRevolute "
@@ -3654,8 +3658,8 @@ Returns the current actual torques on the robot's drivers from the simulator.
 
 %feature("docstring") Simulator::getContacts "
 
-Returns the list of contacts (x,n,kFriction) at the last time step. Normals
-point into object `a`. The contact point (x,n,kFriction) is represented as a
+Returns the nx7 list of contacts (x,n,kFriction) at the last time step. Normals
+point into object `a`. Each contact point (x,n,kFriction) is represented as a
 7-element vector.  
 ";
 
@@ -3670,7 +3674,8 @@ faked simulation state.
 
 %feature("docstring") Simulator::getContactForces "
 
-Returns the list of contact forces on object a at the last time step.  
+Returns the list of contact forces on object a at the last time step. Result is
+an nx3 array.  
 ";
 
 %feature("docstring") Simulator::getState "
@@ -4076,6 +4081,9 @@ C++ includes: geometry.h
 %feature("docstring") VolumeGrid::get "
 ";
 
+%feature("docstring") VolumeGrid::getValues "
+";
+
 %feature("docstring") VolumeGrid::VolumeGrid "
 ";
 
@@ -4086,6 +4094,9 @@ C++ includes: geometry.h
 ";
 
 %feature("docstring") VolumeGrid::set "
+";
+
+%feature("docstring") VolumeGrid::setValues "
 ";
 
 %feature("docstring") VolumeGrid::resize "

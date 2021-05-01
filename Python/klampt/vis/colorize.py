@@ -294,9 +294,9 @@ def colorize(object,value,colormap=None,feature=None,vrange=None,lighting=None):
     #now map values to colors
     colors = None
     if colormap == 'random':
-        colors = np.random.rand(N,3)
+        colors = np.random.rand(N,3,dtype=np.float32)
     elif hasattr(value[0],'__iter__'):
-        colors = np.asarray(value)
+        colors = np.array(value,dtype=np.float32)
         if colors.shape[1] not in [3,4]:
             raise ValueError("Value array must be a 1-D list, Nx3 array, or Nx4 array")
     else:
@@ -310,7 +310,7 @@ def colorize(object,value,colormap=None,feature=None,vrange=None,lighting=None):
         cm_interpolator = cm.get_cmap(colormap)
         value = np.asarray(value)
         interp = (value - vrange[0])*(1.0/(vrange[1]-vrange[0]))
-        colors = cm_interpolator(interp)
+        colors = cm_interpolator(interp).astype(np.float32)
 
     if shading is not None:
         colors[:,:3] = shading[:,np.newaxis]*colors[:,:3]
@@ -361,12 +361,11 @@ def colorize(object,value,colormap=None,feature=None,vrange=None,lighting=None):
             geometry.setPointCloud(appearance)
     else:
         #assign appearance features
-        have_alpha = (colors.shape[1]==4)
         temp = Appearance()
         if feature == 'vertices':
-            temp.setColors(Appearance.VERTICES,colors.flatten(),have_alpha)
+            temp.setColors(Appearance.VERTICES,colors)
         else:
-            temp.setColors(Appearance.FACES,colors.flatten(),have_alpha)
+            temp.setColors(Appearance.FACES,colors)
         appearance.set(temp)
         appearance.refresh()
 

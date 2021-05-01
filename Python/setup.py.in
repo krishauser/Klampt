@@ -5,6 +5,7 @@ except ImportError:
 import os
 import glob
 import sys
+import numpy
 
 src_folder = "klampt/src"
 root_py_folder = "klampt"
@@ -83,6 +84,8 @@ for d in defs:
             commondefines.append((d,None))
     else:
         commondefines.append((d,None))
+
+includeDirs.append(numpy.get_include())
 
 commonfiles = ['pyerr.cpp']
 rssourcefiles = commonfiles + ['robotsim.cpp','robotik.cpp','robotsim_wrap.cxx']

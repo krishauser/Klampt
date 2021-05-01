@@ -75,14 +75,15 @@ class Appearance
   ///feature.  feature can be ALL, VERTICES, EDGES, FACES, EMISSIVE,
   ///or SPECULAR.
   void getColor(int feature,float out[4]);
-  ///Sets per-element color for elements of the given feature type.
+  ///Sets per-element color for elements of the given feature type.  Must be an mxn
+  ///array.  m is the number of features of that type, and n is either 3 or 4.
   ///
-  ///If alpha=True, colors are assumed to be 4*N rgba values, where N is the
-  ///number of features of that type.
+  ///If n == 4, they are assumed to be rgba values, and 
   ///
-  ///Otherwise they are assumed to be 3*N rgb values.  Only supports feature=VERTICES
-  ///and feature=FACES
-  void setColors(int feature,const std::vector<float>& colors,bool alpha=false);
+  ///If n == 3,  each row is an rgb value.
+  ///
+  ///Only supports feature=VERTICES and feature=FACES
+  void setColors(int feature,float* np_array2, int m, int n);
   ///Sets the specular highlight shininess and strength.  To turn off, use
   ///``setShininess(0)``.  The specular strength can be set via the second argument.
   ///``setShininess(20,0.1)``.  Note that this changes the specular color
@@ -102,13 +103,13 @@ class Appearance
   /// - bgra8: unsigned byte RGBA colors with blue in the 1st byte and alpha in the 4th
   /// - l8: unsigned byte grayscale colors
   ///
-  void setTexture1D(int w,const char* format,const std::vector<unsigned char>& bytes);
+  void setTexture1D(const char* format,unsigned char* np_array,int m);
   ///Sets a 2D texture of the given width/height.  See :func:`setTexture1D` for 
   ///valid format strings.
   ///
-  ///bytes is is given in order left to right, top to bottom if ``topdown==True``.
-  ///Otherwise, it is given in order left to right, bottom to top.
-  void setTexture2D(int w,int h,const char* format,const std::vector<unsigned char>& bytes,bool topdown=true);
+  ///bytes is given in top to bottom order if ``topdown==True``.
+  ///Otherwise, it is given in order bottom to top.
+  void setTexture2D(const char* format,unsigned char* np_array2,int m,int n,bool topdown=true);
   ///Sets per-vertex texture coordinates. 
   ///
   ///If the texture is 1D, uvs is an array of length n containing 1D texture coordinates. 
