@@ -36,6 +36,7 @@
 #include <Klampt/View/RobotPoseWidget.h>
 #include <KrisLibrary/utils/AnyCollection.h>
 #include <KrisLibrary/utils/stringutils.h>
+#include <KrisLibrary/Timer.h>
 #include <ode/ode.h>
 #include "pyerr.h"
 #include "pyconvert.h"
@@ -418,7 +419,9 @@ void GetPointCloud(const Geometry::AnyCollisionGeometry3D& geom,PointCloud& pc)
 
 void GetPointCloud(const PointCloud& pc,Geometry::AnyCollisionGeometry3D& geom)
 {
-  Meshing::PointCloud3D gpc;
+  geom = Meshing::PointCloud3D();
+  Meshing::PointCloud3D& gpc = geom.AsPointCloud();
+  gpc.settings = pc.settings;
   gpc.points.resize(pc.vertices.size()/3);
   for(size_t i=0;i<gpc.points.size();i++)
     gpc.points[i].set(pc.vertices[i*3],pc.vertices[i*3+1],pc.vertices[i*3+2]);
@@ -429,14 +432,17 @@ void GetPointCloud(const PointCloud& pc,Geometry::AnyCollisionGeometry3D& geom)
       throw PyException("GetPointCloud: Invalid number of properties in PointCloud");
     }
     gpc.properties.resize(pc.properties.size() / pc.propertyNames.size());
+    gpc.properties[0].resize(pc.properties.size());
+    gpc.properties[0].copy(&pc.properties[0]);
+    int m=(int)pc.propertyNames.size();
     for(size_t i=0;i<gpc.properties.size();i++) {
-      gpc.properties[i].resize(pc.propertyNames.size());
-      gpc.properties[i].copy(&pc.properties[i*pc.propertyNames.size()]);
+      //gpc.properties[i].resize(pc.propertyNames.size());
+      //gpc.properties[i].copy(&pc.properties[i*pc.propertyNames.size()]);
+      if(i != 0)
+        gpc.properties[i].setRef(gpc.properties[0],i*m,1,m);
     }
+    gpc.properties[0].n = m;
   }
-  gpc.settings = pc.settings;
-  //printf("Copying PointCloud to geometry, %d points\n",(int)gpc.points.size());
-  geom = gpc;
   geom.ClearCollisionData();
 }
 
@@ -2139,7 +2145,7 @@ void PointCloud::setPoints(double* parray,int m,int n)
 {
   if(n!=3) throw PyException("Array must be size nx3");
   int num = m;
-  bool resized = (vertices.size() != num*3);
+  bool resized = ((int)vertices.size() != num*3);
   vertices.resize(num*3);
   copy(parray,parray+num*3,&vertices[0]);
   if(resized) {
@@ -2232,7 +2238,7 @@ void PointCloud::setProperties(double* np_array2, int m, int n)
   if(m != npt) {
     throw PyException("Invalid size of properties array, must have #points rows");
   }
-  if(nprop != n) {
+  if((int)nprop != n) {
     propertyNames.resize(n);
     properties.resize(m*n);
     for(int i=(int)nprop;i<n;i++) {
