@@ -86,6 +86,9 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 
 ## Version history
 
+**0.9** (5/15/2021)
+-   Python API: Direct Numpy interface speeds up large data copies (20x speedup for setting a 640x480 point cloud).
+
 **Master** (2/22/2021)
 -   Fixed bug in simulation of affine joints when the joint angle can go negative. Also, internal affine transmission coupling is simulated in a fashion that's sensitive to the driver's PID constants.
 -   URDF import can now import multiple collision and visual geometries.
