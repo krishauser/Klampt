@@ -376,14 +376,14 @@ void GetMesh(const Geometry::AnyCollisionGeometry3D& geom,TriangleMesh& tmesh)
 
 void GetMesh(const TriangleMesh& tmesh,Geometry::AnyCollisionGeometry3D& geom)
 {
-  Meshing::TriMesh mesh;
+  geom = Meshing::TriMesh();
+  Meshing::TriMesh& mesh = geom.AsTriangleMesh();
   mesh.tris.resize(tmesh.indices.size()/3);
   mesh.verts.resize(tmesh.vertices.size()/3);
   for(size_t i=0;i<mesh.tris.size();i++)
     mesh.tris[i].set(tmesh.indices[i*3],tmesh.indices[i*3+1],tmesh.indices[i*3+2]);
   for(size_t i=0;i<mesh.verts.size();i++)
     mesh.verts[i].set(tmesh.vertices[i*3],tmesh.vertices[i*3+1],tmesh.vertices[i*3+2]);
-  geom = mesh;
   geom.ClearCollisionData();
 }
 
@@ -410,7 +410,9 @@ void GetPointCloud(const Geometry::AnyCollisionGeometry3D& geom,PointCloud& pc)
 
 void GetPointCloud(const PointCloud& pc,Geometry::AnyCollisionGeometry3D& geom)
 {
-  Meshing::PointCloud3D gpc;
+  geom = Meshing::PointCloud3D();
+  Meshing::PointCloud3D& gpc = geom.AsPointCloud();
+  gpc.settings = pc.settings;
   gpc.points.resize(pc.vertices.size()/3);
   for(size_t i=0;i<gpc.points.size();i++)
     gpc.points[i].set(pc.vertices[i*3],pc.vertices[i*3+1],pc.vertices[i*3+2]);
@@ -421,14 +423,17 @@ void GetPointCloud(const PointCloud& pc,Geometry::AnyCollisionGeometry3D& geom)
       throw PyException("GetPointCloud: Invalid number of properties in PointCloud");
     }
     gpc.properties.resize(pc.properties.size() / pc.propertyNames.size());
+    gpc.properties[0].resize(pc.properties.size());
+    gpc.properties[0].copy(&pc.properties[0]);
+    int m=(int)pc.propertyNames.size();
     for(size_t i=0;i<gpc.properties.size();i++) {
-      gpc.properties[i].resize(pc.propertyNames.size());
-      gpc.properties[i].copy(&pc.properties[i*pc.propertyNames.size()]);
+      //gpc.properties[i].resize(pc.propertyNames.size());
+      //gpc.properties[i].copy(&pc.properties[i*pc.propertyNames.size()]);
+      if(i != 0)
+        gpc.properties[i].setRef(gpc.properties[0],i*m,1,m);
     }
+    gpc.properties[0].n = m;
   }
-  gpc.settings = pc.settings;
-  //printf("Copying PointCloud to geometry, %d points\n",(int)gpc.points.size());
-  geom = gpc;
   geom.ClearCollisionData();
 }
 
@@ -456,7 +461,8 @@ void GetVolumeGrid(const Geometry::AnyCollisionGeometry3D& geom,VolumeGrid& grid
 
 void GetVolumeGrid(const VolumeGrid& grid,Geometry::AnyCollisionGeometry3D& geom)
 {
-  Meshing::VolumeGrid gvg;
+  geom = Meshing::VolumeGrid();
+  Meshing::VolumeGrid& gvg = geom.AsImplicitSurface();
   Assert(grid.dims.size()==3);
   Assert(grid.bbox.size()==6);
   gvg.Resize(grid.dims[0],grid.dims[1],grid.dims[2]);
@@ -467,7 +473,6 @@ void GetVolumeGrid(const VolumeGrid& grid,Geometry::AnyCollisionGeometry3D& geom
   for(Array3D<Real>::iterator i=gvg.value.begin();i!=gvg.value.end();++i,k++) {
     *i = grid.values[k];
   }
-  geom = gvg;
   geom.ClearCollisionData();
 }
 
