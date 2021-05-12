@@ -237,8 +237,7 @@ def point_cloud_normals(pc,estimation_radius=None,estimation_knn=None,estimation
     N = len(pc.vertices)//3
     if not _has_numpy:
         raise RuntimeError("Need numpy to perform plane fitting")
-    positions = np.array(pc.vertices)
-    positions = positions.reshape((N,3))
+    positions = pc.getVertices()
     if estimation_radius is None and estimation_knn is None:
         R = max(positions.max(axis=0)-positions.min(axis=0))
         estimation_radius = 3*R/math.sqrt(N)
@@ -307,9 +306,9 @@ def point_cloud_normals(pc,estimation_radius=None,estimation_knn=None,estimation
                 normals[i,:] = -n
 
     if add:
-        normal_x = normals[:,0].tolist()
-        normal_y = normals[:,1].tolist()
-        normal_z = normals[:,2].tolist()
+        normal_x = normals[:,0]
+        normal_y = normals[:,1]
+        normal_z = normals[:,2]
         pc.addProperty('normal_x',normal_x)
         pc.addProperty('normal_y',normal_y)
         pc.addProperty('normal_z',normal_z)

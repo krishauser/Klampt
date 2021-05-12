@@ -66,8 +66,8 @@ class SimRobotSensor
   RobotModel robot();
   ///Returns a list of names for the measurements (one per measurement).
   std::vector<std::string> measurementNames();
-  ///Returns a list of measurements from the previous simulation (or kinematicSimulate) timestep
-  void getMeasurements(std::vector<double>& out);
+  ///Returns an array of measurements from the previous simulation (or kinematicSimulate) timestep
+  void getMeasurements(double** np_out,int* m);
   ///Returns all setting names
   std::vector<std::string> settings();
   ///Returns the value of the named setting (you will need to manually parse this)
@@ -81,7 +81,7 @@ class SimRobotSensor
   //note: only the last overload docstring is added to the documentation
   ///Draws a sensor indicator using OpenGL.  If measurements are given, the indicator is drawn as though
   ///these are the latest measurements, otherwise only an indicator is drawn.
-  void drawGL(const std::vector<double>& measurements);
+  void drawGL(double* np_array,int m);
 
   ///simulates / advances the kinematic simulation
   void kinematicSimulate(WorldModel& world,double dt);

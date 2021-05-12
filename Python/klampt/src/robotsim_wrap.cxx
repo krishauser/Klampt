@@ -19830,6 +19830,67 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_PointCloud_setProperties__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  double *arg2 = (double *) 0 ;
+  int arg3 ;
+  int arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  
+  if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_setProperties" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(swig_obj[1], NPY_DOUBLE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 2) ||
+      !require_size(array2, size, 2)) SWIG_fail;
+    arg2 = (double*) array_data(array2);
+    arg3 = (int) array_size(array2,0);
+    arg4 = (int) array_size(array2,1);
+  }
+  {
+    try {
+      (arg1)->setProperties(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_PointCloud_addProperty__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
   PyObject *resultobj = 0;
   PointCloud *arg1 = (PointCloud *) 0 ;
@@ -19881,11 +19942,13 @@ SWIGINTERN PyObject *_wrap_PointCloud_addProperty__SWIG_1(PyObject *SWIGUNUSEDPA
   PyObject *resultobj = 0;
   PointCloud *arg1 = (PointCloud *) 0 ;
   std::string *arg2 = 0 ;
-  std::vector< double,std::allocator< double > > *arg3 = 0 ;
+  double *arg3 = (double *) 0 ;
+  int arg4 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   int res2 = SWIG_OLDOBJ ;
-  int res3 = SWIG_OLDOBJ ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
   
   if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
@@ -19905,19 +19968,20 @@ SWIGINTERN PyObject *_wrap_PointCloud_addProperty__SWIG_1(PyObject *SWIGUNUSEDPA
     arg2 = ptr;
   }
   {
-    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
-    res3 = swig::asptr(swig_obj[2], &ptr);
-    if (!SWIG_IsOK(res3)) {
-      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "PointCloud_addProperty" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PointCloud_addProperty" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
-    }
-    arg3 = ptr;
+    npy_intp size[1] = {
+      -1 
+    };
+    array3 = obj_to_array_contiguous_allow_conversion(swig_obj[2],
+      NPY_DOUBLE,
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 1) ||
+      !require_size(array3, size, 1)) SWIG_fail;
+    arg3 = (double*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
   }
   {
     try {
-      (arg1)->addProperty((std::string const &)*arg2,(std::vector< double,std::allocator< double > > const &)*arg3);
+      (arg1)->addProperty((std::string const &)*arg2,arg3,arg4);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -19930,11 +19994,21 @@ SWIGINTERN PyObject *_wrap_PointCloud_addProperty__SWIG_1(PyObject *SWIGUNUSEDPA
   }
   resultobj = SWIG_Py_Void();
   if (SWIG_IsNewObj(res2)) delete arg2;
-  if (SWIG_IsNewObj(res3)) delete arg3;
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
   return resultobj;
 fail:
   if (SWIG_IsNewObj(res2)) delete arg2;
-  if (SWIG_IsNewObj(res3)) delete arg3;
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
   return NULL;
 }
 
@@ -19969,9 +20043,13 @@ SWIGINTERN PyObject *_wrap_PointCloud_addProperty(PyObject *self, PyObject *args
       int res = SWIG_AsPtr_std_string(argv[1], (std::string**)(0));
       _v = SWIG_CheckState(res);
       if (_v) {
-        int res = swig::asptr(argv[2], (std::vector< double,std::allocator< double > >**)(0));
-        _v = SWIG_CheckState(res);
+        {
+          _v = is_array(argv[2]) || PySequence_Check(argv[2]);
+        }
         if (_v) {
+          if (argc <= 3) {
+            return _wrap_PointCloud_addProperty__SWIG_1(self, argc, argv);
+          }
           return _wrap_PointCloud_addProperty__SWIG_1(self, argc, argv);
         }
       }
@@ -19982,55 +20060,8 @@ fail:
   SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'PointCloud_addProperty'.\n"
     "  Possible C/C++ prototypes are:\n"
     "    PointCloud::addProperty(std::string const &)\n"
-    "    PointCloud::addProperty(std::string const &,std::vector< double,std::allocator< double > > const &)\n");
+    "    PointCloud::addProperty(std::string const &,double *,int)\n");
   return 0;
-}
-
-
-SWIGINTERN PyObject *_wrap_PointCloud_setProperties__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
-  PyObject *resultobj = 0;
-  PointCloud *arg1 = (PointCloud *) 0 ;
-  std::vector< double,std::allocator< double > > *arg2 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int res2 = SWIG_OLDOBJ ;
-  
-  if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_setProperties" "', argument " "1"" of type '" "PointCloud *""'"); 
-  }
-  arg1 = reinterpret_cast< PointCloud * >(argp1);
-  {
-    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
-    res2 = swig::asptr(swig_obj[1], &ptr);
-    if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "PointCloud_setProperties" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PointCloud_setProperties" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
-    }
-    arg2 = ptr;
-  }
-  {
-    try {
-      (arg1)->setProperties((std::vector< double,std::allocator< double > > const &)*arg2);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_Py_Void();
-  if (SWIG_IsNewObj(res2)) delete arg2;
-  return resultobj;
-fail:
-  if (SWIG_IsNewObj(res2)) delete arg2;
-  return NULL;
 }
 
 
@@ -20038,12 +20069,14 @@ SWIGINTERN PyObject *_wrap_PointCloud_setProperties__SWIG_1(PyObject *SWIGUNUSED
   PyObject *resultobj = 0;
   PointCloud *arg1 = (PointCloud *) 0 ;
   int arg2 ;
-  std::vector< double,std::allocator< double > > *arg3 = 0 ;
+  double *arg3 = (double *) 0 ;
+  int arg4 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
-  int res3 = SWIG_OLDOBJ ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
   
   if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
@@ -20057,19 +20090,20 @@ SWIGINTERN PyObject *_wrap_PointCloud_setProperties__SWIG_1(PyObject *SWIGUNUSED
   } 
   arg2 = static_cast< int >(val2);
   {
-    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
-    res3 = swig::asptr(swig_obj[2], &ptr);
-    if (!SWIG_IsOK(res3)) {
-      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "PointCloud_setProperties" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PointCloud_setProperties" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
-    }
-    arg3 = ptr;
+    npy_intp size[1] = {
+      -1 
+    };
+    array3 = obj_to_array_contiguous_allow_conversion(swig_obj[2],
+      NPY_DOUBLE,
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 1) ||
+      !require_size(array3, size, 1)) SWIG_fail;
+    arg3 = (double*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
   }
   {
     try {
-      (arg1)->setProperties(arg2,(std::vector< double,std::allocator< double > > const &)*arg3);
+      (arg1)->setProperties(arg2,arg3,arg4);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -20081,10 +20115,20 @@ SWIGINTERN PyObject *_wrap_PointCloud_setProperties__SWIG_1(PyObject *SWIGUNUSED
     }
   }
   resultobj = SWIG_Py_Void();
-  if (SWIG_IsNewObj(res3)) delete arg3;
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
   return resultobj;
 fail:
-  if (SWIG_IsNewObj(res3)) delete arg3;
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
   return NULL;
 }
 
@@ -20103,9 +20147,16 @@ SWIGINTERN PyObject *_wrap_PointCloud_setProperties(PyObject *self, PyObject *ar
     int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_PointCloud, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
-      int res = swig::asptr(argv[1], (std::vector< double,std::allocator< double > >**)(0));
-      _v = SWIG_CheckState(res);
+      {
+        _v = is_array(argv[1]) || PySequence_Check(argv[1]);
+      }
       if (_v) {
+        if (argc <= 2) {
+          return _wrap_PointCloud_setProperties__SWIG_0(self, argc, argv);
+        }
+        if (argc <= 3) {
+          return _wrap_PointCloud_setProperties__SWIG_0(self, argc, argv);
+        }
         return _wrap_PointCloud_setProperties__SWIG_0(self, argc, argv);
       }
     }
@@ -20121,9 +20172,13 @@ SWIGINTERN PyObject *_wrap_PointCloud_setProperties(PyObject *self, PyObject *ar
         _v = SWIG_CheckState(res);
       }
       if (_v) {
-        int res = swig::asptr(argv[2], (std::vector< double,std::allocator< double > >**)(0));
-        _v = SWIG_CheckState(res);
+        {
+          _v = is_array(argv[2]) || PySequence_Check(argv[2]);
+        }
         if (_v) {
+          if (argc <= 3) {
+            return _wrap_PointCloud_setProperties__SWIG_1(self, argc, argv);
+          }
           return _wrap_PointCloud_setProperties__SWIG_1(self, argc, argv);
         }
       }
@@ -20133,8 +20188,8 @@ SWIGINTERN PyObject *_wrap_PointCloud_setProperties(PyObject *self, PyObject *ar
 fail:
   SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'PointCloud_setProperties'.\n"
     "  Possible C/C++ prototypes are:\n"
-    "    PointCloud::setProperties(std::vector< double,std::allocator< double > > const &)\n"
-    "    PointCloud::setProperties(int,std::vector< double,std::allocator< double > > const &)\n");
+    "    PointCloud::setProperties(double *,int,int)\n"
+    "    PointCloud::setProperties(int,double *,int)\n");
   return 0;
 }
 
@@ -20495,15 +20550,18 @@ SWIGINTERN PyObject *_wrap_PointCloud_getProperties__SWIG_0(PyObject *SWIGUNUSED
   PyObject *resultobj = 0;
   PointCloud *arg1 = (PointCloud *) 0 ;
   int arg2 ;
-  std::vector< double,std::allocator< double > > *arg3 = 0 ;
+  double **arg3 = (double **) 0 ;
+  int *arg4 = (int *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
-  std::vector< double > temp3 ;
+  double *data_temp3 = NULL ;
+  int dim_temp3 ;
   
   {
-    arg3 = &temp3;
+    arg3 = &data_temp3;
+    arg4 = &dim_temp3;
   }
   if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
@@ -20518,7 +20576,7 @@ SWIGINTERN PyObject *_wrap_PointCloud_getProperties__SWIG_0(PyObject *SWIGUNUSED
   arg2 = static_cast< int >(val2);
   {
     try {
-      ((PointCloud const *)arg1)->getProperties(arg2,*arg3);
+      ((PointCloud const *)arg1)->getProperties(arg2,arg3,arg4);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -20531,23 +20589,27 @@ SWIGINTERN PyObject *_wrap_PointCloud_getProperties__SWIG_0(PyObject *SWIGUNUSED
   }
   resultobj = SWIG_Py_Void();
   {
-    PyObject *o, *o2, *o3;
-    o = convert_darray_obj(&(*arg3)[0],(int)arg3->size());
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
+    npy_intp dims[1] = {
+      *arg4 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(1, dims, NPY_DOUBLE, (void*)(*arg3));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg3), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg3), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
   }
   return resultobj;
 fail:
@@ -20559,14 +20621,17 @@ SWIGINTERN PyObject *_wrap_PointCloud_getProperties__SWIG_1(PyObject *SWIGUNUSED
   PyObject *resultobj = 0;
   PointCloud *arg1 = (PointCloud *) 0 ;
   std::string *arg2 = 0 ;
-  std::vector< double,std::allocator< double > > *arg3 = 0 ;
+  double **arg3 = (double **) 0 ;
+  int *arg4 = (int *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   int res2 = SWIG_OLDOBJ ;
-  std::vector< double > temp3 ;
+  double *data_temp3 = NULL ;
+  int dim_temp3 ;
   
   {
-    arg3 = &temp3;
+    arg3 = &data_temp3;
+    arg4 = &dim_temp3;
   }
   if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
@@ -20587,7 +20652,7 @@ SWIGINTERN PyObject *_wrap_PointCloud_getProperties__SWIG_1(PyObject *SWIGUNUSED
   }
   {
     try {
-      ((PointCloud const *)arg1)->getProperties((std::string const &)*arg2,*arg3);
+      ((PointCloud const *)arg1)->getProperties((std::string const &)*arg2,arg3,arg4);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -20600,23 +20665,27 @@ SWIGINTERN PyObject *_wrap_PointCloud_getProperties__SWIG_1(PyObject *SWIGUNUSED
   }
   resultobj = SWIG_Py_Void();
   {
-    PyObject *o, *o2, *o3;
-    o = convert_darray_obj(&(*arg3)[0],(int)arg3->size());
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
+    npy_intp dims[1] = {
+      *arg4 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(1, dims, NPY_DOUBLE, (void*)(*arg3));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg3), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg3), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
   }
   if (SWIG_IsNewObj(res2)) delete arg2;
   return resultobj;
@@ -20666,9 +20735,64 @@ SWIGINTERN PyObject *_wrap_PointCloud_getProperties(PyObject *self, PyObject *ar
 fail:
   SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'PointCloud_getProperties'.\n"
     "  Possible C/C++ prototypes are:\n"
-    "    PointCloud::getProperties(int,std::vector< double,std::allocator< double > > &) const\n"
-    "    PointCloud::getProperties(std::string const &,std::vector< double,std::allocator< double > > &) const\n");
+    "    PointCloud::getProperties(int,double **,int *) const\n"
+    "    PointCloud::getProperties(std::string const &,double **,int *) const\n");
   return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_getAllProperties(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  double **arg2 = (double **) 0 ;
+  int *arg3 = (int *) 0 ;
+  int *arg4 = (int *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double *data_temp2 = NULL ;
+  int dim1_temp2 ;
+  int dim2_temp2 ;
+  PyObject *swig_obj[1] ;
+  
+  {
+    arg2 = &data_temp2;
+    arg3 = &dim1_temp2;
+    arg4 = &dim2_temp2;
+  }
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_getAllProperties" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  {
+    try {
+      (arg1)->getAllProperties(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    npy_intp dims[2] = {
+      *arg3, *arg4 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, (void*)(*arg2));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
+  }
+  return resultobj;
+fail:
+  return NULL;
 }
 
 
@@ -51609,14 +51733,17 @@ fail:
 SWIGINTERN PyObject *_wrap_SimRobotSensor_getMeasurements(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   SimRobotSensor *arg1 = (SimRobotSensor *) 0 ;
-  std::vector< double,std::allocator< double > > *arg2 = 0 ;
+  double **arg2 = (double **) 0 ;
+  int *arg3 = (int *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  std::vector< double > temp2 ;
+  double *data_temp2 = NULL ;
+  int dim_temp2 ;
   PyObject *swig_obj[1] ;
   
   {
-    arg2 = &temp2;
+    arg2 = &data_temp2;
+    arg3 = &dim_temp2;
   }
   if (!args) SWIG_fail;
   swig_obj[0] = args;
@@ -51627,7 +51754,7 @@ SWIGINTERN PyObject *_wrap_SimRobotSensor_getMeasurements(PyObject *SWIGUNUSEDPA
   arg1 = reinterpret_cast< SimRobotSensor * >(argp1);
   {
     try {
-      (arg1)->getMeasurements(*arg2);
+      (arg1)->getMeasurements(arg2,arg3);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -51640,23 +51767,27 @@ SWIGINTERN PyObject *_wrap_SimRobotSensor_getMeasurements(PyObject *SWIGUNUSEDPA
   }
   resultobj = SWIG_Py_Void();
   {
-    PyObject *o, *o2, *o3;
-    o = convert_darray_obj(&(*arg2)[0],(int)arg2->size());
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
+    npy_intp dims[1] = {
+      *arg3 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(1, dims, NPY_DOUBLE, (void*)(*arg2));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg2), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg2), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
   }
   return resultobj;
 fail:
@@ -51846,10 +51977,12 @@ fail:
 SWIGINTERN PyObject *_wrap_SimRobotSensor_drawGL__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
   PyObject *resultobj = 0;
   SimRobotSensor *arg1 = (SimRobotSensor *) 0 ;
-  std::vector< double,std::allocator< double > > *arg2 = 0 ;
+  double *arg2 = (double *) 0 ;
+  int arg3 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  int res2 = SWIG_OLDOBJ ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
   
   if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_SimRobotSensor, 0 |  0 );
@@ -51858,19 +51991,20 @@ SWIGINTERN PyObject *_wrap_SimRobotSensor_drawGL__SWIG_1(PyObject *SWIGUNUSEDPAR
   }
   arg1 = reinterpret_cast< SimRobotSensor * >(argp1);
   {
-    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
-    res2 = swig::asptr(swig_obj[1], &ptr);
-    if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SimRobotSensor_drawGL" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "SimRobotSensor_drawGL" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
-    }
-    arg2 = ptr;
+    npy_intp size[1] = {
+      -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(swig_obj[1],
+      NPY_DOUBLE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 1) ||
+      !require_size(array2, size, 1)) SWIG_fail;
+    arg2 = (double*) array_data(array2);
+    arg3 = (int) array_size(array2,0);
   }
   {
     try {
-      (arg1)->drawGL((std::vector< double,std::allocator< double > > const &)*arg2);
+      (arg1)->drawGL(arg2,arg3);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -51882,10 +52016,20 @@ SWIGINTERN PyObject *_wrap_SimRobotSensor_drawGL__SWIG_1(PyObject *SWIGUNUSEDPAR
     }
   }
   resultobj = SWIG_Py_Void();
-  if (SWIG_IsNewObj(res2)) delete arg2;
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
   return resultobj;
 fail:
-  if (SWIG_IsNewObj(res2)) delete arg2;
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
   return NULL;
 }
 
@@ -51913,9 +52057,13 @@ SWIGINTERN PyObject *_wrap_SimRobotSensor_drawGL(PyObject *self, PyObject *args)
     int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_SimRobotSensor, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
-      int res = swig::asptr(argv[1], (std::vector< double,std::allocator< double > >**)(0));
-      _v = SWIG_CheckState(res);
+      {
+        _v = is_array(argv[1]) || PySequence_Check(argv[1]);
+      }
       if (_v) {
+        if (argc <= 2) {
+          return _wrap_SimRobotSensor_drawGL__SWIG_1(self, argc, argv);
+        }
         return _wrap_SimRobotSensor_drawGL__SWIG_1(self, argc, argv);
       }
     }
@@ -51925,7 +52073,7 @@ fail:
   SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'SimRobotSensor_drawGL'.\n"
     "  Possible C/C++ prototypes are:\n"
     "    SimRobotSensor::drawGL()\n"
-    "    SimRobotSensor::drawGL(std::vector< double,std::allocator< double > > const &)\n");
+    "    SimRobotSensor::drawGL(double *,int)\n");
   return 0;
 }
 
@@ -61620,28 +61768,28 @@ static PyMethodDef SwigMethods[] = {
 		"TriangleMesh_getVertices(TriangleMesh self)\n"
 		"\n"
 		"\n"
-		"Retrieves a view of the vertices as an nx3 array.  \n"
+		"Retrieves a view of the vertices as an nx3 Numpy array.  \n"
 		"\n"
 		""},
 	 { "TriangleMesh_setVertices", _wrap_TriangleMesh_setVertices, METH_VARARGS, "\n"
 		"TriangleMesh_setVertices(TriangleMesh self, double * np_array2)\n"
 		"\n"
 		"\n"
-		"Sets all vertices to the given nx3 array.  \n"
+		"Sets all vertices to the given nx3 Numpy array.  \n"
 		"\n"
 		""},
 	 { "TriangleMesh_getIndices", _wrap_TriangleMesh_getIndices, METH_O, "\n"
 		"TriangleMesh_getIndices(TriangleMesh self)\n"
 		"\n"
 		"\n"
-		"Retrieves a view of the vertices as an mx3 array.  \n"
+		"Retrieves a view of the vertices as an mx3 Numpy array.  \n"
 		"\n"
 		""},
 	 { "TriangleMesh_setIndices", _wrap_TriangleMesh_setIndices, METH_VARARGS, "\n"
 		"TriangleMesh_setIndices(TriangleMesh self, int * np_array2)\n"
 		"\n"
 		"\n"
-		"Sets all indices to the given mx3 array.  \n"
+		"Sets all indices to the given mx3 Numpy array.  \n"
 		"\n"
 		""},
 	 { "TriangleMesh_translate", _wrap_TriangleMesh_translate, METH_VARARGS, "\n"
@@ -61681,14 +61829,14 @@ static PyMethodDef SwigMethods[] = {
 		"ConvexHull_getPoints(ConvexHull self)\n"
 		"\n"
 		"\n"
-		"Retrieves a view of the points as an nx3 array.  \n"
+		"Retrieves a view of the points as an nx3 Numpy array.  \n"
 		"\n"
 		""},
 	 { "ConvexHull_setPoints", _wrap_ConvexHull_setPoints, METH_VARARGS, "\n"
 		"ConvexHull_setPoints(ConvexHull self, double * np_array2)\n"
 		"\n"
 		"\n"
-		"Sets all points to the given nx3 array.  \n"
+		"Sets all points to the given nx3 Numpy array.  \n"
 		"\n"
 		""},
 	 { "ConvexHull_addPoint", _wrap_ConvexHull_addPoint, METH_VARARGS, "\n"
@@ -61747,14 +61895,14 @@ static PyMethodDef SwigMethods[] = {
 		"PointCloud_getPoints(PointCloud self)\n"
 		"\n"
 		"\n"
-		"Retrieves a view of the points as an nx3 array.  \n"
+		"Retrieves a view of the points as an nx3 Numpy array.  \n"
 		"\n"
 		""},
 	 { "PointCloud_setPoints", _wrap_PointCloud_setPoints, METH_VARARGS, "\n"
 		"PointCloud_setPoints(PointCloud self, double * np_array2)\n"
 		"\n"
 		"\n"
-		"Sets all the points to the given nx3 array.  \n"
+		"Sets all the points to the given nx3 Numpy array.  \n"
 		"\n"
 		""},
 	 { "PointCloud_addPoint", _wrap_PointCloud_addPoint, METH_VARARGS, "\n"
@@ -61780,19 +61928,19 @@ static PyMethodDef SwigMethods[] = {
 		""},
 	 { "PointCloud_addProperty", _wrap_PointCloud_addProperty, METH_VARARGS, "\n"
 		"PointCloud_addProperty(PointCloud self, std::string const & pname)\n"
-		"PointCloud_addProperty(PointCloud self, std::string const & pname, doubleVector properties)\n"
+		"PointCloud_addProperty(PointCloud self, std::string const & pname, double * np_array)\n"
 		"\n"
 		"\n"
 		"Adds a new property with name pname, and sets values for this property to the\n"
-		"given list (a n-list)  \n"
+		"given length-n array.  \n"
 		"\n"
 		""},
 	 { "PointCloud_setProperties", _wrap_PointCloud_setProperties, METH_VARARGS, "\n"
-		"PointCloud_setProperties(PointCloud self, doubleVector properties)\n"
-		"PointCloud_setProperties(PointCloud self, int pindex, doubleVector properties)\n"
+		"PointCloud_setProperties(PointCloud self, double * np_array2)\n"
+		"PointCloud_setProperties(PointCloud self, int pindex, double * np_array)\n"
 		"\n"
 		"\n"
-		"Sets property pindex of all points to the given list (a n-list)  \n"
+		"Sets property pindex of all points to the given length-n array.  \n"
 		"\n"
 		""},
 	 { "PointCloud_setProperty", _wrap_PointCloud_setProperty, METH_VARARGS, "\n"
@@ -61817,6 +61965,13 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Gets property named pindex of all points as an array.  \n"
+		"\n"
+		""},
+	 { "PointCloud_getAllProperties", _wrap_PointCloud_getAllProperties, METH_O, "\n"
+		"PointCloud_getAllProperties(PointCloud self)\n"
+		"\n"
+		"\n"
+		"Gets all the properties as an nxp array.  \n"
 		"\n"
 		""},
 	 { "PointCloud_translate", _wrap_PointCloud_translate, METH_VARARGS, "\n"
@@ -61957,6 +62112,8 @@ static PyMethodDef SwigMethods[] = {
 	 { "VolumeGrid_getValues", _wrap_VolumeGrid_getValues, METH_O, "\n"
 		"VolumeGrid_getValues(VolumeGrid self)\n"
 		"\n"
+		"\n"
+		"Returns a 3D Numpy array view of the values.  \n"
 		"\n"
 		""},
 	 { "VolumeGrid_setValues", _wrap_VolumeGrid_setValues, METH_VARARGS, "\n"
@@ -65235,7 +65392,7 @@ static PyMethodDef SwigMethods[] = {
 		"SimRobotSensor_getMeasurements(SimRobotSensor self)\n"
 		"\n"
 		"\n"
-		"Returns a list of measurements from the previous simulation (or\n"
+		"Returns an array of measurements from the previous simulation (or\n"
 		"kinematicSimulate) timestep.  \n"
 		"\n"
 		""},
@@ -65263,7 +65420,7 @@ static PyMethodDef SwigMethods[] = {
 		""},
 	 { "SimRobotSensor_drawGL", _wrap_SimRobotSensor_drawGL, METH_VARARGS, "\n"
 		"SimRobotSensor_drawGL(SimRobotSensor self)\n"
-		"SimRobotSensor_drawGL(SimRobotSensor self, doubleVector measurements)\n"
+		"SimRobotSensor_drawGL(SimRobotSensor self, double * np_array)\n"
 		"\n"
 		"\n"
 		"Draws a sensor indicator using OpenGL. If measurements are given, the indicator\n"

@@ -2139,10 +2139,16 @@ void PointCloud::setPoints(double* parray,int m,int n)
 {
   if(n!=3) throw PyException("Array must be size nx3");
   int num = m;
+  bool resized = (vertices.size() != num*3);
   vertices.resize(num*3);
   copy(parray,parray+num*3,&vertices[0]);
-  properties.resize(num*propertyNames.size());
-  fill(properties.begin(),properties.end(),0.0);
+  if(resized) {
+    properties.resize(num*propertyNames.size());
+    fill(properties.begin(),properties.end(),0.0);
+  }
+  else {
+    properties.resize(num*propertyNames.size(),0.0);
+  }
 }
 void PointCloud::getPoints(double** pview,int* m,int *n)
 {
@@ -2190,18 +2196,18 @@ void PointCloud::addProperty(const std::string& pname)
 {
   int n = numPoints();
   vector<double> values(n,0.0);
-  addProperty(pname,values);
+  addProperty(pname,&values[0],n);
 }
 
-void PointCloud::addProperty(const std::string& pname,const std::vector<double> & values)
+void PointCloud::addProperty(const std::string& pname,double* values,int numvals)
 {
   int n = numPoints();
-  if(int(values.size()) != n) {
+  if(numvals != n) {
     stringstream ss;
-    ss<<"Invalid size "<<values.size()<<" of properties list, must have size #points = "<<n;
+    ss<<"Invalid size "<<numvals<<" of properties list, must have size #points = "<<n;
     throw PyException(ss.str().c_str());
   }
-  assert(values.size() == n);
+  assert(numvals == n);
   size_t m=propertyNames.size();
   assert(properties.size() == n*m);
   propertyNames.push_back(pname);
@@ -2218,25 +2224,44 @@ void PointCloud::addProperty(const std::string& pname,const std::vector<double> 
   assert(properties.size() == (n*(m+1)));
 }
 
-void PointCloud::setProperties(const vector<double>& vproperties)
+void PointCloud::setProperties(double* np_array2, int m, int n)
 {
-  int n = numPoints();
-  size_t m=propertyNames.size();
-  if(vproperties.size() < n*m) {
-    throw PyException("Invalid size of properties list, must have size at least #points * #properties");
+  int npt = numPoints();
+  size_t nprop=propertyNames.size();
+
+  if(m != npt) {
+    throw PyException("Invalid size of properties array, must have #points rows");
   }
-  if(properties.size() != n*m) {
-    throw PyException("Internal error, properties doesn't contain #points * #properties items?"); 
+  if(nprop != n) {
+    propertyNames.resize(n);
+    properties.resize(m*n);
+    for(int i=(int)nprop;i<n;i++) {
+      stringstream ss;
+      ss<<"Property "<<i;
+      propertyNames[i] = ss.str();
+    }
   }
-  copy(vproperties.begin(),vproperties.begin()+m*n,properties.begin());
+  //if(n != nprop) {
+  //  throw PyException("Invalid size of properties array, must have #properties columns");
+  //}
+
+  copy(np_array2,np_array2+m*n,properties.begin());
+}
+ 
+void PointCloud::getAllProperties(double** np_view2, int* m, int* n)
+{
+  *m = numPoints();
+  *n = (int)propertyNames.size();
+  *np_view2 = (double*)malloc(properties.size()*sizeof(double));
+  copy(properties.begin(),properties.end(),*np_view2);
 }
 
-void PointCloud::setProperties(int pindex,const vector<double>& vproperties)
+void PointCloud::setProperties(int pindex,double* vproperties,int numvals)
 {
   if(pindex < 0 || pindex >= (int)propertyNames.size())
     throw PyException("Invalid property index"); 
   int n = numPoints();
-  if((int)vproperties.size() < n) {
+  if(numvals != n) {
     throw PyException("Invalid size of properties vector, needs to have size #points"); 
   }
   size_t k=pindex;
@@ -2288,18 +2313,19 @@ double PointCloud::getProperty(int index,const std::string& pname) const
   return getProperty(index,pindex);
 }
 
-void PointCloud::getProperties(int pindex,std::vector<double>& out) const
+void PointCloud::getProperties(int pindex,double** out, int* m) const
 {
   if(pindex < 0 || pindex >= (int)propertyNames.size())
     throw PyException("Invalid property index");  
   int n=numPoints();
-  out.resize(n);
+  *m = n;
+  *out = (double*)malloc(n*sizeof(double));
   size_t k=pindex;
   for(int i=0;i<n;i++,k+=propertyNames.size())
-    out[i] = properties[k];
+    (*out)[i] = properties[k];
 }
 
-void PointCloud::getProperties(const std::string& pname,std::vector<double>& out) const
+void PointCloud::getProperties(const std::string& pname,double** out,int* m) const
 {
   int pindex = -1;
   for(size_t i=0;i<propertyNames.size();i++)
@@ -2309,7 +2335,7 @@ void PointCloud::getProperties(const std::string& pname,std::vector<double>& out
     }
   if(pindex < 0)
     throw PyException("Invalid property name");  
-  return getProperties(pindex,out); 
+  return getProperties(pindex,out,m); 
 }
 
 void PointCloud::join(const PointCloud& pc)
@@ -4208,7 +4234,7 @@ SimRobotSensor RobotModel::sensor(const char* name)
   Assert(sensors != NULL);
   shared_ptr<SensorBase> sensor = sensors->GetNamedSensor(name);
   if(sensor==NULL) {
-    fprintf(stderr,"Warning, sensor %s does not exist\n",name);
+    fprintf(stderr,"RobotModel::sensor(): Warning, sensor %s does not exist\n",name);
   }
   return SimRobotSensor(*this,sensor.get());
 }
@@ -5386,11 +5412,18 @@ std::vector<std::string> SimRobotSensor::measurementNames()
   return res;
 }
 
-void SimRobotSensor::getMeasurements(std::vector<double>& out)
+void SimRobotSensor::getMeasurements(double** out,int* m)
 {
-  out.resize(0);
-  if(!sensor) return;
-  sensor->GetMeasurements(out);
+  if(!sensor) {
+    *out = NULL;
+    *m = 0;
+    return;
+  }
+  vector<double> vout;
+  sensor->GetMeasurements(vout);
+  *m = (int)vout.size();
+  *out = (double*)malloc((*m)*sizeof(double));
+  copy(vout.begin(),vout.end(),*out);
 }
 
 std::vector<std::string> SimRobotSensor::settings()
@@ -5419,13 +5452,16 @@ void SimRobotSensor::setSetting(const std::string& name,const std::string& val)
 
 void SimRobotSensor::drawGL()
 {
+  if(!sensor) return;
   vector<double> measurements;
-  drawGL(measurements);
+  sensor->DrawGL(*robotModel.robot,measurements);
 }
 
-void SimRobotSensor::drawGL(const std::vector<double>& measurements)
+void SimRobotSensor::drawGL(double* np_array,int m)
 {
   if(!sensor) return;
+  std::vector<double> measurements(m);
+  copy(np_array,np_array+m,&measurements[0]);
   sensor->DrawGL(*robotModel.robot,measurements);
 }
 

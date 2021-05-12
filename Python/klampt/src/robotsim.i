@@ -400,20 +400,21 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
   }
 }
 
-%apply (unsigned char* IN_ARRAY1, int DIM1) {(unsigned char* np_array,int m)};
+%apply (unsigned char* IN_ARRAY1,int DIM1) {(unsigned char* np_array,int m)};
 %apply (unsigned char* IN_ARRAY2,int DIM1,int DIM2) {(unsigned char* np_array2, int m, int n)};
 %apply (int* IN_ARRAY2,int DIM1,int DIM2) {(int* np_array2, int m, int n)};
 %apply (int** ARGOUTVIEW_ARRAY2,int* DIM1,int* DIM2) {(int** np_view2,int* m, int *n)};
 %apply (float* IN_ARRAY1, int DIM1) {(float* np_array,int m)};
 %apply (float* IN_ARRAY2,int DIM1,int DIM2) {(float* np_array2, int m, int n)};
 %apply (float* IN_ARRAY2,int DIM1,int DIM2) {(float* contacts, int m, int n)};
-%apply (double* ARGOUT_ARRAY1,int DIM1) {(double* out,int m)};
-%apply (double* ARGOUT_ARRAY1,int DIM1) {(double* out2,int m)};
+%apply (double* IN_ARRAY1, int DIM1) {(double* np_array,int m)};
 %apply (double* IN_ARRAY2,int DIM1,int DIM2) {(double* np_array2, int m, int n)};
-%apply (double** ARGOUTVIEW_ARRAY2,int* DIM1,int* DIM2) {(double** np_view2,int* m, int *n)};
-%apply (double** ARGOUTVIEWM_ARRAY2,int* DIM1,int* DIM2) {(double** np_out2,int* m, int *n)};
 %apply (double* IN_ARRAY3,int DIM1,int DIM2, int DIM3) {(double* np_array3, int m, int n, int p)};
+%apply (double** ARGOUTVIEW_ARRAY1,int* DIM1) {(double** np_view,int* m)};
+%apply (double** ARGOUTVIEW_ARRAY2,int* DIM1,int* DIM2) {(double** np_view2,int* m, int *n)};
 %apply (double** ARGOUTVIEW_ARRAY3,int* DIM1,int* DIM2,int* DIM3) {(double** np_view3,int* m, int *n, int* p)};
+%apply (double** ARGOUTVIEWM_ARRAY1,int* DIM1) {(double** np_out,int* m)};
+%apply (double** ARGOUTVIEWM_ARRAY2,int* DIM1,int* DIM2) {(double** np_out2,int* m, int *n)};
 %apply (double** ARGOUTVIEWM_ARRAY3,int* DIM1,int* DIM2,int* DIM3) {(double** np_out3,int* m, int *n, int* p)};
 
 

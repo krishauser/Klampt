@@ -138,7 +138,7 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
             glDisable(GL_LIGHTING)
             glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
             if self.backgroundImageDisplayList is not None:
-                self.backgroundImageDisplayList.draw(self.drawBackgroundImage)
+                self.backgroundImageDisplayList.draw(self._drawBackgroundImage)
             glDisable(GL_TEXTURE_2D)
             glEnable(GL_CULL_FACE)
             glEnable(GL_LIGHTING)
@@ -237,7 +237,7 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
             else:
                 self.backgroundImageDisplayList.markChanged()
 
-    def drawBackgroundImage(self):
+    def _drawBackgroundImage(self):
         glEnable(GL_TEXTURE_2D)
         glBindTexture(GL_TEXTURE_2D,self.backgroundImageTexture)
         glBegin(GL_TRIANGLE_FAN)

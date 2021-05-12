@@ -204,7 +204,7 @@ def colorize(object,value,colormap=None,feature=None,vrange=None,lighting=None):
     shading = None
     if isinstance(value,str) or lighting is not None:
         #need positions / normals -- compute them for the indicated features
-        positions = np.array(geometrydata.vertices)
+        positions = geometrydata.getVertices()
         positions = positions.reshape((positions.shape[0]//3,3))
         normals = None
         if lighting is not None or value in ['n','normal','nx','ny','nz']:
@@ -228,7 +228,7 @@ def colorize(object,value,colormap=None,feature=None,vrange=None,lighting=None):
                         if l > 0:
                             normals[i] *= 1.0/l
                 else:
-                    indices = np.array(geometrydata.indices).reshape(-1,3)
+                    indices = geometrydata.getIndices()
                     a = positions[indices[:,0]]
                     b = positions[indices[:,1]]
                     c = positions[indices[:,2]]
@@ -241,7 +241,7 @@ def colorize(object,value,colormap=None,feature=None,vrange=None,lighting=None):
             if lighting is not None or value in ['position','x','y','z']:
                 #compute positions = triangle centroids
                 assert not isinstance(geometrydata,PointCloud)
-                tris = np.array(geometrydata.indices,dtype=np.uint32).reshape(-1,3)
+                tris = geometrydata.getIndices()
                 A = positions[tris[:,0]]
                 B = positions[tris[:,1]]
                 C = positions[tris[:,2]]
@@ -336,15 +336,15 @@ def colorize(object,value,colormap=None,feature=None,vrange=None,lighting=None):
         if prop == 'r':
             assert appearance.propertyNames[hascolor+1] == 'g'
             assert appearance.propertyNames[hascolor+2] == 'b'
-            appearance.setProperties(hascolor,colors[:,0].tolist())
-            appearance.setProperties(hascolor+1,colors[:,1].tolist())
-            appearance.setProperties(hascolor+2,colors[:,2].tolist())
+            appearance.setProperties(hascolor,colors[:,0])
+            appearance.setProperties(hascolor+1,colors[:,1])
+            appearance.setProperties(hascolor+2,colors[:,2])
         elif prop == 'rgb':
             r = (colors[:,0]*255.0).astype(np.uint32)
             g = (colors[:,1]*255.0).astype(np.uint32)
             b = (colors[:,2]*255.0).astype(np.uint32)
             rgb = np.bitwise_or.reduce((np.left_shift(r,16),np.left_shift(g,8),b))
-            appearance.setProperties(hascolor,rgb.tolist())
+            appearance.setProperties(hascolor,rgb)
         elif prop == 'rgba':
             r = (colors[:,0]*255.0).astype(np.uint32)
             g = (colors[:,1]*255.0).astype(np.uint32)
@@ -355,7 +355,7 @@ def colorize(object,value,colormap=None,feature=None,vrange=None,lighting=None):
                 a = (colors[:,3]*255.0).astype(np.uint32)
             rgba = np.bitwise_or.reduce((np.left_shift(r,16),np.left_shift(g,8),
                                         np.left_shift(a,24),b))
-            appearance.setProperties(hascolor,rgba.tolist())
+            appearance.setProperties(hascolor,rgba)
         if isinstance(geometry,Geometry3D):
             #write it back to the geometry
             geometry.setPointCloud(appearance)

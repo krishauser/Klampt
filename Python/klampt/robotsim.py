@@ -899,14 +899,14 @@ class TriangleMesh(object):
 
     def getVertices(self):
         r"""
-        Retrieves a view of the vertices as an nx3 array.  
+        Retrieves a view of the vertices as an nx3 Numpy array.  
 
         """
         return _robotsim.TriangleMesh_getVertices(self)
 
     def setVertices(self, np_array2):
         r"""
-        Sets all vertices to the given nx3 array.  
+        Sets all vertices to the given nx3 Numpy array.  
 
         Args:
             np_array2 (:obj:`2D Numpy array of floats`)
@@ -915,14 +915,14 @@ class TriangleMesh(object):
 
     def getIndices(self):
         r"""
-        Retrieves a view of the vertices as an mx3 array.  
+        Retrieves a view of the vertices as an mx3 Numpy array.  
 
         """
         return _robotsim.TriangleMesh_getIndices(self)
 
     def setIndices(self, np_array2):
         r"""
-        Sets all indices to the given mx3 array.  
+        Sets all indices to the given mx3 Numpy array.  
 
         Args:
             np_array2 (:obj:`2D Numpy array of ints`)
@@ -996,14 +996,14 @@ class ConvexHull(object):
 
     def getPoints(self):
         r"""
-        Retrieves a view of the points as an nx3 array.  
+        Retrieves a view of the points as an nx3 Numpy array.  
 
         """
         return _robotsim.ConvexHull_getPoints(self)
 
     def setPoints(self, np_array2):
         r"""
-        Sets all points to the given nx3 array.  
+        Sets all points to the given nx3 Numpy array.  
 
         Args:
             np_array2 (:obj:`2D Numpy array of floats`)
@@ -1171,14 +1171,14 @@ class PointCloud(object):
 
     def getPoints(self):
         r"""
-        Retrieves a view of the points as an nx3 array.  
+        Retrieves a view of the points as an nx3 Numpy array.  
 
         """
         return _robotsim.PointCloud_getPoints(self)
 
     def setPoints(self, np_array2):
         r"""
-        Sets all the points to the given nx3 array.  
+        Sets all the points to the given nx3 Numpy array.  
 
         Args:
             np_array2 (:obj:`2D Numpy array of floats`)
@@ -1218,31 +1218,32 @@ class PointCloud(object):
     def addProperty(self, *args):
         r"""
         Adds a new property with name pname, and sets values for this property to the
-        given list (a n-list)  
+        given length-n array.  
 
         addProperty (pname)
 
-        addProperty (pname,properties)
+        addProperty (pname,np_array)
 
 
         Args:
             pname (str): 
-            properties (:obj:`list of floats`, optional): 
+            np_array (:obj:`1D Numpy array of floats`, optional): 
         """
         return _robotsim.PointCloud_addProperty(self, *args)
 
     def setProperties(self, *args):
         r"""
-        Sets property pindex of all points to the given list (a n-list)  
+        Sets property pindex of all points to the given length-n array.  
 
-        setProperties (properties)
+        setProperties (np_array2)
 
-        setProperties (pindex,properties)
+        setProperties (pindex,np_array)
 
 
         Args:
-            properties (:obj:`list of floats`): 
+            np_array2 (:obj:`2D Numpy array of floats`, optional): 
             pindex (int, optional): 
+            np_array (:obj:`1D Numpy array of floats`, optional): 
         """
         return _robotsim.PointCloud_setProperties(self, *args)
 
@@ -1296,6 +1297,13 @@ class PointCloud(object):
             pname (str, optional): 
         """
         return _robotsim.PointCloud_getProperties(self, *args)
+
+    def getAllProperties(self):
+        r"""
+        Gets all the properties as an nxp array.  
+
+        """
+        return _robotsim.PointCloud_getAllProperties(self)
 
     def translate(self, t):
         r"""
@@ -1558,6 +1566,8 @@ class VolumeGrid(object):
 
     def getValues(self):
         r"""
+        Returns a 3D Numpy array view of the values.  
+
         """
         return _robotsim.VolumeGrid_getValues(self)
 
@@ -1821,7 +1831,7 @@ class Geometry3D(object):
 
 
         Args:
-            arg2 (:class:`~klampt.TriangleMesh` or :class:`~klampt.PointCloud` or :obj:`ConvexHull` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.VolumeGrid` or :class:`~klampt.Geometry3D`, optional): 
+            arg2 (:class:`~klampt.TriangleMesh` or :class:`~klampt.GeometricPrimitive` or :obj:`ConvexHull` or :class:`~klampt.PointCloud` or :class:`~klampt.VolumeGrid` or :class:`~klampt.Geometry3D`, optional): 
         """
         _robotsim.Geometry3D_swiginit(self, _robotsim.new_Geometry3D(*args))
     __swig_destroy__ = _robotsim.delete_Geometry3D
@@ -5332,7 +5342,7 @@ class WorldModel(object):
 
 
         Args:
-            robot (int or str): 
+            robot (str or int): 
             index (int, optional): 
             name (str, optional): 
 
@@ -6134,7 +6144,7 @@ class IKSolver(object):
             tol (float, optional): 
 
         Returns:
-            (bool or :obj:`PyObject *`):
+            (:obj:`PyObject *` or bool):
         """
         return _robotsim.IKSolver_solve(self, *args)
 
@@ -6447,7 +6457,7 @@ class SimRobotSensor(object):
 
     def getMeasurements(self):
         r"""
-        Returns a list of measurements from the previous simulation (or
+        Returns an array of measurements from the previous simulation (or
         kinematicSimulate) timestep.  
 
         """
@@ -6492,11 +6502,11 @@ class SimRobotSensor(object):
 
         drawGL ()
 
-        drawGL (measurements)
+        drawGL (np_array)
 
 
         Args:
-            measurements (:obj:`list of floats`, optional): 
+            np_array (:obj:`1D Numpy array of floats`, optional): 
         """
         return _robotsim.SimRobotSensor_drawGL(self, *args)
 

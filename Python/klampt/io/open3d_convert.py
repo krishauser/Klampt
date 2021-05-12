@@ -25,7 +25,6 @@ def to_open3d(obj):
     if isinstance(obj,PointCloud):
         pc = open3d.geometry.PointCloud()
         pc.points = open3d.utility.Vector3dVector(obj.getPoints())
-        print(obj.getPoints()[:10])
         #TODO: other properties
         colors = geometry.point_cloud_colors(obj,('r','g','b'))
         if colors is not None:

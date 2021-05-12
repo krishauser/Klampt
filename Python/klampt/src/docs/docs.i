@@ -343,7 +343,7 @@ C++ includes: geometry.h
 
 %feature("docstring") ConvexHull::setPoints "
 
-Sets all points to the given nx3 array.  
+Sets all points to the given nx3 Numpy array.  
 ";
 
 %feature("docstring") ConvexHull::translate "
@@ -368,7 +368,7 @@ Retrieves a point.
 
 %feature("docstring") ConvexHull::getPoints "
 
-Retrieves a view of the points as an nx3 array.  
+Retrieves a view of the points as an nx3 Numpy array.  
 ";
 
 %feature("docstring") ConvexHull::ConvexHull "
@@ -1889,12 +1889,12 @@ C++ includes: geometry.h
 
 %feature("docstring") PointCloud::setProperties "
 
-Sets all the properties of all points to the given list (a kn-list)  
+Sets all the properties of all points to the given nxp array.  
 ";
 
 %feature("docstring") PointCloud::setProperties "
 
-Sets property pindex of all points to the given list (a n-list)  
+Sets property pindex of all points to the given length-n array.  
 ";
 
 %feature("docstring") PointCloud::transform "
@@ -1920,7 +1920,7 @@ Adds a new property. All values for this property are set to 0.
 %feature("docstring") PointCloud::addProperty "
 
 Adds a new property with name pname, and sets values for this property to the
-given list (a n-list)  
+given length-n array.  
 ";
 
 %feature("docstring") PointCloud::getPoint "
@@ -1938,15 +1938,20 @@ Returns the number of points.
 Adds a point. Sets all its properties to 0. Returns the index.  
 ";
 
-%feature("docstring") PointCloud::getSetting "
+%feature("docstring") PointCloud::getAllProperties "
 
-Retrieves the given setting.  
+Gets all the properties as an nxp array.  
 ";
 
 %feature("docstring") PointCloud::join "
 
 Adds the given point cloud to this one. They must share the same properties or
 else an exception is raised.  
+";
+
+%feature("docstring") PointCloud::getSetting "
+
+Retrieves the given setting.  
 ";
 
 %feature("docstring") PointCloud::numProperties "
@@ -1994,12 +1999,12 @@ Sets the given setting.
 
 %feature("docstring") PointCloud::setPoints "
 
-Sets all the points to the given nx3 array.  
+Sets all the points to the given nx3 Numpy array.  
 ";
 
 %feature("docstring") PointCloud::getPoints "
 
-Retrieves a view of the points as an nx3 array.  
+Retrieves a view of the points as an nx3 Numpy array.  
 ";
 
 // File: classPointPoser.xml
@@ -3584,7 +3589,7 @@ Returns the model of the robot to which this belongs.
 
 %feature("docstring") SimRobotSensor::getMeasurements "
 
-Returns a list of measurements from the previous simulation (or
+Returns an array of measurements from the previous simulation (or
 kinematicSimulate) timestep.  
 ";
 
@@ -4036,7 +4041,7 @@ C++ includes: geometry.h
 
 %feature("docstring") TriangleMesh::setVertices "
 
-Sets all vertices to the given nx3 array.  
+Sets all vertices to the given nx3 Numpy array.  
 ";
 
 %feature("docstring") TriangleMesh::TriangleMesh "
@@ -4049,7 +4054,7 @@ Translates all the vertices by v=v+t.
 
 %feature("docstring") TriangleMesh::getIndices "
 
-Retrieves a view of the vertices as an mx3 array.  
+Retrieves a view of the vertices as an mx3 Numpy array.  
 ";
 
 %feature("docstring") TriangleMesh::transform "
@@ -4059,12 +4064,12 @@ Transforms all the vertices by the rigid transform v=R*v+t.
 
 %feature("docstring") TriangleMesh::getVertices "
 
-Retrieves a view of the vertices as an nx3 array.  
+Retrieves a view of the vertices as an nx3 Numpy array.  
 ";
 
 %feature("docstring") TriangleMesh::setIndices "
 
-Sets all indices to the given mx3 array.  
+Sets all indices to the given mx3 Numpy array.  
 ";
 
 // File: classViewport.xml
@@ -4118,6 +4123,8 @@ C++ includes: geometry.h
 ";
 
 %feature("docstring") VolumeGrid::getValues "
+
+Returns a 3D Numpy array view of the values.  
 ";
 
 %feature("docstring") VolumeGrid::VolumeGrid "

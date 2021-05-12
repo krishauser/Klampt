@@ -654,8 +654,8 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,refe
     def attach(objects,editor):
         #attach visualization items to the transform
         if isinstance(objects,RobotModelLink):
-            assert objects.index >= 0
             r = objects.robot()
+            assert objects.index >= 0 and objects.index < r.numLinks()
             descendant = [False]*r.numLinks()
             descendant[objects.index] = True
             for i in range(r.numLinks()):

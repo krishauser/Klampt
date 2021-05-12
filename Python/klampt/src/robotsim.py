@@ -905,7 +905,7 @@ class TriangleMesh(object):
         getVertices(TriangleMesh self)
 
 
-        Retrieves a view of the vertices as an nx3 array.  
+        Retrieves a view of the vertices as an nx3 Numpy array.  
 
         """
         return _robotsim.TriangleMesh_getVertices(self)
@@ -915,7 +915,7 @@ class TriangleMesh(object):
         setVertices(TriangleMesh self, double * np_array2)
 
 
-        Sets all vertices to the given nx3 array.  
+        Sets all vertices to the given nx3 Numpy array.  
 
         """
         return _robotsim.TriangleMesh_setVertices(self, np_array2)
@@ -925,7 +925,7 @@ class TriangleMesh(object):
         getIndices(TriangleMesh self)
 
 
-        Retrieves a view of the vertices as an mx3 array.  
+        Retrieves a view of the vertices as an mx3 Numpy array.  
 
         """
         return _robotsim.TriangleMesh_getIndices(self)
@@ -935,7 +935,7 @@ class TriangleMesh(object):
         setIndices(TriangleMesh self, int * np_array2)
 
 
-        Sets all indices to the given mx3 array.  
+        Sets all indices to the given mx3 Numpy array.  
 
         """
         return _robotsim.TriangleMesh_setIndices(self, np_array2)
@@ -1015,7 +1015,7 @@ class ConvexHull(object):
         getPoints(ConvexHull self)
 
 
-        Retrieves a view of the points as an nx3 array.  
+        Retrieves a view of the points as an nx3 Numpy array.  
 
         """
         return _robotsim.ConvexHull_getPoints(self)
@@ -1025,7 +1025,7 @@ class ConvexHull(object):
         setPoints(ConvexHull self, double * np_array2)
 
 
-        Sets all points to the given nx3 array.  
+        Sets all points to the given nx3 Numpy array.  
 
         """
         return _robotsim.ConvexHull_setPoints(self, np_array2)
@@ -1202,7 +1202,7 @@ class PointCloud(object):
         getPoints(PointCloud self)
 
 
-        Retrieves a view of the points as an nx3 array.  
+        Retrieves a view of the points as an nx3 Numpy array.  
 
         """
         return _robotsim.PointCloud_getPoints(self)
@@ -1212,7 +1212,7 @@ class PointCloud(object):
         setPoints(PointCloud self, double * np_array2)
 
 
-        Sets all the points to the given nx3 array.  
+        Sets all the points to the given nx3 Numpy array.  
 
         """
         return _robotsim.PointCloud_setPoints(self, np_array2)
@@ -1250,22 +1250,22 @@ class PointCloud(object):
     def addProperty(self, *args):
         r"""
         addProperty(PointCloud self, std::string const & pname)
-        addProperty(PointCloud self, std::string const & pname, doubleVector properties)
+        addProperty(PointCloud self, std::string const & pname, double * np_array)
 
 
         Adds a new property with name pname, and sets values for this property to the
-        given list (a n-list)  
+        given length-n array.  
 
         """
         return _robotsim.PointCloud_addProperty(self, *args)
 
     def setProperties(self, *args):
         r"""
-        setProperties(PointCloud self, doubleVector properties)
-        setProperties(PointCloud self, int pindex, doubleVector properties)
+        setProperties(PointCloud self, double * np_array2)
+        setProperties(PointCloud self, int pindex, double * np_array)
 
 
-        Sets property pindex of all points to the given list (a n-list)  
+        Sets property pindex of all points to the given length-n array.  
 
         """
         return _robotsim.PointCloud_setProperties(self, *args)
@@ -1302,6 +1302,16 @@ class PointCloud(object):
 
         """
         return _robotsim.PointCloud_getProperties(self, *args)
+
+    def getAllProperties(self):
+        r"""
+        getAllProperties(PointCloud self)
+
+
+        Gets all the properties as an nxp array.  
+
+        """
+        return _robotsim.PointCloud_getAllProperties(self)
 
     def translate(self, t):
         r"""
@@ -1564,6 +1574,8 @@ class VolumeGrid(object):
         r"""
         getValues(VolumeGrid self)
 
+
+        Returns a 3D Numpy array view of the values.  
 
         """
         return _robotsim.VolumeGrid_getValues(self)
@@ -6572,7 +6584,7 @@ class SimRobotSensor(object):
         getMeasurements(SimRobotSensor self)
 
 
-        Returns a list of measurements from the previous simulation (or
+        Returns an array of measurements from the previous simulation (or
         kinematicSimulate) timestep.  
 
         """
@@ -6612,7 +6624,7 @@ class SimRobotSensor(object):
     def drawGL(self, *args):
         r"""
         drawGL(SimRobotSensor self)
-        drawGL(SimRobotSensor self, doubleVector measurements)
+        drawGL(SimRobotSensor self, double * np_array)
 
 
         Draws a sensor indicator using OpenGL. If measurements are given, the indicator

@@ -186,14 +186,14 @@ struct PointCloud
   void setPoint(int index,const double p[3]);
   ///Retrieves the position of the point at the given index
   void getPoint(int index,double out[3]) const;
+  ///Sets all the properties of all points to the given nxp array 
+  void setProperties(double* np_array2, int m, int n);
   ///Adds a new property.  All values for this property are set to 0.
   void addProperty(const std::string& pname);
-  ///Adds a new property with name pname, and sets values for this property to the given list (a n-list)
-  void addProperty(const std::string& pname,const std::vector<double> & properties);
-  ///Sets all the properties of all points to the given list (a kn-list)
-  void setProperties(const std::vector<double>& properties);
-  ///Sets property pindex of all points to the given list (a n-list)
-  void setProperties(int pindex,const std::vector<double>& properties);
+  ///Adds a new property with name pname, and sets values for this property to the given length-n array
+  void addProperty(const std::string& pname,double* np_array,int m);
+  ///Sets property pindex of all points to the given length-n array
+  void setProperties(int pindex,double* np_array,int m);
   ///Sets property pindex of point index to the given value
   void setProperty(int index,int pindex,double value);
   ///Sets the property named pname of point index to the given value
@@ -203,9 +203,11 @@ struct PointCloud
   ///Gets the property named pname of point index
   double getProperty(int index,const std::string& pname) const;
   ///Gets property pindex of all points as an array
-  void getProperties(int pindex,std::vector<double>& out) const;
+  void getProperties(int pindex,double** np_out,int* m) const;
   ///Gets property named pindex of all points as an array
-  void getProperties(const std::string& pname,std::vector<double>& out) const;
+  void getProperties(const std::string& pname,double** np_out,int* m) const;
+  ///Gets all the properties as an nxp array
+  void getAllProperties(double** np_view2, int* m, int* n);
   ///Translates all the points by v=v+t
   void translate(const double t[3]);
   ///Transforms all the points by the rigid transform v=R*v+t

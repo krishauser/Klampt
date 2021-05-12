@@ -2927,6 +2927,7 @@ class VisAppearance:
             s = self.attributes["size"]
             if s:
                 self.appearance.setPointSize(s)
+            self.appearance.setSilhouette(0)
             wp = None
             geometry = None
             lighting = True
@@ -3378,8 +3379,11 @@ class VisualizationScene:
         name = None
         if hasattr(object,'getName'):
             name = object.getName()
-        if hasattr(object,'name'):
-            name = object.name()
+        elif hasattr(object,'name'):
+            if callable(object.name):
+                name = object.name()
+            else:
+                name = object.name
         if name is not None and name in self.items:
             if self.items[name].item is object:
                 return name

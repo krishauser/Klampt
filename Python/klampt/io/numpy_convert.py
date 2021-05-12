@@ -62,7 +62,7 @@ def to_numpy(obj,type='auto'):
         points = obj.getPoints()
         if obj.numProperties() == 0:
             return points
-        properties = np.array(obj.properties).reshape((obj.numPoints(),obj.numProperties()))
+        properties = obj.getAllProperties()
         return np.hstack((points,properties))
     elif type == 'VolumeGrid':
         bmin = np.array(obj.bbox)[:3]
@@ -179,7 +179,7 @@ def from_numpy(obj,type='auto',template=None):
         if len(res.propertyNames) > 0:
             res.properties.resize(len(res.propertyNames)*points.shape[0])
         if obj.shape[1] >= 3:
-            res.setProperties(properties.flatten())
+            res.setProperties(properties)
         return res
     elif type == 'VolumeGrid':
         from klampt import VolumeGrid

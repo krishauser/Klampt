@@ -43,30 +43,11 @@ import math
 import sys
 from ..math import vectorops,so3,se3
 import time
-
-_has_numpy = False
-_tried_numpy_import = False
-np = None
+import numpy as np
 
 _has_scipy = False
 _tried_scipy_import = False
 sp = None
-
-def _try_numpy_import():
-    global _has_numpy,_tried_numpy_import
-    global np
-    if _tried_numpy_import:
-        return _has_numpy
-    _tried_numpy_import = True
-    try:
-        import numpy as np
-        _has_numpy = True
-        #sys.modules['numpy'] = numpy
-    except ImportError:
-        import warnings
-        warnings.warn("klampt.model.sensing.py: numpy not available.",ImportWarning)
-        _has_numpy = False
-    return _has_numpy
 
 def _try_scipy_import():
     global _has_scipy,_tried_scipy_import
@@ -159,10 +140,7 @@ def camera_to_images(camera,image_format='numpy',color_format='channels'):
             * 'numpy' (default): returns numpy arrays.  Depending on the
               value of color_format, the RGB image either has shape (h,w,3)
               and dtype uint8 or (h,w) and dtype uint32. Depth images as
-              numpy arrays with shape (h,w).  Will fall back to 'native' if 
-              numpy is not available.
-            * 'native': returns list-of-lists arrays in the same format as
-              above
+              numpy arrays with shape (h,w).
 
         color_format (str): governs how pixels in the RGB result are packed. 
         Can be:
@@ -173,11 +151,8 @@ def camera_to_images(camera,image_format='numpy',color_format='channels'):
               R,G,B channels packed in hex format 0xrrggbb.
             * 'bgr': similar to 'rgb' but with hex order 0xbbggrr.
 
-    (Note that image_format='native' takes up a lot of extra memory, especially
-    with color_format='channels')
-
     Returns:
-        tuple: (rgb, depth), which are either numpy arrays or list-of-lists
+        tuple: (rgb, depth), which are either numpy arrays or another image
         format, as specified by image_format.
 
             * rgb: the RGB result (packed as specified by color_format)
@@ -197,15 +172,12 @@ def camera_to_images(camera,image_format='numpy',color_format='channels'):
     measurements = camera.getMeasurements()
     #t1 = time.time()
     #print("camera.getMeasurements() time",t1-t0)
-    if image_format == 'numpy':
-        if not _try_numpy_import():
-            image_format = 'native'
     rgb = None
     depth = None
     if has_rgb:
         if image_format == 'numpy':
             #t0 = time.time()
-            argb = np.array(measurements[0:w*h]).reshape(h,w).astype(np.uint32)
+            argb = np.asarray(measurements[0:w*h]).reshape(h,w).astype(np.uint32)
             #t1 = time.time()
             #print("Numpy array creation time",t1-t0)
             if color_format == 'rgb':
@@ -222,36 +194,16 @@ def camera_to_images(camera,image_format='numpy',color_format='channels'):
             #t2 = time.time()
             #print("  Conversion time",t2-t1)
         else:
-            if color_format == 'rgb':
-                rgb = []
-                for i in range(h):
-                    rgb.append([int(v) for v in measurements[i*w:(i+1)*w]])
-            elif color_format == 'bgr':
-                def bgr_to_rgb(pixel):
-                    return ((pixel & 0x0000ff) << 16) | (pixel & 0x00ff00) | ((pixel & 0xff0000) >> 16)
-                rgb = []
-                for i in range(h):
-                    rgb.append([bgr_to_rgb(int(v)) for v in measurements[i*w:(i+1)*w]])
-            else:
-                rgb = []
-                for i in range(h):
-                    start = i*w
-                    row = []
-                    for j in range(w):
-                        pixel = int(measurements[start+j])
-                        row.append([(pixel>>16)&0xff,(pixel>>8)&0xff,pixel&0xff])
-                    rgb.append(row)
+            raise NotImplementedError("No other image formats besides numpy supported")
     if has_depth:
         start = (w*h if has_rgb else 0)
         if image_format == 'numpy':
             #t0 = time.time()
-            depth = np.array(measurements[start:start+w*h]).reshape(h,w)
+            depth = np.asarray(measurements[start:start+w*h]).reshape(h,w)
             #t1 = time.time()
             #print("Numpy array creation time",t1-t0)
         else:
-            depth = []
-            for i in range(h):
-                depth.append(measurements[start+i*w:start+(i+1)*w])
+            raise NotImplementedError("No other image formats besides numpy supported")
     if has_rgb and has_depth:
         return rgb,depth
     elif has_rgb:
@@ -295,10 +247,7 @@ def image_to_points(depth,color,xfov,yfov=None,depth_scale=None,depth_range=None
             value. Can be:
 
             * 'numpy' (default): either an Nx3, Nx4, or Nx6 numpy array,
-              depending on whether color is requested (and its format).  Will
-              fall back to 'native' if numpy is not available.
-            * 'native': same as numpy, but in list-of-lists format rather than
-              numpy arrays.
+              depending on whether color is requested (and its format).  
             * 'PointCloud': a Klampt PointCloud object
             * 'Geometry3D': a Klampt Geometry3D point cloud object
 
@@ -312,9 +261,6 @@ def image_to_points(depth,color,xfov,yfov=None,depth_scale=None,depth_range=None
         camera frame with +x to the right, +y down, +z forward.
 
     """
-    has_numpy = _try_numpy_import()
-    if not has_numpy:
-        raise NotImplementedError("TODO image_to_points without numpy")
     depth = np.asarray(depth)
     assert len(depth.shape)==2
     h,w = depth.shape
@@ -368,24 +314,22 @@ def image_to_points(depth,color,xfov,yfov=None,depth_scale=None,depth_range=None
     else:
         pts = pts[valid]
 
-    if points_format == 'native':
-        return pts.tolist()
-    elif points_format == 'numpy':
+    if points_format == 'numpy':
         return pts
     elif points_format == 'PointCloud' or points_format == 'Geometry3D':
         res = PointCloud()
         if all_points:
             res.setSetting('width',str(w))
             res.setSetting('height',str(h))
-        res.setPoints(pts.shape[0],pts[:,0:3].flatten().tolist())
+        res.setPoints(pts[:,0:3])
         if color_format == 'rgb':
             res.addProperty('rgb')
-            res.setProperties(pts[:,3].flatten().tolist())
+            res.setProperties(pts[:,3])
         elif color_format == 'channels':
             res.addProperty('r')
             res.addProperty('g')
             res.addProperty('b')
-            res.setProperties(pts[:,3:6].flatten().tolist())
+            res.setProperties(pts[:,3:6])
         if points_format == 'PointCloud':
             return res
         else:
@@ -394,7 +338,7 @@ def image_to_points(depth,color,xfov,yfov=None,depth_scale=None,depth_range=None
             g.setPointCloud(res)
             return g
     else:
-        raise ValueError("Invalid points_format, must be either native, numpy, PointCloud, or Geometry3D")
+        raise ValueError("Invalid points_format, must be either numpy, PointCloud, or Geometry3D")
 
 
 def camera_to_points(camera,points_format='numpy',all_points=False,color_format='channels'):
@@ -412,10 +356,7 @@ def camera_to_points(camera,points_format='numpy',all_points=False,color_format=
             value. Can be:
 
             * 'numpy' (default): either an Nx3, Nx4, or Nx6 numpy array,
-              depending on whether color is requested (and its format).  Will
-              fall back to 'native' if numpy is not available.
-            * 'native': same as numpy, but in list-of-lists format rather than
-              numpy arrays.
+              depending on whether color is requested (and its format).  
             * 'PointCloud': a Klampt PointCloud object
             * 'Geometry3D': a Klampt Geometry3D point cloud object
 
@@ -441,9 +382,6 @@ def camera_to_points(camera,points_format='numpy',all_points=False,color_format=
     assert isinstance(camera,SimRobotSensor),"Must provide a SimRobotSensor instance"
     assert camera.type() == 'CameraSensor',"Must provide a camera sensor instance"
     assert int(camera.getSetting('depth'))==1,"Camera sensor must have a depth channel"
-    has_numpy = _try_numpy_import()
-    if points_format == 'numpy' and not has_numpy:
-        points_format = 'native'
 
     images = camera_to_images(camera,'numpy',color_format)
     assert images != None
@@ -468,61 +406,57 @@ def camera_to_points(camera,points_format='numpy',all_points=False,color_format=
     yscale = xscale #square pixels are assumed
     xs = [(j+xshift)*xscale for j in range(w)]
     ys = [(i+yshift)*yscale for i in range(h)]
-    if has_numpy:
-        if all_points:
-            depth[depth >= zmax] = 0
-        if color_format == 'channels':
-            #scale to range [0,1]
-            rgb = rgb*(1.0/255.0)
-        xgrid = np.repeat(np.array(xs).reshape((1,w)),h,0)
-        ygrid = np.repeat(np.array(ys).reshape((h,1)),w,1)
-        assert xgrid.shape == (h,w)
-        assert ygrid.shape == (h,w)
-        pts = np.dstack((np.multiply(xgrid,depth),np.multiply(ygrid,depth),depth))
-        assert pts.shape == (h,w,3)
-        if color_format is not None:
-            if len(rgb.shape) == 2:
-                rgb = rgb.reshape(rgb.shape[0],rgb.shape[1],1)
-            pts = np.concatenate((pts,rgb),2)
-        #now have a nice array containing all points, shaped h x w x (3+c)
-        #extract out the valid points from this array
-        if all_points:
-            pts = pts.reshape(w*h,pts.shape[2])
-        else:
-            pts = pts[depth < zmax]
 
-        if points_format == 'native':
-            return pts.tolist()
-        elif points_format == 'numpy':
-            return pts
-        elif points_format == 'PointCloud' or points_format == 'Geometry3D':
-            res = PointCloud()
-            if all_points:
-                res.setSetting('width',str(w))
-                res.setSetting('height',str(h))
-            res.setPoints(pts.shape[0],pts[:,0:3].flatten().tolist())
-            if color_format == 'rgb':
-                res.addProperty('rgb')
-                res.setProperties(pts[:,3].flatten().tolist())
-            elif color_format == 'channels':
-                res.addProperty('r')
-                res.addProperty('g')
-                res.addProperty('b')
-                res.setProperties(pts[:,3:6].flatten().tolist())
-            elif color_format == 'bgr':
-                raise ValueError("bgr color format not supported with PointCloud output")
-            if points_format == 'PointCloud':
-                return res
-            else:
-                from klampt import Geometry3D
-                g = Geometry3D()
-                g.setPointCloud(res)
-                return g
-        else:
-            raise ValueError("Invalid points_format "+points_format)
-        return Nnoe
+    if all_points:
+        depth[depth >= zmax] = 0
+    if color_format == 'channels':
+        #scale to range [0,1]
+        rgb = rgb*(1.0/255.0)
+    xgrid = np.repeat(np.array(xs).reshape((1,w)),h,0)
+    ygrid = np.repeat(np.array(ys).reshape((h,1)),w,1)
+    assert xgrid.shape == (h,w)
+    assert ygrid.shape == (h,w)
+    pts = np.dstack((np.multiply(xgrid,depth),np.multiply(ygrid,depth),depth))
+    assert pts.shape == (h,w,3)
+    if color_format is not None:
+        if len(rgb.shape) == 2:
+            rgb = rgb.reshape(rgb.shape[0],rgb.shape[1],1)
+        pts = np.concatenate((pts,rgb),2)
+    #now have a nice array containing all points, shaped h x w x (3+c)
+    #extract out the valid points from this array
+    if all_points:
+        pts = pts.reshape(w*h,pts.shape[2])
     else:
-        raise NotImplementedError("Native format depth image processing not done yet")
+        pts = pts[depth < zmax]
+
+    if points_format == 'numpy':
+        return pts
+    elif points_format == 'PointCloud' or points_format == 'Geometry3D':
+        res = PointCloud()
+        if all_points:
+            res.setSetting('width',str(w))
+            res.setSetting('height',str(h))
+        res.setPoints(pts[:,0:3])
+        if color_format == 'rgb':
+            res.addProperty('rgb')
+            res.setProperties(pts[:,3])
+        elif color_format == 'channels':
+            res.addProperty('r')
+            res.addProperty('g')
+            res.addProperty('b')
+            res.setProperties(pts[:,3:6])
+        elif color_format == 'bgr':
+            raise ValueError("bgr color format not supported with PointCloud output")
+        if points_format == 'PointCloud':
+            return res
+        else:
+            from klampt import Geometry3D
+            g = Geometry3D()
+            g.setPointCloud(res)
+            return g
+    else:
+        raise ValueError("Invalid points_format "+points_format)
+    return None
 
 
 def camera_to_points_world(camera,robot,points_format='numpy',color_format='channels'):
@@ -544,10 +478,6 @@ def camera_to_points_world(camera,robot,points_format='numpy',color_format='chan
         Rw = np.array(so3.matrix(Tworld[0]))
         tw = np.array(Tworld[1])
         pts[:,0:3] = np.dot(pts[:,0:3],Rw.T) + tw
-        return pts
-    elif points_format == 'native':
-        for p in pts:
-            p[0:3] = se3.apply(Tworld,p[0:3])
         return pts
     elif points_format == 'PointCloud' or points_format == 'Geometry3D':
         pts.transform(*Tworld)
