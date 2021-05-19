@@ -46,7 +46,9 @@ def to_numpy(obj,type='auto'):
     elif type == 'TriangleMesh':
         from klampt import Geometry3D
         if isinstance(obj,Geometry3D):
-            res = to_numpy(obj.getTriangleMesh(),type)
+            tm = obj.getTriangleMesh()
+            res = to_numpy(tm,type)
+            res = (res[0],res[1].copy())
             R = to_numpy(obj.getCurrentTransform()[0],'Matrix3')
             t = to_numpy(obj.getCurrentTransform()[1],'Vector3')
             return (np.dot(R,res[0])+t,res[1])
@@ -54,7 +56,8 @@ def to_numpy(obj,type='auto'):
     elif type == 'PointCloud':
         from klampt import Geometry3D
         if isinstance(obj,Geometry3D):
-            res = to_numpy(obj.getPointCloud(),type)
+            pc = obj.getPointCloud()
+            res = to_numpy(pc,type)
             R = to_numpy(obj.getCurrentTransform()[0],'Matrix3')
             t = to_numpy(obj.getCurrentTransform()[1],'Vector3')
             res[:,:3] = np.dot(R,res[:,:3])+t
@@ -71,11 +74,19 @@ def to_numpy(obj,type='auto'):
         return (bmin,bmax,values)
     elif type == 'Geometry3D':
         if obj.type() == 'PointCloud':
-            return to_numpy(obj.getCurrentTransform(),'RigidTransform'),to_numpy(obj.getPointCloud(),obj.type())
+            pc = obj.getPointCloud()
+            pcdata = to_numpy(pc,obj.type())
+            return to_numpy(obj.getCurrentTransform(),'RigidTransform'),pcdata
         elif obj.type() == 'TriangleMesh':
-            return to_numpy(obj.getCurrentTransform(),'RigidTransform'),to_numpy(obj.getTriangleMesh(),obj.type())
+            mesh = obj.getTriangleMesh()
+            meshdata = to_numpy(mesh,obj.type())
+            meshdata = (meshdata[0].copy(),meshdata[1].copy())
+            return to_numpy(obj.getCurrentTransform(),'RigidTransform'),meshdata
         elif obj.type() == 'VolumeGrid':
-            return to_numpy(obj.getCurrentTransform(),'RigidTransform'),to_numpy(obj.getVolumeGrid(),obj.type())
+            grid = obj.getVolumeGrid()
+            griddata = to_numpy(grid,obj.type())
+            griddata = (griddata[0],griddata[1],griddata[2].copy())
+            return to_numpy(obj.getCurrentTransform(),'RigidTransform'),griddata
         elif obj.type() == 'Group':
             arrays = []
             for i in range(obj.numElements()):
@@ -164,22 +175,24 @@ def from_numpy(obj,type='auto',template=None):
         from klampt import PointCloud
         assert len(obj.shape) == 2,"PointCloud array must be a 2D array"
         assert obj.shape[1] >= 3,"PointCloud array must have at least 3 values"
-        points = obj[:,:3]
-        properties = obj[:,3:]
+        #points = obj[:,:3]
+        #properties = obj[:,3:]
+        numproperties = obj.shape[1]-3
         res = PointCloud()
-        res.setPoints(points)
+        #res.setPoints(points)
+        res.setPointsAndProperties(obj)
         if template is not None:
-            if len(template.propertyNames) != properties.shape[1]:
+            if len(template.propertyNames) != numproperties:
                 raise ValueError("Template object doesn't have the same properties as the numpy object")
             for i in range(len(template.propertyNames)):
                 res.propertyNames[i] = template.propertyNames[i]
         else:
-            for i in range(properties.shape[1]):
+            for i in range(numproperties):
                 res.propertyNames.append('property %d'%(i+1))
-        if len(res.propertyNames) > 0:
-            res.properties.resize(len(res.propertyNames)*points.shape[0])
-        if obj.shape[1] >= 3:
-            res.setProperties(properties)
+        #if len(res.propertyNames) > 0:
+        #    res.properties.resize(len(res.propertyNames)*points.shape[0])
+        #if obj.shape[1] >= 3:
+        #    res.setProperties(properties)
         return res
     elif type == 'VolumeGrid':
         from klampt import VolumeGrid

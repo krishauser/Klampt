@@ -979,7 +979,7 @@ class PlannerInterface(object):
             goalMilestones (:obj:`std::allocator< int > >`, optional): 
 
         Returns:
-            (:obj:`object` or :obj:`PyObject *`):
+            (:obj:`PyObject *` or :obj:`object`):
         """
         return _motionplanning.PlannerInterface_getPath(self, *args)
 

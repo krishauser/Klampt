@@ -385,14 +385,14 @@ void GetMesh(const Geometry::AnyCollisionGeometry3D& geom,TriangleMesh& tmesh)
 
 void GetMesh(const TriangleMesh& tmesh,Geometry::AnyCollisionGeometry3D& geom)
 {
-  Meshing::TriMesh mesh;
+  geom = Meshing::TriMesh();
+  Meshing::TriMesh& mesh = geom.AsTriangleMesh();
   mesh.tris.resize(tmesh.indices.size()/3);
   mesh.verts.resize(tmesh.vertices.size()/3);
   for(size_t i=0;i<mesh.tris.size();i++)
     mesh.tris[i].set(tmesh.indices[i*3],tmesh.indices[i*3+1],tmesh.indices[i*3+2]);
   for(size_t i=0;i<mesh.verts.size();i++)
     mesh.verts[i].set(tmesh.vertices[i*3],tmesh.vertices[i*3+1],tmesh.vertices[i*3+2]);
-  geom = mesh;
   geom.ClearCollisionData();
 }
 
@@ -423,8 +423,12 @@ void GetPointCloud(const PointCloud& pc,Geometry::AnyCollisionGeometry3D& geom)
   Meshing::PointCloud3D& gpc = geom.AsPointCloud();
   gpc.settings = pc.settings;
   gpc.points.resize(pc.vertices.size()/3);
-  for(size_t i=0;i<gpc.points.size();i++)
-    gpc.points[i].set(pc.vertices[i*3],pc.vertices[i*3+1],pc.vertices[i*3+2]);
+  int k=0;
+  //const double* v=&pc.vertices[0];
+  //for(size_t i=0;i<gpc.points.size();i++,k+=3)
+  //  gpc.points[i].set(v[k],v[k+1],v[k+2]);
+  assert(sizeof(Vector3) == sizeof(double)*3);
+  memcpy(&gpc.points[0],&pc.vertices[0],sizeof(double)*3*gpc.points.size());
   gpc.propertyNames = pc.propertyNames;
   if(pc.propertyNames.size() > 0) {
     if(pc.properties.size() != gpc.points.size()*pc.propertyNames.size()) {
@@ -433,13 +437,16 @@ void GetPointCloud(const PointCloud& pc,Geometry::AnyCollisionGeometry3D& geom)
     }
     gpc.properties.resize(pc.properties.size() / pc.propertyNames.size());
     gpc.properties[0].resize(pc.properties.size());
-    gpc.properties[0].copy(&pc.properties[0]);
+    //gpc.properties[0].copy(&pc.properties[0]);
+    memcpy(&gpc.properties[0][0],&pc.properties[0],sizeof(double)*pc.properties.size());
+    
     int m=(int)pc.propertyNames.size();
-    for(size_t i=0;i<gpc.properties.size();i++) {
+    int k=0;
+    for(size_t i=1;i<gpc.properties.size();i++,k+=m) {
       //gpc.properties[i].resize(pc.propertyNames.size());
       //gpc.properties[i].copy(&pc.properties[i*pc.propertyNames.size()]);
-      if(i != 0)
-        gpc.properties[i].setRef(gpc.properties[0],i*m,1,m);
+      //if(i != 0)
+        gpc.properties[i].setRef(gpc.properties[0],k,1,m);
     }
     gpc.properties[0].n = m;
   }
@@ -470,7 +477,8 @@ void GetVolumeGrid(const Geometry::AnyCollisionGeometry3D& geom,VolumeGrid& grid
 
 void GetVolumeGrid(const VolumeGrid& grid,Geometry::AnyCollisionGeometry3D& geom)
 {
-  Meshing::VolumeGrid gvg;
+  geom = Meshing::VolumeGrid();
+  Meshing::VolumeGrid& gvg = geom.AsImplicitSurface();
   Assert(grid.dims.size()==3);
   Assert(grid.bbox.size()==6);
   gvg.Resize(grid.dims[0],grid.dims[1],grid.dims[2]);
@@ -481,7 +489,6 @@ void GetVolumeGrid(const VolumeGrid& grid,Geometry::AnyCollisionGeometry3D& geom
   for(Array3D<Real>::iterator i=gvg.value.begin();i!=gvg.value.end();++i,k++) {
     *i = grid.values[k];
   }
-  geom = gvg;
   geom.ClearCollisionData();
 }
 
@@ -1452,6 +1459,50 @@ void Geometry3D::support(const double dir[3], double out[3])
   res.get(out);
 }
 
+
+Geometry3D Geometry3D::slice(const double R[9],const double t[3],double tol)
+{
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  if(!geom) throw PyException("Geometry3D is empty, cannot slice");
+  if(geom->type == AnyGeometry3D::PointCloud && tol == 0)
+     throw PyException("Geometry3D is a point cloud and tolerance is 0, slice will get no points");
+  
+  Geometry3D res;
+  shared_ptr<AnyCollisionGeometry3D>& resgeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(res.geomPtr);
+  resgeom = make_shared<AnyCollisionGeometry3D>();
+  RigidTransform T;
+  T.R.set(R);
+  T.t.set(t);
+  if(!geom->Slice(T,*resgeom,tol))
+    throw PyException("Slice is not supported for that type of geometry");
+  return res;
+}
+
+Geometry3D Geometry3D::roi(const char* query,const double bmin[3],const double bmax[3])
+{
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  if(!geom) throw PyException("Geometry3D is empty, cannot perform ROI");
+  Geometry3D res;
+  shared_ptr<AnyCollisionGeometry3D>& resgeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(res.geomPtr);
+  resgeom = make_shared<AnyCollisionGeometry3D>();
+  int flag=0;
+  if(query[0]=='~') {
+    flag |= ExtractROIFlagInvert;
+    query = &query[1];
+  }
+  if(0==strcmp(query,"intersect")) flag|=ExtractROIFlagIntersection;
+  else if(0==strcmp(query,"within")) flag|=ExtractROIFlagWithin;
+  else if(0==strcmp(query,"touching")) flag|=ExtractROIFlagTouching;
+  else
+    throw PyException("Invalid query, must be intersect, within, or touching");
+  AABB3D bb;
+  bb.bmin.set(bmin);
+  bb.bmax.set(bmax);
+  if(!geom->ExtractROI(bb,*resgeom,flag))
+    throw PyException("ROI is not supported for that type of geometry");
+  return res;
+}
+
 //KH: note: pointer gymnastics necessary to allow appearances to refer to temporary appearances as well as references to world, while also
 //exposing an opaque pointer in appearance.h
 
@@ -2253,6 +2304,42 @@ void PointCloud::setProperties(double* np_array2, int m, int n)
 
   copy(np_array2,np_array2+m*n,properties.begin());
 }
+
+void PointCloud::setPointsAndProperties(double* np_array2, int m,int n)
+{
+  if(m==0) {
+    vertices.resize(0);
+    properties.resize(0);
+    propertyNames.resize(0);
+    return;
+  }
+  if(n < 3)
+    throw PyException("Invalid size of array, must have >= 3 dimensions");
+
+  size_t nprop=propertyNames.size();
+  if((int)nprop != n-3) {
+    propertyNames.resize(n-3);
+    for(int i=(int)nprop;i<n-3;i++) {
+      stringstream ss;
+      ss<<"Property "<<i;
+      propertyNames[i] = ss.str();
+    }
+  }
+  vertices.resize(m*3);
+  properties.resize(m*(n-3));
+  if(n==3)
+    copy(np_array2,np_array2+m*3,&vertices[0]);
+  else {
+    int kv=0;
+    int kp=0;
+    int k=0;
+    for(int i=0;i<m;i++,k+=n,kv+=3,kp+=(n-3)) {
+      for(int j=0;j<3;j++) vertices[kv+j]=np_array2[k+j];
+      for(int j=0;j<n-3;j++) properties[kp+j]=np_array2[k+3+j];
+    }
+  }
+  
+}
  
 void PointCloud::getAllProperties(double** np_view2, int* m, int* n)
 {
@@ -2424,6 +2511,285 @@ void PointCloud::transform(const double R[9],const double t[3])
     Vector3 n(properties[base+nx],properties[base+ny],properties[base+nz]);
     n = T.R*n;
     n.get(properties[base+nx],properties[base+ny],properties[base+nz]);
+  }
+}
+
+void PointCloud::setDepthImage_d(const double intrinsics[4],double* np_depth2,int m,int n,double depth_scale)
+{
+  double fx=intrinsics[0],fy=intrinsics[1],cx=intrinsics[2],cy=intrinsics[3];
+  if(fx <= 0 || fy <= 0) throw PyException("Invalid intrinsics values");
+  settings.clear();
+  { stringstream ss; ss<<n; settings["width"] = ss.str(); }
+  { stringstream ss; ss<<m; settings["height"] = ss.str(); }
+  { settings["viewpoint"] = "0 0 0 1 0 0 0"; }
+  double invfx = 1.0/fx;
+  double invfy = 1.0/fy;
+  propertyNames.resize(0);
+  properties.resize(0);
+
+  vertices.resize(m*n*3);
+  int k=0;
+  for(int i=0;i<m;i++) {
+    double y=(i-cy)*invfy;
+    for(int j=0;j<n;j++,k++) {
+      double x=(j-cx)*invfx;
+      double z=np_depth2[k]*depth_scale;
+      vertices[k*3] = x*z;
+      vertices[k*3+1] = y*z;
+      vertices[k*3+2] = z;
+    }
+  }
+}
+
+void PointCloud::setDepthImage_f(const double intrinsics[4],float* np_depth2,int m,int n,double depth_scale)
+{
+  double fx=intrinsics[0],fy=intrinsics[1],cx=intrinsics[2],cy=intrinsics[3];
+  if(fx <= 0 || fy <= 0) throw PyException("Invalid intrinsics values");
+  settings.clear();
+  { stringstream ss; ss<<n; settings["width"] = ss.str(); }
+  { stringstream ss; ss<<m; settings["height"] = ss.str(); }
+  { settings["viewpoint"] = "0 0 0 1 0 0 0"; }
+  double invfx = 1.0/fx;
+  double invfy = 1.0/fy;
+  propertyNames.resize(0);
+  properties.resize(0);
+
+  vertices.resize(m*n*3);
+  int k=0;
+  for(int i=0;i<m;i++) {
+    double y=(i-cy)*invfy;
+    for(int j=0;j<n;j++,k++) {
+      double x=(j-cx)*invfx;
+      double z=np_depth2[k]*depth_scale;
+      vertices[k*3] = x*z;
+      vertices[k*3+1] = y*z;
+      vertices[k*3+2] = z;
+    }
+  }
+}
+
+void PointCloud::setDepthImage_s(const double intrinsics[4],unsigned short* np_depth2,int m,int n,double depth_scale)
+{
+  double fx=intrinsics[0],fy=intrinsics[1],cx=intrinsics[2],cy=intrinsics[3];
+  if(fx <= 0 || fy <= 0) throw PyException("Invalid intrinsics values");
+  settings.clear();
+  { stringstream ss; ss<<n; settings["width"] = ss.str(); }
+  { stringstream ss; ss<<m; settings["height"] = ss.str(); }
+  { settings["viewpoint"] = "0 0 0 1 0 0 0"; }
+  double invfx = 1.0/fx;
+  double invfy = 1.0/fy;
+  propertyNames.resize(0);
+  properties.resize(0);
+
+  vertices.resize(m*n*3);
+  int k=0;
+  for(int i=0;i<m;i++) {
+    double y=(i-cy)*invfy;
+    for(int j=0;j<n;j++,k++) {
+      double x=(j-cx)*invfx;
+      double z=np_depth2[k]*depth_scale;
+      vertices[k*3] = x*z;
+      vertices[k*3+1] = y*z;
+      vertices[k*3+2] = z;
+    }
+  }
+}
+
+void PointCloud::setRGBDImages_i_d(const double intrinsics[4],unsigned int* np_array2,int m,int n,double* np_depth2,int m2,int n2,double depth_scale)
+{
+  if(m != m2 || n != n2) throw PyException("Non-matching image sizes");
+  double fx=intrinsics[0],fy=intrinsics[1],cx=intrinsics[2],cy=intrinsics[3];
+  if(fx <= 0 || fy <= 0) throw PyException("Invalid intrinsics values");
+  settings.clear();
+  { stringstream ss; ss<<n; settings["width"] = ss.str(); }
+  { stringstream ss; ss<<m; settings["height"] = ss.str(); }
+  { settings["viewpoint"] = "0 0 0 1 0 0 0"; }
+  double invfx = 1.0/fx;
+  double invfy = 1.0/fy;
+  propertyNames.resize(1);
+  propertyNames[0] = "rgb";
+  properties.resize(m*n);
+  for(int i=0;i<m*n;i++)
+    properties[i] = Real(np_array2[i]);  //encode uint as double
+
+  vertices.resize(m*n*3);
+  int k=0;
+  for(int i=0;i<m;i++) {
+    double y=(i-cy)*invfy;
+    for(int j=0;j<n;j++,k++) {
+      double x=(j-cx)*invfx;
+      double z=np_depth2[k]*depth_scale;
+      vertices[k*3] = x*z;
+      vertices[k*3+1] = y*z;
+      vertices[k*3+2] = z;
+    }
+  }
+}
+
+void PointCloud::setRGBDImages_i_f(const double intrinsics[4],unsigned int* np_array2,int m,int n,float* np_depth2,int m2,int n2,double depth_scale)
+{
+  if(m != m2 || n != n2) throw PyException("Non-matching image sizes");
+  double fx=intrinsics[0],fy=intrinsics[1],cx=intrinsics[2],cy=intrinsics[3];
+  if(fx <= 0 || fy <= 0) throw PyException("Invalid intrinsics values");
+  settings.clear();
+  { stringstream ss; ss<<n; settings["width"] = ss.str(); }
+  { stringstream ss; ss<<m; settings["height"] = ss.str(); }
+  { settings["viewpoint"] = "0 0 0 1 0 0 0"; }
+  double invfx = 1.0/fx;
+  double invfy = 1.0/fy;
+  propertyNames.resize(1);
+  propertyNames[0] = "rgb";
+  properties.resize(m*n);
+  for(int i=0;i<m*n;i++)
+    properties[i] = Real(np_array2[i]);  //encode uint as double
+
+  vertices.resize(m*n*3);
+  int k=0;
+  for(int i=0;i<m;i++) {
+    double y=(i-cy)*invfy;
+    for(int j=0;j<n;j++,k++) {
+      double x=(j-cx)*invfx;
+      double z=np_depth2[k]*depth_scale;
+      vertices[k*3] = x*z;
+      vertices[k*3+1] = y*z;
+      vertices[k*3+2] = z;
+    }
+  }
+}
+
+void PointCloud::setRGBDImages_i_s(const double intrinsics[4],unsigned int* np_array2,int m,int n,unsigned short* np_depth2,int m2,int n2,double depth_scale)
+{
+  if(m != m2 || n != n2) throw PyException("Non-matching image sizes");
+  double fx=intrinsics[0],fy=intrinsics[1],cx=intrinsics[2],cy=intrinsics[3];
+  if(fx <= 0 || fy <= 0) throw PyException("Invalid intrinsics values");
+  settings.clear();
+  { stringstream ss; ss<<n; settings["width"] = ss.str(); }
+  { stringstream ss; ss<<m; settings["height"] = ss.str(); }
+  { settings["viewpoint"] = "0 0 0 1 0 0 0"; }
+  double invfx = 1.0/fx;
+  double invfy = 1.0/fy;
+  propertyNames.resize(1);
+  propertyNames[0] = "rgb";
+  properties.resize(m*n);
+  for(int i=0;i<m*n;i++)
+    properties[i] = Real(np_array2[i]);  //encode uint as double
+
+  vertices.resize(m*n*3);
+  int k=0;
+  for(int i=0;i<m;i++) {
+    double y=(i-cy)*invfy;
+    for(int j=0;j<n;j++,k++) {
+      double x=(j-cx)*invfx;
+      double z=np_depth2[k]*depth_scale;
+      vertices[k*3] = x*z;
+      vertices[k*3+1] = y*z;
+      vertices[k*3+2] = z;
+    }
+  }
+}
+
+void PointCloud::setRGBDImages_b_d(const double intrinsics[4],unsigned char* np_array3,int m,int n,int p,double* np_depth2,int m2,int n2,double depth_scale)
+{
+  if(p != 3) throw PyException("Need 3 color channels");
+  if(m != m2 || n != n2) throw PyException("Non-matching image sizes");
+  double fx=intrinsics[0],fy=intrinsics[1],cx=intrinsics[2],cy=intrinsics[3];
+  if(fx <= 0 || fy <= 0) throw PyException("Invalid intrinsics values");
+  settings.clear();
+  { stringstream ss; ss<<n; settings["width"] = ss.str(); }
+  { stringstream ss; ss<<m; settings["height"] = ss.str(); }
+  { settings["viewpoint"] = "0 0 0 1 0 0 0"; }
+  double invfx = 1.0/fx;
+  double invfy = 1.0/fy;
+  propertyNames.resize(1);
+  propertyNames[0] = "rgb";
+  properties.resize(m*n);
+  int j=0;
+  for(int i=0;i<m*n;i++,j+=3) {
+    unsigned int rgb = (((unsigned int)np_array3[j])<<16) | (((unsigned int)np_array3[j+1])<<8) | (np_array3[j+2]);
+    properties[i] = Real(rgb);  //encode uint as double
+  }
+
+  vertices.resize(m*n*3);
+  int k=0;
+  for(int i=0;i<m;i++) {
+    double y=(i-cy)*invfy;
+    for(int j=0;j<n;j++,k++) {
+      double x=(j-cx)*invfx;
+      double z=np_depth2[k]*depth_scale;
+      vertices[k*3] = x*z;
+      vertices[k*3+1] = y*z;
+      vertices[k*3+2] = z;
+    }
+  }
+}
+
+void PointCloud::setRGBDImages_b_f(const double intrinsics[4],unsigned char* np_array3,int m,int n,int p,float* np_depth2,int m2,int n2,double depth_scale)
+{
+  if(p != 3) throw PyException("Need 3 color channels");
+  if(m != m2 || n != n2) throw PyException("Non-matching image sizes");
+  double fx=intrinsics[0],fy=intrinsics[1],cx=intrinsics[2],cy=intrinsics[3];
+  if(fx <= 0 || fy <= 0) throw PyException("Invalid intrinsics values");
+  settings.clear();
+  { stringstream ss; ss<<n; settings["width"] = ss.str(); }
+  { stringstream ss; ss<<m; settings["height"] = ss.str(); }
+  { settings["viewpoint"] = "0 0 0 1 0 0 0"; }
+  double invfx = 1.0/fx;
+  double invfy = 1.0/fy;
+  propertyNames.resize(1);
+  propertyNames[0] = "rgb";
+  properties.resize(m*n);
+  int j=0;
+  for(int i=0;i<m*n;i++,j+=3) {
+    unsigned int rgb = (((unsigned int)np_array3[j])<<16) | (((unsigned int)np_array3[j+1])<<8) | (np_array3[j+2]);
+    properties[i] = Real(rgb);  //encode uint as double
+  }
+
+  vertices.resize(m*n*3);
+  int k=0;
+  for(int i=0;i<m;i++) {
+    double y=(i-cy)*invfy;
+    for(int j=0;j<n;j++,k++) {
+      double x=(j-cx)*invfx;
+      double z=np_depth2[k]*depth_scale;
+      vertices[k*3] = x*z;
+      vertices[k*3+1] = y*z;
+      vertices[k*3+2] = z;
+    }
+  }
+}
+
+void PointCloud::setRGBDImages_b_s(const double intrinsics[4],unsigned char* np_array3,int m,int n,int p,unsigned short* np_depth2,int m2,int n2,double depth_scale)
+{
+  if(p != 3) throw PyException("Need 3 color channels");
+  if(m != m2 || n != n2) throw PyException("Non-matching image sizes");
+  double fx=intrinsics[0],fy=intrinsics[1],cx=intrinsics[2],cy=intrinsics[3];
+  if(fx <= 0 || fy <= 0) throw PyException("Invalid intrinsics values");
+  settings.clear();
+  { stringstream ss; ss<<n; settings["width"] = ss.str(); }
+  { stringstream ss; ss<<m; settings["height"] = ss.str(); }
+  { settings["viewpoint"] = "0 0 0 1 0 0 0"; }
+  double invfx = 1.0/fx;
+  double invfy = 1.0/fy;
+  propertyNames.resize(1);
+  propertyNames[0] = "rgb";
+  properties.resize(m*n);
+  int j=0;
+  for(int i=0;i<m*n;i++,j+=3) {
+    unsigned int rgb = (((unsigned int)np_array3[j])<<16) | (((unsigned int)np_array3[j+1])<<8) | (np_array3[j+2]);
+    properties[i] = Real(rgb);  //encode uint as double
+  }
+
+  vertices.resize(m*n*3);
+  int k=0;
+  for(int i=0;i<m;i++) {
+    double y=(i-cy)*invfy;
+    for(int j=0;j<n;j++,k++) {
+      double x=(j-cx)*invfx;
+      double z=np_depth2[k]*depth_scale;
+      vertices[k*3] = x*z;
+      vertices[k*3+1] = y*z;
+      vertices[k*3+2] = z;
+    }
   }
 }
 

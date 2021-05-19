@@ -1217,6 +1217,16 @@ class PointCloud(object):
         """
         return _robotsim.PointCloud_setPoints(self, np_array2)
 
+    def setPointsAndProperties(self, np_array2):
+        r"""
+        setPointsAndProperties(PointCloud self, double * np_array2)
+
+
+        Sets all the points and m properties from the given n x (3+m) array.  
+
+        """
+        return _robotsim.PointCloud_setPointsAndProperties(self, np_array2)
+
     def addPoint(self, p):
         r"""
         addPoint(PointCloud self, double const [3] p) -> int
@@ -1363,6 +1373,111 @@ class PointCloud(object):
 
         """
         return _robotsim.PointCloud_getSetting(self, key)
+
+    def setDepthImage_d(self, intrinsics, np_array2, depth_scale):
+        r"""
+        setDepthImage_d(PointCloud self, double const [4] intrinsics, double * np_array2, double depth_scale)
+
+
+        Sets a structured point cloud from a depth image. [fx,fy,cx,cy] are the
+        intrinsics parameters. The depth is given as a size hxw array, top to bottom.  
+
+        """
+        return _robotsim.PointCloud_setDepthImage_d(self, intrinsics, np_array2, depth_scale)
+
+    def setDepthImage_f(self, intrinsics, np_depth2, depth_scale):
+        r"""
+        setDepthImage_f(PointCloud self, double const [4] intrinsics, float * np_depth2, double depth_scale)
+
+
+        Sets a structured point cloud from a depth image. [fx,fy,cx,cy] are the
+        intrinsics parameters. The depth is given as a size hxw array, top to bottom.  
+
+        """
+        return _robotsim.PointCloud_setDepthImage_f(self, intrinsics, np_depth2, depth_scale)
+
+    def setDepthImage_s(self, intrinsics, np_depth2, depth_scale):
+        r"""
+        setDepthImage_s(PointCloud self, double const [4] intrinsics, unsigned short * np_depth2, double depth_scale)
+
+
+        Sets a structured point cloud from a depth image. [fx,fy,cx,cy] are the
+        intrinsics parameters. The depth is given as a size hxw array, top to bottom.  
+
+        """
+        return _robotsim.PointCloud_setDepthImage_s(self, intrinsics, np_depth2, depth_scale)
+
+    def setRGBDImages_i_d(self, intrinsics, np_array2, np_depth2, depth_scale):
+        r"""
+        setRGBDImages_i_d(PointCloud self, double const [4] intrinsics, unsigned int * np_array2, double * np_depth2, double depth_scale)
+
+
+        Sets a structured point cloud from an RGBD (color,depth) image pair.
+        [fx,fy,cx,cy] are the intrinsics parameters. The RGB colors are packed in
+        0xrrggbb order, size hxw, top to bottom.  
+
+        """
+        return _robotsim.PointCloud_setRGBDImages_i_d(self, intrinsics, np_array2, np_depth2, depth_scale)
+
+    def setRGBDImages_i_f(self, intrinsics, np_array2, np_depth2, depth_scale):
+        r"""
+        setRGBDImages_i_f(PointCloud self, double const [4] intrinsics, unsigned int * np_array2, float * np_depth2, double depth_scale)
+
+
+        Sets a structured point cloud from an RGBD (color,depth) image pair.
+        [fx,fy,cx,cy] are the intrinsics parameters. The RGB colors are packed in
+        0xrrggbb order, size hxw, top to bottom.  
+
+        """
+        return _robotsim.PointCloud_setRGBDImages_i_f(self, intrinsics, np_array2, np_depth2, depth_scale)
+
+    def setRGBDImages_i_s(self, intrinsics, np_array2, np_depth2, depth_scale):
+        r"""
+        setRGBDImages_i_s(PointCloud self, double const [4] intrinsics, unsigned int * np_array2, unsigned short * np_depth2, double depth_scale)
+
+
+        Sets a structured point cloud from an RGBD (color,depth) image pair.
+        [fx,fy,cx,cy] are the intrinsics parameters. The RGB colors are packed in
+        0xrrggbb order, size hxw, top to bottom.  
+
+        """
+        return _robotsim.PointCloud_setRGBDImages_i_s(self, intrinsics, np_array2, np_depth2, depth_scale)
+
+    def setRGBDImages_b_d(self, intrinsics, np_array3, np_depth2, depth_scale):
+        r"""
+        setRGBDImages_b_d(PointCloud self, double const [4] intrinsics, unsigned char * np_array3, double * np_depth2, double depth_scale)
+
+
+        Sets a structured point cloud from an RGBD (color,depth) image pair.
+        [fx,fy,cx,cy] are the intrinsics parameters. The RGB colors are packed in
+        0xrrggbb order, size hxw, top to bottom.  
+
+        """
+        return _robotsim.PointCloud_setRGBDImages_b_d(self, intrinsics, np_array3, np_depth2, depth_scale)
+
+    def setRGBDImages_b_f(self, intrinsics, np_array3, np_depth2, depth_scale):
+        r"""
+        setRGBDImages_b_f(PointCloud self, double const [4] intrinsics, unsigned char * np_array3, float * np_depth2, double depth_scale)
+
+
+        Sets a structured point cloud from an RGBD (color,depth) image pair.
+        [fx,fy,cx,cy] are the intrinsics parameters. The RGB colors are an h x w x 3
+        array, top to bottom.  
+
+        """
+        return _robotsim.PointCloud_setRGBDImages_b_f(self, intrinsics, np_array3, np_depth2, depth_scale)
+
+    def setRGBDImages_b_s(self, intrinsics, np_array3, np_depth2, depth_scale):
+        r"""
+        setRGBDImages_b_s(PointCloud self, double const [4] intrinsics, unsigned char * np_array3, unsigned short * np_depth2, double depth_scale)
+
+
+        Sets a structured point cloud from an RGBD (color,depth) image pair.
+        [fx,fy,cx,cy] are the intrinsics parameters. The RGB colors are an h x w x 3
+        array, top to bottom.  
+
+        """
+        return _robotsim.PointCloud_setRGBDImages_b_s(self, intrinsics, np_array3, np_depth2, depth_scale)
     vertices = property(_robotsim.PointCloud_vertices_get, _robotsim.PointCloud_vertices_set, doc=r"""vertices : std::vector<(double,std::allocator<(double)>)>""")
     propertyNames = property(_robotsim.PointCloud_propertyNames_get, _robotsim.PointCloud_propertyNames_set, doc=r"""propertyNames : std::vector<(std::string,std::allocator<(std::string)>)>""")
     properties = property(_robotsim.PointCloud_properties_get, _robotsim.PointCloud_properties_set, doc=r"""properties : std::vector<(double,std::allocator<(double)>)>""")
@@ -1372,6 +1487,74 @@ class PointCloud(object):
         from klampt.io import loader
         jsonobj = loader.toJson(self,'PointCloud')
         return (loader.fromJson,(jsonobj,'PointCloud'))
+
+    def setDepthImage(self,intrinsics,depth,depth_scale=1.0):
+        """
+        %Sets a structured point cloud from a depth image.
+
+        Args:
+            intrinsics (4-list): the intrinsics parameters [fx,fy,cx,cy].
+            depth (np.ndarray): the depth values, of size h x w.  Should have
+                dtype float, np.float32, or np.uint16 for best performance.
+            depth_scale (float, optional): converts depth image values to real
+                depth units.
+        """
+        import numpy as np
+        if len(intrinsics) != 4:
+            raise ValueError("Invalid value for the intrinsics parameters")
+        if depth.dtype == float:
+            return self.setDepthImage_d(intrinsics,depth,depth_scale)
+        elif depth.dtype == np.float32:
+            return self.setDepthImage_f(intrinsics,depth,depth_scale)
+        elif depth.dtype == np.uint16:
+            return self.setDepthImage_s(intrinsics,depth,depth_scale)
+        else:
+            return self.setDepthImage_d(intrinsics,depth,depth_scale)
+
+    def setRGBDImages(self,intrinsics,color,depth,depth_scale=1.0):
+        """
+        %Sets a structured point cloud from a (color,depth) image pair.
+
+        Args:
+            intrinsics (4-list): the intrinsics parameters [fx,fy,cx,cy].
+            color (np.ndarray): the color values, of size h x w or h x w x 3.
+                In first case, must have dtype np.uint32 with r,g,b values
+                packed in 0xrrggbb order.  In second case, if dtype is
+                np.uint8, min and max are [0,255].  If dtype is float or
+                np.float32, min and max are [0,1].
+            depth (np.ndarray): the depth values, of size h x w.  Should have
+                dtype float, np.float32, or np.uint16 for best performance.
+            depth_scale (float, optional): converts depth image values to real
+                depth units.
+        """
+        import numpy as np
+        if len(intrinsics) != 4:
+            raise ValueError("Invalid value for the intrinsics parameters")
+        if color.shape[0] != depth.shape[0] or color.shape[1] != depth.shape[1]:
+            raise ValueError("Color and depth images need to have matching dimensions")
+        if len(color.shape)==3:
+            if color.shape[2] != 3:
+                raise ValueError("Color image can only have 3 channels")
+            if color.dtype != np.uint8:
+                color = (color*255.0).astype(np.uint8)
+            if depth.dtype == float:
+                return self.setRGBDImages_b_d(intrinsics,color,depth,depth_scale)
+            elif depth.dtype == np.float32:
+                return self.setRGBDImages_b_f(intrinsics,color,depth,depth_scale)
+            elif depth.dtype == np.uint16:
+                return self.setRGBDImages_b_s(intrinsics,color,depth,depth_scale)
+            else:
+                return self.setRGBDImages_b_d(intrinsics,color,depth,depth_scale)
+        else:
+            if depth.dtype == float:
+                return self.setRGBDImages_i_d(intrinsics,color,depth,depth_scale)
+            elif depth.dtype == np.float32:
+                return self.setRGBDImages_i_f(intrinsics,color,depth,depth_scale)
+            elif depth.dtype == np.uint16:
+                return self.setRGBDImages_i_s(intrinsics,color,depth,depth_scale)
+            else:
+                return self.setRGBDImages_i_d(intrinsics,color,depth,depth_scale)
+
 
     __swig_destroy__ = _robotsim.delete_PointCloud
 
@@ -2457,6 +2640,55 @@ class Geometry3D(object):
 
         """
         return _robotsim.Geometry3D_support(self, dir)
+
+    def slice(self, R, t, tol):
+        r"""
+        slice(Geometry3D self, double const [9] R, double const [3] t, double tol) -> Geometry3D
+
+
+        Calculates a 2D slice through the data. The slice is given by the local X-Y
+        plane of a transform (R,T) with orientation R and translation t. The return
+        Geometry's data is in the local frame of (R,t), and (R,t) is set as its current
+        transform.  
+
+        The geometry's current transform is respected.  
+
+        O(N) time.  
+
+        Supported types:  
+
+        *   PointCloud. Needs tol > 0. A PointCloud is returned.  
+        *   TriangleMesh. tol is ignored. A Group of GeometricPrimitives (segments) is
+            returned.  
+
+        """
+        return _robotsim.Geometry3D_slice(self, R, t, tol)
+
+    def roi(self, query, bmin, bmax):
+        r"""
+        roi(Geometry3D self, char const * query, double const [3] bmin, double const [3] bmax) -> Geometry3D
+
+
+        Calculates a region of interest of the data for the bounding box [bmin,bmax].
+        The geometry's current transform is respected.  
+
+        `query` can be "intersect", "touching", or "within". If "intersect",
+        this tries to get a representation of the geometry intersecting the box. If
+        "touching", all elements touching the box are returned. If "within", only
+        elements entirely inside the box are returned.  
+
+        `query` can also be prefaced with a '~' which indicates that the ROI should be
+        inverted, i.e. select everything that does NOT intersect with a box.  
+
+        O(N) time.  
+
+        Supported types:  
+
+        *   PointCloud  
+        *   TriangleMesh  
+
+        """
+        return _robotsim.Geometry3D_roi(self, query, bmin, bmax)
     world = property(_robotsim.Geometry3D_world_get, _robotsim.Geometry3D_world_set, doc=r"""world : int""")
     id = property(_robotsim.Geometry3D_id_get, _robotsim.Geometry3D_id_set, doc=r"""id : int""")
     geomPtr = property(_robotsim.Geometry3D_geomPtr_get, _robotsim.Geometry3D_geomPtr_set, doc=r"""geomPtr : p.void""")

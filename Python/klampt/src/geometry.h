@@ -180,6 +180,8 @@ struct PointCloud
   void getPoints(double** np_view2, int* m, int* n);
   ///Sets all the points to the given nx3 Numpy array
   void setPoints(double* np_array2, int m, int n);
+  ///Sets all the points and m properties from the given n x (3+m) array
+  void setPointsAndProperties(double* np_array2, int m,int n);
   ///Adds a point. Sets all its properties to 0.  Returns the index.
   int addPoint(const double p[3]);
   ///Sets the position of the point at the given index to p
@@ -219,6 +221,25 @@ struct PointCloud
   void setSetting(const std::string& key,const std::string& value);
   ///Retrieves the given setting
   std::string getSetting(const std::string& key) const;
+  ///Sets a structured point cloud from a depth image.  [fx,fy,cx,cy] are the intrinsics parameters.  The depth is given as a size hxw array, top to bottom.
+  void setDepthImage_d(const double intrinsics[4],double* np_array2,int m,int n,double depth_scale);
+  ///Sets a structured point cloud from a depth image.  [fx,fy,cx,cy] are the intrinsics parameters.  The depth is given as a size hxw array, top to bottom.
+  void setDepthImage_f(const double intrinsics[4],float* np_depth2,int m2,int n2,double depth_scale);
+  ///Sets a structured point cloud from a depth image.  [fx,fy,cx,cy] are the intrinsics parameters.  The depth is given as a size hxw array, top to bottom.
+  void setDepthImage_s(const double intrinsics[4],unsigned short* np_depth2,int m2,int n2,double depth_scale);
+  ///Sets a structured point cloud from an RGBD (color,depth) image pair.  [fx,fy,cx,cy] are the intrinsics parameters.  The RGB colors are packed in 0xrrggbb order, size hxw, top to bottom.
+  void setRGBDImages_i_d(const double intrinsics[4],unsigned int* np_array2,int m,int n,double* np_depth2,int m2,int n2,double depth_scale);
+  ///Sets a structured point cloud from an RGBD (color,depth) image pair.  [fx,fy,cx,cy] are the intrinsics parameters.  The RGB colors are packed in 0xrrggbb order, size hxw, top to bottom.
+  void setRGBDImages_i_f(const double intrinsics[4],unsigned int* np_array2,int m,int n,float* np_depth2,int m2,int n2,double depth_scale);
+  ///Sets a structured point cloud from an RGBD (color,depth) image pair.  [fx,fy,cx,cy] are the intrinsics parameters.  The RGB colors are packed in 0xrrggbb order, size hxw, top to bottom.
+  void setRGBDImages_i_s(const double intrinsics[4],unsigned int* np_array2,int m,int n,unsigned short* np_depth2,int m2,int n2,double depth_scale);
+  ///Sets a structured point cloud from an RGBD (color,depth) image pair.  [fx,fy,cx,cy] are the intrinsics parameters.  The RGB colors are packed in 0xrrggbb order, size hxw, top to bottom.
+  void setRGBDImages_b_d(const double intrinsics[4],unsigned char* np_array3,int m,int n,int p,double* np_depth2,int m2,int n2,double depth_scale);
+  ///Sets a structured point cloud from an RGBD (color,depth) image pair.  [fx,fy,cx,cy] are the intrinsics parameters.  The RGB colors are an h x w x 3 array, top to bottom.
+  void setRGBDImages_b_f(const double intrinsics[4],unsigned char* np_array3,int m,int n,int p,float* np_depth2,int m2,int n2,double depth_scale);
+  ///Sets a structured point cloud from an RGBD (color,depth) image pair.  [fx,fy,cx,cy] are the intrinsics parameters.  The RGB colors are an h x w x 3 array, top to bottom.
+  void setRGBDImages_b_s(const double intrinsics[4],unsigned char* np_array3,int m,int n,int p,unsigned short* np_depth2,int m2,int n2,double depth_scale);
+  
 
   std::vector<double> vertices;
   std::vector<std::string> propertyNames;
@@ -746,6 +767,38 @@ class Geometry3D
   ///- ConvexHull
   ///
   void support(const double dir[3], double out[3]);
+  ///Calculates a 2D slice through the data. The slice is given by the local X-Y plane of a 
+  ///transform (R,T) with orientation R and translation t.  The return Geometry's data is in
+  ///the local frame of (R,t), and (R,t) is set as its current transform. 
+  ///
+  ///The geometry's current transform is respected.
+  ///
+  ///O(N) time.
+  ///
+  ///Supported types:
+  ///
+  ///- PointCloud.  Needs tol > 0.  A PointCloud is returned.
+  ///- TriangleMesh. tol is ignored. A Group of GeometricPrimitives (segments) is returned.
+  ///
+  Geometry3D slice(const double R[9],const double t[3],double tol);
+  ///Calculates a region of interest of the data for the bounding box [bmin,bmax]. 
+  ///The geometry's current transform is respected.
+  ///
+  ///`query` can be "intersect", "touching", or "within". If "intersect", this tries to get a
+  ///representation of the geometry intersecting the box.  If "touching", all elements touching
+  ///the box are returned.  If "within", only elements entirely inside the box are returned.
+  ///
+  ///`query` can also be prefaced with a '~' which indicates that the ROI should be inverted,
+  ///i.e. select everything that does NOT intersect with a box.
+  ///
+  ///O(N) time.
+  ///
+  ///Supported types:
+  ///
+  ///- PointCloud
+  ///- TriangleMesh
+  ///
+  Geometry3D roi(const char* query,const double bmin[3],const double bmax[3]);
 
   int world;
   int id;

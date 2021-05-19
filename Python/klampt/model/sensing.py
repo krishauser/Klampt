@@ -37,6 +37,7 @@ convert between intrinsics definitions.
 """
 
 from ..robotsim import *
+from ..robotsim import Geometry3D
 from ..io import loader
 from . import coordinates
 import math
@@ -222,9 +223,13 @@ def image_to_points(depth,color,xfov,yfov=None,depth_scale=None,depth_range=None
         color (list of lists or numpy array, optional): the w x h color image. 
             Assumed that color maps directly onto depth pixels.  If None,
             an uncolored point cloud will be produced. 
-        xfov (float): horizontal field of view, in radians.
+        xfov (float): horizontal field of view, in radians.  Related to the
+            intrinsics fx via :math:`fx = w/(2 \tan(xfov/2))`, i.e.,
+            :math:`xfov = 2*\arctan(w/(2*fx))`.
         yfov (float, optional): vertical field of view, in radians.  If not
-            given, square pixels are assumed.
+            given, square pixels are assumed.  Related to the intrinsics
+            :math:`fy = h/(2 \tan(yfov/2))`, i.e.,
+            :math:`yfov = 2*\arctan(h/(2*fy))`.
         depth_scale (float, optional): a scaling from depth image values to
             absolute depth values.
         depth_range (pair of floats, optional): if given, only points within 
@@ -276,13 +281,28 @@ def image_to_points(depth,color,xfov,yfov=None,depth_scale=None,depth_range=None
                 color_format = 'rgb'
     if depth_scale is not None:
         depth *= depth_scale
-    if depth_range is not None:
-        valid = np.logical_and((depth > depth_range[0]),(depth < depth_range[1]))
-        if all_points:
-            depth[~valid] = 0
-        valid = (depth > 0)
-    else:
-        valid = (depth > 0)
+
+    if (points_format == 'PointCloud' or points_format == 'Geometry3D') and all_points:
+        #shortcut, about 2x faster than going through Numpy
+        res = PointCloud()
+        fx = 0.5*w/math.tan(xfov*0.5)
+        if yfov is None:
+            fy = fx
+        else:
+            fy = 0.5*h/math.tan(yfov*0.5)
+        cx = 0.5*w
+        cy = 0.5*h
+        if color_format is None or color is None:
+            res.setDepthImages([fx,fy,cx,cy],depth,depth_scale)
+        else:
+            res.setRGBDImages([fx,fy,cx,cy],color,depth,depth_scale)
+
+        if points_format == 'PointCloud':
+            return res
+        else:
+            g = Geometry3D()
+            g.setPointCloud(res)
+            return g
 
     xshift = -w*0.5
     yshift = -h*0.5
@@ -306,34 +326,44 @@ def image_to_points(depth,color,xfov,yfov=None,depth_scale=None,depth_range=None
     if color_format is not None:
         if len(color.shape) == 2:
             color = color.reshape(color.shape[0],color.shape[1],1)
-        pts = np.concatenate((pts,color),2)
+
     #now have a nice array containing all points, shaped h x w x (3+c)
     #extract out the valid points from this array
     if all_points:
         pts = pts.reshape(w*h,pts.shape[2])
+        if color is not None:
+            color = color.reshape(w*h,color.shape[2])
     else:
+        if depth_range is not None:
+            valid = np.logical_and((depth > depth_range[0]),(depth < depth_range[1]))
+            if all_points:
+                depth[~valid] = 0
+            valid = (depth > 0)
+        else:
+            valid = (depth > 0)
         pts = pts[valid]
+        color = color[valid]
 
     if points_format == 'numpy':
+        pts = np.concatenate((pts,color),2)
         return pts
     elif points_format == 'PointCloud' or points_format == 'Geometry3D':
         res = PointCloud()
         if all_points:
             res.setSetting('width',str(w))
             res.setSetting('height',str(h))
-        res.setPoints(pts[:,0:3])
+        res.setPoints(pts)
         if color_format == 'rgb':
             res.addProperty('rgb')
-            res.setProperties(pts[:,3])
+            res.setProperties(color)
         elif color_format == 'channels':
             res.addProperty('r')
             res.addProperty('g')
             res.addProperty('b')
-            res.setProperties(pts[:,3:6])
+            res.setProperties(color)
         if points_format == 'PointCloud':
             return res
         else:
-            from klampt import Geometry3D
             g = Geometry3D()
             g.setPointCloud(res)
             return g
@@ -397,6 +427,25 @@ def camera_to_points(camera,points_format='numpy',all_points=False,color_format=
     h = int(camera.getSetting('yres'))
     xfov = float(camera.getSetting('xfov'))
     yfov = float(camera.getSetting('yfov'))
+
+    if (points_format == 'PointCloud' or points_format == 'Geometry3D') and (color_format is None or color_format == 'rgb') and all_points:
+        #shortcut, about 2x faster than going through Numpy
+        res = PointCloud()
+        fx = 0.5*w/math.tan(xfov*0.5)
+        fy = 0.5*h/math.tan(yfov*0.5)
+        cx = 0.5*w
+        cy = 0.5*h
+        if color_format is None:
+            res.setDepthImages([fx,fy,cx,cy],depth)
+        else:
+            res.setRGBDImages([fx,fy,cx,cy],rgb,depth)
+        if points_format == 'PointCloud':
+            return res
+        else:
+            g = Geometry3D()
+            g.setPointCloud(res)
+            return g
+
     zmin = float(camera.getSetting('zmin'))
     zmax = float(camera.getSetting('zmax'))
     xshift = -w*0.5
@@ -439,7 +488,7 @@ def camera_to_points(camera,points_format='numpy',all_points=False,color_format=
         res.setPoints(pts[:,0:3])
         if color_format == 'rgb':
             res.addProperty('rgb')
-            res.setProperties(pts[:,3])
+            res.setProperties(pts[:,3:4])
         elif color_format == 'channels':
             res.addProperty('r')
             res.addProperty('g')
@@ -450,7 +499,6 @@ def camera_to_points(camera,points_format='numpy',all_points=False,color_format=
         if points_format == 'PointCloud':
             return res
         else:
-            from klampt import Geometry3D
             g = Geometry3D()
             g.setPointCloud(res)
             return g
@@ -710,8 +758,8 @@ def intrinsics_to_camera(data,camera,format='opencv'):
         raise ValueError("Invalid format, only opencv, numpy, ros, and json are supported")
     w = int(cx*2)
     h = int(cy*2)
-    xfov = math.atan(fx/w*2)*2
-    yfov = math.atan(fy/h*2)*2
+    xfov = math.atan(fx/(w*2))*2
+    yfov = math.atan(fy/(h*2))*2
     camera.setSetting('xres',str(w))
     camera.setSetting('yres',str(h))
     camera.setSetting('xfov',str(xfov))
@@ -858,7 +906,6 @@ def visible(camera,object,full=True,robot=None):
                 yclosest = max(min(cproj[1],camera.h),0)
                 zclosest = max(min(cproj[2],camera.clippingplanes[1]),camera.clippingplanes[0])
                 return vectorops.distance((xclosest,yclosest),cproj[0:2]) <= rproj
-    from klampt import Geometry3D
     if not isinstance(object,Geometry3D):
         raise ValueError("Object must be a point, sphere, bounding box, or Geometry3D")
     return visible(camera,object.getBB(),full,robot)

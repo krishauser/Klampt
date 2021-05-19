@@ -888,6 +888,27 @@ Copies the geometry of the argument into this geometry.
 Sets the current transformation (not modifying the underlying data)  
 ";
 
+%feature("docstring") Geometry3D::roi "
+
+Calculates a region of interest of the data for the bounding box [bmin,bmax].
+The geometry's current transform is respected.  
+
+`query` can be \"intersect\", \"touching\", or \"within\". If \"intersect\",
+this tries to get a representation of the geometry intersecting the box. If
+\"touching\", all elements touching the box are returned. If \"within\", only
+elements entirely inside the box are returned.  
+
+`query` can also be prefaced with a '~' which indicates that the ROI should be
+inverted, i.e. select everything that does NOT intersect with a box.  
+
+O(N) time.  
+
+Supported types:  
+
+*   PointCloud  
+*   TriangleMesh  
+";
+
 %feature("docstring") Geometry3D::free "
 
 Frees the data associated with this geometry, if standalone.  
@@ -970,6 +991,24 @@ Unsupported types:
 *   ConvexHull - anything else besides ConvexHull  
 
 See the comments of the distance_point function  
+";
+
+%feature("docstring") Geometry3D::slice "
+
+Calculates a 2D slice through the data. The slice is given by the local X-Y
+plane of a transform (R,T) with orientation R and translation t. The return
+Geometry's data is in the local frame of (R,t), and (R,t) is set as its current
+transform.  
+
+The geometry's current transform is respected.  
+
+O(N) time.  
+
+Supported types:  
+
+*   PointCloud. Needs tol > 0. A PointCloud is returned.  
+*   TriangleMesh. tol is ignored. A Group of GeometricPrimitives (segments) is
+    returned.  
 ";
 
 %feature("docstring") Geometry3D::getCurrentTransform "
@@ -1887,6 +1926,140 @@ np.array(pc.properties).reshape((p.numPoints(),p.numProperties()))
 C++ includes: geometry.h
 ";
 
+%feature("docstring") PointCloud::setSetting "
+
+Sets the given setting.  
+";
+
+%feature("docstring") PointCloud::numProperties "
+
+Returns the number of properties.  
+";
+
+%feature("docstring") PointCloud::setRGBDImages_i_f "
+
+Sets a structured point cloud from an RGBD (color,depth) image pair.
+[fx,fy,cx,cy] are the intrinsics parameters. The RGB colors are packed in
+0xrrggbb order, size hxw, top to bottom.  
+";
+
+%feature("docstring") PointCloud::setDepthImage_f "
+
+Sets a structured point cloud from a depth image. [fx,fy,cx,cy] are the
+intrinsics parameters. The depth is given as a size hxw array, top to bottom.  
+";
+
+%feature("docstring") PointCloud::setRGBDImages_i_d "
+
+Sets a structured point cloud from an RGBD (color,depth) image pair.
+[fx,fy,cx,cy] are the intrinsics parameters. The RGB colors are packed in
+0xrrggbb order, size hxw, top to bottom.  
+";
+
+%feature("docstring") PointCloud::setDepthImage_d "
+
+Sets a structured point cloud from a depth image. [fx,fy,cx,cy] are the
+intrinsics parameters. The depth is given as a size hxw array, top to bottom.  
+";
+
+%feature("docstring") PointCloud::setPointsAndProperties "
+
+Sets all the points and m properties from the given n x (3+m) array.  
+";
+
+%feature("docstring") PointCloud::setRGBDImages_b_d "
+
+Sets a structured point cloud from an RGBD (color,depth) image pair.
+[fx,fy,cx,cy] are the intrinsics parameters. The RGB colors are packed in
+0xrrggbb order, size hxw, top to bottom.  
+";
+
+%feature("docstring") PointCloud::setRGBDImages_b_f "
+
+Sets a structured point cloud from an RGBD (color,depth) image pair.
+[fx,fy,cx,cy] are the intrinsics parameters. The RGB colors are an h x w x 3
+array, top to bottom.  
+";
+
+%feature("docstring") PointCloud::numPoints "
+
+Returns the number of points.  
+";
+
+%feature("docstring") PointCloud::setRGBDImages_b_s "
+
+Sets a structured point cloud from an RGBD (color,depth) image pair.
+[fx,fy,cx,cy] are the intrinsics parameters. The RGB colors are an h x w x 3
+array, top to bottom.  
+";
+
+%feature("docstring") PointCloud::setDepthImage_s "
+
+Sets a structured point cloud from a depth image. [fx,fy,cx,cy] are the
+intrinsics parameters. The depth is given as a size hxw array, top to bottom.  
+";
+
+%feature("docstring") PointCloud::getProperties "
+
+Gets property pindex of all points as an array.  
+";
+
+%feature("docstring") PointCloud::getProperties "
+
+Gets property named pindex of all points as an array.  
+";
+
+%feature("docstring") PointCloud::getAllProperties "
+
+Gets all the properties as an nxp array.  
+";
+
+%feature("docstring") PointCloud::setRGBDImages_i_s "
+
+Sets a structured point cloud from an RGBD (color,depth) image pair.
+[fx,fy,cx,cy] are the intrinsics parameters. The RGB colors are packed in
+0xrrggbb order, size hxw, top to bottom.  
+";
+
+%feature("docstring") PointCloud::join "
+
+Adds the given point cloud to this one. They must share the same properties or
+else an exception is raised.  
+";
+
+%feature("docstring") PointCloud::transform "
+
+Transforms all the points by the rigid transform v=R*v+t.  
+";
+
+%feature("docstring") PointCloud::getSetting "
+
+Retrieves the given setting.  
+";
+
+%feature("docstring") PointCloud::setProperty "
+
+Sets property pindex of point index to the given value.  
+";
+
+%feature("docstring") PointCloud::setProperty "
+
+Sets the property named pname of point index to the given value.  
+";
+
+%feature("docstring") PointCloud::PointCloud "
+";
+
+%feature("docstring") PointCloud::translate "
+
+Translates all the points by v=v+t.  
+";
+
+%feature("docstring") PointCloud::setPoints "
+
+Sets all the points to the given nx3 Numpy array.  
+";
+
 %feature("docstring") PointCloud::setProperties "
 
 Sets all the properties of all points to the given nxp array.  
@@ -1897,9 +2070,9 @@ Sets all the properties of all points to the given nxp array.
 Sets property pindex of all points to the given length-n array.  
 ";
 
-%feature("docstring") PointCloud::transform "
+%feature("docstring") PointCloud::getPoint "
 
-Transforms all the points by the rigid transform v=R*v+t.  
+Retrieves the position of the point at the given index.  
 ";
 
 %feature("docstring") PointCloud::setPoint "
@@ -1907,9 +2080,9 @@ Transforms all the points by the rigid transform v=R*v+t.
 Sets the position of the point at the given index to p.  
 ";
 
-%feature("docstring") PointCloud::translate "
+%feature("docstring") PointCloud::addPoint "
 
-Translates all the points by v=v+t.  
+Adds a point. Sets all its properties to 0. Returns the index.  
 ";
 
 %feature("docstring") PointCloud::addProperty "
@@ -1923,65 +2096,6 @@ Adds a new property with name pname, and sets values for this property to the
 given length-n array.  
 ";
 
-%feature("docstring") PointCloud::getPoint "
-
-Retrieves the position of the point at the given index.  
-";
-
-%feature("docstring") PointCloud::numPoints "
-
-Returns the number of points.  
-";
-
-%feature("docstring") PointCloud::addPoint "
-
-Adds a point. Sets all its properties to 0. Returns the index.  
-";
-
-%feature("docstring") PointCloud::getAllProperties "
-
-Gets all the properties as an nxp array.  
-";
-
-%feature("docstring") PointCloud::join "
-
-Adds the given point cloud to this one. They must share the same properties or
-else an exception is raised.  
-";
-
-%feature("docstring") PointCloud::getSetting "
-
-Retrieves the given setting.  
-";
-
-%feature("docstring") PointCloud::numProperties "
-
-Returns the number of properties.  
-";
-
-%feature("docstring") PointCloud::setProperty "
-
-Sets property pindex of point index to the given value.  
-";
-
-%feature("docstring") PointCloud::setProperty "
-
-Sets the property named pname of point index to the given value.  
-";
-
-%feature("docstring") PointCloud::getProperties "
-
-Gets property pindex of all points as an array.  
-";
-
-%feature("docstring") PointCloud::getProperties "
-
-Gets property named pindex of all points as an array.  
-";
-
-%feature("docstring") PointCloud::PointCloud "
-";
-
 %feature("docstring") PointCloud::getProperty "
 
 Gets property pindex of point index.  
@@ -1990,16 +2104,6 @@ Gets property pindex of point index.
 %feature("docstring") PointCloud::getProperty "
 
 Gets the property named pname of point index.  
-";
-
-%feature("docstring") PointCloud::setSetting "
-
-Sets the given setting.  
-";
-
-%feature("docstring") PointCloud::setPoints "
-
-Sets all the points to the given nx3 Numpy array.  
 ";
 
 %feature("docstring") PointCloud::getPoints "

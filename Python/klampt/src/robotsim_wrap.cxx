@@ -19674,6 +19674,68 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_PointCloud_setPointsAndProperties(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  double *arg2 = (double *) 0 ;
+  int arg3 ;
+  int arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "PointCloud_setPointsAndProperties", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_setPointsAndProperties" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(swig_obj[1], NPY_DOUBLE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 2) ||
+      !require_size(array2, size, 2)) SWIG_fail;
+    arg2 = (double*) array_data(array2);
+    arg3 = (int) array_size(array2,0);
+    arg4 = (int) array_size(array2,1);
+  }
+  {
+    try {
+      (arg1)->setPointsAndProperties(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_PointCloud_addPoint(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   PointCloud *arg1 = (PointCloud *) 0 ;
@@ -21038,6 +21100,888 @@ SWIGINTERN PyObject *_wrap_PointCloud_getSetting(PyObject *SWIGUNUSEDPARM(self),
   return resultobj;
 fail:
   if (SWIG_IsNewObj(res2)) delete arg2;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_setDepthImage_d(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  double *arg2 ;
+  double *arg3 = (double *) 0 ;
+  int arg4 ;
+  int arg5 ;
+  double arg6 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[4] ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
+  double val6 ;
+  int ecode6 = 0 ;
+  PyObject *swig_obj[4] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "PointCloud_setDepthImage_d", 4, 4, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_setDepthImage_d" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  {
+    if (!convert_darray(swig_obj[1],temp2,4)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array3 = obj_to_array_contiguous_allow_conversion(swig_obj[2], NPY_DOUBLE,
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 2) ||
+      !require_size(array3, size, 2)) SWIG_fail;
+    arg3 = (double*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
+    arg5 = (int) array_size(array3,1);
+  }
+  ecode6 = SWIG_AsVal_double(swig_obj[3], &val6);
+  if (!SWIG_IsOK(ecode6)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "PointCloud_setDepthImage_d" "', argument " "6"" of type '" "double""'");
+  } 
+  arg6 = static_cast< double >(val6);
+  {
+    try {
+      (arg1)->setDepthImage_d((double const (*))arg2,arg3,arg4,arg5,arg6);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_setDepthImage_f(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  double *arg2 ;
+  float *arg3 = (float *) 0 ;
+  int arg4 ;
+  int arg5 ;
+  double arg6 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[4] ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
+  double val6 ;
+  int ecode6 = 0 ;
+  PyObject *swig_obj[4] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "PointCloud_setDepthImage_f", 4, 4, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_setDepthImage_f" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  {
+    if (!convert_darray(swig_obj[1],temp2,4)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array3 = obj_to_array_contiguous_allow_conversion(swig_obj[2], NPY_FLOAT,
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 2) ||
+      !require_size(array3, size, 2)) SWIG_fail;
+    arg3 = (float*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
+    arg5 = (int) array_size(array3,1);
+  }
+  ecode6 = SWIG_AsVal_double(swig_obj[3], &val6);
+  if (!SWIG_IsOK(ecode6)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "PointCloud_setDepthImage_f" "', argument " "6"" of type '" "double""'");
+  } 
+  arg6 = static_cast< double >(val6);
+  {
+    try {
+      (arg1)->setDepthImage_f((double const (*))arg2,arg3,arg4,arg5,arg6);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_setDepthImage_s(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  double *arg2 ;
+  unsigned short *arg3 = (unsigned short *) 0 ;
+  int arg4 ;
+  int arg5 ;
+  double arg6 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[4] ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
+  double val6 ;
+  int ecode6 = 0 ;
+  PyObject *swig_obj[4] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "PointCloud_setDepthImage_s", 4, 4, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_setDepthImage_s" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  {
+    if (!convert_darray(swig_obj[1],temp2,4)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array3 = obj_to_array_contiguous_allow_conversion(swig_obj[2], NPY_USHORT,
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 2) ||
+      !require_size(array3, size, 2)) SWIG_fail;
+    arg3 = (unsigned short*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
+    arg5 = (int) array_size(array3,1);
+  }
+  ecode6 = SWIG_AsVal_double(swig_obj[3], &val6);
+  if (!SWIG_IsOK(ecode6)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "PointCloud_setDepthImage_s" "', argument " "6"" of type '" "double""'");
+  } 
+  arg6 = static_cast< double >(val6);
+  {
+    try {
+      (arg1)->setDepthImage_s((double const (*))arg2,arg3,arg4,arg5,arg6);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_setRGBDImages_i_d(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  double *arg2 ;
+  unsigned int *arg3 = (unsigned int *) 0 ;
+  int arg4 ;
+  int arg5 ;
+  double *arg6 = (double *) 0 ;
+  int arg7 ;
+  int arg8 ;
+  double arg9 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[4] ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
+  PyArrayObject *array6 = NULL ;
+  int is_new_object6 = 0 ;
+  double val9 ;
+  int ecode9 = 0 ;
+  PyObject *swig_obj[5] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "PointCloud_setRGBDImages_i_d", 5, 5, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_setRGBDImages_i_d" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  {
+    if (!convert_darray(swig_obj[1],temp2,4)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array3 = obj_to_array_contiguous_allow_conversion(swig_obj[2], NPY_UINT,
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 2) ||
+      !require_size(array3, size, 2)) SWIG_fail;
+    arg3 = (unsigned int*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
+    arg5 = (int) array_size(array3,1);
+  }
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array6 = obj_to_array_contiguous_allow_conversion(swig_obj[3], NPY_DOUBLE,
+      &is_new_object6);
+    if (!array6 || !require_dimensions(array6, 2) ||
+      !require_size(array6, size, 2)) SWIG_fail;
+    arg6 = (double*) array_data(array6);
+    arg7 = (int) array_size(array6,0);
+    arg8 = (int) array_size(array6,1);
+  }
+  ecode9 = SWIG_AsVal_double(swig_obj[4], &val9);
+  if (!SWIG_IsOK(ecode9)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode9), "in method '" "PointCloud_setRGBDImages_i_d" "', argument " "9"" of type '" "double""'");
+  } 
+  arg9 = static_cast< double >(val9);
+  {
+    try {
+      (arg1)->setRGBDImages_i_d((double const (*))arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  {
+    if (is_new_object6 && array6)
+    {
+      Py_DECREF(array6); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  {
+    if (is_new_object6 && array6)
+    {
+      Py_DECREF(array6); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_setRGBDImages_i_f(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  double *arg2 ;
+  unsigned int *arg3 = (unsigned int *) 0 ;
+  int arg4 ;
+  int arg5 ;
+  float *arg6 = (float *) 0 ;
+  int arg7 ;
+  int arg8 ;
+  double arg9 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[4] ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
+  PyArrayObject *array6 = NULL ;
+  int is_new_object6 = 0 ;
+  double val9 ;
+  int ecode9 = 0 ;
+  PyObject *swig_obj[5] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "PointCloud_setRGBDImages_i_f", 5, 5, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_setRGBDImages_i_f" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  {
+    if (!convert_darray(swig_obj[1],temp2,4)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array3 = obj_to_array_contiguous_allow_conversion(swig_obj[2], NPY_UINT,
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 2) ||
+      !require_size(array3, size, 2)) SWIG_fail;
+    arg3 = (unsigned int*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
+    arg5 = (int) array_size(array3,1);
+  }
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array6 = obj_to_array_contiguous_allow_conversion(swig_obj[3], NPY_FLOAT,
+      &is_new_object6);
+    if (!array6 || !require_dimensions(array6, 2) ||
+      !require_size(array6, size, 2)) SWIG_fail;
+    arg6 = (float*) array_data(array6);
+    arg7 = (int) array_size(array6,0);
+    arg8 = (int) array_size(array6,1);
+  }
+  ecode9 = SWIG_AsVal_double(swig_obj[4], &val9);
+  if (!SWIG_IsOK(ecode9)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode9), "in method '" "PointCloud_setRGBDImages_i_f" "', argument " "9"" of type '" "double""'");
+  } 
+  arg9 = static_cast< double >(val9);
+  {
+    try {
+      (arg1)->setRGBDImages_i_f((double const (*))arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  {
+    if (is_new_object6 && array6)
+    {
+      Py_DECREF(array6); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  {
+    if (is_new_object6 && array6)
+    {
+      Py_DECREF(array6); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_setRGBDImages_i_s(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  double *arg2 ;
+  unsigned int *arg3 = (unsigned int *) 0 ;
+  int arg4 ;
+  int arg5 ;
+  unsigned short *arg6 = (unsigned short *) 0 ;
+  int arg7 ;
+  int arg8 ;
+  double arg9 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[4] ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
+  PyArrayObject *array6 = NULL ;
+  int is_new_object6 = 0 ;
+  double val9 ;
+  int ecode9 = 0 ;
+  PyObject *swig_obj[5] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "PointCloud_setRGBDImages_i_s", 5, 5, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_setRGBDImages_i_s" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  {
+    if (!convert_darray(swig_obj[1],temp2,4)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array3 = obj_to_array_contiguous_allow_conversion(swig_obj[2], NPY_UINT,
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 2) ||
+      !require_size(array3, size, 2)) SWIG_fail;
+    arg3 = (unsigned int*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
+    arg5 = (int) array_size(array3,1);
+  }
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array6 = obj_to_array_contiguous_allow_conversion(swig_obj[3], NPY_USHORT,
+      &is_new_object6);
+    if (!array6 || !require_dimensions(array6, 2) ||
+      !require_size(array6, size, 2)) SWIG_fail;
+    arg6 = (unsigned short*) array_data(array6);
+    arg7 = (int) array_size(array6,0);
+    arg8 = (int) array_size(array6,1);
+  }
+  ecode9 = SWIG_AsVal_double(swig_obj[4], &val9);
+  if (!SWIG_IsOK(ecode9)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode9), "in method '" "PointCloud_setRGBDImages_i_s" "', argument " "9"" of type '" "double""'");
+  } 
+  arg9 = static_cast< double >(val9);
+  {
+    try {
+      (arg1)->setRGBDImages_i_s((double const (*))arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  {
+    if (is_new_object6 && array6)
+    {
+      Py_DECREF(array6); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  {
+    if (is_new_object6 && array6)
+    {
+      Py_DECREF(array6); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_setRGBDImages_b_d(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  double *arg2 ;
+  unsigned char *arg3 = (unsigned char *) 0 ;
+  int arg4 ;
+  int arg5 ;
+  int arg6 ;
+  double *arg7 = (double *) 0 ;
+  int arg8 ;
+  int arg9 ;
+  double arg10 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[4] ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
+  PyArrayObject *array7 = NULL ;
+  int is_new_object7 = 0 ;
+  double val10 ;
+  int ecode10 = 0 ;
+  PyObject *swig_obj[5] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "PointCloud_setRGBDImages_b_d", 5, 5, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_setRGBDImages_b_d" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  {
+    if (!convert_darray(swig_obj[1],temp2,4)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    npy_intp size[3] = {
+      -1, -1, -1 
+    };
+    array3 = obj_to_array_contiguous_allow_conversion(swig_obj[2], NPY_UBYTE,
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 3) ||
+      !require_size(array3, size, 3)) SWIG_fail;
+    arg3 = (unsigned char*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
+    arg5 = (int) array_size(array3,1);
+    arg6 = (int) array_size(array3,2);
+  }
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array7 = obj_to_array_contiguous_allow_conversion(swig_obj[3], NPY_DOUBLE,
+      &is_new_object7);
+    if (!array7 || !require_dimensions(array7, 2) ||
+      !require_size(array7, size, 2)) SWIG_fail;
+    arg7 = (double*) array_data(array7);
+    arg8 = (int) array_size(array7,0);
+    arg9 = (int) array_size(array7,1);
+  }
+  ecode10 = SWIG_AsVal_double(swig_obj[4], &val10);
+  if (!SWIG_IsOK(ecode10)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode10), "in method '" "PointCloud_setRGBDImages_b_d" "', argument " "10"" of type '" "double""'");
+  } 
+  arg10 = static_cast< double >(val10);
+  {
+    try {
+      (arg1)->setRGBDImages_b_d((double const (*))arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  {
+    if (is_new_object7 && array7)
+    {
+      Py_DECREF(array7); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  {
+    if (is_new_object7 && array7)
+    {
+      Py_DECREF(array7); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_setRGBDImages_b_f(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  double *arg2 ;
+  unsigned char *arg3 = (unsigned char *) 0 ;
+  int arg4 ;
+  int arg5 ;
+  int arg6 ;
+  float *arg7 = (float *) 0 ;
+  int arg8 ;
+  int arg9 ;
+  double arg10 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[4] ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
+  PyArrayObject *array7 = NULL ;
+  int is_new_object7 = 0 ;
+  double val10 ;
+  int ecode10 = 0 ;
+  PyObject *swig_obj[5] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "PointCloud_setRGBDImages_b_f", 5, 5, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_setRGBDImages_b_f" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  {
+    if (!convert_darray(swig_obj[1],temp2,4)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    npy_intp size[3] = {
+      -1, -1, -1 
+    };
+    array3 = obj_to_array_contiguous_allow_conversion(swig_obj[2], NPY_UBYTE,
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 3) ||
+      !require_size(array3, size, 3)) SWIG_fail;
+    arg3 = (unsigned char*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
+    arg5 = (int) array_size(array3,1);
+    arg6 = (int) array_size(array3,2);
+  }
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array7 = obj_to_array_contiguous_allow_conversion(swig_obj[3], NPY_FLOAT,
+      &is_new_object7);
+    if (!array7 || !require_dimensions(array7, 2) ||
+      !require_size(array7, size, 2)) SWIG_fail;
+    arg7 = (float*) array_data(array7);
+    arg8 = (int) array_size(array7,0);
+    arg9 = (int) array_size(array7,1);
+  }
+  ecode10 = SWIG_AsVal_double(swig_obj[4], &val10);
+  if (!SWIG_IsOK(ecode10)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode10), "in method '" "PointCloud_setRGBDImages_b_f" "', argument " "10"" of type '" "double""'");
+  } 
+  arg10 = static_cast< double >(val10);
+  {
+    try {
+      (arg1)->setRGBDImages_b_f((double const (*))arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  {
+    if (is_new_object7 && array7)
+    {
+      Py_DECREF(array7); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  {
+    if (is_new_object7 && array7)
+    {
+      Py_DECREF(array7); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_setRGBDImages_b_s(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  double *arg2 ;
+  unsigned char *arg3 = (unsigned char *) 0 ;
+  int arg4 ;
+  int arg5 ;
+  int arg6 ;
+  unsigned short *arg7 = (unsigned short *) 0 ;
+  int arg8 ;
+  int arg9 ;
+  double arg10 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[4] ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
+  PyArrayObject *array7 = NULL ;
+  int is_new_object7 = 0 ;
+  double val10 ;
+  int ecode10 = 0 ;
+  PyObject *swig_obj[5] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "PointCloud_setRGBDImages_b_s", 5, 5, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_setRGBDImages_b_s" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  {
+    if (!convert_darray(swig_obj[1],temp2,4)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    npy_intp size[3] = {
+      -1, -1, -1 
+    };
+    array3 = obj_to_array_contiguous_allow_conversion(swig_obj[2], NPY_UBYTE,
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 3) ||
+      !require_size(array3, size, 3)) SWIG_fail;
+    arg3 = (unsigned char*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
+    arg5 = (int) array_size(array3,1);
+    arg6 = (int) array_size(array3,2);
+  }
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array7 = obj_to_array_contiguous_allow_conversion(swig_obj[3], NPY_USHORT,
+      &is_new_object7);
+    if (!array7 || !require_dimensions(array7, 2) ||
+      !require_size(array7, size, 2)) SWIG_fail;
+    arg7 = (unsigned short*) array_data(array7);
+    arg8 = (int) array_size(array7,0);
+    arg9 = (int) array_size(array7,1);
+  }
+  ecode10 = SWIG_AsVal_double(swig_obj[4], &val10);
+  if (!SWIG_IsOK(ecode10)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode10), "in method '" "PointCloud_setRGBDImages_b_s" "', argument " "10"" of type '" "double""'");
+  } 
+  arg10 = static_cast< double >(val10);
+  {
+    try {
+      (arg1)->setRGBDImages_b_s((double const (*))arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  {
+    if (is_new_object7 && array7)
+    {
+      Py_DECREF(array7); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  {
+    if (is_new_object7 && array7)
+    {
+      Py_DECREF(array7); 
+    }
+  }
   return NULL;
 }
 
@@ -26786,6 +27730,125 @@ SWIGINTERN PyObject *_wrap_Geometry3D_support(PyObject *SWIGUNUSEDPARM(self), Py
   }
   return resultobj;
 fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_slice(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  double *arg2 ;
+  double *arg3 ;
+  double arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[9] ;
+  double temp3[3] ;
+  double val4 ;
+  int ecode4 = 0 ;
+  PyObject *swig_obj[4] ;
+  Geometry3D result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Geometry3D_slice", 4, 4, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_slice" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  {
+    if (!convert_darray(swig_obj[1],temp2,9)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    if (!convert_darray(swig_obj[2],temp3,3)) {
+      return NULL;
+    }
+    arg3 = &temp3[0];
+  }
+  ecode4 = SWIG_AsVal_double(swig_obj[3], &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "Geometry3D_slice" "', argument " "4"" of type '" "double""'");
+  } 
+  arg4 = static_cast< double >(val4);
+  {
+    try {
+      result = (arg1)->slice((double const (*))arg2,(double const (*))arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj((new Geometry3D(static_cast< const Geometry3D& >(result))), SWIGTYPE_p_Geometry3D, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_roi(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  char *arg2 = (char *) 0 ;
+  double *arg3 ;
+  double *arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  double temp3[3] ;
+  double temp4[3] ;
+  PyObject *swig_obj[4] ;
+  Geometry3D result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Geometry3D_roi", 4, 4, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_roi" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  res2 = SWIG_AsCharPtrAndSize(swig_obj[1], &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_roi" "', argument " "2"" of type '" "char const *""'");
+  }
+  arg2 = reinterpret_cast< char * >(buf2);
+  {
+    if (!convert_darray(swig_obj[2],temp3,3)) {
+      return NULL;
+    }
+    arg3 = &temp3[0];
+  }
+  {
+    if (!convert_darray(swig_obj[3],temp4,3)) {
+      return NULL;
+    }
+    arg4 = &temp4[0];
+  }
+  {
+    try {
+      result = (arg1)->roi((char const *)arg2,(double const (*))arg3,(double const (*))arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj((new Geometry3D(static_cast< const Geometry3D& >(result))), SWIGTYPE_p_Geometry3D, SWIG_POINTER_OWN |  0 );
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return resultobj;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
   return NULL;
 }
 
@@ -61905,6 +62968,13 @@ static PyMethodDef SwigMethods[] = {
 		"Sets all the points to the given nx3 Numpy array.  \n"
 		"\n"
 		""},
+	 { "PointCloud_setPointsAndProperties", _wrap_PointCloud_setPointsAndProperties, METH_VARARGS, "\n"
+		"PointCloud_setPointsAndProperties(PointCloud self, double * np_array2)\n"
+		"\n"
+		"\n"
+		"Sets all the points and m properties from the given n x (3+m) array.  \n"
+		"\n"
+		""},
 	 { "PointCloud_addPoint", _wrap_PointCloud_addPoint, METH_VARARGS, "\n"
 		"PointCloud_addPoint(PointCloud self, double const [3] p) -> int\n"
 		"\n"
@@ -62008,6 +63078,84 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Retrieves the given setting.  \n"
+		"\n"
+		""},
+	 { "PointCloud_setDepthImage_d", _wrap_PointCloud_setDepthImage_d, METH_VARARGS, "\n"
+		"PointCloud_setDepthImage_d(PointCloud self, double const [4] intrinsics, double * np_array2, double depth_scale)\n"
+		"\n"
+		"\n"
+		"Sets a structured point cloud from a depth image. [fx,fy,cx,cy] are the\n"
+		"intrinsics parameters. The depth is given as a size hxw array, top to bottom.  \n"
+		"\n"
+		""},
+	 { "PointCloud_setDepthImage_f", _wrap_PointCloud_setDepthImage_f, METH_VARARGS, "\n"
+		"PointCloud_setDepthImage_f(PointCloud self, double const [4] intrinsics, float * np_depth2, double depth_scale)\n"
+		"\n"
+		"\n"
+		"Sets a structured point cloud from a depth image. [fx,fy,cx,cy] are the\n"
+		"intrinsics parameters. The depth is given as a size hxw array, top to bottom.  \n"
+		"\n"
+		""},
+	 { "PointCloud_setDepthImage_s", _wrap_PointCloud_setDepthImage_s, METH_VARARGS, "\n"
+		"PointCloud_setDepthImage_s(PointCloud self, double const [4] intrinsics, unsigned short * np_depth2, double depth_scale)\n"
+		"\n"
+		"\n"
+		"Sets a structured point cloud from a depth image. [fx,fy,cx,cy] are the\n"
+		"intrinsics parameters. The depth is given as a size hxw array, top to bottom.  \n"
+		"\n"
+		""},
+	 { "PointCloud_setRGBDImages_i_d", _wrap_PointCloud_setRGBDImages_i_d, METH_VARARGS, "\n"
+		"PointCloud_setRGBDImages_i_d(PointCloud self, double const [4] intrinsics, unsigned int * np_array2, double * np_depth2, double depth_scale)\n"
+		"\n"
+		"\n"
+		"Sets a structured point cloud from an RGBD (color,depth) image pair.\n"
+		"[fx,fy,cx,cy] are the intrinsics parameters. The RGB colors are packed in\n"
+		"0xrrggbb order, size hxw, top to bottom.  \n"
+		"\n"
+		""},
+	 { "PointCloud_setRGBDImages_i_f", _wrap_PointCloud_setRGBDImages_i_f, METH_VARARGS, "\n"
+		"PointCloud_setRGBDImages_i_f(PointCloud self, double const [4] intrinsics, unsigned int * np_array2, float * np_depth2, double depth_scale)\n"
+		"\n"
+		"\n"
+		"Sets a structured point cloud from an RGBD (color,depth) image pair.\n"
+		"[fx,fy,cx,cy] are the intrinsics parameters. The RGB colors are packed in\n"
+		"0xrrggbb order, size hxw, top to bottom.  \n"
+		"\n"
+		""},
+	 { "PointCloud_setRGBDImages_i_s", _wrap_PointCloud_setRGBDImages_i_s, METH_VARARGS, "\n"
+		"PointCloud_setRGBDImages_i_s(PointCloud self, double const [4] intrinsics, unsigned int * np_array2, unsigned short * np_depth2, double depth_scale)\n"
+		"\n"
+		"\n"
+		"Sets a structured point cloud from an RGBD (color,depth) image pair.\n"
+		"[fx,fy,cx,cy] are the intrinsics parameters. The RGB colors are packed in\n"
+		"0xrrggbb order, size hxw, top to bottom.  \n"
+		"\n"
+		""},
+	 { "PointCloud_setRGBDImages_b_d", _wrap_PointCloud_setRGBDImages_b_d, METH_VARARGS, "\n"
+		"PointCloud_setRGBDImages_b_d(PointCloud self, double const [4] intrinsics, unsigned char * np_array3, double * np_depth2, double depth_scale)\n"
+		"\n"
+		"\n"
+		"Sets a structured point cloud from an RGBD (color,depth) image pair.\n"
+		"[fx,fy,cx,cy] are the intrinsics parameters. The RGB colors are packed in\n"
+		"0xrrggbb order, size hxw, top to bottom.  \n"
+		"\n"
+		""},
+	 { "PointCloud_setRGBDImages_b_f", _wrap_PointCloud_setRGBDImages_b_f, METH_VARARGS, "\n"
+		"PointCloud_setRGBDImages_b_f(PointCloud self, double const [4] intrinsics, unsigned char * np_array3, float * np_depth2, double depth_scale)\n"
+		"\n"
+		"\n"
+		"Sets a structured point cloud from an RGBD (color,depth) image pair.\n"
+		"[fx,fy,cx,cy] are the intrinsics parameters. The RGB colors are an h x w x 3\n"
+		"array, top to bottom.  \n"
+		"\n"
+		""},
+	 { "PointCloud_setRGBDImages_b_s", _wrap_PointCloud_setRGBDImages_b_s, METH_VARARGS, "\n"
+		"PointCloud_setRGBDImages_b_s(PointCloud self, double const [4] intrinsics, unsigned char * np_array3, unsigned short * np_depth2, double depth_scale)\n"
+		"\n"
+		"\n"
+		"Sets a structured point cloud from an RGBD (color,depth) image pair.\n"
+		"[fx,fy,cx,cy] are the intrinsics parameters. The RGB colors are an h x w x 3\n"
+		"array, top to bottom.  \n"
 		"\n"
 		""},
 	 { "PointCloud_vertices_set", _wrap_PointCloud_vertices_set, METH_VARARGS, "PointCloud_vertices_set(PointCloud self, doubleVector vertices)"},
@@ -62670,6 +63818,49 @@ static PyMethodDef SwigMethods[] = {
 		"Supported types:  \n"
 		"\n"
 		"*   ConvexHull  \n"
+		"\n"
+		""},
+	 { "Geometry3D_slice", _wrap_Geometry3D_slice, METH_VARARGS, "\n"
+		"Geometry3D_slice(Geometry3D self, double const [9] R, double const [3] t, double tol) -> Geometry3D\n"
+		"\n"
+		"\n"
+		"Calculates a 2D slice through the data. The slice is given by the local X-Y\n"
+		"plane of a transform (R,T) with orientation R and translation t. The return\n"
+		"Geometry's data is in the local frame of (R,t), and (R,t) is set as its current\n"
+		"transform.  \n"
+		"\n"
+		"The geometry's current transform is respected.  \n"
+		"\n"
+		"O(N) time.  \n"
+		"\n"
+		"Supported types:  \n"
+		"\n"
+		"*   PointCloud. Needs tol > 0. A PointCloud is returned.  \n"
+		"*   TriangleMesh. tol is ignored. A Group of GeometricPrimitives (segments) is\n"
+		"    returned.  \n"
+		"\n"
+		""},
+	 { "Geometry3D_roi", _wrap_Geometry3D_roi, METH_VARARGS, "\n"
+		"Geometry3D_roi(Geometry3D self, char const * query, double const [3] bmin, double const [3] bmax) -> Geometry3D\n"
+		"\n"
+		"\n"
+		"Calculates a region of interest of the data for the bounding box [bmin,bmax].\n"
+		"The geometry's current transform is respected.  \n"
+		"\n"
+		"`query` can be \"intersect\", \"touching\", or \"within\". If \"intersect\",\n"
+		"this tries to get a representation of the geometry intersecting the box. If\n"
+		"\"touching\", all elements touching the box are returned. If \"within\", only\n"
+		"elements entirely inside the box are returned.  \n"
+		"\n"
+		"`query` can also be prefaced with a '~' which indicates that the ROI should be\n"
+		"inverted, i.e. select everything that does NOT intersect with a box.  \n"
+		"\n"
+		"O(N) time.  \n"
+		"\n"
+		"Supported types:  \n"
+		"\n"
+		"*   PointCloud  \n"
+		"*   TriangleMesh  \n"
 		"\n"
 		""},
 	 { "Geometry3D_world_set", _wrap_Geometry3D_world_set, METH_VARARGS, "Geometry3D_world_set(Geometry3D self, int world)"},

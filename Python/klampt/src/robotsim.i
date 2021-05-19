@@ -402,6 +402,9 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 
 %apply (unsigned char* IN_ARRAY1,int DIM1) {(unsigned char* np_array,int m)};
 %apply (unsigned char* IN_ARRAY2,int DIM1,int DIM2) {(unsigned char* np_array2, int m, int n)};
+%apply (unsigned char* IN_ARRAY3,int DIM1,int DIM2,int DIM3) {(unsigned char* np_array3, int m, int n,int p)};
+%apply (unsigned short* IN_ARRAY2,int DIM1,int DIM2) {(unsigned short* np_array2, int m, int n)};
+%apply (unsigned int* IN_ARRAY2,int DIM1,int DIM2) {(unsigned int* np_array2, int m, int n)};
 %apply (int* IN_ARRAY2,int DIM1,int DIM2) {(int* np_array2, int m, int n)};
 %apply (int** ARGOUTVIEW_ARRAY2,int* DIM1,int* DIM2) {(int** np_view2,int* m, int *n)};
 %apply (float* IN_ARRAY1, int DIM1) {(float* np_array,int m)};
@@ -417,6 +420,10 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 %apply (double** ARGOUTVIEWM_ARRAY2,int* DIM1,int* DIM2) {(double** np_out2,int* m, int *n)};
 %apply (double** ARGOUTVIEWM_ARRAY3,int* DIM1,int* DIM2,int* DIM3) {(double** np_out3,int* m, int *n, int* p)};
 
+//typemaps specifically for PointCloud
+%apply (unsigned short* IN_ARRAY2,int DIM1,int DIM2) {(unsigned short* np_depth2, int m2, int n2)};
+%apply (float* IN_ARRAY2,int DIM1,int DIM2) {(float* np_depth2, int m2, int n2)};
+%apply (double* IN_ARRAY2,int DIM1,int DIM2) {(double* np_depth2, int m2, int n2)};
 
 %feature("autodoc","1");
 %include "docs/docs.i"
@@ -502,6 +509,74 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
         from klampt.io import loader
         jsonobj = loader.toJson(self,'PointCloud')
         return (loader.fromJson,(jsonobj,'PointCloud'))
+
+    def setDepthImage(self,intrinsics,depth,depth_scale=1.0):
+        """
+        %Sets a structured point cloud from a depth image.
+
+        Args:
+            intrinsics (4-list): the intrinsics parameters [fx,fy,cx,cy].
+            depth (np.ndarray): the depth values, of size h x w.  Should have
+                dtype float, np.float32, or np.uint16 for best performance.
+            depth_scale (float, optional): converts depth image values to real
+                depth units.
+        """
+        import numpy as np
+        if len(intrinsics) != 4:
+            raise ValueError("Invalid value for the intrinsics parameters")
+        if depth.dtype == float:
+            return self.setDepthImage_d(intrinsics,depth,depth_scale)
+        elif depth.dtype == np.float32:
+            return self.setDepthImage_f(intrinsics,depth,depth_scale)
+        elif depth.dtype == np.uint16:
+            return self.setDepthImage_s(intrinsics,depth,depth_scale)
+        else:
+            return self.setDepthImage_d(intrinsics,depth,depth_scale)
+
+    def setRGBDImages(self,intrinsics,color,depth,depth_scale=1.0):
+        """
+        %Sets a structured point cloud from a (color,depth) image pair.
+
+        Args:
+            intrinsics (4-list): the intrinsics parameters [fx,fy,cx,cy].
+            color (np.ndarray): the color values, of size h x w or h x w x 3.
+                In first case, must have dtype np.uint32 with r,g,b values
+                packed in 0xrrggbb order.  In second case, if dtype is
+                np.uint8, min and max are [0,255].  If dtype is float or
+                np.float32, min and max are [0,1].
+            depth (np.ndarray): the depth values, of size h x w.  Should have
+                dtype float, np.float32, or np.uint16 for best performance.
+            depth_scale (float, optional): converts depth image values to real
+                depth units.
+        """
+        import numpy as np
+        if len(intrinsics) != 4:
+            raise ValueError("Invalid value for the intrinsics parameters")
+        if color.shape[0] != depth.shape[0] or color.shape[1] != depth.shape[1]:
+            raise ValueError("Color and depth images need to have matching dimensions")
+        if len(color.shape)==3:
+            if color.shape[2] != 3:
+                raise ValueError("Color image can only have 3 channels")
+            if color.dtype != np.uint8:
+                color = (color*255.0).astype(np.uint8)
+            if depth.dtype == float:
+                return self.setRGBDImages_b_d(intrinsics,color,depth,depth_scale)
+            elif depth.dtype == np.float32:
+                return self.setRGBDImages_b_f(intrinsics,color,depth,depth_scale)
+            elif depth.dtype == np.uint16:
+                return self.setRGBDImages_b_s(intrinsics,color,depth,depth_scale)
+            else:
+                return self.setRGBDImages_b_d(intrinsics,color,depth,depth_scale)
+        else:
+            if depth.dtype == float:
+                return self.setRGBDImages_i_d(intrinsics,color,depth,depth_scale)
+            elif depth.dtype == np.float32:
+                return self.setRGBDImages_i_f(intrinsics,color,depth,depth_scale)
+            elif depth.dtype == np.uint16:
+                return self.setRGBDImages_i_s(intrinsics,color,depth,depth_scale)
+            else:
+                return self.setRGBDImages_i_d(intrinsics,color,depth,depth_scale)
+
 }
 }
 
