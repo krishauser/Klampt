@@ -2928,6 +2928,7 @@ class VisAppearance:
             if s:
                 self.appearance.setPointSize(s)
             self.appearance.setSilhouette(0)
+            self.appearance.setCreaseAngle(0)
             wp = None
             geometry = None
             lighting = True
@@ -3336,8 +3337,13 @@ class VisualizationScene:
             if item_name == 'all':
                 for (name,itemvis) in self.items.items():
                     itemvis.markChanged()
+                    if hasattr(itemvis,'appearance'):
+                        itemvis.appearance.refresh(True)
             else:
-                self.getItem(item_name).markChanged()
+                item = self.getItem(item_name)
+                item.markChanged()
+                if hasattr(item,'appearance'):
+                    item.appearance.refresh(True)
 
     def clear(self):
         """Clears the visualization world"""
