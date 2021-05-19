@@ -283,8 +283,14 @@ if __name__ == '__main__':
                 #determine whether to process
                 if ln.find('(') >= 0 and ln.find(')') >= 0:
                     fn_sig = ln.strip()
-                    eprint("Parsing signature for",fn_sig)
-                    current_signature.append(fn_sig)
+                    if fn_sig[0] == '%':
+                        finished_reading_signature = True
+                        pos = ln.find('%')
+                        ln = ln[:pos]+ln[pos+1:]
+                        current_docstring.append(ln)
+                    else:
+                        eprint("Parsing signature for",fn_sig)
+                        current_signature.append(fn_sig)
                 else:
                     finished_reading_signature = True
                     current_docstring.append(ln)
