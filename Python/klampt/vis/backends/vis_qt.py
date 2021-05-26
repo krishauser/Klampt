@@ -466,7 +466,7 @@ class QtWindowManager(_ThreadedWindowManager):
         glinit._GLBackend.app = None
 
     def screenshot(self,format,want_depth):
-        if not self.multithreaded() or self.in_vis_loop or self.in_app_thread:
+        if not self.multithreaded() or self.in_vis_loop or (self.in_app_thread and threading.current_thread().__class__.__name__ != '_MainThread'):
             #already in visualization loop -- just get the image
             return self._frontend.get_screen(format,want_depth)
         if not self.vis_thread_running:
