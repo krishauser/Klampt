@@ -217,10 +217,18 @@ class SimpleSimulator (Simulator):
     def addEmulator(self,robot,e):
         """Adds an emulator to the given robot.  e must be of SensorEmulator or ActuatorEmulator type.
         """
+        if isinstance(robot,int):
+            index = robot
+        elif isinstance(robot,str):
+            index = self.world.robot(robot).index
+        elif isinstance(robot,RobotModel):
+            index = robot.index
+        else:
+            raise ValueError("Invalid robot specified")
         if isinstance(e,SensorEmulator):
-            self.sensorEmulators[robot].append(e)
+            self.sensorEmulators[index].append(e)
         elif isinstance(e,ActuatorEmulator):
-            self.actuatorEmulators[robot] = [e] + self.actuatorEmulators[robot]
+            self.actuatorEmulators[index] = [e] + self.actuatorEmulators[index]
         else:
             raise ValueError("Invalid emulator type")
 
