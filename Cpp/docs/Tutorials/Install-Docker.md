@@ -61,7 +61,7 @@ You should be able to run a Jupyter notebook containing Klamp't, which should lo
 
 ![Jupyter image](../../../Python/docs/source/_static/images/jupyter.png)
 
-## Running the X11 Image (out of date)
+## Running the X11 Image
 
 Once you've installed Docker, setup X forwarding `$ xhost +` before run the container.
 
