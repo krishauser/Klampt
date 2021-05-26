@@ -11,34 +11,26 @@ SAVE ANY FILES YOU WISH TO KEEP IN YOUR "WORK" FOLDER.  ALL OTHER FILES WILL NOT
 
 ## Installing Docker
 
-### Unix
+### *nix
 
 1. Follow the instructions on Docker's website to install Docker for Linux
-   https://docs.docker.com/install/linux/docker-ce/ubuntu/#install-using-the-repository
-2. Follow the instructions on Docker's website to install Docker-compose for Linux
-   https://docs.docker.com/compose/install/#install-compose
+   https://docs.docker.com/engine/install/ubuntu/
+2. If you wish to access GPU inside docker container, follow the instructions on Nvidia's website to install nvidia-docker for Linux
+   https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide
+   
+   **Note:** Currently only Linux supports accessing GPU inside Docker, all other platforms are not supported
 
 ### Windows
 
-1. Register a Docker ID. You may need one to download Docker.
+1. Follow the instructions on Docker's website to install Docker Desktop on Windows
 
-2. Follow the instructions on Docker's website to install Docker on Windows
-
-    a. If you have Windows 10 Pro, Enterprise, or Education, lookup instructions for Downloading and Installing Docker
-
-    b. If you have Windows 10 Home or a different edition not mentioned above, download Docker Toolbox
+    a. Go to https://docs.docker.com/docker-for-windows/install/
 
 ### Mac
 
-1. Register a Docker ID - you need one to download Docker from the Docker store for Mac
+1. Follow the instructions on Docker's website to install Docker Desktop on Mac (both Intel and Apple chip)
 
-2. Follow the instructions on Docker's website to install Docker on Mac
-
-    a. If you have a Mac from after 2010, you should be able to just install Docker
-
-    b. If you have a Mac from earlier, you may need to install Docker-toolbox. Read the instructions for doing so
-
-
+    a. Go to https://docs.docker.com/docker-for-windows/install/
 
 ## Running the Jupyter Notebook image (recommended)
 
@@ -71,7 +63,9 @@ You should be able to run a Jupyter notebook containing Klamp't, which should lo
 
 ## Running the X11 Image (out of date)
 
-Once you've installed Docker, run the container. 
+Once you've installed Docker, setup X forwarding `$ xhost +` before run the container.
+
+You may also need to build the container by `$ docker build -t klampt .`.
 
 On RPM Linux (like Red Hat or Fedora), use:
 
@@ -82,17 +76,17 @@ $ docker run -it -e DISPLAY=unix$DISPLAY -w /etc/Klampt --name klampt -v /tmp/.X
 On Debian Linux (like Ubuntu), use:
 
 ```sh
-$ docker run -it -e DISPLAY=unix$DISPLAY -w /etc/Klampt --name klampt -v /tmp/.X11-unix:/tmp/.X11-unix -v $HOME/.Xauthority:/home/Klampt/.Xauthority -e XAUTHORITY=/home/Klampt/.Xauthority --net=host stevekuznetsov/klampt:latest
+$ docker run -it -e DISPLAY=$DISPLAY -w /etc/Klampt --name klampt -v /tmp/.X11-unix:/tmp/.X11-unix --net=host klampt
 ```
 
-On Windows, you need to get [`Xming`](http://sourceforge.net/projects/xming/) and install it, then run:
+On Windows (Outdated), you need to get [`Xming`](http://sourceforge.net/projects/xming/) and install it, then run:
 
 ```
 > Xming.exe :0 -multiwindow -clipboard -ac
 > docker run -it -e DISPLAY=192.168.99.1:0 -w /etc/Klampt --name klampt stevekuznetsov/klampt:latest
 ```
 
-On Mac, run the following in iTerm.app or Terminal.app:
+On Mac (Outdated), run the following in iTerm.app or Terminal.app:
 
 ```sh
 $ brew install socat
@@ -117,14 +111,25 @@ The parts of the `docker run` command are explained below. Not all parts apply t
   Command                                       | Description                                     | Operating Systems |
 | --------------------------------------------- | ----------------------------------------------- | ----------------- |
 `-it`                                           | keeps the container active                      | all               |
-`-e DISPLAY=unix$DISPLAY`                       | connects displays                               | all               |
+`-e DISPLAY=$DISPLAY`                       | connects displays                               | all               |
 `--name klampt`                                 | names the container                             | all               | 
 `-w /etc/Klampt`                                | sets working directory                          | all               |
 `-v /tmp/.X11-unix:/tmp/.X11-unix`              | mounts the x11 socket                           | all Linux         |
-`-v $HOME/.Xauthority:/home/Klampt/.Xauthority` | mounts the Xauthority files                     | Debian Linux      |
-`-e XAUTHORITY=/home/Klampt/.Xauthority`        | allows the container to connect to the X server | Debian Linux      |
 `--net=host`                                    | places container inside host's network stack    | Debian Linux      |
-`stevekuznetsov/klampt:latest`                  | decides which image to run                      | all               |
+`klampt`                  | decides which image to run                      | all               |
+
+## Test your docker visualization works correctly
+
+You can test that your GUI works by typing the following commands in the interactive shell of container.
+
+```
+$ python3
+>>> import klampt.vis
+>>> klampt.vis.init("PyQt5")
+>>> klampt.vis.debug()
+```
+
+After that, you should be able to see an X window popping up in your host machine.
 
 #### Using Klamp't 
 
