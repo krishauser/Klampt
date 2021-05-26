@@ -87,7 +87,9 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 ## Version history
 
 **0.9** (5/15/2021)
--   Python API: Direct Numpy interface speeds up large data copies (20x speedup for setting a 640x480 point cloud).
+-   Some geometries support slicing and ROI (region of interest) calculations.  Slicing takes a slice of a geometry with a plane, and ROI calculations determine a region of interest of the geometry.  Meshes and point clouds are supported.
+-   Polygon geometries now support ray casting.
+-   Python API: Direct Numpy interface speeds up large data copies. Tests indicate ~6x speedup (45ms->7.5ms) for getting a simulated sensor image (SimRobotSensor.getMeasurements()), ~80x speedup (160ms->2ms) for converting images to point clouds (PointCloud.setDepthImage/setRGBDImages), and 20x speedup (200ms->10ms) for converting a Numpy array to a point cloud (tested on 640x480 images).
 
 **Master** (2/22/2021)
 -   Fixed bug in simulation of affine joints when the joint angle can go negative. Also, internal affine transmission coupling is simulated in a fashion that's sensitive to the driver's PID constants.
