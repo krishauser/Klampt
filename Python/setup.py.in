@@ -5,7 +5,11 @@ except ImportError:
 import os
 import glob
 import sys
-import numpy
+try:
+    import numpy
+except ImportError:
+    print('Building Klampt from source requires numpy.  Try "pip install numpy". Exiting.')
+    exit(1)
 
 src_folder = "klampt/src"
 root_py_folder = "klampt"
@@ -137,7 +141,8 @@ setup(name='Klampt',
             'klampt_browser=klampt.apps.klampt_browser:main',
             'klampt_path=klampt.apps.klampt_path:main',
             'klampt_sim=klampt.apps.klampt_sim:main',
-            'klampt_thumbnails=klampt.apps.klampt_thumbnails:main'
+            'klampt_thumbnails=klampt.apps.klampt_thumbnails:main',
+            'klampt_control=klampt.apps.klampt_control:main',
             ],
       },
       classifiers=[
@@ -149,6 +154,10 @@ setup(name='Klampt',
         "Operating System :: MacOS",
         "Operating System :: POSIX :: Linux",
         "Topic :: Scientific/Engineering"
+      ],
+      install_requires=[
+        'PyOpenGL',
+        'numpy',
       ],
      )
 
