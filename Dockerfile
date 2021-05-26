@@ -9,8 +9,10 @@ MAINTAINER Steve Kuznetsov <skuznets@redhat.com>
 # Install dependencies
 RUN apt-get update
 
+RUN DEBIAN_FRONTEND="noninteractive" apt-get -y install tzdata
+
 RUN apt-get -y install freeglut3-dev qt5-default
 
 RUN apt-get -y install python3-dev python3-pip
 
-RUN pip3 install Klampt
+RUN pip3 install PyOpenGL PyQt5 Klampt
