@@ -1,13 +1,15 @@
-"""Defines the ``SubRobotModel`` class, which is ``RobotModel``-like but
-only modifies selected degrees of freedom of the robot (e.g., an arm, a leg).
+"""Defines the :class:`SubRobotModel` class, which is :class:`RobotModel`-like 
+but only modifies selected degrees of freedom of the robot (e.g., an arm, a
+leg).
 
 Many, but not all, ``klampt`` module functions accept SubRobotModel in
 the place of RobotModel.
 """
 
 from ..robotsim import *
-from collide import self_collision_iter
-from trajectory import Trajectory,HermiteTrajectory
+from .collide import self_collision_iter
+from .trajectory import Trajectory,HermiteTrajectory
+import warnings
 
 class SubRobotModel:
     """A helper that lets you conveniently set/get quantities for a subset
@@ -31,27 +33,31 @@ class SubRobotModel:
         assert isinstance(robot,(RobotModel,SubRobotModel)),"SubRobotModel constructor must be given a RobotModel or SubRobotModel as first argument"
         self._robot = robot
         self._links = links[:]
+        self._drivers = None
         self.index = robot.index
         self.world = robot.world
         if isinstance(robot,SubRobotModel):
-            print "Warning, taking sub-robot of sub-robot... not tested yet"
-            raw_input("Press enter to continue...")         
+            warnings.warn("Taking sub-robot of sub-robot... not tested yet")
+            self._robot = robot._robot
         for i,l in enumerate(self._links):
             if isinstance(l,str):
                 self._links[i] = robot.link(l).getIndex()
+        self._inv_links = dict((l,i) for (i,l) in enumerate(self._links))
 
-    def tofull(self,object,type=None):
-        """Converts the given index, link, configuration, velocity, or trajectory of a sub robot
-        to the corresponding object of the full robot.  Returns the object for the full robot.
+    def tofull(self,object,reference=None):
+        """Converts the given index, link, configuration, velocity, or
+        trajectory of a sub robot to the corresponding object of the full
+        robot. 
 
         Args:
-            object: an integer index, configuration, velocity, matrix, list of configurations,
-                or Trajectory.
-            type (str, optional): describes how to interpret object:
+            object: an integer index, configuration, velocity, matrix, list of 
+                configurations, or Trajectory.
+            reference (list, optional): describes the reference 
+                object that this should fill in for the indices not in this
+                sub-robot. By default, uses the robot's current configuration.
 
-                * 'vector' or 'Velocity': object is treated like a velocity.
-                * 'jacobian': object is treated like a jacobian matrix. 
-                * anything else: object is treated as a list of configurations.
+        Returns:
+            : The corresponding object mapped to the full robot.
         """
         if isinstance(object,int):
             return self._links[object]
@@ -59,75 +65,67 @@ class SubRobotModel:
             return object._link
         elif isinstance(object,(list,tuple)):
             if hasattr(object[0],'__iter__'):
-                if type == 'jacobian':
-                    #treat this as a jacobian matrix
-                    res = []
-                    for row in object:
-                        assert len(row) == len(self._links)
-                        res.append(self.tofull(row,'velocity'))
-                    return res
+                #treat this as a list of configuration-like objects
+                res = []
+                if reference is not None:
+                    if len(reference) != len(object):
+                        if not hasattr(reference[0],'__iter__'):
+                            reference = [reference]*len(object)
+                        else:
+                            raise ValueError("Invalid size of reference object")
                 else:
-                    #treat this like a list of configurations
-                    res = []
-                    for row in object:
-                        assert len(row) == len(self._links)
-                        res.append(self.tofull(row))
-                    return res
+                    reference = [None]*len(object)
+                for i,row in enumerate(object):
+                    assert len(row) == len(self._links)
+                    res.append(self.tofull(row,reference=reference[i]))
+                return res
             else:
                 assert len(object) == len(self._links)
-                if type == 'velocity' or type == 'Vector':
-                    #treat as a velocity
-                    res = [0.0]*self._robot.numLinks()
-                    for l,v in zip(self._links,object):
-                        res[l] = v
-                    return res
-                else:
-                    #treat as a configuration 
+                if reference is None:
                     res = self._robot.getConfig()
-                    for l,v in zip(self._links,object):
-                        res[l] = v
-                    return res
+                else:
+                    res = [v for v in reference]
+                for l,v in zip(self._links,object):
+                    res[l] = v
+                return res
         elif isinstance(object,Trajectory):
             if isinstance(object,HermiteTrajectory):
                 raise NotImplementedError("Can't lift hermite trajectories to full robots yet")
-            newmilestones = [self.tofull(v) for v in object.milestones]
+            newmilestones = self.tofull(object.milestones,reference=reference)
             return object.constructor(object.times,newmilestones)
         else:
             raise ValueError("Invalid object type, not an integer, configuration, or Trajectory")
 
     def fromfull(self,object):
-        """Converts the given index, configuration, velocity, or trajectory of a full robot
-        to the corresponding object of the sub-robot. 
+        """Converts the given index, configuration, velocity, or trajectory of
+        a full robot to the corresponding object of the sub-robot. 
 
         Args:
-            object: an integer index, configuration, velocity, matrix, list of configurations,
-                or Trajectory.
+            object: an integer index, configuration, velocity, matrix, list of
+                configurations, or Trajectory.
 
         Returns:
             : The corresponding object mapped to the sub-robot.
 
         Note:
-            For indices, this is an O(n) operation where n is the size of the sub-robot.
-            If the index doesn't belong to the sub-robot then None is returned.
+            For indices, if the index doesn't belong to the sub-robot then None
+            is returned.
         """
         if isinstance(object,int):
-            for i,l in enumerate(self._links):
-                if l == object:
-                    return i
-            return None
+            return self._inv_links.get(object,None)
         elif isinstance(object,RobotModelLink):
             return SubRobotModelLink(object,self)
         elif isinstance(object,(list,tuple)):
             if hasattr(object[0],'__iter__'):
                 #treat this like a list of configurations
                 res = []
-                for row in object:
-                    assert len(row) == self._robot.numLinks()
+                for i,row in enumerate(object):
+                    assert len(row) == self._robot.numLinks(),'Object {} needs to be a configuration of length {}'.format(i,self._robot.numLinks())
                     res.append(self.fromfull(row))
                 return res
             else:
                 #treat as a configuration 
-                assert len(object) == self._robot.numLinks()
+                assert len(object) == self._robot.numLinks(),'Object needs to be a configuration of length {}'.format(self._robot.numLinks())
                 return [object[i] for i in self._links]
         elif isinstance(object,Trajectory):
             if isinstance(object,HermiteTrajectory):
@@ -146,11 +144,26 @@ class SubRobotModel:
         else:
             return SubRobotModelLink(self._robot.link(self._links[index]),self)
 
+    def _computeDrivers(self):
+        self._drivers = []
+        for i in range(self._robot.numDrivers()):
+            d = self._robot.driver(i)
+            for l in d.getAffectedLinks():
+                if l in self._links:
+                    self._drivers.append(d)
+
     def numDrivers(self):
-        raise NotImplementedError("TODO Accessing number of drivers in sub-robot")
+        if self._drivers is None:
+            self._computeDrivers()
+        return len(self._drivers)
 
     def driver(self,index):
-        raise NotImplementedError("TODO Accessing drivers in sub-robot")
+        if self._drivers is None:
+            self._computeDrivers()
+        if index < 0 or index >= len(self._drivers):
+            raise ValueError("Invalid driver index, must be between {} and {}".format(0,len(self._drivers)-1))
+        dindex = self._drivers[index]
+        return SubRobotModelDriver(self._robot.driver(index),self)
   
     def getConfig(self):
         q = self._robot.getConfig()
@@ -185,7 +198,7 @@ class SubRobotModel:
         q = self._robot.getVelocityLimits()
         return [q[i] for i in self._links]
     def setVelocityLimits(self,vmax):
-        assert len(q) == len(self._links)
+        assert len(vmax) == len(self._links)
         qfull = self._robot.getVelocityLimits()
         for i,v in zip(self._links,vmax):
             qfull[i] = v
@@ -194,7 +207,7 @@ class SubRobotModel:
         q = self._robot.getAccelerationLimits()
         return [q[i] for i in self._links]
     def setAccelerationLimits(self,amax):
-        assert len(q) == len(self._links)
+        assert len(amax) == len(self._links)
         qfull = self._robot.getAccelerationLimits()
         for i,v in zip(self._links,amax):
             qfull[i] = v
@@ -203,7 +216,7 @@ class SubRobotModel:
         q = self._robot.getTorqueLimits()
         return [q[i] for i in self._links]
     def setTorqueLimits(self,tmax):
-        assert len(q) == len(self._links)
+        assert len(tmax) == len(self._links)
         qfull = self._robot.getTorqueLimits()
         for i,v in zip(self._links,tmax):
             qfull[i] = v
@@ -223,6 +236,29 @@ class SubRobotModel:
         raise NotImplementedError("TODO: getCom")
     def getComJacobian(self):
         raise NotImplementedError("TODO: getComJacobian")
+    def getLinearMomentum(self):
+        vinit = self._robot.getVelocity()
+        vtemp = self.tofull(self.getVelocity,[0]*self._robot.numLinks())
+        self._robot.setVelocity(vtemp)
+        res = self._robot.getLinearMomentum()
+        self._robot.setVelocity(vinit)
+        return res
+    def getAngularMomentum(self):
+        vinit = self._robot.getVelocity()
+        vtemp = self.tofull(self.getVelocity,[0]*self._robot.numLinks())
+        self._robot.setVelocity(vtemp)
+        res = self._robot.getAngularMomentum()
+        self._robot.setVelocity(vinit)
+        return res
+    def getKineticEnergy(self):
+        vinit = self._robot.getVelocity()
+        vtemp = self.tofull(self.getVelocity,[0]*self._robot.numLinks())
+        self._robot.setVelocity(vtemp)
+        res = self._robot.getKineticEnergy()
+        self._robot.setVelocity(vinit)
+        return res
+    def getTotalInertia(self):
+        raise NotImplementedError("TODO: getTotalInertia")
     def getMassMatrix(self):
         raise NotImplementedError("TODO: getMassMatrix")
     def getMassMatrixInv(self):
@@ -232,41 +268,32 @@ class SubRobotModel:
     def getCoriolisForces(self):
         raise NotImplementedError("TODO: getCoriolisForceMatrix")
     def getGravityForces(self,g):
-        raise NotImplementedError("TODO:  getGravityForces")
+        raise NotImplementedError("TODO: getGravityForces")
     def torquesFromAccel(self,ddq):
         raise NotImplementedError("TODO: torquesFromAccel")
     def accelFromTorques(self,t):
         raise NotImplementedError("TODO: accelFromTorques")
 
     def interpolate(self,a,b,u):
-        afull = self._robot.getConfig()
-        bfull = afull[:]
-        for i,ai,bi in zip(self._links,a,b):
-            afull[i] =ai
-            bfull[i] =bi
+        afull = self.tofull(a)
+        bfull = self.tofull(b)
         q = self._robot.interpolate(afull,bfull,u)
         return [q[i] for i in self._links]
     def distance(self,a,b):
-        afull = self._robot.getConfig()
-        bfull = afull[:]
-        for i,ai,bi in zip(self._links,a,b):
-            afull[i] =ai
-            bfull[i] =bi
+        afull = self.tofull(a)
+        bfull = self.tofull(b)
         return self._robot.distance(afull,bfull)
-    def interpolate_deriv(self,a,b):
-        afull = self._robot.getConfig()
-        bfull = afull[:]
-        for i,ai,bi in zip(self._links,a,b):
-            afull[i] =ai
-            bfull[i] =bi
-        q = self._robot.interpolate_deriv(afull,bfull)
+    def interpolateDeriv(self,a,b):
+        afull = self.tofull(a)
+        bfull = self.tofull(b)
+        q = self._robot.interpolateDeriv(afull,bfull)
         return [q[i] for i in self._links]
     def randomizeConfig(self,unboundedScale=1.0):
         oldfull = self._robot.getConfig()
         self._robot.randomizeConfig(unboundedScale)
-        qfull = self._robot.getConfig()
+        qrand = self._robot.getConfig()
         for i,l in enumerate(self._links):
-            oldfull[l] = qfull[l]
+            oldfull[l] = qrand[l]
         self._robot.setConfig(oldfull)
     def selfCollisionEnabled(self,link1,link2):
         if not isinstance(link1,str):
@@ -295,7 +322,23 @@ class SubRobotModel:
         return any(self_collision_iter(geoms,dotest))
     def drawGL(self,keepAppearance=True):
         for i in self._links:
-            self._robot.link(i).drawGL(keepAppearance)
+            self._robot.link(i).drawWorldGL(keepAppearance)
+    def reduce(self):
+        raise NotImplementedError("Can't reduce a sub-robot")
+    def mount(self,link,subRobot,R,t):
+        self._robot.mount(self.tofull(link),subRobot,R,t)
+    def sensor(self,index):
+        """Returns the SimSensorModel corresponding to index. Note however that
+        you can't set the "link" setting according to this SubRobotModel.
+
+        Args:
+            index (int or str)
+        """
+        if isinstance(index,str):
+            return self._robot.sensor(index)
+        else:
+            return self._robot.sensor(self.tofull(index))
+
 
 class SubRobotModelLink:
     """A helper that lets you treat links of a subrobot just like a normal
@@ -343,9 +386,35 @@ class SubRobotModelLink:
     def setParent(self,p):
         self._link.setParent(self._robot.tofull(p))
     def getJacobian(self,p):
-        self._robot.tofull(self._link.getJacobian(p),'jacobian')
+        self._robot.fromfull(self._link.getJacobian(p))
     def getPositionJacobian(self,p):
-        self._robot.tofull(self._link.getPositionJacobian(p),'jacobian')
+        self._robot.fromfull(self._link.getPositionJacobian(p))
     def getOrientationJacobian(self):
-        self._robot.tofull(self._link.getOrientationJacobian(),'jacobian')
+        self._robot.fromfull(self._link.getOrientationJacobian())
 
+
+class SubRobotModelDriver:
+    """A helper that lets you treat drivers of a subrobot just like a normal
+    RobotModelDriver.
+    """
+    def __init__(self,driver,robot):
+        self._driver = driver
+        self._robot = robot
+        self.getName = driver.getName
+        self.getType = driver.getType
+        self.getAffineCoeffs = driver.getAffineCoeffs
+        self.setValue = driver.setValue
+        self.getValue = driver.getValue
+        self.setVelocity = driver.setVelocity
+        self.getVelocity = driver.getVelocity
+    
+    def robot(self):
+        return self._robot
+  
+    def getAffectedLink(self):
+        origLink = self._driver.getAffectedLink()
+        return self._robot._inv_links[origLink]
+
+    def getAffectedLinks(self):
+        origLinks = self._driver.getAffectedLinks()
+        return [self._robot._inv_links[origLink] for origLink in origLinks]
