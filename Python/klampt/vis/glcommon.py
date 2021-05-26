@@ -70,7 +70,7 @@ class GLWidgetPlugin(GLPluginInterface):
                 self.widgethoverfunc()
                 self.refresh()
         return False
-    def idlefunc(self):
+    def idle(self):
         self.klamptwidgetmaster.idle()
         return True
 
