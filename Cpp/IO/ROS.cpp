@@ -11,6 +11,7 @@
 #include "Sensing/VisualSensors.h"
 #include "Sensing/ForceSensors.h"
 #include <KrisLibrary/Timer.h>
+#include <KrisLibrary/Logger.h>
 #include <ros/ros.h>
 #include <ros/time.h>
 #include <tf/transform_listener.h>
@@ -859,8 +860,11 @@ bool ROSPublishTrajectory(const LinearPath& path,const char* topic)
 bool ROSPublishTrajectory(const Robot& robot,const LinearPath& path,const char* topic)
 {
   if(!ROSInit()) return false;
-  PublisherList::iterator i=gPublishers.find(topic); 
   ROSPublisher<trajectory_msgs::JointTrajectory>* pub = GetPublisher<trajectory_msgs::JointTrajectory>(topic);
+  if(!pub) {
+    LOG4CXX_ERROR(KrisLibrary::logger(),"Error getting JointTrajectory publisher on "<<topic);
+    return false;
+  }
   //ignore if no subscribers
   if(pub->pub.getNumSubscribers () == 0) return true;
   //do conversion if there's a subscriber
@@ -872,8 +876,11 @@ bool ROSPublishTrajectory(const Robot& robot,const LinearPath& path,const char* 
 bool ROSPublishTrajectory(const Robot& robot,const vector<int>& indices,const LinearPath& path,const char* topic)
 {
   if(!ROSInit()) return false;
-  PublisherList::iterator i=gPublishers.find(topic); 
   ROSPublisher<trajectory_msgs::JointTrajectory>* pub = GetPublisher<trajectory_msgs::JointTrajectory>(topic);
+  if(!pub) {
+    LOG4CXX_ERROR(KrisLibrary::logger(),"Error getting JointTrajectory publisher on "<<topic);
+    return false;
+  }
   //ignore if no subscribers
   if(pub->pub.getNumSubscribers () == 0) return true;
   //do conversion if there's a subscriber
@@ -927,10 +934,18 @@ bool ROSPublishSensorMeasurement(const SensorBase* sensor,const Robot& robot,con
     if(measurements.empty()) return false;
     if(camera->rgb) {
       ROSPublisher<sensor_msgs::CameraInfo>* pubinfo = GetPublisher<sensor_msgs::CameraInfo>((string(topic)+"/rgb/camera_info").c_str());
+      if(!pubinfo) {
+        LOG4CXX_ERROR(KrisLibrary::logger(),"Error getting CameraInfo publisher on "<<topic<<"/rgb/camera_info");
+        return false;
+      }
       KlamptToROSCameraInfo(*camera,pubinfo->msg);
       pubinfo->msg.header.frame_id = frame;
       pubinfo->publish_current();
       ROSPublisher<sensor_msgs::Image>* pub = GetPublisher<sensor_msgs::Image>((string(topic)+"/rgb/image_rect_color").c_str());
+      if(!pubinfo) {
+        LOG4CXX_ERROR(KrisLibrary::logger(),"Error getting Image publisher on "<<topic<<"/rgb/image_rect_color");
+        return false;
+      }
       pub->msg.header.frame_id = frame;
       pub->msg.width = camera->xres;
       pub->msg.height = camera->yres;
@@ -951,11 +966,19 @@ bool ROSPublishSensorMeasurement(const SensorBase* sensor,const Robot& robot,con
     }
     if(camera->depth) {
       ROSPublisher<sensor_msgs::CameraInfo>* pubinfo = GetPublisher<sensor_msgs::CameraInfo>((string(topic)+"/depth_registered/camera_info").c_str());
+      if(!pubinfo) {
+        LOG4CXX_ERROR(KrisLibrary::logger(),"Error getting CameraInfo publisher on "<<topic<<"/depth_registered/camera_info");
+        return false;
+      }
       KlamptToROSCameraInfo(*camera,pubinfo->msg);
       pubinfo->publish_current();
       int ofs = 0;
       if(camera->rgb) ofs = camera->xres*camera->yres;
       ROSPublisher<sensor_msgs::Image>* pub = GetPublisher<sensor_msgs::Image>((string(topic)+"/depth_registered/image_rect").c_str());
+      if(!pubinfo) {
+        LOG4CXX_ERROR(KrisLibrary::logger(),"Error getting Image publisher on "<<topic<<"/depth_registered/image_rect");
+        return false;
+      }
       pub->msg.width = camera->xres;
       pub->msg.height = camera->yres;
       pub->msg.encoding = "32FC1";
