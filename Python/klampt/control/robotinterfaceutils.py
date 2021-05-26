@@ -273,6 +273,8 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
         print("Starting with clock",curclock)
         assert curclock is not None
         self._emulator.lastClock = None
+
+        self._warned = False
         return True
 
     def close(self):
@@ -280,11 +282,16 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
         return self._base.close()
 
     def startStep(self):
+        if not self._warned:
+            warnings.warn("startStep is deprecated, use beginStep",DeprecationWarning)
+        self._warned = True
+
+    def beginStep(self):
         assert self._indices is not None,"RobotInterface not initialized yet"
-        assert not self._subRobot,"Can't do startStep on a sub-interface"
-        assert not self._inStep,"startStep called twice in a row?"
+        assert not self._subRobot,"Can't do beginStep on a sub-interface"
+        assert not self._inStep,"beginStep called twice in a row?"
         self._inStep = True
-        self._try('startStep',[],lambda *args:0)
+        self._try('beginStep',[],lambda *args:0)
         if self._emulator.lastClock is None:
             qcmd = self._try('commandedPosition',[],lambda *args:None)
             vcmd = self._try('commandedVelocity',[],lambda *args:None)
@@ -807,9 +814,9 @@ class MultiRobotInterface(RobotInterfaceBase):
         self._initialized = False
         return res
 
-    def startStep(self):
+    def beginStep(self):
         for (p,c) in self._partInterfaces.items():
-            c.startStep()
+            c.beginStep()
             # TODO: If there are nested Cartesian commands or the klamptModel() object
             # is accessed, then the reference model used by sub-robots may be invalidated!
             if p in self._klamptParts:
@@ -1575,8 +1582,8 @@ class _RobotInterfaceEmulatorData:
                 if t > t0:
                     futureTimes.append(t-t0)
                     futureMilestones.append(unifiedMilestones[i])
-            if len(futureTimes)==0:
-                warnings.warn("getCommand is returning empty command because no times are after current time???")
+            # if len(futureTimes)==0:
+            #     warnings.warn("getCommand is returning empty command because no times are after current time???")
             return futureTimes,futureMilestones
         if commandType == 'pwc':
             unifiedTimes = None
@@ -1600,8 +1607,8 @@ class _RobotInterfaceEmulatorData:
                     futureTimes.append(t-t0)
                     futureMilestones.append(unifiedMilestones[i])
                     futureVelocities.append(unifiedVelocities[i])
-            if len(futureTimes)==0:
-                warnings.warn("getCommand is returning empty command because no times are after current time???")
+            # if len(futureTimes)==0:
+            #     warnings.warn("getCommand is returning empty command because no times are after current time???")
             return futureTimes,futureMilestones,futureVelocities
         return list(zip(*res))
 
@@ -2009,8 +2016,8 @@ class _SubRobotInterfaceCompleter(RobotInterfaceCompleter):
     def initialize(self):
         raise RuntimeError("Can't call initialize() on a sub-robot interface.")
 
-    def startStep(self):
-        raise RuntimeError("Can't call startStep() on a sub-robot interface.")
+    def beginStep(self):
+        raise RuntimeError("Can't call beginStep() on a sub-robot interface.")
 
     def endStep(self):
         raise RuntimeError("Can't call endStep() on a sub-robot interface.")

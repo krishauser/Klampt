@@ -3,6 +3,7 @@
 
 from ..robotsim import WorldModel
 import functools
+import warnings
 
 
 class RobotInterfaceBase(object):
@@ -26,7 +27,7 @@ class RobotInterfaceBase(object):
         dt = 1.0/interface.controlRate()
         while interface.status() == 'ok':  #no error handling done here...
             t0 = time.time()
-            interface.startStep()
+            interface.beginStep()
             [any getXXX or setXXX commands here comprising the control loop]
             interface.endStep()
             t1 = time.time()
@@ -112,6 +113,7 @@ class RobotInterfaceBase(object):
         self._worldModel = None
         self._klamptModel = None
         self._klamptDriverIndices = None
+        self._warned = False
 
     def __str__(self):
         inner = []
@@ -132,6 +134,12 @@ class RobotInterfaceBase(object):
         return True
 
     def startStep(self):
+        """Deprecated. use beginStep instead."""
+        if not self._warned:
+            warnings.warn("startStep will be deprecated, use beginStep instead",DeprecationWarning)
+        self._warned = True
+
+    def beginStep(self):
         """This is called before the commands sent at each time step"""
         pass
 

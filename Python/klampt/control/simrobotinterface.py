@@ -3,12 +3,13 @@ simualted robot.  Defines a variety of RobotInterfaceBase interfaces that work
 with Klamp't simulations.
 
 For each of the classes in this module, if you provide the simulator argument
-then this will automatically update your simulation upon each startStep() /
+then this will automatically update your simulation upon each beginStep() /
 endStep() pair.  Otherwise, you will have to step the simulation manually.
 """
 
 from .robotinterface import RobotInterfaceBase
 from klampt.model.robotinfo import RobotInfo
+from klampt.model import robotinfo
 from klampt import RobotModel,Simulator,SimRobotController
 import functools
 
@@ -339,3 +340,16 @@ class KinematicSimControlInterface(RobotInterfaceBase):
     
     def commandedPosition(self):
         return self.q
+
+
+def make(robotModel):
+    """Makes a default KinematicSimControlInterface for the robot. This module
+    can be referenced using 'klampt.control.simrobotinterface', e.g. as an 
+    argument to the ``klampt_control`` app.
+    """
+    try:
+        ri = robotinfo.get(robotModel.getName())
+    except KeyError:
+        ri = None
+    from .robotinterfaceutils import RobotInterfaceCompleter
+    return RobotInterfaceCompleter(KinematicSimControlInterface(robotModel,ri))
