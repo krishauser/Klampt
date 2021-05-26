@@ -86,7 +86,7 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 
 ## Version history
 
-**Master** (2/22/2021)
+**0.8.7** (also master) (5/25/2021)
 -   Fixed bug in simulation of affine joints when the joint angle can go negative. Also, internal affine transmission coupling is simulated in a fashion that's sensitive to the driver's PID constants.
 -   URDF import can now import multiple collision and visual geometries.
 -   Python API: Workaround for Mac OSX Big Sur dropping support for OpenGL when importing PyOpenGL.
