@@ -63,6 +63,8 @@ You should be able to run a Jupyter notebook containing Klamp't, which should lo
 
 ## Running the X11 Image
 
+On Linux distributions:
+
 Once you've installed Docker, setup X forwarding `$ xhost +` before run the container.
 
 You may also need to build the container by `$ docker build -t klampt .`.
@@ -70,7 +72,7 @@ You may also need to build the container by `$ docker build -t klampt .`.
 On RPM Linux (like Red Hat or Fedora), use:
 
 ```sh
-$ docker run -it -e DISPLAY=unix$DISPLAY -w /etc/Klampt --name klampt -v /tmp/.X11-unix:/tmp/.X11-unix stevekuznetsov/klampt:latest
+$ docker run -it -e DISPLAY=unix$DISPLAY -w /etc/Klampt --name klampt -v /tmp/.X11-unix:/tmp/.X11-unix klampt
 ```
 
 On Debian Linux (like Ubuntu), use:
@@ -79,11 +81,11 @@ On Debian Linux (like Ubuntu), use:
 $ docker run -it -e DISPLAY=$DISPLAY -w /etc/Klampt --name klampt -v /tmp/.X11-unix:/tmp/.X11-unix --net=host klampt
 ```
 
-On Windows (Outdated), you need to get [`Xming`](http://sourceforge.net/projects/xming/) and install it, then run:
+On Windows, you need to get [`Xming`](http://sourceforge.net/projects/xming/) and install it, then run:
 
 ```
 > Xming.exe :0 -multiwindow -clipboard -ac
-> docker run -it -e DISPLAY=192.168.99.1:0 -w /etc/Klampt --name klampt stevekuznetsov/klampt:latest
+> docker run -it -e DISPLAY=host.docker.internal:0.0 -w /etc/Klampt --name klampt klampt
 ```
 
 On Mac (Outdated), run the following in iTerm.app or Terminal.app:
@@ -97,7 +99,7 @@ $ socat TCP-LISTEN:6000,reuseaddr,fork UNIX-CLIENT:\"$DISPLAY\"
 Then, in whatever terminal you like (can be the same as above), but *not* in the Docker terminal, run:
 
 ```sh
-$ docker run -it -e DISPLAY=192.168.99.1:0 -w /etc/Klampt --name klampt stevekuznetsov/klampt:latest
+$ docker run -it -e DISPLAY=host.docker.internal:0 -w /etc/Klampt --name klampt klampt
 ```
 
 Finally, if `XQuartz` did not start automatically, start it:
@@ -131,14 +133,14 @@ $ python3
 
 After that, you should be able to see an X window popping up in your host machine.
 
-#### Using Klamp't 
+### Using Klamp't 
 
 Once you've created your own scripts that you wish to run, save them in some directory on your host, and amend the `docker run` command used above to include `-v /path/to/your/data:/home/Klampt/data`. For instance, the RPM Linux `run` command, if there is data at `/home/myuser/klamptdata`, would look like:
 
 ```sh
 docker run -it -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=unix$DISPLAY --name klampt \
 	-v /home/myuser/klamptdata:/home/Klampt/data \ # shares data with the container
-	stevekuznetsov/klampt:latest
+	klampt
 ```
 
 Then, use the internal tools inside of the container (i.e. `SimTest`, `RobotTest`, etc.) on your files. They will be found in `/home/Klampt/data`. 
