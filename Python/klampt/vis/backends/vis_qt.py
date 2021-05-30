@@ -1,4 +1,4 @@
-from ..visualization import _WindowManager,_ThreadedWindowManager,_globalLock
+from ..visualization import _WindowManager,_ThreadedWindowManager,VisualizationScene,_globalLock
 from .vis_gl import WindowInfo,GLVisualizationFrontend,GLVisualizationPlugin
 from .. import glinit,glcommon
 import sys
@@ -724,7 +724,7 @@ class _MyWindow(QMainWindow):
             if fn is None:
                 self.saving_html = False
                 return
-            from ..io import html
+            from ...io import html
             self.html_start_time = time.time()
             self.html_saver = html.HTMLSharePath(fn)
             self.html_saver.dt = 0.033;
