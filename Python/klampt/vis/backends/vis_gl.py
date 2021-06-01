@@ -46,6 +46,7 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
         #need to set this to a weakref of the GLProgram being used with this plugin. Automatically done in GLVisualizationFrontend()
         self.program = None
         self.backgroundImage = None
+        self.backgroundImageUploaded = False
         self.backgroundImageTexture = None
         self.backgroundImageDisplayList = None
 
@@ -109,21 +110,30 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
 
     def displayfunc(self):
         if self.backgroundImage is not None:
-            (img,rows,cols,pixformat)= self.backgroundImage
-            if self.backgroundImageTexture is None:
-                self.backgroundImageTexture = glGenTextures(1)
-                glBindTexture(GL_TEXTURE_2D, self.backgroundImageTexture)
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-                glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP)
-                glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP)
-            else:
-                glBindTexture(GL_TEXTURE_2D, self.backgroundImageTexture)
-            
-            glPixelStorei(GL_UNPACK_ALIGNMENT,1)
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, cols, rows, 0, pixformat, GL_UNSIGNED_BYTE, img)
-            glBindTexture(GL_TEXTURE_2D, 0)
-            self.backgroundImage = None
+            if not self.backgroundImageUploaded:
+                (img,rows,cols,pixformat)= self.backgroundImage
+                if self.backgroundImageTexture is None:
+                    self.backgroundImageTexture = glGenTextures(1)
+                    glBindTexture(GL_TEXTURE_2D, self.backgroundImageTexture)
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+                    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP)
+                    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP)
+                else:
+                    glBindTexture(GL_TEXTURE_2D, self.backgroundImageTexture)
+                
+                glPixelStorei(GL_UNPACK_ALIGNMENT,1)
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, cols, rows, 0, pixformat, GL_UNSIGNED_BYTE, img)
+                glBindTexture(GL_TEXTURE_2D, 0)
+                self.backgroundImageUploaded = True
+        else:
+            #make sure to free stuff inside the visualization loop
+            if self.backgroundImageDisplayList is not None:
+                self.backgroundImageDisplayList.destroy()
+                self.backgroundImageDisplayList = None
+            if self.backgroundImageTexture is not None:
+                glDeleteTextures([self.backgroundImageTexture])
+                self.backgroundImageTexture = None
         if self.backgroundImageTexture is not None:
             self.program.prepare_GL()
             glMatrixMode(GL_PROJECTION)
@@ -186,12 +196,7 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
         if img is None:
             with _globalLock:
                 self.backgroundImage = None
-                if self.backgroundImageDisplayList is not None:
-                    self.backgroundImageDisplayList.destroy()
-                self.backgroundImageDisplayList = None
-                if self.backgroundImageTexture is not None:
-                    glDeleteTextures([self.backgroundImageTexture])
-                self.backgroundImageTexture = None
+                self.backgroundImageUploaded = False
             return
             
         pixformat = GL_RGBA
@@ -232,6 +237,7 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
 
         with _globalLock:
             self.backgroundImage = (img,rows,cols,pixformat)
+            self.backgroundImageUploaded = False
             if self.backgroundImageDisplayList is None:
                 self.backgroundImageDisplayList = glcommon.CachedGLObject()
             else:
