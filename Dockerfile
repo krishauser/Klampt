@@ -1,4 +1,4 @@
-FROM ubuntu:15.04
+FROM ubuntu:20.04
 
 # This image contains Klamp't: Kris' Locomotion and Manipulation Planning Toolbox
 # This image utilizes X11 in order to allow users to interact with the GUI.
@@ -7,43 +7,12 @@ FROM ubuntu:15.04
 MAINTAINER Steve Kuznetsov <skuznets@redhat.com>
 
 # Install dependencies
-RUN apt-get update && \
-	apt-get -y install g++ \
-	 cmake \
-	 git \
-	 freeglut3 \
-	 freeglut3-dev \
-	 libglpk-dev \
-	 python-dev \
-	 python-opengl \
-	 libxmu-dev \
-	 libxi-dev \
-	 libqt4-dev \
-	 libassimp-dev \
-	 ffmpeg && \
-	apt-get clean
+RUN apt-get update
 
-# Copy Klamp't files
-RUN mkdir /etc/Klampt
-COPY CMakeLists.txt /etc/Klampt/CMakeLists.txt
-COPY CMakeModules /etc/Klampt/CMakeModules/
-COPY Cpp /etc/Klampt/Cpp
-COPY data /etc/Klampt/data/
-COPY LICENSE /etc/Klampt/LICENSE
-COPY Python /etc/Klampt/Python/
+RUN DEBIAN_FRONTEND="noninteractive" apt-get -y install tzdata
 
-# Install Klamp't dependencies
-RUN cd /etc/Klampt/Cpp/Dependencies && \
-	make unpack-deps && \
-	make deps && \
-	echo "/etc/Klampt/Cpp/Dependencies/ode-0.14/ode/src/.libs/" >> /etc/ld.so.conf && \
-	ldconfig
+RUN apt-get -y install freeglut3-dev qt5-default
 
-# Install Klamp't
-RUN cd /etc/Klampt && \
-	cmake . && \
-	make Klampt && \
-	make apps && \ 
-	make python && \
-	make python-install
+RUN apt-get -y install python3-dev python3-pip
 
+RUN pip3 install PyOpenGL PyQt5 Klampt
