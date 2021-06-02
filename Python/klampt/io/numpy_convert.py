@@ -184,6 +184,7 @@ def from_numpy(obj,type='auto',template=None):
         if template is not None:
             if len(template.propertyNames) != numproperties:
                 raise ValueError("Template object doesn't have the same properties as the numpy object")
+            res.propertyNames.resize(len(template.propertyNames))
             for i in range(len(template.propertyNames)):
                 res.propertyNames[i] = template.propertyNames[i]
         else:
