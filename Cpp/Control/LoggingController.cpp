@@ -84,6 +84,24 @@ void LoggingController::Update(Real dt)
   }
 }
 
+void LoggingController::Reset()
+{
+  base->Reset();
+}
+
+bool LoggingController::ReadState(File& f)
+{
+  if(!base->ReadState(f)) return false;
+  trajectory.resize(0);
+  return true;
+}
+
+bool LoggingController::WriteState(File& f) const
+{
+  if(!base->WriteState(f)) return false;
+  return true;
+}
+
 map<string,string> LoggingController::Settings() const
 {
   map<string,string> res=base->Settings();

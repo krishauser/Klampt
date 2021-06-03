@@ -2,6 +2,7 @@
 #define KLAMPT_SENSING_COMMON_H
 
 #include <KrisLibrary/File.h>
+#include <KrisLibrary/Logger.h>
 #include <KrisLibrary/math/random.h>
 #include <KrisLibrary/math/math.h>
 #include <KrisLibrary/math3d/primitives.h>
@@ -79,12 +80,51 @@ inline bool ReadFile(File& f,vector<T>& v)
   int n;
   if(!ReadFile(f,n)) return false;
   v.resize(0);
-  if(n > 0) {
+  if(n >= 0) {
     v.resize(n);
     if(!ReadArrayFile(f,&v[0],n)) return false;
     return true;
   }
+  LOG4CXX_WARN(KrisLibrary::logger(),"ReadFile(vector): Invalid size "<<n);
   return false;
+}
+
+inline bool WriteFile(File& f,const File& fbuf)
+{
+  const unsigned char* buf = fbuf.GetDataBuffer();
+  if(!buf) {
+    LOG4CXX_WARN(KrisLibrary::logger(),"ReadFile(File): file is not a buffer");
+    return false;
+  }
+  int n=fbuf.Length();
+  if(!WriteFile(f,n)) return false;
+  if(n > 0)
+    if(!WriteArrayFile(f,buf,n)) return false;
+  return true;
+}
+
+inline bool ReadFile(File& f,File& fbuf)
+{
+  if(!fbuf.OpenData()) {
+    LOG4CXX_WARN(KrisLibrary::logger(),"ReadFile(File): unable to open file as buffer");
+  }
+  int n;
+  if(!ReadFile(f,n)) return false;
+  if(n > 0) {
+    unsigned char* data = new unsigned char[n];
+    if(!ReadArrayFile(f,data,n)) {
+      delete [] data;
+      return false;
+    }
+    if(!fbuf.WriteData(data,n)) {
+      LOG4CXX_WARN(KrisLibrary::logger(),"ReadFile(File): unable to write data to buffer?");
+      return false;
+    }
+    delete [] data;
+    fbuf.Seek(0,FILESEEKSTART);
+    return true;
+  }
+  return true;
 }
 
 #endif
