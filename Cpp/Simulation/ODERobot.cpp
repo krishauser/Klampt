@@ -9,6 +9,7 @@
 #include <KrisLibrary/Logger.h>
 #include "Settings.h"
 
+
 DECLARE_LOGGER(ODESimulator)
 
 double ODERobot::defaultPadding = gDefaultRobotPadding;
@@ -993,6 +994,10 @@ bool ODERobot::ReadState(File& f)
 
     dBodySetPosition(bodyID[i],pos[0],pos[1],pos[2]);
     dBodySetQuaternion(bodyID[i],q);
+    //need to do this to avoid the normalization
+    dReal* bq = (dReal*)dBodyGetQuaternion(bodyID[i]);
+    for(int j=0;j<4;j++)
+      bq[j] = q[j];
     dBodySetLinearVel(bodyID[i],v[0],v[1],v[2]);
     dBodySetAngularVel(bodyID[i],w[0],w[1],w[2]);
     dBodySetForce(bodyID[i],frc[0],frc[1],frc[2]);
@@ -1003,17 +1008,18 @@ bool ODERobot::ReadState(File& f)
   File f2;
   f2.OpenData();
   WriteState(f2);
-  void* d1=f.GetDataBuffer();
-  void* d2=f2.GetDataBuffer();
+  char* d1=(char*)f.GetDataBuffer();
+  char* d2=(char*)f2.GetDataBuffer();
   int l1=f.Position()-initPos;
   int l2=f2.Position();
   if(l1 != l2) {
     FatalError("ODERobot::Write/ReadState() do not read the same number of bits %d vs %d!",l1,l2);
   }
-  */
-  /*
-  if(memcmp(((char*)d1)+initPos,d2,l1) != 0) {
-    FatalError("ODERobot::Write/ReadState() do not work correctly!");
+  for(int i=0;i<l1;i++) {
+    if(d1[initPos+i] != d2[i]) {
+      printf("Invalid byte written at position %d\n",i);
+      FatalError("ODERobot::Write/ReadState() do not work correctly!");
+    }
   }
   */
   return true;
@@ -1023,7 +1029,6 @@ bool ODERobot::WriteState(File& f) const
 {
   for(size_t i=0;i<robot.links.size();i++) {
     if(bodyID[i] == NULL)  continue;
-
     const dReal* pos=dBodyGetPosition(bodyID[i]);
     const dReal* q=dBodyGetQuaternion(bodyID[i]);
     const dReal* v=dBodyGetLinearVel(bodyID[i]);

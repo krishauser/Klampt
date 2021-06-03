@@ -1,5 +1,6 @@
 #include "ControlledSimulator.h"
 #include "Sensing/JointSensors.h"
+#include "Sensing/Common_Internal.h"
 #include <KrisLibrary/math/angle.h>
 DEFINE_LOGGER(ControlledRobotSimulator)
 
@@ -325,12 +326,32 @@ void ControlledRobotSimulator::UpdateRobot()
 
 bool ControlledRobotSimulator::ReadState(File& f)
 {
-  if(!ReadFile(f,curTime)) return false;
-  if(!ReadFile(f,nextControlTime)) return false;
-  if(!ReadFile(f,command)) return false;
-  if(!sensors.ReadState(f)) return false;
+  if(!ReadFile(f,curTime)) {
+    printf("ControlledRobotSimulator::ReadState: Unable to read curTime\n");
+    return false;
+  }
+  if(!ReadFile(f,nextControlTime)) {
+    printf("ControlledRobotSimulator::ReadState: Unable to read nextControlTime\n");
+    return false;
+  }
+  if(!ReadFile(f,command)) {
+    printf("ControlledRobotSimulator::ReadState: Unable to read command\n");
+    return false;
+  }
+  if(!sensors.ReadState(f)) {
+    printf("ControlledRobotSimulator::ReadState: Unable to read sensors\n");
+    return false;
+  }
   if(controller) {
-    if(!controller->ReadState(f)) return false;
+    File cfile;
+    if(!ReadFile(f,cfile)) {
+      printf("Unable to read controller file\n");
+      return false;
+    }
+    if(!controller->ReadState(cfile)) {
+      printf("Unable to read controller\n");
+      return false;
+    }
   }
   return true;
 }
@@ -342,7 +363,9 @@ bool ControlledRobotSimulator::WriteState(File& f) const
   if(!WriteFile(f,command)) return false;
   if(!sensors.WriteState(f)) return false;
   if(controller) {
-    if(!controller->WriteState(f)) return false;
+    File cfile; cfile.OpenData();
+    if(!controller->WriteState(cfile)) return false;
+    if(!WriteFile(f,cfile)) return false;
   }
   return true;
 }

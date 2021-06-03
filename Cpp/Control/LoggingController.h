@@ -20,6 +20,9 @@ class LoggingController : public RobotController
   LoggingController(Robot& robot,const shared_ptr<RobotController>& base);
   virtual const char* Type() const { return "LoggingController"; }
   virtual void Update(Real dt);
+  virtual void Reset();
+  virtual bool ReadState(File& f);
+  virtual bool WriteState(File& f) const;
   bool SaveLog(const char* fn) const;
   bool LoadLog(const char* fn);
 

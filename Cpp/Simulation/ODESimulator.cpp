@@ -20,7 +20,7 @@
 
 DEFINE_LOGGER(ODESimulator)
 
-#define TEST_READ_WRITE_STATE 0
+#define TEST_READ_WRITE_STATE 1
 #define DO_TIMING 0
 
 const static size_t gMaxKMeansSize = 5000;

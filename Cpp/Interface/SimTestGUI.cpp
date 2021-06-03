@@ -98,38 +98,6 @@ void SimTestBackend::Start()
   MapButtonToggle("draw_time",&drawTime);
   MapButtonToggle("pose_objects",&pose_objects);
   MapButtonToggle("output_ros",&output_ros);
- 
-  /*
-  //TEMP: testing determinism
-  bool nondet = false;
-  int n=20;
-  Real dt = 0.01;
-  vector<string> trace(n);
-  for(int i=0;i<n;i++) {
-  string start,temp;
-  sim.WriteState(start);
-  sim.Advance(dt);
-  sim.WriteState(trace[i]);
-
-  sim.ReadState(start);
-  sim.Advance(dt);
-  sim.WriteState(temp);
-  if(temp != trace[i]) {
-  printf("Warning, sim state nondeterministic @ step %d: ",i);
-  nondet = true;
-  if(temp.length() != trace[i].length())
-  printf("different lengths %d vs %d\n",temp.length(),trace[i].length());
-  else {
-  for(size_t j=0;j<temp.length();j++)
-  if(temp[j] != trace[i][j]) {
-  printf("byte %d\n",j);
-  break;
-  }
-  }
-  getchar();
-  }
-  }
-  */
 
   SimGUIBackend::Start();
 }

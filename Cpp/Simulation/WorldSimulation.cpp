@@ -2,6 +2,7 @@
 #include <KrisLibrary/Timer.h>
 #include <ode/ode.h>
 #include "ODECommon.h"
+#include "Sensing/Common_Internal.h"
 DEFINE_LOGGER(WorldSimulator)
 
 
@@ -17,7 +18,7 @@ DEFINE_LOGGER(WorldSimulator)
     return false; \
   }
 
-#define TEST_READ_WRITE 0
+#define TEST_READ_WRITE 1
 
 template <class T>
 bool TestReadWriteState(T& obj,const char* name="")
@@ -112,31 +113,6 @@ void Reset(ContactFeedbackInfo& info)
   info.meanPoint.setZero();
   info.times.clear();
   info.contactLists.clear();
-}
-
-template <class T>
-bool WriteFile(File& f,const vector<T>& v)
-{
-  if(!WriteFile(f,int(v.size()))) return false;
-  if(!v.empty()) 
-	if(!WriteArrayFile(f,&v[0],v.size())) return false;
-  return true;
-}
-
-
-template <class T>
-bool ReadFile(File& f,vector<T>& v)
-{
-  int n;
-  READ_FILE_DEBUG(f,n,"ReadFile(vector<T>)");
-  if(n < 0) {
-    LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"ReadFile(vector<T>): invalid size "<<n);
-    return false;
-  }
-  v.resize(n);
-  if(n != 0)
-    READ_ARRAY_FILE_DEBUG(f,&v[0],n,"ReadFile(vector<T>)")
-  return true;
 }
 
 bool WriteFile(File& f,const ContactPoint& cp)
@@ -570,13 +546,23 @@ bool WorldSimulation::ReadState(File& f)
   }
   //controlSimulators will read the robotControllers' states
   for(size_t i=0;i<controlSimulators.size();i++) {
-    if(!controlSimulators[i].ReadState(f)) {
+    File cfile;
+    if(!ReadFile(f,cfile)) {
+      LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"WorldSimulation::ReadState: Control simulator "<<i<<" sub-file failed to read");
+      return false;
+    }
+    if(!controlSimulators[i].ReadState(cfile)) {
       LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"WorldSimulation::ReadState: Control simulator "<<i<<" failed to read");
       return false;
     }
   }
   for(size_t i=0;i<hooks.size();i++) {
-    if(!hooks[i]->ReadState(f)) {
+    File cfile;
+    if(!ReadFile(f,cfile)) {
+      LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"WorldSimulation::ReadState: Hook "<<i<<" sub-file failed to read");
+      return false;
+    }
+    if(!hooks[i]->ReadState(cfile)) {
       LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"WorldSimulation::ReadState: Hook "<<i<<" failed to read");
       return false;
     }
@@ -615,13 +601,20 @@ bool WorldSimulation::WriteState(File& f) const
   if(!odesim.WriteState(f)) return false;
   //controlSimulators will write the robotControllers' states
   for(size_t i=0;i<controlSimulators.size();i++) {
-    if(!controlSimulators[i].WriteState(f)) return false;
+    File cfile; cfile.OpenData();
+    if(!controlSimulators[i].WriteState(cfile)) {
+      LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"WorldSimulation::ReadState: Control simulator "<<i<<" failed to write");
+      return false;
+    }
+    if(!WriteFile(f,cfile)) return false;
   }
   for(size_t i=0;i<hooks.size();i++) {
-    if(!hooks[i]->WriteState(f)) {
+    File cfile;cfile.OpenData();
+    if(!hooks[i]->WriteState(cfile)) {
       LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"WorldSimulation::ReadState: Hook "<<i<<" failed to write");
       return false;
     }
+    if(!WriteFile(f,cfile)) return false;
   }
   if(!WriteFile(f,int(contactFeedback.size()))) return false;
   for(ContactFeedbackMap::const_iterator i=contactFeedback.begin();i!=contactFeedback.end();i++) {

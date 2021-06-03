@@ -24,17 +24,32 @@ SensorBase::SensorBase()
 bool SensorBase::ReadState(File& f)
 {
   vector<double> values;
-  if(!ReadFile(f,values)) return false;
+  if(!ReadFile(f,values)) {
+    LOG4CXX_WARN(KrisLibrary::logger(),"SensorBase::ReadState: Unable to read values");
+    return false;
+  }
   SetMeasurements(values);
   vector<double> state;
-  if(!ReadFile(f,state)) return false;
+  if(!ReadFile(f,state)) {
+    LOG4CXX_WARN(KrisLibrary::logger(),"SensorBase::ReadState: Unable to read internal state");
+    return false;
+  }
   SetInternalState(state);
   size_t n;
-  if(!ReadFile(f,n)) return false;
+  if(!ReadFile(f,n)) {
+    LOG4CXX_WARN(KrisLibrary::logger(),"SensorBase::ReadState: Unable to read property size");
+    return false;
+  }
   for(size_t i=0;i<n;i++) {
     string key,value;
-    if(!ReadFile(f,key)) return false;
-    if(!ReadFile(f,value)) return false;
+    if(!ReadFile(f,key)) {
+      LOG4CXX_WARN(KrisLibrary::logger(),"SensorBase::ReadState: Unable to read property key "<<i);
+      return false;
+    }
+    if(!ReadFile(f,value)) {
+      LOG4CXX_WARN(KrisLibrary::logger(),"SensorBase::ReadState: Unable to read property value "<<i);
+      return false;
+    }
     SetSetting(key,value);
   }
   return true;
