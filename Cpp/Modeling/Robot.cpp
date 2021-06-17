@@ -53,9 +53,9 @@ public:
   }
   ///returns the winning value. This will return an empty Val if there are 0 votes.  If there are ties, this
   ///returns the one that has least value.
-  Val winner() const {
+  Val winner(Val defaultValue=0) const {
     size_t imax = 0;
-    Val vmax;
+    Val vmax=defaultValue;
     for(auto i=counts.begin();i!=counts.end();i++) {
       if(i->second > imax) {
         imax = i->second;
@@ -672,18 +672,17 @@ bool Robot::LoadRob(const char* fn) {
       else mountNames.push_back(name);
     }
     else if(name == "property") {
-      string value;
       SafeInputString(ss,stemp);
-      getline(ss, value);
+      stringstream buffer;
+      buffer << ss.rdbuf();
       if(ss.fail() || ss.bad()) {
         LOG4CXX_ERROR(GET_LOGGER(RobParser), "   Explicit property on line "<< lineno<<" could not be read");
         return false;
       }
       if(stemp == "controller" || stemp == "sensors") {
         //need to escape these strings
-        stringstream ss(value);
         string file;
-        SafeInputString(ss,file);
+        SafeInputString(buffer,file);
         const char* ext = FileExtension(file.c_str());
         if(ext && 0==strcmp(ext,"xml")) {
           //prepend the robot path
@@ -699,16 +698,34 @@ bool Robot::LoadRob(const char* fn) {
         }
         else {
           //this property may have escapes (e.g. /n, /") which should be translated
-          properties[stemp] = TranslateEscapes(value);
-          stringstream ss(value);
+          buffer.seekg(0);
+          EatWhitespace(buffer);
+          if(buffer.peek() == '\"') {
+            string value;
+            SafeInputString(buffer,value);
+            properties[stemp] = value;
+          }
+          else
+            properties[stemp] = TranslateEscapes(buffer.str());
+          //check for valid XML
+          stringstream sstest(properties[stemp]);
           TiXmlElement e(stemp.c_str());
-          ss >> e;
-          if(!ss) 
+          sstest >> e;
+          if(!sstest) 
             LOG4CXX_ERROR(GET_LOGGER(RobParser),"     Property "<<stemp<<" is not valid XML");
         }
       }
-      else 
-        properties[stemp] = value; 
+      else {
+        //this property may have escapes (e.g. /n, /") which should be translated
+        EatWhitespace(buffer);
+        if(buffer.peek() == '\"') {
+          string value;
+          SafeInputString(buffer,value);
+          properties[stemp] = value;
+        }
+        else
+          properties[stemp] = TranslateEscapes(buffer.str());
+      }
     } else {
       LOG4CXX_ERROR(GET_LOGGER(RobParser), "   Invalid robot property "<<name<<" on line "<<lineno<< "");
       return false;
@@ -878,47 +895,49 @@ bool Robot::LoadRob(const char* fn) {
     }
   }
 
-  accMax.resize(n, Inf);
-  if (qVec.empty())
-    q.set(Zero);
-  else
-    q.copy(&qVec[0]);
-  if (qMinVec.empty())
-    qMin.set(-Inf);
-  else
-    qMin.copy(&qMinVec[0]);
-  if (qMaxVec.empty())
-    qMax.set(Inf);
-  else
-    qMax.copy(&qMaxVec[0]);
-  if (vMaxVec.empty())
-    velMax.set(Inf);
-  else
-    velMax.copy(&vMaxVec[0]);
-  if (vMinVec.empty())
-    velMin.setNegative(velMax);
-  else
-    velMin.copy(&vMinVec[0]);
-  if (tMaxVec.empty())
-    torqueMax.set(Inf);
-  else
-    torqueMax.copy(&tMaxVec[0]);
-  if (pMaxVec.empty())
-    powerMax.set(Inf);
-  else
-    powerMax.copy(&pMaxVec[0]);
-  if (aMaxVec.empty()) {
-    if (tMaxVec.empty())
-      accMax.set(Inf);
+  if(n > 0) {
+    accMax.resize(n, Inf);
+    if (qVec.empty()) 
+      q.set(Zero);
     else
-      GetAccMax(*this, accMax);
-  } else
-    accMax.copy(&aMaxVec[0]);
-  if (axes.empty())
-    axes.resize(TParent.size(), Vector3(0, 0, 1));
+      q.copy(&qVec[0]);
+    if (qMinVec.empty())
+      qMin.set(-Inf);
+    else
+      qMin.copy(&qMinVec[0]);
+    if (qMaxVec.empty())
+      qMax.set(Inf);
+    else
+      qMax.copy(&qMaxVec[0]);
+    if (vMaxVec.empty())
+      velMax.set(Inf);
+    else
+      velMax.copy(&vMaxVec[0]);
+    if (vMinVec.empty())
+      velMin.setNegative(velMax);
+    else
+      velMin.copy(&vMinVec[0]);
+    if (tMaxVec.empty())
+      torqueMax.set(Inf);
+    else
+      torqueMax.copy(&tMaxVec[0]);
+    if (pMaxVec.empty())
+      powerMax.set(Inf);
+    else
+      powerMax.copy(&pMaxVec[0]);
+    if (aMaxVec.empty()) {
+      if (tMaxVec.empty())
+        accMax.set(Inf);
+      else
+        GetAccMax(*this, accMax);
+    } else
+      accMax.copy(&aMaxVec[0]);
+    if (axes.empty())
+      axes.resize(TParent.size(), Vector3(0, 0, 1));
+  }
   //dq.resize(n,0);
   if (TParent.empty()
-      && (a.empty() || d.empty() || alpha.empty() || theta.empty())) {
+      && (a.empty() || d.empty() || alpha.empty() || theta.empty()) && mountFiles.empty()) {
         LOG4CXX_ERROR(GET_LOGGER(RobParser), "   No D-H parameters or link transforms specified");
     return false;
   } else if (TParent.empty()) {
@@ -1161,7 +1180,7 @@ bool Robot::LoadRob(const char* fn) {
 
 
   //first mount the geometries, they affect whether a link is included in self collision testing
-  vector<int> mountLinkIndices(mountLinks.size());
+  vector<int> mountLinkIndices(mountLinks.size(),-2);  //-2 indicates not found
   for (size_t i = 0; i < mountLinks.size(); i++) {
     int linkIndex = LinkIndex(mountLinks[i].c_str());
     if(linkIndex < 0 || linkIndex >= (int)links.size()) {
@@ -1169,8 +1188,7 @@ bool Robot::LoadRob(const char* fn) {
         //pass
       }
       else {
-        LOG4CXX_ERROR(GET_LOGGER(RobParser),"   Invalid mount link "<<mountLinks[i]<<", out of range");
-        return false;
+        mountLinkIndices[i] = -2;
       }
     }
     mountLinkIndices[i] = linkIndex;
@@ -1181,6 +1199,10 @@ bool Robot::LoadRob(const char* fn) {
       //its a robot, delay til later
     }
     else {
+      if(mountLinkIndices[i] == -2) {
+        LOG4CXX_ERROR(GET_LOGGER(RobParser),"   Invalid mount link "<<mountLinks[i]<<", out of range");
+        return false;
+      }
       string fn = ResolveFileReference(path,mountFiles[i]);
       LOG4CXX_INFO(GET_LOGGER(RobParser),"   Mounting geometry file " << mountFiles[i]);
       //mount a triangle mesh on top of another triangle mesh
@@ -1265,6 +1287,14 @@ bool Robot::LoadRob(const char* fn) {
   timer.Reset();
   //do the mounting of subchains
   for (size_t i = 0; i < mountLinks.size(); i++) {
+    if(mountLinkIndices[i] == -2) { //determine mount link dynamically
+      int linkIndex = LinkIndex(mountLinks[i].c_str());
+      if(linkIndex < 0) {
+        LOG4CXX_ERROR(GET_LOGGER(RobParser),"   Invalid mount link "<<mountLinks[i]<<", out of range");
+        return false;
+      }
+      mountLinkIndices[i] = linkIndex;
+    }
     const char* ext = FileExtension(mountFiles[i].c_str());
     if(ext && (0==strcmp(ext,"rob") || 0==strcmp(ext,"urdf"))) {
       string fn = ResolveFileReference(path,mountFiles[i]);
@@ -1957,18 +1987,40 @@ void Robot::Mount(int link, const Robot& subchain, const RigidTransform& T,const
         LOG4CXX_WARN(GET_LOGGER(Robot),"Robot::Mount: Warning, mounted robot sensors couldn't be loaded "<<i->second.c_str());
         continue;
       }
-      //go through and modify all links
+      //go through and modify names and all links in sensors
       TiXmlElement* c = e.FirstChildElement();
       while(c != NULL) {
+        if(c->Attribute("name") && prefix) { //add prefix to sensor name
+          c->SetAttribute("name",(string(prefix)+":"+string(c->Attribute("name"))).c_str());
+        }
         if(c->Attribute("link")) {
           //TODO: if the link is on the root element 0 or -1, transform Tsensor attribute by T
-          int link;
-          if(c->QueryIntAttribute("link",&link) == TIXML_SUCCESS) 
-            c->SetAttribute("link",lstart+link);
+          int slink;
+          if(c->QueryIntAttribute("link",&slink) == TIXML_SUCCESS) {
+            if(slink == -1)
+              c->SetAttribute("link",link);
+            else
+              c->SetAttribute("link",lstart+slink);
+          }
           else {
             //named link
+            slink = subchain.LinkIndex(c->Attribute("link"));
             if(prefix)
               c->SetAttribute("link",(string(prefix)+":"+string(c->Attribute("link"))).c_str());
+          }
+          if(slink < 0) {
+            RigidTransform Tbase,Tsensor;
+            Tbase = T;
+            Tsensor.setIdentity();
+            const char* Tsensor_attr = c->Attribute("Tsensor");
+            if(Tsensor_attr) {
+              stringstream ssSensor(Tsensor_attr);
+              ssSensor >> Tsensor;
+            }
+            Tsensor = Tbase * Tsensor;
+            stringstream ss2;
+            ss2 << Tsensor;
+            c->SetAttribute("Tsensor",ss2.str().c_str());
           }
         }
         else if(c->Attribute("indices")) {
