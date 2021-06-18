@@ -342,7 +342,7 @@ def image_to_points(depth,color,xfov,yfov=None,depth_scale=None,depth_range=None
     yshift = -h*0.5
     xscale = math.tan(xfov*0.5)/(w*0.5)
     if yfov is not None:
-        yscale = -1.0/(math.tan(yfov*0.5)*h/2)
+        yscale = math.tan(yfov*0.5)/(h*0.5)
     else:
         yscale = xscale #square pixels are assumed
     xs = [(j+xshift)*xscale for j in range(w)]
