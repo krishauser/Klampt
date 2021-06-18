@@ -216,13 +216,19 @@ def camera_to_images(camera,image_format='numpy',color_format='channels'):
 
 def image_to_points(depth,color,xfov,yfov=None,depth_scale=None,depth_range=None,color_format='auto',points_format='numpy',all_points=False):
     """Given a depth and optionally color image, returns a point cloud
-    representing the depth or RGB-D scene.  
+    representing the depth or RGB-D scene.
+
+    Optimal performance is obtained with ``points_format='PointCloud'`` or
+    ``'Geometry3D'``, with ``all_points=True``.
 
     Args:
-        depth (list of lists or numpy array): the w x h depth image (rectified).
-        color (list of lists or numpy array, optional): the w x h color image. 
-            Assumed that color maps directly onto depth pixels.  If None,
-            an uncolored point cloud will be produced. 
+        depth (list of lists or numpy array): the w x h depth image (rectified)
+            given as a numpy array of shape (h,w).
+        color (list of lists or numpy array, optional): the w x h color image
+            given as a numpy uint8 array of shape (h,w,3) or a numpy uint32
+            array of shape (h,w) encoding RGB pixels in the format 0xrrggbb.
+            It is assumed that color maps directly onto depth pixels. 
+            If color = None, an uncolored point cloud will be produced. 
         xfov (float): horizontal field of view, in radians.  Related to the
             intrinsics fx via :math:`fx = w/(2 \tan(xfov/2))`, i.e.,
             :math:`xfov = 2*\arctan(w/(2*fx))`.
@@ -308,7 +314,7 @@ def image_to_points(depth,color,xfov,yfov=None,depth_scale=None,depth_range=None
     yshift = -h*0.5
     xscale = math.tan(xfov*0.5)/(w*0.5)
     if yfov is not None:
-        yscale = -1.0/(math.tan(yfov*0.5)*h/2)
+        yscale = math.tan(yfov*0.5)/(h*0.5)
     else:
         yscale = xscale #square pixels are assumed
     xs = [(j+xshift)*xscale for j in range(w)]
