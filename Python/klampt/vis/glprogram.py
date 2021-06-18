@@ -288,8 +288,10 @@ class GLNavigationProgram(GLProgram):
     def set_view(self,v):
         """Sets the viewport to a tuple previously returned by get_view(),
         e.g. a prior view that was saved to file."""
+        if v.h != self.view.h or v.w != self.view.w:
+            #minimize possible flickering?
+            self.reshape(self.view.w,self.view.h)
         self.view = v
-        self.reshape(self.view.w,self.view.h)
     
     def prepare_GL(self):
         """Prepares for OpenGL rendering with the current modelview matrix
