@@ -173,7 +173,8 @@ class GLViewport:
         if self.camera.dist*1.05 > f:
             #allow super zoomed-out views to work without adjusting far plane
             f = self.camera.dist*1.05
-        GLU.gluPerspective (self.fov/aspect,aspect,n,f)
+        fovy = math.degrees(math.atan(math.tan(math.radians(self.fov*0.5))/aspect))*2
+        GLU.gluPerspective (fovy,aspect,n,f)
 
         # Initialize ModelView matrix
         GL.glMatrixMode(GL.GL_MODELVIEW)
