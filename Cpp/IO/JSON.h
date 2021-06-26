@@ -4,6 +4,8 @@
 #include <Klampt/Modeling/Resources.h>
 #include <KrisLibrary/utils/AnyCollection.h>
 
+namespace Klampt {
+
 ///Default conversion to collection
 template <class T>
 void Convert(const T& x,AnyCollection& c) { c = x; }
@@ -30,18 +32,18 @@ bool Convert(const AnyCollection& c,std::vector<T>& v)
   return true;
 }
 
-void Convert(const Vector3& x,AnyCollection& c);
-void Convert(const Vector& x,AnyCollection& c);
-void Convert(const IKGoal& g,AnyCollection& c);
-void Convert(const Hold& h,AnyCollection& c);
-void Convert(const Grasp& g,AnyCollection& c);
-void Convert(const Stance& s,AnyCollection& c);
-bool Convert(const AnyCollection& c,Vector3& x);
-bool Convert(const AnyCollection& c,Vector& x);
-bool Convert(const AnyCollection& c,IKGoal& g);
-bool Convert(const AnyCollection& c,Hold& h);
-bool Convert(const AnyCollection& c,Grasp& g);
-bool Convert(const AnyCollection& c,Stance& s);
+template <> void Convert(const Vector3& x,AnyCollection& c);
+template <> void Convert(const Vector& x,AnyCollection& c);
+template <> void Convert(const IKGoal& g,AnyCollection& c);
+template <> void Convert(const Hold& h,AnyCollection& c);
+template <> void Convert(const Grasp& g,AnyCollection& c);
+template <> void Convert(const Stance& s,AnyCollection& c);
+template <> bool Convert(const AnyCollection& c,Vector3& x);
+template <> bool Convert(const AnyCollection& c,Vector& x);
+template <> bool Convert(const AnyCollection& c,IKGoal& g);
+template <> bool Convert(const AnyCollection& c,Hold& h);
+template <> bool Convert(const AnyCollection& c,Grasp& g);
+template <> bool Convert(const AnyCollection& c,Stance& s);
 
 template <class T>
 void SaveJSON(std::ostream& out,const T& x) {
@@ -58,5 +60,7 @@ bool LoadJSON(std::istream& in,const T& x) {
   if(!in) return false;
   return Convert(msg,x);
 }
+
+} //namespace Klampt
 
 #endif

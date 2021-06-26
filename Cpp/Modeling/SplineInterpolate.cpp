@@ -1,5 +1,7 @@
 #include "SplineInterpolate.h"
 
+namespace Klampt {
+
 void SplineInterpolate(const vector<Vector>& pts,
 		       vector<GeneralizedCubicBezierCurve>& paths,
 		       CSpace* space,GeodesicSpace* manifold)
@@ -407,3 +409,4 @@ void MonotonicAccelInterpolate(const vector<Vector>& pts,vector<GeneralizedCubic
   }
 }
 
+} //namespace Klampt

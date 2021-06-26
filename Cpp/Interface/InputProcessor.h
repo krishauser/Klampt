@@ -6,6 +6,8 @@
 #include <KrisLibrary/utils/AsyncIO.h>
 #include <KrisLibrary/Timer.h>
 
+namespace Klampt {
+
 /** @brief An abstract base class for processing user input through a 2D
  * mouse driven gui into PlannerObjectives used for planning.
  *
@@ -25,14 +27,14 @@ class InputProcessorBase
   virtual void Spaceball(const RigidTransform& T) {}
   virtual void SetGlobalTime(Real time) { currentTime = time; }
   virtual void SetPredictionTime(Real splitTime) {}
-  virtual PlannerObjectiveBase* MakeObjective(Robot* robot) { return NULL; }
+  virtual PlannerObjectiveBase* MakeObjective(RobotModel* robot) { return NULL; }
   virtual void DrawGL() {}
 
   //helpers
-  Robot* GetRobot() const;
+  RobotModel* GetRobot() const;
   void GetClickRay(int mx, int my, Ray3D& ray) const;
 
-  RobotWorld* world;
+  WorldModel* world;
   Camera::Viewport* viewport;
   Real currentTime;
 };
@@ -50,7 +52,7 @@ class StandardInputProcessor : public InputProcessorBase
   virtual void Hover(int mx,int my);
   virtual void Drag(float dx,float dy);
   virtual void Spaceball(const RigidTransform& T);
-  virtual PlannerObjectiveBase* MakeObjective(Robot* robot);
+  virtual PlannerObjectiveBase* MakeObjective(RobotModel* robot);
   virtual void DrawGL();
 
   bool move, changed;
@@ -75,7 +77,7 @@ class PredictiveExtrapolationInputProcessor : public StandardInputProcessor
   virtual void Hover(int mx,int my);
   virtual void Drag(float mx,float my);
   virtual void SetPredictionTime(Real splitTime);
-  virtual PlannerObjectiveBase* MakeObjective(Robot* robot);
+  virtual PlannerObjectiveBase* MakeObjective(RobotModel* robot);
   virtual void DrawGL();
 
   Real currentInputTime;
@@ -102,7 +104,7 @@ class SerializedObjectiveProcessor : public InputProcessorBase
   virtual ~SerializedObjectiveProcessor() {}
   virtual void Activate(bool enabled);
   virtual bool HasUpdate();
-  virtual PlannerObjectiveBase* MakeObjective(Robot* robot);
+  virtual PlannerObjectiveBase* MakeObjective(RobotModel* robot);
 
   AsyncReaderThread* reader;
 };
@@ -122,5 +124,7 @@ class SocketObjectiveProcessor : public SerializedObjectiveProcessor
   virtual string Instructions() { return "Reading objectives over socket..."; }
   SocketReadWorker socketReader;
 };
+
+} // namespace Klampt
 
 #endif

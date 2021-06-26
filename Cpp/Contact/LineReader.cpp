@@ -3,6 +3,8 @@
 #include <KrisLibrary/errors.h>
 #include <sstream>
 
+namespace Klampt {
+
 //reads a c-style token, getting rid of whitespace in front
 //of line.  Reads alphanumeric characters, '#' and '_'
 bool ReadCToken(istream& in,string& str)
@@ -168,3 +170,5 @@ SimpleParser::Result LineReader::InputPunct(const string& punct)
   cerr<<"Error, reading punctuation characters: "<<punct<<" on line "<<lineno<<endl;
   return Error;
 }
+
+} //namespace Klampt

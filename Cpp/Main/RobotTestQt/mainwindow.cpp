@@ -41,7 +41,7 @@ bool MainWindow::Initialize(int _argc,const char** _argv)
     connect(ui->spn_driver,SIGNAL(valueChanged(double)),gui.get(),SLOT(SetDriverValue(double)));
     connect(ui->spn_link,SIGNAL(valueChanged(double)),gui.get(),SLOT(SetLinkValue(double)));
 
-    Robot* rob=world.robots[0].get();
+    RobotModel* rob=world.robots[0].get();
 
     //fill GUI info
     for(int i=0;i<rob->linkNames.size();i++)
@@ -104,9 +104,9 @@ void MainWindow::SetDriver(int index){
 void MainWindow::UpdateDriverParameters(){
     bool oldState = ui->spn_driver->blockSignals(true);
 #define NUM(x) QString::number(x)
-  Robot* rob = world.robots[0].get();
+  RobotModel* rob = world.robots[0].get();
   if(gui->driver_index >=0) {
-    RobotJointDriver dr=rob->drivers[gui->driver_index];
+    RobotModelDriver dr=rob->drivers[gui->driver_index];
     QString driver_info=QString("V [%1 %2], T [%3,%4], PID %5,%6,%7").arg( \
           NUM(dr.vmin),NUM(dr.vmax),NUM(dr.tmin),NUM(dr.tmax),NUM(dr.servoP),NUM(dr.servoI),NUM(dr.servoD));
     ui->lbl_driver_info->setText(driver_info);
@@ -126,7 +126,7 @@ void MainWindow::SetLink(int index){
 }
 
 void MainWindow::UpdateLinkValue(){
-    Robot* rob = world.robots[0].get();
+    RobotModel* rob = world.robots[0].get();
     bool oldState = ui->spn_link->blockSignals(true);
     if(gui->link_index >= 0) {
       ui->spn_link->setValue(rob->q[gui->link_index]);
@@ -136,7 +136,7 @@ void MainWindow::UpdateLinkValue(){
 }
 
 void MainWindow::UpdateDriverValue(){
-    Robot* rob = world.robots[0].get();
+    RobotModel* rob = world.robots[0].get();
     bool oldState = ui->spn_driver->blockSignals(true);
     if(gui->driver_index >= 0) {
       ui->spn_driver->setValue(rob->GetDriverValue(gui->driver_index));
@@ -163,7 +163,7 @@ void MainWindow::UpdateDriverSlider(double value){
 
 void MainWindow::UpdateLinkParameters(){
 #define NUM(x) QString::number(x)
-  Robot* rob = world.robots[0].get();
+  RobotModel* rob = world.robots[0].get();
   if(gui->link_index >= 0) {
     QString link_info=QString("V [%1 %2], A [%3,%4], T [%5,%6]").arg(
     NUM(rob->velMin(gui->link_index)),NUM(rob->velMax(gui->link_index)),

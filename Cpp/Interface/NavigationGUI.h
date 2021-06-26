@@ -6,6 +6,8 @@
 #include <KrisLibrary/camera/viewport.h>
 #include <KrisLibrary/Timer.h>
 
+namespace Klampt {
+
 /** @brief A backend that processes mouse motion calls into dragging
  * callbacks.  Makes it a bit easier to determine free-dragging,
  * control-dragging, shift-dragging, etc.
@@ -94,5 +96,7 @@ class GLNavigationBackend : public MouseDragBackend
   int frames_rendered;
   bool mode_2d;
 };
+
+} //namespace Klampt
 
 #endif //INTERFACE_NAVIGATION_GUI_H

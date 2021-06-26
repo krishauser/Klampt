@@ -2,7 +2,9 @@
 #include "Modeling/DynamicPath.h"
 #include <sstream>
 
-JointTrackingController::JointTrackingController(Robot& _robot)
+using namespace Klampt;
+
+JointTrackingController::JointTrackingController(RobotModel& _robot)
   :RobotController(_robot)
 {
 }

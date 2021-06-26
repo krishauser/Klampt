@@ -2,8 +2,9 @@
 #include <KrisLibrary/robotics/IKFunctions.h>
 #include <KrisLibrary/robotics/Stability.h>
 #include <KrisLibrary/robotics/TorqueSolver.h>
+using namespace Klampt;
 
-Real ConstraintChecker::ContactDistance(const Robot& robot,const Stance& stance)
+Real ConstraintChecker::ContactDistance(const RobotModel& robot,const Stance& stance)
 {
   Real maxErr = 0;
   Vector res;
@@ -17,7 +18,7 @@ Real ConstraintChecker::ContactDistance(const Robot& robot,const Stance& stance)
   return maxErr;
 }
 
-bool ConstraintChecker::HasContact(const Robot& robot,const Stance& stance,Real dist)
+bool ConstraintChecker::HasContact(const RobotModel& robot,const Stance& stance,Real dist)
 {
   Vector res;
   for(Stance::const_iterator i=stance.begin();i!=stance.end();i++) {
@@ -29,7 +30,7 @@ bool ConstraintChecker::HasContact(const Robot& robot,const Stance& stance,Real 
   return true;
 }
 
-bool ConstraintChecker::HasContactVelocity(const Robot& robot,const Stance& stance,Real maxErr)
+bool ConstraintChecker::HasContactVelocity(const RobotModel& robot,const Stance& stance,Real maxErr)
 {
   Vector res;
   Vector3 dw,dv;
@@ -44,17 +45,17 @@ bool ConstraintChecker::HasContactVelocity(const Robot& robot,const Stance& stan
   return true;
 }
 
-bool ConstraintChecker::HasJointLimits(const Robot& robot) 
+bool ConstraintChecker::HasJointLimits(const RobotModel& robot) 
 {
   return robot.InJointLimits(robot.q);
 }
 
-bool ConstraintChecker::HasVelocityLimits(const Robot& robot) 
+bool ConstraintChecker::HasVelocityLimits(const RobotModel& robot) 
 {
   return robot.InVelocityLimits(robot.dq);
 }
 
-bool ConstraintChecker::HasSupportPolygon(const Robot& robot,const Stance& stance,const Vector3& gravity,int numFCEdges) 
+bool ConstraintChecker::HasSupportPolygon(const RobotModel& robot,const Stance& stance,const Vector3& gravity,int numFCEdges) 
 {
   vector<ContactPoint> cps(NumContactPoints(stance));
   int k=0;
@@ -68,7 +69,7 @@ bool ConstraintChecker::HasSupportPolygon(const Robot& robot,const Stance& stanc
   return TestCOMEquilibrium(cps,gravity,numFCEdges,com,f);
 }
 
-bool ConstraintChecker::HasSupportPolygon_Robust(const Robot& robot,const Stance& stance,const Vector3& gravity,Real robustnessFactor,int numFCEdges) 
+bool ConstraintChecker::HasSupportPolygon_Robust(const RobotModel& robot,const Stance& stance,const Vector3& gravity,Real robustnessFactor,int numFCEdges) 
 {
   vector<ContactPoint> cps(NumContactPoints(stance));
   int k=0;
@@ -85,13 +86,13 @@ bool ConstraintChecker::HasSupportPolygon_Robust(const Robot& robot,const Stance
 }
 
 
-bool ConstraintChecker::HasEnvCollision(Robot& robot,Terrain& env)
+bool ConstraintChecker::HasEnvCollision(RobotModel& robot,TerrainModel& env)
 {
   robot.UpdateGeometry();
   return robot.MeshCollision(*env.geometry);
 }
 
-bool ConstraintChecker::HasEnvCollision(Robot& robot,Terrain& env,const Stance& stance, const vector<int>& ignoreList)
+bool ConstraintChecker::HasEnvCollision(RobotModel& robot,TerrainModel& env,const Stance& stance, const vector<int>& ignoreList)
 {
 	robot.UpdateGeometry();
 	robot.InitMeshCollision(*env.geometry);
@@ -112,7 +113,7 @@ bool ConstraintChecker::HasEnvCollision(Robot& robot,Terrain& env,const Stance& 
 	return false;
 }
 
-bool ConstraintChecker::HasEnvCollision(Robot& robot,Terrain& env,const vector<IKGoal>& constraints, const vector<int>& ignoreList)
+bool ConstraintChecker::HasEnvCollision(RobotModel& robot,TerrainModel& env,const vector<IKGoal>& constraints, const vector<int>& ignoreList)
 {
 	robot.UpdateGeometry();
 	robot.InitMeshCollision(*env.geometry);
@@ -137,7 +138,7 @@ bool ConstraintChecker::HasEnvCollision(Robot& robot,Terrain& env,const vector<I
 }
 
 
-bool ConstraintChecker::HasEnvCollision(Robot& robot,Terrain& env,const vector<IKGoal>& constraints)
+bool ConstraintChecker::HasEnvCollision(RobotModel& robot,TerrainModel& env,const vector<IKGoal>& constraints)
 {
 	robot.UpdateGeometry();
 	robot.InitMeshCollision(*env.geometry);
@@ -162,13 +163,13 @@ bool ConstraintChecker::HasEnvCollision(Robot& robot,Terrain& env,const vector<I
 	return false;
 }
 
-bool ConstraintChecker::HasSelfCollision(Robot& robot)
+bool ConstraintChecker::HasSelfCollision(RobotModel& robot)
 {
   robot.UpdateGeometry();
   return robot.SelfCollision();
 }
 
-bool ConstraintChecker::HasTorqueLimits(Robot& robot,const Stance& stance,const Vector3& gravity,int numFCEdges)
+bool ConstraintChecker::HasTorqueLimits(RobotModel& robot,const Stance& stance,const Vector3& gravity,int numFCEdges)
 {
   ContactFormation contacts;
   ToContactFormation(stance,contacts);

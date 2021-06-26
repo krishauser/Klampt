@@ -6,6 +6,7 @@
 #include <KrisLibrary/spline/Hermite.h>
 #include <fstream>
 
+namespace Klampt {
 
 ostream& operator << (ostream& out,const MultiPath& path)
 {
@@ -721,3 +722,5 @@ int MultiPath::Evaluate(Real time,Vector& q,Vector& v,InterpPolicy policy) const
   v /= duration;
   return seg;
 }
+
+} //namespace Klampt

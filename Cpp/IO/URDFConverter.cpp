@@ -10,11 +10,12 @@
 #include <KrisLibrary/utils/stringutils.h>
 #include <KrisLibrary/geometry/AnyGeometry.h>
 #include <KrisLibrary/math3d/geometry3d.h>
- #include <KrisLibrary/math3d/rotation.h>
+#include <KrisLibrary/math3d/rotation.h>
 #include <string.h>
 using namespace std;
 using namespace Geometry;
 using namespace Math3D;
+using namespace Klampt;
 
 string URDFConverter::packageRootPath("");
 bool URDFConverter::useVisGeom = false;
@@ -40,23 +41,23 @@ int URDFConverter::GetLinkIndexfromName(string name, const vector<string> linkna
 	return link_index;
 }
 
-RobotJoint::Type URDFConverter::jointType_URDF2ROB(int type) {
+RobotModelJoint::Type URDFConverter::jointType_URDF2ROB(int type) {
 	//ROB { Weld, Normal, Spin, Floating, FloatingPlanar, BallAndSocket, Closed };
 	//URDF {UNKNOWN, REVOLUTE, CONTINUOUS, PRISMATIC, FLOATING, PLANAR, FIXED };
 
-	RobotJoint::Type robtype = RobotJoint::Weld;
+	RobotModelJoint::Type robtype = RobotModelJoint::Weld;
 	if (type == urdf::Joint::REVOLUTE)
-		robtype = RobotJoint::Normal;
+		robtype = RobotModelJoint::Normal;
 	else if (type == urdf::Joint::CONTINUOUS)
-		robtype = RobotJoint::Spin;
+		robtype = RobotModelJoint::Spin;
 	else if (type == urdf::Joint::FIXED)
-		robtype = RobotJoint::Weld;
+		robtype = RobotModelJoint::Weld;
 	else if (type == urdf::Joint::FLOATING)
-		robtype = RobotJoint::Floating;
+		robtype = RobotModelJoint::Floating;
 	else if (type == urdf::Joint::PLANAR)
-		robtype = RobotJoint::FloatingPlanar;
+		robtype = RobotModelJoint::FloatingPlanar;
 	else if (type == urdf::Joint::PRISMATIC) {
-		robtype = RobotJoint::Normal;
+		robtype = RobotModelJoint::Normal;
 	}
 	return robtype;
 }

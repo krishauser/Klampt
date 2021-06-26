@@ -3,11 +3,12 @@
 #include <KrisLibrary/errors.h>
 
 DECLARE_LOGGER(Sensing);
+using namespace Klampt;
 
 TransformedSensor::TransformedSensor()
 {}
 
-void TransformedSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
+void TransformedSensor::SimulateKinematic(RobotModel& robot,WorldModel& world)
 {
   if(!sensor) return;
   sensor->SimulateKinematic(robot,world);
@@ -79,7 +80,7 @@ void TransformedSensor::DoTransform()
   }
 }
 
-void TransformedSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
+void TransformedSensor::Simulate(SimRobotController* robot,Simulator* sim)
 {
   if(!sensor) return;
   sensor->Simulate(robot,sim);
@@ -156,7 +157,7 @@ bool TransformedSensor::SetSetting(const string& name,const string& str)
   return false;
 }
 
-void TransformedSensor::DrawGL(const Robot& robot,const vector<double>& measurements)
+void TransformedSensor::DrawGL(const RobotModel& robot,const vector<double>& measurements)
 {
   if(sensor) sensor->DrawGL(robot,measurements);
 }
@@ -166,7 +167,7 @@ void TransformedSensor::DrawGL(const Robot& robot,const vector<double>& measurem
 CorruptedSensor::CorruptedSensor()
 {}
 
-void CorruptedSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
+void CorruptedSensor::SimulateKinematic(RobotModel& robot,WorldModel& world)
 {
   if(!sensor) return;
   sensor->SimulateKinematic(robot,world);
@@ -210,7 +211,7 @@ void CorruptedSensor::DoCorrupt()
   }
 }
 
-void CorruptedSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
+void CorruptedSensor::Simulate(SimRobotController* robot,Simulator* sim)
 {
   if(!sensor) return;
   sensor->Simulate(robot,sim);
@@ -281,7 +282,7 @@ bool CorruptedSensor::SetSetting(const string& name,const string& str)
   return false;
 }
 
-void CorruptedSensor::DrawGL(const Robot& robot,const vector<double>& measurements)
+void CorruptedSensor::DrawGL(const RobotModel& robot,const vector<double>& measurements)
 {
   if(sensor) sensor->DrawGL(robot,measurements);
 }
@@ -294,13 +295,13 @@ FilteredSensor::FilteredSensor()
   :smoothing(0)
 {}
 
-void FilteredSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
+void FilteredSensor::SimulateKinematic(RobotModel& robot,WorldModel& world)
 {
   if(!sensor) return;
   sensor->SimulateKinematic(robot,world);
 }
 
-void FilteredSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
+void FilteredSensor::Simulate(SimRobotController* robot,Simulator* sim)
 {
   if(!sensor) return;
   sensor->Simulate(robot,sim);
@@ -374,7 +375,7 @@ bool FilteredSensor::SetSetting(const string& name,const string& str)
   return false;
 }
 
-void FilteredSensor::DrawGL(const Robot& robot,const vector<double>& measurements)
+void FilteredSensor::DrawGL(const RobotModel& robot,const vector<double>& measurements)
 {
   if(sensor) sensor->DrawGL(robot,measurements);
 }
@@ -385,7 +386,7 @@ TimeDelayedSensor::TimeDelayedSensor()
 {}
 
 
-void TimeDelayedSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
+void TimeDelayedSensor::SimulateKinematic(RobotModel& robot,WorldModel& world)
 {
   if(!sensor) return;
   sensor->SimulateKinematic(robot,world);
@@ -402,7 +403,7 @@ void TimeDelayedSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
   }
 }
 
-void TimeDelayedSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
+void TimeDelayedSensor::Simulate(SimRobotController* robot,Simulator* sim)
 {
   if(!sensor) return;
   sensor->Simulate(robot,sim);
@@ -526,7 +527,7 @@ bool TimeDelayedSensor::SetSetting(const string& name,const string& str)
   return false;
 }
 
-void TimeDelayedSensor::DrawGL(const Robot& robot,const vector<double>& measurements)
+void TimeDelayedSensor::DrawGL(const RobotModel& robot,const vector<double>& measurements)
 {
   if(sensor) sensor->DrawGL(robot,measurements);
 }

@@ -6,6 +6,8 @@
 #include <sstream>
 #include <fstream>
 
+namespace Klampt {
+
 const static Real gJointLimitEpsilon = 1e-7;
 const static Real gVelocityLimitEpsilon = 1e-7;
 
@@ -39,7 +41,7 @@ PolynomialMotionQueue::PolynomialMotionQueue()
   pathOffset = 0;
 }
 
-void PolynomialMotionQueue::SetLimits(const Robot& robot)
+void PolynomialMotionQueue::SetLimits(const RobotModel& robot)
 {
   qMin = robot.qMin;
   qMax = robot.qMax;
@@ -373,7 +375,7 @@ void PolynomialMotionQueue::Advance(Real dt)
 
 
 
-PolynomialPathController::PolynomialPathController(Robot& robot)
+PolynomialPathController::PolynomialPathController(RobotModel& robot)
   :JointTrackingController(robot)
 {
   PolynomialMotionQueue::SetLimits(robot);
@@ -609,3 +611,5 @@ bool PolynomialPathController::SendCommand(const string& name,const string& str)
   }
   return false;
 }
+
+} //namespace Klampt

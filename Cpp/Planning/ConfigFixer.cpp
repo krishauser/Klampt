@@ -1,4 +1,5 @@
 #include "ConfigFixer.h"
+using namespace Klampt;
 
 ConfigFixer::ConfigFixer()
   :maxIters(1000),d0(0.1),dmax(1.0),dRate(1e-4)

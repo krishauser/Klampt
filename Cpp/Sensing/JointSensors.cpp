@@ -1,12 +1,13 @@
 #include "JointSensors.h"
 #include "Common_Internal.h"
-#include "Simulation/ControlledSimulator.h"
+#include "Simulation/SimRobotController.h"
 DECLARE_LOGGER(Sensing);
+using namespace Klampt;
 
 JointPositionSensor::JointPositionSensor()
 {}
 
-void JointPositionSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
+void JointPositionSensor::SimulateKinematic(RobotModel& robot,WorldModel& world)
 {
   q = robot.q;
   if(!qvariance.empty()) {
@@ -31,7 +32,7 @@ void JointPositionSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
   }
 }
 
-void JointPositionSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
+void JointPositionSensor::Simulate(SimRobotController* robot,Simulator* sim)
 {
   robot->oderobot->GetConfig(q);
   if(!qvariance.empty()) {
@@ -140,7 +141,7 @@ bool JointPositionSensor::SetSetting(const string& name,const string& str)
 JointVelocitySensor::JointVelocitySensor()
 {}
 
-void JointVelocitySensor::SimulateKinematic(Robot& robot,RobotWorld& world)
+void JointVelocitySensor::SimulateKinematic(RobotModel& robot,WorldModel& world)
 {
   dq = robot.dq;
   if(!dqvariance.empty()) {
@@ -165,7 +166,7 @@ void JointVelocitySensor::SimulateKinematic(Robot& robot,RobotWorld& world)
   }
 }
 
-void JointVelocitySensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
+void JointVelocitySensor::Simulate(SimRobotController* robot,Simulator* sim)
 {
   robot->oderobot->GetVelocities(dq);
   if(!dqvariance.empty()) {
@@ -274,7 +275,7 @@ bool JointVelocitySensor::SetSetting(const string& name,const string& str)
 DriverTorqueSensor::DriverTorqueSensor()
 {}
 
-void DriverTorqueSensor::SimulateKinematic(Robot& robot,RobotWorld& world) 
+void DriverTorqueSensor::SimulateKinematic(RobotModel& robot,WorldModel& world) 
 {
   t.resize(robot.drivers.size(),0.0);
   if(!tvariance.empty()) {
@@ -299,7 +300,7 @@ void DriverTorqueSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
   }
 }
 
-void DriverTorqueSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
+void DriverTorqueSensor::Simulate(SimRobotController* robot,Simulator* sim)
 {
   Assert(robot->command.actuators.size() == robot->robot->drivers.size());
   robot->GetActuatorTorques(t);

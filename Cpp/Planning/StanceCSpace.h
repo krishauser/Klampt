@@ -6,6 +6,8 @@
 #include <KrisLibrary/robotics/Stability.h>
 #include <KrisLibrary/robotics/TorqueSolver.h>
 
+namespace Klampt {
+
 /** @brief A configuration space that constrains a robot to the IK constraints
  * in a stance, and checks for stability against gravity.
  *
@@ -25,7 +27,7 @@
 class StanceCSpace : public ContactCSpace
 {
  public:
-  StanceCSpace(RobotWorld& world,int index,
+  StanceCSpace(WorldModel& world,int index,
 		WorldPlannerSettings* settings);
   StanceCSpace(const SingleRobotCSpace& space);
   StanceCSpace(const StanceCSpace& space);
@@ -60,5 +62,7 @@ class StanceCSpace : public ContactCSpace
   ContactFormation formation;
   TorqueSolver torqueSolver;
 };
+
+} // namespace Klampt;
 
 #endif

@@ -3,6 +3,7 @@
 #include <KrisLibrary/GLdraw/drawextra.h>
 #include <KrisLibrary/GLdraw/GL.h>
 using namespace GLDraw;
+using namespace Klampt;
 
 ViewGrasp::ViewGrasp()
   :viewRobot(NULL)

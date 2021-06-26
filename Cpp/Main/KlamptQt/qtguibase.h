@@ -9,6 +9,7 @@
 #include <QTimer>
 #include <QFileDialog>
 #include <QMessageBox>
+using namespace Klampt;
 
 class QtGUIBase : public QObject,public GenericGUIBase
 {

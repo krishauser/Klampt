@@ -1,13 +1,14 @@
 #include "WorldDragWidget.h"
 #include <KrisLibrary/GLdraw/drawextra.h>
 using namespace GLDraw;
+using namespace Klampt;
 
-WorldDragWidget::WorldDragWidget(RobotWorld* _world)
+WorldDragWidget::WorldDragWidget(WorldModel* _world)
   :world(_world),active(true),robotsActive(true),objectsActive(true),terrainsActive(false),
    highlightColor(1,1,1,0.3),lineColor(1,0.5,0),lineWidth(5.0),dragging(false),hoverID(-1),highlightID(-1)
 {}
 
-void WorldDragWidget::Set(RobotWorld* _world)
+void WorldDragWidget::Set(WorldModel* _world)
 {
   world = _world;
 }
@@ -43,7 +44,7 @@ bool WorldDragWidget::Hover(int x,int y,Camera::Viewport& viewport,double& dista
   if(robotsActive) {
     int body;
     Vector3 localpt;
-    Robot* rob = world->RayCastRobot(r,body,localpt);
+    RobotModel* rob = world->RayCastRobot(r,body,localpt);
     if(rob) {
       hoverPt = localpt;
       int index = -1;
@@ -58,7 +59,7 @@ bool WorldDragWidget::Hover(int x,int y,Camera::Viewport& viewport,double& dista
   }
   if(objectsActive) {
     Vector3 localpt;
-    RigidObject* obj = world->RayCastObject(r,localpt);
+    RigidObjectModel* obj = world->RayCastObject(r,localpt);
     if(obj) {
       Vector3 worldpt = obj->T*localpt;
       Real d=worldpt.distance(r.source);

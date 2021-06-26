@@ -1,12 +1,13 @@
 #include "ObjectPoseWidget.h"
 using namespace GLDraw;
+using namespace Klampt;
 
 RigidObjectPoseWidget::RigidObjectPoseWidget()
   :rigidObject(NULL)
 {
 }
 
-RigidObjectPoseWidget::RigidObjectPoseWidget(RigidObject* object)
+RigidObjectPoseWidget::RigidObjectPoseWidget(RigidObjectModel* object)
   :rigidObject(object)
 {
   poser.T = object->T;
@@ -14,7 +15,7 @@ RigidObjectPoseWidget::RigidObjectPoseWidget(RigidObject* object)
   widgets[0] = &poser;
 }
 
-void RigidObjectPoseWidget::Set(RigidObject* object)
+void RigidObjectPoseWidget::Set(RigidObjectModel* object)
 {
   rigidObject = object;
   poser.T = object->T;

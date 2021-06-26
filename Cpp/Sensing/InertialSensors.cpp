@@ -1,8 +1,10 @@
 #include "InertialSensors.h"
 #include "Common_Internal.h"
-#include "Simulation/ControlledSimulator.h"
+#include "Simulation/SimRobotController.h"
 #include "Simulation/ODESimulator.h"
-#include "Simulation/WorldSimulation.h"
+#include "Simulation/Simulator.h"
+
+using namespace Klampt;
 
 Accelerometer::Accelerometer()
   :link(0),accelVariance(Zero),accel(Zero)
@@ -18,7 +20,7 @@ void Accelerometer::Advance(Real dt)
   last_dt = dt;
 }
 
-void Accelerometer::SimulateKinematic(Robot& robot,RobotWorld& world)
+void Accelerometer::SimulateKinematic(RobotModel& robot,WorldModel& world)
 {
   RigidTransform T;
   Vector3 w,v,vp;
@@ -48,7 +50,7 @@ void Accelerometer::SimulateKinematic(Robot& robot,RobotWorld& world)
 }
 
 
-void Accelerometer::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
+void Accelerometer::Simulate(SimRobotController* robot,Simulator* sim)
 {
   RigidTransform T;
   Vector3 w,v,vp;
@@ -160,7 +162,7 @@ void TiltSensor::Advance(Real dt)
 {
 }
 
-void TiltSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
+void TiltSensor::SimulateKinematic(RobotModel& robot,WorldModel& world)
 {
   RigidTransform T;
   Vector3 w,v;
@@ -192,7 +194,7 @@ void TiltSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
     if(!hasAxis[i]) wlocal[i] = 0;
 }
 
-void TiltSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
+void TiltSensor::Simulate(SimRobotController* robot,Simulator* sim)
 {
   RigidTransform T;
   Vector3 w,v;
@@ -303,7 +305,7 @@ GyroSensor::GyroSensor()
   last_w.setZero();
 }
 
-void GyroSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
+void GyroSensor::SimulateKinematic(RobotModel& robot,WorldModel& world)
 {
   RigidTransform T;
   Vector3 w,v;
@@ -334,7 +336,7 @@ void GyroSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
   }
 }
 
-void GyroSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
+void GyroSensor::Simulate(SimRobotController* robot,Simulator* sim)
 {
   RigidTransform T;
   Vector3 w,v;
@@ -478,7 +480,7 @@ IMUSensor::IMUSensor()
   Reset();
 }
 
-void IMUSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
+void IMUSensor::SimulateKinematic(RobotModel& robot,WorldModel& world)
 {
   RigidTransform T;
   T = robot.links[accelerometer.link].T_World;
@@ -513,7 +515,7 @@ void IMUSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
 }
 
 
-void IMUSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
+void IMUSensor::Simulate(SimRobotController* robot,Simulator* sim)
 {
   accelerometer.Simulate(robot,sim);
   accel = accelerometer.accel;

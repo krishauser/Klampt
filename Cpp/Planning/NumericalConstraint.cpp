@@ -1,6 +1,8 @@
 #include "NumericalConstraint.h"
 #include <KrisLibrary/math/differentiation.h>
 
+namespace Klampt {
+
 string JointLimitConstraint::Label() const { return "JointLimit"; }
 string JointLimitConstraint::Label(int i) const 
 {
@@ -11,7 +13,7 @@ string JointLimitConstraint::Label(int i) const
   return str;
 }
 
-SuppPolyConstraint::SuppPolyConstraint(Robot& _robot, SupportPolygon& _sp):robot(_robot),sp(_sp),cmInequality(A,b)
+SuppPolyConstraint::SuppPolyConstraint(RobotModel& _robot, SupportPolygon& _sp):robot(_robot),sp(_sp),cmInequality(A,b)
 {
   //Initialize the linear inequality representation
   A.resize(sp.planes.size(),2);
@@ -110,7 +112,7 @@ bool SuppPolyConstraint::Satisfies_i(const Vector& x,int i,Real d)
 
 
 
-CollisionConstraint::CollisionConstraint(Robot& _robot, Geometry::AnyCollisionGeometry3D& _geometry):robot(_robot),geometry(_geometry)
+CollisionConstraint::CollisionConstraint(RobotModel& _robot, Geometry::AnyCollisionGeometry3D& _geometry):robot(_robot),geometry(_geometry)
 {
 	query.resize(robot.links.size());
 	robot.InitMeshCollision(geometry);
@@ -307,7 +309,7 @@ bool CollisionConstraint::Satisfies_i(const Vector& x,int i,Real d)
 	}
 }
 
-SelfCollisionConstraint::SelfCollisionConstraint(Robot& _robot)
+SelfCollisionConstraint::SelfCollisionConstraint(RobotModel& _robot)
   :robot(_robot)
 {
   for(size_t i=0;i<robot.links.size();i++) 
@@ -521,4 +523,4 @@ void TorqueLimitConstraint::Eval(const Vector& x,Vector& v)
   v(0) = 1-maxSat;
 }
 
-
+} //namespace Klampt

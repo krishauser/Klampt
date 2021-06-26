@@ -5,13 +5,14 @@
 #include "VisualSensors.h"
 #include "OtherSensors.h"
 #include "Common_Internal.h"
-#include "Simulation/WorldSimulation.h"
+#include "Simulation/Simulator.h"
 #include <KrisLibrary/utils/PropertyMap.h>
 #include <tinyxml.h>
 
 DECLARE_LOGGER(XmlParser);
 DEFINE_LOGGER(Sensing);
 
+using namespace Klampt;
 using namespace GLDraw;
 
 
@@ -25,29 +26,29 @@ bool SensorBase::ReadState(File& f)
 {
   vector<double> values;
   if(!ReadFile(f,values)) {
-    LOG4CXX_WARN(KrisLibrary::logger(),"SensorBase::ReadState: Unable to read values");
+    LOG4CXX_WARN(GET_LOGGER(Sensing),"SensorBase::ReadState: Unable to read values");
     return false;
   }
   SetMeasurements(values);
   vector<double> state;
   if(!ReadFile(f,state)) {
-    LOG4CXX_WARN(KrisLibrary::logger(),"SensorBase::ReadState: Unable to read internal state");
+    LOG4CXX_WARN(GET_LOGGER(Sensing),"SensorBase::ReadState: Unable to read internal state");
     return false;
   }
   SetInternalState(state);
   size_t n;
   if(!ReadFile(f,n)) {
-    LOG4CXX_WARN(KrisLibrary::logger(),"SensorBase::ReadState: Unable to read property size");
+    LOG4CXX_WARN(GET_LOGGER(Sensing),"SensorBase::ReadState: Unable to read property size");
     return false;
   }
   for(size_t i=0;i<n;i++) {
     string key,value;
     if(!ReadFile(f,key)) {
-      LOG4CXX_WARN(KrisLibrary::logger(),"SensorBase::ReadState: Unable to read property key "<<i);
+      LOG4CXX_WARN(GET_LOGGER(Sensing),"SensorBase::ReadState: Unable to read property key "<<i);
       return false;
     }
     if(!ReadFile(f,value)) {
-      LOG4CXX_WARN(KrisLibrary::logger(),"SensorBase::ReadState: Unable to read property value "<<i);
+      LOG4CXX_WARN(GET_LOGGER(Sensing),"SensorBase::ReadState: Unable to read property value "<<i);
       return false;
     }
     SetSetting(key,value);
@@ -356,7 +357,7 @@ shared_ptr<SensorBase> RobotSensors::GetNamedSensor(const string& name)
 
 
 
-void RobotSensors::MakeDefault(Robot* robot)
+void RobotSensors::MakeDefault(RobotModel* robot)
 {
   sensors.resize(0);
   string sensorXml;

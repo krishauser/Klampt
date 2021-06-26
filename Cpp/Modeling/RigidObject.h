@@ -1,19 +1,21 @@
-#ifndef RIGID_OBJECT_H
-#define RIGID_OBJECT_H
+#ifndef KLAMPT_RIGID_OBJECT_H
+#define KLAMPT_RIGID_OBJECT_H
 
 #include <KrisLibrary/geometry/AnyGeometry.h>
 #include <string>
 #include "ManagedGeometry.h"
-using namespace std;
-using namespace Math3D;
+
+namespace Klampt {
+  using namespace std;
+  using namespace Math3D;
 
 /** @ingroup Modeling
  * @brief A (static) rigid object that may be manipulated.
  */
-class RigidObject
+class RigidObjectModel
 {
 public:
-  RigidObject();
+  RigidObjectModel();
   ///Loads from a .obj file.  If libcurl is available, can load from a URL
   bool Load(const char* fn);
   bool Save(const char* fn);
@@ -42,5 +44,7 @@ public:
   Real kRestitution;
   Real kStiffness,kDamping;
 };
+
+} //namespace Klampt
 
 #endif

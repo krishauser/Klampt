@@ -4,12 +4,14 @@
 #include <KrisLibrary/GLdraw/Widget.h>
 #include <Klampt/Modeling/World.h>
 
+namespace Klampt {
+
 class WorldDragWidget : public GLDraw::Widget
 {
 public:
-  WorldDragWidget(RobotWorld* world=NULL);
+  WorldDragWidget(WorldModel* world=NULL);
   virtual ~WorldDragWidget() {}
-  void Set(RobotWorld* world);
+  void Set(WorldModel* world);
   void Enable(bool active);
   virtual void SetHighlight(bool value);
   virtual bool Hover(int x,int y,Camera::Viewport& viewport,double& distance);
@@ -18,7 +20,7 @@ public:
   virtual void Drag(int dx,int dy,Camera::Viewport& viewport);
   virtual void DrawGL(Camera::Viewport& viewport);
 
-  RobotWorld* world;
+  WorldModel* world;
   bool active;
   bool robotsActive,objectsActive,terrainsActive;
   GLDraw::GLColor highlightColor,lineColor;
@@ -32,5 +34,7 @@ public:
   int highlightID;
   GLDraw::GLColor originalFaceColor;
 };
+
+} // namespace Klampt;
 
 #endif

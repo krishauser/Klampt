@@ -2,7 +2,9 @@
 #define CONTROL_JOINT_SENSORS_H
 
 #include "Sensor.h"
-using namespace Math;
+
+namespace Klampt {
+  using namespace Math;
 
 /** @ingroup Sensing
  * @brief Simulates a joint encoder.
@@ -18,8 +20,8 @@ class JointPositionSensor : public SensorBase
   JointPositionSensor();
   virtual ~JointPositionSensor() {}
   virtual const char* Type() const { return "JointPositionSensor"; }
-  virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
-  virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
+  virtual void Simulate(SimRobotController* robot,Simulator* sim);
+  virtual void SimulateKinematic(RobotModel& robot,WorldModel& world);
   virtual void Reset();
   virtual void MeasurementNames(vector<string>& names) const;
   virtual void GetMeasurements(vector<double>& values) const;
@@ -48,8 +50,8 @@ class JointVelocitySensor : public SensorBase
   JointVelocitySensor();
   virtual ~JointVelocitySensor() {}
   virtual const char* Type() const { return "JointVelocitySensor"; }
-  virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
-  virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
+  virtual void Simulate(SimRobotController* robot,Simulator* sim);
+  virtual void SimulateKinematic(RobotModel& robot,WorldModel& world);
   virtual void Reset();
   virtual void MeasurementNames(vector<string>& names) const;
   virtual void GetMeasurements(vector<double>& values) const;
@@ -81,8 +83,8 @@ class DriverTorqueSensor : public SensorBase
   DriverTorqueSensor();
   virtual ~DriverTorqueSensor() {}
   virtual const char* Type() const { return "DriverTorqueSensor"; }
-  virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
-  virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
+  virtual void Simulate(SimRobotController* robot,Simulator* sim);
+  virtual void SimulateKinematic(RobotModel& robot,WorldModel& world);
   virtual void Reset();
   virtual void MeasurementNames(vector<string>& names) const;
   virtual void GetMeasurements(vector<double>& values) const;
@@ -96,5 +98,7 @@ class DriverTorqueSensor : public SensorBase
   Vector tresolution;   ///< Estimate on the torque resolution
   Vector t;             ///< Measurement: joint torques
 };
+
+} //namespace Klampt
 
 #endif 

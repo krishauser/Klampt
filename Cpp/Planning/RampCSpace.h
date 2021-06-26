@@ -7,6 +7,8 @@
 #include <KrisLibrary/planning/EdgePlanner.h>
 #include <KrisLibrary/planning/KinodynamicSpace.h>
 
+namespace Klampt {
+
 /** @brief A CSpace where configurations are given by (q,dq) config, velocity
  * pairs.  Local paths are time-optimal acceleration bounded curves.
  *
@@ -97,5 +99,6 @@ public:
   CSpace* space;
 };
 
+} //namespace Klampt
 
 #endif //RAMP_CSPACE_H

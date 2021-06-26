@@ -5,7 +5,9 @@
 #include <KrisLibrary/math3d/primitives.h>
 #include <string>
 #include <sstream>
-using namespace std;
+
+namespace Klampt {
+  using namespace std;
 
 class GenericGUIBase;
 class GenericBackendBase;
@@ -281,5 +283,7 @@ bool GenericGUIBase::SendCommand(const string& cmd,const T1& arg1,const T2& arg2
   ss<<arg1<<" "<<arg2<<" "<<arg3<<endl;
   return this->SendCommand(cmd,ss.str());
 }
+
+} //namespace Klampt
 
 #endif 

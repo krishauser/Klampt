@@ -1,5 +1,6 @@
 #ifndef MOTORCALIBRATE_H
 #define MOTORCALIBRATE_H
+
 #include "motorcalibrate.h"
 #include "Modeling/Resources.h"
 #include "Modeling/Robot.h"
@@ -11,6 +12,7 @@
 #include <KrisLibrary/utils/AnyCollection.h>
 #include <fstream>
 #include <KrisLibrary/Timer.h>
+using namespace std;
 
 //set this to something small if you want this to be faster
 //const static size_t gMaxMilestones = 100;

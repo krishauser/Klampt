@@ -5,10 +5,12 @@
 #include <KrisLibrary/math3d/primitives.h>
 //forward declarations
 namespace Meshing { class PointCloud3D; }
-class RobotWorld;
-class Robot;
-class ControlledRobotSimulator;
-class WorldSimulation;
+
+namespace Klampt {
+class WorldModel;
+class RobotModel;
+class SimRobotController;
+class Simulator;
 class LinearPath;
 class SensorBase;
 
@@ -48,18 +50,18 @@ bool ROSHadUpdate(const char* topic);
 bool ROSSetQueueSize(int size);
 
 bool ROSPublishPose(const Math3D::RigidTransform& T,const char* topic="klampt/transform");
-bool ROSPublishJointState(const Robot& robot,const char* topic="klampt/joint_state");
+bool ROSPublishJointState(const RobotModel& robot,const char* topic="klampt/joint_state");
 bool ROSPublishPointCloud(const Meshing::PointCloud3D& pc,const char* topic="klampt/point_cloud");
 ///publishes a Trajectory message with default joint names
 bool ROSPublishTrajectory(const LinearPath& path,const char* topic="klampt/trajectory");
 ///publishes a Trajectory with the robot's links as joint names
-bool ROSPublishTrajectory(const Robot& robot,const LinearPath& path,const char* topic="klampt/trajectory");
+bool ROSPublishTrajectory(const RobotModel& robot,const LinearPath& path,const char* topic="klampt/trajectory");
 ///publishes a Trajectory along the specified robot indices
-bool ROSPublishTrajectory(const Robot& robot,const std::vector<int>& indices,const LinearPath& path,const char* topic="klampt/trajectory");
+bool ROSPublishTrajectory(const RobotModel& robot,const std::vector<int>& indices,const LinearPath& path,const char* topic="klampt/trajectory");
 ///publishes a JointState about the robot's current commanded joint state
-bool ROSPublishCommandedJointState(ControlledRobotSimulator& robot,const char* topic="klampt/joint_state_commanded");
+bool ROSPublishCommandedJointState(SimRobotController& robot,const char* topic="klampt/joint_state_commanded");
 ///publishes a JointState about the robot's current sensed joint state
-bool ROSPublishSensedJointState(ControlledRobotSimulator& robot,const char* topic="klampt/joint_state_sensed");
+bool ROSPublishSensedJointState(SimRobotController& robot,const char* topic="klampt/joint_state_sensed");
 ///Pubhlishes a sensor reading to a topic of the appropriate type.
 ///- Generically, a FloatArray is published.
 ///- CameraSensor publishes two topics if color is available: [topic]/rgb/camera_info and [topic]/rgb/image_color_rect.
@@ -67,7 +69,7 @@ bool ROSPublishSensedJointState(ControlledRobotSimulator& robot,const char* topi
 bool ROSPublishSensorMeasurement(const SensorBase* sensor,const char* topic="klampt/sensor");
 ///Same as above, but with the proper tf frame name.  robot is the robot to which the sensor is attached and
 ///frameprefix is the tf frame prefix.
-bool ROSPublishSensorMeasurement(const SensorBase* sensor,const Robot& robot,const char* topic="klampt/sensor",const char* frameprefix="klampt");
+bool ROSPublishSensorMeasurement(const SensorBase* sensor,const RobotModel& robot,const char* topic="klampt/sensor",const char* frameprefix="klampt");
 
 ///Subscribes to Pose updates from the given topic.  Note: the T
 ///object must not be destroyed while ROSSubscribeUpdate is being called.
@@ -76,7 +78,7 @@ bool ROSSubscribePose(Math3D::RigidTransform& T,const char* topic="klampt/joint_
 ///Subscribes to JointState updates from the given topic.  Note: the robot
 ///object must not be destroyed while ROSSubscribeUpdate is being called.
 ///If you want to detach it from  future updates, call RosDetach([topic]);
-bool ROSSubscribeJointState(Robot& robot,const char* topic="klampt/joint_state");
+bool ROSSubscribeJointState(RobotModel& robot,const char* topic="klampt/joint_state");
 ///Subscribes to PointCloud2 updates from the given topic.  Note: the
 ///object must not be destroyed while ROSSubscribeUpdate is being called.
 ///If you want to detach it from  future updates, call RosDetach([topic]);
@@ -89,19 +91,19 @@ bool ROSSubscribeTrajectory(LinearPath& path,const char* topic="klampt/trajector
 ///robot as reference (Trajectories can specify a subset of robot joints).
 ///Note: the robot and path must not be destroyed while ROSSubscribeUpdate is being called.
 ///If you want to detach it from  future updates, call RosDetach([topic]);
-bool ROSSubscribeTrajectory(Robot& robot,LinearPath& path,const char* topic="klampt/trajectory");
+bool ROSSubscribeTrajectory(RobotModel& robot,LinearPath& path,const char* topic="klampt/trajectory");
 
 ///Publishes the world to the transform server, under frames named by
 ///[frameprefix]/[rigid object name] for rigid objects and
 ///[frameprefix]/[robot name]/[link name] for robot links
-bool ROSPublishTransforms(const RobotWorld& world,const char* frameprefix="klampt");
+bool ROSPublishTransforms(const WorldModel& world,const char* frameprefix="klampt");
 ///Publishes the simulation to the transform server, under frames named by
 ///[frameprefix]/[rigid object name] for rigid objects and
 ///[frameprefix]/[robot name]/[link name] for robot links
-bool ROSPublishTransforms(const WorldSimulation& sim,const char* frameprefix="klampt");
+bool ROSPublishTransforms(const Simulator& sim,const char* frameprefix="klampt");
 ///Publishes the robot link transforms to the transform server under frames
 ///named by [frameprefix]/[link name]
-bool ROSPublishTransforms(const Robot& robot,const char* frameprefix="klampt");
+bool ROSPublishTransforms(const RobotModel& robot,const char* frameprefix="klampt");
 ///Publishes the transform to the transform server under the given name.
 bool ROSPublishTransform(const Math3D::RigidTransform& T,const char* frame="klampt_transform");
 
@@ -109,17 +111,19 @@ bool ROSPublishTransform(const Math3D::RigidTransform& T,const char* frame="klam
 ///object must not be destroyed while ROSSubscribeUpdate is being called.
 ///If you want to detach it from future updates, call RosDetach("tf");
 ///Note: does NOT set robot configurations.  
-bool ROSSubscribeTransforms(RobotWorld& world,const char* frameprefix="klampt");
+bool ROSSubscribeTransforms(WorldModel& world,const char* frameprefix="klampt");
 ///Subscribes to robot updates from the transform server.  Note: the robot
 ///object must not be destroyed while ROSSubscribeUpdate is being called.
 ///If you want to detach it from  future updates, call RosDetach("tf");
 ///Note: does NOT set robot configurations.
-bool ROSSubscribeTransforms(Robot& robot,const char* frameprefix="klampt");
+bool ROSSubscribeTransforms(RobotModel& robot,const char* frameprefix="klampt");
 ///Subscribes to transform updates from the transform server.  Note: the T
 ///object must not be destroyed while ROSSubscribeUpdate is being called.
 ///If you want to detach it from  future updates, call RosDetach("tf");
 bool ROSSubscribeTransform(Math3D::RigidTransform& T,const char* frameprefix="klampt_transform");
 
 /*@}*/
+
+} //namespace Klampt
 
 #endif

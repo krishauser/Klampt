@@ -6,6 +6,8 @@
 #include <KrisLibrary/robotics/IK.h>
 #include "ViewRobot.h"
 
+namespace Klampt {
+
 /* @defgroup View
  * @brief Definitions of OpenGL drawing routines and UI widgets.
  */
@@ -24,10 +26,10 @@ class RobotLinkPoseWidget : public GLDraw::Widget
 {
 public:
   RobotLinkPoseWidget();
-  RobotLinkPoseWidget(Robot* robot,ViewRobot* viewRobot);
+  RobotLinkPoseWidget(RobotModel* robot,ViewRobot* viewRobot);
   virtual ~RobotLinkPoseWidget() {}
   ///Initializer
-  void Set(Robot* robot,ViewRobot* viewRobot);
+  void Set(RobotModel* robot,ViewRobot* viewRobot);
   ///Sets the active dofs
   void SetActiveDofs(const vector<int>& activeDofs);
   virtual bool Hover(int x,int y,Camera::Viewport& viewport,double& distance);
@@ -37,7 +39,7 @@ public:
   virtual void DrawGL(Camera::Viewport& viewport);
   void InitDefaultAppearance();
 
-  Robot* robot;
+  RobotModel* robot;
   ViewRobot* viewRobot;
   Config poseConfig;
   GLDraw::GLColor highlightColor;
@@ -54,7 +56,7 @@ public:
 class RobotIKPoseWidget : public GLDraw::WidgetSet
 {
 public:
-  RobotIKPoseWidget(Robot* robot);
+  RobotIKPoseWidget(RobotModel* robot);
   ///Clears all constraints on the given link
   void ClearLink(int link);
   ///Fixes the given point on the link at its current location
@@ -82,7 +84,7 @@ public:
   virtual bool Hover(int x,int y,Camera::Viewport& viewport,double& closestDistance);
   virtual bool BeginDrag(int x,int y,Camera::Viewport& viewport,double& closestDistance);
 
-  Robot* robot;
+  RobotModel* robot;
   vector<IKGoal> poseGoals;
   vector<GLDraw::TransformWidget> poseWidgets;
 };
@@ -94,8 +96,8 @@ class RobotPoseWidget : public GLDraw::WidgetSet
 {
 public:
   RobotPoseWidget();
-  RobotPoseWidget(Robot* robot,ViewRobot* viewRobot);
-  void Set(Robot* robot,ViewRobot* viewRobot);
+  RobotPoseWidget(RobotModel* robot,ViewRobot* viewRobot);
+  void Set(RobotModel* robot,ViewRobot* viewRobot);
 
   const Config& Pose() const { return linkPoser.poseConfig; }
   void SetPose(const Config& q);
@@ -149,5 +151,6 @@ public:
 };
 
 /** @} */
+} //namespace Klampt
 
 #endif

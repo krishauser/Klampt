@@ -6,6 +6,8 @@
 #include <KrisLibrary/GLdraw/GLColor.h>
 #include "ViewHold.h"
 
+namespace Klampt {
+
 /** @ingroup View 
  * @brief Displays a support polygon using OpenGL.
  *
@@ -41,6 +43,6 @@ struct ViewStance
   GLDraw::GLColor forceColor;
 };
 
-
+} //namespace Klampt
 
 #endif

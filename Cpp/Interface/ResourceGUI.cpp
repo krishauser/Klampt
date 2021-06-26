@@ -2,8 +2,9 @@
 #include "IO/XmlWorld.h"
 #include <KrisLibrary/utils/stringutils.h>
 #include <KrisLibrary/utils/ioutils.h>
+using namespace Klampt;
 
-ResourceGUIBackend::ResourceGUIBackend(RobotWorld* world,ResourceManager* library)
+ResourceGUIBackend::ResourceGUIBackend(WorldModel* world,ResourceManager* library)
   :WorldGUIBackend(world),resources(library)
 {
 }

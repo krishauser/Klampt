@@ -3,7 +3,9 @@
 
 #include "Sensor.h"
 #include <KrisLibrary/math3d/primitives.h>
-using namespace Math3D;
+
+namespace Klampt {
+  using namespace Math3D;
 
 /** @ingroup Sensing
  * @brief Simulates an accelerometer.
@@ -19,8 +21,8 @@ class Accelerometer : public SensorBase
  public:
   Accelerometer();
   virtual const char* Type() const { return "Accelerometer"; }
-  virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
-  virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
+  virtual void Simulate(SimRobotController* robot,Simulator* sim);
+  virtual void SimulateKinematic(RobotModel& robot,WorldModel& world);
   virtual void Advance(double dt);
   virtual void Reset();
   virtual void MeasurementNames(vector<string>& names) const;
@@ -61,8 +63,8 @@ class TiltSensor : public SensorBase
  public:
   TiltSensor();
   virtual const char* Type() const { return "TiltSensor"; }
-  virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
-  virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
+  virtual void Simulate(SimRobotController* robot,Simulator* sim);
+  virtual void SimulateKinematic(RobotModel& robot,WorldModel& world);
   virtual void Advance(double dt);
   virtual void Reset();
   virtual void MeasurementNames(vector<string>& names) const;
@@ -100,8 +102,8 @@ class GyroSensor : public SensorBase
  public:
   GyroSensor();
   virtual const char* Type() const { return "GyroSensor"; }
-  virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
-  virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
+  virtual void Simulate(SimRobotController* robot,Simulator* sim);
+  virtual void SimulateKinematic(RobotModel& robot,WorldModel& world);
   virtual void Reset();
   virtual void Advance(Real dt);
   virtual void MeasurementNames(vector<string>& names) const;
@@ -141,8 +143,8 @@ class IMUSensor : public SensorBase
  public:
   IMUSensor();
   virtual const char* Type() const { return "IMUSensor"; }
-  virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
-  virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
+  virtual void Simulate(SimRobotController* robot,Simulator* sim);
+  virtual void SimulateKinematic(RobotModel& robot,WorldModel& world);
   virtual void Advance(Real dt);
   virtual void Reset();
   virtual void MeasurementNames(vector<string>& names) const;
@@ -160,5 +162,7 @@ class IMUSensor : public SensorBase
   Vector3 angAccel,angVel;
   Matrix3 rotation;
 };
+
+} //namespace Klampt
 
 #endif

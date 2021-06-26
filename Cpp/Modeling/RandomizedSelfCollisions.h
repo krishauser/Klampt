@@ -4,6 +4,8 @@
 #include <KrisLibrary/structs/array2d.h>
 #include "Modeling/Robot.h"
 
+namespace Klampt {
+
 /** @file RandomizedSelfCollisions.h
  * @ingroup Modeling
  * @brief Helper functions for computing potentially colliding pairs of links
@@ -38,5 +40,7 @@ void RandomizedIndependentSelfCollisionPairs(RobotWithGeometry& robot,Array2D<bo
 void RandomizedSelfCollisionDistances(RobotWithGeometry& robot,Array2D<Real>& minDistance,Array2D<Real>& maxDistance,int numSamples);
 
 /*@}*/
+
+} //namespace Klampt
 
 #endif

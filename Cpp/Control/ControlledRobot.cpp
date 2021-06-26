@@ -1,11 +1,13 @@
 #include "ControlledRobot.h"
 #include "Sensing/JointSensors.h"
 
+using namespace Klampt;
+
 ControlledRobot::ControlledRobot()
   :klamptRobotModel(NULL),klamptController(NULL)
 {}
 
-bool ControlledRobot::Init(Robot* _robot,RobotController* _controller)
+bool ControlledRobot::Init(RobotModel* _robot,RobotController* _controller)
 {
   klamptRobotModel=_robot;
   klamptController=_controller;

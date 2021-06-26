@@ -2,6 +2,7 @@
 #include <KrisLibrary/GLdraw/drawextra.h>
 #include <KrisLibrary/Timer.h>
 using namespace GLDraw;
+using namespace Klampt;
 
 const static GLColor grey(0.5,0.5,0.5);
 const static GLColor red(1,0,0);
@@ -77,7 +78,7 @@ void GLCheckeredSphere::Draw()
 }
 
 
-ViewRobot::ViewRobot(Robot* _robot)
+ViewRobot::ViewRobot(RobotModel* _robot)
   :robot(_robot)
 {
 }
@@ -86,7 +87,7 @@ ViewRobot::~ViewRobot()
 {
 }
 
-void ViewRobot::Draw(Robot* _robot) 
+void ViewRobot::Draw(RobotModel* _robot) 
 {
   robot = _robot;
   if(!robot) return;

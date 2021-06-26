@@ -2,7 +2,7 @@
 #include "Modeling/DynamicPath.h"
 #include <KrisLibrary/math/random.h>
 using namespace std;
-
+using namespace Klampt;
 
 RampCSpaceAdaptor::RampCSpaceAdaptor(CSpace* _cspace,const Vector& _velMax,const Vector& _accMax)
   :cspace(_cspace),velMax(_velMax),accMax(_accMax),visibilityTolerance(1e-3)

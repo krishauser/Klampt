@@ -14,13 +14,14 @@
 #include <string.h>
 
 using namespace std;
+using namespace Klampt;
 
 
 int URDFtoRob(AnyCollection& settings,string infile,string outfile){
   string path = GetFilePath(outfile.c_str());
 
 
-  Robot robot;
+  RobotModel robot;
 
   URDFConverter::useVisGeom = settings["useVisGeom"];
   URDFConverter::flipYZ = settings["flipYZ"];

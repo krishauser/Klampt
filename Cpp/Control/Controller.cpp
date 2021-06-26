@@ -8,7 +8,9 @@
 #include <KrisLibrary/utils/PropertyMap.h>
 #include <tinyxml.h>
 
-RobotController::RobotController(Robot& _robot)
+namespace Klampt {
+
+RobotController::RobotController(RobotModel& _robot)
   : robot(_robot),time(0),nominalTimeStep(0),sensors(NULL),command(NULL)
 {}
 
@@ -39,7 +41,7 @@ void RobotController::SetPIDCommand(const Config& _qdes,const Config& dqdes)
   //controller?
   //robot.NormalizeAngles(qdes);
   for(size_t i=0;i<robot.drivers.size();i++) {
-    if(robot.drivers[i].type == RobotJointDriver::Normal) {
+    if(robot.drivers[i].type == RobotModelDriver::Normal) {
       command->actuators[i].SetPID(qdes(robot.drivers[i].linkIndices[0]),dqdes(robot.drivers[i].linkIndices[0]),command->actuators[i].iterm);
     }
     else {
@@ -61,7 +63,7 @@ void RobotController::SetTorqueCommand(const Vector& torques)
   else if(torques.size()==robot.links.size()) {
     //parse out links
     for(size_t i=0;i<robot.drivers.size();i++) {
-      if(robot.drivers[i].type == RobotJointDriver::Normal) {
+      if(robot.drivers[i].type == RobotModelDriver::Normal) {
 	command->actuators[i].SetTorque(torques(robot.drivers[i].linkIndices[0]));
       }
       else {
@@ -182,7 +184,7 @@ bool RobotController::GetSensedVelocity(Config& dq)
 
 
 
-void RobotControllerFactory::RegisterDefault(Robot& robot)
+void RobotControllerFactory::RegisterDefault(RobotModel& robot)
 {
   Register("JointTrackingController",new JointTrackingController(robot));
   Register("PolynomialPathController",new PolynomialPathController(robot));
@@ -208,14 +210,14 @@ shared_ptr<RobotController> RobotControllerFactory::CreateByName(const char* nam
   return NULL;
 }
 
-shared_ptr<RobotController> RobotControllerFactory::CreateByName(const char* name,Robot& robot)
+shared_ptr<RobotController> RobotControllerFactory::CreateByName(const char* name,RobotModel& robot)
 {
   for(map<std::string,shared_ptr<RobotController> >::iterator i=controllers.begin();i!=controllers.end();i++)
     if(i->first == name && &i->second->robot==&robot) return i->second;
   return NULL;
 }
 
-shared_ptr<RobotController> RobotControllerFactory::Load(TiXmlElement* in,Robot& robot)
+shared_ptr<RobotController> RobotControllerFactory::Load(TiXmlElement* in,RobotModel& robot)
 {
   if(0!=strcmp(in->Value(),"controller")) {
     LOG4CXX_WARN(KrisLibrary::logger(),"Controller does not have type \"controller\", got "<<in->Value());
@@ -276,7 +278,7 @@ bool RobotControllerFactory::Save(RobotController* controller,TiXmlElement* out)
   return true;
 }
 
-shared_ptr<RobotController> RobotControllerFactory::Load(const char* fn,Robot& robot)
+shared_ptr<RobotController> RobotControllerFactory::Load(const char* fn,RobotModel& robot)
 {
   TiXmlDocument doc;
   if(!doc.LoadFile(fn)) return NULL;
@@ -294,7 +296,7 @@ map<std::string,shared_ptr<RobotController> > RobotControllerFactory::controller
 
 
 
-shared_ptr<RobotController> MakeDefaultController(Robot* robot)
+shared_ptr<RobotController> MakeDefaultController(RobotModel* robot)
 {
   string controllerXml;
   if(robot->properties.get("controller",controllerXml)) {
@@ -307,14 +309,14 @@ shared_ptr<RobotController> MakeDefaultController(Robot* robot)
     }
   
     LOG4CXX_ERROR(KrisLibrary::logger(), "MakeDefaultController: could not load controller from data "<<controllerXml);
-	LOG4CXX_ERROR(KrisLibrary::logger(), "  Making the standard controller instead.");
-	KrisLibrary::loggerWait();
+    LOG4CXX_ERROR(KrisLibrary::logger(), "  Making the standard controller instead.");
+    //KrisLibrary::loggerWait();
   }
   auto c = make_shared<PolynomialPathController>(*robot);
   auto fc = make_shared<FeedforwardController>(*robot,c);
   auto lc= make_shared<LoggingController>(*robot,fc);
   //defaults -- gravity compensation is better off with free-floating robots
-  if(robot->joints[0].type == RobotJoint::Floating)
+  if(robot->joints[0].type == RobotModelJoint::Floating)
     fc->enableGravityCompensation=false;  //feedforward capability
   else
     fc->enableGravityCompensation=true;  //feedforward capability
@@ -322,3 +324,5 @@ shared_ptr<RobotController> MakeDefaultController(Robot* robot)
   lc->save = false;
   return lc;
 }
+
+} //namespace Klampt

@@ -1,6 +1,8 @@
 #include "RobotConstrainedInterpolator.h"
+using namespace std;
+using namespace Klampt;
 
-RobotConstrainedInterpolator::RobotConstrainedInterpolator(Robot& robot,const vector<IKGoal>& goals)
+RobotConstrainedInterpolator::RobotConstrainedInterpolator(RobotModel& robot,const vector<IKGoal>& goals)
   :ConstrainedInterpolator(&space,&f),space(robot),f(robot)
 {
   f.UseIK(goals);
@@ -35,7 +37,7 @@ bool RobotConstrainedInterpolator::Project(Config& x)
 }
 
 
-RobotSmoothConstrainedInterpolator::RobotSmoothConstrainedInterpolator(Robot& robot,const vector<IKGoal>& goals)
+RobotSmoothConstrainedInterpolator::RobotSmoothConstrainedInterpolator(RobotModel& robot,const vector<IKGoal>& goals)
   :SmoothConstrainedInterpolator(&space,&f),space(robot),f(robot)
 {
   SmoothConstrainedInterpolator::manifold = &space;

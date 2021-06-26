@@ -11,6 +11,7 @@
 #include <assert.h>
 #include <iostream>
 #include <stdio.h>
+using namespace Klampt;
 
 const char* special_map(int k) {
   switch(k){

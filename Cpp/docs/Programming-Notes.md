@@ -16,8 +16,9 @@
 
 - Data can inadvertently "leak" from simulation to planning if a shared World Model is used, since the simulation will update the model for visualization.  An easy way to get around such conflicts is simply to copy the world into separate planning and simulation worlds.  (This is fast, since none of the geometry is actually copied.)  The standard pattern (in Python) is:
 
-    ```python
-    RobotWorld world, simWorld;
+    ```cpp
+    using namespace Klampt;
+    WorldModel world, simWorld;
     ... set up the world model ...
     CopyWorld(world,simWorld);
     WorldSimulation sim;

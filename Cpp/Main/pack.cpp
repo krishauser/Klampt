@@ -6,6 +6,7 @@
 #include <vector>
 #include <string.h>
 using namespace std;
+using namespace Klampt;
 
 map<string,vector<string> > unpackTypes;
 map<string,vector<string> > packTypes;

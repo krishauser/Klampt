@@ -5,6 +5,8 @@
 #include <KrisLibrary/math3d/random.h>
 #include <KrisLibrary/Timer.h>
 
+namespace Klampt {
+
 #define TEST_NO_JOINT_LIMITS 0
 #define DO_TIMING 1
 
@@ -35,7 +37,7 @@ public:
   }
 };
 
-ContactCSpace::ContactCSpace(RobotWorld& world,int index,
+ContactCSpace::ContactCSpace(WorldModel& world,int index,
 			     WorldPlannerSettings* settings)
   :SingleRobotCSpace(world,index,settings),
    numSolveContact(0),solveContactTime(0)
@@ -63,7 +65,7 @@ void ContactCSpace::Sample(Config& x)
   SingleRobotCSpace::Sample(x);
   bool floating = false;
   for(size_t i=0;i<robot.joints.size();i++)
-    if(robot.joints[i].type == RobotJoint::Floating) {
+    if(robot.joints[i].type == RobotModelJoint::Floating) {
       floating = true;
       break;
     }
@@ -73,7 +75,7 @@ void ContactCSpace::Sample(Config& x)
     js.Init();
     js.SolveWorkspaceBounds(contactIK);
     for(size_t i=0;i<robot.joints.size();i++)
-      if(robot.joints[i].type == RobotJoint::Floating) {
+      if(robot.joints[i].type == RobotModelJoint::Floating) {
 	vector<int> indices;
 	robot.GetJointIndices(i,indices);
 	if(js.bounds[robot.joints[i].linkIndex].IsEmpty()) {
@@ -258,7 +260,7 @@ void ContactCSpace::Properties(PropertyMap& map)
 
 
 /*
-MultiContactCSpace::MultiContactCSpace(RobotWorld& world,WorldPlannerSettings* settings)
+MultiContactCSpace::MultiContactCSpace(WorldModel& world,WorldPlannerSettings* settings)
   :MultiRobotCSpace(world,settings),
    numSolveContact(0),numIsFeasible(0),solveContactTime(0),isFeasibleTime(0)
 {}
@@ -491,3 +493,5 @@ void MultiContactCSpace::Properties(PropertyMap& map)
   }
 }
 */
+
+} //namespace Klampt

@@ -8,6 +8,8 @@
 #include <Klampt/Modeling/Robot.h>
 #include <KrisLibrary/utils/ArrayMapping.h>
 
+namespace Klampt {
+
 /** @ingroup Continuous
  * @file NumericalConstraint.h
  * @brief Formulates the robot constraints as mathematical inequalities
@@ -17,19 +19,19 @@
 /** @ingroup Continuous  @brief Joint limit inequality */
 struct JointLimitConstraint : public LimitConstraint
 {
-  JointLimitConstraint(const Robot& _robot)
+  JointLimitConstraint(const RobotModel& _robot)
     :LimitConstraint(_robot.qMin,_robot.qMax),robot(_robot)
   {}
   virtual string Label() const;
   virtual string Label(int i) const;
 
-  const Robot& robot;
+  const RobotModel& robot;
 };
 
 /** @ingroup Continuous  @brief Support polygon inequality */
 struct SuppPolyConstraint : public InequalityConstraint
 {
-  SuppPolyConstraint(Robot& robot, SupportPolygon& sp);
+  SuppPolyConstraint(RobotModel& robot, SupportPolygon& sp);
   virtual string Label() const;
   virtual int NumDimensions() const;
   virtual void PreEval(const Vector& x);
@@ -43,7 +45,7 @@ struct SuppPolyConstraint : public InequalityConstraint
   virtual Real Margin(const Vector& x,int& minConstraint);
   virtual bool Satisfies_i(const Vector& x,int i,Real d=Zero);
 
-  Robot& robot;
+  RobotModel& robot;
   SupportPolygon& sp;
   LinearConstraint cmInequality;
   Matrix A;
@@ -58,7 +60,7 @@ struct SuppPolyConstraint : public InequalityConstraint
 /** @ingroup Continuous  @brief Environment collision inequality */
 struct CollisionConstraint : public InequalityConstraint
 {
-  CollisionConstraint(Robot& robot, Geometry::AnyCollisionGeometry3D& geom);
+  CollisionConstraint(RobotModel& robot, Geometry::AnyCollisionGeometry3D& geom);
   virtual string Label() const;
   virtual string Label(int i) const;
   virtual int NumDimensions() const {
@@ -77,7 +79,7 @@ struct CollisionConstraint : public InequalityConstraint
 
   virtual bool Satisfies_i(const Vector& x,int i,Real d=Zero);
 
-  Robot& robot;
+  RobotModel& robot;
   Geometry::AnyCollisionGeometry3D& geometry;
   vector<DistanceQuery> query;
   ArrayMapping activeDofs;
@@ -86,7 +88,7 @@ struct CollisionConstraint : public InequalityConstraint
 /** @ingroup Continuous  @brief Self collision inequality */
 struct SelfCollisionConstraint : public InequalityConstraint
 {
-  SelfCollisionConstraint(Robot& robot);
+  SelfCollisionConstraint(RobotModel& robot);
   virtual string Label() const;
   virtual string Label(int i) const;
   virtual int NumDimensions() const { return (int)collisionPairs.size(); }
@@ -100,7 +102,7 @@ struct SelfCollisionConstraint : public InequalityConstraint
 
   virtual bool Satisfies_i(const Vector& x,int i,Real d=Zero);
 
-  Robot& robot;
+  RobotModel& robot;
   vector<pair<int,int> > collisionPairs;
   vector<DistanceQuery> query;
 };
@@ -116,5 +118,7 @@ struct TorqueLimitConstraint : public InequalityConstraint
 
   TorqueSolver& solver;
 };
+
+} //namespace Klampt
 
 #endif

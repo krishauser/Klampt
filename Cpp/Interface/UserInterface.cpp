@@ -11,6 +11,8 @@
 #endif //WIN32
 using namespace GLDraw;
 
+namespace Klampt {
+
 const static Real gPlannerStopDeltaThreshold = 0.2;
 
 /** @brief Adaptor for sending paths to PhysicalRobotInterface from a
@@ -94,7 +96,7 @@ string JointCommandInterface::MouseInputEvent(int mx,int my,bool drag)
       //alter current desired configuration
       Config q;
       robotInterface->GetEndConfig(q);
-      Robot* robot=GetRobot();
+      RobotModel* robot=GetRobot();
       robot->UpdateConfig(q);
       for(size_t i=0;i<robot->drivers.size();i++) {
 	if(robot->DoesDriverAffect(i,currentLink)) {
@@ -116,11 +118,11 @@ string JointCommandInterface::MouseInputEvent(int mx,int my,bool drag)
 
     Config q;
     robotInterface->GetCurConfig(q);
-    Robot* robot=GetRobot();
+    RobotModel* robot=GetRobot();
     robot->UpdateConfig(q);
     int link;
     Vector3 localPos;
-    Robot* rob=world->RayCastRobot(ray,link,localPos);
+    RobotModel* rob=world->RayCastRobot(ray,link,localPos);
 
     if(rob) {
       currentLink = link;
@@ -205,7 +207,7 @@ void InputProcessingInterface::DrawGL()
 {
   if(inputProcessor) inputProcessor->DrawGL();
   if(currentObjective) {
-    Robot* robot=GetRobot();
+    RobotModel* robot=GetRobot();
     CartesianObjective* cobj = dynamic_cast<CartesianObjective*>(&*currentObjective);
     if(cobj) {
       glPointSize(5.0);
@@ -290,7 +292,7 @@ string IKCommandInterface::UpdateEvent()
   
   Config q;
   robotInterface->GetEndConfig(q);
-  Robot* robot = GetRobot();
+  RobotModel* robot = GetRobot();
   robot->UpdateConfig(q);
   int iters = 100;
   bool res = SolveIK(*robot, problem, 1e-3, iters, 0);
@@ -582,7 +584,7 @@ string MTPlannerCommandInterface::UpdateEvent()
   shared_ptr<PlannerObjectiveBase> obj;
   bool changedObjective = false;
   if(ObjectiveChanged()) {
-    Robot* robot = planningWorld->robots[0].get();
+    RobotModel* robot = planningWorld->robots[0].get();
     changedObjective = true;
     obj.reset(inputProcessor->MakeObjective(robot));
     //this is the visualization objective -- must be a different pointer
@@ -646,3 +648,6 @@ string MTRRTCommandInterface::ActivateEvent(bool enabled)
   }
   return MTPlannerCommandInterface::ActivateEvent(enabled);
 }
+
+
+} // namespace Klampt

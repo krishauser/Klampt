@@ -6,10 +6,12 @@
 #include <KrisLibrary/math3d/primitives.h>
 #include <KrisLibrary/GLdraw/GLRenderToImage.h>
 #include <KrisLibrary/GLdraw/GLDisplayList.h>
-using namespace Math3D;
 
-class RobotWorld;
-class Robot;
+namespace Klampt {
+  using namespace Math3D;
+
+class WorldModel;
+class RobotModel;
 
 /** @ingroup Sensing
  * @brief Simulates a laser range sensor, either sweeping or stationary.  Can
@@ -41,8 +43,8 @@ class LaserRangeSensor : public SensorBase
   LaserRangeSensor();
   virtual ~LaserRangeSensor() {}
   virtual const char* Type() const { return "LaserRangeSensor"; }
-  virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
-  virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
+  virtual void Simulate(SimRobotController* robot,Simulator* sim);
+  virtual void SimulateKinematic(RobotModel robot,WorldModel& world);
   virtual void Advance(double dt);
   virtual void Reset();
   virtual void MeasurementNames(vector<string>& names) const;
@@ -51,7 +53,7 @@ class LaserRangeSensor : public SensorBase
   virtual map<string,string> Settings() const;
   virtual bool GetSetting(const string& name,string& str) const;
   virtual bool SetSetting(const string& name,const string& str);
-  virtual void DrawGL(const Robot& robot,const vector<double>& measurements);
+  virtual void DrawGL(const RobotModel robot,const vector<double>& measurements);
 
   int link;
   RigidTransform Tsensor; ///< z is forward, x points left, y points up
@@ -126,8 +128,8 @@ class CameraSensor : public SensorBase
   CameraSensor();
   virtual ~CameraSensor();
   virtual const char* Type() const { return "CameraSensor"; }
-  virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
-  virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
+  virtual void Simulate(SimRobotController* robot,Simulator* sim);
+  virtual void SimulateKinematic(RobotModel robot,WorldModel& world);
   virtual void Reset();
   virtual void MeasurementNames(vector<string>& names) const;
   virtual void GetMeasurements(vector<double>& values) const;
@@ -135,7 +137,7 @@ class CameraSensor : public SensorBase
   virtual map<string,string> Settings() const;
   virtual bool GetSetting(const string& name,string& str) const;
   virtual bool SetSetting(const string& name,const string& str);
-  virtual void DrawGL(const Robot& robot,const vector<double>& measurements);
+  virtual void DrawGL(const RobotModel robot,const vector<double>& measurements);
   ///Gets the OpenGL view associated with the camera.  The result is in the link's local frame.
   ///Note that in OpenGL views, Z is backward, and Y is up.
   void GetViewport(Camera::Viewport& view) const;
@@ -163,5 +165,7 @@ class CameraSensor : public SensorBase
   GLDraw::GLDisplayList depthDisplayList;
   unsigned int depthDisplayHash;
 };
+
+} //namespace Klampt
 
 #endif 

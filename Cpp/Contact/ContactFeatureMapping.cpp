@@ -9,6 +9,8 @@
 #include <sstream>
 using namespace std;
 
+namespace Klampt {
+
 bool MatchHoldToFeatureMapping(const Hold& h,const ContactFeature& f,ContactFeatureMapping& m,Real& error);
 
 ContactFeatureMapping::ContactFeatureMapping()
@@ -575,3 +577,5 @@ void SetFeatureMappingOrientation(ContactFeatureMapping& feature,const Matrix3& 
   Vector3 desz = Rdes*locz;
   feature.wheelRoll = BestRotationAngle(baseAxis,basez,desz);
 }
+
+} //namespace Klampt

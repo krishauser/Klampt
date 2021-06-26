@@ -2,6 +2,7 @@
 #include <KrisLibrary/GLdraw/drawextra.h>
 using namespace GLDraw;
 using namespace Math3D;
+using namespace Klampt;
 
 ViewWrench::ViewWrench()
 :fscale(1.0),mscale(1.0)

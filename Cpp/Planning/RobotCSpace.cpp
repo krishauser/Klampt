@@ -13,6 +13,8 @@
 #include <KrisLibrary/Timer.h>
 #include <sstream>
 
+namespace Klampt {
+
 Real RandLaplacian()
 {
   Real v = Rand();
@@ -34,7 +36,7 @@ Real SafeRand(Real a,Real b)
   else return Rand(a,b);
 }
 
-RobotCSpace::RobotCSpace(Robot& _robot)
+RobotCSpace::RobotCSpace(RobotModel& _robot)
   :robot(_robot),norm(2.0)
 {
   floatingRotationWeight=1;
@@ -69,15 +71,15 @@ void RobotCSpace::Sample(Config& q)
   for(size_t i=0;i<robot.joints.size();i++) {
     int link = robot.joints[i].linkIndex;
     switch(robot.joints[i].type) {
-    case RobotJoint::Weld:
+    case RobotModelJoint::Weld:
       break;
-    case RobotJoint::Normal:
+    case RobotModelJoint::Normal:
       robot.q(link) = Rand(robot.qMin(link),robot.qMax(link));
       break;
-    case RobotJoint::Spin:
+    case RobotModelJoint::Spin:
       robot.q(link) = Rand(0,TwoPi);
       break;
-    case RobotJoint::FloatingPlanar:
+    case RobotModelJoint::FloatingPlanar:
       {
       int p = robot.parents[link];
       assert(p>=0);
@@ -88,8 +90,8 @@ void RobotCSpace::Sample(Config& q)
       robot.q(pp) = SafeRand(robot.qMin(pp),robot.qMax(pp));
       break;
       }
-    case RobotJoint::Floating:
-    case RobotJoint::BallAndSocket:
+    case RobotModelJoint::Floating:
+    case RobotModelJoint::BallAndSocket:
       {
 	RigidTransform T;
   T.t.x = RandTwoSidedLaplacian();
@@ -106,7 +108,7 @@ void RobotCSpace::Sample(Config& q)
     }
   }
   for(size_t i=0;i<robot.drivers.size();i++) {
-    if(robot.drivers[i].type != RobotJointDriver::Normal) {
+    if(robot.drivers[i].type != RobotModelDriver::Normal) {
       Real val = Rand(robot.drivers[i].qmin,robot.drivers[i].qmax);
       robot.SetDriverValue(i,val);
     }
@@ -127,9 +129,9 @@ void RobotCSpace::SampleNeighborhood(const Config& c,Real r,Config& q)
     else ri = r / jointRadiusScale[i];
     int link = robot.joints[i].linkIndex;
     switch(robot.joints[i].type) {
-    case RobotJoint::Weld:
+    case RobotModelJoint::Weld:
       break;
-    case RobotJoint::Normal:
+    case RobotModelJoint::Normal:
       robot.q(link) += Rand(-ri,ri);
       //reflection sampling strategy
       if(robot.q(link) < robot.qMin(link))
@@ -138,11 +140,11 @@ void RobotCSpace::SampleNeighborhood(const Config& c,Real r,Config& q)
         robot.q(link) = robot.qMax(link) - (robot.q(link)-robot.qMax(link));
       robot.q(link) = Clamp(robot.q(link),robot.qMin(link),robot.qMax(link));
       break;
-    case RobotJoint::Spin:
+    case RobotModelJoint::Spin:
       robot.q(link) += Rand(-ri,ri);
       break;
-    case RobotJoint::Floating:
-    case RobotJoint::BallAndSocket:
+    case RobotModelJoint::Floating:
+    case RobotModelJoint::BallAndSocket:
       {
 	RigidTransform T = robot.links[link].T_World;
 	T.t.x += Rand(-ri,ri);
@@ -162,7 +164,7 @@ void RobotCSpace::SampleNeighborhood(const Config& c,Real r,Config& q)
     }
   }
   for(size_t i=0;i<robot.drivers.size();i++) {
-    if(robot.drivers[i].type != RobotJointDriver::Normal) {
+    if(robot.drivers[i].type != RobotModelDriver::Normal) {
       Real val = robot.GetDriverValue(i);
       Real scale = 1.0;
       //TODO: figure out the proper scale factor
@@ -182,15 +184,15 @@ void RobotCSpace::SampleNeighborhood(const Config& c,Real r,Config& q)
 
 void RobotCSpace::Interpolate(const Config& x,const Config& y,Real u,Config& out)
 {
-  ::Interpolate(robot,x,y,u,out);
+  Klampt::Interpolate(robot,x,y,u,out);
 }
 
 Real RobotCSpace::Distance(const Config& a,const Config& b)
 {
   if(jointWeights.empty())
-    return ::Distance(robot,a,b,norm,floatingRotationWeight);
+    return Klampt::Distance(robot,a,b,norm,floatingRotationWeight);
   else
-    return ::Distance(robot,a,b,norm,jointWeights,floatingRotationWeight);
+    return Klampt::Distance(robot,a,b,norm,jointWeights,floatingRotationWeight);
 }
 
 void RobotCSpace::Properties(PropertyMap& map)
@@ -205,25 +207,25 @@ void RobotCSpace::Properties(PropertyMap& map)
   for(size_t i=0;i<robot.joints.size();i++) {
     int link = robot.joints[i].linkIndex;
     switch(robot.joints[i].type) {
-    case RobotJoint::Normal:
+    case RobotModelJoint::Normal:
       v*=robot.qMax(link)-robot.qMin(link);
       break;
-    case RobotJoint::Weld:
+    case RobotModelJoint::Weld:
       dim--;
       break;
-    case RobotJoint::Spin:
+    case RobotModelJoint::Spin:
       v*=TwoPi;
       vmin(link) = 0;
       vmax(link) = TwoPi;
       euclidean = 0;
       break;
-    case RobotJoint::Floating:
-    case RobotJoint::BallAndSocket:
+    case RobotModelJoint::Floating:
+    case RobotModelJoint::BallAndSocket:
       v*= Pi*4.0/3.0;
       weights[link] = weights[link-1] = weights[link-2] = floatingRotationWeight;
       euclidean = 0;
       break;
-    case RobotJoint::FloatingPlanar:
+    case RobotModelJoint::FloatingPlanar:
       vmin(link) = 0;
       vmax(link) = TwoPi;
       v*= TwoPi;
@@ -256,7 +258,7 @@ void RobotCSpace::Properties(PropertyMap& map)
 
 void RobotCSpace::InterpolateDeriv(const Config& a,const Config& b,Real u,Vector& dx)
 { 
-  ::InterpolateDerivative(robot,a,b,u,dx);
+  Klampt::InterpolateDerivative(robot,a,b,u,dx);
 }
 
 void RobotCSpace::InterpolateDerivA(const Config& a,const Config& b,Real u,const Vector& da,Vector& dx) 
@@ -264,7 +266,7 @@ void RobotCSpace::InterpolateDerivA(const Config& a,const Config& b,Real u,const
   dx.mul(da,1-u);
   for(size_t i=0;i<robot.joints.size();i++) {
     //int k=robot.joints[i].linkIndex;
-    if(robot.joints[i].type == RobotJoint::Floating) {
+    if(robot.joints[i].type == RobotModelJoint::Floating) {
       vector<int> indices;
       robot.GetJointIndices(i,indices);
       Vector3 oldrot(a(indices[3]),a(indices[4]),a(indices[5]));
@@ -289,7 +291,7 @@ void RobotCSpace::InterpolateDerivA(const Config& a,const Config& b,Real u,const
       dtheta *= (1-u);
       dtheta.get(dx(indices[3]),dx(indices[4]),dx(indices[5]));
     }
-    else if(robot.joints[i].type == RobotJoint::BallAndSocket) {
+    else if(robot.joints[i].type == RobotModelJoint::BallAndSocket) {
       vector<int> indices;
       robot.GetJointIndices(i,indices);
       Vector3 oldrot(a(indices[0]),a(indices[1]),a(indices[2]));
@@ -321,7 +323,7 @@ void RobotCSpace::InterpolateDerivB(const Config& a,const Config& b,Real u,const
   dx.mul(db,u);
   for(size_t i=0;i<robot.joints.size();i++) {
     //int k=robot.joints[i].linkIndex;
-    if(robot.joints[i].type == RobotJoint::Floating) {
+    if(robot.joints[i].type == RobotModelJoint::Floating) {
       vector<int> indices;
       robot.GetJointIndices(i,indices);
       Vector3 oldrot(a(indices[3]),a(indices[4]),a(indices[5]));
@@ -346,7 +348,7 @@ void RobotCSpace::InterpolateDerivB(const Config& a,const Config& b,Real u,const
       dtheta *= u;
       dtheta.get(dx(indices[3]),dx(indices[4]),dx(indices[5]));
     }
-    else if(robot.joints[i].type == RobotJoint::BallAndSocket) {
+    else if(robot.joints[i].type == RobotModelJoint::BallAndSocket) {
       vector<int> indices;
       robot.GetJointIndices(i,indices);
       Vector3 oldrot(a(indices[0]),a(indices[1]),a(indices[2]));
@@ -378,14 +380,14 @@ void RobotCSpace::InterpolateDeriv2(const Config& a,const Config& b,Real u,Vecto
 
 void RobotCSpace::Integrate(const Config& a,const Vector& da,Config& b)
 {
-  ::Integrate(robot,a,da,b);
+  Klampt::Integrate(robot,a,da,b);
 }
 
 
 
 
 
-ActiveRobotCSpace::ActiveRobotCSpace(Robot& _robot,const ArrayMapping& _dofs)
+ActiveRobotCSpace::ActiveRobotCSpace(RobotModel& _robot,const ArrayMapping& _dofs)
   :robot(_robot),dofs(_dofs)
 {
   xq=yq=tempq=robot.q;
@@ -395,7 +397,7 @@ ActiveRobotCSpace::ActiveRobotCSpace(Robot& _robot,const ArrayMapping& _dofs)
     invMap[dofs.mapping[i]] = int(i);
   for(size_t i=0;i<robot.joints.size();i++)
     if(invMap[robot.joints[i].linkIndex] >= 0) 
-      if(robot.joints[i].type == RobotJoint::Floating || robot.joints[i].type == RobotJoint::Spin || robot.joints[i].type == RobotJoint::FloatingPlanar || robot.joints[i].type == RobotJoint::BallAndSocket)
+      if(robot.joints[i].type == RobotModelJoint::Floating || robot.joints[i].type == RobotModelJoint::Spin || robot.joints[i].type == RobotModelJoint::FloatingPlanar || robot.joints[i].type == RobotModelJoint::BallAndSocket)
   joints.push_back(i);
 
   for(size_t i=0;i<dofs.mapping.size();i++) {
@@ -422,16 +424,16 @@ void ActiveRobotCSpace::Sample(Config& x)
     int link = robot.joints[i].linkIndex;
     int k=invMap[link];
     switch(robot.joints[i].type) {
-    case RobotJoint::Weld:
+    case RobotModelJoint::Weld:
       break;
-    case RobotJoint::Normal:
+    case RobotModelJoint::Normal:
       x(k) = Rand(robot.qMin(link),robot.qMax(link));
       break;
-    case RobotJoint::Spin:
+    case RobotModelJoint::Spin:
       x(k) = Rand(0,TwoPi);
       break;
-    case RobotJoint::Floating:
-    case RobotJoint::BallAndSocket:
+    case RobotModelJoint::Floating:
+    case RobotModelJoint::BallAndSocket:
       {
 	Matrix3 R;
 	QuaternionRotation qr;
@@ -455,7 +457,7 @@ void ActiveRobotCSpace::Interpolate(const Config& x,const Config& y,Real u,Confi
 {
   dofs.Map(x,xq);
   dofs.Map(y,yq);
-  ::Interpolate(robot,xq,yq,u,tempq);
+  Klampt::Interpolate(robot,xq,yq,u,tempq);
   out.resize(dofs.Size());
   dofs.InvMap(tempq,out);
 }
@@ -467,15 +469,15 @@ Real ActiveRobotCSpace::Distance(const Config& x,const Config& y)
   for(size_t j=0;j<joints.size();j++) {
     int i=joints[j];
     switch(robot.joints[i].type) {
-    case RobotJoint::Weld:
+    case RobotModelJoint::Weld:
       break;
-    case RobotJoint::Normal:
+    case RobotModelJoint::Normal:
       {
 	int l=invMap[robot.joints[i].linkIndex];
 	norm << (x(l)-y(l));
       }
       break;
-    case RobotJoint::Floating:
+    case RobotModelJoint::Floating:
       {
 	vector<int> indices;
 	robot.GetJointIndices(i,indices);
@@ -528,7 +530,7 @@ void ActiveRobotCSpace::InterpolateDeriv(const Config& a,const Config& b,Real u,
   dofs.Map(a,xq);
   dofs.Map(b,yq);
   Assert(u==0);
-  ::InterpolateDerivative(robot,xq,yq,tempq);
+  Klampt::InterpolateDerivative(robot,xq,yq,tempq);
   dx.resize(dofs.Size());
   dofs.InvMap(tempq,dx);
 }
@@ -556,7 +558,7 @@ void ActiveRobotCSpace::Integrate(const Config& a,const Vector& da,Config& b)
   }  
   dofs.Map(a,xq);
   dofs.Map(da,yq);
-  ::Integrate(robot,xq,yq,tempq);
+  Klampt::Integrate(robot,xq,yq,tempq);
   b.resize(dofs.Size());
   dofs.InvMap(tempq,b);
 }
@@ -565,7 +567,7 @@ void ActiveRobotCSpace::Integrate(const Config& a,const Vector& da,Config& b)
 
 
 
-SingleRobotCSpace::SingleRobotCSpace(RobotWorld& _world,int _index,WorldPlannerSettings* _settings)
+SingleRobotCSpace::SingleRobotCSpace(WorldModel& _world,int _index,WorldPlannerSettings* _settings)
   :RobotCSpace(*_world.robots[_index]),world(_world),index(_index),settings(_settings),constraintsDirty(true)
 {
   Assert(settings != NULL);
@@ -587,7 +589,7 @@ bool SingleRobotCSpace::CheckJointLimits(const Config& x)
 {
   robot.UpdateConfig(x);
   for(size_t i=0;i<robot.joints.size();i++) {
-    if(robot.joints[i].type == RobotJoint::Normal || robot.joints[i].type == RobotJoint::Weld) {
+    if(robot.joints[i].type == RobotModelJoint::Normal || robot.joints[i].type == RobotModelJoint::Weld) {
       int k=robot.joints[i].linkIndex;
       if(x(k) < robot.qMin(k) || x(k) > robot.qMax(k)) {
 	//printf("Joint %d value %g out of bounds [%g,%g]\n",i,x(i),robot.qMin(i),robot.qMax(i));
@@ -734,7 +736,7 @@ void SingleRobotCSpace::Sample(Config& x)
   RobotCSpace::Sample(x);
   const AABB3D& bb=settings->robotSettings[index].worldBounds;
   for(size_t i=0;i<robot.joints.size();i++) {
-    if(robot.joints[i].type == RobotJoint::Floating) {
+    if(robot.joints[i].type == RobotModelJoint::Floating) {
       //generate a floating base position
       Vector3 p;
       p.x = Rand(bb.bmin.x,bb.bmax.x);
@@ -820,7 +822,7 @@ EdgePlannerPtr SingleRobotCSpace::PathChecker(const Config& a,const Config& b)
 /*
 vector<pair<int,int> > linkIndices;
 vector<vector<Geometry::CollisionMeshQueryEnhanced> > linkCollisions;
-void GetCollisionList(RobotWorld& world,int robot,WorldPlannerSettings* settings)
+void GetCollisionList(WorldModel& world,int robot,WorldPlannerSettings* settings)
 {
   if(linkCollisions.empty()) {
     linkIndices.resize(world.robots[robot]->links.size());
@@ -861,12 +863,12 @@ void SingleRobotCSpace::GetJointLimits(Vector& bmin,Vector& bmax)
   bmin.resize(robot.links.size(),-Inf);
   bmax.resize(robot.links.size(),Inf);
   for(size_t i=0;i<robot.links.size();i++) {
-    if(robot.joints[i].type == RobotJoint::Normal) {
+    if(robot.joints[i].type == RobotModelJoint::Normal) {
       int k=robot.joints[i].linkIndex;
       bmin(k) = robot.qMin(k);
       bmax(k) = robot.qMax(k);
     }
-    else if(robot.joints[i].type == RobotJoint::Spin) {
+    else if(robot.joints[i].type == RobotModelJoint::Spin) {
       int k=robot.joints[i].linkIndex;
       bmin(k) = 0;
       bmax(k) = TwoPi;
@@ -913,7 +915,7 @@ void SingleRobotCSpace::Properties(PropertyMap& map)
 
 
 
-SingleRigidObjectCSpace::SingleRigidObjectCSpace(RobotWorld& _world,int _index,WorldPlannerSettings* _settings)
+SingleRigidObjectCSpace::SingleRigidObjectCSpace(WorldModel& _world,int _index,WorldPlannerSettings* _settings)
   :SE3CSpace(_settings->objectSettings[_index].worldBounds.bmin,_settings->objectSettings[_index].worldBounds.bmax),
   world(_world),index(_index),settings(_settings),constraintsDirty(true)
 {
@@ -925,7 +927,7 @@ SingleRigidObjectCSpace::SingleRigidObjectCSpace(RobotWorld& _world,int _index,W
   Init();
 }
 
-RigidObject* SingleRigidObjectCSpace::GetObject() const
+RigidObjectModel* SingleRigidObjectCSpace::GetObject() const
 {
   return world.rigidObjects[index].get();
 }
@@ -981,3 +983,4 @@ EdgePlannerPtr SingleRigidObjectCSpace::PathChecker(const Config& a,const Config
 }
 
 
+} // namespace Klampt

@@ -8,32 +8,32 @@
 #include "MultiPath.h"
 #include "Contact/Stance.h"
 #include "Contact/Grasp.h"
-using namespace std;
+
+class AnyCollection;
 
 /** @file Resources.h
  * @ingroup Modeling
  * @brief Defines all Klampt Resource types, and packing / unpacking utilities.
  */
-
-class AnyCollection;
 typedef BasicResource<Config> ConfigResource;
-typedef BasicResource<Vector3> Vector3Resource;
-typedef BasicResource<Matrix3> Matrix3Resource;
-typedef BasicResource<Matrix> MatrixResource;
-typedef BasicResource<RigidTransform> RigidTransformResource;
-typedef BasicResource<GeometricPrimitive3D> GeometricPrimitive3DResource;
+typedef BasicResource<Math3D::Vector3> Vector3Resource;
+typedef BasicResource<Math3D::Matrix3> Matrix3Resource;
+typedef BasicResource<Math::Matrix> MatrixResource;
+typedef BasicResource<Math3D::RigidTransform> RigidTransformResource;
+typedef BasicResource<Geometry::GeometricPrimitive3D> GeometricPrimitive3DResource;
 typedef BasicResource<Camera::Viewport> ViewportResource;
 //forward declarations needed before BasicResource<T> instantiation
 template <> const char* BasicResourceTypeName<Config>();
-template <> const char* BasicResourceTypeName<Vector3>();
-template <> const char* BasicResourceTypeName<Matrix3>();
-template <> const char* BasicResourceTypeName<Matrix>();
-template <> const char* BasicResourceTypeName<RigidTransform>();
+template <> const char* BasicResourceTypeName<Math3D::Vector3>();
+template <> const char* BasicResourceTypeName<Math3D::Matrix3>();
+template <> const char* BasicResourceTypeName<Math::Matrix>();
+template <> const char* BasicResourceTypeName<Math3D::RigidTransform>();
 template <> const char* BasicResourceTypeName<Meshing::TriMesh>();
-template <> const char* BasicResourceTypeName<GeometricPrimitive3D>();
-template <> const char* BasicResourceTypeName<Hold>();
+template <> const char* BasicResourceTypeName<Geometry::GeometricPrimitive3D>();
 template <> const char* BasicResourceTypeName<Camera::Viewport>();
 
+namespace Klampt {
+  using namespace std;
 
 /** @ingroup Modeling
  * @brief Resource for multiple Config's.
@@ -105,7 +105,7 @@ class RobotResource : public ResourceBase
   virtual ResourceBase* Make() { return new RobotResource; }
   virtual ResourceBase* Copy();
 
-  Robot robot;
+  RobotModel robot;
 };
 
 /** @ingroup Modeling
@@ -122,11 +122,11 @@ class RigidObjectResource : public ResourceBase
   virtual ResourceBase* Make() { return new RigidObjectResource; }
   virtual ResourceBase* Copy();
 
-  RigidObject object;
+  RigidObjectModel object;
 };
 
 /** @ingroup Modeling
- * @brief Resource for a RobotWorld.
+ * @brief Resource for a WorldModel.
  *
  * Implementation status: Incomplete. (Saving is not done yet, visualization
  * info are not implemented in hierarchy)
@@ -146,7 +146,7 @@ class WorldResource : public CompoundResourceBase
   virtual bool Pack(vector<ResourcePtr>& subobjects,string* errorMessage=NULL);
   virtual bool Unpack(vector<ResourcePtr>& subobjects,bool* incomplete=NULL);
 
-  RobotWorld world;
+  WorldModel world;
 };
 
 /** @ingroup Modeling
@@ -384,5 +384,7 @@ ResourcePtr PackResources(ResourceLibrary& resources,const string& type,string* 
 vector<ResourcePtr> UnpackResource(ResourcePtr r,bool* successful=NULL,bool* incomplete=NULL);
 
 /*@}*/
+
+} //namespace Klampt
 
 #endif

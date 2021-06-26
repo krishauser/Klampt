@@ -5,11 +5,13 @@
 #include "JointTrackingController.h"
 #include <KrisLibrary/robotics/TorqueSolver.h>
 
+namespace Klampt {
+
 /** @brief Makes a joint tracking controller 'aware' of a contact formation.
  */
 struct ContactJointTrackingController : public RobotController
 {
-  ContactJointTrackingController(Robot& robot,const SmartPointer<JointTrackingController>& base);
+  ContactJointTrackingController(RobotModel& robot,const SmartPointer<JointTrackingController>& base);
   void SetGravity(const Vector3& gravity);
   //contact estimates are given in the LOCAL frame
   void SetContactEstimate(const ContactFormation& contacts,Real penetrationWeight=100);
@@ -31,5 +33,6 @@ struct ContactJointTrackingController : public RobotController
   Config qdes_last,dqdes_last;
 };
 
+} //namespace Klampt
 
 #endif

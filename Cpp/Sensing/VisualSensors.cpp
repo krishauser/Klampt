@@ -7,9 +7,9 @@
 //#undef HAVE_GLEW
 //#define HAVE_GLEW 0
 
-#include "Simulation/ControlledSimulator.h"
+#include "Simulation/SimRobotController.h"
 #include "Simulation/ODESimulator.h"
-#include "Simulation/WorldSimulation.h"
+#include "Simulation/Simulator.h"
 #include <KrisLibrary/GLdraw/drawextra.h>
 #include <KrisLibrary/GLdraw/GLView.h>
 #include <KrisLibrary/GLdraw/GLError.h>
@@ -26,6 +26,7 @@
 DECLARE_LOGGER(Sensing)
 #define DEBUG_GL_RENDER_TIMING 0
 
+using namespace Klampt;
 using namespace GLDraw;
 
 LaserRangeSensor::LaserRangeSensor()
@@ -53,14 +54,14 @@ double EvalPattern(int type,double x,double correction=1.0)
   return 2.0*(Mod(x/correction,1.0)*correction)-1.0;
 }
 
-void LaserRangeSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
+void LaserRangeSensor::Simulate(SimRobotController* robot,Simulator* sim)
 {
   if(link >= 0) 
     robot->oderobot->GetLinkTransform(link,robot->robot->links[link].T_World);
   SimulateKinematic(*robot->robot,*sim->world);
 }
 
-void LaserRangeSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
+void LaserRangeSensor::SimulateKinematic(RobotModel robot,WorldModel& world)
 {
   depthReadings.resize(measurementCount);
   //need to make sure that the sawtooth pattern hits the last measurement: scale the time domain so last measurement before
@@ -233,7 +234,7 @@ bool LaserRangeSensor::SetSetting(const string& name,const string& str)
   return false;
 }
 
-void LaserRangeSensor::DrawGL(const Robot& robot,const vector<double>& measurements) 
+void LaserRangeSensor::DrawGL(const RobotModel robot,const vector<double>& measurements) 
 {
   RigidTransform T = (link >= 0 ? robot.links[link].T_World*Tsensor : Tsensor);
   glPushMatrix();
@@ -310,7 +311,7 @@ CameraSensor::~CameraSensor()
 {
 }
 
-void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
+void CameraSensor::SimulateKinematic(RobotModel robot,WorldModel& world)
 {
   #if DEBUG_GL_RENDER_TIMING
   Timer timer;
@@ -451,7 +452,7 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
           if(rgb) {
             //get color of object
             //TODO: lighting
-            RobotWorld::AppearancePtr app = world.GetAppearance(obj);
+            WorldModel::AppearancePtr app = world.GetAppearance(obj);
             const float* rgba = app->faceColor.rgba;
             pixels[k*3] = (unsigned char)(rgba[0]*255.0);
             pixels[k*3+1] = (unsigned char)(rgba[1]*255.0);
@@ -511,7 +512,7 @@ void CameraSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
   depthDisplayList.erase();
 }
 
-void CameraSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
+void CameraSensor::Simulate(SimRobotController* robot,Simulator* sim)
 {
   sim->UpdateModel();
   if (link >= 0)  //make sure we get the true simulated link transform
@@ -655,7 +656,7 @@ void doTriangle(const Vector3& a,const Vector3& b,const Vector3& c)
   glVertex3v(c);
 }
 
-void CameraSensor::DrawGL(const Robot& robot,const vector<double>& measurements) 
+void CameraSensor::DrawGL(const RobotModel robot,const vector<double>& measurements) 
 {
   Camera::Viewport v;
   GetViewport(v);

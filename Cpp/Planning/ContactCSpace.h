@@ -6,6 +6,8 @@
 #include <Klampt/Contact/Stance.h>
 #include <KrisLibrary/robotics/IK.h>
 
+namespace Klampt {
+
 /** @brief A SingleRobotCSpace for a robot maintaining contact.
  *
  * The loop closure constraints are solved for using the Newton Raphson method
@@ -17,7 +19,7 @@
 class ContactCSpace : public SingleRobotCSpace
 {
  public:
-  ContactCSpace(RobotWorld& world,int index,
+  ContactCSpace(WorldModel& world,int index,
 		WorldPlannerSettings* settings);
   ContactCSpace(const SingleRobotCSpace& space);
   ContactCSpace(const ContactCSpace& space);
@@ -62,7 +64,7 @@ class MultiContactCSpace : public MultiRobotCSpace
     vector<Real> kFriction;
   };
 
-  MultiContactCSpace(RobotWorld& world,
+  MultiContactCSpace(WorldModel& world,
 		     WorldPlannerSettings* settings);
   MultiContactCSpace(const MultiRobotCSpace&);
   MultiContactCSpace(const MultiContactCSpace&);
@@ -96,5 +98,7 @@ class MultiContactCSpace : public MultiRobotCSpace
   double solveContactTime,isFeasibleTime;
 };
 */
+
+} // namespace Klampt
 
 #endif

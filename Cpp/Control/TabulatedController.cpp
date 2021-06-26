@@ -8,7 +8,9 @@
 #include <KrisLibrary/optimization/LSQRInterface.h>
 #include <fstream>
 
-TabulatedController::TabulatedController(Robot& robot)
+namespace Klampt {
+
+TabulatedController::TabulatedController(RobotModel& robot)
   :RobotController(robot),torqueMode(true),commands(0)
 {}
 
@@ -17,7 +19,7 @@ void TabulatedController::StateToFeature(const Config& q,const Vector& dq,Vector
   x.resize(q.n + dq.n);
   x.copySubVector(0,q);
   for(int i=0;i<q.n;i++)
-    if(robot.joints[i].type == RobotJoint::Spin) 
+    if(robot.joints[i].type == RobotModelJoint::Spin) 
       x(i) = AngleNormalize(x(i));
   x.copySubVector(q.n,dq);
 }
@@ -56,7 +58,7 @@ void TabulatedController::Update(Real dt)
   Assert(u.n == (int)robot.drivers.size());
     
   for(size_t i=0;i<robot.drivers.size();i++) {
-    if(robot.drivers[i].type == RobotJointDriver::Normal) {
+    if(robot.drivers[i].type == RobotModelDriver::Normal) {
       if(torqueMode) 
 	command->actuators[i].SetTorque(u(i));
       else
@@ -103,14 +105,14 @@ Real timeStep = 0.01;
 
 //upon integrating from q, how long does the state stay in the cell centered
 //at center?  Increments to the next index
-Real NextCell(Robot& robot,const Geometry::GridTable<Vector>& commands,
+Real NextCell(RobotModel& robot,const Geometry::GridTable<Vector>& commands,
 	      IntTuple& index,const Vector& center,const Config& q,const Vector& dq,const Vector& ddq)
 {
   Config newq,newdq;
   newdq = dq+ddq*timeStep;
   newq = q + dq*timeStep + ddq*(0.5*Sqr(timeStep));
   for(int i=0;i<q.n;i++)
-    if(robot.joints[i].type == RobotJoint::Spin) 
+    if(robot.joints[i].type == RobotModelJoint::Spin) 
       newq(i) = AngleNormalize(newq(i));
 
   Config f(newq.n+newdq.n);
@@ -120,13 +122,13 @@ Real NextCell(Robot& robot,const Geometry::GridTable<Vector>& commands,
 
   for(size_t i=0;i<index.size();i++) {
     if(index[i] > commands.imax[i]) {
-      if((int)i < q.n && robot.joints[i].type == RobotJoint::Spin) 
+      if((int)i < q.n && robot.joints[i].type == RobotModelJoint::Spin) 
 	index[i]=commands.imin[i];
       else
 	index[i]=commands.imax[i];
     }
     else if(index[i] < commands.imin[i]) {
-      if((int)i < q.n && robot.joints[i].type == RobotJoint::Spin)
+      if((int)i < q.n && robot.joints[i].type == RobotModelJoint::Spin)
 	index[i] = commands.imax[i];
       else
 	index[i] = commands.imin[i];
@@ -177,7 +179,7 @@ Real NextCell(Robot& robot,const Geometry::GridTable<Vector>& commands,
     int i=exit-1;
     index[i]++;
     if(index[i] > commands.imax[i]) {
-      if(i < dqofs && robot.joints[i].type == RobotJoint::Spin) 
+      if(i < dqofs && robot.joints[i].type == RobotModelJoint::Spin) 
 	index[i]=commands.imin[i];
       else
 	index[i]=commands.imax[i];
@@ -187,7 +189,7 @@ Real NextCell(Robot& robot,const Geometry::GridTable<Vector>& commands,
     int i=-exit-1;
     index[i]--;
     if(index[i] < commands.imin[i]) {
-      if(i < dqofs && robot.joints[i].type == RobotJoint::Spin) 
+      if(i < dqofs && robot.joints[i].type == RobotModelJoint::Spin) 
 	index[i] = commands.imax[i];
       else
 	index[i] = commands.imin[i];
@@ -200,7 +202,7 @@ void OptimizeMDP(TabulatedController& controller,
 		 const Config& qdes,const Vector& w,
 		 int numTransitionSamples,Real discount)
 {
-  Robot& robot=controller.robot;
+  RobotModel& robot=controller.robot;
   Geometry::GridTable<Vector>& commands=controller.commands;
   //set up an MDP on the grid
   int n=(int)commands.values.size();
@@ -254,7 +256,7 @@ void OptimizeMDP(TabulatedController& controller,
     //assess cost
     Real qcost=0;
     for(int i=0;i<robot.q.n;i++) {
-      if(robot.joints[i].type == RobotJoint::Spin) 
+      if(robot.joints[i].type == RobotModelJoint::Spin) 
 	qcost += Sqr(AngleDiff(robot.q(i),qdes(i)))*w(i);
       else
 	qcost += Sqr(robot.q(i) - qdes(i))*w(i);
@@ -389,3 +391,5 @@ void OptimizeMDP(TabulatedController& controller,
   } while (IncrementIndex(index,commands.imin,commands.imax)==0);
   out.close();
 }
+
+} //namespace Klampt

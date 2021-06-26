@@ -3,6 +3,9 @@
 #include <KrisLibrary/utils/ProgressPrinter.h>
 #include "Planning/DistanceQuery.h"
 
+
+namespace Klampt {
+
 void SampleRobot(RobotWithGeometry& robot)
 {
   for(int i=0;i<robot.q.n;i++) {
@@ -175,3 +178,5 @@ void RandomizedSelfCollisionDistances(RobotWithGeometry& robot,Array2D<Real>& mi
     minDistance(i,i) = maxDistance(i,i) = 0;
   }
 }
+
+} //namespace Klampt

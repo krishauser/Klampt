@@ -6,6 +6,7 @@
 #include <KrisLibrary/GLdraw/GLColor.h>
 #include "ViewHold.h"
 
+namespace Klampt {
 
 /** @ingroup View 
  * @brief Displays a grasp using OpenGL.
@@ -19,5 +20,7 @@ struct ViewGrasp
   ViewContact viewContact;
   GLDraw::GLColor forceColor;
 };
+
+} //namespace Klampt
 
 #endif

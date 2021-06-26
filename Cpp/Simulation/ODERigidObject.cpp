@@ -6,12 +6,14 @@
 #include <KrisLibrary/errors.h>
 #include <iostream>
 
+using namespace Klampt;
+
 DECLARE_LOGGER(ODESimulator)
 
 double ODERigidObject::defaultPadding = gDefaultRigidObjectPadding;
 ODESurfaceProperties ODERigidObject::defaultSurface = {0.1,0.5,Inf,Inf};
 
-ODERigidObject::ODERigidObject(RigidObject& _obj)
+ODERigidObject::ODERigidObject(RigidObjectModel& _obj)
   :obj(_obj),bodyID(0),geometry(0),spaceID(0)
 {}
 

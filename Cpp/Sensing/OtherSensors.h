@@ -4,6 +4,8 @@
 #include "Sensor.h"
 #include <deque>
 
+namespace Klampt {
+
 /** @ingroup Sensing
  * @brief A transformed "piggyback" sensor with a scale, bias, and minimum / maximum
  *
@@ -18,8 +20,8 @@ class TransformedSensor : public SensorBase
   TransformedSensor();
   virtual ~TransformedSensor() {}
   virtual const char* Type() const { return "TransformedSensor"; }
-  virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
-  virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
+  virtual void Simulate(SimRobotController* robot,Simulator* sim);
+  virtual void SimulateKinematic(RobotModel& robot,WorldModel& world);
   virtual void Advance(double dt);
   virtual void Reset();
   virtual void MeasurementNames(vector<string>& names) const;
@@ -30,7 +32,7 @@ class TransformedSensor : public SensorBase
   virtual map<string,string> Settings() const;
   virtual bool GetSetting(const string& name,string& str) const;
   virtual bool SetSetting(const string& name,const string& str);
-  virtual void DrawGL(const Robot& robot,const vector<double>& measurements);
+  virtual void DrawGL(const RobotModel& robot,const vector<double>& measurements);
   void DoTransform();
 
   shared_ptr<SensorBase> sensor;
@@ -54,8 +56,8 @@ class CorruptedSensor : public SensorBase
   CorruptedSensor();
   virtual ~CorruptedSensor() {}
   virtual const char* Type() const { return "CorruptedSensor"; }
-  virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
-  virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
+  virtual void Simulate(SimRobotController* robot,Simulator* sim);
+  virtual void SimulateKinematic(RobotModel& robot,WorldModel& world);
   virtual void Advance(double dt);
   virtual void Reset();
   virtual void MeasurementNames(vector<string>& names) const;
@@ -66,7 +68,7 @@ class CorruptedSensor : public SensorBase
   virtual map<string,string> Settings() const;
   virtual bool GetSetting(const string& name,string& str) const;
   virtual bool SetSetting(const string& name,const string& str);
-  virtual void DrawGL(const Robot& robot,const vector<double>& measurements);
+  virtual void DrawGL(const RobotModel& robot,const vector<double>& measurements);
   void DoCorrupt();
 
   shared_ptr<SensorBase> sensor;
@@ -88,8 +90,8 @@ class FilteredSensor : public SensorBase
   FilteredSensor();
   virtual ~FilteredSensor() {}
   virtual const char* Type() const { return "FilteredSensor"; }
-  virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
-  virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
+  virtual void Simulate(SimRobotController* robot,Simulator* sim);
+  virtual void SimulateKinematic(RobotModel& robot,WorldModel& world);
   virtual void Advance(double dt);
   virtual void Reset();
   virtual void MeasurementNames(vector<string>& names) const;
@@ -100,7 +102,7 @@ class FilteredSensor : public SensorBase
   virtual map<string,string> Settings() const;
   virtual bool GetSetting(const string& name,string& str) const;
   virtual bool SetSetting(const string& name,const string& str);
-  virtual void DrawGL(const Robot& robot,const vector<double>& measurements);
+  virtual void DrawGL(const RobotModel& robot,const vector<double>& measurements);
 
   shared_ptr<SensorBase> sensor;
   vector<double> measurements;
@@ -120,8 +122,8 @@ class TimeDelayedSensor : public SensorBase
   TimeDelayedSensor();
   virtual ~TimeDelayedSensor() {}
   virtual const char* Type() const { return "TimeDelayedSensor"; }
-  virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
-  virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
+  virtual void Simulate(SimRobotController* robot,Simulator* sim);
+  virtual void SimulateKinematic(RobotModel& robot,WorldModel& world);
   virtual void Advance(double dt);
   virtual void Reset();
   virtual void MeasurementNames(vector<string>& names) const;
@@ -132,7 +134,7 @@ class TimeDelayedSensor : public SensorBase
   virtual map<string,string> Settings() const;
   virtual bool GetSetting(const string& name,string& str) const;
   virtual bool SetSetting(const string& name,const string& str);
-  virtual void DrawGL(const Robot& robot,const vector<double>& measurements);
+  virtual void DrawGL(const RobotModel& robot,const vector<double>& measurements);
 
   shared_ptr<SensorBase> sensor;
   deque<vector<double> > measurementsInTransit;
@@ -141,5 +143,7 @@ class TimeDelayedSensor : public SensorBase
   double curTime;
   double delay,jitter;
 };
+
+} //namespace Klampt
 
 #endif

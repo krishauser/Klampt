@@ -12,6 +12,8 @@
 
 DECLARE_LOGGER(ODESimulator)
 
+namespace Klampt {
+
 double ODERobot::defaultPadding = gDefaultRobotPadding;
 //k restitution of 0.1, friction of 1, infinite stiffness
 ODESurfaceProperties ODERobot::defaultSurface = {0.1,1.0,Inf,Inf};
@@ -35,7 +37,7 @@ Matrix3 TranslateInertia(const Matrix3& Hc,const Vector3& c,Real mass)
   return Ho;
 }
 
-ODERobot::ODERobot(Robot& _robot)
+ODERobot::ODERobot(RobotModel& _robot)
   :robot(_robot),jointGroupID(0),spaceID(0)
 {
 }
@@ -136,12 +138,12 @@ void ODERobot::Create(int robotIndex,dWorldID worldID,bool useBoundaryLayer)
   vector<vector<int> > bodyLinks;
   vector<int> jointToBody(robot.joints.size(),-1);
   for(size_t i=0;i<robot.joints.size();i++) {
-    if(robot.joints[i].type == RobotJoint::Floating || robot.joints[i].type == RobotJoint::FloatingPlanar || robot.joints[i].type == RobotJoint::BallAndSocket) {
+    if(robot.joints[i].type == RobotModelJoint::Floating || robot.joints[i].type == RobotModelJoint::FloatingPlanar || robot.joints[i].type == RobotModelJoint::BallAndSocket) {
       jointToBody[i] = bodyJoints.size();
       bodyJoints.push_back(vector<int>(1,i));
       bodyLinks.push_back(vector<int>(1,robot.joints[i].linkIndex));
     }
-    else if(robot.joints[i].type == RobotJoint::Weld) {
+    else if(robot.joints[i].type == RobotModelJoint::Weld) {
       int link=robot.joints[i].linkIndex;
       int parent = robot.parents[link];
       if(parent >= 0) {
@@ -176,12 +178,12 @@ void ODERobot::Create(int robotIndex,dWorldID worldID,bool useBoundaryLayer)
     }
   }
   //construct rigid bodies
-  vector<RigidObject> bodyObjects(bodyJoints.size());
+  vector<RigidObjectModel> bodyObjects(bodyJoints.size());
   vector<ODEGeometry*> bodyGeometry(bodyJoints.size(),NULL);
   for(size_t i=0;i<bodyJoints.size();i++) {
     int joint = bodyJoints[i][0];
     int baseLink = robot.joints[joint].linkIndex;
-    if(robot.joints[i].type == RobotJoint::Floating || robot.joints[i].type == RobotJoint::FloatingPlanar || robot.joints[i].type == RobotJoint::BallAndSocket) {
+    if(robot.joints[i].type == RobotModelJoint::Floating || robot.joints[i].type == RobotModelJoint::FloatingPlanar || robot.joints[i].type == RobotModelJoint::BallAndSocket) {
       //can't have any mass/inertia/geometry leading up to link
       vector<int> indices;
       robot.GetJointIndices(joint,indices);
@@ -293,7 +295,7 @@ void ODERobot::Create(int robotIndex,dWorldID worldID,bool useBoundaryLayer)
 
     //set up body
     bodyID[primaryLink] = dBodyCreate(worldID);
-    RigidObject& body = bodyObjects[i];
+    RigidObjectModel& body = bodyObjects[i];
     //set body transform
     dBodySetPosition(bodyID[primaryLink],body.T.t.x,body.T.t.y,body.T.t.z);
     dMatrix3 rot;
@@ -339,7 +341,7 @@ void ODERobot::Create(int robotIndex,dWorldID worldID,bool useBoundaryLayer)
   jointGroupID = dJointGroupCreate(0);
   for(size_t i=0;i<robot.joints.size();i++) {
     switch(robot.joints[i].type) {
-    case RobotJoint::Weld:
+    case RobotModelJoint::Weld:
       //ignore weld joints that are attached to another rigid body
       //if the parent is -1, then it's attached to the world
       {
@@ -363,8 +365,8 @@ void ODERobot::Create(int robotIndex,dWorldID worldID,bool useBoundaryLayer)
         }
       }
       break;
-    case RobotJoint::Normal:
-    case RobotJoint::Spin:
+    case RobotModelJoint::Normal:
+    case RobotModelJoint::Spin:
       {
         int link = robot.joints[i].linkIndex;
         Assert(bodyID[link] != 0);
@@ -377,7 +379,7 @@ void ODERobot::Create(int robotIndex,dWorldID worldID,bool useBoundaryLayer)
           Vector3 axis = robot.links[link].T_World.R*robot.links[link].w;
           dJointSetHingeAnchor(jointID[link],pos.x,pos.y,pos.z);
           dJointSetHingeAxis(jointID[link],axis.x,axis.y,axis.z);
-          if(robot.joints[i].type != RobotJoint::Spin) {
+          if(robot.joints[i].type != RobotModelJoint::Spin) {
             if(USE_JOINT_STOPS) {
               //printf("Joint %d (link %s) ODE joint stops %g %g\n",i,robot.LinkName(link).c_str(),robot.qMin(link),robot.qMax(link));
               //stops are not working correctly if they are out of the range (-pi,pi) -- ODE flips out
@@ -399,7 +401,7 @@ void ODERobot::Create(int robotIndex,dWorldID worldID,bool useBoundaryLayer)
           dJointSetHingeParam(jointID[link],dParamFMax,0);
         }
         else {
-          Assert(robot.joints[i].type != RobotJoint::Spin);
+          Assert(robot.joints[i].type != RobotModelJoint::Spin);
           jointID[link] = dJointCreateSlider(worldID,jointGroupID);
           dJointAttach(jointID[link],bodyID[link],bp);
           Vector3 axis = robot.links[link].T_World.R*robot.links[link].w;
@@ -415,7 +417,7 @@ void ODERobot::Create(int robotIndex,dWorldID worldID,bool useBoundaryLayer)
         dJointSetFeedback(jointID[link],&jointFeedback[link]);
       }
       break;
-    case RobotJoint::Floating:
+    case RobotModelJoint::Floating:
       break;
     default:
       FatalError("TODO: setup FloatingPlanar, BallAndSocket, and Custom joints\n");
@@ -483,14 +485,14 @@ void ODERobot::GetConfig(Config& q) const
   for(size_t i=0;i<robot.joints.size();i++) {
     int k=robot.joints[i].linkIndex;
     switch(robot.joints[i].type) {
-    case RobotJoint::Weld:
+    case RobotModelJoint::Weld:
       q(k)=robot.q(k);
       break;
-    case RobotJoint::Normal:
-    case RobotJoint::Spin:
+    case RobotModelJoint::Normal:
+    case RobotModelJoint::Spin:
       q(k) = GetLinkAngle(k);
       break;
-    case RobotJoint::Floating:
+    case RobotModelJoint::Floating:
       {
         //first, get the root position
         RigidTransform T;
@@ -651,17 +653,17 @@ void ODERobot::GetVelocities(Config& dq) const
   for(size_t i=0;i<robot.joints.size();i++) {
     int k=robot.joints[i].linkIndex;
     switch(robot.joints[i].type) {
-    case RobotJoint::Weld:
+    case RobotModelJoint::Weld:
       break;
-    case RobotJoint::Normal:
-    case RobotJoint::Spin:
+    case RobotModelJoint::Normal:
+    case RobotModelJoint::Spin:
       Assert(jointID[k] != NULL);
       if(robot.links[k].type == RobotLink3D::Revolute) 
         dq(k)=dJointGetHingeAngleRate(jointID[k]);
       else
         dq(k)=dJointGetSliderPositionRate(jointID[k]);
       break;
-    case RobotJoint::Floating: 
+    case RobotModelJoint::Floating: 
       {
         Assert(bodyID[k] != NULL);
         vector<int> indices;
@@ -750,15 +752,15 @@ void ODERobot::AddTorques(const Config& t)
   for(size_t i=0;i<robot.joints.size();i++) {
     int k=robot.joints[i].linkIndex;
     switch(robot.joints[i].type) {
-    case RobotJoint::Weld:
+    case RobotModelJoint::Weld:
       break;
-    case RobotJoint::Normal:
+    case RobotModelJoint::Normal:
       if(robot.links[k].type == RobotLink3D::Revolute) 
         dJointAddHingeTorque(jointID[k],t(k));
       else
         dJointAddSliderForce(jointID[k],t(k));
       break;
-    case RobotJoint::Floating:
+    case RobotModelJoint::Floating:
       {
         //for floating, convert generalized torques to true force/moment
         //Jt (f,m) = t
@@ -828,18 +830,18 @@ void ODERobot::AddLinkTorque(int i,Real t)
 
 Real ODERobot::GetDriverValue(int driver) const
 {
-  const RobotJointDriver& d=robot.drivers[driver];
+  const RobotModelDriver& d=robot.drivers[driver];
   switch(d.type) {
-  case RobotJointDriver::Normal:
+  case RobotModelDriver::Normal:
     return GetLinkAngle(d.linkIndices[0]);
-  case RobotJointDriver::Translation:
+  case RobotModelDriver::Translation:
     {
       RigidTransform T;
       GetLinkTransform(d.linkIndices[1],T);
       return robot.links[d.linkIndices[0]].w.dot(T.t);
     }
     break;
-  case RobotJointDriver::Rotation:
+  case RobotModelDriver::Rotation:
     {
       RigidTransform T;
       GetLinkTransform(d.linkIndices[1],T);
@@ -855,7 +857,7 @@ Real ODERobot::GetDriverValue(int driver) const
       }
     }
     break;
-  case RobotJointDriver::Affine: 
+  case RobotModelDriver::Affine: 
     {
       Real vavg=0;
       for(size_t i=0;i<d.linkIndices.size();i++) {
@@ -885,25 +887,25 @@ Real ODERobot::GetDriverValue(int driver) const
 
 Real ODERobot::GetDriverVelocity(int driver) const
 {
-  const RobotJointDriver& d=robot.drivers[driver];
+  const RobotModelDriver& d=robot.drivers[driver];
   switch(d.type) {
-  case RobotJointDriver::Normal:
+  case RobotModelDriver::Normal:
     return GetLinkVelocity(d.linkIndices[0]);
-  case RobotJointDriver::Translation:
+  case RobotModelDriver::Translation:
     {
       Vector3 w,v;
       GetLinkVelocity(d.linkIndices[1],w,v);
       return robot.links[d.linkIndices[0]].w.dot(v);
     }
     break;
-  case RobotJointDriver::Rotation:
+  case RobotModelDriver::Rotation:
     {
       Vector3 w,v;
       GetLinkVelocity(d.linkIndices[1],w,v);
       return robot.links[d.linkIndices[0]].w.dot(w);
     }
     break;
-  case RobotJointDriver::Affine: 
+  case RobotModelDriver::Affine: 
     {
       Real vavg=0;
       for(size_t i=0;i<d.linkIndices.size();i++)
@@ -920,26 +922,26 @@ Real ODERobot::GetDriverVelocity(int driver) const
 
 void ODERobot::AddDriverTorque(int driver,Real t)
 {
-  const RobotJointDriver& d=robot.drivers[driver];
+  const RobotModelDriver& d=robot.drivers[driver];
   switch(d.type) {
-  case RobotJointDriver::Normal:
+  case RobotModelDriver::Normal:
     AddLinkTorque(d.linkIndices[0],t);
     break;
-  case RobotJointDriver::Translation:
+  case RobotModelDriver::Translation:
     {
       Assert(bodyID[d.linkIndices[1]] != NULL);
       Vector3 f=robot.links[d.linkIndices[0]].w*t;
       dBodyAddForce(bodyID[d.linkIndices[1]],f.x,f.y,f.z);
     }
     break;
-  case RobotJointDriver::Rotation:
+  case RobotModelDriver::Rotation:
     {
       Assert(bodyID[d.linkIndices[1]] != NULL);
       Vector3 m=robot.links[d.linkIndices[0]].w*t;
       dBodyAddTorque(bodyID[d.linkIndices[1]],m.x,m.y,m.z);
     }
     break;
-  case RobotJointDriver::Affine:
+  case RobotModelDriver::Affine:
     {
       for(size_t i=0;i<d.linkIndices.size();i++)
         AddLinkTorque(d.linkIndices[i],t*d.affScaling[i]);
@@ -952,12 +954,12 @@ void ODERobot::AddDriverTorque(int driver,Real t)
 
 void ODERobot::SetDriverFixedVelocity(int driver,Real vel,Real tmax)
 {
-  const RobotJointDriver& d=robot.drivers[driver];
+  const RobotModelDriver& d=robot.drivers[driver];
   switch(d.type) {
-  case RobotJointDriver::Normal:
+  case RobotModelDriver::Normal:
     SetLinkFixedVelocity(d.linkIndices[0],vel,tmax);
     break;
-  case RobotJointDriver::Affine:
+  case RobotModelDriver::Affine:
     for(size_t i=0;i<d.linkIndices.size();i++) {
       SetLinkFixedVelocity(d.linkIndices[i],vel*d.affScaling[i],tmax);
     }
@@ -1102,3 +1104,5 @@ void ODERobot::InterpolateState(const Vector& x,const Vector& y,Real u)
   Assert(k == x.n);
 }
 */
+
+} //namespace Klampt

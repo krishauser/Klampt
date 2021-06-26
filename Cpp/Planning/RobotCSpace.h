@@ -8,6 +8,8 @@
 #include <KrisLibrary/planning/RigidBodyCSpace.h>
 #include <KrisLibrary/utils/ArrayMapping.h>
 
+namespace Klampt {
+
 /** @defgroup Planning */
 
 /** @ingroup Planning
@@ -30,7 +32,7 @@
 class RobotCSpace : public GeodesicCSpace
 {
 public:
-  RobotCSpace(Robot& robot);
+  RobotCSpace(RobotModel& robot);
   RobotCSpace(const RobotCSpace& space);
   virtual int NumDimensions();
   virtual string VariableName(int i);
@@ -46,7 +48,7 @@ public:
   virtual void InterpolateDeriv2(const Config& a,const Config& b,Real u,Vector& ddx);
   virtual void Integrate(const Config& a,const Vector& da,Config& b);
 
-  Robot& robot;
+  RobotModel& robot;
   //optional: can edit weights for distance metric and neighborhood sampling
   Real norm;
   vector<Real> jointWeights;
@@ -63,7 +65,7 @@ public:
 class ActiveRobotCSpace : public GeodesicCSpace 
 {
 public:
-  ActiveRobotCSpace(Robot& robot,const ArrayMapping& dofs);
+  ActiveRobotCSpace(RobotModel& robot,const ArrayMapping& dofs);
   virtual int NumDimensions();
   virtual string VariableName(int i);
   virtual void Sample(Config& x);
@@ -77,7 +79,7 @@ public:
   virtual void InterpolateDeriv2(const Config& a,const Config& b,Real u,Vector& ddx);
   virtual void Integrate(const Config& a,const Vector& da,Config& b);
 
-  Robot& robot;
+  RobotModel& robot;
   ArrayMapping dofs;
   Config xq,yq,tempq;
   vector<int> invMap;
@@ -88,7 +90,7 @@ public:
 
 /** @ingroup Planning
  * @brief A cspace consisting of a single robot configuration in a
- * RobotWorld.  Feasibility constraints are joint and collision constraints.
+ * WorldModel.  Feasibility constraints are joint and collision constraints.
  *
  * Uses WorldPlannerSettings to determine the settings for collision constraints.
  *
@@ -100,7 +102,7 @@ public:
 class SingleRobotCSpace : public RobotCSpace
 {
  public:
-  SingleRobotCSpace(RobotWorld& world,int index,
+  SingleRobotCSpace(WorldModel& world,int index,
 		    WorldPlannerSettings* settings);
   SingleRobotCSpace(const SingleRobotCSpace& space);
 
@@ -124,7 +126,7 @@ class SingleRobotCSpace : public RobotCSpace
   bool CheckJointLimits(const Config& x);
   bool CheckCollisionFree(const Config& x);
 
-  RobotWorld& world;
+  WorldModel& world;
   int index;
   WorldPlannerSettings* settings;
 
@@ -145,8 +147,8 @@ class SingleRobotCSpace : public RobotCSpace
 class SingleRigidObjectCSpace: public SE3CSpace
 {
  public:
-  SingleRigidObjectCSpace(RobotWorld& world,int index,WorldPlannerSettings* settings);
-  RigidObject* GetObject() const;  
+  SingleRigidObjectCSpace(WorldModel& world,int index,WorldPlannerSettings* settings);
+  RigidObjectModel* GetObject() const;  
   virtual EdgePlannerPtr PathChecker(const Config& a,const Config& b);
 
   ///Ignores collisino between this object and world ID id
@@ -154,7 +156,7 @@ class SingleRigidObjectCSpace: public SE3CSpace
   void Init();
   bool UpdateGeometry(const Config& x);
 
-  RobotWorld& world;
+  WorldModel& world;
   int index;
   WorldPlannerSettings* settings;
 
@@ -164,5 +166,6 @@ class SingleRigidObjectCSpace: public SE3CSpace
   bool constraintsDirty;
 };
 
+} // namespace Klampt
 
 #endif

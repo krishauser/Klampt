@@ -6,15 +6,17 @@
 #include <KrisLibrary/GLdraw/GeometryAppearance.h>
 #include <Klampt/Modeling/Robot.h>
 
+namespace Klampt {
+
 /** @ingroup View
  * @brief Draws the robot (potentially color-coded)
  */
 struct ViewRobot
 {
-  ViewRobot(Robot* robot=NULL);
+  ViewRobot(RobotModel* robot=NULL);
   ~ViewRobot();
   ///Draws the whole robot
-  void Draw(Robot* robot);
+  void Draw(RobotModel* robot);
   ///Draws the whole robot
   void Draw();
   ///Draws opaque / transparent parts of the robot
@@ -49,8 +51,10 @@ struct ViewRobot
   ///easy way to save/restore appearance
   void SetAppearance(const vector<GLDraw::GeometryAppearance>& );
 
-  Robot* robot;
+  RobotModel* robot;
   vector< vector<GLDraw::GeometryAppearance> > appearanceStack;
 };
+
+} //namespace Klampt
 
 #endif

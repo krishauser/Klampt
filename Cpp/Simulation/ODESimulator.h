@@ -10,6 +10,8 @@
 #include <ode/contact.h>
 #include <map>
 
+namespace Klampt {
+
 struct ODEObjectID;
 struct ODEContactList;
 struct ODEContactResult;
@@ -122,9 +124,9 @@ class ODESimulator
   ODESimulatorSettings& GetSettings() { return settings; }
   Status GetStatus() const; 
   void GetStatusHistory(vector<Status>& statuses,vector<Real>& statusChangeTimes) const;
-  void AddTerrain(Terrain& terr);
-  void AddRobot(Robot& robot);
-  void AddObject(RigidObject& object);
+  void AddTerrain(TerrainModel& terr);
+  void AddRobot(RobotModel& robot);
+  void AddObject(RigidObjectModel& object);
   ///Returns true if the current  state is in "reliable" status. Otherwise returns false
   ///and populates the list of overlapping object pairs. 
   bool CheckObjectOverlap(vector<pair<ODEObjectID,ODEObjectID> >& overlaps);
@@ -137,7 +139,7 @@ class ODESimulator
   size_t numRobots() const { return robots.size(); }
   size_t numObjects() const { return objects.size(); }
   inline dWorldID world() const { return worldID; }
-  const Terrain* terrain(int i) const { return terrains[i]; }
+  const TerrainModel* terrain(int i) const { return terrains[i]; }
   ODEGeometry* terrainGeom(int i) const { return terrainGeoms[i]; }
   ODERobot* robot(int i) const { return robots[i]; }
   ODERigidObject* object(int i) const { return objects[i]; }
@@ -185,7 +187,7 @@ class ODESimulator
   dWorldID worldID;
   dSpaceID envSpaceID;
   vector<ODEGeometry*> terrainGeoms;
-  vector<const Terrain*> terrains;
+  vector<const TerrainModel*> terrains;
   vector<ODERobot*> robots;
   vector<ODERigidObject*> objects;
   map<pair<ODEObjectID,ODEObjectID>,ODEContactList> contactList;
@@ -298,5 +300,7 @@ struct ODEJoint
   dJointID joint;
   dJointFeedback feedback;
 };
+
+} //namespace Klampt
 
 #endif

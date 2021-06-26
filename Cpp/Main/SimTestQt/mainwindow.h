@@ -10,6 +10,8 @@
 #include "Interface/SimTestGUI.h"
 #include "qsimtestgui.h"
 
+using namespace Klampt;
+
 namespace Ui {
 class MainWindow;
 }
@@ -22,7 +24,7 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     QSettings* ini;
-    RobotWorld world;
+    WorldModel world;
     shared_ptr<SimTestBackend> backend;
     shared_ptr<QSimTestGUI> gui;
     bool Initialize(int _argc, const char **_argv);

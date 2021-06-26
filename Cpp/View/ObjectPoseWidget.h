@@ -6,6 +6,8 @@
 #include <KrisLibrary/robotics/IK.h>
 #include <Klampt/Modeling/RigidObject.h>
 
+namespace Klampt {
+
 /** @addtogroup View */
 /** @{ */
 
@@ -16,8 +18,8 @@ class RigidObjectPoseWidget : public GLDraw::WidgetSet
 {
 public:
   RigidObjectPoseWidget();
-  RigidObjectPoseWidget(RigidObject* object);
-  void Set(RigidObject* object);
+  RigidObjectPoseWidget(RigidObjectModel* object);
+  void Set(RigidObjectModel* object);
 
   const RigidTransform& Pose() const { return poser.T; }
   void SetPose(const RigidTransform& q);
@@ -28,10 +30,12 @@ public:
   virtual void EndDrag();
   virtual void Keypress(char c);
 
-  RigidObject* rigidObject;
+  RigidObjectModel* rigidObject;
   GLDraw::TransformWidget poser;
 };
 
 /** @} */
+
+} //namespace Klampt
 
 #endif

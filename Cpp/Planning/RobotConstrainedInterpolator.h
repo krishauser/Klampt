@@ -5,6 +5,7 @@
 #include "RobotCSpace.h"
 #include <KrisLibrary/robotics/IKFunctions.h>
 
+namespace Klampt {
 
 /** @ingroup Planning
  * @brief Just like a ConstrainedInterpolator but only projects the active
@@ -13,7 +14,7 @@
 class RobotConstrainedInterpolator : public ConstrainedInterpolator
 {
 public:
-  RobotConstrainedInterpolator(Robot& robot,const vector<IKGoal>& goals);
+  RobotConstrainedInterpolator(RobotModel& robot,const vector<IKGoal>& goals);
   virtual void ConstraintValue(const Config& x,Vector& v);
   virtual bool Project(Config& x);
 
@@ -28,7 +29,7 @@ public:
 class RobotSmoothConstrainedInterpolator : public SmoothConstrainedInterpolator
 {
 public:
-  RobotSmoothConstrainedInterpolator(Robot& robot,const vector<IKGoal>& goals);
+  RobotSmoothConstrainedInterpolator(RobotModel& robot,const vector<IKGoal>& goals);
   virtual void ConstraintValue(const Config& x,Vector& v);
   virtual bool Project(Config& x);
   virtual bool ProjectVelocity(const Config& x,Vector& v);
@@ -36,5 +37,7 @@ public:
   RobotCSpace space;
   RobotIKFunction f;
 };
+
+} //namespace Klampt
 
 #endif

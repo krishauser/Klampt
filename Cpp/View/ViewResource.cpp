@@ -9,6 +9,7 @@
 #include <KrisLibrary/robotics/IKFunctions.h>
 #include <sstream>
 using namespace GLDraw;
+using namespace Klampt;
 
 #if 0
   void drawgeom(const GeometricPrimitive2D& geom)
@@ -168,7 +169,7 @@ using namespace GLDraw;
   }
 #endif
 
-ViewResource::ViewResource(Robot* robot)
+ViewResource::ViewResource(RobotModel* robot)
 {
   SetRobot(robot);
   pathTime = 0;
@@ -176,7 +177,7 @@ ViewResource::ViewResource(Robot* robot)
   pathIKResolution = 0.005;
 }
 
-void ViewResource::SetRobot(Robot* robot)
+void ViewResource::SetRobot(RobotModel* robot)
 {
   configViewer.robot = robot;
   configsViewer.robot = robot;

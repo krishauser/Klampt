@@ -6,13 +6,15 @@
 #include <string.h>
 #include <sstream>
 
+using namespace Klampt;
+
 #ifndef GLUT_LEFT_BUTTON
 #define GLUT_LEFT_BUTTON 0
 #define GLUT_MIDDLE_BUTTON 1
 #define GLUT_RIGHT_BUTTON 2
 #endif //GLUT_LEFT_BUTTON
 
-RobotTestBackend::RobotTestBackend(RobotWorld* world)
+RobotTestBackend::RobotTestBackend(WorldModel* world)
   :WorldGUIBackend(world)
 {
 }
@@ -470,7 +472,7 @@ void RobotTestBackend::SetDrawExpanded(int value)
 
 #if HAVE_GLUI
 
-GLUIRobotTestGUI::GLUIRobotTestGUI(GenericBackendBase* backend,RobotWorld* _world,int w,int h)
+GLUIRobotTestGUI::GLUIRobotTestGUI(GenericBackendBase* backend,WorldModel* _world,int w,int h)
   :GLUIGUI(backend,w,h),world(_world)
 {}
 

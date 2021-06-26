@@ -6,6 +6,8 @@
 #include <Klampt/Modeling/Robot.h>
 #include <KrisLibrary/robotics/Wrench.h>
 
+namespace Klampt {
+
 class ODERobot;
 
 /** @ingroup Control
@@ -21,7 +23,7 @@ class ODERobot;
  */
 struct RobotStateEstimator
 {
-  RobotStateEstimator(Robot& _robot) :robot(_robot) {}
+  RobotStateEstimator(RobotModel& _robot) :robot(_robot) {}
   virtual ~RobotStateEstimator() {}
   virtual void ReadSensors(RobotSensors& sensors) {}
   virtual void UpdateModel() {}
@@ -29,7 +31,7 @@ struct RobotStateEstimator
   virtual void Advance(Real dt) {}
   virtual void Reset() {}
 
-  Robot& robot;
+  RobotModel& robot;
 };
 
 /** @ingroup Control
@@ -38,7 +40,7 @@ struct RobotStateEstimator
  */ 
 struct OmniscientStateEstimator : public RobotStateEstimator
 {
-  OmniscientStateEstimator(Robot& _robot,ODERobot& _oderobot)
+  OmniscientStateEstimator(RobotModel& _robot,ODERobot& _oderobot)
     :RobotStateEstimator(_robot),oderobot(_oderobot) {}
   virtual ~OmniscientStateEstimator();
   virtual void UpdateModel();
@@ -55,7 +57,7 @@ struct OmniscientStateEstimator : public RobotStateEstimator
  */ 
 struct IntegratedStateEstimator : public RobotStateEstimator
 {
-  IntegratedStateEstimator(Robot& _robot);
+  IntegratedStateEstimator(RobotModel& _robot);
   virtual ~IntegratedStateEstimator() {}
   virtual void ReadSensors(RobotSensors& sensors);
   virtual void UpdateModel() {
@@ -76,5 +78,7 @@ struct IntegratedStateEstimator : public RobotStateEstimator
   vector<RigidTransform> accelerometerFrames;
   vector<RigidBodyVelocity> accelerometerVels;
 };
+
+} //namespace Klampt
 
 #endif

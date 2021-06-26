@@ -9,9 +9,10 @@
 #include <string.h>
 #include <typeinfo>
 
+namespace Klampt {
 
 //extracts IK problems from the plannerobjective
-void Extract(PlannerObjectiveBase* obj,Robot* robot,vector<IKGoal>& ikproblem,vector<pair<int,Real> >& joint_constraints)
+void Extract(PlannerObjectiveBase* obj,RobotModel* robot,vector<IKGoal>& ikproblem,vector<pair<int,Real> >& joint_constraints)
 {
   if(typeid(*obj) == typeid(CompositeObjective)) {
     CompositeObjective* cobj = dynamic_cast<CompositeObjective*>(obj);
@@ -43,7 +44,7 @@ void Extract(PlannerObjectiveBase* obj,Robot* robot,vector<IKGoal>& ikproblem,ve
   }
 }
 
-bool Optimize(shared_ptr<PlannerObjectiveBase> obj,Robot* robot,int iters,Real tol)
+bool Optimize(shared_ptr<PlannerObjectiveBase> obj,RobotModel* robot,int iters,Real tol)
 {
   vector<IKGoal> ikproblem;
   vector<pair<int,Real> > joint_constraints;
@@ -763,7 +764,7 @@ bool DynamicMotionPlannerBase::LogEnd()
   return true;
 }
 
-void DynamicMotionPlannerBase::Init(CSpace* _space,Robot* _robot,WorldPlannerSettings* _settings)
+void DynamicMotionPlannerBase::Init(CSpace* _space,RobotModel* _robot,WorldPlannerSettings* _settings)
 {
   cspace = _space;
   robot = _robot;
@@ -2401,19 +2402,4 @@ int DynamicHybridTreePlanner::PlanFrom(ParabolicRamp::DynamicPath& path,Real cut
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+} //namespace Klampt

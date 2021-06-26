@@ -1,9 +1,11 @@
 #include "ZMP.h"
 #include <KrisLibrary/robotics/NewtonEuler.h>
 
+namespace Klampt {
+
 ///Utility: returns the center of mass first and second derivatives given joint positions and first and second derivatives.
 ///Note: changes the robot's configuration and velocity to q and dq, respectively.
-void GetCOMDerivs(Robot& robot,const Config& q,const Vector& dq,const Vector& ddq,Vector3& cm,Vector3& dcm,Vector3& ddcm,NewtonEulerSolver& ne)
+void GetCOMDerivs(RobotModel& robot,const Config& q,const Vector& dq,const Vector& ddq,Vector3& cm,Vector3& dcm,Vector3& ddcm,NewtonEulerSolver& ne)
 {
   robot.UpdateConfig(q);
   robot.dq = dq;
@@ -25,7 +27,7 @@ void GetCOMDerivs(Robot& robot,const Config& q,const Vector& dq,const Vector& dd
 
 ///Utility: returns the center of mass first and second derivatives given joint positions and first and second derivatives.
 ///Note: changes the robot's configuration and velocity to q and dq, respectively.
-void GetCOMDerivs(Robot& robot,const Config& q,const Vector& dq,const Vector& ddq,Vector3& cm,Vector3& dcm,Vector3& ddcm)
+void GetCOMDerivs(RobotModel& robot,const Config& q,const Vector& dq,const Vector& ddq,Vector3& cm,Vector3& dcm,Vector3& ddcm)
 {
   NewtonEulerSolver ne(robot);
   GetCOMDerivs(robot,q,dq,ddq,cm,dcm,ddcm,ne);
@@ -34,7 +36,7 @@ void GetCOMDerivs(Robot& robot,const Config& q,const Vector& dq,const Vector& dd
 
 ///Returns the zero-moment point of a robot executing the given trajectory q(t) with first and second derivatives dq and ddq.
 ///The ground height is assumed to be 0 by default and gravity is assumed to be 9.8m/s^2.
-Vector2 GetZMP(Robot& robot,const Config& q,const Vector& dq,const Vector& ddq,NewtonEulerSolver& ne,Real groundHeight,Real g)
+Vector2 GetZMP(RobotModel& robot,const Config& q,const Vector& dq,const Vector& ddq,NewtonEulerSolver& ne,Real groundHeight,Real g)
 {
   Vector3 cm,dcm,ddcm;
   GetCOMDerivs(robot,q,dq,ddq,cm,dcm,ddcm,ne);
@@ -46,8 +48,10 @@ Vector2 GetZMP(Robot& robot,const Config& q,const Vector& dq,const Vector& ddq,N
 
 ///Returns the zero-moment point of a robot executing the given trajectory q(t) with first and second derivatives dq and ddq.
 ///The ground height is assumed to be 0 by default and gravity is assumed to be 9.8m/s^2.
-Vector2 GetZMP(Robot& robot,const Config& q,const Vector& dq,const Vector& ddq,Real groundHeight,Real g)
+Vector2 GetZMP(RobotModel& robot,const Config& q,const Vector& dq,const Vector& ddq,Real groundHeight,Real g)
 {
   NewtonEulerSolver ne(robot);
   return GetZMP(robot,q,dq,ddq,ne,groundHeight,g);
 }
+
+} //namespace Klampt

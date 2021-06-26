@@ -6,6 +6,8 @@
 using namespace Meshing;
 using namespace Geometry;
 
+namespace Klampt {
+
 const static Real third = 1.0/3.0;
 
 //m = m+xy^t
@@ -436,3 +438,5 @@ Matrix3 Inertia_Solid(const TriMesh& mesh,Real gridRes,const Vector3& center,Rea
   H *= mass;
   return H;
 }
+
+} //namespace Klampt

@@ -7,17 +7,20 @@
 #include <memory>
 #include <string>
 #include <typeinfo>
-using namespace std;
+
+class TiXmlElement;
+
+namespace Klampt {
+  using namespace std;
 
 /** @defgroup Sensing
  * Sensor configuration and simulation.
  */
 
-class Robot;
-class RobotWorld;
-class ControlledRobotSimulator;
-class WorldSimulation;
-class TiXmlElement;
+class RobotModel;
+class WorldModel;
+class SimRobotController;
+class Simulator;
 
 /** @ingroup Sensing
  * @brief A sensor base class.  A SensorBase should allow a Controller to 
@@ -55,9 +58,9 @@ class SensorBase
   virtual ~SensorBase() {}
   virtual const char* Type() const { return "SensorBase"; }
   ///Called whenever the sensor is updated from the simulaton
-  virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim) {}
+  virtual void Simulate(SimRobotController* robot,Simulator* sim) {}
   ///Updates the sensor for a kinematic world.  Useful for non-simulation debugging.
-  virtual void SimulateKinematic(Robot& robot,RobotWorld& world) {}
+  virtual void SimulateKinematic(RobotModel& robot,WorldModel& world) {}
   ///Advances to the next time step with duration dt elapsed
   virtual void Advance(double dt) {}
   ///Should be overridden if the sensor is stateful to reset to an initial state
@@ -85,7 +88,7 @@ class SensorBase
   virtual bool SetSetting(const string& name,const string& str);
   ///If the sensor can be drawn, draw the sensor on the robot's current configuration,
   ///using these measurements, using OpenGL calls.
-  virtual void DrawGL(const Robot& robot,const vector<double>& measurements) {}
+  virtual void DrawGL(const RobotModel& robot,const vector<double>& measurements) {}
 
   string name;
   double rate;
@@ -106,7 +109,7 @@ class SensorBase
 class RobotSensors
 {
  public:
-  void MakeDefault(Robot* robot);
+  void MakeDefault(RobotModel* robot);
   bool LoadSettings(const char* fn);
   bool SaveSettings(const char* fn);
   bool LoadSettings(TiXmlElement* in);
@@ -224,5 +227,7 @@ T* RobotSensors::GetTypedSensor(int index)
     } \
     return true;              \
   }
+
+} //namespace Klampt
 
 #endif
