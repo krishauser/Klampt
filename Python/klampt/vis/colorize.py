@@ -204,8 +204,10 @@ def colorize(object,value,colormap=None,feature=None,vrange=None,lighting=None):
     shading = None
     if isinstance(value,str) or lighting is not None:
         #need positions / normals -- compute them for the indicated features
-        positions = geometrydata.getVertices()
-        positions = positions.reshape((positions.shape[0]//3,3))
+        if isinstance(geometrydata,PointCloud):
+            positions = geometrydata.getPoints()
+        else:
+            positions = geometrydata.getVertices()
         normals = None
         if lighting is not None or value in ['n','normal','nx','ny','nz']:
             if isinstance(geometrydata,PointCloud):

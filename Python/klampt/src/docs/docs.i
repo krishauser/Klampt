@@ -33,8 +33,8 @@ For more complex appearances, you will need to call your own OpenGL calls.
 Appearances can be either references to appearances of objects in the world, or
 they can be standalone.  
 
-Performance note: Avoid rebuilding buffers (e.g., via :meth:`refresh` as much as
-possible.  
+Performance note: Avoid rebuilding buffers (e.g., via :meth:`refresh`) as much
+as possible.  
 
 C++ includes: appearance.h
 ";
@@ -650,6 +650,12 @@ Once constructed, call setPoint, setPoints, or setTransform to specify the
 nature of the constraint.  
 
 C++ includes: robotik.h
+";
+
+%feature("docstring") GeneralizedIKObjective::sampleTransform "
+
+Returns a transformation (R,t) from link relative to link2, sampled at random
+from the space of transforms that satisfies the objective obj.  
 ";
 
 %feature("docstring") GeneralizedIKObjective::GeneralizedIKObjective "
@@ -1428,8 +1434,8 @@ current position/rotation constraint types are kept.
 %feature("docstring") IKObjective::loadString "
 
 Loads the objective from a Klamp't-native formatted string. For a more readable
-but verbose format, try the JSON IO routines :meth:`klampt.io.loader.toJson` /
-:meth:`klampt.io.loader.fromJson`  
+but verbose format, try the JSON IO routines :meth:`klampt.io.loader.to_json` /
+:meth:`klampt.io.loader.from_json`  
 ";
 
 %feature("docstring") IKObjective::setFreePosConstraint "
@@ -1455,8 +1461,8 @@ Sets a multiple fixed-point constraint relative to link2.
 %feature("docstring") IKObjective::saveString "
 
 Saves the objective to a Klamp't-native formatted string. For a more readable
-but verbose format, try the JSON IO routines :meth:`klampt.io.loader.toJson` /
-:meth:`klampt.io.loader.fromJson`  
+but verbose format, try the JSON IO routines :meth:`klampt.io.loader.to_json` /
+:meth:`klampt.io.loader.from_json`  
 ";
 
 %feature("docstring") IKObjective::setLinks "
@@ -1498,6 +1504,12 @@ some real value u.
 %feature("docstring") IKObjective::getRotation "
 
 For fixed rotation constraints, returns the orientation.  
+";
+
+%feature("docstring") IKObjective::sampleTransform "
+
+Returns a transformation (R,t) from link relative to link2, sampled at random
+from the space of transforms that satisfies the objective obj.  
 ";
 
 %feature("docstring") IKObjective::getTransform "
@@ -4591,23 +4603,17 @@ Returns a RigidObjectModel in the world by index or name.
 Returns a RigidObjectModel in the world by index or name.  
 ";
 
+// File: namespaceKlampt.xml
+
+// File: namespacestd.xml
+
 // File: appearance_8h.xml
 
 // File: geometry_8h.xml
 
 // File: motionplanning_8h.xml
 
-%feature("docstring") setRandomSeed "
-
-Sets the random seed used by the motion planner.  
-";
-
-%feature("docstring") getPlanJSONString "
-
-Saves planner values to a JSON string.  
-";
-
-%feature("docstring") setPlanType "
+%feature("docstring") set_plan_type "
 
 Sets the planner type.  
 
@@ -4627,9 +4633,9 @@ Valid values are
 *   fmm*: an anytime fast marching method algorithm for optimal motion planning  
 ";
 
-%feature("docstring") setPlanJSONString "
+%feature("docstring") get_plan_json_string "
 
-Loads planner values from a JSON string.  
+Saves planner values to a JSON string.  
 ";
 
 %feature("docstring") destroy "
@@ -4637,10 +4643,10 @@ Loads planner values from a JSON string.
 Performs cleanup of all created spaces and planners.  
 ";
 
-%feature("docstring") setPlanSetting "
+%feature("docstring") set_plan_setting "
 ";
 
-%feature("docstring") setPlanSetting "
+%feature("docstring") set_plan_setting "
 
 Sets a numeric or string-valued setting for the planner.  
 
@@ -4679,46 +4685,21 @@ Valid string values are:
     shortcutting, you should set foundSolution:0.  
 ";
 
+%feature("docstring") set_random_seed "
+
+Sets the random seed used by the motion planner.  
+";
+
+%feature("docstring") set_plan_json_string "
+
+Loads planner values from a JSON string.  
+";
+
 // File: robotik_8h.xml
-
-%feature("docstring") SampleTransform "
-
-Returns a transformation (R,t) from link relative to link2, sampled at random
-from the space of transforms that satisfies the objective obj.  
-";
-
-%feature("docstring") SampleTransform "
-
-Returns a transformation (R,t) from link relative to link2, sampled at random
-from the space of transforms that satisfies the objective obj.  
-";
 
 // File: robotio_8h.xml
 
-%feature("docstring") ProcessStreams "
-
-Does some processing on stream subscriptions.  
-
-Args:  
-
-    protocol (str): either name the protocol to be updated, or \"all\" for
-        updating all subscribed streams  
-
-Returns: (bool): True if any stream was updated.  
-";
-
-%feature("docstring") DetachFromStream "
-
-Unsubscribes from a stream previously subscribed to via
-:func:`SubscribeToStream`  
-";
-
-%feature("docstring") ThreeJSGetScene "
-
-Exports the WorldModel to a JSON string ready for use in Three.js.  
-";
-
-%feature("docstring") SubscribeToStream "
+%feature("docstring") subscribe_to_stream "
 
 Subscribes a Geometry3D to a stream.  
 
@@ -4742,12 +4723,7 @@ klampt.io.ros.
 Returns: (bool): True if successful.  
 ";
 
-%feature("docstring") ThreeJSGetTransforms "
-
-Exports the WorldModel to a JSON string ready for use in Three.js.  
-";
-
-%feature("docstring") WaitForStream "
+%feature("docstring") wait_for_stream "
 
 Waits up to timeout seconds for an update on the given stream.  
 
@@ -4756,20 +4732,48 @@ Return:
     (bool): True if the stream was updated.  
 ";
 
+%feature("docstring") threejs_get_scene "
+
+Exports the WorldModel to a JSON string ready for use in Three.js.  
+";
+
+%feature("docstring") detach_from_stream "
+
+Unsubscribes from a stream previously subscribed to via
+:func:`SubscribeToStream`  
+";
+
+%feature("docstring") process_streams "
+
+Does some processing on stream subscriptions.  
+
+Args:  
+
+    protocol (str): either name the protocol to be updated, or \"all\" for
+        updating all subscribed streams  
+
+Returns: (bool): True if any stream was updated.  
+";
+
+%feature("docstring") threejs_get_transforms "
+
+Exports the WorldModel to a JSON string ready for use in Three.js.  
+";
+
 // File: robotmodel_8h.xml
 
 // File: robotsim_8h.xml
 
-%feature("docstring") destroy "
+%feature("docstring") Klampt::set_random_seed "
+
+Sets the random seed used by the configuration sampler.  
+";
+
+%feature("docstring") Klampt::destroy "
 
 Cleans up all internal data structures. Useful for multithreaded programs to
 make sure ODE errors aren't thrown on exit. This is called for you on exit when
 importing the Python klampt module.  
-";
-
-%feature("docstring") setRandomSeed "
-
-Sets the random seed used by the configuration sampler.  
 ";
 
 // File: rootfind_8h.xml
@@ -4841,14 +4845,52 @@ destroys internal data structures
 
 // File: stability_8h.xml
 
-%feature("docstring") forceClosure2D "
+%feature("docstring") force_closure "
+
+Returns true if the array of contact points has force closure. A contact point
+is given by a list of n=7 floats, [x,y,z,nx,ny,nz,k] where (x,y,z) is the
+position, (nx,ny,nz) is the normal, and k is the coefficient of friction (>= 0)  
+";
+
+%feature("docstring") force_closure "
+
+Returns true if the list of contact points has force closure.  
+
+In the 1-argument version, each contact point is specified by a list of 7
+floats, [x,y,z,nx,ny,nz,k] where (x,y,z) is the position, (nx,ny,nz) is the
+normal, and k is the coefficient of friction.  
+
+The 2-argument version is a \"fancy\" version that allows more control over the
+constraint planes.  
+
+Args:  
+
+     contacts (list of 7-float lists or tuples): the list of contacts, each
+         specified as a 7-list or tuple [x,y,z,nx,ny,nz,k], with:
+
+             * (x,y,z): the contact position
+             * (nx,ny,nz): the contact normal
+             * k: the coefficient of friction (>= 0)
+
+     contactPositions (list of 3-float lists or tuples): the list of contact
+         point positions.
+     frictionCones (list of lists): Each item of this list specifies linear
+         inequalities that must be met of the force at the corresponding
+         contact point.  The item must have length k*4 where k is an integer,
+         and each inequality gives the entries (ax,ay,az,b) of a constraint
+         ax*fx+ay*fy+az*fz <= b that limits the contact force (fx,fy,fz) at
+         the i'th contact.  Each of the k 4-tuples is laid out sequentially
+         per-contact.  
+";
+
+%feature("docstring") force_closure_2d "
 
 Returns true if the list of 2D contact points has force closure. A contact point
 is given by a list of n=4 floats, [x,y,theta,k] where (x,y) is the position,
 theta is the normal angle, and k is the coefficient of friction (>= 0)  
 ";
 
-%feature("docstring") forceClosure2D "
+%feature("docstring") force_closure_2d "
 
 Returns true if the list of 2D contact points has force closure.  
 
@@ -4877,119 +4919,7 @@ Args:
          per-contact.  
 ";
 
-%feature("docstring") equilibriumTorques "
-
-Solves for the torques / forces that keep the robot balanced against gravity.  
-
-Args:  
-
-*   robot: the robot model, posed in its current configuration  
-*   contacts: an nx7 array of contact points, each given as 7-lists
-    [x,y,z,nx,ny,nz,kFriction]  
-*   links: a list of the links on which those contact points lie  
-*   fext: the external force (e.g., gravity)  
-*   norm: the torque norm to minimize. If 0, minimizes the l-infinity norm
-    (default) If 1, minimizes the l-1 norm. If 2, minimizes the l-2 norm
-    (experimental, may not get good results)  
-
-Returns:  
-
-    (tuple): a pair (t,f) giving the joint torques and frictional
-         contact forces, if a solution exists, or None if no solution exists.  
-";
-
-%feature("docstring") equilibriumTorques "
-
-Solves for the torques / forces that keep the robot balanced against gravity.  
-
-The problem being solved is  
-
-:math:`min_{t,f_1,...,f_N} \\|t\\|_p`  
-
-:math:`s.t. t_{int} + G(q) = t + sum_{i=1}^N J_i(q)^T f_i`  
-
-:math:`|t| \\leq t_{max}`  
-
-:math:`f_i \\in FC_i`  
-
-Args:  
-
-    robot (RobotModel): the robot, posed in its current configuration
-    contacts (ndarray): an N x 7 array of contact points, each given as 7-lists
-        [x,y,z,nx,ny,nz,kFriction]
-    links (list of N ints): a list of the links on which those contact points
-        lie
-    fext (list of 3 floats): the external force (e.g., gravity)
-    norm (double): the torque norm to minimize.  
-
-        * If 0, minimizes the l-infinity norm (default)
-        * If 1, minimizes the l-1 norm.
-        * If 2, minimizes the l-2 norm (experimental, may not get good results).
-    internalTorques (list of robot.numLinks() floats, optional): allows you to
-        solve for dynamic situations, e.g., with coriolis forces taken into
-        account.  These are added to the RHS of the torque balance equation.
-        If not given, t_int is assumed to be zero.
-
-        To use dynamics, set the robot's joint velocities dq, calculate
-        then calculate the torques via robot.torquesFromAccel(ddq), and pass
-        the result into internalTorques.  
-
-Returns:  
-
-    (pair of lists, optional): a pair (torque,force) if a solution exists,
-         giving valid joint torques t and frictional contact forces (f1,...,fn).
-
-         None is returned if no solution exists.  
-";
-
-%feature("docstring") supportPolygon2D "
-
-Calculates the support polygon (interval) for a given set of contacts and a
-downward external force (0,-g). A contact point is given by a list of 4 floats,
-[x,y,theta,k] as usual.  
-
-The return value is a 2-tuple giving the min / max extents of the support
-polygon. If they are both infinite, the support polygon is empty.  
-";
-
-%feature("docstring") supportPolygon2D "
-
-Calculates the support polygon (interval) for a given set of contacts and a
-downward external force (0,-g).  
-
-The 2-argument version is a \"fancy\" version that allows more control over the
-constraint planes.  
-
-Args:  
-
-    contacts (list of 4-float lists or tuples): the list of contacts, each
-        specified as a 4-list or tuple [x,y,theta,k], with:
-
-            * (x,y,z): the contact position
-            * theta: is the normal angle (in radians, CCW to the x axis)
-            * k: the coefficient of friction (>= 0)
-
-    contactPositions (list of 2-float lists or tuples): the list of contact
-        point positions.
-     frictionCones (list of lists): The i'th element in this list has length
-         k*3 (for some integer k), and gives the contact force constraints
-         (ax,ay,b) where ax*fx+ay*fy <= b limits the contact force (fx,fy)
-         at the i'th contact. Each of the k 3-tuples is laid out sequentially
-         per-contact.  
-
-Returns:  
-
-    (2-tuple): gives the min/max extents of the support polygon.
-        If the support interval is empty, (inf,inf) is returned.  
-";
-
-%feature("docstring") setFrictionConeApproximationEdges "
-
-Globally sets the number of edges used in the friction cone approximation. The
-default value is 4.  
-";
-
-%feature("docstring") comEquilibrium2D "
+%feature("docstring") com_equilibrium_2d "
 
 Tests whether the given COM com is stable for the given contacts and the given
 external force fext. A contact point is given by a list of 4 floats,
@@ -5002,7 +4932,7 @@ com can also be set to None in which case this tests if ANY COM has at the
 contacts. The return value is True or False.  
 ";
 
-%feature("docstring") comEquilibrium2D "
+%feature("docstring") com_equilibrium_2d "
 
 Tests whether the given COM com is stable for the given contacts and the given
 external force fext.  
@@ -5041,7 +4971,7 @@ Returns:
         If com = None, the result is True or False.  
 ";
 
-%feature("docstring") supportPolygon "
+%feature("docstring") support_polygon "
 
 Calculates the support polygon for a given set of contacts and a downward
 external force (0,0,-g). A contact point is given by a list of 7 floats,
@@ -5053,7 +4983,7 @@ facing normals, and ofs is the offset from 0. In other words to test stability
 of a com [x,y], you can test whether dot([nx,ny],[x,y]) <= ofs for all planes.  
 ";
 
-%feature("docstring") supportPolygon "
+%feature("docstring") support_polygon "
 
 Calculates the support polygon for a given set of contacts and a downward
 external force (0,0,-g).  
@@ -5097,45 +5027,119 @@ Returns:
             myComEquilibrium = lambda x: np.all(np.dot(A,x)<=b)  
 ";
 
-%feature("docstring") forceClosure "
+%feature("docstring") equilibrium_torques "
 
-Returns true if the array of contact points has force closure. A contact point
-is given by a list of n=7 floats, [x,y,z,nx,ny,nz,k] where (x,y,z) is the
-position, (nx,ny,nz) is the normal, and k is the coefficient of friction (>= 0)  
+Solves for the torques / forces that keep the robot balanced against gravity.  
+
+Args:  
+
+*   robot: the robot model, posed in its current configuration  
+*   contacts: an nx7 array of contact points, each given as 7-lists
+    [x,y,z,nx,ny,nz,kFriction]  
+*   links: a list of the links on which those contact points lie  
+*   fext: the external force (e.g., gravity)  
+*   norm: the torque norm to minimize. If 0, minimizes the l-infinity norm
+    (default) If 1, minimizes the l-1 norm. If 2, minimizes the l-2 norm
+    (experimental, may not get good results)  
+
+Returns:  
+
+    (tuple): a pair (t,f) giving the joint torques and frictional
+         contact forces, if a solution exists, or None if no solution exists.  
 ";
 
-%feature("docstring") forceClosure "
+%feature("docstring") equilibrium_torques "
 
-Returns true if the list of contact points has force closure.  
+Solves for the torques / forces that keep the robot balanced against gravity.  
 
-In the 1-argument version, each contact point is specified by a list of 7
-floats, [x,y,z,nx,ny,nz,k] where (x,y,z) is the position, (nx,ny,nz) is the
-normal, and k is the coefficient of friction.  
+The problem being solved is  
+
+:math:`min_{t,f_1,...,f_N} \\|t\\|_p`  
+
+:math:`s.t. t_{int} + G(q) = t + sum_{i=1}^N J_i(q)^T f_i`  
+
+:math:`|t| \\leq t_{max}`  
+
+:math:`f_i \\in FC_i`  
+
+Args:  
+
+    robot (RobotModel): the robot, posed in its current configuration
+    contacts (ndarray): an N x 7 array of contact points, each given as 7-lists
+        [x,y,z,nx,ny,nz,kFriction]
+    links (list of N ints): a list of the links on which those contact points
+        lie
+    fext (list of 3 floats): the external force (e.g., gravity)
+    norm (double): the torque norm to minimize.  
+
+        * If 0, minimizes the l-infinity norm (default)
+        * If 1, minimizes the l-1 norm.
+        * If 2, minimizes the l-2 norm (experimental, may not get good results).
+    internalTorques (list of robot.numLinks() floats, optional): allows you to
+        solve for dynamic situations, e.g., with coriolis forces taken into
+        account.  These are added to the RHS of the torque balance equation.
+        If not given, t_int is assumed to be zero.
+
+        To use dynamics, set the robot's joint velocities dq, calculate
+        then calculate the torques via robot.torquesFromAccel(ddq), and pass
+        the result into internalTorques.  
+
+Returns:  
+
+    (pair of lists, optional): a pair (torque,force) if a solution exists,
+         giving valid joint torques t and frictional contact forces (f1,...,fn).
+
+         None is returned if no solution exists.  
+";
+
+%feature("docstring") set_friction_cone_approximation_edges "
+
+Globally sets the number of edges used in the friction cone approximation. The
+default value is 4.  
+";
+
+%feature("docstring") support_polygon_2d "
+
+Calculates the support polygon (interval) for a given set of contacts and a
+downward external force (0,-g). A contact point is given by a list of 4 floats,
+[x,y,theta,k] as usual.  
+
+The return value is a 2-tuple giving the min / max extents of the support
+polygon. If they are both infinite, the support polygon is empty.  
+";
+
+%feature("docstring") support_polygon_2d "
+
+Calculates the support polygon (interval) for a given set of contacts and a
+downward external force (0,-g).  
 
 The 2-argument version is a \"fancy\" version that allows more control over the
 constraint planes.  
 
 Args:  
 
-     contacts (list of 7-float lists or tuples): the list of contacts, each
-         specified as a 7-list or tuple [x,y,z,nx,ny,nz,k], with:
+    contacts (list of 4-float lists or tuples): the list of contacts, each
+        specified as a 4-list or tuple [x,y,theta,k], with:
 
-             * (x,y,z): the contact position
-             * (nx,ny,nz): the contact normal
-             * k: the coefficient of friction (>= 0)
+            * (x,y,z): the contact position
+            * theta: is the normal angle (in radians, CCW to the x axis)
+            * k: the coefficient of friction (>= 0)
 
-     contactPositions (list of 3-float lists or tuples): the list of contact
-         point positions.
-     frictionCones (list of lists): Each item of this list specifies linear
-         inequalities that must be met of the force at the corresponding
-         contact point.  The item must have length k*4 where k is an integer,
-         and each inequality gives the entries (ax,ay,az,b) of a constraint
-         ax*fx+ay*fy+az*fz <= b that limits the contact force (fx,fy,fz) at
-         the i'th contact.  Each of the k 4-tuples is laid out sequentially
+    contactPositions (list of 2-float lists or tuples): the list of contact
+        point positions.
+     frictionCones (list of lists): The i'th element in this list has length
+         k*3 (for some integer k), and gives the contact force constraints
+         (ax,ay,b) where ax*fx+ay*fy <= b limits the contact force (fx,fy)
+         at the i'th contact. Each of the k 3-tuples is laid out sequentially
          per-contact.  
+
+Returns:  
+
+    (2-tuple): gives the min/max extents of the support polygon.
+        If the support interval is empty, (inf,inf) is returned.  
 ";
 
-%feature("docstring") comEquilibrium "
+%feature("docstring") com_equilibrium "
 
 Tests whether the given COM com is stable for the given contacts and the given
 external force fext. A contact point is given by a list of 7 floats,
@@ -5148,7 +5152,7 @@ com can also be set to None in which case this tests if ANY COM has at the
 contacts. The return value is True or False.  
 ";
 
-%feature("docstring") comEquilibrium "
+%feature("docstring") com_equilibrium "
 
 Tests whether the given COM com is stable for the given contacts and the given
 external force fext.  

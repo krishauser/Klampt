@@ -16,9 +16,13 @@ class TerrainModel;
 class SimRobotSensor;
 
 //forward definitions for pointers to internal objects
-class RigidObject;
-class Terrain;
-class Robot;
+namespace Klampt {
+
+  class RigidObjectModel;
+  class TerrainModel;
+  class RobotModel;
+
+} //nameskace Klampt
 
 /** @brief Stores mass information for a rigid body or robot link.
  * 
@@ -302,7 +306,7 @@ class RobotModelLink
 
   int world;
   int robotIndex;
-  Robot* robotPtr;
+  Klampt::RobotModel* robotPtr;
   int index;
 };
 
@@ -345,7 +349,7 @@ class RobotModelDriver
 
   int world;
   int robotIndex;
-  Robot* robotPtr;
+  Klampt::RobotModel* robotPtr;
   int index;
 };
 
@@ -614,7 +618,7 @@ class RobotModel
 
   int world;
   int index;
-  Robot* robot;
+  Klampt::RobotModel* robot;
   bool dirty_dynamics;
 };
 
@@ -690,7 +694,7 @@ class RigidObjectModel
 
   int world;
   int index;
-  RigidObject* object;
+  Klampt::RigidObjectModel* object;
 };
 
 /** @brief Static environment geometry.
@@ -726,7 +730,7 @@ class TerrainModel
 
   int world;
   int index;
-  Terrain* terrain;
+  Klampt::TerrainModel* terrain;
 };
 
 /** @brief The main world class, containing robots, rigid objects, and static

@@ -24,7 +24,7 @@ using namespace std;
 #define PyInt_Check PyLong_Check
 #endif //PY_MAJOR_VERSION >= 3
 
-void setRandomSeed(int seed)
+void set_random_seed(int seed)
 {
   Math::Srand(seed);
 }
@@ -1054,23 +1054,23 @@ PyObject* CSpaceInterface::getStats()
 }
 
 
-void setPlanJSONString(const char* string)
+void set_plan_json_string(const char* string)
 {
   if(!factory.LoadJSON(string))
     throw PyException("Invalid JSON string");
 }
 
-std::string getPlanJSONString()
+std::string get_plan_json_string()
 {
   return factory.SaveJSON();
 }
 
-void setPlanType(const char* type)
+void set_plan_type(const char* type)
 {
   factory.type = type;
 }
 
-void setPlanSetting(const char* setting,double value)
+void set_plan_setting(const char* setting,double value)
 {
   //printf("Setting factory setting %s to %g\n",setting,value);
   if(0==strcmp(setting,"knn")) 
@@ -1106,7 +1106,7 @@ void setPlanSetting(const char* setting,double value)
   }
 }
 
-void setPlanSetting(const char* setting,const char* value)
+void set_plan_setting(const char* setting,const char* value)
 {
   if(0==strcmp(setting,"pointLocation"))
     factory.pointLocation = value;
@@ -1468,7 +1468,7 @@ void append_ramp(const ParabolicRamp::ParabolicRamp1D& ramp,
   }
 }
 
-void interpolate1DMinTime(double x0,double v0,double x1,double v1,
+void interpolate_1d_min_time(double x0,double v0,double x1,double v1,
              double xmin,double xmax,double vmax,double amax,
              vector<double>& out,vector<double>& out2,vector<double>& out3)
 {
@@ -1492,7 +1492,7 @@ void interpolate1DMinTime(double x0,double v0,double x1,double v1,
   append_ramp(ramp,out,out2,out3);
 }
 
-void interpolate1DMinAccel(double x0,double v0,double x1,double v1,
+void interpolate_1d_min_accel(double x0,double v0,double x1,double v1,
               double endTime,double xmin,double xmax,double vmax,
               vector<double>& out,vector<double>& out2,vector<double>& out3)
 {
@@ -1514,7 +1514,7 @@ void interpolate1DMinAccel(double x0,double v0,double x1,double v1,
     append_ramp(ramps[i],out,out2,out3);
 }
 
-void interpolateNDMinTime(const vector<double>& x0,const vector<double>& v0,const vector<double>& x1,const vector<double>& v1,
+void interpolate_nd_min_time(const vector<double>& x0,const vector<double>& v0,const vector<double>& x1,const vector<double>& v1,
              const vector<double>& xmin,const vector<double>& xmax,const vector<double>& vmax,const vector<double>& amax,
              vector<vector<double> >& out,vector<vector<double> >& out2,vector<vector<double> >& out3)
 {
@@ -1560,7 +1560,7 @@ void interpolateNDMinTime(const vector<double>& x0,const vector<double>& v0,cons
   }
 }
 
-void interpolateNDMinAccel(const vector<double>& x0,const vector<double>& v0,const vector<double>& x1,const vector<double>& v1,
+void interpolate_nd_min_accel(const vector<double>& x0,const vector<double>& v0,const vector<double>& x1,const vector<double>& v1,
              double endTime,const vector<double>& xmin,const vector<double>& xmax,const vector<double>& vmax,
              vector<vector<double> >& out,vector<vector<double> >& out2,vector<vector<double> >& out3)
 {
@@ -1597,7 +1597,7 @@ void interpolateNDMinAccel(const vector<double>& x0,const vector<double>& v0,con
   }
 }
 
-void interpolateNDMinTimeLinear(const vector<double>& x0,const vector<double>& x1,
+void interpolate_nd_min_time_linear(const vector<double>& x0,const vector<double>& x1,
              const vector<double>& vmax,const vector<double>& amax,
              vector<double>& out,vector<vector<double> >& out2,vector<vector<double> >& out3)
 {
@@ -1647,7 +1647,7 @@ void interpolateNDMinTimeLinear(const vector<double>& x0,const vector<double>& x
   }
 }
 
-void combineNDCubic(const vector<vector<double> >& times,const vector<vector<double> >& positions,const vector<vector<double> >& velocities,
+void combine_nd_cubic(const vector<vector<double> >& times,const vector<vector<double> >& positions,const vector<vector<double> >& velocities,
     vector<double>& out,vector<vector<double> >& out2,vector<vector<double> >& out3)
 {
   if(positions.size() != times.size()) throw PyException("Invalid input, need same # of positions as times");

@@ -17,7 +17,7 @@ from .. import robotinterface
 from .. import controller
 from .. import blocks
 import rospy
-from klampt.trajectory import Trajectory,HermiteTrajectory
+from klampt.model.trajectory import Trajectory,HermiteTrajectory
 from trajectory_msgs.msg import JointTrajectory,JointTrajectoryPoint
 from sensor_msgs.msg import JointState
 from rosgraph_msgs.msg import Clock

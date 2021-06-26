@@ -33,8 +33,8 @@ def to_open3d(obj):
         return pc
     elif isinstance(obj,TriangleMesh):
         m = open3d.geometry.TriangleMesh()
-        pc.vertices = open3d.utility.Vector3dVector(obj.getVertices())
-        pc.triangles = open3d.utility.Vector3iVector(obj.getIndices())
+        m.vertices = open3d.utility.Vector3dVector(obj.getVertices())
+        m.triangles = open3d.utility.Vector3iVector(obj.getIndices())
         return m
     elif isinstance(obj,VolumeGrid):
         import numpy as np

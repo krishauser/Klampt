@@ -479,8 +479,8 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 %pythoncode {
     def __reduce__(self):
         from klampt.io import loader
-        jsonobj = loader.toJson(self,'IKObjective')
-        return (loader.fromJson,(jsonobj,'IKObjective'))
+        jsonobj = loader.to_json(self,'IKObjective')
+        return (loader.from_json,(jsonobj,'IKObjective'))
 }
 }
 
@@ -488,8 +488,8 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 %pythoncode {
     def __reduce__(self):
         from klampt.io import loader
-        jsonobj = loader.toJson(self,'Geometry3D')
-        return (loader.fromJson,(jsonobj,'Geometry3D'))
+        jsonobj = loader.to_json(self,'Geometry3D')
+        return (loader.from_json,(jsonobj,'Geometry3D'))
 }
 }
 
@@ -498,8 +498,8 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 %pythoncode {
     def __reduce__(self):
         from klampt.io import loader
-        jsonobj = loader.toJson(self,'TriangleMesh')
-        return (loader.fromJson,(jsonobj,'TriangleMesh'))
+        jsonobj = loader.to_json(self,'TriangleMesh')
+        return (loader.from_json,(jsonobj,'TriangleMesh'))
 }
 }
 
@@ -507,8 +507,8 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 %pythoncode {
     def __reduce__(self):
         from klampt.io import loader
-        jsonobj = loader.toJson(self,'PointCloud')
-        return (loader.fromJson,(jsonobj,'PointCloud'))
+        jsonobj = loader.to_json(self,'PointCloud')
+        return (loader.from_json,(jsonobj,'PointCloud'))
 
     def setDepthImage(self,intrinsics,depth,depth_scale=1.0):
         """
@@ -584,8 +584,8 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 %pythoncode {
     def __reduce__(self):
         from klampt.io import loader
-        jsonobj = loader.toJson(self,'VolumeGrid')
-        return (loader.fromJson,(jsonobj,'VolumeGrid'))
+        jsonobj = loader.to_json(self,'VolumeGrid')
+        return (loader.from_json,(jsonobj,'VolumeGrid'))
 }
 }
 
@@ -593,8 +593,8 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 %pythoncode {
     def __reduce__(self):
         from klampt.io import loader
-        jsonobj = loader.toJson(self,'ConvexHull')
-        return (loader.fromJson,(jsonobj,'ConvexHull'))
+        jsonobj = loader.to_json(self,'ConvexHull')
+        return (loader.from_json,(jsonobj,'ConvexHull'))
 }
 }
 
@@ -602,8 +602,8 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 %pythoncode {
     def __reduce__(self):
         from klampt.io import loader
-        jsonobj = loader.toJson(self,'GeometricPrimitive')
-        return (loader.fromJson,(jsonobj,'GeometricPrimitive'))
+        jsonobj = loader.to_json(self,'GeometricPrimitive')
+        return (loader.from_json,(jsonobjO,'GeometricPrimitive'))
 }
 }
 
@@ -615,3 +615,47 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 %include "robotsim.h"
 %include "robotio.h"
 %include "stability.h"
+
+
+//PEP8 deprecations
+%pythoncode {
+    import warnings
+
+    def _deprecated_func(oldName,newName):
+        import sys
+        mod = sys.modules[__name__]
+        f = getattr(mod,newName)
+        def depf(*args,**kwargs):
+            warnings.warn("{} will be deprecated in favor of {} in a future version of Klampt".format(oldName,newName),DeprecationWarning)
+            return f(*args,**kwargs)
+        depf.__doc__ = 'Deprecated in a future version of Klampt. Use {} instead'.format(newName)
+        setattr(mod,oldName,depf)
+
+    _deprecated_func('SubscribeToStream','subscribe_to_stream')
+    _deprecated_func('DetachFromStream','detach_from_stream')
+    _deprecated_func('ProcessStreams','process_streams')
+    _deprecated_func('WaitForStream','wait_for_stream')
+    _deprecated_func('ThreeJSGetScene','threejs_get_scene')
+    _deprecated_func('ThreeJSGetTransforms','threejs_get_transforms')
+    _deprecated_func('setFrictionConeApproximationEdges','set_friction_cone_approximation_edges')
+    _deprecated_func('forceClosure','force_closure')
+    _deprecated_func('forceClosure2D','force_closure_2d')
+    _deprecated_func('comEquilibrium','com_equilibrium')
+    _deprecated_func('comEquilibrium2D','com_equilibrium_2d')
+    _deprecated_func('supportPolygon','support_polygon')
+    _deprecated_func('supportPolygon2D','support_polygon_2d')
+    _deprecated_func('equilibriumTorques','equilibrium_torques')
+    _deprecated_func('setRandomSeed','set_random_seed')
+
+    def SampleTransform(obj):
+        """Deprecated.  Use ``obj.sampleTransform()`` instead.
+
+        Args:
+            obj (IKObjective or GeneralizedIKObjective)
+
+        Returns:
+            klampt se3 element.
+        """
+        return obj.sampleTransform()
+
+}

@@ -96,20 +96,20 @@ class QtWindowManager(_ThreadedWindowManager):
                 if self.windows[self.current_window].glwindow is not None:
                     self._frontend.window = self.windows[self.current_window].glwindow
         if plugin is None:
-            self._frontend.setPlugin(self._frontend.scene)
+            self._frontend.set_plugin(self._frontend.scene)
         else:
-            self._frontend.setPlugin(plugin)
+            self._frontend.set_plugin(plugin)
         self.onFrontendChange()
 
     def pushPlugin(self,plugin):
         assert isinstance(self._frontend,glcommon.GLPluginProgram),"Can't push a plugin after splitView"
         if len(self._frontend.plugins) == 0:
-            self._frontend.setPlugin(self._frontend.scene)
-        self._frontend.pushPlugin(plugin)
+            self._frontend.set_plugin(self._frontend.scene)
+        self._frontend.push_plugin(plugin)
         self.onFrontendChange()
 
     def popPlugin(self):
-        self._frontend.popPlugin()
+        self._frontend.pop_plugin()
         self.onFrontendChange()
 
     def splitView(self,plugin):
@@ -117,7 +117,7 @@ class QtWindowManager(_ThreadedWindowManager):
         if plugin is None:
             plugin = GLVisualizationPlugin()
         if isinstance(self._frontend,glcommon.GLMultiViewportProgram):
-            self._frontend.addView(plugin)
+            self._frontend.add_view(plugin)
             if hasattr(plugin,'scene') and isinstance(plugin.scene,VisualizationScene):
                 self._frontend.scene = plugin.scene
         else:
@@ -128,8 +128,8 @@ class QtWindowManager(_ThreadedWindowManager):
             if self.current_window is not None:
                 if self.windows[self.current_window].glwindow is not None:
                     multiProgram.window = self.windows[self.current_window].glwindow
-            multiProgram.addView(self._frontend)
-            multiProgram.addView(plugin)
+            multiProgram.add_view(self._frontend)
+            multiProgram.add_view(plugin)
             multiProgram.name = self.window_title
             multiProgram.scene = self._frontend
             self._frontend = multiProgram

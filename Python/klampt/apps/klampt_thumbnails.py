@@ -33,7 +33,7 @@ def make_thumbnails(folder,outputfolder):
             vis.lock()
             del world
             vis.unlock()
-        elif os.path.splitext(filename)[1] in resource.knownTypes():
+        elif os.path.splitext(filename)[1] in resource.known_types():
             res = resource.get(filename,doedit=False,directory=folder)
             im = resource.thumbnail(res,(128,96))
             if im != None:

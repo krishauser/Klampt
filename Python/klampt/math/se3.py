@@ -17,8 +17,8 @@ directional quantity ``d`` is either ``apply_rotation(T,d)`` or
 
 To flatten into a single array, use ``klampt.model.getConfig(T)``, which is
 equivalent to ``T[0] + T[1]``.  To read and write to disk in a way that is
-compatible with  other Klamp't IO routines, use ``klampt.io.loader.writeSe3()``
-and ``klampt.io.loader.readSe3()``.
+compatible with  other Klamp't IO routines, use ``klampt.io.loader.write_se3()``
+and ``klampt.io.loader.read_se3()``.
 """
 
 from . import vectorops

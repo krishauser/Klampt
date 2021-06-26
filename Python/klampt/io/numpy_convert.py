@@ -34,7 +34,8 @@ def to_numpy(obj,type='auto'):
     if type == 'auto':
         otype = types.object_to_type(obj,supportedTypes)
         if otype is None and type=='auto':
-                raise ValueError('obj is not a supported type: '+', '.join(otype))
+            raise ValueError('obj is not a supported type: '+', '.join(otype))
+        type = otype
     if type not in supportedTypes:
         raise ValueError(type+' is not a supported type')
     if type == 'RigidTransform':

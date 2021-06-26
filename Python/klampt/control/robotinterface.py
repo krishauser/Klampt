@@ -138,6 +138,7 @@ class RobotInterfaceBase(object):
         if not self._warned:
             warnings.warn("startStep will be deprecated, use beginStep instead",DeprecationWarning)
         self._warned = True
+        self.beginStep()
 
     def beginStep(self):
         """This is called before the commands sent at each time step"""

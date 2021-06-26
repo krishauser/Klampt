@@ -519,6 +519,7 @@ def _deprecated_func(oldName,newName):
     def depf(*args,**kwargs):
         warnings.warn("{} will be deprecated in favor of {} in a future version of Klampt".format(oldName,newName),DeprecationWarning)
         return f(*args,**kwargs)
+    depf.__doc__ = 'Deprecated in a future version of Klampt. Use {} instead'.format(newName)
     setattr(mod,oldName,depf)
 
 _deprecated_func('preferredPlanOptions','preferred_plan_options')

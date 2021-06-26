@@ -12,7 +12,7 @@
 #include <Klampt/Control/LoggingController.h>
 #include <Klampt/Sensing/JointSensors.h>
 #include <Klampt/Planning/RobotCSpace.h>
-#include <Klampt/Simulation/WorldSimulation.h>
+#include <Klampt/Simulation/Simulator.h>
 #include <Klampt/Modeling/Interpolate.h>
 #include <Klampt/Modeling/Mass.h>
 #include <Klampt/Planning/RobotCSpace.h>
@@ -45,6 +45,7 @@
 #ifndef WIN32
 #include <unistd.h>
 #endif //WIN32
+using namespace Geometry;
 
 inline void MakeNumpyArray(double** out,int* m,int* n,int _m,int _n,Matrix& ref)
 {
@@ -59,17 +60,17 @@ inline void MakeNumpyArray(double** out,int* m,int* n,int _m,int _n,Matrix& ref)
 /// Internally used.
 struct WorldData
 {
-  RobotWorld* world;
+  Klampt::WorldModel* world;
   bool worldExternal;
-  XmlWorld xmlWorld;
+  Klampt::XmlWorld xmlWorld;
   int refCount;
-  vector<shared_ptr<RobotSensors> > robotSensors;
+  vector<shared_ptr<Klampt::RobotSensors> > robotSensors;
 };
 
 /// Internally used.
 struct SimData
 {
-  WorldSimulation sim;
+  Klampt::Simulator sim;
 };
 
 
@@ -94,7 +95,7 @@ static bool gEnableCollisionInitialization = false;
 
 static int gStabilityNumFCEdges = 4;
 
-int createWorld(RobotWorld* ptr=NULL)
+int createWorld(Klampt::WorldModel* ptr=NULL)
 {
   if(worldDeleteList.empty()) {
     worlds.push_back(make_shared<WorldData>());
@@ -103,7 +104,7 @@ int createWorld(RobotWorld* ptr=NULL)
       worlds.back()->worldExternal = true;
     }
     else {
-      worlds.back()->world = new RobotWorld;
+      worlds.back()->world = new Klampt::WorldModel;
       worlds.back()->worldExternal = false;
     }
     worlds.back()->refCount = 1;
@@ -118,7 +119,7 @@ int createWorld(RobotWorld* ptr=NULL)
       worlds[index]->worldExternal = true;
     }
     else {
-      worlds[index]->world = new RobotWorld;
+      worlds[index]->world = new Klampt::WorldModel;
       worlds[index]->worldExternal = false;
     }
     worlds[index]->refCount = 1;
@@ -242,10 +243,10 @@ void destroy()
   worldDeleteList.clear();
   sims.resize(0);
   worlds.resize(0);
-  ManagedGeometry::manager.Clear();
+  Klampt::ManagedGeometry::manager.Clear();
 }
 
-void setRandomSeed(int seed)
+void set_random_seed(int seed)
 {
   Math::Srand(seed);
 }
@@ -253,7 +254,7 @@ void setRandomSeed(int seed)
 
 /***************************  GEOMETRY CODE ***************************************/
 
-ManagedGeometry& GetManagedGeometry(RobotWorld& world,int id)
+Klampt::ManagedGeometry& GetManagedGeometry(Klampt::WorldModel& world,int id)
 {
   if(id < 0) {
     fprintf(stderr,"GetManagedGeometry(): Invalid ID: %d\n",id);
@@ -274,11 +275,11 @@ ManagedGeometry& GetManagedGeometry(RobotWorld& world,int id)
 }
 
 
-class ManualOverrideController : public RobotController
+class ManualOverrideController : public Klampt::RobotController
 {
  public:
-  ManualOverrideController(Robot& robot,const shared_ptr<RobotController>& _base)
-    :RobotController(robot),base(_base),override(false)
+  ManualOverrideController(Klampt::RobotModel& robot,const shared_ptr<Klampt::RobotController>& _base)
+    :Klampt::RobotController(robot),base(_base),override(false)
   {}
   virtual const char* Type() const { return "ManualOverrideController"; }
   virtual void Update(Real dt);
@@ -294,7 +295,7 @@ class ManualOverrideController : public RobotController
   virtual vector<string> Commands() const { return base->Commands(); }
   virtual bool SendCommand(const string& name,const string& str) { return base->SendCommand(name,str); }
 
-  shared_ptr<RobotController> base;
+  shared_ptr<Klampt::RobotController> base;
   bool override;
 };
 
@@ -311,8 +312,8 @@ bool ManualOverrideController::ReadState(File& f)
     }
     return true;
   }
-  if(!RobotController::ReadState(f)) {
-    printf("Unable to read RobotController\n");
+  if(!Klampt::RobotController::ReadState(f)) {
+    printf("Unable to read Klampt::RobotController\n");
     return false;
   }
   return true;
@@ -322,7 +323,7 @@ bool ManualOverrideController::WriteState(File& f) const
 {
   if(!WriteFile(f,override)) return false;
   if(!override) return base->WriteState(f);
-  return RobotController::WriteState(f);
+  return Klampt::RobotController::WriteState(f);
 }
 
 void ManualOverrideController::Update(Real dt)
@@ -337,39 +338,39 @@ void ManualOverrideController::Update(Real dt)
   else {
     //keep existing commands
   }
-  RobotController::Update(dt);
+  Klampt::RobotController::Update(dt);
 }
 
 
 typedef ManualOverrideController MyController;
-inline shared_ptr<MyController> MakeController(Robot* robot)
+inline shared_ptr<MyController> MakeController(Klampt::RobotModel* robot)
 {
   ManualOverrideController* lc=new ManualOverrideController(*robot,MakeDefaultController(robot));
   return shared_ptr<MyController>(lc);
 }
-inline PolynomialPathController* GetPathController(RobotController* controller)
+inline Klampt::PolynomialPathController* GetPathController(Klampt::RobotController* controller)
 {
   MyController* mc=dynamic_cast<MyController*>(controller);
   if(!mc) {
     throw PyException("Not using the default manual override controller");
   }
-  LoggingController* lc=dynamic_cast<LoggingController*>(mc->base.get());
+  Klampt::LoggingController* lc=dynamic_cast<Klampt::LoggingController*>(mc->base.get());
   if(!lc) {
     throw PyException("Not using the default robot controller");
   }
-  FeedforwardController* ffc=dynamic_cast<FeedforwardController*>(lc->base.get());
-  PolynomialPathController* pc=dynamic_cast<PolynomialPathController*>(ffc->base.get());
+  Klampt::FeedforwardController* ffc=dynamic_cast<Klampt::FeedforwardController*>(lc->base.get());
+  Klampt::PolynomialPathController* pc=dynamic_cast<Klampt::PolynomialPathController*>(ffc->base.get());
   return pc;
 }
-inline PolynomialMotionQueue* GetMotionQueue(RobotController* controller)
+inline Klampt::PolynomialMotionQueue* GetMotionQueue(Klampt::RobotController* controller)
 {
   return GetPathController(controller);
 }
 
 
-void GetMesh(const Geometry::AnyCollisionGeometry3D& geom,TriangleMesh& tmesh)
+void GetMesh(const AnyCollisionGeometry3D& geom,TriangleMesh& tmesh)
 {
-  Assert(geom.type == Geometry::AnyGeometry3D::TriangleMesh);
+  Assert(geom.type == AnyGeometry3D::TriangleMesh);
   const Meshing::TriMesh& mesh = geom.AsTriangleMesh();
   tmesh.indices.resize(mesh.tris.size()*3);
   tmesh.vertices.resize(mesh.verts.size()*3);
@@ -383,7 +384,7 @@ void GetMesh(const Geometry::AnyCollisionGeometry3D& geom,TriangleMesh& tmesh)
   }
 }
 
-void GetMesh(const TriangleMesh& tmesh,Geometry::AnyCollisionGeometry3D& geom)
+void GetMesh(const TriangleMesh& tmesh,AnyCollisionGeometry3D& geom)
 {
   geom = Meshing::TriMesh();
   Meshing::TriMesh& mesh = geom.AsTriangleMesh();
@@ -397,9 +398,9 @@ void GetMesh(const TriangleMesh& tmesh,Geometry::AnyCollisionGeometry3D& geom)
 }
 
 
-void GetPointCloud(const Geometry::AnyCollisionGeometry3D& geom,PointCloud& pc)
+void GetPointCloud(const AnyCollisionGeometry3D& geom,PointCloud& pc)
 {
-  Assert(geom.type == Geometry::AnyGeometry3D::PointCloud);
+  Assert(geom.type == AnyGeometry3D::PointCloud);
   const Meshing::PointCloud3D& gpc = geom.AsPointCloud();
   pc.vertices.resize(gpc.points.size()*3);
   pc.propertyNames = gpc.propertyNames;
@@ -417,7 +418,7 @@ void GetPointCloud(const Geometry::AnyCollisionGeometry3D& geom,PointCloud& pc)
   pc.settings = gpc.settings;
 }
 
-void GetPointCloud(const PointCloud& pc,Geometry::AnyCollisionGeometry3D& geom)
+void GetPointCloud(const PointCloud& pc,AnyCollisionGeometry3D& geom)
 {
   geom = Meshing::PointCloud3D();
   Meshing::PointCloud3D& gpc = geom.AsPointCloud();
@@ -453,9 +454,9 @@ void GetPointCloud(const PointCloud& pc,Geometry::AnyCollisionGeometry3D& geom)
   geom.ClearCollisionData();
 }
 
-void GetVolumeGrid(const Geometry::AnyCollisionGeometry3D& geom,VolumeGrid& grid)
+void GetVolumeGrid(const AnyCollisionGeometry3D& geom,VolumeGrid& grid)
 {
-  Assert(geom.type == Geometry::AnyGeometry3D::ImplicitSurface);
+  Assert(geom.type == AnyGeometry3D::ImplicitSurface);
   const Meshing::VolumeGrid& gvg = geom.AsImplicitSurface();
   grid.dims.resize(3);
   grid.dims[0] = gvg.value.m;
@@ -475,7 +476,7 @@ void GetVolumeGrid(const Geometry::AnyCollisionGeometry3D& geom,VolumeGrid& grid
   }
 }
 
-void GetVolumeGrid(const VolumeGrid& grid,Geometry::AnyCollisionGeometry3D& geom)
+void GetVolumeGrid(const VolumeGrid& grid,AnyCollisionGeometry3D& geom)
 {
   geom = Meshing::VolumeGrid();
   Meshing::VolumeGrid& gvg = geom.AsImplicitSurface();
@@ -674,9 +675,9 @@ void Geometry3D::set(const Geometry3D& g)
 {
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   const shared_ptr<AnyCollisionGeometry3D>& ggeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(g.geomPtr);
-  ManagedGeometry* mgeom = NULL;
+  Klampt::ManagedGeometry* mgeom = NULL;
   if(!isStandalone()) {
-    RobotWorld& world = *worlds[this->world]->world;
+    Klampt::WorldModel& world = *worlds[this->world]->world;
     mgeom = &GetManagedGeometry(world,id);
   }
   if(geom == NULL) {
@@ -759,13 +760,13 @@ ConvexHull Geometry3D::getConvexHull()
 {
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   if(!geom) return ConvexHull();
-  Assert(geom->type == Geometry::AnyGeometry3D::ConvexHull);
-  if(geom->type != Geometry::AnyGeometry3D::ConvexHull) {
+  Assert(geom->type == AnyGeometry3D::ConvexHull);
+  if(geom->type != AnyGeometry3D::ConvexHull) {
     ConvexHull chull;
     return chull;
   }
-  const Geometry::ConvexHull3D& hull = geom->AsConvexHull();
-  if(hull.type != Geometry::ConvexHull3D::Polytope) {
+  const ConvexHull3D& hull = geom->AsConvexHull();
+  if(hull.type != ConvexHull3D::Polytope) {
     throw PyException("Can't get ConvexHull object from ConvexHull groups");
   }
   const auto& pts = hull.AsPolytope();
@@ -777,9 +778,9 @@ ConvexHull Geometry3D::getConvexHull()
 void Geometry3D::setTriangleMesh(const TriangleMesh& mesh)
 {
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
-  ManagedGeometry* mgeom = NULL;
+  Klampt::ManagedGeometry* mgeom = NULL;
   if(!isStandalone()) {
-    RobotWorld& world = *worlds[this->world]->world;
+    Klampt::WorldModel& world = *worlds[this->world]->world;
     mgeom = &GetManagedGeometry(world,id);
   }
   if(geom == NULL) {
@@ -799,9 +800,9 @@ void Geometry3D::setTriangleMesh(const TriangleMesh& mesh)
 void Geometry3D::setGroup()
 {
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
-  ManagedGeometry* mgeom = NULL;
+  Klampt::ManagedGeometry* mgeom = NULL;
   if(!isStandalone()) {
-    RobotWorld& world = *worlds[this->world]->world;
+    Klampt::WorldModel& world = *worlds[this->world]->world;
     mgeom = &GetManagedGeometry(world,id);
   }
   if(geom == NULL) {
@@ -810,7 +811,7 @@ void Geometry3D::setGroup()
     else
       geom = make_shared<AnyCollisionGeometry3D>();
   }
-  *geom = AnyCollisionGeometry3D(vector<Geometry::AnyGeometry3D>());
+  *geom = AnyCollisionGeometry3D(vector<AnyGeometry3D>());
   geom->ReinitCollisionData();
 }
 
@@ -923,9 +924,9 @@ VolumeGrid Geometry3D::getVolumeGrid()
 void Geometry3D::setPointCloud(const PointCloud& pc)
 {
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
-  ManagedGeometry* mgeom = NULL;
+  Klampt::ManagedGeometry* mgeom = NULL;
   if(!isStandalone()) {
-    RobotWorld& world = *worlds[this->world]->world;
+    Klampt::WorldModel& world = *worlds[this->world]->world;
     mgeom = &GetManagedGeometry(world,id);
   }
   if(geom == NULL) {
@@ -950,9 +951,9 @@ void Geometry3D::setPointCloud(const PointCloud& pc)
 void Geometry3D::setVolumeGrid(const VolumeGrid& vg)
 {
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
-  ManagedGeometry* mgeom = NULL;
+  Klampt::ManagedGeometry* mgeom = NULL;
   if(!isStandalone()) {
-    RobotWorld& world = *worlds[this->world]->world;
+    Klampt::WorldModel& world = *worlds[this->world]->world;
     mgeom = &GetManagedGeometry(world,id);
   }
   if(geom == NULL) {
@@ -977,9 +978,9 @@ void Geometry3D::setVolumeGrid(const VolumeGrid& vg)
 void Geometry3D::setConvexHull(const ConvexHull& hull)
 {
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
-  ManagedGeometry* mgeom = NULL;
+  Klampt::ManagedGeometry* mgeom = NULL;
   if(!isStandalone()) {
-    RobotWorld& world = *worlds[this->world]->world;
+    Klampt::WorldModel& world = *worlds[this->world]->world;
     mgeom = &GetManagedGeometry(world,id);
   }
   if(geom == NULL) {
@@ -1012,9 +1013,9 @@ void Geometry3D::setConvexHullGroup(const Geometry3D& geom1, const Geometry3D & 
   shared_ptr<AnyCollisionGeometry3D>& ingeom2 = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geom2.geomPtr);
   Assert(ingeom2->type == AnyGeometry3D::ConvexHull);
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
-  ManagedGeometry* mgeom = NULL;
+  Klampt::ManagedGeometry* mgeom = NULL;
   if(!isStandalone()) {
-    RobotWorld& world = *worlds[this->world]->world;
+    Klampt::WorldModel& world = *worlds[this->world]->world;
     mgeom = &GetManagedGeometry(world,id);
   }
   if(geom == NULL) {
@@ -1029,7 +1030,7 @@ void Geometry3D::setConvexHullGroup(const Geometry3D& geom1, const Geometry3D & 
   RigidTransform T2 = ingeom2->GetTransform();
   RigidTransform TRel;
   TRel.mulInverseA(T1,T2);
-  Geometry::ConvexHull3D hull;
+  ConvexHull3D hull;
   hull.SetHull(ingeom1->AsConvexHull(), ingeom2->AsConvexHull());
   *geom = AnyCollisionGeometry3D(hull);
   geom->InitCollisionData();
@@ -1046,9 +1047,9 @@ void Geometry3D::setConvexHullGroup(const Geometry3D& geom1, const Geometry3D & 
 void Geometry3D::setGeometricPrimitive(const GeometricPrimitive& prim)
 {
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);  
-  ManagedGeometry* mgeom = NULL;
+  Klampt::ManagedGeometry* mgeom = NULL;
   if(!isStandalone()) {
-    RobotWorld& world = *worlds[this->world]->world;
+    Klampt::WorldModel& world = *worlds[this->world]->world;
     mgeom = &GetManagedGeometry(world,id);
   }
   if(geom == NULL) {
@@ -1090,11 +1091,11 @@ bool Geometry3D::loadFile(const char* fn)
     assert(id >= 0);
     //use the manager, this will automatically figure out caching and
     //appearance stuff
-    RobotWorld& world = *worlds[this->world]->world;
-    ManagedGeometry* mgeom = NULL;
+    Klampt::WorldModel& world = *worlds[this->world]->world;
+    Klampt::ManagedGeometry* mgeom = NULL;
     mgeom = &GetManagedGeometry(world,id);
     if(mgeom->Load(fn)) {
-      geom = shared_ptr<Geometry::AnyCollisionGeometry3D>(*mgeom);
+      geom = shared_ptr<AnyCollisionGeometry3D>(*mgeom);
       return true;
     }
     return false;
@@ -1168,8 +1169,8 @@ void Geometry3D::transform(const double R[9],const double t[3])
   }
   else {
     //update the display list / cache
-    RobotWorld& world=*worlds[this->world]->world;
-    ManagedGeometry* mgeom = &GetManagedGeometry(world,id);
+    Klampt::WorldModel& world=*worlds[this->world]->world;
+    Klampt::ManagedGeometry* mgeom = &GetManagedGeometry(world,id);
     mgeom->TransformGeometry(Matrix4(T));
     //mgeom->OnGeometryChange();
     //mgeom->RemoveFromCache();
@@ -1506,15 +1507,18 @@ Geometry3D Geometry3D::roi(const char* query,const double bmin[3],const double b
 //KH: note: pointer gymnastics necessary to allow appearances to refer to temporary appearances as well as references to world, while also
 //exposing an opaque pointer in appearance.h
 
-//defined in Cpp/Modeling/ManagedGeometry.cpp
-void SetupDefaultAppearance(GLDraw::GeometryAppearance& app);
+//defined in Cpp/Modeling/Klampt::ManagedGeometry.cpp
+
+namespace Klampt {
+  void SetupDefaultAppearance(GLDraw::GeometryAppearance& app);
+}
 
 Appearance::Appearance()
   :world(-1),id(-1),appearancePtr(NULL)
 {
   auto ptr = new shared_ptr<GLDraw::GeometryAppearance>;
   ptr->reset(new GLDraw::GeometryAppearance());
-  SetupDefaultAppearance(**ptr);
+  Klampt::SetupDefaultAppearance(**ptr);
   appearancePtr = ptr;
 }
 
@@ -1549,7 +1553,7 @@ void Appearance::refresh(bool deep)
   shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
   if(!app) return;
   if(!isStandalone()) {
-    ManagedGeometry& geom = GetManagedGeometry(*worlds[this->world]->world,id);
+    Klampt::ManagedGeometry& geom = GetManagedGeometry(*worlds[this->world]->world,id);
     if(geom.IsDynamicGeometry()) {
       if(geom.DynamicGeometryUpdate()) return;
       return;
@@ -1584,8 +1588,8 @@ void Appearance::set(const Appearance& g)
 
   if(!isStandalone()) {
     //need to detach from other geometries that might be sharing this appearance
-    RobotWorld& world=*worlds[this->world]->world;
-    ManagedGeometry& geom = GetManagedGeometry(world,id);
+    Klampt::WorldModel& world=*worlds[this->world]->world;
+    Klampt::ManagedGeometry& geom = GetManagedGeometry(world,id);
     if(geom.IsAppearanceShared()) {
       geom.SetUniqueAppearance();
       app = geom.Appearance();
@@ -1621,8 +1625,8 @@ void Appearance::setDraw(bool draw)
   shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
   if(!app) return;
   if(!isStandalone()) {
-    RobotWorld& world=*worlds[this->world]->world;
-    ManagedGeometry& geom = GetManagedGeometry(world,id);
+    Klampt::WorldModel& world=*worlds[this->world]->world;
+    Klampt::ManagedGeometry& geom = GetManagedGeometry(world,id);
     if(geom.IsAppearanceShared()) {
       geom.SetUniqueAppearance();
       app = geom.Appearance();
@@ -1644,8 +1648,8 @@ void Appearance::setDraw(int feature,bool draw)
   shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
   if(!app) return;
   if(!isStandalone()) {
-    RobotWorld& world=*worlds[this->world]->world;
-    ManagedGeometry& geom = GetManagedGeometry(world,id);
+    Klampt::WorldModel& world=*worlds[this->world]->world;
+    Klampt::ManagedGeometry& geom = GetManagedGeometry(world,id);
     if(geom.IsAppearanceShared()) {
       geom.SetUniqueAppearance();
       app = geom.Appearance();
@@ -1684,8 +1688,8 @@ void Appearance::setColor(float r,float g,float b,float a)
   shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
   if(!app) return;
   if(!isStandalone()) {
-    RobotWorld& world=*worlds[this->world]->world;
-    ManagedGeometry& geom = GetManagedGeometry(world,id);
+    Klampt::WorldModel& world=*worlds[this->world]->world;
+    Klampt::ManagedGeometry& geom = GetManagedGeometry(world,id);
     if(geom.IsAppearanceShared()) {
       geom.SetUniqueAppearance();
       app = geom.Appearance();
@@ -1699,8 +1703,8 @@ void Appearance::setShininess(float shininess,float strength)
   shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
   if(!app) return;
   if(!isStandalone()) {
-    RobotWorld& world=*worlds[this->world]->world;
-    ManagedGeometry& geom = GetManagedGeometry(world,id);
+    Klampt::WorldModel& world=*worlds[this->world]->world;
+    Klampt::ManagedGeometry& geom = GetManagedGeometry(world,id);
     if(geom.IsAppearanceShared()) {
       geom.SetUniqueAppearance();
       app = geom.Appearance();
@@ -1723,8 +1727,8 @@ void Appearance::setColor(int feature,float r,float g,float b,float a)
   shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
   if(!app) return;
   if(!isStandalone()) {
-    RobotWorld& world=*worlds[this->world]->world;
-    ManagedGeometry& geom = GetManagedGeometry(world,id);
+    Klampt::WorldModel& world=*worlds[this->world]->world;
+    Klampt::ManagedGeometry& geom = GetManagedGeometry(world,id);
     if(geom.IsAppearanceShared()) {
       geom.SetUniqueAppearance();
       app = geom.Appearance();
@@ -1915,8 +1919,8 @@ void Appearance::setPointSize(float size)
   shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
   if(!app) return;
   if(!isStandalone()) {
-    RobotWorld& world=*worlds[this->world]->world;
-    ManagedGeometry& geom = GetManagedGeometry(world,id);
+    Klampt::WorldModel& world=*worlds[this->world]->world;
+    Klampt::ManagedGeometry& geom = GetManagedGeometry(world,id);
     if(geom.IsAppearanceShared()) {
       geom.SetUniqueAppearance();
       app = geom.Appearance();
@@ -1930,8 +1934,8 @@ void Appearance::setCreaseAngle(float creaseAngleRads)
   shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
   if(!app) return;
   if(!isStandalone()) {
-    RobotWorld& world=*worlds[this->world]->world;
-    ManagedGeometry& geom = GetManagedGeometry(world,id);
+    Klampt::WorldModel& world=*worlds[this->world]->world;
+    Klampt::ManagedGeometry& geom = GetManagedGeometry(world,id);
     if(geom.IsAppearanceShared()) {
       geom.SetUniqueAppearance();
       app = geom.Appearance();
@@ -1945,8 +1949,8 @@ void Appearance::setSilhouette(float radius,float r,float g,float b,float a)
   shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
   if(!app) return;
   if(!isStandalone()) {
-    RobotWorld& world=*worlds[this->world]->world;
-    ManagedGeometry& geom = GetManagedGeometry(world,id);
+    Klampt::WorldModel& world=*worlds[this->world]->world;
+    Klampt::ManagedGeometry& geom = GetManagedGeometry(world,id);
     if(geom.IsAppearanceShared()) {
       geom.SetUniqueAppearance();
       app = geom.Appearance();
@@ -1974,7 +1978,7 @@ void Appearance::drawWorldGL(Geometry3D& g)
   if(!geom) return;
   if(!app) {
     app = make_shared<GLDraw::GeometryAppearance>();
-    SetupDefaultAppearance(*app);
+    Klampt::SetupDefaultAppearance(*app);
   }
   if(app->geom) {
     if(app->geom != geom.get()) {
@@ -1999,7 +2003,7 @@ void Appearance::drawGL(Geometry3D& g)
   if(!geom) return;
   if(!app) {
     app = make_shared<GLDraw::GeometryAppearance>();
-    SetupDefaultAppearance(*app);
+    Klampt::SetupDefaultAppearance(*app);
   }
   if(app->geom) {
     if(app->geom != geom.get()) {
@@ -2908,9 +2912,9 @@ WorldModel::WorldModel(const WorldModel& w)
   refWorld(index);
 }
 
-WorldModel::WorldModel(void* ptrRobotWorld)
+WorldModel::WorldModel(void* ptr)
 {
-  index = createWorld((RobotWorld*)ptrRobotWorld);
+  index = createWorld((Klampt::WorldModel*)ptr);
 }
 
 
@@ -2926,21 +2930,21 @@ const WorldModel& WorldModel::operator = (const WorldModel& w)
 WorldModel WorldModel::copy()
 {
   WorldModel res;
-  RobotWorld& myworld = *worlds[index]->world;
-  RobotWorld& otherworld = *worlds[res.index]->world;
+  Klampt::WorldModel& myworld = *worlds[index]->world;
+  Klampt::WorldModel& otherworld = *worlds[res.index]->world;
   otherworld = myworld;
   //world occupants -- copy everything but geometry
   for(size_t i=0;i<otherworld.robots.size();i++) {
-    otherworld.robots[i] = make_shared<Robot>();
+    otherworld.robots[i] = make_shared<Klampt::RobotModel>();
     *otherworld.robots[i] = *myworld.robots[i];
     otherworld.robotViews[i].robot = otherworld.robots[i].get();
   }
   for(size_t i=0;i<otherworld.terrains.size();i++) {
-    otherworld.terrains[i] = make_shared<Terrain>();
+    otherworld.terrains[i] = make_shared<Klampt::TerrainModel>();
     *otherworld.terrains[i] = *myworld.terrains[i];
   }
   for(size_t i=0;i<otherworld.rigidObjects.size();i++) {
-    otherworld.rigidObjects[i] = make_shared<RigidObject>();
+    otherworld.rigidObjects[i] = make_shared<Klampt::RigidObjectModel>();
     *otherworld.rigidObjects[i] = *myworld.rigidObjects[i];
   }
   return res;
@@ -2961,13 +2965,13 @@ bool WorldModel::loadFile(const char* fn)
 
 bool WorldModel::saveFile(const char* fn,const char* elementPath)
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   return world.SaveXML(fn,elementPath);
 }
 
 bool WorldModel::readFile(const char* fn)
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
 
   const char* ext=FileExtension(fn);
   if(0==strcmp(ext,"rob") || 0==strcmp(ext,"urdf")) {
@@ -3036,31 +3040,31 @@ bool WorldModel::readFile(const char* fn)
 
 int WorldModel::numRobots()
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   return world.robots.size();
 }
 
 int WorldModel::numRobotLinks(int robot)
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   return world.robots[robot]->links.size();
 }
 
 int WorldModel::numRigidObjects()
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   return world.rigidObjects.size();
 }
 
 int WorldModel::numTerrains()
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   return world.terrains.size();
 }
 
 int WorldModel::numIDs()
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   return world.NumIDs();
 }
 
@@ -3077,7 +3081,7 @@ RobotModel WorldModel::robot(int robot)
 
 RobotModel WorldModel::robot(const char* robot)
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   RobotModel r;
   r.world = index;
   for(size_t i=0;i<world.robots.size();i++)
@@ -3134,7 +3138,7 @@ RigidObjectModel WorldModel::rigidObject(int object)
 
 RigidObjectModel WorldModel::rigidObject(const char* object)
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   RigidObjectModel obj;
   obj.world = index;
   for(size_t i=0;i<world.rigidObjects.size();i++)
@@ -3163,7 +3167,7 @@ TerrainModel WorldModel::terrain(const char* terrain)
 {
   TerrainModel t;
   t.world = index;
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   for(size_t i=0;i<world.terrains.size();i++)
     if(world.terrains[i]->name == terrain) {
       t.index = (int)i;
@@ -3175,22 +3179,22 @@ TerrainModel WorldModel::terrain(const char* terrain)
 
 RobotModel WorldModel::makeRobot(const char* name)
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   RobotModel robot;
   robot.world = index;
   robot.index = (int)world.robots.size();
-  world.AddRobot(name,new Robot());
+  world.AddRobot(name,new Klampt::RobotModel());
   robot.robot = world.robots.back().get();
   return robot;
 }
 
 RigidObjectModel WorldModel::makeRigidObject(const char* name)
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   RigidObjectModel object;
   object.world = index;
   object.index = (int)world.rigidObjects.size();
-  world.AddRigidObject(name,new RigidObject());
+  world.AddRigidObject(name,new Klampt::RigidObjectModel());
   object.object = world.rigidObjects.back().get();
   object.object->geometry.CreateEmpty();
   return object;
@@ -3198,11 +3202,11 @@ RigidObjectModel WorldModel::makeRigidObject(const char* name)
 
 TerrainModel WorldModel::makeTerrain(const char* name)
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   TerrainModel terrain;
   terrain.world = index;
   terrain.index = world.terrains.size();
-  world.AddTerrain(name,new Terrain());
+  world.AddTerrain(name,new Klampt::TerrainModel());
   terrain.terrain = world.terrains.back().get();
   terrain.terrain->geometry.CreateEmpty();
   return terrain;
@@ -3210,7 +3214,7 @@ TerrainModel WorldModel::makeTerrain(const char* name)
 
 RobotModel WorldModel::loadRobot(const char* fn)
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   int oindex=world.LoadRobot(fn);
   if(oindex < 0) return RobotModel();
   RobotModel robot;
@@ -3225,7 +3229,7 @@ RobotModel WorldModel::loadRobot(const char* fn)
 
 RigidObjectModel WorldModel::loadRigidObject(const char* fn)
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   int oindex=world.LoadRigidObject(fn);
   if(oindex < 0) return RigidObjectModel();
   RigidObjectModel obj;
@@ -3240,7 +3244,7 @@ RigidObjectModel WorldModel::loadRigidObject(const char* fn)
 
 TerrainModel WorldModel::loadTerrain(const char* fn)
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   int oindex=world.LoadTerrain(fn);
   if(oindex < 0) return TerrainModel();
   TerrainModel obj;
@@ -3253,7 +3257,7 @@ TerrainModel WorldModel::loadTerrain(const char* fn)
 
 int WorldModel::loadElement(const char* fn)
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   int id = world.LoadElement(fn);
   return id;
 }
@@ -3262,8 +3266,8 @@ RobotModel WorldModel::add(const char* name,const RobotModel& robot)
 {
   if(robot.robot == NULL)
     throw PyException("add(RobotModel): robot refers to NULL object");
-  RobotWorld& world = *worlds[index]->world;
-  world.AddRobot(name,new Robot());
+  Klampt::WorldModel& world = *worlds[index]->world;
+  world.AddRobot(name,new Klampt::RobotModel());
   *world.robots.back() = *robot.robot;
   return this->robot((int)world.robots.size()-1);
 }
@@ -3272,8 +3276,8 @@ RigidObjectModel WorldModel::add(const char* name,const RigidObjectModel& obj)
 {
   if(obj.object == NULL)
     throw PyException("add(RigidObjectModel): obj refers to NULL object");
-  RobotWorld& world = *worlds[index]->world;
-  world.AddRigidObject(name,new RigidObject());
+  Klampt::WorldModel& world = *worlds[index]->world;
+  world.AddRigidObject(name,new Klampt::RigidObjectModel());
   *world.rigidObjects.back() = *obj.object;
   return this->rigidObject((int)world.rigidObjects.size()-1);
 }
@@ -3282,8 +3286,8 @@ TerrainModel WorldModel::add(const char* name,const TerrainModel& terrain)
 {
   if(terrain.terrain == NULL)
     throw PyException("add(TerrianModel): terrain refers to NULL object");
-  RobotWorld& world = *worlds[index]->world;
-  world.AddTerrain(name,new Terrain());
+  Klampt::WorldModel& world = *worlds[index]->world;
+  world.AddTerrain(name,new Klampt::TerrainModel());
   *world.terrains.back() = *terrain.terrain;
   return this->terrain((int)world.terrains.size()-1);
 }
@@ -3292,7 +3296,7 @@ void WorldModel::remove(const RobotModel& obj)
 {
   if(obj.world != index) 
     throw PyException("Robot does not belong to this world");
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   if(obj.index < 0 || obj.index >= (int)world.robots.size())
     throw PyException("Invalid robot index");
   world.robots.erase(world.robots.begin()+obj.index);
@@ -3302,7 +3306,7 @@ void WorldModel::remove(const RigidObjectModel& obj)
 {
   if(obj.world != index) 
     throw PyException("Rigid object does not belong to this world");
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   if(obj.index < 0 || obj.index >= (int)world.rigidObjects.size())
     throw PyException("Invalid rigid object index");
   world.rigidObjects.erase(world.rigidObjects.begin()+obj.index);
@@ -3312,7 +3316,7 @@ void WorldModel::remove(const TerrainModel& obj)
 {
   if(obj.world != index) 
     throw PyException("Terrain does not belong to this world");
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   if(obj.index < 0 || obj.index >= (int)world.terrains.size())
     throw PyException("Invalid terrain index");
   world.terrains.erase(world.terrains.begin()+obj.index);
@@ -3321,13 +3325,13 @@ void WorldModel::remove(const TerrainModel& obj)
 
 void WorldModel::drawGL()
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   world.DrawGL();
 }
 
 void WorldModel::enableGeometryLoading(bool enabled)
 {
-  Robot::disableGeometryLoading = !enabled;
+  Klampt::RobotModel::disableGeometryLoading = !enabled;
 }
 
 void WorldModel::enableInitCollisions(bool enabled)
@@ -3342,13 +3346,13 @@ void WorldModel::enableInitCollisions(bool enabled)
 
 std::string WorldModel::getName(int id)
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   return world.GetName(id);
 }
 
 Geometry3D WorldModel::geometry(int id)
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   if(world.IsTerrain(id)>=0 || world.IsRigidObject(id)>=0 || world.IsRobotLink(id).first>=0) {
     Geometry3D geom;
     geom.world = index;
@@ -3364,7 +3368,7 @@ Geometry3D WorldModel::geometry(int id)
 
 Appearance WorldModel::appearance(int id)
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   if(world.IsTerrain(id)>=0 || world.IsRigidObject(id)>=0 || world.IsRobotLink(id).first>=0) {
     Appearance geom;
     geom.world = index;
@@ -3457,7 +3461,7 @@ void RobotModelLink::setParent(const RobotModelLink& link)
 int RobotModelLink::getID() const
 {
   if(index < 0) return -1;
-  RobotWorld& world = *worlds[this->world]->world;
+  Klampt::WorldModel& world = *worlds[this->world]->world;
   return world.RobotLinkID(robotIndex,index);
 }
 
@@ -3491,8 +3495,8 @@ Mass::Mass()
 void Mass::estimate(const Geometry3D& g,double mass,double surfaceFraction)
 {
   shared_ptr<AnyCollisionGeometry3D>* gp = reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(g.geomPtr);
-  Vector3 com = CenterOfMass(**gp,surfaceFraction);
-  Matrix3 H = Inertia(**gp,com,mass,surfaceFraction);
+  Vector3 com = Klampt::CenterOfMass(**gp,surfaceFraction);
+  Matrix3 H = Klampt::Inertia(**gp,com,mass,surfaceFraction);
   this->mass = mass;
   com.get(&this->com[0]);
   this->inertia.resize(9);
@@ -3795,7 +3799,7 @@ void RobotModelLink::drawLocalGL(bool keepAppearance)
 {
   if(index < 0)
     throw PyException("RobotModelLink is invalid");
-  RobotWorld& world = *worlds[this->world]->world;
+  Klampt::WorldModel& world = *worlds[this->world]->world;
   if(keepAppearance) {
     world.robotViews[robotIndex].DrawLink_Local(index);
   }
@@ -3845,11 +3849,11 @@ const char* RobotModelDriver::getType()
 {
   if(index < 0) return "";
   switch(robotPtr->drivers[index].type) {
-  case RobotJointDriver::Normal: return "normal";
-  case RobotJointDriver::Affine: return "affine";
-  case RobotJointDriver::Translation: return "translation";
-  case RobotJointDriver::Rotation: return "rotation";
-  case RobotJointDriver::Custom: return "custom";
+  case Klampt::RobotModelDriver::Normal: return "normal";
+  case Klampt::RobotModelDriver::Affine: return "affine";
+  case Klampt::RobotModelDriver::Translation: return "translation";
+  case Klampt::RobotModelDriver::Rotation: return "rotation";
+  case Klampt::RobotModelDriver::Custom: return "custom";
   default: return "error";
   }
 }
@@ -3927,14 +3931,14 @@ bool RobotModel::saveFile(const char* fn,const char* geometryPrefix)
 const char* RobotModel::getName() const
 {
   if(!robot) throw PyException("RobotModel is empty");
-  RobotWorld& world = *worlds[this->world]->world;
+  Klampt::WorldModel& world = *worlds[this->world]->world;
   return world.robots[index]->name.c_str();
 }
 
 void RobotModel::setName(const char* name)
 {
   if(!robot) throw PyException("RobotModel is empty");
-  RobotWorld& world = *worlds[this->world]->world;
+  Klampt::WorldModel& world = *worlds[this->world]->world;
   world.robots[index]->name = name;
 }
 
@@ -3942,7 +3946,7 @@ void RobotModel::setName(const char* name)
 int RobotModel::getID() const
 {
   if(!robot) return -1;
-  RobotWorld& world = *worlds[this->world]->world;
+  Klampt::WorldModel& world = *worlds[this->world]->world;
   return world.RobotID(index);
 }
 
@@ -4019,12 +4023,12 @@ const char* RobotModel::getJointType(int dofIndex)
   for(size_t i=0;i<robot->joints.size();i++) {
     if(robot->DoesJointAffect((int)i,dofIndex)) {
       switch(robot->joints[i].type) {
-      case RobotJoint::Weld: return "weld";
-      case RobotJoint::Normal: return "normal";
-      case RobotJoint::Spin: return "spin";
-      case RobotJoint::Floating: return "floating";
-      case RobotJoint::FloatingPlanar: return "floatingplanar";
-      case RobotJoint::BallAndSocket: return "ballandsocket";
+      case Klampt::RobotModelJoint::Weld: return "weld";
+      case Klampt::RobotModelJoint::Normal: return "normal";
+      case Klampt::RobotModelJoint::Spin: return "spin";
+      case Klampt::RobotModelJoint::Floating: return "floating";
+      case Klampt::RobotModelJoint::FloatingPlanar: return "floatingplanar";
+      case Klampt::RobotModelJoint::BallAndSocket: return "ballandsocket";
       default:
         return "invalid joint type?";
       }
@@ -4289,16 +4293,16 @@ bool RobotModel::selfCollides()
 void RobotModel::randomizeConfig(double unboundedStdDeviation)
 {
   if(!robot) throw PyException("RobotModel is empty");
-  RobotCSpace space(*robot);
+  Klampt::RobotCSpace space(*robot);
   space.Sample(robot->q);
   for(size_t i=0;i<robot->joints.size();i++)
-    if(robot->joints[i].type == RobotJoint::Floating) {
+    if(robot->joints[i].type == Klampt::RobotModelJoint::Floating) {
       int base = robot->joints[i].baseIndex;
       robot->q[base] *= unboundedStdDeviation;
       robot->q[base+1] *= unboundedStdDeviation;
       robot->q[base+2] *= unboundedStdDeviation;
     }
-    else if(robot->joints[i].type == RobotJoint::FloatingPlanar) {
+    else if(robot->joints[i].type == Klampt::RobotModelJoint::FloatingPlanar) {
       int base = robot->joints[i].baseIndex;
       robot->q[base] *= unboundedStdDeviation;
       robot->q[base+1] *= unboundedStdDeviation;
@@ -4359,7 +4363,7 @@ void RobotModel::drawGL(bool keepAppearance)
 {
   if(!robot) throw PyException("RobotModel is empty");
   if(!worlds[this->world]) throw PyException("RobotModel is associated with a deleted world");
-  RobotWorld& world = *worlds[this->world]->world;
+  Klampt::WorldModel& world = *worlds[this->world]->world;
   if(keepAppearance) {
     world.robotViews[index].Draw();
   }
@@ -4582,10 +4586,10 @@ SimRobotSensor RobotModel::sensor(int sensorIndex)
   if(index >= (int)worldData->robotSensors.size())
     worldData->robotSensors.resize(index+1);
   if(!worldData->robotSensors[index]) {
-    worldData->robotSensors[index].reset(new RobotSensors);
+    worldData->robotSensors[index].reset(new Klampt::RobotSensors);
     worldData->robotSensors[index]->MakeDefault(robot);
   }
-  RobotSensors* sensors = worldData->robotSensors[index].get();
+  Klampt::RobotSensors* sensors = worldData->robotSensors[index].get();
   Assert(sensors != NULL);
   if(sensorIndex < 0 || sensorIndex >= (int)sensors->sensors.size()) 
     return SimRobotSensor(*this,NULL);
@@ -4599,12 +4603,12 @@ SimRobotSensor RobotModel::sensor(const char* name)
   if(index >= (int)worldData->robotSensors.size())
     worldData->robotSensors.resize(index+1);
   if(!worldData->robotSensors[index]) {
-    worldData->robotSensors[index].reset(new RobotSensors);
+    worldData->robotSensors[index].reset(new Klampt::RobotSensors);
     worldData->robotSensors[index]->MakeDefault(robot);
   }
-  RobotSensors* sensors = worldData->robotSensors[index].get();
+  Klampt::RobotSensors* sensors = worldData->robotSensors[index].get();
   Assert(sensors != NULL);
-  shared_ptr<SensorBase> sensor = sensors->GetNamedSensor(name);
+  shared_ptr<Klampt::SensorBase> sensor = sensors->GetNamedSensor(name);
   if(sensor==NULL) {
     fprintf(stderr,"RobotModel::sensor(): Warning, sensor %s does not exist\n",name);
   }
@@ -4636,7 +4640,7 @@ const char* RigidObjectModel::getName() const
 {
   if(!object) return "";
   if(!worlds[this->world]) throw PyException("RigidObjectModel is associated with a deleted world");
-  RobotWorld& world = *worlds[this->world]->world;
+  Klampt::WorldModel& world = *worlds[this->world]->world;
   return world.rigidObjects[index]->name.c_str();
 }
 
@@ -4644,7 +4648,7 @@ void RigidObjectModel::setName(const char* name)
 {
   if(!object) throw PyException("RigidObjectModel is invalid");
   if(!worlds[this->world]) throw PyException("RigidObjectModel is associated with a deleted world");
-  RobotWorld& world = *worlds[this->world]->world;
+  Klampt::WorldModel& world = *worlds[this->world]->world;
   world.rigidObjects[index]->name = name;
 }
 
@@ -4652,7 +4656,7 @@ int RigidObjectModel::getID() const
 {
   if(!object) throw PyException("RigidObjectModel is invalid");
   if(!worlds[this->world]) throw PyException("RigidObjectModel is associated with a deleted world");
-  RobotWorld& world = *worlds[this->world]->world;
+  Klampt::WorldModel& world = *worlds[this->world]->world;
   return world.RigidObjectID(index);
 }
 
@@ -4682,7 +4686,7 @@ Mass RigidObjectModel::getMass()
 {
   if(!object) throw PyException("RigidObjectModel is invalid");
   Mass mass;
-  RigidObject* obj=object;
+  Klampt::RigidObjectModel* obj=object;
   mass.mass = obj->mass;
   mass.com.resize(3);
   mass.inertia.resize(9);
@@ -4700,7 +4704,7 @@ void RigidObjectModel::setMass(const Mass& mass)
   if(mass.inertia.size()!=9 && mass.inertia.size()!=3) {
     throw PyException("Mass inertia does not have length 3 or 9");
   }
-  RigidObject* obj=object;
+  Klampt::RigidObjectModel* obj=object;
   obj->mass = mass.mass;
   obj->com.set(&mass.com[0]);
   if(mass.inertia.size()==3) {
@@ -4718,7 +4722,7 @@ ContactParameters RigidObjectModel::getContactParameters()
 {
   if(!object) throw PyException("RigidObjectModel is invalid");
   ContactParameters params;
-  RigidObject* obj=object;
+  Klampt::RigidObjectModel* obj=object;
   params.kFriction = obj->kFriction;
   params.kRestitution = obj->kRestitution;
   params.kStiffness = obj->kStiffness;
@@ -4729,7 +4733,7 @@ ContactParameters RigidObjectModel::getContactParameters()
 void RigidObjectModel::setContactParameters(const ContactParameters& params)
 {
   if(!object) throw PyException("RigidObjectModel is invalid");
-  RigidObject* obj=object;
+  Klampt::RigidObjectModel* obj=object;
   obj->kFriction = params.kFriction;
   obj->kRestitution = params.kRestitution;
   obj->kStiffness = params.kStiffness;
@@ -4739,7 +4743,7 @@ void RigidObjectModel::setContactParameters(const ContactParameters& params)
 void RigidObjectModel::getTransform(double R[9],double t[3])
 {
   if(!object) throw PyException("RigidObjectModel is invalid");
-  RigidObject* obj=object;
+  Klampt::RigidObjectModel* obj=object;
   obj->T.R.get(R);
   obj->T.t.get(t);
 }
@@ -4747,7 +4751,7 @@ void RigidObjectModel::getTransform(double R[9],double t[3])
 void RigidObjectModel::setTransform(const double R[9],const double t[3])
 {
   if(!object) throw PyException("RigidObjectModel is invalid");
-  RigidObject* obj=object;
+  Klampt::RigidObjectModel* obj=object;
   obj->T.R.set(R);
   obj->T.t.set(t);
   obj->geometry->SetTransform(obj->T);
@@ -4756,7 +4760,7 @@ void RigidObjectModel::setTransform(const double R[9],const double t[3])
 void RigidObjectModel::getVelocity(double out[3],double out2[3])
 {
   if(!object) throw PyException("RigidObjectModel is invalid");
-  RigidObject* obj=object;
+  Klampt::RigidObjectModel* obj=object;
   obj->w.get(out);
   obj->v.get(out2);
 }
@@ -4764,7 +4768,7 @@ void RigidObjectModel::getVelocity(double out[3],double out2[3])
 void RigidObjectModel::setVelocity(const double angularVelocity[3],const double velocity[3])
 {
   if(!object) throw PyException("RigidObjectModel is invalid");
-  RigidObject* obj=object;
+  Klampt::RigidObjectModel* obj=object;
   obj->w.set(angularVelocity);
   obj->v.set(velocity);
 }
@@ -4773,7 +4777,7 @@ void RigidObjectModel::drawGL(bool keepAppearance)
 {
   if(!object) throw PyException("RigidObjectModel is invalid");
   if(!worlds[this->world]) throw PyException("RigidObjectModel is associated with a deleted world");
-  RobotWorld& world = *worlds[this->world]->world;
+  Klampt::WorldModel& world = *worlds[this->world]->world;
   if(keepAppearance) {
     world.rigidObjects[index]->DrawGL();
   }
@@ -4814,7 +4818,7 @@ const char* TerrainModel::getName() const
 {
   if(!terrain) throw PyException("TerrainModel is invalid");
   if(!worlds[this->world]) throw PyException("TerrainModel is associated with a deleted world");
-  RobotWorld& world = *worlds[this->world]->world;
+  Klampt::WorldModel& world = *worlds[this->world]->world;
   return world.terrains[index]->name.c_str();
 }
 
@@ -4822,7 +4826,7 @@ void TerrainModel::setName(const char* name)
 {
   if(!terrain) throw PyException("TerrainModel is invalid");
   if(!worlds[this->world]) throw PyException("TerrainModel is associated with a deleted world");
-  RobotWorld& world = *worlds[this->world]->world;
+  Klampt::WorldModel& world = *worlds[this->world]->world;
   world.terrains[index]->name = name;
 }
 
@@ -4831,7 +4835,7 @@ int TerrainModel::getID() const
 {
   if(!terrain) throw PyException("TerrainModel is invalid");
   if(!worlds[this->world]) throw PyException("TerrainModel is associated with a deleted world");
-  RobotWorld& world = *worlds[this->world]->world;
+  Klampt::WorldModel& world = *worlds[this->world]->world;
   return world.TerrainID(index);
 }
 
@@ -4868,7 +4872,7 @@ void TerrainModel::drawGL(bool keepAppearance)
 {
   if(!terrain) throw PyException("TerrainModel is invalid");
   if(!worlds[this->world]) throw PyException("TerrainModel is associated with a deleted world");
-  RobotWorld& world = *worlds[this->world]->world;
+  Klampt::WorldModel& world = *worlds[this->world]->world;
   if(keepAppearance) {
     world.terrains[index]->DrawGL();
   }
@@ -4906,13 +4910,13 @@ Simulator::Simulator(const WorldModel& model)
 
   //initialize simulation
   printf("Initializing simulation...\n");
-  RobotWorld& rworld=*worlds[model.index]->world;
+  Klampt::WorldModel& rworld=*worlds[model.index]->world;
   sim->Init(&rworld);
 
   //setup controllers
   sim->robotControllers.resize(rworld.robots.size());
   for(size_t i=0;i<sim->robotControllers.size();i++) {
-    Robot* robot=rworld.robots[i].get();
+    Klampt::RobotModel* robot=rworld.robots[i].get();
     sim->SetController(i,MakeController(robot));
 
     sim->controlSimulators[i].sensors.MakeDefault(robot);
@@ -4924,7 +4928,7 @@ Simulator::Simulator(const WorldModel& model)
   TiXmlElement* e=worlds[world.index]->xmlWorld.GetElement("simulation");
   if(e) {
     printf("Reading simulation settings...\n");
-    XmlSimulationSettings s(e);
+    Klampt::XmlSimulationSettings s(e);
     if(!s.GetSettings(*sim)) {
       fprintf(stderr,"Warning, simulation settings not read correctly\n");
     }
@@ -4975,7 +4979,7 @@ void Simulator::setState(const string& str)
 
 void Simulator::checkObjectOverlap(std::vector<int>& out,std::vector<int>& out2)
 {
-  vector<pair<ODEObjectID,ODEObjectID> > overlaps;
+  vector<pair<Klampt::ODEObjectID,Klampt::ODEObjectID> > overlaps;
   sim->odesim.CheckObjectOverlap(overlaps);
   out.resize(overlaps.size());
   out2.resize(overlaps.size());
@@ -5064,7 +5068,7 @@ void Simulator::contactTorque(int aid,int bid,double res[3])
 
 void Simulator::getContacts(int aid,int bid,double** out,int* m,int* n)
 {
-  ODEContactList* c=sim->GetContactList(aid,bid);
+  Klampt::ODEContactList* c=sim->GetContactList(aid,bid);
   if(!c) {
     *out = NULL;
     *m = 0;
@@ -5087,7 +5091,7 @@ void Simulator::getContacts(int aid,int bid,double** out,int* m,int* n)
 
 void Simulator::getContactForces(int aid,int bid,double** out,int* m,int* n)
 {
-  ODEContactList* c=sim->GetContactList(aid,bid);
+  Klampt::ODEContactList* c=sim->GetContactList(aid,bid);
   if(!c) {
     *out = NULL;
     *m = 0;
@@ -5134,9 +5138,9 @@ void Simulator::enableContactFeedback(int obj1,int obj2)
 void Simulator::enableContactFeedbackAll()
 {
   //setup feedback
-  RobotWorld& rworld=*worlds[world.index]->world;
+  Klampt::WorldModel& rworld=*worlds[world.index]->world;
   //world-object
-  const ODESimulatorSettings& settings = sim->odesim.GetSettings();
+  const Klampt::ODESimulatorSettings& settings = sim->odesim.GetSettings();
   if(settings.rigidObjectCollisions) {
     for(size_t i=0;i<rworld.rigidObjects.size();i++) {
       int objid = rworld.RigidObjectID(i);
@@ -5210,7 +5214,7 @@ std::vector<std::string> Simulator::settings()
 
 std::string Simulator::getSetting(const std::string& name)
 {
-  ODESimulatorSettings& settings = sim->odesim.GetSettings();
+  Klampt::ODESimulatorSettings& settings = sim->odesim.GetSettings();
   stringstream ss;
   if(name == "gravity") ss << Vector3(settings.gravity);
   else if(name == "simStep") ss << sim->simStep;
@@ -5235,7 +5239,7 @@ std::string Simulator::getSetting(const std::string& name)
 
 void Simulator::setSetting(const std::string& name,const std::string& value)
 {
-  ODESimulatorSettings& settings = sim->odesim.GetSettings();
+  Klampt::ODESimulatorSettings& settings = sim->odesim.GetSettings();
   stringstream ss(value);
   if(name == "gravity") { Vector3 g; ss >> g; sim->odesim.SetGravity(g); }
   else if(name == "simStep") ss >> sim->simStep;
@@ -5318,7 +5322,7 @@ bool SimBody::isDynamicsEnabled()
 void SimBody::applyWrench(const double f[3],const double t[3])
 {
   if(!body) return;
-  sim->sim->hooks.push_back(make_shared<WrenchHook>(body,Vector3(f),Vector3(t)));
+  sim->sim->hooks.push_back(make_shared<Klampt::WrenchHook>(body,Vector3(f),Vector3(t)));
   sim->sim->hooks.back()->autokill = true;
   //dBodyAddForce(body,f[0],f[1],f[2]);
   //dBodyAddTorque(body,t[0],t[1],t[2]);
@@ -5327,7 +5331,7 @@ void SimBody::applyWrench(const double f[3],const double t[3])
 void SimBody::applyForceAtPoint(const double f[3],const double pworld[3])
 {
   if(!body) return;
-  sim->sim->hooks.push_back(make_shared<ForceHook>(body,Vector3(pworld),Vector3(f)));
+  sim->sim->hooks.push_back(make_shared<Klampt::ForceHook>(body,Vector3(pworld),Vector3(f)));
   sim->sim->hooks.back()->autokill = true;
   //dBodyAddForceAtPos(body,f[0],f[1],f[2],pworld[0],pworld[1],pworld[2]);
 }
@@ -5335,7 +5339,7 @@ void SimBody::applyForceAtPoint(const double f[3],const double pworld[3])
 void SimBody::applyForceAtLocalPoint(const double f[3],const double plocal[3])
 {
   if(!body) return;
-  sim->sim->hooks.push_back(make_shared<LocalForceHook>(body,Vector3(plocal),Vector3(f)));
+  sim->sim->hooks.push_back(make_shared<Klampt::LocalForceHook>(body,Vector3(plocal),Vector3(f)));
   sim->sim->hooks.back()->autokill = true;
   //dBodyAddForceAtRelPos(body,f[0],f[1],f[2],plocal[0],plocal[1],plocal[2]);
 }
@@ -5345,7 +5349,7 @@ void SimBody::setVelocity(const double w[3],const double v[3])
   if(!body) return;
   dBodySetLinearVel(body,v[0],v[1],v[2]);
   dBodySetAngularVel(body,w[1],w[1],w[2]);
-  ODEObjectID id = sim->sim->WorldToODEID(objectID);
+  Klampt::ODEObjectID id = sim->sim->WorldToODEID(objectID);
   sim->sim->odesim.DisableInstabilityCorrection(id);
 }
 
@@ -5392,7 +5396,7 @@ void SimBody::getTransform(double out[9],double out2[3])
 
 void SimBody::setObjectTransform(const double R[9],const double t[3])
 {
-  ODEObjectID id = sim->sim->WorldToODEID(objectID);
+  Klampt::ODEObjectID id = sim->sim->WorldToODEID(objectID);
   if(id.IsRigidObject()) sim->sim->odesim.object(id.index)->SetTransform(RigidTransform(Matrix3(R),Vector3(t)));
   else if(id.IsRobot()) sim->sim->odesim.robot(id.index)->SetLinkTransform(id.bodyIndex,RigidTransform(Matrix3(R),Vector3(t)));
   else setTransform(R,t);
@@ -5400,7 +5404,7 @@ void SimBody::setObjectTransform(const double R[9],const double t[3])
 
 void SimBody::getObjectTransform(double out[9],double out2[3])
 {
-  ODEObjectID id = sim->sim->WorldToODEID(objectID);
+  Klampt::ODEObjectID id = sim->sim->WorldToODEID(objectID);
   if(id.IsRigidObject()) {
     RigidTransform T;
     sim->sim->odesim.object(id.index)->GetTransform(T);
@@ -5441,7 +5445,7 @@ ContactParameters SimBody::getSurface()
     res.kFriction=res.kRestitution=res.kStiffness=res.kDamping=0;
   }
   else {
-    ODESurfaceProperties* params = &geometry->surf();
+    Klampt::ODESurfaceProperties* params = &geometry->surf();
     res.kFriction=params->kFriction;
     res.kRestitution=params->kRestitution;
     res.kStiffness=params->kStiffness;
@@ -5453,7 +5457,7 @@ ContactParameters SimBody::getSurface()
 void SimBody::setSurface(const ContactParameters& res)
 {
   if(!geometry) return;
-  ODESurfaceProperties* params = &geometry->surf();
+  Klampt::ODESurfaceProperties* params = &geometry->surf();
   params->kFriction=res.kFriction;
   params->kRestitution=res.kRestitution;
   params->kStiffness=res.kStiffness;
@@ -5625,7 +5629,7 @@ SimBody Simulator::body(const TerrainModel& terrain)
 
 void Simulator::getJointForces(const RobotModelLink& link,double out[6])
 {
-  ODERobot* oderobot = sim->odesim.robot(link.robotIndex);
+  Klampt::ODERobot* oderobot = sim->odesim.robot(link.robotIndex);
   dJointFeedback fb = oderobot->feedback(link.index);
   Vector3 fw(fb.f1[0],fb.f1[1],fb.f1[2]);
   RigidTransform T;
@@ -5690,8 +5694,8 @@ void SimRobotController::getCommandedVelocity(vector<double>& dq)
 void SimRobotController::getCommandedTorque(std::vector<double>& t)
 {
   if(!controller) throw PyException("Invalid SimRobotController");
-  RobotMotorCommand& command = controller->command;
-  //Robot* robot=sim->sim->controlSimulators[index];
+  Klampt::RobotMotorCommand& command = controller->command;
+  //Klampt::RobotModel* robot=sim->sim->controlSimulators[index];
   t.resize(command.actuators.size());
   for(size_t i=0;i<command.actuators.size();i++) 
     t[i] = command.actuators[i].torque;
@@ -5722,7 +5726,7 @@ void SimRobotController::getSensedVelocity(vector<double>& dq)
 void SimRobotController::getSensedTorque(std::vector<double>& t)
 {
   if(!controller) throw PyException("Invalid SimRobotController");
-  DriverTorqueSensor* s = controller->sensors.GetTypedSensor<DriverTorqueSensor>();
+  Klampt::DriverTorqueSensor* s = controller->sensors.GetTypedSensor<Klampt::DriverTorqueSensor>();
   if(s==NULL){
       throw PyException("Robot has no torque sensor");
   }
@@ -5739,7 +5743,7 @@ void SimRobotController::getSensedTorque(std::vector<double>& t)
   }
 }
 
-SimRobotSensor::SimRobotSensor(const RobotModel& _robot,SensorBase* _sensor)
+SimRobotSensor::SimRobotSensor(const RobotModel& _robot,Klampt::SensorBase* _sensor)
   :robotModel(_robot),sensor(_sensor)
 {}
 
@@ -5747,7 +5751,7 @@ SimRobotSensor::SimRobotSensor(SimRobotController& _controller,const char* name,
   :sensor(NULL)
 {
   robotModel = _controller.model();
-  shared_ptr<SensorBase> newsensor = _controller.controller->sensors.CreateByType(type);
+  shared_ptr<Klampt::SensorBase> newsensor = _controller.controller->sensors.CreateByType(type);
   if(!newsensor) {
     throw PyException("Invalid sensor type specified");
   }
@@ -5861,7 +5865,7 @@ void SimRobotSensor::kinematicReset()
 SimRobotSensor SimRobotController::sensor(int sensorIndex)
 {
   if(!controller) throw PyException("Invalid SimRobotController");
-  RobotSensors& sensors = controller->sensors;
+  Klampt::RobotSensors& sensors = controller->sensors;
   if(sensorIndex < 0 || sensorIndex >= (int)sensors.sensors.size()) 
     return SimRobotSensor(RobotModel(),NULL);
   return SimRobotSensor(model(),sensors.sensors[sensorIndex].get());
@@ -5870,8 +5874,8 @@ SimRobotSensor SimRobotController::sensor(int sensorIndex)
 SimRobotSensor SimRobotController::sensor(const char* name)
 {
   if(!controller) throw PyException("Invalid SimRobotController");
-  RobotSensors& sensors = controller->sensors;
-  shared_ptr<SensorBase> sensor = sensors.GetNamedSensor(name);
+  Klampt::RobotSensors& sensors = controller->sensors;
+  shared_ptr<Klampt::SensorBase> sensor = sensors.GetNamedSensor(name);
   if(sensor==NULL) {
     fprintf(stderr,"Warning, sensor %s does not exist\n",name);
   }
@@ -5887,7 +5891,7 @@ std::vector<std::string> SimRobotController::commands()
 void SimRobotController::setManualMode(bool enabled)
 {
   if(!controller) throw PyException("Invalid SimRobotController");
-  RobotController* c=sim->sim->robotControllers[index].get();
+  Klampt::RobotController* c=sim->sim->robotControllers[index].get();
   MyController* mc=reinterpret_cast<MyController*>(c);
   if(mc)
     mc->override = enabled;
@@ -5901,8 +5905,8 @@ std::string SimRobotController::getControlType()
 {
   if(!controller) throw PyException("Invalid SimRobotController");
   std::vector<int> res;
-  typedef std::vector<ActuatorCommand>::iterator it_ac;
-  RobotMotorCommand& command = controller->command;
+  typedef std::vector<Klampt::ActuatorCommand>::iterator it_ac;
+  Klampt::RobotMotorCommand& command = controller->command;
   int mode = -1;
   for(it_ac it = command.actuators.begin();
             it != command.actuators.end();
@@ -5913,13 +5917,13 @@ std::string SimRobotController::getControlType()
           mode = -2;
   switch(mode)
   {
-  case ActuatorCommand::OFF:
+  case Klampt::ActuatorCommand::OFF:
       return "off";
-  case ActuatorCommand::TORQUE:
+  case Klampt::ActuatorCommand::TORQUE:
       return "torque";
-  case ActuatorCommand::PID:
+  case Klampt::ActuatorCommand::PID:
       return "PID";
-  case ActuatorCommand::LOCKED_VELOCITY:
+  case Klampt::ActuatorCommand::LOCKED_VELOCITY:
       return "locked_velocity";
   default:
       return "unknown";
@@ -5954,9 +5958,9 @@ bool SimRobotController::setSetting(const std::string& name,const std::string& v
   return controller->controller->SetSetting(name,val);
 }
 
-void EnablePathControl(RobotController* c)
+void EnablePathControl(Klampt::RobotController* c)
 {
-  PolynomialPathController* pc = GetPathController(c);
+  Klampt::PolynomialPathController* pc = GetPathController(c);
   MyController* mc=dynamic_cast<MyController*>(c);
   if(pc->path.elements.empty() || mc->override) {
     Config q;
@@ -6033,7 +6037,7 @@ void SimRobotController::setLinear(const std::vector<double>& q,double dt)
     throw PyException("Invalid size of configuration");
   }
   EnablePathControl(sim->sim->robotControllers[index].get());
-  PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
+  Klampt::PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
   mq->Cut(0);
   mq->AppendLinear(Vector(q),dt);
 }
@@ -6046,7 +6050,7 @@ void SimRobotController::setCubic(const std::vector<double>& q,const std::vector
     throw PyException("Invalid size of velocity");
   }
   EnablePathControl(sim->sim->robotControllers[index].get());
-  PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
+  Klampt::PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
   mq->Cut(0);
   mq->AppendCubic(Vector(q),Vector(v),dt);
 }
@@ -6056,7 +6060,7 @@ void SimRobotController::addLinear(const std::vector<double>& q,double dt)
     throw PyException("Invalid size of configuration");
   }
   EnablePathControl(sim->sim->robotControllers[index].get());
-  PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
+  Klampt::PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
   mq->AppendLinear(Vector(q),dt);
 }
 
@@ -6069,7 +6073,7 @@ void SimRobotController::addCubic(const std::vector<double>& q,const std::vector
     throw PyException("Invalid size of velocity");
   }
   EnablePathControl(sim->sim->robotControllers[index].get());
-  PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
+  Klampt::PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
   mq->AppendCubic(Vector(q),Vector(v),dt);
 }
 
@@ -6098,7 +6102,7 @@ void SimRobotController::setVelocity(const vector<double>& dq,double dt)
     throw PyException("Negative dt");
   }
   EnablePathControl(sim->sim->robotControllers[index].get());
-  PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
+  Klampt::PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
   Config qv(controller->robot->links.size(),&dq[0]);
   stringstream ss;
   ss<<mq->CurTime()+dt<<"\t"<<qv;
@@ -6107,21 +6111,21 @@ void SimRobotController::setVelocity(const vector<double>& dq,double dt)
 
 double SimRobotController::remainingTime() const
 {
-  PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
+  Klampt::PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
   return mq->TimeRemaining();
 }
 
 
 void SimRobotController::setTorque(const std::vector<double>& t)
 {
-  RobotMotorCommand& command = controller->command;
+  Klampt::RobotMotorCommand& command = controller->command;
   if(t.size() != command.actuators.size()) {
     throw PyException("Invalid command size, must be equal to driver size");
   }
   for(size_t i=0;i<command.actuators.size();i++) {
     command.actuators[i].SetTorque(t[i]);
   }
-  RobotController* c=sim->sim->robotControllers[index].get();
+  Klampt::RobotController* c=sim->sim->robotControllers[index].get();
   MyController* mc=dynamic_cast<MyController*>(c);
   if(!mc) {
     throw PyException("Not using the default manual override controller");
@@ -6131,8 +6135,8 @@ void SimRobotController::setTorque(const std::vector<double>& t)
 
 void SimRobotController::setPIDCommand(const std::vector<double>& qdes,const std::vector<double>& dqdes)
 {
-  RobotMotorCommand& command = controller->command;
-  Robot* robot=controller->robot;
+  Klampt::RobotMotorCommand& command = controller->command;
+  Klampt::RobotModel* robot=controller->robot;
   if(qdes.size() != command.actuators.size() || dqdes.size() != command.actuators.size()) {
     if(qdes.size() != robot->links.size() || dqdes.size() != robot->links.size())
       throw PyException("Invalid command sizes");
@@ -6149,7 +6153,7 @@ void SimRobotController::setPIDCommand(const std::vector<double>& qdes,const std
       command.actuators[i].SetPID(qdes[i],dqdes[i],command.actuators[i].iterm);
     }
   }
-  RobotController* c=sim->sim->robotControllers[index].get();
+  Klampt::RobotController* c=sim->sim->robotControllers[index].get();
   MyController* mc=dynamic_cast<MyController*>(c);
   if(!mc) {
     throw PyException("Not using the default manual override controller");
@@ -6160,8 +6164,8 @@ void SimRobotController::setPIDCommand(const std::vector<double>& qdes,const std
 void SimRobotController::setPIDCommand(const std::vector<double>& qdes,const std::vector<double>& dqdes,const std::vector<double>& tfeedforward)
 {
   setPIDCommand(qdes,dqdes);
-  RobotMotorCommand& command = controller->command;
-  //Robot* robot=sim->sim->controlSimulators[index];
+  Klampt::RobotMotorCommand& command = controller->command;
+  //Klampt::RobotModel* robot=sim->sim->controlSimulators[index];
   if(tfeedforward.size() != command.actuators.size())
      throw PyException("Invalid command sizes");
   for(size_t i=0;i<command.actuators.size();i++) {
@@ -6173,7 +6177,7 @@ void SimRobotController::setPIDCommand(const std::vector<double>& qdes,const std
 
 void SimRobotController::setPIDGains(const std::vector<double>& kP,const std::vector<double>& kI,const std::vector<double>& kD)
 {
-  RobotMotorCommand& command = controller->command;
+  Klampt::RobotMotorCommand& command = controller->command;
   if(kP.size() != command.actuators.size() || kI.size() != command.actuators.size() || kD.size() != command.actuators.size()) {
     throw PyException("Invalid gain sizes");
   }
@@ -6186,7 +6190,7 @@ void SimRobotController::setPIDGains(const std::vector<double>& kP,const std::ve
 
 void SimRobotController::getPIDGains(std::vector<double>& kPout,std::vector<double>& kIout,std::vector<double>& kDout)
 {
-  RobotMotorCommand& command = controller->command;
+  Klampt::RobotMotorCommand& command = controller->command;
   int size = command.actuators.size();
   kPout.resize(size, 0.0);
   kIout.resize(size, 0.0);
@@ -6481,14 +6485,14 @@ void TransformPoser::enableRotation(bool enable)
 ObjectPoser::ObjectPoser(RigidObjectModel& object)
   :Widget()
 {
-  RobotWorld& world = *worlds[object.world]->world;
-  RigidObject* obj = world.rigidObjects[object.index].get();
-  widgets[index].widget = make_shared<RigidObjectPoseWidget>(obj);
+  Klampt::WorldModel& world = *worlds[object.world]->world;
+  Klampt::RigidObjectModel* obj = world.rigidObjects[object.index].get();
+  widgets[index].widget = make_shared<Klampt::RigidObjectPoseWidget>(obj);
 }
 
 void ObjectPoser::set(const double R[9],const double t[3])
 {
-  RigidObjectPoseWidget* tw=dynamic_cast<RigidObjectPoseWidget*>(widgets[index].widget.get());
+  Klampt::RigidObjectPoseWidget* tw=dynamic_cast<Klampt::RigidObjectPoseWidget*>(widgets[index].widget.get());
   RigidTransform T;
   T.R.set(R);
   T.t.set(t);
@@ -6497,7 +6501,7 @@ void ObjectPoser::set(const double R[9],const double t[3])
 
 void ObjectPoser::get(double out[9],double out2[3])
 {
-  RigidObjectPoseWidget* tw=dynamic_cast<RigidObjectPoseWidget*>(widgets[index].widget.get());
+  Klampt::RigidObjectPoseWidget* tw=dynamic_cast<Klampt::RigidObjectPoseWidget*>(widgets[index].widget.get());
   RigidTransform T = tw->Pose();
   T.R.get(out);
   T.t.get(out2);
@@ -6506,44 +6510,44 @@ void ObjectPoser::get(double out[9],double out2[3])
 RobotPoser::RobotPoser(RobotModel& robot)
 {
   Assert(worlds[robot.world]->world != NULL);
-  RobotWorld& world = *worlds[robot.world]->world;
+  Klampt::WorldModel& world = *worlds[robot.world]->world;
   Assert(robot.index >= 0 && robot.index < world.robots.size());
-  Robot* rob = world.robots[robot.index].get();
-  ViewRobot* view = &world.robotViews[robot.index];
+  Klampt::RobotModel* rob = world.robots[robot.index].get();
+  Klampt::ViewRobot* view = &world.robotViews[robot.index];
   Assert(rob != NULL);
   Assert(view != NULL);
-  widgets[index].widget = make_shared<RobotPoseWidget>(rob,view);
+  widgets[index].widget = make_shared<Klampt::RobotPoseWidget>(rob,view);
 }
 
 void RobotPoser::setActiveDofs(const std::vector<int>& dofs)
 {
-  RobotPoseWidget* tw=dynamic_cast<RobotPoseWidget*>(widgets[index].widget.get());
+  Klampt::RobotPoseWidget* tw=dynamic_cast<Klampt::RobotPoseWidget*>(widgets[index].widget.get());
   tw->SetActiveDofs(dofs);
 }
 
 void RobotPoser::set(const std::vector<double>& q)
 {
-  RobotPoseWidget* tw=dynamic_cast<RobotPoseWidget*>(widgets[index].widget.get());
+  Klampt::RobotPoseWidget* tw=dynamic_cast<Klampt::RobotPoseWidget*>(widgets[index].widget.get());
   tw->SetPose(Config(q));
 }
 
 void RobotPoser::get(std::vector<double>& out)
 {
-  RobotPoseWidget* tw=dynamic_cast<RobotPoseWidget*>(widgets[index].widget.get());
+  Klampt::RobotPoseWidget* tw=dynamic_cast<Klampt::RobotPoseWidget*>(widgets[index].widget.get());
   out.resize(tw->Pose().size());
   tw->Pose().getCopy(&out[0]);
 }
 
 void RobotPoser::getConditioned(const std::vector<double>& qref,std::vector<double>& out)
 {
-  RobotPoseWidget* tw=dynamic_cast<RobotPoseWidget*>(widgets[index].widget.get());
+  Klampt::RobotPoseWidget* tw=dynamic_cast<Klampt::RobotPoseWidget*>(widgets[index].widget.get());
   out.resize(tw->Pose().size());
   tw->Pose_Conditioned(Config(qref)).getCopy(&out[0]);
 }
 
 void RobotPoser::addIKConstraint(const IKObjective& obj)
 {
-  RobotPoseWidget* tw=dynamic_cast<RobotPoseWidget*>(widgets[index].widget.get());
+  Klampt::RobotPoseWidget* tw=dynamic_cast<Klampt::RobotPoseWidget*>(widgets[index].widget.get());
   tw->ikPoser.ClearLink(obj.goal.link);
   tw->ikPoser.Add(obj.goal);
   tw->ikPoser.Enable(&tw->ikPoser.poseWidgets.back(),false);
@@ -6551,7 +6555,7 @@ void RobotPoser::addIKConstraint(const IKObjective& obj)
 
 void RobotPoser::clearIKConstraints()
 {
-  RobotPoseWidget* tw=dynamic_cast<RobotPoseWidget*>(widgets[index].widget.get());
+  Klampt::RobotPoseWidget* tw=dynamic_cast<Klampt::RobotPoseWidget*>(widgets[index].widget.get());
   tw->ikPoser.poseGoals.clear();
   tw->ikPoser.poseWidgets.clear();
 }
@@ -6670,7 +6674,7 @@ void BoxPoser::getDims(double out[3])
 
 /***************************  STABILITY TESTING CODE ***************************************/
 
-void setFrictionConeApproximationEdges(int numEdges)
+void set_friction_cone_approximation_edges(int numEdges)
 {
   if(numEdges < 3) throw PyException("Invalid number of friction cone approximation edges, must be at least 3");
   gStabilityNumFCEdges = numEdges;
@@ -6740,28 +6744,28 @@ void Convert(const std::vector<std::vector<double > >& contactPositions,const st
   }
 }
 
-bool forceClosure(double* contacts,int m,int n)
+bool force_closure(double* contacts,int m,int n)
 {
   vector<ContactPoint> cps;
   Convert(contacts,m,n,cps);
   return TestForceClosure(cps,gStabilityNumFCEdges);
 }
 
-bool forceClosure(const std::vector<std::vector<double> >& contactPositions,const std::vector<std::vector<double > >& frictionCones)
+bool force_closure(const std::vector<std::vector<double> >& contactPositions,const std::vector<std::vector<double > >& frictionCones)
 {
   vector<CustomContactPoint> cps;
   Convert(contactPositions,frictionCones,cps);
   return TestForceClosure(cps);
 }
 
-bool forceClosure2D(double* contacts,int m,int n)
+bool force_closure_2d(double* contacts,int m,int n)
 {
   vector<ContactPoint2D> cps;
   Convert(contacts,m,n,cps);
   return TestForceClosure(cps);
 }
 
-bool forceClosure2D(const std::vector<std::vector<double > >& contactPositions,const std::vector<std::vector<double> >& frictionCones)
+bool force_closure_2d(const std::vector<std::vector<double > >& contactPositions,const std::vector<std::vector<double> >& frictionCones)
 {
   vector<CustomContactPoint2D> cps;
   Convert(contactPositions,frictionCones,cps);
@@ -6815,7 +6819,7 @@ PyObject* ToPy2(const vector<Vector2>& x)
 }
 
 
-PyObject* comEquilibrium(double* contacts,int m,int n,const vector<double>& fext,PyObject* com)
+PyObject* com_equilibrium(double* contacts,int m,int n,const vector<double>& fext,PyObject* com)
 {
   if(fext.size() != 3) throw PyException("Invalid external force, must be a 3-list");
   vector<ContactPoint> cps;
@@ -6837,7 +6841,7 @@ PyObject* comEquilibrium(double* contacts,int m,int n,const vector<double>& fext
   Py_RETURN_NONE;
 }
 
-PyObject* comEquilibrium(const std::vector<std::vector<double> >& contactPositions,const std::vector<std::vector<double> >& frictionCones,const vector<double>& fext,PyObject* com)
+PyObject* com_equilibrium(const std::vector<std::vector<double> >& contactPositions,const std::vector<std::vector<double> >& frictionCones,const vector<double>& fext,PyObject* com)
 {
   if(fext.size() != 3) throw PyException("Invalid external force, must be a 3-list");
   vector<CustomContactPoint> cps;
@@ -6860,7 +6864,7 @@ PyObject* comEquilibrium(const std::vector<std::vector<double> >& contactPositio
 }
 
 
-PyObject* comEquilibrium2D(double* contacts,int m,int n,const vector<double>& fext,PyObject* com)
+PyObject* com_equilibrium_2d(double* contacts,int m,int n,const vector<double>& fext,PyObject* com)
 {
   if(fext.size() != 2) throw PyException("Invalid external force, must be a 2-list");
   vector<ContactPoint2D> cps;
@@ -6882,7 +6886,7 @@ PyObject* comEquilibrium2D(double* contacts,int m,int n,const vector<double>& fe
   Py_RETURN_NONE;
 }
 
-PyObject* comEquilibrium2D(const std::vector<std::vector<double> >& contactPositions,const std::vector<std::vector<double> >& frictionCones,const vector<double>& fext,PyObject* com)
+PyObject* com_equilibrium_2d(const std::vector<std::vector<double> >& contactPositions,const std::vector<std::vector<double> >& frictionCones,const vector<double>& fext,PyObject* com)
 {
   if(fext.size() != 2) throw PyException("Invalid external force, must be a 2-list");
   vector<CustomContactPoint2D> cps;
@@ -6905,7 +6909,7 @@ PyObject* comEquilibrium2D(const std::vector<std::vector<double> >& contactPosit
 }
 
 
-PyObject* supportPolygon(double* contacts,int m,int n)
+PyObject* support_polygon(double* contacts,int m,int n)
 {
   vector<ContactPoint> cps;
   Convert(contacts,m,n,cps);
@@ -6936,7 +6940,7 @@ PyObject* supportPolygon(double* contacts,int m,int n)
 /// The format of a plane is (nx,ny,ofs) where (nx,ny) are the outward facing normals, and
 /// ofs is the offset from 0.  In other words to test stability of a com [x,y], you can test
 /// whether dot([nx,ny],[x,y]) <= ofs  for all planes.
-PyObject* supportPolygon(const std::vector<std::vector<double> >& contactPositions,const std::vector<std::vector<double> >& frictionCones)
+PyObject* support_polygon(const std::vector<std::vector<double> >& contactPositions,const std::vector<std::vector<double> >& frictionCones)
 {
   vector<CustomContactPoint> cps;
   Convert(contactPositions,frictionCones,cps);
@@ -6963,17 +6967,17 @@ PyObject* supportPolygon(const std::vector<std::vector<double> >& contactPositio
 /// 
 /// The return value is a 2-tuple giving the min / max extents of the support polygon.
 /// If they are both infinite, the support polygon is empty.
-PyObject* supportPolygon2D(double* contacts,int m,int n)
+PyObject* support_polygon_2d(double* contacts,int m,int n)
 {
   throw PyException("2D support polygons not implemented yet");
 }
 
-PyObject* supportPolygon2D(const std::vector<std::vector<double> >& contacts,const std::vector<std::vector<double> >& frictionCones)
+PyObject* support_polygon_2d(const std::vector<std::vector<double> >& contacts,const std::vector<std::vector<double> >& frictionCones)
 {
   throw PyException("2D support polygons not implemented yet");
 }
 
-PyObject* equilibriumTorques(const RobotModel& robot,double* contacts,int m,int n,const std::vector<int>& links,const std::vector<double>& fext,const std::vector<double>& internalTorques,double norm)
+PyObject* equilibrium_torques(const RobotModel& robot,double* contacts,int m,int n,const std::vector<int>& links,const std::vector<double>& fext,const std::vector<double>& internalTorques,double norm)
 {
   if(robot.robot == NULL) throw PyException("Called with empty robot");
   if(fext.size() != 3) throw PyException("Invalid external force, must be a 3-list");
@@ -7001,10 +7005,10 @@ PyObject* equilibriumTorques(const RobotModel& robot,double* contacts,int m,int 
   return Py_BuildValue("(NN)",ToPy(ts.t),ToPy(ts.f));
 }
 
-PyObject* equilibriumTorques(const RobotModel& robot,double* contacts,int m,int n,const std::vector<int>& links,const vector<double>& fext,double norm)
+PyObject* equilibrium_torques(const RobotModel& robot,double* contacts,int m,int n,const std::vector<int>& links,const vector<double>& fext,double norm)
 {
   vector<double> internalTorques;
-  return ::equilibriumTorques(robot,contacts,m,n,links,fext,internalTorques,norm);
+  return ::equilibrium_torques(robot,contacts,m,n,links,fext,internalTorques,norm);
 }
 
 
@@ -7012,7 +7016,7 @@ PyObject* equilibriumTorques(const RobotModel& robot,double* contacts,int m,int 
 
 /*************************** IO CODE ***************************************/
 
-bool SubscribeToStream(Geometry3D& g,const char* protocol,const char* name,const char* type)
+bool subscribe_to_stream(Geometry3D& g,const char* protocol,const char* name,const char* type)
 {
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(g.geomPtr);
   if(0==strcmp(protocol,"ros")) {
@@ -7020,16 +7024,16 @@ bool SubscribeToStream(Geometry3D& g,const char* protocol,const char* name,const
       type = "PointCloud";
     if(0 == strcmp(type,"PointCloud")) {
       if(!g.isStandalone()) {
-  RobotWorld& world=*worlds[g.world]->world;
+  Klampt::WorldModel& world=*worlds[g.world]->world;
   GetManagedGeometry(world,g.id).RemoveFromCache();
   return GetManagedGeometry(world,g.id).Load((string("ros:PointCloud2//")+string(name)).c_str());
       }
-      printf("Warning, attaching to a ROS stream without a ManagedGeometry.\n");
+      printf("Warning, attaching to a ROS stream without a Klampt::ManagedGeometry.\n");
       printf("You will not be able to automatically get updates from ROS.\n");
       if(!geom) 
         geom.reset(new AnyCollisionGeometry3D());
       (*geom) = AnyCollisionGeometry3D(Meshing::PointCloud3D());
-      return ROSSubscribePointCloud(geom->AsPointCloud(),name);
+      return Klampt::ROSSubscribePointCloud(geom->AsPointCloud(),name);
       //TODO: update ROS, update the appearance every time the point cloud changes
     }
     else {
@@ -7043,10 +7047,10 @@ bool SubscribeToStream(Geometry3D& g,const char* protocol,const char* name,const
   }
 }
 
-bool DetachFromStream(const char* protocol,const char* name)
+bool detach_from_stream(const char* protocol,const char* name)
 {
   if(0==strcmp(protocol,"ros")) {
-    return ROSDetach(name);
+    return Klampt::ROSDetach(name);
   }
   else {
     throw PyException("DetachFromStream: Unsupported protocol argument");
@@ -7054,17 +7058,17 @@ bool DetachFromStream(const char* protocol,const char* name)
   }
 }
 
-bool ProcessStreams(const char* protocol)
+bool process_streams(const char* protocol)
 {
-  if((0==strcmp(protocol,"all")&&ROSInitialized()) || 0==strcmp(protocol,"ros"))
-    if(ROSSubscribeUpdate()) return true;
+  if((0==strcmp(protocol,"all")&&Klampt::ROSInitialized()) || 0==strcmp(protocol,"ros"))
+    if(Klampt::ROSSubscribeUpdate()) return true;
   return false;
 }
 
-bool WaitForStream(const char* protocol,const char* name,double timeout)
+bool wait_for_stream(const char* protocol,const char* name,double timeout)
 {
   if(0==strcmp(protocol,"ros")) {
-    return ROSWaitForUpdate(name,timeout);
+    return Klampt::ROSWaitForUpdate(name,timeout);
   }
   return false;
 }
@@ -7077,26 +7081,26 @@ bool PublishToStream(const Geometry3D& g,const char* protocol,const char* name,c
 */
 
 ///Exports the WorldModel to a JSON string ready for use in Three.js
-std::string ThreeJSGetScene(const WorldModel& w)
+std::string threejs_get_scene(const WorldModel& w)
 {
   if(w.index < 0) return "{}";
-  RobotWorld& world = *worlds[w.index]->world;
+  Klampt::WorldModel& world = *worlds[w.index]->world;
 
   AnyCollection obj;
-  ThreeJSExport(world,obj);
+  Klampt::ThreeJSExport(world,obj);
   std::ostringstream stream;
   stream<<obj;
   return stream.str();
 }
 
 ///Exports the WorldModel to a JSON string ready for use in Three.js
-std::string ThreeJSGetTransforms(const WorldModel& w)
+std::string threejs_get_transforms(const WorldModel& w)
 {
   if(w.index < 0) return "{}";
-   RobotWorld& world = *worlds[w.index]->world;
+   Klampt::WorldModel& world = *worlds[w.index]->world;
 
    AnyCollection obj;
-   ThreeJSExportTransforms(world,obj);
+   Klampt::ThreeJSExportTransforms(world,obj);
    std::ostringstream stream;
    stream<<obj;
    return stream.str();

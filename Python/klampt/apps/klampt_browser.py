@@ -17,14 +17,14 @@ from PyQt5 import QtWidgets
 world_item_extensions = set(['.obj','.rob','.urdf','.env'])
 robot_override_types = ['Config','Configs']
 animation_types = ['Trajectory','LinearPath','MultiPath']
-create_types = resource.visualEditTypes()[:-1]
+create_types = resource.visual_edit_types()[:-1]
 
 def save(obj,fn):
     if hasattr(obj,'saveFile'):
         return obj.saveFile(fn)
     if hasattr(obj,'save'):
         return obj.save(fn)
-    type = loader.filenameToType(fn)
+    type = loader.filename_to_type(fn)
     return loader.save(obj,type,fn)
 
 MAX_VIS_ITEMS = 1000
@@ -99,7 +99,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
         # Add filters
         filters = []
         print("ALLOWABLE FILE EXTENSIONS")
-        for k,v in loader.extensionToTypes.items():
+        for k,v in loader.extension_to_types.items():
             filters.append("*"+k)
             print(" ",k)
         filters.append("*.xml")
@@ -496,7 +496,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
             self.loadedItem(fn,obj)
             return True
         try:
-            type = loader.filenameToType(fn)
+            type = loader.filename_to_type(fn)
         except RuntimeError:
             if warn:
                 QtWidgets.QMessageBox.warning(self.splitter,"Invalid item","Could not load file "+fn+" as a known Klamp't type")

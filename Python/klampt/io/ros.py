@@ -712,7 +712,7 @@ def to_ShapeMsg(klampt_geom):
     else:
         raise ValueError("Implicit surfaces, geometric primitives, and groups not supported yet")
 
-supportedKlamptTypes = {
+SUPPORTED_KLAMPT_TYPES = {
     'Vector3':'Vector3',
     'Point':'Point',
     'Matrix3':'Quaternion',
@@ -733,13 +733,13 @@ supportedKlamptTypes = {
 
 def _compatibleKlamptType(klampt_obj):
     from ..model import types
-    if klampt_obj.__class__.__name__ in supportedKlamptTypes:
+    if klampt_obj.__class__.__name__ in SUPPORTED_KLAMPT_TYPES:
         return klampt_obj.__class__.__name__
-    otype = types.object_to_type(klampt_obj,supportedKlamptTypes)
+    otype = types.object_to_type(klampt_obj,SUPPORTED_KLAMPT_TYPES)
     if otype is None:
-        raise ValueError("Don't know how to convert Klampt objects of type "+",".join(otypes))
-    if otype not in supportedKlamptTypes:
-        raise ValueError("Don't know how to convert Klampt objects of type "+otype)
+        raise ValueError("Don't know how to convert Klampt object of type "+",".join(types.object_to_types(klampt_obj)))
+    if otype not in SUPPORTED_KLAMPT_TYPES:
+        raise ValueError("Don't know how to convert Klampt object of type "+otype)
     return otype
 
 def _from_converter(ros_obj):
@@ -750,13 +750,13 @@ def _from_converter(ros_obj):
 
 def _from_converter2(klampt_obj):
     type = _compatibleKlamptType(klampt_obj)
-    converter = 'from_' + supportedKlamptTypes[type]
-    assert converter in globals(),"Can't convert from ROS message type "+supportedKlamptTypes[type]
+    converter = 'from_' + SUPPORTED_KLAMPT_TYPES[type]
+    assert converter in globals(),"Can't convert from ROS message type "+SUPPORTED_KLAMPT_TYPES[type]
     return globals()[converter]
 
 def _to_converter(klampt_obj):
     type = _compatibleKlamptType(klampt_obj)
-    converter = 'to_' + supportedKlamptTypes[type]
+    converter = 'to_' + SUPPORTED_KLAMPT_TYPES[type]
     assert converter in globals()
     return globals()[converter]
 
@@ -895,7 +895,7 @@ def publisher(topic,klampt_type,convert_kwargs=None,ros_type=None,**kwargs):
     if not isinstance(klampt_type,str):
         klampt_type = klampt_type.__class__.__name__
     if ros_type is None:
-        ros_type = supportedKlamptTypes[klampt_type]
+        ros_type = SUPPORTED_KLAMPT_TYPES[klampt_type]
     if ros_type in ['SensorMsg','ShapeMsg']:
         raise ValueError("Klamp't object is ambiguous, need to specify a ROS type")
     converter = 'to_' + ros_type
@@ -939,9 +939,9 @@ def subscriber(topic,klampt_type,callback,convert_kwargs=None,**kwargs):
     """
     if convert_kwargs is None:
         convert_kwargs = dict()
-    if klampt_type not in supportedKlamptTypes:
+    if klampt_type not in SUPPORTED_KLAMPT_TYPES:
         raise ValueError("Don't know how to convert ROS messages to Klampt type "+klampt_type)
-    ros_type = supportedKlamptTypes[klampt_type]
+    ros_type = SUPPORTED_KLAMPT_TYPES[klampt_type]
     converter = 'from_'+ros_type
     assert converter in globals(),"No converter for Klampt type "+klampt_type
     convert_fn = globals()[converter]

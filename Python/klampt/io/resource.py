@@ -101,11 +101,11 @@ def _get_world(world):
 
 def known_extensions():
     """Returns all known resource file extensions"""
-    return list(loader.extensionToType.keys())
+    return list(loader.EXTENSION_TO_TYPES.keys())
 
 def known_types():
     """Returns all known resource types"""
-    return list(loader.typeToExtension.keys())+['WorldModel','MultiPath','Point','Rotation','Matrix3','ContactPoint']
+    return list(loader.TYPE_TO_EXTENSIONS.keys())+['WorldModel','MultiPath','Point','Rotation','Matrix3','ContactPoint']
 
 def visual_edit_types():
     """Returns types that can be visually edited"""
@@ -172,9 +172,9 @@ def get(name,type='auto',directory=None,default=None,doedit='auto',description=N
             print("Ok pressed, returning anonymous resource")
             return newvalue
     if directory==None:
-        directory = getDirectory()
+        directory = get_directory()
     if type == 'auto':
-        type = loader.filenameToType(name)
+        type = loader.filename_to_type(name)
     value = None
     fn = os.path.join(directory,name)
     try:
@@ -235,13 +235,13 @@ def set(name,value,type='auto',directory=None):
     """
     if type == 'auto':
         try:
-            type = loader.filenameToType(name)
+            type = loader.filename_to_type(name)
         except Exception:
             type = types.object_to_types(value)
             if isinstance(type,(list,tuple)):
                 type = type[0]
     if directory==None:
-        directory = getDirectory()    
+        directory = get_directory()    
     fn = os.path.join(directory,name)
     _ensure_dir(fn)
     if type == 'xml':
@@ -317,9 +317,9 @@ def load(type=None,directory=None):
     fg = FileGetter('Open resource')
     fg.directory = directory
     if directory==None:
-        fg.directory = getDirectory()    
+        fg.directory = get_directory()    
     if type is not None:
-        extensions=[v for v in loader.typeToExtensions[type]]
+        extensions=[v for v in loader.TYPE_TO_EXTENSIONS[type]]
         extensions.append('.json')
         fg.filetypes.append((type,extensions))
 
@@ -360,7 +360,7 @@ def save(value,type='auto',directory=None):
     fg = FileGetter('Save resource')
     fg.directory = directory
     if directory==None:
-        fg.directory = getDirectory()    
+        fg.directory = get_directory()    
     if type == 'auto':
         typelist = types.object_to_types(value)
         if isinstance(typelist,str):
@@ -368,7 +368,7 @@ def save(value,type='auto',directory=None):
     else:
         typelist = [type] 
     for type in typelist:
-        extensions=[v for v in loader.typeToExtensions[type]]
+        extensions=[v for v in loader.TYPE_TO_EXTENSIONS[type]]
         extensions.append('.json')
         print("Available extensions for objects of type",type,":",extensions)
         fg.filetypes.append((type,extensions))
@@ -721,7 +721,7 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,refe
                 Tref = frame.getTransform()
             editor = editors.RigidTransformEditor(name,value,description,world,Tref)
             if type == 'Rotation':
-                editor.disableTranslation()
+                editor.disable_translation()
             attach(referenceObject,editor)
             #Run!
             if type == 'Rotation':
@@ -751,6 +751,7 @@ def _deprecated_func(oldName,newName):
     def depf(*args,**kwargs):
         warnings.warn("{} will be deprecated in favor of {} in a future version of Klampt".format(oldName,newName),DeprecationWarning)
         return f(*args,**kwargs)
+    depf.__doc__ = 'Deprecated in a future version of Klampt. Use {} instead'.format(newName)
     setattr(mod,oldName,depf)
 
 _deprecated_func("getDirectory","get_directory")

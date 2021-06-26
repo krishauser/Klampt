@@ -337,39 +337,39 @@ class doubleMatrix(object):
 _motionplanning.doubleMatrix_swigregister(doubleMatrix)
 
 
-def setRandomSeed(seed):
+def set_random_seed(seed):
     r"""
-    setRandomSeed(int seed)
+    set_random_seed(int seed)
 
 
-    Sets the random seed used by the configuration sampler.  
+    Sets the random seed used by the motion planner.  
 
     """
-    return _motionplanning.setRandomSeed(seed)
+    return _motionplanning.set_random_seed(seed)
 
-def setPlanJSONString(string):
+def set_plan_json_string(string):
     r"""
-    setPlanJSONString(char const * string)
+    set_plan_json_string(char const * string)
 
 
     Loads planner values from a JSON string.  
 
     """
-    return _motionplanning.setPlanJSONString(string)
+    return _motionplanning.set_plan_json_string(string)
 
-def getPlanJSONString():
+def get_plan_json_string():
     r"""
-    getPlanJSONString() -> std::string
+    get_plan_json_string() -> std::string
 
 
     Saves planner values to a JSON string.  
 
     """
-    return _motionplanning.getPlanJSONString()
+    return _motionplanning.get_plan_json_string()
 
-def setPlanType(type):
+def set_plan_type(type):
     r"""
-    setPlanType(char const * type)
+    set_plan_type(char const * type)
 
 
     Sets the planner type.  
@@ -390,12 +390,12 @@ def setPlanType(type):
     *   fmm*: an anytime fast marching method algorithm for optimal motion planning  
 
     """
-    return _motionplanning.setPlanType(type)
+    return _motionplanning.set_plan_type(type)
 
-def setPlanSetting(*args):
+def set_plan_setting(*args):
     r"""
-    setPlanSetting(char const * setting, double value)
-    setPlanSetting(char const * setting, char const * value)
+    set_plan_setting(char const * setting, double value)
+    set_plan_setting(char const * setting, char const * value)
 
 
     Sets a numeric or string-valued setting for the planner.  
@@ -435,7 +435,7 @@ def setPlanSetting(*args):
         shortcutting, you should set foundSolution:0.  
 
     """
-    return _motionplanning.setPlanSetting(*args)
+    return _motionplanning.set_plan_setting(*args)
 
 def destroy():
     r"""
@@ -1004,28 +1004,55 @@ class PlannerInterface(object):
 _motionplanning.PlannerInterface_swigregister(PlannerInterface)
 
 
-def interpolate1DMinTime(x0, v0, x1, v1, xmin, xmax, vmax, amax):
-    r"""interpolate1DMinTime(double x0, double v0, double x1, double v1, double xmin, double xmax, double vmax, double amax)"""
-    return _motionplanning.interpolate1DMinTime(x0, v0, x1, v1, xmin, xmax, vmax, amax)
+def interpolate_1d_min_time(x0, v0, x1, v1, xmin, xmax, vmax, amax):
+    r"""interpolate_1d_min_time(double x0, double v0, double x1, double v1, double xmin, double xmax, double vmax, double amax)"""
+    return _motionplanning.interpolate_1d_min_time(x0, v0, x1, v1, xmin, xmax, vmax, amax)
 
-def interpolate1DMinAccel(x0, v0, x1, v1, endTime, xmin, xmax, vmax):
-    r"""interpolate1DMinAccel(double x0, double v0, double x1, double v1, double endTime, double xmin, double xmax, double vmax)"""
-    return _motionplanning.interpolate1DMinAccel(x0, v0, x1, v1, endTime, xmin, xmax, vmax)
+def interpolate_1d_min_accel(x0, v0, x1, v1, endTime, xmin, xmax, vmax):
+    r"""interpolate_1d_min_accel(double x0, double v0, double x1, double v1, double endTime, double xmin, double xmax, double vmax)"""
+    return _motionplanning.interpolate_1d_min_accel(x0, v0, x1, v1, endTime, xmin, xmax, vmax)
 
-def interpolateNDMinTime(x0, v0, x1, v1, xmin, xmax, vmax, amax):
-    r"""interpolateNDMinTime(doubleVector x0, doubleVector v0, doubleVector x1, doubleVector v1, doubleVector xmin, doubleVector xmax, doubleVector vmax, doubleVector amax)"""
-    return _motionplanning.interpolateNDMinTime(x0, v0, x1, v1, xmin, xmax, vmax, amax)
+def interpolate_nd_min_time(x0, v0, x1, v1, xmin, xmax, vmax, amax):
+    r"""interpolate_nd_min_time(doubleVector x0, doubleVector v0, doubleVector x1, doubleVector v1, doubleVector xmin, doubleVector xmax, doubleVector vmax, doubleVector amax)"""
+    return _motionplanning.interpolate_nd_min_time(x0, v0, x1, v1, xmin, xmax, vmax, amax)
 
-def interpolateNDMinAccel(x0, v0, x1, v1, endTime, xmin, xmax, vmax):
-    r"""interpolateNDMinAccel(doubleVector x0, doubleVector v0, doubleVector x1, doubleVector v1, double endTime, doubleVector xmin, doubleVector xmax, doubleVector vmax)"""
-    return _motionplanning.interpolateNDMinAccel(x0, v0, x1, v1, endTime, xmin, xmax, vmax)
+def interpolate_nd_min_accel(x0, v0, x1, v1, endTime, xmin, xmax, vmax):
+    r"""interpolate_nd_min_accel(doubleVector x0, doubleVector v0, doubleVector x1, doubleVector v1, double endTime, doubleVector xmin, doubleVector xmax, doubleVector vmax)"""
+    return _motionplanning.interpolate_nd_min_accel(x0, v0, x1, v1, endTime, xmin, xmax, vmax)
 
-def interpolateNDMinTimeLinear(x0, x1, vmax, amax):
-    r"""interpolateNDMinTimeLinear(doubleVector x0, doubleVector x1, doubleVector vmax, doubleVector amax)"""
-    return _motionplanning.interpolateNDMinTimeLinear(x0, x1, vmax, amax)
+def interpolate_nd_min_time_linear(x0, x1, vmax, amax):
+    r"""interpolate_nd_min_time_linear(doubleVector x0, doubleVector x1, doubleVector vmax, doubleVector amax)"""
+    return _motionplanning.interpolate_nd_min_time_linear(x0, x1, vmax, amax)
 
-def combineNDCubic(times, positions, velocities):
-    r"""combineNDCubic(doubleMatrix times, doubleMatrix positions, doubleMatrix velocities)"""
-    return _motionplanning.combineNDCubic(times, positions, velocities)
+def combine_nd_cubic(times, positions, velocities):
+    r"""combine_nd_cubic(doubleMatrix times, doubleMatrix positions, doubleMatrix velocities)"""
+    return _motionplanning.combine_nd_cubic(times, positions, velocities)
+
+import warnings
+
+def _deprecated_func(oldName,newName):
+    import sys
+    mod = sys.modules[__name__]
+    f = getattr(mod,newName)
+    def depf(*args,**kwargs):
+        warnings.warn("{} will be deprecated in favor of {} in a future version of Klampt".format(oldName,newName),DeprecationWarning)
+        return f(*args,**kwargs)
+    depf.__doc__ = 'Deprecated in a future version of Klampt. Use {} instead'.format(newName)
+    setattr(mod,oldName,depf)
+
+_deprecated_func('setRandomSeed','set_random_seed')
+_deprecated_func('setPlanJSONString','set_plan_json_string')
+_deprecated_func('getPlanJSONString','get_plan_json_string')
+_deprecated_func('setPlanType','set_plan_type')
+_deprecated_func('setPlanSetting','set_plan_setting')
+_deprecated_func('interpolate1DMinTime','interpolate_1d_min_time')
+_deprecated_func('interpolate1DMinAccel','interpolate_1d_min_accel')
+_deprecated_func('interpolateNDMinTime','interpolate_nd_min_time')
+_deprecated_func('interpolateNDMinAccel','interpolate_1d_min_accel')
+_deprecated_func('interpolateNDMinTimeLinear','interpolate_nd_min_time_linear')
+_deprecated_func('combineNDCubic','combine_nd_cubic')
+
+
+
 
 

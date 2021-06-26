@@ -54,11 +54,13 @@ The default scene manager lets you set up and modify the visualization scene
 implemented.  See Klampt-examples/Python/demos/vistemplate.py for more
 examples.
 
-To capture user interaction and add other functionality, you may create a
+The vis module provides some basic methods for capturing user interaction.
+To add other user interaction functionality, you may create a
 :class:`~klampt.vis.glinterface.GLPluginInterface` subclass to add
 functionality on top of the default visualization world.  To do so, call
 ``vis.pushPlugin(plugin)``.  Note that custom rendering (the ``display()``
-method) is only available with the OpenGL rendering backend.
+and ``display_screen()`` methods) are only available with the OpenGL
+rendering backend.
 
 Only one rendering backend can be chosen during the lifetime of your process,
 and each backend has its own quirks with regards to window launching and
@@ -445,9 +447,6 @@ Scene management functions
 - :func:`getItemConfig`: returns the configuration of a named item.
 - :func:`hide`: hides/unhides an item.  The item is not removed, it just
   becomes invisible.
-- :func:`edit`: turns on/off visual editing of some item.  Points, transforms,
-  ``coordinates.Point``, ``coordinates.Transform``, ``coordinates.Frame``,
-  :class:`RobotModel`, and :class:`RigidObjectModel` are currently accepted.
 - :func:`hideLabel`: hides/unhides an item's text label.
 - :func:`setLabel`: changes an item's text label from its name to a custom
   string.
@@ -502,6 +501,20 @@ You may also log custom numeric data with :func:`logPlot` and event data using
 - :func:`setPlotSize`: sets the width and height of the plot.
 - :func:`savePlot`: saves a plot to a CSV (extension .csv) or Trajectory 
   (extension .traj) file.
+
+User Interaction
+~~~~~~~~~~~~~~~~
+
+- :func:`edit`: turns on/off visual editing of some item.  Points, transforms,
+  ``coordinates.Point``, ``coordinates.Transform``, ``coordinates.Frame``,
+  :class:`RobotModel`, and :class:`RigidObjectModel` are currently accepted.
+- :func:`pick`: asks the user to click on an item in the scene. 
+- :func:`addAction`: adds a keyboard shortcut (GLUT) / menu items (Qt) /
+  buttons (IPython).
+- :func:`addButton`: adds a button to the view.
+- :func:`addSelect`: adds a selection dropdown or listbox.
+- :func:`addInput`: adds a string, integer, or float input box.
+- :func:`addWidget`: adds a widget(s) from a JSON description.
 
 Global appearance / camera control functions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1294,6 +1307,30 @@ def edit(name,doedit=True):
 
     """
     scene().edit(name,doedit)
+
+def pick(click_callback,hover_callback=None,highlight_color=(1,1,0,0.3),filter=None,tolerance=0.01):
+    """Picks an item from the scene.  ``click_callback`` is called once the 
+    user left-clicks on an item.  ``hover_callback`` is called when a user
+    hovers over an item. 
+    
+    Once the user clicks, callbacks are disabled. To re-enable callbacks, call
+    pick() again.
+
+    Args:
+        click_callback (callable): a function f(name,item,point) that receives 
+            the name of the item, the item itself, and the point clicked on, 
+            in world coordinates.  Set this to None to disable picking.
+        hover_callback (callable): a function f(name,item,point) that receives 
+            the name of the item, the item itself, and the point hovered over, 
+            in world coordinates.  Set this to None to disable picking.
+        highlight_color (tuple, optional): if given, hovered items will be
+            colored with the given color.
+        filter (callable, optional): a function f(name,item) that returns True
+            if the item should be included in the selection.
+        tolerance (float, optional): a collision tolerance for non-volumetric
+            objects.
+    """
+    scene().pick(click_callback,hover_callback,highlight_color,filter,tolerance)
 
 def setAppearance(name,appearance):
     """Changes the Appearance of an item, for an item that uses the Appearance
@@ -2373,7 +2410,7 @@ class VisAppearance:
     def markChanged(self,config=True,appearance=True):
         if appearance:
             for c in self.displayCache:
-                c.markChanged()
+                c.mark_changed()
         for (k,a) in self.subAppearances.items():
             a.markChanged(config,appearance)
         if config:
@@ -3166,6 +3203,29 @@ class VisAppearance:
             except Exception:
                 raise
         return (so3.identity(),self.getCenter())
+    
+    def rayCast(self,source,direction,tolerance=0.01):
+        """Returns a point on the item intersected by the ray
+        ``source + t*direction``, or None if it does not intersect.
+
+        For non-volumetric items, the item is treated as though it
+        were expanded by ``tolerance`` units.
+        """
+        geom = None
+        if isinstance(self.item,Geometry3D):
+            geom = self.item
+        elif hasattr(self.item,'geometry') and callable(self.item.geometry):
+            geom = self.item.geometry()
+        #TODO: ray cast other items like points, transforms, trajectories
+        if geom is None: return None
+        margin = geom.getCollisionMargin()
+        if geom.type() == 'PointCloud':
+            geom.setCollisionMargin(tolerance)
+        elif geom.type() == 'GeometricPrimitive' and geom.getGeometricPrimitive().type in ['Point','Segment','Line']:
+            geom.setCollisionMargin(tolerance)
+        (hit,pt) = geom.rayCast(source,direction)
+        geom.setCollisionMargin(margin)  #restore margin
+        return pt if hit else None
 
     def getSubItem(self,path):
         if len(path) == 0: return self
@@ -3306,7 +3366,21 @@ class VisAppearance:
 
 class VisualizationScene:
     """Holds all of the visualization information for a scene, including
-    labels, edit status, and animations"""
+    labels, edit status, and animations.
+    
+    Attributes:
+        items (dict of str->VisAppearance): the top level items in the scene.
+        labels (list): internally used
+        t (float): current scene time, internally used
+        timeCallback (callable): a function time()->float that is used to get
+            the time update.  If None, ``time.time()`` is used.
+        startTime (float): first time that updateTime() was called, internally
+            used.
+        doRefresh (bool): whether any item wants to refresh the visualization.
+        cameraController: if given, a class to update the camera whenever
+            updateCamera is called.
+
+    """
     def __init__(self):
         self.items = {}
         self.labels = []
@@ -3382,6 +3456,7 @@ class VisualizationScene:
                 self.listItems(v,indent+2)
 
     def getItemName(self,object):
+        """Retrieves a str or tuple of strs giving the path to an object"""
         name = None
         if hasattr(object,'getName'):
             name = object.getName()
@@ -3797,6 +3872,9 @@ class VisualizationScene:
 
     def edit(self,name,doedit=True):
         raise NotImplementedError("Needs to be implemented by subclass")
+    
+    def pick(self,click_callback,hover_callback,highlight_color,filter,tolerance):
+        raise NotImplementedError("Needs to be implemented by subclass")
 
     def getViewport(self):
         raise NotImplementedError("Needs to be implemented by subclass")
@@ -3891,7 +3969,6 @@ class VisualizationScene:
                     window.draw_text((x,y+size),v.item,size,col)
         GL.glEnable(GL.GL_DEPTH_TEST)
 
-
     def _renderGLLabelRaw(self,view,point,textList,colorList):
         #assert not self.makingDisplayList,"drawText must be called outside of display list"
         assert self.window is not None
@@ -3913,6 +3990,41 @@ class VisualizationScene:
     def clearDisplayLists(self):
         for i in self.items.values():
             i.clearDisplayLists()
+
+    def rayCast(self,x,y,filter=None,tolerance=0.01):
+        """Performs ray casting with the scene
+
+        Args:
+            x (float): the screen x-coordinate of the mouse cursor
+            y (float): the screen y-coordinate of the mouse cursor
+            filter (callable, optional): if given, a function f(name,item) that
+                returns True if the item should be considered.
+            tolerance (float, optional): a tolerance for ray intersection with
+                non-volumetric items.
+        
+        Returns:
+            tuple: a pair ``(visapp,pt)`` with visapp the first intersected 
+            :class:`VisAppearance` and pt the clicked point.  If nothing 
+            intersects, then (None,None) is returned.
+        """
+        (s,d) = self.view.click_ray(x,y)
+        data = [(None,None),float('inf')]  #closest and closest distance
+        def doclick(name,visappearance,data=data):
+            item = visappearance.item
+            if filter is not None or filter(name,item):
+                if len(visappearance.subAppearances) != 0:
+                    for sname,app in visappearance.subAppearances.items():
+                        doclick(sname,app)
+                else:
+                    pt = visappearance.rayCast(s,d,tolerance)
+                    if pt is not None:
+                        dist = vectorops.dot(vectorops.sub(pt,s),d)
+                        if dist < data[1]:
+                            data[0] = (visappearance,pt)
+                            data[1] = dist
+        for name,item in self.items.items():
+            doclick(name,item)
+        return data[0]
 
     def saveJsonConfig(self,fn=None):
         def dumpitem(v):
@@ -3977,11 +4089,12 @@ class VisualizationScene:
             if k not in parsed:
                 warnings.warn("JSON object {} not in visualization".format(k))
 
+
 def _camera_translate(vp,tgt):
     vp.camera.tgt = tgt
 
 def _camera_lookat(vp,tgt):
-    T = vp.getTransform()
+    T = vp.get_transform()
     vp.camera.tgt = tgt
     vp.camera.dist = max(vectorops.distance(T[1],tgt),0.1)
     #set R to point at target
@@ -3994,7 +4107,7 @@ def _camera_lookat(vp,tgt):
 class _TrackingCameraController:
     def __init__(self,vp,target):
         self.vp = vp
-        T = vp.getTransform()
+        T = vp.get_transform()
         target.swapDrawConfig()
         self.viewportToTarget = se3.mul(se3.inv(target.getTransform()),T)
         target.swapDrawConfig()
@@ -4003,7 +4116,7 @@ class _TrackingCameraController:
         self.target.swapDrawConfig()
         T = se3.mul(self.target.getTransform(),self.viewportToTarget)
         self.target.swapDrawConfig()
-        self.vp.setTransform(T)
+        self.vp.set_transform(T)
         return self.vp
 
 class _TranslatingCameraController:
@@ -4051,13 +4164,13 @@ class _TrajectoryCameraController:
     def update(self,t):
         if isinstance(self.trajectory,(SE3Trajectory,SE3HermiteTrajectory)):
             T = self.trajectory.eval(t,'loop')
-            self.vp.setTransform(T)
+            self.vp.set_transform(T)
         elif isinstance(self.trajectory,(SO3Trajectory,SO3HermiteTrajectory)):
             R = self.trajectory.eval(t,'loop')
             self.vp.camera.set_orientation(R,'xyz')
         else:
             trans = self.trajectory.eval(t,'loop')
-            T = self.vp.getTransform()
+            T = self.vp.get_transform()
             ofs = vectorops(self.vp.tgt,T[0])
             self.vp.camera.tgt = vectorops.add(trans,ofs)
         return self.vp
@@ -4069,7 +4182,7 @@ class _SimCamCameraController:
     def update(self,t):
         from ..model import sensing
         T = sensing.get_sensor_xform(self.target,self.target.robot())
-        self.vp.setTransform(T)
+        self.vp.set_transform(T)
         return self.vp
 
 

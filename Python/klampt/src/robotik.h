@@ -94,15 +94,19 @@ class IKObjective
 
   ///Gets the transform T that's closest to the transform (R,t) and 
   ///that satisfies the IK goal's constraints.
-  void closestMatch(const double R[9],const double t[3],double out[9],double out2[3]);
+  void closestMatch(const double R[9],const double t[3],double out[9],double out2[3]) const;
+
+  ///Returns a transformation (R,t) from link relative to link2, sampled at random from
+  ///the space of transforms that satisfies the objective obj.
+  void sampleTransform(double out[9],double out2[3]) const;
 
   ///Loads the objective from a Klamp't-native formatted string. For a
   ///more readable but verbose format, try the JSON IO routines
-  ///:meth:`klampt.io.loader.toJson` / :meth:`klampt.io.loader.fromJson`
+  ///:meth:`klampt.io.loader.to_json` / :meth:`klampt.io.loader.from_json`
   bool loadString(const char* str);
   ///Saves the objective to a Klamp't-native formatted string.  For a
   ///more readable but verbose format, try the JSON IO routines
-  ///:meth:`klampt.io.loader.toJson` / :meth:`klampt.io.loader.fromJson`
+  ///:meth:`klampt.io.loader.to_json` / :meth:`klampt.io.loader.from_json`
   std::string saveString() const;
 
   IKGoal goal;
@@ -233,6 +237,10 @@ class GeneralizedIKObjective
   void setPoint(const double p1[3],const double p2[3]);
   void setPoints(PyObject* p1s,PyObject* p2s);
   void setTransform(const double R[9],const double t[3]);
+  ///Returns a transformation (R,t) from link relative to link2, sampled at random from
+  ///the space of transforms that satisfies the objective obj.
+  void sampleTransform(double out[9],double out2[3]) const;
+
 
   RobotModelLink link1,link2;
   RigidObjectModel obj1,obj2;
@@ -281,12 +289,5 @@ class GeneralizedIKSolver
   int maxIters;
   bool useJointLimits;
 };
-
-///Returns a transformation (R,t) from link relative to link2, sampled at random from
-///the space of transforms that satisfies the objective obj.
-void SampleTransform(const IKObjective& obj,double out[9],double out2[3]);
-///Returns a transformation (R,t) from link relative to link2, sampled at random from
-///the space of transforms that satisfies the objective obj.
-void SampleTransform(const GeneralizedIKObjective& obj,double out[9],double out2[3]);
 
 #endif

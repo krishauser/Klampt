@@ -7,14 +7,13 @@
 #include <stddef.h>
 #include "robotmodel.h"
 
-class Simulator;
-class SimRobotController;
-
 //declarations for internal objects
-class SensorBase;
-class WorldSimulation;
-class ControlledRobotSimulator;
-class ODEGeometry;
+namespace Klampt {
+  class SensorBase;
+  class Simulator;
+  class SimRobotController;
+  class ODEGeometry;
+}
 typedef struct dxBody *dBodyID;
 typedef struct dxJoint *dJointID;
 
@@ -23,6 +22,8 @@ class SimRobotSensor;
 class SimRobotController;
 class SimBody;
 class Simulator;
+
+using namespace std;
 
 /** @brief A sensor on a simulated robot.  Retrieve one from the controller
  * using :meth:`SimRobotController.getSensor`, or create a new one
@@ -56,7 +57,7 @@ class Simulator;
 class SimRobotSensor
 {
  public:
-  SimRobotSensor(const RobotModel& robot,SensorBase* sensor);
+  SimRobotSensor(const RobotModel& robot,Klampt::SensorBase* sensor);
   SimRobotSensor(SimRobotController& robot,const char* name,const char* type);
   ///Returns the name of the sensor
   std::string name();
@@ -90,7 +91,7 @@ class SimRobotSensor
   void kinematicReset();
 
   RobotModel robotModel;
-  SensorBase* sensor;
+  Klampt::SensorBase* sensor;
 };
 
 /** @brief A controller for a simulated robot.
@@ -283,7 +284,7 @@ class SimRobotController
 
   int index;
   Simulator* sim;
-  ControlledRobotSimulator* controller;
+  Klampt::SimRobotController* controller;
 };
 
 /** @brief A reference to a rigid body inside a Simulator (either a
@@ -365,7 +366,7 @@ class SimBody
 
   Simulator* sim;
   int objectID;
-  ODEGeometry* geometry;
+  Klampt::ODEGeometry* geometry;
   dBodyID body;
 };
 
@@ -584,12 +585,12 @@ class Simulator
 
   int index;
   WorldModel world;
-  WorldSimulation* sim;
+  Klampt::Simulator* sim;
   std::string initialState;
 };
 
 /// Sets the random seed used by the configuration sampler
-void setRandomSeed(int seed);
+void set_random_seed(int seed);
 
 ///Cleans up all internal data structures.  Useful for multithreaded programs to make sure ODE errors
 ///aren't thrown on exit.  This is called for you on exit when importing the Python klampt module.

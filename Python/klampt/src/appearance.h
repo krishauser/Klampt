@@ -16,7 +16,7 @@
  * Appearances can be either references to appearances of objects in the world,
  * or they can be standalone. 
  *
- * Performance note: Avoid rebuilding buffers (e.g., via :meth:`refresh`  as 
+ * Performance note: Avoid rebuilding buffers (e.g., via :meth:`refresh`)  as 
  * much as possible.
  */
 class Appearance

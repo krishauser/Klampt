@@ -6,6 +6,7 @@ from . import ik
 from ..math import vectorops,so3,se3
 from .. import robotsim
 from ..robotsim import RobotModel,RobotModelLink,RigidObjectModel,TerrainModel
+import numpy as np
 import warnings
 
 def id_to_object(world,ID):
@@ -139,7 +140,7 @@ def force_closure(contactOrHoldList):
     friction cones.  If Hull(W) contains the zero vector in its interior,
     then the contacts are said to be in force closure.
     """
-    return robotsim.forceClosure(_toarray(contactOrHoldList))
+    return robotsim.force_closure(_toarray(contactOrHoldList))
     
 def com_equilibrium(contactOrHoldList,fext=(0,0,-1),com=None):
     """Given a list of ContactPoints or Holds, an external gravity force,
@@ -165,7 +166,7 @@ def com_equilibrium(contactOrHoldList,fext=(0,0,-1),com=None):
     If com != None, this returns either None if there is no solution,
     or otherwise returns a list of contact forces.
     """
-    return robotsim.comEquilibrium(_toarray(contactOrHoldList),fext,com)
+    return robotsim.com_equilibrium(_toarray(contactOrHoldList),fext,com)
 
 def support_polygon(contactOrHoldList):
     """Given a list of ContactPoints or Holds, returns the support polygon.
@@ -176,7 +177,7 @@ def support_polygon(contactOrHoldList):
     An empty support polygon is given by the result [(0,0,-1)].
     A complete support polygon is given by the result [].
     """
-    return robotsim.supportPolygon(_toarray(contactOrHoldList))
+    return robotsim.support_polygon(_toarray(contactOrHoldList))
 
 def equilibrium_torques(robot,holdList,fext=(0,0,-9.8),internalTorques=None,norm=0):
     """ Solves for the torques / forces that keep the robot balanced against
@@ -211,9 +212,9 @@ def equilibrium_torques(robot,holdList,fext=(0,0,-9.8),internalTorques=None,norm
     """
     links = sum([[h.link]*len(h.contacts) for h in holdList],[])
     if internalTorques is None:
-        res = robotsim.equilibriumTorques(robot,_toarray(holdList),links,fext,norm)
+        res = robotsim.equilibrium_torques(robot,_toarray(holdList),links,fext,norm)
     else:
-        res = robotsim.equilibriumTorques(robot,_toarray(holdList),links,fext,internalTorques,norm)
+        res = robotsim.equilibrium_torques(robot,_toarray(holdList),links,fext,internalTorques,norm)
     if res is None: return res
     f = res[1]
     return (res[0],[f[i*3:i*3+3] for i in range(len(f)//3)])
@@ -504,6 +505,7 @@ def _deprecated_func(oldName,newName):
     def depf(*args,**kwargs):
         warnings.warn("{} will be deprecated in favor of {} in a future version of Klampt".format(oldName,newName),DeprecationWarning)
         return f(*args,**kwargs)
+    depf.__doc__ = 'Deprecated in a future version of Klampt. Use {} instead'.format(newName)
     setattr(mod,oldName,depf)
 
 _deprecated_func('idToObject','id_to_object')

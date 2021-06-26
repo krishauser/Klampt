@@ -34,12 +34,12 @@ class WorldModel;
  * Returns:
  *     (bool): True if successful.
  */
-bool SubscribeToStream(Geometry3D& g,const char* protocol,const char* name,const char* type="");
+bool subscribe_to_stream(Geometry3D& g,const char* protocol,const char* name,const char* type="");
 
 /** @brief Unsubscribes from a stream previously subscribed to via
  * :func:`SubscribeToStream`
  */
-bool DetachFromStream(const char* protocol,const char* name);
+bool detach_from_stream(const char* protocol,const char* name);
 
 /** @brief Does some processing on stream subscriptions.
  * 
@@ -51,7 +51,7 @@ bool DetachFromStream(const char* protocol,const char* name);
  * Returns:
  *     (bool): True if any stream was updated.
  */
-bool ProcessStreams(const char* protocol="all");
+bool process_streams(const char* protocol="all");
 
 /** @brief Waits up to timeout seconds for an update on the given stream
  * 
@@ -59,14 +59,13 @@ bool ProcessStreams(const char* protocol="all");
  * 
  *     (bool): True if the stream was updated.
  */
-bool WaitForStream(const char* protocol,const char* name,double timeout);
+bool wait_for_stream(const char* protocol,const char* name,double timeout);
 
 ///Exports the WorldModel to a JSON string ready for use in Three.js
-std::string ThreeJSGetScene(const WorldModel&);
+std::string threejs_get_scene(const WorldModel&);
 
 ///Exports the WorldModel to a JSON string ready for use in Three.js
-std::string ThreeJSGetTransforms(const WorldModel&);
-
+std::string threejs_get_transforms(const WorldModel&);
 
 
 #endif //_ROBOTSIM_IO_H

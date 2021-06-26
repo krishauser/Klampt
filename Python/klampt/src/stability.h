@@ -9,12 +9,12 @@ class RobotModel;
 
 /// Globally sets the number of edges used in the friction cone approximation.
 /// The default value is 4.
-void setFrictionConeApproximationEdges(int numEdges);
+void set_friction_cone_approximation_edges(int numEdges);
 
 /// Returns true if the array of contact points has force closure.  A contact point
 /// is given by a list of n=7 floats, [x,y,z,nx,ny,nz,k] where (x,y,z) is the position,
 /// (nx,ny,nz) is the normal, and k is the coefficient of friction (>= 0)
-bool forceClosure(double* contacts,int m,int n);
+bool force_closure(double* contacts,int m,int n);
 
 //note: only the last overload docstring is added to the documentation
 /** @brief Returns true if the list of contact points has force closure. 
@@ -45,12 +45,12 @@ bool forceClosure(double* contacts,int m,int n);
  *          the i'th contact.  Each of the k 4-tuples is laid out sequentially
  *          per-contact.
  */
-bool forceClosure(const std::vector<std::vector<double > >& contactPositions,const std::vector<std::vector<double > >& frictionCones);
+bool force_closure(const std::vector<std::vector<double > >& contactPositions,const std::vector<std::vector<double > >& frictionCones);
 
 /// Returns true if the list of 2D contact points has force closure.  A contact point
 /// is given by a list of n=4 floats, [x,y,theta,k] where (x,y) is the position,
 /// theta is the normal angle, and k is the coefficient of friction (>= 0)
-bool forceClosure2D(double* contacts,int m,int n);
+bool force_closure_2d(double* contacts,int m,int n);
 
 //note: only the last overload docstring is added to the documentation
 /** @brief Returns true if the list of 2D contact points has force closure. 
@@ -79,7 +79,7 @@ bool forceClosure2D(double* contacts,int m,int n);
  *          at the i'th contact. Each of the k 3-tuples is laid out sequentially
  *          per-contact.
  */
-bool forceClosure2D(const std::vector<std::vector<double > >& contactPositions,const std::vector<std::vector<double> >& frictionCones);
+bool force_closure_2d(const std::vector<std::vector<double > >& contactPositions,const std::vector<std::vector<double> >& frictionCones);
 
 /// Tests whether the given COM com is stable for the given contacts and the given
 /// external force fext.  A contact point is given by a list of 7 floats,
@@ -90,7 +90,7 @@ bool forceClosure2D(const std::vector<std::vector<double > >& contactPositions,c
 /// 
 /// com can also be set to None in which case this tests if ANY COM has
 /// at the contacts.  The return value is True or False.
-PyObject* comEquilibrium(double* contacts,int m,int n,const std::vector<double>& fext,PyObject* com);
+PyObject* com_equilibrium(double* contacts,int m,int n,const std::vector<double>& fext,PyObject* com);
 
 //note: only the last overload docstring is added to the documentation
 /** @brief Tests whether the given COM com is stable for the given contacts and the given
@@ -131,7 +131,7 @@ PyObject* comEquilibrium(double* contacts,int m,int n,const std::vector<double>&
  *         If com = None, the result is True or False.
  *
  */
-PyObject* comEquilibrium(const std::vector<std::vector<double> >& contactPositions,const std::vector<std::vector<double> >& frictionCones,const std::vector<double>& fext,PyObject* com);
+PyObject* com_equilibrium(const std::vector<std::vector<double> >& contactPositions,const std::vector<std::vector<double> >& frictionCones,const std::vector<double>& fext,PyObject* com);
 
 
 /// Tests whether the given COM com is stable for the given contacts and the given
@@ -143,7 +143,7 @@ PyObject* comEquilibrium(const std::vector<std::vector<double> >& contactPositio
 /// 
 /// com can also be set to None in which case this tests if ANY COM has
 /// at the contacts.  The return value is True or False.
-PyObject* comEquilibrium2D(double* contacts,int m,int n,const std::vector<double>& fext,PyObject* com);
+PyObject* com_equilibrium_2d(double* contacts,int m,int n,const std::vector<double>& fext,PyObject* com);
 
 //note: only the last overload docstring is added to the documentation
 /** @brief Tests whether the given COM com is stable for the given contacts and the given
@@ -183,7 +183,7 @@ PyObject* comEquilibrium2D(double* contacts,int m,int n,const std::vector<double
  *         If com = None, the result is True or False.
  *
  */
-PyObject* comEquilibrium2D(const std::vector<std::vector<double> >& contactPositions,const std::vector<std::vector<double> >& frictionCones,const std::vector<double>& fext,PyObject* com);
+PyObject* com_equilibrium_2d(const std::vector<std::vector<double> >& contactPositions,const std::vector<std::vector<double> >& frictionCones,const std::vector<double>& fext,PyObject* com);
 
 
 /// Calculates the support polygon for a given set of contacts and a downward external force (0,0,-g).
@@ -193,7 +193,7 @@ PyObject* comEquilibrium2D(const std::vector<std::vector<double> >& contactPosit
 /// The format of a plane is (nx,ny,ofs) where (nx,ny) are the outward facing normals, and
 /// ofs is the offset from 0.  In other words to test stability of a com [x,y], you can test
 /// whether dot([nx,ny],[x,y]) <= ofs  for all planes.
-PyObject* supportPolygon(double* contacts,int m,int n);
+PyObject* support_polygon(double* contacts,int m,int n);
 
 //note: only the last overload docstring is added to the documentation
 /** @brief Calculates the support polygon for a given set of contacts and a downward external force (0,0,-g).
@@ -237,7 +237,7 @@ PyObject* supportPolygon(double* contacts,int m,int n);
  *             myComEquilibrium = lambda x: np.all(np.dot(A,x)<=b)
  *
  */
-PyObject* supportPolygon(const std::vector<std::vector<double> >& contactPositions,const std::vector<std::vector<double> >& frictionCones);
+PyObject* support_polygon(const std::vector<std::vector<double> >& contactPositions,const std::vector<std::vector<double> >& frictionCones);
 
 
 /// Calculates the support polygon (interval)  for a given set of contacts and a downward
@@ -245,7 +245,7 @@ PyObject* supportPolygon(const std::vector<std::vector<double> >& contactPositio
 /// 
 /// The return value is a 2-tuple giving the min / max extents of the support polygon.
 /// If they are both infinite, the support polygon is empty.
-PyObject* supportPolygon2D(double* contacts,int m,int n);
+PyObject* support_polygon_2d(double* contacts,int m,int n);
 
 //note: only the last overload docstring is added to the documentation
 /** @brief Calculates the support polygon (interval)  for a given set of contacts and a downward
@@ -277,7 +277,7 @@ PyObject* supportPolygon2D(double* contacts,int m,int n);
  *         If the support interval is empty, (inf,inf) is returned.
  *
  */
-PyObject* supportPolygon2D(const std::vector<std::vector<double> >& contacts,const std::vector<std::vector<double> >& frictionCones);
+PyObject* support_polygon_2d(const std::vector<std::vector<double> >& contacts,const std::vector<std::vector<double> >& frictionCones);
 
 
 /** @brief Solves for the torques / forces that keep the robot balanced against gravity
@@ -298,7 +298,7 @@ PyObject* supportPolygon2D(const std::vector<std::vector<double> >& contacts,con
  *          contact forces, if a solution exists, or None if no solution exists.
  *
  */
-PyObject* equilibriumTorques(const RobotModel& robot,
+PyObject* equilibrium_torques(const RobotModel& robot,
 							double* contacts,int m,int n,const std::vector<int>& links,
 							const std::vector<double>& fext,
 							double norm=0);
@@ -344,7 +344,7 @@ PyObject* equilibriumTorques(const RobotModel& robot,
  *          None is returned if no solution exists.
  *
  */
-PyObject* equilibriumTorques(const RobotModel& robot,
+PyObject* equilibrium_torques(const RobotModel& robot,
 							double* contacts,int m,int n,const std::vector<int>& links,
 							const std::vector<double>& fext,
 							const std::vector<double>& internalTorques,

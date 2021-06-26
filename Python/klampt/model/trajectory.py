@@ -937,12 +937,12 @@ class HermiteTrajectory(Trajectory):
                 m0 = milestones[i]
                 m1 = milestones[i+1]
                 if velocities is None:
-                    ts,xs,vs = motionplanning.interpolateNDMinTimeLinear(m0,m1,vmax,amax)
+                    ts,xs,vs = motionplanning.interpolate_nd_min_time_linear(m0,m1,vmax,amax)
                 else:
                     v0 = velocities[i]
                     v1 = velocities[i+1]
-                    ts,xs,vs = motionplanning.interpolateNDMinTime(m0,v0,m1,v1,xmin,xmax,vmax,amax)
-                    ts,xs,vs = motionplanning.combineNDCubic(ts,xs,vs)
+                    ts,xs,vs = motionplanning.interpolate_nd_min_time(m0,v0,m1,v1,xmin,xmax,vmax,amax)
+                    ts,xs,vs = motionplanning.combine_nd_cubic(ts,xs,vs)
                 newtimes += [newtimes[-1] + t for t in ts[1:]]
                 newmilestones += xs[1:]
                 newvelocities += vs[1:]

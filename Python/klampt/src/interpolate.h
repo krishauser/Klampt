@@ -10,7 +10,7 @@ using namespace std;
 ///
 /// Returns (times,positions,velocities) which may be interpolated using cubic
 /// interpolation.  If a path cannot be found, then empty arrays are returned.
-void interpolate1DMinTime(double x0,double v0,double x1,double v1,
+void interpolate_1d_min_time(double x0,double v0,double x1,double v1,
              double xmin,double xmax,double vmax,double amax,
              vector<double>& out,vector<double>& out2,vector<double>& out3);
 
@@ -20,7 +20,7 @@ void interpolate1DMinTime(double x0,double v0,double x1,double v1,
 ///
 /// Returns (times,positions,velocities) which may be interpolated using cubic
 /// interpolation.  If a path cannot be found, then empty arrays are returned.
-void interpolate1DMinAccel(double x0,double v0,double x1,double v1,
+void interpolate_1d_min_accel(double x0,double v0,double x1,double v1,
               double endTime,double xmin,double xmax,double vmax,
               vector<double>& out,vector<double>& out2,vector<double>& out3);
 
@@ -35,10 +35,10 @@ void interpolate1DMinAccel(double x0,double v0,double x1,double v1,
 /// Returns (times,positions,velocities) which give each of the channels'
 /// interpolants, each of which may be interpolated using cubic interpolation.
 /// Specifically, len(times), len(positions), and len(velocities) == len(x0),
-/// and for each channel i, the 1D interpolator hermite(times[i],positions[i],velocities[i])
+/// and for each channel i, the 1D interpolator ``hermite(times[i],positions[i],velocities[i])``
 /// will give the path for that channel.
 /// If a path cannot be found, then empty arrays are returned.
-void interpolateNDMinTime(const vector<double>& x0,const vector<double>& v0,const vector<double>& x1,const vector<double>& v1,
+void interpolate_nd_min_time(const vector<double>& x0,const vector<double>& v0,const vector<double>& x1,const vector<double>& v1,
              const vector<double>& xmin,const vector<double>& xmax,const vector<double>& vmax,const vector<double>& amax,
              vector<vector<double> >& out,vector<vector<double> >& out2,vector<vector<double> >& out3);
 
@@ -54,7 +54,7 @@ void interpolateNDMinTime(const vector<double>& x0,const vector<double>& v0,cons
 /// and for each channel i, the 1D interpolator hermite(times[i],positions[i],velocities[i])
 /// will give the path for that channel.
 /// If a path cannot be found, then empty arrays are returned.
-void interpolateNDMinAccel(const vector<double>& x0,const vector<double>& v0,const vector<double>& x1,const vector<double>& v1,
+void interpolate_nd_min_accel(const vector<double>& x0,const vector<double>& v0,const vector<double>& x1,const vector<double>& v1,
              double endTime,const vector<double>& xmin,const vector<double>& xmax,const vector<double>& vmax,
              vector<vector<double> >& out,vector<vector<double> >& out2,vector<vector<double> >& out3);
 
@@ -65,9 +65,9 @@ void interpolateNDMinAccel(const vector<double>& x0,const vector<double>& v0,con
 /// Returns (times,positions,velocities) which give the parameters of an
 /// ND cubic curve.  (len(times)==len(positions)==len(velocities)), and
 /// len(positions[i])==len(velocities[i])==N for all i.  The
-/// ND interpolator hermite(times,positions[i],velocities[i])
+/// ND interpolator ``hermite(times,positions[i],velocities[i])``
 /// will give the optimized trajectory.
-void interpolateNDMinTimeLinear(const vector<double>& x0,const vector<double>& x1,
+void interpolate_nd_min_time_linear(const vector<double>& x0,const vector<double>& x1,
              const vector<double>& vmax,const vector<double>& amax,
              vector<double>& out,vector<vector<double> >& out2,vector<vector<double> >& out3);
 
@@ -76,9 +76,9 @@ void interpolateNDMinTimeLinear(const vector<double>& x0,const vector<double>& x
 /// (times',positions',velocities') suitable for input into an N-D cubic
 /// interpolator.
 ///
-/// Use this to post-process the results from interpolateNDMinTime and
-/// interpolateNDMinAccel.
-void combineNDCubic(const vector<vector<double> >& times,const vector<vector<double> >& positions,const vector<vector<double> >& velocities,
+/// Use this to post-process the results from :func:`interpolate_nd_min_time` 
+/// and :func:`interpolate_nd_min_accel`.
+void combine_nd_cubic(const vector<vector<double> >& times,const vector<vector<double> >& positions,const vector<vector<double> >& velocities,
     vector<double>& out,vector<vector<double> >& out2,vector<vector<double> >& out3);
 
 #endif // INTERPOLATE_H

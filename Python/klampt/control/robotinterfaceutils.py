@@ -285,6 +285,7 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
         if not self._warned:
             warnings.warn("startStep is deprecated, use beginStep",DeprecationWarning)
         self._warned = True
+        self.beginStep()
 
     def beginStep(self):
         assert self._indices is not None,"RobotInterface not initialized yet"
@@ -1682,7 +1683,7 @@ class _RobotInterfaceEmulatorData:
                 if abs(dqcmd[i]) > vmax[i]:
                     vmax[i] = dqcmd[i]
             try:
-                ts,xs,vs = motionplanning.interpolateNDMinTime(qcmd,dqcmd,q,[0]*len(q),xmin,xmax,vmax,amax)
+                ts,xs,vs = motionplanning.interpolate_nd_min_time(qcmd,dqcmd,q,[0]*len(q),xmin,xmax,vmax,amax)
             except Exception as e:
                 print("Couldn't solve for move to?")
                 print(e)
@@ -1694,7 +1695,7 @@ class _RobotInterfaceEmulatorData:
                     print("vcmd:",dqcmd,"vmax:",vmax)
                     print("amax:",amax)
                 raise
-            ts,xs,vs = motionplanning.combineNDCubic(ts,xs,vs)
+            ts,xs,vs = motionplanning.combine_nd_cubic(ts,xs,vs)
             self.setPiecewiseCubic(indices,ts,xs,vs,True)
 
     def setVelocity(self,indices,v,ttl):

@@ -305,10 +305,10 @@ def get_config_names(item):
         return x
     elif is_compound(item):
         res = []
-        cnames = componentNames(item)
+        cnames = component_names(item)
         comps = components(item)
         for (cname,comp) in zip(cnames,comps):
-            for n in getConfigNames(comp):
+            for n in get_config_names(comp):
                 res.append(cname+'.'+n)
         return res
     elif hasattr(item,'__iter__'):
@@ -321,7 +321,7 @@ def get_config_names(item):
         if isinstance(item[0],(bool,int,float,str)):
             return ['['+str(i)+']' for i in range(len(item))]
         else:
-            return sum(['['+str(i)+'].'+getConfigNames(v) for i,v in enumerate(item)],[])
+            return sum(['['+str(i)+'].'+get_config_names(v) for i,v in enumerate(item)],[])
     else:
         return []
 
@@ -388,8 +388,9 @@ def _deprecated_func(oldName,newName):
     def depf(*args,**kwargs):
         warnings.warn("{} will be deprecated in favor of {} in a future version of Klampt".format(oldName,newName),DeprecationWarning)
         return f(*args,**kwargs)
+    depf.__doc__ = 'Deprecated in a future version of Klampt. Use {} instead'.format(newName)
     setattr(mod,oldName,depf)
-    
+        
 _deprecated_func("isCompound","is_compound")
 _deprecated_func("getConfig","get_config")
 _deprecated_func("setConfig","set_config")

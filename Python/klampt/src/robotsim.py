@@ -964,8 +964,8 @@ class TriangleMesh(object):
 
     def __reduce__(self):
         from klampt.io import loader
-        jsonobj = loader.toJson(self,'TriangleMesh')
-        return (loader.fromJson,(jsonobj,'TriangleMesh'))
+        jsonobj = loader.to_json(self,'TriangleMesh')
+        return (loader.from_json,(jsonobj,'TriangleMesh'))
 
     __swig_destroy__ = _robotsim.delete_TriangleMesh
 
@@ -1073,8 +1073,8 @@ class ConvexHull(object):
 
     def __reduce__(self):
         from klampt.io import loader
-        jsonobj = loader.toJson(self,'ConvexHull')
-        return (loader.fromJson,(jsonobj,'ConvexHull'))
+        jsonobj = loader.to_json(self,'ConvexHull')
+        return (loader.from_json,(jsonobj,'ConvexHull'))
 
     __swig_destroy__ = _robotsim.delete_ConvexHull
 
@@ -1485,8 +1485,8 @@ class PointCloud(object):
 
     def __reduce__(self):
         from klampt.io import loader
-        jsonobj = loader.toJson(self,'PointCloud')
-        return (loader.fromJson,(jsonobj,'PointCloud'))
+        jsonobj = loader.to_json(self,'PointCloud')
+        return (loader.from_json,(jsonobj,'PointCloud'))
 
     def setDepthImage(self,intrinsics,depth,depth_scale=1.0):
         """
@@ -1667,8 +1667,8 @@ class GeometricPrimitive(object):
 
     def __reduce__(self):
         from klampt.io import loader
-        jsonobj = loader.toJson(self,'GeometricPrimitive')
-        return (loader.fromJson,(jsonobj,'GeometricPrimitive'))
+        jsonobj = loader.to_json(self,'GeometricPrimitive')
+        return (loader.from_json,(jsonobjO,'GeometricPrimitive'))
 
     __swig_destroy__ = _robotsim.delete_GeometricPrimitive
 
@@ -1779,8 +1779,8 @@ class VolumeGrid(object):
 
     def __reduce__(self):
         from klampt.io import loader
-        jsonobj = loader.toJson(self,'VolumeGrid')
-        return (loader.fromJson,(jsonobj,'VolumeGrid'))
+        jsonobj = loader.to_json(self,'VolumeGrid')
+        return (loader.from_json,(jsonobj,'VolumeGrid'))
 
     __swig_destroy__ = _robotsim.delete_VolumeGrid
 
@@ -2695,8 +2695,8 @@ class Geometry3D(object):
 
     def __reduce__(self):
         from klampt.io import loader
-        jsonobj = loader.toJson(self,'Geometry3D')
-        return (loader.fromJson,(jsonobj,'Geometry3D'))
+        jsonobj = loader.to_json(self,'Geometry3D')
+        return (loader.from_json,(jsonobj,'Geometry3D'))
 
 
 # Register Geometry3D in _robotsim:
@@ -2715,8 +2715,8 @@ class Appearance(object):
     Appearances can be either references to appearances of objects in the world, or
     they can be standalone.  
 
-    Performance note: Avoid rebuilding buffers (e.g., via :meth:`refresh` as much as
-    possible.  
+    Performance note: Avoid rebuilding buffers (e.g., via :meth:`refresh`) as much
+    as possible.  
 
     C++ includes: appearance.h
 
@@ -4305,7 +4305,7 @@ class RobotModelLink(object):
         return _robotsim.RobotModelLink_drawWorldGL(self, keepAppearance)
     world = property(_robotsim.RobotModelLink_world_get, _robotsim.RobotModelLink_world_set, doc=r"""world : int""")
     robotIndex = property(_robotsim.RobotModelLink_robotIndex_get, _robotsim.RobotModelLink_robotIndex_set, doc=r"""robotIndex : int""")
-    robotPtr = property(_robotsim.RobotModelLink_robotPtr_get, _robotsim.RobotModelLink_robotPtr_set, doc=r"""robotPtr : p.Robot""")
+    robotPtr = property(_robotsim.RobotModelLink_robotPtr_get, _robotsim.RobotModelLink_robotPtr_set, doc=r"""robotPtr : p.Klampt::RobotModel""")
     index = property(_robotsim.RobotModelLink_index_get, _robotsim.RobotModelLink_index_set, doc=r"""index : int""")
 
     name = property(getName, setName)
@@ -4461,7 +4461,7 @@ class RobotModelDriver(object):
         return _robotsim.RobotModelDriver_getVelocity(self)
     world = property(_robotsim.RobotModelDriver_world_get, _robotsim.RobotModelDriver_world_set, doc=r"""world : int""")
     robotIndex = property(_robotsim.RobotModelDriver_robotIndex_get, _robotsim.RobotModelDriver_robotIndex_set, doc=r"""robotIndex : int""")
-    robotPtr = property(_robotsim.RobotModelDriver_robotPtr_get, _robotsim.RobotModelDriver_robotPtr_set, doc=r"""robotPtr : p.Robot""")
+    robotPtr = property(_robotsim.RobotModelDriver_robotPtr_get, _robotsim.RobotModelDriver_robotPtr_set, doc=r"""robotPtr : p.Klampt::RobotModel""")
     index = property(_robotsim.RobotModelDriver_index_get, _robotsim.RobotModelDriver_index_set, doc=r"""index : int""")
 
     name = property(getName, setName)
@@ -5178,7 +5178,7 @@ class RobotModel(object):
         return _robotsim.RobotModel_sensor(self, *args)
     world = property(_robotsim.RobotModel_world_get, _robotsim.RobotModel_world_set, doc=r"""world : int""")
     index = property(_robotsim.RobotModel_index_get, _robotsim.RobotModel_index_set, doc=r"""index : int""")
-    robot = property(_robotsim.RobotModel_robot_get, _robotsim.RobotModel_robot_set, doc=r"""robot : p.Robot""")
+    robot = property(_robotsim.RobotModel_robot_get, _robotsim.RobotModel_robot_set, doc=r"""robot : p.Klampt::RobotModel""")
     dirty_dynamics = property(_robotsim.RobotModel_dirty_dynamics_get, _robotsim.RobotModel_dirty_dynamics_set, doc=r"""dirty_dynamics : bool""")
 
     name = property(getName, setName)
@@ -5401,7 +5401,7 @@ class RigidObjectModel(object):
         return _robotsim.RigidObjectModel_drawGL(self, keepAppearance)
     world = property(_robotsim.RigidObjectModel_world_get, _robotsim.RigidObjectModel_world_set, doc=r"""world : int""")
     index = property(_robotsim.RigidObjectModel_index_get, _robotsim.RigidObjectModel_index_set, doc=r"""index : int""")
-    object = property(_robotsim.RigidObjectModel_object_get, _robotsim.RigidObjectModel_object_set, doc=r"""object : p.RigidObject""")
+    object = property(_robotsim.RigidObjectModel_object_get, _robotsim.RigidObjectModel_object_set, doc=r"""object : p.Klampt::RigidObjectModel""")
     __swig_destroy__ = _robotsim.delete_RigidObjectModel
 
 # Register RigidObjectModel in _robotsim:
@@ -5523,7 +5523,7 @@ class TerrainModel(object):
         return _robotsim.TerrainModel_drawGL(self, keepAppearance)
     world = property(_robotsim.TerrainModel_world_get, _robotsim.TerrainModel_world_set, doc=r"""world : int""")
     index = property(_robotsim.TerrainModel_index_get, _robotsim.TerrainModel_index_set, doc=r"""index : int""")
-    terrain = property(_robotsim.TerrainModel_terrain_get, _robotsim.TerrainModel_terrain_set, doc=r"""terrain : p.Terrain""")
+    terrain = property(_robotsim.TerrainModel_terrain_get, _robotsim.TerrainModel_terrain_set, doc=r"""terrain : p.Klampt::TerrainModel""")
     __swig_destroy__ = _robotsim.delete_TerrainModel
 
 # Register TerrainModel in _robotsim:
@@ -6233,14 +6233,25 @@ class IKObjective(object):
         """
         return _robotsim.IKObjective_closestMatch(self, R, t)
 
+    def sampleTransform(self):
+        r"""
+        sampleTransform(IKObjective self)
+
+
+        Returns a transformation (R,t) from link relative to link2, sampled at random
+        from the space of transforms that satisfies the objective obj.  
+
+        """
+        return _robotsim.IKObjective_sampleTransform(self)
+
     def loadString(self, str):
         r"""
         loadString(IKObjective self, char const * str) -> bool
 
 
         Loads the objective from a Klamp't-native formatted string. For a more readable
-        but verbose format, try the JSON IO routines :meth:`klampt.io.loader.toJson` /
-        :meth:`klampt.io.loader.fromJson`  
+        but verbose format, try the JSON IO routines :meth:`klampt.io.loader.to_json` /
+        :meth:`klampt.io.loader.from_json`  
 
         """
         return _robotsim.IKObjective_loadString(self, str)
@@ -6251,8 +6262,8 @@ class IKObjective(object):
 
 
         Saves the objective to a Klamp't-native formatted string. For a more readable
-        but verbose format, try the JSON IO routines :meth:`klampt.io.loader.toJson` /
-        :meth:`klampt.io.loader.fromJson`  
+        but verbose format, try the JSON IO routines :meth:`klampt.io.loader.to_json` /
+        :meth:`klampt.io.loader.from_json`  
 
         """
         return _robotsim.IKObjective_saveString(self)
@@ -6262,8 +6273,8 @@ class IKObjective(object):
 
     def __reduce__(self):
         from klampt.io import loader
-        jsonobj = loader.toJson(self,'IKObjective')
-        return (loader.fromJson,(jsonobj,'IKObjective'))
+        jsonobj = loader.to_json(self,'IKObjective')
+        return (loader.from_json,(jsonobj,'IKObjective'))
 
     __swig_destroy__ = _robotsim.delete_IKObjective
 
@@ -6593,6 +6604,17 @@ class GeneralizedIKObjective(object):
 
         """
         return _robotsim.GeneralizedIKObjective_setTransform(self, R, t)
+
+    def sampleTransform(self):
+        r"""
+        sampleTransform(GeneralizedIKObjective self)
+
+
+        Returns a transformation (R,t) from link relative to link2, sampled at random
+        from the space of transforms that satisfies the objective obj.  
+
+        """
+        return _robotsim.GeneralizedIKObjective_sampleTransform(self)
     link1 = property(_robotsim.GeneralizedIKObjective_link1_get, _robotsim.GeneralizedIKObjective_link1_set, doc=r"""link1 : RobotModelLink""")
     link2 = property(_robotsim.GeneralizedIKObjective_link2_get, _robotsim.GeneralizedIKObjective_link2_set, doc=r"""link2 : RobotModelLink""")
     obj1 = property(_robotsim.GeneralizedIKObjective_obj1_get, _robotsim.GeneralizedIKObjective_obj1_set, doc=r"""obj1 : RigidObjectModel""")
@@ -6711,18 +6733,6 @@ class GeneralizedIKSolver(object):
 # Register GeneralizedIKSolver in _robotsim:
 _robotsim.GeneralizedIKSolver_swigregister(GeneralizedIKSolver)
 
-
-def SampleTransform(*args):
-    r"""
-    SampleTransform(IKObjective obj)
-    SampleTransform(GeneralizedIKObjective obj)
-
-
-    Returns a transformation (R,t) from link relative to link2, sampled at random
-    from the space of transforms that satisfies the objective obj.  
-
-    """
-    return _robotsim.SampleTransform(*args)
 class SimRobotSensor(object):
     r"""
 
@@ -6764,7 +6774,7 @@ class SimRobotSensor(object):
 
     def __init__(self, *args):
         r"""
-        __init__(SimRobotSensor self, RobotModel robot, SensorBase * sensor) -> SimRobotSensor
+        __init__(SimRobotSensor self, RobotModel robot, Klampt::SensorBase * sensor) -> SimRobotSensor
         __init__(SimRobotSensor self, SimRobotController robot, char const * name, char const * type) -> SimRobotSensor
 
 
@@ -6885,7 +6895,7 @@ class SimRobotSensor(object):
         """
         return _robotsim.SimRobotSensor_kinematicReset(self)
     robotModel = property(_robotsim.SimRobotSensor_robotModel_get, _robotsim.SimRobotSensor_robotModel_set, doc=r"""robotModel : RobotModel""")
-    sensor = property(_robotsim.SimRobotSensor_sensor_get, _robotsim.SimRobotSensor_sensor_set, doc=r"""sensor : p.SensorBase""")
+    sensor = property(_robotsim.SimRobotSensor_sensor_get, _robotsim.SimRobotSensor_sensor_set, doc=r"""sensor : p.Klampt::SensorBase""")
     __swig_destroy__ = _robotsim.delete_SimRobotSensor
 
 # Register SimRobotSensor in _robotsim:
@@ -7304,7 +7314,7 @@ class SimRobotController(object):
         return _robotsim.SimRobotController_getPIDGains(self)
     index = property(_robotsim.SimRobotController_index_get, _robotsim.SimRobotController_index_set, doc=r"""index : int""")
     sim = property(_robotsim.SimRobotController_sim_get, _robotsim.SimRobotController_sim_set, doc=r"""sim : p.Simulator""")
-    controller = property(_robotsim.SimRobotController_controller_get, _robotsim.SimRobotController_controller_set, doc=r"""controller : p.ControlledRobotSimulator""")
+    controller = property(_robotsim.SimRobotController_controller_get, _robotsim.SimRobotController_controller_set, doc=r"""controller : p.Klampt::SimRobotController""")
 
 # Register SimRobotController in _robotsim:
 _robotsim.SimRobotController_swigregister(SimRobotController)
@@ -7536,7 +7546,7 @@ class SimBody(object):
         return _robotsim.SimBody_setSurface(self, params)
     sim = property(_robotsim.SimBody_sim_get, _robotsim.SimBody_sim_set, doc=r"""sim : p.Simulator""")
     objectID = property(_robotsim.SimBody_objectID_get, _robotsim.SimBody_objectID_set, doc=r"""objectID : int""")
-    geometry = property(_robotsim.SimBody_geometry_get, _robotsim.SimBody_geometry_set, doc=r"""geometry : p.ODEGeometry""")
+    geometry = property(_robotsim.SimBody_geometry_get, _robotsim.SimBody_geometry_set, doc=r"""geometry : p.Klampt::ODEGeometry""")
     body = property(_robotsim.SimBody_body_get, _robotsim.SimBody_body_set, doc=r"""body : dBodyID""")
 
     def __init__(self):
@@ -8118,22 +8128,22 @@ class Simulator(object):
         return _robotsim.Simulator_setSetting(self, name, value)
     index = property(_robotsim.Simulator_index_get, _robotsim.Simulator_index_set, doc=r"""index : int""")
     world = property(_robotsim.Simulator_world_get, _robotsim.Simulator_world_set, doc=r"""world : WorldModel""")
-    sim = property(_robotsim.Simulator_sim_get, _robotsim.Simulator_sim_set, doc=r"""sim : p.WorldSimulation""")
+    sim = property(_robotsim.Simulator_sim_get, _robotsim.Simulator_sim_set, doc=r"""sim : p.Klampt::Simulator""")
     initialState = property(_robotsim.Simulator_initialState_get, _robotsim.Simulator_initialState_set, doc=r"""initialState : std::string""")
 
 # Register Simulator in _robotsim:
 _robotsim.Simulator_swigregister(Simulator)
 
 
-def setRandomSeed(seed):
+def set_random_seed(seed):
     r"""
-    setRandomSeed(int seed)
+    set_random_seed(int seed)
 
 
-    Sets the random seed used by the configuration sampler.  
+    Sets the random seed used by the motion planner.  
 
     """
-    return _robotsim.setRandomSeed(seed)
+    return _robotsim.set_random_seed(seed)
 
 def destroy():
     r"""
@@ -8145,9 +8155,9 @@ def destroy():
     """
     return _robotsim.destroy()
 
-def SubscribeToStream(*args):
+def subscribe_to_stream(*args):
     r"""
-    SubscribeToStream(Geometry3D g, char const * protocol, char const * name, char const * type="") -> bool
+    subscribe_to_stream(Geometry3D g, char const * protocol, char const * name, char const * type="") -> bool
 
 
     Subscribes a Geometry3D to a stream.  
@@ -8172,22 +8182,22 @@ def SubscribeToStream(*args):
     Returns: (bool): True if successful.  
 
     """
-    return _robotsim.SubscribeToStream(*args)
+    return _robotsim.subscribe_to_stream(*args)
 
-def DetachFromStream(protocol, name):
+def detach_from_stream(protocol, name):
     r"""
-    DetachFromStream(char const * protocol, char const * name) -> bool
+    detach_from_stream(char const * protocol, char const * name) -> bool
 
 
     Unsubscribes from a stream previously subscribed to via
     :func:`SubscribeToStream`  
 
     """
-    return _robotsim.DetachFromStream(protocol, name)
+    return _robotsim.detach_from_stream(protocol, name)
 
-def ProcessStreams(*args):
+def process_streams(*args):
     r"""
-    ProcessStreams(char const * protocol="all") -> bool
+    process_streams(char const * protocol="all") -> bool
 
 
     Does some processing on stream subscriptions.  
@@ -8200,11 +8210,11 @@ def ProcessStreams(*args):
     Returns: (bool): True if any stream was updated.  
 
     """
-    return _robotsim.ProcessStreams(*args)
+    return _robotsim.process_streams(*args)
 
-def WaitForStream(protocol, name, timeout):
+def wait_for_stream(protocol, name, timeout):
     r"""
-    WaitForStream(char const * protocol, char const * name, double timeout) -> bool
+    wait_for_stream(char const * protocol, char const * name, double timeout) -> bool
 
 
     Waits up to timeout seconds for an update on the given stream.  
@@ -8214,43 +8224,43 @@ def WaitForStream(protocol, name, timeout):
         (bool): True if the stream was updated.  
 
     """
-    return _robotsim.WaitForStream(protocol, name, timeout)
+    return _robotsim.wait_for_stream(protocol, name, timeout)
 
-def ThreeJSGetScene(arg1):
+def threejs_get_scene(arg1):
     r"""
-    ThreeJSGetScene(WorldModel arg1) -> std::string
+    threejs_get_scene(WorldModel arg1) -> std::string
 
 
     Exports the WorldModel to a JSON string ready for use in Three.js.  
 
     """
-    return _robotsim.ThreeJSGetScene(arg1)
+    return _robotsim.threejs_get_scene(arg1)
 
-def ThreeJSGetTransforms(arg1):
+def threejs_get_transforms(arg1):
     r"""
-    ThreeJSGetTransforms(WorldModel arg1) -> std::string
+    threejs_get_transforms(WorldModel arg1) -> std::string
 
 
     Exports the WorldModel to a JSON string ready for use in Three.js.  
 
     """
-    return _robotsim.ThreeJSGetTransforms(arg1)
+    return _robotsim.threejs_get_transforms(arg1)
 
-def setFrictionConeApproximationEdges(numEdges):
+def set_friction_cone_approximation_edges(numEdges):
     r"""
-    setFrictionConeApproximationEdges(int numEdges)
+    set_friction_cone_approximation_edges(int numEdges)
 
 
     Globally sets the number of edges used in the friction cone approximation. The
     default value is 4.  
 
     """
-    return _robotsim.setFrictionConeApproximationEdges(numEdges)
+    return _robotsim.set_friction_cone_approximation_edges(numEdges)
 
-def forceClosure(*args):
+def force_closure(*args):
     r"""
-    forceClosure(double * contacts, int m, int n) -> bool
-    forceClosure(doubleMatrix contactPositions, doubleMatrix frictionCones) -> bool
+    force_closure(double * contacts, int m, int n) -> bool
+    force_closure(doubleMatrix contactPositions, doubleMatrix frictionCones) -> bool
 
 
     Returns true if the list of contact points has force closure.  
@@ -8282,12 +8292,12 @@ def forceClosure(*args):
              per-contact.  
 
     """
-    return _robotsim.forceClosure(*args)
+    return _robotsim.force_closure(*args)
 
-def forceClosure2D(*args):
+def force_closure_2d(*args):
     r"""
-    forceClosure2D(double * contacts, int m, int n) -> bool
-    forceClosure2D(doubleMatrix contactPositions, doubleMatrix frictionCones) -> bool
+    force_closure_2d(double * contacts, int m, int n) -> bool
+    force_closure_2d(doubleMatrix contactPositions, doubleMatrix frictionCones) -> bool
 
 
     Returns true if the list of 2D contact points has force closure.  
@@ -8317,12 +8327,12 @@ def forceClosure2D(*args):
              per-contact.  
 
     """
-    return _robotsim.forceClosure2D(*args)
+    return _robotsim.force_closure_2d(*args)
 
-def comEquilibrium(*args):
+def com_equilibrium(*args):
     r"""
-    comEquilibrium(double * contacts, int m, int n, doubleVector fext, PyObject * com) -> PyObject
-    comEquilibrium(doubleMatrix contactPositions, doubleMatrix frictionCones, doubleVector fext, PyObject * com) -> PyObject *
+    com_equilibrium(double * contacts, int m, int n, doubleVector fext, PyObject * com) -> PyObject
+    com_equilibrium(doubleMatrix contactPositions, doubleMatrix frictionCones, doubleVector fext, PyObject * com) -> PyObject *
 
 
     Tests whether the given COM com is stable for the given contacts and the given
@@ -8359,12 +8369,12 @@ def comEquilibrium(*args):
             If com = None, the result is True or False.  
 
     """
-    return _robotsim.comEquilibrium(*args)
+    return _robotsim.com_equilibrium(*args)
 
-def comEquilibrium2D(*args):
+def com_equilibrium_2d(*args):
     r"""
-    comEquilibrium2D(double * contacts, int m, int n, doubleVector fext, PyObject * com) -> PyObject
-    comEquilibrium2D(doubleMatrix contactPositions, doubleMatrix frictionCones, doubleVector fext, PyObject * com) -> PyObject *
+    com_equilibrium_2d(double * contacts, int m, int n, doubleVector fext, PyObject * com) -> PyObject
+    com_equilibrium_2d(doubleMatrix contactPositions, doubleMatrix frictionCones, doubleVector fext, PyObject * com) -> PyObject *
 
 
     Tests whether the given COM com is stable for the given contacts and the given
@@ -8404,12 +8414,12 @@ def comEquilibrium2D(*args):
             If com = None, the result is True or False.  
 
     """
-    return _robotsim.comEquilibrium2D(*args)
+    return _robotsim.com_equilibrium_2d(*args)
 
-def supportPolygon(*args):
+def support_polygon(*args):
     r"""
-    supportPolygon(double * contacts, int m, int n) -> PyObject
-    supportPolygon(doubleMatrix contactPositions, doubleMatrix frictionCones) -> PyObject *
+    support_polygon(double * contacts, int m, int n) -> PyObject
+    support_polygon(doubleMatrix contactPositions, doubleMatrix frictionCones) -> PyObject *
 
 
     Calculates the support polygon for a given set of contacts and a downward
@@ -8454,12 +8464,12 @@ def supportPolygon(*args):
                 myComEquilibrium = lambda x: np.all(np.dot(A,x)<=b)  
 
     """
-    return _robotsim.supportPolygon(*args)
+    return _robotsim.support_polygon(*args)
 
-def supportPolygon2D(*args):
+def support_polygon_2d(*args):
     r"""
-    supportPolygon2D(double * contacts, int m, int n) -> PyObject
-    supportPolygon2D(doubleMatrix contacts, doubleMatrix frictionCones) -> PyObject *
+    support_polygon_2d(double * contacts, int m, int n) -> PyObject
+    support_polygon_2d(doubleMatrix contacts, doubleMatrix frictionCones) -> PyObject *
 
 
     Calculates the support polygon (interval) for a given set of contacts and a
@@ -8491,12 +8501,12 @@ def supportPolygon2D(*args):
             If the support interval is empty, (inf,inf) is returned.  
 
     """
-    return _robotsim.supportPolygon2D(*args)
+    return _robotsim.support_polygon_2d(*args)
 
-def equilibriumTorques(*args):
+def equilibrium_torques(*args):
     r"""
-    equilibriumTorques(RobotModel robot, double * contacts, int m, int n, intVector links, doubleVector fext, double norm=0) -> PyObject
-    equilibriumTorques(RobotModel robot, double * contacts, int m, int n, intVector links, doubleVector fext, doubleVector internalTorques, double norm=0) -> PyObject
+    equilibrium_torques(RobotModel robot, double * contacts, int m, int n, intVector links, doubleVector fext, double norm=0) -> PyObject
+    equilibrium_torques(RobotModel robot, double * contacts, int m, int n, intVector links, doubleVector fext, doubleVector internalTorques, double norm=0) -> PyObject
 
 
     Solves for the torques / forces that keep the robot balanced against gravity.  
@@ -8541,6 +8551,47 @@ def equilibriumTorques(*args):
              None is returned if no solution exists.  
 
     """
-    return _robotsim.equilibriumTorques(*args)
+    return _robotsim.equilibrium_torques(*args)
+
+import warnings
+
+def _deprecated_func(oldName,newName):
+    import sys
+    mod = sys.modules[__name__]
+    f = getattr(mod,newName)
+    def depf(*args,**kwargs):
+        warnings.warn("{} will be deprecated in favor of {} in a future version of Klampt".format(oldName,newName),DeprecationWarning)
+        return f(*args,**kwargs)
+    depf.__doc__ = 'Deprecated in a future version of Klampt. Use {} instead'.format(newName)
+    setattr(mod,oldName,depf)
+
+_deprecated_func('SubscribeToStream','subscribe_to_stream')
+_deprecated_func('DetachFromStream','detach_from_stream')
+_deprecated_func('ProcessStreams','process_streams')
+_deprecated_func('WaitForStream','wait_for_stream')
+_deprecated_func('ThreeJSGetScene','threejs_get_scene')
+_deprecated_func('ThreeJSGetTransforms','threejs_get_transforms')
+_deprecated_func('setFrictionConeApproximationEdges','set_friction_cone_approximation_edges')
+_deprecated_func('forceClosure','force_closure')
+_deprecated_func('forceClosure2D','force_closure_2d')
+_deprecated_func('comEquilibrium','com_equilibrium')
+_deprecated_func('comEquilibrium2D','com_equilibrium_2d')
+_deprecated_func('supportPolygon','support_polygon')
+_deprecated_func('supportPolygon2D','support_polygon_2d')
+_deprecated_func('equilibriumTorques','equilibrium_torques')
+_deprecated_func('setRandomSeed','set_random_seed')
+
+def SampleTransform(obj):
+    """Deprecated.  Use ``obj.sampleTransform()`` instead.
+
+    Args:
+        obj (IKObjective or GeneralizedIKObjective)
+
+    Returns:
+        klampt se3 element.
+    """
+    return obj.sampleTransform()
+
+
 
 

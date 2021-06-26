@@ -259,11 +259,11 @@ class MotionPlan:
         if space.cspace is None:
             space.setup()
         if type != None:
-            motionplanning.setPlanType(type)
+            motionplanning.set_plan_type(type)
         if len(options) > 0:
             MotionPlan.setOptions(**options)
         self.space = space
-        self.planOptions = motionplanning.getPlanJSONString()
+        self.planOptions = motionplanning.get_plan_json_string()
         self.planner = motionplanning.PlannerInterface(space.cspace)
         self.edgeCost=None
         self.terminalCost=None
@@ -311,11 +311,11 @@ class MotionPlan:
         """
         for (a,b) in list(opts.items()):
             if a=='type':
-                motionplanning.setPlanType(str(b))
+                motionplanning.set_plan_type(str(b))
             elif isinstance(b,str):
-                motionplanning.setPlanSetting(a,b)
+                motionplanning.set_plan_setting(a,b)
             else:
-                motionplanning.setPlanSetting(a,float(b))
+                motionplanning.set_plan_setting(a,float(b))
 
     def setEndpoints(self,start,goal):
         """Sets the start and goal configuration or goal condition. 

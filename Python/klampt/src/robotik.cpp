@@ -13,6 +13,7 @@
 #include <Klampt/Planning/RobotCSpace.h>
 #include "pyerr.h"
 #include "pyconvert.h"
+using namespace std;
 
 //defined in robotsim.cpp
 inline void MakeNumpyArray(double** out,int* m,int* n,int _m,int _n,Matrix& ref)
@@ -243,7 +244,7 @@ void IKObjective::matchDestination(const double R[9],const double t[3])
   goal.MatchGoalTransform(T);
 }
 
-void IKObjective::closestMatch(const double R[9],const double t[3],double out[9],double out2[3])
+void IKObjective::closestMatch(const double R[9],const double t[3],double out[9],double out2[3]) const
 {
   RigidTransform T,Tout;
   T.R = Matrix3(R);
@@ -614,7 +615,7 @@ void IKSolver::sampleInitial()
   if(qmin.empty()) {
     //this method correctly updates non-normal joints and handles infinite bounds
     Config qorig = robot.robot->q;
-    RobotCSpace space(*robot.robot);
+    Klampt::RobotCSpace space(*robot.robot);
     space.Sample(robot.robot->q);
     swap(robot.robot->q,qorig);
     for(size_t i=0;i<active.size();i++)
@@ -689,18 +690,18 @@ void SampleTransform(const IKGoal& goal,RigidTransform& T)
   }
 }
 
-void SampleTransform(const IKObjective& obj,double out[9],double out2[3])
+void IKObjective::sampleTransform(double out[9],double out2[3]) const
 {
   RigidTransform T;
-  SampleTransform(obj.goal,T);
+  SampleTransform(goal,T);
   T.R.get(out);
   T.t.get(out2);
 }
 
-void SampleTransform(const GeneralizedIKObjective& obj,double out[9],double out2[3])
+void GeneralizedIKObjective::sampleTransform(double out[9],double out2[3]) const
 {
   RigidTransform T;
-  SampleTransform(obj.goal,T);
+  SampleTransform(goal,T);
   T.R.get(out);
   T.t.get(out2);
 }

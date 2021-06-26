@@ -80,7 +80,7 @@ def get_sensor_xform(sensor,robot=None):
         klampt.se3 object: the sensor transform  
     """
     s = sensor.getSetting("Tsensor")
-    Tsensor = loader.readSe3(s)
+    Tsensor = loader.read_se3(s)
     if robot is not None:
         link = int(sensor.getSetting("link"))
         if link >= 0:
@@ -104,7 +104,7 @@ def set_sensor_xform(sensor,T,link=None):
     be associated with  one.
 
     (the reason why you should use this is that the Tsensor attribute has a
-    particular format using the loader.writeSe3 function.)
+    particular format using the loader.write_se3 function.)
     """
     if isinstance(T,coordinates.Frame):
         if isinstance(T._data,RobotModelLink):
@@ -121,7 +121,7 @@ def set_sensor_xform(sensor,T,link=None):
         s = sensor.getSetting("Tsensor")
     except Exception:
         raise ValueError("Sensor does not have a Tsensor attribute")
-    sensor.setSetting("Tsensor",loader.writeSe3(T))
+    sensor.setSetting("Tsensor",loader.write_se3(T))
     if link != None:
         if isinstance(link,RobotModelLink):
             sensor.setSetting("link",str(link.index))
