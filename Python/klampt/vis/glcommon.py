@@ -114,7 +114,7 @@ class GLMultiViewportProgram(GLProgram):
             plugin = view
             pview = GLPluginProgram()
             pview.window = self.window
-            pview.setPlugin(view)
+            pview.set_plugin(view)
             view = pview
         assert isinstance(view,GLProgram)
         self.views.append(view)
