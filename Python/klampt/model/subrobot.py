@@ -8,7 +8,6 @@ the place of RobotModel.
 
 from ..robotsim import *
 from .collide import self_collision_iter
-from .trajectory import Trajectory,HermiteTrajectory
 import warnings
 
 class SubRobotModel:
@@ -88,13 +87,15 @@ class SubRobotModel:
                 for l,v in zip(self._links,object):
                     res[l] = v
                 return res
-        elif isinstance(object,Trajectory):
-            if isinstance(object,HermiteTrajectory):
-                raise NotImplementedError("Can't lift hermite trajectories to full robots yet")
-            newmilestones = self.tofull(object.milestones,reference=reference)
-            return object.constructor(object.times,newmilestones)
         else:
-            raise ValueError("Invalid object type, not an integer, configuration, or Trajectory")
+            from .trajectory import Trajectory,HermiteTrajectory
+            if isinstance(object,Trajectory):
+                if isinstance(object,HermiteTrajectory):
+                    raise NotImplementedError("Can't lift hermite trajectories to full robots yet")
+                newmilestones = self.tofull(object.milestones,reference=reference)
+                return object.constructor(object.times,newmilestones)
+            else:
+                raise ValueError("Invalid object type, not an integer, configuration, or Trajectory")
 
     def fromfull(self,object):
         """Converts the given index, configuration, velocity, or trajectory of
@@ -127,13 +128,15 @@ class SubRobotModel:
                 #treat as a configuration 
                 assert len(object) == self._robot.numLinks(),'Object needs to be a configuration of length {}'.format(self._robot.numLinks())
                 return [object[i] for i in self._links]
-        elif isinstance(object,Trajectory):
-            if isinstance(object,HermiteTrajectory):
-                raise NotImplementedError("Can't project hermite trajectories to sub-robots yet")
-            newmilestones = [self.fromfull(v) for v in object.milestones]
-            return object.constructor(object.times,newmilestones)
         else:
-            raise ValueError("Invalid object type, not an integer, configuration, or Trajectory")
+            from .trajectory import Trajectory,HermiteTrajectory
+            if isinstance(object,Trajectory):
+                if isinstance(object,HermiteTrajectory):
+                    raise NotImplementedError("Can't project hermite trajectories to sub-robots yet")
+                newmilestones = [self.fromfull(v) for v in object.milestones]
+                return object.constructor(object.times,newmilestones)
+            else:
+                raise ValueError("Invalid object type, not an integer, configuration, or Trajectory")
 
     def numLinks(self):
         return len(self._links)
