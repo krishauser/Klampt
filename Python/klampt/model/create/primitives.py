@@ -2,7 +2,7 @@
 of them).
 """
 
-from klampt import Geometry3D,GeometricPrimitive
+from klampt import Geometry3D,GeometricPrimitive,Mass
 from klampt.math import vectorops
 
 def box(width,depth,height,center=None,R=None,t=None,world=None,name=None,mass=float('inf'),type='TriangleMesh'):
