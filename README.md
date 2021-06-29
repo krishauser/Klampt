@@ -94,7 +94,15 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 -   Python API: Direct Numpy interface speeds up large data copies. Tests indicate ~6x speedup (45ms->7.5ms) for getting a simulated sensor image (SimRobotSensor.getMeasurements()), ~80x speedup (160ms->2ms) for converting images to point clouds (PointCloud.setDepthImage/setRGBDImages), and 20x speedup (200ms->10ms) for converting a Numpy array to a point cloud (tested on 640x480 images).
 -   Python API: global functions and many classes in the the klampt.vis module now conform to PEP8 naming conventions.  Old non-conformant functions produce a DeprecationWarning and will be removed in the future.  (Run your code with `python -W all` to see these warnings.))
 
-**Master** (2/22/2021)
+**master** (6/1/2021)
+
+Note: If you have a `pip` installed Klampt, you may get these updates by cloning the Git repo, then run `cd Klampt/Python; python patch_a_pip_install.py`. This provides all of the Python API updates listed below without needing to build from source.
+
+-   Fixed bug saving/restoring simulation states.
+-   Python API: fixed bug with setBackgroundImage(None)
+
+
+**0.8.7** (5/25/2021)
 -   Fixed bug in simulation of affine joints when the joint angle can go negative. Also, internal affine transmission coupling is simulated in a fashion that's sensitive to the driver's PID constants.
 -   URDF import can now import multiple collision and visual geometries.
 -   Python API: Workaround for Mac OSX Big Sur dropping support for OpenGL when importing PyOpenGL.

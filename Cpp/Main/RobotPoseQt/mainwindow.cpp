@@ -179,7 +179,11 @@ void MainWindow::SetLink(int index){
 void MainWindow::UpdateLinkValue(){
     if(world.robots.empty()) return;
     if(gui->link_index < 0) return;
+<<<<<<< HEAD
     RobotModel* rob=world.robots[0].get();
+=======
+    Robot* rob=world.robots[0].get();
+>>>>>>> master
     bool oldState = ui->spn_link->blockSignals(true);
     ui->spn_link->setValue(rob->q[gui->link_index]);
     UpdateLinkSlider(rob->q[gui->link_index]);
@@ -189,7 +193,11 @@ void MainWindow::UpdateLinkValue(){
 void MainWindow::UpdateDriverValue(){
     if(world.robots.empty()) return;
     if(gui->driver_index < 0) return;
+<<<<<<< HEAD
     RobotModel* rob=world.robots[0].get();
+=======
+    Robot* rob=world.robots[0].get();
+>>>>>>> master
     bool oldState = ui->spn_driver->blockSignals(true);
     ui->spn_driver->setValue(rob->GetDriverValue(gui->driver_index));
     UpdateDriverSlider(rob->GetDriverValue(gui->driver_index));
@@ -216,7 +224,11 @@ void MainWindow::UpdateDriverSlider(double value){
 void MainWindow::UpdateLinkParameters(){
     if(world.robots.empty()) return;
     if(gui->link_index < 0) return;
+<<<<<<< HEAD
     RobotModel* rob=world.robots[0].get();
+=======
+    Robot* rob=world.robots[0].get();
+>>>>>>> master
 #define NUM(x) QString::number(x)
   QString link_info=QString("[%1 %2], T [%3,%4]").arg(NUM(rob->velMin(gui->link_index)),NUM(rob->velMax(gui->link_index)),NUM(-rob->torqueMax(gui->link_index)),NUM(rob->torqueMax(gui->link_index)));
   ui->lbl_link_info->setText(link_info);

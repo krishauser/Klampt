@@ -5,9 +5,9 @@
 :: (assumes the zip command line tool is available.  See GnuWin32 zip.)
 
 :: configuration variables
-SET klamptversion=0.8.6
+SET klamptversion=0.8.7
 :: dependency libraries may be kept back to a prior version
-SET klamptdepversion=0.8.6
+SET klamptdepversion=0.8.7
 ::    this is used for Python build (VS 2015)
 SET VS90COMNTOOLS=%VS140COMNTOOLS%
 SET PYTHON27_32=D:\Python27\python.exe
@@ -162,7 +162,7 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 
 
 :: upload files to motion website
-copy msvc/Klampt-%klamptversion%-win32.msi d:\iml-webpage\software\klampt\0.8\
+copy msvc\Klampt-%klamptversion%-win32.msi d:\iml-webpage\software\klampt\0.8\
 :: Qt5 doesn't have a 64-bit version
 :: copy msvc64/Klampt-%klamptversion%-win64.msi d:\iml-webpage\software\klampt\0.8\
 if %errorlevel% neq 0 exit /b %errorlevel%

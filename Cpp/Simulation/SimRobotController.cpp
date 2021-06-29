@@ -170,14 +170,14 @@ void SimRobotController::GetActuatorTorques(Vector& t) const
     q -= TwoPi;
     }
     if(q < robot->qMin(link)-gJointLimitWarningThreshold || q > robot->qMax(link)+gJointLimitWarningThreshold) {
-      printf("Warning: joint angle %s out of bounds\n",robot->linkNames[link].c_str());
-      printf("q=%g, qmin=%g, qmax=%g (deg)\n",RtoD(q),RtoD(robot->qMin(link)),RtoD(robot->qMax(link)));
+      LOG4CXX_WARN(GET_LOGGER(SimRobotController),"Warning: joint angle %s out of bounds",robot->linkNames[link].c_str());
+      LOG4CXX_WARN(GET_LOGGER(SimRobotController),"(q="<<RtoD(q)<<", qmin="<<RtoD(robot->qMin(link))<<", qmax="<<RtoD(robot->qMax(link))<<" (deg)");
       //getchar();
     }
     const ActuatorCommand& cmd=command.actuators[i];
     switch(cmd.mode) {
     case ActuatorCommand::OFF:
-      printf("Warning: actuator off?\n");
+      LOG4CXX_WARN(GET_LOGGER(SimRobotController),"Warning: actuator off?");
       t(i) = 0;
       break;
     case ActuatorCommand::TORQUE:
@@ -225,8 +225,7 @@ void SimRobotController::Step(Real dt,Simulator* sim)
     else
       delay = 1.0/sensors.sensors[i]->rate;
     if(delay < dt) {
-      printf("Sensor %s set to rate higher than internal simulation time step\n",sensors.sensors[i]->name.c_str());
-      printf("  ... Limiting sensor rate to %f\n",1.0/dt);
+      LOG4CXX_WARN(GET_LOGGER(SimRobotController),"Sensor "<<sensors.sensors[i]->name<<" set to rate higher than internal simulation time step, limiting to "<<1.0/dt);
       sensors.sensors[i]->rate = 1.0/dt;
       //todo: handle numerical errors in inversion...
       delay = dt;
@@ -329,29 +328,29 @@ void SimRobotController::UpdateRobot()
 bool SimRobotController::ReadState(File& f)
 {
   if(!ReadFile(f,curTime)) {
-    printf("SimRobotController::ReadState: Unable to read curTime\n");
+    LOG4CXX_ERROR(GET_LOGGER("SimRobotController"),"SimRobotController::ReadState: Unable to read curTime");
     return false;
   }
   if(!ReadFile(f,nextControlTime)) {
-    printf("SimRobotController::ReadState: Unable to read nextControlTime\n");
+    LOG4CXX_ERROR(GET_LOGGER("SimRobotController"),"SimRobotController::ReadState: Unable to read nextControlTime");
     return false;
   }
   if(!ReadFile(f,command)) {
-    printf("SimRobotController::ReadState: Unable to read command\n");
+    LOG4CXX_ERROR(GET_LOGGER("SimRobotController"),"SimRobotController::ReadState: Unable to read command");
     return false;
   }
   if(!sensors.ReadState(f)) {
-    printf("SimRobotController::ReadState: Unable to read sensors\n");
+    LOG4CXX_ERROR(GET_LOGGER("SimRobotController"),"SimRobotController::ReadState: Unable to read sensors");
     return false;
   }
   if(controller) {
     File cfile;
     if(!ReadFile(f,cfile)) {
-      printf("Unable to read controller file\n");
+      LOG4CXX_ERROR(GET_LOGGER("SimRobotController"),"Unable to read controller file");
       return false;
     }
     if(!controller->ReadState(cfile)) {
-      printf("Unable to read controller\n");
+      LOG4CXX_ERROR(GET_LOGGER("SimRobotController"),"Unable to read controller");
       return false;
     }
   }
