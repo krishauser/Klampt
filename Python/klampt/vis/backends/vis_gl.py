@@ -108,66 +108,58 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
                 self.klamptwidgetmaster.remove(item.editor)
         VisualizationScene.remove(self,name)
 
-    def displayfunc(self):
-        if self.backgroundImage is not None:
-            if not self.backgroundImageUploaded:
-                (img,rows,cols,pixformat)= self.backgroundImage
-                if self.backgroundImageTexture is None:
-                    self.backgroundImageTexture = glGenTextures(1)
-                    glBindTexture(GL_TEXTURE_2D, self.backgroundImageTexture)
-                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-                    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP)
-                    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP)
-                else:
-                    glBindTexture(GL_TEXTURE_2D, self.backgroundImageTexture)
-                
-                glPixelStorei(GL_UNPACK_ALIGNMENT,1)
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, cols, rows, 0, pixformat, GL_UNSIGNED_BYTE, img)
-                glBindTexture(GL_TEXTURE_2D, 0)
-                self.backgroundImageUploaded = True
-        else:
-            #make sure to free stuff inside the visualization loop
-            if self.backgroundImageDisplayList is not None:
-                self.backgroundImageDisplayList.destroy()
-                self.backgroundImageDisplayList = None
-            if self.backgroundImageTexture is not None:
-                glDeleteTextures([self.backgroundImageTexture])
-                self.backgroundImageTexture = None
-        if self.backgroundImageTexture is not None:
-            self.program.prepare_GL()
-            glMatrixMode(GL_PROJECTION)
-            glDisable(GL_CULL_FACE)
-            glLoadIdentity()
-            glOrtho(0,1,1,0,-1,1);
-            glMatrixMode(GL_MODELVIEW)
-            glLoadIdentity()
-            glDisable(GL_DEPTH_TEST)
-            glDepthMask(GL_FALSE)
-            glEnable(GL_TEXTURE_2D)
-            glDisable(GL_LIGHTING)
-            glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
-            if self.backgroundImageDisplayList is not None:
-                self.backgroundImageDisplayList.draw(self.drawBackgroundImage)
-            glDisable(GL_TEXTURE_2D)
-            glEnable(GL_CULL_FACE)
-            glEnable(GL_LIGHTING)
-            glEnable(GL_DEPTH_TEST)
-            glDepthMask(GL_TRUE)
-
-            #do the rest of displayfunc -- but prepare_GL does a clear
-            #self.program.prepare_GL()
-            self.program.set_lights_GL()
-            self.program.view.set_current_GL()
-            self.display()
-            self.program.prepare_screen_GL()
-            self.display_screen()
-            return True
-        return False
-
     def display(self):
         global _globalLock
         with _globalLock:
+            #upload background image to a texture if added
+            if self.backgroundImage is not None:
+                if not self.backgroundImageUploaded:
+                    (img,rows,cols,pixformat)= self.backgroundImage
+                    if self.backgroundImageTexture is None:
+                        self.backgroundImageTexture = glGenTextures(1)
+                        glBindTexture(GL_TEXTURE_2D, self.backgroundImageTexture)
+                        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+                        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+                        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP)
+                        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP)
+                    else:
+                        glBindTexture(GL_TEXTURE_2D, self.backgroundImageTexture)
+                    
+                    glPixelStorei(GL_UNPACK_ALIGNMENT,1)
+                    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, cols, rows, 0, pixformat, GL_UNSIGNED_BYTE, img)
+                    glBindTexture(GL_TEXTURE_2D, 0)
+                    self.backgroundImageUploaded = True
+            else:
+                #make sure to free stuff inside the visualization loop
+                if self.backgroundImageDisplayList is not None:
+                    self.backgroundImageDisplayList.destroy()
+                    self.backgroundImageDisplayList = None
+                if self.backgroundImageTexture is not None:
+                    glDeleteTextures([self.backgroundImageTexture])
+                    self.backgroundImageTexture = None
+            #render background image if it exists
+            if self.backgroundImageTexture is not None:
+                glMatrixMode(GL_PROJECTION)
+                glDisable(GL_CULL_FACE)
+                glLoadIdentity()
+                glOrtho(0,1,1,0,-1,1);
+                glMatrixMode(GL_MODELVIEW)
+                glLoadIdentity()
+                glDisable(GL_DEPTH_TEST)
+                glDepthMask(GL_FALSE)
+                glEnable(GL_TEXTURE_2D)
+                glDisable(GL_LIGHTING)
+                glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
+                if self.backgroundImageDisplayList is not None:
+                    self.backgroundImageDisplayList.draw(self._drawBackgroundImage)
+                glDisable(GL_TEXTURE_2D)
+                glEnable(GL_CULL_FACE)
+                glEnable(GL_LIGHTING)
+                glEnable(GL_DEPTH_TEST)
+                glDepthMask(GL_TRUE)
+
+                self.program.view.set_current_GL()
+
             #for items currently being edited AND having the appearance changed, draw the reference object
             #according to the vis settings
             #glcommon.GLWidgetPlugin.display(self)
@@ -243,7 +235,7 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
             else:
                 self.backgroundImageDisplayList.markChanged()
 
-    def drawBackgroundImage(self):
+    def _drawBackgroundImage(self):
         glEnable(GL_TEXTURE_2D)
         glBindTexture(GL_TEXTURE_2D,self.backgroundImageTexture)
         glBegin(GL_TRIANGLE_FAN)
