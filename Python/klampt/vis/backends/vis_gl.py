@@ -2,10 +2,8 @@ from ..visualization import _globalLock,VisualizationScene
 from .. import glcommon
 import weakref
 from collections import defaultdict
-from ...math import vectorops
-
-from .. import glinit
 from OpenGL.GL import *
+import warnings
 
 class WindowInfo:
     """Mode can be hidden, shown, or dialog"""
@@ -50,6 +48,7 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
         self.backgroundImageUploaded = False
         self.backgroundImageTexture = None
         self.backgroundImageDisplayList = None
+        self.backgroundImageMode = 'stretch'
         self.click_callback = None
         self.hover_callback = None
         self.click_filter = None
@@ -121,66 +120,80 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
                 self.klamptwidgetmaster.remove(item.editor)
         VisualizationScene.remove(self,name)
 
-    def displayfunc(self):
-        if self.backgroundImage is not None:
-            if not self.backgroundImageUploaded:
-                (img,rows,cols,pixformat)= self.backgroundImage
-                if self.backgroundImageTexture is None:
-                    self.backgroundImageTexture = glGenTextures(1)
-                    glBindTexture(GL_TEXTURE_2D, self.backgroundImageTexture)
-                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-                    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP)
-                    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP)
-                else:
-                    glBindTexture(GL_TEXTURE_2D, self.backgroundImageTexture)
-                
-                glPixelStorei(GL_UNPACK_ALIGNMENT,1)
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, cols, rows, 0, pixformat, GL_UNSIGNED_BYTE, img)
-                glBindTexture(GL_TEXTURE_2D, 0)
-                self.backgroundImageUploaded = True
-        else:
-            #make sure to free stuff inside the visualization loop
-            if self.backgroundImageDisplayList is not None:
-                self.backgroundImageDisplayList.destroy()
-                self.backgroundImageDisplayList = None
-            if self.backgroundImageTexture is not None:
-                glDeleteTextures([self.backgroundImageTexture])
-                self.backgroundImageTexture = None
-        if self.backgroundImageTexture is not None:
-            self.program.prepare_GL()
-            glMatrixMode(GL_PROJECTION)
-            glDisable(GL_CULL_FACE)
-            glLoadIdentity()
-            glOrtho(0,1,1,0,-1,1);
-            glMatrixMode(GL_MODELVIEW)
-            glLoadIdentity()
-            glDisable(GL_DEPTH_TEST)
-            glDepthMask(GL_FALSE)
-            glEnable(GL_TEXTURE_2D)
-            glDisable(GL_LIGHTING)
-            glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
-            if self.backgroundImageDisplayList is not None:
-                self.backgroundImageDisplayList.draw(self._drawBackgroundImage)
-            glDisable(GL_TEXTURE_2D)
-            glEnable(GL_CULL_FACE)
-            glEnable(GL_LIGHTING)
-            glEnable(GL_DEPTH_TEST)
-            glDepthMask(GL_TRUE)
-
-            #do the rest of displayfunc -- but prepare_GL does a clear
-            #self.program.prepare_GL()
-            self.program.set_lights_GL()
-            self.program.view.set_current_GL()
-            self.display()
-            self.program.prepare_screen_GL()
-            self.display_screen()
-            return True
-        return False
-
     def display(self):
         global _globalLock
         with _globalLock:
+            #upload background image to a texture if added
+            if self.backgroundImage is not None:
+                if not self.backgroundImageUploaded:
+                    (img,rows,cols,pixformat)= self.backgroundImage
+                    if self.backgroundImageTexture is None:
+                        self.backgroundImageTexture = glGenTextures(1)
+                        glBindTexture(GL_TEXTURE_2D, self.backgroundImageTexture)
+                        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+                        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+                        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP)
+                        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP)
+                    else:
+                        glBindTexture(GL_TEXTURE_2D, self.backgroundImageTexture)
+                    
+                    glPixelStorei(GL_UNPACK_ALIGNMENT,1)
+                    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, cols, rows, 0, pixformat, GL_UNSIGNED_BYTE, img)
+                    glBindTexture(GL_TEXTURE_2D, 0)
+                    self.backgroundImageUploaded = True
+            else:
+                #make sure to free stuff inside the visualization loop
+                if self.backgroundImageDisplayList is not None:
+                    self.backgroundImageDisplayList.destroy()
+                    self.backgroundImageDisplayList = None
+                if self.backgroundImageTexture is not None:
+                    glDeleteTextures([self.backgroundImageTexture])
+                    self.backgroundImageTexture = None
+            #render background image if it exists
+            if self.backgroundImageTexture is not None:
+                glDisable(GL_CULL_FACE)
+                glMatrixMode(GL_PROJECTION)
+                glLoadIdentity()
+                rows,cols = self.backgroundImage[1],self.backgroundImage[2]
+                if self.backgroundImageMode == 'stretch':
+                    glOrtho(-1,1,1,-1,-1,1)
+                elif self.backgroundImageMode == 'scale':
+                    xscale = cols / self.view.w
+                    yscale = rows / self.view.h
+                    scale = max(xscale,yscale)
+                    xrange = xscale / scale
+                    yrange = yscale / scale
+                    glOrtho(-1.0/xrange,1.0/xrange,1.0/yrange,-1.0/yrange,-1,1)
+                elif self.backgroundImageMode == 'fixed':
+                    xrange = cols / self.view.w
+                    yrange = rows / self.view.h
+                    #xrange = 2/(r-l), r-l = 2/xrange
+                    glOrtho(-1.0,2/xrange-1,2.0/yrange-1,-1,-1,1)
+                elif self.backgroundImageMode == 'center':
+                    xrange = cols / self.view.w
+                    yrange = rows / self.view.h
+                    glOrtho(-1.0/xrange,1.0/xrange,1.0/yrange,-1.0/yrange,-1,1)
+                else:
+                    glOrtho(-1,1,1,-1,-1,1)
+                    warnings.warn("Invalid background image mode {}".format(self.backgroundImageMode))
+                    self.backgroundImageMode = 'stretch'
+                glMatrixMode(GL_MODELVIEW)
+                glLoadIdentity()
+                glDisable(GL_DEPTH_TEST)
+                glDepthMask(GL_FALSE)
+                glEnable(GL_TEXTURE_2D)
+                glDisable(GL_LIGHTING)
+                glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
+                if self.backgroundImageDisplayList is not None:
+                    self.backgroundImageDisplayList.draw(self._drawBackgroundImage)
+                glDisable(GL_TEXTURE_2D)
+                glEnable(GL_CULL_FACE)
+                glEnable(GL_LIGHTING)
+                glEnable(GL_DEPTH_TEST)
+                glDepthMask(GL_TRUE)
+
+                self.program.view.set_current_GL()
+
             #for items currently being edited AND having the appearance changed, draw the reference object
             #according to the vis settings
             #glcommon.GLWidgetPlugin.display(self)
@@ -188,12 +201,13 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
             self.updateCamera()
             self.renderGL(self.view)
 
-    def setBackgroundImage(self,img,format='auto',rows='auto'):
+    def setBackgroundImage(self,img,format='auto',rows='auto',mode='stretch'):
         """Sets an image to go underneath the OpenGL rendering.
 
-        img must be a list of bytes or numpy array.  If bytes, then
-        format can be either 'rgb' (same as 'auto'), 'bgr', 'rgba', or 'bgra',
-        corresponding to the OpenGL format constant.
+        ``img`` must be a list of bytes or numpy array.  If bytes, then
+        ``format`` can be either 'rgb' (same as 'auto'), 'bgr', 'rgba', or 
+        'bgra', corresponding to the OpenGL format constant.  In this case,
+        ``rows`` must be an integer.
 
         If img is a numpy array with shape w x h x 3, it is assumed to have rgb
         information as channels.  If dtype=uint8, they are assumed to be
@@ -203,7 +217,17 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
         integers 0x00rrggbb by default.  If format='bgr', then the rgb
         information is assumed to be integers 0xbbggrr.
 
-        If img == None, then the background image is cleared.
+        If ``img == None``, then the background image is cleared.
+
+        ``mode`` controls how the image is resized to the screen size. 
+
+        - 'stretch' resizes the image to the screen.
+        - 'scale' resizes the image with a uniform scale to take up either the
+          full width or height of the screen.
+        - 'fixed' keeps the image size constant and matched to the upper left.
+        - 'center' keeps the image size constant and fixed to the center.
+        - 'tile' uses the image as a repeating texture.
+
         """
         global _globalLock
         if img is None:
@@ -234,8 +258,8 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
                 if format == 'bgr':
                     pixformat = GL_BGRA
         else:
-            pixels = img
-            assert rows != 'auto'
+            if not isinstance(rows,int):
+                raise ValueError("rows must be an integer, not 'auto'")
             pixformat = GL_RGB
             pixsize = 3
             if format == 'bgr':
@@ -255,19 +279,20 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
                 self.backgroundImageDisplayList = glcommon.CachedGLObject()
             else:
                 self.backgroundImageDisplayList.markChanged()
+            self.backgroundImageMode = mode
 
     def _drawBackgroundImage(self):
         glEnable(GL_TEXTURE_2D)
         glBindTexture(GL_TEXTURE_2D,self.backgroundImageTexture)
         glBegin(GL_TRIANGLE_FAN)
         glTexCoord2f(0,0)
-        glVertex2f(0,0)
+        glVertex2f(-1,-1)
         glTexCoord2f(1,0)
-        glVertex2f(1,0)
+        glVertex2f(1,-1)
         glTexCoord2f(1,1)
         glVertex2f(1,1)
         glTexCoord2f(0,1)
-        glVertex2f(0,1)
+        glVertex2f(-1,1)
         glEnd()
 
     def widgetchangefunc(self,edit):
