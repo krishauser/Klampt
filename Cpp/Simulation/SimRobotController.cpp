@@ -170,7 +170,7 @@ void SimRobotController::GetActuatorTorques(Vector& t) const
     q -= TwoPi;
     }
     if(q < robot->qMin(link)-gJointLimitWarningThreshold || q > robot->qMax(link)+gJointLimitWarningThreshold) {
-      LOG4CXX_WARN(GET_LOGGER(SimRobotController),"Warning: joint angle %s out of bounds",robot->linkNames[link].c_str());
+      LOG4CXX_WARN(GET_LOGGER(SimRobotController),"Warning: joint angle "<<robot->linkNames[link].c_str()<<" out of bounds");
       LOG4CXX_WARN(GET_LOGGER(SimRobotController),"(q="<<RtoD(q)<<", qmin="<<RtoD(robot->qMin(link))<<", qmax="<<RtoD(robot->qMax(link))<<" (deg)");
       //getchar();
     }
@@ -328,29 +328,29 @@ void SimRobotController::UpdateRobot()
 bool SimRobotController::ReadState(File& f)
 {
   if(!ReadFile(f,curTime)) {
-    LOG4CXX_ERROR(GET_LOGGER("SimRobotController"),"SimRobotController::ReadState: Unable to read curTime");
+    LOG4CXX_ERROR(GET_LOGGER(SimRobotController),"SimRobotController::ReadState: Unable to read curTime");
     return false;
   }
   if(!ReadFile(f,nextControlTime)) {
-    LOG4CXX_ERROR(GET_LOGGER("SimRobotController"),"SimRobotController::ReadState: Unable to read nextControlTime");
+    LOG4CXX_ERROR(GET_LOGGER(SimRobotController),"SimRobotController::ReadState: Unable to read nextControlTime");
     return false;
   }
   if(!ReadFile(f,command)) {
-    LOG4CXX_ERROR(GET_LOGGER("SimRobotController"),"SimRobotController::ReadState: Unable to read command");
+    LOG4CXX_ERROR(GET_LOGGER(SimRobotController),"SimRobotController::ReadState: Unable to read command");
     return false;
   }
   if(!sensors.ReadState(f)) {
-    LOG4CXX_ERROR(GET_LOGGER("SimRobotController"),"SimRobotController::ReadState: Unable to read sensors");
+    LOG4CXX_ERROR(GET_LOGGER(SimRobotController),"SimRobotController::ReadState: Unable to read sensors");
     return false;
   }
   if(controller) {
     File cfile;
     if(!ReadFile(f,cfile)) {
-      LOG4CXX_ERROR(GET_LOGGER("SimRobotController"),"Unable to read controller file");
+      LOG4CXX_ERROR(GET_LOGGER(SimRobotController),"Unable to read controller file");
       return false;
     }
     if(!controller->ReadState(cfile)) {
-      LOG4CXX_ERROR(GET_LOGGER("SimRobotController"),"Unable to read controller");
+      LOG4CXX_ERROR(GET_LOGGER(SimRobotController),"Unable to read controller");
       return false;
     }
   }
