@@ -169,8 +169,8 @@ def from_numpy(obj,type='auto',template=None):
     elif type == 'TriangleMesh':
         from klampt import TriangleMesh
         res = TriangleMesh()
-        res.setVertices(obj[0])
-        res.setIndices(obj[1])
+        res.setVertices(obj[0].astype(float))
+        res.setIndices(obj[1].astype(np.int32))
         return res
     elif type == 'PointCloud':
         from klampt import PointCloud
@@ -181,7 +181,7 @@ def from_numpy(obj,type='auto',template=None):
         numproperties = obj.shape[1]-3
         res = PointCloud()
         #res.setPoints(points)
-        res.setPointsAndProperties(obj)
+        res.setPointsAndProperties(obj.astype(float))
         if template is not None:
             if len(template.propertyNames) != numproperties:
                 raise ValueError("Template object doesn't have the same properties as the numpy object")
@@ -213,7 +213,7 @@ def from_numpy(obj,type='auto',template=None):
         res.dims.append(values.shape[0])
         res.dims.append(values.shape[1])
         res.dims.append(values.shape[2])
-        res.setValues(values)
+        res.setValues(values.astype(float))
         return res
     elif type == 'Group':
         from klampt import Geometry3D
