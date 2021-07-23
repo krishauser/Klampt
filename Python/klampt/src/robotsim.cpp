@@ -3689,7 +3689,7 @@ void RobotModelLink::getOrientationJacobian(double** np_out2,int* m,int* n)
   int j=index;
   while(j!=-1) {
     Vector3 w;
-    robotPtr->GetOrientationJacobian(index,j,w);
+    robotPtr->links[j].GetOrientationJacobian(w);
     Jmat(0,j)=w.x; Jmat(1,j)=w.y; Jmat(2,j)=w.z;
     j=robotPtr->parents[j];
   }
