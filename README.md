@@ -95,7 +95,6 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 -   Python API: global functions and many classes in the the klampt.vis module now conform to PEP8 naming conventions.  Old non-conformant functions produce a DeprecationWarning and will be removed in the future.  (Run your code with `python -W all` to see these warnings.))
 
 **master** (6/1/2021)
-
 Note: If you have a `pip` installed Klampt, you may get these updates by cloning the Git repo, then run `cd Klampt/Python; python patch_a_pip_install.py`. This provides all of the Python API updates listed below without needing to build from source.
 
 -   Fixed bug saving/restoring simulation states.
