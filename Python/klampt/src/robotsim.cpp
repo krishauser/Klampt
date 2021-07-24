@@ -3686,6 +3686,7 @@ void RobotModelLink::getOrientationJacobian(double** np_out2,int* m,int* n)
     throw PyException("RobotModelLink is invalid");
   Matrix Jmat;
   MakeNumpyArray(np_out2,m,n,3,int(robotPtr->links.size()),Jmat);
+  Jmat.setZero();
   int j=index;
   while(j!=-1) {
     Vector3 w;
