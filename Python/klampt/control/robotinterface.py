@@ -50,9 +50,9 @@ class RobotInterfaceBase(object):
 
     A robot can have "parts", which are named groups of DOFs.  For example, a
     robot with a gripper can have parts "arm" and "gripper", which can be 
-    controlled separately.  You may retrieve part names using :meth:`parts`, 
-    part indices using :meth:`indices`, and access a RIL interface to a part
-    using :meth:`partController`. 
+    potentially controlled separately.  You may retrieve part names using 
+    :meth:`parts`, part indices using :meth:`indices`, and (potentially)
+    access a RIL interface to a part using :meth:`partInterface`. 
 
     It is suggested that these parts correspond with parts in the robot's 
     :class:`~klampt.model.robotinfo.RobotInfo` structure.
@@ -102,10 +102,13 @@ class RobotInterfaceBase(object):
         properties (dict): a dict from string key to property value. Application
             dependent. Examples may include:
 
-            * 'name': str
-            * 'version': str
-            * 'simulated': bool
-            * 'klamptModelFile': str
+            * 'name' (str): the name of the robot
+            * 'version' (str): a version of this interface
+            * 'simulated' (bool): whether the "robot" is simulated vs physical
+            * 'klamptModelFile' (str): the file name of the Klamp't model file.
+            * 'asynchronous' (bool): if True, beginStep/endStep are not needed to
+              communicate with the robot.  Networked controllers are often
+              asynchronous.
 
     """
     def __init__(self,**properties):
@@ -250,13 +253,13 @@ class RobotInterfaceBase(object):
         """Returns a status string for the given part / joint.  'ok' means
         everything is OK."""
         if part is not None or joint_idx is not None:
-            return self.getPartController(part,joint_idx).status()
+            return self.partInterface(part,joint_idx).status()
         return 'ok'
 
     def isMoving(self,part=None,joint_idx=None):
         """Returns true if the part / joint are currently moving"""
         if part is not None or joint_idx is not None:
-            return self.getPartController(part,joint_idx).isMoving()
+            return self.partInterface(part,joint_idx).isMoving()
         raise NotImplementedError()
 
     def sensedPosition(self):
@@ -457,6 +460,13 @@ class RobotInterfaceBase(object):
         """
         raise NotImplementedError()
 
+    def getPIDGains(self):
+        """Gets the PID gains (kP,kI,kD) as set to a prior call to setPIDGains.
+        Some controllers might not implement this even if they implement
+        setPIDGains...
+        """
+        raise NotImplementedError()
+
     def moveToPosition(self,q,speed=1.0):
         """Sets a move-to position command.  The trajectory that the robot will
         take on should be extractable through getMoveToTrajectory(q).
@@ -523,6 +533,11 @@ class RobotInterfaceBase(object):
             load_com (list of 3 floats, optional): the COM of the load,
                 expressed relative to the end-effector link frame.
         """
+        raise NotImplementedError()
+
+    def getGravityCompensation(self):
+        """Gets (gravity,load,load_com) as from a prior call to
+        setGravityCompensation."""
         raise NotImplementedError()
 
     def setCartesianPosition(self,xparams,frame='world'):
