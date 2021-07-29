@@ -6,7 +6,7 @@ def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
 #all of the classes defined in the package that you'd like to cross-reference
-classes = {'RobotModel','WorldModel','RobotModelLink','Terrain','RigidObjectModel',
+classes = {'RobotModel','WorldModel','RobotModelLink','RobotModelDriver','Terrain','RigidObjectModel',
     'Geometry3D','Appearance','TriangleMesh','PointCloud','VolumeGrid','GeometricPrimitive',
     'ContactParameters','Mass','DistanceQueryResult','DistanceQuerySettings',
     'SimRobotSensor','SimRobotController','SimBody','Simulator',
@@ -239,7 +239,10 @@ def print_signature(siglist,indent0,docstring):
             print()
             print(indent0+'Returns:')
             unique = set(ret)
-            print(indent0+indentstr,'(%s):'%(' or '.join([to_type_doc(r) for r in unique]),))
+            if len(unique) > 1:
+                print(indent0+indentstr,'(%s):'%(' or '.join([to_type_doc(r) for r in unique]),))
+            else:
+                print(indent0+indentstr,'%s:'%(''.join([to_type_doc(r) for r in unique]),))
 
     if len(docdetails) > 0:
         print()

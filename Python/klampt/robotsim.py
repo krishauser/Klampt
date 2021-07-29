@@ -1288,7 +1288,7 @@ class PointCloud(object):
             pname (str, optional): 
 
         Returns:
-            (float):
+            float:
         """
         return _robotsim.PointCloud_getProperty(self, *args)
 
@@ -2028,7 +2028,7 @@ class Geometry3D(object):
 
 
         Args:
-            arg2 (:class:`~klampt.TriangleMesh` or :class:`~klampt.PointCloud` or :class:`~klampt.Geometry3D` or :obj:`ConvexHull` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.VolumeGrid`, optional): 
+            arg2 (:obj:`ConvexHull` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.VolumeGrid` or :class:`~klampt.TriangleMesh` or :class:`~klampt.Geometry3D` or :class:`~klampt.PointCloud`, optional): 
         """
         _robotsim.Geometry3D_swiginit(self, _robotsim.new_Geometry3D(*args))
     __swig_destroy__ = _robotsim.delete_Geometry3D
@@ -2834,7 +2834,7 @@ class Appearance(object):
             feature (int, optional): 
 
         Returns:
-            (bool):
+            bool:
 
         If no arguments are given, returns whether the object is visible.  
 
@@ -4509,7 +4509,7 @@ class RobotModel(object):
             name (str, optional): 
 
         Returns:
-            (:class:`~klampt.RobotModelLink`):
+            :class:`~klampt.RobotModelLink`:
         """
         return _robotsim.RobotModel_link(self, *args)
 
@@ -4526,9 +4526,9 @@ class RobotModel(object):
         r"""
         Returns a reference to the driver by index or name.  
 
-        driver (index): :obj:`RobotModelDriver`
+        driver (index): :class:`~klampt.RobotModelDriver`
 
-        driver (name): :obj:`RobotModelDriver`
+        driver (name): :class:`~klampt.RobotModelDriver`
 
 
         Args:
@@ -4536,7 +4536,7 @@ class RobotModel(object):
             name (str, optional): 
 
         Returns:
-            (:obj:`RobotModelDriver`):
+            :class:`~klampt.RobotModelDriver`:
         """
         return _robotsim.RobotModel_driver(self, *args)
 
@@ -4555,7 +4555,7 @@ class RobotModel(object):
             name (str, optional): 
 
         Returns:
-            (str):
+            str:
         """
         return _robotsim.RobotModel_getJointType(self, *args)
 
@@ -4706,7 +4706,7 @@ class RobotModel(object):
             name (str, optional): 
 
         Returns:
-            (float):
+            float:
         """
         return _robotsim.RobotModel_getDOFPosition(self, *args)
 
@@ -5065,7 +5065,7 @@ class RobotModel(object):
             name (str, optional): 
 
         Returns:
-            (:class:`~klampt.SimRobotSensor`):
+            :class:`~klampt.SimRobotSensor`:
         """
         return _robotsim.RobotModel_sensor(self, *args)
     world = property(_robotsim.RobotModel_world_get, _robotsim.RobotModel_world_set, doc=r"""world : int""")
@@ -5582,7 +5582,7 @@ class WorldModel(object):
             name (str, optional): 
 
         Returns:
-            (:class:`~klampt.RobotModel`):
+            :class:`~klampt.RobotModel`:
         """
         return _robotsim.WorldModel_robot(self, *args)
 
@@ -5601,7 +5601,7 @@ class WorldModel(object):
             name (str, optional): 
 
         Returns:
-            (:class:`~klampt.RobotModelLink`):
+            :class:`~klampt.RobotModelLink`:
         """
         return _robotsim.WorldModel_robotLink(self, *args)
 
@@ -5619,7 +5619,7 @@ class WorldModel(object):
             name (str, optional): 
 
         Returns:
-            (:class:`~klampt.RigidObjectModel`):
+            :class:`~klampt.RigidObjectModel`:
         """
         return _robotsim.WorldModel_rigidObject(self, *args)
 
@@ -5637,7 +5637,7 @@ class WorldModel(object):
             name (str, optional): 
 
         Returns:
-            (:obj:`TerrainModel`):
+            :obj:`TerrainModel`:
         """
         return _robotsim.WorldModel_terrain(self, *args)
 
@@ -5742,7 +5742,7 @@ class WorldModel(object):
             terrain (:obj:`TerrainModel`, optional): 
 
         Returns:
-            (:class:`~klampt.RigidObjectModel` or :class:`~klampt.RobotModel` or :obj:`TerrainModel`):
+            (:class:`~klampt.RobotModel` or :obj:`TerrainModel` or :class:`~klampt.RigidObjectModel`):
         """
         return _robotsim.WorldModel_add(self, *args)
 
@@ -6481,7 +6481,7 @@ class GeneralizedIKObjective(object):
 
 
         Args:
-            obj (:obj:`GeneralizedIKObjective` or :class:`~klampt.RigidObjectModel`, optional): 
+            obj (:class:`~klampt.RigidObjectModel` or :obj:`GeneralizedIKObjective`, optional): 
             link (:class:`~klampt.RobotModelLink`, optional): 
             link2 (:class:`~klampt.RobotModelLink`, optional): 
             obj2 (:class:`~klampt.RigidObjectModel`, optional): 
@@ -6960,7 +6960,7 @@ class SimRobotController(object):
             name (str, optional): 
 
         Returns:
-            (:class:`~klampt.SimRobotSensor`):
+            :class:`~klampt.SimRobotSensor`:
         """
         return _robotsim.SimRobotController_sensor(self, *args)
 
@@ -7874,7 +7874,7 @@ class Simulator(object):
             robot (int or :class:`~klampt.RobotModel`): 
 
         Returns:
-            (:class:`~klampt.SimRobotController`):
+            :class:`~klampt.SimRobotController`:
         """
         return _robotsim.Simulator_controller(self, *args)
 
@@ -7895,7 +7895,7 @@ class Simulator(object):
             terrain (:obj:`TerrainModel`, optional): 
 
         Returns:
-            (:class:`~klampt.SimBody`):
+            :class:`~klampt.SimBody`:
         """
         return _robotsim.Simulator_body(self, *args)
 
@@ -8136,7 +8136,7 @@ def force_closure(*args):
 
 
     Returns:
-        (bool):
+        bool:
 
     In the 1-argument version, each contact point is specified by a list of 7
     floats, [x,y,z,nx,ny,nz,k] where (x,y,z) is the position, (nx,ny,nz) is the
@@ -8177,7 +8177,7 @@ def force_closure_2d(*args):
 
 
     Returns:
-        (bool):
+        bool:
 
     In the 1-argument version, each contact point is given by a list of 4 floats,
     [x,y,theta,k] where (x,y) is the position, theta is the normal angle, and k is
