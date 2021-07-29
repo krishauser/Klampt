@@ -4,9 +4,11 @@
 A robot typically consists of a set of parts, a base (either fixed or
 moving), end effectors, a controller, and other assorted properties. 
 """
+from klampt.control.robotinterface import RobotInterfaceBase
 import os
 import sys
 import importlib
+from klampt import RobotModel,IKSolver
 
 class EndEffectorInfo:
     """Stores info about default end effectors and the method for Cartesian
@@ -95,9 +97,10 @@ class RobotInfo:
         self.properties = properties
         self.filePaths = []
         self.robotModel = None
+        self._driverIndices = None
         self._worldTemp = None
 
-    def klamptModel(self):
+    def klamptModel(self) -> RobotModel:
         """Returns the Klamp't RobotModel associated with this robot, either by
         the ``robotModel`` object or loading from the given filename
         ``self.modelFile``.
@@ -123,9 +126,9 @@ class RobotInfo:
         self.robotModel.setName(self.name)
         return self.robotModel
 
-    def controller(self):
-        """Returns a :class:`~klampt.control.robotinterface.RobotInterfaceBase`
-        configured for use on the real robot.  Requires ``controllerFile`` to 
+    def controller(self) -> RobotInterfaceBase:
+        """Returns a Robot Interface Layer object configured for use on the
+        real robot.  Requires ``controllerFile`` to 
         be defined.
         """
         if self.controllerFile is None:
@@ -185,21 +188,28 @@ class RobotInfo:
     def partLinkNames(self,part):
         res = self.parts[part]
         return self.toNames(res)
+    
+    def partDriverIndices(self,part):
+        res = self.parts[part]
+        return self.toDriverIndices(res)
 
     def partAsSubrobot(self,part):
+        """
+        Returns:
+            :class:`~klampt.model.subrobot.SubRobotModel`
+        """
         from klampt.model.subrobot import SubRobotModel
         partLinks = self.partLinkIndices(part)
         model = self.klamptModel()
         return SubRobotModel(model,partLinks)
 
-    def eeSolver(self,endEffector,target):
+    def eeSolver(self,endEffector,target) -> IKSolver:
         """Given a named end effector and a target point, transform, or set of
         parameters from config.setConfig(ikgoal) / config.getConfig(ikgoal),
-        returns the :class:`~klampt.robotsim.IKSolver` for the end effector and
-        that target.
+        returns the IKSolver for the end effector and  that target.
         """
         ee = self.endEffectors[endEffector]
-        from klampt import IKSolver,IKObjective
+        from klampt import IKObjective
         from ..model import config,ik
         robot = self.klamptModel()
         link = robot.link(ee.link)
@@ -223,12 +233,31 @@ class RobotInfo:
             return items
         else:
             robot = self.klamptModel()
+            res = [i for i in items]
             for i,v in enumerate(items):
                 if not isinstance(v,int):
                     assert isinstance(v,str),"Link identifiers must be int or str"
-                    items[i] = robot.link(v).getIndex()
-                    assert items[i] >= 0,"Link %s doesn't exist in robot %s"%(v,self.name)
-            return items
+                    res[i] = robot.link(v).getIndex()
+                    assert res[i] >= 0,"Link %s doesn't exist in robot %s"%(v,self.name)
+            return res
+    
+    def toDriverIndices(self,items):
+        """Converts link names or indices to robot driver indices"""
+        robot = self.klamptModel()
+        if self._driverIndices is None:
+            self._driverIndices = dict()
+            for i in range(robot.numDrivers()):
+                d = robot.driver(i)
+                self._driverIndices[d.getAffectedLink()] = i
+        res = []
+        for i,v in enumerate(items):
+            if not isinstance(v,int):
+                assert isinstance(v,str),"Link identifiers must be int or str"
+                v= robot.link(v).getIndex()
+                assert v >= 0,"Link %s doesn't exist in robot %s"%(v,self.name)
+            if v in self._driverIndices:
+                res.append(self._driverIndices[v])
+        return res
 
     def toNames(self,items):
         """Returns link identifiers as link names"""
@@ -236,12 +265,13 @@ class RobotInfo:
             return items
         else:
             robot = self.klamptModel()
+            res = [i for i in items]
             for i,v in enumerate(items):
                 if not isinstance(v,str):
                     assert isinstance(v,int),"Link identifiers must be int or str"
                     assert v >= 0 and v < robot.numLinks(),"Link %d is invalid for robot %s"%(v,self.name)
-                    items[i] = robot.link(v).getName()
-            return items
+                    res[i] = robot.link(v).getName()
+            return res
 
     def load(self,f):
         """Loads the info from a JSON file. f is a file object."""
@@ -332,9 +362,12 @@ def register(robotInfo):
 
 def load(fn):
     """Loads / registers a RobotInfo from a JSON file previously saved to disk."""
-    res = RobotInfo()
+    res = RobotInfo(None)
     with open(fn,'r') as f:
         res.load(f)
+        if res.modelFile is not None:  #make sure the model file is an absolute path
+            if not res.modelFile.startswith('/') and not res.modelFile.startswith('http:/')  and not res.modelFile.startswith('https://'):
+                res.modelFile = os.path.abspath(os.path.join(os.path.split(fn)[0],res.modelFile))
         register(res)
     return res
 
