@@ -22,7 +22,7 @@ namespace Klampt {
   class TerrainModel;
   class RobotModel;
 
-} //nameskace Klampt
+} //namespace Klampt
 
 /** @brief Stores mass information for a rigid body or robot link.
  * 
