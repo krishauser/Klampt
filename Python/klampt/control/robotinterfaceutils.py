@@ -642,7 +642,7 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
         return self._try('commandedCartesianVelocity',[frame],lambda frame: RobotInterfaceBase.commandedCartesianVelocity(self,frame))
 
     def commandedCartesianForce(self,frame='world'):
-        return self._try('destinationCartesianForce',[frame],lambda frame: RobotInterfaceBase.destinationCartesianForce(self,frame))
+        return self._try('commandedCartesianForce',[frame],lambda frame: RobotInterfaceBase.commandedCartesianForce(self,frame))
 
     def destinationCartesianPosition(self,frame='world'):
         return self._try('destinationCartesianPosition',[frame],lambda frame: RobotInterfaceBase.destinationCartesianPosition(self,frame))
