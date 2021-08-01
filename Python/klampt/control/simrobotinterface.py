@@ -15,6 +15,7 @@ import functools
 
 class _SimControlInterface(RobotInterfaceBase):
     def __init__(self,sim_controller,simulator=None,robotInfo=None):
+        RobotInterfaceBase.__init__(self,name=self.__class__.__name__)
         assert isinstance(sim_controller,SimRobotController)
         self.sim_controller = sim_controller
         self.robot = sim_controller.model()
@@ -27,7 +28,11 @@ class _SimControlInterface(RobotInterfaceBase):
         self.robotInfo = robotInfo
         if robotInfo is not None:
             assert isinstance(robotInfo,RobotInfo)
-        RobotInterfaceBase.__init__(self,name=self.__class__.__name__)
+            if robotInfo.modelFile is not None:
+                self.properties['klamptModelFile'] = robotInfo.modelFile
+    
+    def klamptModel(self):
+        return self.robot
 
     def initialize(self):
         self._status = 'ok'
@@ -41,8 +46,8 @@ class _SimControlInterface(RobotInterfaceBase):
         if self.robotInfo is None:
             return RobotInterfaceBase.parts(self)
         res = {None:list(range(self.numJoints()))}
-        for (k,v) in self.robotInfo.parts:
-            res[k] = self.robotInfo.toIndices(v)
+        for k in self.robotInfo.parts:
+            res[k] = self.robotInfo.partDriverIndices(k)
         return res
 
     def controlRate(self):
@@ -81,7 +86,7 @@ class _SimControlInterface(RobotInterfaceBase):
             if self.simulator.getStatus() >= Simulator.STATUS_UNSTABLE:
                 self._status = self.simulator.getStatusString()
 
-    def status(self):
+    def status(self,joint_idx=None):
         return self._status
 
 
@@ -150,8 +155,7 @@ class SimMoveToControlInterface(_SimControlInterface):
     def commandedPosition(self):
         return self.configFromKlampt(self.sim_controller.getCommandedConfig())
 
-    def isMoving(self,part=None,joint_idx=None):
-        assert part is None
+    def isMoving(self,joint_idx=None):
         return self.sim_controller.remainingTime() > 0
 
 
@@ -216,8 +220,7 @@ class SimFullControlInterface(_SimControlInterface):
         assert speed == 1.0,"Can't accept non-max speed commands yet"
         self.sim_controller.setMilestone(self.configToKlampt(q))
 
-    def isMoving(self,part=None,joint_idx=None):
-        assert part is None
+    def isMoving(self,joint_idx=None):
         return self.sim_controller.remainingTime() > 0
         
     def sensedPosition(self):
@@ -256,12 +259,15 @@ class KinematicSimControlInterface(RobotInterfaceBase):
     the status of the interface to non-'ok' error codes.
     """
     def __init__(self,robot,robotInfo=None):
+        RobotInterfaceBase.__init__(self,name=self.__class__.__name__)
         assert isinstance(robot,RobotModel)
         self.robot = robot
         self._status = 'ok'
         self.robotInfo = robotInfo
         if robotInfo is not None:
             assert isinstance(robotInfo,RobotInfo)
+            if robotInfo.modelFile is not None:
+                self.properties['klamptModelFile'] = robotInfo.modelFile
         q0 = robot.getConfig()
         self.q = self.configFromKlampt(robot.getConfig())
         qmin,qmax = robot.getJointLimits()
@@ -274,7 +280,6 @@ class KinematicSimControlInterface(RobotInterfaceBase):
                         qmin[l],qmax[l] = qmax[l],qmin[l]
         self.qmin,self.qmax = self.configFromKlampt(qmin),self.configFromKlampt(qmax)
         robot.setConfig(q0)
-        RobotInterfaceBase.__init__(self,name=self.__class__.__name__)
 
     def klamptModel(self):
         return self.robot
@@ -284,8 +289,8 @@ class KinematicSimControlInterface(RobotInterfaceBase):
         if self.robotInfo is None:
             return RobotInterfaceBase.parts(self)
         res = {None:list(range(self.numJoints()))}
-        for (k,v) in self.robotInfo.parts:
-            res[k] = self.robotInfo.toIndices(v)
+        for k in self.robotInfo.parts:
+            res[k] = self.robotInfo.partDriverIndices(k)
         return res
 
     def controlRate(self):
@@ -314,7 +319,7 @@ class KinematicSimControlInterface(RobotInterfaceBase):
     def endStep(self):
         pass
 
-    def status(self):
+    def status(self,joint_idx=None):
         return self._status
 
     def setPosition(self,q):
