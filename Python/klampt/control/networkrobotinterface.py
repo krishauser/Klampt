@@ -13,6 +13,14 @@ import copy
 # Marshaller.dispatch[np.ndarray] = Marshaller.dump_array
 
 class RobotInterfaceServer:
+    """A XMLRPC-based server for a RIL motor controller.
+    
+    Args:
+        interface (RobotInterfaceBase): the interface to serve
+        ip (str): the IP address (usually '128.0.0.1' or 'localhost')
+        port (int): the port of the listening socket
+    
+    """
     def __init__(self,interface,ip,port=7881):
         self.ip = ip
         self.port = port
@@ -103,11 +111,11 @@ class DictProxy:
             return default_value
 
 class RobotInterfaceClient(RobotInterfaceBase):
-    """A client that connects to a RobotInterfaceServer.
+    """An XMLRPC-based client that connects to a RobotInterfaceServer.
     
     Args:
-        ip (str): the IP address of the server
-        port (int): the port of the server
+        addr (str): the IP address of the server, including port. 
+            Localhost port 7881 is used by default.
     """
     def __init__(self,addr='http://localhost:7881'):
         RobotInterfaceBase.__init__(self)
