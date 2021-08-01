@@ -16,7 +16,7 @@ Logging... TODO
 
 """
 
-from .robotinterface import *
+from .robotinterface import RobotInterfaceBase
 from ..math import vectorops,so2,so3,se3,spline
 from ..plan import motionplanning
 from ..model.trajectory import Trajectory,HermiteTrajectory
@@ -24,6 +24,33 @@ from .cartesian_drive import CartesianDriveSolver
 import bisect
 import math
 import warnings
+import time
+from functools import wraps
+
+
+STATUS_COMMAND_METHODS = ['reset','enableSensor','setPIDGains','setToolCoordinates','setGravityCompensation']
+MOTION_COMMAND_METHODS = ['estop','softStop',
+                          'setPosition','setVelocity','setTorque','setPID',
+                          'moveToPosition','setPiecewiseLinear','setPiecewiseCubic',
+                          'setCartesianPosition','moveToCartesianPosition','setCartesianVelocity','setCartesianForce']
+STRUCTURE_QUERY_METHODS = ['numJoints','parts','controlRate','jointName','sensors','hasSensor','klamptModel']
+STATUS_QUERY_METHODS = ['status','clock','getPIDGains','getToolCoordinates','getGravityCompensation']
+SENSOR_QUERY_METHODS = ['enabledSensors','sensorMeasurements','sensorUpdateTime']
+MOTION_QUERY_METHODS = ['isMoving',
+                        'sensedPosition','sensedVelocity','sensedTorque',
+                        'commandedPosition','commandedVelocity','commandedTorque',
+                        'destinationPosition','destinationVelocity','destinationTime',
+                        'queuedTrajectory',
+                        'sensedCartesianPosition','sensedCartesianVelocity','sensedCartesianForce',
+                        'commandedCartesianPosition','commandedCartesianVelocity','commandedCartesianForce',
+                        'destinationCartesianPosition','destinationCartesianVelocity',
+                        'queuedCartesianTrajectory']
+UTILITY_METHODS = ['indices','cartesianPosition','cartesianVelocity','cartesianForce',
+                    'partToRobotConfig','robotToPartConfig',
+                    'configFromKlampt','velocityFromKlampt','configToKlampt','velocityToKlampt']
+COMMAND_METHODS = STATUS_COMMAND_METHODS+MOTION_COMMAND_METHODS
+QUERY_METHODS = STRUCTURE_QUERY_METHODS+STATUS_QUERY_METHODS+SENSOR_QUERY_METHODS+MOTION_QUERY_METHODS
+
 
 class RobotInterfaceCompleter(RobotInterfaceBase):
     """Completes as much of the RobotInterfaceBase API as possible from a
@@ -106,8 +133,8 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
     violation", "discontinuity violation", etc.
     """
     def __init__(self,base_interface,base_initialized=False,
-        joint_limit_checking=False,velocity_limit_checking=False,discontinuity_checking=math.radians(10),
-        tracking_error_checking=math.radians(30),self_collision_checking=False,obstacle_collision_checking=None):
+                joint_limit_checking=False,velocity_limit_checking=False,discontinuity_checking=math.radians(10),
+                tracking_error_checking=math.radians(30),self_collision_checking=False,obstacle_collision_checking=None):
         RobotInterfaceBase.__init__(self)
         self._base = base_interface
         self._baseInitialized  = base_initialized
@@ -127,6 +154,7 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
         self._tracking_error_checking=tracking_error_checking
         self._self_collision_checking=self_collision_checking
         self._obstacle_collision_checking=obstacle_collision_checking
+        self.properties = base_interface.properties
 
     def __str__(self):
         return "Completer("+str(self._base)+')'
@@ -230,12 +258,12 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
                     raise NotImplementedError("Function {} is not implemented by base interface {}, no fallback available".format(fn,self._base))
                 #print("...not available, returning",fallback(*args))
                 return fallback(*args)
-            except Exception:
-                print("Error received during first call of ",fn,"of base",str(self._base))
+            except Exception as e:
+                print("Error",e,"received during first call of",fn,"of base",str(self._base))
                 raise
-        except Exception:
-                print("Error received during later call of ",fn,"of base",str(self._base))
-                raise
+        except Exception as e:
+            print("Error",e,"received during later call of",fn,"of base",str(self._base))
+            raise
 
     def initialize(self):
         if self._indices is not None:
@@ -270,7 +298,7 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
             return False
         self._emulator = _RobotInterfaceEmulatorData(self._base.numJoints(),self._base.klamptModel())
         self._emulator.curClock = curclock
-        print("Starting with clock",curclock)
+        print("RobotInterfaceCompleter({}): Starting with clock {}".format(self._base,curclock))
         assert curclock is not None
         self._emulator.lastClock = None
 
@@ -410,11 +438,11 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
     def reset(self):
         return self._base.reset()
 
-    def partInterface(self,part=None,joint_idx=None):
+    def partInterface(self,part,joint_idx=None):
         return _SubRobotInterfaceCompleter(self,part,joint_idx)
 
     def jointName(self,joint_idx):
-        return self._try('jointName',[self.joint_idx],lambda joint_idx: 'Joint '+str(joint_idx))
+        return self._try('jointName',[joint_idx],lambda joint_idx: 'Joint '+str(joint_idx))
 
     def sensors(self):
         return self._try('sensors',[],lambda *args:[])
@@ -423,7 +451,7 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
         return self._try('enabledSensors',[],lambda *args:[])
 
     def hasSensor(self,sensor):
-        return self._try('hasSensor',[],lambda *args:False)
+        return self._try('hasSensor',[sensor],lambda sensor:sensor in self.sensors())
 
     def enableSensor(self,sensor):
         return self._try('enableSensor',[sensor],lambda *args:False)
@@ -454,7 +482,7 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
 
     def setPIDGains(self,kP,kI,kD):
         assert len(kP) == len(self._indices),"kP vector has incorrect length: {} != {}".format(len(kP),len(self._indices))
-        assert len(kI) == len(self._indices),"kD vector has incorrect length: {} != {}".format(len(kI),len(self._indices))
+        assert len(kI) == len(self._indices),"kI vector has incorrect length: {} != {}".format(len(kI),len(self._indices))
         assert len(kD) == len(self._indices),"kD vector has incorrect length: {} != {}".format(len(kD),len(self._indices))
         try:
             self._base.setPIDGains(kP,kI,kD)
@@ -467,6 +495,13 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
         if not hasattr(kI,'__iter__'):
             kI = [kI]*len(self._indices)
         self._emulator.setPIDGains(self._indices,kP,kI,kD)
+
+    def getPIDGains(self):
+        try:
+            return self._base.getPIDGains()
+        except NotImplementedError:
+            pass
+        return self._emulator.getPIDGains(self._indices)
 
     def moveToPosition(self,q,speed=1):
         assert len(q) == len(self._indices),"Position vector has incorrect length: {} != {}".format(len(q),len(self._indices))
@@ -483,7 +518,7 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
         self._emulator.setToolCoordinates(xtool_local,self._indices)
 
     def getToolCoordinates(self):
-        self._emulator.getToolCoordinates(self._indices)
+        return self._emulator.getToolCoordinates(self._indices)
 
     def setGravityCompensation(self,gravity=[0,0,-9.8],load=0.0,load_com=[0,0,0]):
         try:
@@ -491,6 +526,13 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
         except NotImplementedError:
             pass
         self._emulator.setGravityCompensation(gravity,load,load_com,self._indices)
+
+    def getGravityCompensation(self):
+        try:
+            return self._base.getGravityCompensation()
+        except NotImplementedError:
+            pass
+        self._emulator.getGravityCompensation(self._indices)
 
     def setCartesianPosition(self,xparams,frame='world'):
         assert len(xparams)==2 or len(xparams)==3, "Cartesian target must be a point or (R,t) transform"
@@ -511,14 +553,14 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
         assert ttl is None or isinstance(ttl,(int,float)), "ttl must be None or a number"
         self._emulator.setCartesianForce(fparams,ttl,frame,self._indices)
 
-    def status(self):
-        return self._base.status()
+    def status(self,joint_idx=None):
+        return self._base.status(joint_idx)
 
-    def isMoving(self):
+    def isMoving(self,joint_idx=None):
         if self._emulator.isMoving(self._indices):
             return True
         try:
-            return self._base.isMoving()
+            return self._base.isMoving(joint_idx)
         except NotImplementedError:
             return False
 
@@ -648,6 +690,116 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
 
 
 
+def klamptCartesianPosition(model,q,part_indices,tool_coordinates,frame):
+    """Helper for implementers: an implementation of cartesianPosition
+    that uses the Klampt model.
+
+    Args:
+        q: configuration for whole robot (#drivers)
+        part_indices: the indices of the part being queried.
+        tool_coordinates: the local coordinates of the tool point
+        frame: either 'world' or 'base'
+    """
+    if frame == 'tool':
+        return se3.identity()
+    elif frame == 'end effector':
+        return (so3.identity(),tool_coordinates)
+    assert len(q) == model.numDrivers()
+    for i,v in enumerate(q):
+        if i > part_indices[-1]: break
+        model.driver(i).setValue(v)
+    model.setConfig(model.getConfig())
+    ee_index = model.driver(part_indices[-1]).getAffectedLink()
+    ee_xform = model.link(ee_index).getTransform()
+    tool_xform = ee_xform[0],se3.apply(ee_xform,tool_coordinates)
+    if frame == 'base':
+        base_link_index = model.driver(part_indices[0]).getAffectedLink()
+        base_xform = model.link(base_link_index)
+        return se3.apply(se3.inv(base_xform,tool_xform))
+    elif frame == 'world':
+        return tool_xform
+    else:
+        raise ValueError("Invalid frame specified")
+
+def klamptCartesianVelocity(model,q,dq,part_indices,tool_coordinates,frame):
+    """Helper for implementers: an implementation of cartesianVelocity
+    that uses the Klampt model.
+
+    Args:
+        q: configuration for whole robot (#drivers)
+        dq: velocity for whole robot (#drivers)
+        part_indices: the indices of the part being queried.
+        tool_coordinates: the local coordinates of the tool point
+        frame: either 'world' or 'base'
+    """
+    assert len(q) == model.numDrivers()
+    assert len(dq) == model.numDrivers()
+    for i,v in enumerate(q):
+        if i > part_indices[-1]: break
+        model.driver(i).setValue(v)
+        if frame == 'base' and i < part_indices[0]:
+            model.driver(i).setVelocity(0)  #get relative velocity to base
+        else:
+            model.driver(i).setVelocity(dq[i])
+    model.setConfig(model.getConfig())
+    ee_index = model.driver(part_indices[-1]).getAffectedLink()
+    ee = model.link(ee_index)
+    v = ee.getPointVelocity(tool_coordinates)
+    w = ee.getAngularVelocity()
+    if frame == 'base':
+        base_index = model.driver(part_indices[0]).getAffectedLink()
+        baseLink = model.link(base_index)
+        Tbase = baseLink.getTransform()
+        Rworld_base = so3.inv(Tbase[0])
+        return (so3.apply(Rworld_base,w),so3.apply(Rworld_base,v))
+    elif frame == 'end effector' or frame == 'tool':
+        Tee = ee.getTransform()
+        Rworld_ee = so3.inv(Tee[0])
+        return (so3.apply(Rworld_ee,w),so3.apply(Rworld_ee,v))
+    elif frame == 'world':
+        return (w,v)
+    else:
+        raise ValueError("Invalid frame specified")
+
+
+def klamptCartesianForce(model,q,t,part_indices,tool_coordinates,frame):
+    """Helper for implementers: an implementation of cartesianForce
+    that uses the Klampt model.
+
+    Args:
+        q: configuration for whole robot (#drivers)
+        t: torques for whole robot (#drivers)
+        part_indices: the indices of the part being queried.
+        tool_coordinates: the local coordinates of the tool point
+        frame: either 'world' or 'base'
+    """
+    import numpy as np
+    assert len(q) == model.numDrivers()
+    for i,v in enumerate(q):
+        if i > part_indices[-1]: break
+        model.driver(i).setValue(v)
+    model.setConfig(model.getConfig())
+    ee_index = model.driver(part_indices[-1]).getAffectedLink()
+    ee = model.link(ee_index)
+    J = ee.getJacobian(tool_coordinates)
+    wrench = np.dot(J,model.velocityFromDrivers(t))
+    torque,force = wrench[:3].tolist(),wrench[3:].tolist()
+    if frame == 'world':
+        return (torque,force)
+    elif frame == 'base':
+        base_index = model.driver(part_indices[0]).getAffectedLink()
+        baseLink = model.link(base_index)
+        Tbase = baseLink.getTransform()
+        Rworld_base = so3.inv(Tbase[0])
+        return (so3.apply(Rworld_base,torque),so3.apply(Rworld_base,force))
+    elif frame == 'end effector' or frame == 'tool':
+        Tee = ee.getTransform()
+        Rworld_ee = so3.inv(Tee[0])
+        return (so3.apply(Rworld_ee,torque),so3.apply(Rworld_ee,force))
+    raise ValueError("Invalid frame specified")
+
+
+
 class MultiRobotInterface(RobotInterfaceBase):
     """A RobotInterfaceBase that consists of multiple parts, which are
     communicated with separately.  For example, a mobile manipulator can
@@ -657,7 +809,7 @@ class MultiRobotInterface(RobotInterfaceBase):
     each part of the robot.
 
     .. note::
-        TIP: wrap your interface with a :class:`RobotInterfaceCompleter`
+        TIP: wrap your part's interface with a :class:`RobotInterfaceCompleter`
         before adding it so that all parts get a uniform interface.
 
     The total configuration for the robot is a list of floats, segmented into
@@ -718,7 +870,7 @@ class MultiRobotInterface(RobotInterfaceBase):
             voltron_controller = MultiRobotInterface()
             for part in robotInfo.parts:
                 part_controller = RobotInterfaceCompleter([create the part controller])
-                voltron_controller.addPart(part,part_controller,robotInfo.klamptModel(),robotInfo.partLinkIndices(part))
+                voltron_controller.addPart(part,part_controller,robotInfo.klamptModel(),robotInfo.partDriverIndices(part))
             if not voltron_controller.initialize():
                 print("hmm... error on initialize?")
             ... do stuff, treating voltron_controller as a unified robot ...
@@ -847,18 +999,15 @@ class MultiRobotInterface(RobotInterfaceBase):
                     return False
         return True
 
-    def partInterface(self,part=None,joint_idx=None):
-        if part is None and joint_idx is None:
-            return self
+    def partInterface(self,part,joint_idx=None):
         assert part in self._partInterfaces
         if joint_idx is None:
             return self._partInterfaces[part]
         else:
             return self._partInterfaces[part].partInterface(None,joint_idx)
 
-    def jointName(self,joint_idx,part=None):
-        if part is None:
-            part = self._jointToPart[joint_idx]
+    def jointName(self,joint_idx):
+        part = self._jointToPart[joint_idx]
         return part + ' ' + self._partInterfaces[part].jointName(joint_idx)
 
     def sensors(self):
@@ -944,7 +1093,16 @@ class MultiRobotInterface(RobotInterfaceBase):
         kIs = self.split(kI)
         kDs = self.split(kD)
         for (p,kP,kI,kD) in zip(self._partNames,kPs,kIs,kDs):
-            self._partInterfaces[p].setPID(kP,kI,kD)
+            self._partInterfaces[p].setPIDGains(kP,kI,kD)
+
+    def getPIDGains(self):
+        kPs,kIs,kDs = [],[],[]
+        for p in self._partNames:
+            kP,kI,kD = self._partInterfaces[p].getPIDGains()
+            kPs.append(kP)
+            kIs.append(kI)
+            kDs.append(kD)
+        return self.join(kPs),self.join(kIs),self.join(kDs)
 
     def setPiecewiseLinear(self):
         raise NotImplementedError()
@@ -964,14 +1122,16 @@ class MultiRobotInterface(RobotInterfaceBase):
     def setCartesianForce(self,fparams,ttl=None,frame='world'):
         raise ValueError("Can't do cartesian control without specifying a part")
 
-    def status(self):
+    def status(self,joint_idx=None):
         for p,c in self._partInterfaces.items():
             s = c.status()
             if s != 'ok':
                 return s
         return 'ok'
 
-    def isMoving(self):
+    def isMoving(self,joint_idx=None):
+        if joint_idx is not None:
+            print("TODO: check only the joint specified for whether it's moving")
         return any(c.isMoving() for p,c in self._partInterfaces.items())
 
     def sensedPosition(self):
@@ -1027,6 +1187,376 @@ class MultiRobotInterface(RobotInterfaceBase):
 
     def destinationCartesianVelocity(self,frame='world'):
         raise ValueError("Can't do cartesian get without specifying a part")
+
+
+class ThreadedRobotInterface(RobotInterfaceBase):
+    """Adapts a synchronous robot interface to an asynchronous robot interface
+    that runs in a separate thread.
+
+    There is no need to run beginStep() and endStep() on this interface. 
+
+    All query functions will return the results from the prior time step.
+
+    All commands will be delayed until the next time step.
+    """
+    def __init__(self,interface):
+        RobotInterfaceBase.__init__(self)
+        from threading import Thread, RLock
+        self._interface = interface
+        self._thread = Thread(target=self._threadFunc)
+        self._thread.daemon = True
+        self._lock = RLock()
+        self._commands = []
+        self._status = dict()
+        self._quit = True
+        self._initialized = None
+        self._once_query_methods = dict()
+        self._loop_query_methods = dict()
+        self._sensor_measurements = dict()
+        self._not_implemented_commands = set()
+        self._klamptModel = None
+        import copy
+        self.properties = copy.deepcopy(self._interface.properties)
+        if self.properties.get('asynchronous',False):
+            warnings.warn("ThreadedRobotInterface: interface is already asynchronous?  Suggest not threading it")
+        self.properties['asynchronous'] = True
+
+        for meth in ['reset'] + MOTION_COMMAND_METHODS:
+            f = getattr(self._interface,meth)
+            latch = None
+            if meth.startswith('set') and any(meth.endswith(v) for v in ['Position','Velocity','Torque','Force']):
+                latch = 'commanded'+meth[3:]
+            setattr(self,meth,self._queuedMethod(meth,f,latch=latch))
+        for meth in STATUS_COMMAND_METHODS:
+            if meth == 'reset': continue
+            if meth == 'enableSensor': continue
+            assert meth.startswith('set')
+            f = getattr(self._interface,meth)
+            setattr(self,meth,self._queuedMethod(meth,f,latch='g'+meth[1:]))
+        for meth in STRUCTURE_QUERY_METHODS:
+            f = getattr(self._interface,meth)
+            if meth != 'klamptModel':
+                setattr(self,meth,self._queryMethod(meth,f))
+            #handle these in loop manually
+        for meth in STATUS_QUERY_METHODS:
+            f = getattr(self._interface,meth)
+            setattr(self,meth,self._queryMethod(meth,f))
+            if meth in ['status','clock']:
+                self._loop_query_methods[meth] = f
+            else:
+                self._once_query_methods[meth] = f
+        for meth in MOTION_QUERY_METHODS:
+            if 'Cartesian' in meth or 'cartesian' in meth:
+                #the method will use the query + cartesian converter, e.g., cartesianPosition(sensedPosition).
+                continue
+            f = getattr(self._interface,meth)
+            setattr(self,meth,self._queryMethod(meth,f))
+            self._loop_query_methods[meth] = f
+        for meth in UTILITY_METHODS:
+            f = getattr(self._interface,meth)
+            setattr(self,meth,self._lockedMethod(meth,f))
+        
+    def log(self,msg):
+        """Logs internal messages"""
+        print(msg)
+
+    def klamptModel(self):
+        return self._klamptModel
+
+    def partInterface(self,part,joint_idx=None):
+        iface = self._interface.partInterface(part,joint_idx)
+        return _ThreadedSubRobotInterface(self,part,joint_idx,iface)
+
+    def enableSensor(self,sensor,enabled=True):
+        with self._lock:
+            if enabled:
+                if sensor not in self._sensor_measurements:
+                    self._sensor_measurements[sensor] = None,None
+            else:
+                if sensor in self._sensor_measurements:
+                    del self._sensor_measurements[sensor]
+
+    def enabledSensors(self):
+        return list(self._sensor_measurements.keys())
+
+    def sensorMeasurements(self,sensor):
+        return self._sensor_measurements.get(sensor,(None,None))[1]
+
+    def sensorUpdateTime(self,sensor):
+        return self._sensor_measurements.get(sensor,(None,None))[0]
+
+    def initialize(self):
+        if self._initialized != None:
+            raise RuntimeError("initialize() can only be called once")
+        self._quit = False
+        self._thread.start()
+        t0 = time.time()
+        while self._initialized == None:
+            time.sleep(0.01)
+            t1 = time.time()
+            if t1 - t0 > 5:
+                print("Initialization is taking a long time...")
+                t0 = t1
+        return self._initialized
+
+    def close(self):
+        if self._quit:
+            warnings.warn("close() called before initialize()?")
+        elif self._thread is not None:
+            self._quit = True
+            self._thread.join()
+            self._thread = None
+        else:
+            warnings.warn("close() called twice?")
+
+    def _queuedMethod(self,name,func,latch=None):
+        @wraps(func)
+        def f(*args):
+            if name in self._not_implemented_commands:
+                raise NotImplementedError("Method {} is not implemented by base interface".format(name))
+            with self._lock:
+                self._commands.append((name,func,args))
+                if latch is not None:
+                    self._status[latch] = args
+        return f
+
+    def _queryMethod(self,name,func):
+        @wraps(func)
+        def f(*args):
+            if len(args)==0:
+                res = self._status.get(name,None)
+            else:
+                res = self._status.get((name,)+tuple(args),None)
+            if isinstance(res,Exception):
+                raise res
+            return res
+        return f
+    
+    def _lockedMethod(self,name,func):
+        @wraps(func)
+        def f(*args):
+            with self._lock:
+                return func(*args)
+        return f
+
+    def _threadFunc(self):
+        from .utils import TimedLooper
+        self._initialized = self._interface.initialize()
+        dt = 1.0/self._interface.controlRate()
+        self._klamptModel = self._interface.klamptModel()  #TODO: might want to copy this to avoid thread clashing
+        with self._lock:
+            #handle STRUCTURE_QUERY_METHODS
+            for meth in ['numJoints','parts','controlRate','sensors']: #0-argument methods
+                self._status[meth] = getattr(self._interface,meth)()
+            for j in range(self._status['numJoints']):
+                self._status[('jointName',j)] = self._interface.jointName(j)
+            for s in self._status['sensors']:
+                self._status[('hasSensor',s)] = self._interface.hasSensor(s)
+        looper = TimedLooper(dt=dt,name='RobotInterfaceServer({})'.format(str(self._interface)),warning_printer=self.log)
+        while looper:
+            self._interface.beginStep()
+            t = self._interface.clock()
+            with self._lock:
+                active_sensors = list(self._sensor_measurements.keys())
+
+            status_updates = dict()
+            sensor_updates = dict()
+            for meth,func in self._loop_query_methods.items():  #query these every loop
+                try:
+                    res = func()
+                except Exception as e:
+                    res = e
+                status_updates[meth] = res
+            for sensor in active_sensors:
+                try:
+                    meas = self._interface.sensorMeasurements(sensor)
+                except Exception as e:
+                    res = e
+                sensor_updates[sensor] = t,meas
+            with self._lock:
+                for meth,func in self._once_query_methods.items():  #query these only once at the beginning
+                    try:
+                        res = func()
+                    except Exception as e:
+                        res = e
+                    self._status[meth] = res
+                self._once_query_methods = dict()
+                self._status.update(status_updates)
+                self._sensor_measurements.update(sensor_updates)
+                for command in self._commands:
+                    fn,f,args = command
+                    try:
+                        f(*args)  #run the command
+                    except NotImplementedError:
+                        if fn not in self._not_implemented_commands:
+                            warnings.warn("Method {} cannot be called because base interface does not implement it".format(fn))
+                        self._not_implemented_commands.add(fn)
+                    except Exception as e:
+                        warnings.warn("Exception {} raised while calling method {}({})".format(e,fn,args))
+                self._commands = []
+            self._interface.endStep()
+            if self._quit:
+                break
+        self._interface.close()
+
+class _ThreadedSubRobotInterface(RobotInterfaceBase):
+    def __init__(self,parent,part,joint_idx,base_part_interface):
+        RobotInterfaceBase.__init__(self)
+        self._parent = parent
+        assert isinstance(parent,ThreadedRobotInterface)
+        self._indices = parent.indices(part,joint_idx)
+        self._base_part_interface = base_part_interface
+        self.properties['name'] = part
+
+        for meth in ['reset'] + MOTION_COMMAND_METHODS:
+            f = getattr(self._base_part_interface,meth)
+            latch = None
+            if meth.startswith('set') and any(meth.endswith(v) for v in ['Position','Velocity','Torque','Force']):
+                latch = (part,'commanded'+meth[3:])
+            setattr(self,meth,self._parent._queuedMethod((part,meth),f,latch))
+        for meth in STATUS_COMMAND_METHODS:
+            if meth == 'reset': continue
+            if meth == 'enableSensor': continue
+            assert meth.startswith('set')
+            f = getattr(self._base_part_interface,meth)
+            setattr(self,meth,self._parent._queuedMethod((part,meth),f,latch=(part,'g'+meth[1:])))
+        for meth in STRUCTURE_QUERY_METHODS:
+            f = getattr(self._base_part_interface,meth)
+            if meth != 'klamptModel':
+                setattr(self,meth,self._parent._queryMethod((part,meth),f))
+            #handle these in loop manually
+        for meth in STATUS_QUERY_METHODS:
+            f = getattr(self._base_part_interface,meth)
+            if meth in ['status']:
+                self._parent._loop_query_methods[(part,meth)] = f
+            elif meth == 'clock':
+                pass #TODO: what do do with the clock method? assume on the same clock as the parent?
+            else:
+                self._parent._once_query_methods[(part,meth)] = f
+            setattr(self,meth,self._parent._queryMethod((part,meth),f))
+        for meth in MOTION_QUERY_METHODS:
+            if 'Cartesian' in meth or 'cartesian' in meth:
+                #the method will use the query + cartesian converter, e.g., cartesianPosition(sensedPosition).
+                continue
+            if meth in ['getPIDGains',
+                        'sensedPosition','sensedVelocity','sensedTorque',
+                        'commandedPosition','commandedVelocity','commandedTorque',
+                        'destinationPosition','destinationVelocity']:  #Overridden already
+                continue
+            f = getattr(self._base_part_interface,meth)
+            setattr(self,meth,self._parent._queryMethod((part,meth),f))
+            self._parent._loop_query_methods[(part,meth)] = f
+        for meth in UTILITY_METHODS:
+            f = getattr(self._base_part_interface,meth)
+            setattr(self,meth,self._parent._lockedMethod((part,meth),f))
+
+    def __str__(self):
+        return str(self._parent)+'['+self.properties['name']+']'
+    
+    def initialize(self):
+        raise RuntimeError("Can't call initialize() on a sub-robot interface.")
+
+    def beginStep(self):
+        raise RuntimeError("Can't call beginStep() on a sub-robot interface.")
+
+    def endStep(self):
+        raise RuntimeError("Can't call endStep() on a sub-robot interface.")
+
+    def numJoints(self):
+        return len(self._indices)
+
+    def _toPart(self,q):
+        return [q[i] for i in self._indices]
+
+    def getPIDGains(self):
+        P,I,D = self._parent.getPIDGains()
+        return self._toPart(P),self._toPart(I),self._toPart(D)
+
+    def sensedPosition(self):
+        return self._toPart(self._parent.sensedPosition())
+
+    def sensedVelocity(self):
+        return self._toPart(self._parent.sensedVelocity())
+
+    def sensedTorque(self):
+        return self._toPart(self._parent.sensedTorque())
+
+    def commandedPosition(self):
+        return self._toPart(self._parent.commandedPosition())
+
+    def commandedVelocity(self):
+        return self._toPart(self._parent.commandedPosition())
+
+    def commandedTorque(self):
+        return self._toPart(self._parent.commandedTorque())
+
+    def destinationPosition(self):
+        return self._toPart(self._parent.destinationPosition())
+
+    def destinationVelocity(self):
+        return self._toPart(self._parent.destinationVelocity())
+
+    def sensedCartesianPosition(self,frame='world'):
+        tool_coordinates = self.getToolCoordinates()
+        model = self._parent.klamptModel()
+        if model is None: raise NotImplementedError("TODO: return cartesian position from part interface?")
+        return klamptCartesianPosition(model,self._parent.sensedPosition(),self._indices,tool_coordinates,frame)
+
+    def sensedCartesianVelocity(self,frame='world'):
+        tool_coordinates = self.getToolCoordinates()
+        model = self._parent.klamptModel()
+        if model is None: raise NotImplementedError("TODO: return cartesian position from part interface?")
+        return klamptCartesianVelocity(model,self._parent.sensedPosition(),self._parent.sensedVelocity(),self._indices,tool_coordinates,frame)
+
+    def sensedCartesianForce(self,frame='world'):
+        tool_coordinates = self.getToolCoordinates()
+        model = self._parent.klamptModel()
+        if model is None: raise NotImplementedError("TODO: return cartesian position from part interface?")
+        return klamptCartesianForce(model,self._parent.sensedPosition(),self._parent.sensedTorque(),self._indices,tool_coordinates,frame)
+
+    def commandedCartesianPosition(self,frame='world'):
+        tool_coordinates = self.getToolCoordinates()
+        model = self._parent.klamptModel()
+        if model is None: raise NotImplementedError("TODO: return cartesian position from part interface?")
+        return klamptCartesianPosition(model,self._parent.commandedPosition(),self._indices,tool_coordinates,frame)
+
+    def commandedCartesianVelocity(self,frame='world'):
+        tool_coordinates = self.getToolCoordinates()
+        model = self._parent.klamptModel()
+        if model is None: raise NotImplementedError("TODO: return cartesian position from part interface?")
+        return klamptCartesianVelocity(model,self._parent.commandedPosition(),self._parent.commandedVelocity(),self._indices,tool_coordinates,frame)
+
+    def commandedCartesianForce(self,frame='world'):
+        tool_coordinates = self.getToolCoordinates()
+        model = self._parent.klamptModel()
+        if model is None: raise NotImplementedError("TODO: return cartesian position from part interface?")
+        return self.klamptCartesianForce(model,self._parent.commandedPosition(),self._parent.commandedTorque(),self._indices,tool_coordinates,frame)
+
+    def destinationCartesianPosition(self,frame='world'):
+        tool_coordinates = self.getToolCoordinates()
+        model = self._parent.klamptModel()
+        if model is None: raise NotImplementedError("TODO: return cartesian position from part interface?")
+        return klamptCartesianPosition(model,self._parent.destinationPosition(),self._indices,tool_coordinates,frame)
+
+    def destinationCartesianVelocity(self,frame='world'):
+        tool_coordinates = self.getToolCoordinates()
+        model = self._parent.klamptModel()
+        if model is None: raise NotImplementedError("TODO: return cartesian position from part interface?")
+        return self.klamptCartesianVelocity(model,self._parent.destinationPosition(),self._parent.destinationVelocity(),self._indices,tool_coordinates,frame)
+
+    def queuedCartesianTrajectory(self,frame='world'):
+        tool_coordinates = self.getToolCoordinates()
+        model = self._parent.klamptModel()
+        if model is None: raise NotImplementedError("TODO: return cartesian position from part interface?")
+        res = self._parent.queuedTrajectory()
+        if len(res) == 2:
+            ts,qs = res
+            return ts,[klamptCartesianPosition(model,q,self._indices,tool_coordinates,frame) for q in qs]
+        elif len(res) == 3:
+            ts,qs,vs = res
+            return ts,[klamptCartesianPosition(model,q,self._indices,tool_coordinates,frame) for q in qs],[klamptCartesianVelocity(model,q,dq,self._indices,tool_coordinates,frame) for q,dq in zip(qs,vs)]
+        else:
+            raise RuntimeError("Invalid result from queuedTrajectory")    
 
 
 class _JointInterfaceEmulatorData:
@@ -1302,9 +1832,10 @@ class _CartesianEmulatorData:
     def __init__(self,robot,indices):
         self.robot = robot
         self.indices = indices
+        self.robotIndices = [robot.driver(i).getAffectedLink() for i in indices]
         self.driver = CartesianDriveSolver(robot)
         assert indices[-1] == max(indices),"Indices must be in sorted order"
-        self.eeLink = robot.link(indices[-1])
+        self.eeLink = robot.link(self.robotIndices[-1])
         self.toolCoordinates = [0,0,0]
         self.t = None
         self.active = False
@@ -1324,7 +1855,7 @@ class _CartesianEmulatorData:
             raise NotImplementedError("Can only handle world frame, for now")
         qorig = self.robot.getConfig()
         if not self.active:
-            self.driver.start(qorig,self.indices[-1],endEffectorPositions=self.toolCoordinates)
+            self.driver.start(qorig,self.robotIndices[-1],endEffectorPositions=self.toolCoordinates)
         goal = self.driver.ikGoals[0]
         if len(xparams) == 3:
             #point-to-point constraint
@@ -1358,7 +1889,7 @@ class _CartesianEmulatorData:
         qcur = self.robot.getConfig()
 
         if not self.active:
-            self.driver.start(qcur,self.indices[-1],endEffectorPositions=self.toolCoordinates)
+            self.driver.start(qcur,self.robotIndices[-1],endEffectorPositions=self.toolCoordinates)
             self.active = True
 
         if self.t is None:
@@ -1398,80 +1929,13 @@ class _CartesianEmulatorData:
         return [self.robot.driver(i).getValue() for i in self.indices]
 
     def cartesianPosition(self,q,frame='world'):
-        assert len(q) == self.robot.numDrivers()
-        if frame == 'tool':
-            return se3.identity()
-        elif frame == 'end effector':
-            return (so3.identity(),self.toolCoordinates)
-        model = self.robot
-        for i,v in enumerate(q):
-            model.driver(i).setValue(v)
-        model.setConfig(model.getConfig())
-        T = self.eeLink.getTransform()
-        t = T.apply(self.toolCoordinates)
-        Ttool_world = (T[0],t)
-        if frame == 'world':
-            return Ttool_world
-        elif frame == 'base':
-            baseLink = self.robot.link(self.indices[0])
-            return se3.apply(se3.inv(baseLink.getTransform()),Ttool_world)
-        else:
-            raise ValueError("Invalid frame specified")
+        return klamptCartesianPosition(self.robot,q,self.robotIndices,self.toolCoordinates,frame)
         
     def cartesianVelocity(self,q,dq,frame='world'):
-        assert len(q) == self.robot.numDrivers()
-        assert len(dq) == self.robot.numDrivers()
-        assert len(q) == self.robot.numDrivers()
-        model = self.robot
-        for i,v in enumerate(q):
-            model.driver(i).setValue(v)
-            if frame == 'base' and i < self.indices[0]:
-                model.driver(i).setVelocity(0)  #get relative velocity to base
-            else:
-                model.driver(i).setVelocity(dq[i])
-        model.setConfig(model.getConfig())
-        local = self.toolCoordinates
-        v = self.eeLink.getPointVelocity(local)
-        w = self.eeLink.getAngularVelocity()
-        if frame == 'world':
-            return w,v
-        elif frame == 'base':
-            baseLink = self.robot.link(self.indices[0])
-            Tbase = baseLink.getTransform()
-            Rworld_base = so3.inv(Tbase[0])
-            return (so3.apply(Rworld_base,w),so3.apply(Rworld_base,v))
-        elif frame == 'end effector' or frame == 'tool':
-            eeLink = self.eeLink
-            Tee = eeLink.getTransform()
-            Rworld_ee = so3.inv(Tee[0])
-            return (so3.apply(Rworld_ee,w),so3.apply(Rworld_ee,v))
-        else:
-            raise ValueError("Invalid frame specified")
+        return klamptCartesianVelocity(self.robot,q,dq,self.robotIndices,self.toolCoordinates,frame)
 
     def cartesianForce(self,q,t,frame='world'):
-        assert len(q) == self.robot.numDrivers()
-        model = self.robot
-        for i,v in enumerate(q):
-            model.driver(i).setValue(v)
-        model.setConfig(model.getConfig())
-        local = self.toolCoordinates
-        J = self.eeLink.getJacobian(local)
-        wrench = [vectorops.dot(Jrow,t) for Jrow in J]
-        torque,force = wrench[:3],wrench[3:]
-        if frame == 'world':
-            return (torque,force)
-        elif frame == 'base':
-            baseLink = self.robot.link(self.indices[0])
-            Tbase = baseLink.getTransform()
-            Rworld_base = so3.inv(Tbase[0])
-            return (so3.apply(Rworld_base,torque),so3.apply(Rworld_base,force))
-        elif frame == 'end effector' or frame == 'tool':
-            eeLink = self.eeLink
-            Tee = eeLink.getTransform()
-            Rworld_ee = so3.inv(Tee[0])
-            return (so3.apply(Rworld_ee,torque),so3.apply(Rworld_ee,force))
-        raise ValueError("Invalid frame specified")
-
+        return klamptCartesianForce(self.robot,q,t,self.robotIndices,self.toolCoordinates,frame)
 
 class _RobotInterfaceEmulatorData:
     def __init__(self,nd,klamptModel):
@@ -1737,6 +2201,19 @@ class _RobotInterfaceEmulatorData:
         for i,qi,dqi,ti in zip(indices,q,dq,t):
             self.jointData[i].pidCmd = (qi,dqi,ti)
 
+    def setPIDGains(self,indices,kP,kI,kD):
+        for i,P,I,D in zip(indices,kP,kI,kD):
+            self.jointData[i].pidGains = (kP,kI,kD)
+
+    def getPIDGains(self,indices):
+        kP,kI,kD = [],[],[]
+        for i in indices:
+            P,I,D = self.jointData[i].pidGains
+            kP.append(P)
+            kI.append(I)
+            kD.append(D)
+        return kP,kI,kD
+
     def setPiecewiseLinear(self,indices,ts,qs,relative):
         assert self.curClock is not None
         assert len(ts) == len(qs)
@@ -1866,6 +2343,9 @@ class _RobotInterfaceEmulatorData:
     def setGravityCompensation(self,gravity,load,load_com,indices):
         raise NotImplementedError("TODO: implement gravity compensation?")
 
+    def getGravityCompensation(self,indices):
+        raise NotImplementedError("TODO: implement gravity compensation?")
+
     def setCartesianPosition(self,xparams,frame,indices):
         try:
             c = self.cartesianInterfaces[tuple(indices)]
@@ -1988,10 +2468,10 @@ class _SubRobotInterfaceCompleter(RobotInterfaceCompleter):
     def __str__(self):
         return str(self._parent)+'['+self.properties['name']+']'
 
-    def status(self):
+    def status(self,joint_idx=None):
         if self._base_part_interface is not None:
-            return self._base_part_interface.status()
-        return RobotInterfaceCompleter.status(self)
+            return self._base_part_interface.status(joint_idx)
+        return RobotInterfaceCompleter.status(self,joint_idx)
 
     def estop(self):
         #if self._base_part_interface is not None:
@@ -2050,3 +2530,37 @@ class _SubRobotInterfaceCompleter(RobotInterfaceCompleter):
     def destinationVelocity(self):
         return self._toPart(self._parent.destinationVelocity())
 
+    def sensedCartesianPosition(self,frame='world'):
+        return self.cartesianPosition(self._parent.sensedPosition(),frame)
+
+    def sensedCartesianVelocity(self,frame='world'):
+        return self.cartesianVelocity(self._parent.sensedPosition(),self._parent.sensedVelocity(),frame)
+
+    def sensedCartesianForce(self,frame='world'):
+        return self.cartesianForce(self._parent.sensedPosition(),self._parent.sensedTorque(),frame)
+
+    def commandedCartesianPosition(self,frame='world'):
+        return self.cartesianPosition(self._parent.commandedPosition(),frame)
+
+    def commandedCartesianVelocity(self,frame='world'):
+        return self.cartesianVelocity(self._parent.commandedPosition(),self._parent.commandedVelocity(),frame)
+
+    def commandedCartesianForce(self,frame='world'):
+        return self.cartesianForce(self._parent.commandedPosition(),self._parent.commandedTorque(),frame)
+
+    def destinationCartesianPosition(self,frame='world'):
+        return self.cartesianPosition(self._parent.destinationPosition(),frame)
+
+    def destinationCartesianVelocity(self,frame='world'):
+        return self.cartesianVelocity(self._parent.destinationPosition(),self._parent.desinationVelocity())
+
+    def queuedCartesianTrajectory(self,frame='world'):
+        res = self._parent.queuedTrajectory()
+        if len(res) == 2:
+            ts,qs = res
+            return ts,[self.cartesianPosition(q,frame) for q in qs]
+        elif len(res) == 3:
+            ts,qs,vs = res
+            return ts,[self.cartesianPosition(q,frame) for q in qs],[self.cartesianVelocity(q,dq,frame) for q,dq in zip(qs,vs)]
+        else:
+            raise RuntimeError("Invalid result from queuedTrajectory")
