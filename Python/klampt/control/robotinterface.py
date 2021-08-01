@@ -180,7 +180,7 @@ class RobotInterfaceBase(object):
         assert joint_idx >= 0 and joint_idx < len(plist),"Invalid joint index for part "+str(part)
         return [plist[joint_idx]]
 
-    def partInterface(self,part=None,joint_idx=None):
+    def partInterface(self,part,joint_idx=None):
         """Returns a RobotInterfaceBase that allows control of the given 
         part/joint.  If no such controller exists, raises a
         NotImplementedError.
@@ -188,8 +188,6 @@ class RobotInterfaceBase(object):
         The part/joint controller should operate on exactly the DOFs specified
         by self.indices(part,joint_idx).
         """
-        if part is None and joint_idx is None:
-            return self
         raise NotImplementedError()
 
     def controlRate(self):
@@ -249,17 +247,13 @@ class RobotInterfaceBase(object):
         """Returns the clock time of the last sensor update."""
         raise NotImplementedError()
 
-    def status(self,part=None,joint_idx=None):
-        """Returns a status string for the given part / joint.  'ok' means
+    def status(self,joint_idx=None):
+        """Returns a status string for the robot / given joint.  'ok' means
         everything is OK."""
-        if part is not None or joint_idx is not None:
-            return self.partInterface(part,joint_idx).status()
         return 'ok'
 
-    def isMoving(self,part=None,joint_idx=None):
-        """Returns true if the part / joint are currently moving"""
-        if part is not None or joint_idx is not None:
-            return self.partInterface(part,joint_idx).isMoving()
+    def isMoving(self,joint_idx=None):
+        """Returns true if the robot / joint are currently moving"""
         raise NotImplementedError()
 
     def sensedPosition(self):
@@ -316,12 +310,12 @@ class RobotInterfaceBase(object):
             or a piecewise-cubic trajectory.
         """
         raise NotImplementedError()
-
+    
     def cartesianPosition(self,q,frame='world'):
         """Converts from a joint position vector to a cartesian position.
 
         Args:
-            q (vector): the robot's joint positions.
+            q (vector): the (whole) robot's joint positions.
             frame (str): either 'world', 'base', 'end effector', or 'tool'.
                 Note: 'end effector' and 'tool' don't make any sense here,
                 since the tool frame is constant relative to these frames...
@@ -337,8 +331,8 @@ class RobotInterfaceBase(object):
         velocity.
 
         Args: 
-            q (vector): the robot's joint positions.
-            dq (vector): the robot's joint velocities.
+            q (vector): the (whole) robot's joint positions.
+            dq (vector): the (whole) robot's joint velocities.
             frame (str): either 'world', 'base', 'end effector', or 'tool'.
                 Note: if 'base' is specified, the velocity of the base is 
                 subtracted from the reported speed.
@@ -353,8 +347,8 @@ class RobotInterfaceBase(object):
         """Converts from a joint position / torque vector to a cartesian force.
 
         Args: 
-            q (vector): the robot's joint positions.
-            t (vector): the robot's joint torques.
+            q (vector): the (whole) robot's joint positions.
+            t (vector): the (whole) robot's joint torques.
             frame (str): either 'world', 'base', 'end effector', or 'tool'.
 
         Returns:
@@ -379,7 +373,7 @@ class RobotInterfaceBase(object):
         return self.cartesianVelocity(self.commandedPosition(),self.commandedVelocity(),frame)
 
     def commandedCartesianForce(self,frame='world'):
-        return self.cartesianForce(self.commandedPosition(),self.commandedTorque(),frame='world')
+        return self.cartesianForce(self.commandedPosition(),self.commandedTorque(),frame)
 
     def destinationCartesianPosition(self,frame='world'):
         """Retrieves the Cartesian destination of a motion queue controller.
@@ -590,7 +584,6 @@ class RobotInterfaceBase(object):
         """
         raise NotImplementedError()
 
-
     def partToRobotConfig(self,pconfig,part,robotConfig,joint_idx=None):
         """Fills a configuration vector for the whole robot given the
         configuration `pconfig` for a part"""
@@ -609,6 +602,9 @@ class RobotInterfaceBase(object):
     def klamptModel(self):
         """If applicable, returns the Klamp't RobotModel associated with this
         controller.  Default tries to load from properties['klamptModelFile'].
+
+        Note that the configuration DOFs in the RIL robot correspond to the
+        robot's DRIVERs, not its links.
 
         Note: the result of the default implementation is cached, so this can
         be called multiple times without a performance hit.
@@ -704,5 +700,3 @@ class RobotInterfaceBase(object):
             for (i,x) in zip(dofs,velocity):
                 model.driver(i).setVelocity(x)
             return model.getVelocity()
-
-    
