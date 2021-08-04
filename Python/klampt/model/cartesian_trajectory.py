@@ -32,8 +32,14 @@ from . import config
 from collections import deque
 import math
 import warnings
+from typing import Union,Optional,List,Sequence,Callable
+from .typing import Vector,Vector3,Matrix3,RigidTransform
 
-def set_cartesian_constraints(x,constraints,solver):
+def set_cartesian_constraints(
+        x: Vector,
+        constraints: List[IKObjective],
+        solver: IKSolver
+    ) -> None:
     """For ``x`` a workspace parameter setting (obtained via
     ``config.getConfig(constraints)``), a set of constraints, and a
     :class:`IKSolver` object, modifies the constraints and the solver so that
@@ -44,14 +50,18 @@ def set_cartesian_constraints(x,constraints,solver):
     for c in constraints:
         solver.add(c)
 
-def solve_cartesian(x,constraints,solver):
+def solve_cartesian(
+        x: Vector,
+        constraints: List[IKObjective],
+        solver: IKSolver
+    ) -> bool:
     """For ``x`` a workspace parameter setting (obtained via
     ``config.getConfig(constraints)``), a set of constraints, and a IKSolver
     object, returns True if the solver can find a solution, starting from the
     robot's current configuration). Returns True if successful.
     """
     set_cartesian_constraints(x,constraints,solver)
-    return  solver.solve()
+    return solver.solve()
 
 def _make_canonical(robot,constraints,startConfig,endConfig,solver):
     if not hasattr(constraints,'__iter__'):
