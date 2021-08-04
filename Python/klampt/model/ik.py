@@ -67,8 +67,17 @@ klampt.robotsim.IKSolver)
 from ..robotsim import *
 from ..math import so3,se3
 from .subrobot import SubRobotModel
+from typing import Union,Optional,List,Sequence,Callable
+from .typing import Vector,Vector3,Rotation,RigidTransform
 
-def objective(body,ref=None,local=None,world=None,R=None,t=None):
+def objective(
+        body: Union[RobotModelLink,RigidObjectModel],
+        ref: Union[None,RobotModelLink,RigidObjectModel] = None,
+        local: Union[None,Vector3,List[Vector3]] = None,
+        world: Union[None,Vector3,List[Vector3]] = None,
+        R: Optional[Rotation] = None,
+        t: Optional[Vector3] = None
+    ) -> IKObjective:
     """Returns an IKObjective for a given body.
 
     There are two modes in which this can be used:
@@ -162,7 +171,12 @@ def objective(body,ref=None,local=None,world=None,R=None,t=None):
         return obj
 
 
-def fixed_objective(link,ref=None,local=None,world=None):
+def fixed_objective(
+        link: RobotModelLink,
+        ref: Union[None,RobotModelLink,RigidObjectModel] = None,
+        local: Union[None,Vector3,List[Vector3]] = None,
+        world: Union[None,Vector3,List[Vector3]] = None
+    ) -> IKObjective:
     """Convenience function for fixing the given link at the current position
     in space. 
 
@@ -214,7 +228,12 @@ def fixed_objective(link,ref=None,local=None,world=None):
     else:
         raise ValueError("ik.fixed_objective does not accept both local and world keyword arguments")
 
-def fixed_rotation_objective(link,ref=None,local_axis=None,world_axis=None):
+def fixed_rotation_objective(
+        link: RobotModelLink,
+        ref: Union[None,RobotModelLink,RigidObjectModel] = None,
+        local_axis: Optional[Vector3] = None,
+        world_axis: Optional[Vector3] = None
+    ) -> IKObjective:
     """Convenience function for fixing the given link at its current
     orientation in space. 
 
@@ -273,7 +292,11 @@ def objects(objectives):
     raise NotImplementedError()
     pass
 
-def solver(objectives,iters=None,tol=None):
+def solver(
+        objectives: Union[IKObjective,Sequence[IKObjective]],
+        iters: Optional[int] = None,
+        tol: Optional[float] = None
+    ) -> IKSolver:
     """Returns a solver for the given objective(s). 
 
     Args:
@@ -375,7 +398,12 @@ def solver(objectives,iters=None,tol=None):
         else:
             raise TypeError("Objective is of wrong type")
 
-def solve(objectives,iters=1000,tol=1e-3,activeDofs=None):
+def solve(
+        objectives: Union[IKObjective,Sequence[IKObjective]],
+        iters: int = 1000,
+        tol: float = 1e-3,
+        activeDofs: Optional[List[int]] = None
+    ) -> bool:
     """Attempts to solve the given objective(s). Either a single objective
     or a list of simultaneous objectives can be provided.
 
@@ -419,16 +447,24 @@ def solve(objectives,iters=1000,tol=1e-3,activeDofs=None):
     else:
         return s.solve()
 
-def residual(objectives):
+def residual(objectives: Union[IKObjective,Sequence[IKObjective]]) -> Vector:
     """Returns the residual of the given objectives."""
     return solver(objectives).getResidual()
 
-def jacobian(objectives):
+def jacobian(objectives: Union[IKObjective,Sequence[IKObjective]]): 
     """Returns the jacobian of the given objectives."""
     return solver(objectives).getJacobian()
 
 
-def solve_global(objectives,iters=1000,tol=1e-3,activeDofs=None,numRestarts=100,feasibilityCheck=None,startRandom=False):
+def solve_global(
+        objectives: Union[IKObjective,Sequence[IKObjective]],
+        iters: int = 1000,
+        tol: float = 1e-3,
+        activeDofs: Optional[List[int]] = None,
+        numRestarts: int=100,
+        feasibilityCheck: Optional[Callable[[],bool]] = None,
+        startRandom: bool=False
+    ) -> bool:
     """Attempts to solve the given objective(s) but avoids local minima
     to some extent using a random-restart technique.  
         
@@ -483,7 +519,15 @@ def solve_global(objectives,iters=1000,tol=1e-3,activeDofs=None,numRestarts=100,
                     return True
         return False
 
-def solve_nearby(objectives,maxDeviation,iters=1000,tol=1e-3,activeDofs=None,numRestarts=0,feasibilityCheck=None):
+def solve_nearby(
+        objectives: Union[IKObjective,Sequence[IKObjective]],
+        maxDeviation: float,
+        iters: int = 1000,
+        tol: float = 1e-3,
+        activeDofs: Optional[List[int]] = None,
+        numRestarts: int = 0,
+        feasibilityCheck: Optional[Callable[[],bool]] = None
+    ) -> bool:
     """Solves for an IK solution that does not deviate too far from the
     initial configuration.
 

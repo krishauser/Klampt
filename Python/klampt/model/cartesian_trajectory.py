@@ -37,7 +37,7 @@ from .typing import Vector,Vector3,Matrix3,RigidTransform
 
 def set_cartesian_constraints(
         x: Vector,
-        constraints: List[IKObjective],
+        constraints: Sequence[IKObjective],
         solver: IKSolver
     ) -> None:
     """For ``x`` a workspace parameter setting (obtained via
@@ -52,7 +52,7 @@ def set_cartesian_constraints(
 
 def solve_cartesian(
         x: Vector,
-        constraints: List[IKObjective],
+        constraints: Sequence[IKObjective],
         solver: IKSolver
     ) -> bool:
     """For ``x`` a workspace parameter setting (obtained via
@@ -93,12 +93,18 @@ def _make_canonical(robot,constraints,startConfig,endConfig,solver):
         endConfig = robot.getConfig()
     return constraints,startConfig,endConfig,solver
 
-def cartesian_interpolate_linear(robot,a,b,constraints,
-    startConfig='robot',endConfig=None,
-    delta=1e-2,
-    solver=None,
-    feasibilityTest=None,
-    maximize=False):
+def cartesian_interpolate_linear(
+        robot: Union[RobotModel,SubRobotModel],
+        a: Vector,
+        b: Vector,
+        constraints: Union[int,str,IKObjective,Sequence[int],Sequence[str],Sequence[IKObjective]],
+        startConfig: Union[str,Vector] = 'robot',
+        endConfig: Optional[Vector] = None,
+        delta: float = 1e-2,
+        solver: Optional[IKSolver] = None,
+        feasibilityTest: Optional[Callable[[Vector],bool]] = None,
+        maximize: bool = False
+    ) -> Optional[RobotTrajectory]:
     """Resolves a continuous robot trajectory that interpolates between two
     cartesian points for specified IK constraints.  The output path is only a
     kinematic resolution, and has time domain [0,1].
@@ -269,12 +275,19 @@ class _BisectNode:
         self.qa,self.qb = qa,qb
         self.left,self.right = None,None
 
-def cartesian_interpolate_bisect(robot,a,b,constraints,
-    startConfig='robot',endConfig=None,
-    delta=1e-2,
-    solver=None,
-    feasibilityTest=None,
-    growthTol=10):
+def cartesian_interpolate_bisect(
+        robot: Union[RobotModel,SubRobotModel],
+        a: Vector,
+        b: Vector,
+        constraints: Union[int,str,IKObjective,Sequence[int],Sequence[str],Sequence[IKObjective]],
+        startConfig: Union[str,Vector] = 'robot',
+        endConfig: Optional[Vector] = None,
+        delta: float = 1e-2,
+        solver: Optional[IKSolver] = None,
+        feasibilityTest: Optional[Callable[[Vector],bool]] = None,
+        maximize: bool = False,
+        growthTol: int = 10
+    ) -> Optional[RobotTrajectory]:
     """Resolves a continuous robot trajectory that interpolates between two
     cartesian points for a single link of a robot.  Note that the output path
     is only a kinematic resolution, and has time domain [0,1].
@@ -417,14 +430,19 @@ def cartesian_interpolate_bisect(robot,a,b,constraints,
             q.append(n.left)
     return res
 
-def cartesian_path_interpolate(robot,path,constraints,
-    startConfig='robot',endConfig=None,
-    delta=1e-2,
-    method='any',
-    solver=None,
-    feasibilityTest=None,
-    numSamples=1000,
-    maximize=False):
+def cartesian_path_interpolate(
+        robot: Union[RobotModel,SubRobotModel],
+        path: Union[Trajectory,Sequence[Vector]],
+        constraints: Union[int,str,IKObjective,Sequence[int],Sequence[str],Sequence[IKObjective]],
+        startConfig: Union[str,Vector] = 'robot',
+        endConfig: Optional[Vector] = None,
+        delta: float = 1e-2,
+        method: str = 'any',
+        solver: Optional[IKSolver] = None,
+        feasibilityTest: Optional[Callable[[Vector],bool]] = None,
+        numSamples: int = 1000,
+        maximize: bool = False
+    ) -> Optional[RobotTrajectory]:
     """Resolves a continuous robot trajectory that follows a cartesian path 
     for one or more links of a robot.
 
@@ -776,13 +794,18 @@ def cartesian_path_interpolate(robot,path,constraints,
     return None
 
 
-def cartesian_bump(robot,js_path,constraints,bump_paths,
-    delta=1e-2,
-    solver=None,
-    ee_relative=False,
-    maximize=False,
-    closest=False,
-    maxDeviation=None):
+def cartesian_bump(
+        robot: Union[RobotModel,SubRobotModel],
+        js_path: Union[Trajectory,RobotTrajectory],
+        constraints: Union[int,str,IKObjective,Sequence[int],Sequence[str],Sequence[IKObjective]],
+        bump_paths: Union[RigidTransform,SE3Trajectory,Sequence[RigidTransform],Sequence[SE3Trajectory]],
+        delta: float = 1e-2,
+        solver: Optional[IKSolver] = None,
+        ee_relative: bool = False,
+        maximize: bool = False,
+        closest: bool = False,
+        maxDeviation: Optional[List[float]] = None
+    ) -> Optional[RobotTrajectory]:
     """Given the robot and a reference joint space trajectory, "bumps" the
     trajectory in Cartesian space using a given relative transform (or
     transform path).  The movement in joint space is approximately minimized
@@ -977,11 +1000,14 @@ def cartesian_bump(robot,js_path,constraints,bump_paths,
     warnings.warn("cartesian_bump(): Resolved %d/%d bumped edges"%(numResolved,numTotalEdges),RuntimeWarning)
     return res
 
-def cartesian_move_to(robot,constraints,
-    delta=1e-2,
-    solver=None,
-    feasibilityTest=None,
-    maximize=False):
+def cartesian_move_to(
+        robot:Union[RobotModel,SubRobotModel],
+        constraints: Union[int,str,IKObjective,Sequence[int],Sequence[str],Sequence[IKObjective]],
+        delta: float = 1e-2,
+        solver: Optional[IKSolver] = None,
+        feasibilityTest: Optional[Callable[[Vector],bool]] = None,
+        maximize: bool = False
+    ) -> Optional[RobotTrajectory]:
     """A convenience function that generates a path that performs a linear
     cartesian interpolation starting from the robot's current configuration
     and ending at the desired IK constraints.

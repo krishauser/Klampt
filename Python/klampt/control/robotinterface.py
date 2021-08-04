@@ -1,10 +1,11 @@
 """The main module for Klampt's Robot Interface Layer.
 """
 
-from ..robotsim import WorldModel
+from ..robotsim import WorldModel,RobotModel
 import functools
 import warnings
-
+from typing import Union,Optional,Any
+from klampt.model.typing import Vector,Vector3,RigidTransform
 
 class RobotInterfaceBase(object):
     """The main class for the Klamp't Robot Interface Layer. Defines a unifying
@@ -126,32 +127,32 @@ class RobotInterfaceBase(object):
             inner.append(self.properties['version'])
         return "RobotInterface("+','.join(inner)+')'
 
-    def initialize(self):
+    def initialize(self) -> bool:
         """Tries to connect to the robot.  Returns true if ready to send
         commands.  This should probably be the first method called.
         """
         return True
 
-    def close(self):
+    def close(self) -> bool:
         """Cleanly shuts down any resources acquired using initialize()."""
         return True
 
-    def startStep(self):
+    def startStep(self) -> None:
         """Deprecated. use beginStep instead."""
         if not self._warned:
             warnings.warn("startStep will be deprecated, use beginStep instead",DeprecationWarning)
         self._warned = True
         self.beginStep()
 
-    def beginStep(self):
+    def beginStep(self) -> None:
         """This is called before the commands sent at each time step"""
         pass
 
-    def endStep(self):
+    def endStep(self) -> None:
         """This is called after the commands sent at each time step"""
         pass
 
-    def numJoints(self,part=None):
+    def numJoints(self,part: Optional[str] = None) -> int:
         """Returns the number of joints of the given part.  By default, this
         returns the number of actuated DOFs in the Klamp't model. 
         """
@@ -163,7 +164,7 @@ class RobotInterfaceBase(object):
         return len(self.parts()[part])
 
     @functools.lru_cache(maxsize=None)
-    def parts(self):
+    def parts(self) -> 'dict[Any,list[int]]':
         """Returns a dictionary of (part-name,configuration index list) pairs
         defining the named parts of the robot.
 
@@ -172,7 +173,10 @@ class RobotInterfaceBase(object):
         """
         return {None:list(range(self.numJoints()))}
 
-    def indices(self,part=None,joint_idx=None):
+    def indices(self,
+            part: Optional[str] = None,
+            joint_idx: Optional[int] = None
+        ) -> 'list[int]':
         """Helper: returns a list of indices for the given part / joint index"""
         plist = self.parts()[part]
         if joint_idx is None:
@@ -180,7 +184,10 @@ class RobotInterfaceBase(object):
         assert joint_idx >= 0 and joint_idx < len(plist),"Invalid joint index for part "+str(part)
         return [plist[joint_idx]]
 
-    def partInterface(self,part,joint_idx=None):
+    def partInterface(self,
+            part: str,
+            joint_idx: Optional[int] = None
+        ) -> 'RobotInterfaceBase':
         """Returns a RobotInterfaceBase that allows control of the given 
         part/joint.  If no such controller exists, raises a
         NotImplementedError.
@@ -190,118 +197,120 @@ class RobotInterfaceBase(object):
         """
         raise NotImplementedError()
 
-    def controlRate(self):
+    def controlRate(self) -> float:
         """Returns the control rate, in Hz"""
         raise NotImplementedError()
 
-    def clock(self):
+    def clock(self) -> float:
         """Returns the current time on the robot's clock, in seconds"""
         raise NotImplementedError()
 
-    def estop(self):
+    def estop(self) -> None:
         """Calls an emergency stop on the robot"""
         self.softStop()
 
-    def softStop(self):
+    def softStop(self) -> None:
         """Calls a software E-stop on the robot (braking as quickly as
         possible).  Default implementation stops robot at current position; a 
         better solution would slow the robot down.
         """
         self.setPosition(self.commandedPosition())
 
-    def reset(self):
+    def reset(self) -> bool:
         """If the robot has a non-normal status code, attempt to reset it
         to normal operation.  Returns true on success, false on failure.
         """
         return False
 
-    def jointName(self,joint_idx):
+    def jointName(self, joint_idx: int) -> str:
         """Returns a string naming the given joint"""
         raise NotImplementedError()
 
-    def sensors(self):
+    def sensors(self) -> list:
         """Returns a list of names of possible sensors on this robot."""
         raise NotImplementedError()
 
-    def enabledSensors(self):
+    def enabledSensors(self) -> list:
         """Returns a list of names of enabled sensors on this robot."""
         raise NotImplementedError()
 
-    def hasSensor(self,sensor):
+    def hasSensor(self, sensor: str) -> bool:
         """Returns true if the given sensor can be enabled.
         """
         return sensor in self.sensors()
 
-    def enableSensor(self,sensor,enabled=True):
+    def enableSensor(self,
+        sensor: str,
+        enabled: bool=True) -> bool:
         """Enables / disables a sensor. Returns true if successful.
         """
         raise NotImplementedError()
 
-    def sensorMeasurements(self,name):
+    def sensorMeasurements(self, name: str):
         """Returns the latest measurements from a sensor.  Interpretation of
         the result is sensor-dependent.
         """
         raise NotImplementedError()
 
-    def sensorUpdateTime(self,name):
+    def sensorUpdateTime(self, name: str) -> float:
         """Returns the clock time of the last sensor update."""
         raise NotImplementedError()
 
-    def status(self,joint_idx=None):
+    def status(self, joint_idx: Optional[int] = None) -> str:
         """Returns a status string for the robot / given joint.  'ok' means
         everything is OK."""
         return 'ok'
 
-    def isMoving(self,joint_idx=None):
+    def isMoving(self, joint_idx: Optional[int] = None) -> bool:
         """Returns true if the robot / joint are currently moving"""
         raise NotImplementedError()
 
-    def sensedPosition(self):
+    def sensedPosition(self) -> Vector:
         """Retrieves the currently sensed joint position. 
         """
         raise NotImplementedError()
 
-    def sensedVelocity(self):
+    def sensedVelocity(self) -> Vector:
         """Retrieves the currently sensed joint velocity. 
         """
         raise NotImplementedError()
 
-    def sensedTorque(self):
+    def sensedTorque(self) -> Vector:
         """Retrieves the currently sensed joint torque. 
         """
         raise NotImplementedError()
 
-    def commandedPosition(self):
+    def commandedPosition(self) -> Vector:
         """Retrieves the currently commanded joint position. 
         """
         raise NotImplementedError()
 
-    def commandedVelocity(self):
+    def commandedVelocity(self) -> Vector:
         """Retrieves the currently commanded joint velocity. 
         """
         raise NotImplementedError()
 
-    def commandedTorque(self):
+    def commandedTorque(self) -> Vector:
         """Retrieves the currently commanded joint torque. 
         """
         raise NotImplementedError()
 
-    def destinationPosition(self):
+    def destinationPosition(self) -> Vector:
         """Retrieves the destination of a motion queue controller.
         """
         raise NotImplementedError()
 
-    def destinationVelocity(self):
+    def destinationVelocity(self) -> Vector:
         """Retrieves the final velocity of a motion queue controller.
         """
         raise NotImplementedError()
     
-    def destinationTime(self):
+    def destinationTime(self) -> float:
         """Retrieves the final clock time of a motion queue controller.
         """
         raise NotImplementedError()
 
-    def queuedTrajectory(self):
+    def queuedTrajectory(self) -> tuple:
         """Returns a trajectory starting from the current time representing all
         commands in a motion queue controller.
 
@@ -311,7 +320,7 @@ class RobotInterfaceBase(object):
         """
         raise NotImplementedError()
     
-    def cartesianPosition(self,q,frame='world'):
+    def cartesianPosition(self, q: Vector, frame: str = 'world') -> RigidTransform:
         """Converts from a joint position vector to a cartesian position.
 
         Args:
@@ -326,7 +335,11 @@ class RobotInterfaceBase(object):
         """
         raise NotImplementedError()
 
-    def cartesianVelocity(self,q,dq,frame='world'):
+    def cartesianVelocity(self,
+            q: Vector,
+            dq: Vector,
+            frame: str = 'world'
+        ) -> RigidTransform:
         """Converts from a joint position / velocity vector to a cartesian
         velocity.
 
@@ -343,7 +356,11 @@ class RobotInterfaceBase(object):
         """
         raise NotImplementedError()
 
-    def cartesianForce(self,q,t,frame='world'):
+    def cartesianForce(self,
+            q: Vector,
+            t: Vector,
+            frame: str = 'world'
+        ) -> RigidTransform:
         """Converts from a joint position / torque vector to a cartesian force.
 
         Args: 
@@ -357,25 +374,25 @@ class RobotInterfaceBase(object):
         """
         raise NotImplementedError()
 
-    def sensedCartesianPosition(self,frame='world'):
+    def sensedCartesianPosition(self, frame: str = 'world') -> RigidTransform:
         return self.cartesianPosition(self.sensedPosition(),frame)
 
-    def sensedCartesianVelocity(self,frame='world'):
+    def sensedCartesianVelocity(self, frame: str = 'world') -> RigidTransform:
         return self.cartesianVelocity(self.sensedPosition(),self.sensedVelocity(),frame)
 
-    def sensedCartesianForce(self,frame='world'):
+    def sensedCartesianForce(self, frame: str = 'world') -> RigidTransform:
         return self.cartesianForce(self.sensedPosition(),self.sensedTorque(),frame)
 
-    def commandedCartesianPosition(self,frame='world'):
+    def commandedCartesianPosition(self, frame: str = 'world') -> RigidTransform:
         return self.cartesianPosition(self.commandedPosition(),frame)
 
-    def commandedCartesianVelocity(self,frame='world'):
+    def commandedCartesianVelocity(self, frame: str = 'world') -> RigidTransform:
         return self.cartesianVelocity(self.commandedPosition(),self.commandedVelocity(),frame)
 
-    def commandedCartesianForce(self,frame='world'):
+    def commandedCartesianForce(self, frame: str = 'world') -> RigidTransform:
         return self.cartesianForce(self.commandedPosition(),self.commandedTorque(),frame)
 
-    def destinationCartesianPosition(self,frame='world'):
+    def destinationCartesianPosition(self, frame: str = 'world') -> RigidTransform:
         """Retrieves the Cartesian destination of a motion queue controller.
 
         Args:
@@ -383,7 +400,7 @@ class RobotInterfaceBase(object):
         """
         return self.cartesianPosition(self.destinationPosition(),frame)
 
-    def destinationCartesianVelocity(self,frame='world'):
+    def destinationCartesianVelocity(self, frame: str = 'world') -> RigidTransform:
         """Retrieves the final Cartesian velocity of a motion queue controller.
 
         Args:
@@ -391,7 +408,7 @@ class RobotInterfaceBase(object):
         """
         return self.cartesianVelocity(self.destinationPosition(),self.desinationVelocity())
 
-    def queuedCartesianTrajectory(self,frame='world'):
+    def queuedCartesianTrajectory(self, frame: str = 'world') -> tuple:
         """Returns the Cartesian trajectory starting from the current time 
         representing all commands in a motion queue controller.
 
@@ -413,7 +430,7 @@ class RobotInterfaceBase(object):
         else:
             raise RuntimeError("Invalid result from queuedTrajectory")
 
-    def setPosition(self,q):
+    def setPosition(self, q: Vector) -> None:
         """Sets an instantaneous position command.
 
         Args:
@@ -422,7 +439,10 @@ class RobotInterfaceBase(object):
         """
         raise NotImplementedError()
 
-    def setVelocity(self,v,ttl=None):
+    def setVelocity(self,
+            v: Vector,
+            ttl: Optional[float] = None
+        ) -> None:
         """Sets an instantaneous velocity command. 
 
         Args:
@@ -432,7 +452,10 @@ class RobotInterfaceBase(object):
         """
         raise NotImplementedError()
 
-    def setTorque(self,t,ttl=None):
+    def setTorque(self,
+            t: Vector,
+            ttl: Optional[float] = None
+        ) -> None:
         """Sets a instantaneous torque command.
 
         Args:
@@ -442,26 +465,33 @@ class RobotInterfaceBase(object):
         """
         raise NotImplementedError()
 
-    def setPID(self,q,dq,t=None):
+    def setPID(self,
+            q: Vector,
+            dq: Vector,
+            t: Optional[Vector] = None
+        ) -> None:
         """Sets a PID command to configuration q, velocity dq, and feedforward
         torque t. 
         """
         raise NotImplementedError()
 
-    def setPIDGains(self,kP,kI,kD):
+    def setPIDGains(self, kP: Vector, kI: Vector, kD: Vector) -> None:
         """Sets the PID gains.  Some controllers might not implement this even 
         if they implement setPID...
         """
         raise NotImplementedError()
 
-    def getPIDGains(self):
+    def getPIDGains(self) -> 'tuple[list[float],list[float],list[float]]':
         """Gets the PID gains (kP,kI,kD) as set to a prior call to setPIDGains.
         Some controllers might not implement this even if they implement
         setPIDGains...
         """
         raise NotImplementedError()
 
-    def moveToPosition(self,q,speed=1.0):
+    def moveToPosition(self,
+            q: Vector,
+            speed: float=1.0
+        ) -> None:
         """Sets a move-to position command.  The trajectory that the robot will
         take on should be extractable through getMoveToTrajectory(q).
 
@@ -473,7 +503,11 @@ class RobotInterfaceBase(object):
         """
         raise NotImplementedError()
 
-    def setPiecewiseLinear(self,ts,qs,relative=True):
+    def setPiecewiseLinear(self,
+            ts: 'list[float]',
+            qs: 'list[list[float]]',
+            relative: bool=True
+        ) -> None:
         """Tells the robot to start a piecewise linear trajectory
         command.  The first milestone will be interpolated from the
         current commanded configuration.
@@ -488,7 +522,11 @@ class RobotInterfaceBase(object):
         """
         raise NotImplementedError()
 
-    def setPiecewiseCubic(self,ts,qs,vs):
+    def setPiecewiseCubic(self,
+            ts: 'list[float]',
+            qs: 'list[list[float]]',
+            vs: 'list[list[float]]'
+        ) -> None:
         """Tells the robot to start a piecewise cubic trajectory
         command.   The first milestone will be interpolated from the
         current commanded configuration / velocity.
@@ -505,17 +543,21 @@ class RobotInterfaceBase(object):
         """
         raise NotImplementedError()
 
-    def setToolCoordinates(self,xtool_local):
+    def setToolCoordinates(self, xtool_local: Vector3) -> None:
         """Sets the tool coordinates of this robot relative to its end
         effector link."""
         raise NotImplementedError()
 
-    def getToolCoordinates(self):
+    def getToolCoordinates(self) -> Vector3:
         """Gets the tool coordinates of this robot relative to its end
         effector link."""
         raise NotImplementedError()
         
-    def setGravityCompensation(self,gravity=[0,0,-9.8],load=0.0,load_com=[0,0,0]):
+    def setGravityCompensation(self,
+            gravity: Vector3=[0,0,-9.8],
+            load: float=0.0,
+            load_com: Vector3=[0,0,0]
+        ) -> None:
         """Sets up gravity compensation with a given gravity vector and end
         effector load.
 
@@ -529,12 +571,15 @@ class RobotInterfaceBase(object):
         """
         raise NotImplementedError()
 
-    def getGravityCompensation(self):
+    def getGravityCompensation(self) -> tuple:
         """Gets (gravity,load,load_com) as from a prior call to
         setGravityCompensation."""
         raise NotImplementedError()
 
-    def setCartesianPosition(self,xparams,frame='world'):
+    def setCartesianPosition(self,
+            xparams: Union[Vector,RigidTransform],
+            frame: str = 'world'
+        ) -> None:
         """Sets a Cartesian position command.  The tool is commanded to reach
         the given coordinates relative to the given frame.  Like setPosition,
         this command is sent in immediate mode.
@@ -546,7 +591,11 @@ class RobotInterfaceBase(object):
         """
         raise NotImplementedError()
 
-    def moveToCartesianPosition(self,xparams,speed=1.0,frame='world'):
+    def moveToCartesianPosition(self,
+            xparams: Union[Vector,RigidTransform],
+            speed: float=1.0,
+            frame: str = 'world'
+        ) -> None:
         """Sets a Cartesian move-to-position command. The tool is commanded to reach
         the given coordinates relative to the given frame. 
 
@@ -559,7 +608,11 @@ class RobotInterfaceBase(object):
         """
         raise NotImplementedError()
 
-    def setCartesianVelocity(self,dxparams,ttl=None,frame='world'):
+    def setCartesianVelocity(self,
+            dxparams: Union[Vector,RigidTransform],
+            ttl: Optional[float] = None,
+            frame: str = 'world'
+        ) -> None:
         """Sets a Cartesian velocity command. The tool is commanded to move
         along the given velocity(s) relative to the given frame.  
 
@@ -572,7 +625,11 @@ class RobotInterfaceBase(object):
         """
         raise NotImplementedError()
 
-    def setCartesianForce(self,fparams,ttl=None,frame='world'):
+    def setCartesianForce(self,
+            fparams: Union[Vector,RigidTransform],
+            ttl: Optional[float] = None,
+            frame: str = 'world'
+        ) -> None:
         """Sets a Cartesian torque command. The tool is commanded to exert
         the given force or (torque, force) relative to the given frame.  
 
@@ -584,7 +641,12 @@ class RobotInterfaceBase(object):
         """
         raise NotImplementedError()
 
-    def partToRobotConfig(self,pconfig,part,robotConfig,joint_idx=None):
+    def partToRobotConfig(self,
+            pconfig: Vector,
+            part: str,
+            robotConfig: Vector,
+            joint_idx: Optional[int] = None
+        ) -> Vector:
         """Fills a configuration vector for the whole robot given the
         configuration `pconfig` for a part"""
         pindices = self.indices(part,joint_idx)
@@ -594,12 +656,16 @@ class RobotInterfaceBase(object):
             q[i] = x
         return q
 
-    def robotToPartConfig(self,robotConfig,part,joint_idx=None):
+    def robotToPartConfig(self,
+            robotConfig: Vector,
+            part: str,
+            joint_idx: Optional[int] = None
+        ) -> Vector:
         """Retrieves a part's configuration from a robot configuration"""
         pindices = self.indices(part,joint_idx)
         return [robotConfig[i] for i in pindices]
 
-    def klamptModel(self):
+    def klamptModel(self) -> RobotModel:
         """If applicable, returns the Klamp't RobotModel associated with this
         controller.  Default tries to load from properties['klamptModelFile'].
 
@@ -623,7 +689,11 @@ class RobotInterfaceBase(object):
                 return self._klamptModel
         return None
 
-    def configFromKlampt(self,klamptConfig,part=None,joint_idx=None):
+    def configFromKlampt(self,
+            klamptConfig: Vector,
+            part: Optional[str] = None,
+            joint_idx: Optional[int] = None
+        ) -> Vector:
         """Extracts a RobotInterfaceBase configuration from a configuration of
         the Klampt model. 
 
@@ -639,7 +709,11 @@ class RobotInterfaceBase(object):
             return qdrivers
         return [qdrivers[i] for i in self.indices(part,joint_idx)]
 
-    def velocityFromKlampt(self,klamptVelocity,part=None,joint_idx=None):
+    def velocityFromKlampt(self,
+            klamptVelocity: Vector,
+            part: Optional[str] = None,
+            joint_idx: Optional[int] = None
+        ) -> Vector:
         """Extracts a RobotInterfaceBase velocity from a velocity of
         the Klampt model."""
         model = self.klamptModel()
@@ -652,7 +726,12 @@ class RobotInterfaceBase(object):
             return vdrivers
         return [vdrivers[i] for i in self.indices(part,joint_idx)]
 
-    def configToKlampt(self,config,klamptConfig=None,part=None,joint_idx=None):
+    def configToKlampt(self,
+            config: Vector,
+            klamptConfig: Optional[Vector] = None,
+            part: Optional[str] = None,
+            joint_idx: Optional[int] = None
+        ) -> Vector:
         """Creates a configuration vector for the Klamp't model using the 
         RobotInterfaceBase configuration.
 
@@ -677,7 +756,12 @@ class RobotInterfaceBase(object):
                 model.driver(i).setValue(x)
             return model.getConfig()
 
-    def velocityToKlampt(self,velocity,klamptVelocity=None,part=None,joint_idx=None):
+    def velocityToKlampt(self,
+            velocity: Vector,
+            klamptVelocity: Optional[Vector] = None,
+            part: Optional[str] = None,
+            joint_idx: Optional[int] = None
+        ) -> Vector:
         """Creates a velocity vector for a Klamp't model using the joint velocity.
 
         If klamptVelocity is given, then these values are used for the non-part
