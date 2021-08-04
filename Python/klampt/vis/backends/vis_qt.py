@@ -131,7 +131,7 @@ class QtWindowManager(_ThreadedWindowManager):
             multiProgram.add_view(self._frontend)
             multiProgram.add_view(plugin)
             multiProgram.name = self.window_title
-            multiProgram.scene = self._frontend
+            multiProgram.scene = self._frontend.scene
             self._frontend = multiProgram
             if hasattr(plugin,'scene') and isinstance(plugin.scene,VisualizationScene):
                 multiProgram.scene = plugin.scene
