@@ -431,9 +431,13 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
 
     def estop(self):
         self._base.estop()
+        #clear pending commands
+        self._emulator.promote(self._indices,None)
 
     def softStop(self):
         self._base.softStop()
+        #clear pending commands
+        self._emulator.promote(self._indices,None)
 
     def reset(self):
         return self._base.reset()
