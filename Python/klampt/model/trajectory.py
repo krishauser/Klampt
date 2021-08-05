@@ -16,7 +16,7 @@ from ..math.geodesic import *
 import warnings
 from ..robotsim import RobotModel,RobotModelLink
 from .subrobot import SubRobotModel
-from typing import Optional,Union,Sequence,List,Tuple,Callable,Literal
+from typing import Optional,Union,Sequence,List,Tuple,Callable
 from .typing import Vector3,Vector,Rotation,RigidTransform
 MetricType = Callable[[Vector,Vector],float]
 class Trajectory:
@@ -1470,11 +1470,22 @@ class SE3HermiteTrajectory(GeodesicHermiteTrajectory):
         return SE3HermiteTrajectory
 
 
+try:
+    from typing import Literal
+    _VELOCITIES_OPTIONS = Literal['auto','trapezoidal','constant','triangular','parabolic','cosine','minimum-jerk','optimal']
+    _TIMING_OPTIONS = Literal['limited','uniform','path','L2','Linf','robot','sqrt-L2','sqrt-Linf','sqrt-robot']
+    _SMOOTHING_OPTIONS = Literal['linear','cubic','spline','ramp']
+    _SMOOTHING_OPTIONS2 = Literal['spline','pause']
+except ImportError:
+    _VELOCITIES_OPTIONS = str
+    _TIMING_OPTIONS = str
+    _SMOOTHING_OPTIONS = str
+    _SMOOTHING_OPTIONS2 = str
 
 def path_to_trajectory(
         path: Union[Sequence[Vector],Trajectory,RobotTrajectory],
-        velocities: Literal['auto','trapezoidal','constant','triangular','parabolic','cosine','minimum-jerk','optimal'] = 'auto',
-        timing: Union[Literal['limited','uniform','path','L2','Linf','robot','sqrt-L2','sqrt-Linf','sqrt-robot'],List[float],MetricType]= 'limited',
+        velocities: _VELOCITIES_OPTIONS = 'auto',
+        timing: Union[_TIMING_OPTIONS,List[float],MetricType]= 'limited',
         smoothing: str='spline',
         stoptol: Optional[float] = None,
         vmax: Union[str,float,Vector] = 'auto',
@@ -1954,7 +1965,7 @@ def execute_path(
         path: List[Vector],
         controller: Union[SimRobotController,RobotInterfaceBase],
         speed: float = 1.0,
-        smoothing: Optional[Literal['linear','cubic','spline','ramp']] = None,
+        smoothing: Optional[_SMOOTHING_OPTIONS] = None,
         activeDofs: Optional[List[Union[int,str]]] = None
     ):
     """Sends an untimed trajectory to a controller.
@@ -2111,7 +2122,7 @@ def execute_trajectory(
         trajectory: Trajectory,
         controller: Union[SimRobotController,RobotInterfaceBase],
         speed: float = 1.0,
-        smoothing: Optional[Literal['spline','pause']] = None,
+        smoothing: Optional[_SMOOTHING_OPTIONS2] = None,
         activeDofs: Optional[List[Union[int,str]]] = None
     ):
     """Sends a timed trajectory to a controller.
