@@ -125,7 +125,10 @@ class RobotInterfaceBase(object):
             inner.append(self.properties['name'])
         if 'version' in self.properties:
             inner.append(self.properties['version'])
-        return "RobotInterface("+','.join(inner)+')'
+        if len(inner)==0:
+            return self.__class__.__name__
+        else:
+            return ','.join(inner)
 
     def initialize(self) -> bool:
         """Tries to connect to the robot.  Returns true if ready to send
@@ -206,7 +209,7 @@ class RobotInterfaceBase(object):
         raise NotImplementedError()
 
     def estop(self) -> None:
-        """Calls an emergency stop on the robot"""
+        """Calls an emergency stop on the robot. Default uses the soft stop."""
         self.softStop()
 
     def softStop(self) -> None:
@@ -665,7 +668,7 @@ class RobotInterfaceBase(object):
         pindices = self.indices(part,joint_idx)
         return [robotConfig[i] for i in pindices]
 
-    def klamptModel(self) -> RobotModel:
+    def klamptModel(self) -> Optional[RobotModel]:
         """If applicable, returns the Klamp't RobotModel associated with this
         controller.  Default tries to load from properties['klamptModelFile'].
 
