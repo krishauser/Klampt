@@ -8,7 +8,10 @@ from klampt.control.robotinterface import RobotInterfaceBase
 import os
 import sys
 import importlib
-from klampt import RobotModel,IKSolver
+from klampt import RobotModel,IKSolver,IKObjective
+from klampt.model.subrobot import SubRobotModel
+from typing import Optional,Union,Sequence,List,Dict,Any
+from .typing import Vector,RigidTransform
 
 class EndEffectorInfo:
     """Stores info about default end effectors and the method for Cartesian
@@ -23,9 +26,9 @@ class EndEffectorInfo:
             left unspecified.
     """
     def __init__(self,link,activeLinks,ikObjective=None):
-        self.link = link
-        self.activeLinks = activeLinks
-        self.ikObjective = ikObjective
+        self.link = link                 # type: Union[int,str]
+        self.activeLinks = activeLinks   # type: List[Union[int,str]]
+        self.ikObjective = ikObjective   # type: Optional[List[IKObjective]]
 
 
 class RobotInfo:
@@ -69,11 +72,11 @@ class RobotInfo:
                 freeBase=False,
                 parts=None,endEffectors=None,
                 properties=None):
-        self.name = name
-        self.modelFile = modelFile
-        self.controllerFile = None
-        self.simulatorFile = None
-        self.freeBase = freeBase
+        self.name = name                # type: str
+        self.modelFile = modelFile      # type: str
+        self.controllerFile = None      # type: Optional[str]
+        self.simulatorFile = None       # type: Optional[str]
+        self.freeBase = freeBase        # type: bool
         if parts is None:
             parts = dict()
         else:
@@ -92,11 +95,11 @@ class RobotInfo:
         else:
             if not isinstance(properties,dict):
                 raise ValueError("`properties` must be a dict")
-        self.parts = parts
-        self.endEffectors = endEffectors
-        self.properties = properties
-        self.filePaths = []
-        self.robotModel = None
+        self.parts = parts                # type: Dict[str,Sequence[int]]
+        self.endEffectors = endEffectors  # type: Dict[str,EndEffectorInfo]
+        self.properties = properties      # type: Dict[str,Any]
+        self.filePaths = []               # type: List[str]
+        self.robotModel = None            # type: RobotModel
         self._driverIndices = None
         self._worldTemp = None
 
@@ -178,32 +181,27 @@ class RobotInfo:
         for e in emulators:
             sim.addEmulator(robotIndex,e)
 
-    def partLinks(self,part):
+    def partLinks(self, part: str) -> List[Union[int,str]]:
         return self.parts[part]
 
-    def partLinkIndices(self,part):
+    def partLinkIndices(self, part: str) -> List[int]:
         res = self.parts[part]
         return self.toIndices(res)
 
-    def partLinkNames(self,part):
+    def partLinkNames(self, part: str) -> List[str]:
         res = self.parts[part]
         return self.toNames(res)
     
-    def partDriverIndices(self,part):
+    def partDriverIndices(self, part: str) -> List[int]:
         res = self.parts[part]
         return self.toDriverIndices(res)
 
-    def partAsSubrobot(self,part):
-        """
-        Returns:
-            :class:`~klampt.model.subrobot.SubRobotModel`
-        """
-        from klampt.model.subrobot import SubRobotModel
+    def partAsSubrobot(self, part: str) -> SubRobotModel:
         partLinks = self.partLinkIndices(part)
         model = self.klamptModel()
         return SubRobotModel(model,partLinks)
 
-    def eeSolver(self,endEffector,target) -> IKSolver:
+    def eeSolver(self, endEffector: str, target: Union[Vector,RigidTransform]) -> IKSolver:
         """Given a named end effector and a target point, transform, or set of
         parameters from config.setConfig(ikgoal) / config.getConfig(ikgoal),
         returns the IKSolver for the end effector and  that target.
@@ -227,7 +225,7 @@ class RobotInfo:
         s.setActiveDofs(self.toIndices(ee.activeLinks))
         return s
 
-    def toIndices(self,items):
+    def toIndices(self, items: Sequence[Union[int,str]]) -> List[int]:
         """Returns link identifiers as link indices"""
         if all(isinstance(v,int) for v in items):
             return items
@@ -241,7 +239,7 @@ class RobotInfo:
                     assert res[i] >= 0,"Link %s doesn't exist in robot %s"%(v,self.name)
             return res
     
-    def toDriverIndices(self,items):
+    def toDriverIndices(self, items: Sequence[Union[int,str]]) -> List[int]:
         """Converts link names or indices to robot driver indices"""
         robot = self.klamptModel()
         if self._driverIndices is None:
@@ -259,7 +257,7 @@ class RobotInfo:
                 res.append(self._driverIndices[v])
         return res
 
-    def toNames(self,items):
+    def toNames(self, items: Sequence[Union[int,str]]) -> List[str]:
         """Returns link identifiers as link names"""
         if all(isinstance(v,str) for v in items):
             return items
@@ -273,7 +271,7 @@ class RobotInfo:
                     res[i] = robot.link(v).getName()
             return res
 
-    def load(self,f):
+    def load(self,f) -> None:
         """Loads the info from a JSON file. f is a file object."""
         import json
         from ..io import loader
@@ -291,7 +289,7 @@ class RobotInfo:
             ees[k] = EndEffectorInfo(v['link'],v['activeLinks'],obj)
         self.endEffectors = ees
 
-    def save(self,f):
+    def save(self,f) -> None:
         """Saves the info to a JSON file. f is a file object."""
         import json
         from ..io import loader
@@ -355,12 +353,12 @@ def _dynamic_load_module(fn,search_paths=[]):
 
 allRobots = dict()
 
-def register(robotInfo):
+def register(robotInfo: RobotInfo):
     """Registers a RobotInfo to the global registry."""
     global allRobots
     allRobots[robotInfo.name] = robotInfo
 
-def load(fn):
+def load(fn: str) -> RobotInfo:
     """Loads / registers a RobotInfo from a JSON file previously saved to disk."""
     res = RobotInfo(None)
     with open(fn,'r') as f:
@@ -371,7 +369,7 @@ def load(fn):
         register(res)
     return res
 
-def get(name):
+def get(name: str) -> RobotInfo:
     """Retrieves a registered RobotInfo from the global registry."""
     global allRobots
     return allRobots[name]
