@@ -446,7 +446,12 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
         return _SubRobotInterfaceCompleter(self,part,joint_idx)
 
     def jointName(self,joint_idx):
-        return self._try('jointName',[joint_idx],lambda joint_idx: 'Joint '+str(joint_idx))
+        def modelJointName(idx):
+            robot = self.klamptModel()
+            if robot is None:
+                return 'Joint '+str(idx)
+            return robot.link(robot.driver(idx).getAffectedLink()).getName()
+        return self._try('jointName',[joint_idx],modelJointName)
 
     def sensors(self):
         return self._try('sensors',[],lambda *args:[])
