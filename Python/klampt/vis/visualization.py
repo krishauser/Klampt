@@ -1294,8 +1294,12 @@ def edit(name,doedit=True):
     - :class:`~klampt.model.coordinates.Transform`
     - :class:`~klampt.model.coordinates.Frame`
 
+    Returns:
+        Varies: None if doedit=False, otherwise, an editor object which
+        depends on the backend.  In OpenGL mode, returns a Widget. In
+        Jupyter, returns a VBox containing controls.
     """
-    scene().edit(name,doedit)
+    return scene().edit(name,doedit)
 
 def setAppearance(name,appearance):
     """Changes the Appearance of an item, for an item that uses the Appearance

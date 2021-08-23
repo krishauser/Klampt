@@ -156,6 +156,7 @@ class KlamptWidgetAdaptor(KlamptWidget,VisualizationScene):
             if obj.editor:
                 del self._editors[name]
         self.doRefresh = True
+        return obj.editor if doedit else None
 
     def setGhostConfig(self,q,name="ghost",robot=0):
         """Needed for EditConfig to work on ghosts"""

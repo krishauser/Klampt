@@ -87,6 +87,7 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
                 obj.remove_editor()
         self.doRefresh = True
         _globalLock.release()
+        return obj.editor if doedit else None
     
     def hide(self,name,hidden=True):
         global _globalLock
