@@ -2028,7 +2028,7 @@ class Geometry3D(object):
 
 
         Args:
-            arg2 (:obj:`ConvexHull` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.VolumeGrid` or :class:`~klampt.TriangleMesh` or :class:`~klampt.Geometry3D` or :class:`~klampt.PointCloud`, optional): 
+            arg2 (:class:`~klampt.GeometricPrimitive` or :class:`~klampt.PointCloud` or :obj:`ConvexHull` or :class:`~klampt.TriangleMesh` or :class:`~klampt.VolumeGrid` or :class:`~klampt.Geometry3D`, optional): 
         """
         _robotsim.Geometry3D_swiginit(self, _robotsim.new_Geometry3D(*args))
     __swig_destroy__ = _robotsim.delete_Geometry3D
@@ -6499,7 +6499,7 @@ class GeneralizedIKObjective(object):
 
 
         Args:
-            obj (:class:`~klampt.RigidObjectModel` or :obj:`GeneralizedIKObjective`, optional): 
+            obj (:obj:`GeneralizedIKObjective` or :class:`~klampt.RigidObjectModel`, optional): 
             link (:class:`~klampt.RobotModelLink`, optional): 
             link2 (:class:`~klampt.RobotModelLink`, optional): 
             obj2 (:class:`~klampt.RigidObjectModel`, optional): 
@@ -6687,7 +6687,7 @@ class SimRobotSensor(object):
 
 
         Args:
-            robot (:class:`~klampt.RobotModel` or :class:`~klampt.SimRobotController`): 
+            robot (:class:`~klampt.SimRobotController` or :class:`~klampt.RobotModel`): 
             sensor (:obj:`Klampt::SensorBase *`, optional): 
             name (str, optional): 
             type (str, optional): 
@@ -7889,7 +7889,7 @@ class Simulator(object):
 
 
         Args:
-            robot (int or :class:`~klampt.RobotModel`): 
+            robot (:class:`~klampt.RobotModel` or int): 
 
         Returns:
             :class:`~klampt.SimRobotController`:

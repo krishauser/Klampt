@@ -603,7 +603,7 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
     def __reduce__(self):
         from klampt.io import loader
         jsonobj = loader.to_json(self,'GeometricPrimitive')
-        return (loader.from_json,(jsonobjO,'GeometricPrimitive'))
+        return (loader.from_json,(jsonobj,'GeometricPrimitive'))
 }
 }
 

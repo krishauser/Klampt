@@ -398,7 +398,7 @@ def set_plan_setting(*args):
 
     Args:
         setting (str): 
-        value (float or str): 
+        value (str or float): 
 
     Valid numeric values are:  
 
@@ -979,7 +979,7 @@ class PlannerInterface(object):
             goalMilestones (:obj:`std::allocator< int > >`, optional): 
 
         Returns:
-            (:obj:`PyObject *` or :obj:`object`):
+            (:obj:`object` or :obj:`PyObject *`):
         """
         return _motionplanning.PlannerInterface_getPath(self, *args)
 
