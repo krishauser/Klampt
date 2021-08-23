@@ -1305,8 +1305,12 @@ def edit(name,doedit=True):
     - :class:`~klampt.model.coordinates.Transform`
     - :class:`~klampt.model.coordinates.Frame`
 
+    Returns:
+        Varies: None if doedit=False, otherwise, an editor object which
+        depends on the backend.  In OpenGL mode, returns a Widget. In
+        Jupyter, returns a VBox containing controls.
     """
-    scene().edit(name,doedit)
+    return scene().edit(name,doedit)
 
 def pick(click_callback,hover_callback=None,highlight_color=(1,1,0,0.3),filter=None,tolerance=0.01):
     """Picks an item from the scene.  ``click_callback`` is called once the 

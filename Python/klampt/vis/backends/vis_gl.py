@@ -90,6 +90,7 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
                     self.klamptwidgetmaster.remove(obj.editor)
                     obj.remove_editor()
             self.doRefresh = True
+        return obj.editor if doedit else None
     
     def pick(self,click_callback,hover_callback,highlight_color,filter,tolerance):
         global _globalLock
