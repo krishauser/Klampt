@@ -32960,6 +32960,120 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_TransformPoser_enableTranslationAxes(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  TransformPoser *arg1 = (TransformPoser *) 0 ;
+  bool arg2 ;
+  bool arg3 ;
+  bool arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  bool val2 ;
+  int ecode2 = 0 ;
+  bool val3 ;
+  int ecode3 = 0 ;
+  bool val4 ;
+  int ecode4 = 0 ;
+  PyObject *swig_obj[4] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "TransformPoser_enableTranslationAxes", 4, 4, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_TransformPoser, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TransformPoser_enableTranslationAxes" "', argument " "1"" of type '" "TransformPoser *""'"); 
+  }
+  arg1 = reinterpret_cast< TransformPoser * >(argp1);
+  ecode2 = SWIG_AsVal_bool(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "TransformPoser_enableTranslationAxes" "', argument " "2"" of type '" "bool""'");
+  } 
+  arg2 = static_cast< bool >(val2);
+  ecode3 = SWIG_AsVal_bool(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "TransformPoser_enableTranslationAxes" "', argument " "3"" of type '" "bool""'");
+  } 
+  arg3 = static_cast< bool >(val3);
+  ecode4 = SWIG_AsVal_bool(swig_obj[3], &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "TransformPoser_enableTranslationAxes" "', argument " "4"" of type '" "bool""'");
+  } 
+  arg4 = static_cast< bool >(val4);
+  {
+    try {
+      (arg1)->enableTranslationAxes(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_TransformPoser_enableRotationAxes(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  TransformPoser *arg1 = (TransformPoser *) 0 ;
+  bool arg2 ;
+  bool arg3 ;
+  bool arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  bool val2 ;
+  int ecode2 = 0 ;
+  bool val3 ;
+  int ecode3 = 0 ;
+  bool val4 ;
+  int ecode4 = 0 ;
+  PyObject *swig_obj[4] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "TransformPoser_enableRotationAxes", 4, 4, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_TransformPoser, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TransformPoser_enableRotationAxes" "', argument " "1"" of type '" "TransformPoser *""'"); 
+  }
+  arg1 = reinterpret_cast< TransformPoser * >(argp1);
+  ecode2 = SWIG_AsVal_bool(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "TransformPoser_enableRotationAxes" "', argument " "2"" of type '" "bool""'");
+  } 
+  arg2 = static_cast< bool >(val2);
+  ecode3 = SWIG_AsVal_bool(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "TransformPoser_enableRotationAxes" "', argument " "3"" of type '" "bool""'");
+  } 
+  arg3 = static_cast< bool >(val3);
+  ecode4 = SWIG_AsVal_bool(swig_obj[3], &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "TransformPoser_enableRotationAxes" "', argument " "4"" of type '" "bool""'");
+  } 
+  arg4 = static_cast< bool >(val4);
+  {
+    try {
+      (arg1)->enableRotationAxes(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_delete_TransformPoser(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   TransformPoser *arg1 = (TransformPoser *) 0 ;
@@ -64268,6 +64382,16 @@ static PyMethodDef SwigMethods[] = {
 		""},
 	 { "TransformPoser_enableRotation", _wrap_TransformPoser_enableRotation, METH_VARARGS, "\n"
 		"TransformPoser_enableRotation(TransformPoser self, bool arg2)\n"
+		"\n"
+		"\n"
+		""},
+	 { "TransformPoser_enableTranslationAxes", _wrap_TransformPoser_enableTranslationAxes, METH_VARARGS, "\n"
+		"TransformPoser_enableTranslationAxes(TransformPoser self, bool x, bool y, bool z)\n"
+		"\n"
+		"\n"
+		""},
+	 { "TransformPoser_enableRotationAxes", _wrap_TransformPoser_enableRotationAxes, METH_VARARGS, "\n"
+		"TransformPoser_enableRotationAxes(TransformPoser self, bool x, bool y, bool z)\n"
 		"\n"
 		"\n"
 		""},

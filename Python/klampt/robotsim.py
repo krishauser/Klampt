@@ -1670,7 +1670,7 @@ class GeometricPrimitive(object):
     def __reduce__(self):
         from klampt.io import loader
         jsonobj = loader.to_json(self,'GeometricPrimitive')
-        return (loader.from_json,(jsonobjO,'GeometricPrimitive'))
+        return (loader.from_json,(jsonobj,'GeometricPrimitive'))
 
     __swig_destroy__ = _robotsim.delete_GeometricPrimitive
 
@@ -3366,6 +3366,24 @@ class TransformPoser(Widget):
             arg2 (bool)
         """
         return _robotsim.TransformPoser_enableRotation(self, arg2)
+
+    def enableTranslationAxes(self, x, y, z):
+        r"""
+        Args:
+            x (bool)
+            y (bool)
+            z (bool)
+        """
+        return _robotsim.TransformPoser_enableTranslationAxes(self, x, y, z)
+
+    def enableRotationAxes(self, x, y, z):
+        r"""
+        Args:
+            x (bool)
+            y (bool)
+            z (bool)
+        """
+        return _robotsim.TransformPoser_enableRotationAxes(self, x, y, z)
     __swig_destroy__ = _robotsim.delete_TransformPoser
 
 # Register TransformPoser in _robotsim:

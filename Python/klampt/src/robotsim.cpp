@@ -6483,6 +6483,23 @@ void TransformPoser::enableRotation(bool enable)
   tw->enableRotation = enable;
 }
 
+void TransformPoser::enableTranslationAxes(bool x,bool y,bool z)
+{
+  GLDraw::TransformWidget* tw=dynamic_cast<GLDraw::TransformWidget*>(widgets[index].widget.get());
+  tw->enableTranslationAxes[0] = x;
+  tw->enableTranslationAxes[1] = y;
+  tw->enableTranslationAxes[2] = z;
+}
+
+void TransformPoser::enableRotationAxes(bool x,bool y,bool z)
+{
+  GLDraw::TransformWidget* tw=dynamic_cast<GLDraw::TransformWidget*>(widgets[index].widget.get());
+  tw->enableRotationAxes[0] = x;
+  tw->enableRotationAxes[1] = y;
+  tw->enableRotationAxes[2] = z;
+  tw->enableOuterRingRotation = (x && y && z);
+}
+
 ObjectPoser::ObjectPoser(RigidObjectModel& object)
   :Widget()
 {
