@@ -3955,19 +3955,25 @@ Loads the terrain from the file fn.
 %feature("docstring") TransformPoser "
 ";
 
-%feature("docstring") TransformPoser::TransformPoser "
+%feature("docstring") TransformPoser::enableTranslation "
 ";
 
 %feature("docstring") TransformPoser::enableRotation "
 ";
 
-%feature("docstring") TransformPoser::enableTranslation "
+%feature("docstring") TransformPoser::TransformPoser "
+";
+
+%feature("docstring") TransformPoser::enableTranslationAxes "
+";
+
+%feature("docstring") TransformPoser::set "
 ";
 
 %feature("docstring") TransformPoser::get "
 ";
 
-%feature("docstring") TransformPoser::set "
+%feature("docstring") TransformPoser::enableRotationAxes "
 ";
 
 // File: structTriangleMesh.xml
