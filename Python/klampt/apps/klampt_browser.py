@@ -99,7 +99,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
         # Add filters
         filters = []
         print("ALLOWABLE FILE EXTENSIONS")
-        for k,v in loader.extension_to_types.items():
+        for k,v in loader.EXTENSION_TO_TYPES.items():
             filters.append("*"+k)
             print(" ",k)
         filters.append("*.xml")
