@@ -436,15 +436,15 @@ def _color_format_to_uint8_channels(format,colors):
         r = [0xff]*len(colors)
         return r,r,r,(colors*255).astype(np.uint8).tolist()
     elif tuple(format)==('r','g','b'):
-        r = (np.asarray(colors[0])*255).astype(np.uint8)
-        b = (np.asarray(colors[1])*255).astype(np.uint8)
-        g = (np.asarray(colors[2])*255).astype(np.uint8)
+        r = (np.asarray(colors[:,0])*255).astype(np.uint8)
+        g = (np.asarray(colors[:,1])*255).astype(np.uint8)
+        b = (np.asarray(colors[:,2])*255).astype(np.uint8)
         return r.tolist(),g.tolist(),b.tolist()
     elif tuple(format)==('r','g','b','a'):
-        r = (np.asarray(colors[0])*255).astype(np.uint8)
-        b = (np.asarray(colors[1])*255).astype(np.uint8)
-        g = (np.asarray(colors[2])*255).astype(np.uint8)
-        a = (np.asarray(colors[3])*255).astype(np.uint8)
+        r = (np.asarray(colors[:,0])*255).astype(np.uint8)
+        g = (np.asarray(colors[:,1])*255).astype(np.uint8)
+        b = (np.asarray(colors[:,2])*255).astype(np.uint8)
+        a = (np.asarray(colors[:,3])*255).astype(np.uint8)
         return r.tolist(),g.tolist(),b.tolist(),a.tolist()
     else:
         raise ValueError("Invalid format specifier "+str(format))
@@ -492,7 +492,9 @@ def point_cloud_colors(pc,format='rgb'):
         return
     if len(rgbchannels)==1:
         rgb = pc.getProperties(rgbchannels[0][1])
-        if format == rgbchannels[0][0]:
+        if format == 'rgb' and rgbchannels[0][0] == 'rgb':
+            return rgb
+        if format == 'argb' and rgbchannels[0][0] == 'rgba':
             return rgb
         import numpy as np
         rgb = np.array(rgb,dtype=np.uint32)
@@ -632,8 +634,12 @@ def point_cloud_set_colors(pc,colors,color_format='rgb',pc_property='auto'):
             if alphachannel is not None:
                 pc_property = 'rgba'
             else:
-                pc_property = rgbchannels[0][0]
-    if color_format == pc_property:
+                pc_property = rgbchannels[0][0]    
+    pc_color_format = pc_property
+    if pc_property == 'rgba':
+        pc_color_format = 'argb'
+    
+    if color_format == pc_color_format:
         if color_format == 'channels':
             assert len(colors)==3 or len(colors)==4,'Channels must give a 3-tuple or 4-tuple'
             for c,values in zip('rgb',colors):
@@ -653,7 +659,7 @@ def point_cloud_set_colors(pc,colors,color_format='rgb',pc_property='auto'):
                 pc.addProperty(color_format,colors)
     else:
         channels = _color_format_to_uint8_channels(color_format,colors)
-        packed = _color_format_from_uint8_channels(pc_property,*channels)
+        packed = _color_format_from_uint8_channels(pc_color_format,*channels)
         if pc_property in rgbdict:
             pc.setProperties(rgbdict[pc_property],packed)
         elif alphachannel is not None and pc_property == alphachannel[0]:
