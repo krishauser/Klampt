@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6.4)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6.4...3.20)
 PROJECT( Klampt )
 
 # version (e.g. for packaging)

@@ -1,5 +1,5 @@
 # Make the SimTest Qt program
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6.4)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6.4...3.20)
 PROJECT(SimTest)
 
 #Building from within Main/[AppName] folder
@@ -21,7 +21,6 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 ##### Qt Specific stuff ####
 # Configure Qt
 IF(USE_QT5_APPS)
-  cmake_policy(SET CMP0053 OLD)
   FIND_PACKAGE(Qt5 COMPONENTS Widgets Gui OpenGL)
   FIND_PACKAGE(Qt5Widgets)
   include_directories(${Qt5Widgets_INCLUDE_DIRS} ${Qt5Gui_INCLUDE_DIRS} ${Qt5OpenGL_INCLUDE_DIRS})
