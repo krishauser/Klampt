@@ -341,14 +341,26 @@ bool RobotModel::LoadRob(const char* fn) {
       while (SafeInputFloat(ss, ftemp))
         qMinVec.push_back(ftemp);
     } else if (name == "qmindeg") {
-      while (SafeInputFloat(ss, ftemp))
-        qMinVec.push_back(DtoR(ftemp));
+      size_t i=0;
+      while (SafeInputFloat(ss, ftemp)) {
+        if(i < jointType.size() && jointType[i]==RobotLink3D::Prismatic)
+          qMinVec.push_back(ftemp); //don't convert
+        else
+          qMinVec.push_back(DtoR(ftemp));
+        i++;
+      }
     } else if (name == "qmax") {
       while (SafeInputFloat(ss, ftemp))
         qMaxVec.push_back(ftemp);
     } else if (name == "qmaxdeg") {
-      while (SafeInputFloat(ss, ftemp))
-        qMaxVec.push_back(DtoR(ftemp));
+      size_t i=0;
+      while (SafeInputFloat(ss, ftemp)) {
+        if(i < jointType.size() && jointType[i]==RobotLink3D::Prismatic)
+          qMaxVec.push_back(ftemp); //don't convert
+        else
+          qMaxVec.push_back(DtoR(ftemp));
+        i++;
+      }
     } else if (name == "q") {
       while (SafeInputFloat(ss, ftemp))
         qVec.push_back(ftemp);
