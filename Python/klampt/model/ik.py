@@ -116,7 +116,7 @@ def objective(body,ref=None,local=None,world=None,R=None,t=None):
             obj = GeneralizedIKObjective(body,ref)
         else:
             obj = GeneralizedIKObjective(body)
-        if local and world:
+        if (local is not None) and (world is not None):
             assert(len(local)==len(world))
             if hasattr(local[0],'__iter__'):
                 #sanity check
@@ -135,7 +135,7 @@ def objective(body,ref=None,local=None,world=None,R=None,t=None):
     else:
         obj = IKObjective()
         obj.robot = body.robot()
-        if local and world:
+        if (local is not None) and (world is not None):
             assert(len(local)==len(world))
             if hasattr(local[0],'__iter__'):
                 #sanity check
@@ -152,7 +152,7 @@ def objective(body,ref=None,local=None,world=None,R=None,t=None):
                     obj.setRelativePoint(body.index,ref.index,local,world)
                 else:
                     obj.setFixedPoint(body.index,local,world)
-        elif R and t:
+        if (R is not None) and (t is not None):
             if ref:
                 obj.setRelativeTransform(body.index,ref.index,R,t)
             else:
@@ -323,8 +323,8 @@ def solver(objectives,iters=None,tol=None):
             else:
                 world = WorldModel(generalized[0].link1.world)
             s = GeneralizedIKSolver(world)
-            if iters != None: s.setMaxIters(iters)
-            if tol != None: s.setTolerance(tol)
+            if iters is not None: s.setMaxIters(iters)
+            if tol is not None: s.setTolerance(tol)
             for obj in generalized:
                 s.add(obj)
             for (key,(r,objs)) in robs.items():
@@ -339,8 +339,8 @@ def solver(objectives,iters=None,tol=None):
                     s.setActiveDofs(r._links)
                 else:
                     s = IKSolver(r)
-                if iters != None: s.setMaxIters(iters)
-                if tol != None: s.setTolerance(tol)
+                if iters is not None: s.setMaxIters(iters)
+                if tol is not None: s.setTolerance(tol)
                 for obj in objs:
                     s.add(obj)
                 res.append(s)
@@ -357,8 +357,8 @@ def solver(objectives,iters=None,tol=None):
                 s.setActiveDofs(r._links)
             else:
                 s = IKSolver(objectives.robot)
-            if iters != None: s.setMaxIters(iters)
-            if tol != None: s.setTolerance(tol)
+            if iters is not None: s.setMaxIters(iters)
+            if tol is not None: s.setTolerance(tol)
             s.add(objectives)
             return s
         elif isinstance(objectives,GeneralizedIKObjective):
@@ -368,8 +368,8 @@ def solver(objectives,iters=None,tol=None):
             else:
                 world = WorldModel(objectives.link1.world)
             s = GeneralizedIKSolver(world)
-            if iters != None: s.setMaxIters(iters)
-            if tol != None: s.setTolerance(tol)
+            if iters is not None: s.setMaxIters(iters)
+            if tol is not None: s.setTolerance(tol)
             s.add(objectives)
             return s
         else:
