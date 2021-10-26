@@ -6,7 +6,8 @@ RobotConstrainedInterpolator::RobotConstrainedInterpolator(RobotModel& robot,con
   :ConstrainedInterpolator(&space,&f),space(robot),f(robot)
 {
   f.UseIK(goals);
-  GetDefaultIKDofs(robot,goals,f.activeDofs);  
+  GetDefaultIKDofs(robot,goals,f.activeDofs);
+  robot.ConfigureDriverConstraints(f);
 }
 
 void RobotConstrainedInterpolator::ConstraintValue(const Config& x,Vector& v)

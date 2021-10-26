@@ -215,6 +215,7 @@ bool ContactCSpace::SolveContact(int numIters,Real dist)
     for(size_t i=0;i<active.size();i++)
       if(active[i]) equality.activeDofs.mapping.push_back(i);
   }
+  robot.ConfigureDriverConstraints(equality);
   RobotIKSolver solver(equality);
 
   //use or don't use joint limits?  threshold for some revolute joints?
@@ -414,6 +415,7 @@ bool MultiContactCSpace::SolveContact(Config& x,int numIters,Real tol)
   RobotIKFunction equality(aggregateRobot);
   equality.UseIK(closedChainConstraints);
   GetDefaultIKDofs(aggregateRobot,closedChainConstraints,equality.activeDofs);
+  aggregateRobot.ConfigureDriverConstraints(equality);
   RobotIKSolver solver(equality);
 
   //use or don't use joint limits?  threshold for some revolute joints?

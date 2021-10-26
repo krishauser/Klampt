@@ -1002,6 +1002,7 @@ bool RobotPoseWidget::SolveIK(int iters,Real tol)
     dofs = intersect;
   }
   f.activeDofs.mapping = vector<int>(dofs.begin(),dofs.end());
+  robot->ConfigureDriverConstraints(f);
 
   //define start config
   if(true || undoConfigs.empty())
@@ -1042,6 +1043,7 @@ bool RobotPoseWidget::SolveIKFixedBase(int iters,Real tol)
     dofs = intersect;
   }
   f.activeDofs.mapping = vector<int>(dofs.begin(),dofs.end());
+  robot->ConfigureDriverConstraints(f);
 
   robot->q = linkPoser.poseConfig;
   bool res = (RobustSolveIK(*robot,f,iters,tol,5) == 0);
@@ -1077,6 +1079,7 @@ bool RobotPoseWidget::SolveIKFixedJoint(int fixedJoint,int iters,Real tol)
     dofs = intersect;
   }
   f.activeDofs.mapping = vector<int>(dofs.begin(),dofs.end());
+  robot->ConfigureDriverConstraints(f);
 
   robot->q = linkPoser.poseConfig;
   bool res = (RobustSolveIK(*robot,f,iters,tol,5) == 0);
