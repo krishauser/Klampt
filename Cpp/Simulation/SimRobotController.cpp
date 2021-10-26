@@ -219,6 +219,9 @@ void SimRobotController::Step(Real dt,Simulator* sim)
     nextSenseTime.resize(sensors.sensors.size(),curTime);
   }
   for(size_t i=0;i<sensors.sensors.size();i++) {
+    if(!sensors.sensors[i]->enabled)
+      continue;
+      
     Real delay = 0;
     if(sensors.sensors[i]->rate == 0)
       delay = controlTimeStep;
