@@ -152,7 +152,7 @@ def objective(body,ref=None,local=None,world=None,R=None,t=None):
                     obj.setRelativePoint(body.index,ref.index,local,world)
                 else:
                     obj.setFixedPoint(body.index,local,world)
-        if (R is not None) and (t is not None):
+        elif (R is not None) and (t is not None):
             if ref:
                 obj.setRelativeTransform(body.index,ref.index,R,t)
             else:
