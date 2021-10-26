@@ -5,6 +5,9 @@
 #include <KrisLibrary/utils/PropertyMap.h>
 #include "ManagedGeometry.h"
 
+//forward declaration
+class RobotIKFunction;
+
 namespace Klampt {
   using namespace std;
 
@@ -130,6 +133,10 @@ public:
   ///link j moves in the workspace in response to a unit change in q(i)
   ///It is used by exact collision checkers, and is uninitialized by default.
   void ComputeLipschitzMatrix();
+
+  ///Configures an IK solver to respect driver constraints.  Only works for
+  ///Affine constraints at the moment.
+  void ConfigureDriverConstraints(RobotIKFunction& f);
 
   string name;
   vector<string> geomFiles;   ///< geometry file names (used in saving)

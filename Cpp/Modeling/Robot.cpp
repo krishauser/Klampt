@@ -5,6 +5,7 @@
 #include <string.h>
 #include <KrisLibrary/robotics/DenavitHartenberg.h>
 #include <KrisLibrary/robotics/Rotation.h>
+#include <KrisLibrary/robotics/IKFunctions.h>
 #include <KrisLibrary/math3d/misc.h>
 #include <KrisLibrary/math3d/basis.h>
 #include <KrisLibrary/meshing/IO.h>
@@ -3726,6 +3727,14 @@ void RobotModel::Merge(const std::vector<RobotModel*>& robots)
     }
     copy(robots[i]->driverNames.begin(),robots[i]->driverNames.end(),driverNames.begin()+doffset[i]);
   }
+}
+
+void RobotModel::ConfigureDriverConstraints(RobotIKFunction& f)
+{
+  for(auto d:drivers)
+    if(d.type == RobotModelDriver::Affine) {
+      f.UseAffineConstraint(d.linkIndices,d.affScaling,d.affOffset);
+    }
 }
 
 } //Klampt
