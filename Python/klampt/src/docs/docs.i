@@ -1884,8 +1884,8 @@ Property names are usually lowercase but follow PCL naming convention, and often
 include:  
 
 *   `normal_x`, `normal_y`, `normal_z`: the outward normal  
-*   `rgb`, `rgba`: integer encoding of RGB (24 bit int) or RGBA color (32 bit
-    int)  
+*   `rgb`, `rgba`: integer encoding of RGB (24 bit int, format 0xrrggbb) or RGBA
+    color (32 bit int, format 0xaarrggbb)  
 *   `opacity`: opacity, in range [0,1]  
 *   `c`: opacity, in range [0,255]  
 *   `r,g,b,a`: color channels, in range [0,1]  
@@ -2698,6 +2698,11 @@ tmax[i]`
 
 Sets the velocity limit vector vmax, the constraint is :math:`|dq[i]| \\leq
 vmax[i]`  
+";
+
+%feature("docstring") RobotModel::addSensor "
+
+Adds a new sensor with a given name and type.  
 ";
 
 %feature("docstring") RobotModel::getAccelerationLimits "
@@ -3558,6 +3563,11 @@ Sets a rate controller from the current commanded config to move at rate dq for
 time dt > 0. dq has size model().numLinks()  
 ";
 
+%feature("docstring") SimRobotController::addSensor "
+
+Adds a new sensor with a given name and type.  
+";
+
 %feature("docstring") SimRobotController::getControlType "
 
 Returns the control type for the active controller.  
@@ -3639,8 +3649,10 @@ starting at the current queued end state.
 %feature("docstring") SimRobotSensor "
 
 A sensor on a simulated robot. Retrieve one from the controller using
-:meth:`SimRobotController.getSensor`, or create a new one using
-`SimRobotSensor(robotController,name,type)`  
+:meth:`SimRobotController.sensor`, or create a new one using
+:meth:`SimRobotController.addSensor`. You may also use kinematically-simulated
+sensors using :meth:`RobotModel.sensor` or create a new one using
+:meth:`RobotModel.addSensor`.  
 
 Use :meth:`getMeasurements` to get the currently simulated measurement vector.  
 
@@ -3664,7 +3676,14 @@ FilteredSensor and TimeDelayedSensor also work. The force-related sensors
 To use get/setSetting, you will need to know the sensor attribute names and
 types as described in `the Klampt sensor documentation
 <https://github.com/krishauser/Klampt/blob/master/Documentation/Manual-
-Control.md#sensors>`_ (same as in the world or sensor XML file).  
+Control.md#sensors>`_ (same as in the world or sensor XML file). Common settings
+include:  
+
+*   rate (float): how frequently the sensor is simulated  
+*   enabled (bool): whether the simulator simulates this sensor  
+*   link (int): the link on which this sensor lies (-1 for world)  
+*   Tsensor (se3 transform, serialized with loader.write_se3(T)): the transform
+    of the sensor on the robot / world.  
 
 C++ includes: robotsim.h
 ";
@@ -3677,9 +3696,6 @@ Returns the value of the named setting (you will need to manually parse this)
 %feature("docstring") SimRobotSensor::type "
 
 Returns the type of the sensor.  
-";
-
-%feature("docstring") SimRobotSensor::SimRobotSensor "
 ";
 
 %feature("docstring") SimRobotSensor::SimRobotSensor "

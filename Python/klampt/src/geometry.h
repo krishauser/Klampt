@@ -119,8 +119,8 @@ struct ConvexHull
  * often include:
  *
  * - ``normal_x``, ``normal_y``, ``normal_z``: the outward normal 
- * - ``rgb``, ``rgba``: integer encoding of RGB (24 bit int) or RGBA color (32
- *   bit int) 
+ * - ``rgb``, ``rgba``: integer encoding of RGB (24 bit int, format 0xrrggbb)
+ *   or RGBA color (32 bit int, format 0xaarrggbb) 
  * - ``opacity``: opacity, in range [0,1]
  * - ``c``: opacity, in range [0,255]
  * - ``r,g,b,a``: color channels, in range [0,1]
