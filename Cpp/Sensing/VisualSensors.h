@@ -53,7 +53,7 @@ class LaserRangeSensor : public SensorBase
   virtual map<string,string> Settings() const;
   virtual bool GetSetting(const string& name,string& str) const;
   virtual bool SetSetting(const string& name,const string& str);
-  virtual void DrawGL(const RobotModel robot,const vector<double>& measurements);
+  virtual void DrawGL(const RobotModel& robot,const vector<double>& measurements);
 
   int link;
   RigidTransform Tsensor; ///< z is forward, x points left, y points up
@@ -137,7 +137,7 @@ class CameraSensor : public SensorBase
   virtual map<string,string> Settings() const;
   virtual bool GetSetting(const string& name,string& str) const;
   virtual bool SetSetting(const string& name,const string& str);
-  virtual void DrawGL(const RobotModel robot,const vector<double>& measurements);
+  virtual void DrawGL(const RobotModel& robot,const vector<double>& measurements);
   ///Gets the OpenGL view associated with the camera.  The result is in the link's local frame.
   ///Note that in OpenGL views, Z is backward, and Y is up.
   void GetViewport(Camera::Viewport& view) const;

@@ -234,7 +234,7 @@ bool LaserRangeSensor::SetSetting(const string& name,const string& str)
   return false;
 }
 
-void LaserRangeSensor::DrawGL(const RobotModel robot,const vector<double>& measurements) 
+void LaserRangeSensor::DrawGL(const RobotModel& robot,const vector<double>& measurements) 
 {
   RigidTransform T = (link >= 0 ? robot.links[link].T_World*Tsensor : Tsensor);
   glPushMatrix();
@@ -656,7 +656,7 @@ void doTriangle(const Vector3& a,const Vector3& b,const Vector3& c)
   glVertex3v(c);
 }
 
-void CameraSensor::DrawGL(const RobotModel robot,const vector<double>& measurements) 
+void CameraSensor::DrawGL(const RobotModel& robot,const vector<double>& measurements) 
 {
   Camera::Viewport v;
   GetViewport(v);
