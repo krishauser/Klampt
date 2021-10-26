@@ -26,8 +26,10 @@ class Simulator;
 using namespace std;
 
 /** @brief A sensor on a simulated robot.  Retrieve one from the controller
- * using :meth:`SimRobotController.getSensor`, or create a new one
- * using ``SimRobotSensor(robotController,name,type)``
+ * using :meth:`SimRobotController.sensor`, or create a new one
+ * using :meth:`SimRobotController.addSensor`.  You may also use
+ * kinematically-simulated sensors using :meth:`RobotModel.sensor` or create
+ * a new one using :meth:`RobotModel.addSensor`.
  *
  * Use  :meth:`getMeasurements` to get the currently simulated measurement
  * vector.
@@ -52,13 +54,20 @@ using namespace std;
  *
  * To use get/setSetting, you will need to know the sensor attribute names
  * and types as described in `the Klampt sensor documentation <https://github.com/krishauser/Klampt/blob/master/Documentation/Manual-Control.md#sensors>`_
- * (same as in the world or sensor XML file).
+ * (same as in the world or sensor XML file). Common settings include:
+ * 
+ * - rate (float): how frequently the sensor is simulated
+ * - enabled (bool): whether the simulator simulates this sensor
+ * - link (int): the link on which this sensor lies (-1 for world)
+ * - Tsensor (se3 transform, serialized with loader.write_se3(T)): the transform
+ *    of the sensor on the robot / world.
+ * 
  */
 class SimRobotSensor
 {
  public:
   SimRobotSensor(const RobotModel& robot,Klampt::SensorBase* sensor);
-  SimRobotSensor(SimRobotController& robot,const char* name,const char* type);
+
   ///Returns the name of the sensor
   std::string name();
   ///Returns the type of the sensor
@@ -195,6 +204,8 @@ class SimRobotController
   /// a null sensor is returned (i.e., SimRobotSensor.name() or
   /// SimRobotSensor.type()) will return the empty string.)
   SimRobotSensor sensor(const char* name);
+  ///Adds a new sensor with a given name and type
+  SimRobotSensor addSensor(const char* name,const char* type);
   
   /// gets a custom command list
   std::vector<std::string> commands();

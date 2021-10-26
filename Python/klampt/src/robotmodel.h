@@ -615,6 +615,8 @@ class RobotModel
   /// a null sensor is returned (i.e., SimRobotSensor.name() or
   /// SimRobotSensor.type()) will return the empty string.)
   SimRobotSensor sensor(const char* name);
+  ///Adds a new sensor with a given name and type
+  SimRobotSensor addSensor(const char* name,const char* type);
 
   int world;
   int index;

@@ -4616,6 +4616,32 @@ SimRobotSensor RobotModel::sensor(const char* name)
   return SimRobotSensor(*this,sensor.get());
 }
 
+SimRobotSensor RobotModel::addSensor(const char* name,const char* type)
+{
+  if(!robot) throw PyException("RobotModel is empty");
+  shared_ptr<WorldData> worldData = worlds[world];
+  if(index >= (int)worldData->robotSensors.size())
+    worldData->robotSensors.resize(index+1);
+  if(!worldData->robotSensors[index]) {
+    worldData->robotSensors[index].reset(new Klampt::RobotSensors);
+    worldData->robotSensors[index]->MakeDefault(robot);
+  }
+  Klampt::RobotSensors* sensors = worldData->robotSensors[index].get();
+  Assert(sensors != NULL);
+  if(sensors->GetNamedSensor(name)) {
+    throw PyException("Sensor name already exists");
+  }
+  shared_ptr<Klampt::SensorBase> newsensor = sensors->CreateByType(type);
+  if(!newsensor) {
+    throw PyException("Invalid sensor type");
+  }
+  newsensor->name = name;
+  worldData->robotSensors[index]->sensors.push_back(newsensor);
+  return SimRobotSensor(*this,worldData->robotSensors[index]->sensors.back().get());
+}
+
+
+
 RigidObjectModel::RigidObjectModel()
   :world(-1),index(-1),object(NULL)
 {}
@@ -5748,22 +5774,7 @@ SimRobotSensor::SimRobotSensor(const RobotModel& _robot,Klampt::SensorBase* _sen
   :robotModel(_robot),sensor(_sensor)
 {}
 
-SimRobotSensor::SimRobotSensor(SimRobotController& _controller,const char* name,const char* type)
-  :sensor(NULL)
-{
-  robotModel = _controller.model();
-  shared_ptr<Klampt::SensorBase> newsensor = _controller.controller->sensors.CreateByType(type);
-  if(!newsensor) {
-    throw PyException("Invalid sensor type specified");
-  }
-  if(_controller.controller->sensors.GetNamedSensor(name)) {
-    throw PyException("Sensor name already exists");
-  }
-  newsensor->name = name;
-  _controller.controller->sensors.sensors.push_back(newsensor);
-  _controller.controller->nextSenseTime.push_back(_controller.controller->curTime);
-  sensor = _controller.controller->sensors.sensors.back().get();
-}
+
 
 RobotModel SimRobotSensor::robot()
 {
@@ -5881,6 +5892,21 @@ SimRobotSensor SimRobotController::sensor(const char* name)
     fprintf(stderr,"Warning, sensor %s does not exist\n",name);
   }
   return SimRobotSensor(model(),sensor.get());
+}
+
+SimRobotSensor SimRobotController::addSensor(const char* name,const char* type)
+{
+  shared_ptr<Klampt::SensorBase> newsensor = controller->sensors.CreateByType(type);
+  if(!newsensor) {
+    throw PyException("Invalid sensor type specified");
+  }
+  if(controller->sensors.GetNamedSensor(name)) {
+    throw PyException("Sensor name already exists");
+  }
+  newsensor->name = name;
+  controller->sensors.sensors.push_back(newsensor);
+  controller->nextSenseTime.push_back(controller->curTime);
+  return SimRobotSensor(model(),controller->sensors.sensors.back().get());
 }
 
 std::vector<std::string> SimRobotController::commands()

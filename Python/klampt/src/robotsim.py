@@ -1111,8 +1111,8 @@ class PointCloud(object):
     include:  
 
     *   `normal_x`, `normal_y`, `normal_z`: the outward normal  
-    *   `rgb`, `rgba`: integer encoding of RGB (24 bit int) or RGBA color (32 bit
-        int)  
+    *   `rgb`, `rgba`: integer encoding of RGB (24 bit int, format 0xrrggbb) or RGBA
+        color (32 bit int, format 0xaarrggbb)  
     *   `opacity`: opacity, in range [0,1]  
     *   `c`: opacity, in range [0,255]  
     *   `r,g,b,a`: color channels, in range [0,1]  
@@ -5192,6 +5192,16 @@ class RobotModel(object):
 
         """
         return _robotsim.RobotModel_sensor(self, *args)
+
+    def addSensor(self, name, type):
+        r"""
+        addSensor(RobotModel self, char const * name, char const * type) -> SimRobotSensor
+
+
+        Adds a new sensor with a given name and type.  
+
+        """
+        return _robotsim.RobotModel_addSensor(self, name, type)
     world = property(_robotsim.RobotModel_world_get, _robotsim.RobotModel_world_set, doc=r"""world : int""")
     index = property(_robotsim.RobotModel_index_get, _robotsim.RobotModel_index_set, doc=r"""index : int""")
     robot = property(_robotsim.RobotModel_robot_get, _robotsim.RobotModel_robot_set, doc=r"""robot : p.Klampt::RobotModel""")
@@ -6754,8 +6764,10 @@ class SimRobotSensor(object):
 
 
     A sensor on a simulated robot. Retrieve one from the controller using
-    :meth:`SimRobotController.getSensor`, or create a new one using
-    `SimRobotSensor(robotController,name,type)`  
+    :meth:`SimRobotController.sensor`, or create a new one using
+    :meth:`SimRobotController.addSensor`. You may also use kinematically-simulated
+    sensors using :meth:`RobotModel.sensor` or create a new one using
+    :meth:`RobotModel.addSensor`.  
 
     Use :meth:`getMeasurements` to get the currently simulated measurement vector.  
 
@@ -6779,7 +6791,14 @@ class SimRobotSensor(object):
     To use get/setSetting, you will need to know the sensor attribute names and
     types as described in `the Klampt sensor documentation
     <https://github.com/krishauser/Klampt/blob/master/Documentation/Manual-
-    Control.md#sensors>`_ (same as in the world or sensor XML file).  
+    Control.md#sensors>`_ (same as in the world or sensor XML file). Common settings
+    include:  
+
+    *   rate (float): how frequently the sensor is simulated  
+    *   enabled (bool): whether the simulator simulates this sensor  
+    *   link (int): the link on which this sensor lies (-1 for world)  
+    *   Tsensor (se3 transform, serialized with loader.write_se3(T)): the transform
+        of the sensor on the robot / world.  
 
     C++ includes: robotsim.h
 
@@ -6788,14 +6807,13 @@ class SimRobotSensor(object):
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
 
-    def __init__(self, *args):
+    def __init__(self, robot, sensor):
         r"""
         __init__(SimRobotSensor self, RobotModel robot, Klampt::SensorBase * sensor) -> SimRobotSensor
-        __init__(SimRobotSensor self, SimRobotController robot, char const * name, char const * type) -> SimRobotSensor
 
 
         """
-        _robotsim.SimRobotSensor_swiginit(self, _robotsim.new_SimRobotSensor(*args))
+        _robotsim.SimRobotSensor_swiginit(self, _robotsim.new_SimRobotSensor(robot, sensor))
 
     def name(self):
         r"""
@@ -7103,6 +7121,16 @@ class SimRobotController(object):
 
         """
         return _robotsim.SimRobotController_sensor(self, *args)
+
+    def addSensor(self, name, type):
+        r"""
+        addSensor(SimRobotController self, char const * name, char const * type) -> SimRobotSensor
+
+
+        Adds a new sensor with a given name and type.  
+
+        """
+        return _robotsim.SimRobotController_addSensor(self, name, type)
 
     def commands(self):
         r"""
