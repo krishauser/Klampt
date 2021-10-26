@@ -35,6 +35,7 @@ class Simulator;
  * Default settings:
  * - rate: the number of time per second this should be called, in Hz.  If 0,
  *   the sensor is updated every time the controller is called (default)
+ * - enabled: whether the sensor provides data. True by default.
  *
  * FOR IMPLEMENTERS: at a minimum, you must overload the Type(),
  * MeasurementNames and Get/SetMeasurements methods.  (Note: it is important
@@ -92,6 +93,7 @@ class SensorBase
 
   string name;
   double rate;
+  bool enabled;
 };
 
 

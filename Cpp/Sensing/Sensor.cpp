@@ -19,7 +19,7 @@ using namespace GLDraw;
 
 
 SensorBase::SensorBase()
-  :name("Unnamed sensor"),rate(0)
+  :name("Unnamed sensor"),rate(0),enabled(true)
 {}
 
 bool SensorBase::ReadState(File& f)
@@ -78,17 +78,20 @@ map<string,string> SensorBase::Settings() const
 {
   map<string,string> settings;
   FILL_SENSOR_SETTING(settings,rate);
+  FILL_SENSOR_SETTING(settings,enabled);
   return settings;
 }
 bool SensorBase::GetSetting(const string& name,string& str) const
 {
   GET_SENSOR_SETTING(rate);
+  GET_SENSOR_SETTING(enabled);
   return false;
 }
 
 bool SensorBase::SetSetting(const string& name,const string& str)
 {
   SET_SENSOR_SETTING(rate);
+  SET_SENSOR_SETTING(enabled);
   return false;
 }
 
