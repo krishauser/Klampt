@@ -533,6 +533,7 @@ PyObject* IKSolver::solve(int iters,double tol)
   }
   if(activeDofs.empty()) GetDefaultIKDofs(*robot.robot,goals,f.activeDofs);
   else f.activeDofs.mapping = activeDofs;
+  robot.robot->ConfigureDriverConstraints(f);
 
   RobotIKSolver solver(f);
   if(useJointLimits) {
@@ -579,6 +580,7 @@ bool IKSolver::solve()
   }
   if(activeDofs.empty()) GetDefaultIKDofs(*robot.robot,goals,f.activeDofs);
   else f.activeDofs.mapping = activeDofs;
+  robot.robot->ConfigureDriverConstraints(f);
 
   RobotIKSolver solver(f);
   if(useJointLimits) {
