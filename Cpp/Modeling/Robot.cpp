@@ -1197,23 +1197,21 @@ bool RobotModel::LoadRob(const char* fn) {
   //first mount the geometries, they affect whether a link is included in self collision testing
   vector<int> mountLinkIndices(mountLinks.size(),-2);  //-2 indicates not found
   for (size_t i = 0; i < mountLinks.size(); i++) {
-    int linkIndex = LinkIndex(mountLinks[i].c_str());
-    if(linkIndex < 0 || linkIndex >= (int)links.size()) {
-      if(mountLinks[i]=="-1") {
-        //pass
-      }
-      else {
-        mountLinkIndices[i] = -2;
-      }
-    }
-    mountLinkIndices[i] = linkIndex;
-  }
-  for (size_t i = 0; i < mountLinks.size(); i++) {
     const char* ext = FileExtension(mountFiles[i].c_str());
     if(ext && (0==strcmp(ext,"rob") || 0==strcmp(ext,"urdf"))) {
       //its a robot, delay til later
     }
     else {
+      int linkIndex = LinkIndex(mountLinks[i].c_str());
+      if(linkIndex < 0 || linkIndex >= (int)links.size()) {
+        if(mountLinks[i]=="-1") {
+          //pass
+        }
+        else {
+          mountLinkIndices[i] = -2;
+        }
+      }
+      mountLinkIndices[i] = linkIndex;
       if(mountLinkIndices[i] == -2) {
         LOG4CXX_ERROR(GET_LOGGER(RobParser),"   Invalid mount link "<<mountLinks[i]<<", out of range");
         return false;
@@ -1302,16 +1300,16 @@ bool RobotModel::LoadRob(const char* fn) {
   timer.Reset();
   //do the mounting of subchains
   for (size_t i = 0; i < mountLinks.size(); i++) {
-    if(mountLinkIndices[i] == -2) { //determine mount link dynamically
-      int linkIndex = LinkIndex(mountLinks[i].c_str());
-      if(linkIndex < 0) {
-        LOG4CXX_ERROR(GET_LOGGER(RobParser),"   Invalid mount link "<<mountLinks[i]<<", out of range");
-        return false;
-      }
-      mountLinkIndices[i] = linkIndex;
-    }
     const char* ext = FileExtension(mountFiles[i].c_str());
     if(ext && (0==strcmp(ext,"rob") || 0==strcmp(ext,"urdf"))) {
+      if(mountLinkIndices[i] == -2) { //determine mount link dynamically
+        int linkIndex = LinkIndex(mountLinks[i].c_str());
+        if(linkIndex < 0) {
+          LOG4CXX_ERROR(GET_LOGGER(RobParser),"   Invalid mount link "<<mountLinks[i]<<", out of range");
+          return false;
+        }
+        mountLinkIndices[i] = linkIndex;
+      }
       string fn = ResolveFileReference(path,mountFiles[i]);
       LOG4CXX_INFO(GET_LOGGER(RobParser),"   Mounting subchain file " << mountFiles[i]);
       RobotModel subchain;
@@ -3278,19 +3276,17 @@ bool RobotModel::LoadURDF(const char* fn)
   //first mount the geometries, they affect whether a link is included in self collision testing
   vector<int> mountLinkIndices(mountLinks.size());
   for (size_t i = 0; i < mountLinks.size(); i++) {
-    int linkIndex = LinkIndex(mountLinks[i].c_str());
-    if(linkIndex < 0) {
-      LOG4CXX_ERROR(GET_LOGGER(URDFParser),"   Invalid mount link "<<mountLinks[i]);
-      return false;
-    }
-    mountLinkIndices[i] = linkIndex;
-  }
-  for (size_t i = 0; i < mountLinks.size(); i++) {
     const char* ext = FileExtension(mountFiles[i].c_str());
     if(ext && (0==strcmp(ext,"rob") || 0==strcmp(ext,"urdf"))) {
       //its a robot, delay til later
     }
     else {
+      int linkIndex = LinkIndex(mountLinks[i].c_str());
+      if(linkIndex < 0) {
+        LOG4CXX_ERROR(GET_LOGGER(URDFParser),"   Invalid mount link "<<mountLinks[i]);
+        return false;
+      }
+      mountLinkIndices[i] = linkIndex;
       string fn = ResolveFileReference(path,mountFiles[i]);
       LOG4CXX_INFO(GET_LOGGER(URDFParser),"   Mounting geometry file " << mountFiles[i]);
       //mount a triangle mesh on top of another triangle mesh
@@ -3351,6 +3347,12 @@ bool RobotModel::LoadURDF(const char* fn)
   for (size_t i = 0; i < mountLinks.size(); i++) {
     const char* ext = FileExtension(mountFiles[i].c_str());
     if(ext && (0==strcmp(ext,"rob") || 0==strcmp(ext,"urdf"))) {
+      int linkIndex = LinkIndex(mountLinks[i].c_str());
+      if(linkIndex < 0) {
+        LOG4CXX_ERROR(GET_LOGGER(URDFParser),"   Invalid mount link "<<mountLinks[i]);
+        return false;
+      }
+      mountLinkIndices[i] = linkIndex;
       string fn = ResolveFileReference(path,mountFiles[i]);
       LOG4CXX_INFO(GET_LOGGER(URDFParser),"   Mounting subchain file " << mountFiles[i]);
       RobotModel subchain;
