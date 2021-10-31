@@ -250,7 +250,7 @@ def quaternion(R):
             s = 0.5 / s;
             q[3] = (M[k][j] - M[j][k]) * s;
             q[j] = (M[i][j] + M[j][i]) * s;
-            q[k] = (M[i][k] + M[i][k]) * s;
+            q[k] = (M[i][k] + M[k][i]) * s;
         w,x,y,z = q[3],q[0],q[1],q[2]
         return vectorops.unit([w,x,y,z])
     
