@@ -24,9 +24,10 @@ bool MainWindow::Initialize(int _argc,const char** _argv)
         printf("RobotTest: error loading robot file %s, quitting\n",argv[1]);
         return false;
     }
+    RobotModel* rob=world.robots[0].get();
     backend.reset(new RobotTestBackend(&world));
     printf("BACKEND LOADED\n");
-    gui.reset(new QRobotTestGUI(ui->displaywidget,backend.get()));
+    gui.reset(new QRobotTestGUI(ui->displaywidget,backend.get(),rob));
     gui->opened_file = argv[1];
     backend->Start();
 
@@ -40,8 +41,6 @@ bool MainWindow::Initialize(int _argc,const char** _argv)
     //Send GUI events
     connect(ui->spn_driver,SIGNAL(valueChanged(double)),gui.get(),SLOT(SetDriverValue(double)));
     connect(ui->spn_link,SIGNAL(valueChanged(double)),gui.get(),SLOT(SetLinkValue(double)));
-
-    RobotModel* rob=world.robots[0].get();
 
     //fill GUI info
     for(int i=0;i<rob->linkNames.size();i++)

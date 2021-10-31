@@ -36,7 +36,7 @@
     <set>QDialogButtonBox::Ok</set>
    </property>
   </widget>
-  <widget class="QComboBox" name="comboBox">
+  <widget class="QComboBox" name="formatCombo">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -55,6 +55,19 @@
      <string>URDF Format</string>
     </property>
    </item>
+  </widget>
+  <widget class="QCheckBox" name="namesCheck">
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>260</y>
+     <width>92</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Names</string>
+   </property>
   </widget>
  </widget>
  <resources/>
@@ -76,7 +89,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>comboBox</sender>
+   <sender>formatCombo</sender>
    <signal>activated(int)</signal>
    <receiver>CollisionOutput</receiver>
    <slot>SetFormat(int)</slot>
@@ -91,8 +104,25 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>namesCheck</sender>
+   <signal>stateChanged(int)</signal>
+   <receiver>CollisionOutput</receiver>
+   <slot>OnNamesClicked(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>212</x>
+     <y>267</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>245</x>
+     <y>245</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>SetFormat(int)</slot>
+  <slot>OnNamesClicked(int)</slot>
  </slots>
 </ui>

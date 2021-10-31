@@ -13,17 +13,37 @@ CollisionOutput::~CollisionOutput()
     delete ui;
 }
 
-void CollisionOutput::SetValue(const std::string& value)
+void CollisionOutput::SetValue(const std::string& value,const std::string& value_with_names)
 {
     rob_text = QString::fromStdString(value);
     urdf_text = QString::fromStdString(std::string("<noselfcollision pairs=\"") + value + std::string("\" />"));
-    ui->textEdit->setText(rob_text);
+    rob_names_text = QString::fromStdString(value_with_names);
+    urdf_names_text = QString::fromStdString(std::string("<noselfcollision pairs=\"") + value_with_names + std::string("\" />"));
+    UpdateText();
+}
+
+void CollisionOutput::UpdateText()
+{
+    if(ui->namesCheck->isChecked()) {
+        if(ui->formatCombo->currentIndex() == 0)
+           ui->textEdit->setText(rob_names_text);
+        else
+            ui->textEdit->setText(urdf_names_text);
+    }
+    else {
+        if(ui->formatCombo->currentIndex() == 0)
+            ui->textEdit->setText(rob_text);
+        else
+            ui->textEdit->setText(urdf_text);
+    }
 }
 
 void CollisionOutput::SetFormat(int fmt)
 {
-    if(fmt == 0)
-        ui->textEdit->setText(rob_text);
-    else
-        ui->textEdit->setText(urdf_text);
+    UpdateText();
+}
+
+void CollisionOutput::OnNamesClicked(int state)
+{
+    UpdateText();
 }
