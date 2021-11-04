@@ -364,58 +364,58 @@ def _color_format_from_uint8_channels(format,r,g,b,a=None):
         r = np.asarray(r).astype(np.uint32)
         g = np.asarray(g).astype(np.uint32)
         b = np.asarray(b).astype(np.uint32)
-        return np.bitwise_or.reduce((np.left_shift(r,16),np.left_shift(g,8),b)).tolist()
+        return np.bitwise_or.reduce((np.left_shift(r,16),np.left_shift(g,8),b))
     elif format == 'bgr':
         r = np.asarray(r).astype(np.uint32)
         g = np.asarray(g).astype(np.uint32)
         b = np.asarray(b).astype(np.uint32)
-        return np.bitwise_or.reduce((np.left_shift(b,16),np.left_shift(g,8),r)).tolist()
+        return np.bitwise_or.reduce((np.left_shift(b,16),np.left_shift(g,8),r))
     elif format=='rgba':
         r = np.asarray(r).astype(np.uint32)
         g = np.asarray(g).astype(np.uint32)
         b = np.asarray(b).astype(np.uint32)
         a = np.asarray(a).astype(np.uint32)
-        return np.bitwise_or.reduce((np.left_shift(r,24),np.left_shift(g,16),np.left_shift(b,8),a)).tolist()
+        return np.bitwise_or.reduce((np.left_shift(r,24),np.left_shift(g,16),np.left_shift(b,8),a))
     elif format=='bgra':
         r = np.asarray(r).astype(np.uint32)
         g = np.asarray(g).astype(np.uint32)
         b = np.asarray(b).astype(np.uint32)
         a = np.asarray(a).astype(np.uint32)
-        return np.bitwise_or.reduce((np.left_shift(g,24),np.left_shift(g,16),np.left_shift(r,8),a)).tolist()
+        return np.bitwise_or.reduce((np.left_shift(g,24),np.left_shift(g,16),np.left_shift(r,8),a))
     elif format=='argb':
         r = np.asarray(r).astype(np.uint32)
         g = np.asarray(g).astype(np.uint32)
         b = np.asarray(b).astype(np.uint32)
         a = np.asarray(a).astype(np.uint32)
-        return np.bitwise_or.reduce((np.left_shift(a,24),np.left_shift(r,16),np.left_shift(g,8),b)).tolist()
+        return np.bitwise_or.reduce((np.left_shift(a,24),np.left_shift(r,16),np.left_shift(g,8),b))
     elif format=='abgr':
         r = np.asarray(r).astype(np.uint32)
         g = np.asarray(g).astype(np.uint32)
         b = np.asarray(b).astype(np.uint32)
         a = np.asarray(a).astype(np.uint32)
-        return np.bitwise_or.reduce((np.left_shift(a,24),np.left_shift(b,16),np.left_shift(g,8),r)).tolist()
+        return np.bitwise_or.reduce((np.left_shift(a,24),np.left_shift(b,16),np.left_shift(g,8),r))
     elif format=='channels':
         one_255 = 1.0/255.0
         r = np.asarray(r)
         g = np.asarray(g)
         b = np.asarray(b)
         if not hasattr(a,'__iter__'):
-            return (r*one_255).tolist(),(g*one_255).tolist(),(b*one_255).tolist()
+            return (r*one_255),(g*one_255),(b*one_255)
         else:
             a = np.asarray(a)
-            return (r*one_255).tolist(),(g*one_255).tolist(),(b*one_255).tolist(),(a*one_255).tolist()
+            return (r*one_255),(g*one_255),(b*one_255),(a*one_255)
     elif format=='opacity':
         one_255 = 1.0/255.0
         if not hasattr(a,'__iter__'):
             return np.ones(len(r))
         a = np.asarray(a)
-        return (a*one_255).tolist()
+        return (a*one_255)
     elif tuple(format)==('r','g','b'):
         one_255 = 1.0/255.0
         r = np.asarray(r)
         g = np.asarray(g)
         b = np.asarray(b)
-        return np.column_stack((r*one_255,g*one_255,b*one_255)).tolist()
+        return np.column_stack((r*one_255,g*one_255,b*one_255))
     elif tuple(format)==('r','g','b','a'):
         one_255 = 1.0/255.0
         if not hasattr(a,'__iter__'):
@@ -425,7 +425,7 @@ def _color_format_from_uint8_channels(format,r,g,b,a=None):
         r = np.asarray(r)
         g = np.asarray(g)
         b = np.asarray(b)
-        return np.column_stack((r*one_255,g*one_255,b*one_255,a*one_255)).tolist()
+        return np.column_stack((r*one_255,g*one_255,b*one_255,a*one_255))
     else:
         raise ValueError("Invalid format specifier "+str(format))
 
@@ -433,42 +433,42 @@ def _color_format_from_uint8_channels(format,r,g,b,a=None):
 def _color_format_to_uint8_channels(format,colors):
     import numpy as np
     if format=='channels':
-        return tuple((np.asarray(c)*255).astype(np.uint8).tolist() for c in colors)
+        return tuple((np.asarray(c)*255).astype(np.uint8) for c in colors)
     colors = np.asarray(colors)
     if format == 'rgb':
         r,g,b = np.right_shift(np.bitwise_and(colors,0xff0000),16),np.right_shift(np.bitwise_and(colors,0xff00),8),np.bitwise_and(colors,0xff)
-        return r.tolist(),g.tolist(),b.tolist()
+        return r,g,b
     elif format == 'bgr':
         b,g,r = np.right_shift(np.bitwise_and(colors,0xff0000),16),np.right_shift(np.bitwise_and(colors,0xff00),8),np.bitwise_and(colors,0xff)
-        return r.tolist(),g.tolist(),b.tolist()
+        return r,g,b
     elif format=='rgba':
         r,g,b,a = np.right_shift(np.bitwise_and(colors,0xff000000),24),np.right_shift(np.bitwise_and(colors,0xff0000),16),np.right_shift(np.bitwise_and(colors,0xff00),8),np.bitwise_and(colors,0xff)
-        return r.tolist(),g.tolist(),b.tolist(),a.tolist()
+        return r,g,b,a
     elif format=='bgra':
         b,g,r,a = np.right_shift(np.bitwise_and(colors,0xff000000),24),np.right_shift(np.bitwise_and(colors,0xff0000),16),np.right_shift(np.bitwise_and(colors,0xff00),8),np.bitwise_and(colors,0xff)
-        return r.tolist(),g.tolist(),b.tolist(),a.tolist()
+        return r,g,b,a
     elif format=='argb':
         a,r,g,b = np.right_shift(np.bitwise_and(colors,0xff000000),24),np.right_shift(np.bitwise_and(colors,0xff0000),16),np.right_shift(np.bitwise_and(colors,0xff00),8),np.bitwise_and(colors,0xff)
-        return r.tolist(),g.tolist(),b.tolist(),a.tolist()
+        return r,g,b,a
     elif format=='abgr':
         a,b,g,r = np.right_shift(np.bitwise_and(colors,0xff000000),24),np.right_shift(np.bitwise_and(colors,0xff0000),16),np.right_shift(np.bitwise_and(colors,0xff00),8),np.bitwise_and(colors,0xff)
-        return r.tolist(),g.tolist(),b.tolist(),a.tolist()
+        return r,g,b,a
     elif format=='opacity':
         r = [0xff]*len(colors)
-        return r,r,r,(colors*255).astype(np.uint8).tolist()
+        return r,r,r,(colors*255).astype(np.uint8)
     elif tuple(format)==('r','g','b'):
         colors = np.asarray(colors)
-        r = (colors[:,0]*255).astype(np.uint8)
-        g = (colors[:,1]*255).astype(np.uint8)
-        b = (colors[:,2]*255).astype(np.uint8)
-        return r.tolist(),g.tolist(),b.tolist()
+        r = np.rint(colors[:,0]*255).astype(np.uint8)
+        g = np.rint(colors[:,1]*255).astype(np.uint8)
+        b = np.rint(colors[:,2]*255).astype(np.uint8)
+        return r,g,b
     elif tuple(format)==('r','g','b','a'):
         colors = np.asarray(colors)
-        r = (colors[:,0]*255).astype(np.uint8)
-        g = (colors[:,1]*255).astype(np.uint8)
-        b = (colors[:,2]*255).astype(np.uint8)
-        a = (colors[:,3]*255).astype(np.uint8)
-        return r.tolist(),g.tolist(),b.tolist(),a.tolist()
+        r = np.rint(colors[:,0]*255).astype(np.uint8)
+        g = np.rint(colors[:,1]*255).astype(np.uint8)
+        b = np.rint(colors[:,2]*255).astype(np.uint8)
+        a = np.rint(colors[:,3]*255).astype(np.uint8)
+        return r,g,b,a
     else:
         raise ValueError("Invalid format specifier "+str(format))
 
@@ -482,8 +482,10 @@ def point_cloud_colors(pc,format='rgb'):
         pc (PointCloud): the point cloud
         format: describes the output color format, either:
 
-            - 'rgb': packed 24bit int, with the hex format 0xrrggbb,
-            - 'bgr': packed 24bit int, with the hex format 0xbbggrr,
+            - 'rgb': packed 32bit int, with the hex format 0xrrggbb (only 24
+               bits used),
+            - 'bgr': packed 32bit int, with the hex format 0xbbggrr (only 24
+               bits used),
             - 'rgba': packed 32bit int, with the hex format 0xrrggbbaa,
             - 'bgra': packed 32bit int, with the hex format 0xbbggrraa,
             - 'argb': packed 32bit int, with the hex format 0xaarrggbb,
@@ -495,9 +497,9 @@ def point_cloud_colors(pc,format='rgb'):
             - 'opacity': returns opacity only, in the range [0,1].
 
     Returns:
-        list: A list of pc.numPoints() colors corresponding to the points
-            in the point cloud.  If format='channels', the return value is
-            a tuple (r,g,b) or (r,g,b,a).
+        numpy.ndarray: A an array of pc.numPoints() colors corresponding to 
+            the points in the point cloud.  If format='channels', the return
+            value is a tuple (r,g,b) or (r,g,b,a).
     """
     rgbchannels = []
     alphachannel = None
@@ -520,7 +522,7 @@ def point_cloud_colors(pc,format='rgb'):
         if format == 'argb' and rgbchannels[0][0] == 'rgba':
             return rgb
         import numpy as np
-        rgb = np.array(rgb,dtype=np.uint32)
+        rgb = np.asarray(rgb).astype(dtype=np.uint32)
         r = np.right_shift(np.bitwise_and(rgb,0xff0000),16)
         g = np.right_shift(np.bitwise_and(rgb,0xff00),8)
         b = np.bitwise_and(rgb,0xff)
@@ -529,7 +531,7 @@ def point_cloud_colors(pc,format='rgb'):
                 a = np.right_shift(np.bitwise_and(rgb,0xff000000),24)
             elif alphachannel[0] == 'opacity':
                 a = pc.getProperties(alphachannel[0][1])
-                a = (np.array(a)*255).astype(np.uint32)
+                a = np.rint(np.asarray(a)*255).astype(np.uint32)
             elif alphachannel[0] == 'c':
                 a = pc.getProperties(alphachannel[0][1])
             else:
@@ -559,7 +561,7 @@ def point_cloud_colors(pc,format='rgb'):
         elif alphachannel[0] == 'c':
             import numpy as np
             one_255 = 1.0/255.0
-            a = (np.array(pc.getProperties(alphachannel[0][1]))*one_255).tolist()
+            a = (np.asarray(pc.getProperties(alphachannel[0][1]))*one_255)
         else:
             raise ValueError("Weird type of alpha channel? "+alphachannel[0])
         if format=='channels':
@@ -571,15 +573,15 @@ def point_cloud_colors(pc,format='rgb'):
             return list(zip(r,g,b))
         elif isinstance(format,(list,tuple)) and tuple(format)==('r','g','b','a'):
             if alphachannel is None:
-                a = [1.0]*pc.numPoints()
-            return list(zip(r,g,b,a))
+                a = np.full(pc.numPoints(),1.0)
+            return np.column_stack((r,g,b,a))
         
         import numpy as np
-        r = (np.array(r)*255.0).astype(np.uint32)
-        g = (np.array(g)*255.0).astype(np.uint32)
-        b = (np.array(b)*255.0).astype(np.uint32)
+        r = np.rint(np.asarray(r)*255.0).astype(np.uint32)
+        g = np.rint(np.asarray(g)*255.0).astype(np.uint32)
+        b = np.rint(np.asarray(b)*255.0).astype(np.uint32)
         if alphachannel is not None:
-            a = (np.array(a)*255.0).astype(np.uint32)
+            a = np.rint(np.asarray(a)*255.0).astype(np.uint32)
             return _color_format_from_uint8_channels(format,r,g,b,a)
         else:
             return _color_format_from_uint8_channels(format,r,g,b)
@@ -587,7 +589,7 @@ def point_cloud_colors(pc,format='rgb'):
         if alphachannel[0] == 'opacity':
             import numpy as np
             a = pc.getProperties(alphachannel[0][1])
-            a = (np.array(a)*255).astype(np.uint32)
+            a = (np.asarray(a)*255).astype(np.uint32)
         elif alphachannel[0] == 'c':
             import numpy as np
             a = pc.getProperties(alphachannel[0][1])
@@ -604,13 +606,15 @@ def point_cloud_set_colors(pc,colors,color_format='rgb',pc_property='auto'):
 
     Args:
         pc (PointCloud): the point cloud
-        colors (list): the list of colors, which can be either ints, tuples, or
-            channels, depending on color_format.
+        colors (list or numpy.ndarray): the array of colors, and each color 
+            can be either ints, tuples, or channels, depending on color_format.
         color_format: describes the format of each element of ``colors``, and
             can be:
 
-            - 'rgb': packed 24bit int, with the hex format 0xrrggbb,
-            - 'bgr': packed 24bit int, with the hex format 0xbbggrr,
+            - 'rgb': packed 32bit int, with the hex format 0xrrggbb (only 24
+               bits used),
+            - 'bgr': packed 32bit int, with the hex format 0xbbggrr (only 24
+               bits used),
             - 'rgba': packed 32bit int, with the hex format 0xrrggbbaa,
             - 'bgra': packed 32bit int, with the hex format 0xbbggrraa,
             - 'argb': packed 32bit int, with the hex format 0xaarrggbb,
