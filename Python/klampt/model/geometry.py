@@ -361,16 +361,38 @@ def _color_format_from_uint8_channels(format,r,g,b,a=None):
     if a is None:
         a = 0xff
     if format == 'rgb':
+        r = np.asarray(r).astype(np.uint32)
+        g = np.asarray(g).astype(np.uint32)
+        b = np.asarray(b).astype(np.uint32)
         return np.bitwise_or.reduce((np.left_shift(r,16),np.left_shift(g,8),b)).tolist()
     elif format == 'bgr':
+        r = np.asarray(r).astype(np.uint32)
+        g = np.asarray(g).astype(np.uint32)
+        b = np.asarray(b).astype(np.uint32)
         return np.bitwise_or.reduce((np.left_shift(b,16),np.left_shift(g,8),r)).tolist()
     elif format=='rgba':
+        r = np.asarray(r).astype(np.uint32)
+        g = np.asarray(g).astype(np.uint32)
+        b = np.asarray(b).astype(np.uint32)
+        a = np.asarray(a).astype(np.uint32)
         return np.bitwise_or.reduce((np.left_shift(r,24),np.left_shift(g,16),np.left_shift(b,8),a)).tolist()
     elif format=='bgra':
+        r = np.asarray(r).astype(np.uint32)
+        g = np.asarray(g).astype(np.uint32)
+        b = np.asarray(b).astype(np.uint32)
+        a = np.asarray(a).astype(np.uint32)
         return np.bitwise_or.reduce((np.left_shift(g,24),np.left_shift(g,16),np.left_shift(r,8),a)).tolist()
     elif format=='argb':
+        r = np.asarray(r).astype(np.uint32)
+        g = np.asarray(g).astype(np.uint32)
+        b = np.asarray(b).astype(np.uint32)
+        a = np.asarray(a).astype(np.uint32)
         return np.bitwise_or.reduce((np.left_shift(a,24),np.left_shift(r,16),np.left_shift(g,8),b)).tolist()
     elif format=='abgr':
+        r = np.asarray(r).astype(np.uint32)
+        g = np.asarray(g).astype(np.uint32)
+        b = np.asarray(b).astype(np.uint32)
+        a = np.asarray(a).astype(np.uint32)
         return np.bitwise_or.reduce((np.left_shift(a,24),np.left_shift(b,16),np.left_shift(g,8),r)).tolist()
     elif format=='channels':
         one_255 = 1.0/255.0
@@ -435,15 +457,17 @@ def _color_format_to_uint8_channels(format,colors):
         r = [0xff]*len(colors)
         return r,r,r,(colors*255).astype(np.uint8).tolist()
     elif tuple(format)==('r','g','b'):
-        r = (np.asarray(colors[0])*255).astype(np.uint8)
-        b = (np.asarray(colors[1])*255).astype(np.uint8)
-        g = (np.asarray(colors[2])*255).astype(np.uint8)
+        colors = np.asarray(colors)
+        r = (colors[:,0]*255).astype(np.uint8)
+        g = (colors[:,1]*255).astype(np.uint8)
+        b = (colors[:,2]*255).astype(np.uint8)
         return r.tolist(),g.tolist(),b.tolist()
     elif tuple(format)==('r','g','b','a'):
-        r = (np.asarray(colors[0])*255).astype(np.uint8)
-        b = (np.asarray(colors[1])*255).astype(np.uint8)
-        g = (np.asarray(colors[2])*255).astype(np.uint8)
-        a = (np.asarray(colors[3])*255).astype(np.uint8)
+        colors = np.asarray(colors)
+        r = (colors[:,0]*255).astype(np.uint8)
+        g = (colors[:,1]*255).astype(np.uint8)
+        b = (colors[:,2]*255).astype(np.uint8)
+        a = (colors[:,3]*255).astype(np.uint8)
         return r.tolist(),g.tolist(),b.tolist(),a.tolist()
     else:
         raise ValueError("Invalid format specifier "+str(format))
@@ -491,7 +515,9 @@ def point_cloud_colors(pc,format='rgb'):
         return
     if len(rgbchannels)==1:
         rgb = pc.getProperties(rgbchannels[0][1])
-        if format == rgbchannels[0][0]:
+        if format == 'rgb' and rgbchannels[0][0] == 'rgb':
+            return rgb
+        if format == 'argb' and rgbchannels[0][0] == 'rgba':
             return rgb
         import numpy as np
         rgb = np.array(rgb,dtype=np.uint32)
@@ -589,10 +615,13 @@ def point_cloud_set_colors(pc,colors,color_format='rgb',pc_property='auto'):
             - 'bgra': packed 32bit int, with the hex format 0xbbggrraa,
             - 'argb': packed 32bit int, with the hex format 0xaarrggbb,
             - 'abgr': packed 32bit int, with the hex format 0xaabbggrr,
-            - ('r','g','b'): triple with each channel in range [0,1]
-            - ('r','g','b','a'): tuple with each channel in range [0,1]
-            - 'channels': ``colors`` is a list of channels, in the form (r,g,b)
-               or (r,g,b,a), where each value in the channel has range [0,1].
+            - ('r','g','b'): triple with each channel in range [0,1]. Also use
+              this if colors is an n x 3 numpy array.
+            - ('r','g','b','a'): tuple with each channel in range [0,1]. Also 
+              use this if colors is an n x 4 numpy array.
+            - 'channels': ``colors`` is a list of 3 or 4 channels, in the form
+               (r,g,b) or (r,g,b,a), where each element in a channel has range
+               [0,1].
             - 'opacity': opacity only, in the range [0,1].
 
         pc_property (str): describes to which property the colors should be
@@ -632,7 +661,11 @@ def point_cloud_set_colors(pc,colors,color_format='rgb',pc_property='auto'):
                 pc_property = 'rgba'
             else:
                 pc_property = rgbchannels[0][0]
-    if color_format == pc_property:
+    pc_color_format = pc_property
+    if pc_property == 'rgba':
+        pc_color_format = 'argb'
+
+    if color_format == pc_color_format:
         if color_format == 'channels':
             assert len(colors)==3 or len(colors)==4,'Channels must give a 3-tuple or 4-tuple'
             for c,values in zip('rgb',colors):
@@ -652,7 +685,7 @@ def point_cloud_set_colors(pc,colors,color_format='rgb',pc_property='auto'):
                 pc.addProperty(color_format,colors)
     else:
         channels = _color_format_to_uint8_channels(color_format,colors)
-        packed = _color_format_from_uint8_channels(pc_property,*channels)
+        packed = _color_format_from_uint8_channels(pc_color_format,*channels)
         if pc_property in rgbdict:
             pc.setProperties(rgbdict[pc_property],packed)
         elif alphachannel is not None and pc_property == alphachannel[0]:
