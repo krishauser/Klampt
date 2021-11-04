@@ -212,8 +212,8 @@ def colorize(object,value,colormap=None,feature=None,vrange=None,lighting=None):
         if lighting is not None or value in ['n','normal','nx','ny','nz']:
             if isinstance(geometrydata,PointCloud):
                 #get normals from point cloud
-                from ..model import sensing
-                normals = np.asarray(sensing.point_cloud_normals(geometrydata,estimation_viewpoint=[0,0,0]))
+                from ..model import geometry
+                normals = np.asarray(geometry.point_cloud_normals(geometrydata,estimation_viewpoint=[0,0,0]))
             else:
                 if feature == 'vertices':
                     #compute normals by averaging triangle vertices
@@ -296,7 +296,7 @@ def colorize(object,value,colormap=None,feature=None,vrange=None,lighting=None):
     #now map values to colors
     colors = None
     if colormap == 'random':
-        colors = np.random.rand(N,3,dtype=np.float32)
+        colors = np.random.rand(N,3).astype(np.float32)
     elif hasattr(value[0],'__iter__'):
         colors = np.array(value,dtype=np.float32)
         if colors.shape[1] not in [3,4]:
@@ -352,7 +352,7 @@ def colorize(object,value,colormap=None,feature=None,vrange=None,lighting=None):
             g = (colors[:,1]*255.0).astype(np.uint32)
             b = (colors[:,2]*255.0).astype(np.uint32)
             if colors.shape[1] == 3:
-                a = np.full(colors.shape[0],255,dtype=np.uint8)
+                a = np.full(colors.shape[0],255,dtype=np.uint32)
             else:
                 a = (colors[:,3]*255.0).astype(np.uint32)
             rgba = np.bitwise_or.reduce((np.left_shift(r,16),np.left_shift(g,8),
