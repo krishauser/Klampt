@@ -342,19 +342,19 @@ def colorize(object,value,colormap=None,feature=None,vrange=None,lighting=None):
             appearance.setProperties(hascolor+1,colors[:,1])
             appearance.setProperties(hascolor+2,colors[:,2])
         elif prop == 'rgb':
-            r = (colors[:,0]*255.0).astype(np.uint32)
-            g = (colors[:,1]*255.0).astype(np.uint32)
-            b = (colors[:,2]*255.0).astype(np.uint32)
+            r = np.rint(colors[:,0]*255.0).astype(np.uint32)
+            g = np.rint(colors[:,1]*255.0).astype(np.uint32)
+            b = np.rint(colors[:,2]*255.0).astype(np.uint32)
             rgb = np.bitwise_or.reduce((np.left_shift(r,16),np.left_shift(g,8),b))
             appearance.setProperties(hascolor,rgb)
         elif prop == 'rgba':
-            r = (colors[:,0]*255.0).astype(np.uint32)
-            g = (colors[:,1]*255.0).astype(np.uint32)
-            b = (colors[:,2]*255.0).astype(np.uint32)
+            r = np.rint(colors[:,0]*255.0).astype(np.uint32)
+            g = np.rint(colors[:,1]*255.0).astype(np.uint32)
+            b = np.rint(colors[:,2]*255.0).astype(np.uint32)
             if colors.shape[1] == 3:
                 a = np.full(colors.shape[0],255,dtype=np.uint32)
             else:
-                a = (colors[:,3]*255.0).astype(np.uint32)
+                a = np.rint(colors[:,3]*255.0).astype(np.uint32)
             rgba = np.bitwise_or.reduce((np.left_shift(r,16),np.left_shift(g,8),
                                         np.left_shift(a,24),b))
             appearance.setProperties(hascolor,rgba)
