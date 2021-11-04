@@ -175,7 +175,7 @@ def camera_to_images(camera,image_format='numpy',color_format='channels'):
     #print("camera.getMeasurements() time",t1-t0)
     rgb = None
     depth = None
-    if has_rgb:
+    if has_rgb and len(measurements) > 0:
         if image_format == 'numpy':
             #t0 = time.time()
             argb = np.asarray(measurements[0:w*h]).reshape(h,w).astype(np.uint32)
@@ -196,7 +196,7 @@ def camera_to_images(camera,image_format='numpy',color_format='channels'):
             #print("  Conversion time",t2-t1)
         else:
             raise NotImplementedError("No other image formats besides numpy supported")
-    if has_depth:
+    if has_depth and len(measurements) > 0:
         start = (w*h if has_rgb else 0)
         if image_format == 'numpy':
             #t0 = time.time()
