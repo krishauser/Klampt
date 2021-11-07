@@ -28,12 +28,20 @@ Real RandTwoSidedLaplacian()
   else return -RandLaplacian();
 }
 
-Real SafeRand(Real a,Real b)
+Real SafeRand(Real a,Real b,Real unboundedStdDeviation=1.0)
 {
-  if(IsInf(a) && IsInf(b)) return RandTwoSidedLaplacian();
-  else if(IsInf(a)) return b-RandLaplacian();
-  else if(IsInf(b)) return a+RandLaplacian();
+  if(IsInf(a) && IsInf(b)) return RandTwoSidedLaplacian()*unboundedStdDeviation;
+  else if(IsInf(a)) return b-RandLaplacian()*unboundedStdDeviation;
+  else if(IsInf(b)) return a+RandLaplacian()*unboundedStdDeviation;
   else return Rand(a,b);
+}
+
+Real SafeAngleRand(Real a,Real b)
+{
+  if(b-a < TwoPi)
+    return Rand(a,b);
+  else
+    return Rand(0,TwoPi);
 }
 
 RobotCSpace::RobotCSpace(RobotModel& _robot)
@@ -51,7 +59,8 @@ RobotCSpace::RobotCSpace(RobotModel& _robot)
 RobotCSpace::RobotCSpace(const RobotCSpace& space)
 :robot(space.robot),norm(space.norm),
 jointWeights(space.jointWeights),floatingRotationWeight(space.floatingRotationWeight),
-jointRadiusScale(space.jointRadiusScale),floatingRotationRadiusScale(space.floatingRotationRadiusScale)
+jointRadiusScale(space.jointRadiusScale),floatingRotationRadiusScale(space.floatingRotationRadiusScale),
+unboundedStdDeviation(1.0)
 {
   CopyConstraints(&space);
 }
@@ -85,22 +94,35 @@ void RobotCSpace::Sample(Config& q)
       assert(p>=0);
       int pp = robot.parents[p];
       assert(pp>=0);
-      robot.q(link) = Rand(0,TwoPi);
-      robot.q(p) = SafeRand(robot.qMin(p),robot.qMax(p));
-      robot.q(pp) = SafeRand(robot.qMin(pp),robot.qMax(pp));
+      robot.q(link) = SafeAngleRand(robot.qMax(link),robot.qMin(link));
+      robot.q(p) = SafeRand(robot.qMin(p),robot.qMax(p),unboundedStdDeviation);
+      robot.q(pp) = SafeRand(robot.qMin(pp),robot.qMax(pp),unboundedStdDeviation);
       break;
       }
     case RobotModelJoint::Floating:
     case RobotModelJoint::BallAndSocket:
       {
-	RigidTransform T;
-  T.t.x = RandTwoSidedLaplacian();
-  T.t.y = RandTwoSidedLaplacian();
-  T.t.z = RandTwoSidedLaplacian();
-	QuaternionRotation qr;
-	RandRotation(qr);
-	qr.getMatrix(T.R);
-	robot.SetJointByTransform(i,robot.joints[i].linkIndex,T);
+        RigidTransform T;
+        T.t.x = SafeRand(robot.qMin(link),robot.qMax(link),unboundedStdDeviation);
+        T.t.y = SafeRand(robot.qMin(link+1),robot.qMax(link+1),unboundedStdDeviation);
+        T.t.z = SafeRand(robot.qMin(link+2),robot.qMax(link+2),unboundedStdDeviation);
+        QuaternionRotation qr;
+        //TODO: if limits are specified for the rotation DOFs, should we just sample them accordingly?
+        if(AngleCCWDiff(robot.qMax(link+3),robot.qMin(link+3)) < TwoPi || 
+          AngleCCWDiff(robot.qMax(link+4),robot.qMin(link+4)) < TwoPi ||
+          AngleCCWDiff(robot.qMax(link+5),robot.qMin(link+5)) < TwoPi) {
+          robot.q(link) = T.t.x;
+          robot.q(link+1) = T.t.y;
+          robot.q(link+2) = T.t.z;
+          robot.q(link+3) = SafeAngleRand(robot.qMax(link+3),robot.qMin(link+3));
+          robot.q(link+4) = SafeAngleRand(robot.qMax(link+4),robot.qMin(link+4));
+          robot.q(link+5) = SafeAngleRand(robot.qMax(link+4),robot.qMin(link+5));
+        }
+        else {
+          RandRotation(qr);
+          qr.getMatrix(T.R);
+          robot.SetJointByTransform(i,robot.joints[i].linkIndex,T);
+        }
       }
       break;
     default:

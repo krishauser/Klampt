@@ -55,6 +55,7 @@ public:
   Real floatingRotationWeight;
   vector<Real> jointRadiusScale;
   Real floatingRotationRadiusScale;
+  Real unboundedStdDeviation;
 };
 
 
