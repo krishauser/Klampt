@@ -3263,6 +3263,8 @@ bool RobotModel::LoadURDF(const char* fn)
         urdf::Color c=linkNode->link->visual->material->color;
         this->geomManagers[link_index].SetUniqueAppearance();
         this->geomManagers[link_index].Appearance()->faceColor.set(c.r,c.g,c.b,c.a);
+        this->geomManagers[link_index].Appearance()->vertexColors.clear();
+        this->geomManagers[link_index].Appearance()->faceColors.clear();
       }
       Matrix4 ident; ident.setIdentity();
       if(!linkNode->geomScale.isEqual(ident)) {
