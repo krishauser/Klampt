@@ -44,7 +44,7 @@ class LaserRangeSensor : public SensorBase
   virtual ~LaserRangeSensor() {}
   virtual const char* Type() const { return "LaserRangeSensor"; }
   virtual void Simulate(SimRobotController* robot,Simulator* sim);
-  virtual void SimulateKinematic(RobotModel robot,WorldModel& world);
+  virtual void SimulateKinematic(RobotModel& robot,WorldModel& world);
   virtual void Advance(double dt);
   virtual void Reset();
   virtual void MeasurementNames(vector<string>& names) const;
@@ -129,7 +129,7 @@ class CameraSensor : public SensorBase
   virtual ~CameraSensor();
   virtual const char* Type() const { return "CameraSensor"; }
   virtual void Simulate(SimRobotController* robot,Simulator* sim);
-  virtual void SimulateKinematic(RobotModel robot,WorldModel& world);
+  virtual void SimulateKinematic(RobotModel& robot,WorldModel& world);
   virtual void Reset();
   virtual void MeasurementNames(vector<string>& names) const;
   virtual void GetMeasurements(vector<double>& values) const;

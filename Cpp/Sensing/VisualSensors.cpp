@@ -61,7 +61,7 @@ void LaserRangeSensor::Simulate(SimRobotController* robot,Simulator* sim)
   SimulateKinematic(*robot->robot,*sim->world);
 }
 
-void LaserRangeSensor::SimulateKinematic(RobotModel robot,WorldModel& world)
+void LaserRangeSensor::SimulateKinematic(RobotModel& robot,WorldModel& world)
 {
   depthReadings.resize(measurementCount);
   //need to make sure that the sawtooth pattern hits the last measurement: scale the time domain so last measurement before
@@ -311,7 +311,7 @@ CameraSensor::~CameraSensor()
 {
 }
 
-void CameraSensor::SimulateKinematic(RobotModel robot,WorldModel& world)
+void CameraSensor::SimulateKinematic(RobotModel& robot,WorldModel& world)
 {
   #if DEBUG_GL_RENDER_TIMING
   Timer timer;
