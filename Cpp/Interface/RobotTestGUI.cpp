@@ -66,6 +66,8 @@ void RobotTestBackend::Start()
   MapButtonToggle("draw_sensors",&draw_sensors);
   MapButtonToggle("draw_self_collision_tests",&draw_self_collision_tests);
   MapButtonToggle("output_ros",&output_ros);
+
+  UpdateConfig();
 }
   
 void RobotTestBackend::UpdateConfig()
