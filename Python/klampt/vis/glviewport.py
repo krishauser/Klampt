@@ -5,6 +5,7 @@ except:
     _HAS_OPENGL = False
 
 from . import camera
+from . import gldraw
 from ..math import so3,se3,vectorops
 from ..robotsim import Viewport
 import math
@@ -38,7 +39,7 @@ class GLViewport:
         self.camera = camera.orbit()
         self.camera.dist = 6.0
         #x field of view in degrees
-        self.fov = 30
+        self.fov = 30.0
         #near and far clipping planes
         self.clippingplanes = (0.2,100)
 
@@ -240,3 +241,63 @@ class GLViewport:
 
         f.close()
 
+    def drawGL(self,draw_frustum=True,draw_coords=True):
+        """Draws an OpenGL widget illustrating the viewport."""
+        GL.glPushMatrix()
+
+        mat = se3.homogeneous(self.get_transform())
+        cols = list(zip(*mat))
+        pack = sum((list(c) for c in cols),[])
+        GL.glMultMatrixf(pack)
+        n,f = self.clippingplanes
+        aspect = float(self.w)/float(self.h)
+        rfov = math.radians(self.fov)
+        scale = math.tan(rfov*0.5/aspect)*aspect
+        #note that +z is *backward* in the camera view
+        if draw_frustum:
+            xmin = (self.x - self.w*0.5)/((self.w)*0.5)
+            xmax = (self.x + self.w*0.5)/((self.w)*0.5)
+            ymax = -(self.y - self.h*0.5)/((self.h)*0.5)
+            ymin = -(self.y + self.h*0.5)/((self.h)*0.5)
+            xscale = scale
+            yscale = xscale/aspect
+            xmin *= xscale
+            xmax *= xscale
+            ymin *= yscale
+            ymax *= yscale
+            GL.glDisable(GL.GL_LIGHTING)
+            GL.glColor3f(1,1,0)
+            GL.glBegin(GL.GL_LINES)
+            #near plane
+            GL.glVertex3f(n*xmax,n*ymax,n)
+            GL.glVertex3f(n*xmax,n*ymin,n)
+            GL.glVertex3f(n*xmax,n*ymin,n)
+            GL.glVertex3f(n*xmin,n*ymin,n)
+            GL.glVertex3f(n*xmin,n*ymin,n)
+            GL.glVertex3f(n*xmin,n*ymax,n)
+            GL.glVertex3f(n*xmin,n*ymax,n)
+            GL.glVertex3f(n*xmax,n*ymax,n)
+            #far plane
+            GL.glVertex3f(f*xmax,f*ymax,f)
+            GL.glVertex3f(f*xmax,f*ymin,f)
+            GL.glVertex3f(f*xmax,f*ymin,f)
+            GL.glVertex3f(f*xmin,f*ymin,f)
+            GL.glVertex3f(f*xmin,f*ymin,f)
+            GL.glVertex3f(f*xmin,f*ymax,f)
+            GL.glVertex3f(f*xmin,f*ymax,f)
+            GL.glVertex3f(f*xmax,f*ymax,f)
+            #connections
+            GL.glVertex3f(n*xmax,n*ymax,n)
+            GL.glVertex3f(f*xmax,f*ymax,f)
+            GL.glVertex3f(n*xmax,n*ymin,n)
+            GL.glVertex3f(f*xmax,f*ymin,f)
+            GL.glVertex3f(n*xmin,n*ymin,n)
+            GL.glVertex3f(f*xmin,f*ymin,f)
+            GL.glVertex3f(n*xmin,n*ymax,n)
+            GL.glVertex3f(f*xmin,f*ymax,f)
+            GL.glEnd()
+
+        if draw_coords:
+            gldraw.xform_widget(se3.identity(),0.1,0.01)
+            
+        GL.glPopMatrix()
