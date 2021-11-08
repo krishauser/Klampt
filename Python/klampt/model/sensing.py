@@ -446,7 +446,7 @@ def camera_to_points(camera,points_format='numpy',all_points=False,color_format=
         points_format = 'native'
 
     images = camera_to_images(camera,'numpy',color_format)
-    assert images != None
+    assert images is not None
 
     rgb,depth = None,None
     if int(camera.getSetting('rgb'))==0:
