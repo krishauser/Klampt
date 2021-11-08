@@ -34,12 +34,18 @@ convert between intrinsics definitions.
 :func:`camera_ray`, and :func:`camera_project` convert to/from image points.
 :func:`visible` determines whether a point or object is visible from a camera.
 
+:func:`projection_map_texture` maps a texture from a camera into an OpenGL
+appearance.
+
 """
 
 from ..robotsim import *
 from ..robotsim import Geometry3D
 from ..io import loader
+from ..vis.glviewport import GLViewport
+from ..model.typing import RigidTransform,Vector3
 from . import coordinates
+from typing import Union,Tuple
 import math
 import sys
 from ..math import vectorops,so3,se3
@@ -66,7 +72,7 @@ def _try_scipy_import():
         _has_scipy = False
     return _has_scipy
 
-def get_sensor_xform(sensor,robot=None):
+def get_sensor_xform(sensor : SimRobotSensor, robot : RobotModel = None) -> RigidTransform:
     """Extracts the transform of a SimRobotSensor.  The sensor must be
     of a link-mounted type, e.g., a CameraSensor or ForceSensor.
 
@@ -79,6 +85,10 @@ def get_sensor_xform(sensor,robot=None):
     Returns:
         klampt.se3 object: the sensor transform  
     """
+    if robot is None:
+        return sensor.getTransform()
+    else:
+        return sensor.getTransformWorld()
     s = sensor.getSetting("Tsensor")
     Tsensor = loader.read_se3(s)
     if robot is not None:
@@ -88,7 +98,7 @@ def get_sensor_xform(sensor,robot=None):
     return Tsensor
 
 
-def set_sensor_xform(sensor,T,link=None):
+def set_sensor_xform(sensor : SimRobotSensor, T : RigidTransform, link : RobotModelLink = None):
     """Given a link-mounted sensor (e.g., CameraSensor or ForceSensor), sets 
     its link-local transform to T.
 
@@ -117,20 +127,12 @@ def set_sensor_xform(sensor,T,link=None):
             #assume its parent is a link?
             parent = T.parent()._data
         return set_sensor_xform(sensor,T.relativeCoordinates(),parent)
-    try:
-        s = sensor.getSetting("Tsensor")
-    except Exception:
-        raise ValueError("Sensor does not have a Tsensor attribute")
-    sensor.setSetting("Tsensor",loader.write_se3(T))
+    sensor.setTransform(*T)
     if link != None:
-        if isinstance(link,RobotModelLink):
-            sensor.setSetting("link",str(link.index))
-        else:
-            assert isinstance(link,int),"Can only set a sensor transform to a RobotModelLink or an integer link index"
-            sensor.setSetting("link",str(link))
+        sensor.setLink(link)
 
 
-def camera_to_images(camera,image_format='numpy',color_format='channels'):
+def camera_to_images(camera : SimRobotSensor, image_format='numpy',color_format='channels'):
     """Given a SimRobotSensor that is a CameraSensor, returns either the RGB
     image, the depth image, or both.
 
@@ -377,7 +379,10 @@ def image_to_points(depth,color,xfov,yfov=None,depth_scale=None,depth_range=None
         raise ValueError("Invalid points_format, must be either numpy, PointCloud, or Geometry3D")
 
 
-def camera_to_points(camera,points_format='numpy',all_points=False,color_format='channels'):
+def camera_to_points(camera : SimRobotSensor,
+                     points_format='numpy',
+                     all_points=False,
+                     color_format='channels') -> Union['ndarray',PointCloud,Geometry3D]:
     """Given a SimRobotSensor that is a CameraSensor, returns a point cloud
     associated with the current measurements.
 
@@ -513,7 +518,10 @@ def camera_to_points(camera,points_format='numpy',all_points=False,color_format=
     return None
 
 
-def camera_to_points_world(camera,robot,points_format='numpy',color_format='channels'):
+def camera_to_points_world(camera : SimRobotSensor,
+                           robot : RobotModel,
+                           points_format='numpy',
+                           color_format='channels') -> Union['ndarray',PointCloud,Geometry3D]:
     """Same as :meth:`camera_to_points`, but converts to the world coordinate
     system given the robot to which the camera is attached.  
 
@@ -540,7 +548,7 @@ def camera_to_points_world(camera,robot,points_format='numpy',color_format='chan
     return pts
 
 
-def camera_to_viewport(camera,robot):
+def camera_to_viewport(camera : SimRobotSensor, robot : RobotModel) -> GLViewport:
     """Returns a GLViewport instance corresponding to the camera's view. 
 
     See :mod:`klampt.vis.glprogram` and :mod:`klampt.vis.visualization` for
@@ -559,7 +567,6 @@ def camera_to_viewport(camera,robot):
     """
     assert isinstance(camera,SimRobotSensor),"Must provide a SimRobotSensor instance"
     assert camera.type() == 'CameraSensor',"Must provide a camera sensor instance"
-    from ..vis.glviewport import GLViewport
     xform = get_sensor_xform(camera,robot)
     w = int(camera.getSetting('xres'))
     h = int(camera.getSetting('yres'))
@@ -578,7 +585,7 @@ def camera_to_viewport(camera,robot):
     return view
 
 
-def viewport_to_camera(viewport,camera,robot):
+def viewport_to_camera(viewport : GLViewport, camera : SimRobotSensor, robot : RobotModel):
     """Fills in a simulated camera's settings to match a GLViewport specifying
     the camera's view. 
 
@@ -595,7 +602,7 @@ def viewport_to_camera(viewport,camera,robot):
     assert isinstance(viewport,GLViewport)
     assert isinstance(camera,SimRobotSensor),"Must provide a SimRobotSensor instance"
     assert camera.type() == 'CameraSensor',"Must provide a camera sensor instance"
-    xform = viewport.getTransform()
+    xform = viewport.get_transform()
     link = int(camera.getSetting('link'))
     if link < 0 or robot is None:
         rlink = None
@@ -614,7 +621,7 @@ def viewport_to_camera(viewport,camera,robot):
     return camera
 
 
-def camera_to_intrinsics(camera,format='opencv',fn=None):
+def camera_to_intrinsics(camera : SimRobotSensor, format='opencv', fn=None):
     """Returns the camera's intrinsics and/or saves them to a file under the
     given format.
 
@@ -711,7 +718,7 @@ distortion_coefficients: !!opencv-matrix
         raise ValueError("Invalid format, only opencv, numpy, ros, and json are supported")
 
 
-def intrinsics_to_camera(data,camera,format='opencv'):
+def intrinsics_to_camera(data, camera : SimRobotSensor, format='opencv'):
     """Fills in a simulated camera's settings to match given intrinsics.  Note:
     all distortions are dropped.
 
@@ -774,7 +781,7 @@ def intrinsics_to_camera(data,camera,format='opencv'):
 
 
 
-def camera_ray(camera,robot,x,y):
+def camera_ray(camera : SimRobotSensor, robot : RobotModel, x : float, y : float) -> Tuple[Vector3,Vector3]:
     """Returns the (source,direction) of a ray emanating from the
     SimRobotSensor at pixel coordinates (x,y).
 
@@ -793,7 +800,7 @@ def camera_ray(camera,robot,x,y):
     return camera_to_viewport(camera,robot).click_ray(x,y)
 
 
-def camera_project(camera,robot,pt,clip=True):
+def camera_project(camera : SimRobotSensor, robot : RobotModel, pt : Vector3,clip=True) -> Vector3:
     """Given a point in world space, returns the (x,y,z) coordinates of the
     projected pixel.  z is given in absolute coordinates, while x,y are given
     in pixel values.
@@ -818,7 +825,7 @@ def camera_project(camera,robot,pt,clip=True):
     return camera_to_viewport(camera,robot).project(pt,clip)
 
 
-def visible(camera,object,full=True,robot=None):
+def visible(camera : Union[SimRobotSensor,GLViewport], object, full=True, robot=None) -> bool:
     """Tests whether the given object is visible in a SimRobotSensor or a
     GLViewport. 
 
@@ -916,3 +923,51 @@ def visible(camera,object,full=True,robot=None):
         raise ValueError("Object must be a point, sphere, bounding box, or Geometry3D")
     return visible(camera,object.getBB(),full,robot)
 
+
+def projection_map_texture(vp : Union[SimRobotSensor,GLViewport],
+                           app : Appearance,
+                           robot : RobotModel = None):
+    """Calculates texture coordinate generator for a given appearance to
+    project an image texture onto some geometry.
+
+    The appearance should already have been set up for the given object.
+
+    To complete the projection mapping, call app.setTexture2D(format,image).
+    """
+    if isinstance(vp,SimRobotSensor):
+        vp = camera_to_viewport(vp,robot)
+    texgen = np.zeros((4,4))
+    T = vp.get_transform('openGL')
+    xdir = so3.apply(T[0],[1,0,0])
+    ydir = so3.apply(T[0],[0,1,0])
+    zdir = so3.apply(T[0],[0,0,1])
+    if vp.orthogonal:
+        vscale = vp.h/vp.w
+        texgen[0,0:3] = vectorops.mul(xdir,0.5/vp.fov)
+        texgen[1,0:3] = vectorops.mul(ydir,0.5/(vp.fov*vscale))
+        texgen[0,3] = 0.5 - vectorops.dot(xdir,T[1])*0.5/vp.fov
+        texgen[1,3] = 0.5 - vectorops.dot(ydir,T[1])*0.5/(vp.fov*vscale)
+        texgen[3,3] = 1 
+    else:
+        fov = math.radians(vp.fov)
+        vfov = math.atan(math.tan(fov*0.5)*vp.w/vp.h)*2.0
+        #u = vx^T(p-o)/(s vz^T(p-o)) + 0.5 = S/Q
+        #  = [vx^T(p-o) + 0.5 (s vz^T(p-o))] / (s vz^T(p-o))
+        #S = (vx+0.5 s vz)^T p - (vx + 0.5 s vz)^T o)
+        #Q = s vz^T p - s vz^T o
+        #v = 1/scale * vy^T(p-o)/(s vz^T(p-o)) + 0.5 = S/Q
+        #  = [vy^T(p-o)/scale + 0.5 (s vz^T(p-o))] / (s vz^T(p-o))
+        #T = (vy/scale+0.5 s vz)^T p - (vy/scale + 0.5 s vz)^T o)
+        scale = 2.0*math.tan(fov*0.5)
+        vscale = vp.h/vp.w
+        xdir = vectorops.mul(xdir,-1)
+        ydir = vectorops.mul(ydir,-1)
+        xnum = vectorops.madd(xdir,zdir,0.5*scale)
+        ynum = vectorops.madd(vectorops.div(ydir,vscale),zdir,0.5*scale)
+        texgen[0,0:3] = xnum
+        texgen[1,0:3] = ynum
+        texgen[0,3] = -vectorops.dot(xnum,T[1])
+        texgen[1,3] = -vectorops.dot(ynum,T[1])
+        texgen[3,0:3] = vectorops.mul(zdir,scale)
+        texgen[3,3] = -scale*vectorops.dot(zdir,T[1])
+    app.setTexgen(texgen,True)
