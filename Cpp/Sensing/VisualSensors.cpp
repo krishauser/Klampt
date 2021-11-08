@@ -547,7 +547,7 @@ void CameraSensor::MeasurementNames(vector<string>& names) const
 
 void CameraSensor::GetMeasurements(vector<double>& measurements) const
 {
-  if(pixels.empty()) {
+  if(pixels.empty() && floats.empty()) {
     measurements.resize(0);
     return;
   }
