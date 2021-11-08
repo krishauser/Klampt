@@ -97,28 +97,62 @@ class Appearance
   ///Sets a 1D texture of the given width.  Valid format strings are
   ///
   /// - "": turn off texture mapping
-  /// - rgb8: unsigned byte RGB colors with red in the 1st byte, green in the 2nd, blue in the 3rd
-  /// - bgr8: unsigned byte RGB colors with blue in the 1st byte, green in the 2nd, green in the 3rd
-  /// - rgba8: unsigned byte RGBA colors with red in the 1st byte and alpha in the 4th
-  /// - bgra8: unsigned byte RGBA colors with blue in the 1st byte and alpha in the 4th
   /// - l8: unsigned byte grayscale colors
   ///
-  void setTexture1D(const char* format,unsigned char* np_array,int m);
-  ///Sets a 2D texture of the given width/height.  See :func:`setTexture1D` for 
+  void setTexture1D_b(const char* format,unsigned char* np_array,int m);
+  ///Sets a 1D texture of the given width.  Valid format strings are
+  ///
+  /// - "": turn off texture mapping
+  /// - rgba8: unsigned byte RGBA colors with red in the 1st byte and alpha in the 4th
+  /// - bgra8: unsigned byte RGBA colors with blue in the 1st byte and alpha in the 4th
+  ///
+  void setTexture1D_i(const char* format,unsigned int* np_array,int m);
+  ///Sets a 1D texture of the given width, given a 2D array of channels.
+  ///Valid format strings are
+  ///
+  /// - "": turn off texture mapping
+  /// - rgb8: unsigned byte RGB colors with red in the 1st column, green in the 2nd, blue in the 3rd
+  /// - bgr8: unsigned byte RGB colors with blue in the 1st column, green in the 2nd, green in the 3rd
+  /// - rgba8: unsigned byte RGBA colors with red in the 1st column and alpha in the 4th
+  /// - bgra8: unsigned byte RGBA colors with blue in the 1st column and alpha in the 4th
+  /// - l8: unsigned byte grayscale colors, one channel
+  ///
+  void setTexture1D_channels(const char* format,unsigned char* np_array2,int m,int n);
+  //note: only docs for last overload are included
+  ///Sets a 2D texture of the given width/height.  See :func:`setTexture1D_b` for 
   ///valid format strings.
   ///
-  ///bytes is given in top to bottom order if ``topdown==True``.
+  ///The array is given in top to bottom order if ``topdown==True``.
   ///Otherwise, it is given in order bottom to top.
-  void setTexture2D(const char* format,unsigned char* np_array2,int m,int n,bool topdown=true);
-  ///Sets per-vertex texture coordinates. 
+  void setTexture2D_b(const char* format,unsigned char* np_array2,int m,int n,bool topdown=true);
+  ///Sets a 2D texture of the given width/height.  See :func:`setTexture1D_i` for 
+  ///valid format strings.
   ///
-  ///If the texture is 1D, uvs is an array of length n containing 1D texture coordinates. 
+  ///The array is given in top to bottom order if ``topdown==True``.
+  ///Otherwise, it is given in order bottom to top.
+  void setTexture2D_i(const char* format,unsigned int* np_array2,int m,int n,bool topdown=true);
+  ///Sets a 2D texture of the given width/height from a 3D array of channels.
+  ///See :func:`setTexture1D_channels` for valid format strings.
   ///
-  ///If the texture is 2D, uvs is an array of length 2n containing U-V coordinates u1, v1,
-  ///u2, v2, ..., un, vn. 
+  ///The array is given in top to bottom order if ``topdown==True``.
+  ///Otherwise, it is given in order bottom to top.
+  void setTexture2D_channels(const char* format,unsigned char* np_array3,int m,int n,int p,bool topdown=true);
+  //note: only docs for last overload are included
+  ///Sets per-vertex texture coordinates for a 1D texture.
   ///
   ///You may also set uvs to be empty, which turns off texture mapping altogether.
-  void setTexcoords(const std::vector<double>& uvs);
+  void setTexcoords1D(double* np_array,int m);
+  ///Sets per-vertex texture coordinates for a 2D texture.  uvs is an array of
+  ///shape (nx2) containing U-V coordinates [[u1, v1], [u2, v2], ..., [un, vn]]. 
+  ///
+  ///You may also set uvs to be empty, which turns off texture mapping altogether.
+  void setTexcoords2D(double* np_array2,int m,int n);
+  ///Sets the texture generation.  The array must be size m x 4, with m in the 
+  ///range 0,...,4.  If worldcoordinates=true, the texture generation is 
+  ///performed in world coordinates rather than object coordinates.
+  void setTexgen(double* np_array2,int m,int n,bool worldcoordinates=false);
+  ///Sets whether textures are to wrap (default true)
+  void setTexWrap(bool wrap);
   ///For point clouds, sets the point size.
   void setPointSize(float size);
   ///For meshes, sets the crease angle.  Set to 0 to disable smoothing.

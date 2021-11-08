@@ -84,13 +84,43 @@ class SimRobotSensor
   std::string getSetting(const std::string& name);
   ///Sets the value of the named setting (you will need to manually cast an int/float/etc to a str)
   void setSetting(const std::string& name,const std::string& val);
+  ///Retrieves whether the sensor is enabled during simulation (helper for getSetting)
+  bool getEnabled();
+  ///Sets whether the sensor is enabled (helper for setSetting)
+  void setEnabled(bool enabled);
+  ///Retrieves the link on which the sensor is mounted (helper for getSetting)
+  RobotModelLink getLink();
+  ///Sets the link on which the sensor is mounted (helper for setSetting)
+  void setLink(const RobotModelLink& link);
+  ///Sets the link on which the sensor is mounted (helper for setSetting)
+  void setLink(int link);
+  ///Retrieves the local transform of the sensor on the robot's link. 
+  ///(helper for getSetting)
+  ///
+  ///If the sensor doesn't have a transform (such as a joint position or
+  ///torque sensor) an exception will be raised.
+  void getTransform(double out[9],double out2[3]);
+  ///Retrieves the world transform of the sensor given the robot's current
+  ///configuration. (helper for getSetting)
+  ///
+  ///If the sensor doesn't have a transform (such as a joint position or
+  ///torque sensor) an exception will be raised.
+  void getTransformWorld(double out[9],double out2[3]);
+  ///Sets the local transform of the sensor on the robot's link.
+  ///(helper for setSetting)
+  ///
+  ///If the sensor doesn't have a transform (such as a joint position or
+  ///torque sensor) an exception will be raised.
+  void setTransform(const double R[9],const double t[3]);
   //note: only the last overload docstring is added to the documentation
-  ///Draws a sensor indicator using OpenGL.  If measurements are given, the indicator is drawn as though
-  ///these are the latest measurements, otherwise only an indicator is drawn.
+  ///Draws a sensor indicator using OpenGL.  If measurements are given,
+  ///the indicator is drawn as though these are the latest measurements,
+  ///otherwise only an indicator is drawn.
   void drawGL();
   //note: only the last overload docstring is added to the documentation
-  ///Draws a sensor indicator using OpenGL.  If measurements are given, the indicator is drawn as though
-  ///these are the latest measurements, otherwise only an indicator is drawn.
+  ///Draws a sensor indicator using OpenGL.  If measurements are given,
+  ///the indicator is drawn as though these are the latest measurements,
+  ///otherwise only an indicator is drawn.
   void drawGL(double* np_array,int m);
 
   ///simulates / advances the kinematic simulation
@@ -304,15 +334,20 @@ class SimRobotController
  * Can use this class to directly apply forces to or control positions
  * / velocities of objects in the simulation.  
  * 
- * Note: 
+ * .. note::
+ * 
  *    All changes are applied in the current simulation substep, not the duration
  *    provided to Simulation.simulate().  If you need fine-grained control,
  *    make sure to call Simulation.simulate() with time steps equal to the value
- *    provided to Simulation.setSimStep() (this is 0.001s by default).
+ *    provided to Simulation.setSimStep() (this is 0.001s by default).  Or, use
+ *    a hook from :class:`~klampt.sim.simulation.SimpleSimulator`.
  *
- * Note: 
- *    The transform of the object is centered at the *object's center of mass*
- *    rather than the reference frame given in the RobotModelLink or RigidObjectModel.
+ * .. node::
+ * 
+ *    The transform of the body is centered at the *object's center of mass*
+ *    rather than the object's reference frame given in the RobotModelLink or
+ *    RigidObjectModel.
+ * 
  */
 class SimBody
 {
@@ -360,8 +395,9 @@ class SimBody
   /// Returns the angular velocity and translational velocity
   void getVelocity(double out[3],double out2[3]);
 
-  /// Sets the collision padding used for contact generation.  At 0 padding the simulation will be unstable
-  /// for triangle mesh and point cloud geometries.  A larger value is useful to maintain simulation stability
+  /// Sets the collision padding used for contact generation.  At 0 padding
+  /// the simulation will be unstable for triangle mesh and point cloud
+  /// geometries. A larger value is useful to maintain simulation stability
   /// for thin or soft objects.  Default is 0.0025.
   void setCollisionPadding(double padding);
   double getCollisionPadding();

@@ -72,8 +72,11 @@ void set_plan_setting(const char* setting,const char* value);
 ///Performs cleanup of all created spaces and planners
 void destroy();
 
-/** @brief A raw interface for a configuration space.  Note: the native
- * Python CSpace interface class in cspace.py is easier to use.
+/** @brief A raw interface for a configuration space.  
+ * 
+ * ..note::
+ * 
+ *     The native Python CSpace interface class in cspace.py is easier to use.
  *
  * You can either set a single feasibility test function using setFeasibility()
  * or add several feasibility tests, all of which need to be satisfied, using

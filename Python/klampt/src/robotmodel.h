@@ -91,16 +91,19 @@ public:
 
 /** @brief A reference to a link of a RobotModel.
  *
- * The link stores many mostly-constant items (id, name, parent, geometry, appearance, mass, joint
- * axes).  There are two exceptions:
-
+ * The link stores many mostly-constant items (id, name, parent, geometry,
+ * appearance, mass, joint axes).  There are two exceptions:
+ *
  * - the link's current transform, which is affected by the RobotModel's
- *     current configuration, i.e., the last :meth:`RobotModel.setConfig` (q) call.
- * - The various Jacobians of points on the link, accessed by :meth:`RobotModelLink.getJacobian` ,
- *     :meth:`RobotModelLink.getPositionJacobian` , and :meth:`RobotModelLink.getOrientationJacobian` ,
+ *     current configuration, i.e., the last :meth:`RobotModel.setConfig` call.
+ * - The various Jacobians of points on the link, accessed by
+ *     :meth:`RobotModelLink.getJacobian` ,
+ *     :meth:`RobotModelLink.getPositionJacobian` , and
+ *     :meth:`RobotModelLink.getOrientationJacobian` ,
  *     which are configuration dependent.
  *
- * A RobotModelLink is not created by hand, but instead accessed using :meth:`RobotModel.link` (index or name)
+ * A RobotModelLink is not created by hand, but instead accessed using
+ * :meth:`RobotModel.link` (index or name).
  */
 class RobotModelLink
 {
@@ -108,9 +111,11 @@ class RobotModelLink
   RobotModelLink();
   ///Returns the ID of the robot link in its world
   ///
-  ///Note:
+  ///.. note::
+  ///
   ///    The world ID is not the same as the link's index, retrieved by
   ///    getIndex.
+  ///
   int getID() const;
   ///Returns the name of the robot link
   const char* getName() const;
@@ -193,10 +198,11 @@ class RobotModelLink
   void getTransform(double out[9],double out2[3]);
   ///Sets the link's current transformation (R,t) to the world frame. 
   ///
-  ///Note:
+  ///.. note::
   ///
   ///    This does NOT perform inverse kinematics.  The transform is
   ///    overwritten when the robot's setConfig() method is called.
+  ///
   void setTransform(const double R[9],const double t[3]);
   ///Returns the velocity of the link's origin given the robot's current joint
   ///configuration and velocities.  Equivalent to getPointVelocity([0,0,0]).
@@ -338,7 +344,13 @@ class RobotModelDriver
   ///Returns:
   ///    tuple: a pair (scale,offset), each of length len(getAffectedLinks()).
   void getAffineCoeffs(std::vector<double>& out,std::vector<double>& out2);
-  ///Sets the robot's config to correspond to the given driver value 
+  ///Sets the robot's config to correspond to the given driver value.
+  ///
+  ///.. note::
+  ///
+  ///    Does not update the links' forward kinematics.  Use
+  ///    robot.setConfig(robot.getConfig()) to update the forward kinematics.
+  ///
   void setValue(double val);
   ///Gets the current driver value from the robot's config
   double getValue();
@@ -399,8 +411,10 @@ class RobotModel
   bool saveFile(const char* fn,const char* geometryPrefix=NULL);
   ///Returns the ID of the robot in its world
   ///
-  ///Note:
+  ///.. note::
+  ///
   ///    The world ID is not the same as the robot index.
+  ///
   int getID() const;
   const char* getName() const;
   ///Sets the name of the robot
@@ -457,13 +471,21 @@ class RobotModel
   void setTorqueLimits(const std::vector<double>& tmax);
   ///Sets a single DOF's position (by index or by name).
   ///
-  ///Note: if you are setting several joints at once, use setConfig because this
-  ///function computes forward kinematics each time it is called.
+  ///.. note::
+  ///
+  ///    If you are setting several joints at once, use setConfig because this
+  ///   function computes forward kinematics for all descendant links each time 
+  ///   it is called.
+  ///
   void setDOFPosition(int i,double qi);
   ///Sets a single DOF's position (by index or by name).
   ///
-  ///Note: if you are setting several joints at once, use setConfig because this
-  ///function computes forward kinematics each time it is called.
+  ///.. note::
+  ///
+  ///    If you are setting several joints at once, use setConfig because this
+  ///    function computes forward kinematics for all descendant links each time 
+  ///    it is called.
+  ///
   void setDOFPosition(const char* name,double qi);
   ///Returns a single DOF's position
   double getDOFPosition(int i);
@@ -511,7 +533,7 @@ class RobotModel
   ///Returns the generalized gravity vector G(q) for the given workspace
   ///gravity vector g (usually (0,0,-9.8)). 
   ///
-  ///Note:
+  ///.. note::
   ///
   ///    "Forces" is somewhat of a misnomer; the result is a vector of joint
   ///    torques.
@@ -524,7 +546,7 @@ class RobotModel
   ///Computes the inverse dynamics.  Uses Recursive Newton Euler solver and
   ///takes O(n) time.
   ///
-  ///Note: 
+  ///.. note::
   ///
   ///    Does not include gravity term G(q).  getGravityForces(g) will need
   ///    to be added to the result.
@@ -536,7 +558,7 @@ class RobotModel
   void torquesFromAccel(const std::vector<double>& ddq,std::vector<double>& out);
   ///Computes the foward dynamics (using Recursive Newton Euler solver)
   ///
-  ///Note: 
+  ///.. note::
   ///
   ///    Does not include gravity term G(q).  getGravityForces(g) will need
   ///    to be subtracted from the argument t.
@@ -564,7 +586,11 @@ class RobotModel
   ///Samples a random configuration and updates the robot's pose.  Properly
   ///handles non-normal joints and handles DOFs with infinite bounds
   ///using a centered Laplacian distribution with the given scaling term.
-  ///(Note that the python random seeding does not affect the result.)
+  ///
+  ///.. note::
+  ///
+  ///    Python random module seeding does not affect the result.
+  ///
   void randomizeConfig(double unboundedScale=1.0);
 
   ///Converts a full configuration (length numLinks()) to a list of driver values
@@ -641,8 +667,10 @@ class RigidObjectModel
   bool saveFile(const char* fn,const char* geometryName=NULL);
   ///Returns the ID of the rigid object in its world 
   ///
-  ///Note:
+  ///.. note::
+  ///
   ///    The world ID is not the same as the rigid object index.
+  ///
   int getID() const;
   const char* getName() const;
   void setName(const char* name);
@@ -652,19 +680,21 @@ class RigidObjectModel
   Appearance appearance();
   ///Returns a copy of the Mass of this rigid object. 
   ///
-  ///Note: 
+  ///.. note::
   ///
   ///    To change the mass properties, you should call ``m=object.getMass()``,
   ///    change the desired properties in m, and then ``object.setMass(m)``
+  ///
   Mass getMass();
   void setMass(const Mass& mass);
   ///Returns a copy of the ContactParameters of this rigid object.
   ///
-  ///Note:
+  ///.. note::
   ///
   ///    To change the contact parameters, you should call
   ///    ``p=object.getContactParameters()``, change the desired properties in
   ///    p, and then call ``object.setContactParameters(p)``
+  ///
   ContactParameters getContactParameters();
   void setContactParameters(const ContactParameters& params);
   ///Retrieves the rotation / translation of the rigid object (R,t)
@@ -711,8 +741,9 @@ class TerrainModel
   bool saveFile(const char* fn,const char* geometryName=NULL);
   ///Returns the ID of the terrain in its world
   ///
-  ///Note:
+  ///.. note::
   ///    The world ID is not the same as the terrain index.
+  ///
   int getID() const;
   const char* getName() const;
   void setName(const char* name);

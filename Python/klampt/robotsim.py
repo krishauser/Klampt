@@ -1088,8 +1088,8 @@ class PointCloud(object):
     include:  
 
     *   `normal_x`, `normal_y`, `normal_z`: the outward normal  
-    *   `rgb`, `rgba`: integer encoding of RGB (24 bit int) or RGBA color (32 bit
-        int)  
+    *   `rgb`, `rgba`: integer encoding of RGB (24 bit int, format 0xrrggbb) or RGBA
+        color (32 bit int, format 0xaarrggbb)  
     *   `opacity`: opacity, in range [0,1]  
     *   `c`: opacity, in range [0,255]  
     *   `r,g,b,a`: color channels, in range [0,1]  
@@ -1495,7 +1495,7 @@ class PointCloud(object):
 
     def setDepthImage(self,intrinsics,depth,depth_scale=1.0):
         """
-        %Sets a structured point cloud from a depth image.
+        Sets a structured point cloud from a depth image.
 
         Args:
             intrinsics (4-list): the intrinsics parameters [fx,fy,cx,cy].
@@ -1518,7 +1518,7 @@ class PointCloud(object):
 
     def setRGBDImages(self,intrinsics,color,depth,depth_scale=1.0):
         """
-        Sets a structured point cloud from a (color,depth) image pair.
+        Sets a structured point cloud from a color,depth image pair.
 
         Args:
             intrinsics (4-list): the intrinsics parameters [fx,fy,cx,cy].
@@ -1684,6 +1684,15 @@ class VolumeGrid(object):
     An axis-aligned volumetric grid, typically a signed distance transform with > 0
     indicating outside and < 0 indicating inside. Can also store an occupancy grid
     with 1 indicating inside and 0 indicating outside.  
+
+    In general, values are associated with cells rather than vertices. So, cell
+    (i,j,k) is associated with a single value, and has size (w,d,h) =
+    ((bmax[0]-bmin[0])/dims[0], (bmax[1]-bmin[1])/dims[1],
+    (bmax[2]-bmin[2])/dims[2]). It ranges over the box [w*i,w*(i+1)) x [d*j,d*(j+1))
+    x [h*k,h*(k+1)).  
+
+    For SDFs and TSDFs which assume values at vertices, the values are specified at
+    the **centers** of cells. I.e., at (w*(i+1/2),d*(j+1/2),h*(k+1/2)).  
 
     Attributes:  
 
@@ -2028,7 +2037,7 @@ class Geometry3D(object):
 
 
         Args:
-            arg2 (:class:`~klampt.GeometricPrimitive` or :class:`~klampt.PointCloud` or :obj:`ConvexHull` or :class:`~klampt.TriangleMesh` or :class:`~klampt.VolumeGrid` or :class:`~klampt.Geometry3D`, optional): 
+            arg2 (:class:`~klampt.VolumeGrid` or :class:`~klampt.TriangleMesh` or :class:`~klampt.PointCloud` or :class:`~klampt.Geometry3D` or :class:`~klampt.GeometricPrimitive` or :obj:`ConvexHull`, optional): 
         """
         _robotsim.Geometry3D_swiginit(self, _robotsim.new_Geometry3D(*args))
     __swig_destroy__ = _robotsim.delete_Geometry3D
@@ -2951,7 +2960,7 @@ class Appearance(object):
         """
         return _robotsim.Appearance_getElementColor(self, feature, element)
 
-    def setTexture1D(self, format, np_array):
+    def setTexture1D_b(self, format, np_array):
         r"""
         Sets a 1D texture of the given width. Valid format strings are.  
 
@@ -2960,52 +2969,145 @@ class Appearance(object):
             np_array (:obj:`unsigned char *`)
 
         *   "": turn off texture mapping  
-        *   rgb8: unsigned byte RGB colors with red in the 1st byte, green in the 2nd,
-            blue in the 3rd  
-        *   bgr8: unsigned byte RGB colors with blue in the 1st byte, green in the 2nd,
-            green in the 3rd  
+        *   l8: unsigned byte grayscale colors  
+
+        """
+        return _robotsim.Appearance_setTexture1D_b(self, format, np_array)
+
+    def setTexture1D_i(self, format, np_array, m):
+        r"""
+        Sets a 1D texture of the given width. Valid format strings are.  
+
+        Args:
+            format (str)
+            np_array (:obj:`unsigned int *`)
+            m (int)
+
+        *   "": turn off texture mapping  
         *   rgba8: unsigned byte RGBA colors with red in the 1st byte and alpha in the
             4th  
         *   bgra8: unsigned byte RGBA colors with blue in the 1st byte and alpha in the
             4th  
-        *   l8: unsigned byte grayscale colors  
 
         """
-        return _robotsim.Appearance_setTexture1D(self, format, np_array)
+        return _robotsim.Appearance_setTexture1D_i(self, format, np_array, m)
 
-    def setTexture2D(self, format, np_array2, topdown=True):
+    def setTexture1D_channels(self, format, np_array2):
         r"""
-        Sets a 2D texture of the given width/height. See :func:`setTexture1D` for valid
-        format strings.  
+        Sets a 1D texture of the given width, given a 2D array of channels. Valid format
+        strings are.  
+
+        Args:
+            format (str)
+            np_array2 (:obj:`unsigned char *`)
+
+        *   "": turn off texture mapping  
+        *   rgb8: unsigned byte RGB colors with red in the 1st column, green in the 2nd,
+            blue in the 3rd  
+        *   bgr8: unsigned byte RGB colors with blue in the 1st column, green in the
+            2nd, green in the 3rd  
+        *   rgba8: unsigned byte RGBA colors with red in the 1st column and alpha in the
+            4th  
+        *   bgra8: unsigned byte RGBA colors with blue in the 1st column and alpha in
+            the 4th  
+        *   l8: unsigned byte grayscale colors, one channel  
+
+        """
+        return _robotsim.Appearance_setTexture1D_channels(self, format, np_array2)
+
+    def setTexture2D_b(self, format, np_array2, topdown=True):
+        r"""
+        Sets a 2D texture of the given width/height. See :func:`setTexture1D_b` for
+        valid format strings.  
 
         Args:
             format (str)
             np_array2 (:obj:`unsigned char *`)
             topdown (bool, optional): default value True
 
-        bytes is given in top to bottom order if `topdown==True`. Otherwise, it is given
-        in order bottom to top.  
+        The array is given in top to bottom order if `topdown==True`. Otherwise, it is
+        given in order bottom to top.  
 
         """
-        return _robotsim.Appearance_setTexture2D(self, format, np_array2, topdown)
+        return _robotsim.Appearance_setTexture2D_b(self, format, np_array2, topdown)
 
-    def setTexcoords(self, uvs):
+    def setTexture2D_i(self, format, np_array2, topdown=True):
         r"""
-        Sets per-vertex texture coordinates.  
+        Sets a 2D texture of the given width/height. See :func:`setTexture1D_i` for
+        valid format strings.  
 
         Args:
-            uvs (:obj:`list of floats`)
+            format (str)
+            np_array2 (:obj:`unsigned int *`)
+            topdown (bool, optional): default value True
 
-        If the texture is 1D, uvs is an array of length n containing 1D texture
-        coordinates.  
+        The array is given in top to bottom order if `topdown==True`. Otherwise, it is
+        given in order bottom to top.  
 
-        If the texture is 2D, uvs is an array of length 2n containing U-V coordinates
-        u1, v1, u2, v2, ..., un, vn.  
+        """
+        return _robotsim.Appearance_setTexture2D_i(self, format, np_array2, topdown)
+
+    def setTexture2D_channels(self, format, np_array3, topdown=True):
+        r"""
+        Sets a 2D texture of the given width/height from a 3D array of channels. See
+        :func:`setTexture1D_channels` for valid format strings.  
+
+        Args:
+            format (str)
+            np_array3 (:obj:`unsigned char *`)
+            topdown (bool, optional): default value True
+
+        The array is given in top to bottom order if `topdown==True`. Otherwise, it is
+        given in order bottom to top.  
+
+        """
+        return _robotsim.Appearance_setTexture2D_channels(self, format, np_array3, topdown)
+
+    def setTexcoords1D(self, np_array):
+        r"""
+        Sets per-vertex texture coordinates for a 1D texture.  
+
+        Args:
+            np_array (:obj:`1D Numpy array of floats`)
 
         You may also set uvs to be empty, which turns off texture mapping altogether.  
 
         """
-        return _robotsim.Appearance_setTexcoords(self, uvs)
+        return _robotsim.Appearance_setTexcoords1D(self, np_array)
+
+    def setTexcoords2D(self, np_array2):
+        r"""
+        Sets per-vertex texture coordinates for a 2D texture. uvs is an array of shape
+        (nx2) containing U-V coordinates [[u1, v1], [u2, v2], ..., [un, vn]].  
+
+        Args:
+            np_array2 (:obj:`2D Numpy array of floats`)
+
+        You may also set uvs to be empty, which turns off texture mapping altogether.  
+
+        """
+        return _robotsim.Appearance_setTexcoords2D(self, np_array2)
+
+    def setTexgen(self, np_array2, worldcoordinates=False):
+        r"""
+        Sets the texture generation. The array must be size m x 4, with m in the range
+        0,...,4. If worldcoordinates=true, the texture generation is performed in world
+        coordinates rather than object coordinates.  
+
+        Args:
+            np_array2 (:obj:`2D Numpy array of floats`)
+            worldcoordinates (bool, optional): default value False
+        """
+        return _robotsim.Appearance_setTexgen(self, np_array2, worldcoordinates)
+
+    def setTexWrap(self, wrap):
+        r"""
+        Sets whether textures are to wrap (default true)  
+
+        Args:
+            wrap (bool)
+        """
+        return _robotsim.Appearance_setTexWrap(self, wrap)
 
     def setPointSize(self, size):
         r"""
@@ -3076,6 +3178,95 @@ class Appearance(object):
     world = property(_robotsim.Appearance_world_get, _robotsim.Appearance_world_set, doc=r"""world : int""")
     id = property(_robotsim.Appearance_id_get, _robotsim.Appearance_id_set, doc=r"""id : int""")
     appearancePtr = property(_robotsim.Appearance_appearancePtr_get, _robotsim.Appearance_appearancePtr_set, doc=r"""appearancePtr : p.void""")
+
+    def setTexture1D(self,format,array):
+        """Sets a 1D texture.
+
+        Args:
+            format (str): describes how the array is specified.
+                Valid values include:
+                    - '': turn off texture mapping
+                    - 'rgb8': unsigned byte RGB colors with red in the 1st
+                      column, green in the 2nd, blue in the 3rd.
+                    - 'bgr8': unsigned byte RGB colors with blue in the 1st
+                      column, green in the 2nd, green in the 3rd
+                    - 'rgba8': unsigned byte RGBA colors with red in the 1st
+                      column and alpha in the 4th
+                    - 'bgra8': unsigned byte RGBA colors with blue in the 1st
+                      column and alpha in the 4th
+                    - 'l8': unsigned byte grayscale colors, one channel
+            array (np.ndarray): a 1D or 2D array, of size w or w x c
+                where w is the width and c is the number of channels.
+
+                Datatype is of type uint8, or for rgba8 / bgra8, can
+                also be packed into uint32 elements.  In this case, the pixel
+                format is 0xaarrggbb or 0xaabbggrr, respectively.
+        """
+        import numpy
+        array = numpy.asarray(array)
+        if array.shape == 1:
+            if array.dtype == numpy.uint8:
+                return self.setTexture1D_b(format,array)
+            else:
+                return self.setTexture1D_i(format,array)
+        elif array.shape == 2:
+            return self.setTexture1D_channels(format,array)
+        else:
+            raise ValueError("Can only pass a 1D or 2D array to setTexture1D")
+
+    def setTexture2D(self,format,array):
+        """Sets a 2D texture.
+
+        Args:
+            format (str): describes how the array is specified.
+                Valid values include:
+                    - '': turn off texture mapping
+                    - 'rgb8': unsigned byte RGB colors with red in the 1st
+                      column, green in the 2nd, blue in the 3rd.
+                    - 'bgr8': unsigned byte RGB colors with blue in the 1st
+                      column, green in the 2nd, green in the 3rd
+                    - 'rgba8': unsigned byte RGBA colors with red in the 1st
+                      column and alpha in the 4th
+                    - 'bgra8': unsigned byte RGBA colors with blue in the 1st
+                      column and alpha in the 4th
+                    - 'l8': unsigned byte grayscale colors, one channel
+            array (np.ndarray): a 2D or 3D array, of size h x w or h x w x c
+                where h is the height, w is the width, and c is the number of
+                channels.
+
+                Datatype is of type uint8, or for rgba8 / bgra8, can
+                also be packed into uint32 elements.  In this case, the pixel
+                format is 0xaarrggbb or 0xaabbggrr, respectively.
+        """
+
+        import numpy
+        array = numpy.asarray(array)
+        if array.shape == 2:
+            if array.dtype == numpy.uint8:
+                return self.setTexture2D_b(format,array)
+            else:
+                return self.setTexture2D_i(format,array)
+        elif array.shape == 3:
+            return self.setTexture2D_channels(format,array)
+        else:
+            raise ValueError("Can only pass a 2D or 3D array to setTexture2D")
+
+    def setTexcoords(self,array):
+        """Sets texture coordinates for the mesh.
+
+        Args:
+            array (np.ndarray): a 1D or 2D array, of size N or Nx2, where N is
+                the number of vertices in the mesh.
+        """
+        import numpy
+        array = numpy.asarray(array)
+        if len(array.shape) == 1:
+            return self.setTexcoords1D(array)
+        elif len(array.shape) == 2:
+            return self.setTexcoords2D(array)
+        else:
+            raise ValueError("Must provide either a 1D or 2D array")
+
 
 # Register Appearance in _robotsim:
 _robotsim.Appearance_swigregister(Appearance)
@@ -3752,7 +3943,7 @@ class RobotModelLink(object):
     appearance, mass, joint axes). There are two exceptions:  
 
     *   the link's current transform, which is affected by the RobotModel's current
-        configuration, i.e., the last :meth:`RobotModel.setConfig` (q) call.  
+        configuration, i.e., the last :meth:`RobotModel.setConfig` call.  
     *   The various Jacobians of points on the link, accessed by
         :meth:`RobotModelLink.getJacobian` ,
         :meth:`RobotModelLink.getPositionJacobian` , and
@@ -3760,7 +3951,7 @@ class RobotModelLink(object):
         dependent.  
 
     A RobotModelLink is not created by hand, but instead accessed using
-    :meth:`RobotModel.link` (index or name)  
+    :meth:`RobotModel.link` (index or name).  
 
     C++ includes: robotmodel.h
 
@@ -3781,7 +3972,10 @@ class RobotModelLink(object):
         Returns:
             int:
 
-        Note: The world ID is not the same as the link's index, retrieved by getIndex.  
+        .. note::  
+
+            The world ID is not the same as the link's index, retrieved by
+            getIndex.  
 
         """
         return _robotsim.RobotModelLink_getID(self)
@@ -4038,7 +4232,7 @@ class RobotModelLink(object):
             R (:obj:`list of 9 floats (so3 element)`)
             t (:obj:`list of 3 floats`)
 
-        Note:  
+        .. note::  
 
             This does NOT perform inverse kinematics.  The transform is
             overwritten when the robot's setConfig() method is called.  
@@ -4355,6 +4549,12 @@ class RobotModelDriver(object):
 
         Args:
             val (float)
+
+        .. note::  
+
+            Does not update the links' forward kinematics.  Use
+            robot.setConfig(robot.getConfig()) to update the forward kinematics.  
+
         """
         return _robotsim.RobotModelDriver_setValue(self, val)
 
@@ -4483,7 +4683,9 @@ class RobotModel(object):
         Returns:
             int:
 
-        Note: The world ID is not the same as the robot index.  
+        .. note::  
+
+            The world ID is not the same as the robot index.  
 
         """
         return _robotsim.RobotModel_getID(self)
@@ -4704,8 +4906,11 @@ class RobotModel(object):
             qi (float): 
             name (str, optional): 
 
-        Note: if you are setting several joints at once, use setConfig because this
-        function computes forward kinematics each time it is called.  
+        .. note::  
+
+            If you are setting several joints at once, use setConfig because this
+            function computes forward kinematics for all descendant links each time
+            it is called.  
 
         """
         return _robotsim.RobotModel_setDOFPosition(self, *args)
@@ -4843,7 +5048,7 @@ class RobotModel(object):
         Args:
             g (:obj:`list of 3 floats`)
 
-        Note:  
+        .. note::  
 
             "Forces" is somewhat of a misnomer; the result is a vector of joint
             torques.  
@@ -4864,7 +5069,7 @@ class RobotModel(object):
         Args:
             ddq (:obj:`list of floats`)
 
-        Note:  
+        .. note::  
 
             Does not include gravity term G(q).  getGravityForces(g) will need
             to be added to the result.  
@@ -4884,7 +5089,7 @@ class RobotModel(object):
         Args:
             t (:obj:`list of floats`)
 
-        Note:  
+        .. note::  
 
             Does not include gravity term G(q).  getGravityForces(g) will need
             to be subtracted from the argument t.  
@@ -4943,11 +5148,15 @@ class RobotModel(object):
         r"""
         Samples a random configuration and updates the robot's pose. Properly handles
         non-normal joints and handles DOFs with infinite bounds using a centered
-        Laplacian distribution with the given scaling term. (Note that the python random
-        seeding does not affect the result.)  
+        Laplacian distribution with the given scaling term.  
 
         Args:
             unboundedScale (float, optional): default value 1.0
+
+        .. note::  
+
+            Python random module seeding does not affect the result.  
+
         """
         return _robotsim.RobotModel_randomizeConfig(self, unboundedScale)
 
@@ -5086,6 +5295,18 @@ class RobotModel(object):
             :class:`~klampt.SimRobotSensor`:
         """
         return _robotsim.RobotModel_sensor(self, *args)
+
+    def addSensor(self, name, type):
+        r"""
+        Adds a new sensor with a given name and type.  
+
+        Args:
+            name (str)
+            type (str)
+        Returns:
+            :class:`~klampt.SimRobotSensor`:
+        """
+        return _robotsim.RobotModel_addSensor(self, name, type)
     world = property(_robotsim.RobotModel_world_get, _robotsim.RobotModel_world_set, doc=r"""world : int""")
     index = property(_robotsim.RobotModel_index_get, _robotsim.RobotModel_index_set, doc=r"""index : int""")
     robot = property(_robotsim.RobotModel_robot_get, _robotsim.RobotModel_robot_set, doc=r"""robot : p.Klampt::RobotModel""")
@@ -5156,7 +5377,9 @@ class RigidObjectModel(object):
         Returns:
             int:
 
-        Note: The world ID is not the same as the rigid object index.  
+        .. note::  
+
+            The world ID is not the same as the rigid object index.  
 
         """
         return _robotsim.RigidObjectModel_getID(self)
@@ -5200,7 +5423,7 @@ class RigidObjectModel(object):
         Returns:
             :class:`~klampt.Mass`:
 
-        Note:  
+        .. note::  
 
             To change the mass properties, you should call ``m=object.getMass()``,
             change the desired properties in m, and then ``object.setMass(m)``  
@@ -5222,7 +5445,7 @@ class RigidObjectModel(object):
         Returns:
             :class:`~klampt.ContactParameters`:
 
-        Note:  
+        .. note::  
 
             To change the contact parameters, you should call
             ``p=object.getContactParameters()``, change the desired properties in
@@ -5356,7 +5579,7 @@ class TerrainModel(object):
         Returns:
             int:
 
-        Note: The world ID is not the same as the terrain index.  
+        .. note:: The world ID is not the same as the terrain index.  
 
         """
         return _robotsim.TerrainModel_getID(self)
@@ -5614,7 +5837,7 @@ class WorldModel(object):
 
 
         Args:
-            robot (int or str): 
+            robot (str or int): 
             index (int, optional): 
             name (str, optional): 
 
@@ -5760,7 +5983,7 @@ class WorldModel(object):
             terrain (:obj:`TerrainModel`, optional): 
 
         Returns:
-            (:class:`~klampt.RobotModel` or :obj:`TerrainModel` or :class:`~klampt.RigidObjectModel`):
+            (:obj:`TerrainModel` or :class:`~klampt.RigidObjectModel` or :class:`~klampt.RobotModel`):
         """
         return _robotsim.WorldModel_add(self, *args)
 
@@ -6424,7 +6647,7 @@ class IKSolver(object):
             tol (float, optional): 
 
         Returns:
-            (bool or :obj:`PyObject *`):
+            (:obj:`PyObject *` or bool):
         """
         return _robotsim.IKSolver_solve(self, *args)
 
@@ -6499,7 +6722,7 @@ class GeneralizedIKObjective(object):
 
 
         Args:
-            obj (:obj:`GeneralizedIKObjective` or :class:`~klampt.RigidObjectModel`, optional): 
+            obj (:class:`~klampt.RigidObjectModel` or :obj:`GeneralizedIKObjective`, optional): 
             link (:class:`~klampt.RobotModelLink`, optional): 
             link2 (:class:`~klampt.RobotModelLink`, optional): 
             obj2 (:class:`~klampt.RigidObjectModel`, optional): 
@@ -6645,8 +6868,10 @@ class SimRobotSensor(object):
 
 
     A sensor on a simulated robot. Retrieve one from the controller using
-    :meth:`SimRobotController.getSensor`, or create a new one using
-    `SimRobotSensor(robotController,name,type)`  
+    :meth:`SimRobotController.sensor`, or create a new one using
+    :meth:`SimRobotController.addSensor`. You may also use kinematically-simulated
+    sensors using :meth:`RobotModel.sensor` or create a new one using
+    :meth:`RobotModel.addSensor`.  
 
     Use :meth:`getMeasurements` to get the currently simulated measurement vector.  
 
@@ -6670,7 +6895,14 @@ class SimRobotSensor(object):
     To use get/setSetting, you will need to know the sensor attribute names and
     types as described in `the Klampt sensor documentation
     <https://github.com/krishauser/Klampt/blob/master/Documentation/Manual-
-    Control.md#sensors>`_ (same as in the world or sensor XML file).  
+    Control.md#sensors>`_ (same as in the world or sensor XML file). Common settings
+    include:  
+
+    *   rate (float): how frequently the sensor is simulated  
+    *   enabled (bool): whether the simulator simulates this sensor  
+    *   link (int): the link on which this sensor lies (-1 for world)  
+    *   Tsensor (se3 transform, serialized with loader.write_se3(T)): the transform
+        of the sensor on the robot / world.  
 
     C++ includes: robotsim.h
 
@@ -6679,20 +6911,13 @@ class SimRobotSensor(object):
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
 
-    def __init__(self, *args):
+    def __init__(self, robot, sensor):
         r"""
-        __init__ (robot,sensor): :class:`~klampt.SimRobotSensor`
-
-        __init__ (robot,name,type): :class:`~klampt.SimRobotSensor`
-
-
         Args:
-            robot (:class:`~klampt.SimRobotController` or :class:`~klampt.RobotModel`): 
-            sensor (:obj:`Klampt::SensorBase *`, optional): 
-            name (str, optional): 
-            type (str, optional): 
+            robot (:class:`~klampt.RobotModel`)
+            sensor (:obj:`Klampt::SensorBase *`)
         """
-        _robotsim.SimRobotSensor_swiginit(self, _robotsim.new_SimRobotSensor(*args))
+        _robotsim.SimRobotSensor_swiginit(self, _robotsim.new_SimRobotSensor(robot, sensor))
 
     def name(self):
         r"""
@@ -6768,6 +6993,85 @@ class SimRobotSensor(object):
             val (str)
         """
         return _robotsim.SimRobotSensor_setSetting(self, name, val)
+
+    def getEnabled(self):
+        r"""
+        Retrieves whether the sensor is enabled during simulation (helper for
+        getSetting)  
+
+        Returns:
+            bool:
+        """
+        return _robotsim.SimRobotSensor_getEnabled(self)
+
+    def setEnabled(self, enabled):
+        r"""
+        Sets whether the sensor is enabled (helper for setSetting)  
+
+        Args:
+            enabled (bool)
+        """
+        return _robotsim.SimRobotSensor_setEnabled(self, enabled)
+
+    def getLink(self):
+        r"""
+        Retrieves the link on which the sensor is mounted (helper for getSetting)  
+
+        Returns:
+            :class:`~klampt.RobotModelLink`:
+        """
+        return _robotsim.SimRobotSensor_getLink(self)
+
+    def setLink(self, *args):
+        r"""
+        Sets the link on which the sensor is mounted (helper for setSetting)  
+
+        setLink (link)
+
+
+        Args:
+            link (:class:`~klampt.RobotModelLink` or int): 
+        """
+        return _robotsim.SimRobotSensor_setLink(self, *args)
+
+    def getTransform(self):
+        r"""
+        Retrieves the local transform of the sensor on the robot's link. (helper for
+        getSetting)  
+
+
+        If the sensor doesn't have a transform (such as a joint position or torque
+        sensor) an exception will be raised.  
+
+        """
+        return _robotsim.SimRobotSensor_getTransform(self)
+
+    def getTransformWorld(self):
+        r"""
+        Retrieves the world transform of the sensor given the robot's current
+        configuration. (helper for getSetting)  
+
+
+        If the sensor doesn't have a transform (such as a joint position or torque
+        sensor) an exception will be raised.  
+
+        """
+        return _robotsim.SimRobotSensor_getTransformWorld(self)
+
+    def setTransform(self, R, t):
+        r"""
+        Sets the local transform of the sensor on the robot's link. (helper for
+        setSetting)  
+
+        Args:
+            R (:obj:`list of 9 floats (so3 element)`)
+            t (:obj:`list of 3 floats`)
+
+        If the sensor doesn't have a transform (such as a joint position or torque
+        sensor) an exception will be raised.  
+
+        """
+        return _robotsim.SimRobotSensor_setTransform(self, R, t)
 
     def drawGL(self, *args):
         r"""
@@ -6981,6 +7285,18 @@ class SimRobotController(object):
             :class:`~klampt.SimRobotSensor`:
         """
         return _robotsim.SimRobotController_sensor(self, *args)
+
+    def addSensor(self, name, type):
+        r"""
+        Adds a new sensor with a given name and type.  
+
+        Args:
+            name (str)
+            type (str)
+        Returns:
+            :class:`~klampt.SimRobotSensor`:
+        """
+        return _robotsim.SimRobotController_addSensor(self, name, type)
 
     def commands(self):
         r"""
@@ -7237,13 +7553,19 @@ class SimBody(object):
     Can use this class to directly apply forces to or control positions / velocities
     of objects in the simulation.  
 
-    Note: All changes are applied in the current simulation substep, not the
-    duration provided to Simulation.simulate(). If you need fine-grained control,
-    make sure to call Simulation.simulate() with time steps equal to the value
-    provided to Simulation.setSimStep() (this is 0.001s by default).  
+    .. note::  
 
-    Note: The transform of the object is centered at the *object's center of mass*
-    rather than the reference frame given in the RobotModelLink or RigidObjectModel.  
+    All changes are applied in the current simulation substep, not the duration
+    provided to Simulation.simulate(). If you need fine-grained control, make sure
+    to call Simulation.simulate() with time steps equal to the value provided to
+    Simulation.setSimStep() (this is 0.001s by default). Or, use a hook from
+    :class:`~klampt.sim.simulation.SimpleSimulator`.  
+
+    .. node::  
+
+    The transform of the body is centered at the *object's center of mass* rather
+    than the object's reference frame given in the RobotModelLink or
+    RigidObjectModel.  
 
     C++ includes: robotsim.h
 
@@ -7447,13 +7769,19 @@ class SimBody(object):
         Can use this class to directly apply forces to or control positions / velocities
         of objects in the simulation.  
 
-        Note: All changes are applied in the current simulation substep, not the
-        duration provided to Simulation.simulate(). If you need fine-grained control,
-        make sure to call Simulation.simulate() with time steps equal to the value
-        provided to Simulation.setSimStep() (this is 0.001s by default).  
+        .. note::  
 
-        Note: The transform of the object is centered at the *object's center of mass*
-        rather than the reference frame given in the RobotModelLink or RigidObjectModel.  
+        All changes are applied in the current simulation substep, not the duration
+        provided to Simulation.simulate(). If you need fine-grained control, make sure
+        to call Simulation.simulate() with time steps equal to the value provided to
+        Simulation.setSimStep() (this is 0.001s by default). Or, use a hook from
+        :class:`~klampt.sim.simulation.SimpleSimulator`.  
+
+        .. node::  
+
+        The transform of the body is centered at the *object's center of mass* rather
+        than the object's reference frame given in the RobotModelLink or
+        RigidObjectModel.  
 
         C++ includes: robotsim.h
 
@@ -7889,7 +8217,7 @@ class Simulator(object):
 
 
         Args:
-            robot (:class:`~klampt.RobotModel` or int): 
+            robot (int or :class:`~klampt.RobotModel`): 
 
         Returns:
             :class:`~klampt.SimRobotController`:

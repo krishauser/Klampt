@@ -158,7 +158,8 @@ def print_signature(siglist,indent0,docstring):
                 try:
                     atype,aname = arg.rsplit(' ',1)
                 except Exception:
-                    eprint("Couldnt parse argument",arg,"?")
+                    eprint("Couldnt parse argument '{}' ?".format(arg))
+                    eprint(sargs)
                     raise
                 if aname == 'self':
                     #skip documenting self

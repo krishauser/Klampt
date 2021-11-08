@@ -1490,7 +1490,7 @@ class PointCloud(object):
 
     def setDepthImage(self,intrinsics,depth,depth_scale=1.0):
         """
-        %Sets a structured point cloud from a depth image.
+        Sets a structured point cloud from a depth image.
 
         Args:
             intrinsics (4-list): the intrinsics parameters [fx,fy,cx,cy].
@@ -1513,7 +1513,7 @@ class PointCloud(object):
 
     def setRGBDImages(self,intrinsics,color,depth,depth_scale=1.0):
         """
-        %Sets a structured point cloud from a (color,depth) image pair.
+        Sets a structured point cloud from a color,depth image pair.
 
         Args:
             intrinsics (4-list): the intrinsics parameters [fx,fy,cx,cy].
@@ -1682,6 +1682,15 @@ class VolumeGrid(object):
     An axis-aligned volumetric grid, typically a signed distance transform with > 0
     indicating outside and < 0 indicating inside. Can also store an occupancy grid
     with 1 indicating inside and 0 indicating outside.  
+
+    In general, values are associated with cells rather than vertices. So, cell
+    (i,j,k) is associated with a single value, and has size (w,d,h) =
+    ((bmax[0]-bmin[0])/dims[0], (bmax[1]-bmin[1])/dims[1],
+    (bmax[2]-bmin[2])/dims[2]). It ranges over the box [w*i,w*(i+1)) x [d*j,d*(j+1))
+    x [h*k,h*(k+1)).  
+
+    For SDFs and TSDFs which assume values at vertices, the values are specified at
+    the **centers** of cells. I.e., at (w*(i+1/2),d*(j+1/2),h*(k+1/2)).  
 
     Attributes:  
 
@@ -2922,58 +2931,145 @@ class Appearance(object):
         """
         return _robotsim.Appearance_getElementColor(self, feature, element)
 
-    def setTexture1D(self, format, np_array):
+    def setTexture1D_b(self, format, np_array):
         r"""
-        setTexture1D(Appearance self, char const * format, unsigned char * np_array)
+        setTexture1D_b(Appearance self, char const * format, unsigned char * np_array)
 
 
         Sets a 1D texture of the given width. Valid format strings are.  
 
         *   "": turn off texture mapping  
-        *   rgb8: unsigned byte RGB colors with red in the 1st byte, green in the 2nd,
-            blue in the 3rd  
-        *   bgr8: unsigned byte RGB colors with blue in the 1st byte, green in the 2nd,
-            green in the 3rd  
+        *   l8: unsigned byte grayscale colors  
+
+        """
+        return _robotsim.Appearance_setTexture1D_b(self, format, np_array)
+
+    def setTexture1D_i(self, format, np_array, m):
+        r"""
+        setTexture1D_i(Appearance self, char const * format, unsigned int * np_array, int m)
+
+
+        Sets a 1D texture of the given width. Valid format strings are.  
+
+        *   "": turn off texture mapping  
         *   rgba8: unsigned byte RGBA colors with red in the 1st byte and alpha in the
             4th  
         *   bgra8: unsigned byte RGBA colors with blue in the 1st byte and alpha in the
             4th  
-        *   l8: unsigned byte grayscale colors  
 
         """
-        return _robotsim.Appearance_setTexture1D(self, format, np_array)
+        return _robotsim.Appearance_setTexture1D_i(self, format, np_array, m)
 
-    def setTexture2D(self, format, np_array2, topdown=True):
+    def setTexture1D_channels(self, format, np_array2):
         r"""
-        setTexture2D(Appearance self, char const * format, unsigned char * np_array2, bool topdown=True)
+        setTexture1D_channels(Appearance self, char const * format, unsigned char * np_array2)
 
 
-        Sets a 2D texture of the given width/height. See :func:`setTexture1D` for valid
-        format strings.  
+        Sets a 1D texture of the given width, given a 2D array of channels. Valid format
+        strings are.  
 
-        bytes is given in top to bottom order if `topdown==True`. Otherwise, it is given
-        in order bottom to top.  
+        *   "": turn off texture mapping  
+        *   rgb8: unsigned byte RGB colors with red in the 1st column, green in the 2nd,
+            blue in the 3rd  
+        *   bgr8: unsigned byte RGB colors with blue in the 1st column, green in the
+            2nd, green in the 3rd  
+        *   rgba8: unsigned byte RGBA colors with red in the 1st column and alpha in the
+            4th  
+        *   bgra8: unsigned byte RGBA colors with blue in the 1st column and alpha in
+            the 4th  
+        *   l8: unsigned byte grayscale colors, one channel  
 
         """
-        return _robotsim.Appearance_setTexture2D(self, format, np_array2, topdown)
+        return _robotsim.Appearance_setTexture1D_channels(self, format, np_array2)
 
-    def setTexcoords(self, uvs):
+    def setTexture2D_b(self, format, np_array2, topdown=True):
         r"""
-        setTexcoords(Appearance self, doubleVector uvs)
+        setTexture2D_b(Appearance self, char const * format, unsigned char * np_array2, bool topdown=True)
 
 
-        Sets per-vertex texture coordinates.  
+        Sets a 2D texture of the given width/height. See :func:`setTexture1D_b` for
+        valid format strings.  
 
-        If the texture is 1D, uvs is an array of length n containing 1D texture
-        coordinates.  
+        The array is given in top to bottom order if `topdown==True`. Otherwise, it is
+        given in order bottom to top.  
 
-        If the texture is 2D, uvs is an array of length 2n containing U-V coordinates
-        u1, v1, u2, v2, ..., un, vn.  
+        """
+        return _robotsim.Appearance_setTexture2D_b(self, format, np_array2, topdown)
+
+    def setTexture2D_i(self, format, np_array2, topdown=True):
+        r"""
+        setTexture2D_i(Appearance self, char const * format, unsigned int * np_array2, bool topdown=True)
+
+
+        Sets a 2D texture of the given width/height. See :func:`setTexture1D_i` for
+        valid format strings.  
+
+        The array is given in top to bottom order if `topdown==True`. Otherwise, it is
+        given in order bottom to top.  
+
+        """
+        return _robotsim.Appearance_setTexture2D_i(self, format, np_array2, topdown)
+
+    def setTexture2D_channels(self, format, np_array3, topdown=True):
+        r"""
+        setTexture2D_channels(Appearance self, char const * format, unsigned char * np_array3, bool topdown=True)
+
+
+        Sets a 2D texture of the given width/height from a 3D array of channels. See
+        :func:`setTexture1D_channels` for valid format strings.  
+
+        The array is given in top to bottom order if `topdown==True`. Otherwise, it is
+        given in order bottom to top.  
+
+        """
+        return _robotsim.Appearance_setTexture2D_channels(self, format, np_array3, topdown)
+
+    def setTexcoords1D(self, np_array):
+        r"""
+        setTexcoords1D(Appearance self, double * np_array)
+
+
+        Sets per-vertex texture coordinates for a 1D texture.  
 
         You may also set uvs to be empty, which turns off texture mapping altogether.  
 
         """
-        return _robotsim.Appearance_setTexcoords(self, uvs)
+        return _robotsim.Appearance_setTexcoords1D(self, np_array)
+
+    def setTexcoords2D(self, np_array2):
+        r"""
+        setTexcoords2D(Appearance self, double * np_array2)
+
+
+        Sets per-vertex texture coordinates for a 2D texture. uvs is an array of shape
+        (nx2) containing U-V coordinates [[u1, v1], [u2, v2], ..., [un, vn]].  
+
+        You may also set uvs to be empty, which turns off texture mapping altogether.  
+
+        """
+        return _robotsim.Appearance_setTexcoords2D(self, np_array2)
+
+    def setTexgen(self, np_array2, worldcoordinates=False):
+        r"""
+        setTexgen(Appearance self, double * np_array2, bool worldcoordinates=False)
+
+
+        Sets the texture generation. The array must be size m x 4, with m in the range
+        0,...,4. If worldcoordinates=true, the texture generation is performed in world
+        coordinates rather than object coordinates.  
+
+        """
+        return _robotsim.Appearance_setTexgen(self, np_array2, worldcoordinates)
+
+    def setTexWrap(self, wrap):
+        r"""
+        setTexWrap(Appearance self, bool wrap)
+
+
+        Sets whether textures are to wrap (default true)  
+
+        """
+        return _robotsim.Appearance_setTexWrap(self, wrap)
 
     def setPointSize(self, size):
         r"""
@@ -3039,6 +3135,95 @@ class Appearance(object):
     world = property(_robotsim.Appearance_world_get, _robotsim.Appearance_world_set, doc=r"""world : int""")
     id = property(_robotsim.Appearance_id_get, _robotsim.Appearance_id_set, doc=r"""id : int""")
     appearancePtr = property(_robotsim.Appearance_appearancePtr_get, _robotsim.Appearance_appearancePtr_set, doc=r"""appearancePtr : p.void""")
+
+    def setTexture1D(self,format,array):
+        """Sets a 1D texture.
+
+        Args:
+            format (str): describes how the array is specified.
+                Valid values include:
+                    - '': turn off texture mapping
+                    - 'rgb8': unsigned byte RGB colors with red in the 1st
+                      column, green in the 2nd, blue in the 3rd.
+                    - 'bgr8': unsigned byte RGB colors with blue in the 1st
+                      column, green in the 2nd, green in the 3rd
+                    - 'rgba8': unsigned byte RGBA colors with red in the 1st
+                      column and alpha in the 4th
+                    - 'bgra8': unsigned byte RGBA colors with blue in the 1st
+                      column and alpha in the 4th
+                    - 'l8': unsigned byte grayscale colors, one channel
+            array (np.ndarray): a 1D or 2D array, of size w or w x c
+                where w is the width and c is the number of channels.
+
+                Datatype is of type uint8, or for rgba8 / bgra8, can
+                also be packed into uint32 elements.  In this case, the pixel
+                format is 0xaarrggbb or 0xaabbggrr, respectively.
+        """
+        import numpy
+        array = numpy.asarray(array)
+        if array.shape == 1:
+            if array.dtype == numpy.uint8:
+                return self.setTexture1D_b(format,array)
+            else:
+                return self.setTexture1D_i(format,array)
+        elif array.shape == 2:
+            return self.setTexture1D_channels(format,array)
+        else:
+            raise ValueError("Can only pass a 1D or 2D array to setTexture1D")
+
+    def setTexture2D(self,format,array):
+        """Sets a 2D texture.
+
+        Args:
+            format (str): describes how the array is specified.
+                Valid values include:
+                    - '': turn off texture mapping
+                    - 'rgb8': unsigned byte RGB colors with red in the 1st
+                      column, green in the 2nd, blue in the 3rd.
+                    - 'bgr8': unsigned byte RGB colors with blue in the 1st
+                      column, green in the 2nd, green in the 3rd
+                    - 'rgba8': unsigned byte RGBA colors with red in the 1st
+                      column and alpha in the 4th
+                    - 'bgra8': unsigned byte RGBA colors with blue in the 1st
+                      column and alpha in the 4th
+                    - 'l8': unsigned byte grayscale colors, one channel
+            array (np.ndarray): a 2D or 3D array, of size h x w or h x w x c
+                where h is the height, w is the width, and c is the number of
+                channels.
+
+                Datatype is of type uint8, or for rgba8 / bgra8, can
+                also be packed into uint32 elements.  In this case, the pixel
+                format is 0xaarrggbb or 0xaabbggrr, respectively.
+        """
+
+        import numpy
+        array = numpy.asarray(array)
+        if array.shape == 2:
+            if array.dtype == numpy.uint8:
+                return self.setTexture2D_b(format,array)
+            else:
+                return self.setTexture2D_i(format,array)
+        elif array.shape == 3:
+            return self.setTexture2D_channels(format,array)
+        else:
+            raise ValueError("Can only pass a 2D or 3D array to setTexture2D")
+
+    def setTexcoords(self,array):
+        """Sets texture coordinates for the mesh.
+
+        Args:
+            array (np.ndarray): a 1D or 2D array, of size N or Nx2, where N is
+                the number of vertices in the mesh.
+        """
+        import numpy
+        array = numpy.asarray(array)
+        if len(array.shape) == 1:
+            return self.setTexcoords1D(array)
+        elif len(array.shape) == 2:
+            return self.setTexcoords2D(array)
+        else:
+            raise ValueError("Must provide either a 1D or 2D array")
+
 
 # Register Appearance in _robotsim:
 _robotsim.Appearance_swigregister(Appearance)
@@ -3798,7 +3983,7 @@ class RobotModelLink(object):
     appearance, mass, joint axes). There are two exceptions:  
 
     *   the link's current transform, which is affected by the RobotModel's current
-        configuration, i.e., the last :meth:`RobotModel.setConfig` (q) call.  
+        configuration, i.e., the last :meth:`RobotModel.setConfig` call.  
     *   The various Jacobians of points on the link, accessed by
         :meth:`RobotModelLink.getJacobian` ,
         :meth:`RobotModelLink.getPositionJacobian` , and
@@ -3806,7 +3991,7 @@ class RobotModelLink(object):
         dependent.  
 
     A RobotModelLink is not created by hand, but instead accessed using
-    :meth:`RobotModel.link` (index or name)  
+    :meth:`RobotModel.link` (index or name).  
 
     C++ includes: robotmodel.h
 
@@ -3830,7 +4015,10 @@ class RobotModelLink(object):
 
         Returns the ID of the robot link in its world.  
 
-        Note: The world ID is not the same as the link's index, retrieved by getIndex.  
+        .. note::  
+
+            The world ID is not the same as the link's index, retrieved by
+            getIndex.  
 
         """
         return _robotsim.RobotModelLink_getID(self)
@@ -4103,7 +4291,7 @@ class RobotModelLink(object):
 
         Sets the link's current transformation (R,t) to the world frame.  
 
-        Note:  
+        .. note::  
 
             This does NOT perform inverse kinematics.  The transform is
             overwritten when the robot's setConfig() method is called.  
@@ -4443,6 +4631,11 @@ class RobotModelDriver(object):
 
         Sets the robot's config to correspond to the given driver value.  
 
+        .. note::  
+
+            Does not update the links' forward kinematics.  Use
+            robot.setConfig(robot.getConfig()) to update the forward kinematics.  
+
         """
         return _robotsim.RobotModelDriver_setValue(self, val)
 
@@ -4573,7 +4766,9 @@ class RobotModel(object):
 
         Returns the ID of the robot in its world.  
 
-        Note: The world ID is not the same as the robot index.  
+        .. note::  
+
+            The world ID is not the same as the robot index.  
 
         """
         return _robotsim.RobotModel_getID(self)
@@ -4793,8 +4988,11 @@ class RobotModel(object):
 
         Sets a single DOF's position (by index or by name).  
 
-        Note: if you are setting several joints at once, use setConfig because this
-        function computes forward kinematics each time it is called.  
+        .. note::  
+
+            If you are setting several joints at once, use setConfig because this
+            function computes forward kinematics for all descendant links each time
+            it is called.  
 
         """
         return _robotsim.RobotModel_setDOFPosition(self, *args)
@@ -4959,7 +5157,7 @@ class RobotModel(object):
         Returns the generalized gravity vector G(q) for the given workspace gravity
         vector g (usually (0,0,-9.8)).  
 
-        Note:  
+        .. note::  
 
             "Forces" is somewhat of a misnomer; the result is a vector of joint
             torques.  
@@ -4980,7 +5178,7 @@ class RobotModel(object):
         Computes the inverse dynamics. Uses Recursive Newton Euler solver and takes O(n)
         time.  
 
-        Note:  
+        .. note::  
 
             Does not include gravity term G(q).  getGravityForces(g) will need
             to be added to the result.  
@@ -5000,7 +5198,7 @@ class RobotModel(object):
 
         Computes the foward dynamics (using Recursive Newton Euler solver)  
 
-        Note:  
+        .. note::  
 
             Does not include gravity term G(q).  getGravityForces(g) will need
             to be subtracted from the argument t.  
@@ -5058,8 +5256,11 @@ class RobotModel(object):
 
         Samples a random configuration and updates the robot's pose. Properly handles
         non-normal joints and handles DOFs with infinite bounds using a centered
-        Laplacian distribution with the given scaling term. (Note that the python random
-        seeding does not affect the result.)  
+        Laplacian distribution with the given scaling term.  
+
+        .. note::  
+
+            Python random module seeding does not affect the result.  
 
         """
         return _robotsim.RobotModel_randomizeConfig(self, unboundedScale)
@@ -5272,7 +5473,9 @@ class RigidObjectModel(object):
 
         Returns the ID of the rigid object in its world.  
 
-        Note: The world ID is not the same as the rigid object index.  
+        .. note::  
+
+            The world ID is not the same as the rigid object index.  
 
         """
         return _robotsim.RigidObjectModel_getID(self)
@@ -5320,7 +5523,7 @@ class RigidObjectModel(object):
 
         Returns a copy of the Mass of this rigid object.  
 
-        Note:  
+        .. note::  
 
             To change the mass properties, you should call ``m=object.getMass()``,
             change the desired properties in m, and then ``object.setMass(m)``  
@@ -5343,7 +5546,7 @@ class RigidObjectModel(object):
 
         Returns a copy of the ContactParameters of this rigid object.  
 
-        Note:  
+        .. note::  
 
             To change the contact parameters, you should call
             ``p=object.getContactParameters()``, change the desired properties in
@@ -5482,7 +5685,7 @@ class TerrainModel(object):
 
         Returns the ID of the terrain in its world.  
 
-        Note: The world ID is not the same as the terrain index.  
+        .. note:: The world ID is not the same as the terrain index.  
 
         """
         return _robotsim.TerrainModel_getID(self)
@@ -6897,6 +7100,90 @@ class SimRobotSensor(object):
         """
         return _robotsim.SimRobotSensor_setSetting(self, name, val)
 
+    def getEnabled(self):
+        r"""
+        getEnabled(SimRobotSensor self) -> bool
+
+
+        Retrieves whether the sensor is enabled during simulation (helper for
+        getSetting)  
+
+        """
+        return _robotsim.SimRobotSensor_getEnabled(self)
+
+    def setEnabled(self, enabled):
+        r"""
+        setEnabled(SimRobotSensor self, bool enabled)
+
+
+        Sets whether the sensor is enabled (helper for setSetting)  
+
+        """
+        return _robotsim.SimRobotSensor_setEnabled(self, enabled)
+
+    def getLink(self):
+        r"""
+        getLink(SimRobotSensor self) -> RobotModelLink
+
+
+        Retrieves the link on which the sensor is mounted (helper for getSetting)  
+
+        """
+        return _robotsim.SimRobotSensor_getLink(self)
+
+    def setLink(self, *args):
+        r"""
+        setLink(SimRobotSensor self, RobotModelLink link)
+        setLink(SimRobotSensor self, int link)
+
+
+        Sets the link on which the sensor is mounted (helper for setSetting)  
+
+        """
+        return _robotsim.SimRobotSensor_setLink(self, *args)
+
+    def getTransform(self):
+        r"""
+        getTransform(SimRobotSensor self)
+
+
+        Retrieves the local transform of the sensor on the robot's link. (helper for
+        getSetting)  
+
+        If the sensor doesn't have a transform (such as a joint position or torque
+        sensor) an exception will be raised.  
+
+        """
+        return _robotsim.SimRobotSensor_getTransform(self)
+
+    def getTransformWorld(self):
+        r"""
+        getTransformWorld(SimRobotSensor self)
+
+
+        Retrieves the world transform of the sensor given the robot's current
+        configuration. (helper for getSetting)  
+
+        If the sensor doesn't have a transform (such as a joint position or torque
+        sensor) an exception will be raised.  
+
+        """
+        return _robotsim.SimRobotSensor_getTransformWorld(self)
+
+    def setTransform(self, R, t):
+        r"""
+        setTransform(SimRobotSensor self, double const [9] R, double const [3] t)
+
+
+        Sets the local transform of the sensor on the robot's link. (helper for
+        setSetting)  
+
+        If the sensor doesn't have a transform (such as a joint position or torque
+        sensor) an exception will be raised.  
+
+        """
+        return _robotsim.SimRobotSensor_setTransform(self, R, t)
+
     def drawGL(self, *args):
         r"""
         drawGL(SimRobotSensor self)
@@ -7373,13 +7660,19 @@ class SimBody(object):
     Can use this class to directly apply forces to or control positions / velocities
     of objects in the simulation.  
 
-    Note: All changes are applied in the current simulation substep, not the
-    duration provided to Simulation.simulate(). If you need fine-grained control,
-    make sure to call Simulation.simulate() with time steps equal to the value
-    provided to Simulation.setSimStep() (this is 0.001s by default).  
+    .. note::  
 
-    Note: The transform of the object is centered at the *object's center of mass*
-    rather than the reference frame given in the RobotModelLink or RigidObjectModel.  
+    All changes are applied in the current simulation substep, not the duration
+    provided to Simulation.simulate(). If you need fine-grained control, make sure
+    to call Simulation.simulate() with time steps equal to the value provided to
+    Simulation.setSimStep() (this is 0.001s by default). Or, use a hook from
+    :class:`~klampt.sim.simulation.SimpleSimulator`.  
+
+    .. node::  
+
+    The transform of the body is centered at the *object's center of mass* rather
+    than the object's reference frame given in the RobotModelLink or
+    RigidObjectModel.  
 
     C++ includes: robotsim.h
 
@@ -7604,13 +7897,19 @@ class SimBody(object):
         Can use this class to directly apply forces to or control positions / velocities
         of objects in the simulation.  
 
-        Note: All changes are applied in the current simulation substep, not the
-        duration provided to Simulation.simulate(). If you need fine-grained control,
-        make sure to call Simulation.simulate() with time steps equal to the value
-        provided to Simulation.setSimStep() (this is 0.001s by default).  
+        .. note::  
 
-        Note: The transform of the object is centered at the *object's center of mass*
-        rather than the reference frame given in the RobotModelLink or RigidObjectModel.  
+        All changes are applied in the current simulation substep, not the duration
+        provided to Simulation.simulate(). If you need fine-grained control, make sure
+        to call Simulation.simulate() with time steps equal to the value provided to
+        Simulation.setSimStep() (this is 0.001s by default). Or, use a hook from
+        :class:`~klampt.sim.simulation.SimpleSimulator`.  
+
+        .. node::  
+
+        The transform of the body is centered at the *object's center of mass* rather
+        than the object's reference frame given in the RobotModelLink or
+        RigidObjectModel.  
 
         C++ includes: robotsim.h
 

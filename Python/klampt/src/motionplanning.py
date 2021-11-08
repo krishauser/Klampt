@@ -450,8 +450,11 @@ class CSpaceInterface(object):
     r"""
 
 
-    A raw interface for a configuration space. Note: the native Python CSpace
-    interface class in cspace.py is easier to use.  
+    A raw interface for a configuration space.  
+
+    ..note::  
+
+        The native Python CSpace interface class in cspace.py is easier to use.  
 
     You can either set a single feasibility test function using setFeasibility() or
     add several feasibility tests, all of which need to be satisfied, using

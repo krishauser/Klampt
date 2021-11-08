@@ -44,6 +44,15 @@ C++ includes: appearance.h
 Frees the data associated with this appearance, if standalone.  
 ";
 
+%feature("docstring") Appearance::setTexture2D_b "
+
+Sets a 2D texture of the given width/height. See :func:`setTexture1D_b` for
+valid format strings.  
+
+The array is given in top to bottom order if `topdown==True`. Otherwise, it is
+given in order bottom to top.  
+";
+
 %feature("docstring") Appearance::setPointSize "
 
 For point clouds, sets the point size.  
@@ -59,25 +68,23 @@ Copies the appearance of the argument into this appearance.
 Sets the per-element color for the given feature.  
 ";
 
-%feature("docstring") Appearance::setTexture1D "
+%feature("docstring") Appearance::setTexture2D_i "
 
-Sets a 1D texture of the given width. Valid format strings are.  
+Sets a 2D texture of the given width/height. See :func:`setTexture1D_i` for
+valid format strings.  
 
-*   \"\": turn off texture mapping  
-*   rgb8: unsigned byte RGB colors with red in the 1st byte, green in the 2nd,
-    blue in the 3rd  
-*   bgr8: unsigned byte RGB colors with blue in the 1st byte, green in the 2nd,
-    green in the 3rd  
-*   rgba8: unsigned byte RGBA colors with red in the 1st byte and alpha in the
-    4th  
-*   bgra8: unsigned byte RGBA colors with blue in the 1st byte and alpha in the
-    4th  
-*   l8: unsigned byte grayscale colors  
+The array is given in top to bottom order if `topdown==True`. Otherwise, it is
+given in order bottom to top.  
 ";
 
 %feature("docstring") Appearance::clone "
 
 Creates a standalone appearance from this appearance.  
+";
+
+%feature("docstring") Appearance::setTexWrap "
+
+Sets whether textures are to wrap (default true)  
 ";
 
 %feature("docstring") Appearance::getElementColor "
@@ -117,6 +124,15 @@ Note that the geometry's current transform is NOT respected, and this only draws
 the geometry in its local transform.  
 ";
 
+%feature("docstring") Appearance::setTexture2D_channels "
+
+Sets a 2D texture of the given width/height from a 3D array of channels. See
+:func:`setTexture1D_channels` for valid format strings.  
+
+The array is given in top to bottom order if `topdown==True`. Otherwise, it is
+given in order bottom to top.  
+";
+
 %feature("docstring") Appearance::~Appearance "
 ";
 
@@ -133,9 +149,24 @@ If 5 arguments are given, changes the color of the given feature. feature can be
 ALL, VERTICES, EDGES, FACES, EMISSIVE, or SPECULAR.  
 ";
 
+%feature("docstring") Appearance::setTexture1D_b "
+
+Sets a 1D texture of the given width. Valid format strings are.  
+
+*   \"\": turn off texture mapping  
+*   l8: unsigned byte grayscale colors  
+";
+
 %feature("docstring") Appearance::isStandalone "
 
 Returns true if this is a standalone appearance.  
+";
+
+%feature("docstring") Appearance::setTexcoords1D "
+
+Sets per-vertex texture coordinates for a 1D texture.  
+
+You may also set uvs to be empty, which turns off texture mapping altogether.  
 ";
 
 %feature("docstring") Appearance::refresh "
@@ -145,17 +176,45 @@ deep=True, the entire data structure will be revised. Use this for streaming
 data, for example.  
 ";
 
-%feature("docstring") Appearance::setTexcoords "
+%feature("docstring") Appearance::setTexture1D_i "
 
-Sets per-vertex texture coordinates.  
+Sets a 1D texture of the given width. Valid format strings are.  
 
-If the texture is 1D, uvs is an array of length n containing 1D texture
-coordinates.  
+*   \"\": turn off texture mapping  
+*   rgba8: unsigned byte RGBA colors with red in the 1st byte and alpha in the
+    4th  
+*   bgra8: unsigned byte RGBA colors with blue in the 1st byte and alpha in the
+    4th  
+";
 
-If the texture is 2D, uvs is an array of length 2n containing U-V coordinates
-u1, v1, u2, v2, ..., un, vn.  
+%feature("docstring") Appearance::setDraw "
+";
 
-You may also set uvs to be empty, which turns off texture mapping altogether.  
+%feature("docstring") Appearance::setDraw "
+
+Turns on/off visibility of the object or a feature.  
+
+If one argument is given, turns the object visibility on or off  
+
+If two arguments are given, turns the feature (first int argument) visibility on
+or off. feature can be ALL, VERTICES, EDGES, or FACES.  
+";
+
+%feature("docstring") Appearance::setTexture1D_channels "
+
+Sets a 1D texture of the given width, given a 2D array of channels. Valid format
+strings are.  
+
+*   \"\": turn off texture mapping  
+*   rgb8: unsigned byte RGB colors with red in the 1st column, green in the 2nd,
+    blue in the 3rd  
+*   bgr8: unsigned byte RGB colors with blue in the 1st column, green in the
+    2nd, green in the 3rd  
+*   rgba8: unsigned byte RGBA colors with red in the 1st column and alpha in the
+    4th  
+*   bgra8: unsigned byte RGBA colors with blue in the 1st column and alpha in
+    the 4th  
+*   l8: unsigned byte grayscale colors, one channel  
 ";
 
 %feature("docstring") Appearance::getColor "
@@ -169,15 +228,6 @@ If 0 arguments are given, retrieves the main object color.
 
 If 1 arguments are given, returns the color of the given feature. feature.
 feature can be ALL, VERTICES, EDGES, FACES, EMISSIVE, or SPECULAR.  
-";
-
-%feature("docstring") Appearance::setTexture2D "
-
-Sets a 2D texture of the given width/height. See :func:`setTexture1D` for valid
-format strings.  
-
-bytes is given in top to bottom order if `topdown==True`. Otherwise, it is given
-in order bottom to top.  
 ";
 
 %feature("docstring") Appearance::getDraw "
@@ -219,23 +269,25 @@ silhouette drawing.
 Retrieves the specular highlight shininess.  
 ";
 
-%feature("docstring") Appearance::setDraw "
-";
+%feature("docstring") Appearance::setTexgen "
 
-%feature("docstring") Appearance::setDraw "
-
-Turns on/off visibility of the object or a feature.  
-
-If one argument is given, turns the object visibility on or off  
-
-If two arguments are given, turns the feature (first int argument) visibility on
-or off. feature can be ALL, VERTICES, EDGES, or FACES.  
+Sets the texture generation. The array must be size m x 4, with m in the range
+0,...,4. If worldcoordinates=true, the texture generation is performed in world
+coordinates rather than object coordinates.  
 ";
 
 %feature("docstring") Appearance::Appearance "
 ";
 
 %feature("docstring") Appearance::Appearance "
+";
+
+%feature("docstring") Appearance::setTexcoords2D "
+
+Sets per-vertex texture coordinates for a 2D texture. uvs is an array of shape
+(nx2) containing U-V coordinates [[u1, v1], [u2, v2], ..., [un, vn]].  
+
+You may also set uvs to be empty, which turns off texture mapping altogether.  
 ";
 
 %feature("docstring") Appearance::setShininess "
@@ -384,8 +436,11 @@ Adds a point.
 
 %feature("docstring") CSpaceInterface "
 
-A raw interface for a configuration space. Note: the native Python CSpace
-interface class in cspace.py is easier to use.  
+A raw interface for a configuration space.  
+
+..note::  
+
+    The native Python CSpace interface class in cspace.py is easier to use.  
 
 You can either set a single feasibility test function using setFeasibility() or
 add several feasibility tests, all of which need to be satisfied, using
@@ -2179,7 +2234,7 @@ Sets the rotation / translation (R,t) of the rigid object.
 
 Returns a copy of the ContactParameters of this rigid object.  
 
-Note:  
+.. note::  
 
     To change the contact parameters, you should call
     ``p=object.getContactParameters()``, change the desired properties in
@@ -2190,7 +2245,9 @@ Note:
 
 Returns the ID of the rigid object in its world.  
 
-Note: The world ID is not the same as the rigid object index.  
+.. note::  
+
+    The world ID is not the same as the rigid object index.  
 ";
 
 %feature("docstring") RigidObjectModel::getVelocity "
@@ -2260,7 +2317,7 @@ Returns:
 
 Returns a copy of the Mass of this rigid object.  
 
-Note:  
+.. note::  
 
     To change the mass properties, you should call ``m=object.getMass()``,
     change the desired properties in m, and then ``object.setMass(m)``  
@@ -2379,7 +2436,7 @@ vector (length numLinks()).
 Returns the generalized gravity vector G(q) for the given workspace gravity
 vector g (usually (0,0,-9.8)).  
 
-Note:  
+.. note::  
 
     \"Forces\" is somewhat of a misnomer; the result is a vector of joint
     torques.  
@@ -2415,7 +2472,9 @@ Returns:
 
 Returns the ID of the robot in its world.  
 
-Note: The world ID is not the same as the robot index.  
+.. note::  
+
+    The world ID is not the same as the robot index.  
 ";
 
 %feature("docstring") RobotModel::saveFile "
@@ -2445,7 +2504,7 @@ Enables/disables self collisions between two links (depending on value)
 
 Computes the foward dynamics (using Recursive Newton Euler solver)  
 
-Note:  
+.. note::  
 
     Does not include gravity term G(q).  getGravityForces(g) will need
     to be subtracted from the argument t.  
@@ -2501,16 +2560,22 @@ Calculates the 3x3 total inertia matrix of the robot.
 
 Sets a single DOF's position (by index or by name).  
 
-Note: if you are setting several joints at once, use setConfig because this
-function computes forward kinematics each time it is called.  
+.. note::  
+
+    If you are setting several joints at once, use setConfig because this
+ function computes forward kinematics for all descendant links each time it is
+called.  
 ";
 
 %feature("docstring") RobotModel::setDOFPosition "
 
 Sets a single DOF's position (by index or by name).  
 
-Note: if you are setting several joints at once, use setConfig because this
-function computes forward kinematics each time it is called.  
+.. note::  
+
+    If you are setting several joints at once, use setConfig because this
+    function computes forward kinematics for all descendant links each time
+    it is called.  
 ";
 
 %feature("docstring") RobotModel::getCoriolisForces "
@@ -2583,7 +2648,7 @@ Returns the number of links = number of DOF's.
 Computes the inverse dynamics. Uses Recursive Newton Euler solver and takes O(n)
 time.  
 
-Note:  
+.. note::  
 
     Does not include gravity term G(q).  getGravityForces(g) will need
     to be added to the result.  
@@ -2715,8 +2780,11 @@ Retrieve the acceleration limit vector amax, the constraint is :math:`|ddq[i]|
 
 Samples a random configuration and updates the robot's pose. Properly handles
 non-normal joints and handles DOFs with infinite bounds using a centered
-Laplacian distribution with the given scaling term. (Note that the python random
-seeding does not affect the result.)  
+Laplacian distribution with the given scaling term.  
+
+.. note::  
+
+    Python random module seeding does not affect the result.  
 ";
 
 // File: classRobotModelDriver.xml
@@ -2748,6 +2816,11 @@ Sets the robot's velocity to correspond to the given driver velocity value.
 %feature("docstring") RobotModelDriver::setValue "
 
 Sets the robot's config to correspond to the given driver value.  
+
+.. note::  
+
+    Does not update the links' forward kinematics.  Use
+    robot.setConfig(robot.getConfig()) to update the forward kinematics.  
 ";
 
 %feature("docstring") RobotModelDriver::getValue "
@@ -2806,7 +2879,7 @@ The link stores many mostly-constant items (id, name, parent, geometry,
 appearance, mass, joint axes). There are two exceptions:  
 
 *   the link's current transform, which is affected by the RobotModel's current
-    configuration, i.e., the last :meth:`RobotModel.setConfig` (q) call.  
+    configuration, i.e., the last :meth:`RobotModel.setConfig` call.  
 *   The various Jacobians of points on the link, accessed by
     :meth:`RobotModelLink.getJacobian` ,
     :meth:`RobotModelLink.getPositionJacobian` , and
@@ -2814,7 +2887,7 @@ appearance, mass, joint axes). There are two exceptions:
     dependent.  
 
 A RobotModelLink is not created by hand, but instead accessed using
-:meth:`RobotModel.link` (index or name)  
+:meth:`RobotModel.link` (index or name).  
 
 C++ includes: robotmodel.h
 ";
@@ -2997,7 +3070,10 @@ Returns:
 
 Returns the ID of the robot link in its world.  
 
-Note: The world ID is not the same as the link's index, retrieved by getIndex.  
+.. note::  
+
+    The world ID is not the same as the link's index, retrieved by
+    getIndex.  
 ";
 
 %feature("docstring") RobotModelLink::getAngularAcceleration "
@@ -3075,7 +3151,7 @@ Gets the local rotational / translational axis.
 
 Sets the link's current transformation (R,t) to the world frame.  
 
-Note:  
+.. note::  
 
     This does NOT perform inverse kinematics.  The transform is
     overwritten when the robot's setConfig() method is called.  
@@ -3171,13 +3247,19 @@ TerrainModel, or a link of a RobotModel).
 Can use this class to directly apply forces to or control positions / velocities
 of objects in the simulation.  
 
-Note: All changes are applied in the current simulation substep, not the
-duration provided to Simulation.simulate(). If you need fine-grained control,
-make sure to call Simulation.simulate() with time steps equal to the value
-provided to Simulation.setSimStep() (this is 0.001s by default).  
+.. note::  
 
-Note: The transform of the object is centered at the *object's center of mass*
-rather than the reference frame given in the RobotModelLink or RigidObjectModel.  
+All changes are applied in the current simulation substep, not the duration
+provided to Simulation.simulate(). If you need fine-grained control, make sure
+to call Simulation.simulate() with time steps equal to the value provided to
+Simulation.setSimStep() (this is 0.001s by default). Or, use a hook from
+:class:`~klampt.sim.simulation.SimpleSimulator`.  
+
+.. node::  
+
+The transform of the body is centered at the *object's center of mass* rather
+than the object's reference frame given in the RobotModelLink or
+RigidObjectModel.  
 
 C++ includes: robotsim.h
 ";
@@ -3688,6 +3770,36 @@ include:
 C++ includes: robotsim.h
 ";
 
+%feature("docstring") SimRobotSensor::setLink "
+
+Sets the link on which the sensor is mounted (helper for setSetting)  
+";
+
+%feature("docstring") SimRobotSensor::setLink "
+
+Sets the link on which the sensor is mounted (helper for setSetting)  
+";
+
+%feature("docstring") SimRobotSensor::getTransformWorld "
+
+Retrieves the world transform of the sensor given the robot's current
+configuration. (helper for getSetting)  
+
+If the sensor doesn't have a transform (such as a joint position or torque
+sensor) an exception will be raised.  
+";
+
+%feature("docstring") SimRobotSensor::getEnabled "
+
+Retrieves whether the sensor is enabled during simulation (helper for
+getSetting)  
+";
+
+%feature("docstring") SimRobotSensor::getLink "
+
+Retrieves the link on which the sensor is mounted (helper for getSetting)  
+";
+
 %feature("docstring") SimRobotSensor::getSetting "
 
 Returns the value of the named setting (you will need to manually parse this)  
@@ -3701,6 +3813,24 @@ Returns the type of the sensor.
 %feature("docstring") SimRobotSensor::SimRobotSensor "
 ";
 
+%feature("docstring") SimRobotSensor::getTransform "
+
+Retrieves the local transform of the sensor on the robot's link. (helper for
+getSetting)  
+
+If the sensor doesn't have a transform (such as a joint position or torque
+sensor) an exception will be raised.  
+";
+
+%feature("docstring") SimRobotSensor::setTransform "
+
+Sets the local transform of the sensor on the robot's link. (helper for
+setSetting)  
+
+If the sensor doesn't have a transform (such as a joint position or torque
+sensor) an exception will be raised.  
+";
+
 %feature("docstring") SimRobotSensor::settings "
 
 Returns all setting names.  
@@ -3712,6 +3842,11 @@ simulates / advances the kinematic simulation
 ";
 
 %feature("docstring") SimRobotSensor::kinematicSimulate "
+";
+
+%feature("docstring") SimRobotSensor::setEnabled "
+
+Sets whether the sensor is enabled (helper for setSetting)  
 ";
 
 %feature("docstring") SimRobotSensor::robot "
@@ -4099,7 +4234,7 @@ Returns a reference to the appearance associated with this object.
 
 Returns the ID of the terrain in its world.  
 
-Note: The world ID is not the same as the terrain index.  
+.. note:: The world ID is not the same as the terrain index.  
 ";
 
 %feature("docstring") TerrainModel::loadFile "
@@ -4239,6 +4374,15 @@ Sets all indices to the given mx3 Numpy array.
 An axis-aligned volumetric grid, typically a signed distance transform with > 0
 indicating outside and < 0 indicating inside. Can also store an occupancy grid
 with 1 indicating inside and 0 indicating outside.  
+
+In general, values are associated with cells rather than vertices. So, cell
+(i,j,k) is associated with a single value, and has size (w,d,h) =
+((bmax[0]-bmin[0])/dims[0], (bmax[1]-bmin[1])/dims[1],
+(bmax[2]-bmin[2])/dims[2]). It ranges over the box [w*i,w*(i+1)) x [d*j,d*(j+1))
+x [h*k,h*(k+1)).  
+
+For SDFs and TSDFs which assume values at vertices, the values are specified at
+the **centers** of cells. I.e., at (w*(i+1/2),d*(j+1/2),h*(k+1/2)).  
 
 Attributes:  
 

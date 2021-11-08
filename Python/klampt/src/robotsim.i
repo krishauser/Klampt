@@ -493,6 +493,97 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 }
 }
 
+%extend Appearance {
+%pythoncode {
+    def setTexture1D(self,format,array):
+        """Sets a 1D texture.
+
+        Args:
+            format (str): describes how the array is specified.
+                Valid values include:
+                    - '': turn off texture mapping
+                    - 'rgb8': unsigned byte RGB colors with red in the 1st
+                      column, green in the 2nd, blue in the 3rd.
+                    - 'bgr8': unsigned byte RGB colors with blue in the 1st
+                      column, green in the 2nd, green in the 3rd
+                    - 'rgba8': unsigned byte RGBA colors with red in the 1st
+                      column and alpha in the 4th
+                    - 'bgra8': unsigned byte RGBA colors with blue in the 1st
+                      column and alpha in the 4th
+                    - 'l8': unsigned byte grayscale colors, one channel
+            array (np.ndarray): a 1D or 2D array, of size w or w x c
+                where w is the width and c is the number of channels.
+                
+                Datatype is of type uint8, or for rgba8 / bgra8, can
+                also be packed into uint32 elements.  In this case, the pixel
+                format is 0xaarrggbb or 0xaabbggrr, respectively.
+        """
+        import numpy
+        array = numpy.asarray(array)
+        if array.shape == 1:
+            if array.dtype == numpy.uint8:
+                return self.setTexture1D_b(format,array)
+            else:
+                return self.setTexture1D_i(format,array)
+        elif array.shape == 2:
+            return self.setTexture1D_channels(format,array)
+        else:
+            raise ValueError("Can only pass a 1D or 2D array to setTexture1D")
+
+    def setTexture2D(self,format,array):
+        """Sets a 2D texture.
+
+        Args:
+            format (str): describes how the array is specified.
+                Valid values include:
+                    - '': turn off texture mapping
+                    - 'rgb8': unsigned byte RGB colors with red in the 1st
+                      column, green in the 2nd, blue in the 3rd.
+                    - 'bgr8': unsigned byte RGB colors with blue in the 1st
+                      column, green in the 2nd, green in the 3rd
+                    - 'rgba8': unsigned byte RGBA colors with red in the 1st
+                      column and alpha in the 4th
+                    - 'bgra8': unsigned byte RGBA colors with blue in the 1st
+                      column and alpha in the 4th
+                    - 'l8': unsigned byte grayscale colors, one channel
+            array (np.ndarray): a 2D or 3D array, of size h x w or h x w x c
+                where h is the height, w is the width, and c is the number of
+                channels.
+                
+                Datatype is of type uint8, or for rgba8 / bgra8, can
+                also be packed into uint32 elements.  In this case, the pixel
+                format is 0xaarrggbb or 0xaabbggrr, respectively.
+        """
+        
+        import numpy
+        array = numpy.asarray(array)
+        if array.shape == 2:
+            if array.dtype == numpy.uint8:
+                return self.setTexture2D_b(format,array)
+            else:
+                return self.setTexture2D_i(format,array)
+        elif array.shape == 3:
+            return self.setTexture2D_channels(format,array)
+        else:
+            raise ValueError("Can only pass a 2D or 3D array to setTexture2D")
+
+    def setTexcoords(self,array):
+        """Sets texture coordinates for the mesh.
+
+        Args:
+            array (np.ndarray): a 1D or 2D array, of size N or Nx2, where N is
+                the number of vertices in the mesh.
+        """
+        import numpy
+        array = numpy.asarray(array)
+        if len(array.shape) == 1:
+            return self.setTexcoords1D(array)
+        elif len(array.shape) == 2:
+            return self.setTexcoords2D(array)
+        else:
+            raise ValueError("Must provide either a 1D or 2D array")
+}
+}
 
 %extend TriangleMesh {
 %pythoncode {
@@ -512,7 +603,7 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 
     def setDepthImage(self,intrinsics,depth,depth_scale=1.0):
         """
-        %Sets a structured point cloud from a depth image.
+        Sets a structured point cloud from a depth image.
 
         Args:
             intrinsics (4-list): the intrinsics parameters [fx,fy,cx,cy].
@@ -535,7 +626,7 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 
     def setRGBDImages(self,intrinsics,color,depth,depth_scale=1.0):
         """
-        %Sets a structured point cloud from a (color,depth) image pair.
+        Sets a structured point cloud from a color,depth image pair.
 
         Args:
             intrinsics (4-list): the intrinsics parameters [fx,fy,cx,cy].

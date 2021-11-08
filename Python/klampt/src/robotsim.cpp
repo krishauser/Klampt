@@ -1247,14 +1247,14 @@ Geometry3D Geometry3D::convert(const char* destype,double param)
     if(!geom->Remesh(param,*resgeom)) {
       stringstream ss;
       ss<<"Cannot perform the geometry remeshiing "<<geom->TypeName()<<" at res "<<param;
-      throw PyException(ss.str().c_str());
+      throw PyException(ss.str());
     }
     return res;
   }
   if(!geom->Convert(destype2,*resgeom,param)) {
     stringstream ss;
     ss<<"Cannot perform the geometry conversion "<<geom->TypeName()<<" -> "<<destype;
-    throw PyException(ss.str().c_str());
+    throw PyException(ss.str());
   }
   return res;
 }
@@ -1899,19 +1899,218 @@ void Appearance::getElementColor(int feature,int element,float out[4])
     throw PyException("Invalid feature, can only do per-element colors for VERTICES or FACES");
   }
 }
-void Appearance::setTexture1D(const char* format,unsigned char* bytes,int m)
+
+Image::PixelFormat StringToImageFormat(const char* format)
 {
-  throw PyException("Python API for textures not implemented yet");
+  if(0==strcmp(format,"rgb8")) {
+    return Image::R8G8B8;
+  }
+  else if(0==strcmp(format,"bgr8")) {
+    return Image::B8G8R8;
+  }
+  else if(0==strcmp(format,"rgba8")) {
+    return Image::R8G8B8A8;
+  }
+  else if(0==strcmp(format,"bgra8")) {
+    return Image::B8G8R8A8;
+  }
+  else if(0==strcmp(format,"l8")) {
+    return Image::A8;
+  }
+  else
+    throw PyException("Invalid format string, must be rgb8, bgr8, rgba8, bgr8, or l8");
+  return Image::None;
 }
 
-void Appearance::setTexture2D(const char* format,unsigned char* bytes,int m,int n,bool topdown)
+void Appearance::setTexture1D_b(const char* format,unsigned char* bytes,int m)
 {
- throw PyException("Python API for textures not implemented yet");
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) throw PyException("Invalid appearance");
+  app->tex1D.reset();
+  app->tex2D.reset();
+  app->textureObject.cleanup();
+  if(strlen(format)==0) {
+    return;
+  }
+  app->tex1D = make_shared<Image>();
+  Image::PixelFormat fmt = StringToImageFormat(format);
+  int bpp = Image::pixelFormatSize(fmt);
+  app->tex1D->initialize(1,m/bpp,fmt);
+  memcpy(app->tex1D->data,bytes,m);
 }
 
-void Appearance::setTexcoords(const std::vector<double>& uvs)
+void Appearance::setTexture1D_i(const char* format,unsigned int* bytes,int m)
 {
-  throw PyException("Python API for textures not implemented yet");
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) throw PyException("Invalid appearance");
+  app->tex1D.reset();
+  app->tex2D.reset();
+  app->textureObject.cleanup();
+  if(strlen(format)==0) {
+    return;
+  }
+  app->tex1D = make_shared<Image>();
+  Image::PixelFormat fmt = StringToImageFormat(format);
+  int bpp = Image::pixelFormatSize(fmt);
+  if(bpp != 4) throw PyException("Provided uint32 type to texture, but not a 32-bit format");
+  app->tex1D->initialize(1,m,fmt);
+  memcpy(app->tex1D->data,bytes,m*sizeof(unsigned int));
+}
+
+void Appearance::setTexture1D_channels(const char* format,unsigned char* bytes,int m,int n)
+{
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) throw PyException("Invalid appearance");
+  app->tex1D.reset();
+  app->tex2D.reset();
+  app->textureObject.cleanup();
+  if(strlen(format)==0) {
+    return;
+  }
+  app->tex1D = make_shared<Image>();
+  Image::PixelFormat fmt = StringToImageFormat(format);
+  int bpp = Image::pixelFormatSize(fmt);
+  if(bpp != n) {
+    stringstream ss;
+    ss<<"Provided "<<n<<"channels to texture, but format is a "<<bpp<<"-byte format";
+    throw PyException(ss.str());
+  }
+  app->tex1D->initialize(1,m,fmt);
+  memcpy(app->tex1D->data,bytes,m*n);
+}
+
+void Appearance::setTexture2D_b(const char* format,unsigned char* bytes,int m,int n,bool topdown)
+{
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) throw PyException("Invalid appearance");
+  app->tex1D.reset();
+  app->tex2D.reset();
+  app->textureObject.cleanup();
+  if(strlen(format)==0) {
+    return;
+  }
+  app->tex2D = make_shared<Image>();
+  Image::PixelFormat fmt = StringToImageFormat(format);
+  int bpp = Image::pixelFormatSize(fmt);
+  if(bpp != 1) throw PyException("Provided uint8 type to texture, but not an 8-bit format");
+  app->tex2D->initialize(n,m,fmt);
+  if(topdown) {
+    memcpy(app->tex2D->data,bytes,m*n);
+  }
+  else {
+    int stride = n;
+    for(int i=0;i<m;i++) {
+      int iflip = m-1-i;
+      memcpy(&app->tex2D->data[iflip*stride],&bytes[i*stride],stride);
+    }
+  }
+}
+
+void Appearance::setTexture2D_i(const char* format,unsigned int* bytes,int m,int n,bool topdown)
+{
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) throw PyException("Invalid appearance");
+  app->tex1D.reset();
+  app->tex2D.reset();
+  app->textureObject.cleanup();
+  if(strlen(format)==0) {
+    return;
+  }
+  app->tex2D = make_shared<Image>();
+  Image::PixelFormat fmt = StringToImageFormat(format);
+  int bpp = Image::pixelFormatSize(fmt);
+  if(bpp != 4) throw PyException("Provided uint32 type to texture, but not a 32-bit format");
+  app->tex2D->initialize(n,m,fmt);
+  if(topdown) {
+    memcpy(app->tex2D->data,bytes,m*n*sizeof(unsigned int));
+  }
+  else {
+    int stride = n*sizeof(unsigned int);
+    for(int i=0;i<m;i++) {
+      int iflip = m-1-i;
+      memcpy(&app->tex2D->data[iflip*stride],&bytes[i*stride],stride);
+    }
+  }
+}
+
+void Appearance::setTexture2D_channels(const char* format,unsigned char* bytes,int m,int n,int p,bool topdown)
+{
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) throw PyException("Invalid appearance");
+  app->tex1D.reset();
+  app->tex2D.reset();
+  app->textureObject.cleanup();
+  if(strlen(format)==0) {
+    return;
+  }
+  app->tex2D = make_shared<Image>();
+  Image::PixelFormat fmt = StringToImageFormat(format);
+  int bpp = Image::pixelFormatSize(fmt);
+  if(bpp != p) {
+    stringstream ss;
+    ss<<"Provided "<<p<<"channels to texture, but format is a "<<bpp<<"-byte format";
+    throw PyException(ss.str());
+  }
+  app->tex2D->initialize(n,m,fmt);
+  if(topdown) {
+    memcpy(app->tex2D->data,bytes,m*n*p);
+  }
+  else {
+    int stride = n*p;
+    for(int i=0;i<m;i++) {
+      int iflip = m-1-i;
+      memcpy(&app->tex2D->data[iflip*stride],&bytes[i*stride],stride);
+    }
+  }
+}
+
+void Appearance::setTexcoords1D(double* np_array,int m)
+{
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) throw PyException("Invalid appearance");
+  app->texcoords.resize(m);
+  for(int i=0;i<m;i++)
+    app->texcoords[i].x = np_array[i];
+}
+
+void Appearance::setTexcoords2D(double* np_array2,int m,int n)
+{
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) throw PyException("Invalid appearance");
+  if(n != 2) throw PyException("Must provide exactly 2 columns");
+  app->texcoords.resize(m);
+  for(int i=0;i<m;i++) {
+    app->texcoords[i].x = np_array2[i*2];
+    app->texcoords[i].y = np_array2[i*2+1];
+  }
+}
+
+void Appearance::setTexgen(double* np_array2,int m,int n,bool worldcoordinates)
+{
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) throw PyException("Invalid appearance");
+  if(m==0) {
+    app->texgen.resize(0);
+    return;
+  }
+  if(n != 4) throw PyException("Texgen array must have exactly 4 columns");
+  if(worldcoordinates) {
+    RigidTransform Tident; Tident.setIdentity();
+    app->texgenEyeTransform = make_shared<RigidTransform>(Tident);
+  }
+  else {
+    app->texgenEyeTransform.reset();
+  }
+  app->texgen.resize(m);
+  for(int i=0;i<m;i++)
+    app->texgen[i].set(&np_array2[i*4]);
+}
+
+void Appearance::setTexWrap(bool wrap)
+{
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) throw PyException("Invalid appearance");
+  app->texWrap = wrap;
 }
 
 void Appearance::setPointSize(float size)
@@ -2266,7 +2465,7 @@ void PointCloud::addProperty(const std::string& pname,double* values,int numvals
   if(numvals != n) {
     stringstream ss;
     ss<<"Invalid size "<<numvals<<" of properties list, must have size #points = "<<n;
-    throw PyException(ss.str().c_str());
+    throw PyException(ss.str());
   }
   assert(numvals == n);
   size_t m=propertyNames.size();
@@ -2902,7 +3101,7 @@ WorldModel::WorldModel(const char* fn)
   if(!loadFile(fn)) {
     stringstream ss;
     ss << "Error loading world XML file " << fn;
-    throw PyException(ss.str().c_str());
+    throw PyException(ss.str());
   }
 }
 
@@ -4188,7 +4387,7 @@ void RobotModel::setDOFPosition(int i,double qi)
     throw PyException("Invalid joint index");
   }
   robot->q(i) = qi;
-  robot->UpdateFrames();
+  robot->UpdateDownstreamFrames(i);
 }
 
 void RobotModel::setDOFPosition(const char* name,double qi)
@@ -4198,7 +4397,7 @@ void RobotModel::setDOFPosition(const char* name,double qi)
   for(size_t i=0;i<robot->linkNames.size();i++)
     if(sname == robot->linkNames[i]) {
       robot->q(i) = qi;
-      robot->UpdateFrames();
+      robot->UpdateDownstreamFrames(i);
       return;
     }
   throw PyException("Invalid link name");
@@ -4295,19 +4494,8 @@ void RobotModel::randomizeConfig(double unboundedStdDeviation)
 {
   if(!robot) throw PyException("RobotModel is empty");
   Klampt::RobotCSpace space(*robot);
+  space.unboundedStdDeviation = unboundedStdDeviation;
   space.Sample(robot->q);
-  for(size_t i=0;i<robot->joints.size();i++)
-    if(robot->joints[i].type == Klampt::RobotModelJoint::Floating) {
-      int base = robot->joints[i].baseIndex;
-      robot->q[base] *= unboundedStdDeviation;
-      robot->q[base+1] *= unboundedStdDeviation;
-      robot->q[base+2] *= unboundedStdDeviation;
-    }
-    else if(robot->joints[i].type == Klampt::RobotModelJoint::FloatingPlanar) {
-      int base = robot->joints[i].baseIndex;
-      robot->q[base] *= unboundedStdDeviation;
-      robot->q[base+1] *= unboundedStdDeviation;
-    }
   robot->UpdateFrames();
   robot->UpdateGeometry();
 }
@@ -5836,6 +6024,103 @@ void SimRobotSensor::setSetting(const std::string& name,const std::string& val)
 {
   if(!sensor) return;
   if(!sensor->SetSetting(name,val)) throw PyException("Setting "+name+" not supported or value not formatted correctly");
+}
+
+bool SimRobotSensor::getEnabled()
+{
+  if(!sensor) return false;
+  string enabled;
+  if(!sensor->GetSetting("enabled",enabled)) return false;
+  if(enabled=="0") return false;
+  else return true;
+}
+
+void SimRobotSensor::setEnabled(bool enabled)
+{
+  if(!sensor) return;
+  if(enabled) sensor->SetSetting("enabled","1");
+  else sensor->SetSetting("enabled","0");
+}
+
+RobotModelLink SimRobotSensor::getLink()
+{
+  if(!sensor) return RobotModelLink();
+  std::string val;
+  if(!sensor->GetSetting("link",val)) {
+    throw PyException("Sensor doesn't have link attribute");
+  }
+  stringstream ss(val);
+  int index;
+  ss>>index;
+  if(!ss)
+    return robotModel.link(val.c_str());
+  else
+    return robotModel.link(index);
+}
+
+void SimRobotSensor::setLink(const RobotModelLink& link)
+{
+  setLink(link.index);
+}
+
+void SimRobotSensor::setLink(int link)
+{
+  if(!sensor) return;
+  string temp;
+  if(!sensor->GetSetting("link",temp)) 
+    throw PyException("Sensor doesn't have link attribute");
+  stringstream ss;
+  ss<<link;
+  sensor->SetSetting("link",ss.str());
+}
+
+void SimRobotSensor::getTransform(double out[9],double out2[3])
+{
+  if(!sensor) return;
+  RigidTransform T;
+  string val;
+  if(!sensor->GetSetting("Tsensor",val)) 
+    throw PyException("Sensor doesn't have Tsensor attribute");
+  stringstream ss(val);
+  ss >> T;
+  if(!ss) {
+    stringstream ss2;
+    ss2<<"Error parsing Tsensor attribute: "<<val;
+    throw PyException(ss2.str().c_str());
+  }
+  T.R.get(out);
+  T.t.get(out2);
+}
+
+void SimRobotSensor::getTransformWorld(double out[9],double out2[3])
+{
+  if(!sensor) return;
+  RigidTransform Tlocal,Tlink;
+  double R[9],t[3];
+  getTransform(R,t);
+  Tlocal.R.set(R);
+  Tlocal.t.set(t);
+  RobotModelLink link=getLink();
+  link.getTransform(R,t);
+  Tlink.R.set(R);
+  Tlink.t.set(t);
+  RigidTransform Tworld=Tlink*Tlocal;
+  Tworld.R.get(out);
+  Tworld.t.get(out2);
+}
+
+void SimRobotSensor::setTransform(const double R[9],const double t[3])
+{
+  if(!sensor) return;
+  string temp;
+  if(!sensor->GetSetting("Tsensor",temp)) 
+    throw PyException("Sensor doesn't have Tsensor attribute");
+  RigidTransform T;
+  T.R.set(R);
+  T.t.set(t);
+  stringstream ss;
+  ss<<T;
+  sensor->SetSetting("Tsensor",ss.str());
 }
 
 void SimRobotSensor::drawGL()

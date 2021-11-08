@@ -280,6 +280,14 @@ struct GeometricPrimitive
  * transform with > 0 indicating outside and < 0 indicating inside. 
  * Can also store an occupancy grid with 1 indicating inside and 0
  * indicating outside.
+ * 
+ * In general, values are associated with cells rather than vertices. So,
+ * cell (i,j,k) is associated with a single value, and has size
+ * (w,d,h) = ((bmax[0]-bmin[0])/dims[0], (bmax[1]-bmin[1])/dims[1], (bmax[2]-bmin[2])/dims[2]).
+ * It ranges over the box [w*i,w*(i+1)) x [d*j,d*(j+1)) x [h*k,h*(k+1)).
+ * 
+ * For SDFs and TSDFs which assume values at vertices, the values are specified
+ * at the **centers** of cells.  I.e., at (w*(i+1/2),d*(j+1/2),h*(k+1/2)).
  *
  * Attributes:
  *
