@@ -291,8 +291,6 @@ def image_to_points(depth,color,xfov,yfov=None,depth_scale=None,depth_range=None
                 color_format = 'rgb'
     else:
         color_format = None
-    if depth_scale is not None:
-        depth *= depth_scale
 
     if (points_format == 'PointCloud' or points_format == 'Geometry3D') and all_points:
         #shortcut, about 2x faster than going through Numpy
@@ -304,6 +302,8 @@ def image_to_points(depth,color,xfov,yfov=None,depth_scale=None,depth_range=None
             fy = 0.5*h/math.tan(yfov*0.5)
         cx = 0.5*w
         cy = 0.5*h
+        if depth_scale is None:
+            depth_scale = 1.0
         if color_format is None:
             res.setDepthImage([fx,fy,cx,cy],depth,depth_scale)
         else:
@@ -315,6 +315,9 @@ def image_to_points(depth,color,xfov,yfov=None,depth_scale=None,depth_range=None
             g = Geometry3D()
             g.setPointCloud(res)
             return g
+
+    if depth_scale is not None:
+        depth *= depth_scale
 
     if points_format == 'TriangleMesh':
         if not all_points:
