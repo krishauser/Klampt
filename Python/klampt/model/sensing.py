@@ -263,6 +263,8 @@ def image_to_points(depth,color,xfov,yfov=None,depth_scale=None,depth_range=None
               depending on whether color is requested (and its format).  
             * 'PointCloud': a Klampt PointCloud object
             * 'Geometry3D': a Klampt Geometry3D point cloud object
+            * 'TriangleMesh': a Klampt TriangleMesh object showing a regular 
+              grid encoded with the depth image.
 
         all_points (bool, optional): configures whether bad points should be
             stripped out.  If False (default), this strips out all pixels that
@@ -287,6 +289,8 @@ def image_to_points(depth,color,xfov,yfov=None,depth_scale=None,depth_range=None
             else:
                 assert len(color.shape)==2
                 color_format = 'rgb'
+    else:
+        color_format = None
     if depth_scale is not None:
         depth *= depth_scale
 
@@ -300,8 +304,8 @@ def image_to_points(depth,color,xfov,yfov=None,depth_scale=None,depth_range=None
             fy = 0.5*h/math.tan(yfov*0.5)
         cx = 0.5*w
         cy = 0.5*h
-        if color_format is None or color is None:
-            res.setDepthImages([fx,fy,cx,cy],depth,depth_scale)
+        if color_format is None:
+            res.setDepthImage([fx,fy,cx,cy],depth,depth_scale)
         else:
             res.setRGBDImages([fx,fy,cx,cy],color,depth,depth_scale)
 
@@ -311,6 +315,10 @@ def image_to_points(depth,color,xfov,yfov=None,depth_scale=None,depth_range=None
             g = Geometry3D()
             g.setPointCloud(res)
             return g
+
+    if points_format == 'TriangleMesh':
+        if not all_points:
+            raise NotImplementedError("TODO: TriangleMesh result but with missing data")
 
     xshift = -w*0.5
     yshift = -h*0.5
@@ -339,21 +347,23 @@ def image_to_points(depth,color,xfov,yfov=None,depth_scale=None,depth_range=None
     #extract out the valid points from this array
     if all_points:
         pts = pts.reshape(w*h,pts.shape[2])
-        if color is not None:
+        if color_format is not None:
             color = color.reshape(w*h,color.shape[2])
     else:
         if depth_range is not None:
             valid = np.logical_and((depth > depth_range[0]),(depth < depth_range[1]))
-            if all_points:
+            if all_points and points_format != 'TriangleMesh':
                 depth[~valid] = 0
             valid = (depth > 0)
         else:
             valid = (depth > 0)
         pts = pts[valid]
-        color = color[valid]
+        if color is not None:
+            color = color[valid]
 
     if points_format == 'numpy':
-        pts = np.concatenate((pts,color),2)
+        if color_format is not None:
+            pts = np.concatenate((pts,color),2)
         return pts
     elif points_format == 'PointCloud' or points_format == 'Geometry3D':
         res = PointCloud()
@@ -375,6 +385,26 @@ def image_to_points(depth,color,xfov,yfov=None,depth_scale=None,depth_range=None
             g = Geometry3D()
             g.setPointCloud(res)
             return g
+    elif points_format == 'TriangleMesh':
+        res = TriangleMesh()
+        res.setVertices(pts)
+        indices = np.empty(((w-1)*(h-1)*2,3),dtype=np.int32)
+        k = 0
+        for i in range(h-1):
+            for j in range(w-1):
+                vcorner = i*w + j
+                indices[k,:] = (vcorner,vcorner+1,vcorner+w+1)
+                indices[k+1,:] = (vcorner+w+1,vcorner+w,vcorner)
+                k += 2
+        res.setIndices(indices)
+        if color is not None:
+            app = Appearance()
+            if color_format == 'channels':
+                app.setColors(Appearance.VERTICES,np.asarray(color).T)
+            else:
+                raise NotImplementedError("TODO: convert colors to per-vertex colors")
+            return (res,app)
+        return res
     else:
         raise ValueError("Invalid points_format, must be either numpy, PointCloud, or Geometry3D")
 
@@ -400,6 +430,8 @@ def camera_to_points(camera : SimRobotSensor,
               depending on whether color is requested (and its format).  
             * 'PointCloud': a Klampt PointCloud object
             * 'Geometry3D': a Klampt Geometry3D point cloud object
+            * 'TriangleMesh': a Klampt TriangleMesh object showing a regular 
+              grid encoded with the depth image.
 
         all_points (bool, optional): configures whether bad points should be
             stripped out.  If False (default), this strips out all pixels that
@@ -425,7 +457,7 @@ def camera_to_points(camera : SimRobotSensor,
     assert int(camera.getSetting('depth'))==1,"Camera sensor must have a depth channel"
 
     images = camera_to_images(camera,'numpy',color_format)
-    assert images != None
+    assert images is not None
 
     rgb,depth = None,None
     if int(camera.getSetting('rgb'))==0:
@@ -447,7 +479,7 @@ def camera_to_points(camera : SimRobotSensor,
         cx = 0.5*w
         cy = 0.5*h
         if color_format is None:
-            res.setDepthImages([fx,fy,cx,cy],depth)
+            res.setDepthImage([fx,fy,cx,cy],depth)
         else:
             res.setRGBDImages([fx,fy,cx,cy],rgb,depth)
         if points_format == 'PointCloud':
@@ -457,17 +489,21 @@ def camera_to_points(camera : SimRobotSensor,
             g.setPointCloud(res)
             return g
 
+    if points_format == 'TriangleMesh':
+        if not all_points:
+            raise NotImplementedError("TODO: TriangleMesh result but with missing data")
+
     zmin = float(camera.getSetting('zmin'))
     zmax = float(camera.getSetting('zmax'))
     xshift = -w*0.5
     yshift = -h*0.5
     xscale = math.tan(xfov*0.5)/(w*0.5)
-    #yscale = -1.0/(math.tan(yfov*0.5)*h/2)
+    #yscale = math.tan(yfov*0.5)/(h*0.5)
     yscale = xscale #square pixels are assumed
     xs = [(j+xshift)*xscale for j in range(w)]
     ys = [(i+yshift)*yscale for i in range(h)]
 
-    if all_points:
+    if all_points and points_format != 'TriangleMesh':
         depth[depth >= zmax] = 0
     if color_format == 'channels':
         #scale to range [0,1]
@@ -513,6 +549,26 @@ def camera_to_points(camera : SimRobotSensor,
             g = Geometry3D()
             g.setPointCloud(res)
             return g
+    elif points_format == 'TriangleMesh':
+        res = TriangleMesh()
+        res.setVertices(pts[:,:3])
+        indices = np.empty(((w-1)*(h-1)*2,3),dtype=np.int32)
+        k = 0
+        for i in range(h-1):
+            for j in range(w-1):
+                vcorner = i*w + j
+                indices[k,:] = (vcorner,vcorner+1,vcorner+w+1)
+                indices[k+1,:] = (vcorner+w+1,vcorner+w,vcorner)
+                k += 2
+        res.setIndices(indices)
+        if color_format is not None:
+            app = Appearance()
+            if color_format == 'channels':
+                app.setColors(Appearance.VERTICES,pts[:,3:])
+            else:
+                raise NotImplementedError("TODO: convert colors to per-vertex colors")
+            return (res,app)
+        return res
     else:
         raise ValueError("Invalid points_format "+points_format)
     return None
@@ -611,7 +667,7 @@ def viewport_to_camera(viewport : GLViewport, camera : SimRobotSensor, robot : R
     set_sensor_xform(camera,xform,rlink)
     (zmin,zmax) = viewport.clippingplanes
     xfov = math.radians(viewport.fov)
-    yfov = xfov*viewport.h/viewport.w
+    yfov = 2.0*math.atan(math.tan(xfov*0.5)*viewport.h/viewport.w)
     camera.setSetting('xres',str(viewport.w))
     camera.setSetting('yres',str(viewport.h))
     camera.setSetting('xfov',str(xfov))
