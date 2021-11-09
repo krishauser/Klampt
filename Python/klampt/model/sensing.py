@@ -392,13 +392,12 @@ def image_to_points(depth,color,xfov,yfov=None,depth_scale=None,depth_range=None
         res = TriangleMesh()
         res.setVertices(pts)
         indices = np.empty(((w-1)*(h-1)*2,3),dtype=np.int32)
+        template = np.array([[0,1,w+1],[w+1,w,0]],dtype=np.int32)
+        rowtemplate = np.vstack([template+j for j in range(w-1)])
         k = 0
         for i in range(h-1):
-            for j in range(w-1):
-                vcorner = i*w + j
-                indices[k,:] = (vcorner,vcorner+1,vcorner+w+1)
-                indices[k+1,:] = (vcorner+w+1,vcorner+w,vcorner)
-                k += 2
+            indices[k:k+(w-1)*2,:] = rowtemplate + (i*w)
+            k += (w-1)*2
         res.setIndices(indices)
         if color is not None:
             app = Appearance()
@@ -556,13 +555,12 @@ def camera_to_points(camera : SimRobotSensor,
         res = TriangleMesh()
         res.setVertices(pts[:,:3])
         indices = np.empty(((w-1)*(h-1)*2,3),dtype=np.int32)
+        template = np.array([[0,1,w+1],[w+1,w,0]],dtype=np.int32)
+        rowtemplate = np.vstack([template+j for j in range(w-1)])
         k = 0
         for i in range(h-1):
-            for j in range(w-1):
-                vcorner = i*w + j
-                indices[k,:] = (vcorner,vcorner+1,vcorner+w+1)
-                indices[k+1,:] = (vcorner+w+1,vcorner+w,vcorner)
-                k += 2
+            indices[k:k+(w-1)*2,:] = rowtemplate + (i*w)
+            k += (w-1)*2
         res.setIndices(indices)
         if color_format is not None:
             app = Appearance()
