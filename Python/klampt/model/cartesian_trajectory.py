@@ -873,7 +873,7 @@ def cartesian_bump(
             newconstraints = []
             for d in constraints:
                 if isinstance(d,(int,str)):
-                    newconstraints.append(ik.objective(robot,d,R=so3.identity(),t=[0,0,0]))
+                    newconstraints.append(ik.objective(robot.link(d),R=so3.identity(),t=[0,0,0]))
                 else:
                     assert isinstance(d,IKObjective)
                     newconstraints.append(d)
