@@ -117,6 +117,7 @@ def filenameToTypes(name):
     extension.
     """
     fileName, fileExtension = os.path.splitext(name)
+    fileExtension = fileExtension.lower()
     if fileExtension in extensionToTypes:
         return extensionToTypes[fileExtension]
     else:
@@ -137,6 +138,7 @@ def filenameToType(name):
         str: The Klamp't type
     """
     fileName, fileExtension = os.path.splitext(name)
+    fileExtension = fileExtension.lower()
     if fileExtension == '.xml':
         return 'xml'  #dynamic loading
     elif fileExtension == '.json':
