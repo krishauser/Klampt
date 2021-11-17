@@ -366,7 +366,7 @@ def image_to_points(depth,color,xfov,yfov=None,depth_scale=None,depth_range=None
 
     if points_format == 'numpy':
         if color_format is not None:
-            pts = np.concatenate((pts,color),2)
+            pts = np.concatenate((pts,color),1)
         return pts
     elif points_format == 'PointCloud' or points_format == 'Geometry3D':
         res = PointCloud()
