@@ -91,7 +91,11 @@ def from_open3d(obj):
     elif isinstance(obj,open3d.geometry.VoxelGrid):
         grid = VolumeGrid()
         import numpy as np
-        occupied = np.array(obj.voxels,dtype=np.int32)
+        if hasattr(obj, 'voxels'):
+            # open3d <= 0.9.0
+            occupied = np.array(obj.voxels,dtype=np.int32)
+        else:
+            occupied = np.array([v.grid_index for v in obj.get_voxels()],dtype=np.int32)
         imin = np.min(occupied,axis=0)
         imax = np.max(occupied,axis=0)
         assert imin.shape == (3,)
