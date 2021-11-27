@@ -14088,6 +14088,299 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_brake_1d(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  double arg1 ;
+  double arg2 ;
+  double arg3 ;
+  std::vector< double,std::allocator< double > > *arg4 = 0 ;
+  std::vector< double,std::allocator< double > > *arg5 = 0 ;
+  std::vector< double,std::allocator< double > > *arg6 = 0 ;
+  double val1 ;
+  int ecode1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  double val3 ;
+  int ecode3 = 0 ;
+  std::vector< double > temp4 ;
+  std::vector< double > temp5 ;
+  std::vector< double > temp6 ;
+  PyObject *swig_obj[3] ;
+  
+  {
+    arg4 = &temp4;
+  }
+  {
+    arg5 = &temp5;
+  }
+  {
+    arg6 = &temp6;
+  }
+  if (!SWIG_Python_UnpackTuple(args, "brake_1d", 3, 3, swig_obj)) SWIG_fail;
+  ecode1 = SWIG_AsVal_double(swig_obj[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "brake_1d" "', argument " "1"" of type '" "double""'");
+  } 
+  arg1 = static_cast< double >(val1);
+  ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "brake_1d" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  ecode3 = SWIG_AsVal_double(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "brake_1d" "', argument " "3"" of type '" "double""'");
+  } 
+  arg3 = static_cast< double >(val3);
+  {
+    try {
+      brake_1d(arg1,arg2,arg3,*arg4,*arg5,*arg6);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(&(*arg4)[0],(int)arg4->size());
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(&(*arg5)[0],(int)arg5->size());
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(&(*arg6)[0],(int)arg6->size());
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_brake_nd(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::vector< double,std::allocator< double > > *arg1 = 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = 0 ;
+  std::vector< double,std::allocator< double > > *arg3 = 0 ;
+  std::vector< double,std::allocator< double > > *arg4 = 0 ;
+  std::vector< double,std::allocator< double > > *arg5 = 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg6 = 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg7 = 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg8 = 0 ;
+  int res1 = SWIG_OLDOBJ ;
+  int res2 = SWIG_OLDOBJ ;
+  int res3 = SWIG_OLDOBJ ;
+  int res4 = SWIG_OLDOBJ ;
+  int res5 = SWIG_OLDOBJ ;
+  std::vector< std::vector< double > > temp6 ;
+  std::vector< std::vector< double > > temp7 ;
+  std::vector< std::vector< double > > temp8 ;
+  PyObject *swig_obj[5] ;
+  
+  {
+    arg6 = &temp6;
+  }
+  {
+    arg7 = &temp7;
+  }
+  {
+    arg8 = &temp8;
+  }
+  if (!SWIG_Python_UnpackTuple(args, "brake_nd", 5, 5, swig_obj)) SWIG_fail;
+  {
+    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
+    res1 = swig::asptr(swig_obj[0], &ptr);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "brake_nd" "', argument " "1"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "brake_nd" "', argument " "1"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    arg1 = ptr;
+  }
+  {
+    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
+    res2 = swig::asptr(swig_obj[1], &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "brake_nd" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "brake_nd" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    arg2 = ptr;
+  }
+  {
+    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
+    res3 = swig::asptr(swig_obj[2], &ptr);
+    if (!SWIG_IsOK(res3)) {
+      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "brake_nd" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "brake_nd" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    arg3 = ptr;
+  }
+  {
+    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
+    res4 = swig::asptr(swig_obj[3], &ptr);
+    if (!SWIG_IsOK(res4)) {
+      SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "brake_nd" "', argument " "4"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "brake_nd" "', argument " "4"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    arg4 = ptr;
+  }
+  {
+    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
+    res5 = swig::asptr(swig_obj[4], &ptr);
+    if (!SWIG_IsOK(res5)) {
+      SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "brake_nd" "', argument " "5"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "brake_nd" "', argument " "5"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    arg5 = ptr;
+  }
+  {
+    try {
+      brake_nd((std::vector< double,std::allocator< double > > const &)*arg1,(std::vector< double,std::allocator< double > > const &)*arg2,(std::vector< double,std::allocator< double > > const &)*arg3,(std::vector< double,std::allocator< double > > const &)*arg4,(std::vector< double,std::allocator< double > > const &)*arg5,*arg6,*arg7,*arg8);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_dmatrix_obj((*arg6));
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_dmatrix_obj((*arg7));
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_dmatrix_obj((*arg8));
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  if (SWIG_IsNewObj(res1)) delete arg1;
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  if (SWIG_IsNewObj(res4)) delete arg4;
+  if (SWIG_IsNewObj(res5)) delete arg5;
+  return resultobj;
+fail:
+  if (SWIG_IsNewObj(res1)) delete arg1;
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  if (SWIG_IsNewObj(res4)) delete arg4;
+  if (SWIG_IsNewObj(res5)) delete arg5;
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_combine_nd_cubic(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg1 = 0 ;
@@ -14746,6 +15039,8 @@ static PyMethodDef SwigMethods[] = {
 	 { "interpolate_nd_min_time", _wrap_interpolate_nd_min_time, METH_VARARGS, "interpolate_nd_min_time(doubleVector x0, doubleVector v0, doubleVector x1, doubleVector v1, doubleVector xmin, doubleVector xmax, doubleVector vmax, doubleVector amax)"},
 	 { "interpolate_nd_min_accel", _wrap_interpolate_nd_min_accel, METH_VARARGS, "interpolate_nd_min_accel(doubleVector x0, doubleVector v0, doubleVector x1, doubleVector v1, double endTime, doubleVector xmin, doubleVector xmax, doubleVector vmax)"},
 	 { "interpolate_nd_min_time_linear", _wrap_interpolate_nd_min_time_linear, METH_VARARGS, "interpolate_nd_min_time_linear(doubleVector x0, doubleVector x1, doubleVector vmax, doubleVector amax)"},
+	 { "brake_1d", _wrap_brake_1d, METH_VARARGS, "brake_1d(double x0, double v0, double amax)"},
+	 { "brake_nd", _wrap_brake_nd, METH_VARARGS, "brake_nd(doubleVector x0, doubleVector v0, doubleVector xmin, doubleVector xmax, doubleVector amax)"},
 	 { "combine_nd_cubic", _wrap_combine_nd_cubic, METH_VARARGS, "combine_nd_cubic(doubleMatrix times, doubleMatrix positions, doubleMatrix velocities)"},
 	 { NULL, NULL, 0, NULL }
 };

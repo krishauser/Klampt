@@ -1,14 +1,16 @@
 
 import sys
 from collections import defaultdict
+import re
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
 #all of the classes defined in the package that you'd like to cross-reference
-classes = {'RobotModel','WorldModel','RobotModelLink','RobotModelDriver','Terrain','RigidObjectModel',
-    'Geometry3D','Appearance','TriangleMesh','PointCloud','VolumeGrid','GeometricPrimitive',
-    'ContactParameters','Mass','DistanceQueryResult','DistanceQuerySettings',
+classes = {'RobotModel','WorldModel','RobotModelLink','RobotModelDriver','TerrainModel','RigidObjectModel',
+    'IKObjective','IKSolver',
+    'Geometry3D','Appearance','Viewport','Widget','TriangleMesh','PointCloud','VolumeGrid','GeometricPrimitive','ConvexHull',
+    'ContactParameters','Mass','DistanceQueryResult','DistanceQuerySettings','ContactQueryResult',
     'SimRobotSensor','SimRobotController','SimBody','Simulator',
     'CSpaceInterface','MotionPlanInterface',
     'ContactPoint','Trajectory','RobotTrajectory','HermiteTrajectory','MultiPath',
@@ -29,8 +31,15 @@ class_prefix = {
 
 basic_types = {'int','float','str','bytes','bool'}
 
+#location to inject typing string
+typing_inject_location = 'import __builtin__'
+typing_header = """
+from typing import Sequence,Tuple,Iterator
+from klampt.model.typing import IntArray,Vector,Vector3,Point,Rotation
+"""
+
 #conversions from SWIG docstrings to RST docstrings
-to_python_types = { 'char const *':'str',
+to_python_types = {
     'char *':'str',
     'char':'str',
     'std::string':'str',
@@ -60,7 +69,72 @@ to_python_types = { 'char const *':'str',
     'double * np_array':'1D Numpy array of floats',
     'double * np_array2':'2D Numpy array of floats',
     'double * np_array3':'3D Numpy array of floats',
-    'PyObject': "object"
+    'PyObject': "object",
+    'PyObject *': "object"
+}
+
+to_python_type_hints = {
+    'void' : 'None',
+    'bool' : 'bool',
+    'int' : 'int',
+    'float' : 'float',
+    'size_t' : 'int',
+    'ptrdiff_t' : 'int',
+    'SwigPyIterator': 'Iterator',
+    'swig::SwigPyIterator': 'Iterator',
+    'swig::SwigPyIterator *': 'Iterator',
+    'intArray *': '"intArray"',
+    'floatArray *': '"floatArray"',
+    'doubleArray *': '"doubleArray"',
+    'intVector *': '"intVector"',
+    'floatVector *': '"floatVector"',
+    'doubleVector *': '"doubleVector"',
+    'stringVector *': '"stringVector"',
+    "std::vector< int,std::allocator< int > > *": '"intVector"',
+    "std::vector< float,std::allocator< float > > *": '"floatVector"',
+    "std::vector< double,std::allocator< double > > *": '"doubleVector"',
+    "std::vector< std::string,std::allocator< std::string > > *": '"stringVector"',
+    "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *": '"doubleMatrix"',
+    "std::vector< int >::value_type" : "int",
+    "std::vector< float >::value_type" : "float",
+    "std::vector< double >::value_type" : "float",
+    "std::vector< std::string >::value_type" : "str",
+    "std::vector< std::vector< double > >::value_type" : "Vector",
+    "std::map< std::string,std::string >::key_type" : 'str',
+    "std::map< std::string,std::string >::mapped_type" : 'str',
+    "std::vector< std::string,std::allocator< std::string > >" : "Sequence[str]",
+    'unsigned char *':'"ndarray"',
+    'unsigned short *':'"ndarray"',
+    'unsigned int *':'"ndarray"',
+    'int *' : 'IntArray',
+    'float *' : 'Vector',
+    'double *' : 'Vector',
+    'intArray' : 'IntArray',
+    'intVector' : 'IntArray',
+    'floatArray' : 'Vector',
+    'floatVector' : 'Vector',
+    'doubleArray' : 'Vector',
+    'doubleVector' : 'Vector',
+    'doubleMatrix' : 'Sequence[Sequence[float]]',
+    "double [9]" : 'Rotation',
+    "double [3]" : 'Point',
+    "double const [9]" : 'Rotation',
+    "double const [3]" : 'Point',
+    "double [4]" : "Sequence[float]",
+    "double [16]" : "Sequence[float]",
+    "std::vector< double > &, std::vector< double > &, std::vector< double > &": "Tuple[Vector,Vector,Vector]",
+    "std::vector< double > &, std::vector< std::vector< double > > &, std::vector< std::vector< double > > &": "Tuple[Vector,Sequence[Vector],Sequence[Vector]]",
+    "std::vector< std::vector< double > > &, std::vector< std::vector< double > > &, std::vector< std::vector< double > > &": "Tuple[Sequence[Vector],Sequence[Vector],Sequence[Vector]]",
+    "Klampt::SensorBase *" : None,
+}
+
+"""SWIG's bindings of STL has a bunch of garbage"""
+stl_to_python_type_hints = {
+    "::size_type" : 'int',
+    "::difference_type" : 'int',
+    "::iterator" : "Iterator",
+    "::reverse_iterator" : "Iterator",
+    "::allocator_type" : None,
 }
 
 to_python_defaults = {'NULL':"None"}
@@ -80,11 +154,8 @@ def parse_type(typestr,argname=None):
     if typestr.endswith('&'):
         typestr = typestr[:-1].strip()
         processed = True
-    if typestr.endswith('const'):
-        typestr = typestr[:-5].strip()
-        processed = True
-    if typestr.endswith('const '):
-        typestr = typestr[:-6].strip()
+    if 'const' in typestr:
+        typestr = typestr.replace(' const','')
         processed = True
     if processed:
         try:
@@ -92,6 +163,37 @@ def parse_type(typestr,argname=None):
         except KeyError:
             pass
     return typestr
+
+def parse_type_hint(typestr):
+    typestr0 = typestr
+    typestr = typestr.strip().strip('"')
+    try:
+        return to_python_type_hints[typestr]
+    except KeyError:
+        try:
+            return to_python_types[typestr]
+        except KeyError:
+            pass
+    processed = False
+    if typestr.endswith('&'):
+        typestr = typestr[:-1].strip()
+        processed = True
+    if 'const' in typestr:
+        typestr = typestr.replace(' const','')
+        processed = True
+    if '::' in typestr:  #SWIG versions of STL containers have lots of boilerplate
+        for k,v in stl_to_python_type_hints.items():
+            if k in typestr:
+                return v
+    if processed:
+        try:
+            return to_python_type_hints[typestr]
+        except KeyError:
+            try:
+                return to_python_types[typestr]
+            except KeyError:
+                pass
+    return typestr0
 
 def parse_default(defstr):
     return to_python_defaults.get(defstr,defstr)
@@ -104,8 +206,140 @@ def to_type_doc(type):
     else:
         return ':obj:`%s`'%(type,)
 
+def smart_split(string : str, delim=',', quotes='"'):
+    """Splits a string by a delimiter, ignoring parts within quotes.
+
+    Quotes can also be a 2-element list, which indicates start and end tokens.
+    """
+    if len(quotes)==2 and isinstance(quotes,(list,tuple)):
+        start,end=quotes
+        quote_parts = []
+        i = 0
+        last = 0
+        in_quote = False
+        num_quotes = 0
+        ever_quoted = False
+        while i < len(string):
+            if string[i:].startswith(start):
+                ever_quoted = True
+                if in_quote:
+                    eprint("Adding quote at position",i)
+                else:
+                    quote_parts.append(string[last:i])
+                    last = i
+                num_quotes += 1
+                in_quote = True
+                i += len(start)
+            elif string[i:].startswith(end):
+                if not in_quote:
+                    assert num_quotes == 0
+                    raise RuntimeError("End terminator '{}' encountered at position {} outside of quote: {}".format(end,i,string))
+                num_quotes -= 1
+                eprint("Removing quote at position",i)
+                i += len(end)
+                if num_quotes == 0:
+                    in_quote = False
+                    eprint("Ended quoted region",string[last:i])
+                    quote_parts.append(string[last:i])
+                    last = i
+            else:
+                i += 1
+        if last != len(string):
+            quote_parts.append(string[last:])
+        # if ever_quoted:
+        #     eprint("Split string",string,"->",quote_parts)
+        #     input()
+    else:
+        quote_parts = string.split(quotes)
+    split_args = []
+    for i,part in enumerate(quote_parts):
+        if i%2==0:
+            split_parts = part.split(delim)
+            if len(split_parts) > 0:
+                if split_parts[0]=='':
+                    split_args += split_parts[1:]
+                elif len(split_args) > 0:
+                    split_args[-1] = split_args[-1]+split_parts[0]
+                    split_args += split_parts[1:]
+                else:
+                    split_args += split_parts
+        else:
+            split_args[-1]+='"{}"'.format(part)
+    return split_args
+
+
+def print_definition(defn : str, indent0 : str):
+    fn,args,ret = re.split('\(|\)',defn)
+    #Shouldn't do normal args.split(',') since nested vector and map type hints can have commas in them
+    args = smart_split(args,',','"')
+    # if '=' in args:
+    #     eprint(defn,":",args,"->",split_args)
+    #     input("HAS DEFAULT")
+
+    #parse typing of arguments
+    for i,arg in enumerate(args):
+        if ':' not in arg: continue
+        name,desc = arg.split(':',1)
+        if '=' in desc: #has default arg
+            desc,default_arg = desc.split('=')
+            desc_parsed = parse_type_hint(desc)
+            if desc_parsed == desc:
+                if desc.strip().strip('"') not in classes:
+                    eprint("Failed to parse arg type",desc)
+                    #input()
+            if desc_parsed is not None:
+                # if ' ' in desc_parsed.strip():
+                #     eprint("Uh... didn't catch RST type?",desc,desc_parsed)
+                #     input()
+                desc_parsed = desc_parsed + '=' + default_arg
+            else:
+                desc_parsed = '=' + default_arg
+            # eprint("PARSED VERSION OF ARG WITH DEFAULT:",desc_parsed)
+            # input()
+        else:
+            desc_parsed = parse_type_hint(desc)
+            if desc_parsed == desc:
+                if desc.strip().strip('"') not in classes:
+                    eprint("Failed to parse arg type",desc)
+                    #input()
+        if desc_parsed is not None:
+            # if ' ' in desc_parsed.strip():
+            #     eprint("Uh... didn't catch RST type?",desc,desc_parsed)
+            #     input()
+            args[i] = name + ': ' + desc_parsed
+        else:
+            args[i] = name
+
+    #parse typing of return value
+    if '->' in ret:
+        prefix,retval = ret.split('->',1)
+        if retval.endswith(':'):
+            suffix = ':'
+            retval = retval[:-1]
+        else:
+            input("Uh... function definition doesn't end with :?")
+        
+        retval_parsed = parse_type_hint(retval)
+        if retval_parsed == retval:
+            if retval.strip().strip('"') not in classes:
+                eprint("Couldn't parse return type",retval)
+                #input()
+        
+        if retval_parsed is not None:
+            ret = prefix+'->'+retval_parsed+suffix
+        else:
+            ret = prefix + suffix
+    print("{}{}({}){}".format(indent0,fn,','.join(args),ret))
+
 def print_signature(siglist,indent0,docstring):
-    """Converts a SWIG signature to Google Python documentation convention.
+    """Converts a SWIG signature in a docstring to Google
+    Python documentation convention.
+
+    Args:
+        siglist (list of str): lines of SWIG signature in docstring
+        indent0 (str): spaces giving the top-level indent
+        docstring (list of str): remaining lines of docstring
+    
     """
     docsummary = []
     docdetails = []
@@ -152,7 +386,7 @@ def print_signature(siglist,indent0,docstring):
         fn = s[:s.find("(")]
         sargs = s[s.find("(")+1:s.find(")")]
         if len(sargs.strip()) > 0:
-            for arg in sargs.split(','):
+            for arg in smart_split(sargs,',',['<','>']):
                 if arg=='self':
                     continue
                 try:
@@ -259,6 +493,7 @@ if __name__ == '__main__':
     f = open(sys.argv[1],'r')
     reading_docstring = False
     finished_reading_signature = False
+    typing_injected = False
     current_signature = []
     current_docstring = []
     outer_indent = ''
@@ -267,6 +502,7 @@ if __name__ == '__main__':
     for line,ln in enumerate(f.readlines()):
         ln = ln[:-1]  #strip endline
         first_nw = len(ln) - len(ln.lstrip())
+        defn = ln[first_nw:first_nw+4]=='def '
         quote = (ln[first_nw:first_nw+3]=='"""' or ln[first_nw:first_nw+4]=='r"""')
         if reading_docstring:
             if quote:
@@ -308,5 +544,11 @@ if __name__ == '__main__':
                 finished_reading_signature = False
                 outer_indent = ln[:first_nw]
             print(ln)
+        elif defn:
+            print_definition(ln[first_nw:],ln[:first_nw])
+        elif not typing_injected and typing_inject_location in ln:
+            print(ln)
+            print(typing_header)
+            typing_injected = True
         else:
             print(ln)
