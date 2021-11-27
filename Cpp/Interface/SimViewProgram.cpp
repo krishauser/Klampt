@@ -21,6 +21,8 @@ using namespace Klampt;
 typedef LoggingController MyController;
 typedef PolynomialPathController MyMilestoneController;
 
+namespace Klampt {
+
 PolynomialMotionQueue* GetMotionQueue(RobotController* rc)
 {
   LoggingController* lc = dynamic_cast<LoggingController*>(rc);
@@ -37,6 +39,8 @@ PolynomialMotionQueue* GetMotionQueue(RobotController* rc)
   }
   return c;
 }
+
+} //namespace Klampt
 
 SimViewProgram::SimViewProgram(WorldModel* world)
   :WorldViewProgram(world),simulate(0)
