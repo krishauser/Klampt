@@ -1647,6 +1647,94 @@ void interpolate_nd_min_time_linear(const vector<double>& x0,const vector<double
   }
 }
 
+void brake_1d(double x0,double v0,double amax,
+              vector<double>& out,vector<double>& out2,vector<double>& out3)
+{
+  if(v0==0) {
+    out.resize(1);
+    out2.resize(1);
+    out3.resize(1);
+    out[0] = 0;
+    out2[0] = x0;
+    out3[0] = 0;
+    return;
+  }
+  if(amax <= 0)
+    throw PyException("Invalid value for acceleration maximum");
+  out.resize(2);
+  out2.resize(2);
+  out3.resize(2);
+  double t = Abs(v0)/amax;
+  out[0]=0;
+  out[1]=t;
+  out2[0]=x0;
+  out2[1]=x0+t*v0-0.5*Sqr(t)*Sign(v0)*amax;
+  out3[0]=v0;
+  out3[1]=0;
+}
+
+void brake_nd(const vector<double>& x0,const vector<double>& v0,
+             const vector<double>& xmin,const vector<double>& xmax,const vector<double>& amax,
+             vector<vector<double> >& out,vector<vector<double> >& out2,vector<vector<double> >& out3)
+{
+  if(x0.size() != v0.size()) 
+    throw PyException("State position and velocity don't match");
+  if(!xmin.empty())  {
+    if(x0.size() != xmin.size()) 
+      throw PyException("Position bound incorrect size");
+  }
+  if(!xmax.empty())  {
+    if(x0.size() != xmax.size()) 
+      throw PyException("Position bound incorrect size");
+  }
+  if(x0.size() != amax.size()) 
+    throw PyException("Acceleration bound incorrect size");
+  for(size_t i=0;i<x0.size();i++) {
+    if(v0[i] != 0 && amax[i] <= 0) {
+        throw PyException("Invalid value for acceleration maximum");
+    }
+  }
+  out.resize(x0.size());
+  out2.resize(x0.size());
+  out3.resize(x0.size());
+  double maxtime = 0;
+  for(size_t i=0;i<x0.size();i++) {
+    brake_1d(x0[i],v0[i],amax[i],out[i],out2[i],out3[i]);
+    Assert(out[i][0] == 0);
+    maxtime = Max(maxtime,out[i].back());
+  }
+  //try slowing down the braking
+  for(size_t i=0;i<x0.size();i++) {
+    if(out[i].back() != maxtime) {
+      if(out[i].size()==1) { //stationary
+        out[i].resize(2,0);
+        out2[i].resize(2,out2[i][0]);
+        out3[i].resize(2,out3[i][0]);
+      }
+      double a = -v0[i]/maxtime;
+      out[i].back() = maxtime;
+      out2[i].back() = x0[i] + v0[i]*maxtime + 0.5*a*maxtime*maxtime;
+      bool feasible = true;
+      double xbnd = x0[i];
+      if(!xmin.empty() && out2[i].back() < xmin[i]) { //out of range
+        feasible = true;
+        xbnd = xmin[i];
+      }
+      if(!xmax.empty() && out2[i].back() > xmax[i]) { //out of range
+        feasible = true;
+        xbnd = xmax[i];
+      }
+      if(!feasible) {
+        out[i].resize(0);
+        if(x0[i] >= xmin[i] && x0[i] <= xmax[i])
+          interpolate_1d_min_accel(x0[i],v0[i],xbnd,0,maxtime,xmin[i],xmax[i],dInf,out[i],out2[i],out3[i]);
+        if(out[i].empty()) //failure
+          brake_1d(x0[i],v0[i],amax[i],out[i],out2[i],out3[i]);
+      }
+    }
+  }
+}
+
 void combine_nd_cubic(const vector<vector<double> >& times,const vector<vector<double> >& positions,const vector<vector<double> >& velocities,
     vector<double>& out,vector<vector<double> >& out2,vector<vector<double> >& out3)
 {
