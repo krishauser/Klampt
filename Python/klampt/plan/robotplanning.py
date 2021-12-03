@@ -323,7 +323,7 @@ def planToSet(world,robot,target,
     if hasattr(space,'lift'):  #the planning takes place in a space of lower dimension than #links
         plan = EmbeddedMotionPlan(space,q0,**planOptions)
     else:
-        plan = MotionPlan(space,q0,**planOptions)
+        plan = MotionPlan(space,**planOptions)
 
     #convert target to a (test,sample) pair if it's a cspace
     if isinstance(target,CSpace):
