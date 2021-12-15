@@ -1051,3 +1051,38 @@ _deprecated_func("filenameToType","filename_to_type")
 _deprecated_func("filenameToTypes","filename_to_type")
 _deprecated_func("toJson","to_json")
 _deprecated_func("fromJson","from_json")
+
+from collections import UserDict, UserList
+class _DeprecatedDict(dict):
+    def __init__(self,oldname,newname,*args,**kwargs):
+        UserDict.__init__(self,*args,**kwargs)
+        self._oldname = oldname
+        self._newname = newname
+        self._warned = False
+    def __getitem__(self,key):
+        if not self._warned:
+            self._warned = True
+            warnings.warn("{} will be deprecated in favor of {} in a future version of Klampt".format(self._oldname,self._newname),DeprecationWarning)
+        return UserDict.__getitem__(self,key)
+
+class _DeprecatedList(UserList):
+    def __init__(self,oldname,newname,*args,**kwargs):
+        UserList.__init__(self,*args,**kwargs)
+        self._oldname = oldname
+        self._newname = newname
+        self._warned = False
+    def __getitem__(self,key):
+        if not self._warned:
+            self._warned = True
+            warnings.warn("{} will be deprecated in favor of {} in a future version of Klampt".format(self._oldname,self._newname),DeprecationWarning)
+        return UserList.__getitem__(self,key)
+    def __contains__(self,key):
+        if not self._warned:
+            self._warned = True
+            warnings.warn("{} will be deprecated in favor of {} in a future version of Klampt".format(self._oldname,self._newname),DeprecationWarning)
+        return UserList.__contains__(self,key)
+
+
+extensionToTypes = _DeprecatedDict("extensionToTypes","EXTENSION_TO_TYPES",EXTENSION_TO_TYPES)
+typeToExtensions = _DeprecatedDict("typeToExtensions","TYPE_TO_EXTENSIONS",TYPE_TO_EXTENSIONS)
+unsupportedJsonTypes = _DeprecatedList("unsupportedJsonTypes","UNSUPPORTED_JSON_TYPES",UNSUPPORTED_JSON_TYPES)
