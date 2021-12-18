@@ -565,7 +565,7 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
     def cartesianVelocity(self,q,dq,frame='world'):
         if self._baseControlMode == self._emulatorControlMode:
             #using base interface
-            return self._try('cartesianVelocity',[q,dq,frame],lambda q,dq,frame: self._emulator.cartesianPosition(q,dq,frame,self._indices))
+            return self._try('cartesianVelocity',[q,dq,frame],lambda q,dq,frame: self._emulator.cartesianVelocity(q,dq,frame,self._indices))
         else:
             return self._emulator.cartesianVelocity(q,dq,frame,self._indices)
 
