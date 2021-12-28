@@ -289,7 +289,12 @@ class ControllerGUI(QtWidgets.QMainWindow):
             if not w:
                 break
         indices = self.controller.indices(self.activePart)
-        qmin_rob,qmax_rob = self.controller.klamptModel().getJointLimits()
+        robotModel = self.controller.klamptModel()
+        qmin_rob,qmax_rob = robotModel.getJointLimits()
+        for i in range(robotModel.numLinks()):
+            if robotModel.getJointType(i)=='spin':
+                qmin_rob[i] = 0
+                qmax_rob[i] = math.pi*2
         qmin = self.controller.configFromKlampt(qmin_rob)
         qmax = self.controller.configFromKlampt(qmax_rob)
         if len(indices) != nj:
@@ -303,6 +308,14 @@ class ControllerGUI(QtWidgets.QMainWindow):
             jointWidget = QtWidgets.QWidget()
             ui_filename = pkg_resources.resource_filename('klampt','data/joint_edit.ui')
             uic.loadUi(ui_filename, jointWidget)
+            if math.isinf(qmin_rob[i]):
+                self.addError("Infinite joint limit on joint {}".format(self.controller.jointName(indices[i])))
+                qmin_rob[i] = -1
+                if math.isinf(qmax_rob[i]):
+                    qmax_rob[i] = 1
+            elif math.isinf(qmax_rob[i]):
+                self.addError("Infinite joint limit on joint {}".format(self.controller.jointName(indices[i])))
+                qmax_rob[i] = 1
             jointWidget.sensedSpinBox.setMinimum(qmin[indices[i]])
             jointWidget.sensedSpinBox.setMaximum(qmax[indices[i]])
             jointWidget.commandSpinBox.setMinimum(qmin[indices[i]])
