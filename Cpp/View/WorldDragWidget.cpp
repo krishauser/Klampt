@@ -5,7 +5,7 @@ using namespace Klampt;
 
 WorldDragWidget::WorldDragWidget(WorldModel* _world)
   :world(_world),active(true),robotsActive(true),objectsActive(true),terrainsActive(false),
-   highlightColor(1,1,1,0.3),lineColor(1,0.5,0),lineWidth(5.0),dragging(false),hoverID(-1),highlightID(-1)
+   highlightColor(1,1,1,1.0),lineColor(1,0.5,0),lineWidth(5.0),dragging(false),hoverID(-1),highlightID(-1)
 {}
 
 void WorldDragWidget::Set(WorldModel* _world)
@@ -23,13 +23,14 @@ void WorldDragWidget::SetHighlight(bool value)
   hasHighlight = value;
   if(hasHighlight && hoverID >= 0) {
     //update the object's color
-    originalFaceColor = world->GetAppearance(hoverID)->faceColor;
-    world->GetAppearance(hoverID)->faceColor.blend(originalFaceColor,highlightColor,highlightColor.rgba[3]);
+    originalFaceColor = world->GetAppearance(hoverID)->tintColor;
+    world->GetAppearance(hoverID)->SetTintColor(highlightColor,0.3);
     highlightID = hoverID;
   }
   else if(!hasHighlight && highlightID >= 0) {
     //restore the object's color
-    world->GetAppearance(highlightID)->faceColor = originalFaceColor;
+    world->GetAppearance(highlightID)->tintColor = originalFaceColor;
+    world->GetAppearance(highlightID)->tintStrength = 0.0;
   }
 }
 
