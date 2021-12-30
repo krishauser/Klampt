@@ -15,8 +15,8 @@ class RobotConstrainedInterpolator : public ConstrainedInterpolator
 {
 public:
   RobotConstrainedInterpolator(RobotModel& robot,const vector<IKGoal>& goals);
-  virtual void ConstraintValue(const Config& x,Vector& v);
-  virtual bool Project(Config& x);
+  virtual void ConstraintValue(const Config& x,Vector& v) override;
+  virtual bool Project(Config& x) override;
 
   RobotCSpace space;
   RobotIKFunction f;
@@ -30,9 +30,9 @@ class RobotSmoothConstrainedInterpolator : public SmoothConstrainedInterpolator
 {
 public:
   RobotSmoothConstrainedInterpolator(RobotModel& robot,const vector<IKGoal>& goals);
-  virtual void ConstraintValue(const Config& x,Vector& v);
-  virtual bool Project(Config& x);
-  virtual bool ProjectVelocity(const Config& x,Vector& v);
+  virtual void ConstraintValue(const Config& x,Vector& v) override;
+  virtual bool Project(Config& x) override;
+  virtual bool ProjectVelocity(const Config& x,Vector& v) override;
 
   RobotCSpace space;
   RobotIKFunction f;

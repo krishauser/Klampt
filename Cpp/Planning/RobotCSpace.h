@@ -34,19 +34,19 @@ class RobotCSpace : public GeodesicCSpace
 public:
   RobotCSpace(RobotModel& robot);
   RobotCSpace(const RobotCSpace& space);
-  virtual int NumDimensions();
-  virtual string VariableName(int i);
-  virtual void Sample(Config& x);
-  virtual void SampleNeighborhood(const Config& c,Real r,Config& out);
-  virtual void Interpolate(const Config& x,const Config& y,Real u,Config& out);
-  virtual Real Distance(const Config& x,const Config& y);
-  virtual void Properties(PropertyMap&);
+  virtual int NumDimensions() override;
+  virtual string VariableName(int i) override;
+  virtual void Sample(Config& x) override;
+  virtual void SampleNeighborhood(const Config& c,Real r,Config& out) override;
+  virtual void Interpolate(const Config& x,const Config& y,Real u,Config& out) override;
+  virtual Real Distance(const Config& x,const Config& y) override;
+  virtual void Properties(PropertyMap&) override;
 
-  virtual void InterpolateDeriv(const Config& a,const Config& b,Real u,Vector& dx);
-  virtual void InterpolateDerivA(const Config& a,const Config& b,Real u,const Vector& da,Vector& dx);
-  virtual void InterpolateDerivB(const Config& a,const Config& b,Real u,const Vector& db,Vector& dx);
-  virtual void InterpolateDeriv2(const Config& a,const Config& b,Real u,Vector& ddx);
-  virtual void Integrate(const Config& a,const Vector& da,Config& b);
+  virtual void InterpolateDeriv(const Config& a,const Config& b,Real u,Vector& dx) override;
+  virtual void InterpolateDerivA(const Config& a,const Config& b,Real u,const Vector& da,Vector& dx) override;
+  virtual void InterpolateDerivB(const Config& a,const Config& b,Real u,const Vector& db,Vector& dx) override;
+  virtual void InterpolateDeriv2(const Config& a,const Config& b,Real u,Vector& ddx) override;
+  virtual void Integrate(const Config& a,const Vector& da,Config& b) override;
 
   RobotModel& robot;
   //optional: can edit weights for distance metric and neighborhood sampling
@@ -67,18 +67,18 @@ class ActiveRobotCSpace : public GeodesicCSpace
 {
 public:
   ActiveRobotCSpace(RobotModel& robot,const ArrayMapping& dofs);
-  virtual int NumDimensions();
-  virtual string VariableName(int i);
-  virtual void Sample(Config& x);
-  virtual void Interpolate(const Config& x,const Config& y,Real u,Config& out);
-  virtual Real Distance(const Config& x,const Config& y);
-  virtual void Properties(PropertyMap&) const;
+  virtual int NumDimensions() override;
+  virtual string VariableName(int i) override;
+  virtual void Sample(Config& x) override;
+  virtual void Interpolate(const Config& x,const Config& y,Real u,Config& out) override;
+  virtual Real Distance(const Config& x,const Config& y) override;
+  virtual void Properties(PropertyMap&) override;
 
-  virtual void InterpolateDeriv(const Config& a,const Config& b,Real u,Vector& dx);
-  virtual void InterpolateDerivA(const Config& a,const Config& b,Real u,const Vector& da,Vector& dx);
-  virtual void InterpolateDerivB(const Config& a,const Config& b,Real u,const Vector& db,Vector& dx);
-  virtual void InterpolateDeriv2(const Config& a,const Config& b,Real u,Vector& ddx);
-  virtual void Integrate(const Config& a,const Vector& da,Config& b);
+  virtual void InterpolateDeriv(const Config& a,const Config& b,Real u,Vector& dx) override;
+  virtual void InterpolateDerivA(const Config& a,const Config& b,Real u,const Vector& da,Vector& dx) override;
+  virtual void InterpolateDerivB(const Config& a,const Config& b,Real u,const Vector& db,Vector& dx) override;
+  virtual void InterpolateDeriv2(const Config& a,const Config& b,Real u,Vector& ddx) override;
+  virtual void Integrate(const Config& a,const Vector& da,Config& b) override;
 
   RobotModel& robot;
   ArrayMapping dofs;
@@ -114,12 +114,12 @@ class SingleRobotCSpace : public RobotCSpace
   void Init();
 
   virtual ~SingleRobotCSpace() {}
-  virtual void Sample(Config& x);
-  virtual void SampleNeighborhood(const Config& c,Real r,Config& x);
-  virtual bool IsFeasible(const Config& x);
-  virtual EdgePlannerPtr PathChecker(const Config& a,const Config& b,int obstacle);
-  virtual EdgePlannerPtr PathChecker(const Config& a,const Config& b);
-  virtual void Properties(PropertyMap& map);
+  virtual void Sample(Config& x) override;
+  virtual void SampleNeighborhood(const Config& c,Real r,Config& x) override;
+  virtual bool IsFeasible(const Config& x) override;
+  virtual EdgePlannerPtr PathChecker(const Config& a,const Config& b,int obstacle) override;
+  virtual EdgePlannerPtr PathChecker(const Config& a,const Config& b) override;
+  virtual void Properties(PropertyMap& map) override;
 
   virtual void GetJointLimits(Vector& bmin,Vector& bmax);
 
@@ -150,7 +150,7 @@ class SingleRigidObjectCSpace: public SE3CSpace
  public:
   SingleRigidObjectCSpace(WorldModel& world,int index,WorldPlannerSettings* settings);
   RigidObjectModel* GetObject() const;  
-  virtual EdgePlannerPtr PathChecker(const Config& a,const Config& b);
+  virtual EdgePlannerPtr PathChecker(const Config& a,const Config& b) override;
 
   ///Ignores collisino between this object and world ID id
   void IgnoreCollisions(int id);

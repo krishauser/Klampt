@@ -8,7 +8,7 @@ RampCSpaceAdaptor::RampCSpaceAdaptor(CSpace* _cspace,const Vector& _velMax,const
   :cspace(_cspace),velMax(_velMax),accMax(_accMax),visibilityTolerance(1e-3)
 {}
 
-int RampCSpaceAdaptor::NumDimensions() const { return cspace->NumDimensions()*2; }
+int RampCSpaceAdaptor::NumDimensions() { return cspace->NumDimensions()*2; }
 
 bool RampCSpaceAdaptor::IsFeasible(const Config& q,const Config& dq)
 {
@@ -107,7 +107,7 @@ void RampCSpaceAdaptor::Interpolate(const State& x,const State& y,Real u,State& 
   }
 }
 
-void RampCSpaceAdaptor::Properties(PropertyMap& props) const
+void RampCSpaceAdaptor::Properties(PropertyMap& props)
 {
   cspace->Properties(props);
   props.set("euclidean",0);

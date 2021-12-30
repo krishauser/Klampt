@@ -22,8 +22,8 @@ struct JointLimitConstraint : public LimitConstraint
   JointLimitConstraint(const RobotModel& _robot)
     :LimitConstraint(_robot.qMin,_robot.qMax),robot(_robot)
   {}
-  virtual string Label() const;
-  virtual string Label(int i) const;
+  virtual string Label() const override;
+  virtual string Label(int i) const override;
 
   const RobotModel& robot;
 };
@@ -32,18 +32,18 @@ struct JointLimitConstraint : public LimitConstraint
 struct SuppPolyConstraint : public InequalityConstraint
 {
   SuppPolyConstraint(RobotModel& robot, SupportPolygon& sp);
-  virtual string Label() const;
-  virtual int NumDimensions() const;
-  virtual void PreEval(const Vector& x);
-  virtual void Eval(const Vector& x,Vector& v);
-  virtual Real Eval_i(const Vector& x,int i);
-  virtual void Jacobian(const Vector& x,Matrix& J);
-  virtual void Jacobian_i(const Vector& x,int i,Vector& Ji);
-  virtual void Hessian_i(const Vector& x,int i,Matrix& Hi);
+  virtual string Label() const override;
+  virtual int NumDimensions() const override;
+  virtual void PreEval(const Vector& x) override;
+  virtual void Eval(const Vector& x,Vector& v) override;
+  virtual Real Eval_i(const Vector& x,int i) override;
+  virtual void Jacobian(const Vector& x,Matrix& J) override;
+  virtual void Jacobian_i(const Vector& x,int i,Vector& Ji) override;
+  virtual void Hessian_i(const Vector& x,int i,Matrix& Hi) override;
 
   //saves by considering constraints dependent
-  virtual Real Margin(const Vector& x,int& minConstraint);
-  virtual bool Satisfies_i(const Vector& x,int i,Real d=Zero);
+  virtual Real Margin(const Vector& x,int& minConstraint) override;
+  virtual bool Satisfies_i(const Vector& x,int i,Real d=Zero) override;
 
   RobotModel& robot;
   SupportPolygon& sp;
@@ -61,23 +61,23 @@ struct SuppPolyConstraint : public InequalityConstraint
 struct CollisionConstraint : public InequalityConstraint
 {
   CollisionConstraint(RobotModel& robot, Geometry::AnyCollisionGeometry3D& geom);
-  virtual string Label() const;
-  virtual string Label(int i) const;
-  virtual int NumDimensions() const {
+  virtual string Label() const override;
+  virtual string Label(int i) const override;
+  virtual int NumDimensions() const override {
 //	  return this->activeDofs.Size();
 //	  cout << "calling NumDimensions" << endl;
 //	  getchar();
 	  return robot.links.size();
   }
-  virtual void PreEval(const Vector& x);
-  virtual void Eval(const Vector& x, Vector& v);
-  virtual Real Eval_i(const Vector& x,int i);
-  virtual void Jacobian(const Vector& x,Matrix& J);
-  virtual void Jacobian_i(const Vector& x,int i,Vector& Ji);
-  //virtual void DirectionalDeriv(const Vector& x,const Vector& h,Vector& v);
-  virtual void Hessian_i(const Vector& x,int i,Matrix& Hi);
+  virtual void PreEval(const Vector& x) override;
+  virtual void Eval(const Vector& x, Vector& v) override;
+  virtual Real Eval_i(const Vector& x,int i) override;
+  virtual void Jacobian(const Vector& x,Matrix& J) override;
+  virtual void Jacobian_i(const Vector& x,int i,Vector& Ji) override;
+  //virtual void DirectionalDeriv(const Vector& x,const Vector& h,Vector& v) override;
+  virtual void Hessian_i(const Vector& x,int i,Matrix& Hi) override;
 
-  virtual bool Satisfies_i(const Vector& x,int i,Real d=Zero);
+  virtual bool Satisfies_i(const Vector& x,int i,Real d=Zero) override;
 
   RobotModel& robot;
   Geometry::AnyCollisionGeometry3D& geometry;
@@ -89,18 +89,18 @@ struct CollisionConstraint : public InequalityConstraint
 struct SelfCollisionConstraint : public InequalityConstraint
 {
   SelfCollisionConstraint(RobotModel& robot);
-  virtual string Label() const;
-  virtual string Label(int i) const;
-  virtual int NumDimensions() const { return (int)collisionPairs.size(); }
-  virtual void PreEval(const Vector& x);
-  virtual void Eval(const Vector& x, Vector& v);
-  virtual Real Eval_i(const Vector& x,int i);
-  virtual void Jacobian(const Vector& x,Matrix& J);
-  virtual void Jacobian_i(const Vector& x,int i,Vector& Ji);
-  //virtual void DirectionalDeriv(const Vector& x,const Vector& h,Vector& v);
-  virtual void Hessian_i(const Vector& x,int i,Matrix& Hi);
+  virtual string Label() const override;
+  virtual string Label(int i) const override;
+  virtual int NumDimensions() const override { return (int)collisionPairs.size(); }
+  virtual void PreEval(const Vector& x) override;
+  virtual void Eval(const Vector& x, Vector& v) override;
+  virtual Real Eval_i(const Vector& x,int i) override;
+  virtual void Jacobian(const Vector& x,Matrix& J) override;
+  virtual void Jacobian_i(const Vector& x,int i,Vector& Ji) override;
+  //virtual void DirectionalDeriv(const Vector& x,const Vector& h,Vector& v) override;
+  virtual void Hessian_i(const Vector& x,int i,Matrix& Hi) override;
 
-  virtual bool Satisfies_i(const Vector& x,int i,Real d=Zero);
+  virtual bool Satisfies_i(const Vector& x,int i,Real d=Zero) override;
 
   RobotModel& robot;
   vector<pair<int,int> > collisionPairs;
@@ -111,10 +111,10 @@ struct SelfCollisionConstraint : public InequalityConstraint
 struct TorqueLimitConstraint : public InequalityConstraint
 {
   TorqueLimitConstraint(TorqueSolver& solver);
-  virtual string Label() const;
-  virtual int NumDimensions() const;
-  virtual void PreEval(const Vector& x);
-  virtual void Eval(const Vector& x,Vector& v);
+  virtual string Label() const override;
+  virtual int NumDimensions() const override;
+  virtual void PreEval(const Vector& x) override;
+  virtual void Eval(const Vector& x,Vector& v) override;
 
   TorqueSolver& solver;
 };

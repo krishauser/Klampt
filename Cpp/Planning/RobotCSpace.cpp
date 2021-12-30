@@ -538,7 +538,7 @@ Real ActiveRobotCSpace::Distance(const Config& x,const Config& y)
 }
 
 
-void ActiveRobotCSpace::Properties(PropertyMap& map) const
+void ActiveRobotCSpace::Properties(PropertyMap& map)
 {
   //TODO
 }
