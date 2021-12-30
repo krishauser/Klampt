@@ -43,7 +43,7 @@ struct OmniscientStateEstimator : public RobotStateEstimator
   OmniscientStateEstimator(RobotModel& _robot,ODERobot& _oderobot)
     :RobotStateEstimator(_robot),oderobot(_oderobot) {}
   virtual ~OmniscientStateEstimator();
-  virtual void UpdateModel();
+  virtual void UpdateModel() override;
 
   ODERobot& oderobot;
 };
@@ -59,14 +59,14 @@ struct IntegratedStateEstimator : public RobotStateEstimator
 {
   IntegratedStateEstimator(RobotModel& _robot);
   virtual ~IntegratedStateEstimator() {}
-  virtual void ReadSensors(RobotSensors& sensors);
-  virtual void UpdateModel() {
+  virtual void ReadSensors(RobotSensors& sensors) override;
+  virtual void UpdateModel() override {
     robot.UpdateConfig(q_predicted);
     robot.dq = dq_predicted;
   }
-  virtual void ReadCommand(const RobotMotorCommand& command);
-  virtual void Advance(Real dt);
-  virtual void Reset();
+  virtual void ReadCommand(const RobotMotorCommand& command) override;
+  virtual void Advance(Real dt) override;
+  virtual void Reset() override;
 
   //instead of ReadCommand, this estimator uses SetDDQ
   void SetDDQ(const Vector& ddq) { ddq_predicted = ddq; }

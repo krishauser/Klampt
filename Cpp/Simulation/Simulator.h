@@ -148,9 +148,9 @@ class ForceHook : public SimulatorHook
 {
  public:
   ForceHook(dBodyID body,const Vector3& worldpt,const Vector3& f);
-  virtual void Step(Real dt);
-  virtual bool ReadState(File& f);
-  virtual bool WriteState(File& f) const;
+  virtual void Step(Real dt) override;
+  virtual bool ReadState(File& f) override;
+  virtual bool WriteState(File& f) const override;
 
   dBodyID body;
   Vector3 worldpt,f;
@@ -164,9 +164,9 @@ class LocalForceHook : public SimulatorHook
 {
  public:
   LocalForceHook(dBodyID body,const Vector3& localpt,const Vector3& f);
-  virtual void Step(Real dt);
-  virtual bool ReadState(File& f);
-  virtual bool WriteState(File& f) const;
+  virtual void Step(Real dt) override;
+  virtual bool ReadState(File& f) override;
+  virtual bool WriteState(File& f) const override;
 
   dBodyID body;
   Vector3 localpt,f;
@@ -181,9 +181,9 @@ class WrenchHook : public SimulatorHook
 {
  public:
   WrenchHook(dBodyID body,const Vector3& f,const Vector3& m);
-  virtual void Step(Real dt);
-  virtual bool ReadState(File& f);
-  virtual bool WriteState(File& f) const;
+  virtual void Step(Real dt) override;
+  virtual bool ReadState(File& f) override;
+  virtual bool WriteState(File& f) const override;
 
   dBodyID body;
   Vector3 f,m;
@@ -196,9 +196,9 @@ class SpringHook : public SimulatorHook
 {
  public:
   SpringHook(dBodyID body,const Vector3& worldpt,const Vector3& target,Real kP,Real kD=0);
-  virtual void Step(Real dt);
-  virtual bool ReadState(File& f);
-  virtual bool WriteState(File& f) const;
+  virtual void Step(Real dt) override;
+  virtual bool ReadState(File& f) override;
+  virtual bool WriteState(File& f) const override;
 
   dBodyID body;
   Vector3 localpt,target;
@@ -212,24 +212,24 @@ class JointForceHook : public SimulatorHook
 {
 public:
   JointForceHook(ODEJoint* joint,Real f);
-  virtual void Step(Real dt);
-  virtual bool ReadState(File& f);
-  virtual bool WriteState(File& f) const;
+  virtual void Step(Real dt) override;
+  virtual bool ReadState(File& f) override;
+  virtual bool WriteState(File& f) const override;
 
   ODEJoint* joint;
   Real f;
 };
 
 /** @ingroup Simulation
- * @brief A hook that adds a constant force to a joint
+ * @brief A hook that adds a Hookean (optionally damped) virtual spring to a joint
  */
 class JointSpringHook : public SimulatorHook
 {
 public:
   JointSpringHook(ODEJoint* joint,Real target,Real kP,Real kD=0);
-  virtual void Step(Real dt);
-  virtual bool ReadState(File& f);
-  virtual bool WriteState(File& f) const;
+  virtual void Step(Real dt) override;
+  virtual bool ReadState(File& f) override;
+  virtual bool WriteState(File& f) const override;
 
   ODEJoint* joint;
   Real target;

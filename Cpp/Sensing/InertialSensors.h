@@ -20,19 +20,19 @@ class Accelerometer : public SensorBase
 {
  public:
   Accelerometer();
-  virtual const char* Type() const { return "Accelerometer"; }
-  virtual void Simulate(SimRobotController* robot,Simulator* sim);
-  virtual void SimulateKinematic(RobotModel& robot,WorldModel& world);
-  virtual void Advance(double dt);
-  virtual void Reset();
-  virtual void MeasurementNames(vector<string>& names) const;
-  virtual void GetMeasurements(vector<double>& values) const;
-  virtual void SetMeasurements(const vector<double>& values);
-  virtual void GetInternalState(vector<double>& state) const;
-  virtual void SetInternalState(const vector<double>& state);
-  virtual map<string,string> Settings() const;
-  virtual bool GetSetting(const string& name,string& str) const;
-  virtual bool SetSetting(const string& name,const string& str);
+  virtual const char* Type() const override { return "Accelerometer"; }
+  virtual void Simulate(SimRobotController* robot,Simulator* sim) override;
+  virtual void SimulateKinematic(RobotModel& robot,WorldModel& world) override;
+  virtual void Advance(double dt) override;
+  virtual void Reset() override;
+  virtual void MeasurementNames(vector<string>& names) const override;
+  virtual void GetMeasurements(vector<double>& values) const override;
+  virtual void SetMeasurements(const vector<double>& values) override;
+  virtual void GetInternalState(vector<double>& state) const override;
+  virtual void SetInternalState(const vector<double>& state) override;
+  virtual map<string,string> Settings() const override;
+  virtual bool GetSetting(const string& name,string& str) const override;
+  virtual bool SetSetting(const string& name,const string& str) override;
 
   int link;
   RigidTransform Tsensor;  ///< Position of unit on link
@@ -62,17 +62,17 @@ class TiltSensor : public SensorBase
 {
  public:
   TiltSensor();
-  virtual const char* Type() const { return "TiltSensor"; }
-  virtual void Simulate(SimRobotController* robot,Simulator* sim);
-  virtual void SimulateKinematic(RobotModel& robot,WorldModel& world);
-  virtual void Advance(double dt);
-  virtual void Reset();
-  virtual void MeasurementNames(vector<string>& names) const;
-  virtual void GetMeasurements(vector<double>& values) const;
-  virtual void SetMeasurements(const vector<double>& values);
-  virtual map<string,string> Settings() const;
-  virtual bool GetSetting(const string& name,string& str) const;
-  virtual bool SetSetting(const string& name,const string& str);
+  virtual const char* Type() const override { return "TiltSensor"; }
+  virtual void Simulate(SimRobotController* robot,Simulator* sim) override;
+  virtual void SimulateKinematic(RobotModel& robot,WorldModel& world) override;
+  virtual void Advance(double dt) override;
+  virtual void Reset() override;
+  virtual void MeasurementNames(vector<string>& names) const override;
+  virtual void GetMeasurements(vector<double>& values) const override;
+  virtual void SetMeasurements(const vector<double>& values) override;
+  virtual map<string,string> Settings() const override;
+  virtual bool GetSetting(const string& name,string& str) const override;
+  virtual bool SetSetting(const string& name,const string& str) override;
 
   int link;
   Vector3 referenceDir;
@@ -101,19 +101,19 @@ class GyroSensor : public SensorBase
 {
  public:
   GyroSensor();
-  virtual const char* Type() const { return "GyroSensor"; }
-  virtual void Simulate(SimRobotController* robot,Simulator* sim);
-  virtual void SimulateKinematic(RobotModel& robot,WorldModel& world);
-  virtual void Reset();
-  virtual void Advance(Real dt);
-  virtual void MeasurementNames(vector<string>& names) const;
-  virtual void GetMeasurements(vector<double>& values) const;
-  virtual void SetMeasurements(const vector<double>& values);
-  virtual void GetInternalState(vector<double>& state) const;
-  virtual void SetInternalState(const vector<double>& state);
-  virtual map<string,string> Settings() const;
-  virtual bool GetSetting(const string& name,string& str) const;
-  virtual bool SetSetting(const string& name,const string& str);
+  virtual const char* Type() const override { return "GyroSensor"; }
+  virtual void Simulate(SimRobotController* robot,Simulator* sim) override;
+  virtual void SimulateKinematic(RobotModel& robot,WorldModel& world) override;
+  virtual void Reset() override;
+  virtual void Advance(Real dt) override;
+  virtual void MeasurementNames(vector<string>& names) const override;
+  virtual void GetMeasurements(vector<double>& values) const override;
+  virtual void SetMeasurements(const vector<double>& values) override;
+  virtual void GetInternalState(vector<double>& state) const override;
+  virtual void SetInternalState(const vector<double>& state) override;
+  virtual map<string,string> Settings() const override;
+  virtual bool GetSetting(const string& name,string& str) const override;
+  virtual bool SetSetting(const string& name,const string& str) override;
 
   int link;                ///< The link on which the sensor is located
   bool hasAngAccel;        ///< True if angular accel is directly measured
@@ -142,19 +142,19 @@ class IMUSensor : public SensorBase
 {
  public:
   IMUSensor();
-  virtual const char* Type() const { return "IMUSensor"; }
-  virtual void Simulate(SimRobotController* robot,Simulator* sim);
-  virtual void SimulateKinematic(RobotModel& robot,WorldModel& world);
-  virtual void Advance(Real dt);
-  virtual void Reset();
-  virtual void MeasurementNames(vector<string>& names) const;
-  virtual void GetMeasurements(vector<double>& values) const;
-  virtual void SetMeasurements(const vector<double>& values);
-  virtual void GetInternalState(vector<double>& state) const;
-  virtual void SetInternalState(const vector<double>& state);
-  virtual map<string,string> Settings() const;
-  virtual bool GetSetting(const string& name,string& str) const;
-  virtual bool SetSetting(const string& name,const string& str);
+  virtual const char* Type() const override { return "IMUSensor"; }
+  virtual void Simulate(SimRobotController* robot,Simulator* sim) override;
+  virtual void SimulateKinematic(RobotModel& robot,WorldModel& world) override;
+  virtual void Advance(Real dt) override;
+  virtual void Reset() override;
+  virtual void MeasurementNames(vector<string>& names) const override;
+  virtual void GetMeasurements(vector<double>& values) const override;
+  virtual void SetMeasurements(const vector<double>& values) override;
+  virtual void GetInternalState(vector<double>& state) const override;
+  virtual void SetInternalState(const vector<double>& state) override;
+  virtual map<string,string> Settings() const override;
+  virtual bool GetSetting(const string& name,string& str) const override;
+  virtual bool SetSetting(const string& name,const string& str) override;
 
   Accelerometer accelerometer;
   GyroSensor gyro;

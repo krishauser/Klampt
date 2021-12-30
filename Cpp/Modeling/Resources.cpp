@@ -793,7 +793,7 @@ vector<string> IKGoalResource::CastTypes() const
   return res;
 }
 
-ResourcePtr IKGoalResource::Cast(const char* subtype) const
+ResourcePtr IKGoalResource::Cast(const char* subtype)
 {
   if(0==strcmp(subtype,"Hold")) {
     Hold h;
@@ -849,7 +849,7 @@ vector<string> HoldResource::SubTypes() const
   return res;
 }
 
-ResourcePtr HoldResource::Cast(const char* subtype) const
+ResourcePtr HoldResource::Cast(const char* subtype)
 {
   if(0==strcmp(subtype,"IKGoal")) {
     return MakeResource(this->name,this->hold.ikConstraint);

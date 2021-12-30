@@ -42,18 +42,18 @@ class LaserRangeSensor : public SensorBase
  public:
   LaserRangeSensor();
   virtual ~LaserRangeSensor() {}
-  virtual const char* Type() const { return "LaserRangeSensor"; }
-  virtual void Simulate(SimRobotController* robot,Simulator* sim);
-  virtual void SimulateKinematic(RobotModel& robot,WorldModel& world);
-  virtual void Advance(double dt);
-  virtual void Reset();
-  virtual void MeasurementNames(vector<string>& names) const;
-  virtual void GetMeasurements(vector<double>& values) const;
-  virtual void SetMeasurements(const vector<double>& values);
-  virtual map<string,string> Settings() const;
-  virtual bool GetSetting(const string& name,string& str) const;
-  virtual bool SetSetting(const string& name,const string& str);
-  virtual void DrawGL(const RobotModel& robot,const vector<double>& measurements);
+  virtual const char* Type() const override { return "LaserRangeSensor"; }
+  virtual void Simulate(SimRobotController* robot,Simulator* sim) override;
+  virtual void SimulateKinematic(RobotModel& robot,WorldModel& world) override;
+  virtual void Advance(double dt) override;
+  virtual void Reset() override;
+  virtual void MeasurementNames(vector<string>& names) const override;
+  virtual void GetMeasurements(vector<double>& values) const override;
+  virtual void SetMeasurements(const vector<double>& values) override;
+  virtual map<string,string> Settings() const override;
+  virtual bool GetSetting(const string& name,string& str) const override;
+  virtual bool SetSetting(const string& name,const string& str) override;
+  virtual void DrawGL(const RobotModel& robot,const vector<double>& measurements) override;
 
   int link;
   RigidTransform Tsensor; ///< z is forward, x points left, y points up
@@ -127,17 +127,17 @@ class CameraSensor : public SensorBase
  public:
   CameraSensor();
   virtual ~CameraSensor();
-  virtual const char* Type() const { return "CameraSensor"; }
-  virtual void Simulate(SimRobotController* robot,Simulator* sim);
-  virtual void SimulateKinematic(RobotModel& robot,WorldModel& world);
-  virtual void Reset();
-  virtual void MeasurementNames(vector<string>& names) const;
-  virtual void GetMeasurements(vector<double>& values) const;
-  virtual void SetMeasurements(const vector<double>& values);
-  virtual map<string,string> Settings() const;
-  virtual bool GetSetting(const string& name,string& str) const;
-  virtual bool SetSetting(const string& name,const string& str);
-  virtual void DrawGL(const RobotModel& robot,const vector<double>& measurements);
+  virtual const char* Type() const override { return "CameraSensor"; }
+  virtual void Simulate(SimRobotController* robot,Simulator* sim) override;
+  virtual void SimulateKinematic(RobotModel& robot,WorldModel& world) override;
+  virtual void Reset() override;
+  virtual void MeasurementNames(vector<string>& names) const override;
+  virtual void GetMeasurements(vector<double>& values) const override;
+  virtual void SetMeasurements(const vector<double>& values) override;
+  virtual map<string,string> Settings() const override;
+  virtual bool GetSetting(const string& name,string& str) const override;
+  virtual bool SetSetting(const string& name,const string& str) override;
+  virtual void DrawGL(const RobotModel& robot,const vector<double>& measurements) override;
   ///Gets the OpenGL view associated with the camera.  The result is in the link's local frame.
   ///Note that in OpenGL views, Z is backward, and Y is up.
   void GetViewport(Camera::Viewport& view) const;

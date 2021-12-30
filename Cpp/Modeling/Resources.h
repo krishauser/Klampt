@@ -43,19 +43,19 @@ class ConfigsResource : public CompoundResourceBase
  public:
   using ResourceBase::Load;
   using ResourceBase::Save;
-  virtual bool Load(istream& in);
-  virtual bool Save(ostream& out);
-  virtual bool Save(AnyCollection& c);
-  virtual bool Load(AnyCollection& c);
-  virtual const char* Type() const { return "Configs"; }
-  virtual ResourceBase* Make() { return new ConfigsResource; }
-  virtual ResourceBase* Copy();
-  virtual vector<string> CastTypes() const;
-  virtual vector<string> SubTypes() const;
-  virtual ResourcePtr Cast(const char* subtype);
-  virtual bool Extract(const char* subtype,vector<ResourcePtr>&);
-  virtual bool Pack(vector<ResourcePtr>& subobjects,string* errorMessage=NULL);
-  virtual bool Unpack(vector<ResourcePtr>& subobjects,bool* incomplete=NULL);
+  virtual bool Load(istream& in) override;
+  virtual bool Save(ostream& out) override;
+  virtual bool Save(AnyCollection& c) override;
+  virtual bool Load(AnyCollection& c) override;
+  virtual const char* Type() const override { return "Configs"; }
+  virtual ResourceBase* Make() override { return new ConfigsResource; }
+  virtual ResourceBase* Copy() override;
+  virtual vector<string> CastTypes() const override;
+  virtual vector<string> SubTypes() const override;
+  virtual ResourcePtr Cast(const char* subtype) override;
+  virtual bool Extract(const char* subtype,vector<ResourcePtr>&) override;
+  virtual bool Pack(vector<ResourcePtr>& subobjects,string* errorMessage=NULL) override;
+  virtual bool Unpack(vector<ResourcePtr>& subobjects,bool* incomplete=NULL) override;
 
   vector<Vector> configs;
 };
@@ -67,11 +67,11 @@ class ConfigsResource : public CompoundResourceBase
 class TriMeshResource : public BasicResource<Meshing::TriMesh>
 {
 public:
-  virtual bool Load(const std::string& fn);
-  virtual bool Save(const std::string& fn);
-  virtual const char* Type() const { return "TriMesh"; }
-  virtual ResourceBase* Make() { return new TriMeshResource; }
-  virtual ResourceBase* Copy();
+  virtual bool Load(const std::string& fn) override;
+  virtual bool Save(const std::string& fn) override;
+  virtual const char* Type() const override { return "TriMesh"; }
+  virtual ResourceBase* Make() override { return new TriMeshResource; }
+  virtual ResourceBase* Copy() override;
 };
 
 /** @ingroup Modeling
@@ -82,11 +82,11 @@ class PointCloudResource : public ResourceBase
  public:
   using ResourceBase::Load;
   using ResourceBase::Save;
-  virtual bool Load(istream& in);
-  virtual bool Save(ostream& out);
-  virtual const char* Type() const { return "PointCloud"; }
-  virtual ResourceBase* Make() { return new PointCloudResource; }
-  virtual ResourceBase* Copy();
+  virtual bool Load(istream& in) override;
+  virtual bool Save(ostream& out) override;
+  virtual const char* Type() const override { return "PointCloud"; }
+  virtual ResourceBase* Make() override { return new PointCloudResource; }
+  virtual ResourceBase* Copy() override;
 
   Meshing::PointCloud3D pointCloud;
 };
@@ -99,11 +99,11 @@ class RobotResource : public ResourceBase
  public:
   using ResourceBase::Load;
   using ResourceBase::Save;
-  virtual bool Load(const string& fn);
-  virtual bool Save(const string& fn);
-  virtual const char* Type() const { return "Robot"; }
-  virtual ResourceBase* Make() { return new RobotResource; }
-  virtual ResourceBase* Copy();
+  virtual bool Load(const string& fn) override;
+  virtual bool Save(const string& fn) override;
+  virtual const char* Type() const override { return "Robot"; }
+  virtual ResourceBase* Make() override { return new RobotResource; }
+  virtual ResourceBase* Copy() override;
 
   RobotModel robot;
 };
@@ -116,11 +116,11 @@ class RigidObjectResource : public ResourceBase
  public:
   using ResourceBase::Load;
   using ResourceBase::Save;
-  virtual bool Load(const string& fn);
-  virtual bool Save(const string& fn);
-  virtual const char* Type() const { return "RigidObject"; }
-  virtual ResourceBase* Make() { return new RigidObjectResource; }
-  virtual ResourceBase* Copy();
+  virtual bool Load(const string& fn) override;
+  virtual bool Save(const string& fn) override;
+  virtual const char* Type() const override { return "RigidObject"; }
+  virtual ResourceBase* Make() override { return new RigidObjectResource; }
+  virtual ResourceBase* Copy() override;
 
   RigidObjectModel object;
 };
@@ -136,15 +136,15 @@ class WorldResource : public CompoundResourceBase
  public:
   using ResourceBase::Load;
   using ResourceBase::Save;
-  virtual bool Load(const string& fn);
-  virtual bool Save(const string& fn);
-  virtual const char* Type() const { return "World"; }
-  virtual ResourceBase* Make() { return new WorldResource; }
-  virtual ResourceBase* Copy();
-  virtual vector<string> SubTypes() const;
-  virtual bool Extract(const char* subtype,vector<ResourcePtr>&);
-  virtual bool Pack(vector<ResourcePtr>& subobjects,string* errorMessage=NULL);
-  virtual bool Unpack(vector<ResourcePtr>& subobjects,bool* incomplete=NULL);
+  virtual bool Load(const string& fn) override;
+  virtual bool Save(const string& fn) override;
+  virtual const char* Type() const override { return "World"; }
+  virtual ResourceBase* Make() override { return new WorldResource; }
+  virtual ResourceBase* Copy() override;
+  virtual vector<string> SubTypes() const override;
+  virtual bool Extract(const char* subtype,vector<ResourcePtr>&) override;
+  virtual bool Pack(vector<ResourcePtr>& subobjects,string* errorMessage=NULL) override;
+  virtual bool Unpack(vector<ResourcePtr>& subobjects,bool* incomplete=NULL) override;
 
   WorldModel world;
 };
@@ -157,20 +157,20 @@ class LinearPathResource : public CompoundResourceBase
  public:
   using ResourceBase::Load;
   using ResourceBase::Save;
-  virtual bool Load(istream& in);
-  virtual bool Save(ostream& out);
-  virtual bool Save(AnyCollection& c);
-  virtual bool Load(AnyCollection& c);
-  virtual const char* Type() const { return "LinearPath"; }
-  virtual ResourceBase* Make() { return new LinearPathResource; }
-  virtual ResourceBase* Copy();
-  virtual vector<string> CastTypes() const;
-  virtual vector<string> SubTypes() const;
-  virtual vector<string> ExtractTypes() const;
-  virtual ResourcePtr Cast(const char* subtype);
-  virtual bool Extract(const char* subtype,vector<ResourcePtr>&);
-  virtual bool Pack(vector<ResourcePtr>& subobjects,string* errorMessage=NULL);
-  virtual bool Unpack(vector<ResourcePtr>& subobjects,bool* incomplete=NULL);
+  virtual bool Load(istream& in) override;
+  virtual bool Save(ostream& out) override;
+  virtual bool Save(AnyCollection& c) override;
+  virtual bool Load(AnyCollection& c) override;
+  virtual const char* Type() const override { return "LinearPath"; }
+  virtual ResourceBase* Make() override { return new LinearPathResource; }
+  virtual ResourceBase* Copy() override;
+  virtual vector<string> CastTypes() const override;
+  virtual vector<string> SubTypes() const override;
+  virtual vector<string> ExtractTypes() const override;
+  virtual ResourcePtr Cast(const char* subtype) override;
+  virtual bool Extract(const char* subtype,vector<ResourcePtr>&) override;
+  virtual bool Pack(vector<ResourcePtr>& subobjects,string* errorMessage=NULL) override;
+  virtual bool Unpack(vector<ResourcePtr>& subobjects,bool* incomplete=NULL) override;
 
   vector<Real> times;
   vector<Vector> milestones;
@@ -187,20 +187,20 @@ class MultiPathResource : public CompoundResourceBase
  public:
   using ResourceBase::Load;
   using ResourceBase::Save;
-  virtual bool Load(const string& fn);
-  virtual bool Save(const string& fn);
-  virtual bool Load(TiXmlElement* in);
-  virtual bool Save(TiXmlElement* out);
-  virtual const char* Type() const { return "MultiPath"; }
-  virtual ResourceBase* Make() { return new MultiPathResource; }
-  virtual ResourceBase* Copy();
-  virtual vector<string> CastTypes() const;
-  virtual vector<string> SubTypes() const;
-  virtual vector<string> ExtractTypes() const;
-  virtual ResourcePtr Cast(const char* subtype);
-  virtual bool Extract(const char* subtype,vector<ResourcePtr>&);
-  virtual bool Pack(vector<ResourcePtr>& subobjects,string* errorMessage=NULL);
-  virtual bool Unpack(vector<ResourcePtr>& subobjects,bool* incomplete=NULL);
+  virtual bool Load(const string& fn) override;
+  virtual bool Save(const string& fn) override;
+  virtual bool Load(TiXmlElement* in) override;
+  virtual bool Save(TiXmlElement* out) override;
+  virtual const char* Type() const override { return "MultiPath"; }
+  virtual ResourceBase* Make() override { return new MultiPathResource; }
+  virtual ResourceBase* Copy() override;
+  virtual vector<string> CastTypes() const override;
+  virtual vector<string> SubTypes() const override;
+  virtual vector<string> ExtractTypes() const override;
+  virtual ResourcePtr Cast(const char* subtype) override;
+  virtual bool Extract(const char* subtype,vector<ResourcePtr>&) override;
+  virtual bool Pack(vector<ResourcePtr>& subobjects,string* errorMessage=NULL) override;
+  virtual bool Unpack(vector<ResourcePtr>& subobjects,bool* incomplete=NULL) override;
 
   MultiPath path;
 };
@@ -218,22 +218,22 @@ class IKGoalResource : public CompoundResourceBase
   IKGoalResource(const IKGoal& val,const string& name) : CompoundResourceBase(name),goal(val) {}
   using ResourceBase::Load;
   using ResourceBase::Save;
-  virtual bool Load(AnyCollection& c);
-  virtual bool Save(AnyCollection& c);
-  virtual bool Load(std::istream& in) {
+  virtual bool Load(AnyCollection& c) override;
+  virtual bool Save(AnyCollection& c) override;
+  virtual bool Load(std::istream& in) override {
     in>>goal;
     if(in.bad()) return false;
     return true;
   }
-  virtual bool Save(std::ostream& out) {
+  virtual bool Save(std::ostream& out) override {
     out<<goal<<std::endl;
     return true;
   }
-  virtual const char* Type() const { return "IKGoal"; }
-  virtual ResourceBase* Make() { return new IKGoalResource; }
-  virtual ResourceBase* Copy() { return new IKGoalResource(goal,name); }
-  virtual vector<string> CastTypes() const;
-  virtual ResourcePtr Cast(const char* subtype) const;
+  virtual const char* Type() const override { return "IKGoal"; }
+  virtual ResourceBase* Make() override { return new IKGoalResource; }
+  virtual ResourceBase* Copy() override { return new IKGoalResource(goal,name); }
+  virtual vector<string> CastTypes() const override;
+  virtual ResourcePtr Cast(const char* subtype) override;
 
   IKGoal goal;
 };
@@ -249,25 +249,25 @@ class HoldResource : public CompoundResourceBase
   HoldResource(const Hold& val,const string& name) : CompoundResourceBase(name),hold(val) {}
   using ResourceBase::Load;
   using ResourceBase::Save;
-  virtual bool Load(AnyCollection& c);
-  virtual bool Save(AnyCollection& c);
-  virtual bool Load(std::istream& in) {
+  virtual bool Load(AnyCollection& c) override;
+  virtual bool Save(AnyCollection& c) override;
+  virtual bool Load(std::istream& in) override {
     in>>hold;
     if(in.bad()) return false;
     return true;
   }
-  virtual bool Save(std::ostream& out) {
+  virtual bool Save(std::ostream& out) override {
     out<<hold<<std::endl;
     return true;
   }
-  virtual const char* Type() const { return "Hold"; }
-  virtual ResourceBase* Make() { return new HoldResource; }
-  virtual ResourceBase* Copy() { return new HoldResource(hold,name); }
-  virtual vector<string> CastTypes() const;
-  virtual vector<string> SubTypes() const;
-  virtual ResourcePtr Cast(const char* subtype) const;
-  virtual bool Pack(vector<ResourcePtr>& subobjects,string* errorMessage=NULL);
-  virtual bool Unpack(vector<ResourcePtr>& subobjects,bool* incomplete=NULL);
+  virtual const char* Type() const override { return "Hold"; }
+  virtual ResourceBase* Make() override { return new HoldResource; }
+  virtual ResourceBase* Copy() override { return new HoldResource(hold,name); }
+  virtual vector<string> CastTypes() const override;
+  virtual vector<string> SubTypes() const override;
+  virtual ResourcePtr Cast(const char* subtype) override;
+  virtual bool Pack(vector<ResourcePtr>& subobjects,string* errorMessage=NULL) override;
+  virtual bool Unpack(vector<ResourcePtr>& subobjects,bool* incomplete=NULL) override;
 
   Hold hold;
 };
@@ -282,22 +282,22 @@ class StanceResource : public CompoundResourceBase
   StanceResource(const Stance& val);
   using ResourceBase::Load;
   using ResourceBase::Save;
-  virtual bool Load(istream& in);
-  virtual bool Save(ostream& out);
-  virtual bool Load(TiXmlElement* in);
-  virtual bool Save(TiXmlElement* out);
-  virtual bool Load(AnyCollection& c);
-  virtual bool Save(AnyCollection& c);
-  virtual const char* Type() const { return "Stance"; }
-  virtual ResourceBase* Make() { return new StanceResource; }
-  virtual ResourceBase* Copy();
-  virtual vector<string> CastTypes() const;
-  virtual vector<string> SubTypes() const;
-  virtual vector<string> ExtractTypes() const;
-  virtual ResourcePtr Cast(const char* subtype);
-  virtual bool Extract(const char* subtype,vector<ResourcePtr>&);
-  virtual bool Pack(vector<ResourcePtr>& subobjects,string* errorMessage=NULL);
-  virtual bool Unpack(vector<ResourcePtr>& subobjects,bool* incomplete=NULL);
+  virtual bool Load(istream& in) override;
+  virtual bool Save(ostream& out) override;
+  virtual bool Load(TiXmlElement* in) override;
+  virtual bool Save(TiXmlElement* out) override;
+  virtual bool Load(AnyCollection& c) override;
+  virtual bool Save(AnyCollection& c) override;
+  virtual const char* Type() const override { return "Stance"; }
+  virtual ResourceBase* Make() override { return new StanceResource; }
+  virtual ResourceBase* Copy() override;
+  virtual vector<string> CastTypes() const override;
+  virtual vector<string> SubTypes() const override;
+  virtual vector<string> ExtractTypes() const override;
+  virtual ResourcePtr Cast(const char* subtype) override;
+  virtual bool Extract(const char* subtype,vector<ResourcePtr>&) override;
+  virtual bool Pack(vector<ResourcePtr>& subobjects,string* errorMessage=NULL) override;
+  virtual bool Unpack(vector<ResourcePtr>& subobjects,bool* incomplete=NULL) override;
 
   Stance stance;
 };
@@ -315,20 +315,20 @@ class GraspResource : public CompoundResourceBase
   GraspResource(const Grasp& val);
   using ResourceBase::Load;
   using ResourceBase::Save;
-  virtual bool Load(TiXmlElement* in);
-  virtual bool Save(TiXmlElement* out);
-  virtual bool Load(AnyCollection& c);
-  virtual bool Save(AnyCollection& c);
-  virtual const char* Type() const { return "Grasp"; }
-  virtual ResourceBase* Make() { return new GraspResource; }
-  virtual ResourceBase* Copy();
-  virtual vector<string> CastTypes() const;
-  virtual vector<string> SubTypes() const;
-  virtual vector<string> ExtractTypes() const;
-  virtual ResourcePtr Cast(const char* subtype);
-  virtual bool Extract(const char* subtype,vector<ResourcePtr>&);
-  virtual bool Pack(vector<ResourcePtr>& subobjects,string* errorMessage=NULL);
-  virtual bool Unpack(vector<ResourcePtr>& subobjects,bool* incomplete=NULL);
+  virtual bool Load(TiXmlElement* in) override;
+  virtual bool Save(TiXmlElement* out) override;
+  virtual bool Load(AnyCollection& c) override;
+  virtual bool Save(AnyCollection& c) override;
+  virtual const char* Type() const override { return "Grasp"; }
+  virtual ResourceBase* Make() override { return new GraspResource; }
+  virtual ResourceBase* Copy() override;
+  virtual vector<string> CastTypes() const override;
+  virtual vector<string> SubTypes() const override;
+  virtual vector<string> ExtractTypes() const override;
+  virtual ResourcePtr Cast(const char* subtype) override;
+  virtual bool Extract(const char* subtype,vector<ResourcePtr>&) override;
+  virtual bool Pack(vector<ResourcePtr>& subobjects,string* errorMessage=NULL) override;
+  virtual bool Unpack(vector<ResourcePtr>& subobjects,bool* incomplete=NULL) override;
 
   Grasp grasp;
 };
