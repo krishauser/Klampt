@@ -63,7 +63,6 @@ bool LoadWorldCommandLine(WorldModel& world,int argc, const char** argv)
   world.lights.resize(1);
   world.lights[0].setColor(GLColor(1, 1, 1));
   world.lights[0].setDirectionalLight(Vector3(0.2, -0.4, 1));
-  world.lights[0].setColor(GLColor(1, 1, 1));
 
   for (int i = 1; i<argc; i++) {
     if (argv[i][0] == '-') {

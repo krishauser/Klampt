@@ -32,9 +32,11 @@ struct ViewRobot
   void DrawTorques(const Vector& t);
   void SetColors(const GLDraw::GLColor& c);
   void SetColor(int i,const GLDraw::GLColor& c);
+  void SetTintColors(const GLDraw::GLColor& c,Real fraction);
+  void SetTintColor(int i,const GLDraw::GLColor& c,Real fraction);
   void SetGrey();
-  void BlendColors(const GLDraw::GLColor& c,Real fraction);
-  void BlendColor(int i,const GLDraw::GLColor& c,Real fraction);
+  //void BlendColors(const GLDraw::GLColor& c,Real fraction);
+  //void BlendColor(int i,const GLDraw::GLColor& c,Real fraction);
   void SetTorqueColors(const Vector& t);
   ///gets the currently active appearance
   GLDraw::GeometryAppearance& Appearance(int link);

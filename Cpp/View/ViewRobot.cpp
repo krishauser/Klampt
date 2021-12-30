@@ -112,6 +112,25 @@ void ViewRobot::SetColor(int link,const GLColor& c)
   }
 }
 
+void ViewRobot::SetTintColors(const GLColor& c,Real fraction)
+{
+  if(robot) {
+    for(size_t i=0;i<robot->links.size();i++) {
+      GLDraw::GeometryAppearance& a = Appearance(i);
+      a.SetTintColor(c,fraction);
+    }
+  }
+}
+
+void ViewRobot::SetTintColor(int link,const GLColor& c,Real fraction)
+{
+  if(robot) {
+    GLDraw::GeometryAppearance& a = Appearance(link);
+    a.SetTintColor(c,fraction);
+  }
+}
+
+/*
 void ViewRobot::BlendColors(const GLColor& c,Real fraction)
 {
   if(robot) {
@@ -133,6 +152,7 @@ void ViewRobot::BlendColor(int link,const GLColor& c,Real fraction)
     a.ModulateColor(c,fraction);
   }
 }
+*/
 
 void ViewRobot::SetGrey() { SetColors(grey); }
 

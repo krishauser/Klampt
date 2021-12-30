@@ -358,8 +358,8 @@ void SimGUIBackend::DrawSensor(int robot,int sensor)
 void SimGUIBackend::SetForceColors()
 {
   for(size_t i=0;i<world->robots.size();i++) {
-    if(world->robotViews[i].appearanceStack.empty())
-      world->robotViews[i].PushAppearance();
+    //if(world->robotViews[i].appearanceStack.empty())
+    //  world->robotViews[i].PushAppearance();
     for(size_t j=0;j<world->robots[i]->links.size();j++) {
       if(i==0) {
         float amount = 0;
@@ -394,7 +394,8 @@ void SimGUIBackend::SetForceColors()
           color[1]=0;
           color[2]=0;
         }
-        world->robotViews[i].BlendColor(j,GLColor(color),amount);
+        //world->robotViews[i].BlendColor(j,GLColor(color),amount);
+        world->robotViews[i].SetTintColor(j,GLColor(color),amount);
       }
     }
   }

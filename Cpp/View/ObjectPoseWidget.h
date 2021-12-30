@@ -24,11 +24,11 @@ public:
   const RigidTransform& Pose() const { return poser.T; }
   void SetPose(const RigidTransform& q);
 
-  virtual void DrawGL(Camera::Viewport& viewport);
-  virtual bool BeginDrag(int x,int y,Camera::Viewport& viewport,double& distance);
-  virtual void Drag(int dx,int dy,Camera::Viewport& viewport);
-  virtual void EndDrag();
-  virtual void Keypress(char c);
+  virtual void DrawGL(Camera::Viewport& viewport) override;
+  virtual bool BeginDrag(int x,int y,Camera::Viewport& viewport,double& distance) override;
+  virtual void Drag(int dx,int dy,Camera::Viewport& viewport) override;
+  virtual void EndDrag() override;
+  virtual void Keypress(char c) override;
 
   RigidObjectModel* rigidObject;
   GLDraw::TransformWidget poser;

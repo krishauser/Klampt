@@ -32,11 +32,11 @@ public:
   void Set(RobotModel* robot,ViewRobot* viewRobot);
   ///Sets the active dofs
   void SetActiveDofs(const vector<int>& activeDofs);
-  virtual bool Hover(int x,int y,Camera::Viewport& viewport,double& distance);
-  virtual void SetHighlight(bool active);
-  virtual bool BeginDrag(int x,int y,Camera::Viewport& viewport,double& distance);
-  virtual void Drag(int dx,int dy,Camera::Viewport& viewport);
-  virtual void DrawGL(Camera::Viewport& viewport);
+  virtual bool Hover(int x,int y,Camera::Viewport& viewport,double& distance) override;
+  virtual void SetHighlight(bool active) override;
+  virtual bool BeginDrag(int x,int y,Camera::Viewport& viewport,double& distance) override;
+  virtual void Drag(int dx,int dy,Camera::Viewport& viewport) override;
+  virtual void DrawGL(Camera::Viewport& viewport) override;
   void InitDefaultAppearance();
 
   RobotModel* robot;
@@ -77,12 +77,12 @@ public:
   int ActiveWidget() const;
   ///Clears the constraint on the currently active widget
   bool ClearCurrent();
-  virtual void DrawGL(Camera::Viewport& viewport);
-  virtual void Drag(int dx,int dy,Camera::Viewport& viewport);
+  virtual void DrawGL(Camera::Viewport& viewport) override;
+  virtual void Drag(int dx,int dy,Camera::Viewport& viewport) override;
 
   //these are overloaded to allow IK widgets to shine through
-  virtual bool Hover(int x,int y,Camera::Viewport& viewport,double& closestDistance);
-  virtual bool BeginDrag(int x,int y,Camera::Viewport& viewport,double& closestDistance);
+  virtual bool Hover(int x,int y,Camera::Viewport& viewport,double& closestDistance) override;
+  virtual bool BeginDrag(int x,int y,Camera::Viewport& viewport,double& closestDistance) override;
 
   RobotModel* robot;
   vector<IKGoal> poseGoals;
@@ -129,11 +129,11 @@ public:
   ///Solves the current IK problem with a joint fixed in place
   bool SolveIKFixedJoint(int fixedJoint,int iters=0,Real tol=0);
 
-  virtual void DrawGL(Camera::Viewport& viewport);
-  virtual bool BeginDrag(int x,int y,Camera::Viewport& viewport,double& distance);
-  virtual void Drag(int dx,int dy,Camera::Viewport& viewport);
-  virtual void EndDrag();
-  virtual void Keypress(char c);
+  virtual void DrawGL(Camera::Viewport& viewport) override;
+  virtual bool BeginDrag(int x,int y,Camera::Viewport& viewport,double& distance) override;
+  virtual void Drag(int dx,int dy,Camera::Viewport& viewport) override;
+  virtual void EndDrag() override;
+  virtual void Keypress(char c) override;
 
   void Snapshot();
   void Undo();

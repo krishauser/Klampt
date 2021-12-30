@@ -269,7 +269,7 @@ void SimViewProgram::RenderWorld()
           color[1]=0;
           color[2]=0;
         }
-        world->robotViews[i].BlendColor(j,GLColor(color),amount);
+        world->robotViews[i].SetTintColor(j,GLColor(color),amount);
       }
       world->robotViews[i].DrawLink_World(j);
     }

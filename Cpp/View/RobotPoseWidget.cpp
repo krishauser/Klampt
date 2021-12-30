@@ -271,12 +271,11 @@ void RobotLinkPoseWidget::DrawGL(Camera::Viewport& viewport)
   viewRobot->PushAppearance();
   for(size_t i=0;i<poserAppearance.size();i++) { 
     auto& app = viewRobot->Appearance(i);
-    app.CopyMaterial(poserAppearance[i]);
+    app.CopyMaterialFlat(poserAppearance[i]);
   }
   if(hasHighlight || hasFocus) {
     for(size_t i=0;i<highlightedLinks.size();i++) {
-      viewRobot->Appearance(highlightedLinks[i]).ModulateColor(highlightColor,0.5);
-      //const auto& app = viewRobot->Appearance(highlightedLinks[i]);
+      viewRobot->Appearance(highlightedLinks[i]).SetTintColor(highlightColor,0.5);
     }
   }
   if(!activeDofs.empty()) {
@@ -286,7 +285,7 @@ void RobotLinkPoseWidget::DrawGL(Camera::Viewport& viewport)
       active[activeDofs[i]] = true;
     for(size_t i=0;i<robot->links.size();i++)
       if(!active[i]) 
-        viewRobot->Appearance(i).ModulateColor(black,0.5);
+        viewRobot->Appearance(i).SetTintColor(black,0.5);
   }
   viewRobot->Draw();
   viewRobot->PopAppearance();

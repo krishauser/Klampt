@@ -13,12 +13,12 @@ public:
   virtual ~WorldDragWidget() {}
   void Set(WorldModel* world);
   void Enable(bool active);
-  virtual void SetHighlight(bool value);
-  virtual bool Hover(int x,int y,Camera::Viewport& viewport,double& distance);
-  virtual bool BeginDrag(int x,int y,Camera::Viewport& viewport,double& distance);
-  virtual void EndDrag();
-  virtual void Drag(int dx,int dy,Camera::Viewport& viewport);
-  virtual void DrawGL(Camera::Viewport& viewport);
+  virtual void SetHighlight(bool value) override;
+  virtual bool Hover(int x,int y,Camera::Viewport& viewport,double& distance) override;
+  virtual bool BeginDrag(int x,int y,Camera::Viewport& viewport,double& distance) override;
+  virtual void EndDrag() override;
+  virtual void Drag(int dx,int dy,Camera::Viewport& viewport) override;
+  virtual void DrawGL(Camera::Viewport& viewport) override;
 
   WorldModel* world;
   bool active;
