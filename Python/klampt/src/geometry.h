@@ -516,8 +516,10 @@ class Geometry3D
   Geometry3D(const VolumeGrid&);
   ~Geometry3D();
   const Geometry3D& operator = (const Geometry3D& rhs);
-  ///Creates a standalone geometry from this geometry
+  ///Creates a standalone geometry from this geometry (identical to copy... will be deprecated in a future version)
   Geometry3D clone();
+  ///Creates a standalone geometry from this geometry
+  Geometry3D copy();
   ///Copies the geometry of the argument into this geometry.
   void set(const Geometry3D&);
   ///Returns true if this is a standalone geometry

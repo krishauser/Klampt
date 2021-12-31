@@ -662,6 +662,16 @@ bool Geometry3D::isStandalone()
 
 Geometry3D Geometry3D::clone()
 {
+  static bool warned = false;
+  if(!warned) {
+    fprintf(stderr,"Warning: Geometry3D.clone will be deprecated. Use copy instead\n");
+    warned = true;
+  }
+  return copy();
+}
+
+Geometry3D Geometry3D::copy()
+{
   Geometry3D res;
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   shared_ptr<AnyCollisionGeometry3D>& resgeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(res.geomPtr);
