@@ -185,7 +185,10 @@ class QtWindowManager(_ThreadedWindowManager):
                         if w.guidata:
                             w.guidata.setWindowTitle(w.name)
                             w.guidata.glwidget = w.glwindow
-                            w.guidata.attachGLWindow()
+                            if hasattr(w.guidata,'attachGLWindow'):
+                                w.guidata.attachGLWindow()
+                            #else:
+                            #    w.glwindow.setParent(w.guidata)
                         w.doReload = False
                     if w.mode == 'dialog':
                         print("#########################################")
