@@ -446,6 +446,10 @@ class ControllerGUI(QtWidgets.QMainWindow):
             self.suppressGuiEvents = True
             indices = self.controller.indices(self.activePart)
             qmin_rob,qmax_rob = self.robot.getJointLimits()
+            for i in range(self.robot.numLinks()):
+                if self.robot.getJointType(i)=='spin':
+                    qmin_rob[i] = 0
+                    qmax_rob[i] = math.pi*2
             qmin = self.controller.configFromKlampt(qmin_rob)
             qmax = self.controller.configFromKlampt(qmax_rob)
             if len(indices) != len(self.jointForms):
