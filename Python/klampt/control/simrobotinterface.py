@@ -12,6 +12,7 @@ from klampt.model.robotinfo import RobotInfo
 from klampt.model import robotinfo
 from klampt import RobotModel,Simulator,SimRobotController
 import functools
+import warnings
 
 class _SimControlInterface(RobotInterfaceBase):
     def __init__(self,sim_controller,simulator=None,robotInfo=None):
@@ -176,7 +177,8 @@ class SimFullControlInterface(_SimControlInterface):
     def setVelocity(self,v,ttl=None):
         if ttl is None:
             ttl = 0.1
-        self.sim_controller.setVelocity(v,ttl)
+        v_config = self.velocityToKlampt(v)  #only accepts velocities of #links
+        self.sim_controller.setVelocity(v_config,ttl)
 
     def setTorque(self,t,ttl=None):
         if ttl is not None:
@@ -327,14 +329,16 @@ class KinematicSimControlInterface(RobotInterfaceBase):
             return
         if len(q) != len(self.q):
             raise ValueError("Invalid position command")
-        self.q = q
         if any(v < a or v > b for (v,a,b) in zip(q,self.qmin,self.qmax)):
             for i,(v,a,b) in enumerate(zip(q,self.qmin,self.qmax)):
                 if v < a or v > b:
                     self._status = 'joint %d limit violation: %f <= %f <= %f'%(i,a,v,b)
-        self.robot.setConfig(self.configToKlampt(self.q))
+                    return
+        self.robot.setConfig(self.configToKlampt(q))
         if self.robot.selfCollides():
             self._status = 'self collision'
+            return
+        self.q = q
         
     def reset(self):
         self._status = 'ok'
@@ -347,14 +351,26 @@ class KinematicSimControlInterface(RobotInterfaceBase):
         return self.q
 
 
-def make(robotModel):
+def make(robotModel : RobotModel):
     """Makes a default KinematicSimControlInterface for the robot. This module
     can be referenced using 'klampt.control.simrobotinterface', e.g. as an 
     argument to the ``klampt_control`` app.
     """
     try:
-        ri = robotinfo.get(robotModel.getName())
+        ri = robotinfo.RobotInfo.get(robotModel.getName())
     except KeyError:
         ri = None
-    from .robotinterfaceutils import RobotInterfaceCompleter
-    return RobotInterfaceCompleter(KinematicSimControlInterface(robotModel,ri))
+    if ri is not None and ri.parts:
+        from .robotinterfaceutils import OmniRobotInterface
+        res = OmniRobotInterface(robotModel)
+        sim_interface = KinematicSimControlInterface(robotModel)
+        res.addPhysicalPart('robot',sim_interface,sim_interface.indices())
+        #set up parts
+        for (name,indices) in ri.parts.items():
+            driver_indices = ri.toDriverIndices(indices)
+            res.addVirtualPart(name,driver_indices)
+            print("klampt.control.simrobotinterface: adding virtual part {}, indices {}".format(name,driver_indices))
+        return res
+    else:
+        from .robotinterfaceutils import RobotInterfaceCompleter
+        return RobotInterfaceCompleter(KinematicSimControlInterface(robotModel,ri))

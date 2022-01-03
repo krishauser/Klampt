@@ -1,5 +1,5 @@
 import time
-
+from threading import Lock
 
 class TimedLooper:
     """A class to easily control how timed loops are run.
@@ -128,3 +128,177 @@ class TimedLooper:
         """Returns the total number of iters run"""
         return self._iters
 
+
+
+class PromiseTimeout(Exception):
+    def __init__(self, promise):
+        self.promise = promise
+
+    def __str__(self):
+        if self.promise._name is not None:
+            return "PromiseTimeout %s timed out" % (self.promise._name,)
+        return "PromiseTimeout timed out"
+
+
+class PromiseError(Exception):
+    def __init__(self, promise, error):
+        self.promise = promise
+
+    def __str__(self):
+        if self.promise._name is not None:
+            return "Promise {} encountered exception {}".format(
+                self.promise._name, self.promise._error
+            )
+        return "Promise encountered exception {}".format(self.promise._error)
+
+
+class Promise:
+    """A placeholder for an asynchronous result, inspired by the twisted
+    package.  This provides a thread-safe mechanism to pass values between
+    threads.
+
+    For receivers
+    -------------
+
+    To wait for result using polling::
+
+        if promise:
+            val = promise.value()
+
+    or setting a callback function fn(value) with::
+
+        promise.setCallback(fn)
+
+    or blocking until it arrives using:::
+
+        val = promise.wait()
+
+    If you wish to put a timeout on :func:`wait`, use
+    ``val = promise.wait(timeout)``.
+
+    :func:`value` will raise a RuntimeError if the value is not available yet.
+
+    ``wait(timeout)`` will raise a :class:`PromiseTimeout` exception if the
+    timeout is reached without the result arriving.
+
+    For senders
+    -------------
+
+    Make sure to return a Promise
+
+    Use ``callback(value)`` to set the value when it is available.
+
+    If an error occurred before the value can be delivered, call
+    :func:`errback`.
+
+    """
+
+    def __init__(self, name=None):
+        self._name = name
+        self._read = False
+        self._value = None
+        self._error = None
+        self._callback = None
+        self._errback = None
+        self._lock = Lock()
+
+    def setCallback(self, fn):
+        """Called by receiver to trigger a call fn(value) when a value
+        arrives. If a non-error result is already set, fn(value) is called
+        immediately.
+        """
+        assert callable(fn), "fn nees to be a callable object"
+        with self._lock:  # locking needed in case the callback is set, then the sender sets the value, then _callback is called twice
+            if self._callback is not None:
+                raise RuntimeError(
+                    "Callback already previously set to {}".format(self._callback)
+                )
+            self._callback = fn
+            if self._read:
+                self._callback(self._value)
+
+    def setErrback(self, fn):
+        """Called by receiver to trigger a call fn(error) when an error
+        arrives. If an error result is already set, fn(error) is called
+        immediately.
+        """
+        assert callable(fn), "fn nees to be a callable object"
+        with self._lock:  # locking needed in case the errback is set, then the sender sets the error, then _errback is called twice
+            self._errback = fn
+            if self._read and self._error:
+                self._errback(self._error)
+
+    def __nonzero__(self):
+        """Returns True if the provider has responded with a value or error."""
+        return self.available()
+
+    def __bool__(self):
+        """Returns True if the provider has responded with a value or error."""
+        return self.available()
+
+    def available(self):
+        """Returns True if the provider has responded with a value or error."""
+        return self._read
+
+    def error(self):
+        """Returns a previously set error result, or None if no error
+        occurred."""
+        return self._error
+
+    def value(self):
+        """Returns the value previously set by the provider.  A RuntimeError is
+        raised if no value has been set yet.
+
+        If an error occurred, a PromiseError is raised.
+        """
+        if self._read:
+            if self._error is not None:
+                raise PromiseError(self)
+            return self._value
+        raise RuntimeError("Value is not available")
+
+    def wait(self, timeout=None, resolution=0.01):
+        """Blocks until the response is available and then returns the value.
+
+        A timeout can be used via the timeout argument.  At the moment, this
+        just uses polling.  For finer control on the polling frequency,
+        change the resolution argument.  (Note: a future implementation might
+        do away with polling.)
+        """
+        t0 = time.time()
+        while not self.available():
+            time.sleep(resolution)
+            t = time.time()
+            if timeout is not None and t - t0 > timeout:
+                raise PromiseTimeout(self)
+        if self.error():
+            raise RuntimeError(self.error())
+        return self.value()
+
+    def callback(self, value):
+        """Called by the provider to set the value."""
+        assert not callable(
+            value
+        ), "callback() is meant to be used by the caller to set the promise's value. Do you mean to use setCallback()?"
+        if self._read:
+            raise RuntimeError("Can't call callback() twice on a Promise object")
+        with self._lock:
+            self._value = value
+            if self._callback is not None:
+                self._callback(value)
+            self._read = True
+
+    def errback(self, error):
+        """Called by the provider to indicate an error."""
+        assert not callable(
+            error
+        ), "errback() is meant to be used by the caller to set the promise's error condition. Do you mean to use setErrback()?"
+        if self._read:
+            raise RuntimeError(
+                "Can't call errback()/callback() twice on a Promise object"
+            )
+        with self._lock:
+            self._error = error
+            if self._errback is not None:
+                self._errback(error)
+            self._read = True

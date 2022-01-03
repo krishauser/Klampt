@@ -1,10 +1,11 @@
-from ..controller import RobotControllerIO,RobotControllerBase
+from ..controller import RobotControllerIO,RobotControllerBlock
 import math
 
-class BigWiggleController(RobotControllerBase):
+class BigWiggleController(RobotControllerBlock):
     """A controller that wiggles each of the robot's joints between their
-    extrema"""
-    def __init__(self,robot,period=2):
+    extrema.
+    """
+    def __init__(self, robot, period=10):
         self.robot = robot
         self.qmin,self.qmax = robot.getJointLimits()
         for i in range(len(self.qmin)):
@@ -15,19 +16,16 @@ class BigWiggleController(RobotControllerBase):
         self.index = 0
         self.startTime = None
         self.period = period
+        RobotControllerBlock.__init__(self,robot)
 
-    def inputNames(self):
-        return ['t']
+    def __getstate__(self):
+        return {'q':self.q,'index':self.index,'startTime':self.startTime,'period':self.period}
 
-    def outputNames(self):
-        return ['qcmd']
-
-    def getState(self):
-        return {'index':self.index,'startTime':self.startTime}
-
-    def setState(self,state):
+    def __setstate__(self,state):
+        self.q = state['q']
         self.index=state['index']
         self.startTime=state['startTime']
+        self.period=state['period']
         
     def advance(self,**inputs):
         api = RobotControllerIO(inputs)
@@ -67,9 +65,9 @@ class BigWiggleController(RobotControllerBase):
             self.startTime = None
 
 
-class OneJointWiggleController(RobotControllerBase):
+class OneJointWiggleController(RobotControllerBlock):
     """A controller that wiggles one of the robot's joints by some magnitude"""
-    def __init__(self,robot,index,magnitude,period=2):
+    def __init__(self,robot,index,magnitude,period=10):
         self.robot = robot
         self.qmin,self.qmax = robot.getJointLimits()
         self.q = robot.getConfig()
@@ -77,17 +75,12 @@ class OneJointWiggleController(RobotControllerBase):
         self.startTime = None
         self.magnitude = magnitude
         self.period = period
+        RobotControllerBlock.__init__(self,robot)
 
-    def inputNames(self):
-        return ['t']
-
-    def outputNames(self):
-        return ['qcmd']
-
-    def getState(self):
+    def __getstate__(self):
         return {'startTime',self.startTime}
 
-    def setState(self,state):
+    def __setstate__(self,state):
         self.startTime=state['startTime']
         
     def advance(self,**inputs):

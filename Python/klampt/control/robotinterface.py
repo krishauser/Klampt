@@ -2,9 +2,10 @@
 """
 
 from ..robotsim import WorldModel,RobotModel
+from ..model.subrobot import SubRobotModel
 import functools
 import warnings
-from typing import Union,Optional,Any
+from typing import Union,Optional,Any,Dict,List,Tuple,Callable
 from klampt.model.typing import Vector,Vector3,RigidTransform
 
 class RobotInterfaceBase(object):
@@ -22,23 +23,51 @@ class RobotInterfaceBase(object):
     Each of these methods should be synchronous calls, called at a single time
     step.  The calling convention is::
 
+        from klampt.control.utils import TimedLooper
+
         interface = MyRobotInterface(...args...)
         if not interface.initialize():  #should be called first
             raise RuntimeError("There was some problem initializing interface "+str(interface))
+        
         dt = 1.0/interface.controlRate()
-        while interface.status() == 'ok':  #no error handling done here...
-            t0 = time.time()
-            interface.beginStep()
-            [any getXXX or setXXX commands here comprising the control loop]
-            interface.endStep()
-            t1 = time.time()
-            telapsed = t1 - t0
-            [wait for time max(dt - telapsed,0)]
+        looper = TimedLooper(dt) 
+        while looper:           #this will run as close to the control rate as possible
+            try:
+                interface.beginStep()
+                if interface.status() != 'ok':  #no error handling done here... could also try interface.reset()
+                    raise RuntimeError("Some error occurred: {}".format(interface.status()))
+                [do any state queries or commands here comprising the control loop]
+                interface.endStep()
+            except Exception as e:
+                print("Terminating on exception:",e)
+                looper.stop()
+        
         interface.close()   #cleanly shut down the interface
 
     To accept asynchronous commands, a :class:`RobotInterfaceBase` subclass
-    can be passed to :class:`AsynchronousRobotInterface` or
-    :class:`RobotInterfaceServer`.
+    can be wrapped by a :class:`ThreadedRobotInterface` or client (e.g.,
+    :class:`XMLRPCClientRobotInterface`).  Asynchronous usage allows sending 
+    commands in a procedural fashion, e.g.::
+
+        interface = MyRobotInterface(...args...)
+        if not interface.initialize():  #should be called first
+            raise RuntimeError("There was some problem initializing interface "+str(interface))
+
+        time.sleep(whatever)
+        [any state queries or commands here]
+
+        interface.moveToPosition(qtarget)
+        poll_rate = 0.05
+        while interface.isMoving()
+            time.sleep(poll_rate)
+
+        if interface.status() != 'ok':  #no error handling done here... could also try interface.reset()
+            raise RuntimeError("Some error occurred: {}".format(interface.status()))
+
+        time.sleep(whatever)
+        [any state queries or commands here]
+        
+        interface.close()   #cleanly shut down the interface
 
 
     **DOFs and Parts**
@@ -59,7 +88,39 @@ class RobotInterfaceBase(object):
     :class:`~klampt.model.robotinfo.RobotInfo` structure.
 
 
-    **Functionalities**
+    **Semantics of methods**
+
+    In the strictest sense, no methods are assumed to be available before
+    :meth:`initialize` is called (and returns True) .
+
+    The following methods should be available after initialize() and do
+    not need to be protected by :meth:`beginStep` / :meth:`endStep`:
+
+    * :meth:`parts`, :meth:`indices`, :meth:`numJoints`, and :meth:`jointName`:
+      should be constant. (At the very least, no parts should be destroyed)
+    * :meth:`partInterface`.
+    * :meth:`partToRobotConfig` and :meth:`robotToPartConfig`: utility methods.
+    * :meth:`klamptModel`: if available, must be constant.
+    * :meth:`configToKlampt`, :meth:`configFromKlampt`, :meth:`velocityToKlampt`,
+      and :meth:`velocityFromKlampt`: utility methods.
+    * :meth:`cartesianPosition`, :meth:`cartesianVelocity`, and
+      :meth:`cartesianForce`: utility methods.
+    * :meth:`controlRate`: if available, should be constant.
+    * :meth:`sensors`, :meth:`hasSensor`: should be constant.  If a sensor can
+      be hot-swapped, it should be in the list of sensors but may appear/
+      disappear from :meth:`enabledSensors`.
+
+    Most implementations will have these methods available even before
+    ``initialize()`` is called, but to be safe a caller shouldn't count on it.
+    For example, if a robot tests to see which parts are connected at runtime,
+    then ``parts()``, ``numJoints()``, ``klamptModel()``, etc will not be
+    available until afterwards.
+
+    All other methods should be placed within a :meth:`beginStep` /
+    :meth:`endStep` pair.
+
+
+    **Minimal functionality (For implementers)**
 
     There are a few functions your subclass will need to fill out:
 
@@ -96,12 +157,75 @@ class RobotInterfaceBase(object):
        the end effector frame)
 
     Note that an interface might only support commands to one type of frame,
-    and raise NotImplementedError() for other frames.
+    and raise ``NotImplementedError()`` for other frames.
+
+
+    **Real-time filters**
+
+    Filters perform real-time enforcement of joint limits, velocity limits,
+    collision checks, and signal processing. Typically filters
+    are handled in software using a :class:`RobotInterfaceCompleter` but an
+    implementation is also allowed to send filter parameters to the hardware.
+
+    Users can activate and deactivate filters using the :func:`setFilter`
+    method.  A filter has an name, operation, input arguments, and output
+    arguments, and its operation will usually yield an output or raise an
+    exception, e.g., if a commanded position / velocity exceeds the limits,
+    it can raise a FilterSoftStop exception, or it can just alter arguments,
+    e.g., clamping to valid ranges. 
+    
+    Common examples include the following (using filter operations available in
+    :mod:`robotinterfaceutils`):
+
+    * ``setFilter('joint_limit',LimitClampFilter(qmin,qmax))``: clamps 
+      commanded position to limits.
+    * ``setFilter('joint_limit',LimitStopFilter(qmin,qmax))``: stops when
+      commanded position exceeds limits.
+    * ``setFilter('velocity_limit',LimitClampFilter(qmin,qmax))``: clamps 
+      commanded velocity to limits.
+    * ``setFilter('velocity_limit',LimitStopFilter(qmin,qmax))``: stops
+      when commanded velocity exceeds limits.
+    * ``setFilter('collision',CollisionStopFilter(collider))``: stops when
+      the robot is about to collide.
+    * ``setFilter('position_tracking',DifferenceStopFilter(math.radians(15)))``:
+      stops when the tracking error between the commanded and sensed position
+      exceeds 15 radians.
+    * ``setFilter('position_delta',DifferenceStopFilter(math.radians(5)))``:
+      stops when the commanded position jumps more than 5 radians in a
+      single time step.
+    * ``setFilter(SENSOR_NAME,FIRFilter(b),output=OUT_NAME)``: adds a FIR
+      filter to sensor SENSOR_NAME and outputs it to OUT_NAME.
+    * ``setFilter('custom_filter', block,
+          ['sensedPosition','sensedVelocity'],
+          'positionCommand')``: sets a custom filter that uses a Block of
+      two arguments (sensed position and velocity) and outputs one value
+      (a position command).
+
+    To disable a filter, pass None as the second argument.
+
+
+    **Customization**
+
+    Certain controllers will provide custom API methods that fall outside of 
+    the standard API.  Although an RIL subclass is free to implement any
+    methods desired, for maximum compatibility with utility classes (e.g.,
+    RobotInterfaceCompleter), the subclass should provide uniform access to
+    these custom methods through the following standard methods:
+
+    * Global settings, which overload :func:`setSetting` and
+      :func:`getSetting`.  Unlike properties, settings are expected to be
+      changeable through the life of the interface.
+    * Sensors, which overload :func:`sensors`, :func:`enableSensor`,
+      :func:`sensorMeasurements`, and :func:`sensorUpdateTime`.
+    * State queries, which overload :func:`stateValue`.
+    * Control modes, which overload :func:`setControlMode`.
+    * Custom calls and event triggers, which overload :func:`functionCall`
 
 
     Attributes:
-        properties (dict): a dict from string key to property value. Application
-            dependent. Examples may include:
+        properties (dict): a dict from string key to property value. Properties
+            are application-dependent and constant through the life of the
+            interface. Examples may include:
 
             * 'name' (str): the name of the robot
             * 'version' (str): a version of this interface
@@ -110,7 +234,16 @@ class RobotInterfaceBase(object):
             * 'asynchronous' (bool): if True, beginStep/endStep are not needed to
               communicate with the robot.  Networked controllers are often
               asynchronous.
-
+            * 'complete' (bool): if True, all methods are implemented.
+            * 'part' (bool): if True, this is not a top-level interface.
+            * 'joint_limits' (pair of Vector): the hardware joint limits, not
+              overridable by software limits.
+            * 'velocity_limits' (pair of Vector): the hardware velocity limits, not
+              overridable by software limits.
+            * 'acceleration_limits' (pair of Vector): the hardware accel limits,
+              not overridable by software limits.
+            * 'torque_limits' (pair of Vector): the hardware torque limits,
+              not overridable by software limits.
     """
     def __init__(self,**properties):
         self.properties = properties
@@ -128,7 +261,9 @@ class RobotInterfaceBase(object):
         if len(inner)==0:
             return self.__class__.__name__
         else:
-            return ','.join(inner)
+            if self.properties.get('name',None) == self.__class__.__name__:
+                return ','.join(inner)
+            return ','.join(inner) + '({})'.format(self.__class__.__name__)
 
     def initialize(self) -> bool:
         """Tries to connect to the robot.  Returns true if ready to send
@@ -166,8 +301,12 @@ class RobotInterfaceBase(object):
             return m.numDrivers()
         return len(self.parts()[part])
 
+    def jointName(self, joint_idx: int) -> str:
+        """Returns a string naming the given joint"""
+        raise NotImplementedError()
+
     @functools.lru_cache(maxsize=None)
-    def parts(self) -> 'dict[Any,list[int]]':
+    def parts(self) -> Dict[Any,List[int]]:
         """Returns a dictionary of (part-name,configuration index list) pairs
         defining the named parts of the robot.
 
@@ -179,7 +318,7 @@ class RobotInterfaceBase(object):
     def indices(self,
             part: Optional[str] = None,
             joint_idx: Optional[int] = None
-        ) -> 'list[int]':
+        ) -> List[int]:
         """Helper: returns a list of indices for the given part / joint index"""
         plist = self.parts()[part]
         if joint_idx is None:
@@ -208,6 +347,11 @@ class RobotInterfaceBase(object):
         """Returns the current time on the robot's clock, in seconds"""
         raise NotImplementedError()
 
+    def status(self, joint_idx: Optional[int] = None) -> str:
+        """Returns a status string for the robot / given joint.  'ok' means
+        everything is OK."""
+        return 'ok'
+
     def estop(self) -> None:
         """Calls an emergency stop on the robot. Default uses the soft stop."""
         self.softStop()
@@ -219,16 +363,24 @@ class RobotInterfaceBase(object):
         """
         self.setPosition(self.commandedPosition())
 
-    def reset(self) -> bool:
+    def reset(self) -> None:
         """If the robot has a non-normal status code, attempt to reset it
-        to normal operation.  Returns true on success, false on failure.
+        to normal operation.  The caller should poll until status()=='ok'
         """
-        return False
+        raise NotImplementedError("Reset is not implemented")
 
-    def jointName(self, joint_idx: int) -> str:
-        """Returns a string naming the given joint"""
-        raise NotImplementedError()
+    def getSettings(self) -> Dict[str,Any]:
+        """Retrieves an implementation-dependent dict of possible settings."""
+        raise NotImplementedError("Settings are not implemented")
 
+    def getSetting(self, name : str):
+        """Retrieves an implementation-dependent setting."""
+        raise KeyError(name+" isn't a valid setting")
+    
+    def setSetting(self, name : str, value) -> None:
+        """Sets an implementation-dependent setting."""
+        raise KeyError(name+" isn't a valid setting")
+    
     def sensors(self) -> list:
         """Returns a list of names of possible sensors on this robot."""
         raise NotImplementedError()
@@ -258,11 +410,14 @@ class RobotInterfaceBase(object):
     def sensorUpdateTime(self, name: str) -> float:
         """Returns the clock time of the last sensor update."""
         raise NotImplementedError()
+    
+    def setControlMode(self,mode,*args,**kwargs):
+        """Enables a custom control mode."""
+        raise NotImplementedError()
 
-    def status(self, joint_idx: Optional[int] = None) -> str:
-        """Returns a status string for the robot / given joint.  'ok' means
-        everything is OK."""
-        return 'ok'
+    def functionCall(self,proc,*args,**kwargs):
+        """Enables a custom one-off function call."""
+        raise NotImplementedError()
 
     def isMoving(self, joint_idx: Optional[int] = None) -> bool:
         """Returns true if the robot / joint are currently moving"""
@@ -322,6 +477,10 @@ class RobotInterfaceBase(object):
             or a piecewise-cubic trajectory.
         """
         raise NotImplementedError()
+    
+    def stateValue(self,name) -> Union[float,Vector]:
+        """Retrieves some custom state value"""
+        raise NotImplementedError(name + " is not a valid state query")
     
     def cartesianPosition(self, q: Vector, frame: str = 'world') -> RigidTransform:
         """Converts from a joint position vector to a cartesian position.
@@ -484,7 +643,7 @@ class RobotInterfaceBase(object):
         """
         raise NotImplementedError()
 
-    def getPIDGains(self) -> 'tuple[list[float],list[float],list[float]]':
+    def getPIDGains(self) -> Tuple[List[float],List[float],List[float]]:
         """Gets the PID gains (kP,kI,kD) as set to a prior call to setPIDGains.
         Some controllers might not implement this even if they implement
         setPIDGains...
@@ -507,8 +666,8 @@ class RobotInterfaceBase(object):
         raise NotImplementedError()
 
     def setPiecewiseLinear(self,
-            ts: 'list[float]',
-            qs: 'list[list[float]]',
+            ts: List[float],
+            qs: List[List[float]],
             relative: bool=True
         ) -> None:
         """Tells the robot to start a piecewise linear trajectory
@@ -526,9 +685,9 @@ class RobotInterfaceBase(object):
         raise NotImplementedError()
 
     def setPiecewiseCubic(self,
-            ts: 'list[float]',
-            qs: 'list[list[float]]',
-            vs: 'list[list[float]]'
+            ts: List[float],
+            qs: List[List[float]],
+            vs: List[List[float]]
         ) -> None:
         """Tells the robot to start a piecewise cubic trajectory
         command.   The first milestone will be interpolated from the
@@ -595,12 +754,32 @@ class RobotInterfaceBase(object):
         raise NotImplementedError()
 
     def moveToCartesianPosition(self,
-            xparams: Union[Vector,RigidTransform],
+            xparams: Union[Vector3,RigidTransform],
             speed: float=1.0,
             frame: str = 'world'
         ) -> None:
-        """Sets a Cartesian move-to-position command. The tool is commanded to reach
-        the given coordinates relative to the given frame. 
+        """Sets a Cartesian move-to-position command. The tool is commanded
+        to reach the given coordinates relative to the given frame. The
+        movement is accomplished via an arbitrary joint space motion, and is
+        not necessarily linear in Cartesian space.
+
+        Args:
+            xparams: typically a klampt.math.se3 object for position /
+                orientation commands, or a 3-vector for position-only.
+            speed (float, optional): The speed at which the position
+                should be reached.
+            frame (str): either 'world', 'base', 'end effector', or 'tool'
+        """
+        raise NotImplementedError()
+    
+    def moveToCartesianPositionLinear(self,
+            xparams: Union[Vector3,RigidTransform],
+            speed: float=1.0,
+            frame: str = 'world'
+        ) -> None:
+        """Sets a Cartesian move-to-position command. The tool is commanded
+        to reach the given coordinates relative to the given frame via a
+        linear Cartesian path.
 
         Args:
             xparams: typically a klampt.math.se3 object for position /
@@ -612,7 +791,7 @@ class RobotInterfaceBase(object):
         raise NotImplementedError()
 
     def setCartesianVelocity(self,
-            dxparams: Union[Vector,RigidTransform],
+            dxparams: Union[Vector3,Tuple[Vector3,Vector3]],
             ttl: Optional[float] = None,
             frame: str = 'world'
         ) -> None:
@@ -668,7 +847,7 @@ class RobotInterfaceBase(object):
         pindices = self.indices(part,joint_idx)
         return [robotConfig[i] for i in pindices]
 
-    def klamptModel(self) -> Optional[RobotModel]:
+    def klamptModel(self) -> Optional[Union[RobotModel,SubRobotModel]]:
         """If applicable, returns the Klamp't RobotModel associated with this
         controller.  Default tries to load from properties['klamptModelFile'].
 
@@ -742,7 +921,9 @@ class RobotInterfaceBase(object):
         configuration values.  Otherwise, the robot's current configuration from
         self.klamptModel() is used.
 
-        Note: the configuration of the model in self.klamptModel() is overridden.
+        .. note::
+            The configuration of the model in self.klamptModel() is overridden.
+
         """
         model = self.klamptModel()
         if model is None:
@@ -771,7 +952,9 @@ class RobotInterfaceBase(object):
         configuration values.  Otherwise, the robot's current velocity from
         self.klamptModel() is used.
 
-        Note: the velocity of the model in self.klamptModel() is overridden.
+        .. note::
+            The velocity of the model in self.klamptModel() is overridden.
+            
         """
         model = self.klamptModel()
         if model is None:
@@ -787,3 +970,39 @@ class RobotInterfaceBase(object):
             for (i,x) in zip(dofs,velocity):
                 model.driver(i).setVelocity(x)
             return model.getVelocity()
+
+    def wait(self,timeout=None,pollRate=None) -> float:
+        """Sleeps the caller until ``isMoving()`` returns False.  This should 
+        only be called outside of a beginStep()/endStep() pair.
+        
+        Args:
+            timeout (float, optional): if given, will break after this amount
+                of time has elapsed (in s)
+            pollRate (float, optional): time between isMoving checks, in Hz.
+                If None, polls at the controller's natural rate. 
+        
+        .. note::
+
+            pollRate should only be non-None if the interface is asynchronous.
+            Otherwise, steps may be skipped.
+
+        Returns:
+            float: the approximate time in s that was waited.
+        """
+        self.beginStep()
+        moving = self.isMoving()
+        self.endStep()
+        if not moving: return 0
+
+        dt = 1.0/pollRate if pollRate is not None else 1.0/self.controlRate()
+        from .utils import TimedLooper
+        ttotal = 0
+        looper = TimedLooper(dt)
+        while looper:
+            self.beginStep()
+            moving = self.isMoving()
+            self.endStep()
+            if not moving: return ttotal
+            if timeout is not None and ttotal >= timeout:
+                return ttotal
+            ttotal += dt

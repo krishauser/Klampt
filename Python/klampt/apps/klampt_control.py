@@ -2,12 +2,11 @@ from klampt import *
 from klampt import WidgetSet,RobotPoser,PointPoser,TransformPoser
 from klampt import vis
 from klampt.math import vectorops,so3,se3
-from klampt.model import robotinfo
 from klampt.model.robotinfo import RobotInfo
 from klampt.io import loader
 from klampt.vis.glcommon import GLWidgetPlugin
 from klampt.control.robotinterface import RobotInterfaceBase
-from klampt.control.networkrobotinterface import RobotInterfaceClient,RobotInterfaceServer
+from klampt.control.networkrobotinterface import XMLRPCRobotInterfaceClient,XMLRPCRobotInterfaceServer
 from klampt.model import trajectory
 import math
 import time
@@ -25,17 +24,48 @@ from PyQt5 import uic
 from OpenGL import GL
 
 
+class ControllerStepContext:
+    def __init__(self,gui):
+        if not isinstance(gui,ControllerGUI):
+            raise ValueError("need to call this with a GUI")
+        self.gui = gui
+    def __enter__(self):
+        if not self.gui.advancing:
+            return self
+        try:
+            self.gui.controller.beginStep()  
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            self.gui.addException("beginStep",e)
+            self.gui.advancing = False
+        return self
+    def __exit__(self,type,value,tb):
+        if not self.gui.advancing:
+            return
+        try:
+            self.gui.controller.endStep()  
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            self.gui.addException("endStep",e)
+            self.gui.advancing = False
+
 
 class ControllerGLPlugin(GLWidgetPlugin):
-    def __init__(self,world,controller,gui):
+    def __init__(self, world : WorldModel, controller : RobotInterfaceBase, gui : 'ControllerGUI'):
         GLWidgetPlugin.__init__(self)
 
         self.world = world
         self.controller = controller
         self.gui = gui
         #read commanded configuration
-        q = self.controller.configToKlampt(self.controller.commandedPosition())
-        world.robot(0).setConfig(q)
+        self.controller.beginStep()
+        q = self.controller.commandedPosition()
+        self.controller.endStep()
+        if q is not None:
+            qklampt = self.controller.configToKlampt(q)
+            world.robot(0).setConfig(qklampt)
         self.robotPoser = RobotPoser(world.robot(0))
         self.toolCoordinatesPoser = PointPoser()
         self.toolCoordinatesPoser.set([0,0,0])
@@ -85,6 +115,9 @@ class ControllerGLPlugin(GLWidgetPlugin):
     def setTargetConfig(self,qtgt):
         self.robotPoser.set(qtgt)
         if self.cartesianControlEnabled:
+            if self.toolCoordinates is None:
+                print("Warning: cartesianControlEnabled=True but toolCoordinates=None?")
+                return
             robot = self.world.robot(0)
             robot.setConfig(qtgt)
             ee = robot.link(self.endEffectorLink)
@@ -180,11 +213,12 @@ class ControllerGLPlugin(GLWidgetPlugin):
 
 
 class ControllerGUI(QtWidgets.QMainWindow):
-    def __init__(self,glwidget,robotinfo,controller:RobotInterfaceBase,plugin,parent=None):
+    def __init__(self, glwidget : ControllerGLPlugin, robotinfo:RobotInfo, controller:RobotInterfaceBase, plugin, parent=None):
         QtWidgets.QMainWindow.__init__(self,parent)
         self.robotinfo = robotinfo           # type: RobotInfo
         self.controller = controller         # type: RobotInterfaceBase
         self.activeController = controller   # type: RobotInterfaceBase
+        self.advancing = True 
         self.activePart = None
         self.glwidget = glwidget 
         self.plugin = plugin                 # type: ControllerGLPlugin
@@ -278,7 +312,7 @@ class ControllerGUI(QtWidgets.QMainWindow):
         for ee in self.unmatchedEEs:
             self.addError("End effector {} in RobotInfo does not match a part".format(ee))
     
-    def updateActiveController(self,activeName:str,active:RobotInterfaceBase):
+    def updateActiveController(self, activeName:str, active:RobotInterfaceBase):
         self.activePart = activeName
         self.activeController = active
         self.updateStatus()
@@ -290,13 +324,14 @@ class ControllerGUI(QtWidgets.QMainWindow):
                 break
         indices = self.controller.indices(self.activePart)
         robotModel = self.controller.klamptModel()
-        qmin_rob,qmax_rob = robotModel.getJointLimits()
-        for i in range(robotModel.numLinks()):
-            if robotModel.getJointType(i)=='spin':
-                qmin_rob[i] = 0
-                qmax_rob[i] = math.pi*2
-        qmin = self.controller.configFromKlampt(qmin_rob)
-        qmax = self.controller.configFromKlampt(qmax_rob)
+        qmin,qmax = [],[]
+        for i in range(robotModel.numDrivers()):
+            a,b = robotModel.driver(i).getLimits()
+            if robotModel.getJointType(robotModel.driver(i).getAffectedLink()) == 'spin':
+                a = 0
+                b = math.pi*2
+            qmin.append(a)
+            qmax.append(b)
         if len(indices) != nj:
             self.addError("Part's numJoints() returns {} joints, while controller's indices({}) returns {}".format(nj,self.activePart,len(indices)))
             return
@@ -305,23 +340,29 @@ class ControllerGUI(QtWidgets.QMainWindow):
             del form
         self.jointForms = []
         for i in range(nj):
+            j = indices[i]
             jointWidget = QtWidgets.QWidget()
             ui_filename = pkg_resources.resource_filename('klampt','data/joint_edit.ui')
             uic.loadUi(ui_filename, jointWidget)
-            if math.isinf(qmin_rob[i]):
-                self.addError("Infinite joint limit on joint {}".format(self.controller.jointName(indices[i])))
-                qmin_rob[i] = -1
-                if math.isinf(qmax_rob[i]):
-                    qmax_rob[i] = 1
-            elif math.isinf(qmax_rob[i]):
-                self.addError("Infinite joint limit on joint {}".format(self.controller.jointName(indices[i])))
-                qmax_rob[i] = 1
-            jointWidget.sensedSpinBox.setMinimum(qmin[indices[i]])
-            jointWidget.sensedSpinBox.setMaximum(qmax[indices[i]])
-            jointWidget.commandSpinBox.setMinimum(qmin[indices[i]])
-            jointWidget.commandSpinBox.setMaximum(qmax[indices[i]])
-            jointWidget.targetSpinBox.setMinimum(qmin[indices[i]])
-            jointWidget.targetSpinBox.setMaximum(qmax[indices[i]])
+            if math.isinf(qmin[j]):
+                self.addError("Infinite joint limit on joint {}".format(self.controller.jointName(j)))
+                if math.isinf(qmax[j]):
+                    qmin[j] = -1
+                    qmax[j] = 1
+                else:
+                    qmin[j] = qmax[j]-1
+            elif math.isinf(qmax[j]):
+                self.addError("Infinite joint limit on joint {}".format(self.controller.jointName(j)))
+                qmax[j] = qmin[j] + 1
+            if qmax[j] == qmin[j]:
+                print("Warning, joint {} has equal minimum and maximum {}, must be frozen?".format(self.controller.jointName(j),qmin[j]))
+                input()
+            jointWidget.sensedSpinBox.setMinimum(qmin[j])
+            jointWidget.sensedSpinBox.setMaximum(qmax[j])
+            jointWidget.commandSpinBox.setMinimum(qmin[j])
+            jointWidget.commandSpinBox.setMaximum(qmax[j])
+            jointWidget.targetSpinBox.setMinimum(qmin[j])
+            jointWidget.targetSpinBox.setMaximum(qmax[j])
             jointWidget.commandSlider.valueChanged.connect(lambda value,idx=i:self.onCommandChange(idx,qmin[idx] + value/1024.0*(qmax[idx]-qmin[idx])))
             jointWidget.commandSpinBox.valueChanged.connect(lambda value,idx=i:self.onCommandChange(idx,value))
             jointWidget.targetSlider.valueChanged.connect(lambda value,idx=i:self.onTargetChange(idx,qmin[idx] + value/1024.0*(qmax[idx]-qmin[idx])))
@@ -337,134 +378,160 @@ class ControllerGUI(QtWidgets.QMainWindow):
         eematches = self.partsToEEs[activeName]
         self.panel.endEffectorList.clear()
         for eename in eematches:
-            self.panel.endEffectorList.addItem(eename)
+            self.panel.endEffectorList.addItem(eename)    
 
         if len(eematches) == 0:
+            self.panel.endEffectorList.setEnabled(False)
             self.selectedEndEffector = None
             self.panel.toolXSpinBox.setValue(0)
             self.panel.toolYSpinBox.setValue(0)
             self.panel.toolZSpinBox.setValue(0)
         else:
+            self.panel.endEffectorList.setEnabled(True)
             self.selectedEndEffector = eematches[0]
             self.onEndEffectorChanged(0)
         
+        #setup cartesian UI items
         cartesianEnabled = False
         cartesianLink = None
-        self.controller.beginStep()            
-        try:
-            tool = active.getToolCoordinates()
-            cartesianEnabled = True
-            cartesianLink = self.robot.driver(self.controller.indices(self.activePart)[-1]).getAffectedLink()
-        except NotImplementedError as e:
-            #disable cartesian control
-            cartesianEnabled = False
-        except Exception as e:
-            self.addException("getToolCoordinates",e)
-        if cartesianEnabled:
+        self.advancing = True
+        with ControllerStepContext(self):
             try:
-                Tsns = active.sensedCartesianPosition()
-                try:
-                    Tcmd = active.commandedCartesianPosition()
-                except NotImplementedError:
-                    Tcmd = None
-                except Exception as e:
-                    self.addException("commandedCartesianPosition",e)
-                self.plugin.setToolCoordinates(tool)
-                self.plugin.setCartesianPoses(Tsns,Tcmd)
-            except ValueError:
-                cartesianEnabled = False
+                tool = active.getToolCoordinates()
+                cartesianEnabled = True
+                cartesianLink = self.robot.driver(self.controller.indices(self.activePart)[-1]).getAffectedLink()
+            except NotImplementedError as e:
+                #may need to force tool coordinates on the item
+                if self.selectedEndEffector is not None:
+                    try:
+                        tool = self.setEndEffectorToolCoordinates(self.selectedEndEffector)
+                    except NotImplementedError:
+                        self.addError("Unable to set tool coordinates for end effector {}, part {}".format(eename,self.activePart))
+                    except Exception as e:
+                        self.addException("setToolCoordinates",e)
+                else:
+                    #disable cartesian control
+                    print("getToolCoordinates is not implemented by {}, disabling cartesian control".format(str(active)))
+                    cartesianEnabled = False
             except Exception as e:
-                self.addException("sensedCartesianPosition",e)
-        self.controller.endStep()  
+                self.addException("getToolCoordinates",e)
+            if cartesianEnabled:
+                try:
+                    Tsns = active.sensedCartesianPosition()
+                    try:
+                        Tcmd = active.commandedCartesianPosition()
+                    except NotImplementedError:
+                        Tcmd = None
+                    except Exception as e:
+                        self.addException("commandedCartesianPosition",e)
+                    self.plugin.setToolCoordinates(tool)
+                    self.plugin.setCartesianPoses(Tsns,Tcmd)
+                except ValueError:
+                    cartesianEnabled = False
+                except Exception as e:
+                    self.addException("sensedCartesianPosition",e)
+                    cartesianEnabled = False
+        
         self.panel.moveToCartesianPositionButton.setEnabled(cartesianEnabled)
         self.panel.setCartesianPositionButton.setEnabled(cartesianEnabled)
         self.panel.setCartesianVelocityButton.setEnabled(cartesianEnabled)
         self.plugin.enableCartesianWidget(cartesianEnabled,cartesianLink)
     
     def onIdle(self):
-        self.controller.beginStep()
-        try:
-            clock = self.controller.clock()
-            vis.add("clock","%.3f"%clock,position=(10,10))
-        except NotImplementedError:
-            vis.add("clock","clock() method not implemented",position=(10,10))
-            self.addNotImplementedError('clock')
-        except Exception as e:
-            self.addException('clock',e)
-        try:
-            qsns = self.controller.sensedPosition()
-        except NotImplementedError:
-            qsns = None
-            self.addNotImplementedError('sensedPosition')
-        try:
-            qcmd = self.controller.commandedPosition()
-        except NotImplementedError:
-            qcmd = None
-            self.addNotImplementedError('commandedPosition')
-        self.qsns = qsns
-        self.qcmd = qcmd
-        self.plugin.qsns = self.controller.configToKlampt(qsns) if qsns is not None else None
-        self.plugin.qcmd = self.controller.configToKlampt(qcmd) if qcmd is not None else None
-
-        self.controller.endStep()
-
-        if self.plugin.cartesianControlEnabled:  #update cartesian poses
+        with ControllerStepContext(self):
+            if not self.advancing:
+                return
+        
             try:
-                Tsns = self.activeController.sensedCartesianPosition()
-                try:
-                    Tcmd = self.activeController.commandedCartesianPosition()
-                except NotImplementedError:
-                    Tcmd = None
-                except Exception as e:
-                    self.addException("commandedCartesianPosition",e)
-                self.plugin.setCartesianPoses(Tsns,Tcmd,False)
-            except ValueError:
-                cartesianEnabled = False
+                clock = self.controller.clock()
+                vis.add("clock","%.3f"%clock,position=(10,10))
+            except NotImplementedError:
+                vis.add("clock","clock() method not implemented",position=(10,10))
+                self.addNotImplementedError('clock')
             except Exception as e:
-                self.addException("sensedCartesianPosition",e)
-            if self.plugin.robotPoser.hasFocus():
-                #change poser
-                T = None
-                q = self.plugin.robotPoser.get()
-                qcontroller = self.controller.configFromKlampt(q)
+                self.addException('clock',e)
+            try:
+                qsns = self.controller.sensedPosition()
+            except NotImplementedError:
+                qsns = None
+                self.addNotImplementedError('sensedPosition')
+            try:
+                qcmd = self.controller.commandedPosition()
+            except NotImplementedError:
+                qcmd = None
+                self.addNotImplementedError('commandedPosition')
+            self.qsns = qsns
+            self.qcmd = qcmd
+            self.plugin.qsns = self.controller.configToKlampt(qsns) if qsns is not None else None
+            self.plugin.qcmd = self.controller.configToKlampt(qcmd) if qcmd is not None else None
+
+            if self.plugin.cartesianControlEnabled:  #update cartesian poses
                 try:
-                    T = self.activeController.cartesianPosition(qcontroller)
+                    Tsns = self.activeController.sensedCartesianPosition()
+                    try:
+                        Tcmd = self.activeController.commandedCartesianPosition()
+                    except NotImplementedError:
+                        Tcmd = None
+                    except Exception as e:
+                        self.addException("commandedCartesianPosition",e)
+                    self.plugin.setCartesianPoses(Tsns,Tcmd,False)
                 except NotImplementedError:
-                    from klampt.control import robotinterfaceutils
-                    T = robotinterfaceutils.klamptCartesianPosition(self.robot,qcontroller,self.controller.indices(self.activePart),self.activeController.getToolCoordinates())
-                    self.addNotImplementedError("cartesianPosition")
+                    cartesianEnabled = False
+                except ValueError:
+                    cartesianEnabled = False
                 except Exception as e:
-                    self.addException("cartesianPosition",e)
-                if T is not None:
+                    self.addException("sensedCartesianPosition",e)
+                if self.plugin.robotPoser.hasFocus():
+                    #change poser
+                    T = None
+                    q = self.plugin.robotPoser.get()
+                    qcontroller = self.controller.configFromKlampt(q)
+                    activeIndices = self.controller.indices(self.activePart)
+                    
+                    from klampt.control import robotinterfaceutils
+                    tool_coordinates = self.activeController.getToolCoordinates()
+                    T = robotinterfaceutils.klamptCartesianPosition(self.robot,qcontroller,activeIndices,tool_coordinates,'world')
                     self.plugin.cartesianGoalPoser.set(*T)
-            if self.plugin.cartesianGoalPoser.hasFocus():
-                #TODO: solve IK problem to update the robot poser
-                pass
-            
+                if self.plugin.cartesianGoalPoser.hasFocus():
+                    #TODO: solve IK problem to update the robot poser
+                    pass
+        
         self.idleCount += 1
         if self.idleCount % 10 == 1:  #TODO: sync this with the control rate to get reasonable visual updates?
             self.suppressGuiEvents = True
             indices = self.controller.indices(self.activePart)
-            qmin_rob,qmax_rob = self.robot.getJointLimits()
-            qmin = self.controller.configFromKlampt(qmin_rob)
-            qmax = self.controller.configFromKlampt(qmax_rob)
             if len(indices) != len(self.jointForms):
                 self.addError("Invalid result from indices({}): {} should be {}".format(self.activePart,len(indices),len(self.jointForms)))
                 self.suppressGuiEvents = False
                 return
             if self.qsns is not None:
                 for i,j in enumerate(indices):
-                    self.jointForms[i].sensedSlider.setValue(int(1024*(self.qsns[i]-qmin[j])/(qmax[j]-qmin[j])))
+                    vmin = self.jointForms[i].sensedSpinBox.minimum()
+                    vmax = self.jointForms[i].sensedSpinBox.maximum()
+                    if vmin == vmax: 
+                        print("Frozen joint?",i)
+                        continue
+                    self.jointForms[i].sensedSlider.setValue(int(1024*(self.qsns[i]-vmin)/(vmax-vmin)))
                     self.jointForms[i].sensedSpinBox.setValue(self.qsns[i])
             if self.qcmd is not None:
                 for i,j in enumerate(indices):
-                    self.jointForms[i].commandSlider.setValue(int(1024*(self.qcmd[i]-qmin[j])/(qmax[j]-qmin[j])))
+                    vmin = self.jointForms[i].sensedSpinBox.minimum()
+                    vmax = self.jointForms[i].sensedSpinBox.maximum()
+                    if vmin == vmax: 
+                        print("Frozen joint?",i)
+                        continue
+                    self.jointForms[i].commandSlider.setValue(int(1024*(self.qcmd[i]-vmin)/(vmax-vmin)))
                     self.jointForms[i].commandSpinBox.setValue(self.qcmd[i])
             qtgt_rob = self.plugin.robotPoser.get()
             qtgt = self.controller.configFromKlampt(qtgt_rob)
             for i,j in enumerate(indices):
-                self.jointForms[i].targetSlider.setValue(int(1024*(qtgt[j]-qmin[j])/(qmax[j]-qmin[j])))
-                self.jointForms[i].targetSpinBox.setValue(qtgt[j])
+                vmin = self.jointForms[i].sensedSpinBox.minimum()
+                vmax = self.jointForms[i].sensedSpinBox.maximum()
+                if vmin == vmax: 
+                    print("Frozen joint?",i)
+                    continue
+                self.jointForms[i].targetSlider.setValue(int(1024*(qtgt[j]-vmin)/(vmax-vmin)))
+                self.jointForms[i].targetSpinBox.setValue(qtgt[i])
             self.suppressGuiEvents = False
 
     def onPartChange(self,index):
@@ -503,18 +570,19 @@ class ControllerGUI(QtWidgets.QMainWindow):
         if self.suppressGuiEvents: return
         if self.qcmd is None: return
         if self.jointForms[index].lockButton.isChecked(): return
+        if not self.advancing: return
         indices = self.controller.indices(self.activePart)
         j = indices[index]
         target = [v for v in self.qcmd]
         target[j] = value
-        self.controller.beginStep()
-        try:
-            self.controller.setPosition(target)
-        except NotImplementedError:
-            self.addNotImplementedError('setPosition')
-        except Exception as e:
-            self.addException('setPosition',e)
-        self.controller.endStep()
+        with ControllerStepContext(self):
+            if self.advancing:
+                try:
+                    self.controller.setPosition(target)
+                except NotImplementedError:
+                    self.addNotImplementedError('setPosition')
+                except Exception as e:
+                    self.addException('setPosition',e)
         #update destination too
         qtgt = self.controller.configToKlampt(target)
         self.plugin.setTargetConfig(qtgt)
@@ -527,19 +595,66 @@ class ControllerGUI(QtWidgets.QMainWindow):
         else:
             qtgt_active = qtgt
         speed = self.panel.speedSpinBox.value()
-        self.controller.beginStep()
-        try:
-            self.activeController.moveToPosition(qtgt_active,speed)
-        except NotImplementedError:
-            self.addNotImplementedError('moveToPosition')
-        except Exception as e:
-            self.addException('moveToPosition',e)
-        self.controller.endStep()
+        with ControllerStepContext(self):
+            if self.advancing:
+                try:
+                    self.activeController.moveToPosition(qtgt_active,speed)
+                except NotImplementedError:
+                    self.addNotImplementedError('moveToPosition')
+                except Exception as e:
+                    self.addException('moveToPosition',e)
 
     def onSetPosition(self):
-        pass
+        """Set Position called in joint poser. Either linearly interpolate or
+        call setPosition, depending on whether Interpolate is checked."""
+        qtgt = self.plugin.robotPoser.get()
+        qtgt = self.controller.configFromKlampt(qtgt)
+        if self.activeController is not self.controller:
+            qtgt_active = [qtgt[i] for i in self.controller.indices(self.activePart)]
+        else:
+            qtgt_active = qtgt
+        speed = self.panel.speedSpinBox.value()
+        with ControllerStepContext(self):
+            if self.advancing:
+                if self.panel.jointInterpolateCheck.isChecked():
+                    if speed > 0:
+                        times = [1.0/speed]
+                        milestones = [qtgt_active]
+                        self.activeController.setPiecewiseLinear(times,milestones)
+                    else:
+                        print("Need speed > 0 to interpolate")
+                else:
+                    self.activeController.setPosition(qtgt_active)
+            
 
     def onSetVelocity(self):
+        """Set Velocity called in joint poser. """
+        if not self.panel.jointInterpolateCheck.isChecked():
+            print("Need Interpolate to be checked")
+            return
+        qtgt = self.plugin.robotPoser.get()
+        qtgt = self.controller.configFromKlampt(qtgt)
+        if self.activeController is not self.controller:
+            qtgt_active = [qtgt[i] for i in self.controller.indices(self.activePart)]
+        else:
+            qtgt_active = qtgt
+        speed = self.panel.speedSpinBox.value()
+        if not (speed > 0):
+            print("Need speed > 0 to set velocity")
+            return
+        
+        with ControllerStepContext(self):
+            qcur_active = self.activeController.commandedPosition()
+            vtgt = vectorops.div(vectorops.sub(qtgt_active,qcur_active),speed)
+            self.activeController.setVelocity(vtgt,1.0)
+
+    def onMoveToCartesianPosition(self):
+        pass
+
+    def onSetCartesianPosition(self):
+        pass
+
+    def onSetCartesianVelocity(self):
         pass
 
     def onClipConfig(self):
@@ -570,7 +685,21 @@ class ControllerGUI(QtWidgets.QMainWindow):
         clipboard.setText(text,QtGui.QClipboard.Clipboard)
         if clipboard.supportsSelection():
             clipboard.setText(text,QtGui.QClipboard.Selection)
-        
+    
+    def setEndEffectorToolCoordinates(self,eename):
+        ee = self.robotinfo.endEffectors[eename]
+        last_link = self.robot.driver(self.activeController.indices()[-1]).getAffectedLink()
+        obj = ee.ikObjective   # type: IKObjective
+        if obj is None:
+            local = [0,0,0]
+        else:
+            local,world = obj.getPosition()
+        if ee.link != last_link:  #need to transform to last actuated link
+            local = self.robot.link(last_link).getLocalPosition(self.robot.link(ee.link).getWorldPosition(local))
+        with ControllerStepContext(self):
+            self.activeController.setToolCoordinates(local)
+        return local
+
     def onEndEffectorChanged(self,index):
         ees = self.partsToEEs[self.activePart]
         if index < 0 or len(ees)==0: 
@@ -580,34 +709,29 @@ class ControllerGUI(QtWidgets.QMainWindow):
             return
         assert index >= 0 and index < len(ees)
         eename = ees[index]
-        obj = self.robotinfo.endEffectors[eename].ikObjective   # type: IKObjective
-        if obj is None:
-            self.activeController.setToolCoordinates([0,0,0])
-            self.panel.toolXSpinBox.setValue(0)
-            self.panel.toolYSpinBox.setValue(0)
-            self.panel.toolZSpinBox.setValue(0)
-            return
-        local,world = obj.getPosition()
         try:
-            self.activeController.setToolCoordinates(local)
-        except NotImplementedError:
+            tool = self.setEndEffectorToolCoordinates(eename)
+            self.panel.toolXSpinBox.setValue(tool[0])
+            self.panel.toolYSpinBox.setValue(tool[1])
+            self.panel.toolZSpinBox.setValue(tool[2])
+        except NotImplementedError as e:
+            import traceback
+            traceback.print_exc()
+            print(e)
             self.addError("Unable to set tool coordinates for end effector {}, part {}".format(eename,self.activePart))
         except Exception as e:
             self.addException("setToolCoordinates",e)
-        self.panel.toolXSpinBox.setValue(local[0])
-        self.panel.toolYSpinBox.setValue(local[1])
-        self.panel.toolZSpinBox.setValue(local[2])
 
     def updateStatus(self):
-        self.controller.beginStep()
-        try:
-            status = self.activeController.status()    
-            self.panel.statusLabel.setText('Status: '+status)
-        except NotImplementedError:
-            self.panel.statusLabel.setText('status() method not implemented by {}'.format(self.activeController))
-        except Exception as e:
-            self.addException("status",e)
-        self.controller.endStep()
+        with ControllerStepContext(self):
+            if self.advancing:
+                try:
+                    status = self.activeController.status()    
+                    self.panel.statusLabel.setText('Status: '+status)
+                except NotImplementedError:
+                    self.panel.statusLabel.setText('status() method not implemented by {}'.format(self.activeController))
+                except Exception as e:
+                    self.addException("status",e)
 
     def addError(self,text):
         print("addError",text)
@@ -642,14 +766,16 @@ def main():
         4. A robot file, world file, or objects for the visualization/planning
         
         In case 1 and 2, the Python file or module must contain a function
-        make(robotModel) returning a RobotInterfaceBase instance.
+        make(robotModel,robotInfo) or make(robotModel) returning a
+        RobotInterfaceBase instance.
         
-        In cases 2 and 3, a robot file must be provided.
+        In cases 1 and 2, a robot file must be provided on the command line.
         
         OPTS can be any of
-        --server IP: launch the controller as a standalone server (recommend
-            using "localhost:7881")
-        --client IP: use a client as the controller
+        --server IP: launch the controller as a standalone XML-RPC server
+            (recommend using "localhost:7881")
+        --client IP: use an XML-RPC client as the controller.  Try
+            "http://localhost:7881".
         --sim: simulate the robot and use a standard controller.  Equivalent to
             including klampt.control.simrobotinterface in FILES
         """)
@@ -693,34 +819,28 @@ def main():
         elif ext in ['.py','.pyc']:
             info.controllerFile = fn
         elif ext == '.json':
-            info = robotinfo.load(fn)
+            info = RobotInfo.load(fn)
             if info.controllerFile is None:
                 print("RobotInfo file",fn,"doesn't specify controllerFile")
         else: #assume module
             info.controllerFile = fn
+    
     if world.numRobots()==0:
         if info.modelFile is not None:
             print("Loading",info.modelFile,"from paths",info.filePaths)
             model = info.klamptModel()
             world.add(info.name,model)
-        else:
-            print("No robot models loaded, can't run the visualization")
-            exit(1)
 
-    if info.name =='untitled':
-        info.name = world.robot(0).getName()
-    info.robotModel = world.robot(0)
-    robotinfo.register(info)
+    if world.numRobots() != 0:
+        if info.name =='untitled':
+            info.name = world.robot(0).getName()
+        info.robotModel = world.robot(0)
+        RobotInfo.register(info)
 
     if mode == 'normal':
         controller = info.controller()
     elif mode == 'client':
-        if ':' in ip:
-            addr,port = ip.split(':')
-        else:
-            addr=ip
-            port = 7881
-        controller = RobotInterfaceClient(addr,int(port))
+        controller = XMLRPCRobotInterfaceClient(ip)
     elif mode == 'server':
         if ':' in ip:
             addr,port = ip.split(':')
@@ -728,7 +848,7 @@ def main():
             addr=ip
             port = 7881
         controller = info.controller()
-        server = RobotInterfaceServer(controller,addr,int(port))
+        server = XMLRPCRobotInterfaceServer(controller,addr,int(port))
         print("Beginning Robot Interface Layer server for controller",controller)
         print("Press Ctrl+C to exit...")
         server.serve()
@@ -737,6 +857,18 @@ def main():
     res = controller.initialize()
     if not res:
         print("Error starting up controller")
+        exit(1)
+    
+    if controller.properties.get('klamptModelFile',None):
+        if world.numRobots()==0:
+            world.loadFile(controller.properties['klamptModelFile'])
+            print("Loaded robot file",controller.properties['klamptModelFile'])
+        elif controller.properties['klamptModelFile'] != info.modelFile:
+            print("Controller is based on robot file",controller.properties['klamptModelFile'],"while info is based on",info.modelFile)
+    else:
+        print("Controller doesn't have klamptModelFile property...")
+    if world.numRobots()==0:
+        print("No robot models loaded, can't run the visualization")
         exit(1)
 
     g_gui = None

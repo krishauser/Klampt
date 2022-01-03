@@ -1,8 +1,8 @@
-from ..controller import ControllerBlock,RobotControllerIO
+from ..controller import RobotControllerBlock,RobotControllerIO
 from klampt.model import trajectory
+from klampt.io import loader
 
-
-class TrajectoryPositionController(ControllerBlock):
+class TrajectoryPositionController(RobotControllerBlock):
     """A (robot) controller that takes in a trajectory and outputs the position
     along the trajectory.  If type is a 2-tuple, this will also output the
     derivative of the trajectory"""
@@ -10,16 +10,10 @@ class TrajectoryPositionController(ControllerBlock):
         self.traj = traj
         self.outputType = type
         self.startTime = None
+        RobotControllerBlock.__init__(self)
+        for t in type:
+            self._outputs.addChannel(t)
 
-    def inputNames(self):
-        return ['t']
-
-    def outputNames(self):
-        if isinstance(self.outputType,(tuple,list)):
-            return self.outputType
-        else:
-            return [self.outputType]
-    
     def advance(self,**inputs):
         t = inputs['t']
         if self.startTime == None:
@@ -32,27 +26,24 @@ class TrajectoryPositionController(ControllerBlock):
         else:
             return {self.outputType:self.traj.eval(t)}
 
-    def getState(self):
-        return {'startTime':self.startTime}
-    def setState(self,state):
+    def __getstate__(self):
+        return {'startTime':self.startTime,'traj':loader.toJson(self.traj)}
+    def __setstate__(self,state):
         self.startTime = state['startTime']
-    def signal(self,type,**inputs):
+        self.traj = loader.fromJson(state['traj'],'Trajectory')
+    def signal(self,type,*inputs):
         if type=='reset':
             self.startTime = None
 
 
-class TrajectoryWithFeedforwardTorqueController(ControllerBlock):
+class TrajectoryWithFeedforwardTorqueController(RobotControllerBlock):
     """A controller that takes in a joint trajectory and a feedforward torque
     trajectory."""
     def __init__(self,traj,torquetraj):
         self.traj = traj
         self.torquetraj = torquetraj
         self.startTime = None
-    def inputNames(self):
-        return ['t']
-
-    def outputNames(self):
-        return ['qcmd','dqcmd','torquecmd']
+        RobotControllerBlock.__init__(self)
 
     def advance(self,**inputs):
         api = RobotControllerIO(inputs)
@@ -62,10 +53,12 @@ class TrajectoryWithFeedforwardTorqueController(ControllerBlock):
         t = t - self.startTime
         return api.makeFeedforwardPIDCommand(self.traj.eval(t),self.traj.deriv(t),self.torquetraj.eval(t))
 
-    def getState(self):
-        return {'startTime':self.startTime}
-    def setState(self,state):
+    def __getstate__(self):
+        return {'startTime':self.startTime,'traj':loader.toJson(self.traj),'torquetraj':loader.toJson(self.torqueTraj)}
+    def __setstate__(self,state):
         self.startTime = state['startTime']
+        self.traj = loader.fromJson(state['traj'],'Trajectory')
+        self.torquetraj = loader.fromJson(state['torquetraj'],'Trajectory')
     def signal(self,type,**inputs):
         if type=='reset':
             self.startTime = None

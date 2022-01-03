@@ -46,13 +46,14 @@
      <item>
       <widget class="QToolButton" name="lockButton">
        <property name="toolTip">
-        <string>Uncheck me to allow immediate commands</string>
+        <string>Uncheck me to allow immediate commands when &quot;Command&quot; slider is dragged</string>
        </property>
        <property name="text">
         <string>...</string>
        </property>
        <property name="icon">
-        <iconset theme="stock_lock"/>
+        <iconset theme="stock_lock">
+         <normaloff>.</normaloff>.</iconset>
        </property>
        <property name="checkable">
         <bool>true</bool>

@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,4,0,0">
+  <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0">
    <property name="leftMargin">
     <number>0</number>
    </property>
@@ -125,503 +125,6 @@
     </layout>
    </item>
    <item>
-    <widget class="QToolBox" name="centralTabWidget">
-     <property name="currentIndex">
-      <number>0</number>
-     </property>
-     <widget class="QWidget" name="jointControlWidget">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>396</width>
-        <height>341</height>
-       </rect>
-      </property>
-      <attribute name="label">
-       <string>Joint control</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_3" stretch="1,4,1">
-       <property name="topMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
-        <number>0</number>
-       </property>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_6" stretch="2,1,1">
-         <property name="sizeConstraint">
-          <enum>QLayout::SetDefaultConstraint</enum>
-         </property>
-         <property name="bottomMargin">
-          <number>0</number>
-         </property>
-         <item>
-          <widget class="QPushButton" name="configClipboardButton">
-           <property name="toolTip">
-            <string>Copy a configuration to the clipboard</string>
-           </property>
-           <property name="text">
-            <string>Copy config</string>
-           </property>
-           <property name="icon">
-            <iconset theme="edit-copy">
-             <normaloff>.</normaloff>.</iconset>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QComboBox" name="configSourceList">
-           <property name="toolTip">
-            <string>Select which configuration you wish to copy</string>
-           </property>
-           <item>
-            <property name="text">
-             <string>Sensed</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Commanded</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Destination</string>
-            </property>
-           </item>
-          </widget>
-         </item>
-         <item>
-          <widget class="QComboBox" name="configFormatList">
-           <property name="toolTip">
-            <string>Select the format of the copied text</string>
-           </property>
-           <item>
-            <property name="text">
-             <string>Python list</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>.config</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Raw values</string>
-            </property>
-           </item>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <widget class="QScrollArea" name="jointScrollArea">
-         <property name="widgetResizable">
-          <bool>true</bool>
-         </property>
-         <widget class="QWidget" name="jointScrollAreaContents">
-          <property name="geometry">
-           <rect>
-            <x>0</x>
-            <y>0</y>
-            <width>376</width>
-            <height>18</height>
-           </rect>
-          </property>
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <layout class="QVBoxLayout" name="jointScrollAreaLayout">
-           <property name="spacing">
-            <number>5</number>
-           </property>
-           <property name="sizeConstraint">
-            <enum>QLayout::SetDefaultConstraint</enum>
-           </property>
-          </layout>
-         </widget>
-        </widget>
-       </item>
-       <item>
-        <widget class="QFrame" name="frame_2">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>80</height>
-          </size>
-         </property>
-         <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
-         </property>
-         <widget class="QPushButton" name="moveToPositionButton">
-          <property name="geometry">
-           <rect>
-            <x>10</x>
-            <y>10</y>
-            <width>91</width>
-            <height>27</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Move-to</string>
-          </property>
-         </widget>
-         <widget class="QPushButton" name="setPositionButton">
-          <property name="geometry">
-           <rect>
-            <x>10</x>
-            <y>40</y>
-            <width>111</width>
-            <height>27</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Set position</string>
-          </property>
-         </widget>
-         <widget class="QPushButton" name="setVelocityButton">
-          <property name="geometry">
-           <rect>
-            <x>130</x>
-            <y>40</y>
-            <width>111</width>
-            <height>27</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Set velocity</string>
-          </property>
-         </widget>
-         <widget class="QLabel" name="label">
-          <property name="geometry">
-           <rect>
-            <x>110</x>
-            <y>10</y>
-            <width>67</width>
-            <height>31</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Speed</string>
-          </property>
-         </widget>
-         <widget class="QDoubleSpinBox" name="speedSpinBox">
-          <property name="geometry">
-           <rect>
-            <x>170</x>
-            <y>10</y>
-            <width>69</width>
-            <height>27</height>
-           </rect>
-          </property>
-          <property name="toolTip">
-           <string>Modulates the speed of the command</string>
-          </property>
-          <property name="maximum">
-           <double>5.000000000000000</double>
-          </property>
-          <property name="singleStep">
-           <double>0.100000000000000</double>
-          </property>
-          <property name="value">
-           <double>1.000000000000000</double>
-          </property>
-         </widget>
-         <widget class="QCheckBox" name="jointInterpolateCheck">
-          <property name="geometry">
-           <rect>
-            <x>250</x>
-            <y>10</y>
-            <width>101</width>
-            <height>22</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Interpolate</string>
-          </property>
-          <property name="checked">
-           <bool>true</bool>
-          </property>
-         </widget>
-         <widget class="QPushButton" name="setPIDButton">
-          <property name="geometry">
-           <rect>
-            <x>250</x>
-            <y>40</y>
-            <width>111</width>
-            <height>27</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Set PID</string>
-          </property>
-         </widget>
-         <zorder>moveToPositionButton</zorder>
-         <zorder>setPositionButton</zorder>
-         <zorder>setVelocityButton</zorder>
-         <zorder>label</zorder>
-         <zorder>speedSpinBox</zorder>
-         <zorder>jointInterpolateCheck</zorder>
-         <zorder>jointFrame</zorder>
-         <zorder>setPIDButton</zorder>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="cartesianControlWidget">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>396</width>
-        <height>341</height>
-       </rect>
-      </property>
-      <attribute name="label">
-       <string>Cartesian control</string>
-      </attribute>
-      <widget class="QDoubleSpinBox" name="toolXSpinBox">
-       <property name="geometry">
-        <rect>
-         <x>110</x>
-         <y>60</y>
-         <width>81</width>
-         <height>27</height>
-        </rect>
-       </property>
-       <property name="decimals">
-        <number>4</number>
-       </property>
-       <property name="minimum">
-        <double>-1.000000000000000</double>
-       </property>
-       <property name="maximum">
-        <double>1.000000000000000</double>
-       </property>
-       <property name="singleStep">
-        <double>0.010000000000000</double>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_2">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>60</y>
-         <width>101</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Tool position</string>
-       </property>
-      </widget>
-      <widget class="QDoubleSpinBox" name="toolYSpinBox">
-       <property name="geometry">
-        <rect>
-         <x>190</x>
-         <y>60</y>
-         <width>81</width>
-         <height>27</height>
-        </rect>
-       </property>
-       <property name="decimals">
-        <number>4</number>
-       </property>
-       <property name="minimum">
-        <double>-1.000000000000000</double>
-       </property>
-       <property name="maximum">
-        <double>1.000000000000000</double>
-       </property>
-       <property name="singleStep">
-        <double>0.010000000000000</double>
-       </property>
-      </widget>
-      <widget class="QDoubleSpinBox" name="toolZSpinBox">
-       <property name="geometry">
-        <rect>
-         <x>270</x>
-         <y>60</y>
-         <width>81</width>
-         <height>27</height>
-        </rect>
-       </property>
-       <property name="decimals">
-        <number>4</number>
-       </property>
-       <property name="minimum">
-        <double>-1.000000000000000</double>
-       </property>
-       <property name="maximum">
-        <double>1.000000000000000</double>
-       </property>
-       <property name="singleStep">
-        <double>0.010000000000000</double>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="pushButton">
-       <property name="geometry">
-        <rect>
-         <x>110</x>
-         <y>90</y>
-         <width>99</width>
-         <height>27</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Visual edit</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="moveToCartesianPositionButton">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>130</y>
-         <width>91</width>
-         <height>27</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Move-to</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="endEffectorLabel">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>0</y>
-         <width>101</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>End effector</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="endEffectorLinkLabel">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>30</y>
-         <width>271</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>End effector link: </string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="setCartesianVelocityButton">
-       <property name="geometry">
-        <rect>
-         <x>130</x>
-         <y>160</y>
-         <width>111</width>
-         <height>27</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Set velocity</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_3">
-       <property name="geometry">
-        <rect>
-         <x>110</x>
-         <y>130</y>
-         <width>51</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Speed</string>
-       </property>
-      </widget>
-      <widget class="QDoubleSpinBox" name="cartesianSpeedSpinBox">
-       <property name="geometry">
-        <rect>
-         <x>170</x>
-         <y>130</y>
-         <width>69</width>
-         <height>27</height>
-        </rect>
-       </property>
-       <property name="maximum">
-        <double>5.000000000000000</double>
-       </property>
-       <property name="singleStep">
-        <double>0.100000000000000</double>
-       </property>
-       <property name="value">
-        <double>1.000000000000000</double>
-       </property>
-      </widget>
-      <widget class="QCheckBox" name="cartesianInterpolateCheck">
-       <property name="geometry">
-        <rect>
-         <x>250</x>
-         <y>130</y>
-         <width>101</width>
-         <height>22</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Interpolate</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="setCartesianPositionButton">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>160</y>
-         <width>111</width>
-         <height>27</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Set position</string>
-       </property>
-      </widget>
-      <widget class="QComboBox" name="endEffectorList">
-       <property name="geometry">
-        <rect>
-         <x>110</x>
-         <y>0</y>
-         <width>181</width>
-         <height>27</height>
-        </rect>
-       </property>
-      </widget>
-     </widget>
-     <widget class="QWidget" name="loggingWidget">
-      <attribute name="label">
-       <string>Logging</string>
-      </attribute>
-     </widget>
-     <widget class="QWidget" name="presetsWidget">
-      <attribute name="label">
-       <string>Presets</string>
-      </attribute>
-     </widget>
-     <widget class="QWidget" name="motionPlanningWidget">
-      <attribute name="label">
-       <string>Motion planning</string>
-      </attribute>
-     </widget>
-    </widget>
-   </item>
-   <item>
     <widget class="Line" name="line">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -636,6 +139,803 @@
      <property name="rightMargin">
       <number>9</number>
      </property>
+     <item>
+      <widget class="QToolBox" name="centralTabWidget">
+       <property name="currentIndex">
+        <number>0</number>
+       </property>
+       <widget class="QWidget" name="jointControlWidget">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>378</width>
+          <height>341</height>
+         </rect>
+        </property>
+        <attribute name="label">
+         <string>Joint control</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_3" stretch="1,4,1">
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_6" stretch="2,1,1">
+           <property name="sizeConstraint">
+            <enum>QLayout::SetDefaultConstraint</enum>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QPushButton" name="configClipboardButton">
+             <property name="toolTip">
+              <string>Copy a configuration to the clipboard</string>
+             </property>
+             <property name="text">
+              <string>Copy config</string>
+             </property>
+             <property name="icon">
+              <iconset theme="edit-copy">
+               <normaloff>.</normaloff>.</iconset>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="configSourceList">
+             <property name="toolTip">
+              <string>Select which configuration you wish to copy</string>
+             </property>
+             <item>
+              <property name="text">
+               <string>Sensed</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Commanded</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Destination</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="configFormatList">
+             <property name="toolTip">
+              <string>Select the format of the copied text</string>
+             </property>
+             <item>
+              <property name="text">
+               <string>Python list</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>.config</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Raw values</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QScrollArea" name="jointScrollArea">
+           <property name="widgetResizable">
+            <bool>true</bool>
+           </property>
+           <widget class="QWidget" name="jointScrollAreaContents">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>358</width>
+              <height>18</height>
+             </rect>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <layout class="QVBoxLayout" name="jointScrollAreaLayout">
+             <property name="spacing">
+              <number>5</number>
+             </property>
+             <property name="sizeConstraint">
+              <enum>QLayout::SetDefaultConstraint</enum>
+             </property>
+            </layout>
+           </widget>
+          </widget>
+         </item>
+         <item>
+          <widget class="QFrame" name="frame_2">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>80</height>
+            </size>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::StyledPanel</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Raised</enum>
+           </property>
+           <widget class="QPushButton" name="moveToPositionButton">
+            <property name="geometry">
+             <rect>
+              <x>10</x>
+              <y>10</y>
+              <width>91</width>
+              <height>27</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Move-to</string>
+            </property>
+           </widget>
+           <widget class="QPushButton" name="setPositionButton">
+            <property name="geometry">
+             <rect>
+              <x>10</x>
+              <y>40</y>
+              <width>111</width>
+              <height>27</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Set position</string>
+            </property>
+           </widget>
+           <widget class="QPushButton" name="setVelocityButton">
+            <property name="geometry">
+             <rect>
+              <x>130</x>
+              <y>40</y>
+              <width>111</width>
+              <height>27</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Set velocity</string>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label">
+            <property name="geometry">
+             <rect>
+              <x>110</x>
+              <y>10</y>
+              <width>67</width>
+              <height>31</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Speed</string>
+            </property>
+           </widget>
+           <widget class="QDoubleSpinBox" name="speedSpinBox">
+            <property name="geometry">
+             <rect>
+              <x>170</x>
+              <y>10</y>
+              <width>69</width>
+              <height>27</height>
+             </rect>
+            </property>
+            <property name="toolTip">
+             <string>Modulates the speed of the command</string>
+            </property>
+            <property name="maximum">
+             <double>5.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="value">
+             <double>1.000000000000000</double>
+            </property>
+           </widget>
+           <widget class="QCheckBox" name="jointInterpolateCheck">
+            <property name="geometry">
+             <rect>
+              <x>250</x>
+              <y>10</y>
+              <width>101</width>
+              <height>22</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Interpolate</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+           <widget class="QPushButton" name="setPIDButton">
+            <property name="geometry">
+             <rect>
+              <x>250</x>
+              <y>40</y>
+              <width>111</width>
+              <height>27</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Set PID</string>
+            </property>
+           </widget>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="cartesianControlWidget">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>378</width>
+          <height>341</height>
+         </rect>
+        </property>
+        <attribute name="label">
+         <string>Cartesian control</string>
+        </attribute>
+        <widget class="QDoubleSpinBox" name="toolXSpinBox">
+         <property name="geometry">
+          <rect>
+           <x>110</x>
+           <y>60</y>
+           <width>81</width>
+           <height>27</height>
+          </rect>
+         </property>
+         <property name="decimals">
+          <number>4</number>
+         </property>
+         <property name="minimum">
+          <double>-1.000000000000000</double>
+         </property>
+         <property name="maximum">
+          <double>1.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.010000000000000</double>
+         </property>
+        </widget>
+        <widget class="QLabel" name="toolPositionLabel">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>60</y>
+           <width>101</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Tool position</string>
+         </property>
+        </widget>
+        <widget class="QDoubleSpinBox" name="toolYSpinBox">
+         <property name="geometry">
+          <rect>
+           <x>190</x>
+           <y>60</y>
+           <width>81</width>
+           <height>27</height>
+          </rect>
+         </property>
+         <property name="decimals">
+          <number>4</number>
+         </property>
+         <property name="minimum">
+          <double>-1.000000000000000</double>
+         </property>
+         <property name="maximum">
+          <double>1.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.010000000000000</double>
+         </property>
+        </widget>
+        <widget class="QDoubleSpinBox" name="toolZSpinBox">
+         <property name="geometry">
+          <rect>
+           <x>270</x>
+           <y>60</y>
+           <width>81</width>
+           <height>27</height>
+          </rect>
+         </property>
+         <property name="decimals">
+          <number>4</number>
+         </property>
+         <property name="minimum">
+          <double>-1.000000000000000</double>
+         </property>
+         <property name="maximum">
+          <double>1.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.010000000000000</double>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="visualEditButton">
+         <property name="geometry">
+          <rect>
+           <x>110</x>
+           <y>90</y>
+           <width>99</width>
+           <height>27</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Visual edit</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="moveToCartesianPositionButton">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>130</y>
+           <width>91</width>
+           <height>27</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Move-to</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="endEffectorLabel">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>0</y>
+           <width>101</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>End effector</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="endEffectorLinkLabel">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>30</y>
+           <width>271</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>End effector link: </string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="setCartesianVelocityButton">
+         <property name="geometry">
+          <rect>
+           <x>130</x>
+           <y>160</y>
+           <width>111</width>
+           <height>27</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Set velocity</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="speedLabel">
+         <property name="geometry">
+          <rect>
+           <x>110</x>
+           <y>130</y>
+           <width>51</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Speed</string>
+         </property>
+        </widget>
+        <widget class="QDoubleSpinBox" name="cartesianSpeedSpinBox">
+         <property name="geometry">
+          <rect>
+           <x>170</x>
+           <y>130</y>
+           <width>69</width>
+           <height>27</height>
+          </rect>
+         </property>
+         <property name="maximum">
+          <double>5.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.100000000000000</double>
+         </property>
+         <property name="value">
+          <double>1.000000000000000</double>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="cartesianInterpolateCheck">
+         <property name="geometry">
+          <rect>
+           <x>250</x>
+           <y>130</y>
+           <width>101</width>
+           <height>22</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Interpolate</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="setCartesianPositionButton">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>160</y>
+           <width>111</width>
+           <height>27</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Set position</string>
+         </property>
+        </widget>
+        <widget class="QComboBox" name="endEffectorList">
+         <property name="geometry">
+          <rect>
+           <x>110</x>
+           <y>0</y>
+           <width>181</width>
+           <height>27</height>
+          </rect>
+         </property>
+        </widget>
+       </widget>
+       <widget class="QWidget" name="loggingWidget">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>378</width>
+          <height>341</height>
+         </rect>
+        </property>
+        <attribute name="label">
+         <string>Logging</string>
+        </attribute>
+        <widget class="QLineEdit" name="logFileEdit">
+         <property name="geometry">
+          <rect>
+           <x>110</x>
+           <y>0</y>
+           <width>181</width>
+           <height>27</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>log.csv</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="logFileLabel">
+         <property name="geometry">
+          <rect>
+           <x>50</x>
+           <y>0</y>
+           <width>61</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Log file</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="loggingButton">
+         <property name="geometry">
+          <rect>
+           <x>130</x>
+           <y>40</y>
+           <width>81</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Log</string>
+         </property>
+         <property name="icon">
+          <iconset theme="document-save"/>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QLabel" name="commandFileLabel">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>110</y>
+           <width>101</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Command file</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="browseLogFileButton">
+         <property name="geometry">
+          <rect>
+           <x>290</x>
+           <y>0</y>
+           <width>81</width>
+           <height>27</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Browse...</string>
+         </property>
+         <property name="checkable">
+          <bool>false</bool>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="loggingButton_2">
+         <property name="geometry">
+          <rect>
+           <x>50</x>
+           <y>150</y>
+           <width>101</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Record</string>
+         </property>
+         <property name="icon">
+          <iconset theme="media-record"/>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="loggingButton_3">
+         <property name="geometry">
+          <rect>
+           <x>190</x>
+           <y>150</y>
+           <width>101</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Replay</string>
+         </property>
+         <property name="icon">
+          <iconset theme="media-playback-start"/>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="commandFileEdit">
+         <property name="geometry">
+          <rect>
+           <x>110</x>
+           <y>110</y>
+           <width>181</width>
+           <height>27</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>commands.json</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="browseCommandFileButton">
+         <property name="geometry">
+          <rect>
+           <x>290</x>
+           <y>110</y>
+           <width>81</width>
+           <height>27</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Browse...</string>
+         </property>
+         <property name="checkable">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </widget>
+       <widget class="QWidget" name="presetsWidget">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>378</width>
+          <height>341</height>
+         </rect>
+        </property>
+        <attribute name="label">
+         <string>Presets</string>
+        </attribute>
+        <widget class="QPushButton" name="loadPresetsDirButton">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>10</y>
+           <width>151</width>
+           <height>27</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Load resource dir...</string>
+         </property>
+         <property name="checkable">
+          <bool>false</bool>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="loadPresetButton">
+         <property name="geometry">
+          <rect>
+           <x>180</x>
+           <y>10</y>
+           <width>151</width>
+           <height>27</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Load resource...</string>
+         </property>
+         <property name="checkable">
+          <bool>false</bool>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_6">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>40</y>
+           <width>131</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Configurations</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_7">
+         <property name="geometry">
+          <rect>
+           <x>190</x>
+           <y>40</y>
+           <width>131</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Cartesian poses</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_8">
+         <property name="geometry">
+          <rect>
+           <x>190</x>
+           <y>160</y>
+           <width>131</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Trajectories</string>
+         </property>
+        </widget>
+        <widget class="QListWidget" name="configurationList">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>61</y>
+           <width>161</width>
+           <height>221</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QListWidget" name="cartesianPoseList">
+         <property name="geometry">
+          <rect>
+           <x>190</x>
+           <y>60</y>
+           <width>161</width>
+           <height>91</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QListWidget" name="trajectoryList">
+         <property name="geometry">
+          <rect>
+           <x>190</x>
+           <y>180</y>
+           <width>161</width>
+           <height>101</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="sendPresetToPoser">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>290</y>
+           <width>121</width>
+           <height>27</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Send to poser</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="moveToPreset">
+         <property name="geometry">
+          <rect>
+           <x>140</x>
+           <y>290</y>
+           <width>101</width>
+           <height>27</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Move to</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="executePreset">
+         <property name="geometry">
+          <rect>
+           <x>250</x>
+           <y>290</y>
+           <width>101</width>
+           <height>27</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Execute</string>
+         </property>
+        </widget>
+       </widget>
+       <widget class="QWidget" name="motionPlanningWidget">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>378</width>
+          <height>341</height>
+         </rect>
+        </property>
+        <attribute name="label">
+         <string>Motion planning</string>
+        </attribute>
+       </widget>
+      </widget>
+     </item>
      <item>
       <widget class="QLabel" name="errorLabel">
        <property name="text">
