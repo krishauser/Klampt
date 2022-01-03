@@ -413,7 +413,7 @@ class Trajectory:
         """
         return self.discretize_state(dt)
 
-    def remesh(self, newtimes: List[float], tol: float=1e-6) -> 'Trajectory':
+    def remesh(self, newtimes: List[float], tol: float=1e-6) -> Tuple['Trajectory',List[int]]:
         """Returns a path that has milestones at the times given in newtimes, as well
         as the current milestone times.  Return value is (path,newtimeidx) where
         path is the remeshed path, and newtimeidx is a list of time indices for which
