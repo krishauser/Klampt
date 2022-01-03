@@ -6156,9 +6156,12 @@ void SimRobotSensor::getTransformWorld(double out[9],double out2[3])
   Tlocal.R.set(R);
   Tlocal.t.set(t);
   RobotModelLink link=getLink();
-  link.getTransform(R,t);
-  Tlink.R.set(R);
-  Tlink.t.set(t);
+  if(link.index < 0) Tlink.setIdentity();
+  else {
+    link.getTransform(R,t);
+    Tlink.R.set(R);
+    Tlink.t.set(t);
+  }
   RigidTransform Tworld=Tlink*Tlocal;
   Tworld.R.get(out);
   Tworld.t.get(out2);
