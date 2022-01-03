@@ -276,8 +276,11 @@ def error(R1 : Rotation, R2 : Rotation) -> float:
     More precisely, this is the (local) Lie derivative, which is the rotation 
     vector representation of R1*R2^T.
 
-    Fun fact: this is related to the derivative of interpolate(R2,R1,u) at u=0
-    by d/du interpolate(R2,R1,0) = mul(error(R1,R2),R2).
+    Fun fact: the error w=error(R1,R2) is related to the derivative of
+    interpolate(R2,R1,u) at u=0 by
+    d/du interpolate(R2,R1,0) = mul(cross_product(w),R2).
+    
+    You can also recover R1 from w via R1 = mul(from_moment(w),R2).
     """
     R = mul(R1,inv(R2))
     return moment(R)

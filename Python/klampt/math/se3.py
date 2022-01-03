@@ -109,7 +109,14 @@ def distance(T1 : RigidTransform, T2 : RigidTransform, Rweight=1.0,tweight=1.0) 
 
 def error(T1 : RigidTransform, T2 : RigidTransform) -> float:
     """Returns a 6D "difference vector" that describes how far T1 is from T2.
-    More precisely, this is the Lie derivative (w,v)."""
+    More precisely, this is the (stacked) Lie derivative (w,v).
+    
+    Fun fact: the error is related to the derivative of interpolate(T2,T1,u)
+    at u=0 by d/du interpolate(T2,T1,0) = (mul(cross_product(w),R2),v).
+    
+    You can also recover T1 from (w,v) via T1 = (mul(from_moment(w),T2[0]),
+    vectorops.add(v,T2[1])).
+    """
     (R1,t1)=T1
     (R2,t2)=T2
     #concatenate lists
