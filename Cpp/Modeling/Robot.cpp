@@ -101,6 +101,7 @@ Real Radius(const Geometry::AnyGeometry3D& geom)
       return Sqrt(dmax);
     }
   case Geometry::AnyGeometry3D::ImplicitSurface:
+  case Geometry::AnyGeometry3D::OccupancyGrid:
     {
       Box3D box;
       box.set(geom.AsImplicitSurface().bb);
@@ -1138,6 +1139,19 @@ bool RobotModel::LoadRob(const char* fn) {
         drivers[i].tmax = torqueMax(itemp);
         drivers[i].amin = -accMax(itemp);
         drivers[i].amax = accMax(itemp);
+      }
+      else if(drivers[i].type == RobotModelDriver::Affine) {  //set acceleration limits from robot's acceleration limits
+        for(size_t j=0;j<drivers[i].linkIndices.size();j++) {
+          Real s = drivers[i].affScaling[j];
+          if(s > 0) {
+            drivers[i].amin = Max(drivers[i].amin,-accMax[drivers[i].linkIndices[j]]/s);
+            drivers[i].amax = Min(drivers[i].amax,accMax[drivers[i].linkIndices[j]]/s);
+          }
+          else if(s < 0) {
+            drivers[i].amin = Max(drivers[i].amin,accMax[drivers[i].linkIndices[j]]/s);
+            drivers[i].amax = Max(drivers[i].amax,-accMax[drivers[i].linkIndices[j]]/s);
+          }
+        }
       }
     }
   }
@@ -3187,6 +3201,42 @@ bool RobotModel::LoadURDF(const char* fn)
       drivers[d].linkIndices.push_back(i);
       drivers[d].affScaling.push_back(affineJointScales[i]);
       drivers[d].affOffset.push_back(affineJointOffsets[i]);
+    }
+  }
+  //setup affine driver limits
+  for(size_t i=0;i<drivers.size();i++) {
+    if(drivers[i].type == RobotModelDriver::Affine) {  //set acceleration limits from robot's acceleration limits
+      drivers[i].qmin = -Inf;
+      drivers[i].qmax = Inf;
+      drivers[i].vmin = -Inf;
+      drivers[i].vmax = Inf;
+      drivers[i].amin = -Inf;
+      drivers[i].amax = Inf;
+      drivers[i].tmin = -Inf;
+      drivers[i].tmax = Inf;
+      for(size_t j=0;j<drivers[i].linkIndices.size();j++) {
+        Real s = drivers[i].affScaling[j];
+        if(s > 0) {
+          drivers[i].qmin = Max(drivers[i].qmin,qMin[drivers[i].linkIndices[j]]/s);
+          drivers[i].qmax = Min(drivers[i].qmax,qMax[drivers[i].linkIndices[j]]/s);
+          drivers[i].vmin = Max(drivers[i].vmin,-velMin[drivers[i].linkIndices[j]]/s);
+          drivers[i].vmax = Min(drivers[i].vmax,velMax[drivers[i].linkIndices[j]]/s);
+          drivers[i].amin = Max(drivers[i].amin,-accMax[drivers[i].linkIndices[j]]/s);
+          drivers[i].amax = Min(drivers[i].amax,accMax[drivers[i].linkIndices[j]]/s);
+          drivers[i].tmin = Max(drivers[i].tmin,-torqueMax[drivers[i].linkIndices[j]]/s);
+          drivers[i].tmax = Min(drivers[i].tmax,torqueMax[drivers[i].linkIndices[j]]/s);
+        }
+        else if(s < 0) {
+          drivers[i].qmin = Max(drivers[i].qmin,qMax[drivers[i].linkIndices[j]]/s);
+          drivers[i].qmax = Min(drivers[i].qmax,qMin[drivers[i].linkIndices[j]]/s);
+          drivers[i].vmin = Max(drivers[i].vmin,velMin[drivers[i].linkIndices[j]]/s);
+          drivers[i].vmax = Min(drivers[i].vmax,-velMax[drivers[i].linkIndices[j]]/s);
+          drivers[i].amin = Max(drivers[i].amin,accMax[drivers[i].linkIndices[j]]/s);
+          drivers[i].amax = Min(drivers[i].amax,-accMax[drivers[i].linkIndices[j]]/s);
+          drivers[i].tmin = Max(drivers[i].tmin,torqueMax[drivers[i].linkIndices[j]]/s);
+          drivers[i].tmax = Min(drivers[i].tmax,-torqueMax[drivers[i].linkIndices[j]]/s);
+        }
+      }
     }
   }
 
