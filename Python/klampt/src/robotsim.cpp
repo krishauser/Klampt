@@ -4093,25 +4093,70 @@ void RobotModelDriver::getAffineCoeffs(std::vector<double>& scale,std::vector<do
 
 void RobotModelDriver::setValue(double val)
 {
+  if(index < 0 || index >= (int)robotPtr->drivers.size()) {
+    throw PyException("Invalid driver index");
+  }
   robotPtr->SetDriverValue(index,val);
 }
 
 double RobotModelDriver::getValue()
 {
+  if(index < 0 || index >= (int)robotPtr->drivers.size()) {
+    throw PyException("Invalid driver index");
+  }
   return robotPtr->GetDriverValue(index);
 }
 void RobotModelDriver::setVelocity(double val)
 {
+  if(index < 0 || index >= (int)robotPtr->drivers.size()) {
+    throw PyException("Invalid driver index");
+  }
   robotPtr->SetDriverVelocity(index,val);
 }
 
 double RobotModelDriver::getVelocity()
 {
+  if(index < 0 || index >= (int)robotPtr->drivers.size()) {
+    throw PyException("Invalid driver index");
+  }
   return robotPtr->GetDriverVelocity(index);
 }
 
+void RobotModelDriver::getLimits(double out[2])
+{
+  if(index < 0 || index >= (int)robotPtr->drivers.size()) {
+    throw PyException("Invalid driver index");
+  }
+  out[0] = robotPtr->drivers[index].qmin;
+  out[1] = robotPtr->drivers[index].qmax;
+}
 
+void RobotModelDriver::getVelocityLimits(double out[2])
+{
+  if(index < 0 || index >= (int)robotPtr->drivers.size()) {
+    throw PyException("Invalid driver index");
+  }
+  out[0] = robotPtr->drivers[index].vmin;
+  out[1] = robotPtr->drivers[index].vmax;
+}
 
+void RobotModelDriver::getAccelerationLimits(double out[2])
+{
+  if(index < 0 || index >= (int)robotPtr->drivers.size()) {
+    throw PyException("Invalid driver index");
+  }
+  out[0] = robotPtr->drivers[index].amin;
+  out[1] = robotPtr->drivers[index].amax;
+}
+
+void RobotModelDriver::getTorqueLimits(double out[2])
+{
+  if(index < 0 || index >= (int)robotPtr->drivers.size()) {
+    throw PyException("Invalid driver index");
+  }
+  out[0] = robotPtr->drivers[index].tmin;
+  out[1] = robotPtr->drivers[index].tmax;
+}
 
 RobotModel::RobotModel()
   :world(-1),index(-1),robot(NULL),dirty_dynamics(true)

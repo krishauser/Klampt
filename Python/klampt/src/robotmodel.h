@@ -358,6 +358,14 @@ class RobotModelDriver
   void setVelocity(double val);
   ///Gets the current driver velocity value from the robot's velocity
   double getVelocity();
+  ///Retrieves value limits [xmin,xmax]
+  void getLimits(double out[2]);
+  ///Retrieves velocity limits [vmin,vmax]
+  void getVelocityLimits(double out[2]);
+  ///Retrieves acceleration limits [amin,amax]
+  void getAccelerationLimits(double out[2]);
+  ///Retrieves generalized torque limits [tmin,tmax]
+  void getTorqueLimits(double out[2]);
 
   int world;
   int robotIndex;
@@ -373,7 +381,7 @@ class RobotModelDriver
  * on the robot's current configuration and/or velocity.  To update that, use
  * the setConfig() and setVelocity() functions.  setConfig() also update's the
  * robot's link transforms via forward kinematics.  You may also use setDOFPosition
- * and setDOFVelocity for individual changes, but this is more expensive because
+ * and setDOFVelocity for individual changes, but these are more expensive because
  * each call updates all of the affected the link transforms.
  *
  * It is important to understand that changing the configuration of the model
@@ -391,10 +399,23 @@ class RobotModelDriver
  *     do some stuff that may touch the robot's configuration...
  *     robot.setConfig(q)
  *
- * The model maintains configuration/velocity/acceleration/torque bounds.
+ * The model maintains configuration/velocity/acceleration/torque limits.
  * However, these are not enforced by the model, so you can happily set
- * configurations outside  must rather be enforced by the
- * planner / simulator.
+ * configurations outside the limits. Valid commands must rather be enforced 
+ * by the planner / controller / simulator.
+ * 
+ * As elsewhere in Klampt, the mapping between links and drivers is not one-to
+ * one. A driver is essentially an actuator and transmission, and for most links
+ * a link is driven by a unique driver (e.g., a motor and gearbox). However,
+ * there do exist certain cases in which a link is not driven at all (e.g., the
+ * 6 virtual links of a floating-base robot), or multiple links are driven by
+ * a single actuator (e.g., a parallel-bar mechanism or a compliant hand). 
+ * There are also unusual drivers that introduce underactuated dynamics into
+ * the system, such as a differential drive or Dubin's car mobile base.   Care
+ * must be taken when sending commands to motor controllers (e.g., Klampt
+ * Robot Interface Layer), which often work in the actuator space rather than
+ * joint space.  (See :func:`configToDrivers`, :func:`configFromDrivers`,
+ * :func:`velocityToDrivers`, :func:`velocityFromDrivers`).
  */
 class RobotModel
 {

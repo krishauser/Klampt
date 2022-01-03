@@ -2054,10 +2054,21 @@ class Geometry3D(object):
         clone(Geometry3D self) -> Geometry3D
 
 
-        Creates a standalone geometry from this geometry.  
+        Creates a standalone geometry from this geometry (identical to copy... will be
+        deprecated in a future version)  
 
         """
         return _robotsim.Geometry3D_clone(self)
+
+    def copy(self) -> "Geometry3D":
+        r"""
+        copy(Geometry3D self) -> Geometry3D
+
+
+        Creates a standalone geometry from this geometry.  
+
+        """
+        return _robotsim.Geometry3D_copy(self)
 
     def set(self, arg2: "Geometry3D") -> "void":
         r"""
@@ -4668,6 +4679,46 @@ class RobotModelDriver(object):
 
         """
         return _robotsim.RobotModelDriver_getVelocity(self)
+
+    def getLimits(self) -> "void":
+        r"""
+        getLimits(RobotModelDriver self)
+
+
+        Retrieves value limits [xmin,xmax].  
+
+        """
+        return _robotsim.RobotModelDriver_getLimits(self)
+
+    def getVelocityLimits(self) -> "void":
+        r"""
+        getVelocityLimits(RobotModelDriver self)
+
+
+        Retrieves velocity limits [vmin,vmax].  
+
+        """
+        return _robotsim.RobotModelDriver_getVelocityLimits(self)
+
+    def getAccelerationLimits(self) -> "void":
+        r"""
+        getAccelerationLimits(RobotModelDriver self)
+
+
+        Retrieves acceleration limits [amin,amax].  
+
+        """
+        return _robotsim.RobotModelDriver_getAccelerationLimits(self)
+
+    def getTorqueLimits(self) -> "void":
+        r"""
+        getTorqueLimits(RobotModelDriver self)
+
+
+        Retrieves generalized torque limits [tmin,tmax].  
+
+        """
+        return _robotsim.RobotModelDriver_getTorqueLimits(self)
     world = property(_robotsim.RobotModelDriver_world_get, _robotsim.RobotModelDriver_world_set, doc=r"""world : int""")
     robotIndex = property(_robotsim.RobotModelDriver_robotIndex_get, _robotsim.RobotModelDriver_robotIndex_set, doc=r"""robotIndex : int""")
     robotPtr = property(_robotsim.RobotModelDriver_robotPtr_get, _robotsim.RobotModelDriver_robotPtr_set, doc=r"""robotPtr : p.Klampt::RobotModel""")
@@ -4697,7 +4748,7 @@ class RobotModel(object):
     robot's current configuration and/or velocity. To update that, use the
     setConfig() and setVelocity() functions. setConfig() also update's the robot's
     link transforms via forward kinematics. You may also use setDOFPosition and
-    setDOFVelocity for individual changes, but this is more expensive because each
+    setDOFVelocity for individual changes, but these are more expensive because each
     call updates all of the affected the link transforms.  
 
     It is important to understand that changing the configuration of the model
@@ -4715,9 +4766,23 @@ class RobotModel(object):
         do some stuff that may touch the robot's configuration...
         robot.setConfig(q)  
 
-    The model maintains configuration/velocity/acceleration/torque bounds. However,
+    The model maintains configuration/velocity/acceleration/torque limits. However,
     these are not enforced by the model, so you can happily set configurations
-    outside must rather be enforced by the planner / simulator.  
+    outside the limits. Valid commands must rather be enforced by the planner /
+    controller / simulator.  
+
+    As elsewhere in Klampt, the mapping between links and drivers is not one-to one.
+    A driver is essentially an actuator and transmission, and for most links a link
+    is driven by a unique driver (e.g., a motor and gearbox). However, there do
+    exist certain cases in which a link is not driven at all (e.g., the 6 virtual
+    links of a floating-base robot), or multiple links are driven by a single
+    actuator (e.g., a parallel-bar mechanism or a compliant hand). There are also
+    unusual drivers that introduce underactuated dynamics into the system, such as a
+    differential drive or Dubin's car mobile base. Care must be taken when sending
+    commands to motor controllers (e.g., Klampt Robot Interface Layer), which often
+    work in the actuator space rather than joint space. (See
+    :func:`configToDrivers`, :func:`configFromDrivers`, :func:`velocityToDrivers`,
+    :func:`velocityFromDrivers`).  
 
     C++ includes: robotmodel.h
 

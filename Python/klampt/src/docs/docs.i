@@ -1357,7 +1357,8 @@ break if the closest points are at least upperBound distance from one another.
 
 %feature("docstring") Geometry3D::clone "
 
-Creates a standalone geometry from this geometry.  
+Creates a standalone geometry from this geometry (identical to copy... will be
+deprecated in a future version)  
 ";
 
 %feature("docstring") Geometry3D::loadFile "
@@ -1368,6 +1369,11 @@ Loads from file. Standard mesh types, PCD files, and .geom files are supported.
 %feature("docstring") Geometry3D::setVolumeGrid "
 
 Sets this Geometry3D to a volumeGrid.  
+";
+
+%feature("docstring") Geometry3D::copy "
+
+Creates a standalone geometry from this geometry.  
 ";
 
 %feature("docstring") Geometry3D::getElement "
@@ -2336,7 +2342,7 @@ joint limits, velocity limits, etc, as well as a *current configuration* and
 robot's current configuration and/or velocity. To update that, use the
 setConfig() and setVelocity() functions. setConfig() also update's the robot's
 link transforms via forward kinematics. You may also use setDOFPosition and
-setDOFVelocity for individual changes, but this is more expensive because each
+setDOFVelocity for individual changes, but these are more expensive because each
 call updates all of the affected the link transforms.  
 
 It is important to understand that changing the configuration of the model
@@ -2354,9 +2360,23 @@ save/restore the configuration as follows::
     do some stuff that may touch the robot's configuration...
     robot.setConfig(q)  
 
-The model maintains configuration/velocity/acceleration/torque bounds. However,
+The model maintains configuration/velocity/acceleration/torque limits. However,
 these are not enforced by the model, so you can happily set configurations
-outside must rather be enforced by the planner / simulator.  
+outside the limits. Valid commands must rather be enforced by the planner /
+controller / simulator.  
+
+As elsewhere in Klampt, the mapping between links and drivers is not one-to one.
+A driver is essentially an actuator and transmission, and for most links a link
+is driven by a unique driver (e.g., a motor and gearbox). However, there do
+exist certain cases in which a link is not driven at all (e.g., the 6 virtual
+links of a floating-base robot), or multiple links are driven by a single
+actuator (e.g., a parallel-bar mechanism or a compliant hand). There are also
+unusual drivers that introduce underactuated dynamics into the system, such as a
+differential drive or Dubin's car mobile base. Care must be taken when sending
+commands to motor controllers (e.g., Klampt Robot Interface Layer), which often
+work in the actuator space rather than joint space. (See
+:func:`configToDrivers`, :func:`configFromDrivers`, :func:`velocityToDrivers`,
+:func:`velocityFromDrivers`).  
 
 C++ includes: robotmodel.h
 ";
@@ -2803,6 +2823,11 @@ A RobotModelDriver is not created by hand, but instead accessed using
 C++ includes: robotmodel.h
 ";
 
+%feature("docstring") RobotModelDriver::getTorqueLimits "
+
+Retrieves generalized torque limits [tmin,tmax].  
+";
+
 %feature("docstring") RobotModelDriver::getAffectedLinks "
 
 Returns the indices of the driver's affected links.  
@@ -2823,6 +2848,11 @@ Sets the robot's config to correspond to the given driver value.
     robot.setConfig(robot.getConfig()) to update the forward kinematics.  
 ";
 
+%feature("docstring") RobotModelDriver::getLimits "
+
+Retrieves value limits [xmin,xmax].  
+";
+
 %feature("docstring") RobotModelDriver::getValue "
 
 Gets the current driver value from the robot's config.  
@@ -2836,6 +2866,11 @@ Returns the single affected link for \"normal\" links.
 %feature("docstring") RobotModelDriver::setName "
 
 Sets the name of the driver.  
+";
+
+%feature("docstring") RobotModelDriver::getVelocityLimits "
+
+Retrieves velocity limits [vmin,vmax].  
 ";
 
 %feature("docstring") RobotModelDriver::getName "
@@ -2858,6 +2893,11 @@ Returns: tuple: a pair (scale,offset), each of length len(getAffectedLinks()).
 
 Currently can be \"normal\", \"affine\", \"rotation\", \"translation\", or
 \"custom\".  
+";
+
+%feature("docstring") RobotModelDriver::getAccelerationLimits "
+
+Retrieves acceleration limits [amin,amax].  
 ";
 
 %feature("docstring") RobotModelDriver::getVelocity "
