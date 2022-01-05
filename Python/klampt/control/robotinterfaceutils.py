@@ -258,8 +258,10 @@ class _Struct:
     
     If the struct has a member ``children`` it is assumed to be hierarchical.
 
-    ``robotModel`` and ``promise`` are ignored when serializing
+    Fields in class variable DO_NOT_SERIALIZE are not serialized
     """
+    DO_NOT_SERIALIZE = []
+
     def __init__(self,rhs=None):
         if rhs is not None:  #copy constructor
             for k in self.__dict__:
@@ -286,10 +288,8 @@ class _Struct:
 
         res = self.__dict__.copy()
         for (k,v) in res.items():
-            res[k] = _to_json(v,k)
-        for ignore in ['robotModel','promise']:
-            if ignore in res:
-                del res[ignore]
+            if k not in self.__class__.DO_NOT_SERIALIZE:
+                res[k] = _to_json(v,k)
         if hasattr(self,'children') and self.children is not None:
             for (name,part) in self.children.items():
                 assert isinstance(part,_Struct)
@@ -317,6 +317,8 @@ class _Struct:
 
 class _RobotInterfaceStructure(_Struct):
     """Constant information over the life of an interface."""
+    DO_NOT_SERIALIZE = ["robotModel"]
+
     def __init__(self):
         self.controlRate = None            #type: float
         self.numJoints = None              #type: int
@@ -409,9 +411,10 @@ class _RobotInterfacePartState(_Struct):
 
     def from_json(self,jsonobj):
         _Struct.from_json(self,jsonobj)
-        cartesian_obj = self.cartesianState
-        self.cartesianState = _RobotInterfaceCartesianState()
-        self.cartesianState.from_json(cartesian_obj)
+        if self.cartesianState is not None:
+            cartesian_obj = self.cartesianState
+            self.cartesianState = _RobotInterfaceCartesianState()
+            self.cartesianState.from_json(cartesian_obj)
 
 
 class _RobotInterfaceState(_RobotInterfacePartState):
@@ -438,7 +441,9 @@ class _RobotInterfaceState(_RobotInterfacePartState):
 
 
 class _RobotInterfaceCommand(_Struct):
-    """Command from the user to the robot, treated as write-only"""
+    """Command from the user to the robot."""
+    DO_NOT_SERIALIZE = ["promise"]
+
     def __init__(self):
         self.time = None                    #type: float
         self.indices = None                 #type: List[int]
@@ -446,6 +451,16 @@ class _RobotInterfaceCommand(_Struct):
         self.args = None                    #type: Tuple[Any]
         self.promise = None                 #type: Promise
 
+
+def _valid_vector(v,length=None) -> bool:
+    if v is None: return False
+    if length is not None and len(v) != length: return False
+    if all(x is not None for x in v):
+        if any(x is None for x in v):
+            print("WARNING: vector has mized values and None: {}".format(v))
+            return False
+        return True
+    return False
 
 def _gather_state_var(res,state,state_inds,attr,n):
     stateattr = getattr(state,attr)
@@ -570,7 +585,7 @@ def _split_state(unified_state: _RobotInterfaceState,
 
 def _gather_settings(parts : Dict[str,List[int]],
                      part_settings : Dict[str,_RobotInterfaceSettings],
-                     unified_state : _RobotInterfaceSettings) -> None:
+                     unified_settings : _RobotInterfaceSettings) -> None:
     if None in parts:
         assert len(part_settings)+1 == len(parts),"part settings isn't the right size? {} vs {}".format(list(part_settings.keys()),list(parts.keys()))
     else:
@@ -580,13 +595,13 @@ def _gather_settings(parts : Dict[str,List[int]],
     for (partname,inds) in parts.items():
         if partname is None: continue
         settings = part_settings[partname]
-        _gather_state_var(unified_state,settings,inds,'kP',n)
-        _gather_state_var(unified_state,settings,inds,'kI',n)
-        _gather_state_var(unified_state,settings,inds,'kD',n)
-        if any(getattr(settings,n) for n in ['toolCoordinates','gravity','settings','sensorEnabled','parts']):
-            if unified_state.children is None:
-                unified_state.children = dict()
-            unified_state.children[partname] = _RobotInterfacePartSettings(settings)
+        _gather_state_var(unified_settings,settings,inds,'kP',n)
+        _gather_state_var(unified_settings,settings,inds,'kI',n)
+        _gather_state_var(unified_settings,settings,inds,'kD',n)
+        if any(getattr(settings,n) for n in ['toolCoordinates','gravity','settings','sensorEnabled','children']):
+            if unified_settings.children is None:
+                unified_settings.children = dict()
+            unified_settings.children[partname] = _RobotInterfacePartSettings(settings)
         
 def _split_settings(unified_settings : _RobotInterfaceSettings,
                     parts : Dict[str,List[int]]) -> Dict[str,_RobotInterfaceSettings]:
@@ -600,7 +615,7 @@ def _split_settings(unified_settings : _RobotInterfaceSettings,
         _split_state_var(unified_settings,settings,inds,'kD')
         if unified_settings.children is not None and partname in unified_settings.children:
             partsetting = unified_settings.children[partname]
-            for n in ['toolCoordinates','gravity','load','load_com','settings','sensorEnabled','parts']:
+            for n in ['toolCoordinates','gravity','load','load_com','settings','sensorEnabled','children']:
                 setattr(settings,n,copy.copy(getattr(partsetting,n)))
     return res
 
@@ -1579,9 +1594,9 @@ class _RobotInterfaceStatefulWrapper(_RobotInterfaceStatefulBase):
         self._state.commandedPosition = self._try('commandedPosition',(),self._state.commandedPosition)
         self._state.commandedVelocity = self._try('commandedVelocity',(),self._state.commandedVelocity)
         self._state.commandedTorque = self._try('commandedTorque',(),self._state.commandedTorque)
-        if self._state.commandedTorque is not None and all(x is not None for x in self._state.commandedTorque):
+        if _valid_vector(self._state.commandedTorque):
             self._try('setTorque',(self._state.commandedTorque,))
-        if self._state.commandedVelocity is not None and all(x is not None for x in self._state.commandedVelocity):
+        if _valid_vector(self._state.commandedVelocity):
             self._try('setVelocity',(self._state.commandedVelocity,))
             self._try('setPiecewiseCubic',([0],[self._state.commandedPosition],[self._state.commandedVelocity]))
             self._try('setPID',(self._state.commandedPosition,self._state.commandedVelocity))
@@ -1590,7 +1605,7 @@ class _RobotInterfaceStatefulWrapper(_RobotInterfaceStatefulBase):
             self._try('setVelocity',(vel,))
             self._try('setPiecewiseCubic',([0],[self._state.commandedPosition],[vel]),strict=False)
             self._try('setPID',(self._state.commandedPosition,vel),strict=False)
-        if self._state.commandedPosition is not None and all(x is not None for x in self._state.commandedPosition):
+        if _valid_vector(self._state.commandedPosition):
             self._try('setPosition',(self._state.commandedPosition,))
             self._try('moveToPosition',(self._state.commandedPosition,),strict=False)
             self._try('setPiecewiseLinear',([0],[self._state.commandedPosition]))
@@ -1827,6 +1842,7 @@ class OmniRobotInterface(_RobotInterfaceStatefulBase):
         self._filters = dict()               # type: Dict[str,Dict[str,Callable]]
         self._in_step = False
         del self._partInterfaces
+        self.properties['complete'] = True
 
     def addPhysicalPart(self, name : str, interface : RobotInterfaceBase, indices : Sequence[int]=None) -> None:
         """Adds a new part corresponding to a physical RIL implementation.
