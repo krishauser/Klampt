@@ -10,6 +10,7 @@ from functools import wraps
 import sys
 import copy
 from typing import Dict,Tuple,List,Sequence,Any
+import warnings
 
 # #helps when numpy is used
 # Marshaller.dispatch[np.float64] = Marshaller.dump_double
@@ -55,6 +56,9 @@ class ClientRobotInterfaceBase(_RobotInterfaceStatefulBase):
         self._settings = settings
         self._state = state
         self._structure.klamptModel = self.klamptModel()
+        if self._structure.klamptModel is None:
+            warnings.warn("KlamptModel could not be loaded: {}".format(self.properties.get('klamptModelFile',None)))
+            input()
         for (k,inds) in self._structure.parts.items():
             if k is None: continue
             partInterface = _RobotInterfaceStatefulBase()
@@ -62,7 +66,8 @@ class ClientRobotInterfaceBase(_RobotInterfaceStatefulBase):
             partInterface._structure.numJoints = len(inds)
             if self._structure.jointNames is not None:
                 partInterface._structure.jointNames = [self._structure.jointNames[i] for i in inds]
-            partInterface._structure.klamptModel = SubRobotModel(self._structure.klamptModel,inds)
+            if self._structure.klamptModel is not None:
+                partInterface._structure.klamptModel = SubRobotModel(self._structure.klamptModel,inds)
             self._partInterfaces[k] = partInterface
         settings = _split_settings(self._settings,self._structure.parts)
         for (k,setting) in settings.items():
@@ -86,13 +91,14 @@ class ClientRobotInterfaceBase(_RobotInterfaceStatefulBase):
         #zero out settings delta
         self._delta_settings = _RobotInterfaceSettings()
         for (k,iface) in self._partInterfaces.items():
-            iface._settings = _RobotInterfaceSettings()
+            iface._delta_settings = _RobotInterfaceSettings()
     
     def endStep(self):
         #read settings changes, command changes and pass to interface
+        assert self._delta_settings is not None,"Didn't call beginStep?"
         _gather_settings(self._structure.parts,dict((k,iface._delta_settings) for k,iface in self._partInterfaces.items()),self._delta_settings)
         cmds = _gather_commands([self._commands]+[iface._commands for iface in self._partInterfaces.values()],
-                                [self.indices()]+[self.structure._parts[k] for k in self._partInterfaces])
+                                [self.indices()]+[self._structure.parts[k] for k in self._partInterfaces])
         try:
             next_state = self.updateSettingsAndCommands(self._delta_settings,cmds)
         except Exception:
@@ -104,6 +110,7 @@ class ClientRobotInterfaceBase(_RobotInterfaceStatefulBase):
 
         self._state = next_state
         self._commands = []
+        self._delta_settings = None
         #clear part command queues
         for (k,iface) in self._partInterfaces.items():
             iface._commands = []
@@ -345,10 +352,10 @@ class XMLRPCRobotInterfaceClient(ClientRobotInterfaceBase):
         state.from_json(state_json)
         return (props,struct,settings,state)
     
-    def updateSettingsAndCommands(self, settings : _RobotInterfaceSettings, commands : List[_RobotInterfaceCommand]) -> _RobotInterfaceState:
-        settings_json = settings.to_json()
+    def updateSettingsAndCommands(self, delta_settings : _RobotInterfaceSettings, commands : List[_RobotInterfaceCommand]) -> _RobotInterfaceState:
+        delta_settings_json = delta_settings.to_json()
         commands_json = [cmd.to_json() for cmd in commands]
-        state_json = self.s.updateSettingsAndCommands(settings_json,commands_json)
+        state_json = self.s.updateSettingsAndCommands(delta_settings_json,commands_json)
         state = _RobotInterfaceState()
         state.from_json(state_json)
         return state
