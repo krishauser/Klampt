@@ -221,9 +221,11 @@ class RobotInfo:
         except AttributeError:
             raise RuntimeError("Module {} must have a make(robotModel) method".format(mod.__name__))
         try:
-            return mod.make(self.klamptModel())
+            res = mod.make(self.klamptModel())
         except Exception as e:
             raise RuntimeError("Error running make(robotModel) for module {}: {}".format(mod.__name__,str(e)))
+        res.properties['klamptModelFile'] = self.modelFile
+        return res
         
     def configureSimulator(self,sim,robotIndex=0):
         """Configures a :class:`~klampt.sim.simulation.SimpleSimulator` to
