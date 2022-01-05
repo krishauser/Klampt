@@ -369,7 +369,7 @@ def make(robotModel : RobotModel):
         for (name,indices) in ri.parts.items():
             driver_indices = ri.toDriverIndices(indices)
             res.addVirtualPart(name,driver_indices)
-            print("klampt.control.simrobotinterface: adding virtual part {}, indices {}".format(name,driver_indices))
+            print('klampt.control.simrobotinterface: adding virtual part "{}", indices {}'.format(name,driver_indices))
         return res
     else:
         from .robotinterfaceutils import RobotInterfaceCompleter
