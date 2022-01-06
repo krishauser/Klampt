@@ -286,17 +286,16 @@ class _Struct:
                 return [_to_json(v,name) for v in obj]
             return obj
 
-        res = self.__dict__.copy()
-        for (k,v) in res.items():
-            if k not in self.__class__.DO_NOT_SERIALIZE:
+        res = dict()
+        for (k,v) in self.__dict__.items():
+            if v is not None and k not in self.__class__.DO_NOT_SERIALIZE:
                 res[k] = _to_json(v,k)
-        if hasattr(self,'children') and self.children is not None:
-            for (name,part) in self.children.items():
-                assert isinstance(part,_Struct)
-                res["children"][name] = part.to_json()
         return res
     
     def from_json(self,jsonobj):
+        for k in self.__dict__:
+            if k not in self.__class__.DO_NOT_SERIALIZE:
+                self.__dict__[k] = None
         for (k,v) in jsonobj.items():
             self.__dict__[k] = v
         if 'children' in jsonobj and jsonobj['children'] is not None:
@@ -363,7 +362,7 @@ class _RobotInterfacePartSettings(_Struct):
         self.settings = None                #type: Dict[str,Any]
         self.sensorEnabled = None           #type: Dict[str,bool]
         self.children = None                #type: Dict[str,_RobotInterfacePartSettings]
-        _Struct.__init__(rhs)
+        _Struct.__init__(self,rhs)
     
 
 class _RobotInterfaceSettings(_RobotInterfacePartSettings):
@@ -598,11 +597,11 @@ def _gather_settings(parts : Dict[str,List[int]],
         _gather_state_var(unified_settings,settings,inds,'kP',n)
         _gather_state_var(unified_settings,settings,inds,'kI',n)
         _gather_state_var(unified_settings,settings,inds,'kD',n)
-        if any(getattr(settings,n) for n in ['toolCoordinates','gravity','settings','sensorEnabled','children']):
+        if any(getattr(settings,n) is not None for n in ['toolCoordinates','gravity','settings','sensorEnabled','children']):
             if unified_settings.children is None:
                 unified_settings.children = dict()
             unified_settings.children[partname] = _RobotInterfacePartSettings(settings)
-        
+            
 def _split_settings(unified_settings : _RobotInterfaceSettings,
                     parts : Dict[str,List[int]]) -> Dict[str,_RobotInterfaceSettings]:
     res = dict()
@@ -1183,6 +1182,12 @@ class _RobotInterfaceStatefulBase(RobotInterfaceBase):
 
     def moveToCartesianPosition(self,xparams,speed=1.0,frame='world'):
         res = self._queueCommand('moveToCartesianPosition',(xparams,speed,frame))
+        if self._shortcut_update and frame == 'base':
+            self._state.cartesianState.destinationPosition = xparams
+        return res
+    
+    def moveToCartesianPositionLinear(self,xparams,speed=1.0,frame='world'):
+        res = self._queueCommand('moveToCartesianPositionLinear',(xparams,speed,frame))
         if self._shortcut_update and frame == 'base':
             self._state.cartesianState.destinationPosition = xparams
         return res
@@ -2265,7 +2270,7 @@ class OmniRobotInterface(_RobotInterfaceStatefulBase):
         self._commands = _gather_commands(commands,indices)
         #set commands to emulator, advance
         for cmd in self._commands:
-            if cmd.func in ['reset','estop','softStop']:
+            if cmd.func in ['reset']:
                 getattr(self._emulator,cmd.func)()
             else:
                 if cmd.indices is None:  #command to everything
@@ -2366,6 +2371,10 @@ class OmniRobotInterface(_RobotInterfaceStatefulBase):
             iface = self._childPhysicalParts[part]
         elif part in self._virtualParts:
             iface = self._virtualParts[part]
+        elif part is None:
+            if joint_idx is not None:
+                raise NotImplementedError("Single-joint interfaces")
+            return self
         else:
             raise ValueError("Invalid part name {}".format(part))
         if joint_idx is not None:
@@ -3972,7 +3981,7 @@ class _CartesianEmulatorData:
 
     def moveToCartesianPositionLinear(self,qcur,xparams,speed,frame='world'):
         assert len(qcur) == self.robot.numDrivers(),"Invalid length of current configuration: {}!={}".format(len(qcur),self.robot.numDrivers())
-        assert speed is None or speed <= 0,"Invalid speed, must be positive"
+        assert speed is None or speed >= 0,"Invalid speed, must be positive"
         if len(xparams) == 2:
             if len(xparams[0]) != 9 or len(xparams[1]) != 3:
                 raise ValueError("Invalid IK parameters, must be a 3 vector or a RigidTransform")
@@ -3989,7 +3998,10 @@ class _CartesianEmulatorData:
             self.driver.start(qcur,self.robotIndices[-1],endEffectorPositions=self.toolCoordinates)
             self.active = True
             self.mode = 'moveToCartesianPositionLinear'
-        self.driveCommand = (xparams,speed)
+        if speed is None:
+            speed = 1.0   #TODO: determine a good speed from the distance traveled
+        self.driveCommand = (xparams,1.0/speed)
+        self.endDriveTime = None
 
     def update(self,qcur,t,dt):
         if self.t is None:
@@ -4005,35 +4017,51 @@ class _CartesianEmulatorData:
         assert len(qcur) == self.robot.numDrivers()
         for i,v in enumerate(qcur):
             self.robot.driver(i).setValue(v)
-        qcur = self.robot.getConfig()
+        qcur_rob = self.robot.getConfig()
         if self.mode == 'setCartesianVelocity':
             #print("Drive command",self.driveCommand,"dt",dt)
-            (amt,q) = self.driver.drive(qcur,self.driveCommand[0],self.driveCommand[1],dt)
+            (amt,q) = self.driver.drive(qcur_rob,self.driveCommand[0],self.driveCommand[1],dt)
             self.robot.setConfig(q)
             #print("Result",amt,q)
         else:  #moveToCartesianLinear
-            xdesired,speed = self.driveCommand
+            xdesired,remainingTime = self.driveCommand
+            if remainingTime <= dt:
+                remainingTime = dt
+            delta = 0
             xcur = self.cartesianPosition(qcur)
-            if len(xdesired)==2:
-                v = vectorops.mul(vectorops.sub(xdesired,xcur),1.0/speed)
-                (amt,q) = self.driver.drive(qcur,None,v,dt)
+            assert len(xcur) == len(xdesired),"Invalid result from cartesianPosition or args to moveToCartesianPositionLinear"
+            if len(xdesired)==3:
+                v = vectorops.mul(vectorops.sub(xdesired,xcur),1.0/remainingTime)
+                (amt,q) = self.driver.drive(qcur_rob,None,v,dt)
+                delta = vectorops.norm(v)
             else:
-                wv = se3.error(self.driveCommand[0],xcur)
+                assert len(xdesired)==2
+                assert len(xdesired[0])==9
+                assert len(xdesired[1])==3
+                wv = vectorops.mul(se3.error(self.driveCommand[0],xcur),1.0/remainingTime)
                 w = wv[:3]
                 v = wv[3:]
-                (amt,q) = self.driver.drive(qcur,w,v,dt)
-            if amt == 0: #done
+                delta = vectorops.norm(wv)
+                (amt,q) = self.driver.drive(qcur_rob,w,v,dt)
+            if amt*delta < 1e-8: #done
                 self.active = False
             self.robot.setConfig(q)
+            remainingTime = self.driveCommand[1]-dt*amt
+            self.driveCommand = (self.driveCommand[0],remainingTime)
         return [self.robot.driver(i).getValue() for i in self.indices]
 
     def cartesianPosition(self,q,frame='world'):
+        assert len(q) == self.robot.numDrivers()
         return klamptCartesianPosition(self.robot,q,self.indices,self.toolCoordinates,frame)
         
     def cartesianVelocity(self,q,dq,frame='world'):
+        assert len(q) == self.robot.numDrivers()
+        assert len(dq) == self.robot.numDrivers()
         return klamptCartesianVelocity(self.robot,q,dq,self.indices,self.toolCoordinates,frame)
 
     def cartesianForce(self,q,t,frame='world'):
+        assert len(q) == self.robot.numDrivers()
+        assert len(t) == self.robot.numDrivers()
         return klamptCartesianForce(self.robot,q,t,self.indices,self.toolCoordinates,frame)
 
 
@@ -4975,6 +5003,7 @@ class RobotInterfaceEmulator:
         self.setPosition(indices,[self.klamptModel.driver(i).getValue() for i in indices])
 
     def moveToCartesianPosition(self,indices,xparams,speed,frame):
+        assert speed > 0
         if self.status != 'ok': return
         try:
             c = self.cartesianInterfaces[tuple(indices)]

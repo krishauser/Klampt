@@ -142,7 +142,7 @@
      <item>
       <widget class="QToolBox" name="centralTabWidget">
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="jointControlWidget">
         <property name="geometry">
@@ -156,7 +156,7 @@
         <attribute name="label">
          <string>Joint control</string>
         </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_3" stretch="1,4,1">
+        <layout class="QVBoxLayout" name="verticalLayout_3" stretch="1,8,2">
          <property name="topMargin">
           <number>0</number>
          </property>
@@ -474,7 +474,7 @@
           <double>0.010000000000000</double>
          </property>
         </widget>
-        <widget class="QPushButton" name="visualEditButton">
+        <widget class="QPushButton" name="visualEditToolButton">
          <property name="geometry">
           <rect>
            <x>110</x>
@@ -665,7 +665,8 @@
           <string>Log</string>
          </property>
          <property name="icon">
-          <iconset theme="document-save"/>
+          <iconset theme="document-save">
+           <normaloff>.</normaloff>.</iconset>
          </property>
          <property name="checkable">
           <bool>true</bool>
@@ -713,7 +714,8 @@
           <string>Record</string>
          </property>
          <property name="icon">
-          <iconset theme="media-record"/>
+          <iconset theme="media-record">
+           <normaloff>.</normaloff>.</iconset>
          </property>
          <property name="checkable">
           <bool>true</bool>
@@ -732,7 +734,8 @@
           <string>Replay</string>
          </property>
          <property name="icon">
-          <iconset theme="media-playback-start"/>
+          <iconset theme="media-playback-start">
+           <normaloff>.</normaloff>.</iconset>
          </property>
          <property name="checkable">
           <bool>true</bool>

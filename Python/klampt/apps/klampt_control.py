@@ -7,13 +7,15 @@ from klampt.io import loader
 from klampt.vis.glcommon import GLWidgetPlugin
 from klampt.control.robotinterface import RobotInterfaceBase
 from klampt.control.networkrobotinterface import XMLRPCRobotInterfaceClient,XMLRPCRobotInterfaceServer
-from klampt.model import trajectory
+from klampt.model import trajectory, ik
 import math
 import time
 import sys
 import os
 import weakref
 import pkg_resources
+
+from klampt.control.robotinterfaceutils import StepContext,klamptCartesianPosition
 
 vis.init("PyQt5")
 
@@ -134,9 +136,6 @@ class ControllerGLPlugin(GLWidgetPlugin):
         GLWidgetPlugin.display(self)
         for i in range(robot.numLinks()):
             robot.link(i).appearance().setColor(*oldcolors[i])
-        #Put your display handler here
-        #the current example draws the sensed robot in grey and the
-        #commanded configurations in transparent green
 
         #this line will draw the world
         if self.qsns is not None:
@@ -227,7 +226,7 @@ class ControllerGUI(QtWidgets.QMainWindow):
         self.robot = controller.klamptModel()
         assert self.robot is not None,"klamptModel() method must be implemented for klampt_control to work"
         self.idleCount = 0
-        # Splitter to show 2 views in same widget easily.
+        # Splitter to show 2 views in same widget
         self.splitter = QtWidgets.QSplitter()
         self.panel = QtWidgets.QWidget()
         ui_filename = pkg_resources.resource_filename('klampt','data/klampt_control.ui')
@@ -300,6 +299,9 @@ class ControllerGUI(QtWidgets.QMainWindow):
         self.panel.setCartesianVelocityButton.clicked.connect(self.onSetCartesianVelocity)
     
         self.panel.endEffectorList.currentIndexChanged.connect(self.onEndEffectorChanged)
+        self.panel.toolXSpinBox.valueChanged.connect(self.onToolCoordinatesChanged)
+        self.panel.toolYSpinBox.valueChanged.connect(self.onToolCoordinatesChanged)
+        self.panel.toolZSpinBox.valueChanged.connect(self.onToolCoordinatesChanged)
         
         self.errorText = []
         self.errorTextarea = self.panel.errorTextarea
@@ -395,27 +397,35 @@ class ControllerGUI(QtWidgets.QMainWindow):
         cartesianEnabled = False
         cartesianLink = None
         self.advancing = True
-        with ControllerStepContext(self):
-            try:
+        try:
+            with ControllerStepContext(self):
                 tool = active.getToolCoordinates()
-                cartesianEnabled = True
-                cartesianLink = self.robot.driver(self.controller.indices(self.activePart)[-1]).getAffectedLink()
-            except NotImplementedError as e:
-                #may need to force tool coordinates on the item
-                if self.selectedEndEffector is not None:
-                    try:
-                        tool = self.setEndEffectorToolCoordinates(self.selectedEndEffector)
-                    except NotImplementedError:
-                        self.addError("Unable to set tool coordinates for end effector {}, part {}".format(eename,self.activePart))
-                    except Exception as e:
-                        self.addException("setToolCoordinates",e)
-                else:
-                    #disable cartesian control
-                    print("getToolCoordinates is not implemented by {}, disabling cartesian control".format(str(active)))
-                    cartesianEnabled = False
-            except Exception as e:
-                self.addException("getToolCoordinates",e)
-            if cartesianEnabled:
+            cartesianEnabled = True
+            cartesianLink = self.robot.driver(self.controller.indices(self.activePart)[-1]).getAffectedLink()
+        except NotImplementedError as e:
+            #may need to force tool coordinates on the item
+            if self.selectedEndEffector is not None:
+                try:
+                    tool = self.setEndEffectorToolCoordinates(self.selectedEndEffector)
+                    print("setToolCoordinates worked... waiting to see if we get a cartesian position")
+                    self.activeController.beginStep()
+                    self.activeController.endStep()
+                    print(self.controller._settings.to_json())
+                    time.sleep(0.01)
+                    cartesianEnabled = True
+                except NotImplementedError:
+                    self.addError("Unable to set tool coordinates for end effector {}, part {}".format(eename,self.activePart))
+                except Exception as e:
+                    self.addException("setToolCoordinates",e)
+            else:
+                #disable cartesian control
+                print("getToolCoordinates is not implemented by {}, disabling cartesian control".format(str(active)))
+                cartesianEnabled = False
+        except Exception as e:
+            self.addException("getToolCoordinates",e)
+        if cartesianEnabled:
+            print("Trying to get one of sensedCartesianPosition or commandedCartesianPosition")
+            with ControllerStepContext(self):
                 try:
                     Tsns = active.sensedCartesianPosition()
                     try:
@@ -426,15 +436,26 @@ class ControllerGUI(QtWidgets.QMainWindow):
                         self.addException("commandedCartesianPosition",e)
                     self.plugin.setToolCoordinates(tool)
                     self.plugin.setCartesianPoses(Tsns,Tcmd)
-                except ValueError:
-                    cartesianEnabled = False
-                except Exception as e:
+                except ValueError as e:
+                    import traceback
+                    traceback.print_exc()
                     self.addException("sensedCartesianPosition",e)
                     cartesianEnabled = False
+                except Exception as e:
+                    import traceback
+                    traceback.print_exc()
+                    self.addException("sensedCartesianPosition",e)
+                    cartesianEnabled = False
+        print("Cartesian control enabled for part {}? {}".format(activeName,cartesianEnabled))
         
+        self.panel.endEffectorList.setEnabled(cartesianEnabled)
         self.panel.moveToCartesianPositionButton.setEnabled(cartesianEnabled)
         self.panel.setCartesianPositionButton.setEnabled(cartesianEnabled)
         self.panel.setCartesianVelocityButton.setEnabled(cartesianEnabled)
+        self.panel.toolXSpinBox.setEnabled(cartesianEnabled)
+        self.panel.toolYSpinBox.setEnabled(cartesianEnabled)
+        self.panel.toolZSpinBox.setEnabled(cartesianEnabled)
+        self.panel.visualEditToolButton.setEnabled(cartesianEnabled)
         self.plugin.enableCartesianWidget(cartesianEnabled,cartesianLink)
     
     def onIdle(self):
@@ -450,6 +471,15 @@ class ControllerGUI(QtWidgets.QMainWindow):
                 self.addNotImplementedError('clock')
             except Exception as e:
                 self.addException('clock',e)
+
+            try:
+                status = self.activeController.status()    
+                self.panel.statusLabel.setText('Status: '+status)
+            except NotImplementedError:
+                self.panel.statusLabel.setText('status() method not implemented by {}'.format(self.activeController))
+            except Exception as e:
+                self.addException("status",e)
+
             try:
                 qsns = self.controller.sensedPosition()
             except NotImplementedError:
@@ -488,12 +518,25 @@ class ControllerGUI(QtWidgets.QMainWindow):
                     qcontroller = self.controller.configFromKlampt(q)
                     activeIndices = self.controller.indices(self.activePart)
                     
-                    from klampt.control import robotinterfaceutils
                     tool_coordinates = self.activeController.getToolCoordinates()
-                    T = robotinterfaceutils.klamptCartesianPosition(self.robot,qcontroller,activeIndices,tool_coordinates,'world')
+                    T = klamptCartesianPosition(self.robot,qcontroller,activeIndices,tool_coordinates,'world')
                     self.plugin.cartesianGoalPoser.set(*T)
                 if self.plugin.cartesianGoalPoser.hasFocus():
-                    #TODO: solve IK problem to update the robot poser
+                    #solve IK problem to update the robot poser
+                    Tgoal = self.plugin.cartesianGoalPoser.get()
+                    q0 = self.controller.configToKlampt(self.controller.commandedPosition())
+                    activeIndices = self.controller.indices(self.activePart)
+                    activeLinks = sum([self.robot.driver(i).getAffectedLinks() for i in activeIndices],[])
+                    tool_coordinates = self.activeController.getToolCoordinates()
+                    link_origin_transform = vectorops.sub(Tgoal[1],so3.apply(Tgoal[0],tool_coordinates))
+
+                    obj = ik.objective(self.robot.link(activeLinks[-1]),R=Tgoal[0],t=link_origin_transform)
+                    solver = ik.solver(obj)
+                    solver.setActiveDofs(activeLinks)
+                    self.robot.setConfig(q0)
+                    res = solver.solve()
+                    if res:
+                        self.plugin.robotPoser.set(self.robot.getConfig())
                     pass
         
         self.idleCount += 1
@@ -588,6 +631,7 @@ class ControllerGUI(QtWidgets.QMainWindow):
         self.plugin.setTargetConfig(qtgt)
 
     def onMoveToPosition(self):
+        if not self.advancing: return
         qtgt = self.plugin.robotPoser.get()
         qtgt = self.controller.configFromKlampt(qtgt)
         if self.activeController is not self.controller:
@@ -607,6 +651,7 @@ class ControllerGUI(QtWidgets.QMainWindow):
     def onSetPosition(self):
         """Set Position called in joint poser. Either linearly interpolate or
         call setPosition, depending on whether Interpolate is checked."""
+        if not self.advancing: return
         qtgt = self.plugin.robotPoser.get()
         qtgt = self.controller.configFromKlampt(qtgt)
         if self.activeController is not self.controller:
@@ -620,15 +665,26 @@ class ControllerGUI(QtWidgets.QMainWindow):
                     if speed > 0:
                         times = [1.0/speed]
                         milestones = [qtgt_active]
-                        self.activeController.setPiecewiseLinear(times,milestones)
+                        try:
+                            self.activeController.setPiecewiseLinear(times,milestones)
+                        except NotImplementedError:
+                            self.addNotImplementedError('setPiecewiseLinear')
+                        except Exception as e:
+                            self.addException('setPiecewiseLinear',e)
                     else:
                         print("Need speed > 0 to interpolate")
                 else:
-                    self.activeController.setPosition(qtgt_active)
+                    try:
+                        self.activeController.setPosition(qtgt_active)
+                    except NotImplementedError:
+                        self.addNotImplementedError('setPosition')
+                    except Exception as e:
+                        self.addException('setPosition',e)
             
 
     def onSetVelocity(self):
         """Set Velocity called in joint poser. """
+        if not self.advancing: return
         if not self.panel.jointInterpolateCheck.isChecked():
             print("Need Interpolate to be checked")
             return
@@ -646,16 +702,67 @@ class ControllerGUI(QtWidgets.QMainWindow):
         with ControllerStepContext(self):
             qcur_active = self.activeController.commandedPosition()
             vtgt = vectorops.div(vectorops.sub(qtgt_active,qcur_active),speed)
-            self.activeController.setVelocity(vtgt,1.0)
+            try:
+                self.activeController.setVelocity(vtgt,1.0)
+            except NotImplementedError:
+                self.addNotImplementedError('setVelocity')
+            except Exception as e:
+                self.addException('setVelocity',e)
 
     def onMoveToCartesianPosition(self):
-        pass
+        if not self.advancing: return
+        Ttgt = self.plugin.cartesianGoalPoser.get()
+        speed = self.panel.cartesianSpeedSpinBox.value()
+        if self.panel.cartesianInterpolateCheck.isChecked():
+            func = 'moveToCartesianPositionLinear'
+        else:
+            func = 'moveToCartesianPosition'
+        with ControllerStepContext(self):
+            try:
+                getattr(self.activeController,func)(Ttgt,speed)
+            except NotImplementedError:
+                self.addNotImplementedError(func)
+            except Exception as e:
+                self.addException(func,e)
 
     def onSetCartesianPosition(self):
-        pass
+        if not self.advancing: return
+        Ttgt = self.plugin.cartesianGoalPoser.get()
+        speed = self.panel.cartesianSpeedSpinBox.value()
+        if not self.panel.cartesianInterpolateCheck.isChecked():
+            func = 'setCartesianPosition'
+            args = (Ttgt,)
+        else:
+            func = 'moveToCartesianPosition'
+            args = (Ttgt,speed)
+        with ControllerStepContext(self):
+            try:
+                getattr(self.activeController,func)(*args)
+            except NotImplementedError:
+                self.addNotImplementedError(func)
+            except Exception as e:
+                self.addException(func,e)
 
     def onSetCartesianVelocity(self):
-        pass
+        if not self.advancing: return
+        if not self.panel.cartesianInterpolateCheck.isChecked():
+            print("Need Interpolate to be checked")
+            return
+        Ttgt = self.plugin.cartesianGoalPoser.get()
+        speed = self.panel.cartesianSpeedSpinBox.value()
+        if not (speed > 0):
+            print("Need speed > 0 to set velocity")
+            return
+        
+        with ControllerStepContext(self):
+            Tcur = self.activeController.commandedCartesianPosition()
+            wvtgt = vectorops.div(se3.error(Ttgt,Tcur),speed)
+            try:
+                self.activeController.setCartesianVelocity((wvtgt[:3],wvtgt[3:]),1.0)
+            except NotImplementedError:
+                self.addNotImplementedError('setVelocity')
+            except Exception as e:
+                self.addException('setVelocity',e)
 
     def onClipConfig(self):
         source = self.panel.configSourceList.currentIndex()
@@ -696,11 +803,20 @@ class ControllerGUI(QtWidgets.QMainWindow):
             local,world = obj.getPosition()
         if ee.link != last_link:  #need to transform to last actuated link
             local = self.robot.link(last_link).getLocalPosition(self.robot.link(ee.link).getWorldPosition(local))
-        with ControllerStepContext(self):
-            self.activeController.setToolCoordinates(local)
+        if self.advancing:
+            with ControllerStepContext(self):
+                self.activeController.setToolCoordinates(local)
+            #update target to match
+            time.sleep(0.01)
+            with ControllerStepContext(self):
+                Tcmd = self.activeController.commandedCartesianPosition()
+                self.plugin.cartesianGoalPoser.set(*Tcmd)
+        self.plugin.setToolCoordinates(local)
         return local
 
     def onEndEffectorChanged(self,index):
+        if self.suppressGuiEvents: return
+        self.suppressGuiEvents = True
         ees = self.partsToEEs[self.activePart]
         if index < 0 or len(ees)==0: 
             self.panel.toolXSpinBox.setValue(0)
@@ -721,17 +837,34 @@ class ControllerGUI(QtWidgets.QMainWindow):
             self.addError("Unable to set tool coordinates for end effector {}, part {}".format(eename,self.activePart))
         except Exception as e:
             self.addException("setToolCoordinates",e)
+        self.suppressGuiEvents = False
+    
+    def onToolCoordinatesChanged(self,value):
+        if self.suppressGuiEvents: return
+        x = self.panel.toolXSpinBox.value()
+        y = self.panel.toolYSpinBox.value()
+        z = self.panel.toolZSpinBox.value()
+        local = x,y,z
+        self.panel.endEffectorList.setCurrentIndex(-1)
+        if self.advancing:
+            with ControllerStepContext(self):
+                self.activeController.setToolCoordinates(local)
+            time.sleep(0.01)
+            with ControllerStepContext(self):
+                Tcmd = self.activeController.commandedCartesianPosition()
+                self.plugin.cartesianGoalPoser.set(*Tcmd)
+        self.plugin.setToolCoordinates(local)
 
     def updateStatus(self):
-        with ControllerStepContext(self):
-            if self.advancing:
-                try:
-                    status = self.activeController.status()    
-                    self.panel.statusLabel.setText('Status: '+status)
-                except NotImplementedError:
-                    self.panel.statusLabel.setText('status() method not implemented by {}'.format(self.activeController))
-                except Exception as e:
-                    self.addException("status",e)
+        if not self.advancing: return
+        with ControllerStepContext(self):           
+            try:
+                status = self.activeController.status()    
+                self.panel.statusLabel.setText('Status: '+status)
+            except NotImplementedError:
+                self.panel.statusLabel.setText('status() method not implemented by {}'.format(self.activeController))
+            except Exception as e:
+                self.addException("status",e)
 
     def addError(self,text):
         print("addError",text)
