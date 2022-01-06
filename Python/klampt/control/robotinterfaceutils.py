@@ -1597,8 +1597,8 @@ class _RobotInterfaceStatefulWrapper(_RobotInterfaceStatefulBase):
 
         #discover capabilities by commanding no-ops
         self._state.commandedPosition = self._try('commandedPosition',(),self._state.commandedPosition)
-        self._state.commandedVelocity = self._try('commandedVelocity',(),self._state.commandedVelocity)
-        self._state.commandedTorque = self._try('commandedTorque',(),self._state.commandedTorque)
+        self._state.commandedVelocity = self._try('commandedVelocity',(),self._state.commandedVelocity,strict=False)
+        self._state.commandedTorque = self._try('commandedTorque',(),self._state.commandedTorque,strict=False)
         if _valid_vector(self._state.commandedTorque):
             self._try('setTorque',(self._state.commandedTorque,))
         if _valid_vector(self._state.commandedVelocity):
@@ -3672,6 +3672,8 @@ class _JointInterfaceEmulatorData:
             self.commandTTL -= dt
 
         if self.controlMode is None:
+            if self.commandedPosition is None:
+                 self.commandedPosition = self.sensedPosition
             if self.commandedVelocity is None:
                  self.commandedVelocity = 0.0
             return 
@@ -3713,8 +3715,8 @@ class _JointInterfaceEmulatorData:
                 self.commandedPosition = self.sensedPosition
                 self.commandedVelocity = 0
                 if self.sensedPosition is None:
-                    raise ValueError("Trying to get a command for joint {} on the first timestep before sensors have arrived".format(self.name))
-                self.controlMode = 'setPosition'
+                    raise ValueError("Trying to get a command for joint {} before sensed position was entered?".format(self.name))
+            self.controlMode = 'setPosition'
         if commandType == 'setPiecewiseCubic':
             assert self.trajectoryTimes is not None,"Can't get piecewise cubic trajectory except in piecewise cubic mode"
             return self.trajectoryTimes,self.trajectoryMilestones,self.trajectoryVelocities
@@ -4797,11 +4799,8 @@ class RobotInterfaceEmulator:
             ttl = 1.0
             model = self.klamptModel
             if model is not None:
-                qmin,qmax = model.getJointLimits()
-                xmin = model.configToDrivers(qmin)
-                xmax = model.configToDrivers(qmax)
-                xmin = [xmin[i] for i in indices]
-                xmax = [xmax[i] for i in indices]
+                limits = [model.driver(i).getLimits() for i in indices]
+                xmin,xmax = zip(*limits)
                 #stop when the first joint limit is hit
                 ttl = 1.0
                 for i in range(len(indices)):
@@ -4944,16 +4943,24 @@ class RobotInterfaceEmulator:
         return False
 
     def commandedPosition(self):
-        return [j.commandedPosition for j in self.jointData]
+        res = [j.commandedPosition for j in self.jointData]
+        if not _valid_vector(res): raise RuntimeError("commandedPosition queried before a step could be taken?")
+        return res
 
     def commandedVelocity(self):
-        return [j.commandedVelocity for j in self.jointData]
+        res = [j.commandedVelocity for j in self.jointData]
+        if not _valid_vector(res): raise RuntimeError("commandedVelocity queried before a step could be taken?")
+        return res
 
     def commandedTorque(self):
-        return [j.commandedTorque for j in self.jointData]
+        res = [j.commandedTorque for j in self.jointData]
+        if not _valid_vector(res): raise RuntimeError("no commanded torque sent to emulator")
+        return res
 
     def sensedPosition(self):
-        return [j.sensedPosition for j in self.jointData]
+        res = [j.sensedPosition for j in self.jointData]
+        if not _valid_vector(res): raise RuntimeError("sensedPosition queried before a step could be taken?")
+        return res
 
     def sensedVelocity(self):
         return [j.sensedVelocity for j in self.jointData]

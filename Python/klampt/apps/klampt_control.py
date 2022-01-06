@@ -63,9 +63,15 @@ class ControllerGLPlugin(GLWidgetPlugin):
         self.gui = gui
         #read commanded configuration
         self.controller.beginStep()
-        q = self.controller.commandedPosition()
+        try:
+            q = self.controller.commandedPosition()
+        except Exception as e:
+            try:
+                q = self.controller.sensedPosition()
+            except Exception:
+                q = None
         self.controller.endStep()
-        if q is not None:
+        if q is not None and all(v is not None for v in q):
             qklampt = self.controller.configToKlampt(q)
             world.robot(0).setConfig(qklampt)
         self.robotPoser = RobotPoser(world.robot(0))
@@ -304,7 +310,7 @@ class ControllerGUI(QtWidgets.QMainWindow):
         self.panel.toolZSpinBox.valueChanged.connect(self.onToolCoordinatesChanged)
         
         self.errorText = []
-        self.errorTextarea = self.panel.errorTextarea
+        self.panel.errorTextarea.setPlainText("")
         
         self.splitter.addWidget(self.panel)
         self.splitter.addWidget(self.glwidget)
@@ -446,7 +452,6 @@ class ControllerGUI(QtWidgets.QMainWindow):
                     traceback.print_exc()
                     self.addException("sensedCartesianPosition",e)
                     cartesianEnabled = False
-        print("Cartesian control enabled for part {}? {}".format(activeName,cartesianEnabled))
         
         self.panel.endEffectorList.setEnabled(cartesianEnabled)
         self.panel.moveToCartesianPositionButton.setEnabled(cartesianEnabled)
@@ -456,6 +461,11 @@ class ControllerGUI(QtWidgets.QMainWindow):
         self.panel.toolYSpinBox.setEnabled(cartesianEnabled)
         self.panel.toolZSpinBox.setEnabled(cartesianEnabled)
         self.panel.visualEditToolButton.setEnabled(cartesianEnabled)
+        partname = 'whole robot' if self.activePart is None else 'part '+str(self.activePart)
+        if cartesianEnabled:
+            self.panel.cartesianInfoText.setText("Cartesian control is enabled for {}.".format(partname))
+        else:
+            self.panel.cartesianInfoText.setText("Cartesian control is not enabled for {}.\nSelect a different part or reconfigure the controller.".format(partname))
         self.plugin.enableCartesianWidget(cartesianEnabled,cartesianLink)
     
     def onIdle(self):
@@ -590,13 +600,16 @@ class ControllerGUI(QtWidgets.QMainWindow):
         self.updateActiveController(part,partController)
     
     def onReset(self):
-        self.activeController.reset()
+        with ControllerStepContext(self):
+            self.activeController.reset()
     
     def onEstop(self):
-        self.activeController.estop()
+        with ControllerStepContext(self):
+            self.activeController.estop()
     
     def onSoftStop(self):
-        self.activeController.softStop()
+        with ControllerStepContext(self):
+            self.activeController.softStop()
 
     def onTargetChange(self,index,value):
         if self.suppressGuiEvents: return
@@ -871,14 +884,14 @@ class ControllerGUI(QtWidgets.QMainWindow):
         if len(self.errorText) > 0 and text == self.errorText[-1]: 
             return
         self.errorText.append(text)
-        self.errorTextarea.setPlainText('\n'.join(self.errorText))
+        self.panel.errorTextarea.setPlainText('\n'.join(self.errorText))
 
     def addNotImplementedError(self,method):
         for text in self.errorText:
             if text.startswith(method+'()'):
                 return
         self.errorText.append('{}() method not implemented by {}'.format(method,self.activeController))
-        self.errorTextarea.setPlainText('\n'.join(self.errorText))
+        self.panel.errorTextarea.setPlainText('\n'.join(self.errorText))
 
     def addException(self,method,e):
         self.addError('Exception on {}: {}'.format(method,e))
