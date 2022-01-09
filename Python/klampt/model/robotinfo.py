@@ -47,6 +47,8 @@ class RobotInfo:
             Should be a Python file (``/path/to/file.py``) or module
             (`package.module`) containing a function ``make(robotModel)`` that
             returns a :class:`RobotInterfaceBase`.
+        controllerArgs (list, optional): extra arguments that will be passed to
+            the make() function.
         simulatorFile (str, optional): the file containing code for simulation
             emulators for the robot.  If not provided, the default robot
             simulator is used.
@@ -109,6 +111,7 @@ class RobotInfo:
         self.modelFile = modelFile      # type: str
         self.baseType = baseType        # type: str
         self.controllerFile = None      # type: Optional[str]
+        self.controllerArgs = None      # type: Optional[list]
         self.simulatorFile = None       # type: Optional[str]
         self.calibrationFiles = dict()  # type: Dict[str,str]
         if parts is None:
@@ -220,8 +223,12 @@ class RobotInfo:
             maker = mod.make
         except AttributeError:
             raise RuntimeError("Module {} must have a make(robotModel) method".format(mod.__name__))
+        if self.controllerArgs is not None:
+            args = self.controllerArgs
+        else:
+            args = ()
         try:
-            res = mod.make(self.klamptModel())
+            res = mod.make(self.klamptModel(),*args)
         except Exception as e:
             raise RuntimeError("Error running make(robotModel) for module {}: {}".format(mod.__name__,str(e)))
         res.properties['klamptModelFile'] = self.modelFile
@@ -373,9 +380,11 @@ class RobotInfo:
             jsonobj = json.load(f)
         self.endEffectors = dict()
         self.grippers = dict()
-        for attr in ['name','modelFile','parts','baseType','endEffectors','grippers','properties','controllerFile','simulatorFile','calibrationFiles','filePaths']:
+        REQUIRED = ['name','modelFile']
+        OPTIONAL = ['parts','baseType','endEffectors','grippers','properties','controllerFile','controllerArgs','simulatorFile','calibrationFiles','filePaths']
+        for attr in REQUIRED+OPTIONAL:
             if attr not in jsonobj:
-                if attr in ['parts','endEffectors','grippers','properties','baseType','parts','controllerFile','simulatorFile','calibrationFiles','filePaths']: #optional
+                if attr in OPTIONAL: #optional
                     continue
                 else:
                     raise IOError("Loaded JSON object doesn't contain '"+attr+"' key")
@@ -396,7 +405,7 @@ class RobotInfo:
         """Saves the info to a JSON file. f is a file object."""
         from ..io import loader
         jsonobj = dict()
-        for attr in ['name','modelFile','parts','baseType','properties','controllerFile','simulatorFile','calibrationFiles','filePaths']:
+        for attr in ['name','modelFile','parts','baseType','properties','controllerFile','controllerArgs','simulatorFile','calibrationFiles','filePaths']:
             jsonobj[attr] = getattr(self,attr)
         ees = dict()
         for k,v in self.endEffectors.items():
@@ -406,7 +415,7 @@ class RobotInfo:
         if len(ees) > 0:
             jsonobj['endEffectors'] = ees
         grippers = dict()
-        for k,v in self.endEffectors.items():
+        for k,v in self.grippers.items():
             grippers[k] = v.toJson()
         if len(grippers) > 0:
             jsonobj['grippers'] = grippers
