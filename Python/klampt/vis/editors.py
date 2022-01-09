@@ -437,7 +437,7 @@ class TrajectoryEditor(VisualEditorBase):
             self.animSelector.addItem("Linear (RobotTrajectory)")
         #self.animSelector.addItem("Retimed")
         #self.animSelector.addItem("Retimed-spline")
-        self.animSelector.currentindex_changed.connect(self.anim_selector_changed)
+        self.animSelector.currentIndexChanged.connect(self.anim_selector_changed)
 
         label = QLabel("Time")
         label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
@@ -453,8 +453,13 @@ class TrajectoryEditor(VisualEditorBase):
 
     def insert(self):
         if self.editingIndex < 0:
-            self.value.times.append(0.0)
+            if len(self.value.times) == 0:
+                self.value.times.append(0.0)
+                self.durations.append(0.0)
+                self.value.milestones.append(self.poser_to_milestone())
+            self.value.times.append(self.value.times[-1]+self.durationSpinBox.value())
             self.value.milestones.append(self.poser_to_milestone())
+            self.durations.append(self.durationSpinBox.value())
             self.editingIndex = len(self.durations)-1
         else:
             newdur = 1.0
@@ -609,7 +614,7 @@ class TrajectoryEditor(VisualEditorBase):
             oldAppearances = [self.robot.link(j).appearance().clone() for j in range(self.robot.numLinks())]
 
         #draw animation, if available
-        if self.animTrajectoryTime is not None:
+        if self.animTrajectoryTime is not None and self.animTrajectory.times:
             if self.robot is not None:
                 for j in range(self.robot.numLinks()):
                     self.robot.link(j).appearance().setColor(1.0,1.0,0,0.5)
