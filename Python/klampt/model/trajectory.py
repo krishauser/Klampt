@@ -2153,7 +2153,7 @@ def execute_trajectory(
         cq0 = controller.commandedPosition()
         if cq0[0] is None:
             cq0 = controller.sensedPosition()
-        q0 = controller.configFromKlampt(cq0)
+        q0 = controller.configToKlampt(cq0)
     else:
         raise ValueError("Invalid type of controller, must be SimRobotController or RobotInterfaceBase")
     if activeDofs is not None:
@@ -2183,14 +2183,12 @@ def execute_trajectory(
             cv0 = controller.commandedVelocity()
             if cv0[0] is None:
                 cv0 = controller.sensedVelocity()
-            v0 = controller.velocityFromKlampt(cv0)
-            times,positions,velocities = [0],[q0],[v0]
+            times,positions,velocities = [0],[controller.configFromKlampt(q0)],[cv0]
             start = 1 if trajectory.times[0]==0 else 0
-            #TODO: move to start?
-            for i in range(1,len(trajectory.milestones)):
+            for i in range(start,len(trajectory.milestones)):
                 times.append(trajectory.times[i]/speed)
-                positions.append(trajectory.milestones[i][:n])
-                velocities.append(trajectory.milestones[i][n:])
+                positions.append(controller.configFromKlampt(trajectory.milestones[i][:n]))
+                velocities.append(controller.velocityFromKlampt(trajectory.milestones[i][n:]))
             controller.setPiecewiseCubic(times,positions,velocities)
     else:
         if smoothing == None:
@@ -2202,12 +2200,12 @@ def execute_trajectory(
                     controller.addLinear(q,(trajectory.times[i]-trajectory.times[i-1])/speed)
             else:
                 #TODO: move to start?
-                times,positions = [0],[q0]
+                times,positions = [0],[controller.configFromKlampt(q0)]
                 start = 1 if 0==trajectory.times[0] else 0
                 for i in range(start,len(trajectory.milestones)):
                     times.append(trajectory.times[i]/speed)
-                    positions.append(trajectory.milestones[i])
-                controller.setPiecewiseLinear(times,[controller.configFromKlampt(q) for q in positions])
+                    positions.append(controller.configFromKlampt(trajectory.milestones[i]))
+                controller.setPiecewiseLinear(times,positions)
         elif smoothing == 'spline':
             t = HermiteTrajectory()
             t.makeSpline(trajectory)
@@ -2217,7 +2215,7 @@ def execute_trajectory(
                 ts = trajectory.startTime()
                 controller.setMilestone(trajectory.eval(ts))
                 zero = [0.0]*len(trajectory.milestones[0])
-                for i in range(1,len(trajectory.times)):
+                for i in range(start,len(trajectory.times)):
                     q = trajectory.milestones[i]
                     controller.addCubic(q,zero,(trajectory.times[i]-trajectory.times[i-1])/speed)
             else:
