@@ -43,6 +43,10 @@ Hints on wrapping to get the best performance:
    Configure your klamptModel's geometries to be as simple as possible and
    set the trajectory collision checking to... TODO
 
+This module also provides :func:`make_from_file` which can either take a
+.py / .pyc file, or a module string naming a Python file with a `make`
+method.
+
 """
 
 
@@ -251,6 +255,36 @@ class StepContext:
                 raise
         if self.ignore:
             return True
+
+
+def make_from_file(fn : str, robotModel : RobotModel, *args,**kwargs) -> RobotInterfaceBase:
+    """Create a RobotInterfaceBase from a Python file or module containing the
+    ``make()`` function.
+
+    args and kwargs will be passed to ``make``.
+
+    Example::
+        iface = make_from_file('klampt.control.simrobotcontroller', robot)
+    
+    """
+    import importlib
+    if fn.endswith('py') or fn.endswith('pyc'):
+        import os
+        import sys
+        path,base = os.path.split(fn)
+        mod_name,file_ext = os.path.splitext(base)
+        sys.path.append(os.path.abspath(path))
+        mod = importlib.import_module(mod_name,base)
+        sys.path.pop(-1)
+    else:
+        mod = importlib.import_module(fn)
+    try:
+        maker = mod.make
+    except AttributeError:
+        print("Module",mod.__name__,"must have a make() method")
+        raise
+    return maker(robotModel,*args,**kwargs)
+    
 
 
 class _Struct:
@@ -2133,7 +2167,8 @@ class OmniRobotInterface(_RobotInterfaceStatefulBase):
                     self._state.commandedVelocity = copy.copy(self._state.sensedVelocity)
                 if self._state.commandedTorque is None:
                     self._state.commandedTorque = copy.copy(self._state.sensedTorque)
-                self._emulator.initialCommand(self._state.commandedPosition,self._state.commandedVelocity,self._state.commandedTorque)
+                self._emulator.initialize(self._state.sensedPosition,self._state.sensedVelocity,self._state.sensedTorque,
+                    self._state.commandedPosition,self._state.commandedVelocity,self._state.commandedTorque)
             else:
                 #on later steps, fill parts of state that are not updated by physical parts with emulated state
                 self._updateStateFromEmulator('commandedPosition')
@@ -2554,10 +2589,13 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
         self._inStep = True
         self._try('beginStep',(),0)
         if self._emulator.numUpdates < 0:
+            qsns = self._try('sensedPosition',(),lambda *args:None)
+            vsns = self._try('sensedVelocity',(),lambda *args:None)
+            tsns = self._try('sensedTorque',(),lambda *args:None)
             qcmd = self._try('commandedPosition',(),lambda *args:None)
             vcmd = self._try('commandedVelocity',(),lambda *args:None)
             tcmd = self._try('commandedTorque',(),lambda *args:None)
-            self._emulator.initialCommand(qcmd,vcmd,tcmd)
+            self._emulator.initialize(qsns,vsns,tsns,qcmd,vcmd,tcmd)
         if not self._has['controlRate']:
             self._emulator.advanceClock(self.clock(),None)
         elif not self._has['clock']:
@@ -3548,6 +3586,7 @@ class MultiprocessingRobotInterface(_RobotInterfaceStatefulBase):
             import pickle
             data = pickle.loads(initial_message)
             self._structure,self._settings,self._state = data
+            assert self._state.sensedPosition is not None,"Initial state gave empty sensedPosition?"
             #self._structure,self._settings,self._state = initial_message
             self._structure.klamptModel = None   #use the interface's klampt model -- no risk of thread clashes because the other process has a copy
             self._structure.klamptModel = interface.klamptModel()
@@ -3586,6 +3625,9 @@ class MultiprocessingRobotInterface(_RobotInterfaceStatefulBase):
             sendQueue.put(None)  #marks an error
             sendQueue.put("Interface {} failed to initialize".format(str(interface._base)))
             return
+
+        interface.beginStep()
+        interface.endStep()
         
         dt = 1.0/interface.controlRate()
         looper = TimedLooper(dt=dt,name='RobotInterfaceServer({})'.format(self._interfaceName),warning_printer=self.log)
@@ -3670,14 +3712,7 @@ class _JointInterfaceEmulatorData:
         self.sensedPosition = q
         if self.commandTTL is not None:
             self.commandTTL -= dt
-
-        if self.controlMode is None:
-            if self.commandedPosition is None:
-                 self.commandedPosition = self.sensedPosition
-            if self.commandedVelocity is None:
-                 self.commandedVelocity = 0.0
-            return 
-        elif self.controlMode == 'setPID':
+        if self.controlMode == 'setPID':
             self.commandedPosition = self.pidCmd[0]
             self.commandedVelocity = self.pidCmd[1]
             self.commandedTorque = self.pidCmd[2]
@@ -4157,7 +4192,7 @@ class RobotInterfaceEmulator:
         self.commandFilters = dict()               #type: Dict[Sequence[int],Dict[str,Callable]]
         self.virtualSensorMeasurements = dict()    #type: Dict[str,Tuple[float,Vector]]
 
-    def initialCommand(self,qcmd,vcmd,tcmd):
+    def initialize(self,qsns,vsns,tsns,qcmd,vcmd,tcmd):
         """Could be called before the emulator starts running to initialize the
         commanded joint positions before the emulator takes over.
         """
@@ -4166,16 +4201,24 @@ class RobotInterfaceEmulator:
         assert tcmd is None or len(tcmd) == len(self.jointData)
         self.numUpdates = 0
         for i,j in enumerate(self.jointData):
+            j.sensedPosition = qsns[i]
+            j.sensedVelocity = 0 if vsns is None else vsns[i]
+            j.sensedTorque = None if tsns is None else tsns[i]
             if qcmd is not None:
                 j.commandedPosition = qcmd[i]
+            else:
+                j.commandedPosition = qsns[i]
             if vcmd is not None:
                 j.commandedVelocity = vcmd[i]
+            else:
+                j.commandedVelocity = 0
             if tcmd is not None:
                 j.commandedTorque = tcmd[i]
+        
     
     def advanceClock(self,newClock,rate):
         if self.numUpdates < 0:
-            raise RuntimeError("Need to call initialCommand before advanceClock")
+            raise RuntimeError("Need to call initialize before advanceClock")
         lastClock = self.curClock
         if rate is None:
             self.curClock = newClock
@@ -4197,7 +4240,7 @@ class RobotInterfaceEmulator:
         """
         assert q is not None,"Must pass a valid sensed config to update"
         if self.numUpdates < 0:
-            raise RuntimeError("Need to call initialCommand before update")
+            raise RuntimeError("Need to call initialize before update")
         self.numUpdates += 1
         if v is None:   #can accept null velocities
             v = [None]*len(q)
