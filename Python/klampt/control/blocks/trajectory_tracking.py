@@ -1,4 +1,4 @@
-from ..controller import RobotControllerBlock,RobotControllerIO
+from .robotcontroller import RobotControllerBlock,RobotControllerIO
 from klampt.model import trajectory
 from klampt.io import loader
 

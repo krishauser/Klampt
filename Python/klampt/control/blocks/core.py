@@ -1,3 +1,24 @@
+"""
+Defines a set of generic "system blocks" that are repeatedly-updating
+processes. These can implement filters, estimators, read from sensor drivers,
+or output commands to a simulated or real robot. 
+
+The :class:`Block` class defines a block as accepting some
+inputs and produces some outputs every time that ``advance()`` is
+called.  The inputs and outputs are extremely general, and consist
+of arguments referred to by an int or str index.  Outputs can also be
+added, subtracted, and compared to produce new outputs.
+
+The core module contains several examples of controller 
+blocks that can be composed.  Connect the inputs and outputs of blocks,
+pass any subset to a :class:`SuperBlock`, and the inputs and outputs of
+the SuperBlock will be automatically determined.
+
+See :mod:`klampt.control.blocks.utils` for
+utilities, and :mod:`klampt.control.blocks.state_machine` for state machines
+that use Blocks.
+"""
+
 from klampt.math import vectorops
 from typing import Union,Any,Tuple,Sequence,Dict,List,Iterator
 import weakref
@@ -265,6 +286,9 @@ class Sink(Block):
         Block.__init__(self,1,0)
 
 class ValueSource(Source):
+    """A simple Source whose value is controlled by an external process
+    via ``Source.write(value)``.
+    """
     def __init__(self,value):
         Source.__init__(self)
         self.value = value
@@ -274,12 +298,18 @@ class ValueSource(Source):
         self.value = value
 
 class ValueSink(Sink):
+    """A simple Sink whose value is extracted by an external process
+    via ``Sink.read()``.
+    """
     def advance(self,value):
         self.value = value
     def read(self):
         return self.value
 
 class Counter(Source):
+    """Maintains a value that increases linearly each time advance() is
+    called.
+    """
     def __init__(self,initVal=0,increment=1):
         Source.__init__(self)
         self.value = initVal
@@ -294,6 +324,7 @@ class Counter(Source):
         self.value,self.increment = state
 
 class Add(Block):
+    """Adds two inputs (scalar or vector)."""
     def __init__(self):
         Block.__init__(self,2,1)
     def advance(self,a,b):
@@ -302,6 +333,7 @@ class Add(Block):
         return a+b
 
 class Sub(Block):
+    """Subtracts the second input from the first (scalar or vector)."""
     def __init__(self):
         Block.__init__(self,2,1)
     def advance(self,a,b):
@@ -310,6 +342,7 @@ class Sub(Block):
         return a-b
 
 class BinaryOp(Block):
+    """Generic lambda for a binary operation."""
     def __init__(self,func):
         self.func = func
         Block.__init__(self,2,1)
@@ -318,6 +351,7 @@ class BinaryOp(Block):
 
 
 class Min(Block):
+    """Takes the minimum of two inputs (scalar or vector)."""
     def __init__(self):
         Block.__init__(self,2,1)
     def advance(self,a,b):
@@ -326,6 +360,7 @@ class Min(Block):
         return min(a,b)
 
 class Max(Block):
+    """Takes the maximum of two inputs (scalar or vector)."""
     def __init__(self):
         Block.__init__(self,2,1)
     def advance(self,a,b):

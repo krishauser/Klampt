@@ -2,7 +2,7 @@
 Interface Layer, and connect ControllerBlocks to RobotInterfaceBase receivers.
 """
 
-from .controller import RobotControllerBlock
+from .blocks.robotcontroller import RobotControllerBlock
 from .robotinterface import RobotInterfaceBase
 from .robotinterfaceutils import RobotInterfaceCompleter
 

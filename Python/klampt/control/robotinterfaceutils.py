@@ -55,7 +55,7 @@ from ..math import vectorops,so2,so3,se3,spline
 from ..plan import motionplanning
 from ..model.trajectory import Trajectory,HermiteTrajectory
 from ..model.robotinfo import RobotInfo
-from ..robotsim import RobotModel
+from ..robotsim import WorldModel,RobotModel
 from ..model.subrobot import SubRobotModel
 from .cartesian_drive import CartesianDriveSolver
 from . import blocks
@@ -2027,7 +2027,7 @@ class OmniRobotInterface(_RobotInterfaceStatefulBase):
             hw_qmax = [hw_qmax[i] for i in indices]
         self._emulator.setJointLimits(indices,qmin,qmax,op,hw_qmin,hw_qmax)
     
-    def setCollisionFilter(self, world : 'WorldModel'=None, op = 'warn'):
+    def setCollisionFilter(self, world : WorldModel=None, op = 'warn'):
         """Activates a collision filter.
         
         If world=None, only does self collision. Otherwise, does self and
@@ -2736,7 +2736,7 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
         hw_qmin,hw_qmax = self.properties.get('joint_limits',(None,None))
         self._emulator.setJointLimits(self._indices,qmin,qmax,op,hw_qmin,hw_qmax)
     
-    def setCollisionFilter(self, world : 'WorldModel'=None, op = 'warn'):
+    def setCollisionFilter(self, world : WorldModel=None, op = 'warn'):
         """Activates a collision filter.
         
         If world=None, only does self collision. Otherwise, does self and

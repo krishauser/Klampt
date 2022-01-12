@@ -141,7 +141,13 @@ class Distance(Block):
 
 
 class WorldCollision(Block):
-    def __init__(self, collider : 'WorldCollider'):
+    """Returns True if a collision occurrs in the world (or a collider)"""
+    def __init__(self, world_or_collider):
+        from klampt.model.collide import WorldCollider
+        if not isinstance(world_or_collider,WorldCollider):
+            collider = WorldCollider(world_or_collider)
+        else:
+            collider = world_or_collider
         self.collider = collider
         Block.__init__(self,'q',0)
     def advance(self,q) -> bool:

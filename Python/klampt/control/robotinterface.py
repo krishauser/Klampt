@@ -195,11 +195,9 @@ class RobotInterfaceBase(object):
       single time step.
     * ``setFilter(SENSOR_NAME,FIRFilter(b),output=OUT_NAME)``: adds a FIR
       filter to sensor SENSOR_NAME and outputs it to OUT_NAME.
-    * ``setFilter('custom_filter', block,
-          ['sensedPosition','sensedVelocity'],
-          'positionCommand')``: sets a custom filter that uses a Block of
-      two arguments (sensed position and velocity) and outputs one value
-      (a position command).
+    * ``setFilter('custom_filter', block, ['sensedPosition','sensedVelocity'], 'positionCommand')``:
+      sets a custom filter that uses a Block of two arguments (sensed position
+      and velocity) and outputs one value (a position command).
 
     To disable a filter, pass None as the second argument.
 
@@ -971,13 +969,16 @@ class RobotInterfaceBase(object):
                 model.driver(i).setVelocity(x)
             return model.getVelocity()
 
-    def wait(self,timeout=None,pollRate=None) -> float:
+    def wait(self,timeout=None,condition=None,pollRate=None) -> float:
         """Sleeps the caller until ``isMoving()`` returns False.  This should 
         only be called outside of a beginStep()/endStep() pair.
         
         Args:
             timeout (float, optional): if given, will break after this amount
                 of time has elapsed (in s)
+            condition (callable, optional): if given, overrides the test
+                ``self.isMoving()``.  Instead, will stop when ``condition()``
+                returns True.
             pollRate (float, optional): time between isMoving checks, in Hz.
                 If None, polls at the controller's natural rate. 
         
@@ -989,10 +990,11 @@ class RobotInterfaceBase(object):
         Returns:
             float: the approximate time in s that was waited.
         """
+        if condition is None: condition = lambda : not self.isMoving()
         self.beginStep()
-        moving = self.isMoving()
+        stop = condition()
         self.endStep()
-        if not moving: return 0
+        if stop: return 0
 
         dt = 1.0/pollRate if pollRate is not None else 1.0/self.controlRate()
         from .utils import TimedLooper
@@ -1000,9 +1002,10 @@ class RobotInterfaceBase(object):
         looper = TimedLooper(dt)
         while looper:
             self.beginStep()
-            moving = self.isMoving()
+            stop = condition()
             self.endStep()
-            if not moving: return ttotal
+            if stop: return ttotal
             if timeout is not None and ttotal >= timeout:
                 return ttotal
             ttotal += dt
+

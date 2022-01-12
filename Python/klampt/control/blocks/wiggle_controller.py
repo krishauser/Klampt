@@ -1,4 +1,4 @@
-from ..controller import RobotControllerIO,RobotControllerBlock
+from .robotcontroller import RobotControllerIO,RobotControllerBlock
 import math
 
 class BigWiggleController(RobotControllerBlock):

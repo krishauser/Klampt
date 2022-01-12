@@ -1,4 +1,4 @@
-from ..controller import RobotControllerBlock
+from .robotcontroller import RobotControllerBlock
 from ..cartesian_drive import CartesianDriveSolver
 
 

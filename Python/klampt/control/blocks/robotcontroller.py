@@ -1,21 +1,6 @@
-"""Defines a set of generic "controller blocks" that are repeatedly-updating
-processes, which typically output commands to a simulated or real robot. 
-However, blocks can do much more, including estimators, read from sensor
-drivers, etc.
-
-The :class:`ControllerBlock` class defines a block as accepting some
-inputs and produces some outputs every time that ``advance()`` is
-called.  The inputs and outputs are extremely general, and are just string-
-indexed dictionaries.  The usage of a ControllerBlock is governed by
-convention.
-
-
-Robot controller blocks
-=======================
-
-If the block is being used for :class:`SimpleSimulator` or the Klampt Robot
-Interface Layer (see :class:`RobotInterfaceBase`, there's a standard convention
-defined by :class:`RobotControllerBase`. It expects to receive the following
+"""Defines RobotControllerBlock, which can be used for :class:`SimpleSimulator`
+or the Klampt Robot Interface Layer (see :class:`RobotInterfaceBase`). Defines
+a standard convention, expecting to receive the following
 values as input:
 
 - t: current time, in seconds
@@ -26,7 +11,7 @@ values as input:
 - ...
 - [sensor1_name]: measurement vector for sensor k
 
-The output dictionary is expected to contain one or more of the following keys:
+The output is expected to contain one or more of the following keys:
 
 - qcmd
 - dqcmd 
@@ -44,7 +29,7 @@ These are interpreted as follows:
 
 No other combinations are currently supported.
 
-For convenience, your RobotControllerBase subclass may use the
+For convenience, your RobotControllerBlock subclass may use the
 :class:`RobotControllerIO` class for object-oriented access to the input
 / output data. Example usage is as follows::
 
@@ -59,13 +44,13 @@ Binding robot controllers to a robot
 ====================================
 
 The easiest way to use this with a simulated / real robot is the
-:class:`.interop.ControllerToInterface` class. 
+:class:`klampt.control.interop.RobotControllerBlockToInterface` class. 
 
 Example that outputs to a simulation (and visualizes it)::
 
-    from klampt.control.controller import RobotControllerBase
+    from klampt.control.block.robotcontroller import RobotControllerBase
     from klampt.control.simrobotinterface import *
-    from klampt.control.interop import RobotControllerToInterface
+    from klampt.control.interop import RobotControllerBlockToInterface
     from klampt import WorldModel, Simulator
     from klampt import vis
 
@@ -79,7 +64,7 @@ Example that outputs to a simulation (and visualizes it)::
     vis.show()
     controller = MyControllerObject()  #subclass of RobotControllerBase
     interface = SimPositionControlInterface(sim.controller(0),sim)
-    binding = RobotControllerToInterface(controller,interface)
+    binding = RobotControllerBlockToInterface(controller,interface)
     while vis.shown():
         binding.advance()
         sim.updateWorld()
@@ -87,33 +72,23 @@ Example that outputs to a simulation (and visualizes it)::
 
 Example that outputs to a real robot::
 
-    from klampt.control.controller import RobotControllerBase
-    from klampt.control.interop import RobotControllerToInterface
+    from klampt.control.block.controller import RobotControllerBlock
+    from klampt.control.interop import RobotControllerBlockToInterface
 
     #create MyControllerObject, MyRobotInterface class here
 
     controller = MyControllerObject()  #subclass of RobotControllerBase
     interface = MyRobotInterface(...)
-    binding = RobotControllerToInterface(controller,interface)
+    binding = RobotControllerBlockToInterface(controller,interface)
     while not done:
         binding.advance()
 
 For tighter control over a simulation, such as sub-stepping, you should use the
-:mod:`klampt.sim.simulation` module.  Robot controllers in ControllerBlock form
-are accepted by the :meth:`SimpleSimulator.setController` method.
-
-
-Blocks submodule
-================
-
-The :mod:`klampt.control.blocks` module gives several examples of controller 
-blocks that can be composed.  See :mod:`klampt.control.blocks.utils` for
-utilities, and :mod:`klampt.control.blocks.state_machine` for state machines
-that use ControllerBlocks.
-
+:mod:`klampt.sim.simulation` module.  Robot controllers in RobotControllerBlock
+form are accepted by the :meth:`SimpleSimulator.setController` method.
 """
 
-from .blocks.core import Block
+from .core import Block
 
 class RobotControllerBlock(Block):
     """A block implementation for a robot controller.  This doesn't
