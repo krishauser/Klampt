@@ -1,3 +1,7 @@
+"""Functions for computing robot workspaces, with lots of options for setting
+feasibility conditions.
+"""
+
 from klampt import RobotModel,RobotModelLink,RigidObjectModel,TerrainModel,VolumeGrid,IKObjective
 from klampt import vis
 from klampt.math import vectorops,so3,se3
@@ -77,10 +81,13 @@ def compute_occupancy_grid(points : Sequence[Vector3],
         dimensions = [d+2 for d in dimensions]
 
     #compact way to compute all valid indices of points
-    indices = np.multiply(points - np.asarray(lower_corner),np.asarray(invcellsize))
-    indices = np.floor(indices).astype(int)
-    valid_points = np.all((0 <= indices) & (indices < np.array(dimensions)),axis=1)
-    valid_indices = indices[valid_points,:]
+    if len(points)==0:
+        valid_indices = []
+    else:
+        indices = np.multiply(points - np.asarray(lower_corner),np.asarray(invcellsize))
+        indices = np.floor(indices).astype(int)
+        valid_points = np.all((0 <= indices) & (indices < np.array(dimensions)),axis=1)
+        valid_indices = indices[valid_points,:]
     #output
     reachable = np.zeros(dimensions)
     if value=='occupancy':
@@ -178,10 +185,13 @@ def compute_field_grid(points : Sequence[Vector3],
         dimensions = [d+2 for d in dimensions]
     
     #compact way to compute all valid indices of points
-    indices = np.multiply(points - np.asarray(lower_corner),np.asarray(invcellsize))
-    indices = np.floor(indices).astype(int)
-    valid_points = np.all((0 <= indices) & (indices < np.array(dimensions)),axis=1)
-    valid_indices = indices[valid_points,:]
+    if len(points)==0:
+        valid_indices = []
+    else:
+        indices = np.multiply(points - np.asarray(lower_corner),np.asarray(invcellsize))
+        indices = np.floor(indices).astype(int)
+        valid_points = np.all((0 <= indices) & (indices < np.array(dimensions)),axis=1)
+        valid_indices = indices[valid_points,:]
     
     result = None
     if aggregator == 'max':
@@ -325,7 +335,7 @@ def compute_workspace(link : RobotModelLink,
         robot.setJointLimits(qmin,qmax)
     else:
         robot.setJointLimits(qmin,qmax)
-
+    
     if isinstance(constraint_or_point,IKObjective):
         point_local,_ = constraint_or_point.getPosition()
         constraint = constraint_or_point
@@ -356,12 +366,14 @@ def compute_workspace(link : RobotModelLink,
 
             #now solve the IK constraint
             i,j,k = vals.nonzero()
+            num_restarts = max(5,Nsamples//len(i))
+            print("Using",num_restarts,"restarts to solve IK constraint")
             for n in range(len(i)):
                 ind = (i[n],j[n],k[n])
                 target = vectorops.add(bmin,vectorops.mul(vectorops.add(ind,[0.5]*3),cellsize))  #target at center point
                 #try reaching point described by ind. TODO: allow up to cellsize/2 slop
-                constraint.setFixedPoint(link.getIndex(),point_local,target)
-                res = ik.solve_global(constraint,iters=20,numRestarts=5)
+                constraint.setFixedPosConstraint(point_local,target)
+                res = ik.solve_global(constraint,iters=20,numRestarts=num_restarts)
                 if res:
                     feasible = True
                     for (name,test) in feasibleTests.items():
@@ -371,7 +383,7 @@ def compute_workspace(link : RobotModelLink,
                             feasible = False
                     if feasible:
                         points['workspace'].append(target)
-                    
+            print("With IK constraint, reached",len(points[name]),"/",len(i),"cells")
             res = {}
             for name in points:
                 res[name] = compute_occupancy_grid(points[name],resolution=None,dimensions=vg_temp.dims,bounds=(bmin,bmax),value=value)
@@ -413,7 +425,7 @@ def compute_workspace(link : RobotModelLink,
                 ind = (i[n],j[n],k[n])
                 target = vectorops.add(bmin,vectorops.mul(vectorops.add(ind,[0.5]*3),cellsize))  #target at center point
                 #try reaching point described by ind. TODO: allow up to cellsize/2 slop
-                constraint.setFixedPoint(link.getIndex(),point_local,target)
+                constraint.setFixedPosConstraint(point_local,target)
                 res = ik.solve_global(constraint,iters=20,numRestarts=5,feasibilityCheck=overall_feasibility_test)
                 if res:
                     points.append(target)
@@ -560,7 +572,7 @@ def compute_workspace_field(link : RobotModelLink,
             ind = (i[n],j[n],k[n])
             target = vectorops.add(bmin,vectorops.mul(vectorops.add(ind,[0.5]*3),cellsize))  #target at center point
             #try reaching point described by ind. TODO: allow up to cellsize/2 slop
-            constraint.setFixedPoint(link.getIndex(),point_local,target)
+            constraint.setFixedPosConstraint(point_local,target)
             res = ik.solve_global(constraint,iters=20,numRestarts=5,feasibilityCheck=overall_feasibility_test)
             if res:
                 points.append(target)
@@ -591,8 +603,12 @@ def _setup_feasible_tests(robot,link,point_local,fixed_links,
     if self_collision:
         feasibleTests['self_collision_free'] = lambda: not robot.selfCollides()
     if obstacles is not None:
+        free_links = []
+        for i in range(robot.numLinks()):
+            if i not in fixed_links:
+                free_links.append(i)
         def collision_free_obstacle(obstacle):
-            for j in range(robot.numLinks()):
+            for j in free_links:
                 if robot.link(j).geometry().collides(obstacle.geometry()):
                     return False
             return True
