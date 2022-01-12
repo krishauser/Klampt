@@ -16,11 +16,13 @@ from . import gldraw
 from . import visualization
 import time
 from ..math import vectorops,so3,se3
-from ..robotsim import WidgetSet,RobotPoser,ObjectPoser,TransformPoser,PointPoser,AABBPoser,BoxPoser,SpherePoser,WorldModel,RobotModelLink,RigidObjectModel,TerrainModel,IKObjective,Appearance,Geometry3D
+from ..robotsim import WidgetSet,RobotPoser,ObjectPoser,TransformPoser,PointPoser,AABBPoser,BoxPoser,SpherePoser,WorldModel,RobotModel,RobotModelLink,RigidObjectModel,TerrainModel,IKObjective,Appearance,Geometry3D
 from ..model.subrobot import SubRobotModel
 from ..model import trajectory
 from ..model import collide
 import warnings
+from ..model.typing import Config, Vector, Vector3, RigidTransform
+from typing import Optional, Sequence, List, Tuple, Any
 from OpenGL.GL import *
 
 class VisualEditorBase(glcommon.GLWidgetPlugin):
@@ -28,21 +30,21 @@ class VisualEditorBase(glcommon.GLWidgetPlugin):
     :func:`run`.
     """
     
-    def __init__(self,name,value,description,world):
+    def __init__(self, name : str, value, description : str, world : WorldModel):
         glcommon.GLWidgetPlugin.__init__(self)
         self.name = name
         self.value = value
         self.description = description
         self.world = world
-    def instructions(self):
+    def instructions(self) -> Optional[str]:
         return None
-    def loadable(self):
+    def loadable(self) -> bool:
         """Whether Load... should be shown"""
         return True
-    def savable(self):
+    def savable(self) -> bool:
         """Whether Save... should be shown"""
         return True
-    def display(self):
+    def display(self) -> bool:
         if self.world: self.world.drawGL()
         self.klamptwidgetmaster.drawGL(self.viewport())
         return True
@@ -79,7 +81,7 @@ class ConfigEditor(VisualEditorBase):
     Either a world or a :class:`~klampt.RobotModel` or
     :class:`~klampt.SubRobotModel` must be provided.
     """
-    def __init__(self,name,value,description,world,robot=None):
+    def __init__(self, name : str, value : Config, description : str, world : WorldModel, robot : RobotModel=None):
         VisualEditorBase.__init__(self,name,value,description,world)
         if robot is None:
             robot = world.robot(0)
@@ -128,7 +130,7 @@ class ConfigsEditor(VisualEditorBase):
     Either a world or a :class:`~klampt.RobotModel` or
     :class:`~klampt.SubRobotModel` must be provided.
     """
-    def __init__(self,name,value,description,world,robot=None):
+    def __init__(self, name : str, value : List[Config], description : str, world : WorldModel, robot : RobotModel=None):
         VisualEditorBase.__init__(self,name,value,description,world)
         if robot is None:
             robot = world.robot(0)
@@ -289,7 +291,7 @@ class TrajectoryEditor(VisualEditorBase):
     If a Trajectory is given, then it must either be attached to a robot or
     a 1D, 2D, or 3D trajectory.
     """
-    def __init__(self,name,value,description,world,robot=None):
+    def __init__(self, name : str, value : trajectory.Trajectory, description : str, world : WorldModel, robot : RobotModel=None):
         VisualEditorBase.__init__(self,name,value,description,world)
         if robot is None:
             if isinstance(value,trajectory.RobotTrajectory):
@@ -763,7 +765,7 @@ class TrajectoryEditor(VisualEditorBase):
 class SelectionEditor(VisualEditorBase):
     """Edits a list of indices selecting some links of a robot.
     """
-    def __init__(self,name,value,description,world,robot=None):
+    def __init__(self, name : str, value : List[int], description : str, world : WorldModel, robot : RobotModel=None):
         VisualEditorBase.__init__(self,name,value,description,world)
         self.robot = robot
         self.lastClicked = -1
@@ -942,11 +944,11 @@ class SelectionEditor(VisualEditorBase):
 class PointEditor(VisualEditorBase):
     """Edits a 3-D point.
 
-    If ``frame`` is given, then it is :mod:`klampt.math.se3` element, and the
+    If ``frame`` is given, then it is a :mod:`klampt.math.se3` element, and the
     input and output are measured with respect to that frame.  However, the
     editing is done in world coordinates.
     """
-    def __init__(self,name,value,description,world,frame=None):
+    def __init__(self, name : str, value : Vector3, description : str, world : WorldModel, frame : RigidTransform=None):
         VisualEditorBase.__init__(self,name,value,description,world)
         self.frame = se3.identity() if frame is None else frame
         self.pointposer = PointPoser()
@@ -977,7 +979,7 @@ class RigidTransformEditor(VisualEditorBase):
     Visualization objects can be attached to the edited transform using
     the :meth:`attach` method.
     """
-    def __init__(self,name,value,description,world,frame=None):
+    def __init__(self, name : str, value : RigidTransform, description : str, world : WorldModel, frame : RigidTransform=None):
         VisualEditorBase.__init__(self,name,value,description,world)
         self.frame = se3.identity() if frame is None else frame
         self.xformposer = TransformPoser()
@@ -1011,7 +1013,13 @@ class RigidTransformEditor(VisualEditorBase):
 
     def attach(self,object,relativePose=None):
         """Attaches an object to visually move along with the edited
-        transform."""
+        transform.
+
+        Args:
+            object (RigidObjectModel or Geometry3D): the object to move
+            relativePose (se3 element, optional): if given, the relative pose
+                of the object w.r.t. the transform
+        """
         assert hasattr(object,'setTransform') or hasattr(object,'setCurrentTransform'),"Can only attach objects with setTransform and getTransform methods"
         assert hasattr(object,'getTransform') or hasattr(object,'getCurrentTransform'),"Can only attach objects with setTransform and getTransform methods"
         self.attachedObjects.append(object)
@@ -1072,7 +1080,7 @@ class AABBEditor(VisualEditorBase):
     input and output are measured with respect to that frame.  However, the
     editing is done in world coordinates.
     """
-    def __init__(self,name,value,description,world,frame=None):
+    def __init__(self, name : str, value : Tuple[Vector3,Vector3], description : str, world, frame : RigidTransform=None):
         VisualEditorBase.__init__(self,name,value,description,world)
         self.aabbposer = AABBPoser()
         self.aabbposer.set(value[0],value[1])
@@ -1100,7 +1108,7 @@ class SphereEditor(VisualEditorBase):
     input and output are measured with respect to that frame.  However, the
     editing is done in world coordinates.
     """
-    def __init__(self,name,value,description,world,frame=None):
+    def __init__(self, name : str, value : Tuple[Vector3,float], description : str, world : WorldModel, frame : RigidTransform=None):
         VisualEditorBase.__init__(self,name,value,description,world)
         self.frame = se3.identity() if frame is None else frame
         self.sphereposer = SpherePoser()
@@ -1541,7 +1549,7 @@ if _has_qt:
             
 
 
-    def run(editorObject):
+    def run(editorObject : VisualEditorBase) -> Tuple[bool,Any]:
         """
         Launches a visual editor.
 
@@ -1592,7 +1600,7 @@ if _has_qt:
         print("vis.editors.run(): Result",res,"return value",retVal)
         return res,retVal
 else:
-    def run(editorObject):
+    def run(editorObject : VisualEditorBase) -> Tuple[bool,Any]:
         """
         Args:
             editorObject (VisualEditorBase): some subclass of VisualEditorBase
