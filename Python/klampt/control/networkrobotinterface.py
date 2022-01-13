@@ -1,6 +1,11 @@
+"""Classes for building networked RIL servers and clients.
+
+.. versionadded:: 0.9
+"""
+
 from .robotinterface import RobotInterfaceBase
 from .robotinterfaceutils import _RobotInterfaceState,_RobotInterfaceStructure,_RobotInterfaceSettings,_RobotInterfaceCommand,_RobotInterfaceStatefulBase,_RobotInterfaceStatefulWrapper
-from .robotinterfaceutils import _split_settings,_split_state,_gather_settings,_gather_commands
+from .robotinterfaceutils import _split_settings,_split_state,_gather_settings,_gather_commands,_update_from_settings
 from ..model.subrobot import SubRobotModel
 from xmlrpc.server import SimpleXMLRPCServer
 from xmlrpc.client import ServerProxy, Marshaller
@@ -101,14 +106,14 @@ class ClientRobotInterfaceBase(_RobotInterfaceStatefulBase):
                                 [self.indices()]+[self._structure.parts[k] for k in self._partInterfaces])
         try:
             next_state = self.updateSettingsAndCommands(self._delta_settings,cmds)
+            if next_state is None:
+                self._state.status = 'server error'
+            else:
+                self._state = next_state
         except Exception:
             #must have disconnected
             self._state.status = 'disconnected'
-
-        if next_state is None:
-            self._state.status = 'server error'
-
-        self._state = next_state
+        
         self._commands = []
         self._delta_settings = None
         #clear part command queues
@@ -192,8 +197,8 @@ class ServerRobotInterfaceBase(_RobotInterfaceStatefulBase):
     
     def updateSettingsAndCommands_impl(self, delta_settings : _RobotInterfaceSettings, commands : List[_RobotInterfaceCommand]) -> _RobotInterfaceState:
         with self._lock:
-            self._base._delta_settings = delta_settings
-            self._base._commands = commands
+            _update_from_settings(None,self._base._delta_settings,delta_settings)
+            self._base._commands += commands
             self._state = copy.deepcopy(self._base._state)
             return self._state
     
@@ -216,10 +221,13 @@ class ServerRobotInterfaceBase(_RobotInterfaceStatefulBase):
         from klampt.control.utils import TimedLooper
         dt = 1.0 / self._base.controlRate()
         looper = TimedLooper(dt)
+        with self._lock:
+            self._base.beginStep()
         while looper and not self._stop:
             with self._lock:
-                self._base.beginStep()
                 self._base.endStep()
+                self._base.beginStep()
+        self._base.endStep()
 
     def startController(self):
         from threading import Thread
