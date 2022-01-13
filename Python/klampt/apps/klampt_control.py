@@ -1027,7 +1027,7 @@ def main():
         dw = QtWidgets.QDesktopWidget()
         x=dw.width()*0.8
         y=dw.height()*0.8
-        gui.setFixedSize(x,y)
+        gui.resize(x,y)
         return gui
     vis.customUI(makefunc)
     vis.pushPlugin(g_plugin)
