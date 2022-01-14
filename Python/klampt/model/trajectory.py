@@ -8,8 +8,6 @@
 
 import bisect
 
-from ..control.robotinterface import RobotInterfaceBase
-from ..robotsim import SimRobotController
 from ..math import so3,se3,vectorops
 from ..math import spline
 from ..math.geodesic import *
@@ -19,6 +17,7 @@ from .subrobot import SubRobotModel
 from typing import Optional,Union,Sequence,List,Tuple,Callable
 from .typing import Vector3,Vector,Rotation,RigidTransform
 MetricType = Callable[[Vector,Vector],float]
+
 class Trajectory:
     """A basic piecewise-linear trajectory class, which can be overloaded
     to provide different functionality.  A plain Trajectory interpolates
@@ -124,7 +123,7 @@ class Trajectory:
             endBehavior (str): If 'loop' then the trajectory loops forever.  
 
         Returns:
-            (tuple): (index,param) giving the segment index and interpolation
+            (index,param) giving the segment index and interpolation
             parameter.  index < 0 indicates that the time is before the first
             milestone and/or there is only 1 milestone.
         """
@@ -167,7 +166,7 @@ class Trajectory:
             endBehavior (str): If 'loop' then the trajectory loops forever.  
 
         Returns:
-            (:obj:`list` of :obj:`float`): the configuration at time t
+            The configuration at time t
         """
         return self.eval_state(t,endBehavior)
 
@@ -180,7 +179,7 @@ class Trajectory:
             endBehavior (str): If 'loop' then the trajectory loops forever.  
 
         Returns:
-            (:obj:`list` of :obj:`float`): the velocity (derivative) at time t
+            The velocity (derivative) at time t
         """
         return self.deriv_state(t,endBehavior)
 
@@ -492,7 +491,7 @@ class Trajectory:
             dofs (list of int): the indices to extract.
 
         Returns:
-            Trajectory: a copy of this trajectory but only over the given DOFs.
+            A copy of this trajectory but only over the given DOFs.
         """
         if len(self.times)==0:
             return self.constructor()
@@ -502,7 +501,7 @@ class Trajectory:
                 raise ValueError("Invalid dof")
         return self.constructor([t for t in self.times],[[m[j] for j in dofs] for m in self.milestones])
 
-    def stackDofs(self, trajs: List['Trajectory'], strict: bool = True) -> 'Trajectory':
+    def stackDofs(self, trajs: List['Trajectory'], strict: bool = True) -> None:
         """Stacks the degrees of freedom of multiple trajectories together.
         The result is contained in self.
 
@@ -512,9 +511,6 @@ class Trajectory:
             trajs (list or tuple of Trajectory): the trajectories to stack
             strict (bool, optional): if True, will warn if the classes of the
                 trajectories do not match self.
-
-        Returns:
-            None
         """
         if not isinstance(trajs,(list,tuple)):
             raise ValueError("Trajectory.stackDofs takes in a list of trajectories as input")
@@ -603,8 +599,7 @@ class RobotTrajectory(Trajectory):
             dofs (list of int or str): the indices to extract
 
         Returns:
-            RobotTrajectory: a copy of this trajectory but over a
-            SubRobotModel.
+            A copy of this trajectory but over a SubRobotModel.
         """
         from .subrobot import SubRobotModel
         subrob = SubRobotModel(self.robot,dofs)
@@ -1059,7 +1054,7 @@ class HermiteTrajectory(Trajectory):
             if len(m)%2 != 0:
                 raise ValueError("Milestone length isn't even?: {} != {}".format(len(m)))
 
-    def extractDofs(self,dofs):
+    def extractDofs(self,dofs) -> 'HermiteTrajectory':
         """Returns a trajectory just over the given DOFs.
 
         Args:
@@ -1067,8 +1062,7 @@ class HermiteTrajectory(Trajectory):
             must be < len(milestones[0])/2.
 
         Returns:
-            HermiteTrajectory: a copy of this trajectory but only over the
-            given DOFs.
+            A copy of this trajectory but only over the given DOFs.
         """
         if len(self.times)==0:
             return self.constructor()
@@ -1078,7 +1072,7 @@ class HermiteTrajectory(Trajectory):
                 raise ValueError("Invalid dof")
         return self.constructor([t for t in self.times],[[m[j] for j in dofs] + [m[n+j] for j in dofs] for m in self.milestones])
 
-    def stackDofs(self,trajs,strict=True):
+    def stackDofs(self,trajs,strict=True) -> None:
         """Stacks the degrees of freedom of multiple trajectories together.
         The result is contained in self.
 
@@ -1089,9 +1083,6 @@ class HermiteTrajectory(Trajectory):
                 stack
             strict (bool, optional): ignored. Will always warn for invalid
                 classes.
-
-        Returns:
-            None
         """
         if not isinstance(trajs,(list,tuple)):
             raise ValueError("HermiteTrajectory.stackDofs takes in a list of trajectories as input")
@@ -1651,8 +1642,8 @@ def path_to_trajectory(
         verbose (int, optional): if > 0, some debug printouts will be given.
 
     Returns:
-        (Trajectory): a finely-discretized, timed trajectory that is C1 continuous
-            and respects the limits defined in the arguments.
+        A finely-discretized, timed trajectory that is C1 continuous
+        and respects the limits defined in the arguments.
     """
     assert dt > 0.0,"dt has to be positive"
     if vmax == 'auto' and (timing == 'limited' or speed == 'limited'):
@@ -1963,7 +1954,7 @@ def path_to_trajectory(
 
 def execute_path(
         path: List[Vector],
-        controller: Union[SimRobotController,RobotInterfaceBase],
+        controller: Union['SimRobotController','RobotInterfaceBase'],
         speed: float = 1.0,
         smoothing: Optional[_SMOOTHING_OPTIONS] = None,
         activeDofs: Optional[List[Union[int,str]]] = None
@@ -2004,6 +1995,9 @@ def execute_path(
     """
     if len(path)==0: return  #be tolerant of empty paths?
     if speed <= 0: raise ValueError("Speed must be positive")
+    from ..control.robotinterface import RobotInterfaceBase
+    from ..robotsim import SimRobotController
+
     if isinstance(controller,SimRobotController):
         robot_model = controller.model()
         q0 = controller.getCommandedConfig()
@@ -2120,7 +2114,7 @@ def execute_path(
 
 def execute_trajectory(
         trajectory: Trajectory,
-        controller: Union[SimRobotController,RobotInterfaceBase],
+        controller: Union['SimRobotController','RobotInterfaceBase'],
         speed: float = 1.0,
         smoothing: Optional[_SMOOTHING_OPTIONS2] = None,
         activeDofs: Optional[List[Union[int,str]]] = None
@@ -2145,6 +2139,8 @@ def execute_trajectory(
     """
     if len(trajectory.times)==0: return  #be tolerant of empty paths?
     if speed <= 0: raise ValueError("Speed must be positive")
+    from ..control.robotinterface import RobotInterfaceBase
+    from ..robotsim import SimRobotController
     if isinstance(controller,SimRobotController):
         robot_model = controller.model()
         q0 = controller.getCommandedConfig()
@@ -2215,7 +2211,7 @@ def execute_trajectory(
                 ts = trajectory.startTime()
                 controller.setMilestone(trajectory.eval(ts))
                 zero = [0.0]*len(trajectory.milestones[0])
-                for i in range(start,len(trajectory.times)):
+                for i in range(1,len(trajectory.times)):
                     q = trajectory.milestones[i]
                     controller.addCubic(q,zero,(trajectory.times[i]-trajectory.times[i-1])/speed)
             else:
