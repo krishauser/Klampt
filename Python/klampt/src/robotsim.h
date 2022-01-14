@@ -76,31 +76,33 @@ class SimRobotSensor
   RobotModel robot();
   ///Returns a list of names for the measurements (one per measurement).
   std::vector<std::string> measurementNames();
-  ///Returns an array of measurements from the previous simulation (or kinematicSimulate) timestep
+  ///Returns an array of measurements from the previous simulation (or
+  ///kinematicSimulate) timestep
   void getMeasurements(double** np_out,int* m);
   ///Returns all setting names
+  ///
   std::vector<std::string> settings();
   ///Returns the value of the named setting (you will need to manually parse this)
   std::string getSetting(const std::string& name);
   ///Sets the value of the named setting (you will need to manually cast an int/float/etc to a str)
   void setSetting(const std::string& name,const std::string& val);
-  ///Retrieves whether the sensor is enabled during simulation (helper for getSetting)
+  ///Return whether the sensor is enabled during simulation (helper for getSetting)
   bool getEnabled();
   ///Sets whether the sensor is enabled (helper for setSetting)
   void setEnabled(bool enabled);
-  ///Retrieves the link on which the sensor is mounted (helper for getSetting)
+  ///Returns the link on which the sensor is mounted (helper for getSetting)
   RobotModelLink getLink();
   ///Sets the link on which the sensor is mounted (helper for setSetting)
   void setLink(const RobotModelLink& link);
   ///Sets the link on which the sensor is mounted (helper for setSetting)
   void setLink(int link);
-  ///Retrieves the local transform of the sensor on the robot's link. 
+  ///Returns the local transform of the sensor on the robot's link. 
   ///(helper for getSetting)
   ///
   ///If the sensor doesn't have a transform (such as a joint position or
   ///torque sensor) an exception will be raised.
   void getTransform(double out[9],double out2[3]);
-  ///Retrieves the world transform of the sensor given the robot's current
+  ///Returns the world transform of the sensor given the robot's current
   ///configuration. (helper for getSetting)
   ///
   ///If the sensor doesn't have a transform (such as a joint position or
@@ -202,25 +204,31 @@ class SimRobotController
   RobotModel model();
   /// Sets the current feedback control rate, in s
   void setRate(double dt);
-  /// Gets the current feedback control rate, in s
+  /// Returns The current feedback control rate, in s
+  ///
   double getRate();
 
-  /// Returns the current commanded configuration (size model().numLinks())
+  /// Returns The current commanded configuration (size model().numLinks())
+  ///
   void getCommandedConfig(std::vector<double>& out);
-  /// Returns the current commanded velocity (size model().numLinks())
+  /// Returns The current commanded velocity (size model().numLinks())
+  ///
   void getCommandedVelocity(std::vector<double>& out);
-  /// Returns the current commanded (feedforward) torque
-  /// (size model().numDrivers())
+  /// Returns The current commanded (feedforward) torque
+  ///     (size model().numDrivers())
+  ///
   void getCommandedTorque(std::vector<double>& out);
 
-  /// Returns the current "sensed" configuration from the simulator
-  /// (size model().numLinks())
+  /// Returns The current "sensed" configuration from the simulator
+  ///     (size model().numLinks())
+  ///
   void getSensedConfig(std::vector<double>& out);
-  /// Returns the current "sensed" velocity from the simulator
-  /// (size model().numLinks())
+  /// Returns The current "sensed" velocity from the simulator
+  ///     (size model().numLinks())
+  ///
   void getSensedVelocity(std::vector<double>& out);
-  /// Returns the current "sensed" (feedback) torque from the simulator. 
-  /// (size model().numDrivers())
+  /// Returns The current "sensed" (feedback) torque from the simulator. 
+  ///     (size model().numDrivers())
   ///
   /// Note: a default robot doesn't have a torque sensor, so this will be 0
   void getSensedTorque(std::vector<double>& out);
@@ -231,22 +239,27 @@ class SimRobotController
   SimRobotSensor sensor(int index);
   //note: only the last overload docstring is added to the documentation
   /// Returns a sensor by index or by name.  If out of bounds or unavailable,
-  /// a null sensor is returned (i.e., SimRobotSensor.name() or
-  /// SimRobotSensor.type()) will return the empty string.)
+  ///     a null sensor is returned (i.e., SimRobotSensor.name() or
+  ///     SimRobotSensor.type()) will return the empty string.)
   SimRobotSensor sensor(const char* name);
   ///Adds a new sensor with a given name and type
+  ///
+  /// Returns:
+  ///
+  ///     The new sensor.
+  ///
   SimRobotSensor addSensor(const char* name,const char* type);
   
-  /// gets a custom command list
+  /// Returns a custom command list
   std::vector<std::string> commands();
-  /// sends a custom string command to the controller
+  /// Sends a custom string command to the controller
   bool sendCommand(const std::string& name,const std::string& args);
 
-  ///Returns all valid setting names
+  /// Returns all valid setting names
   std::vector<std::string> settings();
-  /// gets a setting of the controller
+  /// Returns a setting of the controller
   std::string getSetting(const std::string& name);
-  /// sets a setting of the controller
+  /// Sets a setting of the controller
   bool setSetting(const std::string& name,const std::string& val);
 
   /// Uses a dynamic interpolant to get from the current state to the
@@ -308,19 +321,22 @@ class SimRobotController
 
   /** @brief Returns the control type for the active controller.
    *
-   * Possible return values are:
+   * Returns:
+   * 
+   *     One of
    *
-   * - unknown
-   * - off
-   * - torque
-   * - PID
-   * - locked_velocity
+   *     - unknown
+   *     - off
+   *     - torque
+   *     - PID
+   *     - locked_velocity
+   * 
    */
   std::string getControlType();
 
   /// Sets the PID gains.  Arguments have size model().numDrivers().
   void setPIDGains(const std::vector<double>& kP,const std::vector<double>& kI,const std::vector<double>& kD);
-  /// Gets the PID gains for the PID controller
+  /// Returns the PID gains for the PID controller
   void getPIDGains(std::vector<double>& kPout,std::vector<double>& kIout,std::vector<double>& kDout);
 
   int index;
@@ -336,17 +352,17 @@ class SimRobotController
  * 
  * .. note::
  * 
- *    All changes are applied in the current simulation substep, not the duration
- *    provided to Simulation.simulate().  If you need fine-grained control,
- *    make sure to call Simulation.simulate() with time steps equal to the value
- *    provided to Simulation.setSimStep() (this is 0.001s by default).  Or, use
- *    a hook from :class:`~klampt.sim.simulation.SimpleSimulator`.
+ *     All changes are applied in the current simulation substep, not the duration
+ *     provided to Simulation.simulate().  If you need fine-grained control,
+ *     make sure to call Simulation.simulate() with time steps equal to the value
+ *     provided to Simulation.setSimStep() (this is 0.001s by default).  Or, use
+ *     a hook from :class:`~klampt.sim.simulation.SimpleSimulator`.
  *
- * .. node::
+ * .. note::
  * 
- *    The transform of the body is centered at the *object's center of mass*
- *    rather than the object's reference frame given in the RobotModelLink or
- *    RigidObjectModel.
+ *     The transform of the body is centered at the *object's center of mass*
+ *     rather than the object's reference frame given in the RobotModelLink or
+ *     RigidObjectModel.
  * 
  */
 class SimBody
@@ -472,19 +488,32 @@ class Simulator
   /// Resets to the initial state (same as setState(initialState))
   void reset();
 
-  /// Returns an indicator code for the simulator status.  The return result
-  /// is one of the STATUS_X flags.  (Technically, this returns the *worst* status
-  /// over the last simulate() call)
+  /// Returns an indicator code for the simulator status. 
+  ///
+  /// Returns:
+  ///
+  ///     One of the STATUS_X flags.  (Technically, this returns the *worst* status
+  ///     over the last simulate() call)
+  ///
   int getStatus();
   /// Returns a string indicating the simulator's status.  If s is provided and >= 0,
   /// this function maps the indicator code s to a string.
   std::string getStatusString(int s=-1);
-  /// Checks if any objects are overlapping. Returns a pair of lists of
-  /// integers, giving the pairs of object ids that are overlapping.
+  /// Checks if any objects are overlapping.
+  ///
+  /// Returns:
+  ///
+  ///     A pair of lists of integers, giving the pairs of object ids that
+  ///     are overlapping.
+  ///
   void checkObjectOverlap(std::vector<int>& out,std::vector<int>& out2);
 
-  /// Returns a Base64 string representing the binary data for the current
-  /// simulation state, including controller parameters, etc.
+  /// Gets the current simulation state, including controller parameters, etc.
+  ///
+  /// Returns:
+  ///
+  ///     A Base64 string representing the binary data for the state
+  ///
   std::string getState();
   /// Sets the current simulation state from a Base64 string returned by
   /// a prior getState call.
@@ -573,19 +602,23 @@ class Simulator
   ///Returns the SimBody corresponding to the given object
   SimBody body(const RigidObjectModel& object);
   //note: only the last overload docstring is added to the documentation
-  ///Returns the SimBody corresponding to the given link, rigid object, or terrain
+  ///Return the SimBody corresponding to the given link, rigid object, or terrain
   SimBody body(const TerrainModel& terrain);
 
   /// Returns the joint force and torque local to the link, as would be read
-  /// by a force-torque sensor mounted at the given link's origin.  The 6
-  /// entries are (fx,fy,fz,mx,my,mz)
+  /// by a force-torque sensor mounted at the given link's origin. 
+  ///
+  /// Returns:
+  ///
+  ///     6 entries of the wrench (fx,fy,fz,mx,my,mz)
+  ///     
   void getJointForces(const RobotModelLink& link,double out[6]);
 
   /// Sets the overall gravity vector
   void setGravity(const double g[3]);
   /// Sets the internal simulation substep.  Values < 0.01 are recommended.
   void setSimStep(double dt);
-  ///Returns all setting names
+  /// Returns all setting names
   std::vector<std::string> settings();
   /** @brief Retrieves some simulation setting. 
    * 
@@ -624,6 +657,12 @@ class Simulator
    * 
    * See `Klampt/Simulation/ODESimulator.h <http://motion.pratt.duke.edu/klampt/klampt_docs/ODESimulator_8h_source.html>`_
    * for detailed descriptions of these parameters.
+   * 
+   * Returns:
+   *      
+   *     A string encoding the data. This will need to be cast to int or
+   *     float manually.
+   * 
    */
   std::string getSetting(const std::string& name);
   /// Sets some simulation setting. Raises an exception if the name is

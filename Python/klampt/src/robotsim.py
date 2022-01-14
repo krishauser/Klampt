@@ -1157,8 +1157,8 @@ class PointCloud(object):
 
     To get all properties as a n x k numpy array::  
 
-        properties =
-    np.array(pc.properties).reshape((p.numPoints(),p.numProperties()))  
+        properties = np.array(pc.properties)
+        properties.reshape((p.numPoints(),p.numProperties()))  
 
     (Or use the convenience functions in :mod:`klampt.io.numpy_convert`)  
 
@@ -1202,7 +1202,7 @@ class PointCloud(object):
         getPoints(PointCloud self)
 
 
-        Retrieves a view of the points as an nx3 Numpy array.  
+        Returns a view of the points as an nx3 Numpy array.  
 
         """
         return _robotsim.PointCloud_getPoints(self)
@@ -1232,7 +1232,9 @@ class PointCloud(object):
         addPoint(PointCloud self, double const [3] p) -> int
 
 
-        Adds a point. Sets all its properties to 0. Returns the index.  
+        Adds a point. Sets all its properties to 0.  
+
+        Returns the point's index.  
 
         """
         return _robotsim.PointCloud_addPoint(self, p)
@@ -1252,7 +1254,7 @@ class PointCloud(object):
         getPoint(PointCloud self, int index)
 
 
-        Retrieves the position of the point at the given index.  
+        Returns the position of the point at the given index.  
 
         """
         return _robotsim.PointCloud_getPoint(self, index)
@@ -1297,7 +1299,7 @@ class PointCloud(object):
         getProperty(PointCloud self, int index, std::string const & pname) -> double
 
 
-        Gets the property named pname of point index.  
+        Returns the property named pname of point index.  
 
         """
         return _robotsim.PointCloud_getProperty(self, *args)
@@ -1308,7 +1310,7 @@ class PointCloud(object):
         getProperties(PointCloud self, std::string const & pname)
 
 
-        Gets property named pindex of all points as an array.  
+        Returns property named pindex of all points as an array.  
 
         """
         return _robotsim.PointCloud_getProperties(self, *args)
@@ -1318,7 +1320,7 @@ class PointCloud(object):
         getAllProperties(PointCloud self)
 
 
-        Gets all the properties as an nxp array.  
+        Returns all the properties as an nxp array.  
 
         """
         return _robotsim.PointCloud_getAllProperties(self)
@@ -1369,7 +1371,7 @@ class PointCloud(object):
         getSetting(PointCloud self, std::string const & key) -> std::string
 
 
-        Retrieves the given setting.  
+        Returns the given setting.  
 
         """
         return _robotsim.PointCloud_getSetting(self, key)
@@ -2085,7 +2087,7 @@ class Geometry3D(object):
         isStandalone(Geometry3D self) -> bool
 
 
-        Returns true if this is a standalone geometry.  
+        Returns True if this is a standalone geometry.  
 
         """
         return _robotsim.Geometry3D_isStandalone(self)
@@ -2116,7 +2118,7 @@ class Geometry3D(object):
         empty(Geometry3D self) -> bool
 
 
-        Returns true if this has no contents (not the same as numElements()==0)  
+        Returns True if this has no contents (not the same as numElements()==0)  
 
         """
         return _robotsim.Geometry3D_empty(self)
@@ -2250,8 +2252,9 @@ class Geometry3D(object):
 
 
         Returns an element of the Geometry3D if it is a Group, TriangleMesh, or
-        PointCloud. The element will be in local coordinates. Raises an error if this is
-        of any other type.  
+        PointCloud. Raises an error if this is of any other type.  
+
+        The element will be in local coordinates.  
 
         """
         return _robotsim.Geometry3D_getElement(self, element)
@@ -2284,6 +2287,10 @@ class Geometry3D(object):
 
 
         Loads from file. Standard mesh types, PCD files, and .geom files are supported.  
+
+        Returns:  
+
+            True on success, False on failure  
 
         """
         return _robotsim.Geometry3D_loadFile(self, fn)
@@ -2389,8 +2396,9 @@ class Geometry3D(object):
         getBB(Geometry3D self)
 
 
-        Returns the axis-aligned bounding box of the object as a tuple (bmin,bmax).
-        Note: O(1) time, but may not be tight.  
+        Returns an axis-aligned bounding box of the object as a tuple (bmin,bmax).  
+
+        Note: O(1) time, but may not be tight  
 
         """
         return _robotsim.Geometry3D_getBB(self)
@@ -2400,7 +2408,7 @@ class Geometry3D(object):
         getBBTight(Geometry3D self)
 
 
-        Returns a tighter axis-aligned bounding box of the object than
+        Computes a tighter axis-aligned bounding box of the object than
         :meth:`Geometry3D.getBB`. Worst case O(n) time.  
 
         """
@@ -2578,9 +2586,7 @@ class Geometry3D(object):
         rayCast(Geometry3D self, double const [3] s, double const [3] d) -> bool
 
 
-        Returns (hit,pt) where hit is true if the ray starting at s and pointing in
-        direction d hits the geometry (given in world coordinates); pt is the hit point,
-        in world coordinates.  
+        Performs a ray cast.  
 
         Supported types:  
 
@@ -2590,6 +2596,12 @@ class Geometry3D(object):
             'radius' property assigned)  
         *   VolumeGrid  
         *   Group (groups of the aforementioned types)  
+
+        Returns:  
+
+            (hit,pt) where hit is true if the ray starting at s and pointing
+            in direction d hits the geometry (given in world coordinates); pt is
+            the hit point, in world coordinates.  
 
         """
         return _robotsim.Geometry3D_rayCast(self, s, d)
@@ -2599,13 +2611,7 @@ class Geometry3D(object):
         rayCast_ext(Geometry3D self, double const [3] s, double const [3] d) -> int
 
 
-        Returns (hit_element,pt) where hit_element is >= 0 if ray starting at s and
-        pointing in direction d hits the geometry (given in world coordinates).  
-
-        *   hit_element is -1 if the object is not hit, otherwise it gives the index of
-            the element (triangle, point, sub-object) that was hit. For geometric
-            primitives, this will be 0.  
-        *   pt is the hit point, in world coordinates.  
+        A more sophisticated ray cast.  
 
         Supported types:  
 
@@ -2615,6 +2621,17 @@ class Geometry3D(object):
             'radius' property assigned)  
         *   VolumeGrid  
         *   Group (groups of the aforementioned types)  
+
+        Returns:  
+
+            (hit_element,pt) where hit_element is >= 0 if ray starting at
+            s and pointing in direction d hits the geometry (given in world
+            coordinates).  
+
+            - hit_element is -1 if the object is not hit, otherwise it gives the
+              index of the element (triangle, point, sub-object) that was hit.  
+              For geometric primitives, this will be 0.
+            - pt is the hit point, in world coordinates.  
 
         """
         return _robotsim.Geometry3D_rayCast_ext(self, s, d)
@@ -3153,16 +3170,18 @@ class Appearance(object):
         Args:
             format (str): describes how the array is specified.
                 Valid values include:
-                    - '': turn off texture mapping
-                    - 'rgb8': unsigned byte RGB colors with red in the 1st
-                      column, green in the 2nd, blue in the 3rd.
-                    - 'bgr8': unsigned byte RGB colors with blue in the 1st
-                      column, green in the 2nd, green in the 3rd
-                    - 'rgba8': unsigned byte RGBA colors with red in the 1st
-                      column and alpha in the 4th
-                    - 'bgra8': unsigned byte RGBA colors with blue in the 1st
-                      column and alpha in the 4th
-                    - 'l8': unsigned byte grayscale colors, one channel
+
+                - '': turn off texture mapping
+                - 'rgb8': unsigned byte RGB colors with red in the 1st
+                    column, green in the 2nd, blue in the 3rd.
+                - 'bgr8': unsigned byte RGB colors with blue in the 1st
+                    column, green in the 2nd, green in the 3rd
+                - 'rgba8': unsigned byte RGBA colors with red in the 1st
+                    column and alpha in the 4th
+                - 'bgra8': unsigned byte RGBA colors with blue in the 1st
+                    column and alpha in the 4th
+                - 'l8': unsigned byte grayscale colors, one channel
+
             array (np.ndarray): a 1D or 2D array, of size w or w x c
                 where w is the width and c is the number of channels.
 
@@ -3188,16 +3207,18 @@ class Appearance(object):
         Args:
             format (str): describes how the array is specified.
                 Valid values include:
-                    - '': turn off texture mapping
-                    - 'rgb8': unsigned byte RGB colors with red in the 1st
-                      column, green in the 2nd, blue in the 3rd.
-                    - 'bgr8': unsigned byte RGB colors with blue in the 1st
-                      column, green in the 2nd, green in the 3rd
-                    - 'rgba8': unsigned byte RGBA colors with red in the 1st
-                      column and alpha in the 4th
-                    - 'bgra8': unsigned byte RGBA colors with blue in the 1st
-                      column and alpha in the 4th
-                    - 'l8': unsigned byte grayscale colors, one channel
+
+                - '': turn off texture mapping
+                - 'rgb8': unsigned byte RGB colors with red in the 1st
+                    column, green in the 2nd, blue in the 3rd.
+                - 'bgr8': unsigned byte RGB colors with blue in the 1st
+                    column, green in the 2nd, green in the 3rd
+                - 'rgba8': unsigned byte RGBA colors with red in the 1st
+                    column and alpha in the 4th
+                - 'bgra8': unsigned byte RGBA colors with blue in the 1st
+                    column and alpha in the 4th
+                - 'l8': unsigned byte grayscale colors, one channel
+
             array (np.ndarray): a 2D or 3D array, of size h x w or h x w x c
                 where h is the height, w is the width, and c is the number of
                 channels.
@@ -4130,7 +4151,7 @@ class RobotModelLink(object):
         getMass(RobotModelLink self) -> Mass
 
 
-        Retrieves the inertial properties of the link. (Note that the Mass is given with
+        Returns the inertial properties of the link. (Note that the Mass is given with
         origin at the link frame, not about the COM.)  
 
         """
@@ -4152,11 +4173,11 @@ class RobotModelLink(object):
         getParentTransform(RobotModelLink self)
 
 
-        Gets transformation (R,t) to the parent link.  
+        Gets the transformation (R,t) to the parent link.  
 
         Returns:  
 
-            (se3 object): a pair (R,t), with R a 9-list and t a 3-list of floats,
+            se3 object: a pair (R,t), with R a 9-list and t a 3-list of floats,
             giving the local transform from this link to its parent, in the
             reference (zero) configuration.  
 
@@ -4232,7 +4253,7 @@ class RobotModelLink(object):
 
         Returns:  
 
-            (list of 3 floats): the world coordinates of the local point plocal  
+            list of 3 floats: the world coordinates of the local point plocal  
 
         """
         return _robotsim.RobotModelLink_getWorldPosition(self, plocal)
@@ -4246,7 +4267,7 @@ class RobotModelLink(object):
 
         Returns:  
 
-            (list of 3 floats): the world coordinates of the local direction
+            list of 3 floats: the world coordinates of the local direction
             vlocal  
 
         """
@@ -4261,7 +4282,7 @@ class RobotModelLink(object):
 
         Returns:  
 
-            (list of 3 floats): the local coordinates of the world point pworld  
+            list of 3 floats: the local coordinates of the world point pworld  
 
         """
         return _robotsim.RobotModelLink_getLocalPosition(self, pworld)
@@ -4275,7 +4296,7 @@ class RobotModelLink(object):
 
         Returns:  
 
-            (list of 3 floats): the local coordinates of the world direction
+            list of 3 floats: the local coordinates of the world direction
             vworld  
 
         """
@@ -4290,7 +4311,7 @@ class RobotModelLink(object):
 
         Returns:  
 
-            (se3 object): a pair (R,t), with R a 9-list and t a 3-list of floats.  
+            se3 object: a pair (R,t), with R a 9-list and t a 3-list of floats.  
 
         """
         return _robotsim.RobotModelLink_getTransform(self)
@@ -4315,12 +4336,12 @@ class RobotModelLink(object):
         getVelocity(RobotModelLink self)
 
 
-        Returns the velocity of the link's origin given the robot's current joint
+        Computes the velocity of the link's origin given the robot's current joint
         configuration and velocities. Equivalent to getPointVelocity([0,0,0]).  
 
         Returns:  
 
-            (list of 3 floats): the current velocity of the link's origin, in
+            list of 3 floats: the current velocity of the link's origin, in
             world coordinates  
 
         """
@@ -4331,12 +4352,12 @@ class RobotModelLink(object):
         getAngularVelocity(RobotModelLink self)
 
 
-        Returns the angular velocity of the link given the robot's current joint
+        Computes the angular velocity of the link given the robot's current joint
         configuration and velocities.  
 
         Returns:  
 
-            (list of 3 floats): the current angular velocity of the link, in world
+            list of 3 floats: the current angular velocity of the link, in world
             coordinates  
 
         """
@@ -4347,12 +4368,12 @@ class RobotModelLink(object):
         getPointVelocity(RobotModelLink self, double const [3] plocal)
 
 
-        Returns the world velocity of a point attached to the link, given the robot's
+        Computes the world velocity of a point attached to the link, given the robot's
         current joint configuration and velocities.  
 
         Returns:  
 
-            (list of 3 floats): the current velocity of the point, in
+            list of 3 floats: the current velocity of the point, in
             world coordinates.  
 
         """
@@ -4363,16 +4384,16 @@ class RobotModelLink(object):
         getJacobian(RobotModelLink self, double const [3] plocal)
 
 
-        Returns the total jacobian of a point on this link w.r.t. the robot's
+        Computes the total jacobian of a point on this link w.r.t. the robot's
         configuration q.  
+
+        The orientation jacobian is given in the first 3 rows, and is stacked on the
+        position jacobian, which is given in the last 3 rows.  
 
         Returns:  
 
-            (6xn array): the 6xn total Jacobian matrix of the
+            ndarray: the 6xn total Jacobian matrix of the
             point given by local coordinates plocal.  
-
-            The orientation jacobian is given in the first 3 rows, and is stacked
-            on the position jacobian, which is given in the last 3 rows.  
 
         """
         return _robotsim.RobotModelLink_getJacobian(self, plocal)
@@ -4382,16 +4403,16 @@ class RobotModelLink(object):
         getPositionJacobian(RobotModelLink self, double const [3] plocal)
 
 
-        Returns the position jacobian of a point on this link w.r.t. the robot's
+        Computes the position jacobian of a point on this link w.r.t. the robot's
         configuration q.  
+
+        This matrix J gives the point's velocity (in world coordinates) via
+        np.dot(J,dq), where dq is the robot's joint velocities.  
 
         Returns:  
 
-            (3xn array): the 3xn Jacobian matrix of the
+            ndarray: the 3xn Jacobian matrix of the
             point given by local coordinates plocal.  
-
-            This matrix J gives the point's velocity (in world coordinates) via
-            np.dot(J,dq), where dq is the robot's joint velocities.  
 
         """
         return _robotsim.RobotModelLink_getPositionJacobian(self, plocal)
@@ -4401,15 +4422,15 @@ class RobotModelLink(object):
         getOrientationJacobian(RobotModelLink self)
 
 
-        Returns the orientation jacobian of this link w.r.t. the robot's configuration
+        Computes the orientation jacobian of this link w.r.t. the robot's configuration
         q.  
+
+        This matrix J gives the link's angular velocity (in world coordinates) via
+        np.dot(J,dq), where dq is the robot's joint velocities.  
 
         Returns:  
 
-            (3xn array):: the 3xn orientation Jacobian matrix of the link.  
-
-            This matrix J gives the link's angular velocity (in world coordinates)
-            via np.dot(J,dq), where dq is the robot's joint velocities.  
+            ndarray:: the 3xn orientation Jacobian matrix of the link.  
 
         """
         return _robotsim.RobotModelLink_getOrientationJacobian(self)
@@ -4419,7 +4440,7 @@ class RobotModelLink(object):
         getAcceleration(RobotModelLink self, doubleVector ddq)
 
 
-        Returns the acceleration of the link origin given the robot's current joint
+        Computes the acceleration of the link origin given the robot's current joint
         configuration and velocities, and the joint accelerations ddq.  
 
         ddq can be empty, which calculates the acceleration with acceleration 0, and is
@@ -4427,7 +4448,7 @@ class RobotModelLink(object):
 
         Returns:  
 
-            (list of 3 floats): the acceleration of the link's origin, in
+            list of 3 floats: the acceleration of the link's origin, in
             world coordinates.  
 
         """
@@ -4438,12 +4459,12 @@ class RobotModelLink(object):
         getPointAcceleration(RobotModelLink self, double const [3] plocal, doubleVector ddq)
 
 
-        Returns the acceleration of the point given the robot's current joint
+        Computes the acceleration of the point given the robot's current joint
         configuration and velocities, and the joint accelerations ddq.  
 
         Returns:  
 
-            (list of 3 floats): the acceleration of the point, in
+            list of 3 floats: the acceleration of the point, in
             world coordinates.  
 
         """
@@ -4454,12 +4475,12 @@ class RobotModelLink(object):
         getAngularAcceleration(RobotModelLink self, doubleVector ddq)
 
 
-        Returns the angular acceleration of the link given the robot's current joint
+        Computes the angular acceleration of the link given the robot's current joint
         configuration and velocities, and the joint accelerations ddq.  
 
         Returns:  
 
-            (list of 3 floats): the angular acceleration of the link, in
+            list of 3 floats: the angular acceleration of the link, in
             world coordinates.  
 
         """
@@ -4470,12 +4491,12 @@ class RobotModelLink(object):
         getPositionHessian(RobotModelLink self, double const [3] plocal)
 
 
-        Returns the Hessians of each component of the position p w.r.t the robot's
+        Computes the Hessians of each component of the position p w.r.t the robot's
         configuration q.  
 
         Returns:  
 
-            (3-D array): a 3xnxn array with each of the elements in the first axis
+            ndarray: a 3xnxn array with each of the elements in the first axis
             corresponding respectively, to the (x,y,z) components of the Hessian.  
 
         """
@@ -4486,12 +4507,12 @@ class RobotModelLink(object):
         getOrientationHessian(RobotModelLink self)
 
 
-        Returns the Hessians of each orientation component of the link w.r.t the robot's
-        configuration q.  
+        Computes the Hessians of each orientation component of the link w.r.t the
+        robot's configuration q.  
 
         Returns:  
 
-            (3-D array): a 3xnxn array with each of the elements in the first axis
+            ndarray: a 3xnxn array with each of the elements in the first axis
             corresponding, respectively, to the (wx,wy,wz) components of the Hessian.  
 
         """
@@ -4596,8 +4617,11 @@ class RobotModelDriver(object):
         getType(RobotModelDriver self) -> char const *
 
 
-        Currently can be "normal", "affine", "rotation", "translation", or
-        "custom".  
+        Gets the type of the driver.  
+
+        Returns:  
+
+            One of  "normal", "affine", "rotation", "translation", or "custom"  
 
         """
         return _robotsim.RobotModelDriver_getType(self)
@@ -4630,7 +4654,7 @@ class RobotModelDriver(object):
         For "affine" links, returns the scale and offset of the driver value mapped to
         the world.  
 
-        Returns: tuple: a pair (scale,offset), each of length len(getAffectedLinks()).  
+        Returns a pair (scale,offset), each of length len(getAffectedLinks()).  
 
         """
         return _robotsim.RobotModelDriver_getAffineCoeffs(self)
@@ -4655,7 +4679,7 @@ class RobotModelDriver(object):
         getValue(RobotModelDriver self) -> double
 
 
-        Gets the current driver value from the robot's config.  
+        Returns the current driver value from the robot's config.  
 
         """
         return _robotsim.RobotModelDriver_getValue(self)
@@ -4675,7 +4699,7 @@ class RobotModelDriver(object):
         getVelocity(RobotModelDriver self) -> double
 
 
-        Gets the current driver velocity value from the robot's velocity.  
+        Returns the current driver velocity value from the robot's velocity.  
 
         """
         return _robotsim.RobotModelDriver_getVelocity(self)
@@ -4685,7 +4709,7 @@ class RobotModelDriver(object):
         getLimits(RobotModelDriver self)
 
 
-        Retrieves value limits [xmin,xmax].  
+        Returns value limits [xmin,xmax].  
 
         """
         return _robotsim.RobotModelDriver_getLimits(self)
@@ -4695,7 +4719,7 @@ class RobotModelDriver(object):
         getVelocityLimits(RobotModelDriver self)
 
 
-        Retrieves velocity limits [vmin,vmax].  
+        Returns velocity limits [vmin,vmax].  
 
         """
         return _robotsim.RobotModelDriver_getVelocityLimits(self)
@@ -4705,7 +4729,7 @@ class RobotModelDriver(object):
         getAccelerationLimits(RobotModelDriver self)
 
 
-        Retrieves acceleration limits [amin,amax].  
+        Returns acceleration limits [amin,amax].  
 
         """
         return _robotsim.RobotModelDriver_getAccelerationLimits(self)
@@ -4715,7 +4739,7 @@ class RobotModelDriver(object):
         getTorqueLimits(RobotModelDriver self)
 
 
-        Retrieves generalized torque limits [tmin,tmax].  
+        Returns generalized torque limits [tmin,tmax].  
 
         """
         return _robotsim.RobotModelDriver_getTorqueLimits(self)
@@ -4805,6 +4829,10 @@ class RobotModel(object):
 
 
         Loads the robot from the file fn.  
+
+        Returns:  
+
+            True if successful, False if failed.  
 
         """
         return _robotsim.RobotModel_loadFile(self, fn)
@@ -4964,7 +4992,7 @@ class RobotModel(object):
         getJointLimits(RobotModel self)
 
 
-        Retrieves a pair (qmin,qmax) of min/max joint limit vectors.  
+        Returns a pair (qmin,qmax) of min/max joint limit vectors.  
 
         """
         return _robotsim.RobotModel_getJointLimits(self)
@@ -4984,7 +5012,7 @@ class RobotModel(object):
         getVelocityLimits(RobotModel self)
 
 
-        Retrieve the velocity limit vector vmax, the constraint is :math:`|dq[i]| \leq
+        Returns the velocity limit vector vmax, the constraint is :math:`|dq[i]| \leq
         vmax[i]`  
 
         """
@@ -5006,7 +5034,7 @@ class RobotModel(object):
         getAccelerationLimits(RobotModel self)
 
 
-        Retrieve the acceleration limit vector amax, the constraint is :math:`|ddq[i]|
+        Returns the acceleration limit vector amax, the constraint is :math:`|ddq[i]|
         \leq amax[i]`  
 
         """
@@ -5028,8 +5056,8 @@ class RobotModel(object):
         getTorqueLimits(RobotModel self)
 
 
-        Retrieve the torque limit vector tmax, the constraint is :math:`|torque[i]|
-        \leq tmax[i]`  
+        Returns the torque limit vector tmax, the constraint is :math:`|torque[i]| \leq
+        tmax[i]`  
 
         """
         return _robotsim.RobotModel_getTorqueLimits(self)
@@ -5098,11 +5126,11 @@ class RobotModel(object):
         getComJacobian(RobotModel self)
 
 
-        Returns the Jacobian matrix of the current center of mass.  
+        Computes the Jacobian matrix of the current center of mass.  
 
         Returns:  
 
-            (3xn array): a 3xn matrix J such that np.dot(J,dq) gives the
+            ndarray: a 3xn matrix J such that np.dot(J,dq) gives the
             COM velocity at the currene configuration  
 
         """
@@ -5113,7 +5141,7 @@ class RobotModel(object):
         getLinearMomentum(RobotModel self)
 
 
-        Returns the 3D linear momentum vector.  
+        Computes the 3D linear momentum vector.  
 
         """
         return _robotsim.RobotModel_getLinearMomentum(self)
@@ -5123,7 +5151,7 @@ class RobotModel(object):
         getAngularMomentum(RobotModel self)
 
 
-        Returns the 3D angular momentum vector.  
+        Computes the 3D angular momentum vector.  
 
         """
         return _robotsim.RobotModel_getAngularMomentum(self)
@@ -5133,7 +5161,7 @@ class RobotModel(object):
         getKineticEnergy(RobotModel self) -> double
 
 
-        Returns the kinetic energy at the current config / velocity.  
+        Computes the kinetic energy at the current config / velocity.  
 
         """
         return _robotsim.RobotModel_getKineticEnergy(self)
@@ -5143,7 +5171,7 @@ class RobotModel(object):
         getTotalInertia(RobotModel self)
 
 
-        Calculates the 3x3 total inertia matrix of the robot.  
+        Computes the 3x3 total inertia matrix of the robot.  
 
         """
         return _robotsim.RobotModel_getTotalInertia(self)
@@ -5153,7 +5181,9 @@ class RobotModel(object):
         getMassMatrix(RobotModel self)
 
 
-        Returns the nxn mass matrix B(q). Takes O(n^2) time.  
+        Computes the nxn mass matrix B(q).  
+
+        Takes O(n^2) time  
 
         """
         return _robotsim.RobotModel_getMassMatrix(self)
@@ -5163,8 +5193,10 @@ class RobotModel(object):
         getMassMatrixInv(RobotModel self)
 
 
-        Returns the inverse of the nxn mass matrix B(q)^-1. Takes O(n^2) time, which is
-        much faster than inverting the result of getMassMatrix.  
+        Computes the inverse of the nxn mass matrix B(q)^-1.  
+
+        Takes O(n^2) time, which is much faster than inverting the result of
+        getMassMatrix  
 
         """
         return _robotsim.RobotModel_getMassMatrixInv(self)
@@ -5174,8 +5206,9 @@ class RobotModel(object):
         getMassMatrixDeriv(RobotModel self, int i)
 
 
-        Returns the derivative of the nxn mass matrix with respect to q_i. Takes O(n^3)
-        time.  
+        Computes the derivative of the nxn mass matrix with respect to q_i.  
+
+        Takes O(n^3) time.  
 
         """
         return _robotsim.RobotModel_getMassMatrixDeriv(self, i)
@@ -5185,8 +5218,10 @@ class RobotModel(object):
         getMassMatrixTimeDeriv(RobotModel self)
 
 
-        Returns the derivative of the nxn mass matrix with respect to t, given the
-        robot's current velocity. Takes O(n^4) time.  
+        Computes the derivative of the nxn mass matrix with respect to t, given the
+        robot's current velocity.  
+
+        Takes O(n^4) time.  
 
         """
         return _robotsim.RobotModel_getMassMatrixTimeDeriv(self)
@@ -5196,8 +5231,9 @@ class RobotModel(object):
         getCoriolisForceMatrix(RobotModel self)
 
 
-        Returns the Coriolis force matrix C(q,dq) for current config and velocity. Takes
-        O(n^2) time.  
+        Computes the Coriolis force matrix C(q,dq) for current config and velocity.  
+
+        Takes O(n^2) time.  
 
         """
         return _robotsim.RobotModel_getCoriolisForceMatrix(self)
@@ -5207,9 +5243,11 @@ class RobotModel(object):
         getCoriolisForces(RobotModel self)
 
 
-        Returns the Coriolis forces C(q,dq)*dq for current config and velocity. Takes
-        O(n) time, which is faster than computing matrix and doing product. ("Forces"
-        is somewhat of a misnomer; the result is a joint torque vector)  
+        Computes the Coriolis forces C(q,dq)*dq for current config and velocity.  
+
+        Takes O(n) time, which is faster than computing matrix and doing the product.  
+
+        ("Forces" is somewhat of a misnomer; the result is a joint torque vector)  
 
         """
         return _robotsim.RobotModel_getCoriolisForces(self)
@@ -5219,7 +5257,7 @@ class RobotModel(object):
         getGravityForces(RobotModel self, double const [3] g)
 
 
-        Returns the generalized gravity vector G(q) for the given workspace gravity
+        Computes the generalized gravity vector G(q) for the given workspace gravity
         vector g (usually (0,0,-9.8)).  
 
         .. note::  
@@ -5229,7 +5267,7 @@ class RobotModel(object):
 
         Returns:  
 
-            (list of floats): the n-element generalized gravity vector at the
+            list of floats: the n-element generalized gravity vector at the
             robot's current configuration.  
 
         """
@@ -5250,7 +5288,7 @@ class RobotModel(object):
 
         Returns:  
 
-            (list of floats): the n-element torque vector that would produce
+            list of floats: the n-element torque vector that would produce
             the joint accelerations ddq in the absence of external forces.  
 
         """
@@ -5270,7 +5308,7 @@ class RobotModel(object):
 
         Returns:  
 
-            (list of floats): the n-element joint acceleration vector that would
+            list of floats: the n-element joint acceleration vector that would
             result from joint torques t in the absence of external forces.  
 
         """
@@ -5286,8 +5324,8 @@ class RobotModel(object):
 
         Returns:  
 
-            (list of n floats): The configuration that is u fraction of the way
-            from a to b  
+            list of floats: The n-element configuration that is u fraction of
+            the way from a to b  
 
         """
         return _robotsim.RobotModel_interpolate(self, a, b, u)
@@ -5452,9 +5490,10 @@ class RobotModel(object):
         sensor(RobotModel self, char const * name) -> SimRobotSensor
 
 
-        Returns a sensor by index or by name. If out of bounds or unavailable, a null
-        sensor is returned (i.e., SimRobotSensor.name() or SimRobotSensor.type()) will
-        return the empty string.)  
+        Returns a sensor by index or by name.  
+
+        If out of bounds or unavailable, a null sensor is returned (i.e.,
+        SimRobotSensor.name() or SimRobotSensor.type()) will return the empty string.)  
 
         """
         return _robotsim.RobotModel_sensor(self, *args)
@@ -5465,6 +5504,10 @@ class RobotModel(object):
 
 
         Adds a new sensor with a given name and type.  
+
+        Returns:  
+
+            The new sensor.  
 
         """
         return _robotsim.RobotModel_addSensor(self, name, type)
@@ -5637,7 +5680,7 @@ class RigidObjectModel(object):
 
         Returns:  
 
-            (se3 object): a pair (R,t), with R a 9-list and t a 3-list of floats,
+            se3 object: a pair (R,t), with R a 9-list and t a 3-list of floats,
             giving the transform to world coordinates.  
 
         """
@@ -5662,7 +5705,7 @@ class RigidObjectModel(object):
 
         Returns:  
 
-            (tuple): a pair of 3-lists (w,v) where w is the angular velocity
+            tuple: a pair of 3-lists (w,v) where w is the angular velocity
             vector and v is the translational velocity vector (both in world
             coordinates)  
 
@@ -5902,6 +5945,10 @@ class WorldModel(object):
 
         Reads from a world XML file.  
 
+        Returns:  
+
+            True if successful, False if failed.  
+
         """
         return _robotsim.WorldModel_readFile(self, fn)
 
@@ -6091,7 +6138,11 @@ class WorldModel(object):
 
 
         Loads some element from a file, automatically detecting its type. Meshes are
-        interpreted as terrains. The ID is returned, or -1 if loading failed.  
+        interpreted as terrains.  
+
+        Returns:  
+
+            The element's ID, or -1 if loading failed.  
 
         """
         return _robotsim.WorldModel_loadElement(self, fn)
@@ -6121,8 +6172,8 @@ class WorldModel(object):
 
         IMPORTANT:  
 
-            All other RobotModel, RigidObjectModel, and TerrainModel references will be
-        invalidated.  
+            All other RobotModel, RigidObjectModel, or TerrainModel references
+            will be invalidated.  
 
         """
         return _robotsim.WorldModel_remove(self, *args)
@@ -6267,7 +6318,7 @@ class IKObjective(object):
         numPosDims(IKObjective self) -> int
 
 
-        Returns the number of position dimensions constrained (0-3)  
+        Returns: The number of position dimensions constrained (0-3)  
 
         """
         return _robotsim.IKObjective_numPosDims(self)
@@ -6277,7 +6328,7 @@ class IKObjective(object):
         numRotDims(IKObjective self) -> int
 
 
-        Returns the number of rotation dimensions constrained (0-3)  
+        Returns: The number of rotation dimensions constrained (0-3)  
 
         """
         return _robotsim.IKObjective_numRotDims(self)
@@ -6670,7 +6721,7 @@ class IKSolver(object):
         getMaxIters(IKSolver self) -> int
 
 
-        Gets the max # of iterations.  
+        Returns the max # of iterations.  
 
         """
         return _robotsim.IKSolver_getMaxIters(self)
@@ -6690,7 +6741,7 @@ class IKSolver(object):
         getTolerance(IKSolver self) -> double
 
 
-        Gets the constraint solve tolerance.  
+        Returns the constraint solve tolerance.  
 
         """
         return _robotsim.IKSolver_getTolerance(self)
@@ -6710,7 +6761,7 @@ class IKSolver(object):
         getActiveDofs(IKSolver self)
 
 
-        Gets the active degrees of freedom.  
+        Returns the active degrees of freedom.  
 
         """
         return _robotsim.IKSolver_getActiveDofs(self)
@@ -6730,7 +6781,7 @@ class IKSolver(object):
         getJointLimits(IKSolver self)
 
 
-        Gets the limits on the robot's configuration (by default this is the robot's
+        Returns the limits on the robot's configuration (by default this is the robot's
         joint limits.  
 
         """
@@ -6752,7 +6803,7 @@ class IKSolver(object):
         getBiasConfig(IKSolver self)
 
 
-        Gets the solvers' bias configuration.  
+        Returns the solvers' bias configuration.  
 
         """
         return _robotsim.IKSolver_getBiasConfig(self)
@@ -6762,7 +6813,7 @@ class IKSolver(object):
         isSolved(IKSolver self) -> bool
 
 
-        Returns true if the current configuration residual is less than tol.  
+        Returns True if the current configuration residual is less than tol.  
 
         """
         return _robotsim.IKSolver_isSolved(self)
@@ -6772,7 +6823,7 @@ class IKSolver(object):
         getResidual(IKSolver self)
 
 
-        Returns a vector describing the error of the objective at the current
+        Returns the vector describing the error of the objective at the current
         configuration.  
 
         """
@@ -6783,24 +6834,26 @@ class IKSolver(object):
         getJacobian(IKSolver self)
 
 
-        Returns a matrix describing the instantaneous derivative of the objective with
-        respect to the active Dofs.  
+        Computes the matrix describing the instantaneous derivative of the objective
+        with respect to the active Dofs.  
 
         """
         return _robotsim.IKSolver_getJacobian(self)
 
-    def solve(self, *args) -> "PyObject *":
+    def solve(self) -> "bool":
         r"""
         solve(IKSolver self) -> bool
-        solve(IKSolver self, int iters, double tol) -> PyObject *
 
 
-        Old-style: will be deprecated. Specify # of iterations and tolerance. Tries to
-        find a configuration that satifies all simultaneous objectives up to the desired
-        tolerance. Returns (res,iterations) where res is true if x converged.  
+        Tries to find a configuration that satifies all simultaneous objectives up to
+        the desired tolerance.  
+
+        Returns:  
+
+            True if x converged.  
 
         """
-        return _robotsim.IKSolver_solve(self, *args)
+        return _robotsim.IKSolver_solve(self)
 
     def lastSolveIters(self) -> "int":
         r"""
@@ -7170,8 +7223,7 @@ class SimRobotSensor(object):
         getEnabled(SimRobotSensor self) -> bool
 
 
-        Retrieves whether the sensor is enabled during simulation (helper for
-        getSetting)  
+        Return whether the sensor is enabled during simulation (helper for getSetting)  
 
         """
         return _robotsim.SimRobotSensor_getEnabled(self)
@@ -7191,7 +7243,7 @@ class SimRobotSensor(object):
         getLink(SimRobotSensor self) -> RobotModelLink
 
 
-        Retrieves the link on which the sensor is mounted (helper for getSetting)  
+        Returns the link on which the sensor is mounted (helper for getSetting)  
 
         """
         return _robotsim.SimRobotSensor_getLink(self)
@@ -7212,7 +7264,7 @@ class SimRobotSensor(object):
         getTransform(SimRobotSensor self)
 
 
-        Retrieves the local transform of the sensor on the robot's link. (helper for
+        Returns the local transform of the sensor on the robot's link. (helper for
         getSetting)  
 
         If the sensor doesn't have a transform (such as a joint position or torque
@@ -7226,7 +7278,7 @@ class SimRobotSensor(object):
         getTransformWorld(SimRobotSensor self)
 
 
-        Retrieves the world transform of the sensor given the robot's current
+        Returns the world transform of the sensor given the robot's current
         configuration. (helper for getSetting)  
 
         If the sensor doesn't have a transform (such as a joint position or torque
@@ -7391,7 +7443,7 @@ class SimRobotController(object):
         getRate(SimRobotController self) -> double
 
 
-        Gets the current feedback control rate, in s.  
+        Returns The current feedback control rate, in s.  
 
         """
         return _robotsim.SimRobotController_getRate(self)
@@ -7401,7 +7453,7 @@ class SimRobotController(object):
         getCommandedConfig(SimRobotController self)
 
 
-        Returns the current commanded configuration (size model().numLinks())  
+        Returns The current commanded configuration (size model().numLinks())  
 
         """
         return _robotsim.SimRobotController_getCommandedConfig(self)
@@ -7411,7 +7463,7 @@ class SimRobotController(object):
         getCommandedVelocity(SimRobotController self)
 
 
-        Returns the current commanded velocity (size model().numLinks())  
+        Returns The current commanded velocity (size model().numLinks())  
 
         """
         return _robotsim.SimRobotController_getCommandedVelocity(self)
@@ -7421,7 +7473,7 @@ class SimRobotController(object):
         getCommandedTorque(SimRobotController self)
 
 
-        Returns the current commanded (feedforward) torque (size model().numDrivers())  
+        Returns The current commanded (feedforward) torque (size model().numDrivers())  
 
         """
         return _robotsim.SimRobotController_getCommandedTorque(self)
@@ -7431,7 +7483,7 @@ class SimRobotController(object):
         getSensedConfig(SimRobotController self)
 
 
-        Returns the current "sensed" configuration from the simulator (size
+        Returns The current "sensed" configuration from the simulator (size
         model().numLinks())  
 
         """
@@ -7442,7 +7494,7 @@ class SimRobotController(object):
         getSensedVelocity(SimRobotController self)
 
 
-        Returns the current "sensed" velocity from the simulator (size
+        Returns The current "sensed" velocity from the simulator (size
         model().numLinks())  
 
         """
@@ -7453,7 +7505,7 @@ class SimRobotController(object):
         getSensedTorque(SimRobotController self)
 
 
-        Returns the current "sensed" (feedback) torque from the simulator. (size
+        Returns The current "sensed" (feedback) torque from the simulator. (size
         model().numDrivers())  
 
         Note: a default robot doesn't have a torque sensor, so this will be 0  
@@ -7481,6 +7533,10 @@ class SimRobotController(object):
 
         Adds a new sensor with a given name and type.  
 
+        Returns:  
+
+            The new sensor.  
+
         """
         return _robotsim.SimRobotController_addSensor(self, name, type)
 
@@ -7489,7 +7545,7 @@ class SimRobotController(object):
         commands(SimRobotController self) -> stringVector
 
 
-        gets a custom command list  
+        Returns a custom command list.  
 
         """
         return _robotsim.SimRobotController_commands(self)
@@ -7499,7 +7555,7 @@ class SimRobotController(object):
         sendCommand(SimRobotController self, std::string const & name, std::string const & args) -> bool
 
 
-        sends a custom string command to the controller  
+        Sends a custom string command to the controller.  
 
         """
         return _robotsim.SimRobotController_sendCommand(self, name, args)
@@ -7519,7 +7575,7 @@ class SimRobotController(object):
         getSetting(SimRobotController self, std::string const & name) -> std::string
 
 
-        gets a setting of the controller  
+        Returns a setting of the controller.  
 
         """
         return _robotsim.SimRobotController_getSetting(self, name)
@@ -7529,7 +7585,7 @@ class SimRobotController(object):
         setSetting(SimRobotController self, std::string const & name, std::string const & val) -> bool
 
 
-        sets a setting of the controller  
+        Sets a setting of the controller.  
 
         """
         return _robotsim.SimRobotController_setSetting(self, name, val)
@@ -7678,13 +7734,15 @@ class SimRobotController(object):
 
         Returns the control type for the active controller.  
 
-        Possible return values are:  
+        Returns:  
 
-        *   unknown  
-        *   off  
-        *   torque  
-        *   PID  
-        *   locked_velocity  
+            One of
+
+            - unknown
+            - off
+            - torque
+            - PID
+            - locked_velocity  
 
         """
         return _robotsim.SimRobotController_getControlType(self)
@@ -7704,7 +7762,7 @@ class SimRobotController(object):
         getPIDGains(SimRobotController self)
 
 
-        Gets the PID gains for the PID controller.  
+        Returns the PID gains for the PID controller.  
 
         """
         return _robotsim.SimRobotController_getPIDGains(self)
@@ -7727,17 +7785,17 @@ class SimBody(object):
 
     .. note::  
 
-    All changes are applied in the current simulation substep, not the duration
-    provided to Simulation.simulate(). If you need fine-grained control, make sure
-    to call Simulation.simulate() with time steps equal to the value provided to
-    Simulation.setSimStep() (this is 0.001s by default). Or, use a hook from
-    :class:`~klampt.sim.simulation.SimpleSimulator`.  
+        All changes are applied in the current simulation substep, not the duration
+        provided to Simulation.simulate().  If you need fine-grained control,
+        make sure to call Simulation.simulate() with time steps equal to the value
+        provided to Simulation.setSimStep() (this is 0.001s by default).  Or, use
+        a hook from :class:`~klampt.sim.simulation.SimpleSimulator`.  
 
-    .. node::  
+    .. note::  
 
-    The transform of the body is centered at the *object's center of mass* rather
-    than the object's reference frame given in the RobotModelLink or
-    RigidObjectModel.  
+        The transform of the body is centered at the *object's center of mass*
+        rather than the object's reference frame given in the RobotModelLink or
+        RigidObjectModel.  
 
     C++ includes: robotsim.h
 
@@ -7964,17 +8022,17 @@ class SimBody(object):
 
         .. note::  
 
-        All changes are applied in the current simulation substep, not the duration
-        provided to Simulation.simulate(). If you need fine-grained control, make sure
-        to call Simulation.simulate() with time steps equal to the value provided to
-        Simulation.setSimStep() (this is 0.001s by default). Or, use a hook from
-        :class:`~klampt.sim.simulation.SimpleSimulator`.  
+            All changes are applied in the current simulation substep, not the duration
+            provided to Simulation.simulate().  If you need fine-grained control,
+            make sure to call Simulation.simulate() with time steps equal to the value
+            provided to Simulation.setSimStep() (this is 0.001s by default).  Or, use
+            a hook from :class:`~klampt.sim.simulation.SimpleSimulator`.  
 
-        .. node::  
+        .. note::  
 
-        The transform of the body is centered at the *object's center of mass* rather
-        than the object's reference frame given in the RobotModelLink or
-        RigidObjectModel.  
+            The transform of the body is centered at the *object's center of mass*
+            rather than the object's reference frame given in the RobotModelLink or
+            RigidObjectModel.  
 
         C++ includes: robotsim.h
 
@@ -8146,9 +8204,12 @@ class Simulator(object):
         getStatus(Simulator self) -> int
 
 
-        Returns an indicator code for the simulator status. The return result is one of
-        the STATUS_X flags. (Technically, this returns the *worst* status over the last
-        simulate() call)  
+        Returns an indicator code for the simulator status.  
+
+        Returns:  
+
+            One of the STATUS_X flags.  (Technically, this returns the *worst* status
+            over the last simulate() call)  
 
         """
         return _robotsim.Simulator_getStatus(self)
@@ -8169,8 +8230,12 @@ class Simulator(object):
         checkObjectOverlap(Simulator self)
 
 
-        Checks if any objects are overlapping. Returns a pair of lists of integers,
-        giving the pairs of object ids that are overlapping.  
+        Checks if any objects are overlapping.  
+
+        Returns:  
+
+            A pair of lists of integers, giving the pairs of object ids that
+            are overlapping.  
 
         """
         return _robotsim.Simulator_checkObjectOverlap(self)
@@ -8180,8 +8245,11 @@ class Simulator(object):
         getState(Simulator self) -> std::string
 
 
-        Returns a Base64 string representing the binary data for the current simulation
-        state, including controller parameters, etc.  
+        Gets the current simulation state, including controller parameters, etc.  
+
+        Returns:  
+
+            A Base64 string representing the binary data for the state  
 
         """
         return _robotsim.Simulator_getState(self)
@@ -8430,7 +8498,7 @@ class Simulator(object):
         body(Simulator self, TerrainModel terrain) -> SimBody
 
 
-        Returns the SimBody corresponding to the given link, rigid object, or terrain.  
+        Return the SimBody corresponding to the given link, rigid object, or terrain.  
 
         """
         return _robotsim.Simulator_body(self, *args)
@@ -8441,8 +8509,11 @@ class Simulator(object):
 
 
         Returns the joint force and torque local to the link, as would be read by a
-        force-torque sensor mounted at the given link's origin. The 6 entries are
-        (fx,fy,fz,mx,my,mz)  
+        force-torque sensor mounted at the given link's origin.  
+
+        Returns:  
+
+            6 entries of the wrench (fx,fy,fz,mx,my,mz)  
 
         """
         return _robotsim.Simulator_getJointForces(self, link)
@@ -8520,6 +8591,11 @@ class Simulator(object):
         See `Klampt/Simulation/ODESimulator.h
         <http://motion.pratt.duke.edu/klampt/klampt_docs/ODESimulator_8h_source.html>`_
         for detailed descriptions of these parameters.  
+
+        Returns:  
+
+            A string encoding the data. This will need to be cast to int or
+            float manually.  
 
         """
         return _robotsim.Simulator_getSetting(self, name)
@@ -8769,12 +8845,12 @@ def com_equilibrium(*args) -> "PyObject *":
 
     Returns:  
 
-        (bool, None, or list): if com is given, and there are feasible
-            equilibrium forces, this returns a list of 3 tuples giving
-            equilibrium forces at each of the contacts. None is returned if
-            no such forces exist.  
+        bool, None, or list: if com is given, and there are feasible
+        equilibrium forces, this returns a list of 3 tuples giving
+        equilibrium forces at each of the contacts. None is returned if
+        no such forces exist.  
 
-            If com = None, the result is True or False.  
+        If com = None, the result is True or False.  
 
     """
     return _robotsim.com_equilibrium(*args)
@@ -8814,12 +8890,12 @@ def com_equilibrium_2d(*args) -> "PyObject *":
 
     Returns:  
 
-        (bool, None, or list): if com is given, and there are feasible
-            equilibrium forces, this returns a list of 2-tuples giving
-            equilibrium forces at each of the contacts. None is returned if
-            no such forces exist.
+        bool, None, or list: if com is given, and there are feasible
+        equilibrium forces, this returns a list of 2-tuples giving
+        equilibrium forces at each of the contacts. None is returned if
+        no such forces exist.
 
-            If com = None, the result is True or False.  
+        If com = None, the result is True or False.  
 
     """
     return _robotsim.com_equilibrium_2d(*args)
@@ -8858,18 +8934,18 @@ def support_polygon(*args) -> "PyObject *":
 
     Returns:  
 
-        (list of 3-tuples): The sorted plane boundaries of the support
-            polygon. The format of a plane is (nx,ny,ofs) where (nx,ny) are the
-            outward facing normals, and ofs is the offset from 0.  In other words
-            to test stability of a com with x-y coordinates [x,y], you can test
-            whether dot([nx,ny],[x,y]) <= ofs  for all planes.
+        list of 3-tuples: The sorted plane boundaries of the support
+        polygon. The format of a plane is (nx,ny,ofs) where (nx,ny) are the
+        outward facing normals, and ofs is the offset from 0.  In other words
+        to test stability of a com with x-y coordinates [x,y], you can test
+        whether dot([nx,ny],[x,y]) <= ofs  for all planes.
 
-            Hint: with numpy, you can do::
+        Hint: with numpy, you can do::
 
-                Ab = np.array(supportPolygon(args))
-                A=Ab[:,0:2]
-                b=Ab[:,2]
-                myComEquilibrium = lambda x: np.all(np.dot(A,x)<=b)  
+            Ab = np.array(supportPolygon(args))
+            A=Ab[:,0:2]
+            b=Ab[:,2]
+            myComEquilibrium = lambda x: np.all(np.dot(A,x)<=b)  
 
     """
     return _robotsim.support_polygon(*args)
@@ -8897,7 +8973,7 @@ def support_polygon_2d(*args) -> "PyObject *":
 
         contactPositions (list of 2-float lists or tuples): the list of contact
             point positions.
-         frictionCones (list of lists): The i'th element in this list has length
+        frictionCones (list of lists): The i'th element in this list has length
              k*3 (for some integer k), and gives the contact force constraints
              (ax,ay,b) where ax*fx+ay*fy <= b limits the contact force (fx,fy)
              at the i'th contact. Each of the k 3-tuples is laid out sequentially
@@ -8905,8 +8981,8 @@ def support_polygon_2d(*args) -> "PyObject *":
 
     Returns:  
 
-        (2-tuple): gives the min/max extents of the support polygon.
-            If the support interval is empty, (inf,inf) is returned.  
+        2-tuple: gives the min/max extents of the support polygon.
+        If the support interval is empty, (inf,inf) is returned.  
 
     """
     return _robotsim.support_polygon_2d(*args)
@@ -8953,10 +9029,10 @@ def equilibrium_torques(*args) -> "PyObject *":
 
     Returns:  
 
-        (pair of lists, optional): a pair (torque,force) if a solution exists,
-             giving valid joint torques t and frictional contact forces (f1,...,fn).
+        pair of lists, optional: a pair (torque,force) if a solution exists,
+        giving valid joint torques t and frictional contact forces (f1,...,fn).
 
-             None is returned if no solution exists.  
+        None is returned if no solution exists.  
 
     """
     return _robotsim.equilibrium_torques(*args)

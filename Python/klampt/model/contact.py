@@ -366,8 +366,10 @@ def sim_contact_map(sim):
 def contact_map_ik_objectives(contactmap):
     """Given a contact map, computes a set of non-conflicting
     IKObjective's or GeneralizedIKObjective's that enforce all simultaneous
-    contact constraints.  Usually called in conjunction with contactMap
-    with the following sequence::
+    contact constraints. 
+    
+    Usually called in conjunction with  :func:`contact_map` with the following
+    sequence::
 
         objectives = contact_map_ik_objectives(contact_map(contacts,lambda x:x==None or isinstance(x,TerrainModel)))
 
@@ -387,8 +389,10 @@ def contact_map_ik_objectives(contactmap):
 
 def contact_map_holds(contactmap):
     """Given a contact map, computes a set of non-conflicting
-    Holds that enforce all simultaneous contact constraints.  Usually called in conjunction with contactMap
-    with the following sequence::
+    Holds that enforce all simultaneous contact constraints.
+    
+    Usually called in conjunction with :func:`contact_map` with the following
+    sequence::
 
         objectives = contact_map_holds(contact_map(contacts,lambda x:x==None or isinstance(x,TerrainModel)))
         

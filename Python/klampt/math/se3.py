@@ -93,6 +93,8 @@ def from_ndarray(mat : "ndarray") -> "RigidTransform":
 
 def mul(T1 : RigidTransform, T2 : RigidTransform) -> RigidTransform:
     """Composes two transformations."""
+    if len(T1) != 2: raise ValueError("T1 is not a transform")
+    if len(T2) != 2: raise ValueError("T2 is not a transform (did you mean to use apply())?")
     (R1,t1) = T1
     (R2,t2) = T2
     R = so3.mul(R1,R2)

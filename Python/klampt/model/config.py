@@ -52,8 +52,10 @@ from ..robotsim import WorldModel,RobotModel,RobotModelLink,RigidObjectModel,IKO
 from ..math import vectorops,so3,se3
 from . import coordinates
 import warnings
+from .typing import Config
+from typing import Union,List
 
-def is_compound(item):
+def is_compound(item) -> bool:
     if isinstance(item,WorldModel):
         return True
     elif isinstance(item,coordinates.Group):
@@ -83,7 +85,7 @@ def components(item):
         return sum([components(v) for v in item],[])
     return [item]
 
-def component_names(item):
+def component_names(item) -> Union[str,List[str]]:
     """For compound items returns a list of names of all component sub-items.
     For non-compound items, returns a singular name."""
     if isinstance(item,WorldModel):
@@ -106,7 +108,7 @@ def component_names(item):
         return [item.name]
     return ['']
 
-def num_config_params(item):
+def num_config_params(item) -> int:
     """Returns the number of free parameters in the flattened version of the configuration
     of the given item. Nearly all Klamp't objects are recognized, including RobotModel's,
     RigidObjectModel's, WorldModel's, IKObjectives, and all variable types in the
@@ -141,7 +143,7 @@ def num_config_params(item):
         return len(item)
     return 0
 
-def get_config(item):
+def get_config(item) -> Config:
     """Returns a flattened version of the configuration of the given item.
     Nearly all Klamp't objects are recognized, including RobotModel's,
     RigidObjectModel's, WorldModel's, IKObjectives, and all variable types in the
@@ -196,7 +198,7 @@ def get_config(item):
     else:
         return []
 
-def set_config(item,vector):
+def set_config(item, vector : Config) -> None:
     """Sets the configuration of the given item to the given vector.
     Nearly all Klamp't objects are recognized, including RobotModel's,
     RigidObjectModel's, WorldModel's, IKObjectives, and all variable types in the
@@ -272,7 +274,7 @@ _so3Names = ['R11','R21','R31','R12','R22','R32','R13','R23','R33']
 _pointNames = ['x','y','z']
 _se3Names = _so3Names + ['tx','ty','tz']
 
-def get_config_names(item):
+def get_config_names(item) -> List[str]:
     """Returns a list giving string names for each configuration dimension of given
     item. Nearly all Klamp't objects are recognized, including RobotModel's,
     RigidObjectModel's, WorldModel's, IKObjectives, and all variable types in the
@@ -326,7 +328,7 @@ def get_config_names(item):
         return []
 
 
-def distance(item,a,b):
+def distance(item, a : Config, b : Config) -> float:
     """Returns a distance metric for the given configurations a and b of the given item.
     If possible this is a geodesic distance.
     """
@@ -351,7 +353,7 @@ def distance(item,a,b):
         return d
     return vectorops.distance(a,b)
 
-def interpolate(item,a,b,u):
+def interpolate(item, a : Config, b : Config, u : float) -> Config:
     """Returns a distance metric for the given configurations a and b of the given item.
     If possible this is a geodesic distance.
     """

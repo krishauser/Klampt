@@ -15,10 +15,10 @@ in/out using :meth:`setManager`.
 """
 
 from ..math import so3,se3,vectorops
-from ..robotsim import RobotModelLink,RigidObjectModel,SimRobotController
+from ..robotsim import IKObjective, RobotModelLink,RigidObjectModel,SimRobotController
 from . import ik
 from collections import defaultdict
-
+from typing import Optional, Union
 
 class Frame:
     """Represents some coordinate frame in space."""
@@ -92,10 +92,10 @@ class Transform:
         self._name = None
         self._source = source
         self._destination = destination
-    def source(self):
+    def source(self) -> Frame:
         """Returns the source Frame"""
         return self._source
-    def destination(self):
+    def destination(self) -> Frame:
         """Returns the source Frame"""
         return self._destination
     def coordinates(self):
@@ -142,10 +142,10 @@ class Point:
         if self._frame ==None:
             return self._localCoordinates[:]
         return se3.apply(self._frame.worldCoordinates(),self._localCoordinates)
-    def frame(self):
+    def frame(self) -> Frame:
         """Returns the frame to which this Point is attached"""
         return self._frame
-    def toWorld(self):
+    def toWorld(self) -> 'Point':
         """Returns a Point representing the same point in space, but
         in the world reference frame"""
         return Point(self.worldCoordinates(),None)
@@ -182,9 +182,9 @@ class Direction:
         if self._frame ==None:
             return self._localCoordinates[:]
         return so3.apply(self._frame.worldCoordinates()[0],self._localCoordinates)
-    def frame(self):
+    def frame(self) -> Frame:
         return self._frame
-    def toWorld(self):
+    def toWorld(self) -> 'Direction':
         """Returns a Direction representing the same direction in space, but
         in the world reference frame"""
         return Direction(self.worldCoordinates(),None)
@@ -227,7 +227,7 @@ class Group:
     def __init__(self):
         self._name = None
         self.destroy()
-    def rootFrame(self):
+    def rootFrame(self) -> Optional[Frame]:
         return self.frames.get('root',None)
     def destroy(self):
         """Call this to destroy a group cleanly"""
@@ -270,7 +270,7 @@ class Group:
             f._data = robotModel.link(i)
         return
     def setController(self,controller):
-        """Given a robotController, sets this group to contain all sensed
+        """Given a SimRobotController, sets this group to contain all sensed
         and commanded frames."""
         root = self.frames['root']
         robot = controller.robot()
@@ -577,13 +577,13 @@ class Manager(Group):
         Group.__init__(self)
         self._name = "world_group"
         self.frames['world'] = self.frames['root']
-    def worldFrame(self):
+    def worldFrame(self) -> Frame:
         return self.frames.get('world',None)
     def destroy(self):
         Group.destroy(self)
-    def deleteFrame(self,name):
+    def deleteFrame(self,name : str):
         assert name != 'world',"World frame may not be deleted"
-    def setFrameCoordinates(self,name,coordinates,parent='relative'):
+    def setFrameCoordinates(self, name : str, coordinates, parent='relative'):
         assert name != 'world',"World frame must stay fixed at identity"
         Group.setFrameCoordinates(self,name,coordinates,parent)
 
@@ -594,12 +594,12 @@ def _callfn(name):
     global _defaultManager
     return lambda *args,**kwargs:getattr(_defaultManager,name)(*args,**kwargs)
 
-def manager():
+def manager() -> Manager:
     """Retrieves the default top-level manager"""
     global _defaultManager
     return _defaultManager
 
-def setManager(manager):
+def setManager(manager : Manager) -> None:
     """Sets the new top-level manager to a new Manager instance, and
     returns the old top-level manager."""
     assert isinstance(manager,Manager),"setManager must be called with a Manager instance"
@@ -647,7 +647,7 @@ def _ancestor_with_link(frame):
         frame = frame._parent
     return frame
     
-def ik_objective(obj,target):
+def ik_objective(obj,target) -> IKObjective:
     """Returns an IK objective that attempts to fix the given
     klampt.coordinates object 'obj' at given target object 'target'. 
 
@@ -661,7 +661,7 @@ def ik_objective(obj,target):
             If obj is a Transform object, this element is an se3 object.
 
     Returns:
-        IKObjective: An IK objective to be used with the klampt.ik module.
+        An IK objective to be used with the klampt.ik module.
 
     Since the klampt.ik module is not aware about custom frames, an
     ancestor of the object must be attached to a RobotModelLink or a

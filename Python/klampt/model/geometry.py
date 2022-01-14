@@ -1,5 +1,5 @@
-"""Utility functions for operating on  geometry.  See the :class:`Geometry3D`
-documentation for the core geometry class. 
+"""Utility functions for operating on  geometry.  See the
+:class:`~klampt.Geometry3D` documentation for the core geometry class. 
 
 .. versionadded:: 0.8.6
 
@@ -15,7 +15,7 @@ Working with point clouds
 =========================
 
 :func:`point_cloud_normals` estimates normals from a normal-free
-:class:`PointCloud`.
+:class:`~klampt.PointCloud`.
 
 The :func:`fit_plane`, :func:`fit_plane3`, and :class:`PlaneFitter` class help
 with plane estimation.
@@ -493,13 +493,13 @@ def point_cloud_colors(pc,format='rgb'):
             - ('r','g','b'): triple with each channel in range [0,1]
             - ('r','g','b','a'): tuple with each channel in range [0,1]
             - 'channels': returns a list of channels, in the form (r,g,b) or 
-                (r,g,b,a), where each value in the channel has range [0,1].
+               (r,g,b,a), where each value in the channel has range [0,1].
             - 'opacity': returns opacity only, in the range [0,1].
 
     Returns:
         numpy.ndarray: A an array of pc.numPoints() colors corresponding to 
-            the points in the point cloud.  If format='channels', the return
-            value is a tuple (r,g,b) or (r,g,b,a).
+        the points in the point cloud.  If format='channels', the return
+        value is a tuple (r,g,b) or (r,g,b,a).
     """
     rgbchannels = []
     alphachannel = None
@@ -601,7 +601,7 @@ def point_cloud_colors(pc,format='rgb'):
         raise ValueError("Invalid colors in point cloud? found "+str(len(rgbchannels))+" color channels")
 
 
-def point_cloud_set_colors(pc,colors,color_format='rgb',pc_property='auto'):
+def point_cloud_set_colors(pc,colors,color_format='rgb',pc_property='auto') -> None:
     """Sets the colors of a point cloud.
 
     Args:
@@ -633,8 +633,6 @@ def point_cloud_set_colors(pc,colors,color_format='rgb',pc_property='auto'):
             if it's already colored, or color_format if not.  'channels' sets
             the 'r', 'g', 'b', and optionally 'a' properties.
 
-    Returns:
-        None
     """
     rgbchannels = []
     alphachannel = None
@@ -724,7 +722,7 @@ def triangle_normals(trimesh):
     from ..io import numpy_convert
 
     verts,tris = numpy_convert.to_numpy(trimesh)
-    normals = np.zeros(tris.shape)
+    #normals = np.zeros(tris.shape)
     dba = verts[tris[:,1]]-verts[tris[:,0]]
     dca = verts[tris[:,2]]-verts[tris[:,0]]
     n = np.cross(dba,dca)

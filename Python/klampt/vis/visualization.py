@@ -585,6 +585,7 @@ from . import gldraw
 from . import glinit
 from .glinterface import GLPluginInterface
 from .glprogram import GLPluginProgram
+from .glviewport import GLViewport
 from . import glcommon
 import time
 import signal
@@ -1679,11 +1680,11 @@ def followCamera(target,translate=True,rotate=False,center=False) -> None:
     """
     scene().followCamera(target,translate,rotate,center)
 
-def getViewport() -> "GLViewport":
+def getViewport() -> GLViewport:
     """Returns the :class:`GLViewport` of the current scene"""
     return scene().getViewport()
 
-def setViewport(viewport : "GLViewport") -> None:
+def setViewport(viewport : GLViewport) -> None:
     """Sets the current scene to use a given :class:`GLViewport`"""
     scene().setViewport(viewport)
 

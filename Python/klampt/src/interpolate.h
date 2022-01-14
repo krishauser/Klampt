@@ -8,8 +8,12 @@ using namespace std;
 /// position bounds x in [xmin,xmax], velocity bounds |v|<=vmax, and
 /// acceleration bounds |a|<=amax.
 ///
-/// Returns (times,positions,velocities) which may be interpolated using hermite
-/// interpolation.  If a path cannot be found, then empty arrays are returned.
+/// Returns:
+///
+///     (times,positions,velocities) which may be interpolated using hermite
+///     interpolation.  If a path cannot be found, then empty arrays are
+///     returned.
+///
 void interpolate_1d_min_time(double x0,double v0,double x1,double v1,
              double xmin,double xmax,double vmax,double amax,
              vector<double>& out,vector<double>& out2,vector<double>& out3);
@@ -18,8 +22,11 @@ void interpolate_1d_min_time(double x0,double v0,double x1,double v1,
 /// finishes at a fixed end time endTime.  Enforces position bounds x in
 /// [xmin,xmax] and the velocity bounds |v|<=vmax.
 ///
-/// Returns (times,positions,velocities) which may be interpolated using hermite
-/// interpolation.  If a path cannot be found, then empty arrays are returned.
+/// Returns:
+///
+///     (times,positions,velocities) which may be interpolated using hermite
+///     interpolation.  If a path cannot be found, then empty arrays are
+///     returned.
 void interpolate_1d_min_accel(double x0,double v0,double x1,double v1,
               double endTime,double xmin,double xmax,double vmax,
               vector<double>& out,vector<double>& out2,vector<double>& out3);
@@ -32,12 +39,18 @@ void interpolate_1d_min_accel(double x0,double v0,double x1,double v1,
 /// to finish exactly at the same time.  The limiting channel will be solved
 /// in min-time form, while the others will be solved in min-accel form.
 ///
-/// Returns (times,positions,velocities) which give each of the channels'
-/// interpolants, each of which may be interpolated using cubic interpolation.
-/// Specifically, len(times), len(positions), and len(velocities) == len(x0),
-/// and for each channel i, the 1D interpolator ``hermite(times[i],positions[i],velocities[i])``
-/// will give the path for that channel.
-/// If a path cannot be found, then empty arrays are returned.
+/// Returns:
+///
+///     (times,positions,velocities) which give each of the channels'
+///     interpolants, each of which may be interpolated using cubic
+///     interpolation. If a path cannot be found, then empty arrays are
+///     returned.
+/// 
+///     Specifically, len(times), len(positions), and len(velocities) ==
+///     len(x0), and for each channel i, the 1D interpolator
+///     ``hermite(times[i],positions[i],velocities[i])``
+///     will give the path for that channel.
+/// 
 void interpolate_nd_min_time(const vector<double>& x0,const vector<double>& v0,const vector<double>& x1,const vector<double>& v1,
              const vector<double>& xmin,const vector<double>& xmax,const vector<double>& vmax,const vector<double>& amax,
              vector<vector<double> >& out,vector<vector<double> >& out2,vector<vector<double> >& out3);
@@ -48,12 +61,18 @@ void interpolate_nd_min_time(const vector<double>& x0,const vector<double>& v0,c
 /// finishes at a fixed end time endTime.  Enforces position bounds x in
 /// [xmin,xmax] and the velocity bounds |v|<=vmax. (element-wise)
 ///
-/// Returns (times,positions,velocities) which give each of the channels'
-/// interpolants, each of which may be interpolated using cubic interpolation.
-/// Specifically, len(times), len(positions), and len(velocities) == len(x0),
-/// and for each channel i, the 1D interpolator hermite(times[i],positions[i],velocities[i])
-/// will give the path for that channel.
-/// If a path cannot be found, then empty arrays are returned.
+/// Returns:
+///
+///     (times,positions,velocities) which give each of the channels'
+///     interpolants, each of which may be interpolated using cubic
+///     interpolation.  If a path cannot be found, then empty arrays are
+///     returned.
+///
+///     Specifically, len(times), len(positions), and len(velocities) ==
+///     len(x0), and for each channel i, the 1D interpolator
+///     ``hermite(times[i],positions[i],velocities[i])`` will give the path
+///     for that channel.
+/// 
 void interpolate_nd_min_accel(const vector<double>& x0,const vector<double>& v0,const vector<double>& x1,const vector<double>& v1,
              double endTime,const vector<double>& xmin,const vector<double>& xmax,const vector<double>& vmax,
              vector<vector<double> >& out,vector<vector<double> >& out2,vector<vector<double> >& out3);
@@ -62,11 +81,16 @@ void interpolate_nd_min_accel(const vector<double>& x0,const vector<double>& v0,
 /// line in configuration space, and minimizes time under velocity bounds
 /// |v|<=vmax, and acceleration bounds |a|<=amax (element-wise). 
 ///
-/// Returns (times,positions,velocities) which give the parameters of an
-/// ND cubic curve.  (len(times)==len(positions)==len(velocities)), and
-/// len(positions[i])==len(velocities[i])==N for all i.  The
-/// ND interpolator ``hermite(times,positions[i],velocities[i])``
-/// will give the optimized trajectory.
+/// Returns:
+///
+///     (times,positions,velocities) which give the parameters of an
+///     ND cubic curve.
+///
+///     (len(times)==len(positions)==len(velocities)), and
+///     len(positions[i])==len(velocities[i])==N for all i.  The
+///     ND interpolator ``hermite(times,positions[i],velocities[i])``
+///     will give the optimized trajectory.
+///
 void interpolate_nd_min_time_linear(const vector<double>& x0,const vector<double>& x1,
              const vector<double>& vmax,const vector<double>& amax,
              vector<double>& out,vector<vector<double> >& out2,vector<vector<double> >& out3);
@@ -74,8 +98,11 @@ void interpolate_nd_min_time_linear(const vector<double>& x0,const vector<double
 /// Computes a max-braking polynomial from (x0,v0) to a stopped state obeying
 /// acceleration constraints |a|<=amax.
 ///
-/// Returns (times,positions,velocities) which may be interpolated using cubic
-/// interpolation.
+/// Returns:
+///
+///     (times,positions,velocities) which may be interpolated using cubic
+///     interpolation.
+///
 void brake_1d(double x0,double v0,double amax,
               vector<double>& out,vector<double>& out2,vector<double>& out3);
 
@@ -90,11 +117,16 @@ void brake_1d(double x0,double v0,double amax,
 ///
 /// If position bounds cannot be met, stopping is done as fast as possible.
 ///
-/// Returns (times,positions,velocities) which give the parameters of an
-/// ND cubic curve.  (len(times)==len(positions)==len(velocities)), and
-/// len(positions[i])==len(velocities[i])==N for all i.  The
-/// ND interpolator ``hermite(times,positions[i],velocities[i])``
-/// will give the optimized trajectory.
+/// Returns:
+///
+///     (times,positions,velocities) which give the parameters of an
+///     ND cubic curve.
+///
+///     (len(times)==len(positions)==len(velocities)), and
+///     len(positions[i])==len(velocities[i])==N for all i.  The
+///     ND interpolator ``hermite(times,positions[i],velocities[i])``
+///     will give the optimized trajectory.
+///
 void brake_nd(const vector<double>& x0,const vector<double>& v0,
               const vector<double>& xmin,const vector<double>& xmax,const vector<double>& amax,
               vector<vector<double> >& out,vector<vector<double> >& out2,vector<vector<double> >& out3);

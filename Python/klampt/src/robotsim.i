@@ -501,16 +501,18 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
         Args:
             format (str): describes how the array is specified.
                 Valid values include:
-                    - '': turn off texture mapping
-                    - 'rgb8': unsigned byte RGB colors with red in the 1st
-                      column, green in the 2nd, blue in the 3rd.
-                    - 'bgr8': unsigned byte RGB colors with blue in the 1st
-                      column, green in the 2nd, green in the 3rd
-                    - 'rgba8': unsigned byte RGBA colors with red in the 1st
-                      column and alpha in the 4th
-                    - 'bgra8': unsigned byte RGBA colors with blue in the 1st
-                      column and alpha in the 4th
-                    - 'l8': unsigned byte grayscale colors, one channel
+
+                - '': turn off texture mapping
+                - 'rgb8': unsigned byte RGB colors with red in the 1st
+                    column, green in the 2nd, blue in the 3rd.
+                - 'bgr8': unsigned byte RGB colors with blue in the 1st
+                    column, green in the 2nd, green in the 3rd
+                - 'rgba8': unsigned byte RGBA colors with red in the 1st
+                    column and alpha in the 4th
+                - 'bgra8': unsigned byte RGBA colors with blue in the 1st
+                    column and alpha in the 4th
+                - 'l8': unsigned byte grayscale colors, one channel
+
             array (np.ndarray): a 1D or 2D array, of size w or w x c
                 where w is the width and c is the number of channels.
                 
@@ -536,16 +538,18 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
         Args:
             format (str): describes how the array is specified.
                 Valid values include:
-                    - '': turn off texture mapping
-                    - 'rgb8': unsigned byte RGB colors with red in the 1st
-                      column, green in the 2nd, blue in the 3rd.
-                    - 'bgr8': unsigned byte RGB colors with blue in the 1st
-                      column, green in the 2nd, green in the 3rd
-                    - 'rgba8': unsigned byte RGBA colors with red in the 1st
-                      column and alpha in the 4th
-                    - 'bgra8': unsigned byte RGBA colors with blue in the 1st
-                      column and alpha in the 4th
-                    - 'l8': unsigned byte grayscale colors, one channel
+
+                - '': turn off texture mapping
+                - 'rgb8': unsigned byte RGB colors with red in the 1st
+                    column, green in the 2nd, blue in the 3rd.
+                - 'bgr8': unsigned byte RGB colors with blue in the 1st
+                    column, green in the 2nd, green in the 3rd
+                - 'rgba8': unsigned byte RGBA colors with red in the 1st
+                    column and alpha in the 4th
+                - 'bgra8': unsigned byte RGBA colors with blue in the 1st
+                    column and alpha in the 4th
+                - 'l8': unsigned byte grayscale colors, one channel
+                
             array (np.ndarray): a 2D or 3D array, of size h x w or h x w x c
                 where h is the height, w is the width, and c is the number of
                 channels.

@@ -16,7 +16,8 @@ class RobotInterfaceBase(object):
     .. note::
         The API may look intimidating, but a subclass implementer is free to
         set up as many or as few of the given methods as the robot's motor
-        controller truly implements.  The :class:`RobotInterfaceCompleter` 
+        controller truly implements.  The
+        :class:`~klampt.control.robotinterfaceutils.RobotInterfaceCompleter`
         class will fill in the remainder of derived methods.  See the
         Functionalities section for more details.
     
@@ -45,9 +46,11 @@ class RobotInterfaceBase(object):
         interface.close()   #cleanly shut down the interface
 
     To accept asynchronous commands, a :class:`RobotInterfaceBase` subclass
-    can be wrapped by a :class:`ThreadedRobotInterface` or client (e.g.,
-    :class:`XMLRPCClientRobotInterface`).  Asynchronous usage allows sending 
-    commands in a procedural fashion, e.g.::
+    can be wrapped by a
+    :class:`~klampt.control.robotinterfaceutils.ThreadedRobotInterface`
+    or client (e.g.,
+    :class:`~klampt.control.networkrobotinterface.XMLRPCClientRobotInterface`).
+    Asynchronous usage allows sending  commands in a procedural fashion, e.g.::
 
         interface = MyRobotInterface(...args...)
         if not interface.initialize():  #should be called first
@@ -130,12 +133,12 @@ class RobotInterfaceBase(object):
       :meth:`setTorque`, or :meth:`setPID`
     * Either :meth:`sensedPosition` or :meth:`commandedPosition`
 
-    Pass your RobotInterfaceBase subclass to :class:`RobotInterfaceCompleter`
-    to complete the implementation of as many of the remaining items as
-    possible.
+    Pass your RobotInterfaceBase subclass to
+    :class:`~klampt.control.robotinterfaceutils.RobotInterfaceCompleter` to
+    complete the implementation of as many of the remaining items as possible.
 
-    See the :class:`SimPositionControlInterface` class for an example that
-    passes commands to a Klamp't physics simulator.
+    See the :class:`.simrobotinterface.SimPositionControlInterface` class 
+    for an example that passes commands to a Klamp't physics simulator.
 
 
     **Cartesian control**
@@ -164,8 +167,9 @@ class RobotInterfaceBase(object):
 
     Filters perform real-time enforcement of joint limits, velocity limits,
     collision checks, and signal processing. Typically filters
-    are handled in software using a :class:`RobotInterfaceCompleter` but an
-    implementation is also allowed to send filter parameters to the hardware.
+    are handled in software using a
+    :class:`.robotinterfaceutils.RobotInterfaceCompleter` but an implementation
+    is also allowed to send filter parameters to the hardware.
 
     Users can activate and deactivate filters using the :func:`setFilter`
     method.  A filter has an name, operation, input arguments, and output
@@ -242,6 +246,7 @@ class RobotInterfaceBase(object):
               not overridable by software limits.
             * 'torque_limits' (pair of Vector): the hardware torque limits,
               not overridable by software limits.
+
     """
     def __init__(self,**properties):
         self.properties = properties

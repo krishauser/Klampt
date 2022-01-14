@@ -9,6 +9,7 @@ from klampt.math import vectorops,so3,se3
 from klampt.model import collide
 import random
 import math
+from typing import Union,List,Tuple,Sequence,Callable,Any
 
 def _get_bound(objects):
     """Obtains the tight outer bounds of the object(s) at their current transforms, in world coordinates."""
@@ -100,15 +101,17 @@ def xy_jiggle(world,objects,fixed_objects,bmin,bmax,iters,randomize=True,
             numConflicts[i] += 1
     return removed
 
-def make_object_arrangement(world,container,objects,container_wall_thickness=0.01,max_iterations=100,remove_failures=False):
+def make_object_arrangement(world : WorldModel, container : Union[RigidObjectModel,TerrainModel],
+    objects : Sequence[RigidObjectModel], container_wall_thickness=0.01,max_iterations=100,
+    remove_failures=False) -> WorldModel:
     """For a given container and a list of objects in the world, places the objects inside the container with randomized x-y locations
     and z orientations so that they are initially collision free and on the bottom of the container.
 
     Args:
         world (WorldModel): the world containing the objects and obstacles
-        container: the container RigidObject / Terrain in world into which
-            objects should be spawned.  Assumed axis-aligned.
-        objects (list of RigidObject): a list of RigidObjects in the world,
+        container: the container RigidObjectModel / TerrainModel in world into
+            which objects should be spawned.  Assumed axis-aligned.
+        objects (list of RigidObjectModel): a list of RigidObjects in the world,
             at arbitrary locations.  They are placed in order.
         container_wall_thickness (float, optional): a margin subtracted from
             the container's outer dimensions into which the objects are spawned.
@@ -150,17 +153,18 @@ def make_object_arrangement(world,container,objects,container_wall_thickness=0.0
             return None
     return world
 
-def make_object_pile(world,container,objects,container_wall_thickness=0.01,randomize_orientation=True,
-    visualize=False,verbose=0):
+def make_object_pile(world : WorldModel, container : Union[RigidObjectModel,TerrainModel],
+    objects : Sequence[RigidObjectModel],container_wall_thickness=0.01,randomize_orientation=True,
+    visualize=False,verbose=0)  -> Tuple[WorldModel,Simulator]:
     """For a given container and a list of objects in the world, drops the
     objects inside the container and simulates until stable.
 
     Args:
         world (WorldModel): the world containing the objects and obstacles
-        container: the container RigidObject / Terrain in world into which
-            objects should be spawned.  Assumed axis-aligned.
-        objects (list of RigidObject): a list of RigidObjects in the world,
-            at arbitrary locations.  They are placed in order.
+        container: the container RigidObjectModel / TerrainModel in world into 
+            which objects should be spawned.  Assumed axis-aligned.
+        objects (list of RigidObjectModel): a list of RigidObjectModels in the 
+            world, at arbitrary locations.  They are placed in order.
         container_wall_thickness (float, optional): a margin subtracted from
             the container's outer dimensions into which the objects are spawned.
         randomize_orientation (bool or str, optional): if True, the orientation
@@ -172,11 +176,11 @@ def make_object_pile(world,container,objects,container_wall_thickness=0.01,rando
         verbose (int, optional): if > 0, prints progress of the pile.
     
     Returns:
-        tuple: (world,sim), containing
+        A pair (world,sim), containing
 
-            - world (WorldModel): the original world
-            - sim (Simulator): the Simulator instance at the state used to obtain
-              the stable placement of the objects.
+        - world (WorldModel): the original world
+        - sim (Simulator): the Simulator instance at the state used to obtain
+            the stable placement of the objects.
 
     .. note::
 

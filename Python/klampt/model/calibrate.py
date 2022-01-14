@@ -1,3 +1,8 @@
+"""Functions for extrinsic calibration of cameras.
+
+.. versionadded:: 0.9
+"""
+
 from klampt import *
 from klampt.math import vectorops,so3,se3
 from klampt.io import resource
@@ -495,7 +500,7 @@ class RobotExtrinsicCalibration:
                 to be isotropic.
         
         Returns:
-            PixelObservation, PointObservation, or TransformObservation
+            The configured detection object.
         """
         if frame_id < 0 or frame_id >= len(self.frames):
             raise ValueError("Invalid frame")
@@ -599,9 +604,8 @@ class RobotExtrinsicCalibration:
                 and understanding the observation error model.
         
         Returns:
-            list: a list of PointObservation, TransformObservation, or
-                PixelObservation objects, corresponding to the values in
-                `self.observations`.
+            A list of configured observation objects, corresponding to the 
+            values in `self.observations`.
         """
         if camera_transforms is None:
             camera_transforms = dict()
@@ -702,8 +706,8 @@ class RobotExtrinsicCalibration:
                 markers have transforms (`local_coordinates`) specified.
         
         Returns:
-            list of lists: a list of residuals (prediction - observed value)
-                corresponding to the values in `self.observations`.
+            A list of residuals (prediction - observed value)
+            corresponding to the values in `self.observations`.
         """
         if camera_transforms is None:
             camera_transforms = dict()
@@ -783,8 +787,8 @@ class RobotExtrinsicCalibration:
                 markers have transforms (`local_coordinates`) specified.
         
         Returns:
-            list of float: a list of log likelihoods of residuals
-                corresponding to the values in `self.observations`.
+            A list of log likelihoods of residuals corresponding to the
+            values in `self.observations`.
         """
         residuals = self.predictedResiduals(camera_transforms,marker_transforms)
         log2pi = math.log(math.pi*2)
@@ -804,7 +808,7 @@ class RobotExtrinsicCalibration:
         Requires scipy.
 
         Returns:
-            (float,dict,dict): gives RMSE, camera transform dictionary, and
+            A tuple of the RMSE, camera transform dictionary, and
             marker transform dictionary.
         """
         import numpy as np

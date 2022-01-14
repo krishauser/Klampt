@@ -143,7 +143,7 @@ def cartesian_interpolate_linear(
             path.
 
     Returns: 
-        RobotTrajectory or None: a configuration space path that interpolates
+        A configuration space path that interpolates
         the Cartesian path, or None if no solution can be found.
 
     """
@@ -329,8 +329,8 @@ def cartesian_interpolate_bisect(
             configurations.
 
     Returns: 
-        RobotTrajectory or None: a configuration space path that interpolates
-        the Cartesian path, or None if no solution can be found.
+        A configuration space path that interpolates the Cartesian path, or
+        None if no solution can be found.
 
     """
     assert delta > 0,"Spatial resolution must be positive"
@@ -491,8 +491,8 @@ def cartesian_path_interpolate(
             the path.
 
     Returns: 
-        RobotTrajectory or None: a configuration space path that interpolates 
-        the Cartesian path, or None if no solution can be found.
+        A configuration space path that interpolates the Cartesian path,
+        or None if no solution can be found.
 
     """
     assert delta > 0,"Spatial resolution must be positive"
@@ -857,8 +857,7 @@ def cartesian_bump(
             allowed to move from `js_path`.
 
     Returns:
-        RobotTrajectory or None: the bumped trajectory, or None if no path can
-        be found.
+        The bumped trajectory, or None if no path can be found.
     """
     #make into canonical form
     if not hasattr(constraints,'__iter__'):

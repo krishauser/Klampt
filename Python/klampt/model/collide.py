@@ -76,7 +76,7 @@ def self_collision_iter(
     Uses a quick bounding box reject test.
 
     Returns:
-        iterator over tuple: Iterator over colliding pairs (i,j) where i and
+        Iterator over colliding pairs (i,j) where i and
         j are indices into geomlist.
     """
     #bblist = [g.getBB() for g in geomlist]
@@ -124,7 +124,7 @@ def group_collision_iter(
     Uses a quick bounding box reject test.
 
     Returns:
-        iterator over tuple: Iterator over colliding pairs (i,j) where i is
+        Iterator over colliding pairs (i,j) where i is
         an index into geomlist1 and j is an index into geomlist.
     """
     if len(geomlist1) == 0 or len(geomlist2) == 0: return
@@ -180,7 +180,7 @@ def group_subset_collision_iter(
     Uses a quick bounding box reject test.
 
     Returns:
-        iterator over tuple: Iterator over colliding pairs (i,j) where i is
+        Iterator over colliding pairs (i,j) where i is
         an index into alist and j is an index into glist.
     """
     if len(alist) == 0 or len(blist) == 0: return
@@ -225,10 +225,10 @@ def ray_cast(
     ray at source s and direction d. 
 
     Returns:
-        tuple: A pair (index,point) if a collision is found, where:
+        A pair (index,point) if a collision is found, where:
 
-            * index is the index of the geometry in geomlist
-            * point is the collision point in world coordinates.
+        * index is the index of the geometry in geomlist
+        * point is the collision point in world coordinates.
     
         Returns None if no collision is found.
     """
@@ -361,11 +361,11 @@ class WorldCollider:
         for i in ignore:
             self.ignoreCollision(i)
                 
-    def _getGeomIndex(self,object):
+    def _getGeomIndex(self,object) -> int:
         """Finds the geomList index corresponding to an object
 
         Returns:
-            int: the index into self.geomList describing the object
+            The index into self.geomList describing the object
         """
         assert isinstance(object,(RobotModel,RobotModelLink,RigidObjectModel,TerrainModel))
         for i,(o,g) in enumerate(self.geomList):
@@ -376,7 +376,7 @@ class WorldCollider:
         return None
 
 
-    def ignoreCollision(self, ign: Union[WorldBodyType,Tuple[WorldBodyType,WorldBodyType]] ):
+    def ignoreCollision(self, ign: Union[WorldBodyType,Tuple[WorldBodyType,WorldBodyType]] ) -> None:
         """Permanently removes an object or a pair of objects from
         consideration.
 
@@ -403,7 +403,7 @@ class WorldCollider:
                 self.mask[i].discard(geom)
             self.mask[geom]=set()
 
-    def isCollisionEnabled(self, obj_or_pair: Union[WorldBodyType,Tuple[CollidableType,WorldBodyType]] ):
+    def isCollisionEnabled(self, obj_or_pair: Union[WorldBodyType,Tuple[CollidableType,WorldBodyType]] ) -> bool:
         """Returns true if the object or pair of objects are considered for
         collision.
 
@@ -457,13 +457,12 @@ class WorldCollider:
         are interpreted
 
         Returns:
-            iterator of tuple: Iterates over
-            ((object1,geom1),(object2,geom2)) pairs indicating which objects
-            should be tested for collision. They have type:
+            Iterates over ``((object1,geom1),(object2,geom2))`` pairs indicating 
+            which objects should be tested for collision. They have type:
 
-                - object1, object2: a RobotModelLink, RigidObjectModel, or
-                  TerrainModel
-                - geom1, geom2: Geometry3D corresponding to those objects.
+            - object1, object2: a RobotModelLink, RigidObjectModel, or
+                TerrainModel
+            - geom1, geom2: Geometry3D corresponding to those objects.
 
         """
         res = []
@@ -540,8 +539,8 @@ class WorldCollider:
             collisions for that robot are tested
 
         Returns:
-            iterator over tuple: Iterates over colliding
-            (RobotModelLink,RobotModelLink) pairs.
+            Iterates over colliding
+            ``(RobotModelLink,RobotModelLink)`` pairs.
         """
         if isinstance(robot,RobotModel):
             robot = robot.index
@@ -572,7 +571,7 @@ class WorldCollider:
                 test, or None to all objects.
 
         Returns:
-            iterator over tuple: Iterates over colliding
+            Iterates over colliding
             (RobotModelLink,RigidObjectModel) pairs.
         """
         if isinstance(robot,RobotModel):
@@ -607,7 +606,7 @@ class WorldCollider:
                 test, or None to all terrains.
 
         Returns:
-            iterator over tuple: Iterates over colliding
+            Iterates over colliding
             (RobotModelLink,TerrainModel) pairs.
         """
         if isinstance(robot,RobotModel):
@@ -642,7 +641,7 @@ class WorldCollider:
                 test, or None to all terrains.
 
         Returns:
-            iterator over tuple: Iterates over colliding
+            Iterates over colliding
             (RigidObjectModel,TerrainModel) pairs.
         """
         if isinstance(object,RigidObjectModel):
@@ -676,7 +675,7 @@ class WorldCollider:
                 test, or None to all objects.
 
         Returns:
-            iterator over tuple: Iterates over colliding
+            Iterates over colliding
             (RigidObjectModel,TerrainModel) pairs.
         """
         if isinstance(object,RigidObjectModel):
@@ -712,7 +711,7 @@ class WorldCollider:
                 geometries in geomList to test.
 
         Returns:
-            tuple: The (object,point) pair or None if no collision is found.
+            The (object,point) pair or None if no collision is found.
         """
         res = None
         dmin = 1e300
@@ -738,7 +737,7 @@ class WorldCollider:
             d (list of 3 floats): the ray direction
 
         Returns:
-            tuple: The (object,point) pair or None if no collision is found.
+            The (object,point) pair or None if no collision is found.
         """
         if isinstance(robot,RobotModel):
             try:

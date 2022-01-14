@@ -1,3 +1,8 @@
+"""Utilities for using and building controllers.
+
+.. versionadded:: 0.9
+"""
+
 import time
 from threading import Lock
 

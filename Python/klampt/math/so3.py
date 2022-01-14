@@ -61,6 +61,8 @@ def from_ndarray(mat : "ndarray") -> Rotation:
 
 def mul(R1 : Rotation, R2 : Rotation) -> Rotation:
     """Multiplies two rotations."""
+    if len(R1) != 9: raise ValueError("R1 is not a rotation matrix")
+    if len(R2) != 9: raise ValueError("R2 is not a rotation matrix (did you mean to use apply())?")
     m1=matrix(R1)
     m2T=matrix(inv(R2))
     mres = matrix(identity())

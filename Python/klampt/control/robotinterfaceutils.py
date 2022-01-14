@@ -1,7 +1,8 @@
 """Contains utilities for the Klampt Robot Interface Layer. 
 
 The :class:`RobotInterfaceCompleter` class is extremely widely used to
-standardize the capabilities of :class:`RobotInterfaceBase` to handle
+standardize the capabilities of
+:class:`~.robotinterface.RobotInterfaceBase` to handle
 advanced functions. For example, if you have a position controlled robot
 (e.g., an Arduino-controlled set of motors) and want to do more
 sophisticated work with it, you can create a completer and get access to
@@ -48,55 +49,6 @@ This module also provides :func:`make_from_file` which can either take a
 method.
 
 """
-
-
-from .robotinterface import RobotInterfaceBase
-from ..math import vectorops,so2,so3,se3,spline
-from ..plan import motionplanning
-from ..model.trajectory import Trajectory,HermiteTrajectory
-from ..model.robotinfo import RobotInfo
-from ..robotsim import WorldModel,RobotModel
-from ..model.subrobot import SubRobotModel
-from .cartesian_drive import CartesianDriveSolver
-from . import blocks
-from .utils import Promise
-import bisect
-import math
-import warnings
-import time
-from functools import wraps
-from ..model.typing import Vector,Vector3,RigidTransform
-from typing import Dict,Any,Union,Optional,List,Tuple,Sequence,Callable,TextIO
-import copy
-import numpy as np
-
-PART_NAME_SEPARATOR = '__'
-
-SETTING_COMMAND_METHODS = ['reset','enableSensor','setPIDGains','setToolCoordinates','setGravityCompensation']
-MOTION_COMMAND_METHODS = ['estop','softStop',
-                          'setPosition','setVelocity','setTorque','setPID',
-                          'moveToPosition','setPiecewiseLinear','setPiecewiseCubic',
-                          'setCartesianPosition','moveToCartesianPosition','setCartesianVelocity','setCartesianForce',
-                          'setControlMode']
-STRUCTURE_QUERY_METHODS = ['numJoints','parts','controlRate','jointName','sensors','hasSensor','klamptModel']
-SETTING_QUERY_METHODS = ['status','clock','getPIDGains','getToolCoordinates','getGravityCompensation']
-SENSOR_QUERY_METHODS = ['enabledSensors','sensorMeasurements','sensorUpdateTime']
-MOTION_QUERY_METHODS = ['isMoving',
-                        'sensedPosition','sensedVelocity','sensedTorque',
-                        'commandedPosition','commandedVelocity','commandedTorque',
-                        'destinationPosition','destinationVelocity','destinationTime',
-                        'queuedTrajectory',
-                        'sensedCartesianPosition','sensedCartesianVelocity','sensedCartesianForce',
-                        'commandedCartesianPosition','commandedCartesianVelocity','commandedCartesianForce',
-                        'destinationCartesianPosition','destinationCartesianVelocity',
-                        'queuedCartesianTrajectory']
-UTILITY_METHODS = ['indices','cartesianPosition','cartesianVelocity','cartesianForce',
-                    'partToRobotConfig','robotToPartConfig',
-                    'configFromKlampt','velocityFromKlampt','configToKlampt','velocityToKlampt']
-COMMAND_METHODS = SETTING_COMMAND_METHODS+MOTION_COMMAND_METHODS
-QUERY_METHODS = STRUCTURE_QUERY_METHODS+SETTING_QUERY_METHODS+SENSOR_QUERY_METHODS+MOTION_QUERY_METHODS
-CUSTOM_METHODS = ['functionCall','setSetting','getSetting','setFilter','stateValue']
-ALL_METHODS = COMMAND_METHODS + QUERY_METHODS + CUSTOM_METHODS
 
 """
 
@@ -176,6 +128,56 @@ Multi-part Cartesian commands and queries w.r.t. base/world work because each
 interface is aware of the parent and its Cartesian transform.
 
 """
+
+
+from .robotinterface import RobotInterfaceBase
+from ..math import vectorops,so2,so3,se3,spline
+from ..plan import motionplanning
+from ..model.trajectory import Trajectory,HermiteTrajectory
+from ..model.robotinfo import RobotInfo
+from ..robotsim import WorldModel,RobotModel
+from ..model.subrobot import SubRobotModel
+from .cartesian_drive import CartesianDriveSolver
+from . import blocks
+from .utils import Promise
+import bisect
+import math
+import warnings
+import time
+from functools import wraps
+from ..model.typing import Vector,Vector3,RigidTransform
+from typing import Dict,Any,Union,Optional,List,Tuple,Sequence,Callable,TextIO
+import copy
+import numpy as np
+
+PART_NAME_SEPARATOR = '__'
+
+SETTING_COMMAND_METHODS = ['reset','enableSensor','setPIDGains','setToolCoordinates','setGravityCompensation']
+MOTION_COMMAND_METHODS = ['estop','softStop',
+                          'setPosition','setVelocity','setTorque','setPID',
+                          'moveToPosition','setPiecewiseLinear','setPiecewiseCubic',
+                          'setCartesianPosition','moveToCartesianPosition','setCartesianVelocity','setCartesianForce',
+                          'setControlMode']
+STRUCTURE_QUERY_METHODS = ['numJoints','parts','controlRate','jointName','sensors','hasSensor','klamptModel']
+SETTING_QUERY_METHODS = ['status','clock','getPIDGains','getToolCoordinates','getGravityCompensation']
+SENSOR_QUERY_METHODS = ['enabledSensors','sensorMeasurements','sensorUpdateTime']
+MOTION_QUERY_METHODS = ['isMoving',
+                        'sensedPosition','sensedVelocity','sensedTorque',
+                        'commandedPosition','commandedVelocity','commandedTorque',
+                        'destinationPosition','destinationVelocity','destinationTime',
+                        'queuedTrajectory',
+                        'sensedCartesianPosition','sensedCartesianVelocity','sensedCartesianForce',
+                        'commandedCartesianPosition','commandedCartesianVelocity','commandedCartesianForce',
+                        'destinationCartesianPosition','destinationCartesianVelocity',
+                        'queuedCartesianTrajectory']
+UTILITY_METHODS = ['indices','cartesianPosition','cartesianVelocity','cartesianForce',
+                    'partToRobotConfig','robotToPartConfig',
+                    'configFromKlampt','velocityFromKlampt','configToKlampt','velocityToKlampt']
+COMMAND_METHODS = SETTING_COMMAND_METHODS+MOTION_COMMAND_METHODS
+QUERY_METHODS = STRUCTURE_QUERY_METHODS+SETTING_QUERY_METHODS+SENSOR_QUERY_METHODS+MOTION_QUERY_METHODS
+CUSTOM_METHODS = ['functionCall','setSetting','getSetting','setFilter','stateValue']
+ALL_METHODS = COMMAND_METHODS + QUERY_METHODS + CUSTOM_METHODS
+
 
 class StepContext:
     """Makes it easier to handle exceptions in RIL control code. Flags allow
@@ -337,7 +339,7 @@ class _Struct:
                 self.children[k] = self.__class__()
                 self.children[k].from_json(v)
 
-    def complete(self):
+    def complete(self) -> bool:
         """Returns true if all items are present in state"""
         if not all(v is not None for k,v in self.__dict__.items()):
             return False
@@ -346,6 +348,21 @@ class _Struct:
                 if not v.complete():
                     return False
         return True
+    
+    def update(self,rhs) -> None:
+        """Adds any non-None items from rhs to self."""
+        for k,v in rhs.__dict__.items():
+            if v is None: continue
+            if k == 'children':
+                if self.children is None:
+                    self.children = dict()
+                for ck,cv in v.items():
+                    if ck not in self.children:
+                        self.children[ck] = cv
+                    else:
+                        self.children[ck].update(cv)
+            else:
+                self.__dict__[k] = v
 
 
 class _RobotInterfaceStructure(_Struct):
@@ -1950,7 +1967,7 @@ class OmniRobotInterface(_RobotInterfaceStatefulBase):
         * 'tracking_monitor': monitors sensed vs commanded positions
         * 'self_collision': adjusts position commands to avoid collisions
         * 'obstacle_collision': adjusts position commands to avoid collisions
-        * SENSOR_NAME: some sensor for which hasSensor(SENSOR_NAME)=True.
+        * SENSOR_NAME: some sensor for which ``hasSensor(SENSOR_NAME)=True``.
 
         Valid operands include:
 
@@ -1961,7 +1978,7 @@ class OmniRobotInterface(_RobotInterfaceStatefulBase):
         * 'positionCommand', 'velocityCommand', 'torqueCommand': updated when a
           position, velocity, or torque command are scheduled for sending to the
           robot. 
-        * SENSOR_NAME: some sensor for which hasSensor(SENSOR_NAME)=True.
+        * SENSOR_NAME: some sensor for which ``hasSensor(SENSOR_NAME)=True``.
         * 'status': the input / output status
 
         Args:
@@ -2034,8 +2051,9 @@ class OmniRobotInterface(_RobotInterfaceStatefulBase):
         world collision.
 
         If op = 'stop', a soft stop is raised if a collision is predicted.
+
         If op = 'warn', a warning is printed and the robot silently ignores
-            the command.
+        the command.
         
         """
         self._emulator.setCollisionFilter(world,op)
@@ -2302,6 +2320,8 @@ class OmniRobotInterface(_RobotInterfaceStatefulBase):
             indices.append(self._virtualPartIndices[k])
             commands.append(iface._commands)
             iface._commands = []   #erase primary commands
+        if any(c for c in commands):
+            print("OmniRobotInterface: commands:",commands)
         self._commands = _gather_commands(commands,indices)
         #set commands to emulator, advance
         for cmd in self._commands:
@@ -2684,7 +2704,7 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
         * 'tracking_monitor': monitors sensed vs commanded positions
         * 'self_collision': adjusts position commands to avoid collisions
         * 'obstacle_collision': adjusts position commands to avoid collisions
-        * SENSOR_NAME: some sensor for which hasSensor(SENSOR_NAME)=True.
+        * SENSOR_NAME: some sensor for which ``hasSensor(SENSOR_NAME)=True``.
 
         Valid operands include:
 
@@ -2695,7 +2715,7 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
         * 'positionCommand', 'velocityCommand', 'torqueCommand': updated when a
           position, velocity, or torque command are scheduled for sending to the
           robot. 
-        * SENSOR_NAME: some sensor for which hasSensor(SENSOR_NAME)=True.
+        * SENSOR_NAME: some sensor for which ``hasSensor(SENSOR_NAME)=True``.
         * 'status': the input / output status
 
         Args:
@@ -2743,8 +2763,9 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
         world collision.
 
         If op = 'stop', a soft stop is raised if a collision is predicted.
+
         If op = 'warn', a warning is printed and the robot silently ignores
-            the command.
+        the command.
         
         """
         self._emulator.setCollisionFilter(world,op)

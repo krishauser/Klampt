@@ -500,6 +500,7 @@ void IKSolver::getJacobian(double** out,int* m,int* n)
   f.Jacobian(x,J);
 }
 
+/* //old style
 PyObject* IKSolver::solve(int iters,double tol)
 {
   static bool warned=false;
@@ -554,6 +555,7 @@ PyObject* IKSolver::solve(int iters,double tol)
   PyTuple_SetItem(tuple,1,PyInt_FromLong(iters));
   return tuple;
 }
+*/
 
 bool IKSolver::solve()
 {

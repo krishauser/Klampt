@@ -51332,14 +51332,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_IKSolver_solve__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+SWIGINTERN PyObject *_wrap_IKSolver_solve(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   IKSolver *arg1 = (IKSolver *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  PyObject *swig_obj[1] ;
   bool result;
   
-  if ((nobjs < 1) || (nobjs > 1)) SWIG_fail;
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_IKSolver, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKSolver_solve" "', argument " "1"" of type '" "IKSolver *""'"); 
@@ -51362,103 +51364,6 @@ SWIGINTERN PyObject *_wrap_IKSolver_solve__SWIG_0(PyObject *SWIGUNUSEDPARM(self)
   return resultobj;
 fail:
   return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_IKSolver_solve__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
-  PyObject *resultobj = 0;
-  IKSolver *arg1 = (IKSolver *) 0 ;
-  int arg2 ;
-  double arg3 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  double val3 ;
-  int ecode3 = 0 ;
-  PyObject *result = 0 ;
-  
-  if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_IKSolver, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKSolver_solve" "', argument " "1"" of type '" "IKSolver *""'"); 
-  }
-  arg1 = reinterpret_cast< IKSolver * >(argp1);
-  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IKSolver_solve" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
-  ecode3 = SWIG_AsVal_double(swig_obj[2], &val3);
-  if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "IKSolver_solve" "', argument " "3"" of type '" "double""'");
-  } 
-  arg3 = static_cast< double >(val3);
-  {
-    try {
-      result = (PyObject *)(arg1)->solve(arg2,arg3);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = result;
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_IKSolver_solve(PyObject *self, PyObject *args) {
-  Py_ssize_t argc;
-  PyObject *argv[4] = {
-    0
-  };
-  
-  if (!(argc = SWIG_Python_UnpackTuple(args, "IKSolver_solve", 0, 3, argv))) SWIG_fail;
-  --argc;
-  if (argc == 1) {
-    int _v;
-    void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_IKSolver, 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      return _wrap_IKSolver_solve__SWIG_0(self, argc, argv);
-    }
-  }
-  if (argc == 3) {
-    int _v;
-    void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_IKSolver, 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      {
-        int res = SWIG_AsVal_int(argv[1], NULL);
-        _v = SWIG_CheckState(res);
-      }
-      if (_v) {
-        {
-          int res = SWIG_AsVal_double(argv[2], NULL);
-          _v = SWIG_CheckState(res);
-        }
-        if (_v) {
-          return _wrap_IKSolver_solve__SWIG_1(self, argc, argv);
-        }
-      }
-    }
-  }
-  
-fail:
-  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'IKSolver_solve'.\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    IKSolver::solve()\n"
-    "    IKSolver::solve(int,double)\n");
-  return 0;
 }
 
 
@@ -64644,7 +64549,7 @@ static PyMethodDef SwigMethods[] = {
 		"PointCloud_getPoints(PointCloud self)\n"
 		"\n"
 		"\n"
-		"Retrieves a view of the points as an nx3 Numpy array.  \n"
+		"Returns a view of the points as an nx3 Numpy array.  \n"
 		"\n"
 		""},
 	 { "PointCloud_setPoints", _wrap_PointCloud_setPoints, METH_VARARGS, "\n"
@@ -64665,7 +64570,9 @@ static PyMethodDef SwigMethods[] = {
 		"PointCloud_addPoint(PointCloud self, double const [3] p) -> int\n"
 		"\n"
 		"\n"
-		"Adds a point. Sets all its properties to 0. Returns the index.  \n"
+		"Adds a point. Sets all its properties to 0.  \n"
+		"\n"
+		"Returns the point's index.  \n"
 		"\n"
 		""},
 	 { "PointCloud_setPoint", _wrap_PointCloud_setPoint, METH_VARARGS, "\n"
@@ -64679,7 +64586,7 @@ static PyMethodDef SwigMethods[] = {
 		"PointCloud_getPoint(PointCloud self, int index)\n"
 		"\n"
 		"\n"
-		"Retrieves the position of the point at the given index.  \n"
+		"Returns the position of the point at the given index.  \n"
 		"\n"
 		""},
 	 { "PointCloud_addProperty", _wrap_PointCloud_addProperty, METH_VARARGS, "\n"
@@ -64712,7 +64619,7 @@ static PyMethodDef SwigMethods[] = {
 		"PointCloud_getProperty(PointCloud self, int index, std::string const & pname) -> double\n"
 		"\n"
 		"\n"
-		"Gets the property named pname of point index.  \n"
+		"Returns the property named pname of point index.  \n"
 		"\n"
 		""},
 	 { "PointCloud_getProperties", _wrap_PointCloud_getProperties, METH_VARARGS, "\n"
@@ -64720,14 +64627,14 @@ static PyMethodDef SwigMethods[] = {
 		"PointCloud_getProperties(PointCloud self, std::string const & pname)\n"
 		"\n"
 		"\n"
-		"Gets property named pindex of all points as an array.  \n"
+		"Returns property named pindex of all points as an array.  \n"
 		"\n"
 		""},
 	 { "PointCloud_getAllProperties", _wrap_PointCloud_getAllProperties, METH_O, "\n"
 		"PointCloud_getAllProperties(PointCloud self)\n"
 		"\n"
 		"\n"
-		"Gets all the properties as an nxp array.  \n"
+		"Returns all the properties as an nxp array.  \n"
 		"\n"
 		""},
 	 { "PointCloud_translate", _wrap_PointCloud_translate, METH_VARARGS, "\n"
@@ -64763,7 +64670,7 @@ static PyMethodDef SwigMethods[] = {
 		"PointCloud_getSetting(PointCloud self, std::string const & key) -> std::string\n"
 		"\n"
 		"\n"
-		"Retrieves the given setting.  \n"
+		"Returns the given setting.  \n"
 		"\n"
 		""},
 	 { "PointCloud_setDepthImage_d", _wrap_PointCloud_setDepthImage_d, METH_VARARGS, "\n"
@@ -65066,7 +64973,7 @@ static PyMethodDef SwigMethods[] = {
 		"Geometry3D_isStandalone(Geometry3D self) -> bool\n"
 		"\n"
 		"\n"
-		"Returns true if this is a standalone geometry.  \n"
+		"Returns True if this is a standalone geometry.  \n"
 		"\n"
 		""},
 	 { "Geometry3D_free", _wrap_Geometry3D_free, METH_O, "\n"
@@ -65088,7 +64995,7 @@ static PyMethodDef SwigMethods[] = {
 		"Geometry3D_empty(Geometry3D self) -> bool\n"
 		"\n"
 		"\n"
-		"Returns true if this has no contents (not the same as numElements()==0)  \n"
+		"Returns True if this has no contents (not the same as numElements()==0)  \n"
 		"\n"
 		""},
 	 { "Geometry3D_getTriangleMesh", _wrap_Geometry3D_getTriangleMesh, METH_O, "\n"
@@ -65183,8 +65090,9 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Returns an element of the Geometry3D if it is a Group, TriangleMesh, or\n"
-		"PointCloud. The element will be in local coordinates. Raises an error if this is\n"
-		"of any other type.  \n"
+		"PointCloud. Raises an error if this is of any other type.  \n"
+		"\n"
+		"The element will be in local coordinates.  \n"
 		"\n"
 		""},
 	 { "Geometry3D_setElement", _wrap_Geometry3D_setElement, METH_VARARGS, "\n"
@@ -65208,6 +65116,10 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Loads from file. Standard mesh types, PCD files, and .geom files are supported.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    True on success, False on failure  \n"
 		"\n"
 		""},
 	 { "Geometry3D_saveFile", _wrap_Geometry3D_saveFile, METH_VARARGS, "\n"
@@ -65283,15 +65195,16 @@ static PyMethodDef SwigMethods[] = {
 		"Geometry3D_getBB(Geometry3D self)\n"
 		"\n"
 		"\n"
-		"Returns the axis-aligned bounding box of the object as a tuple (bmin,bmax).\n"
-		"Note: O(1) time, but may not be tight.  \n"
+		"Returns an axis-aligned bounding box of the object as a tuple (bmin,bmax).  \n"
+		"\n"
+		"Note: O(1) time, but may not be tight  \n"
 		"\n"
 		""},
 	 { "Geometry3D_getBBTight", _wrap_Geometry3D_getBBTight, METH_O, "\n"
 		"Geometry3D_getBBTight(Geometry3D self)\n"
 		"\n"
 		"\n"
-		"Returns a tighter axis-aligned bounding box of the object than\n"
+		"Computes a tighter axis-aligned bounding box of the object than\n"
 		":meth:`Geometry3D.getBB`. Worst case O(n) time.  \n"
 		"\n"
 		""},
@@ -65442,9 +65355,7 @@ static PyMethodDef SwigMethods[] = {
 		"Geometry3D_rayCast(Geometry3D self, double const [3] s, double const [3] d) -> bool\n"
 		"\n"
 		"\n"
-		"Returns (hit,pt) where hit is true if the ray starting at s and pointing in\n"
-		"direction d hits the geometry (given in world coordinates); pt is the hit point,\n"
-		"in world coordinates.  \n"
+		"Performs a ray cast.  \n"
 		"\n"
 		"Supported types:  \n"
 		"\n"
@@ -65454,19 +65365,19 @@ static PyMethodDef SwigMethods[] = {
 		"    'radius' property assigned)  \n"
 		"*   VolumeGrid  \n"
 		"*   Group (groups of the aforementioned types)  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    (hit,pt) where hit is true if the ray starting at s and pointing\n"
+		"    in direction d hits the geometry (given in world coordinates); pt is\n"
+		"    the hit point, in world coordinates.  \n"
 		"\n"
 		""},
 	 { "Geometry3D_rayCast_ext", _wrap_Geometry3D_rayCast_ext, METH_VARARGS, "\n"
 		"Geometry3D_rayCast_ext(Geometry3D self, double const [3] s, double const [3] d) -> int\n"
 		"\n"
 		"\n"
-		"Returns (hit_element,pt) where hit_element is >= 0 if ray starting at s and\n"
-		"pointing in direction d hits the geometry (given in world coordinates).  \n"
-		"\n"
-		"*   hit_element is -1 if the object is not hit, otherwise it gives the index of\n"
-		"    the element (triangle, point, sub-object) that was hit. For geometric\n"
-		"    primitives, this will be 0.  \n"
-		"*   pt is the hit point, in world coordinates.  \n"
+		"A more sophisticated ray cast.  \n"
 		"\n"
 		"Supported types:  \n"
 		"\n"
@@ -65476,6 +65387,17 @@ static PyMethodDef SwigMethods[] = {
 		"    'radius' property assigned)  \n"
 		"*   VolumeGrid  \n"
 		"*   Group (groups of the aforementioned types)  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    (hit_element,pt) where hit_element is >= 0 if ray starting at\n"
+		"    s and pointing in direction d hits the geometry (given in world\n"
+		"    coordinates).  \n"
+		"\n"
+		"    - hit_element is -1 if the object is not hit, otherwise it gives the\n"
+		"      index of the element (triangle, point, sub-object) that was hit.  \n"
+		"      For geometric primitives, this will be 0.\n"
+		"    - pt is the hit point, in world coordinates.  \n"
 		"\n"
 		""},
 	 { "Geometry3D_contacts", _wrap_Geometry3D_contacts, METH_VARARGS, "\n"
@@ -66371,7 +66293,7 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModelLink_getMass(RobotModelLink self) -> Mass\n"
 		"\n"
 		"\n"
-		"Retrieves the inertial properties of the link. (Note that the Mass is given with\n"
+		"Returns the inertial properties of the link. (Note that the Mass is given with\n"
 		"origin at the link frame, not about the COM.)  \n"
 		"\n"
 		""},
@@ -66387,11 +66309,11 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModelLink_getParentTransform(RobotModelLink self)\n"
 		"\n"
 		"\n"
-		"Gets transformation (R,t) to the parent link.  \n"
+		"Gets the transformation (R,t) to the parent link.  \n"
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (se3 object): a pair (R,t), with R a 9-list and t a 3-list of floats,\n"
+		"    se3 object: a pair (R,t), with R a 9-list and t a 3-list of floats,\n"
 		"    giving the local transform from this link to its parent, in the\n"
 		"    reference (zero) configuration.  \n"
 		"\n"
@@ -66446,7 +66368,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (list of 3 floats): the world coordinates of the local point plocal  \n"
+		"    list of 3 floats: the world coordinates of the local point plocal  \n"
 		"\n"
 		""},
 	 { "RobotModelLink_getWorldDirection", _wrap_RobotModelLink_getWorldDirection, METH_VARARGS, "\n"
@@ -66457,7 +66379,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (list of 3 floats): the world coordinates of the local direction\n"
+		"    list of 3 floats: the world coordinates of the local direction\n"
 		"    vlocal  \n"
 		"\n"
 		""},
@@ -66469,7 +66391,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (list of 3 floats): the local coordinates of the world point pworld  \n"
+		"    list of 3 floats: the local coordinates of the world point pworld  \n"
 		"\n"
 		""},
 	 { "RobotModelLink_getLocalDirection", _wrap_RobotModelLink_getLocalDirection, METH_VARARGS, "\n"
@@ -66480,7 +66402,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (list of 3 floats): the local coordinates of the world direction\n"
+		"    list of 3 floats: the local coordinates of the world direction\n"
 		"    vworld  \n"
 		"\n"
 		""},
@@ -66492,7 +66414,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (se3 object): a pair (R,t), with R a 9-list and t a 3-list of floats.  \n"
+		"    se3 object: a pair (R,t), with R a 9-list and t a 3-list of floats.  \n"
 		"\n"
 		""},
 	 { "RobotModelLink_setTransform", _wrap_RobotModelLink_setTransform, METH_VARARGS, "\n"
@@ -66511,12 +66433,12 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModelLink_getVelocity(RobotModelLink self)\n"
 		"\n"
 		"\n"
-		"Returns the velocity of the link's origin given the robot's current joint\n"
+		"Computes the velocity of the link's origin given the robot's current joint\n"
 		"configuration and velocities. Equivalent to getPointVelocity([0,0,0]).  \n"
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (list of 3 floats): the current velocity of the link's origin, in\n"
+		"    list of 3 floats: the current velocity of the link's origin, in\n"
 		"    world coordinates  \n"
 		"\n"
 		""},
@@ -66524,12 +66446,12 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModelLink_getAngularVelocity(RobotModelLink self)\n"
 		"\n"
 		"\n"
-		"Returns the angular velocity of the link given the robot's current joint\n"
+		"Computes the angular velocity of the link given the robot's current joint\n"
 		"configuration and velocities.  \n"
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (list of 3 floats): the current angular velocity of the link, in world\n"
+		"    list of 3 floats: the current angular velocity of the link, in world\n"
 		"    coordinates  \n"
 		"\n"
 		""},
@@ -66537,12 +66459,12 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModelLink_getPointVelocity(RobotModelLink self, double const [3] plocal)\n"
 		"\n"
 		"\n"
-		"Returns the world velocity of a point attached to the link, given the robot's\n"
+		"Computes the world velocity of a point attached to the link, given the robot's\n"
 		"current joint configuration and velocities.  \n"
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (list of 3 floats): the current velocity of the point, in\n"
+		"    list of 3 floats: the current velocity of the point, in\n"
 		"    world coordinates.  \n"
 		"\n"
 		""},
@@ -66550,54 +66472,54 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModelLink_getJacobian(RobotModelLink self, double const [3] plocal)\n"
 		"\n"
 		"\n"
-		"Returns the total jacobian of a point on this link w.r.t. the robot's\n"
+		"Computes the total jacobian of a point on this link w.r.t. the robot's\n"
 		"configuration q.  \n"
+		"\n"
+		"The orientation jacobian is given in the first 3 rows, and is stacked on the\n"
+		"position jacobian, which is given in the last 3 rows.  \n"
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (6xn array): the 6xn total Jacobian matrix of the\n"
+		"    ndarray: the 6xn total Jacobian matrix of the\n"
 		"    point given by local coordinates plocal.  \n"
-		"\n"
-		"    The orientation jacobian is given in the first 3 rows, and is stacked\n"
-		"    on the position jacobian, which is given in the last 3 rows.  \n"
 		"\n"
 		""},
 	 { "RobotModelLink_getPositionJacobian", _wrap_RobotModelLink_getPositionJacobian, METH_VARARGS, "\n"
 		"RobotModelLink_getPositionJacobian(RobotModelLink self, double const [3] plocal)\n"
 		"\n"
 		"\n"
-		"Returns the position jacobian of a point on this link w.r.t. the robot's\n"
+		"Computes the position jacobian of a point on this link w.r.t. the robot's\n"
 		"configuration q.  \n"
+		"\n"
+		"This matrix J gives the point's velocity (in world coordinates) via\n"
+		"np.dot(J,dq), where dq is the robot's joint velocities.  \n"
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (3xn array): the 3xn Jacobian matrix of the\n"
+		"    ndarray: the 3xn Jacobian matrix of the\n"
 		"    point given by local coordinates plocal.  \n"
-		"\n"
-		"    This matrix J gives the point's velocity (in world coordinates) via\n"
-		"    np.dot(J,dq), where dq is the robot's joint velocities.  \n"
 		"\n"
 		""},
 	 { "RobotModelLink_getOrientationJacobian", _wrap_RobotModelLink_getOrientationJacobian, METH_O, "\n"
 		"RobotModelLink_getOrientationJacobian(RobotModelLink self)\n"
 		"\n"
 		"\n"
-		"Returns the orientation jacobian of this link w.r.t. the robot's configuration\n"
+		"Computes the orientation jacobian of this link w.r.t. the robot's configuration\n"
 		"q.  \n"
+		"\n"
+		"This matrix J gives the link's angular velocity (in world coordinates) via\n"
+		"np.dot(J,dq), where dq is the robot's joint velocities.  \n"
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (3xn array):: the 3xn orientation Jacobian matrix of the link.  \n"
-		"\n"
-		"    This matrix J gives the link's angular velocity (in world coordinates)\n"
-		"    via np.dot(J,dq), where dq is the robot's joint velocities.  \n"
+		"    ndarray:: the 3xn orientation Jacobian matrix of the link.  \n"
 		"\n"
 		""},
 	 { "RobotModelLink_getAcceleration", _wrap_RobotModelLink_getAcceleration, METH_VARARGS, "\n"
 		"RobotModelLink_getAcceleration(RobotModelLink self, doubleVector ddq)\n"
 		"\n"
 		"\n"
-		"Returns the acceleration of the link origin given the robot's current joint\n"
+		"Computes the acceleration of the link origin given the robot's current joint\n"
 		"configuration and velocities, and the joint accelerations ddq.  \n"
 		"\n"
 		"ddq can be empty, which calculates the acceleration with acceleration 0, and is\n"
@@ -66605,7 +66527,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (list of 3 floats): the acceleration of the link's origin, in\n"
+		"    list of 3 floats: the acceleration of the link's origin, in\n"
 		"    world coordinates.  \n"
 		"\n"
 		""},
@@ -66613,12 +66535,12 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModelLink_getPointAcceleration(RobotModelLink self, double const [3] plocal, doubleVector ddq)\n"
 		"\n"
 		"\n"
-		"Returns the acceleration of the point given the robot's current joint\n"
+		"Computes the acceleration of the point given the robot's current joint\n"
 		"configuration and velocities, and the joint accelerations ddq.  \n"
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (list of 3 floats): the acceleration of the point, in\n"
+		"    list of 3 floats: the acceleration of the point, in\n"
 		"    world coordinates.  \n"
 		"\n"
 		""},
@@ -66626,12 +66548,12 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModelLink_getAngularAcceleration(RobotModelLink self, doubleVector ddq)\n"
 		"\n"
 		"\n"
-		"Returns the angular acceleration of the link given the robot's current joint\n"
+		"Computes the angular acceleration of the link given the robot's current joint\n"
 		"configuration and velocities, and the joint accelerations ddq.  \n"
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (list of 3 floats): the angular acceleration of the link, in\n"
+		"    list of 3 floats: the angular acceleration of the link, in\n"
 		"    world coordinates.  \n"
 		"\n"
 		""},
@@ -66639,12 +66561,12 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModelLink_getPositionHessian(RobotModelLink self, double const [3] plocal)\n"
 		"\n"
 		"\n"
-		"Returns the Hessians of each component of the position p w.r.t the robot's\n"
+		"Computes the Hessians of each component of the position p w.r.t the robot's\n"
 		"configuration q.  \n"
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (3-D array): a 3xnxn array with each of the elements in the first axis\n"
+		"    ndarray: a 3xnxn array with each of the elements in the first axis\n"
 		"    corresponding respectively, to the (x,y,z) components of the Hessian.  \n"
 		"\n"
 		""},
@@ -66652,12 +66574,12 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModelLink_getOrientationHessian(RobotModelLink self)\n"
 		"\n"
 		"\n"
-		"Returns the Hessians of each orientation component of the link w.r.t the robot's\n"
-		"configuration q.  \n"
+		"Computes the Hessians of each orientation component of the link w.r.t the\n"
+		"robot's configuration q.  \n"
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (3-D array): a 3xnxn array with each of the elements in the first axis\n"
+		"    ndarray: a 3xnxn array with each of the elements in the first axis\n"
 		"    corresponding, respectively, to the (wx,wy,wz) components of the Hessian.  \n"
 		"\n"
 		""},
@@ -66716,8 +66638,11 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModelDriver_getType(RobotModelDriver self) -> char const *\n"
 		"\n"
 		"\n"
-		"Currently can be \"normal\", \"affine\", \"rotation\", \"translation\", or\n"
-		"\"custom\".  \n"
+		"Gets the type of the driver.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    One of  \"normal\", \"affine\", \"rotation\", \"translation\", or \"custom\"  \n"
 		"\n"
 		""},
 	 { "RobotModelDriver_getAffectedLink", _wrap_RobotModelDriver_getAffectedLink, METH_O, "\n"
@@ -66741,7 +66666,7 @@ static PyMethodDef SwigMethods[] = {
 		"For \"affine\" links, returns the scale and offset of the driver value mapped to\n"
 		"the world.  \n"
 		"\n"
-		"Returns: tuple: a pair (scale,offset), each of length len(getAffectedLinks()).  \n"
+		"Returns a pair (scale,offset), each of length len(getAffectedLinks()).  \n"
 		"\n"
 		""},
 	 { "RobotModelDriver_setValue", _wrap_RobotModelDriver_setValue, METH_VARARGS, "\n"
@@ -66760,7 +66685,7 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModelDriver_getValue(RobotModelDriver self) -> double\n"
 		"\n"
 		"\n"
-		"Gets the current driver value from the robot's config.  \n"
+		"Returns the current driver value from the robot's config.  \n"
 		"\n"
 		""},
 	 { "RobotModelDriver_setVelocity", _wrap_RobotModelDriver_setVelocity, METH_VARARGS, "\n"
@@ -66774,35 +66699,35 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModelDriver_getVelocity(RobotModelDriver self) -> double\n"
 		"\n"
 		"\n"
-		"Gets the current driver velocity value from the robot's velocity.  \n"
+		"Returns the current driver velocity value from the robot's velocity.  \n"
 		"\n"
 		""},
 	 { "RobotModelDriver_getLimits", _wrap_RobotModelDriver_getLimits, METH_O, "\n"
 		"RobotModelDriver_getLimits(RobotModelDriver self)\n"
 		"\n"
 		"\n"
-		"Retrieves value limits [xmin,xmax].  \n"
+		"Returns value limits [xmin,xmax].  \n"
 		"\n"
 		""},
 	 { "RobotModelDriver_getVelocityLimits", _wrap_RobotModelDriver_getVelocityLimits, METH_O, "\n"
 		"RobotModelDriver_getVelocityLimits(RobotModelDriver self)\n"
 		"\n"
 		"\n"
-		"Retrieves velocity limits [vmin,vmax].  \n"
+		"Returns velocity limits [vmin,vmax].  \n"
 		"\n"
 		""},
 	 { "RobotModelDriver_getAccelerationLimits", _wrap_RobotModelDriver_getAccelerationLimits, METH_O, "\n"
 		"RobotModelDriver_getAccelerationLimits(RobotModelDriver self)\n"
 		"\n"
 		"\n"
-		"Retrieves acceleration limits [amin,amax].  \n"
+		"Returns acceleration limits [amin,amax].  \n"
 		"\n"
 		""},
 	 { "RobotModelDriver_getTorqueLimits", _wrap_RobotModelDriver_getTorqueLimits, METH_O, "\n"
 		"RobotModelDriver_getTorqueLimits(RobotModelDriver self)\n"
 		"\n"
 		"\n"
-		"Retrieves generalized torque limits [tmin,tmax].  \n"
+		"Returns generalized torque limits [tmin,tmax].  \n"
 		"\n"
 		""},
 	 { "RobotModelDriver_world_set", _wrap_RobotModelDriver_world_set, METH_VARARGS, "RobotModelDriver_world_set(RobotModelDriver self, int world)"},
@@ -66826,6 +66751,10 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Loads the robot from the file fn.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    True if successful, False if failed.  \n"
 		"\n"
 		""},
 	 { "RobotModel_saveFile", _wrap_RobotModel_saveFile, METH_VARARGS, "\n"
@@ -66943,7 +66872,7 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModel_getJointLimits(RobotModel self)\n"
 		"\n"
 		"\n"
-		"Retrieves a pair (qmin,qmax) of min/max joint limit vectors.  \n"
+		"Returns a pair (qmin,qmax) of min/max joint limit vectors.  \n"
 		"\n"
 		""},
 	 { "RobotModel_setJointLimits", _wrap_RobotModel_setJointLimits, METH_VARARGS, "\n"
@@ -66957,7 +66886,7 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModel_getVelocityLimits(RobotModel self)\n"
 		"\n"
 		"\n"
-		"Retrieve the velocity limit vector vmax, the constraint is :math:`|dq[i]| \\leq\n"
+		"Returns the velocity limit vector vmax, the constraint is :math:`|dq[i]| \\leq\n"
 		"vmax[i]`  \n"
 		"\n"
 		""},
@@ -66973,7 +66902,7 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModel_getAccelerationLimits(RobotModel self)\n"
 		"\n"
 		"\n"
-		"Retrieve the acceleration limit vector amax, the constraint is :math:`|ddq[i]|\n"
+		"Returns the acceleration limit vector amax, the constraint is :math:`|ddq[i]|\n"
 		"\\leq amax[i]`  \n"
 		"\n"
 		""},
@@ -66989,8 +66918,8 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModel_getTorqueLimits(RobotModel self)\n"
 		"\n"
 		"\n"
-		"Retrieve the torque limit vector tmax, the constraint is :math:`|torque[i]|\n"
-		"\\leq tmax[i]`  \n"
+		"Returns the torque limit vector tmax, the constraint is :math:`|torque[i]| \\leq\n"
+		"tmax[i]`  \n"
 		"\n"
 		""},
 	 { "RobotModel_setTorqueLimits", _wrap_RobotModel_setTorqueLimits, METH_VARARGS, "\n"
@@ -67041,11 +66970,11 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModel_getComJacobian(RobotModel self)\n"
 		"\n"
 		"\n"
-		"Returns the Jacobian matrix of the current center of mass.  \n"
+		"Computes the Jacobian matrix of the current center of mass.  \n"
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (3xn array): a 3xn matrix J such that np.dot(J,dq) gives the\n"
+		"    ndarray: a 3xn matrix J such that np.dot(J,dq) gives the\n"
 		"    COM velocity at the currene configuration  \n"
 		"\n"
 		""},
@@ -67053,83 +66982,93 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModel_getLinearMomentum(RobotModel self)\n"
 		"\n"
 		"\n"
-		"Returns the 3D linear momentum vector.  \n"
+		"Computes the 3D linear momentum vector.  \n"
 		"\n"
 		""},
 	 { "RobotModel_getAngularMomentum", _wrap_RobotModel_getAngularMomentum, METH_O, "\n"
 		"RobotModel_getAngularMomentum(RobotModel self)\n"
 		"\n"
 		"\n"
-		"Returns the 3D angular momentum vector.  \n"
+		"Computes the 3D angular momentum vector.  \n"
 		"\n"
 		""},
 	 { "RobotModel_getKineticEnergy", _wrap_RobotModel_getKineticEnergy, METH_O, "\n"
 		"RobotModel_getKineticEnergy(RobotModel self) -> double\n"
 		"\n"
 		"\n"
-		"Returns the kinetic energy at the current config / velocity.  \n"
+		"Computes the kinetic energy at the current config / velocity.  \n"
 		"\n"
 		""},
 	 { "RobotModel_getTotalInertia", _wrap_RobotModel_getTotalInertia, METH_O, "\n"
 		"RobotModel_getTotalInertia(RobotModel self)\n"
 		"\n"
 		"\n"
-		"Calculates the 3x3 total inertia matrix of the robot.  \n"
+		"Computes the 3x3 total inertia matrix of the robot.  \n"
 		"\n"
 		""},
 	 { "RobotModel_getMassMatrix", _wrap_RobotModel_getMassMatrix, METH_O, "\n"
 		"RobotModel_getMassMatrix(RobotModel self)\n"
 		"\n"
 		"\n"
-		"Returns the nxn mass matrix B(q). Takes O(n^2) time.  \n"
+		"Computes the nxn mass matrix B(q).  \n"
+		"\n"
+		"Takes O(n^2) time  \n"
 		"\n"
 		""},
 	 { "RobotModel_getMassMatrixInv", _wrap_RobotModel_getMassMatrixInv, METH_O, "\n"
 		"RobotModel_getMassMatrixInv(RobotModel self)\n"
 		"\n"
 		"\n"
-		"Returns the inverse of the nxn mass matrix B(q)^-1. Takes O(n^2) time, which is\n"
-		"much faster than inverting the result of getMassMatrix.  \n"
+		"Computes the inverse of the nxn mass matrix B(q)^-1.  \n"
+		"\n"
+		"Takes O(n^2) time, which is much faster than inverting the result of\n"
+		"getMassMatrix  \n"
 		"\n"
 		""},
 	 { "RobotModel_getMassMatrixDeriv", _wrap_RobotModel_getMassMatrixDeriv, METH_VARARGS, "\n"
 		"RobotModel_getMassMatrixDeriv(RobotModel self, int i)\n"
 		"\n"
 		"\n"
-		"Returns the derivative of the nxn mass matrix with respect to q_i. Takes O(n^3)\n"
-		"time.  \n"
+		"Computes the derivative of the nxn mass matrix with respect to q_i.  \n"
+		"\n"
+		"Takes O(n^3) time.  \n"
 		"\n"
 		""},
 	 { "RobotModel_getMassMatrixTimeDeriv", _wrap_RobotModel_getMassMatrixTimeDeriv, METH_O, "\n"
 		"RobotModel_getMassMatrixTimeDeriv(RobotModel self)\n"
 		"\n"
 		"\n"
-		"Returns the derivative of the nxn mass matrix with respect to t, given the\n"
-		"robot's current velocity. Takes O(n^4) time.  \n"
+		"Computes the derivative of the nxn mass matrix with respect to t, given the\n"
+		"robot's current velocity.  \n"
+		"\n"
+		"Takes O(n^4) time.  \n"
 		"\n"
 		""},
 	 { "RobotModel_getCoriolisForceMatrix", _wrap_RobotModel_getCoriolisForceMatrix, METH_O, "\n"
 		"RobotModel_getCoriolisForceMatrix(RobotModel self)\n"
 		"\n"
 		"\n"
-		"Returns the Coriolis force matrix C(q,dq) for current config and velocity. Takes\n"
-		"O(n^2) time.  \n"
+		"Computes the Coriolis force matrix C(q,dq) for current config and velocity.  \n"
+		"\n"
+		"Takes O(n^2) time.  \n"
 		"\n"
 		""},
 	 { "RobotModel_getCoriolisForces", _wrap_RobotModel_getCoriolisForces, METH_O, "\n"
 		"RobotModel_getCoriolisForces(RobotModel self)\n"
 		"\n"
 		"\n"
-		"Returns the Coriolis forces C(q,dq)*dq for current config and velocity. Takes\n"
-		"O(n) time, which is faster than computing matrix and doing product. (\"Forces\"\n"
-		"is somewhat of a misnomer; the result is a joint torque vector)  \n"
+		"Computes the Coriolis forces C(q,dq)*dq for current config and velocity.  \n"
+		"\n"
+		"Takes O(n) time, which is faster than computing matrix and doing the product.  \n"
+		"\n"
+		"(\"Forces\" is somewhat of a misnomer; the result is a joint torque vector)  \n"
 		"\n"
 		""},
 	 { "RobotModel_getGravityForces", _wrap_RobotModel_getGravityForces, METH_VARARGS, "\n"
 		"RobotModel_getGravityForces(RobotModel self, double const [3] g)\n"
 		"\n"
 		"\n"
-		"Returns the generalized gravity vector G(q) for the given workspace gravity\n"
+		"Computes the generalized gravity vector G(q) for the given workspace gravity\n"
 		"vector g (usually (0,0,-9.8)).  \n"
 		"\n"
 		".. note::  \n"
@@ -67139,7 +67078,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (list of floats): the n-element generalized gravity vector at the\n"
+		"    list of floats: the n-element generalized gravity vector at the\n"
 		"    robot's current configuration.  \n"
 		"\n"
 		""},
@@ -67157,7 +67096,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (list of floats): the n-element torque vector that would produce\n"
+		"    list of floats: the n-element torque vector that would produce\n"
 		"    the joint accelerations ddq in the absence of external forces.  \n"
 		"\n"
 		""},
@@ -67174,7 +67113,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (list of floats): the n-element joint acceleration vector that would\n"
+		"    list of floats: the n-element joint acceleration vector that would\n"
 		"    result from joint torques t in the absence of external forces.  \n"
 		"\n"
 		""},
@@ -67187,8 +67126,8 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (list of n floats): The configuration that is u fraction of the way\n"
-		"    from a to b  \n"
+		"    list of floats: The n-element configuration that is u fraction of\n"
+		"    the way from a to b  \n"
 		"\n"
 		""},
 	 { "RobotModel_distance", _wrap_RobotModel_distance, METH_VARARGS, "\n"
@@ -67311,9 +67250,10 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModel_sensor(RobotModel self, char const * name) -> SimRobotSensor\n"
 		"\n"
 		"\n"
-		"Returns a sensor by index or by name. If out of bounds or unavailable, a null\n"
-		"sensor is returned (i.e., SimRobotSensor.name() or SimRobotSensor.type()) will\n"
-		"return the empty string.)  \n"
+		"Returns a sensor by index or by name.  \n"
+		"\n"
+		"If out of bounds or unavailable, a null sensor is returned (i.e.,\n"
+		"SimRobotSensor.name() or SimRobotSensor.type()) will return the empty string.)  \n"
 		"\n"
 		""},
 	 { "RobotModel_addSensor", _wrap_RobotModel_addSensor, METH_VARARGS, "\n"
@@ -67321,6 +67261,10 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Adds a new sensor with a given name and type.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    The new sensor.  \n"
 		"\n"
 		""},
 	 { "RobotModel_world_set", _wrap_RobotModel_world_set, METH_VARARGS, "RobotModel_world_set(RobotModel self, int world)"},
@@ -67432,7 +67376,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (se3 object): a pair (R,t), with R a 9-list and t a 3-list of floats,\n"
+		"    se3 object: a pair (R,t), with R a 9-list and t a 3-list of floats,\n"
 		"    giving the transform to world coordinates.  \n"
 		"\n"
 		""},
@@ -67451,7 +67395,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (tuple): a pair of 3-lists (w,v) where w is the angular velocity\n"
+		"    tuple: a pair of 3-lists (w,v) where w is the angular velocity\n"
 		"    vector and v is the translational velocity vector (both in world\n"
 		"    coordinates)  \n"
 		"\n"
@@ -67602,6 +67546,10 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Reads from a world XML file.  \n"
 		"\n"
+		"Returns:  \n"
+		"\n"
+		"    True if successful, False if failed.  \n"
+		"\n"
 		""},
 	 { "WorldModel_loadFile", _wrap_WorldModel_loadFile, METH_VARARGS, "\n"
 		"WorldModel_loadFile(WorldModel self, char const * fn) -> bool\n"
@@ -67737,7 +67685,11 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Loads some element from a file, automatically detecting its type. Meshes are\n"
-		"interpreted as terrains. The ID is returned, or -1 if loading failed.  \n"
+		"interpreted as terrains.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    The element's ID, or -1 if loading failed.  \n"
 		"\n"
 		""},
 	 { "WorldModel_add", _wrap_WorldModel_add, METH_VARARGS, "\n"
@@ -67761,8 +67713,8 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"IMPORTANT:  \n"
 		"\n"
-		"    All other RobotModel, RigidObjectModel, and TerrainModel references will be\n"
-		"invalidated.  \n"
+		"    All other RobotModel, RigidObjectModel, or TerrainModel references\n"
+		"    will be invalidated.  \n"
 		"\n"
 		""},
 	 { "WorldModel_getName", _wrap_WorldModel_getName, METH_VARARGS, "\n"
@@ -67854,14 +67806,14 @@ static PyMethodDef SwigMethods[] = {
 		"IKObjective_numPosDims(IKObjective self) -> int\n"
 		"\n"
 		"\n"
-		"Returns the number of position dimensions constrained (0-3)  \n"
+		"Returns: The number of position dimensions constrained (0-3)  \n"
 		"\n"
 		""},
 	 { "IKObjective_numRotDims", _wrap_IKObjective_numRotDims, METH_O, "\n"
 		"IKObjective_numRotDims(IKObjective self) -> int\n"
 		"\n"
 		"\n"
-		"Returns the number of rotation dimensions constrained (0-3)  \n"
+		"Returns: The number of rotation dimensions constrained (0-3)  \n"
 		"\n"
 		""},
 	 { "IKObjective_setFixedPoint", _wrap_IKObjective_setFixedPoint, METH_VARARGS, "\n"
@@ -68120,7 +68072,7 @@ static PyMethodDef SwigMethods[] = {
 		"IKSolver_getMaxIters(IKSolver self) -> int\n"
 		"\n"
 		"\n"
-		"Gets the max # of iterations.  \n"
+		"Returns the max # of iterations.  \n"
 		"\n"
 		""},
 	 { "IKSolver_setTolerance", _wrap_IKSolver_setTolerance, METH_VARARGS, "\n"
@@ -68134,7 +68086,7 @@ static PyMethodDef SwigMethods[] = {
 		"IKSolver_getTolerance(IKSolver self) -> double\n"
 		"\n"
 		"\n"
-		"Gets the constraint solve tolerance.  \n"
+		"Returns the constraint solve tolerance.  \n"
 		"\n"
 		""},
 	 { "IKSolver_setActiveDofs", _wrap_IKSolver_setActiveDofs, METH_VARARGS, "\n"
@@ -68148,7 +68100,7 @@ static PyMethodDef SwigMethods[] = {
 		"IKSolver_getActiveDofs(IKSolver self)\n"
 		"\n"
 		"\n"
-		"Gets the active degrees of freedom.  \n"
+		"Returns the active degrees of freedom.  \n"
 		"\n"
 		""},
 	 { "IKSolver_setJointLimits", _wrap_IKSolver_setJointLimits, METH_VARARGS, "\n"
@@ -68162,7 +68114,7 @@ static PyMethodDef SwigMethods[] = {
 		"IKSolver_getJointLimits(IKSolver self)\n"
 		"\n"
 		"\n"
-		"Gets the limits on the robot's configuration (by default this is the robot's\n"
+		"Returns the limits on the robot's configuration (by default this is the robot's\n"
 		"joint limits.  \n"
 		"\n"
 		""},
@@ -68178,21 +68130,21 @@ static PyMethodDef SwigMethods[] = {
 		"IKSolver_getBiasConfig(IKSolver self)\n"
 		"\n"
 		"\n"
-		"Gets the solvers' bias configuration.  \n"
+		"Returns the solvers' bias configuration.  \n"
 		"\n"
 		""},
 	 { "IKSolver_isSolved", _wrap_IKSolver_isSolved, METH_O, "\n"
 		"IKSolver_isSolved(IKSolver self) -> bool\n"
 		"\n"
 		"\n"
-		"Returns true if the current configuration residual is less than tol.  \n"
+		"Returns True if the current configuration residual is less than tol.  \n"
 		"\n"
 		""},
 	 { "IKSolver_getResidual", _wrap_IKSolver_getResidual, METH_O, "\n"
 		"IKSolver_getResidual(IKSolver self)\n"
 		"\n"
 		"\n"
-		"Returns a vector describing the error of the objective at the current\n"
+		"Returns the vector describing the error of the objective at the current\n"
 		"configuration.  \n"
 		"\n"
 		""},
@@ -68200,18 +68152,20 @@ static PyMethodDef SwigMethods[] = {
 		"IKSolver_getJacobian(IKSolver self)\n"
 		"\n"
 		"\n"
-		"Returns a matrix describing the instantaneous derivative of the objective with\n"
-		"respect to the active Dofs.  \n"
+		"Computes the matrix describing the instantaneous derivative of the objective\n"
+		"with respect to the active Dofs.  \n"
 		"\n"
 		""},
-	 { "IKSolver_solve", _wrap_IKSolver_solve, METH_VARARGS, "\n"
+	 { "IKSolver_solve", _wrap_IKSolver_solve, METH_O, "\n"
 		"IKSolver_solve(IKSolver self) -> bool\n"
-		"IKSolver_solve(IKSolver self, int iters, double tol) -> PyObject *\n"
 		"\n"
 		"\n"
-		"Old-style: will be deprecated. Specify # of iterations and tolerance. Tries to\n"
-		"find a configuration that satifies all simultaneous objectives up to the desired\n"
-		"tolerance. Returns (res,iterations) where res is true if x converged.  \n"
+		"Tries to find a configuration that satifies all simultaneous objectives up to\n"
+		"the desired tolerance.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    True if x converged.  \n"
 		"\n"
 		""},
 	 { "IKSolver_lastSolveIters", _wrap_IKSolver_lastSolveIters, METH_O, "\n"
@@ -68442,8 +68396,7 @@ static PyMethodDef SwigMethods[] = {
 		"SimRobotSensor_getEnabled(SimRobotSensor self) -> bool\n"
 		"\n"
 		"\n"
-		"Retrieves whether the sensor is enabled during simulation (helper for\n"
-		"getSetting)  \n"
+		"Return whether the sensor is enabled during simulation (helper for getSetting)  \n"
 		"\n"
 		""},
 	 { "SimRobotSensor_setEnabled", _wrap_SimRobotSensor_setEnabled, METH_VARARGS, "\n"
@@ -68457,7 +68410,7 @@ static PyMethodDef SwigMethods[] = {
 		"SimRobotSensor_getLink(SimRobotSensor self) -> RobotModelLink\n"
 		"\n"
 		"\n"
-		"Retrieves the link on which the sensor is mounted (helper for getSetting)  \n"
+		"Returns the link on which the sensor is mounted (helper for getSetting)  \n"
 		"\n"
 		""},
 	 { "SimRobotSensor_setLink", _wrap_SimRobotSensor_setLink, METH_VARARGS, "\n"
@@ -68472,7 +68425,7 @@ static PyMethodDef SwigMethods[] = {
 		"SimRobotSensor_getTransform(SimRobotSensor self)\n"
 		"\n"
 		"\n"
-		"Retrieves the local transform of the sensor on the robot's link. (helper for\n"
+		"Returns the local transform of the sensor on the robot's link. (helper for\n"
 		"getSetting)  \n"
 		"\n"
 		"If the sensor doesn't have a transform (such as a joint position or torque\n"
@@ -68483,7 +68436,7 @@ static PyMethodDef SwigMethods[] = {
 		"SimRobotSensor_getTransformWorld(SimRobotSensor self)\n"
 		"\n"
 		"\n"
-		"Retrieves the world transform of the sensor given the robot's current\n"
+		"Returns the world transform of the sensor given the robot's current\n"
 		"configuration. (helper for getSetting)  \n"
 		"\n"
 		"If the sensor doesn't have a transform (such as a joint position or torque\n"
@@ -68559,35 +68512,35 @@ static PyMethodDef SwigMethods[] = {
 		"SimRobotController_getRate(SimRobotController self) -> double\n"
 		"\n"
 		"\n"
-		"Gets the current feedback control rate, in s.  \n"
+		"Returns The current feedback control rate, in s.  \n"
 		"\n"
 		""},
 	 { "SimRobotController_getCommandedConfig", _wrap_SimRobotController_getCommandedConfig, METH_O, "\n"
 		"SimRobotController_getCommandedConfig(SimRobotController self)\n"
 		"\n"
 		"\n"
-		"Returns the current commanded configuration (size model().numLinks())  \n"
+		"Returns The current commanded configuration (size model().numLinks())  \n"
 		"\n"
 		""},
 	 { "SimRobotController_getCommandedVelocity", _wrap_SimRobotController_getCommandedVelocity, METH_O, "\n"
 		"SimRobotController_getCommandedVelocity(SimRobotController self)\n"
 		"\n"
 		"\n"
-		"Returns the current commanded velocity (size model().numLinks())  \n"
+		"Returns The current commanded velocity (size model().numLinks())  \n"
 		"\n"
 		""},
 	 { "SimRobotController_getCommandedTorque", _wrap_SimRobotController_getCommandedTorque, METH_O, "\n"
 		"SimRobotController_getCommandedTorque(SimRobotController self)\n"
 		"\n"
 		"\n"
-		"Returns the current commanded (feedforward) torque (size model().numDrivers())  \n"
+		"Returns The current commanded (feedforward) torque (size model().numDrivers())  \n"
 		"\n"
 		""},
 	 { "SimRobotController_getSensedConfig", _wrap_SimRobotController_getSensedConfig, METH_O, "\n"
 		"SimRobotController_getSensedConfig(SimRobotController self)\n"
 		"\n"
 		"\n"
-		"Returns the current \"sensed\" configuration from the simulator (size\n"
+		"Returns The current \"sensed\" configuration from the simulator (size\n"
 		"model().numLinks())  \n"
 		"\n"
 		""},
@@ -68595,7 +68548,7 @@ static PyMethodDef SwigMethods[] = {
 		"SimRobotController_getSensedVelocity(SimRobotController self)\n"
 		"\n"
 		"\n"
-		"Returns the current \"sensed\" velocity from the simulator (size\n"
+		"Returns The current \"sensed\" velocity from the simulator (size\n"
 		"model().numLinks())  \n"
 		"\n"
 		""},
@@ -68603,7 +68556,7 @@ static PyMethodDef SwigMethods[] = {
 		"SimRobotController_getSensedTorque(SimRobotController self)\n"
 		"\n"
 		"\n"
-		"Returns the current \"sensed\" (feedback) torque from the simulator. (size\n"
+		"Returns The current \"sensed\" (feedback) torque from the simulator. (size\n"
 		"model().numDrivers())  \n"
 		"\n"
 		"Note: a default robot doesn't have a torque sensor, so this will be 0  \n"
@@ -68625,19 +68578,23 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Adds a new sensor with a given name and type.  \n"
 		"\n"
+		"Returns:  \n"
+		"\n"
+		"    The new sensor.  \n"
+		"\n"
 		""},
 	 { "SimRobotController_commands", _wrap_SimRobotController_commands, METH_O, "\n"
 		"SimRobotController_commands(SimRobotController self) -> stringVector\n"
 		"\n"
 		"\n"
-		"gets a custom command list  \n"
+		"Returns a custom command list.  \n"
 		"\n"
 		""},
 	 { "SimRobotController_sendCommand", _wrap_SimRobotController_sendCommand, METH_VARARGS, "\n"
 		"SimRobotController_sendCommand(SimRobotController self, std::string const & name, std::string const & args) -> bool\n"
 		"\n"
 		"\n"
-		"sends a custom string command to the controller  \n"
+		"Sends a custom string command to the controller.  \n"
 		"\n"
 		""},
 	 { "SimRobotController_settings", _wrap_SimRobotController_settings, METH_O, "\n"
@@ -68651,14 +68608,14 @@ static PyMethodDef SwigMethods[] = {
 		"SimRobotController_getSetting(SimRobotController self, std::string const & name) -> std::string\n"
 		"\n"
 		"\n"
-		"gets a setting of the controller  \n"
+		"Returns a setting of the controller.  \n"
 		"\n"
 		""},
 	 { "SimRobotController_setSetting", _wrap_SimRobotController_setSetting, METH_VARARGS, "\n"
 		"SimRobotController_setSetting(SimRobotController self, std::string const & name, std::string const & val) -> bool\n"
 		"\n"
 		"\n"
-		"sets a setting of the controller  \n"
+		"Sets a setting of the controller.  \n"
 		"\n"
 		""},
 	 { "SimRobotController_setMilestone", _wrap_SimRobotController_setMilestone, METH_VARARGS, "\n"
@@ -68768,13 +68725,15 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns the control type for the active controller.  \n"
 		"\n"
-		"Possible return values are:  \n"
+		"Returns:  \n"
 		"\n"
-		"*   unknown  \n"
-		"*   off  \n"
-		"*   torque  \n"
-		"*   PID  \n"
-		"*   locked_velocity  \n"
+		"    One of\n"
+		"\n"
+		"    - unknown\n"
+		"    - off\n"
+		"    - torque\n"
+		"    - PID\n"
+		"    - locked_velocity  \n"
 		"\n"
 		""},
 	 { "SimRobotController_setPIDGains", _wrap_SimRobotController_setPIDGains, METH_VARARGS, "\n"
@@ -68788,7 +68747,7 @@ static PyMethodDef SwigMethods[] = {
 		"SimRobotController_getPIDGains(SimRobotController self)\n"
 		"\n"
 		"\n"
-		"Gets the PID gains for the PID controller.  \n"
+		"Returns the PID gains for the PID controller.  \n"
 		"\n"
 		""},
 	 { "SimRobotController_index_set", _wrap_SimRobotController_index_set, METH_VARARGS, "SimRobotController_index_set(SimRobotController self, int index)"},
@@ -68963,17 +68922,17 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		".. note::  \n"
 		"\n"
-		"All changes are applied in the current simulation substep, not the duration\n"
-		"provided to Simulation.simulate(). If you need fine-grained control, make sure\n"
-		"to call Simulation.simulate() with time steps equal to the value provided to\n"
-		"Simulation.setSimStep() (this is 0.001s by default). Or, use a hook from\n"
-		":class:`~klampt.sim.simulation.SimpleSimulator`.  \n"
+		"    All changes are applied in the current simulation substep, not the duration\n"
+		"    provided to Simulation.simulate().  If you need fine-grained control,\n"
+		"    make sure to call Simulation.simulate() with time steps equal to the value\n"
+		"    provided to Simulation.setSimStep() (this is 0.001s by default).  Or, use\n"
+		"    a hook from :class:`~klampt.sim.simulation.SimpleSimulator`.  \n"
 		"\n"
-		".. node::  \n"
+		".. note::  \n"
 		"\n"
-		"The transform of the body is centered at the *object's center of mass* rather\n"
-		"than the object's reference frame given in the RobotModelLink or\n"
-		"RigidObjectModel.  \n"
+		"    The transform of the body is centered at the *object's center of mass*\n"
+		"    rather than the object's reference frame given in the RobotModelLink or\n"
+		"    RigidObjectModel.  \n"
 		"\n"
 		"C++ includes: robotsim.h\n"
 		"\n"
@@ -69081,9 +69040,12 @@ static PyMethodDef SwigMethods[] = {
 		"Simulator_getStatus(Simulator self) -> int\n"
 		"\n"
 		"\n"
-		"Returns an indicator code for the simulator status. The return result is one of\n"
-		"the STATUS_X flags. (Technically, this returns the *worst* status over the last\n"
-		"simulate() call)  \n"
+		"Returns an indicator code for the simulator status.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    One of the STATUS_X flags.  (Technically, this returns the *worst* status\n"
+		"    over the last simulate() call)  \n"
 		"\n"
 		""},
 	 { "Simulator_getStatusString", _wrap_Simulator_getStatusString, METH_VARARGS, "\n"
@@ -69098,16 +69060,23 @@ static PyMethodDef SwigMethods[] = {
 		"Simulator_checkObjectOverlap(Simulator self)\n"
 		"\n"
 		"\n"
-		"Checks if any objects are overlapping. Returns a pair of lists of integers,\n"
-		"giving the pairs of object ids that are overlapping.  \n"
+		"Checks if any objects are overlapping.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    A pair of lists of integers, giving the pairs of object ids that\n"
+		"    are overlapping.  \n"
 		"\n"
 		""},
 	 { "Simulator_getState", _wrap_Simulator_getState, METH_O, "\n"
 		"Simulator_getState(Simulator self) -> std::string\n"
 		"\n"
 		"\n"
-		"Returns a Base64 string representing the binary data for the current simulation\n"
-		"state, including controller parameters, etc.  \n"
+		"Gets the current simulation state, including controller parameters, etc.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    A Base64 string representing the binary data for the state  \n"
 		"\n"
 		""},
 	 { "Simulator_setState", _wrap_Simulator_setState, METH_VARARGS, "\n"
@@ -69290,7 +69259,7 @@ static PyMethodDef SwigMethods[] = {
 		"Simulator_body(Simulator self, TerrainModel terrain) -> SimBody\n"
 		"\n"
 		"\n"
-		"Returns the SimBody corresponding to the given link, rigid object, or terrain.  \n"
+		"Return the SimBody corresponding to the given link, rigid object, or terrain.  \n"
 		"\n"
 		""},
 	 { "Simulator_getJointForces", _wrap_Simulator_getJointForces, METH_VARARGS, "\n"
@@ -69298,8 +69267,11 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Returns the joint force and torque local to the link, as would be read by a\n"
-		"force-torque sensor mounted at the given link's origin. The 6 entries are\n"
-		"(fx,fy,fz,mx,my,mz)  \n"
+		"force-torque sensor mounted at the given link's origin.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    6 entries of the wrench (fx,fy,fz,mx,my,mz)  \n"
 		"\n"
 		""},
 	 { "Simulator_setGravity", _wrap_Simulator_setGravity, METH_VARARGS, "\n"
@@ -69365,6 +69337,11 @@ static PyMethodDef SwigMethods[] = {
 		"See `Klampt/Simulation/ODESimulator.h\n"
 		"<http://motion.pratt.duke.edu/klampt/klampt_docs/ODESimulator_8h_source.html>`_\n"
 		"for detailed descriptions of these parameters.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    A string encoding the data. This will need to be cast to int or\n"
+		"    float manually.  \n"
 		"\n"
 		""},
 	 { "Simulator_setSetting", _wrap_Simulator_setSetting, METH_VARARGS, "\n"
@@ -69577,12 +69554,12 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (bool, None, or list): if com is given, and there are feasible\n"
-		"        equilibrium forces, this returns a list of 3 tuples giving\n"
-		"        equilibrium forces at each of the contacts. None is returned if\n"
-		"        no such forces exist.  \n"
+		"    bool, None, or list: if com is given, and there are feasible\n"
+		"    equilibrium forces, this returns a list of 3 tuples giving\n"
+		"    equilibrium forces at each of the contacts. None is returned if\n"
+		"    no such forces exist.  \n"
 		"\n"
-		"        If com = None, the result is True or False.  \n"
+		"    If com = None, the result is True or False.  \n"
 		"\n"
 		""},
 	 { "com_equilibrium_2d", _wrap_com_equilibrium_2d, METH_VARARGS, "\n"
@@ -69619,12 +69596,12 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (bool, None, or list): if com is given, and there are feasible\n"
-		"        equilibrium forces, this returns a list of 2-tuples giving\n"
-		"        equilibrium forces at each of the contacts. None is returned if\n"
-		"        no such forces exist.\n"
+		"    bool, None, or list: if com is given, and there are feasible\n"
+		"    equilibrium forces, this returns a list of 2-tuples giving\n"
+		"    equilibrium forces at each of the contacts. None is returned if\n"
+		"    no such forces exist.\n"
 		"\n"
-		"        If com = None, the result is True or False.  \n"
+		"    If com = None, the result is True or False.  \n"
 		"\n"
 		""},
 	 { "support_polygon", _wrap_support_polygon, METH_VARARGS, "\n"
@@ -69660,18 +69637,18 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (list of 3-tuples): The sorted plane boundaries of the support\n"
-		"        polygon. The format of a plane is (nx,ny,ofs) where (nx,ny) are the\n"
-		"        outward facing normals, and ofs is the offset from 0.  In other words\n"
-		"        to test stability of a com with x-y coordinates [x,y], you can test\n"
-		"        whether dot([nx,ny],[x,y]) <= ofs  for all planes.\n"
+		"    list of 3-tuples: The sorted plane boundaries of the support\n"
+		"    polygon. The format of a plane is (nx,ny,ofs) where (nx,ny) are the\n"
+		"    outward facing normals, and ofs is the offset from 0.  In other words\n"
+		"    to test stability of a com with x-y coordinates [x,y], you can test\n"
+		"    whether dot([nx,ny],[x,y]) <= ofs  for all planes.\n"
 		"\n"
-		"        Hint: with numpy, you can do::\n"
+		"    Hint: with numpy, you can do::\n"
 		"\n"
-		"            Ab = np.array(supportPolygon(args))\n"
-		"            A=Ab[:,0:2]\n"
-		"            b=Ab[:,2]\n"
-		"            myComEquilibrium = lambda x: np.all(np.dot(A,x)<=b)  \n"
+		"        Ab = np.array(supportPolygon(args))\n"
+		"        A=Ab[:,0:2]\n"
+		"        b=Ab[:,2]\n"
+		"        myComEquilibrium = lambda x: np.all(np.dot(A,x)<=b)  \n"
 		"\n"
 		""},
 	 { "support_polygon_2d", _wrap_support_polygon_2d, METH_VARARGS, "\n"
@@ -69696,7 +69673,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"    contactPositions (list of 2-float lists or tuples): the list of contact\n"
 		"        point positions.\n"
-		"     frictionCones (list of lists): The i'th element in this list has length\n"
+		"    frictionCones (list of lists): The i'th element in this list has length\n"
 		"         k*3 (for some integer k), and gives the contact force constraints\n"
 		"         (ax,ay,b) where ax*fx+ay*fy <= b limits the contact force (fx,fy)\n"
 		"         at the i'th contact. Each of the k 3-tuples is laid out sequentially\n"
@@ -69704,8 +69681,8 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (2-tuple): gives the min/max extents of the support polygon.\n"
-		"        If the support interval is empty, (inf,inf) is returned.  \n"
+		"    2-tuple: gives the min/max extents of the support polygon.\n"
+		"    If the support interval is empty, (inf,inf) is returned.  \n"
 		"\n"
 		""},
 	 { "equilibrium_torques", _wrap_equilibrium_torques, METH_VARARGS, "\n"
@@ -69749,10 +69726,10 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (pair of lists, optional): a pair (torque,force) if a solution exists,\n"
-		"         giving valid joint torques t and frictional contact forces (f1,...,fn).\n"
+		"    pair of lists, optional: a pair (torque,force) if a solution exists,\n"
+		"    giving valid joint torques t and frictional contact forces (f1,...,fn).\n"
 		"\n"
-		"         None is returned if no solution exists.  \n"
+		"    None is returned if no solution exists.  \n"
 		"\n"
 		""},
 	 { NULL, NULL, 0, NULL }

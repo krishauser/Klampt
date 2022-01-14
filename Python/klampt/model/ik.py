@@ -108,9 +108,10 @@ def objective(
         should take on.
 
     Returns:
-        IKObjective or GeneralizedIKObjective: usually a plain IK objective
-        is returned, but if body and ref are not on the same robot, then a
-        GeneralizedIKObjective may be returned.
+        An IK objective describing the constraint.
+
+        If body and ref are not on the same robot, then a
+        GeneralizedIKObjective may be returned. TODO: not implemented yet.
     """
     generalized = False
     if not hasattr(body,'robot'):
@@ -201,8 +202,6 @@ def fixed_objective(
         world (3-vector, or a list of 3-vectors, optional): the world
             coordinates on `body` should be constrained in place
 
-    Returns:
-        IKObjective or GeneralizedIKObjective
     """
     refcoords = ref.getTransform() if ref is not None else se3.identity()
     Tw = link.getTransform()
@@ -258,8 +257,6 @@ def fixed_rotation_objective(
         world_axis (3-vector, optional): the world coordinates
             of the direction that should be constrained.
 
-    Returns:
-        IKObjective or GeneralizedIKObjective
     """
     refcoords = ref.getTransform()[0] if ref is not None else so3.identity()
     Rw = link.getTransform()
@@ -316,13 +313,11 @@ def solver(
             the solver is set to this value.  Otherwise, the default value
             (1e-3) is used.
 
-    Returns:
-        IKSolver or GeneralizedIKSolver
-
-    Note:
+    .. note::
         In rare cases, this may return a list of IKSolver's if you give
         it objectives on different robots.  They should be solved
         independently for efficiency.
+
     """
     if hasattr(objectives,'__iter__'):
         generalized = []
@@ -414,12 +409,12 @@ def solve(
         activeDofs (list, optional): a list of link indices or names to use for IK
             solving.  By default, will determine these automatically.
 
-    Note:
+    .. note::
         You cannot use sub-robots and activeDofs at the same time.  Undefined
         behavior will result.
 
     Returns:
-        bool: True if a solution is successfully found to the given tolerance,
+        True if a solution is successfully found to the given tolerance,
         within the provided number of iterations.  The robot(s) are then set
         to the solution configuration.  If a solution is not found, False is
         returned and the robot(s) are set to the best found configuration.
@@ -480,7 +475,7 @@ def solve_global(
             and start from random initial configurations
 
     Returns:
-        bool: True if a feasible solution is successfully found to the given
+        True if a feasible solution is successfully found to the given
         tolerance, within the provided number of iterations.
     """
     if feasibilityCheck is None: feasibilityCheck=lambda : True
@@ -531,7 +526,7 @@ def solve_nearby(
     """Solves for an IK solution that does not deviate too far from the
     initial configuration.
 
-    Note:
+    .. note::
         Currently only supports single-robot objectives!
     
     Args: 

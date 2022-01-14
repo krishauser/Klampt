@@ -17,6 +17,8 @@ the SuperBlock will be automatically determined.
 See :mod:`klampt.control.blocks.utils` for
 utilities, and :mod:`klampt.control.blocks.state_machine` for state machines
 that use Blocks.
+
+.. versionadded:: 0.9
 """
 
 from klampt.math import vectorops

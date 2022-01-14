@@ -123,12 +123,12 @@ PyObject* com_equilibrium(double* contacts,int m,int n,const std::vector<double>
  *
  * Returns:
  * 
- *     (bool, None, or list): if com is given, and there are feasible
- *         equilibrium forces, this returns a list of 3 tuples giving
- *         equilibrium forces at each of the contacts. None is returned if
- *         no such forces exist.  
+ *     bool, None, or list: if com is given, and there are feasible
+ *     equilibrium forces, this returns a list of 3 tuples giving
+ *     equilibrium forces at each of the contacts. None is returned if
+ *     no such forces exist.  
  *
- *         If com = None, the result is True or False.
+ *     If com = None, the result is True or False.
  *
  */
 PyObject* com_equilibrium(const std::vector<std::vector<double> >& contactPositions,const std::vector<std::vector<double> >& frictionCones,const std::vector<double>& fext,PyObject* com);
@@ -175,12 +175,12 @@ PyObject* com_equilibrium_2d(double* contacts,int m,int n,const std::vector<doub
  *
  * Returns:
  * 
- *     (bool, None, or list): if com is given, and there are feasible
- *         equilibrium forces, this returns a list of 2-tuples giving
- *         equilibrium forces at each of the contacts. None is returned if
- *         no such forces exist. 
+ *     bool, None, or list: if com is given, and there are feasible
+ *     equilibrium forces, this returns a list of 2-tuples giving
+ *     equilibrium forces at each of the contacts. None is returned if
+ *     no such forces exist. 
  *
- *         If com = None, the result is True or False.
+ *     If com = None, the result is True or False.
  *
  */
 PyObject* com_equilibrium_2d(const std::vector<std::vector<double> >& contactPositions,const std::vector<std::vector<double> >& frictionCones,const std::vector<double>& fext,PyObject* com);
@@ -223,18 +223,18 @@ PyObject* support_polygon(double* contacts,int m,int n);
  * 
  * Returns:
  * 
- *     (list of 3-tuples): The sorted plane boundaries of the support 
- *         polygon. The format of a plane is (nx,ny,ofs) where (nx,ny) are the
- *         outward facing normals, and ofs is the offset from 0.  In other words
- *         to test stability of a com with x-y coordinates [x,y], you can test
- *         whether dot([nx,ny],[x,y]) <= ofs  for all planes.
+ *     list of 3-tuples: The sorted plane boundaries of the support 
+ *     polygon. The format of a plane is (nx,ny,ofs) where (nx,ny) are the
+ *     outward facing normals, and ofs is the offset from 0.  In other words
+ *     to test stability of a com with x-y coordinates [x,y], you can test
+ *     whether dot([nx,ny],[x,y]) <= ofs  for all planes.
  *
- *         Hint: with numpy, you can do::
+ *     Hint: with numpy, you can do::
  *
- *             Ab = np.array(supportPolygon(args))
- *             A=Ab[:,0:2]
- *             b=Ab[:,2]
- *             myComEquilibrium = lambda x: np.all(np.dot(A,x)<=b)
+ *         Ab = np.array(supportPolygon(args))
+ *         A=Ab[:,0:2]
+ *         b=Ab[:,2]
+ *         myComEquilibrium = lambda x: np.all(np.dot(A,x)<=b)
  *
  */
 PyObject* support_polygon(const std::vector<std::vector<double> >& contactPositions,const std::vector<std::vector<double> >& frictionCones);
@@ -265,7 +265,7 @@ PyObject* support_polygon_2d(double* contacts,int m,int n);
  * 
  *     contactPositions (list of 2-float lists or tuples): the list of contact
  *         point positions. 
- *      frictionCones (list of lists): The i'th element in this list has length
+ *     frictionCones (list of lists): The i'th element in this list has length
  *          k*3 (for some integer k), and gives the contact force constraints
  *          (ax,ay,b) where ax*fx+ay*fy <= b limits the contact force (fx,fy)
  *          at the i'th contact. Each of the k 3-tuples is laid out sequentially
@@ -273,8 +273,8 @@ PyObject* support_polygon_2d(double* contacts,int m,int n);
  *
  * Returns:
  *
- *     (2-tuple): gives the min/max extents of the support polygon. 
- *         If the support interval is empty, (inf,inf) is returned.
+ *     2-tuple: gives the min/max extents of the support polygon. 
+ *     If the support interval is empty, (inf,inf) is returned.
  *
  */
 PyObject* support_polygon_2d(const std::vector<std::vector<double> >& contacts,const std::vector<std::vector<double> >& frictionCones);
@@ -294,8 +294,8 @@ PyObject* support_polygon_2d(const std::vector<std::vector<double> >& contacts,c
  *
  * Returns:
  *
- *     (tuple): a pair (t,f) giving the joint torques and frictional
- *          contact forces, if a solution exists, or None if no solution exists.
+ *     tuple: a pair (t,f) giving the joint torques and frictional
+ *     contact forces, if a solution exists, or None if no solution exists.
  *
  */
 PyObject* equilibrium_torques(const RobotModel& robot,
@@ -338,10 +338,10 @@ PyObject* equilibrium_torques(const RobotModel& robot,
  *
  * Returns:
  * 
- *     (pair of lists, optional): a pair (torque,force) if a solution exists,
- *          giving valid joint torques t and frictional contact forces (f1,...,fn). 
+ *     pair of lists, optional: a pair (torque,force) if a solution exists,
+ *     giving valid joint torques t and frictional contact forces (f1,...,fn). 
  *
- *          None is returned if no solution exists.
+ *     None is returned if no solution exists.
  *
  */
 PyObject* equilibrium_torques(const RobotModel& robot,

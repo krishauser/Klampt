@@ -45,7 +45,7 @@ from ..io import loader
 from ..vis.glviewport import GLViewport
 from ..model.typing import RigidTransform,Vector3
 from . import coordinates
-from typing import Union,Tuple
+from typing import Union,Tuple,Any
 import math
 import sys
 from ..math import vectorops,so3,se3
@@ -83,7 +83,7 @@ def get_sensor_xform(sensor : SimRobotSensor, robot : RobotModel = None) -> Rigi
             coordinates on the link to which it is mounted.
 
     Returns:
-        klampt.se3 object: the sensor transform  
+        The sensor transform (klampt.se3 object)
     """
     if robot is None:
         return sensor.getTransform()
@@ -132,7 +132,7 @@ def set_sensor_xform(sensor : SimRobotSensor, T : RigidTransform, link : RobotMo
         sensor.setLink(link)
 
 
-def camera_to_images(camera : SimRobotSensor, image_format='numpy',color_format='channels'):
+def camera_to_images(camera : SimRobotSensor, image_format='numpy',color_format='channels') -> Tuple[Any,Any]:
     """Given a SimRobotSensor that is a CameraSensor, returns either the RGB
     image, the depth image, or both.
 
@@ -155,7 +155,7 @@ def camera_to_images(camera : SimRobotSensor, image_format='numpy',color_format=
             * 'bgr': similar to 'rgb' but with hex order 0xbbggrr.
 
     Returns:
-        tuple: (rgb, depth), which are either numpy arrays or another image
+        (rgb, depth), which are either numpy arrays or another image
         format, as specified by image_format.
 
             * rgb: the RGB result (packed as specified by color_format)
@@ -452,7 +452,7 @@ def camera_to_points(camera : SimRobotSensor,
             * None: no color is produced.
 
     Returns:
-        object: the point cloud in the requested format.
+        The point cloud in the requested format.
     """
     assert isinstance(camera,SimRobotSensor),"Must provide a SimRobotSensor instance"
     assert camera.type() == 'CameraSensor',"Must provide a camera sensor instance"
@@ -620,7 +620,7 @@ def camera_to_viewport(camera : SimRobotSensor, robot : RobotModel) -> GLViewpor
             local coordinates.
 
     Returns:
-        :class:`GLViewport`: matches the camera's viewport.
+        A GLViewport matching the camera's viewport.
     """
     assert isinstance(camera,SimRobotSensor),"Must provide a SimRobotSensor instance"
     assert camera.type() == 'CameraSensor',"Must provide a camera sensor instance"
@@ -689,9 +689,13 @@ def camera_to_intrinsics(camera : SimRobotSensor, format='opencv', fn=None):
         fn (str, optional): the file to save to (must be .json, .xml, or .yml).
         
     Returns:
-        varies: If format='opencv', the (projection, distortion) matrix is
-        returned. If format='numpy', just the projection matrix is returned. 
+        If format='opencv', the (projection, distortion) matrix is
+        returned.
+        
+        If format='numpy', just the projection matrix is returned. 
+
         If format=='json', a dict of the fx, fy, cx, cy values is returned
+        
     """
     assert isinstance(camera,SimRobotSensor),"Must provide a SimRobotSensor instance"
     assert camera.type() == 'CameraSensor',"Must provide a camera sensor instance"
@@ -852,7 +856,7 @@ def camera_ray(camera : SimRobotSensor, robot : RobotModel, x : float, y : float
         y (int/float): y pixel coordinates
 
     Returns:
-        (source,direction): world-space ray source/direction.
+        A pair (source,direction) giving the world-space ray source/direction.
     """
     return camera_to_viewport(camera,robot).click_ray(x,y)
 
@@ -877,7 +881,7 @@ def camera_project(camera : SimRobotSensor, robot : RobotModel, pt : Vector3,cli
             outside of the viewing volume.
 
     Returns:
-        tuple: (x,y,z), where x,y are pixel value of image, z is depth.
+        (x,y,z), where x,y are pixel value of image, z is depth.
     """
     return camera_to_viewport(camera,robot).project(pt,clip)
 

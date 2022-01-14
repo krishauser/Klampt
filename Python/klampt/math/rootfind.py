@@ -136,8 +136,6 @@ def findRootsBounded(startVals: object, boundVals: object, iter: int) ->object:
         startVals (:obj:`object`)
         boundVals (:obj:`object`)
         iter (int)
-    Returns:
-        :obj:`object`:
     """
     return _rootfind.findRootsBounded(startVals, boundVals, iter)
 

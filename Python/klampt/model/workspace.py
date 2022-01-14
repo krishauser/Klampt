@@ -1,5 +1,7 @@
 """Functions for computing robot workspaces, with lots of options for setting
 feasibility conditions.
+
+.. versionadded:: 0.9
 """
 
 from klampt import RobotModel,RobotModelLink,RigidObjectModel,TerrainModel,VolumeGrid,IKObjective
@@ -16,7 +18,7 @@ def compute_occupancy_grid(points : Sequence[Vector3],
                            resolution=0.05,
                            dimensions=None,
                            bounds=None,
-                           value='occupancy'):
+                           value='occupancy') -> VolumeGrid:
     """
     Helper to compute an occupancy grid given a set of points.
 
@@ -31,8 +33,6 @@ def compute_occupancy_grid(points : Sequence[Vector3],
             range of the grid. If not given, calculated by the 
         value (str): either 'occupancy', 'count', or 'probability'.
 
-    Returns:
-        VolumeGrid
     """
     points = np.asarray(points)
     auto_bounds = False
@@ -112,7 +112,7 @@ def compute_field_grid(points : Sequence[Vector3],
                        dimensions=None,
                        bounds=None,
                        aggregator='max',
-                       initial_value='auto'):
+                       initial_value='auto') -> VolumeGrid:
     """
     Helper to compute a gridded value field over a set of scattered points.
 
@@ -135,8 +135,6 @@ def compute_field_grid(points : Sequence[Vector3],
             aggregation.  If aggregator is a pair of functions, 'auto' sets x
             to None by default.
 
-    Returns:
-        VolumeGrid
     """
     points = np.asarray(points)
     auto_bounds = False
@@ -302,8 +300,8 @@ def compute_workspace(link : RobotModelLink,
         all_tests (bool): whether to return a dict of results.
 
     Returns:
-        VolumeGrid or dict of str->VolumeGrid: The grid of reached points.
-        If all_tests=True, gives a set of grids of reached points.  Key
+        The grid of reached points. If ``all_tests=True``, gives a set of
+        grids of reached points indexed by strings.  Key
         'workspace' gives the reachable workspace of points meeting every
         feasibility condition.  Keys 'self_collision_free',
         'obstacle_X_collision_free' (X in range 0,...,len(obstacles)-1),
@@ -497,8 +495,8 @@ def compute_workspace_field(link : RobotModelLink,
             If a list, a list of callables. If a dict, a map of str->callable.
 
     Returns:
-        VolumeGrid or dict of str->VolumeGrid: The grid of reached points.
-        If all_tests=True, gives a set of grids of reached points.  Key
+        The grid of reached points.
+        If ``all_tests=True``, gives a set of grids of reached points.  Key
         'workspace' gives the reachable workspace of points meeting every
         feasibility condition.  Keys 'self_collision_free',
         'obstacle_X_collision_free' (X in range 0,...,len(obstacles)-1),

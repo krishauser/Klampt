@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>396</width>
+    <width>386</width>
     <height>857</height>
    </rect>
   </property>
@@ -142,14 +142,14 @@
      <item>
       <widget class="QToolBox" name="centralTabWidget">
        <property name="currentIndex">
-        <number>0</number>
+        <number>3</number>
        </property>
        <widget class="QWidget" name="jointControlWidget">
         <property name="geometry">
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>378</width>
+          <width>368</width>
           <height>341</height>
          </rect>
         </property>
@@ -157,7 +157,13 @@
          <string>Joint control</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_3" stretch="1,8,2">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
          <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
           <number>0</number>
          </property>
          <property name="bottomMargin">
@@ -205,6 +211,21 @@
                <string>Destination</string>
               </property>
              </item>
+             <item>
+              <property name="text">
+               <string>Sensed drivers</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Commanded drivers</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Destination drivers</string>
+              </property>
+             </item>
             </widget>
            </item>
            <item>
@@ -241,7 +262,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>358</width>
+              <width>366</width>
               <height>18</height>
              </rect>
             </property>
@@ -318,9 +339,9 @@
            <widget class="QLabel" name="label">
             <property name="geometry">
              <rect>
-              <x>110</x>
+              <x>116</x>
               <y>10</y>
-              <width>67</width>
+              <width>61</width>
               <height>31</height>
              </rect>
             </property>
@@ -379,6 +400,14 @@
              <string>Set PID</string>
             </property>
            </widget>
+           <zorder>moveToPositionButton</zorder>
+           <zorder>setPositionButton</zorder>
+           <zorder>setVelocityButton</zorder>
+           <zorder>label</zorder>
+           <zorder>speedSpinBox</zorder>
+           <zorder>jointInterpolateCheck</zorder>
+           <zorder>setPIDButton</zorder>
+           <zorder>jointScrollArea</zorder>
           </widget>
          </item>
         </layout>
@@ -388,7 +417,7 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>378</width>
+          <width>368</width>
           <height>341</height>
          </rect>
         </property>
@@ -545,7 +574,7 @@
         <widget class="QLabel" name="speedLabel">
          <property name="geometry">
           <rect>
-           <x>110</x>
+           <x>120</x>
            <y>130</y>
            <width>51</width>
            <height>31</height>
@@ -632,7 +661,7 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>378</width>
+          <width>368</width>
           <height>341</height>
          </rect>
         </property>
@@ -647,7 +676,7 @@
           <rect>
            <x>110</x>
            <y>0</y>
-           <width>181</width>
+           <width>161</width>
            <height>27</height>
           </rect>
          </property>
@@ -710,7 +739,7 @@
          </property>
          <property name="geometry">
           <rect>
-           <x>290</x>
+           <x>280</x>
            <y>0</y>
            <width>81</width>
            <height>27</height>
@@ -777,7 +806,7 @@
           <rect>
            <x>110</x>
            <y>110</y>
-           <width>181</width>
+           <width>161</width>
            <height>27</height>
           </rect>
          </property>
@@ -791,7 +820,7 @@
          </property>
          <property name="geometry">
           <rect>
-           <x>290</x>
+           <x>280</x>
            <y>110</y>
            <width>81</width>
            <height>27</height>
@@ -810,7 +839,7 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>378</width>
+          <width>368</width>
           <height>341</height>
          </rect>
         </property>
@@ -819,12 +848,12 @@
         </attribute>
         <widget class="QPushButton" name="loadPresetsDirButton">
          <property name="enabled">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <property name="geometry">
           <rect>
            <x>10</x>
-           <y>10</y>
+           <y>0</y>
            <width>151</width>
            <height>27</height>
           </rect>
@@ -838,13 +867,13 @@
         </widget>
         <widget class="QPushButton" name="loadPresetButton">
          <property name="enabled">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <property name="geometry">
           <rect>
-           <x>180</x>
-           <y>10</y>
-           <width>151</width>
+           <x>170</x>
+           <y>0</y>
+           <width>131</width>
            <height>27</height>
           </rect>
          </property>
@@ -859,7 +888,7 @@
          <property name="geometry">
           <rect>
            <x>20</x>
-           <y>40</y>
+           <y>30</y>
            <width>131</width>
            <height>17</height>
           </rect>
@@ -872,7 +901,7 @@
          <property name="geometry">
           <rect>
            <x>190</x>
-           <y>40</y>
+           <y>30</y>
            <width>131</width>
            <height>17</height>
           </rect>
@@ -885,49 +914,49 @@
          <property name="geometry">
           <rect>
            <x>190</x>
-           <y>160</y>
-           <width>131</width>
+           <y>150</y>
+           <width>151</width>
            <height>17</height>
           </rect>
          </property>
          <property name="text">
-          <string>Trajectories</string>
+          <string>Cartesian Trajectories</string>
          </property>
         </widget>
         <widget class="QListWidget" name="configurationList">
          <property name="enabled">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <property name="geometry">
           <rect>
            <x>10</x>
-           <y>61</y>
-           <width>161</width>
-           <height>221</height>
-          </rect>
-         </property>
-        </widget>
-        <widget class="QListWidget" name="cartesianPoseList">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="geometry">
-          <rect>
-           <x>190</x>
-           <y>60</y>
+           <y>51</y>
            <width>161</width>
            <height>91</height>
           </rect>
          </property>
         </widget>
-        <widget class="QListWidget" name="trajectoryList">
+        <widget class="QListWidget" name="cartesianPoseList">
          <property name="enabled">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <property name="geometry">
           <rect>
            <x>190</x>
-           <y>180</y>
+           <y>50</y>
+           <width>161</width>
+           <height>91</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QListWidget" name="cartesianTrajectoryList">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="geometry">
+          <rect>
+           <x>190</x>
+           <y>170</y>
            <width>161</width>
            <height>101</height>
           </rect>
@@ -935,12 +964,12 @@
         </widget>
         <widget class="QPushButton" name="sendPresetToPoser">
          <property name="enabled">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <property name="geometry">
           <rect>
            <x>10</x>
-           <y>290</y>
+           <y>280</y>
            <width>121</width>
            <height>27</height>
           </rect>
@@ -951,12 +980,12 @@
         </widget>
         <widget class="QPushButton" name="moveToPreset">
          <property name="enabled">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <property name="geometry">
           <rect>
            <x>140</x>
-           <y>290</y>
+           <y>280</y>
            <width>101</width>
            <height>27</height>
           </rect>
@@ -967,12 +996,12 @@
         </widget>
         <widget class="QPushButton" name="executePreset">
          <property name="enabled">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <property name="geometry">
           <rect>
            <x>250</x>
-           <y>290</y>
+           <y>280</y>
            <width>101</width>
            <height>27</height>
           </rect>
@@ -981,13 +1010,77 @@
           <string>Execute</string>
          </property>
         </widget>
+        <widget class="QLabel" name="label_9">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>150</y>
+           <width>131</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Trajectories</string>
+         </property>
+        </widget>
+        <widget class="QListWidget" name="trajectoryList">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>170</y>
+           <width>161</width>
+           <height>101</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QComboBox" name="smoothingComboBox">
+         <property name="geometry">
+          <rect>
+           <x>250</x>
+           <y>310</y>
+           <width>101</width>
+           <height>27</height>
+          </rect>
+         </property>
+         <item>
+          <property name="text">
+           <string>None</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Pause</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Spline</string>
+          </property>
+         </item>
+        </widget>
+        <widget class="QLabel" name="label_4">
+         <property name="geometry">
+          <rect>
+           <x>170</x>
+           <y>310</y>
+           <width>81</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Smoothing</string>
+         </property>
+        </widget>
        </widget>
        <widget class="QWidget" name="motionPlanningWidget">
         <property name="geometry">
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>378</width>
+          <width>368</width>
           <height>341</height>
          </rect>
         </property>
@@ -1058,7 +1151,8 @@
           <string>Execute plan</string>
          </property>
          <property name="icon">
-          <iconset theme="media-playback-start"/>
+          <iconset theme="media-playback-start">
+           <normaloff>.</normaloff>.</iconset>
          </property>
         </widget>
         <widget class="QPushButton" name="planToCartesianButton">
