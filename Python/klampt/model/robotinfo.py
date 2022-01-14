@@ -27,12 +27,13 @@ class RobotInfo:
             or .rob.)
         baseType (str): specifies whether the robot has a mobile or floating
             base. Possible values are:
-                - 'fixed': rigidly attached
-                - 'floating': floating in space (e.g., drone, legged robot)
-                - 'differential': differential drive base
-                    (properties['differential'] should hold more info)
-                - 'dubins': Dubins car base (properties['dubins'] should hold
-                    more info)
+
+            - 'fixed': rigidly attached
+            - 'floating': floating in space (e.g., drone, legged robot)
+            - 'differential': differential drive base
+              (properties['differential'] should hold more info)
+            - 'dubins': Dubins car base (properties['dubins'] should hold
+              more info)
 
         parts (dict str->list): a set of named parts.  Each part consists
             of a list of link names or indices.
@@ -69,12 +70,15 @@ class RobotInfo:
             .rob or .urdf file when the calibration changes.
 
             Valid keys include:
-                - [sensor name]: a JSON file giving any of the named sensor's
-                    settings (typically, the transform T)
-                - kinematics: a JSON file giving link parent transforms and
-                    joint axes. The file should have format:
-                    ``{"link1":{"axis":VALUE,"Tparent":VALUE} ...}``
+
+            - [sensor name]: a JSON file giving any of the named sensor's
+              settings (typically, the transform T)
+            - kinematics: a JSON file giving link parent transforms and
+              joint axes. The file should have format:
+              ``{"link1":{"axis":VALUE,"Tparent":VALUE} ...}``
             
+        resourceDir (str, optional): the directory containing resources for
+            this robot.
         filePaths (list of str): a list of paths where files will be searched.
         robotModel (RobotModel): a cached robot model, loaded upon calling
             :func:`klamptModel`.
@@ -114,6 +118,7 @@ class RobotInfo:
         self.controllerArgs = None      # type: Optional[list]
         self.simulatorFile = None       # type: Optional[str]
         self.calibrationFiles = dict()  # type: Dict[str,str]
+        self.resourceDir = None         # type: Optional[str]
         if parts is None:
             parts = dict()
         else:
@@ -370,6 +375,23 @@ class RobotInfo:
                     res[i] = robot.link(v).getName()
             return res
 
+    def listResources(self) -> List[str]:
+        """Retrieves a list of all named resources, if resourceDir is set"""
+        if self.resourceDir is None:
+            return []
+        import os
+        return [item for item in os.listdir(self.resourceDir)]
+
+    def getResource(self, name : str, doedit='auto'):
+        """Loads a named resource."""
+        from klampt.io import resource
+        return resource.get(name, directory=self.resourceDir, doedit=doedit, world=self._worldTemp)
+    
+    def setResource(self, name :str, object) -> None:
+        """Saves a new named resource.  object can be any supported Klampt type."""
+        from klampt.io import resource
+        resource.set(name, object, directory=self.resourceDir)
+
     def _instance_load(self, f : Union[str,TextIO]) -> None:
         """Loads the info from a JSON file. f is a file name or file object."""
         from ..io import loader
@@ -381,7 +403,7 @@ class RobotInfo:
         self.endEffectors = dict()
         self.grippers = dict()
         REQUIRED = ['name','modelFile']
-        OPTIONAL = ['parts','baseType','endEffectors','grippers','properties','controllerFile','controllerArgs','simulatorFile','calibrationFiles','filePaths']
+        OPTIONAL = ['parts','baseType','endEffectors','grippers','properties','controllerFile','controllerArgs','simulatorFile','calibrationFiles','resourceDir','filePaths']
         for attr in REQUIRED+OPTIONAL:
             if attr not in jsonobj:
                 if attr in OPTIONAL: #optional
@@ -405,7 +427,7 @@ class RobotInfo:
         """Saves the info to a JSON file. f is a file object."""
         from ..io import loader
         jsonobj = dict()
-        for attr in ['name','modelFile','parts','baseType','properties','controllerFile','controllerArgs','simulatorFile','calibrationFiles','filePaths']:
+        for attr in ['name','modelFile','parts','baseType','properties','controllerFile','controllerArgs','simulatorFile','calibrationFiles','resourceDir','filePaths']:
             jsonobj[attr] = getattr(self,attr)
         ees = dict()
         for k,v in self.endEffectors.items():

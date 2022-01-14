@@ -5,9 +5,10 @@ from klampt.math import vectorops,so3,se3
 from klampt.model.robotinfo import RobotInfo
 from klampt.io import loader
 from klampt.vis.glcommon import GLWidgetPlugin
+from klampt.vis import gldraw
 from klampt.control.robotinterface import RobotInterfaceBase
 from klampt.control.networkrobotinterface import XMLRPCRobotInterfaceClient,XMLRPCRobotInterfaceServer
-from klampt.model import trajectory, ik
+from klampt.model import trajectory, ik, types
 import math
 import time
 import sys
@@ -98,6 +99,8 @@ class ControllerGLPlugin(GLWidgetPlugin):
         except NotImplementedError:
             self.dt = 0.1
         self.tNextIdle = 0
+        self.showPreset = False
+        self.preset = None
         
     def enableCartesianWidget(self,enabled,link=None):
         self.cartesianControlEnabled = enabled
@@ -121,7 +124,11 @@ class ControllerGLPlugin(GLWidgetPlugin):
                 self.cartesianGoalPoser.set(*Tsns)
 
     def setTargetConfig(self,qtgt):
-        self.robotPoser.set(qtgt)
+        """Sets the target configuration and updates the Cartesian pose."""
+        if qtgt is None:
+            qtgt = self.robotPoser.get()
+        else:
+            self.robotPoser.set(qtgt)
         if self.cartesianControlEnabled:
             if self.toolCoordinates is None:
                 print("Warning: cartesianControlEnabled=True but toolCoordinates=None?")
@@ -131,7 +138,32 @@ class ControllerGLPlugin(GLWidgetPlugin):
             ee = robot.link(self.endEffectorLink)
             t = ee.getWorldPosition(self.toolCoordinates)
             R = ee.getTransform()[0] 
-            self.cartesianGoalPoser.set(R,t)            
+            self.cartesianGoalPoser.set(R,t)
+    
+    def setTargetPose(self,Ttgt, q0 = None, activeLinks = None):
+        """Sets the target pose and update the IK.
+        
+        If Ttgt = None, gets the target from the goal poser.
+        """
+        if not self.cartesianControlEnabled: return
+        if Ttgt is None:
+            Ttgt = self.cartesianGoalPoser.get()
+        else:
+            self.cartesianGoalPoser.set(*Ttgt)
+        if q0 is None:
+            q0 = self.robotPoser.get()
+        tool_coordinates = self.toolCoordinates
+        link_origin_transform = vectorops.sub(Ttgt[1],so3.apply(Ttgt[0],tool_coordinates))
+
+        robot = self.world.robot(0)
+        obj = ik.objective(robot.link(activeLinks[-1]),R=Ttgt[0],t=link_origin_transform)
+        solver = ik.solver(obj)
+        if activeLinks is not None:
+            solver.setActiveDofs(activeLinks)
+        robot.setConfig(q0)
+        res = solver.solve()
+        if res:
+            self.robotPoser.set(robot.getConfig())
 
     def display(self):
         robot = self.world.robot(0)
@@ -158,6 +190,8 @@ class ControllerGLPlugin(GLWidgetPlugin):
             #restore colors
             for i in range(robot.numLinks()):
                 robot.link(i).appearance().setColor(*oldcolors[i])
+
+        gldraw.xform_widget(se3.identity(),0.2,0.01, fancy=True)
 
         #draw transform frames
         if self.Tsns is not None:
@@ -202,6 +236,55 @@ class ControllerGLPlugin(GLWidgetPlugin):
             GL.glPopMatrix()
             GL.glEnable(GL.GL_LIGHTING)
         
+        if self.showPreset:
+            if isinstance(self.preset,tuple):
+                GL.glColor3f(1,0,1,0.5)
+                gldraw.xform_widget(self.preset,0.1,0.01,lighting=False)
+            elif isinstance(self.preset,list):
+                GL.glEnable(GL.GL_LIGHTING)
+                robot.setConfig(self.preset)
+                for i in range(robot.numLinks()):
+                    robot.link(i).appearance().setColor(1,0,1,0.5)
+                robot.drawGL()
+                #restore colors
+                for i in range(robot.numLinks()):
+                    robot.link(i).appearance().setColor(*oldcolors[i])
+            elif isinstance(self.preset,trajectory.RobotTrajectory):
+                #draw line strip
+                GL.glLineWidth(4.0)
+                GL.glDisable(GL.GL_LIGHTING)
+                GL.glEnable(GL.GL_BLEND)
+                GL.glColor4f(1,0,1,0.5)
+                GL.glBegin(GL.GL_LINE_STRIP)
+                ee = robot.link(robot.numLinks()-1)
+                for m in self.preset.milestones:
+                    robot.setConfig(m)
+                    eepos = ee.getWorldPosition(self.toolCoordinates if self.toolCoordinates is not None else (0,0,0))
+                    GL.glVertex3fv(eepos)
+                GL.glEnd()
+            elif isinstance(self.preset,trajectory.SE3Trajectory):
+                #draw line strip
+                GL.glLineWidth(4.0)
+                GL.glDisable(GL.GL_LIGHTING)
+                GL.glEnable(GL.GL_BLEND)
+                GL.glColor4f(1,0,1,0.5)
+                GL.glBegin(GL.GL_LINE_STRIP)
+                for m in self.preset.milestones:
+                    R = m[:9]
+                    t = m[9:12]
+                    GL.glVertex3fv(t)
+                GL.glEnd()
+            elif isinstance(self.preset,trajectory.Trajectory):
+                #draw line strip
+                GL.glLineWidth(4.0)
+                GL.glDisable(GL.GL_LIGHTING)
+                GL.glEnable(GL.GL_BLEND)
+                GL.glColor4f(1,0,1,0.5)
+                GL.glBegin(GL.GL_LINE_STRIP)
+                for m in self.preset.milestones:
+                    GL.glVertex3fv(m[:3])
+                GL.glEnd()
+        
 
     def idle(self):
         self.gui.onIdle()
@@ -230,6 +313,10 @@ class ControllerGUI(QtWidgets.QMainWindow):
         self.qsns = None   #controller config
         self.qcmd = None   #controller config
         self.robot = controller.klamptModel()
+        self.configPresets = dict()
+        self.trajectoryPresets = dict()
+        self.cartesianPosePresets = dict()
+        self.cartesianTrajectoryPresets = dict()
         assert self.robot is not None,"klamptModel() method must be implemented for klampt_control to work"
         self.idleCount = 0
         # Splitter to show 2 views in same widget
@@ -244,6 +331,8 @@ class ControllerGUI(QtWidgets.QMainWindow):
         self.splitter.setHandleWidth(7)
         self.setCentralWidget(self.splitter)
         
+        self.suppressGuiEvents = False
+        self.panel.centralTabWidget.currentChanged.connect(self.onTabChange)
         self.panel.controllerLabel.setText("Controller: {}".format(controller))
         try:
             rate = controller.controlRate()
@@ -286,28 +375,48 @@ class ControllerGUI(QtWidgets.QMainWindow):
                     self.unmatchedEEs.remove(eename)
             self.partsToEEs[part] = eematches
 
+        #top region
         self.partList.currentIndexChanged.connect(self.onPartChange)
         self.panel.resetButton.clicked.connect(self.onReset)
         self.panel.estopButton.clicked.connect(self.onEstop)
         self.panel.softStopButton.clicked.connect(self.onSoftStop)
         
+        #joint control panel
         self.panel.configClipboardButton.clicked.connect(self.onClipConfig)
         self.jointScrollAreaLayout = self.panel.jointScrollAreaLayout
         self.jointScrollAreaLayout.setAlignment(QtCore.Qt.AlignTop)
         self.jointForms = []
-        self.suppressGuiEvents = False
-        
         self.panel.moveToPositionButton.clicked.connect(self.onMoveToPosition)
         self.panel.setPositionButton.clicked.connect(self.onSetPosition)
         self.panel.setVelocityButton.clicked.connect(self.onSetVelocity)
+        
+        #cartesian panel
         self.panel.moveToCartesianPositionButton.clicked.connect(self.onMoveToCartesianPosition)
         self.panel.setCartesianPositionButton.clicked.connect(self.onSetCartesianPosition)
         self.panel.setCartesianVelocityButton.clicked.connect(self.onSetCartesianVelocity)
-    
         self.panel.endEffectorList.currentIndexChanged.connect(self.onEndEffectorChanged)
         self.panel.toolXSpinBox.valueChanged.connect(self.onToolCoordinatesChanged)
         self.panel.toolYSpinBox.valueChanged.connect(self.onToolCoordinatesChanged)
         self.panel.toolZSpinBox.valueChanged.connect(self.onToolCoordinatesChanged)
+
+        #logging panel
+
+        #motion planning panel
+
+        #presets panel
+        self.panel.loadPresetsDirButton.clicked.connect(self.onLoadPresetsDir)
+        self.panel.loadPresetButton.clicked.connect(self.onLoadPreset)
+        if self.robotinfo.resourceDir is not None:
+            for item in os.listdir(self.robotinfo.resourceDir):
+                self.loadPreset(os.path.join(self.robotinfo.resourceDir,item))
+            self.refreshPresetLists()
+        self.panel.configurationList.itemSelectionChanged.connect(lambda : self.onPresetSelected(self.panel.configurationList))
+        self.panel.trajectoryList.itemSelectionChanged.connect(lambda : self.onPresetSelected(self.panel.trajectoryList))
+        self.panel.cartesianPoseList.itemSelectionChanged.connect(lambda : self.onPresetSelected(self.panel.cartesianPoseList))
+        self.panel.cartesianTrajectoryList.itemSelectionChanged.connect(lambda : self.onPresetSelected(self.panel.cartesianTrajectoryList))
+        self.panel.sendPresetToPoser.clicked.connect(self.onSendPresetToPoser)
+        self.panel.moveToPreset.clicked.connect(self.onMoveToPreset)
+        self.panel.executePreset.clicked.connect(self.onExecutePreset)
         
         self.errorText = []
         self.panel.errorTextarea.setPlainText("")
@@ -319,6 +428,13 @@ class ControllerGUI(QtWidgets.QMainWindow):
         self.updateActiveController(None,controller)
         for ee in self.unmatchedEEs:
             self.addError("End effector {} in RobotInfo does not match a part".format(ee))
+    
+    def onTabChange(self,index):
+        if index == 3:
+            #presets
+            self.plugin.showPreset = True
+        else:
+            self.plugin.showPreset = False
     
     def updateActiveController(self, activeName:str, active:RobotInterfaceBase):
         self.activePart = activeName
@@ -523,30 +639,35 @@ class ControllerGUI(QtWidgets.QMainWindow):
                     self.addException("sensedCartesianPosition",e)
                 if self.plugin.robotPoser.hasFocus():
                     #change poser
-                    T = None
-                    q = self.plugin.robotPoser.get()
-                    qcontroller = self.controller.configFromKlampt(q)
-                    activeIndices = self.controller.indices(self.activePart)
+                    self.plugin.setTargetConfig(None)
+                    #q = self.plugin.robotPoser.get()
+                    # T = None
+                    # qcontroller = self.controller.configFromKlampt(q)
+                    # activeIndices = self.controller.indices(self.activePart)
                     
-                    tool_coordinates = self.activeController.getToolCoordinates()
-                    T = klamptCartesianPosition(self.robot,qcontroller,activeIndices,tool_coordinates,'world')
-                    self.plugin.cartesianGoalPoser.set(*T)
+                    # tool_coordinates = self.activeController.getToolCoordinates()
+                    # T = klamptCartesianPosition(self.robot,qcontroller,activeIndices,tool_coordinates,'world')
+                    # self.plugin.cartesianGoalPoser.set(*T)
                 if self.plugin.cartesianGoalPoser.hasFocus():
                     #solve IK problem to update the robot poser
-                    Tgoal = self.plugin.cartesianGoalPoser.get()
                     q0 = self.controller.configToKlampt(self.controller.commandedPosition())
                     activeIndices = self.controller.indices(self.activePart)
                     activeLinks = sum([self.robot.driver(i).getAffectedLinks() for i in activeIndices],[])
-                    tool_coordinates = self.activeController.getToolCoordinates()
-                    link_origin_transform = vectorops.sub(Tgoal[1],so3.apply(Tgoal[0],tool_coordinates))
+                    self.plugin.setTargetPose(None,q0,activeLinks)
+                    # Tgoal = self.plugin.cartesianGoalPoser.get()
+                    # q0 = self.controller.configToKlampt(self.controller.commandedPosition())
+                    # activeIndices = self.controller.indices(self.activePart)
+                    # activeLinks = sum([self.robot.driver(i).getAffectedLinks() for i in activeIndices],[])
+                    # tool_coordinates = self.activeController.getToolCoordinates()
+                    # link_origin_transform = vectorops.sub(Tgoal[1],so3.apply(Tgoal[0],tool_coordinates))
 
-                    obj = ik.objective(self.robot.link(activeLinks[-1]),R=Tgoal[0],t=link_origin_transform)
-                    solver = ik.solver(obj)
-                    solver.setActiveDofs(activeLinks)
-                    self.robot.setConfig(q0)
-                    res = solver.solve()
-                    if res:
-                        self.plugin.robotPoser.set(self.robot.getConfig())
+                    # obj = ik.objective(self.robot.link(activeLinks[-1]),R=Tgoal[0],t=link_origin_transform)
+                    # solver = ik.solver(obj)
+                    # solver.setActiveDofs(activeLinks)
+                    # self.robot.setConfig(q0)
+                    # res = solver.solve()
+                    # if res:
+                    #     self.plugin.robotPoser.set(self.robot.getConfig())
                     pass
         
         self.idleCount += 1
@@ -785,6 +906,12 @@ class ControllerGUI(QtWidgets.QMainWindow):
             q = self.plugin.qcmd
         elif source == 2:
             q = self.plugin.robotPoser.get()
+        elif source == 3:
+            q = self.qsns
+        elif source == 4:
+            q = self.qcmd
+        elif source == 5:
+            q = self.controller.configFromKlampt(self.plugin.robotPoser.get())
         else:
             assert False,"This code should not be reached"
         if q is None:
@@ -867,6 +994,192 @@ class ControllerGUI(QtWidgets.QMainWindow):
                 Tcmd = self.activeController.commandedCartesianPosition()
                 self.plugin.cartesianGoalPoser.set(*Tcmd)
         self.plugin.setToolCoordinates(local)
+    
+    def onLoadPresetsDir(self):
+        rootdir = self.robotinfo.resourceDir if self.robotinfo.resourceDir is not None else ''
+        file = str(QtWidgets.QFileDialog.getExistingDirectory(self, "Select Directory",directory=rootdir))
+        if not file: return
+        for item in os.listdir(file):
+            self.loadPreset(os.path.join(file,item))
+        self.refreshPresetLists()
+    
+    def onLoadPreset(self):
+        rootdir = self.robotinfo.resourceDir if self.robotinfo.resourceDir is not None else ''
+        strlist = QtWidgets.QFileDialog.getOpenFileNames(self, "Select One or more files", directory=rootdir, filter="Configs (*.config);;Points (*.vector3);;Rigid transforms (*.xform);;Trajectories (*.path, *.traj);;JSON files (*.json)")
+        if len(strlist) == 0: return
+        if len(strlist) == 2 and str(strlist[0]).startswith("['"):  #Qt quirk -- string as list needs to be parsed?
+            items = str(strlist[0]).split("'")
+            strlist = []
+            for i in items:
+                if i in ['[',']',', ']:
+                    continue
+                strlist.append(i)
+        for i in range(len(strlist)):
+            item = str(strlist[i])
+            self.loadPreset(item)
+        self.refreshPresetLists()
+    
+    def refreshPresetLists(self):
+        self.panel.configurationList.clear()
+        self.panel.trajectoryList.clear()
+        self.panel.cartesianPoseList.clear()
+        self.panel.cartesianTrajectoryList.clear()
+        for k in sorted(self.configPresets.keys()):
+            self.panel.configurationList.addItem(k)
+        for k in sorted(self.cartesianPosePresets.keys()):
+            self.panel.cartesianPoseList.addItem(k)
+        for k in sorted(self.trajectoryPresets.keys()):
+            self.panel.trajectoryList.addItem(k)
+        for k in sorted(self.cartesianTrajectoryPresets.keys()):
+            self.panel.cartesianTrajectoryList.addItem(k)
+
+    def loadPreset(self,item):
+        itemfile = os.path.split(item)[1]
+        itemname = os.path.splitext(itemfile)[0]
+        try:
+            res = loader.load('auto',item)
+        except Exception as e:
+            print(e)
+            print("{}: couldn't read as a Klampt type, skipping".format(itemfile))
+            return False
+        type = types.object_to_type(res,['Config','RigidTransform','Trajectory'])
+        if type is None:
+            print("{}: couldn't read as supported preset type, skipping".format(itemfile))
+            return False
+        if type == 'Config':
+            if len(res) not in [self.robot.numLinks(),self.robot.numDrivers(),3]:
+                print("{}: vector does not match the robot's # of links, # of drivers, and is not a point".format(itemfile))
+                return False
+            if len(res) == self.robot.numLinks():
+                self.configPresets[itemname] = res
+            elif len(res) == self.robot.numDrivers():
+                self.configPresets[itemname] = self.robot.configFromDrivers(res)
+            else:
+                self.cartesianPosePresets[itemname] = res
+            print("{}: recognized as Config".format(itemfile))
+        elif type == 'RigidTransform':
+            print("{}: recognized as RigidTransform".format(itemfile))
+            self.cartesianPosePresets[itemname] = res
+        else:
+            #trajectory
+            if len(res.milestones) == 0:
+                print("{}: empty trajectory, skipping".format(itemfile))
+                return False
+            n = len(res.milestones[0])
+            if n not in [self.robot.numLinks(),self.robot.numLinks()*2,self.robot.numDrivers(),12,3]:
+                print("{}: trajectory doesn't match the robot's # of links, # of drivers, and is not Cartesian".format(itemfile))
+                return False
+            if n == self.robot.numLinks():
+                print("{}: recognized as Trajectory".format(itemfile))
+                if n in [12,3]:
+                    print("Warning {} is ambiguous, could be cartesian trajectory".format(itemfile))
+                self.trajectoryPresets[itemname] = trajectory.RobotTrajectory(self.robot,res.times,res.milestones)
+            elif n == self.robot.numLinks()*2:
+                print("{}: recognized as HermiteTrajectory")
+                if n in [12,3]:
+                    print("Warning {} is ambiguous, could be cartesian trajectory".format(itemfile))
+                self.trajectoryPresets[itemname] = trajectory.HermiteTrajectory(res.times,res.milestones)
+            elif n == self.robot.numDrivers():
+                print("{}: recognized as Trajectory")
+                if n in [12,3]:
+                    print("Warning {} is ambiguous, could be cartesian trajectory".format(itemfile))
+                for i,m in enumerate(res.milestones):
+                    res.milestones[i] = self.controller.configToKlampt(m)
+                self.trajectoryPresets[itemname] = trajectory.RobotTrajectory(self.robot,res.times,res.milestones)
+            elif n == 12:
+                print("{}: recognized as SE3Trajectory")
+                self.cartesianTrajectoryPresets[itemname] = trajectory.SE3Trajectory(res.times,res.milestones)
+            else:
+                print("{}: recognized as Vector3 Trajectory")
+                self.cartesianTrajectoryPresets[itemname] = res
+        return True
+    
+    def onPresetSelected(self,widget):
+        if self.suppressGuiEvents: return
+        self.suppressGuiEvents = True
+        deselected = 0
+        for widget2 in [self.panel.configurationList,self.panel.trajectoryList,self.panel.cartesianPoseList,self.panel.cartesianTrajectoryList]:
+            if widget != widget2:
+                deselected += 1
+                widget2.setCurrentItem(None)
+                widget2.setCurrentRow(-1)
+        val = self.getPreset()
+        if val is not None:
+            self.plugin.preset = val
+        self.suppressGuiEvents = False
+    
+    def getPreset(self,start=False):
+        if self.panel.configurationList.currentItem() is not None:
+            return self.configPresets[self.panel.configurationList.currentItem().text()]
+        elif self.panel.cartesianPoseList.currentItem() is not None:
+            tgt = self.cartesianPosePresets[self.panel.cartesianPoseList.currentItem().text()]
+            if len(tgt) == 3:
+                T = self.plugin.cartesianGoalPoser.get()
+                tgt = (T[0],tgt)
+            return tgt
+        elif self.panel.trajectoryList.currentItem() is not None:
+            traj = self.trajectoryPresets[self.panel.trajectoryList.currentItem().text()]
+            if start:
+                return traj.eval(traj.startTime())
+            else:
+                return traj
+        elif self.panel.cartesianTrajectoryList.currentItem() is not None:
+            traj = self.cartesianTrajectoryPresets[self.panel.cartesianTrajectoryList.currentItem().text()]
+            if start:
+                tgt = traj.eval(traj.startTime())
+                if len(tgt) == 3:
+                    T = self.plugin.cartesianGoalPoser.get()
+                    tgt = (T[0],tgt)
+                return tgt
+            else:
+                return traj
+        return None
+    
+    def onSendPresetToPoser(self):
+        val = self.getPreset(True)
+        if val is None: return
+        if isinstance(val,tuple):
+            self.plugin.setTargetPose(val)
+        else:
+            self.plugin.setTargetConfig(val)
+    
+    def onMoveToPreset(self):
+        val = self.getPreset(True)
+        if val is None: return
+        if isinstance(val,tuple):
+            self.plugin.setTargetPose(val)
+            self.onMoveToCartesianPosition()
+        else:
+            self.plugin.setTargetConfig(val)
+            self.onMoveToPosition()
+    
+    def onExecutePreset(self):
+        val = self.getPreset()
+        if isinstance(val,tuple):
+            self.plugin.setTargetPose(val)
+            self.onMoveToCartesianPosition()
+        elif isinstance(val,list):
+            self.plugin.setTargetConfig(val)
+            self.onMoveToPosition()
+        elif isinstance(val,trajectory.RobotTrajectory):
+            start = self.getPreset(True)
+            self.plugin.setTargetConfig(start)
+            self.onMoveToPosition()
+            speed = self.panel.speedSpinBox.value()
+            smoothing = [None,'pause','spline'][self.panel.smoothingComboBox.currentIndex()]
+            with ControllerStepContext(self):
+                trajectory.execute_trajectory(val,self.controller,speed=speed,smoothing=smoothing)
+        elif isinstance(val,trajectory.HermiteTrajectory):
+            start = self.getPreset(True)
+            self.plugin.setTargetConfig(start)
+            self.onMoveToPosition()
+            speed = self.panel.speedSpinBox.value()
+            smoothing = [None,'pause','spline'][self.panel.smoothingComboBox.currentIndex()]
+            with ControllerStepContext(self):
+                trajectory.execute_trajectory(val,self.controller,speed=speed,smoothing=smoothing)
+        else:
+            print("TODO: execute cartesian trajectory")
+            pass
 
     def updateStatus(self):
         if not self.advancing: return
@@ -919,7 +1232,7 @@ def main():
         
         OPTS can be any of
         --server IP: launch the controller as a standalone XML-RPC server
-            (recommend using "localhost:7881")
+            (recommend using "0.0.0.0:7881")
         --client IP: use an XML-RPC client as the controller.  Try
             "http://localhost:7881".
         --sim: simulate the robot and use a standard controller.  Equivalent to
@@ -1004,6 +1317,11 @@ def main():
     if not res:
         print("Error starting up controller")
         exit(1)
+
+    import atexit
+    def close_controller():
+        controller.close()
+    atexit.register(close_controller)
     
     if controller.properties.get('klamptModelFile',None):
         if world.numRobots()==0:
@@ -1036,8 +1354,8 @@ def main():
     vis.run()
     del g_gui
     
-    #close the controller
     controller.close()
+    atexit.unregister(close_controller)
     return
 
 
