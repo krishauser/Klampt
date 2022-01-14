@@ -386,7 +386,8 @@ class ResourceBrowser(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.warning(self.splitter,"Creation not available","Unable to create item of type "+type+", did you remember to add items to the reference world?")
             return
         if obj is not None and save:
-            fn = resource.save(obj,type,directory='')
+            cur_file_path = self.model.filePath(self.view.rootIndex())
+            fn = resource.save(obj,type,directory=cur_file_path)
             if fn is not None:
                 self.loadedItem(fn,obj)
                 #TODO: should we add to selection in tree view?
