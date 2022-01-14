@@ -6,7 +6,7 @@ import numpy as np
 from klampt.math import so3,se3
 from ..model import types
 
-supportedTypes = set(['Vector3','Point','Matrix3','Rotation','RigidTransform',
+SUPPORTED_TYPES = set(['Vector3','Point','Matrix3','Rotation','RigidTransform',
         'Config','Configs','Trajectory',
         'TriangleMesh','PointCloud','VolumeGrid','Geometry3D' ])
 """set of supported types for numpy I/O"""
@@ -30,13 +30,13 @@ def to_numpy(obj,type='auto'):
     If you want to get a transformed point cloud or mesh, you can pass in a
     Geometry3D as the obj, and its geometry data type as the type.
     """
-    global supportedTypes 
+    global SUPPORTED_TYPES 
     if type == 'auto':
-        otype = types.object_to_type(obj,supportedTypes)
+        otype = types.object_to_type(obj,SUPPORTED_TYPES)
         if otype is None and type=='auto':
             raise ValueError('obj is not a supported type: '+', '.join(otype))
         type = otype
-    if type not in supportedTypes:
+    if type not in SUPPORTED_TYPES:
         raise ValueError(type+' is not a supported type')
     if type == 'RigidTransform':
         return np.array(se3.homogeneous(obj))
@@ -112,12 +112,12 @@ def from_numpy(obj,type='auto',template=None):
     * VolumeGrid: accepts a triple (bmin,bmax,array)
     * Geometry3D: accepts a pair (T,geomdata)
     """
-    global supportedTypes 
+    global SUPPORTED_TYPES 
     if type == 'auto' and template is not None:
         otype = types.object_to_types(template)
         if isinstance(otype,(list,tuple)):
             for t in otype:
-                if t in supportedTypes:
+                if t in SUPPORTED_TYPES:
                     type = t
                     break
             if type == 'auto':
@@ -152,7 +152,7 @@ def from_numpy(obj,type='auto',template=None):
                 type = 'Config'
             else:
                 raise ValueError("Can't auto-detect type of matrix of shape "+str(obj.shape))
-    if type not in supportedTypes:
+    if type not in SUPPORTED_TYPES:
         raise ValueError(type+' is not a supported type')
     if type == 'RigidTransform':
         return se3.from_homogeneous(obj)
@@ -252,3 +252,6 @@ def from_numpy(obj,type='auto',template=None):
         return g
     else:
         return obj.flatten()
+
+from .loader import _DeprecatedDict
+supportedTypes = _DeprecatedDict("supportedTypes","SUPPORTED_TYPES",SUPPORTED_TYPES)
