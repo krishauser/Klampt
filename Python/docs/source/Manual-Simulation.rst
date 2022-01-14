@@ -130,7 +130,7 @@ API summary
 
 To create and manage a simulation:
 
--  ``sim = Simulator(world): creates a simulator for a given``\ WorldModel\`
+-  ``sim = Simulator(world)``: creates a simulator for a given ``WorldModel``
    (note: cannot modify the number of entities in the world at this
    point, undefined behavior will occur if you do!)
 -  ``sim.getWorld()``: retrieves the simulation’s WorldModel
