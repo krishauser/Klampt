@@ -4224,7 +4224,7 @@ class RobotInterfaceEmulator:
         for i,j in enumerate(self.jointData):
             j.sensedPosition = qsns[i]
             j.sensedVelocity = 0 if vsns is None else vsns[i]
-            j.sensedTorque = None if tsns is None else tsns[i]
+            #j.sensedTorque = None if tsns is None else tsns[i]
             if qcmd is not None:
                 j.commandedPosition = qcmd[i]
             else:
@@ -4233,8 +4233,10 @@ class RobotInterfaceEmulator:
                 j.commandedVelocity = vcmd[i]
             else:
                 j.commandedVelocity = 0
-            if tcmd is not None:
+            if tcmd is not None and tcmd[i] is not None:
                 j.commandedTorque = tcmd[i]
+            else:
+                j.commandedTorque = 0
         
     
     def advanceClock(self,newClock,rate):
