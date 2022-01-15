@@ -197,6 +197,7 @@ RigidObjectModel* WorldViewProgram::ClickObject(const Ray3D& r,Vector3& localpt)
   return world->RayCastObject(r,localpt);
 }
 
+#endif // HAVE_GLUI
+
 } //namespace Klampt
 
-#endif // HAVE_GLUI
