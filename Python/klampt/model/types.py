@@ -275,6 +275,16 @@ def transfer(object,source_robot,target_robot,link_map=None):
             tlink = target_robot.link(sname)
             if tlink.index >= 0:
                 link_map[i] = tlink.index
+        warn_threshold = min(source_robot.numLinks()//2,target_robot.numLinks()//2)
+        if len(link_map) < warn_threshold:
+            print("klampt.model.types.transfer: warning, auto-detected link map:")
+            print(link_map)
+            print("Source links:")
+            for i in range(source_robot.numLinks()):
+                print(" ",source_robot.link(i).getName())
+            print("Target links:")
+            for i in range(target_robot.numLinks()):
+                print(" ",target_robot.link(i).getName())
     if len(link_map)==1:
         items = list(link_map.items())
         if items[0][0] =='*':
