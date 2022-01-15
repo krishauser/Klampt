@@ -137,7 +137,7 @@ def main():
         if callable(output_file):
             base,ext = os.path.splitext(input_file)
             output = output_file(base,ext)
-            print("reconfigured filename",input_file,"to",output)
+            #print("reconfigured filename",input_file,"to",output)
         else:
             output = output_file
         if output_folder is not None:
