@@ -376,9 +376,7 @@ class SimpleSimulator (Simulator):
     def controlStep(self, dt :float) -> None:
         for i in range(self.world.numRobots()):
             c = self.robotControllers[i]
-            if callable(c):
-                c(self.controller(i))
-            else:
+            if hasattr(c,'advance'):  #it's a block
                 #build measurement dict
                 measurements = {'t':self.getTime(),'dt':dt}
                 for e in self.sensorEmulators[i]:
@@ -403,3 +401,5 @@ class SimpleSimulator (Simulator):
                 #process output => sim using actuator emulators
                 for e in self.actuatorEmulators[i]:
                     e.process(output,dt)
+            else:  #it's a callable
+                c(self.controller(i))
