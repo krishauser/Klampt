@@ -2,7 +2,7 @@ from klampt import *
 from klampt import WidgetSet,RobotPoser,PointPoser,TransformPoser
 from klampt import vis
 from klampt.math import vectorops,so3,se3
-from klampt.model.robotinfo import RobotInfo
+from klampt.model.robotinfo import RobotInfo,_resolve_file
 from klampt.io import loader
 from klampt.vis.glcommon import GLWidgetPlugin
 from klampt.vis import gldraw
@@ -407,8 +407,9 @@ class ControllerGUI(QtWidgets.QMainWindow):
         self.panel.loadPresetsDirButton.clicked.connect(self.onLoadPresetsDir)
         self.panel.loadPresetButton.clicked.connect(self.onLoadPreset)
         if self.robotinfo.resourceDir is not None:
-            for item in os.listdir(self.robotinfo.resourceDir):
-                self.loadPreset(os.path.join(self.robotinfo.resourceDir,item))
+            resourceDir = _resolve_file(self.robotinfo.resourceDir,self.robotinfo.filePaths)
+            for item in os.listdir(resourceDir):
+                self.loadPreset(os.path.join(resourceDir,item))
             self.refreshPresetLists()
         self.panel.configurationList.itemSelectionChanged.connect(lambda : self.onPresetSelected(self.panel.configurationList))
         self.panel.trajectoryList.itemSelectionChanged.connect(lambda : self.onPresetSelected(self.panel.trajectoryList))

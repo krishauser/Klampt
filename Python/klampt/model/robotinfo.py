@@ -394,17 +394,20 @@ class RobotInfo:
         if self.resourceDir is None:
             return []
         import os
-        return [item for item in os.listdir(self.resourceDir)]
+        resourceDir = _resolve_file(self.resourceDir,self.filePaths)
+        return [item for item in os.listdir(resourceDir)]
 
     def getResource(self, name : str, doedit='auto'):
         """Loads a named resource."""
         from klampt.io import resource
-        return resource.get(name, directory=self.resourceDir, doedit=doedit, world=self._worldTemp)
+        resourceDir = _resolve_file(self.resourceDir,self.filePaths)
+        return resource.get(name, directory=resourceDir, doedit=doedit, world=self._worldTemp)
     
     def setResource(self, name :str, object) -> None:
         """Saves a new named resource.  object can be any supported Klampt type."""
         from klampt.io import resource
-        resource.set(name, object, directory=self.resourceDir)
+        resourceDir = _resolve_file(self.resourceDir,self.filePaths)
+        resource.set(name, object, directory=resourceDir)
 
     def _instance_load(self, f : Union[str,TextIO]) -> None:
         """Loads the info from a JSON file. f is a file name or file object."""
@@ -989,7 +992,15 @@ class GripperInfo:
         
 
 
-
+def _resolve_file(file,search_paths=[]):
+    if '~' in file:
+        return _resolve_file(os.path.expanduser(file),search_paths)
+    if os.path.exists(file):
+        return os.path.abspath(file)
+    for path in search_paths:
+        if os.path.exists(os.path.join(path,file)):
+            return os.path.abspath(os.path.join(path,file))
+    raise RuntimeError("Unable to resolve {} in paths {}".format(file,search_paths))
 
 def _dynamic_load_module(fn,search_paths=[]):
     if fn.endswith('py') or fn.endswith('pyc'):
