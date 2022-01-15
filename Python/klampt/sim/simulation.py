@@ -302,7 +302,7 @@ class SimpleSimulator (Simulator):
     def drawControllersGL(self) -> None:
         #draw controllers
         for i in range(self.world.numRobots()):
-            if self.robotControllers[i] == None: 
+            if self.robotControllers[i] is None: 
                 continue
             if not hasattr(self.robotControllers[i],'drawGL'):
                 continue
@@ -401,5 +401,5 @@ class SimpleSimulator (Simulator):
                 #process output => sim using actuator emulators
                 for e in self.actuatorEmulators[i]:
                     e.process(output,dt)
-            else:  #it's a callable
+            elif callable(c):  #it's a callable(SimRobotController)
                 c(self.controller(i))
