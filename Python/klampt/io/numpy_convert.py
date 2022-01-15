@@ -253,5 +253,5 @@ def from_numpy(obj,type='auto',template=None):
     else:
         return obj.flatten()
 
-from .loader import _DeprecatedDict
-supportedTypes = _DeprecatedDict("supportedTypes","SUPPORTED_TYPES",SUPPORTED_TYPES)
+from .loader import _DeprecatedList
+supportedTypes = _DeprecatedList("supportedTypes","SUPPORTED_TYPES",SUPPORTED_TYPES)
