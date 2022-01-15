@@ -570,7 +570,7 @@ class GripperInfo:
             klamptModel.
         klamptModel (str, optional): the Klamp't .rob or .urdf model to which
             this refers to.  Note: this is not necessarily a model of just the
-            gripper. 
+            gripper.  To get just the gripper, use ``self.getSubrobot()``.
     """
 
     all_grippers = dict()
@@ -586,7 +586,7 @@ class GripperInfo:
     @staticmethod
     def load(fn: str) -> 'GripperInfo':
         """Loads / registers a GripperInfo from a JSON file previously saved to disk."""
-        res = GripperInfo()
+        res = GripperInfo(fn,-1)
         with open(fn,'r') as f:
             jsonobj = json.load(f)
             res.fromJson(jsonobj)
@@ -819,23 +819,8 @@ class GripperInfo:
                 robot.setConfig(q0)
             return res
         else:
-            import numpy as np
-            from klampt.io import numpy_convert
-            #merge the gripper parts into a static geometry
-            verts = []
-            tris = []
-            nverts = 0
-            for i,link in enumerate(gripperLinks):
-                xform,(iverts,itris) = numpy_convert.to_numpy(robot.link(link).geometry())
-                verts.append(np.dot(np.hstack((iverts,np.ones((len(iverts),1)))),xform.T)[:,:3])
-                tris.append(itris+nverts)
-                nverts += len(iverts)
-            verts = np.vstack(verts)
-            tris = np.vstack(tris)
-            for t in tris:
-                assert all(v >= 0 and v < len(verts) for v in t)
-            mesh = numpy_convert.from_numpy((verts,tris),'TriangleMesh')
-            res.setTriangleMesh(mesh)
+            from . import geometry
+            res = geometry.merge(*[robot.link(link) for link in gripperLinks])
             if qfinger is not None:
                 robot.setConfig(q0)
             return res
