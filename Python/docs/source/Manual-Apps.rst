@@ -6,10 +6,9 @@ Klamp't comes with a few utility programs that are installed into your Python/Sc
 - ``klampt_browser``: a program for browsing through and editing resources.
 - ``klampt_control``: a program for controlling robots and debugging Robot Interface Layer controllers.
 - ``klampt_path``: a command-line utility for modifying paths.
+- ``klampt_resource``: a utility program for modifying resources and generating thumbnails.
 - ``klampt_sim``: an imitation of the SimTest program. 
   An entry point to fast prototyping of controllers using the Python API.
-- ``klampt_thumbnails``: a utility program for generating thumbnails of
-  worlds, robots, objects, and resources.
 
 klampt\_browser
 ---------------
@@ -108,13 +107,22 @@ in the experimental Controller API.  The following image shows the output from::
 
 .. image:: _static/images/klampt_sim.png
 
-klampt\_thumbnails
+klampt\_resource
 -------------------
 
-``klampt_thumbnails`` generates a folder of thumbnail PNGs given a folder containing Klampt
-resources.  This is most useful when you have programmatically generated many worlds, configurations,
-or motions.
+``klampt_resource --robot=INPUT_ROBOT --transfer=TARGET_ROBOT INPUT_FOLDER [OUTPUT_FOLDER]`` 
+converts all compatible resources from one robot to another.  The robots must share link names.
+Applicable resource types are:
+``Config (.config)``, ``Configs (.configs)``, ``Trajectory (.path, .traj)``, ``MultiPath (.xml)``,
+``IKObjective (.ikgoal)``, ``Hold (.hold)``, ``Grasp (.grasp)``.
 
+``klampt_resource --thumbnails --world=WORLD INPUT_FOLDER [OUTPUT_FOLDER]`` generates a folder of 
+thumbnail PNGs given a folder containing Klampt resources.  This is useful when you have 
+programmatically generated many  worlds, configurations, or motions. 
+
+``klampt_resource --convert=TYPE INPUT [OUTPUT]`` converts a resource from one type to another.
+Currently only supports TYPE "json".  See ``klampt_path`` for conversions of path / trajectory
+types.
 
 Example files
 -------------
