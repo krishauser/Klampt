@@ -2,7 +2,18 @@
 (non-robot-specific) code. 
 
 A robot typically consists of a set of parts, a base (either fixed or
-moving), end effectors, a controller, and other assorted properties. 
+moving), end effectors, a controller, and other assorted properties.  The
+:class:`RobotInfo` data structure will let you define these and store them
+in a human-editable file format.  This is also used for ``klampt_control`` and
+some Robot Interface Layer controllers (see
+:class:`klampt.control.robotinterfaceutils.OmniRobotInterface`).
+
+Grippers also come with a lot of semantic information, such as typical
+approach directions, opening widths, synergies, etc. These should be stored in
+a :class:`GripperInfo` structure.  (So far, Klamp't doesn't have built-in
+integration with grasp planning algorithms, but we hope to add more in the
+future.)
+
 """
 from ctypes import ArgumentError
 from klampt.control.robotinterface import RobotInterfaceBase
@@ -56,7 +67,7 @@ class RobotInfo:
 
             Should be a Python file (``/path/to/file.py``) or module
             (`package.module`) containing a function
-            ``make(robotModel,sim,robotIndex)`` which returns a pair
+            ``make(sim,robotIndex)`` which returns a pair
             ``(controller, emulators)``.
 
             Here, ``controller`` is a :class:`RobotInterfaceBase` configured
@@ -102,8 +113,11 @@ class RobotInfo:
         res = RobotInfo(None)
         res.load(fn)
         if res.modelFile is not None:  #make sure the model file is an absolute path
-            if not res.modelFile.startswith('/') and not res.modelFile.startswith('http:/')  and not res.modelFile.startswith('https://'):
+            if not res.modelFile.startswith('/') and not res.modelFile.startswith('http://')  and not res.modelFile.startswith('https://'):
                 res.modelFile = os.path.abspath(os.path.join(os.path.split(fn)[0],res.modelFile))
+        path,file = os.path.split(fn)
+        if path:
+            res.filePaths.append(path)
         RobotInfo.register(res)
         return res
 
@@ -223,7 +237,7 @@ class RobotInfo:
         """
         if self.controllerFile is None:
             raise RuntimeError("Can't create controller for "+self.name+", no file given")
-        mod = _dynamic_load_module(self.controllerFile)
+        mod = _dynamic_load_module(self.controllerFile,self.filePaths)
         try:
             maker = mod.make
         except AttributeError:
@@ -259,17 +273,17 @@ class RobotInfo:
         try:
             maker = mod.make
         except AttributeError:
-            raise RuntimeError("Module {} must have a make(sim,) method".format(mod.__name__))
+            raise RuntimeError("Module {} must have a make(sim,robotIndex) method".format(mod.__name__))
         try:
-            res = mod.make(robotModel,sim,robotIndex)
+            res = mod.make(sim,robotIndex)
         except Exception as e:
-            raise RuntimeError("Error running make(robotModel,sim,robotIndex) for module {}: {}"%(mod.__name__,str(e)))
+            raise RuntimeError("Error running make(sim,robotIndex) for module {}: {}"%(mod.__name__,str(e)))
         try:
             controller,emulators = res
             for e in emulators:
                 pass
         except Exception:
-            raise RuntimeError("Result of make(robotModel,sim,robotIndex) for module {} is not a pair (controller,emulators)"%(mod.__name__,))
+            raise RuntimeError("Result of make(sim,robotIndex) for module {} is not a pair (controller,emulators)"%(mod.__name__,))
         sim.setController(robotIndex,controller)
         for e in emulators:
             sim.addEmulator(robotIndex,e)
@@ -581,6 +595,9 @@ class GripperInfo:
         name : str = None, register=True):
         """From a standalone gripper, return a GripperInfo such that the link
         indices are shifted onto a new robot model.
+        
+        klamptModel should contain the arm as well as the gripper links, and
+        baseLink should be the name or index of the gripper base on the model.
         """
         if name is None:
             name = gripper.name + "_mounted"
@@ -653,7 +670,7 @@ class GripperInfo:
         return vectorops.interpolate(self.closedConfig,self.openConfig,amount)
     
     def configToOpening(self, qfinger : Vector) -> float:
-        """Estimates far qfinger is from closedConfig to openConfig.
+        """Estimates how far qfinger is from closedConfig to openConfig.
         Only meaningful if qfinger is close to being along the straight
         C-space line between the two.
         """
@@ -977,28 +994,32 @@ class GripperInfo:
 def _dynamic_load_module(fn,search_paths=[]):
     if fn.endswith('py') or fn.endswith('pyc'):
         path,base = os.path.split(fn)
-        mod_name,file_ext = os.path.splitext(base)
-        try:
-            sys.path.append(os.path.abspath(path))
-            mod = importlib.import_module(mod_name,base)
-        except ImportError as e:
-            if not fn.startswith('/'):
-                loaded = False
-                for search_path in search_paths:
-                    try:
-                        sys.path.append(os.path.abspath(os.path.join(search_path,path)))
-                        mod = importlib.import_module(mod_name,base)
-                        sys.path.pop(-1)
-                        loaded = True
-                        break
-                    except ImportError:
-                        pass
-                    finally:
-                        sys.path.pop(-1)
-            if not loaded:
-                raise e
-        finally:
-            sys.path.pop(-1)
+        loaded = False
+        exc = None
+        for fullpath in [None] + search_paths:
+            if fullpath is None:
+                fullpath = fn
+            else:
+                fullpath = os.path.join(fullpath,fn)
+            if os.path.exists(fullpath):
+                path,base = os.path.split(fullpath)
+                mod_name,file_ext = os.path.splitext(base)
+                try:
+                    sys.path.append(os.path.abspath(path))
+                    print("Try path",sys.path[-1])
+                    mod = importlib.import_module(mod_name,base)
+                    sys.path.pop(-1)
+                    loaded = True
+                    break
+                except ImportError as e:
+                    import traceback
+                    traceback.print_exc()
+                    exc = e
+                finally:
+                    sys.path.pop(-1)
+        if not loaded:
+            print("Unable to load module",base,"in any of",path,"+s",search_paths)
+            raise exc
     else:
         try:
             mod = importlib.import_module(fn)
@@ -1011,7 +1032,7 @@ def _dynamic_load_module(fn,search_paths=[]):
                         mod = importlib.import_module(fn)
                         loaded = True
                         break
-                    except ImportError:
+                    except ImportError as e:
                         pass
                     finally:
                         sys.path.pop(-1)
