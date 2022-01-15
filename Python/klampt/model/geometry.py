@@ -25,16 +25,23 @@ with plane estimation.
 :func:`point_cloud_colors` and :func:`point_cloud_set_colors` sets / gets 
 colors from a PointCloud.
 
+Other utilities
+===============
+
+:func:`merge` can put together TriangleMesh and PointCloud geometries into
+unified geometries.
+
+:func:`triangle_normals` computes triangle normals for a TriangleMesh.
+
 """
 
 from ..robotsim import Geometry3D,PointCloud,TriangleMesh
 import math
 from .create import primitives
 from ..math import vectorops,so3,se3
-
-_has_numpy = False
-_tried_numpy_import = False
-np = None
+from typing import Union, Tuple, Sequence
+from .typing import Vector3
+import numpy as np
 
 _has_scipy = False
 _tried_scipy_import = False
@@ -45,22 +52,6 @@ box = primitives.box
 
 sphere = primitives.sphere
 """Alias for :func:`klampt.model.create.primitives.sphere`"""
-
-def _try_numpy_import():
-    global _has_numpy,_tried_numpy_import
-    global np
-    if _tried_numpy_import:
-        return _has_numpy
-    _tried_numpy_import = True
-    try:
-        import numpy as np
-        _has_numpy = True
-        #sys.modules['numpy'] = numpy
-    except ImportError:
-        import warnings
-        warnings.warn("klampt.model.geometry.py: numpy not available.",ImportWarning)
-        _has_numpy = False
-    return _has_numpy
 
 def _try_scipy_import():
     global _has_scipy,_tried_scipy_import
@@ -90,7 +81,6 @@ class PlaneFitter:
         cov (3x3 array): covariance of points
     """
     def __init__(self,points=None):
-        _try_numpy_import()
         if points is None:
             self.count = 0
             self.centroid = np.zeros(3)
@@ -162,7 +152,7 @@ class PlaneFitter:
         self.sse = self.count * np.dot(self.normal,np.dot(self.cov,self.normal))
 
 
-def point_cloud_simplify(pc,radius):
+def point_cloud_simplify(pc : Union[Geometry3D,PointCloud], radius : float) -> Union[Geometry3D,PointCloud]:
     """Simplifies a point cloud by averaging points within neighborhoods. Uses 
     a fast hash grid data structure.
 
@@ -179,7 +169,7 @@ def point_cloud_simplify(pc,radius):
         return Geometry3D(pc).convert('PointCloud',radius).getPointCloud()
  
 
-def point_cloud_normals(pc,estimation_radius=None,estimation_knn=None,estimation_viewpoint=None,add=True):
+def point_cloud_normals(pc : Union[Geometry3D,PointCloud], estimation_radius=None,estimation_knn=None,estimation_viewpoint=None,add=True) -> np.ndarray:
     """Returns the normals of the point cloud.  If pc has the standard
     ``normal_x, normal_y, normal_z`` properties, these will be returned. 
     Otherwise, they will be estimated using plane fitting.
@@ -199,11 +189,12 @@ def point_cloud_normals(pc,estimation_radius=None,estimation_knn=None,estimation
     - If ``estimation_viewpoint`` is provided, this must be a 3-list.  The
       normals are oriented such that they point toward the viewpoint.
 
-    Returns:
-        A list of N 3-lists, or an N x 3 numpy array if numpy is available.
+    If ``add=True``, estimated normals will be added to the point cloud 
+    under the ``normal_x, normal_y, normal_z`` properties.
 
-        If ``add=True``, estimated normals will be added to the point cloud 
-        under the ``normal_x, normal_y, normal_z`` properties.
+    Returns:
+        A N x 3 numpy array of normals.
+
     """
     geom = None
     if isinstance(pc,Geometry3D):
@@ -224,20 +215,14 @@ def point_cloud_normals(pc,estimation_radius=None,estimation_knn=None,estimation
         normal_x = pc.getProperties(inds[0])
         normal_y = pc.getProperties(inds[1])
         normal_z = pc.getProperties(inds[2])
-        if _has_numpy:
-            return np.array([normal_x,normal_y,normal_z]).T
-        else:
-            return list(zip(normal_x,normal_y,normal_z))
+        return np.column_stack([normal_x,normal_y,normal_z])
 
     if not all(i < 0 for i in inds):
         raise ValueError("Point cloud has some normal components but not all of them?")
     #need to estimate normals
-    _try_numpy_import()
     _try_scipy_import()
-    N = len(pc.vertices)//3
-    if not _has_numpy:
-        raise RuntimeError("Need numpy to perform plane fitting")
-    positions = pc.getVertices()
+    positions = pc.getPoints()
+    N = positions.shape[0]
     if estimation_radius is None and estimation_knn is None:
         R = max(positions.max(axis=0)-positions.min(axis=0))
         estimation_radius = 3*R/math.sqrt(N)
@@ -317,12 +302,11 @@ def point_cloud_normals(pc,estimation_radius=None,estimation_knn=None,estimation
     return normals
 
 
-def fit_plane3(point1,point2,point3):
+def fit_plane3(point1 : Vector3, point2 : Vector3, point3 : Vector3) -> Tuple[float,float,float,float]:
     """Returns a 3D plane equation fitting the 3 points.
   
     The result is (a,b,c,d) with the plane equation ax+by+cz+d=0
     """
-    _try_numpy_import()
     normal = np.cross(point2-point1,point3-point1)
     nlen = np.linalg.norm(normal)
     if nlen < 1e-4:
@@ -333,20 +317,19 @@ def fit_plane3(point1,point2,point3):
     return (normal[0],normal[1],normal[2],offset)
 
 
-def fit_plane(points):
+def fit_plane(points : Sequence[Vector3]) -> Tuple[float,float,float,float]:
     """Returns a 3D plane equation that is a least squares fit
     through the points (len(points) >= 3)."""
     centroid,normal = fit_plane_centroid(points)
     return normal[0],normal[1],normal[2],-vectorops.dot(centroid,normal)
 
 
-def fit_plane_centroid(points):
+def fit_plane_centroid(points : Sequence[Vector3]) -> Tuple[Vector3,Vector3]:
     """Similar to :func:`fit_plane`, but returns a (centroid,normal) pair."""
     if len(points)<3:
         raise ValueError("Need to have at least 3 points to fit a plane")
     #if len(points)==3:
     #    return fit_plane3(points[0],points[1],points[2])
-    _try_numpy_import()
     points = np.asarray(points)
     centroid = np.average(points,axis=0)
     U,W,Vt = np.linalg.svd(points-[centroid]*len(points),full_matrices=False)
@@ -357,7 +340,6 @@ def fit_plane_centroid(points):
 
 
 def _color_format_from_uint8_channels(format,r,g,b,a=None):
-    import numpy as np
     if a is None:
         a = 0xff
     if format == 'rgb':
@@ -431,7 +413,6 @@ def _color_format_from_uint8_channels(format,r,g,b,a=None):
 
 
 def _color_format_to_uint8_channels(format,colors):
-    import numpy as np
     if format=='channels':
         return tuple((np.asarray(c)*255).astype(np.uint8) for c in colors)
     colors = np.asarray(colors)
@@ -473,7 +454,7 @@ def _color_format_to_uint8_channels(format,colors):
         raise ValueError("Invalid format specifier "+str(format))
 
 
-def point_cloud_colors(pc,format='rgb'):
+def point_cloud_colors(pc : PointCloud, format='rgb') -> np.ndarray:
     """Returns the colors of the point cloud in the given format.  If the
     point cloud has no colors, this returns None.  If the point cloud has no
     colors but has opacity, this returns white colors.
@@ -497,7 +478,7 @@ def point_cloud_colors(pc,format='rgb'):
             - 'opacity': returns opacity only, in the range [0,1].
 
     Returns:
-        numpy.ndarray: A an array of pc.numPoints() colors corresponding to 
+        A an array of pc.numPoints() colors corresponding to 
         the points in the point cloud.  If format='channels', the return
         value is a tuple (r,g,b) or (r,g,b,a).
     """
@@ -521,7 +502,6 @@ def point_cloud_colors(pc,format='rgb'):
             return rgb
         if format == 'argb' and rgbchannels[0][0] == 'rgba':
             return rgb
-        import numpy as np
         rgb = np.asarray(rgb).astype(dtype=np.uint32)
         r = np.right_shift(np.bitwise_and(rgb,0xff0000),16)
         g = np.right_shift(np.bitwise_and(rgb,0xff00),8)
@@ -559,7 +539,6 @@ def point_cloud_colors(pc,format='rgb'):
         elif alphachannel[0] == 'opacity':
             a = pc.getProperties(alphachannel[0][1])
         elif alphachannel[0] == 'c':
-            import numpy as np
             one_255 = 1.0/255.0
             a = (np.asarray(pc.getProperties(alphachannel[0][1]))*one_255)
         else:
@@ -576,7 +555,6 @@ def point_cloud_colors(pc,format='rgb'):
                 a = np.full(pc.numPoints(),1.0)
             return np.column_stack((r,g,b,a))
         
-        import numpy as np
         r = np.rint(np.asarray(r)*255.0).astype(np.uint32)
         g = np.rint(np.asarray(g)*255.0).astype(np.uint32)
         b = np.rint(np.asarray(b)*255.0).astype(np.uint32)
@@ -587,11 +565,9 @@ def point_cloud_colors(pc,format='rgb'):
             return _color_format_from_uint8_channels(format,r,g,b)
     elif len(rgbchannels)==0 and alphachannel is not None:
         if alphachannel[0] == 'opacity':
-            import numpy as np
             a = pc.getProperties(alphachannel[0][1])
             a = (np.asarray(a)*255).astype(np.uint32)
         elif alphachannel[0] == 'c':
-            import numpy as np
             a = pc.getProperties(alphachannel[0][1])
         else:
             raise ValueError("Weird type of alpha channel? "+alphachannel[0])
@@ -601,7 +577,7 @@ def point_cloud_colors(pc,format='rgb'):
         raise ValueError("Invalid colors in point cloud? found "+str(len(rgbchannels))+" color channels")
 
 
-def point_cloud_set_colors(pc,colors,color_format='rgb',pc_property='auto') -> None:
+def point_cloud_set_colors(pc : PointCloud, colors, color_format='rgb',pc_property='auto') -> None:
     """Sets the colors of a point cloud.
 
     Args:
@@ -702,7 +678,7 @@ def point_cloud_set_colors(pc,colors,color_format='rgb',pc_property='auto') -> N
             pc.addProperty(pc_property,packed)
 
 
-def triangle_normals(trimesh):
+def triangle_normals(trimesh : Union[TriangleMesh,Geometry3D]) -> np.ndarray:
     """
     Returns a list or numpy array of (outward) triangle normals for the
     triangle mesh defined by vertices verts and triangles tris.
@@ -711,14 +687,13 @@ def triangle_normals(trimesh):
         trimesh (TriangleMesh or Geometry3D)
 
     Returns:
-        list of lists or numpy array: an n x 3 matrix of triangle normals.
+        An N x 3 matrix of triangle normals with N the number of triangles.
     """
     if isinstance(trimesh,Geometry3D):
         assert trimesh.type() == 'TriangleMesh',"Must provide a TriangleMesh to triangle_normals"
         trimesh = trimesh.getTriangleMesh()
-    assert isinstance(trimesh,TriangleMesh)
+    assert isinstance(trimesh,TriangleMesh),"Must provide a TriangleMesh to triangle_normals"
 
-    import numpy as np
     from ..io import numpy_convert
 
     verts,tris = numpy_convert.to_numpy(trimesh)
@@ -729,3 +704,73 @@ def triangle_normals(trimesh):
     norms = np.linalg.norm(n,axis=1)[:, np.newaxis]
     n = np.divide(n,norms,where=norms!=0)
     return n
+
+
+def merge(*items) -> Geometry3D:
+    """Merges one or more geometries into a single geometry.
+    
+    Args:
+        items: Each arg must be a Geometry3D, TriangleMesh, PointCloud,
+            RobotLinkModel, RigidObjectModel, or TerrainModel.
+    
+    Returns:
+        A merged geometry. If all underlying geometries have PointCloud type,
+        then the result will have PointCloud type.  Otherwise, they must all
+        be convertable to TriangleMesh, and the result will be of TriangleMesh
+        type.
+    """
+    from klampt.io import numpy_convert
+
+    xforms = []
+    tri_meshes = []
+    point_clouds = []
+    for item in enumerate(items):
+        if isinstance(item,TriangleMesh):
+            xforms.append(se3.identity())
+            tri_meshes.append(item)
+            continue
+        if isinstance(item,PointCloud):
+            xforms.append(se3.identity())
+            point_clouds.append(item)
+            continue
+        geom = item
+        if hasattr(item,'geometry') and callable(item.geometry):
+            geom = item.geometry()
+        if isinstance(geom,Geometry3D):
+            xforms.append(geom.getCurrentTransform())
+            if item.type() == 'TriangleMesh':
+                tri_meshes.append(geom.getTriangleMesh())
+            elif item.type() == 'PointCloud':
+                point_clouds.append(geom.getPointCloud())
+            else:
+                tri_meshes.append(geom.convert('TriangleMesh'))
+    if len(point_clouds) != 0:
+        if len(tri_meshes) != 0:
+            raise ValueError("Can't pass mixed PointCloud and TriangleMesh types")
+        all_points = []
+        for pc in point_clouds:
+            all_points.append(numpy_convert.to_numpy(pc,'PointCloud'))
+        if not all(pc.shape[1]==all_points[0].shape[1] for pc in all_points):
+            raise ValueError("Mismatch in PointCloud # of properties, can't merge")
+        points = np.vstack(all_points)
+        pc = numpy_convert.from_numpy(points,'PointCloud')
+        return Geometry3D(pc)
+    elif len(tri_meshes) != 0:
+        verts = []
+        tris = []
+        nverts = 0
+        for xform,tm in zip(xforms,tri_meshes):
+            (iverts,itris) = numpy_convert.to_numpy(tm,'TriangleMesh')
+            verts.append(np.dot(np.hstack((iverts,np.ones((len(iverts),1)))),xform.T)[:,:3])
+            tris.append(itris+nverts)
+            nverts += len(iverts)
+        verts = np.vstack(verts)
+        tris = np.vstack(tris)
+        for t in tris:
+            assert all(v >= 0 and v < len(verts) for v in t)
+        mesh = numpy_convert.from_numpy((verts,tris),'TriangleMesh')
+        merged_geom = Geometry3D()
+        merged_geom.setTriangleMesh(mesh)
+        return merged_geom
+    else:
+        return Geometry3D()
