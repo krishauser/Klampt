@@ -289,7 +289,7 @@ class KlamptWidget(widgets.DOMWidget):
             if name != 'world' or self.world is not None:
                 warnings.warn("KlamptWidget.add: only one world is supported, and should be added as world")
             self.world = item
-            s = ThreeJSGetScene(self.world)
+            s = threejs_get_scene(self.world)
             self.scene = json.loads(s)
         else:
             raise ValueError("KlamptWidget can't handle objects of type "+type+" yet")
