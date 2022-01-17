@@ -848,6 +848,9 @@ def _try_methods(obj, fn: Union[str,List[str]], args, fallback : Callable = None
                 if callable(a):
                     try:
                         a = a()
+                    except NotImplementedError:
+                        #used to mark something is currently invalid and should cause a fallback
+                        continue
                     except Exception:
                         print("Exception raised while evaluating argument of method",f,"of object",str(obj))
                         raise
@@ -2320,8 +2323,6 @@ class OmniRobotInterface(_RobotInterfaceStatefulBase):
             indices.append(self._virtualPartIndices[k])
             commands.append(iface._commands)
             iface._commands = []   #erase primary commands
-        if any(c for c in commands):
-            print("OmniRobotInterface: commands:",commands)
         self._commands = _gather_commands(commands,indices)
         #set commands to emulator, advance
         for cmd in self._commands:
@@ -3774,8 +3775,16 @@ class _JointInterfaceEmulatorData:
                     raise ValueError("Trying to get a command for joint {} before sensed position was entered?".format(self.name))
             self.controlMode = 'setPosition'
         if commandType == 'setPiecewiseCubic':
-            assert self.trajectoryTimes is not None,"Can't get piecewise cubic trajectory except in piecewise cubic mode"
-            return self.trajectoryTimes,self.trajectoryMilestones,self.trajectoryVelocities
+            if self.controlMode == 'setPosition':
+                if self.commandedVelocity == 0:
+                    return [0],[self.commandedPosition],[0]
+                else:
+                    dt = self._positionDifference(self.commandedPosition,self.lastCommandedPosition)/self.commandedVelocity
+                    return [dt],[self.commandedPosition],[self.commandedVelocity]
+            elif self.trajectoryTimes is not None:
+                return self.trajectoryTimes,self.trajectoryMilestones,self.trajectoryVelocities
+            else:
+                print("TODO: convert other control modes to setPiecewiseCubic?")
         elif commandType == 'setPiecewiseLinear':
             if self.controlMode == 'setPiecewiseCubic':
                 traj = HermiteTrajectory(self.trajectoryTimes,[[m] for m in self.trajectoryMilestones],[[v] for v in self.trajectoryVelocities])
