@@ -15,7 +15,6 @@ integration with grasp planning algorithms, but we hope to add more in the
 future.)
 
 """
-from ctypes import ArgumentError
 from klampt.control.robotinterface import RobotInterfaceBase
 import os
 import sys
@@ -92,7 +91,9 @@ class RobotInfo:
             this robot.
         filePaths (list of str): a list of paths where files will be searched.
         robotModel (RobotModel): a cached robot model, loaded upon calling
-            :func:`klamptModel`.
+            :func:`klamptModel`.  If a robot is loaded externally (e.g., via
+            :class:`~klampt.WorldModel`) you may set this member to avoid re-
+            loading a model.
     """
 
     all_robots = dict()
