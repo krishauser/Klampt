@@ -1,5 +1,5 @@
-#ifndef ROBOT_WORLD_H
-#define ROBOT_WORLD_H
+#ifndef KLAMPT_WORLD_H
+#define KLAMPT_WORLD_H
 
 #include "Robot.h"
 #include "Terrain.h"
@@ -9,9 +9,11 @@
 #include <KrisLibrary/camera/viewport.h>
 #include <KrisLibrary/GLdraw/GLLight.h>
 
+namespace Klampt {
+
 /** @file World.h
  * @ingroup Modeling
- * @brief Defines the RobotWorld class.
+ * @brief Defines the WorldModel class.
  */
 
 /** @ingroup Modeling
@@ -19,13 +21,13 @@
  * static geometries (terrains).  Lights and other viewport information
  * may also be stored here.
  */
-class RobotWorld
+class WorldModel
 {
  public:
   typedef shared_ptr<Geometry::AnyCollisionGeometry3D> GeometryPtr;
   typedef shared_ptr<GLDraw::GeometryAppearance> AppearancePtr;
 
-  RobotWorld();
+  WorldModel();
   ///Loads from an XML file.  fn also be a URL if libcurl support is
   ///enabled.
   bool LoadXML(const char* fn);
@@ -33,6 +35,10 @@ class RobotWorld
   ///If elementDir==NULL, they will be saved to a folder that has the same base
   ///name as fn.
   bool SaveXML(const char* fn,const char* elementDir=NULL);
+  /** @brief Performs a shallow copy of a WorldModel.  Since it does not copy geometry,
+   * this operation is very fast.
+   */
+  void Copy(const WorldModel& other);
   void InitCollisions();
   void UpdateGeometry();
   void SetGLLights();
@@ -60,20 +66,20 @@ class RobotWorld
   void SetTransform(int id,const RigidTransform& T);
 
   int LoadRobot(const string& fn);
-  int AddRobot(const string& name,Robot* robot=NULL);
+  int AddRobot(const string& name,RobotModel* robot=NULL);
   void DeleteRobot(const string& name);
-  Robot* GetRobot(const string& name);
+  RobotModel* GetRobot(const string& name);
   ViewRobot* GetRobotView(const string& name);
 
   int LoadTerrain(const string& fn);
-  int AddTerrain(const string& name,Terrain* terrain=NULL);
+  int AddTerrain(const string& name,TerrainModel* terrain=NULL);
   void DeleteTerrain(const string& name);
-  Terrain* GetTerrain(const string& name);
+  TerrainModel* GetTerrain(const string& name);
 
   int LoadRigidObject(const string& fn);
-  int AddRigidObject(const string& name,RigidObject* obj=NULL);
+  int AddRigidObject(const string& name,RigidObjectModel* obj=NULL);
   void DeleteRigidObject(const string& name);
-  RigidObject* GetRigidObject(const string& name);
+  RigidObjectModel* GetRigidObject(const string& name);
 
   ///Returns the ID of the entity the ray hits, or -1 if nothing was hit.  Returns hit point *in world frame*.
   int RayCast(const Ray3D& r,Vector3& worldpt);
@@ -82,9 +88,9 @@ class RobotWorld
   ///Same as RayCast but only checks specified IDs (see TerrainID, RigidObjectID, RobotID, RobotLinkID)
   int RayCastSelected(const Ray3D& r,const vector<int>& selectedIDs,Vector3& worldpt);
   ///Ray casts only robots.  Returns hit robot, link, and point *in local frame*.
-  Robot* RayCastRobot(const Ray3D& r,int& body,Vector3& localpt);
+  RobotModel* RayCastRobot(const Ray3D& r,int& body,Vector3& localpt);
   ///Ray casts only objects.  Returns hit object and point *in local frame*.
-  RigidObject* RayCastObject(const Ray3D& r,Vector3& localpt);
+  RigidObjectModel* RayCastObject(const Ray3D& r,Vector3& localpt);
 
   ///Loads an element from the file fn, using its extension to figure out
   ///what type it is.  fn also be a URL if libcurl support is
@@ -100,17 +106,13 @@ class RobotWorld
   GLDraw::GLColor background;
 
   //world occupants
-  vector<shared_ptr<Robot> > robots;
-  vector<shared_ptr<Terrain> > terrains;
-  vector<shared_ptr<RigidObject> > rigidObjects;
+  vector<shared_ptr<RobotModel> > robots;
+  vector<shared_ptr<TerrainModel> > terrains;
+  vector<shared_ptr<RigidObjectModel> > rigidObjects;
 
   vector<ViewRobot> robotViews;
 };
 
-/** @ingroup Modeling
- * @brief Performs a shallow copy of a RobotWorld.  Since it does not copy geometry,
- * this operation is very fast.
- */
-void CopyWorld(const RobotWorld& a,RobotWorld& b);
+} //namespace Klampt
 
 #endif

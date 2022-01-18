@@ -5,12 +5,13 @@
 #include <sstream>
 using namespace GLDraw;
 using namespace std;
+using namespace Klampt;
 
 InputProcessorBase::InputProcessorBase()
   : world(NULL),viewport(NULL),currentTime(0)
 {}
 
-Robot* InputProcessorBase::GetRobot() const
+RobotModel* InputProcessorBase::GetRobot() const
 {
   return world->robots[0].get();
 }
@@ -43,8 +44,8 @@ void StandardInputProcessor::Hover(int mx,int my)
   
   int link;
   Vector3 localPos;
-  Robot* rob = world->RayCastRobot( ray, link, localPos);
-  Robot* robot = GetRobot();
+  RobotModel* rob = world->RayCastRobot( ray, link, localPos);
+  RobotModel* robot = GetRobot();
   if (rob) {
     currentLink = link;
     currentPoint = localPos;
@@ -86,7 +87,7 @@ void StandardInputProcessor::Spaceball(const RigidTransform& T)
   }
 }
 
-PlannerObjectiveBase* StandardInputProcessor::MakeObjective(Robot* robot) 
+PlannerObjectiveBase* StandardInputProcessor::MakeObjective(RobotModel* robot) 
 { 
   if(!move) return NULL;
   assert(currentLink >= 0);
@@ -107,7 +108,7 @@ PlannerObjectiveBase* StandardInputProcessor::MakeObjective(Robot* robot)
 void StandardInputProcessor::DrawGL()
 {
   if(currentLink < 0) return;
-  Robot* robot=GetRobot();
+  RobotModel* robot=GetRobot();
   glPointSize(5.0);
   glEnable( GL_POINT_SMOOTH);
   glDisable( GL_LIGHTING);
@@ -173,7 +174,7 @@ void PredictiveExtrapolationInputProcessor::SetPredictionTime(Real splitTime)
   predictionOffset = splitTime;
 }
   
-PlannerObjectiveBase* PredictiveExtrapolationInputProcessor::MakeObjective(Robot* robot)
+PlannerObjectiveBase* PredictiveExtrapolationInputProcessor::MakeObjective(RobotModel* robot)
 {
   if(!move) return NULL;
   assert(currentLink >= 0);
@@ -258,7 +259,7 @@ bool SerializedObjectiveProcessor::HasUpdate()
   return reader!=NULL && reader->UnreadCount() > 0;
 }
 
-PlannerObjectiveBase* SerializedObjectiveProcessor::MakeObjective(Robot* robot)
+PlannerObjectiveBase* SerializedObjectiveProcessor::MakeObjective(RobotModel* robot)
 {
   if(!reader) return NULL;
   string payload = reader->Newest();

@@ -1,13 +1,14 @@
 #include "WorldDragWidget.h"
 #include <KrisLibrary/GLdraw/drawextra.h>
 using namespace GLDraw;
+using namespace Klampt;
 
-WorldDragWidget::WorldDragWidget(RobotWorld* _world)
+WorldDragWidget::WorldDragWidget(WorldModel* _world)
   :world(_world),active(true),robotsActive(true),objectsActive(true),terrainsActive(false),
-   highlightColor(1,1,1,0.3),lineColor(1,0.5,0),lineWidth(5.0),dragging(false),hoverID(-1),highlightID(-1)
+   highlightColor(1,1,1,1.0),lineColor(1,0.5,0),lineWidth(5.0),dragging(false),hoverID(-1),highlightID(-1)
 {}
 
-void WorldDragWidget::Set(RobotWorld* _world)
+void WorldDragWidget::Set(WorldModel* _world)
 {
   world = _world;
 }
@@ -22,13 +23,14 @@ void WorldDragWidget::SetHighlight(bool value)
   hasHighlight = value;
   if(hasHighlight && hoverID >= 0) {
     //update the object's color
-    originalFaceColor = world->GetAppearance(hoverID)->faceColor;
-    world->GetAppearance(hoverID)->faceColor.blend(originalFaceColor,highlightColor,highlightColor.rgba[3]);
+    originalFaceColor = world->GetAppearance(hoverID)->tintColor;
+    world->GetAppearance(hoverID)->SetTintColor(highlightColor,0.3);
     highlightID = hoverID;
   }
   else if(!hasHighlight && highlightID >= 0) {
     //restore the object's color
-    world->GetAppearance(highlightID)->faceColor = originalFaceColor;
+    world->GetAppearance(highlightID)->tintColor = originalFaceColor;
+    world->GetAppearance(highlightID)->tintStrength = 0.0;
   }
 }
 
@@ -43,7 +45,7 @@ bool WorldDragWidget::Hover(int x,int y,Camera::Viewport& viewport,double& dista
   if(robotsActive) {
     int body;
     Vector3 localpt;
-    Robot* rob = world->RayCastRobot(r,body,localpt);
+    RobotModel* rob = world->RayCastRobot(r,body,localpt);
     if(rob) {
       hoverPt = localpt;
       int index = -1;
@@ -58,7 +60,7 @@ bool WorldDragWidget::Hover(int x,int y,Camera::Viewport& viewport,double& dista
   }
   if(objectsActive) {
     Vector3 localpt;
-    RigidObject* obj = world->RayCastObject(r,localpt);
+    RigidObjectModel* obj = world->RayCastObject(r,localpt);
     if(obj) {
       Vector3 worldpt = obj->T*localpt;
       Real d=worldpt.distance(r.source);

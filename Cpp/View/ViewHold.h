@@ -5,6 +5,8 @@
 #include <Klampt/Contact/Hold.h>
 #include "ViewRobot.h"
 
+namespace Klampt {
+
 /** \ingroup View 
  * \brief Displays a contact point using OpenGL.
  *
@@ -48,5 +50,7 @@ struct ViewHold
   bool drawContacts;
   GLDraw::GLColor outlineColor;
 };
+
+} //namespace Klampt
 
 #endif

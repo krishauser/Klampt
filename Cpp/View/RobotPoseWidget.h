@@ -6,6 +6,8 @@
 #include <KrisLibrary/robotics/IK.h>
 #include "ViewRobot.h"
 
+namespace Klampt {
+
 /* @defgroup View
  * @brief Definitions of OpenGL drawing routines and UI widgets.
  */
@@ -24,20 +26,20 @@ class RobotLinkPoseWidget : public GLDraw::Widget
 {
 public:
   RobotLinkPoseWidget();
-  RobotLinkPoseWidget(Robot* robot,ViewRobot* viewRobot);
+  RobotLinkPoseWidget(RobotModel* robot,ViewRobot* viewRobot);
   virtual ~RobotLinkPoseWidget() {}
   ///Initializer
-  void Set(Robot* robot,ViewRobot* viewRobot);
+  void Set(RobotModel* robot,ViewRobot* viewRobot);
   ///Sets the active dofs
   void SetActiveDofs(const vector<int>& activeDofs);
-  virtual bool Hover(int x,int y,Camera::Viewport& viewport,double& distance);
-  virtual void SetHighlight(bool active);
-  virtual bool BeginDrag(int x,int y,Camera::Viewport& viewport,double& distance);
-  virtual void Drag(int dx,int dy,Camera::Viewport& viewport);
-  virtual void DrawGL(Camera::Viewport& viewport);
+  virtual bool Hover(int x,int y,Camera::Viewport& viewport,double& distance) override;
+  virtual void SetHighlight(bool active) override;
+  virtual bool BeginDrag(int x,int y,Camera::Viewport& viewport,double& distance) override;
+  virtual void Drag(int dx,int dy,Camera::Viewport& viewport) override;
+  virtual void DrawGL(Camera::Viewport& viewport) override;
   void InitDefaultAppearance();
 
-  Robot* robot;
+  RobotModel* robot;
   ViewRobot* viewRobot;
   Config poseConfig;
   GLDraw::GLColor highlightColor;
@@ -54,7 +56,7 @@ public:
 class RobotIKPoseWidget : public GLDraw::WidgetSet
 {
 public:
-  RobotIKPoseWidget(Robot* robot);
+  RobotIKPoseWidget(RobotModel* robot);
   ///Clears all constraints on the given link
   void ClearLink(int link);
   ///Fixes the given point on the link at its current location
@@ -75,14 +77,14 @@ public:
   int ActiveWidget() const;
   ///Clears the constraint on the currently active widget
   bool ClearCurrent();
-  virtual void DrawGL(Camera::Viewport& viewport);
-  virtual void Drag(int dx,int dy,Camera::Viewport& viewport);
+  virtual void DrawGL(Camera::Viewport& viewport) override;
+  virtual void Drag(int dx,int dy,Camera::Viewport& viewport) override;
 
   //these are overloaded to allow IK widgets to shine through
-  virtual bool Hover(int x,int y,Camera::Viewport& viewport,double& closestDistance);
-  virtual bool BeginDrag(int x,int y,Camera::Viewport& viewport,double& closestDistance);
+  virtual bool Hover(int x,int y,Camera::Viewport& viewport,double& closestDistance) override;
+  virtual bool BeginDrag(int x,int y,Camera::Viewport& viewport,double& closestDistance) override;
 
-  Robot* robot;
+  RobotModel* robot;
   vector<IKGoal> poseGoals;
   vector<GLDraw::TransformWidget> poseWidgets;
 };
@@ -94,8 +96,8 @@ class RobotPoseWidget : public GLDraw::WidgetSet
 {
 public:
   RobotPoseWidget();
-  RobotPoseWidget(Robot* robot,ViewRobot* viewRobot);
-  void Set(Robot* robot,ViewRobot* viewRobot);
+  RobotPoseWidget(RobotModel* robot,ViewRobot* viewRobot);
+  void Set(RobotModel* robot,ViewRobot* viewRobot);
 
   const Config& Pose() const { return linkPoser.poseConfig; }
   void SetPose(const Config& q);
@@ -127,11 +129,11 @@ public:
   ///Solves the current IK problem with a joint fixed in place
   bool SolveIKFixedJoint(int fixedJoint,int iters=0,Real tol=0);
 
-  virtual void DrawGL(Camera::Viewport& viewport);
-  virtual bool BeginDrag(int x,int y,Camera::Viewport& viewport,double& distance);
-  virtual void Drag(int dx,int dy,Camera::Viewport& viewport);
-  virtual void EndDrag();
-  virtual void Keypress(char c);
+  virtual void DrawGL(Camera::Viewport& viewport) override;
+  virtual bool BeginDrag(int x,int y,Camera::Viewport& viewport,double& distance) override;
+  virtual void Drag(int dx,int dy,Camera::Viewport& viewport) override;
+  virtual void EndDrag() override;
+  virtual void Keypress(char c) override;
 
   void Snapshot();
   void Undo();
@@ -149,5 +151,6 @@ public:
 };
 
 /** @} */
+} //namespace Klampt
 
 #endif

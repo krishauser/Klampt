@@ -16,7 +16,7 @@
  * Appearances can be either references to appearances of objects in the world,
  * or they can be standalone. 
  *
- * Performance note: Avoid rebuilding buffers (e.g., via :meth:`refresh`  as 
+ * Performance note: Avoid rebuilding buffers (e.g., via :meth:`refresh`)  as 
  * much as possible.
  */
 class Appearance
@@ -75,14 +75,15 @@ class Appearance
   ///feature.  feature can be ALL, VERTICES, EDGES, FACES, EMISSIVE,
   ///or SPECULAR.
   void getColor(int feature,float out[4]);
-  ///Sets per-element color for elements of the given feature type.
+  ///Sets per-element color for elements of the given feature type.  Must be an mxn
+  ///array.  m is the number of features of that type, and n is either 3 or 4.
   ///
-  ///If alpha=True, colors are assumed to be 4*N rgba values, where N is the
-  ///number of features of that type.
+  ///If n == 4, they are assumed to be rgba values, and 
   ///
-  ///Otherwise they are assumed to be 3*N rgb values.  Only supports feature=VERTICES
-  ///and feature=FACES
-  void setColors(int feature,const std::vector<float>& colors,bool alpha=false);
+  ///If n == 3,  each row is an rgb value.
+  ///
+  ///Only supports feature=VERTICES and feature=FACES
+  void setColors(int feature,float* np_array2, int m, int n);
   ///Sets the specular highlight shininess and strength.  To turn off, use
   ///``setShininess(0)``.  The specular strength can be set via the second argument.
   ///``setShininess(20,0.1)``.  Note that this changes the specular color
@@ -96,28 +97,62 @@ class Appearance
   ///Sets a 1D texture of the given width.  Valid format strings are
   ///
   /// - "": turn off texture mapping
-  /// - rgb8: unsigned byte RGB colors with red in the 1st byte, green in the 2nd, blue in the 3rd
-  /// - bgr8: unsigned byte RGB colors with blue in the 1st byte, green in the 2nd, green in the 3rd
-  /// - rgba8: unsigned byte RGBA colors with red in the 1st byte and alpha in the 4th
-  /// - bgra8: unsigned byte RGBA colors with blue in the 1st byte and alpha in the 4th
   /// - l8: unsigned byte grayscale colors
   ///
-  void setTexture1D(int w,const char* format,const std::vector<unsigned char>& bytes);
-  ///Sets a 2D texture of the given width/height.  See :func:`setTexture1D` for 
+  void setTexture1D_b(const char* format,unsigned char* np_array,int m);
+  ///Sets a 1D texture of the given width.  Valid format strings are
+  ///
+  /// - "": turn off texture mapping
+  /// - rgba8: unsigned byte RGBA colors with red in the 1st byte and alpha in the 4th
+  /// - bgra8: unsigned byte RGBA colors with blue in the 1st byte and alpha in the 4th
+  ///
+  void setTexture1D_i(const char* format,unsigned int* np_array,int m);
+  ///Sets a 1D texture of the given width, given a 2D array of channels.
+  ///Valid format strings are
+  ///
+  /// - "": turn off texture mapping
+  /// - rgb8: unsigned byte RGB colors with red in the 1st column, green in the 2nd, blue in the 3rd
+  /// - bgr8: unsigned byte RGB colors with blue in the 1st column, green in the 2nd, green in the 3rd
+  /// - rgba8: unsigned byte RGBA colors with red in the 1st column and alpha in the 4th
+  /// - bgra8: unsigned byte RGBA colors with blue in the 1st column and alpha in the 4th
+  /// - l8: unsigned byte grayscale colors, one channel
+  ///
+  void setTexture1D_channels(const char* format,unsigned char* np_array2,int m,int n);
+  //note: only docs for last overload are included
+  ///Sets a 2D texture of the given width/height.  See :func:`setTexture1D_b` for 
   ///valid format strings.
   ///
-  ///bytes is is given in order left to right, top to bottom if ``topdown==True``.
-  ///Otherwise, it is given in order left to right, bottom to top.
-  void setTexture2D(int w,int h,const char* format,const std::vector<unsigned char>& bytes,bool topdown=true);
-  ///Sets per-vertex texture coordinates. 
+  ///The array is given in top to bottom order if ``topdown==True``.
+  ///Otherwise, it is given in order bottom to top.
+  void setTexture2D_b(const char* format,unsigned char* np_array2,int m,int n,bool topdown=true);
+  ///Sets a 2D texture of the given width/height.  See :func:`setTexture1D_i` for 
+  ///valid format strings.
   ///
-  ///If the texture is 1D, uvs is an array of length n containing 1D texture coordinates. 
+  ///The array is given in top to bottom order if ``topdown==True``.
+  ///Otherwise, it is given in order bottom to top.
+  void setTexture2D_i(const char* format,unsigned int* np_array2,int m,int n,bool topdown=true);
+  ///Sets a 2D texture of the given width/height from a 3D array of channels.
+  ///See :func:`setTexture1D_channels` for valid format strings.
   ///
-  ///If the texture is 2D, uvs is an array of length 2n containing U-V coordinates u1, v1,
-  ///u2, v2, ..., un, vn. 
+  ///The array is given in top to bottom order if ``topdown==True``.
+  ///Otherwise, it is given in order bottom to top.
+  void setTexture2D_channels(const char* format,unsigned char* np_array3,int m,int n,int p,bool topdown=true);
+  //note: only docs for last overload are included
+  ///Sets per-vertex texture coordinates for a 1D texture.
   ///
   ///You may also set uvs to be empty, which turns off texture mapping altogether.
-  void setTexcoords(const std::vector<double>& uvs);
+  void setTexcoords1D(double* np_array,int m);
+  ///Sets per-vertex texture coordinates for a 2D texture.  uvs is an array of
+  ///shape (nx2) containing U-V coordinates [[u1, v1], [u2, v2], ..., [un, vn]]. 
+  ///
+  ///You may also set uvs to be empty, which turns off texture mapping altogether.
+  void setTexcoords2D(double* np_array2,int m,int n);
+  ///Sets the texture generation.  The array must be size m x 4, with m in the 
+  ///range 0,...,4.  If worldcoordinates=true, the texture generation is 
+  ///performed in world coordinates rather than object coordinates.
+  void setTexgen(double* np_array2,int m,int n,bool worldcoordinates=false);
+  ///Sets whether textures are to wrap (default true)
+  void setTexWrap(bool wrap);
   ///For point clouds, sets the point size.
   void setPointSize(float size);
   ///For meshes, sets the crease angle.  Set to 0 to disable smoothing.

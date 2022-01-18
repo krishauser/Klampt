@@ -10,8 +10,8 @@ a file browser (available in Qt only).
 
 By default, resources are stored in the ``resources/`` subdirectory of the
 current working directory.
-Use :meth:`~klampt.io.resource.getDirectory` and
-:meth:`~klampt.io.resource.setDirectory` to change where resources are
+Use :meth:`~klampt.io.resource.get_directory` and
+:meth:`~klampt.io.resource.set_drectory` to change where resources are
 stored  Alternatively, the ``directory=[DIRNAME]`` keyword
 argument can be provided to get, set, load, and save.
 
@@ -38,7 +38,7 @@ from ..model.contact import Hold
 from .. import vis
 from ..vis import editors
 from ..vis.backends import vis_gl
-
+import warnings
 
 global _directory
 global _editTemporaryWorlds
@@ -70,12 +70,11 @@ class _LRUCache:
         self.cache[key] = value
 _editTemporaryWorlds = _LRUCache(10)
 
-
-def getDirectory():
+def get_directory():
     """Returns the current resource directory."""
     return _directory
 
-def setDirectory(value):
+def set_directory(value):
     """Sets the current resource directory."""
     global _directory
     _directory = value
@@ -100,15 +99,15 @@ def _get_world(world):
             return w
     return world
 
-def knownExtensions():
+def known_extensions():
     """Returns all known resource file extensions"""
-    return list(loader.extensionToType.keys())
+    return list(loader.EXTENSION_TO_TYPES.keys())
 
-def knownTypes():
+def known_types():
     """Returns all known resource types"""
-    return list(loader.typeToExtension.keys())+['WorldModel','MultiPath','Point','Rotation','Matrix3','ContactPoint']
+    return list(loader.TYPE_TO_EXTENSIONS.keys())+['WorldModel','MultiPath','Point','Rotation','Matrix3','ContactPoint']
 
-def visualEditTypes():
+def visual_edit_types():
     """Returns types that can be visually edited"""
     return ['Config','Configs','Trajectory','Vector3','Point','RigidTransform','Rotation','WorldModel']
 
@@ -173,9 +172,9 @@ def get(name,type='auto',directory=None,default=None,doedit='auto',description=N
             print("Ok pressed, returning anonymous resource")
             return newvalue
     if directory==None:
-        directory = getDirectory()
+        directory = get_directory()
     if type == 'auto':
-        type = loader.filenameToType(name)
+        type = loader.filename_to_type(name)
     value = None
     fn = os.path.join(directory,name)
     try:
@@ -236,13 +235,13 @@ def set(name,value,type='auto',directory=None):
     """
     if type == 'auto':
         try:
-            type = loader.filenameToType(name)
+            type = loader.filename_to_type(name)
         except Exception:
-            type = types.objectToTypes(value)
+            type = types.object_to_types(value)
             if isinstance(type,(list,tuple)):
                 type = type[0]
     if directory==None:
-        directory = getDirectory()    
+        directory = get_directory()    
     fn = os.path.join(directory,name)
     _ensure_dir(fn)
     if type == 'xml':
@@ -318,9 +317,9 @@ def load(type=None,directory=None):
     fg = FileGetter('Open resource')
     fg.directory = directory
     if directory==None:
-        fg.directory = getDirectory()    
+        fg.directory = get_directory()    
     if type is not None:
-        extensions=[v for v in loader.typeToExtensions[type]]
+        extensions=[v for v in loader.TYPE_TO_EXTENSIONS[type]]
         extensions.append('.json')
         fg.filetypes.append((type,extensions))
 
@@ -361,15 +360,15 @@ def save(value,type='auto',directory=None):
     fg = FileGetter('Save resource')
     fg.directory = directory
     if directory==None:
-        fg.directory = getDirectory()    
+        fg.directory = get_directory()    
     if type == 'auto':
-        typelist = types.objectToTypes(value)
+        typelist = types.object_to_types(value)
         if isinstance(typelist,str):
             typelist = [typelist]
     else:
         typelist = [type] 
     for type in typelist:
-        extensions=[v for v in loader.typeToExtensions[type]]
+        extensions=[v for v in loader.TYPE_TO_EXTENSIONS[type]]
         extensions.append('.json')
         print("Available extensions for objects of type",type,":",extensions)
         fg.filetypes.append((type,extensions))
@@ -448,7 +447,7 @@ def thumbnail(value,size,type='auto',world=None,frame=None):
         world = value
         value = None
     if type == 'auto' and value is not None:
-        typelist = types.objectToTypes(value)
+        typelist = types.object_to_types(value)
         if isinstance(typelist,(list,tuple)):
             type = typelist[0]
         else:
@@ -612,7 +611,7 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,refe
     if name == None:
         name = 'Anonymous'
     if type == 'auto':
-        type = types.objectToTypes(value)
+        type = types.object_to_types(value)
         if type is None:
             raise RuntimeError("Could not autodetect type of object "+name)
         if isinstance(type,(list,tuple)):
@@ -655,8 +654,8 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,refe
     def attach(objects,editor):
         #attach visualization items to the transform
         if isinstance(objects,RobotModelLink):
-            assert objects.index >= 0
             r = objects.robot()
+            assert objects.index >= 0 and objects.index < r.numLinks()
             descendant = [False]*r.numLinks()
             descendant[objects.index] = True
             for i in range(r.numLinks()):
@@ -722,7 +721,7 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,refe
                 Tref = frame.getTransform()
             editor = editors.RigidTransformEditor(name,value,description,world,Tref)
             if type == 'Rotation':
-                editor.disableTranslation()
+                editor.disable_translation()
             attach(referenceObject,editor)
             #Run!
             if type == 'Rotation':
@@ -743,3 +742,20 @@ def edit(name,value,type='auto',description=None,editor='visual',world=None,refe
     else:
         raise ValueError("Invalid value for argument 'editor', must be either 'visual' or 'console'")
 
+
+
+def _deprecated_func(oldName,newName):
+    import sys
+    mod = sys.modules[__name__]
+    f = getattr(mod,newName)
+    def depf(*args,**kwargs):
+        warnings.warn("{} will be deprecated in favor of {} in a future version of Klampt".format(oldName,newName),DeprecationWarning)
+        return f(*args,**kwargs)
+    depf.__doc__ = 'Deprecated in a future version of Klampt. Use {} instead'.format(newName)
+    setattr(mod,oldName,depf)
+
+_deprecated_func("getDirectory","get_directory")
+_deprecated_func("setDirectory","set_directory")
+_deprecated_func("knownExtensions","known_extensions")
+_deprecated_func("knownTypes","known_types")
+_deprecated_func("visualEditTypes","visual_edit_types")

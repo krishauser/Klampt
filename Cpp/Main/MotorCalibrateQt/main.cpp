@@ -1,13 +1,14 @@
 #include <QApplication>
 #include "dialog.h"
 #include "Main/motorcalibrate.h"
+using namespace Klampt;
 
 int main(int argc, char *argv[])
 {
   if(argc > 1){
       return main_shell(argc,argv);
   }
-  Robot::disableGeometryLoading = true;
+  RobotModel::disableGeometryLoading = true;
 
     QApplication a(argc, argv);
     Dialog w;

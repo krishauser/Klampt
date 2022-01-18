@@ -54,11 +54,13 @@ The default scene manager lets you set up and modify the visualization scene
 implemented.  See Klampt-examples/Python/demos/vistemplate.py for more
 examples.
 
-To capture user interaction and add other functionality, you may create a
+The vis module provides some basic methods for capturing user interaction.
+To add other user interaction functionality, you may create a
 :class:`~klampt.vis.glinterface.GLPluginInterface` subclass to add
 functionality on top of the default visualization world.  To do so, call
 ``vis.pushPlugin(plugin)``.  Note that custom rendering (the ``display()``
-method) is only available with the OpenGL rendering backend.
+and ``display_screen()`` methods) are only available with the OpenGL
+rendering backend.
 
 Only one rendering backend can be chosen during the lifetime of your process,
 and each backend has its own quirks with regards to window launching and
@@ -445,9 +447,6 @@ Scene management functions
 - :func:`getItemConfig`: returns the configuration of a named item.
 - :func:`hide`: hides/unhides an item.  The item is not removed, it just
   becomes invisible.
-- :func:`edit`: turns on/off visual editing of some item.  Points, transforms,
-  ``coordinates.Point``, ``coordinates.Transform``, ``coordinates.Frame``,
-  :class:`RobotModel`, and :class:`RigidObjectModel` are currently accepted.
 - :func:`hideLabel`: hides/unhides an item's text label.
 - :func:`setLabel`: changes an item's text label from its name to a custom
   string.
@@ -502,6 +501,20 @@ You may also log custom numeric data with :func:`logPlot` and event data using
 - :func:`setPlotSize`: sets the width and height of the plot.
 - :func:`savePlot`: saves a plot to a CSV (extension .csv) or Trajectory 
   (extension .traj) file.
+
+User Interaction
+~~~~~~~~~~~~~~~~
+
+- :func:`edit`: turns on/off visual editing of some item.  Points, transforms,
+  ``coordinates.Point``, ``coordinates.Transform``, ``coordinates.Frame``,
+  :class:`RobotModel`, and :class:`RigidObjectModel` are currently accepted.
+- :func:`pick`: asks the user to click on an item in the scene. 
+- :func:`addAction`: adds a keyboard shortcut (GLUT) / menu items (Qt) /
+  buttons (IPython).
+- :func:`addButton`: adds a button to the view.
+- :func:`addSelect`: adds a selection dropdown or listbox.
+- :func:`addInput`: adds a string, integer, or float input box.
+- :func:`addWidget`: adds a widget(s) from a JSON description.
 
 Global appearance / camera control functions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -572,6 +585,7 @@ from . import gldraw
 from . import glinit
 from .glinterface import GLPluginInterface
 from .glprogram import GLPluginProgram
+from .glviewport import GLViewport
 from . import glcommon
 import time
 import signal
@@ -585,7 +599,11 @@ from ..model.trajectory import *
 from ..model.multipath import MultiPath
 from ..model.contact import ContactPoint,Hold
 from ..model.collide import bb_empty,bb_create,bb_union
+from typing import Callable,Union,Sequence
 import warnings
+
+#Type for references to items in a visualization world
+ItemPath = Union[str,Sequence[str]]
 
 #the global lock for all visualization calls
 _globalLock = threading.RLock()
@@ -756,9 +774,7 @@ def debug(*args,**kwargs):
                     name = arg.name
                 if name is None:
                     try:
-                        type = types.objectToTypes(arg)
-                        if isinstance(type,list):
-                            type = type[0]
+                        type = types.object_to_type(arg)
                         name = type + '['+str(itemcount)+']'
                     except ValueError:
                         name = 'item['+str(itemcount)+']'
@@ -874,7 +890,7 @@ def nativeWindow():
         return None
     return _window_manager.frontend()
 
-def scene():
+def scene() -> "VisualizationScene":
     """Returns the active window data used by the backend.  The result will be
     a subclass of :class:`VisualizationScene`.
     """
@@ -883,7 +899,7 @@ def scene():
         return None
     return _window_manager.scene()
 
-def createWindow(title=None):
+def createWindow(title=None) -> int:
     """Creates a new window (and sets it active).
 
     Returns:
@@ -895,8 +911,8 @@ def createWindow(title=None):
         id = _window_manager.createWindow(title)
     return id
 
-def setWindow(id):
-    """Sets currently active window. 
+def setWindow(id : int) -> None:
+    """Sets the currently active window. 
 
     Note:
         ID 0 is the default visualization window.
@@ -906,13 +922,13 @@ def setWindow(id):
     with _globalLock:
         _window_manager.setWindow(id)
 
-def getWindow():
+def getWindow() -> int:
     """Retrieves ID of currently active window or -1 if no window is active"""
     global _window_manager
     _init()
     return _window_manager.getWindow()
 
-def setPlugin(plugin):
+def setPlugin(plugin: GLPluginInterface) -> None:
     """Lets the user capture input via a glinterface.GLPluginInterface class.
     Set plugin to None to disable plugins and return to the standard
     visualization.
@@ -928,7 +944,7 @@ def setPlugin(plugin):
     with _globalLock:
         _window_manager.setPlugin(plugin)
 
-def pushPlugin(plugin):
+def pushPlugin(plugin: GLPluginInterface) -> None:
     """Adds a new plugin on top of the old one.
 
     Args:
@@ -942,14 +958,14 @@ def pushPlugin(plugin):
     with _globalLock:
         _window_manager.pushPlugin(plugin)
 
-def popPlugin():
+def popPlugin() -> None:
     """Reverses a prior pushPlugin() call"""
     global _window_manager
     _init()
     with _globalLock:
         _window_manager.popPlugin()
 
-def splitView(plugin=None):
+def splitView(plugin : GLPluginInterface=None) -> None:
     """Adds a second OpenGL viewport in the same window, governed by the given
     plugin.
 
@@ -964,7 +980,7 @@ def splitView(plugin=None):
     with _globalLock:
         _window_manager.splitView(plugin)
 
-def addPlugin(plugin=None):
+def addPlugin(plugin : GLPluginInterface=None) -> None:
     """Adds a second OpenGL viewport in the same window, governed by the given
     plugin.  DEPRECATED: use :func:`splitView` instead.
 
@@ -974,9 +990,10 @@ def addPlugin(plugin=None):
             plugin.
 
     """
+    warnings.warn("{} will be deprecated in favor of {} in a future version of Klampt".format('addPlugin','splitView'),DeprecationWarning)
     splitView(plugin)
 
-def run(plugin=None):
+def run(plugin : GLPluginInterface=None) -> None:
     """A blocking call to start a single window and then kill the visualization
     once the user closes the window. 
 
@@ -995,7 +1012,7 @@ def run(plugin=None):
     _window_manager.run()
     kill()
 
-def multithreaded():
+def multithreaded() -> bool:
     """Returns true if the current GUI system allows multithreading.  Useful for apps
     that will work cross-platform with Macs and systems with only GLUT.
     """
@@ -1010,22 +1027,22 @@ def dialog():
     _init()
     return _window_manager.dialog()
 
-def setWindowTitle(title):
+def setWindowTitle(title : str) -> None:
     global _window_manager
     _init()
     _window_manager.setWindowName(title)
 
-def getWindowTitle():
+def getWindowTitle() -> str:
     global _window_manager
     return _window_manager.getWindowName()
 
-def resizeWindow(w,h):
+def resizeWindow(w : int, h : int):
     """Resizes the current window.  For OpenGL, this can be done after the
     window is shown. Otherwise, it must take place before showing."""
     global _window_manager
     return _window_manager.resizeWindow(w,h)
 
-def kill():
+def kill() -> None:
     """This should be called at the end of the calling program to cleanly terminate the
     visualization thread"""
     global _backend,_window_manager
@@ -1035,7 +1052,7 @@ def kill():
     _window_manager = None
     _backend = None
 
-def loop(setup=None,callback=None,cleanup=None):
+def loop(setup : Callable=None, callback : Callable=None, cleanup : Callable=None) -> None:
     """Runs the visualization thread inline with the main thread.
     The setup() function is called at the start, the callback() function is run
     every time the event thread is idle, and the cleanup() function is called
@@ -1050,7 +1067,7 @@ def loop(setup=None,callback=None,cleanup=None):
     _init()
     _window_manager.loop(setup,callback,cleanup)
 
-def show(display=True):
+def show(display : bool=True) -> None:
     """Shows or hides the current window.
 
     NOTE FOR MAC USERS: due to a lack of support of multithreading on Mac, this
@@ -1065,13 +1082,13 @@ def show(display=True):
         else:
             _window_manager.hide()
 
-def spin(duration):
+def spin(duration : float) -> None:
     """Spin-shows a window for a certain duration or until the window is closed."""
     global _window_manager
     _init()
     _window_manager.spin(duration)
 
-def lock():
+def lock() -> None:
     """Begins a locked section.  Needs to be called any time you modify a
     visualization item outside of the visualization thread.  unlock() must be
     called to let the visualization thread proceed.
@@ -1079,17 +1096,17 @@ def lock():
     global _window_manager
     _window_manager.lock()
 
-def unlock():
+def unlock() -> None:
     """Ends a locked section acquired by lock()."""
     global _window_manager
     _window_manager.unlock()
 
-def update():
+def update() -> None:
     """Manually triggers a redraw of the current window."""
     global _window_manager
     _window_manager.update()
 
-def shown():
+def shown() -> bool:
     """Returns true if a visualization window is currently shown."""
     global _globalLock,_window_manager
     _init()
@@ -1097,7 +1114,7 @@ def shown():
         res = _window_manager.shown()
     return res
 
-def customUI(func):
+def customUI(func : Callable) -> None:
     """Tells the next created window/dialog to use a custom UI function. Only
     available in PyQT mode.
 
@@ -1116,7 +1133,7 @@ def customUI(func):
     with _globalLock:
         _window_manager.set_custom_ui(func)
 
-def threadCall(func):
+def threadCall(func : Callable) -> None:
     """Call `func` inside the visualization thread. This is useful for some
     odd calls that are incompatible with being run outside the Qt or OpenGL
     thread.
@@ -1130,7 +1147,7 @@ def threadCall(func):
 
 
 ######### CONVENIENCE ALIASES FOR VisualizationScene methods ###########
-def addAction(hook,short_text,key=None,description=None):
+def addAction(hook : Callable, short_text : str, key : str=None, description : str=None) -> None:
     """Adds a callback to the window that can be triggered by menu choice or
     keyboard. Alias for nativeWindow().addAction().
 
@@ -1145,13 +1162,13 @@ def addAction(hook,short_text,key=None,description=None):
     _init()
     nativeWindow().addAction(hook,short_text,key,description)
 
-def clear():
+def clear() -> None:
     """Clears the visualization world."""
     if _backend is None:
         return
     scene().clear()
 
-def add(name,item,keepAppearance=False,**kwargs):
+def add(name : str, item,keepAppearance=False,**kwargs) -> None:
     """Adds an item to the visualization.
 
     Args:
@@ -1166,11 +1183,11 @@ def add(name,item,keepAppearance=False,**kwargs):
     _init()
     scene().add(name,item,keepAppearance,**kwargs)
     
-def listItems(name=None,indent=0):
+def listItems(name=None,indent=0) -> None:
     _init()
     scene().listItems(name,indent)
 
-def getItemName(object):
+def getItemName(object) -> ItemPath:
     """Retrieves the name / path of a given object in the scene, or returns
     None if the object doesnt exist.
     """
@@ -1178,18 +1195,22 @@ def getItemName(object):
         return None
     return scene().getItemName(object)
 
-def dirty(item_name='all'):
-    """Marks the given item as dirty and recreates the OpenGL display lists.  You may need
-    to call this if you modify an item's geometry, for example.  If things start disappearing
-    from your world when you create a new window, you may need to call this too."""
+def dirty(item_name : str='all') -> None:
+    """Marks the given item as dirty and recreates the OpenGL display lists. 
+    You may need to call this if you modify an item's geometry, for example. 
+    
+    If things start disappearing from your world when you create a new window,
+    you may need to call this too.
+    """
     scene().dirty(item_name)
 
-def animate(name,animation,speed=1.0,endBehavior='loop'):
+def animate(name : ItemPath, animation, speed : float=1.0, endBehavior : str='loop') -> None:
     """Sends an animation to the named object.
     Works with points, so3 elements, se3 elements, rigid objects, or robots, and may work
     with other objects as well.
 
     Args:
+        name (str): the named object
         animation: may be a Trajectory or a list of configurations.
         speed (float, optional): a modulator on the animation speed.  If the animation
             is a list of milestones, it is by default run at 1 milestone per second.
@@ -1199,15 +1220,15 @@ def animate(name,animation,speed=1.0,endBehavior='loop'):
     """
     scene().animate(name,animation,speed,endBehavior)
 
-def pauseAnimation(paused=True):
+def pauseAnimation(paused=True) -> None:
     """Pauses or unpauses the animation."""
     scene().pauseAnimation(paused)
 
-def stepAnimation(amount):
+def stepAnimation(amount : float) -> None:
     """Moves forward the animation time by ``amount``, given in seconds"""
     scene().stepAnimation(amount)
 
-def animationTime(newtime=None):
+def animationTime(newtime : float=None) -> None:
     """Gets/sets the current animation time
 
     If newtime is None (default), this gets the animation time.
@@ -1216,7 +1237,7 @@ def animationTime(newtime=None):
     """
     return scene().animationTime(newtime)
 
-def setTimeCallback(timefunc=None):
+def setTimeCallback(timefunc : Callable=None) -> None:
     """Sets a function that will return the window's global time.  This
     will be used by the animation timing, visualization plots, and movie-saving
     functions.
@@ -1229,11 +1250,11 @@ def setTimeCallback(timefunc=None):
     scene().setTimeCallback(timefunc)
     
 
-def remove(name):
+def remove(name : ItemPath) -> None:
     """Removes an item from the visualization"""
     return scene().remove(name)
 
-def getItemConfig(name):
+def getItemConfig(name : ItemPath) -> Sequence[float]:
     """Returns a configuration of an item from the visualization.  Useful for 
     interacting with edited objects.
 
@@ -1242,33 +1263,33 @@ def getItemConfig(name):
             None if name doesnt refer to an object."""
     return scene().getItemConfig(name)
 
-def setItemConfig(name,value):
+def setItemConfig(name : ItemPath, value : Sequence[float]) -> None:
     """Sets a configuration of an item from the visualization.
 
     Args:
-        name (str): the item to set the configuration of.
+        name (str): the item to set the configuration.
         value (list of floats): the item's configuration.  The number of items
             depends on the object's type.  See the config module for more information.
 
     """
     return scene().setItemConfig(name,value)
 
-def setLabel(name,text):
+def setLabel(name : ItemPath, text : str) -> None:
     """Changes the label of an item in the visualization"""
     setAttribute(name,"label",text)
 
-def hideLabel(name,hidden=True):
+def hideLabel(name : ItemPath, hidden=True) -> None:
     """Hides or shows the label of an item in the visualization"""
     return scene().hideLabel(name,hidden)
 
-def hide(name,hidden=True):
+def hide(name : ItemPath, hidden=True) -> None:
     """Hides an item in the visualization.  
 
     Note: the opposite of hide() is not show(), it's hide(False).
     """
     scene().hide(name,hidden)
 
-def edit(name,doedit=True):
+def edit(name : ItemPath, doedit=True) -> None:
     """Turns on/off visual editing of some item. 
 
     In OpenGL mode, currently accepts items of type:
@@ -1301,13 +1322,38 @@ def edit(name,doedit=True):
     """
     return scene().edit(name,doedit)
 
-def setAppearance(name,appearance):
+def pick(click_callback : Callable, hover_callback : Callable=None,
+        highlight_color=(1,1,0,0.3), filter : Callable=None, tolerance=0.01) -> None:
+    """Picks an item from the scene.  ``click_callback`` is called once the 
+    user left-clicks on an item.  ``hover_callback`` is called when a user
+    hovers over an item. 
+    
+    Once the user clicks, callbacks are disabled. To re-enable callbacks, call
+    pick() again.
+
+    Args:
+        click_callback (callable): a function f(name,item,point) that receives 
+            the name of the item, the item itself, and the point clicked on, 
+            in world coordinates.  Set this to None to disable picking.
+        hover_callback (callable): a function f(name,item,point) that receives 
+            the name of the item, the item itself, and the point hovered over, 
+            in world coordinates.  Set this to None to disable picking.
+        highlight_color (tuple, optional): if given, hovered items will be
+            colored with the given color.
+        filter (callable, optional): a function f(name,item) that returns True
+            if the item should be included in the selection.
+        tolerance (float, optional): a collision tolerance for non-volumetric
+            objects.
+    """
+    scene().pick(click_callback,hover_callback,highlight_color,filter,tolerance)
+
+def setAppearance(name : ItemPath, appearance : Appearance) -> None:
     """Changes the Appearance of an item, for an item that uses the Appearance
     item to draw (config, geometry, robots, rigid bodies).
     """
     scene().setAppearance(name,appearance)
 
-def setAttribute(name,attr,value):
+def setAttribute(name : ItemPath, attr : str, value) -> None:
     """Sets an attribute of an item's appearance.
 
     Args:
@@ -1342,7 +1388,7 @@ def setAttribute(name,attr,value):
     """
     scene().setAttribute(name,attr,value)
 
-def getAttribute(name,attr):
+def getAttribute(name : ItemPath, attr : str):
     """Gets an attribute of an item's appearance. If not previously set by the
     user, the default value will be returned.
 
@@ -1352,7 +1398,7 @@ def getAttribute(name,attr):
     """
     return scene().getAttribute(name,attr)
 
-def getAttributes(name):
+def getAttributes(name : ItemPath) -> dict:
     """Gets a dictionary of all relevant attributes of an item's appearance. 
     If not previously set by the user, default values will be returned.
 
@@ -1361,13 +1407,13 @@ def getAttributes(name):
     """
     return scene().getAttributes(name)
 
-def revertAppearance(name):
+def revertAppearance(name : ItemPath) -> None:
     scene().revertAppearance(name)
 
-def setColor(name,r,g,b,a=1.0):
+def setColor(name : ItemPath, r : float, g : float, b : float, a : float=1.0) -> None:
     scene().setColor(name,r,g,b,a)
 
-def setDrawFunc(name,func):
+def setDrawFunc(name : ItemPath, func : Callable) -> None:
     """Sets a custom OpenGL drawing function for an item.
 
     Args:
@@ -1448,7 +1494,7 @@ def _getBounds(object):
     return []
 
 
-def autoFitViewport(viewport,objects,zoom=True,rotate=True): 
+def autoFitViewport(viewport : Viewport, objects : Sequence, zoom=True,rotate=True) -> None: 
     from ..model.sensing import fit_plane_centroid
     ofs = sum([_getOffsets(o) for o in objects],[])
     pts = sum([_getBounds(o) for o in objects],[])
@@ -1513,7 +1559,7 @@ def autoFitViewport(viewport,objects,zoom=True,rotate=True):
             far = max((viewport.camera.dist + zmax)*1.5, radius*3)
         viewport.clippingplanes = (near,far)
 
-def addText(name,text,position=None,**kwargs):
+def addText(name : str, text : str, position=None, **kwargs) -> None:
     """Adds text to the visualizer.  You must give an identifier to all pieces 
     of text, which will be used to access the text as any other vis object. 
 
@@ -1539,33 +1585,33 @@ def addText(name,text,position=None,**kwargs):
     else:
         scene().addText(name,text,position=position,**kwargs)
 
-def clearText():
+def clearText() -> None:
     """Clears all text in the visualization."""
     scene().clearText()
 
-def addPlot(name):
+def addPlot(name : str) -> None:
     """Creates a new empty plot with the identifier ``name``."""
     add(name,VisPlot())
 
-def addPlotItem(name,itemname):
+def addPlotItem(name : str, itemname : str) -> None:
     """Adds a scene item named ``itemname`` to the plot.  All of the item's
     configuration variables will be plotted by default, see
     :func:`hidePlotItem` to turn off drawing some of these channels.
     """
     scene().addPlotItem(name,itemname)
 
-def logPlot(name,itemname,value):
+def logPlot(name : str, itemname : str,value) -> None:
     """Logs a custom visualization item to a plot.  ``itemname`` can be an
     arbitrary identifier; future logPlot calls with this itemname will add
     values to the plotted curve.
     """
     scene().logPlot(name,itemname,value)
 
-def logPlotEvent(name,eventname,color=None):
+def logPlotEvent(name : str,eventname : str,color=None):
     """Logs an event on the plot."""
     scene().logPlotEvent(name,eventname,color)
 
-def hidePlotItem(name,itemname,hidden=True):
+def hidePlotItem(name : str, itemname : str,hidden=True):
     """Hides an item in the plot.  To hide a particular channel of a given item
     pass a pair ``(itemname,channelindex)``. 
 
@@ -1578,27 +1624,27 @@ def hidePlotItem(name,itemname,hidden=True):
     """
     scene().hidePlotItem(name,itemname,hidden)
 
-def setPlotDuration(name,time):
+def setPlotDuration(name : str, time : float) -> None:
     """Sets the plot duration."""
     setAttribute(name,'duration',time)
 
-def setPlotRange(name,vmin,vmax): 
+def setPlotRange(name : str, vmin : float, vmax : float) -> None: 
     """Sets the y range of a plot to [vmin,vmax]."""
     setAttribute(name,'range',(vmin,vmax))
 
-def setPlotPosition(name,x,y):
+def setPlotPosition(name : str, x : float, y : float) -> None:
     """Sets the upper left position of the plot on the screen."""
     setAttribute(name,'position',(x,y))
 
-def setPlotSize(name,w,h):
+def setPlotSize(name : str, w : int, h : int) -> None:
     """sets the width and height of the plot, in pixels."""
     setAttribute(name,'size',(w,h))
 
-def savePlot(name,fn):
+def savePlot(name : str, fn : str) -> None:
     """Saves a plot to a CSV (extension .csv) or Trajectory (extension .traj) file."""
     scene().savePlot(name,fn)
 
-def autoFitCamera(zoom=True,rotate=True,scale=1):
+def autoFitCamera(zoom=True,rotate=True,scale=1) -> None:
     """Automatically fits the camera to all items in the visualization. 
 
     Args:
@@ -1609,7 +1655,7 @@ def autoFitCamera(zoom=True,rotate=True,scale=1):
     print("klampt.vis: auto-fitting camera to scene.")
     scene().autoFitCamera(zoom,rotate,scale)
 
-def followCamera(target,translate=True,rotate=False,center=False):
+def followCamera(target,translate=True,rotate=False,center=False) -> None:
     """Sets the camera to follow a target.  The camera starts from its current
     location and keeps the target in the same position on screen. 
 
@@ -1634,26 +1680,26 @@ def followCamera(target,translate=True,rotate=False,center=False):
     """
     scene().followCamera(target,translate,rotate,center)
 
-def getViewport():
+def getViewport() -> GLViewport:
     """Returns the :class:`GLViewport` of the current scene"""
     return scene().getViewport()
 
-def setViewport(viewport):
+def setViewport(viewport : GLViewport) -> None:
     """Sets the current scene to use a given :class:`GLViewport`"""
     scene().setViewport(viewport)
 
-def setBackgroundColor(r,g,b,a=1): 
+def setBackgroundColor(r : float, g : float, b : float, a : float=1) -> None: 
     """Sets the background color of the current scene."""
     scene().setBackgroundColor(r,g,b,a)
 
-def saveJsonConfig(fn=None):
+def saveJsonConfig(fn : str=None) -> Union[dict,None]:
     """Saves the visualization options to a JSON object or file.
 
     If fn is provided, it's saved to a file.  Otherwise, it is returned.
     """
     return scene().saveJsonConfig(fn)
 
-def loadJsonConfig(jsonobj_or_fn):
+def loadJsonConfig(jsonobj_or_fn : Union[dict,str]):
     """Loads the visualization options from a JSON object or file.
 
     jsonobj_or_fn can either by a dict (previously obtained by saveJsonConfig
@@ -1687,7 +1733,7 @@ def screenshot(format='auto',want_depth=False):
         return None
     return _window_manager.screenshot(format,want_depth)
 
-def screenshotCallback(fn,format='auto',want_depth=False):
+def screenshotCallback(fn : Callable, format='auto', want_depth=False) -> None:
     """Sets a callback ``fn`` that will receive a screenshot of the scene when
     rendering is done.
 
@@ -1704,9 +1750,9 @@ def screenshotCallback(fn,format='auto',want_depth=False):
         return None
     return _window_manager.screenshotCallback(fn,format,want_depth)
 
-def objectToVisType(item,world):
+def objectToVisType(item, world : WorldModel) -> str:
     """Returns the default type for the given item in the current world"""
-    itypes = types.objectToTypes(item,world)
+    itypes = types.object_to_types(item,world)
     if isinstance(itypes,(list,tuple)):
         #ambiguous, still need to figure out what to draw
         validtypes = []
@@ -2379,7 +2425,7 @@ class VisAppearance:
     def markChanged(self,config=True,appearance=True):
         if appearance:
             for c in self.displayCache:
-                c.markChanged()
+                c.mark_changed()
         for (k,a) in self.subAppearances.items():
             a.markChanged(config,appearance)
         if config:
@@ -2933,6 +2979,8 @@ class VisAppearance:
             s = self.attributes["size"]
             if s:
                 self.appearance.setPointSize(s)
+            self.appearance.setSilhouette(0)
+            self.appearance.setCreaseAngle(0)
             wp = None
             geometry = None
             lighting = True
@@ -2997,7 +3045,7 @@ class VisAppearance:
                 if world and rindex < world.numRobots():
                     robot = world.robot(rindex)
                     if robot.numLinks() != len(item):
-                        warnings.warn("Unable to draw Config, does not have the same # of DOFs as the robot: %d != %d"%(robot.numLinks(),len(item)))
+                        warnings.warn("Unable to draw Config %s, does not have the same # of DOFs as the robot: %d != %d"%(self.name,robot.numLinks(),len(item)))
                     else:
                         if not self.useDefaultAppearance:
                             oldAppearance = [robot.link(i).appearance().clone() for i in range(robot.numLinks())]
@@ -3170,6 +3218,29 @@ class VisAppearance:
             except Exception:
                 raise
         return (so3.identity(),self.getCenter())
+    
+    def rayCast(self,source,direction,tolerance=0.01):
+        """Returns a point on the item intersected by the ray
+        ``source + t*direction``, or None if it does not intersect.
+
+        For non-volumetric items, the item is treated as though it
+        were expanded by ``tolerance`` units.
+        """
+        geom = None
+        if isinstance(self.item,Geometry3D):
+            geom = self.item
+        elif hasattr(self.item,'geometry') and callable(self.item.geometry):
+            geom = self.item.geometry()
+        #TODO: ray cast other items like points, transforms, trajectories
+        if geom is None: return None
+        margin = geom.getCollisionMargin()
+        if geom.type() == 'PointCloud':
+            geom.setCollisionMargin(tolerance)
+        elif geom.type() == 'GeometricPrimitive' and geom.getGeometricPrimitive().type in ['Point','Segment','Line']:
+            geom.setCollisionMargin(tolerance)
+        (hit,pt) = geom.rayCast(source,direction)
+        geom.setCollisionMargin(margin)  #restore margin
+        return pt if hit else None
 
     def getSubItem(self,path):
         if len(path) == 0: return self
@@ -3310,7 +3381,21 @@ class VisAppearance:
 
 class VisualizationScene:
     """Holds all of the visualization information for a scene, including
-    labels, edit status, and animations"""
+    labels, edit status, and animations.
+    
+    Attributes:
+        items (dict of str->VisAppearance): the top level items in the scene.
+        labels (list): internally used
+        t (float): current scene time, internally used
+        timeCallback (callable): a function time()->float that is used to get
+            the time update.  If None, ``time.time()`` is used.
+        startTime (float): first time that updateTime() was called, internally
+            used.
+        doRefresh (bool): whether any item wants to refresh the visualization.
+        cameraController: if given, a class to update the camera whenever
+            updateCamera is called.
+
+    """
     def __init__(self):
         self.items = {}
         self.labels = []
@@ -3341,8 +3426,13 @@ class VisualizationScene:
             if item_name == 'all':
                 for (name,itemvis) in self.items.items():
                     itemvis.markChanged()
+                    if hasattr(itemvis,'appearance'):
+                        itemvis.appearance.refresh(True)
             else:
-                self.getItem(item_name).markChanged()
+                item = self.getItem(item_name)
+                item.markChanged()
+                if hasattr(item,'appearance'):
+                    item.appearance.refresh(True)
 
     def clear(self):
         """Clears the visualization world"""
@@ -3381,11 +3471,15 @@ class VisualizationScene:
                 self.listItems(v,indent+2)
 
     def getItemName(self,object):
+        """Retrieves a str or tuple of strs giving the path to an object"""
         name = None
         if hasattr(object,'getName'):
             name = object.getName()
-        if hasattr(object,'name'):
-            name = object.name()
+        elif hasattr(object,'name'):
+            if callable(object.name):
+                name = object.name()
+            else:
+                name = object.name
         if name is not None and name in self.items:
             if self.items[name].item is object:
                 return name
@@ -3793,6 +3887,9 @@ class VisualizationScene:
 
     def edit(self,name,doedit=True):
         raise NotImplementedError("Needs to be implemented by subclass")
+    
+    def pick(self,click_callback,hover_callback,highlight_color,filter,tolerance):
+        raise NotImplementedError("Needs to be implemented by subclass")
 
     def getViewport(self):
         raise NotImplementedError("Needs to be implemented by subclass")
@@ -3805,7 +3902,7 @@ class VisualizationScene:
 
     def renderGL(self,view):
         """Renders the scene in OpenGL"""
-        vp = view.toViewport()
+        vp = view.to_viewport()
         self.labels = []
         world = self.items.get('world',None)
         if world is not None: world=world.item
@@ -3887,7 +3984,6 @@ class VisualizationScene:
                     window.draw_text((x,y+size),v.item,size,col)
         GL.glEnable(GL.GL_DEPTH_TEST)
 
-
     def _renderGLLabelRaw(self,view,point,textList,colorList):
         #assert not self.makingDisplayList,"drawText must be called outside of display list"
         assert self.window is not None
@@ -3909,6 +4005,41 @@ class VisualizationScene:
     def clearDisplayLists(self):
         for i in self.items.values():
             i.clearDisplayLists()
+
+    def rayCast(self,x,y,filter=None,tolerance=0.01):
+        """Performs ray casting with the scene
+
+        Args:
+            x (float): the screen x-coordinate of the mouse cursor
+            y (float): the screen y-coordinate of the mouse cursor
+            filter (callable, optional): if given, a function f(name,item) that
+                returns True if the item should be considered.
+            tolerance (float, optional): a tolerance for ray intersection with
+                non-volumetric items.
+        
+        Returns:
+            tuple: a pair ``(visapp,pt)`` with visapp the first intersected 
+            :class:`VisAppearance` and pt the clicked point.  If nothing 
+            intersects, then (None,None) is returned.
+        """
+        (s,d) = self.view.click_ray(x,y)
+        data = [(None,None),float('inf')]  #closest and closest distance
+        def doclick(name,visappearance,data=data):
+            item = visappearance.item
+            if filter is not None or filter(name,item):
+                if len(visappearance.subAppearances) != 0:
+                    for sname,app in visappearance.subAppearances.items():
+                        doclick(sname,app)
+                else:
+                    pt = visappearance.rayCast(s,d,tolerance)
+                    if pt is not None:
+                        dist = vectorops.dot(vectorops.sub(pt,s),d)
+                        if dist < data[1]:
+                            data[0] = (visappearance,pt)
+                            data[1] = dist
+        for name,item in self.items.items():
+            doclick(name,item)
+        return data[0]
 
     def saveJsonConfig(self,fn=None):
         def dumpitem(v):
@@ -3973,11 +4104,12 @@ class VisualizationScene:
             if k not in parsed:
                 warnings.warn("JSON object {} not in visualization".format(k))
 
+
 def _camera_translate(vp,tgt):
     vp.camera.tgt = tgt
 
 def _camera_lookat(vp,tgt):
-    T = vp.getTransform()
+    T = vp.get_transform()
     vp.camera.tgt = tgt
     vp.camera.dist = max(vectorops.distance(T[1],tgt),0.1)
     #set R to point at target
@@ -3990,7 +4122,7 @@ def _camera_lookat(vp,tgt):
 class _TrackingCameraController:
     def __init__(self,vp,target):
         self.vp = vp
-        T = vp.getTransform()
+        T = vp.get_transform()
         target.swapDrawConfig()
         self.viewportToTarget = se3.mul(se3.inv(target.getTransform()),T)
         target.swapDrawConfig()
@@ -3999,7 +4131,7 @@ class _TrackingCameraController:
         self.target.swapDrawConfig()
         T = se3.mul(self.target.getTransform(),self.viewportToTarget)
         self.target.swapDrawConfig()
-        self.vp.setTransform(T)
+        self.vp.set_transform(T)
         return self.vp
 
 class _TranslatingCameraController:
@@ -4047,13 +4179,13 @@ class _TrajectoryCameraController:
     def update(self,t):
         if isinstance(self.trajectory,(SE3Trajectory,SE3HermiteTrajectory)):
             T = self.trajectory.eval(t,'loop')
-            self.vp.setTransform(T)
+            self.vp.set_transform(T)
         elif isinstance(self.trajectory,(SO3Trajectory,SO3HermiteTrajectory)):
             R = self.trajectory.eval(t,'loop')
             self.vp.camera.set_orientation(R,'xyz')
         else:
             trans = self.trajectory.eval(t,'loop')
-            T = self.vp.getTransform()
+            T = self.vp.get_transform()
             ofs = vectorops(self.vp.tgt,T[0])
             self.vp.camera.tgt = vectorops.add(trans,ofs)
         return self.vp
@@ -4065,7 +4197,7 @@ class _SimCamCameraController:
     def update(self,t):
         from ..model import sensing
         T = sensing.get_sensor_xform(self.target,self.target.robot())
-        self.vp.setTransform(T)
+        self.vp.set_transform(T)
         return self.vp
 
 

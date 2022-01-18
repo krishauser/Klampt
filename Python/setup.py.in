@@ -5,6 +5,11 @@ except ImportError:
 import os
 import glob
 import sys
+try:
+    import numpy
+except ImportError:
+    print('Building Klampt from source requires numpy.  Try "pip install numpy". Exiting.')
+    exit(1)
 
 src_folder = "klampt/src"
 root_py_folder = "klampt"
@@ -84,6 +89,8 @@ for d in defs:
     else:
         commondefines.append((d,None))
 
+includeDirs.append(numpy.get_include())
+
 commonfiles = ['pyerr.cpp']
 rssourcefiles = commonfiles + ['robotsim.cpp','robotik.cpp','robotsim_wrap.cxx']
 mpsourcefiles = commonfiles + ['motionplanning.cpp','motionplanning_wrap.cxx']
@@ -128,13 +135,14 @@ setup(name='Klampt',
       py_modules=['klampt.robotsim','klampt.plan.motionplanning'],
       packages=klampt_packages,
       package_dir={'klampt': root_py_folder},
-      package_data={'klampt': extra_shared_libraries + ['data/*.html','data/*.js']},
+      package_data={'klampt': extra_shared_libraries + ['data/*.html','data/*.js','data/*.ui']},
       entry_points = {
         'console_scripts': [
             'klampt_browser=klampt.apps.klampt_browser:main',
+            'klampt_control=klampt.apps.klampt_control:main',
             'klampt_path=klampt.apps.klampt_path:main',
             'klampt_sim=klampt.apps.klampt_sim:main',
-            'klampt_thumbnails=klampt.apps.klampt_thumbnails:main'
+            'klampt_thumbnails=klampt.apps.klampt_thumbnails:main',
             ],
       },
       classifiers=[
@@ -146,6 +154,10 @@ setup(name='Klampt',
         "Operating System :: MacOS",
         "Operating System :: POSIX :: Linux",
         "Topic :: Scientific/Engineering"
+      ],
+      install_requires=[
+        'PyOpenGL',
+        'numpy',
       ],
      )
 

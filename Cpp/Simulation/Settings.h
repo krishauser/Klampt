@@ -1,5 +1,7 @@
-#ifndef SIMULATION_SETTINGS_H
-#define SIMULATION_SETTINGS_H
+#ifndef KLAMPT_SIMULATION_SETTINGS_H
+#define KLAMPT_SIMULATION_SETTINGS_H
+
+namespace Klampt {
 
 //Set these values to 0 to get all warnings
 const static double gTorqueLimitWarningThreshold = Inf;
@@ -23,5 +25,7 @@ const static bool gRigidObjectCollisionsEnabled = true;
 const static bool gRobotSelfCollisionsEnabled = false;
 const static bool gRobotRobotCollisionsEnabled = true;
 const static bool gAdaptiveTimeStepping = true;
+
+} //namespace Klampt
 
 #endif

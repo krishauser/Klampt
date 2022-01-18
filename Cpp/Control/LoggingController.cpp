@@ -1,7 +1,8 @@
 #include "LoggingController.h"
 #include <sstream>
+using namespace Klampt;
 
-LoggingController::LoggingController(Robot& robot,const shared_ptr<RobotController>& _base)
+LoggingController::LoggingController(RobotModel& robot,const shared_ptr<RobotController>& _base)
   : RobotController(robot),base(_base),save(false),replay(false),onlyJointCommands(false),replayIndex(0)
 {}
 

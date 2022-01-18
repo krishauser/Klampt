@@ -6,8 +6,10 @@
 #include "ODESurface.h"
 #include <ode/common.h>
 #include <KrisLibrary/File.h>
-using namespace Math;
-using namespace std;
+
+namespace Klampt {
+  using namespace Math;
+  using namespace std;
 
 /** @ingroup Simulation
  * @brief A robot simulated in an ODE "world"
@@ -31,7 +33,7 @@ class ODERobot
   static double defaultPadding;
   static ODESurfaceProperties defaultSurface;
 
-  ODERobot(Robot& robot);
+  ODERobot(RobotModel& robot);
   ~ODERobot();
   void Create(int index,dWorldID worldID,bool useBoundaryLayer=true);
   void Clear();
@@ -75,7 +77,7 @@ class ODERobot
   dBodyID baseBody(int link) const;  //for attached links, returns the base body for the link
   inline dJointFeedback feedback(int link) const { return jointFeedback[link]; }
 
-  Robot& robot;
+  RobotModel& robot;
 
  private:
   vector<RigidTransform> T_bodyToLink;
@@ -87,5 +89,7 @@ class ODERobot
   dSpaceID spaceID;
   vector<shared_ptr<RobotWithGeometry::CollisionGeometry> > tempGeometries;
 };
+
+} //namespace Klampt
 
 #endif

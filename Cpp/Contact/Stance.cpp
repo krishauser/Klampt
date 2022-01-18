@@ -5,6 +5,8 @@
 #include <string>
 #include <iostream>
 
+namespace Klampt {
+
 bool Stance::remove(int link)
 {
   iterator i=find(link);
@@ -339,3 +341,5 @@ void ToIKProblem(const Stance& stance,vector<IKGoal>& constraints)
     k++;
   }
 }
+
+} //namespace Klampt

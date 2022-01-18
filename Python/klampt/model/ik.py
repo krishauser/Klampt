@@ -67,8 +67,17 @@ klampt.robotsim.IKSolver)
 from ..robotsim import *
 from ..math import so3,se3
 from .subrobot import SubRobotModel
+from typing import Union,Optional,List,Sequence,Callable
+from .typing import Vector,Vector3,Rotation,RigidTransform
 
-def objective(body,ref=None,local=None,world=None,R=None,t=None):
+def objective(
+        body: Union[RobotModelLink,RigidObjectModel],
+        ref: Union[None,RobotModelLink,RigidObjectModel] = None,
+        local: Union[None,Vector3,List[Vector3]] = None,
+        world: Union[None,Vector3,List[Vector3]] = None,
+        R: Optional[Rotation] = None,
+        t: Optional[Vector3] = None
+    ) -> IKObjective:
     """Returns an IKObjective for a given body.
 
     There are two modes in which this can be used:
@@ -99,9 +108,10 @@ def objective(body,ref=None,local=None,world=None,R=None,t=None):
         should take on.
 
     Returns:
-        IKObjective or GeneralizedIKObjective: usually a plain IK objective
-        is returned, but if body and ref are not on the same robot, then a
-        GeneralizedIKObjective may be returned.
+        An IK objective describing the constraint.
+
+        If body and ref are not on the same robot, then a
+        GeneralizedIKObjective may be returned. TODO: not implemented yet.
     """
     generalized = False
     if not hasattr(body,'robot'):
@@ -162,7 +172,12 @@ def objective(body,ref=None,local=None,world=None,R=None,t=None):
         return obj
 
 
-def fixed_objective(link,ref=None,local=None,world=None):
+def fixed_objective(
+        link: RobotModelLink,
+        ref: Union[None,RobotModelLink,RigidObjectModel] = None,
+        local: Union[None,Vector3,List[Vector3]] = None,
+        world: Union[None,Vector3,List[Vector3]] = None
+    ) -> IKObjective:
     """Convenience function for fixing the given link at the current position
     in space. 
 
@@ -187,8 +202,6 @@ def fixed_objective(link,ref=None,local=None,world=None):
         world (3-vector, or a list of 3-vectors, optional): the world
             coordinates on `body` should be constrained in place
 
-    Returns:
-        IKObjective or GeneralizedIKObjective
     """
     refcoords = ref.getTransform() if ref is not None else se3.identity()
     Tw = link.getTransform()
@@ -214,7 +227,12 @@ def fixed_objective(link,ref=None,local=None,world=None):
     else:
         raise ValueError("ik.fixed_objective does not accept both local and world keyword arguments")
 
-def fixed_rotation_objective(link,ref=None,local_axis=None,world_axis=None):
+def fixed_rotation_objective(
+        link: RobotModelLink,
+        ref: Union[None,RobotModelLink,RigidObjectModel] = None,
+        local_axis: Optional[Vector3] = None,
+        world_axis: Optional[Vector3] = None
+    ) -> IKObjective:
     """Convenience function for fixing the given link at its current
     orientation in space. 
 
@@ -239,8 +257,6 @@ def fixed_rotation_objective(link,ref=None,local_axis=None,world_axis=None):
         world_axis (3-vector, optional): the world coordinates
             of the direction that should be constrained.
 
-    Returns:
-        IKObjective or GeneralizedIKObjective
     """
     refcoords = ref.getTransform()[0] if ref is not None else so3.identity()
     Rw = link.getTransform()
@@ -273,7 +289,11 @@ def objects(objectives):
     raise NotImplementedError()
     pass
 
-def solver(objectives,iters=None,tol=None):
+def solver(
+        objectives: Union[IKObjective,Sequence[IKObjective]],
+        iters: Optional[int] = None,
+        tol: Optional[float] = None
+    ) -> IKSolver:
     """Returns a solver for the given objective(s). 
 
     Args:
@@ -293,13 +313,11 @@ def solver(objectives,iters=None,tol=None):
             the solver is set to this value.  Otherwise, the default value
             (1e-3) is used.
 
-    Returns:
-        IKSolver or GeneralizedIKSolver
-
-    Note:
+    .. note::
         In rare cases, this may return a list of IKSolver's if you give
         it objectives on different robots.  They should be solved
         independently for efficiency.
+
     """
     if hasattr(objectives,'__iter__'):
         generalized = []
@@ -375,7 +393,12 @@ def solver(objectives,iters=None,tol=None):
         else:
             raise TypeError("Objective is of wrong type")
 
-def solve(objectives,iters=1000,tol=1e-3,activeDofs=None):
+def solve(
+        objectives: Union[IKObjective,Sequence[IKObjective]],
+        iters: int = 1000,
+        tol: float = 1e-3,
+        activeDofs: Optional[List[int]] = None
+    ) -> bool:
     """Attempts to solve the given objective(s). Either a single objective
     or a list of simultaneous objectives can be provided.
 
@@ -386,12 +409,12 @@ def solve(objectives,iters=1000,tol=1e-3,activeDofs=None):
         activeDofs (list, optional): a list of link indices or names to use for IK
             solving.  By default, will determine these automatically.
 
-    Note:
+    .. note::
         You cannot use sub-robots and activeDofs at the same time.  Undefined
         behavior will result.
 
     Returns:
-        bool: True if a solution is successfully found to the given tolerance,
+        True if a solution is successfully found to the given tolerance,
         within the provided number of iterations.  The robot(s) are then set
         to the solution configuration.  If a solution is not found, False is
         returned and the robot(s) are set to the best found configuration.
@@ -419,16 +442,24 @@ def solve(objectives,iters=1000,tol=1e-3,activeDofs=None):
     else:
         return s.solve()
 
-def residual(objectives):
+def residual(objectives: Union[IKObjective,Sequence[IKObjective]]) -> Vector:
     """Returns the residual of the given objectives."""
     return solver(objectives).getResidual()
 
-def jacobian(objectives):
+def jacobian(objectives: Union[IKObjective,Sequence[IKObjective]]): 
     """Returns the jacobian of the given objectives."""
     return solver(objectives).getJacobian()
 
 
-def solve_global(objectives,iters=1000,tol=1e-3,activeDofs=None,numRestarts=100,feasibilityCheck=None,startRandom=False):
+def solve_global(
+        objectives: Union[IKObjective,Sequence[IKObjective]],
+        iters: int = 1000,
+        tol: float = 1e-3,
+        activeDofs: Optional[List[int]] = None,
+        numRestarts: int=100,
+        feasibilityCheck: Optional[Callable[[],bool]] = None,
+        startRandom: bool=False
+    ) -> bool:
     """Attempts to solve the given objective(s) but avoids local minima
     to some extent using a random-restart technique.  
         
@@ -444,7 +475,7 @@ def solve_global(objectives,iters=1000,tol=1e-3,activeDofs=None,numRestarts=100,
             and start from random initial configurations
 
     Returns:
-        bool: True if a feasible solution is successfully found to the given
+        True if a feasible solution is successfully found to the given
         tolerance, within the provided number of iterations.
     """
     if feasibilityCheck is None: feasibilityCheck=lambda : True
@@ -483,11 +514,19 @@ def solve_global(objectives,iters=1000,tol=1e-3,activeDofs=None,numRestarts=100,
                     return True
         return False
 
-def solve_nearby(objectives,maxDeviation,iters=1000,tol=1e-3,activeDofs=None,numRestarts=0,feasibilityCheck=None):
+def solve_nearby(
+        objectives: Union[IKObjective,Sequence[IKObjective]],
+        maxDeviation: float,
+        iters: int = 1000,
+        tol: float = 1e-3,
+        activeDofs: Optional[List[int]] = None,
+        numRestarts: int = 0,
+        feasibilityCheck: Optional[Callable[[],bool]] = None
+    ) -> bool:
     """Solves for an IK solution that does not deviate too far from the
     initial configuration.
 
-    Note:
+    .. note::
         Currently only supports single-robot objectives!
     
     Args: 

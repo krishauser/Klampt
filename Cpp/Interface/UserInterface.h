@@ -11,6 +11,7 @@
 #include "InputProcessor.h"
 #include <KrisLibrary/utils/threadutils.h>
 
+namespace Klampt {
 
 
 /** @brief An abstract base class for a user interface.
@@ -23,7 +24,7 @@ class RobotUserInterface
  public:
   RobotUserInterface();
   virtual ~RobotUserInterface() { }
-  Robot* GetRobot() const { return world->robots[0].get(); }
+  RobotModel* GetRobot() const { return world->robots[0].get(); }
   void GetClickRay(int mx,int my,Ray3D& ray) const;
 
   //Subclasses overload these functions
@@ -47,10 +48,10 @@ class RobotUserInterface
   virtual string UpdateEvent() { return ""; }
 
   //settings
-  RobotWorld* world;
+  WorldModel* world;
   Camera::Viewport* viewport;
   //if set, the planner will plan in this world
-  RobotWorld* planningWorld;
+  WorldModel* planningWorld;
   WorldPlannerSettings* settings;
   MotionQueueInterface* robotInterface;
 };
@@ -218,5 +219,7 @@ class MTRRTCommandInterface: public MTPlannerCommandInterface
 
   shared_ptr<SingleRobotCSpace> cspace;
 };
+
+} // namespace Klampt
 
 #endif

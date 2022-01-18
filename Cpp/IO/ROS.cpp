@@ -4,9 +4,9 @@
 
 #include "Modeling/World.h"
 #include "Modeling/Paths.h"
-#include "Simulation/WorldSimulation.h"
+#include "Simulation/Simulator.h"
 #include <KrisLibrary/meshing/PointCloud.h>
-#include "Simulation/ControlledSimulator.h"
+#include "Simulation/SimRobotController.h"
 #include "Sensing/Sensor.h"
 #include "Sensing/VisualSensors.h"
 #include "Sensing/ForceSensors.h"
@@ -25,6 +25,8 @@
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/CameraInfo.h>
 #include <trajectory_msgs/JointTrajectory.h>
+
+namespace Klampt {
 
 bool IsBigEndian() {
   int n = 1;
@@ -100,7 +102,7 @@ bool KlamptToROS(const RigidTransform& kT,geometry_msgs::PoseStamped& pose)
   return true;
 }
 
-bool ROSToKlampt(const sensor_msgs::JointState& js,Robot& krobot)
+bool ROSToKlampt(const sensor_msgs::JointState& js,RobotModel& krobot)
 {
   map<string,int> indices;
   for(size_t i=0;i<krobot.linkNames.size();i++)
@@ -117,7 +119,7 @@ bool ROSToKlampt(const sensor_msgs::JointState& js,Robot& krobot)
   return true;
 }
 
-bool KlamptToROS(const Robot& krobot,sensor_msgs::JointState& js)
+bool KlamptToROS(const RobotModel& krobot,sensor_msgs::JointState& js)
 {
   js.name = krobot.linkNames;
   js.position.resize(krobot.linkNames.size());
@@ -146,13 +148,13 @@ bool KlamptToROS(const vector<double>& kvec,std_msgs::Float32MultiArray& msg)
 }
 
 
-bool CommandedKlamptToROS(ControlledRobotSimulator& kcontroller,sensor_msgs::JointState& js)
+bool CommandedKlamptToROS(SimRobotController& kcontroller,sensor_msgs::JointState& js)
 {
   Config qcmd,vcmd,t;
   kcontroller.GetCommandedConfig(qcmd);
   kcontroller.GetCommandedVelocity(vcmd);
   kcontroller.GetLinkTorques(t);
-  Robot& krobot = *kcontroller.robot;
+  RobotModel& krobot = *kcontroller.robot;
   js.name = krobot.linkNames;
   js.position.resize(krobot.linkNames.size());
   js.velocity.resize(krobot.linkNames.size());
@@ -165,13 +167,13 @@ bool CommandedKlamptToROS(ControlledRobotSimulator& kcontroller,sensor_msgs::Joi
   return true;
 }
 
-bool SensedKlamptToROS(ControlledRobotSimulator& kcontroller,sensor_msgs::JointState& js)
+bool SensedKlamptToROS(SimRobotController& kcontroller,sensor_msgs::JointState& js)
 {
   Config qcmd,vcmd,t;
   kcontroller.GetSensedConfig(qcmd);
   kcontroller.GetSensedVelocity(vcmd);
   kcontroller.GetLinkTorques(t);
-  Robot& krobot = *kcontroller.robot;
+  RobotModel& krobot = *kcontroller.robot;
   js.name = krobot.linkNames;
   js.position.resize(krobot.linkNames.size());
   js.velocity.resize(krobot.linkNames.size());
@@ -213,7 +215,7 @@ bool KlamptToROS(const LinearPath& kpath,trajectory_msgs::JointTrajectory& traj)
   return true;
 }
 
-bool KlamptToROS(const Robot& robot,const LinearPath& kpath,trajectory_msgs::JointTrajectory& traj)
+bool KlamptToROS(const RobotModel& robot,const LinearPath& kpath,trajectory_msgs::JointTrajectory& traj)
 {
   if(kpath.milestones.empty()) {
     traj.joint_names.clear();
@@ -233,7 +235,7 @@ bool KlamptToROS(const Robot& robot,const LinearPath& kpath,trajectory_msgs::Joi
   return true;
 }
 
-bool KlamptToROS(const Robot& robot,const vector<int>& indices,const LinearPath& kpath,trajectory_msgs::JointTrajectory& traj)
+bool KlamptToROS(const RobotModel& robot,const vector<int>& indices,const LinearPath& kpath,trajectory_msgs::JointTrajectory& traj)
 {
   if(kpath.milestones.empty()) {
     traj.joint_names.clear();
@@ -727,7 +729,7 @@ bool RosPublish(const Type& obj,const string& topic)
   return RosPublish2<Type,ROSPublisher<Msg>,Msg>(obj,topic);
 }
 
-bool ROSPublishTransforms(const RobotWorld& world,const char* frameprefix)
+bool ROSPublishTransforms(const WorldModel& world,const char* frameprefix)
 {
   if(!ROSInit()) return false;
   string prefix = frameprefix;
@@ -759,7 +761,7 @@ bool ROSPublishTransforms(const RobotWorld& world,const char* frameprefix)
   return true;
 }
 
-bool ROSPublishTransforms(const WorldSimulation& sim,const char* frameprefix)
+bool ROSPublishTransforms(const Simulator& sim,const char* frameprefix)
 {
   if(!ROSInit()) return false;
   string prefix = frameprefix;
@@ -795,7 +797,7 @@ bool ROSPublishTransforms(const WorldSimulation& sim,const char* frameprefix)
   return true;
 }
 
-bool ROSPublishTransforms(const Robot& robot,const char* frameprefix)
+bool ROSPublishTransforms(const RobotModel& robot,const char* frameprefix)
 {
   if(!ROSInit()) return false;
   string prefix = frameprefix;
@@ -842,9 +844,9 @@ bool ROSPublishPose(const RigidTransform& T,const char* topic)
   return RosPublish<RigidTransform,geometry_msgs::PoseStamped>(T,topic);
 }
 
-bool ROSPublishJointState(const Robot& robot,const char* topic)
+bool ROSPublishJointState(const RobotModel& robot,const char* topic)
 {
-  return RosPublish<Robot,sensor_msgs::JointState>(robot,topic);
+  return RosPublish<RobotModel,sensor_msgs::JointState>(robot,topic);
 }
 
 bool ROSPublishPointCloud(const Meshing::PointCloud3D& pc,const char* topic)
@@ -857,7 +859,7 @@ bool ROSPublishTrajectory(const LinearPath& path,const char* topic)
   return RosPublish<LinearPath,trajectory_msgs::JointTrajectory>(path,topic);
 }
 
-bool ROSPublishTrajectory(const Robot& robot,const LinearPath& path,const char* topic)
+bool ROSPublishTrajectory(const RobotModel& robot,const LinearPath& path,const char* topic)
 {
   if(!ROSInit()) return false;
   ROSPublisher<trajectory_msgs::JointTrajectory>* pub = GetPublisher<trajectory_msgs::JointTrajectory>(topic);
@@ -873,7 +875,7 @@ bool ROSPublishTrajectory(const Robot& robot,const LinearPath& path,const char* 
   return true; 
 }
 
-bool ROSPublishTrajectory(const Robot& robot,const vector<int>& indices,const LinearPath& path,const char* topic)
+bool ROSPublishTrajectory(const RobotModel& robot,const vector<int>& indices,const LinearPath& path,const char* topic)
 {
   if(!ROSInit()) return false;
   ROSPublisher<trajectory_msgs::JointTrajectory>* pub = GetPublisher<trajectory_msgs::JointTrajectory>(topic);
@@ -917,10 +919,10 @@ void KlamptToROSCameraInfo(const CameraSensor& cam,sensor_msgs::CameraInfo& msg)
 
 bool ROSPublishSensorMeasurement(const SensorBase* sensor,const char* topic)
 {
-  Robot blank;
+  RobotModel blank;
   return ROSPublishSensorMeasurement(sensor,blank,topic,NULL);
 }
-bool ROSPublishSensorMeasurement(const SensorBase* sensor,const Robot& robot,const char* topic,const char* frameprefix)
+bool ROSPublishSensorMeasurement(const SensorBase* sensor,const RobotModel& robot,const char* topic,const char* frameprefix)
 {
   if(!ROSInit()) return false;
   if(0 == strcmp(sensor->Type(),"CameraSensor")) {
@@ -1019,7 +1021,7 @@ bool ROSPublishSensorMeasurement(const SensorBase* sensor,const Robot& robot,con
   return true;
 }
 
-bool ROSPublishCommandedJointState(ControlledRobotSimulator& robot,const char* topic)
+bool ROSPublishCommandedJointState(SimRobotController& robot,const char* topic)
 {
   ROSPublisher<sensor_msgs::JointState>* pub = GetPublisher<sensor_msgs::JointState>(topic);
   if(!pub) return false;
@@ -1028,7 +1030,7 @@ bool ROSPublishCommandedJointState(ControlledRobotSimulator& robot,const char* t
   return true;
 }
 
-bool ROSPublishSensedJointState(ControlledRobotSimulator& robot,const char* topic)
+bool ROSPublishSensedJointState(SimRobotController& robot,const char* topic)
 {
   ROSPublisher<sensor_msgs::JointState>* pub = GetPublisher<sensor_msgs::JointState>(topic);
   if(!pub) return false;
@@ -1038,17 +1040,17 @@ bool ROSPublishSensedJointState(ControlledRobotSimulator& robot,const char* topi
 }
 
 
-bool ROSSubscribeTransforms(RobotWorld& world,const char* frameprefix);
-bool ROSSubscribeTransforms(Robot& robot,const char* frameprefix);
+bool ROSSubscribeTransforms(WorldModel& world,const char* frameprefix);
+bool ROSSubscribeTransforms(RobotModel& robot,const char* frameprefix);
 bool ROSSubscribeTransform(RigidTransform& T,const char* frameprefix);
 bool ROSSubscribePose(RigidTransform& T,const char* topic)
 {
   //TODO: handle un-stamped messages?
   return RosSubscribe<RigidTransform,geometry_msgs::PoseStamped>(T,topic);
 }
-bool ROSSubscribeJointState(Robot& robot,const char* topic)
+bool ROSSubscribeJointState(RobotModel& robot,const char* topic)
 {
-  return RosSubscribe<Robot,sensor_msgs::JointState>(robot,topic);
+  return RosSubscribe<RobotModel,sensor_msgs::JointState>(robot,topic);
 }
 bool ROSSubscribePointCloud(Meshing::PointCloud3D& pc,const char* topic)
 {
@@ -1148,35 +1150,42 @@ bool ROSHadUpdate(const char* topic)
   return s->numMessages > 0;
 }
 
+
+} //namespace Klampt
+
+
 #else
 
 #include "Modeling/World.h"
+
+namespace Klampt {
+
 bool ROSInit(const char* nodename) { fprintf(stderr,"ROSInit(): Klamp't was not built with ROS support\n"); return false; }
 bool ROSShutdown() { return false; }
 bool ROSInitialized() { return false; }
 bool ROSSetQueueSize(int size) { return false; }
-bool ROSPublishTransforms(const RobotWorld& world,const char* frameprefix) { return false; }
-bool ROSPublishTransforms(const WorldSimulation& sim,const char* frameprefix) { return false; }
-bool ROSPublishTransforms(const Robot& robot,const char* frameprefix) { return false; }
+bool ROSPublishTransforms(const WorldModel& world,const char* frameprefix) { return false; }
+bool ROSPublishTransforms(const Simulator& sim,const char* frameprefix) { return false; }
+bool ROSPublishTransforms(const RobotModel& robot,const char* frameprefix) { return false; }
 bool ROSPublishTransform(const RigidTransform& T,const char* frame) { return false; }
 bool ROSPublishPose(const RigidTransform& T,const char* topic) { return false; }
-bool ROSPublishJointState(const Robot& robot,const char* topic) { return false; }
+bool ROSPublishJointState(const RobotModel& robot,const char* topic) { return false; }
 bool ROSPublishPointCloud(const Meshing::PointCloud3D& pc,const char* topic) { return false; }
 bool ROSPublishTrajectory(const LinearPath& T,const char* topic) { return false; }
-bool ROSPublishTrajectory(const Robot& robot,const LinearPath& path,const char* topic) { return false; }
-bool ROSPublishTrajectory(const Robot& robot,const vector<int>& indices,const LinearPath& path,const char* topic) { return false; }
-bool ROSPublishCommandedJointState(ControlledRobotSimulator& robot,const char* topic) { return false; }
-bool ROSPublishSensedJointState(ControlledRobotSimulator& robot,const char* topic) { return false; }
+bool ROSPublishTrajectory(const RobotModel& robot,const LinearPath& path,const char* topic) { return false; }
+bool ROSPublishTrajectory(const RobotModel& robot,const vector<int>& indices,const LinearPath& path,const char* topic) { return false; }
+bool ROSPublishCommandedJointState(SimRobotController& robot,const char* topic) { return false; }
+bool ROSPublishSensedJointState(SimRobotController& robot,const char* topic) { return false; }
 bool ROSPublishSensorMeasurement(const SensorBase* sensor,const char* topic) { return false; }
-bool ROSPublishSensorMeasurement(const SensorBase* sensor,const Robot& robot,const char* topic,const char* frameprefix) { return false; }
-bool ROSSubscribeTransforms(RobotWorld& world,const char* frameprefix) { return false; }
-bool ROSSubscribeTransforms(Robot& robot,const char* frameprefix) { return false; }
+bool ROSPublishSensorMeasurement(const SensorBase* sensor,const RobotModel& robot,const char* topic,const char* frameprefix) { return false; }
+bool ROSSubscribeTransforms(WorldModel& world,const char* frameprefix) { return false; }
+bool ROSSubscribeTransforms(RobotModel& robot,const char* frameprefix) { return false; }
 bool ROSSubscribeTransform(RigidTransform& T,const char* frameprefix) { return false; }
 bool ROSSubscribePose(RigidTransform& T,const char* topic) { return false; }
-bool ROSSubscribeJointState(Robot& robot,const char* topic) { return false; }
+bool ROSSubscribeJointState(RobotModel& robot,const char* topic) { return false; }
 bool ROSSubscribePointCloud(Meshing::PointCloud3D& pc,const char* topic)  { return false; }
 bool ROSSubscribeTrajectory(LinearPath& T,const char* topic) { return false; }
-bool ROSSubscribeTrajectory(Robot& robot,LinearPath& path,const char* topic) { return false; }
+bool ROSSubscribeTrajectory(RobotModel& robot,LinearPath& path,const char* topic) { return false; }
 bool ROSSubscribeUpdate() { return false; }
 bool ROSDetach(const char* topic) { return false; }
 int ROSNumSubscribedTopics() { return 0; }
@@ -1186,5 +1195,6 @@ std::string ROSFrame(const char* topic) { return ""; }
 bool ROSWaitForUpdate(const char* topic,double timeout) { return false; }
 bool ROSHadUpdate(const char* topic) { return false; }
 
-#endif //HAVE_ROS
+} //namespace Klampt
 
+#endif //HAVE_ROS

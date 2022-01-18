@@ -34,7 +34,7 @@ Examples:
 
 """
 
-from klampt import ThreeJSGetScene,ThreeJSGetTransforms
+from klampt import threejs_get_scene,threejs_get_transforms
 from klampt.math import vectorops,so3,se3
 from klampt.model import types
 from klampt.model.trajectory import Trajectory,RobotTrajectory,SE3Trajectory
@@ -115,14 +115,14 @@ class KlamptWidget(widgets.DOMWidget):
         self._extras = dict()
         self._aggregating_rpc = 0
         self._rpc_calls = []
-        s = ThreeJSGetScene(self.world)
+        s = threejs_get_scene(self.world)
         self.scene = json.loads(s)
 
     def update(self):
         """Updates the view with changes to the world.  Unlike setWorld(), this only pushes the geometry
         transforms, so it's much faster."""
         if self.world:
-            s = ThreeJSGetTransforms(self.world)
+            s = threejs_get_transforms(self.world)
             self.transforms = json.loads(s)
 
     def clear(self):
@@ -173,7 +173,7 @@ class KlamptWidget(widgets.DOMWidget):
         """
         if type == 'auto':
             try:
-                candidates = types.objectToTypes(item,self.world)
+                candidates = types.object_to_types(item,self.world)
             except Exception:
                 raise ValueError("Invalid item, not a known Klamp't type")
             if isinstance(candidates,(list,tuple)):
@@ -289,7 +289,7 @@ class KlamptWidget(widgets.DOMWidget):
             if name != 'world' or self.world is not None:
                 warnings.warn("KlamptWidget.add: only one world is supported, and should be added as world")
             self.world = item
-            s = ThreeJSGetScene(self.world)
+            s = threejs_get_scene(self.world)
             self.scene = json.loads(s)
         else:
             raise ValueError("KlamptWidget can't handle objects of type "+type+" yet")

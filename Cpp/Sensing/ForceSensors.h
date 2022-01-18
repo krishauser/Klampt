@@ -3,6 +3,10 @@
 
 #include "Sensor.h"
 #include <KrisLibrary/math3d/primitives.h>
+
+
+namespace Klampt {
+
 using namespace Math3D;
 
 /** @ingroup Sensing
@@ -41,17 +45,17 @@ class ContactSensor : public SensorBase
  public:
   ContactSensor();
   virtual ~ContactSensor() {}
-  virtual const char* Type() const { return "ContactSensor"; }
-  virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
-  virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
-  virtual void Reset();
-  virtual void MeasurementNames(vector<string>& names) const;
-  virtual void GetMeasurements(vector<double>& values) const;
-  virtual void SetMeasurements(const vector<double>& values);
-  virtual map<string,string> Settings() const;
-  virtual bool GetSetting(const string& name,string& str) const;
-  virtual bool SetSetting(const string& name,const string& str);
-  virtual void DrawGL(const Robot& robot,const vector<double>& measurements);
+  virtual const char* Type() const override { return "ContactSensor"; }
+  virtual void Simulate(SimRobotController* robot,Simulator* sim) override;
+  virtual void SimulateKinematic(RobotModel& robot,WorldModel& world) override;
+  virtual void Reset() override;
+  virtual void MeasurementNames(vector<string>& names) const override;
+  virtual void GetMeasurements(vector<double>& values) const override;
+  virtual void SetMeasurements(const vector<double>& values) override;
+  virtual map<string,string> Settings() const override;
+  virtual bool GetSetting(const string& name,string& str) const override;
+  virtual bool SetSetting(const string& name,const string& str) override;
+  virtual void DrawGL(const RobotModel& robot,const vector<double>& measurements) override;
 
   int link;                ///< The link on which the sensor is located
   RigidTransform Tsensor;  ///< Local frame of the sensor relative to the link (by convention, origin is at contact patch center, z is normal to surface, out of robot)
@@ -91,17 +95,17 @@ class ForceTorqueSensor : public SensorBase
  public:
   ForceTorqueSensor();
   virtual ~ForceTorqueSensor() {}
-  virtual const char* Type() const { return "ForceTorqueSensor"; }
-  virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
-  virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
-  virtual void Reset();
-  virtual void MeasurementNames(vector<string>& names) const;
-  virtual void GetMeasurements(vector<double>& values) const;
-  virtual void SetMeasurements(const vector<double>& values);
-  virtual map<string,string> Settings() const;
-  virtual bool GetSetting(const string& name,string& str) const;
-  virtual bool SetSetting(const string& name,const string& str);
-  virtual void DrawGL(const Robot& robot,const vector<double>& measurements);
+  virtual const char* Type() const override { return "ForceTorqueSensor"; }
+  virtual void Simulate(SimRobotController* robot,Simulator* sim) override;
+  virtual void SimulateKinematic(RobotModel& robot,WorldModel& world) override;
+  virtual void Reset() override;
+  virtual void MeasurementNames(vector<string>& names) const override;
+  virtual void GetMeasurements(vector<double>& values) const override;
+  virtual void SetMeasurements(const vector<double>& values) override;
+  virtual map<string,string> Settings() const override;
+  virtual bool GetSetting(const string& name,string& str) const override;
+  virtual bool SetSetting(const string& name,const string& str) override;
+  virtual void DrawGL(const RobotModel& robot,const vector<double>& measurements) override;
 
   int link;                ///< The link on which the sensor is located (between link and parent)
   bool hasForce[3];        ///< true if force is measured along the given axis (default false)
@@ -110,5 +114,7 @@ class ForceTorqueSensor : public SensorBase
 
   Vector3 f,t;             ///< Measurement: the force/torque at the given position, on the link (negative on the parent link)
 };
+
+} //namespace Klampt
 
 #endif 

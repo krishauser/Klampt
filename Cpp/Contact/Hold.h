@@ -3,7 +3,9 @@
 
 #include <KrisLibrary/robotics/Contact.h>
 #include <KrisLibrary/robotics/IK.h>
-using namespace std;
+
+namespace Klampt {
+  using namespace std;
 
 /** @file Contact/Hold.h
  * @ingroup Contact
@@ -102,5 +104,7 @@ ostream& operator << (ostream&, const Hold&);
 istream& operator >> (istream&, Hold&);
 
 /**@}*/
+
+} //namespace Klampt
 
 #endif

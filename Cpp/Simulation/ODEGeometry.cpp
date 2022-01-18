@@ -12,6 +12,8 @@ using namespace Meshing;
 
 #define USING_GIMPACT 0
 
+namespace Klampt {
+
 ODEGeometry::ODEGeometry()
   :triMeshDataID(0),geomID(0),verts(NULL),indices(NULL),normals(NULL),numVerts(0),numTris(0),geometrySelfAllocated(false)
 {
@@ -297,3 +299,5 @@ AnyCollisionGeometry3D* ODEGeometry::SetPaddingWithPreshrink(Real padding,bool i
     return NULL;
   }
 }
+
+} //namespace Klampt

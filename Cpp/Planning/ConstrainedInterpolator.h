@@ -4,7 +4,9 @@
 #include <KrisLibrary/math/function.h>
 #include <KrisLibrary/planning/GeneralizedBezierCurve.h>
 #include <KrisLibrary/optimization/Newton.h>
-using namespace std;
+
+namespace Klampt {
+  using namespace std;
 
 /** @ingroup Planning
  * @brief Construct a polyline between a and b such that each point is near
@@ -123,5 +125,7 @@ bool AppendInterpolate(SmoothConstrainedInterpolator& interp,
 		       const Vector& pt,Real suffixDuration,
 		       GeneralizedCubicBezierSpline& path);
 
+
+} //namespace Klampt
 
 #endif

@@ -4,6 +4,7 @@
 #include <KrisLibrary/GLdraw/GL.h>
 #include <KrisLibrary/GLdraw/GLUTString.h>
 using namespace GLDraw;
+using namespace Klampt;
 
 ViewContact::ViewContact()
 {

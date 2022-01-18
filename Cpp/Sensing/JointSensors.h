@@ -2,7 +2,9 @@
 #define CONTROL_JOINT_SENSORS_H
 
 #include "Sensor.h"
-using namespace Math;
+
+namespace Klampt {
+  using namespace Math;
 
 /** @ingroup Sensing
  * @brief Simulates a joint encoder.
@@ -17,16 +19,16 @@ class JointPositionSensor : public SensorBase
  public:
   JointPositionSensor();
   virtual ~JointPositionSensor() {}
-  virtual const char* Type() const { return "JointPositionSensor"; }
-  virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
-  virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
-  virtual void Reset();
-  virtual void MeasurementNames(vector<string>& names) const;
-  virtual void GetMeasurements(vector<double>& values) const;
-  virtual void SetMeasurements(const vector<double>& values);
-  virtual map<string,string> Settings() const;
-  virtual bool GetSetting(const string& name,string& str) const;
-  virtual bool SetSetting(const string& name,const string& str);
+  virtual const char* Type() const override { return "JointPositionSensor"; }
+  virtual void Simulate(SimRobotController* robot,Simulator* sim) override;
+  virtual void SimulateKinematic(RobotModel& robot,WorldModel& world) override;
+  virtual void Reset() override;
+  virtual void MeasurementNames(vector<string>& names) const override;
+  virtual void GetMeasurements(vector<double>& values) const override;
+  virtual void SetMeasurements(const vector<double>& values) override;
+  virtual map<string,string> Settings() const override;
+  virtual bool GetSetting(const string& name,string& str) const override;
+  virtual bool SetSetting(const string& name,const string& str) override;
 
   vector<int> indices;   ///< The indices on which the position sensors are located
   Vector qvariance;      ///< Estimated variance of the encoder values
@@ -47,16 +49,16 @@ class JointVelocitySensor : public SensorBase
  public:
   JointVelocitySensor();
   virtual ~JointVelocitySensor() {}
-  virtual const char* Type() const { return "JointVelocitySensor"; }
-  virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
-  virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
-  virtual void Reset();
-  virtual void MeasurementNames(vector<string>& names) const;
-  virtual void GetMeasurements(vector<double>& values) const;
-  virtual void SetMeasurements(const vector<double>& values);
-  virtual map<string,string> Settings() const;
-  virtual bool GetSetting(const string& name,string& str) const;
-  virtual bool SetSetting(const string& name,const string& str);
+  virtual const char* Type() const override { return "JointVelocitySensor"; }
+  virtual void Simulate(SimRobotController* robot,Simulator* sim) override;
+  virtual void SimulateKinematic(RobotModel& robot,WorldModel& world) override;
+  virtual void Reset() override;
+  virtual void MeasurementNames(vector<string>& names) const override;
+  virtual void GetMeasurements(vector<double>& values) const override;
+  virtual void SetMeasurements(const vector<double>& values) override;
+  virtual map<string,string> Settings() const override;
+  virtual bool GetSetting(const string& name,string& str) const override;
+  virtual bool SetSetting(const string& name,const string& str) override;
 
   vector<int> indices;   ///< The indices on which the velocity sensors are located
   Vector dqvariance;     ///< Estimated variance of the encoder values
@@ -80,21 +82,23 @@ class DriverTorqueSensor : public SensorBase
  public:
   DriverTorqueSensor();
   virtual ~DriverTorqueSensor() {}
-  virtual const char* Type() const { return "DriverTorqueSensor"; }
-  virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
-  virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
-  virtual void Reset();
-  virtual void MeasurementNames(vector<string>& names) const;
-  virtual void GetMeasurements(vector<double>& values) const;
-  virtual void SetMeasurements(const vector<double>& values);
-  virtual map<string,string> Settings() const;
-  virtual bool GetSetting(const string& name,string& str) const;
-  virtual bool SetSetting(const string& name,const string& str);
+  virtual const char* Type() const override { return "DriverTorqueSensor"; }
+  virtual void Simulate(SimRobotController* robot,Simulator* sim) override;
+  virtual void SimulateKinematic(RobotModel& robot,WorldModel& world) override;
+  virtual void Reset() override;
+  virtual void MeasurementNames(vector<string>& names) const override;
+  virtual void GetMeasurements(vector<double>& values) const override;
+  virtual void SetMeasurements(const vector<double>& values) override;
+  virtual map<string,string> Settings() const override;
+  virtual bool GetSetting(const string& name,string& str) const override;
+  virtual bool SetSetting(const string& name,const string& str) override;
 
   vector<int> indices;   ///< The indices on which the torque sensors are located
   Vector tvariance;     ///< Estimated variance of the torque values
   Vector tresolution;   ///< Estimate on the torque resolution
   Vector t;             ///< Measurement: joint torques
 };
+
+} //namespace Klampt
 
 #endif 

@@ -6,6 +6,8 @@
 #include <queue>
 using namespace Math3D;
 
+namespace Klampt {
+
 //optional flags to reduce curvature of the path by adjusting tangent vectors
 
 //this alters the initial tangents, so it breaks C1 continuity when
@@ -874,11 +876,4 @@ bool AppendInterpolate(SmoothConstrainedInterpolator& interp,const Vector& pt,Re
   return true;
 }
 
-
-
-
-
-
-
-
-
+} //namespace Klampt

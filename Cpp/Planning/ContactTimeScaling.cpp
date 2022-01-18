@@ -7,12 +7,13 @@
 #include <KrisLibrary/geometry/PolytopeProjection.h>
 using namespace Math3D;
 using namespace Optimization;
+using namespace Klampt;
 
 #define TEST_NO_CONTACT 0
 
 
 
-ZMPTimeScaling::ZMPTimeScaling(Robot& robot)
+ZMPTimeScaling::ZMPTimeScaling(RobotModel& robot)
   :CustomTimeScaling(robot)
 {
 }
@@ -56,7 +57,7 @@ void ZMPTimeScaling::SetParams(const MultiPath& path,const vector<Real>& colocat
  */
 void ZMPTimeScaling::SetParams(const MultiPath& path,const vector<Real>& paramDivs,const vector<ConvexPolygon2D>& supportPolys,const vector<Real>& groundHeights)
 {
-  Robot& robot = cspace.robot;
+  RobotModel& robot = cspace.robot;
   Assert(path.sections.size()==supportPolys.size());
   Assert(path.sections.size()==groundHeights.size());
   this->supportPolys = supportPolys;
@@ -95,13 +96,13 @@ void ZMPTimeScaling::SetParams(const MultiPath& path,const vector<Real>& paramDi
   }
 }
 
-TorqueTimeScaling::TorqueTimeScaling(Robot& robot)
+TorqueTimeScaling::TorqueTimeScaling(RobotModel& robot)
   :CustomTimeScaling(robot),torqueLimitShift(0),torqueLimitScale(1)
 {}
 
 void TorqueTimeScaling::SetParams(const MultiPath& path,const vector<Real>& colocationParams)
 {
-  Robot& robot = cspace.robot;
+  RobotModel& robot = cspace.robot;
   CustomTimeScaling::SetPath(path,colocationParams);
   CustomTimeScaling::SetDefaultBounds();
   CustomTimeScaling::SetStartStop();
@@ -148,14 +149,14 @@ void TorqueTimeScaling::SetParams(const MultiPath& path,const vector<Real>& colo
 }
 
 
-ContactTimeScaling::ContactTimeScaling(Robot& robot)
+ContactTimeScaling::ContactTimeScaling(RobotModel& robot)
   :CustomTimeScaling(robot),torqueLimitShift(0),torqueLimitScale(1.0),frictionRobustness(0),forceRobustness(0)
 {
 }
 
 bool ContactTimeScaling::SetParams(const MultiPath& path,const vector<Real>& paramDivs,int numFCEdges)
 {
-  Robot& robot = cspace.robot;
+  RobotModel& robot = cspace.robot;
   CustomTimeScaling::SetPath(path,paramDivs);
   CustomTimeScaling::SetDefaultBounds();
   CustomTimeScaling::SetStartStop();
@@ -331,7 +332,7 @@ bool ContactTimeScaling::SetParams(const MultiPath& path,const vector<Real>& par
 
 bool ContactTimeScaling::Check(const MultiPath& path)
 {
-  Robot& robot = cspace.robot;
+  RobotModel& robot = cspace.robot;
   //test at the colocation points
   Assert(traj.timeScaling.times.size()==paramDivs.size());
   Vector x,dx,ddx;

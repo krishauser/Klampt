@@ -9,6 +9,8 @@
 #include <stdio.h>
 #include <iostream>
 
+using namespace Klampt;
+
 #if defined (__APPLE__) || defined (MACOSX)
 #include <GL/glui.h>
 #else

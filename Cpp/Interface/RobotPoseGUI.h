@@ -8,12 +8,13 @@
 #include <KrisLibrary/utils/apputils.h>
 #include <fstream>
 
-using namespace Math3D;
-using namespace GLDraw;
-
 #define GLUT_LEFT_BUTTON 0
 #define GLUT_MIDDLE_BUTTON 1
 #define GLUT_RIGHT_BUTTON 2
+
+namespace Klampt {
+  using namespace Math3D;
+  using namespace GLDraw;
 
 /** @brief Contains the functionality for the RobotPose program
  *
@@ -68,7 +69,7 @@ class RobotPoseBackend : public ResourceGUIBackend
 {
  public:
   AppUtils::ProgramSettings settings;
-  Robot* robot;
+  RobotModel* robot;
   int cur_link,cur_driver;
   vector<bool> self_colliding, env_colliding;
 
@@ -81,7 +82,7 @@ class RobotPoseBackend : public ResourceGUIBackend
   //temp: sensors storage
   RobotSensors robotSensors;
 
-  RobotPoseBackend(RobotWorld* world,ResourceManager* library);
+  RobotPoseBackend(WorldModel* world,ResourceManager* library);
   virtual void Start();
   void UpdateConfig();
   virtual void RenderWorld();
@@ -100,6 +101,6 @@ class RobotPoseBackend : public ResourceGUIBackend
   ResourcePtr PoserToResource(const string& type);
 };
 
-
+} // namespace Klampt
 
 #endif //INTERFACE_ROBOTPOSEGUI_H

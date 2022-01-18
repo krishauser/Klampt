@@ -4,9 +4,9 @@
 #include <KrisLibrary/utils/ioutils.h>
 #include <KrisLibrary/utils/apputils.h>
 #include <KrisLibrary/math/random.h>
+using namespace Klampt;
 
-
-SimTestBackend::SimTestBackend(RobotWorld* world)
+SimTestBackend::SimTestBackend(WorldModel* world)
   :SimGUIBackend(world),settings("Klampt")
 {
   settings["movieWidth"] = 640;
@@ -188,7 +188,7 @@ void SimTestBackend::RenderWorld()
   //draw commanded setpoint
   if(drawDesired) {
     for(size_t r=0;r<world->robots.size();r++) {
-      Robot* robot=world->robots[r].get();
+      RobotModel* robot=world->robots[r].get();
       
       robot->UpdateConfig(robotWidgets[r].Pose());
       sim.controlSimulators[r].GetCommandedConfig(robot->q);
@@ -455,7 +455,7 @@ bool SimTestBackend::OnCommand(const string& cmd,const string& args)
     double driver_value;
     ss>>driver_value;
     if(world->robots.size()>0) {
-      Robot* robot = world->robots[0].get();
+      RobotModel* robot = world->robots[0].get();
       robot->UpdateConfig(robotWidgets[0].Pose());
       robot->SetDriverValue(cur_driver,driver_value);
       robotWidgets[0].SetPose(robot->q);
@@ -684,7 +684,7 @@ void SimTestBackend::SimStep(Real dt)
     
   //update root of poseConfig from simulation
   for(size_t r=0;r<world->robots.size();r++) {
-    Robot* robot=world->robots[r].get();
+    RobotModel* robot=world->robots[r].get();
     robot->UpdateConfig(robotWidgets[r].Pose());
     Vector driverVals(robot->drivers.size());
     for(size_t i=0;i<robot->drivers.size();i++)
@@ -752,7 +752,7 @@ void delete_all(GLUI_Listbox* listbox)
   }
 }
 
-GLUISimTestGUI::GLUISimTestGUI(GenericBackendBase* _backend,RobotWorld* _world,int w,int h)
+GLUISimTestGUI::GLUISimTestGUI(GenericBackendBase* _backend,WorldModel* _world,int w,int h)
   :world(_world),settings("Klampt")
 {
   BaseT::backend = _backend;
@@ -872,7 +872,7 @@ bool GLUISimTestGUI::Initialize()
   AddControl(glui->add_checkbox_to_panel(panel,"Pose objects"),"pose_objects");
   AddControl(glui->add_checkbox_to_panel(panel,"Pose by IK"),"pose_ik");
   driver_listbox = glui->add_listbox_to_panel(panel,"Driver",&cur_driver);
-  Robot* robot = world->robots[0].get();
+  RobotModel* robot = world->robots[0].get();
   for(size_t i=0;i<robot->drivers.size();i++) {
     char buf[256];
     strcpy(buf,robot->driverNames[i].c_str());
@@ -925,7 +925,7 @@ bool GLUISimTestGUI::Initialize()
 
 void GLUISimTestGUI::UpdateGUI()
 {
-  Robot* robot = world->robots[0].get();
+  RobotModel* robot = world->robots[0].get();
   if(cur_driver >= 0 && cur_driver < (int)robot->drivers.size()) {
     driver_listbox->set_int_val(cur_driver);
     Vector2 limits = robot->GetDriverLimits(cur_driver);

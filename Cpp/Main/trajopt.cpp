@@ -13,6 +13,7 @@
 #include <fstream>
 using namespace std;
 using namespace Math3D;
+using namespace Klampt;
 
 /** @brief Completely interpolates, optimizes, and time-scales the
  * given MultiPath to satisfy its contact constraints.
@@ -43,7 +44,7 @@ using namespace Math3D;
  * the path is not dynamically feasible.  For example, the milestones or
  * interpolated path might violate stability constraints.
  */
-bool ContactOptimizeMultipath(Robot& robot,const MultiPath& path,
+bool ContactOptimizeMultipath(RobotModel& robot,const MultiPath& path,
 			      Real interpTol,int numdivs,
 			      TimeScaledBezierCurve& traj,
 			      Real torqueRobustness=0.0,
@@ -172,7 +173,7 @@ void ContactOptimizeMultipath(const char* robfile,const char* pathfile,const cha
   settings["outputPath"].as(outputPath);
   Real outputDt = Real(settings["outputDt"]);
 
-  Robot robot;
+  RobotModel robot;
   if(!robot.Load(robfile)) {
     printf("Unable to load robot file %s\n",robfile);
     return;
@@ -202,7 +203,7 @@ void ContactOptimizeMultipath(const char* robfile,const char* pathfile,const cha
 	}
     }
     path.SetStance(s,i);
-    if(numContacts == 0 && !ignoreForces && robot.joints[0].type == RobotJoint::Floating) {
+    if(numContacts == 0 && !ignoreForces && robot.joints[0].type == RobotModelJoint::Floating) {
       printf("Warning, no contacts given in stance %d for floating-base robot\n",i);
       printf("Should set ignoreForces = true in trajopt.settings if you wish\n");
       printf("to ignore contact force constraints.\n");
@@ -260,7 +261,7 @@ void ContactOptimizeMultipath(const char* robfile,const char* pathfile,const cha
 
 int main(int argc, char** argv)
 {
-  Robot::disableGeometryLoading = true;
+  RobotModel::disableGeometryLoading = true;
   if(argc < 3) {
     printf("Usage: TrajOpt robot multipath [settings]\n");
     printf("Saving settings template to trajopt_default.settings...\n");

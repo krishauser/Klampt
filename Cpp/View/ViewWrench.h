@@ -4,6 +4,8 @@
 #include <KrisLibrary/GLdraw/GLColor.h>
 #include <KrisLibrary/math3d/primitives.h>
 
+namespace Klampt {
+
 class ViewWrench
 {
 public:
@@ -13,5 +15,6 @@ public:
     GLDraw::GLColor forceColor,momentColor,centerColor;
 };
 
+} // namespace Klampt
 
 #endif

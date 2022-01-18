@@ -49,6 +49,11 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
         self.backgroundImageTexture = None
         self.backgroundImageDisplayList = None
         self.backgroundImageMode = 'stretch'
+        self.click_callback = None
+        self.hover_callback = None
+        self.click_filter = None
+        self.hover_highlight_color = (1,1,0,0.5)
+        self.click_tolerance = 0.01
 
     def initialize(self):
         #keep or refresh display lists?
@@ -69,26 +74,33 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
 
     def edit(self,name,doedit=True):
         global _globalLock
-        _globalLock.acquire()
-        obj = self.getItem(name)
-        if obj is None:
-            _globalLock.release()
-            raise ValueError("Object "+name+" does not exist in visualization")
-        if doedit:
-            world = self.items.get('world',None)
-            if world is not None:
-                world=world.item
-            obj.make_editor(world)
-            if obj.editor:
-                self.klamptwidgetmaster.add(obj.editor)
-        else:
-            if obj.editor:
-                self.klamptwidgetmaster.remove(obj.editor)
-                obj.remove_editor()
-        self.doRefresh = True
-        _globalLock.release()
+        with _globalLock:
+            obj = self.getItem(name)
+            if obj is None:
+                raise ValueError("Object "+name+" does not exist in visualization")
+            if doedit:
+                world = self.items.get('world',None)
+                if world is not None:
+                    world=world.item
+                obj.make_editor(world)
+                if obj.editor:
+                    self.klamptwidgetmaster.add(obj.editor)
+            else:
+                if obj.editor:
+                    self.klamptwidgetmaster.remove(obj.editor)
+                    obj.remove_editor()
+            self.doRefresh = True
         return obj.editor if doedit else None
     
+    def pick(self,click_callback,hover_callback,highlight_color,filter,tolerance):
+        global _globalLock
+        with _globalLock:
+            self.click_callback = click_callback
+            self.hover_callback = hover_callback
+            self.click_filter = filter
+            self.hover_highlight_color = highlight_color
+            self.click_tolerance = tolerance
+
     def hide(self,name,hidden=True):
         global _globalLock
         with _globalLock:
@@ -315,11 +327,30 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
         global _globalLock
         _globalLock.acquire()
         glcommon.GLWidgetPlugin.mousefunc(self,button,state,x,y)
+        if button == 0 and state == 0:
+            if self.click_callback is not None:
+                cb = self.click_callback
+                self.click_callback = None
+                self.hover_callback = None
+                (item,pt) = self.rayCast(x,y,self.click_filter,self.click_tolerance)
+                cb(item.name,item.item,pt)
+                if self.hover_item is not None:
+                    self.hover_item.highlight(None)
+                self.hover_item = None
         _globalLock.release()
     def motionfunc(self,x,y,dx,dy):
         global _globalLock
         _globalLock.acquire()
         glcommon.GLWidgetPlugin.motionfunc(self,x,y,dx,dy)
+        if self.hover_callback is not None:
+            (item,pt) = self.rayCast(x,y,self.click_filter,self.click_tolerance)
+            self.hover_callback(item.name,item.item,pt)
+            if self.hover_item is not None:
+                if item is None:
+                    self.hover_item.highlight(None)
+                else:
+                    self.hover_item.highlight(self.hover_highlight_color)
+            self.hover_item = item
         _globalLock.release()
     def eventfunc(self,type,args=""):
         global _globalLock

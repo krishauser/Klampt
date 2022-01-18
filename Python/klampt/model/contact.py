@@ -6,8 +6,10 @@ from . import ik
 from ..math import vectorops,so3,se3
 from .. import robotsim
 from ..robotsim import RobotModel,RobotModelLink,RigidObjectModel,TerrainModel
+import numpy as np
+import warnings
 
-def idToObject(world,ID):
+def id_to_object(world,ID):
     """Helper: takes a WorldModel ID and converts it into an object."""
     assert(ID >= 0 and ID < world.numIDs())
     if ID < world.numTerrains():
@@ -23,7 +25,7 @@ def idToObject(world,ID):
         if ID < world.numRobotLinks(i):
             return world.robotLink(i,ID)
         ID -= world.numRobotLinks(i)
-    raise RuntimeError("Internal error in idToObject, invalid ID?")
+    raise RuntimeError("Internal error in id_to_object, invalid ID?")
 
 
 class ContactPoint:
@@ -127,7 +129,10 @@ def _flatten(contactOrHoldList):
     else:
         return sum([_flatten(c) for c in contactOrHoldList],[])
 
-def forceClosure(contactOrHoldList):
+def _toarray(contactOrHoldList):
+    return np.array(_flatten(contactOrHoldList))
+
+def force_closure(contactOrHoldList):
     """Given a list of ContactPoints or Holds, tests for force closure.
     Return value is True or False.
 
@@ -135,9 +140,9 @@ def forceClosure(contactOrHoldList):
     friction cones.  If Hull(W) contains the zero vector in its interior,
     then the contacts are said to be in force closure.
     """
-    return robotsim.forceClosure(_flatten(contactOrHoldList))
+    return robotsim.force_closure(_toarray(contactOrHoldList))
     
-def comEquilibrium(contactOrHoldList,fext=(0,0,-1),com=None):
+def com_equilibrium(contactOrHoldList,fext=(0,0,-1),com=None):
     """Given a list of ContactPoints or Holds, an external gravity force,
     and a COM, tests for the existence of an equilibrium solution.
 
@@ -161,9 +166,9 @@ def comEquilibrium(contactOrHoldList,fext=(0,0,-1),com=None):
     If com != None, this returns either None if there is no solution,
     or otherwise returns a list of contact forces.
     """
-    return robotsim.comEquilibrium(_flatten(contactOrHoldList),fext,com)
+    return robotsim.com_equilibrium(_toarray(contactOrHoldList),fext,com)
 
-def supportPolygon(contactOrHoldList):
+def support_polygon(contactOrHoldList):
     """Given a list of ContactPoints or Holds, returns the support polygon.
     The support polygon is given by list of tuples (ax,ay,b) such
     that the contraint ax*x+ay*y <= c holds for all (x,y) in the support
@@ -172,9 +177,9 @@ def supportPolygon(contactOrHoldList):
     An empty support polygon is given by the result [(0,0,-1)].
     A complete support polygon is given by the result [].
     """
-    return robotsim.supportPolygon(_flatten(contactOrHoldList))
+    return robotsim.support_polygon(_toarray(contactOrHoldList))
 
-def equilibriumTorques(robot,holdList,fext=(0,0,-9.8),internalTorques=None,norm=0):
+def equilibrium_torques(robot,holdList,fext=(0,0,-9.8),internalTorques=None,norm=0):
     """ Solves for the torques / forces that keep the robot balanced against
     gravity.
 
@@ -207,14 +212,14 @@ def equilibriumTorques(robot,holdList,fext=(0,0,-9.8),internalTorques=None,norm=
     """
     links = sum([[h.link]*len(h.contacts) for h in holdList],[])
     if internalTorques is None:
-        res = robotsim.equilibriumTorques(robot,_flatten(holdList),links,fext,norm)
+        res = robotsim.equilibrium_torques(robot,_toarray(holdList),links,fext,norm)
     else:
-        res = robotsim.equilibriumTorques(robot,_flatten(holdList),links,fext,internalTorques,norm)
+        res = robotsim.equilibrium_torques(robot,_toarray(holdList),links,fext,internalTorques,norm)
     if res is None: return res
     f = res[1]
     return (res[0],[f[i*3:i*3+3] for i in range(len(f)//3)])
 
-def contactMap(contacts,fixed=None):
+def contact_map(contacts,fixed=None):
     """Given an unordered list of ContactPoints, computes a canonical dict
     from (obj1,obj2) pairs to a list of contacts on those objects.
     The resulting dict is also regularized so that objects are sorted in
@@ -273,7 +278,7 @@ def contactMap(contacts,fixed=None):
             paircontacts.getdefault((o1,o2),[]).append(c)
     return paircontacts
 
-def geometryContacts(geom1,geom2,padding1,padding2=0,maxcontacts=0,kFriction=1):
+def geometry_contacts(geom1,geom2,padding1,padding2=0,maxcontacts=0,kFriction=1):
     """Similar to ``geom1.contacts(geom2,padding1,padding2,maxcontacts)``, but
     returns a list of :class:`ContactPoint`, where the point (x) of each 
     contact is placed in the center of the overlap region.
@@ -296,7 +301,7 @@ def geometryContacts(geom1,geom2,padding1,padding2=0,maxcontacts=0,kFriction=1):
         cps[-1].object2 = geom2
     return cps
 
-def worldContactMap(world,padding,kFriction=1,collider=None):
+def world_contact_map(world,padding,kFriction=1,collider=None):
     """Given a WorldModel, returns a contact map representing all current
     contacts (distance >= 0 and <= padding).
 
@@ -331,7 +336,7 @@ def worldContactMap(world,padding,kFriction=1,collider=None):
         obj2,geom2 = j
         pad1 = fpadding(obj1)
         pad2 = fpadding(obj2)
-        clist = geometryContacts(geom1,geom2,pad1,pad2)
+        clist = geometry_contacts(geom1,geom2,pad1,pad2)
         if len(clist) > 0:
             kf = ffriction(obj1,obj2)
             for c in clist:
@@ -339,7 +344,7 @@ def worldContactMap(world,padding,kFriction=1,collider=None):
             cmap[(obj1,obj2)] = clist
     return cmap
 
-def simContactMap(sim):
+def sim_contact_map(sim):
     """Given a :class:`Simulation`, returns a contact map representing all
     current contacts (among bodies with collision feedback enabled).
     """
@@ -352,19 +357,21 @@ def simContactMap(sim):
                 for ci in c:
                     assert len(ci) == 7,"Internal error in Simulation.getContacts()?"
                 #figure out the objects corresponding to a and b
-                oa = idToObject(w,a)
-                ob = idToObject(w,b)
+                oa = id_to_object(w,a)
+                ob = id_to_object(w,b)
                 clist = [ContactPoint(ci[0:3],ci[3:6],ci[6]) for ci in c]
                 cmap[(oa,ob)] = clist
     return cmap
 
-def contactMapIKObjectives(contactmap):
+def contact_map_ik_objectives(contactmap):
     """Given a contact map, computes a set of non-conflicting
     IKObjective's or GeneralizedIKObjective's that enforce all simultaneous
-    contact constraints.  Usually called in conjunction with contactMap
-    with the following sequence::
+    contact constraints. 
+    
+    Usually called in conjunction with  :func:`contact_map` with the following
+    sequence::
 
-        objectives = contactMapIKObjectives(contactMap(contacts,lambda x:x==None or isinstance(x,TerrainModel)))
+        objectives = contact_map_ik_objectives(contact_map(contacts,lambda x:x==None or isinstance(x,TerrainModel)))
 
     """
     objectives = []
@@ -380,12 +387,14 @@ def contactMapIKObjectives(contactmap):
             objectives.append(ik.objective(o1,local=x1loc,world=x2))
     return objectives
 
-def contactMapHolds(contactmap):
+def contact_map_holds(contactmap):
     """Given a contact map, computes a set of non-conflicting
-    Holds that enforce all simultaneous contact constraints.  Usually called in conjunction with contactMap
-    with the following sequence::
+    Holds that enforce all simultaneous contact constraints.
+    
+    Usually called in conjunction with :func:`contact_map` with the following
+    sequence::
 
-        objectives = contactMapHolds(contactMap(contacts,lambda x:x==None or isinstance(x,TerrainModel)))
+        objectives = contact_map_holds(contact_map(contacts,lambda x:x==None or isinstance(x,TerrainModel)))
         
     """
     holds = []
@@ -424,7 +433,7 @@ def skew(x):
     xhat[2,1] = x[0]
     return xhat
 
-def invMassMatrix(obj):
+def inv_mass_matrix(obj):
     """Returns the inverse of obj's generalized mass matrix::
 
         [H 0 ]-1
@@ -453,7 +462,7 @@ def invMassMatrix(obj):
     Hinv[0:3,0:3] = numpy.inv(H)
     return Hinv
 
-def wrenchMatrices(contactMap):
+def wrench_matrices(contactMap):
     """Returns a map from contact pairs (o1,o2) to pairs of rigid-body wrench
     matrices (W1,W2) corresponding to each pair of objects in the contact map.
 
@@ -491,3 +500,28 @@ def wrenchMatrices(contactMap):
             w2[3:6,3*i:3*i+3] = numpy.eye(3)
             
         res[(o1,o2)]=(w1,w2)
+
+
+def _deprecated_func(oldName,newName):
+    import sys
+    mod = sys.modules[__name__]
+    f = getattr(mod,newName)
+    def depf(*args,**kwargs):
+        warnings.warn("{} will be deprecated in favor of {} in a future version of Klampt".format(oldName,newName),DeprecationWarning)
+        return f(*args,**kwargs)
+    depf.__doc__ = 'Deprecated in a future version of Klampt. Use {} instead'.format(newName)
+    setattr(mod,oldName,depf)
+
+_deprecated_func('idToObject','id_to_object')
+_deprecated_func('forceClosure','force_closure')
+_deprecated_func('comEquilibrium','com_equilibrium')
+_deprecated_func('supportPolygon','support_polygon')
+_deprecated_func('equilibriumTorques','equilibrium_torques')
+_deprecated_func('contactMap','contact_map')
+_deprecated_func('geometryContacts','geometry_contacts')
+_deprecated_func('worldContactMap','world_contact_map')
+_deprecated_func('simContactMap','sim_contact_map')
+_deprecated_func('contactMapIKObjectives','contact_map_ik_objectives')
+_deprecated_func('contactMapHolds','contact_map_holds')
+_deprecated_func('invMassMatrix','inv_mass_matrix')
+_deprecated_func('wrenchMatrices','wrench_matrices')

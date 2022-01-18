@@ -6,8 +6,9 @@
 #include <KrisLibrary/GLdraw/drawextra.h>
 #include <fstream>
 using namespace GLDraw;
+using namespace Klampt;
 
-WorldGUIBackend::WorldGUIBackend(RobotWorld* _world)
+WorldGUIBackend::WorldGUIBackend(WorldModel* _world)
   :world(_world)
 {
 }
@@ -115,8 +116,8 @@ bool WorldGUIBackend::ReloadFile(const char* fn)
         //check for previous robots of the same filename
         for(size_t i=0;i<world->robots.size();i++) {
           if(name == world->robots[i]->name) {
-            shared_ptr<Robot> r = world->robots[index];
-            shared_ptr<Robot> s = world->robots[i];
+            shared_ptr<RobotModel> r = world->robots[index];
+            shared_ptr<RobotModel> s = world->robots[i];
             //copy configuration, if possible
             map<string,int> jqmap;
             for(size_t j=0;j<r->links.size();j++)
@@ -264,12 +265,12 @@ void WorldGUIBackend::Start()
   return GLNavigationBackend::Start();
 }
 
-Robot* WorldGUIBackend::ClickRobot(const Ray3D& r,int& body,Vector3& localpt) const
+RobotModel* WorldGUIBackend::ClickRobot(const Ray3D& r,int& body,Vector3& localpt) const
 {
   return world->RayCastRobot(r,body,localpt);
 }
 
-RigidObject* WorldGUIBackend::ClickObject(const Ray3D& r,Vector3& localpt) const
+RigidObjectModel* WorldGUIBackend::ClickObject(const Ray3D& r,Vector3& localpt) const
 {
   return world->RayCastObject(r,localpt);
 }

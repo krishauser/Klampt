@@ -91,4 +91,4 @@ class GLPluginInterface:
         """
         if self.view is None:
             raise RuntimeError("Can't get viewport for a GLPluginInterface that's not bound to a GLProgram")
-        return self.view.toViewport()
+        return self.view.to_viewport()

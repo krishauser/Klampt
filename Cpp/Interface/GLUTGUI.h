@@ -4,6 +4,8 @@
 #include <KrisLibrary/GLdraw/GLUTProgram.h>
 #include "GenericGUI.h"
 
+namespace Klampt {
+
 class GLUTGUI : public GenericGUIBase, public GLUTProgramBase
 {
  public:
@@ -39,5 +41,6 @@ class GLUTGUI : public GenericGUIBase, public GLUTProgramBase
   unsigned int displayMode;
 };
 
+} //namespace Klampt
 
 #endif

@@ -4,6 +4,8 @@
 #include "Sensor.h"
 #include <deque>
 
+namespace Klampt {
+
 /** @ingroup Sensing
  * @brief A transformed "piggyback" sensor with a scale, bias, and minimum / maximum
  *
@@ -17,20 +19,20 @@ class TransformedSensor : public SensorBase
  public:
   TransformedSensor();
   virtual ~TransformedSensor() {}
-  virtual const char* Type() const { return "TransformedSensor"; }
-  virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
-  virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
-  virtual void Advance(double dt);
-  virtual void Reset();
-  virtual void MeasurementNames(vector<string>& names) const;
-  virtual void GetMeasurements(vector<double>& values) const;
-  virtual void SetMeasurements(const vector<double>& values);
-  virtual void GetInternalState(vector<double>& state) const;
-  virtual void SetInternalState(const vector<double>& state);
-  virtual map<string,string> Settings() const;
-  virtual bool GetSetting(const string& name,string& str) const;
-  virtual bool SetSetting(const string& name,const string& str);
-  virtual void DrawGL(const Robot& robot,const vector<double>& measurements);
+  virtual const char* Type() const override { return "TransformedSensor"; }
+  virtual void Simulate(SimRobotController* robot,Simulator* sim) override;
+  virtual void SimulateKinematic(RobotModel& robot,WorldModel& world) override;
+  virtual void Advance(double dt) override;
+  virtual void Reset() override;
+  virtual void MeasurementNames(vector<string>& names) const override;
+  virtual void GetMeasurements(vector<double>& values) const override;
+  virtual void SetMeasurements(const vector<double>& values) override;
+  virtual void GetInternalState(vector<double>& state) const override;
+  virtual void SetInternalState(const vector<double>& state) override;
+  virtual map<string,string> Settings() const override;
+  virtual bool GetSetting(const string& name,string& str) const override;
+  virtual bool SetSetting(const string& name,const string& str) override;
+  virtual void DrawGL(const RobotModel& robot,const vector<double>& measurements) override;
   void DoTransform();
 
   shared_ptr<SensorBase> sensor;
@@ -53,20 +55,20 @@ class CorruptedSensor : public SensorBase
  public:
   CorruptedSensor();
   virtual ~CorruptedSensor() {}
-  virtual const char* Type() const { return "CorruptedSensor"; }
-  virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
-  virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
-  virtual void Advance(double dt);
-  virtual void Reset();
-  virtual void MeasurementNames(vector<string>& names) const;
-  virtual void GetMeasurements(vector<double>& values) const;
-  virtual void SetMeasurements(const vector<double>& values);
-  virtual void GetInternalState(vector<double>& state) const;
-  virtual void SetInternalState(const vector<double>& state);
-  virtual map<string,string> Settings() const;
-  virtual bool GetSetting(const string& name,string& str) const;
-  virtual bool SetSetting(const string& name,const string& str);
-  virtual void DrawGL(const Robot& robot,const vector<double>& measurements);
+  virtual const char* Type() const override { return "CorruptedSensor"; }
+  virtual void Simulate(SimRobotController* robot,Simulator* sim) override;
+  virtual void SimulateKinematic(RobotModel& robot,WorldModel& world) override;
+  virtual void Advance(double dt) override;
+  virtual void Reset() override;
+  virtual void MeasurementNames(vector<string>& names) const override;
+  virtual void GetMeasurements(vector<double>& values) const override;
+  virtual void SetMeasurements(const vector<double>& values) override;
+  virtual void GetInternalState(vector<double>& state) const override;
+  virtual void SetInternalState(const vector<double>& state) override;
+  virtual map<string,string> Settings() const override;
+  virtual bool GetSetting(const string& name,string& str) const override;
+  virtual bool SetSetting(const string& name,const string& str) override;
+  virtual void DrawGL(const RobotModel& robot,const vector<double>& measurements) override;
   void DoCorrupt();
 
   shared_ptr<SensorBase> sensor;
@@ -87,20 +89,20 @@ class FilteredSensor : public SensorBase
  public:
   FilteredSensor();
   virtual ~FilteredSensor() {}
-  virtual const char* Type() const { return "FilteredSensor"; }
-  virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
-  virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
-  virtual void Advance(double dt);
-  virtual void Reset();
-  virtual void MeasurementNames(vector<string>& names) const;
-  virtual void GetMeasurements(vector<double>& values) const;
-  virtual void SetMeasurements(const vector<double>& values);
-  virtual void GetInternalState(vector<double>& state) const;
-  virtual void SetInternalState(const vector<double>& state);
-  virtual map<string,string> Settings() const;
-  virtual bool GetSetting(const string& name,string& str) const;
-  virtual bool SetSetting(const string& name,const string& str);
-  virtual void DrawGL(const Robot& robot,const vector<double>& measurements);
+  virtual const char* Type() const override { return "FilteredSensor"; }
+  virtual void Simulate(SimRobotController* robot,Simulator* sim) override;
+  virtual void SimulateKinematic(RobotModel& robot,WorldModel& world) override;
+  virtual void Advance(double dt) override;
+  virtual void Reset() override;
+  virtual void MeasurementNames(vector<string>& names) const override;
+  virtual void GetMeasurements(vector<double>& values) const override;
+  virtual void SetMeasurements(const vector<double>& values) override;
+  virtual void GetInternalState(vector<double>& state) const override;
+  virtual void SetInternalState(const vector<double>& state) override;
+  virtual map<string,string> Settings() const override;
+  virtual bool GetSetting(const string& name,string& str) const override;
+  virtual bool SetSetting(const string& name,const string& str) override;
+  virtual void DrawGL(const RobotModel& robot,const vector<double>& measurements) override;
 
   shared_ptr<SensorBase> sensor;
   vector<double> measurements;
@@ -119,20 +121,20 @@ class TimeDelayedSensor : public SensorBase
  public:
   TimeDelayedSensor();
   virtual ~TimeDelayedSensor() {}
-  virtual const char* Type() const { return "TimeDelayedSensor"; }
-  virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim);
-  virtual void SimulateKinematic(Robot& robot,RobotWorld& world);
-  virtual void Advance(double dt);
-  virtual void Reset();
-  virtual void MeasurementNames(vector<string>& names) const;
-  virtual void GetMeasurements(vector<double>& values) const;
-  virtual void SetMeasurements(const vector<double>& values);
-  virtual void GetInternalState(vector<double>& state) const;
-  virtual void SetInternalState(const vector<double>& state);
-  virtual map<string,string> Settings() const;
-  virtual bool GetSetting(const string& name,string& str) const;
-  virtual bool SetSetting(const string& name,const string& str);
-  virtual void DrawGL(const Robot& robot,const vector<double>& measurements);
+  virtual const char* Type() const override { return "TimeDelayedSensor"; }
+  virtual void Simulate(SimRobotController* robot,Simulator* sim) override;
+  virtual void SimulateKinematic(RobotModel& robot,WorldModel& world) override;
+  virtual void Advance(double dt) override;
+  virtual void Reset() override;
+  virtual void MeasurementNames(vector<string>& names) const override;
+  virtual void GetMeasurements(vector<double>& values) const override;
+  virtual void SetMeasurements(const vector<double>& values) override;
+  virtual void GetInternalState(vector<double>& state) const override;
+  virtual void SetInternalState(const vector<double>& state) override;
+  virtual map<string,string> Settings() const override;
+  virtual bool GetSetting(const string& name,string& str) const override;
+  virtual bool SetSetting(const string& name,const string& str) override;
+  virtual void DrawGL(const RobotModel& robot,const vector<double>& measurements) override;
 
   shared_ptr<SensorBase> sensor;
   deque<vector<double> > measurementsInTransit;
@@ -141,5 +143,7 @@ class TimeDelayedSensor : public SensorBase
   double curTime;
   double delay,jitter;
 };
+
+} //namespace Klampt
 
 #endif

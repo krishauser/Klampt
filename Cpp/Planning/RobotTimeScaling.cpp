@@ -9,6 +9,8 @@
 #include <sstream>
 #include <fstream>
 
+namespace Klampt {
+
 #define DO_CHECK_BOUNDS 0
 #define DO_SAVE_LIMITS 0
 #define DO_SAVE_PLOT 0
@@ -53,7 +55,7 @@ void DiscretizeSpline(GeneralizedCubicBezierSpline& path,Real xtol)
   swap(path.durations,out.durations);
 }
 
-bool CheckBounds(Robot& robot,const TimeScaledBezierCurve& traj,const vector<Real>& times)
+bool CheckBounds(RobotModel& robot,const TimeScaledBezierCurve& traj,const vector<Real>& times)
 {
   Vector v,a,maxv,maxa;
   Vector oldv,diffa,maxdiffa;
@@ -98,7 +100,7 @@ bool CheckBounds(Robot& robot,const TimeScaledBezierCurve& traj,const vector<Rea
 }
 
 
-bool CheckBounds(Robot& robot,const TimeScaledBezierCurve& traj,Real dt)
+bool CheckBounds(RobotModel& robot,const TimeScaledBezierCurve& traj,Real dt)
 {
   Real T=traj.EndTime();
   int numdivs = (int)Ceil(T/dt);
@@ -109,7 +111,7 @@ bool CheckBounds(Robot& robot,const TimeScaledBezierCurve& traj,Real dt)
 }
 
 
-void SaveLimits(Robot& robot,const TimeScaledBezierCurve& traj,Real dt,const char* fn)
+void SaveLimits(RobotModel& robot,const TimeScaledBezierCurve& traj,Real dt,const char* fn)
 {
   Real T=traj.EndTime();
   int numdivs = (int)Ceil(T/dt);
@@ -192,7 +194,7 @@ void SaveLimits(Robot& robot,const TimeScaledBezierCurve& traj,Real dt,const cha
 }
 
 
-bool TimeOptimizePath(Robot& robot,const vector<Real>& oldtimes,const vector<Config>& oldconfigs,Real dt,vector<Real>& newtimes,vector<Config>& newconfigs)
+bool TimeOptimizePath(RobotModel& robot,const vector<Real>& oldtimes,const vector<Config>& oldconfigs,Real dt,vector<Real>& newtimes,vector<Config>& newconfigs)
 {
   //make a smooth interpolator
   Vector dx0,dx1,temp;
@@ -257,7 +259,7 @@ bool TimeOptimizePath(Robot& robot,const vector<Real>& oldtimes,const vector<Con
   return true;
 }
 
-bool InterpolateConstrainedPath(Robot& robot,const Config& a,const Config& b,const vector<IKGoal>& ikGoals,vector<Config>& milestones,Real xtol)
+bool InterpolateConstrainedPath(RobotModel& robot,const Config& a,const Config& b,const vector<IKGoal>& ikGoals,vector<Config>& milestones,Real xtol)
 {
   RobotConstrainedInterpolator interp(robot,ikGoals);
   interp.ftol = xtol*gConstraintToleranceScale;
@@ -293,7 +295,7 @@ bool InterpolateConstrainedPath(Robot& robot,const Config& a,const Config& b,con
   */
 }
 
-bool InterpolateConstrainedPath(Robot& robot,const vector<Config>& milestones,const vector<IKGoal>& ikGoals,vector<Config>& path,Real xtol)
+bool InterpolateConstrainedPath(RobotModel& robot,const vector<Config>& milestones,const vector<IKGoal>& ikGoals,vector<Config>& path,Real xtol)
 {
   if(ikGoals.empty()) {
     path = milestones;
@@ -311,7 +313,7 @@ bool InterpolateConstrainedPath(Robot& robot,const vector<Config>& milestones,co
   return true;
 }
 
-void SmoothDiscretizePath(Robot& robot,const vector<Config>& oldconfigs,int n,vector<Real>& times,vector<Config>& configs)
+void SmoothDiscretizePath(RobotModel& robot,const vector<Config>& oldconfigs,int n,vector<Real>& times,vector<Config>& configs)
 {
   times.resize(n);
   configs.resize(n);
@@ -334,7 +336,7 @@ void SmoothDiscretizePath(Robot& robot,const vector<Config>& oldconfigs,int n,ve
 }
 
 
-bool InterpolateConstrainedMultiPath(Robot& robot,const MultiPath& path,vector<GeneralizedCubicBezierSpline>& paths,Real xtol)
+bool InterpolateConstrainedMultiPath(RobotModel& robot,const MultiPath& path,vector<GeneralizedCubicBezierSpline>& paths,Real xtol)
 {
   //sanity check -- make sure it's a continuous path
   if(!path.IsContinuous()) {
@@ -484,7 +486,7 @@ bool InterpolateConstrainedMultiPath(Robot& robot,const MultiPath& path,vector<G
 }
 
 
-bool DiscretizeConstrainedMultiPath(Robot& robot,const MultiPath& path,MultiPath& out,Real xtol)
+bool DiscretizeConstrainedMultiPath(RobotModel& robot,const MultiPath& path,MultiPath& out,Real xtol)
 {
   if(path.settings.contains("resolution")) {
     //see if the resolution is high enough to just interpolate directly
@@ -606,7 +608,7 @@ Real OptimalTriangularTimeScaling(const GeneralizedCubicBezierSpline& path,const
   return T;
 }
 
-bool GenerateAndTimeOptimizeMultiPath(Robot& robot,MultiPath& multipath,Real xtol,Real dt)
+bool GenerateAndTimeOptimizeMultiPath(RobotModel& robot,MultiPath& multipath,Real xtol,Real dt)
 {
   Timer timer;
   vector<GeneralizedCubicBezierSpline > paths;
@@ -956,7 +958,7 @@ bool GenerateAndTimeOptimizeMultiPath(Robot& robot,MultiPath& multipath,Real xto
 }
 
 
-void EvaluateMultiPath(Robot& robot,const MultiPath& path,Real t,Config& q,Real xtol,Real contactol,int numIKIters)
+void EvaluateMultiPath(RobotModel& robot,const MultiPath& path,Real t,Config& q,Real xtol,Real contactol,int numIKIters)
 {
   RobotCSpace space(robot);
   GeneralizedCubicBezierCurve curve(&space,&space);
@@ -988,3 +990,5 @@ void EvaluateMultiPath(Robot& robot,const MultiPath& path,Real t,Config& q,Real 
     }
   }
 }
+
+} //namespace Klampt 

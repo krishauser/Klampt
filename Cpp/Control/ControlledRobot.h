@@ -3,6 +3,8 @@
 
 #include "Controller.h"
 
+namespace Klampt {
+
 /** @brief An interface for a Klamp't controlled robot.  This should be
  * implemented if you wish to use Klamp't controllers to communicate directly
  * with a real robot's motor controller.
@@ -21,7 +23,7 @@ class ControlledRobot
  public:
   ControlledRobot();
   virtual ~ControlledRobot() {}
-  virtual bool Init(Robot* robot,RobotController* controller=NULL);
+  virtual bool Init(RobotModel* robot,RobotController* controller=NULL);
   virtual void Step(Real dt);
   virtual void ReadSensorData(RobotSensors& sensors)=0;
   virtual void WriteCommandData(const RobotMotorCommand& command)=0;
@@ -33,12 +35,14 @@ class ControlledRobot
   void GetSensedVelocity(Config& dq);
 
   //settings
-  Robot* klamptRobotModel;
+  RobotModel* klamptRobotModel;
   RobotController* klamptController;
 
   //state
   RobotMotorCommand command;
   RobotSensors sensors;
 };
+
+} //namespace Klampt
 
 #endif

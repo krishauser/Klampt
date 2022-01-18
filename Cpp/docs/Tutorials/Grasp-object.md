@@ -41,7 +41,7 @@ In the tutorial code we provide a framework for setting up the environment in pi
 
 int main(int argc,const char** argv)
 {
-  RobotWorld world;
+  WorldModel world;
   PickAndPlaceEnvironment env;
   if(!Setup(env,world)) return 1;
 

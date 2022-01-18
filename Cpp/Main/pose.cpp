@@ -18,6 +18,7 @@
 #include <fstream>
 using namespace Math3D;
 using namespace GLDraw;
+using namespace Klampt;
 
 enum {
   STORE_TO_LIBRARY_ID = RESOURCE_BROWSER_GLUI_ID_END,
@@ -67,7 +68,7 @@ public:
   WidgetSet allWidgets;
   int draw_geom,draw_com,draw_frame;
 
-  RobotPoseProgram(RobotWorld* world)
+  RobotPoseProgram(WorldModel* world)
     :ResourceBrowserProgram(world),settings("Klampt")
   {
     settings["movieWidth"] = 640;
@@ -1084,7 +1085,7 @@ int main(int argc, char** argv)
     printf(OPTIONS_STRING);
     return 0;
   }
-  RobotWorld world;
+  WorldModel world;
   world.lights.resize(1);
   world.lights[0].setColor(GLColor(1,1,1));
   world.lights[0].setDirectionalLight(Vector3(0.2,-0.4,1));

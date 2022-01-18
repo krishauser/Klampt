@@ -3,7 +3,9 @@
 
 #include <KrisLibrary/geometry/AnyGeometry.h>
 #include <ode/common.h>
-using namespace Geometry;
+
+namespace Klampt {
+  using namespace Geometry;
 
 struct CustomGeometryData
 {
@@ -29,6 +31,8 @@ void InitODECustomGeometry();
 bool GetCustomGeometryCollisionReliableFlag();
 ///Resets the reliability flag to true
 void ClearCustomGeometryCollisionReliableFlag();
+
+} //namespace Klampt
 
 #endif
 

@@ -5,14 +5,16 @@
 #include <KrisLibrary/math3d/interpolate.h>
 #include <KrisLibrary/robotics/Rotation.h>
 
-void Interpolate(Robot& robot,const Config& x,const Config& y,Real u,Config& out)
+namespace Klampt {
+
+void Interpolate(RobotModel& robot,const Config& x,const Config& y,Real u,Config& out)
 {
   Assert(&out != &robot.q);
   out.mul(x,1.0-u);
   out.madd(y,u);
   for(size_t i=0;i<robot.joints.size();i++) {
     switch(robot.joints[i].type) {
-    case RobotJoint::Floating:
+    case RobotModelJoint::Floating:
       {
 	vector<int> indices;
 	robot.GetJointIndices(i,indices);
@@ -30,7 +32,7 @@ void Interpolate(Robot& robot,const Config& x,const Config& y,Real u,Config& out
 	eu.get(out(indices[3]),out(indices[4]),out(indices[5]));
       }
       break;
-    case RobotJoint::BallAndSocket:
+    case RobotModelJoint::BallAndSocket:
       {
 	vector<int> indices;
 	robot.GetJointIndices(i,indices);
@@ -48,13 +50,13 @@ void Interpolate(Robot& robot,const Config& x,const Config& y,Real u,Config& out
 	eu.get(out(indices[0]),out(indices[2]),out(indices[3]));
       }
       break;
-    case RobotJoint::Spin:
+    case RobotModelJoint::Spin:
       {
 	int k=robot.joints[i].linkIndex;
 	out[k] = AngleInterp(AngleNormalize(x(k)),AngleNormalize(y(k)),u);
       }
       break;
-    case RobotJoint::FloatingPlanar:
+    case RobotModelJoint::FloatingPlanar:
       {
 	vector<int> indices;
 	robot.GetJointIndices(i,indices);
@@ -98,15 +100,15 @@ void IntegrateEulerAngleZYX(const EulerAngleRotation& a,const Vector3& da,EulerA
 /** @brief Returns the velocity vector that will move the robot from the
  * current configuration to 'dest' in minimal time. 
  */
-void InterpolateDerivative(Robot& robot,const Config& a,const Config& b,Vector& dq)
+void InterpolateDerivative(RobotModel& robot,const Config& a,const Config& b,Vector& dq)
 {
   dq = b - a;
   for(size_t i=0;i<robot.joints.size();i++) {
     int k=robot.joints[i].linkIndex;
-    if(robot.joints[i].type == RobotJoint::Spin) {
+    if(robot.joints[i].type == RobotModelJoint::Spin) {
       dq(k) = AngleDiff(AngleNormalize(b(k)),AngleNormalize(a(k)));
     }
-    else if(robot.joints[i].type == RobotJoint::Floating) {
+    else if(robot.joints[i].type == RobotModelJoint::Floating) {
       vector<int> indices;
       robot.GetJointIndices(i,indices);
       EulerAngleRotation oldrot(a(indices[3]),a(indices[4]),a(indices[5]));
@@ -118,12 +120,12 @@ void InterpolateDerivative(Robot& robot,const Config& a,const Config& b,Vector& 
       GetEulerAngleZYXInterpDeriv(oldrot,newrot,dtheta);
       dtheta.get(dq(indices[3]),dq(indices[4]),dq(indices[5]));
     }
-    else if(robot.joints[i].type == RobotJoint::FloatingPlanar) {
+    else if(robot.joints[i].type == RobotModelJoint::FloatingPlanar) {
       vector<int> indices;
       robot.GetJointIndices(i,indices);
       dq(indices[2]) = AngleDiff(AngleNormalize(b(indices[2])),AngleNormalize(a(indices[2])));
     }
-    else if(robot.joints[i].type == RobotJoint::BallAndSocket) {
+    else if(robot.joints[i].type == RobotModelJoint::BallAndSocket) {
       vector<int> indices;
       robot.GetJointIndices(i,indices);
       EulerAngleRotation oldrot(a(indices[0]),a(indices[1]),a(indices[2]));
@@ -135,42 +137,42 @@ void InterpolateDerivative(Robot& robot,const Config& a,const Config& b,Vector& 
       GetEulerAngleZYXInterpDeriv(oldrot,newrot,dtheta);
       dtheta.get(dq(indices[0]),dq(indices[1]),dq(indices[2]));
     }
-    else if(robot.joints[i].type == RobotJoint::Weld) {
+    else if(robot.joints[i].type == RobotModelJoint::Weld) {
       dq(k) = 0;
     }
   }
 }
 
-void InterpolateDerivative(Robot& robot,const Config& a,const Config& b,Real u,Vector& dx)
+void InterpolateDerivative(RobotModel& robot,const Config& a,const Config& b,Real u,Vector& dx)
 {
-  if(u==0) ::InterpolateDerivative(robot,a,b,dx);
+  if(u==0) Klampt::InterpolateDerivative(robot,a,b,dx);
   else if(u==1) {
-    ::InterpolateDerivative(robot,b,a,dx);
+    Klampt::InterpolateDerivative(robot,b,a,dx);
     dx.inplaceNegative();
   }
   else {
     Vector temp;
-    ::Interpolate(robot,a,b,u,temp);
+    Klampt::Interpolate(robot,a,b,u,temp);
     if(u < 0.5) {
-      ::InterpolateDerivative(robot,temp,b,dx);
+      Klampt::InterpolateDerivative(robot,temp,b,dx);
       dx *= 1.0/(1.0-u);
     }
     else {
-      ::InterpolateDerivative(robot,temp,a,dx);
+      Klampt::InterpolateDerivative(robot,temp,a,dx);
       dx *= -1.0/u;
     }
   }
 }
 
-void Integrate(Robot& robot,const Config& q,const Vector& dq,Config& b)
+void Integrate(RobotModel& robot,const Config& q,const Vector& dq,Config& b)
 {
   b = q+dq;
   for(size_t i=0;i<robot.joints.size();i++) {
     int k=robot.joints[i].linkIndex;
-    if(robot.joints[i].type == RobotJoint::Spin) {
+    if(robot.joints[i].type == RobotModelJoint::Spin) {
       b(k) = AngleNormalize(b(k));
     }
-    else if(robot.joints[i].type == RobotJoint::Floating) {
+    else if(robot.joints[i].type == RobotModelJoint::Floating) {
       vector<int> indices;
       robot.GetJointIndices(i,indices);
       EulerAngleRotation rot(q(indices[3]),q(indices[4]),q(indices[5]));
@@ -182,12 +184,12 @@ void Integrate(Robot& robot,const Config& q,const Vector& dq,Config& b)
       IntegrateEulerAngleZYX(rot,drot,rotb);
       rotb.get(b(indices[3]),b(indices[4]),b(indices[5]));
     }
-    else if(robot.joints[i].type == RobotJoint::FloatingPlanar) {
+    else if(robot.joints[i].type == RobotModelJoint::FloatingPlanar) {
       vector<int> indices;
       robot.GetJointIndices(i,indices);
       b[indices[2]] = AngleNormalize(b[indices[2]]);
     }
-    else if(robot.joints[i].type == RobotJoint::BallAndSocket) {
+    else if(robot.joints[i].type == RobotModelJoint::BallAndSocket) {
       vector<int> indices;
       robot.GetJointIndices(i,indices);
       EulerAngleRotation rot(q(indices[0]),q(indices[1]),q(indices[2]));
@@ -203,7 +205,7 @@ void Integrate(Robot& robot,const Config& q,const Vector& dq,Config& b)
 }
 
 
-Real Distance(const Robot& robot,const Config& a,const Config& b,Real normExp,Real floatingRotationWeight)
+Real Distance(const RobotModel& robot,const Config& a,const Config& b,Real normExp,Real floatingRotationWeight)
 {
   Assert(a.n == robot.q.n);
   Assert(b.n == robot.q.n);
@@ -211,15 +213,15 @@ Real Distance(const Robot& robot,const Config& a,const Config& b,Real normExp,Re
   for(size_t i=0;i<robot.joints.size();i++) {
     int link = robot.joints[i].linkIndex;
     switch(robot.joints[i].type) {
-    case RobotJoint::Weld:
+    case RobotModelJoint::Weld:
       break;
-    case RobotJoint::Normal:
+    case RobotModelJoint::Normal:
       norm.collect(a(link)-b(link));
       break;
-    case RobotJoint::Spin:
+    case RobotModelJoint::Spin:
       norm.collect(AngleDiff(AngleNormalize(a(link)),AngleNormalize(b(link))));
       break;
-    case RobotJoint::Floating:
+    case RobotModelJoint::Floating:
       {
 	vector<int> indices;
 	robot.GetJointIndices(i,indices);
@@ -245,7 +247,7 @@ Real Distance(const Robot& robot,const Config& a,const Config& b,Real normExp,Re
 	norm.collect(aa.angle*floatingRotationWeight);
       }
       break;
-    case RobotJoint::BallAndSocket:
+    case RobotModelJoint::BallAndSocket:
       {
 	vector<int> indices;
 	robot.GetJointIndices(i,indices);
@@ -272,7 +274,7 @@ Real Distance(const Robot& robot,const Config& a,const Config& b,Real normExp,Re
 }
 
 
-Real Distance(const Robot& robot,const Config& a,const Config& b,Real normExp,const vector<Real>& jointWeights,Real floatingRotationWeight)
+Real Distance(const RobotModel& robot,const Config& a,const Config& b,Real normExp,const vector<Real>& jointWeights,Real floatingRotationWeight)
 {
   Assert(a.n == robot.q.n);
   Assert(b.n == robot.q.n);
@@ -281,15 +283,15 @@ Real Distance(const Robot& robot,const Config& a,const Config& b,Real normExp,co
     int link = robot.joints[i].linkIndex;
     Real w = jointWeights[i];
     switch(robot.joints[i].type) {
-    case RobotJoint::Weld:
+    case RobotModelJoint::Weld:
       break;
-    case RobotJoint::Normal:
+    case RobotModelJoint::Normal:
       norm.collect(a(link)-b(link),w);
       break;
-    case RobotJoint::Spin:
+    case RobotModelJoint::Spin:
       norm.collect(AngleDiff(AngleNormalize(a(link)),AngleNormalize(b(link))),w);
       break;
-    case RobotJoint::Floating:
+    case RobotModelJoint::Floating:
       {
 	vector<int> indices;
 	robot.GetJointIndices(i,indices);
@@ -315,7 +317,7 @@ Real Distance(const Robot& robot,const Config& a,const Config& b,Real normExp,co
 	norm.collect(aa.angle,floatingRotationWeight*w);
       }
       break;
-    case RobotJoint::BallAndSocket:
+    case RobotModelJoint::BallAndSocket:
       {
 	vector<int> indices;
 	robot.GetJointIndices(i,indices);
@@ -339,3 +341,5 @@ Real Distance(const Robot& robot,const Config& a,const Config& b,Real normExp,co
   }
   return norm;
 }
+
+} //namespace Klampt

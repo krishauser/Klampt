@@ -10,6 +10,7 @@ using namespace std;
 using namespace Math;
 using namespace Meshing;
 using namespace GLDraw;
+using namespace Klampt;
 
 void SetupTextureCoordinates(TriMeshWithTopology& mesh,vector<Vector2>& texcoords)
 {

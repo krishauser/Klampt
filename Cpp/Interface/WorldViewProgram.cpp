@@ -8,8 +8,9 @@
 #include <fstream>
 using namespace Math3D;
 using namespace GLDraw;
+namespace Klampt {
 
-WorldViewWidget::WorldViewWidget(RobotWorld* _world)
+WorldViewWidget::WorldViewWidget(WorldModel* _world)
   :world(_world), clickedRobot(NULL), clickedObject(NULL)
 {}
 
@@ -55,14 +56,13 @@ bool WorldViewWidget::Hover(int x, int y, Camera::Viewport& viewport, double& di
 
 
 
-bool LoadWorldCommandLine(RobotWorld& world,int argc, const char** argv)
+bool LoadWorldCommandLine(WorldModel& world,int argc, const char** argv)
 {
   XmlWorld xmlWorld;
   vector<string> configs;
   world.lights.resize(1);
   world.lights[0].setColor(GLColor(1, 1, 1));
   world.lights[0].setDirectionalLight(Vector3(0.2, -0.4, 1));
-  world.lights[0].setColor(GLColor(1, 1, 1));
 
   for (int i = 1; i<argc; i++) {
     if (argv[i][0] == '-') {
@@ -119,7 +119,7 @@ bool LoadWorldCommandLine(RobotWorld& world,int argc, const char** argv)
 #if HAVE_GLUI || HAVE_GLUT
 
 
-WorldViewProgram::WorldViewProgram(RobotWorld* _world)
+WorldViewProgram::WorldViewProgram(WorldModel* _world)
   :world(_world)
 {
 }
@@ -187,14 +187,17 @@ void WorldViewProgram::ClickRay(int x,int y,Ray3D& r) const
 }
 
 
-Robot* WorldViewProgram::ClickRobot(const Ray3D& r,int& body,Vector3& localpt) const
+RobotModel* WorldViewProgram::ClickRobot(const Ray3D& r,int& body,Vector3& localpt) const
 {
   return world->RayCastRobot(r,body,localpt);
 }
 
-RigidObject* WorldViewProgram::ClickObject(const Ray3D& r,Vector3& localpt) const
+RigidObjectModel* WorldViewProgram::ClickObject(const Ray3D& r,Vector3& localpt) const
 {
   return world->RayCastObject(r,localpt);
 }
 
 #endif // HAVE_GLUI
+
+} //namespace Klampt
+

@@ -10,6 +10,8 @@
 #include <fstream>
 #include <sstream>
 
+namespace Klampt {
+
 /*
 //TODO: replace this with a true likelihood function
 Real TrianglePlacementLikelihood(const Triangle3D& tri,Real kFriction)
@@ -729,3 +731,5 @@ void HoldFromTransform(const ContactFeatureBase* f,const RigidTransform& T,Hold&
     break;
   }
 }
+
+} //namespace Klampt

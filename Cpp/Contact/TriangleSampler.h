@@ -5,8 +5,10 @@
 #include <KrisLibrary/math3d/Triangle3D.h>
 #include <vector>
 #include <KrisLibrary/math/sample.h>
-using namespace std;
-using namespace Math3D;
+
+namespace Klampt {
+  using namespace std;
+  using namespace Math3D;
 
 /** @ingroup Geometry
  * @brief Samples points in a list of 2d triangles.
@@ -49,6 +51,8 @@ struct Triangle3DSampler
   std::vector<Real> areas;
   std::vector<Real> sumAreas;
 };
+
+} //namespace Klampt
 
 #endif
 

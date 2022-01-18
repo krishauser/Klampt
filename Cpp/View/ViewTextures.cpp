@@ -9,6 +9,8 @@
 using namespace Math;
 using namespace GLDraw;
 
+namespace Klampt {
+
 float startValidColors = 0;
 bool texture_set_up=false;
 bool gl_texture_set_up=false;
@@ -127,3 +129,5 @@ float ViewTextures::GradientTexcoord(float u,float min,float max)
   if(min == max) return 0;
   return (u-min)/(max-min);
 }
+
+} //namespace Klampt

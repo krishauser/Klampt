@@ -1,6 +1,6 @@
-from .loader import load,save,write,read,toJson,fromJson
-from ..robotsim import SubscribeToStream,DetachFromStream,ProcessStreams,WaitForStream,ThreeJSGetScene,ThreeJSGetTransforms
+from .loader import load,save,write,read,to_json,from_json
+from ..robotsim import subscribe_to_stream,detach_from_stream,process_streams,wait_for_stream,threejs_get_scene,threejs_get_transforms
 
 __all__ = ['html','loader','resource',
-    'SubscribeToStream','DetachFromStream','ProcessStreams','WaitForStream','ThreeJSGetScene','ThreeJSGetTransforms',
-    'load','save','write','read','toJson','fromJson' ]
+    'subscribe_to_stream','detach_from_stream','process_streams','wait_for_stream','threejs_get_scene','threejs_get_transforms',
+    'load','save','write','read','to_json','from_json' ]

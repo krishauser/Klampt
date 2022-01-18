@@ -34,39 +34,27 @@ convert between intrinsics definitions.
 :func:`camera_ray`, and :func:`camera_project` convert to/from image points.
 :func:`visible` determines whether a point or object is visible from a camera.
 
+:func:`projection_map_texture` maps a texture from a camera into an OpenGL
+appearance.
+
 """
 
 from ..robotsim import *
+from ..robotsim import Geometry3D
 from ..io import loader
+from ..vis.glviewport import GLViewport
+from ..model.typing import RigidTransform,Vector3
 from . import coordinates
+from typing import Union,Tuple,Any
 import math
 import sys
 from ..math import vectorops,so3,se3
 import time
-
-_has_numpy = False
-_tried_numpy_import = False
-np = None
+import numpy as np
 
 _has_scipy = False
 _tried_scipy_import = False
 sp = None
-
-def _try_numpy_import():
-    global _has_numpy,_tried_numpy_import
-    global np
-    if _tried_numpy_import:
-        return _has_numpy
-    _tried_numpy_import = True
-    try:
-        import numpy as np
-        _has_numpy = True
-        #sys.modules['numpy'] = numpy
-    except ImportError:
-        import warnings
-        warnings.warn("klampt.model.sensing.py: numpy not available.",ImportWarning)
-        _has_numpy = False
-    return _has_numpy
 
 def _try_scipy_import():
     global _has_scipy,_tried_scipy_import
@@ -84,7 +72,7 @@ def _try_scipy_import():
         _has_scipy = False
     return _has_scipy
 
-def get_sensor_xform(sensor,robot=None):
+def get_sensor_xform(sensor : SimRobotSensor, robot : RobotModel = None) -> RigidTransform:
     """Extracts the transform of a SimRobotSensor.  The sensor must be
     of a link-mounted type, e.g., a CameraSensor or ForceSensor.
 
@@ -95,10 +83,14 @@ def get_sensor_xform(sensor,robot=None):
             coordinates on the link to which it is mounted.
 
     Returns:
-        klampt.se3 object: the sensor transform  
+        The sensor transform (klampt.se3 object)
     """
+    if robot is None:
+        return sensor.getTransform()
+    else:
+        return sensor.getTransformWorld()
     s = sensor.getSetting("Tsensor")
-    Tsensor = loader.readSe3(s)
+    Tsensor = loader.read_se3(s)
     if robot is not None:
         link = int(sensor.getSetting("link"))
         if link >= 0:
@@ -106,7 +98,7 @@ def get_sensor_xform(sensor,robot=None):
     return Tsensor
 
 
-def set_sensor_xform(sensor,T,link=None):
+def set_sensor_xform(sensor : SimRobotSensor, T : RigidTransform, link : RobotModelLink = None):
     """Given a link-mounted sensor (e.g., CameraSensor or ForceSensor), sets 
     its link-local transform to T.
 
@@ -122,7 +114,7 @@ def set_sensor_xform(sensor,T,link=None):
     be associated with  one.
 
     (the reason why you should use this is that the Tsensor attribute has a
-    particular format using the loader.writeSe3 function.)
+    particular format using the loader.write_se3 function.)
     """
     if isinstance(T,coordinates.Frame):
         if isinstance(T._data,RobotModelLink):
@@ -135,20 +127,12 @@ def set_sensor_xform(sensor,T,link=None):
             #assume its parent is a link?
             parent = T.parent()._data
         return set_sensor_xform(sensor,T.relativeCoordinates(),parent)
-    try:
-        s = sensor.getSetting("Tsensor")
-    except Exception:
-        raise ValueError("Sensor does not have a Tsensor attribute")
-    sensor.setSetting("Tsensor",loader.writeSe3(T))
+    sensor.setTransform(*T)
     if link != None:
-        if isinstance(link,RobotModelLink):
-            sensor.setSetting("link",str(link.index))
-        else:
-            assert isinstance(link,int),"Can only set a sensor transform to a RobotModelLink or an integer link index"
-            sensor.setSetting("link",str(link))
+        sensor.setLink(link)
 
 
-def camera_to_images(camera,image_format='numpy',color_format='channels'):
+def camera_to_images(camera : SimRobotSensor, image_format='numpy',color_format='channels') -> Tuple[Any,Any]:
     """Given a SimRobotSensor that is a CameraSensor, returns either the RGB
     image, the depth image, or both.
 
@@ -159,10 +143,7 @@ def camera_to_images(camera,image_format='numpy',color_format='channels'):
             * 'numpy' (default): returns numpy arrays.  Depending on the
               value of color_format, the RGB image either has shape (h,w,3)
               and dtype uint8 or (h,w) and dtype uint32. Depth images as
-              numpy arrays with shape (h,w).  Will fall back to 'native' if 
-              numpy is not available.
-            * 'native': returns list-of-lists arrays in the same format as
-              above
+              numpy arrays with shape (h,w).
 
         color_format (str): governs how pixels in the RGB result are packed. 
         Can be:
@@ -173,11 +154,8 @@ def camera_to_images(camera,image_format='numpy',color_format='channels'):
               R,G,B channels packed in hex format 0xrrggbb.
             * 'bgr': similar to 'rgb' but with hex order 0xbbggrr.
 
-    (Note that image_format='native' takes up a lot of extra memory, especially
-    with color_format='channels')
-
     Returns:
-        tuple: (rgb, depth), which are either numpy arrays or list-of-lists
+        (rgb, depth), which are either numpy arrays or another image
         format, as specified by image_format.
 
             * rgb: the RGB result (packed as specified by color_format)
@@ -197,15 +175,12 @@ def camera_to_images(camera,image_format='numpy',color_format='channels'):
     measurements = camera.getMeasurements()
     #t1 = time.time()
     #print("camera.getMeasurements() time",t1-t0)
-    if image_format == 'numpy':
-        if not _try_numpy_import():
-            image_format = 'native'
     rgb = None
     depth = None
-    if has_rgb:
+    if has_rgb and len(measurements) > 0:
         if image_format == 'numpy':
             #t0 = time.time()
-            argb = np.array(measurements[0:w*h]).reshape(h,w).astype(np.uint32)
+            argb = np.asarray(measurements[0:w*h]).reshape(h,w).astype(np.uint32)
             #t1 = time.time()
             #print("Numpy array creation time",t1-t0)
             if color_format == 'rgb':
@@ -222,36 +197,16 @@ def camera_to_images(camera,image_format='numpy',color_format='channels'):
             #t2 = time.time()
             #print("  Conversion time",t2-t1)
         else:
-            if color_format == 'rgb':
-                rgb = []
-                for i in range(h):
-                    rgb.append([int(v) for v in measurements[i*w:(i+1)*w]])
-            elif color_format == 'bgr':
-                def bgr_to_rgb(pixel):
-                    return ((pixel & 0x0000ff) << 16) | (pixel & 0x00ff00) | ((pixel & 0xff0000) >> 16)
-                rgb = []
-                for i in range(h):
-                    rgb.append([bgr_to_rgb(int(v)) for v in measurements[i*w:(i+1)*w]])
-            else:
-                rgb = []
-                for i in range(h):
-                    start = i*w
-                    row = []
-                    for j in range(w):
-                        pixel = int(measurements[start+j])
-                        row.append([(pixel>>16)&0xff,(pixel>>8)&0xff,pixel&0xff])
-                    rgb.append(row)
-    if has_depth:
+            raise NotImplementedError("No other image formats besides numpy supported")
+    if has_depth and len(measurements) > 0:
         start = (w*h if has_rgb else 0)
         if image_format == 'numpy':
             #t0 = time.time()
-            depth = np.array(measurements[start:start+w*h]).reshape(h,w)
+            depth = np.asarray(measurements[start:start+w*h]).reshape(h,w)
             #t1 = time.time()
             #print("Numpy array creation time",t1-t0)
         else:
-            depth = []
-            for i in range(h):
-                depth.append(measurements[start+i*w:start+(i+1)*w])
+            raise NotImplementedError("No other image formats besides numpy supported")
     if has_rgb and has_depth:
         return rgb,depth
     elif has_rgb:
@@ -263,16 +218,26 @@ def camera_to_images(camera,image_format='numpy',color_format='channels'):
 
 def image_to_points(depth,color,xfov,yfov=None,depth_scale=None,depth_range=None,color_format='auto',points_format='numpy',all_points=False):
     """Given a depth and optionally color image, returns a point cloud
-    representing the depth or RGB-D scene.  
+    representing the depth or RGB-D scene.
+
+    Optimal performance is obtained with ``points_format='PointCloud'`` or
+    ``'Geometry3D'``, with ``all_points=True``.
 
     Args:
-        depth (list of lists or numpy array): the w x h depth image (rectified).
-        color (list of lists or numpy array, optional): the w x h color image. 
-            Assumed that color maps directly onto depth pixels.  If None,
-            an uncolored point cloud will be produced. 
-        xfov (float): horizontal field of view, in radians.
+        depth (list of lists or numpy array): the w x h depth image (rectified)
+            given as a numpy array of shape (h,w).
+        color (list of lists or numpy array, optional): the w x h color image
+            given as a numpy uint8 array of shape (h,w,3) or a numpy uint32
+            array of shape (h,w) encoding RGB pixels in the format 0xrrggbb.
+            It is assumed that color maps directly onto depth pixels. 
+            If color = None, an uncolored point cloud will be produced. 
+        xfov (float): horizontal field of view, in radians.  Related to the
+            intrinsics fx via :math:`fx = w/(2 \tan(xfov/2))`, i.e.,
+            :math:`xfov = 2*\arctan(w/(2*fx))`.
         yfov (float, optional): vertical field of view, in radians.  If not
-            given, square pixels are assumed.
+            given, square pixels are assumed.  Related to the intrinsics
+            :math:`fy = h/(2 \tan(yfov/2))`, i.e.,
+            :math:`yfov = 2*\arctan(h/(2*fy))`.
         depth_scale (float, optional): a scaling from depth image values to
             absolute depth values.
         depth_range (pair of floats, optional): if given, only points within 
@@ -295,12 +260,11 @@ def image_to_points(depth,color,xfov,yfov=None,depth_scale=None,depth_range=None
             value. Can be:
 
             * 'numpy' (default): either an Nx3, Nx4, or Nx6 numpy array,
-              depending on whether color is requested (and its format).  Will
-              fall back to 'native' if numpy is not available.
-            * 'native': same as numpy, but in list-of-lists format rather than
-              numpy arrays.
+              depending on whether color is requested (and its format).  
             * 'PointCloud': a Klampt PointCloud object
             * 'Geometry3D': a Klampt Geometry3D point cloud object
+            * 'TriangleMesh': a Klampt TriangleMesh object showing a regular 
+              grid encoded with the depth image.
 
         all_points (bool, optional): configures whether bad points should be
             stripped out.  If False (default), this strips out all pixels that
@@ -312,9 +276,6 @@ def image_to_points(depth,color,xfov,yfov=None,depth_scale=None,depth_range=None
         camera frame with +x to the right, +y down, +z forward.
 
     """
-    has_numpy = _try_numpy_import()
-    if not has_numpy:
-        raise NotImplementedError("TODO image_to_points without numpy")
     depth = np.asarray(depth)
     assert len(depth.shape)==2
     h,w = depth.shape
@@ -328,15 +289,39 @@ def image_to_points(depth,color,xfov,yfov=None,depth_scale=None,depth_range=None
             else:
                 assert len(color.shape)==2
                 color_format = 'rgb'
+    else:
+        color_format = None
+
+    if (points_format == 'PointCloud' or points_format == 'Geometry3D') and all_points:
+        #shortcut, about 2x faster than going through Numpy
+        res = PointCloud()
+        fx = 0.5*w/math.tan(xfov*0.5)
+        if yfov is None:
+            fy = fx
+        else:
+            fy = 0.5*h/math.tan(yfov*0.5)
+        cx = 0.5*w
+        cy = 0.5*h
+        if depth_scale is None:
+            depth_scale = 1.0
+        if color_format is None:
+            res.setDepthImage([fx,fy,cx,cy],depth,depth_scale)
+        else:
+            res.setRGBDImages([fx,fy,cx,cy],color,depth,depth_scale)
+
+        if points_format == 'PointCloud':
+            return res
+        else:
+            g = Geometry3D()
+            g.setPointCloud(res)
+            return g
+
     if depth_scale is not None:
         depth *= depth_scale
-    if depth_range is not None:
-        valid = np.logical_and((depth > depth_range[0]),(depth < depth_range[1]))
-        if all_points:
-            depth[~valid] = 0
-        valid = (depth > 0)
-    else:
-        valid = (depth > 0)
+
+    if points_format == 'TriangleMesh':
+        if not all_points:
+            raise NotImplementedError("TODO: TriangleMesh result but with missing data")
 
     xshift = -w*0.5
     yshift = -h*0.5
@@ -360,44 +345,76 @@ def image_to_points(depth,color,xfov,yfov=None,depth_scale=None,depth_range=None
     if color_format is not None:
         if len(color.shape) == 2:
             color = color.reshape(color.shape[0],color.shape[1],1)
-        pts = np.concatenate((pts,color),2)
+
     #now have a nice array containing all points, shaped h x w x (3+c)
     #extract out the valid points from this array
     if all_points:
         pts = pts.reshape(w*h,pts.shape[2])
+        if color_format is not None:
+            color = color.reshape(w*h,color.shape[2])
     else:
+        if depth_range is not None:
+            valid = np.logical_and((depth > depth_range[0]),(depth < depth_range[1]))
+            if all_points and points_format != 'TriangleMesh':
+                depth[~valid] = 0
+            valid = (depth > 0)
+        else:
+            valid = (depth > 0)
         pts = pts[valid]
+        if color is not None:
+            color = color[valid]
 
-    if points_format == 'native':
-        return pts.tolist()
-    elif points_format == 'numpy':
+    if points_format == 'numpy':
+        if color_format is not None:
+            pts = np.concatenate((pts,color),1)
         return pts
     elif points_format == 'PointCloud' or points_format == 'Geometry3D':
         res = PointCloud()
         if all_points:
             res.setSetting('width',str(w))
             res.setSetting('height',str(h))
-        res.setPoints(pts.shape[0],pts[:,0:3].flatten().tolist())
+        res.setPoints(pts)
         if color_format == 'rgb':
             res.addProperty('rgb')
-            res.setProperties(pts[:,3].flatten().tolist())
+            res.setProperties(color)
         elif color_format == 'channels':
             res.addProperty('r')
             res.addProperty('g')
             res.addProperty('b')
-            res.setProperties(pts[:,3:6].flatten().tolist())
+            res.setProperties(color)
         if points_format == 'PointCloud':
             return res
         else:
-            from klampt import Geometry3D
             g = Geometry3D()
             g.setPointCloud(res)
             return g
+    elif points_format == 'TriangleMesh':
+        res = TriangleMesh()
+        res.setVertices(pts)
+        indices = np.empty(((w-1)*(h-1)*2,3),dtype=np.int32)
+        template = np.array([[0,1,w+1],[w+1,w,0]],dtype=np.int32)
+        rowtemplate = np.vstack([template+j for j in range(w-1)])
+        k = 0
+        for i in range(h-1):
+            indices[k:k+(w-1)*2,:] = rowtemplate + (i*w)
+            k += (w-1)*2
+        res.setIndices(indices)
+        if color is not None:
+            app = Appearance()
+            if color_format == 'channels':
+                app.setColors(Appearance.VERTICES,np.asarray(color).T)
+            else:
+                raise NotImplementedError("TODO: convert colors to per-vertex colors")
+            return (res,app)
+        return res
     else:
-        raise ValueError("Invalid points_format, must be either native, numpy, PointCloud, or Geometry3D")
+        raise ValueError("Invalid points_format, must be either numpy, PointCloud, or Geometry3D")
 
 
-def camera_to_points(camera,points_format='numpy',all_points=False,color_format='channels'):
+def camera_to_points(camera : SimRobotSensor,
+                     points_format='numpy',
+                     all_points=False,
+                     color_format='channels') -> Union['ndarray',PointCloud,Geometry3D]:
     """Given a SimRobotSensor that is a CameraSensor, returns a point cloud
     associated with the current measurements.
 
@@ -412,12 +429,11 @@ def camera_to_points(camera,points_format='numpy',all_points=False,color_format=
             value. Can be:
 
             * 'numpy' (default): either an Nx3, Nx4, or Nx6 numpy array,
-              depending on whether color is requested (and its format).  Will
-              fall back to 'native' if numpy is not available.
-            * 'native': same as numpy, but in list-of-lists format rather than
-              numpy arrays.
+              depending on whether color is requested (and its format).  
             * 'PointCloud': a Klampt PointCloud object
             * 'Geometry3D': a Klampt Geometry3D point cloud object
+            * 'TriangleMesh': a Klampt TriangleMesh object showing a regular 
+              grid encoded with the depth image.
 
         all_points (bool, optional): configures whether bad points should be
             stripped out.  If False (default), this strips out all pixels that
@@ -436,14 +452,11 @@ def camera_to_points(camera,points_format='numpy',all_points=False,color_format=
             * None: no color is produced.
 
     Returns:
-        object: the point cloud in the requested format.
+        The point cloud in the requested format.
     """
     assert isinstance(camera,SimRobotSensor),"Must provide a SimRobotSensor instance"
     assert camera.type() == 'CameraSensor',"Must provide a camera sensor instance"
     assert int(camera.getSetting('depth'))==1,"Camera sensor must have a depth channel"
-    has_numpy = _try_numpy_import()
-    if points_format == 'numpy' and not has_numpy:
-        points_format = 'native'
 
     images = camera_to_images(camera,'numpy',color_format)
     assert images is not None
@@ -459,73 +472,113 @@ def camera_to_points(camera,points_format='numpy',all_points=False,color_format=
     h = int(camera.getSetting('yres'))
     xfov = float(camera.getSetting('xfov'))
     yfov = float(camera.getSetting('yfov'))
+
+    if (points_format == 'PointCloud' or points_format == 'Geometry3D') and (color_format is None or color_format == 'rgb') and all_points:
+        #shortcut, about 2x faster than going through Numpy
+        res = PointCloud()
+        fx = 0.5*w/math.tan(xfov*0.5)
+        fy = 0.5*h/math.tan(yfov*0.5)
+        cx = 0.5*w
+        cy = 0.5*h
+        if color_format is None:
+            res.setDepthImage([fx,fy,cx,cy],depth)
+        else:
+            res.setRGBDImages([fx,fy,cx,cy],rgb,depth)
+        if points_format == 'PointCloud':
+            return res
+        else:
+            g = Geometry3D()
+            g.setPointCloud(res)
+            return g
+
+    if points_format == 'TriangleMesh':
+        if not all_points:
+            raise NotImplementedError("TODO: TriangleMesh result but with missing data")
+
     zmin = float(camera.getSetting('zmin'))
     zmax = float(camera.getSetting('zmax'))
     xshift = -w*0.5
     yshift = -h*0.5
     xscale = math.tan(xfov*0.5)/(w*0.5)
-    #yscale = -1.0/(math.tan(yfov*0.5)*h/2)
+    #yscale = math.tan(yfov*0.5)/(h*0.5)
     yscale = xscale #square pixels are assumed
     xs = [(j+xshift)*xscale for j in range(w)]
     ys = [(i+yshift)*yscale for i in range(h)]
-    if has_numpy:
-        if all_points:
-            depth[depth >= zmax] = 0
-        if color_format == 'channels':
-            #scale to range [0,1]
-            rgb = rgb*(1.0/255.0)
-        xgrid = np.repeat(np.array(xs).reshape((1,w)),h,0)
-        ygrid = np.repeat(np.array(ys).reshape((h,1)),w,1)
-        assert xgrid.shape == (h,w)
-        assert ygrid.shape == (h,w)
-        pts = np.dstack((np.multiply(xgrid,depth),np.multiply(ygrid,depth),depth))
-        assert pts.shape == (h,w,3)
-        if color_format is not None:
-            if len(rgb.shape) == 2:
-                rgb = rgb.reshape(rgb.shape[0],rgb.shape[1],1)
-            pts = np.concatenate((pts,rgb),2)
-        #now have a nice array containing all points, shaped h x w x (3+c)
-        #extract out the valid points from this array
-        if all_points:
-            pts = pts.reshape(w*h,pts.shape[2])
-        else:
-            pts = pts[depth < zmax]
 
-        if points_format == 'native':
-            return pts.tolist()
-        elif points_format == 'numpy':
-            return pts
-        elif points_format == 'PointCloud' or points_format == 'Geometry3D':
-            res = PointCloud()
-            if all_points:
-                res.setSetting('width',str(w))
-                res.setSetting('height',str(h))
-            res.setPoints(pts.shape[0],pts[:,0:3].flatten().tolist())
-            if color_format == 'rgb':
-                res.addProperty('rgb')
-                res.setProperties(pts[:,3].flatten().tolist())
-            elif color_format == 'channels':
-                res.addProperty('r')
-                res.addProperty('g')
-                res.addProperty('b')
-                res.setProperties(pts[:,3:6].flatten().tolist())
-            elif color_format == 'bgr':
-                raise ValueError("bgr color format not supported with PointCloud output")
-            if points_format == 'PointCloud':
-                return res
-            else:
-                from klampt import Geometry3D
-                g = Geometry3D()
-                g.setPointCloud(res)
-                return g
-        else:
-            raise ValueError("Invalid points_format "+points_format)
-        return Nnoe
+    if all_points and points_format != 'TriangleMesh':
+        depth[depth >= zmax] = 0
+    if color_format == 'channels':
+        #scale to range [0,1]
+        rgb = rgb*(1.0/255.0)
+    xgrid = np.repeat(np.array(xs).reshape((1,w)),h,0)
+    ygrid = np.repeat(np.array(ys).reshape((h,1)),w,1)
+    assert xgrid.shape == (h,w)
+    assert ygrid.shape == (h,w)
+    pts = np.dstack((np.multiply(xgrid,depth),np.multiply(ygrid,depth),depth))
+    assert pts.shape == (h,w,3)
+    if color_format is not None:
+        if len(rgb.shape) == 2:
+            rgb = rgb.reshape(rgb.shape[0],rgb.shape[1],1)
+        pts = np.concatenate((pts,rgb),2)
+    #now have a nice array containing all points, shaped h x w x (3+c)
+    #extract out the valid points from this array
+    if all_points:
+        pts = pts.reshape(w*h,pts.shape[2])
     else:
-        raise NotImplementedError("Native format depth image processing not done yet")
+        pts = pts[depth < zmax]
+
+    if points_format == 'numpy':
+        return pts
+    elif points_format == 'PointCloud' or points_format == 'Geometry3D':
+        res = PointCloud()
+        if all_points:
+            res.setSetting('width',str(w))
+            res.setSetting('height',str(h))
+        res.setPoints(pts[:,0:3])
+        if color_format == 'rgb':
+            res.addProperty('rgb')
+            res.setProperties(pts[:,3:4])
+        elif color_format == 'channels':
+            res.addProperty('r')
+            res.addProperty('g')
+            res.addProperty('b')
+            res.setProperties(pts[:,3:6])
+        elif color_format == 'bgr':
+            raise ValueError("bgr color format not supported with PointCloud output")
+        if points_format == 'PointCloud':
+            return res
+        else:
+            g = Geometry3D()
+            g.setPointCloud(res)
+            return g
+    elif points_format == 'TriangleMesh':
+        res = TriangleMesh()
+        res.setVertices(pts[:,:3])
+        indices = np.empty(((w-1)*(h-1)*2,3),dtype=np.int32)
+        template = np.array([[0,1,w+1],[w+1,w,0]],dtype=np.int32)
+        rowtemplate = np.vstack([template+j for j in range(w-1)])
+        k = 0
+        for i in range(h-1):
+            indices[k:k+(w-1)*2,:] = rowtemplate + (i*w)
+            k += (w-1)*2
+        res.setIndices(indices)
+        if color_format is not None:
+            app = Appearance()
+            if color_format == 'channels':
+                app.setColors(Appearance.VERTICES,pts[:,3:])
+            else:
+                raise NotImplementedError("TODO: convert colors to per-vertex colors")
+            return (res,app)
+        return res
+    else:
+        raise ValueError("Invalid points_format "+points_format)
+    return None
 
 
-def camera_to_points_world(camera,robot,points_format='numpy',color_format='channels'):
+def camera_to_points_world(camera : SimRobotSensor,
+                           robot : RobotModel,
+                           points_format='numpy',
+                           color_format='channels') -> Union['ndarray',PointCloud,Geometry3D]:
     """Same as :meth:`camera_to_points`, but converts to the world coordinate
     system given the robot to which the camera is attached.  
 
@@ -545,10 +598,6 @@ def camera_to_points_world(camera,robot,points_format='numpy',color_format='chan
         tw = np.array(Tworld[1])
         pts[:,0:3] = np.dot(pts[:,0:3],Rw.T) + tw
         return pts
-    elif points_format == 'native':
-        for p in pts:
-            p[0:3] = se3.apply(Tworld,p[0:3])
-        return pts
     elif points_format == 'PointCloud' or points_format == 'Geometry3D':
         pts.transform(*Tworld)
     else:
@@ -556,7 +605,7 @@ def camera_to_points_world(camera,robot,points_format='numpy',color_format='chan
     return pts
 
 
-def camera_to_viewport(camera,robot):
+def camera_to_viewport(camera : SimRobotSensor, robot : RobotModel) -> GLViewport:
     """Returns a GLViewport instance corresponding to the camera's view. 
 
     See :mod:`klampt.vis.glprogram` and :mod:`klampt.vis.visualization` for
@@ -571,11 +620,10 @@ def camera_to_viewport(camera,robot):
             local coordinates.
 
     Returns:
-        :class:`GLViewport`: matches the camera's viewport.
+        A GLViewport matching the camera's viewport.
     """
     assert isinstance(camera,SimRobotSensor),"Must provide a SimRobotSensor instance"
     assert camera.type() == 'CameraSensor',"Must provide a camera sensor instance"
-    from ..vis.glviewport import GLViewport
     xform = get_sensor_xform(camera,robot)
     w = int(camera.getSetting('xres'))
     h = int(camera.getSetting('yres'))
@@ -594,7 +642,7 @@ def camera_to_viewport(camera,robot):
     return view
 
 
-def viewport_to_camera(viewport,camera,robot):
+def viewport_to_camera(viewport : GLViewport, camera : SimRobotSensor, robot : RobotModel):
     """Fills in a simulated camera's settings to match a GLViewport specifying
     the camera's view. 
 
@@ -611,7 +659,7 @@ def viewport_to_camera(viewport,camera,robot):
     assert isinstance(viewport,GLViewport)
     assert isinstance(camera,SimRobotSensor),"Must provide a SimRobotSensor instance"
     assert camera.type() == 'CameraSensor',"Must provide a camera sensor instance"
-    xform = viewport.getTransform()
+    xform = viewport.get_transform()
     link = int(camera.getSetting('link'))
     if link < 0 or robot is None:
         rlink = None
@@ -620,7 +668,7 @@ def viewport_to_camera(viewport,camera,robot):
     set_sensor_xform(camera,xform,rlink)
     (zmin,zmax) = viewport.clippingplanes
     xfov = math.radians(viewport.fov)
-    yfov = xfov*viewport.h/viewport.w
+    yfov = 2.0*math.atan(math.tan(xfov*0.5)*viewport.h/viewport.w)
     camera.setSetting('xres',str(viewport.w))
     camera.setSetting('yres',str(viewport.h))
     camera.setSetting('xfov',str(xfov))
@@ -630,7 +678,7 @@ def viewport_to_camera(viewport,camera,robot):
     return camera
 
 
-def camera_to_intrinsics(camera,format='opencv',fn=None):
+def camera_to_intrinsics(camera : SimRobotSensor, format='opencv', fn=None):
     """Returns the camera's intrinsics and/or saves them to a file under the
     given format.
 
@@ -641,9 +689,13 @@ def camera_to_intrinsics(camera,format='opencv',fn=None):
         fn (str, optional): the file to save to (must be .json, .xml, or .yml).
         
     Returns:
-        varies: If format='opencv', the (projection, distortion) matrix is
-        returned. If format='numpy', just the projection matrix is returned. 
+        If format='opencv', the (projection, distortion) matrix is
+        returned.
+        
+        If format='numpy', just the projection matrix is returned. 
+
         If format=='json', a dict of the fx, fy, cx, cy values is returned
+        
     """
     assert isinstance(camera,SimRobotSensor),"Must provide a SimRobotSensor instance"
     assert camera.type() == 'CameraSensor',"Must provide a camera sensor instance"
@@ -727,7 +779,7 @@ distortion_coefficients: !!opencv-matrix
         raise ValueError("Invalid format, only opencv, numpy, ros, and json are supported")
 
 
-def intrinsics_to_camera(data,camera,format='opencv'):
+def intrinsics_to_camera(data, camera : SimRobotSensor, format='opencv'):
     """Fills in a simulated camera's settings to match given intrinsics.  Note:
     all distortions are dropped.
 
@@ -780,8 +832,8 @@ def intrinsics_to_camera(data,camera,format='opencv'):
         raise ValueError("Invalid format, only opencv, numpy, ros, and json are supported")
     w = int(cx*2)
     h = int(cy*2)
-    xfov = math.atan(fx/w*2)*2
-    yfov = math.atan(fy/h*2)*2
+    xfov = math.atan(fx/(w*2))*2
+    yfov = math.atan(fy/(h*2))*2
     camera.setSetting('xres',str(w))
     camera.setSetting('yres',str(h))
     camera.setSetting('xfov',str(xfov))
@@ -790,7 +842,7 @@ def intrinsics_to_camera(data,camera,format='opencv'):
 
 
 
-def camera_ray(camera,robot,x,y):
+def camera_ray(camera : SimRobotSensor, robot : RobotModel, x : float, y : float) -> Tuple[Vector3,Vector3]:
     """Returns the (source,direction) of a ray emanating from the
     SimRobotSensor at pixel coordinates (x,y).
 
@@ -804,12 +856,12 @@ def camera_ray(camera,robot,x,y):
         y (int/float): y pixel coordinates
 
     Returns:
-        (source,direction): world-space ray source/direction.
+        A pair (source,direction) giving the world-space ray source/direction.
     """
     return camera_to_viewport(camera,robot).click_ray(x,y)
 
 
-def camera_project(camera,robot,pt,clip=True):
+def camera_project(camera : SimRobotSensor, robot : RobotModel, pt : Vector3,clip=True) -> Vector3:
     """Given a point in world space, returns the (x,y,z) coordinates of the
     projected pixel.  z is given in absolute coordinates, while x,y are given
     in pixel values.
@@ -829,12 +881,12 @@ def camera_project(camera,robot,pt,clip=True):
             outside of the viewing volume.
 
     Returns:
-        tuple: (x,y,z), where x,y are pixel value of image, z is depth.
+        (x,y,z), where x,y are pixel value of image, z is depth.
     """
     return camera_to_viewport(camera,robot).project(pt,clip)
 
 
-def visible(camera,object,full=True,robot=None):
+def visible(camera : Union[SimRobotSensor,GLViewport], object, full=True, robot=None) -> bool:
     """Tests whether the given object is visible in a SimRobotSensor or a
     GLViewport. 
 
@@ -928,8 +980,55 @@ def visible(camera,object,full=True,robot=None):
                 yclosest = max(min(cproj[1],camera.h),0)
                 zclosest = max(min(cproj[2],camera.clippingplanes[1]),camera.clippingplanes[0])
                 return vectorops.distance((xclosest,yclosest),cproj[0:2]) <= rproj
-    from klampt import Geometry3D
     if not isinstance(object,Geometry3D):
         raise ValueError("Object must be a point, sphere, bounding box, or Geometry3D")
     return visible(camera,object.getBB(),full,robot)
 
+
+def projection_map_texture(vp : Union[SimRobotSensor,GLViewport],
+                           app : Appearance,
+                           robot : RobotModel = None):
+    """Calculates texture coordinate generator for a given appearance to
+    project an image texture onto some geometry.
+
+    The appearance should already have been set up for the given object.
+
+    To complete the projection mapping, call app.setTexture2D(format,image).
+    """
+    if isinstance(vp,SimRobotSensor):
+        vp = camera_to_viewport(vp,robot)
+    texgen = np.zeros((4,4))
+    T = vp.get_transform('openGL')
+    xdir = so3.apply(T[0],[1,0,0])
+    ydir = so3.apply(T[0],[0,1,0])
+    zdir = so3.apply(T[0],[0,0,1])
+    if vp.orthogonal:
+        vscale = vp.h/vp.w
+        texgen[0,0:3] = vectorops.mul(xdir,0.5/vp.fov)
+        texgen[1,0:3] = vectorops.mul(ydir,0.5/(vp.fov*vscale))
+        texgen[0,3] = 0.5 - vectorops.dot(xdir,T[1])*0.5/vp.fov
+        texgen[1,3] = 0.5 - vectorops.dot(ydir,T[1])*0.5/(vp.fov*vscale)
+        texgen[3,3] = 1 
+    else:
+        fov = math.radians(vp.fov)
+        vfov = math.atan(math.tan(fov*0.5)*vp.w/vp.h)*2.0
+        #u = vx^T(p-o)/(s vz^T(p-o)) + 0.5 = S/Q
+        #  = [vx^T(p-o) + 0.5 (s vz^T(p-o))] / (s vz^T(p-o))
+        #S = (vx+0.5 s vz)^T p - (vx + 0.5 s vz)^T o)
+        #Q = s vz^T p - s vz^T o
+        #v = 1/scale * vy^T(p-o)/(s vz^T(p-o)) + 0.5 = S/Q
+        #  = [vy^T(p-o)/scale + 0.5 (s vz^T(p-o))] / (s vz^T(p-o))
+        #T = (vy/scale+0.5 s vz)^T p - (vy/scale + 0.5 s vz)^T o)
+        scale = 2.0*math.tan(fov*0.5)
+        vscale = vp.h/vp.w
+        xdir = vectorops.mul(xdir,-1)
+        ydir = vectorops.mul(ydir,-1)
+        xnum = vectorops.madd(xdir,zdir,0.5*scale)
+        ynum = vectorops.madd(vectorops.div(ydir,vscale),zdir,0.5*scale)
+        texgen[0,0:3] = xnum
+        texgen[1,0:3] = ynum
+        texgen[0,3] = -vectorops.dot(xnum,T[1])
+        texgen[1,3] = -vectorops.dot(ynum,T[1])
+        texgen[3,0:3] = vectorops.mul(zdir,scale)
+        texgen[3,3] = -scale*vectorops.dot(zdir,T[1])
+    app.setTexgen(texgen,True)

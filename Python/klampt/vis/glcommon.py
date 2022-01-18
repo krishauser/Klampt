@@ -22,6 +22,9 @@ class GLWidgetPlugin(GLPluginInterface):
         self.klamptwidgetmaster = WidgetSet()
         self.klamptwidgetdragging = False
     def addWidget(self,widget):
+        warnings.warn("addWidget will be deprecated in favor of add_widget in a future version of Klampt",DeprecationWarning)
+        self.add_widget(widget)
+    def add_widget(self,widget):
         self.klamptwidgetmaster.add(widget)
     def widgetchangefunc(self,event):
         """Called whenever a widget is clicked or dragged.
@@ -95,11 +98,23 @@ class GLMultiViewportProgram(GLProgram):
                 return False
         return True
     def addView(self,view):
+        warnings.warn("addView will be deprecated in favor of add_view in a future version of Klampt",DeprecationWarning)
+        self.add_view(view)
+    def removeView(self,view):
+        warnings.warn("removeView will be deprecated in favor of remove_view in a future version of Klampt",DeprecationWarning)
+        self.remove_view(view)
+    def clearViews(self):
+        warnings.warn("clearViews will be deprecated in favor of clear_views in a future version of Klampt",DeprecationWarning)
+        self.clear_views()
+    def update_active(self,x,y):
+        warnings.warn("update_active will be deprecated in favor of update_active in a future version of Klampt",DeprecationWarning)
+        self.update_active(x,y)
+    def add_view(self,view):
         if isinstance(view,GLPluginInterface):
             plugin = view
             pview = GLPluginProgram()
             pview.window = self.window
-            pview.setPlugin(view)
+            pview.set_plugin(view)
             view = pview
         assert isinstance(view,GLProgram)
         self.views.append(view)
@@ -109,7 +124,7 @@ class GLMultiViewportProgram(GLProgram):
         self.fit()
         #print "Added a view, total",len(self.views),"size now",self.view.w,self.view.h
         return view
-    def removeView(self,view):
+    def remove_view(self,view):
         view.window = None
         for i,p in enumerate(self.views):
             if p is view:
@@ -118,13 +133,13 @@ class GLMultiViewportProgram(GLProgram):
                 self.fit()
                 self.activeView = None
                 return
-    def clearViews(self):
+    def clear_views(self):
         for p in self.views:
             p.window = None
         self.views = []
         self.defaultSizes = []
         self.activeView = None
-    def updateActive(self,x,y):
+    def update_active(self,x,y):
         if not self.view.contains(x,y):
             return
         self.activeView = None
@@ -229,7 +244,7 @@ class GLMultiViewportProgram(GLProgram):
             for p in self.views:
                 p.keyboardfunc(c,x,y)
             return True
-        self.updateActive(x,y)
+        self.update_active(x,y)
         if self.activeView != None:
             return True if self.views[self.activeView].keyboardfunc(c,x,y) else False
         return False
@@ -238,7 +253,7 @@ class GLMultiViewportProgram(GLProgram):
             for p in self.views:
                 p.keyboardupfunc(c,x,y)
             return True
-        self.updateActive(x,y)
+        self.update_active(x,y)
         if self.activeView != None:
             return True if self.views[self.activeView].keyboardupfunc(c,x,y) else False
         return False
@@ -249,7 +264,7 @@ class GLMultiViewportProgram(GLProgram):
             return True
         if state == 0:
             #button down
-            self.updateActive(x,y)
+            self.update_active(x,y)
             self.dragging = True
         else:
             self.dragging = False
@@ -262,7 +277,7 @@ class GLMultiViewportProgram(GLProgram):
                 p.motionfunc(x,y,dx,dy)
             return True
         if not self.dragging:
-            self.updateActive(x,y)
+            self.update_active(x,y)
         if self.activeView != None:
             return True if self.views[self.activeView].motionfunc(x,y,dx,dy) else False
         return False
@@ -346,10 +361,14 @@ class CachedGLObject:
             self.glDisplayList = None
 
     def markChanged(self):
+        warnings.warn("markChanged will be deprecated in favor of mark_changed in a future version of Klampt",DeprecationWarning)
+        self.mark_changed()
+
+    def mark_changed(self):
         """Marked by an outside source to indicate the object has changed and
         should be redrawn."""
         self.changed = True
-    
+
     def draw(self,renderFunction,transform=None,args=None,parameters=None):
         """Given the function that actually makes OpenGL calls, this
         will draw the object.

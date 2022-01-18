@@ -6,13 +6,15 @@
 #include <string.h>
 #include <sstream>
 
+using namespace Klampt;
+
 #ifndef GLUT_LEFT_BUTTON
 #define GLUT_LEFT_BUTTON 0
 #define GLUT_MIDDLE_BUTTON 1
 #define GLUT_RIGHT_BUTTON 2
 #endif //GLUT_LEFT_BUTTON
 
-RobotTestBackend::RobotTestBackend(RobotWorld* world)
+RobotTestBackend::RobotTestBackend(WorldModel* world)
   :WorldGUIBackend(world)
 {
 }
@@ -64,6 +66,8 @@ void RobotTestBackend::Start()
   MapButtonToggle("draw_sensors",&draw_sensors);
   MapButtonToggle("draw_self_collision_tests",&draw_self_collision_tests);
   MapButtonToggle("output_ros",&output_ros);
+
+  UpdateConfig();
 }
   
 void RobotTestBackend::UpdateConfig()
@@ -141,8 +145,8 @@ void RobotTestBackend::RenderWorld()
     GLColor blue(0,0,1);
     viewRobot.RestoreAppearance();
     viewRobot.PushAppearance();
-    for(size_t i=0;i<robot->links.size();i++) {
-      if(self_colliding[i]) viewRobot.SetColor(i,colliding);
+    for(size_t i=0;i<robot->links.size();i++) {\
+      if(self_colliding[i]) viewRobot.SetTintColor(i,colliding,1.0);
       if((int)i == cur_link)
         viewRobot.SetColor(i,highlight); 
       else if(cur_driver >= 0 && cur_driver < (int)robot->drivers.size() &&
@@ -152,7 +156,7 @@ void RobotTestBackend::RenderWorld()
         //draw a little blue
         if(robot->selfCollisions(i,cur_link) || robot->selfCollisions(cur_link,i) )  {
           GLDraw::GeometryAppearance &app  = viewRobot.Appearance(i);
-          app.ModulateColor(blue,0.5);
+          app.SetTintColor(blue,0.5);
         }
       }
     }
@@ -470,7 +474,7 @@ void RobotTestBackend::SetDrawExpanded(int value)
 
 #if HAVE_GLUI
 
-GLUIRobotTestGUI::GLUIRobotTestGUI(GenericBackendBase* backend,RobotWorld* _world,int w,int h)
+GLUIRobotTestGUI::GLUIRobotTestGUI(GenericBackendBase* backend,WorldModel* _world,int w,int h)
   :GLUIGUI(backend,w,h),world(_world)
 {}
 

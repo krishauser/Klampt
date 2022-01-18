@@ -8,16 +8,18 @@ using namespace Optimization;
 
 #define OPTIMIZE_DRIVER_TORQUES 0
 
+namespace Klampt {
+
 int kNumFCEdges = 4;
 
 //from link velocities/torques to driver velocities/torques
-void MulDriverJacobian(Robot& robot,const Vector& in,Vector& out)
+void MulDriverJacobian(RobotModel& robot,const Vector& in,Vector& out)
 {
   assert(in.n == (int)robot.links.size());
   out.resize(robot.drivers.size());
   out.setZero();
   for(size_t i=0;i<robot.drivers.size();i++) {
-    if(robot.drivers[i].type == RobotJointDriver::Normal) 
+    if(robot.drivers[i].type == RobotModelDriver::Normal) 
       out[i] = in[robot.drivers[i].linkIndices[0]];
     else {
       Vector Ji;
@@ -28,13 +30,13 @@ void MulDriverJacobian(Robot& robot,const Vector& in,Vector& out)
 }
 
 //from driver velocities/torques to link velocities/torques
-void MulDriverJacobianT(Robot& robot,const Vector& in,Vector& out)
+void MulDriverJacobianT(RobotModel& robot,const Vector& in,Vector& out)
 {
   assert(in.n == (int)robot.drivers.size());
   out.resize(robot.links.size());
   out.setZero();
   for(size_t i=0;i<robot.drivers.size();i++) {
-    if(robot.drivers[i].type == RobotJointDriver::Normal) 
+    if(robot.drivers[i].type == RobotModelDriver::Normal) 
       out[robot.drivers[i].linkIndices[0]] = in[i];
     else {
       Vector Ji;
@@ -47,7 +49,7 @@ void MulDriverJacobianT(Robot& robot,const Vector& in,Vector& out)
 //from link velocities/torques to driver velocities/torques
 //the in matrix is of size num_links x m, and out will be of size num_drivers x m
 //equivalent to out = Jd*in
-void MulDriverJacobian(Robot& robot,const Matrix& in,Matrix& out)
+void MulDriverJacobian(RobotModel& robot,const Matrix& in,Matrix& out)
 {
   assert(in.m == (int)robot.links.size());
   out.resize(robot.drivers.size(),in.n);
@@ -63,7 +65,7 @@ void MulDriverJacobian(Robot& robot,const Matrix& in,Matrix& out)
 //from driver velocities/torques to link velocities/torques
 //the in matrix is of size num_drivers x m, and out will be of size num_links x m
 //equivalent to out = Jd*in
-void MulDriverJacobianT(Robot& robot,const Matrix& in,Matrix& out)
+void MulDriverJacobianT(RobotModel& robot,const Matrix& in,Matrix& out)
 {
   assert(in.m == (int)robot.drivers.size());
   out.resize(robot.links.size(),in.n);
@@ -78,7 +80,7 @@ void MulDriverJacobianT(Robot& robot,const Matrix& in,Matrix& out)
 //from linke velocities/torques to driver velocities/torques
 //the in matrix is of size m x num_links, and out will be of size m x num_drivers
 //equivalent to out = in*Jd^T
-void PostMulDriverJacobianT(Robot& robot,const Matrix& in,Matrix& out)
+void PostMulDriverJacobianT(RobotModel& robot,const Matrix& in,Matrix& out)
 {
   assert(in.n == (int)robot.links.size());
   out.resize(in.m,robot.drivers.size());
@@ -94,7 +96,7 @@ void PostMulDriverJacobianT(Robot& robot,const Matrix& in,Matrix& out)
 //from driver velocities/torques to link velocities/torques
 //the in matrix is of size m x num_drivers, and out will be of size m x num_links
 //equivalent to out = in*Jd
-void PostMulDriverJacobian(Robot& robot,const Matrix& in,Matrix& out)
+void PostMulDriverJacobian(RobotModel& robot,const Matrix& in,Matrix& out)
 {
   assert(in.n == (int)robot.drivers.size());
   out.resize(in.m,robot.links.size());
@@ -133,7 +135,7 @@ void GetGoalAccel0(RobotDynamics3D& robot,const IKGoal& goal,Vector& ddx0)
   }
 }
 
-OperationalSpaceController::OperationalSpaceController(Robot& _robot)
+OperationalSpaceController::OperationalSpaceController(RobotModel& _robot)
   :RobotController(_robot),gravity(0,0,-9.8)
 {
   stateEstimator = new IntegratedStateEstimator(_robot);
@@ -283,7 +285,7 @@ void OperationalSpaceController::TasksToTorques(Vector& t)
 
   //look for fixed links -- todo: add this as a constraint to the LP solver
   for(size_t i=0;i<robot.joints.size();i++)
-    if(robot.joints[i].type == RobotJoint::Weld) {
+    if(robot.joints[i].type == RobotModelJoint::Weld) {
       assert(robot.parents[robot.joints[i].linkIndex] == -1);
       ddq0(robot.joints[i].linkIndex) = 0;
       Vector temp;
@@ -616,3 +618,5 @@ void OperationalSpaceController::TasksToTorques(Vector& t)
     stateEstimator->SetDDQ(ddq_predicted);
   }
 }
+
+} //namespace Klampt

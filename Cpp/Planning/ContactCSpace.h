@@ -6,6 +6,8 @@
 #include <Klampt/Contact/Stance.h>
 #include <KrisLibrary/robotics/IK.h>
 
+namespace Klampt {
+
 /** @brief A SingleRobotCSpace for a robot maintaining contact.
  *
  * The loop closure constraints are solved for using the Newton Raphson method
@@ -17,16 +19,16 @@
 class ContactCSpace : public SingleRobotCSpace
 {
  public:
-  ContactCSpace(RobotWorld& world,int index,
+  ContactCSpace(WorldModel& world,int index,
 		WorldPlannerSettings* settings);
   ContactCSpace(const SingleRobotCSpace& space);
   ContactCSpace(const ContactCSpace& space);
 
-  virtual void Sample(Config& q);
-  virtual void SampleNeighborhood(const Config& c,Real r,Config& q);
-  virtual void Interpolate(const Config& x,const Config& y,Real u,Config& out);
-  virtual EdgePlannerPtr PathChecker(const Config& a,const Config& b);
-  virtual void Properties(PropertyMap&);
+  virtual void Sample(Config& q) override;
+  virtual void SampleNeighborhood(const Config& c,Real r,Config& q) override;
+  virtual void Interpolate(const Config& x,const Config& y,Real u,Config& out) override;
+  virtual EdgePlannerPtr PathChecker(const Config& a,const Config& b) override;
+  virtual void Properties(PropertyMap&) override;
 
   void AddContact(const IKGoal& goal);
   void AddContact(int link,const Vector3& localPos,const Vector3& worldPos);
@@ -62,7 +64,7 @@ class MultiContactCSpace : public MultiRobotCSpace
     vector<Real> kFriction;
   };
 
-  MultiContactCSpace(RobotWorld& world,
+  MultiContactCSpace(WorldModel& world,
 		     WorldPlannerSettings* settings);
   MultiContactCSpace(const MultiRobotCSpace&);
   MultiContactCSpace(const MultiContactCSpace&);
@@ -72,13 +74,13 @@ class MultiContactCSpace : public MultiRobotCSpace
   ///Same as above, but with different structure.  Here all the indexes in the formation are World ids.
   void InitContactPairs(const ContactFormation& formation);
 
-  virtual int NumDimensions() const;
-  virtual void Sample(Config& x);
-  virtual void SampleNeighborhood(const Config& c,Real r,Config& x);
-  virtual bool IsFeasible(const Config&);
-  virtual void Interpolate(const Config& x,const Config& y,Real u,Config& out);
-  virtual void Midpoint(const Config& x,const Config& y,Config& out);
-  virtual void Properties(PropertyMap&);
+  virtual int NumDimensions() const override;
+  virtual void Sample(Config& x) override;
+  virtual void SampleNeighborhood(const Config& c,Real r,Config& x) override;
+  virtual bool IsFeasible(const Config&) override;
+  virtual void Interpolate(const Config& x,const Config& y,Real u,Config& out) override;
+  virtual void Midpoint(const Config& x,const Config& y,Config& out) override;
+  virtual void Properties(PropertyMap&) override;
 
   bool SolveContact(Config& x,int numIters=0,Real tol=0);
   Real ContactDistance();
@@ -96,5 +98,7 @@ class MultiContactCSpace : public MultiRobotCSpace
   double solveContactTime,isFeasibleTime;
 };
 */
+
+} // namespace Klampt
 
 #endif

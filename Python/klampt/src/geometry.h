@@ -45,6 +45,14 @@
 struct TriangleMesh
 {
   TriangleMesh();
+  ///Retrieves a view of the vertices as an nx3 Numpy array
+  void getVertices(double** np_view2, int* m, int* n);
+  ///Sets all vertices to the given nx3 Numpy array
+  void setVertices(double* np_array2, int m, int n);
+  ///Retrieves a view of the vertices as an mx3 Numpy array
+  void getIndices(int** np_view2, int* m, int* n);
+  ///Sets all indices to the given mx3 Numpy array
+  void setIndices(int* np_array2, int m, int n);
   ///Translates all the vertices by v=v+t
   void translate(const double t[3]);
   ///Transforms all the vertices by the rigid transform v=R*v+t
@@ -69,6 +77,10 @@ struct ConvexHull
   ConvexHull();
   ///Returns the # of points
   int numPoints() const; 
+  ///Retrieves a view of the points as an nx3 Numpy array
+  void getPoints(double** np_view2, int* m, int* n);
+  ///Sets all points to the given nx3 Numpy array
+  void setPoints(double* np_array2, int m, int n);
   ///Adds a point
   void addPoint(const double pt[3]);
   ///Retrieves a point
@@ -153,7 +165,8 @@ struct ConvexHull
  * 
  * To get all properties as a n x k numpy array::
  *
- *     properties = np.array(pc.properties).reshape((p.numPoints(),p.numProperties()))
+ *     properties = np.array(pc.properties)
+ *     properties.reshape((p.numPoints(),p.numProperties()))
  *
  * (Or use the convenience functions in :mod:`klampt.io.numpy_convert`)
  */
@@ -164,34 +177,42 @@ struct PointCloud
   int numPoints() const;
   ///Returns the number of properties
   int numProperties() const;
-  ///Sets all the points to the given list (a 3n-list)
-  void setPoints(int num,const std::vector<double>& plist);
-  ///Adds a point. Sets all its properties to 0.  Returns the index.
+  ///Returns a view of the points as an nx3 Numpy array
+  void getPoints(double** np_view2, int* m, int* n);
+  ///Sets all the points to the given nx3 Numpy array
+  void setPoints(double* np_array2, int m, int n);
+  ///Sets all the points and m properties from the given n x (3+m) array
+  void setPointsAndProperties(double* np_array2, int m,int n);
+  ///Adds a point. Sets all its properties to 0.  
+  ///
+  ///Returns the point's index.
   int addPoint(const double p[3]);
   ///Sets the position of the point at the given index to p
   void setPoint(int index,const double p[3]);
-  ///Retrieves the position of the point at the given index
+  ///Returns the position of the point at the given index
   void getPoint(int index,double out[3]) const;
+  ///Sets all the properties of all points to the given nxp array 
+  void setProperties(double* np_array2, int m, int n);
   ///Adds a new property.  All values for this property are set to 0.
   void addProperty(const std::string& pname);
-  ///Adds a new property with name pname, and sets values for this property to the given list (a n-list)
-  void addProperty(const std::string& pname,const std::vector<double> & properties);
-  ///Sets all the properties of all points to the given list (a kn-list)
-  void setProperties(const std::vector<double>& properties);
-  ///Sets property pindex of all points to the given list (a n-list)
-  void setProperties(int pindex,const std::vector<double>& properties);
+  ///Adds a new property with name pname, and sets values for this property to the given length-n array
+  void addProperty(const std::string& pname,double* np_array,int m);
+  ///Sets property pindex of all points to the given length-n array
+  void setProperties(int pindex,double* np_array,int m);
   ///Sets property pindex of point index to the given value
   void setProperty(int index,int pindex,double value);
   ///Sets the property named pname of point index to the given value
   void setProperty(int index,const std::string& pname,double value);
-  ///Gets property pindex of point index 
+  ///Returns property pindex of point index 
   double getProperty(int index,int pindex) const;
-  ///Gets the property named pname of point index
+  ///Returns the property named pname of point index
   double getProperty(int index,const std::string& pname) const;
-  ///Gets property pindex of all points as an array
-  void getProperties(int pindex,std::vector<double>& out) const;
-  ///Gets property named pindex of all points as an array
-  void getProperties(const std::string& pname,std::vector<double>& out) const;
+  ///Returns property pindex of all points as an array
+  void getProperties(int pindex,double** np_out,int* m) const;
+  ///Returns property named pindex of all points as an array
+  void getProperties(const std::string& pname,double** np_out,int* m) const;
+  ///Returns all the properties as an nxp array
+  void getAllProperties(double** np_view2, int* m, int* n);
   ///Translates all the points by v=v+t
   void translate(const double t[3]);
   ///Transforms all the points by the rigid transform v=R*v+t
@@ -201,8 +222,27 @@ struct PointCloud
   void join(const PointCloud& pc);
   ///Sets the given setting
   void setSetting(const std::string& key,const std::string& value);
-  ///Retrieves the given setting
+  ///Returns the given setting
   std::string getSetting(const std::string& key) const;
+  ///Sets a structured point cloud from a depth image.  [fx,fy,cx,cy] are the intrinsics parameters.  The depth is given as a size hxw array, top to bottom.
+  void setDepthImage_d(const double intrinsics[4],double* np_array2,int m,int n,double depth_scale);
+  ///Sets a structured point cloud from a depth image.  [fx,fy,cx,cy] are the intrinsics parameters.  The depth is given as a size hxw array, top to bottom.
+  void setDepthImage_f(const double intrinsics[4],float* np_depth2,int m2,int n2,double depth_scale);
+  ///Sets a structured point cloud from a depth image.  [fx,fy,cx,cy] are the intrinsics parameters.  The depth is given as a size hxw array, top to bottom.
+  void setDepthImage_s(const double intrinsics[4],unsigned short* np_depth2,int m2,int n2,double depth_scale);
+  ///Sets a structured point cloud from an RGBD (color,depth) image pair.  [fx,fy,cx,cy] are the intrinsics parameters.  The RGB colors are packed in 0xrrggbb order, size hxw, top to bottom.
+  void setRGBDImages_i_d(const double intrinsics[4],unsigned int* np_array2,int m,int n,double* np_depth2,int m2,int n2,double depth_scale);
+  ///Sets a structured point cloud from an RGBD (color,depth) image pair.  [fx,fy,cx,cy] are the intrinsics parameters.  The RGB colors are packed in 0xrrggbb order, size hxw, top to bottom.
+  void setRGBDImages_i_f(const double intrinsics[4],unsigned int* np_array2,int m,int n,float* np_depth2,int m2,int n2,double depth_scale);
+  ///Sets a structured point cloud from an RGBD (color,depth) image pair.  [fx,fy,cx,cy] are the intrinsics parameters.  The RGB colors are packed in 0xrrggbb order, size hxw, top to bottom.
+  void setRGBDImages_i_s(const double intrinsics[4],unsigned int* np_array2,int m,int n,unsigned short* np_depth2,int m2,int n2,double depth_scale);
+  ///Sets a structured point cloud from an RGBD (color,depth) image pair.  [fx,fy,cx,cy] are the intrinsics parameters.  The RGB colors are packed in 0xrrggbb order, size hxw, top to bottom.
+  void setRGBDImages_b_d(const double intrinsics[4],unsigned char* np_array3,int m,int n,int p,double* np_depth2,int m2,int n2,double depth_scale);
+  ///Sets a structured point cloud from an RGBD (color,depth) image pair.  [fx,fy,cx,cy] are the intrinsics parameters.  The RGB colors are an h x w x 3 array, top to bottom.
+  void setRGBDImages_b_f(const double intrinsics[4],unsigned char* np_array3,int m,int n,int p,float* np_depth2,int m2,int n2,double depth_scale);
+  ///Sets a structured point cloud from an RGBD (color,depth) image pair.  [fx,fy,cx,cy] are the intrinsics parameters.  The RGB colors are an h x w x 3 array, top to bottom.
+  void setRGBDImages_b_s(const double intrinsics[4],unsigned char* np_array3,int m,int n,int p,unsigned short* np_depth2,int m2,int n2,double depth_scale);
+  
 
   std::vector<double> vertices;
   std::vector<std::string> propertyNames;
@@ -243,6 +283,14 @@ struct GeometricPrimitive
  * transform with > 0 indicating outside and < 0 indicating inside. 
  * Can also store an occupancy grid with 1 indicating inside and 0
  * indicating outside.
+ * 
+ * In general, values are associated with cells rather than vertices. So,
+ * cell (i,j,k) is associated with a single value, and has size
+ * (w,d,h) = ((bmax[0]-bmin[0])/dims[0], (bmax[1]-bmin[1])/dims[1], (bmax[2]-bmin[2])/dims[2]).
+ * It ranges over the box [w*i,w*(i+1)) x [d*j,d*(j+1)) x [h*k,h*(k+1)).
+ * 
+ * For SDFs and TSDFs which assume values at vertices, the values are specified
+ * at the **centers** of cells.  I.e., at (w*(i+1/2),d*(j+1/2),h*(k+1/2)).
  *
  * Attributes:
  *
@@ -269,6 +317,9 @@ public:
   void set(int i,int j,int k,double value);
   double get(int i,int j,int k);
   void shift(double dv);
+  ///Returns a 3D Numpy array view of the values
+  void getValues(double** np_view3, int* m, int* n, int* p);
+  void setValues(double* np_array3, int m, int n, int p);
 
   std::vector<double> bbox; 
   std::vector<int> dims;
@@ -468,18 +519,20 @@ class Geometry3D
   Geometry3D(const VolumeGrid&);
   ~Geometry3D();
   const Geometry3D& operator = (const Geometry3D& rhs);
-  ///Creates a standalone geometry from this geometry
+  ///Creates a standalone geometry from this geometry (identical to copy... will be deprecated in a future version)
   Geometry3D clone();
+  ///Creates a standalone geometry from this geometry
+  Geometry3D copy();
   ///Copies the geometry of the argument into this geometry.
   void set(const Geometry3D&);
-  ///Returns true if this is a standalone geometry
+  ///Returns True if this is a standalone geometry
   bool isStandalone();
   ///Frees the data associated with this geometry, if standalone 
   void free();
   ///Returns the type of geometry: TriangleMesh, PointCloud, VolumeGrid, 
   ///GeometricPrimitive, or Group
   std::string type();
-  ///Returns true if this has no contents (not the same as numElements()==0)
+  ///Returns True if this has no contents (not the same as numElements()==0)
   bool empty();
   ///Returns a TriangleMesh if this geometry is of type TriangleMesh
   TriangleMesh getTriangleMesh();
@@ -509,8 +562,9 @@ class Geometry3D
   ///repeatedly call setElement() with increasing indices.
   void setGroup();
   ///Returns an element of the Geometry3D if it is a Group, TriangleMesh, or 
-  ///PointCloud.  The element will be in local coordinates.
-  ///Raises an error if this is of any other type.  
+  ///PointCloud.  Raises an error if this is of any other type.  
+  ///
+  ///The element will be in local coordinates.
   Geometry3D getElement(int element);
   ///Sets an element of the Geometry3D if it is a Group, TriangleMesh, or
   /// PointCloud. The element will be in local coordinates.
@@ -521,6 +575,11 @@ class Geometry3D
 
   ///Loads from file.  Standard mesh types, PCD files, and .geom files are
   ///supported.
+  ///
+  ///Returns:
+  ///
+  ///    True on success, False on failure
+  ///
   bool loadFile(const char* fn);
   ///Saves to file.  Standard mesh types, PCD files, and .geom files are
   ///supported.
@@ -549,10 +608,11 @@ class Geometry3D
   void setCollisionMargin(double margin);
   ///Returns the padding around the base geometry.  Default 0
   double getCollisionMargin();
-  ///Returns the axis-aligned bounding box of the object as a tuple (bmin,bmax). 
+  ///Returns an axis-aligned bounding box of the object as a tuple (bmin,bmax). 
+  ///
   ///Note: O(1) time, but may not be tight
   void getBB(double out[3],double out2[3]);
-  ///Returns a tighter axis-aligned bounding box of the object than
+  ///Computes a tighter axis-aligned bounding box of the object than
   ///:meth:`Geometry3D.getBB`. Worst case O(n) time.
   void getBBTight(double out[3],double out2[3]);
   /** @brief Converts a geometry to another type, if a conversion is
@@ -665,9 +725,7 @@ class Geometry3D
   ///and upperBound, e.g., to break if the closest points are at least
   ///upperBound distance from one another.  
   DistanceQueryResult distance_ext(const Geometry3D& other,const DistanceQuerySettings& settings);
-  ///Returns (hit,pt) where hit is true if the ray starting at s and pointing
-  ///in direction d hits the geometry (given in world coordinates); pt is
-  ///the hit point, in world coordinates.
+  ///Performs a ray cast.
   ///
   ///Supported types:
   ///
@@ -677,16 +735,15 @@ class Geometry3D
   ///  'radius' property assigned)
   ///- VolumeGrid
   ///- Group (groups of the aforementioned types)
+  ///
+  ///Returns:
+  ///
+  ///    (hit,pt) where hit is true if the ray starting at s and pointing
+  ///    in direction d hits the geometry (given in world coordinates); pt is
+  ///    the hit point, in world coordinates.
   ///
   bool rayCast(const double s[3],const double d[3],double out[3]);
-  ///Returns (hit_element,pt) where hit_element is >= 0 if ray starting at 
-  ///s and pointing in direction d hits the geometry (given in world 
-  ///coordinates).  
-  ///
-  ///- hit_element is -1 if the object is not hit, otherwise it gives the
-  ///  index of the element (triangle, point, sub-object) that was hit.  
-  ///  For geometric primitives, this will be 0.
-  ///- pt is the hit point, in world coordinates.
+  ///A more sophisticated ray cast. 
   ///
   ///Supported types:
   ///
@@ -696,6 +753,17 @@ class Geometry3D
   ///  'radius' property assigned)
   ///- VolumeGrid
   ///- Group (groups of the aforementioned types)
+  ///
+  ///Returns:
+  ///
+  ///    (hit_element,pt) where hit_element is >= 0 if ray starting at 
+  ///    s and pointing in direction d hits the geometry (given in world 
+  ///    coordinates).  
+  ///
+  ///    - hit_element is -1 if the object is not hit, otherwise it gives the
+  ///      index of the element (triangle, point, sub-object) that was hit.  
+  ///      For geometric primitives, this will be 0.
+  ///    - pt is the hit point, in world coordinates.
   ///
   int rayCast_ext(const double s[3],const double d[3],double out[3]);
  
@@ -727,6 +795,38 @@ class Geometry3D
   ///- ConvexHull
   ///
   void support(const double dir[3], double out[3]);
+  ///Calculates a 2D slice through the data. The slice is given by the local X-Y plane of a 
+  ///transform (R,T) with orientation R and translation t.  The return Geometry's data is in
+  ///the local frame of (R,t), and (R,t) is set as its current transform. 
+  ///
+  ///The geometry's current transform is respected.
+  ///
+  ///O(N) time.
+  ///
+  ///Supported types:
+  ///
+  ///- PointCloud.  Needs tol > 0.  A PointCloud is returned.
+  ///- TriangleMesh. tol is ignored. A Group of GeometricPrimitives (segments) is returned.
+  ///
+  Geometry3D slice(const double R[9],const double t[3],double tol);
+  ///Calculates a region of interest of the data for the bounding box [bmin,bmax]. 
+  ///The geometry's current transform is respected.
+  ///
+  ///`query` can be "intersect", "touching", or "within". If "intersect", this tries to get a
+  ///representation of the geometry intersecting the box.  If "touching", all elements touching
+  ///the box are returned.  If "within", only elements entirely inside the box are returned.
+  ///
+  ///`query` can also be prefaced with a '~' which indicates that the ROI should be inverted,
+  ///i.e. select everything that does NOT intersect with a box.
+  ///
+  ///O(N) time.
+  ///
+  ///Supported types:
+  ///
+  ///- PointCloud
+  ///- TriangleMesh
+  ///
+  Geometry3D roi(const char* query,const double bmin[3],const double bmax[3]);
 
   int world;
   int id;

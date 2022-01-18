@@ -5,6 +5,7 @@
 
 #define DEBUG_GUI 0
 
+namespace Klampt {
 
 template <class T>
 size_t ReplaceValues(AnyCollection& coll,const T& val,const AnyValue& replacement)
@@ -374,3 +375,4 @@ bool CompositeBackend::ProcessMessage(const AnyCollection& msg)
 }
 
 
+} //namespace Klampt

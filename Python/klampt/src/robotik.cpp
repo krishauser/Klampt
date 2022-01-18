@@ -13,9 +13,16 @@
 #include <Klampt/Planning/RobotCSpace.h>
 #include "pyerr.h"
 #include "pyconvert.h"
+using namespace std;
 
 //defined in robotsim.cpp
-void copy(const Matrix& mat,vector<vector<double> >& v);
+inline void MakeNumpyArray(double** out,int* m,int* n,int _m,int _n,Matrix& ref)
+{
+  *m = _m;
+  *n = _n;
+  *out = (double*)malloc(_m*_n*sizeof(double));
+  ref.setRef(*out,_m*_n,0,_n,1,_m,_n);
+}
 
 bool PySequence_ToVector3(PyObject* seq,Vector3& val)
 {
@@ -237,7 +244,7 @@ void IKObjective::matchDestination(const double R[9],const double t[3])
   goal.MatchGoalTransform(T);
 }
 
-void IKObjective::closestMatch(const double R[9],const double t[3],double out[9],double out2[3])
+void IKObjective::closestMatch(const double R[9],const double t[3],double out[9],double out2[3]) const
 {
   RigidTransform T,Tout;
   T.R = Matrix3(R);
@@ -345,7 +352,7 @@ void IKSolver::add(const IKObjective& objective)
 
 void IKSolver::set(int i,const IKObjective& objective)
 {
-  if(i < 0 || i >= objectives.size()) throw PyException("Invalid index specified in set");
+  if(i < 0 || i >= (int)objectives.size()) throw PyException("Invalid index specified in set");
   objectives[i] = objective;
 }
 
@@ -476,7 +483,7 @@ void IKSolver::getResidual(std::vector<double>& out)
   }
 }
 
-void IKSolver::getJacobian(std::vector<std::vector<double> >& out)
+void IKSolver::getJacobian(double** out,int* m,int* n)
 {
   RobotIKFunction f(*robot.robot);
   vector<IKGoal> goals(objectives.size());
@@ -487,15 +494,13 @@ void IKSolver::getJacobian(std::vector<std::vector<double> >& out)
   else f.activeDofs.mapping = activeDofs;
 
   Vector x(f.activeDofs.Size());
-  Matrix J;
   f.GetState(x);
-  J.resize(f.NumDimensions(),x.n);
+  Matrix J;
+  MakeNumpyArray(out,m,n,f.NumDimensions(),x.n,J);
   f.Jacobian(x,J);
-
-  //copy to out
-  ::copy(J,out);
 }
 
+/* //old style
 PyObject* IKSolver::solve(int iters,double tol)
 {
   static bool warned=false;
@@ -529,6 +534,7 @@ PyObject* IKSolver::solve(int iters,double tol)
   }
   if(activeDofs.empty()) GetDefaultIKDofs(*robot.robot,goals,f.activeDofs);
   else f.activeDofs.mapping = activeDofs;
+  robot.robot->ConfigureDriverConstraints(f);
 
   RobotIKSolver solver(f);
   if(useJointLimits) {
@@ -549,13 +555,14 @@ PyObject* IKSolver::solve(int iters,double tol)
   PyTuple_SetItem(tuple,1,PyInt_FromLong(iters));
   return tuple;
 }
+*/
 
 bool IKSolver::solve()
 {
   if(useJointLimits) {
     const Real* usedQmin = (qmin.empty() ? &robot.robot->qMin[0] : &qmin[0]);
     const Real* usedQmax = (qmax.empty() ? &robot.robot->qMax[0] : &qmax[0]);
-    for(size_t i=0;i<robot.robot->q.size();i++) {
+    for(int i=0;i<robot.robot->q.size();i++) {
       if(robot.robot->q(i) < usedQmin[i] || robot.robot->q(i) > usedQmax[i]) {
         if(robot.robot->q(i) < usedQmin[i]-Epsilon || robot.robot->q(i) > usedQmax[i] + Epsilon) 
           printf("IKSolver:: Joint limits on joint %i exceeded: %g <= %g <= %g. Clamping to limits...\n", i,usedQmin[i],robot.robot->q(i),usedQmax[i]);
@@ -575,6 +582,7 @@ bool IKSolver::solve()
   }
   if(activeDofs.empty()) GetDefaultIKDofs(*robot.robot,goals,f.activeDofs);
   else f.activeDofs.mapping = activeDofs;
+  robot.robot->ConfigureDriverConstraints(f);
 
   RobotIKSolver solver(f);
   if(useJointLimits) {
@@ -611,7 +619,7 @@ void IKSolver::sampleInitial()
   if(qmin.empty()) {
     //this method correctly updates non-normal joints and handles infinite bounds
     Config qorig = robot.robot->q;
-    RobotCSpace space(*robot.robot);
+    Klampt::RobotCSpace space(*robot.robot);
     space.Sample(robot.robot->q);
     swap(robot.robot->q,qorig);
     for(size_t i=0;i<active.size();i++)
@@ -651,7 +659,7 @@ void GeneralizedIKSolver::getResidual(std::vector<double>& out)
   throw PyException("Not implemented yet");
 }
 
-void GeneralizedIKSolver::getJacobian(std::vector<std::vector<double> >& out)
+void GeneralizedIKSolver::getJacobian(double** out,int* m, int* n)
 {
   throw PyException("Not implemented yet");
 }
@@ -686,18 +694,18 @@ void SampleTransform(const IKGoal& goal,RigidTransform& T)
   }
 }
 
-void SampleTransform(const IKObjective& obj,double out[9],double out2[3])
+void IKObjective::sampleTransform(double out[9],double out2[3]) const
 {
   RigidTransform T;
-  SampleTransform(obj.goal,T);
+  SampleTransform(goal,T);
   T.R.get(out);
   T.t.get(out2);
 }
 
-void SampleTransform(const GeneralizedIKObjective& obj,double out[9],double out2[3])
+void GeneralizedIKObjective::sampleTransform(double out[9],double out2[3]) const
 {
   RigidTransform T;
-  SampleTransform(obj.goal,T);
+  SampleTransform(goal,T);
   T.R.get(out);
   T.t.get(out2);
 }

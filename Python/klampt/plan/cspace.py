@@ -210,6 +210,7 @@ class CSpace:
         if self.cspace is None: return {}
         return self.cspace.getStats()
 
+
 class MotionPlan:
     """A motion planner instantiated on a space.  Currently supports
     only kinematic, point-to-point, or point-to-set plans.
@@ -258,11 +259,11 @@ class MotionPlan:
         if space.cspace is None:
             space.setup()
         if type != None:
-            motionplanning.setPlanType(type)
+            motionplanning.set_plan_type(type)
         if len(options) > 0:
             MotionPlan.setOptions(**options)
         self.space = space
-        self.planOptions = motionplanning.getPlanJSONString()
+        self.planOptions = motionplanning.get_plan_json_string()
         self.planner = motionplanning.PlannerInterface(space.cspace)
         self.edgeCost=None
         self.terminalCost=None
@@ -310,11 +311,11 @@ class MotionPlan:
         """
         for (a,b) in list(opts.items()):
             if a=='type':
-                motionplanning.setPlanType(str(b))
+                motionplanning.set_plan_type(str(b))
             elif isinstance(b,str):
-                motionplanning.setPlanSetting(a,b)
+                motionplanning.set_plan_setting(a,b)
             else:
-                motionplanning.setPlanSetting(a,float(b))
+                motionplanning.set_plan_setting(a,float(b))
 
     def setEndpoints(self,start,goal):
         """Sets the start and goal configuration or goal condition. 
@@ -435,8 +436,11 @@ costAcceptingPlanners = set(['prm','rrt','rrt*','prm*','lazyprm*','lazyrrg*'])
 Goal set planners, random-restart, and shortcut planners also support costs.
 """
 
+def configurePlanner(*args,**kwargs):
+    warnings.warn("configurePlanner will be renamed configure_planner in a future version of Klampt",DeprecationWarning)
+    return configure_planner(*args,**kwargs)
 
-def configurePlanner(space,start,goal,edgeCost=None,terminalCost=None,optimizing=True,
+def configure_planner(space,start,goal,edgeCost=None,terminalCost=None,optimizing=True,
     type='auto',stepsize=None,knn=10,
     shortcut='auto',restart='auto',restartIters=1000,pointLocation='auto',
     **otherSettings):

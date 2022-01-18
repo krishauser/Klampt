@@ -3,7 +3,9 @@
 
 #include <KrisLibrary/geometry/rayprimitives.h>
 #include "TriangleSampler.h"
-using Geometry::PointRay2D;
+
+namespace Klampt {
+  using Geometry::PointRay2D;
 
 /** @ingroup Geometry
  * @brief Samples points in a convex polygon. 
@@ -33,5 +35,6 @@ public:
   void Clear() { Triangle3DSampler::Clear(); }
 };
 
+} //namespace Klampt
 
 #endif

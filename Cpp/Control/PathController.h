@@ -6,6 +6,7 @@
 #include <KrisLibrary/spline/PiecewisePolynomial.h>
 #include <list>
 
+namespace Klampt {
 
 /** @ingroup Control
  * @brief A motion queue that runs on a piecewise polynomial path.
@@ -41,7 +42,7 @@ public:
   virtual ~PolynomialMotionQueue() {}
   ///Automatically sets the velocity/acceleration/joint limits for the given
   ///robot model
-  void SetLimits(const Robot& robot);
+  void SetLimits(const RobotModel& robot);
   ///Sets a constant trajectory
   void SetConstant(const Config& x);
   ///Sets the trajectory from a PiecewisePolynomialND
@@ -123,7 +124,7 @@ public:
 class PolynomialPathController : public JointTrackingController, public PolynomialMotionQueue
 {
  public:
-  PolynomialPathController(Robot& robot);
+  PolynomialPathController(RobotModel& robot);
   virtual ~PolynomialPathController() {}
 
   virtual const char* Type() const { return "PolynomialPathController"; }
@@ -137,5 +138,7 @@ class PolynomialPathController : public JointTrackingController, public Polynomi
   virtual vector<string> Commands() const;
   virtual bool SendCommand(const string& name,const string& str);
 };
+
+} //namespace Klampt
 
 #endif

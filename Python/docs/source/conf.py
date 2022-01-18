@@ -39,15 +39,17 @@ release = __version__
 nitpicky = False
 ignore_missing_types = ['bool','int','float','str','list','dict','tuple','function','None'
     'list of ints','list of strs','list of floats','list of 3 floats','list of 4 floats','list of 9 floats',
-    'optional','object',
+    'optional','object','ndarray',
     'pair','pair of floats']
 nitpick_ignore = [('py:class',t) for t in ignore_missing_types]
+
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx_autodoc_typehints',
     'sphinx.ext.viewcode',
     'sphinx.ext.mathjax',
     'sphinx_automodapi.automodapi',
@@ -107,12 +109,14 @@ html_static_path = ['_static']
 
 
 #KH: modification for stupid table bug in RTD theme
-html_context = {
-    'css_files': [
-        '_static/theme_overrides.css',  # override wide tables in RTD theme
-        ],
-     }
+# html_context = {
+#     'css_files': [
+#         '_static/theme_overrides.css',  # override wide tables in RTD theme
+#         ],
+#      }
 
+def setup(app):
+    app.add_css_file('theme_overrides.css')
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
@@ -203,4 +207,9 @@ epub_exclude_files = ['search.html']
 # -- Extension configuration -------------------------------------------------
 
 autoclass_content = 'both'
+
+autodoc_member_order = 'bysource'
+
+autodoc_typehints = "signature"
+typehints_fully_qualified = False
 

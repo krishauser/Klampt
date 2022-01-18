@@ -6,7 +6,9 @@
 #include <KrisLibrary/math/vector.h>
 #include <ode/common.h>
 #include <KrisLibrary/File.h>
-using namespace Math;
+
+namespace Klampt {
+  using namespace Math;
 
 /** @ingroup Simulation
  * @brief An ODE-simulated rigid object.
@@ -20,7 +22,7 @@ class ODERigidObject
   static double defaultPadding;
   static ODESurfaceProperties defaultSurface;
 
-  ODERigidObject(RigidObject& obj);
+  ODERigidObject(RigidObjectModel& obj);
   ~ODERigidObject();
   void Create(dWorldID worldID,dSpaceID space,bool useBoundaryLayer=true);
   void Clear();
@@ -37,12 +39,14 @@ class ODERigidObject
   dSpaceID space() { return spaceID; }
   ODEGeometry* triMesh() { return geometry; }
 
-  RigidObject& obj;
+  RigidObjectModel& obj;
 
  private:
   dBodyID bodyID;
   ODEGeometry* geometry;
   dSpaceID spaceID;
 };
+
+} //namespace Klampt
 
 #endif

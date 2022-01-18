@@ -14,12 +14,13 @@
 
 - A robot model does not necessarily correspond to a real robot.  Its kinematics, geometry, and limits need to be calibrated from the specifications of the real robot.
 
-- Data can inadvertently "leak" from simulation to planning if a shared World Model is used, since the simulation will update the model for visualization.  An easy way to get around such conflicts is simply to copy the world into separate planning and simulation worlds.  (This is fast, since none of the geometry is actually copied.)  The standard pattern (in Python) is:
+- Data can inadvertently "leak" from simulation to planning if a shared World Model is used, since the simulation will update the model for visualization.  An easy way to get around such conflicts is simply to copy the world into separate planning and simulation worlds.  (This is fast, since none of the geometry is actually copied.)  The standard pattern (in C++) is:
 
-    ```python
-    RobotWorld world, simWorld;
+    ```cpp
+    using namespace Klampt;
+    WorldModel world, simWorld;
     ... set up the world model ...
-    CopyWorld(world,simWorld);
+    simWorld.Copy(world);
     WorldSimulation sim;
     sim.Init(&simWorld);  //the simulation will modify simWorld only
     MyPlanner planner(world);  //leaving you free to modify world, e.g., planning,  without interference

@@ -7,7 +7,9 @@
 //#include "resourcemanager.h"
 #include "Main/RobotPoseQt/resourcemanager.h"
 #include <sstream>
-using namespace Math3D;
+
+namespace Klampt {
+  using namespace Math3D;
 
 /**@brief A backend for resource browsing.
  * Natively supports configs, paths, transforms, ik goals, holds, stance,
@@ -41,7 +43,7 @@ using namespace Math3D;
 class ResourceGUIBackend : public WorldGUIBackend
 {
 public:
-  ResourceGUIBackend(RobotWorld* world,ResourceManager* library);
+  ResourceGUIBackend(WorldModel* world,ResourceManager* library);
   bool LoadCommandLine(int argc,const char** argv);
 
   ResourceNodePtr Add(ResourcePtr r);
@@ -85,6 +87,6 @@ public:
   ViewResource viewResource;
 };
 
-
+} // namespace Klampt
 
 #endif

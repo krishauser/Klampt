@@ -10,6 +10,8 @@ using namespace std;
 
 #define THREE_JS_OLD_VERSION 0
 
+namespace Klampt {
+
 unsigned char FloatColorChar(float v)
 {
   return Max(Min(int(v*255.0),255),0);
@@ -65,11 +67,11 @@ struct ThreeJSCache
   map<const GLDraw::GeometryAppearance*,string> materialUUIDs;
 };
 
-void ThreeJSExport(const RobotWorld& world,AnyCollection& out,ThreeJSCache& cache);
-void ThreeJSExport(WorldSimulation& sim,AnyCollection& out,ThreeJSCache& cache);
-void ThreeJSExport(const Robot& robot,AnyCollection& out,ThreeJSCache& cache);
-void ThreeJSExport(const RigidObject& object,AnyCollection& out,ThreeJSCache& cache);
-void ThreeJSExport(const Terrain& terrain,AnyCollection& out,ThreeJSCache& cache);
+void ThreeJSExport(const WorldModel& world,AnyCollection& out,ThreeJSCache& cache);
+void ThreeJSExport(Simulator& sim,AnyCollection& out,ThreeJSCache& cache);
+void ThreeJSExport(const RobotModel& robot,AnyCollection& out,ThreeJSCache& cache);
+void ThreeJSExport(const RigidObjectModel& object,AnyCollection& out,ThreeJSCache& cache);
+void ThreeJSExport(const TerrainModel& terrain,AnyCollection& out,ThreeJSCache& cache);
 void ThreeJSExport(const ManagedGeometry& geom,AnyCollection& out,ThreeJSCache& cache);
 void ThreeJSExportGeometry(const ManagedGeometry& geom,AnyCollection& out,ThreeJSCache& cache);
 void ThreeJSExportAppearance(const ManagedGeometry& geom,AnyCollection& out,ThreeJSCache& cache);
@@ -90,7 +92,7 @@ void ThreeJSExport(const RigidTransform& T,AnyCollection& out)
 
 
 
-void ThreeJSExport(const RobotWorld& world,AnyCollection& out,ThreeJSCache& cache)
+void ThreeJSExport(const WorldModel& world,AnyCollection& out,ThreeJSCache& cache)
 {
   out["metadata"]["version"] = 4.4;
   out["metadata"]["type"] = "Object";
@@ -252,7 +254,7 @@ void ThreeJSExport(const RobotWorld& world,AnyCollection& out,ThreeJSCache& cach
   rootobject["matrix"]=sceneMatrix;
 }
 
-void ThreeJSExportTransforms(const RobotWorld& world,AnyCollection& out)
+void ThreeJSExportTransforms(const WorldModel& world,AnyCollection& out)
 {
   out["metadata"]["version"] = 4.4;
   out["metadata"]["type"] = "Object";
@@ -324,14 +326,14 @@ void ThreeJSExportTransforms(const RobotWorld& world,AnyCollection& out)
 
 }
 
-void ThreeJSExport(WorldSimulation& sim,AnyCollection& out,ThreeJSCache& cache)
+void ThreeJSExport(Simulator& sim,AnyCollection& out,ThreeJSCache& cache)
 {
   sim.UpdateModel();
   ThreeJSExport(*sim.world,out,cache);
   //TODO: export commanded config
 }
 
-void ThreeJSExportTransforms(WorldSimulation& sim,AnyCollection& out)
+void ThreeJSExportTransforms(Simulator& sim,AnyCollection& out)
 {
   sim.UpdateModel();
   ThreeJSExportTransforms(*sim.world,out);
@@ -339,7 +341,7 @@ void ThreeJSExportTransforms(WorldSimulation& sim,AnyCollection& out)
 }
 
 
-void ThreeJSExport(const Robot& robot,AnyCollection& out,ThreeJSCache& cache)
+void ThreeJSExport(const RobotModel& robot,AnyCollection& out,ThreeJSCache& cache)
 {
   out["uuid"] = MakeRandomUUID();
   out["name"] = robot.name;
@@ -373,7 +375,7 @@ void ThreeJSExport(const Robot& robot,AnyCollection& out,ThreeJSCache& cache)
   }
 }
 
-void ThreeJSExportTransforms(const Robot& robot,AnyCollection& out)
+void ThreeJSExportTransforms(const RobotModel& robot,AnyCollection& out)
 {  
   AnyCollection robotUpdate;
   
@@ -414,7 +416,7 @@ void ThreeJSExportTransforms(const Robot& robot,AnyCollection& out)
   }
 }
 
-void ThreeJSExport(const RigidObject& object,AnyCollection& out,ThreeJSCache& cache)
+void ThreeJSExport(const RigidObjectModel& object,AnyCollection& out,ThreeJSCache& cache)
 {
   out["uuid"] = MakeRandomUUID();
   out["name"] = object.name;
@@ -422,14 +424,14 @@ void ThreeJSExport(const RigidObject& object,AnyCollection& out,ThreeJSCache& ca
   ThreeJSExport(object.T,out["matrix"]);
 }
 
-void ThreeJSExportTransforms(const RigidObject& object,AnyCollection& out)
+void ThreeJSExportTransforms(const RigidObjectModel& object,AnyCollection& out)
 {
   //out["uuid"] = MakeRandomUUID();
   out["name"] = object.name;
   ThreeJSExport(object.T,out["matrix"]);
 }
 
-void ThreeJSExport(const Terrain& terrain,AnyCollection& out,ThreeJSCache& cache)
+void ThreeJSExport(const TerrainModel& terrain,AnyCollection& out,ThreeJSCache& cache)
 {
   out["uuid"] = MakeRandomUUID();
   out["name"] = terrain.name;
@@ -438,7 +440,7 @@ void ThreeJSExport(const Terrain& terrain,AnyCollection& out,ThreeJSCache& cache
   ThreeJSExport(T,out["matrix"]);
 }
 
-void ThreeJSExportTransforms(const Terrain& terrain,AnyCollection& out)
+void ThreeJSExportTransforms(const TerrainModel& terrain,AnyCollection& out)
 {
   //out["uuid"] = MakeRandomUUID();
   out["name"] = terrain.name;
@@ -742,7 +744,7 @@ void ThreeJSExport(const GLDraw::GeometryAppearance& app,const Geometry::AnyColl
 
 ///Exports a world to a JSON object that can be used in the three.js editor.
 ///Contains metadata, geometries, materials, and object items.
-void ThreeJSExport(const RobotWorld& world,AnyCollection& out)
+void ThreeJSExport(const WorldModel& world,AnyCollection& out)
 {
   ThreeJSCache cache;
   ThreeJSExport(world,out,cache);
@@ -751,13 +753,13 @@ void ThreeJSExport(const RobotWorld& world,AnyCollection& out)
 ///editor.  Contains metadata, geometries, materials, and object items.
 ///Draws the simulation world in natural color and the commanded
 ///world in transparent green.
-void ThreeJSExport(WorldSimulation& sim,AnyCollection& out)
+void ThreeJSExport(Simulator& sim,AnyCollection& out)
 {
   ThreeJSCache cache;
   ThreeJSExport(sim,out,cache);
 }
 
-//void ThreeJSExportTransforms(WorldSimulation& sim,AnyCollection& out) //DJZ - not using cache for transforms, so don't need this function 
+//void ThreeJSExportTransforms(Simulator& sim,AnyCollection& out) //DJZ - not using cache for transforms, so don't need this function 
 //{
 //  ThreeJSCache cache;
 //  ThreeJSExportTransforms(sim,out,cache);
@@ -765,21 +767,21 @@ void ThreeJSExport(WorldSimulation& sim,AnyCollection& out)
 
 ///Exports a robot to a JSON object that can be used in the three.js editor.
 ///The result is a hierarchical set of Mesh or Group objects.
-void ThreeJSExport(const Robot& robot,AnyCollection& out)
+void ThreeJSExport(const RobotModel& robot,AnyCollection& out)
 {
   ThreeJSCache cache;
   ThreeJSExport(robot,out,cache);
 }
 ///Exports a rigid object to a JSON object that can be used in the three.js
 ///editor. The result is a Mesh object (or Group if the geometry is empty).
-void ThreeJSExport(const RigidObject& object,AnyCollection& out)
+void ThreeJSExport(const RigidObjectModel& object,AnyCollection& out)
 {
   ThreeJSCache cache;
   ThreeJSExport(object,out,cache);
 }
 ///Exports a rigid object to a JSON object that can be used in the three.js
 ///editor. The result is a Mesh object (or Group if the geometry is empty).
-void ThreeJSExport(const Terrain& terrain,AnyCollection& out)
+void ThreeJSExport(const TerrainModel& terrain,AnyCollection& out)
 {
   ThreeJSCache cache;
   ThreeJSExport(terrain,out,cache);
@@ -817,3 +819,5 @@ void ThreeJSExport(const GLDraw::GeometryAppearance& app,const Geometry::AnyColl
   ThreeJSCache cache;
   ThreeJSExport(app,geom,out,cache);
 }
+
+} // namespace Klampt

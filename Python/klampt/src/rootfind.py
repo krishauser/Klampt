@@ -64,17 +64,16 @@ class _SwigNonDynamicMeta(type):
 
 
 
-def setFTolerance(tolf):
+def setFTolerance(tolf: "double") -> "void":
     r"""
     setFTolerance(double tolf)
-
 
     Sets the termination threshold for the change in f.  
 
     """
     return _rootfind.setFTolerance(tolf)
 
-def setXTolerance(tolx):
+def setXTolerance(tolx: "double") -> "void":
     r"""
     setXTolerance(double tolx)
 
@@ -84,7 +83,7 @@ def setXTolerance(tolx):
     """
     return _rootfind.setXTolerance(tolx)
 
-def setVectorField(pVFObj):
+def setVectorField(pVFObj: "PyObject *") -> "int":
     r"""
     setVectorField(PyObject * pVFObj) -> int
 
@@ -101,7 +100,7 @@ def setVectorField(pVFObj):
     """
     return _rootfind.setVectorField(pVFObj)
 
-def findRoots(startVals, iter):
+def findRoots(startVals: "PyObject *", iter: "int") -> "PyObject *":
     r"""
     findRoots(PyObject * startVals, int iter) -> PyObject *
 
@@ -125,7 +124,7 @@ def findRoots(startVals, iter):
     """
     return _rootfind.findRoots(startVals, iter)
 
-def findRootsBounded(startVals, boundVals, iter):
+def findRootsBounded(startVals: "PyObject *", boundVals: "PyObject *", iter: "int") -> "PyObject *":
     r"""
     findRootsBounded(PyObject * startVals, PyObject * boundVals, int iter) -> PyObject *
 
@@ -135,7 +134,7 @@ def findRootsBounded(startVals, boundVals, iter):
     """
     return _rootfind.findRootsBounded(startVals, boundVals, iter)
 
-def destroy():
+def destroy() -> "void":
     r"""
     destroy()
 

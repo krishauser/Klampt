@@ -3,13 +3,15 @@
 
 #include "Controller.h"
 
+namespace Klampt {
+
 /** @brief A controller base class that reads out a desired servo position
  * and velocity using the method GetDesiredState.
  */
 class JointTrackingController : public RobotController
 {
  public:
-  JointTrackingController(Robot& robot);
+  JointTrackingController(RobotModel& robot);
   virtual ~JointTrackingController() {}  
   virtual const char* Type() const { return "JointTrackingController"; }
   virtual void Update(Real dt);
@@ -34,5 +36,7 @@ class JointTrackingController : public RobotController
 
   Config qdesDefault;
 };
+
+} //namespace Klampt
 
 #endif

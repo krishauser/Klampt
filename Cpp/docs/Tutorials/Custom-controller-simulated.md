@@ -12,7 +12,8 @@ What we'll do is create a new directory with three files, MyController.h, main.c
 
 Your MyController.h will look something like this:
 ```
-#include "Controller.h"
+#include <Klampt/Controller.h>
+using namespace Klampt;
 
 class MyController : public RobotController
 {
@@ -54,11 +55,12 @@ Note that, internally, the GetSensedX and SetPIDCommand convenience functions re
 
 Let's now switch to main.cpp. We could run a command-line simulation like in the [Klamp't simulation tutorial](Run-a-simulation-Cpp.md), but let's make things more interesting by making a GUI. The plan is to implement a new version of the SimTest program that will allow us to use this controller. For simplicity we'll copy our main.cpp file from the GLUI version of SimTest, given in Main/simtest.cpp:
 ```
-#include "Interface/SimTestGUI.h"
-#include 
+#include <Klampt/Interface/SimTestGUI.h>
+using namespace Klampt
+
 int main(int argc,const char** argv)
 {
-  RobotWorld world;
+  WorldModel world;
   SimTestBackend backend(&world);
   if(!backend.LoadAndInitSim(argc,argv)) {
     return 1;

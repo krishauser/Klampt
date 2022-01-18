@@ -12,8 +12,9 @@
 #include "Modeling/MultiPath.h"
 #include "Modeling/Interpolate.h"
 #include <sstream>
+using namespace Klampt;
 
-RobotPoseBackend::RobotPoseBackend(RobotWorld* world,ResourceManager* library)
+RobotPoseBackend::RobotPoseBackend(WorldModel* world,ResourceManager* library)
   : ResourceGUIBackend(world,library),settings("Klampt") {
   settings["cleanContactsNTol"]= 0.01;
   settings["pathOptimize"]["contactTol"] = 0.05;
@@ -584,7 +585,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
       configs = milestones;
       }
       else {
-      Robot* robot=world->robots[0].get();
+      RobotModel* robot=world->robots[0].get();
       Timer timer;
       if(!InterpolateConstrainedPath(*robot,milestones,robotWidgets[0].Constraints(),configs,1e-2)) return;
       
@@ -836,7 +837,7 @@ bool RobotPoseBackend::OnCommand(const string& cmd,const string& args)
   else if(cmd=="set_driver_value") {
     double driver_value;
     ss>>driver_value;
-    Robot* robot = world->robots[0].get();
+    RobotModel* robot = world->robots[0].get();
     robot->UpdateConfig(robotWidgets[0].Pose());
     robot->SetDriverValue(cur_driver,driver_value);
     robotWidgets[0].SetPose(robot->q);

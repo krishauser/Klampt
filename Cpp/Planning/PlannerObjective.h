@@ -6,6 +6,10 @@
 #include <Klampt/Modeling/DynamicPath.h>
 #include <KrisLibrary/robotics/IK.h>
 
+class AnyCollection;
+
+namespace Klampt {
+
 /** @ingroup Planning
  * @brief A base class for objective functionals in time/config/velocity
  * space 
@@ -173,7 +177,7 @@ class CompositeObjective : public PlannerObjectiveBase
 class CartesianObjective : public PlannerObjectiveBase
 {
  public:
-  CartesianObjective(Robot* robot);
+  CartesianObjective(RobotModel* robot);
   virtual ~CartesianObjective() {}
 
   virtual const char* TypeString() { return "cartesian"; }
@@ -187,7 +191,7 @@ class CartesianObjective : public PlannerObjectiveBase
   virtual bool DifferentialTimeInvariant() const { return true; }
   virtual bool PathInvariant() const { return true; }
 
-  Robot* robot;
+  RobotModel* robot;
   IKGoal ikGoal;
 };
 
@@ -197,7 +201,7 @@ class CartesianObjective : public PlannerObjectiveBase
 class IKObjective : public PlannerObjectiveBase
 {
  public:
-  IKObjective(Robot* robot);
+  IKObjective(RobotModel* robot);
   virtual ~IKObjective() {}
 
   virtual const char* TypeString() { return "ik"; }
@@ -214,7 +218,7 @@ class IKObjective : public PlannerObjectiveBase
   virtual bool DifferentialTimeInvariant() const { return true; }
   virtual bool PathInvariant() const { return true; }
 
-  Robot* robot;
+  RobotModel* robot;
   IKGoal ikGoal;
   Real posCoeff,oriCoeff;
 };
@@ -225,7 +229,7 @@ class IKObjective : public PlannerObjectiveBase
 class CartesianTrackingObjective : public PlannerObjectiveBase
 {
  public:
-  CartesianTrackingObjective(Robot* robot);
+  CartesianTrackingObjective(RobotModel* robot);
   virtual ~CartesianTrackingObjective() {}
   virtual const char* TypeString() { return "cartesian_tracking"; }
 
@@ -246,7 +250,7 @@ class CartesianTrackingObjective : public PlannerObjectiveBase
   void GetDifferentialCostFunction(Real t,Matrix3& A,Vector3& b) const;
   Real DifferentialCost(Real t,const Vector& q,int index);
 
-  Robot* robot;
+  RobotModel* robot;
   //track localPosition on this link 
   int link;
   Vector3 localPosition;
@@ -287,16 +291,16 @@ class CartesianTrackingObjective : public PlannerObjectiveBase
  * - ik: sets an IK objective
  *   * data: serialized IKGoal.
  */
-PlannerObjectiveBase* LoadPlannerObjective(istream& in,Robot* robot=NULL);
+PlannerObjectiveBase* LoadPlannerObjective(istream& in,RobotModel* robot=NULL);
 
 ///Saves an objective in the format used by LoadPlannerObjective
 bool SavePlannerObjective(PlannerObjectiveBase* obj,ostream& out);
 
-class AnyCollection;
-
 ///Same as the other LoadPlannerObjective, but just given a JSON structure.
-PlannerObjectiveBase* LoadPlannerObjective(AnyCollection& msg,Robot* robot=NULL);
+PlannerObjectiveBase* LoadPlannerObjective(AnyCollection& msg,RobotModel* robot=NULL);
 bool SavePlannerObjective(PlannerObjectiveBase* obj,AnyCollection& msg);
+
+} //namespace Klampt
 
 #endif
 

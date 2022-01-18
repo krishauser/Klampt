@@ -2,10 +2,12 @@
 
 #include <QSettings>
 #include <QApplication>
+#include <sstream>
 
-QRobotTestGUI::QRobotTestGUI(QKlamptDisplay* _display,GenericBackendBase *_backend) :
+QRobotTestGUI::QRobotTestGUI(QKlamptDisplay* _display,GenericBackendBase *_backend, RobotModel* _robot) :
   QKlamptGUIBase(_display,_backend),
-    col_out(new CollisionOutput)
+  robot(_robot),
+  col_out(new CollisionOutput)
 
 {
   const char* rules = "[ \
@@ -64,7 +66,24 @@ bool QRobotTestGUI::OnCommand(const string &cmd, const string &args){
     }
     else if(cmd=="return_self_collisions"){
         string str=&(args[0]);
-        col_out->SetValue(str);
+        stringstream ss(str);
+        stringstream ss_out;
+        int temp,temp2;
+        while(ss) {
+          ss >> temp >> temp2;
+          if(!ss) break;
+          if(temp < 0 || temp >= (int)robot->links.size() )
+            ss_out << temp;
+          else
+            ss_out << robot->linkNames[temp];
+          ss_out << " ";
+          if(temp2 < 0 || temp2 >= (int)robot->links.size() )
+            ss_out << temp2;
+          else
+            ss_out << robot->linkNames[temp2];
+          ss_out << "\t";
+        }
+        col_out->SetValue(str,ss_out.str());
         col_out->show();
 		return true;
     }

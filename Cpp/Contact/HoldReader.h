@@ -4,6 +4,8 @@
 #include "Hold.h"
 #include "LineReader.h"
 
+namespace Klampt {
+
 class HoldReader : public LineReader
 {
 public:
@@ -14,5 +16,7 @@ public:
 
   Hold h;
 };
+
+} //namespace Klampt
 
 #endif

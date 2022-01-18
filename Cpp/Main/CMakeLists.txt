@@ -33,6 +33,9 @@ IF(USE_QT5_APPS)
 			      ${QT_BINARY_DIR}/Qt5Svg.dll
 			DESTINATION bin
 			COMPONENT apps)
+		install(FILES ${QT_PLUGINS_DIR}/platforms/qwindows.dll
+			      DESTINATION bin/platforms
+			      COMPONENT apps)
 		install(FILES ${QT_PLUGINS_DIR}/iconengines/qsvgicon.dll
 			      DESTINATION bin/iconengines
 			      COMPONENT apps)

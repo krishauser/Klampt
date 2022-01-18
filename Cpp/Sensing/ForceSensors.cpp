@@ -1,13 +1,17 @@
 #include "ForceSensors.h"
 #include "Common_Internal.h"
 #include "View/ViewWrench.h"
-#include "Simulation/ControlledSimulator.h"
+#include "Simulation/SimRobotController.h"
 #include "Simulation/ODESimulator.h"
-#include "Simulation/WorldSimulation.h"
+#include "Simulation/Simulator.h"
 #include <KrisLibrary/robotics/NewtonEuler.h>
 #include <KrisLibrary/GLdraw/drawextra.h>
 
+using namespace Klampt;
 using namespace GLDraw;
+
+
+namespace Klampt {
 
 //defined in ODESimulator.cpp
 bool HasContact(dBodyID a);
@@ -16,7 +20,7 @@ bool HasContact(dBodyID a);
 ///Will produce bogus o1 and o2 vectors
 void GetContacts(dBodyID a,vector<ODEContactList>& contacts);
 
-
+} //namespace Klampt
 
 
 ContactSensor::ContactSensor()
@@ -29,13 +33,13 @@ ContactSensor::ContactSensor()
   hasForce[0] = hasForce[1] = hasForce[2] = false;
 }
 
-void ContactSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
+void ContactSensor::SimulateKinematic(RobotModel& robot,WorldModel& world)
 {
   contact = false;
   force.setZero();
 }
 
-void ContactSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim)
+void ContactSensor::Simulate(SimRobotController* robot,Simulator* sim)
 {
   contact = false;
   force.setZero();
@@ -170,7 +174,7 @@ bool ContactSensor::SetSetting(const string& name,const string& str)
   return false;
 }
 
-void ContactSensor::DrawGL(const Robot& robot,const vector<double>& measurements)
+void ContactSensor::DrawGL(const RobotModel& robot,const vector<double>& measurements)
 {
   glPushMatrix();
   glMultMatrix(Matrix4(robot.links[link].T_World*Tsensor));
@@ -227,7 +231,7 @@ ForceTorqueSensor::ForceTorqueSensor()
   hasTorque[0] = hasTorque[1] = hasTorque[2] = false;
 }
 
-void ForceTorqueSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
+void ForceTorqueSensor::SimulateKinematic(RobotModel& robot,WorldModel& world)
 {
   f.setZero();
   t.setZero();
@@ -251,7 +255,7 @@ void ForceTorqueSensor::SimulateKinematic(Robot& robot,RobotWorld& world)
     if(!hasTorque[i]) t[i] = 0;
 }
 
-void ForceTorqueSensor::Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim) 
+void ForceTorqueSensor::Simulate(SimRobotController* robot,Simulator* sim) 
 {
   dJointFeedback fb = robot->oderobot->feedback(link);
   Vector3 w,v;
@@ -341,7 +345,7 @@ bool ForceTorqueSensor::SetSetting(const string& name,const string& str)
   return false;
 }
 
-void ForceTorqueSensor::DrawGL(const Robot& robot,const vector<double>& measurements)
+void ForceTorqueSensor::DrawGL(const RobotModel& robot,const vector<double>& measurements)
 {
   glPushMatrix();
   glMultMatrix(Matrix4(robot.links[link].T_World));

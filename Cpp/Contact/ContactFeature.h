@@ -6,6 +6,8 @@
 #include <KrisLibrary/math3d/geometry3d.h>
 #include <memory>
 
+namespace Klampt {
+
 struct Triangle3DSampler;
 
 /** @defgroup Contact
@@ -184,5 +186,7 @@ Vector3 FeatureContactNormal(const ContactFeatureBase* f);
 Vector3 SampleFeatureContactPoint(const ContactFeatureBase* f);
 
 /*@}*/
+
+} //namespace Klampt
 
 #endif
