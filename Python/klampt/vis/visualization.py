@@ -258,7 +258,7 @@ certain types of geometries like VolumeGrids are not supported.
 
 Animations are supported, but you will manually have to advance the animations 
 and call ``vis.update()`` or ``vis.scene().update()`` for each frame.  
-See :class:`~klampt.vis.ipython.widgets.Playback` for a convenient widget
+See :class:`~klampt.vis.ipython.Playback` for a convenient widget
 that handles this somewhat automatically.
 
 
@@ -865,7 +865,7 @@ def debug(*args,**kwargs):
                 my_scene.update()
             def reset():
                 my_scene.animationTime(0)
-            from .ipython.widgets import Playback
+            from .ipython import Playback
             playback = Playback(nativeWindow(),advance=advance,reset=reset,maxframes=int(animationDuration*framerate),framerate=framerate)
             from IPython.display import display
             display(playback)
@@ -883,7 +883,7 @@ def debug(*args,**kwargs):
 def nativeWindow():
     """Returns the active window data used by the backend.  The result will be
     a subclass of :class:`~klampt.vis.glprogram.GLPluginProgram` if OpenGL is
-    used (PyQt or GLUT) or a :class:`~klampt.vis.ipython.widgets.KlamptWidget`
+    used (PyQt or GLUT) or a :class:`~klampt.vis.ipython.KlamptWidget`
     """
     global _window_manager
     if _window_manager is None:
@@ -903,7 +903,7 @@ def createWindow(title=None) -> int:
     """Creates a new window (and sets it active).
 
     Returns:
-        int: an identifier of the window (for use with :func:`setWindow`).
+        An identifier of the window (for use with :func:`setWindow`).
     """
     global _globalLock,_window_manager
     _init()
@@ -1259,8 +1259,9 @@ def getItemConfig(name : ItemPath) -> Sequence[float]:
     interacting with edited objects.
 
     Returns:
-        list: a list of floats describing the item's current configuration.  Returns
-            None if name doesnt refer to an object."""
+        A list of floats describing the item's current configuration.  Returns
+        None if ``name`` doesnt refer to an object.
+    """
     return scene().getItemConfig(name)
 
 def setItemConfig(name : ItemPath, value : Sequence[float]) -> None:
@@ -1269,7 +1270,8 @@ def setItemConfig(name : ItemPath, value : Sequence[float]) -> None:
     Args:
         name (str): the item to set the configuration.
         value (list of floats): the item's configuration.  The number of items
-            depends on the object's type.  See the config module for more information.
+            depends on the object's type.  See the :mod:`klampt.model.config`
+            module for more information.
 
     """
     return scene().setItemConfig(name,value)
@@ -1316,9 +1318,10 @@ def edit(name : ItemPath, doedit=True) -> None:
     - :class:`~klampt.model.coordinates.Frame`
 
     Returns:
-        Varies: None if doedit=False, otherwise, an editor object which
-        depends on the backend.  In OpenGL mode, returns a Widget. In
-        Jupyter, returns a VBox containing controls.
+        None if doedit=False, otherwise, an editor object which
+        depends on the backend.  In OpenGL mode, returns one of the
+        :class:`~klampt.Widget` subclasses. In Jupyter, returns a ``VBox``
+        containing controls.
     """
     return scene().edit(name,doedit)
 
