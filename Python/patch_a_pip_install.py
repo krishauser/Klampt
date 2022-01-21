@@ -13,7 +13,7 @@ else:
 #need to grab the existing C extension module .py and .so files
 import site
 import glob
-pip_klampt_version = '0.8.6'
+pip_klampt_version = '0.9.0'
 py_version = '%d.%d'%(sys.version_info[0],sys.version_info[1])
 klampt_path = None
 for path in site.getsitepackages():
@@ -23,7 +23,7 @@ for path in site.getsitepackages():
 if klampt_path is None:
     from distutils.sysconfig import get_python_lib
     site_packages_dir = get_python_lib()
-    if os.path.exists(site_packages_dir,'klampt'):
+    if os.path.exists(os.path.join(site_packages_dir,'klampt')):
         klampt_path = os.path.join(site_packages_dir,'klampt')
     else:
         print("Can't find install dir for Klampt",pip_klampt_version,"?  Perhaps wasn't installed by pip?")
