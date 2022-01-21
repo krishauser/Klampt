@@ -9,7 +9,7 @@ the place of RobotModel.
 from ..robotsim import *
 from .collide import self_collision_iter
 import warnings
-from typing import Union,List,Sequence
+from typing import Union,List,Sequence,Tuple
 from .typing import Config,Vector,Vector3,RigidTransform
 
 class SubRobotModel:

@@ -17,7 +17,7 @@ To build the Klampt C++ library and Python API, you will need to obtain the foll
 
 - CMake (version &gt;= 2.6)
 - GLPK, the GNU Linear Programming Kit
-- Python, if you wish to build the Python bindings (compatible with Python 2.6, 2.7 and 3.x).
+- Python, if you wish to build the Python bindings (compatible with Python 2.7 and 3.x).
 - (recommended) Assimp, if you wish to load STL, DAE and other geometry file formats.  (Only OBJ and OFF are natively supported in Klampt.)
 - (recommended) Qt5, if you wish to use nicer GUIs for the core applications.
 - (optional) ROS, if you wish to write to/read from ROS topics.

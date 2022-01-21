@@ -142,7 +142,7 @@ setup(name='Klampt',
             'klampt_control=klampt.apps.klampt_control:main',
             'klampt_path=klampt.apps.klampt_path:main',
             'klampt_sim=klampt.apps.klampt_sim:main',
-            'klampt_thumbnails=klampt.apps.klampt_thumbnails:main',
+            'klampt_resource=klampt.apps.klampt_resource:main',
             ],
       },
       classifiers=[
@@ -157,7 +157,7 @@ setup(name='Klampt',
       ],
       install_requires=[
         'PyOpenGL',
-        'numpy',
+        'numpy>=1.20.1'
       ],
      )
 

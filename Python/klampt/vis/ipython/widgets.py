@@ -69,7 +69,7 @@ class KlamptWidget(widgets.DOMWidget):
         _camera (Dict): the incoming camera JSON message from the frontend (private)
         camera (Dict): the outgoing camera JSON message (private)
         drawn (Int): the incoming drawn message from the frontend (private)
-        events (Dict): incoming events from the frontend (private)
+        events (List): incoming events from the frontend (private)
         world (WorldModel): the WorldModel isinstance
         _extras (dict): a dict mapping extra item names to (type,threejs_items) pairs
         _rpc_calls (list): a list of pending RPC calls between beginRpc() and endRpc()

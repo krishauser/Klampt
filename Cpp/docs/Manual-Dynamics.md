@@ -38,14 +38,14 @@ A robot's motion under given torques and external forces can be computed by dete
 and integrating the equation forward in time.
 
 ### API summary
-Klamp't has several methods for calculating and manipulating dynamics terms. The first set of methods is found in the `Robot` class, which use the &quot;classic&quot; Euler-Lagrange method that expands the terms mathematically in terms of Jacobians and Jacobian derivatives, and runs in _O(n<sup>3</sup>)_. 
+Klamp't has several methods for calculating and manipulating dynamics terms. The first set of methods is found in the `RobotModel` class, which use the &quot;classic&quot; Euler-Lagrange method that expands the terms mathematically in terms of Jacobians and Jacobian derivatives, and runs in _O(n<sup>3</sup>)_. 
 - `CalcAcceleration`: used to convert the RHS to accelerations (_forward dynamics_).
 - `CalcTorques` is used to convert from accelerations to the RHS (_inverse dynamics_).
 - `KineticEnergy`: 
 - `KineticEnergyInv`: 
 - `GravityTorques`: 
 - `CoriolisForce`: 
-Note that these are actually defined in `RobotKinematics3D` and `RobotDynamics3D`.
+Note that these are actually defined in `RobotKinematics3D` and `RobotDynamics3D` in `KrisLibrary`.
 
 The second set of methods uses the Newton-Euler rigid body equations and the Featherstone algorithm (KrisLibrary/robotics/NewtonEuler.h). These equations are _O(n)_ for sparsely branched chains and are typically faster than the classic methods for modestly sized robots (e.g., n&gt;6). Although NewtonEuler is designed particularly for the `CalcAccel` and `CalcTorques` methods for forward and inverse dynamics, it is also possible to use it to calculate the C+G term in O(n) time, and it can calculate the _B_ or _B<sup>-1</sup>_ matrices in _O(n<sup>2</sup>)_ time.
 

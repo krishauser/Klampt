@@ -21,15 +21,16 @@ The following geometries are currently supported:
 - _Triangle meshes_: complete, optimized, and well-tested.
 - _Point clouds_: nearly complete support.
 - _Geometric primitives_: nearly complete support. 
-- _Implicit surface volume grids_: experimentally supported.  However, the implementation is incomplete at the moment.
+- _Implicit surface volume grids_: mostly well supported.
+- _Convex hulls_: only weakly supported, mostly for convex hull-convex hull collision and distance checks.
 
 The following operations are supported:
 - _Drawing_: All types supported.
 - _Collision detection in planning_. All types supported. Note: Point cloud collision detection is currently inefficient for large point clouds.
 - _Tolerance verification_. All types supported. Note: Point cloud collision detection is currently inefficient for large point clouds.
-- _Distance detection in planning_.  primitive/primitive and triangle mesh/triangle mesh distance functions are available.
-- _Ray casting_. Triangle meshes, point clouds.
-- _Contact detection in simulation_. Triangle mesh / triangle mesh and triangle mesh / point cloud only.
+- _Distance detection in planning_.  primitive/primitive, triangle mesh/triangle mesh, convex hull/convex hull, point cloud / volume grid distance functions are available.
+- _Ray casting_. Triangle meshes, point clouds, geometric primitives, convex hulls.
+- _Contact detection in simulation_. Triangle mesh / triangle mesh, triangle mesh / point cloud, point cloud / volume grid only.
 
 
 ### Geometry caching
