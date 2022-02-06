@@ -261,7 +261,7 @@ def point_cloud_normals(pc : Union[Geometry3D,PointCloud], estimation_radius=Non
         from collections import defaultdict
         pt_hash = defaultdict(list)
         for i,(ind,p) in enumerate(zip(indices,positions)):
-            pt_hash[ind].append((i,p))
+            pt_hash[tuple(ind)].append((i,p))
         successful = 0
         for (ind,iplist) in pt_hash.items():
             if len(iplist) < estimation_knn:
