@@ -7,6 +7,8 @@
 #include "RobotCSpace.h"
 #include <KrisLibrary/math3d/Polygon2D.h>
 
+namespace Klampt {
+
 /** @brief A base class for a time scaling with colocation point constraints.
  * Subclasses should fill in dsmax, ds2ddsConstraintNormals, and
  * ds2ddsConstraintOffsets before Optimize is called.
@@ -16,7 +18,7 @@
 class CustomTimeScaling
 {
  public:
-  CustomTimeScaling(Robot& robot);
+  CustomTimeScaling(RobotModel& robot);
   ///Sets up the path
   void SetPath(const GeneralizedCubicBezierSpline& path,
 	       const vector<Real>& colocationParams);
@@ -79,7 +81,7 @@ class CustomTimeScaling
 class TorqueTimeScaling : public CustomTimeScaling
 {
  public:
-  TorqueTimeScaling(Robot& robot);
+  TorqueTimeScaling(RobotModel& robot);
   void SetParams(const MultiPath& path,const vector<Real>& colocationParams);
 
   Real torqueLimitShift;   ///< offsets the torque limits by a fixed amount (default 0)
@@ -103,7 +105,7 @@ class TorqueTimeScaling : public CustomTimeScaling
 class ZMPTimeScaling : public CustomTimeScaling
 {
  public:
-  ZMPTimeScaling(Robot& robot);
+  ZMPTimeScaling(RobotModel& robot);
   ///Sets a multi-stance ZMP optimization problem
   void SetParams(const MultiPath& path,const vector<Real>& colocationParams,
      const vector<ConvexPolygon2D>& supportPolys,const vector<Real>& groundHeights);
@@ -133,7 +135,7 @@ class ZMPTimeScaling : public CustomTimeScaling
 class ContactTimeScaling : public CustomTimeScaling
 {
  public:
-  ContactTimeScaling(Robot& robot);
+  ContactTimeScaling(RobotModel& robot);
   ///Uses the stances inside the multipath to determine the contacts.
   ///Discretizes friction cone into pyramid with numFCEdges edges.
   bool SetParams(const MultiPath& path,const vector<Real>& colocationParams,
@@ -147,5 +149,7 @@ class ContactTimeScaling : public CustomTimeScaling
   Real frictionRobustness;  ///< from 0 to 1, indicates the amount of increased robustness in friction cones (default 0)
   Real forceRobustness;   ///< >= 0, indicates the absolute margin for forces to be contained within the friction cone
 };
+
+} //namespace Klampt
 
 #endif

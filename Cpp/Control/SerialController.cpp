@@ -2,8 +2,9 @@
 #include <KrisLibrary/utils/threadutils.h>
 #include <KrisLibrary/utils/AnyCollection.h>
 #include <signal.h>
+using namespace Klampt;
 
-SerialController::SerialController(Robot& robot,const string& _servAddr,Real _writeRate)
+SerialController::SerialController(RobotModel& robot,const string& _servAddr,Real _writeRate)
   :RobotController(robot),servAddr(_servAddr),writeRate(_writeRate),lastWriteTime(0),endVCmdTime(-1)
 {
   //HACK: is this where the sigpipe ignore should be?

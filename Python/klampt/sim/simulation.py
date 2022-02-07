@@ -1,6 +1,8 @@
 from ..robotsim import *
 from . import simlog
 import weakref
+from typing import Union,List,Sequence,Callable,Any
+from klampt.control.blocks.robotcontroller import RobotControllerBlock
 
 class SensorEmulator:
     """A generic sensor emulator.  Translates from the physics simulation ->
@@ -13,10 +15,10 @@ class SensorEmulator:
     """
     def __init__(self):
         pass
-    def update(self):
+    def update(self) -> dict:
         """Returns a dictionary mapping named sensors to their outputs."""
         return {}
-    def drawGL(self):
+    def drawGL(self) -> None:
         """Optional: for debugging"""
         return
 
@@ -28,7 +30,7 @@ class DefaultSensorEmulator(SensorEmulator):
     def __init__(self,sim,controller):
         self.sim = sim
         self.controller = controller
-    def update(self):
+    def update(self) -> dict:
         measurements = {}
         mode = self.controller.getControlType()
         if mode == "PID":
@@ -42,7 +44,7 @@ class DefaultSensorEmulator(SensorEmulator):
             measurements[s.name()] = s.getMeasurements()
             k+=1
         return measurements
-    def drawGL(self):
+    def drawGL(self) -> None:
         if self.controller.getControlType() == "PID":
             q = self.controller.getCommandedConfig()
             r = self.controller.model()
@@ -58,15 +60,19 @@ class DefaultSensorEmulator(SensorEmulator):
 
 
 class ActuatorEmulator:
-    """A generic actuator emulator.  Translates outputs from the Python controller -> the physics simulation.
-    A variety of non-traditional actuators can be simulated here.
+    """A generic actuator emulator.  Translates outputs from the Python
+    controller -> the physics simulation. A variety of non-traditional
+    actuators can be simulated here.
 
-    The Python controller is assumed to have the structure of BaseController, where outputs a dictionary
-    of commands every control time step.  The emulator will read these with the process() methods
+    The Python controller is assumed to have the structure of
+    :class:`~klampt.control.blocks.robotcontroller.RobotControllerBlock', which
+    outputs a dictionary of commands every control time step.  The emulator
+    will read these with the process() method, and perhaps interact with the
+    simulator on substep().
     """
     def __init__(self):
         pass
-    def process(self,commands,dt):
+    def process(self, commands : dict, dt : float) -> None:
         """Processes the dictionary of commands, which are outputted by the controller.
         This may involve applying commands to the low-level motor emulator, 
         or applying forces to the simulator.
@@ -79,12 +85,12 @@ class ActuatorEmulator:
         remove it from the commands dictionary.
         """
         pass
-    def substep(self,dt):
+    def substep(self, dt : float) -> None:
         """This is called every simulation substep, which occurs at a higher rate than
         process() is called.  dt is the simulation substep.
         """
         pass
-    def drawGL(self):
+    def drawGL(self) -> None:
         """Optional: for debugging"""
         return
 
@@ -98,8 +104,6 @@ class DefaultActuatorEmulator(ActuatorEmulator):
     - tcmd: time for a dqcmd
 
     And will also pass any remaining commands to the low-level C controller.
-
-    It can also simulate forces, etc. at a higher rate than the control loop rate.
     """
     def __init__(self,sim,controller):
         self.sim = sim
@@ -141,14 +145,14 @@ class SimpleSimulator (Simulator):
     Args:
         world (WorldModel): the world that should be simulated.
     """
-    def __init__(self,world):
+    def __init__(self, world : WorldModel):
         Simulator.__init__(self,world)
         #these are functions automatically called at each time step
         self.robotControllers = [None]*world.numRobots()
         self.sensorEmulators = [[DefaultSensorEmulator(weakref.proxy(self),self.controller(i))] for i in range(world.numRobots())]
         self.actuatorEmulators = [[DefaultActuatorEmulator(weakref.proxy(self),self.controller(i))] for i in range(world.numRobots())]
-        self.hooks = []
-        self.hook_args = []
+        self.hooks = []              # type: List[Callable]
+        self.hook_args = []          # type: List[Any]
         #the rate of applying simulation substeps.  Hooks and actuator emulators are
         #called at this rate.  Note: this should be set at least as large as the simulation time step
         self.substep_dt = 0.001
@@ -189,7 +193,8 @@ class SimpleSimulator (Simulator):
             else:
                 self.pauseLogging(False)
 
-    def setController(self,robot,function):
+    def setController(self, robot : Union[int,str,RobotModel],
+                      function : Union[Callable,RobotControllerBlock]) -> None:
         """Sets a robot's controller function.
 
         Args:
@@ -198,7 +203,7 @@ class SimpleSimulator (Simulator):
                 robot's SimRobotController instance, or 2) an instance of a
                 :class:`klampt.control.controller.ControllerBlock` class,
                 which must conform to the
-                :class:`klampt.control.controller.RobotControllerBase`
+                :class:`klampt.control.blocks.robotcontroller.RobotControllerBlock`
                 convention.
         """
         if isinstance(robot,int):
@@ -214,8 +219,10 @@ class SimpleSimulator (Simulator):
         self.robotControllers += [None]*(self.world.numRobots()-len(self.robotControllers))
         self.robotControllers[index] = function
 
-    def addEmulator(self,robot,e):
-        """Adds an emulator to the given robot.  e must be of SensorEmulator or ActuatorEmulator type.
+    def addEmulator(self, robot : Union[int,str,RobotModel],
+                    e : Union[SensorEmulator,ActuatorEmulator]) -> None:
+        """Adds an emulator to the given robot.  e must be of SensorEmulator or
+        ActuatorEmulator type.
         """
         if isinstance(robot,int):
             index = robot
@@ -232,7 +239,7 @@ class SimpleSimulator (Simulator):
         else:
             raise ValueError("Invalid emulator type")
 
-    def addHook(self,objects,function):
+    def addHook(self, objects, function : Callable) -> None:
         """For the world object(s), applies a hook that gets called every
         simulation loop. 
 
@@ -277,13 +284,13 @@ class SimpleSimulator (Simulator):
         self.hooks.append(function)
         self.hook_args.append(args)
 
-    def drawGL(self):
+    def drawGL(self) -> None:
         self.updateWorld()
         self.world.drawGL()
         self.drawEmulatorsGL()
         self.drawControllersGL()
 
-    def drawEmulatorsGL(self):
+    def drawEmulatorsGL(self) -> None:
         #draw emulators
         for elist in self.sensorEmulators:
             for e in elist:
@@ -292,16 +299,16 @@ class SimpleSimulator (Simulator):
             for e in elist:
                 e.drawGL()
 
-    def drawControllersGL(self):
+    def drawControllersGL(self) -> None:
         #draw controllers
         for i in range(self.world.numRobots()):
-            if self.robotControllers[i] == None: 
+            if self.robotControllers[i] is None: 
                 continue
             if not hasattr(self.robotControllers[i],'drawGL'):
                 continue
             self.robotControllers[i].drawGL()
 
-    def simulate(self,dt):
+    def simulate(self, dt : float) -> None:
         """Runs the simulation.  Note that this should be called at the
         rate of the controller.  Simulation hooks and emulator substeps
         will be called at the rate of substep_dt.
@@ -322,7 +329,7 @@ class SimpleSimulator (Simulator):
         for i,T in enumerate(self.objectStates):
             self.world.rigidObject(i).setTransform(*T)
         #advance controller
-        self.control_loop(dt)
+        self.controlStep(dt)
         #save post-controller state
         self.robotStates = [(self.world.robot(i).getConfig(),self.world.robot(i).getVelocity()) for i in range(self.world.numRobots())]
         self.objectStates = [self.world.rigidObject(i).getTransform() for i in range(self.world.numRigidObjects())]
@@ -366,12 +373,10 @@ class SimpleSimulator (Simulator):
         #done
         return
 
-    def control_loop(self,dt):
+    def controlStep(self, dt :float) -> None:
         for i in range(self.world.numRobots()):
             c = self.robotControllers[i]
-            if callable(c):
-                c(self.controller(i))
-            else:
+            if hasattr(c,'advance'):  #it's a block
                 #build measurement dict
                 measurements = {'t':self.getTime(),'dt':dt}
                 for e in self.sensorEmulators[i]:
@@ -387,7 +392,7 @@ class SimpleSimulator (Simulator):
                         print(v)
                 """
                 if c:
-                    #assume it's a ControllerBase instance
+                    #assume it's a RobotControllerBlock instance
                     #compute controller output, advance controller
                     output = c.advance(**measurements)
                 else:
@@ -396,3 +401,5 @@ class SimpleSimulator (Simulator):
                 #process output => sim using actuator emulators
                 for e in self.actuatorEmulators[i]:
                     e.process(output,dt)
+            elif callable(c):  #it's a callable(SimRobotController)
+                c(self.controller(i))

@@ -34,9 +34,11 @@ class IKObjective
   int link() const;
   ///The index of the destination link, or -1 if fixed to the world
   int destLink() const;
-  ///Returns the number of position dimensions constrained (0-3)
+  ///Returns:
+  ///    The number of position dimensions constrained (0-3)
   int numPosDims() const;
-  ///Returns the number of rotation dimensions constrained (0-3)
+  ///Returns:
+  ///    The number of rotation dimensions constrained (0-3)
   int numRotDims() const;
 
   ///Sets a fixed-point constraint
@@ -94,15 +96,19 @@ class IKObjective
 
   ///Gets the transform T that's closest to the transform (R,t) and 
   ///that satisfies the IK goal's constraints.
-  void closestMatch(const double R[9],const double t[3],double out[9],double out2[3]);
+  void closestMatch(const double R[9],const double t[3],double out[9],double out2[3]) const;
+
+  ///Returns a transformation (R,t) from link relative to link2, sampled at random from
+  ///the space of transforms that satisfies the objective obj.
+  void sampleTransform(double out[9],double out2[3]) const;
 
   ///Loads the objective from a Klamp't-native formatted string. For a
   ///more readable but verbose format, try the JSON IO routines
-  ///:meth:`klampt.io.loader.toJson` / :meth:`klampt.io.loader.fromJson`
+  ///:meth:`klampt.io.loader.to_json` / :meth:`klampt.io.loader.from_json`
   bool loadString(const char* str);
   ///Saves the objective to a Klamp't-native formatted string.  For a
   ///more readable but verbose format, try the JSON IO routines
-  ///:meth:`klampt.io.loader.toJson` / :meth:`klampt.io.loader.fromJson`
+  ///:meth:`klampt.io.loader.to_json` / :meth:`klampt.io.loader.from_json`
   std::string saveString() const;
 
   IKGoal goal;
@@ -148,44 +154,42 @@ class IKSolver
   void clear();
   /// Sets the max # of iterations (default 100)
   void setMaxIters(int iters);
-  /// Gets the max # of iterations
+  /// Returns the max # of iterations
   int getMaxIters();
   /// Sets the constraint solve tolerance (default 1e-3)
   void setTolerance(double res);
-  /// Gets the constraint solve tolerance
+  /// Returns the constraint solve tolerance
   double getTolerance();
   /// Sets the active degrees of freedom
   void setActiveDofs(const std::vector<int>& active);
-  /// Gets the active degrees of freedom
+  /// Returns the active degrees of freedom
   void getActiveDofs(std::vector<int>& out);
   /// Sets limits on the robot's configuration.  If empty, this turns off joint limits.
   void setJointLimits(const std::vector<double>& qmin,const std::vector<double>& qmax);
-  /// Gets the limits on the robot's configuration (by default this is the robot's joint limits
+  /// Returns the limits on the robot's configuration (by default this is the robot's joint limits
   void getJointLimits(std::vector<double>& out,std::vector<double>& out2);
   /// Biases the solver to approach a given configuration.  Setting an empty vector clears the bias term.
   void setBiasConfig(const std::vector<double>& biasConfig);
-  /// Gets the solvers' bias configuration
+  /// Returns the solvers' bias configuration
   void getBiasConfig(std::vector<double>& out);
 
-  /// Returns true if the current configuration residual is less than tol
+  /// Returns True if the current configuration residual is less than tol
   bool isSolved();
-  /// Returns a vector describing the error of the objective at the current configuration
+  /// Returns the vector describing the error of the objective at the current configuration
   void getResidual(std::vector<double>& out);
-  /// Returns a matrix describing the instantaneous derivative of the objective
+  /// Computes the matrix describing the instantaneous derivative of the objective
   /// with respect to the active Dofs
-  void getJacobian(std::vector<std::vector<double> >& out);
+  void getJacobian(double** np_out2,int* m,int* n);
 
   /** Tries to find a configuration that satifies all simultaneous objectives
    * up to the desired tolerance.
-   * Returns true if x converged.
+   * 
+   * Returns:
+   * 
+   *     True if x converged.
+   * 
    */
   bool solve();
-  /** Old-style: will be deprecated.  Specify # of iterations and tolerance.
-   * Tries to find a configuration that satifies all simultaneous objectives
-   * up to the desired tolerance. Returns (res,iterations) where res is true
-   * if x converged.
-   */
-  PyObject* solve(int iters,double tol);
   /// Returns the number of Newton-Raphson iterations used in the last solve() call.
   int lastSolveIters();
 
@@ -233,6 +237,10 @@ class GeneralizedIKObjective
   void setPoint(const double p1[3],const double p2[3]);
   void setPoints(PyObject* p1s,PyObject* p2s);
   void setTransform(const double R[9],const double t[3]);
+  ///Returns a transformation (R,t) from link relative to link2, sampled at random from
+  ///the space of transforms that satisfies the objective obj.
+  void sampleTransform(double out[9],double out2[3]) const;
+
 
   RobotModelLink link1,link2;
   RigidObjectModel obj1,obj2;
@@ -261,7 +269,7 @@ class GeneralizedIKSolver
   void getResidual(std::vector<double>& out);
   /// Returns a matrix describing the instantaneous derivative of the objective
   /// with respect to the active parameters
-  void getJacobian(std::vector<std::vector<double> >& out);
+  void getJacobian(double** np_out2,int* m,int* n);
 
   /** Tries to find a configuration that satifies all simultaneous objectives
    * up to the desired tolerance.  
@@ -281,12 +289,5 @@ class GeneralizedIKSolver
   int maxIters;
   bool useJointLimits;
 };
-
-///Returns a transformation (R,t) from link relative to link2, sampled at random from
-///the space of transforms that satisfies the objective obj.
-void SampleTransform(const IKObjective& obj,double out[9],double out2[3]);
-///Returns a transformation (R,t) from link relative to link2, sampled at random from
-///the space of transforms that satisfies the objective obj.
-void SampleTransform(const GeneralizedIKObjective& obj,double out[9],double out2[3]);
 
 #endif

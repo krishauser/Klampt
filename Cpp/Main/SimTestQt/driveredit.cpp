@@ -1,12 +1,15 @@
 #include "driveredit.h"
 #include "ui_driveredit.h"
 #include <QFileDialog>
+using namespace Klampt;
+
+#define SPIN_BOX_MAX_SCALE 10.0
 
 #define SPIN_BOX_MAX_SCALE 10.0
 
 string toStdString(const QString& s);
 
-DriverEdit::DriverEdit(RobotWorld* _world,WorldSimulation* _sim,QWidget *parent) :
+DriverEdit::DriverEdit(WorldModel* _world,Simulator* _sim,QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DriverEdit),
     world(_world),sim(_sim),robot(NULL),current(0)

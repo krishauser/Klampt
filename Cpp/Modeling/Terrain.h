@@ -4,13 +4,15 @@
 #include "ManagedGeometry.h"
 #include <vector>
 #include <string>
-using namespace std;
-using namespace Math;
+
+namespace Klampt {
+  using namespace std;
+  using namespace Math;
 
 /** @ingroup Modeling
  * @brief A model of a static terrain with known friction.
  */
-class Terrain
+class TerrainModel
 {
 public:
   ///Can support .env files, anything the AnyGeometry class uses, and
@@ -37,5 +39,7 @@ public:
   ManagedGeometry geometry;
   vector<Real> kFriction;       //per element friction
 };
+
+} //namespace Klampt
 
 #endif

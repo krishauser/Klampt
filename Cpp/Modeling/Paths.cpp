@@ -7,6 +7,9 @@
 #include "ParabolicRamp.h"
 #include "DynamicPath.h"
 #include "Conversions.h"
+using namespace std;
+
+namespace Klampt {
 
 LinearPath::LinearPath()
 {}
@@ -82,7 +85,7 @@ void LinearPath::Deriv(Real t,Vector& dxt) const
   }
 }
 
-void LinearPath::Eval(Robot& robot,Real t,Vector& xt) const
+void LinearPath::Eval(RobotModel& robot,Real t,Vector& xt) const
 {
   Real param;
   int seg = Spline::TimeSegmentation::Map(times,t,param);
@@ -93,7 +96,7 @@ void LinearPath::Eval(Robot& robot,Real t,Vector& xt) const
   }
 }
 
-void LinearPath::Deriv(Robot& robot,Real t,Vector& dxt) const
+void LinearPath::Deriv(RobotModel& robot,Real t,Vector& dxt) const
 {
   Real param;
   int seg = Spline::TimeSegmentation::Map(times,t,param);
@@ -583,7 +586,7 @@ void Discretize(const Spline::PiecewisePolynomialND& in,Real res,vector<Real>& t
 }
 
 
-void Discretize(Robot& robot,const LinearPath& in,Real res,vector<Real>& times,vector<Config>& milestones)
+void Discretize(RobotModel& robot,const LinearPath& in,Real res,vector<Real>& times,vector<Config>& milestones)
 {
   times.resize(0);
   milestones.resize(0);
@@ -602,7 +605,7 @@ void Discretize(Robot& robot,const LinearPath& in,Real res,vector<Real>& times,v
 }
 
 
-void Discretize(Robot& robot,const LinearPath& in,Real res,vector<Real>& times,vector<Config>& milestones,vector<Vector>& dmilestones)
+void Discretize(RobotModel& robot,const LinearPath& in,Real res,vector<Real>& times,vector<Config>& milestones,vector<Vector>& dmilestones)
 {
   times.resize(0);
   milestones.resize(0);
@@ -625,3 +628,4 @@ void Discretize(Robot& robot,const LinearPath& in,Real res,vector<Real>& times,v
   in.Deriv(robot,T,dmilestones.back());
 }
 
+} //namespace Klampt

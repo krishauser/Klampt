@@ -1,9 +1,9 @@
-from ..controller import ControllerBlock
+from .robotcontroller import RobotControllerBlock
 from ..cartesian_drive import CartesianDriveSolver
 
 
-class CartesianDriveController(ControllerBlock):
-    """Adapts a CartesianDriveSolver to a ControllerBlock.  The robot's
+class CartesianDriveController(RobotControllerBlock):
+    """Adapts a CartesianDriveSolver to a RobotControllerBlock.  The robot's
     commanded position is updated by the solver.
 
     It is assumed that the solver is initialized with all the settings but
@@ -16,14 +16,14 @@ class CartesianDriveController(ControllerBlock):
         self.solver = solver
         self.links = links
         self.baseLinks = baseLinks
+        self.endEffectorPositions = endEffectorPositions
         self.start = start
         self._qcmd = None
-
-    def inputNames(self):
-        return ['wdes','vdes','dt']
-
-    def outputNames(self):
-        return ['progress','qcmd']
+        RobotControllerBlock.__init__(self)
+        self._inputs.addChannel('wdes')
+        self._inputs.addChannel('vdes')
+        self._inputs.addChannel('dt')
+        self._outputs.addChannel('progress')
 
     def signal(self,type,**inputs):
         if type == 'enter' or type == 'start':
@@ -32,8 +32,9 @@ class CartesianDriveController(ControllerBlock):
     def advance(self,**inputs):
         if 'qcmd' in inputs:
             self._qcmd = inputs['qcmd']
-        elif self._qcmd is None:
+        if self._qcmd is None:
             self._qcmd = inputs['q']
+        assert self._qcmd is not None,"Need either q or qcmd"
 
         if self.start:
             self.solver.start(self._qcmd,self.links,self.baseLinks,self.endEffectorPositions)
@@ -43,11 +44,11 @@ class CartesianDriveController(ControllerBlock):
         self._qcmd = qcmd
         return {'progress':progress,'qcmd':qcmd}
 
-    def getState(self):
+    def __getstate__(self):
         import copy
         return copy.deepcopy({'driveTransforms':self.solver.driveTransforms,'driveSpeedAdjustment':self.solver.driveSpeedAdjustment})
 
-    def setState(self,state):
+    def __setstate__(self,state):
         self.solver.driveTransforms = state['driveTransforms']
         self.solver.driveSpeedAdjustment = state['driveSpeedAdjustment']
 

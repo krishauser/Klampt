@@ -4,8 +4,10 @@
 #include <vector>
 #include <KrisLibrary/math/vector.h>
 #include <KrisLibrary/math/math.h>
-using namespace std;
-using namespace Math;
+
+namespace Klampt {
+  using namespace std;
+  using namespace Math;
 
 /** @defgroup Control */
 
@@ -51,5 +53,7 @@ struct RobotMotorCommand
 
   vector<ActuatorCommand> actuators;
 };
+
+} // namespace Klampt
 
 #endif

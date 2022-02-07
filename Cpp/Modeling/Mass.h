@@ -2,7 +2,9 @@
 #define OBJECT_MASS_H
 
 #include <KrisLibrary/geometry/AnyGeometry.h>
-using namespace Math3D;
+
+namespace Klampt {
+    using namespace Math3D;
 
 /** @addtogroup Modeling */
 /*@{*/
@@ -57,5 +59,7 @@ inline Matrix3 Inertia_Solid(const Meshing::TriMesh& mesh,Real gridRes,Real mass
 }
 
 /*@}*/
+
+} //namespace Klampt
 
 #endif

@@ -205,7 +205,7 @@ class RobotOptimizationProblem(optimize.OptimizationProblemBuilder):
         """
         if type is None:
             assert initialValue is not None,"Either type or initialValue must be provided"
-            type = types.objectToTypes(initialValue)
+            type = types.object_to_type(initialValue)
         if type in ['Vector3','Point']:
             if initialValue is None:
                 initialValue = [0.0]*3

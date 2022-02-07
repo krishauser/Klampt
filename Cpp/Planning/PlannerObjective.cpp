@@ -4,6 +4,8 @@
 #include <IO/JSON.h>
 #include <string.h>
 
+namespace Klampt {
+
 struct ErrorAccumulator
 {
   /// Sets an L-p norm
@@ -189,7 +191,7 @@ Real VelocityObjective::Delta(PlannerObjectiveBase* priorGoal)
 
 
 
-CartesianObjective::CartesianObjective(Robot* _robot)
+CartesianObjective::CartesianObjective(RobotModel* _robot)
     : robot(_robot)
 {
   ikGoal.link = -1;
@@ -212,7 +214,7 @@ Real CartesianObjective::Delta(PlannerObjectiveBase* priorGoal)
 
 
 
-IKObjective::IKObjective(Robot* _robot)
+IKObjective::IKObjective(RobotModel* _robot)
   : robot(_robot)
 {
   ikGoal.link = -1;
@@ -370,7 +372,7 @@ bool CompositeObjective::PathInvariant() const
 
 
 
-CartesianTrackingObjective::CartesianTrackingObjective(Robot* _robot)
+CartesianTrackingObjective::CartesianTrackingObjective(RobotModel* _robot)
   :robot(_robot),link(-1),localPosition(0.0),
    endTimeWeight(0.0),endPosWeight(0.0),endPosMatWeight(0.0)
 {}
@@ -654,7 +656,7 @@ bool SavePlannerObjective(PlannerObjectiveBase* obj,AnyCollection& msg)
 }
 
 
-PlannerObjectiveBase* LoadPlannerObjective(AnyCollection& msg,Robot* robot)
+PlannerObjectiveBase* LoadPlannerObjective(AnyCollection& msg,RobotModel* robot)
 {
   string type;
   bool res = msg["type"].as<string>(type);
@@ -719,7 +721,7 @@ PlannerObjectiveBase* LoadPlannerObjective(AnyCollection& msg,Robot* robot)
 }
 
 
-PlannerObjectiveBase* LoadPlannerObjective(istream& in,Robot* robot)
+PlannerObjectiveBase* LoadPlannerObjective(istream& in,RobotModel* robot)
 {
   AnyCollection msg;
   in>>msg;
@@ -742,3 +744,5 @@ bool SavePlannerObjective(PlannerObjectiveBase* obj,ostream& out)
   }
   return true;
 }
+
+} //namespace Klampt

@@ -1,6 +1,8 @@
 #include "Grasp.h"
 #include <tinyxml.h>
 
+using namespace Klampt;
+
 Grasp::Grasp()
   :objectIndex(-1),robotIndex(0)
 {}

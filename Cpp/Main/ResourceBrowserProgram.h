@@ -9,6 +9,7 @@
 #include <sstream>
 using namespace Math3D;
 using namespace GLDraw;
+using namespace Klampt;
 
 //GLUI widget ID's
 
@@ -36,7 +37,7 @@ enum {
 class ResourceBrowserProgram : public WorldViewProgram
 {
 public:
-  ResourceBrowserProgram(RobotWorld* world);
+  ResourceBrowserProgram(WorldModel* world);
   bool LoadCommandLine(int argc,char** argv);
 
   //subclass will call this to add controls
@@ -90,7 +91,7 @@ public:
   ViewResource viewResource;
 };
 
-ResourceBrowserProgram::ResourceBrowserProgram(RobotWorld* world)
+ResourceBrowserProgram::ResourceBrowserProgram(WorldModel* world)
   :WorldViewProgram(world)
 {
   MakeRobotResourceLibrary(resources);

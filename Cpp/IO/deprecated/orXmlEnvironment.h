@@ -7,8 +7,10 @@
 //#include <math3d/primitives.h>
 #include <Klampt/Modeling/World.h>
 #include "orXmlTags.h"
-using namespace std;
-using namespace Math3D;
+
+namespace Klampt {
+  using namespace std;
+  using namespace Math3D;
 
 class OrXmlBody;
 string ToLowercase(string str);
@@ -18,7 +20,7 @@ public:
 	OrXmlKinbody(TiXmlElement* element);
 	~OrXmlKinbody();
 	bool GetContent();
-	bool GetObjectOrTerrain(RobotWorld& world);
+	bool GetObjectOrTerrain(WorldModel& world);
 	bool GetAllCleanBodyJoints();
 	void GetAllBodyGeom();
 //	bool getParentChildRelation();
@@ -166,7 +168,7 @@ public:
 	OrXmlEnvironment();
 	~OrXmlEnvironment();
 	bool Load(const string& fn);
-	bool GetWorld(RobotWorld& world);
+	bool GetWorld(WorldModel& world);
 	bool Convert2URDF();
 	bool Convert2Rob();
 	bool getWorld();
@@ -194,6 +196,8 @@ std::ostream& operator <<(std::ostream&, const OrXmlEnvironment&);
 std::ostream& operator <<(std::ostream&, const OrXmlKinbody&);
 std::ostream& operator <<(std::ostream&, const OrXmlBody&);
 std::ostream& operator <<(std::ostream&, const OrXmlRobot&);
+
+} // namespace Klampt
 
 #endif
 

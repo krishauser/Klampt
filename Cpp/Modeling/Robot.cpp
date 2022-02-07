@@ -5,6 +5,7 @@
 #include <string.h>
 #include <KrisLibrary/robotics/DenavitHartenberg.h>
 #include <KrisLibrary/robotics/Rotation.h>
+#include <KrisLibrary/robotics/IKFunctions.h>
 #include <KrisLibrary/math3d/misc.h>
 #include <KrisLibrary/math3d/basis.h>
 #include <KrisLibrary/meshing/IO.h>
@@ -25,6 +26,8 @@
 DEFINE_LOGGER(Robot)
 DEFINE_LOGGER(RobParser)
 DEFINE_LOGGER(URDFParser)
+
+namespace Klampt {
 
 //defined in XmlWorld.cpp
 string ResolveFileReference(const string& path,const string& fn);
@@ -98,6 +101,7 @@ Real Radius(const Geometry::AnyGeometry3D& geom)
       return Sqrt(dmax);
     }
   case Geometry::AnyGeometry3D::ImplicitSurface:
+  case Geometry::AnyGeometry3D::OccupancyGrid:
     {
       Box3D box;
       box.set(geom.AsImplicitSurface().bb);
@@ -129,7 +133,7 @@ Real Radius(const Geometry::AnyGeometry3D& geom)
   return 0;
 }
 
-void GetAccMax(const Robot& robot, Vector& accMax) {
+void GetAccMax(const RobotModel& robot, Vector& accMax) {
   accMax = robot.torqueMax;
   Real sumMass = 0;
   Real sumCom = 0;
@@ -155,22 +159,22 @@ void SetDefaultAppearance(shared_ptr<GLDraw::GeometryAppearance> app)
 }
 
 
-int RobotJointDriver::NumControls() const {
+int RobotModelDriver::NumControls() const {
   return 1;
 }
-int RobotJointDriver::NumLinks() const {
+int RobotModelDriver::NumLinks() const {
   return linkIndices.size();
 }
-bool RobotJointDriver::Affects(int link) const {
+bool RobotModelDriver::Affects(int link) const {
   for (size_t i = 0; i < linkIndices.size(); i++)
     if (linkIndices[i] == link)
       return true;
   return false;
 }
 
-bool Robot::disableGeometryLoading = false;
+bool RobotModel::disableGeometryLoading = false;
 
-std::string Robot::LinkName(int i) const {
+std::string RobotModel::LinkName(int i) const {
   if (linkNames.empty())
     return RobotWithGeometry::LinkName(i);
   else if (linkNames[i].empty())
@@ -179,7 +183,7 @@ std::string Robot::LinkName(int i) const {
     return linkNames[i];
 }
 
-int Robot::LinkIndex(const char* name) const
+int RobotModel::LinkIndex(const char* name) const
 {
   if(IsValidInteger(name)) {
     stringstream ss(name);
@@ -192,11 +196,11 @@ int Robot::LinkIndex(const char* name) const
   return -1;
 }
 
-bool Robot::Load(const char* fn) {
+bool RobotModel::Load(const char* fn) {
   bool res = false;
   const char* ext = FileExtension(fn);
   if(ext == NULL) {
-    LOG4CXX_ERROR(GET_LOGGER(Robot),"Robot::Load("<<fn <<"): no extension, file must have .rob or .urdf extension");
+    LOG4CXX_ERROR(GET_LOGGER(Robot),"RobotModel::Load("<<fn <<"): no extension, file must have .rob or .urdf extension");
   }
   else if (0 == strcmp(ext, "rob")) {
     res = LoadRob(fn);
@@ -205,13 +209,13 @@ bool Robot::Load(const char* fn) {
     res = LoadURDF(fn);
   }
   else {
-    LOG4CXX_ERROR(GET_LOGGER(Robot),"Robot::Load("<<fn<<"): unknown extenion "<<ext <<", only .rob or .urdf supported");
+    LOG4CXX_ERROR(GET_LOGGER(Robot),"RobotModel::Load("<<fn<<"): unknown extenion "<<ext <<", only .rob or .urdf supported");
   }
 
   return res;
 }
 
-bool Robot::LoadRob(const char* fn) {
+bool RobotModel::LoadRob(const char* fn) {
   string path = GetFilePath(fn);
   string localfile = MakeURLLocal(fn);
   if(localfile.empty()) return false;
@@ -506,22 +510,22 @@ bool Robot::LoadRob(const char* fn) {
         LOG4CXX_ERROR(GET_LOGGER(RobParser),"Invalid geomTransform on line "<<lineno);
       }
     }else if (name == "joint") {
-      RobotJoint tempJoint;
-      tempJoint.type = RobotJoint::Normal;
+      RobotModelJoint tempJoint;
+      tempJoint.type = RobotModelJoint::Normal;
       ss >> stemp;
       if (ss) {
         Lowercase(stemp);
         if (stemp == "weld") {
-          tempJoint.type = RobotJoint::Weld;
+          tempJoint.type = RobotModelJoint::Weld;
           ss >> tempJoint.linkIndex;
         } else if (stemp == "normal") {
-          tempJoint.type = RobotJoint::Normal;
+          tempJoint.type = RobotModelJoint::Normal;
           ss >> tempJoint.linkIndex;
         } else if (stemp == "spin") {
-          tempJoint.type = RobotJoint::Spin;
+          tempJoint.type = RobotModelJoint::Spin;
           ss >> tempJoint.linkIndex;
         } else if (stemp == "floating") {
-          tempJoint.type = RobotJoint::Floating;
+          tempJoint.type = RobotModelJoint::Floating;
           ss >> tempJoint.linkIndex;
           if (tempJoint.linkIndex <= 0) {
             LOG4CXX_INFO(GET_LOGGER(RobParser),"Invalid floating link "<< tempJoint.linkIndex<<" on line "<< lineno);
@@ -535,7 +539,7 @@ bool Robot::LoadRob(const char* fn) {
             }
           }
         } else if (stemp == "ballandsocket") {
-          tempJoint.type = RobotJoint::BallAndSocket;
+          tempJoint.type = RobotModelJoint::BallAndSocket;
           ss >> tempJoint.linkIndex;
           if (tempJoint.linkIndex <= 0) {
             LOG4CXX_INFO(GET_LOGGER(RobParser),"Invalid ballandsocket link "<<tempJoint.linkIndex <<" on line "<<lineno);
@@ -549,7 +553,7 @@ bool Robot::LoadRob(const char* fn) {
             }
           }
         } else if (stemp == "floatingplanar") {
-          tempJoint.type = RobotJoint::FloatingPlanar;
+          tempJoint.type = RobotModelJoint::FloatingPlanar;
           ss >> tempJoint.linkIndex;
           if (tempJoint.linkIndex <= 0) {
             LOG4CXX_INFO(GET_LOGGER(RobParser),"Invalid floatingplanar link "<<tempJoint.linkIndex <<" on line "<<lineno);
@@ -571,8 +575,8 @@ bool Robot::LoadRob(const char* fn) {
       if (ss)
         joints.push_back(tempJoint);
     } else if (name == "driver") {
-      RobotJointDriver tempDriver;
-      tempDriver.type = RobotJointDriver::Normal;
+      RobotModelDriver tempDriver;
+      tempDriver.type = RobotModelDriver::Normal;
       ss >> stemp;
       if (ss) {
         //TODO: servo parameters, dry friction
@@ -582,13 +586,13 @@ bool Robot::LoadRob(const char* fn) {
         tempDriver.dryFriction = 0;
         tempDriver.viscousFriction = 0;
         if (stemp == "normal") {
-          tempDriver.type = RobotJointDriver::Normal;
+          tempDriver.type = RobotModelDriver::Normal;
           tempDriver.linkIndices.resize(1);
           ss >> itemp;
           tempDriver.linkIndices[0] = itemp;
           //Settings are loaded below
         } else if (stemp == "affine") {
-          tempDriver.type = RobotJointDriver::Affine;
+          tempDriver.type = RobotModelDriver::Affine;
           ss >> itemp;
           if (itemp <= 0) {
             LOG4CXX_ERROR(GET_LOGGER(RobParser),"Invalid number of joint indices "<<itemp);
@@ -613,7 +617,7 @@ bool Robot::LoadRob(const char* fn) {
           tempDriver.amin = -Inf;
           tempDriver.amax = Inf;
         } else if (stemp == "translation") {
-          tempDriver.type = RobotJointDriver::Translation;
+          tempDriver.type = RobotModelDriver::Translation;
           tempDriver.linkIndices.resize(2);
           ss >> itemp;
           tempDriver.linkIndices[0] = itemp;
@@ -621,7 +625,7 @@ bool Robot::LoadRob(const char* fn) {
           tempDriver.linkIndices[1] = itemp;
           //Settings are loaded below
         } else if (stemp == "rotation") {
-          tempDriver.type = RobotJointDriver::Rotation;
+          tempDriver.type = RobotModelDriver::Rotation;
           tempDriver.linkIndices.resize(2);
           ss >> itemp;
           tempDriver.linkIndices[0] = itemp;
@@ -1027,7 +1031,7 @@ bool Robot::LoadRob(const char* fn) {
     }
     geomFiles[i] = geomFn[i];
     geomFn[i] = ResolveFileReference(path,geomFn[i]);
-    if(Robot::disableGeometryLoading) continue;
+    if(RobotModel::disableGeometryLoading) continue;
     if (!LoadGeometry(i, geomFn[i].c_str())) {
       LOG4CXX_ERROR(GET_LOGGER(RobParser),"   Unable to load link "<<i<<" geometry file "<<geomFn[i]);
       return false;
@@ -1086,11 +1090,11 @@ bool Robot::LoadRob(const char* fn) {
     for (size_t i = 0; i < links.size(); i++) {
       if (parents[i] == -1) {
         if (velMin[i] == 0 && velMax[i] == 0)
-          joints[i].type = RobotJoint::Weld;
+          joints[i].type = RobotModelJoint::Weld;
         else
-          joints[i].type = RobotJoint::Normal;
+          joints[i].type = RobotModelJoint::Normal;
       } else
-        joints[i].type = RobotJoint::Normal;
+        joints[i].type = RobotModelJoint::Normal;
       joints[i].linkIndex = (int) i;
     }
   }
@@ -1098,11 +1102,11 @@ bool Robot::LoadRob(const char* fn) {
 //    Assert(joints.size() == links.size());
     drivers.resize(0);
     for (size_t i = 0; i < joints.size(); i++) {
-      if (joints[i].type != RobotJoint::Normal
-          && joints[i].type != RobotJoint::Spin)
+      if (joints[i].type != RobotModelJoint::Normal
+          && joints[i].type != RobotModelJoint::Spin)
         continue;
-      RobotJointDriver d;
-      d.type = RobotJointDriver::Normal;
+      RobotModelDriver d;
+      d.type = RobotModelDriver::Normal;
       d.linkIndices.push_back(i);
       d.qmin = qMin(i);
       d.qmax = qMax(i);
@@ -1122,9 +1126,9 @@ bool Robot::LoadRob(const char* fn) {
     nd = (int) drivers.size();
   } else { //load normal driver settings
     for (size_t i = 0; i < drivers.size(); i++) {
-      if (drivers[i].type == RobotJointDriver::Normal
-          || drivers[i].type == RobotJointDriver::Translation
-          || drivers[i].type == RobotJointDriver::Rotation) {
+      if (drivers[i].type == RobotModelDriver::Normal
+          || drivers[i].type == RobotModelDriver::Translation
+          || drivers[i].type == RobotModelDriver::Rotation) {
         int itemp = drivers[i].linkIndices[0];
         Assert(itemp >= 0 && itemp < (int) n);
         drivers[i].qmin = qMin(itemp);
@@ -1135,6 +1139,19 @@ bool Robot::LoadRob(const char* fn) {
         drivers[i].tmax = torqueMax(itemp);
         drivers[i].amin = -accMax(itemp);
         drivers[i].amax = accMax(itemp);
+      }
+      else if(drivers[i].type == RobotModelDriver::Affine) {  //set acceleration limits from robot's acceleration limits
+        for(size_t j=0;j<drivers[i].linkIndices.size();j++) {
+          Real s = drivers[i].affScaling[j];
+          if(s > 0) {
+            drivers[i].amin = Max(drivers[i].amin,-accMax[drivers[i].linkIndices[j]]/s);
+            drivers[i].amax = Min(drivers[i].amax,accMax[drivers[i].linkIndices[j]]/s);
+          }
+          else if(s < 0) {
+            drivers[i].amin = Max(drivers[i].amin,accMax[drivers[i].linkIndices[j]]/s);
+            drivers[i].amax = Max(drivers[i].amax,-accMax[drivers[i].linkIndices[j]]/s);
+          }
+        }
       }
     }
   }
@@ -1194,23 +1211,21 @@ bool Robot::LoadRob(const char* fn) {
   //first mount the geometries, they affect whether a link is included in self collision testing
   vector<int> mountLinkIndices(mountLinks.size(),-2);  //-2 indicates not found
   for (size_t i = 0; i < mountLinks.size(); i++) {
-    int linkIndex = LinkIndex(mountLinks[i].c_str());
-    if(linkIndex < 0 || linkIndex >= (int)links.size()) {
-      if(mountLinks[i]=="-1") {
-        //pass
-      }
-      else {
-        mountLinkIndices[i] = -2;
-      }
-    }
-    mountLinkIndices[i] = linkIndex;
-  }
-  for (size_t i = 0; i < mountLinks.size(); i++) {
     const char* ext = FileExtension(mountFiles[i].c_str());
     if(ext && (0==strcmp(ext,"rob") || 0==strcmp(ext,"urdf"))) {
       //its a robot, delay til later
     }
     else {
+      int linkIndex = LinkIndex(mountLinks[i].c_str());
+      if(linkIndex < 0 || linkIndex >= (int)links.size()) {
+        if(mountLinks[i]=="-1") {
+          //pass
+        }
+        else {
+          mountLinkIndices[i] = -2;
+        }
+      }
+      mountLinkIndices[i] = linkIndex;
       if(mountLinkIndices[i] == -2) {
         LOG4CXX_ERROR(GET_LOGGER(RobParser),"   Invalid mount link "<<mountLinks[i]<<", out of range");
         return false;
@@ -1271,7 +1286,7 @@ bool Robot::LoadRob(const char* fn) {
       }
       if(link1 > link2) Swap(link1,link2);
       if(!(link1 < link2)) {
-        LOG4CXX_ERROR(GET_LOGGER(RobParser),"Robot::Load(): Invalid self collision pair "<<selfCollision[i].first<<", "<<selfCollision[i].second);
+        LOG4CXX_ERROR(GET_LOGGER(RobParser),"RobotModel::Load(): Invalid self collision pair "<<selfCollision[i].first<<", "<<selfCollision[i].second);
           return false;
       }
       InitSelfCollisionPair(link1,link2);
@@ -1289,7 +1304,7 @@ bool Robot::LoadRob(const char* fn) {
     }
       if(link1 > link2) Swap(link1,link2);
       if(!(link1 < link2)) {
-        LOG4CXX_ERROR(GET_LOGGER(RobParser),"Robot::Load(): Invalid no-self collision pair "<<noSelfCollision[i].first<<", "<<noSelfCollision[i].second);
+        LOG4CXX_ERROR(GET_LOGGER(RobParser),"RobotModel::Load(): Invalid no-self collision pair "<<noSelfCollision[i].first<<", "<<noSelfCollision[i].second);
         return false;
       }
     SafeDelete(selfCollisions(link1,link2));
@@ -1299,19 +1314,19 @@ bool Robot::LoadRob(const char* fn) {
   timer.Reset();
   //do the mounting of subchains
   for (size_t i = 0; i < mountLinks.size(); i++) {
-    if(mountLinkIndices[i] == -2) { //determine mount link dynamically
-      int linkIndex = LinkIndex(mountLinks[i].c_str());
-      if(linkIndex < 0) {
-        LOG4CXX_ERROR(GET_LOGGER(RobParser),"   Invalid mount link "<<mountLinks[i]<<", out of range");
-        return false;
-      }
-      mountLinkIndices[i] = linkIndex;
-    }
     const char* ext = FileExtension(mountFiles[i].c_str());
     if(ext && (0==strcmp(ext,"rob") || 0==strcmp(ext,"urdf"))) {
+      if(mountLinkIndices[i] == -2) { //determine mount link dynamically
+        int linkIndex = LinkIndex(mountLinks[i].c_str());
+        if(linkIndex < 0) {
+          LOG4CXX_ERROR(GET_LOGGER(RobParser),"   Invalid mount link "<<mountLinks[i]<<", out of range");
+          return false;
+        }
+        mountLinkIndices[i] = linkIndex;
+      }
       string fn = ResolveFileReference(path,mountFiles[i]);
       LOG4CXX_INFO(GET_LOGGER(RobParser),"   Mounting subchain file " << mountFiles[i]);
-      Robot subchain;
+      RobotModel subchain;
       if (!subchain.Load(fn.c_str())) {
         LOG4CXX_ERROR(GET_LOGGER(RobParser),"   Error reading subchain file " << fn);
         return false;
@@ -1338,7 +1353,7 @@ bool Robot::LoadRob(const char* fn) {
     }
     if(link1 > link2) Swap(link1,link2);
     if(!(link1 < link2)) {
-      LOG4CXX_ERROR(GET_LOGGER(RobParser),"Robot::Load(): Invalid self collision pair "<<selfCollision[i].first<<", "<<selfCollision[i].second);
+      LOG4CXX_ERROR(GET_LOGGER(RobParser),"RobotModel::Load(): Invalid self collision pair "<<selfCollision[i].first<<", "<<selfCollision[i].second);
       return false;
     }
     InitSelfCollisionPair(link1,link2);
@@ -1356,7 +1371,7 @@ bool Robot::LoadRob(const char* fn) {
     }
     if(link1 > link2) Swap(link1,link2);
     if(!(link1 < link2)) {
-      LOG4CXX_ERROR(GET_LOGGER(RobParser),"Robot::Load(): Invalid no-self collision pair "<<noSelfCollision[i].first<<", "<<noSelfCollision[i].second);
+      LOG4CXX_ERROR(GET_LOGGER(RobParser),"RobotModel::Load(): Invalid no-self collision pair "<<noSelfCollision[i].first<<", "<<noSelfCollision[i].second);
       return false;
     }
     SafeDelete(selfCollisions(link1,link2));
@@ -1365,7 +1380,7 @@ bool Robot::LoadRob(const char* fn) {
   return true;
 }
 
-void Robot::InitStandardJoints() {
+void RobotModel::InitStandardJoints() {
   if (linkNames.empty()) {
     linkNames.resize(links.size());
     for (size_t i = 0; i < links.size(); i++) {
@@ -1378,9 +1393,9 @@ void Robot::InitStandardJoints() {
   int numNormal = 0;
   for (size_t i = 0; i < links.size(); i++) {
     if (parents[i] == -1)
-      joints[i].type = RobotJoint::Weld;
+      joints[i].type = RobotModelJoint::Weld;
     else {
-      joints[i].type = RobotJoint::Normal;
+      joints[i].type = RobotModelJoint::Normal;
       numNormal++;
     }
     joints[i].linkIndex = (int) i;
@@ -1388,11 +1403,11 @@ void Robot::InitStandardJoints() {
   drivers.resize(0);
   driverNames.resize(0);
   for (size_t i = 0; i < links.size(); i++) {
-    if (joints[i].type != RobotJoint::Normal
-        && joints[i].type != RobotJoint::Spin)
+    if (joints[i].type != RobotModelJoint::Normal
+        && joints[i].type != RobotModelJoint::Spin)
       continue;
-    RobotJointDriver d;
-    d.type = RobotJointDriver::Normal;
+    RobotModelDriver d;
+    d.type = RobotModelDriver::Normal;
     d.linkIndices.push_back(i);
     d.qmin = qMin(i);
     d.qmax = qMax(i);
@@ -1405,7 +1420,7 @@ void Robot::InitStandardJoints() {
   }
 }
 
-void Robot::SetGeomFiles(const char* geomPath,const char* geomExt) {
+void RobotModel::SetGeomFiles(const char* geomPath,const char* geomExt) {
   geomFiles.resize(links.size());
   for (size_t i = 0; i < links.size(); i++) {
     stringstream ss;
@@ -1414,12 +1429,12 @@ void Robot::SetGeomFiles(const char* geomPath,const char* geomExt) {
   }
 }
 
-void Robot::SetGeomFiles(const vector<string>& files)
+void RobotModel::SetGeomFiles(const vector<string>& files)
 {
   geomFiles = files;
 }
 
-bool Robot::LoadGeometry(int i,const char* file)
+bool RobotModel::LoadGeometry(int i,const char* file)
 {
   if(i >= (int)geomManagers.size())
     geomManagers.resize(geometry.size());
@@ -1432,15 +1447,15 @@ bool Robot::LoadGeometry(int i,const char* file)
   return false;
 }
 
-bool Robot::SaveGeometry(const char* prefix) {
+bool RobotModel::SaveGeometry(const char* prefix) {
   for (size_t i = 0; i < links.size(); i++) {
     if (!IsGeometryEmpty(i)) {
       if(geomFiles[i].empty()) {
-        LOG4CXX_ERROR(GET_LOGGER(RobParser),"Robot::SaveGeometry: warning, link "<<i<<" has empty file name");
+        LOG4CXX_ERROR(GET_LOGGER(RobParser),"RobotModel::SaveGeometry: warning, link "<<i<<" has empty file name");
         continue;
       }
       if(!geometry[i]->Save((string(prefix)+geomFiles[i]).c_str())) {
-           LOG4CXX_ERROR(GET_LOGGER(RobParser), "Robot::SaveGeometry: Unable to save to geometry file " << string(prefix)+geomFiles[i] << "");
+           LOG4CXX_ERROR(GET_LOGGER(RobParser), "RobotModel::SaveGeometry: Unable to save to geometry file " << string(prefix)+geomFiles[i] << "");
            return false;
          }
     }
@@ -1448,7 +1463,7 @@ bool Robot::SaveGeometry(const char* prefix) {
   return true;
 }
 
-bool Robot::Save(const char* fn) {
+bool RobotModel::Save(const char* fn) {
   ofstream file;
   file.open(fn, ios::out);
   if (!file.is_open()) {
@@ -1583,24 +1598,24 @@ bool Robot::Save(const char* fn) {
   for (int i = 0; i < nJoints; i++) {
     file << "joint ";
     switch (joints[i].type) {
-    case RobotJoint::Floating:
+    case RobotModelJoint::Floating:
       file << "floating " << joints[i].linkIndex << " "
           << joints[i].baseIndex << endl;
       break;
-    case RobotJoint::Normal:
+    case RobotModelJoint::Normal:
       file << "normal " << joints[i].linkIndex << endl;
       break;
-    case RobotJoint::Weld:
+    case RobotModelJoint::Weld:
       file << "weld " << joints[i].linkIndex << endl;
       break;
-    case RobotJoint::Spin:
+    case RobotModelJoint::Spin:
       file << "spin " << joints[i].linkIndex << endl;
       break;
-    case RobotJoint::FloatingPlanar:
+    case RobotModelJoint::FloatingPlanar:
       file << "floating2d " << joints[i].linkIndex << " "
           << joints[i].baseIndex << endl;
       break;
-    case RobotJoint::BallAndSocket:
+    case RobotModelJoint::BallAndSocket:
       file << "ballandsocket " << joints[i].linkIndex << " "
           << joints[i].baseIndex << endl;
       break;
@@ -1615,12 +1630,12 @@ bool Robot::Save(const char* fn) {
   int nDrivers = drivers.size();
   for (int i = 0; i < nDrivers; i++) {
     switch (drivers[i].type) {
-    case RobotJointDriver::Normal:
+    case RobotModelDriver::Normal:
       if(drivers[i].linkIndices.size() > 0){
         file << "driver normal " << drivers[i].linkIndices[0] << endl;
       }
       break;
-    case RobotJointDriver::Affine:
+    case RobotModelDriver::Affine:
       if(drivers[i].linkIndices.size() > 0){
         file << "driver affine "<<drivers[i].linkIndices.size() <<"\t";
         for (auto l:drivers[i].linkIndices)
@@ -1682,7 +1697,7 @@ bool Robot::Save(const char* fn) {
 }
 
 
-bool Robot::CheckValid() const {
+bool RobotModel::CheckValid() const {
   for (size_t i = 0; i < parents.size(); i++)
     if (parents[i] < -1 || parents[i] >= (int) parents.size()) {
       LOG4CXX_ERROR(GET_LOGGER(Robot),"Invalid parent["<<i<<"]=" << parents[i]);
@@ -1702,9 +1717,9 @@ bool Robot::CheckValid() const {
   //check joint definitions
   for (size_t i = 0; i < joints.size(); i++) {
     switch (joints[i].type) {
-    case RobotJoint::Weld:
-    case RobotJoint::Normal:
-    case RobotJoint::Spin:
+    case RobotModelJoint::Weld:
+    case RobotModelJoint::Normal:
+    case RobotModelJoint::Spin:
       if (matchedLink[joints[i].linkIndex]>=0) {
         LOG4CXX_ERROR(GET_LOGGER(Robot),"Joint "<<i<<" controls an already controlled link, "<<joints[i].linkIndex<<" controlled by "<<matchedLink[joints[i].linkIndex] ); 
         return false;
@@ -1716,7 +1731,7 @@ bool Robot::CheckValid() const {
         return false;
       }
       break;
-    case RobotJoint::Floating: {
+    case RobotModelJoint::Floating: {
       int numLinks = 0;
       int link = joints[i].linkIndex;
       while (link != joints[i].baseIndex) {
@@ -1738,7 +1753,7 @@ bool Robot::CheckValid() const {
       }
     }
       break;
-    case RobotJoint::FloatingPlanar: {
+    case RobotModelJoint::FloatingPlanar: {
       int numLinks = 0;
       int link = joints[i].linkIndex;
       while (link != joints[i].baseIndex) {
@@ -1760,7 +1775,7 @@ bool Robot::CheckValid() const {
       }
     }
       break;
-    case RobotJoint::BallAndSocket: {
+    case RobotModelJoint::BallAndSocket: {
       int numLinks = 0;
       int link = joints[i].linkIndex;
       while (link != joints[i].baseIndex) {
@@ -1799,8 +1814,8 @@ bool Robot::CheckValid() const {
       LOG4CXX_ERROR(GET_LOGGER(Robot),"Driver "<<i<<" doesn't affect any joints");
       return false;
     }
-    if (drivers[i].type == RobotJointDriver::Normal
-        || drivers[i].type == RobotJointDriver::Affine) {
+    if (drivers[i].type == RobotModelDriver::Normal
+        || drivers[i].type == RobotModelDriver::Affine) {
       for (size_t j = 0; j < drivers[i].linkIndices.size(); j++) {
         if (drivenLink[drivers[i].linkIndices[j]] >= 0) {
           LOG4CXX_ERROR(GET_LOGGER(Robot), "Driver " << i << "affects an already driven link, "<< drivers[i].linkIndices[j] <<" driven by" << drivenLink[drivers[i].linkIndices[j]]);
@@ -1808,8 +1823,8 @@ bool Robot::CheckValid() const {
         }
         drivenLink[drivers[i].linkIndices[j]] = (int)i;
       }
-    } else if (drivers[i].type == RobotJointDriver::Translation
-        || drivers[i].type == RobotJointDriver::Rotation) {
+    } else if (drivers[i].type == RobotModelDriver::Translation
+        || drivers[i].type == RobotModelDriver::Rotation) {
       //only the first linkindex is actually driven
       if (drivenLink[drivers[i].linkIndices[0]] >= 0) {
         LOG4CXX_ERROR(GET_LOGGER(Robot), "Driver " << i << "affects an already driven link, " << drivers[i].linkIndices[0] << " driven by" << drivenLink[drivers[i].linkIndices[0]]);
@@ -1840,11 +1855,11 @@ void concat(Array2D<T>& x, const Array2D<T>& y, T emptyVal = 0) {
   x = temp;
 }
 
-void Robot::Mount(int link, const Geometry::AnyGeometry3D& mesh,
+void RobotModel::Mount(int link, const Geometry::AnyGeometry3D& mesh,
     const RigidTransform& T) {
   if(!geometry[link]) {
     if(link >= (int)geomManagers.size()) {
-      LOG4CXX_INFO(GET_LOGGER(Robot),"Robot::Mount (geometry): Need to add geometry managers?");
+      LOG4CXX_INFO(GET_LOGGER(Robot),"RobotModel::Mount (geometry): Need to add geometry managers?");
       geomManagers.resize(geometry.size());
     }
     geomManagers[link].CreateEmpty();
@@ -1864,7 +1879,7 @@ void Robot::Mount(int link, const Geometry::AnyGeometry3D& mesh,
       geomManagers[link].SetUniqueAppearance();
     }
     else {
-      LOG4CXX_INFO(GET_LOGGER(Robot),"Robot::Mount (geometry): Need to add geometry managers?");
+      LOG4CXX_INFO(GET_LOGGER(Robot),"RobotModel::Mount (geometry): Need to add geometry managers?");
       geomManagers.resize(geometry.size());
     }
     geomManagers[link].CreateEmpty();
@@ -1875,7 +1890,7 @@ void Robot::Mount(int link, const Geometry::AnyGeometry3D& mesh,
   //TODO: reinitialize all self collisions with this mesh
 }
 
-void Robot::Mount(int link, const Robot& subchain, const RigidTransform& T,const char* prefix)
+void RobotModel::Mount(int link, const RobotModel& subchain, const RigidTransform& T,const char* prefix)
 {
   Assert(&subchain != this);
   size_t norig = links.size();
@@ -1996,7 +2011,7 @@ void Robot::Mount(int link, const Robot& subchain, const RigidTransform& T,const
       TiXmlElement e("sensors");
       ss >> e;
       if(!ss) {
-        LOG4CXX_WARN(GET_LOGGER(Robot),"Robot::Mount: Warning, mounted robot sensors couldn't be loaded "<<i->second.c_str());
+        LOG4CXX_WARN(GET_LOGGER(Robot),"RobotModel::Mount: Warning, mounted robot sensors couldn't be loaded "<<i->second.c_str());
         continue;
       }
       //go through and modify names and all links in sensors
@@ -2046,13 +2061,13 @@ void Robot::Mount(int link, const Robot& subchain, const RigidTransform& T,const
         c = c->NextSiblingElement();
       }
       if(properties.count("sensors") > 0) {
-        LOG4CXX_INFO(GET_LOGGER(Robot),"Robot::Mount: Adding sensors as children of previous sensors");
+        LOG4CXX_INFO(GET_LOGGER(Robot),"RobotModel::Mount: Adding sensors as children of previous sensors");
         //add sensors onto my sensors
         TiXmlElement emaster("sensors");
         stringstream ss1(properties["sensors"]);
         ss1 >> emaster;
         if(!ss1) {
-          LOG4CXX_WARN(GET_LOGGER(Robot),"Robot::Mount: Warning, base robot's sensors couldn't be loaded "<<properties["sensors"]);
+          LOG4CXX_WARN(GET_LOGGER(Robot),"RobotModel::Mount: Warning, base robot's sensors couldn't be loaded "<<properties["sensors"]);
           continue;
         }
         TiXmlElement* c = e.FirstChildElement();
@@ -2072,20 +2087,20 @@ void Robot::Mount(int link, const Robot& subchain, const RigidTransform& T,const
 
     }
     else if(i->first == "controller") {
-      LOG4CXX_WARN(GET_LOGGER(Robot),"Robot::Mount: Warning, mounted robot will not preserve controller "<<i->second);
+      LOG4CXX_WARN(GET_LOGGER(Robot),"RobotModel::Mount: Warning, mounted robot will not preserve controller "<<i->second);
     }
   }
 }
 
-bool Robot::DoesJointAffect(int joint, int dof) const {
+bool RobotModel::DoesJointAffect(int joint, int dof) const {
   switch (joints[joint].type) {
-  case RobotJoint::Weld:
-  case RobotJoint::Normal:
-  case RobotJoint::Spin:
+  case RobotModelJoint::Weld:
+  case RobotModelJoint::Normal:
+  case RobotModelJoint::Spin:
     return joints[joint].linkIndex == dof;
-  case RobotJoint::Floating:
-  case RobotJoint::FloatingPlanar:
-  case RobotJoint::BallAndSocket: {
+  case RobotModelJoint::Floating:
+  case RobotModelJoint::FloatingPlanar:
+  case RobotModelJoint::BallAndSocket: {
     int link = joints[joint].linkIndex;
     while (link != joints[joint].baseIndex) {
       if (link == dof)
@@ -2100,17 +2115,17 @@ bool Robot::DoesJointAffect(int joint, int dof) const {
   }
 }
 
-void Robot::GetJointIndices(int joint, vector<int>& indices) const {
+void RobotModel::GetJointIndices(int joint, vector<int>& indices) const {
   switch (joints[joint].type) {
-  case RobotJoint::Weld:
-  case RobotJoint::Normal:
-  case RobotJoint::Spin:
+  case RobotModelJoint::Weld:
+  case RobotModelJoint::Normal:
+  case RobotModelJoint::Spin:
     indices.resize(1);
     indices[0] = joints[joint].linkIndex;
     break;
-  case RobotJoint::Floating:
-  case RobotJoint::FloatingPlanar:
-  case RobotJoint::BallAndSocket: {
+  case RobotModelJoint::Floating:
+  case RobotModelJoint::FloatingPlanar:
+  case RobotModelJoint::BallAndSocket: {
     indices.resize(0);
     int link = joints[joint].linkIndex;
     while (link != joints[joint].baseIndex) {
@@ -2126,7 +2141,7 @@ void Robot::GetJointIndices(int joint, vector<int>& indices) const {
   }
 }
 
-bool Robot::IsPassiveDOF(int dof) const {
+bool RobotModel::IsPassiveDOF(int dof) const {
   for (size_t i = 0; i < drivers.size(); i++)
     for (size_t j = 0; j < drivers.size(); j++)
       if (drivers[i].linkIndices[j] == dof)
@@ -2134,25 +2149,25 @@ bool Robot::IsPassiveDOF(int dof) const {
   return true;
 }
 
-bool Robot::DoesDriverAffect(int driver, int dof) const {
+bool RobotModel::DoesDriverAffect(int driver, int dof) const {
   return drivers[driver].Affects(dof);
 }
 
-void Robot::GetDriverIndices(int driver, vector<int>& indices) const {
+void RobotModel::GetDriverIndices(int driver, vector<int>& indices) const {
   indices = drivers[driver].linkIndices;
 }
 
-Vector2 Robot::GetDriverLimits(int d) const {
+Vector2 RobotModel::GetDriverLimits(int d) const {
   return Vector2(drivers[d].qmin, drivers[d].qmax);
 }
 
-Real Robot::GetDriverValue(int d) const {
+Real RobotModel::GetDriverValue(int d) const {
   switch (drivers[d].type) {
-  case RobotJointDriver::Normal:
-  case RobotJointDriver::Translation:
-  case RobotJointDriver::Rotation:
+  case RobotModelDriver::Normal:
+  case RobotModelDriver::Translation:
+  case RobotModelDriver::Rotation:
     return q(drivers[d].linkIndices[0]);
-  case RobotJointDriver::Affine: {
+  case RobotModelDriver::Affine: {
     Real vavg = 0;
     for (size_t i = 0; i < drivers[d].linkIndices.size(); i++) {
       int k = drivers[d].linkIndices[i];
@@ -2169,14 +2184,14 @@ Real Robot::GetDriverValue(int d) const {
   }
 }
 
-void Robot::SetDriverValue(int d, Real value) {
+void RobotModel::SetDriverValue(int d, Real value) {
   switch (drivers[d].type) {
-  case RobotJointDriver::Normal:
-  case RobotJointDriver::Translation:
-  case RobotJointDriver::Rotation:
+  case RobotModelDriver::Normal:
+  case RobotModelDriver::Translation:
+  case RobotModelDriver::Rotation:
     q(drivers[d].linkIndices[0]) = value;
     break;
-  case RobotJointDriver::Affine: {
+  case RobotModelDriver::Affine: {
     for (size_t i = 0; i < drivers[d].linkIndices.size(); i++) {
       int k = drivers[d].linkIndices[i];
       Assert(k >= 0 && k < q.n);
@@ -2189,7 +2204,7 @@ void Robot::SetDriverValue(int d, Real value) {
   }
 }
 
-void Robot::SetJointByTransform(int j, int link, const RigidTransform& Tl) {
+void RobotModel::SetJointByTransform(int j, int link, const RigidTransform& Tl) {
   vector<int> indices;
   GetJointIndices(j, indices);
   RigidTransform T0, T;
@@ -2200,18 +2215,18 @@ void Robot::SetJointByTransform(int j, int link, const RigidTransform& Tl) {
   T.mulInverseA(T0, Tl);
 
   switch (joints[j].type) {
-  case RobotJoint::Weld:
+  case RobotModelJoint::Weld:
     FatalError("Can't set a weld joint");
     break;
-  case RobotJoint::Normal:
-  case RobotJoint::Spin:
+  case RobotModelJoint::Normal:
+  case RobotModelJoint::Spin:
     Assert(joints[j].linkIndex == link);
     FatalError("TODO: infer Normal/Spin link parameter from transform");
     break;
-  case RobotJoint::BallAndSocket:
+  case RobotModelJoint::BallAndSocket:
     SetJointByOrientation(j, link, Tl.R);
     break;
-  case RobotJoint::Floating:
+  case RobotModelJoint::Floating:
     Assert(joints[j].linkIndex == link);
     {
       //TODO: only know how to do translation then RPY, make this more sophisticated
@@ -2248,7 +2263,7 @@ void Robot::SetJointByTransform(int j, int link, const RigidTransform& Tl) {
       e.get(q(rz), q(ry), q(rx));
     }
     break;
-  case RobotJoint::FloatingPlanar:
+  case RobotModelJoint::FloatingPlanar:
     Assert(joints[j].linkIndex == link);
     {
       Assert(indices.size() == 3);
@@ -2270,7 +2285,7 @@ void Robot::SetJointByTransform(int j, int link, const RigidTransform& Tl) {
   }
 }
 
-void Robot::SetJointByOrientation(int j, int link, const Matrix3& Rl) {
+void RobotModel::SetJointByOrientation(int j, int link, const Matrix3& Rl) {
   vector<int> indices;
   GetJointIndices(j, indices);
   Matrix3 R0, R;
@@ -2282,15 +2297,15 @@ void Robot::SetJointByOrientation(int j, int link, const Matrix3& Rl) {
   R.mulTransposeA(R0, Rl);
 
   switch (joints[j].type) {
-  case RobotJoint::Weld:
+  case RobotModelJoint::Weld:
     FatalError("Can't set a weld joint");
     break;
-  case RobotJoint::Normal:
-  case RobotJoint::Spin:
+  case RobotModelJoint::Normal:
+  case RobotModelJoint::Spin:
     Assert(joints[j].linkIndex == link);
     FatalError("TODO: infer link parameter from transform");
     break;
-  case RobotJoint::Floating:
+  case RobotModelJoint::Floating:
     Assert(joints[j].linkIndex == link);
     {
       //TODO: only know how to do RPY, make this more sophisticated
@@ -2315,7 +2330,7 @@ void Robot::SetJointByOrientation(int j, int link, const Matrix3& Rl) {
       e.get(q(rz), q(ry), q(rx));
     }
     break;
-  case RobotJoint::FloatingPlanar:
+  case RobotModelJoint::FloatingPlanar:
     Assert(joints[j].linkIndex == link);
     {
       Assert(indices.size() == 3);
@@ -2330,7 +2345,7 @@ void Robot::SetJointByOrientation(int j, int link, const Matrix3& Rl) {
       q(indices[2]) = Atan2(desx.y, desx.x);
     }
     break;
-  case RobotJoint::BallAndSocket:
+  case RobotModelJoint::BallAndSocket:
     Assert(joints[j].linkIndex == link);
     {
       //TODO: only know how to do RPY, make this more sophisticated
@@ -2360,13 +2375,13 @@ void Robot::SetJointByOrientation(int j, int link, const Matrix3& Rl) {
   }
 }
 
-Real Robot::GetDriverVelocity(int d) const {
+Real RobotModel::GetDriverVelocity(int d) const {
   switch (drivers[d].type) {
-  case RobotJointDriver::Normal:
-  case RobotJointDriver::Translation:
-  case RobotJointDriver::Rotation:
+  case RobotModelDriver::Normal:
+  case RobotModelDriver::Translation:
+  case RobotModelDriver::Rotation:
     return dq(drivers[d].linkIndices[0]);
-  case RobotJointDriver::Affine: {
+  case RobotModelDriver::Affine: {
     Real vavg = 0;
     for (size_t i = 0; i < drivers[d].linkIndices.size(); i++) {
       int k = drivers[d].linkIndices[i];
@@ -2381,18 +2396,18 @@ Real Robot::GetDriverVelocity(int d) const {
   }
 }
 
-void Robot::SetDriverVelocity(int d, Real value) {
+void RobotModel::SetDriverVelocity(int d, Real value) {
   switch (drivers[d].type) {
-  case RobotJointDriver::Normal:
+  case RobotModelDriver::Normal:
     Assert(drivers[d].linkIndices.size() == 1);
     dq[drivers[d].linkIndices[0]] = value;
     break;
-  case RobotJointDriver::Translation:
-  case RobotJointDriver::Rotation:
+  case RobotModelDriver::Translation:
+  case RobotModelDriver::Rotation:
     Assert(drivers[d].linkIndices.size() == 2);
     dq[drivers[d].linkIndices[0]] = value;
     break;
-  case RobotJointDriver::Affine: {
+  case RobotModelDriver::Affine: {
     for (size_t j = 0; j < drivers[d].linkIndices.size(); j++)
       dq[drivers[d].linkIndices[j]] = value * drivers[d].affScaling[j];
   }
@@ -2430,18 +2445,18 @@ void AngVelToEulerAngles(const Vector3& theta, const Vector3& w,
   Assert(res == true);
 }
 
-void Robot::SetJointVelocityByMoment(int j, int link, const Vector3& w,
+void RobotModel::SetJointVelocityByMoment(int j, int link, const Vector3& w,
     const Vector3& v) {
   switch (joints[j].type) {
-  case RobotJoint::Weld:
+  case RobotModelJoint::Weld:
     FatalError("Can't set a weld joint");
     break;
-  case RobotJoint::Normal:
-  case RobotJoint::Spin:
+  case RobotModelJoint::Normal:
+  case RobotModelJoint::Spin:
     Assert(joints[j].linkIndex == link);
     FatalError("TODO: infer Normal/Spin link velocity from twist");
     break;
-  case RobotJoint::Floating: {
+  case RobotModelJoint::Floating: {
     //TODO: only know how to do translation then RPY, make this more sophisticated
     //TODO: only know how to do identity root transforms
     vector<int> indices;
@@ -2481,7 +2496,7 @@ void Robot::SetJointVelocityByMoment(int j, int link, const Vector3& w,
     dtheta.get(dq(rz), dq(ry), dq(rx));
   }
     break;
-  case RobotJoint::FloatingPlanar: {
+  case RobotModelJoint::FloatingPlanar: {
     vector<int> indices;
     GetJointIndices(j, indices);
     Assert(joints[j].baseIndex == -1);
@@ -2495,7 +2510,7 @@ void Robot::SetJointVelocityByMoment(int j, int link, const Vector3& w,
     dq(indices[2]) = w.dot(links[indices[2]].w);
   }
     break;
-  case RobotJoint::BallAndSocket: {
+  case RobotModelJoint::BallAndSocket: {
     //TODO: only know how to do RPY, make this more sophisticated
     vector<int> indices;
     GetJointIndices(j, indices);
@@ -2527,15 +2542,15 @@ void Robot::SetJointVelocityByMoment(int j, int link, const Vector3& w,
   }
 }
 
-void Robot::GetDriverJacobian(int d, Vector& J) {
+void RobotModel::GetDriverJacobian(int d, Vector& J) {
   J.resize(links.size(), Zero);
   switch (drivers[d].type) {
-  case RobotJointDriver::Normal:
-  case RobotJointDriver::Rotation:
-  case RobotJointDriver::Translation:
+  case RobotModelDriver::Normal:
+  case RobotModelDriver::Rotation:
+  case RobotModelDriver::Translation:
     J(drivers[d].linkIndices[0]) = 1.0;
     break;
-  case RobotJointDriver::Affine: {
+  case RobotModelDriver::Affine: {
     for (size_t j = 0; j < drivers[d].linkIndices.size(); j++)
       J(drivers[d].linkIndices[j]) = drivers[d].affScaling[j];
   }
@@ -2546,7 +2561,7 @@ void Robot::GetDriverJacobian(int d, Vector& J) {
   }
 }
 
-bool Robot::LoadURDF(const char* fn)
+bool RobotModel::LoadURDF(const char* fn)
 {
   string localfile = MakeURLLocal(fn);
   if(localfile.empty()) return false;
@@ -2555,12 +2570,12 @@ bool Robot::LoadURDF(const char* fn)
   //Get content from the Willow Garage parser
   std::shared_ptr<urdf::ModelInterface> parser = urdf::parseURDF(localfile);
   if(!parser) {
-    LOG4CXX_ERROR(GET_LOGGER(URDFParser),"Robot::LoadURDF: error parsing XML");
+    LOG4CXX_ERROR(GET_LOGGER(URDFParser),"RobotModel::LoadURDF: error parsing XML");
     return false;
   }
   std::shared_ptr<urdf::Link> root_link = parser->root_link_;
   if (!root_link) {
-    LOG4CXX_ERROR(GET_LOGGER(URDFParser),"Robot::LoadURDF: Root link is NULL");
+    LOG4CXX_ERROR(GET_LOGGER(URDFParser),"RobotModel::LoadURDF: Root link is NULL");
     return false;
   }
 
@@ -2961,14 +2976,14 @@ bool Robot::LoadURDF(const char* fn)
 
     //floating base joint
     if(!freezeRootLink) {
-      this->joints[0].type = RobotJoint::Floating;
+      this->joints[0].type = RobotModelJoint::Floating;
       this->joints[0].linkIndex = 5;
       this->joints[0].baseIndex = -1;
     }
     else {
       //freezeRootLink = true, so freeze all those links
       for(int i=0;i<6;i++) {
-        this->joints[i].type =  RobotJoint::Weld;
+        this->joints[i].type =  RobotModelJoint::Weld;
         this->joints[i].linkIndex = i;
         this->joints[i].baseIndex = -1;
       }
@@ -2976,7 +2991,7 @@ bool Robot::LoadURDF(const char* fn)
   }
   else {
     //fixed base
-    this->joints[0].type =  RobotJoint::Weld;
+    this->joints[0].type =  RobotModelJoint::Weld;
     this->joints[0].linkIndex = 0;
     this->joints[0].baseIndex = -1;
   }
@@ -3085,11 +3100,11 @@ bool Robot::LoadURDF(const char* fn)
         this->accMax[link_index] = customAccMax[linkNode->link->name];
       else
         this->accMax[link_index] = default_acc_max;
-      if(this->joints[joint_index].type == RobotJoint::Spin) {
+      if(this->joints[joint_index].type == RobotModelJoint::Spin) {
           this->qMax[link_index] = Inf;
           this->qMin[link_index] = -Inf;
       }
-      if(this->joints[joint_index].type == RobotJoint::Weld){
+      if(this->joints[joint_index].type == RobotModelJoint::Weld){
         qMin[link_index] = 0;
         qMax[link_index] = 0;
         velMin[link_index] = 0;
@@ -3112,12 +3127,12 @@ bool Robot::LoadURDF(const char* fn)
           LOG4CXX_WARN(GET_LOGGER(URDFParser), "Couldn't load mimic joint "<<joint->name);
         }
       }
-      if (this->joints[joint_index].type == RobotJoint::Normal
-          || this->joints[joint_index].type == RobotJoint::Spin) {
+      if (this->joints[joint_index].type == RobotModelJoint::Normal
+          || this->joints[joint_index].type == RobotModelJoint::Spin) {
         int linkI = this->joints[joint_index].linkIndex;
-        RobotJointDriver driver;
+        RobotModelDriver driver;
         driverNames.push_back(linkNames[linkI]);
-        driver.type = RobotJointDriver::Normal;
+        driver.type = RobotModelDriver::Normal;
         driver.linkIndices.push_back(linkI);
         driver.qmin = qMin(linkI);
         driver.qmax = qMax(linkI);
@@ -3178,7 +3193,7 @@ bool Robot::LoadURDF(const char* fn)
     if(affineJointParents[i] >= 0) {
       Assert(linkToDriver.count(affineJointParents[i]) > 0);
       int d=linkToDriver[affineJointParents[i]];
-      drivers[d].type = RobotJointDriver::Affine;
+      drivers[d].type = RobotModelDriver::Affine;
       if(drivers[d].affScaling.empty()) {
         drivers[d].affScaling.push_back(1);
         drivers[d].affOffset.push_back(0);
@@ -3186,6 +3201,42 @@ bool Robot::LoadURDF(const char* fn)
       drivers[d].linkIndices.push_back(i);
       drivers[d].affScaling.push_back(affineJointScales[i]);
       drivers[d].affOffset.push_back(affineJointOffsets[i]);
+    }
+  }
+  //setup affine driver limits
+  for(size_t i=0;i<drivers.size();i++) {
+    if(drivers[i].type == RobotModelDriver::Affine) {  //set acceleration limits from robot's acceleration limits
+      drivers[i].qmin = -Inf;
+      drivers[i].qmax = Inf;
+      drivers[i].vmin = -Inf;
+      drivers[i].vmax = Inf;
+      drivers[i].amin = -Inf;
+      drivers[i].amax = Inf;
+      drivers[i].tmin = -Inf;
+      drivers[i].tmax = Inf;
+      for(size_t j=0;j<drivers[i].linkIndices.size();j++) {
+        Real s = drivers[i].affScaling[j];
+        if(s > 0) {
+          drivers[i].qmin = Max(drivers[i].qmin,qMin[drivers[i].linkIndices[j]]/s);
+          drivers[i].qmax = Min(drivers[i].qmax,qMax[drivers[i].linkIndices[j]]/s);
+          drivers[i].vmin = Max(drivers[i].vmin,-velMin[drivers[i].linkIndices[j]]/s);
+          drivers[i].vmax = Min(drivers[i].vmax,velMax[drivers[i].linkIndices[j]]/s);
+          drivers[i].amin = Max(drivers[i].amin,-accMax[drivers[i].linkIndices[j]]/s);
+          drivers[i].amax = Min(drivers[i].amax,accMax[drivers[i].linkIndices[j]]/s);
+          drivers[i].tmin = Max(drivers[i].tmin,-torqueMax[drivers[i].linkIndices[j]]/s);
+          drivers[i].tmax = Min(drivers[i].tmax,torqueMax[drivers[i].linkIndices[j]]/s);
+        }
+        else if(s < 0) {
+          drivers[i].qmin = Max(drivers[i].qmin,qMax[drivers[i].linkIndices[j]]/s);
+          drivers[i].qmax = Min(drivers[i].qmax,qMin[drivers[i].linkIndices[j]]/s);
+          drivers[i].vmin = Max(drivers[i].vmin,velMin[drivers[i].linkIndices[j]]/s);
+          drivers[i].vmax = Min(drivers[i].vmax,-velMax[drivers[i].linkIndices[j]]/s);
+          drivers[i].amin = Max(drivers[i].amin,accMax[drivers[i].linkIndices[j]]/s);
+          drivers[i].amax = Min(drivers[i].amax,-accMax[drivers[i].linkIndices[j]]/s);
+          drivers[i].tmin = Max(drivers[i].tmin,torqueMax[drivers[i].linkIndices[j]]/s);
+          drivers[i].tmax = Min(drivers[i].tmax,-torqueMax[drivers[i].linkIndices[j]]/s);
+        }
+      }
     }
   }
 
@@ -3203,7 +3254,7 @@ bool Robot::LoadURDF(const char* fn)
     else link_index -= 1;
 
     //geometry
-    if (!linkNode->geomName.empty() && !Robot::disableGeometryLoading) {
+    if (!linkNode->geomName.empty() && !RobotModel::disableGeometryLoading) {
       string fn;
       geomFiles[link_index] = linkNode->geomName;
       fn = ResolveFileReference(path,linkNode->geomName);
@@ -3262,6 +3313,8 @@ bool Robot::LoadURDF(const char* fn)
         urdf::Color c=linkNode->link->visual->material->color;
         this->geomManagers[link_index].SetUniqueAppearance();
         this->geomManagers[link_index].Appearance()->faceColor.set(c.r,c.g,c.b,c.a);
+        this->geomManagers[link_index].Appearance()->vertexColors.clear();
+        this->geomManagers[link_index].Appearance()->faceColors.clear();
       }
       Matrix4 ident; ident.setIdentity();
       if(!linkNode->geomScale.isEqual(ident)) {
@@ -3275,19 +3328,17 @@ bool Robot::LoadURDF(const char* fn)
   //first mount the geometries, they affect whether a link is included in self collision testing
   vector<int> mountLinkIndices(mountLinks.size());
   for (size_t i = 0; i < mountLinks.size(); i++) {
-    int linkIndex = LinkIndex(mountLinks[i].c_str());
-    if(linkIndex < 0) {
-      LOG4CXX_ERROR(GET_LOGGER(URDFParser),"   Invalid mount link "<<mountLinks[i]);
-      return false;
-    }
-    mountLinkIndices[i] = linkIndex;
-  }
-  for (size_t i = 0; i < mountLinks.size(); i++) {
     const char* ext = FileExtension(mountFiles[i].c_str());
     if(ext && (0==strcmp(ext,"rob") || 0==strcmp(ext,"urdf"))) {
       //its a robot, delay til later
     }
     else {
+      int linkIndex = LinkIndex(mountLinks[i].c_str());
+      if(linkIndex < 0) {
+        LOG4CXX_ERROR(GET_LOGGER(URDFParser),"   Invalid mount link "<<mountLinks[i]);
+        return false;
+      }
+      mountLinkIndices[i] = linkIndex;
       string fn = ResolveFileReference(path,mountFiles[i]);
       LOG4CXX_INFO(GET_LOGGER(URDFParser),"   Mounting geometry file " << mountFiles[i]);
       //mount a triangle mesh on top of another triangle mesh
@@ -3323,7 +3374,7 @@ bool Robot::LoadURDF(const char* fn)
       }
       if(link1 > link2) Swap(link1,link2);
       if(!(link1 < link2)) {
-        LOG4CXX_ERROR(GET_LOGGER(URDFParser),"Robot::LoadURDF(): Invalid self collision pair "<<selfCollision[i].first<<", "<<selfCollision[i].second);
+        LOG4CXX_ERROR(GET_LOGGER(URDFParser),"RobotModel::LoadURDF(): Invalid self collision pair "<<selfCollision[i].first<<", "<<selfCollision[i].second);
           return false;
       }
       InitSelfCollisionPair(link1,link2);
@@ -3348,9 +3399,15 @@ bool Robot::LoadURDF(const char* fn)
   for (size_t i = 0; i < mountLinks.size(); i++) {
     const char* ext = FileExtension(mountFiles[i].c_str());
     if(ext && (0==strcmp(ext,"rob") || 0==strcmp(ext,"urdf"))) {
+      int linkIndex = LinkIndex(mountLinks[i].c_str());
+      if(linkIndex < 0) {
+        LOG4CXX_ERROR(GET_LOGGER(URDFParser),"   Invalid mount link "<<mountLinks[i]);
+        return false;
+      }
+      mountLinkIndices[i] = linkIndex;
       string fn = ResolveFileReference(path,mountFiles[i]);
       LOG4CXX_INFO(GET_LOGGER(URDFParser),"   Mounting subchain file " << mountFiles[i]);
-      Robot subchain;
+      RobotModel subchain;
       if (!subchain.Load(fn.c_str())) {
         LOG4CXX_ERROR(GET_LOGGER(URDFParser),"   Error reading subchain file " << fn);
         return false;
@@ -3440,7 +3497,7 @@ bool Robot::LoadURDF(const char* fn)
   return true;
 }
 
-void Robot::ComputeLipschitzMatrix()
+void RobotModel::ComputeLipschitzMatrix()
 {
   Timer timer;
   lipschitzMatrix.resize(links.size(), links.size(), 0.0);
@@ -3494,7 +3551,7 @@ void Robot::ComputeLipschitzMatrix()
 //defined in ODERobot.cpp
 Matrix3 TranslateInertia(const Matrix3& Hc,const Vector3& c,Real mass);
 
-void Robot::Reduce(Robot& reduced,vector<int>& dofMap)
+void RobotModel::Reduce(RobotModel& reduced,vector<int>& dofMap)
 {
   vector<bool> fixedLink(q.n,false);
   vector<int> fixedParent(q.n,-1);
@@ -3503,7 +3560,7 @@ void Robot::Reduce(Robot& reduced,vector<int>& dofMap)
       fixedLink[i] = true;
   }
   for(size_t i=0;i<joints.size();i++)
-    if(joints[i].type == RobotJoint::Weld) {
+    if(joints[i].type == RobotModelJoint::Weld) {
       fixedLink[joints[i].linkIndex] = true;
     }
   for(size_t i=0;i<drivers.size();i++)
@@ -3660,7 +3717,7 @@ void Robot::Reduce(Robot& reduced,vector<int>& dofMap)
       mappedIndices[j] = robotToFree[d.linkIndices[j]];
     }
     if(!include) {
-      LOG4CXX_WARN(GET_LOGGER(Robot),"Robot::Reduce: driver dropped because it drives a fixed link??");
+      LOG4CXX_WARN(GET_LOGGER(Robot),"RobotModel::Reduce: driver dropped because it drives a fixed link??");
       continue;
     }
     reduced.drivers.push_back(d);
@@ -3672,7 +3729,7 @@ void Robot::Reduce(Robot& reduced,vector<int>& dofMap)
   for(size_t i=0;i<joints.size();i++) {
     const auto& j=joints[i];
     if(fixedLink[j.linkIndex]) continue;
-    Assert(j.type != RobotJoint::Weld);
+    Assert(j.type != RobotModelJoint::Weld);
     reduced.joints.push_back(j);
     Assert(j.linkIndex >= 0);
     reduced.joints.back().linkIndex = robotToFree[j.linkIndex];
@@ -3682,7 +3739,7 @@ void Robot::Reduce(Robot& reduced,vector<int>& dofMap)
   dofMap = robotToFree;
 }
 
-void Robot::Merge(const std::vector<Robot*>& robots)
+void RobotModel::Merge(const std::vector<RobotModel*>& robots)
 {
   vector<RobotWithGeometry*> grobots(robots.size());
   copy(robots.begin(),robots.end(),grobots.begin());
@@ -3725,3 +3782,13 @@ void Robot::Merge(const std::vector<Robot*>& robots)
     copy(robots[i]->driverNames.begin(),robots[i]->driverNames.end(),driverNames.begin()+doffset[i]);
   }
 }
+
+void RobotModel::ConfigureDriverConstraints(RobotIKFunction& f)
+{
+  for(auto d:drivers)
+    if(d.type == RobotModelDriver::Affine) {
+      f.UseAffineConstraint(d.linkIndices,d.affScaling,d.affOffset);
+    }
+}
+
+} //Klampt

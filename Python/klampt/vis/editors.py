@@ -16,10 +16,13 @@ from . import gldraw
 from . import visualization
 import time
 from ..math import vectorops,so3,se3
-from ..robotsim import WidgetSet,RobotPoser,ObjectPoser,TransformPoser,PointPoser,AABBPoser,BoxPoser,SpherePoser,WorldModel,RobotModelLink,RigidObjectModel,TerrainModel,IKObjective,Appearance,Geometry3D
+from ..robotsim import WidgetSet,RobotPoser,ObjectPoser,TransformPoser,PointPoser,AABBPoser,BoxPoser,SpherePoser,WorldModel,RobotModel,RobotModelLink,RigidObjectModel,TerrainModel,IKObjective,Appearance,Geometry3D
 from ..model.subrobot import SubRobotModel
 from ..model import trajectory
 from ..model import collide
+import warnings
+from ..model.typing import Config, Vector, Vector3, RigidTransform
+from typing import Optional, Sequence, List, Tuple, Any
 from OpenGL.GL import *
 
 class VisualEditorBase(glcommon.GLWidgetPlugin):
@@ -27,31 +30,31 @@ class VisualEditorBase(glcommon.GLWidgetPlugin):
     :func:`run`.
     """
     
-    def __init__(self,name,value,description,world):
+    def __init__(self, name : str, value, description : str, world : WorldModel):
         glcommon.GLWidgetPlugin.__init__(self)
         self.name = name
         self.value = value
         self.description = description
         self.world = world
-    def instructions(self):
+    def instructions(self) -> Optional[str]:
         return None
-    def loadable(self):
+    def loadable(self) -> bool:
         """Whether Load... should be shown"""
         return True
-    def savable(self):
+    def savable(self) -> bool:
         """Whether Save... should be shown"""
         return True
-    def display(self):
+    def display(self) -> bool:
         if self.world: self.world.drawGL()
         self.klamptwidgetmaster.drawGL(self.viewport())
         return True
-    def updateGuiFromValue(self):
+    def update_gui_from_value(self):
         """Called when the value is externally changed (from Load...)"""
         return
-    def updateValueFromGui(self):
+    def update_value_from_gui(self):
         """Called when the value is requested (from Save... and OK)"""
         return
-    def addDialogItems(self,parent,ui='qt'):
+    def add_dialog_items(self,parent,ui='qt'):
         return
     def display_screen(self):
         pass
@@ -78,7 +81,7 @@ class ConfigEditor(VisualEditorBase):
     Either a world or a :class:`~klampt.RobotModel` or
     :class:`~klampt.SubRobotModel` must be provided.
     """
-    def __init__(self,name,value,description,world,robot=None):
+    def __init__(self, name : str, value : Config, description : str, world : WorldModel, robot : RobotModel=None):
         VisualEditorBase.__init__(self,name,value,description,world)
         if robot is None:
             robot = world.robot(0)
@@ -114,7 +117,7 @@ class ConfigEditor(VisualEditorBase):
         self.klamptwidgetmaster.drawGL(self.viewport())
         return False
 
-    def updateGuiFromValue(self):
+    def update_gui_from_value(self):
         self.robotposer.set(self.value)
         self.refresh()
 
@@ -127,7 +130,7 @@ class ConfigsEditor(VisualEditorBase):
     Either a world or a :class:`~klampt.RobotModel` or
     :class:`~klampt.SubRobotModel` must be provided.
     """
-    def __init__(self,name,value,description,world,robot=None):
+    def __init__(self, name : str, value : List[Config], description : str, world : WorldModel, robot : RobotModel=None):
         VisualEditorBase.__init__(self,name,value,description,world)
         if robot is None:
             robot = world.robot(0)
@@ -145,7 +148,7 @@ class ConfigsEditor(VisualEditorBase):
     def instructions(self):
         return 'Right-click and drag on the robot links to pose the robot.\nKeyboard i: insert, d: delete, < to select previous, > to select next'
 
-    def addDialogItems(self,parent,ui='qt'):
+    def add_dialog_items(self,parent,ui='qt'):
         self.indexSpinBox = QSpinBox()
         self.indexSpinBox.setRange(0,len(self.value)-1)
         layout = QHBoxLayout(parent)
@@ -159,7 +162,7 @@ class ConfigsEditor(VisualEditorBase):
         layout.addWidget(self.deleteButton)
         self.insertButton.clicked.connect(self.insert)
         self.deleteButton.clicked.connect(self.delete)
-        self.indexSpinBox.valueChanged.connect(self.indexChanged)
+        self.indexSpinBox.valueChanged.connect(self.index_changed)
 
     def insert(self):
         if self.editingIndex < 0:
@@ -190,7 +193,7 @@ class ConfigsEditor(VisualEditorBase):
             self.indexSpinBox.setValue(self.editingIndex)
         self.refresh()
 
-    def indexChanged(self,index):
+    def index_changed(self,index):
         self.editingIndex = index
         if index >= 0 and index < len(self.value):
             if isinstance(self.robot,SubRobotModel):
@@ -222,13 +225,13 @@ class ConfigsEditor(VisualEditorBase):
             if self.editingIndex < 0:
                 self.editingIndex = min(len(self.durations)-1,0)
             self.indexSpinBox.setValue(self.editingIndex)
-            self.indexChanged(self.editingIndex)
+            self.index_changed(self.editingIndex)
             return True
         elif c=='.' or c=='>':
             self.editingIndex += 1
             self.editingIndex = min(len(self.durations)-1,self.editingIndex)
             self.indexSpinBox.setValue(self.editingIndex)
-            self.indexChanged(self.editingIndex)
+            self.index_changed(self.editingIndex)
             return True
 
     def display(self):
@@ -274,11 +277,11 @@ class ConfigsEditor(VisualEditorBase):
             self.robot.link(j).appearance().set(oldAppearances[j])
         glDisable(GL_BLEND)
 
-    def updateGuiFromValue(self):
+    def update_gui_from_value(self):
         if self.editingIndex >= len(self.value):
             self.editingIndex = len(self.value)-1
         self.indexSpinBox.setValue(self.editingIndex)
-        self.indexChanged(self.editingIndex)
+        self.index_changed(self.editingIndex)
 
 
 class TrajectoryEditor(VisualEditorBase):
@@ -288,7 +291,7 @@ class TrajectoryEditor(VisualEditorBase):
     If a Trajectory is given, then it must either be attached to a robot or
     a 1D, 2D, or 3D trajectory.
     """
-    def __init__(self,name,value,description,world,robot=None):
+    def __init__(self, name : str, value : trajectory.Trajectory, description : str, world : WorldModel, robot : RobotModel=None):
         VisualEditorBase.__init__(self,name,value,description,world)
         if robot is None:
             if isinstance(value,trajectory.RobotTrajectory):
@@ -340,7 +343,7 @@ class TrajectoryEditor(VisualEditorBase):
         else:
             raise NotImplementedError("Can't edit trajectories except for robot trajectories, R^2, R^3, or SE(3) trajectories yet")
         self.addWidget(self.milestoneposer)
-        self.updateAnimTrajectory()
+        self.update_anim_trajectory()
     
     def attach(self,object,relativePose=None):
         """For an SE3 trajectory, shows the given object relative to the edited transform trajectory"""
@@ -388,7 +391,7 @@ class TrajectoryEditor(VisualEditorBase):
         else:
             return 'Right-click and drag on the poser to set keyframes.\nKeyboard i: insert, d: delete, < to select previous, > to select next'
 
-    def addDialogItems(self,parent,ui='qt'):
+    def add_dialog_items(self,parent,ui='qt'):
         vlayout = QVBoxLayout(parent)
         #adding and editing keyframes
         self.indexSpinBox = QSpinBox()
@@ -400,8 +403,8 @@ class TrajectoryEditor(VisualEditorBase):
         self.durationSpinBox.setDecimals(4)
         self.insertButton = QPushButton("Insert")
         self.deleteButton = QPushButton("Delete")
-        self.indexSpinBox.valueChanged.connect(self.indexChanged)
-        self.durationSpinBox.valueChanged.connect(self.durationChanged)
+        self.indexSpinBox.valueChanged.connect(self.index_changed)
+        self.durationSpinBox.valueChanged.connect(self.duration_changed)
         self.insertButton.clicked.connect(self.insert)
         self.deleteButton.clicked.connect(self.delete)
 
@@ -422,10 +425,10 @@ class TrajectoryEditor(VisualEditorBase):
         self.timeDriver = QSlider()
         self.timeDriver.setOrientation(Qt.Horizontal)
         self.timeDriver.setRange(0,1000)
-        self.timeDriver.valueChanged.connect(self.timeDriverChanged)
+        self.timeDriver.valueChanged.connect(self.time_driver_changed)
         self.playButton = QPushButton("Play")
         self.playButton.setCheckable(True)
-        self.playButton.toggled.connect(self.togglePlay)
+        self.playButton.toggled.connect(self.toggle_play)
 
         layout = QHBoxLayout()
         vlayout.addLayout(layout)
@@ -436,7 +439,7 @@ class TrajectoryEditor(VisualEditorBase):
             self.animSelector.addItem("Linear (RobotTrajectory)")
         #self.animSelector.addItem("Retimed")
         #self.animSelector.addItem("Retimed-spline")
-        self.animSelector.currentIndexChanged.connect(self.animSelectorChanged)
+        self.animSelector.currentIndexChanged.connect(self.anim_selector_changed)
 
         label = QLabel("Time")
         label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
@@ -448,12 +451,17 @@ class TrajectoryEditor(VisualEditorBase):
         label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         layout.addWidget(label)
         layout.addWidget(self.animSelector)
-        self.indexChanged(self.editingIndex)
+        self.index_changed(self.editingIndex)
 
     def insert(self):
         if self.editingIndex < 0:
-            self.value.times.append(0.0)
+            if len(self.value.times) == 0:
+                self.value.times.append(0.0)
+                self.durations.append(0.0)
+                self.value.milestones.append(self.poser_to_milestone())
+            self.value.times.append(self.value.times[-1]+self.durationSpinBox.value())
             self.value.milestones.append(self.poser_to_milestone())
+            self.durations.append(self.durationSpinBox.value())
             self.editingIndex = len(self.durations)-1
         else:
             newdur = 1.0
@@ -470,7 +478,7 @@ class TrajectoryEditor(VisualEditorBase):
                 newdur = self.value.times[self.editingIndex]-self.value.times[self.editingIndex-1]
             self.durations.insert(self.editingIndex+1,newdur)
             self.value.milestones.insert(self.editingIndex+1,self.poser_to_milestone())
-            self.onDurationsChanged()
+            self.on_durations_changed()
             self.editingIndex += 1
         if hasattr(self,'indexSpinBox'):
             self.indexSpinBox.setRange(0,len(self.durations)-1)
@@ -485,7 +493,7 @@ class TrajectoryEditor(VisualEditorBase):
                 self.editingIndex = len(self.durations)-1
             if self.editingIndex >= 0:
                 self.milestone_to_poser(self.value.milestones[self.editingIndex])
-            self.onDurationsChanged()
+            self.on_durations_changed()
             #print("Now has",len(self.durations),"configs, editing index",self.editingIndex)
         if hasattr(self,'indexSpinBox'):
             self.indexSpinBox.setRange(0,len(self.durations)-1)
@@ -494,7 +502,7 @@ class TrajectoryEditor(VisualEditorBase):
                 self.durationSpinBox.setValue(self.durations[self.editingIndex])
         self.refresh()
 
-    def indexChanged(self,index):
+    def index_changed(self,index):
         self.editingIndex = index
         if index >= 0 and index < len(self.durations):
             self.durationSpinBox.setValue(self.durations[self.editingIndex])
@@ -507,23 +515,23 @@ class TrajectoryEditor(VisualEditorBase):
                     self.timeDriver.setValue(int(1000*(self.animTrajectoryTime - self.value.times[0])/self.value.duration()))
         self.refresh()
 
-    def durationChanged(self,value):
+    def duration_changed(self,value):
         if self.editingIndex >= 0 and self.editingIndex < len(self.durations):
             self.durations[self.editingIndex] = max(value,0.0)
-            self.onDurationsChanged()
+            self.on_durations_changed()
         self.refresh()
 
-    def timeDriverChanged(self,value):
+    def time_driver_changed(self,value):
         u = value * 0.001
         self.animTrajectoryTime = self.animTrajectory.times[0] + u*self.animTrajectory.duration()
         self.refresh()
 
-    def animSelectorChanged(self,value):
+    def anim_selector_changed(self,value):
         self.animSelectorValue = value
-        self.updateAnimTrajectory()
+        self.update_anim_trajectory()
         self.refresh()
 
-    def togglePlay(self,value):
+    def toggle_play(self,value):
         self.animating = value
         self.refresh()
         if value:
@@ -532,7 +540,7 @@ class TrajectoryEditor(VisualEditorBase):
             #self.idlesleep(float('inf'))
             self.idlesleep(0.1)
 
-    def onDurationsChanged(self):
+    def on_durations_changed(self):
         """Update the trajectory times"""
         if len(self.durations)==0:
             self.value.times = []
@@ -540,12 +548,12 @@ class TrajectoryEditor(VisualEditorBase):
             self.value.times = [self.durations[0]]
             for i in range(1,len(self.durations)):
                 self.value.times.append(self.value.times[-1] + self.durations[i])
-        self.updateAnimTrajectory()
+        self.update_anim_trajectory()
         if not self.animating:
             if hasattr(self,'timeDriver'):
                 self.timeDriver.setValue(int(1000*(self.animTrajectoryTime - self.value.times[0])/self.value.duration()))
 
-    def updateAnimTrajectory(self):
+    def update_anim_trajectory(self):
         from ..model import trajectory
         if self.animSelectorValue == 1:
             if isinstance(self.value,trajectory.SE3Trajectory):
@@ -578,14 +586,14 @@ class TrajectoryEditor(VisualEditorBase):
                 self.editingIndex = min(len(self.durations)-1,0)
             if hasattr(self,'indexSpinBox'):
                 self.indexSpinBox.setValue(self.editingIndex)
-                self.indexChanged(self.editingIndex)
+                self.index_changed(self.editingIndex)
             return True
         elif c=='.' or c=='>':
             self.editingIndex += 1
             self.editingIndex = min(len(self.durations)-1,self.editingIndex)
             if hasattr(self,'indexSpinBox'):
                 self.indexSpinBox.setValue(self.editingIndex)
-                self.indexChanged(self.editingIndex)
+                self.index_changed(self.editingIndex)
             return True
 
     def display(self):
@@ -608,7 +616,7 @@ class TrajectoryEditor(VisualEditorBase):
             oldAppearances = [self.robot.link(j).appearance().clone() for j in range(self.robot.numLinks())]
 
         #draw animation, if available
-        if self.animTrajectoryTime is not None:
+        if self.animTrajectoryTime is not None and self.animTrajectory.times:
             if self.robot is not None:
                 for j in range(self.robot.numLinks()):
                     self.robot.link(j).appearance().setColor(1.0,1.0,0,0.5)
@@ -741,7 +749,7 @@ class TrajectoryEditor(VisualEditorBase):
         self.lastAnimTrajectoryTime = t
         return False
 
-    def updateGuiFromValue(self):
+    def update_gui_from_value(self):
         if self.editingIndex >= len(self.value.times):
             self.editingIndex = len(self.value.times)-1
         self.durations = []
@@ -750,14 +758,14 @@ class TrajectoryEditor(VisualEditorBase):
             for i in range(len(self.value.times)-1):
                 self.durations.append(self.value.times[i+1]-self.value.times[i])
         self.indexSpinBox.setValue(self.editingIndex)
-        self.indexChanged(self.editingIndex)
-        self.onDurationsChanged()
+        self.index_changed(self.editingIndex)
+        self.on_durations_changed()
 
 
 class SelectionEditor(VisualEditorBase):
     """Edits a list of indices selecting some links of a robot.
     """
-    def __init__(self,name,value,description,world,robot=None):
+    def __init__(self, name : str, value : List[int], description : str, world : WorldModel, robot : RobotModel=None):
         VisualEditorBase.__init__(self,name,value,description,world)
         self.robot = robot
         self.lastClicked = -1
@@ -767,7 +775,7 @@ class SelectionEditor(VisualEditorBase):
     def instructions(self):
         return 'Right-click to toggle selection of robot links / objects in the world.\nKeyboard: < to deselect previous, > to select next'
 
-    def addDialogItems(self,parent,ui='qt'):
+    def add_dialog_items(self,parent,ui='qt'):
         layout = QHBoxLayout(parent)
         self.clearButton = QPushButton("Clear")
         self.selectAllButton = QPushButton("Select all")
@@ -779,13 +787,13 @@ class SelectionEditor(VisualEditorBase):
         elif self.world != None:
             for i in range(self.world.numIDs()):
                 self.selectionList.addItem(self.world.getName(i))
-        self.updateGuiFromValue()
+        self.update_gui_from_value()
         layout.addWidget(self.clearButton)
         layout.addWidget(self.selectAllButton)
         layout.addWidget(self.selectionList)
         self.clearButton.clicked.connect(self.clear)
-        self.selectAllButton.clicked.connect(self.selectAll)
-        self.selectionList.itemSelectionChanged.connect(self.selectionListChanged)
+        self.selectAllButton.clicked.connect(self.select_all)
+        self.selectionList.itemSelectionChanged.connect(self.selection_list_changed)
         self.selectionListChangeFlag = False
 
     def clear(self):
@@ -793,7 +801,7 @@ class SelectionEditor(VisualEditorBase):
         self.selectionList.clearSelection()
         self.refresh()
 
-    def selectAll(self):
+    def select_all(self):
         if self.robot is None:
             #select all ids in the world
             self.value = list(range(self.world.numIDs()))
@@ -836,7 +844,7 @@ class SelectionEditor(VisualEditorBase):
         self.lastClicked = id
         self.refresh()
 
-    def selectionListChanged(self):
+    def selection_list_changed(self):
         #if the GUI has changed the selection then don't update the selection list
         if self.selectionListChangeFlag: return
         self.value = []
@@ -927,7 +935,7 @@ class SelectionEditor(VisualEditorBase):
             apps[i].set(self.oldAppearances[i])
         glDisable(GL_BLEND)
 
-    def updateGuiFromValue(self):
+    def update_gui_from_value(self):
         self.selectionList.clearSelection()
         for i in self.value:
             self.selectionList.setCurrentItem(self.selectionList.item(i),QItemSelectionModel.Select)
@@ -936,11 +944,11 @@ class SelectionEditor(VisualEditorBase):
 class PointEditor(VisualEditorBase):
     """Edits a 3-D point.
 
-    If ``frame`` is given, then it is :mod:`klampt.math.se3` element, and the
+    If ``frame`` is given, then it is a :mod:`klampt.math.se3` element, and the
     input and output are measured with respect to that frame.  However, the
     editing is done in world coordinates.
     """
-    def __init__(self,name,value,description,world,frame=None):
+    def __init__(self, name : str, value : Vector3, description : str, world : WorldModel, frame : RigidTransform=None):
         VisualEditorBase.__init__(self,name,value,description,world)
         self.frame = se3.identity() if frame is None else frame
         self.pointposer = PointPoser()
@@ -956,7 +964,7 @@ class PointEditor(VisualEditorBase):
             self.value = se3.apply(se3.inv(self.frame),self.pointposer.get())
         return VisualEditorBase.mousefunc(self,button,state,x,y)
 
-    def updateGuiFromValue(self):
+    def update_gui_from_value(self):
         self.pointposer.set(se3.apply(self.frame,self.value))
         self.refresh()
 
@@ -971,7 +979,7 @@ class RigidTransformEditor(VisualEditorBase):
     Visualization objects can be attached to the edited transform using
     the :meth:`attach` method.
     """
-    def __init__(self,name,value,description,world,frame=None):
+    def __init__(self, name : str, value : RigidTransform, description : str, world : WorldModel, frame : RigidTransform=None):
         VisualEditorBase.__init__(self,name,value,description,world)
         self.frame = se3.identity() if frame is None else frame
         self.xformposer = TransformPoser()
@@ -986,18 +994,32 @@ class RigidTransformEditor(VisualEditorBase):
         self.translationEnabled = True
 
     def disableTranslation(self):
+        warnings.warn("disableTranslation will be deprecated in favor of disable_translation in a future version of Klampt",DeprecationWarning)
+        self.disable_translation()
+
+    def disableRotation(self):
+        warnings.warn("disableRotation will be deprecated in favor of disable_rotation in a future version of Klampt",DeprecationWarning)
+        self.disable_rotation()
+
+    def disable_translation(self):
         """Turns off editing of translation."""
         self.translationEnabled = False
         self.xformposer.enableTranslation(False)
 
-    def disableRotation(self):
+    def disable_rotation(self):
         """Turns off editing of rotation."""
         self.rotationEnabled = False
         self.xformposer.enableRotation(False)
 
     def attach(self,object,relativePose=None):
         """Attaches an object to visually move along with the edited
-        transform."""
+        transform.
+
+        Args:
+            object (RigidObjectModel or Geometry3D): the object to move
+            relativePose (se3 element, optional): if given, the relative pose
+                of the object w.r.t. the transform
+        """
         assert hasattr(object,'setTransform') or hasattr(object,'setCurrentTransform'),"Can only attach objects with setTransform and getTransform methods"
         assert hasattr(object,'getTransform') or hasattr(object,'getCurrentTransform'),"Can only attach objects with setTransform and getTransform methods"
         self.attachedObjects.append(object)
@@ -1046,7 +1068,7 @@ class RigidTransformEditor(VisualEditorBase):
                 a.drawWorldGL(o)
         return True
 
-    def updateGuiFromValue(self):
+    def update_gui_from_value(self):
         self.xformposer.set(*se3.mul(self.frame,self.value))
         self.refresh()
 
@@ -1058,7 +1080,7 @@ class AABBEditor(VisualEditorBase):
     input and output are measured with respect to that frame.  However, the
     editing is done in world coordinates.
     """
-    def __init__(self,name,value,description,world,frame=None):
+    def __init__(self, name : str, value : Tuple[Vector3,Vector3], description : str, world, frame : RigidTransform=None):
         VisualEditorBase.__init__(self,name,value,description,world)
         self.aabbposer = AABBPoser()
         self.aabbposer.set(value[0],value[1])
@@ -1074,7 +1096,7 @@ class AABBEditor(VisualEditorBase):
             self.value = self.aabbposer.get()
         return VisualEditorBase.mousefunc(self,button,state,x,y)
 
-    def updateGuiFromValue(self):
+    def update_gui_from_value(self):
         self.aabbposer.set(self.value[0],self.value[1])
         self.refresh()
 
@@ -1086,7 +1108,7 @@ class SphereEditor(VisualEditorBase):
     input and output are measured with respect to that frame.  However, the
     editing is done in world coordinates.
     """
-    def __init__(self,name,value,description,world,frame=None):
+    def __init__(self, name : str, value : Tuple[Vector3,float], description : str, world : WorldModel, frame : RigidTransform=None):
         VisualEditorBase.__init__(self,name,value,description,world)
         self.frame = se3.identity() if frame is None else frame
         self.sphereposer = SpherePoser()
@@ -1102,7 +1124,7 @@ class SphereEditor(VisualEditorBase):
             self.value = (se3.apply(se3.inv(self.frame),cr[:3]),cr[3])
         return VisualEditorBase.mousefunc(self,button,state,x,y)
 
-    def updateGuiFromValue(self):
+    def update_gui_from_value(self):
         self.sphereposer.set(se3.apply(self.frame,self.value[0])+[self.value[1]])
         self.refresh()
 
@@ -1129,7 +1151,7 @@ class GeometricPrimitiveEditor(VisualEditorBase):
             self.poser = BoxPoser()
         else:
             raise NotImplementedError("Can't edit GeometricPrimitive of type "+value.type+" yet")
-        self.updateGuiFromValue()
+        self.update_gui_from_value()
         self.addWidget(self.poser)
 
     def instructions(self):
@@ -1152,10 +1174,10 @@ class GeometricPrimitiveEditor(VisualEditorBase):
                 dims = self.poser.getDims()
                 self.value.setBox(tl,Rl,dims)
             else:
-                raise NotImplementedError("Can't edit GeometricPrimitive of type "+value.type+" yet")
+                raise NotImplementedError("Can't edit GeometricPrimitive of type "+self.value.type+" yet")
         return VisualEditorBase.mousefunc(self,button,state,x,y)
 
-    def updateGuiFromValue(self):
+    def update_gui_from_value(self):
         if self.value.type == 'Point':
             c = self.value.properties[0:3]
             self.poser.set(se3.apply(self.frame,c))
@@ -1176,7 +1198,7 @@ class GeometricPrimitiveEditor(VisualEditorBase):
             Rw,tw = se3.mul(self.frame,(R,t))
             self.poser.set(Rw,tw,dims)
         else:
-            raise NotImplementedError("Can't edit GeometricPrimitive of type "+value.type+" yet")
+            raise NotImplementedError("Can't edit GeometricPrimitive of type "+self.value.type+" yet")
         self.refresh()
 
 
@@ -1202,7 +1224,7 @@ class ObjectTransformEditor(VisualEditorBase):
             self.value = self.objposer.get()
         return VisualEditorBase.mousefunc(self,button,state,x,y)
 
-    def updateGuiFromValue(self):
+    def update_gui_from_value(self):
         self.objposer.set(*self.value)
         self.refresh()
 
@@ -1214,7 +1236,7 @@ class WorldEditor(VisualEditorBase):
         Edits to robot and rigid object poses are done immediately, but
         since terrains do not have poses, their actual geometry needs to
         be updated.  To apply the edited poses to the terrain geometries, 
-        call :meth:`updateValueFromGui` after the editor has been run.
+        call :meth:`update_value_from_gui` after the editor has been run.
 
     """
     def __init__(self,name,value,description):
@@ -1234,11 +1256,11 @@ class WorldEditor(VisualEditorBase):
             #Tw.t = gc = Tg.R*gcloc + Tg.t
             self.terrainPosers[i].set(T0[0],gc)
         for r in self.robotPosers:
-            self.addWidget(r)
+            self.add_widget(r)
         for r in self.objectPosers:
-            self.addWidget(r)
+            self.add_widget(r)
         for r in self.terrainPosers:
-            self.addWidget(r)
+            self.add_widget(r)
 
     def loadable(self):
         return False
@@ -1254,7 +1276,7 @@ class WorldEditor(VisualEditorBase):
         self.klamptwidgetmaster.drawGL(self.viewport())
         return False
 
-    def updateValueFromGui(self):
+    def update_value_from_gui(self):
         """Applies the transforms to all the terrain geometries."""
         for i in range(self.world.numTerrains()):
             T0 = self.world.terrain(i).geometry().getCurrentTransform()
@@ -1297,7 +1319,7 @@ class SensorEditor(RigidTransformEditor):
         
     def initialize(self):
         res = RigidTransformEditor.initialize(self)
-        self.refreshVisualization()
+        self.refresh_visualization()
         return res
 
     def loadable(self):
@@ -1305,21 +1327,21 @@ class SensorEditor(RigidTransformEditor):
     def savable(self):
         return False
     
-    def addDialogItems(self,parent,ui='qt'):
+    def add_dialog_items(self,parent,ui='qt'):
         layout = QHBoxLayout(parent)
         self.selectionList = QListWidget()
         settings = self.value.settings()
         self.settingsOrder = sorted([k for k in settings if k not in ['Tsensor','rate']])
         for k in self.settingsOrder:
             self.selectionList.addItem(k)
-        self.selectionList.currentRowChanged.connect(self.onSettingSelected)
+        self.selectionList.currentRowChanged.connect(self.on_setting_selected)
         self.editBox = QLineEdit("value")
-        self.editBox.editingFinished.connect(self.onSettingEdited)
-        self.onSettingSelected()
+        self.editBox.editingFinished.connect(self.on_setting_edited)
+        self.on_setting_selected()
         layout.addWidget(self.selectionList)
         layout.addWidget(self.editBox)
         
-    def refreshVisualization(self):
+    def refresh_visualization(self):
         self.value.kinematicSimulate(0.01)
         self.measurements = self.value.getMeasurements()
         self.refresh()
@@ -1333,7 +1355,7 @@ class SensorEditor(RigidTransformEditor):
 
         self.value.drawGL(self.measurements)
 
-    def onSettingSelected(self):
+    def on_setting_selected(self):
         if self.selectionList.currentRow() < 0:
             self.editBox.setText('')
             return
@@ -1341,18 +1363,17 @@ class SensorEditor(RigidTransformEditor):
         value = self.value.getSetting(item)
         self.editBox.setText(value)
 
-    def onSettingEdited(self):
+    def on_setting_edited(self):
         if self.selectionList.currentRow() < 0:
             return
         value = str(self.editBox.text())
         item = self.settingsOrder[self.selectionList.currentRow()]
         try:
             self.value.setSetting(item,value)
-            self.refreshVisualization()
+            self.refresh_visualization()
         except Exception as e:
             QMessageBox.warning(self,"Invalid sensor setting","Sensor does not accept setting: "+str(e))
             self.editBox.setText(self.value.getSetting(item))
-
 
     def instructions(self):
         return 'Right-click and drag on the widget to pose the sensor'
@@ -1365,7 +1386,7 @@ class SensorEditor(RigidTransformEditor):
         if res:
             sensing.set_sensor_xform(sensor,self.value)
             self.value = sensor
-            self.refreshVisualization()
+            self.refresh_visualization()
             return True
         self.value = sensor
         return False
@@ -1379,19 +1400,19 @@ class SensorEditor(RigidTransformEditor):
         self.value = sensor
         return res
 
-    def updateValueFromGui(self):
+    def update_value_from_gui(self):
         sensor = self.value
         from ..model import sensing
         self.value = sensing.get_sensor_xform(sensor)
-        RigidTransformEditor.updateValueFromGui(self)
+        RigidTransformEditor.update_value_from_gui(self)
         sensing.set_sensor_xform(sensor,self.value)
         self.value = sensor
 
-    def updateGuiFromValue(self):
+    def update_gui_from_value(self):
         sensor = self.value
         from ..model import sensing
         self.value = sensing.get_sensor_xform(sensor)
-        RigidTransformEditor.updateGuiFromValue(self)
+        RigidTransformEditor.update_gui_from_value(self)
         self.value = sensor
 
 
@@ -1480,7 +1501,7 @@ if _has_qt:
             if editorObject.loadable() or editorObject.savable():
                 self.topBoxLayout.addWidget(self.loadsave)
 
-            editorObject.addDialogItems(self.extraDialog,ui='qt')
+            editorObject.add_dialog_items(self.extraDialog,ui='qt')
 
         def closeEvent(self,event):
             global _doexit
@@ -1500,7 +1521,7 @@ if _has_qt:
             print("#########################################")
             print("klampt.vis: EditDialog accept")
             print("#########################################")
-            self.editorObject.updateValueFromGui()
+            self.editorObject.update_value_from_gui()
             return QDialog.accept(self)
 
         def reject(self):
@@ -1514,23 +1535,21 @@ if _has_qt:
         def load(self):
             from ..io import resource
             from ..model import types
-            type = types.objectToTypes(self.editorObject.value)
-            if isinstance(type,list):
-                type = type[0]
+            type = types.object_to_type(self.editorObject.value)
             res = resource.load(type,'.')
             if res is not None:
                 #TODO: check compatibility with world
                 self.editorObject.value = res[1]
-                self.editorObject.updateGuiFromValue()
+                self.editorObject.update_gui_from_value()
 
         def save(self):
             from ..io import resource
-            self.editorObject.updateValueFromGui()
+            self.editorObject.update_value_from_gui()
             resource.save(self.editorObject.value,'auto','.')
             
 
 
-    def run(editorObject):
+    def run(editorObject : VisualEditorBase) -> Tuple[bool,Any]:
         """
         Launches a visual editor.
 
@@ -1581,7 +1600,7 @@ if _has_qt:
         print("vis.editors.run(): Result",res,"return value",retVal)
         return res,retVal
 else:
-    def run(editorObject):
+    def run(editorObject : VisualEditorBase) -> Tuple[bool,Any]:
         """
         Args:
             editorObject (VisualEditorBase): some subclass of VisualEditorBase

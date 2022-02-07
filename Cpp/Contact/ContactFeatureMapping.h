@@ -12,6 +12,8 @@
 /** @addtogroup Contact */
 /*@{*/
 
+namespace Klampt {
+
 /** @brief A mapping from a ContactFeature to a point on the environment.
  */
 struct ContactFeatureMapping
@@ -62,5 +64,7 @@ Real BestFeatureMappingAngle(const ContactFeatureMapping& feature,const Matrix3&
 void SetFeatureMappingOrientation(ContactFeatureMapping& feature,const Matrix3& Rdes);
 
 /*@}*/
+
+} //namespace Klampt
 
 #endif

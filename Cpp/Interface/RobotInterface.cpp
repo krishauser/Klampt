@@ -1,4 +1,5 @@
 #include "RobotInterface.h"
+using namespace Klampt;
 
 MotionQueueInterface::MotionQueueInterface()
 {}

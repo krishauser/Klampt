@@ -4,6 +4,8 @@
 #include "Controller.h"
 #include <KrisLibrary/geometry/GridTable.h>
 
+namespace Klampt {
+
 /** @ingroup Control
  * @brief A controller that reads from a grid of torque/desired
  * configuration commands.
@@ -15,7 +17,7 @@
 class TabulatedController : public RobotController
 {
  public:
-  TabulatedController(Robot& robot);
+  TabulatedController(RobotModel& robot);
   ~TabulatedController() {}
 
   ///Can implement arbitrary feature mappings by overloading this
@@ -40,6 +42,8 @@ class TabulatedController : public RobotController
 void OptimizeMDP(TabulatedController& controller,
 		 const Config& qdes,const Vector& w,
 		 int numTransitionSamples,Real discount=1.0);
+
+} //namespace Klampt
 
 #endif
 

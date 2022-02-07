@@ -7,17 +7,17 @@ Primary API
 .. autosummary::
     ~klampt.model.contact.ContactPoint
     ~klampt.model.contact.Hold
-    ~klampt.model.contact.forceClosure
-    ~klampt.model.contact.comEquilibrium
-    ~klampt.model.contact.supportPolygon
-    ~klampt.model.contact.equilibriumTorques
-    ~klampt.model.contact.contactMap
-    ~klampt.model.contact.worldContactMap
-    ~klampt.model.contact.simContactMap
-    ~klampt.model.contact.contactMapIKObjectives
-    ~klampt.model.contact.contactMapHolds
-    ~klampt.model.contact.geometryContacts
-    ~klampt.model.contact.wrenchMatrices
+    ~klampt.model.contact.force_closure
+    ~klampt.model.contact.com_equilibrium
+    ~klampt.model.contact.support_polygon
+    ~klampt.model.contact.equilibrium_torques
+    ~klampt.model.contact.contact_map
+    ~klampt.model.contact.world_contact_map
+    ~klampt.model.contact.sim_contact_map
+    ~klampt.model.contact.contact_map_ik_objectives
+    ~klampt.model.contact.contact_map_holds
+    ~klampt.model.contact.geometry_contacts
+    ~klampt.model.contact.wrench_matrices
 
 Helpers
 ~~~~~~~~

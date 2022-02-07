@@ -5,15 +5,17 @@
  *      Author: yajia
  */
 
-#ifndef URDFCONVERTER_H_
-#define URDFCONVERTER_H_
+#ifndef KLAMPT_IO_URDFCONVERTER_H
+#define KLAMPT_IO_URDFCONVERTER_H
 
 #include <vector>
 #include <KrisLibrary/math3d/primitives.h>
 #include "Modeling/Robot.h"
 #include "urdf_link.h"
-using namespace std;
-using namespace Math3D;
+
+namespace Klampt {
+  using namespace std;
+  using namespace Math3D;
 
 class URDFLinkNode {
 public:
@@ -39,7 +41,7 @@ public:
 class URDFConverter {
 public:
 	static int GetLinkIndexfromName(string name, const vector<string> linknames);
-	static RobotJoint::Type jointType_URDF2ROB(int );
+	static RobotModelJoint::Type jointType_URDF2ROB(int );
 	static void DFSLinkTree( URDFLinkNode& root, vector<URDFLinkNode>& linkNodes);
 	static void setJointforNodes(vector< std::shared_ptr<urdf::Joint> >& joints, vector<URDFLinkNode>& linkNodes);
 	static Math3D::Matrix3 convertInertial( urdf::Inertial& I);
@@ -52,5 +54,7 @@ public:
 	//Set this to true if the geometry Y-Z plane should be flipped
 	static bool flipYZ; 
 };
+
+} //namespace Klampt
 
 #endif /* URDFCONVERTER_H_ */

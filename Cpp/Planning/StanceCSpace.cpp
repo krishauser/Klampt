@@ -1,6 +1,7 @@
 #include "StanceCSpace.h"
+using namespace Klampt;
 
-StanceCSpace::StanceCSpace(RobotWorld& world,int index,
+StanceCSpace::StanceCSpace(WorldModel& world,int index,
 			   WorldPlannerSettings* settings)
   :ContactCSpace(world,index,settings),gravity(0,0,-9.8),numFCEdges(4),
    spCalculated(false),spMargin(0),torqueSolver(robot,formation,numFCEdges)

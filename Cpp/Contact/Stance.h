@@ -6,9 +6,10 @@
 #include <KrisLibrary/math/matrix.h>
 #include <map>
 #include <vector>
-using namespace std;
 
-struct Environment;
+namespace Klampt {
+
+using namespace std;
 
 /** @ingroup Contact
  *  @brief A collection of holds.
@@ -75,5 +76,7 @@ void ToContactFormation(const Stance& stance,ContactFormation& contacts);
 ///@ingroup Contact
 ///extracts the IK goals from the stance
 void ToIKProblem(const Stance& stance,vector<IKGoal>& constraints);
+
+} //namespace Klampt
 
 #endif

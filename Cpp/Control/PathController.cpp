@@ -6,6 +6,8 @@
 #include <sstream>
 #include <fstream>
 
+namespace Klampt {
+
 const static Real gJointLimitEpsilon = 1e-7;
 const static Real gVelocityLimitEpsilon = 1e-7;
 
@@ -39,7 +41,7 @@ PolynomialMotionQueue::PolynomialMotionQueue()
   pathOffset = 0;
 }
 
-void PolynomialMotionQueue::SetLimits(const Robot& robot)
+void PolynomialMotionQueue::SetLimits(const RobotModel& robot)
 {
   qMin = robot.qMin;
   qMax = robot.qMax;
@@ -138,8 +140,10 @@ void PolynomialMotionQueue::AppendLinear(const Config& config,Real dt)
   if(path.elements.empty()) FatalError("PolynomialMotionQueue::AppendLinear: motion queue is uninitialized.  Wait until after the control loop or call SetMilestone() first\n");
   if(dt == 0 && config != Endpoint()) {
     //want a continuous jump?
-    LOG4CXX_WARN(KrisLibrary::logger(),"PolynomialMotionQueue::AppendLinear: Warning, discontinuous jump requested");
-    LOG4CXX_WARN(KrisLibrary::logger(),"  Time "<<path.EndTime()<<" distance "<<config.distance(Endpoint()));
+    if(config.distance(Endpoint()) > Epsilon) {
+      LOG4CXX_WARN(KrisLibrary::logger(),"PolynomialMotionQueue::AppendLinear: Warning, discontinuous jump requested");
+      LOG4CXX_WARN(KrisLibrary::logger(),"  Time "<<path.EndTime()<<" distance "<<config.distance(Endpoint()));
+    }
     path.Concat(Spline::Linear(config,config,0,0),true);    
   }
   else 
@@ -152,8 +156,10 @@ void PolynomialMotionQueue::AppendCubic(const Config& x,const Vector& v,Real dt)
   if(dt == 0) {
     if(x != Endpoint()) {
       //want a continuous jump?
-      LOG4CXX_WARN(KrisLibrary::logger(),"PolynomialMotionQueue::AppendCubic: Warning, discontinuous jump requested");
-      LOG4CXX_WARN(KrisLibrary::logger(),"  Time "<<path.EndTime()<<" distance "<<x.distance(Endpoint()));
+      if(x.distance(Endpoint()) > Epsilon) {
+        LOG4CXX_WARN(KrisLibrary::logger(),"PolynomialMotionQueue::AppendCubic: Warning, discontinuous jump requested");
+        LOG4CXX_WARN(KrisLibrary::logger(),"  Time "<<path.EndTime()<<" distance "<<x.distance(Endpoint()));
+      }
       path.Concat(Spline::Linear(x,x,0,0),true);    
     }
   }
@@ -373,7 +379,7 @@ void PolynomialMotionQueue::Advance(Real dt)
 
 
 
-PolynomialPathController::PolynomialPathController(Robot& robot)
+PolynomialPathController::PolynomialPathController(RobotModel& robot)
   :JointTrackingController(robot)
 {
   PolynomialMotionQueue::SetLimits(robot);
@@ -609,3 +615,5 @@ bool PolynomialPathController::SendCommand(const string& name,const string& str)
   }
   return false;
 }
+
+} //namespace Klampt

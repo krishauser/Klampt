@@ -6,6 +6,8 @@
 
 class GLUI_Control;
 
+namespace Klampt {
+
 /** @brief A base class for GLUI GUIs.
  *
  * GLUI controls should not be setup with hooks and live variables -- instead,
@@ -66,5 +68,6 @@ class GLUIGUI : public GenericGUIBase, public GLUIProgramBase
   vector<string> controlNames;
 };
 
+} // namespace Klampt
 
 #endif

@@ -9,13 +9,14 @@
 #include <KrisLibrary/utils/stringutils.h>
 #include <KrisLibrary/utils/apputils.h>
 #include <fstream>
-using namespace Math3D;
-using namespace GLDraw;
 
 #define GLUT_LEFT_BUTTON 0
 #define GLUT_MIDDLE_BUTTON 1
 #define GLUT_RIGHT_BUTTON 2
 
+namespace Klampt {
+  using namespace Math3D;
+  using namespace GLDraw;
 
 struct SensorPlot
 {
@@ -101,7 +102,7 @@ public:
   vector<vector<bool> > drawSensors;
   vector<GeometryAppearance> originalAppearance,expandedAppearance;
 
-  SimTestBackend(RobotWorld* world);
+  SimTestBackend(WorldModel* world);
   //message handlers
   virtual void Start();
   virtual bool OnCommand(const string& cmd,const string& args);
@@ -137,6 +138,7 @@ public:
   }
 };
 
+} //namespace Klampt
 
 
 #if HAVE_GLUI
@@ -149,13 +151,15 @@ public:
 #include <GL/glui.h>
 #endif //__APPLE__ || MACOSX
 
+namespace Klampt {
+
 class GLUISimTestGUI : public GLScreenshotProgram<GLUIGUI>
 {
 public:
   typedef GLScreenshotProgram<GLUIGUI> BaseT;
 
-  RobotWorld* world;
-  WorldSimulation* sim;
+  WorldModel* world;
+  Simulator* sim;
   AppUtils::ProgramSettings settings;
 
   //GUI state
@@ -185,7 +189,7 @@ public:
   GLUI_Button* isolateMeasurementButton;
   GLUI_Listbox* measurementListbox;
 
-  GLUISimTestGUI(GenericBackendBase* backend,RobotWorld* _world,int w=800,int h=600);
+  GLUISimTestGUI(GenericBackendBase* backend,WorldModel* _world,int w=800,int h=600);
   virtual bool Initialize();
   void UpdateGUI();
   void UpdateControllerSettingGUI();
@@ -195,6 +199,8 @@ public:
   virtual void Handle_Keypress(unsigned char c,int x,int y);
   virtual bool OnCommand(const string& cmd,const string& args);
 };
+
+} // namespace Klampt
 
 #endif //HAVE_GLUI
 

@@ -5,6 +5,8 @@
 #include <Klampt/Modeling/DynamicPath.h>
 #include <Klampt/Control/PathController.h>
 
+namespace Klampt {
+
 /** A unified interface to control either a simulated or real robot, which
  * operates in a motion queue mode.
  * 
@@ -66,5 +68,7 @@ class DefaultMotionQueueInterface : public MotionQueueInterface
   virtual MotionResult SendMilestoneImmediate(const Config& x);
   virtual MotionResult SendPathImmediate(Real tbreak,const ParabolicRamp::DynamicPath& path);
 };
+
+} //namespace Klampt
 
 #endif

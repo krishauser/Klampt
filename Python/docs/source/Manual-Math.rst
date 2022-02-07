@@ -37,7 +37,8 @@ module under the following files.
    routines for handling 3D rigid transformations
 
 The use of `numpy / scipy <http://numpy.org/>`__ is recommended if you
-are doing any significant linear algebra.
+are doing any significant linear algebra.  We provide converters from
+Klampt math objects to numpy objects.
 
 
 3D Points / Directions
@@ -218,42 +219,40 @@ to be rotated about its local x, y and z axes to get to B.
 The following table summarizes the major SO(3) operations in Matlab, the
 Klamp't so3 module, Numpy, and Scipy.
 
-+----------------------------------------------+-------------------------------------------+--------------------------------------+-----------------------------+-----------------------------------+
-| Operation                                    | Matlab (Robotics toolbox)                 | Klamp't so3                          | Numpy                       |Scipy                              |
-+==============================================+===========================================+======================================+=============================+===================================+
-| Import                                       | N/A                                       | from klampt.math import so3          | import numpy                | from scipy.spatial.transform      |
-|                                              |                                           |                                      |                             | import Rotation as R              |
-+----------------------------------------------+-------------------------------------------+--------------------------------------+-----------------------------+-----------------------------------+
-| Create SO(3) identity                        | eye(3)                                    | so3.identity()                       | numpy.eye(3)                | R.from\_rotvec([0,0,0])           |
-+----------------------------------------------+-------------------------------------------+--------------------------------------+-----------------------------+-----------------------------------+
-| Create SO(3) from 3x3 matrix                 | a                                         | so3.from\_matrix(a)                  | a                           | a.from\_dcm()                     |
-+----------------------------------------------+-------------------------------------------+--------------------------------------+-----------------------------+-----------------------------------+
-| Create from axis-angle representation        | axang2rotm([x y z rads])                  | so3.rotation([x,y,z],rads)           | N/A                         | R.from\_rotvec([x*r,y*r,z*r])     |
-+----------------------------------------------+-------------------------------------------+--------------------------------------+-----------------------------+-----------------------------------+
-| Create from rotation vector representation   | rads=norm(w); axang2rotm([w/rads rads])   | so3.from\_rotation\_vector(w)        | N/A                         | R.from\_rotvec(w)                 |
-+----------------------------------------------+-------------------------------------------+--------------------------------------+-----------------------------+-----------------------------------+
-| Create from euler-angle representation       | eul2rotm([theta phi psi],'ZYX')           | so3.from_rpy((psi,phi,theta))        | N/A                         |R.from_euler('zyx',[psi,phi,theta])|
-+----------------------------------------------+-------------------------------------------+--------------------------------------+-----------------------------+-----------------------------------+
-| Create from quaternion representation        | quat2rotm([w x y z])                      | so3.from\_quaternion([w,x,y,z])      | N/A                         | R.from\_quat([x,y,z,w])           |
-+----------------------------------------------+-------------------------------------------+--------------------------------------+-----------------------------+-----------------------------------+
-| Apply rotation to point                      | R\*x                                      | so3.apply(R,x)                       | numpy.dot(R,x)              | a.apply(x)                        |
-+----------------------------------------------+-------------------------------------------+--------------------------------------+-----------------------------+-----------------------------------+
-| Compose rotation R1 followed by R2           | R2\*R1                                    | so3.mul(R2,R1)                       | numpy.dot(R2,R1)            | R1*R2                             |
-+----------------------------------------------+-------------------------------------------+--------------------------------------+-----------------------------+-----------------------------------+
-| Invert rotation                              | R'                                        | so3.inv(R)                           | R.T or numpy.transpose(R)   | a.inv()                           |
-+----------------------------------------------+-------------------------------------------+--------------------------------------+-----------------------------+-----------------------------------+
-| Interpolate rotations R1 and R2              | N/A                                       | so3.interpolate(R1,R2,u)             | N/A                         | from scipy.spatial.transform      |
-|                                              |                                           |                                      |                             | import Slerp;  Slerp([0,1],R1,R2);|
-|                                              |                                           |                                      |                             | s(u)                              |
-+----------------------------------------------+-------------------------------------------+--------------------------------------+-----------------------------+-----------------------------------+
-| Angular difference between R1 and R2         | abs(rotm2axang(R1'\*R2)[4])               | so3.angle(R1,R2)                     | N/A                         | a.magnitude()                     |
-+----------------------------------------------+-------------------------------------------+--------------------------------------+-----------------------------+-----------------------------------+
-| Convert to Klampt so3 object                 | N/A                                       | R                                    | R.T.flatten()               | a.as\_dcm().T.flatten()           |
-+----------------------------------------------+-------------------------------------------+--------------------------------------+-----------------------------+-----------------------------------+
++----------------------------------------------+-------------------------------------------+--------------------------------------+--------------------------------------+-----------------------------------+
+| Operation                                    | Matlab (Robotics toolbox)                 | Klamp't so3                          | Numpy                                |Scipy                              |
++==============================================+===========================================+======================================+======================================+===================================+
+| Import                                       | N/A                                       | from klampt.math import so3          | import numpy                         | from scipy.spatial.transform      |
+|                                              |                                           |                                      |                                      | import Rotation as R              |
++----------------------------------------------+-------------------------------------------+--------------------------------------+--------------------------------------+-----------------------------------+
+| Create SO(3) identity                        | eye(3)                                    | so3.identity()                       | numpy.eye(3)                         | R.from\_rotvec([0,0,0])           |
++----------------------------------------------+-------------------------------------------+--------------------------------------+--------------------------------------+-----------------------------------+
+| Create SO(3) from 3x3 matrix                 | a                                         | so3.from\_matrix(a)                  | a                                    | a.from\_dcm()                     |
++----------------------------------------------+-------------------------------------------+--------------------------------------+--------------------------------------+-----------------------------------+
+| Create from axis-angle representation        | axang2rotm([x y z rads])                  | so3.rotation([x,y,z],rads)           | N/A                                  | R.from\_rotvec([x*r,y*r,z*r])     |
++----------------------------------------------+-------------------------------------------+--------------------------------------+--------------------------------------+-----------------------------------+
+| Create from rotation vector representation   | rads=norm(w); axang2rotm([w/rads rads])   | so3.from\_rotation\_vector(w)        | N/A                                  | R.from\_rotvec(w)                 |
++----------------------------------------------+-------------------------------------------+--------------------------------------+--------------------------------------+-----------------------------------+
+| Create from euler-angle representation       | eul2rotm([theta phi psi],'ZYX')           | so3.from_rpy((psi,phi,theta))        | N/A                                  |R.from_euler('zyx',[psi,phi,theta])|
++----------------------------------------------+-------------------------------------------+--------------------------------------+--------------------------------------+-----------------------------------+
+| Create from quaternion representation        | quat2rotm([w x y z])                      | so3.from\_quaternion([w,x,y,z])      | N/A                                  | R.from\_quat([x,y,z,w])           |
++----------------------------------------------+-------------------------------------------+--------------------------------------+--------------------------------------+-----------------------------------+
+| Apply rotation to point                      | R\*x                                      | so3.apply(R,x)                       | numpy.dot(R,x)                       | a.apply(x)                        |
++----------------------------------------------+-------------------------------------------+--------------------------------------+--------------------------------------+-----------------------------------+
+| Compose rotation R1 followed by R2           | R2\*R1                                    | so3.mul(R2,R1)                       | numpy.dot(R2,R1)                     | R1*R2                             |
++----------------------------------------------+-------------------------------------------+--------------------------------------+--------------------------------------+-----------------------------------+
+| Invert rotation                              | R'                                        | so3.inv(R)                           | R.T or numpy.transpose(R)            | a.inv()                           |
++----------------------------------------------+-------------------------------------------+--------------------------------------+--------------------------------------+-----------------------------------+
+| Interpolate rotations R1 and R2              | N/A                                       | so3.interpolate(R1,R2,u)             | N/A                                  | from scipy.spatial.transform      |
+|                                              |                                           |                                      |                                      | import Slerp;  Slerp([0,1],R1,R2);|
+|                                              |                                           |                                      |                                      | s(u)                              |
++----------------------------------------------+-------------------------------------------+--------------------------------------+--------------------------------------+-----------------------------------+
+| Angular difference between R1 and R2         | abs(rotm2axang(R1'\*R2)[4])               | so3.angle(R1,R2)                     | N/A                                  | a.magnitude()                     |
++----------------------------------------------+-------------------------------------------+--------------------------------------+--------------------------------------+-----------------------------------+
+| Convert to Klampt so3 object                 | N/A                                       | R                                    | R.T.flatten() or so3.from_ndarray(R) | a.as\_dcm().T.flatten()           |
++----------------------------------------------+-------------------------------------------+--------------------------------------+--------------------------------------+-----------------------------------+
 
 Note: newer versions of Scipy use ``from_matrix`` and ``as_matrix`` instead of ``from_dcm`` and ``as_dcm``.
-
-Note: Can use the :mod:`klampt.io.numpy_convert` conversion routines :meth:`~klampt.io.numpy_convert.from_numpy` and :meth:`~klampt.io.numpy_convert.to_numpy` to swap between representations.
 
 
 Rigid Transformations
@@ -340,17 +339,20 @@ equivalent to the SO(3) Rotation object)
 +----------------------------------------------------+---------------------------------+----------------------------+------------------------------------------+
 | Distance between T1 and T2                         | N/A                             | se3.distance(T1,T2)        | N/A                                      |
 +----------------------------------------------------+---------------------------------+----------------------------+------------------------------------------+
-| Convert to Klampt se3 object                       | N/A                             | T                          | import klampt.io.numpy_convert;          |
-|                                                    |                                 |                            | klampt.io.numpy_convert.from_numpy(T)    |
+| Convert to Klampt se3 object                       | N/A                             | T                          | se3.from_ndarray(T)                      |
 +----------------------------------------------------+---------------------------------+----------------------------+------------------------------------------+
+
+
 
 Linear Algebra
 ----------------------------------------
 
 For basic linear algebra on vectors (adding, subtracting, multiplying,
-interpolating), the klampt.vectorops module contains a suite of
-functions. It is very lightweight and works nicely with vectors
-represented as native Python lists.
+interpolating), the :mod:`klampt.math.vectorops` module contains a suite
+of functions. It is very lightweight and works nicely with vectors
+represented as native Python lists.  Our tests indicate it performs
+operations on small vectors faster than converting to Numpy and
+performing the operation.
 
 We recommend using Numpy/Scipy for more sophisticated linear algebra
 functionality, such as matrix operations. Note that some Klamp't routines
@@ -370,12 +372,16 @@ method to convert a Numpy array ``x`` for use with Klamp't routines, or
 to convert a list to a Numpy array object.
 
 To work with rotation matrices in Numpy/Scipy, use the
-``so3.matrix()``/``so3.from_matrix()`` routines to convert to and from 2-D
+``so3.ndarray()``/``so3.from_ndarray()`` routines to convert to and from 2-D
 arrays, respectively. Similarly, to work with rigid transformation
-matrices, use ``se3.homogeneous()``/``se3.from_homogeneous()`` to get a
+matrices, use ``se3.ndarray()``/``se3.from_ndarray()`` to get a
 representation of the transform as a 4x4 matrix in homogeneous
 coordinates.
 
+You may also use the :mod:`klampt.io.numpy_convert` uniform conversion routines
+:meth:`~klampt.io.numpy_convert.to_numpy` and :meth:`~klampt.io.numpy_convert.from_numpy` to swap between
+representations.  These work with quite a few Klampt objects, including point clouds,
+triangle meshes, etc.
 
 
 

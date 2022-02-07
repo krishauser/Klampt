@@ -6,6 +6,8 @@
 
 class AnyCollection;
 
+namespace Klampt {
+
 /** @ingroup Control
  * @brief A controller that writes sensor data to a socket and reads
  * robot commands from a socket.
@@ -35,7 +37,7 @@ class AnyCollection;
 class SerialController : public RobotController
 {
 public:
-  SerialController(Robot& robot,const string& servAddr="",Real writeRate=10);
+  SerialController(RobotModel& robot,const string& servAddr="",Real writeRate=10);
   virtual ~SerialController() {}
   virtual const char* Type() const { return "SerialController"; }
   virtual void Update(Real dt);
@@ -59,6 +61,6 @@ public:
   Real endVCmdTime;
 };
 
-
+} // namespace Klampt
 
 #endif

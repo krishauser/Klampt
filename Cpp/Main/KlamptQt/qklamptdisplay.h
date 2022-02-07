@@ -5,6 +5,7 @@
 #include <QKeyEvent>
 #include "GLScreenshotPlugin.h"
 #include "Interface/GenericGUI.h"
+using namespace Klampt;
 
 class QKlamptDisplay : public QGLWidget, public GLScreenshotPlugin
 {

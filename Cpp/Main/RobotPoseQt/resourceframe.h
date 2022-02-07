@@ -10,6 +10,7 @@
 
 #include "resourcemanager.h"
 #include "Interface/GenericGUI.h"
+using namespace Klampt;
 
 namespace Ui {
   class ResourceFrame;

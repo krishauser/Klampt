@@ -1,11 +1,12 @@
-"""An adaptor between :class:`ControllerBlock` and the Klamp't C++ serial 
-controller interface (SerialController).
+"""An adaptor between
+:class:`~klampt.control.blocks.robotcontroller.RobotControllerBlock`
+and the Klamp't C++ serial controller interface (SerialController).
 """
 import asyncore,socket
 import errno
 import json
 import time
-from .. import controller
+from ..blocks import robotcontroller
 
 headerlen = 4
 
@@ -153,17 +154,17 @@ class ControllerClient(JsonClient):
 
         import asyncore
         from klampt.control.io.serialcontroller import ControllerClient
-        from klampt.control.controller import ControllerBlock
+        from klampt.control.blocks.robotcontroller import RobotControllerBlock
 
-        class MyController(ControllerBlock):
+        class MyController(RobotControllerBlock):
             ...define your controller here...
 
         #open up a client on localhost:3456
-        client = ControllerClient(('localhost',3456),'MyController())
+        client = ControllerClient(('localhost',3456),MyController())
         asyncore.loop()
 
     Arguments:
-        addr: a (host,port) pair or         
+        addr: a (host,port) pair 
     """
     
     def __init__(self,addr,controller):
@@ -203,7 +204,7 @@ class ControllerClient(JsonClient):
             return
 
 
-class JsonSerialController(controller.ControllerBlock):
+class JsonSerialController(robotcontroller.RobotControllerBlock):
     """A controller that maintains a server to write/read messages every
     output_and_advance cycle.
 

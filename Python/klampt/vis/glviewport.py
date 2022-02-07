@@ -5,11 +5,13 @@ except:
     _HAS_OPENGL = False
 
 from . import camera
+from . import gldraw
 from ..math import so3,se3,vectorops
 from ..robotsim import Viewport
 import math
 import warnings
-
+from ..model.typing import Vector3,RigidTransform
+from typing import Tuple
 class GLViewport:
     """
     A class describing an OpenGL camera view.
@@ -38,22 +40,14 @@ class GLViewport:
         self.camera = camera.orbit()
         self.camera.dist = 6.0
         #x field of view in degrees
-        self.fov = 30
+        self.fov = 30.0
         #near and far clipping planes
         self.clippingplanes = (0.2,100)
 
-    def contains(self,x,y):
+    def contains(self, x : float, y : float) -> bool:
         return x >= self.x and y >= self.y and x < self.x + self.w and y < self.y + self.h
 
-    def setTransform(self,T,convention='standard'):
-        """Deprecated soon: use set_transform"""
-        self.set_transform(T,convention)
-
-    def getTransform(self,convention='standard'):
-        """Deprecated soon: use get_transform"""
-        return self.get_transform(convention)
-
-    def set_transform(self,T,convention='standard'):
+    def set_transform(self, T : RigidTransform, convention='standard') -> None:
         """Sets the pose of the camera, with T given in world coordinates.
 
         If convention = 'openGL', the Z axis of T is the *backward* direction of
@@ -68,8 +62,7 @@ class GLViewport:
             xzflip = [1,0,0,  0,-1,0,  0,0,-1]
             self.camera.set_matrix((so3.mul(T[0],xzflip),T[1]))
 
-
-    def get_transform(self,convention='standard'):
+    def get_transform(self,convention='standard') -> RigidTransform:
         """Gets the pose of the camera, with T given in world coordinates.
 
         If convention = 'openGL', the Z axis of T is the *backward* direction of
@@ -85,7 +78,7 @@ class GLViewport:
             xzflip = [1,0,0,  0,-1,0,  0,0,-1]
             return (so3.mul(T[0],xzflip),T[1])
 
-    def fit(self,center,radius):
+    def fit(self, center : Vector3, radius : float) -> None:
         """Fits the viewport to an object filling a sphere of a certain center
         and radius"""
         self.camera.tgt = center
@@ -97,11 +90,7 @@ class GLViewport:
             zmax =radius*3.5
         self.clippingplanes = (zmin,zmax)
 
-    def toViewport(self):
-        """Deprecated soon: use to_viewport."""
-        return self.to_viewport()
-
-    def to_viewport(self):
+    def to_viewport(self) -> Viewport:
         """Returns a Klampt C++ Viewport() instance corresponding to this view.
         This is used to interface with the Widget classes"""
         vp = Viewport()
@@ -114,7 +103,7 @@ class GLViewport:
         vp.setRigidTransform(*self.camera.matrix())
         return vp
 
-    def click_ray(self,x,y):
+    def click_ray(self, x:float, y:float) -> Tuple[Vector3,Vector3]:
         """Returns a pair of 3-tuples indicating the ray source and direction
         in world coordinates for a screen-coordinate point (x,y)"""
         R,t = self.camera.matrix()
@@ -128,7 +117,7 @@ class GLViewport:
         d = vectorops.div(d,vectorops.norm(d))
         return (t,so3.apply(R,d))
 
-    def project(self,pt,clip=True):
+    def project(self, pt:Vector3, clip=True) -> Vector3:
         """Given a point in world space, returns the (x,y,z) coordinates of the projected
         pixel.  z is given in absolute coordinates, while x,y are given in pixel values.
 
@@ -156,12 +145,7 @@ class GLViewport:
         y = (self.y + self.h/2) - v*self.w
         return (x,y,-ploc[2])
 
-    def setCurrentGL(self):
-        """Deprecated soon: use set_current_GL"""
-        warnings.warn("setCurrentGL will be deprecated in the next version of Klampt",DeprecationWarning)
-        self.set_current_GL()
-
-    def set_current_GL(self):
+    def set_current_GL(self) -> None:
         """Sets up the view in the current OpenGL context"""
         if not _HAS_OPENGL:
             raise RuntimeError("PyOpenGL is not installed, cannot use set_current_gl")
@@ -186,7 +170,7 @@ class GLViewport:
         pack = sum((list(c) for c in cols),[])
         GL.glMultMatrixf(pack)
 
-    def save_file(self,fn):
+    def save_file(self,fn : str) -> None:
         """Saves to a viewport txt file. The file format is compatible with
         the RobotTest, RobotPose, and SimTest apps.
         """
@@ -207,7 +191,7 @@ class GLViewport:
         f.write("ORBITDIST %f\n"%(self.camera.dist,))
         f.close()
 
-    def load_file(self,fn):
+    def load_file(self,fn : str) -> None:
         """Loads from a viewport txt file. The file format is compatible with
         the RobotTest, RobotPose, and SimTest apps.
         """
@@ -258,3 +242,63 @@ class GLViewport:
 
         f.close()
 
+    def drawGL(self,draw_frustum=True,draw_coords=True) -> None:
+        """Draws an OpenGL widget illustrating the viewport."""
+        GL.glPushMatrix()
+
+        mat = se3.homogeneous(self.get_transform())
+        cols = list(zip(*mat))
+        pack = sum((list(c) for c in cols),[])
+        GL.glMultMatrixf(pack)
+        n,f = self.clippingplanes
+        aspect = float(self.w)/float(self.h)
+        rfov = math.radians(self.fov)
+        scale = math.tan(rfov*0.5/aspect)*aspect
+        #note that +z is *backward* in the camera view
+        if draw_frustum:
+            xmin = (self.x - self.w*0.5)/((self.w)*0.5)
+            xmax = (self.x + self.w*0.5)/((self.w)*0.5)
+            ymax = -(self.y - self.h*0.5)/((self.h)*0.5)
+            ymin = -(self.y + self.h*0.5)/((self.h)*0.5)
+            xscale = scale
+            yscale = xscale/aspect
+            xmin *= xscale
+            xmax *= xscale
+            ymin *= yscale
+            ymax *= yscale
+            GL.glDisable(GL.GL_LIGHTING)
+            GL.glColor3f(1,1,0)
+            GL.glBegin(GL.GL_LINES)
+            #near plane
+            GL.glVertex3f(n*xmax,n*ymax,n)
+            GL.glVertex3f(n*xmax,n*ymin,n)
+            GL.glVertex3f(n*xmax,n*ymin,n)
+            GL.glVertex3f(n*xmin,n*ymin,n)
+            GL.glVertex3f(n*xmin,n*ymin,n)
+            GL.glVertex3f(n*xmin,n*ymax,n)
+            GL.glVertex3f(n*xmin,n*ymax,n)
+            GL.glVertex3f(n*xmax,n*ymax,n)
+            #far plane
+            GL.glVertex3f(f*xmax,f*ymax,f)
+            GL.glVertex3f(f*xmax,f*ymin,f)
+            GL.glVertex3f(f*xmax,f*ymin,f)
+            GL.glVertex3f(f*xmin,f*ymin,f)
+            GL.glVertex3f(f*xmin,f*ymin,f)
+            GL.glVertex3f(f*xmin,f*ymax,f)
+            GL.glVertex3f(f*xmin,f*ymax,f)
+            GL.glVertex3f(f*xmax,f*ymax,f)
+            #connections
+            GL.glVertex3f(n*xmax,n*ymax,n)
+            GL.glVertex3f(f*xmax,f*ymax,f)
+            GL.glVertex3f(n*xmax,n*ymin,n)
+            GL.glVertex3f(f*xmax,f*ymin,f)
+            GL.glVertex3f(n*xmin,n*ymin,n)
+            GL.glVertex3f(f*xmin,f*ymin,f)
+            GL.glVertex3f(n*xmin,n*ymax,n)
+            GL.glVertex3f(f*xmin,f*ymax,f)
+            GL.glEnd()
+
+        if draw_coords:
+            gldraw.xform_widget(se3.identity(),0.1,0.01)
+            
+        GL.glPopMatrix()

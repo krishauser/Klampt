@@ -5,6 +5,8 @@
 #include <KrisLibrary/GLdraw/GeometryAppearance.h>
 #include <string>
 
+namespace Klampt {
+
 /** @ingroup View 
  * @brief Applies a texture to some object.
  */
@@ -20,5 +22,6 @@ struct Texturizer
   bool texCoordAutoScale;
 };
 
+} //namespace Klampt
 
 #endif

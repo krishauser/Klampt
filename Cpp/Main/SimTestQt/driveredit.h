@@ -4,8 +4,9 @@
 #include <QDialog>
 #include "Modeling/Robot.h"
 #include "Modeling/World.h"
-#include "Simulation/WorldSimulation.h"
+#include "Simulation/Simulator.h"
 
+using namespace Klampt;
 
 namespace Ui {
 class DriverEdit;
@@ -16,10 +17,10 @@ class DriverEdit : public QDialog
     Q_OBJECT
     
 public:
-    explicit DriverEdit(RobotWorld* _world,WorldSimulation* _sim=NULL,QWidget *parent=0);
+    explicit DriverEdit(WorldModel* _world,Simulator* _sim=NULL,QWidget *parent=0);
     ~DriverEdit();
 
-    void SetRobot(Robot *robot_);
+    void SetRobot(RobotModel *robot_);
     void SetDriver(int _driver);
     void RequestSliderValues(int index);
     void addDrivers(vector<string> drivers);
@@ -45,9 +46,9 @@ public slots:
 private:
     Ui::DriverEdit *ui;
     int driver;
-    RobotWorld *world;
-    WorldSimulation* sim;
-    Robot* robot;
+    WorldModel *world;
+    Simulator* sim;
+    RobotModel* robot;
 signals:
     void GetDriverValues(int i);
     void SetDriverValue(int index,float val);

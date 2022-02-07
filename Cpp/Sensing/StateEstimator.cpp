@@ -4,6 +4,8 @@
 #include "Simulation/ODERobot.h"
 #include <KrisLibrary/math/angle.h>
 
+using namespace Klampt;
+
 void OmniscientStateEstimator::UpdateModel()
 {
   oderobot.GetConfig(robot.q);
@@ -11,7 +13,7 @@ void OmniscientStateEstimator::UpdateModel()
   robot.UpdateFrames();
 }
 
-IntegratedStateEstimator::IntegratedStateEstimator(Robot& _robot)
+IntegratedStateEstimator::IntegratedStateEstimator(RobotModel& _robot)
   :RobotStateEstimator(_robot), last_dt(0.0)
 {}
 
@@ -21,7 +23,7 @@ void IntegratedStateEstimator::ReadSensors(RobotSensors& sensors)
   JointVelocitySensor* jv = sensors.GetTypedSensor<JointVelocitySensor>();
   if(jv) {
     for(size_t i=0;i<robot.joints.size();i++) {
-      if(robot.joints[i].type == RobotJoint::Normal || robot.joints[i].type == RobotJoint::Spin) {
+      if(robot.joints[i].type == RobotModelJoint::Normal || robot.joints[i].type == RobotModelJoint::Spin) {
 	int link = robot.joints[i].linkIndex;
 	dq_predicted[link] = jv->dq[link];
       }
@@ -33,11 +35,11 @@ void IntegratedStateEstimator::ReadSensors(RobotSensors& sensors)
     else {
       //do finite differencing
       for(size_t i=0;i<robot.joints.size();i++) {
-	if(robot.joints[i].type == RobotJoint::Normal) {
+	if(robot.joints[i].type == RobotModelJoint::Normal) {
 	  int link = robot.joints[i].linkIndex;
 	  dq_predicted[link] = (jp->q[link] - q_predicted[link])/last_dt;
 	}
-	else if(robot.joints[i].type == RobotJoint::Spin) {
+	else if(robot.joints[i].type == RobotModelJoint::Spin) {
 	  int link = robot.joints[i].linkIndex;
 	  dq_predicted[link] = AngleDiff(jp->q[link],q_predicted[link])/last_dt;
 	}
@@ -48,7 +50,7 @@ void IntegratedStateEstimator::ReadSensors(RobotSensors& sensors)
   //update joint positions for normal joints
   if(jp) {
     for(size_t i=0;i<robot.joints.size();i++) {
-      if(robot.joints[i].type == RobotJoint::Normal || robot.joints[i].type == RobotJoint::Spin) {
+      if(robot.joints[i].type == RobotModelJoint::Normal || robot.joints[i].type == RobotModelJoint::Spin) {
 	int link = robot.joints[i].linkIndex;
 	q_predicted[link] = jp->q[link];
       }
@@ -64,7 +66,7 @@ void IntegratedStateEstimator::ReadSensors(RobotSensors& sensors)
       int glink = gyroSensors[j]->link;
       int match = -1;
       for(size_t i=0;i<robot.joints.size();i++) {
-	if(robot.joints[i].type == RobotJoint::Floating) {
+	if(robot.joints[i].type == RobotModelJoint::Floating) {
 	  if(robot.joints[i].linkIndex == glink) {
 	    match = (int)i;
 	    break;

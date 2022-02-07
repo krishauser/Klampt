@@ -71,52 +71,52 @@ class SwigPyIterator(object):
     __repr__ = _swig_repr
     __swig_destroy__ = _motionplanning.delete_SwigPyIterator
 
-    def value(self):
+    def value(self) -> "PyObject *":
         return _motionplanning.SwigPyIterator_value(self)
 
-    def incr(self, n=1):
+    def incr(self, n: "size_t"=1) -> "swig::SwigPyIterator *":
         return _motionplanning.SwigPyIterator_incr(self, n)
 
-    def decr(self, n=1):
+    def decr(self, n: "size_t"=1) -> "swig::SwigPyIterator *":
         return _motionplanning.SwigPyIterator_decr(self, n)
 
-    def distance(self, x):
+    def distance(self, x: "SwigPyIterator") -> "ptrdiff_t":
         return _motionplanning.SwigPyIterator_distance(self, x)
 
-    def equal(self, x):
+    def equal(self, x: "SwigPyIterator") -> "bool":
         return _motionplanning.SwigPyIterator_equal(self, x)
 
-    def copy(self):
+    def copy(self) -> "swig::SwigPyIterator *":
         return _motionplanning.SwigPyIterator_copy(self)
 
-    def next(self):
+    def next(self) -> "PyObject *":
         return _motionplanning.SwigPyIterator_next(self)
 
-    def __next__(self):
+    def __next__(self) -> "PyObject *":
         return _motionplanning.SwigPyIterator___next__(self)
 
-    def previous(self):
+    def previous(self) -> "PyObject *":
         return _motionplanning.SwigPyIterator_previous(self)
 
-    def advance(self, n):
+    def advance(self, n: "ptrdiff_t") -> "swig::SwigPyIterator *":
         return _motionplanning.SwigPyIterator_advance(self, n)
 
-    def __eq__(self, x):
+    def __eq__(self, x: "SwigPyIterator") -> "bool":
         return _motionplanning.SwigPyIterator___eq__(self, x)
 
-    def __ne__(self, x):
+    def __ne__(self, x: "SwigPyIterator") -> "bool":
         return _motionplanning.SwigPyIterator___ne__(self, x)
 
-    def __iadd__(self, n):
+    def __iadd__(self, n: "ptrdiff_t") -> "swig::SwigPyIterator &":
         return _motionplanning.SwigPyIterator___iadd__(self, n)
 
-    def __isub__(self, n):
+    def __isub__(self, n: "ptrdiff_t") -> "swig::SwigPyIterator &":
         return _motionplanning.SwigPyIterator___isub__(self, n)
 
-    def __add__(self, n):
+    def __add__(self, n: "ptrdiff_t") -> "swig::SwigPyIterator *":
         return _motionplanning.SwigPyIterator___add__(self, n)
 
-    def __sub__(self, *args):
+    def __sub__(self, *args) -> "ptrdiff_t":
         return _motionplanning.SwigPyIterator___sub__(self, *args)
     def __iter__(self):
         return self
@@ -128,102 +128,102 @@ class doubleVector(object):
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
 
-    def iterator(self):
+    def iterator(self) -> "swig::SwigPyIterator *":
         return _motionplanning.doubleVector_iterator(self)
     def __iter__(self):
         return self.iterator()
 
-    def __nonzero__(self):
+    def __nonzero__(self) -> "bool":
         return _motionplanning.doubleVector___nonzero__(self)
 
-    def __bool__(self):
+    def __bool__(self) -> "bool":
         return _motionplanning.doubleVector___bool__(self)
 
-    def __len__(self):
+    def __len__(self) -> "std::vector< double >::size_type":
         return _motionplanning.doubleVector___len__(self)
 
-    def __getslice__(self, i, j):
+    def __getslice__(self, i: "std::vector< double >::difference_type", j: "std::vector< double >::difference_type") -> "std::vector< double,std::allocator< double > > *":
         return _motionplanning.doubleVector___getslice__(self, i, j)
 
-    def __setslice__(self, *args):
+    def __setslice__(self, *args) -> "void":
         return _motionplanning.doubleVector___setslice__(self, *args)
 
-    def __delslice__(self, i, j):
+    def __delslice__(self, i: "std::vector< double >::difference_type", j: "std::vector< double >::difference_type") -> "void":
         return _motionplanning.doubleVector___delslice__(self, i, j)
 
-    def __delitem__(self, *args):
+    def __delitem__(self, *args) -> "void":
         return _motionplanning.doubleVector___delitem__(self, *args)
 
-    def __getitem__(self, *args):
+    def __getitem__(self, *args) -> "std::vector< double >::value_type const &":
         return _motionplanning.doubleVector___getitem__(self, *args)
 
-    def __setitem__(self, *args):
+    def __setitem__(self, *args) -> "void":
         return _motionplanning.doubleVector___setitem__(self, *args)
 
-    def pop(self):
+    def pop(self) -> "std::vector< double >::value_type":
         return _motionplanning.doubleVector_pop(self)
 
-    def append(self, x):
+    def append(self, x: "std::vector< double >::value_type const &") -> "void":
         return _motionplanning.doubleVector_append(self, x)
 
-    def empty(self):
+    def empty(self) -> "bool":
         return _motionplanning.doubleVector_empty(self)
 
-    def size(self):
+    def size(self) -> "std::vector< double >::size_type":
         return _motionplanning.doubleVector_size(self)
 
-    def swap(self, v):
+    def swap(self, v: "doubleVector") -> "void":
         return _motionplanning.doubleVector_swap(self, v)
 
-    def begin(self):
+    def begin(self) -> "std::vector< double >::iterator":
         return _motionplanning.doubleVector_begin(self)
 
-    def end(self):
+    def end(self) -> "std::vector< double >::iterator":
         return _motionplanning.doubleVector_end(self)
 
-    def rbegin(self):
+    def rbegin(self) -> "std::vector< double >::reverse_iterator":
         return _motionplanning.doubleVector_rbegin(self)
 
-    def rend(self):
+    def rend(self) -> "std::vector< double >::reverse_iterator":
         return _motionplanning.doubleVector_rend(self)
 
-    def clear(self):
+    def clear(self) -> "void":
         return _motionplanning.doubleVector_clear(self)
 
-    def get_allocator(self):
+    def get_allocator(self) -> "std::vector< double >::allocator_type":
         return _motionplanning.doubleVector_get_allocator(self)
 
-    def pop_back(self):
+    def pop_back(self) -> "void":
         return _motionplanning.doubleVector_pop_back(self)
 
-    def erase(self, *args):
+    def erase(self, *args) -> "std::vector< double >::iterator":
         return _motionplanning.doubleVector_erase(self, *args)
 
     def __init__(self, *args):
         _motionplanning.doubleVector_swiginit(self, _motionplanning.new_doubleVector(*args))
 
-    def push_back(self, x):
+    def push_back(self, x: "std::vector< double >::value_type const &") -> "void":
         return _motionplanning.doubleVector_push_back(self, x)
 
-    def front(self):
+    def front(self) -> "std::vector< double >::value_type const &":
         return _motionplanning.doubleVector_front(self)
 
-    def back(self):
+    def back(self) -> "std::vector< double >::value_type const &":
         return _motionplanning.doubleVector_back(self)
 
-    def assign(self, n, x):
+    def assign(self, n: "std::vector< double >::size_type", x: "std::vector< double >::value_type const &") -> "void":
         return _motionplanning.doubleVector_assign(self, n, x)
 
-    def resize(self, *args):
+    def resize(self, *args) -> "void":
         return _motionplanning.doubleVector_resize(self, *args)
 
-    def insert(self, *args):
+    def insert(self, *args) -> "void":
         return _motionplanning.doubleVector_insert(self, *args)
 
-    def reserve(self, n):
+    def reserve(self, n: "std::vector< double >::size_type") -> "void":
         return _motionplanning.doubleVector_reserve(self, n)
 
-    def capacity(self):
+    def capacity(self) -> "std::vector< double >::size_type":
         return _motionplanning.doubleVector_capacity(self)
     __swig_destroy__ = _motionplanning.delete_doubleVector
 
@@ -234,102 +234,102 @@ class doubleMatrix(object):
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
 
-    def iterator(self):
+    def iterator(self) -> "swig::SwigPyIterator *":
         return _motionplanning.doubleMatrix_iterator(self)
     def __iter__(self):
         return self.iterator()
 
-    def __nonzero__(self):
+    def __nonzero__(self) -> "bool":
         return _motionplanning.doubleMatrix___nonzero__(self)
 
-    def __bool__(self):
+    def __bool__(self) -> "bool":
         return _motionplanning.doubleMatrix___bool__(self)
 
-    def __len__(self):
+    def __len__(self) -> "std::vector< std::vector< double > >::size_type":
         return _motionplanning.doubleMatrix___len__(self)
 
-    def __getslice__(self, i, j):
+    def __getslice__(self, i: "std::vector< std::vector< double > >::difference_type", j: "std::vector< std::vector< double > >::difference_type") -> "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *":
         return _motionplanning.doubleMatrix___getslice__(self, i, j)
 
-    def __setslice__(self, *args):
+    def __setslice__(self, *args) -> "void":
         return _motionplanning.doubleMatrix___setslice__(self, *args)
 
-    def __delslice__(self, i, j):
+    def __delslice__(self, i: "std::vector< std::vector< double > >::difference_type", j: "std::vector< std::vector< double > >::difference_type") -> "void":
         return _motionplanning.doubleMatrix___delslice__(self, i, j)
 
-    def __delitem__(self, *args):
+    def __delitem__(self, *args) -> "void":
         return _motionplanning.doubleMatrix___delitem__(self, *args)
 
-    def __getitem__(self, *args):
+    def __getitem__(self, *args) -> "std::vector< std::vector< double > >::value_type const &":
         return _motionplanning.doubleMatrix___getitem__(self, *args)
 
-    def __setitem__(self, *args):
+    def __setitem__(self, *args) -> "void":
         return _motionplanning.doubleMatrix___setitem__(self, *args)
 
-    def pop(self):
+    def pop(self) -> "std::vector< std::vector< double > >::value_type":
         return _motionplanning.doubleMatrix_pop(self)
 
-    def append(self, x):
+    def append(self, x: "doubleVector") -> "void":
         return _motionplanning.doubleMatrix_append(self, x)
 
-    def empty(self):
+    def empty(self) -> "bool":
         return _motionplanning.doubleMatrix_empty(self)
 
-    def size(self):
+    def size(self) -> "std::vector< std::vector< double > >::size_type":
         return _motionplanning.doubleMatrix_size(self)
 
-    def swap(self, v):
+    def swap(self, v: "doubleMatrix") -> "void":
         return _motionplanning.doubleMatrix_swap(self, v)
 
-    def begin(self):
+    def begin(self) -> "std::vector< std::vector< double > >::iterator":
         return _motionplanning.doubleMatrix_begin(self)
 
-    def end(self):
+    def end(self) -> "std::vector< std::vector< double > >::iterator":
         return _motionplanning.doubleMatrix_end(self)
 
-    def rbegin(self):
+    def rbegin(self) -> "std::vector< std::vector< double > >::reverse_iterator":
         return _motionplanning.doubleMatrix_rbegin(self)
 
-    def rend(self):
+    def rend(self) -> "std::vector< std::vector< double > >::reverse_iterator":
         return _motionplanning.doubleMatrix_rend(self)
 
-    def clear(self):
+    def clear(self) -> "void":
         return _motionplanning.doubleMatrix_clear(self)
 
-    def get_allocator(self):
+    def get_allocator(self) -> "std::vector< std::vector< double > >::allocator_type":
         return _motionplanning.doubleMatrix_get_allocator(self)
 
-    def pop_back(self):
+    def pop_back(self) -> "void":
         return _motionplanning.doubleMatrix_pop_back(self)
 
-    def erase(self, *args):
+    def erase(self, *args) -> "std::vector< std::vector< double > >::iterator":
         return _motionplanning.doubleMatrix_erase(self, *args)
 
     def __init__(self, *args):
         _motionplanning.doubleMatrix_swiginit(self, _motionplanning.new_doubleMatrix(*args))
 
-    def push_back(self, x):
+    def push_back(self, x: "doubleVector") -> "void":
         return _motionplanning.doubleMatrix_push_back(self, x)
 
-    def front(self):
+    def front(self) -> "std::vector< std::vector< double > >::value_type const &":
         return _motionplanning.doubleMatrix_front(self)
 
-    def back(self):
+    def back(self) -> "std::vector< std::vector< double > >::value_type const &":
         return _motionplanning.doubleMatrix_back(self)
 
-    def assign(self, n, x):
+    def assign(self, n: "std::vector< std::vector< double > >::size_type", x: "doubleVector") -> "void":
         return _motionplanning.doubleMatrix_assign(self, n, x)
 
-    def resize(self, *args):
+    def resize(self, *args) -> "void":
         return _motionplanning.doubleMatrix_resize(self, *args)
 
-    def insert(self, *args):
+    def insert(self, *args) -> "void":
         return _motionplanning.doubleMatrix_insert(self, *args)
 
-    def reserve(self, n):
+    def reserve(self, n: "std::vector< std::vector< double > >::size_type") -> "void":
         return _motionplanning.doubleMatrix_reserve(self, n)
 
-    def capacity(self):
+    def capacity(self) -> "std::vector< std::vector< double > >::size_type":
         return _motionplanning.doubleMatrix_capacity(self)
     __swig_destroy__ = _motionplanning.delete_doubleMatrix
 
@@ -337,39 +337,39 @@ class doubleMatrix(object):
 _motionplanning.doubleMatrix_swigregister(doubleMatrix)
 
 
-def setRandomSeed(seed):
+def set_random_seed(seed: "int") -> "void":
     r"""
-    setRandomSeed(int seed)
+    set_random_seed(int seed)
 
 
-    Sets the random seed used by the configuration sampler.  
+    Sets the random seed used by the motion planner.  
 
     """
-    return _motionplanning.setRandomSeed(seed)
+    return _motionplanning.set_random_seed(seed)
 
-def setPlanJSONString(string):
+def set_plan_json_string(string: "char const *") -> "void":
     r"""
-    setPlanJSONString(char const * string)
+    set_plan_json_string(char const * string)
 
 
     Loads planner values from a JSON string.  
 
     """
-    return _motionplanning.setPlanJSONString(string)
+    return _motionplanning.set_plan_json_string(string)
 
-def getPlanJSONString():
+def get_plan_json_string() -> "std::string":
     r"""
-    getPlanJSONString() -> std::string
+    get_plan_json_string() -> std::string
 
 
     Saves planner values to a JSON string.  
 
     """
-    return _motionplanning.getPlanJSONString()
+    return _motionplanning.get_plan_json_string()
 
-def setPlanType(type):
+def set_plan_type(type: "char const *") -> "void":
     r"""
-    setPlanType(char const * type)
+    set_plan_type(char const * type)
 
 
     Sets the planner type.  
@@ -390,12 +390,12 @@ def setPlanType(type):
     *   fmm*: an anytime fast marching method algorithm for optimal motion planning  
 
     """
-    return _motionplanning.setPlanType(type)
+    return _motionplanning.set_plan_type(type)
 
-def setPlanSetting(*args):
+def set_plan_setting(*args) -> "void":
     r"""
-    setPlanSetting(char const * setting, double value)
-    setPlanSetting(char const * setting, char const * value)
+    set_plan_setting(char const * setting, double value)
+    set_plan_setting(char const * setting, char const * value)
 
 
     Sets a numeric or string-valued setting for the planner.  
@@ -435,9 +435,9 @@ def setPlanSetting(*args):
         shortcutting, you should set foundSolution:0.  
 
     """
-    return _motionplanning.setPlanSetting(*args)
+    return _motionplanning.set_plan_setting(*args)
 
-def destroy():
+def destroy() -> "void":
     r"""
     destroy()
 
@@ -450,8 +450,11 @@ class CSpaceInterface(object):
     r"""
 
 
-    A raw interface for a configuration space. Note: the native Python CSpace
-    interface class in cspace.py is easier to use.  
+    A raw interface for a configuration space.  
+
+    ..note::  
+
+        The native Python CSpace interface class in cspace.py is easier to use.  
 
     You can either set a single feasibility test function using setFeasibility() or
     add several feasibility tests, all of which need to be satisfied, using
@@ -488,7 +491,7 @@ class CSpaceInterface(object):
         _motionplanning.CSpaceInterface_swiginit(self, _motionplanning.new_CSpaceInterface(*args))
     __swig_destroy__ = _motionplanning.delete_CSpaceInterface
 
-    def destroy(self):
+    def destroy(self) -> "void":
         r"""
         destroy(CSpaceInterface self)
 
@@ -496,7 +499,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_destroy(self)
 
-    def setFeasibility(self, pyFeas):
+    def setFeasibility(self, pyFeas: "PyObject *") -> "void":
         r"""
         setFeasibility(CSpaceInterface self, PyObject * pyFeas)
 
@@ -504,7 +507,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_setFeasibility(self, pyFeas)
 
-    def addFeasibilityTest(self, name, pyFeas):
+    def addFeasibilityTest(self, name: "char const *", pyFeas: "PyObject *") -> "void":
         r"""
         addFeasibilityTest(CSpaceInterface self, char const * name, PyObject * pyFeas)
 
@@ -512,7 +515,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_addFeasibilityTest(self, name, pyFeas)
 
-    def setVisibility(self, pyVisible):
+    def setVisibility(self, pyVisible: "PyObject *") -> "void":
         r"""
         setVisibility(CSpaceInterface self, PyObject * pyVisible)
 
@@ -520,7 +523,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_setVisibility(self, pyVisible)
 
-    def addVisibilityTest(self, name, pyVisible):
+    def addVisibilityTest(self, name: "char const *", pyVisible: "PyObject *") -> "void":
         r"""
         addVisibilityTest(CSpaceInterface self, char const * name, PyObject * pyVisible)
 
@@ -528,7 +531,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_addVisibilityTest(self, name, pyVisible)
 
-    def setVisibilityEpsilon(self, eps):
+    def setVisibilityEpsilon(self, eps: "double") -> "void":
         r"""
         setVisibilityEpsilon(CSpaceInterface self, double eps)
 
@@ -536,7 +539,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_setVisibilityEpsilon(self, eps)
 
-    def setSampler(self, pySamp):
+    def setSampler(self, pySamp: "PyObject *") -> "void":
         r"""
         setSampler(CSpaceInterface self, PyObject * pySamp)
 
@@ -544,7 +547,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_setSampler(self, pySamp)
 
-    def setNeighborhoodSampler(self, pySamp):
+    def setNeighborhoodSampler(self, pySamp: "PyObject *") -> "void":
         r"""
         setNeighborhoodSampler(CSpaceInterface self, PyObject * pySamp)
 
@@ -552,7 +555,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_setNeighborhoodSampler(self, pySamp)
 
-    def setDistance(self, pyDist):
+    def setDistance(self, pyDist: "PyObject *") -> "void":
         r"""
         setDistance(CSpaceInterface self, PyObject * pyDist)
 
@@ -560,7 +563,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_setDistance(self, pyDist)
 
-    def setInterpolate(self, pyInterp):
+    def setInterpolate(self, pyInterp: "PyObject *") -> "void":
         r"""
         setInterpolate(CSpaceInterface self, PyObject * pyInterp)
 
@@ -568,7 +571,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_setInterpolate(self, pyInterp)
 
-    def setProperty(self, key, value):
+    def setProperty(self, key: "char const *", value: "char const *") -> "void":
         r"""
         setProperty(CSpaceInterface self, char const * key, char const * value)
 
@@ -576,7 +579,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_setProperty(self, key, value)
 
-    def getProperty(self, key):
+    def getProperty(self, key: "char const *") -> "char const *":
         r"""
         getProperty(CSpaceInterface self, char const * key) -> char const *
 
@@ -584,7 +587,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_getProperty(self, key)
 
-    def isFeasible(self, q):
+    def isFeasible(self, q: "PyObject *") -> "bool":
         r"""
         isFeasible(CSpaceInterface self, PyObject * q) -> bool
 
@@ -594,7 +597,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_isFeasible(self, q)
 
-    def isVisible(self, a, b):
+    def isVisible(self, a: "PyObject *", b: "PyObject *") -> "bool":
         r"""
         isVisible(CSpaceInterface self, PyObject * a, PyObject * b) -> bool
 
@@ -604,7 +607,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_isVisible(self, a, b)
 
-    def testFeasibility(self, name, q):
+    def testFeasibility(self, name: "char const *", q: "PyObject *") -> "bool":
         r"""
         testFeasibility(CSpaceInterface self, char const * name, PyObject * q) -> bool
 
@@ -615,7 +618,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_testFeasibility(self, name, q)
 
-    def testVisibility(self, name, a, b):
+    def testVisibility(self, name: "char const *", a: "PyObject *", b: "PyObject *") -> "bool":
         r"""
         testVisibility(CSpaceInterface self, char const * name, PyObject * a, PyObject * b) -> bool
 
@@ -626,7 +629,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_testVisibility(self, name, a, b)
 
-    def feasibilityFailures(self, q):
+    def feasibilityFailures(self, q: "PyObject *") -> "PyObject *":
         r"""
         feasibilityFailures(CSpaceInterface self, PyObject * q) -> PyObject *
 
@@ -636,7 +639,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_feasibilityFailures(self, q)
 
-    def visibilityFailures(self, a, b):
+    def visibilityFailures(self, a: "PyObject *", b: "PyObject *") -> "PyObject *":
         r"""
         visibilityFailures(CSpaceInterface self, PyObject * a, PyObject * b) -> PyObject *
 
@@ -646,7 +649,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_visibilityFailures(self, a, b)
 
-    def sample(self):
+    def sample(self) -> "PyObject *":
         r"""
         sample(CSpaceInterface self) -> PyObject *
 
@@ -656,7 +659,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_sample(self)
 
-    def distance(self, a, b):
+    def distance(self, a: "PyObject *", b: "PyObject *") -> "double":
         r"""
         distance(CSpaceInterface self, PyObject * a, PyObject * b) -> double
 
@@ -666,7 +669,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_distance(self, a, b)
 
-    def interpolate(self, a, b, u):
+    def interpolate(self, a: "PyObject *", b: "PyObject *", u: "double") -> "PyObject *":
         r"""
         interpolate(CSpaceInterface self, PyObject * a, PyObject * b, double u) -> PyObject *
 
@@ -676,7 +679,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_interpolate(self, a, b, u)
 
-    def adaptiveQueriesEnabled(self):
+    def adaptiveQueriesEnabled(self) -> "bool":
         r"""
         adaptiveQueriesEnabled(CSpaceInterface self) -> bool
 
@@ -687,7 +690,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_adaptiveQueriesEnabled(self)
 
-    def enableAdaptiveQueries(self, enabled=True):
+    def enableAdaptiveQueries(self, enabled: "bool"=True) -> "void":
         r"""
         enableAdaptiveQueries(CSpaceInterface self, bool enabled=True)
 
@@ -697,7 +700,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_enableAdaptiveQueries(self, enabled)
 
-    def optimizeQueryOrder(self):
+    def optimizeQueryOrder(self) -> "void":
         r"""
         optimizeQueryOrder(CSpaceInterface self)
 
@@ -707,7 +710,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_optimizeQueryOrder(self)
 
-    def setFeasibilityDependency(self, name, precedingTest):
+    def setFeasibilityDependency(self, name: "char const *", precedingTest: "char const *") -> "void":
         r"""
         setFeasibilityDependency(CSpaceInterface self, char const * name, char const * precedingTest)
 
@@ -717,7 +720,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_setFeasibilityDependency(self, name, precedingTest)
 
-    def setFeasibilityPrior(self, name, costPrior=0.0, feasibilityProbability=0.0, evidenceStrength=1.0):
+    def setFeasibilityPrior(self, name: "char const *", costPrior: "double"=0.0, feasibilityProbability: "double"=0.0, evidenceStrength: "double"=1.0) -> "void":
         r"""
         setFeasibilityPrior(CSpaceInterface self, char const * name, double costPrior=0.0, double feasibilityProbability=0.0, double evidenceStrength=1.0)
 
@@ -728,7 +731,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_setFeasibilityPrior(self, name, costPrior, feasibilityProbability, evidenceStrength)
 
-    def setVisibilityDependency(self, name, precedingTest):
+    def setVisibilityDependency(self, name: "char const *", precedingTest: "char const *") -> "void":
         r"""
         setVisibilityDependency(CSpaceInterface self, char const * name, char const * precedingTest)
 
@@ -738,7 +741,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_setVisibilityDependency(self, name, precedingTest)
 
-    def setVisibilityPrior(self, name, costPrior=0.0, visibilityProbability=0.0, evidenceStrength=1.0):
+    def setVisibilityPrior(self, name: "char const *", costPrior: "double"=0.0, visibilityProbability: "double"=0.0, evidenceStrength: "double"=1.0) -> "void":
         r"""
         setVisibilityPrior(CSpaceInterface self, char const * name, double costPrior=0.0, double visibilityProbability=0.0, double evidenceStrength=1.0)
 
@@ -749,7 +752,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_setVisibilityPrior(self, name, costPrior, visibilityProbability, evidenceStrength)
 
-    def feasibilityCost(self, name):
+    def feasibilityCost(self, name: "char const *") -> "double":
         r"""
         feasibilityCost(CSpaceInterface self, char const * name) -> double
 
@@ -759,7 +762,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_feasibilityCost(self, name)
 
-    def feasibilityProbability(self, name):
+    def feasibilityProbability(self, name: "char const *") -> "double":
         r"""
         feasibilityProbability(CSpaceInterface self, char const * name) -> double
 
@@ -769,7 +772,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_feasibilityProbability(self, name)
 
-    def visibilityCost(self, name):
+    def visibilityCost(self, name: "char const *") -> "double":
         r"""
         visibilityCost(CSpaceInterface self, char const * name) -> double
 
@@ -779,7 +782,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_visibilityCost(self, name)
 
-    def visibilityProbability(self, name):
+    def visibilityProbability(self, name: "char const *") -> "double":
         r"""
         visibilityProbability(CSpaceInterface self, char const * name) -> double
 
@@ -789,7 +792,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_visibilityProbability(self, name)
 
-    def feasibilityQueryOrder(self):
+    def feasibilityQueryOrder(self) -> "PyObject *":
         r"""
         feasibilityQueryOrder(CSpaceInterface self) -> PyObject *
 
@@ -799,7 +802,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_feasibilityQueryOrder(self)
 
-    def visibilityQueryOrder(self):
+    def visibilityQueryOrder(self) -> "PyObject *":
         r"""
         visibilityQueryOrder(CSpaceInterface self) -> PyObject *
 
@@ -809,7 +812,7 @@ class CSpaceInterface(object):
         """
         return _motionplanning.CSpaceInterface_visibilityQueryOrder(self)
 
-    def getStats(self):
+    def getStats(self) -> "PyObject *":
         r"""
         getStats(CSpaceInterface self) -> PyObject *
 
@@ -876,7 +879,7 @@ class PlannerInterface(object):
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
 
-    def __init__(self, cspace):
+    def __init__(self, cspace: "CSpaceInterface"):
         r"""
         __init__(PlannerInterface self, CSpaceInterface cspace) -> PlannerInterface
 
@@ -885,7 +888,7 @@ class PlannerInterface(object):
         _motionplanning.PlannerInterface_swiginit(self, _motionplanning.new_PlannerInterface(cspace))
     __swig_destroy__ = _motionplanning.delete_PlannerInterface
 
-    def destroy(self):
+    def destroy(self) -> "void":
         r"""
         destroy(PlannerInterface self)
 
@@ -893,7 +896,7 @@ class PlannerInterface(object):
         """
         return _motionplanning.PlannerInterface_destroy(self)
 
-    def setEndpoints(self, start, goal):
+    def setEndpoints(self, start: "PyObject *", goal: "PyObject *") -> "bool":
         r"""
         setEndpoints(PlannerInterface self, PyObject * start, PyObject * goal) -> bool
 
@@ -901,7 +904,7 @@ class PlannerInterface(object):
         """
         return _motionplanning.PlannerInterface_setEndpoints(self, start, goal)
 
-    def setEndpointSet(self, start, goal, goalSample=None):
+    def setEndpointSet(self, start: "PyObject *", goal: "PyObject *", goalSample: "PyObject *"=None) -> "bool":
         r"""
         setEndpointSet(PlannerInterface self, PyObject * start, PyObject * goal, PyObject * goalSample=None) -> bool
 
@@ -909,7 +912,7 @@ class PlannerInterface(object):
         """
         return _motionplanning.PlannerInterface_setEndpointSet(self, start, goal, goalSample)
 
-    def setCostFunction(self, edgeCost=None, terminalCost=None):
+    def setCostFunction(self, edgeCost: "PyObject *"=None, terminalCost: "PyObject *"=None) -> "void":
         r"""
         setCostFunction(PlannerInterface self, PyObject * edgeCost=None, PyObject * terminalCost=None)
 
@@ -917,7 +920,7 @@ class PlannerInterface(object):
         """
         return _motionplanning.PlannerInterface_setCostFunction(self, edgeCost, terminalCost)
 
-    def addMilestone(self, milestone):
+    def addMilestone(self, milestone: "PyObject *") -> "int":
         r"""
         addMilestone(PlannerInterface self, PyObject * milestone) -> int
 
@@ -925,7 +928,7 @@ class PlannerInterface(object):
         """
         return _motionplanning.PlannerInterface_addMilestone(self, milestone)
 
-    def getClosestMilestone(self, config):
+    def getClosestMilestone(self, config: "PyObject *") -> "int":
         r"""
         getClosestMilestone(PlannerInterface self, PyObject * config) -> int
 
@@ -933,7 +936,7 @@ class PlannerInterface(object):
         """
         return _motionplanning.PlannerInterface_getClosestMilestone(self, config)
 
-    def getMilestone(self, arg2):
+    def getMilestone(self, arg2: "int") -> "PyObject *":
         r"""
         getMilestone(PlannerInterface self, int arg2) -> PyObject *
 
@@ -941,7 +944,7 @@ class PlannerInterface(object):
         """
         return _motionplanning.PlannerInterface_getMilestone(self, arg2)
 
-    def planMore(self, iterations):
+    def planMore(self, iterations: "int") -> "void":
         r"""
         planMore(PlannerInterface self, int iterations)
 
@@ -949,7 +952,7 @@ class PlannerInterface(object):
         """
         return _motionplanning.PlannerInterface_planMore(self, iterations)
 
-    def getSolutionPath(self):
+    def getSolutionPath(self) -> "PyObject *":
         r"""
         getSolutionPath(PlannerInterface self) -> PyObject *
 
@@ -957,7 +960,7 @@ class PlannerInterface(object):
         """
         return _motionplanning.PlannerInterface_getSolutionPath(self)
 
-    def getPath(self, *args):
+    def getPath(self, *args) -> "PyObject *":
         r"""
         getPath(PlannerInterface self, int milestone1, int milestone2) -> PyObject
         getPath(PlannerInterface self, int milestone1, std::vector< int,std::allocator< int > > const & goalMilestones) -> PyObject *
@@ -966,7 +969,7 @@ class PlannerInterface(object):
         """
         return _motionplanning.PlannerInterface_getPath(self, *args)
 
-    def getData(self, setting):
+    def getData(self, setting: "char const *") -> "double":
         r"""
         getData(PlannerInterface self, char const * setting) -> double
 
@@ -974,7 +977,7 @@ class PlannerInterface(object):
         """
         return _motionplanning.PlannerInterface_getData(self, setting)
 
-    def getStats(self):
+    def getStats(self) -> "PyObject *":
         r"""
         getStats(PlannerInterface self) -> PyObject *
 
@@ -982,7 +985,7 @@ class PlannerInterface(object):
         """
         return _motionplanning.PlannerInterface_getStats(self)
 
-    def getRoadmap(self):
+    def getRoadmap(self) -> "PyObject *":
         r"""
         getRoadmap(PlannerInterface self) -> PyObject *
 
@@ -990,7 +993,7 @@ class PlannerInterface(object):
         """
         return _motionplanning.PlannerInterface_getRoadmap(self)
 
-    def dump(self, fn):
+    def dump(self, fn: "char const *") -> "void":
         r"""
         dump(PlannerInterface self, char const * fn)
 
@@ -1004,28 +1007,63 @@ class PlannerInterface(object):
 _motionplanning.PlannerInterface_swigregister(PlannerInterface)
 
 
-def interpolate1DMinTime(x0, v0, x1, v1, xmin, xmax, vmax, amax):
-    r"""interpolate1DMinTime(double x0, double v0, double x1, double v1, double xmin, double xmax, double vmax, double amax)"""
-    return _motionplanning.interpolate1DMinTime(x0, v0, x1, v1, xmin, xmax, vmax, amax)
+def interpolate_1d_min_time(x0: "double", v0: "double", x1: "double", v1: "double", xmin: "double", xmax: "double", vmax: "double", amax: "double") -> "std::vector< double > &, std::vector< double > &, std::vector< double > &":
+    r"""interpolate_1d_min_time(double x0, double v0, double x1, double v1, double xmin, double xmax, double vmax, double amax)"""
+    return _motionplanning.interpolate_1d_min_time(x0, v0, x1, v1, xmin, xmax, vmax, amax)
 
-def interpolate1DMinAccel(x0, v0, x1, v1, endTime, xmin, xmax, vmax):
-    r"""interpolate1DMinAccel(double x0, double v0, double x1, double v1, double endTime, double xmin, double xmax, double vmax)"""
-    return _motionplanning.interpolate1DMinAccel(x0, v0, x1, v1, endTime, xmin, xmax, vmax)
+def interpolate_1d_min_accel(x0: "double", v0: "double", x1: "double", v1: "double", endTime: "double", xmin: "double", xmax: "double", vmax: "double") -> "std::vector< double > &, std::vector< double > &, std::vector< double > &":
+    r"""interpolate_1d_min_accel(double x0, double v0, double x1, double v1, double endTime, double xmin, double xmax, double vmax)"""
+    return _motionplanning.interpolate_1d_min_accel(x0, v0, x1, v1, endTime, xmin, xmax, vmax)
 
-def interpolateNDMinTime(x0, v0, x1, v1, xmin, xmax, vmax, amax):
-    r"""interpolateNDMinTime(doubleVector x0, doubleVector v0, doubleVector x1, doubleVector v1, doubleVector xmin, doubleVector xmax, doubleVector vmax, doubleVector amax)"""
-    return _motionplanning.interpolateNDMinTime(x0, v0, x1, v1, xmin, xmax, vmax, amax)
+def interpolate_nd_min_time(x0: "doubleVector", v0: "doubleVector", x1: "doubleVector", v1: "doubleVector", xmin: "doubleVector", xmax: "doubleVector", vmax: "doubleVector", amax: "doubleVector") -> "std::vector< std::vector< double > > &, std::vector< std::vector< double > > &, std::vector< std::vector< double > > &":
+    r"""interpolate_nd_min_time(doubleVector x0, doubleVector v0, doubleVector x1, doubleVector v1, doubleVector xmin, doubleVector xmax, doubleVector vmax, doubleVector amax)"""
+    return _motionplanning.interpolate_nd_min_time(x0, v0, x1, v1, xmin, xmax, vmax, amax)
 
-def interpolateNDMinAccel(x0, v0, x1, v1, endTime, xmin, xmax, vmax):
-    r"""interpolateNDMinAccel(doubleVector x0, doubleVector v0, doubleVector x1, doubleVector v1, double endTime, doubleVector xmin, doubleVector xmax, doubleVector vmax)"""
-    return _motionplanning.interpolateNDMinAccel(x0, v0, x1, v1, endTime, xmin, xmax, vmax)
+def interpolate_nd_min_accel(x0: "doubleVector", v0: "doubleVector", x1: "doubleVector", v1: "doubleVector", endTime: "double", xmin: "doubleVector", xmax: "doubleVector", vmax: "doubleVector") -> "std::vector< std::vector< double > > &, std::vector< std::vector< double > > &, std::vector< std::vector< double > > &":
+    r"""interpolate_nd_min_accel(doubleVector x0, doubleVector v0, doubleVector x1, doubleVector v1, double endTime, doubleVector xmin, doubleVector xmax, doubleVector vmax)"""
+    return _motionplanning.interpolate_nd_min_accel(x0, v0, x1, v1, endTime, xmin, xmax, vmax)
 
-def interpolateNDMinTimeLinear(x0, x1, vmax, amax):
-    r"""interpolateNDMinTimeLinear(doubleVector x0, doubleVector x1, doubleVector vmax, doubleVector amax)"""
-    return _motionplanning.interpolateNDMinTimeLinear(x0, x1, vmax, amax)
+def interpolate_nd_min_time_linear(x0: "doubleVector", x1: "doubleVector", vmax: "doubleVector", amax: "doubleVector") -> "std::vector< double > &, std::vector< std::vector< double > > &, std::vector< std::vector< double > > &":
+    r"""interpolate_nd_min_time_linear(doubleVector x0, doubleVector x1, doubleVector vmax, doubleVector amax)"""
+    return _motionplanning.interpolate_nd_min_time_linear(x0, x1, vmax, amax)
 
-def combineNDCubic(times, positions, velocities):
-    r"""combineNDCubic(doubleMatrix times, doubleMatrix positions, doubleMatrix velocities)"""
-    return _motionplanning.combineNDCubic(times, positions, velocities)
+def brake_1d(x0: "double", v0: "double", amax: "double") -> "std::vector< double > &, std::vector< double > &, std::vector< double > &":
+    r"""brake_1d(double x0, double v0, double amax)"""
+    return _motionplanning.brake_1d(x0, v0, amax)
+
+def brake_nd(x0: "doubleVector", v0: "doubleVector", xmin: "doubleVector", xmax: "doubleVector", amax: "doubleVector") -> "std::vector< std::vector< double > > &, std::vector< std::vector< double > > &, std::vector< std::vector< double > > &":
+    r"""brake_nd(doubleVector x0, doubleVector v0, doubleVector xmin, doubleVector xmax, doubleVector amax)"""
+    return _motionplanning.brake_nd(x0, v0, xmin, xmax, amax)
+
+def combine_nd_cubic(times: "doubleMatrix", positions: "doubleMatrix", velocities: "doubleMatrix") -> "std::vector< double > &, std::vector< std::vector< double > > &, std::vector< std::vector< double > > &":
+    r"""combine_nd_cubic(doubleMatrix times, doubleMatrix positions, doubleMatrix velocities)"""
+    return _motionplanning.combine_nd_cubic(times, positions, velocities)
+
+import warnings
+
+def _deprecated_func(oldName,newName):
+    import sys
+    mod = sys.modules[__name__]
+    f = getattr(mod,newName)
+    def depf(*args,**kwargs):
+        warnings.warn("{} will be deprecated in favor of {} in a future version of Klampt".format(oldName,newName),DeprecationWarning)
+        return f(*args,**kwargs)
+    depf.__doc__ = 'Deprecated in a future version of Klampt. Use {} instead'.format(newName)
+    setattr(mod,oldName,depf)
+
+_deprecated_func('setRandomSeed','set_random_seed')
+_deprecated_func('setPlanJSONString','set_plan_json_string')
+_deprecated_func('getPlanJSONString','get_plan_json_string')
+_deprecated_func('setPlanType','set_plan_type')
+_deprecated_func('setPlanSetting','set_plan_setting')
+_deprecated_func('interpolate1DMinTime','interpolate_1d_min_time')
+_deprecated_func('interpolate1DMinAccel','interpolate_1d_min_accel')
+_deprecated_func('interpolateNDMinTime','interpolate_nd_min_time')
+_deprecated_func('interpolateNDMinAccel','interpolate_1d_min_accel')
+_deprecated_func('interpolateNDMinTimeLinear','interpolate_nd_min_time_linear')
+_deprecated_func('combineNDCubic','combine_nd_cubic')
+
+
+
 
 

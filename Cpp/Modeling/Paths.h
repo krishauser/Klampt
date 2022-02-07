@@ -2,9 +2,16 @@
 #define KLAMPT_MODELING_PATH_H
 
 #include "Robot.h"
-class MultiPath;
+
+//forward declarations
 namespace ParabolicRamp { class DynamicPath; }
 namespace Spline { class PiecewisePolynomialND; }
+
+namespace Klampt {
+  using namespace std;
+
+//forward declarations
+class MultiPath;
 
 /** @addtogroup Modeling */
 /*@{*/
@@ -32,9 +39,9 @@ class LinearPath
   ///Evaluates the path derivative at time t
   void Deriv(Real t,Vector& dxt) const;
   ///Evaluates the path at time t, using proper interpolation for the given robot
-  void Eval(Robot& robot,Real t,Vector& xt) const;
+  void Eval(RobotModel& robot,Real t,Vector& xt) const;
   ///Evaluates the path derivative at time t, using proper interpolation for the given robot
-  void Deriv(Robot& robot,Real t,Vector& dxt) const;
+  void Deriv(RobotModel& robot,Real t,Vector& dxt) const;
 
   vector<Real> times;
   vector<Vector> milestones;
@@ -76,11 +83,11 @@ void Keyframes(const LinearPath& in,vector<Config>& milestones);
 void Keyframes(const LinearPath& in,vector<Real>& times,vector<Config>& milestones);
 ///Extracts keyframes + tangent vectors.  Will construct tangent vectors by smoothing
 void Keyframes(const LinearPath& in,vector<Real>& times,vector<Config>& milestones,vector<Config>& dmilestones);
-void Keyframes(Robot& robot,const LinearPath& in,vector<Real>& times,vector<Config>& milestones,vector<Config>& dmilestones);
+void Keyframes(RobotModel& robot,const LinearPath& in,vector<Real>& times,vector<Config>& milestones,vector<Config>& dmilestones);
 void Keyframes(const MultiPath& in,vector<Config>& milestones);
 void Keyframes(const MultiPath& in,vector<Real>& times,vector<Config>& milestones);
 void Keyframes(const MultiPath& in,vector<Real>& times,vector<Config>& milestones,vector<Config>& dmilestones);
-void Keyframes(Robot& robot,const MultiPath& in,vector<Real>& times,vector<Config>& milestones,vector<Config>& dmilestones);
+void Keyframes(RobotModel& robot,const MultiPath& in,vector<Real>& times,vector<Config>& milestones,vector<Config>& dmilestones);
 void Keyframes(const ParabolicRamp::DynamicPath& in,vector<Config>& milestones);
 void Keyframes(const ParabolicRamp::DynamicPath& in,vector<Real>& times,vector<Config>& milestones);
 void Keyframes(const ParabolicRamp::DynamicPath& in,vector<Real>& times,vector<Config>& milestones,vector<Config>& dmilestones);
@@ -135,7 +142,7 @@ void Smooth(const MultiPath& in,ParabolicRamp::DynamicPath& out)
   Interpolate(times,milestones,dmilestones,out);
 }
 template <class T>
-void Smooth(Robot& robot,const LinearPath& in,T& out)
+void Smooth(RobotModel& robot,const LinearPath& in,T& out)
 {
   vector<Real> times;
   vector<Vector> milestones,dmilestones;
@@ -143,7 +150,7 @@ void Smooth(Robot& robot,const LinearPath& in,T& out)
   Interpolate(times,milestones,dmilestones,out);
 }
 template <class T>
-void Smooth(Robot& robot,const MultiPath& in,ParabolicRamp::DynamicPath& out)
+void Smooth(RobotModel& robot,const MultiPath& in,ParabolicRamp::DynamicPath& out)
 {
   vector<Real> times;
   vector<Vector> milestones,dmilestones;
@@ -163,8 +170,8 @@ void Discretize(const ParabolicRamp::DynamicPath& in,Real res,vector<Real>& time
 void Discretize(const Spline::PiecewisePolynomialND& in,Real res,vector<Real>& times,vector<Config>& milestones,vector<Vector>& dmilestones);
 ///Split up the path into keyframes and velocities at a given resolution using
 ///the robot interpolation function
-void Discretize(Robot& robot,const LinearPath& in,Real res,vector<Real>& times,vector<Config>& milestones);
-void Discretize(Robot& robot,const LinearPath& in,Real res,vector<Real>& times,vector<Config>& milestones,vector<Vector>& dmilestones);
+void Discretize(RobotModel& robot,const LinearPath& in,Real res,vector<Real>& times,vector<Config>& milestones);
+void Discretize(RobotModel& robot,const LinearPath& in,Real res,vector<Real>& times,vector<Config>& milestones,vector<Vector>& dmilestones);
 
 
 ///Create a representation that matches the input path at keyframes derived from the 
@@ -189,5 +196,7 @@ void Approximate(const T1& in,Real res,LinearPath& out)
 }
 
 /*@}*/
+
+} //namespace Klampt
 
 #endif 

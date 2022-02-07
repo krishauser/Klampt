@@ -3,6 +3,8 @@
 #include <KrisLibrary/Timer.h>
 #include <time.h>
 
+namespace Klampt {
+
 //tests shortcutting on randomly generated paths between a and b
 void TestShortcutting(SingleRobotCSpace* cspace,MotionPlannerFactory& plannerFactory,const Config& a,const Config& b)
 {
@@ -133,3 +135,5 @@ void TestDynamicShortcutting(SingleRobotCSpace& freeSpace,const ParabolicRamp::D
   printf("Dynamic shortcutting with window %g made %d shortcuts, took %g seconds\n",2.0,ns,timer.ElapsedTime());
 }
 
+
+} //namespace Klampt

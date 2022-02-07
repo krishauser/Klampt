@@ -1,9 +1,11 @@
 #ifndef SIMULATION_GUI_H
 #define SIMULATION_GUI_H
 
-#include <Klampt/Simulation/WorldSimulation.h>
+#include <Klampt/Simulation/Simulator.h>
 #include "WorldGUI.h"
 #include <set>
+
+namespace Klampt {
 
 /** @brief Generic simulation program.
  *
@@ -38,13 +40,13 @@ class SimGUIBackend : public WorldGUIBackend
 public:
   typedef GLNavigationBackend BaseT;
   int simulate;
-  WorldSimulation sim;
+  Simulator sim;
   string initialState;
 
   ///the contact state on the last DoContactStateLogging call
   set<pair<int,int> > inContact;
 
-  SimGUIBackend(RobotWorld* world)
+  SimGUIBackend(WorldModel* world)
     :WorldGUIBackend(world),simulate(0)
   {}
 
@@ -135,5 +137,7 @@ public:
   ///Logs contact wrenches to the given CSV file
   void DoContactWrenchLogging(const char* fn="simtest_wrench_log.csv");
 };
+
+} // namespace Klampt
 
 #endif

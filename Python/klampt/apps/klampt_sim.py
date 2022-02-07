@@ -3,6 +3,7 @@ import sys
 from klampt import *
 from klampt import vis
 from klampt.math import vectorops,so3,se3
+from klampt.model.robotinfo import RobotInfo
 from klampt.vis.glrobotprogram import *
 import importlib
 import time
@@ -135,15 +136,19 @@ def main():
     print(sys.argv[0]+": Simulates a robot file and Python controller")
     if len(sys.argv)<=1:
         print("USAGE: klampt_sim [world_file] [trajectory (.traj/.path) or controller (.py)]")
+        print("         [robotinfo file]")
         print()
         print("  Try: klampt_sim athlete_plane.xml motions/athlete_flex_opt.path ")
         print("       [run from Klampt-examples/data/]")
+        print("  Try: klampt_sim ur5/ur5_with_robotiq85_sim.json ")
+        print("       [run from Klampt-examples/robotinfo/]")
     print("================================================================================")
     if len(sys.argv)<=1:
         exit()
 
     world = WorldModel()
     #load up any world items, control modules, or paths
+    robotinfos = dict()
     control_modules = []
     for fn in sys.argv[1:]:
         path,base = os.path.split(fn)
@@ -154,6 +159,15 @@ def main():
             control_modules.append(mod)
         elif file_ext=='.path':
             control_modules.append(fn)
+        elif file_ext=='.json':
+            robotinfo = RobotInfo.load(fn)
+            if robotinfo.modelFile is not None:
+                robotinfos[world.numRobots()] = robotinfo
+                model = robotinfo.klamptModel()
+                print("Loaded robot from",robotinfo.modelFile)
+                world.add(robotinfo.name,model)
+            else:
+                print("RobotInfo {} has no robotmodel?".format(fn))
         else:
             res = world.readFile(fn)
             if not res:
@@ -161,6 +175,9 @@ def main():
                 print("Quitting...")
                 sys.exit(1)
     viewer = MyGLViewer(world)
+    for index,robotinfo in robotinfos.items():
+        if robotinfo.simulatorFile is not None:
+            robotinfo.configureSimulator(viewer.sim,index)
 
     for i,c in enumerate(control_modules):
         if isinstance(c,str):

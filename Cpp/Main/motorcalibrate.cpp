@@ -12,6 +12,7 @@
 #include <fstream>
 using namespace std;
 using namespace Math;
+using namespace Klampt;
 
 /** @brief Simulates a single DOF under PD control and stick-slip friction.
  *
@@ -318,7 +319,7 @@ Real GOptimizeDof(const vector<Real>& minvs,const vector<Real>& ds,const vector<
 //robot's dynamics
 //ddq = A * t + b
 //Assume all other links use steady state torque t = -A^-1 b
-void LinearizeRobot(Robot& robot,const vector<int>& fixedLinks,
+void LinearizeRobot(RobotModel& robot,const vector<int>& fixedLinks,
 		    Vector& minv,Vector& d,Vector& k,Vector& c)
 {
   minv.resize(robot.links.size());
@@ -332,7 +333,7 @@ void LinearizeRobot(Robot& robot,const vector<int>& fixedLinks,
   Vector b;
   vector<int> fixedDofs;
   for(size_t i=0;i<robot.joints.size();i++)
-    if(robot.joints[i].type == RobotJoint::Weld) 
+    if(robot.joints[i].type == RobotModelJoint::Weld) 
       fixedDofs.push_back(robot.joints[i].linkIndex);
 
   Vector tsteady;
@@ -384,7 +385,7 @@ void LinearizeRobot(Robot& robot,const vector<int>& fixedLinks,
       fprintf(stderr,"Aborting...\n");
       Abort();
     }
-    if(robot.joints[i].type == RobotJoint::Weld) 
+    if(robot.joints[i].type == RobotModelJoint::Weld) 
       c(i) = 0;
   }
   if(c.maxAbsElement() > 1000) {
@@ -402,7 +403,7 @@ void LinearizeRobot(Robot& robot,const vector<int>& fixedLinks,
 
 struct MotorCalibrationProblem
 {
-  Robot* robot;
+  RobotModel* robot;
   /** time step of the simulator */
   Real simDt;
   /** not used */
@@ -554,7 +555,7 @@ void RunCalibrationInd(MotorCalibrationProblem& problem,int numIters)
   vector<Real> rmsds(problem.estimateDrivers.size());
   for(size_t k=0;k<problem.estimateDrivers.size();k++) {
     int d = problem.estimateDrivers[k];
-    Assert(problem.robot->drivers[d].type == RobotJointDriver::Normal);
+    Assert(problem.robot->drivers[d].type == RobotModelDriver::Normal);
     int j = problem.robot->drivers[d].linkIndices[0];
 
     Real& kP = problem.robot->drivers[d].servoP;
@@ -640,7 +641,7 @@ void RunCalibrationInd(MotorCalibrationProblem& problem,int numIters)
 
 
 /*
-void SimulateODE(WorldSimulation& sim,Real advanceDt,Real settleTime,
+void SimulateODE(Simulator& sim,Real advanceDt,Real settleTime,
 		 const LinearPathResource& cmdQ,const LinearPathResource& cmdV,
 		 Real tmax,
 		 vector<Config>& qout,vector<Vector>& dqout)
@@ -669,7 +670,7 @@ void SimulateODE(WorldSimulation& sim,Real advanceDt,Real settleTime,
   }
 }
 
-void SimulateConstrained(Robot& robot,Real simDt,bool motorInterpolate,
+void SimulateConstrained(RobotModel& robot,Real simDt,bool motorInterpolate,
 			 const vector<int>& fixedLinks,
 			 const LinearPathResource& cmdQ,const LinearPathResource& cmdV,
 			 Real tmax,
@@ -682,7 +683,7 @@ void SimulateConstrained(Robot& robot,Real simDt,bool motorInterpolate,
 
   vector<int> fixedDofs;
   for(size_t i=0;i<robot.joints.size();i++)
-    if(robot.joints[i].type == RobotJoint::Weld)
+    if(robot.joints[i].type == RobotModelJoint::Weld)
       fixedDofs.push_back(robot.joints[i].linkIndex);
 
   Vector q=robot.q,dq=robot.dq;
@@ -826,7 +827,7 @@ bool SolveCalibration(MotorCalibrationProblem& problem,int numIters)
 
 */
 
-void Difference(Robot& robot,const LinearPathResource& path,LinearPathResource& vpath)
+void Difference(RobotModel& robot,const LinearPathResource& path,LinearPathResource& vpath)
 {
   vpath.times=path.times;
   vpath.milestones.resize(path.times.size());
@@ -840,7 +841,7 @@ void Difference(Robot& robot,const LinearPathResource& path,LinearPathResource& 
 
 void test()
 {
-  Robot robot;
+  RobotModel robot;
   if(!robot.Load("data/free_cube.rob")) {
     fprintf(stderr,"Failed to load robot\n");
     return;
@@ -866,7 +867,7 @@ string motorcalibrate(AnyCollection settings){
   gDefaultVelocityWeight = Real(settings["velocityErrorWeight"]);
   assert(commandedPaths.size()==sensedPaths.size());
 
-  Robot robot;
+  RobotModel robot;
   if(!robot.Load(robotfn.c_str())) {
     fprintf(stderr,"Failed to load robot\n");
     return NULL;
@@ -883,7 +884,7 @@ string motorcalibrate(AnyCollection settings){
   problem.savePostOptimize = true;
   if(fixedLinks.empty()) {
     for(size_t i=0;i<robot.joints.size();i++)
-      if(robot.joints[i].type == RobotJoint::Floating || robot.joints[i].type == RobotJoint::FloatingPlanar)
+      if(robot.joints[i].type == RobotModelJoint::Floating || robot.joints[i].type == RobotModelJoint::FloatingPlanar)
 	printf("Warning, fixed links are empty, and this is not a fixed-base robot?\n");
   }
   if(drivers.empty()) {
@@ -927,7 +928,7 @@ string motorcalibrate(AnyCollection settings){
   if(asURDF) {
     //write as <robot><klampt> children
     for(size_t i=0;i<robot.drivers.size();i++) {
-      if(robot.drivers[i].type == RobotJointDriver::Normal) {
+      if(robot.drivers[i].type == RobotModelDriver::Normal) {
 	int link = robot.drivers[i].linkIndices[0];
 	ret_stream<<"<link name=\""<<robot.linkNames[link]<<"\" "<<
 	  "servoP="<<robot.drivers[i].servoP<<" "
@@ -969,7 +970,7 @@ string motorcalibrate(AnyCollection settings){
 
 int main_shell(int argc,char** argv)
 {
-  Robot::disableGeometryLoading = true;
+  RobotModel::disableGeometryLoading = true;
 
   MotorCalibrateSettings settings;
   settings["robot"]=string();

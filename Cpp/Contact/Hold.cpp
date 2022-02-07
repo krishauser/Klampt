@@ -5,6 +5,8 @@
 #include <iostream>
 #include <sstream>
 
+namespace Klampt {
+
 void Hold::Transform(const RigidTransform& T)
 {
   for(size_t i=0;i<contacts.size();i++) {
@@ -304,3 +306,5 @@ istream& operator >> (istream& in, Hold& h)
   h = reader.h;
   return in;
 }
+
+} //namespace Klampt

@@ -7,6 +7,8 @@
 #include <KrisLibrary/robotics/Contact.h>
 #include <KrisLibrary/utils/SmartPointer.h>
 
+namespace Klampt {
+
 //task is q''[indices] = ddqdes
 struct JointAccelTask
 {
@@ -89,7 +91,7 @@ struct ContactForceTask
  */
 struct OperationalSpaceController : public RobotController
 {
-  OperationalSpaceController(Robot& robot);
+  OperationalSpaceController(RobotModel& robot);
 
   virtual const char* Type() const { return "OperationalSpaceController"; }
   virtual void Update(Real dt);
@@ -117,5 +119,7 @@ struct OperationalSpaceController : public RobotController
   vector<TorqueTask> torqueTasks;
   vector<ContactForceTask> contactForceTasks;
 };
+
+} //namespace Klampt
 
 #endif

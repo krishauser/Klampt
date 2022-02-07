@@ -1,13 +1,13 @@
 #include "controllerdialog.h"
 #include "ui_controllerdialog.h"
 #include "Modeling/World.h"
-#include "Simulation/WorldSimulation.h"
+#include "Simulation/Simulator.h"
 #include <iostream>
 //#include <boost/foreach.hpp>
 
 string toStdString(const QString& s);
 
-ControllerDialog::ControllerDialog(WorldSimulation* _sim,QWidget *parent) :
+ControllerDialog::ControllerDialog(Simulator* _sim,QWidget *parent) :
   QDialog(parent),sim(_sim),world(_sim ? _sim->world : NULL),
     ui(new Ui::ControllerDialog)
 {

@@ -2,6 +2,8 @@
 #include "ParabolicRamp.h"
 #include "DynamicPath.h"
 
+namespace Klampt {
+
 inline Spline::PiecewisePolynomial Cast(const ParabolicRamp::ParabolicRamp1D& ramp)
 {
   Spline::PiecewisePolynomial res;
@@ -83,3 +85,5 @@ inline Spline::PiecewisePolynomialND Cast(const ParabolicRamp::DynamicPath& path
   }
   return res;
 }
+
+} //namespace Klampt

@@ -7,14 +7,13 @@
 #include <stddef.h>
 #include "robotmodel.h"
 
-class Simulator;
-class SimRobotController;
-
 //declarations for internal objects
-class SensorBase;
-class WorldSimulation;
-class ControlledRobotSimulator;
-class ODEGeometry;
+namespace Klampt {
+  class SensorBase;
+  class Simulator;
+  class SimRobotController;
+  class ODEGeometry;
+}
 typedef struct dxBody *dBodyID;
 typedef struct dxJoint *dJointID;
 
@@ -24,9 +23,13 @@ class SimRobotController;
 class SimBody;
 class Simulator;
 
+using namespace std;
+
 /** @brief A sensor on a simulated robot.  Retrieve one from the controller
- * using :meth:`SimRobotController.getSensor`, or create a new one
- * using ``SimRobotSensor(robotController,name,type)``
+ * using :meth:`SimRobotController.sensor`, or create a new one
+ * using :meth:`SimRobotController.addSensor`.  You may also use
+ * kinematically-simulated sensors using :meth:`RobotModel.sensor` or create
+ * a new one using :meth:`RobotModel.addSensor`.
  *
  * Use  :meth:`getMeasurements` to get the currently simulated measurement
  * vector.
@@ -51,13 +54,20 @@ class Simulator;
  *
  * To use get/setSetting, you will need to know the sensor attribute names
  * and types as described in `the Klampt sensor documentation <https://github.com/krishauser/Klampt/blob/master/Documentation/Manual-Control.md#sensors>`_
- * (same as in the world or sensor XML file).
+ * (same as in the world or sensor XML file). Common settings include:
+ * 
+ * - rate (float): how frequently the sensor is simulated
+ * - enabled (bool): whether the simulator simulates this sensor
+ * - link (int): the link on which this sensor lies (-1 for world)
+ * - Tsensor (se3 transform, serialized with loader.write_se3(T)): the transform
+ *    of the sensor on the robot / world.
+ * 
  */
 class SimRobotSensor
 {
  public:
-  SimRobotSensor(const RobotModel& robot,SensorBase* sensor);
-  SimRobotSensor(SimRobotController& robot,const char* name,const char* type);
+  SimRobotSensor(const RobotModel& robot,Klampt::SensorBase* sensor);
+
   ///Returns the name of the sensor
   std::string name();
   ///Returns the type of the sensor
@@ -66,22 +76,54 @@ class SimRobotSensor
   RobotModel robot();
   ///Returns a list of names for the measurements (one per measurement).
   std::vector<std::string> measurementNames();
-  ///Returns a list of measurements from the previous simulation (or kinematicSimulate) timestep
-  void getMeasurements(std::vector<double>& out);
+  ///Returns an array of measurements from the previous simulation (or
+  ///kinematicSimulate) timestep
+  void getMeasurements(double** np_out,int* m);
   ///Returns all setting names
+  ///
   std::vector<std::string> settings();
   ///Returns the value of the named setting (you will need to manually parse this)
   std::string getSetting(const std::string& name);
   ///Sets the value of the named setting (you will need to manually cast an int/float/etc to a str)
   void setSetting(const std::string& name,const std::string& val);
+  ///Return whether the sensor is enabled during simulation (helper for getSetting)
+  bool getEnabled();
+  ///Sets whether the sensor is enabled (helper for setSetting)
+  void setEnabled(bool enabled);
+  ///Returns the link on which the sensor is mounted (helper for getSetting)
+  RobotModelLink getLink();
+  ///Sets the link on which the sensor is mounted (helper for setSetting)
+  void setLink(const RobotModelLink& link);
+  ///Sets the link on which the sensor is mounted (helper for setSetting)
+  void setLink(int link);
+  ///Returns the local transform of the sensor on the robot's link. 
+  ///(helper for getSetting)
+  ///
+  ///If the sensor doesn't have a transform (such as a joint position or
+  ///torque sensor) an exception will be raised.
+  void getTransform(double out[9],double out2[3]);
+  ///Returns the world transform of the sensor given the robot's current
+  ///configuration. (helper for getSetting)
+  ///
+  ///If the sensor doesn't have a transform (such as a joint position or
+  ///torque sensor) an exception will be raised.
+  void getTransformWorld(double out[9],double out2[3]);
+  ///Sets the local transform of the sensor on the robot's link.
+  ///(helper for setSetting)
+  ///
+  ///If the sensor doesn't have a transform (such as a joint position or
+  ///torque sensor) an exception will be raised.
+  void setTransform(const double R[9],const double t[3]);
   //note: only the last overload docstring is added to the documentation
-  ///Draws a sensor indicator using OpenGL.  If measurements are given, the indicator is drawn as though
-  ///these are the latest measurements, otherwise only an indicator is drawn.
+  ///Draws a sensor indicator using OpenGL.  If measurements are given,
+  ///the indicator is drawn as though these are the latest measurements,
+  ///otherwise only an indicator is drawn.
   void drawGL();
   //note: only the last overload docstring is added to the documentation
-  ///Draws a sensor indicator using OpenGL.  If measurements are given, the indicator is drawn as though
-  ///these are the latest measurements, otherwise only an indicator is drawn.
-  void drawGL(const std::vector<double>& measurements);
+  ///Draws a sensor indicator using OpenGL.  If measurements are given,
+  ///the indicator is drawn as though these are the latest measurements,
+  ///otherwise only an indicator is drawn.
+  void drawGL(double* np_array,int m);
 
   ///simulates / advances the kinematic simulation
   void kinematicSimulate(WorldModel& world,double dt);
@@ -90,7 +132,7 @@ class SimRobotSensor
   void kinematicReset();
 
   RobotModel robotModel;
-  SensorBase* sensor;
+  Klampt::SensorBase* sensor;
 };
 
 /** @brief A controller for a simulated robot.
@@ -162,25 +204,31 @@ class SimRobotController
   RobotModel model();
   /// Sets the current feedback control rate, in s
   void setRate(double dt);
-  /// Gets the current feedback control rate, in s
+  /// Returns The current feedback control rate, in s
+  ///
   double getRate();
 
-  /// Returns the current commanded configuration (size model().numLinks())
+  /// Returns The current commanded configuration (size model().numLinks())
+  ///
   void getCommandedConfig(std::vector<double>& out);
-  /// Returns the current commanded velocity (size model().numLinks())
+  /// Returns The current commanded velocity (size model().numLinks())
+  ///
   void getCommandedVelocity(std::vector<double>& out);
-  /// Returns the current commanded (feedforward) torque
-  /// (size model().numDrivers())
+  /// Returns The current commanded (feedforward) torque
+  ///     (size model().numDrivers())
+  ///
   void getCommandedTorque(std::vector<double>& out);
 
-  /// Returns the current "sensed" configuration from the simulator
-  /// (size model().numLinks())
+  /// Returns The current "sensed" configuration from the simulator
+  ///     (size model().numLinks())
+  ///
   void getSensedConfig(std::vector<double>& out);
-  /// Returns the current "sensed" velocity from the simulator
-  /// (size model().numLinks())
+  /// Returns The current "sensed" velocity from the simulator
+  ///     (size model().numLinks())
+  ///
   void getSensedVelocity(std::vector<double>& out);
-  /// Returns the current "sensed" (feedback) torque from the simulator. 
-  /// (size model().numDrivers())
+  /// Returns The current "sensed" (feedback) torque from the simulator. 
+  ///     (size model().numDrivers())
   ///
   /// Note: a default robot doesn't have a torque sensor, so this will be 0
   void getSensedTorque(std::vector<double>& out);
@@ -191,20 +239,27 @@ class SimRobotController
   SimRobotSensor sensor(int index);
   //note: only the last overload docstring is added to the documentation
   /// Returns a sensor by index or by name.  If out of bounds or unavailable,
-  /// a null sensor is returned (i.e., SimRobotSensor.name() or
-  /// SimRobotSensor.type()) will return the empty string.)
+  ///     a null sensor is returned (i.e., SimRobotSensor.name() or
+  ///     SimRobotSensor.type()) will return the empty string.)
   SimRobotSensor sensor(const char* name);
+  ///Adds a new sensor with a given name and type
+  ///
+  /// Returns:
+  ///
+  ///     The new sensor.
+  ///
+  SimRobotSensor addSensor(const char* name,const char* type);
   
-  /// gets a custom command list
+  /// Returns a custom command list
   std::vector<std::string> commands();
-  /// sends a custom string command to the controller
+  /// Sends a custom string command to the controller
   bool sendCommand(const std::string& name,const std::string& args);
 
-  ///Returns all valid setting names
+  /// Returns all valid setting names
   std::vector<std::string> settings();
-  /// gets a setting of the controller
+  /// Returns a setting of the controller
   std::string getSetting(const std::string& name);
-  /// sets a setting of the controller
+  /// Sets a setting of the controller
   bool setSetting(const std::string& name,const std::string& val);
 
   /// Uses a dynamic interpolant to get from the current state to the
@@ -266,24 +321,27 @@ class SimRobotController
 
   /** @brief Returns the control type for the active controller.
    *
-   * Possible return values are:
+   * Returns:
+   * 
+   *     One of
    *
-   * - unknown
-   * - off
-   * - torque
-   * - PID
-   * - locked_velocity
+   *     - unknown
+   *     - off
+   *     - torque
+   *     - PID
+   *     - locked_velocity
+   * 
    */
   std::string getControlType();
 
   /// Sets the PID gains.  Arguments have size model().numDrivers().
   void setPIDGains(const std::vector<double>& kP,const std::vector<double>& kI,const std::vector<double>& kD);
-  /// Gets the PID gains for the PID controller
+  /// Returns the PID gains for the PID controller
   void getPIDGains(std::vector<double>& kPout,std::vector<double>& kIout,std::vector<double>& kDout);
 
   int index;
   Simulator* sim;
-  ControlledRobotSimulator* controller;
+  Klampt::SimRobotController* controller;
 };
 
 /** @brief A reference to a rigid body inside a Simulator (either a
@@ -292,15 +350,20 @@ class SimRobotController
  * Can use this class to directly apply forces to or control positions
  * / velocities of objects in the simulation.  
  * 
- * Note: 
- *    All changes are applied in the current simulation substep, not the duration
- *    provided to Simulation.simulate().  If you need fine-grained control,
- *    make sure to call Simulation.simulate() with time steps equal to the value
- *    provided to Simulation.setSimStep() (this is 0.001s by default).
+ * .. note::
+ * 
+ *     All changes are applied in the current simulation substep, not the duration
+ *     provided to Simulation.simulate().  If you need fine-grained control,
+ *     make sure to call Simulation.simulate() with time steps equal to the value
+ *     provided to Simulation.setSimStep() (this is 0.001s by default).  Or, use
+ *     a hook from :class:`~klampt.sim.simulation.SimpleSimulator`.
  *
- * Note: 
- *    The transform of the object is centered at the *object's center of mass*
- *    rather than the reference frame given in the RobotModelLink or RigidObjectModel.
+ * .. note::
+ * 
+ *     The transform of the body is centered at the *object's center of mass*
+ *     rather than the object's reference frame given in the RobotModelLink or
+ *     RigidObjectModel.
+ * 
  */
 class SimBody
 {
@@ -348,8 +411,9 @@ class SimBody
   /// Returns the angular velocity and translational velocity
   void getVelocity(double out[3],double out2[3]);
 
-  /// Sets the collision padding used for contact generation.  At 0 padding the simulation will be unstable
-  /// for triangle mesh and point cloud geometries.  A larger value is useful to maintain simulation stability
+  /// Sets the collision padding used for contact generation.  At 0 padding
+  /// the simulation will be unstable for triangle mesh and point cloud
+  /// geometries. A larger value is useful to maintain simulation stability
   /// for thin or soft objects.  Default is 0.0025.
   void setCollisionPadding(double padding);
   double getCollisionPadding();
@@ -365,7 +429,7 @@ class SimBody
 
   Simulator* sim;
   int objectID;
-  ODEGeometry* geometry;
+  Klampt::ODEGeometry* geometry;
   dBodyID body;
 };
 
@@ -424,19 +488,32 @@ class Simulator
   /// Resets to the initial state (same as setState(initialState))
   void reset();
 
-  /// Returns an indicator code for the simulator status.  The return result
-  /// is one of the STATUS_X flags.  (Technically, this returns the *worst* status
-  /// over the last simulate() call)
+  /// Returns an indicator code for the simulator status. 
+  ///
+  /// Returns:
+  ///
+  ///     One of the STATUS_X flags.  (Technically, this returns the *worst* status
+  ///     over the last simulate() call)
+  ///
   int getStatus();
   /// Returns a string indicating the simulator's status.  If s is provided and >= 0,
   /// this function maps the indicator code s to a string.
   std::string getStatusString(int s=-1);
-  /// Checks if any objects are overlapping. Returns a pair of lists of
-  /// integers, giving the pairs of object ids that are overlapping.
+  /// Checks if any objects are overlapping.
+  ///
+  /// Returns:
+  ///
+  ///     A pair of lists of integers, giving the pairs of object ids that
+  ///     are overlapping.
+  ///
   void checkObjectOverlap(std::vector<int>& out,std::vector<int>& out2);
 
-  /// Returns a Base64 string representing the binary data for the current
-  /// simulation state, including controller parameters, etc.
+  /// Gets the current simulation state, including controller parameters, etc.
+  ///
+  /// Returns:
+  ///
+  ///     A Base64 string representing the binary data for the state
+  ///
   std::string getState();
   /// Sets the current simulation state from a Base64 string returned by
   /// a prior getState call.
@@ -482,12 +559,13 @@ class Simulator
   /// contact on the current time step.  You can set bid=-1 to tell if object 
   /// ``a`` is in contact with any object. 
   bool inContact(int aid,int bid);
-  /// Returns the list of contacts (x,n,kFriction) at the last time step.
-  /// Normals point into object ``a``.  The contact point (x,n,kFriction) is 
+  /// Returns the nx7 list of contacts (x,n,kFriction) at the last time step.
+  /// Normals point into object ``a``.  Each contact point (x,n,kFriction) is 
   /// represented as a 7-element vector
-  void getContacts(int aid,int bid,std::vector<std::vector<double> >& out);
-  /// Returns the list of contact forces on object a at the last time step
-  void getContactForces(int aid,int bid,std::vector<std::vector<double> >& out);
+  void getContacts(int aid,int bid,double** np_out2,int* m,int* n);
+  /// Returns the list of contact forces on object a at the last time step. Result
+  /// is an nx3 array.
+  void getContactForces(int aid,int bid,double** np_out2,int* m,int* n);
   /// Returns the contact force on object a at the last time step.  You can set
   /// bid to -1 to get the overall contact force on object a.
   void contactForce(int aid,int bid,double out[3]);
@@ -524,19 +602,23 @@ class Simulator
   ///Returns the SimBody corresponding to the given object
   SimBody body(const RigidObjectModel& object);
   //note: only the last overload docstring is added to the documentation
-  ///Returns the SimBody corresponding to the given link, rigid object, or terrain
+  ///Return the SimBody corresponding to the given link, rigid object, or terrain
   SimBody body(const TerrainModel& terrain);
 
   /// Returns the joint force and torque local to the link, as would be read
-  /// by a force-torque sensor mounted at the given link's origin.  The 6
-  /// entries are (fx,fy,fz,mx,my,mz)
+  /// by a force-torque sensor mounted at the given link's origin. 
+  ///
+  /// Returns:
+  ///
+  ///     6 entries of the wrench (fx,fy,fz,mx,my,mz)
+  ///     
   void getJointForces(const RobotModelLink& link,double out[6]);
 
   /// Sets the overall gravity vector
   void setGravity(const double g[3]);
   /// Sets the internal simulation substep.  Values < 0.01 are recommended.
   void setSimStep(double dt);
-  ///Returns all setting names
+  /// Returns all setting names
   std::vector<std::string> settings();
   /** @brief Retrieves some simulation setting. 
    * 
@@ -575,6 +657,12 @@ class Simulator
    * 
    * See `Klampt/Simulation/ODESimulator.h <http://motion.pratt.duke.edu/klampt/klampt_docs/ODESimulator_8h_source.html>`_
    * for detailed descriptions of these parameters.
+   * 
+   * Returns:
+   *      
+   *     A string encoding the data. This will need to be cast to int or
+   *     float manually.
+   * 
    */
   std::string getSetting(const std::string& name);
   /// Sets some simulation setting. Raises an exception if the name is
@@ -583,12 +671,12 @@ class Simulator
 
   int index;
   WorldModel world;
-  WorldSimulation* sim;
+  Klampt::Simulator* sim;
   std::string initialState;
 };
 
 /// Sets the random seed used by the configuration sampler
-void setRandomSeed(int seed);
+void set_random_seed(int seed);
 
 ///Cleans up all internal data structures.  Useful for multithreaded programs to make sure ODE errors
 ///aren't thrown on exit.  This is called for you on exit when importing the Python klampt module.

@@ -3,6 +3,7 @@
 #include <sstream>
 #include <fstream>
 using namespace std;
+namespace Klampt {
 
 string ToLowercase(string str){
 	string lowerstr = "";
@@ -410,7 +411,7 @@ bool OrXmlKinbody::getRealContent() {
 	return true;
 }
 
-bool OrXmlKinbody::GetObjectOrTerrain(RobotWorld& world) {
+bool OrXmlKinbody::GetObjectOrTerrain(WorldModel& world) {
 	if (!isGetAllCleanBody) {
 		cout
 				<< "Error: should first process all the contents by GetAllCleanBodyJoints!\n"
@@ -1341,7 +1342,7 @@ bool OrXmlEnvironment::Convert2URDF() {
 	return true;
 }
 
-bool OrXmlEnvironment::GetWorld(RobotWorld& world) {
+bool OrXmlEnvironment::GetWorld(WorldModel& world) {
 	//parse xml first
 	if (!getWorld()) {
 		cout << "getWorld failed!\n" << flush;
@@ -1453,8 +1454,8 @@ bool OrXmlRobot::GetFixedBaseRobot(Robot& robot) {
 	for (size_t i = 0; i < nJoint; i++) {
 		if (xmlJoints[i]->enabled == false)
 			continue;
-		RobotJoint robjoint;
-		robjoint.type = RobotJoint::Normal;
+		RobotModelJoint robjoint;
+		robjoint.type = RobotModelJoint::Normal;
 		int b1 = -1, b2 = -1;
 		assert(xmlJoints[i]->bodys.size() == 2);
 		for (size_t j = 0; j < xmlBodys.size(); j++) {
@@ -1485,7 +1486,7 @@ bool OrXmlRobot::GetFixedBaseRobot(Robot& robot) {
 
 		if (xmlJoints[i]->cleanLimits.size() == 2) {
 			if (xmlJoints[i]->cleanLimits[0] == xmlJoints[i]->cleanLimits[1])
-				robjoint.type = RobotJoint::Weld;
+				robjoint.type = RobotModelJoint::Weld;
 			else {
 				robot.qMin[linkI] = xmlJoints[i]->cleanLimits[0];
 				robot.qMax[linkI] = xmlJoints[i]->cleanLimits[1];
@@ -1520,11 +1521,11 @@ bool OrXmlRobot::GetFixedBaseRobot(Robot& robot) {
 	robot.driverNames.resize(0);
 	robot.drivers.resize(0);
 	for (size_t i = 0; i < nJoint; i++) {
-		if (robot.joints[i].type == RobotJoint::Normal) {
+		if (robot.joints[i].type == RobotModelJoint::Normal) {
 			robot.driverNames.push_back(xmlJoints[i]->name);
 			int linkI = robot.joints[i].linkIndex;
-			RobotJointDriver d;
-			d.type = RobotJointDriver::Normal;
+			RobotModelDriver d;
+			d.type = RobotModelDriver::Normal;
 			d.linkIndices.push_back(linkI);
 			d.qmin = robot.qMin(linkI);
 			d.qmax = robot.qMax(linkI);
@@ -2424,12 +2425,12 @@ void OrXmlRobot::WriteHubo(Robot& robot, bool isjaemi) {
 	size_t nJoints = robot.joints.size();
 	for (size_t i = 0; i < nJoints; i++) {
 		file << "joint ";
-		if (robot.joints[i].type == RobotJoint::Floating)
+		if (robot.joints[i].type == RobotModelJoint::Floating)
 			file << "floating " << robot.joints[i].linkIndex << " "
 					<< robot.joints[i].baseIndex << endl;
-		else if (robot.joints[i].type == RobotJoint::Normal)
+		else if (robot.joints[i].type == RobotModelJoint::Normal)
 			file << "normal " << robot.joints[i].linkIndex << endl;
-		else if (robot.joints[i].type == RobotJoint::Weld)
+		else if (robot.joints[i].type == RobotModelJoint::Weld)
 			file << "weld " << robot.joints[i].linkIndex << endl;
 
 	}
@@ -2437,7 +2438,7 @@ void OrXmlRobot::WriteHubo(Robot& robot, bool isjaemi) {
 
 	size_t nDrivers = robot.drivers.size();
 	for (size_t i = 0; i < nDrivers; i++) {
-		if (robot.drivers[i].type == RobotJointDriver::Normal) {
+		if (robot.drivers[i].type == RobotModelDriver::Normal) {
 			file << "driver normal " << robot.drivers[i].linkIndices[0] << endl;
 		}
 	}
@@ -2447,7 +2448,7 @@ void OrXmlRobot::WriteHubo(Robot& robot, bool isjaemi) {
 	for (size_t i = 0; i < drivergroups.size(); i++) {
 		for (size_t j = 0; j < drivergroups[i].size(); j++)
 			if (robot.drivers[drivergroups[i][j]].type
-					== RobotJointDriver::Normal) {
+					== RobotModelDriver::Normal) {
 				file << robot.drivers[drivergroups[i][j]].servoP << " ";
 			}
 		if (i < drivergroups.size() - 1)
@@ -2458,7 +2459,7 @@ void OrXmlRobot::WriteHubo(Robot& robot, bool isjaemi) {
 	for (size_t i = 0; i < drivergroups.size(); i++) {
 		for (size_t j = 0; j < drivergroups[i].size(); j++)
 			if (robot.drivers[drivergroups[i][j]].type
-					== RobotJointDriver::Normal) {
+					== RobotModelDriver::Normal) {
 				file << robot.drivers[drivergroups[i][j]].servoI << " ";
 			}
 		if (i < drivergroups.size() - 1)
@@ -2469,7 +2470,7 @@ void OrXmlRobot::WriteHubo(Robot& robot, bool isjaemi) {
 	for (size_t i = 0; i < drivergroups.size(); i++) {
 		for (size_t j = 0; j < drivergroups[i].size(); j++)
 			if (robot.drivers[drivergroups[i][j]].type
-					== RobotJointDriver::Normal) {
+					== RobotModelDriver::Normal) {
 				file << robot.drivers[drivergroups[i][j]].servoD << " ";
 			}
 		if (i < drivergroups.size() - 1)
@@ -2481,7 +2482,7 @@ void OrXmlRobot::WriteHubo(Robot& robot, bool isjaemi) {
 	for (size_t i = 0; i < drivergroups.size(); i++) {
 		for (size_t j = 0; j < drivergroups[i].size(); j++)
 			if (robot.drivers[drivergroups[i][j]].type
-					== RobotJointDriver::Normal) {
+					== RobotModelDriver::Normal) {
 				file << robot.drivers[drivergroups[i][j]].dryFriction << " ";
 			}
 		if (i < drivergroups.size() - 1)
@@ -2502,7 +2503,7 @@ void OrXmlRobot::Write2Rob(Robot& robot) {
 
 	cout << "Writing .rob file to " << filename << endl;
 	vector<string> geomFiles(robot.links.size());
-	if(robot.joints[0].type == RobotJoint::Floating){
+	if(robot.joints[0].type == RobotModelJoint::Floating){
 		cout<<"write floating base robot"<<endl;
 		for (size_t i = 0; i < robot.links.size(); i++) {
 			if (i < 5)
@@ -2660,20 +2661,20 @@ bool OrXmlRobot::GetFloatingBaseRobot(Robot& robot) {
 	}
 
 	robot.joints.resize(1);
-	robot.joints[0].type = RobotJoint::Floating;
+	robot.joints[0].type = RobotModelJoint::Floating;
 	robot.joints[0].linkIndex = 5;
 	robot.joints[0].baseIndex = -1;
 
 	for (size_t i = 0; i < xmlJoints.size(); i++) {
-		RobotJoint robjoint;
-		robjoint.type = RobotJoint::Normal;
+		RobotModelJoint robjoint;
+		robjoint.type = RobotModelJoint::Normal;
 		if (xmlJoints[i]->enabled == false) {
-			robjoint.type = RobotJoint::Weld;
+			robjoint.type = RobotModelJoint::Weld;
 		}
 
 		int linkI = xmlJoints[i]->linkI;
 		robjoint.linkIndex = linkI;
-		if(robjoint.type != RobotJoint::Weld){
+		if(robjoint.type != RobotModelJoint::Weld){
 			if(robot.links[linkI].mass == 0){
 				robot.links[linkI].mass = 0.1;
 			}
@@ -2690,7 +2691,7 @@ bool OrXmlRobot::GetFloatingBaseRobot(Robot& robot) {
 
 		if (xmlJoints[i]->cleanLimits.size() == 2) {
 			if (xmlJoints[i]->cleanLimits[0] == xmlJoints[i]->cleanLimits[1])
-				robjoint.type = RobotJoint::Weld;
+				robjoint.type = RobotModelJoint::Weld;
 			else {
 				robot.qMin[linkI] = xmlJoints[i]->cleanLimits[0];
 				robot.qMax[linkI] = xmlJoints[i]->cleanLimits[1];
@@ -2723,11 +2724,11 @@ bool OrXmlRobot::GetFloatingBaseRobot(Robot& robot) {
 	robot.driverNames.resize(0);
 	robot.drivers.resize(0);
 	for (size_t i = 0; i < nJoint; i++) {
-		if (robot.joints[i].type == RobotJoint::Normal) {
+		if (robot.joints[i].type == RobotModelJoint::Normal) {
 			int linkI = robot.joints[i].linkIndex;
 			robot.driverNames.push_back(robot.linkNames[linkI]);
-			RobotJointDriver d;
-			d.type = RobotJointDriver::Normal;
+			RobotModelDriver d;
+			d.type = RobotModelDriver::Normal;
 			d.linkIndices.push_back(linkI);
 			d.qmin = robot.qMin(linkI);
 			d.qmax = robot.qMax(linkI);
@@ -3065,3 +3066,5 @@ std::ostream& operator <<(std::ostream& out, const OrXmlRobot& robot) {
 		out << *robot.transformation << endl;
 	return out;
 }
+
+} // namespace Klampt

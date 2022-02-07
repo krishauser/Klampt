@@ -47,7 +47,7 @@ If names are not unique, entities must be addressed by index. Furthermore, some 
 
 ### API summary
 
-See the RobotWorld class (Klampt/Modeling/World.h)
+See the WorldModel class (Klampt/Modeling/World.h)
 
 
 
@@ -79,9 +79,9 @@ Klamp't works with arbitrary tree-structured articulated robots. Parallel mechan
 
 ### API summary
 
-The Robot Model in the C++ API is implemented by the `Robot` class in [Klampt/Modeling/Robot.h](../Modeling/Robot.h).  This structure is based heavily on the KrisLibrary/robotics package for defining articulated robot kinematics and dynamics. `Robot` has the following class hierarchy:
+The Robot Model in the C++ API is implemented by the `RobotModel` class in [Klampt/Modeling/Robot.h](../Modeling/Robot.h).  This structure is based heavily on the KrisLibrary/robotics package for defining articulated robot kinematics and dynamics. `RobotModel` has the following class hierarchy:
 
-<centering> `Robot` -&gt; `RobotWithGeometry` -&gt; `RobotDynamics3D` -&gt; `RobotKinematics3D` -&gt; `Chain` </centering>
+<centering> `RobotModel` -&gt; `RobotWithGeometry` -&gt; `RobotDynamics3D` -&gt; `RobotKinematics3D` -&gt; `Chain` </centering>
 
 The reasons for the class hierarchy are largely historical, but meaningful. For example, a protein backbone might be modeled as a `RobotKinematics3D` but not a `RobotDynamics3D`.
 
@@ -89,9 +89,9 @@ The reasons for the class hierarchy are largely historical, but meaningful. For 
 - `RobotKinematics3D` stores the kinematic and dynamic information of links, joint limits, the current configuration and the current link frames.  It also provides methods for computing forward kinematics, jacobians, and the center of mass.
 - `RobotDynamics3D` stores the actuator limits and the current velocity. It provides methods for computing information related to the robot's dynamics.
 - `RobotGeometry3D` stores link collision geometries and information about which links can self collide.  It performs self-collision testing and collision testing with other geometries.
-- `Robot` defines link names and semantics of `Joints` and `Drivers`.
+- `RobotModel` defines link names and semantics of `Joints` and `Drivers`.
 
-A `Robot` configuration is defined by a `Config` class (which is simply a typedef for `Vector`, see KrisLibrary/math/vector.h). The robot model's configuration is described in `Robot.q`, and the current transforms of its links are given in `Robot.links[index].T_World`. To ensure consistency between the configuration and the link frames, the `Robot.UpdateConfig(q)` method should be called to change the robot's configuration. `UpdateConfig` performs forward kinematics to compute the link frames, while simple assignment of the form `Robot.q=q` does not.
+A `RobotModel` configuration is defined by a `Config` class (which is simply a typedef for `Vector`, see KrisLibrary/math/vector.h). The robot model's configuration is described in `RobotModel.q`, and the current transforms of its links are given in `RobotModel.links[index].T_World`. To ensure consistency between the configuration and the link frames, the `RobotModel.UpdateConfig(q)` method should be called to change the robot's configuration. `UpdateConfig` performs forward kinematics to compute the link frames, while simple assignment of the form `RobotModel.q=q` does not.
 
 
 
@@ -112,9 +112,9 @@ The current transformation of a link is calculated via forward kinematics, and d
 
 ### API summary
 
-Links are stored in the `Robot.links` member, which is an array of `RobotLink3D`s. The parent index of each link is stored in the `Robot.parents` member, which is a list of `int`s. The link type is stored in `RobotLink3D.type` and its axis is stored in `RobotLink3D.w`. `RobotLink3D` also contains mass parameters (`mass`, `inertia`, `com`), the reference transformation to its parent (`T0_Parent`), and the link's current transformation `T_World`.
+Links are stored in the `RobotModel.links` member, which is an array of `RobotLink3D`s. The parent index of each link is stored in the `RobotModel.parents` member, which is a list of `int`s. The link type is stored in `RobotLink3D.type` and its axis is stored in `RobotLink3D.w`. `RobotLink3D` also contains mass parameters (`mass`, `inertia`, `com`), the reference transformation to its parent (`T0_Parent`), and the link's current transformation `T_World`.
 
-Link geometries are stored in the `Robot.geometry` list, but to take advantage of the cache the `Robot.geomManagers` variable should be used for saving/loading/modifying the geometry. _Note: The transform of each collision geometry is only updated to the current link transform after `robot.UpdateGeometry()` is called_.
+Link geometries are stored in the `RobotModel.geometry` list, but to take advantage of the cache the `RobotModel.geomManagers` variable should be used for saving/loading/modifying the geometry. _Note: The transform of each collision geometry is only updated to the current link transform after `RobotModel.UpdateGeometry()` is called_.
 
 
 
@@ -139,7 +139,7 @@ The DOFs of a robot are considered as generic variables that define the extents 
 
 In C++ the joint type is referred to in CamelCase, while in files the joint type is referred to in lowercase.
 
-**Drivers.** Although many robots are driven by motors that transmit torques directly to single DOFs, the `Robot` class can represent other drive systems that apply forces to multiple DOFs. For example, a cable-driven finger may have a single cable actuating three links, a mobile base may only be able to move forward and turn, and a satellite may have thrusters. Free-floating bases may have no drive systems whatsoever.
+**Drivers.** Although many robots are driven by motors that transmit torques directly to single DOFs, the `RobotModel` class can represent other drive systems that apply forces to multiple DOFs. For example, a cable-driven finger may have a single cable actuating three links, a mobile base may only be able to move forward and turn, and a satellite may have thrusters. Free-floating bases may have no drive systems whatsoever.
 
 A robot is set up with a list of Drivers available to produce torques.
 - `Normal` drivers act as one would expect a motor that drives a single DOF to behave.

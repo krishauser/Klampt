@@ -3,7 +3,9 @@
 
 #include <tinyxml.h>
 #include <Klampt/Simulation/ODESimulator.h>
-#include <Klampt/Simulation/WorldSimulation.h>
+#include <Klampt/Simulation/Simulator.h>
+
+namespace Klampt {
 
 class XmlODEGeometry
 {
@@ -27,9 +29,11 @@ class XmlSimulationSettings
 {
  public:
   XmlSimulationSettings(TiXmlElement* element);
-  bool GetSettings(WorldSimulation& sim);
+  bool GetSettings(Simulator& sim);
 
   TiXmlElement* e;
 };
+
+} //namespace Klampt
 
 #endif

@@ -9580,7 +9580,7 @@ SWIGINTERN PyObject *doubleMatrix_swiginit(PyObject *SWIGUNUSEDPARM(self), PyObj
   return SWIG_Python_InitShadowInstance(args);
 }
 
-SWIGINTERN PyObject *_wrap_setRandomSeed(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_set_random_seed(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   int arg1 ;
   int val1 ;
@@ -9591,12 +9591,12 @@ SWIGINTERN PyObject *_wrap_setRandomSeed(PyObject *SWIGUNUSEDPARM(self), PyObjec
   swig_obj[0] = args;
   ecode1 = SWIG_AsVal_int(swig_obj[0], &val1);
   if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "setRandomSeed" "', argument " "1"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "set_random_seed" "', argument " "1"" of type '" "int""'");
   } 
   arg1 = static_cast< int >(val1);
   {
     try {
-      setRandomSeed(arg1);
+      set_random_seed(arg1);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -9614,7 +9614,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_setPlanJSONString(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_set_plan_json_string(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   char *arg1 = (char *) 0 ;
   int res1 ;
@@ -9626,12 +9626,12 @@ SWIGINTERN PyObject *_wrap_setPlanJSONString(PyObject *SWIGUNUSEDPARM(self), PyO
   swig_obj[0] = args;
   res1 = SWIG_AsCharPtrAndSize(swig_obj[0], &buf1, NULL, &alloc1);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "setPlanJSONString" "', argument " "1"" of type '" "char const *""'");
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "set_plan_json_string" "', argument " "1"" of type '" "char const *""'");
   }
   arg1 = reinterpret_cast< char * >(buf1);
   {
     try {
-      setPlanJSONString((char const *)arg1);
+      set_plan_json_string((char const *)arg1);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -9651,14 +9651,14 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_getPlanJSONString(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_get_plan_json_string(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   std::string result;
   
-  if (!SWIG_Python_UnpackTuple(args, "getPlanJSONString", 0, 0, 0)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "get_plan_json_string", 0, 0, 0)) SWIG_fail;
   {
     try {
-      result = getPlanJSONString();
+      result = get_plan_json_string();
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -9676,7 +9676,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_setPlanType(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_set_plan_type(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   char *arg1 = (char *) 0 ;
   int res1 ;
@@ -9688,12 +9688,12 @@ SWIGINTERN PyObject *_wrap_setPlanType(PyObject *SWIGUNUSEDPARM(self), PyObject 
   swig_obj[0] = args;
   res1 = SWIG_AsCharPtrAndSize(swig_obj[0], &buf1, NULL, &alloc1);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "setPlanType" "', argument " "1"" of type '" "char const *""'");
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "set_plan_type" "', argument " "1"" of type '" "char const *""'");
   }
   arg1 = reinterpret_cast< char * >(buf1);
   {
     try {
-      setPlanType((char const *)arg1);
+      set_plan_type((char const *)arg1);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -9713,7 +9713,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_setPlanSetting__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+SWIGINTERN PyObject *_wrap_set_plan_setting__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
   PyObject *resultobj = 0;
   char *arg1 = (char *) 0 ;
   double arg2 ;
@@ -9726,17 +9726,17 @@ SWIGINTERN PyObject *_wrap_setPlanSetting__SWIG_0(PyObject *SWIGUNUSEDPARM(self)
   if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
   res1 = SWIG_AsCharPtrAndSize(swig_obj[0], &buf1, NULL, &alloc1);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "setPlanSetting" "', argument " "1"" of type '" "char const *""'");
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "set_plan_setting" "', argument " "1"" of type '" "char const *""'");
   }
   arg1 = reinterpret_cast< char * >(buf1);
   ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "setPlanSetting" "', argument " "2"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "set_plan_setting" "', argument " "2"" of type '" "double""'");
   } 
   arg2 = static_cast< double >(val2);
   {
     try {
-      setPlanSetting((char const *)arg1,arg2);
+      set_plan_setting((char const *)arg1,arg2);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -9756,7 +9756,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_setPlanSetting__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+SWIGINTERN PyObject *_wrap_set_plan_setting__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
   PyObject *resultobj = 0;
   char *arg1 = (char *) 0 ;
   char *arg2 = (char *) 0 ;
@@ -9770,17 +9770,17 @@ SWIGINTERN PyObject *_wrap_setPlanSetting__SWIG_1(PyObject *SWIGUNUSEDPARM(self)
   if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
   res1 = SWIG_AsCharPtrAndSize(swig_obj[0], &buf1, NULL, &alloc1);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "setPlanSetting" "', argument " "1"" of type '" "char const *""'");
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "set_plan_setting" "', argument " "1"" of type '" "char const *""'");
   }
   arg1 = reinterpret_cast< char * >(buf1);
   res2 = SWIG_AsCharPtrAndSize(swig_obj[1], &buf2, NULL, &alloc2);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "setPlanSetting" "', argument " "2"" of type '" "char const *""'");
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "set_plan_setting" "', argument " "2"" of type '" "char const *""'");
   }
   arg2 = reinterpret_cast< char * >(buf2);
   {
     try {
-      setPlanSetting((char const *)arg1,(char const *)arg2);
+      set_plan_setting((char const *)arg1,(char const *)arg2);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -9802,13 +9802,13 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_setPlanSetting(PyObject *self, PyObject *args) {
+SWIGINTERN PyObject *_wrap_set_plan_setting(PyObject *self, PyObject *args) {
   Py_ssize_t argc;
   PyObject *argv[3] = {
     0
   };
   
-  if (!(argc = SWIG_Python_UnpackTuple(args, "setPlanSetting", 0, 2, argv))) SWIG_fail;
+  if (!(argc = SWIG_Python_UnpackTuple(args, "set_plan_setting", 0, 2, argv))) SWIG_fail;
   --argc;
   if (argc == 2) {
     int _v;
@@ -9820,7 +9820,7 @@ SWIGINTERN PyObject *_wrap_setPlanSetting(PyObject *self, PyObject *args) {
         _v = SWIG_CheckState(res);
       }
       if (_v) {
-        return _wrap_setPlanSetting__SWIG_0(self, argc, argv);
+        return _wrap_set_plan_setting__SWIG_0(self, argc, argv);
       }
     }
   }
@@ -9832,16 +9832,16 @@ SWIGINTERN PyObject *_wrap_setPlanSetting(PyObject *self, PyObject *args) {
       int res = SWIG_AsCharPtrAndSize(argv[1], 0, NULL, 0);
       _v = SWIG_CheckState(res);
       if (_v) {
-        return _wrap_setPlanSetting__SWIG_1(self, argc, argv);
+        return _wrap_set_plan_setting__SWIG_1(self, argc, argv);
       }
     }
   }
   
 fail:
-  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'setPlanSetting'.\n"
+  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'set_plan_setting'.\n"
     "  Possible C/C++ prototypes are:\n"
-    "    setPlanSetting(char const *,double)\n"
-    "    setPlanSetting(char const *,char const *)\n");
+    "    set_plan_setting(char const *,double)\n"
+    "    set_plan_setting(char const *,char const *)\n");
   return 0;
 }
 
@@ -13182,7 +13182,7 @@ SWIGINTERN PyObject *PlannerInterface_swiginit(PyObject *SWIGUNUSEDPARM(self), P
   return SWIG_Python_InitShadowInstance(args);
 }
 
-SWIGINTERN PyObject *_wrap_interpolate1DMinTime(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_interpolate_1d_min_time(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   double arg1 ;
   double arg2 ;
@@ -13225,50 +13225,50 @@ SWIGINTERN PyObject *_wrap_interpolate1DMinTime(PyObject *SWIGUNUSEDPARM(self), 
   {
     arg11 = &temp11;
   }
-  if (!SWIG_Python_UnpackTuple(args, "interpolate1DMinTime", 8, 8, swig_obj)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "interpolate_1d_min_time", 8, 8, swig_obj)) SWIG_fail;
   ecode1 = SWIG_AsVal_double(swig_obj[0], &val1);
   if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "interpolate1DMinTime" "', argument " "1"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "interpolate_1d_min_time" "', argument " "1"" of type '" "double""'");
   } 
   arg1 = static_cast< double >(val1);
   ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "interpolate1DMinTime" "', argument " "2"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "interpolate_1d_min_time" "', argument " "2"" of type '" "double""'");
   } 
   arg2 = static_cast< double >(val2);
   ecode3 = SWIG_AsVal_double(swig_obj[2], &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "interpolate1DMinTime" "', argument " "3"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "interpolate_1d_min_time" "', argument " "3"" of type '" "double""'");
   } 
   arg3 = static_cast< double >(val3);
   ecode4 = SWIG_AsVal_double(swig_obj[3], &val4);
   if (!SWIG_IsOK(ecode4)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "interpolate1DMinTime" "', argument " "4"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "interpolate_1d_min_time" "', argument " "4"" of type '" "double""'");
   } 
   arg4 = static_cast< double >(val4);
   ecode5 = SWIG_AsVal_double(swig_obj[4], &val5);
   if (!SWIG_IsOK(ecode5)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "interpolate1DMinTime" "', argument " "5"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "interpolate_1d_min_time" "', argument " "5"" of type '" "double""'");
   } 
   arg5 = static_cast< double >(val5);
   ecode6 = SWIG_AsVal_double(swig_obj[5], &val6);
   if (!SWIG_IsOK(ecode6)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "interpolate1DMinTime" "', argument " "6"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "interpolate_1d_min_time" "', argument " "6"" of type '" "double""'");
   } 
   arg6 = static_cast< double >(val6);
   ecode7 = SWIG_AsVal_double(swig_obj[6], &val7);
   if (!SWIG_IsOK(ecode7)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode7), "in method '" "interpolate1DMinTime" "', argument " "7"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode7), "in method '" "interpolate_1d_min_time" "', argument " "7"" of type '" "double""'");
   } 
   arg7 = static_cast< double >(val7);
   ecode8 = SWIG_AsVal_double(swig_obj[7], &val8);
   if (!SWIG_IsOK(ecode8)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode8), "in method '" "interpolate1DMinTime" "', argument " "8"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode8), "in method '" "interpolate_1d_min_time" "', argument " "8"" of type '" "double""'");
   } 
   arg8 = static_cast< double >(val8);
   {
     try {
-      interpolate1DMinTime(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,*arg9,*arg10,*arg11);
+      interpolate_1d_min_time(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,*arg9,*arg10,*arg11);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -13343,7 +13343,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_interpolate1DMinAccel(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_interpolate_1d_min_accel(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   double arg1 ;
   double arg2 ;
@@ -13386,50 +13386,50 @@ SWIGINTERN PyObject *_wrap_interpolate1DMinAccel(PyObject *SWIGUNUSEDPARM(self),
   {
     arg11 = &temp11;
   }
-  if (!SWIG_Python_UnpackTuple(args, "interpolate1DMinAccel", 8, 8, swig_obj)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "interpolate_1d_min_accel", 8, 8, swig_obj)) SWIG_fail;
   ecode1 = SWIG_AsVal_double(swig_obj[0], &val1);
   if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "interpolate1DMinAccel" "', argument " "1"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "interpolate_1d_min_accel" "', argument " "1"" of type '" "double""'");
   } 
   arg1 = static_cast< double >(val1);
   ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
   if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "interpolate1DMinAccel" "', argument " "2"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "interpolate_1d_min_accel" "', argument " "2"" of type '" "double""'");
   } 
   arg2 = static_cast< double >(val2);
   ecode3 = SWIG_AsVal_double(swig_obj[2], &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "interpolate1DMinAccel" "', argument " "3"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "interpolate_1d_min_accel" "', argument " "3"" of type '" "double""'");
   } 
   arg3 = static_cast< double >(val3);
   ecode4 = SWIG_AsVal_double(swig_obj[3], &val4);
   if (!SWIG_IsOK(ecode4)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "interpolate1DMinAccel" "', argument " "4"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "interpolate_1d_min_accel" "', argument " "4"" of type '" "double""'");
   } 
   arg4 = static_cast< double >(val4);
   ecode5 = SWIG_AsVal_double(swig_obj[4], &val5);
   if (!SWIG_IsOK(ecode5)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "interpolate1DMinAccel" "', argument " "5"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "interpolate_1d_min_accel" "', argument " "5"" of type '" "double""'");
   } 
   arg5 = static_cast< double >(val5);
   ecode6 = SWIG_AsVal_double(swig_obj[5], &val6);
   if (!SWIG_IsOK(ecode6)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "interpolate1DMinAccel" "', argument " "6"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "interpolate_1d_min_accel" "', argument " "6"" of type '" "double""'");
   } 
   arg6 = static_cast< double >(val6);
   ecode7 = SWIG_AsVal_double(swig_obj[6], &val7);
   if (!SWIG_IsOK(ecode7)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode7), "in method '" "interpolate1DMinAccel" "', argument " "7"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode7), "in method '" "interpolate_1d_min_accel" "', argument " "7"" of type '" "double""'");
   } 
   arg7 = static_cast< double >(val7);
   ecode8 = SWIG_AsVal_double(swig_obj[7], &val8);
   if (!SWIG_IsOK(ecode8)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode8), "in method '" "interpolate1DMinAccel" "', argument " "8"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode8), "in method '" "interpolate_1d_min_accel" "', argument " "8"" of type '" "double""'");
   } 
   arg8 = static_cast< double >(val8);
   {
     try {
-      interpolate1DMinAccel(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,*arg9,*arg10,*arg11);
+      interpolate_1d_min_accel(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,*arg9,*arg10,*arg11);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -13504,7 +13504,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_interpolateNDMinTime(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_interpolate_nd_min_time(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   std::vector< double,std::allocator< double > > *arg1 = 0 ;
   std::vector< double,std::allocator< double > > *arg2 = 0 ;
@@ -13539,15 +13539,15 @@ SWIGINTERN PyObject *_wrap_interpolateNDMinTime(PyObject *SWIGUNUSEDPARM(self), 
   {
     arg11 = &temp11;
   }
-  if (!SWIG_Python_UnpackTuple(args, "interpolateNDMinTime", 8, 8, swig_obj)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "interpolate_nd_min_time", 8, 8, swig_obj)) SWIG_fail;
   {
     std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
     res1 = swig::asptr(swig_obj[0], &ptr);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "interpolateNDMinTime" "', argument " "1"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "interpolate_nd_min_time" "', argument " "1"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "interpolateNDMinTime" "', argument " "1"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "interpolate_nd_min_time" "', argument " "1"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     arg1 = ptr;
   }
@@ -13555,10 +13555,10 @@ SWIGINTERN PyObject *_wrap_interpolateNDMinTime(PyObject *SWIGUNUSEDPARM(self), 
     std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
     res2 = swig::asptr(swig_obj[1], &ptr);
     if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "interpolateNDMinTime" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "interpolate_nd_min_time" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "interpolateNDMinTime" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "interpolate_nd_min_time" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     arg2 = ptr;
   }
@@ -13566,10 +13566,10 @@ SWIGINTERN PyObject *_wrap_interpolateNDMinTime(PyObject *SWIGUNUSEDPARM(self), 
     std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
     res3 = swig::asptr(swig_obj[2], &ptr);
     if (!SWIG_IsOK(res3)) {
-      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "interpolateNDMinTime" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "interpolate_nd_min_time" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "interpolateNDMinTime" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "interpolate_nd_min_time" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     arg3 = ptr;
   }
@@ -13577,10 +13577,10 @@ SWIGINTERN PyObject *_wrap_interpolateNDMinTime(PyObject *SWIGUNUSEDPARM(self), 
     std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
     res4 = swig::asptr(swig_obj[3], &ptr);
     if (!SWIG_IsOK(res4)) {
-      SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "interpolateNDMinTime" "', argument " "4"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "interpolate_nd_min_time" "', argument " "4"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "interpolateNDMinTime" "', argument " "4"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "interpolate_nd_min_time" "', argument " "4"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     arg4 = ptr;
   }
@@ -13588,10 +13588,10 @@ SWIGINTERN PyObject *_wrap_interpolateNDMinTime(PyObject *SWIGUNUSEDPARM(self), 
     std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
     res5 = swig::asptr(swig_obj[4], &ptr);
     if (!SWIG_IsOK(res5)) {
-      SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "interpolateNDMinTime" "', argument " "5"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "interpolate_nd_min_time" "', argument " "5"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "interpolateNDMinTime" "', argument " "5"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "interpolate_nd_min_time" "', argument " "5"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     arg5 = ptr;
   }
@@ -13599,10 +13599,10 @@ SWIGINTERN PyObject *_wrap_interpolateNDMinTime(PyObject *SWIGUNUSEDPARM(self), 
     std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
     res6 = swig::asptr(swig_obj[5], &ptr);
     if (!SWIG_IsOK(res6)) {
-      SWIG_exception_fail(SWIG_ArgError(res6), "in method '" "interpolateNDMinTime" "', argument " "6"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res6), "in method '" "interpolate_nd_min_time" "', argument " "6"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "interpolateNDMinTime" "', argument " "6"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "interpolate_nd_min_time" "', argument " "6"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     arg6 = ptr;
   }
@@ -13610,10 +13610,10 @@ SWIGINTERN PyObject *_wrap_interpolateNDMinTime(PyObject *SWIGUNUSEDPARM(self), 
     std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
     res7 = swig::asptr(swig_obj[6], &ptr);
     if (!SWIG_IsOK(res7)) {
-      SWIG_exception_fail(SWIG_ArgError(res7), "in method '" "interpolateNDMinTime" "', argument " "7"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res7), "in method '" "interpolate_nd_min_time" "', argument " "7"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "interpolateNDMinTime" "', argument " "7"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "interpolate_nd_min_time" "', argument " "7"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     arg7 = ptr;
   }
@@ -13621,16 +13621,16 @@ SWIGINTERN PyObject *_wrap_interpolateNDMinTime(PyObject *SWIGUNUSEDPARM(self), 
     std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
     res8 = swig::asptr(swig_obj[7], &ptr);
     if (!SWIG_IsOK(res8)) {
-      SWIG_exception_fail(SWIG_ArgError(res8), "in method '" "interpolateNDMinTime" "', argument " "8"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res8), "in method '" "interpolate_nd_min_time" "', argument " "8"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "interpolateNDMinTime" "', argument " "8"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "interpolate_nd_min_time" "', argument " "8"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     arg8 = ptr;
   }
   {
     try {
-      interpolateNDMinTime((std::vector< double,std::allocator< double > > const &)*arg1,(std::vector< double,std::allocator< double > > const &)*arg2,(std::vector< double,std::allocator< double > > const &)*arg3,(std::vector< double,std::allocator< double > > const &)*arg4,(std::vector< double,std::allocator< double > > const &)*arg5,(std::vector< double,std::allocator< double > > const &)*arg6,(std::vector< double,std::allocator< double > > const &)*arg7,(std::vector< double,std::allocator< double > > const &)*arg8,*arg9,*arg10,*arg11);
+      interpolate_nd_min_time((std::vector< double,std::allocator< double > > const &)*arg1,(std::vector< double,std::allocator< double > > const &)*arg2,(std::vector< double,std::allocator< double > > const &)*arg3,(std::vector< double,std::allocator< double > > const &)*arg4,(std::vector< double,std::allocator< double > > const &)*arg5,(std::vector< double,std::allocator< double > > const &)*arg6,(std::vector< double,std::allocator< double > > const &)*arg7,(std::vector< double,std::allocator< double > > const &)*arg8,*arg9,*arg10,*arg11);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -13721,7 +13721,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_interpolateNDMinAccel(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_interpolate_nd_min_accel(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   std::vector< double,std::allocator< double > > *arg1 = 0 ;
   std::vector< double,std::allocator< double > > *arg2 = 0 ;
@@ -13757,15 +13757,15 @@ SWIGINTERN PyObject *_wrap_interpolateNDMinAccel(PyObject *SWIGUNUSEDPARM(self),
   {
     arg11 = &temp11;
   }
-  if (!SWIG_Python_UnpackTuple(args, "interpolateNDMinAccel", 8, 8, swig_obj)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "interpolate_nd_min_accel", 8, 8, swig_obj)) SWIG_fail;
   {
     std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
     res1 = swig::asptr(swig_obj[0], &ptr);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "interpolateNDMinAccel" "', argument " "1"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "interpolate_nd_min_accel" "', argument " "1"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "interpolateNDMinAccel" "', argument " "1"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "interpolate_nd_min_accel" "', argument " "1"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     arg1 = ptr;
   }
@@ -13773,10 +13773,10 @@ SWIGINTERN PyObject *_wrap_interpolateNDMinAccel(PyObject *SWIGUNUSEDPARM(self),
     std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
     res2 = swig::asptr(swig_obj[1], &ptr);
     if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "interpolateNDMinAccel" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "interpolate_nd_min_accel" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "interpolateNDMinAccel" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "interpolate_nd_min_accel" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     arg2 = ptr;
   }
@@ -13784,10 +13784,10 @@ SWIGINTERN PyObject *_wrap_interpolateNDMinAccel(PyObject *SWIGUNUSEDPARM(self),
     std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
     res3 = swig::asptr(swig_obj[2], &ptr);
     if (!SWIG_IsOK(res3)) {
-      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "interpolateNDMinAccel" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "interpolate_nd_min_accel" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "interpolateNDMinAccel" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "interpolate_nd_min_accel" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     arg3 = ptr;
   }
@@ -13795,26 +13795,26 @@ SWIGINTERN PyObject *_wrap_interpolateNDMinAccel(PyObject *SWIGUNUSEDPARM(self),
     std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
     res4 = swig::asptr(swig_obj[3], &ptr);
     if (!SWIG_IsOK(res4)) {
-      SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "interpolateNDMinAccel" "', argument " "4"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "interpolate_nd_min_accel" "', argument " "4"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "interpolateNDMinAccel" "', argument " "4"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "interpolate_nd_min_accel" "', argument " "4"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     arg4 = ptr;
   }
   ecode5 = SWIG_AsVal_double(swig_obj[4], &val5);
   if (!SWIG_IsOK(ecode5)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "interpolateNDMinAccel" "', argument " "5"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "interpolate_nd_min_accel" "', argument " "5"" of type '" "double""'");
   } 
   arg5 = static_cast< double >(val5);
   {
     std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
     res6 = swig::asptr(swig_obj[5], &ptr);
     if (!SWIG_IsOK(res6)) {
-      SWIG_exception_fail(SWIG_ArgError(res6), "in method '" "interpolateNDMinAccel" "', argument " "6"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res6), "in method '" "interpolate_nd_min_accel" "', argument " "6"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "interpolateNDMinAccel" "', argument " "6"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "interpolate_nd_min_accel" "', argument " "6"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     arg6 = ptr;
   }
@@ -13822,10 +13822,10 @@ SWIGINTERN PyObject *_wrap_interpolateNDMinAccel(PyObject *SWIGUNUSEDPARM(self),
     std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
     res7 = swig::asptr(swig_obj[6], &ptr);
     if (!SWIG_IsOK(res7)) {
-      SWIG_exception_fail(SWIG_ArgError(res7), "in method '" "interpolateNDMinAccel" "', argument " "7"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res7), "in method '" "interpolate_nd_min_accel" "', argument " "7"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "interpolateNDMinAccel" "', argument " "7"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "interpolate_nd_min_accel" "', argument " "7"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     arg7 = ptr;
   }
@@ -13833,16 +13833,16 @@ SWIGINTERN PyObject *_wrap_interpolateNDMinAccel(PyObject *SWIGUNUSEDPARM(self),
     std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
     res8 = swig::asptr(swig_obj[7], &ptr);
     if (!SWIG_IsOK(res8)) {
-      SWIG_exception_fail(SWIG_ArgError(res8), "in method '" "interpolateNDMinAccel" "', argument " "8"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res8), "in method '" "interpolate_nd_min_accel" "', argument " "8"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "interpolateNDMinAccel" "', argument " "8"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "interpolate_nd_min_accel" "', argument " "8"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     arg8 = ptr;
   }
   {
     try {
-      interpolateNDMinAccel((std::vector< double,std::allocator< double > > const &)*arg1,(std::vector< double,std::allocator< double > > const &)*arg2,(std::vector< double,std::allocator< double > > const &)*arg3,(std::vector< double,std::allocator< double > > const &)*arg4,arg5,(std::vector< double,std::allocator< double > > const &)*arg6,(std::vector< double,std::allocator< double > > const &)*arg7,(std::vector< double,std::allocator< double > > const &)*arg8,*arg9,*arg10,*arg11);
+      interpolate_nd_min_accel((std::vector< double,std::allocator< double > > const &)*arg1,(std::vector< double,std::allocator< double > > const &)*arg2,(std::vector< double,std::allocator< double > > const &)*arg3,(std::vector< double,std::allocator< double > > const &)*arg4,arg5,(std::vector< double,std::allocator< double > > const &)*arg6,(std::vector< double,std::allocator< double > > const &)*arg7,(std::vector< double,std::allocator< double > > const &)*arg8,*arg9,*arg10,*arg11);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -13931,7 +13931,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_interpolateNDMinTimeLinear(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_interpolate_nd_min_time_linear(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   std::vector< double,std::allocator< double > > *arg1 = 0 ;
   std::vector< double,std::allocator< double > > *arg2 = 0 ;
@@ -13958,15 +13958,15 @@ SWIGINTERN PyObject *_wrap_interpolateNDMinTimeLinear(PyObject *SWIGUNUSEDPARM(s
   {
     arg7 = &temp7;
   }
-  if (!SWIG_Python_UnpackTuple(args, "interpolateNDMinTimeLinear", 4, 4, swig_obj)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "interpolate_nd_min_time_linear", 4, 4, swig_obj)) SWIG_fail;
   {
     std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
     res1 = swig::asptr(swig_obj[0], &ptr);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "interpolateNDMinTimeLinear" "', argument " "1"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "interpolate_nd_min_time_linear" "', argument " "1"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "interpolateNDMinTimeLinear" "', argument " "1"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "interpolate_nd_min_time_linear" "', argument " "1"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     arg1 = ptr;
   }
@@ -13974,10 +13974,10 @@ SWIGINTERN PyObject *_wrap_interpolateNDMinTimeLinear(PyObject *SWIGUNUSEDPARM(s
     std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
     res2 = swig::asptr(swig_obj[1], &ptr);
     if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "interpolateNDMinTimeLinear" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "interpolate_nd_min_time_linear" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "interpolateNDMinTimeLinear" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "interpolate_nd_min_time_linear" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     arg2 = ptr;
   }
@@ -13985,10 +13985,10 @@ SWIGINTERN PyObject *_wrap_interpolateNDMinTimeLinear(PyObject *SWIGUNUSEDPARM(s
     std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
     res3 = swig::asptr(swig_obj[2], &ptr);
     if (!SWIG_IsOK(res3)) {
-      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "interpolateNDMinTimeLinear" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "interpolate_nd_min_time_linear" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "interpolateNDMinTimeLinear" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "interpolate_nd_min_time_linear" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     arg3 = ptr;
   }
@@ -13996,16 +13996,16 @@ SWIGINTERN PyObject *_wrap_interpolateNDMinTimeLinear(PyObject *SWIGUNUSEDPARM(s
     std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
     res4 = swig::asptr(swig_obj[3], &ptr);
     if (!SWIG_IsOK(res4)) {
-      SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "interpolateNDMinTimeLinear" "', argument " "4"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "interpolate_nd_min_time_linear" "', argument " "4"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "interpolateNDMinTimeLinear" "', argument " "4"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "interpolate_nd_min_time_linear" "', argument " "4"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     arg4 = ptr;
   }
   {
     try {
-      interpolateNDMinTimeLinear((std::vector< double,std::allocator< double > > const &)*arg1,(std::vector< double,std::allocator< double > > const &)*arg2,(std::vector< double,std::allocator< double > > const &)*arg3,(std::vector< double,std::allocator< double > > const &)*arg4,*arg5,*arg6,*arg7);
+      interpolate_nd_min_time_linear((std::vector< double,std::allocator< double > > const &)*arg1,(std::vector< double,std::allocator< double > > const &)*arg2,(std::vector< double,std::allocator< double > > const &)*arg3,(std::vector< double,std::allocator< double > > const &)*arg4,*arg5,*arg6,*arg7);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -14088,7 +14088,300 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_combineNDCubic(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_brake_1d(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  double arg1 ;
+  double arg2 ;
+  double arg3 ;
+  std::vector< double,std::allocator< double > > *arg4 = 0 ;
+  std::vector< double,std::allocator< double > > *arg5 = 0 ;
+  std::vector< double,std::allocator< double > > *arg6 = 0 ;
+  double val1 ;
+  int ecode1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  double val3 ;
+  int ecode3 = 0 ;
+  std::vector< double > temp4 ;
+  std::vector< double > temp5 ;
+  std::vector< double > temp6 ;
+  PyObject *swig_obj[3] ;
+  
+  {
+    arg4 = &temp4;
+  }
+  {
+    arg5 = &temp5;
+  }
+  {
+    arg6 = &temp6;
+  }
+  if (!SWIG_Python_UnpackTuple(args, "brake_1d", 3, 3, swig_obj)) SWIG_fail;
+  ecode1 = SWIG_AsVal_double(swig_obj[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "brake_1d" "', argument " "1"" of type '" "double""'");
+  } 
+  arg1 = static_cast< double >(val1);
+  ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "brake_1d" "', argument " "2"" of type '" "double""'");
+  } 
+  arg2 = static_cast< double >(val2);
+  ecode3 = SWIG_AsVal_double(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "brake_1d" "', argument " "3"" of type '" "double""'");
+  } 
+  arg3 = static_cast< double >(val3);
+  {
+    try {
+      brake_1d(arg1,arg2,arg3,*arg4,*arg5,*arg6);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(&(*arg4)[0],(int)arg4->size());
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(&(*arg5)[0],(int)arg5->size());
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(&(*arg6)[0],(int)arg6->size());
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_brake_nd(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  std::vector< double,std::allocator< double > > *arg1 = 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = 0 ;
+  std::vector< double,std::allocator< double > > *arg3 = 0 ;
+  std::vector< double,std::allocator< double > > *arg4 = 0 ;
+  std::vector< double,std::allocator< double > > *arg5 = 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg6 = 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg7 = 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg8 = 0 ;
+  int res1 = SWIG_OLDOBJ ;
+  int res2 = SWIG_OLDOBJ ;
+  int res3 = SWIG_OLDOBJ ;
+  int res4 = SWIG_OLDOBJ ;
+  int res5 = SWIG_OLDOBJ ;
+  std::vector< std::vector< double > > temp6 ;
+  std::vector< std::vector< double > > temp7 ;
+  std::vector< std::vector< double > > temp8 ;
+  PyObject *swig_obj[5] ;
+  
+  {
+    arg6 = &temp6;
+  }
+  {
+    arg7 = &temp7;
+  }
+  {
+    arg8 = &temp8;
+  }
+  if (!SWIG_Python_UnpackTuple(args, "brake_nd", 5, 5, swig_obj)) SWIG_fail;
+  {
+    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
+    res1 = swig::asptr(swig_obj[0], &ptr);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "brake_nd" "', argument " "1"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "brake_nd" "', argument " "1"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    arg1 = ptr;
+  }
+  {
+    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
+    res2 = swig::asptr(swig_obj[1], &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "brake_nd" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "brake_nd" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    arg2 = ptr;
+  }
+  {
+    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
+    res3 = swig::asptr(swig_obj[2], &ptr);
+    if (!SWIG_IsOK(res3)) {
+      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "brake_nd" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "brake_nd" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    arg3 = ptr;
+  }
+  {
+    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
+    res4 = swig::asptr(swig_obj[3], &ptr);
+    if (!SWIG_IsOK(res4)) {
+      SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "brake_nd" "', argument " "4"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "brake_nd" "', argument " "4"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    arg4 = ptr;
+  }
+  {
+    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
+    res5 = swig::asptr(swig_obj[4], &ptr);
+    if (!SWIG_IsOK(res5)) {
+      SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "brake_nd" "', argument " "5"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "brake_nd" "', argument " "5"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    arg5 = ptr;
+  }
+  {
+    try {
+      brake_nd((std::vector< double,std::allocator< double > > const &)*arg1,(std::vector< double,std::allocator< double > > const &)*arg2,(std::vector< double,std::allocator< double > > const &)*arg3,(std::vector< double,std::allocator< double > > const &)*arg4,(std::vector< double,std::allocator< double > > const &)*arg5,*arg6,*arg7,*arg8);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_dmatrix_obj((*arg6));
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_dmatrix_obj((*arg7));
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_dmatrix_obj((*arg8));
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  if (SWIG_IsNewObj(res1)) delete arg1;
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  if (SWIG_IsNewObj(res4)) delete arg4;
+  if (SWIG_IsNewObj(res5)) delete arg5;
+  return resultobj;
+fail:
+  if (SWIG_IsNewObj(res1)) delete arg1;
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  if (SWIG_IsNewObj(res4)) delete arg4;
+  if (SWIG_IsNewObj(res5)) delete arg5;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_combine_nd_cubic(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg1 = 0 ;
   std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg2 = 0 ;
@@ -14113,15 +14406,15 @@ SWIGINTERN PyObject *_wrap_combineNDCubic(PyObject *SWIGUNUSEDPARM(self), PyObje
   {
     arg6 = &temp6;
   }
-  if (!SWIG_Python_UnpackTuple(args, "combineNDCubic", 3, 3, swig_obj)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "combine_nd_cubic", 3, 3, swig_obj)) SWIG_fail;
   {
     std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *ptr = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)0;
     res1 = swig::asptr(swig_obj[0], &ptr);
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "combineNDCubic" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "combine_nd_cubic" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "combineNDCubic" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "combine_nd_cubic" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
     }
     arg1 = ptr;
   }
@@ -14129,10 +14422,10 @@ SWIGINTERN PyObject *_wrap_combineNDCubic(PyObject *SWIGUNUSEDPARM(self), PyObje
     std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *ptr = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)0;
     res2 = swig::asptr(swig_obj[1], &ptr);
     if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "combineNDCubic" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "combine_nd_cubic" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "combineNDCubic" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "combine_nd_cubic" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
     }
     arg2 = ptr;
   }
@@ -14140,16 +14433,16 @@ SWIGINTERN PyObject *_wrap_combineNDCubic(PyObject *SWIGUNUSEDPARM(self), PyObje
     std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *ptr = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)0;
     res3 = swig::asptr(swig_obj[2], &ptr);
     if (!SWIG_IsOK(res3)) {
-      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "combineNDCubic" "', argument " "3"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "combine_nd_cubic" "', argument " "3"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "combineNDCubic" "', argument " "3"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "combine_nd_cubic" "', argument " "3"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
     }
     arg3 = ptr;
   }
   {
     try {
-      combineNDCubic((std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg1,(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg2,(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg3,*arg4,*arg5,*arg6);
+      combine_nd_cubic((std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg1,(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg2,(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg3,*arg4,*arg5,*arg6);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -14320,29 +14613,29 @@ static PyMethodDef SwigMethods[] = {
 	 { "delete_doubleMatrix", _wrap_delete_doubleMatrix, METH_O, "delete_doubleMatrix(doubleMatrix self)"},
 	 { "doubleMatrix_swigregister", doubleMatrix_swigregister, METH_O, NULL},
 	 { "doubleMatrix_swiginit", doubleMatrix_swiginit, METH_VARARGS, NULL},
-	 { "setRandomSeed", _wrap_setRandomSeed, METH_O, "\n"
-		"setRandomSeed(int seed)\n"
+	 { "set_random_seed", _wrap_set_random_seed, METH_O, "\n"
+		"set_random_seed(int seed)\n"
 		"\n"
 		"\n"
-		"Sets the random seed used by the configuration sampler.  \n"
+		"Sets the random seed used by the motion planner.  \n"
 		"\n"
 		""},
-	 { "setPlanJSONString", _wrap_setPlanJSONString, METH_O, "\n"
-		"setPlanJSONString(char const * string)\n"
+	 { "set_plan_json_string", _wrap_set_plan_json_string, METH_O, "\n"
+		"set_plan_json_string(char const * string)\n"
 		"\n"
 		"\n"
 		"Loads planner values from a JSON string.  \n"
 		"\n"
 		""},
-	 { "getPlanJSONString", _wrap_getPlanJSONString, METH_NOARGS, "\n"
-		"getPlanJSONString() -> std::string\n"
+	 { "get_plan_json_string", _wrap_get_plan_json_string, METH_NOARGS, "\n"
+		"get_plan_json_string() -> std::string\n"
 		"\n"
 		"\n"
 		"Saves planner values to a JSON string.  \n"
 		"\n"
 		""},
-	 { "setPlanType", _wrap_setPlanType, METH_O, "\n"
-		"setPlanType(char const * type)\n"
+	 { "set_plan_type", _wrap_set_plan_type, METH_O, "\n"
+		"set_plan_type(char const * type)\n"
 		"\n"
 		"\n"
 		"Sets the planner type.  \n"
@@ -14363,9 +14656,9 @@ static PyMethodDef SwigMethods[] = {
 		"*   fmm*: an anytime fast marching method algorithm for optimal motion planning  \n"
 		"\n"
 		""},
-	 { "setPlanSetting", _wrap_setPlanSetting, METH_VARARGS, "\n"
-		"setPlanSetting(char const * setting, double value)\n"
-		"setPlanSetting(char const * setting, char const * value)\n"
+	 { "set_plan_setting", _wrap_set_plan_setting, METH_VARARGS, "\n"
+		"set_plan_setting(char const * setting, double value)\n"
+		"set_plan_setting(char const * setting, char const * value)\n"
 		"\n"
 		"\n"
 		"Sets a numeric or string-valued setting for the planner.  \n"
@@ -14741,12 +15034,14 @@ static PyMethodDef SwigMethods[] = {
 	 { "PlannerInterface_spaceIndex_get", _wrap_PlannerInterface_spaceIndex_get, METH_O, "PlannerInterface_spaceIndex_get(PlannerInterface self) -> int"},
 	 { "PlannerInterface_swigregister", PlannerInterface_swigregister, METH_O, NULL},
 	 { "PlannerInterface_swiginit", PlannerInterface_swiginit, METH_VARARGS, NULL},
-	 { "interpolate1DMinTime", _wrap_interpolate1DMinTime, METH_VARARGS, "interpolate1DMinTime(double x0, double v0, double x1, double v1, double xmin, double xmax, double vmax, double amax)"},
-	 { "interpolate1DMinAccel", _wrap_interpolate1DMinAccel, METH_VARARGS, "interpolate1DMinAccel(double x0, double v0, double x1, double v1, double endTime, double xmin, double xmax, double vmax)"},
-	 { "interpolateNDMinTime", _wrap_interpolateNDMinTime, METH_VARARGS, "interpolateNDMinTime(doubleVector x0, doubleVector v0, doubleVector x1, doubleVector v1, doubleVector xmin, doubleVector xmax, doubleVector vmax, doubleVector amax)"},
-	 { "interpolateNDMinAccel", _wrap_interpolateNDMinAccel, METH_VARARGS, "interpolateNDMinAccel(doubleVector x0, doubleVector v0, doubleVector x1, doubleVector v1, double endTime, doubleVector xmin, doubleVector xmax, doubleVector vmax)"},
-	 { "interpolateNDMinTimeLinear", _wrap_interpolateNDMinTimeLinear, METH_VARARGS, "interpolateNDMinTimeLinear(doubleVector x0, doubleVector x1, doubleVector vmax, doubleVector amax)"},
-	 { "combineNDCubic", _wrap_combineNDCubic, METH_VARARGS, "combineNDCubic(doubleMatrix times, doubleMatrix positions, doubleMatrix velocities)"},
+	 { "interpolate_1d_min_time", _wrap_interpolate_1d_min_time, METH_VARARGS, "interpolate_1d_min_time(double x0, double v0, double x1, double v1, double xmin, double xmax, double vmax, double amax)"},
+	 { "interpolate_1d_min_accel", _wrap_interpolate_1d_min_accel, METH_VARARGS, "interpolate_1d_min_accel(double x0, double v0, double x1, double v1, double endTime, double xmin, double xmax, double vmax)"},
+	 { "interpolate_nd_min_time", _wrap_interpolate_nd_min_time, METH_VARARGS, "interpolate_nd_min_time(doubleVector x0, doubleVector v0, doubleVector x1, doubleVector v1, doubleVector xmin, doubleVector xmax, doubleVector vmax, doubleVector amax)"},
+	 { "interpolate_nd_min_accel", _wrap_interpolate_nd_min_accel, METH_VARARGS, "interpolate_nd_min_accel(doubleVector x0, doubleVector v0, doubleVector x1, doubleVector v1, double endTime, doubleVector xmin, doubleVector xmax, doubleVector vmax)"},
+	 { "interpolate_nd_min_time_linear", _wrap_interpolate_nd_min_time_linear, METH_VARARGS, "interpolate_nd_min_time_linear(doubleVector x0, doubleVector x1, doubleVector vmax, doubleVector amax)"},
+	 { "brake_1d", _wrap_brake_1d, METH_VARARGS, "brake_1d(double x0, double v0, double amax)"},
+	 { "brake_nd", _wrap_brake_nd, METH_VARARGS, "brake_nd(doubleVector x0, doubleVector v0, doubleVector xmin, doubleVector xmax, doubleVector amax)"},
+	 { "combine_nd_cubic", _wrap_combine_nd_cubic, METH_VARARGS, "combine_nd_cubic(doubleMatrix times, doubleMatrix positions, doubleMatrix velocities)"},
 	 { NULL, NULL, 0, NULL }
 };
 

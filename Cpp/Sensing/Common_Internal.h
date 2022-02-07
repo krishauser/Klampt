@@ -8,6 +8,8 @@
 #include <KrisLibrary/math3d/primitives.h>
 #include <sstream>
 
+namespace Klampt {
+
 using namespace Math;
 using namespace Math3D;
 
@@ -45,8 +47,11 @@ inline Vector3 Discretize(const Vector3& value,const Vector3& resolution,const V
   return res;
 }
 
+} //namespace Klampt
 
-inline bool WriteFile(File& f,const string& s)
+//The following are overrides for ReadFile/WriteFile 
+
+inline bool WriteFile(File& f,const std::string& s)
 {
   size_t n=s.length();
   if(!WriteFile(f,n)) return false;
@@ -55,7 +60,7 @@ inline bool WriteFile(File& f,const string& s)
   return true;
 }
 
-inline bool ReadFile(File& f,string& s)
+inline bool ReadFile(File& f,std::string& s)
 {
   size_t n;
   if(!ReadFile(f,n)) return false;
@@ -66,7 +71,7 @@ inline bool ReadFile(File& f,string& s)
 }
 
 template <class T>
-inline bool WriteFile(File& f,const vector<T>& v)
+inline bool WriteFile(File& f,const std::vector<T>& v)
 {
   if(!WriteFile(f,(int)v.size())) return false;
   if(!v.empty())
@@ -75,7 +80,7 @@ inline bool WriteFile(File& f,const vector<T>& v)
 }
 
 template <class T>
-inline bool ReadFile(File& f,vector<T>& v)
+inline bool ReadFile(File& f,std::vector<T>& v)
 {
   int n;
   if(!ReadFile(f,n)) return false;

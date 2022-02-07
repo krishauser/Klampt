@@ -3,6 +3,7 @@
 #include <KrisLibrary/errors.h>
 #include <iostream>
 using namespace Math;
+using namespace Klampt;
 
 //rayBound caps rays at the given distance
 

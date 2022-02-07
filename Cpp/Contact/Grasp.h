@@ -8,6 +8,8 @@
 #include <vector>
 class TiXmlElement;
 
+namespace Klampt {
+
 /** @ingroup Contact
  * @brief Slightly more sophisticated than a Stance, a Grasp allows
  * some of the robot's degrees of freedom to be fixed.
@@ -51,5 +53,7 @@ class Grasp
   vector<int> contactLinks;
   vector<Vector3> forces;
 };
+
+} //namespace Klampt
 
 #endif

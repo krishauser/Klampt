@@ -9,6 +9,8 @@
 typedef void PyObject;
 #endif //HAVE_PYTHON
 
+namespace Klampt {
+
 /** @brief A controller that interfaces with a python module.
  *
  * The module is required to define at least the "update" function.
@@ -37,7 +39,7 @@ typedef void PyObject;
 class PyController : public RobotController
 {
  public:
-  PyController(Robot& robot);
+  PyController(RobotModel& robot);
   ~PyController();
   bool Load(const string& moduleName);
   void Unload();
@@ -60,5 +62,7 @@ class PyController : public RobotController
   vector<string> commandFuncNames;
   vector<PyObject*> commandFuncs;
 };
+
+} //namespace Klampt
 
 #endif

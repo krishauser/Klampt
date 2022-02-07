@@ -6,11 +6,13 @@
 #include "ViewStance.h"
 #include "ViewGrasp.h"
 
+namespace Klampt {
+
 class ViewResource
 {
  public:
-  ViewResource(Robot* robot=NULL);
-  void SetRobot(Robot* robot);
+  ViewResource(RobotModel* robot=NULL);
+  void SetRobot(RobotModel* robot);
   void SetAnimTime(Real time);
   void DrawGL(const ResourcePtr& r);
 
@@ -33,6 +35,8 @@ class ViewResource
   vector<shared_ptr<Geometry::AnyGeometry3D> > geometries;
   vector<GLDraw::GeometryAppearance> appearances;
 };
+
+} //namespace Klampt
 
 #endif 
 

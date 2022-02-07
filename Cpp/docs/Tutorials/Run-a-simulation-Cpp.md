@@ -19,7 +19,7 @@ This very basic main.cpp runs a simulation for 5 seconds (simulation time) from 
 
 int main(int argc,const char** argv) {
   //create a world
-  RobotWorld world;
+  WorldModel world;
 
   //The SimGUIBackend class offers many helpers for setting
   //up default simulations, doing logging, sending paths, etc.

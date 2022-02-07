@@ -2,6 +2,8 @@
 #include "Sensing/JointSensors.h"
 #include <KrisLibrary/utils/AnyCollection.h>
 
+using namespace Klampt;
+
 SerialControlledRobot::SerialControlledRobot(const char* _host,double timeout)
   :host(_host),robotTime(0),timeStep(0),numOverruns(0),stopFlag(false),controllerMutex(NULL)
 {
@@ -13,7 +15,7 @@ SerialControlledRobot::~SerialControlledRobot()
   controllerPipe = NULL;
 }
 
-bool SerialControlledRobot::Init(Robot* _robot,RobotController* _controller)
+bool SerialControlledRobot::Init(RobotModel* _robot,RobotController* _controller)
 {
   if(!ControlledRobot::Init(_robot,_controller)) return false;
   if(!controllerPipe->Start()) {

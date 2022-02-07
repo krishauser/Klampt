@@ -1,3 +1,4 @@
+from __future__ import print_function,division
 from robotsim import *
 import atexit
 atexit.register(destroy)

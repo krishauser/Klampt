@@ -3,7 +3,9 @@
 
 #include <KrisLibrary/utils/SimpleParser.h>
 #include <string>
-using namespace std;
+
+namespace Klampt {
+  using namespace std;
 
 /** This is a helper class to read text data of the form
  *
@@ -41,5 +43,7 @@ public:
   int mode;  
   string curitem;
 };
+
+} //namespace Klampt
 
 #endif

@@ -3,6 +3,8 @@
 #include <iostream>
 #include <stdio.h>
 
+using namespace Klampt;
+
 void Triangle2DSampler::InitAreas()
 {
   areas.resize(tris.size());

@@ -4,9 +4,11 @@
 #include <Klampt/Modeling/World.h>
 #include "NavigationGUI.h"
 #include <KrisLibrary/math3d/Ray3D.h>
-using namespace Math3D;
 
-/** @brief A generic gui with a RobotWorld which allows clicking on entities
+namespace Klampt {
+  using namespace Math3D;
+
+/** @brief A generic gui with a WorldModel which allows clicking on entities
  * and loading files.
  *
  * Note: if anything is connected to a ROS topic, OnIdle will call the ROSUpdate() hook
@@ -21,7 +23,7 @@ using namespace Math3D;
 class WorldGUIBackend : public GLNavigationBackend
 {
 public:
-  WorldGUIBackend(RobotWorld* world);
+  WorldGUIBackend(WorldModel* world);
   virtual ~WorldGUIBackend();
 
   bool LoadCommandLine(int argc,const char** argv);
@@ -34,10 +36,10 @@ public:
   virtual bool OnCommand(const string& cmd,const string& args);
   //GLNavigationBackend overloads
   virtual void SetWorldLights() { world->SetGLLights(); }
-  Robot* ClickRobot(int x,int y,int& body,Vector3& localpt) const;
-  Robot* ClickRobot(const Ray3D& r,int& body,Vector3& localpt) const;
-  RigidObject* ClickObject(int x,int y,Vector3& localpt) const;
-  RigidObject* ClickObject(const Ray3D& r,Vector3& localpt) const;
+  RobotModel* ClickRobot(int x,int y,int& body,Vector3& localpt) const;
+  RobotModel* ClickRobot(const Ray3D& r,int& body,Vector3& localpt) const;
+  RigidObjectModel* ClickObject(int x,int y,Vector3& localpt) const;
+  RigidObjectModel* ClickObject(const Ray3D& r,Vector3& localpt) const;
   virtual void RefreshIdle() { SendPauseIdle(0); }
   virtual void RenderWorld();
 
@@ -63,9 +65,9 @@ public:
 
   virtual bool OnMouseWheel(int dwheel);
 
-  RobotWorld* world;
+  WorldModel* world;
 };
 
-
+} // namespace Klampt
 
 #endif

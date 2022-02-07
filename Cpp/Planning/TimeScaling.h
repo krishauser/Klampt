@@ -7,8 +7,10 @@
 #include <KrisLibrary/math/vector.h>
 #include <vector>
 #include <utility>
-using namespace Math;
-using namespace std;
+
+namespace Klampt {
+  using namespace Math;
+  using namespace std;
 
 /** @ingroup Planning
  * @brief Maps time into a given path parameter range (e.g., [0,1]) with 
@@ -155,5 +157,7 @@ bool OptimizeTimeScaling(const GeneralizedCubicBezierSpline& path,
 			 const Vector& vmin,const Vector& vmax,
 			 const Vector& amin,const Vector& amax,
 			 TimeScaling& scaling);
+
+} //namespace Klampt
 
 #endif

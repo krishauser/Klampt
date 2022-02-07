@@ -14,9 +14,9 @@ sphinx-docs:
 	echo "HTML docs are placed in Klampt/Python/docs/build/html"
 
 swig:
-	swig -python -c++ src/robotsim.i
-	swig -python -c++ src/motionplanning.i
-	swig -python -c++ src/rootfind.i
+	swig -python -py3 -c++ src/robotsim.i
+	swig -python -py3 -c++ src/motionplanning.i
+	swig -python -py3 -c++ src/rootfind.i
 	python3 src/improve_swig_docs.py src/robotsim.py > src/robotsim_temp.py
 	python3 src/improve_swig_docs.py src/motionplanning.py > src/motionplanning_temp.py
 	python3 src/improve_swig_docs.py src/rootfind.py > src/rootfind_temp.py

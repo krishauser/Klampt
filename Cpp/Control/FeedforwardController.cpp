@@ -5,7 +5,9 @@
 #include <string>
 #include <sstream>
 
-FeedforwardController::FeedforwardController(Robot& _robot,shared_ptr<RobotController> _base)
+using namespace Klampt;
+
+FeedforwardController::FeedforwardController(RobotModel& _robot,shared_ptr<RobotController> _base)
   :RobotController(_robot),base(_base),stateEstimator(NULL),enableGravityCompensation(true),
    enableFeedforwardAcceleration(true),gravity(0,0,-9.8)
 {
@@ -58,7 +60,7 @@ void FeedforwardController::Update(Real dt)
   //cout<<"Estimated config "<<robot.q<<endl;
   //cout<<"FF Torques: "<<torques<<endl;
   for(size_t i=0;i<command->actuators.size();i++) {
-    if(robot.drivers[i].type == RobotJointDriver::Normal) {
+    if(robot.drivers[i].type == RobotModelDriver::Normal) {
       command->actuators[i].torque = torques(robot.drivers[i].linkIndices[0]);
     }
     else {
@@ -199,7 +201,7 @@ void FeedforwardController::SolveTorques(Vector& torques,Real dt)
     Assert(dt > 0);
     Vector ddq(robot.links.size(),Zero);
     for(size_t i=0;i<command->actuators.size();i++) {
-      if(robot.drivers[i].type == RobotJointDriver::Normal) {
+      if(robot.drivers[i].type == RobotModelDriver::Normal) {
 	int link=robot.drivers[i].linkIndices[0];
 	Assert(link >= 0 && link < (int)robot.links.size());
 	//finite difference version
