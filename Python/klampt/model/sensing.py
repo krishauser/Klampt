@@ -328,6 +328,8 @@ def image_to_points(depth,color,xfov,yfov=None,depth_scale=None,depth_range=None
             else:
                 assert len(color.shape)==2
                 color_format = 'rgb'
+    else:
+        color_format = None
     if depth_scale is not None:
         depth *= depth_scale
     if depth_range is not None:
