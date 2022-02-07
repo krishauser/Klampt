@@ -7,12 +7,10 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [tool.cibuildwheel.macos]
-before-all = ["cd Klampt",
-              "ls",
-              "brew install mesa glew assimp",
+before-all = ["brew install mesa glew assimp",
               "pip install cmake",
-              "cd Klampt",
-              "cd Cpp/Dependencies",
+              "git checkout cibuildwheel",
+              "cd ../Cpp/Dependencies",
               "make unpack-deps",
               "make dep-tinyxml && make dep-ode",
               "cd KrisLibrary",
@@ -20,18 +18,15 @@ before-all = ["cd Klampt",
               "cmake . -DC11_ENABLED=ON && make -j",
               "cd ../../../",
               "cmake . && make -j Klampt",
-              "cd ../",
-              "cp Klampt/Python/setup.py ."]
+              "cd Python"]
 
 
 [tool.cibuildwheel.linux]
 before-all = ["yum clean all",
               "yum install -y glpk glpk-devel mesa-libGLU-devel git",
               "pip install cmake",
-              "git clone https://github.com/krishauser/Klampt",
-              "cd Klampt",
               "git checkout cibuildwheel",
-              "cd Cpp/Dependencies",
+              "cd ../Cpp/Dependencies",
               "make unpack-deps",
               "git clone https://github.com/assimp/assimp.git",
               "cd assimp",
@@ -46,5 +41,4 @@ before-all = ["yum clean all",
               "cmake . -DC11_ENABLED=ON && make -j",
               "cd ../../../",
               "cmake . && make -j Klampt",
-              "cd ../",
-              "cp Klampt/Python/setup.py ."]
+              "cd Python"]
