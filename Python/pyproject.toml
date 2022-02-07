@@ -7,7 +7,9 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [tool.cibuildwheel.macos]
-before-all = ["brew install mesa glew assimp",
+before-all = ["cd Klampt",
+              "ls",
+              "brew install mesa glew assimp",
               "pip install cmake",
               "cd Klampt",
               "cd Cpp/Dependencies",
