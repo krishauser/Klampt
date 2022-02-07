@@ -2,6 +2,10 @@ name: Build Python
 
 on: [push, pull_request]
 
+defaults:
+  run:
+    working-directory: Python
+
 jobs:
   build_wheels:
     name: Build Python wheels on ${{ matrix.os }}
