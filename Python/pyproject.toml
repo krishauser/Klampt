@@ -40,5 +40,5 @@ before-all = ["yum clean all",
               "git checkout devel",
               "cmake . -DC11_ENABLED=ON && make -j",
               "cd ../../../",
-              "cmake . && make -j Klampt",
+              "cmake . -DCMAKE_OSX_SYSROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk && make -j Klampt",
               "cd Python"]
