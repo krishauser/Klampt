@@ -7,15 +7,20 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [tool.cibuildwheel.macos]
-before-all = ["brew install mesa glew assimp",
-              "pip install cmake",
+before-all = ["pip install cmake",
               "git checkout cibuildwheel",
               "cd ../Cpp/Dependencies",
               "make unpack-deps",
+              "git clone https://github.com/assimp/assimp.git",
+              "cd assimp",
+              "cmake . && make -j 8 && make install",
+              "cd ..",
               "make dep-tinyxml && make dep-ode",
+              "cd glew-2.0.0 && make",
+              "cd ..",
               "cd KrisLibrary",
               "git checkout devel",
-              "cmake . -DC11_ENABLED=ON && make -j",
+              "cmake . -DC11_ENABLED=ON -DODE_DEFINITIONS=\"-DdDOUBLE\" && make -j",  #need to override pkg-config's /usr/local/include
               "cd ../../../",
               "cmake . && make -j Klampt",
               "cd Python"]
