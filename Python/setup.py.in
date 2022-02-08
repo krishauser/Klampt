@@ -91,11 +91,14 @@ for d in defs:
 
 includeDirs.append(numpy.get_include())
 
-#remove /usr/local/include on Mac build
+#remove /usr/local/include on Mac build, add -isysroot
 import platform
 if platform.system()=='Darwin':
     print("Removing /usr/local/include from include paths")
     includeDirs = [v for v in includeDirs if v != '/usr/local/include']
+    import subprocess
+    sysroot = subprocess.check_output(['xcrun', '--show-sdk-path'])
+    extra_compile_args.append('-isysroot '+sysroot.decode('utf-8'))
 
 commonfiles = ['pyerr.cpp']
 rssourcefiles = commonfiles + ['robotsim.cpp','robotik.cpp','robotsim_wrap.cxx']

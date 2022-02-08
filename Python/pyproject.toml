@@ -21,9 +21,9 @@ before-all = ["brew uninstall --ignore-dependencies pkg-config",
               "cd ..",
               "cd KrisLibrary",
               "git checkout devel",
-              "cmake . -DC11_ENABLED=ON && make -j",
+              "cmake . -DC11_ENABLED=ON -DUSE_GLUT=OFF -DUSE_GLUI=OFF -DGLEW_ROOT=../glew-2.0.0 && make -j",
               "cd ../../../",
-              "cmake . && make -j Klampt",
+              "cmake . -DUSE_GLUT=OFF -DUSE_GLUI=OFF -DGLEW_ROOT=Cpp/Dependencies/glew-2.0.0 && make -j Klampt",
               "cd Python"
               ]
 
@@ -45,7 +45,7 @@ before-all = ["yum clean all",
               "make dep-tinyxml && make dep-ode",
               "cd KrisLibrary",
               "git checkout devel",
-              "cmake . -DC11_ENABLED=ON && make -j",
+              "cmake . -DC11_ENABLED=ON -DUSE_GLUT=OFF -DUSE_GLUI=OFF  && make -j",
               "cd ../../../",
               "cmake . && make -j Klampt",
               "cd Python"]
