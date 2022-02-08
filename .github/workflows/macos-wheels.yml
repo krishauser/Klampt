@@ -1,4 +1,4 @@
-name: Build Python
+name: Build Python wheels on MacOS
 
 on: [push, pull_request]
 
