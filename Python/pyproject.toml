@@ -7,7 +7,8 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [tool.cibuildwheel.macos]
-before-all = ["pip install cmake",
+before-all = ["brew uninstall pkg-config",
+              "pip install cmake",
               "git checkout cibuildwheel",
               "cd ../Cpp/Dependencies",
               "make unpack-deps",
@@ -23,8 +24,7 @@ before-all = ["pip install cmake",
               "cmake . -DC11_ENABLED=ON && make -j",
               "cd ../../../",
               "cmake . && make -j Klampt",
-              "cd Python",
-              "rm -rf /Library/Developer/CommandLineTools",  #some problem with <cmath> and Catalina...
+              "cd Python"
               ]
 
 
