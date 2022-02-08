@@ -97,8 +97,9 @@ if platform.system()=='Darwin':
     print("Removing /usr/local/include from include paths")
     includeDirs = [v for v in includeDirs if v != '/usr/local/include']
     import subprocess
-    sysroot = subprocess.check_output(['xcrun', '--show-sdk-path'])
-    extra_compile_args.append('-isysroot '+sysroot.decode('utf-8').strip())
+    sysroot = subprocess.check_output(['xcrun', '--show-sdk-path']).decode('utf-8').strip()
+    sysroot = '/Applications/Xcode_12.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.1.sdk'
+    extra_compile_args.append('-isysroot '+sysroot)
 
 commonfiles = ['pyerr.cpp']
 rssourcefiles = commonfiles + ['robotsim.cpp','robotik.cpp','robotsim_wrap.cxx']
