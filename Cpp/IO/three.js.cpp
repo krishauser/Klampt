@@ -1,4 +1,5 @@
 #include "three.js.h"
+#include <KrisLibrary/utils/AnyCollection.h>
 #include <KrisLibrary/meshing/MeshPrimitives.h>
 #include <KrisLibrary/meshing/PointCloud.h>
 #include <KrisLibrary/math/random.h>

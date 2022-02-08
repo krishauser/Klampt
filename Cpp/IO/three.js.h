@@ -3,7 +3,7 @@
 
 #include <Klampt/Modeling/World.h>
 #include <Klampt/Simulation/Simulator.h>
-#include <KrisLibrary/utils/AnyCollection.h>
+class AnyCollection;
 
 namespace Klampt {
 
