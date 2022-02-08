@@ -25,7 +25,7 @@ before-all = ["pip install cmake",
               "cmake . && make -j Klampt",
               "cd Python",
               "sed \"s:-I/usr/local/include ::g\"  setup.py > setup.py",  #take out /usr/local/include
-              "echo setup.py"
+              "cat setup.py"
               ]
 
 
