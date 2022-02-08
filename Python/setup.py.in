@@ -91,6 +91,12 @@ for d in defs:
 
 includeDirs.append(numpy.get_include())
 
+#remove /usr/local/include on Mac build
+import platform
+if platform.system()=='Darwin':
+    print("Removing /usr/local/include from include paths")
+    includeDirs = [v for v in includeDirs if v != '/usr/local/include']
+
 commonfiles = ['pyerr.cpp']
 rssourcefiles = commonfiles + ['robotsim.cpp','robotik.cpp','robotsim_wrap.cxx']
 mpsourcefiles = commonfiles + ['motionplanning.cpp','motionplanning_wrap.cxx']
