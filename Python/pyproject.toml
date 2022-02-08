@@ -24,7 +24,7 @@ before-all = ["pip install cmake",
               "cd ../../../",
               "cmake . && make -j Klampt",
               "cd Python",
-              "sed -i.bak \"s:/usr/local/include;::g\"  setup.py"  #take out /usr/local/include from include dirs
+              "rm -rf /Library/Developer/CommandLineTools",  #some problem with <cmath> and Catalina...
               ]
 
 
