@@ -972,8 +972,8 @@ def from_json(jsonobj,type='auto'):
         elif rotConstraint == 'fixed':
             obj = IKObjective()
             R = so3.from_moment(endRotation)
-            t = vectorops.sub(endPosition,so3.apply(R,localPosition))
-            obj.setFixedTransform(link,R,t)
+            obj.setFixedPosConstraint(localPosition,endPosition)
+            obj.setFixedRotConstraint(R)
             return obj
         else:
             raise ValueError("Invalid IK rotation constraint "+rotConstraint)
