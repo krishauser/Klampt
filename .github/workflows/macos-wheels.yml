@@ -28,6 +28,7 @@ jobs:
         env:
           MACOSX_DEPLOYMENT_TARGET: 10.9
           CIBW_ARCHS_MACOS: x86_64 universal2
+          LDFLAGS: -framework OpenGL
 
       - uses: actions/upload-artifact@v2
         with:

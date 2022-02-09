@@ -91,22 +91,15 @@ for d in defs:
 
 includeDirs.append(numpy.get_include())
 
-#remove /usr/local/include on Mac build, add -isysroot
+#remove /usr/include and /usr/local/include on Mac build
 import platform
 if platform.system()=='Darwin':
     print("Removing /usr/local/include from include paths")
-    import subprocess
-    sysroot = subprocess.check_output(['xcrun', '--show-sdk-path']).decode('utf-8').strip()
-    extra_compile_args.append('-isysroot '+sysroot)
     extra_compile_args.append('-H') #show include files
-    #convert Path/To/X.framework -> -framework X
+    #TODO convert Path/To/X.framework -> -framework X for linker
     new_include_dirs = []
     for v in includeDirs:
-        if 'framework' in v:
-            framework_name = v.split('/')[-1]  #like OpenGL.framework
-            framework_name = framework_name.split('.')[0]
-            extra_compile_args.append('-framework '+framework_name)
-        elif v.endswith('/usr/include') or v.endswith('/usr/local/include'):
+        if v.endswith('/usr/include') or v.endswith('/usr/local/include'):
             continue
         else:
             new_include_dirs.append(v)
