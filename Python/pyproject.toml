@@ -19,7 +19,7 @@ before-all = ["brew install assimp glew",
               "cmake . -DC11_ENABLED=ON -DUSE_GLUT=OFF -DUSE_GLUI=OFF -DCMAKE_OSX_ARCHITECTURES=\"arm64;x86_64\" && make -j",
               "cd ../../../",
               "cmake . -DUSE_GLUT=OFF -DUSE_GLUI=OFF -DCMAKE_OSX_ARCHITECTURES=\"arm64;x86_64\" && make -j Klampt",
-              "cd Python" 
+              "cd Python"
               ]
 
 
