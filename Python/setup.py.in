@@ -104,6 +104,9 @@ if platform.system()=='Darwin':
         else:
             new_include_dirs.append(v)
     includeDirs = new_include_dirs
+    #print results of lipo
+    for l in libs:
+        print(subprocess.check_output(["lipo","-info",l]).decode('utf-8').strip())
 
 commonfiles = ['pyerr.cpp']
 rssourcefiles = commonfiles + ['robotsim.cpp','robotik.cpp','robotsim_wrap.cxx']
