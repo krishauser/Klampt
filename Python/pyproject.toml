@@ -7,7 +7,8 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [tool.cibuildwheel.macos]
-before-all = ["brew install assimp glew",
+before-all = ["arch -x86_64 brew install assimp glew",
+              "arch -arm64 brew install assimp glew",
               "brew uninstall --ignore-dependencies pkg-config",
               "pip install cmake",
               "git checkout cibuildwheel",
