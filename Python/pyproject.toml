@@ -7,8 +7,7 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [tool.cibuildwheel.macos]
-before-all = ["arch -x86_64 brew install assimp glew",
-              "arch -arm64 brew install assimp glew",
+before-all = ["brew install assimp glew",
               "brew uninstall --ignore-dependencies pkg-config",
               "pip install cmake",
               "git checkout cibuildwheel",
@@ -17,9 +16,9 @@ before-all = ["arch -x86_64 brew install assimp glew",
               "make dep-tinyxml && make dep-ode",
               "cd KrisLibrary",
               "git checkout devel",
-              "cmake . -DC11_ENABLED=ON -DUSE_GLUT=OFF -DUSE_GLUI=OFF && make -j",
+              "cmake . -DC11_ENABLED=ON -DUSE_GLUT=OFF -DUSE_GLUI=OFF -DCMAKE_OSX_ARCHITECTURES=\"arm64;x86_64\" && make -j",
               "cd ../../../",
-              "cmake . -DUSE_GLUT=OFF -DUSE_GLUI=OFF && make -j Klampt",
+              "cmake . -DUSE_GLUT=OFF -DUSE_GLUI=OFF -DCMAKE_OSX_ARCHITECTURES=\"arm64;x86_64\" && make -j Klampt",
               "cd Python"
               ]
 
