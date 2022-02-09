@@ -7,23 +7,18 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [tool.cibuildwheel.macos]
-before-all = ["brew uninstall --ignore-dependencies pkg-config",
+before-all = ["brew install assimp glew",
+              "brew uninstall --ignore-dependencies pkg-config",
               "pip install cmake",
               "git checkout cibuildwheel",
               "cd ../Cpp/Dependencies",
               "make unpack-deps",
-              "git clone https://github.com/assimp/assimp.git",
-              "cd assimp",
-              "cmake . && make -j 8 && make install",
-              "cd ..",
               "make dep-tinyxml && make dep-ode",
-              "cd glew-2.0.0 && make",
-              "cd ..",
               "cd KrisLibrary",
               "git checkout devel",
-              "cmake . -DC11_ENABLED=ON -DUSE_GLUT=OFF -DUSE_GLUI=OFF -DGLEW_ROOT=../glew-2.0.0 && make -j",
+              "cmake . -DC11_ENABLED=ON -DUSE_GLUT=OFF -DUSE_GLUI=OFF && make -j",
               "cd ../../../",
-              "cmake . -DUSE_GLUT=OFF -DUSE_GLUI=OFF -DGLEW_ROOT=Cpp/Dependencies/glew-2.0.0 && make -j Klampt",
+              "cmake . -DUSE_GLUT=OFF -DUSE_GLUI=OFF && make -j Klampt",
               "cd Python"
               ]
 
