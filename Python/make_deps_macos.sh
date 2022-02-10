@@ -15,7 +15,10 @@ popd
 pushd tinyxml
 make ARCHS="-arch x86_64 -arch arm64"
 popd
-make dep-ode
+pushd ode-0.14;
+X_EXTRA_LIBS=-lX11 CFLAGS="-fPIC -arch x86_84 -arch arm64" CXXFLAGS="-fPIC -arch x86_84 -arch arm64" ./configure --with-trimesh=none --disable-demos
+make
+popd
 pushd KrisLibrary
 git checkout devel
 cmake . -DC11_ENABLED=ON -DUSE_GLUT=OFF -DUSE_GLUI=OFF -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
