@@ -23,8 +23,10 @@ jobs:
       - name: Build dependencies
         run: bash make_deps_macosx.sh
         env:
+          MACOSX_DEPLOYMENT_TARGET: 10.9
+          LDFLAGS: -framework OpenGL
       
-      - name: Check universal build:
+      - name: Check universal build
         run: python check_mac_universal.py
 
       - name: Install cibuildwheel
