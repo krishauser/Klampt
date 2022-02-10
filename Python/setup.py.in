@@ -70,6 +70,7 @@ for l in libs:
         extra_link_args.append(fn.split('.')[0])
     else:
         libnames.append(fn)
+full_libs = libs
 libs = libnames
 
 #Parse definitions
@@ -106,7 +107,7 @@ if platform.system()=='Darwin':
             new_include_dirs.append(v)
     includeDirs = new_include_dirs
     #print results of lipo
-    for l in libs:
+    for l in full_libs:
         print(subprocess.check_output(["lipo","-info",l]).decode('utf-8').strip())
 
 commonfiles = ['pyerr.cpp']
