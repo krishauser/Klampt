@@ -13,10 +13,10 @@ make -j
 make install
 popd
 pushd tinyxml
-make ARCHS="-mmacosx-version-min=10.5 -arch x86_64 -arch arm64"
+make ARCHS="-mmacosx-version-min=10.5 -arch x86_64 -arch arm64 -stdlib=libc++"
 popd
 pushd ode-0.14;
-X_EXTRA_LIBS=-lX11 CFLAGS="-fPIC -arch x86_84 -arch arm64" CXXFLAGS="-fPIC -mmacosx-version-min=10.5 -arch x86_84 -arch arm64" ./configure --with-trimesh=none --disable-demos
+X_EXTRA_LIBS=-lX11 CFLAGS="-fPIC -arch x86_84 -arch arm64" CXXFLAGS="-fPIC -mmacosx-version-min=10.5 -arch x86_84 -arch arm64 -stdlib=libc++" ./configure --with-trimesh=none --disable-demos
 make
 popd
 pushd KrisLibrary
