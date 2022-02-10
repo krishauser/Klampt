@@ -21,7 +21,7 @@ jobs:
       - uses: actions/setup-python@v2
 
       - name: Build dependencies
-        run: bash make_deps_macosx.sh
+        run: bash make_deps_macos.sh
         env:
           MACOSX_DEPLOYMENT_TARGET: 10.9
           LDFLAGS: -framework OpenGL
