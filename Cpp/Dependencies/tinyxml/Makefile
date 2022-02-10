@@ -17,6 +17,9 @@ PROFILE        := NO
 # will not be used. YES will include the STL files.
 TINYXML_USE_STL := YES
 
+# if you want to cross-compile...
+ARCHS := 
+
 #****************************************************************************
 
 CC     := gcc
@@ -25,8 +28,8 @@ LD     := g++
 AR     := ar rcs
 RANLIB := ranlib
 
-DEBUG_CFLAGS     := -Wall -Wno-format -g -DDEBUG
-RELEASE_CFLAGS   := -Wall -Wno-unknown-pragmas -Wno-format -O3
+DEBUG_CFLAGS     := -Wall -Wno-format -g -DDEBUG ${ARCHS}
+RELEASE_CFLAGS   := -Wall -Wno-unknown-pragmas -Wno-format -O3 ${ARCHS}
 
 LIBS		 :=
 
