@@ -13,7 +13,7 @@ print(libs)
 
 #print results of lipo
 for l in libs:
-    if not l.endswith('.platform'):
+    if not l.endswith('.framework'):
         try:
             print(subprocess.check_output(["lipo","-info",l]).decode('utf-8').strip())
         except subprocess.CalledProcessError as e:
