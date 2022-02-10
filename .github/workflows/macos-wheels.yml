@@ -20,6 +20,13 @@ jobs:
       # Used to host cibuildwheel
       - uses: actions/setup-python@v2
 
+      - name: Build dependencies
+        run: bash make_deps_macosx.sh
+        env:
+      
+      - name: Check universal build:
+        run: python check_mac_universal.py
+
       - name: Install cibuildwheel
         run: python -m pip install cibuildwheel==2.3.1
       

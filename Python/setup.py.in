@@ -95,7 +95,6 @@ includeDirs.append(numpy.get_include())
 #remove /usr/include and /usr/local/include on Mac build
 import platform
 if platform.system()=='Darwin':
-    import subprocess
     print("Removing /usr/local/include from include paths")
     extra_compile_args.append('-H') #show include files
     #TODO convert Path/To/X.framework -> -framework X for linker
@@ -106,15 +105,7 @@ if platform.system()=='Darwin':
         else:
             new_include_dirs.append(v)
     includeDirs = new_include_dirs
-    #print results of lipo
-    for l in full_libs:
-        if not l.endswith('.platform'):
-            try:
-                print(subprocess.check_output(["lipo","-info",l]).decode('utf-8').strip())
-            except subprocess.CalledProcessError as e:
-                print("Error while checking",l)
-                print(e)
-
+    
 commonfiles = ['pyerr.cpp']
 rssourcefiles = commonfiles + ['robotsim.cpp','robotik.cpp','robotsim_wrap.cxx']
 mpsourcefiles = commonfiles + ['motionplanning.cpp','motionplanning_wrap.cxx']
