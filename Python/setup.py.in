@@ -94,6 +94,7 @@ includeDirs.append(numpy.get_include())
 #remove /usr/include and /usr/local/include on Mac build
 import platform
 if platform.system()=='Darwin':
+    import subprocess
     print("Removing /usr/local/include from include paths")
     extra_compile_args.append('-H') #show include files
     #TODO convert Path/To/X.framework -> -framework X for linker
