@@ -9,7 +9,7 @@ make unpack-deps
 git clone https://github.com/assimp/assimp.git
 pushd assimp
 cmake . -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
-make -j 
+make -j VERBOSE=1
 make install
 popd
 pushd tinyxml
