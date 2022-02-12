@@ -15,7 +15,7 @@ make -j
 make install
 popd
 pushd tinyxml
-make ARCHS="${ARCHFLAGS} -std=gnu++11"
+make ARCHS="${ARCHFLAGS} -std=gnu++11" lib
 popd
 pushd ode-0.14;
 X_EXTRA_LIBS=-lX11 CFLAGS="-fPIC ${ARCHFLAGS}" CXXFLAGS="-fPIC ${ARCHFLAGS} -std=gnu++11" ./configure --with-trimesh=none --disable-demos
