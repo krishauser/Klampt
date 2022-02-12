@@ -4,7 +4,7 @@ brew install glew
 brew uninstall --ignore-dependencies pkg-config
 pip install cmake
 
-ARCHFLAGS="-arch x86_64 -arch arm64 -isysroot /Applications/Xcode_12.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.1.sdk -mmacosx-version-min=10.9 -std=gnu++11"
+ARCHFLAGS="-arch x86_64 -arch arm64 -isysroot /Applications/Xcode_12.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.1.sdk -mmacosx-version-min=10.9 "
 
 pushd ../Cpp/Dependencies
 make unpack-deps
@@ -15,10 +15,10 @@ make -j
 make install
 popd
 pushd tinyxml
-make ARCHS="${ARCHFLAGS}"
+make ARCHS="${ARCHFLAGS} -std=gnu++11"
 popd
 pushd ode-0.14;
-X_EXTRA_LIBS=-lX11 CFLAGS="-fPIC ${ARCHFLAGS}" CXXFLAGS="-fPIC ${ARCHFLAGS}" ./configure --with-trimesh=none --disable-demos
+X_EXTRA_LIBS=-lX11 CFLAGS="-fPIC ${ARCHFLAGS}" CXXFLAGS="-fPIC ${ARCHFLAGS} -std=gnu++11" ./configure --with-trimesh=none --disable-demos
 make
 popd
 pushd KrisLibrary
