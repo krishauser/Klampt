@@ -65,6 +65,7 @@ else (ODE_INCLUDE_DIRS AND ODE_LIBRARIES)
       # Try to use ode-config
       find_program(ODECONFIG_EXECUTABLE ode-config PATHS ${ODE_ROOT})
       if (ODECONFIG_EXECUTABLE)
+        MESSAGE("ODE configuration flags determined by ode-config: ${ODECONFIG_EXECUTABLE}")
         execute_process(COMMAND ${ODECONFIG_EXECUTABLE} --cflags OUTPUT_VARIABLE ODECONFIG_CFLAGS)
         set(ODE_DEFINITIONS ${ODECONFIG_CFLAGS} CACHE STRING "")
         set(ODE_DEFINITIONS_FOUND TRUE)
