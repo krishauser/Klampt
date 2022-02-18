@@ -1,6 +1,5 @@
 set -e  #error if any step fails
 
-brew install glew
 brew uninstall --ignore-dependencies pkg-config
 pip install cmake
 
@@ -8,6 +7,10 @@ ARCHFLAGS="-arch x86_64 -arch arm64 -isysroot /Applications/Xcode_12.4.app/Conte
 
 pushd ../Cpp/Dependencies
 make unpack-deps
+pushd glew-2.0.0
+make CFLAGS.EXTRA="${ARCHFLAGS}"
+make install
+popd
 git clone https://github.com/assimp/assimp.git
 pushd assimp
 cmake . -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
