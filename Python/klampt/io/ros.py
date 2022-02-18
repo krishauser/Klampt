@@ -301,7 +301,7 @@ def to_JointTrajectory(klampt_traj,indices='auto',link_joint_names=None):
         else:
             assert len(link_joint_names) == len(klampt_traj.milestones[0])
             for i in range(len(klampt_traj.milestones[0])):
-                res.joint_names.append(link_joint_names)
+                res.joint_names.append(link_joint_names[i])
         for i,q in enumerate(klampt_traj.milestones):
             res.points.append(JointTrajectoryPoint())
             res.points[-1].time_from_start = rospy.Duration(klampt_traj.times[i])
