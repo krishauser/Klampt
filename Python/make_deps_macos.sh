@@ -8,8 +8,13 @@ ARCHFLAGS="-arch x86_64 -arch arm64 -isysroot /Applications/Xcode_12.4.app/Conte
 pushd ../Cpp/Dependencies
 make unpack-deps
 pushd glew-2.0.0
-make STRIP= CFLAGS.EXTRA="${ARCHFLAGS}"
+pushd build
+cmake ./cmake -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
+make -j4
 make install
+popd
+#make STRIP= CFLAGS.EXTRA="${ARCHFLAGS}"
+#make install
 popd
 git clone https://github.com/assimp/assimp.git
 pushd assimp
