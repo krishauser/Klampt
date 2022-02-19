@@ -113,7 +113,7 @@ rfsourcefiles = commonfiles + ['rootfind.cpp','pyvectorfield.cpp','rootfind_wrap
 
 
 setup(name='Klampt',
-      version='@KLAMPT_VERSION@',
+      version='@KLAMPT_VERSION@.post1',
       description="Python API to Klamp't, a package for robot modeling, simulating, planning, optimization, and visualization",
       author='Kris Hauser',
       author_email='hauser.kris@gmail.com',
