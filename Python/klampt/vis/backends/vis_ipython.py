@@ -103,7 +103,8 @@ class KlamptWidgetAdaptor(KlamptWidget,VisualizationScene):
                 link_selector = 'dropdown'
             res = EditConfig(item._robot,klampt_widget=weakref.proxy(self),link_subset=item.links,link_selector=link_selector)
         elif isinstance(item,RigidObjectModel):
-            res = EditTransform(item.getTransform(),klampt_widget=weakref.proxy(self),xform_name=obj.name,callback=lambda T:item.setTranform(*T))
+            #TODO: when this is removed, need to remove obj.name+'_transform'
+            res = EditTransform(item.getTransform(),klampt_widget=weakref.proxy(self),xform_name=obj.name+'_transform',callback=lambda T:item.setTransform(*T))
         elif isinstance(item,(list,tuple)):
             #determine if it's a rotation, transform, or point
             itype = objectToVisType(item,None)
@@ -247,7 +248,7 @@ class KlamptWidgetAdaptor(KlamptWidget,VisualizationScene):
             else:
                 display(widgets.HBox(children=self._buttons))
         for k,v in self._editors.items():
-            display(HTML('<h3>'+k+'</h3>'))
+            display(HTML('<h3>'+str(k)+'</h3>'))
             display(v)
 
     def display_plots(self):
@@ -375,9 +376,16 @@ class IPythonWindowManager(_WindowManager):
         if setup is not None:
             setup()
         playback = Playback(self.scene())
+        def setup_and_reset_time():
+            setup()
+            self.frontend().animationTime(0)
+        def callback_and_advance_time():
+            dt = 0.04
+            callback()
+            self.frontend().animationTime(self.frontend().animationTime()+dt)
         playback.quiet = False
-        playback.reset = setup
-        playback.advance = callback
+        playback.reset = setup_and_reset_time
+        playback.advance = callback_and_advance_time
         if cleanup is not None:
             warnings.warn("vis_ipython: An IPython visualization will run forever, and cleanup() will never be called")
         self.show()
