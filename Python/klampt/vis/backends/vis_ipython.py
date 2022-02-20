@@ -377,11 +377,13 @@ class IPythonWindowManager(_WindowManager):
             setup()
         playback = Playback(self.scene())
         def setup_and_reset_time():
-            setup()
+            if setup is not None:
+                setup()
             self.frontend().animationTime(0)
         def callback_and_advance_time():
             dt = 0.04
-            callback()
+            if callback is not None:
+                callback()
             self.frontend().animationTime(self.frontend().animationTime()+dt)
         playback.quiet = False
         playback.reset = setup_and_reset_time
