@@ -98,7 +98,7 @@ class SubRobotModel:
                 if isinstance(object,HermiteTrajectory):
                     raise NotImplementedError("Can't lift hermite trajectories to full robots yet")
                 newmilestones = self.tofull(object.milestones,reference=reference)
-                return object.constructor(object.times,newmilestones)
+                return object.constructor()(object.times,newmilestones)
             else:
                 raise ValueError("Invalid object type, not an integer, configuration, or Trajectory")
 
