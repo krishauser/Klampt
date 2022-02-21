@@ -11,6 +11,7 @@ pushd glew-2.0.0
 pushd build
 cmake ./cmake -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
 make -j4
+bin/glewinfo
 make install
 popd
 #make STRIP= CFLAGS.EXTRA="${ARCHFLAGS}"
@@ -39,4 +40,6 @@ popd
 pushd ..
 cmake . -DUSE_GLUT=OFF -DUSE_GLUI=OFF -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
 make -j Klampt
+make -j Pack
+bin/Pack
 popd
