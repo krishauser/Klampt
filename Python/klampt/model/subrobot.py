@@ -33,7 +33,7 @@ class SubRobotModel:
         """
         assert isinstance(robot,(RobotModel,SubRobotModel)),"SubRobotModel constructor must be given a RobotModel or SubRobotModel as first argument"
         self._robot = robot
-        self._links = links[:]     #type : List[int]
+        self._links = [ robot.link(i).index for i in links ]     #type : List[int]
         self._drivers = None       #type : List[RobotModelDriver]
         self.index = robot.index
         self.world = robot.world
@@ -46,6 +46,7 @@ class SubRobotModel:
         for i,l in enumerate(self._links):
             if isinstance(l,str):
                 self._links[i] = robot.link(l).getIndex()
+
         self._inv_links = dict((l,i) for (i,l) in enumerate(self._links))
 
     def tofull(self,object,reference=None):
@@ -170,8 +171,8 @@ class SubRobotModel:
             self._computeDrivers()
         if index < 0 or index >= len(self._drivers):
             raise ValueError("Invalid driver index, must be between {} and {}".format(0,len(self._drivers)-1))
-        dindex = self._drivers[index]
-        return SubRobotModelDriver(self._robot.driver(index),self)
+        dindex = self._drivers[index].index
+        return SubRobotModelDriver(self._robot.driver(dindex),self)
   
     def getConfig(self) -> Config:
         q = self._robot.getConfig()
@@ -180,7 +181,7 @@ class SubRobotModel:
         q = self._robot.getVelocity()
         return [q[i] for i in self._links]
     def setConfig(self, q : Config) -> None:
-        assert len(q) == self.numDrivers()
+        assert len(q) == len(self._links)
         qfull = self._robot.getConfig()
         for i,v in zip(self._links,q):
             qfull[i] = v
