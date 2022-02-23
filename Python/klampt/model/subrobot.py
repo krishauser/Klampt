@@ -180,7 +180,7 @@ class SubRobotModel:
         q = self._robot.getVelocity()
         return [q[i] for i in self._links]
     def setConfig(self, q : Config) -> None:
-        assert len(q) == len(self._links)
+        assert len(q) == self.numDrivers()
         qfull = self._robot.getConfig()
         for i,v in zip(self._links,q):
             qfull[i] = v
