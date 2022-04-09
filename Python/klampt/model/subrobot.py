@@ -161,6 +161,7 @@ class SubRobotModel:
             for l in d.getAffectedLinks():
                 if l in self._links:
                     self._drivers.append(d)
+                break
 
     def numDrivers(self) -> int:
         if self._drivers is None:
