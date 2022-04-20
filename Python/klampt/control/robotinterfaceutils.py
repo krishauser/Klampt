@@ -4837,9 +4837,11 @@ class RobotInterfaceEmulator:
                     xmax[i] = qcmd[i]
                     #TODO: warn if this is way out of bounds
                 if abs(dqcmd[i]) > vmax[i]:
-                    vmax[i] = dqcmd[i]
+                    vmax[i] = abs(dqcmd[i])
             try:
                 ts,xs,vs = motionplanning.interpolate_nd_min_time(qcmd,dqcmd,q,[0]*len(q),xmin,xmax,vmax,amax)
+                if any(len(t)==0 for t in ts):
+                    raise ValueError("Unable to solve for min-time interpolation")
             except Exception as e:
                 print("Couldn't solve for move to?")
                 print(e)
