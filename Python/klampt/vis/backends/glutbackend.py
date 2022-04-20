@@ -84,7 +84,8 @@ class GLUTWindow:
         glutMouseFunc (glutsafe(self._mousefunc,update_modifiers=True))
         glutDisplayFunc (glutsafe(self._displayfunc))
         glutIdleFunc(glutsafe(program.idlefunc))
-        glutCloseFunc(glutsafe(self._closefunc))
+        if bool(glutCloseFunc):
+            glutCloseFunc(glutsafe(self._closefunc))
 
         #init function
         self.program.initialize()

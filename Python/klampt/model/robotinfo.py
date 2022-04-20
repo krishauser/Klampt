@@ -809,7 +809,7 @@ class GripperInfo:
             Tbase = robot.link(self.baseLink).getTransform()
             for i,link in enumerate(gripperLinks):
                 Trel = se3.mul(se3.inv(Tbase),robot.link(link).getTransform())
-                g = robot.link(link).geometry().clone()
+                g = robot.link(link).geometry().copy()
                 if not g.empty():
                     g.setCurrentTransform(*se3.identity())
                     g.transform(*Trel)
