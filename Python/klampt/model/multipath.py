@@ -298,10 +298,10 @@ class MultiPath:
                 if hasattr(ikgoal,'text'):
                     xik.text = ikgoal.text
                 else:
-                    xik.text = loader.writeIKObjective(ikgoal)
+                    xik.text = loader.write_IKObjective(ikgoal)
             for h in sec.holds:
                 xh = ET.SubElement(xs,"hold")
-                xh.text = loader.writeHold(h)
+                xh.text = loader.write_Hold(h)
             for h in sec.holdIndices:
                 xh = ET.SubElement(xs,"hold")
                 if isinstance(h,int):
@@ -311,17 +311,17 @@ class MultiPath:
             for i in range(len(sec.configs)):
                 xm = ET.Element("milestone")
                 xs.append(xm)
-                xm.set("config",loader.writeVector(sec.configs[i]))
+                xm.set("config",loader.write_Vector(sec.configs[i]))
                 if sec.times != None:
                     xm.set("time",str(sec.times[i]))
                 if sec.velocities != None:
-                    xm.set("velocity",loader.writeVector(sec.velocities[i]))
+                    xm.set("velocity",loader.write_Vector(sec.velocities[i]))
         for hkey,h in self.holdSet.items():
             xh = ET.Element("hold")
             root.append(xh)
             if not isinstance(hkey,int):
                 xh.set('name',str(hkey))
-            xh.text = loader.writeHold(h)
+            xh.text = loader.write_Hold(h)
         return ET.ElementTree(root)
 
     def loadXML(self,tree):
@@ -341,15 +341,15 @@ class MultiPath:
             for m in milestones:
                 if 'config' not in m.attrib:
                     raise ValueError("Milestone does not contain config attribute")
-                s.configs.append(loader.readVector(m.attrib['config']))
+                s.configs.append(loader.read_Vector(m.attrib['config']))
                 if 'time' in m.attrib:
                     if s.times==None: s.times = []
                     s.times.append(float(m.attrib['time']))
                 if 'velocity' in m.attrib:
                     if s.velocities==None: s.velocities = []
-                    s.velocities.append(loader.readVector(m.attrib['velocity']))
+                    s.velocities.append(loader.read_Vector(m.attrib['velocity']))
             for obj in sec.findall('ikgoal'):
-                s.ikObjectives.append(loader.readIKObjective(obj.text))
+                s.ikObjectives.append(loader.read_IKObjective(obj.text))
                 s.ikObjectives[-1].text = obj.text
             for h in sec.findall('hold'):
                 if 'index' in h.attrib:
@@ -357,11 +357,11 @@ class MultiPath:
                 elif 'name' in h.attrib:
                     s.holdIndices.append(h.attrib['name'])
                 else:
-                    s.holds.append(loader.readHold(h.text))
+                    s.holds.append(loader.read_Hold(h.text))
             self.sections.append(s)
         #read global hold set
         for h in root.findall('hold'):
-            hold = loader.readHold(h.text)
+            hold = loader.read_Hold(h.text)
             if 'name' in h.attrib:
                 self.holdSet[h.attrib['name']] = hold
             else:
