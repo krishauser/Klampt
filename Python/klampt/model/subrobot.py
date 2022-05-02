@@ -102,7 +102,7 @@ class SubRobotModel:
                 newmilestones = self.tofull(obj.milestones,reference=reference)
                 return obj.constructor()(obj.times,newmilestones)
             else:
-                raise ValueError(f"Invalid obj type ({obj}, type {type(obj)}), not an integer, configuration, or Trajectory")
+                raise ValueError("Invalid obj type ({}, type {}), not an integer, configuration, or Trajectory".format(obj,type(obj)))
 
     def fromfull(self,object):
         """Converts the given index, configuration, velocity, or trajectory of
@@ -158,10 +158,8 @@ class SubRobotModel:
         self._drivers = []
         for i in range(self._robot.numDrivers()):
             d = self._robot.driver(i)
-            for l in d.getAffectedLinks():
-                if l in self._links:
-                    self._drivers.append(d)
-                break
+            if any((l in self._links) for l in d.getAffectedLinks()):
+                self._drivers.append(d)
 
     def numDrivers(self) -> int:
         if self._drivers is None:
@@ -364,9 +362,9 @@ class SubRobotModel:
         raise NotImplementedError("Can't reduce a sub-robot")
     def mount(self,link,subRobot,R,t):
         self._robot.mount(self.tofull(link),subRobot,R,t)
-    def sensor(self,index):
-        """Returns the SimSensorModel corresponding to index. Note however that
-        you can't set the "link" setting according to this SubRobotModel.
+    def sensor(self,index) -> 'SimRobotSensor':
+        """Returns the SimRobotSensor corresponding to index. Note however that
+        you shouldn't set the "link" setting according to this SubRobotModel.
 
         Args:
             index (int or str)
@@ -374,7 +372,7 @@ class SubRobotModel:
         if isinstance(index,str):
             return self._robot.sensor(index)
         else:
-            return self._robot.sensor(self.tofull(index))
+            return self._robot.sensor(index)
 
 
 class SubRobotModelLink:
