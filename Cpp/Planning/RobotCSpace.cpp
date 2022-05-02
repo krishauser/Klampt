@@ -1,5 +1,5 @@
 #include "RobotCSpace.h"
-#include "Modeling/Interpolate.h"
+#include "Klampt/Modeling/Interpolate.h"
 #include <KrisLibrary/math/angle.h>
 #include <KrisLibrary/math/random.h>
 #include <KrisLibrary/math3d/rotation.h>
@@ -694,7 +694,7 @@ void SingleRobotCSpace::Init()
     settings->collisionEnabled(ignoreCollisions[i].second,ignoreCollisions[i].first) = false;
   }
 
-  AddConstraint("update_geometry",std::bind(std::mem_fun(&SingleRobotCSpace::UpdateGeometry),this,std::placeholders::_1));
+  AddConstraint("update_geometry",std::bind(std::mem_fn(&SingleRobotCSpace::UpdateGeometry),this,std::placeholders::_1));
 
   int id = world.RobotID(index);
   collisionPairs.resize(0);
@@ -973,7 +973,7 @@ void SingleRigidObjectCSpace::Init()
   constraints.resize(3);
   constraintNames.resize(3);
 
-  CSet::CPredicate f = std::bind(std::mem_fun(&SingleRigidObjectCSpace::UpdateGeometry),this,std::placeholders::_1);
+  CSet::CPredicate f = std::bind(std::mem_fn(&SingleRigidObjectCSpace::UpdateGeometry),this,std::placeholders::_1);
   CSpace::AddConstraint("update_geometry",f);
 
   if(collisionPairs.empty()) {

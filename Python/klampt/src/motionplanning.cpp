@@ -1536,8 +1536,8 @@ void interpolate_nd_min_time(const vector<double>& x0,const vector<double>& v0,c
     }
   }
   vector<vector<ParabolicRamp::ParabolicRamp1D> > ramps;
-  bool res=ParabolicRamp::SolveMinTimeBounded(x0,v0,x1,v1,amax,vmax,xmin,xmax,ramps);
-  if(!res) {
+  Real time=ParabolicRamp::SolveMinTimeBounded(x0,v0,x1,v1,amax,vmax,xmin,xmax,ramps);
+  if(time < 0) {
     out.resize(0);
     out2.resize(0);
     out3.resize(0);

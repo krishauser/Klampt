@@ -1,5 +1,5 @@
 #include "RampCSpace.h"
-#include "Modeling/DynamicPath.h"
+#include "Klampt/Modeling/DynamicPath.h"
 #include <KrisLibrary/math/random.h>
 using namespace std;
 using namespace Klampt;

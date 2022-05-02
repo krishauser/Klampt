@@ -7,6 +7,7 @@
 #include "IO/XmlODE.h"
 #include "IO/three.js.h"
 #include <KrisLibrary/utils/stringutils.h>
+#include <KrisLibrary/utils/AnyCollection.h>
 #include <KrisLibrary/robotics/IKFunctions.h>
 #include <fstream>
 using namespace Math3D;

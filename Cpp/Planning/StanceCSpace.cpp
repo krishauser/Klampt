@@ -31,8 +31,8 @@ void StanceCSpace::SetStance(const Stance& s)
   for(Stance::const_iterator i=s.begin();i!=s.end();i++)
     contactIK.push_back(i->second.ikConstraint);
 
-  AddConstraint("rigid_equilibrium",std::bind(std::mem_fun(&StanceCSpace::CheckRBStability),this,std::placeholders::_1));
-  AddConstraint("torque_balance",std::bind(std::mem_fun(&StanceCSpace::CheckTorqueStability),this,std::placeholders::_1));
+  AddConstraint("rigid_equilibrium",std::bind(std::mem_fn(&StanceCSpace::CheckRBStability),this,std::placeholders::_1));
+  AddConstraint("torque_balance",std::bind(std::mem_fn(&StanceCSpace::CheckTorqueStability),this,std::placeholders::_1));
 }
 
 void StanceCSpace::SetHold(const Hold& h)
@@ -47,8 +47,8 @@ void StanceCSpace::SetHold(const Hold& h)
   for(Stance::const_iterator i=stance.begin();i!=stance.end();i++)
     contactIK.push_back(i->second.ikConstraint);
 
-  AddConstraint("rigid_equilibrium",std::bind(std::mem_fun(&StanceCSpace::CheckRBStability),this,std::placeholders::_1));
-  AddConstraint("torque_balance",std::bind(std::mem_fun(&StanceCSpace::CheckTorqueStability),this,std::placeholders::_1));
+  AddConstraint("rigid_equilibrium",std::bind(std::mem_fn(&StanceCSpace::CheckRBStability),this,std::placeholders::_1));
+  AddConstraint("torque_balance",std::bind(std::mem_fn(&StanceCSpace::CheckTorqueStability),this,std::placeholders::_1));
 }
 
 void StanceCSpace::CalculateSP()

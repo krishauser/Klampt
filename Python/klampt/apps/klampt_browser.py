@@ -423,7 +423,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
                 todel.append(name)
             elif isinstance(s,Geometry3D):
                 t = self.world.makeTerrain(name)
-                t.geometry().set(s.clone())
+                t.geometry().set(s.copy())
                 todel.append(name)
         for name in todel:
             self.remove(name)
