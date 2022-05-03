@@ -1498,7 +1498,7 @@ def _getBounds(object):
 
 
 def autoFitViewport(viewport : Viewport, objects : Sequence, zoom=True,rotate=True) -> None: 
-    from ..model.sensing import fit_plane_centroid
+    from ..model.geometry import fit_plane_centroid
     ofs = sum([_getOffsets(o) for o in objects],[])
     pts = sum([_getBounds(o) for o in objects],[])
     #print("Bounding box",bb,"center",center)
