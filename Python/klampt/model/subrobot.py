@@ -70,6 +70,8 @@ class SubRobotModel:
             return obj._link
         elif hasattr(obj,'__iter__'):
             obj = list(obj) # In case of generators
+            if len(obj) == 0:
+                raise ValueError("cannot convert empty configuration list ")
             if hasattr(obj[0],'__iter__'):
                 #treat this as a list of configuration-like objects
                 res = []

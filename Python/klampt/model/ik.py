@@ -289,8 +289,11 @@ def objects(objectives):
     raise NotImplementedError()
     pass
 
+
 class SubRobotIKSolver(IKSolver):
-    """IKSolver but with metadata saved for subrobots.
+    """A version of IKSolver for subrobots.  Allows addressing of
+    configurations and links according to the indices of the SubRobotModel
+    provided upon initialization.
     """
     def __init__(self, r: SubRobotModel):
         assert(isinstance(r, SubRobotModel))
@@ -298,8 +301,8 @@ class SubRobotIKSolver(IKSolver):
         super().setActiveDofs(r._links)
         self.subrobot = r
 
-    def copy(self) -> "SubrobotIKSolver":
-        return SubrobotIKSolver(self.subrobot)
+    def copy(self) -> "SubRobotIKSolver":
+        return SubRobotIKSolver(self.subrobot)
 
     def setActiveDofs(self, active: IntArray) -> None:
         r"""
@@ -366,7 +369,7 @@ class SubRobotIKSolver(IKSolver):
             old_config[n] = x
         return super().setBiasConfig(old_config)
 
-    def getBiasConfig(self) ->None:
+    def getBiasConfig(self) -> Vector:
         r"""
         Returns the solvers' bias configuration.  
         Respects subrobotness.
@@ -374,15 +377,6 @@ class SubRobotIKSolver(IKSolver):
         """
         config = super().getBiasConfig()
         return [config[i] for i in self.subrobot._links]
-
-
-    def getResidual(self) ->None:
-        r"""
-        Returns the vector describing the error of the objective at the current
-        configuration.  
-
-        """
-        raise NotImplementedError("Not implemented for SubRobotIKSolver")
 
     def getJacobian(self):
         r"""
@@ -396,14 +390,7 @@ class SubRobotIKSolver(IKSolver):
         """
         return super().getJacobian()[:, self.subrobot._links]
 
-    def sampleInitial(self) ->None:
-        r"""
-        Samples an initial random configuration. More initial configurations can be
-        sampled in case the prior configs lead to local minima.  
 
-        ??? what does this do?
-        """
-        return super().sampleInitial()
 
 def solver(
         objectives: Union[IKObjective,Sequence[IKObjective]],
