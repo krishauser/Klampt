@@ -2065,18 +2065,24 @@ class OmniRobotInterface(_RobotInterfaceStatefulBase):
         if len(self._physicalParts) == 0:
             warnings.warn("No physical parts defined")
             return False
-        for k,iface in self._virtualParts.items():
-            link_inds = []
-            for i in self._virtualPartIndices[k]:
-                link_inds += self._structure.klamptModel.driver(i).getAffectedLinks()
-            iface._structure.klamptModel = SubRobotModel(self._structure.klamptModel,link_inds)
-        for k,iface in self._physicalParts.items():
-            link_inds = []
-            for i in self._physicalPartIndices[k]:
-                link_inds += self._structure.klamptModel.driver(i).getAffectedLinks()
-            iface._structure.klamptModel = SubRobotModel(self._structure.klamptModel,link_inds)
-        
-        n = self._structure.klamptModel.numDrivers()
+        if self._structure.klamptModel is not None:
+            for k,iface in self._virtualParts.items():
+                link_inds = []
+                for i in self._virtualPartIndices[k]:
+                    link_inds += self._structure.klamptModel.driver(i).getAffectedLinks()
+                iface._structure.klamptModel = SubRobotModel(self._structure.klamptModel,link_inds)
+            for k,iface in self._physicalParts.items():
+                link_inds = []
+                for i in self._physicalPartIndices[k]:
+                    link_inds += self._structure.klamptModel.driver(i).getAffectedLinks()
+                iface._structure.klamptModel = SubRobotModel(self._structure.klamptModel,link_inds)
+            
+            n = self._structure.klamptModel.numDrivers()
+        else:
+            n = 0
+            for k,iface in self._physicalParts.items():
+                n = max(n,max(self._physicalPartIndices[k])+1)
+
         self._structure.numJoints = n
         self._structure.jointNames = [None]*n
         
@@ -4837,7 +4843,7 @@ class RobotInterfaceEmulator:
                     xmax[i] = qcmd[i]
                     #TODO: warn if this is way out of bounds
                 if abs(dqcmd[i]) > vmax[i]:
-                    vmax[i] = dqcmd[i]
+                    vmax[i] = abs(dqcmd[i])
             try:
                 ts,xs,vs = motionplanning.interpolate_nd_min_time(qcmd,dqcmd,q,[0]*len(q),xmin,xmax,vmax,amax)
             except Exception as e:
