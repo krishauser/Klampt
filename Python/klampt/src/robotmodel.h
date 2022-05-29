@@ -606,10 +606,16 @@ class RobotModel
   ///Computes the inverse dynamics.  Uses Recursive Newton Euler solver and
   ///takes O(n) time.
   ///
+  ///Specifically, solves for :math:`\tau` in the (partial) dynamics equation:
+  ///
+  ///.. math::
+  ///
+  ///    `B(q) \ddot{q} + C(q,\dot{q}) = \tau`
+  ///
   ///.. note::
   ///
-  ///    Does not include gravity term G(q).  getGravityForces(g) will need
-  ///    to be added to the result.
+  ///    Does not include gravity term G(q).  getGravityForces(g) will 
+  ///    need to be added to the result.
   ///
   ///Returns:
   ///
@@ -617,12 +623,20 @@ class RobotModel
   ///    the joint accelerations ddq in the absence of external forces.
   /// 
   void torquesFromAccel(const std::vector<double>& ddq,std::vector<double>& out);
-  ///Computes the foward dynamics (using Recursive Newton Euler solver)
+  ///Computes the foward dynamics.  Uses Recursive Newton Euler solver and
+  ///takes O(n) time.
+  //
+  ///Specifically, solves for :math:`\ddot{q}` in the (partial) dynamics
+  ///equation:
+  ///
+  ///.. math::
+  ///
+  ///    `B(q) \ddot{q} + C(q,\dot{q}) = \tau`
   ///
   ///.. note::
   ///
-  ///    Does not include gravity term G(q).  getGravityForces(g) will need
-  ///    to be subtracted from the argument t.
+  ///    Does not include gravity term G(q).  getGravityForces(g) will 
+  ///    need to be subtracted from the argument t.
   ///
   ///Returns:
   /// 
@@ -636,8 +650,7 @@ class RobotModel
   ///
   ///Returns:
   /// 
-  ///    list of floats: The n-element configuration that is u fraction of 
-  ///    the way from a to b
+  ///    The n-element configuration that is u fraction of the way from a to b.
   /// 
   void interpolate(const std::vector<double>& a,const std::vector<double>& b,double u,std::vector<double>& out);
   ///Computes a distance between two configurations, properly taking into account nonstandard joints
@@ -782,7 +795,7 @@ class RigidObjectModel
   ///
   ///Returns:
   /// 
-  ///    tuple: a pair of 3-lists (w,v) where w is the angular velocity
+  ///    A pair of 3-lists (w,v) where w is the angular velocity
   ///    vector and v is the translational velocity vector (both in world
   ///    coordinates)
   /// 

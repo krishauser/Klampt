@@ -420,7 +420,12 @@ Retrieves a point.
 
 %feature("docstring") ConvexHull::getPoints "
 
-Retrieves a view of the points as an nx3 Numpy array.  
+Retrieves a view of the points.  
+
+Returns:  
+
+    ndarray: an nx3 Numpy array. Setting elements of this array will
+    change the points.  
 ";
 
 %feature("docstring") ConvexHull::ConvexHull "
@@ -1986,27 +1991,26 @@ Examples::
     pc.vertices.append(0)
     pc.vertices.append(0)
     pc.properties.append(0)
-    print(len(pc.vertices))  #prints 3
-    print(pc.numPoints())  #prints 1
+    print(len(pc.vertices)) #prints 3
+    print(pc.numPoints())   #prints 1
     #add another point with coordinates (1,2,3)
     pc.addPoint([1,2,3])
     #this prints 2
     print(pc.numPoints() )
+    print(pc.getPoints())   #prints [[0,0,0],[1,2,3]]
     #this prints 2, because there is 1 property category x 2 points
-    print(len(pc.properties.size()))
+    print(pc.properties.size())
+    assert pc.propertyNames.size() == pc.getAllProperties().shape[1]
     #this prints 0; this is the default value added when addPoint is called
     print(pc.getProperty(1,0) )  
 
 To get all points as an n x 3 numpy array::  
 
-    points = np.array(pc.vertices).reshape((pc.numPoints(),3))  
+    points = pc.getPoints()  
 
 To get all properties as a n x k numpy array::  
 
-    properties = np.array(pc.properties)
-    properties.reshape((p.numPoints(),p.numProperties()))  
-
-(Or use the convenience functions in :mod:`klampt.io.numpy_convert`)  
+    properties = pc.getAllProperties()  
 
 C++ includes: geometry.h
 ";
@@ -2087,16 +2091,29 @@ intrinsics parameters. The depth is given as a size hxw array, top to bottom.
 %feature("docstring") PointCloud::getProperties "
 
 Returns property pindex of all points as an array.  
+
+Returns:  
+
+    ndarray: an n-D Numpy array.  
 ";
 
 %feature("docstring") PointCloud::getProperties "
 
 Returns property named pindex of all points as an array.  
+
+Returns:  
+
+    ndarray: an n-D Numpy array.  
 ";
 
 %feature("docstring") PointCloud::getAllProperties "
 
-Returns all the properties as an nxp array.  
+Returns all the properties of all points as an array view.  
+
+Returns:  
+
+    ndarray: an nxk Numpy array. Setting elements of this array will
+    change the vertices.  
 ";
 
 %feature("docstring") PointCloud::setRGBDImages_i_s "
@@ -2147,7 +2164,7 @@ Sets all the points to the given nx3 Numpy array.
 
 %feature("docstring") PointCloud::setProperties "
 
-Sets all the properties of all points to the given nxp array.  
+Sets all the properties of all points to the given nxk array.  
 ";
 
 %feature("docstring") PointCloud::setProperties "
@@ -2195,7 +2212,12 @@ Returns the property named pname of point index.
 
 %feature("docstring") PointCloud::getPoints "
 
-Returns a view of the points as an nx3 Numpy array.  
+Returns a view of the points.  
+
+Returns:  
+
+    ndarray: an nx3 Numpy array. Setting elements of this array will
+    change the points.  
 ";
 
 // File: classPointPoser.xml
@@ -2276,7 +2298,7 @@ Retrieves the (angular velocity, velocity) of the rigid object.
 
 Returns:  
 
-    tuple: a pair of 3-lists (w,v) where w is the angular velocity
+    A pair of 3-lists (w,v) where w is the angular velocity
     vector and v is the translational velocity vector (both in world
     coordinates)  
 ";
@@ -2492,8 +2514,7 @@ nonstandard joints.
 
 Returns:  
 
-    list of floats: The n-element configuration that is u fraction of
-    the way from a to b  
+    The n-element configuration that is u fraction of the way from a to b.  
 ";
 
 %feature("docstring") RobotModel::getComJacobian "
@@ -2540,12 +2561,19 @@ Enables/disables self collisions between two links (depending on value)
 
 %feature("docstring") RobotModel::accelFromTorques "
 
-Computes the foward dynamics (using Recursive Newton Euler solver)  
+Computes the foward dynamics. Uses Recursive Newton Euler solver and takes O(n)
+time.  
+
+Specifically, solves for :math:`\\ddot{q}` in the (partial) dynamics equation:  
+
+.. math::  
+
+    `B(q) \\ddot{q} + C(q,@dot {q}) = \\tau`  
 
 .. note::  
 
-    Does not include gravity term G(q).  getGravityForces(g) will need
-    to be subtracted from the argument t.  
+    Does not include gravity term G(q).  getGravityForces(g) will
+    need to be subtracted from the argument t.  
 
 Returns:  
 
@@ -2689,10 +2717,16 @@ Returns the number of links = number of DOF's.
 Computes the inverse dynamics. Uses Recursive Newton Euler solver and takes O(n)
 time.  
 
+Specifically, solves for :math:`\\tau` in the (partial) dynamics equation:  
+
+.. math::  
+
+    `B(q) \\ddot{q} + C(q,@dot {q}) = \\tau`  
+
 .. note::  
 
-    Does not include gravity term G(q).  getGravityForces(g) will need
-    to be added to the result.  
+    Does not include gravity term G(q).  getGravityForces(g) will
+    need to be added to the result.  
 
 Returns:  
 
@@ -4401,13 +4435,11 @@ Examples::
 
 To get all vertices as a numpy array::  
 
-    verts = np.array(m.vertices).reshape((len(m.vertices)//3,3))  
+    verts = m.getVertices()  
 
 To get all indices as a numpy array::  
 
-    inds = np.array(m.indices,dtype=np.int32).reshape((len(m.indices)//3,3))  
-
-(Or use the convenience functions in :mod:`klampt.io.numpy_convert`)  
+    inds = m.getIndices()  
 
 C++ includes: geometry.h
 ";
@@ -4427,7 +4459,12 @@ Translates all the vertices by v=v+t.
 
 %feature("docstring") TriangleMesh::getIndices "
 
-Retrieves a view of the vertices as an mx3 Numpy array.  
+Retrieves an array view of the triangle indices.  
+
+Returns:  
+
+    ndarray: an mx3 Numpy array of int32 type. Setting elements of this
+    array will change the indices.  
 ";
 
 %feature("docstring") TriangleMesh::transform "
@@ -4437,7 +4474,12 @@ Transforms all the vertices by the rigid transform v=R*v+t.
 
 %feature("docstring") TriangleMesh::getVertices "
 
-Retrieves a view of the vertices as an nx3 Numpy array.  
+Retrieves an array view of the vertices.  
+
+Returns:  
+
+    ndarray: an nx3 Numpy array. Setting elements of this array will
+    change the vertices.  
 ";
 
 %feature("docstring") TriangleMesh::setIndices "
@@ -4502,6 +4544,8 @@ C++ includes: geometry.h
 ";
 
 %feature("docstring") VolumeGrid::get "
+
+Gets a specific element of a cell.  
 ";
 
 %feature("docstring") VolumeGrid::getValues "
@@ -4516,12 +4560,18 @@ Returns a 3D Numpy array view of the values.
 ";
 
 %feature("docstring") VolumeGrid::set "
+
+Sets all elements to a uniform value (e.g., 0)  
 ";
 
 %feature("docstring") VolumeGrid::set "
+
+Sets a specific element of a cell.  
 ";
 
 %feature("docstring") VolumeGrid::setValues "
+
+Sets the values to a 3D numpy array.  
 ";
 
 %feature("docstring") VolumeGrid::resize "

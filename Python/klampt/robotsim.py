@@ -25,7 +25,7 @@ except ImportError:
     import __builtin__
 
 from typing import Sequence,Tuple,Iterator
-from klampt.model.typing import IntArray,Vector,Vector3,Point,Rotation
+from klampt.model.typing import IntArray,Config,Vector,Vector3,Matrix3,Point,Rotation,RigidTransform
 
 
 def _swig_repr(self):
@@ -881,13 +881,11 @@ class TriangleMesh(object):
 
     To get all vertices as a numpy array::  
 
-        verts = np.array(m.vertices).reshape((len(m.vertices)//3,3))  
+        verts = m.getVertices()  
 
     To get all indices as a numpy array::  
 
-        inds = np.array(m.indices,dtype=np.int32).reshape((len(m.indices)//3,3))  
-
-    (Or use the convenience functions in :mod:`klampt.io.numpy_convert`)  
+        inds = m.getIndices()  
 
     C++ includes: geometry.h
 
@@ -903,7 +901,13 @@ class TriangleMesh(object):
 
     def getVertices(self) ->None:
         r"""
-        Retrieves a view of the vertices as an nx3 Numpy array.  
+        Retrieves an array view of the vertices.  
+
+
+        Returns:  
+
+            ndarray: an nx3 Numpy array. Setting elements of this array will
+            change the vertices.  
 
         """
         return _robotsim.TriangleMesh_getVertices(self)
@@ -919,7 +923,13 @@ class TriangleMesh(object):
 
     def getIndices(self) ->None:
         r"""
-        Retrieves a view of the vertices as an mx3 Numpy array.  
+        Retrieves an array view of the triangle indices.  
+
+
+        Returns:  
+
+            ndarray: an mx3 Numpy array of int32 type. Setting elements of this
+            array will change the indices.  
 
         """
         return _robotsim.TriangleMesh_getIndices(self)
@@ -998,7 +1008,13 @@ class ConvexHull(object):
 
     def getPoints(self) ->None:
         r"""
-        Retrieves a view of the points as an nx3 Numpy array.  
+        Retrieves a view of the points.  
+
+
+        Returns:  
+
+            ndarray: an nx3 Numpy array. Setting elements of this array will
+            change the points.  
 
         """
         return _robotsim.ConvexHull_getPoints(self)
@@ -1119,27 +1135,26 @@ class PointCloud(object):
         pc.vertices.append(0)
         pc.vertices.append(0)
         pc.properties.append(0)
-        print(len(pc.vertices))  #prints 3
-        print(pc.numPoints())  #prints 1
+        print(len(pc.vertices)) #prints 3
+        print(pc.numPoints())   #prints 1
         #add another point with coordinates (1,2,3)
         pc.addPoint([1,2,3])
         #this prints 2
         print(pc.numPoints() )
+        print(pc.getPoints())   #prints [[0,0,0],[1,2,3]]
         #this prints 2, because there is 1 property category x 2 points
-        print(len(pc.properties.size()))
+        print(pc.properties.size())
+        assert pc.propertyNames.size() == pc.getAllProperties().shape[1]
         #this prints 0; this is the default value added when addPoint is called
         print(pc.getProperty(1,0) )  
 
     To get all points as an n x 3 numpy array::  
 
-        points = np.array(pc.vertices).reshape((pc.numPoints(),3))  
+        points = pc.getPoints()  
 
     To get all properties as a n x k numpy array::  
 
-        properties = np.array(pc.properties)
-        properties.reshape((p.numPoints(),p.numProperties()))  
-
-    (Or use the convenience functions in :mod:`klampt.io.numpy_convert`)  
+        properties = pc.getAllProperties()  
 
     C++ includes: geometry.h
 
@@ -1169,7 +1184,13 @@ class PointCloud(object):
 
     def getPoints(self) ->None:
         r"""
-        Returns a view of the points as an nx3 Numpy array.  
+        Returns a view of the points.  
+
+
+        Returns:  
+
+            ndarray: an nx3 Numpy array. Setting elements of this array will
+            change the points.  
 
         """
         return _robotsim.PointCloud_getPoints(self)
@@ -1303,12 +1324,23 @@ class PointCloud(object):
         Args:
             pindex (int, optional): 
             pname (str, optional): 
+
+        Returns:  
+
+            ndarray: an n-D Numpy array.  
+
         """
         return _robotsim.PointCloud_getProperties(self, *args)
 
     def getAllProperties(self) ->None:
         r"""
-        Returns all the properties as an nxp array.  
+        Returns all the properties of all points as an array view.  
+
+
+        Returns:  
+
+            ndarray: an nxk Numpy array. Setting elements of this array will
+            change the vertices.  
 
         """
         return _robotsim.PointCloud_getAllProperties(self)
@@ -1732,6 +1764,8 @@ class VolumeGrid(object):
 
     def set(self, *args) ->None:
         r"""
+        Sets a specific element of a cell.  
+
         set (value)
 
         set (i,j,k,value)
@@ -1747,6 +1781,8 @@ class VolumeGrid(object):
 
     def get(self, i: int, j: int, k: int) ->float:
         r"""
+        Gets a specific element of a cell.  
+
         Args:
             i (int)
             j (int)
@@ -1770,6 +1806,8 @@ class VolumeGrid(object):
 
     def setValues(self, np_array3: Vector) ->None:
         r"""
+        Sets the values to a 3D numpy array.  
+
         Args:
             np_array3 (:obj:`3D Numpy array of floats`)
         """
@@ -2028,7 +2066,7 @@ class Geometry3D(object):
 
 
         Args:
-            arg2 (:class:`~klampt.GeometricPrimitive` or :class:`~klampt.TriangleMesh` or :class:`~klampt.VolumeGrid` or :class:`~klampt.ConvexHull` or :class:`~klampt.Geometry3D` or :class:`~klampt.PointCloud`, optional): 
+            arg2 (:class:`~klampt.VolumeGrid` or :class:`~klampt.TriangleMesh` or :class:`~klampt.ConvexHull` or :class:`~klampt.PointCloud` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.Geometry3D`, optional): 
         """
         _robotsim.Geometry3D_swiginit(self, _robotsim.new_Geometry3D(*args))
     __swig_destroy__ = _robotsim.delete_Geometry3D
@@ -5033,10 +5071,16 @@ class RobotModel(object):
         Args:
             ddq (:obj:`list of floats`)
 
+        Specifically, solves for :math:`\tau` in the (partial) dynamics equation:  
+
+        .. math::  
+
+            `B(q) \ddot{q} + C(q,@dot {q}) = \tau`  
+
         .. note::  
 
-            Does not include gravity term G(q).  getGravityForces(g) will need
-            to be added to the result.  
+            Does not include gravity term G(q).  getGravityForces(g) will
+            need to be added to the result.  
 
         Returns:  
 
@@ -5048,15 +5092,22 @@ class RobotModel(object):
 
     def accelFromTorques(self, t: Vector) ->None:
         r"""
-        Computes the foward dynamics (using Recursive Newton Euler solver)  
+        Computes the foward dynamics. Uses Recursive Newton Euler solver and takes O(n)
+        time.  
 
         Args:
             t (:obj:`list of floats`)
 
+        Specifically, solves for :math:`\ddot{q}` in the (partial) dynamics equation:  
+
+        .. math::  
+
+            `B(q) \ddot{q} + C(q,@dot {q}) = \tau`  
+
         .. note::  
 
-            Does not include gravity term G(q).  getGravityForces(g) will need
-            to be subtracted from the argument t.  
+            Does not include gravity term G(q).  getGravityForces(g) will
+            need to be subtracted from the argument t.  
 
         Returns:  
 
@@ -5078,8 +5129,7 @@ class RobotModel(object):
 
         Returns:  
 
-            list of floats: The n-element configuration that is u fraction of
-            the way from a to b  
+            The n-element configuration that is u fraction of the way from a to b.  
 
         """
         return _robotsim.RobotModel_interpolate(self, a, b, u)
@@ -5438,7 +5488,7 @@ class RigidObjectModel(object):
 
         Returns:  
 
-            tuple: a pair of 3-lists (w,v) where w is the angular velocity
+            A pair of 3-lists (w,v) where w is the angular velocity
             vector and v is the translational velocity vector (both in world
             coordinates)  
 
@@ -5759,7 +5809,7 @@ class WorldModel(object):
 
 
         Args:
-            robot (str or int): 
+            robot (int or str): 
             index (int, optional): 
             name (str, optional): 
 
@@ -5896,7 +5946,7 @@ class WorldModel(object):
             terrain (:class:`~klampt.TerrainModel`, optional): 
 
         Returns:
-            (:class:`~klampt.RobotModel` or :class:`~klampt.TerrainModel` or :class:`~klampt.RigidObjectModel`):
+            (:class:`~klampt.TerrainModel` or :class:`~klampt.RigidObjectModel` or :class:`~klampt.RobotModel`):
         """
         return _robotsim.WorldModel_add(self, *args)
 
