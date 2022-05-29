@@ -932,6 +932,7 @@ def cartesian_bump(
                     solver.setJointLimits(qmin0,qmax0)
                     return None
             else:
+                solver.minimize()  #make sure to properly minimize the residual rather than relying on solve()
                 closeIntervals.add(i)
                 #otherwise soldier on with an imperfect solution
         else:

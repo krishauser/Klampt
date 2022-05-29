@@ -50628,6 +50628,102 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_IKSolver_addSecondary(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  IKSolver *arg1 = (IKSolver *) 0 ;
+  IKObjective *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "IKSolver_addSecondary", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_IKSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKSolver_addSecondary" "', argument " "1"" of type '" "IKSolver *""'"); 
+  }
+  arg1 = reinterpret_cast< IKSolver * >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2, SWIGTYPE_p_IKObjective,  0  | 0);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "IKSolver_addSecondary" "', argument " "2"" of type '" "IKObjective const &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "IKSolver_addSecondary" "', argument " "2"" of type '" "IKObjective const &""'"); 
+  }
+  arg2 = reinterpret_cast< IKObjective * >(argp2);
+  {
+    try {
+      (arg1)->addSecondary((IKObjective const &)*arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IKSolver_setSecondary(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  IKSolver *arg1 = (IKSolver *) 0 ;
+  int arg2 ;
+  IKObjective *arg3 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  PyObject *swig_obj[3] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "IKSolver_setSecondary", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_IKSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKSolver_setSecondary" "', argument " "1"" of type '" "IKSolver *""'"); 
+  }
+  arg1 = reinterpret_cast< IKSolver * >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IKSolver_setSecondary" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3, SWIGTYPE_p_IKObjective,  0  | 0);
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "IKSolver_setSecondary" "', argument " "3"" of type '" "IKObjective const &""'"); 
+  }
+  if (!argp3) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "IKSolver_setSecondary" "', argument " "3"" of type '" "IKObjective const &""'"); 
+  }
+  arg3 = reinterpret_cast< IKObjective * >(argp3);
+  {
+    try {
+      (arg1)->setSecondary(arg2,(IKObjective const &)*arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_IKSolver_clear(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   IKSolver *arg1 = (IKSolver *) 0 ;
@@ -51332,6 +51428,64 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_IKSolver_getSecondaryResidual(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  IKSolver *arg1 = (IKSolver *) 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::vector< double > temp2 ;
+  PyObject *swig_obj[1] ;
+  
+  {
+    arg2 = &temp2;
+  }
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_IKSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKSolver_getSecondaryResidual" "', argument " "1"" of type '" "IKSolver *""'"); 
+  }
+  arg1 = reinterpret_cast< IKSolver * >(argp1);
+  {
+    try {
+      (arg1)->getSecondaryResidual(*arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(&(*arg2)[0],(int)arg2->size());
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_IKSolver_solve(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   IKSolver *arg1 = (IKSolver *) 0 ;
@@ -51364,6 +51518,118 @@ SWIGINTERN PyObject *_wrap_IKSolver_solve(PyObject *SWIGUNUSEDPARM(self), PyObje
   return resultobj;
 fail:
   return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IKSolver_minimize__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  IKSolver *arg1 = (IKSolver *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  bool result;
+  
+  if ((nobjs < 1) || (nobjs > 1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_IKSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKSolver_minimize" "', argument " "1"" of type '" "IKSolver *""'"); 
+  }
+  arg1 = reinterpret_cast< IKSolver * >(argp1);
+  {
+    try {
+      result = (bool)(arg1)->minimize();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IKSolver_minimize__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  IKSolver *arg1 = (IKSolver *) 0 ;
+  PyObject *arg2 = (PyObject *) 0 ;
+  PyObject *arg3 = (PyObject *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  bool result;
+  
+  if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_IKSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKSolver_minimize" "', argument " "1"" of type '" "IKSolver *""'"); 
+  }
+  arg1 = reinterpret_cast< IKSolver * >(argp1);
+  arg2 = swig_obj[1];
+  arg3 = swig_obj[2];
+  {
+    try {
+      result = (bool)(arg1)->minimize(arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IKSolver_minimize(PyObject *self, PyObject *args) {
+  Py_ssize_t argc;
+  PyObject *argv[4] = {
+    0
+  };
+  
+  if (!(argc = SWIG_Python_UnpackTuple(args, "IKSolver_minimize", 0, 3, argv))) SWIG_fail;
+  --argc;
+  if (argc == 1) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_IKSolver, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      return _wrap_IKSolver_minimize__SWIG_0(self, argc, argv);
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_IKSolver, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      _v = (argv[1] != 0);
+      if (_v) {
+        _v = (argv[2] != 0);
+        if (_v) {
+          return _wrap_IKSolver_minimize__SWIG_1(self, argc, argv);
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'IKSolver_minimize'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    IKSolver::minimize()\n"
+    "    IKSolver::minimize(PyObject *,PyObject *)\n");
+  return 0;
 }
 
 
@@ -51533,6 +51799,58 @@ SWIGINTERN PyObject *_wrap_IKSolver_objectives_get(PyObject *SWIGUNUSEDPARM(self
   }
   arg1 = reinterpret_cast< IKSolver * >(argp1);
   result = (std::vector< IKObjective,std::allocator< IKObjective > > *)& ((arg1)->objectives);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_IKObjective_std__allocatorT_IKObjective_t_t, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IKSolver_secondary_objectives_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  IKSolver *arg1 = (IKSolver *) 0 ;
+  std::vector< IKObjective,std::allocator< IKObjective > > *arg2 = (std::vector< IKObjective,std::allocator< IKObjective > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "IKSolver_secondary_objectives_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_IKSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKSolver_secondary_objectives_set" "', argument " "1"" of type '" "IKSolver *""'"); 
+  }
+  arg1 = reinterpret_cast< IKSolver * >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_std__vectorT_IKObjective_std__allocatorT_IKObjective_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "IKSolver_secondary_objectives_set" "', argument " "2"" of type '" "std::vector< IKObjective,std::allocator< IKObjective > > *""'"); 
+  }
+  arg2 = reinterpret_cast< std::vector< IKObjective,std::allocator< IKObjective > > * >(argp2);
+  if (arg1) (arg1)->secondary_objectives = *arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IKSolver_secondary_objectives_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  IKSolver *arg1 = (IKSolver *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  std::vector< IKObjective,std::allocator< IKObjective > > *result = 0 ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_IKSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKSolver_secondary_objectives_get" "', argument " "1"" of type '" "IKSolver *""'"); 
+  }
+  arg1 = reinterpret_cast< IKSolver * >(argp1);
+  result = (std::vector< IKObjective,std::allocator< IKObjective > > *)& ((arg1)->secondary_objectives);
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_IKObjective_std__allocatorT_IKObjective_t_t, 0 |  0 );
   return resultobj;
 fail:
@@ -68054,6 +68372,20 @@ static PyMethodDef SwigMethods[] = {
 		"Assigns an existing objective added by add.  \n"
 		"\n"
 		""},
+	 { "IKSolver_addSecondary", _wrap_IKSolver_addSecondary, METH_VARARGS, "\n"
+		"IKSolver_addSecondary(IKSolver self, IKObjective objective)\n"
+		"\n"
+		"\n"
+		"Adds a new objective to the secondary objectives list.  \n"
+		"\n"
+		""},
+	 { "IKSolver_setSecondary", _wrap_IKSolver_setSecondary, METH_VARARGS, "\n"
+		"IKSolver_setSecondary(IKSolver self, int i, IKObjective objective)\n"
+		"\n"
+		"\n"
+		"Assigns an existing objective added by addsecondary.  \n"
+		"\n"
+		""},
 	 { "IKSolver_clear", _wrap_IKSolver_clear, METH_O, "\n"
 		"IKSolver_clear(IKSolver self)\n"
 		"\n"
@@ -68156,6 +68488,14 @@ static PyMethodDef SwigMethods[] = {
 		"with respect to the active Dofs.  \n"
 		"\n"
 		""},
+	 { "IKSolver_getSecondaryResidual", _wrap_IKSolver_getSecondaryResidual, METH_O, "\n"
+		"IKSolver_getSecondaryResidual(IKSolver self)\n"
+		"\n"
+		"\n"
+		"Returns the vector describing the error of the secondary objective at the\n"
+		"current configuration.  \n"
+		"\n"
+		""},
 	 { "IKSolver_solve", _wrap_IKSolver_solve, METH_O, "\n"
 		"IKSolver_solve(IKSolver self) -> bool\n"
 		"\n"
@@ -68163,16 +68503,46 @@ static PyMethodDef SwigMethods[] = {
 		"Tries to find a configuration that satifies all simultaneous objectives up to\n"
 		"the desired tolerance.  \n"
 		"\n"
+		"All of the primary and the secondary objectives are solved simultaneously.  \n"
+		"\n"
 		"Returns:  \n"
 		"\n"
 		"    True if x converged.  \n"
+		"\n"
+		""},
+	 { "IKSolver_minimize", _wrap_IKSolver_minimize, METH_VARARGS, "\n"
+		"IKSolver_minimize(IKSolver self) -> bool\n"
+		"IKSolver_minimize(IKSolver self, PyObject * secondary_objective, PyObject * secondary_objective_grad) -> bool\n"
+		"\n"
+		"\n"
+		"Tries to find a configuration that satifies all simultaneous objectives up to\n"
+		"the desired tolerance. Amongst configurations on the solution manifold, this\n"
+		"tries to minimize the secondary objective function. The gradient must also be\n"
+		"given.  \n"
+		"\n"
+		"The user provides a pair of functions `(f,grad)` with `f(q)` the secondary\n"
+		"objective to minimize and `grad(q)` its gradient. Here q is a function of all\n"
+		"robot DOFs, and `grad(q)` should return a list or tuple of length `len(q)``.\n"
+		"Note, however, that the minimization will occur only over the current active\n"
+		"DOFS.  \n"
+		"\n"
+		"This overrides the secondary objectives specified in `addSecondary`.  \n"
+		"\n"
+		"Arguments: secondary_objective (callable): a function `f(q)->float` that should\n"
+		"be minimized. secondary_objective_grad (callable): a function\n"
+		"`grad(q)->`sequence of length `len(q)` giving the gradient of `f` at `q`.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    True if x converged on the primary objectives.  \n"
 		"\n"
 		""},
 	 { "IKSolver_lastSolveIters", _wrap_IKSolver_lastSolveIters, METH_O, "\n"
 		"IKSolver_lastSolveIters(IKSolver self) -> int\n"
 		"\n"
 		"\n"
-		"Returns the number of Newton-Raphson iterations used in the last solve() call.  \n"
+		"Returns the number of Newton-Raphson iterations used in the last solve() call or\n"
+		"the number of Quasi-Newton iterations used in the last minimize() call.  \n"
 		"\n"
 		""},
 	 { "IKSolver_sampleInitial", _wrap_IKSolver_sampleInitial, METH_O, "\n"
@@ -68187,6 +68557,8 @@ static PyMethodDef SwigMethods[] = {
 	 { "IKSolver_robot_get", _wrap_IKSolver_robot_get, METH_O, "IKSolver_robot_get(IKSolver self) -> RobotModel"},
 	 { "IKSolver_objectives_set", _wrap_IKSolver_objectives_set, METH_VARARGS, "IKSolver_objectives_set(IKSolver self, std::vector< IKObjective,std::allocator< IKObjective > > * objectives)"},
 	 { "IKSolver_objectives_get", _wrap_IKSolver_objectives_get, METH_O, "IKSolver_objectives_get(IKSolver self) -> std::vector< IKObjective,std::allocator< IKObjective > > *"},
+	 { "IKSolver_secondary_objectives_set", _wrap_IKSolver_secondary_objectives_set, METH_VARARGS, "IKSolver_secondary_objectives_set(IKSolver self, std::vector< IKObjective,std::allocator< IKObjective > > * secondary_objectives)"},
+	 { "IKSolver_secondary_objectives_get", _wrap_IKSolver_secondary_objectives_get, METH_O, "IKSolver_secondary_objectives_get(IKSolver self) -> std::vector< IKObjective,std::allocator< IKObjective > > *"},
 	 { "IKSolver_tol_set", _wrap_IKSolver_tol_set, METH_VARARGS, "IKSolver_tol_set(IKSolver self, double tol)"},
 	 { "IKSolver_tol_get", _wrap_IKSolver_tol_get, METH_O, "IKSolver_tol_get(IKSolver self) -> double"},
 	 { "IKSolver_maxIters_set", _wrap_IKSolver_maxIters_set, METH_VARARGS, "IKSolver_maxIters_set(IKSolver self, int maxIters)"},

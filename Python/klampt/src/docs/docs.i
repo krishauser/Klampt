@@ -1628,67 +1628,44 @@ Typical calling pattern is::
 C++ includes: robotik.h
 ";
 
+%feature("docstring") IKSolver::getSecondaryResidual "
+
+Returns the vector describing the error of the secondary objective at the
+current configuration.  
+";
+
+%feature("docstring") IKSolver::IKSolver "
+
+Initializes an IK solver. Given a RobotModel, an empty solver is created. Given
+an IK solver, acts as a copy constructor.  
+";
+
+%feature("docstring") IKSolver::IKSolver "
+
+Initializes an IK solver. Given a RobotModel, an empty solver is created. Given
+an IK solver, acts as a copy constructor.  
+";
+
+%feature("docstring") IKSolver::clear "
+
+Clears objectives.  
+";
+
+%feature("docstring") IKSolver::setBiasConfig "
+
+Biases the solver to approach a given configuration. Setting an empty vector
+clears the bias term.  
+";
+
 %feature("docstring") IKSolver::copy "
 
 Copy constructor.  
 ";
 
-%feature("docstring") IKSolver::setMaxIters "
+%feature("docstring") IKSolver::getJacobian "
 
-Sets the max # of iterations (default 100)  
-";
-
-%feature("docstring") IKSolver::IKSolver "
-
-Initializes an IK solver. Given a RobotModel, an empty solver is created. Given
-an IK solver, acts as a copy constructor.  
-";
-
-%feature("docstring") IKSolver::IKSolver "
-
-Initializes an IK solver. Given a RobotModel, an empty solver is created. Given
-an IK solver, acts as a copy constructor.  
-";
-
-%feature("docstring") IKSolver::getMaxIters "
-
-Returns the max # of iterations.  
-";
-
-%feature("docstring") IKSolver::set "
-
-Assigns an existing objective added by add.  
-";
-
-%feature("docstring") IKSolver::getJointLimits "
-
-Returns the limits on the robot's configuration (by default this is the robot's
-joint limits.  
-";
-
-%feature("docstring") IKSolver::getActiveDofs "
-
-Returns the active degrees of freedom.  
-";
-
-%feature("docstring") IKSolver::solve "
-
-Tries to find a configuration that satifies all simultaneous objectives up to
-the desired tolerance.  
-
-Returns:  
-
-    True if x converged.  
-";
-
-%feature("docstring") IKSolver::lastSolveIters "
-
-Returns the number of Newton-Raphson iterations used in the last solve() call.  
-";
-
-%feature("docstring") IKSolver::isSolved "
-
-Returns True if the current configuration residual is less than tol.  
+Computes the matrix describing the instantaneous derivative of the objective
+with respect to the active Dofs.  
 ";
 
 %feature("docstring") IKSolver::setTolerance "
@@ -1696,9 +1673,103 @@ Returns True if the current configuration residual is less than tol.
 Sets the constraint solve tolerance (default 1e-3)  
 ";
 
+%feature("docstring") IKSolver::solve "
+
+Tries to find a configuration that satifies all simultaneous objectives up to
+the desired tolerance.  
+
+All of the primary and the secondary objectives are solved simultaneously.  
+
+Returns:  
+
+    True if x converged.  
+";
+
+%feature("docstring") IKSolver::set "
+
+Assigns an existing objective added by add.  
+";
+
+%feature("docstring") IKSolver::setSecondary "
+
+Assigns an existing objective added by addsecondary.  
+";
+
+%feature("docstring") IKSolver::addSecondary "
+
+Adds a new objective to the secondary objectives list.  
+";
+
 %feature("docstring") IKSolver::add "
 
 Adds a new simultaneous objective.  
+";
+
+%feature("docstring") IKSolver::getActiveDofs "
+
+Returns the active degrees of freedom.  
+";
+
+%feature("docstring") IKSolver::getResidual "
+
+Returns the vector describing the error of the objective at the current
+configuration.  
+";
+
+%feature("docstring") IKSolver::setJointLimits "
+
+Sets limits on the robot's configuration. If empty, this turns off joint limits.  
+";
+
+%feature("docstring") IKSolver::setMaxIters "
+
+Sets the max # of iterations (default 100)  
+";
+
+%feature("docstring") IKSolver::minimize "
+
+Tries to find a configuration that satifies all simultaneous objectives up to
+the desired tolerance, or minimizes the residual if they cannot be met.  
+
+If secondary objectives are specified, this tries to minimize them once the
+primary objectives are satisfied.  
+
+The relation to `:func:solve` is that `solve` uses a root-finding method that
+tries indirectly to minimize the residual, but it may stall out when the
+objectives are infeasible.  
+
+Returns:  
+
+    True if x converged on the primary objectives.  
+";
+
+%feature("docstring") IKSolver::minimize "
+
+Tries to find a configuration that satifies all simultaneous objectives up to
+the desired tolerance. Amongst configurations on the solution manifold, this
+tries to minimize the secondary objective function. The gradient must also be
+given.  
+
+The user provides a pair of functions `(f,grad)` with `f(q)` the secondary
+objective to minimize and `grad(q)` its gradient. Here q is a function of all
+robot DOFs, and `grad(q)` should return a list or tuple of length `len(q)``.
+Note, however, that the minimization will occur only over the current active
+DOFS.  
+
+This overrides the secondary objectives specified in `addSecondary`.  
+
+Arguments: secondary_objective (callable): a function `f(q)->float` that should
+be minimized. secondary_objective_grad (callable): a function
+`grad(q)->`sequence of length `len(q)` giving the gradient of `f` at `q`.  
+
+Returns:  
+
+    True if x converged on the primary objectives.  
+";
+
+%feature("docstring") IKSolver::getMaxIters "
+
+Returns the max # of iterations.  
 ";
 
 %feature("docstring") IKSolver::getTolerance "
@@ -1706,9 +1777,21 @@ Adds a new simultaneous objective.
 Returns the constraint solve tolerance.  
 ";
 
-%feature("docstring") IKSolver::setJointLimits "
+%feature("docstring") IKSolver::lastSolveIters "
 
-Sets limits on the robot's configuration. If empty, this turns off joint limits.  
+Returns the number of Newton-Raphson iterations used in the last solve() call or
+the number of Quasi-Newton iterations used in the last minimize() call.  
+";
+
+%feature("docstring") IKSolver::isSolved "
+
+Returns True if the current configuration residual is less than tol.  
+";
+
+%feature("docstring") IKSolver::getJointLimits "
+
+Returns the limits on the robot's configuration (by default this is the robot's
+joint limits.  
 ";
 
 %feature("docstring") IKSolver::getBiasConfig "
@@ -1722,32 +1805,9 @@ Samples an initial random configuration. More initial configurations can be
 sampled in case the prior configs lead to local minima.  
 ";
 
-%feature("docstring") IKSolver::clear "
-
-Clears objectives.  
-";
-
 %feature("docstring") IKSolver::setActiveDofs "
 
 Sets the active degrees of freedom.  
-";
-
-%feature("docstring") IKSolver::setBiasConfig "
-
-Biases the solver to approach a given configuration. Setting an empty vector
-clears the bias term.  
-";
-
-%feature("docstring") IKSolver::getJacobian "
-
-Computes the matrix describing the instantaneous derivative of the objective
-with respect to the active Dofs.  
-";
-
-%feature("docstring") IKSolver::getResidual "
-
-Returns the vector describing the error of the objective at the current
-configuration.  
 ";
 
 // File: classMass.xml

@@ -2028,7 +2028,7 @@ class Geometry3D(object):
 
 
         Args:
-            arg2 (:class:`~klampt.GeometricPrimitive` or :class:`~klampt.TriangleMesh` or :class:`~klampt.VolumeGrid` or :class:`~klampt.ConvexHull` or :class:`~klampt.Geometry3D` or :class:`~klampt.PointCloud`, optional): 
+            arg2 (:class:`~klampt.VolumeGrid` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.TriangleMesh` or :class:`~klampt.ConvexHull` or :class:`~klampt.PointCloud` or :class:`~klampt.Geometry3D`, optional): 
         """
         _robotsim.Geometry3D_swiginit(self, _robotsim.new_Geometry3D(*args))
     __swig_destroy__ = _robotsim.delete_Geometry3D
@@ -5896,7 +5896,7 @@ class WorldModel(object):
             terrain (:class:`~klampt.TerrainModel`, optional): 
 
         Returns:
-            (:class:`~klampt.RobotModel` or :class:`~klampt.TerrainModel` or :class:`~klampt.RigidObjectModel`):
+            (:class:`~klampt.RigidObjectModel` or :class:`~klampt.TerrainModel` or :class:`~klampt.RobotModel`):
         """
         return _robotsim.WorldModel_add(self, *args)
 
@@ -6403,6 +6403,25 @@ class IKSolver(object):
         """
         return _robotsim.IKSolver_set(self, i, objective)
 
+    def addSecondary(self, objective:  "IKObjective") ->None:
+        r"""
+        Adds a new objective to the secondary objectives list.  
+
+        Args:
+            objective (:class:`~klampt.IKObjective`)
+        """
+        return _robotsim.IKSolver_addSecondary(self, objective)
+
+    def setSecondary(self, i: int, objective:  "IKObjective") ->None:
+        r"""
+        Assigns an existing objective added by addsecondary.  
+
+        Args:
+            i (int)
+            objective (:class:`~klampt.IKObjective`)
+        """
+        return _robotsim.IKSolver_setSecondary(self, i, objective)
+
     def clear(self) ->None:
         r"""
         Clears objectives.  
@@ -6516,11 +6535,21 @@ class IKSolver(object):
         """
         return _robotsim.IKSolver_getJacobian(self)
 
+    def getSecondaryResidual(self) ->None:
+        r"""
+        Returns the vector describing the error of the secondary objective at the
+        current configuration.  
+
+        """
+        return _robotsim.IKSolver_getSecondaryResidual(self)
+
     def solve(self) ->bool:
         r"""
         Tries to find a configuration that satifies all simultaneous objectives up to
         the desired tolerance.  
 
+
+        All of the primary and the secondary objectives are solved simultaneously.  
 
         Returns:  
 
@@ -6529,9 +6558,45 @@ class IKSolver(object):
         """
         return _robotsim.IKSolver_solve(self)
 
+    def minimize(self, *args) ->bool:
+        r"""
+        Tries to find a configuration that satifies all simultaneous objectives up to
+        the desired tolerance. Amongst configurations on the solution manifold, this
+        tries to minimize the secondary objective function. The gradient must also be
+        given.  
+
+        minimize (): bool
+
+        minimize (secondary_objective,secondary_objective_grad): bool
+
+
+        Args:
+            secondary_objective (:obj:`object`, optional): 
+            secondary_objective_grad (:obj:`object`, optional): 
+
+        The user provides a pair of functions `(f,grad)` with `f(q)` the secondary
+        objective to minimize and `grad(q)` its gradient. Here q is a function of all
+        robot DOFs, and `grad(q)` should return a list or tuple of length `len(q)``.
+        Note, however, that the minimization will occur only over the current active
+        DOFS.  
+
+        This overrides the secondary objectives specified in `addSecondary`.  
+
+        Arguments: secondary_objective (callable): a function `f(q)->float` that should
+        be minimized. secondary_objective_grad (callable): a function
+        `grad(q)->`sequence of length `len(q)` giving the gradient of `f` at `q`.  
+
+        Returns:  
+
+            True if x converged on the primary objectives.  
+
+        """
+        return _robotsim.IKSolver_minimize(self, *args)
+
     def lastSolveIters(self) ->int:
         r"""
-        Returns the number of Newton-Raphson iterations used in the last solve() call.  
+        Returns the number of Newton-Raphson iterations used in the last solve() call or
+        the number of Quasi-Newton iterations used in the last minimize() call.  
 
         """
         return _robotsim.IKSolver_lastSolveIters(self)
@@ -6545,6 +6610,7 @@ class IKSolver(object):
         return _robotsim.IKSolver_sampleInitial(self)
     robot = property(_robotsim.IKSolver_robot_get, _robotsim.IKSolver_robot_set, doc=r"""robot : RobotModel""")
     objectives = property(_robotsim.IKSolver_objectives_get, _robotsim.IKSolver_objectives_set, doc=r"""objectives : std::vector<(IKObjective,std::allocator<(IKObjective)>)>""")
+    secondary_objectives = property(_robotsim.IKSolver_secondary_objectives_get, _robotsim.IKSolver_secondary_objectives_set, doc=r"""secondary_objectives : std::vector<(IKObjective,std::allocator<(IKObjective)>)>""")
     tol = property(_robotsim.IKSolver_tol_get, _robotsim.IKSolver_tol_set, doc=r"""tol : double""")
     maxIters = property(_robotsim.IKSolver_maxIters_get, _robotsim.IKSolver_maxIters_set, doc=r"""maxIters : int""")
     activeDofs = property(_robotsim.IKSolver_activeDofs_get, _robotsim.IKSolver_activeDofs_set, doc=r"""activeDofs : std::vector<(int,std::allocator<(int)>)>""")
@@ -6598,7 +6664,7 @@ class GeneralizedIKObjective(object):
 
 
         Args:
-            obj (:obj:`GeneralizedIKObjective` or :class:`~klampt.RigidObjectModel`, optional): 
+            obj (:class:`~klampt.RigidObjectModel` or :obj:`GeneralizedIKObjective`, optional): 
             link (:class:`~klampt.RobotModelLink`, optional): 
             link2 (:class:`~klampt.RobotModelLink`, optional): 
             obj2 (:class:`~klampt.RigidObjectModel`, optional): 
@@ -8050,7 +8116,7 @@ class Simulator(object):
 
 
         Args:
-            robot (:class:`~klampt.RobotModel` or int): 
+            robot (int or :class:`~klampt.RobotModel`): 
 
         Returns:
             :class:`~klampt.SimRobotController`:

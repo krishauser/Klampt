@@ -6696,6 +6696,26 @@ class IKSolver(object):
         """
         return _robotsim.IKSolver_set(self, i, objective)
 
+    def addSecondary(self, objective: "IKObjective") -> "void":
+        r"""
+        addSecondary(IKSolver self, IKObjective objective)
+
+
+        Adds a new objective to the secondary objectives list.  
+
+        """
+        return _robotsim.IKSolver_addSecondary(self, objective)
+
+    def setSecondary(self, i: "int", objective: "IKObjective") -> "void":
+        r"""
+        setSecondary(IKSolver self, int i, IKObjective objective)
+
+
+        Assigns an existing objective added by addsecondary.  
+
+        """
+        return _robotsim.IKSolver_setSecondary(self, i, objective)
+
     def clear(self) -> "void":
         r"""
         clear(IKSolver self)
@@ -6840,6 +6860,17 @@ class IKSolver(object):
         """
         return _robotsim.IKSolver_getJacobian(self)
 
+    def getSecondaryResidual(self) -> "void":
+        r"""
+        getSecondaryResidual(IKSolver self)
+
+
+        Returns the vector describing the error of the secondary objective at the
+        current configuration.  
+
+        """
+        return _robotsim.IKSolver_getSecondaryResidual(self)
+
     def solve(self) -> "bool":
         r"""
         solve(IKSolver self) -> bool
@@ -6848,6 +6879,8 @@ class IKSolver(object):
         Tries to find a configuration that satifies all simultaneous objectives up to
         the desired tolerance.  
 
+        All of the primary and the secondary objectives are solved simultaneously.  
+
         Returns:  
 
             True if x converged.  
@@ -6855,12 +6888,43 @@ class IKSolver(object):
         """
         return _robotsim.IKSolver_solve(self)
 
+    def minimize(self, *args) -> "bool":
+        r"""
+        minimize(IKSolver self) -> bool
+        minimize(IKSolver self, PyObject * secondary_objective, PyObject * secondary_objective_grad) -> bool
+
+
+        Tries to find a configuration that satifies all simultaneous objectives up to
+        the desired tolerance. Amongst configurations on the solution manifold, this
+        tries to minimize the secondary objective function. The gradient must also be
+        given.  
+
+        The user provides a pair of functions `(f,grad)` with `f(q)` the secondary
+        objective to minimize and `grad(q)` its gradient. Here q is a function of all
+        robot DOFs, and `grad(q)` should return a list or tuple of length `len(q)``.
+        Note, however, that the minimization will occur only over the current active
+        DOFS.  
+
+        This overrides the secondary objectives specified in `addSecondary`.  
+
+        Arguments: secondary_objective (callable): a function `f(q)->float` that should
+        be minimized. secondary_objective_grad (callable): a function
+        `grad(q)->`sequence of length `len(q)` giving the gradient of `f` at `q`.  
+
+        Returns:  
+
+            True if x converged on the primary objectives.  
+
+        """
+        return _robotsim.IKSolver_minimize(self, *args)
+
     def lastSolveIters(self) -> "int":
         r"""
         lastSolveIters(IKSolver self) -> int
 
 
-        Returns the number of Newton-Raphson iterations used in the last solve() call.  
+        Returns the number of Newton-Raphson iterations used in the last solve() call or
+        the number of Quasi-Newton iterations used in the last minimize() call.  
 
         """
         return _robotsim.IKSolver_lastSolveIters(self)
@@ -6877,6 +6941,7 @@ class IKSolver(object):
         return _robotsim.IKSolver_sampleInitial(self)
     robot = property(_robotsim.IKSolver_robot_get, _robotsim.IKSolver_robot_set, doc=r"""robot : RobotModel""")
     objectives = property(_robotsim.IKSolver_objectives_get, _robotsim.IKSolver_objectives_set, doc=r"""objectives : std::vector<(IKObjective,std::allocator<(IKObjective)>)>""")
+    secondary_objectives = property(_robotsim.IKSolver_secondary_objectives_get, _robotsim.IKSolver_secondary_objectives_set, doc=r"""secondary_objectives : std::vector<(IKObjective,std::allocator<(IKObjective)>)>""")
     tol = property(_robotsim.IKSolver_tol_get, _robotsim.IKSolver_tol_set, doc=r"""tol : double""")
     maxIters = property(_robotsim.IKSolver_maxIters_get, _robotsim.IKSolver_maxIters_set, doc=r"""maxIters : int""")
     activeDofs = property(_robotsim.IKSolver_activeDofs_get, _robotsim.IKSolver_activeDofs_set, doc=r"""activeDofs : std::vector<(int,std::allocator<(int)>)>""")

@@ -395,7 +395,8 @@ class SubRobotIKSolver(IKSolver):
 def solver(
         objectives: Union[IKObjective,Sequence[IKObjective]],
         iters: Optional[int] = None,
-        tol: Optional[float] = None
+        tol: Optional[float] = None,
+        secondary : Optional[Union[IKObjective,Sequence[IKObjective],Tuple[Callable,Callable]]] = None,
     ) -> IKSolver:
     """Returns a solver for the given objective(s). 
 
@@ -415,6 +416,10 @@ def solver(
         tol (float, optional): if given, the constraint solving tolerance for
             the solver is set to this value.  Otherwise, the default value
             (1e-3) is used.
+        
+        secondary (IKObjective or list of IKObjective, optional): if given,
+            tries to optimize a secondary objective.  Make sure to use
+            ``solver.minimize()`` rather than ``solver.solve()``
 
     .. note::
         In rare cases, this may return a list of IKSolver's if you give
@@ -422,6 +427,7 @@ def solver(
         independently for efficiency.
 
     """
+    result = None
     if hasattr(objectives,'__iter__'):
         generalized = []
         robs = dict()
@@ -443,62 +449,61 @@ def solver(
                 world = WorldModel(generalized[0].obj1.world)
             else:
                 world = WorldModel(generalized[0].link1.world)
-            s = GeneralizedIKSolver(world)
-            if iters is not None: s.setMaxIters(iters)
-            if tol is not None: s.setTolerance(tol)
-            for obj in generalized:
-                s.add(obj)
-            for (key,(r,objs)) in robs.items():
-                for obj in objs:
-                    s.add(GeneralizedIKObjective(r,obj))
-            return s
+            result = GeneralizedIKSolver(world)
         else:
-            res = []
+            result = []
             for key,(r,objs) in robs.items():
                 if isinstance(r,SubRobotModel):
                     s = SubRobotIKSolver(r)
                 else:
                     s = IKSolver(r)
-                if iters is not None: s.setMaxIters(iters)
-                if tol is not None: s.setTolerance(tol)
                 for obj in objs:
                     s.add(obj)
-                res.append(s)
-            if len(res)==1:
-                return res[0]
-            return res
+                result.append(s)
     else:
         if isinstance(objectives,IKObjective):
             if not hasattr(objectives,'robot'):
                 raise ValueError("IKObjective object must have 'robot' member for use in ik.solver. Either set this manually or use the ik.objective function")
             if isinstance(objectives.robot,SubRobotModel):
                 r = objectives.robot
-                s = SubRobotIKSolver(r)
+                result = SubRobotIKSolver(r)
             else:
-                s = IKSolver(objectives.robot)
-            if iters is not None: s.setMaxIters(iters)
-            if tol is not None: s.setTolerance(tol)
-            s.add(objectives)
-            return s
+                result = IKSolver(objectives.robot)
+            result.add(objectives)
         elif isinstance(objectives,GeneralizedIKObjective):
             world = None
             if objectives.isObj1:
                 world = WorldModel(objectives.obj1.world)
             else:
                 world = WorldModel(objectives.link1.world)
-            s = GeneralizedIKSolver(world)
-            if iters is not None: s.setMaxIters(iters)
-            if tol is not None: s.setTolerance(tol)
-            s.add(objectives)
-            return s
+            result = GeneralizedIKSolver(world)
+            result.add(objectives)
         else:
             raise TypeError("Objective is of wrong type")
+    
+    if not isinstance(result,list):
+        result = [result]
+    if secondary is not None:
+        #add secondary objectives
+        if not hasattr(secondary,'__iter__'):
+            secondary = [secondary]
+        for s in result:        
+            for o in secondary:
+                s.addSecondary(o)
+    for s in result:
+        if iters is not None: s.setMaxIters(iters)
+        if tol is not None: s.setTolerance(tol)
+    if len(result)==1:
+        return result[0]
+    return result
+
 
 def solve(
         objectives: Union[IKObjective,Sequence[IKObjective]],
         iters: int = 1000,
         tol: float = 1e-3,
-        activeDofs: Optional[List[int]] = None
+        activeDofs: Optional[List[int]] = None,
+        secondary: Optional[Union[IKObjective,Sequence[IKObjective],Tuple[Callable,Callable]]]=None
     ) -> bool:
     """Attempts to solve the given objective(s). Either a single objective
     or a list of simultaneous objectives can be provided.
@@ -506,9 +511,13 @@ def solve(
     Args:
         objectives: either a single IKObjective or a list of IKObjectives.
         iters (int, optional): a maximum number of iterations.
-        tol (float, optional): a maximum error tolerance on satisfying the objectives
-        activeDofs (list, optional): a list of link indices or names to use for IK
-            solving.  By default, will determine these automatically.
+        tol (float, optional): a maximum error tolerance on satisfying the
+            objectives
+        activeDofs (list, optional): a list of link indices or names to use for
+            IK solving.  By default, will determine these automatically.
+        secondary (IKObjective or list of IKObjective or tuple (func,gradient),
+            optional): if given, tries to optimize a secondary objective.  If a
+            tuple, it provides both a function and its gradient.
 
     .. note::
         You cannot use sub-robots and activeDofs at the same time.  Undefined
@@ -529,7 +538,13 @@ def solve(
     constructors from the robotsim module, the .robot member of these goals
     must be set).
     """
-    s = solver(objectives,iters,tol)
+    minimize = False
+    minimize_args = ()
+    if secondary is not None:
+        if isinstance(secondary,Tuple) and len(secondary)==2 and callable(secondary[0]) and callable(secondary[1]):
+            minimize_args = secondary
+            secondary = None
+    s = solver(objectives,iters,tol,secondary)
     if activeDofs is not None:
         links = activeDofs[:]
         for i,l in enumerate(links):
@@ -538,9 +553,14 @@ def solve(
         s.setActiveDofs(links)
 
     if hasattr(s,'__iter__'):
+        if minimize:
+            res = [si.minimize(*minimize_args)[0] for si in s]
+            return all(res)
         res = [si.solve()[0] for si in s]
         return all(res)
     else:
+        if minimize:
+            return s.minimize(*minimize_args)
         return s.solve()
 
 def residual(objectives: Union[IKObjective,Sequence[IKObjective]]) -> Vector:
@@ -557,6 +577,7 @@ def solve_global(
         iters: int = 1000,
         tol: float = 1e-3,
         activeDofs: Optional[List[int]] = None,
+        secondary: Optional[Union[IKObjective,Sequence[IKObjective],Tuple[Callable,Callable]]]=None,
         numRestarts: int=100,
         feasibilityCheck: Optional[Callable[[],bool]] = None,
         startRandom: bool=False
@@ -565,62 +586,66 @@ def solve_global(
     to some extent using a random-restart technique.  
         
     Args:
-        objectives, iters, tol, activeDofs: same as :func:`solve`
-        numRestarts (int, optional): the number of random restarts.  The larger this is,
-            the more likely a solution will be found, but if no solution exists, the
-            routine will take more time.
-        feasibilityCheck (function, optional): if provided, it will be a function feasible() 
-            that returns True if the robot/world in the current configuration is feasible,
-            and False otherwise.
-        startRandom (bool, optional): True if you wish to forgo the robot's current configuration
-            and start from random initial configurations
+        objectives, iters, tol, activeDofs, secondary: same as :func:`solve`
+        numRestarts (int, optional): the number of random restarts.  The larger
+            this is, the more likely a solution will be found, but if no
+            solution exists, the routine will take more time.
+        feasibilityCheck (function, optional): if provided, it will be a
+            function feasible() that returns True if the robot/world in the
+            current configuration is feasible, and False otherwise.
+        startRandom (bool, optional): True if you wish to forgo the robot's
+            current configuration and start from random initial configurations.
 
     Returns:
         True if a feasible solution is successfully found to the given
         tolerance, within the provided number of iterations.
     """
     if feasibilityCheck is None: feasibilityCheck=lambda : True
-    s = solver(objectives,iters,tol)
+    minimize = False
+    minimize_args = ()
+    if secondary is not None:
+        if isinstance(secondary,Tuple) and len(secondary)==2 and callable(secondary[0]) and callable(secondary[1]):
+            minimize_args = secondary
+            secondary = None
+
+    s = solver(objectives,iters,tol,secondary)
     if activeDofs is not None:
         links = activeDofs[:]
         for i,l in enumerate(links):
             if isinstance(l,str):
                 links[i] = s.robot.link(l).getIndex()
         s.setActiveDofs(links)
-    if hasattr(s,'__iter__'):
-        if startRandom:
-            s.sampleInitial()
+    if not hasattr(s,'__iter__'):
+        s = [s]
+    if startRandom:
+        s[0].sampleInitial()
+    if minimize:
+        res = [si.minimize(*minimize_args) for si in s]
+    else:
         res = [si.solve() for si in s]
+    if all(res):
+        if feasibilityCheck():
+            return True
+    for i in range(numRestarts):
+        for si in s:
+            si.sampleInitial()
+        if minimize:
+            res = [si.minimize(*minimize_args) for si in s]
+        else:
+            res = [si.solve() for si in s]
         if all(res):
             if feasibilityCheck():
                 return True
-        for i in range(numRestarts):
-            for si in s:
-                si.sampleInitial()
-            res = [si.solve() for si in s]
-            if all(res):
-                if feasibilityCheck():
-                    return True
-        return False
-    else:
-        if startRandom:
-            s.sampleInitial()
-        if s.solve():
-            if feasibilityCheck():
-                return True
-        for i in range(numRestarts):
-            s.sampleInitial()
-            if s.solve():
-                if feasibilityCheck():
-                    return True
-        return False
-
+    return False
+    
+    
 def solve_nearby(
         objectives: Union[IKObjective,Sequence[IKObjective]],
         maxDeviation: float,
         iters: int = 1000,
         tol: float = 1e-3,
         activeDofs: Optional[List[int]] = None,
+        secondary: Optional[Union[IKObjective,Sequence[IKObjective],Tuple[Callable,Callable]]]=None,
         numRestarts: int = 0,
         feasibilityCheck: Optional[Callable[[],bool]] = None
     ) -> bool:
@@ -637,6 +662,13 @@ def solve_nearby(
         numRestarts (int): same as in :func:`solve_global` , but is by default set to zero.
     """
     if feasibilityCheck is None: feasibilityCheck=lambda : True
+    minimize = False
+    minimize_args = ()
+    if secondary is not None:
+        if isinstance(secondary,Tuple) and len(secondary)==2 and callable(secondary[0]) and callable(secondary[1]):
+            minimize_args = secondary
+            secondary = None
+
     s = solver(objectives,iters,tol)
     if not isinstance(s,IKSolver):
         raise NotImplementedError("solve_nearby: currently only supports single-robot objectives")
@@ -660,12 +692,18 @@ def solve_nearby(
     s.setJointLimits(qmin,qmax)
     s.setBiasConfig(q)
     #start solving
-    if s.solve():
-        if feasibilityCheck():
-            return True
+    if minimize:
+        solved = s.minimize(*minimize_args)
+    else:
+        solved = s.solve()
+    if solved and feasibilityCheck():
+        return True
     for i in range(numRestarts):
         s.sampleInitial()
-        if s.solve():
-            if feasibilityCheck():
-                return True
+        if minimize:
+            solved = s.minimize(*minimize_args)
+        else:
+            solved = s.solve()
+        if solved and feasibilityCheck():
+            return True
     return False

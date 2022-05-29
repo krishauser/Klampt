@@ -336,7 +336,8 @@ IKSolver::IKSolver(const RobotModel& _robot)
 {}
 
 IKSolver::IKSolver(const IKSolver& solver)
-  :robot(solver.robot),objectives(solver.objectives),tol(solver.tol),maxIters(solver.maxIters),activeDofs(solver.activeDofs),useJointLimits(solver.useJointLimits),qmin(solver.qmin),qmax(solver.qmax),lastIters(solver.lastIters)
+  :robot(solver.robot),objectives(solver.objectives),secondary_objectives(solver.secondary_objectives),
+  tol(solver.tol),maxIters(solver.maxIters),activeDofs(solver.activeDofs),useJointLimits(solver.useJointLimits),qmin(solver.qmin),qmax(solver.qmax),lastIters(solver.lastIters)
 {}
 
 
@@ -356,9 +357,21 @@ void IKSolver::set(int i,const IKObjective& objective)
   objectives[i] = objective;
 }
 
+void IKSolver::addSecondary(const IKObjective& objective)
+{
+  secondary_objectives.push_back(objective);
+}
+  
+void IKSolver::setSecondary(int i,const IKObjective& objective)
+{
+  if(i < 0 || i >= (int)secondary_objectives.size()) throw PyException("Invalid index specified in setSecondary");
+  objectives[i] = objective;
+}
+
 void IKSolver::clear()
 {
   objectives.resize(0);
+  secondary_objectives.resize(0);
 }
 
 void IKSolver::setMaxIters(int iters)
@@ -389,9 +402,11 @@ void IKSolver::setActiveDofs(const std::vector<int>& active)
 void IKSolver::getActiveDofs(std::vector<int>& out)
 {
   if(activeDofs.empty()) {
-    vector<IKGoal> goals(objectives.size());
+    vector<IKGoal> goals(objectives.size() + secondary_objectives.size());
     for(size_t i=0;i<objectives.size();i++)
       goals[i] = objectives[i].goal;
+    for(size_t i=0;i<secondary_objectives.size();i++)
+      goals[i+objectives.size()] = secondary_objectives[i].goal;
     ArrayMapping map;
     GetDefaultIKDofs(*robot.robot,goals,map);
     out = map.mapping;
@@ -483,6 +498,35 @@ void IKSolver::getResidual(std::vector<double>& out)
   }
 }
 
+void IKSolver::getSecondaryResidual(std::vector<double>& out)
+{
+  int size = 0;
+  for(size_t i=0;i<secondary_objectives.size();i++) {
+    int m=IKGoal::NumDims(secondary_objectives[i].goal.posConstraint);
+    int n=IKGoal::NumDims(secondary_objectives[i].goal.rotConstraint);
+    size += m + n;
+  }
+  out.resize(size);
+  size = 0;
+  for(size_t i=0;i<secondary_objectives.size();i++) {
+    const IKGoal& goal = secondary_objectives[i].goal;
+    int m=IKGoal::NumDims(goal.posConstraint);
+    int n=IKGoal::NumDims(goal.rotConstraint);
+    Real poserr[3],orierr[3];
+    if(goal.destLink < 0)
+      goal.GetError(robot.robot->links[goal.link].T_World,poserr,orierr);
+    else {
+      RigidTransform Trel;
+      Trel.mulInverseB(robot.robot->links[goal.link].T_World,robot.robot->links[goal.destLink].T_World);
+      goal.GetError(Trel,poserr,orierr);
+    }
+    for(int k=0;k<m;k++,size++)
+      out[size] = poserr[k];
+    for(int k=0;k<n;k++,size++)
+      out[size] = orierr[k];
+  }
+}
+
 void IKSolver::getJacobian(double** out,int* m,int* n)
 {
   RobotIKFunction f(*robot.robot);
@@ -557,51 +601,211 @@ PyObject* IKSolver::solve(int iters,double tol)
 }
 */
 
-bool IKSolver::solve()
+void SetupSolver(IKSolver* s,RobotIKFunction& f,RobotIKSolver& solver,bool add_secondary=false)
 {
-  if(useJointLimits) {
-    const Real* usedQmin = (qmin.empty() ? &robot.robot->qMin[0] : &qmin[0]);
-    const Real* usedQmax = (qmax.empty() ? &robot.robot->qMax[0] : &qmax[0]);
-    for(int i=0;i<robot.robot->q.size();i++) {
-      if(robot.robot->q(i) < usedQmin[i] || robot.robot->q(i) > usedQmax[i]) {
-        if(robot.robot->q(i) < usedQmin[i]-Epsilon || robot.robot->q(i) > usedQmax[i] + Epsilon) 
-          printf("IKSolver:: Joint limits on joint %i exceeded: %g <= %g <= %g. Clamping to limits...\n", i,usedQmin[i],robot.robot->q(i),usedQmax[i]);
-        robot.robot->q(i) = Clamp(robot.robot->q(i),usedQmin[i],usedQmax[i]);
+  Klampt::RobotModel* robot=s->robot.robot;
+  if(s->useJointLimits) {
+    const Real* usedQmin = (s->qmin.empty() ? &robot->qMin[0] : &s->qmin[0]);
+    const Real* usedQmax = (s->qmax.empty() ? &robot->qMax[0] : &s->qmax[0]);
+    for(int i=0;i<robot->q.size();i++) {
+      if(robot->q(i) < usedQmin[i] || robot->q(i) > usedQmax[i]) {
+        if(robot->q(i) < usedQmin[i]-Epsilon || robot->q(i) > usedQmax[i] + Epsilon) 
+          printf("IKSolver:: Joint limits on joint %i exceeded: %g <= %g <= %g. Clamping to limits...\n", i,usedQmin[i],robot->q(i),usedQmax[i]);
+        robot->q(i) = Clamp(robot->q(i),usedQmin[i],usedQmax[i]);
       }
     }
   }
-  RobotIKFunction f(*robot.robot);
-  vector<IKGoal> goals(objectives.size());
-  for(size_t i=0;i<objectives.size();i++)
-    goals[i] = objectives[i].goal;
-  f.UseIK(goals);
-  for(size_t i=0;i<objectives.size();i++) {
-    IKGoalFunction* obji = dynamic_cast<IKGoalFunction*>(f.functions[i].get());
-    obji->positionScale = objectives[i].positionScale;
-    obji->rotationScale = objectives[i].rotationScale;
+  vector<IKGoal> goals(s->objectives.size());
+  for(size_t i=0;i<s->objectives.size();i++)
+    goals[i] = s->objectives[i].goal;
+  if(add_secondary) {
+    goals.resize(s->objectives.size()+s->secondary_objectives.size());
+    for(size_t i=0;i<s->secondary_objectives.size();i++)
+      goals[i+s->objectives.size()] = s->secondary_objectives[i].goal;
   }
-  if(activeDofs.empty()) GetDefaultIKDofs(*robot.robot,goals,f.activeDofs);
-  else f.activeDofs.mapping = activeDofs;
-  robot.robot->ConfigureDriverConstraints(f);
-
-  RobotIKSolver solver(f);
-  if(useJointLimits) {
-    if(qmin.empty())
-      solver.UseJointLimits();
-    else {
-      if(qmin.size() != robot.robot->links.size()) throw PyException("Invalid size on qmin");
-      if(qmax.size() != robot.robot->links.size()) throw PyException("Invalid size on qmax");
-      solver.UseJointLimits(Vector(qmin),Vector(qmax));
+  f.UseIK(goals);
+  for(size_t i=0;i<s->objectives.size();i++) {
+    IKGoalFunction* obji = dynamic_cast<IKGoalFunction*>(f.functions[i].get());
+    obji->positionScale = s->objectives[i].positionScale;
+    obji->rotationScale = s->objectives[i].rotationScale;
+  }
+  if(add_secondary) {
+    for(size_t i=0;i<s->secondary_objectives.size();i++) {
+      IKGoalFunction* obji = dynamic_cast<IKGoalFunction*>(f.functions[i+s->objectives.size()].get());
+      obji->positionScale = s->secondary_objectives[i].positionScale;
+      obji->rotationScale = s->secondary_objectives[i].rotationScale;
     }
   }
-  if(!biasConfig.empty()) {
-    if(biasConfig.size() != robot.robot->links.size()) throw PyException("Invalid size on biasConfig");
-    solver.UseBiasConfiguration(Vector(biasConfig));
+  if(s->activeDofs.empty()) GetDefaultIKDofs(*robot,goals,f.activeDofs);
+  else f.activeDofs.mapping = s->activeDofs;
+  robot->ConfigureDriverConstraints(f);
+
+  if(s->useJointLimits) {
+    if(s->qmin.empty())
+      solver.UseJointLimits();
+    else {
+      if(s->qmin.size() != robot->links.size()) throw PyException("Invalid size on qmin");
+      if(s->qmax.size() != robot->links.size()) throw PyException("Invalid size on qmax");
+      solver.UseJointLimits(Vector(s->qmin),Vector(s->qmax));
+    }
+  }
+  if(!s->biasConfig.empty()) {
+    if(s->biasConfig.size() != robot->links.size()) throw PyException("Invalid size on biasConfig");
+    solver.UseBiasConfiguration(Vector(s->biasConfig));
   }
   solver.solver.verbose = 0;
+}
+
+bool IKSolver::solve()
+{
+  RobotIKFunction f(*robot.robot);
+  RobotIKSolver solver(f);
+  SetupSolver(this,f,solver,true);
 
   int iters=maxIters;
   bool res = solver.Solve(tol,iters);
+  robot.robot->UpdateGeometry();
+  lastIters = iters;
+  return res;
+}
+
+bool IKSolver::minimize()
+{
+  RobotIKFunction f(*robot.robot);
+  RobotIKSolver solver(f);
+  SetupSolver(this,f,solver);
+
+  int iters=maxIters;
+  bool res;
+  if(secondary_objectives.empty())
+    res = solver.MinimizeResidual(tol,tol*0.01,iters);
+  else {
+    RobotIKFunction fsecondary(*robot.robot);
+    vector<IKGoal> goals(secondary_objectives.size());
+    for(size_t i=0;i<secondary_objectives.size();i++)
+      goals[i] = secondary_objectives[i].goal;
+    fsecondary.UseIK(goals);
+    fsecondary.activeDofs = f.activeDofs;
+    res = solver.PrioritizedSolve(fsecondary,tol,tol*0.01,iters);
+  }
+  robot.robot->UpdateGeometry();
+  lastIters = iters;
+  return res;
+}
+
+PyObject* PyTupleFromVector(const Vector& x)
+{
+  PyObject* ls = PyTuple_New(x.n);
+  PyObject* pItem;
+  if(ls == NULL) {
+    goto fail;
+  }
+	
+  for(int i = 0; i < x.n; i++) {
+    pItem = PyFloat_FromDouble(x[i]);
+    if(pItem == NULL)
+      goto fail;
+    PyTuple_SetItem(ls, (Py_ssize_t)i, pItem);
+  }
+  
+  return ls;
+  
+ fail:
+  Py_XDECREF(ls);
+  return NULL;
+}
+class PyScalarFieldFunction : public ScalarFieldFunction {
+	private:
+    Vector qref;
+    vector<int> activeDofs;
+		PyObject *pFunc, *pGrad;
+		PyObject *pXTemp;
+		
+	public:
+		PyScalarFieldFunction(const Vector& _qref,const vector<int>& _activeDofs,PyObject* _pFunc,PyObject* _pGrad)
+      :qref(_qref),activeDofs(_activeDofs),pFunc(_pFunc),pGrad(_pGrad) {
+      Py_INCREF(_pFunc);
+      Py_INCREF(_pGrad);
+    }
+		~PyScalarFieldFunction() {
+      Py_DECREF(pFunc);
+      Py_DECREF(pGrad);
+      Py_XDECREF(pXTemp);
+    }
+		
+		string Label() const { return "Scalar Field Function interface to Python"; }
+    void PreEval(const Vector& x) {
+      if(x.n != (int)activeDofs.size()) {
+        throw PyException("Uh... PreEval got a wrong sized vector?");
+      }
+      Vector xfull(qref);
+      for(size_t i=0;i<activeDofs.size();i++)
+        xfull[activeDofs[i]] = x[i];
+
+      Py_XDECREF(pXTemp);
+      pXTemp = PyTupleFromVector(xfull);	
+      if(pXTemp == NULL) {
+        if(!PyErr_Occurred()) {
+          throw PyException("PyScalarFieldFunction::PreEval: Couldn't "	\
+          "build variable-value tuple.");
+        }
+      }
+    }
+		Real Eval(const Vector& x) {
+      Assert(pXTemp != NULL);
+      PyObject* pResult = PyObject_CallFunctionObjArgs(pFunc, pXTemp, NULL);
+      
+      // Get result as double
+      if(PyFloat_Check(pResult) || PyLong_Check(pResult)) {
+        Real result = PyFloat_AsDouble(pResult);
+        assert(!PyErr_Occurred());
+        Py_DECREF(pResult);
+        return result;
+      }
+      Py_DECREF(pResult);
+      throw PyException("PyScalarFieldFunction::Eval: returned an invalid object.");
+      return 0.0;
+    }
+
+		void Gradient(const Vector& x, Vector& g) {
+      if(x.n != (int)activeDofs.size()) {
+        throw PyException("Uh... Gradient got a wrong sized vector?");
+      }
+      g.resize(x.n);
+      Vector gfull(qref.n,0.0);
+      Assert(pXTemp != NULL);
+      PyObject* pResult = PyObject_CallFunctionObjArgs(pGrad, pXTemp, NULL);
+
+      if(PySequence_Check(pResult)) {
+        if(PySequence_Size(pResult) != (Py_ssize_t)x.n) {
+          Py_DECREF(pResult);
+          throw PyException("PyScalarFieldFunction::Gradient: returned a list of incorrect size.");
+        }
+        if(!PyListToConfig(pResult,gfull)) {
+          Py_DECREF(pResult);
+          throw PyException("PyScalarFieldFunction::Gradient: could not convert result to a vector.");
+        }
+        for(size_t i=0;i<activeDofs.size();i++)
+          g[i] = gfull[activeDofs[i]];
+        return;
+      }
+      Py_DECREF(pResult);
+      throw PyException("PyScalarFieldFunction::Gradient: returned an invalid object.");
+    }
+};
+
+
+bool IKSolver::minimize(PyObject* secondary_objective,PyObject* secondary_objective_grad)
+{
+  vector<int> activeDofs;
+  getActiveDofs(activeDofs);
+  PyScalarFieldFunction fsecondary(robot.robot->q,activeDofs,secondary_objective,secondary_objective_grad);
+  RobotIKFunction f(*robot.robot);
+  RobotIKSolver solver(f);
+  SetupSolver(this,f,solver);
+
+  int iters=maxIters;
+  bool res = solver.PrioritizedSolve(fsecondary,tol,tol*0.01,iters);
   robot.robot->UpdateGeometry();
   lastIters = iters;
   return res;
