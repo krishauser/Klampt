@@ -1358,7 +1358,7 @@ def pick(click_callback : Callable, hover_callback : Callable=None,
     """
     scene().pick(click_callback,hover_callback,highlight_color,filter,tolerance)
 
-def addButton(text : str, callback : Callback = None, id : str = None, icon=None, iconformat=None, style=None) -> str:
+def addButton(text : str, callback : Callable = None, id : str = None, icon=None, iconformat=None, style=None) -> str:
     """Adds a button to the GUI. 
 
     Arguments:
@@ -1387,7 +1387,7 @@ def addButton(text : str, callback : Callback = None, id : str = None, icon=None
         scene().bindWidget(widget['id'],callback)
     return widget['id']
 
-def addCheckbox(text : str, callback : Callback=None, checked=False, id=None, icon=None, iconformat=None, style=None) -> str:
+def addCheckbox(text : str, callback : Callable=None, checked=False, id=None, icon=None, iconformat=None, style=None) -> str:
     """Adds a checkbox  to the GUI. 
 
     Arguments:
@@ -1406,7 +1406,7 @@ def addCheckbox(text : str, callback : Callback=None, checked=False, id=None, ic
         widget['id'] = id
     else:
         widget['id'] = text
-    if state:
+    if checked:
         widget['state'] = 'checked'
     else:
       widget['state'] = ''
@@ -1421,7 +1421,7 @@ def addCheckbox(text : str, callback : Callback=None, checked=False, id=None, ic
         scene().bindWidget(widget['id'],callback)
     return widget['id']
 
-def addSelect(text : str, options : List[str], callback : Callback=None, selection=None, id=None, multiple=False, style=None) -> str:
+def addSelect(text : str, options : List[str], callback : Callable=None, selection=None, id=None, multiple=False, style=None) -> str:
     """Adds a selection widget to the GUI. 
 
     Arguments:
@@ -1452,7 +1452,7 @@ def addSelect(text : str, options : List[str], callback : Callback=None, selecti
         scene().bindWidget(widget['id'],callback)
     return widget['id']
 
-def addInput(text: str, value : Union[str,int,float], callback : Callback=None, id=None, min:Union[int,float]=None, max:Union[int,float]=None, style=None) -> str:
+def addInput(text: str, value : Union[str,int,float], callback : Callable=None, id=None, min:Union[int,float]=None, max:Union[int,float]=None, style=None) -> str:
     """Adds a text or numeric input to the GUI. 
 
     Arguments:
@@ -1466,17 +1466,22 @@ def addInput(text: str, value : Union[str,int,float], callback : Callback=None, 
         max (int,float): maximum value allowed
         style (dict): the HTML style of the button
     """
-    widget = {'text':text,'type':'select','options':options}
+    if isinstance(value,(int,float)):
+        widget = {'text':text,'type':'number','state':value}
+        if isinstance(value,float):
+            widget['step'] = 'any'
+        else:
+            widget['step'] = 1
+        if min is not None:
+            widget['min'] = min
+        if max is not None:
+            widget['max'] = max
+    else:
+        widget = {'text':text,'type':'text','state':value}
     if id is not None:
         widget['id'] = id
     else:
         widget['id'] = text
-    if state is not None:
-        if isinstance(state,str):
-            state=[state]
-        widget['state'] = state
-    else:
-      widget['state'] = []
     if style is not None:
         widget['style'] = style
     nativeWindow().addWidget(widget)
@@ -1496,7 +1501,7 @@ def setGUI(menu : dict) -> None:
     """Replaces a whole GUI with the JSONGUI object."""
     nativeWindow().setGUI(menu)
 
-def bindWidget(id : str, callback : Callback) -> None:
+def bindWidget(id : str, callback : Callable) -> None:
     """Provides a callback function that is triggered when the named GUI widget
     is interacted with.
     """
