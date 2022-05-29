@@ -34,22 +34,33 @@
  *
  * To get all vertices as a numpy array::
  * 
- *     verts = np.array(m.vertices).reshape((len(m.vertices)//3,3))
+ *     verts = m.getVertices()
  *
  * To get all indices as a numpy array::
  * 
- *     inds = np.array(m.indices,dtype=np.int32).reshape((len(m.indices)//3,3))
+ *     inds = m.getIndices()
  *
- * (Or use the convenience functions in :mod:`klampt.io.numpy_convert`)
  */
 struct TriangleMesh
 {
   TriangleMesh();
-  ///Retrieves a view of the vertices as an nx3 Numpy array
+  ///Retrieves an array view of the vertices.
+  ///
+  ///Returns:
+  ///
+  ///    ndarray: an nx3 Numpy array. Setting elements of this array will
+  ///    change the vertices.
+  ///
   void getVertices(double** np_view2, int* m, int* n);
   ///Sets all vertices to the given nx3 Numpy array
   void setVertices(double* np_array2, int m, int n);
-  ///Retrieves a view of the vertices as an mx3 Numpy array
+  ///Retrieves an array view of the triangle indices.
+  ///
+  ///Returns:
+  ///
+  ///    ndarray: an mx3 Numpy array of int32 type. Setting elements of this 
+  ///    array will change the indices.
+  /// 
   void getIndices(int** np_view2, int* m, int* n);
   ///Sets all indices to the given mx3 Numpy array
   void setIndices(int* np_array2, int m, int n);
@@ -77,7 +88,13 @@ struct ConvexHull
   ConvexHull();
   ///Returns the # of points
   int numPoints() const; 
-  ///Retrieves a view of the points as an nx3 Numpy array
+  ///Retrieves a view of the points.
+  ///
+  ///Returns:
+  ///
+  ///    ndarray: an nx3 Numpy array. Setting elements of this array will
+  ///    change the points.
+  ///
   void getPoints(double** np_view2, int* m, int* n);
   ///Sets all points to the given nx3 Numpy array
   void setPoints(double* np_array2, int m, int n);
@@ -148,27 +165,27 @@ struct ConvexHull
  *     pc.vertices.append(0)
  *     pc.vertices.append(0)
  *     pc.properties.append(0)
- *     print(len(pc.vertices))  #prints 3
- *     print(pc.numPoints())  #prints 1
+ *     print(len(pc.vertices)) #prints 3
+ *     print(pc.numPoints())   #prints 1
  *     #add another point with coordinates (1,2,3)
  *     pc.addPoint([1,2,3])
  *     #this prints 2
  *     print(pc.numPoints() )
+ *     print(pc.getPoints())   #prints [[0,0,0],[1,2,3]]
  *     #this prints 2, because there is 1 property category x 2 points
- *     print(len(pc.properties.size()))
+ *     print(pc.properties.size())
+ *     assert pc.propertyNames.size() == pc.getAllProperties().shape[1]
  *     #this prints 0; this is the default value added when addPoint is called
  *     print(pc.getProperty(1,0) )
  *
  * To get all points as an n x 3 numpy array::
  *
- *     points = np.array(pc.vertices).reshape((pc.numPoints(),3))
+ *     points = pc.getPoints()
  * 
  * To get all properties as a n x k numpy array::
  *
- *     properties = np.array(pc.properties)
- *     properties.reshape((p.numPoints(),p.numProperties()))
+ *     properties = pc.getAllProperties()
  *
- * (Or use the convenience functions in :mod:`klampt.io.numpy_convert`)
  */
 struct PointCloud
 {
@@ -177,7 +194,13 @@ struct PointCloud
   int numPoints() const;
   ///Returns the number of properties
   int numProperties() const;
-  ///Returns a view of the points as an nx3 Numpy array
+  ///Returns a view of the points.
+  ///
+  ///Returns:
+  ///
+  ///    ndarray: an nx3 Numpy array. Setting elements of this array will
+  ///    change the points.
+  ///
   void getPoints(double** np_view2, int* m, int* n);
   ///Sets all the points to the given nx3 Numpy array
   void setPoints(double* np_array2, int m, int n);
@@ -191,7 +214,7 @@ struct PointCloud
   void setPoint(int index,const double p[3]);
   ///Returns the position of the point at the given index
   void getPoint(int index,double out[3]) const;
-  ///Sets all the properties of all points to the given nxp array 
+  ///Sets all the properties of all points to the given nxk array 
   void setProperties(double* np_array2, int m, int n);
   ///Adds a new property.  All values for this property are set to 0.
   void addProperty(const std::string& pname);
@@ -208,10 +231,26 @@ struct PointCloud
   ///Returns the property named pname of point index
   double getProperty(int index,const std::string& pname) const;
   ///Returns property pindex of all points as an array
+  ///
+  ///Returns:
+  ///
+  ///    ndarray: an n-D Numpy array.
+  ///
   void getProperties(int pindex,double** np_out,int* m) const;
   ///Returns property named pindex of all points as an array
+  ///
+  ///Returns:
+  ///
+  ///    ndarray: an n-D Numpy array.
+  ///
   void getProperties(const std::string& pname,double** np_out,int* m) const;
-  ///Returns all the properties as an nxp array
+  ///Returns all the properties of all points as an array view.
+  ///
+  ///Returns:
+  ///
+  ///    ndarray: an nxk Numpy array. Setting elements of this array will
+  ///    change the vertices.
+  ///
   void getAllProperties(double** np_view2, int* m, int* n);
   ///Translates all the points by v=v+t
   void translate(const double t[3]);
@@ -313,12 +352,16 @@ public:
   VolumeGrid();
   void setBounds(const double bmin[3],const double bmax[3]);
   void resize(int sx,int sy,int sz);
+  ///Sets all elements to a uniform value (e.g., 0)
   void set(double value);
+  ///Sets a specific element of a cell
   void set(int i,int j,int k,double value);
+  ///Gets a specific element of a cell
   double get(int i,int j,int k);
   void shift(double dv);
   ///Returns a 3D Numpy array view of the values
   void getValues(double** np_view3, int* m, int* n, int* p);
+  ///Sets the values to a 3D numpy array
   void setValues(double* np_array3, int m, int n, int p);
 
   std::vector<double> bbox; 

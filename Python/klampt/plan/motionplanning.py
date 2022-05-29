@@ -22,7 +22,7 @@ except ImportError:
     import __builtin__
 
 from typing import Sequence,Tuple,Iterator
-from klampt.model.typing import IntArray,Vector,Vector3,Point,Rotation
+from klampt.model.typing import IntArray,Config,Vector,Vector3,Matrix3,Point,Rotation,RigidTransform
 
 
 def _swig_repr(self):
@@ -400,7 +400,7 @@ def set_plan_setting(*args) ->None:
 
     Args:
         setting (str): 
-        value (str or float): 
+        value (float or str): 
 
     Valid numeric values are:  
 
