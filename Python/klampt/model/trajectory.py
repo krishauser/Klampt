@@ -778,7 +778,7 @@ class SE3Trajectory(GeodesicTrajectory):
     def checkValid(self):
         Trajectory.checkValid(self)
         for m in self.milestones:
-            if len(m) != 9:
+            if len(m) != 12:
                 raise ValueError("Invalid length of milestone: {} != 12".format(len(m)))
     def extractDofs(self, dofs: List[int]) -> Trajectory:
         if list(dofs) == list(range(9)):

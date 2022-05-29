@@ -68,7 +68,7 @@ from ..robotsim import *
 from ..math import so3,se3
 from .subrobot import SubRobotModel
 from typing import Union,Optional,List,Sequence,Callable
-from .typing import Vector,Vector3,Rotation,RigidTransform
+from .typing import IntArray,Vector,Vector3,Rotation,RigidTransform
 
 def objective(
         body: Union[RobotModelLink,RigidObjectModel],
@@ -289,6 +289,109 @@ def objects(objectives):
     raise NotImplementedError()
     pass
 
+
+class SubRobotIKSolver(IKSolver):
+    """A version of IKSolver for subrobots.  Allows addressing of
+    configurations and links according to the indices of the SubRobotModel
+    provided upon initialization.
+    """
+    def __init__(self, r: SubRobotModel):
+        assert(isinstance(r, SubRobotModel))
+        super().__init__(r._robot)
+        super().setActiveDofs(r._links)
+        self.subrobot = r
+
+    def copy(self) -> "SubRobotIKSolver":
+        return SubRobotIKSolver(self.subrobot)
+
+    def setActiveDofs(self, active: IntArray) -> None:
+        r"""
+        Sets the active degrees of freedom.  
+        Respects subrobotness.
+
+        Args:
+            active (:obj:`list of int`)
+        """
+        return super().setActiveDofs([self.subrobot._links[x] for x in active])
+
+    def getActiveDofs(self) -> List[int]:
+        r"""
+        Returns the active degrees of freedom.  
+        Respects subrobotness.
+
+        """
+        return [self.subrobot._inv_links[i] for i in super().getActiveDofs()]
+
+    def setJointLimits(self, qmin: Vector, qmax: Vector) -> None:
+        r"""
+        Sets limits on the robot's configuration. If empty, this turns off joint limits.  
+        Respects subrobotness.
+
+        Args:
+            qmin (:obj:`list of floats`)
+            qmax (:obj:`list of floats`)
+        """
+        qmin_old, qmax_old = super().getJointLimits()
+        for n, lower, upper in zip(self.subrobot._links, qmin, qmax):
+            qmin_old[n] = lower
+            qmax_old[n] = upper
+        return super().setJointLimits(qmin_old, qmax_old)
+
+    def getJointLimits(self):
+        r"""
+        Returns the limits on the robot's configuration (by default this is the robot's
+        joint limits.  
+
+        Respects subrobotness.
+
+        Return:
+        ------
+            (qmin, qmax): Pair of lists of joint limits.
+        """
+        qmin_full, qmax_full = super().getJointLimits()
+        qmin = [qmin_full[i] for i in self.subrobot._links]
+        qmax = [qmax_full[i] for i in self.subrobot._links]
+        return qmin, qmax
+
+    def setBiasConfig(self, bias_config: Vector) -> None:
+        r"""
+        Biases the solver to approach a given configuration. Setting an empty vector
+        clears the bias term.  
+        Respects subrobotness.
+
+        Args:
+            bias_config (:obj:`list of floats`)
+        """
+        old_config = super().getBiasConfig()
+        if len(old_config) == 0:
+            old_config = [0.0]*self.robot.numLinks()
+        for n, x in zip(self.subrobot._links, bias_config):
+            old_config[n] = x
+        return super().setBiasConfig(old_config)
+
+    def getBiasConfig(self) ->Vector:
+        r"""
+        Returns the solvers' bias configuration.  
+        Respects subrobotness.
+
+        """
+        config = super().getBiasConfig()
+        return [config[i] for i in self.subrobot._links]
+
+    def getJacobian(self):
+        r"""
+        Computes the matrix describing the instantaneous derivative of the objective
+        with respect to the active Dofs.  
+        Respects subrobotness.
+
+        Return:
+        ------
+            Matrix (6 x N) J; such that J @ qdot = EE velocity.
+        """
+        return super().getJacobian()[:, self.subrobot._links]
+
+
+
 def solver(
         objectives: Union[IKObjective,Sequence[IKObjective]],
         iters: Optional[int] = None,
@@ -353,8 +456,7 @@ def solver(
             res = []
             for key,(r,objs) in robs.items():
                 if isinstance(r,SubRobotModel):
-                    s = IKSolver(r._robot)
-                    s.setActiveDofs(r._links)
+                    s = SubRobotIKSolver(r)
                 else:
                     s = IKSolver(r)
                 if iters is not None: s.setMaxIters(iters)
@@ -371,8 +473,7 @@ def solver(
                 raise ValueError("IKObjective object must have 'robot' member for use in ik.solver. Either set this manually or use the ik.objective function")
             if isinstance(objectives.robot,SubRobotModel):
                 r = objectives.robot
-                s = IKSolver(r._robot)
-                s.setActiveDofs(r._links)
+                s = SubRobotIKSolver(r)
             else:
                 s = IKSolver(objectives.robot)
             if iters is not None: s.setMaxIters(iters)

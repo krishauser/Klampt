@@ -136,8 +136,10 @@ template <class T>
 void RobotSensors::GetTypedSensors(vector<T*>& _sensors)
 {
   _sensors.resize(0);
-  for(size_t i=0;i<sensors.size();i++)
-    if(typeid(T) == typeid(*sensors[i])) _sensors.push_back(dynamic_cast<T*>(sensors[i].get()));
+  for(size_t i=0;i<sensors.size();i++) {
+    const SensorBase& s = *sensors[i];
+    if(typeid(T) == typeid(s)) _sensors.push_back(dynamic_cast<T*>(sensors[i].get()));
+  }
 }
 
 
@@ -145,7 +147,8 @@ template <class T>
 T* RobotSensors::GetTypedSensor(int index)
 {
   for(size_t i=0;i<sensors.size();i++) {
-    if(typeid(T) == typeid(*sensors[i])) {
+    const SensorBase& s = *sensors[i];
+    if(typeid(T) == typeid(s)) {
       if(index==0) return dynamic_cast<T*>(sensors[i].get());
       index--;
     }

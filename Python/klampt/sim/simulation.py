@@ -113,7 +113,7 @@ class DefaultActuatorEmulator(ActuatorEmulator):
         or None if no command was issued. """
         if commands == None: return
         c = self.controller
-        defaultVals = set(['dt','torquecmd','qcmd','dqcmd','tcmd'])
+        defaultVals = set(['t','dt','torquecmd','qcmd','dqcmd','tcmd'])
         if 'qcmd' in commands:
             dqcmd = commands['dqcmd'] if 'dqcmd' in commands else [0.0]*len(commands['qcmd'])
             if 'torquecmd' in commands:
@@ -127,8 +127,10 @@ class DefaultActuatorEmulator(ActuatorEmulator):
             c.setTorque(commands['torquecmd'])
         for (k,v) in commands.items():
             if k not in defaultVals:
-                print("Sending command",k,v,"to low level controller")
-                c.sendCommand(k,v)
+                if c.model().sensor(k).type() != '':
+                    continue
+                if c.sendCommand(k,str(v)):
+                    print("Sent command",k,v,"to low level controller")
         return
 
 

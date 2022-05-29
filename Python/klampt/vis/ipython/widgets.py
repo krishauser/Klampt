@@ -240,7 +240,7 @@ class KlamptWidget(widgets.DOMWidget):
                 #it's a set of configurations
                 rindex = item.robot.index
                 names = []
-                for i,q in enumerate(item):
+                for i,q in enumerate(item.milestones):
                     iname = name+'_'+str(i)
                     self.addGhost(iname,rindex)
                     self.setGhostConfig(q,iname,rindex)
