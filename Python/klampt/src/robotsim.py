@@ -6939,17 +6939,29 @@ class IKSolver(object):
 
 
         Tries to find a configuration that satifies all simultaneous objectives up to
-        the desired tolerance. Amongst configurations on the solution manifold, this
-        tries to minimize the secondary objective function. The gradient must also be
-        given.  
+        the desired tolerance or minimizes the residual.  
 
-        The user provides a pair of functions `(f,grad)` with `f(q)` the secondary
-        objective to minimize and `grad(q)` its gradient. Here q is a function of all
-        robot DOFs, and `grad(q)` should return a list or tuple of length `len(q)``.
-        Note, however, that the minimization will occur only over the current active
-        DOFS.  
+        The relation to `:func:solve` is that `solve` uses a root-finding method that
+        tries indirectly to minimize the residual, but it may stall out when the
+        objectives are infeasible.  
 
-        This overrides the secondary objectives specified in `addSecondary`.  
+        If secondary objectives are specified, this tries to minimize them once the
+        primary objectives are satisfied, i.e., it will minimize on the solution
+        manifold of the primary constraints.  
+
+        There are two flavors of secondary objectives. If no arguments are given, then
+        any constraints added via `addSecondary` will have their residuals minimized.  
+
+        If the user provides a pair of functions `(f,grad)`, then a custom objective is
+        specified. Here, `f(q)` is the secondary objective to minimize and `grad(q)` its
+        gradient. This will override the secondary objectives added via `addSecondary`.
+        Specifically, q is a function of all robot DOFs, and `grad(q)` should return a
+        list or tuple of length `len(q)``.  
+
+        .. note::  
+
+            The minimization will occur only over the current active DOFs, which will
+            include default active DOFs for secondary objectives.  
 
         Arguments: secondary_objective (callable): a function `f(q)->float` that should
         be minimized. secondary_objective_grad (callable): a function
