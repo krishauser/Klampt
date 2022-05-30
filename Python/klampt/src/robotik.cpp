@@ -623,7 +623,10 @@ void SetupSolver(IKSolver* s,RobotIKFunction& f,RobotIKSolver& solver,bool add_s
     for(size_t i=0;i<s->secondary_objectives.size();i++)
       goals[i+s->objectives.size()] = s->secondary_objectives[i].goal;
   }
+  for(size_t i=0;i<goals.size();i++) 
+    if(goals[i].link < 0 || goals[i].link > robot->q.n) throw PyException("Invalid goal link");
   f.UseIK(goals);
+
   for(size_t i=0;i<s->objectives.size();i++) {
     IKGoalFunction* obji = dynamic_cast<IKGoalFunction*>(f.functions[i].get());
     obji->positionScale = s->objectives[i].positionScale;
