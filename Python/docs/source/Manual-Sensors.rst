@@ -240,7 +240,7 @@ See the `C++ API documentation <http://motion.cs.illinois.edu/software/klampt/la
 ``ContactSensor``
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-See the `C++ API documentation <http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classContactSensorSensor.html>`__ for attributes.
+See the `C++ API documentation <http://motion.cs.illinois.edu/software/klampt/latest/klampt_docs/classContactSensor.html>`__ for attributes.
 
 ``ForceTorqueSensor``
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -488,7 +488,7 @@ Interactions between camera sensors and threading
 --------------------------------------------------
 
 Although most sensors can be used very straightforwardly offline or in conjunction 
-with the `klampt.vis <Manual-visualization.html>`__ module, camera sensors have a bit of
+with the `klampt.vis <Manual-Visualization.html>`__ module, camera sensors have a bit of
 an odd interaction.  For optimal performance they will use OpenGL when it is
 initialized, but will fall back to (much slower) software emulation if OpenGL has 
 not been initialized.  These two methods provide different results, and so OpenGL
