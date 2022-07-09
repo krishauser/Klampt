@@ -150,6 +150,10 @@ class IKSolver
   void add(const IKObjective& objective);
   /// Assigns an existing objective added by add
   void set(int i,const IKObjective& objective);
+  /// Adds a new objective to the secondary objectives list
+  void addSecondary(const IKObjective& objective);
+  /// Assigns an existing objective added by addsecondary
+  void setSecondary(int i,const IKObjective& objective);
   /// Clears objectives
   void clear();
   /// Sets the max # of iterations (default 100)
@@ -180,9 +184,13 @@ class IKSolver
   /// Computes the matrix describing the instantaneous derivative of the objective
   /// with respect to the active Dofs
   void getJacobian(double** np_out2,int* m,int* n);
+  /// Returns the vector describing the error of the secondary objective at the current configuration
+  void getSecondaryResidual(std::vector<double>& out);
 
   /** Tries to find a configuration that satifies all simultaneous objectives
-   * up to the desired tolerance.
+   * up to the desired tolerance. 
+   * 
+   * All of the primary and the secondary objectives are solved simultaneously.
    * 
    * Returns:
    * 
@@ -190,7 +198,52 @@ class IKSolver
    * 
    */
   bool solve();
-  /// Returns the number of Newton-Raphson iterations used in the last solve() call.
+  /** Tries to find a configuration that satifies all simultaneous objectives
+   * up to the desired tolerance, or minimizes the residual if they cannot be
+   * met.  (Only the last override is documented...)
+   */
+  bool minimize();
+  /** Tries to find a configuration that satifies all simultaneous objectives
+   * up to the desired tolerance or minimizes the residual.
+   * 
+   * The relation to ``:func:solve`` is that ``solve`` uses a root-finding
+   * method that tries indirectly to minimize the residual, but it may stall 
+   * out when the objectives are infeasible.
+   * 
+   * If secondary objectives are specified, this tries to minimize them once the
+   * primary objectives are satisfied, i.e., it will minimize on the solution
+   * manifold of the primary constraints.
+   * 
+   * There are two flavors of secondary objectives. If no arguments are given,
+   * then any constraints added via ``addSecondary`` will have their residuals
+   * minimized.
+   * 
+   * If the user provides a pair of functions ``(f,grad)``, then a custom objective
+   * is specified. Here, ``f(q)`` is the secondary objective to minimize and
+   * ``grad(q)`` its gradient.  This will override the secondary objectives added
+   * via ``addSecondary``.  Specifically, q is a function of all robot DOFs, and
+   * ``grad(q)`` should return a list or tuple of length `len(q)``.
+   * 
+   * .. note::
+   * 
+   *     The minimization will occur only over the current active DOFs, which will
+   *     include default active DOFs for secondary objectives.
+   * 
+   * Arguments:
+   *     secondary_objective (callable): a function ``f(q)->float`` that should be minimized.
+   *     secondary_objective_grad (callable): a function ``grad(q)->``sequence of length
+   *        ``len(q)`` giving the gradient of ``f`` at ``q``.
+   * 
+   * Returns:
+   * 
+   *     True if x converged on the primary objectives.
+   * 
+   */
+  bool minimize(PyObject* secondary_objective,PyObject* secondary_objective_grad);
+  
+  /// Returns the number of Newton-Raphson iterations used in the last solve()
+  /// call or the number of Quasi-Newton iterations used in the last minimize()
+  /// call.
   int lastSolveIters();
 
   /// Samples an initial random configuration.  More initial configurations can
@@ -199,6 +252,7 @@ class IKSolver
 
   RobotModel robot;
   std::vector<IKObjective> objectives;
+  std::vector<IKObjective> secondary_objectives;
   double tol;
   int maxIters;
   std::vector<int> activeDofs;

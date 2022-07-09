@@ -29,7 +29,7 @@ basic_types = {'int','float','str','bytes','bool'}
 typing_inject_location = 'import __builtin__'
 typing_header = """
 from typing import Sequence,Tuple,Iterator
-from klampt.model.typing import IntArray,Vector,Vector3,Point,Rotation
+from klampt.model.typing import IntArray,Config,Vector,Vector3,Matrix3,Point,Rotation,RigidTransform
 """
 
 #conversions from SWIG docstrings to RST docstrings

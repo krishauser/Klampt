@@ -430,7 +430,7 @@ class _WizardGUI:
         if self.goalConfig is not None:
             goal = self.goalConfig
         elif self.goalIKTargets is not None:
-            goal = robotcspace.ClosedLoopRobotCSpace(robot,self.goalIKTargets,None)
+            goal = robotcspace.ClosedLoopRobotCSpace(self.movingObject,self.goalIKTargets,None)
         elif self.goalSetSampler is not None:
             goal = (self.goalSetTest,self.goalSetSampler)
         elif self.goalSetTest is not None:
@@ -477,6 +477,7 @@ def wizard(world_or_space_or_plan,moving_object=None,
         MotionPlan: a properly configured MotionPlan object that can be called
         to get a motion plan. (see :meth:`MotionPlan.planMore`).
     """
+    from klampt import WorldModel,RobotModel,RigidObjectModel
     gui = _WizardGUI()
     if isinstance(world_or_space_or_plan,WorldModel):
         gui.world = world_or_space_or_plan

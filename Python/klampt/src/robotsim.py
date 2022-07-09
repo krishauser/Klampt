@@ -877,13 +877,11 @@ class TriangleMesh(object):
 
     To get all vertices as a numpy array::  
 
-        verts = np.array(m.vertices).reshape((len(m.vertices)//3,3))  
+        verts = m.getVertices()  
 
     To get all indices as a numpy array::  
 
-        inds = np.array(m.indices,dtype=np.int32).reshape((len(m.indices)//3,3))  
-
-    (Or use the convenience functions in :mod:`klampt.io.numpy_convert`)  
+        inds = m.getIndices()  
 
     C++ includes: geometry.h
 
@@ -905,7 +903,12 @@ class TriangleMesh(object):
         getVertices(TriangleMesh self)
 
 
-        Retrieves a view of the vertices as an nx3 Numpy array.  
+        Retrieves an array view of the vertices.  
+
+        Returns:  
+
+            ndarray: an nx3 Numpy array. Setting elements of this array will
+            change the vertices.  
 
         """
         return _robotsim.TriangleMesh_getVertices(self)
@@ -925,7 +928,12 @@ class TriangleMesh(object):
         getIndices(TriangleMesh self)
 
 
-        Retrieves a view of the vertices as an mx3 Numpy array.  
+        Retrieves an array view of the triangle indices.  
+
+        Returns:  
+
+            ndarray: an mx3 Numpy array of int32 type. Setting elements of this
+            array will change the indices.  
 
         """
         return _robotsim.TriangleMesh_getIndices(self)
@@ -1015,7 +1023,12 @@ class ConvexHull(object):
         getPoints(ConvexHull self)
 
 
-        Retrieves a view of the points as an nx3 Numpy array.  
+        Retrieves a view of the points.  
+
+        Returns:  
+
+            ndarray: an nx3 Numpy array. Setting elements of this array will
+            change the points.  
 
         """
         return _robotsim.ConvexHull_getPoints(self)
@@ -1140,27 +1153,26 @@ class PointCloud(object):
         pc.vertices.append(0)
         pc.vertices.append(0)
         pc.properties.append(0)
-        print(len(pc.vertices))  #prints 3
-        print(pc.numPoints())  #prints 1
+        print(len(pc.vertices)) #prints 3
+        print(pc.numPoints())   #prints 1
         #add another point with coordinates (1,2,3)
         pc.addPoint([1,2,3])
         #this prints 2
         print(pc.numPoints() )
+        print(pc.getPoints())   #prints [[0,0,0],[1,2,3]]
         #this prints 2, because there is 1 property category x 2 points
-        print(len(pc.properties.size()))
+        print(pc.properties.size())
+        assert pc.propertyNames.size() == pc.getAllProperties().shape[1]
         #this prints 0; this is the default value added when addPoint is called
         print(pc.getProperty(1,0) )  
 
     To get all points as an n x 3 numpy array::  
 
-        points = np.array(pc.vertices).reshape((pc.numPoints(),3))  
+        points = pc.getPoints()  
 
     To get all properties as a n x k numpy array::  
 
-        properties = np.array(pc.properties)
-        properties.reshape((p.numPoints(),p.numProperties()))  
-
-    (Or use the convenience functions in :mod:`klampt.io.numpy_convert`)  
+        properties = pc.getAllProperties()  
 
     C++ includes: geometry.h
 
@@ -1202,7 +1214,12 @@ class PointCloud(object):
         getPoints(PointCloud self)
 
 
-        Returns a view of the points as an nx3 Numpy array.  
+        Returns a view of the points.  
+
+        Returns:  
+
+            ndarray: an nx3 Numpy array. Setting elements of this array will
+            change the points.  
 
         """
         return _robotsim.PointCloud_getPoints(self)
@@ -1312,6 +1329,10 @@ class PointCloud(object):
 
         Returns property named pindex of all points as an array.  
 
+        Returns:  
+
+            ndarray: an n-D Numpy array.  
+
         """
         return _robotsim.PointCloud_getProperties(self, *args)
 
@@ -1320,7 +1341,12 @@ class PointCloud(object):
         getAllProperties(PointCloud self)
 
 
-        Returns all the properties as an nxp array.  
+        Returns all the properties of all points as an array view.  
+
+        Returns:  
+
+            ndarray: an nxk Numpy array. Setting elements of this array will
+            change the vertices.  
 
         """
         return _robotsim.PointCloud_getAllProperties(self)
@@ -1745,6 +1771,8 @@ class VolumeGrid(object):
         set(VolumeGrid self, int i, int j, int k, double value)
 
 
+        Sets a specific element of a cell.  
+
         """
         return _robotsim.VolumeGrid_set(self, *args)
 
@@ -1752,6 +1780,8 @@ class VolumeGrid(object):
         r"""
         get(VolumeGrid self, int i, int j, int k) -> double
 
+
+        Gets a specific element of a cell.  
 
         """
         return _robotsim.VolumeGrid_get(self, i, j, k)
@@ -1778,6 +1808,8 @@ class VolumeGrid(object):
         r"""
         setValues(VolumeGrid self, double * np_array3)
 
+
+        Sets the values to a 3D numpy array.  
 
         """
         return _robotsim.VolumeGrid_setValues(self, np_array3)
@@ -5281,10 +5313,16 @@ class RobotModel(object):
         Computes the inverse dynamics. Uses Recursive Newton Euler solver and takes O(n)
         time.  
 
+        Specifically, solves for :math:`\tau` in the (partial) dynamics equation:  
+
+        .. math::  
+
+            `B(q) \ddot{q} + C(q,@dot {q}) = \tau`  
+
         .. note::  
 
-            Does not include gravity term G(q).  getGravityForces(g) will need
-            to be added to the result.  
+            Does not include gravity term G(q).  getGravityForces(g) will
+            need to be added to the result.  
 
         Returns:  
 
@@ -5299,12 +5337,19 @@ class RobotModel(object):
         accelFromTorques(RobotModel self, doubleVector t)
 
 
-        Computes the foward dynamics (using Recursive Newton Euler solver)  
+        Computes the foward dynamics. Uses Recursive Newton Euler solver and takes O(n)
+        time.  
+
+        Specifically, solves for :math:`\ddot{q}` in the (partial) dynamics equation:  
+
+        .. math::  
+
+            `B(q) \ddot{q} + C(q,@dot {q}) = \tau`  
 
         .. note::  
 
-            Does not include gravity term G(q).  getGravityForces(g) will need
-            to be subtracted from the argument t.  
+            Does not include gravity term G(q).  getGravityForces(g) will
+            need to be subtracted from the argument t.  
 
         Returns:  
 
@@ -5324,8 +5369,7 @@ class RobotModel(object):
 
         Returns:  
 
-            list of floats: The n-element configuration that is u fraction of
-            the way from a to b  
+            The n-element configuration that is u fraction of the way from a to b.  
 
         """
         return _robotsim.RobotModel_interpolate(self, a, b, u)
@@ -5705,7 +5749,7 @@ class RigidObjectModel(object):
 
         Returns:  
 
-            tuple: a pair of 3-lists (w,v) where w is the angular velocity
+            A pair of 3-lists (w,v) where w is the angular velocity
             vector and v is the translational velocity vector (both in world
             coordinates)  
 
@@ -6696,6 +6740,26 @@ class IKSolver(object):
         """
         return _robotsim.IKSolver_set(self, i, objective)
 
+    def addSecondary(self, objective: "IKObjective") -> "void":
+        r"""
+        addSecondary(IKSolver self, IKObjective objective)
+
+
+        Adds a new objective to the secondary objectives list.  
+
+        """
+        return _robotsim.IKSolver_addSecondary(self, objective)
+
+    def setSecondary(self, i: "int", objective: "IKObjective") -> "void":
+        r"""
+        setSecondary(IKSolver self, int i, IKObjective objective)
+
+
+        Assigns an existing objective added by addsecondary.  
+
+        """
+        return _robotsim.IKSolver_setSecondary(self, i, objective)
+
     def clear(self) -> "void":
         r"""
         clear(IKSolver self)
@@ -6840,6 +6904,17 @@ class IKSolver(object):
         """
         return _robotsim.IKSolver_getJacobian(self)
 
+    def getSecondaryResidual(self) -> "void":
+        r"""
+        getSecondaryResidual(IKSolver self)
+
+
+        Returns the vector describing the error of the secondary objective at the
+        current configuration.  
+
+        """
+        return _robotsim.IKSolver_getSecondaryResidual(self)
+
     def solve(self) -> "bool":
         r"""
         solve(IKSolver self) -> bool
@@ -6848,6 +6923,8 @@ class IKSolver(object):
         Tries to find a configuration that satifies all simultaneous objectives up to
         the desired tolerance.  
 
+        All of the primary and the secondary objectives are solved simultaneously.  
+
         Returns:  
 
             True if x converged.  
@@ -6855,12 +6932,55 @@ class IKSolver(object):
         """
         return _robotsim.IKSolver_solve(self)
 
+    def minimize(self, *args) -> "bool":
+        r"""
+        minimize(IKSolver self) -> bool
+        minimize(IKSolver self, PyObject * secondary_objective, PyObject * secondary_objective_grad) -> bool
+
+
+        Tries to find a configuration that satifies all simultaneous objectives up to
+        the desired tolerance or minimizes the residual.  
+
+        The relation to `:func:solve` is that `solve` uses a root-finding method that
+        tries indirectly to minimize the residual, but it may stall out when the
+        objectives are infeasible.  
+
+        If secondary objectives are specified, this tries to minimize them once the
+        primary objectives are satisfied, i.e., it will minimize on the solution
+        manifold of the primary constraints.  
+
+        There are two flavors of secondary objectives. If no arguments are given, then
+        any constraints added via `addSecondary` will have their residuals minimized.  
+
+        If the user provides a pair of functions `(f,grad)`, then a custom objective is
+        specified. Here, `f(q)` is the secondary objective to minimize and `grad(q)` its
+        gradient. This will override the secondary objectives added via `addSecondary`.
+        Specifically, q is a function of all robot DOFs, and `grad(q)` should return a
+        list or tuple of length `len(q)``.  
+
+        .. note::  
+
+            The minimization will occur only over the current active DOFs, which will
+            include default active DOFs for secondary objectives.  
+
+        Arguments: secondary_objective (callable): a function `f(q)->float` that should
+        be minimized. secondary_objective_grad (callable): a function
+        `grad(q)->`sequence of length `len(q)` giving the gradient of `f` at `q`.  
+
+        Returns:  
+
+            True if x converged on the primary objectives.  
+
+        """
+        return _robotsim.IKSolver_minimize(self, *args)
+
     def lastSolveIters(self) -> "int":
         r"""
         lastSolveIters(IKSolver self) -> int
 
 
-        Returns the number of Newton-Raphson iterations used in the last solve() call.  
+        Returns the number of Newton-Raphson iterations used in the last solve() call or
+        the number of Quasi-Newton iterations used in the last minimize() call.  
 
         """
         return _robotsim.IKSolver_lastSolveIters(self)
@@ -6877,6 +6997,7 @@ class IKSolver(object):
         return _robotsim.IKSolver_sampleInitial(self)
     robot = property(_robotsim.IKSolver_robot_get, _robotsim.IKSolver_robot_set, doc=r"""robot : RobotModel""")
     objectives = property(_robotsim.IKSolver_objectives_get, _robotsim.IKSolver_objectives_set, doc=r"""objectives : std::vector<(IKObjective,std::allocator<(IKObjective)>)>""")
+    secondary_objectives = property(_robotsim.IKSolver_secondary_objectives_get, _robotsim.IKSolver_secondary_objectives_set, doc=r"""secondary_objectives : std::vector<(IKObjective,std::allocator<(IKObjective)>)>""")
     tol = property(_robotsim.IKSolver_tol_get, _robotsim.IKSolver_tol_set, doc=r"""tol : double""")
     maxIters = property(_robotsim.IKSolver_maxIters_get, _robotsim.IKSolver_maxIters_set, doc=r"""maxIters : int""")
     activeDofs = property(_robotsim.IKSolver_activeDofs_get, _robotsim.IKSolver_activeDofs_set, doc=r"""activeDofs : std::vector<(int,std::allocator<(int)>)>""")

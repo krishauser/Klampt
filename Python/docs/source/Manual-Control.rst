@@ -76,9 +76,10 @@ functionality, or find someone else's implementation for your brand / type of ro
 Writing Control Loops
 ~~~~~~~~~~~~~~~~~~~~~
 
-For your controller code to use an RIL API, it should treat the API as a synchronous
-process, in which all commands and queries at a given time step are placed within a
-``beginStep()``/``endStep()`` block.  The calling convention is:
+An RIL API can either be synchronous or asynchronous.  Synchronous APIs are a little
+more fussy, requiring that all commands and queries at a given time step are placed
+within a ``beginStep()``/``endStep()`` block which is run at approximately a fixed rate.
+The calling convention is:
 
 .. code:: python
 
@@ -96,6 +97,7 @@ process, in which all commands and queries at a given time step are placed withi
         t1 = time.time()
         telapsed = t1 - t0
         [wait for time max(dt - telapsed,0)]
+    interface.close()
 
 To make your code even simpler, we provide the helper classes ``TimedLooper`` and
 ``StepContext`` which are used as follows:
@@ -113,8 +115,29 @@ To make your code even simpler, we provide the helper classes ``TimedLooper`` an
         with StepContext(interface):
             status = interface.status()
             [any interface queries/ commands here comprising the control loop]
+    interface.close()
         
+An asynchronous controller is much easier to work with: just initialize, and call
+whatever queries and commands you wish:
 
+.. code:: python
+
+    interface = MyRobotInterface(...args...)
+    if not interface.initialize():  #should be called first
+        raise RuntimeError("There was some problem initializing interface "+str(interface))
+    [any interface queries / commands can go here, for example...]
+    q = interface.commandedPosition()
+    q[0] += 0.1
+    interface.moveToPosition(q)
+    interface.wait()
+    q[0] -= 0.1
+    interface.moveToPosition(q)
+    interface.wait()
+    interface.close()
+
+You are free to use the synchronous convention with asynchronous controllers as well.
+
+To determine whether an RIL interface is asynchronous, test ``interface.properties.get('asynchronous',False)``.
 
 
 Status Management
@@ -129,7 +152,7 @@ Status Management
 - ``interface.reset()``: if status() is not 'ok', tries to reset to an ok state.
   A controller should not issue commands until status() is 'ok' again.
 - ``interface.estop()``: triggers an emergency stop.  Default just does a soft stop.
-- ``interface.softStop()``: triggers a soft stop.
+- ``interface.softStop()``: triggers a soft stop. 
 
 DOFs, Joints, and Parts
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -168,31 +191,41 @@ piecewise linear and piecewise cubic interpolation, as well as
 smooth move-to commands.  It also allows Cartesian commands to be configured
 and issued. 
 
+Each of these commands begins immediately and returns to the caller immediately.
+A command overrides any prior command to the robot.
+
 Keep in mind that almost all robots will only implement a subset of
 these natively; other commands will be software emulated (via
 :class:`klampt.control.robotinterfaceutils.RobotControllerCompleter`).
+For example, simply implementing ``setPosition`` and then completing it
+will suffice.
 
-**Basic control**
+**Low-level control**
 
 - ``interface.setPosition(q)``: Immediate position control.
-- ``interface.moveToPosition(q,speed=1)``: Smooth position control.
 - ``interface.setVelocity(v,ttl=None)``: Immediate velocity control, with an optional time-to-live.
 - ``interface.setTorque(t,ttl=None)``: Torque control, with an optional time-to-live.
-- ``interface.setVelocity(v,ttl=None)``: Immediate velocity control, with an optional time-to-live.
 - ``interface.setPID(q,dq,t_feedforward=None)``: PID command, with optional feedforward torque.
+
+**Motion queue control**
+
+A motion queue will progressively dole out position, velocity, or PID commands to
+the underlying joint controllers. A conceptual illustration is as follows.
+
+|Motion queue illustration|
+
+- ``interface.moveToPosition(q,speed=1)``: Smooth position control. The semantics of how the motion
+  is generated is implementation-dependent.
 - ``interface.setPiecewiseLinear(times,milestones,relative=True)``: initiates a piecewise linear
   trajectory between the given times and milestones.  If relative=True, time 0 is the current time,
   but otherwise all the times should be greater than ``interface.clock()``.
 - ``interface.setPiecewiseCubic(times,milestones,velocities,relative=True)``: initiates a piecewise
   cubic trajectory between the given times, milestones, and velocities.  If relative=True, time 0 
   is the current time, but otherwise all the times should be greater than ``interface.clock()``.
+- ``interface.destinationConfig()``: returns the final configuration of the queue.
+- ``interface.destinationTime()``: returns the clock time at which the destination is expected to
+  be reached.
 
-time-optimal acceleration-bounded
-trajectories. The trajectory interpolation profile is the standard
-trapezoidal velocity profile, except it also accepts interruption and
-arbitrary start and goal velocities.
-
-|Trapezoidal velocity profiles|
 
 **Cartesian control**
 
@@ -252,17 +285,18 @@ see :ref:`Robot Controllers in Simulation`, the `simulation documentation <Manua
 and the `sensor documentation <Manual-Sensors.html>`__.
 
 
+Controller File Format
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Klampt Control App
-~~~~~~~~~~~~~~~~~~
+RIL interfaces are specified to most tools in a standardized controller file format, specifically, 
+a .py file or python module with a single ``make(robot)`` function that returns a subclass of
+``RobotInterfaceBase``.  For example, ``klampt.control.simrobotcontroller`` returns a kinematically
+simulated robot interface.  Several example controller files for UR5 robots, Robotiq grippers, and
+the Kinova Gen 3 are given in `Klampt-examples <https://github.com/krishauser/Klampt-examples>`__/robotinfo.
 
-The ``klampt_control`` app helps debug functionality of RIL interfaces. 
+This file format is used by ``klampt_control`` and :class:`~klampt.model.robotinfo.RobotInfo`, and
+we plan for it to be the method by which we refer to controller code in the future.
 
-``klampt_control`` and RobotInfo refer to RIL interfaces in a unified format.
-To specify such an interface, provide as input a .py file with a
-single ``make(robot)`` function that returns a subclass of ``RobotInterface`` 
-that implements the desired functionality.  For example,
-``klampt.control.simrobotcontroller`` returns a kinematically simulated robot interface.
 
 
 
@@ -280,8 +314,8 @@ by the communication layer.  The block diagram of the architecture looks like th
 
 For RIL to work, there are a few functions your subclass will need to fill out, at a minimum:
 
-  * :meth:`~klampt.control.robotinterface.RobotInterfaceBase.numJoints` or :meth:`~klampt.control.robotinterface.RobotInterfaceBase.klamptModel`
-  * Either :meth:`~klampt.control.robotinterface.RobotInterfaceBase.clock` or :meth:`~klampt.control.robotinterface.RobotInterfaceBase.controlRate`
+  * :meth:`~klampt.control.robotinterface.RobotInterfaceBase.numJoints`, :meth:`~klampt.control.robotinterface.RobotInterfaceBase.klamptModel`, or ``properties['klamptModelFile']``.
+  * Either :meth:`~klampt.control.robotinterface.RobotInterfaceBase.controlRate` or :meth:`~klampt.control.robotinterface.RobotInterfaceBase.clock`
   * Either :meth:`~klampt.control.robotinterface.RobotInterfaceBase.setPosition`, :meth:`~klampt.control.robotinterface.RobotInterfaceBase.moveToPosition`, :meth:`~klampt.control.robotinterface.RobotInterfaceBase.setVelocity`, 
     :meth:`~klampt.control.robotinterface.RobotInterfaceBase.setTorque`, or :meth:`~klampt.control.robotinterface.RobotInterfaceBase.setPID`
   * Either :meth:`~klampt.control.robotinterface.RobotInterfaceBase.sensedPosition` or :meth:`~klampt.control.robotinterface.RobotInterfaceBase.commandedPosition`
@@ -291,9 +325,65 @@ Given these implementations, we provide a convenience class,
 that will automatically fill in all other parts of the RIL API, e.g., velocity
 control, motion queue control, and Cartesian control.  
 
+Below is a **minimal RIL template**, including the standard ``make`` function 
+that is required for standard RIL controller files::
+
+    from klampt.control import RobotInterfaceBase,RobotInterfaceCompleter
+
+    class MyRobotDriver(RobotInterfaceBase):
+        def __init__(self):
+            RobotInterfaceBase.__init__(self)
+            self.properties['klamptModelFile'] = 'path/to/my/URDF'
+
+        def initialize(self):
+            #TODO: connect to robot
+            return True
+
+        def controlRate(self):
+            return 10  #10Hz or whatever
+
+        def setPosition(self,q):
+            #TODO: send a position command
+            raise NotImplementedError()
+
+        def sensedPosition(self):
+            #TODO: return current joint positions
+            raise NotImplementedError()
+
+    def make(robotModel):
+        return RobotInterfaceCompleter(MyRobotDriver())
+
+Place this in ``myrobot.py`` and run ``klampt_control myrobot.py``.  That's it!
+
+
+
 .. note::
     Move-to and Cartesian control functions are only available if
     ``RobotInterfaceBase.klamptModel()`` is implemented.)
+
+
+
+Software Emulation
+~~~~~~~~~~~~~~~~~~
+
+The RobotControllerCompleter class will perform software-based motion generation, 
+Cartesian control, and filtering automatically given a base interface that implements
+at least one low-level command, such as setPosition.  It can also create virtual
+parts, mixing-and-matching medium-level control (e.g., an arm cartesian command) and
+low-level control (e.g., a gripper setVelocity command) seamlessly. 
+
+For motion generation during ``moveToPosition`` and ``moveToCartesianPosition`` commands, the
+emulator will compute time-optimal acceleration-bounded trajectories.  For this to
+work well, it is very important that the ``klamptModel()`` have accurate velocity
+and acceleration bounds.
+
+|Trapezoidal velocity profiles|
+
+To enable Cartesian control, you will need to call ``addPart`` to create a ``part``
+whose last index corresponds to the driver in ``klamptModel()`` whose link matches the
+end effector.  Then, retrieve the part interface via ``partInterface(partName)`` and
+call ``setToolCoordinates([toolx,tooly,toolz])``.
+
 
 Frankenstein Robots
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -328,14 +418,16 @@ Asynchronous Interfaces
 
 The best practice for implementing an RIL API is to use an *asynchronous*
 interface that does not require the caller to operate with the device driver
-in lock-step.   The :class:`~klampt.control.robotinterfaceutils.ThreadedRobotInterface`
+in lock-step.   
+
+**Automagic method**: The :class:`~klampt.control.robotinterfaceutils.ThreadedRobotInterface`
 and :class:`~klampt.control.robotinterfaceutils.MultiprocessingRobotInterface` classes
-assist with this.  Wrapping a synchronous controller, 
+build asynchronous .  Wrapping a synchronous controller, 
 e.g., ``ThreadedRobotInterface(MyInterface())``, will generate an asynchronous
 interface.  Note that ``beginStep()`` and ``endStep()`` do not need to called in
 asynchronous mode.  
 
-To make your own threaded implementation, you should launch a thread that
+**Manual method**: To make your own threaded implementation, you should launch a thread that
 synchrononously communicates with your robot, while relaying asynchronous
 commands from the caller. The following code does a very basic job of this
 for a position-controlled robot, which only relays the sensed/ commanded
@@ -436,10 +528,66 @@ messages.
 
 
 
+Klampt Control App
+------------------
+
+The ``klampt_control`` app helps debug functionality of RIL interfaces.  It allows you to pose
+the robot, set joint and Cartesian targets, and control individual parts as well.  Moreover, it
+offers a standard server/client interface to your RIL controllers.
+
+``klampt_control`` allows you to operate robots in real time, to debug implementations
+of Robot Interface Layer (RIL) controllers, and launch RIL controllers in server or client
+mode.
+
+A controller script is a Python file or module that contains a function
+``make(RobotModel) -> RobotInterfaceBase``.  We recommend including such a script
+in a :class:`~klampt.model.robotinfo.RobotInfo` JSON file, which specifies
+the controller, model, parts, and end effectors::
+
+   klampt_control Klampt-examples/robotinfo/ur5/ur5_sim.py
+
+.. image:: _static/images/klampt_control.png
+
+Alternatively, the script may be specified directly on
+the command line along with the associated robot or world model.  The following
+launches an interface to control a physical UR5 robot::
+
+   klampt_control Klampt-examples/robotinfo/ur5/controller/ur5_ril.py Klampt-examples/data/robots/ur5.rob
+
+The default kinematic simulation interface is specified with ``klampt.control.simrobotcontroller``,
+so the following controls a virtual UR5::
+
+   klampt_control klampt.control.simrobotcontroller Klampt-examples/data/robots/ur5.rob
+
+Similarly, you can just include the ``--sim`` flag::
+
+   klampt_control --sim Klampt-examples/data/robots/ur5.rob
+
+To launch a controller as an XML-RPC server, you can simply pass the ``--server`` flag::
+
+   klampt_control --server 0.0.0.0:7881 Klampt-examples/robotinfo/ur5/ur5_sim.rob
+
+To run the ``klampt_control`` GUI in client mode, run::
+
+   klampt_control --client http://localhost:7881 
+
+If you are not running on the same machine or do not have the same directory structure, you
+will need to specify the robot file as well::
+
+   klampt_control --client http://[SERVER_IP]:7881 Klampt-examples/robotinfo/ur5/ur5_sim.rob
+
+
+Note: ``klampt_control`` currently does not support logging or motion planning, but will do so in a future
+version of Klampt.
+
+
+
+
 
 
 Under the Hood
 --------------
+
 
 Robot Controllers in Simulation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -494,11 +642,12 @@ actuator with a simulated PID loop at the controller level.
 Default Motion Queue Controller
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-|Motion queue illustration|
-
 The default :class:`~klampt.SimRobotController` for simulated robots
 is a motion-queued controller with optional feedforward torques,
-which simulates typical controllers for industrial robots. 
+which simulates typical controllers for industrial robots.  
+The trajectory interpolation profile is the standard trapezoidal
+velocity profile, except it also accepts interruption and
+arbitrary start and goal velocities.
 
 (Note: One limitation of the API is that it is impossible to have
 a subset of joints controlled by a motion queue, while others are

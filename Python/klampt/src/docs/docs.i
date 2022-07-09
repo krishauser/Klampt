@@ -420,7 +420,12 @@ Retrieves a point.
 
 %feature("docstring") ConvexHull::getPoints "
 
-Retrieves a view of the points as an nx3 Numpy array.  
+Retrieves a view of the points.  
+
+Returns:  
+
+    ndarray: an nx3 Numpy array. Setting elements of this array will
+    change the points.  
 ";
 
 %feature("docstring") ConvexHull::ConvexHull "
@@ -1628,67 +1633,44 @@ Typical calling pattern is::
 C++ includes: robotik.h
 ";
 
+%feature("docstring") IKSolver::getSecondaryResidual "
+
+Returns the vector describing the error of the secondary objective at the
+current configuration.  
+";
+
+%feature("docstring") IKSolver::IKSolver "
+
+Initializes an IK solver. Given a RobotModel, an empty solver is created. Given
+an IK solver, acts as a copy constructor.  
+";
+
+%feature("docstring") IKSolver::IKSolver "
+
+Initializes an IK solver. Given a RobotModel, an empty solver is created. Given
+an IK solver, acts as a copy constructor.  
+";
+
+%feature("docstring") IKSolver::clear "
+
+Clears objectives.  
+";
+
+%feature("docstring") IKSolver::setBiasConfig "
+
+Biases the solver to approach a given configuration. Setting an empty vector
+clears the bias term.  
+";
+
 %feature("docstring") IKSolver::copy "
 
 Copy constructor.  
 ";
 
-%feature("docstring") IKSolver::setMaxIters "
+%feature("docstring") IKSolver::getJacobian "
 
-Sets the max # of iterations (default 100)  
-";
-
-%feature("docstring") IKSolver::IKSolver "
-
-Initializes an IK solver. Given a RobotModel, an empty solver is created. Given
-an IK solver, acts as a copy constructor.  
-";
-
-%feature("docstring") IKSolver::IKSolver "
-
-Initializes an IK solver. Given a RobotModel, an empty solver is created. Given
-an IK solver, acts as a copy constructor.  
-";
-
-%feature("docstring") IKSolver::getMaxIters "
-
-Returns the max # of iterations.  
-";
-
-%feature("docstring") IKSolver::set "
-
-Assigns an existing objective added by add.  
-";
-
-%feature("docstring") IKSolver::getJointLimits "
-
-Returns the limits on the robot's configuration (by default this is the robot's
-joint limits.  
-";
-
-%feature("docstring") IKSolver::getActiveDofs "
-
-Returns the active degrees of freedom.  
-";
-
-%feature("docstring") IKSolver::solve "
-
-Tries to find a configuration that satifies all simultaneous objectives up to
-the desired tolerance.  
-
-Returns:  
-
-    True if x converged.  
-";
-
-%feature("docstring") IKSolver::lastSolveIters "
-
-Returns the number of Newton-Raphson iterations used in the last solve() call.  
-";
-
-%feature("docstring") IKSolver::isSolved "
-
-Returns True if the current configuration residual is less than tol.  
+Computes the matrix describing the instantaneous derivative of the objective
+with respect to the active Dofs.  
 ";
 
 %feature("docstring") IKSolver::setTolerance "
@@ -1696,9 +1678,105 @@ Returns True if the current configuration residual is less than tol.
 Sets the constraint solve tolerance (default 1e-3)  
 ";
 
+%feature("docstring") IKSolver::solve "
+
+Tries to find a configuration that satifies all simultaneous objectives up to
+the desired tolerance.  
+
+All of the primary and the secondary objectives are solved simultaneously.  
+
+Returns:  
+
+    True if x converged.  
+";
+
+%feature("docstring") IKSolver::set "
+
+Assigns an existing objective added by add.  
+";
+
+%feature("docstring") IKSolver::setSecondary "
+
+Assigns an existing objective added by addsecondary.  
+";
+
+%feature("docstring") IKSolver::addSecondary "
+
+Adds a new objective to the secondary objectives list.  
+";
+
 %feature("docstring") IKSolver::add "
 
 Adds a new simultaneous objective.  
+";
+
+%feature("docstring") IKSolver::getActiveDofs "
+
+Returns the active degrees of freedom.  
+";
+
+%feature("docstring") IKSolver::getResidual "
+
+Returns the vector describing the error of the objective at the current
+configuration.  
+";
+
+%feature("docstring") IKSolver::setJointLimits "
+
+Sets limits on the robot's configuration. If empty, this turns off joint limits.  
+";
+
+%feature("docstring") IKSolver::setMaxIters "
+
+Sets the max # of iterations (default 100)  
+";
+
+%feature("docstring") IKSolver::minimize "
+
+Tries to find a configuration that satifies all simultaneous objectives up to
+the desired tolerance, or minimizes the residual if they cannot be met. (Only
+the last override is documented...)  
+";
+
+%feature("docstring") IKSolver::minimize "
+
+Tries to find a configuration that satifies all simultaneous objectives up to
+the desired tolerance or minimizes the residual.  
+
+The relation to `:func:solve` is that `solve` uses a root-finding method that
+tries indirectly to minimize the residual, but it may stall out when the
+objectives are infeasible.  
+
+If secondary objectives are specified, this tries to minimize them once the
+primary objectives are satisfied, i.e., it will minimize on the solution
+manifold of the primary constraints.  
+
+There are two flavors of secondary objectives. If no arguments are given, then
+any constraints added via `addSecondary` will have their residuals minimized.  
+
+If the user provides a pair of functions `(f,grad)`, then a custom objective is
+specified. Here, `f(q)` is the secondary objective to minimize and `grad(q)` its
+gradient. This will override the secondary objectives added via `addSecondary`.
+Specifically, q is a function of all robot DOFs, and `grad(q)` should return a
+list or tuple of length `len(q)``.  
+
+.. note::  
+
+    The minimization will occur only over the current active DOFs, which will
+    include default active DOFs for secondary objectives.  
+
+Arguments: secondary_objective (callable): a function `f(q)->float` that should
+be minimized. secondary_objective_grad (callable): a function
+`grad(q)->`sequence of length `len(q)` giving the gradient of `f` at `q`.  
+
+Returns:  
+
+    True if x converged on the primary objectives.  
+";
+
+%feature("docstring") IKSolver::getMaxIters "
+
+Returns the max # of iterations.  
 ";
 
 %feature("docstring") IKSolver::getTolerance "
@@ -1706,9 +1784,21 @@ Adds a new simultaneous objective.
 Returns the constraint solve tolerance.  
 ";
 
-%feature("docstring") IKSolver::setJointLimits "
+%feature("docstring") IKSolver::lastSolveIters "
 
-Sets limits on the robot's configuration. If empty, this turns off joint limits.  
+Returns the number of Newton-Raphson iterations used in the last solve() call or
+the number of Quasi-Newton iterations used in the last minimize() call.  
+";
+
+%feature("docstring") IKSolver::isSolved "
+
+Returns True if the current configuration residual is less than tol.  
+";
+
+%feature("docstring") IKSolver::getJointLimits "
+
+Returns the limits on the robot's configuration (by default this is the robot's
+joint limits.  
 ";
 
 %feature("docstring") IKSolver::getBiasConfig "
@@ -1722,32 +1812,9 @@ Samples an initial random configuration. More initial configurations can be
 sampled in case the prior configs lead to local minima.  
 ";
 
-%feature("docstring") IKSolver::clear "
-
-Clears objectives.  
-";
-
 %feature("docstring") IKSolver::setActiveDofs "
 
 Sets the active degrees of freedom.  
-";
-
-%feature("docstring") IKSolver::setBiasConfig "
-
-Biases the solver to approach a given configuration. Setting an empty vector
-clears the bias term.  
-";
-
-%feature("docstring") IKSolver::getJacobian "
-
-Computes the matrix describing the instantaneous derivative of the objective
-with respect to the active Dofs.  
-";
-
-%feature("docstring") IKSolver::getResidual "
-
-Returns the vector describing the error of the objective at the current
-configuration.  
 ";
 
 // File: classMass.xml
@@ -1986,27 +2053,26 @@ Examples::
     pc.vertices.append(0)
     pc.vertices.append(0)
     pc.properties.append(0)
-    print(len(pc.vertices))  #prints 3
-    print(pc.numPoints())  #prints 1
+    print(len(pc.vertices)) #prints 3
+    print(pc.numPoints())   #prints 1
     #add another point with coordinates (1,2,3)
     pc.addPoint([1,2,3])
     #this prints 2
     print(pc.numPoints() )
+    print(pc.getPoints())   #prints [[0,0,0],[1,2,3]]
     #this prints 2, because there is 1 property category x 2 points
-    print(len(pc.properties.size()))
+    print(pc.properties.size())
+    assert pc.propertyNames.size() == pc.getAllProperties().shape[1]
     #this prints 0; this is the default value added when addPoint is called
     print(pc.getProperty(1,0) )  
 
 To get all points as an n x 3 numpy array::  
 
-    points = np.array(pc.vertices).reshape((pc.numPoints(),3))  
+    points = pc.getPoints()  
 
 To get all properties as a n x k numpy array::  
 
-    properties = np.array(pc.properties)
-    properties.reshape((p.numPoints(),p.numProperties()))  
-
-(Or use the convenience functions in :mod:`klampt.io.numpy_convert`)  
+    properties = pc.getAllProperties()  
 
 C++ includes: geometry.h
 ";
@@ -2087,16 +2153,29 @@ intrinsics parameters. The depth is given as a size hxw array, top to bottom.
 %feature("docstring") PointCloud::getProperties "
 
 Returns property pindex of all points as an array.  
+
+Returns:  
+
+    ndarray: an n-D Numpy array.  
 ";
 
 %feature("docstring") PointCloud::getProperties "
 
 Returns property named pindex of all points as an array.  
+
+Returns:  
+
+    ndarray: an n-D Numpy array.  
 ";
 
 %feature("docstring") PointCloud::getAllProperties "
 
-Returns all the properties as an nxp array.  
+Returns all the properties of all points as an array view.  
+
+Returns:  
+
+    ndarray: an nxk Numpy array. Setting elements of this array will
+    change the vertices.  
 ";
 
 %feature("docstring") PointCloud::setRGBDImages_i_s "
@@ -2147,7 +2226,7 @@ Sets all the points to the given nx3 Numpy array.
 
 %feature("docstring") PointCloud::setProperties "
 
-Sets all the properties of all points to the given nxp array.  
+Sets all the properties of all points to the given nxk array.  
 ";
 
 %feature("docstring") PointCloud::setProperties "
@@ -2195,7 +2274,12 @@ Returns the property named pname of point index.
 
 %feature("docstring") PointCloud::getPoints "
 
-Returns a view of the points as an nx3 Numpy array.  
+Returns a view of the points.  
+
+Returns:  
+
+    ndarray: an nx3 Numpy array. Setting elements of this array will
+    change the points.  
 ";
 
 // File: classPointPoser.xml
@@ -2276,7 +2360,7 @@ Retrieves the (angular velocity, velocity) of the rigid object.
 
 Returns:  
 
-    tuple: a pair of 3-lists (w,v) where w is the angular velocity
+    A pair of 3-lists (w,v) where w is the angular velocity
     vector and v is the translational velocity vector (both in world
     coordinates)  
 ";
@@ -2492,8 +2576,7 @@ nonstandard joints.
 
 Returns:  
 
-    list of floats: The n-element configuration that is u fraction of
-    the way from a to b  
+    The n-element configuration that is u fraction of the way from a to b.  
 ";
 
 %feature("docstring") RobotModel::getComJacobian "
@@ -2540,12 +2623,19 @@ Enables/disables self collisions between two links (depending on value)
 
 %feature("docstring") RobotModel::accelFromTorques "
 
-Computes the foward dynamics (using Recursive Newton Euler solver)  
+Computes the foward dynamics. Uses Recursive Newton Euler solver and takes O(n)
+time.  
+
+Specifically, solves for :math:`\\ddot{q}` in the (partial) dynamics equation:  
+
+.. math::  
+
+    `B(q) \\ddot{q} + C(q,@dot {q}) = \\tau`  
 
 .. note::  
 
-    Does not include gravity term G(q).  getGravityForces(g) will need
-    to be subtracted from the argument t.  
+    Does not include gravity term G(q).  getGravityForces(g) will
+    need to be subtracted from the argument t.  
 
 Returns:  
 
@@ -2689,10 +2779,16 @@ Returns the number of links = number of DOF's.
 Computes the inverse dynamics. Uses Recursive Newton Euler solver and takes O(n)
 time.  
 
+Specifically, solves for :math:`\\tau` in the (partial) dynamics equation:  
+
+.. math::  
+
+    `B(q) \\ddot{q} + C(q,@dot {q}) = \\tau`  
+
 .. note::  
 
-    Does not include gravity term G(q).  getGravityForces(g) will need
-    to be added to the result.  
+    Does not include gravity term G(q).  getGravityForces(g) will
+    need to be added to the result.  
 
 Returns:  
 
@@ -4401,13 +4497,11 @@ Examples::
 
 To get all vertices as a numpy array::  
 
-    verts = np.array(m.vertices).reshape((len(m.vertices)//3,3))  
+    verts = m.getVertices()  
 
 To get all indices as a numpy array::  
 
-    inds = np.array(m.indices,dtype=np.int32).reshape((len(m.indices)//3,3))  
-
-(Or use the convenience functions in :mod:`klampt.io.numpy_convert`)  
+    inds = m.getIndices()  
 
 C++ includes: geometry.h
 ";
@@ -4427,7 +4521,12 @@ Translates all the vertices by v=v+t.
 
 %feature("docstring") TriangleMesh::getIndices "
 
-Retrieves a view of the vertices as an mx3 Numpy array.  
+Retrieves an array view of the triangle indices.  
+
+Returns:  
+
+    ndarray: an mx3 Numpy array of int32 type. Setting elements of this
+    array will change the indices.  
 ";
 
 %feature("docstring") TriangleMesh::transform "
@@ -4437,7 +4536,12 @@ Transforms all the vertices by the rigid transform v=R*v+t.
 
 %feature("docstring") TriangleMesh::getVertices "
 
-Retrieves a view of the vertices as an nx3 Numpy array.  
+Retrieves an array view of the vertices.  
+
+Returns:  
+
+    ndarray: an nx3 Numpy array. Setting elements of this array will
+    change the vertices.  
 ";
 
 %feature("docstring") TriangleMesh::setIndices "
@@ -4502,6 +4606,8 @@ C++ includes: geometry.h
 ";
 
 %feature("docstring") VolumeGrid::get "
+
+Gets a specific element of a cell.  
 ";
 
 %feature("docstring") VolumeGrid::getValues "
@@ -4516,12 +4622,18 @@ Returns a 3D Numpy array view of the values.
 ";
 
 %feature("docstring") VolumeGrid::set "
+
+Sets all elements to a uniform value (e.g., 0)  
 ";
 
 %feature("docstring") VolumeGrid::set "
+
+Sets a specific element of a cell.  
 ";
 
 %feature("docstring") VolumeGrid::setValues "
+
+Sets the values to a 3D numpy array.  
 ";
 
 %feature("docstring") VolumeGrid::resize "

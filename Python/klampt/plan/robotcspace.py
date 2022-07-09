@@ -171,11 +171,15 @@ class ClosedLoopRobotCSpace(RobotCSpace):
     def sample(self):
         """Samples directly on the contact manifold.  The basic method samples
         arbitrarily in the configuration space and then solves IK constraints. 
-        This may be an ineffective method especially for floating-base robots, 
-        since the floating joints may be sampled arbitrarily.
+
+        Note that this may be an ineffective method especially for floating-base
+        robots, since the floating joints may be sampled arbitrarily.  To maximize
+        performance, better problem-speciifc sampling distributions should be
+        implemented by a subclass, if possible.
         """
         x = RobotCSpace.sample(self)
-        return self.solveConstraints(x)
+        res = self.solveConstraints(x)
+        return res
 
     def sampleneighborhood(self,c,r):
         """Samples a neighborhood in ambient space and then projects onto the
@@ -299,7 +303,7 @@ class ImplicitManifoldRobotCSpace(RobotCSpace):
         """
         if tol==None: tol = self.tol
         if maxIters==None: maxIters = self.maxIters
-        import rootfind
+        from klampt import rootfind
         rootfind.setXTolerance(1e-8)
         rootfind.setFTolerance(tol)
         rootfind.setVectorField(self.implicitConstraint)
@@ -331,7 +335,7 @@ class EmbeddedRobotCSpace(EmbeddedCSpace):
         EmbeddedCSpace.__init__(self,ambientspace,subset,xinit)
         #do monkey-patching needed to make the sampler work properly for closed-loop spaces
         if isinstance(ambientspace,ImplicitManifoldRobotCSpace):
-            import rootfind
+            from klampt import rootfind
             def subsetImplicitConstraint(x):
                 return self.ambientSpace.implicitConstraint(self.lift(x))
             def solveManifold(x):
