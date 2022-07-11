@@ -4687,14 +4687,12 @@ void RobotModel::getComJacobian(double** out,int* m,int* n)
   robot->GetCOMJacobian(J);
 }
 
-
 void RobotModel::getComJacobianCols(const std::vector<int>& links,double** out,int* m,int* n)
 {
   if(!robot) throw PyException("RobotModel is empty");
-  throw PyException("NOT IMPLEMENTED YET");
   Matrix J;
-  robot->GetCOMJacobian(J);
-  copy(J,out);
+  MakeNumpyArray(out,m,n,3,(int)links.size(),J);
+  robot->GetCOMJacobian(links,J);
 }
 
 void RobotModel::getLinearMomentum(double out[3])
@@ -6112,34 +6110,6 @@ void SimRobotSensor::getMeasurements(double** out,int* m)
   *m = (int)vout.size();
   *out = (double*)malloc((*m)*sizeof(double));
   copy(vout.begin(),vout.end(),*out);
-}
-
-void SimRobotSensor::getMeasurementsBytes(char* buf,size_t size)
-{
-  if(!sensor)
-    throw PyException("SimRobotSensor is not initialized");
-  if(0 == strcmp(sensor->Type(),"CameraSensor")) {
-    CameraSensor* cam = dynamic_cast<CameraSensor*>(sensor);
-    if(size < cam->pixels.size() + cam->floats.size()*sizeof(float)) {
-      throw PyException("Buffer is too small to receive measurements");
-    }
-    size_t start = 0;
-    if(!cam->pixels.empty()) {
-      memcpy(buf,&cam->pixels[0],cam->pixels.size());
-      start += cam->pixels.size();
-    }
-    if(!cam->floats.empty()) {
-      memcpy(buf+start,&cam->floats[0],cam->floats.size()*sizeof(float));
-    }
-  }
-  else {
-    vector<double> measurements;
-    sensor->GetMeasurements(measurements);
-    if(size < measurements.size()*sizeof(double)) {
-      throw PyException("Buffer is too small to receive measurements");
-    }
-    memcpy(buf,&measurements[0],measurements.size()*sizeof(double));
-  }
 }
 
 std::vector<std::string> SimRobotSensor::settings()

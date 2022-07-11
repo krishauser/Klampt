@@ -310,7 +310,7 @@ class RobotModelLink
   ///    ndarray: the 3xlen(links) orientation Jacobian matrix of the
   ///    link.
   ///
-  void getRotationJacobianCols(const std::vector<int>& links,double** np_out2,int* m,int* n);
+  void getOrientationJacobianCols(const std::vector<int>& links,double** np_out2,int* m,int* n);
 
   ///Computes the acceleration of the link origin given the robot's current
   ///joint configuration and velocities, and the joint accelerations ddq.
@@ -588,28 +588,21 @@ class RobotModel
   ///Computes the Jacobian matrix of the current center of mass
   ///
   ///Returns:
-<<<<<<< HEAD
-  ///
-  ///    (list of 3 lists): a 3xn matrix J such that np.dot(J,dq) gives the
-  ///    COM velocity at the current configuration
-  void getComJacobian(std::vector<std::vector<double> >& out);
-  ///Returns the Jacobian matrix of the current center of mass w.r.t. some
-  ///links of the robot
-  ///
-  ///Returns:
-  ///
-  ///    (list of 3 lists): a 3xlen(links) matrix J such that np.dot(J,dq)
-  ///    gives the COM velocity at the current configuration
-  void getComJacobian2(const std::vector<int>& links,std::vector<std::vector<double> >& out);
-  ///Returns the 3D linear momentum vector
-=======
   /// 
   ///    ndarray: a 3xn matrix J such that np.dot(J,dq) gives the
   ///    COM velocity at the currene configuration
   /// 
   void getComJacobian(double** np_out2,int* m,int* n);
+  ///Returns the Jacobian matrix of the current center of mass w.r.t. some
+  ///links of the robot
+  ///
+  ///Returns:
+  ///
+  ///    ndarray: a 3xlen(links) matrix J such that np.dot(J,dqlinks)
+  ///    gives the COM velocity at the current configuration, and dqlinks
+  ///    is the array of velocities of the links given by `links`
+  void getComJacobianCols(const std::vector<int>& links,double** np_out2,int* m,int* n);
   ///Computes the 3D linear momentum vector
->>>>>>> master
   void getLinearMomentum(double out[3]);
   ///Computes the 3D angular momentum vector
   void getAngularMomentum(double out[3]);

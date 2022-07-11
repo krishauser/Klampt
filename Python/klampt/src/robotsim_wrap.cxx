@@ -38244,7 +38244,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_RobotModelLink_getRotationJacobianCols(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_RobotModelLink_getOrientationJacobianCols(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RobotModelLink *arg1 = (RobotModelLink *) 0 ;
   std::vector< int,std::allocator< int > > *arg2 = 0 ;
@@ -38264,26 +38264,26 @@ SWIGINTERN PyObject *_wrap_RobotModelLink_getRotationJacobianCols(PyObject *SWIG
     arg4 = &dim1_temp3;
     arg5 = &dim2_temp3;
   }
-  if (!SWIG_Python_UnpackTuple(args, "RobotModelLink_getRotationJacobianCols", 2, 2, swig_obj)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "RobotModelLink_getOrientationJacobianCols", 2, 2, swig_obj)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_RobotModelLink, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelLink_getRotationJacobianCols" "', argument " "1"" of type '" "RobotModelLink *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelLink_getOrientationJacobianCols" "', argument " "1"" of type '" "RobotModelLink *""'"); 
   }
   arg1 = reinterpret_cast< RobotModelLink * >(argp1);
   {
     std::vector< int,std::allocator< int > > *ptr = (std::vector< int,std::allocator< int > > *)0;
     res2 = swig::asptr(swig_obj[1], &ptr);
     if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "RobotModelLink_getRotationJacobianCols" "', argument " "2"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "RobotModelLink_getOrientationJacobianCols" "', argument " "2"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "RobotModelLink_getRotationJacobianCols" "', argument " "2"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "RobotModelLink_getOrientationJacobianCols" "', argument " "2"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
     }
     arg2 = ptr;
   }
   {
     try {
-      (arg1)->getRotationJacobianCols((std::vector< int,std::allocator< int > > const &)*arg2,arg3,arg4,arg5);
+      (arg1)->getOrientationJacobianCols((std::vector< int,std::allocator< int > > const &)*arg2,arg3,arg4,arg5);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -67245,8 +67245,8 @@ static PyMethodDef SwigMethods[] = {
 		"    point given by local coordinates plocal.  \n"
 		"\n"
 		""},
-	 { "RobotModelLink_getRotationJacobianCols", _wrap_RobotModelLink_getRotationJacobianCols, METH_VARARGS, "\n"
-		"RobotModelLink_getRotationJacobianCols(RobotModelLink self, intVector links)\n"
+	 { "RobotModelLink_getOrientationJacobianCols", _wrap_RobotModelLink_getOrientationJacobianCols, METH_VARARGS, "\n"
+		"RobotModelLink_getOrientationJacobianCols(RobotModelLink self, intVector links)\n"
 		"\n"
 		"\n"
 		"Returns the orientation jacobian this link w.r.t. specified entries of the\n"

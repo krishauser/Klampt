@@ -7,16 +7,16 @@
 %feature("docstring") AABBPoser "
 ";
 
-%feature("docstring") AABBPoser::get "
+%feature("docstring") AABBPoser::set "
 ";
 
-%feature("docstring") AABBPoser::set "
+%feature("docstring") AABBPoser::setFrame "
 ";
 
 %feature("docstring") AABBPoser::AABBPoser "
 ";
 
-%feature("docstring") AABBPoser::setFrame "
+%feature("docstring") AABBPoser::get "
 ";
 
 // File: classAppearance.xml
@@ -39,11 +39,31 @@ as possible.
 C++ includes: appearance.h
 ";
 
-%feature("docstring") Appearance::refresh "
+%feature("docstring") Appearance::drawWorldGL "
 
-call this to rebuild internal buffers, e.g., when the OpenGL context changes. If
-deep=True, the entire data structure will be revised. Use this for streaming
-data, for example.  
+Draws the given geometry with this appearance. NOTE: for best performance, an
+appearance should only be drawn with a single geometry. Otherwise, the OpenGL
+display lists will be completely recreated.  
+
+Differs from drawGL in that the geometry's current transform is applied before
+drawing.  
+";
+
+%feature("docstring") Appearance::setSilhouette "
+
+For meshes sets a silhouette radius and color. Set the radius to 0 to disable
+silhouette drawing.  
+";
+
+%feature("docstring") Appearance::clone "
+
+Creates a standalone appearance from this appearance.  
+";
+
+%feature("docstring") Appearance::Appearance "
+";
+
+%feature("docstring") Appearance::Appearance "
 ";
 
 %feature("docstring") Appearance::setDraw "
@@ -59,19 +79,52 @@ If two arguments are given, turns the feature (first int argument) visibility on
 or off. feature can be ALL, VERTICES, EDGES, or FACES.  
 ";
 
-%feature("docstring") Appearance::~Appearance "
+%feature("docstring") Appearance::getShininess "
+
+Retrieves the specular highlight shininess.  
 ";
 
-%feature("docstring") Appearance::setColors "
+%feature("docstring") Appearance::setTexWrap "
 
-Sets per-element color for elements of the given feature type. Must be an mxn
-array. m is the number of features of that type, and n is either 3 or 4.  
+Sets whether textures are to wrap (default true)  
+";
 
-If n == 4, they are assumed to be rgba values, and  
+%feature("docstring") Appearance::getElementColor "
 
-If n == 3, each row is an rgb value.  
+Gets the per-element color for the given feature.  
+";
 
-Only supports feature=VERTICES and feature=FACES  
+%feature("docstring") Appearance::setTexture2D_b "
+
+Sets a 2D texture of the given width/height. See :func:`setTexture1D_b` for
+valid format strings.  
+
+The array is given in top to bottom order if `topdown==True`. Otherwise, it is
+given in order bottom to top.  
+";
+
+%feature("docstring") Appearance::isStandalone "
+
+Returns true if this is a standalone appearance.  
+";
+
+%feature("docstring") Appearance::setCreaseAngle "
+
+For meshes, sets the crease angle. Set to 0 to disable smoothing.  
+";
+
+%feature("docstring") Appearance::refresh "
+
+call this to rebuild internal buffers, e.g., when the OpenGL context changes. If
+deep=True, the entire data structure will be revised. Use this for streaming
+data, for example.  
+";
+
+%feature("docstring") Appearance::setShininess "
+
+Sets the specular highlight shininess and strength. To turn off, use
+`setShininess(0)`. The specular strength can be set via the second argument.
+`setShininess(20,0.1)`. Note that this changes the specular color.  
 ";
 
 %feature("docstring") Appearance::getDraw "
@@ -85,6 +138,26 @@ If no arguments are given, returns whether the object is visible.
 
 If one int argument is given, returns whether the given feature is visible.
 feature can be ALL, VERTICES, EDGES, or FACES.  
+";
+
+%feature("docstring") Appearance::setPointSize "
+
+For point clouds, sets the point size.  
+";
+
+%feature("docstring") Appearance::setTexgen "
+
+Sets the texture generation. The array must be size m x 4, with m in the range
+0,...,4. If worldcoordinates=true, the texture generation is performed in world
+coordinates rather than object coordinates.  
+";
+
+%feature("docstring") Appearance::setTexcoords2D "
+
+Sets per-vertex texture coordinates for a 2D texture. uvs is an array of shape
+(nx2) containing U-V coordinates [[u1, v1], [u2, v2], ..., [un, vn]].  
+
+You may also set uvs to be empty, which turns off texture mapping altogether.  
 ";
 
 %feature("docstring") Appearance::drawGL "
@@ -107,16 +180,16 @@ Note that the geometry's current transform is NOT respected, and this only draws
 the geometry in its local transform.  
 ";
 
-%feature("docstring") Appearance::setTexcoords1D "
+%feature("docstring") Appearance::setColors "
 
-Sets per-vertex texture coordinates for a 1D texture.  
+Sets per-element color for elements of the given feature type. Must be an mxn
+array. m is the number of features of that type, and n is either 3 or 4.  
 
-You may also set uvs to be empty, which turns off texture mapping altogether.  
-";
+If n == 4, they are assumed to be rgba values, and  
 
-%feature("docstring") Appearance::clone "
+If n == 3, each row is an rgb value.  
 
-Creates a standalone appearance from this appearance.  
+Only supports feature=VERTICES and feature=FACES  
 ";
 
 %feature("docstring") Appearance::setElementColor "
@@ -124,25 +197,15 @@ Creates a standalone appearance from this appearance.
 Sets the per-element color for the given feature.  
 ";
 
-%feature("docstring") Appearance::setTexcoords2D "
+%feature("docstring") Appearance::setTexture1D_i "
 
-Sets per-vertex texture coordinates for a 2D texture. uvs is an array of shape
-(nx2) containing U-V coordinates [[u1, v1], [u2, v2], ..., [un, vn]].  
+Sets a 1D texture of the given width. Valid format strings are.  
 
-You may also set uvs to be empty, which turns off texture mapping altogether.  
-";
-
-%feature("docstring") Appearance::setSilhouette "
-
-For meshes sets a silhouette radius and color. Set the radius to 0 to disable
-silhouette drawing.  
-";
-
-%feature("docstring") Appearance::setShininess "
-
-Sets the specular highlight shininess and strength. To turn off, use
-`setShininess(0)`. The specular strength can be set via the second argument.
-`setShininess(20,0.1)`. Note that this changes the specular color.  
+*   \"\": turn off texture mapping  
+*   rgba8: unsigned byte RGBA colors with red in the 1st byte and alpha in the
+    4th  
+*   bgra8: unsigned byte RGBA colors with blue in the 1st byte and alpha in the
+    4th  
 ";
 
 %feature("docstring") Appearance::setColor "
@@ -158,24 +221,6 @@ If 5 arguments are given, changes the color of the given feature. feature can be
 ALL, VERTICES, EDGES, FACES, EMISSIVE, or SPECULAR.  
 ";
 
-%feature("docstring") Appearance::setTexgen "
-
-Sets the texture generation. The array must be size m x 4, with m in the range
-0,...,4. If worldcoordinates=true, the texture generation is performed in world
-coordinates rather than object coordinates.  
-";
-
-%feature("docstring") Appearance::setPointSize "
-
-For point clouds, sets the point size.  
-";
-
-%feature("docstring") Appearance::Appearance "
-";
-
-%feature("docstring") Appearance::Appearance "
-";
-
 %feature("docstring") Appearance::setTexture1D_b "
 
 Sets a 1D texture of the given width. Valid format strings are.  
@@ -184,24 +229,10 @@ Sets a 1D texture of the given width. Valid format strings are.
 *   l8: unsigned byte grayscale colors  
 ";
 
-%feature("docstring") Appearance::setCreaseAngle "
+%feature("docstring") Appearance::setTexture2D_channels "
 
-For meshes, sets the crease angle. Set to 0 to disable smoothing.  
-";
-
-%feature("docstring") Appearance::setTexture2D_i "
-
-Sets a 2D texture of the given width/height. See :func:`setTexture1D_i` for
-valid format strings.  
-
-The array is given in top to bottom order if `topdown==True`. Otherwise, it is
-given in order bottom to top.  
-";
-
-%feature("docstring") Appearance::setTexture2D_b "
-
-Sets a 2D texture of the given width/height. See :func:`setTexture1D_b` for
-valid format strings.  
+Sets a 2D texture of the given width/height from a 3D array of channels. See
+:func:`setTexture1D_channels` for valid format strings.  
 
 The array is given in top to bottom order if `topdown==True`. Otherwise, it is
 given in order bottom to top.  
@@ -212,24 +243,14 @@ given in order bottom to top.
 Frees the data associated with this appearance, if standalone.  
 ";
 
-%feature("docstring") Appearance::getElementColor "
+%feature("docstring") Appearance::setTexcoords1D "
 
-Gets the per-element color for the given feature.  
+Sets per-vertex texture coordinates for a 1D texture.  
+
+You may also set uvs to be empty, which turns off texture mapping altogether.  
 ";
 
-%feature("docstring") Appearance::getShininess "
-
-Retrieves the specular highlight shininess.  
-";
-
-%feature("docstring") Appearance::setTexWrap "
-
-Sets whether textures are to wrap (default true)  
-";
-
-%feature("docstring") Appearance::set "
-
-Copies the appearance of the argument into this appearance.  
+%feature("docstring") Appearance::~Appearance "
 ";
 
 %feature("docstring") Appearance::setTexture1D_channels "
@@ -262,39 +283,18 @@ If 1 arguments are given, returns the color of the given feature. feature.
 feature can be ALL, VERTICES, EDGES, FACES, EMISSIVE, or SPECULAR.  
 ";
 
-%feature("docstring") Appearance::setTexture1D_i "
+%feature("docstring") Appearance::setTexture2D_i "
 
-Sets a 1D texture of the given width. Valid format strings are.  
-
-*   \"\": turn off texture mapping  
-*   rgba8: unsigned byte RGBA colors with red in the 1st byte and alpha in the
-    4th  
-*   bgra8: unsigned byte RGBA colors with blue in the 1st byte and alpha in the
-    4th  
-";
-
-%feature("docstring") Appearance::isStandalone "
-
-Returns true if this is a standalone appearance.  
-";
-
-%feature("docstring") Appearance::setTexture2D_channels "
-
-Sets a 2D texture of the given width/height from a 3D array of channels. See
-:func:`setTexture1D_channels` for valid format strings.  
+Sets a 2D texture of the given width/height. See :func:`setTexture1D_i` for
+valid format strings.  
 
 The array is given in top to bottom order if `topdown==True`. Otherwise, it is
 given in order bottom to top.  
 ";
 
-%feature("docstring") Appearance::drawWorldGL "
+%feature("docstring") Appearance::set "
 
-Draws the given geometry with this appearance. NOTE: for best performance, an
-appearance should only be drawn with a single geometry. Otherwise, the OpenGL
-display lists will be completely recreated.  
-
-Differs from drawGL in that the geometry's current transform is applied before
-drawing.  
+Copies the appearance of the argument into this appearance.  
 ";
 
 // File: classBoxPoser.xml
@@ -303,7 +303,7 @@ drawing.
 %feature("docstring") BoxPoser "
 ";
 
-%feature("docstring") BoxPoser::BoxPoser "
+%feature("docstring") BoxPoser::getTransform "
 ";
 
 %feature("docstring") BoxPoser::set "
@@ -312,13 +312,13 @@ drawing.
 %feature("docstring") BoxPoser::setDims "
 ";
 
-%feature("docstring") BoxPoser::getDims "
-";
-
-%feature("docstring") BoxPoser::getTransform "
+%feature("docstring") BoxPoser::BoxPoser "
 ";
 
 %feature("docstring") BoxPoser::setTransform "
+";
+
+%feature("docstring") BoxPoser::getDims "
 ";
 
 // File: classContactParameters.xml
@@ -393,22 +393,9 @@ Attributes:
 C++ includes: geometry.h
 ";
 
-%feature("docstring") ConvexHull::getPoint "
-
-Retrieves a point.  
-";
-
 %feature("docstring") ConvexHull::setPoints "
 
 Sets all points to the given nx3 Numpy array.  
-";
-
-%feature("docstring") ConvexHull::translate "
-
-Translates all the vertices by v=v+t.  
-";
-
-%feature("docstring") ConvexHull::ConvexHull "
 ";
 
 %feature("docstring") ConvexHull::addPoint "
@@ -416,14 +403,12 @@ Translates all the vertices by v=v+t.
 Adds a point.  
 ";
 
-%feature("docstring") ConvexHull::transform "
-
-Transforms all the vertices by the rigid transform v=R*v+t.  
+%feature("docstring") ConvexHull::ConvexHull "
 ";
 
-%feature("docstring") ConvexHull::numPoints "
+%feature("docstring") ConvexHull::translate "
 
-Returns the # of points.  
+Translates all the vertices by v=v+t.  
 ";
 
 %feature("docstring") ConvexHull::getPoints "
@@ -434,6 +419,21 @@ Returns:
 
     ndarray: an nx3 Numpy array. Setting elements of this array will
     change the points.  
+";
+
+%feature("docstring") ConvexHull::getPoint "
+
+Retrieves a point.  
+";
+
+%feature("docstring") ConvexHull::numPoints "
+
+Returns the # of points.  
+";
+
+%feature("docstring") ConvexHull::transform "
+
+Transforms all the vertices by the rigid transform v=R*v+t.  
 ";
 
 // File: classCSpaceInterface.xml
@@ -468,38 +468,7 @@ list see KrisLibrary/planning/CSpace.h.
 C++ includes: motionplanning.h
 ";
 
-%feature("docstring") CSpaceInterface::setVisibilityDependency "
-
-Marks that a certain feasibility test must be performed before another.  
-";
-
-%feature("docstring") CSpaceInterface::feasibilityCost "
-
-Retrieves the empirical average cost of a given feasibility test.  
-";
-
-%feature("docstring") CSpaceInterface::getStats "
-
-Returns constraint testing statistics. If adaptive queries are enabled, this
-returns the stats on each constraint.  
-";
-
-%feature("docstring") CSpaceInterface::isVisible "
-
-Queries whether two configurations are visible.  
-";
-
-%feature("docstring") CSpaceInterface::feasibilityProbability "
-
-Retrieves the empirical average success rate of a given feasibility test.  
-";
-
-%feature("docstring") CSpaceInterface::addFeasibilityTest "
-";
-
-%feature("docstring") CSpaceInterface::feasibilityFailures "
-
-Returns a list of all failed feasibility constraints.  
+%feature("docstring") CSpaceInterface::setProperty "
 ";
 
 %feature("docstring") CSpaceInterface::feasibilityQueryOrder "
@@ -507,9 +476,7 @@ Returns a list of all failed feasibility constraints.
 Retrieves the current order of feasibility tests.  
 ";
 
-%feature("docstring") CSpaceInterface::visibilityFailures "
-
-Returns a list of all failed visibility constraints.  
+%feature("docstring") CSpaceInterface::setNeighborhoodSampler "
 ";
 
 %feature("docstring") CSpaceInterface::testFeasibility "
@@ -518,18 +485,29 @@ Queries whether a given configuration is feasible with respect to a given
 constraint.  
 ";
 
-%feature("docstring") CSpaceInterface::getProperty "
+%feature("docstring") CSpaceInterface::isVisible "
+
+Queries whether two configurations are visible.  
+";
+
+%feature("docstring") CSpaceInterface::~CSpaceInterface "
+";
+
+%feature("docstring") CSpaceInterface::addFeasibilityTest "
 ";
 
 %feature("docstring") CSpaceInterface::setInterpolate "
 ";
 
-%feature("docstring") CSpaceInterface::setFeasibility "
+%feature("docstring") CSpaceInterface::CSpaceInterface "
 ";
 
-%feature("docstring") CSpaceInterface::interpolate "
+%feature("docstring") CSpaceInterface::CSpaceInterface "
+";
 
-Interpolates between two configurations.  
+%feature("docstring") CSpaceInterface::feasibilityCost "
+
+Retrieves the empirical average cost of a given feasibility test.  
 ";
 
 %feature("docstring") CSpaceInterface::isFeasible "
@@ -537,23 +515,34 @@ Interpolates between two configurations.
 Queries whether a given configuration is feasible.  
 ";
 
-%feature("docstring") CSpaceInterface::visibilityQueryOrder "
+%feature("docstring") CSpaceInterface::setFeasibilityPrior "
 
-Retrieves the current order of visibility tests.  
+Resets the data for a certain feasibility test. Default values give a data-
+gathering behavior.  
 ";
 
-%feature("docstring") CSpaceInterface::visibilityProbability "
+%feature("docstring") CSpaceInterface::feasibilityProbability "
 
-Retrieves the empirical average success rate of a given visibility test.  
+Retrieves the empirical average success rate of a given feasibility test.  
 ";
 
-%feature("docstring") CSpaceInterface::~CSpaceInterface "
+%feature("docstring") CSpaceInterface::visibilityFailures "
+
+Returns a list of all failed visibility constraints.  
 ";
 
-%feature("docstring") CSpaceInterface::adaptiveQueriesEnabled "
+%feature("docstring") CSpaceInterface::visibilityCost "
 
-optional: adaptive queries can be used to automatically minimize the total cost
-of testing feasibility / visibility using empirical estimates. Off by default.  
+Retrieves the empirical average cost of a given visibility test.  
+";
+
+%feature("docstring") CSpaceInterface::setVisibilityPrior "
+
+Resets the data for a certain visibility test. Default values give a data-
+gathering behavior.  
+";
+
+%feature("docstring") CSpaceInterface::addVisibilityTest "
 ";
 
 %feature("docstring") CSpaceInterface::sample "
@@ -561,10 +550,20 @@ of testing feasibility / visibility using empirical estimates. Off by default.
 Samples a configuration.  
 ";
 
-%feature("docstring") CSpaceInterface::setVisibilityPrior "
+%feature("docstring") CSpaceInterface::visibilityQueryOrder "
 
-Resets the data for a certain visibility test. Default values give a data-
-gathering behavior.  
+Retrieves the current order of visibility tests.  
+";
+
+%feature("docstring") CSpaceInterface::testVisibility "
+
+Queries whether two configurations are visible with respect to a given
+constraint.  
+";
+
+%feature("docstring") CSpaceInterface::setVisibilityDependency "
+
+Marks that a certain feasibility test must be performed before another.  
 ";
 
 %feature("docstring") CSpaceInterface::optimizeQueryOrder "
@@ -577,15 +576,24 @@ Call this to optimize the feasibility / visibility testing order.
 Marks that a certain feasibility test must be performed before another.  
 ";
 
-%feature("docstring") CSpaceInterface::testVisibility "
-
-Queries whether two configurations are visible with respect to a given
-constraint.  
+%feature("docstring") CSpaceInterface::setFeasibility "
 ";
 
-%feature("docstring") CSpaceInterface::visibilityCost "
+%feature("docstring") CSpaceInterface::setSampler "
+";
 
-Retrieves the empirical average cost of a given visibility test.  
+%feature("docstring") CSpaceInterface::feasibilityFailures "
+
+Returns a list of all failed feasibility constraints.  
+";
+
+%feature("docstring") CSpaceInterface::adaptiveQueriesEnabled "
+
+optional: adaptive queries can be used to automatically minimize the total cost
+of testing feasibility / visibility using empirical estimates. Off by default.  
+";
+
+%feature("docstring") CSpaceInterface::destroy "
 ";
 
 %feature("docstring") CSpaceInterface::distance "
@@ -593,22 +601,29 @@ Retrieves the empirical average cost of a given visibility test.
 Returns the distance between two configurations.  
 ";
 
-%feature("docstring") CSpaceInterface::setDistance "
+%feature("docstring") CSpaceInterface::visibilityProbability "
+
+Retrieves the empirical average success rate of a given visibility test.  
 ";
 
-%feature("docstring") CSpaceInterface::setNeighborhoodSampler "
+%feature("docstring") CSpaceInterface::getStats "
+
+Returns constraint testing statistics. If adaptive queries are enabled, this
+returns the stats on each constraint.  
 ";
 
-%feature("docstring") CSpaceInterface::setProperty "
+%feature("docstring") CSpaceInterface::setVisibilityEpsilon "
 ";
 
-%feature("docstring") CSpaceInterface::destroy "
+%feature("docstring") CSpaceInterface::setVisibility "
 ";
 
-%feature("docstring") CSpaceInterface::CSpaceInterface "
+%feature("docstring") CSpaceInterface::interpolate "
+
+Interpolates between two configurations.  
 ";
 
-%feature("docstring") CSpaceInterface::CSpaceInterface "
+%feature("docstring") CSpaceInterface::getProperty "
 ";
 
 %feature("docstring") CSpaceInterface::enableAdaptiveQueries "
@@ -616,22 +631,7 @@ Returns the distance between two configurations.
 Call this to enable adaptive queries. (It has a small overhead.)  
 ";
 
-%feature("docstring") CSpaceInterface::setVisibility "
-";
-
-%feature("docstring") CSpaceInterface::addVisibilityTest "
-";
-
-%feature("docstring") CSpaceInterface::setFeasibilityPrior "
-
-Resets the data for a certain feasibility test. Default values give a data-
-gathering behavior.  
-";
-
-%feature("docstring") CSpaceInterface::setVisibilityEpsilon "
-";
-
-%feature("docstring") CSpaceInterface::setSampler "
+%feature("docstring") CSpaceInterface::setDistance "
 ";
 
 // File: classDistanceQueryResult.xml
@@ -712,6 +712,18 @@ nature of the constraint.
 C++ includes: robotik.h
 ";
 
+%feature("docstring") GeneralizedIKObjective::sampleTransform "
+
+Returns a transformation (R,t) from link relative to link2, sampled at random
+from the space of transforms that satisfies the objective obj.  
+";
+
+%feature("docstring") GeneralizedIKObjective::setTransform "
+";
+
+%feature("docstring") GeneralizedIKObjective::setPoints "
+";
+
 %feature("docstring") GeneralizedIKObjective::GeneralizedIKObjective "
 ";
 
@@ -736,18 +748,6 @@ C++ includes: robotik.h
 %feature("docstring") GeneralizedIKObjective::setPoint "
 ";
 
-%feature("docstring") GeneralizedIKObjective::sampleTransform "
-
-Returns a transformation (R,t) from link relative to link2, sampled at random
-from the space of transforms that satisfies the objective obj.  
-";
-
-%feature("docstring") GeneralizedIKObjective::setTransform "
-";
-
-%feature("docstring") GeneralizedIKObjective::setPoints "
-";
-
 // File: classGeneralizedIKSolver.xml
 
 
@@ -757,19 +757,6 @@ An inverse kinematics solver between multiple robots and/or objects. NOT
 IMPLEMENTED YET.  
 
 C++ includes: robotik.h
-";
-
-%feature("docstring") GeneralizedIKSolver::GeneralizedIKSolver "
-";
-
-%feature("docstring") GeneralizedIKSolver::setMaxIters "
-
-Sets the max # of iterations (default 100)  
-";
-
-%feature("docstring") GeneralizedIKSolver::setTolerance "
-
-Sets the constraint solve tolerance (default 1e-3)  
 ";
 
 %feature("docstring") GeneralizedIKSolver::getResidual "
@@ -782,11 +769,6 @@ Returns a vector describing the error of the objective.
 Adds a new simultaneous objective.  
 ";
 
-%feature("docstring") GeneralizedIKSolver::sampleInitial "
-
-Samples an initial random configuration.  
-";
-
 %feature("docstring") GeneralizedIKSolver::solve "
 
 Tries to find a configuration that satifies all simultaneous objectives up to
@@ -796,10 +778,28 @@ Returns: res,iters (pair of bool, int): res indicates whether x converged, and
 iters is the number of iterations used.  
 ";
 
+%feature("docstring") GeneralizedIKSolver::setMaxIters "
+
+Sets the max # of iterations (default 100)  
+";
+
 %feature("docstring") GeneralizedIKSolver::getJacobian "
 
 Returns a matrix describing the instantaneous derivative of the objective with
 respect to the active parameters.  
+";
+
+%feature("docstring") GeneralizedIKSolver::setTolerance "
+
+Sets the constraint solve tolerance (default 1e-3)  
+";
+
+%feature("docstring") GeneralizedIKSolver::sampleInitial "
+
+Samples an initial random configuration.  
+";
+
+%feature("docstring") GeneralizedIKSolver::GeneralizedIKSolver "
 ";
 
 // File: structGeometricPrimitive.xml
@@ -821,22 +821,25 @@ Attributes:
 C++ includes: geometry.h
 ";
 
-%feature("docstring") GeometricPrimitive::setPoint "
-";
-
-%feature("docstring") GeometricPrimitive::setBox "
-";
-
 %feature("docstring") GeometricPrimitive::GeometricPrimitive "
-";
-
-%feature("docstring") GeometricPrimitive::setAABB "
 ";
 
 %feature("docstring") GeometricPrimitive::setSphere "
 ";
 
+%feature("docstring") GeometricPrimitive::saveString "
+";
+
+%feature("docstring") GeometricPrimitive::setBox "
+";
+
 %feature("docstring") GeometricPrimitive::loadString "
+";
+
+%feature("docstring") GeometricPrimitive::setPoint "
+";
+
+%feature("docstring") GeometricPrimitive::setTriangle "
 ";
 
 %feature("docstring") GeometricPrimitive::setPolygon "
@@ -845,10 +848,7 @@ C++ includes: geometry.h
 %feature("docstring") GeometricPrimitive::setSegment "
 ";
 
-%feature("docstring") GeometricPrimitive::saveString "
-";
-
-%feature("docstring") GeometricPrimitive::setTriangle "
+%feature("docstring") GeometricPrimitive::setAABB "
 ";
 
 // File: classGeometry3D.xml
@@ -944,19 +944,18 @@ PointCloud objects.
 C++ includes: geometry.h
 ";
 
-%feature("docstring") Geometry3D::getPointCloud "
+%feature("docstring") Geometry3D::setGeometricPrimitive "
 
-Returns a PointCloud if this geometry is of type PointCloud.  
+Sets this Geometry3D to a GeometricPrimitive.  
 ";
 
-%feature("docstring") Geometry3D::getConvexHull "
+%feature("docstring") Geometry3D::support "
 
-Returns a ConvexHull if this geometry is of type ConvexHull.  
-";
+Calculates the furthest point on this geometry in the direction dir.  
 
-%feature("docstring") Geometry3D::setVolumeGrid "
+Supported types:  
 
-Sets this Geometry3D to a volumeGrid.  
+*   ConvexHull  
 ";
 
 %feature("docstring") Geometry3D::getCurrentTransform "
@@ -964,40 +963,9 @@ Sets this Geometry3D to a volumeGrid.
 Gets the current transformation.  
 ";
 
-%feature("docstring") Geometry3D::distance_ext "
+%feature("docstring") Geometry3D::rayCast_ext "
 
-A customizable version of :meth:`Geometry3D.distance`. The settings for the
-calculation can be customized with relErr, absErr, and upperBound, e.g., to
-break if the closest points are at least upperBound distance from one another.  
-";
-
-%feature("docstring") Geometry3D::setGeometricPrimitive "
-
-Sets this Geometry3D to a GeometricPrimitive.  
-";
-
-%feature("docstring") Geometry3D::collides "
-
-Returns true if this geometry collides with the other.  
-
-Unsupported types:  
-
-*   VolumeGrid - GeometricPrimitive [aabb, box, triangle, polygon]  
-*   VolumeGrid - TriangleMesh  
-*   VolumeGrid - VolumeGrid  
-*   ConvexHull - anything else besides ConvexHull  
-";
-
-%feature("docstring") Geometry3D::distance_point_ext "
-
-A customizable version of :meth:`Geometry3D.distance_point`. The settings for
-the calculation can be customized with relErr, absErr, and upperBound, e.g., to
-break if the closest points are at least upperBound distance from one another.  
-";
-
-%feature("docstring") Geometry3D::rayCast "
-
-Performs a ray cast.  
+A more sophisticated ray cast.  
 
 Supported types:  
 
@@ -1010,48 +978,46 @@ Supported types:
 
 Returns:  
 
-    (hit,pt) where hit is true if the ray starting at s and pointing
-    in direction d hits the geometry (given in world coordinates); pt is
-    the hit point, in world coordinates.  
-";
+    (hit_element,pt) where hit_element is >= 0 if ray starting at
+    s and pointing in direction d hits the geometry (given in world
+    coordinates).  
 
-%feature("docstring") Geometry3D::getElement "
-
-Returns an element of the Geometry3D if it is a Group, TriangleMesh, or
-PointCloud. Raises an error if this is of any other type.  
-
-The element will be in local coordinates.  
-";
-
-%feature("docstring") Geometry3D::getVolumeGrid "
-
-Returns a VolumeGrid if this geometry is of type VolumeGrid.  
-";
-
-%feature("docstring") Geometry3D::empty "
-
-Returns True if this has no contents (not the same as numElements()==0)  
-";
-
-%feature("docstring") Geometry3D::getCollisionMargin "
-
-Returns the padding around the base geometry. Default 0.  
-";
-
-%feature("docstring") Geometry3D::numElements "
-
-Returns the number of sub-elements in this geometry.  
-";
-
-%feature("docstring") Geometry3D::withinDistance "
-
-Returns true if this geometry is within distance `tol` to other.  
+    - hit_element is -1 if the object is not hit, otherwise it gives the
+      index of the element (triangle, point, sub-object) that was hit.  
+      For geometric primitives, this will be 0.
+    - pt is the hit point, in world coordinates.  
 ";
 
 %feature("docstring") Geometry3D::setCollisionMargin "
 
 Sets a padding around the base geometry which affects the results of proximity
 queries.  
+";
+
+%feature("docstring") Geometry3D::roi "
+
+Calculates a region of interest of the data for the bounding box [bmin,bmax].
+The geometry's current transform is respected.  
+
+`query` can be \"intersect\", \"touching\", or \"within\". If \"intersect\",
+this tries to get a representation of the geometry intersecting the box. If
+\"touching\", all elements touching the box are returned. If \"within\", only
+elements entirely inside the box are returned.  
+
+`query` can also be prefaced with a '~' which indicates that the ROI should be
+inverted, i.e. select everything that does NOT intersect with a box.  
+
+O(N) time.  
+
+Supported types:  
+
+*   PointCloud  
+*   TriangleMesh  
+";
+
+%feature("docstring") Geometry3D::withinDistance "
+
+Returns true if this geometry is within distance `tol` to other.  
 ";
 
 %feature("docstring") Geometry3D::setConvexHullGroup "
@@ -1061,67 +1027,40 @@ transform of these two objects is frozen in place; i.e., setting the current
 transform of g2 doesn't do anything to this object.  
 ";
 
-%feature("docstring") Geometry3D::getTriangleMesh "
+%feature("docstring") Geometry3D::convert "
 
-Returns a TriangleMesh if this geometry is of type TriangleMesh.  
+Converts a geometry to another type, if a conversion is available. The
+interpretation of param depends on the type of conversion, with 0 being a
+reasonable default.  
+
+Available conversions are:  
+
+*   TriangleMesh -> PointCloud. param is the desired dispersion of the points,
+    by default set to the average triangle diameter. At least all of the mesh's
+    vertices will be returned.  
+*   TriangleMesh -> VolumeGrid. Converted using the fast marching method with
+    good results only if the mesh is watertight. param is the grid resolution,
+    by default set to the average triangle diameter.  
+*   TriangleMesh -> ConvexHull. If param==0, just calculates a convex hull.
+    Otherwise, uses convex decomposition with the HACD library.  
+*   PointCloud -> TriangleMesh. Available if the point cloud is structured.
+    param is the threshold for splitting triangles by depth discontinuity. param
+    is by default infinity.  
+*   PointCloud -> ConvexHull. Converted using SOLID / Qhull.  
+*   GeometricPrimitive -> anything. param determines the desired resolution.  
+*   VolumeGrid -> TriangleMesh. param determines the level set for the marching
+    cubes algorithm.  
+*   VolumeGrid -> PointCloud. param determines the level set.  
+*   ConvexHull -> TriangleMesh.  
+*   ConvexHull -> PointCloud. param is the desired dispersion of the points.
+    Equivalent to ConvexHull -> TriangleMesh -> PointCloud  
 ";
 
-%feature("docstring") Geometry3D::distance_point "
+%feature("docstring") Geometry3D::distance_point_ext "
 
-Returns the the distance and closest point to the input point, given in world
-coordinates. An exception is raised if this operation is not supported with the
-given geometry type.  
-
-The return value contains the distance, closest points, and gradients if
-available.  
-
-For some geometry types, the signed distance is returned. The signed distance
-returns the negative penetration depth if pt is within this. The following
-geometry types return signed distances:  
-
-*   GeometricPrimitive  
-*   PointCloud (approximate, if the cloud is a set of balls with the radius
-    property)  
-*   VolumeGrid  
-*   ConvexHull  
-
-For other types, a signed distance will be returned if the geometry has a
-positive collision margin, and the point penetrates less than this margin.  
-";
-
-%feature("docstring") Geometry3D::~Geometry3D "
-";
-
-%feature("docstring") Geometry3D::setPointCloud "
-
-Sets this Geometry3D to a PointCloud.  
-";
-
-%feature("docstring") Geometry3D::loadFile "
-
-Loads from file. Standard mesh types, PCD files, and .geom files are supported.  
-
-Returns:  
-
-    True on success, False on failure  
-";
-
-%feature("docstring") Geometry3D::rotate "
-
-Rotates the geometry data. Permanently modifies the data and resets any
-collision data structures.  
-";
-
-%feature("docstring") Geometry3D::clone "
-
-Creates a standalone geometry from this geometry (identical to copy... will be
-deprecated in a future version)  
-";
-
-%feature("docstring") Geometry3D::setGroup "
-
-Sets this Geometry3D to a group geometry. To add sub-geometries, repeatedly call
-setElement() with increasing indices.  
+A customizable version of :meth:`Geometry3D.distance_point`. The settings for
+the calculation can be customized with relErr, absErr, and upperBound, e.g., to
+break if the closest points are at least upperBound distance from one another.  
 ";
 
 %feature("docstring") Geometry3D::distance "
@@ -1159,59 +1098,88 @@ Unsupported types:
 See the comments of the distance_point function  
 ";
 
-%feature("docstring") Geometry3D::set "
+%feature("docstring") Geometry3D::translate "
 
-Copies the geometry of the argument into this geometry.  
+Translates the geometry data. Permanently modifies the data and resets any
+collision data structures.  
 ";
 
-%feature("docstring") Geometry3D::setElement "
-
-Sets an element of the Geometry3D if it is a Group, TriangleMesh, or PointCloud.
-The element will be in local coordinates. Raises an error if this is of any
-other type.  
+%feature("docstring") Geometry3D::Geometry3D "
 ";
 
-%feature("docstring") Geometry3D::getBB "
-
-Returns an axis-aligned bounding box of the object as a tuple (bmin,bmax).  
-
-Note: O(1) time, but may not be tight  
+%feature("docstring") Geometry3D::Geometry3D "
 ";
 
-%feature("docstring") Geometry3D::getBBTight "
-
-Computes a tighter axis-aligned bounding box of the object than
-:meth:`Geometry3D.getBB`. Worst case O(n) time.  
+%feature("docstring") Geometry3D::Geometry3D "
 ";
 
-%feature("docstring") Geometry3D::rayCast_ext "
+%feature("docstring") Geometry3D::Geometry3D "
+";
 
-A more sophisticated ray cast.  
+%feature("docstring") Geometry3D::Geometry3D "
+";
 
-Supported types:  
+%feature("docstring") Geometry3D::Geometry3D "
+";
+
+%feature("docstring") Geometry3D::Geometry3D "
+";
+
+%feature("docstring") Geometry3D::getVolumeGrid "
+
+Returns a VolumeGrid if this geometry is of type VolumeGrid.  
+";
+
+%feature("docstring") Geometry3D::getElement "
+
+Returns an element of the Geometry3D if it is a Group, TriangleMesh, or
+PointCloud. Raises an error if this is of any other type.  
+
+The element will be in local coordinates.  
+";
+
+%feature("docstring") Geometry3D::transform "
+
+Translates/rotates/scales the geometry data. Permanently modifies the data and
+resets any collision data structures.  
+";
+
+%feature("docstring") Geometry3D::getTriangleMesh "
+
+Returns a TriangleMesh if this geometry is of type TriangleMesh.  
+";
+
+%feature("docstring") Geometry3D::getCollisionMargin "
+
+Returns the padding around the base geometry. Default 0.  
+";
+
+%feature("docstring") Geometry3D::getConvexHull "
+
+Returns a ConvexHull if this geometry is of type ConvexHull.  
+";
+
+%feature("docstring") Geometry3D::distance_point "
+
+Returns the the distance and closest point to the input point, given in world
+coordinates. An exception is raised if this operation is not supported with the
+given geometry type.  
+
+The return value contains the distance, closest points, and gradients if
+available.  
+
+For some geometry types, the signed distance is returned. The signed distance
+returns the negative penetration depth if pt is within this. The following
+geometry types return signed distances:  
 
 *   GeometricPrimitive  
-*   TriangleMesh  
-*   PointCloud (need a positive collision margin, or points need to have a
-    'radius' property assigned)  
+*   PointCloud (approximate, if the cloud is a set of balls with the radius
+    property)  
 *   VolumeGrid  
-*   Group (groups of the aforementioned types)  
+*   ConvexHull  
 
-Returns:  
-
-    (hit_element,pt) where hit_element is >= 0 if ray starting at
-    s and pointing in direction d hits the geometry (given in world
-    coordinates).  
-
-    - hit_element is -1 if the object is not hit, otherwise it gives the
-      index of the element (triangle, point, sub-object) that was hit.  
-      For geometric primitives, this will be 0.
-    - pt is the hit point, in world coordinates.  
-";
-
-%feature("docstring") Geometry3D::getGeometricPrimitive "
-
-Returns a GeometricPrimitive if this geometry is of type GeometricPrimitive.  
+For other types, a signed distance will be returned if the geometry has a
+positive collision margin, and the point penetrates less than this margin.  
 ";
 
 %feature("docstring") Geometry3D::slice "
@@ -1232,31 +1200,54 @@ Supported types:
     returned.  
 ";
 
-%feature("docstring") Geometry3D::roi "
+%feature("docstring") Geometry3D::setConvexHull "
 
-Calculates a region of interest of the data for the bounding box [bmin,bmax].
-The geometry's current transform is respected.  
-
-`query` can be \"intersect\", \"touching\", or \"within\". If \"intersect\",
-this tries to get a representation of the geometry intersecting the box. If
-\"touching\", all elements touching the box are returned. If \"within\", only
-elements entirely inside the box are returned.  
-
-`query` can also be prefaced with a '~' which indicates that the ROI should be
-inverted, i.e. select everything that does NOT intersect with a box.  
-
-O(N) time.  
-
-Supported types:  
-
-*   PointCloud  
-*   TriangleMesh  
+Sets this Geometry3D to a ConvexHull.  
 ";
 
-%feature("docstring") Geometry3D::type "
+%feature("docstring") Geometry3D::getPointCloud "
 
-Returns the type of geometry: TriangleMesh, PointCloud, VolumeGrid,
-GeometricPrimitive, or Group.  
+Returns a PointCloud if this geometry is of type PointCloud.  
+";
+
+%feature("docstring") Geometry3D::~Geometry3D "
+";
+
+%feature("docstring") Geometry3D::scale "
+
+Scales the geometry data uniformly. Permanently modifies the data and resets any
+collision data structures.  
+";
+
+%feature("docstring") Geometry3D::scale "
+
+Scales the geometry data with different factors on each axis. Permanently
+modifies the data and resets any collision data structures.  
+";
+
+%feature("docstring") Geometry3D::copy "
+
+Creates a standalone geometry from this geometry.  
+";
+
+%feature("docstring") Geometry3D::setVolumeGrid "
+
+Sets this Geometry3D to a volumeGrid.  
+";
+
+%feature("docstring") Geometry3D::free "
+
+Frees the data associated with this geometry, if standalone.  
+";
+
+%feature("docstring") Geometry3D::setCurrentTransform "
+
+Sets the current transformation (not modifying the underlying data)  
+";
+
+%feature("docstring") Geometry3D::getGeometricPrimitive "
+
+Returns a GeometricPrimitive if this geometry is of type GeometricPrimitive.  
 ";
 
 %feature("docstring") Geometry3D::contacts "
@@ -1282,72 +1273,16 @@ Unsupported types:
 *   ConvexHull - anything  
 ";
 
-%feature("docstring") Geometry3D::support "
+%feature("docstring") Geometry3D::getBB "
 
-Calculates the furthest point on this geometry in the direction dir.  
+Returns an axis-aligned bounding box of the object as a tuple (bmin,bmax).  
 
-Supported types:  
-
-*   ConvexHull  
+Note: O(1) time, but may not be tight  
 ";
 
-%feature("docstring") Geometry3D::setCurrentTransform "
+%feature("docstring") Geometry3D::numElements "
 
-Sets the current transformation (not modifying the underlying data)  
-";
-
-%feature("docstring") Geometry3D::scale "
-
-Scales the geometry data uniformly. Permanently modifies the data and resets any
-collision data structures.  
-";
-
-%feature("docstring") Geometry3D::scale "
-
-Scales the geometry data with different factors on each axis. Permanently
-modifies the data and resets any collision data structures.  
-";
-
-%feature("docstring") Geometry3D::Geometry3D "
-";
-
-%feature("docstring") Geometry3D::Geometry3D "
-";
-
-%feature("docstring") Geometry3D::Geometry3D "
-";
-
-%feature("docstring") Geometry3D::Geometry3D "
-";
-
-%feature("docstring") Geometry3D::Geometry3D "
-";
-
-%feature("docstring") Geometry3D::Geometry3D "
-";
-
-%feature("docstring") Geometry3D::Geometry3D "
-";
-
-%feature("docstring") Geometry3D::saveFile "
-
-Saves to file. Standard mesh types, PCD files, and .geom files are supported.  
-";
-
-%feature("docstring") Geometry3D::setTriangleMesh "
-
-Sets this Geometry3D to a TriangleMesh.  
-";
-
-%feature("docstring") Geometry3D::copy "
-
-Creates a standalone geometry from this geometry.  
-";
-
-%feature("docstring") Geometry3D::translate "
-
-Translates the geometry data. Permanently modifies the data and resets any
-collision data structures.  
+Returns the number of sub-elements in this geometry.  
 ";
 
 %feature("docstring") Geometry3D::isStandalone "
@@ -1355,20 +1290,86 @@ collision data structures.
 Returns True if this is a standalone geometry.  
 ";
 
-%feature("docstring") Geometry3D::setConvexHull "
+%feature("docstring") Geometry3D::setElement "
 
-Sets this Geometry3D to a ConvexHull.  
+Sets an element of the Geometry3D if it is a Group, TriangleMesh, or PointCloud.
+The element will be in local coordinates. Raises an error if this is of any
+other type.  
 ";
 
-%feature("docstring") Geometry3D::transform "
+%feature("docstring") Geometry3D::collides "
 
-Translates/rotates/scales the geometry data. Permanently modifies the data and
-resets any collision data structures.  
+Returns true if this geometry collides with the other.  
+
+Unsupported types:  
+
+*   VolumeGrid - GeometricPrimitive [aabb, box, triangle, polygon]  
+*   VolumeGrid - TriangleMesh  
+*   VolumeGrid - VolumeGrid  
+*   ConvexHull - anything else besides ConvexHull  
 ";
 
-%feature("docstring") Geometry3D::free "
+%feature("docstring") Geometry3D::clone "
 
-Frees the data associated with this geometry, if standalone.  
+Creates a standalone geometry from this geometry (identical to copy... will be
+deprecated in a future version)  
+";
+
+%feature("docstring") Geometry3D::saveFile "
+
+Saves to file. Standard mesh types, PCD files, and .geom files are supported.  
+";
+
+%feature("docstring") Geometry3D::type "
+
+Returns the type of geometry: TriangleMesh, PointCloud, VolumeGrid,
+GeometricPrimitive, or Group.  
+";
+
+%feature("docstring") Geometry3D::rayCast "
+
+Performs a ray cast.  
+
+Supported types:  
+
+*   GeometricPrimitive  
+*   TriangleMesh  
+*   PointCloud (need a positive collision margin, or points need to have a
+    'radius' property assigned)  
+*   VolumeGrid  
+*   Group (groups of the aforementioned types)  
+
+Returns:  
+
+    (hit,pt) where hit is true if the ray starting at s and pointing
+    in direction d hits the geometry (given in world coordinates); pt is
+    the hit point, in world coordinates.  
+";
+
+%feature("docstring") Geometry3D::rotate "
+
+Rotates the geometry data. Permanently modifies the data and resets any
+collision data structures.  
+";
+
+%feature("docstring") Geometry3D::setTriangleMesh "
+
+Sets this Geometry3D to a TriangleMesh.  
+";
+
+%feature("docstring") Geometry3D::loadFile "
+
+Loads from file. Standard mesh types, PCD files, and .geom files are supported.  
+
+Returns:  
+
+    True on success, False on failure  
+";
+
+%feature("docstring") Geometry3D::setGroup "
+
+Sets this Geometry3D to a group geometry. To add sub-geometries, repeatedly call
+setElement() with increasing indices.  
 ";
 
 %feature("docstring") Geometry3D::distance_simple "
@@ -1380,33 +1381,32 @@ contains volume information, this value may be negative to indicate penetration.
 See :meth:`Geometry3D.distance` for more information.  
 ";
 
-%feature("docstring") Geometry3D::convert "
+%feature("docstring") Geometry3D::set "
 
-Converts a geometry to another type, if a conversion is available. The
-interpretation of param depends on the type of conversion, with 0 being a
-reasonable default.  
+Copies the geometry of the argument into this geometry.  
+";
 
-Available conversions are:  
+%feature("docstring") Geometry3D::distance_ext "
 
-*   TriangleMesh -> PointCloud. param is the desired dispersion of the points,
-    by default set to the average triangle diameter. At least all of the mesh's
-    vertices will be returned.  
-*   TriangleMesh -> VolumeGrid. Converted using the fast marching method with
-    good results only if the mesh is watertight. param is the grid resolution,
-    by default set to the average triangle diameter.  
-*   TriangleMesh -> ConvexHull. If param==0, just calculates a convex hull.
-    Otherwise, uses convex decomposition with the HACD library.  
-*   PointCloud -> TriangleMesh. Available if the point cloud is structured.
-    param is the threshold for splitting triangles by depth discontinuity. param
-    is by default infinity.  
-*   PointCloud -> ConvexHull. Converted using SOLID / Qhull.  
-*   GeometricPrimitive -> anything. param determines the desired resolution.  
-*   VolumeGrid -> TriangleMesh. param determines the level set for the marching
-    cubes algorithm.  
-*   VolumeGrid -> PointCloud. param determines the level set.  
-*   ConvexHull -> TriangleMesh.  
-*   ConvexHull -> PointCloud. param is the desired dispersion of the points.
-    Equivalent to ConvexHull -> TriangleMesh -> PointCloud  
+A customizable version of :meth:`Geometry3D.distance`. The settings for the
+calculation can be customized with relErr, absErr, and upperBound, e.g., to
+break if the closest points are at least upperBound distance from one another.  
+";
+
+%feature("docstring") Geometry3D::empty "
+
+Returns True if this has no contents (not the same as numElements()==0)  
+";
+
+%feature("docstring") Geometry3D::setPointCloud "
+
+Sets this Geometry3D to a PointCloud.  
+";
+
+%feature("docstring") Geometry3D::getBBTight "
+
+Computes a tighter axis-aligned bounding box of the object than
+:meth:`Geometry3D.getBB`. Worst case O(n) time.  
 ";
 
 // File: classIKObjective.xml
@@ -1426,19 +1426,31 @@ By default these are both 1.
 C++ includes: robotik.h
 ";
 
-%feature("docstring") IKObjective::setFixedRotConstraint "
+%feature("docstring") IKObjective::setRelativeTransform "
 
-Manual: Sets a fixed rotation constraint.  
+Sets a fixed-transform constraint (R,t) relative to linkTgt.  
 ";
 
-%feature("docstring") IKObjective::setAxialRotConstraint "
+%feature("docstring") IKObjective::IKObjective "
 
-Manual: Sets an axial rotation constraint.  
+With no arguments, constructs a blank IKObjective. Given an IKObjective, acts as
+a copy constructor.  
 ";
 
-%feature("docstring") IKObjective::setFixedPosConstraint "
+%feature("docstring") IKObjective::IKObjective "
 
-Manual: Sets a fixed position constraint.  
+With no arguments, constructs a blank IKObjective. Given an IKObjective, acts as
+a copy constructor.  
+";
+
+%feature("docstring") IKObjective::transform "
+
+Tranforms the target position/rotation of this IK constraint by transform (R,t)  
+";
+
+%feature("docstring") IKObjective::setFixedPoint "
+
+Sets a fixed-point constraint.  
 ";
 
 %feature("docstring") IKObjective::closestMatch "
@@ -1447,63 +1459,14 @@ Gets the transform T that's closest to the transform (R,t) and that satisfies
 the IK goal's constraints.  
 ";
 
-%feature("docstring") IKObjective::transformLocal "
+%feature("docstring") IKObjective::setPlanarPosConstraint "
 
-Tranforms the local position/rotation of this IK constraint by transform (R,t)  
+Manual: Sets a planar position constraint nworld^T T(link)*tlocal + oworld = 0.  
 ";
 
-%feature("docstring") IKObjective::setFixedPoints "
+%feature("docstring") IKObjective::setRelativePoint "
 
-Sets a multiple fixed-point constraint.  
-";
-
-%feature("docstring") IKObjective::getRotationAxis "
-
-For axis rotation constraints, returns the local and global axes.  
-";
-
-%feature("docstring") IKObjective::copy "
-
-Copy constructor.  
-";
-
-%feature("docstring") IKObjective::transform "
-
-Tranforms the target position/rotation of this IK constraint by transform (R,t)  
-";
-
-%feature("docstring") IKObjective::numRotDims "
-
-Returns: The number of rotation dimensions constrained (0-3)  
-";
-
-%feature("docstring") IKObjective::setFixedPoint "
-
-Sets a fixed-point constraint.  
-";
-
-%feature("docstring") IKObjective::saveString "
-
-Saves the objective to a Klamp't-native formatted string. For a more readable
-but verbose format, try the JSON IO routines :meth:`klampt.io.loader.to_json` /
-:meth:`klampt.io.loader.from_json`  
-";
-
-%feature("docstring") IKObjective::getTransform "
-
-For fixed-transform constraints, returns the transform (R,t)  
-";
-
-%feature("docstring") IKObjective::IKObjective "
-
-With no arguments, constructs a blank IKObjective. Given an IKObjective, acts as
-a copy constructor.  
-";
-
-%feature("docstring") IKObjective::IKObjective "
-
-With no arguments, constructs a blank IKObjective. Given an IKObjective, acts as
-a copy constructor.  
+Sets a fixed-point constraint relative to link2.  
 ";
 
 %feature("docstring") IKObjective::sampleTransform "
@@ -1512,14 +1475,39 @@ Returns a transformation (R,t) from link relative to link2, sampled at random
 from the space of transforms that satisfies the objective obj.  
 ";
 
-%feature("docstring") IKObjective::setFixedTransform "
+%feature("docstring") IKObjective::setRelativePoints "
 
-Sets a fixed-transform constraint (R,t)  
+Sets a multiple fixed-point constraint relative to link2.  
 ";
 
 %feature("docstring") IKObjective::setFreePosConstraint "
 
 Manual: Sets a free position constraint.  
+";
+
+%feature("docstring") IKObjective::setFreePosition "
+
+Deprecated: use setFreePosConstraint.  
+";
+
+%feature("docstring") IKObjective::copy "
+
+Copy constructor.  
+";
+
+%feature("docstring") IKObjective::setFixedTransform "
+
+Sets a fixed-transform constraint (R,t)  
+";
+
+%feature("docstring") IKObjective::setLinks "
+
+Manual construction.  
+";
+
+%feature("docstring") IKObjective::setFreeRotConstraint "
+
+Manual: Sets a free rotation constraint.  
 ";
 
 %feature("docstring") IKObjective::loadString "
@@ -1529,14 +1517,9 @@ but verbose format, try the JSON IO routines :meth:`klampt.io.loader.to_json` /
 :meth:`klampt.io.loader.from_json`  
 ";
 
-%feature("docstring") IKObjective::setRelativePoints "
+%feature("docstring") IKObjective::setAxialRotConstraint "
 
-Sets a multiple fixed-point constraint relative to link2.  
-";
-
-%feature("docstring") IKObjective::setRelativeTransform "
-
-Sets a fixed-transform constraint (R,t) relative to linkTgt.  
+Manual: Sets an axial rotation constraint.  
 ";
 
 %feature("docstring") IKObjective::setLinearPosConstraint "
@@ -1545,24 +1528,31 @@ Manual: Sets a linear position constraint T(link)*tlocal = sworld + u*dworld for
 some real value u.  
 ";
 
-%feature("docstring") IKObjective::setLinks "
+%feature("docstring") IKObjective::link "
 
-Manual construction.  
+The index of the robot link that is constrained.  
 ";
 
-%feature("docstring") IKObjective::setFreePosition "
+%feature("docstring") IKObjective::getTransform "
 
-Deprecated: use setFreePosConstraint.  
+For fixed-transform constraints, returns the transform (R,t)  
 ";
 
-%feature("docstring") IKObjective::getPositionDirection "
+%feature("docstring") IKObjective::numPosDims "
 
-For linear and planar constraints, returns the direction.  
+Returns: The number of position dimensions constrained (0-3)  
 ";
 
-%feature("docstring") IKObjective::getRotation "
+%feature("docstring") IKObjective::transformLocal "
 
-For fixed rotation constraints, returns the orientation.  
+Tranforms the local position/rotation of this IK constraint by transform (R,t)  
+";
+
+%feature("docstring") IKObjective::saveString "
+
+Saves the objective to a Klamp't-native formatted string. For a more readable
+but verbose format, try the JSON IO routines :meth:`klampt.io.loader.to_json` /
+:meth:`klampt.io.loader.from_json`  
 ";
 
 %feature("docstring") IKObjective::destLink "
@@ -1570,24 +1560,9 @@ For fixed rotation constraints, returns the orientation.
 The index of the destination link, or -1 if fixed to the world.  
 ";
 
-%feature("docstring") IKObjective::setFreeRotConstraint "
+%feature("docstring") IKObjective::getRotationAxis "
 
-Manual: Sets a free rotation constraint.  
-";
-
-%feature("docstring") IKObjective::setPlanarPosConstraint "
-
-Manual: Sets a planar position constraint nworld^T T(link)*tlocal + oworld = 0.  
-";
-
-%feature("docstring") IKObjective::link "
-
-The index of the robot link that is constrained.  
-";
-
-%feature("docstring") IKObjective::getPosition "
-
-Returns the local and global position of the position constraint.  
+For axis rotation constraints, returns the local and global axes.  
 ";
 
 %feature("docstring") IKObjective::matchDestination "
@@ -1598,14 +1573,39 @@ destination position / orientation so that this objective has zero error. The
 current position/rotation constraint types are kept.  
 ";
 
-%feature("docstring") IKObjective::numPosDims "
+%feature("docstring") IKObjective::numRotDims "
 
-Returns: The number of position dimensions constrained (0-3)  
+Returns: The number of rotation dimensions constrained (0-3)  
 ";
 
-%feature("docstring") IKObjective::setRelativePoint "
+%feature("docstring") IKObjective::setFixedRotConstraint "
 
-Sets a fixed-point constraint relative to link2.  
+Manual: Sets a fixed rotation constraint.  
+";
+
+%feature("docstring") IKObjective::setFixedPosConstraint "
+
+Manual: Sets a fixed position constraint.  
+";
+
+%feature("docstring") IKObjective::getRotation "
+
+For fixed rotation constraints, returns the orientation.  
+";
+
+%feature("docstring") IKObjective::setFixedPoints "
+
+Sets a multiple fixed-point constraint.  
+";
+
+%feature("docstring") IKObjective::getPosition "
+
+Returns the local and global position of the position constraint.  
+";
+
+%feature("docstring") IKObjective::getPositionDirection "
+
+For linear and planar constraints, returns the direction.  
 ";
 
 // File: classIKSolver.xml
@@ -1633,90 +1633,10 @@ Typical calling pattern is::
 C++ includes: robotik.h
 ";
 
-%feature("docstring") IKSolver::setSecondary "
-
-Assigns an existing objective added by addsecondary.  
-";
-
-%feature("docstring") IKSolver::setJointLimits "
-
-Sets limits on the robot's configuration. If empty, this turns off joint limits.  
-";
-
-%feature("docstring") IKSolver::IKSolver "
-
-Initializes an IK solver. Given a RobotModel, an empty solver is created. Given
-an IK solver, acts as a copy constructor.  
-";
-
-%feature("docstring") IKSolver::IKSolver "
-
-Initializes an IK solver. Given a RobotModel, an empty solver is created. Given
-an IK solver, acts as a copy constructor.  
-";
-
-%feature("docstring") IKSolver::add "
-
-Adds a new simultaneous objective.  
-";
-
-%feature("docstring") IKSolver::clear "
-
-Clears objectives.  
-";
-
-%feature("docstring") IKSolver::setTolerance "
-
-Sets the constraint solve tolerance (default 1e-3)  
-";
-
 %feature("docstring") IKSolver::getJointLimits "
 
 Returns the limits on the robot's configuration (by default this is the robot's
 joint limits.  
-";
-
-%feature("docstring") IKSolver::setBiasConfig "
-
-Biases the solver to approach a given configuration. Setting an empty vector
-clears the bias term.  
-";
-
-%feature("docstring") IKSolver::getSecondaryResidual "
-
-Returns the vector describing the error of the secondary objective at the
-current configuration.  
-";
-
-%feature("docstring") IKSolver::getBiasConfig "
-
-Returns the solvers' bias configuration.  
-";
-
-%feature("docstring") IKSolver::getMaxIters "
-
-Returns the max # of iterations.  
-";
-
-%feature("docstring") IKSolver::copy "
-
-Copy constructor.  
-";
-
-%feature("docstring") IKSolver::getTolerance "
-
-Returns the constraint solve tolerance.  
-";
-
-%feature("docstring") IKSolver::setMaxIters "
-
-Sets the max # of iterations (default 100)  
-";
-
-%feature("docstring") IKSolver::sampleInitial "
-
-Samples an initial random configuration. More initial configurations can be
-sampled in case the prior configs lead to local minima.  
 ";
 
 %feature("docstring") IKSolver::getResidual "
@@ -1725,48 +1645,35 @@ Returns the vector describing the error of the objective at the current
 configuration.  
 ";
 
+%feature("docstring") IKSolver::clear "
+
+Clears objectives.  
+";
+
+%feature("docstring") IKSolver::copy "
+
+Copy constructor.  
+";
+
+%feature("docstring") IKSolver::isSolved "
+
+Returns True if the current configuration residual is less than tol.  
+";
+
+%feature("docstring") IKSolver::setJointLimits "
+
+Sets limits on the robot's configuration. If empty, this turns off joint limits.  
+";
+
+%feature("docstring") IKSolver::getBiasConfig "
+
+Returns the solvers' bias configuration.  
+";
+
 %feature("docstring") IKSolver::lastSolveIters "
 
 Returns the number of Newton-Raphson iterations used in the last solve() call or
 the number of Quasi-Newton iterations used in the last minimize() call.  
-";
-
-%feature("docstring") IKSolver::setActiveDofs "
-
-Sets the active degrees of freedom.  
-";
-
-%feature("docstring") IKSolver::getJacobian "
-
-Computes the matrix describing the instantaneous derivative of the objective
-with respect to the active Dofs.  
-";
-
-%feature("docstring") IKSolver::set "
-
-Assigns an existing objective added by add.  
-";
-
-%feature("docstring") IKSolver::solve "
-
-Tries to find a configuration that satifies all simultaneous objectives up to
-the desired tolerance.  
-
-All of the primary and the secondary objectives are solved simultaneously.  
-
-Returns:  
-
-    True if x converged.  
-";
-
-%feature("docstring") IKSolver::addSecondary "
-
-Adds a new objective to the secondary objectives list.  
-";
-
-%feature("docstring") IKSolver::getActiveDofs "
-
-Returns the active degrees of freedom.  
 ";
 
 %feature("docstring") IKSolver::minimize "
@@ -1812,9 +1719,102 @@ Returns:
     True if x converged on the primary objectives.  
 ";
 
-%feature("docstring") IKSolver::isSolved "
+%feature("docstring") IKSolver::add "
 
-Returns True if the current configuration residual is less than tol.  
+Adds a new simultaneous objective.  
+";
+
+%feature("docstring") IKSolver::solve "
+
+Tries to find a configuration that satifies all simultaneous objectives up to
+the desired tolerance.  
+
+All of the primary and the secondary objectives are solved simultaneously.  
+
+Returns:  
+
+    True if x converged.  
+";
+
+%feature("docstring") IKSolver::setTolerance "
+
+Sets the constraint solve tolerance (default 1e-3)  
+";
+
+%feature("docstring") IKSolver::getJacobian "
+
+Computes the matrix describing the instantaneous derivative of the objective
+with respect to the active Dofs.  
+";
+
+%feature("docstring") IKSolver::setBiasConfig "
+
+Biases the solver to approach a given configuration. Setting an empty vector
+clears the bias term.  
+";
+
+%feature("docstring") IKSolver::setActiveDofs "
+
+Sets the active degrees of freedom.  
+";
+
+%feature("docstring") IKSolver::sampleInitial "
+
+Samples an initial random configuration. More initial configurations can be
+sampled in case the prior configs lead to local minima.  
+";
+
+%feature("docstring") IKSolver::setMaxIters "
+
+Sets the max # of iterations (default 100)  
+";
+
+%feature("docstring") IKSolver::getActiveDofs "
+
+Returns the active degrees of freedom.  
+";
+
+%feature("docstring") IKSolver::getTolerance "
+
+Returns the constraint solve tolerance.  
+";
+
+%feature("docstring") IKSolver::IKSolver "
+
+Initializes an IK solver. Given a RobotModel, an empty solver is created. Given
+an IK solver, acts as a copy constructor.  
+";
+
+%feature("docstring") IKSolver::IKSolver "
+
+Initializes an IK solver. Given a RobotModel, an empty solver is created. Given
+an IK solver, acts as a copy constructor.  
+";
+
+%feature("docstring") IKSolver::addSecondary "
+
+Adds a new objective to the secondary objectives list.  
+";
+
+%feature("docstring") IKSolver::getMaxIters "
+
+Returns the max # of iterations.  
+";
+
+%feature("docstring") IKSolver::getSecondaryResidual "
+
+Returns the vector describing the error of the secondary objective at the
+current configuration.  
+";
+
+%feature("docstring") IKSolver::set "
+
+Assigns an existing objective added by add.  
+";
+
+%feature("docstring") IKSolver::setSecondary "
+
+Assigns an existing objective added by addsecondary.  
 ";
 
 // File: classMass.xml
@@ -1843,18 +1843,23 @@ Attributes:
 C++ includes: robotmodel.h
 ";
 
-%feature("docstring") Mass::getMass "
-";
-
 %feature("docstring") Mass::setCom "
 ";
 
-%feature("docstring") Mass::setMass "
+%feature("docstring") Mass::setInertia "
+
+Sets an inertia matrix.  
+";
+
+%feature("docstring") Mass::getMass "
 ";
 
 %feature("docstring") Mass::getInertia "
 
 Returns the inertia matrix as a list of 3 floats or 9 floats.  
+";
+
+%feature("docstring") Mass::setMass "
 ";
 
 %feature("docstring") Mass::Mass "
@@ -1873,24 +1878,19 @@ is concentrated at the surface rather than the interior.
 Returns the COM as a list of 3 floats.  
 ";
 
-%feature("docstring") Mass::setInertia "
-
-Sets an inertia matrix.  
-";
-
 // File: classObjectPoser.xml
 
 
 %feature("docstring") ObjectPoser "
 ";
 
-%feature("docstring") ObjectPoser::get "
-";
-
 %feature("docstring") ObjectPoser::set "
 ";
 
 %feature("docstring") ObjectPoser::ObjectPoser "
+";
+
+%feature("docstring") ObjectPoser::get "
 ";
 
 // File: classPlannerInterface.xml
@@ -1942,22 +1942,40 @@ To dump the roadmap to disk, call dump(fn). This saves to a Trivial Graph Format
 C++ includes: motionplanning.h
 ";
 
-%feature("docstring") PlannerInterface::setEndpoints "
-";
-
-%feature("docstring") PlannerInterface::~PlannerInterface "
+%feature("docstring") PlannerInterface::getSolutionPath "
 ";
 
 %feature("docstring") PlannerInterface::setEndpointSet "
 ";
 
+%feature("docstring") PlannerInterface::addMilestone "
+";
+
 %feature("docstring") PlannerInterface::setCostFunction "
 ";
 
-%feature("docstring") PlannerInterface::getStats "
+%feature("docstring") PlannerInterface::setEndpoints "
+";
+
+%feature("docstring") PlannerInterface::getClosestMilestone "
+";
+
+%feature("docstring") PlannerInterface::getPath "
+";
+
+%feature("docstring") PlannerInterface::getPath "
+";
+
+%feature("docstring") PlannerInterface::getMilestone "
+";
+
+%feature("docstring") PlannerInterface::getRoadmap "
 ";
 
 %feature("docstring") PlannerInterface::PlannerInterface "
+";
+
+%feature("docstring") PlannerInterface::~PlannerInterface "
 ";
 
 %feature("docstring") PlannerInterface::getData "
@@ -1966,31 +1984,13 @@ C++ includes: motionplanning.h
 %feature("docstring") PlannerInterface::planMore "
 ";
 
-%feature("docstring") PlannerInterface::getSolutionPath "
-";
-
-%feature("docstring") PlannerInterface::getMilestone "
-";
-
-%feature("docstring") PlannerInterface::getClosestMilestone "
-";
-
-%feature("docstring") PlannerInterface::getRoadmap "
+%feature("docstring") PlannerInterface::dump "
 ";
 
 %feature("docstring") PlannerInterface::destroy "
 ";
 
-%feature("docstring") PlannerInterface::dump "
-";
-
-%feature("docstring") PlannerInterface::addMilestone "
-";
-
-%feature("docstring") PlannerInterface::getPath "
-";
-
-%feature("docstring") PlannerInterface::getPath "
+%feature("docstring") PlannerInterface::getStats "
 ";
 
 // File: structPointCloud.xml
@@ -2082,6 +2082,33 @@ C++ includes: geometry.h
 Sets all the points to the given nx3 Numpy array.  
 ";
 
+%feature("docstring") PointCloud::setRGBDImages_i_d "
+
+Sets a structured point cloud from an RGBD (color,depth) image pair.
+[fx,fy,cx,cy] are the intrinsics parameters. The RGB colors are packed in
+0xrrggbb order, size hxw, top to bottom.  
+";
+
+%feature("docstring") PointCloud::getPoints "
+
+Returns a view of the points.  
+
+Returns:  
+
+    ndarray: an nx3 Numpy array. Setting elements of this array will
+    change the points.  
+";
+
+%feature("docstring") PointCloud::translate "
+
+Translates all the points by v=v+t.  
+";
+
+%feature("docstring") PointCloud::numPoints "
+
+Returns the number of points.  
+";
+
 %feature("docstring") PointCloud::getProperties "
 
 Returns property pindex of all points as an array.  
@@ -2100,80 +2127,9 @@ Returns:
     ndarray: an n-D Numpy array.  
 ";
 
-%feature("docstring") PointCloud::addPoint "
-
-Adds a point. Sets all its properties to 0.  
-
-Returns the point's index.  
-";
-
-%feature("docstring") PointCloud::setRGBDImages_i_s "
-
-Sets a structured point cloud from an RGBD (color,depth) image pair.
-[fx,fy,cx,cy] are the intrinsics parameters. The RGB colors are packed in
-0xrrggbb order, size hxw, top to bottom.  
-";
-
-%feature("docstring") PointCloud::setDepthImage_d "
-
-Sets a structured point cloud from a depth image. [fx,fy,cx,cy] are the
-intrinsics parameters. The depth is given as a size hxw array, top to bottom.  
-";
-
-%feature("docstring") PointCloud::translate "
-
-Translates all the points by v=v+t.  
-";
-
-%feature("docstring") PointCloud::addProperty "
-
-Adds a new property. All values for this property are set to 0.  
-";
-
-%feature("docstring") PointCloud::addProperty "
-
-Adds a new property with name pname, and sets values for this property to the
-given length-n array.  
-";
-
-%feature("docstring") PointCloud::getAllProperties "
-
-Returns all the properties of all points as an array view.  
-
-Returns:  
-
-    ndarray: an nxk Numpy array. Setting elements of this array will
-    change the vertices.  
-";
-
 %feature("docstring") PointCloud::setPoint "
 
 Sets the position of the point at the given index to p.  
-";
-
-%feature("docstring") PointCloud::join "
-
-Adds the given point cloud to this one. They must share the same properties or
-else an exception is raised.  
-";
-
-%feature("docstring") PointCloud::transform "
-
-Transforms all the points by the rigid transform v=R*v+t.  
-";
-
-%feature("docstring") PointCloud::setRGBDImages_b_s "
-
-Sets a structured point cloud from an RGBD (color,depth) image pair.
-[fx,fy,cx,cy] are the intrinsics parameters. The RGB colors are an h x w x 3
-array, top to bottom.  
-";
-
-%feature("docstring") PointCloud::setRGBDImages_i_f "
-
-Sets a structured point cloud from an RGBD (color,depth) image pair.
-[fx,fy,cx,cy] are the intrinsics parameters. The RGB colors are packed in
-0xrrggbb order, size hxw, top to bottom.  
 ";
 
 %feature("docstring") PointCloud::setDepthImage_f "
@@ -2182,39 +2138,16 @@ Sets a structured point cloud from a depth image. [fx,fy,cx,cy] are the
 intrinsics parameters. The depth is given as a size hxw array, top to bottom.  
 ";
 
-%feature("docstring") PointCloud::setSetting "
+%feature("docstring") PointCloud::setDepthImage_d "
 
-Sets the given setting.  
+Sets a structured point cloud from a depth image. [fx,fy,cx,cy] are the
+intrinsics parameters. The depth is given as a size hxw array, top to bottom.  
 ";
 
-%feature("docstring") PointCloud::setRGBDImages_b_f "
+%feature("docstring") PointCloud::setDepthImage_s "
 
-Sets a structured point cloud from an RGBD (color,depth) image pair.
-[fx,fy,cx,cy] are the intrinsics parameters. The RGB colors are an h x w x 3
-array, top to bottom.  
-";
-
-%feature("docstring") PointCloud::setProperties "
-
-Sets all the properties of all points to the given nxk array.  
-";
-
-%feature("docstring") PointCloud::setProperties "
-
-Sets property pindex of all points to the given length-n array.  
-";
-
-%feature("docstring") PointCloud::PointCloud "
-";
-
-%feature("docstring") PointCloud::getPoints "
-
-Returns a view of the points.  
-
-Returns:  
-
-    ndarray: an nx3 Numpy array. Setting elements of this array will
-    change the points.  
+Sets a structured point cloud from a depth image. [fx,fy,cx,cy] are the
+intrinsics parameters. The depth is given as a size hxw array, top to bottom.  
 ";
 
 %feature("docstring") PointCloud::getSetting "
@@ -2232,16 +2165,48 @@ Returns property pindex of point index.
 Returns the property named pname of point index.  
 ";
 
-%feature("docstring") PointCloud::setRGBDImages_i_d "
+%feature("docstring") PointCloud::setRGBDImages_b_s "
+
+Sets a structured point cloud from an RGBD (color,depth) image pair.
+[fx,fy,cx,cy] are the intrinsics parameters. The RGB colors are an h x w x 3
+array, top to bottom.  
+";
+
+%feature("docstring") PointCloud::setRGBDImages_b_f "
+
+Sets a structured point cloud from an RGBD (color,depth) image pair.
+[fx,fy,cx,cy] are the intrinsics parameters. The RGB colors are an h x w x 3
+array, top to bottom.  
+";
+
+%feature("docstring") PointCloud::getPoint "
+
+Returns the position of the point at the given index.  
+";
+
+%feature("docstring") PointCloud::transform "
+
+Transforms all the points by the rigid transform v=R*v+t.  
+";
+
+%feature("docstring") PointCloud::setRGBDImages_i_s "
 
 Sets a structured point cloud from an RGBD (color,depth) image pair.
 [fx,fy,cx,cy] are the intrinsics parameters. The RGB colors are packed in
 0xrrggbb order, size hxw, top to bottom.  
 ";
 
-%feature("docstring") PointCloud::numPoints "
+%feature("docstring") PointCloud::PointCloud "
+";
 
-Returns the number of points.  
+%feature("docstring") PointCloud::setSetting "
+
+Sets the given setting.  
+";
+
+%feature("docstring") PointCloud::setPointsAndProperties "
+
+Sets all the points and m properties from the given n x (3+m) array.  
 ";
 
 %feature("docstring") PointCloud::setProperty "
@@ -2254,10 +2219,45 @@ Sets property pindex of point index to the given value.
 Sets the property named pname of point index to the given value.  
 ";
 
-%feature("docstring") PointCloud::setDepthImage_s "
+%feature("docstring") PointCloud::addProperty "
 
-Sets a structured point cloud from a depth image. [fx,fy,cx,cy] are the
-intrinsics parameters. The depth is given as a size hxw array, top to bottom.  
+Adds a new property. All values for this property are set to 0.  
+";
+
+%feature("docstring") PointCloud::addProperty "
+
+Adds a new property with name pname, and sets values for this property to the
+given length-n array.  
+";
+
+%feature("docstring") PointCloud::join "
+
+Adds the given point cloud to this one. They must share the same properties or
+else an exception is raised.  
+";
+
+%feature("docstring") PointCloud::setProperties "
+
+Sets all the properties of all points to the given nxk array.  
+";
+
+%feature("docstring") PointCloud::setProperties "
+
+Sets property pindex of all points to the given length-n array.  
+";
+
+%feature("docstring") PointCloud::setRGBDImages_i_f "
+
+Sets a structured point cloud from an RGBD (color,depth) image pair.
+[fx,fy,cx,cy] are the intrinsics parameters. The RGB colors are packed in
+0xrrggbb order, size hxw, top to bottom.  
+";
+
+%feature("docstring") PointCloud::addPoint "
+
+Adds a point. Sets all its properties to 0.  
+
+Returns the point's index.  
 ";
 
 %feature("docstring") PointCloud::setRGBDImages_b_d "
@@ -2272,14 +2272,14 @@ Sets a structured point cloud from an RGBD (color,depth) image pair.
 Returns the number of properties.  
 ";
 
-%feature("docstring") PointCloud::setPointsAndProperties "
+%feature("docstring") PointCloud::getAllProperties "
 
-Sets all the points and m properties from the given n x (3+m) array.  
-";
+Returns all the properties of all points as an array view.  
 
-%feature("docstring") PointCloud::getPoint "
+Returns:  
 
-Returns the position of the point at the given index.  
+    ndarray: an nxk Numpy array. Setting elements of this array will
+    change the vertices.  
 ";
 
 // File: classPointPoser.xml
@@ -2288,21 +2288,21 @@ Returns the position of the point at the given index.
 %feature("docstring") PointPoser "
 ";
 
-%feature("docstring") PointPoser::enableAxes "
-";
-
 %feature("docstring") PointPoser::setAxes "
 
 Sets the reference axes (by default aligned to x,y,z)  
-";
-
-%feature("docstring") PointPoser::get "
 ";
 
 %feature("docstring") PointPoser::PointPoser "
 ";
 
 %feature("docstring") PointPoser::set "
+";
+
+%feature("docstring") PointPoser::get "
+";
+
+%feature("docstring") PointPoser::enableAxes "
 ";
 
 // File: classRigidObjectModel.xml
@@ -2320,6 +2320,9 @@ State is retrieved/set using get/setTransform, and get/setVelocity
 C++ includes: robotmodel.h
 ";
 
+%feature("docstring") RigidObjectModel::setContactParameters "
+";
+
 %feature("docstring") RigidObjectModel::loadFile "
 
 Loads the object from the file fn.  
@@ -2328,28 +2331,16 @@ Loads the object from the file fn.
 %feature("docstring") RigidObjectModel::getName "
 ";
 
-%feature("docstring") RigidObjectModel::setTransform "
-
-Sets the rotation / translation (R,t) of the rigid object.  
+%feature("docstring") RigidObjectModel::RigidObjectModel "
 ";
 
-%feature("docstring") RigidObjectModel::getID "
+%feature("docstring") RigidObjectModel::saveFile "
 
-Returns the ID of the rigid object in its world.  
-
-.. note::  
-
-    The world ID is not the same as the rigid object index.  
+Saves the object to the file fn. If geometryName is given, the geometry is saved
+to that file.  
 ";
 
-%feature("docstring") RigidObjectModel::getMass "
-
-Returns a copy of the Mass of this rigid object.  
-
-.. note::  
-
-    To change the mass properties, you should call ``m=object.getMass()``,
-    change the desired properties in m, and then ``object.setMass(m)``  
+%feature("docstring") RigidObjectModel::setName "
 ";
 
 %feature("docstring") RigidObjectModel::drawGL "
@@ -2362,9 +2353,24 @@ reuse OpenGL display lists. A better approach is to change the object's
 Appearance directly.  
 ";
 
+%feature("docstring") RigidObjectModel::geometry "
+
+Returns a reference to the geometry associated with this object.  
+";
+
 %feature("docstring") RigidObjectModel::appearance "
 
 Returns a reference to the appearance associated with this object.  
+";
+
+%feature("docstring") RigidObjectModel::getMass "
+
+Returns a copy of the Mass of this rigid object.  
+
+.. note::  
+
+    To change the mass properties, you should call ``m=object.getMass()``,
+    change the desired properties in m, and then ``object.setMass(m)``  
 ";
 
 %feature("docstring") RigidObjectModel::getContactParameters "
@@ -2378,14 +2384,6 @@ Returns a copy of the ContactParameters of this rigid object.
     p, and then call ``object.setContactParameters(p)``  
 ";
 
-%feature("docstring") RigidObjectModel::geometry "
-
-Returns a reference to the geometry associated with this object.  
-";
-
-%feature("docstring") RigidObjectModel::RigidObjectModel "
-";
-
 %feature("docstring") RigidObjectModel::getTransform "
 
 Retrieves the rotation / translation of the rigid object (R,t)  
@@ -2394,26 +2392,6 @@ Returns:
 
     se3 object: a pair (R,t), with R a 9-list and t a 3-list of floats,
     giving the transform to world coordinates.  
-";
-
-%feature("docstring") RigidObjectModel::setContactParameters "
-";
-
-%feature("docstring") RigidObjectModel::setMass "
-";
-
-%feature("docstring") RigidObjectModel::setName "
-";
-
-%feature("docstring") RigidObjectModel::saveFile "
-
-Saves the object to the file fn. If geometryName is given, the geometry is saved
-to that file.  
-";
-
-%feature("docstring") RigidObjectModel::setVelocity "
-
-Sets the (angular velocity, velocity) of the rigid object.  
 ";
 
 %feature("docstring") RigidObjectModel::getVelocity "
@@ -2425,6 +2403,28 @@ Returns:
     A pair of 3-lists (w,v) where w is the angular velocity
     vector and v is the translational velocity vector (both in world
     coordinates)  
+";
+
+%feature("docstring") RigidObjectModel::setMass "
+";
+
+%feature("docstring") RigidObjectModel::setVelocity "
+
+Sets the (angular velocity, velocity) of the rigid object.  
+";
+
+%feature("docstring") RigidObjectModel::getID "
+
+Returns the ID of the rigid object in its world.  
+
+.. note::  
+
+    The world ID is not the same as the rigid object index.  
+";
+
+%feature("docstring") RigidObjectModel::setTransform "
+
+Sets the rotation / translation (R,t) of the rigid object.  
 ";
 
 // File: classRobotModel.xml
@@ -2479,92 +2479,10 @@ work in the actuator space rather than joint space. (See
 C++ includes: robotmodel.h
 ";
 
-%feature("docstring") RobotModel::reduce "
+%feature("docstring") RobotModel::distance "
 
-Sets self to a reduced version of robot, where all fixed DOFs are eliminated.
-The return value is a map from the original robot DOF indices to the reduced
-DOFs.  
-
-Note that any geometries fixed to the world will disappear.  
-";
-
-%feature("docstring") RobotModel::getComVelocity "
-
-Returns the 3D velocity of the center of mass at the current config / velocity.  
-";
-
-%feature("docstring") RobotModel::getConfig "
-
-Retrieves the current configuration of the robot model.  
-";
-
-%feature("docstring") RobotModel::setTorqueLimits "
-
-Sets the torque limit vector tmax, the constraint is :math:`|torque[i]| \\leq
-tmax[i]`  
-";
-
-%feature("docstring") RobotModel::configFromDrivers "
-
-Converts a list of driver values (length numDrivers()) to a full configuration
-(length numLinks()).  
-";
-
-%feature("docstring") RobotModel::driver "
-
-Returns a reference to the driver by index or name.  
-";
-
-%feature("docstring") RobotModel::driver "
-
-Returns a reference to the driver by index or name.  
-";
-
-%feature("docstring") RobotModel::numLinks "
-
-Returns the number of links = number of DOF's.  
-";
-
-%feature("docstring") RobotModel::setName "
-
-Sets the name of the robot.  
-";
-
-%feature("docstring") RobotModel::getComJacobian "
-
-Computes the Jacobian matrix of the current center of mass.  
-
-Returns:  
-
-    ndarray: a 3xn matrix J such that np.dot(J,dq) gives the
-    COM velocity at the currene configuration  
-";
-
-%feature("docstring") RobotModel::getMassMatrixDeriv "
-
-Computes the derivative of the nxn mass matrix with respect to q_i.  
-
-Takes O(n^3) time.  
-";
-
-%feature("docstring") RobotModel::getJointLimits "
-
-Returns a pair (qmin,qmax) of min/max joint limit vectors.  
-";
-
-%feature("docstring") RobotModel::drawGL "
-
-Draws the robot geometry. If keepAppearance=true, the current appearance is
-honored. Otherwise, only the raw geometry is drawn.  
-
-PERFORMANCE WARNING: if keepAppearance is false, then this does not properly
-reuse OpenGL display lists. A better approach to changing the robot's
-appearances is to set the link Appearance's directly.  
-";
-
-%feature("docstring") RobotModel::enableSelfCollision "
-
-Enables/disables self collisions between two links (depending on value)  
+Computes a distance between two configurations, properly taking into account
+nonstandard joints.  
 ";
 
 %feature("docstring") RobotModel::velocityToDrivers "
@@ -2573,29 +2491,26 @@ Converts a full velocity vector (length numLinks()) to a list of driver
 velocities (length numDrivers()).  
 ";
 
-%feature("docstring") RobotModel::getVelocityLimits "
+%feature("docstring") RobotModel::interpolateDeriv "
 
-Returns the velocity limit vector vmax, the constraint is :math:`|dq[i]| \\leq
-vmax[i]`  
+Returns the configuration derivative at a as you interpolate toward b at unit
+speed.  
 ";
 
-%feature("docstring") RobotModel::numDrivers "
+%feature("docstring") RobotModel::sensor "
 
-Returns the number of drivers.  
+Returns a sensor by index or by name.  
+
+If out of bounds or unavailable, a null sensor is returned (i.e.,
+SimRobotSensor.name() or SimRobotSensor.type()) will return the empty string.)  
 ";
 
-%feature("docstring") RobotModel::getMassMatrixTimeDeriv "
+%feature("docstring") RobotModel::sensor "
 
-Computes the derivative of the nxn mass matrix with respect to t, given the
-robot's current velocity.  
+Returns a sensor by index or by name.  
 
-Takes O(n^4) time.  
-";
-
-%feature("docstring") RobotModel::setVelocity "
-
-Sets the current velocity of the robot model. Like the configuration, this is
-also essentially a temporary variable.  
+If out of bounds or unavailable, a null sensor is returned (i.e.,
+SimRobotSensor.name() or SimRobotSensor.type()) will return the empty string.)  
 ";
 
 %feature("docstring") RobotModel::getCom "
@@ -2608,56 +2523,11 @@ Returns the 3D center of mass at the current config.
 Computes the kinetic energy at the current config / velocity.  
 ";
 
-%feature("docstring") RobotModel::addSensor "
+%feature("docstring") RobotModel::getMassMatrixDeriv "
 
-Adds a new sensor with a given name and type.  
+Computes the derivative of the nxn mass matrix with respect to q_i.  
 
-Returns:  
-
-    The new sensor.  
-";
-
-%feature("docstring") RobotModel::setAccelerationLimits "
-
-Sets the acceleration limit vector amax, the constraint is :math:`|ddq[i]| \\leq
-amax[i]`  
-";
-
-%feature("docstring") RobotModel::sensor "
-
-Returns a sensor by index or by name.  
-
-If out of bounds or unavailable, a null sensor is returned (i.e.,
-SimRobotSensor.name() or SimRobotSensor.type()) will return the empty string.)  
-";
-
-%feature("docstring") RobotModel::sensor "
-
-Returns a sensor by index or by name.  
-
-If out of bounds or unavailable, a null sensor is returned (i.e.,
-SimRobotSensor.name() or SimRobotSensor.type()) will return the empty string.)  
-";
-
-%feature("docstring") RobotModel::getLinearMomentum "
-
-Computes the 3D linear momentum vector.  
-";
-
-%feature("docstring") RobotModel::getAccelerationLimits "
-
-Returns the acceleration limit vector amax, the constraint is :math:`|ddq[i]|
-\\leq amax[i]`  
-";
-
-%feature("docstring") RobotModel::getTotalInertia "
-
-Computes the 3x3 total inertia matrix of the robot.  
-";
-
-%feature("docstring") RobotModel::getVelocity "
-
-Retreives the current velocity of the robot model.  
+Takes O(n^3) time.  
 ";
 
 %feature("docstring") RobotModel::setDOFPosition "
@@ -2682,121 +2552,14 @@ Sets a single DOF's position (by index or by name).
     it is called.  
 ";
 
-%feature("docstring") RobotModel::getID "
+%feature("docstring") RobotModel::drawGL "
 
-Returns the ID of the robot in its world.  
+Draws the robot geometry. If keepAppearance=true, the current appearance is
+honored. Otherwise, only the raw geometry is drawn.  
 
-.. note::  
-
-    The world ID is not the same as the robot index.  
-";
-
-%feature("docstring") RobotModel::getComJacobianCols "
-
-Returns the Jacobian matrix of the current center of mass w.r.t. some links of
-the robot.  
-
-Returns:  
-
-    ndarray: a 3xlen(links) matrix J such that np.dot(J,dqlinks)
-    gives the COM velocity at the current configuration, and dqlinks
-    is the array of velocities of the links given by `links`  
-";
-
-%feature("docstring") RobotModel::getCoriolisForces "
-
-Computes the Coriolis forces C(q,dq)*dq for current config and velocity.  
-
-Takes O(n) time, which is faster than computing matrix and doing the product.  
-
-(\"Forces\" is somewhat of a misnomer; the result is a joint torque vector)  
-";
-
-%feature("docstring") RobotModel::getAngularMomentum "
-
-Computes the 3D angular momentum vector.  
-";
-
-%feature("docstring") RobotModel::configToDrivers "
-
-Converts a full configuration (length numLinks()) to a list of driver values
-(length numDrivers()).  
-";
-
-%feature("docstring") RobotModel::getDOFPosition "
-
-Returns a single DOF's position.  
-";
-
-%feature("docstring") RobotModel::getDOFPosition "
-
-Returns a single DOF's position (by name)  
-";
-
-%feature("docstring") RobotModel::getMassMatrixInv "
-
-Computes the inverse of the nxn mass matrix B(q)^-1.  
-
-Takes O(n^2) time, which is much faster than inverting the result of
-getMassMatrix  
-";
-
-%feature("docstring") RobotModel::interpolateDeriv "
-
-Returns the configuration derivative at a as you interpolate toward b at unit
-speed.  
-";
-
-%feature("docstring") RobotModel::accelFromTorques "
-
-Computes the foward dynamics. Uses Recursive Newton Euler solver and takes O(n)
-time.  
-
-Specifically, solves for :math:`\\ddot{q}` in the (partial) dynamics equation:  
-
-.. math::  
-
-    `B(q) \\ddot{q} + C(q,@dot {q}) = \\tau`  
-
-.. note::  
-
-    Does not include gravity term G(q).  getGravityForces(g) will
-    need to be subtracted from the argument t.  
-
-Returns:  
-
-    list of floats: the n-element joint acceleration vector that would
-    result from joint torques t in the absence of external forces.  
-";
-
-%feature("docstring") RobotModel::getJointType "
-
-Returns the joint type of the joint connecting the link to its parent, where the
-link is identified by index or by name.  
-";
-
-%feature("docstring") RobotModel::getJointType "
-
-Returns the joint type of the joint connecting the link to its parent, where the
-link is identified by index or by name.  
-";
-
-%feature("docstring") RobotModel::RobotModel "
-";
-
-%feature("docstring") RobotModel::getName "
-";
-
-%feature("docstring") RobotModel::getTorqueLimits "
-
-Returns the torque limit vector tmax, the constraint is :math:`|torque[i]| \\leq
-tmax[i]`  
-";
-
-%feature("docstring") RobotModel::distance "
-
-Computes a distance between two configurations, properly taking into account
-nonstandard joints.  
+PERFORMANCE WARNING: if keepAppearance is false, then this does not properly
+reuse OpenGL display lists. A better approach to changing the robot's
+appearances is to set the link Appearance's directly.  
 ";
 
 %feature("docstring") RobotModel::velocityFromDrivers "
@@ -2805,27 +2568,47 @@ Converts a list of driver velocities (length numDrivers()) to a full velocity
 vector (length numLinks()).  
 ";
 
-%feature("docstring") RobotModel::setVelocityLimits "
+%feature("docstring") RobotModel::driver "
 
-Sets the velocity limit vector vmax, the constraint is :math:`|dq[i]| \\leq
-vmax[i]`  
+Returns a reference to the driver by index or name.  
 ";
 
-%feature("docstring") RobotModel::getCoriolisForceMatrix "
+%feature("docstring") RobotModel::driver "
 
-Computes the Coriolis force matrix C(q,dq) for current config and velocity.  
-
-Takes O(n^2) time.  
+Returns a reference to the driver by index or name.  
 ";
 
-%feature("docstring") RobotModel::selfCollisionEnabled "
+%feature("docstring") RobotModel::randomizeConfig "
 
-Queries whether self collisions between two links is enabled.  
+Samples a random configuration and updates the robot's pose. Properly handles
+non-normal joints and handles DOFs with infinite bounds using a centered
+Laplacian distribution with the given scaling term.  
+
+.. note::  
+
+    Python random module seeding does not affect the result.  
 ";
 
 %feature("docstring") RobotModel::selfCollides "
 
 Returns true if the robot is in self collision (faster than manual testing)  
+";
+
+%feature("docstring") RobotModel::configFromDrivers "
+
+Converts a list of driver values (length numDrivers()) to a full configuration
+(length numLinks()).  
+";
+
+%feature("docstring") RobotModel::setVelocity "
+
+Sets the current velocity of the robot model. Like the configuration, this is
+also essentially a temporary variable.  
+";
+
+%feature("docstring") RobotModel::numDrivers "
+
+Returns the number of drivers.  
 ";
 
 %feature("docstring") RobotModel::getGravityForces "
@@ -2844,36 +2627,41 @@ Returns:
     robot's current configuration.  
 ";
 
-%feature("docstring") RobotModel::link "
+%feature("docstring") RobotModel::enableSelfCollision "
 
-Returns a reference to the link by index or name.  
+Enables/disables self collisions between two links (depending on value)  
 ";
 
-%feature("docstring") RobotModel::link "
+%feature("docstring") RobotModel::numLinks "
 
-Returns a reference to the link by index or name.  
+Returns the number of links = number of DOF's.  
 ";
 
-%feature("docstring") RobotModel::setJointLimits "
-
-Sets the min/max joint limit vectors (must have length numLinks())  
+%feature("docstring") RobotModel::RobotModel "
 ";
 
-%feature("docstring") RobotModel::getMassMatrix "
+%feature("docstring") RobotModel::getComJacobian "
 
-Computes the nxn mass matrix B(q).  
-
-Takes O(n^2) time  
-";
-
-%feature("docstring") RobotModel::interpolate "
-
-Interpolates smoothly between two configurations, properly taking into account
-nonstandard joints.  
+Computes the Jacobian matrix of the current center of mass.  
 
 Returns:  
 
-    The n-element configuration that is u fraction of the way from a to b.  
+    ndarray: a 3xn matrix J such that np.dot(J,dq) gives the
+    COM velocity at the currene configuration  
+";
+
+%feature("docstring") RobotModel::getMassMatrixTimeDeriv "
+
+Computes the derivative of the nxn mass matrix with respect to t, given the
+robot's current velocity.  
+
+Takes O(n^4) time.  
+";
+
+%feature("docstring") RobotModel::setVelocityLimits "
+
+Sets the velocity limit vector vmax, the constraint is :math:`|dq[i]| \\leq
+vmax[i]`  
 ";
 
 %feature("docstring") RobotModel::mount "
@@ -2882,6 +2670,11 @@ Mounts a sub-robot onto a link, with its origin at a given local transform
 (R,t). The sub-robot's links will be renamed to subRobot.getName() + ':' +
 link.getName() unless subRobot.getName() is '', in which case the link names are
 preserved.  
+";
+
+%feature("docstring") RobotModel::getComVelocity "
+
+Returns the 3D velocity of the center of mass at the current config / velocity.  
 ";
 
 %feature("docstring") RobotModel::setConfig "
@@ -2897,15 +2690,25 @@ function call, you should call `q = robot.getConfig()` before the call, and then
 `robot.setConfig(q)` after it.  
 ";
 
-%feature("docstring") RobotModel::randomizeConfig "
+%feature("docstring") RobotModel::getVelocityLimits "
 
-Samples a random configuration and updates the robot's pose. Properly handles
-non-normal joints and handles DOFs with infinite bounds using a centered
-Laplacian distribution with the given scaling term.  
+Returns the velocity limit vector vmax, the constraint is :math:`|dq[i]| \\leq
+vmax[i]`  
+";
 
-.. note::  
+%feature("docstring") RobotModel::getTotalInertia "
 
-    Python random module seeding does not affect the result.  
+Computes the 3x3 total inertia matrix of the robot.  
+";
+
+%feature("docstring") RobotModel::getDOFPosition "
+
+Returns a single DOF's position.  
+";
+
+%feature("docstring") RobotModel::getDOFPosition "
+
+Returns a single DOF's position (by name)  
 ";
 
 %feature("docstring") RobotModel::loadFile "
@@ -2915,16 +2718,6 @@ Loads the robot from the file fn.
 Returns:  
 
     True if successful, False if failed.  
-";
-
-%feature("docstring") RobotModel::saveFile "
-
-Saves the robot to the file fn.  
-
-If `geometryPrefix == None` (default), the geometry is not saved. Otherwise, the
-geometry of each link will be saved to files named `geometryPrefix+name`, where
-`name` is either the name of the geometry file that was loaded, or
-`[link_name].off`  
 ";
 
 %feature("docstring") RobotModel::torquesFromAccel "
@@ -2949,6 +2742,213 @@ Returns:
     the joint accelerations ddq in the absence of external forces.  
 ";
 
+%feature("docstring") RobotModel::getMassMatrix "
+
+Computes the nxn mass matrix B(q).  
+
+Takes O(n^2) time  
+";
+
+%feature("docstring") RobotModel::saveFile "
+
+Saves the robot to the file fn.  
+
+If `geometryPrefix == None` (default), the geometry is not saved. Otherwise, the
+geometry of each link will be saved to files named `geometryPrefix+name`, where
+`name` is either the name of the geometry file that was loaded, or
+`[link_name].off`  
+";
+
+%feature("docstring") RobotModel::setJointLimits "
+
+Sets the min/max joint limit vectors (must have length numLinks())  
+";
+
+%feature("docstring") RobotModel::getName "
+";
+
+%feature("docstring") RobotModel::getJointType "
+
+Returns the joint type of the joint connecting the link to its parent, where the
+link is identified by index or by name.  
+";
+
+%feature("docstring") RobotModel::getJointType "
+
+Returns the joint type of the joint connecting the link to its parent, where the
+link is identified by index or by name.  
+";
+
+%feature("docstring") RobotModel::link "
+
+Returns a reference to the link by index or name.  
+";
+
+%feature("docstring") RobotModel::link "
+
+Returns a reference to the link by index or name.  
+";
+
+%feature("docstring") RobotModel::getLinearMomentum "
+
+Computes the 3D linear momentum vector.  
+";
+
+%feature("docstring") RobotModel::setAccelerationLimits "
+
+Sets the acceleration limit vector amax, the constraint is :math:`|ddq[i]| \\leq
+amax[i]`  
+";
+
+%feature("docstring") RobotModel::configToDrivers "
+
+Converts a full configuration (length numLinks()) to a list of driver values
+(length numDrivers()).  
+";
+
+%feature("docstring") RobotModel::getID "
+
+Returns the ID of the robot in its world.  
+
+.. note::  
+
+    The world ID is not the same as the robot index.  
+";
+
+%feature("docstring") RobotModel::getComJacobianCols "
+
+Returns the Jacobian matrix of the current center of mass w.r.t. some links of
+the robot.  
+
+Returns:  
+
+    ndarray: a 3xlen(links) matrix J such that np.dot(J,dqlinks)
+    gives the COM velocity at the current configuration, and dqlinks
+    is the array of velocities of the links given by `links`  
+";
+
+%feature("docstring") RobotModel::getAccelerationLimits "
+
+Returns the acceleration limit vector amax, the constraint is :math:`|ddq[i]|
+\\leq amax[i]`  
+";
+
+%feature("docstring") RobotModel::getCoriolisForces "
+
+Computes the Coriolis forces C(q,dq)*dq for current config and velocity.  
+
+Takes O(n) time, which is faster than computing matrix and doing the product.  
+
+(\"Forces\" is somewhat of a misnomer; the result is a joint torque vector)  
+";
+
+%feature("docstring") RobotModel::getCoriolisForceMatrix "
+
+Computes the Coriolis force matrix C(q,dq) for current config and velocity.  
+
+Takes O(n^2) time.  
+";
+
+%feature("docstring") RobotModel::accelFromTorques "
+
+Computes the foward dynamics. Uses Recursive Newton Euler solver and takes O(n)
+time.  
+
+Specifically, solves for :math:`\\ddot{q}` in the (partial) dynamics equation:  
+
+.. math::  
+
+    `B(q) \\ddot{q} + C(q,@dot {q}) = \\tau`  
+
+.. note::  
+
+    Does not include gravity term G(q).  getGravityForces(g) will
+    need to be subtracted from the argument t.  
+
+Returns:  
+
+    list of floats: the n-element joint acceleration vector that would
+    result from joint torques t in the absence of external forces.  
+";
+
+%feature("docstring") RobotModel::setTorqueLimits "
+
+Sets the torque limit vector tmax, the constraint is :math:`|torque[i]| \\leq
+tmax[i]`  
+";
+
+%feature("docstring") RobotModel::getMassMatrixInv "
+
+Computes the inverse of the nxn mass matrix B(q)^-1.  
+
+Takes O(n^2) time, which is much faster than inverting the result of
+getMassMatrix  
+";
+
+%feature("docstring") RobotModel::selfCollisionEnabled "
+
+Queries whether self collisions between two links is enabled.  
+";
+
+%feature("docstring") RobotModel::addSensor "
+
+Adds a new sensor with a given name and type.  
+
+Returns:  
+
+    The new sensor.  
+";
+
+%feature("docstring") RobotModel::interpolate "
+
+Interpolates smoothly between two configurations, properly taking into account
+nonstandard joints.  
+
+Returns:  
+
+    The n-element configuration that is u fraction of the way from a to b.  
+";
+
+%feature("docstring") RobotModel::reduce "
+
+Sets self to a reduced version of robot, where all fixed DOFs are eliminated.
+The return value is a map from the original robot DOF indices to the reduced
+DOFs.  
+
+Note that any geometries fixed to the world will disappear.  
+";
+
+%feature("docstring") RobotModel::getTorqueLimits "
+
+Returns the torque limit vector tmax, the constraint is :math:`|torque[i]| \\leq
+tmax[i]`  
+";
+
+%feature("docstring") RobotModel::getVelocity "
+
+Retreives the current velocity of the robot model.  
+";
+
+%feature("docstring") RobotModel::getJointLimits "
+
+Returns a pair (qmin,qmax) of min/max joint limit vectors.  
+";
+
+%feature("docstring") RobotModel::getAngularMomentum "
+
+Computes the 3D angular momentum vector.  
+";
+
+%feature("docstring") RobotModel::getConfig "
+
+Retrieves the current configuration of the robot model.  
+";
+
+%feature("docstring") RobotModel::setName "
+
+Sets the name of the robot.  
+";
+
 // File: classRobotModelDriver.xml
 
 
@@ -2965,20 +2965,22 @@ A RobotModelDriver is not created by hand, but instead accessed using
 C++ includes: robotmodel.h
 ";
 
+%feature("docstring") RobotModelDriver::getValue "
+
+Returns the current driver value from the robot's config.  
+";
+
 %feature("docstring") RobotModelDriver::getAccelerationLimits "
 
 Returns acceleration limits [amin,amax].  
 ";
 
-%feature("docstring") RobotModelDriver::RobotModelDriver "
+%feature("docstring") RobotModelDriver::getName "
 ";
 
-%feature("docstring") RobotModelDriver::getAffineCoeffs "
+%feature("docstring") RobotModelDriver::setVelocity "
 
-For \"affine\" links, returns the scale and offset of the driver value mapped to
-the world.  
-
-Returns a pair (scale,offset), each of length len(getAffectedLinks()).  
+Sets the robot's velocity to correspond to the given driver velocity value.  
 ";
 
 %feature("docstring") RobotModelDriver::getAffectedLinks "
@@ -2986,43 +2988,9 @@ Returns a pair (scale,offset), each of length len(getAffectedLinks()).
 Returns the indices of the driver's affected links.  
 ";
 
-%feature("docstring") RobotModelDriver::getValue "
-
-Returns the current driver value from the robot's config.  
-";
-
 %feature("docstring") RobotModelDriver::setName "
 
 Sets the name of the driver.  
-";
-
-%feature("docstring") RobotModelDriver::getType "
-
-Gets the type of the driver.  
-
-Returns:  
-
-    One of  \"normal\", \"affine\", \"rotation\", \"translation\", or \"custom\"  
-";
-
-%feature("docstring") RobotModelDriver::getLimits "
-
-Returns value limits [xmin,xmax].  
-";
-
-%feature("docstring") RobotModelDriver::getTorqueLimits "
-
-Returns generalized torque limits [tmin,tmax].  
-";
-
-%feature("docstring") RobotModelDriver::getVelocityLimits "
-
-Returns velocity limits [vmin,vmax].  
-";
-
-%feature("docstring") RobotModelDriver::getAffectedLink "
-
-Returns the single affected link for \"normal\" links.  
 ";
 
 %feature("docstring") RobotModelDriver::robot "
@@ -3040,17 +3008,49 @@ Sets the robot's config to correspond to the given driver value.
     robot.setConfig(robot.getConfig()) to update the forward kinematics.  
 ";
 
-%feature("docstring") RobotModelDriver::setVelocity "
+%feature("docstring") RobotModelDriver::getTorqueLimits "
 
-Sets the robot's velocity to correspond to the given driver velocity value.  
+Returns generalized torque limits [tmin,tmax].  
 ";
 
-%feature("docstring") RobotModelDriver::getName "
+%feature("docstring") RobotModelDriver::getAffineCoeffs "
+
+For \"affine\" links, returns the scale and offset of the driver value mapped to
+the world.  
+
+Returns a pair (scale,offset), each of length len(getAffectedLinks()).  
 ";
 
 %feature("docstring") RobotModelDriver::getVelocity "
 
 Returns the current driver velocity value from the robot's velocity.  
+";
+
+%feature("docstring") RobotModelDriver::RobotModelDriver "
+";
+
+%feature("docstring") RobotModelDriver::getLimits "
+
+Returns value limits [xmin,xmax].  
+";
+
+%feature("docstring") RobotModelDriver::getType "
+
+Gets the type of the driver.  
+
+Returns:  
+
+    One of  \"normal\", \"affine\", \"rotation\", \"translation\", or \"custom\"  
+";
+
+%feature("docstring") RobotModelDriver::getVelocityLimits "
+
+Returns velocity limits [vmin,vmax].  
+";
+
+%feature("docstring") RobotModelDriver::getAffectedLink "
+
+Returns the single affected link for \"normal\" links.  
 ";
 
 // File: classRobotModelLink.xml
@@ -3077,77 +3077,18 @@ A RobotModelLink is not created by hand, but instead accessed using
 C++ includes: robotmodel.h
 ";
 
-%feature("docstring") RobotModelLink::getVelocity "
+%feature("docstring") RobotModelLink::getAxis "
 
-Computes the velocity of the link's origin given the robot's current joint
-configuration and velocities. Equivalent to getPointVelocity([0,0,0]).  
+Gets the local rotational / translational axis.  
+";
+
+%feature("docstring") RobotModelLink::getWorldPosition "
+
+Converts point from local to world coordinates.  
 
 Returns:  
 
-    list of 3 floats: the current velocity of the link's origin, in
-    world coordinates  
-";
-
-%feature("docstring") RobotModelLink::getAngularVelocity "
-
-Computes the angular velocity of the link given the robot's current joint
-configuration and velocities.  
-
-Returns:  
-
-    list of 3 floats: the current angular velocity of the link, in world
-    coordinates  
-";
-
-%feature("docstring") RobotModelLink::setParent "
-
-Sets the index of the link's parent (on its robot).  
-";
-
-%feature("docstring") RobotModelLink::setParent "
-
-Sets the link's parent (must be on the same robot).  
-";
-
-%feature("docstring") RobotModelLink::getPointVelocity "
-
-Computes the world velocity of a point attached to the link, given the robot's
-current joint configuration and velocities.  
-
-Returns:  
-
-    list of 3 floats: the current velocity of the point, in
-    world coordinates.  
-";
-
-%feature("docstring") RobotModelLink::getParentTransform "
-
-Gets the transformation (R,t) to the parent link.  
-
-Returns:  
-
-    se3 object: a pair (R,t), with R a 9-list and t a 3-list of floats,
-    giving the local transform from this link to its parent, in the
-    reference (zero) configuration.  
-";
-
-%feature("docstring") RobotModelLink::geometry "
-
-Returns a reference to the link's geometry.  
-";
-
-%feature("docstring") RobotModelLink::setAxis "
-
-Sets the local rotational / translational axis.  
-";
-
-%feature("docstring") RobotModelLink::RobotModelLink "
-";
-
-%feature("docstring") RobotModelLink::drawLocalGL "
-
-Draws the link's geometry in its local frame. If keepAppearance=true, the
-current Appearance is honored. Otherwise, just the geometry is drawn.  
+    list of 3 floats: the world coordinates of the local point plocal  
 ";
 
 %feature("docstring") RobotModelLink::getJacobian "
@@ -3164,89 +3105,7 @@ Returns:
     point given by local coordinates plocal.  
 ";
 
-%feature("docstring") RobotModelLink::getLocalDirection "
-
-Converts direction from world to local coordinates.  
-
-Returns:  
-
-    list of 3 floats: the local coordinates of the world direction
-    vworld  
-";
-
-%feature("docstring") RobotModelLink::setPrismatic "
-
-Changes a link from revolute to prismatic or vice versa.  
-";
-
-%feature("docstring") RobotModelLink::getJacobianCols "
-
-Returns the jacobian of a point on this link w.r.t. specified entries of the
-robot's configuration q given by `links`.  
-
-The orientation jacobian is given in the first 3 rows, and is stacked on the
-position jacobian, which is given in the last 3 rows.  
-
-Returns:  
-
-    ndarray: the 6xlen(links) Jacobian matrix of the
-    point given by local coordinates plocal.  
-";
-
-%feature("docstring") RobotModelLink::drawWorldGL "
-
-Draws the link's geometry in the world frame. If keepAppearance=true, the
-current Appearance is honored. Otherwise, just the geometry is drawn.  
-";
-
-%feature("docstring") RobotModelLink::getAcceleration "
-
-Computes the acceleration of the link origin given the robot's current joint
-configuration and velocities, and the joint accelerations ddq.  
-
-ddq can be empty, which calculates the acceleration with acceleration 0, and is
-a little faster than setting ddq to [0]*n  
-
-Returns:  
-
-    list of 3 floats: the acceleration of the link's origin, in
-    world coordinates.  
-";
-
-%feature("docstring") RobotModelLink::getPointAcceleration "
-
-Computes the acceleration of the point given the robot's current joint
-configuration and velocities, and the joint accelerations ddq.  
-
-Returns:  
-
-    list of 3 floats: the acceleration of the point, in
-    world coordinates.  
-";
-
-%feature("docstring") RobotModelLink::getRotationJacobianCols "
-
-Returns the orientation jacobian this link w.r.t. specified entries of the
-robot's configuration q given by `links`.  
-
-This matrix J gives the point's angular velocity (in world coordinates) via
-np.dot(J,dqlinks), where dqlinks are the joint velocities of the links in
-`links`  
-
-Returns:  
-
-    ndarray: the 3xlen(links) orientation Jacobian matrix of the
-    link.  
-";
-
-%feature("docstring") RobotModelLink::getName "
-
-Returns the name of the robot link.  
-";
-
-%feature("docstring") RobotModelLink::appearance "
-
-Returns a reference to the link's appearance.  
+%feature("docstring") RobotModelLink::RobotModelLink "
 ";
 
 %feature("docstring") RobotModelLink::getPositionJacobian "
@@ -3263,79 +3122,19 @@ Returns:
     point given by local coordinates plocal.  
 ";
 
-%feature("docstring") RobotModelLink::setName "
+%feature("docstring") RobotModelLink::getLocalDirection "
 
-Sets the name of the robot link.  
-";
-
-%feature("docstring") RobotModelLink::getOrientationHessian "
-
-Computes the Hessians of each orientation component of the link w.r.t the
-robot's configuration q.  
+Converts direction from world to local coordinates.  
 
 Returns:  
 
-    ndarray: a 3xnxn array with each of the elements in the first axis
-    corresponding, respectively, to the (wx,wy,wz) components of the Hessian.  
+    list of 3 floats: the local coordinates of the world direction
+    vworld  
 ";
 
-%feature("docstring") RobotModelLink::getOrientationJacobian "
+%feature("docstring") RobotModelLink::geometry "
 
-Computes the orientation jacobian of this link w.r.t. the robot's configuration
-q.  
-
-This matrix J gives the link's angular velocity (in world coordinates) via
-np.dot(J,dq), where dq is the robot's joint velocities.  
-
-Returns:  
-
-    ndarray:: the 3xn orientation Jacobian matrix of the link.  
-";
-
-%feature("docstring") RobotModelLink::setMass "
-
-Sets the inertial proerties of the link. (Note that the Mass is given with
-origin at the link frame, not about the COM.)  
-";
-
-%feature("docstring") RobotModelLink::setParentTransform "
-
-Sets transformation (R,t) to the parent link.  
-";
-
-%feature("docstring") RobotModelLink::getID "
-
-Returns the ID of the robot link in its world.  
-
-.. note::  
-
-    The world ID is not the same as the link's index, retrieved by
-    getIndex.  
-";
-
-%feature("docstring") RobotModelLink::getTransform "
-
-Gets the link's current transformation (R,t) to the world frame.  
-
-Returns:  
-
-    se3 object: a pair (R,t), with R a 9-list and t a 3-list of floats.  
-";
-
-%feature("docstring") RobotModelLink::getPositionHessian "
-
-Computes the Hessians of each component of the position p w.r.t the robot's
-configuration q.  
-
-Returns:  
-
-    ndarray: a 3xnxn array with each of the elements in the first axis
-    corresponding respectively, to the (x,y,z) components of the Hessian.  
-";
-
-%feature("docstring") RobotModelLink::getParent "
-
-Returns the index of the link's parent (on its robot).  
+Returns a reference to the link's geometry.  
 ";
 
 %feature("docstring") RobotModelLink::getPositionJacobianCols "
@@ -3353,6 +3152,83 @@ Returns:
     point given by local coordinates plocal.  
 ";
 
+%feature("docstring") RobotModelLink::getAngularVelocity "
+
+Computes the angular velocity of the link given the robot's current joint
+configuration and velocities.  
+
+Returns:  
+
+    list of 3 floats: the current angular velocity of the link, in world
+    coordinates  
+";
+
+%feature("docstring") RobotModelLink::setTransform "
+
+Sets the link's current transformation (R,t) to the world frame.  
+
+.. note::  
+
+    This does NOT perform inverse kinematics.  The transform is
+    overwritten when the robot's setConfig() method is called.  
+";
+
+%feature("docstring") RobotModelLink::setPrismatic "
+
+Changes a link from revolute to prismatic or vice versa.  
+";
+
+%feature("docstring") RobotModelLink::setAxis "
+
+Sets the local rotational / translational axis.  
+";
+
+%feature("docstring") RobotModelLink::drawWorldGL "
+
+Draws the link's geometry in the world frame. If keepAppearance=true, the
+current Appearance is honored. Otherwise, just the geometry is drawn.  
+";
+
+%feature("docstring") RobotModelLink::getName "
+
+Returns the name of the robot link.  
+";
+
+%feature("docstring") RobotModelLink::robot "
+
+Returns a reference to the link's robot.  
+";
+
+%feature("docstring") RobotModelLink::getPointAcceleration "
+
+Computes the acceleration of the point given the robot's current joint
+configuration and velocities, and the joint accelerations ddq.  
+
+Returns:  
+
+    list of 3 floats: the acceleration of the point, in
+    world coordinates.  
+";
+
+%feature("docstring") RobotModelLink::getJacobianCols "
+
+Returns the jacobian of a point on this link w.r.t. specified entries of the
+robot's configuration q given by `links`.  
+
+The orientation jacobian is given in the first 3 rows, and is stacked on the
+position jacobian, which is given in the last 3 rows.  
+
+Returns:  
+
+    ndarray: the 6xlen(links) Jacobian matrix of the
+    point given by local coordinates plocal.  
+";
+
+%feature("docstring") RobotModelLink::appearance "
+
+Returns a reference to the link's appearance.  
+";
+
 %feature("docstring") RobotModelLink::getLocalPosition "
 
 Converts point from world to local coordinates.  
@@ -3360,6 +3236,118 @@ Converts point from world to local coordinates.
 Returns:  
 
     list of 3 floats: the local coordinates of the world point pworld  
+";
+
+%feature("docstring") RobotModelLink::drawLocalGL "
+
+Draws the link's geometry in its local frame. If keepAppearance=true, the
+current Appearance is honored. Otherwise, just the geometry is drawn.  
+";
+
+%feature("docstring") RobotModelLink::isPrismatic "
+
+Returns whether the joint is prismatic.  
+";
+
+%feature("docstring") RobotModelLink::parent "
+
+Returns a reference to the link's parent, or a NULL link if it has no parent.  
+";
+
+%feature("docstring") RobotModelLink::getTransform "
+
+Gets the link's current transformation (R,t) to the world frame.  
+
+Returns:  
+
+    se3 object: a pair (R,t), with R a 9-list and t a 3-list of floats.  
+";
+
+%feature("docstring") RobotModelLink::getWorldDirection "
+
+Converts direction from local to world coordinates.  
+
+Returns:  
+
+    list of 3 floats: the world coordinates of the local direction
+    vlocal  
+";
+
+%feature("docstring") RobotModelLink::getParent "
+
+Returns the index of the link's parent (on its robot).  
+";
+
+%feature("docstring") RobotModelLink::getPositionHessian "
+
+Computes the Hessians of each component of the position p w.r.t the robot's
+configuration q.  
+
+Returns:  
+
+    ndarray: a 3xnxn array with each of the elements in the first axis
+    corresponding respectively, to the (x,y,z) components of the Hessian.  
+";
+
+%feature("docstring") RobotModelLink::getVelocity "
+
+Computes the velocity of the link's origin given the robot's current joint
+configuration and velocities. Equivalent to getPointVelocity([0,0,0]).  
+
+Returns:  
+
+    list of 3 floats: the current velocity of the link's origin, in
+    world coordinates  
+";
+
+%feature("docstring") RobotModelLink::getOrientationJacobian "
+
+Computes the orientation jacobian of this link w.r.t. the robot's configuration
+q.  
+
+This matrix J gives the link's angular velocity (in world coordinates) via
+np.dot(J,dq), where dq is the robot's joint velocities.  
+
+Returns:  
+
+    ndarray:: the 3xn orientation Jacobian matrix of the link.  
+";
+
+%feature("docstring") RobotModelLink::getPointVelocity "
+
+Computes the world velocity of a point attached to the link, given the robot's
+current joint configuration and velocities.  
+
+Returns:  
+
+    list of 3 floats: the current velocity of the point, in
+    world coordinates.  
+";
+
+%feature("docstring") RobotModelLink::setName "
+
+Sets the name of the robot link.  
+";
+
+%feature("docstring") RobotModelLink::getID "
+
+Returns the ID of the robot link in its world.  
+
+.. note::  
+
+    The world ID is not the same as the link's index, retrieved by
+    getIndex.  
+";
+
+%feature("docstring") RobotModelLink::getMass "
+
+Returns the inertial properties of the link. (Note that the Mass is given with
+origin at the link frame, not about the COM.)  
+";
+
+%feature("docstring") RobotModelLink::setParentTransform "
+
+Sets transformation (R,t) to the parent link.  
 ";
 
 %feature("docstring") RobotModelLink::getAngularAcceleration "
@@ -3373,45 +3361,15 @@ Returns:
     world coordinates.  
 ";
 
-%feature("docstring") RobotModelLink::robot "
+%feature("docstring") RobotModelLink::getOrientationHessian "
 
-Returns a reference to the link's robot.  
-";
-
-%feature("docstring") RobotModelLink::parent "
-
-Returns a reference to the link's parent, or a NULL link if it has no parent.  
-";
-
-%feature("docstring") RobotModelLink::getWorldDirection "
-
-Converts direction from local to world coordinates.  
+Computes the Hessians of each orientation component of the link w.r.t the
+robot's configuration q.  
 
 Returns:  
 
-    list of 3 floats: the world coordinates of the local direction
-    vlocal  
-";
-
-%feature("docstring") RobotModelLink::getAxis "
-
-Gets the local rotational / translational axis.  
-";
-
-%feature("docstring") RobotModelLink::getMass "
-
-Returns the inertial properties of the link. (Note that the Mass is given with
-origin at the link frame, not about the COM.)  
-";
-
-%feature("docstring") RobotModelLink::setTransform "
-
-Sets the link's current transformation (R,t) to the world frame.  
-
-.. note::  
-
-    This does NOT perform inverse kinematics.  The transform is
-    overwritten when the robot's setConfig() method is called.  
+    ndarray: a 3xnxn array with each of the elements in the first axis
+    corresponding, respectively, to the (wx,wy,wz) components of the Hessian.  
 ";
 
 %feature("docstring") RobotModelLink::isRevolute "
@@ -3424,18 +3382,60 @@ Returns whether the joint is revolute.
 Returns the index of the link (on its robot).  
 ";
 
-%feature("docstring") RobotModelLink::getWorldPosition "
+%feature("docstring") RobotModelLink::setMass "
 
-Converts point from local to world coordinates.  
+Sets the inertial proerties of the link. (Note that the Mass is given with
+origin at the link frame, not about the COM.)  
+";
+
+%feature("docstring") RobotModelLink::getOrientationJacobianCols "
+
+Returns the orientation jacobian this link w.r.t. specified entries of the
+robot's configuration q given by `links`.  
+
+This matrix J gives the point's angular velocity (in world coordinates) via
+np.dot(J,dqlinks), where dqlinks are the joint velocities of the links in
+`links`  
 
 Returns:  
 
-    list of 3 floats: the world coordinates of the local point plocal  
+    ndarray: the 3xlen(links) orientation Jacobian matrix of the
+    link.  
 ";
 
-%feature("docstring") RobotModelLink::isPrismatic "
+%feature("docstring") RobotModelLink::getParentTransform "
 
-Returns whether the joint is prismatic.  
+Gets the transformation (R,t) to the parent link.  
+
+Returns:  
+
+    se3 object: a pair (R,t), with R a 9-list and t a 3-list of floats,
+    giving the local transform from this link to its parent, in the
+    reference (zero) configuration.  
+";
+
+%feature("docstring") RobotModelLink::getAcceleration "
+
+Computes the acceleration of the link origin given the robot's current joint
+configuration and velocities, and the joint accelerations ddq.  
+
+ddq can be empty, which calculates the acceleration with acceleration 0, and is
+a little faster than setting ddq to [0]*n  
+
+Returns:  
+
+    list of 3 floats: the acceleration of the link's origin, in
+    world coordinates.  
+";
+
+%feature("docstring") RobotModelLink::setParent "
+
+Sets the index of the link's parent (on its robot).  
+";
+
+%feature("docstring") RobotModelLink::setParent "
+
+Sets the link's parent (must be on the same robot).  
 ";
 
 // File: classRobotPoser.xml
@@ -3444,25 +3444,25 @@ Returns whether the joint is prismatic.
 %feature("docstring") RobotPoser "
 ";
 
-%feature("docstring") RobotPoser::get "
+%feature("docstring") RobotPoser::addIKConstraint "
 ";
 
-%feature("docstring") RobotPoser::RobotPoser "
+%feature("docstring") RobotPoser::get "
 ";
 
 %feature("docstring") RobotPoser::set "
 ";
 
-%feature("docstring") RobotPoser::setActiveDofs "
-";
-
 %feature("docstring") RobotPoser::getConditioned "
 ";
 
-%feature("docstring") RobotPoser::addIKConstraint "
+%feature("docstring") RobotPoser::clearIKConstraints "
 ";
 
-%feature("docstring") RobotPoser::clearIKConstraints "
+%feature("docstring") RobotPoser::RobotPoser "
+";
+
+%feature("docstring") RobotPoser::setActiveDofs "
 ";
 
 // File: classSimBody.xml
@@ -3493,40 +3493,9 @@ of objects in the simulation.
 C++ includes: robotsim.h
 ";
 
-%feature("docstring") SimBody::getTransform "
+%feature("docstring") SimBody::isEnabled "
 
-Gets the body's transformation at the current simulation time step (in center-
-of-mass centered coordinates).  
-";
-
-%feature("docstring") SimBody::setObjectTransform "
-
-Sets the body's transformation at the current simulation time step (in object-
-native coordinates)  
-";
-
-%feature("docstring") SimBody::applyForceAtPoint "
-
-Applies a force at a given point (in world coordinates) over the duration of the
-next Simulator.simulate(t) call.  
-";
-
-%feature("docstring") SimBody::isDynamicsEnabled "
-";
-
-%feature("docstring") SimBody::getSurface "
-
-Gets (a copy of) the surface properties.  
-";
-
-%feature("docstring") SimBody::enable "
-
-Sets the simulation of this body on/off.  
-";
-
-%feature("docstring") SimBody::getVelocity "
-
-Returns the angular velocity and translational velocity.  
+Returns true if this body is being simulated.  
 ";
 
 %feature("docstring") SimBody::getObjectTransform "
@@ -3535,16 +3504,37 @@ Gets the body's transformation at the current simulation time step (in object-
 native coordinates).  
 ";
 
+%feature("docstring") SimBody::setSurface "
+
+Sets the surface properties.  
+";
+
+%feature("docstring") SimBody::enableDynamics "
+
+Turns dynamic simulation of the body on/off. If false, velocities will simply be
+integrated forward, and forces will not affect velocity i.e., it will be pure
+kinematic simulation.  
+";
+
+%feature("docstring") SimBody::isDynamicsEnabled "
+";
+
+%feature("docstring") SimBody::applyWrench "
+
+Applies a force and torque about the COM over the duration of the next
+Simulator.simulate(t) call.  
+";
+
+%feature("docstring") SimBody::enable "
+
+Sets the simulation of this body on/off.  
+";
+
 %feature("docstring") SimBody::setCollisionPreshrink "
 
 If set, preshrinks the geometry so that the padded geometry better matches the
 original mesh. If shrinkVisualization=true, the underlying mesh is also shrunk
 (helps debug simulation artifacts due to preshrink)  
-";
-
-%feature("docstring") SimBody::isEnabled "
-
-Returns true if this body is being simulated.  
 ";
 
 %feature("docstring") SimBody::setCollisionPadding "
@@ -3555,10 +3545,9 @@ larger value is useful to maintain simulation stability for thin or soft
 objects. Default is 0.0025.  
 ";
 
-%feature("docstring") SimBody::setVelocity "
+%feature("docstring") SimBody::getSurface "
 
-Sets the angular velocity and translational velocity at the current simulation
-time step.  
+Gets (a copy of) the surface properties.  
 ";
 
 %feature("docstring") SimBody::setTransform "
@@ -3567,25 +3556,10 @@ Sets the body's transformation at the current simulation time step (in center-
 of-mass centered coordinates).  
 ";
 
-%feature("docstring") SimBody::enableDynamics "
+%feature("docstring") SimBody::applyForceAtPoint "
 
-Turns dynamic simulation of the body on/off. If false, velocities will simply be
-integrated forward, and forces will not affect velocity i.e., it will be pure
-kinematic simulation.  
-";
-
-%feature("docstring") SimBody::applyWrench "
-
-Applies a force and torque about the COM over the duration of the next
-Simulator.simulate(t) call.  
-";
-
-%feature("docstring") SimBody::getCollisionPadding "
-";
-
-%feature("docstring") SimBody::setSurface "
-
-Sets the surface properties.  
+Applies a force at a given point (in world coordinates) over the duration of the
+next Simulator.simulate(t) call.  
 ";
 
 %feature("docstring") SimBody::applyForceAtLocalPoint "
@@ -3594,9 +3568,35 @@ Applies a force at a given point (in local center-of-mass-centered coordinates)
 over the duration of the next Simulator.simulate(t) call.  
 ";
 
+%feature("docstring") SimBody::getCollisionPadding "
+";
+
+%feature("docstring") SimBody::setObjectTransform "
+
+Sets the body's transformation at the current simulation time step (in object-
+native coordinates)  
+";
+
+%feature("docstring") SimBody::setVelocity "
+
+Sets the angular velocity and translational velocity at the current simulation
+time step.  
+";
+
 %feature("docstring") SimBody::getID "
 
 Returns the object ID that this body associated with.  
+";
+
+%feature("docstring") SimBody::getVelocity "
+
+Returns the angular velocity and translational velocity.  
+";
+
+%feature("docstring") SimBody::getTransform "
+
+Gets the body's transformation at the current simulation time step (in center-
+of-mass centered coordinates).  
 ";
 
 // File: classSimJoint.xml
@@ -3611,37 +3611,18 @@ objects together, e.g., an object to a robot's gripper.
 C++ includes: robotsim.h
 ";
 
-%feature("docstring") SimJoint::setFriction "
+%feature("docstring") SimJoint::setLimits "
 
-Sets the (dry) friction of the joint.  
+Sets the joint limits, relative to the initial configuration of the bodies.
+Units are in radians for hinges and meters for sliders.  
 ";
 
-%feature("docstring") SimJoint::setVelocity "
-
-Locks velocity of the joint, up to force fmax. Can't be used with setFriction.  
-";
-
-%feature("docstring") SimJoint::makeFixed "
-
-Creates a fixed joint between `a` and `b`. (There's no method to fix a to the
-world; just call a.enableDynamics(False))  
-";
-
-%feature("docstring") SimJoint::makeHinge "
-
-Creates a hinge between `a` and `b`, or `a` and the world. The hinge is located
-at point `pt`, with axis `axis`, both in world coordinates.  
-";
-
-%feature("docstring") SimJoint::makeHinge "
+%feature("docstring") SimJoint::SimJoint "
 ";
 
 %feature("docstring") SimJoint::destroy "
 
 Removes the joint from the simulation.  
-";
-
-%feature("docstring") SimJoint::~SimJoint "
 ";
 
 %feature("docstring") SimJoint::makeSlider "
@@ -3653,7 +3634,15 @@ movement to axis `axis`, given in world coordinates.
 %feature("docstring") SimJoint::makeSlider "
 ";
 
-%feature("docstring") SimJoint::SimJoint "
+%feature("docstring") SimJoint::setFriction "
+
+Sets the (dry) friction of the joint.  
+";
+
+%feature("docstring") SimJoint::makeFixed "
+
+Creates a fixed joint between `a` and `b`. (There's no method to fix a to the
+world; just call a.enableDynamics(False))  
 ";
 
 %feature("docstring") SimJoint::addForce "
@@ -3661,10 +3650,21 @@ movement to axis `axis`, given in world coordinates.
 Adds a torque for the hinge joint and a force for a slider joint.  
 ";
 
-%feature("docstring") SimJoint::setLimits "
+%feature("docstring") SimJoint::setVelocity "
 
-Sets the joint limits, relative to the initial configuration of the bodies.
-Units are in radians for hinges and meters for sliders.  
+Locks velocity of the joint, up to force fmax. Can't be used with setFriction.  
+";
+
+%feature("docstring") SimJoint::makeHinge "
+
+Creates a hinge between `a` and `b`, or `a` and the world. The hinge is located
+at point `pt`, with axis `axis`, both in world coordinates.  
+";
+
+%feature("docstring") SimJoint::makeHinge "
+";
+
+%feature("docstring") SimJoint::~SimJoint "
 ";
 
 // File: classSimRobotController.xml
@@ -3734,112 +3734,26 @@ joints with a workaround::
 C++ includes: robotsim.h
 ";
 
-%feature("docstring") SimRobotController::setRate "
+%feature("docstring") SimRobotController::setLinear "
 
-Sets the current feedback control rate, in s.  
+Uses linear interpolation to get from the current configuration to the desired
+configuration after time dt.  
+
+q has size model().numLinks(). dt must be > 0.  
 ";
 
-%feature("docstring") SimRobotController::sendCommand "
+%feature("docstring") SimRobotController::setManualMode "
 
-Sends a custom string command to the controller.  
-";
-
-%feature("docstring") SimRobotController::setCubic "
-
-Uses cubic (Hermite) interpolation to get from the current
-configuration/velocity to the desired configuration/velocity after time dt.  
-
-q and v have size model().numLinks(). dt must be > 0.  
-";
-
-%feature("docstring") SimRobotController::addCubic "
-
-Same as setCubic but appends an interpolant onto the motion queue.  
-";
-
-%feature("docstring") SimRobotController::getCommandedVelocity "
-
-Returns The current commanded velocity (size model().numLinks())  
+Turns on/off manual mode, if either the setTorque or setPID command were
+previously set.  
 ";
 
 %feature("docstring") SimRobotController::SimRobotController "
 ";
 
-%feature("docstring") SimRobotController::addSensor "
+%feature("docstring") SimRobotController::setRate "
 
-Adds a new sensor with a given name and type.  
-
-Returns:  
-
-    The new sensor.  
-";
-
-%feature("docstring") SimRobotController::getControlType "
-
-Returns the control type for the active controller.  
-
-Returns:  
-
-    One of
-
-    - unknown
-    - off
-    - torque
-    - PID
-    - locked_velocity  
-";
-
-%feature("docstring") SimRobotController::setMilestone "
-
-Uses a dynamic interpolant to get from the current state to the desired
-milestone (with optional ending velocity). This interpolant is time-optimal with
-respect to the velocity and acceleration bounds.  
-
-Arguments have size model().numLinks().  
-";
-
-%feature("docstring") SimRobotController::setMilestone "
-
-Uses a dynamic interpolant to get from the current state to the desired
-milestone (with optional ending velocity). This interpolant is time-optimal with
-respect to the velocity and acceleration bounds.  
-";
-
-%feature("docstring") SimRobotController::~SimRobotController "
-";
-
-%feature("docstring") SimRobotController::getPIDGains "
-
-Returns the PID gains for the PID controller.  
-";
-
-%feature("docstring") SimRobotController::model "
-
-Retrieves the robot model associated with this controller.  
-";
-
-%feature("docstring") SimRobotController::remainingTime "
-
-Returns the remaining duration of the motion queue.  
-";
-
-%feature("docstring") SimRobotController::getRate "
-
-Returns The current feedback control rate, in s.  
-";
-
-%feature("docstring") SimRobotController::sensor "
-
-Returns a sensor by index or by name. If out of bounds or unavailable, a null
-sensor is returned (i.e., SimRobotSensor.name() or SimRobotSensor.type()) will
-return the empty string.)  
-";
-
-%feature("docstring") SimRobotController::sensor "
-
-Returns a sensor by index or by name. If out of bounds or unavailable, a null
-sensor is returned (i.e., SimRobotSensor.name() or SimRobotSensor.type()) will
-return the empty string.)  
+Sets the current feedback control rate, in s.  
 ";
 
 %feature("docstring") SimRobotController::setTorque "
@@ -3848,73 +3762,9 @@ Sets a torque command controller. t can have size model().numDrivers() or
 model().numLinks().  
 ";
 
-%feature("docstring") SimRobotController::getSensedTorque "
+%feature("docstring") SimRobotController::getRate "
 
-Returns The current \"sensed\" (feedback) torque from the simulator. (size
-model().numDrivers())  
-
-Note: a default robot doesn't have a torque sensor, so this will be 0  
-";
-
-%feature("docstring") SimRobotController::setPIDCommand "
-
-Sets a PID command controller. Arguments can have size model().numDrivers() or
-model().numLinks().  
-";
-
-%feature("docstring") SimRobotController::setPIDCommand "
-
-Sets a PID command controller. If tfeedforward is provided, it is the
-feedforward torque vector.  
-";
-
-%feature("docstring") SimRobotController::getSetting "
-
-Returns a setting of the controller.  
-";
-
-%feature("docstring") SimRobotController::getCommandedConfig "
-
-Returns The current commanded configuration (size model().numLinks())  
-";
-
-%feature("docstring") SimRobotController::settings "
-
-Returns all valid setting names.  
-";
-
-%feature("docstring") SimRobotController::setVelocity "
-
-Sets a rate controller from the current commanded config to move at rate dq for
-time dt > 0. dq has size model().numLinks()  
-";
-
-%feature("docstring") SimRobotController::getSensedConfig "
-
-Returns The current \"sensed\" configuration from the simulator (size
-model().numLinks())  
-";
-
-%feature("docstring") SimRobotController::addLinear "
-
-Same as setLinear but appends an interpolant onto the motion queue.  
-";
-
-%feature("docstring") SimRobotController::setSetting "
-
-Sets a setting of the controller.  
-";
-
-%feature("docstring") SimRobotController::addMilestoneLinear "
-
-Same as addMilestone, but enforces that the motion should move along a straight-
-line joint-space path.  
-";
-
-%feature("docstring") SimRobotController::setManualMode "
-
-Turns on/off manual mode, if either the setTorque or setPID command were
-previously set.  
+Returns The current feedback control rate, in s.  
 ";
 
 %feature("docstring") SimRobotController::commands "
@@ -3936,9 +3786,90 @@ Same as setMilestone, but appends an interpolant onto an internal motion queue
 starting at the current queued end state.  
 ";
 
+%feature("docstring") SimRobotController::getCommandedConfig "
+
+Returns The current commanded configuration (size model().numLinks())  
+";
+
+%feature("docstring") SimRobotController::setSetting "
+
+Sets a setting of the controller.  
+";
+
+%feature("docstring") SimRobotController::sensor "
+
+Returns a sensor by index or by name. If out of bounds or unavailable, a null
+sensor is returned (i.e., SimRobotSensor.name() or SimRobotSensor.type()) will
+return the empty string.)  
+";
+
+%feature("docstring") SimRobotController::sensor "
+
+Returns a sensor by index or by name. If out of bounds or unavailable, a null
+sensor is returned (i.e., SimRobotSensor.name() or SimRobotSensor.type()) will
+return the empty string.)  
+";
+
+%feature("docstring") SimRobotController::getSetting "
+
+Returns a setting of the controller.  
+";
+
 %feature("docstring") SimRobotController::getCommandedTorque "
 
 Returns The current commanded (feedforward) torque (size model().numDrivers())  
+";
+
+%feature("docstring") SimRobotController::setMilestone "
+
+Uses a dynamic interpolant to get from the current state to the desired
+milestone (with optional ending velocity). This interpolant is time-optimal with
+respect to the velocity and acceleration bounds.  
+
+Arguments have size model().numLinks().  
+";
+
+%feature("docstring") SimRobotController::setMilestone "
+
+Uses a dynamic interpolant to get from the current state to the desired
+milestone (with optional ending velocity). This interpolant is time-optimal with
+respect to the velocity and acceleration bounds.  
+";
+
+%feature("docstring") SimRobotController::remainingTime "
+
+Returns the remaining duration of the motion queue.  
+";
+
+%feature("docstring") SimRobotController::sendCommand "
+
+Sends a custom string command to the controller.  
+";
+
+%feature("docstring") SimRobotController::setPIDCommand "
+
+Sets a PID command controller. Arguments can have size model().numDrivers() or
+model().numLinks().  
+";
+
+%feature("docstring") SimRobotController::setPIDCommand "
+
+Sets a PID command controller. If tfeedforward is provided, it is the
+feedforward torque vector.  
+";
+
+%feature("docstring") SimRobotController::setVelocity "
+
+Sets a rate controller from the current commanded config to move at rate dq for
+time dt > 0. dq has size model().numLinks()  
+";
+
+%feature("docstring") SimRobotController::getPIDGains "
+
+Returns the PID gains for the PID controller.  
+";
+
+%feature("docstring") SimRobotController::~SimRobotController "
 ";
 
 %feature("docstring") SimRobotController::getSensedVelocity "
@@ -3947,17 +3878,86 @@ Returns The current \"sensed\" velocity from the simulator (size
 model().numLinks())  
 ";
 
-%feature("docstring") SimRobotController::setLinear "
+%feature("docstring") SimRobotController::getSensedConfig "
 
-Uses linear interpolation to get from the current configuration to the desired
-configuration after time dt.  
+Returns The current \"sensed\" configuration from the simulator (size
+model().numLinks())  
+";
 
-q has size model().numLinks(). dt must be > 0.  
+%feature("docstring") SimRobotController::getCommandedVelocity "
+
+Returns The current commanded velocity (size model().numLinks())  
+";
+
+%feature("docstring") SimRobotController::model "
+
+Retrieves the robot model associated with this controller.  
 ";
 
 %feature("docstring") SimRobotController::setPIDGains "
 
 Sets the PID gains. Arguments have size model().numDrivers().  
+";
+
+%feature("docstring") SimRobotController::setCubic "
+
+Uses cubic (Hermite) interpolation to get from the current
+configuration/velocity to the desired configuration/velocity after time dt.  
+
+q and v have size model().numLinks(). dt must be > 0.  
+";
+
+%feature("docstring") SimRobotController::getSensedTorque "
+
+Returns The current \"sensed\" (feedback) torque from the simulator. (size
+model().numDrivers())  
+
+Note: a default robot doesn't have a torque sensor, so this will be 0  
+";
+
+%feature("docstring") SimRobotController::addSensor "
+
+Adds a new sensor with a given name and type.  
+
+Returns:  
+
+    The new sensor.  
+";
+
+%feature("docstring") SimRobotController::addLinear "
+
+Same as setLinear but appends an interpolant onto the motion queue.  
+";
+
+%feature("docstring") SimRobotController::getControlType "
+
+Returns the control type for the active controller.  
+
+Returns:  
+
+    One of
+
+    - unknown
+    - off
+    - torque
+    - PID
+    - locked_velocity  
+";
+
+%feature("docstring") SimRobotController::addMilestoneLinear "
+
+Same as addMilestone, but enforces that the motion should move along a straight-
+line joint-space path.  
+";
+
+%feature("docstring") SimRobotController::addCubic "
+
+Same as setCubic but appends an interpolant onto the motion queue.  
+";
+
+%feature("docstring") SimRobotController::settings "
+
+Returns all valid setting names.  
 ";
 
 // File: classSimRobotSensor.xml
@@ -4005,13 +4005,48 @@ include:
 C++ includes: robotsim.h
 ";
 
-%feature("docstring") SimRobotSensor::SimRobotSensor "
-";
-
 %feature("docstring") SimRobotSensor::setSetting "
 
 Sets the value of the named setting (you will need to manually cast an
 int/float/etc to a str)  
+";
+
+%feature("docstring") SimRobotSensor::getEnabled "
+
+Return whether the sensor is enabled during simulation (helper for getSetting)  
+";
+
+%feature("docstring") SimRobotSensor::robot "
+
+Returns the model of the robot to which this belongs.  
+";
+
+%feature("docstring") SimRobotSensor::kinematicSimulate "
+
+simulates / advances the kinematic simulation  
+";
+
+%feature("docstring") SimRobotSensor::kinematicSimulate "
+";
+
+%feature("docstring") SimRobotSensor::getSetting "
+
+Returns the value of the named setting (you will need to manually parse this)  
+";
+
+%feature("docstring") SimRobotSensor::measurementNames "
+
+Returns a list of names for the measurements (one per measurement).  
+";
+
+%feature("docstring") SimRobotSensor::setLink "
+
+Sets the link on which the sensor is mounted (helper for setSetting)  
+";
+
+%feature("docstring") SimRobotSensor::setLink "
+
+Sets the link on which the sensor is mounted (helper for setSetting)  
 ";
 
 %feature("docstring") SimRobotSensor::getTransform "
@@ -4023,33 +4058,7 @@ If the sensor doesn't have a transform (such as a joint position or torque
 sensor) an exception will be raised.  
 ";
 
-%feature("docstring") SimRobotSensor::drawGL "
-
-Draws a sensor indicator using OpenGL. If measurements are given, the indicator
-is drawn as though these are the latest measurements, otherwise only an
-indicator is drawn.  
-";
-
-%feature("docstring") SimRobotSensor::drawGL "
-
-Draws a sensor indicator using OpenGL. If measurements are given, the indicator
-is drawn as though these are the latest measurements, otherwise only an
-indicator is drawn.  
-";
-
-%feature("docstring") SimRobotSensor::measurementNames "
-
-Returns a list of names for the measurements (one per measurement).  
-";
-
-%feature("docstring") SimRobotSensor::settings "
-
-Returns all setting names.  
-";
-
-%feature("docstring") SimRobotSensor::setEnabled "
-
-Sets whether the sensor is enabled (helper for setSetting)  
+%feature("docstring") SimRobotSensor::SimRobotSensor "
 ";
 
 %feature("docstring") SimRobotSensor::getTransformWorld "
@@ -4061,51 +4070,10 @@ If the sensor doesn't have a transform (such as a joint position or torque
 sensor) an exception will be raised.  
 ";
 
-%feature("docstring") SimRobotSensor::kinematicReset "
+%feature("docstring") SimRobotSensor::getMeasurements "
 
-resets a kinematic simulation so that a new initial condition can be set  
-";
-
-%feature("docstring") SimRobotSensor::getSetting "
-
-Returns the value of the named setting (you will need to manually parse this)  
-";
-
-%feature("docstring") SimRobotSensor::robot "
-
-Returns the model of the robot to which this belongs.  
-";
-
-%feature("docstring") SimRobotSensor::getLink "
-
-Returns the link on which the sensor is mounted (helper for getSetting)  
-";
-
-%feature("docstring") SimRobotSensor::kinematicSimulate "
-
-simulates / advances the kinematic simulation  
-";
-
-%feature("docstring") SimRobotSensor::kinematicSimulate "
-";
-
-%feature("docstring") SimRobotSensor::setTransform "
-
-Sets the local transform of the sensor on the robot's link. (helper for
-setSetting)  
-
-If the sensor doesn't have a transform (such as a joint position or torque
-sensor) an exception will be raised.  
-";
-
-%feature("docstring") SimRobotSensor::setLink "
-
-Sets the link on which the sensor is mounted (helper for setSetting)  
-";
-
-%feature("docstring") SimRobotSensor::setLink "
-
-Sets the link on which the sensor is mounted (helper for setSetting)  
+Returns an array of measurements from the previous simulation (or
+kinematicSimulate) timestep.  
 ";
 
 %feature("docstring") SimRobotSensor::type "
@@ -4118,15 +4086,47 @@ Returns the type of the sensor.
 Returns the name of the sensor.  
 ";
 
-%feature("docstring") SimRobotSensor::getEnabled "
+%feature("docstring") SimRobotSensor::setTransform "
 
-Return whether the sensor is enabled during simulation (helper for getSetting)  
+Sets the local transform of the sensor on the robot's link. (helper for
+setSetting)  
+
+If the sensor doesn't have a transform (such as a joint position or torque
+sensor) an exception will be raised.  
 ";
 
-%feature("docstring") SimRobotSensor::getMeasurements "
+%feature("docstring") SimRobotSensor::getLink "
 
-Returns an array of measurements from the previous simulation (or
-kinematicSimulate) timestep.  
+Returns the link on which the sensor is mounted (helper for getSetting)  
+";
+
+%feature("docstring") SimRobotSensor::drawGL "
+
+Draws a sensor indicator using OpenGL. If measurements are given, the indicator
+is drawn as though these are the latest measurements, otherwise only an
+indicator is drawn.  
+";
+
+%feature("docstring") SimRobotSensor::drawGL "
+
+Draws a sensor indicator using OpenGL. If measurements are given, the indicator
+is drawn as though these are the latest measurements, otherwise only an
+indicator is drawn.  
+";
+
+%feature("docstring") SimRobotSensor::settings "
+
+Returns all setting names.  
+";
+
+%feature("docstring") SimRobotSensor::kinematicReset "
+
+resets a kinematic simulation so that a new initial condition can be set  
+";
+
+%feature("docstring") SimRobotSensor::setEnabled "
+
+Sets whether the sensor is enabled (helper for setSetting)  
 ";
 
 // File: classSimulator.xml
@@ -4137,6 +4137,102 @@ kinematicSimulate) timestep.
 A dynamics simulator for a WorldModel.  
 
 C++ includes: robotsim.h
+";
+
+%feature("docstring") Simulator::updateWorld "
+
+Updates the world model from the current simulation state. This only needs to be
+called if you change the world model and want to revert back to the simulation
+state.  
+";
+
+%feature("docstring") Simulator::~Simulator "
+";
+
+%feature("docstring") Simulator::checkObjectOverlap "
+
+Checks if any objects are overlapping.  
+
+Returns:  
+
+    A pair of lists of integers, giving the pairs of object ids that
+    are overlapping.  
+";
+
+%feature("docstring") Simulator::simulate "
+
+Advances the simulation by time t, and updates the world model from the
+simulation state.  
+";
+
+%feature("docstring") Simulator::getStatusString "
+
+Returns a string indicating the simulator's status. If s is provided and >= 0,
+this function maps the indicator code s to a string.  
+";
+
+%feature("docstring") Simulator::hadSeparation "
+
+Returns true if the objects had ever separated during the last simulate() call.
+You can set `bid` to -1 to determine if object `a` had no contact with any other
+object.  
+";
+
+%feature("docstring") Simulator::setGravity "
+
+Sets the overall gravity vector.  
+";
+
+%feature("docstring") Simulator::getActualConfig "
+
+Returns the current actual configuration of the robot from the simulator.  
+";
+
+%feature("docstring") Simulator::settings "
+
+Returns all setting names.  
+";
+
+%feature("docstring") Simulator::getActualTorques "
+
+Deprecated: renamed to getActualTorque to be consistent with SimRobotController
+methods.  
+";
+
+%feature("docstring") Simulator::contactForce "
+
+Returns the contact force on object a at the last time step. You can set bid to
+-1 to get the overall contact force on object a.  
+";
+
+%feature("docstring") Simulator::getActualVelocity "
+
+Returns the current actual velocity of the robot from the simulator.  
+";
+
+%feature("docstring") Simulator::setSimStep "
+
+Sets the internal simulation substep. Values < 0.01 are recommended.  
+";
+
+%feature("docstring") Simulator::controller "
+
+Returns a controller for the indicated robot, either by index or by RobotModel.  
+";
+
+%feature("docstring") Simulator::controller "
+
+Returns a controller for the indicated robot, either by index or by RobotModel.  
+";
+
+%feature("docstring") Simulator::getJointForces "
+
+Returns the joint force and torque local to the link, as would be read by a
+force-torque sensor mounted at the given link's origin.  
+
+Returns:  
+
+    6 entries of the wrench (fx,fy,fz,mx,my,mz)  
 ";
 
 %feature("docstring") Simulator::Simulator "
@@ -4154,15 +4250,15 @@ Returns:
     A Base64 string representing the binary data for the state  
 ";
 
-%feature("docstring") Simulator::contactForce "
+%feature("docstring") Simulator::meanContactForce "
 
-Returns the contact force on object a at the last time step. You can set bid to
--1 to get the overall contact force on object a.  
+Returns the average contact force on object a over the last simulate() call.  
 ";
 
-%feature("docstring") Simulator::settings "
+%feature("docstring") Simulator::setSetting "
 
-Returns all setting names.  
+Sets some simulation setting. Raises an exception if the name is unknown or the
+value is of improper format.  
 ";
 
 %feature("docstring") Simulator::enableContactFeedback "
@@ -4172,6 +4268,100 @@ indexes returned by object.getID()). Contact feedback has a small overhead so
 you may want to do this selectively. This must be called before using inContact,
 getContacts, getContactForces, contactForce, contactTorque, hadContact,
 hadSeparation, hadPenetration, and meanContactForce.  
+";
+
+%feature("docstring") Simulator::reset "
+
+Resets to the initial state (same as setState(initialState))  
+";
+
+%feature("docstring") Simulator::hadContact "
+
+Returns true if the objects had contact over the last simulate() call. You can
+set `bid` to -1 to determine if object `a` had contact with any other object.  
+";
+
+%feature("docstring") Simulator::getTime "
+
+Returns the simulation time.  
+";
+
+%feature("docstring") Simulator::inContact "
+
+Returns true if the objects (indexes returned by object.getID()) are in contact
+on the current time step. You can set bid=-1 to tell if object `a` is in contact
+with any object.  
+";
+
+%feature("docstring") Simulator::getStatus "
+
+Returns an indicator code for the simulator status.  
+
+Returns:  
+
+    One of the STATUS_X flags.  (Technically, this returns the *worst* status
+    over the last simulate() call)  
+";
+
+%feature("docstring") Simulator::getContacts "
+
+Returns the nx7 list of contacts (x,n,kFriction) at the last time step. Normals
+point into object `a`. Each contact point (x,n,kFriction) is represented as a
+7-element vector.  
+";
+
+%feature("docstring") Simulator::enableContactFeedbackAll "
+
+Call this to enable contact feedback between all pairs of objects. Contact
+feedback has a small overhead so you may want to do this selectively.  
+";
+
+%feature("docstring") Simulator::hadPenetration "
+
+Returns true if the objects interpenetrated during the last simulate() call. If
+so, the simulation may lead to very inaccurate results or artifacts.  
+
+You can set `bid` to -1 to determine if object `a` penetrated any object, or you
+can set `aid=bid=-1` to determine whether any object is penetrating any other
+(indicating that the simulation will not be functioning properly in general).  
+";
+
+%feature("docstring") Simulator::getContactForces "
+
+Returns the list of contact forces on object a at the last time step. Result is
+an nx3 array.  
+";
+
+%feature("docstring") Simulator::body "
+
+Returns the SimBody corresponding to the given link.  
+";
+
+%feature("docstring") Simulator::body "
+
+Returns the SimBody corresponding to the given object.  
+";
+
+%feature("docstring") Simulator::body "
+
+Return the SimBody corresponding to the given link, rigid object, or terrain.  
+";
+
+%feature("docstring") Simulator::getActualTorque "
+
+Returns the current actual torques on the robot's drivers from the simulator.  
+";
+
+%feature("docstring") Simulator::setState "
+
+Sets the current simulation state from a Base64 string returned by a prior
+getState call.  
+";
+
+%feature("docstring") Simulator::fakeSimulate "
+
+Advances a faked simulation by time t, and updates the world model from the
+faked simulation state.  
 ";
 
 %feature("docstring") Simulator::getSetting "
@@ -4221,200 +4411,10 @@ Returns:
     float manually.  
 ";
 
-%feature("docstring") Simulator::~Simulator "
-";
-
-%feature("docstring") Simulator::updateWorld "
-
-Updates the world model from the current simulation state. This only needs to be
-called if you change the world model and want to revert back to the simulation
-state.  
-";
-
-%feature("docstring") Simulator::setSimStep "
-
-Sets the internal simulation substep. Values < 0.01 are recommended.  
-";
-
-%feature("docstring") Simulator::simulate "
-
-Advances the simulation by time t, and updates the world model from the
-simulation state.  
-";
-
-%feature("docstring") Simulator::reset "
-
-Resets to the initial state (same as setState(initialState))  
-";
-
-%feature("docstring") Simulator::hadSeparation "
-
-Returns true if the objects had ever separated during the last simulate() call.
-You can set `bid` to -1 to determine if object `a` had no contact with any other
-object.  
-";
-
-%feature("docstring") Simulator::getActualTorques "
-
-Deprecated: renamed to getActualTorque to be consistent with SimRobotController
-methods.  
-";
-
-%feature("docstring") Simulator::controller "
-
-Returns a controller for the indicated robot, either by index or by RobotModel.  
-";
-
-%feature("docstring") Simulator::controller "
-
-Returns a controller for the indicated robot, either by index or by RobotModel.  
-";
-
-%feature("docstring") Simulator::getContacts "
-
-Returns the nx7 list of contacts (x,n,kFriction) at the last time step. Normals
-point into object `a`. Each contact point (x,n,kFriction) is represented as a
-7-element vector.  
-";
-
-%feature("docstring") Simulator::getActualConfig "
-
-Returns the current actual configuration of the robot from the simulator.  
-";
-
-%feature("docstring") Simulator::getTime "
-
-Returns the simulation time.  
-";
-
-%feature("docstring") Simulator::setSetting "
-
-Sets some simulation setting. Raises an exception if the name is unknown or the
-value is of improper format.  
-";
-
-%feature("docstring") Simulator::getStatus "
-
-Returns an indicator code for the simulator status.  
-
-Returns:  
-
-    One of the STATUS_X flags.  (Technically, this returns the *worst* status
-    over the last simulate() call)  
-";
-
-%feature("docstring") Simulator::hadPenetration "
-
-Returns true if the objects interpenetrated during the last simulate() call. If
-so, the simulation may lead to very inaccurate results or artifacts.  
-
-You can set `bid` to -1 to determine if object `a` penetrated any object, or you
-can set `aid=bid=-1` to determine whether any object is penetrating any other
-(indicating that the simulation will not be functioning properly in general).  
-";
-
-%feature("docstring") Simulator::checkObjectOverlap "
-
-Checks if any objects are overlapping.  
-
-Returns:  
-
-    A pair of lists of integers, giving the pairs of object ids that
-    are overlapping.  
-";
-
-%feature("docstring") Simulator::setGravity "
-
-Sets the overall gravity vector.  
-";
-
-%feature("docstring") Simulator::getActualTorque "
-
-Returns the current actual torques on the robot's drivers from the simulator.  
-";
-
-%feature("docstring") Simulator::setState "
-
-Sets the current simulation state from a Base64 string returned by a prior
-getState call.  
-";
-
-%feature("docstring") Simulator::fakeSimulate "
-
-Advances a faked simulation by time t, and updates the world model from the
-faked simulation state.  
-";
-
-%feature("docstring") Simulator::body "
-
-Returns the SimBody corresponding to the given link.  
-";
-
-%feature("docstring") Simulator::body "
-
-Returns the SimBody corresponding to the given object.  
-";
-
-%feature("docstring") Simulator::body "
-
-Return the SimBody corresponding to the given link, rigid object, or terrain.  
-";
-
-%feature("docstring") Simulator::inContact "
-
-Returns true if the objects (indexes returned by object.getID()) are in contact
-on the current time step. You can set bid=-1 to tell if object `a` is in contact
-with any object.  
-";
-
-%feature("docstring") Simulator::enableContactFeedbackAll "
-
-Call this to enable contact feedback between all pairs of objects. Contact
-feedback has a small overhead so you may want to do this selectively.  
-";
-
-%feature("docstring") Simulator::getActualVelocity "
-
-Returns the current actual velocity of the robot from the simulator.  
-";
-
-%feature("docstring") Simulator::getStatusString "
-
-Returns a string indicating the simulator's status. If s is provided and >= 0,
-this function maps the indicator code s to a string.  
-";
-
-%feature("docstring") Simulator::meanContactForce "
-
-Returns the average contact force on object a over the last simulate() call.  
-";
-
 %feature("docstring") Simulator::contactTorque "
 
 Returns the contact force on object `a` (about `a`'s origin) at the last time
 step. You can set `bid` to -1 to get the overall contact force on object `a`.  
-";
-
-%feature("docstring") Simulator::getJointForces "
-
-Returns the joint force and torque local to the link, as would be read by a
-force-torque sensor mounted at the given link's origin.  
-
-Returns:  
-
-    6 entries of the wrench (fx,fy,fz,mx,my,mz)  
-";
-
-%feature("docstring") Simulator::hadContact "
-
-Returns true if the objects had contact over the last simulate() call. You can
-set `bid` to -1 to determine if object `a` had contact with any other object.  
-";
-
-%feature("docstring") Simulator::getContactForces "
-
-Returns the list of contact forces on object a at the last time step. Result is
-an nx3 array.  
 ";
 
 // File: classSpherePoser.xml
@@ -4423,10 +4423,10 @@ an nx3 array.
 %feature("docstring") SpherePoser "
 ";
 
-%feature("docstring") SpherePoser::set "
+%feature("docstring") SpherePoser::SpherePoser "
 ";
 
-%feature("docstring") SpherePoser::SpherePoser "
+%feature("docstring") SpherePoser::set "
 ";
 
 %feature("docstring") SpherePoser::get "
@@ -4442,12 +4442,23 @@ Static environment geometry.
 C++ includes: robotmodel.h
 ";
 
+%feature("docstring") TerrainModel::geometry "
+
+Returns a reference to the geometry associated with this object.  
+";
+
+%feature("docstring") TerrainModel::setName "
+";
+
 %feature("docstring") TerrainModel::appearance "
 
 Returns a reference to the appearance associated with this object.  
 ";
 
 %feature("docstring") TerrainModel::TerrainModel "
+";
+
+%feature("docstring") TerrainModel::getName "
 ";
 
 %feature("docstring") TerrainModel::drawGL "
@@ -4460,11 +4471,6 @@ reuse OpenGL display lists. A better approach is to change the object's
 Appearance directly.  
 ";
 
-%feature("docstring") TerrainModel::geometry "
-
-Returns a reference to the geometry associated with this object.  
-";
-
 %feature("docstring") TerrainModel::getID "
 
 Returns the ID of the terrain in its world.  
@@ -4472,20 +4478,9 @@ Returns the ID of the terrain in its world.
 .. note:: The world ID is not the same as the terrain index.  
 ";
 
-%feature("docstring") TerrainModel::setName "
-";
-
-%feature("docstring") TerrainModel::loadFile "
-
-Loads the terrain from the file fn.  
-";
-
 %feature("docstring") TerrainModel::setFriction "
 
 Changes the friction coefficient for this terrain.  
-";
-
-%feature("docstring") TerrainModel::getName "
 ";
 
 %feature("docstring") TerrainModel::saveFile "
@@ -4494,13 +4489,18 @@ Saves the terrain to the file fn. If geometryName is given, the geometry is
 saved to that file.  
 ";
 
+%feature("docstring") TerrainModel::loadFile "
+
+Loads the terrain from the file fn.  
+";
+
 // File: classTransformPoser.xml
 
 
 %feature("docstring") TransformPoser "
 ";
 
-%feature("docstring") TransformPoser::enableTranslation "
+%feature("docstring") TransformPoser::enableRotation "
 ";
 
 %feature("docstring") TransformPoser::set "
@@ -4509,13 +4509,13 @@ saved to that file.
 %feature("docstring") TransformPoser::get "
 ";
 
-%feature("docstring") TransformPoser::TransformPoser "
-";
-
 %feature("docstring") TransformPoser::enableTranslationAxes "
 ";
 
-%feature("docstring") TransformPoser::enableRotation "
+%feature("docstring") TransformPoser::enableTranslation "
+";
+
+%feature("docstring") TransformPoser::TransformPoser "
 ";
 
 %feature("docstring") TransformPoser::enableRotationAxes "
@@ -4562,24 +4562,6 @@ To get all indices as a numpy array::
 C++ includes: geometry.h
 ";
 
-%feature("docstring") TriangleMesh::translate "
-
-Translates all the vertices by v=v+t.  
-";
-
-%feature("docstring") TriangleMesh::setVertices "
-
-Sets all vertices to the given nx3 Numpy array.  
-";
-
-%feature("docstring") TriangleMesh::TriangleMesh "
-";
-
-%feature("docstring") TriangleMesh::setIndices "
-
-Sets all indices to the given mx3 Numpy array.  
-";
-
 %feature("docstring") TriangleMesh::getIndices "
 
 Retrieves an array view of the triangle indices.  
@@ -4590,9 +4572,22 @@ Returns:
     array will change the indices.  
 ";
 
-%feature("docstring") TriangleMesh::transform "
+%feature("docstring") TriangleMesh::setVertices "
 
-Transforms all the vertices by the rigid transform v=R*v+t.  
+Sets all vertices to the given nx3 Numpy array.  
+";
+
+%feature("docstring") TriangleMesh::setIndices "
+
+Sets all indices to the given mx3 Numpy array.  
+";
+
+%feature("docstring") TriangleMesh::TriangleMesh "
+";
+
+%feature("docstring") TriangleMesh::translate "
+
+Translates all the vertices by v=v+t.  
 ";
 
 %feature("docstring") TriangleMesh::getVertices "
@@ -4605,6 +4600,11 @@ Returns:
     change the vertices.  
 ";
 
+%feature("docstring") TriangleMesh::transform "
+
+Transforms all the vertices by the rigid transform v=R*v+t.  
+";
+
 // File: classViewport.xml
 
 
@@ -4614,16 +4614,16 @@ Returns:
 %feature("docstring") Viewport::setRigidTransform "
 ";
 
-%feature("docstring") Viewport::fromJson "
+%feature("docstring") Viewport::setModelviewMatrix "
 ";
 
 %feature("docstring") Viewport::getRigidTransform "
 ";
 
-%feature("docstring") Viewport::toJson "
+%feature("docstring") Viewport::fromJson "
 ";
 
-%feature("docstring") Viewport::setModelviewMatrix "
+%feature("docstring") Viewport::toJson "
 ";
 
 // File: classVolumeGrid.xml
@@ -4661,17 +4661,28 @@ Attributes:
 C++ includes: geometry.h
 ";
 
-%feature("docstring") VolumeGrid::get "
-
-Gets a specific element of a cell.  
-";
-
 %feature("docstring") VolumeGrid::setValues "
 
 Sets the values to a 3D numpy array.  
 ";
 
-%feature("docstring") VolumeGrid::setBounds "
+%feature("docstring") VolumeGrid::resize "
+";
+
+%feature("docstring") VolumeGrid::shift "
+";
+
+%feature("docstring") VolumeGrid::getValues "
+
+Returns a 3D Numpy array view of the values.  
+";
+
+%feature("docstring") VolumeGrid::VolumeGrid "
+";
+
+%feature("docstring") VolumeGrid::get "
+
+Gets a specific element of a cell.  
 ";
 
 %feature("docstring") VolumeGrid::set "
@@ -4684,18 +4695,7 @@ Sets all elements to a uniform value (e.g., 0)
 Sets a specific element of a cell.  
 ";
 
-%feature("docstring") VolumeGrid::resize "
-";
-
-%feature("docstring") VolumeGrid::VolumeGrid "
-";
-
-%feature("docstring") VolumeGrid::getValues "
-
-Returns a 3D Numpy array view of the values.  
-";
-
-%feature("docstring") VolumeGrid::shift "
+%feature("docstring") VolumeGrid::setBounds "
 ";
 
 // File: classWidget.xml
@@ -4704,22 +4704,31 @@ Returns a 3D Numpy array view of the values.
 %feature("docstring") Widget "
 ";
 
+%feature("docstring") Widget::endDrag "
+";
+
 %feature("docstring") Widget::Widget "
 ";
 
 %feature("docstring") Widget::wantsRedraw "
 ";
 
-%feature("docstring") Widget::endDrag "
+%feature("docstring") Widget::~Widget "
 ";
 
-%feature("docstring") Widget::drawGL "
+%feature("docstring") Widget::idle "
+";
+
+%feature("docstring") Widget::keypress "
+";
+
+%feature("docstring") Widget::beginDrag "
 ";
 
 %feature("docstring") Widget::drag "
 ";
 
-%feature("docstring") Widget::hasFocus "
+%feature("docstring") Widget::drawGL "
 ";
 
 %feature("docstring") Widget::hover "
@@ -4728,16 +4737,7 @@ Returns a 3D Numpy array view of the values.
 %feature("docstring") Widget::hasHighlight "
 ";
 
-%feature("docstring") Widget::~Widget "
-";
-
-%feature("docstring") Widget::beginDrag "
-";
-
-%feature("docstring") Widget::keypress "
-";
-
-%feature("docstring") Widget::idle "
+%feature("docstring") Widget::hasFocus "
 ";
 
 // File: classWidgetSet.xml
@@ -4746,16 +4746,16 @@ Returns a 3D Numpy array view of the values.
 %feature("docstring") WidgetSet "
 ";
 
-%feature("docstring") WidgetSet::remove "
-";
-
 %feature("docstring") WidgetSet::WidgetSet "
 ";
 
-%feature("docstring") WidgetSet::enable "
+%feature("docstring") WidgetSet::remove "
 ";
 
 %feature("docstring") WidgetSet::add "
+";
+
+%feature("docstring") WidgetSet::enable "
 ";
 
 // File: classWorldModel.xml
@@ -4794,26 +4794,25 @@ states of whichever objects you wish to save/restore.
 C++ includes: robotmodel.h
 ";
 
-%feature("docstring") WorldModel::makeTerrain "
+%feature("docstring") WorldModel::saveFile "
 
-Creates a new empty terrain.  
+Saves to a world XML file. If elementDir is provided, then robots, terrains,
+etc. will be saved there. Otherwise they will be saved to a folder with the same
+base name as fn (without the trailing .xml)  
 ";
 
-%feature("docstring") WorldModel::terrain "
+%feature("docstring") WorldModel::loadTerrain "
 
-Returns a TerrainModel in the world by index or name.  
+Loads a rigid object from a mesh file. An empty terrain is returned if loading
+fails.  
 ";
 
-%feature("docstring") WorldModel::terrain "
-
-Returns a TerrainModel in the world by index or name.  
+%feature("docstring") WorldModel::~WorldModel "
 ";
 
-%feature("docstring") WorldModel::enableGeometryLoading "
+%feature("docstring") WorldModel::drawGL "
 
-If geometry loading is set to false, then only the kinematics are loaded from
-disk, and no geometry / visualization / collision detection structures will be
-loaded. Useful for quick scripts that just use kinematics / dynamics of a robot.  
+Draws the entire world using OpenGL.  
 ";
 
 %feature("docstring") WorldModel::WorldModel "
@@ -4838,6 +4837,118 @@ Creates a WorldModel.
     Python code)  
 ";
 
+%feature("docstring") WorldModel::add "
+
+Adds a copy of the given robot, rigid object, or terrain to this world, either
+from this WorldModel or another.  
+";
+
+%feature("docstring") WorldModel::add "
+
+Adds a copy of the given robot, rigid object, or terrain to this world, either
+from this WorldModel or another.  
+";
+
+%feature("docstring") WorldModel::add "
+
+Adds a copy of the given robot, rigid object, or terrain to this world, either
+from this WorldModel or another.  
+";
+
+%feature("docstring") WorldModel::loadFile "
+
+Alias of readFile.  
+";
+
+%feature("docstring") WorldModel::getName "
+
+Retrieves the name for a given element ID.  
+";
+
+%feature("docstring") WorldModel::numRobotLinks "
+
+Returns the number of links on the given robot.  
+";
+
+%feature("docstring") WorldModel::loadElement "
+
+Loads some element from a file, automatically detecting its type. Meshes are
+interpreted as terrains.  
+
+Returns:  
+
+    The element's ID, or -1 if loading failed.  
+";
+
+%feature("docstring") WorldModel::remove "
+
+Removes a robot, rigid object, or terrain from the world. It must be in this
+world or an exception is raised.  
+
+IMPORTANT:  
+
+    All other RobotModel, RigidObjectModel, or TerrainModel references
+    will be invalidated.  
+";
+
+%feature("docstring") WorldModel::remove "
+
+Removes a robot, rigid object, or terrain from the world. It must be in this
+world or an exception is raised.  
+
+IMPORTANT:  
+
+    All other RobotModel, RigidObjectModel, or TerrainModel references
+    will be invalidated.  
+";
+
+%feature("docstring") WorldModel::remove "
+
+Removes a robot, rigid object, or terrain from the world. It must be in this
+world or an exception is raised.  
+
+IMPORTANT:  
+
+    All other RobotModel, RigidObjectModel, or TerrainModel references
+    will be invalidated.  
+";
+
+%feature("docstring") WorldModel::numRobots "
+
+Returns the number of robots.  
+";
+
+%feature("docstring") WorldModel::appearance "
+
+Retrieves an appearance for a given element ID.  
+";
+
+%feature("docstring") WorldModel::makeTerrain "
+
+Creates a new empty terrain.  
+";
+
+%feature("docstring") WorldModel::robotLink "
+
+Returns a RobotModelLink of some RobotModel in the world by index or name.  
+";
+
+%feature("docstring") WorldModel::robotLink "
+
+Returns a RobotModelLink of some RobotModel in the world by index or name.  
+";
+
+%feature("docstring") WorldModel::makeRigidObject "
+
+Creates a new empty rigid object.  
+";
+
+%feature("docstring") WorldModel::makeRobot "
+
+Creates a new empty robot. (Not terribly useful now since you can't resize the
+number of links yet)  
+";
+
 %feature("docstring") WorldModel::numRigidObjects "
 
 Returns the number of rigid objects.  
@@ -4858,71 +4969,6 @@ Loads a rigid object from a .obj or a mesh file. An empty rigid object is
 returned if loading fails.  
 ";
 
-%feature("docstring") WorldModel::makeRigidObject "
-
-Creates a new empty rigid object.  
-";
-
-%feature("docstring") WorldModel::numRobotLinks "
-
-Returns the number of links on the given robot.  
-";
-
-%feature("docstring") WorldModel::add "
-
-Adds a copy of the given robot, rigid object, or terrain to this world, either
-from this WorldModel or another.  
-";
-
-%feature("docstring") WorldModel::add "
-
-Adds a copy of the given robot, rigid object, or terrain to this world, either
-from this WorldModel or another.  
-";
-
-%feature("docstring") WorldModel::add "
-
-Adds a copy of the given robot, rigid object, or terrain to this world, either
-from this WorldModel or another.  
-";
-
-%feature("docstring") WorldModel::loadTerrain "
-
-Loads a rigid object from a mesh file. An empty terrain is returned if loading
-fails.  
-";
-
-%feature("docstring") WorldModel::makeRobot "
-
-Creates a new empty robot. (Not terribly useful now since you can't resize the
-number of links yet)  
-";
-
-%feature("docstring") WorldModel::rigidObject "
-
-Returns a RigidObjectModel in the world by index or name.  
-";
-
-%feature("docstring") WorldModel::rigidObject "
-
-Returns a RigidObjectModel in the world by index or name.  
-";
-
-%feature("docstring") WorldModel::numTerrains "
-
-Returns the number of terrains.  
-";
-
-%feature("docstring") WorldModel::robotLink "
-
-Returns a RobotModelLink of some RobotModel in the world by index or name.  
-";
-
-%feature("docstring") WorldModel::robotLink "
-
-Returns a RobotModelLink of some RobotModel in the world by index or name.  
-";
-
 %feature("docstring") WorldModel::enableInitCollisions "
 
 If collision detection is set to true, then collision acceleration data
@@ -4935,64 +4981,34 @@ will indeed be initialized the first time that geometry collision, distance, or
 ray-casting routines are called.  
 ";
 
-%feature("docstring") WorldModel::geometry "
-
-Retrieves a geometry for a given element ID.  
-";
-
-%feature("docstring") WorldModel::drawGL "
-
-Draws the entire world using OpenGL.  
-";
-
 %feature("docstring") WorldModel::numIDs "
 
 Returns the total number of world ids.  
 ";
 
-%feature("docstring") WorldModel::remove "
+%feature("docstring") WorldModel::rigidObject "
 
-Removes a robot, rigid object, or terrain from the world. It must be in this
-world or an exception is raised.  
-
-IMPORTANT:  
-
-    All other RobotModel, RigidObjectModel, or TerrainModel references
-    will be invalidated.  
+Returns a RigidObjectModel in the world by index or name.  
 ";
 
-%feature("docstring") WorldModel::remove "
+%feature("docstring") WorldModel::rigidObject "
 
-Removes a robot, rigid object, or terrain from the world. It must be in this
-world or an exception is raised.  
-
-IMPORTANT:  
-
-    All other RobotModel, RigidObjectModel, or TerrainModel references
-    will be invalidated.  
+Returns a RigidObjectModel in the world by index or name.  
 ";
 
-%feature("docstring") WorldModel::remove "
+%feature("docstring") WorldModel::robot "
 
-Removes a robot, rigid object, or terrain from the world. It must be in this
-world or an exception is raised.  
-
-IMPORTANT:  
-
-    All other RobotModel, RigidObjectModel, or TerrainModel references
-    will be invalidated.  
+Returns a RobotModel in the world by index or name.  
 ";
 
-%feature("docstring") WorldModel::saveFile "
+%feature("docstring") WorldModel::robot "
 
-Saves to a world XML file. If elementDir is provided, then robots, terrains,
-etc. will be saved there. Otherwise they will be saved to a folder with the same
-base name as fn (without the trailing .xml)  
+Returns a RobotModel in the world by index or name.  
 ";
 
-%feature("docstring") WorldModel::loadFile "
+%feature("docstring") WorldModel::geometry "
 
-Alias of readFile.  
+Retrieves a geometry for a given element ID.  
 ";
 
 %feature("docstring") WorldModel::copy "
@@ -5001,14 +5017,9 @@ Creates a copy of the world model. Note that geometries and appearances are
 shared, so this is very quick.  
 ";
 
-%feature("docstring") WorldModel::robot "
+%feature("docstring") WorldModel::numTerrains "
 
-Returns a RobotModel in the world by index or name.  
-";
-
-%feature("docstring") WorldModel::robot "
-
-Returns a RobotModel in the world by index or name.  
+Returns the number of terrains.  
 ";
 
 %feature("docstring") WorldModel::loadRobot "
@@ -5017,32 +5028,21 @@ Loads a robot from a .rob or .urdf file. An empty robot is returned if loading
 fails.  
 ";
 
-%feature("docstring") WorldModel::loadElement "
+%feature("docstring") WorldModel::enableGeometryLoading "
 
-Loads some element from a file, automatically detecting its type. Meshes are
-interpreted as terrains.  
-
-Returns:  
-
-    The element's ID, or -1 if loading failed.  
+If geometry loading is set to false, then only the kinematics are loaded from
+disk, and no geometry / visualization / collision detection structures will be
+loaded. Useful for quick scripts that just use kinematics / dynamics of a robot.  
 ";
 
-%feature("docstring") WorldModel::appearance "
+%feature("docstring") WorldModel::terrain "
 
-Retrieves an appearance for a given element ID.  
+Returns a TerrainModel in the world by index or name.  
 ";
 
-%feature("docstring") WorldModel::numRobots "
+%feature("docstring") WorldModel::terrain "
 
-Returns the number of robots.  
-";
-
-%feature("docstring") WorldModel::~WorldModel "
-";
-
-%feature("docstring") WorldModel::getName "
-
-Retrieves the name for a given element ID.  
+Returns a TerrainModel in the world by index or name.  
 ";
 
 // File: namespaceKlampt.xml
@@ -5055,34 +5055,14 @@ Retrieves the name for a given element ID.
 
 // File: motionplanning_8h.xml
 
-%feature("docstring") set_plan_json_string "
+%feature("docstring") set_random_seed "
 
-Loads planner values from a JSON string.  
+Sets the random seed used by the motion planner.  
 ";
 
 %feature("docstring") get_plan_json_string "
 
 Saves planner values to a JSON string.  
-";
-
-%feature("docstring") set_plan_type "
-
-Sets the planner type.  
-
-Valid values are  
-
-*   prm: the Probabilistic Roadmap algorithm  
-*   rrt: the Rapidly Exploring Random Trees algorithm  
-*   sbl: the Single-Query Bidirectional Lazy planner  
-*   sblprt: the probabilistic roadmap of trees (PRT) algorithm with SBL as the
-    inter-root planner.  
-*   rrt*: the RRT* algorithm for optimal motion planning  
-*   prm*: the PRM* algorithm for optimal motion planning  
-*   lazyprm*: the Lazy-PRM* algorithm for optimal motion planning  
-*   lazyrrg*: the Lazy-RRG* algorithm for optimal motion planning  
-*   fmm: the fast marching method algorithm for resolution-complete optimal
-    motion planning  
-*   fmm*: an anytime fast marching method algorithm for optimal motion planning  
 ";
 
 %feature("docstring") set_plan_setting "
@@ -5127,28 +5107,39 @@ Valid string values are:
     shortcutting, you should set foundSolution:0.  
 ";
 
+%feature("docstring") set_plan_type "
+
+Sets the planner type.  
+
+Valid values are  
+
+*   prm: the Probabilistic Roadmap algorithm  
+*   rrt: the Rapidly Exploring Random Trees algorithm  
+*   sbl: the Single-Query Bidirectional Lazy planner  
+*   sblprt: the probabilistic roadmap of trees (PRT) algorithm with SBL as the
+    inter-root planner.  
+*   rrt*: the RRT* algorithm for optimal motion planning  
+*   prm*: the PRM* algorithm for optimal motion planning  
+*   lazyprm*: the Lazy-PRM* algorithm for optimal motion planning  
+*   lazyrrg*: the Lazy-RRG* algorithm for optimal motion planning  
+*   fmm: the fast marching method algorithm for resolution-complete optimal
+    motion planning  
+*   fmm*: an anytime fast marching method algorithm for optimal motion planning  
+";
+
+%feature("docstring") set_plan_json_string "
+
+Loads planner values from a JSON string.  
+";
+
 %feature("docstring") destroy "
 
 Performs cleanup of all created spaces and planners.  
 ";
 
-%feature("docstring") set_random_seed "
-
-Sets the random seed used by the motion planner.  
-";
-
 // File: robotik_8h.xml
 
 // File: robotio_8h.xml
-
-%feature("docstring") wait_for_stream "
-
-Waits up to timeout seconds for an update on the given stream.  
-
-Return:  
-
-    (bool): True if the stream was updated.  
-";
 
 %feature("docstring") subscribe_to_stream "
 
@@ -5191,10 +5182,13 @@ Returns: (bool): True if any stream was updated.
 Exports the WorldModel to a JSON string ready for use in Three.js.  
 ";
 
-%feature("docstring") detach_from_stream "
+%feature("docstring") wait_for_stream "
 
-Unsubscribes from a stream previously subscribed to via
-:func:`SubscribeToStream`  
+Waits up to timeout seconds for an update on the given stream.  
+
+Return:  
+
+    (bool): True if the stream was updated.  
 ";
 
 %feature("docstring") threejs_get_transforms "
@@ -5202,14 +5196,15 @@ Unsubscribes from a stream previously subscribed to via
 Exports the WorldModel to a JSON string ready for use in Three.js.  
 ";
 
+%feature("docstring") detach_from_stream "
+
+Unsubscribes from a stream previously subscribed to via
+:func:`SubscribeToStream`  
+";
+
 // File: robotmodel_8h.xml
 
 // File: robotsim_8h.xml
-
-%feature("docstring") Klampt::set_random_seed "
-
-Sets the random seed used by the configuration sampler.  
-";
 
 %feature("docstring") Klampt::destroy "
 
@@ -5218,23 +5213,26 @@ make sure ODE errors aren't thrown on exit. This is called for you on exit when
 importing the Python klampt module.  
 ";
 
+%feature("docstring") Klampt::set_random_seed "
+
+Sets the random seed used by the configuration sampler.  
+";
+
 // File: rootfind_8h.xml
+
+%feature("docstring") findRootsBounded "
+
+Same as findRoots, but with given bounds (xmin,xmax)  
+";
+
+%feature("docstring") setFTolerance "
+
+Sets the termination threshold for the change in f.  
+";
 
 %feature("docstring") setXTolerance "
 
 Sets the termination threshold for the change in x.  
-";
-
-%feature("docstring") setVectorField "
-
-Sets the vector field object.  
-
-Returns:  
-
-    status (int): 0 if pVFObj = NULL, 1 otherwise.  
-
-See vectorfield.py for an abstract base class that can be overridden to produce
-one of these objects.  
 ";
 
 %feature("docstring") findRoots "
@@ -5256,11 +5254,6 @@ Returns:
         and x is the final point and n is the number of iterations used  
 ";
 
-%feature("docstring") findRootsBounded "
-
-Same as findRoots, but with given bounds (xmin,xmax)  
-";
-
 %feature("docstring") setFunction "
 
 Sets the function object.  
@@ -5275,9 +5268,16 @@ one of these objects.
 Equivalent to setVectorField; just a more intuitive name.  
 ";
 
-%feature("docstring") setFTolerance "
+%feature("docstring") setVectorField "
 
-Sets the termination threshold for the change in f.  
+Sets the vector field object.  
+
+Returns:  
+
+    status (int): 0 if pVFObj = NULL, 1 otherwise.  
+
+See vectorfield.py for an abstract base class that can be overridden to produce
+one of these objects.  
 ";
 
 %feature("docstring") destroy "
@@ -5287,23 +5287,68 @@ destroys internal data structures
 
 // File: stability_8h.xml
 
-%feature("docstring") force_closure "
+%feature("docstring") set_friction_cone_approximation_edges "
 
-Returns true if the array of contact points has force closure. A contact point
-is given by a list of n=7 floats, [x,y,z,nx,ny,nz,k] where (x,y,z) is the
-position, (nx,ny,nz) is the normal, and k is the coefficient of friction (>= 0)  
+Globally sets the number of edges used in the friction cone approximation. The
+default value is 4.  
 ";
 
-%feature("docstring") force_closure "
+%feature("docstring") force_closure_2d "
 
-Returns true if the list of contact points has force closure.  
+Returns true if the list of 2D contact points has force closure. A contact point
+is given by a list of n=4 floats, [x,y,theta,k] where (x,y) is the position,
+theta is the normal angle, and k is the coefficient of friction (>= 0)  
+";
 
-In the 1-argument version, each contact point is specified by a list of 7
-floats, [x,y,z,nx,ny,nz,k] where (x,y,z) is the position, (nx,ny,nz) is the
-normal, and k is the coefficient of friction.  
+%feature("docstring") force_closure_2d "
+
+Returns true if the list of 2D contact points has force closure.  
+
+In the 1-argument version, each contact point is given by a list of 4 floats,
+[x,y,theta,k] where (x,y) is the position, theta is the normal angle, and k is
+the coefficient of friction  
 
 The 2-argument version is a \"fancy\" version that allows more control over the
 constraint planes.  
+
+Args:  
+
+     contacts (list of 4-float lists or tuples): the list of contacts, each
+         specified as a 4-list or tuple [x,y,theta,k], with:
+
+             * (x,y): the contact position
+             * theta: is the normal angle (in radians, CCW to the x axis)
+             * k: the coefficient of friction (>= 0)
+
+     contactPositions (list of 2-float lists or tuples): the list of contact
+         point positions.
+     frictionCones (list of lists): The i'th element in this list has length
+         k*3 (for some integer k), and gives the contact force constraints
+         (ax,ay,b) where ax*fx+ay*fy <= b limits the contact force (fx,fy)
+         at the i'th contact. Each of the k 3-tuples is laid out sequentially
+         per-contact.  
+";
+
+%feature("docstring") support_polygon "
+
+Calculates the support polygon for a given set of contacts and a downward
+external force (0,0,-g). A contact point is given by a list of 7 floats,
+[x,y,z,nx,ny,nz,k] as usual.  
+
+The return value is a list of 3-tuples giving the sorted plane boundaries of the
+polygon. The format of a plane is (nx,ny,ofs) where (nx,ny) are the outward
+facing normals, and ofs is the offset from 0. In other words to test stability
+of a com [x,y], you can test whether dot([nx,ny],[x,y]) <= ofs for all planes.  
+";
+
+%feature("docstring") support_polygon "
+
+Calculates the support polygon for a given set of contacts and a downward
+external force (0,0,-g).  
+
+In the 1-argument version, a contact point is given by a list of 7 floats,
+[x,y,z,nx,ny,nz,k] as usual. The 2-argument version is a \"fancy\" version that
+allows more control over the constraint planes.  
 
 Args:  
 
@@ -5323,12 +5368,138 @@ Args:
          ax*fx+ay*fy+az*fz <= b that limits the contact force (fx,fy,fz) at
          the i'th contact.  Each of the k 4-tuples is laid out sequentially
          per-contact.  
+
+Returns:  
+
+    list of 3-tuples: The sorted plane boundaries of the support
+    polygon. The format of a plane is (nx,ny,ofs) where (nx,ny) are the
+    outward facing normals, and ofs is the offset from 0.  In other words
+    to test stability of a com with x-y coordinates [x,y], you can test
+    whether dot([nx,ny],[x,y]) <= ofs  for all planes.
+
+    Hint: with numpy, you can do::
+
+        Ab = np.array(supportPolygon(args))
+        A=Ab[:,0:2]
+        b=Ab[:,2]
+        myComEquilibrium = lambda x: np.all(np.dot(A,x)<=b)  
 ";
 
-%feature("docstring") set_friction_cone_approximation_edges "
+%feature("docstring") com_equilibrium_2d "
 
-Globally sets the number of edges used in the friction cone approximation. The
-default value is 4.  
+Tests whether the given COM com is stable for the given contacts and the given
+external force fext. A contact point is given by a list of 4 floats,
+[x,y,theta,k] as usual.  
+
+The return value is either None, or a list of 2-tuples giving the support forces
+at the contacts.  
+
+com can also be set to None in which case this tests if ANY COM has at the
+contacts. The return value is True or False.  
+";
+
+%feature("docstring") com_equilibrium_2d "
+
+Tests whether the given COM com is stable for the given contacts and the given
+external force fext.  
+
+The 2-argument version is a \"fancy\" version that allows more control over the
+constraint planes.  
+
+Args:  
+
+     contacts (list of 4-float lists or tuples): the list of contacts, each
+         specified as a 4-list or tuple [x,y,theta,k], with:
+
+             * (x,y,z): the contact position
+             * theta: is the normal angle (in radians, CCW to the x axis)
+             * k: the coefficient of friction (>= 0)
+
+     contactPositions (list of 2-float lists or tuples): the list of contact
+         point positions.
+     frictionCones (list of lists): The i'th element in this list has length
+         k*3 (for some integer k), and gives the contact force constraints
+         (ax,ay,b) where ax*fx+ay*fy <= b limits the contact force (fx,fy)
+         at the i'th contact. Each of the k 3-tuples is laid out sequentially
+         per-contact.
+     fext (2-tuple or list): the external force vector.
+     com (2-tuple or list, or None): the center of mass coordinates.  If None,
+         assumes that you want to test whether ANY COM may be in equilibrium
+         for the given contacts.  
+
+Returns:  
+
+    bool, None, or list: if com is given, and there are feasible
+    equilibrium forces, this returns a list of 2-tuples giving
+    equilibrium forces at each of the contacts. None is returned if
+    no such forces exist.
+
+    If com = None, the result is True or False.  
+";
+
+%feature("docstring") equilibrium_torques "
+
+Solves for the torques / forces that keep the robot balanced against gravity.  
+
+Args:  
+
+*   robot: the robot model, posed in its current configuration  
+*   contacts: an nx7 array of contact points, each given as 7-lists
+    [x,y,z,nx,ny,nz,kFriction]  
+*   links: a list of the links on which those contact points lie  
+*   fext: the external force (e.g., gravity)  
+*   norm: the torque norm to minimize. If 0, minimizes the l-infinity norm
+    (default) If 1, minimizes the l-1 norm. If 2, minimizes the l-2 norm
+    (experimental, may not get good results)  
+
+Returns:  
+
+    tuple: a pair (t,f) giving the joint torques and frictional
+    contact forces, if a solution exists, or None if no solution exists.  
+";
+
+%feature("docstring") equilibrium_torques "
+
+Solves for the torques / forces that keep the robot balanced against gravity.  
+
+The problem being solved is  
+
+:math:`min_{t,f_1,...,f_N} \\|t\\|_p`  
+
+:math:`s.t. t_{int} + G(q) = t + sum_{i=1}^N J_i(q)^T f_i`  
+
+:math:`|t| \\leq t_{max}`  
+
+:math:`f_i \\in FC_i`  
+
+Args:  
+
+    robot (RobotModel): the robot, posed in its current configuration
+    contacts (ndarray): an N x 7 array of contact points, each given as 7-lists
+        [x,y,z,nx,ny,nz,kFriction]
+    links (list of N ints): a list of the links on which those contact points
+        lie
+    fext (list of 3 floats): the external force (e.g., gravity)
+    norm (double): the torque norm to minimize.  
+
+        * If 0, minimizes the l-infinity norm (default)
+        * If 1, minimizes the l-1 norm.
+        * If 2, minimizes the l-2 norm (experimental, may not get good results).
+    internalTorques (list of robot.numLinks() floats, optional): allows you to
+        solve for dynamic situations, e.g., with coriolis forces taken into
+        account.  These are added to the RHS of the torque balance equation.
+        If not given, t_int is assumed to be zero.
+
+        To use dynamics, set the robot's joint velocities dq, calculate
+        then calculate the torques via robot.torquesFromAccel(ddq), and pass
+        the result into internalTorques.  
+
+Returns:  
+
+    pair of lists, optional: a pair (torque,force) if a solution exists,
+    giving valid joint torques t and frictional contact forces (f1,...,fn).
+
+    None is returned if no solution exists.  
 ";
 
 %feature("docstring") com_equilibrium "
@@ -5421,179 +5592,23 @@ Returns:
     If the support interval is empty, (inf,inf) is returned.  
 ";
 
-%feature("docstring") com_equilibrium_2d "
+%feature("docstring") force_closure "
 
-Tests whether the given COM com is stable for the given contacts and the given
-external force fext. A contact point is given by a list of 4 floats,
-[x,y,theta,k] as usual.  
-
-The return value is either None, or a list of 2-tuples giving the support forces
-at the contacts.  
-
-com can also be set to None in which case this tests if ANY COM has at the
-contacts. The return value is True or False.  
+Returns true if the array of contact points has force closure. A contact point
+is given by a list of n=7 floats, [x,y,z,nx,ny,nz,k] where (x,y,z) is the
+position, (nx,ny,nz) is the normal, and k is the coefficient of friction (>= 0)  
 ";
 
-%feature("docstring") com_equilibrium_2d "
+%feature("docstring") force_closure "
 
-Tests whether the given COM com is stable for the given contacts and the given
-external force fext.  
+Returns true if the list of contact points has force closure.  
+
+In the 1-argument version, each contact point is specified by a list of 7
+floats, [x,y,z,nx,ny,nz,k] where (x,y,z) is the position, (nx,ny,nz) is the
+normal, and k is the coefficient of friction.  
 
 The 2-argument version is a \"fancy\" version that allows more control over the
 constraint planes.  
-
-Args:  
-
-     contacts (list of 4-float lists or tuples): the list of contacts, each
-         specified as a 4-list or tuple [x,y,theta,k], with:
-
-             * (x,y,z): the contact position
-             * theta: is the normal angle (in radians, CCW to the x axis)
-             * k: the coefficient of friction (>= 0)
-
-     contactPositions (list of 2-float lists or tuples): the list of contact
-         point positions.
-     frictionCones (list of lists): The i'th element in this list has length
-         k*3 (for some integer k), and gives the contact force constraints
-         (ax,ay,b) where ax*fx+ay*fy <= b limits the contact force (fx,fy)
-         at the i'th contact. Each of the k 3-tuples is laid out sequentially
-         per-contact.
-     fext (2-tuple or list): the external force vector.
-     com (2-tuple or list, or None): the center of mass coordinates.  If None,
-         assumes that you want to test whether ANY COM may be in equilibrium
-         for the given contacts.  
-
-Returns:  
-
-    bool, None, or list: if com is given, and there are feasible
-    equilibrium forces, this returns a list of 2-tuples giving
-    equilibrium forces at each of the contacts. None is returned if
-    no such forces exist.
-
-    If com = None, the result is True or False.  
-";
-
-%feature("docstring") force_closure_2d "
-
-Returns true if the list of 2D contact points has force closure. A contact point
-is given by a list of n=4 floats, [x,y,theta,k] where (x,y) is the position,
-theta is the normal angle, and k is the coefficient of friction (>= 0)  
-";
-
-%feature("docstring") force_closure_2d "
-
-Returns true if the list of 2D contact points has force closure.  
-
-In the 1-argument version, each contact point is given by a list of 4 floats,
-[x,y,theta,k] where (x,y) is the position, theta is the normal angle, and k is
-the coefficient of friction  
-
-The 2-argument version is a \"fancy\" version that allows more control over the
-constraint planes.  
-
-Args:  
-
-     contacts (list of 4-float lists or tuples): the list of contacts, each
-         specified as a 4-list or tuple [x,y,theta,k], with:
-
-             * (x,y): the contact position
-             * theta: is the normal angle (in radians, CCW to the x axis)
-             * k: the coefficient of friction (>= 0)
-
-     contactPositions (list of 2-float lists or tuples): the list of contact
-         point positions.
-     frictionCones (list of lists): The i'th element in this list has length
-         k*3 (for some integer k), and gives the contact force constraints
-         (ax,ay,b) where ax*fx+ay*fy <= b limits the contact force (fx,fy)
-         at the i'th contact. Each of the k 3-tuples is laid out sequentially
-         per-contact.  
-";
-
-%feature("docstring") equilibrium_torques "
-
-Solves for the torques / forces that keep the robot balanced against gravity.  
-
-Args:  
-
-*   robot: the robot model, posed in its current configuration  
-*   contacts: an nx7 array of contact points, each given as 7-lists
-    [x,y,z,nx,ny,nz,kFriction]  
-*   links: a list of the links on which those contact points lie  
-*   fext: the external force (e.g., gravity)  
-*   norm: the torque norm to minimize. If 0, minimizes the l-infinity norm
-    (default) If 1, minimizes the l-1 norm. If 2, minimizes the l-2 norm
-    (experimental, may not get good results)  
-
-Returns:  
-
-    tuple: a pair (t,f) giving the joint torques and frictional
-    contact forces, if a solution exists, or None if no solution exists.  
-";
-
-%feature("docstring") equilibrium_torques "
-
-Solves for the torques / forces that keep the robot balanced against gravity.  
-
-The problem being solved is  
-
-:math:`min_{t,f_1,...,f_N} \\|t\\|_p`  
-
-:math:`s.t. t_{int} + G(q) = t + sum_{i=1}^N J_i(q)^T f_i`  
-
-:math:`|t| \\leq t_{max}`  
-
-:math:`f_i \\in FC_i`  
-
-Args:  
-
-    robot (RobotModel): the robot, posed in its current configuration
-    contacts (ndarray): an N x 7 array of contact points, each given as 7-lists
-        [x,y,z,nx,ny,nz,kFriction]
-    links (list of N ints): a list of the links on which those contact points
-        lie
-    fext (list of 3 floats): the external force (e.g., gravity)
-    norm (double): the torque norm to minimize.  
-
-        * If 0, minimizes the l-infinity norm (default)
-        * If 1, minimizes the l-1 norm.
-        * If 2, minimizes the l-2 norm (experimental, may not get good results).
-    internalTorques (list of robot.numLinks() floats, optional): allows you to
-        solve for dynamic situations, e.g., with coriolis forces taken into
-        account.  These are added to the RHS of the torque balance equation.
-        If not given, t_int is assumed to be zero.
-
-        To use dynamics, set the robot's joint velocities dq, calculate
-        then calculate the torques via robot.torquesFromAccel(ddq), and pass
-        the result into internalTorques.  
-
-Returns:  
-
-    pair of lists, optional: a pair (torque,force) if a solution exists,
-    giving valid joint torques t and frictional contact forces (f1,...,fn).
-
-    None is returned if no solution exists.  
-";
-
-%feature("docstring") support_polygon "
-
-Calculates the support polygon for a given set of contacts and a downward
-external force (0,0,-g). A contact point is given by a list of 7 floats,
-[x,y,z,nx,ny,nz,k] as usual.  
-
-The return value is a list of 3-tuples giving the sorted plane boundaries of the
-polygon. The format of a plane is (nx,ny,ofs) where (nx,ny) are the outward
-facing normals, and ofs is the offset from 0. In other words to test stability
-of a com [x,y], you can test whether dot([nx,ny],[x,y]) <= ofs for all planes.  
-";
-
-%feature("docstring") support_polygon "
-
-Calculates the support polygon for a given set of contacts and a downward
-external force (0,0,-g).  
-
-In the 1-argument version, a contact point is given by a list of 7 floats,
-[x,y,z,nx,ny,nz,k] as usual. The 2-argument version is a \"fancy\" version that
-allows more control over the constraint planes.  
 
 Args:  
 
@@ -5613,21 +5628,6 @@ Args:
          ax*fx+ay*fy+az*fz <= b that limits the contact force (fx,fy,fz) at
          the i'th contact.  Each of the k 4-tuples is laid out sequentially
          per-contact.  
-
-Returns:  
-
-    list of 3-tuples: The sorted plane boundaries of the support
-    polygon. The format of a plane is (nx,ny,ofs) where (nx,ny) are the
-    outward facing normals, and ofs is the offset from 0.  In other words
-    to test stability of a com with x-y coordinates [x,y], you can test
-    whether dot([nx,ny],[x,y]) <= ofs  for all planes.
-
-    Hint: with numpy, you can do::
-
-        Ab = np.array(supportPolygon(args))
-        A=Ab[:,0:2]
-        b=Ab[:,2]
-        myComEquilibrium = lambda x: np.all(np.dot(A,x)<=b)  
 ";
 
 // File: widget_8h.xml

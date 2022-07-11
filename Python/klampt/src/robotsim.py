@@ -4506,9 +4506,9 @@ class RobotModelLink(object):
         """
         return _robotsim.RobotModelLink_getPositionJacobianCols(self, plocal, links)
 
-    def getRotationJacobianCols(self, links: "intVector") -> "void":
+    def getOrientationJacobianCols(self, links: "intVector") -> "void":
         r"""
-        getRotationJacobianCols(RobotModelLink self, intVector links)
+        getOrientationJacobianCols(RobotModelLink self, intVector links)
 
 
         Returns the orientation jacobian this link w.r.t. specified entries of the
@@ -4524,7 +4524,7 @@ class RobotModelLink(object):
             link.  
 
         """
-        return _robotsim.RobotModelLink_getRotationJacobianCols(self, links)
+        return _robotsim.RobotModelLink_getOrientationJacobianCols(self, links)
 
     def getAcceleration(self, ddq: "doubleVector") -> "void":
         r"""

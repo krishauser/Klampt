@@ -2066,7 +2066,7 @@ class Geometry3D(object):
 
 
         Args:
-            arg2 (:class:`~klampt.VolumeGrid` or :class:`~klampt.PointCloud` or :class:`~klampt.ConvexHull` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.TriangleMesh` or :class:`~klampt.Geometry3D`, optional): 
+            arg2 (:class:`~klampt.PointCloud` or :class:`~klampt.TriangleMesh` or :class:`~klampt.VolumeGrid` or :class:`~klampt.ConvexHull` or :class:`~klampt.Geometry3D` or :class:`~klampt.GeometricPrimitive`, optional): 
         """
         _robotsim.Geometry3D_swiginit(self, _robotsim.new_Geometry3D(*args))
     __swig_destroy__ = _robotsim.delete_Geometry3D
@@ -4340,7 +4340,7 @@ class RobotModelLink(object):
         """
         return _robotsim.RobotModelLink_getPositionJacobianCols(self, plocal, links)
 
-    def getRotationJacobianCols(self, links: IntArray) ->None:
+    def getOrientationJacobianCols(self, links: IntArray) ->None:
         r"""
         Returns the orientation jacobian this link w.r.t. specified entries of the
         robot's configuration q given by `links`.  
@@ -4358,7 +4358,7 @@ class RobotModelLink(object):
             link.  
 
         """
-        return _robotsim.RobotModelLink_getRotationJacobianCols(self, links)
+        return _robotsim.RobotModelLink_getOrientationJacobianCols(self, links)
 
     def getAcceleration(self, ddq: Vector) ->None:
         r"""
@@ -6024,7 +6024,7 @@ class WorldModel(object):
             terrain (:class:`~klampt.TerrainModel`, optional): 
 
         Returns:
-            (:class:`~klampt.RigidObjectModel` or :class:`~klampt.RobotModel` or :class:`~klampt.TerrainModel`):
+            (:class:`~klampt.TerrainModel` or :class:`~klampt.RigidObjectModel` or :class:`~klampt.RobotModel`):
         """
         return _robotsim.WorldModel_add(self, *args)
 
@@ -6804,7 +6804,7 @@ class GeneralizedIKObjective(object):
 
 
         Args:
-            obj (:class:`~klampt.RigidObjectModel` or :obj:`GeneralizedIKObjective`, optional): 
+            obj (:obj:`GeneralizedIKObjective` or :class:`~klampt.RigidObjectModel`, optional): 
             link (:class:`~klampt.RobotModelLink`, optional): 
             link2 (:class:`~klampt.RobotModelLink`, optional): 
             obj2 (:class:`~klampt.RigidObjectModel`, optional): 
