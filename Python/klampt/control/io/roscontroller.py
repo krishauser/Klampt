@@ -78,14 +78,15 @@ class RosRobotBlock(blocks.robotcontroller.RobotControllerBlock):
     Acts very much like a ROS JointTrajectoryActionController
     (http://wiki.ros.org/robot_mechanism_controllers/JointTrajectoryActionController)
     Currently does not support:
-        * Setting PID gain constants,
-        * Setting PID integral term bounds,
-        * Parsing of FollowJointTrajectoryActions or reporting completion
-          of the action.
-        * Partial commands for subsets of joints are supported, but you
-          cannot interleave separate messages to subsets of joints (i.e.,
-          you must let one joint group finish before sending messages to
-          another).
+
+    * Setting PID gain constants,
+    * Setting PID integral term bounds,
+    * Parsing of FollowJointTrajectoryActions or reporting completion
+        of the action.
+    * Partial commands for subsets of joints are supported, but you
+        cannot interleave separate messages to subsets of joints (i.e.,
+        you must let one joint group finish before sending messages to
+        another).
     
     Note: trajectory messages start execution exactly at the *Klamp't time*
     given in the time stamp in the header.  Hence, any nodes connected to this

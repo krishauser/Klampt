@@ -1032,6 +1032,7 @@ class WorldModel
   ///
   ///    All other RobotModel, RigidObjectModel, or TerrainModel references
   ///    will be invalidated.
+  ///
   void remove(const RobotModel& robot);
   ///Removes a robot, rigid object, or terrain from the world.  It must be in this world or an exception
   ///is raised.

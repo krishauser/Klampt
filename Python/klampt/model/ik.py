@@ -344,9 +344,8 @@ class SubRobotIKSolver(IKSolver):
 
         Respects subrobotness.
 
-        Return:
-        ------
-            (qmin, qmax): Pair of lists of joint limits.
+        Returns:
+            tuple: (qmin, qmax) giving lists of joint limits.
         """
         qmin_full, qmax_full = super().getJointLimits()
         qmin = [qmin_full[i] for i in self.subrobot._links]
@@ -384,9 +383,8 @@ class SubRobotIKSolver(IKSolver):
         with respect to the active Dofs.  
         Respects subrobotness.
 
-        Return:
-        ------
-            Matrix (6 x N) J; such that J @ qdot = EE velocity.
+        Returns:
+            ndarray: Matrix (6 x N) J; such that J @ qdot = EE velocity.
         """
         return super().getJacobian()[:, self.subrobot._links]
 
