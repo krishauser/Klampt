@@ -179,5 +179,5 @@ for instructions and examples.
 
 To implement a state machine, a controller should manually maintain and
 simulate its behavior in its feedback loop. A framework for such
-controllers is the ``StateMachineController`` class in
-`Python/control/controller.py <../Python/control/controller.py>`__.
+controllers is the ``StateMachineBlock`` class in
+`klampt.control.blocks.state_machine <klampt.control.blocks.html#module-0>`__.
