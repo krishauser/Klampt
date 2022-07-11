@@ -442,7 +442,7 @@ void GetPointCloud(const PointCloud& pc,AnyCollisionGeometry3D& geom)
     memcpy(&gpc.properties[0][0],&pc.properties[0],sizeof(double)*pc.properties.size());
     
     int m=(int)pc.propertyNames.size();
-    int k=0;
+    int k=m;
     for(size_t i=1;i<gpc.properties.size();i++,k+=m) {
       //gpc.properties[i].resize(pc.propertyNames.size());
       //gpc.properties[i].copy(&pc.properties[i*pc.propertyNames.size()]);
