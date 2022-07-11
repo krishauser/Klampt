@@ -77,6 +77,8 @@ class TransformPoser : public Widget
   void get(double out[9],double out2[3]);
   void enableTranslation(bool);
   void enableRotation(bool);
+  void enableTranslationAxes(bool x,bool y,bool z);
+  void enableRotationAxes(bool x,bool y,bool z);
 };
 
 class ObjectPoser : public Widget

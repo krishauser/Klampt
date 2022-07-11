@@ -2,7 +2,7 @@
 Interface Layer, and connect ControllerBlocks to RobotInterfaceBase receivers.
 """
 
-from .controller import ControllerBlock
+from .blocks.robotcontroller import RobotControllerBlock
 from .robotinterface import RobotInterfaceBase
 from .robotinterfaceutils import RobotInterfaceCompleter
 
@@ -22,15 +22,15 @@ class SimRobotControllerToInterface(object):
     Arguments:
         robotInterface (RobotInterfaceBase): the robot interface to use
     """
-    def __init__(self,robotInterface):
-        if not isinstance(robotInterface,RobotInterfaceCompleter):
+    def __init__(self, robotInterface : RobotInterfaceBase) -> None:
+        if not robotInterface.properties.get('complete',False):
             robotInterface = RobotInterfaceCompleter(robotInterface)
         self.robotInterface = robotInterface
 
     def initialize(self):
         self.robotInterface.initialize()
-    def startStep(self):
-        self.robotInterface.startStep()
+    def beginStep(self):
+        self.robotInterface.beginStep()
     def endStep(self):
         self.robotInterface.endStep()
     def model(self):
@@ -103,7 +103,7 @@ class SimRobotControllerToInterface(object):
     def setTorque(self,t):
         self.robotInterface.setTorque(t)
     def setPIDCommand(self,qdes,dqdes,tfeedforward=None):
-        self.robotInterface.setPIDCommand(self.robotInterface.configFromKlampt(qdes),self.robotInterface.velocityFromKlampt(dqdes),tfeedforward)
+        self.robotInterface.setPID(self.robotInterface.configFromKlampt(qdes),self.robotInterface.velocityFromKlampt(dqdes),tfeedforward)
     def setManualMode(self,enabled):
         pass
 
@@ -117,7 +117,7 @@ class SimRobotControllerToInterface(object):
 
 
 class _SimRobotSensorFromInterface(object):
-    def __init__(self,iface,name):
+    def __init__(self, iface : RobotInterfaceBase, name : str):
         self.iface = iface
         self._name = name
     def name(self):
@@ -144,24 +144,22 @@ class _SimRobotSensorFromInterface(object):
         return self.robot().sensor(self._name).drawGL()
 
 
-class RobotControllerToInterface(object):
-    """A class that connects the I/O of a standard :class:`ControllerBlock` 
-    robot controller with a :class:`RobotInterfaceBase` Robot Interface Layer
-    API.
+class RobotControllerBlockToInterface(object):
+    """A class that connects the I/O of a :class:`RobotControllerBlock` robot
+    controller with a :class:`RobotInterfaceBase` Robot Interface Layer API.
 
     Arguments:
-        controller (ControllerBlock): the controller software, should conform
-            to the RobotControllerBase convention.
+        controller (RobotControllerBlock): the controller block.
         robotInterface (RobotInterfaceBase): the robot interface
         controllerRateRatio (float, optional): if not 1, scales how many times
-            the controller is run for each main loop of the robotInterface
+            the block is run for each main loop of the robotInterface
     """
-    def __init__(self,controller,robotInterface,controllerRateRatio=1):
-        if not isinstance(robotInterface,RobotInterfaceCompleter):
-            assert isinstance(robotInterface,RobotInterfaceBase),"robotInterface must be a RobotInterfaceBase"
+    def __init__(self, controller : RobotControllerBlock, robotInterface : RobotInterfaceBase, controllerRateRatio=1):
+        assert isinstance(robotInterface,RobotInterfaceBase),"robotInterface must be a RobotInterfaceBase"
+        if not robotInterface.properties.get('complete',False):
             robotInterface = RobotInterfaceCompleter(robotInterface,base_initialized=True)
             robotInterface.initialize()
-        assert isinstance(controller,ControllerBlock),"controller must be a ControllerBlock"
+        assert isinstance(controller,RobotControllerBlock),"controller must be a ControllerBlock"
         self.robotInterface = robotInterface
         self.controller = controller
         self.controllerRateRatio = controllerRateRatio
@@ -174,7 +172,7 @@ class RobotControllerToInterface(object):
         If step_interface = True the robotInterface will also be
         stepped.  Otherwise, make sure you call startStep()/endStep() like::
         
-            c2i = RobotControllerToInterface(...)
+            c2i = RobotControllerBlockToInterface(...)
             c2i.robotInterface.startStep()
             c2i.advance()
             c2i.robotInterface.endStep()
@@ -198,7 +196,7 @@ class RobotControllerToInterface(object):
                 inputs[s] = self.robotInterface.sensorMeasurements(s)
             except Exception as e:
                 import traceback
-                print("Uh... can't read sensor",s)
+                print("Uh... can't read sensor",s,"from",self.robotInterface)
                 traceback.print_exc()
         #plan
         res = self.controller.advance(**inputs)
@@ -233,7 +231,7 @@ class RobotInterfacetoVis(object):
 
     Note: this assumes that ``vis`` has been set up with an appropriate world.
     """
-    def __init__(self,robotInterface,visRobotIndex=0):
+    def __init__(self, robotInterface : RobotInterfaceBase, visRobotIndex=0):
         self.interface = robotInterface
         self.visRobotIndex = visRobotIndex
         self.text_x = 10
@@ -251,7 +249,7 @@ class RobotInterfacetoVis(object):
         try:
             stat = self.interface.status()
             if stat != 'ok':
-                vis.addText(self.tag+"status",'Status: '+stat,(self.text_x,self.text_y+15),color=(1,0,0))
+                vis.addText(self.tag+"status",'Status: '+str(stat),(self.text_x,self.text_y+15),color=(1,0,0))
             else:
                 try:
                     vis.remove(self.tag+"status")

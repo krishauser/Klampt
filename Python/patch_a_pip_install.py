@@ -2,6 +2,7 @@ import os
 import glob
 import sys
 
+pip_klampt_version = '0.9.0'
 root_py_folder = "klampt"
 if sys.version_info[0] == 2:
     #python2 version has drifted from current Python3 version... maintain separate packages list for compatibility
@@ -10,28 +11,52 @@ if sys.version_info[0] == 2:
 else:
     subpackages = ['apps','control','control/blocks','control/io','io','math','math/autodiff','model','model/create','plan','plan/kinetrajopt','sim','vis','vis/backends','vis/ipython']
 
-#need to grab the existing C extension module .py and .so files
-import site
-import glob
-pip_klampt_version = '0.8.6'
-py_version = '%d.%d'%(sys.version_info[0],sys.version_info[1])
+#find the klampt install path...
+
 klampt_path = None
-for path in site.getsitepackages():
+
+#method 1: check sites
+import site
+for path in [site.getusersitepackages()] + site.getsitepackages():
     if os.path.exists(os.path.join(path,'klampt')):
         klampt_path = os.path.join(path,'klampt')
         break
 if klampt_path is None:
+    #method 2: check distutils
     from distutils.sysconfig import get_python_lib
     site_packages_dir = get_python_lib()
-    if os.path.exists(site_packages_dir,'klampt'):
+    if os.path.exists(os.path.join(site_packages_dir,'klampt')):
         klampt_path = os.path.join(site_packages_dir,'klampt')
-    else:
-        print("Can't find install dir for Klampt",pip_klampt_version,"?  Perhaps wasn't installed by pip?")
+if klampt_path is None:
+    #find via import
+    oldpath = sys.path[:]  #don't search current working directory
+    if "" in sys.path:
+        sys.path.remove("");  
+    fullfile = os.path.abspath(__file__)
+    filepath = os.path.split(fullfile)[0]
+    if filepath in sys.path:
+        sys.path.remove(filepath)
+    try:
+        import klampt
+        klampt_path = klampt.__path__[0]
+    except ImportError as e:
+        print("klampt doesn't seem to be installed for this version of python, perhaps wasn't installed by pip?")
+        print(e)
         exit(1)
+    sys.path = oldpath
+    if klampt.__version__ != pip_klampt_version:
+        print("Installed klampt version doesn't match current module base version: {} vs {}".format(klampt.__version__,pip_klampt_version))
+        exit(1)
+
+print("Installed klampt path:",klampt_path)
+
+
+#need to keep the existing C extension module .py and .so files
 import shutil
 dontcopy = ['robotsim.py','motionplanning.py']
+ignore_prefix_len = len(root_py_folder)+1
 def docopy(fn):
-    basefn = fn[len('klampt/'):]
+    basefn = fn[ignore_prefix_len:]
     print("Copying",fn,"to",os.path.join(klampt_path,basefn))
     shutil.copy(fn,os.path.join(klampt_path,basefn))
 for path in [root_py_folder] + [os.path.join(root_py_folder,p) for p in subpackages]:

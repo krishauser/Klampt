@@ -1,73 +1,29 @@
 
 import sys
 from collections import defaultdict
+from improve_swig_docs_settings import *
+import re
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
-#all of the classes defined in the package that you'd like to cross-reference
-classes = {'RobotModel','WorldModel','RobotModelLink','Terrain','RigidObjectModel',
-    'Geometry3D','Appearance','TriangleMesh','PointCloud','VolumeGrid','GeometricPrimitive',
-    'ContactParameters','Mass','DistanceQueryResult','DistanceQuerySettings',
-    'SimRobotSensor','SimRobotController','SimBody','Simulator',
-    'CSpaceInterface','MotionPlanInterface',
-    'ContactPoint','Trajectory','RobotTrajectory','HermiteTrajectory','MultiPath',
-    'CSpace','MotionPlan'
-    }
-#default prefix for class cross-references
-default_class_prefix = 'klampt'
-#other prefixes for class cross-references
-class_prefix = {
-    'ContactPoint':'klampt.model.contact',
-    'Trajectory':'klampt.model.trajectory',
-    'RobotTrajectory':'klampt.model.trajectory',
-    'HermiteTrajectory':'klampt.model.trajectory',
-    'MultiPath':'klampt.model.multipath',
-    'CSpace':'klampt.plan.cspace',
-    'MotionPlan':'klampt.plan.cspace',
-}
-
-basic_types = {'int','float','str','bytes','bool'}
-
-#conversions from SWIG docstrings to RST docstrings
-to_python_types = { 'char const *':'str',
-    'char *':'str',
-    'char':'str',
-    'std::string':'str',
-    'double':'float',
-    'doubleVector': "list of floats",
-    'doubleArray': "list of floats",
-    'doubleMatrix': "2D matrix, list of list of floats",
-    'floatVector': "list of floats",
-    'floatArray': "list of floats",
-    'intVector': "list of int",
-    'intArray': "list of int",
-    'stringArray': "list of str",
-    'double const [3]': "list of 3 floats",
-    'double [3]': "list of 3 floats",
-    'double const [9]': "list of 9 floats (so3 element)",
-    'double [9]': "list of 9 floats (so3 element)",
-    'std::vector< unsigned char,std::allocator< unsigned char > > const':'bytes',
-    'PyObject': "object"
-}
-
-to_python_defaults = {'NULL':"None"}
-
-def parse_type(typestr):
+def parse_type(typestr,argname=None):
     typestr = typestr.strip()
     try:
         return to_python_types[typestr]
     except KeyError:
         pass
+    if argname is not None:
+        try:
+            return to_python_types[typestr+' '+argname]
+        except KeyError:
+            pass
     processed = False
-    if typestr.endswith('&') or typestr.endswith('*'):
+    if typestr.endswith('&'):
         typestr = typestr[:-1].strip()
         processed = True
-    if typestr.endswith('const'):
-        typestr = typestr[:-5].strip()
-        processed = True
-    if typestr.endswith('const '):
-        typestr = typestr[:-6].strip()
+    if 'const' in typestr:
+        typestr = typestr.replace(' const','')
         processed = True
     if processed:
         try:
@@ -75,6 +31,37 @@ def parse_type(typestr):
         except KeyError:
             pass
     return typestr
+
+def parse_type_hint(typestr):
+    typestr0 = typestr
+    typestr = typestr.strip().strip('"')
+    try:
+        return to_python_type_hints[typestr]
+    except KeyError:
+        try:
+            return to_python_types[typestr]
+        except KeyError:
+            pass
+    processed = False
+    if typestr.endswith('&'):
+        typestr = typestr[:-1].strip()
+        processed = True
+    if 'const' in typestr:
+        typestr = typestr.replace(' const','')
+        processed = True
+    if '::' in typestr:  #SWIG versions of STL containers have lots of boilerplate
+        for k,v in stl_to_python_type_hints.items():
+            if k in typestr:
+                return v
+    if processed:
+        try:
+            return to_python_type_hints[typestr]
+        except KeyError:
+            try:
+                return to_python_types[typestr]
+            except KeyError:
+                pass
+    return typestr0
 
 def parse_default(defstr):
     return to_python_defaults.get(defstr,defstr)
@@ -87,8 +74,140 @@ def to_type_doc(type):
     else:
         return ':obj:`%s`'%(type,)
 
+def smart_split(string : str, delim=',', quotes='"'):
+    """Splits a string by a delimiter, ignoring parts within quotes.
+
+    Quotes can also be a 2-element list, which indicates start and end tokens.
+    """
+    if len(quotes)==2 and isinstance(quotes,(list,tuple)):
+        start,end=quotes
+        quote_parts = []
+        i = 0
+        last = 0
+        in_quote = False
+        num_quotes = 0
+        ever_quoted = False
+        while i < len(string):
+            if string[i:].startswith(start):
+                ever_quoted = True
+                if in_quote:
+                    eprint("Adding quote at position",i)
+                else:
+                    quote_parts.append(string[last:i])
+                    last = i
+                num_quotes += 1
+                in_quote = True
+                i += len(start)
+            elif string[i:].startswith(end):
+                if not in_quote:
+                    assert num_quotes == 0
+                    raise RuntimeError("End terminator '{}' encountered at position {} outside of quote: {}".format(end,i,string))
+                num_quotes -= 1
+                eprint("Removing quote at position",i)
+                i += len(end)
+                if num_quotes == 0:
+                    in_quote = False
+                    eprint("Ended quoted region",string[last:i])
+                    quote_parts.append(string[last:i])
+                    last = i
+            else:
+                i += 1
+        if last != len(string):
+            quote_parts.append(string[last:])
+        # if ever_quoted:
+        #     eprint("Split string",string,"->",quote_parts)
+        #     input()
+    else:
+        quote_parts = string.split(quotes)
+    split_args = []
+    for i,part in enumerate(quote_parts):
+        if i%2==0:
+            split_parts = part.split(delim)
+            if len(split_parts) > 0:
+                if split_parts[0]=='':
+                    split_args += split_parts[1:]
+                elif len(split_args) > 0:
+                    split_args[-1] = split_args[-1]+split_parts[0]
+                    split_args += split_parts[1:]
+                else:
+                    split_args += split_parts
+        else:
+            split_args[-1]+='"{}"'.format(part)
+    return split_args
+
+
+def print_definition(defn : str, indent0 : str):
+    fn,args,ret = re.split('\(|\)',defn)
+    #Shouldn't do normal args.split(',') since nested vector and map type hints can have commas in them
+    args = smart_split(args,',','"')
+    # if '=' in args:
+    #     eprint(defn,":",args,"->",split_args)
+    #     input("HAS DEFAULT")
+
+    #parse typing of arguments
+    for i,arg in enumerate(args):
+        if ':' not in arg: continue
+        name,desc = arg.split(':',1)
+        if '=' in desc: #has default arg
+            desc,default_arg = desc.split('=')
+            desc_parsed = parse_type_hint(desc)
+            if desc_parsed == desc:
+                if desc.strip().strip('"') not in classes:
+                    eprint("Failed to parse arg type",desc)
+                    #input()
+            if desc_parsed is not None:
+                # if ' ' in desc_parsed.strip():
+                #     eprint("Uh... didn't catch RST type?",desc,desc_parsed)
+                #     input()
+                desc_parsed = desc_parsed + '=' + default_arg
+            else:
+                desc_parsed = '=' + default_arg
+            # eprint("PARSED VERSION OF ARG WITH DEFAULT:",desc_parsed)
+            # input()
+        else:
+            desc_parsed = parse_type_hint(desc)
+            if desc_parsed == desc:
+                if desc.strip().strip('"') not in classes:
+                    eprint("Failed to parse arg type",desc)
+                    #input()
+        if desc_parsed is not None:
+            # if ' ' in desc_parsed.strip():
+            #     eprint("Uh... didn't catch RST type?",desc,desc_parsed)
+            #     input()
+            args[i] = name + ': ' + desc_parsed
+        else:
+            args[i] = name
+
+    #parse typing of return value
+    if '->' in ret:
+        prefix,retval = ret.split('->',1)
+        if retval.endswith(':'):
+            suffix = ':'
+            retval = retval[:-1]
+        else:
+            input("Uh... function definition doesn't end with :?")
+        
+        retval_parsed = parse_type_hint(retval)
+        if retval_parsed == retval:
+            if retval.strip().strip('"') not in classes:
+                eprint("Couldn't parse return type",retval)
+                #input()
+        
+        if retval_parsed is not None:
+            ret = prefix+'->'+retval_parsed+suffix
+        else:
+            ret = prefix + suffix
+    print("{}{}({}){}".format(indent0,fn,','.join(args),ret))
+
 def print_signature(siglist,indent0,docstring):
-    """Converts a SWIG signature to Google Python documentation convention.
+    """Converts a SWIG signature in a docstring to Google
+    Python documentation convention.
+
+    Args:
+        siglist (list of str): lines of SWIG signature in docstring
+        indent0 (str): spaces giving the top-level indent
+        docstring (list of str): remaining lines of docstring
+    
     """
     docsummary = []
     docdetails = []
@@ -135,13 +254,14 @@ def print_signature(siglist,indent0,docstring):
         fn = s[:s.find("(")]
         sargs = s[s.find("(")+1:s.find(")")]
         if len(sargs.strip()) > 0:
-            for arg in sargs.split(','):
+            for arg in smart_split(sargs,',',['<','>']):
                 if arg=='self':
                     continue
                 try:
                     atype,aname = arg.rsplit(' ',1)
                 except Exception:
-                    eprint("Couldnt parse argument",arg,"to function",s,"?")
+                    eprint("Couldnt parse argument '{}' ?".format(arg))
+                    eprint(sargs)
                     raise
                 if aname == 'self':
                     #skip documenting self
@@ -149,9 +269,9 @@ def print_signature(siglist,indent0,docstring):
                 aparts = aname.split('=',2)
                 if len(aparts)>1:
                     eprint("Parts",aparts[0],aparts[1])
-                    args[-1].append((aparts[0],parse_type(atype),parse_default(aparts[1])))
+                    args[-1].append((aparts[0],parse_type(atype,aparts[0]),parse_default(aparts[1])))
                 else:
-                    args[-1].append((aname,parse_type(atype),None))
+                    args[-1].append((aname,parse_type(atype,aname),None))
 
         #parse return value
         if len(parts) == 2:
@@ -167,8 +287,9 @@ def print_signature(siglist,indent0,docstring):
                 else:
                     print(indent0+indentstr,aname,'(%s, optional): default value %s'%(to_type_doc(atype),adef))
         if ret[0] is not 'None' and fn != '__init__'and print_return:
-            print(indent0+"Returns:")
-            print(indent0+indentstr,"%s:"%(to_type_doc(ret[0])))
+            pass  #The type hints will already document the type
+            #print(indent0+"Returns:")
+            #print(indent0+indentstr,"%s:"%(to_type_doc(ret[0])))
     else:
         #try determining argument types and optional
         aorders = defaultdict()
@@ -222,7 +343,10 @@ def print_signature(siglist,indent0,docstring):
             print()
             print(indent0+'Returns:')
             unique = set(ret)
-            print(indent0+indentstr,'(%s):'%(' or '.join([to_type_doc(r) for r in unique]),))
+            if len(unique) > 1:
+                print(indent0+indentstr,'(%s):'%(' or '.join([to_type_doc(r) for r in unique]),))
+            else:
+                print(indent0+indentstr,'%s:'%(''.join([to_type_doc(r) for r in unique]),))
 
     if len(docdetails) > 0:
         print()
@@ -238,6 +362,7 @@ if __name__ == '__main__':
     f = open(sys.argv[1],'r')
     reading_docstring = False
     finished_reading_signature = False
+    typing_injected = False
     current_signature = []
     current_docstring = []
     outer_indent = ''
@@ -246,6 +371,7 @@ if __name__ == '__main__':
     for line,ln in enumerate(f.readlines()):
         ln = ln[:-1]  #strip endline
         first_nw = len(ln) - len(ln.lstrip())
+        defn = ln[first_nw:first_nw+4]=='def '
         quote = (ln[first_nw:first_nw+3]=='"""' or ln[first_nw:first_nw+4]=='r"""')
         if reading_docstring:
             if quote:
@@ -266,8 +392,14 @@ if __name__ == '__main__':
                 #determine whether to process
                 if ln.find('(') >= 0 and ln.find(')') >= 0:
                     fn_sig = ln.strip()
-                    eprint("Parsing signature for",fn_sig)
-                    current_signature.append(fn_sig)
+                    if fn_sig[0] == '%':
+                        finished_reading_signature = True
+                        pos = ln.find('%')
+                        ln = ln[:pos]+ln[pos+1:]
+                        current_docstring.append(ln)
+                    else:
+                        eprint("Parsing signature for",fn_sig)
+                        current_signature.append(fn_sig)
                 else:
                     finished_reading_signature = True
                     current_docstring.append(ln)
@@ -281,5 +413,11 @@ if __name__ == '__main__':
                 finished_reading_signature = False
                 outer_indent = ln[:first_nw]
             print(ln)
+        elif defn:
+            print_definition(ln[first_nw:],ln[:first_nw])
+        elif not typing_injected and typing_inject_location in ln:
+            print(ln)
+            print(typing_header)
+            typing_injected = True
         else:
             print(ln)

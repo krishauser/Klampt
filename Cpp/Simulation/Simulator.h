@@ -3,8 +3,10 @@
 
 #include <Klampt/Modeling/World.h>
 #include "ODESimulator.h"
-#include "ControlledSimulator.h"
+#include "SimRobotController.h"
 #include <map>
+
+namespace Klampt {
 
 /** @defgroup Simulation
  * Klampt's rigid body physics simulation engine.
@@ -15,7 +17,7 @@
  * object.  Can be set to accumulate a summary over sub-steps or detailed
  * data per-step.
  *
- * The reason why this is needed is that each outer WorldSimulation.Advance
+ * The reason why this is needed is that each outer Simulator.Advance
  * call may potential make several inner sub steps.  Rather than simply
  * reporting the data at the last point, this class will aggregate the
  * sub-step data.
@@ -39,8 +41,8 @@ struct ContactFeedbackInfo
 
 /** @ingroup Simulation
  * @brief Any function that should be run per sub-step of the simulation
- * needs to be a WorldSimulationHook subclass and added to the
- * WorldSimulation.hooks member.
+ * needs to be a SimulatorHook subclass and added to the
+ * Simulator.hooks member.
  *
  * If the flag autokill = true, the hook is removed at the end of the
  * Advance() call.
@@ -50,11 +52,11 @@ struct ContactFeedbackInfo
  * @sa WrenchHook
  * @sa SpringHook
  */
-class WorldSimulationHook
+class SimulatorHook
 {
  public:
-  WorldSimulationHook() : autokill(false) {}
-  virtual ~WorldSimulationHook() {}
+  SimulatorHook() : autokill(false) {}
+  virtual ~SimulatorHook() {}
   virtual void Step(Real dt) {}
   virtual bool ReadState(File& f) { return true; }
   virtual bool WriteState(File& f) const { return true; }
@@ -62,13 +64,13 @@ class WorldSimulationHook
 };
 
 /** @ingroup Simulation
- * @brief A physical simulator for a RobotWorld.
+ * @brief A physical simulator for a WorldModel.
  */
-class WorldSimulation
+class Simulator
 {
 public:
-  WorldSimulation();
-  void Init(RobotWorld* world);
+  Simulator();
+  void Init(WorldModel* world);
   ///Updates the simulation with new items added to the world model.
   void OnAddModel();
   ///Sets the robot's controller 
@@ -125,14 +127,14 @@ public:
   int ODEToWorldID(const ODEObjectID& odeid) const;
   ODEObjectID WorldToODEID(int id) const;
 
-  RobotWorld* world;
+  WorldModel* world;
   ODESimulator odesim;
   Real time;
   Real simStep;
   bool fakeSimulation;
-  vector<ControlledRobotSimulator> controlSimulators;
+  vector<SimRobotController> controlSimulators;
   vector<shared_ptr<RobotController> > robotControllers;
-  vector<shared_ptr<WorldSimulationHook> > hooks;
+  vector<shared_ptr<SimulatorHook> > hooks;
   typedef map<pair<ODEObjectID,ODEObjectID>,ContactFeedbackInfo> ContactFeedbackMap;
   ContactFeedbackMap contactFeedback;
   ///Worst simulation status over the last Advance() call.
@@ -142,13 +144,13 @@ public:
 /** @ingroup Simulation
  * @brief A hook that adds a constant force to a body
  */
-class ForceHook : public WorldSimulationHook
+class ForceHook : public SimulatorHook
 {
  public:
   ForceHook(dBodyID body,const Vector3& worldpt,const Vector3& f);
-  virtual void Step(Real dt);
-  virtual bool ReadState(File& f);
-  virtual bool WriteState(File& f) const;
+  virtual void Step(Real dt) override;
+  virtual bool ReadState(File& f) override;
+  virtual bool WriteState(File& f) const override;
 
   dBodyID body;
   Vector3 worldpt,f;
@@ -158,13 +160,13 @@ class ForceHook : public WorldSimulationHook
  * @brief A hook that adds a constant force in world coordinates to a point
  * on a body given in local coordinates
  */
-class LocalForceHook : public WorldSimulationHook
+class LocalForceHook : public SimulatorHook
 {
  public:
   LocalForceHook(dBodyID body,const Vector3& localpt,const Vector3& f);
-  virtual void Step(Real dt);
-  virtual bool ReadState(File& f);
-  virtual bool WriteState(File& f) const;
+  virtual void Step(Real dt) override;
+  virtual bool ReadState(File& f) override;
+  virtual bool WriteState(File& f) const override;
 
   dBodyID body;
   Vector3 localpt,f;
@@ -175,13 +177,13 @@ class LocalForceHook : public WorldSimulationHook
  * @brief A hook that adds a constant wrench (force f and moment m) to
  * the body
  */
-class WrenchHook : public WorldSimulationHook
+class WrenchHook : public SimulatorHook
 {
  public:
   WrenchHook(dBodyID body,const Vector3& f,const Vector3& m);
-  virtual void Step(Real dt);
-  virtual bool ReadState(File& f);
-  virtual bool WriteState(File& f) const;
+  virtual void Step(Real dt) override;
+  virtual bool ReadState(File& f) override;
+  virtual bool WriteState(File& f) const override;
 
   dBodyID body;
   Vector3 f,m;
@@ -190,13 +192,13 @@ class WrenchHook : public WorldSimulationHook
 /** @ingroup Simulation
  * @brief A hook that acts as a Hookean (optionally damped) spring to a given fixed target point.
  */
-class SpringHook : public WorldSimulationHook
+class SpringHook : public SimulatorHook
 {
  public:
   SpringHook(dBodyID body,const Vector3& worldpt,const Vector3& target,Real kP,Real kD=0);
-  virtual void Step(Real dt);
-  virtual bool ReadState(File& f);
-  virtual bool WriteState(File& f) const;
+  virtual void Step(Real dt) override;
+  virtual bool ReadState(File& f) override;
+  virtual bool WriteState(File& f) const override;
 
   dBodyID body;
   Vector3 localpt,target;
@@ -206,32 +208,34 @@ class SpringHook : public WorldSimulationHook
 /** @ingroup Simulation
  * @brief A hook that adds a constant force to a joint
  */
-class JointForceHook : public WorldSimulationHook
+class JointForceHook : public SimulatorHook
 {
 public:
   JointForceHook(ODEJoint* joint,Real f);
-  virtual void Step(Real dt);
-  virtual bool ReadState(File& f);
-  virtual bool WriteState(File& f) const;
+  virtual void Step(Real dt) override;
+  virtual bool ReadState(File& f) override;
+  virtual bool WriteState(File& f) const override;
 
   ODEJoint* joint;
   Real f;
 };
 
 /** @ingroup Simulation
- * @brief A hook that adds a constant force to a joint
+ * @brief A hook that adds a Hookean (optionally damped) virtual spring to a joint
  */
-class JointSpringHook : public WorldSimulationHook
+class JointSpringHook : public SimulatorHook
 {
 public:
   JointSpringHook(ODEJoint* joint,Real target,Real kP,Real kD=0);
-  virtual void Step(Real dt);
-  virtual bool ReadState(File& f);
-  virtual bool WriteState(File& f) const;
+  virtual void Step(Real dt) override;
+  virtual bool ReadState(File& f) override;
+  virtual bool WriteState(File& f) const override;
 
   ODEJoint* joint;
   Real target;
   Real kP,kD;
 };
+
+} //namespace Klampt
 
 #endif

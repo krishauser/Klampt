@@ -2,14 +2,16 @@
 #include "Control/FeedforwardController.h"
 #include "Control/LoggingController.h"
 #include "Sensing/JointSensors.h"
-#include "Simulation/WorldSimulation.h"
+#include "Simulation/Simulator.h"
 #include "IO/XmlWorld.h"
 #include "IO/XmlODE.h"
 #include "IO/three.js.h"
 #include <KrisLibrary/utils/stringutils.h>
+#include <KrisLibrary/utils/AnyCollection.h>
 #include <KrisLibrary/robotics/IKFunctions.h>
 #include <fstream>
 using namespace Math3D;
+using namespace Klampt;
 
 string ReadFileAsString(const char* fn)
 {
@@ -71,7 +73,7 @@ typedef PolynomialPathController MyMilestoneController;
 	}
 */
 
-bool SetupCommands(WorldSimulation& sim,const string& fn)
+bool SetupCommands(Simulator& sim,const string& fn)
 {
   if(fn.empty()) return true;
   if(0==strcmp(FileExtension(fn.c_str()),"log")) {
@@ -151,7 +153,7 @@ string ReadSimState(const char* fn,Format format)
   if(format == Raw) return str;
   else return FromBase64(str);
 }
-bool WriteSimState(WorldSimulation& sim,const char* fn,Format format)
+bool WriteSimState(Simulator& sim,const char* fn,Format format)
 {
   if(format == None) return true;
   else if(format == ThreeJS) {
@@ -208,8 +210,8 @@ int main(int argc, char** argv)
     return 0;
   }
   XmlWorld xmlWorld;
-  RobotWorld world;
-  WorldSimulation sim;
+  WorldModel world;
+  Simulator sim;
   vector<string> commandFiles;
   double settlingTime = 0;
   double simEndTime = Inf;
@@ -298,7 +300,7 @@ int main(int argc, char** argv)
   //setup controllers
   sim.robotControllers.resize(world.robots.size());
   for(size_t i=0;i<sim.robotControllers.size();i++) {    
-    Robot* robot=world.robots[i].get();
+    RobotModel* robot=world.robots[i].get();
     sim.SetController(i,MakeDefaultController(robot)); 
     sim.controlSimulators[i].sensors.MakeDefault(robot);
   }

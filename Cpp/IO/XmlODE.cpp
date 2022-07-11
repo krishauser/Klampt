@@ -6,6 +6,8 @@
 
 DEFINE_LOGGER(XmlParser);
 
+namespace Klampt {
+
 int SafeQueryFloat(TiXmlElement* e,const char* attr,double& out)
 {
   if(e->Attribute(attr)) {
@@ -300,7 +302,7 @@ XmlSimulationSettings::XmlSimulationSettings(TiXmlElement* _element)
   :e(_element)
 {}
 
-bool XmlSimulationSettings::GetSettings(WorldSimulation& sim)
+bool XmlSimulationSettings::GetSettings(Simulator& sim)
 {
   LOG4CXX_INFO(GET_LOGGER(XmlParser),"Parsing XML file <simulation> tag...");
   string globals="globals";
@@ -324,7 +326,7 @@ bool XmlSimulationSettings::GetSettings(WorldSimulation& sim)
     int index = obj.index;
     Assert(index < (int)sim.robotControllers.size());
         
-    ControlledRobotSimulator& robotSim=sim.controlSimulators[index];
+    SimRobotController& robotSim=sim.controlSimulators[index];
     TiXmlElement* ec=c->FirstChildElement("controller");
     if(ec) {
       RobotControllerFactory::RegisterDefault(*robotSim.robot);
@@ -366,3 +368,4 @@ bool XmlSimulationSettings::GetSettings(WorldSimulation& sim)
   return true;
 }
 
+} //namespace Klampt

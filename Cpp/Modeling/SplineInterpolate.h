@@ -4,8 +4,10 @@
 #include <KrisLibrary/planning/GeneralizedBezierCurve.h>
 #include <KrisLibrary/math/misc.h>
 #include <vector>
-using namespace Math;
-using namespace std;
+
+namespace Klampt {
+  using namespace Math;
+  using namespace std;
 
 /** @addtogroup Modeling */
 /*@{*/
@@ -61,5 +63,7 @@ void MonotonicAccelInterpolate(const vector<Vector>& pts,
 			  vector<GeneralizedCubicBezierCurve>& paths,
 			  CSpace* space=NULL,GeodesicSpace* manifold=NULL);
 /*@}*/
+
+} //namespace Klampt
 
 #endif

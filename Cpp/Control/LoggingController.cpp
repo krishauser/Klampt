@@ -1,7 +1,8 @@
 #include "LoggingController.h"
 #include <sstream>
+using namespace Klampt;
 
-LoggingController::LoggingController(Robot& robot,const shared_ptr<RobotController>& _base)
+LoggingController::LoggingController(RobotModel& robot,const shared_ptr<RobotController>& _base)
   : RobotController(robot),base(_base),save(false),replay(false),onlyJointCommands(false),replayIndex(0)
 {}
 
@@ -82,6 +83,24 @@ void LoggingController::Update(Real dt)
 	trajectory.push_back(pair<Real,RobotMotorCommand>(base->time,*RobotController::command));
     }
   }
+}
+
+void LoggingController::Reset()
+{
+  base->Reset();
+}
+
+bool LoggingController::ReadState(File& f)
+{
+  if(!base->ReadState(f)) return false;
+  trajectory.resize(0);
+  return true;
+}
+
+bool LoggingController::WriteState(File& f) const
+{
+  if(!base->WriteState(f)) return false;
+  return true;
 }
 
 map<string,string> LoggingController::Settings() const

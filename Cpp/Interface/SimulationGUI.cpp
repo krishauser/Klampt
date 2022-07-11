@@ -20,6 +20,7 @@
 #include <fstream>
 #include <iomanip>
 using namespace GLDraw;
+using namespace Klampt;
 
 typedef LoggingController MyController;
 typedef PolynomialPathController MyMilestoneController;
@@ -119,7 +120,7 @@ bool SimGUIBackend::OnCommand(const string& cmd,const string& args)
 
 void SimGUIBackend::InitController(int i)
 {
-  Robot* robot=world->robots[i].get();
+  RobotModel* robot=world->robots[i].get();
   sim.SetController(i,MakeDefaultController(robot)); 
   sim.controlSimulators[i].sensors.MakeDefault(robot);
 }
@@ -154,7 +155,7 @@ void SimGUIBackend::InitContactFeedbackAll()
 
 void SimGUIBackend::ConnectSerialController(int i,int port,Real writeRate)
 {
-  Robot* robot=world->robots[i].get();
+  RobotModel* robot=world->robots[i].get();
   stringstream ss;
   ss<<"tcp://localhost:"<<port;
   sim.SetController(i,make_shared<SerialController>(*robot,ss.str(),writeRate));
@@ -357,8 +358,8 @@ void SimGUIBackend::DrawSensor(int robot,int sensor)
 void SimGUIBackend::SetForceColors()
 {
   for(size_t i=0;i<world->robots.size();i++) {
-    if(world->robotViews[i].appearanceStack.empty())
-      world->robotViews[i].PushAppearance();
+    //if(world->robotViews[i].appearanceStack.empty())
+    //  world->robotViews[i].PushAppearance();
     for(size_t j=0;j<world->robots[i]->links.size();j++) {
       if(i==0) {
         float amount = 0;
@@ -393,7 +394,8 @@ void SimGUIBackend::SetForceColors()
           color[1]=0;
           color[2]=0;
         }
-        world->robotViews[i].BlendColor(j,GLColor(color),amount);
+        //world->robotViews[i].BlendColor(j,GLColor(color),amount);
+        world->robotViews[i].SetTintColor(j,GLColor(color),amount);
       }
     }
   }
@@ -441,7 +443,7 @@ void SimGUIBackend::DrawContacts(Real pointSize, Real fscale, Real nscale)
   glEnable(GL_POINT_SMOOTH);
   glDisable(GL_DEPTH_TEST);
   glPointSize((float)pointSize);
-  for (WorldSimulation::ContactFeedbackMap::iterator i = sim.contactFeedback.begin(); i != sim.contactFeedback.end(); i++) {
+  for (Simulator::ContactFeedbackMap::iterator i = sim.contactFeedback.begin(); i != sim.contactFeedback.end(); i++) {
     ODEContactList* c = sim.odesim.GetContactFeedback(i->first.first,
                                                       i->first.second);
     Assert(c != NULL);
@@ -472,7 +474,7 @@ void SimGUIBackend::DrawWrenches(Real fscale)
 {
   glEnable(GL_LIGHTING);
   glDisable(GL_DEPTH_TEST);
-  for (WorldSimulation::ContactFeedbackMap::iterator i = sim.contactFeedback.begin(); i != sim.contactFeedback.end(); i++) {
+  for (Simulator::ContactFeedbackMap::iterator i = sim.contactFeedback.begin(); i != sim.contactFeedback.end(); i++) {
     if(!i->second.inContact) continue;
     /*
     ODEContactList* c = sim.odesim.GetContactFeedback(i->first.first,
@@ -924,7 +926,7 @@ void SimGUIBackend::DoContactStateLogging(const char* fn)
     cout<<"Saving simulation contact state to "<<fn<<endl;
     out<<"time,body1,body2,contact"<<endl;
   }
-  for(WorldSimulation::ContactFeedbackMap::iterator i=sim.contactFeedback.begin();i!=sim.contactFeedback.end();i++) {
+  for(Simulator::ContactFeedbackMap::iterator i=sim.contactFeedback.begin();i!=sim.contactFeedback.end();i++) {
     int aid = sim.ODEToWorldID(i->first.first);
     int bid = sim.ODEToWorldID(i->first.second);
     bool hadContact = sim.HadContact(aid,bid);
@@ -963,7 +965,7 @@ void SimGUIBackend::DoContactWrenchLogging(const char* fn)
     cout<<"Saving simulation contact wrenches to "<<fn<<endl;
     out<<"time,body1,body2,cop x,cop y,cop z,fx,fy,fz,tx,ty,tz"<<endl;
   }
-  for(WorldSimulation::ContactFeedbackMap::iterator i=sim.contactFeedback.begin();i!=sim.contactFeedback.end();i++) {
+  for(Simulator::ContactFeedbackMap::iterator i=sim.contactFeedback.begin();i!=sim.contactFeedback.end();i++) {
     if(i->second.contactCount==0) continue;
     int aid = sim.ODEToWorldID(i->first.first);
     int bid = sim.ODEToWorldID(i->first.second);

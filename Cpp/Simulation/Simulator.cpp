@@ -1,23 +1,114 @@
-#include "WorldSimulation.h"
+#include "Simulator.h"
 #include <KrisLibrary/Timer.h>
 #include <ode/ode.h>
 #include "ODECommon.h"
+#include "Sensing/Common_Internal.h"
 DEFINE_LOGGER(WorldSimulator)
 
 
-#define READ_FILE_DEBUG(file,object,prefix)		\
+#define READ_FILE_DEBUG(file,object,prefix)   \
   if(!ReadFile(file,object)) { \
     LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),prefix<<": ReadFile failed to read item "<<#object); \
     return false; \
   }
 
-#define READ_ARRAY_FILE_DEBUG(file,object,count,prefix)	\
-  if(!ReadArrayFile(file,object,count)) {					\
+#define READ_ARRAY_FILE_DEBUG(file,object,count,prefix) \
+  if(!ReadArrayFile(file,object,count)) {         \
     LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),prefix<<": ReadArrayFile failed to read item "<<#object<<", size "<<count); \
     return false; \
   }
 
-#define TEST_READ_WRITE 0
+
+bool WriteFile(File& f,const ContactPoint& cp)
+{
+  if(!WriteFile(f,cp.x)) return false;
+  if(!WriteFile(f,cp.n)) return false;
+  if(!WriteFile(f,cp.kFriction)) return false;
+  return true;
+}
+
+bool ReadFile(File& f,ContactPoint& cp)
+{
+  READ_FILE_DEBUG(f,cp.x,"ReadFile(ContactPoint)");
+  READ_FILE_DEBUG(f,cp.n,"ReadFile(ContactPoint)");
+  READ_FILE_DEBUG(f,cp.kFriction,"ReadFile(ContactPoint)");
+  return true;
+}
+
+bool WriteFile(File& f,const Klampt::ODEObjectID& obj)
+{
+  if(!WriteFile(f,obj.type)) return false;
+  if(!WriteFile(f,obj.index)) return false;
+  if(!WriteFile(f,obj.bodyIndex)) return false;
+  return true;
+}
+
+bool ReadFile(File& f,Klampt::ODEObjectID& obj)
+{
+  READ_FILE_DEBUG(f,obj.type,"ReadFile(ODEObjectID)");
+  READ_FILE_DEBUG(f,obj.index,"ReadFile(ODEObjectID)");
+  READ_FILE_DEBUG(f,obj.bodyIndex,"ReadFile(ODEObjectID)");
+  return true;
+}
+
+bool WriteFile(File& f,const Klampt::ODEContactList& list)
+{
+  if(!WriteFile(f,list.o1)) return false;
+  if(!WriteFile(f,list.o2)) return false;
+  if(!WriteFile(f,list.points)) return false;
+  if(!WriteFile(f,list.forces)) return false;
+  if(!WriteFile(f,list.feedbackIndices)) return false;
+  return true;
+}
+
+bool ReadFile(File& f,Klampt::ODEContactList& list)
+{
+  READ_FILE_DEBUG(f,list.o1,"ReadFile(ODEContactList)");
+  READ_FILE_DEBUG(f,list.o2,"ReadFile(ODEContactList)");
+  READ_FILE_DEBUG(f,list.points,"ReadFile(ODEContactList)");
+  READ_FILE_DEBUG(f,list.forces,"ReadFile(ODEContactList)");
+  READ_FILE_DEBUG(f,list.feedbackIndices,"ReadFile(ODEContactList)");
+  return true;
+}
+
+bool WriteFile(File& f,const Klampt::ContactFeedbackInfo& info)
+{
+  if(!WriteFile(f,info.accum)) return false;
+  if(!WriteFile(f,info.inContact)) return false;
+  if(!WriteFile(f,info.contactCount)) return false;
+  if(!WriteFile(f,info.separationCount)) return false;
+  if(!WriteFile(f,info.penetrating)) return false;
+  if(!WriteFile(f,info.penetrationCount)) return false;
+  if(!WriteFile(f,info.meanForce)) return false;
+  if(!WriteFile(f,info.meanTorque)) return false;
+  if(!WriteFile(f,info.meanPoint)) return false;
+  if(!WriteFile(f,info.accumFull)) return false;
+  if(!WriteFile(f,info.times)) return false;
+  if(!WriteFile(f,info.contactLists)) return false;
+  return true;
+}
+
+bool ReadFile(File& f,Klampt::ContactFeedbackInfo& info)
+{
+  READ_FILE_DEBUG(f,info.accum,"ReadFile(ContactFeedbackInfo)");
+  READ_FILE_DEBUG(f,info.inContact,"ReadFile(ContactFeedbackInfo)");
+  READ_FILE_DEBUG(f,info.contactCount,"ReadFile(ContactFeedbackInfo)");
+  READ_FILE_DEBUG(f,info.separationCount,"ReadFile(ContactFeedbackInfo)");
+  READ_FILE_DEBUG(f,info.penetrating,"ReadFile(ContactFeedbackInfo)");
+  READ_FILE_DEBUG(f,info.penetrationCount,"ReadFile(ContactFeedbackInfo)");
+  READ_FILE_DEBUG(f,info.meanForce,"ReadFile(ContactFeedbackInfo)");
+  READ_FILE_DEBUG(f,info.meanTorque,"ReadFile(ContactFeedbackInfo)");
+  READ_FILE_DEBUG(f,info.meanPoint,"ReadFile(ContactFeedbackInfo)");
+  READ_FILE_DEBUG(f,info.accumFull,"ReadFile(ContactFeedbackInfo)");
+  READ_FILE_DEBUG(f,info.times,"ReadFile(ContactFeedbackInfo)");
+  READ_FILE_DEBUG(f,info.contactLists,"ReadFile(ContactFeedbackInfo)");
+  return true;
+}
+
+
+namespace Klampt {
+
+#define TEST_READ_WRITE 1
 
 template <class T>
 bool TestReadWriteState(T& obj,const char* name="")
@@ -114,126 +205,14 @@ void Reset(ContactFeedbackInfo& info)
   info.contactLists.clear();
 }
 
-template <class T>
-bool WriteFile(File& f,const vector<T>& v)
-{
-  if(!WriteFile(f,int(v.size()))) return false;
-  if(!v.empty()) 
-	if(!WriteArrayFile(f,&v[0],v.size())) return false;
-  return true;
-}
 
-
-template <class T>
-bool ReadFile(File& f,vector<T>& v)
-{
-  int n;
-  READ_FILE_DEBUG(f,n,"ReadFile(vector<T>)");
-  if(n < 0) {
-    LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"ReadFile(vector<T>): invalid size "<<n);
-    return false;
-  }
-  v.resize(n);
-  if(n != 0)
-    READ_ARRAY_FILE_DEBUG(f,&v[0],n,"ReadFile(vector<T>)")
-  return true;
-}
-
-bool WriteFile(File& f,const ContactPoint& cp)
-{
-  if(!WriteFile(f,cp.x)) return false;
-  if(!WriteFile(f,cp.n)) return false;
-  if(!WriteFile(f,cp.kFriction)) return false;
-  return true;
-}
-
-
-bool ReadFile(File& f,ContactPoint& cp)
-{
-  READ_FILE_DEBUG(f,cp.x,"ReadFile(ContactPoint)");
-  READ_FILE_DEBUG(f,cp.n,"ReadFile(ContactPoint)");
-  READ_FILE_DEBUG(f,cp.kFriction,"ReadFile(ContactPoint)");
-  return true;
-}
-
-bool WriteFile(File& f,const ODEObjectID& obj)
-{
-  if(!WriteFile(f,obj.type)) return false;
-  if(!WriteFile(f,obj.index)) return false;
-  if(!WriteFile(f,obj.bodyIndex)) return false;
-  return true;
-}
-
-bool ReadFile(File& f,ODEObjectID& obj)
-{
-  READ_FILE_DEBUG(f,obj.type,"ReadFile(ODEObjectID)");
-  READ_FILE_DEBUG(f,obj.index,"ReadFile(ODEObjectID)");
-  READ_FILE_DEBUG(f,obj.bodyIndex,"ReadFile(ODEObjectID)");
-  return true;
-}
-
-bool WriteFile(File& f,const ODEContactList& list)
-{
-  if(!WriteFile(f,list.o1)) return false;
-  if(!WriteFile(f,list.o2)) return false;
-  if(!WriteFile(f,list.points)) return false;
-  if(!WriteFile(f,list.forces)) return false;
-  if(!WriteFile(f,list.feedbackIndices)) return false;
-  return true;
-}
-
-bool ReadFile(File& f,ODEContactList& list)
-{
-  READ_FILE_DEBUG(f,list.o1,"ReadFile(ODEContactList)");
-  READ_FILE_DEBUG(f,list.o2,"ReadFile(ODEContactList)");
-  READ_FILE_DEBUG(f,list.points,"ReadFile(ODEContactList)");
-  READ_FILE_DEBUG(f,list.forces,"ReadFile(ODEContactList)");
-  READ_FILE_DEBUG(f,list.feedbackIndices,"ReadFile(ODEContactList)");
-  return true;
-}
-
-bool WriteFile(File& f,const ContactFeedbackInfo& info)
-{
-  if(!WriteFile(f,info.accum)) return false;
-  if(!WriteFile(f,info.inContact)) return false;
-  if(!WriteFile(f,info.contactCount)) return false;
-  if(!WriteFile(f,info.separationCount)) return false;
-  if(!WriteFile(f,info.penetrating)) return false;
-  if(!WriteFile(f,info.penetrationCount)) return false;
-  if(!WriteFile(f,info.meanForce)) return false;
-  if(!WriteFile(f,info.meanTorque)) return false;
-  if(!WriteFile(f,info.meanPoint)) return false;
-  if(!WriteFile(f,info.accumFull)) return false;
-  if(!WriteFile(f,info.times)) return false;
-  if(!WriteFile(f,info.contactLists)) return false;
-  return true;
-}
-
-bool ReadFile(File& f,ContactFeedbackInfo& info)
-{
-  READ_FILE_DEBUG(f,info.accum,"ReadFile(ContactFeedbackInfo)");
-  READ_FILE_DEBUG(f,info.inContact,"ReadFile(ContactFeedbackInfo)");
-  READ_FILE_DEBUG(f,info.contactCount,"ReadFile(ContactFeedbackInfo)");
-  READ_FILE_DEBUG(f,info.separationCount,"ReadFile(ContactFeedbackInfo)");
-  READ_FILE_DEBUG(f,info.penetrating,"ReadFile(ContactFeedbackInfo)");
-  READ_FILE_DEBUG(f,info.penetrationCount,"ReadFile(ContactFeedbackInfo)");
-  READ_FILE_DEBUG(f,info.meanForce,"ReadFile(ContactFeedbackInfo)");
-  READ_FILE_DEBUG(f,info.meanTorque,"ReadFile(ContactFeedbackInfo)");
-  READ_FILE_DEBUG(f,info.meanPoint,"ReadFile(ContactFeedbackInfo)");
-  READ_FILE_DEBUG(f,info.accumFull,"ReadFile(ContactFeedbackInfo)");
-  READ_FILE_DEBUG(f,info.times,"ReadFile(ContactFeedbackInfo)");
-  READ_FILE_DEBUG(f,info.contactLists,"ReadFile(ContactFeedbackInfo)");
-  return true;
-}
-
-
-WorldSimulation::WorldSimulation()
+Simulator::Simulator()
   :time(0),simStep(0.001),fakeSimulation(false),worstStatus(ODESimulator::StatusNormal)
 {}
 
-void WorldSimulation::Init(RobotWorld* _world)
+void Simulator::Init(WorldModel* _world)
 {
-  LOG4CXX_INFO(GET_LOGGER(WorldSimulator),"Creating WorldSimulation");
+  LOG4CXX_INFO(GET_LOGGER(WorldSimulator),"Creating Simulator");
   time = 0;
   world = _world;
   odesim.SetGravity(Vector3(0,0,-9.8));
@@ -247,7 +226,7 @@ void WorldSimulation::Init(RobotWorld* _world)
 
   //setup control simulators
   for(size_t i=0;i<controlSimulators.size();i++) {
-    Robot* robot=world->robots[i].get();
+    RobotModel* robot=world->robots[i].get();
     RobotMotorCommand& command=controlSimulators[i].command;
     controlSimulators[i].Init(robot,odesim.robot(i),(i < robotControllers.size() ? robotControllers[i].get() : NULL));
 
@@ -264,7 +243,7 @@ void WorldSimulation::Init(RobotWorld* _world)
 
       //printf("Setting up servo for joint %d\n",j);
       //setup actuator parameters
-      if(robot->drivers[j].type == RobotJointDriver::Normal) {
+      if(robot->drivers[j].type == RobotModelDriver::Normal) {
 	int k=robot->drivers[j].linkIndices[0];
   command.actuators[j].qmin = robot->qMin(k);
   command.actuators[j].qmax = robot->qMax(k);
@@ -273,7 +252,7 @@ void WorldSimulation::Init(RobotWorld* _world)
 	  //ODE has problems with joint angles > 2pi
 	  if(!IsFinite(robot->qMax(k)-robot->qMin(k)) || robot->qMax(k)-robot->qMin(k) >= TwoPi) {
 	    command.actuators[j].measureAngleAbsolute=false;
-	    LOG4CXX_INFO(GET_LOGGER(WorldSimulator),"WorldSimulation: Link "<<k<<" ("<< robot->LinkName(k).c_str()<<") can make complete turn, using relative encoding");
+	    LOG4CXX_INFO(GET_LOGGER(WorldSimulator),"Simulator: Link "<<k<<" ("<< robot->LinkName(k).c_str()<<") can make complete turn, using relative encoding");
     }
 	}
       }
@@ -287,7 +266,7 @@ void WorldSimulation::Init(RobotWorld* _world)
   LOG4CXX_INFO(GET_LOGGER(WorldSimulator),"Done.");
 }
 
-void WorldSimulation::OnAddModel()
+void Simulator::OnAddModel()
 {
   for(size_t i=odesim.numTerrains();i<world->terrains.size();i++)
     odesim.AddTerrain(*world->terrains[i]);
@@ -298,7 +277,7 @@ void WorldSimulation::OnAddModel()
 
     //set up control simulator
     controlSimulators.resize(i+1);
-    Robot* robot=world->robots[i].get();
+    RobotModel* robot=world->robots[i].get();
     RobotMotorCommand& command=controlSimulators[i].command;
     controlSimulators[i].Init(robot,odesim.robot(i),(i < robotControllers.size() ? robotControllers[i].get() : NULL));
 
@@ -315,13 +294,13 @@ void WorldSimulation::OnAddModel()
 
       //printf("Setting up servo for joint %d\n",j);
       //setup actuator parameters
-      if(robot->drivers[j].type == RobotJointDriver::Normal) {
+      if(robot->drivers[j].type == RobotModelDriver::Normal) {
 	int k=robot->drivers[j].linkIndices[0];
 	if(robot->links[k].type == RobotLink3D::Revolute) {
 	  //ODE has problems with joint angles > 2pi
 	  if(robot->qMax(k)-robot->qMin(k) >= TwoPi) {
 	    command.actuators[j].measureAngleAbsolute=false;
-	    LOG4CXX_INFO(GET_LOGGER(WorldSimulator),"WorldSimulation: Link "<<k<<" ("<<robot->LinkName(k).c_str()<<") can make complete turn, using relative encoding");
+	    LOG4CXX_INFO(GET_LOGGER(WorldSimulator),"Simulator: Link "<<k<<" ("<<robot->LinkName(k).c_str()<<") can make complete turn, using relative encoding");
     }
 	}
       }
@@ -334,7 +313,7 @@ void WorldSimulation::OnAddModel()
   }
 }
 
-void WorldSimulation::SetController(int index,shared_ptr<RobotController> c)
+void Simulator::SetController(int index,shared_ptr<RobotController> c)
 {
   if(robotControllers.empty()) {
     robotControllers.resize(world->robots.size());
@@ -348,7 +327,7 @@ void WorldSimulation::SetController(int index,shared_ptr<RobotController> c)
   }
 }
 
-void WorldSimulation::Advance(Real dt)
+void Simulator::Advance(Real dt)
 {
   worstStatus = ODESimulator::StatusNormal;
   if(fakeSimulation) {
@@ -382,7 +361,7 @@ void WorldSimulation::Advance(Real dt)
 
     //update viscous friction approximation as dry friction from current velocity
     for(size_t i=0;i<controlSimulators.size();i++) {
-      Robot* robot=world->robots[i].get();
+      RobotModel* robot=world->robots[i].get();
       for(size_t j=0;j<robot->drivers.size();j++) {
 	//setup viscous friction
 	if(robot->drivers[j].viscousFriction != 0) {
@@ -456,7 +435,7 @@ void WorldSimulation::Advance(Real dt)
 
   //kill any autokill hooks at end of timestep
   bool anyKilled = false;
-  vector<shared_ptr<WorldSimulationHook> > newhooks;
+  vector<shared_ptr<SimulatorHook> > newhooks;
   for(size_t i=0;i<hooks.size();i++) {
     if(hooks[i]->autokill) {
       if(!anyKilled) 
@@ -478,10 +457,10 @@ void WorldSimulation::Advance(Real dt)
     }
   }
   */
-  //printf("WorldSimulation: Sim step %gs, real step %gs\n",dt,timer.ElapsedTime());
+  //printf("Simulator: Sim step %gs, real step %gs\n",dt,timer.ElapsedTime());
 }
 
-void WorldSimulation::AdvanceFake(Real dt)
+void Simulator::AdvanceFake(Real dt)
 {
   bool oldFake = fakeSimulation;
   fakeSimulation = true;
@@ -495,7 +474,7 @@ void WorldSimulation::AdvanceFake(Real dt)
 
   //kill any autokill hooks at end of timestep
   bool anyKilled = false;
-  vector<shared_ptr<WorldSimulationHook> > newhooks;
+  vector<shared_ptr<SimulatorHook> > newhooks;
   for(size_t i=0;i<hooks.size();i++) {
     if(hooks[i]->autokill) {
       if(!anyKilled) 
@@ -509,7 +488,7 @@ void WorldSimulation::AdvanceFake(Real dt)
     swap(hooks,newhooks);
 }
 
-void WorldSimulation::UpdateModel()
+void Simulator::UpdateModel()
 {
   if(fakeSimulation) {
     for(size_t i=0;i<world->robots.size();i++) {
@@ -535,7 +514,7 @@ void WorldSimulation::UpdateModel()
   }
 }
 
-void WorldSimulation::UpdateRobot(int i)
+void Simulator::UpdateRobot(int i)
 {
   if(fakeSimulation) {
     Config q;
@@ -551,7 +530,7 @@ void WorldSimulation::UpdateRobot(int i)
   }
 }
 
-bool WorldSimulation::ReadState(File& f)
+bool Simulator::ReadState(File& f)
 {
 #if TEST_READ_WRITE
   TestReadWriteState(odesim,"odesim");
@@ -563,26 +542,36 @@ bool WorldSimulation::ReadState(File& f)
   //TODO: read this too?
   worstStatus = ODESimulator::StatusNormal;
 
-  READ_FILE_DEBUG(f,time,"WorldSimulation::ReadState");
+  READ_FILE_DEBUG(f,time,"Simulator::ReadState");
   if(!odesim.ReadState(f)) {
-    LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"WorldSimulation::ReadState: ODE sim failed to read");
+    LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"Simulator::ReadState: ODE sim failed to read");
     return false;
   }
   //controlSimulators will read the robotControllers' states
   for(size_t i=0;i<controlSimulators.size();i++) {
-    if(!controlSimulators[i].ReadState(f)) {
-      LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"WorldSimulation::ReadState: Control simulator "<<i<<" failed to read");
+    File cfile;
+    if(!ReadFile(f,cfile)) {
+      LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"Simulator::ReadState: Control simulator "<<i<<" sub-file failed to read");
+      return false;
+    }
+    if(!controlSimulators[i].ReadState(cfile)) {
+      LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"Simulator::ReadState: Control simulator "<<i<<" failed to read");
       return false;
     }
   }
   for(size_t i=0;i<hooks.size();i++) {
-    if(!hooks[i]->ReadState(f)) {
-      LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"WorldSimulation::ReadState: Hook "<<i<<" failed to read");
+    File cfile;
+    if(!ReadFile(f,cfile)) {
+      LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"Simulator::ReadState: Hook "<<i<<" sub-file failed to read");
+      return false;
+    }
+    if(!hooks[i]->ReadState(cfile)) {
+      LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"Simulator::ReadState: Hook "<<i<<" failed to read");
       return false;
     }
   }
   int n;
-  READ_FILE_DEBUG(f,n,"WorldSimulation::ReadState: reading number of contactFeadback items");
+  READ_FILE_DEBUG(f,n,"Simulator::ReadState: reading number of contactFeadback items");
   if(n < 0) {
     LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"Invalid number "<<n<<" of contactFeedback items");
     return false;
@@ -609,19 +598,26 @@ bool WorldSimulation::ReadState(File& f)
   return true;
 }
 
-bool WorldSimulation::WriteState(File& f) const
+bool Simulator::WriteState(File& f) const
 {
   if(!WriteFile(f,time)) return false;
   if(!odesim.WriteState(f)) return false;
   //controlSimulators will write the robotControllers' states
   for(size_t i=0;i<controlSimulators.size();i++) {
-    if(!controlSimulators[i].WriteState(f)) return false;
-  }
-  for(size_t i=0;i<hooks.size();i++) {
-    if(!hooks[i]->WriteState(f)) {
-      LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"WorldSimulation::ReadState: Hook "<<i<<" failed to write");
+    File cfile; cfile.OpenData();
+    if(!controlSimulators[i].WriteState(cfile)) {
+      LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"Simulator::ReadState: Control simulator "<<i<<" failed to write");
       return false;
     }
+    if(!WriteFile(f,cfile)) return false;
+  }
+  for(size_t i=0;i<hooks.size();i++) {
+    File cfile;cfile.OpenData();
+    if(!hooks[i]->WriteState(cfile)) {
+      LOG4CXX_ERROR(GET_LOGGER(WorldSimulator),"Simulator::ReadState: Hook "<<i<<" failed to write");
+      return false;
+    }
+    if(!WriteFile(f,cfile)) return false;
   }
   if(!WriteFile(f,int(contactFeedback.size()))) return false;
   for(ContactFeedbackMap::const_iterator i=contactFeedback.begin();i!=contactFeedback.end();i++) {
@@ -632,14 +628,14 @@ bool WorldSimulation::WriteState(File& f) const
   return true;
 }
 
-bool WorldSimulation::ReadState(const string& s)
+bool Simulator::ReadState(const string& s)
 {
   File f;
   if(!f.OpenData((void*)s.c_str(),s.length(),FILEREAD)) return false;
   return ReadState(f);
 }
 
-bool WorldSimulation::WriteState(string& s) const
+bool Simulator::WriteState(string& s) const
 {
   File f;
   if(!f.OpenData()) return false;
@@ -654,7 +650,7 @@ bool WorldSimulation::WriteState(string& s) const
   return true;
 }
 
-void WorldSimulation::EnableContactFeedback(int aid,int bid,bool accum,bool accumFull)
+void Simulator::EnableContactFeedback(int aid,int bid,bool accum,bool accumFull)
 {
   ContactFeedbackInfo f;
   f.accum = accum;
@@ -667,7 +663,7 @@ void WorldSimulation::EnableContactFeedback(int aid,int bid,bool accum,bool accu
   odesim.EnableContactFeedback(index.first,index.second);
 }
 
-ContactFeedbackInfo* WorldSimulation::GetContactFeedback(int aid,int bid)
+ContactFeedbackInfo* Simulator::GetContactFeedback(int aid,int bid)
 {
   pair<ODEObjectID,ODEObjectID> index(WorldToODEID(aid),WorldToODEID(bid));
   if(index.second < index.first) 
@@ -676,14 +672,14 @@ ContactFeedbackInfo* WorldSimulation::GetContactFeedback(int aid,int bid)
   return &contactFeedback[index];
 }
 
-ODEContactList* WorldSimulation::GetContactList(int aid,int bid)
+ODEContactList* Simulator::GetContactList(int aid,int bid)
 {
   ODEObjectID a=WorldToODEID(aid);
   ODEObjectID b=WorldToODEID(bid);
   return odesim.GetContactFeedback(a,b);
 }
 
-bool WorldSimulation::InContact(int aid,int bid)
+bool Simulator::InContact(int aid,int bid)
 {
   //try finding this in the feedback map
   if(bid < 0) { 
@@ -709,7 +705,7 @@ bool WorldSimulation::InContact(int aid,int bid)
   }
 }
 
-bool WorldSimulation::HadContact(int aid,int bid)
+bool Simulator::HadContact(int aid,int bid)
 {
   if(bid < 0) { 
     ODEObjectID a=WorldToODEID(aid);
@@ -727,7 +723,7 @@ bool WorldSimulation::HadContact(int aid,int bid)
   }
 }
 
-bool WorldSimulation::HadSeparation(int aid,int bid)
+bool Simulator::HadSeparation(int aid,int bid)
 {
   if(bid < 0) { 
     ODEObjectID a=WorldToODEID(aid);
@@ -746,7 +742,7 @@ bool WorldSimulation::HadSeparation(int aid,int bid)
 }
 
 
-bool WorldSimulation::HadPenetration(int aid,int bid)
+bool Simulator::HadPenetration(int aid,int bid)
 {
   if(aid < 0) {
     for(ContactFeedbackMap::iterator i=contactFeedback.begin();i!=contactFeedback.end();i++) {
@@ -770,7 +766,7 @@ bool WorldSimulation::HadPenetration(int aid,int bid)
   }
 }
 
-Vector3 WorldSimulation::ContactForce(int aid,int bid)
+Vector3 Simulator::ContactForce(int aid,int bid)
 {
   ODEObjectID a=WorldToODEID(aid);
   if(bid < 0) {
@@ -805,7 +801,7 @@ Vector3 WorldSimulation::ContactForce(int aid,int bid)
   }
 }
 
-Vector3 WorldSimulation::MeanContactForce(int aid,int bid)
+Vector3 Simulator::MeanContactForce(int aid,int bid)
 {
   ODEObjectID a=WorldToODEID(aid);
   if(bid < 0) {
@@ -826,7 +822,7 @@ Vector3 WorldSimulation::MeanContactForce(int aid,int bid)
   }
 }
 
-Vector3 WorldSimulation::ContactTorque(int aid,int bid)
+Vector3 Simulator::ContactTorque(int aid,int bid)
 {
   ODEObjectID a=WorldToODEID(aid);
   if(bid < 0) {
@@ -861,7 +857,7 @@ Vector3 WorldSimulation::ContactTorque(int aid,int bid)
   }
 }
 
-Vector3 WorldSimulation::MeanContactTorque(int aid,int bid)
+Vector3 Simulator::MeanContactTorque(int aid,int bid)
 {
   ODEObjectID a=WorldToODEID(aid);
   if(bid < 0) {
@@ -884,7 +880,7 @@ Vector3 WorldSimulation::MeanContactTorque(int aid,int bid)
 
 
 
-int WorldSimulation::ODEToWorldID(const ODEObjectID& odeid) const
+int Simulator::ODEToWorldID(const ODEObjectID& odeid) const
 {
   switch(odeid.type) {
   case 0:  //terrain
@@ -902,7 +898,7 @@ int WorldSimulation::ODEToWorldID(const ODEObjectID& odeid) const
   }
 }
 
-ODEObjectID WorldSimulation::WorldToODEID(int id) const
+ODEObjectID Simulator::WorldToODEID(int id) const
 {
   int i=world->IsRigidObject(id);
   if(i>=0) return ODEObjectID(2,i);
@@ -1066,3 +1062,5 @@ bool JointSpringHook::WriteState(File& f) const
   FatalError("Not implemented yet");
   return false;
 }
+
+} //namespace Klampt

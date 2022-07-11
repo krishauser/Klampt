@@ -2697,46 +2697,46 @@ SWIGINTERN PyObject *SWIG_PyStaticMethod_New(PyObject *SWIGUNUSEDPARM(self), PyO
 #define SWIGTYPE_p_BoxPoser swig_types[2]
 #define SWIGTYPE_p_ContactParameters swig_types[3]
 #define SWIGTYPE_p_ContactQueryResult swig_types[4]
-#define SWIGTYPE_p_ControlledRobotSimulator swig_types[5]
-#define SWIGTYPE_p_ConvexHull swig_types[6]
-#define SWIGTYPE_p_DistanceQueryResult swig_types[7]
-#define SWIGTYPE_p_DistanceQuerySettings swig_types[8]
-#define SWIGTYPE_p_GeneralizedIKObjective swig_types[9]
-#define SWIGTYPE_p_GeneralizedIKSolver swig_types[10]
-#define SWIGTYPE_p_GeometricPrimitive swig_types[11]
-#define SWIGTYPE_p_Geometry3D swig_types[12]
-#define SWIGTYPE_p_IKGoal swig_types[13]
-#define SWIGTYPE_p_IKObjective swig_types[14]
-#define SWIGTYPE_p_IKSolver swig_types[15]
-#define SWIGTYPE_p_Mass swig_types[16]
-#define SWIGTYPE_p_ODEGeometry swig_types[17]
-#define SWIGTYPE_p_ObjectPoser swig_types[18]
-#define SWIGTYPE_p_PointCloud swig_types[19]
-#define SWIGTYPE_p_PointPoser swig_types[20]
-#define SWIGTYPE_p_RigidObject swig_types[21]
-#define SWIGTYPE_p_RigidObjectModel swig_types[22]
-#define SWIGTYPE_p_Robot swig_types[23]
-#define SWIGTYPE_p_RobotModel swig_types[24]
-#define SWIGTYPE_p_RobotModelDriver swig_types[25]
-#define SWIGTYPE_p_RobotModelLink swig_types[26]
-#define SWIGTYPE_p_RobotPoser swig_types[27]
-#define SWIGTYPE_p_SensorBase swig_types[28]
-#define SWIGTYPE_p_SimBody swig_types[29]
-#define SWIGTYPE_p_SimJoint swig_types[30]
-#define SWIGTYPE_p_SimRobotController swig_types[31]
-#define SWIGTYPE_p_SimRobotSensor swig_types[32]
-#define SWIGTYPE_p_Simulator swig_types[33]
-#define SWIGTYPE_p_SpherePoser swig_types[34]
-#define SWIGTYPE_p_Terrain swig_types[35]
-#define SWIGTYPE_p_TerrainModel swig_types[36]
-#define SWIGTYPE_p_TransformPoser swig_types[37]
-#define SWIGTYPE_p_TriangleMesh swig_types[38]
-#define SWIGTYPE_p_Viewport swig_types[39]
-#define SWIGTYPE_p_VolumeGrid swig_types[40]
-#define SWIGTYPE_p_Widget swig_types[41]
-#define SWIGTYPE_p_WidgetSet swig_types[42]
-#define SWIGTYPE_p_WorldModel swig_types[43]
-#define SWIGTYPE_p_WorldSimulation swig_types[44]
+#define SWIGTYPE_p_ConvexHull swig_types[5]
+#define SWIGTYPE_p_DistanceQueryResult swig_types[6]
+#define SWIGTYPE_p_DistanceQuerySettings swig_types[7]
+#define SWIGTYPE_p_GeneralizedIKObjective swig_types[8]
+#define SWIGTYPE_p_GeneralizedIKSolver swig_types[9]
+#define SWIGTYPE_p_GeometricPrimitive swig_types[10]
+#define SWIGTYPE_p_Geometry3D swig_types[11]
+#define SWIGTYPE_p_IKGoal swig_types[12]
+#define SWIGTYPE_p_IKObjective swig_types[13]
+#define SWIGTYPE_p_IKSolver swig_types[14]
+#define SWIGTYPE_p_Klampt__ODEGeometry swig_types[15]
+#define SWIGTYPE_p_Klampt__RigidObjectModel swig_types[16]
+#define SWIGTYPE_p_Klampt__RobotModel swig_types[17]
+#define SWIGTYPE_p_Klampt__SensorBase swig_types[18]
+#define SWIGTYPE_p_Klampt__SimRobotController swig_types[19]
+#define SWIGTYPE_p_Klampt__Simulator swig_types[20]
+#define SWIGTYPE_p_Klampt__TerrainModel swig_types[21]
+#define SWIGTYPE_p_Mass swig_types[22]
+#define SWIGTYPE_p_ObjectPoser swig_types[23]
+#define SWIGTYPE_p_PointCloud swig_types[24]
+#define SWIGTYPE_p_PointPoser swig_types[25]
+#define SWIGTYPE_p_RigidObjectModel swig_types[26]
+#define SWIGTYPE_p_RobotModel swig_types[27]
+#define SWIGTYPE_p_RobotModelDriver swig_types[28]
+#define SWIGTYPE_p_RobotModelLink swig_types[29]
+#define SWIGTYPE_p_RobotPoser swig_types[30]
+#define SWIGTYPE_p_SimBody swig_types[31]
+#define SWIGTYPE_p_SimJoint swig_types[32]
+#define SWIGTYPE_p_SimRobotController swig_types[33]
+#define SWIGTYPE_p_SimRobotSensor swig_types[34]
+#define SWIGTYPE_p_Simulator swig_types[35]
+#define SWIGTYPE_p_SpherePoser swig_types[36]
+#define SWIGTYPE_p_TerrainModel swig_types[37]
+#define SWIGTYPE_p_TransformPoser swig_types[38]
+#define SWIGTYPE_p_TriangleMesh swig_types[39]
+#define SWIGTYPE_p_Viewport swig_types[40]
+#define SWIGTYPE_p_VolumeGrid swig_types[41]
+#define SWIGTYPE_p_Widget swig_types[42]
+#define SWIGTYPE_p_WidgetSet swig_types[43]
+#define SWIGTYPE_p_WorldModel swig_types[44]
 #define SWIGTYPE_p__object swig_types[45]
 #define SWIGTYPE_p_allocator_type swig_types[46]
 #define SWIGTYPE_p_char swig_types[47]
@@ -2752,29 +2752,33 @@ SWIGINTERN PyObject *SWIG_PyStaticMethod_New(PyObject *SWIGUNUSEDPARM(self), PyO
 #define SWIGTYPE_p_key_type swig_types[57]
 #define SWIGTYPE_p_mapped_type swig_types[58]
 #define SWIGTYPE_p_p__object swig_types[59]
-#define SWIGTYPE_p_size_type swig_types[60]
-#define SWIGTYPE_p_std__allocatorT_double_t swig_types[61]
-#define SWIGTYPE_p_std__allocatorT_float_t swig_types[62]
-#define SWIGTYPE_p_std__allocatorT_int_t swig_types[63]
-#define SWIGTYPE_p_std__allocatorT_std__pairT_std__string_const_std__string_t_t swig_types[64]
-#define SWIGTYPE_p_std__allocatorT_std__string_t swig_types[65]
-#define SWIGTYPE_p_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t swig_types[66]
-#define SWIGTYPE_p_std__invalid_argument swig_types[67]
-#define SWIGTYPE_p_std__lessT_std__string_t swig_types[68]
-#define SWIGTYPE_p_std__mapT_std__string_std__string_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_std__string_t_t_t swig_types[69]
-#define SWIGTYPE_p_std__vectorT_GeneralizedIKObjective_std__allocatorT_GeneralizedIKObjective_t_t swig_types[70]
-#define SWIGTYPE_p_std__vectorT_IKObjective_std__allocatorT_IKObjective_t_t swig_types[71]
-#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t swig_types[72]
-#define SWIGTYPE_p_std__vectorT_float_std__allocatorT_float_t_t swig_types[73]
-#define SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t swig_types[74]
-#define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t swig_types[75]
-#define SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t swig_types[76]
-#define SWIGTYPE_p_std__vectorT_unsigned_char_std__allocatorT_unsigned_char_t_t swig_types[77]
-#define SWIGTYPE_p_swig__SwigPyIterator swig_types[78]
-#define SWIGTYPE_p_value_type swig_types[79]
-#define SWIGTYPE_p_void swig_types[80]
-static swig_type_info *swig_types[82];
-static swig_module_info swig_module = {swig_types, 81, 0, 0, 0, 0};
+#define SWIGTYPE_p_p_double swig_types[60]
+#define SWIGTYPE_p_p_doubleArray swig_types[61]
+#define SWIGTYPE_p_p_int swig_types[62]
+#define SWIGTYPE_p_p_intArray swig_types[63]
+#define SWIGTYPE_p_size_type swig_types[64]
+#define SWIGTYPE_p_std__allocatorT_double_t swig_types[65]
+#define SWIGTYPE_p_std__allocatorT_float_t swig_types[66]
+#define SWIGTYPE_p_std__allocatorT_int_t swig_types[67]
+#define SWIGTYPE_p_std__allocatorT_std__pairT_std__string_const_std__string_t_t swig_types[68]
+#define SWIGTYPE_p_std__allocatorT_std__string_t swig_types[69]
+#define SWIGTYPE_p_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t swig_types[70]
+#define SWIGTYPE_p_std__invalid_argument swig_types[71]
+#define SWIGTYPE_p_std__lessT_std__string_t swig_types[72]
+#define SWIGTYPE_p_std__mapT_std__string_std__string_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_std__string_t_t_t swig_types[73]
+#define SWIGTYPE_p_std__vectorT_GeneralizedIKObjective_std__allocatorT_GeneralizedIKObjective_t_t swig_types[74]
+#define SWIGTYPE_p_std__vectorT_IKObjective_std__allocatorT_IKObjective_t_t swig_types[75]
+#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t swig_types[76]
+#define SWIGTYPE_p_std__vectorT_float_std__allocatorT_float_t_t swig_types[77]
+#define SWIGTYPE_p_std__vectorT_int_std__allocatorT_int_t_t swig_types[78]
+#define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t swig_types[79]
+#define SWIGTYPE_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t swig_types[80]
+#define SWIGTYPE_p_swig__SwigPyIterator swig_types[81]
+#define SWIGTYPE_p_unsigned_int swig_types[82]
+#define SWIGTYPE_p_value_type swig_types[83]
+#define SWIGTYPE_p_void swig_types[84]
+static swig_type_info *swig_types[86];
+static swig_module_info swig_module = {swig_types, 85, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -2878,6 +2882,7 @@ namespace swig {
 }
 
 
+  #define SWIG_FILE_WITH_INIT
 	#include <exception>
 	#include <vector>
 	#include "pyerr.h"
@@ -3406,6 +3411,17 @@ SWIG_AsVal_ptrdiff_t (PyObject * obj, ptrdiff_t *val)
 
 
 #include <algorithm>
+
+
+#ifndef SWIG_FILE_WITH_INIT
+#define NO_IMPORT_ARRAY
+#endif
+#include "stdio.h"
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+#include <numpy/arrayobject.h>
+
+
+#include <complex> 
 
 
 typedef double doubleArray;
@@ -6147,13 +6163,487 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
   for (i=0; i < mat.size(); i++) {
       PyObject* resi = convert_darray_obj(&(mat[i][0]),mat[i].size());
       if(!resi) {
-	Py_XDECREF(res);
-	return NULL;
+  Py_XDECREF(res);
+  return NULL;
       }
       PyList_SetItem(res,i,resi);
   }
   return res;
 }
+
+
+
+
+
+#if NPY_API_VERSION < 0x00000007
+#define NPY_ARRAY_DEFAULT NPY_DEFAULT
+#define NPY_ARRAY_FARRAY  NPY_FARRAY
+#define NPY_FORTRANORDER  NPY_FORTRAN
+#endif
+
+
+/* Macros to extract array attributes.
+ */
+#if NPY_API_VERSION < 0x00000007
+#define is_array(a)            ((a) && PyArray_Check((PyArrayObject*)a))
+#define array_type(a)          (int)(PyArray_TYPE((PyArrayObject*)a))
+#define array_numdims(a)       (((PyArrayObject*)a)->nd)
+#define array_dimensions(a)    (((PyArrayObject*)a)->dimensions)
+#define array_size(a,i)        (((PyArrayObject*)a)->dimensions[i])
+#define array_strides(a)       (((PyArrayObject*)a)->strides)
+#define array_stride(a,i)      (((PyArrayObject*)a)->strides[i])
+#define array_data(a)          (((PyArrayObject*)a)->data)
+#define array_descr(a)         (((PyArrayObject*)a)->descr)
+#define array_flags(a)         (((PyArrayObject*)a)->flags)
+#define array_clearflags(a,f)  (((PyArrayObject*)a)->flags) &= ~f
+#define array_enableflags(a,f) (((PyArrayObject*)a)->flags) = f
+#define array_is_fortran(a)    (PyArray_ISFORTRAN((PyArrayObject*)a))
+#else
+#define is_array(a)            ((a) && PyArray_Check(a))
+#define array_type(a)          PyArray_TYPE((PyArrayObject*)a)
+#define array_numdims(a)       PyArray_NDIM((PyArrayObject*)a)
+#define array_dimensions(a)    PyArray_DIMS((PyArrayObject*)a)
+#define array_strides(a)       PyArray_STRIDES((PyArrayObject*)a)
+#define array_stride(a,i)      PyArray_STRIDE((PyArrayObject*)a,i)
+#define array_size(a,i)        PyArray_DIM((PyArrayObject*)a,i)
+#define array_data(a)          PyArray_DATA((PyArrayObject*)a)
+#define array_descr(a)         PyArray_DESCR((PyArrayObject*)a)
+#define array_flags(a)         PyArray_FLAGS((PyArrayObject*)a)
+#define array_enableflags(a,f) PyArray_ENABLEFLAGS((PyArrayObject*)a,f)
+#define array_clearflags(a,f)  PyArray_CLEARFLAGS((PyArrayObject*)a,f)
+#define array_is_fortran(a)    (PyArray_IS_F_CONTIGUOUS((PyArrayObject*)a))
+#endif
+#define array_is_contiguous(a) (PyArray_ISCONTIGUOUS((PyArrayObject*)a))
+#define array_is_native(a)     (PyArray_ISNOTSWAPPED((PyArrayObject*)a))
+
+
+  /* Given a PyObject, return a string describing its type.
+   */
+  const char* pytype_string(PyObject* py_obj)
+  {
+    if (py_obj == NULL          ) return "C NULL value";
+    if (py_obj == Py_None       ) return "Python None" ;
+    if (PyCallable_Check(py_obj)) return "callable"    ;
+    if (PyBytes_Check(   py_obj)) return "string"      ;
+    if (PyLong_Check(    py_obj)) return "int"         ;
+    if (PyFloat_Check(   py_obj)) return "float"       ;
+    if (PyDict_Check(    py_obj)) return "dict"        ;
+    if (PyList_Check(    py_obj)) return "list"        ;
+    if (PyTuple_Check(   py_obj)) return "tuple"       ;
+
+    return "unknown type";
+  }
+
+  /* Given a NumPy typecode, return a string describing the type.
+   */
+  const char* typecode_string(int typecode)
+  {
+    static const char* type_names[25] = {"bool",
+                                         "byte",
+                                         "unsigned byte",
+                                         "short",
+                                         "unsigned short",
+                                         "int",
+                                         "unsigned int",
+                                         "long",
+                                         "unsigned long",
+                                         "long long",
+                                         "unsigned long long",
+                                         "float",
+                                         "double",
+                                         "long double",
+                                         "complex float",
+                                         "complex double",
+                                         "complex long double",
+                                         "object",
+                                         "string",
+                                         "unicode",
+                                         "void",
+                                         "ntypes",
+                                         "notype",
+                                         "char",
+                                         "unknown"};
+    return typecode < 24 ? type_names[typecode] : type_names[24];
+  }
+
+  /* Make sure input has correct numpy type.  This now just calls
+     PyArray_EquivTypenums().
+   */
+  int type_match(int actual_type,
+                 int desired_type)
+  {
+    return PyArray_EquivTypenums(actual_type, desired_type);
+  }
+
+#ifdef SWIGPY_USE_CAPSULE
+  void free_cap(PyObject * cap)
+  {
+    void* array = (void*) PyCapsule_GetPointer(cap,SWIGPY_CAPSULE_NAME);
+    if (array != NULL) free(array);
+  }
+#endif
+
+
+
+
+  /* Given a PyObject pointer, cast it to a PyArrayObject pointer if
+   * legal.  If not, set the python error string appropriately and
+   * return NULL.
+   */
+  PyArrayObject* obj_to_array_no_conversion(PyObject* input,
+                                            int        typecode)
+  {
+    PyArrayObject* ary = NULL;
+    if (is_array(input) && (typecode == NPY_NOTYPE ||
+                            PyArray_EquivTypenums(array_type(input), typecode)))
+    {
+      ary = (PyArrayObject*) input;
+    }
+    else if is_array(input)
+    {
+      const char* desired_type = typecode_string(typecode);
+      const char* actual_type  = typecode_string(array_type(input));
+      PyErr_Format(PyExc_TypeError,
+                   "Array of type '%s' required.  Array of type '%s' given",
+                   desired_type, actual_type);
+      ary = NULL;
+    }
+    else
+    {
+      const char* desired_type = typecode_string(typecode);
+      const char* actual_type  = pytype_string(input);
+      PyErr_Format(PyExc_TypeError,
+                   "Array of type '%s' required.  A '%s' was given",
+                   desired_type,
+                   actual_type);
+      ary = NULL;
+    }
+    return ary;
+  }
+
+  /* Convert the given PyObject to a NumPy array with the given
+   * typecode.  On success, return a valid PyArrayObject* with the
+   * correct type.  On failure, the python error string will be set and
+   * the routine returns NULL.
+   */
+  PyArrayObject* obj_to_array_allow_conversion(PyObject* input,
+                                               int       typecode,
+                                               int*      is_new_object)
+  {
+    PyArrayObject* ary = NULL;
+    PyObject*      py_obj;
+    if (is_array(input) && (typecode == NPY_NOTYPE ||
+                            PyArray_EquivTypenums(array_type(input),typecode)))
+    {
+      ary = (PyArrayObject*) input;
+      *is_new_object = 0;
+    }
+    else
+    {
+      py_obj = PyArray_FROMANY(input, typecode, 0, 0, NPY_ARRAY_DEFAULT);
+      /* If NULL, PyArray_FromObject will have set python error value.*/
+      ary = (PyArrayObject*) py_obj;
+      *is_new_object = 1;
+    }
+    return ary;
+  }
+
+  /* Given a PyArrayObject, check to see if it is contiguous.  If so,
+   * return the input pointer and flag it as not a new object.  If it is
+   * not contiguous, create a new PyArrayObject using the original data,
+   * flag it as a new object and return the pointer.
+   */
+  PyArrayObject* make_contiguous(PyArrayObject* ary,
+                                 int*           is_new_object,
+                                 int            min_dims,
+                                 int            max_dims)
+  {
+    PyArrayObject* result;
+    if (array_is_contiguous(ary))
+    {
+      result = ary;
+      *is_new_object = 0;
+    }
+    else
+    {
+      result = (PyArrayObject*) PyArray_ContiguousFromObject((PyObject*)ary,
+                                                              array_type(ary),
+                                                              min_dims,
+                                                              max_dims);
+      *is_new_object = 1;
+    }
+    return result;
+  }
+
+  /* Given a PyArrayObject, check to see if it is Fortran-contiguous.
+   * If so, return the input pointer, but do not flag it as not a new
+   * object.  If it is not Fortran-contiguous, create a new
+   * PyArrayObject using the original data, flag it as a new object
+   * and return the pointer.
+   */
+  PyArrayObject* make_fortran(PyArrayObject* ary,
+                              int*           is_new_object)
+  {
+    PyArrayObject* result;
+    if (array_is_fortran(ary))
+    {
+      result = ary;
+      *is_new_object = 0;
+    }
+    else
+    {
+      Py_INCREF(array_descr(ary));
+      result = (PyArrayObject*) PyArray_FromArray(ary,
+                                                  array_descr(ary),
+#if NPY_API_VERSION < 0x00000007
+                                                  NPY_FORTRANORDER);
+#else
+                                                  NPY_ARRAY_F_CONTIGUOUS);
+#endif
+      *is_new_object = 1;
+    }
+    return result;
+  }
+
+  /* Convert a given PyObject to a contiguous PyArrayObject of the
+   * specified type.  If the input object is not a contiguous
+   * PyArrayObject, a new one will be created and the new object flag
+   * will be set.
+   */
+  PyArrayObject* obj_to_array_contiguous_allow_conversion(PyObject* input,
+                                                          int       typecode,
+                                                          int*      is_new_object)
+  {
+    int is_new1 = 0;
+    int is_new2 = 0;
+    PyArrayObject* ary2;
+    PyArrayObject* ary1 = obj_to_array_allow_conversion(input,
+                                                        typecode,
+                                                        &is_new1);
+    if (ary1)
+    {
+      ary2 = make_contiguous(ary1, &is_new2, 0, 0);
+      if ( is_new1 && is_new2)
+      {
+        Py_DECREF(ary1);
+      }
+      ary1 = ary2;
+    }
+    *is_new_object = is_new1 || is_new2;
+    return ary1;
+  }
+
+  /* Convert a given PyObject to a Fortran-ordered PyArrayObject of the
+   * specified type.  If the input object is not a Fortran-ordered
+   * PyArrayObject, a new one will be created and the new object flag
+   * will be set.
+   */
+  PyArrayObject* obj_to_array_fortran_allow_conversion(PyObject* input,
+                                                       int       typecode,
+                                                       int*      is_new_object)
+  {
+    int is_new1 = 0;
+    int is_new2 = 0;
+    PyArrayObject* ary2;
+    PyArrayObject* ary1 = obj_to_array_allow_conversion(input,
+                                                        typecode,
+                                                        &is_new1);
+    if (ary1)
+    {
+      ary2 = make_fortran(ary1, &is_new2);
+      if (is_new1 && is_new2)
+      {
+        Py_DECREF(ary1);
+      }
+      ary1 = ary2;
+    }
+    *is_new_object = is_new1 || is_new2;
+    return ary1;
+  }
+
+
+  /* Test whether a python object is contiguous.  If array is
+   * contiguous, return 1.  Otherwise, set the python error string and
+   * return 0.
+   */
+  int require_contiguous(PyArrayObject* ary)
+  {
+    int contiguous = 1;
+    if (!array_is_contiguous(ary))
+    {
+      PyErr_SetString(PyExc_TypeError,
+                      "Array must be contiguous.  A non-contiguous array was given");
+      contiguous = 0;
+    }
+    return contiguous;
+  }
+
+  /* Test whether a python object is (C_ or F_) contiguous.  If array is
+   * contiguous, return 1.  Otherwise, set the python error string and
+   * return 0.
+   */
+  int require_c_or_f_contiguous(PyArrayObject* ary)
+  {
+    int contiguous = 1;
+    if (!(array_is_contiguous(ary) || array_is_fortran(ary)))
+    {
+      PyErr_SetString(PyExc_TypeError,
+                      "Array must be contiguous (C_ or F_).  A non-contiguous array was given");
+      contiguous = 0;
+    }
+    return contiguous;
+  }
+
+  /* Require that a numpy array is not byte-swapped.  If the array is
+   * not byte-swapped, return 1.  Otherwise, set the python error string
+   * and return 0.
+   */
+  int require_native(PyArrayObject* ary)
+  {
+    int native = 1;
+    if (!array_is_native(ary))
+    {
+      PyErr_SetString(PyExc_TypeError,
+                      "Array must have native byteorder.  "
+                      "A byte-swapped array was given");
+      native = 0;
+    }
+    return native;
+  }
+
+  /* Require the given PyArrayObject to have a specified number of
+   * dimensions.  If the array has the specified number of dimensions,
+   * return 1.  Otherwise, set the python error string and return 0.
+   */
+  int require_dimensions(PyArrayObject* ary,
+                         int            exact_dimensions)
+  {
+    int success = 1;
+    if (array_numdims(ary) != exact_dimensions)
+    {
+      PyErr_Format(PyExc_TypeError,
+                   "Array must have %d dimensions.  Given array has %d dimensions",
+                   exact_dimensions,
+                   array_numdims(ary));
+      success = 0;
+    }
+    return success;
+  }
+
+  /* Require the given PyArrayObject to have one of a list of specified
+   * number of dimensions.  If the array has one of the specified number
+   * of dimensions, return 1.  Otherwise, set the python error string
+   * and return 0.
+   */
+  int require_dimensions_n(PyArrayObject* ary,
+                           int*           exact_dimensions,
+                           int            n)
+  {
+    int success = 0;
+    int i;
+    char dims_str[255] = "";
+    char s[255];
+    for (i = 0; i < n && !success; i++)
+    {
+      if (array_numdims(ary) == exact_dimensions[i])
+      {
+        success = 1;
+      }
+    }
+    if (!success)
+    {
+      for (i = 0; i < n-1; i++)
+      {
+        sprintf(s, "%d, ", exact_dimensions[i]);
+        strcat(dims_str,s);
+      }
+      sprintf(s, " or %d", exact_dimensions[n-1]);
+      strcat(dims_str,s);
+      PyErr_Format(PyExc_TypeError,
+                   "Array must have %s dimensions.  Given array has %d dimensions",
+                   dims_str,
+                   array_numdims(ary));
+    }
+    return success;
+  }
+
+  /* Require the given PyArrayObject to have a specified shape.  If the
+   * array has the specified shape, return 1.  Otherwise, set the python
+   * error string and return 0.
+   */
+  int require_size(PyArrayObject* ary,
+                   npy_intp*      size,
+                   int            n)
+  {
+    int i;
+    int success = 1;
+    size_t len;
+    char desired_dims[255] = "[";
+    char s[255];
+    char actual_dims[255] = "[";
+    for(i=0; i < n;i++)
+    {
+      if (size[i] != -1 &&  size[i] != array_size(ary,i))
+      {
+        success = 0;
+      }
+    }
+    if (!success)
+    {
+      for (i = 0; i < n; i++)
+      {
+        if (size[i] == -1)
+        {
+          sprintf(s, "*,");
+        }
+        else
+        {
+          sprintf(s, "%ld,", (long int)size[i]);
+        }
+        strcat(desired_dims,s);
+      }
+      len = strlen(desired_dims);
+      desired_dims[len-1] = ']';
+      for (i = 0; i < n; i++)
+      {
+        sprintf(s, "%ld,", (long int)array_size(ary,i));
+        strcat(actual_dims,s);
+      }
+      len = strlen(actual_dims);
+      actual_dims[len-1] = ']';
+      PyErr_Format(PyExc_TypeError,
+                   "Array must have shape of %s.  Given array has shape of %s",
+                   desired_dims,
+                   actual_dims);
+    }
+    return success;
+  }
+
+  /* Require the given PyArrayObject to to be Fortran ordered.  If the
+   * the PyArrayObject is already Fortran ordered, do nothing.  Else,
+   * set the Fortran ordering flag and recompute the strides.
+   */
+  int require_fortran(PyArrayObject* ary)
+  {
+    int success = 1;
+    int nd = array_numdims(ary);
+    int i;
+    npy_intp * strides = array_strides(ary);
+    if (array_is_fortran(ary)) return success;
+    int n_non_one = 0;
+    /* Set the Fortran ordered flag */
+    const npy_intp *dims = array_dimensions(ary);
+    for (i=0; i < nd; ++i)
+      n_non_one += (dims[i] != 1) ? 1 : 0;
+    if (n_non_one > 1)
+      array_clearflags(ary,NPY_ARRAY_CARRAY);
+    array_enableflags(ary,NPY_ARRAY_FARRAY);
+    /* Recompute the strides */
+    strides[0] = strides[nd-1];
+    for (i=1; i < nd; ++i)
+      strides[i] = strides[i-1] * array_size(ary,i-1);
+    return success;
+  }
 
 
 
@@ -18030,6 +18520,240 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_TriangleMesh_getVertices(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  TriangleMesh *arg1 = (TriangleMesh *) 0 ;
+  double **arg2 = (double **) 0 ;
+  int *arg3 = (int *) 0 ;
+  int *arg4 = (int *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double *data_temp2 = NULL ;
+  int dim1_temp2 ;
+  int dim2_temp2 ;
+  PyObject *swig_obj[1] ;
+  
+  {
+    arg2 = &data_temp2;
+    arg3 = &dim1_temp2;
+    arg4 = &dim2_temp2;
+  }
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_TriangleMesh, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TriangleMesh_getVertices" "', argument " "1"" of type '" "TriangleMesh *""'"); 
+  }
+  arg1 = reinterpret_cast< TriangleMesh * >(argp1);
+  {
+    try {
+      (arg1)->getVertices(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    npy_intp dims[2] = {
+      *arg3, *arg4 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, (void*)(*arg2));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_TriangleMesh_setVertices(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  TriangleMesh *arg1 = (TriangleMesh *) 0 ;
+  double *arg2 = (double *) 0 ;
+  int arg3 ;
+  int arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "TriangleMesh_setVertices", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_TriangleMesh, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TriangleMesh_setVertices" "', argument " "1"" of type '" "TriangleMesh *""'"); 
+  }
+  arg1 = reinterpret_cast< TriangleMesh * >(argp1);
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(swig_obj[1], NPY_DOUBLE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 2) ||
+      !require_size(array2, size, 2)) SWIG_fail;
+    arg2 = (double*) array_data(array2);
+    arg3 = (int) array_size(array2,0);
+    arg4 = (int) array_size(array2,1);
+  }
+  {
+    try {
+      (arg1)->setVertices(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_TriangleMesh_getIndices(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  TriangleMesh *arg1 = (TriangleMesh *) 0 ;
+  int **arg2 = (int **) 0 ;
+  int *arg3 = (int *) 0 ;
+  int *arg4 = (int *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int *data_temp2 = NULL ;
+  int dim1_temp2 ;
+  int dim2_temp2 ;
+  PyObject *swig_obj[1] ;
+  
+  {
+    arg2 = &data_temp2;
+    arg3 = &dim1_temp2;
+    arg4 = &dim2_temp2;
+  }
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_TriangleMesh, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TriangleMesh_getIndices" "', argument " "1"" of type '" "TriangleMesh *""'"); 
+  }
+  arg1 = reinterpret_cast< TriangleMesh * >(argp1);
+  {
+    try {
+      (arg1)->getIndices(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    npy_intp dims[2] = {
+      *arg3, *arg4 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(2, dims, NPY_INT, (void*)(*arg2));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_TriangleMesh_setIndices(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  TriangleMesh *arg1 = (TriangleMesh *) 0 ;
+  int *arg2 = (int *) 0 ;
+  int arg3 ;
+  int arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "TriangleMesh_setIndices", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_TriangleMesh, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TriangleMesh_setIndices" "', argument " "1"" of type '" "TriangleMesh *""'"); 
+  }
+  arg1 = reinterpret_cast< TriangleMesh * >(argp1);
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(swig_obj[1], NPY_INT,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 2) ||
+      !require_size(array2, size, 2)) SWIG_fail;
+    arg2 = (int*) array_data(array2);
+    arg3 = (int) array_size(array2,0);
+    arg4 = (int) array_size(array2,1);
+  }
+  {
+    try {
+      (arg1)->setIndices(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_TriangleMesh_translate(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   TriangleMesh *arg1 = (TriangleMesh *) 0 ;
@@ -18325,6 +19049,123 @@ SWIGINTERN PyObject *_wrap_ConvexHull_numPoints(PyObject *SWIGUNUSEDPARM(self), 
   resultobj = SWIG_From_int(static_cast< int >(result));
   return resultobj;
 fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_ConvexHull_getPoints(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ConvexHull *arg1 = (ConvexHull *) 0 ;
+  double **arg2 = (double **) 0 ;
+  int *arg3 = (int *) 0 ;
+  int *arg4 = (int *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double *data_temp2 = NULL ;
+  int dim1_temp2 ;
+  int dim2_temp2 ;
+  PyObject *swig_obj[1] ;
+  
+  {
+    arg2 = &data_temp2;
+    arg3 = &dim1_temp2;
+    arg4 = &dim2_temp2;
+  }
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_ConvexHull, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ConvexHull_getPoints" "', argument " "1"" of type '" "ConvexHull *""'"); 
+  }
+  arg1 = reinterpret_cast< ConvexHull * >(argp1);
+  {
+    try {
+      (arg1)->getPoints(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    npy_intp dims[2] = {
+      *arg3, *arg4 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, (void*)(*arg2));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_ConvexHull_setPoints(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  ConvexHull *arg1 = (ConvexHull *) 0 ;
+  double *arg2 = (double *) 0 ;
+  int arg3 ;
+  int arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "ConvexHull_setPoints", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_ConvexHull, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ConvexHull_setPoints" "', argument " "1"" of type '" "ConvexHull *""'"); 
+  }
+  arg1 = reinterpret_cast< ConvexHull * >(argp1);
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(swig_obj[1], NPY_DOUBLE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 2) ||
+      !require_size(array2, size, 2)) SWIG_fail;
+    arg2 = (double*) array_data(array2);
+    arg3 = (int) array_size(array2,0);
+    arg4 = (int) array_size(array2,1);
+  }
+  {
+    try {
+      (arg1)->setPoints(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
   return NULL;
 }
 
@@ -18717,43 +19558,34 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_PointCloud_setPoints(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_PointCloud_getPoints(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   PointCloud *arg1 = (PointCloud *) 0 ;
-  int arg2 ;
-  std::vector< double,std::allocator< double > > *arg3 = 0 ;
+  double **arg2 = (double **) 0 ;
+  int *arg3 = (int *) 0 ;
+  int *arg4 = (int *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  int res3 = SWIG_OLDOBJ ;
-  PyObject *swig_obj[3] ;
+  double *data_temp2 = NULL ;
+  int dim1_temp2 ;
+  int dim2_temp2 ;
+  PyObject *swig_obj[1] ;
   
-  if (!SWIG_Python_UnpackTuple(args, "PointCloud_setPoints", 3, 3, swig_obj)) SWIG_fail;
+  {
+    arg2 = &data_temp2;
+    arg3 = &dim1_temp2;
+    arg4 = &dim2_temp2;
+  }
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_setPoints" "', argument " "1"" of type '" "PointCloud *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_getPoints" "', argument " "1"" of type '" "PointCloud *""'"); 
   }
   arg1 = reinterpret_cast< PointCloud * >(argp1);
-  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "PointCloud_setPoints" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
-  {
-    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
-    res3 = swig::asptr(swig_obj[2], &ptr);
-    if (!SWIG_IsOK(res3)) {
-      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "PointCloud_setPoints" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PointCloud_setPoints" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
-    }
-    arg3 = ptr;
-  }
   {
     try {
-      (arg1)->setPoints(arg2,(std::vector< double,std::allocator< double > > const &)*arg3);
+      (arg1)->getPoints(arg2,arg3,arg4);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -18765,10 +19597,142 @@ SWIGINTERN PyObject *_wrap_PointCloud_setPoints(PyObject *SWIGUNUSEDPARM(self), 
     }
   }
   resultobj = SWIG_Py_Void();
-  if (SWIG_IsNewObj(res3)) delete arg3;
+  {
+    npy_intp dims[2] = {
+      *arg3, *arg4 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, (void*)(*arg2));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
+  }
   return resultobj;
 fail:
-  if (SWIG_IsNewObj(res3)) delete arg3;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_setPoints(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  double *arg2 = (double *) 0 ;
+  int arg3 ;
+  int arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "PointCloud_setPoints", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_setPoints" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(swig_obj[1], NPY_DOUBLE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 2) ||
+      !require_size(array2, size, 2)) SWIG_fail;
+    arg2 = (double*) array_data(array2);
+    arg3 = (int) array_size(array2,0);
+    arg4 = (int) array_size(array2,1);
+  }
+  {
+    try {
+      (arg1)->setPoints(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_setPointsAndProperties(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  double *arg2 = (double *) 0 ;
+  int arg3 ;
+  int arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "PointCloud_setPointsAndProperties", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_setPointsAndProperties" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(swig_obj[1], NPY_DOUBLE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 2) ||
+      !require_size(array2, size, 2)) SWIG_fail;
+    arg2 = (double*) array_data(array2);
+    arg3 = (int) array_size(array2,0);
+    arg4 = (int) array_size(array2,1);
+  }
+  {
+    try {
+      (arg1)->setPointsAndProperties(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
   return NULL;
 }
 
@@ -18929,6 +19893,67 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_PointCloud_setProperties__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  double *arg2 = (double *) 0 ;
+  int arg3 ;
+  int arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  
+  if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_setProperties" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(swig_obj[1], NPY_DOUBLE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 2) ||
+      !require_size(array2, size, 2)) SWIG_fail;
+    arg2 = (double*) array_data(array2);
+    arg3 = (int) array_size(array2,0);
+    arg4 = (int) array_size(array2,1);
+  }
+  {
+    try {
+      (arg1)->setProperties(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_PointCloud_addProperty__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
   PyObject *resultobj = 0;
   PointCloud *arg1 = (PointCloud *) 0 ;
@@ -18980,11 +20005,13 @@ SWIGINTERN PyObject *_wrap_PointCloud_addProperty__SWIG_1(PyObject *SWIGUNUSEDPA
   PyObject *resultobj = 0;
   PointCloud *arg1 = (PointCloud *) 0 ;
   std::string *arg2 = 0 ;
-  std::vector< double,std::allocator< double > > *arg3 = 0 ;
+  double *arg3 = (double *) 0 ;
+  int arg4 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   int res2 = SWIG_OLDOBJ ;
-  int res3 = SWIG_OLDOBJ ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
   
   if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
@@ -19004,19 +20031,20 @@ SWIGINTERN PyObject *_wrap_PointCloud_addProperty__SWIG_1(PyObject *SWIGUNUSEDPA
     arg2 = ptr;
   }
   {
-    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
-    res3 = swig::asptr(swig_obj[2], &ptr);
-    if (!SWIG_IsOK(res3)) {
-      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "PointCloud_addProperty" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PointCloud_addProperty" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
-    }
-    arg3 = ptr;
+    npy_intp size[1] = {
+      -1 
+    };
+    array3 = obj_to_array_contiguous_allow_conversion(swig_obj[2],
+      NPY_DOUBLE,
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 1) ||
+      !require_size(array3, size, 1)) SWIG_fail;
+    arg3 = (double*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
   }
   {
     try {
-      (arg1)->addProperty((std::string const &)*arg2,(std::vector< double,std::allocator< double > > const &)*arg3);
+      (arg1)->addProperty((std::string const &)*arg2,arg3,arg4);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -19029,11 +20057,21 @@ SWIGINTERN PyObject *_wrap_PointCloud_addProperty__SWIG_1(PyObject *SWIGUNUSEDPA
   }
   resultobj = SWIG_Py_Void();
   if (SWIG_IsNewObj(res2)) delete arg2;
-  if (SWIG_IsNewObj(res3)) delete arg3;
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
   return resultobj;
 fail:
   if (SWIG_IsNewObj(res2)) delete arg2;
-  if (SWIG_IsNewObj(res3)) delete arg3;
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
   return NULL;
 }
 
@@ -19068,9 +20106,13 @@ SWIGINTERN PyObject *_wrap_PointCloud_addProperty(PyObject *self, PyObject *args
       int res = SWIG_AsPtr_std_string(argv[1], (std::string**)(0));
       _v = SWIG_CheckState(res);
       if (_v) {
-        int res = swig::asptr(argv[2], (std::vector< double,std::allocator< double > >**)(0));
-        _v = SWIG_CheckState(res);
+        {
+          _v = is_array(argv[2]) || PySequence_Check(argv[2]);
+        }
         if (_v) {
+          if (argc <= 3) {
+            return _wrap_PointCloud_addProperty__SWIG_1(self, argc, argv);
+          }
           return _wrap_PointCloud_addProperty__SWIG_1(self, argc, argv);
         }
       }
@@ -19081,55 +20123,8 @@ fail:
   SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'PointCloud_addProperty'.\n"
     "  Possible C/C++ prototypes are:\n"
     "    PointCloud::addProperty(std::string const &)\n"
-    "    PointCloud::addProperty(std::string const &,std::vector< double,std::allocator< double > > const &)\n");
+    "    PointCloud::addProperty(std::string const &,double *,int)\n");
   return 0;
-}
-
-
-SWIGINTERN PyObject *_wrap_PointCloud_setProperties__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
-  PyObject *resultobj = 0;
-  PointCloud *arg1 = (PointCloud *) 0 ;
-  std::vector< double,std::allocator< double > > *arg2 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int res2 = SWIG_OLDOBJ ;
-  
-  if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_setProperties" "', argument " "1"" of type '" "PointCloud *""'"); 
-  }
-  arg1 = reinterpret_cast< PointCloud * >(argp1);
-  {
-    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
-    res2 = swig::asptr(swig_obj[1], &ptr);
-    if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "PointCloud_setProperties" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PointCloud_setProperties" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
-    }
-    arg2 = ptr;
-  }
-  {
-    try {
-      (arg1)->setProperties((std::vector< double,std::allocator< double > > const &)*arg2);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_Py_Void();
-  if (SWIG_IsNewObj(res2)) delete arg2;
-  return resultobj;
-fail:
-  if (SWIG_IsNewObj(res2)) delete arg2;
-  return NULL;
 }
 
 
@@ -19137,12 +20132,14 @@ SWIGINTERN PyObject *_wrap_PointCloud_setProperties__SWIG_1(PyObject *SWIGUNUSED
   PyObject *resultobj = 0;
   PointCloud *arg1 = (PointCloud *) 0 ;
   int arg2 ;
-  std::vector< double,std::allocator< double > > *arg3 = 0 ;
+  double *arg3 = (double *) 0 ;
+  int arg4 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
-  int res3 = SWIG_OLDOBJ ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
   
   if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
@@ -19156,19 +20153,20 @@ SWIGINTERN PyObject *_wrap_PointCloud_setProperties__SWIG_1(PyObject *SWIGUNUSED
   } 
   arg2 = static_cast< int >(val2);
   {
-    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
-    res3 = swig::asptr(swig_obj[2], &ptr);
-    if (!SWIG_IsOK(res3)) {
-      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "PointCloud_setProperties" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "PointCloud_setProperties" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
-    }
-    arg3 = ptr;
+    npy_intp size[1] = {
+      -1 
+    };
+    array3 = obj_to_array_contiguous_allow_conversion(swig_obj[2],
+      NPY_DOUBLE,
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 1) ||
+      !require_size(array3, size, 1)) SWIG_fail;
+    arg3 = (double*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
   }
   {
     try {
-      (arg1)->setProperties(arg2,(std::vector< double,std::allocator< double > > const &)*arg3);
+      (arg1)->setProperties(arg2,arg3,arg4);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -19180,10 +20178,20 @@ SWIGINTERN PyObject *_wrap_PointCloud_setProperties__SWIG_1(PyObject *SWIGUNUSED
     }
   }
   resultobj = SWIG_Py_Void();
-  if (SWIG_IsNewObj(res3)) delete arg3;
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
   return resultobj;
 fail:
-  if (SWIG_IsNewObj(res3)) delete arg3;
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
   return NULL;
 }
 
@@ -19202,9 +20210,16 @@ SWIGINTERN PyObject *_wrap_PointCloud_setProperties(PyObject *self, PyObject *ar
     int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_PointCloud, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
-      int res = swig::asptr(argv[1], (std::vector< double,std::allocator< double > >**)(0));
-      _v = SWIG_CheckState(res);
+      {
+        _v = is_array(argv[1]) || PySequence_Check(argv[1]);
+      }
       if (_v) {
+        if (argc <= 2) {
+          return _wrap_PointCloud_setProperties__SWIG_0(self, argc, argv);
+        }
+        if (argc <= 3) {
+          return _wrap_PointCloud_setProperties__SWIG_0(self, argc, argv);
+        }
         return _wrap_PointCloud_setProperties__SWIG_0(self, argc, argv);
       }
     }
@@ -19220,9 +20235,13 @@ SWIGINTERN PyObject *_wrap_PointCloud_setProperties(PyObject *self, PyObject *ar
         _v = SWIG_CheckState(res);
       }
       if (_v) {
-        int res = swig::asptr(argv[2], (std::vector< double,std::allocator< double > >**)(0));
-        _v = SWIG_CheckState(res);
+        {
+          _v = is_array(argv[2]) || PySequence_Check(argv[2]);
+        }
         if (_v) {
+          if (argc <= 3) {
+            return _wrap_PointCloud_setProperties__SWIG_1(self, argc, argv);
+          }
           return _wrap_PointCloud_setProperties__SWIG_1(self, argc, argv);
         }
       }
@@ -19232,8 +20251,8 @@ SWIGINTERN PyObject *_wrap_PointCloud_setProperties(PyObject *self, PyObject *ar
 fail:
   SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'PointCloud_setProperties'.\n"
     "  Possible C/C++ prototypes are:\n"
-    "    PointCloud::setProperties(std::vector< double,std::allocator< double > > const &)\n"
-    "    PointCloud::setProperties(int,std::vector< double,std::allocator< double > > const &)\n");
+    "    PointCloud::setProperties(double *,int,int)\n"
+    "    PointCloud::setProperties(int,double *,int)\n");
   return 0;
 }
 
@@ -19594,15 +20613,18 @@ SWIGINTERN PyObject *_wrap_PointCloud_getProperties__SWIG_0(PyObject *SWIGUNUSED
   PyObject *resultobj = 0;
   PointCloud *arg1 = (PointCloud *) 0 ;
   int arg2 ;
-  std::vector< double,std::allocator< double > > *arg3 = 0 ;
+  double **arg3 = (double **) 0 ;
+  int *arg4 = (int *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
-  std::vector< double > temp3 ;
+  double *data_temp3 = NULL ;
+  int dim_temp3 ;
   
   {
-    arg3 = &temp3;
+    arg3 = &data_temp3;
+    arg4 = &dim_temp3;
   }
   if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
@@ -19617,7 +20639,7 @@ SWIGINTERN PyObject *_wrap_PointCloud_getProperties__SWIG_0(PyObject *SWIGUNUSED
   arg2 = static_cast< int >(val2);
   {
     try {
-      ((PointCloud const *)arg1)->getProperties(arg2,*arg3);
+      ((PointCloud const *)arg1)->getProperties(arg2,arg3,arg4);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -19630,23 +20652,27 @@ SWIGINTERN PyObject *_wrap_PointCloud_getProperties__SWIG_0(PyObject *SWIGUNUSED
   }
   resultobj = SWIG_Py_Void();
   {
-    PyObject *o, *o2, *o3;
-    o = convert_darray_obj(&(*arg3)[0],(int)arg3->size());
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
+    npy_intp dims[1] = {
+      *arg4 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(1, dims, NPY_DOUBLE, (void*)(*arg3));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg3), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg3), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
   }
   return resultobj;
 fail:
@@ -19658,14 +20684,17 @@ SWIGINTERN PyObject *_wrap_PointCloud_getProperties__SWIG_1(PyObject *SWIGUNUSED
   PyObject *resultobj = 0;
   PointCloud *arg1 = (PointCloud *) 0 ;
   std::string *arg2 = 0 ;
-  std::vector< double,std::allocator< double > > *arg3 = 0 ;
+  double **arg3 = (double **) 0 ;
+  int *arg4 = (int *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   int res2 = SWIG_OLDOBJ ;
-  std::vector< double > temp3 ;
+  double *data_temp3 = NULL ;
+  int dim_temp3 ;
   
   {
-    arg3 = &temp3;
+    arg3 = &data_temp3;
+    arg4 = &dim_temp3;
   }
   if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
@@ -19686,7 +20715,7 @@ SWIGINTERN PyObject *_wrap_PointCloud_getProperties__SWIG_1(PyObject *SWIGUNUSED
   }
   {
     try {
-      ((PointCloud const *)arg1)->getProperties((std::string const &)*arg2,*arg3);
+      ((PointCloud const *)arg1)->getProperties((std::string const &)*arg2,arg3,arg4);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -19699,23 +20728,27 @@ SWIGINTERN PyObject *_wrap_PointCloud_getProperties__SWIG_1(PyObject *SWIGUNUSED
   }
   resultobj = SWIG_Py_Void();
   {
-    PyObject *o, *o2, *o3;
-    o = convert_darray_obj(&(*arg3)[0],(int)arg3->size());
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
+    npy_intp dims[1] = {
+      *arg4 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(1, dims, NPY_DOUBLE, (void*)(*arg3));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg3), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg3), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
   }
   if (SWIG_IsNewObj(res2)) delete arg2;
   return resultobj;
@@ -19765,9 +20798,64 @@ SWIGINTERN PyObject *_wrap_PointCloud_getProperties(PyObject *self, PyObject *ar
 fail:
   SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'PointCloud_getProperties'.\n"
     "  Possible C/C++ prototypes are:\n"
-    "    PointCloud::getProperties(int,std::vector< double,std::allocator< double > > &) const\n"
-    "    PointCloud::getProperties(std::string const &,std::vector< double,std::allocator< double > > &) const\n");
+    "    PointCloud::getProperties(int,double **,int *) const\n"
+    "    PointCloud::getProperties(std::string const &,double **,int *) const\n");
   return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_getAllProperties(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  double **arg2 = (double **) 0 ;
+  int *arg3 = (int *) 0 ;
+  int *arg4 = (int *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double *data_temp2 = NULL ;
+  int dim1_temp2 ;
+  int dim2_temp2 ;
+  PyObject *swig_obj[1] ;
+  
+  {
+    arg2 = &data_temp2;
+    arg3 = &dim1_temp2;
+    arg4 = &dim2_temp2;
+  }
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_getAllProperties" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  {
+    try {
+      (arg1)->getAllProperties(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    npy_intp dims[2] = {
+      *arg3, *arg4 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, (void*)(*arg2));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
+  }
+  return resultobj;
+fail:
+  return NULL;
 }
 
 
@@ -20013,6 +21101,888 @@ SWIGINTERN PyObject *_wrap_PointCloud_getSetting(PyObject *SWIGUNUSEDPARM(self),
   return resultobj;
 fail:
   if (SWIG_IsNewObj(res2)) delete arg2;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_setDepthImage_d(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  double *arg2 ;
+  double *arg3 = (double *) 0 ;
+  int arg4 ;
+  int arg5 ;
+  double arg6 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[4] ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
+  double val6 ;
+  int ecode6 = 0 ;
+  PyObject *swig_obj[4] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "PointCloud_setDepthImage_d", 4, 4, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_setDepthImage_d" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  {
+    if (!convert_darray(swig_obj[1],temp2,4)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array3 = obj_to_array_contiguous_allow_conversion(swig_obj[2], NPY_DOUBLE,
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 2) ||
+      !require_size(array3, size, 2)) SWIG_fail;
+    arg3 = (double*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
+    arg5 = (int) array_size(array3,1);
+  }
+  ecode6 = SWIG_AsVal_double(swig_obj[3], &val6);
+  if (!SWIG_IsOK(ecode6)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "PointCloud_setDepthImage_d" "', argument " "6"" of type '" "double""'");
+  } 
+  arg6 = static_cast< double >(val6);
+  {
+    try {
+      (arg1)->setDepthImage_d((double const (*))arg2,arg3,arg4,arg5,arg6);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_setDepthImage_f(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  double *arg2 ;
+  float *arg3 = (float *) 0 ;
+  int arg4 ;
+  int arg5 ;
+  double arg6 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[4] ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
+  double val6 ;
+  int ecode6 = 0 ;
+  PyObject *swig_obj[4] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "PointCloud_setDepthImage_f", 4, 4, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_setDepthImage_f" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  {
+    if (!convert_darray(swig_obj[1],temp2,4)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array3 = obj_to_array_contiguous_allow_conversion(swig_obj[2], NPY_FLOAT,
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 2) ||
+      !require_size(array3, size, 2)) SWIG_fail;
+    arg3 = (float*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
+    arg5 = (int) array_size(array3,1);
+  }
+  ecode6 = SWIG_AsVal_double(swig_obj[3], &val6);
+  if (!SWIG_IsOK(ecode6)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "PointCloud_setDepthImage_f" "', argument " "6"" of type '" "double""'");
+  } 
+  arg6 = static_cast< double >(val6);
+  {
+    try {
+      (arg1)->setDepthImage_f((double const (*))arg2,arg3,arg4,arg5,arg6);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_setDepthImage_s(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  double *arg2 ;
+  unsigned short *arg3 = (unsigned short *) 0 ;
+  int arg4 ;
+  int arg5 ;
+  double arg6 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[4] ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
+  double val6 ;
+  int ecode6 = 0 ;
+  PyObject *swig_obj[4] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "PointCloud_setDepthImage_s", 4, 4, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_setDepthImage_s" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  {
+    if (!convert_darray(swig_obj[1],temp2,4)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array3 = obj_to_array_contiguous_allow_conversion(swig_obj[2], NPY_USHORT,
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 2) ||
+      !require_size(array3, size, 2)) SWIG_fail;
+    arg3 = (unsigned short*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
+    arg5 = (int) array_size(array3,1);
+  }
+  ecode6 = SWIG_AsVal_double(swig_obj[3], &val6);
+  if (!SWIG_IsOK(ecode6)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "PointCloud_setDepthImage_s" "', argument " "6"" of type '" "double""'");
+  } 
+  arg6 = static_cast< double >(val6);
+  {
+    try {
+      (arg1)->setDepthImage_s((double const (*))arg2,arg3,arg4,arg5,arg6);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_setRGBDImages_i_d(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  double *arg2 ;
+  unsigned int *arg3 = (unsigned int *) 0 ;
+  int arg4 ;
+  int arg5 ;
+  double *arg6 = (double *) 0 ;
+  int arg7 ;
+  int arg8 ;
+  double arg9 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[4] ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
+  PyArrayObject *array6 = NULL ;
+  int is_new_object6 = 0 ;
+  double val9 ;
+  int ecode9 = 0 ;
+  PyObject *swig_obj[5] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "PointCloud_setRGBDImages_i_d", 5, 5, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_setRGBDImages_i_d" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  {
+    if (!convert_darray(swig_obj[1],temp2,4)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array3 = obj_to_array_contiguous_allow_conversion(swig_obj[2], NPY_UINT,
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 2) ||
+      !require_size(array3, size, 2)) SWIG_fail;
+    arg3 = (unsigned int*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
+    arg5 = (int) array_size(array3,1);
+  }
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array6 = obj_to_array_contiguous_allow_conversion(swig_obj[3], NPY_DOUBLE,
+      &is_new_object6);
+    if (!array6 || !require_dimensions(array6, 2) ||
+      !require_size(array6, size, 2)) SWIG_fail;
+    arg6 = (double*) array_data(array6);
+    arg7 = (int) array_size(array6,0);
+    arg8 = (int) array_size(array6,1);
+  }
+  ecode9 = SWIG_AsVal_double(swig_obj[4], &val9);
+  if (!SWIG_IsOK(ecode9)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode9), "in method '" "PointCloud_setRGBDImages_i_d" "', argument " "9"" of type '" "double""'");
+  } 
+  arg9 = static_cast< double >(val9);
+  {
+    try {
+      (arg1)->setRGBDImages_i_d((double const (*))arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  {
+    if (is_new_object6 && array6)
+    {
+      Py_DECREF(array6); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  {
+    if (is_new_object6 && array6)
+    {
+      Py_DECREF(array6); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_setRGBDImages_i_f(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  double *arg2 ;
+  unsigned int *arg3 = (unsigned int *) 0 ;
+  int arg4 ;
+  int arg5 ;
+  float *arg6 = (float *) 0 ;
+  int arg7 ;
+  int arg8 ;
+  double arg9 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[4] ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
+  PyArrayObject *array6 = NULL ;
+  int is_new_object6 = 0 ;
+  double val9 ;
+  int ecode9 = 0 ;
+  PyObject *swig_obj[5] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "PointCloud_setRGBDImages_i_f", 5, 5, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_setRGBDImages_i_f" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  {
+    if (!convert_darray(swig_obj[1],temp2,4)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array3 = obj_to_array_contiguous_allow_conversion(swig_obj[2], NPY_UINT,
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 2) ||
+      !require_size(array3, size, 2)) SWIG_fail;
+    arg3 = (unsigned int*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
+    arg5 = (int) array_size(array3,1);
+  }
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array6 = obj_to_array_contiguous_allow_conversion(swig_obj[3], NPY_FLOAT,
+      &is_new_object6);
+    if (!array6 || !require_dimensions(array6, 2) ||
+      !require_size(array6, size, 2)) SWIG_fail;
+    arg6 = (float*) array_data(array6);
+    arg7 = (int) array_size(array6,0);
+    arg8 = (int) array_size(array6,1);
+  }
+  ecode9 = SWIG_AsVal_double(swig_obj[4], &val9);
+  if (!SWIG_IsOK(ecode9)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode9), "in method '" "PointCloud_setRGBDImages_i_f" "', argument " "9"" of type '" "double""'");
+  } 
+  arg9 = static_cast< double >(val9);
+  {
+    try {
+      (arg1)->setRGBDImages_i_f((double const (*))arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  {
+    if (is_new_object6 && array6)
+    {
+      Py_DECREF(array6); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  {
+    if (is_new_object6 && array6)
+    {
+      Py_DECREF(array6); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_setRGBDImages_i_s(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  double *arg2 ;
+  unsigned int *arg3 = (unsigned int *) 0 ;
+  int arg4 ;
+  int arg5 ;
+  unsigned short *arg6 = (unsigned short *) 0 ;
+  int arg7 ;
+  int arg8 ;
+  double arg9 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[4] ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
+  PyArrayObject *array6 = NULL ;
+  int is_new_object6 = 0 ;
+  double val9 ;
+  int ecode9 = 0 ;
+  PyObject *swig_obj[5] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "PointCloud_setRGBDImages_i_s", 5, 5, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_setRGBDImages_i_s" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  {
+    if (!convert_darray(swig_obj[1],temp2,4)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array3 = obj_to_array_contiguous_allow_conversion(swig_obj[2], NPY_UINT,
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 2) ||
+      !require_size(array3, size, 2)) SWIG_fail;
+    arg3 = (unsigned int*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
+    arg5 = (int) array_size(array3,1);
+  }
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array6 = obj_to_array_contiguous_allow_conversion(swig_obj[3], NPY_USHORT,
+      &is_new_object6);
+    if (!array6 || !require_dimensions(array6, 2) ||
+      !require_size(array6, size, 2)) SWIG_fail;
+    arg6 = (unsigned short*) array_data(array6);
+    arg7 = (int) array_size(array6,0);
+    arg8 = (int) array_size(array6,1);
+  }
+  ecode9 = SWIG_AsVal_double(swig_obj[4], &val9);
+  if (!SWIG_IsOK(ecode9)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode9), "in method '" "PointCloud_setRGBDImages_i_s" "', argument " "9"" of type '" "double""'");
+  } 
+  arg9 = static_cast< double >(val9);
+  {
+    try {
+      (arg1)->setRGBDImages_i_s((double const (*))arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  {
+    if (is_new_object6 && array6)
+    {
+      Py_DECREF(array6); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  {
+    if (is_new_object6 && array6)
+    {
+      Py_DECREF(array6); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_setRGBDImages_b_d(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  double *arg2 ;
+  unsigned char *arg3 = (unsigned char *) 0 ;
+  int arg4 ;
+  int arg5 ;
+  int arg6 ;
+  double *arg7 = (double *) 0 ;
+  int arg8 ;
+  int arg9 ;
+  double arg10 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[4] ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
+  PyArrayObject *array7 = NULL ;
+  int is_new_object7 = 0 ;
+  double val10 ;
+  int ecode10 = 0 ;
+  PyObject *swig_obj[5] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "PointCloud_setRGBDImages_b_d", 5, 5, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_setRGBDImages_b_d" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  {
+    if (!convert_darray(swig_obj[1],temp2,4)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    npy_intp size[3] = {
+      -1, -1, -1 
+    };
+    array3 = obj_to_array_contiguous_allow_conversion(swig_obj[2], NPY_UBYTE,
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 3) ||
+      !require_size(array3, size, 3)) SWIG_fail;
+    arg3 = (unsigned char*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
+    arg5 = (int) array_size(array3,1);
+    arg6 = (int) array_size(array3,2);
+  }
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array7 = obj_to_array_contiguous_allow_conversion(swig_obj[3], NPY_DOUBLE,
+      &is_new_object7);
+    if (!array7 || !require_dimensions(array7, 2) ||
+      !require_size(array7, size, 2)) SWIG_fail;
+    arg7 = (double*) array_data(array7);
+    arg8 = (int) array_size(array7,0);
+    arg9 = (int) array_size(array7,1);
+  }
+  ecode10 = SWIG_AsVal_double(swig_obj[4], &val10);
+  if (!SWIG_IsOK(ecode10)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode10), "in method '" "PointCloud_setRGBDImages_b_d" "', argument " "10"" of type '" "double""'");
+  } 
+  arg10 = static_cast< double >(val10);
+  {
+    try {
+      (arg1)->setRGBDImages_b_d((double const (*))arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  {
+    if (is_new_object7 && array7)
+    {
+      Py_DECREF(array7); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  {
+    if (is_new_object7 && array7)
+    {
+      Py_DECREF(array7); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_setRGBDImages_b_f(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  double *arg2 ;
+  unsigned char *arg3 = (unsigned char *) 0 ;
+  int arg4 ;
+  int arg5 ;
+  int arg6 ;
+  float *arg7 = (float *) 0 ;
+  int arg8 ;
+  int arg9 ;
+  double arg10 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[4] ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
+  PyArrayObject *array7 = NULL ;
+  int is_new_object7 = 0 ;
+  double val10 ;
+  int ecode10 = 0 ;
+  PyObject *swig_obj[5] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "PointCloud_setRGBDImages_b_f", 5, 5, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_setRGBDImages_b_f" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  {
+    if (!convert_darray(swig_obj[1],temp2,4)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    npy_intp size[3] = {
+      -1, -1, -1 
+    };
+    array3 = obj_to_array_contiguous_allow_conversion(swig_obj[2], NPY_UBYTE,
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 3) ||
+      !require_size(array3, size, 3)) SWIG_fail;
+    arg3 = (unsigned char*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
+    arg5 = (int) array_size(array3,1);
+    arg6 = (int) array_size(array3,2);
+  }
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array7 = obj_to_array_contiguous_allow_conversion(swig_obj[3], NPY_FLOAT,
+      &is_new_object7);
+    if (!array7 || !require_dimensions(array7, 2) ||
+      !require_size(array7, size, 2)) SWIG_fail;
+    arg7 = (float*) array_data(array7);
+    arg8 = (int) array_size(array7,0);
+    arg9 = (int) array_size(array7,1);
+  }
+  ecode10 = SWIG_AsVal_double(swig_obj[4], &val10);
+  if (!SWIG_IsOK(ecode10)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode10), "in method '" "PointCloud_setRGBDImages_b_f" "', argument " "10"" of type '" "double""'");
+  } 
+  arg10 = static_cast< double >(val10);
+  {
+    try {
+      (arg1)->setRGBDImages_b_f((double const (*))arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  {
+    if (is_new_object7 && array7)
+    {
+      Py_DECREF(array7); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  {
+    if (is_new_object7 && array7)
+    {
+      Py_DECREF(array7); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_PointCloud_setRGBDImages_b_s(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  PointCloud *arg1 = (PointCloud *) 0 ;
+  double *arg2 ;
+  unsigned char *arg3 = (unsigned char *) 0 ;
+  int arg4 ;
+  int arg5 ;
+  int arg6 ;
+  unsigned short *arg7 = (unsigned short *) 0 ;
+  int arg8 ;
+  int arg9 ;
+  double arg10 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[4] ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
+  PyArrayObject *array7 = NULL ;
+  int is_new_object7 = 0 ;
+  double val10 ;
+  int ecode10 = 0 ;
+  PyObject *swig_obj[5] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "PointCloud_setRGBDImages_b_s", 5, 5, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_PointCloud, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "PointCloud_setRGBDImages_b_s" "', argument " "1"" of type '" "PointCloud *""'"); 
+  }
+  arg1 = reinterpret_cast< PointCloud * >(argp1);
+  {
+    if (!convert_darray(swig_obj[1],temp2,4)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    npy_intp size[3] = {
+      -1, -1, -1 
+    };
+    array3 = obj_to_array_contiguous_allow_conversion(swig_obj[2], NPY_UBYTE,
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 3) ||
+      !require_size(array3, size, 3)) SWIG_fail;
+    arg3 = (unsigned char*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
+    arg5 = (int) array_size(array3,1);
+    arg6 = (int) array_size(array3,2);
+  }
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array7 = obj_to_array_contiguous_allow_conversion(swig_obj[3], NPY_USHORT,
+      &is_new_object7);
+    if (!array7 || !require_dimensions(array7, 2) ||
+      !require_size(array7, size, 2)) SWIG_fail;
+    arg7 = (unsigned short*) array_data(array7);
+    arg8 = (int) array_size(array7,0);
+    arg9 = (int) array_size(array7,1);
+  }
+  ecode10 = SWIG_AsVal_double(swig_obj[4], &val10);
+  if (!SWIG_IsOK(ecode10)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode10), "in method '" "PointCloud_setRGBDImages_b_s" "', argument " "10"" of type '" "double""'");
+  } 
+  arg10 = static_cast< double >(val10);
+  {
+    try {
+      (arg1)->setRGBDImages_b_s((double const (*))arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  {
+    if (is_new_object7 && array7)
+    {
+      Py_DECREF(array7); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  {
+    if (is_new_object7 && array7)
+    {
+      Py_DECREF(array7); 
+    }
+  }
   return NULL;
 }
 
@@ -21277,6 +23247,128 @@ SWIGINTERN PyObject *_wrap_VolumeGrid_shift(PyObject *SWIGUNUSEDPARM(self), PyOb
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_VolumeGrid_getValues(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  VolumeGrid *arg1 = (VolumeGrid *) 0 ;
+  double **arg2 = (double **) 0 ;
+  int *arg3 = (int *) 0 ;
+  int *arg4 = (int *) 0 ;
+  int *arg5 = (int *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double *data_temp2 = NULL ;
+  int dim1_temp2 ;
+  int dim2_temp2 ;
+  int dim3_temp2 ;
+  PyObject *swig_obj[1] ;
+  
+  {
+    arg2 = &data_temp2;
+    arg3 = &dim1_temp2;
+    arg4 = &dim2_temp2;
+    arg5 = &dim3_temp2;
+  }
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_VolumeGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VolumeGrid_getValues" "', argument " "1"" of type '" "VolumeGrid *""'"); 
+  }
+  arg1 = reinterpret_cast< VolumeGrid * >(argp1);
+  {
+    try {
+      (arg1)->getValues(arg2,arg3,arg4,arg5);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    npy_intp dims[3] = {
+      *arg3, *arg4, *arg5 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(3, dims, NPY_DOUBLE, (void*)(*arg2));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_VolumeGrid_setValues(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  VolumeGrid *arg1 = (VolumeGrid *) 0 ;
+  double *arg2 = (double *) 0 ;
+  int arg3 ;
+  int arg4 ;
+  int arg5 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "VolumeGrid_setValues", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_VolumeGrid, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "VolumeGrid_setValues" "', argument " "1"" of type '" "VolumeGrid *""'"); 
+  }
+  arg1 = reinterpret_cast< VolumeGrid * >(argp1);
+  {
+    npy_intp size[3] = {
+      -1, -1, -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(swig_obj[1], NPY_DOUBLE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 3) ||
+      !require_size(array2, size, 3)) SWIG_fail;
+    arg2 = (double*) array_data(array2);
+    arg3 = (int) array_size(array2,0);
+    arg4 = (int) array_size(array2,1);
+    arg5 = (int) array_size(array2,2);
+  }
+  {
+    try {
+      (arg1)->setValues(arg2,arg3,arg4,arg5);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
   return NULL;
 }
 
@@ -22995,6 +25087,41 @@ SWIGINTERN PyObject *_wrap_Geometry3D_clone(PyObject *SWIGUNUSEDPARM(self), PyOb
   {
     try {
       result = (arg1)->clone();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj((new Geometry3D(static_cast< const Geometry3D& >(result))), SWIGTYPE_p_Geometry3D, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_copy(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  Geometry3D result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_copy" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  {
+    try {
+      result = (arg1)->copy();
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -25643,6 +27770,125 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Geometry3D_slice(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  double *arg2 ;
+  double *arg3 ;
+  double arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[9] ;
+  double temp3[3] ;
+  double val4 ;
+  int ecode4 = 0 ;
+  PyObject *swig_obj[4] ;
+  Geometry3D result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Geometry3D_slice", 4, 4, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_slice" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  {
+    if (!convert_darray(swig_obj[1],temp2,9)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    if (!convert_darray(swig_obj[2],temp3,3)) {
+      return NULL;
+    }
+    arg3 = &temp3[0];
+  }
+  ecode4 = SWIG_AsVal_double(swig_obj[3], &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "Geometry3D_slice" "', argument " "4"" of type '" "double""'");
+  } 
+  arg4 = static_cast< double >(val4);
+  {
+    try {
+      result = (arg1)->slice((double const (*))arg2,(double const (*))arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj((new Geometry3D(static_cast< const Geometry3D& >(result))), SWIGTYPE_p_Geometry3D, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Geometry3D_roi(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Geometry3D *arg1 = (Geometry3D *) 0 ;
+  char *arg2 = (char *) 0 ;
+  double *arg3 ;
+  double *arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  double temp3[3] ;
+  double temp4[3] ;
+  PyObject *swig_obj[4] ;
+  Geometry3D result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Geometry3D_roi", 4, 4, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Geometry3D, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Geometry3D_roi" "', argument " "1"" of type '" "Geometry3D *""'"); 
+  }
+  arg1 = reinterpret_cast< Geometry3D * >(argp1);
+  res2 = SWIG_AsCharPtrAndSize(swig_obj[1], &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Geometry3D_roi" "', argument " "2"" of type '" "char const *""'");
+  }
+  arg2 = reinterpret_cast< char * >(buf2);
+  {
+    if (!convert_darray(swig_obj[2],temp3,3)) {
+      return NULL;
+    }
+    arg3 = &temp3[0];
+  }
+  {
+    if (!convert_darray(swig_obj[3],temp4,3)) {
+      return NULL;
+    }
+    arg4 = &temp4[0];
+  }
+  {
+    try {
+      result = (arg1)->roi((char const *)arg2,(double const (*))arg3,(double const (*))arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj((new Geometry3D(static_cast< const Geometry3D& >(result))), SWIGTYPE_p_Geometry3D, SWIG_POINTER_OWN |  0 );
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return resultobj;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_Geometry3D_world_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Geometry3D *arg1 = (Geometry3D *) 0 ;
@@ -26924,21 +29170,22 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Appearance_setColors__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+SWIGINTERN PyObject *_wrap_Appearance_setColors(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Appearance *arg1 = (Appearance *) 0 ;
   int arg2 ;
-  std::vector< float,std::allocator< float > > *arg3 = 0 ;
-  bool arg4 ;
+  float *arg3 = (float *) 0 ;
+  int arg4 ;
+  int arg5 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
-  int res3 = SWIG_OLDOBJ ;
-  bool val4 ;
-  int ecode4 = 0 ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
+  PyObject *swig_obj[3] ;
   
-  if ((nobjs < 4) || (nobjs > 4)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "Appearance_setColors", 3, 3, swig_obj)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_setColors" "', argument " "1"" of type '" "Appearance *""'"); 
@@ -26950,24 +29197,20 @@ SWIGINTERN PyObject *_wrap_Appearance_setColors__SWIG_0(PyObject *SWIGUNUSEDPARM
   } 
   arg2 = static_cast< int >(val2);
   {
-    std::vector< float,std::allocator< float > > *ptr = (std::vector< float,std::allocator< float > > *)0;
-    res3 = swig::asptr(swig_obj[2], &ptr);
-    if (!SWIG_IsOK(res3)) {
-      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "Appearance_setColors" "', argument " "3"" of type '" "std::vector< float,std::allocator< float > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Appearance_setColors" "', argument " "3"" of type '" "std::vector< float,std::allocator< float > > const &""'"); 
-    }
-    arg3 = ptr;
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array3 = obj_to_array_contiguous_allow_conversion(swig_obj[2], NPY_FLOAT,
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 2) ||
+      !require_size(array3, size, 2)) SWIG_fail;
+    arg3 = (float*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
+    arg5 = (int) array_size(array3,1);
   }
-  ecode4 = SWIG_AsVal_bool(swig_obj[3], &val4);
-  if (!SWIG_IsOK(ecode4)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "Appearance_setColors" "', argument " "4"" of type '" "bool""'");
-  } 
-  arg4 = static_cast< bool >(val4);
   {
     try {
-      (arg1)->setColors(arg2,(std::vector< float,std::allocator< float > > const &)*arg3,arg4);
+      (arg1)->setColors(arg2,arg3,arg4,arg5);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -26979,128 +29222,21 @@ SWIGINTERN PyObject *_wrap_Appearance_setColors__SWIG_0(PyObject *SWIGUNUSEDPARM
     }
   }
   resultobj = SWIG_Py_Void();
-  if (SWIG_IsNewObj(res3)) delete arg3;
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
   return resultobj;
 fail:
-  if (SWIG_IsNewObj(res3)) delete arg3;
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Appearance_setColors__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
-  PyObject *resultobj = 0;
-  Appearance *arg1 = (Appearance *) 0 ;
-  int arg2 ;
-  std::vector< float,std::allocator< float > > *arg3 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  int res3 = SWIG_OLDOBJ ;
-  
-  if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_setColors" "', argument " "1"" of type '" "Appearance *""'"); 
-  }
-  arg1 = reinterpret_cast< Appearance * >(argp1);
-  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Appearance_setColors" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
   {
-    std::vector< float,std::allocator< float > > *ptr = (std::vector< float,std::allocator< float > > *)0;
-    res3 = swig::asptr(swig_obj[2], &ptr);
-    if (!SWIG_IsOK(res3)) {
-      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "Appearance_setColors" "', argument " "3"" of type '" "std::vector< float,std::allocator< float > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Appearance_setColors" "', argument " "3"" of type '" "std::vector< float,std::allocator< float > > const &""'"); 
-    }
-    arg3 = ptr;
-  }
-  {
-    try {
-      (arg1)->setColors(arg2,(std::vector< float,std::allocator< float > > const &)*arg3);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
     }
   }
-  resultobj = SWIG_Py_Void();
-  if (SWIG_IsNewObj(res3)) delete arg3;
-  return resultobj;
-fail:
-  if (SWIG_IsNewObj(res3)) delete arg3;
   return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_Appearance_setColors(PyObject *self, PyObject *args) {
-  Py_ssize_t argc;
-  PyObject *argv[5] = {
-    0
-  };
-  
-  if (!(argc = SWIG_Python_UnpackTuple(args, "Appearance_setColors", 0, 4, argv))) SWIG_fail;
-  --argc;
-  if (argc == 3) {
-    int _v;
-    void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Appearance, 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      {
-        int res = SWIG_AsVal_int(argv[1], NULL);
-        _v = SWIG_CheckState(res);
-      }
-      if (_v) {
-        int res = swig::asptr(argv[2], (std::vector< float,std::allocator< float > >**)(0));
-        _v = SWIG_CheckState(res);
-        if (_v) {
-          return _wrap_Appearance_setColors__SWIG_1(self, argc, argv);
-        }
-      }
-    }
-  }
-  if (argc == 4) {
-    int _v;
-    void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Appearance, 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      {
-        int res = SWIG_AsVal_int(argv[1], NULL);
-        _v = SWIG_CheckState(res);
-      }
-      if (_v) {
-        int res = swig::asptr(argv[2], (std::vector< float,std::allocator< float > >**)(0));
-        _v = SWIG_CheckState(res);
-        if (_v) {
-          {
-            int res = SWIG_AsVal_bool(argv[3], NULL);
-            _v = SWIG_CheckState(res);
-          }
-          if (_v) {
-            return _wrap_Appearance_setColors__SWIG_0(self, argc, argv);
-          }
-        }
-      }
-    }
-  }
-  
-fail:
-  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'Appearance_setColors'.\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    Appearance::setColors(int,std::vector< float,std::allocator< float > > const &,bool)\n"
-    "    Appearance::setColors(int,std::vector< float,std::allocator< float > > const &)\n");
-  return 0;
 }
 
 
@@ -27608,50 +29744,47 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_Appearance_setTexture1D(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Appearance_setTexture1D_b(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Appearance *arg1 = (Appearance *) 0 ;
-  int arg2 ;
-  char *arg3 = (char *) 0 ;
-  std::vector< unsigned char,std::allocator< unsigned char > > *arg4 = 0 ;
+  char *arg2 = (char *) 0 ;
+  unsigned char *arg3 = (unsigned char *) 0 ;
+  int arg4 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  int res3 ;
-  char *buf3 = 0 ;
-  int alloc3 = 0 ;
-  void *argp4 = 0 ;
-  int res4 = 0 ;
-  PyObject *swig_obj[4] ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
+  PyObject *swig_obj[3] ;
   
-  if (!SWIG_Python_UnpackTuple(args, "Appearance_setTexture1D", 4, 4, swig_obj)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "Appearance_setTexture1D_b", 3, 3, swig_obj)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_setTexture1D" "', argument " "1"" of type '" "Appearance *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_setTexture1D_b" "', argument " "1"" of type '" "Appearance *""'"); 
   }
   arg1 = reinterpret_cast< Appearance * >(argp1);
-  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Appearance_setTexture1D" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
-  res3 = SWIG_AsCharPtrAndSize(swig_obj[2], &buf3, NULL, &alloc3);
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "Appearance_setTexture1D" "', argument " "3"" of type '" "char const *""'");
+  res2 = SWIG_AsCharPtrAndSize(swig_obj[1], &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Appearance_setTexture1D_b" "', argument " "2"" of type '" "char const *""'");
   }
-  arg3 = reinterpret_cast< char * >(buf3);
-  res4 = SWIG_ConvertPtr(swig_obj[3], &argp4, SWIGTYPE_p_std__vectorT_unsigned_char_std__allocatorT_unsigned_char_t_t,  0  | 0);
-  if (!SWIG_IsOK(res4)) {
-    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "Appearance_setTexture1D" "', argument " "4"" of type '" "std::vector< unsigned char,std::allocator< unsigned char > > const &""'"); 
+  arg2 = reinterpret_cast< char * >(buf2);
+  {
+    npy_intp size[1] = {
+      -1 
+    };
+    array3 = obj_to_array_contiguous_allow_conversion(swig_obj[2],
+      NPY_UBYTE,
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 1) ||
+      !require_size(array3, size, 1)) SWIG_fail;
+    arg3 = (unsigned char*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
   }
-  if (!argp4) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Appearance_setTexture1D" "', argument " "4"" of type '" "std::vector< unsigned char,std::allocator< unsigned char > > const &""'"); 
-  }
-  arg4 = reinterpret_cast< std::vector< unsigned char,std::allocator< unsigned char > > * >(argp4);
   {
     try {
-      (arg1)->setTexture1D(arg2,(char const *)arg3,(std::vector< unsigned char,std::allocator< unsigned char > > const &)*arg4);
+      (arg1)->setTexture1D_b((char const *)arg2,arg3,arg4);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -27663,73 +29796,208 @@ SWIGINTERN PyObject *_wrap_Appearance_setTexture1D(PyObject *SWIGUNUSEDPARM(self
     }
   }
   resultobj = SWIG_Py_Void();
-  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
   return resultobj;
 fail:
-  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
   return NULL;
 }
 
 
-SWIGINTERN PyObject *_wrap_Appearance_setTexture2D__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+SWIGINTERN PyObject *_wrap_Appearance_setTexture1D_i(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Appearance *arg1 = (Appearance *) 0 ;
-  int arg2 ;
-  int arg3 ;
-  char *arg4 = (char *) 0 ;
-  std::vector< unsigned char,std::allocator< unsigned char > > *arg5 = 0 ;
+  char *arg2 = (char *) 0 ;
+  unsigned int *arg3 = (unsigned int *) 0 ;
+  int arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  int val4 ;
+  int ecode4 = 0 ;
+  PyObject *swig_obj[4] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Appearance_setTexture1D_i", 4, 4, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_setTexture1D_i" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  res2 = SWIG_AsCharPtrAndSize(swig_obj[1], &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Appearance_setTexture1D_i" "', argument " "2"" of type '" "char const *""'");
+  }
+  arg2 = reinterpret_cast< char * >(buf2);
+  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p_unsigned_int, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "Appearance_setTexture1D_i" "', argument " "3"" of type '" "unsigned int *""'"); 
+  }
+  arg3 = reinterpret_cast< unsigned int * >(argp3);
+  ecode4 = SWIG_AsVal_int(swig_obj[3], &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "Appearance_setTexture1D_i" "', argument " "4"" of type '" "int""'");
+  } 
+  arg4 = static_cast< int >(val4);
+  {
+    try {
+      (arg1)->setTexture1D_i((char const *)arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return resultobj;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_setTexture1D_channels(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
+  char *arg2 = (char *) 0 ;
+  unsigned char *arg3 = (unsigned char *) 0 ;
+  int arg4 ;
+  int arg5 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
+  PyObject *swig_obj[3] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Appearance_setTexture1D_channels", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_setTexture1D_channels" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  res2 = SWIG_AsCharPtrAndSize(swig_obj[1], &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Appearance_setTexture1D_channels" "', argument " "2"" of type '" "char const *""'");
+  }
+  arg2 = reinterpret_cast< char * >(buf2);
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array3 = obj_to_array_contiguous_allow_conversion(swig_obj[2], NPY_UBYTE,
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 2) ||
+      !require_size(array3, size, 2)) SWIG_fail;
+    arg3 = (unsigned char*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
+    arg5 = (int) array_size(array3,1);
+  }
+  {
+    try {
+      (arg1)->setTexture1D_channels((char const *)arg2,arg3,arg4,arg5);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  return resultobj;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_setTexture2D_b__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
+  char *arg2 = (char *) 0 ;
+  unsigned char *arg3 = (unsigned char *) 0 ;
+  int arg4 ;
+  int arg5 ;
   bool arg6 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  int val3 ;
-  int ecode3 = 0 ;
-  int res4 ;
-  char *buf4 = 0 ;
-  int alloc4 = 0 ;
-  void *argp5 = 0 ;
-  int res5 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
   bool val6 ;
   int ecode6 = 0 ;
   
-  if ((nobjs < 6) || (nobjs > 6)) SWIG_fail;
+  if ((nobjs < 4) || (nobjs > 4)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_setTexture2D" "', argument " "1"" of type '" "Appearance *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_setTexture2D_b" "', argument " "1"" of type '" "Appearance *""'"); 
   }
   arg1 = reinterpret_cast< Appearance * >(argp1);
-  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Appearance_setTexture2D" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
-  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
-  if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Appearance_setTexture2D" "', argument " "3"" of type '" "int""'");
-  } 
-  arg3 = static_cast< int >(val3);
-  res4 = SWIG_AsCharPtrAndSize(swig_obj[3], &buf4, NULL, &alloc4);
-  if (!SWIG_IsOK(res4)) {
-    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "Appearance_setTexture2D" "', argument " "4"" of type '" "char const *""'");
+  res2 = SWIG_AsCharPtrAndSize(swig_obj[1], &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Appearance_setTexture2D_b" "', argument " "2"" of type '" "char const *""'");
   }
-  arg4 = reinterpret_cast< char * >(buf4);
-  res5 = SWIG_ConvertPtr(swig_obj[4], &argp5, SWIGTYPE_p_std__vectorT_unsigned_char_std__allocatorT_unsigned_char_t_t,  0  | 0);
-  if (!SWIG_IsOK(res5)) {
-    SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "Appearance_setTexture2D" "', argument " "5"" of type '" "std::vector< unsigned char,std::allocator< unsigned char > > const &""'"); 
+  arg2 = reinterpret_cast< char * >(buf2);
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array3 = obj_to_array_contiguous_allow_conversion(swig_obj[2], NPY_UBYTE,
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 2) ||
+      !require_size(array3, size, 2)) SWIG_fail;
+    arg3 = (unsigned char*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
+    arg5 = (int) array_size(array3,1);
   }
-  if (!argp5) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Appearance_setTexture2D" "', argument " "5"" of type '" "std::vector< unsigned char,std::allocator< unsigned char > > const &""'"); 
-  }
-  arg5 = reinterpret_cast< std::vector< unsigned char,std::allocator< unsigned char > > * >(argp5);
-  ecode6 = SWIG_AsVal_bool(swig_obj[5], &val6);
+  ecode6 = SWIG_AsVal_bool(swig_obj[3], &val6);
   if (!SWIG_IsOK(ecode6)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "Appearance_setTexture2D" "', argument " "6"" of type '" "bool""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "Appearance_setTexture2D_b" "', argument " "6"" of type '" "bool""'");
   } 
   arg6 = static_cast< bool >(val6);
   {
     try {
-      (arg1)->setTexture2D(arg2,arg3,(char const *)arg4,(std::vector< unsigned char,std::allocator< unsigned char > > const &)*arg5,arg6);
+      (arg1)->setTexture2D_b((char const *)arg2,arg3,arg4,arg5,arg6);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -27741,65 +30009,67 @@ SWIGINTERN PyObject *_wrap_Appearance_setTexture2D__SWIG_0(PyObject *SWIGUNUSEDP
     }
   }
   resultobj = SWIG_Py_Void();
-  if (alloc4 == SWIG_NEWOBJ) delete[] buf4;
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
   return resultobj;
 fail:
-  if (alloc4 == SWIG_NEWOBJ) delete[] buf4;
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
   return NULL;
 }
 
 
-SWIGINTERN PyObject *_wrap_Appearance_setTexture2D__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+SWIGINTERN PyObject *_wrap_Appearance_setTexture2D_b__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
   PyObject *resultobj = 0;
   Appearance *arg1 = (Appearance *) 0 ;
-  int arg2 ;
-  int arg3 ;
-  char *arg4 = (char *) 0 ;
-  std::vector< unsigned char,std::allocator< unsigned char > > *arg5 = 0 ;
+  char *arg2 = (char *) 0 ;
+  unsigned char *arg3 = (unsigned char *) 0 ;
+  int arg4 ;
+  int arg5 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  int val3 ;
-  int ecode3 = 0 ;
-  int res4 ;
-  char *buf4 = 0 ;
-  int alloc4 = 0 ;
-  void *argp5 = 0 ;
-  int res5 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
   
-  if ((nobjs < 5) || (nobjs > 5)) SWIG_fail;
+  if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_setTexture2D" "', argument " "1"" of type '" "Appearance *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_setTexture2D_b" "', argument " "1"" of type '" "Appearance *""'"); 
   }
   arg1 = reinterpret_cast< Appearance * >(argp1);
-  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Appearance_setTexture2D" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
-  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
-  if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Appearance_setTexture2D" "', argument " "3"" of type '" "int""'");
-  } 
-  arg3 = static_cast< int >(val3);
-  res4 = SWIG_AsCharPtrAndSize(swig_obj[3], &buf4, NULL, &alloc4);
-  if (!SWIG_IsOK(res4)) {
-    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "Appearance_setTexture2D" "', argument " "4"" of type '" "char const *""'");
+  res2 = SWIG_AsCharPtrAndSize(swig_obj[1], &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Appearance_setTexture2D_b" "', argument " "2"" of type '" "char const *""'");
   }
-  arg4 = reinterpret_cast< char * >(buf4);
-  res5 = SWIG_ConvertPtr(swig_obj[4], &argp5, SWIGTYPE_p_std__vectorT_unsigned_char_std__allocatorT_unsigned_char_t_t,  0  | 0);
-  if (!SWIG_IsOK(res5)) {
-    SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "Appearance_setTexture2D" "', argument " "5"" of type '" "std::vector< unsigned char,std::allocator< unsigned char > > const &""'"); 
+  arg2 = reinterpret_cast< char * >(buf2);
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array3 = obj_to_array_contiguous_allow_conversion(swig_obj[2], NPY_UBYTE,
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 2) ||
+      !require_size(array3, size, 2)) SWIG_fail;
+    arg3 = (unsigned char*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
+    arg5 = (int) array_size(array3,1);
   }
-  if (!argp5) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Appearance_setTexture2D" "', argument " "5"" of type '" "std::vector< unsigned char,std::allocator< unsigned char > > const &""'"); 
-  }
-  arg5 = reinterpret_cast< std::vector< unsigned char,std::allocator< unsigned char > > * >(argp5);
   {
     try {
-      (arg1)->setTexture2D(arg2,arg3,(char const *)arg4,(std::vector< unsigned char,std::allocator< unsigned char > > const &)*arg5);
+      (arg1)->setTexture2D_b((char const *)arg2,arg3,arg4,arg5);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -27811,81 +30081,77 @@ SWIGINTERN PyObject *_wrap_Appearance_setTexture2D__SWIG_1(PyObject *SWIGUNUSEDP
     }
   }
   resultobj = SWIG_Py_Void();
-  if (alloc4 == SWIG_NEWOBJ) delete[] buf4;
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
   return resultobj;
 fail:
-  if (alloc4 == SWIG_NEWOBJ) delete[] buf4;
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
   return NULL;
 }
 
 
-SWIGINTERN PyObject *_wrap_Appearance_setTexture2D(PyObject *self, PyObject *args) {
+SWIGINTERN PyObject *_wrap_Appearance_setTexture2D_b(PyObject *self, PyObject *args) {
   Py_ssize_t argc;
-  PyObject *argv[7] = {
+  PyObject *argv[5] = {
     0
   };
   
-  if (!(argc = SWIG_Python_UnpackTuple(args, "Appearance_setTexture2D", 0, 6, argv))) SWIG_fail;
+  if (!(argc = SWIG_Python_UnpackTuple(args, "Appearance_setTexture2D_b", 0, 4, argv))) SWIG_fail;
   --argc;
-  if (argc == 5) {
+  if (argc == 3) {
     int _v;
     void *vptr = 0;
     int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Appearance, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
-      {
-        int res = SWIG_AsVal_int(argv[1], NULL);
-        _v = SWIG_CheckState(res);
-      }
+      int res = SWIG_AsCharPtrAndSize(argv[1], 0, NULL, 0);
+      _v = SWIG_CheckState(res);
       if (_v) {
         {
-          int res = SWIG_AsVal_int(argv[2], NULL);
-          _v = SWIG_CheckState(res);
+          _v = is_array(argv[2]) || PySequence_Check(argv[2]);
         }
         if (_v) {
-          int res = SWIG_AsCharPtrAndSize(argv[3], 0, NULL, 0);
-          _v = SWIG_CheckState(res);
-          if (_v) {
-            int res = SWIG_ConvertPtr(argv[4], 0, SWIGTYPE_p_std__vectorT_unsigned_char_std__allocatorT_unsigned_char_t_t, SWIG_POINTER_NO_NULL | 0);
-            _v = SWIG_CheckState(res);
-            if (_v) {
-              return _wrap_Appearance_setTexture2D__SWIG_1(self, argc, argv);
-            }
+          if (argc <= 3) {
+            return _wrap_Appearance_setTexture2D_b__SWIG_1(self, argc, argv);
           }
+          if (argc <= 4) {
+            return _wrap_Appearance_setTexture2D_b__SWIG_1(self, argc, argv);
+          }
+          return _wrap_Appearance_setTexture2D_b__SWIG_1(self, argc, argv);
         }
       }
     }
   }
-  if (argc == 6) {
+  if (argc == 4) {
     int _v;
     void *vptr = 0;
     int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Appearance, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
-      {
-        int res = SWIG_AsVal_int(argv[1], NULL);
-        _v = SWIG_CheckState(res);
-      }
+      int res = SWIG_AsCharPtrAndSize(argv[1], 0, NULL, 0);
+      _v = SWIG_CheckState(res);
       if (_v) {
         {
-          int res = SWIG_AsVal_int(argv[2], NULL);
-          _v = SWIG_CheckState(res);
+          _v = is_array(argv[2]) || PySequence_Check(argv[2]);
         }
         if (_v) {
-          int res = SWIG_AsCharPtrAndSize(argv[3], 0, NULL, 0);
-          _v = SWIG_CheckState(res);
-          if (_v) {
-            int res = SWIG_ConvertPtr(argv[4], 0, SWIGTYPE_p_std__vectorT_unsigned_char_std__allocatorT_unsigned_char_t_t, SWIG_POINTER_NO_NULL | 0);
+          {
+            int res = SWIG_AsVal_bool(argv[3], NULL);
             _v = SWIG_CheckState(res);
-            if (_v) {
-              {
-                int res = SWIG_AsVal_bool(argv[5], NULL);
-                _v = SWIG_CheckState(res);
-              }
-              if (_v) {
-                return _wrap_Appearance_setTexture2D__SWIG_0(self, argc, argv);
-              }
-            }
+          }
+          if (_v) {
+            return _wrap_Appearance_setTexture2D_b__SWIG_0(self, argc, argv);
           }
         }
       }
@@ -27893,43 +30159,63 @@ SWIGINTERN PyObject *_wrap_Appearance_setTexture2D(PyObject *self, PyObject *arg
   }
   
 fail:
-  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'Appearance_setTexture2D'.\n"
+  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'Appearance_setTexture2D_b'.\n"
     "  Possible C/C++ prototypes are:\n"
-    "    Appearance::setTexture2D(int,int,char const *,std::vector< unsigned char,std::allocator< unsigned char > > const &,bool)\n"
-    "    Appearance::setTexture2D(int,int,char const *,std::vector< unsigned char,std::allocator< unsigned char > > const &)\n");
+    "    Appearance::setTexture2D_b(char const *,unsigned char *,int,int,bool)\n"
+    "    Appearance::setTexture2D_b(char const *,unsigned char *,int,int)\n");
   return 0;
 }
 
 
-SWIGINTERN PyObject *_wrap_Appearance_setTexcoords(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_Appearance_setTexture2D_i__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
   PyObject *resultobj = 0;
   Appearance *arg1 = (Appearance *) 0 ;
-  std::vector< double,std::allocator< double > > *arg2 = 0 ;
+  char *arg2 = (char *) 0 ;
+  unsigned int *arg3 = (unsigned int *) 0 ;
+  int arg4 ;
+  int arg5 ;
+  bool arg6 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  int res2 = SWIG_OLDOBJ ;
-  PyObject *swig_obj[2] ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
+  bool val6 ;
+  int ecode6 = 0 ;
   
-  if (!SWIG_Python_UnpackTuple(args, "Appearance_setTexcoords", 2, 2, swig_obj)) SWIG_fail;
+  if ((nobjs < 4) || (nobjs > 4)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_setTexcoords" "', argument " "1"" of type '" "Appearance *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_setTexture2D_i" "', argument " "1"" of type '" "Appearance *""'"); 
   }
   arg1 = reinterpret_cast< Appearance * >(argp1);
-  {
-    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
-    res2 = swig::asptr(swig_obj[1], &ptr);
-    if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Appearance_setTexcoords" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "Appearance_setTexcoords" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
-    }
-    arg2 = ptr;
+  res2 = SWIG_AsCharPtrAndSize(swig_obj[1], &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Appearance_setTexture2D_i" "', argument " "2"" of type '" "char const *""'");
   }
+  arg2 = reinterpret_cast< char * >(buf2);
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array3 = obj_to_array_contiguous_allow_conversion(swig_obj[2], NPY_UINT,
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 2) ||
+      !require_size(array3, size, 2)) SWIG_fail;
+    arg3 = (unsigned int*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
+    arg5 = (int) array_size(array3,1);
+  }
+  ecode6 = SWIG_AsVal_bool(swig_obj[3], &val6);
+  if (!SWIG_IsOK(ecode6)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "Appearance_setTexture2D_i" "', argument " "6"" of type '" "bool""'");
+  } 
+  arg6 = static_cast< bool >(val6);
   {
     try {
-      (arg1)->setTexcoords((std::vector< double,std::allocator< double > > const &)*arg2);
+      (arg1)->setTexture2D_i((char const *)arg2,arg3,arg4,arg5,arg6);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -27941,10 +30227,737 @@ SWIGINTERN PyObject *_wrap_Appearance_setTexcoords(PyObject *SWIGUNUSEDPARM(self
     }
   }
   resultobj = SWIG_Py_Void();
-  if (SWIG_IsNewObj(res2)) delete arg2;
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
   return resultobj;
 fail:
-  if (SWIG_IsNewObj(res2)) delete arg2;
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_setTexture2D_i__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
+  char *arg2 = (char *) 0 ;
+  unsigned int *arg3 = (unsigned int *) 0 ;
+  int arg4 ;
+  int arg5 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
+  
+  if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_setTexture2D_i" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  res2 = SWIG_AsCharPtrAndSize(swig_obj[1], &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Appearance_setTexture2D_i" "', argument " "2"" of type '" "char const *""'");
+  }
+  arg2 = reinterpret_cast< char * >(buf2);
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array3 = obj_to_array_contiguous_allow_conversion(swig_obj[2], NPY_UINT,
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 2) ||
+      !require_size(array3, size, 2)) SWIG_fail;
+    arg3 = (unsigned int*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
+    arg5 = (int) array_size(array3,1);
+  }
+  {
+    try {
+      (arg1)->setTexture2D_i((char const *)arg2,arg3,arg4,arg5);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  return resultobj;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_setTexture2D_i(PyObject *self, PyObject *args) {
+  Py_ssize_t argc;
+  PyObject *argv[5] = {
+    0
+  };
+  
+  if (!(argc = SWIG_Python_UnpackTuple(args, "Appearance_setTexture2D_i", 0, 4, argv))) SWIG_fail;
+  --argc;
+  if (argc == 3) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Appearance, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_AsCharPtrAndSize(argv[1], 0, NULL, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        {
+          _v = is_array(argv[2]) || PySequence_Check(argv[2]);
+        }
+        if (_v) {
+          if (argc <= 3) {
+            return _wrap_Appearance_setTexture2D_i__SWIG_1(self, argc, argv);
+          }
+          if (argc <= 4) {
+            return _wrap_Appearance_setTexture2D_i__SWIG_1(self, argc, argv);
+          }
+          return _wrap_Appearance_setTexture2D_i__SWIG_1(self, argc, argv);
+        }
+      }
+    }
+  }
+  if (argc == 4) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Appearance, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_AsCharPtrAndSize(argv[1], 0, NULL, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        {
+          _v = is_array(argv[2]) || PySequence_Check(argv[2]);
+        }
+        if (_v) {
+          {
+            int res = SWIG_AsVal_bool(argv[3], NULL);
+            _v = SWIG_CheckState(res);
+          }
+          if (_v) {
+            return _wrap_Appearance_setTexture2D_i__SWIG_0(self, argc, argv);
+          }
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'Appearance_setTexture2D_i'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    Appearance::setTexture2D_i(char const *,unsigned int *,int,int,bool)\n"
+    "    Appearance::setTexture2D_i(char const *,unsigned int *,int,int)\n");
+  return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_setTexture2D_channels__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
+  char *arg2 = (char *) 0 ;
+  unsigned char *arg3 = (unsigned char *) 0 ;
+  int arg4 ;
+  int arg5 ;
+  int arg6 ;
+  bool arg7 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
+  bool val7 ;
+  int ecode7 = 0 ;
+  
+  if ((nobjs < 4) || (nobjs > 4)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_setTexture2D_channels" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  res2 = SWIG_AsCharPtrAndSize(swig_obj[1], &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Appearance_setTexture2D_channels" "', argument " "2"" of type '" "char const *""'");
+  }
+  arg2 = reinterpret_cast< char * >(buf2);
+  {
+    npy_intp size[3] = {
+      -1, -1, -1 
+    };
+    array3 = obj_to_array_contiguous_allow_conversion(swig_obj[2], NPY_UBYTE,
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 3) ||
+      !require_size(array3, size, 3)) SWIG_fail;
+    arg3 = (unsigned char*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
+    arg5 = (int) array_size(array3,1);
+    arg6 = (int) array_size(array3,2);
+  }
+  ecode7 = SWIG_AsVal_bool(swig_obj[3], &val7);
+  if (!SWIG_IsOK(ecode7)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode7), "in method '" "Appearance_setTexture2D_channels" "', argument " "7"" of type '" "bool""'");
+  } 
+  arg7 = static_cast< bool >(val7);
+  {
+    try {
+      (arg1)->setTexture2D_channels((char const *)arg2,arg3,arg4,arg5,arg6,arg7);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  return resultobj;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_setTexture2D_channels__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
+  char *arg2 = (char *) 0 ;
+  unsigned char *arg3 = (unsigned char *) 0 ;
+  int arg4 ;
+  int arg5 ;
+  int arg6 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  PyArrayObject *array3 = NULL ;
+  int is_new_object3 = 0 ;
+  
+  if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_setTexture2D_channels" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  res2 = SWIG_AsCharPtrAndSize(swig_obj[1], &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Appearance_setTexture2D_channels" "', argument " "2"" of type '" "char const *""'");
+  }
+  arg2 = reinterpret_cast< char * >(buf2);
+  {
+    npy_intp size[3] = {
+      -1, -1, -1 
+    };
+    array3 = obj_to_array_contiguous_allow_conversion(swig_obj[2], NPY_UBYTE,
+      &is_new_object3);
+    if (!array3 || !require_dimensions(array3, 3) ||
+      !require_size(array3, size, 3)) SWIG_fail;
+    arg3 = (unsigned char*) array_data(array3);
+    arg4 = (int) array_size(array3,0);
+    arg5 = (int) array_size(array3,1);
+    arg6 = (int) array_size(array3,2);
+  }
+  {
+    try {
+      (arg1)->setTexture2D_channels((char const *)arg2,arg3,arg4,arg5,arg6);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  return resultobj;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  {
+    if (is_new_object3 && array3)
+    {
+      Py_DECREF(array3); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_setTexture2D_channels(PyObject *self, PyObject *args) {
+  Py_ssize_t argc;
+  PyObject *argv[5] = {
+    0
+  };
+  
+  if (!(argc = SWIG_Python_UnpackTuple(args, "Appearance_setTexture2D_channels", 0, 4, argv))) SWIG_fail;
+  --argc;
+  if (argc == 3) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Appearance, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_AsCharPtrAndSize(argv[1], 0, NULL, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        {
+          _v = is_array(argv[2]) || PySequence_Check(argv[2]);
+        }
+        if (_v) {
+          if (argc <= 3) {
+            return _wrap_Appearance_setTexture2D_channels__SWIG_1(self, argc, argv);
+          }
+          if (argc <= 4) {
+            return _wrap_Appearance_setTexture2D_channels__SWIG_1(self, argc, argv);
+          }
+          if (argc <= 5) {
+            return _wrap_Appearance_setTexture2D_channels__SWIG_1(self, argc, argv);
+          }
+          return _wrap_Appearance_setTexture2D_channels__SWIG_1(self, argc, argv);
+        }
+      }
+    }
+  }
+  if (argc == 4) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Appearance, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_AsCharPtrAndSize(argv[1], 0, NULL, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        {
+          _v = is_array(argv[2]) || PySequence_Check(argv[2]);
+        }
+        if (_v) {
+          {
+            int res = SWIG_AsVal_bool(argv[3], NULL);
+            _v = SWIG_CheckState(res);
+          }
+          if (_v) {
+            return _wrap_Appearance_setTexture2D_channels__SWIG_0(self, argc, argv);
+          }
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'Appearance_setTexture2D_channels'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    Appearance::setTexture2D_channels(char const *,unsigned char *,int,int,int,bool)\n"
+    "    Appearance::setTexture2D_channels(char const *,unsigned char *,int,int,int)\n");
+  return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_setTexcoords1D(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
+  double *arg2 = (double *) 0 ;
+  int arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Appearance_setTexcoords1D", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_setTexcoords1D" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  {
+    npy_intp size[1] = {
+      -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(swig_obj[1],
+      NPY_DOUBLE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 1) ||
+      !require_size(array2, size, 1)) SWIG_fail;
+    arg2 = (double*) array_data(array2);
+    arg3 = (int) array_size(array2,0);
+  }
+  {
+    try {
+      (arg1)->setTexcoords1D(arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_setTexcoords2D(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
+  double *arg2 = (double *) 0 ;
+  int arg3 ;
+  int arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Appearance_setTexcoords2D", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_setTexcoords2D" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(swig_obj[1], NPY_DOUBLE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 2) ||
+      !require_size(array2, size, 2)) SWIG_fail;
+    arg2 = (double*) array_data(array2);
+    arg3 = (int) array_size(array2,0);
+    arg4 = (int) array_size(array2,1);
+  }
+  {
+    try {
+      (arg1)->setTexcoords2D(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_setTexgen__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
+  double *arg2 = (double *) 0 ;
+  int arg3 ;
+  int arg4 ;
+  bool arg5 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  bool val5 ;
+  int ecode5 = 0 ;
+  
+  if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_setTexgen" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(swig_obj[1], NPY_DOUBLE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 2) ||
+      !require_size(array2, size, 2)) SWIG_fail;
+    arg2 = (double*) array_data(array2);
+    arg3 = (int) array_size(array2,0);
+    arg4 = (int) array_size(array2,1);
+  }
+  ecode5 = SWIG_AsVal_bool(swig_obj[2], &val5);
+  if (!SWIG_IsOK(ecode5)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "Appearance_setTexgen" "', argument " "5"" of type '" "bool""'");
+  } 
+  arg5 = static_cast< bool >(val5);
+  {
+    try {
+      (arg1)->setTexgen(arg2,arg3,arg4,arg5);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_setTexgen__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
+  double *arg2 = (double *) 0 ;
+  int arg3 ;
+  int arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  
+  if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_setTexgen" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  {
+    npy_intp size[2] = {
+      -1, -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(swig_obj[1], NPY_DOUBLE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 2) ||
+      !require_size(array2, size, 2)) SWIG_fail;
+    arg2 = (double*) array_data(array2);
+    arg3 = (int) array_size(array2,0);
+    arg4 = (int) array_size(array2,1);
+  }
+  {
+    try {
+      (arg1)->setTexgen(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_setTexgen(PyObject *self, PyObject *args) {
+  Py_ssize_t argc;
+  PyObject *argv[4] = {
+    0
+  };
+  
+  if (!(argc = SWIG_Python_UnpackTuple(args, "Appearance_setTexgen", 0, 3, argv))) SWIG_fail;
+  --argc;
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Appearance, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        _v = is_array(argv[1]) || PySequence_Check(argv[1]);
+      }
+      if (_v) {
+        if (argc <= 2) {
+          return _wrap_Appearance_setTexgen__SWIG_1(self, argc, argv);
+        }
+        if (argc <= 3) {
+          return _wrap_Appearance_setTexgen__SWIG_1(self, argc, argv);
+        }
+        return _wrap_Appearance_setTexgen__SWIG_1(self, argc, argv);
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Appearance, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        _v = is_array(argv[1]) || PySequence_Check(argv[1]);
+      }
+      if (_v) {
+        {
+          int res = SWIG_AsVal_bool(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          return _wrap_Appearance_setTexgen__SWIG_0(self, argc, argv);
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'Appearance_setTexgen'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    Appearance::setTexgen(double *,int,int,bool)\n"
+    "    Appearance::setTexgen(double *,int,int)\n");
+  return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_setTexWrap(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
+  bool arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  bool val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Appearance_setTexWrap", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_setTexWrap" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  ecode2 = SWIG_AsVal_bool(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Appearance_setTexWrap" "', argument " "2"" of type '" "bool""'");
+  } 
+  arg2 = static_cast< bool >(val2);
+  {
+    try {
+      (arg1)->setTexWrap(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
   return NULL;
 }
 
@@ -30846,6 +33859,120 @@ SWIGINTERN PyObject *_wrap_TransformPoser_enableRotation(PyObject *SWIGUNUSEDPAR
   {
     try {
       (arg1)->enableRotation(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_TransformPoser_enableTranslationAxes(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  TransformPoser *arg1 = (TransformPoser *) 0 ;
+  bool arg2 ;
+  bool arg3 ;
+  bool arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  bool val2 ;
+  int ecode2 = 0 ;
+  bool val3 ;
+  int ecode3 = 0 ;
+  bool val4 ;
+  int ecode4 = 0 ;
+  PyObject *swig_obj[4] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "TransformPoser_enableTranslationAxes", 4, 4, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_TransformPoser, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TransformPoser_enableTranslationAxes" "', argument " "1"" of type '" "TransformPoser *""'"); 
+  }
+  arg1 = reinterpret_cast< TransformPoser * >(argp1);
+  ecode2 = SWIG_AsVal_bool(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "TransformPoser_enableTranslationAxes" "', argument " "2"" of type '" "bool""'");
+  } 
+  arg2 = static_cast< bool >(val2);
+  ecode3 = SWIG_AsVal_bool(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "TransformPoser_enableTranslationAxes" "', argument " "3"" of type '" "bool""'");
+  } 
+  arg3 = static_cast< bool >(val3);
+  ecode4 = SWIG_AsVal_bool(swig_obj[3], &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "TransformPoser_enableTranslationAxes" "', argument " "4"" of type '" "bool""'");
+  } 
+  arg4 = static_cast< bool >(val4);
+  {
+    try {
+      (arg1)->enableTranslationAxes(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_TransformPoser_enableRotationAxes(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  TransformPoser *arg1 = (TransformPoser *) 0 ;
+  bool arg2 ;
+  bool arg3 ;
+  bool arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  bool val2 ;
+  int ecode2 = 0 ;
+  bool val3 ;
+  int ecode3 = 0 ;
+  bool val4 ;
+  int ecode4 = 0 ;
+  PyObject *swig_obj[4] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "TransformPoser_enableRotationAxes", 4, 4, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_TransformPoser, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TransformPoser_enableRotationAxes" "', argument " "1"" of type '" "TransformPoser *""'"); 
+  }
+  arg1 = reinterpret_cast< TransformPoser * >(argp1);
+  ecode2 = SWIG_AsVal_bool(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "TransformPoser_enableRotationAxes" "', argument " "2"" of type '" "bool""'");
+  } 
+  arg2 = static_cast< bool >(val2);
+  ecode3 = SWIG_AsVal_bool(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "TransformPoser_enableRotationAxes" "', argument " "3"" of type '" "bool""'");
+  } 
+  arg3 = static_cast< bool >(val3);
+  ecode4 = SWIG_AsVal_bool(swig_obj[3], &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "TransformPoser_enableRotationAxes" "', argument " "4"" of type '" "bool""'");
+  } 
+  arg4 = static_cast< bool >(val4);
+  {
+    try {
+      (arg1)->enableRotationAxes(arg2,arg3,arg4);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -34723,15 +37850,21 @@ SWIGINTERN PyObject *_wrap_RobotModelLink_getJacobian(PyObject *SWIGUNUSEDPARM(s
   PyObject *resultobj = 0;
   RobotModelLink *arg1 = (RobotModelLink *) 0 ;
   double *arg2 ;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg3 = 0 ;
+  double **arg3 = (double **) 0 ;
+  int *arg4 = (int *) 0 ;
+  int *arg5 = (int *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   double temp2[3] ;
-  std::vector< std::vector< double > > temp3 ;
+  double *data_temp3 = NULL ;
+  int dim1_temp3 ;
+  int dim2_temp3 ;
   PyObject *swig_obj[2] ;
   
   {
-    arg3 = &temp3;
+    arg3 = &data_temp3;
+    arg4 = &dim1_temp3;
+    arg5 = &dim2_temp3;
   }
   if (!SWIG_Python_UnpackTuple(args, "RobotModelLink_getJacobian", 2, 2, swig_obj)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_RobotModelLink, 0 |  0 );
@@ -34747,7 +37880,7 @@ SWIGINTERN PyObject *_wrap_RobotModelLink_getJacobian(PyObject *SWIGUNUSEDPARM(s
   }
   {
     try {
-      (arg1)->getJacobian((double const (*))arg2,*arg3);
+      (arg1)->getJacobian((double const (*))arg2,arg3,arg4,arg5);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -34760,106 +37893,30 @@ SWIGINTERN PyObject *_wrap_RobotModelLink_getJacobian(PyObject *SWIGUNUSEDPARM(s
   }
   resultobj = SWIG_Py_Void();
   {
-    PyObject *o, *o2, *o3;
-    o = convert_dmatrix_obj((*arg3));
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
+    npy_intp dims[2] = {
+      *arg4, *arg5 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, (void*)(*arg3));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg3), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg3), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
   }
   return resultobj;
 fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_RobotModelLink_getJacobian2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  RobotModelLink *arg1 = (RobotModelLink *) 0 ;
-  double *arg2 ;
-  std::vector< int,std::allocator< int > > *arg3 = 0 ;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg4 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  double temp2[3] ;
-  int res3 = SWIG_OLDOBJ ;
-  std::vector< std::vector< double > > temp4 ;
-  PyObject *swig_obj[3] ;
-  
-  {
-    arg4 = &temp4;
-  }
-  if (!SWIG_Python_UnpackTuple(args, "RobotModelLink_getJacobian2", 3, 3, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_RobotModelLink, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelLink_getJacobian2" "', argument " "1"" of type '" "RobotModelLink *""'"); 
-  }
-  arg1 = reinterpret_cast< RobotModelLink * >(argp1);
-  {
-    if (!convert_darray(swig_obj[1],temp2,3)) {
-      return NULL;
-    }
-    arg2 = &temp2[0];
-  }
-  {
-    std::vector< int,std::allocator< int > > *ptr = (std::vector< int,std::allocator< int > > *)0;
-    res3 = swig::asptr(swig_obj[2], &ptr);
-    if (!SWIG_IsOK(res3)) {
-      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "RobotModelLink_getJacobian2" "', argument " "3"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "RobotModelLink_getJacobian2" "', argument " "3"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
-    }
-    arg3 = ptr;
-  }
-  {
-    try {
-      (arg1)->getJacobian2((double const (*))arg2,(std::vector< int,std::allocator< int > > const &)*arg3,*arg4);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_Py_Void();
-  {
-    PyObject *o, *o2, *o3;
-    o = convert_dmatrix_obj((*arg4));
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
-  }
-  if (SWIG_IsNewObj(res3)) delete arg3;
-  return resultobj;
-fail:
-  if (SWIG_IsNewObj(res3)) delete arg3;
   return NULL;
 }
 
@@ -34868,15 +37925,21 @@ SWIGINTERN PyObject *_wrap_RobotModelLink_getPositionJacobian(PyObject *SWIGUNUS
   PyObject *resultobj = 0;
   RobotModelLink *arg1 = (RobotModelLink *) 0 ;
   double *arg2 ;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg3 = 0 ;
+  double **arg3 = (double **) 0 ;
+  int *arg4 = (int *) 0 ;
+  int *arg5 = (int *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   double temp2[3] ;
-  std::vector< std::vector< double > > temp3 ;
+  double *data_temp3 = NULL ;
+  int dim1_temp3 ;
+  int dim2_temp3 ;
   PyObject *swig_obj[2] ;
   
   {
-    arg3 = &temp3;
+    arg3 = &data_temp3;
+    arg4 = &dim1_temp3;
+    arg5 = &dim2_temp3;
   }
   if (!SWIG_Python_UnpackTuple(args, "RobotModelLink_getPositionJacobian", 2, 2, swig_obj)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_RobotModelLink, 0 |  0 );
@@ -34892,7 +37955,7 @@ SWIGINTERN PyObject *_wrap_RobotModelLink_getPositionJacobian(PyObject *SWIGUNUS
   }
   {
     try {
-      (arg1)->getPositionJacobian((double const (*))arg2,*arg3);
+      (arg1)->getPositionJacobian((double const (*))arg2,arg3,arg4,arg5);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -34905,23 +37968,27 @@ SWIGINTERN PyObject *_wrap_RobotModelLink_getPositionJacobian(PyObject *SWIGUNUS
   }
   resultobj = SWIG_Py_Void();
   {
-    PyObject *o, *o2, *o3;
-    o = convert_dmatrix_obj((*arg3));
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
+    npy_intp dims[2] = {
+      *arg4, *arg5 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, (void*)(*arg3));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg3), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg3), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
   }
   return resultobj;
 fail:
@@ -34929,26 +37996,100 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_RobotModelLink_getPositionJacobian2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_RobotModelLink_getOrientationJacobian(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelLink *arg1 = (RobotModelLink *) 0 ;
+  double **arg2 = (double **) 0 ;
+  int *arg3 = (int *) 0 ;
+  int *arg4 = (int *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double *data_temp2 = NULL ;
+  int dim1_temp2 ;
+  int dim2_temp2 ;
+  PyObject *swig_obj[1] ;
+  
+  {
+    arg2 = &data_temp2;
+    arg3 = &dim1_temp2;
+    arg4 = &dim2_temp2;
+  }
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_RobotModelLink, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelLink_getOrientationJacobian" "', argument " "1"" of type '" "RobotModelLink *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelLink * >(argp1);
+  {
+    try {
+      (arg1)->getOrientationJacobian(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    npy_intp dims[2] = {
+      *arg3, *arg4 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, (void*)(*arg2));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg2), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg2), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModelLink_getJacobianCols(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RobotModelLink *arg1 = (RobotModelLink *) 0 ;
   double *arg2 ;
   std::vector< int,std::allocator< int > > *arg3 = 0 ;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg4 = 0 ;
+  double **arg4 = (double **) 0 ;
+  int *arg5 = (int *) 0 ;
+  int *arg6 = (int *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   double temp2[3] ;
   int res3 = SWIG_OLDOBJ ;
-  std::vector< std::vector< double > > temp4 ;
+  double *data_temp4 = NULL ;
+  int dim1_temp4 ;
+  int dim2_temp4 ;
   PyObject *swig_obj[3] ;
   
   {
-    arg4 = &temp4;
+    arg4 = &data_temp4;
+    arg5 = &dim1_temp4;
+    arg6 = &dim2_temp4;
   }
-  if (!SWIG_Python_UnpackTuple(args, "RobotModelLink_getPositionJacobian2", 3, 3, swig_obj)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "RobotModelLink_getJacobianCols", 3, 3, swig_obj)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_RobotModelLink, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelLink_getPositionJacobian2" "', argument " "1"" of type '" "RobotModelLink *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelLink_getJacobianCols" "', argument " "1"" of type '" "RobotModelLink *""'"); 
   }
   arg1 = reinterpret_cast< RobotModelLink * >(argp1);
   {
@@ -34961,16 +38102,16 @@ SWIGINTERN PyObject *_wrap_RobotModelLink_getPositionJacobian2(PyObject *SWIGUNU
     std::vector< int,std::allocator< int > > *ptr = (std::vector< int,std::allocator< int > > *)0;
     res3 = swig::asptr(swig_obj[2], &ptr);
     if (!SWIG_IsOK(res3)) {
-      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "RobotModelLink_getPositionJacobian2" "', argument " "3"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "RobotModelLink_getJacobianCols" "', argument " "3"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "RobotModelLink_getPositionJacobian2" "', argument " "3"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "RobotModelLink_getJacobianCols" "', argument " "3"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
     }
     arg3 = ptr;
   }
   {
     try {
-      (arg1)->getPositionJacobian2((double const (*))arg2,(std::vector< int,std::allocator< int > > const &)*arg3,*arg4);
+      (arg1)->getJacobianCols((double const (*))arg2,(std::vector< int,std::allocator< int > > const &)*arg3,arg4,arg5,arg6);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -34983,23 +38124,27 @@ SWIGINTERN PyObject *_wrap_RobotModelLink_getPositionJacobian2(PyObject *SWIGUNU
   }
   resultobj = SWIG_Py_Void();
   {
-    PyObject *o, *o2, *o3;
-    o = convert_dmatrix_obj((*arg4));
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
+    npy_intp dims[2] = {
+      *arg5, *arg6 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, (void*)(*arg4));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg4), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg4), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
   }
   if (SWIG_IsNewObj(res3)) delete arg3;
   return resultobj;
@@ -35009,28 +38154,54 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_RobotModelLink_getOrientationJacobian(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_RobotModelLink_getPositionJacobianCols(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RobotModelLink *arg1 = (RobotModelLink *) 0 ;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg2 = 0 ;
+  double *arg2 ;
+  std::vector< int,std::allocator< int > > *arg3 = 0 ;
+  double **arg4 = (double **) 0 ;
+  int *arg5 = (int *) 0 ;
+  int *arg6 = (int *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  std::vector< std::vector< double > > temp2 ;
-  PyObject *swig_obj[1] ;
+  double temp2[3] ;
+  int res3 = SWIG_OLDOBJ ;
+  double *data_temp4 = NULL ;
+  int dim1_temp4 ;
+  int dim2_temp4 ;
+  PyObject *swig_obj[3] ;
   
   {
-    arg2 = &temp2;
+    arg4 = &data_temp4;
+    arg5 = &dim1_temp4;
+    arg6 = &dim2_temp4;
   }
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
+  if (!SWIG_Python_UnpackTuple(args, "RobotModelLink_getPositionJacobianCols", 3, 3, swig_obj)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_RobotModelLink, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelLink_getOrientationJacobian" "', argument " "1"" of type '" "RobotModelLink *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelLink_getPositionJacobianCols" "', argument " "1"" of type '" "RobotModelLink *""'"); 
   }
   arg1 = reinterpret_cast< RobotModelLink * >(argp1);
   {
+    if (!convert_darray(swig_obj[1],temp2,3)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    std::vector< int,std::allocator< int > > *ptr = (std::vector< int,std::allocator< int > > *)0;
+    res3 = swig::asptr(swig_obj[2], &ptr);
+    if (!SWIG_IsOK(res3)) {
+      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "RobotModelLink_getPositionJacobianCols" "', argument " "3"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "RobotModelLink_getPositionJacobianCols" "', argument " "3"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
+    }
+    arg3 = ptr;
+  }
+  {
     try {
-      (arg1)->getOrientationJacobian(*arg2);
+      (arg1)->getPositionJacobianCols((double const (*))arg2,(std::vector< int,std::allocator< int > > const &)*arg3,arg4,arg5,arg6);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -35043,64 +38214,76 @@ SWIGINTERN PyObject *_wrap_RobotModelLink_getOrientationJacobian(PyObject *SWIGU
   }
   resultobj = SWIG_Py_Void();
   {
-    PyObject *o, *o2, *o3;
-    o = convert_dmatrix_obj((*arg2));
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
+    npy_intp dims[2] = {
+      *arg5, *arg6 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, (void*)(*arg4));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg4), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg4), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
   }
+  if (SWIG_IsNewObj(res3)) delete arg3;
   return resultobj;
 fail:
+  if (SWIG_IsNewObj(res3)) delete arg3;
   return NULL;
 }
 
 
-SWIGINTERN PyObject *_wrap_RobotModelLink_getOrientationJacobian2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_RobotModelLink_getRotationJacobianCols(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RobotModelLink *arg1 = (RobotModelLink *) 0 ;
   std::vector< int,std::allocator< int > > *arg2 = 0 ;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg3 = 0 ;
+  double **arg3 = (double **) 0 ;
+  int *arg4 = (int *) 0 ;
+  int *arg5 = (int *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   int res2 = SWIG_OLDOBJ ;
-  std::vector< std::vector< double > > temp3 ;
+  double *data_temp3 = NULL ;
+  int dim1_temp3 ;
+  int dim2_temp3 ;
   PyObject *swig_obj[2] ;
   
   {
-    arg3 = &temp3;
+    arg3 = &data_temp3;
+    arg4 = &dim1_temp3;
+    arg5 = &dim2_temp3;
   }
-  if (!SWIG_Python_UnpackTuple(args, "RobotModelLink_getOrientationJacobian2", 2, 2, swig_obj)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "RobotModelLink_getRotationJacobianCols", 2, 2, swig_obj)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_RobotModelLink, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelLink_getOrientationJacobian2" "', argument " "1"" of type '" "RobotModelLink *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelLink_getRotationJacobianCols" "', argument " "1"" of type '" "RobotModelLink *""'"); 
   }
   arg1 = reinterpret_cast< RobotModelLink * >(argp1);
   {
     std::vector< int,std::allocator< int > > *ptr = (std::vector< int,std::allocator< int > > *)0;
     res2 = swig::asptr(swig_obj[1], &ptr);
     if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "RobotModelLink_getOrientationJacobian2" "', argument " "2"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "RobotModelLink_getRotationJacobianCols" "', argument " "2"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "RobotModelLink_getOrientationJacobian2" "', argument " "2"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "RobotModelLink_getRotationJacobianCols" "', argument " "2"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
     }
     arg2 = ptr;
   }
   {
     try {
-      (arg1)->getOrientationJacobian2((std::vector< int,std::allocator< int > > const &)*arg2,*arg3);
+      (arg1)->getRotationJacobianCols((std::vector< int,std::allocator< int > > const &)*arg2,arg3,arg4,arg5);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -35113,23 +38296,27 @@ SWIGINTERN PyObject *_wrap_RobotModelLink_getOrientationJacobian2(PyObject *SWIG
   }
   resultobj = SWIG_Py_Void();
   {
-    PyObject *o, *o2, *o3;
-    o = convert_dmatrix_obj((*arg3));
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
+    npy_intp dims[2] = {
+      *arg4, *arg5 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, (void*)(*arg3));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg3), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg3), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
   }
   if (SWIG_IsNewObj(res2)) delete arg2;
   return resultobj;
@@ -35367,25 +38554,24 @@ SWIGINTERN PyObject *_wrap_RobotModelLink_getPositionHessian(PyObject *SWIGUNUSE
   PyObject *resultobj = 0;
   RobotModelLink *arg1 = (RobotModelLink *) 0 ;
   double *arg2 ;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg3 = 0 ;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg4 = 0 ;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg5 = 0 ;
+  double **arg3 = (double **) 0 ;
+  int *arg4 = (int *) 0 ;
+  int *arg5 = (int *) 0 ;
+  int *arg6 = (int *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   double temp2[3] ;
-  std::vector< std::vector< double > > temp3 ;
-  std::vector< std::vector< double > > temp4 ;
-  std::vector< std::vector< double > > temp5 ;
+  double *data_temp3 = NULL ;
+  int dim1_temp3 ;
+  int dim2_temp3 ;
+  int dim3_temp3 ;
   PyObject *swig_obj[2] ;
   
   {
-    arg3 = &temp3;
-  }
-  {
-    arg4 = &temp4;
-  }
-  {
-    arg5 = &temp5;
+    arg3 = &data_temp3;
+    arg4 = &dim1_temp3;
+    arg5 = &dim2_temp3;
+    arg6 = &dim3_temp3;
   }
   if (!SWIG_Python_UnpackTuple(args, "RobotModelLink_getPositionHessian", 2, 2, swig_obj)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_RobotModelLink, 0 |  0 );
@@ -35401,7 +38587,7 @@ SWIGINTERN PyObject *_wrap_RobotModelLink_getPositionHessian(PyObject *SWIGUNUSE
   }
   {
     try {
-      (arg1)->getPositionHessian((double const (*))arg2,*arg3,*arg4,*arg5);
+      (arg1)->getPositionHessian((double const (*))arg2,arg3,arg4,arg5,arg6);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -35414,61 +38600,27 @@ SWIGINTERN PyObject *_wrap_RobotModelLink_getPositionHessian(PyObject *SWIGUNUSE
   }
   resultobj = SWIG_Py_Void();
   {
-    PyObject *o, *o2, *o3;
-    o = convert_dmatrix_obj((*arg3));
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
-  }
-  {
-    PyObject *o, *o2, *o3;
-    o = convert_dmatrix_obj((*arg4));
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
-  }
-  {
-    PyObject *o, *o2, *o3;
-    o = convert_dmatrix_obj((*arg5));
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
+    npy_intp dims[3] = {
+      *arg4, *arg5, *arg6 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(3, dims, NPY_DOUBLE, (void*)(*arg3));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg3), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg3), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
   }
   return resultobj;
 fail:
@@ -35479,24 +38631,23 @@ fail:
 SWIGINTERN PyObject *_wrap_RobotModelLink_getOrientationHessian(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RobotModelLink *arg1 = (RobotModelLink *) 0 ;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg2 = 0 ;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg3 = 0 ;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg4 = 0 ;
+  double **arg2 = (double **) 0 ;
+  int *arg3 = (int *) 0 ;
+  int *arg4 = (int *) 0 ;
+  int *arg5 = (int *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  std::vector< std::vector< double > > temp2 ;
-  std::vector< std::vector< double > > temp3 ;
-  std::vector< std::vector< double > > temp4 ;
+  double *data_temp2 = NULL ;
+  int dim1_temp2 ;
+  int dim2_temp2 ;
+  int dim3_temp2 ;
   PyObject *swig_obj[1] ;
   
   {
-    arg2 = &temp2;
-  }
-  {
-    arg3 = &temp3;
-  }
-  {
-    arg4 = &temp4;
+    arg2 = &data_temp2;
+    arg3 = &dim1_temp2;
+    arg4 = &dim2_temp2;
+    arg5 = &dim3_temp2;
   }
   if (!args) SWIG_fail;
   swig_obj[0] = args;
@@ -35507,7 +38658,7 @@ SWIGINTERN PyObject *_wrap_RobotModelLink_getOrientationHessian(PyObject *SWIGUN
   arg1 = reinterpret_cast< RobotModelLink * >(argp1);
   {
     try {
-      (arg1)->getOrientationHessian(*arg2,*arg3,*arg4);
+      (arg1)->getOrientationHessian(arg2,arg3,arg4,arg5);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -35520,61 +38671,27 @@ SWIGINTERN PyObject *_wrap_RobotModelLink_getOrientationHessian(PyObject *SWIGUN
   }
   resultobj = SWIG_Py_Void();
   {
-    PyObject *o, *o2, *o3;
-    o = convert_dmatrix_obj((*arg2));
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
-  }
-  {
-    PyObject *o, *o2, *o3;
-    o = convert_dmatrix_obj((*arg3));
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
-  }
-  {
-    PyObject *o, *o2, *o3;
-    o = convert_dmatrix_obj((*arg4));
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
+    npy_intp dims[3] = {
+      *arg3, *arg4, *arg5 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(3, dims, NPY_DOUBLE, (void*)(*arg2));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg2), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg2), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
   }
   return resultobj;
 fail:
@@ -35917,7 +39034,7 @@ fail:
 SWIGINTERN PyObject *_wrap_RobotModelLink_robotPtr_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RobotModelLink *arg1 = (RobotModelLink *) 0 ;
-  Robot *arg2 = (Robot *) 0 ;
+  Klampt::RobotModel *arg2 = (Klampt::RobotModel *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -35930,11 +39047,11 @@ SWIGINTERN PyObject *_wrap_RobotModelLink_robotPtr_set(PyObject *SWIGUNUSEDPARM(
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelLink_robotPtr_set" "', argument " "1"" of type '" "RobotModelLink *""'"); 
   }
   arg1 = reinterpret_cast< RobotModelLink * >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_Robot, SWIG_POINTER_DISOWN |  0 );
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_Klampt__RobotModel, SWIG_POINTER_DISOWN |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "RobotModelLink_robotPtr_set" "', argument " "2"" of type '" "Robot *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "RobotModelLink_robotPtr_set" "', argument " "2"" of type '" "Klampt::RobotModel *""'"); 
   }
-  arg2 = reinterpret_cast< Robot * >(argp2);
+  arg2 = reinterpret_cast< Klampt::RobotModel * >(argp2);
   if (arg1) (arg1)->robotPtr = arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
@@ -35949,7 +39066,7 @@ SWIGINTERN PyObject *_wrap_RobotModelLink_robotPtr_get(PyObject *SWIGUNUSEDPARM(
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject *swig_obj[1] ;
-  Robot *result = 0 ;
+  Klampt::RobotModel *result = 0 ;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
@@ -35958,8 +39075,8 @@ SWIGINTERN PyObject *_wrap_RobotModelLink_robotPtr_get(PyObject *SWIGUNUSEDPARM(
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelLink_robotPtr_get" "', argument " "1"" of type '" "RobotModelLink *""'"); 
   }
   arg1 = reinterpret_cast< RobotModelLink * >(argp1);
-  result = (Robot *) ((arg1)->robotPtr);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Robot, 0 |  0 );
+  result = (Klampt::RobotModel *) ((arg1)->robotPtr);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Klampt__RobotModel, 0 |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -36119,6 +39236,50 @@ SWIGINTERN PyObject *_wrap_RobotModelDriver_getName(PyObject *SWIGUNUSEDPARM(sel
   resultobj = SWIG_FromCharPtr((const char *)result);
   return resultobj;
 fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModelDriver_setName(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelDriver *arg1 = (RobotModelDriver *) 0 ;
+  char *arg2 = (char *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "RobotModelDriver_setName", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_RobotModelDriver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelDriver_setName" "', argument " "1"" of type '" "RobotModelDriver *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelDriver * >(argp1);
+  res2 = SWIG_AsCharPtrAndSize(swig_obj[1], &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "RobotModelDriver_setName" "', argument " "2"" of type '" "char const *""'");
+  }
+  arg2 = reinterpret_cast< char * >(buf2);
+  {
+    try {
+      (arg1)->setName((char const *)arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  return resultobj;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
   return NULL;
 }
 
@@ -36520,6 +39681,238 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_RobotModelDriver_getLimits(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelDriver *arg1 = (RobotModelDriver *) 0 ;
+  double *arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[2] ;
+  PyObject *swig_obj[1] ;
+  
+  {
+    arg2 = &temp2[0];
+  }
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_RobotModelDriver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelDriver_getLimits" "', argument " "1"" of type '" "RobotModelDriver *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelDriver * >(argp1);
+  {
+    try {
+      (arg1)->getLimits(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg2,2);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModelDriver_getVelocityLimits(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelDriver *arg1 = (RobotModelDriver *) 0 ;
+  double *arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[2] ;
+  PyObject *swig_obj[1] ;
+  
+  {
+    arg2 = &temp2[0];
+  }
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_RobotModelDriver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelDriver_getVelocityLimits" "', argument " "1"" of type '" "RobotModelDriver *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelDriver * >(argp1);
+  {
+    try {
+      (arg1)->getVelocityLimits(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg2,2);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModelDriver_getAccelerationLimits(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelDriver *arg1 = (RobotModelDriver *) 0 ;
+  double *arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[2] ;
+  PyObject *swig_obj[1] ;
+  
+  {
+    arg2 = &temp2[0];
+  }
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_RobotModelDriver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelDriver_getAccelerationLimits" "', argument " "1"" of type '" "RobotModelDriver *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelDriver * >(argp1);
+  {
+    try {
+      (arg1)->getAccelerationLimits(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg2,2);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModelDriver_getTorqueLimits(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelDriver *arg1 = (RobotModelDriver *) 0 ;
+  double *arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[2] ;
+  PyObject *swig_obj[1] ;
+  
+  {
+    arg2 = &temp2[0];
+  }
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_RobotModelDriver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelDriver_getTorqueLimits" "', argument " "1"" of type '" "RobotModelDriver *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelDriver * >(argp1);
+  {
+    try {
+      (arg1)->getTorqueLimits(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg2,2);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_RobotModelDriver_world_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RobotModelDriver *arg1 = (RobotModelDriver *) 0 ;
@@ -36627,7 +40020,7 @@ fail:
 SWIGINTERN PyObject *_wrap_RobotModelDriver_robotPtr_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RobotModelDriver *arg1 = (RobotModelDriver *) 0 ;
-  Robot *arg2 = (Robot *) 0 ;
+  Klampt::RobotModel *arg2 = (Klampt::RobotModel *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -36640,11 +40033,11 @@ SWIGINTERN PyObject *_wrap_RobotModelDriver_robotPtr_set(PyObject *SWIGUNUSEDPAR
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelDriver_robotPtr_set" "', argument " "1"" of type '" "RobotModelDriver *""'"); 
   }
   arg1 = reinterpret_cast< RobotModelDriver * >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_Robot, SWIG_POINTER_DISOWN |  0 );
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_Klampt__RobotModel, SWIG_POINTER_DISOWN |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "RobotModelDriver_robotPtr_set" "', argument " "2"" of type '" "Robot *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "RobotModelDriver_robotPtr_set" "', argument " "2"" of type '" "Klampt::RobotModel *""'"); 
   }
-  arg2 = reinterpret_cast< Robot * >(argp2);
+  arg2 = reinterpret_cast< Klampt::RobotModel * >(argp2);
   if (arg1) (arg1)->robotPtr = arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
@@ -36659,7 +40052,7 @@ SWIGINTERN PyObject *_wrap_RobotModelDriver_robotPtr_get(PyObject *SWIGUNUSEDPAR
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject *swig_obj[1] ;
-  Robot *result = 0 ;
+  Klampt::RobotModel *result = 0 ;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
@@ -36668,8 +40061,8 @@ SWIGINTERN PyObject *_wrap_RobotModelDriver_robotPtr_get(PyObject *SWIGUNUSEDPAR
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelDriver_robotPtr_get" "', argument " "1"" of type '" "RobotModelDriver *""'"); 
   }
   arg1 = reinterpret_cast< RobotModelDriver * >(argp1);
-  result = (Robot *) ((arg1)->robotPtr);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Robot, 0 |  0 );
+  result = (Klampt::RobotModel *) ((arg1)->robotPtr);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Klampt__RobotModel, 0 |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -38649,14 +42042,20 @@ fail:
 SWIGINTERN PyObject *_wrap_RobotModel_getComJacobian(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RobotModel *arg1 = (RobotModel *) 0 ;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg2 = 0 ;
+  double **arg2 = (double **) 0 ;
+  int *arg3 = (int *) 0 ;
+  int *arg4 = (int *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  std::vector< std::vector< double > > temp2 ;
+  double *data_temp2 = NULL ;
+  int dim1_temp2 ;
+  int dim2_temp2 ;
   PyObject *swig_obj[1] ;
   
   {
-    arg2 = &temp2;
+    arg2 = &data_temp2;
+    arg3 = &dim1_temp2;
+    arg4 = &dim2_temp2;
   }
   if (!args) SWIG_fail;
   swig_obj[0] = args;
@@ -38667,7 +42066,7 @@ SWIGINTERN PyObject *_wrap_RobotModel_getComJacobian(PyObject *SWIGUNUSEDPARM(se
   arg1 = reinterpret_cast< RobotModel * >(argp1);
   {
     try {
-      (arg1)->getComJacobian(*arg2);
+      (arg1)->getComJacobian(arg2,arg3,arg4);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -38680,23 +42079,27 @@ SWIGINTERN PyObject *_wrap_RobotModel_getComJacobian(PyObject *SWIGUNUSEDPARM(se
   }
   resultobj = SWIG_Py_Void();
   {
-    PyObject *o, *o2, *o3;
-    o = convert_dmatrix_obj((*arg2));
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
+    npy_intp dims[2] = {
+      *arg3, *arg4 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, (void*)(*arg2));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg2), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg2), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
   }
   return resultobj;
 fail:
@@ -38704,40 +42107,46 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_RobotModel_getComJacobian2(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_RobotModel_getComJacobianCols(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RobotModel *arg1 = (RobotModel *) 0 ;
   std::vector< int,std::allocator< int > > *arg2 = 0 ;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg3 = 0 ;
+  double **arg3 = (double **) 0 ;
+  int *arg4 = (int *) 0 ;
+  int *arg5 = (int *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   int res2 = SWIG_OLDOBJ ;
-  std::vector< std::vector< double > > temp3 ;
+  double *data_temp3 = NULL ;
+  int dim1_temp3 ;
+  int dim2_temp3 ;
   PyObject *swig_obj[2] ;
   
   {
-    arg3 = &temp3;
+    arg3 = &data_temp3;
+    arg4 = &dim1_temp3;
+    arg5 = &dim2_temp3;
   }
-  if (!SWIG_Python_UnpackTuple(args, "RobotModel_getComJacobian2", 2, 2, swig_obj)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "RobotModel_getComJacobianCols", 2, 2, swig_obj)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_RobotModel, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModel_getComJacobian2" "', argument " "1"" of type '" "RobotModel *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModel_getComJacobianCols" "', argument " "1"" of type '" "RobotModel *""'"); 
   }
   arg1 = reinterpret_cast< RobotModel * >(argp1);
   {
     std::vector< int,std::allocator< int > > *ptr = (std::vector< int,std::allocator< int > > *)0;
     res2 = swig::asptr(swig_obj[1], &ptr);
     if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "RobotModel_getComJacobian2" "', argument " "2"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "RobotModel_getComJacobianCols" "', argument " "2"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "RobotModel_getComJacobian2" "', argument " "2"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "RobotModel_getComJacobianCols" "', argument " "2"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
     }
     arg2 = ptr;
   }
   {
     try {
-      (arg1)->getComJacobian2((std::vector< int,std::allocator< int > > const &)*arg2,*arg3);
+      (arg1)->getComJacobianCols((std::vector< int,std::allocator< int > > const &)*arg2,arg3,arg4,arg5);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -38750,23 +42159,27 @@ SWIGINTERN PyObject *_wrap_RobotModel_getComJacobian2(PyObject *SWIGUNUSEDPARM(s
   }
   resultobj = SWIG_Py_Void();
   {
-    PyObject *o, *o2, *o3;
-    o = convert_dmatrix_obj((*arg3));
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
+    npy_intp dims[2] = {
+      *arg4, *arg5 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, (void*)(*arg3));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg3), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg3), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
   }
   if (SWIG_IsNewObj(res2)) delete arg2;
   return resultobj;
@@ -38930,14 +42343,20 @@ fail:
 SWIGINTERN PyObject *_wrap_RobotModel_getTotalInertia(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RobotModel *arg1 = (RobotModel *) 0 ;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg2 = 0 ;
+  double **arg2 = (double **) 0 ;
+  int *arg3 = (int *) 0 ;
+  int *arg4 = (int *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  std::vector< std::vector< double > > temp2 ;
+  double *data_temp2 = NULL ;
+  int dim1_temp2 ;
+  int dim2_temp2 ;
   PyObject *swig_obj[1] ;
   
   {
-    arg2 = &temp2;
+    arg2 = &data_temp2;
+    arg3 = &dim1_temp2;
+    arg4 = &dim2_temp2;
   }
   if (!args) SWIG_fail;
   swig_obj[0] = args;
@@ -38948,7 +42367,7 @@ SWIGINTERN PyObject *_wrap_RobotModel_getTotalInertia(PyObject *SWIGUNUSEDPARM(s
   arg1 = reinterpret_cast< RobotModel * >(argp1);
   {
     try {
-      (arg1)->getTotalInertia(*arg2);
+      (arg1)->getTotalInertia(arg2,arg3,arg4);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -38961,23 +42380,27 @@ SWIGINTERN PyObject *_wrap_RobotModel_getTotalInertia(PyObject *SWIGUNUSEDPARM(s
   }
   resultobj = SWIG_Py_Void();
   {
-    PyObject *o, *o2, *o3;
-    o = convert_dmatrix_obj((*arg2));
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
+    npy_intp dims[2] = {
+      *arg3, *arg4 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, (void*)(*arg2));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg2), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg2), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
   }
   return resultobj;
 fail:
@@ -38988,14 +42411,20 @@ fail:
 SWIGINTERN PyObject *_wrap_RobotModel_getMassMatrix(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RobotModel *arg1 = (RobotModel *) 0 ;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg2 = 0 ;
+  double **arg2 = (double **) 0 ;
+  int *arg3 = (int *) 0 ;
+  int *arg4 = (int *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  std::vector< std::vector< double > > temp2 ;
+  double *data_temp2 = NULL ;
+  int dim1_temp2 ;
+  int dim2_temp2 ;
   PyObject *swig_obj[1] ;
   
   {
-    arg2 = &temp2;
+    arg2 = &data_temp2;
+    arg3 = &dim1_temp2;
+    arg4 = &dim2_temp2;
   }
   if (!args) SWIG_fail;
   swig_obj[0] = args;
@@ -39006,7 +42435,7 @@ SWIGINTERN PyObject *_wrap_RobotModel_getMassMatrix(PyObject *SWIGUNUSEDPARM(sel
   arg1 = reinterpret_cast< RobotModel * >(argp1);
   {
     try {
-      (arg1)->getMassMatrix(*arg2);
+      (arg1)->getMassMatrix(arg2,arg3,arg4);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -39019,23 +42448,27 @@ SWIGINTERN PyObject *_wrap_RobotModel_getMassMatrix(PyObject *SWIGUNUSEDPARM(sel
   }
   resultobj = SWIG_Py_Void();
   {
-    PyObject *o, *o2, *o3;
-    o = convert_dmatrix_obj((*arg2));
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
+    npy_intp dims[2] = {
+      *arg3, *arg4 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, (void*)(*arg2));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg2), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg2), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
   }
   return resultobj;
 fail:
@@ -39046,14 +42479,20 @@ fail:
 SWIGINTERN PyObject *_wrap_RobotModel_getMassMatrixInv(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RobotModel *arg1 = (RobotModel *) 0 ;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg2 = 0 ;
+  double **arg2 = (double **) 0 ;
+  int *arg3 = (int *) 0 ;
+  int *arg4 = (int *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  std::vector< std::vector< double > > temp2 ;
+  double *data_temp2 = NULL ;
+  int dim1_temp2 ;
+  int dim2_temp2 ;
   PyObject *swig_obj[1] ;
   
   {
-    arg2 = &temp2;
+    arg2 = &data_temp2;
+    arg3 = &dim1_temp2;
+    arg4 = &dim2_temp2;
   }
   if (!args) SWIG_fail;
   swig_obj[0] = args;
@@ -39064,7 +42503,7 @@ SWIGINTERN PyObject *_wrap_RobotModel_getMassMatrixInv(PyObject *SWIGUNUSEDPARM(
   arg1 = reinterpret_cast< RobotModel * >(argp1);
   {
     try {
-      (arg1)->getMassMatrixInv(*arg2);
+      (arg1)->getMassMatrixInv(arg2,arg3,arg4);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -39077,23 +42516,27 @@ SWIGINTERN PyObject *_wrap_RobotModel_getMassMatrixInv(PyObject *SWIGUNUSEDPARM(
   }
   resultobj = SWIG_Py_Void();
   {
-    PyObject *o, *o2, *o3;
-    o = convert_dmatrix_obj((*arg2));
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
+    npy_intp dims[2] = {
+      *arg3, *arg4 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, (void*)(*arg2));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg2), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg2), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
   }
   return resultobj;
 fail:
@@ -39105,16 +42548,22 @@ SWIGINTERN PyObject *_wrap_RobotModel_getMassMatrixDeriv(PyObject *SWIGUNUSEDPAR
   PyObject *resultobj = 0;
   RobotModel *arg1 = (RobotModel *) 0 ;
   int arg2 ;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg3 = 0 ;
+  double **arg3 = (double **) 0 ;
+  int *arg4 = (int *) 0 ;
+  int *arg5 = (int *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
-  std::vector< std::vector< double > > temp3 ;
+  double *data_temp3 = NULL ;
+  int dim1_temp3 ;
+  int dim2_temp3 ;
   PyObject *swig_obj[2] ;
   
   {
-    arg3 = &temp3;
+    arg3 = &data_temp3;
+    arg4 = &dim1_temp3;
+    arg5 = &dim2_temp3;
   }
   if (!SWIG_Python_UnpackTuple(args, "RobotModel_getMassMatrixDeriv", 2, 2, swig_obj)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_RobotModel, 0 |  0 );
@@ -39129,7 +42578,7 @@ SWIGINTERN PyObject *_wrap_RobotModel_getMassMatrixDeriv(PyObject *SWIGUNUSEDPAR
   arg2 = static_cast< int >(val2);
   {
     try {
-      (arg1)->getMassMatrixDeriv(arg2,*arg3);
+      (arg1)->getMassMatrixDeriv(arg2,arg3,arg4,arg5);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -39142,23 +42591,27 @@ SWIGINTERN PyObject *_wrap_RobotModel_getMassMatrixDeriv(PyObject *SWIGUNUSEDPAR
   }
   resultobj = SWIG_Py_Void();
   {
-    PyObject *o, *o2, *o3;
-    o = convert_dmatrix_obj((*arg3));
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
+    npy_intp dims[2] = {
+      *arg4, *arg5 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, (void*)(*arg3));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg3), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg3), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
   }
   return resultobj;
 fail:
@@ -39169,14 +42622,20 @@ fail:
 SWIGINTERN PyObject *_wrap_RobotModel_getMassMatrixTimeDeriv(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RobotModel *arg1 = (RobotModel *) 0 ;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg2 = 0 ;
+  double **arg2 = (double **) 0 ;
+  int *arg3 = (int *) 0 ;
+  int *arg4 = (int *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  std::vector< std::vector< double > > temp2 ;
+  double *data_temp2 = NULL ;
+  int dim1_temp2 ;
+  int dim2_temp2 ;
   PyObject *swig_obj[1] ;
   
   {
-    arg2 = &temp2;
+    arg2 = &data_temp2;
+    arg3 = &dim1_temp2;
+    arg4 = &dim2_temp2;
   }
   if (!args) SWIG_fail;
   swig_obj[0] = args;
@@ -39187,7 +42646,7 @@ SWIGINTERN PyObject *_wrap_RobotModel_getMassMatrixTimeDeriv(PyObject *SWIGUNUSE
   arg1 = reinterpret_cast< RobotModel * >(argp1);
   {
     try {
-      (arg1)->getMassMatrixTimeDeriv(*arg2);
+      (arg1)->getMassMatrixTimeDeriv(arg2,arg3,arg4);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -39200,23 +42659,27 @@ SWIGINTERN PyObject *_wrap_RobotModel_getMassMatrixTimeDeriv(PyObject *SWIGUNUSE
   }
   resultobj = SWIG_Py_Void();
   {
-    PyObject *o, *o2, *o3;
-    o = convert_dmatrix_obj((*arg2));
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
+    npy_intp dims[2] = {
+      *arg3, *arg4 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, (void*)(*arg2));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg2), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg2), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
   }
   return resultobj;
 fail:
@@ -39227,14 +42690,20 @@ fail:
 SWIGINTERN PyObject *_wrap_RobotModel_getCoriolisForceMatrix(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RobotModel *arg1 = (RobotModel *) 0 ;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg2 = 0 ;
+  double **arg2 = (double **) 0 ;
+  int *arg3 = (int *) 0 ;
+  int *arg4 = (int *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  std::vector< std::vector< double > > temp2 ;
+  double *data_temp2 = NULL ;
+  int dim1_temp2 ;
+  int dim2_temp2 ;
   PyObject *swig_obj[1] ;
   
   {
-    arg2 = &temp2;
+    arg2 = &data_temp2;
+    arg3 = &dim1_temp2;
+    arg4 = &dim2_temp2;
   }
   if (!args) SWIG_fail;
   swig_obj[0] = args;
@@ -39245,7 +42714,7 @@ SWIGINTERN PyObject *_wrap_RobotModel_getCoriolisForceMatrix(PyObject *SWIGUNUSE
   arg1 = reinterpret_cast< RobotModel * >(argp1);
   {
     try {
-      (arg1)->getCoriolisForceMatrix(*arg2);
+      (arg1)->getCoriolisForceMatrix(arg2,arg3,arg4);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -39258,23 +42727,27 @@ SWIGINTERN PyObject *_wrap_RobotModel_getCoriolisForceMatrix(PyObject *SWIGUNUSE
   }
   resultobj = SWIG_Py_Void();
   {
-    PyObject *o, *o2, *o3;
-    o = convert_dmatrix_obj((*arg2));
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
+    npy_intp dims[2] = {
+      *arg3, *arg4 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, (void*)(*arg2));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg2), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg2), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
   }
   return resultobj;
 fail:
@@ -40720,6 +44193,62 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_RobotModel_addSensor(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModel *arg1 = (RobotModel *) 0 ;
+  char *arg2 = (char *) 0 ;
+  char *arg3 = (char *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  int res3 ;
+  char *buf3 = 0 ;
+  int alloc3 = 0 ;
+  PyObject *swig_obj[3] ;
+  SwigValueWrapper< SimRobotSensor > result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "RobotModel_addSensor", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_RobotModel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModel_addSensor" "', argument " "1"" of type '" "RobotModel *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModel * >(argp1);
+  res2 = SWIG_AsCharPtrAndSize(swig_obj[1], &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "RobotModel_addSensor" "', argument " "2"" of type '" "char const *""'");
+  }
+  arg2 = reinterpret_cast< char * >(buf2);
+  res3 = SWIG_AsCharPtrAndSize(swig_obj[2], &buf3, NULL, &alloc3);
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "RobotModel_addSensor" "', argument " "3"" of type '" "char const *""'");
+  }
+  arg3 = reinterpret_cast< char * >(buf3);
+  {
+    try {
+      result = (arg1)->addSensor((char const *)arg2,(char const *)arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj((new SimRobotSensor(static_cast< const SimRobotSensor& >(result))), SWIGTYPE_p_SimRobotSensor, SWIG_POINTER_OWN |  0 );
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
+  return resultobj;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_RobotModel_world_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RobotModel *arg1 = (RobotModel *) 0 ;
@@ -40827,7 +44356,7 @@ fail:
 SWIGINTERN PyObject *_wrap_RobotModel_robot_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RobotModel *arg1 = (RobotModel *) 0 ;
-  Robot *arg2 = (Robot *) 0 ;
+  Klampt::RobotModel *arg2 = (Klampt::RobotModel *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -40840,11 +44369,11 @@ SWIGINTERN PyObject *_wrap_RobotModel_robot_set(PyObject *SWIGUNUSEDPARM(self), 
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModel_robot_set" "', argument " "1"" of type '" "RobotModel *""'"); 
   }
   arg1 = reinterpret_cast< RobotModel * >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_Robot, SWIG_POINTER_DISOWN |  0 );
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_Klampt__RobotModel, SWIG_POINTER_DISOWN |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "RobotModel_robot_set" "', argument " "2"" of type '" "Robot *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "RobotModel_robot_set" "', argument " "2"" of type '" "Klampt::RobotModel *""'"); 
   }
-  arg2 = reinterpret_cast< Robot * >(argp2);
+  arg2 = reinterpret_cast< Klampt::RobotModel * >(argp2);
   if (arg1) (arg1)->robot = arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
@@ -40859,7 +44388,7 @@ SWIGINTERN PyObject *_wrap_RobotModel_robot_get(PyObject *SWIGUNUSEDPARM(self), 
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject *swig_obj[1] ;
-  Robot *result = 0 ;
+  Klampt::RobotModel *result = 0 ;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
@@ -40868,8 +44397,8 @@ SWIGINTERN PyObject *_wrap_RobotModel_robot_get(PyObject *SWIGUNUSEDPARM(self), 
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModel_robot_get" "', argument " "1"" of type '" "RobotModel *""'"); 
   }
   arg1 = reinterpret_cast< RobotModel * >(argp1);
-  result = (Robot *) ((arg1)->robot);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Robot, 0 |  0 );
+  result = (Klampt::RobotModel *) ((arg1)->robot);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Klampt__RobotModel, 0 |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -42015,7 +45544,7 @@ fail:
 SWIGINTERN PyObject *_wrap_RigidObjectModel_object_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RigidObjectModel *arg1 = (RigidObjectModel *) 0 ;
-  RigidObject *arg2 = (RigidObject *) 0 ;
+  Klampt::RigidObjectModel *arg2 = (Klampt::RigidObjectModel *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -42028,11 +45557,11 @@ SWIGINTERN PyObject *_wrap_RigidObjectModel_object_set(PyObject *SWIGUNUSEDPARM(
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RigidObjectModel_object_set" "', argument " "1"" of type '" "RigidObjectModel *""'"); 
   }
   arg1 = reinterpret_cast< RigidObjectModel * >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_RigidObject, SWIG_POINTER_DISOWN |  0 );
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_Klampt__RigidObjectModel, SWIG_POINTER_DISOWN |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "RigidObjectModel_object_set" "', argument " "2"" of type '" "RigidObject *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "RigidObjectModel_object_set" "', argument " "2"" of type '" "Klampt::RigidObjectModel *""'"); 
   }
-  arg2 = reinterpret_cast< RigidObject * >(argp2);
+  arg2 = reinterpret_cast< Klampt::RigidObjectModel * >(argp2);
   if (arg1) (arg1)->object = arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
@@ -42047,7 +45576,7 @@ SWIGINTERN PyObject *_wrap_RigidObjectModel_object_get(PyObject *SWIGUNUSEDPARM(
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject *swig_obj[1] ;
-  RigidObject *result = 0 ;
+  Klampt::RigidObjectModel *result = 0 ;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
@@ -42056,8 +45585,8 @@ SWIGINTERN PyObject *_wrap_RigidObjectModel_object_get(PyObject *SWIGUNUSEDPARM(
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RigidObjectModel_object_get" "', argument " "1"" of type '" "RigidObjectModel *""'"); 
   }
   arg1 = reinterpret_cast< RigidObjectModel * >(argp1);
-  result = (RigidObject *) ((arg1)->object);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_RigidObject, 0 |  0 );
+  result = (Klampt::RigidObjectModel *) ((arg1)->object);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Klampt__RigidObjectModel, 0 |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -42772,7 +46301,7 @@ fail:
 SWIGINTERN PyObject *_wrap_TerrainModel_terrain_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   TerrainModel *arg1 = (TerrainModel *) 0 ;
-  Terrain *arg2 = (Terrain *) 0 ;
+  Klampt::TerrainModel *arg2 = (Klampt::TerrainModel *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -42785,11 +46314,11 @@ SWIGINTERN PyObject *_wrap_TerrainModel_terrain_set(PyObject *SWIGUNUSEDPARM(sel
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TerrainModel_terrain_set" "', argument " "1"" of type '" "TerrainModel *""'"); 
   }
   arg1 = reinterpret_cast< TerrainModel * >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_Terrain, SWIG_POINTER_DISOWN |  0 );
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_Klampt__TerrainModel, SWIG_POINTER_DISOWN |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "TerrainModel_terrain_set" "', argument " "2"" of type '" "Terrain *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "TerrainModel_terrain_set" "', argument " "2"" of type '" "Klampt::TerrainModel *""'"); 
   }
-  arg2 = reinterpret_cast< Terrain * >(argp2);
+  arg2 = reinterpret_cast< Klampt::TerrainModel * >(argp2);
   if (arg1) (arg1)->terrain = arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
@@ -42804,7 +46333,7 @@ SWIGINTERN PyObject *_wrap_TerrainModel_terrain_get(PyObject *SWIGUNUSEDPARM(sel
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject *swig_obj[1] ;
-  Terrain *result = 0 ;
+  Klampt::TerrainModel *result = 0 ;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
@@ -42813,8 +46342,8 @@ SWIGINTERN PyObject *_wrap_TerrainModel_terrain_get(PyObject *SWIGUNUSEDPARM(sel
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "TerrainModel_terrain_get" "', argument " "1"" of type '" "TerrainModel *""'"); 
   }
   arg1 = reinterpret_cast< TerrainModel * >(argp1);
-  result = (Terrain *) ((arg1)->terrain);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Terrain, 0 |  0 );
+  result = (Klampt::TerrainModel *) ((arg1)->terrain);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Klampt__TerrainModel, 0 |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -46762,7 +50291,7 @@ SWIGINTERN PyObject *_wrap_IKObjective_closestMatch(PyObject *SWIGUNUSEDPARM(sel
   if (!SWIG_Python_UnpackTuple(args, "IKObjective_closestMatch", 3, 3, swig_obj)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_IKObjective, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKObjective_closestMatch" "', argument " "1"" of type '" "IKObjective *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKObjective_closestMatch" "', argument " "1"" of type '" "IKObjective const *""'"); 
   }
   arg1 = reinterpret_cast< IKObjective * >(argp1);
   {
@@ -46779,7 +50308,7 @@ SWIGINTERN PyObject *_wrap_IKObjective_closestMatch(PyObject *SWIGUNUSEDPARM(sel
   }
   {
     try {
-      (arg1)->closestMatch((double const (*))arg2,(double const (*))arg3,arg4,arg5);
+      ((IKObjective const *)arg1)->closestMatch((double const (*))arg2,(double const (*))arg3,arg4,arg5);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -46813,6 +50342,88 @@ SWIGINTERN PyObject *_wrap_IKObjective_closestMatch(PyObject *SWIGUNUSEDPARM(sel
   {
     PyObject *o, *o2, *o3;
     o = convert_darray_obj(arg5,3);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IKObjective_sampleTransform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  IKObjective *arg1 = (IKObjective *) 0 ;
+  double *arg2 ;
+  double *arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[9] ;
+  double temp3[3] ;
+  PyObject *swig_obj[1] ;
+  
+  {
+    arg2 = &temp2[0];
+  }
+  {
+    arg3 = &temp3[0];
+  }
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_IKObjective, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKObjective_sampleTransform" "', argument " "1"" of type '" "IKObjective const *""'"); 
+  }
+  arg1 = reinterpret_cast< IKObjective * >(argp1);
+  {
+    try {
+      ((IKObjective const *)arg1)->sampleTransform(arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg2,9);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg3,3);
     if ((!resultobj) || (resultobj == Py_None)) {
       resultobj = o;
     } else {
@@ -47344,6 +50955,102 @@ SWIGINTERN PyObject *_wrap_IKSolver_set(PyObject *SWIGUNUSEDPARM(self), PyObject
   {
     try {
       (arg1)->set(arg2,(IKObjective const &)*arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IKSolver_addSecondary(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  IKSolver *arg1 = (IKSolver *) 0 ;
+  IKObjective *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "IKSolver_addSecondary", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_IKSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKSolver_addSecondary" "', argument " "1"" of type '" "IKSolver *""'"); 
+  }
+  arg1 = reinterpret_cast< IKSolver * >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2, SWIGTYPE_p_IKObjective,  0  | 0);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "IKSolver_addSecondary" "', argument " "2"" of type '" "IKObjective const &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "IKSolver_addSecondary" "', argument " "2"" of type '" "IKObjective const &""'"); 
+  }
+  arg2 = reinterpret_cast< IKObjective * >(argp2);
+  {
+    try {
+      (arg1)->addSecondary((IKObjective const &)*arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IKSolver_setSecondary(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  IKSolver *arg1 = (IKSolver *) 0 ;
+  int arg2 ;
+  IKObjective *arg3 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  PyObject *swig_obj[3] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "IKSolver_setSecondary", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_IKSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKSolver_setSecondary" "', argument " "1"" of type '" "IKSolver *""'"); 
+  }
+  arg1 = reinterpret_cast< IKSolver * >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IKSolver_setSecondary" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3, SWIGTYPE_p_IKObjective,  0  | 0);
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "IKSolver_setSecondary" "', argument " "3"" of type '" "IKObjective const &""'"); 
+  }
+  if (!argp3) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "IKSolver_setSecondary" "', argument " "3"" of type '" "IKObjective const &""'"); 
+  }
+  arg3 = reinterpret_cast< IKObjective * >(argp3);
+  {
+    try {
+      (arg1)->setSecondary(arg2,(IKObjective const &)*arg3);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -48000,14 +51707,20 @@ fail:
 SWIGINTERN PyObject *_wrap_IKSolver_getJacobian(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   IKSolver *arg1 = (IKSolver *) 0 ;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg2 = 0 ;
+  double **arg2 = (double **) 0 ;
+  int *arg3 = (int *) 0 ;
+  int *arg4 = (int *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  std::vector< std::vector< double > > temp2 ;
+  double *data_temp2 = NULL ;
+  int dim1_temp2 ;
+  int dim2_temp2 ;
   PyObject *swig_obj[1] ;
   
   {
-    arg2 = &temp2;
+    arg2 = &data_temp2;
+    arg3 = &dim1_temp2;
+    arg4 = &dim2_temp2;
   }
   if (!args) SWIG_fail;
   swig_obj[0] = args;
@@ -48018,7 +51731,69 @@ SWIGINTERN PyObject *_wrap_IKSolver_getJacobian(PyObject *SWIGUNUSEDPARM(self), 
   arg1 = reinterpret_cast< IKSolver * >(argp1);
   {
     try {
-      (arg1)->getJacobian(*arg2);
+      (arg1)->getJacobian(arg2,arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    npy_intp dims[2] = {
+      *arg3, *arg4 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, (void*)(*arg2));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg2), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg2), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IKSolver_getSecondaryResidual(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  IKSolver *arg1 = (IKSolver *) 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::vector< double > temp2 ;
+  PyObject *swig_obj[1] ;
+  
+  {
+    arg2 = &temp2;
+  }
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_IKSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKSolver_getSecondaryResidual" "', argument " "1"" of type '" "IKSolver *""'"); 
+  }
+  arg1 = reinterpret_cast< IKSolver * >(argp1);
+  {
+    try {
+      (arg1)->getSecondaryResidual(*arg2);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -48032,7 +51807,7 @@ SWIGINTERN PyObject *_wrap_IKSolver_getJacobian(PyObject *SWIGUNUSEDPARM(self), 
   resultobj = SWIG_Py_Void();
   {
     PyObject *o, *o2, *o3;
-    o = convert_dmatrix_obj((*arg2));
+    o = convert_darray_obj(&(*arg2)[0],(int)arg2->size());
     if ((!resultobj) || (resultobj == Py_None)) {
       resultobj = o;
     } else {
@@ -48055,14 +51830,16 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_IKSolver_solve__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+SWIGINTERN PyObject *_wrap_IKSolver_solve(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   IKSolver *arg1 = (IKSolver *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  PyObject *swig_obj[1] ;
   bool result;
   
-  if ((nobjs < 1) || (nobjs > 1)) SWIG_fail;
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_IKSolver, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKSolver_solve" "', argument " "1"" of type '" "IKSolver *""'"); 
@@ -48088,38 +51865,22 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_IKSolver_solve__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+SWIGINTERN PyObject *_wrap_IKSolver_minimize__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
   PyObject *resultobj = 0;
   IKSolver *arg1 = (IKSolver *) 0 ;
-  int arg2 ;
-  double arg3 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  double val3 ;
-  int ecode3 = 0 ;
-  PyObject *result = 0 ;
+  bool result;
   
-  if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
+  if ((nobjs < 1) || (nobjs > 1)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_IKSolver, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKSolver_solve" "', argument " "1"" of type '" "IKSolver *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKSolver_minimize" "', argument " "1"" of type '" "IKSolver *""'"); 
   }
   arg1 = reinterpret_cast< IKSolver * >(argp1);
-  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IKSolver_solve" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
-  ecode3 = SWIG_AsVal_double(swig_obj[2], &val3);
-  if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "IKSolver_solve" "', argument " "3"" of type '" "double""'");
-  } 
-  arg3 = static_cast< double >(val3);
   {
     try {
-      result = (PyObject *)(arg1)->solve(arg2,arg3);
+      result = (bool)(arg1)->minimize();
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -48130,20 +51891,57 @@ SWIGINTERN PyObject *_wrap_IKSolver_solve__SWIG_1(PyObject *SWIGUNUSEDPARM(self)
       return NULL;
     }
   }
-  resultobj = result;
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
   return resultobj;
 fail:
   return NULL;
 }
 
 
-SWIGINTERN PyObject *_wrap_IKSolver_solve(PyObject *self, PyObject *args) {
+SWIGINTERN PyObject *_wrap_IKSolver_minimize__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  IKSolver *arg1 = (IKSolver *) 0 ;
+  PyObject *arg2 = (PyObject *) 0 ;
+  PyObject *arg3 = (PyObject *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  bool result;
+  
+  if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_IKSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKSolver_minimize" "', argument " "1"" of type '" "IKSolver *""'"); 
+  }
+  arg1 = reinterpret_cast< IKSolver * >(argp1);
+  arg2 = swig_obj[1];
+  arg3 = swig_obj[2];
+  {
+    try {
+      result = (bool)(arg1)->minimize(arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IKSolver_minimize(PyObject *self, PyObject *args) {
   Py_ssize_t argc;
   PyObject *argv[4] = {
     0
   };
   
-  if (!(argc = SWIG_Python_UnpackTuple(args, "IKSolver_solve", 0, 3, argv))) SWIG_fail;
+  if (!(argc = SWIG_Python_UnpackTuple(args, "IKSolver_minimize", 0, 3, argv))) SWIG_fail;
   --argc;
   if (argc == 1) {
     int _v;
@@ -48151,7 +51949,7 @@ SWIGINTERN PyObject *_wrap_IKSolver_solve(PyObject *self, PyObject *args) {
     int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_IKSolver, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
-      return _wrap_IKSolver_solve__SWIG_0(self, argc, argv);
+      return _wrap_IKSolver_minimize__SWIG_0(self, argc, argv);
     }
   }
   if (argc == 3) {
@@ -48160,27 +51958,21 @@ SWIGINTERN PyObject *_wrap_IKSolver_solve(PyObject *self, PyObject *args) {
     int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_IKSolver, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
-      {
-        int res = SWIG_AsVal_int(argv[1], NULL);
-        _v = SWIG_CheckState(res);
-      }
+      _v = (argv[1] != 0);
       if (_v) {
-        {
-          int res = SWIG_AsVal_double(argv[2], NULL);
-          _v = SWIG_CheckState(res);
-        }
+        _v = (argv[2] != 0);
         if (_v) {
-          return _wrap_IKSolver_solve__SWIG_1(self, argc, argv);
+          return _wrap_IKSolver_minimize__SWIG_1(self, argc, argv);
         }
       }
     }
   }
   
 fail:
-  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'IKSolver_solve'.\n"
+  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'IKSolver_minimize'.\n"
     "  Possible C/C++ prototypes are:\n"
-    "    IKSolver::solve()\n"
-    "    IKSolver::solve(int,double)\n");
+    "    IKSolver::minimize()\n"
+    "    IKSolver::minimize(PyObject *,PyObject *)\n");
   return 0;
 }
 
@@ -48351,6 +52143,58 @@ SWIGINTERN PyObject *_wrap_IKSolver_objectives_get(PyObject *SWIGUNUSEDPARM(self
   }
   arg1 = reinterpret_cast< IKSolver * >(argp1);
   result = (std::vector< IKObjective,std::allocator< IKObjective > > *)& ((arg1)->objectives);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_IKObjective_std__allocatorT_IKObjective_t_t, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IKSolver_secondary_objectives_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  IKSolver *arg1 = (IKSolver *) 0 ;
+  std::vector< IKObjective,std::allocator< IKObjective > > *arg2 = (std::vector< IKObjective,std::allocator< IKObjective > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "IKSolver_secondary_objectives_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_IKSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKSolver_secondary_objectives_set" "', argument " "1"" of type '" "IKSolver *""'"); 
+  }
+  arg1 = reinterpret_cast< IKSolver * >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_std__vectorT_IKObjective_std__allocatorT_IKObjective_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "IKSolver_secondary_objectives_set" "', argument " "2"" of type '" "std::vector< IKObjective,std::allocator< IKObjective > > *""'"); 
+  }
+  arg2 = reinterpret_cast< std::vector< IKObjective,std::allocator< IKObjective > > * >(argp2);
+  if (arg1) (arg1)->secondary_objectives = *arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IKSolver_secondary_objectives_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  IKSolver *arg1 = (IKSolver *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  std::vector< IKObjective,std::allocator< IKObjective > > *result = 0 ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_IKSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKSolver_secondary_objectives_get" "', argument " "1"" of type '" "IKSolver *""'"); 
+  }
+  arg1 = reinterpret_cast< IKSolver * >(argp1);
+  result = (std::vector< IKObjective,std::allocator< IKObjective > > *)& ((arg1)->secondary_objectives);
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_IKObjective_std__allocatorT_IKObjective_t_t, 0 |  0 );
   return resultobj;
 fail:
@@ -49345,6 +53189,88 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_GeneralizedIKObjective_sampleTransform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  GeneralizedIKObjective *arg1 = (GeneralizedIKObjective *) 0 ;
+  double *arg2 ;
+  double *arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[9] ;
+  double temp3[3] ;
+  PyObject *swig_obj[1] ;
+  
+  {
+    arg2 = &temp2[0];
+  }
+  {
+    arg3 = &temp3[0];
+  }
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_GeneralizedIKObjective, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GeneralizedIKObjective_sampleTransform" "', argument " "1"" of type '" "GeneralizedIKObjective const *""'"); 
+  }
+  arg1 = reinterpret_cast< GeneralizedIKObjective * >(argp1);
+  {
+    try {
+      ((GeneralizedIKObjective const *)arg1)->sampleTransform(arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg2,9);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg3,3);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_GeneralizedIKObjective_link1_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   GeneralizedIKObjective *arg1 = (GeneralizedIKObjective *) 0 ;
@@ -49987,14 +53913,20 @@ fail:
 SWIGINTERN PyObject *_wrap_GeneralizedIKSolver_getJacobian(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   GeneralizedIKSolver *arg1 = (GeneralizedIKSolver *) 0 ;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg2 = 0 ;
+  double **arg2 = (double **) 0 ;
+  int *arg3 = (int *) 0 ;
+  int *arg4 = (int *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  std::vector< std::vector< double > > temp2 ;
+  double *data_temp2 = NULL ;
+  int dim1_temp2 ;
+  int dim2_temp2 ;
   PyObject *swig_obj[1] ;
   
   {
-    arg2 = &temp2;
+    arg2 = &data_temp2;
+    arg3 = &dim1_temp2;
+    arg4 = &dim2_temp2;
   }
   if (!args) SWIG_fail;
   swig_obj[0] = args;
@@ -50005,7 +53937,7 @@ SWIGINTERN PyObject *_wrap_GeneralizedIKSolver_getJacobian(PyObject *SWIGUNUSEDP
   arg1 = reinterpret_cast< GeneralizedIKSolver * >(argp1);
   {
     try {
-      (arg1)->getJacobian(*arg2);
+      (arg1)->getJacobian(arg2,arg3,arg4);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -50018,23 +53950,27 @@ SWIGINTERN PyObject *_wrap_GeneralizedIKSolver_getJacobian(PyObject *SWIGUNUSEDP
   }
   resultobj = SWIG_Py_Void();
   {
-    PyObject *o, *o2, *o3;
-    o = convert_dmatrix_obj((*arg2));
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
+    npy_intp dims[2] = {
+      *arg3, *arg4 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, (void*)(*arg2));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg2), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg2), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
   }
   return resultobj;
 fail:
@@ -50416,217 +54352,18 @@ SWIGINTERN PyObject *GeneralizedIKSolver_swiginit(PyObject *SWIGUNUSEDPARM(self)
   return SWIG_Python_InitShadowInstance(args);
 }
 
-SWIGINTERN PyObject *_wrap_SampleTransform__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
-  PyObject *resultobj = 0;
-  IKObjective *arg1 = 0 ;
-  double *arg2 ;
-  double *arg3 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  double temp2[9] ;
-  double temp3[3] ;
-  
-  {
-    arg2 = &temp2[0];
-  }
-  {
-    arg3 = &temp3[0];
-  }
-  if ((nobjs < 1) || (nobjs > 1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_IKObjective,  0  | 0);
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SampleTransform" "', argument " "1"" of type '" "IKObjective const &""'"); 
-  }
-  if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "SampleTransform" "', argument " "1"" of type '" "IKObjective const &""'"); 
-  }
-  arg1 = reinterpret_cast< IKObjective * >(argp1);
-  {
-    try {
-      SampleTransform((IKObjective const &)*arg1,arg2,arg3);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_Py_Void();
-  {
-    PyObject *o, *o2, *o3;
-    o = convert_darray_obj(arg2,9);
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
-  }
-  {
-    PyObject *o, *o2, *o3;
-    o = convert_darray_obj(arg3,3);
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
-  }
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SampleTransform__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
-  PyObject *resultobj = 0;
-  GeneralizedIKObjective *arg1 = 0 ;
-  double *arg2 ;
-  double *arg3 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  double temp2[9] ;
-  double temp3[3] ;
-  
-  {
-    arg2 = &temp2[0];
-  }
-  {
-    arg3 = &temp3[0];
-  }
-  if ((nobjs < 1) || (nobjs > 1)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_GeneralizedIKObjective,  0  | 0);
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SampleTransform" "', argument " "1"" of type '" "GeneralizedIKObjective const &""'"); 
-  }
-  if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "SampleTransform" "', argument " "1"" of type '" "GeneralizedIKObjective const &""'"); 
-  }
-  arg1 = reinterpret_cast< GeneralizedIKObjective * >(argp1);
-  {
-    try {
-      SampleTransform((GeneralizedIKObjective const &)*arg1,arg2,arg3);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_Py_Void();
-  {
-    PyObject *o, *o2, *o3;
-    o = convert_darray_obj(arg2,9);
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
-  }
-  {
-    PyObject *o, *o2, *o3;
-    o = convert_darray_obj(arg3,3);
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
-  }
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SampleTransform(PyObject *self, PyObject *args) {
-  Py_ssize_t argc;
-  PyObject *argv[2] = {
-    0
-  };
-  
-  if (!(argc = SWIG_Python_UnpackTuple(args, "SampleTransform", 0, 1, argv))) SWIG_fail;
-  --argc;
-  if (argc == 1) {
-    int _v;
-    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_IKObjective, SWIG_POINTER_NO_NULL | 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      return _wrap_SampleTransform__SWIG_0(self, argc, argv);
-    }
-  }
-  if (argc == 1) {
-    int _v;
-    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_GeneralizedIKObjective, SWIG_POINTER_NO_NULL | 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      return _wrap_SampleTransform__SWIG_1(self, argc, argv);
-    }
-  }
-  
-fail:
-  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'SampleTransform'.\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    SampleTransform(IKObjective const &,double [9],double [3])\n"
-    "    SampleTransform(GeneralizedIKObjective const &,double [9],double [3])\n");
-  return 0;
-}
-
-
-SWIGINTERN PyObject *_wrap_new_SimRobotSensor__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+SWIGINTERN PyObject *_wrap_new_SimRobotSensor(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RobotModel *arg1 = 0 ;
-  SensorBase *arg2 = (SensorBase *) 0 ;
+  Klampt::SensorBase *arg2 = (Klampt::SensorBase *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
   int res2 = 0 ;
+  PyObject *swig_obj[2] ;
   SimRobotSensor *result = 0 ;
   
-  if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "new_SimRobotSensor", 2, 2, swig_obj)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_RobotModel,  0  | 0);
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_SimRobotSensor" "', argument " "1"" of type '" "RobotModel const &""'"); 
@@ -50635,11 +54372,11 @@ SWIGINTERN PyObject *_wrap_new_SimRobotSensor__SWIG_0(PyObject *SWIGUNUSEDPARM(s
     SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_SimRobotSensor" "', argument " "1"" of type '" "RobotModel const &""'"); 
   }
   arg1 = reinterpret_cast< RobotModel * >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_SensorBase, 0 |  0 );
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_Klampt__SensorBase, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "new_SimRobotSensor" "', argument " "2"" of type '" "SensorBase *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "new_SimRobotSensor" "', argument " "2"" of type '" "Klampt::SensorBase *""'"); 
   }
-  arg2 = reinterpret_cast< SensorBase * >(argp2);
+  arg2 = reinterpret_cast< Klampt::SensorBase * >(argp2);
   {
     try {
       result = (SimRobotSensor *)new SimRobotSensor((RobotModel const &)*arg1,arg2);
@@ -50657,112 +54394,6 @@ SWIGINTERN PyObject *_wrap_new_SimRobotSensor__SWIG_0(PyObject *SWIGUNUSEDPARM(s
   return resultobj;
 fail:
   return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_new_SimRobotSensor__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
-  PyObject *resultobj = 0;
-  SimRobotController *arg1 = 0 ;
-  char *arg2 = (char *) 0 ;
-  char *arg3 = (char *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int res2 ;
-  char *buf2 = 0 ;
-  int alloc2 = 0 ;
-  int res3 ;
-  char *buf3 = 0 ;
-  int alloc3 = 0 ;
-  SimRobotSensor *result = 0 ;
-  
-  if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_SimRobotController,  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_SimRobotSensor" "', argument " "1"" of type '" "SimRobotController &""'"); 
-  }
-  if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_SimRobotSensor" "', argument " "1"" of type '" "SimRobotController &""'"); 
-  }
-  arg1 = reinterpret_cast< SimRobotController * >(argp1);
-  res2 = SWIG_AsCharPtrAndSize(swig_obj[1], &buf2, NULL, &alloc2);
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "new_SimRobotSensor" "', argument " "2"" of type '" "char const *""'");
-  }
-  arg2 = reinterpret_cast< char * >(buf2);
-  res3 = SWIG_AsCharPtrAndSize(swig_obj[2], &buf3, NULL, &alloc3);
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "new_SimRobotSensor" "', argument " "3"" of type '" "char const *""'");
-  }
-  arg3 = reinterpret_cast< char * >(buf3);
-  {
-    try {
-      result = (SimRobotSensor *)new SimRobotSensor(*arg1,(char const *)arg2,(char const *)arg3);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_SimRobotSensor, SWIG_POINTER_NEW |  0 );
-  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
-  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
-  return resultobj;
-fail:
-  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
-  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_new_SimRobotSensor(PyObject *self, PyObject *args) {
-  Py_ssize_t argc;
-  PyObject *argv[4] = {
-    0
-  };
-  
-  if (!(argc = SWIG_Python_UnpackTuple(args, "new_SimRobotSensor", 0, 3, argv))) SWIG_fail;
-  --argc;
-  if (argc == 2) {
-    int _v;
-    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_RobotModel, SWIG_POINTER_NO_NULL | 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      void *vptr = 0;
-      int res = SWIG_ConvertPtr(argv[1], &vptr, SWIGTYPE_p_SensorBase, 0);
-      _v = SWIG_CheckState(res);
-      if (_v) {
-        return _wrap_new_SimRobotSensor__SWIG_0(self, argc, argv);
-      }
-    }
-  }
-  if (argc == 3) {
-    int _v;
-    void *vptr = 0;
-    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_SimRobotController, SWIG_POINTER_NO_NULL);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      int res = SWIG_AsCharPtrAndSize(argv[1], 0, NULL, 0);
-      _v = SWIG_CheckState(res);
-      if (_v) {
-        int res = SWIG_AsCharPtrAndSize(argv[2], 0, NULL, 0);
-        _v = SWIG_CheckState(res);
-        if (_v) {
-          return _wrap_new_SimRobotSensor__SWIG_1(self, argc, argv);
-        }
-      }
-    }
-  }
-  
-fail:
-  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'new_SimRobotSensor'.\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    SimRobotSensor::SimRobotSensor(RobotModel const &,SensorBase *)\n"
-    "    SimRobotSensor::SimRobotSensor(SimRobotController &,char const *,char const *)\n");
-  return 0;
 }
 
 
@@ -50909,14 +54540,17 @@ fail:
 SWIGINTERN PyObject *_wrap_SimRobotSensor_getMeasurements(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   SimRobotSensor *arg1 = (SimRobotSensor *) 0 ;
-  std::vector< double,std::allocator< double > > *arg2 = 0 ;
+  double **arg2 = (double **) 0 ;
+  int *arg3 = (int *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  std::vector< double > temp2 ;
+  double *data_temp2 = NULL ;
+  int dim_temp2 ;
   PyObject *swig_obj[1] ;
   
   {
-    arg2 = &temp2;
+    arg2 = &data_temp2;
+    arg3 = &dim_temp2;
   }
   if (!args) SWIG_fail;
   swig_obj[0] = args;
@@ -50927,7 +54561,7 @@ SWIGINTERN PyObject *_wrap_SimRobotSensor_getMeasurements(PyObject *SWIGUNUSEDPA
   arg1 = reinterpret_cast< SimRobotSensor * >(argp1);
   {
     try {
-      (arg1)->getMeasurements(*arg2);
+      (arg1)->getMeasurements(arg2,arg3);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -50940,73 +54574,28 @@ SWIGINTERN PyObject *_wrap_SimRobotSensor_getMeasurements(PyObject *SWIGUNUSEDPA
   }
   resultobj = SWIG_Py_Void();
   {
-    PyObject *o, *o2, *o3;
-    o = convert_darray_obj(&(*arg2)[0],(int)arg2->size());
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
+    npy_intp dims[1] = {
+      *arg3 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(1, dims, NPY_DOUBLE, (void*)(*arg2));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg2), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg2), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
   }
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SimRobotSensor_getMeasurementsBytes(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  SimRobotSensor *arg1 = (SimRobotSensor *) 0 ;
-  char *arg2 = (char *) 0 ;
-  size_t arg3 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[2] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "SimRobotSensor_getMeasurementsBytes", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_SimRobotSensor, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotSensor_getMeasurementsBytes" "', argument " "1"" of type '" "SimRobotSensor *""'"); 
-  }
-  arg1 = reinterpret_cast< SimRobotSensor * >(argp1);
-  {
-    int res; Py_ssize_t size = 0; void *buf = 0;
-    Py_buffer view;
-    res = PyObject_GetBuffer(swig_obj[1], &view, PyBUF_WRITABLE);
-    size = view.len;
-    buf = view.buf;
-    PyBuffer_Release(&view);
-    if (res < 0) {
-      PyErr_Clear();
-      SWIG_exception_fail(SWIG_ArgError(res), "in method '" "SimRobotSensor_getMeasurementsBytes" "', argument " "2"" of type '" "(char *buf, size_t size)""'");
-    }
-    arg2 = (char *) buf;
-    arg3 = (size_t) (size/sizeof(char));
-  }
-  {
-    try {
-      (arg1)->getMeasurementsBytes(arg2,arg3);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
   return NULL;
@@ -51160,6 +54749,459 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_SimRobotSensor_getEnabled(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SimRobotSensor *arg1 = (SimRobotSensor *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  bool result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_SimRobotSensor, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotSensor_getEnabled" "', argument " "1"" of type '" "SimRobotSensor *""'"); 
+  }
+  arg1 = reinterpret_cast< SimRobotSensor * >(argp1);
+  {
+    try {
+      result = (bool)(arg1)->getEnabled();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SimRobotSensor_setEnabled(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SimRobotSensor *arg1 = (SimRobotSensor *) 0 ;
+  bool arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  bool val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "SimRobotSensor_setEnabled", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_SimRobotSensor, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotSensor_setEnabled" "', argument " "1"" of type '" "SimRobotSensor *""'"); 
+  }
+  arg1 = reinterpret_cast< SimRobotSensor * >(argp1);
+  ecode2 = SWIG_AsVal_bool(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "SimRobotSensor_setEnabled" "', argument " "2"" of type '" "bool""'");
+  } 
+  arg2 = static_cast< bool >(val2);
+  {
+    try {
+      (arg1)->setEnabled(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SimRobotSensor_getLink(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SimRobotSensor *arg1 = (SimRobotSensor *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  RobotModelLink result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_SimRobotSensor, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotSensor_getLink" "', argument " "1"" of type '" "SimRobotSensor *""'"); 
+  }
+  arg1 = reinterpret_cast< SimRobotSensor * >(argp1);
+  {
+    try {
+      result = (arg1)->getLink();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj((new RobotModelLink(static_cast< const RobotModelLink& >(result))), SWIGTYPE_p_RobotModelLink, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SimRobotSensor_setLink__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  SimRobotSensor *arg1 = (SimRobotSensor *) 0 ;
+  RobotModelLink *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  
+  if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_SimRobotSensor, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotSensor_setLink" "', argument " "1"" of type '" "SimRobotSensor *""'"); 
+  }
+  arg1 = reinterpret_cast< SimRobotSensor * >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2, SWIGTYPE_p_RobotModelLink,  0  | 0);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SimRobotSensor_setLink" "', argument " "2"" of type '" "RobotModelLink const &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "SimRobotSensor_setLink" "', argument " "2"" of type '" "RobotModelLink const &""'"); 
+  }
+  arg2 = reinterpret_cast< RobotModelLink * >(argp2);
+  {
+    try {
+      (arg1)->setLink((RobotModelLink const &)*arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SimRobotSensor_setLink__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  SimRobotSensor *arg1 = (SimRobotSensor *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  
+  if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_SimRobotSensor, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotSensor_setLink" "', argument " "1"" of type '" "SimRobotSensor *""'"); 
+  }
+  arg1 = reinterpret_cast< SimRobotSensor * >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "SimRobotSensor_setLink" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  {
+    try {
+      (arg1)->setLink(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SimRobotSensor_setLink(PyObject *self, PyObject *args) {
+  Py_ssize_t argc;
+  PyObject *argv[3] = {
+    0
+  };
+  
+  if (!(argc = SWIG_Python_UnpackTuple(args, "SimRobotSensor_setLink", 0, 2, argv))) SWIG_fail;
+  --argc;
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_SimRobotSensor, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_RobotModelLink, SWIG_POINTER_NO_NULL | 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        return _wrap_SimRobotSensor_setLink__SWIG_0(self, argc, argv);
+      }
+    }
+  }
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_SimRobotSensor, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_int(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        return _wrap_SimRobotSensor_setLink__SWIG_1(self, argc, argv);
+      }
+    }
+  }
+  
+fail:
+  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'SimRobotSensor_setLink'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    SimRobotSensor::setLink(RobotModelLink const &)\n"
+    "    SimRobotSensor::setLink(int)\n");
+  return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_SimRobotSensor_getTransform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SimRobotSensor *arg1 = (SimRobotSensor *) 0 ;
+  double *arg2 ;
+  double *arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[9] ;
+  double temp3[3] ;
+  PyObject *swig_obj[1] ;
+  
+  {
+    arg2 = &temp2[0];
+  }
+  {
+    arg3 = &temp3[0];
+  }
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_SimRobotSensor, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotSensor_getTransform" "', argument " "1"" of type '" "SimRobotSensor *""'"); 
+  }
+  arg1 = reinterpret_cast< SimRobotSensor * >(argp1);
+  {
+    try {
+      (arg1)->getTransform(arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg2,9);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg3,3);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SimRobotSensor_getTransformWorld(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SimRobotSensor *arg1 = (SimRobotSensor *) 0 ;
+  double *arg2 ;
+  double *arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[9] ;
+  double temp3[3] ;
+  PyObject *swig_obj[1] ;
+  
+  {
+    arg2 = &temp2[0];
+  }
+  {
+    arg3 = &temp3[0];
+  }
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_SimRobotSensor, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotSensor_getTransformWorld" "', argument " "1"" of type '" "SimRobotSensor *""'"); 
+  }
+  arg1 = reinterpret_cast< SimRobotSensor * >(argp1);
+  {
+    try {
+      (arg1)->getTransformWorld(arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg2,9);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(arg3,3);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SimRobotSensor_setTransform(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SimRobotSensor *arg1 = (SimRobotSensor *) 0 ;
+  double *arg2 ;
+  double *arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[9] ;
+  double temp3[3] ;
+  PyObject *swig_obj[3] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "SimRobotSensor_setTransform", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_SimRobotSensor, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotSensor_setTransform" "', argument " "1"" of type '" "SimRobotSensor *""'"); 
+  }
+  arg1 = reinterpret_cast< SimRobotSensor * >(argp1);
+  {
+    if (!convert_darray(swig_obj[1],temp2,9)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    if (!convert_darray(swig_obj[2],temp3,3)) {
+      return NULL;
+    }
+    arg3 = &temp3[0];
+  }
+  {
+    try {
+      (arg1)->setTransform((double const (*))arg2,(double const (*))arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_SimRobotSensor_drawGL__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
   PyObject *resultobj = 0;
   SimRobotSensor *arg1 = (SimRobotSensor *) 0 ;
@@ -51195,10 +55237,12 @@ fail:
 SWIGINTERN PyObject *_wrap_SimRobotSensor_drawGL__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
   PyObject *resultobj = 0;
   SimRobotSensor *arg1 = (SimRobotSensor *) 0 ;
-  std::vector< double,std::allocator< double > > *arg2 = 0 ;
+  double *arg2 = (double *) 0 ;
+  int arg3 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  int res2 = SWIG_OLDOBJ ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
   
   if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_SimRobotSensor, 0 |  0 );
@@ -51207,19 +55251,20 @@ SWIGINTERN PyObject *_wrap_SimRobotSensor_drawGL__SWIG_1(PyObject *SWIGUNUSEDPAR
   }
   arg1 = reinterpret_cast< SimRobotSensor * >(argp1);
   {
-    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
-    res2 = swig::asptr(swig_obj[1], &ptr);
-    if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SimRobotSensor_drawGL" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "SimRobotSensor_drawGL" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
-    }
-    arg2 = ptr;
+    npy_intp size[1] = {
+      -1 
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(swig_obj[1],
+      NPY_DOUBLE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 1) ||
+      !require_size(array2, size, 1)) SWIG_fail;
+    arg2 = (double*) array_data(array2);
+    arg3 = (int) array_size(array2,0);
   }
   {
     try {
-      (arg1)->drawGL((std::vector< double,std::allocator< double > > const &)*arg2);
+      (arg1)->drawGL(arg2,arg3);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -51231,10 +55276,20 @@ SWIGINTERN PyObject *_wrap_SimRobotSensor_drawGL__SWIG_1(PyObject *SWIGUNUSEDPAR
     }
   }
   resultobj = SWIG_Py_Void();
-  if (SWIG_IsNewObj(res2)) delete arg2;
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
   return resultobj;
 fail:
-  if (SWIG_IsNewObj(res2)) delete arg2;
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
   return NULL;
 }
 
@@ -51262,9 +55317,13 @@ SWIGINTERN PyObject *_wrap_SimRobotSensor_drawGL(PyObject *self, PyObject *args)
     int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_SimRobotSensor, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
-      int res = swig::asptr(argv[1], (std::vector< double,std::allocator< double > >**)(0));
-      _v = SWIG_CheckState(res);
+      {
+        _v = is_array(argv[1]) || PySequence_Check(argv[1]);
+      }
       if (_v) {
+        if (argc <= 2) {
+          return _wrap_SimRobotSensor_drawGL__SWIG_1(self, argc, argv);
+        }
         return _wrap_SimRobotSensor_drawGL__SWIG_1(self, argc, argv);
       }
     }
@@ -51274,7 +55333,7 @@ fail:
   SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'SimRobotSensor_drawGL'.\n"
     "  Possible C/C++ prototypes are:\n"
     "    SimRobotSensor::drawGL()\n"
-    "    SimRobotSensor::drawGL(std::vector< double,std::allocator< double > > const &)\n");
+    "    SimRobotSensor::drawGL(double *,int)\n");
   return 0;
 }
 
@@ -51512,7 +55571,7 @@ fail:
 SWIGINTERN PyObject *_wrap_SimRobotSensor_sensor_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   SimRobotSensor *arg1 = (SimRobotSensor *) 0 ;
-  SensorBase *arg2 = (SensorBase *) 0 ;
+  Klampt::SensorBase *arg2 = (Klampt::SensorBase *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -51525,11 +55584,11 @@ SWIGINTERN PyObject *_wrap_SimRobotSensor_sensor_set(PyObject *SWIGUNUSEDPARM(se
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotSensor_sensor_set" "', argument " "1"" of type '" "SimRobotSensor *""'"); 
   }
   arg1 = reinterpret_cast< SimRobotSensor * >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_SensorBase, SWIG_POINTER_DISOWN |  0 );
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_Klampt__SensorBase, SWIG_POINTER_DISOWN |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SimRobotSensor_sensor_set" "', argument " "2"" of type '" "SensorBase *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SimRobotSensor_sensor_set" "', argument " "2"" of type '" "Klampt::SensorBase *""'"); 
   }
-  arg2 = reinterpret_cast< SensorBase * >(argp2);
+  arg2 = reinterpret_cast< Klampt::SensorBase * >(argp2);
   if (arg1) (arg1)->sensor = arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
@@ -51544,7 +55603,7 @@ SWIGINTERN PyObject *_wrap_SimRobotSensor_sensor_get(PyObject *SWIGUNUSEDPARM(se
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject *swig_obj[1] ;
-  SensorBase *result = 0 ;
+  Klampt::SensorBase *result = 0 ;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
@@ -51553,8 +55612,8 @@ SWIGINTERN PyObject *_wrap_SimRobotSensor_sensor_get(PyObject *SWIGUNUSEDPARM(se
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotSensor_sensor_get" "', argument " "1"" of type '" "SimRobotSensor *""'"); 
   }
   arg1 = reinterpret_cast< SimRobotSensor * >(argp1);
-  result = (SensorBase *) ((arg1)->sensor);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_SensorBase, 0 |  0 );
+  result = (Klampt::SensorBase *) ((arg1)->sensor);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Klampt__SensorBase, 0 |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -52252,6 +56311,62 @@ fail:
     "    SimRobotController::sensor(int)\n"
     "    SimRobotController::sensor(char const *)\n");
   return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_SimRobotController_addSensor(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SimRobotController *arg1 = (SimRobotController *) 0 ;
+  char *arg2 = (char *) 0 ;
+  char *arg3 = (char *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  int res3 ;
+  char *buf3 = 0 ;
+  int alloc3 = 0 ;
+  PyObject *swig_obj[3] ;
+  SwigValueWrapper< SimRobotSensor > result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "SimRobotController_addSensor", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_SimRobotController, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotController_addSensor" "', argument " "1"" of type '" "SimRobotController *""'"); 
+  }
+  arg1 = reinterpret_cast< SimRobotController * >(argp1);
+  res2 = SWIG_AsCharPtrAndSize(swig_obj[1], &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SimRobotController_addSensor" "', argument " "2"" of type '" "char const *""'");
+  }
+  arg2 = reinterpret_cast< char * >(buf2);
+  res3 = SWIG_AsCharPtrAndSize(swig_obj[2], &buf3, NULL, &alloc3);
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "SimRobotController_addSensor" "', argument " "3"" of type '" "char const *""'");
+  }
+  arg3 = reinterpret_cast< char * >(buf3);
+  {
+    try {
+      result = (arg1)->addSensor((char const *)arg2,(char const *)arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_NewPointerObj((new SimRobotSensor(static_cast< const SimRobotSensor& >(result))), SWIGTYPE_p_SimRobotSensor, SWIG_POINTER_OWN |  0 );
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
+  return resultobj;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
+  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
+  return NULL;
 }
 
 
@@ -53819,7 +57934,7 @@ fail:
 SWIGINTERN PyObject *_wrap_SimRobotController_controller_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   SimRobotController *arg1 = (SimRobotController *) 0 ;
-  ControlledRobotSimulator *arg2 = (ControlledRobotSimulator *) 0 ;
+  Klampt::SimRobotController *arg2 = (Klampt::SimRobotController *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -53832,11 +57947,11 @@ SWIGINTERN PyObject *_wrap_SimRobotController_controller_set(PyObject *SWIGUNUSE
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotController_controller_set" "', argument " "1"" of type '" "SimRobotController *""'"); 
   }
   arg1 = reinterpret_cast< SimRobotController * >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_ControlledRobotSimulator, SWIG_POINTER_DISOWN |  0 );
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_Klampt__SimRobotController, SWIG_POINTER_DISOWN |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SimRobotController_controller_set" "', argument " "2"" of type '" "ControlledRobotSimulator *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SimRobotController_controller_set" "', argument " "2"" of type '" "Klampt::SimRobotController *""'"); 
   }
-  arg2 = reinterpret_cast< ControlledRobotSimulator * >(argp2);
+  arg2 = reinterpret_cast< Klampt::SimRobotController * >(argp2);
   if (arg1) (arg1)->controller = arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
@@ -53851,7 +57966,7 @@ SWIGINTERN PyObject *_wrap_SimRobotController_controller_get(PyObject *SWIGUNUSE
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject *swig_obj[1] ;
-  ControlledRobotSimulator *result = 0 ;
+  Klampt::SimRobotController *result = 0 ;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
@@ -53860,8 +57975,8 @@ SWIGINTERN PyObject *_wrap_SimRobotController_controller_get(PyObject *SWIGUNUSE
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimRobotController_controller_get" "', argument " "1"" of type '" "SimRobotController *""'"); 
   }
   arg1 = reinterpret_cast< SimRobotController * >(argp1);
-  result = (ControlledRobotSimulator *) ((arg1)->controller);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_ControlledRobotSimulator, 0 |  0 );
+  result = (Klampt::SimRobotController *) ((arg1)->controller);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Klampt__SimRobotController, 0 |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -55128,7 +59243,7 @@ fail:
 SWIGINTERN PyObject *_wrap_SimBody_geometry_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   SimBody *arg1 = (SimBody *) 0 ;
-  ODEGeometry *arg2 = (ODEGeometry *) 0 ;
+  Klampt::ODEGeometry *arg2 = (Klampt::ODEGeometry *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -55141,11 +59256,11 @@ SWIGINTERN PyObject *_wrap_SimBody_geometry_set(PyObject *SWIGUNUSEDPARM(self), 
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimBody_geometry_set" "', argument " "1"" of type '" "SimBody *""'"); 
   }
   arg1 = reinterpret_cast< SimBody * >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_ODEGeometry, SWIG_POINTER_DISOWN |  0 );
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_Klampt__ODEGeometry, SWIG_POINTER_DISOWN |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SimBody_geometry_set" "', argument " "2"" of type '" "ODEGeometry *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SimBody_geometry_set" "', argument " "2"" of type '" "Klampt::ODEGeometry *""'"); 
   }
-  arg2 = reinterpret_cast< ODEGeometry * >(argp2);
+  arg2 = reinterpret_cast< Klampt::ODEGeometry * >(argp2);
   if (arg1) (arg1)->geometry = arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
@@ -55160,7 +59275,7 @@ SWIGINTERN PyObject *_wrap_SimBody_geometry_get(PyObject *SWIGUNUSEDPARM(self), 
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject *swig_obj[1] ;
-  ODEGeometry *result = 0 ;
+  Klampt::ODEGeometry *result = 0 ;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
@@ -55169,8 +59284,8 @@ SWIGINTERN PyObject *_wrap_SimBody_geometry_get(PyObject *SWIGUNUSEDPARM(self), 
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SimBody_geometry_get" "', argument " "1"" of type '" "SimBody *""'"); 
   }
   arg1 = reinterpret_cast< SimBody * >(argp1);
-  result = (ODEGeometry *) ((arg1)->geometry);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_ODEGeometry, 0 |  0 );
+  result = (Klampt::ODEGeometry *) ((arg1)->geometry);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Klampt__ODEGeometry, 0 |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -57185,18 +61300,24 @@ SWIGINTERN PyObject *_wrap_Simulator_getContacts(PyObject *SWIGUNUSEDPARM(self),
   Simulator *arg1 = (Simulator *) 0 ;
   int arg2 ;
   int arg3 ;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg4 = 0 ;
+  double **arg4 = (double **) 0 ;
+  int *arg5 = (int *) 0 ;
+  int *arg6 = (int *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
   int val3 ;
   int ecode3 = 0 ;
-  std::vector< std::vector< double > > temp4 ;
+  double *data_temp4 = NULL ;
+  int dim1_temp4 ;
+  int dim2_temp4 ;
   PyObject *swig_obj[3] ;
   
   {
-    arg4 = &temp4;
+    arg4 = &data_temp4;
+    arg5 = &dim1_temp4;
+    arg6 = &dim2_temp4;
   }
   if (!SWIG_Python_UnpackTuple(args, "Simulator_getContacts", 3, 3, swig_obj)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Simulator, 0 |  0 );
@@ -57216,7 +61337,7 @@ SWIGINTERN PyObject *_wrap_Simulator_getContacts(PyObject *SWIGUNUSEDPARM(self),
   arg3 = static_cast< int >(val3);
   {
     try {
-      (arg1)->getContacts(arg2,arg3,*arg4);
+      (arg1)->getContacts(arg2,arg3,arg4,arg5,arg6);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -57229,23 +61350,27 @@ SWIGINTERN PyObject *_wrap_Simulator_getContacts(PyObject *SWIGUNUSEDPARM(self),
   }
   resultobj = SWIG_Py_Void();
   {
-    PyObject *o, *o2, *o3;
-    o = convert_dmatrix_obj((*arg4));
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
+    npy_intp dims[2] = {
+      *arg5, *arg6 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, (void*)(*arg4));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg4), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg4), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
   }
   return resultobj;
 fail:
@@ -57258,18 +61383,24 @@ SWIGINTERN PyObject *_wrap_Simulator_getContactForces(PyObject *SWIGUNUSEDPARM(s
   Simulator *arg1 = (Simulator *) 0 ;
   int arg2 ;
   int arg3 ;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg4 = 0 ;
+  double **arg4 = (double **) 0 ;
+  int *arg5 = (int *) 0 ;
+  int *arg6 = (int *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   int val2 ;
   int ecode2 = 0 ;
   int val3 ;
   int ecode3 = 0 ;
-  std::vector< std::vector< double > > temp4 ;
+  double *data_temp4 = NULL ;
+  int dim1_temp4 ;
+  int dim2_temp4 ;
   PyObject *swig_obj[3] ;
   
   {
-    arg4 = &temp4;
+    arg4 = &data_temp4;
+    arg5 = &dim1_temp4;
+    arg6 = &dim2_temp4;
   }
   if (!SWIG_Python_UnpackTuple(args, "Simulator_getContactForces", 3, 3, swig_obj)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Simulator, 0 |  0 );
@@ -57289,7 +61420,7 @@ SWIGINTERN PyObject *_wrap_Simulator_getContactForces(PyObject *SWIGUNUSEDPARM(s
   arg3 = static_cast< int >(val3);
   {
     try {
-      (arg1)->getContactForces(arg2,arg3,*arg4);
+      (arg1)->getContactForces(arg2,arg3,arg4,arg5,arg6);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -57302,23 +61433,27 @@ SWIGINTERN PyObject *_wrap_Simulator_getContactForces(PyObject *SWIGUNUSEDPARM(s
   }
   resultobj = SWIG_Py_Void();
   {
-    PyObject *o, *o2, *o3;
-    o = convert_dmatrix_obj((*arg4));
-    if ((!resultobj) || (resultobj == Py_None)) {
-      resultobj = o;
-    } else {
-      if (!PyTuple_Check(resultobj)) {
-        PyObject *o2 = resultobj;
-        resultobj = PyTuple_New(1);
-        PyTuple_SetItem(resultobj,0,o2);
-      }
-      o3 = PyTuple_New(1);
-      PyTuple_SetItem(o3,0,o);
-      o2 = resultobj;
-      resultobj = PySequence_Concat(o2,o3);
-      Py_DECREF(o2);
-      Py_DECREF(o3);
-    }
+    npy_intp dims[2] = {
+      *arg5, *arg6 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, (void*)(*arg4));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg4), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg4), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
   }
   return resultobj;
 fail:
@@ -58420,7 +62555,7 @@ fail:
 SWIGINTERN PyObject *_wrap_Simulator_sim_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   Simulator *arg1 = (Simulator *) 0 ;
-  WorldSimulation *arg2 = (WorldSimulation *) 0 ;
+  Klampt::Simulator *arg2 = (Klampt::Simulator *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -58433,11 +62568,11 @@ SWIGINTERN PyObject *_wrap_Simulator_sim_set(PyObject *SWIGUNUSEDPARM(self), PyO
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Simulator_sim_set" "', argument " "1"" of type '" "Simulator *""'"); 
   }
   arg1 = reinterpret_cast< Simulator * >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_WorldSimulation, SWIG_POINTER_DISOWN |  0 );
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_Klampt__Simulator, SWIG_POINTER_DISOWN |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Simulator_sim_set" "', argument " "2"" of type '" "WorldSimulation *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Simulator_sim_set" "', argument " "2"" of type '" "Klampt::Simulator *""'"); 
   }
-  arg2 = reinterpret_cast< WorldSimulation * >(argp2);
+  arg2 = reinterpret_cast< Klampt::Simulator * >(argp2);
   if (arg1) (arg1)->sim = arg2;
   resultobj = SWIG_Py_Void();
   return resultobj;
@@ -58452,7 +62587,7 @@ SWIGINTERN PyObject *_wrap_Simulator_sim_get(PyObject *SWIGUNUSEDPARM(self), PyO
   void *argp1 = 0 ;
   int res1 = 0 ;
   PyObject *swig_obj[1] ;
-  WorldSimulation *result = 0 ;
+  Klampt::Simulator *result = 0 ;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
@@ -58461,8 +62596,8 @@ SWIGINTERN PyObject *_wrap_Simulator_sim_get(PyObject *SWIGUNUSEDPARM(self), PyO
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Simulator_sim_get" "', argument " "1"" of type '" "Simulator *""'"); 
   }
   arg1 = reinterpret_cast< Simulator * >(argp1);
-  result = (WorldSimulation *) ((arg1)->sim);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_WorldSimulation, 0 |  0 );
+  result = (Klampt::Simulator *) ((arg1)->sim);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Klampt__Simulator, 0 |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -58539,7 +62674,7 @@ SWIGINTERN PyObject *Simulator_swiginit(PyObject *SWIGUNUSEDPARM(self), PyObject
   return SWIG_Python_InitShadowInstance(args);
 }
 
-SWIGINTERN PyObject *_wrap_setRandomSeed(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_set_random_seed(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   int arg1 ;
   int val1 ;
@@ -58550,12 +62685,12 @@ SWIGINTERN PyObject *_wrap_setRandomSeed(PyObject *SWIGUNUSEDPARM(self), PyObjec
   swig_obj[0] = args;
   ecode1 = SWIG_AsVal_int(swig_obj[0], &val1);
   if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "setRandomSeed" "', argument " "1"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "set_random_seed" "', argument " "1"" of type '" "int""'");
   } 
   arg1 = static_cast< int >(val1);
   {
     try {
-      setRandomSeed(arg1);
+      set_random_seed(arg1);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -58597,7 +62732,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_SubscribeToStream__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+SWIGINTERN PyObject *_wrap_subscribe_to_stream__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
   PyObject *resultobj = 0;
   Geometry3D *arg1 = 0 ;
   char *arg2 = (char *) 0 ;
@@ -58619,30 +62754,30 @@ SWIGINTERN PyObject *_wrap_SubscribeToStream__SWIG_0(PyObject *SWIGUNUSEDPARM(se
   if ((nobjs < 4) || (nobjs > 4)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_Geometry3D,  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SubscribeToStream" "', argument " "1"" of type '" "Geometry3D &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "subscribe_to_stream" "', argument " "1"" of type '" "Geometry3D &""'"); 
   }
   if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "SubscribeToStream" "', argument " "1"" of type '" "Geometry3D &""'"); 
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "subscribe_to_stream" "', argument " "1"" of type '" "Geometry3D &""'"); 
   }
   arg1 = reinterpret_cast< Geometry3D * >(argp1);
   res2 = SWIG_AsCharPtrAndSize(swig_obj[1], &buf2, NULL, &alloc2);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SubscribeToStream" "', argument " "2"" of type '" "char const *""'");
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "subscribe_to_stream" "', argument " "2"" of type '" "char const *""'");
   }
   arg2 = reinterpret_cast< char * >(buf2);
   res3 = SWIG_AsCharPtrAndSize(swig_obj[2], &buf3, NULL, &alloc3);
   if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "SubscribeToStream" "', argument " "3"" of type '" "char const *""'");
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "subscribe_to_stream" "', argument " "3"" of type '" "char const *""'");
   }
   arg3 = reinterpret_cast< char * >(buf3);
   res4 = SWIG_AsCharPtrAndSize(swig_obj[3], &buf4, NULL, &alloc4);
   if (!SWIG_IsOK(res4)) {
-    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "SubscribeToStream" "', argument " "4"" of type '" "char const *""'");
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "subscribe_to_stream" "', argument " "4"" of type '" "char const *""'");
   }
   arg4 = reinterpret_cast< char * >(buf4);
   {
     try {
-      result = (bool)SubscribeToStream(*arg1,(char const *)arg2,(char const *)arg3,(char const *)arg4);
+      result = (bool)subscribe_to_stream(*arg1,(char const *)arg2,(char const *)arg3,(char const *)arg4);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -58666,7 +62801,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_SubscribeToStream__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+SWIGINTERN PyObject *_wrap_subscribe_to_stream__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
   PyObject *resultobj = 0;
   Geometry3D *arg1 = 0 ;
   char *arg2 = (char *) 0 ;
@@ -58684,25 +62819,25 @@ SWIGINTERN PyObject *_wrap_SubscribeToStream__SWIG_1(PyObject *SWIGUNUSEDPARM(se
   if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_Geometry3D,  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SubscribeToStream" "', argument " "1"" of type '" "Geometry3D &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "subscribe_to_stream" "', argument " "1"" of type '" "Geometry3D &""'"); 
   }
   if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "SubscribeToStream" "', argument " "1"" of type '" "Geometry3D &""'"); 
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "subscribe_to_stream" "', argument " "1"" of type '" "Geometry3D &""'"); 
   }
   arg1 = reinterpret_cast< Geometry3D * >(argp1);
   res2 = SWIG_AsCharPtrAndSize(swig_obj[1], &buf2, NULL, &alloc2);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SubscribeToStream" "', argument " "2"" of type '" "char const *""'");
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "subscribe_to_stream" "', argument " "2"" of type '" "char const *""'");
   }
   arg2 = reinterpret_cast< char * >(buf2);
   res3 = SWIG_AsCharPtrAndSize(swig_obj[2], &buf3, NULL, &alloc3);
   if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "SubscribeToStream" "', argument " "3"" of type '" "char const *""'");
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "subscribe_to_stream" "', argument " "3"" of type '" "char const *""'");
   }
   arg3 = reinterpret_cast< char * >(buf3);
   {
     try {
-      result = (bool)SubscribeToStream(*arg1,(char const *)arg2,(char const *)arg3);
+      result = (bool)subscribe_to_stream(*arg1,(char const *)arg2,(char const *)arg3);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -58724,13 +62859,13 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_SubscribeToStream(PyObject *self, PyObject *args) {
+SWIGINTERN PyObject *_wrap_subscribe_to_stream(PyObject *self, PyObject *args) {
   Py_ssize_t argc;
   PyObject *argv[5] = {
     0
   };
   
-  if (!(argc = SWIG_Python_UnpackTuple(args, "SubscribeToStream", 0, 4, argv))) SWIG_fail;
+  if (!(argc = SWIG_Python_UnpackTuple(args, "subscribe_to_stream", 0, 4, argv))) SWIG_fail;
   --argc;
   if (argc == 3) {
     int _v;
@@ -58744,7 +62879,7 @@ SWIGINTERN PyObject *_wrap_SubscribeToStream(PyObject *self, PyObject *args) {
         int res = SWIG_AsCharPtrAndSize(argv[2], 0, NULL, 0);
         _v = SWIG_CheckState(res);
         if (_v) {
-          return _wrap_SubscribeToStream__SWIG_1(self, argc, argv);
+          return _wrap_subscribe_to_stream__SWIG_1(self, argc, argv);
         }
       }
     }
@@ -58764,7 +62899,7 @@ SWIGINTERN PyObject *_wrap_SubscribeToStream(PyObject *self, PyObject *args) {
           int res = SWIG_AsCharPtrAndSize(argv[3], 0, NULL, 0);
           _v = SWIG_CheckState(res);
           if (_v) {
-            return _wrap_SubscribeToStream__SWIG_0(self, argc, argv);
+            return _wrap_subscribe_to_stream__SWIG_0(self, argc, argv);
           }
         }
       }
@@ -58772,15 +62907,15 @@ SWIGINTERN PyObject *_wrap_SubscribeToStream(PyObject *self, PyObject *args) {
   }
   
 fail:
-  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'SubscribeToStream'.\n"
+  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'subscribe_to_stream'.\n"
     "  Possible C/C++ prototypes are:\n"
-    "    SubscribeToStream(Geometry3D &,char const *,char const *,char const *)\n"
-    "    SubscribeToStream(Geometry3D &,char const *,char const *)\n");
+    "    subscribe_to_stream(Geometry3D &,char const *,char const *,char const *)\n"
+    "    subscribe_to_stream(Geometry3D &,char const *,char const *)\n");
   return 0;
 }
 
 
-SWIGINTERN PyObject *_wrap_DetachFromStream(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_detach_from_stream(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   char *arg1 = (char *) 0 ;
   char *arg2 = (char *) 0 ;
@@ -58793,20 +62928,20 @@ SWIGINTERN PyObject *_wrap_DetachFromStream(PyObject *SWIGUNUSEDPARM(self), PyOb
   PyObject *swig_obj[2] ;
   bool result;
   
-  if (!SWIG_Python_UnpackTuple(args, "DetachFromStream", 2, 2, swig_obj)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "detach_from_stream", 2, 2, swig_obj)) SWIG_fail;
   res1 = SWIG_AsCharPtrAndSize(swig_obj[0], &buf1, NULL, &alloc1);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "DetachFromStream" "', argument " "1"" of type '" "char const *""'");
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "detach_from_stream" "', argument " "1"" of type '" "char const *""'");
   }
   arg1 = reinterpret_cast< char * >(buf1);
   res2 = SWIG_AsCharPtrAndSize(swig_obj[1], &buf2, NULL, &alloc2);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "DetachFromStream" "', argument " "2"" of type '" "char const *""'");
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "detach_from_stream" "', argument " "2"" of type '" "char const *""'");
   }
   arg2 = reinterpret_cast< char * >(buf2);
   {
     try {
-      result = (bool)DetachFromStream((char const *)arg1,(char const *)arg2);
+      result = (bool)detach_from_stream((char const *)arg1,(char const *)arg2);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -58828,7 +62963,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_ProcessStreams__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+SWIGINTERN PyObject *_wrap_process_streams__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
   PyObject *resultobj = 0;
   char *arg1 = (char *) 0 ;
   int res1 ;
@@ -58839,12 +62974,12 @@ SWIGINTERN PyObject *_wrap_ProcessStreams__SWIG_0(PyObject *SWIGUNUSEDPARM(self)
   if ((nobjs < 1) || (nobjs > 1)) SWIG_fail;
   res1 = SWIG_AsCharPtrAndSize(swig_obj[0], &buf1, NULL, &alloc1);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ProcessStreams" "', argument " "1"" of type '" "char const *""'");
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "process_streams" "', argument " "1"" of type '" "char const *""'");
   }
   arg1 = reinterpret_cast< char * >(buf1);
   {
     try {
-      result = (bool)ProcessStreams((char const *)arg1);
+      result = (bool)process_streams((char const *)arg1);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -58864,14 +62999,14 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_ProcessStreams__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **SWIGUNUSEDPARM(swig_obj)) {
+SWIGINTERN PyObject *_wrap_process_streams__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **SWIGUNUSEDPARM(swig_obj)) {
   PyObject *resultobj = 0;
   bool result;
   
   if ((nobjs < 0) || (nobjs > 0)) SWIG_fail;
   {
     try {
-      result = (bool)ProcessStreams();
+      result = (bool)process_streams();
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -58889,36 +63024,36 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_ProcessStreams(PyObject *self, PyObject *args) {
+SWIGINTERN PyObject *_wrap_process_streams(PyObject *self, PyObject *args) {
   Py_ssize_t argc;
   PyObject *argv[2] = {
     0
   };
   
-  if (!(argc = SWIG_Python_UnpackTuple(args, "ProcessStreams", 0, 1, argv))) SWIG_fail;
+  if (!(argc = SWIG_Python_UnpackTuple(args, "process_streams", 0, 1, argv))) SWIG_fail;
   --argc;
   if (argc == 0) {
-    return _wrap_ProcessStreams__SWIG_1(self, argc, argv);
+    return _wrap_process_streams__SWIG_1(self, argc, argv);
   }
   if (argc == 1) {
     int _v;
     int res = SWIG_AsCharPtrAndSize(argv[0], 0, NULL, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
-      return _wrap_ProcessStreams__SWIG_0(self, argc, argv);
+      return _wrap_process_streams__SWIG_0(self, argc, argv);
     }
   }
   
 fail:
-  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'ProcessStreams'.\n"
+  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'process_streams'.\n"
     "  Possible C/C++ prototypes are:\n"
-    "    ProcessStreams(char const *)\n"
-    "    ProcessStreams()\n");
+    "    process_streams(char const *)\n"
+    "    process_streams()\n");
   return 0;
 }
 
 
-SWIGINTERN PyObject *_wrap_WaitForStream(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_wait_for_stream(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   char *arg1 = (char *) 0 ;
   char *arg2 = (char *) 0 ;
@@ -58934,25 +63069,25 @@ SWIGINTERN PyObject *_wrap_WaitForStream(PyObject *SWIGUNUSEDPARM(self), PyObjec
   PyObject *swig_obj[3] ;
   bool result;
   
-  if (!SWIG_Python_UnpackTuple(args, "WaitForStream", 3, 3, swig_obj)) SWIG_fail;
+  if (!SWIG_Python_UnpackTuple(args, "wait_for_stream", 3, 3, swig_obj)) SWIG_fail;
   res1 = SWIG_AsCharPtrAndSize(swig_obj[0], &buf1, NULL, &alloc1);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "WaitForStream" "', argument " "1"" of type '" "char const *""'");
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "wait_for_stream" "', argument " "1"" of type '" "char const *""'");
   }
   arg1 = reinterpret_cast< char * >(buf1);
   res2 = SWIG_AsCharPtrAndSize(swig_obj[1], &buf2, NULL, &alloc2);
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "WaitForStream" "', argument " "2"" of type '" "char const *""'");
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "wait_for_stream" "', argument " "2"" of type '" "char const *""'");
   }
   arg2 = reinterpret_cast< char * >(buf2);
   ecode3 = SWIG_AsVal_double(swig_obj[2], &val3);
   if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "WaitForStream" "', argument " "3"" of type '" "double""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "wait_for_stream" "', argument " "3"" of type '" "double""'");
   } 
   arg3 = static_cast< double >(val3);
   {
     try {
-      result = (bool)WaitForStream((char const *)arg1,(char const *)arg2,arg3);
+      result = (bool)wait_for_stream((char const *)arg1,(char const *)arg2,arg3);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -58974,7 +63109,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_ThreeJSGetScene(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_threejs_get_scene(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   WorldModel *arg1 = 0 ;
   void *argp1 = 0 ;
@@ -58986,15 +63121,15 @@ SWIGINTERN PyObject *_wrap_ThreeJSGetScene(PyObject *SWIGUNUSEDPARM(self), PyObj
   swig_obj[0] = args;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_WorldModel,  0  | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ThreeJSGetScene" "', argument " "1"" of type '" "WorldModel const &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "threejs_get_scene" "', argument " "1"" of type '" "WorldModel const &""'"); 
   }
   if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "ThreeJSGetScene" "', argument " "1"" of type '" "WorldModel const &""'"); 
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "threejs_get_scene" "', argument " "1"" of type '" "WorldModel const &""'"); 
   }
   arg1 = reinterpret_cast< WorldModel * >(argp1);
   {
     try {
-      result = ThreeJSGetScene((WorldModel const &)*arg1);
+      result = threejs_get_scene((WorldModel const &)*arg1);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -59012,7 +63147,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_ThreeJSGetTransforms(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_threejs_get_transforms(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   WorldModel *arg1 = 0 ;
   void *argp1 = 0 ;
@@ -59024,15 +63159,15 @@ SWIGINTERN PyObject *_wrap_ThreeJSGetTransforms(PyObject *SWIGUNUSEDPARM(self), 
   swig_obj[0] = args;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_WorldModel,  0  | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ThreeJSGetTransforms" "', argument " "1"" of type '" "WorldModel const &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "threejs_get_transforms" "', argument " "1"" of type '" "WorldModel const &""'"); 
   }
   if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "ThreeJSGetTransforms" "', argument " "1"" of type '" "WorldModel const &""'"); 
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "threejs_get_transforms" "', argument " "1"" of type '" "WorldModel const &""'"); 
   }
   arg1 = reinterpret_cast< WorldModel * >(argp1);
   {
     try {
-      result = ThreeJSGetTransforms((WorldModel const &)*arg1);
+      result = threejs_get_transforms((WorldModel const &)*arg1);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -59050,7 +63185,7 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_setFrictionConeApproximationEdges(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+SWIGINTERN PyObject *_wrap_set_friction_cone_approximation_edges(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   int arg1 ;
   int val1 ;
@@ -59061,12 +63196,12 @@ SWIGINTERN PyObject *_wrap_setFrictionConeApproximationEdges(PyObject *SWIGUNUSE
   swig_obj[0] = args;
   ecode1 = SWIG_AsVal_int(swig_obj[0], &val1);
   if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "setFrictionConeApproximationEdges" "', argument " "1"" of type '" "int""'");
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "set_friction_cone_approximation_edges" "', argument " "1"" of type '" "int""'");
   } 
   arg1 = static_cast< int >(val1);
   {
     try {
-      setFrictionConeApproximationEdges(arg1);
+      set_friction_cone_approximation_edges(arg1);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -59084,966 +63219,363 @@ fail:
 }
 
 
-SWIGINTERN PyObject *_wrap_forceClosure__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+SWIGINTERN PyObject *_wrap_force_closure__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
   PyObject *resultobj = 0;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg1 = 0 ;
-  int res1 = SWIG_OLDOBJ ;
-  bool result;
-  
-  if ((nobjs < 1) || (nobjs > 1)) SWIG_fail;
-  {
-    std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *ptr = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)0;
-    res1 = swig::asptr(swig_obj[0], &ptr);
-    if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "forceClosure" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "forceClosure" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    arg1 = ptr;
-  }
-  {
-    try {
-      result = (bool)forceClosure((std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg1);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_From_bool(static_cast< bool >(result));
-  if (SWIG_IsNewObj(res1)) delete arg1;
-  return resultobj;
-fail:
-  if (SWIG_IsNewObj(res1)) delete arg1;
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_forceClosure__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
-  PyObject *resultobj = 0;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg1 = 0 ;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg2 = 0 ;
-  int res1 = SWIG_OLDOBJ ;
-  int res2 = SWIG_OLDOBJ ;
-  bool result;
-  
-  if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
-  {
-    std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *ptr = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)0;
-    res1 = swig::asptr(swig_obj[0], &ptr);
-    if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "forceClosure" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "forceClosure" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    arg1 = ptr;
-  }
-  {
-    std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *ptr = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)0;
-    res2 = swig::asptr(swig_obj[1], &ptr);
-    if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "forceClosure" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "forceClosure" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    arg2 = ptr;
-  }
-  {
-    try {
-      result = (bool)forceClosure((std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg1,(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg2);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_From_bool(static_cast< bool >(result));
-  if (SWIG_IsNewObj(res1)) delete arg1;
-  if (SWIG_IsNewObj(res2)) delete arg2;
-  return resultobj;
-fail:
-  if (SWIG_IsNewObj(res1)) delete arg1;
-  if (SWIG_IsNewObj(res2)) delete arg2;
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_forceClosure(PyObject *self, PyObject *args) {
-  Py_ssize_t argc;
-  PyObject *argv[3] = {
-    0
-  };
-  
-  if (!(argc = SWIG_Python_UnpackTuple(args, "forceClosure", 0, 2, argv))) SWIG_fail;
-  --argc;
-  if (argc == 1) {
-    int _v;
-    int res = swig::asptr(argv[0], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      return _wrap_forceClosure__SWIG_0(self, argc, argv);
-    }
-  }
-  if (argc == 2) {
-    int _v;
-    int res = swig::asptr(argv[0], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      int res = swig::asptr(argv[1], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
-      _v = SWIG_CheckState(res);
-      if (_v) {
-        return _wrap_forceClosure__SWIG_1(self, argc, argv);
-      }
-    }
-  }
-  
-fail:
-  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'forceClosure'.\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    forceClosure(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)\n"
-    "    forceClosure(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &,std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)\n");
-  return 0;
-}
-
-
-SWIGINTERN PyObject *_wrap_forceClosure2D__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
-  PyObject *resultobj = 0;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg1 = 0 ;
-  int res1 = SWIG_OLDOBJ ;
-  bool result;
-  
-  if ((nobjs < 1) || (nobjs > 1)) SWIG_fail;
-  {
-    std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *ptr = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)0;
-    res1 = swig::asptr(swig_obj[0], &ptr);
-    if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "forceClosure2D" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "forceClosure2D" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    arg1 = ptr;
-  }
-  {
-    try {
-      result = (bool)forceClosure2D((std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg1);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_From_bool(static_cast< bool >(result));
-  if (SWIG_IsNewObj(res1)) delete arg1;
-  return resultobj;
-fail:
-  if (SWIG_IsNewObj(res1)) delete arg1;
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_forceClosure2D__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
-  PyObject *resultobj = 0;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg1 = 0 ;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg2 = 0 ;
-  int res1 = SWIG_OLDOBJ ;
-  int res2 = SWIG_OLDOBJ ;
-  bool result;
-  
-  if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
-  {
-    std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *ptr = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)0;
-    res1 = swig::asptr(swig_obj[0], &ptr);
-    if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "forceClosure2D" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "forceClosure2D" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    arg1 = ptr;
-  }
-  {
-    std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *ptr = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)0;
-    res2 = swig::asptr(swig_obj[1], &ptr);
-    if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "forceClosure2D" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "forceClosure2D" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    arg2 = ptr;
-  }
-  {
-    try {
-      result = (bool)forceClosure2D((std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg1,(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg2);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = SWIG_From_bool(static_cast< bool >(result));
-  if (SWIG_IsNewObj(res1)) delete arg1;
-  if (SWIG_IsNewObj(res2)) delete arg2;
-  return resultobj;
-fail:
-  if (SWIG_IsNewObj(res1)) delete arg1;
-  if (SWIG_IsNewObj(res2)) delete arg2;
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_forceClosure2D(PyObject *self, PyObject *args) {
-  Py_ssize_t argc;
-  PyObject *argv[3] = {
-    0
-  };
-  
-  if (!(argc = SWIG_Python_UnpackTuple(args, "forceClosure2D", 0, 2, argv))) SWIG_fail;
-  --argc;
-  if (argc == 1) {
-    int _v;
-    int res = swig::asptr(argv[0], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      return _wrap_forceClosure2D__SWIG_0(self, argc, argv);
-    }
-  }
-  if (argc == 2) {
-    int _v;
-    int res = swig::asptr(argv[0], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      int res = swig::asptr(argv[1], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
-      _v = SWIG_CheckState(res);
-      if (_v) {
-        return _wrap_forceClosure2D__SWIG_1(self, argc, argv);
-      }
-    }
-  }
-  
-fail:
-  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'forceClosure2D'.\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    forceClosure2D(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)\n"
-    "    forceClosure2D(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &,std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)\n");
-  return 0;
-}
-
-
-SWIGINTERN PyObject *_wrap_comEquilibrium__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
-  PyObject *resultobj = 0;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg1 = 0 ;
-  std::vector< double,std::allocator< double > > *arg2 = 0 ;
-  PyObject *arg3 = (PyObject *) 0 ;
-  int res1 = SWIG_OLDOBJ ;
-  int res2 = SWIG_OLDOBJ ;
-  PyObject *result = 0 ;
-  
-  if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
-  {
-    std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *ptr = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)0;
-    res1 = swig::asptr(swig_obj[0], &ptr);
-    if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "comEquilibrium" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "comEquilibrium" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    arg1 = ptr;
-  }
-  {
-    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
-    res2 = swig::asptr(swig_obj[1], &ptr);
-    if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "comEquilibrium" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "comEquilibrium" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
-    }
-    arg2 = ptr;
-  }
-  arg3 = swig_obj[2];
-  {
-    try {
-      result = (PyObject *)comEquilibrium((std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg1,(std::vector< double,std::allocator< double > > const &)*arg2,arg3);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = result;
-  if (SWIG_IsNewObj(res1)) delete arg1;
-  if (SWIG_IsNewObj(res2)) delete arg2;
-  return resultobj;
-fail:
-  if (SWIG_IsNewObj(res1)) delete arg1;
-  if (SWIG_IsNewObj(res2)) delete arg2;
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_comEquilibrium__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
-  PyObject *resultobj = 0;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg1 = 0 ;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg2 = 0 ;
-  std::vector< double,std::allocator< double > > *arg3 = 0 ;
-  PyObject *arg4 = (PyObject *) 0 ;
-  int res1 = SWIG_OLDOBJ ;
-  int res2 = SWIG_OLDOBJ ;
-  int res3 = SWIG_OLDOBJ ;
-  PyObject *result = 0 ;
-  
-  if ((nobjs < 4) || (nobjs > 4)) SWIG_fail;
-  {
-    std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *ptr = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)0;
-    res1 = swig::asptr(swig_obj[0], &ptr);
-    if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "comEquilibrium" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "comEquilibrium" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    arg1 = ptr;
-  }
-  {
-    std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *ptr = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)0;
-    res2 = swig::asptr(swig_obj[1], &ptr);
-    if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "comEquilibrium" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "comEquilibrium" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    arg2 = ptr;
-  }
-  {
-    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
-    res3 = swig::asptr(swig_obj[2], &ptr);
-    if (!SWIG_IsOK(res3)) {
-      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "comEquilibrium" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "comEquilibrium" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
-    }
-    arg3 = ptr;
-  }
-  arg4 = swig_obj[3];
-  {
-    try {
-      result = (PyObject *)comEquilibrium((std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg1,(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg2,(std::vector< double,std::allocator< double > > const &)*arg3,arg4);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = result;
-  if (SWIG_IsNewObj(res1)) delete arg1;
-  if (SWIG_IsNewObj(res2)) delete arg2;
-  if (SWIG_IsNewObj(res3)) delete arg3;
-  return resultobj;
-fail:
-  if (SWIG_IsNewObj(res1)) delete arg1;
-  if (SWIG_IsNewObj(res2)) delete arg2;
-  if (SWIG_IsNewObj(res3)) delete arg3;
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_comEquilibrium(PyObject *self, PyObject *args) {
-  Py_ssize_t argc;
-  PyObject *argv[5] = {
-    0
-  };
-  
-  if (!(argc = SWIG_Python_UnpackTuple(args, "comEquilibrium", 0, 4, argv))) SWIG_fail;
-  --argc;
-  if (argc == 3) {
-    int _v;
-    int res = swig::asptr(argv[0], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      int res = swig::asptr(argv[1], (std::vector< double,std::allocator< double > >**)(0));
-      _v = SWIG_CheckState(res);
-      if (_v) {
-        _v = (argv[2] != 0);
-        if (_v) {
-          return _wrap_comEquilibrium__SWIG_0(self, argc, argv);
-        }
-      }
-    }
-  }
-  if (argc == 4) {
-    int _v;
-    int res = swig::asptr(argv[0], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      int res = swig::asptr(argv[1], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
-      _v = SWIG_CheckState(res);
-      if (_v) {
-        int res = swig::asptr(argv[2], (std::vector< double,std::allocator< double > >**)(0));
-        _v = SWIG_CheckState(res);
-        if (_v) {
-          _v = (argv[3] != 0);
-          if (_v) {
-            return _wrap_comEquilibrium__SWIG_1(self, argc, argv);
-          }
-        }
-      }
-    }
-  }
-  
-fail:
-  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'comEquilibrium'.\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    comEquilibrium(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &,std::vector< double,std::allocator< double > > const &,PyObject *)\n"
-    "    comEquilibrium(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &,std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &,std::vector< double,std::allocator< double > > const &,PyObject *)\n");
-  return 0;
-}
-
-
-SWIGINTERN PyObject *_wrap_comEquilibrium2D__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
-  PyObject *resultobj = 0;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg1 = 0 ;
-  std::vector< double,std::allocator< double > > *arg2 = 0 ;
-  PyObject *arg3 = (PyObject *) 0 ;
-  int res1 = SWIG_OLDOBJ ;
-  int res2 = SWIG_OLDOBJ ;
-  PyObject *result = 0 ;
-  
-  if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
-  {
-    std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *ptr = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)0;
-    res1 = swig::asptr(swig_obj[0], &ptr);
-    if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "comEquilibrium2D" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "comEquilibrium2D" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    arg1 = ptr;
-  }
-  {
-    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
-    res2 = swig::asptr(swig_obj[1], &ptr);
-    if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "comEquilibrium2D" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "comEquilibrium2D" "', argument " "2"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
-    }
-    arg2 = ptr;
-  }
-  arg3 = swig_obj[2];
-  {
-    try {
-      result = (PyObject *)comEquilibrium2D((std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg1,(std::vector< double,std::allocator< double > > const &)*arg2,arg3);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = result;
-  if (SWIG_IsNewObj(res1)) delete arg1;
-  if (SWIG_IsNewObj(res2)) delete arg2;
-  return resultobj;
-fail:
-  if (SWIG_IsNewObj(res1)) delete arg1;
-  if (SWIG_IsNewObj(res2)) delete arg2;
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_comEquilibrium2D__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
-  PyObject *resultobj = 0;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg1 = 0 ;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg2 = 0 ;
-  std::vector< double,std::allocator< double > > *arg3 = 0 ;
-  PyObject *arg4 = (PyObject *) 0 ;
-  int res1 = SWIG_OLDOBJ ;
-  int res2 = SWIG_OLDOBJ ;
-  int res3 = SWIG_OLDOBJ ;
-  PyObject *result = 0 ;
-  
-  if ((nobjs < 4) || (nobjs > 4)) SWIG_fail;
-  {
-    std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *ptr = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)0;
-    res1 = swig::asptr(swig_obj[0], &ptr);
-    if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "comEquilibrium2D" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "comEquilibrium2D" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    arg1 = ptr;
-  }
-  {
-    std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *ptr = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)0;
-    res2 = swig::asptr(swig_obj[1], &ptr);
-    if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "comEquilibrium2D" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "comEquilibrium2D" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    arg2 = ptr;
-  }
-  {
-    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
-    res3 = swig::asptr(swig_obj[2], &ptr);
-    if (!SWIG_IsOK(res3)) {
-      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "comEquilibrium2D" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "comEquilibrium2D" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
-    }
-    arg3 = ptr;
-  }
-  arg4 = swig_obj[3];
-  {
-    try {
-      result = (PyObject *)comEquilibrium2D((std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg1,(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg2,(std::vector< double,std::allocator< double > > const &)*arg3,arg4);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = result;
-  if (SWIG_IsNewObj(res1)) delete arg1;
-  if (SWIG_IsNewObj(res2)) delete arg2;
-  if (SWIG_IsNewObj(res3)) delete arg3;
-  return resultobj;
-fail:
-  if (SWIG_IsNewObj(res1)) delete arg1;
-  if (SWIG_IsNewObj(res2)) delete arg2;
-  if (SWIG_IsNewObj(res3)) delete arg3;
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_comEquilibrium2D(PyObject *self, PyObject *args) {
-  Py_ssize_t argc;
-  PyObject *argv[5] = {
-    0
-  };
-  
-  if (!(argc = SWIG_Python_UnpackTuple(args, "comEquilibrium2D", 0, 4, argv))) SWIG_fail;
-  --argc;
-  if (argc == 3) {
-    int _v;
-    int res = swig::asptr(argv[0], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      int res = swig::asptr(argv[1], (std::vector< double,std::allocator< double > >**)(0));
-      _v = SWIG_CheckState(res);
-      if (_v) {
-        _v = (argv[2] != 0);
-        if (_v) {
-          return _wrap_comEquilibrium2D__SWIG_0(self, argc, argv);
-        }
-      }
-    }
-  }
-  if (argc == 4) {
-    int _v;
-    int res = swig::asptr(argv[0], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      int res = swig::asptr(argv[1], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
-      _v = SWIG_CheckState(res);
-      if (_v) {
-        int res = swig::asptr(argv[2], (std::vector< double,std::allocator< double > >**)(0));
-        _v = SWIG_CheckState(res);
-        if (_v) {
-          _v = (argv[3] != 0);
-          if (_v) {
-            return _wrap_comEquilibrium2D__SWIG_1(self, argc, argv);
-          }
-        }
-      }
-    }
-  }
-  
-fail:
-  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'comEquilibrium2D'.\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    comEquilibrium2D(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &,std::vector< double,std::allocator< double > > const &,PyObject *)\n"
-    "    comEquilibrium2D(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &,std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &,std::vector< double,std::allocator< double > > const &,PyObject *)\n");
-  return 0;
-}
-
-
-SWIGINTERN PyObject *_wrap_supportPolygon__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
-  PyObject *resultobj = 0;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg1 = 0 ;
-  int res1 = SWIG_OLDOBJ ;
-  PyObject *result = 0 ;
-  
-  if ((nobjs < 1) || (nobjs > 1)) SWIG_fail;
-  {
-    std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *ptr = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)0;
-    res1 = swig::asptr(swig_obj[0], &ptr);
-    if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "supportPolygon" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "supportPolygon" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    arg1 = ptr;
-  }
-  {
-    try {
-      result = (PyObject *)supportPolygon((std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg1);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = result;
-  if (SWIG_IsNewObj(res1)) delete arg1;
-  return resultobj;
-fail:
-  if (SWIG_IsNewObj(res1)) delete arg1;
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_supportPolygon__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
-  PyObject *resultobj = 0;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg1 = 0 ;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg2 = 0 ;
-  int res1 = SWIG_OLDOBJ ;
-  int res2 = SWIG_OLDOBJ ;
-  PyObject *result = 0 ;
-  
-  if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
-  {
-    std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *ptr = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)0;
-    res1 = swig::asptr(swig_obj[0], &ptr);
-    if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "supportPolygon" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "supportPolygon" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    arg1 = ptr;
-  }
-  {
-    std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *ptr = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)0;
-    res2 = swig::asptr(swig_obj[1], &ptr);
-    if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "supportPolygon" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "supportPolygon" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    arg2 = ptr;
-  }
-  {
-    try {
-      result = (PyObject *)supportPolygon((std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg1,(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg2);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = result;
-  if (SWIG_IsNewObj(res1)) delete arg1;
-  if (SWIG_IsNewObj(res2)) delete arg2;
-  return resultobj;
-fail:
-  if (SWIG_IsNewObj(res1)) delete arg1;
-  if (SWIG_IsNewObj(res2)) delete arg2;
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_supportPolygon(PyObject *self, PyObject *args) {
-  Py_ssize_t argc;
-  PyObject *argv[3] = {
-    0
-  };
-  
-  if (!(argc = SWIG_Python_UnpackTuple(args, "supportPolygon", 0, 2, argv))) SWIG_fail;
-  --argc;
-  if (argc == 1) {
-    int _v;
-    int res = swig::asptr(argv[0], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      return _wrap_supportPolygon__SWIG_0(self, argc, argv);
-    }
-  }
-  if (argc == 2) {
-    int _v;
-    int res = swig::asptr(argv[0], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      int res = swig::asptr(argv[1], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
-      _v = SWIG_CheckState(res);
-      if (_v) {
-        return _wrap_supportPolygon__SWIG_1(self, argc, argv);
-      }
-    }
-  }
-  
-fail:
-  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'supportPolygon'.\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    supportPolygon(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)\n"
-    "    supportPolygon(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &,std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)\n");
-  return 0;
-}
-
-
-SWIGINTERN PyObject *_wrap_supportPolygon2D__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
-  PyObject *resultobj = 0;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg1 = 0 ;
-  int res1 = SWIG_OLDOBJ ;
-  PyObject *result = 0 ;
-  
-  if ((nobjs < 1) || (nobjs > 1)) SWIG_fail;
-  {
-    std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *ptr = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)0;
-    res1 = swig::asptr(swig_obj[0], &ptr);
-    if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "supportPolygon2D" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "supportPolygon2D" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    arg1 = ptr;
-  }
-  {
-    try {
-      result = (PyObject *)supportPolygon2D((std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg1);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = result;
-  if (SWIG_IsNewObj(res1)) delete arg1;
-  return resultobj;
-fail:
-  if (SWIG_IsNewObj(res1)) delete arg1;
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_supportPolygon2D__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
-  PyObject *resultobj = 0;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg1 = 0 ;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg2 = 0 ;
-  int res1 = SWIG_OLDOBJ ;
-  int res2 = SWIG_OLDOBJ ;
-  PyObject *result = 0 ;
-  
-  if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
-  {
-    std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *ptr = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)0;
-    res1 = swig::asptr(swig_obj[0], &ptr);
-    if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "supportPolygon2D" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "supportPolygon2D" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    arg1 = ptr;
-  }
-  {
-    std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *ptr = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)0;
-    res2 = swig::asptr(swig_obj[1], &ptr);
-    if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "supportPolygon2D" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "supportPolygon2D" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    arg2 = ptr;
-  }
-  {
-    try {
-      result = (PyObject *)supportPolygon2D((std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg1,(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg2);
-    }
-    catch(PyException& e) {
-      e.setPyErr();
-      return NULL;
-    }
-    catch(std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
-      return NULL;
-    }
-  }
-  resultobj = result;
-  if (SWIG_IsNewObj(res1)) delete arg1;
-  if (SWIG_IsNewObj(res2)) delete arg2;
-  return resultobj;
-fail:
-  if (SWIG_IsNewObj(res1)) delete arg1;
-  if (SWIG_IsNewObj(res2)) delete arg2;
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_supportPolygon2D(PyObject *self, PyObject *args) {
-  Py_ssize_t argc;
-  PyObject *argv[3] = {
-    0
-  };
-  
-  if (!(argc = SWIG_Python_UnpackTuple(args, "supportPolygon2D", 0, 2, argv))) SWIG_fail;
-  --argc;
-  if (argc == 1) {
-    int _v;
-    int res = swig::asptr(argv[0], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      return _wrap_supportPolygon2D__SWIG_0(self, argc, argv);
-    }
-  }
-  if (argc == 2) {
-    int _v;
-    int res = swig::asptr(argv[0], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      int res = swig::asptr(argv[1], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
-      _v = SWIG_CheckState(res);
-      if (_v) {
-        return _wrap_supportPolygon2D__SWIG_1(self, argc, argv);
-      }
-    }
-  }
-  
-fail:
-  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'supportPolygon2D'.\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    supportPolygon2D(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)\n"
-    "    supportPolygon2D(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &,std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)\n");
-  return 0;
-}
-
-
-SWIGINTERN PyObject *_wrap_equilibriumTorques__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
-  PyObject *resultobj = 0;
-  RobotModel *arg1 = 0 ;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg2 = 0 ;
-  std::vector< int,std::allocator< int > > *arg3 = 0 ;
-  std::vector< double,std::allocator< double > > *arg4 = 0 ;
-  double arg5 ;
+  double *arg1 = (double *) 0 ;
+  int arg2 ;
+  int arg3 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  bool result;
+  
+  if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "force_closure" "', argument " "1"" of type '" "double *""'"); 
+  }
+  arg1 = reinterpret_cast< double * >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "force_closure" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "force_closure" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = static_cast< int >(val3);
+  {
+    try {
+      result = (bool)force_closure(arg1,arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_force_closure__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg1 = 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg2 = 0 ;
+  int res1 = SWIG_OLDOBJ ;
   int res2 = SWIG_OLDOBJ ;
-  int res3 = SWIG_OLDOBJ ;
+  bool result;
+  
+  if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
+  {
+    std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *ptr = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)0;
+    res1 = swig::asptr(swig_obj[0], &ptr);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "force_closure" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "force_closure" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
+    }
+    arg1 = ptr;
+  }
+  {
+    std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *ptr = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)0;
+    res2 = swig::asptr(swig_obj[1], &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "force_closure" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "force_closure" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
+    }
+    arg2 = ptr;
+  }
+  {
+    try {
+      result = (bool)force_closure((std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg1,(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  if (SWIG_IsNewObj(res1)) delete arg1;
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return resultobj;
+fail:
+  if (SWIG_IsNewObj(res1)) delete arg1;
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_force_closure(PyObject *self, PyObject *args) {
+  Py_ssize_t argc;
+  PyObject *argv[4] = {
+    0
+  };
+  
+  if (!(argc = SWIG_Python_UnpackTuple(args, "force_closure", 0, 3, argv))) SWIG_fail;
+  --argc;
+  if (argc == 2) {
+    int _v;
+    int res = swig::asptr(argv[0], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = swig::asptr(argv[1], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        return _wrap_force_closure__SWIG_1(self, argc, argv);
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_double, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_int(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        {
+          int res = SWIG_AsVal_int(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          return _wrap_force_closure__SWIG_0(self, argc, argv);
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'force_closure'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    force_closure(double *,int,int)\n"
+    "    force_closure(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &,std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)\n");
+  return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_force_closure_2d__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  double *arg1 = (double *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  bool result;
+  
+  if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "force_closure_2d" "', argument " "1"" of type '" "double *""'"); 
+  }
+  arg1 = reinterpret_cast< double * >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "force_closure_2d" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "force_closure_2d" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = static_cast< int >(val3);
+  {
+    try {
+      result = (bool)force_closure_2d(arg1,arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_force_closure_2d__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg1 = 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg2 = 0 ;
+  int res1 = SWIG_OLDOBJ ;
+  int res2 = SWIG_OLDOBJ ;
+  bool result;
+  
+  if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
+  {
+    std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *ptr = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)0;
+    res1 = swig::asptr(swig_obj[0], &ptr);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "force_closure_2d" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "force_closure_2d" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
+    }
+    arg1 = ptr;
+  }
+  {
+    std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *ptr = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)0;
+    res2 = swig::asptr(swig_obj[1], &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "force_closure_2d" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "force_closure_2d" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
+    }
+    arg2 = ptr;
+  }
+  {
+    try {
+      result = (bool)force_closure_2d((std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg1,(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  if (SWIG_IsNewObj(res1)) delete arg1;
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return resultobj;
+fail:
+  if (SWIG_IsNewObj(res1)) delete arg1;
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_force_closure_2d(PyObject *self, PyObject *args) {
+  Py_ssize_t argc;
+  PyObject *argv[4] = {
+    0
+  };
+  
+  if (!(argc = SWIG_Python_UnpackTuple(args, "force_closure_2d", 0, 3, argv))) SWIG_fail;
+  --argc;
+  if (argc == 2) {
+    int _v;
+    int res = swig::asptr(argv[0], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = swig::asptr(argv[1], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        return _wrap_force_closure_2d__SWIG_1(self, argc, argv);
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_double, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_int(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        {
+          int res = SWIG_AsVal_int(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          return _wrap_force_closure_2d__SWIG_0(self, argc, argv);
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'force_closure_2d'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    force_closure_2d(double *,int,int)\n"
+    "    force_closure_2d(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &,std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)\n");
+  return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_com_equilibrium__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  double *arg1 = (double *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  std::vector< double,std::allocator< double > > *arg4 = 0 ;
+  PyObject *arg5 = (PyObject *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
   int res4 = SWIG_OLDOBJ ;
-  double val5 ;
-  int ecode5 = 0 ;
   PyObject *result = 0 ;
   
   if ((nobjs < 5) || (nobjs > 5)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_RobotModel,  0  | 0);
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_double, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "equilibriumTorques" "', argument " "1"" of type '" "RobotModel const &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "com_equilibrium" "', argument " "1"" of type '" "double *""'"); 
   }
-  if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "equilibriumTorques" "', argument " "1"" of type '" "RobotModel const &""'"); 
-  }
-  arg1 = reinterpret_cast< RobotModel * >(argp1);
-  {
-    std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *ptr = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)0;
-    res2 = swig::asptr(swig_obj[1], &ptr);
-    if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "equilibriumTorques" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "equilibriumTorques" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    arg2 = ptr;
-  }
-  {
-    std::vector< int,std::allocator< int > > *ptr = (std::vector< int,std::allocator< int > > *)0;
-    res3 = swig::asptr(swig_obj[2], &ptr);
-    if (!SWIG_IsOK(res3)) {
-      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "equilibriumTorques" "', argument " "3"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "equilibriumTorques" "', argument " "3"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
-    }
-    arg3 = ptr;
-  }
+  arg1 = reinterpret_cast< double * >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "com_equilibrium" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "com_equilibrium" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = static_cast< int >(val3);
   {
     std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
     res4 = swig::asptr(swig_obj[3], &ptr);
     if (!SWIG_IsOK(res4)) {
-      SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "equilibriumTorques" "', argument " "4"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "com_equilibrium" "', argument " "4"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "equilibriumTorques" "', argument " "4"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "com_equilibrium" "', argument " "4"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     arg4 = ptr;
   }
-  ecode5 = SWIG_AsVal_double(swig_obj[4], &val5);
-  if (!SWIG_IsOK(ecode5)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "equilibriumTorques" "', argument " "5"" of type '" "double""'");
-  } 
-  arg5 = static_cast< double >(val5);
+  arg5 = swig_obj[4];
   {
     try {
-      result = (PyObject *)equilibriumTorques((RobotModel const &)*arg1,(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg2,(std::vector< int,std::allocator< int > > const &)*arg3,(std::vector< double,std::allocator< double > > const &)*arg4,arg5);
+      result = (PyObject *)com_equilibrium(arg1,arg2,arg3,(std::vector< double,std::allocator< double > > const &)*arg4,arg5);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -60055,76 +63587,63 @@ SWIGINTERN PyObject *_wrap_equilibriumTorques__SWIG_0(PyObject *SWIGUNUSEDPARM(s
     }
   }
   resultobj = result;
-  if (SWIG_IsNewObj(res2)) delete arg2;
-  if (SWIG_IsNewObj(res3)) delete arg3;
   if (SWIG_IsNewObj(res4)) delete arg4;
   return resultobj;
 fail:
-  if (SWIG_IsNewObj(res2)) delete arg2;
-  if (SWIG_IsNewObj(res3)) delete arg3;
   if (SWIG_IsNewObj(res4)) delete arg4;
   return NULL;
 }
 
 
-SWIGINTERN PyObject *_wrap_equilibriumTorques__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+SWIGINTERN PyObject *_wrap_com_equilibrium__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
   PyObject *resultobj = 0;
-  RobotModel *arg1 = 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg1 = 0 ;
   std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg2 = 0 ;
-  std::vector< int,std::allocator< int > > *arg3 = 0 ;
-  std::vector< double,std::allocator< double > > *arg4 = 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
+  std::vector< double,std::allocator< double > > *arg3 = 0 ;
+  PyObject *arg4 = (PyObject *) 0 ;
+  int res1 = SWIG_OLDOBJ ;
   int res2 = SWIG_OLDOBJ ;
   int res3 = SWIG_OLDOBJ ;
-  int res4 = SWIG_OLDOBJ ;
   PyObject *result = 0 ;
   
   if ((nobjs < 4) || (nobjs > 4)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_RobotModel,  0  | 0);
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "equilibriumTorques" "', argument " "1"" of type '" "RobotModel const &""'"); 
+  {
+    std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *ptr = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)0;
+    res1 = swig::asptr(swig_obj[0], &ptr);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "com_equilibrium" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "com_equilibrium" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
+    }
+    arg1 = ptr;
   }
-  if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "equilibriumTorques" "', argument " "1"" of type '" "RobotModel const &""'"); 
-  }
-  arg1 = reinterpret_cast< RobotModel * >(argp1);
   {
     std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *ptr = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)0;
     res2 = swig::asptr(swig_obj[1], &ptr);
     if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "equilibriumTorques" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "com_equilibrium" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "equilibriumTorques" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "com_equilibrium" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
     }
     arg2 = ptr;
   }
   {
-    std::vector< int,std::allocator< int > > *ptr = (std::vector< int,std::allocator< int > > *)0;
+    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
     res3 = swig::asptr(swig_obj[2], &ptr);
     if (!SWIG_IsOK(res3)) {
-      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "equilibriumTorques" "', argument " "3"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "com_equilibrium" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "equilibriumTorques" "', argument " "3"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "com_equilibrium" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
     }
     arg3 = ptr;
   }
-  {
-    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
-    res4 = swig::asptr(swig_obj[3], &ptr);
-    if (!SWIG_IsOK(res4)) {
-      SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "equilibriumTorques" "', argument " "4"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "equilibriumTorques" "', argument " "4"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
-    }
-    arg4 = ptr;
-  }
+  arg4 = swig_obj[3];
   {
     try {
-      result = (PyObject *)equilibriumTorques((RobotModel const &)*arg1,(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg2,(std::vector< int,std::allocator< int > > const &)*arg3,(std::vector< double,std::allocator< double > > const &)*arg4);
+      result = (PyObject *)com_equilibrium((std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg1,(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg2,(std::vector< double,std::allocator< double > > const &)*arg3,arg4);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -60136,97 +63655,763 @@ SWIGINTERN PyObject *_wrap_equilibriumTorques__SWIG_1(PyObject *SWIGUNUSEDPARM(s
     }
   }
   resultobj = result;
+  if (SWIG_IsNewObj(res1)) delete arg1;
   if (SWIG_IsNewObj(res2)) delete arg2;
   if (SWIG_IsNewObj(res3)) delete arg3;
+  return resultobj;
+fail:
+  if (SWIG_IsNewObj(res1)) delete arg1;
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_com_equilibrium(PyObject *self, PyObject *args) {
+  Py_ssize_t argc;
+  PyObject *argv[6] = {
+    0
+  };
+  
+  if (!(argc = SWIG_Python_UnpackTuple(args, "com_equilibrium", 0, 5, argv))) SWIG_fail;
+  --argc;
+  if (argc == 4) {
+    int _v;
+    int res = swig::asptr(argv[0], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = swig::asptr(argv[1], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        int res = swig::asptr(argv[2], (std::vector< double,std::allocator< double > >**)(0));
+        _v = SWIG_CheckState(res);
+        if (_v) {
+          _v = (argv[3] != 0);
+          if (_v) {
+            return _wrap_com_equilibrium__SWIG_1(self, argc, argv);
+          }
+        }
+      }
+    }
+  }
+  if (argc == 5) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_double, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_int(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        {
+          int res = SWIG_AsVal_int(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          int res = swig::asptr(argv[3], (std::vector< double,std::allocator< double > >**)(0));
+          _v = SWIG_CheckState(res);
+          if (_v) {
+            _v = (argv[4] != 0);
+            if (_v) {
+              return _wrap_com_equilibrium__SWIG_0(self, argc, argv);
+            }
+          }
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'com_equilibrium'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    com_equilibrium(double *,int,int,std::vector< double,std::allocator< double > > const &,PyObject *)\n"
+    "    com_equilibrium(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &,std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &,std::vector< double,std::allocator< double > > const &,PyObject *)\n");
+  return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_com_equilibrium_2d__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  double *arg1 = (double *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  std::vector< double,std::allocator< double > > *arg4 = 0 ;
+  PyObject *arg5 = (PyObject *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  int res4 = SWIG_OLDOBJ ;
+  PyObject *result = 0 ;
+  
+  if ((nobjs < 5) || (nobjs > 5)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "com_equilibrium_2d" "', argument " "1"" of type '" "double *""'"); 
+  }
+  arg1 = reinterpret_cast< double * >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "com_equilibrium_2d" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "com_equilibrium_2d" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = static_cast< int >(val3);
+  {
+    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
+    res4 = swig::asptr(swig_obj[3], &ptr);
+    if (!SWIG_IsOK(res4)) {
+      SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "com_equilibrium_2d" "', argument " "4"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "com_equilibrium_2d" "', argument " "4"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    arg4 = ptr;
+  }
+  arg5 = swig_obj[4];
+  {
+    try {
+      result = (PyObject *)com_equilibrium_2d(arg1,arg2,arg3,(std::vector< double,std::allocator< double > > const &)*arg4,arg5);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = result;
   if (SWIG_IsNewObj(res4)) delete arg4;
   return resultobj;
 fail:
-  if (SWIG_IsNewObj(res2)) delete arg2;
-  if (SWIG_IsNewObj(res3)) delete arg3;
   if (SWIG_IsNewObj(res4)) delete arg4;
   return NULL;
 }
 
 
-SWIGINTERN PyObject *_wrap_equilibriumTorques__SWIG_2(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+SWIGINTERN PyObject *_wrap_com_equilibrium_2d__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
   PyObject *resultobj = 0;
-  RobotModel *arg1 = 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg1 = 0 ;
   std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg2 = 0 ;
-  std::vector< int,std::allocator< int > > *arg3 = 0 ;
-  std::vector< double,std::allocator< double > > *arg4 = 0 ;
-  std::vector< double,std::allocator< double > > *arg5 = 0 ;
-  double arg6 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
+  std::vector< double,std::allocator< double > > *arg3 = 0 ;
+  PyObject *arg4 = (PyObject *) 0 ;
+  int res1 = SWIG_OLDOBJ ;
   int res2 = SWIG_OLDOBJ ;
   int res3 = SWIG_OLDOBJ ;
-  int res4 = SWIG_OLDOBJ ;
+  PyObject *result = 0 ;
+  
+  if ((nobjs < 4) || (nobjs > 4)) SWIG_fail;
+  {
+    std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *ptr = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)0;
+    res1 = swig::asptr(swig_obj[0], &ptr);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "com_equilibrium_2d" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "com_equilibrium_2d" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
+    }
+    arg1 = ptr;
+  }
+  {
+    std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *ptr = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)0;
+    res2 = swig::asptr(swig_obj[1], &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "com_equilibrium_2d" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "com_equilibrium_2d" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
+    }
+    arg2 = ptr;
+  }
+  {
+    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
+    res3 = swig::asptr(swig_obj[2], &ptr);
+    if (!SWIG_IsOK(res3)) {
+      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "com_equilibrium_2d" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "com_equilibrium_2d" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    arg3 = ptr;
+  }
+  arg4 = swig_obj[3];
+  {
+    try {
+      result = (PyObject *)com_equilibrium_2d((std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg1,(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg2,(std::vector< double,std::allocator< double > > const &)*arg3,arg4);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = result;
+  if (SWIG_IsNewObj(res1)) delete arg1;
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  return resultobj;
+fail:
+  if (SWIG_IsNewObj(res1)) delete arg1;
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_com_equilibrium_2d(PyObject *self, PyObject *args) {
+  Py_ssize_t argc;
+  PyObject *argv[6] = {
+    0
+  };
+  
+  if (!(argc = SWIG_Python_UnpackTuple(args, "com_equilibrium_2d", 0, 5, argv))) SWIG_fail;
+  --argc;
+  if (argc == 4) {
+    int _v;
+    int res = swig::asptr(argv[0], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = swig::asptr(argv[1], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        int res = swig::asptr(argv[2], (std::vector< double,std::allocator< double > >**)(0));
+        _v = SWIG_CheckState(res);
+        if (_v) {
+          _v = (argv[3] != 0);
+          if (_v) {
+            return _wrap_com_equilibrium_2d__SWIG_1(self, argc, argv);
+          }
+        }
+      }
+    }
+  }
+  if (argc == 5) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_double, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_int(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        {
+          int res = SWIG_AsVal_int(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          int res = swig::asptr(argv[3], (std::vector< double,std::allocator< double > >**)(0));
+          _v = SWIG_CheckState(res);
+          if (_v) {
+            _v = (argv[4] != 0);
+            if (_v) {
+              return _wrap_com_equilibrium_2d__SWIG_0(self, argc, argv);
+            }
+          }
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'com_equilibrium_2d'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    com_equilibrium_2d(double *,int,int,std::vector< double,std::allocator< double > > const &,PyObject *)\n"
+    "    com_equilibrium_2d(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &,std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &,std::vector< double,std::allocator< double > > const &,PyObject *)\n");
+  return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_support_polygon__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  double *arg1 = (double *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  PyObject *result = 0 ;
+  
+  if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "support_polygon" "', argument " "1"" of type '" "double *""'"); 
+  }
+  arg1 = reinterpret_cast< double * >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "support_polygon" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "support_polygon" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = static_cast< int >(val3);
+  {
+    try {
+      result = (PyObject *)support_polygon(arg1,arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = result;
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_support_polygon__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg1 = 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg2 = 0 ;
+  int res1 = SWIG_OLDOBJ ;
+  int res2 = SWIG_OLDOBJ ;
+  PyObject *result = 0 ;
+  
+  if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
+  {
+    std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *ptr = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)0;
+    res1 = swig::asptr(swig_obj[0], &ptr);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "support_polygon" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "support_polygon" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
+    }
+    arg1 = ptr;
+  }
+  {
+    std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *ptr = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)0;
+    res2 = swig::asptr(swig_obj[1], &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "support_polygon" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "support_polygon" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
+    }
+    arg2 = ptr;
+  }
+  {
+    try {
+      result = (PyObject *)support_polygon((std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg1,(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = result;
+  if (SWIG_IsNewObj(res1)) delete arg1;
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return resultobj;
+fail:
+  if (SWIG_IsNewObj(res1)) delete arg1;
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_support_polygon(PyObject *self, PyObject *args) {
+  Py_ssize_t argc;
+  PyObject *argv[4] = {
+    0
+  };
+  
+  if (!(argc = SWIG_Python_UnpackTuple(args, "support_polygon", 0, 3, argv))) SWIG_fail;
+  --argc;
+  if (argc == 2) {
+    int _v;
+    int res = swig::asptr(argv[0], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = swig::asptr(argv[1], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        return _wrap_support_polygon__SWIG_1(self, argc, argv);
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_double, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_int(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        {
+          int res = SWIG_AsVal_int(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          return _wrap_support_polygon__SWIG_0(self, argc, argv);
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'support_polygon'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    support_polygon(double *,int,int)\n"
+    "    support_polygon(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &,std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)\n");
+  return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_support_polygon_2d__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  double *arg1 = (double *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  PyObject *result = 0 ;
+  
+  if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "support_polygon_2d" "', argument " "1"" of type '" "double *""'"); 
+  }
+  arg1 = reinterpret_cast< double * >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "support_polygon_2d" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "support_polygon_2d" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = static_cast< int >(val3);
+  {
+    try {
+      result = (PyObject *)support_polygon_2d(arg1,arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = result;
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_support_polygon_2d__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg1 = 0 ;
+  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg2 = 0 ;
+  int res1 = SWIG_OLDOBJ ;
+  int res2 = SWIG_OLDOBJ ;
+  PyObject *result = 0 ;
+  
+  if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
+  {
+    std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *ptr = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)0;
+    res1 = swig::asptr(swig_obj[0], &ptr);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "support_polygon_2d" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "support_polygon_2d" "', argument " "1"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
+    }
+    arg1 = ptr;
+  }
+  {
+    std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *ptr = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)0;
+    res2 = swig::asptr(swig_obj[1], &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "support_polygon_2d" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "support_polygon_2d" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
+    }
+    arg2 = ptr;
+  }
+  {
+    try {
+      result = (PyObject *)support_polygon_2d((std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg1,(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = result;
+  if (SWIG_IsNewObj(res1)) delete arg1;
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return resultobj;
+fail:
+  if (SWIG_IsNewObj(res1)) delete arg1;
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_support_polygon_2d(PyObject *self, PyObject *args) {
+  Py_ssize_t argc;
+  PyObject *argv[4] = {
+    0
+  };
+  
+  if (!(argc = SWIG_Python_UnpackTuple(args, "support_polygon_2d", 0, 3, argv))) SWIG_fail;
+  --argc;
+  if (argc == 2) {
+    int _v;
+    int res = swig::asptr(argv[0], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = swig::asptr(argv[1], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        return _wrap_support_polygon_2d__SWIG_1(self, argc, argv);
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_double, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_int(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        {
+          int res = SWIG_AsVal_int(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          return _wrap_support_polygon_2d__SWIG_0(self, argc, argv);
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'support_polygon_2d'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    support_polygon_2d(double *,int,int)\n"
+    "    support_polygon_2d(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &,std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)\n");
+  return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_equilibrium_torques__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  RobotModel *arg1 = 0 ;
+  double *arg2 = (double *) 0 ;
+  int arg3 ;
+  int arg4 ;
+  std::vector< int,std::allocator< int > > *arg5 = 0 ;
+  std::vector< double,std::allocator< double > > *arg6 = 0 ;
+  double arg7 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  int val4 ;
+  int ecode4 = 0 ;
   int res5 = SWIG_OLDOBJ ;
-  double val6 ;
-  int ecode6 = 0 ;
+  int res6 = SWIG_OLDOBJ ;
+  double val7 ;
+  int ecode7 = 0 ;
+  PyObject *result = 0 ;
+  
+  if ((nobjs < 7) || (nobjs > 7)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_RobotModel,  0  | 0);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "equilibrium_torques" "', argument " "1"" of type '" "RobotModel const &""'"); 
+  }
+  if (!argp1) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "equilibrium_torques" "', argument " "1"" of type '" "RobotModel const &""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModel * >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "equilibrium_torques" "', argument " "2"" of type '" "double *""'"); 
+  }
+  arg2 = reinterpret_cast< double * >(argp2);
+  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "equilibrium_torques" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = static_cast< int >(val3);
+  ecode4 = SWIG_AsVal_int(swig_obj[3], &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "equilibrium_torques" "', argument " "4"" of type '" "int""'");
+  } 
+  arg4 = static_cast< int >(val4);
+  {
+    std::vector< int,std::allocator< int > > *ptr = (std::vector< int,std::allocator< int > > *)0;
+    res5 = swig::asptr(swig_obj[4], &ptr);
+    if (!SWIG_IsOK(res5)) {
+      SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "equilibrium_torques" "', argument " "5"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "equilibrium_torques" "', argument " "5"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
+    }
+    arg5 = ptr;
+  }
+  {
+    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
+    res6 = swig::asptr(swig_obj[5], &ptr);
+    if (!SWIG_IsOK(res6)) {
+      SWIG_exception_fail(SWIG_ArgError(res6), "in method '" "equilibrium_torques" "', argument " "6"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "equilibrium_torques" "', argument " "6"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    arg6 = ptr;
+  }
+  ecode7 = SWIG_AsVal_double(swig_obj[6], &val7);
+  if (!SWIG_IsOK(ecode7)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode7), "in method '" "equilibrium_torques" "', argument " "7"" of type '" "double""'");
+  } 
+  arg7 = static_cast< double >(val7);
+  {
+    try {
+      result = (PyObject *)equilibrium_torques((RobotModel const &)*arg1,arg2,arg3,arg4,(std::vector< int,std::allocator< int > > const &)*arg5,(std::vector< double,std::allocator< double > > const &)*arg6,arg7);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = result;
+  if (SWIG_IsNewObj(res5)) delete arg5;
+  if (SWIG_IsNewObj(res6)) delete arg6;
+  return resultobj;
+fail:
+  if (SWIG_IsNewObj(res5)) delete arg5;
+  if (SWIG_IsNewObj(res6)) delete arg6;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_equilibrium_torques__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  RobotModel *arg1 = 0 ;
+  double *arg2 = (double *) 0 ;
+  int arg3 ;
+  int arg4 ;
+  std::vector< int,std::allocator< int > > *arg5 = 0 ;
+  std::vector< double,std::allocator< double > > *arg6 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  int val4 ;
+  int ecode4 = 0 ;
+  int res5 = SWIG_OLDOBJ ;
+  int res6 = SWIG_OLDOBJ ;
   PyObject *result = 0 ;
   
   if ((nobjs < 6) || (nobjs > 6)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_RobotModel,  0  | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "equilibriumTorques" "', argument " "1"" of type '" "RobotModel const &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "equilibrium_torques" "', argument " "1"" of type '" "RobotModel const &""'"); 
   }
   if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "equilibriumTorques" "', argument " "1"" of type '" "RobotModel const &""'"); 
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "equilibrium_torques" "', argument " "1"" of type '" "RobotModel const &""'"); 
   }
   arg1 = reinterpret_cast< RobotModel * >(argp1);
-  {
-    std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *ptr = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)0;
-    res2 = swig::asptr(swig_obj[1], &ptr);
-    if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "equilibriumTorques" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "equilibriumTorques" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    arg2 = ptr;
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "equilibrium_torques" "', argument " "2"" of type '" "double *""'"); 
   }
+  arg2 = reinterpret_cast< double * >(argp2);
+  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "equilibrium_torques" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = static_cast< int >(val3);
+  ecode4 = SWIG_AsVal_int(swig_obj[3], &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "equilibrium_torques" "', argument " "4"" of type '" "int""'");
+  } 
+  arg4 = static_cast< int >(val4);
   {
     std::vector< int,std::allocator< int > > *ptr = (std::vector< int,std::allocator< int > > *)0;
-    res3 = swig::asptr(swig_obj[2], &ptr);
-    if (!SWIG_IsOK(res3)) {
-      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "equilibriumTorques" "', argument " "3"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "equilibriumTorques" "', argument " "3"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
-    }
-    arg3 = ptr;
-  }
-  {
-    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
-    res4 = swig::asptr(swig_obj[3], &ptr);
-    if (!SWIG_IsOK(res4)) {
-      SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "equilibriumTorques" "', argument " "4"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "equilibriumTorques" "', argument " "4"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
-    }
-    arg4 = ptr;
-  }
-  {
-    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
     res5 = swig::asptr(swig_obj[4], &ptr);
     if (!SWIG_IsOK(res5)) {
-      SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "equilibriumTorques" "', argument " "5"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "equilibrium_torques" "', argument " "5"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "equilibriumTorques" "', argument " "5"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "equilibrium_torques" "', argument " "5"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
     }
     arg5 = ptr;
   }
-  ecode6 = SWIG_AsVal_double(swig_obj[5], &val6);
-  if (!SWIG_IsOK(ecode6)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "equilibriumTorques" "', argument " "6"" of type '" "double""'");
-  } 
-  arg6 = static_cast< double >(val6);
+  {
+    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
+    res6 = swig::asptr(swig_obj[5], &ptr);
+    if (!SWIG_IsOK(res6)) {
+      SWIG_exception_fail(SWIG_ArgError(res6), "in method '" "equilibrium_torques" "', argument " "6"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "equilibrium_torques" "', argument " "6"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    arg6 = ptr;
+  }
   {
     try {
-      result = (PyObject *)equilibriumTorques((RobotModel const &)*arg1,(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg2,(std::vector< int,std::allocator< int > > const &)*arg3,(std::vector< double,std::allocator< double > > const &)*arg4,(std::vector< double,std::allocator< double > > const &)*arg5,arg6);
+      result = (PyObject *)equilibrium_torques((RobotModel const &)*arg1,arg2,arg3,arg4,(std::vector< int,std::allocator< int > > const &)*arg5,(std::vector< double,std::allocator< double > > const &)*arg6);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -60238,91 +64423,106 @@ SWIGINTERN PyObject *_wrap_equilibriumTorques__SWIG_2(PyObject *SWIGUNUSEDPARM(s
     }
   }
   resultobj = result;
-  if (SWIG_IsNewObj(res2)) delete arg2;
-  if (SWIG_IsNewObj(res3)) delete arg3;
-  if (SWIG_IsNewObj(res4)) delete arg4;
   if (SWIG_IsNewObj(res5)) delete arg5;
+  if (SWIG_IsNewObj(res6)) delete arg6;
   return resultobj;
 fail:
-  if (SWIG_IsNewObj(res2)) delete arg2;
-  if (SWIG_IsNewObj(res3)) delete arg3;
-  if (SWIG_IsNewObj(res4)) delete arg4;
   if (SWIG_IsNewObj(res5)) delete arg5;
+  if (SWIG_IsNewObj(res6)) delete arg6;
   return NULL;
 }
 
 
-SWIGINTERN PyObject *_wrap_equilibriumTorques__SWIG_3(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+SWIGINTERN PyObject *_wrap_equilibrium_torques__SWIG_2(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
   PyObject *resultobj = 0;
   RobotModel *arg1 = 0 ;
-  std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *arg2 = 0 ;
-  std::vector< int,std::allocator< int > > *arg3 = 0 ;
-  std::vector< double,std::allocator< double > > *arg4 = 0 ;
-  std::vector< double,std::allocator< double > > *arg5 = 0 ;
+  double *arg2 = (double *) 0 ;
+  int arg3 ;
+  int arg4 ;
+  std::vector< int,std::allocator< int > > *arg5 = 0 ;
+  std::vector< double,std::allocator< double > > *arg6 = 0 ;
+  std::vector< double,std::allocator< double > > *arg7 = 0 ;
+  double arg8 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  int res2 = SWIG_OLDOBJ ;
-  int res3 = SWIG_OLDOBJ ;
-  int res4 = SWIG_OLDOBJ ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  int val4 ;
+  int ecode4 = 0 ;
   int res5 = SWIG_OLDOBJ ;
+  int res6 = SWIG_OLDOBJ ;
+  int res7 = SWIG_OLDOBJ ;
+  double val8 ;
+  int ecode8 = 0 ;
   PyObject *result = 0 ;
   
-  if ((nobjs < 5) || (nobjs > 5)) SWIG_fail;
+  if ((nobjs < 8) || (nobjs > 8)) SWIG_fail;
   res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_RobotModel,  0  | 0);
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "equilibriumTorques" "', argument " "1"" of type '" "RobotModel const &""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "equilibrium_torques" "', argument " "1"" of type '" "RobotModel const &""'"); 
   }
   if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "equilibriumTorques" "', argument " "1"" of type '" "RobotModel const &""'"); 
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "equilibrium_torques" "', argument " "1"" of type '" "RobotModel const &""'"); 
   }
   arg1 = reinterpret_cast< RobotModel * >(argp1);
-  {
-    std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *ptr = (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *)0;
-    res2 = swig::asptr(swig_obj[1], &ptr);
-    if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "equilibriumTorques" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "equilibriumTorques" "', argument " "2"" of type '" "std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &""'"); 
-    }
-    arg2 = ptr;
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "equilibrium_torques" "', argument " "2"" of type '" "double *""'"); 
   }
+  arg2 = reinterpret_cast< double * >(argp2);
+  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "equilibrium_torques" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = static_cast< int >(val3);
+  ecode4 = SWIG_AsVal_int(swig_obj[3], &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "equilibrium_torques" "', argument " "4"" of type '" "int""'");
+  } 
+  arg4 = static_cast< int >(val4);
   {
     std::vector< int,std::allocator< int > > *ptr = (std::vector< int,std::allocator< int > > *)0;
-    res3 = swig::asptr(swig_obj[2], &ptr);
-    if (!SWIG_IsOK(res3)) {
-      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "equilibriumTorques" "', argument " "3"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "equilibriumTorques" "', argument " "3"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
-    }
-    arg3 = ptr;
-  }
-  {
-    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
-    res4 = swig::asptr(swig_obj[3], &ptr);
-    if (!SWIG_IsOK(res4)) {
-      SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "equilibriumTorques" "', argument " "4"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "equilibriumTorques" "', argument " "4"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
-    }
-    arg4 = ptr;
-  }
-  {
-    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
     res5 = swig::asptr(swig_obj[4], &ptr);
     if (!SWIG_IsOK(res5)) {
-      SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "equilibriumTorques" "', argument " "5"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "equilibrium_torques" "', argument " "5"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
     }
     if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "equilibriumTorques" "', argument " "5"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "equilibrium_torques" "', argument " "5"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
     }
     arg5 = ptr;
   }
   {
+    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
+    res6 = swig::asptr(swig_obj[5], &ptr);
+    if (!SWIG_IsOK(res6)) {
+      SWIG_exception_fail(SWIG_ArgError(res6), "in method '" "equilibrium_torques" "', argument " "6"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "equilibrium_torques" "', argument " "6"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    arg6 = ptr;
+  }
+  {
+    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
+    res7 = swig::asptr(swig_obj[6], &ptr);
+    if (!SWIG_IsOK(res7)) {
+      SWIG_exception_fail(SWIG_ArgError(res7), "in method '" "equilibrium_torques" "', argument " "7"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "equilibrium_torques" "', argument " "7"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    arg7 = ptr;
+  }
+  ecode8 = SWIG_AsVal_double(swig_obj[7], &val8);
+  if (!SWIG_IsOK(ecode8)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode8), "in method '" "equilibrium_torques" "', argument " "8"" of type '" "double""'");
+  } 
+  arg8 = static_cast< double >(val8);
+  {
     try {
-      result = (PyObject *)equilibriumTorques((RobotModel const &)*arg1,(std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &)*arg2,(std::vector< int,std::allocator< int > > const &)*arg3,(std::vector< double,std::allocator< double > > const &)*arg4,(std::vector< double,std::allocator< double > > const &)*arg5);
+      result = (PyObject *)equilibrium_torques((RobotModel const &)*arg1,arg2,arg3,arg4,(std::vector< int,std::allocator< int > > const &)*arg5,(std::vector< double,std::allocator< double > > const &)*arg6,(std::vector< double,std::allocator< double > > const &)*arg7,arg8);
     }
     catch(PyException& e) {
       e.setPyErr();
@@ -60334,121 +64534,276 @@ SWIGINTERN PyObject *_wrap_equilibriumTorques__SWIG_3(PyObject *SWIGUNUSEDPARM(s
     }
   }
   resultobj = result;
-  if (SWIG_IsNewObj(res2)) delete arg2;
-  if (SWIG_IsNewObj(res3)) delete arg3;
-  if (SWIG_IsNewObj(res4)) delete arg4;
   if (SWIG_IsNewObj(res5)) delete arg5;
+  if (SWIG_IsNewObj(res6)) delete arg6;
+  if (SWIG_IsNewObj(res7)) delete arg7;
   return resultobj;
 fail:
-  if (SWIG_IsNewObj(res2)) delete arg2;
-  if (SWIG_IsNewObj(res3)) delete arg3;
-  if (SWIG_IsNewObj(res4)) delete arg4;
   if (SWIG_IsNewObj(res5)) delete arg5;
+  if (SWIG_IsNewObj(res6)) delete arg6;
+  if (SWIG_IsNewObj(res7)) delete arg7;
   return NULL;
 }
 
 
-SWIGINTERN PyObject *_wrap_equilibriumTorques(PyObject *self, PyObject *args) {
+SWIGINTERN PyObject *_wrap_equilibrium_torques__SWIG_3(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  RobotModel *arg1 = 0 ;
+  double *arg2 = (double *) 0 ;
+  int arg3 ;
+  int arg4 ;
+  std::vector< int,std::allocator< int > > *arg5 = 0 ;
+  std::vector< double,std::allocator< double > > *arg6 = 0 ;
+  std::vector< double,std::allocator< double > > *arg7 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  int val4 ;
+  int ecode4 = 0 ;
+  int res5 = SWIG_OLDOBJ ;
+  int res6 = SWIG_OLDOBJ ;
+  int res7 = SWIG_OLDOBJ ;
+  PyObject *result = 0 ;
+  
+  if ((nobjs < 7) || (nobjs > 7)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_RobotModel,  0  | 0);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "equilibrium_torques" "', argument " "1"" of type '" "RobotModel const &""'"); 
+  }
+  if (!argp1) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "equilibrium_torques" "', argument " "1"" of type '" "RobotModel const &""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModel * >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "equilibrium_torques" "', argument " "2"" of type '" "double *""'"); 
+  }
+  arg2 = reinterpret_cast< double * >(argp2);
+  ecode3 = SWIG_AsVal_int(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "equilibrium_torques" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = static_cast< int >(val3);
+  ecode4 = SWIG_AsVal_int(swig_obj[3], &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "equilibrium_torques" "', argument " "4"" of type '" "int""'");
+  } 
+  arg4 = static_cast< int >(val4);
+  {
+    std::vector< int,std::allocator< int > > *ptr = (std::vector< int,std::allocator< int > > *)0;
+    res5 = swig::asptr(swig_obj[4], &ptr);
+    if (!SWIG_IsOK(res5)) {
+      SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "equilibrium_torques" "', argument " "5"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "equilibrium_torques" "', argument " "5"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
+    }
+    arg5 = ptr;
+  }
+  {
+    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
+    res6 = swig::asptr(swig_obj[5], &ptr);
+    if (!SWIG_IsOK(res6)) {
+      SWIG_exception_fail(SWIG_ArgError(res6), "in method '" "equilibrium_torques" "', argument " "6"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "equilibrium_torques" "', argument " "6"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    arg6 = ptr;
+  }
+  {
+    std::vector< double,std::allocator< double > > *ptr = (std::vector< double,std::allocator< double > > *)0;
+    res7 = swig::asptr(swig_obj[6], &ptr);
+    if (!SWIG_IsOK(res7)) {
+      SWIG_exception_fail(SWIG_ArgError(res7), "in method '" "equilibrium_torques" "', argument " "7"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "equilibrium_torques" "', argument " "7"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    arg7 = ptr;
+  }
+  {
+    try {
+      result = (PyObject *)equilibrium_torques((RobotModel const &)*arg1,arg2,arg3,arg4,(std::vector< int,std::allocator< int > > const &)*arg5,(std::vector< double,std::allocator< double > > const &)*arg6,(std::vector< double,std::allocator< double > > const &)*arg7);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = result;
+  if (SWIG_IsNewObj(res5)) delete arg5;
+  if (SWIG_IsNewObj(res6)) delete arg6;
+  if (SWIG_IsNewObj(res7)) delete arg7;
+  return resultobj;
+fail:
+  if (SWIG_IsNewObj(res5)) delete arg5;
+  if (SWIG_IsNewObj(res6)) delete arg6;
+  if (SWIG_IsNewObj(res7)) delete arg7;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_equilibrium_torques(PyObject *self, PyObject *args) {
   Py_ssize_t argc;
-  PyObject *argv[7] = {
+  PyObject *argv[9] = {
     0
   };
   
-  if (!(argc = SWIG_Python_UnpackTuple(args, "equilibriumTorques", 0, 6, argv))) SWIG_fail;
+  if (!(argc = SWIG_Python_UnpackTuple(args, "equilibrium_torques", 0, 8, argv))) SWIG_fail;
   --argc;
-  if (argc == 4) {
-    int _v;
-    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_RobotModel, SWIG_POINTER_NO_NULL | 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      int res = swig::asptr(argv[1], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
-      _v = SWIG_CheckState(res);
-      if (_v) {
-        int res = swig::asptr(argv[2], (std::vector< int,std::allocator< int > >**)(0));
-        _v = SWIG_CheckState(res);
-        if (_v) {
-          int res = swig::asptr(argv[3], (std::vector< double,std::allocator< double > >**)(0));
-          _v = SWIG_CheckState(res);
-          if (_v) {
-            return _wrap_equilibriumTorques__SWIG_1(self, argc, argv);
-          }
-        }
-      }
-    }
-  }
-  if (argc == 5) {
-    int _v;
-    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_RobotModel, SWIG_POINTER_NO_NULL | 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      int res = swig::asptr(argv[1], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
-      _v = SWIG_CheckState(res);
-      if (_v) {
-        int res = swig::asptr(argv[2], (std::vector< int,std::allocator< int > >**)(0));
-        _v = SWIG_CheckState(res);
-        if (_v) {
-          int res = swig::asptr(argv[3], (std::vector< double,std::allocator< double > >**)(0));
-          _v = SWIG_CheckState(res);
-          if (_v) {
-            {
-              int res = SWIG_AsVal_double(argv[4], NULL);
-              _v = SWIG_CheckState(res);
-            }
-            if (_v) {
-              return _wrap_equilibriumTorques__SWIG_0(self, argc, argv);
-            }
-          }
-        }
-      }
-    }
-  }
-  if (argc == 5) {
-    int _v;
-    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_RobotModel, SWIG_POINTER_NO_NULL | 0);
-    _v = SWIG_CheckState(res);
-    if (_v) {
-      int res = swig::asptr(argv[1], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
-      _v = SWIG_CheckState(res);
-      if (_v) {
-        int res = swig::asptr(argv[2], (std::vector< int,std::allocator< int > >**)(0));
-        _v = SWIG_CheckState(res);
-        if (_v) {
-          int res = swig::asptr(argv[3], (std::vector< double,std::allocator< double > >**)(0));
-          _v = SWIG_CheckState(res);
-          if (_v) {
-            int res = swig::asptr(argv[4], (std::vector< double,std::allocator< double > >**)(0));
-            _v = SWIG_CheckState(res);
-            if (_v) {
-              return _wrap_equilibriumTorques__SWIG_3(self, argc, argv);
-            }
-          }
-        }
-      }
-    }
-  }
   if (argc == 6) {
     int _v;
     int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_RobotModel, SWIG_POINTER_NO_NULL | 0);
     _v = SWIG_CheckState(res);
     if (_v) {
-      int res = swig::asptr(argv[1], (std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > >**)(0));
+      void *vptr = 0;
+      int res = SWIG_ConvertPtr(argv[1], &vptr, SWIGTYPE_p_double, 0);
       _v = SWIG_CheckState(res);
       if (_v) {
-        int res = swig::asptr(argv[2], (std::vector< int,std::allocator< int > >**)(0));
-        _v = SWIG_CheckState(res);
-        if (_v) {
-          int res = swig::asptr(argv[3], (std::vector< double,std::allocator< double > >**)(0));
+        {
+          int res = SWIG_AsVal_int(argv[2], NULL);
           _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          {
+            int res = SWIG_AsVal_int(argv[3], NULL);
+            _v = SWIG_CheckState(res);
+          }
           if (_v) {
-            int res = swig::asptr(argv[4], (std::vector< double,std::allocator< double > >**)(0));
+            int res = swig::asptr(argv[4], (std::vector< int,std::allocator< int > >**)(0));
             _v = SWIG_CheckState(res);
             if (_v) {
-              {
-                int res = SWIG_AsVal_double(argv[5], NULL);
-                _v = SWIG_CheckState(res);
-              }
+              int res = swig::asptr(argv[5], (std::vector< double,std::allocator< double > >**)(0));
+              _v = SWIG_CheckState(res);
               if (_v) {
-                return _wrap_equilibriumTorques__SWIG_2(self, argc, argv);
+                return _wrap_equilibrium_torques__SWIG_1(self, argc, argv);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  if (argc == 7) {
+    int _v;
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_RobotModel, SWIG_POINTER_NO_NULL | 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      void *vptr = 0;
+      int res = SWIG_ConvertPtr(argv[1], &vptr, SWIGTYPE_p_double, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        {
+          int res = SWIG_AsVal_int(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          {
+            int res = SWIG_AsVal_int(argv[3], NULL);
+            _v = SWIG_CheckState(res);
+          }
+          if (_v) {
+            int res = swig::asptr(argv[4], (std::vector< int,std::allocator< int > >**)(0));
+            _v = SWIG_CheckState(res);
+            if (_v) {
+              int res = swig::asptr(argv[5], (std::vector< double,std::allocator< double > >**)(0));
+              _v = SWIG_CheckState(res);
+              if (_v) {
+                {
+                  int res = SWIG_AsVal_double(argv[6], NULL);
+                  _v = SWIG_CheckState(res);
+                }
+                if (_v) {
+                  return _wrap_equilibrium_torques__SWIG_0(self, argc, argv);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  if (argc == 7) {
+    int _v;
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_RobotModel, SWIG_POINTER_NO_NULL | 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      void *vptr = 0;
+      int res = SWIG_ConvertPtr(argv[1], &vptr, SWIGTYPE_p_double, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        {
+          int res = SWIG_AsVal_int(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          {
+            int res = SWIG_AsVal_int(argv[3], NULL);
+            _v = SWIG_CheckState(res);
+          }
+          if (_v) {
+            int res = swig::asptr(argv[4], (std::vector< int,std::allocator< int > >**)(0));
+            _v = SWIG_CheckState(res);
+            if (_v) {
+              int res = swig::asptr(argv[5], (std::vector< double,std::allocator< double > >**)(0));
+              _v = SWIG_CheckState(res);
+              if (_v) {
+                int res = swig::asptr(argv[6], (std::vector< double,std::allocator< double > >**)(0));
+                _v = SWIG_CheckState(res);
+                if (_v) {
+                  return _wrap_equilibrium_torques__SWIG_3(self, argc, argv);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  if (argc == 8) {
+    int _v;
+    int res = SWIG_ConvertPtr(argv[0], 0, SWIGTYPE_p_RobotModel, SWIG_POINTER_NO_NULL | 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      void *vptr = 0;
+      int res = SWIG_ConvertPtr(argv[1], &vptr, SWIGTYPE_p_double, 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        {
+          int res = SWIG_AsVal_int(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          {
+            int res = SWIG_AsVal_int(argv[3], NULL);
+            _v = SWIG_CheckState(res);
+          }
+          if (_v) {
+            int res = swig::asptr(argv[4], (std::vector< int,std::allocator< int > >**)(0));
+            _v = SWIG_CheckState(res);
+            if (_v) {
+              int res = swig::asptr(argv[5], (std::vector< double,std::allocator< double > >**)(0));
+              _v = SWIG_CheckState(res);
+              if (_v) {
+                int res = swig::asptr(argv[6], (std::vector< double,std::allocator< double > >**)(0));
+                _v = SWIG_CheckState(res);
+                if (_v) {
+                  {
+                    int res = SWIG_AsVal_double(argv[7], NULL);
+                    _v = SWIG_CheckState(res);
+                  }
+                  if (_v) {
+                    return _wrap_equilibrium_torques__SWIG_2(self, argc, argv);
+                  }
+                }
               }
             }
           }
@@ -60458,12 +64813,12 @@ SWIGINTERN PyObject *_wrap_equilibriumTorques(PyObject *self, PyObject *args) {
   }
   
 fail:
-  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'equilibriumTorques'.\n"
+  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'equilibrium_torques'.\n"
     "  Possible C/C++ prototypes are:\n"
-    "    equilibriumTorques(RobotModel const &,std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &,std::vector< int,std::allocator< int > > const &,std::vector< double,std::allocator< double > > const &,double)\n"
-    "    equilibriumTorques(RobotModel const &,std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &,std::vector< int,std::allocator< int > > const &,std::vector< double,std::allocator< double > > const &)\n"
-    "    equilibriumTorques(RobotModel const &,std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &,std::vector< int,std::allocator< int > > const &,std::vector< double,std::allocator< double > > const &,std::vector< double,std::allocator< double > > const &,double)\n"
-    "    equilibriumTorques(RobotModel const &,std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > const &,std::vector< int,std::allocator< int > > const &,std::vector< double,std::allocator< double > > const &,std::vector< double,std::allocator< double > > const &)\n");
+    "    equilibrium_torques(RobotModel const &,double *,int,int,std::vector< int,std::allocator< int > > const &,std::vector< double,std::allocator< double > > const &,double)\n"
+    "    equilibrium_torques(RobotModel const &,double *,int,int,std::vector< int,std::allocator< int > > const &,std::vector< double,std::allocator< double > > const &)\n"
+    "    equilibrium_torques(RobotModel const &,double *,int,int,std::vector< int,std::allocator< int > > const &,std::vector< double,std::allocator< double > > const &,std::vector< double,std::allocator< double > > const &,double)\n"
+    "    equilibrium_torques(RobotModel const &,double *,int,int,std::vector< int,std::allocator< int > > const &,std::vector< double,std::allocator< double > > const &,std::vector< double,std::allocator< double > > const &)\n");
   return 0;
 }
 
@@ -60725,6 +65080,44 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		""},
+	 { "TriangleMesh_getVertices", _wrap_TriangleMesh_getVertices, METH_O, "\n"
+		"TriangleMesh_getVertices(TriangleMesh self)\n"
+		"\n"
+		"\n"
+		"Retrieves an array view of the vertices.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    ndarray: an nx3 Numpy array. Setting elements of this array will\n"
+		"    change the vertices.  \n"
+		"\n"
+		""},
+	 { "TriangleMesh_setVertices", _wrap_TriangleMesh_setVertices, METH_VARARGS, "\n"
+		"TriangleMesh_setVertices(TriangleMesh self, double * np_array2)\n"
+		"\n"
+		"\n"
+		"Sets all vertices to the given nx3 Numpy array.  \n"
+		"\n"
+		""},
+	 { "TriangleMesh_getIndices", _wrap_TriangleMesh_getIndices, METH_O, "\n"
+		"TriangleMesh_getIndices(TriangleMesh self)\n"
+		"\n"
+		"\n"
+		"Retrieves an array view of the triangle indices.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    ndarray: an mx3 Numpy array of int32 type. Setting elements of this\n"
+		"    array will change the indices.  \n"
+		"\n"
+		""},
+	 { "TriangleMesh_setIndices", _wrap_TriangleMesh_setIndices, METH_VARARGS, "\n"
+		"TriangleMesh_setIndices(TriangleMesh self, int * np_array2)\n"
+		"\n"
+		"\n"
+		"Sets all indices to the given mx3 Numpy array.  \n"
+		"\n"
+		""},
 	 { "TriangleMesh_translate", _wrap_TriangleMesh_translate, METH_VARARGS, "\n"
 		"TriangleMesh_translate(TriangleMesh self, double const [3] t)\n"
 		"\n"
@@ -60756,6 +65149,25 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Returns the # of points.  \n"
+		"\n"
+		""},
+	 { "ConvexHull_getPoints", _wrap_ConvexHull_getPoints, METH_O, "\n"
+		"ConvexHull_getPoints(ConvexHull self)\n"
+		"\n"
+		"\n"
+		"Retrieves a view of the points.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    ndarray: an nx3 Numpy array. Setting elements of this array will\n"
+		"    change the points.  \n"
+		"\n"
+		""},
+	 { "ConvexHull_setPoints", _wrap_ConvexHull_setPoints, METH_VARARGS, "\n"
+		"ConvexHull_setPoints(ConvexHull self, double * np_array2)\n"
+		"\n"
+		"\n"
+		"Sets all points to the given nx3 Numpy array.  \n"
 		"\n"
 		""},
 	 { "ConvexHull_addPoint", _wrap_ConvexHull_addPoint, METH_VARARGS, "\n"
@@ -60810,18 +65222,39 @@ static PyMethodDef SwigMethods[] = {
 		"Returns the number of properties.  \n"
 		"\n"
 		""},
+	 { "PointCloud_getPoints", _wrap_PointCloud_getPoints, METH_O, "\n"
+		"PointCloud_getPoints(PointCloud self)\n"
+		"\n"
+		"\n"
+		"Returns a view of the points.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    ndarray: an nx3 Numpy array. Setting elements of this array will\n"
+		"    change the points.  \n"
+		"\n"
+		""},
 	 { "PointCloud_setPoints", _wrap_PointCloud_setPoints, METH_VARARGS, "\n"
-		"PointCloud_setPoints(PointCloud self, int num, doubleVector plist)\n"
+		"PointCloud_setPoints(PointCloud self, double * np_array2)\n"
 		"\n"
 		"\n"
-		"Sets all the points to the given list (a 3n-list)  \n"
+		"Sets all the points to the given nx3 Numpy array.  \n"
+		"\n"
+		""},
+	 { "PointCloud_setPointsAndProperties", _wrap_PointCloud_setPointsAndProperties, METH_VARARGS, "\n"
+		"PointCloud_setPointsAndProperties(PointCloud self, double * np_array2)\n"
+		"\n"
+		"\n"
+		"Sets all the points and m properties from the given n x (3+m) array.  \n"
 		"\n"
 		""},
 	 { "PointCloud_addPoint", _wrap_PointCloud_addPoint, METH_VARARGS, "\n"
 		"PointCloud_addPoint(PointCloud self, double const [3] p) -> int\n"
 		"\n"
 		"\n"
-		"Adds a point. Sets all its properties to 0. Returns the index.  \n"
+		"Adds a point. Sets all its properties to 0.  \n"
+		"\n"
+		"Returns the point's index.  \n"
 		"\n"
 		""},
 	 { "PointCloud_setPoint", _wrap_PointCloud_setPoint, METH_VARARGS, "\n"
@@ -60835,24 +65268,24 @@ static PyMethodDef SwigMethods[] = {
 		"PointCloud_getPoint(PointCloud self, int index)\n"
 		"\n"
 		"\n"
-		"Retrieves the position of the point at the given index.  \n"
+		"Returns the position of the point at the given index.  \n"
 		"\n"
 		""},
 	 { "PointCloud_addProperty", _wrap_PointCloud_addProperty, METH_VARARGS, "\n"
 		"PointCloud_addProperty(PointCloud self, std::string const & pname)\n"
-		"PointCloud_addProperty(PointCloud self, std::string const & pname, doubleVector properties)\n"
+		"PointCloud_addProperty(PointCloud self, std::string const & pname, double * np_array)\n"
 		"\n"
 		"\n"
 		"Adds a new property with name pname, and sets values for this property to the\n"
-		"given list (a n-list)  \n"
+		"given length-n array.  \n"
 		"\n"
 		""},
 	 { "PointCloud_setProperties", _wrap_PointCloud_setProperties, METH_VARARGS, "\n"
-		"PointCloud_setProperties(PointCloud self, doubleVector properties)\n"
-		"PointCloud_setProperties(PointCloud self, int pindex, doubleVector properties)\n"
+		"PointCloud_setProperties(PointCloud self, double * np_array2)\n"
+		"PointCloud_setProperties(PointCloud self, int pindex, double * np_array)\n"
 		"\n"
 		"\n"
-		"Sets property pindex of all points to the given list (a n-list)  \n"
+		"Sets property pindex of all points to the given length-n array.  \n"
 		"\n"
 		""},
 	 { "PointCloud_setProperty", _wrap_PointCloud_setProperty, METH_VARARGS, "\n"
@@ -60868,7 +65301,7 @@ static PyMethodDef SwigMethods[] = {
 		"PointCloud_getProperty(PointCloud self, int index, std::string const & pname) -> double\n"
 		"\n"
 		"\n"
-		"Gets the property named pname of point index.  \n"
+		"Returns the property named pname of point index.  \n"
 		"\n"
 		""},
 	 { "PointCloud_getProperties", _wrap_PointCloud_getProperties, METH_VARARGS, "\n"
@@ -60876,7 +65309,23 @@ static PyMethodDef SwigMethods[] = {
 		"PointCloud_getProperties(PointCloud self, std::string const & pname)\n"
 		"\n"
 		"\n"
-		"Gets property named pindex of all points as an array.  \n"
+		"Returns property named pindex of all points as an array.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    ndarray: an n-D Numpy array.  \n"
+		"\n"
+		""},
+	 { "PointCloud_getAllProperties", _wrap_PointCloud_getAllProperties, METH_O, "\n"
+		"PointCloud_getAllProperties(PointCloud self)\n"
+		"\n"
+		"\n"
+		"Returns all the properties of all points as an array view.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    ndarray: an nxk Numpy array. Setting elements of this array will\n"
+		"    change the vertices.  \n"
 		"\n"
 		""},
 	 { "PointCloud_translate", _wrap_PointCloud_translate, METH_VARARGS, "\n"
@@ -60912,7 +65361,85 @@ static PyMethodDef SwigMethods[] = {
 		"PointCloud_getSetting(PointCloud self, std::string const & key) -> std::string\n"
 		"\n"
 		"\n"
-		"Retrieves the given setting.  \n"
+		"Returns the given setting.  \n"
+		"\n"
+		""},
+	 { "PointCloud_setDepthImage_d", _wrap_PointCloud_setDepthImage_d, METH_VARARGS, "\n"
+		"PointCloud_setDepthImage_d(PointCloud self, double const [4] intrinsics, double * np_array2, double depth_scale)\n"
+		"\n"
+		"\n"
+		"Sets a structured point cloud from a depth image. [fx,fy,cx,cy] are the\n"
+		"intrinsics parameters. The depth is given as a size hxw array, top to bottom.  \n"
+		"\n"
+		""},
+	 { "PointCloud_setDepthImage_f", _wrap_PointCloud_setDepthImage_f, METH_VARARGS, "\n"
+		"PointCloud_setDepthImage_f(PointCloud self, double const [4] intrinsics, float * np_depth2, double depth_scale)\n"
+		"\n"
+		"\n"
+		"Sets a structured point cloud from a depth image. [fx,fy,cx,cy] are the\n"
+		"intrinsics parameters. The depth is given as a size hxw array, top to bottom.  \n"
+		"\n"
+		""},
+	 { "PointCloud_setDepthImage_s", _wrap_PointCloud_setDepthImage_s, METH_VARARGS, "\n"
+		"PointCloud_setDepthImage_s(PointCloud self, double const [4] intrinsics, unsigned short * np_depth2, double depth_scale)\n"
+		"\n"
+		"\n"
+		"Sets a structured point cloud from a depth image. [fx,fy,cx,cy] are the\n"
+		"intrinsics parameters. The depth is given as a size hxw array, top to bottom.  \n"
+		"\n"
+		""},
+	 { "PointCloud_setRGBDImages_i_d", _wrap_PointCloud_setRGBDImages_i_d, METH_VARARGS, "\n"
+		"PointCloud_setRGBDImages_i_d(PointCloud self, double const [4] intrinsics, unsigned int * np_array2, double * np_depth2, double depth_scale)\n"
+		"\n"
+		"\n"
+		"Sets a structured point cloud from an RGBD (color,depth) image pair.\n"
+		"[fx,fy,cx,cy] are the intrinsics parameters. The RGB colors are packed in\n"
+		"0xrrggbb order, size hxw, top to bottom.  \n"
+		"\n"
+		""},
+	 { "PointCloud_setRGBDImages_i_f", _wrap_PointCloud_setRGBDImages_i_f, METH_VARARGS, "\n"
+		"PointCloud_setRGBDImages_i_f(PointCloud self, double const [4] intrinsics, unsigned int * np_array2, float * np_depth2, double depth_scale)\n"
+		"\n"
+		"\n"
+		"Sets a structured point cloud from an RGBD (color,depth) image pair.\n"
+		"[fx,fy,cx,cy] are the intrinsics parameters. The RGB colors are packed in\n"
+		"0xrrggbb order, size hxw, top to bottom.  \n"
+		"\n"
+		""},
+	 { "PointCloud_setRGBDImages_i_s", _wrap_PointCloud_setRGBDImages_i_s, METH_VARARGS, "\n"
+		"PointCloud_setRGBDImages_i_s(PointCloud self, double const [4] intrinsics, unsigned int * np_array2, unsigned short * np_depth2, double depth_scale)\n"
+		"\n"
+		"\n"
+		"Sets a structured point cloud from an RGBD (color,depth) image pair.\n"
+		"[fx,fy,cx,cy] are the intrinsics parameters. The RGB colors are packed in\n"
+		"0xrrggbb order, size hxw, top to bottom.  \n"
+		"\n"
+		""},
+	 { "PointCloud_setRGBDImages_b_d", _wrap_PointCloud_setRGBDImages_b_d, METH_VARARGS, "\n"
+		"PointCloud_setRGBDImages_b_d(PointCloud self, double const [4] intrinsics, unsigned char * np_array3, double * np_depth2, double depth_scale)\n"
+		"\n"
+		"\n"
+		"Sets a structured point cloud from an RGBD (color,depth) image pair.\n"
+		"[fx,fy,cx,cy] are the intrinsics parameters. The RGB colors are packed in\n"
+		"0xrrggbb order, size hxw, top to bottom.  \n"
+		"\n"
+		""},
+	 { "PointCloud_setRGBDImages_b_f", _wrap_PointCloud_setRGBDImages_b_f, METH_VARARGS, "\n"
+		"PointCloud_setRGBDImages_b_f(PointCloud self, double const [4] intrinsics, unsigned char * np_array3, float * np_depth2, double depth_scale)\n"
+		"\n"
+		"\n"
+		"Sets a structured point cloud from an RGBD (color,depth) image pair.\n"
+		"[fx,fy,cx,cy] are the intrinsics parameters. The RGB colors are an h x w x 3\n"
+		"array, top to bottom.  \n"
+		"\n"
+		""},
+	 { "PointCloud_setRGBDImages_b_s", _wrap_PointCloud_setRGBDImages_b_s, METH_VARARGS, "\n"
+		"PointCloud_setRGBDImages_b_s(PointCloud self, double const [4] intrinsics, unsigned char * np_array3, unsigned short * np_depth2, double depth_scale)\n"
+		"\n"
+		"\n"
+		"Sets a structured point cloud from an RGBD (color,depth) image pair.\n"
+		"[fx,fy,cx,cy] are the intrinsics parameters. The RGB colors are an h x w x 3\n"
+		"array, top to bottom.  \n"
 		"\n"
 		""},
 	 { "PointCloud_vertices_set", _wrap_PointCloud_vertices_set, METH_VARARGS, "PointCloud_vertices_set(PointCloud self, doubleVector vertices)"},
@@ -61003,15 +65530,33 @@ static PyMethodDef SwigMethods[] = {
 		"VolumeGrid_set(VolumeGrid self, int i, int j, int k, double value)\n"
 		"\n"
 		"\n"
+		"Sets a specific element of a cell.  \n"
+		"\n"
 		""},
 	 { "VolumeGrid_get", _wrap_VolumeGrid_get, METH_VARARGS, "\n"
 		"VolumeGrid_get(VolumeGrid self, int i, int j, int k) -> double\n"
 		"\n"
 		"\n"
+		"Gets a specific element of a cell.  \n"
+		"\n"
 		""},
 	 { "VolumeGrid_shift", _wrap_VolumeGrid_shift, METH_VARARGS, "\n"
 		"VolumeGrid_shift(VolumeGrid self, double dv)\n"
 		"\n"
+		"\n"
+		""},
+	 { "VolumeGrid_getValues", _wrap_VolumeGrid_getValues, METH_O, "\n"
+		"VolumeGrid_getValues(VolumeGrid self)\n"
+		"\n"
+		"\n"
+		"Returns a 3D Numpy array view of the values.  \n"
+		"\n"
+		""},
+	 { "VolumeGrid_setValues", _wrap_VolumeGrid_setValues, METH_VARARGS, "\n"
+		"VolumeGrid_setValues(VolumeGrid self, double * np_array3)\n"
+		"\n"
+		"\n"
+		"Sets the values to a 3D numpy array.  \n"
 		"\n"
 		""},
 	 { "VolumeGrid_bbox_set", _wrap_VolumeGrid_bbox_set, METH_VARARGS, "VolumeGrid_bbox_set(VolumeGrid self, doubleVector bbox)"},
@@ -61103,6 +65648,14 @@ static PyMethodDef SwigMethods[] = {
 		"Geometry3D_clone(Geometry3D self) -> Geometry3D\n"
 		"\n"
 		"\n"
+		"Creates a standalone geometry from this geometry (identical to copy... will be\n"
+		"deprecated in a future version)  \n"
+		"\n"
+		""},
+	 { "Geometry3D_copy", _wrap_Geometry3D_copy, METH_O, "\n"
+		"Geometry3D_copy(Geometry3D self) -> Geometry3D\n"
+		"\n"
+		"\n"
 		"Creates a standalone geometry from this geometry.  \n"
 		"\n"
 		""},
@@ -61117,7 +65670,7 @@ static PyMethodDef SwigMethods[] = {
 		"Geometry3D_isStandalone(Geometry3D self) -> bool\n"
 		"\n"
 		"\n"
-		"Returns true if this is a standalone geometry.  \n"
+		"Returns True if this is a standalone geometry.  \n"
 		"\n"
 		""},
 	 { "Geometry3D_free", _wrap_Geometry3D_free, METH_O, "\n"
@@ -61139,7 +65692,7 @@ static PyMethodDef SwigMethods[] = {
 		"Geometry3D_empty(Geometry3D self) -> bool\n"
 		"\n"
 		"\n"
-		"Returns true if this has no contents (not the same as numElements()==0)  \n"
+		"Returns True if this has no contents (not the same as numElements()==0)  \n"
 		"\n"
 		""},
 	 { "Geometry3D_getTriangleMesh", _wrap_Geometry3D_getTriangleMesh, METH_O, "\n"
@@ -61234,8 +65787,9 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Returns an element of the Geometry3D if it is a Group, TriangleMesh, or\n"
-		"PointCloud. The element will be in local coordinates. Raises an error if this is\n"
-		"of any other type.  \n"
+		"PointCloud. Raises an error if this is of any other type.  \n"
+		"\n"
+		"The element will be in local coordinates.  \n"
 		"\n"
 		""},
 	 { "Geometry3D_setElement", _wrap_Geometry3D_setElement, METH_VARARGS, "\n"
@@ -61259,6 +65813,10 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Loads from file. Standard mesh types, PCD files, and .geom files are supported.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    True on success, False on failure  \n"
 		"\n"
 		""},
 	 { "Geometry3D_saveFile", _wrap_Geometry3D_saveFile, METH_VARARGS, "\n"
@@ -61334,15 +65892,16 @@ static PyMethodDef SwigMethods[] = {
 		"Geometry3D_getBB(Geometry3D self)\n"
 		"\n"
 		"\n"
-		"Returns the axis-aligned bounding box of the object as a tuple (bmin,bmax).\n"
-		"Note: O(1) time, but may not be tight.  \n"
+		"Returns an axis-aligned bounding box of the object as a tuple (bmin,bmax).  \n"
+		"\n"
+		"Note: O(1) time, but may not be tight  \n"
 		"\n"
 		""},
 	 { "Geometry3D_getBBTight", _wrap_Geometry3D_getBBTight, METH_O, "\n"
 		"Geometry3D_getBBTight(Geometry3D self)\n"
 		"\n"
 		"\n"
-		"Returns a tighter axis-aligned bounding box of the object than\n"
+		"Computes a tighter axis-aligned bounding box of the object than\n"
 		":meth:`Geometry3D.getBB`. Worst case O(n) time.  \n"
 		"\n"
 		""},
@@ -61493,9 +66052,7 @@ static PyMethodDef SwigMethods[] = {
 		"Geometry3D_rayCast(Geometry3D self, double const [3] s, double const [3] d) -> bool\n"
 		"\n"
 		"\n"
-		"Returns (hit,pt) where hit is true if the ray starting at s and pointing in\n"
-		"direction d hits the geometry (given in world coordinates); pt is the hit point,\n"
-		"in world coordinates.  \n"
+		"Performs a ray cast.  \n"
 		"\n"
 		"Supported types:  \n"
 		"\n"
@@ -61505,19 +66062,19 @@ static PyMethodDef SwigMethods[] = {
 		"    'radius' property assigned)  \n"
 		"*   VolumeGrid  \n"
 		"*   Group (groups of the aforementioned types)  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    (hit,pt) where hit is true if the ray starting at s and pointing\n"
+		"    in direction d hits the geometry (given in world coordinates); pt is\n"
+		"    the hit point, in world coordinates.  \n"
 		"\n"
 		""},
 	 { "Geometry3D_rayCast_ext", _wrap_Geometry3D_rayCast_ext, METH_VARARGS, "\n"
 		"Geometry3D_rayCast_ext(Geometry3D self, double const [3] s, double const [3] d) -> int\n"
 		"\n"
 		"\n"
-		"Returns (hit_element,pt) where hit_element is >= 0 if ray starting at s and\n"
-		"pointing in direction d hits the geometry (given in world coordinates).  \n"
-		"\n"
-		"*   hit_element is -1 if the object is not hit, otherwise it gives the index of\n"
-		"    the element (triangle, point, sub-object) that was hit. For geometric\n"
-		"    primitives, this will be 0.  \n"
-		"*   pt is the hit point, in world coordinates.  \n"
+		"A more sophisticated ray cast.  \n"
 		"\n"
 		"Supported types:  \n"
 		"\n"
@@ -61527,6 +66084,17 @@ static PyMethodDef SwigMethods[] = {
 		"    'radius' property assigned)  \n"
 		"*   VolumeGrid  \n"
 		"*   Group (groups of the aforementioned types)  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    (hit_element,pt) where hit_element is >= 0 if ray starting at\n"
+		"    s and pointing in direction d hits the geometry (given in world\n"
+		"    coordinates).  \n"
+		"\n"
+		"    - hit_element is -1 if the object is not hit, otherwise it gives the\n"
+		"      index of the element (triangle, point, sub-object) that was hit.  \n"
+		"      For geometric primitives, this will be 0.\n"
+		"    - pt is the hit point, in world coordinates.  \n"
 		"\n"
 		""},
 	 { "Geometry3D_contacts", _wrap_Geometry3D_contacts, METH_VARARGS, "\n"
@@ -61563,6 +66131,49 @@ static PyMethodDef SwigMethods[] = {
 		"Supported types:  \n"
 		"\n"
 		"*   ConvexHull  \n"
+		"\n"
+		""},
+	 { "Geometry3D_slice", _wrap_Geometry3D_slice, METH_VARARGS, "\n"
+		"Geometry3D_slice(Geometry3D self, double const [9] R, double const [3] t, double tol) -> Geometry3D\n"
+		"\n"
+		"\n"
+		"Calculates a 2D slice through the data. The slice is given by the local X-Y\n"
+		"plane of a transform (R,T) with orientation R and translation t. The return\n"
+		"Geometry's data is in the local frame of (R,t), and (R,t) is set as its current\n"
+		"transform.  \n"
+		"\n"
+		"The geometry's current transform is respected.  \n"
+		"\n"
+		"O(N) time.  \n"
+		"\n"
+		"Supported types:  \n"
+		"\n"
+		"*   PointCloud. Needs tol > 0. A PointCloud is returned.  \n"
+		"*   TriangleMesh. tol is ignored. A Group of GeometricPrimitives (segments) is\n"
+		"    returned.  \n"
+		"\n"
+		""},
+	 { "Geometry3D_roi", _wrap_Geometry3D_roi, METH_VARARGS, "\n"
+		"Geometry3D_roi(Geometry3D self, char const * query, double const [3] bmin, double const [3] bmax) -> Geometry3D\n"
+		"\n"
+		"\n"
+		"Calculates a region of interest of the data for the bounding box [bmin,bmax].\n"
+		"The geometry's current transform is respected.  \n"
+		"\n"
+		"`query` can be \"intersect\", \"touching\", or \"within\". If \"intersect\",\n"
+		"this tries to get a representation of the geometry intersecting the box. If\n"
+		"\"touching\", all elements touching the box are returned. If \"within\", only\n"
+		"elements entirely inside the box are returned.  \n"
+		"\n"
+		"`query` can also be prefaced with a '~' which indicates that the ROI should be\n"
+		"inverted, i.e. select everything that does NOT intersect with a box.  \n"
+		"\n"
+		"O(N) time.  \n"
+		"\n"
+		"Supported types:  \n"
+		"\n"
+		"*   PointCloud  \n"
+		"*   TriangleMesh  \n"
 		"\n"
 		""},
 	 { "Geometry3D_world_set", _wrap_Geometry3D_world_set, METH_VARARGS, "Geometry3D_world_set(Geometry3D self, int world)"},
@@ -61674,16 +66285,17 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		""},
 	 { "Appearance_setColors", _wrap_Appearance_setColors, METH_VARARGS, "\n"
-		"Appearance_setColors(Appearance self, int feature, floatVector colors, bool alpha=False)\n"
+		"Appearance_setColors(Appearance self, int feature, float * np_array2)\n"
 		"\n"
 		"\n"
-		"Sets per-element color for elements of the given feature type.  \n"
+		"Sets per-element color for elements of the given feature type. Must be an mxn\n"
+		"array. m is the number of features of that type, and n is either 3 or 4.  \n"
 		"\n"
-		"If alpha=True, colors are assumed to be 4*N rgba values, where N is the number\n"
-		"of features of that type.  \n"
+		"If n == 4, they are assumed to be rgba values, and  \n"
 		"\n"
-		"Otherwise they are assumed to be 3*N rgb values. Only supports feature=VERTICES\n"
-		"and feature=FACES  \n"
+		"If n == 3, each row is an rgb value.  \n"
+		"\n"
+		"Only supports feature=VERTICES and feature=FACES  \n"
 		"\n"
 		""},
 	 { "Appearance_setShininess", _wrap_Appearance_setShininess, METH_VARARGS, "\n"
@@ -61716,48 +66328,114 @@ static PyMethodDef SwigMethods[] = {
 		"Gets the per-element color for the given feature.  \n"
 		"\n"
 		""},
-	 { "Appearance_setTexture1D", _wrap_Appearance_setTexture1D, METH_VARARGS, "\n"
-		"Appearance_setTexture1D(Appearance self, int w, char const * format, std::vector< unsigned char,std::allocator< unsigned char > > const & bytes)\n"
+	 { "Appearance_setTexture1D_b", _wrap_Appearance_setTexture1D_b, METH_VARARGS, "\n"
+		"Appearance_setTexture1D_b(Appearance self, char const * format, unsigned char * np_array)\n"
 		"\n"
 		"\n"
 		"Sets a 1D texture of the given width. Valid format strings are.  \n"
 		"\n"
 		"*   \"\": turn off texture mapping  \n"
-		"*   rgb8: unsigned byte RGB colors with red in the 1st byte, green in the 2nd,\n"
-		"    blue in the 3rd  \n"
-		"*   bgr8: unsigned byte RGB colors with blue in the 1st byte, green in the 2nd,\n"
-		"    green in the 3rd  \n"
+		"*   l8: unsigned byte grayscale colors  \n"
+		"\n"
+		""},
+	 { "Appearance_setTexture1D_i", _wrap_Appearance_setTexture1D_i, METH_VARARGS, "\n"
+		"Appearance_setTexture1D_i(Appearance self, char const * format, unsigned int * np_array, int m)\n"
+		"\n"
+		"\n"
+		"Sets a 1D texture of the given width. Valid format strings are.  \n"
+		"\n"
+		"*   \"\": turn off texture mapping  \n"
 		"*   rgba8: unsigned byte RGBA colors with red in the 1st byte and alpha in the\n"
 		"    4th  \n"
 		"*   bgra8: unsigned byte RGBA colors with blue in the 1st byte and alpha in the\n"
 		"    4th  \n"
-		"*   l8: unsigned byte grayscale colors  \n"
 		"\n"
 		""},
-	 { "Appearance_setTexture2D", _wrap_Appearance_setTexture2D, METH_VARARGS, "\n"
-		"Appearance_setTexture2D(Appearance self, int w, int h, char const * format, std::vector< unsigned char,std::allocator< unsigned char > > const & bytes, bool topdown=True)\n"
+	 { "Appearance_setTexture1D_channels", _wrap_Appearance_setTexture1D_channels, METH_VARARGS, "\n"
+		"Appearance_setTexture1D_channels(Appearance self, char const * format, unsigned char * np_array2)\n"
 		"\n"
 		"\n"
-		"Sets a 2D texture of the given width/height. See :func:`setTexture1D` for valid\n"
-		"format strings.  \n"
+		"Sets a 1D texture of the given width, given a 2D array of channels. Valid format\n"
+		"strings are.  \n"
 		"\n"
-		"bytes is is given in order left to right, top to bottom if `topdown==True`.\n"
-		"Otherwise, it is given in order left to right, bottom to top.  \n"
+		"*   \"\": turn off texture mapping  \n"
+		"*   rgb8: unsigned byte RGB colors with red in the 1st column, green in the 2nd,\n"
+		"    blue in the 3rd  \n"
+		"*   bgr8: unsigned byte RGB colors with blue in the 1st column, green in the\n"
+		"    2nd, green in the 3rd  \n"
+		"*   rgba8: unsigned byte RGBA colors with red in the 1st column and alpha in the\n"
+		"    4th  \n"
+		"*   bgra8: unsigned byte RGBA colors with blue in the 1st column and alpha in\n"
+		"    the 4th  \n"
+		"*   l8: unsigned byte grayscale colors, one channel  \n"
 		"\n"
 		""},
-	 { "Appearance_setTexcoords", _wrap_Appearance_setTexcoords, METH_VARARGS, "\n"
-		"Appearance_setTexcoords(Appearance self, doubleVector uvs)\n"
+	 { "Appearance_setTexture2D_b", _wrap_Appearance_setTexture2D_b, METH_VARARGS, "\n"
+		"Appearance_setTexture2D_b(Appearance self, char const * format, unsigned char * np_array2, bool topdown=True)\n"
 		"\n"
 		"\n"
-		"Sets per-vertex texture coordinates.  \n"
+		"Sets a 2D texture of the given width/height. See :func:`setTexture1D_b` for\n"
+		"valid format strings.  \n"
 		"\n"
-		"If the texture is 1D, uvs is an array of length n containing 1D texture\n"
-		"coordinates.  \n"
+		"The array is given in top to bottom order if `topdown==True`. Otherwise, it is\n"
+		"given in order bottom to top.  \n"
 		"\n"
-		"If the texture is 2D, uvs is an array of length 2n containing U-V coordinates\n"
-		"u1, v1, u2, v2, ..., un, vn.  \n"
+		""},
+	 { "Appearance_setTexture2D_i", _wrap_Appearance_setTexture2D_i, METH_VARARGS, "\n"
+		"Appearance_setTexture2D_i(Appearance self, char const * format, unsigned int * np_array2, bool topdown=True)\n"
+		"\n"
+		"\n"
+		"Sets a 2D texture of the given width/height. See :func:`setTexture1D_i` for\n"
+		"valid format strings.  \n"
+		"\n"
+		"The array is given in top to bottom order if `topdown==True`. Otherwise, it is\n"
+		"given in order bottom to top.  \n"
+		"\n"
+		""},
+	 { "Appearance_setTexture2D_channels", _wrap_Appearance_setTexture2D_channels, METH_VARARGS, "\n"
+		"Appearance_setTexture2D_channels(Appearance self, char const * format, unsigned char * np_array3, bool topdown=True)\n"
+		"\n"
+		"\n"
+		"Sets a 2D texture of the given width/height from a 3D array of channels. See\n"
+		":func:`setTexture1D_channels` for valid format strings.  \n"
+		"\n"
+		"The array is given in top to bottom order if `topdown==True`. Otherwise, it is\n"
+		"given in order bottom to top.  \n"
+		"\n"
+		""},
+	 { "Appearance_setTexcoords1D", _wrap_Appearance_setTexcoords1D, METH_VARARGS, "\n"
+		"Appearance_setTexcoords1D(Appearance self, double * np_array)\n"
+		"\n"
+		"\n"
+		"Sets per-vertex texture coordinates for a 1D texture.  \n"
 		"\n"
 		"You may also set uvs to be empty, which turns off texture mapping altogether.  \n"
+		"\n"
+		""},
+	 { "Appearance_setTexcoords2D", _wrap_Appearance_setTexcoords2D, METH_VARARGS, "\n"
+		"Appearance_setTexcoords2D(Appearance self, double * np_array2)\n"
+		"\n"
+		"\n"
+		"Sets per-vertex texture coordinates for a 2D texture. uvs is an array of shape\n"
+		"(nx2) containing U-V coordinates [[u1, v1], [u2, v2], ..., [un, vn]].  \n"
+		"\n"
+		"You may also set uvs to be empty, which turns off texture mapping altogether.  \n"
+		"\n"
+		""},
+	 { "Appearance_setTexgen", _wrap_Appearance_setTexgen, METH_VARARGS, "\n"
+		"Appearance_setTexgen(Appearance self, double * np_array2, bool worldcoordinates=False)\n"
+		"\n"
+		"\n"
+		"Sets the texture generation. The array must be size m x 4, with m in the range\n"
+		"0,...,4. If worldcoordinates=true, the texture generation is performed in world\n"
+		"coordinates rather than object coordinates.  \n"
+		"\n"
+		""},
+	 { "Appearance_setTexWrap", _wrap_Appearance_setTexWrap, METH_VARARGS, "\n"
+		"Appearance_setTexWrap(Appearance self, bool wrap)\n"
+		"\n"
+		"\n"
+		"Sets whether textures are to wrap (default true)  \n"
 		"\n"
 		""},
 	 { "Appearance_setPointSize", _wrap_Appearance_setPointSize, METH_VARARGS, "\n"
@@ -62008,6 +66686,16 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		""},
+	 { "TransformPoser_enableTranslationAxes", _wrap_TransformPoser_enableTranslationAxes, METH_VARARGS, "\n"
+		"TransformPoser_enableTranslationAxes(TransformPoser self, bool x, bool y, bool z)\n"
+		"\n"
+		"\n"
+		""},
+	 { "TransformPoser_enableRotationAxes", _wrap_TransformPoser_enableRotationAxes, METH_VARARGS, "\n"
+		"TransformPoser_enableRotationAxes(TransformPoser self, bool x, bool y, bool z)\n"
+		"\n"
+		"\n"
+		""},
 	 { "delete_TransformPoser", _wrap_delete_TransformPoser, METH_O, "delete_TransformPoser(TransformPoser self)"},
 	 { "TransformPoser_swigregister", TransformPoser_swigregister, METH_O, NULL},
 	 { "TransformPoser_swiginit", TransformPoser_swiginit, METH_VARARGS, NULL},
@@ -62228,7 +66916,10 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns the ID of the robot link in its world.  \n"
 		"\n"
-		"Note: The world ID is not the same as the link's index, retrieved by getIndex.  \n"
+		".. note::  \n"
+		"\n"
+		"    The world ID is not the same as the link's index, retrieved by\n"
+		"    getIndex.  \n"
 		"\n"
 		""},
 	 { "RobotModelLink_getName", _wrap_RobotModelLink_getName, METH_O, "\n"
@@ -62299,7 +66990,7 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModelLink_getMass(RobotModelLink self) -> Mass\n"
 		"\n"
 		"\n"
-		"Retrieves the inertial properties of the link. (Note that the Mass is given with\n"
+		"Returns the inertial properties of the link. (Note that the Mass is given with\n"
 		"origin at the link frame, not about the COM.)  \n"
 		"\n"
 		""},
@@ -62315,11 +67006,11 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModelLink_getParentTransform(RobotModelLink self)\n"
 		"\n"
 		"\n"
-		"Gets transformation (R,t) to the parent link.  \n"
+		"Gets the transformation (R,t) to the parent link.  \n"
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (se3 object): a pair (R,t), with R a 9-list and t a 3-list of floats,\n"
+		"    se3 object: a pair (R,t), with R a 9-list and t a 3-list of floats,\n"
 		"    giving the local transform from this link to its parent, in the\n"
 		"    reference (zero) configuration.  \n"
 		"\n"
@@ -62374,7 +67065,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (list of 3 floats): the world coordinates of the local point plocal  \n"
+		"    list of 3 floats: the world coordinates of the local point plocal  \n"
 		"\n"
 		""},
 	 { "RobotModelLink_getWorldDirection", _wrap_RobotModelLink_getWorldDirection, METH_VARARGS, "\n"
@@ -62385,7 +67076,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (list of 3 floats): the world coordinates of the local direction\n"
+		"    list of 3 floats: the world coordinates of the local direction\n"
 		"    vlocal  \n"
 		"\n"
 		""},
@@ -62397,7 +67088,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (list of 3 floats): the local coordinates of the world point pworld  \n"
+		"    list of 3 floats: the local coordinates of the world point pworld  \n"
 		"\n"
 		""},
 	 { "RobotModelLink_getLocalDirection", _wrap_RobotModelLink_getLocalDirection, METH_VARARGS, "\n"
@@ -62408,7 +67099,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (list of 3 floats): the local coordinates of the world direction\n"
+		"    list of 3 floats: the local coordinates of the world direction\n"
 		"    vworld  \n"
 		"\n"
 		""},
@@ -62420,7 +67111,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (se3 object): a pair (R,t), with R a 9-list and t a 3-list of floats.  \n"
+		"    se3 object: a pair (R,t), with R a 9-list and t a 3-list of floats.  \n"
 		"\n"
 		""},
 	 { "RobotModelLink_setTransform", _wrap_RobotModelLink_setTransform, METH_VARARGS, "\n"
@@ -62429,7 +67120,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Sets the link's current transformation (R,t) to the world frame.  \n"
 		"\n"
-		"Note:  \n"
+		".. note::  \n"
 		"\n"
 		"    This does NOT perform inverse kinematics.  The transform is\n"
 		"    overwritten when the robot's setConfig() method is called.  \n"
@@ -62439,12 +67130,12 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModelLink_getVelocity(RobotModelLink self)\n"
 		"\n"
 		"\n"
-		"Returns the velocity of the link's origin given the robot's current joint\n"
+		"Computes the velocity of the link's origin given the robot's current joint\n"
 		"configuration and velocities. Equivalent to getPointVelocity([0,0,0]).  \n"
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (list of 3 floats): the current velocity of the link's origin, in\n"
+		"    list of 3 floats: the current velocity of the link's origin, in\n"
 		"    world coordinates  \n"
 		"\n"
 		""},
@@ -62452,12 +67143,12 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModelLink_getAngularVelocity(RobotModelLink self)\n"
 		"\n"
 		"\n"
-		"Returns the angular velocity of the link given the robot's current joint\n"
+		"Computes the angular velocity of the link given the robot's current joint\n"
 		"configuration and velocities.  \n"
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (list of 3 floats): the current angular velocity of the link, in world\n"
+		"    list of 3 floats: the current angular velocity of the link, in world\n"
 		"    coordinates  \n"
 		"\n"
 		""},
@@ -62465,12 +67156,12 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModelLink_getPointVelocity(RobotModelLink self, double const [3] plocal)\n"
 		"\n"
 		"\n"
-		"Returns the world velocity of a point attached to the link, given the robot's\n"
+		"Computes the world velocity of a point attached to the link, given the robot's\n"
 		"current joint configuration and velocities.  \n"
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (list of 3 floats): the current velocity of the point, in\n"
+		"    list of 3 floats: the current velocity of the point, in\n"
 		"    world coordinates.  \n"
 		"\n"
 		""},
@@ -62478,103 +67169,104 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModelLink_getJacobian(RobotModelLink self, double const [3] plocal)\n"
 		"\n"
 		"\n"
-		"Returns the total jacobian of a point on this link w.r.t. the robot's\n"
+		"Computes the total jacobian of a point on this link w.r.t. the robot's\n"
 		"configuration q.  \n"
 		"\n"
-		"Returns:  \n"
-		"\n"
-		"    (list of 6 lists of floats): the 6xn total Jacobian matrix of the\n"
-		"    point given by local coordinates plocal.  The matrix is row-major.\n"
-		"\n"
-		"    The orientation jacobian is given in the first 3 rows, and is stacked\n"
-		"    on the position jacobian, which is given in the last 3 rows.  \n"
-		"\n"
-		""},
-	 { "RobotModelLink_getJacobian2", _wrap_RobotModelLink_getJacobian2, METH_VARARGS, "\n"
-		"RobotModelLink_getJacobian2(RobotModelLink self, double const [3] plocal, intVector links)\n"
-		"\n"
-		"\n"
-		"Returns the total jacobian of a point on this link w.r.t. some entries of the\n"
-		"robot's configuration q.  \n"
+		"The orientation jacobian is given in the first 3 rows, and is stacked on the\n"
+		"position jacobian, which is given in the last 3 rows.  \n"
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (list of 6 lists of floats): the 6xlen(links) total Jacobian matrix of\n"
-		"    the point given by local coordinates plocal.  The matrix is row-major.\n"
-		"\n"
-		"    The orientation jacobian is given in the first 3 rows, and is stacked\n"
-		"    on the position jacobian, which is given in the last 3 rows.  \n"
+		"    ndarray: the 6xn total Jacobian matrix of the\n"
+		"    point given by local coordinates plocal.  \n"
 		"\n"
 		""},
 	 { "RobotModelLink_getPositionJacobian", _wrap_RobotModelLink_getPositionJacobian, METH_VARARGS, "\n"
 		"RobotModelLink_getPositionJacobian(RobotModelLink self, double const [3] plocal)\n"
 		"\n"
 		"\n"
-		"Returns the position jacobian of a point on this link w.r.t. the robot's\n"
+		"Computes the position jacobian of a point on this link w.r.t. the robot's\n"
 		"configuration q.  \n"
 		"\n"
-		"Returns:  \n"
-		"\n"
-		"    (list of 3 lists of floats): the 3xn Jacobian matrix of the\n"
-		"    point given by local coordinates plocal.  The matrix is row-major.\n"
-		"\n"
-		"    This matrix J gives the point's velocity (in world coordinates) via\n"
-		"    np.dot(J,dq), where dq is the robot's joint velocities.  \n"
-		"\n"
-		""},
-	 { "RobotModelLink_getPositionJacobian2", _wrap_RobotModelLink_getPositionJacobian2, METH_VARARGS, "\n"
-		"RobotModelLink_getPositionJacobian2(RobotModelLink self, double const [3] plocal, intVector links)\n"
-		"\n"
-		"\n"
-		"Returns the position jacobian of a point on this link w.r.t. some entries of the\n"
-		"robot's configuration q.  \n"
+		"This matrix J gives the point's velocity (in world coordinates) via\n"
+		"np.dot(J,dq), where dq is the robot's joint velocities.  \n"
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (list of 3 lists of floats): the 3xlen(links) Jacobian matrix of the\n"
-		"    point given by local coordinates plocal.  The matrix is row-major.\n"
-		"\n"
-		"    This matrix J gives the point's velocity (in world coordinates) via\n"
-		"    np.dot(J,dq), where dq is the robot's joint velocities.  \n"
+		"    ndarray: the 3xn Jacobian matrix of the\n"
+		"    point given by local coordinates plocal.  \n"
 		"\n"
 		""},
 	 { "RobotModelLink_getOrientationJacobian", _wrap_RobotModelLink_getOrientationJacobian, METH_O, "\n"
 		"RobotModelLink_getOrientationJacobian(RobotModelLink self)\n"
 		"\n"
 		"\n"
-		"Returns the orientation jacobian of this link w.r.t. the robot's configuration\n"
+		"Computes the orientation jacobian of this link w.r.t. the robot's configuration\n"
 		"q.  \n"
 		"\n"
+		"This matrix J gives the link's angular velocity (in world coordinates) via\n"
+		"np.dot(J,dq), where dq is the robot's joint velocities.  \n"
+		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (list of 3 lists of floats): the 3xn orientation Jacobian matrix of\n"
-		"    the link.  The matrix is row-major.\n"
-		"\n"
-		"    This matrix J gives the link's angular velocity (in world coordinates)\n"
-		"    via np.dot(J,dq), where dq is the robot's joint velocities.  \n"
+		"    ndarray:: the 3xn orientation Jacobian matrix of the link.  \n"
 		"\n"
 		""},
-	 { "RobotModelLink_getOrientationJacobian2", _wrap_RobotModelLink_getOrientationJacobian2, METH_VARARGS, "\n"
-		"RobotModelLink_getOrientationJacobian2(RobotModelLink self, intVector links)\n"
+	 { "RobotModelLink_getJacobianCols", _wrap_RobotModelLink_getJacobianCols, METH_VARARGS, "\n"
+		"RobotModelLink_getJacobianCols(RobotModelLink self, double const [3] plocal, intVector links)\n"
 		"\n"
 		"\n"
-		"Returns the orientation jacobian of this link w.r.t. some entries of the robot's\n"
-		"configuration q.  \n"
+		"Returns the jacobian of a point on this link w.r.t. specified entries of the\n"
+		"robot's configuration q given by `links`.  \n"
+		"\n"
+		"The orientation jacobian is given in the first 3 rows, and is stacked on the\n"
+		"position jacobian, which is given in the last 3 rows.  \n"
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (list of 3 lists of floats): the 3xlen(links) orientation Jacobian matrix of\n"
-		"    the link.  The matrix is row-major.\n"
+		"    ndarray: the 6xlen(links) Jacobian matrix of the\n"
+		"    point given by local coordinates plocal.  \n"
 		"\n"
-		"    This matrix J gives the link's angular velocity (in world coordinates)\n"
-		"    via np.dot(J,dq), where dq is the robot's joint velocities.  \n"
+		""},
+	 { "RobotModelLink_getPositionJacobianCols", _wrap_RobotModelLink_getPositionJacobianCols, METH_VARARGS, "\n"
+		"RobotModelLink_getPositionJacobianCols(RobotModelLink self, double const [3] plocal, intVector links)\n"
+		"\n"
+		"\n"
+		"Returns the position jacobian of a point on this link w.r.t. specified entries\n"
+		"of the robot's configuration q given by `links`.  \n"
+		"\n"
+		"This matrix J gives the point's velocity (in world coordinates) via\n"
+		"np.dot(J,dqlinks), where dqlinks are the joint velocities of the links in\n"
+		"`links`  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    ndarray: the 3xlen(links) position Jacobian matrix of the\n"
+		"    point given by local coordinates plocal.  \n"
+		"\n"
+		""},
+	 { "RobotModelLink_getRotationJacobianCols", _wrap_RobotModelLink_getRotationJacobianCols, METH_VARARGS, "\n"
+		"RobotModelLink_getRotationJacobianCols(RobotModelLink self, intVector links)\n"
+		"\n"
+		"\n"
+		"Returns the orientation jacobian this link w.r.t. specified entries of the\n"
+		"robot's configuration q given by `links`.  \n"
+		"\n"
+		"This matrix J gives the point's angular velocity (in world coordinates) via\n"
+		"np.dot(J,dqlinks), where dqlinks are the joint velocities of the links in\n"
+		"`links`  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    ndarray: the 3xlen(links) orientation Jacobian matrix of the\n"
+		"    link.  \n"
 		"\n"
 		""},
 	 { "RobotModelLink_getAcceleration", _wrap_RobotModelLink_getAcceleration, METH_VARARGS, "\n"
 		"RobotModelLink_getAcceleration(RobotModelLink self, doubleVector ddq)\n"
 		"\n"
 		"\n"
-		"Returns the acceleration of the link origin given the robot's current joint\n"
+		"Computes the acceleration of the link origin given the robot's current joint\n"
 		"configuration and velocities, and the joint accelerations ddq.  \n"
 		"\n"
 		"ddq can be empty, which calculates the acceleration with acceleration 0, and is\n"
@@ -62582,7 +67274,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (list of 3 floats): the acceleration of the link's origin, in\n"
+		"    list of 3 floats: the acceleration of the link's origin, in\n"
 		"    world coordinates.  \n"
 		"\n"
 		""},
@@ -62590,12 +67282,12 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModelLink_getPointAcceleration(RobotModelLink self, double const [3] plocal, doubleVector ddq)\n"
 		"\n"
 		"\n"
-		"Returns the acceleration of the point given the robot's current joint\n"
+		"Computes the acceleration of the point given the robot's current joint\n"
 		"configuration and velocities, and the joint accelerations ddq.  \n"
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (list of 3 floats): the acceleration of the point, in\n"
+		"    list of 3 floats: the acceleration of the point, in\n"
 		"    world coordinates.  \n"
 		"\n"
 		""},
@@ -62603,12 +67295,12 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModelLink_getAngularAcceleration(RobotModelLink self, doubleVector ddq)\n"
 		"\n"
 		"\n"
-		"Returns the angular acceleration of the link given the robot's current joint\n"
+		"Computes the angular acceleration of the link given the robot's current joint\n"
 		"configuration and velocities, and the joint accelerations ddq.  \n"
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (list of 3 floats): the angular acceleration of the link, in\n"
+		"    list of 3 floats: the angular acceleration of the link, in\n"
 		"    world coordinates.  \n"
 		"\n"
 		""},
@@ -62616,26 +67308,26 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModelLink_getPositionHessian(RobotModelLink self, double const [3] plocal)\n"
 		"\n"
 		"\n"
-		"Returns the Hessians of each component of the position p w.r.t the robot's\n"
+		"Computes the Hessians of each component of the position p w.r.t the robot's\n"
 		"configuration q.  \n"
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (3-tuple): a triple (Hx,Hy,Hz) of of nxn matrices corresponding,\n"
-		"    respectively, to the (x,y,z) components of the Hessian.  \n"
+		"    ndarray: a 3xnxn array with each of the elements in the first axis\n"
+		"    corresponding respectively, to the (x,y,z) components of the Hessian.  \n"
 		"\n"
 		""},
 	 { "RobotModelLink_getOrientationHessian", _wrap_RobotModelLink_getOrientationHessian, METH_O, "\n"
 		"RobotModelLink_getOrientationHessian(RobotModelLink self)\n"
 		"\n"
 		"\n"
-		"Returns the Hessians of each orientation component of the link w.r.t the robot's\n"
-		"configuration q.  \n"
+		"Computes the Hessians of each orientation component of the link w.r.t the\n"
+		"robot's configuration q.  \n"
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (3-tuple): a triple (Hx,Hy,Hz) of of nxn matrices corresponding,\n"
-		"    respectively, to the (wx,wy,wz) components of the Hessian.  \n"
+		"    ndarray: a 3xnxn array with each of the elements in the first axis\n"
+		"    corresponding, respectively, to the (wx,wy,wz) components of the Hessian.  \n"
 		"\n"
 		""},
 	 { "RobotModelLink_drawLocalGL", _wrap_RobotModelLink_drawLocalGL, METH_VARARGS, "\n"
@@ -62658,8 +67350,8 @@ static PyMethodDef SwigMethods[] = {
 	 { "RobotModelLink_world_get", _wrap_RobotModelLink_world_get, METH_O, "RobotModelLink_world_get(RobotModelLink self) -> int"},
 	 { "RobotModelLink_robotIndex_set", _wrap_RobotModelLink_robotIndex_set, METH_VARARGS, "RobotModelLink_robotIndex_set(RobotModelLink self, int robotIndex)"},
 	 { "RobotModelLink_robotIndex_get", _wrap_RobotModelLink_robotIndex_get, METH_O, "RobotModelLink_robotIndex_get(RobotModelLink self) -> int"},
-	 { "RobotModelLink_robotPtr_set", _wrap_RobotModelLink_robotPtr_set, METH_VARARGS, "RobotModelLink_robotPtr_set(RobotModelLink self, Robot * robotPtr)"},
-	 { "RobotModelLink_robotPtr_get", _wrap_RobotModelLink_robotPtr_get, METH_O, "RobotModelLink_robotPtr_get(RobotModelLink self) -> Robot *"},
+	 { "RobotModelLink_robotPtr_set", _wrap_RobotModelLink_robotPtr_set, METH_VARARGS, "RobotModelLink_robotPtr_set(RobotModelLink self, Klampt::RobotModel * robotPtr)"},
+	 { "RobotModelLink_robotPtr_get", _wrap_RobotModelLink_robotPtr_get, METH_O, "RobotModelLink_robotPtr_get(RobotModelLink self) -> Klampt::RobotModel *"},
 	 { "RobotModelLink_index_set", _wrap_RobotModelLink_index_set, METH_VARARGS, "RobotModelLink_index_set(RobotModelLink self, int index)"},
 	 { "RobotModelLink_index_get", _wrap_RobotModelLink_index_get, METH_O, "RobotModelLink_index_get(RobotModelLink self) -> int"},
 	 { "delete_RobotModelLink", _wrap_delete_RobotModelLink, METH_O, "delete_RobotModelLink(RobotModelLink self)"},
@@ -62675,6 +67367,13 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		""},
+	 { "RobotModelDriver_setName", _wrap_RobotModelDriver_setName, METH_VARARGS, "\n"
+		"RobotModelDriver_setName(RobotModelDriver self, char const * name)\n"
+		"\n"
+		"\n"
+		"Sets the name of the driver.  \n"
+		"\n"
+		""},
 	 { "RobotModelDriver_robot", _wrap_RobotModelDriver_robot, METH_O, "\n"
 		"RobotModelDriver_robot(RobotModelDriver self) -> RobotModel\n"
 		"\n"
@@ -62686,8 +67385,11 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModelDriver_getType(RobotModelDriver self) -> char const *\n"
 		"\n"
 		"\n"
-		"Currently can be \"normal\", \"affine\", \"rotation\", \"translation\", or\n"
-		"\"custom\".  \n"
+		"Gets the type of the driver.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    One of  \"normal\", \"affine\", \"rotation\", \"translation\", or \"custom\"  \n"
 		"\n"
 		""},
 	 { "RobotModelDriver_getAffectedLink", _wrap_RobotModelDriver_getAffectedLink, METH_O, "\n"
@@ -62711,7 +67413,7 @@ static PyMethodDef SwigMethods[] = {
 		"For \"affine\" links, returns the scale and offset of the driver value mapped to\n"
 		"the world.  \n"
 		"\n"
-		"Returns: tuple: a pair (scale,offset), each of length len(getAffectedLinks()).  \n"
+		"Returns a pair (scale,offset), each of length len(getAffectedLinks()).  \n"
 		"\n"
 		""},
 	 { "RobotModelDriver_setValue", _wrap_RobotModelDriver_setValue, METH_VARARGS, "\n"
@@ -62720,12 +67422,17 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Sets the robot's config to correspond to the given driver value.  \n"
 		"\n"
+		".. note::  \n"
+		"\n"
+		"    Does not update the links' forward kinematics.  Use\n"
+		"    robot.setConfig(robot.getConfig()) to update the forward kinematics.  \n"
+		"\n"
 		""},
 	 { "RobotModelDriver_getValue", _wrap_RobotModelDriver_getValue, METH_O, "\n"
 		"RobotModelDriver_getValue(RobotModelDriver self) -> double\n"
 		"\n"
 		"\n"
-		"Gets the current driver value from the robot's config.  \n"
+		"Returns the current driver value from the robot's config.  \n"
 		"\n"
 		""},
 	 { "RobotModelDriver_setVelocity", _wrap_RobotModelDriver_setVelocity, METH_VARARGS, "\n"
@@ -62739,15 +67446,43 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModelDriver_getVelocity(RobotModelDriver self) -> double\n"
 		"\n"
 		"\n"
-		"Gets the current driver velocity value from the robot's velocity.  \n"
+		"Returns the current driver velocity value from the robot's velocity.  \n"
+		"\n"
+		""},
+	 { "RobotModelDriver_getLimits", _wrap_RobotModelDriver_getLimits, METH_O, "\n"
+		"RobotModelDriver_getLimits(RobotModelDriver self)\n"
+		"\n"
+		"\n"
+		"Returns value limits [xmin,xmax].  \n"
+		"\n"
+		""},
+	 { "RobotModelDriver_getVelocityLimits", _wrap_RobotModelDriver_getVelocityLimits, METH_O, "\n"
+		"RobotModelDriver_getVelocityLimits(RobotModelDriver self)\n"
+		"\n"
+		"\n"
+		"Returns velocity limits [vmin,vmax].  \n"
+		"\n"
+		""},
+	 { "RobotModelDriver_getAccelerationLimits", _wrap_RobotModelDriver_getAccelerationLimits, METH_O, "\n"
+		"RobotModelDriver_getAccelerationLimits(RobotModelDriver self)\n"
+		"\n"
+		"\n"
+		"Returns acceleration limits [amin,amax].  \n"
+		"\n"
+		""},
+	 { "RobotModelDriver_getTorqueLimits", _wrap_RobotModelDriver_getTorqueLimits, METH_O, "\n"
+		"RobotModelDriver_getTorqueLimits(RobotModelDriver self)\n"
+		"\n"
+		"\n"
+		"Returns generalized torque limits [tmin,tmax].  \n"
 		"\n"
 		""},
 	 { "RobotModelDriver_world_set", _wrap_RobotModelDriver_world_set, METH_VARARGS, "RobotModelDriver_world_set(RobotModelDriver self, int world)"},
 	 { "RobotModelDriver_world_get", _wrap_RobotModelDriver_world_get, METH_O, "RobotModelDriver_world_get(RobotModelDriver self) -> int"},
 	 { "RobotModelDriver_robotIndex_set", _wrap_RobotModelDriver_robotIndex_set, METH_VARARGS, "RobotModelDriver_robotIndex_set(RobotModelDriver self, int robotIndex)"},
 	 { "RobotModelDriver_robotIndex_get", _wrap_RobotModelDriver_robotIndex_get, METH_O, "RobotModelDriver_robotIndex_get(RobotModelDriver self) -> int"},
-	 { "RobotModelDriver_robotPtr_set", _wrap_RobotModelDriver_robotPtr_set, METH_VARARGS, "RobotModelDriver_robotPtr_set(RobotModelDriver self, Robot * robotPtr)"},
-	 { "RobotModelDriver_robotPtr_get", _wrap_RobotModelDriver_robotPtr_get, METH_O, "RobotModelDriver_robotPtr_get(RobotModelDriver self) -> Robot *"},
+	 { "RobotModelDriver_robotPtr_set", _wrap_RobotModelDriver_robotPtr_set, METH_VARARGS, "RobotModelDriver_robotPtr_set(RobotModelDriver self, Klampt::RobotModel * robotPtr)"},
+	 { "RobotModelDriver_robotPtr_get", _wrap_RobotModelDriver_robotPtr_get, METH_O, "RobotModelDriver_robotPtr_get(RobotModelDriver self) -> Klampt::RobotModel *"},
 	 { "RobotModelDriver_index_set", _wrap_RobotModelDriver_index_set, METH_VARARGS, "RobotModelDriver_index_set(RobotModelDriver self, int index)"},
 	 { "RobotModelDriver_index_get", _wrap_RobotModelDriver_index_get, METH_O, "RobotModelDriver_index_get(RobotModelDriver self) -> int"},
 	 { "delete_RobotModelDriver", _wrap_delete_RobotModelDriver, METH_O, "delete_RobotModelDriver(RobotModelDriver self)"},
@@ -62763,6 +67498,10 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Loads the robot from the file fn.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    True if successful, False if failed.  \n"
 		"\n"
 		""},
 	 { "RobotModel_saveFile", _wrap_RobotModel_saveFile, METH_VARARGS, "\n"
@@ -62783,7 +67522,9 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns the ID of the robot in its world.  \n"
 		"\n"
-		"Note: The world ID is not the same as the robot index.  \n"
+		".. note::  \n"
+		"\n"
+		"    The world ID is not the same as the robot index.  \n"
 		"\n"
 		""},
 	 { "RobotModel_getName", _wrap_RobotModel_getName, METH_O, "\n"
@@ -62878,7 +67619,7 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModel_getJointLimits(RobotModel self)\n"
 		"\n"
 		"\n"
-		"Retrieves a pair (qmin,qmax) of min/max joint limit vectors.  \n"
+		"Returns a pair (qmin,qmax) of min/max joint limit vectors.  \n"
 		"\n"
 		""},
 	 { "RobotModel_setJointLimits", _wrap_RobotModel_setJointLimits, METH_VARARGS, "\n"
@@ -62892,7 +67633,7 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModel_getVelocityLimits(RobotModel self)\n"
 		"\n"
 		"\n"
-		"Retrieve the velocity limit vector vmax, the constraint is :math:`|dq[i]| \\leq\n"
+		"Returns the velocity limit vector vmax, the constraint is :math:`|dq[i]| \\leq\n"
 		"vmax[i]`  \n"
 		"\n"
 		""},
@@ -62908,7 +67649,7 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModel_getAccelerationLimits(RobotModel self)\n"
 		"\n"
 		"\n"
-		"Retrieve the acceleration limit vector amax, the constraint is :math:`|ddq[i]|\n"
+		"Returns the acceleration limit vector amax, the constraint is :math:`|ddq[i]|\n"
 		"\\leq amax[i]`  \n"
 		"\n"
 		""},
@@ -62924,8 +67665,8 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModel_getTorqueLimits(RobotModel self)\n"
 		"\n"
 		"\n"
-		"Retrieve the torque limit vector tmax, the constraint is :math:`|torque[i]|\n"
-		"\\leq tmax[i]`  \n"
+		"Returns the torque limit vector tmax, the constraint is :math:`|torque[i]| \\leq\n"
+		"tmax[i]`  \n"
 		"\n"
 		""},
 	 { "RobotModel_setTorqueLimits", _wrap_RobotModel_setTorqueLimits, METH_VARARGS, "\n"
@@ -62943,8 +67684,11 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Sets a single DOF's position (by index or by name).  \n"
 		"\n"
-		"Note: if you are setting several joints at once, use setConfig because this\n"
-		"function computes forward kinematics each time it is called.  \n"
+		".. note::  \n"
+		"\n"
+		"    If you are setting several joints at once, use setConfig because this\n"
+		"    function computes forward kinematics for all descendant links each time\n"
+		"    it is called.  \n"
 		"\n"
 		""},
 	 { "RobotModel_getDOFPosition", _wrap_RobotModel_getDOFPosition, METH_VARARGS, "\n"
@@ -62973,16 +67717,16 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModel_getComJacobian(RobotModel self)\n"
 		"\n"
 		"\n"
-		"Returns the Jacobian matrix of the current center of mass.  \n"
+		"Computes the Jacobian matrix of the current center of mass.  \n"
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (list of 3 lists): a 3xn matrix J such that np.dot(J,dq) gives the\n"
-		"    COM velocity at the current configuration  \n"
+		"    ndarray: a 3xn matrix J such that np.dot(J,dq) gives the\n"
+		"    COM velocity at the currene configuration  \n"
 		"\n"
 		""},
-	 { "RobotModel_getComJacobian2", _wrap_RobotModel_getComJacobian2, METH_VARARGS, "\n"
-		"RobotModel_getComJacobian2(RobotModel self, intVector links)\n"
+	 { "RobotModel_getComJacobianCols", _wrap_RobotModel_getComJacobianCols, METH_VARARGS, "\n"
+		"RobotModel_getComJacobianCols(RobotModel self, intVector links)\n"
 		"\n"
 		"\n"
 		"Returns the Jacobian matrix of the current center of mass w.r.t. some links of\n"
@@ -62990,101 +67734,112 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (list of 3 lists): a 3xlen(links) matrix J such that np.dot(J,dq)\n"
-		"    gives the COM velocity at the current configuration  \n"
+		"    ndarray: a 3xlen(links) matrix J such that np.dot(J,dqlinks)\n"
+		"    gives the COM velocity at the current configuration, and dqlinks\n"
+		"    is the array of velocities of the links given by `links`  \n"
 		"\n"
 		""},
 	 { "RobotModel_getLinearMomentum", _wrap_RobotModel_getLinearMomentum, METH_O, "\n"
 		"RobotModel_getLinearMomentum(RobotModel self)\n"
 		"\n"
 		"\n"
-		"Returns the 3D linear momentum vector.  \n"
+		"Computes the 3D linear momentum vector.  \n"
 		"\n"
 		""},
 	 { "RobotModel_getAngularMomentum", _wrap_RobotModel_getAngularMomentum, METH_O, "\n"
 		"RobotModel_getAngularMomentum(RobotModel self)\n"
 		"\n"
 		"\n"
-		"Returns the 3D angular momentum vector.  \n"
+		"Computes the 3D angular momentum vector.  \n"
 		"\n"
 		""},
 	 { "RobotModel_getKineticEnergy", _wrap_RobotModel_getKineticEnergy, METH_O, "\n"
 		"RobotModel_getKineticEnergy(RobotModel self) -> double\n"
 		"\n"
 		"\n"
-		"Returns the kinetic energy at the current config / velocity.  \n"
+		"Computes the kinetic energy at the current config / velocity.  \n"
 		"\n"
 		""},
 	 { "RobotModel_getTotalInertia", _wrap_RobotModel_getTotalInertia, METH_O, "\n"
 		"RobotModel_getTotalInertia(RobotModel self)\n"
 		"\n"
 		"\n"
-		"Calculates the 3x3 total inertia matrix of the robot.  \n"
+		"Computes the 3x3 total inertia matrix of the robot.  \n"
 		"\n"
 		""},
 	 { "RobotModel_getMassMatrix", _wrap_RobotModel_getMassMatrix, METH_O, "\n"
 		"RobotModel_getMassMatrix(RobotModel self)\n"
 		"\n"
 		"\n"
-		"Returns the nxn mass matrix B(q). Takes O(n^2) time.  \n"
+		"Computes the nxn mass matrix B(q).  \n"
+		"\n"
+		"Takes O(n^2) time  \n"
 		"\n"
 		""},
 	 { "RobotModel_getMassMatrixInv", _wrap_RobotModel_getMassMatrixInv, METH_O, "\n"
 		"RobotModel_getMassMatrixInv(RobotModel self)\n"
 		"\n"
 		"\n"
-		"Returns the inverse of the nxn mass matrix B(q)^-1. Takes O(n^2) time, which is\n"
-		"much faster than inverting the result of getMassMatrix.  \n"
+		"Computes the inverse of the nxn mass matrix B(q)^-1.  \n"
+		"\n"
+		"Takes O(n^2) time, which is much faster than inverting the result of\n"
+		"getMassMatrix  \n"
 		"\n"
 		""},
 	 { "RobotModel_getMassMatrixDeriv", _wrap_RobotModel_getMassMatrixDeriv, METH_VARARGS, "\n"
 		"RobotModel_getMassMatrixDeriv(RobotModel self, int i)\n"
 		"\n"
 		"\n"
-		"Returns the derivative of the nxn mass matrix with respect to q_i. Takes O(n^3)\n"
-		"time.  \n"
+		"Computes the derivative of the nxn mass matrix with respect to q_i.  \n"
+		"\n"
+		"Takes O(n^3) time.  \n"
 		"\n"
 		""},
 	 { "RobotModel_getMassMatrixTimeDeriv", _wrap_RobotModel_getMassMatrixTimeDeriv, METH_O, "\n"
 		"RobotModel_getMassMatrixTimeDeriv(RobotModel self)\n"
 		"\n"
 		"\n"
-		"Returns the derivative of the nxn mass matrix with respect to t, given the\n"
-		"robot's current velocity. Takes O(n^4) time.  \n"
+		"Computes the derivative of the nxn mass matrix with respect to t, given the\n"
+		"robot's current velocity.  \n"
+		"\n"
+		"Takes O(n^4) time.  \n"
 		"\n"
 		""},
 	 { "RobotModel_getCoriolisForceMatrix", _wrap_RobotModel_getCoriolisForceMatrix, METH_O, "\n"
 		"RobotModel_getCoriolisForceMatrix(RobotModel self)\n"
 		"\n"
 		"\n"
-		"Returns the Coriolis force matrix C(q,dq) for current config and velocity. Takes\n"
-		"O(n^2) time.  \n"
+		"Computes the Coriolis force matrix C(q,dq) for current config and velocity.  \n"
+		"\n"
+		"Takes O(n^2) time.  \n"
 		"\n"
 		""},
 	 { "RobotModel_getCoriolisForces", _wrap_RobotModel_getCoriolisForces, METH_O, "\n"
 		"RobotModel_getCoriolisForces(RobotModel self)\n"
 		"\n"
 		"\n"
-		"Returns the Coriolis forces C(q,dq)*dq for current config and velocity. Takes\n"
-		"O(n) time, which is faster than computing matrix and doing product. (\"Forces\"\n"
-		"is somewhat of a misnomer; the result is a joint torque vector)  \n"
+		"Computes the Coriolis forces C(q,dq)*dq for current config and velocity.  \n"
+		"\n"
+		"Takes O(n) time, which is faster than computing matrix and doing the product.  \n"
+		"\n"
+		"(\"Forces\" is somewhat of a misnomer; the result is a joint torque vector)  \n"
 		"\n"
 		""},
 	 { "RobotModel_getGravityForces", _wrap_RobotModel_getGravityForces, METH_VARARGS, "\n"
 		"RobotModel_getGravityForces(RobotModel self, double const [3] g)\n"
 		"\n"
 		"\n"
-		"Returns the generalized gravity vector G(q) for the given workspace gravity\n"
+		"Computes the generalized gravity vector G(q) for the given workspace gravity\n"
 		"vector g (usually (0,0,-9.8)).  \n"
 		"\n"
-		"Note:  \n"
+		".. note::  \n"
 		"\n"
 		"    \"Forces\" is somewhat of a misnomer; the result is a vector of joint\n"
 		"    torques.  \n"
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (list of floats): the n-element generalized gravity vector at the\n"
+		"    list of floats: the n-element generalized gravity vector at the\n"
 		"    robot's current configuration.  \n"
 		"\n"
 		""},
@@ -63095,14 +67850,20 @@ static PyMethodDef SwigMethods[] = {
 		"Computes the inverse dynamics. Uses Recursive Newton Euler solver and takes O(n)\n"
 		"time.  \n"
 		"\n"
-		"Note:  \n"
+		"Specifically, solves for :math:`\\tau` in the (partial) dynamics equation:  \n"
 		"\n"
-		"    Does not include gravity term G(q).  getGravityForces(g) will need\n"
-		"    to be added to the result.  \n"
+		".. math::  \n"
+		"\n"
+		"    `B(q) \\ddot{q} + C(q,@dot {q}) = \\tau`  \n"
+		"\n"
+		".. note::  \n"
+		"\n"
+		"    Does not include gravity term G(q).  getGravityForces(g) will\n"
+		"    need to be added to the result.  \n"
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (list of floats): the n-element torque vector that would produce\n"
+		"    list of floats: the n-element torque vector that would produce\n"
 		"    the joint accelerations ddq in the absence of external forces.  \n"
 		"\n"
 		""},
@@ -63110,16 +67871,23 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModel_accelFromTorques(RobotModel self, doubleVector t)\n"
 		"\n"
 		"\n"
-		"Computes the foward dynamics (using Recursive Newton Euler solver)  \n"
+		"Computes the foward dynamics. Uses Recursive Newton Euler solver and takes O(n)\n"
+		"time.  \n"
 		"\n"
-		"Note:  \n"
+		"Specifically, solves for :math:`\\ddot{q}` in the (partial) dynamics equation:  \n"
 		"\n"
-		"    Does not include gravity term G(q).  getGravityForces(g) will need\n"
-		"    to be subtracted from the argument t.  \n"
+		".. math::  \n"
+		"\n"
+		"    `B(q) \\ddot{q} + C(q,@dot {q}) = \\tau`  \n"
+		"\n"
+		".. note::  \n"
+		"\n"
+		"    Does not include gravity term G(q).  getGravityForces(g) will\n"
+		"    need to be subtracted from the argument t.  \n"
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (list of floats): the n-element joint acceleration vector that would\n"
+		"    list of floats: the n-element joint acceleration vector that would\n"
 		"    result from joint torques t in the absence of external forces.  \n"
 		"\n"
 		""},
@@ -63132,8 +67900,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (list of n floats): The configuration that is u fraction of the way\n"
-		"    from a to b  \n"
+		"    The n-element configuration that is u fraction of the way from a to b.  \n"
 		"\n"
 		""},
 	 { "RobotModel_distance", _wrap_RobotModel_distance, METH_VARARGS, "\n"
@@ -63158,8 +67925,11 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Samples a random configuration and updates the robot's pose. Properly handles\n"
 		"non-normal joints and handles DOFs with infinite bounds using a centered\n"
-		"Laplacian distribution with the given scaling term. (Note that the python random\n"
-		"seeding does not affect the result.)  \n"
+		"Laplacian distribution with the given scaling term.  \n"
+		"\n"
+		".. note::  \n"
+		"\n"
+		"    Python random module seeding does not affect the result.  \n"
 		"\n"
 		""},
 	 { "RobotModel_configToDrivers", _wrap_RobotModel_configToDrivers, METH_VARARGS, "\n"
@@ -63253,17 +68023,29 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModel_sensor(RobotModel self, char const * name) -> SimRobotSensor\n"
 		"\n"
 		"\n"
-		"Returns a sensor by index or by name. If out of bounds or unavailable, a null\n"
-		"sensor is returned (i.e., SimRobotSensor.name() or SimRobotSensor.type()) will\n"
-		"return the empty string.)  \n"
+		"Returns a sensor by index or by name.  \n"
+		"\n"
+		"If out of bounds or unavailable, a null sensor is returned (i.e.,\n"
+		"SimRobotSensor.name() or SimRobotSensor.type()) will return the empty string.)  \n"
+		"\n"
+		""},
+	 { "RobotModel_addSensor", _wrap_RobotModel_addSensor, METH_VARARGS, "\n"
+		"RobotModel_addSensor(RobotModel self, char const * name, char const * type) -> SimRobotSensor\n"
+		"\n"
+		"\n"
+		"Adds a new sensor with a given name and type.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    The new sensor.  \n"
 		"\n"
 		""},
 	 { "RobotModel_world_set", _wrap_RobotModel_world_set, METH_VARARGS, "RobotModel_world_set(RobotModel self, int world)"},
 	 { "RobotModel_world_get", _wrap_RobotModel_world_get, METH_O, "RobotModel_world_get(RobotModel self) -> int"},
 	 { "RobotModel_index_set", _wrap_RobotModel_index_set, METH_VARARGS, "RobotModel_index_set(RobotModel self, int index)"},
 	 { "RobotModel_index_get", _wrap_RobotModel_index_get, METH_O, "RobotModel_index_get(RobotModel self) -> int"},
-	 { "RobotModel_robot_set", _wrap_RobotModel_robot_set, METH_VARARGS, "RobotModel_robot_set(RobotModel self, Robot * robot)"},
-	 { "RobotModel_robot_get", _wrap_RobotModel_robot_get, METH_O, "RobotModel_robot_get(RobotModel self) -> Robot *"},
+	 { "RobotModel_robot_set", _wrap_RobotModel_robot_set, METH_VARARGS, "RobotModel_robot_set(RobotModel self, Klampt::RobotModel * robot)"},
+	 { "RobotModel_robot_get", _wrap_RobotModel_robot_get, METH_O, "RobotModel_robot_get(RobotModel self) -> Klampt::RobotModel *"},
 	 { "RobotModel_dirty_dynamics_set", _wrap_RobotModel_dirty_dynamics_set, METH_VARARGS, "RobotModel_dirty_dynamics_set(RobotModel self, bool dirty_dynamics)"},
 	 { "RobotModel_dirty_dynamics_get", _wrap_RobotModel_dirty_dynamics_get, METH_O, "RobotModel_dirty_dynamics_get(RobotModel self) -> bool"},
 	 { "delete_RobotModel", _wrap_delete_RobotModel, METH_O, "delete_RobotModel(RobotModel self)"},
@@ -63295,7 +68077,9 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns the ID of the rigid object in its world.  \n"
 		"\n"
-		"Note: The world ID is not the same as the rigid object index.  \n"
+		".. note::  \n"
+		"\n"
+		"    The world ID is not the same as the rigid object index.  \n"
 		"\n"
 		""},
 	 { "RigidObjectModel_getName", _wrap_RigidObjectModel_getName, METH_O, "\n"
@@ -63328,7 +68112,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns a copy of the Mass of this rigid object.  \n"
 		"\n"
-		"Note:  \n"
+		".. note::  \n"
 		"\n"
 		"    To change the mass properties, you should call ``m=object.getMass()``,\n"
 		"    change the desired properties in m, and then ``object.setMass(m)``  \n"
@@ -63345,7 +68129,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns a copy of the ContactParameters of this rigid object.  \n"
 		"\n"
-		"Note:  \n"
+		".. note::  \n"
 		"\n"
 		"    To change the contact parameters, you should call\n"
 		"    ``p=object.getContactParameters()``, change the desired properties in\n"
@@ -63365,7 +68149,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (se3 object): a pair (R,t), with R a 9-list and t a 3-list of floats,\n"
+		"    se3 object: a pair (R,t), with R a 9-list and t a 3-list of floats,\n"
 		"    giving the transform to world coordinates.  \n"
 		"\n"
 		""},
@@ -63384,7 +68168,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (tuple): a pair of 3-lists (w,v) where w is the angular velocity\n"
+		"    A pair of 3-lists (w,v) where w is the angular velocity\n"
 		"    vector and v is the translational velocity vector (both in world\n"
 		"    coordinates)  \n"
 		"\n"
@@ -63412,8 +68196,8 @@ static PyMethodDef SwigMethods[] = {
 	 { "RigidObjectModel_world_get", _wrap_RigidObjectModel_world_get, METH_O, "RigidObjectModel_world_get(RigidObjectModel self) -> int"},
 	 { "RigidObjectModel_index_set", _wrap_RigidObjectModel_index_set, METH_VARARGS, "RigidObjectModel_index_set(RigidObjectModel self, int index)"},
 	 { "RigidObjectModel_index_get", _wrap_RigidObjectModel_index_get, METH_O, "RigidObjectModel_index_get(RigidObjectModel self) -> int"},
-	 { "RigidObjectModel_object_set", _wrap_RigidObjectModel_object_set, METH_VARARGS, "RigidObjectModel_object_set(RigidObjectModel self, RigidObject * object)"},
-	 { "RigidObjectModel_object_get", _wrap_RigidObjectModel_object_get, METH_O, "RigidObjectModel_object_get(RigidObjectModel self) -> RigidObject *"},
+	 { "RigidObjectModel_object_set", _wrap_RigidObjectModel_object_set, METH_VARARGS, "RigidObjectModel_object_set(RigidObjectModel self, Klampt::RigidObjectModel * object)"},
+	 { "RigidObjectModel_object_get", _wrap_RigidObjectModel_object_get, METH_O, "RigidObjectModel_object_get(RigidObjectModel self) -> Klampt::RigidObjectModel *"},
 	 { "delete_RigidObjectModel", _wrap_delete_RigidObjectModel, METH_O, "delete_RigidObjectModel(RigidObjectModel self)"},
 	 { "RigidObjectModel_swigregister", RigidObjectModel_swigregister, METH_O, NULL},
 	 { "RigidObjectModel_swiginit", RigidObjectModel_swiginit, METH_VARARGS, NULL},
@@ -63443,7 +68227,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns the ID of the terrain in its world.  \n"
 		"\n"
-		"Note: The world ID is not the same as the terrain index.  \n"
+		".. note:: The world ID is not the same as the terrain index.  \n"
 		"\n"
 		""},
 	 { "TerrainModel_getName", _wrap_TerrainModel_getName, METH_O, "\n"
@@ -63493,8 +68277,8 @@ static PyMethodDef SwigMethods[] = {
 	 { "TerrainModel_world_get", _wrap_TerrainModel_world_get, METH_O, "TerrainModel_world_get(TerrainModel self) -> int"},
 	 { "TerrainModel_index_set", _wrap_TerrainModel_index_set, METH_VARARGS, "TerrainModel_index_set(TerrainModel self, int index)"},
 	 { "TerrainModel_index_get", _wrap_TerrainModel_index_get, METH_O, "TerrainModel_index_get(TerrainModel self) -> int"},
-	 { "TerrainModel_terrain_set", _wrap_TerrainModel_terrain_set, METH_VARARGS, "TerrainModel_terrain_set(TerrainModel self, Terrain * terrain)"},
-	 { "TerrainModel_terrain_get", _wrap_TerrainModel_terrain_get, METH_O, "TerrainModel_terrain_get(TerrainModel self) -> Terrain *"},
+	 { "TerrainModel_terrain_set", _wrap_TerrainModel_terrain_set, METH_VARARGS, "TerrainModel_terrain_set(TerrainModel self, Klampt::TerrainModel * terrain)"},
+	 { "TerrainModel_terrain_get", _wrap_TerrainModel_terrain_get, METH_O, "TerrainModel_terrain_get(TerrainModel self) -> Klampt::TerrainModel *"},
 	 { "delete_TerrainModel", _wrap_delete_TerrainModel, METH_O, "delete_TerrainModel(TerrainModel self)"},
 	 { "TerrainModel_swigregister", TerrainModel_swigregister, METH_O, NULL},
 	 { "TerrainModel_swiginit", TerrainModel_swiginit, METH_VARARGS, NULL},
@@ -63534,6 +68318,10 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Reads from a world XML file.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    True if successful, False if failed.  \n"
 		"\n"
 		""},
 	 { "WorldModel_loadFile", _wrap_WorldModel_loadFile, METH_VARARGS, "\n"
@@ -63670,7 +68458,11 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Loads some element from a file, automatically detecting its type. Meshes are\n"
-		"interpreted as terrains. The ID is returned, or -1 if loading failed.  \n"
+		"interpreted as terrains.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    The element's ID, or -1 if loading failed.  \n"
 		"\n"
 		""},
 	 { "WorldModel_add", _wrap_WorldModel_add, METH_VARARGS, "\n"
@@ -63694,8 +68486,8 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"IMPORTANT:  \n"
 		"\n"
-		"    All other RobotModel, RigidObjectModel, and TerrainModel references will be\n"
-		"invalidated.  \n"
+		"    All other RobotModel, RigidObjectModel, or TerrainModel references\n"
+		"    will be invalidated.  \n"
 		"\n"
 		""},
 	 { "WorldModel_getName", _wrap_WorldModel_getName, METH_VARARGS, "\n"
@@ -63787,14 +68579,14 @@ static PyMethodDef SwigMethods[] = {
 		"IKObjective_numPosDims(IKObjective self) -> int\n"
 		"\n"
 		"\n"
-		"Returns the number of position dimensions constrained (0-3)  \n"
+		"Returns: The number of position dimensions constrained (0-3)  \n"
 		"\n"
 		""},
 	 { "IKObjective_numRotDims", _wrap_IKObjective_numRotDims, METH_O, "\n"
 		"IKObjective_numRotDims(IKObjective self) -> int\n"
 		"\n"
 		"\n"
-		"Returns the number of rotation dimensions constrained (0-3)  \n"
+		"Returns: The number of rotation dimensions constrained (0-3)  \n"
 		"\n"
 		""},
 	 { "IKObjective_setFixedPoint", _wrap_IKObjective_setFixedPoint, METH_VARARGS, "\n"
@@ -63970,13 +68762,21 @@ static PyMethodDef SwigMethods[] = {
 		"the IK goal's constraints.  \n"
 		"\n"
 		""},
+	 { "IKObjective_sampleTransform", _wrap_IKObjective_sampleTransform, METH_O, "\n"
+		"IKObjective_sampleTransform(IKObjective self)\n"
+		"\n"
+		"\n"
+		"Returns a transformation (R,t) from link relative to link2, sampled at random\n"
+		"from the space of transforms that satisfies the objective obj.  \n"
+		"\n"
+		""},
 	 { "IKObjective_loadString", _wrap_IKObjective_loadString, METH_VARARGS, "\n"
 		"IKObjective_loadString(IKObjective self, char const * str) -> bool\n"
 		"\n"
 		"\n"
 		"Loads the objective from a Klamp't-native formatted string. For a more readable\n"
-		"but verbose format, try the JSON IO routines :meth:`klampt.io.loader.toJson` /\n"
-		":meth:`klampt.io.loader.fromJson`  \n"
+		"but verbose format, try the JSON IO routines :meth:`klampt.io.loader.to_json` /\n"
+		":meth:`klampt.io.loader.from_json`  \n"
 		"\n"
 		""},
 	 { "IKObjective_saveString", _wrap_IKObjective_saveString, METH_O, "\n"
@@ -63984,8 +68784,8 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Saves the objective to a Klamp't-native formatted string. For a more readable\n"
-		"but verbose format, try the JSON IO routines :meth:`klampt.io.loader.toJson` /\n"
-		":meth:`klampt.io.loader.fromJson`  \n"
+		"but verbose format, try the JSON IO routines :meth:`klampt.io.loader.to_json` /\n"
+		":meth:`klampt.io.loader.from_json`  \n"
 		"\n"
 		""},
 	 { "IKObjective_goal_set", _wrap_IKObjective_goal_set, METH_VARARGS, "IKObjective_goal_set(IKObjective self, IKGoal goal)"},
@@ -64027,6 +68827,20 @@ static PyMethodDef SwigMethods[] = {
 		"Assigns an existing objective added by add.  \n"
 		"\n"
 		""},
+	 { "IKSolver_addSecondary", _wrap_IKSolver_addSecondary, METH_VARARGS, "\n"
+		"IKSolver_addSecondary(IKSolver self, IKObjective objective)\n"
+		"\n"
+		"\n"
+		"Adds a new objective to the secondary objectives list.  \n"
+		"\n"
+		""},
+	 { "IKSolver_setSecondary", _wrap_IKSolver_setSecondary, METH_VARARGS, "\n"
+		"IKSolver_setSecondary(IKSolver self, int i, IKObjective objective)\n"
+		"\n"
+		"\n"
+		"Assigns an existing objective added by addsecondary.  \n"
+		"\n"
+		""},
 	 { "IKSolver_clear", _wrap_IKSolver_clear, METH_O, "\n"
 		"IKSolver_clear(IKSolver self)\n"
 		"\n"
@@ -64045,7 +68859,7 @@ static PyMethodDef SwigMethods[] = {
 		"IKSolver_getMaxIters(IKSolver self) -> int\n"
 		"\n"
 		"\n"
-		"Gets the max # of iterations.  \n"
+		"Returns the max # of iterations.  \n"
 		"\n"
 		""},
 	 { "IKSolver_setTolerance", _wrap_IKSolver_setTolerance, METH_VARARGS, "\n"
@@ -64059,7 +68873,7 @@ static PyMethodDef SwigMethods[] = {
 		"IKSolver_getTolerance(IKSolver self) -> double\n"
 		"\n"
 		"\n"
-		"Gets the constraint solve tolerance.  \n"
+		"Returns the constraint solve tolerance.  \n"
 		"\n"
 		""},
 	 { "IKSolver_setActiveDofs", _wrap_IKSolver_setActiveDofs, METH_VARARGS, "\n"
@@ -64073,7 +68887,7 @@ static PyMethodDef SwigMethods[] = {
 		"IKSolver_getActiveDofs(IKSolver self)\n"
 		"\n"
 		"\n"
-		"Gets the active degrees of freedom.  \n"
+		"Returns the active degrees of freedom.  \n"
 		"\n"
 		""},
 	 { "IKSolver_setJointLimits", _wrap_IKSolver_setJointLimits, METH_VARARGS, "\n"
@@ -64087,7 +68901,7 @@ static PyMethodDef SwigMethods[] = {
 		"IKSolver_getJointLimits(IKSolver self)\n"
 		"\n"
 		"\n"
-		"Gets the limits on the robot's configuration (by default this is the robot's\n"
+		"Returns the limits on the robot's configuration (by default this is the robot's\n"
 		"joint limits.  \n"
 		"\n"
 		""},
@@ -64103,21 +68917,21 @@ static PyMethodDef SwigMethods[] = {
 		"IKSolver_getBiasConfig(IKSolver self)\n"
 		"\n"
 		"\n"
-		"Gets the solvers' bias configuration.  \n"
+		"Returns the solvers' bias configuration.  \n"
 		"\n"
 		""},
 	 { "IKSolver_isSolved", _wrap_IKSolver_isSolved, METH_O, "\n"
 		"IKSolver_isSolved(IKSolver self) -> bool\n"
 		"\n"
 		"\n"
-		"Returns true if the current configuration residual is less than tol.  \n"
+		"Returns True if the current configuration residual is less than tol.  \n"
 		"\n"
 		""},
 	 { "IKSolver_getResidual", _wrap_IKSolver_getResidual, METH_O, "\n"
 		"IKSolver_getResidual(IKSolver self)\n"
 		"\n"
 		"\n"
-		"Returns a vector describing the error of the objective at the current\n"
+		"Returns the vector describing the error of the objective at the current\n"
 		"configuration.  \n"
 		"\n"
 		""},
@@ -64125,25 +68939,77 @@ static PyMethodDef SwigMethods[] = {
 		"IKSolver_getJacobian(IKSolver self)\n"
 		"\n"
 		"\n"
-		"Returns a matrix describing the instantaneous derivative of the objective with\n"
-		"respect to the active Dofs.  \n"
+		"Computes the matrix describing the instantaneous derivative of the objective\n"
+		"with respect to the active Dofs.  \n"
 		"\n"
 		""},
-	 { "IKSolver_solve", _wrap_IKSolver_solve, METH_VARARGS, "\n"
+	 { "IKSolver_getSecondaryResidual", _wrap_IKSolver_getSecondaryResidual, METH_O, "\n"
+		"IKSolver_getSecondaryResidual(IKSolver self)\n"
+		"\n"
+		"\n"
+		"Returns the vector describing the error of the secondary objective at the\n"
+		"current configuration.  \n"
+		"\n"
+		""},
+	 { "IKSolver_solve", _wrap_IKSolver_solve, METH_O, "\n"
 		"IKSolver_solve(IKSolver self) -> bool\n"
-		"IKSolver_solve(IKSolver self, int iters, double tol) -> PyObject *\n"
 		"\n"
 		"\n"
-		"Old-style: will be deprecated. Specify # of iterations and tolerance. Tries to\n"
-		"find a configuration that satifies all simultaneous objectives up to the desired\n"
-		"tolerance. Returns (res,iterations) where res is true if x converged.  \n"
+		"Tries to find a configuration that satifies all simultaneous objectives up to\n"
+		"the desired tolerance.  \n"
+		"\n"
+		"All of the primary and the secondary objectives are solved simultaneously.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    True if x converged.  \n"
+		"\n"
+		""},
+	 { "IKSolver_minimize", _wrap_IKSolver_minimize, METH_VARARGS, "\n"
+		"IKSolver_minimize(IKSolver self) -> bool\n"
+		"IKSolver_minimize(IKSolver self, PyObject * secondary_objective, PyObject * secondary_objective_grad) -> bool\n"
+		"\n"
+		"\n"
+		"Tries to find a configuration that satifies all simultaneous objectives up to\n"
+		"the desired tolerance or minimizes the residual.  \n"
+		"\n"
+		"The relation to `:func:solve` is that `solve` uses a root-finding method that\n"
+		"tries indirectly to minimize the residual, but it may stall out when the\n"
+		"objectives are infeasible.  \n"
+		"\n"
+		"If secondary objectives are specified, this tries to minimize them once the\n"
+		"primary objectives are satisfied, i.e., it will minimize on the solution\n"
+		"manifold of the primary constraints.  \n"
+		"\n"
+		"There are two flavors of secondary objectives. If no arguments are given, then\n"
+		"any constraints added via `addSecondary` will have their residuals minimized.  \n"
+		"\n"
+		"If the user provides a pair of functions `(f,grad)`, then a custom objective is\n"
+		"specified. Here, `f(q)` is the secondary objective to minimize and `grad(q)` its\n"
+		"gradient. This will override the secondary objectives added via `addSecondary`.\n"
+		"Specifically, q is a function of all robot DOFs, and `grad(q)` should return a\n"
+		"list or tuple of length `len(q)``.  \n"
+		"\n"
+		".. note::  \n"
+		"\n"
+		"    The minimization will occur only over the current active DOFs, which will\n"
+		"    include default active DOFs for secondary objectives.  \n"
+		"\n"
+		"Arguments: secondary_objective (callable): a function `f(q)->float` that should\n"
+		"be minimized. secondary_objective_grad (callable): a function\n"
+		"`grad(q)->`sequence of length `len(q)` giving the gradient of `f` at `q`.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    True if x converged on the primary objectives.  \n"
 		"\n"
 		""},
 	 { "IKSolver_lastSolveIters", _wrap_IKSolver_lastSolveIters, METH_O, "\n"
 		"IKSolver_lastSolveIters(IKSolver self) -> int\n"
 		"\n"
 		"\n"
-		"Returns the number of Newton-Raphson iterations used in the last solve() call.  \n"
+		"Returns the number of Newton-Raphson iterations used in the last solve() call or\n"
+		"the number of Quasi-Newton iterations used in the last minimize() call.  \n"
 		"\n"
 		""},
 	 { "IKSolver_sampleInitial", _wrap_IKSolver_sampleInitial, METH_O, "\n"
@@ -64158,6 +69024,8 @@ static PyMethodDef SwigMethods[] = {
 	 { "IKSolver_robot_get", _wrap_IKSolver_robot_get, METH_O, "IKSolver_robot_get(IKSolver self) -> RobotModel"},
 	 { "IKSolver_objectives_set", _wrap_IKSolver_objectives_set, METH_VARARGS, "IKSolver_objectives_set(IKSolver self, std::vector< IKObjective,std::allocator< IKObjective > > * objectives)"},
 	 { "IKSolver_objectives_get", _wrap_IKSolver_objectives_get, METH_O, "IKSolver_objectives_get(IKSolver self) -> std::vector< IKObjective,std::allocator< IKObjective > > *"},
+	 { "IKSolver_secondary_objectives_set", _wrap_IKSolver_secondary_objectives_set, METH_VARARGS, "IKSolver_secondary_objectives_set(IKSolver self, std::vector< IKObjective,std::allocator< IKObjective > > * secondary_objectives)"},
+	 { "IKSolver_secondary_objectives_get", _wrap_IKSolver_secondary_objectives_get, METH_O, "IKSolver_secondary_objectives_get(IKSolver self) -> std::vector< IKObjective,std::allocator< IKObjective > > *"},
 	 { "IKSolver_tol_set", _wrap_IKSolver_tol_set, METH_VARARGS, "IKSolver_tol_set(IKSolver self, double tol)"},
 	 { "IKSolver_tol_get", _wrap_IKSolver_tol_get, METH_O, "IKSolver_tol_get(IKSolver self) -> double"},
 	 { "IKSolver_maxIters_set", _wrap_IKSolver_maxIters_set, METH_VARARGS, "IKSolver_maxIters_set(IKSolver self, int maxIters)"},
@@ -64201,6 +69069,14 @@ static PyMethodDef SwigMethods[] = {
 	 { "GeneralizedIKObjective_setTransform", _wrap_GeneralizedIKObjective_setTransform, METH_VARARGS, "\n"
 		"GeneralizedIKObjective_setTransform(GeneralizedIKObjective self, double const [9] R, double const [3] t)\n"
 		"\n"
+		"\n"
+		""},
+	 { "GeneralizedIKObjective_sampleTransform", _wrap_GeneralizedIKObjective_sampleTransform, METH_O, "\n"
+		"GeneralizedIKObjective_sampleTransform(GeneralizedIKObjective self)\n"
+		"\n"
+		"\n"
+		"Returns a transformation (R,t) from link relative to link2, sampled at random\n"
+		"from the space of transforms that satisfies the objective obj.  \n"
 		"\n"
 		""},
 	 { "GeneralizedIKObjective_link1_set", _wrap_GeneralizedIKObjective_link1_set, METH_VARARGS, "GeneralizedIKObjective_link1_set(GeneralizedIKObjective self, RobotModelLink link1)"},
@@ -64292,18 +69168,8 @@ static PyMethodDef SwigMethods[] = {
 	 { "delete_GeneralizedIKSolver", _wrap_delete_GeneralizedIKSolver, METH_O, "delete_GeneralizedIKSolver(GeneralizedIKSolver self)"},
 	 { "GeneralizedIKSolver_swigregister", GeneralizedIKSolver_swigregister, METH_O, NULL},
 	 { "GeneralizedIKSolver_swiginit", GeneralizedIKSolver_swiginit, METH_VARARGS, NULL},
-	 { "SampleTransform", _wrap_SampleTransform, METH_VARARGS, "\n"
-		"SampleTransform(IKObjective obj)\n"
-		"SampleTransform(GeneralizedIKObjective obj)\n"
-		"\n"
-		"\n"
-		"Returns a transformation (R,t) from link relative to link2, sampled at random\n"
-		"from the space of transforms that satisfies the objective obj.  \n"
-		"\n"
-		""},
 	 { "new_SimRobotSensor", _wrap_new_SimRobotSensor, METH_VARARGS, "\n"
-		"SimRobotSensor(RobotModel robot, SensorBase * sensor)\n"
-		"new_SimRobotSensor(SimRobotController robot, char const * name, char const * type) -> SimRobotSensor\n"
+		"new_SimRobotSensor(RobotModel robot, Klampt::SensorBase * sensor) -> SimRobotSensor\n"
 		"\n"
 		"\n"
 		""},
@@ -64339,17 +69205,8 @@ static PyMethodDef SwigMethods[] = {
 		"SimRobotSensor_getMeasurements(SimRobotSensor self)\n"
 		"\n"
 		"\n"
-		"Returns a list of measurements from the previous simulation (or\n"
+		"Returns an array of measurements from the previous simulation (or\n"
 		"kinematicSimulate) timestep.  \n"
-		"\n"
-		""},
-	 { "SimRobotSensor_getMeasurementsBytes", _wrap_SimRobotSensor_getMeasurementsBytes, METH_VARARGS, "\n"
-		"SimRobotSensor_getMeasurementsBytes(SimRobotSensor self, char * buf)\n"
-		"\n"
-		"\n"
-		"Copies measurements into a raw byte array. For camera sensors, this gives the\n"
-		"image as 24-bit RGB pixels followed by the depths as floats. For other sensors,\n"
-		"size must be len(getMeasurements()*8) and they are stored as floats.  \n"
 		"\n"
 		""},
 	 { "SimRobotSensor_settings", _wrap_SimRobotSensor_settings, METH_O, "\n"
@@ -64374,9 +69231,71 @@ static PyMethodDef SwigMethods[] = {
 		"int/float/etc to a str)  \n"
 		"\n"
 		""},
+	 { "SimRobotSensor_getEnabled", _wrap_SimRobotSensor_getEnabled, METH_O, "\n"
+		"SimRobotSensor_getEnabled(SimRobotSensor self) -> bool\n"
+		"\n"
+		"\n"
+		"Return whether the sensor is enabled during simulation (helper for getSetting)  \n"
+		"\n"
+		""},
+	 { "SimRobotSensor_setEnabled", _wrap_SimRobotSensor_setEnabled, METH_VARARGS, "\n"
+		"SimRobotSensor_setEnabled(SimRobotSensor self, bool enabled)\n"
+		"\n"
+		"\n"
+		"Sets whether the sensor is enabled (helper for setSetting)  \n"
+		"\n"
+		""},
+	 { "SimRobotSensor_getLink", _wrap_SimRobotSensor_getLink, METH_O, "\n"
+		"SimRobotSensor_getLink(SimRobotSensor self) -> RobotModelLink\n"
+		"\n"
+		"\n"
+		"Returns the link on which the sensor is mounted (helper for getSetting)  \n"
+		"\n"
+		""},
+	 { "SimRobotSensor_setLink", _wrap_SimRobotSensor_setLink, METH_VARARGS, "\n"
+		"SimRobotSensor_setLink(SimRobotSensor self, RobotModelLink link)\n"
+		"SimRobotSensor_setLink(SimRobotSensor self, int link)\n"
+		"\n"
+		"\n"
+		"Sets the link on which the sensor is mounted (helper for setSetting)  \n"
+		"\n"
+		""},
+	 { "SimRobotSensor_getTransform", _wrap_SimRobotSensor_getTransform, METH_O, "\n"
+		"SimRobotSensor_getTransform(SimRobotSensor self)\n"
+		"\n"
+		"\n"
+		"Returns the local transform of the sensor on the robot's link. (helper for\n"
+		"getSetting)  \n"
+		"\n"
+		"If the sensor doesn't have a transform (such as a joint position or torque\n"
+		"sensor) an exception will be raised.  \n"
+		"\n"
+		""},
+	 { "SimRobotSensor_getTransformWorld", _wrap_SimRobotSensor_getTransformWorld, METH_O, "\n"
+		"SimRobotSensor_getTransformWorld(SimRobotSensor self)\n"
+		"\n"
+		"\n"
+		"Returns the world transform of the sensor given the robot's current\n"
+		"configuration. (helper for getSetting)  \n"
+		"\n"
+		"If the sensor doesn't have a transform (such as a joint position or torque\n"
+		"sensor) an exception will be raised.  \n"
+		"\n"
+		""},
+	 { "SimRobotSensor_setTransform", _wrap_SimRobotSensor_setTransform, METH_VARARGS, "\n"
+		"SimRobotSensor_setTransform(SimRobotSensor self, double const [9] R, double const [3] t)\n"
+		"\n"
+		"\n"
+		"Sets the local transform of the sensor on the robot's link. (helper for\n"
+		"setSetting)  \n"
+		"\n"
+		"If the sensor doesn't have a transform (such as a joint position or torque\n"
+		"sensor) an exception will be raised.  \n"
+		"\n"
+		""},
 	 { "SimRobotSensor_drawGL", _wrap_SimRobotSensor_drawGL, METH_VARARGS, "\n"
 		"SimRobotSensor_drawGL(SimRobotSensor self)\n"
-		"SimRobotSensor_drawGL(SimRobotSensor self, doubleVector measurements)\n"
+		"SimRobotSensor_drawGL(SimRobotSensor self, double * np_array)\n"
 		"\n"
 		"\n"
 		"Draws a sensor indicator using OpenGL. If measurements are given, the indicator\n"
@@ -64399,8 +69318,8 @@ static PyMethodDef SwigMethods[] = {
 		""},
 	 { "SimRobotSensor_robotModel_set", _wrap_SimRobotSensor_robotModel_set, METH_VARARGS, "SimRobotSensor_robotModel_set(SimRobotSensor self, RobotModel robotModel)"},
 	 { "SimRobotSensor_robotModel_get", _wrap_SimRobotSensor_robotModel_get, METH_O, "SimRobotSensor_robotModel_get(SimRobotSensor self) -> RobotModel"},
-	 { "SimRobotSensor_sensor_set", _wrap_SimRobotSensor_sensor_set, METH_VARARGS, "SimRobotSensor_sensor_set(SimRobotSensor self, SensorBase * sensor)"},
-	 { "SimRobotSensor_sensor_get", _wrap_SimRobotSensor_sensor_get, METH_O, "SimRobotSensor_sensor_get(SimRobotSensor self) -> SensorBase *"},
+	 { "SimRobotSensor_sensor_set", _wrap_SimRobotSensor_sensor_set, METH_VARARGS, "SimRobotSensor_sensor_set(SimRobotSensor self, Klampt::SensorBase * sensor)"},
+	 { "SimRobotSensor_sensor_get", _wrap_SimRobotSensor_sensor_get, METH_O, "SimRobotSensor_sensor_get(SimRobotSensor self) -> Klampt::SensorBase *"},
 	 { "delete_SimRobotSensor", _wrap_delete_SimRobotSensor, METH_O, "delete_SimRobotSensor(SimRobotSensor self)"},
 	 { "SimRobotSensor_swigregister", SimRobotSensor_swigregister, METH_O, NULL},
 	 { "SimRobotSensor_swiginit", SimRobotSensor_swiginit, METH_VARARGS, NULL},
@@ -64432,35 +69351,35 @@ static PyMethodDef SwigMethods[] = {
 		"SimRobotController_getRate(SimRobotController self) -> double\n"
 		"\n"
 		"\n"
-		"Gets the current feedback control rate, in s.  \n"
+		"Returns The current feedback control rate, in s.  \n"
 		"\n"
 		""},
 	 { "SimRobotController_getCommandedConfig", _wrap_SimRobotController_getCommandedConfig, METH_O, "\n"
 		"SimRobotController_getCommandedConfig(SimRobotController self)\n"
 		"\n"
 		"\n"
-		"Returns the current commanded configuration (size model().numLinks())  \n"
+		"Returns The current commanded configuration (size model().numLinks())  \n"
 		"\n"
 		""},
 	 { "SimRobotController_getCommandedVelocity", _wrap_SimRobotController_getCommandedVelocity, METH_O, "\n"
 		"SimRobotController_getCommandedVelocity(SimRobotController self)\n"
 		"\n"
 		"\n"
-		"Returns the current commanded velocity (size model().numLinks())  \n"
+		"Returns The current commanded velocity (size model().numLinks())  \n"
 		"\n"
 		""},
 	 { "SimRobotController_getCommandedTorque", _wrap_SimRobotController_getCommandedTorque, METH_O, "\n"
 		"SimRobotController_getCommandedTorque(SimRobotController self)\n"
 		"\n"
 		"\n"
-		"Returns the current commanded (feedforward) torque (size model().numDrivers())  \n"
+		"Returns The current commanded (feedforward) torque (size model().numDrivers())  \n"
 		"\n"
 		""},
 	 { "SimRobotController_getSensedConfig", _wrap_SimRobotController_getSensedConfig, METH_O, "\n"
 		"SimRobotController_getSensedConfig(SimRobotController self)\n"
 		"\n"
 		"\n"
-		"Returns the current \"sensed\" configuration from the simulator (size\n"
+		"Returns The current \"sensed\" configuration from the simulator (size\n"
 		"model().numLinks())  \n"
 		"\n"
 		""},
@@ -64468,7 +69387,7 @@ static PyMethodDef SwigMethods[] = {
 		"SimRobotController_getSensedVelocity(SimRobotController self)\n"
 		"\n"
 		"\n"
-		"Returns the current \"sensed\" velocity from the simulator (size\n"
+		"Returns The current \"sensed\" velocity from the simulator (size\n"
 		"model().numLinks())  \n"
 		"\n"
 		""},
@@ -64476,7 +69395,7 @@ static PyMethodDef SwigMethods[] = {
 		"SimRobotController_getSensedTorque(SimRobotController self)\n"
 		"\n"
 		"\n"
-		"Returns the current \"sensed\" (feedback) torque from the simulator. (size\n"
+		"Returns The current \"sensed\" (feedback) torque from the simulator. (size\n"
 		"model().numDrivers())  \n"
 		"\n"
 		"Note: a default robot doesn't have a torque sensor, so this will be 0  \n"
@@ -64492,18 +69411,29 @@ static PyMethodDef SwigMethods[] = {
 		"return the empty string.)  \n"
 		"\n"
 		""},
+	 { "SimRobotController_addSensor", _wrap_SimRobotController_addSensor, METH_VARARGS, "\n"
+		"SimRobotController_addSensor(SimRobotController self, char const * name, char const * type) -> SimRobotSensor\n"
+		"\n"
+		"\n"
+		"Adds a new sensor with a given name and type.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    The new sensor.  \n"
+		"\n"
+		""},
 	 { "SimRobotController_commands", _wrap_SimRobotController_commands, METH_O, "\n"
 		"SimRobotController_commands(SimRobotController self) -> stringVector\n"
 		"\n"
 		"\n"
-		"gets a custom command list  \n"
+		"Returns a custom command list.  \n"
 		"\n"
 		""},
 	 { "SimRobotController_sendCommand", _wrap_SimRobotController_sendCommand, METH_VARARGS, "\n"
 		"SimRobotController_sendCommand(SimRobotController self, std::string const & name, std::string const & args) -> bool\n"
 		"\n"
 		"\n"
-		"sends a custom string command to the controller  \n"
+		"Sends a custom string command to the controller.  \n"
 		"\n"
 		""},
 	 { "SimRobotController_settings", _wrap_SimRobotController_settings, METH_O, "\n"
@@ -64517,14 +69447,14 @@ static PyMethodDef SwigMethods[] = {
 		"SimRobotController_getSetting(SimRobotController self, std::string const & name) -> std::string\n"
 		"\n"
 		"\n"
-		"gets a setting of the controller  \n"
+		"Returns a setting of the controller.  \n"
 		"\n"
 		""},
 	 { "SimRobotController_setSetting", _wrap_SimRobotController_setSetting, METH_VARARGS, "\n"
 		"SimRobotController_setSetting(SimRobotController self, std::string const & name, std::string const & val) -> bool\n"
 		"\n"
 		"\n"
-		"sets a setting of the controller  \n"
+		"Sets a setting of the controller.  \n"
 		"\n"
 		""},
 	 { "SimRobotController_setMilestone", _wrap_SimRobotController_setMilestone, METH_VARARGS, "\n"
@@ -64634,13 +69564,15 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns the control type for the active controller.  \n"
 		"\n"
-		"Possible return values are:  \n"
+		"Returns:  \n"
 		"\n"
-		"*   unknown  \n"
-		"*   off  \n"
-		"*   torque  \n"
-		"*   PID  \n"
-		"*   locked_velocity  \n"
+		"    One of\n"
+		"\n"
+		"    - unknown\n"
+		"    - off\n"
+		"    - torque\n"
+		"    - PID\n"
+		"    - locked_velocity  \n"
 		"\n"
 		""},
 	 { "SimRobotController_setPIDGains", _wrap_SimRobotController_setPIDGains, METH_VARARGS, "\n"
@@ -64654,15 +69586,15 @@ static PyMethodDef SwigMethods[] = {
 		"SimRobotController_getPIDGains(SimRobotController self)\n"
 		"\n"
 		"\n"
-		"Gets the PID gains for the PID controller.  \n"
+		"Returns the PID gains for the PID controller.  \n"
 		"\n"
 		""},
 	 { "SimRobotController_index_set", _wrap_SimRobotController_index_set, METH_VARARGS, "SimRobotController_index_set(SimRobotController self, int index)"},
 	 { "SimRobotController_index_get", _wrap_SimRobotController_index_get, METH_O, "SimRobotController_index_get(SimRobotController self) -> int"},
 	 { "SimRobotController_sim_set", _wrap_SimRobotController_sim_set, METH_VARARGS, "SimRobotController_sim_set(SimRobotController self, Simulator sim)"},
 	 { "SimRobotController_sim_get", _wrap_SimRobotController_sim_get, METH_O, "SimRobotController_sim_get(SimRobotController self) -> Simulator"},
-	 { "SimRobotController_controller_set", _wrap_SimRobotController_controller_set, METH_VARARGS, "SimRobotController_controller_set(SimRobotController self, ControlledRobotSimulator * controller)"},
-	 { "SimRobotController_controller_get", _wrap_SimRobotController_controller_get, METH_O, "SimRobotController_controller_get(SimRobotController self) -> ControlledRobotSimulator *"},
+	 { "SimRobotController_controller_set", _wrap_SimRobotController_controller_set, METH_VARARGS, "SimRobotController_controller_set(SimRobotController self, Klampt::SimRobotController * controller)"},
+	 { "SimRobotController_controller_get", _wrap_SimRobotController_controller_get, METH_O, "SimRobotController_controller_get(SimRobotController self) -> Klampt::SimRobotController *"},
 	 { "SimRobotController_swigregister", SimRobotController_swigregister, METH_O, NULL},
 	 { "SimRobotController_swiginit", SimRobotController_swiginit, METH_VARARGS, NULL},
 	 { "SimBody_getID", _wrap_SimBody_getID, METH_O, "\n"
@@ -64813,8 +69745,8 @@ static PyMethodDef SwigMethods[] = {
 	 { "SimBody_sim_get", _wrap_SimBody_sim_get, METH_O, "SimBody_sim_get(SimBody self) -> Simulator"},
 	 { "SimBody_objectID_set", _wrap_SimBody_objectID_set, METH_VARARGS, "SimBody_objectID_set(SimBody self, int objectID)"},
 	 { "SimBody_objectID_get", _wrap_SimBody_objectID_get, METH_O, "SimBody_objectID_get(SimBody self) -> int"},
-	 { "SimBody_geometry_set", _wrap_SimBody_geometry_set, METH_VARARGS, "SimBody_geometry_set(SimBody self, ODEGeometry * geometry)"},
-	 { "SimBody_geometry_get", _wrap_SimBody_geometry_get, METH_O, "SimBody_geometry_get(SimBody self) -> ODEGeometry *"},
+	 { "SimBody_geometry_set", _wrap_SimBody_geometry_set, METH_VARARGS, "SimBody_geometry_set(SimBody self, Klampt::ODEGeometry * geometry)"},
+	 { "SimBody_geometry_get", _wrap_SimBody_geometry_get, METH_O, "SimBody_geometry_get(SimBody self) -> Klampt::ODEGeometry *"},
 	 { "SimBody_body_set", _wrap_SimBody_body_set, METH_VARARGS, "SimBody_body_set(SimBody self, dBodyID body)"},
 	 { "SimBody_body_get", _wrap_SimBody_body_get, METH_O, "SimBody_body_get(SimBody self) -> dBodyID"},
 	 { "new_SimBody", _wrap_new_SimBody, METH_NOARGS, "\n"
@@ -64827,13 +69759,19 @@ static PyMethodDef SwigMethods[] = {
 		"Can use this class to directly apply forces to or control positions / velocities\n"
 		"of objects in the simulation.  \n"
 		"\n"
-		"Note: All changes are applied in the current simulation substep, not the\n"
-		"duration provided to Simulation.simulate(). If you need fine-grained control,\n"
-		"make sure to call Simulation.simulate() with time steps equal to the value\n"
-		"provided to Simulation.setSimStep() (this is 0.001s by default).  \n"
+		".. note::  \n"
 		"\n"
-		"Note: The transform of the object is centered at the *object's center of mass*\n"
-		"rather than the reference frame given in the RobotModelLink or RigidObjectModel.  \n"
+		"    All changes are applied in the current simulation substep, not the duration\n"
+		"    provided to Simulation.simulate().  If you need fine-grained control,\n"
+		"    make sure to call Simulation.simulate() with time steps equal to the value\n"
+		"    provided to Simulation.setSimStep() (this is 0.001s by default).  Or, use\n"
+		"    a hook from :class:`~klampt.sim.simulation.SimpleSimulator`.  \n"
+		"\n"
+		".. note::  \n"
+		"\n"
+		"    The transform of the body is centered at the *object's center of mass*\n"
+		"    rather than the object's reference frame given in the RobotModelLink or\n"
+		"    RigidObjectModel.  \n"
 		"\n"
 		"C++ includes: robotsim.h\n"
 		"\n"
@@ -64941,9 +69879,12 @@ static PyMethodDef SwigMethods[] = {
 		"Simulator_getStatus(Simulator self) -> int\n"
 		"\n"
 		"\n"
-		"Returns an indicator code for the simulator status. The return result is one of\n"
-		"the STATUS_X flags. (Technically, this returns the *worst* status over the last\n"
-		"simulate() call)  \n"
+		"Returns an indicator code for the simulator status.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    One of the STATUS_X flags.  (Technically, this returns the *worst* status\n"
+		"    over the last simulate() call)  \n"
 		"\n"
 		""},
 	 { "Simulator_getStatusString", _wrap_Simulator_getStatusString, METH_VARARGS, "\n"
@@ -64958,16 +69899,23 @@ static PyMethodDef SwigMethods[] = {
 		"Simulator_checkObjectOverlap(Simulator self)\n"
 		"\n"
 		"\n"
-		"Checks if any objects are overlapping. Returns a pair of lists of integers,\n"
-		"giving the pairs of object ids that are overlapping.  \n"
+		"Checks if any objects are overlapping.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    A pair of lists of integers, giving the pairs of object ids that\n"
+		"    are overlapping.  \n"
 		"\n"
 		""},
 	 { "Simulator_getState", _wrap_Simulator_getState, METH_O, "\n"
 		"Simulator_getState(Simulator self) -> std::string\n"
 		"\n"
 		"\n"
-		"Returns a Base64 string representing the binary data for the current simulation\n"
-		"state, including controller parameters, etc.  \n"
+		"Gets the current simulation state, including controller parameters, etc.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    A Base64 string representing the binary data for the state  \n"
 		"\n"
 		""},
 	 { "Simulator_setState", _wrap_Simulator_setState, METH_VARARGS, "\n"
@@ -65071,8 +70019,8 @@ static PyMethodDef SwigMethods[] = {
 		"Simulator_getContacts(Simulator self, int aid, int bid)\n"
 		"\n"
 		"\n"
-		"Returns the list of contacts (x,n,kFriction) at the last time step. Normals\n"
-		"point into object `a`. The contact point (x,n,kFriction) is represented as a\n"
+		"Returns the nx7 list of contacts (x,n,kFriction) at the last time step. Normals\n"
+		"point into object `a`. Each contact point (x,n,kFriction) is represented as a\n"
 		"7-element vector.  \n"
 		"\n"
 		""},
@@ -65080,7 +70028,8 @@ static PyMethodDef SwigMethods[] = {
 		"Simulator_getContactForces(Simulator self, int aid, int bid)\n"
 		"\n"
 		"\n"
-		"Returns the list of contact forces on object a at the last time step.  \n"
+		"Returns the list of contact forces on object a at the last time step. Result is\n"
+		"an nx3 array.  \n"
 		"\n"
 		""},
 	 { "Simulator_contactForce", _wrap_Simulator_contactForce, METH_VARARGS, "\n"
@@ -65149,7 +70098,7 @@ static PyMethodDef SwigMethods[] = {
 		"Simulator_body(Simulator self, TerrainModel terrain) -> SimBody\n"
 		"\n"
 		"\n"
-		"Returns the SimBody corresponding to the given link, rigid object, or terrain.  \n"
+		"Return the SimBody corresponding to the given link, rigid object, or terrain.  \n"
 		"\n"
 		""},
 	 { "Simulator_getJointForces", _wrap_Simulator_getJointForces, METH_VARARGS, "\n"
@@ -65157,8 +70106,11 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"\n"
 		"Returns the joint force and torque local to the link, as would be read by a\n"
-		"force-torque sensor mounted at the given link's origin. The 6 entries are\n"
-		"(fx,fy,fz,mx,my,mz)  \n"
+		"force-torque sensor mounted at the given link's origin.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    6 entries of the wrench (fx,fy,fz,mx,my,mz)  \n"
 		"\n"
 		""},
 	 { "Simulator_setGravity", _wrap_Simulator_setGravity, METH_VARARGS, "\n"
@@ -65225,6 +70177,11 @@ static PyMethodDef SwigMethods[] = {
 		"<http://motion.pratt.duke.edu/klampt/klampt_docs/ODESimulator_8h_source.html>`_\n"
 		"for detailed descriptions of these parameters.  \n"
 		"\n"
+		"Returns:  \n"
+		"\n"
+		"    A string encoding the data. This will need to be cast to int or\n"
+		"    float manually.  \n"
+		"\n"
 		""},
 	 { "Simulator_setSetting", _wrap_Simulator_setSetting, METH_VARARGS, "\n"
 		"Simulator_setSetting(Simulator self, std::string const & name, std::string const & value)\n"
@@ -65238,17 +70195,17 @@ static PyMethodDef SwigMethods[] = {
 	 { "Simulator_index_get", _wrap_Simulator_index_get, METH_O, "Simulator_index_get(Simulator self) -> int"},
 	 { "Simulator_world_set", _wrap_Simulator_world_set, METH_VARARGS, "Simulator_world_set(Simulator self, WorldModel world)"},
 	 { "Simulator_world_get", _wrap_Simulator_world_get, METH_O, "Simulator_world_get(Simulator self) -> WorldModel"},
-	 { "Simulator_sim_set", _wrap_Simulator_sim_set, METH_VARARGS, "Simulator_sim_set(Simulator self, WorldSimulation * sim)"},
-	 { "Simulator_sim_get", _wrap_Simulator_sim_get, METH_O, "Simulator_sim_get(Simulator self) -> WorldSimulation *"},
+	 { "Simulator_sim_set", _wrap_Simulator_sim_set, METH_VARARGS, "Simulator_sim_set(Simulator self, Klampt::Simulator * sim)"},
+	 { "Simulator_sim_get", _wrap_Simulator_sim_get, METH_O, "Simulator_sim_get(Simulator self) -> Klampt::Simulator *"},
 	 { "Simulator_initialState_set", _wrap_Simulator_initialState_set, METH_VARARGS, "Simulator_initialState_set(Simulator self, std::string const & initialState)"},
 	 { "Simulator_initialState_get", _wrap_Simulator_initialState_get, METH_O, "Simulator_initialState_get(Simulator self) -> std::string const &"},
 	 { "Simulator_swigregister", Simulator_swigregister, METH_O, NULL},
 	 { "Simulator_swiginit", Simulator_swiginit, METH_VARARGS, NULL},
-	 { "setRandomSeed", _wrap_setRandomSeed, METH_O, "\n"
-		"setRandomSeed(int seed)\n"
+	 { "set_random_seed", _wrap_set_random_seed, METH_O, "\n"
+		"set_random_seed(int seed)\n"
 		"\n"
 		"\n"
-		"Sets the random seed used by the configuration sampler.  \n"
+		"Sets the random seed used by the motion planner.  \n"
 		"\n"
 		""},
 	 { "destroy", _wrap_destroy, METH_NOARGS, "\n"
@@ -65258,8 +70215,8 @@ static PyMethodDef SwigMethods[] = {
 		"destroys internal data structures  \n"
 		"\n"
 		""},
-	 { "SubscribeToStream", _wrap_SubscribeToStream, METH_VARARGS, "\n"
-		"SubscribeToStream(Geometry3D g, char const * protocol, char const * name, char const * type=\"\") -> bool\n"
+	 { "subscribe_to_stream", _wrap_subscribe_to_stream, METH_VARARGS, "\n"
+		"subscribe_to_stream(Geometry3D g, char const * protocol, char const * name, char const * type=\"\") -> bool\n"
 		"\n"
 		"\n"
 		"Subscribes a Geometry3D to a stream.  \n"
@@ -65284,16 +70241,16 @@ static PyMethodDef SwigMethods[] = {
 		"Returns: (bool): True if successful.  \n"
 		"\n"
 		""},
-	 { "DetachFromStream", _wrap_DetachFromStream, METH_VARARGS, "\n"
-		"DetachFromStream(char const * protocol, char const * name) -> bool\n"
+	 { "detach_from_stream", _wrap_detach_from_stream, METH_VARARGS, "\n"
+		"detach_from_stream(char const * protocol, char const * name) -> bool\n"
 		"\n"
 		"\n"
 		"Unsubscribes from a stream previously subscribed to via\n"
 		":func:`SubscribeToStream`  \n"
 		"\n"
 		""},
-	 { "ProcessStreams", _wrap_ProcessStreams, METH_VARARGS, "\n"
-		"ProcessStreams(char const * protocol=\"all\") -> bool\n"
+	 { "process_streams", _wrap_process_streams, METH_VARARGS, "\n"
+		"process_streams(char const * protocol=\"all\") -> bool\n"
 		"\n"
 		"\n"
 		"Does some processing on stream subscriptions.  \n"
@@ -65306,8 +70263,8 @@ static PyMethodDef SwigMethods[] = {
 		"Returns: (bool): True if any stream was updated.  \n"
 		"\n"
 		""},
-	 { "WaitForStream", _wrap_WaitForStream, METH_VARARGS, "\n"
-		"WaitForStream(char const * protocol, char const * name, double timeout) -> bool\n"
+	 { "wait_for_stream", _wrap_wait_for_stream, METH_VARARGS, "\n"
+		"wait_for_stream(char const * protocol, char const * name, double timeout) -> bool\n"
 		"\n"
 		"\n"
 		"Waits up to timeout seconds for an update on the given stream.  \n"
@@ -65317,31 +70274,31 @@ static PyMethodDef SwigMethods[] = {
 		"    (bool): True if the stream was updated.  \n"
 		"\n"
 		""},
-	 { "ThreeJSGetScene", _wrap_ThreeJSGetScene, METH_O, "\n"
-		"ThreeJSGetScene(WorldModel arg1) -> std::string\n"
+	 { "threejs_get_scene", _wrap_threejs_get_scene, METH_O, "\n"
+		"threejs_get_scene(WorldModel arg1) -> std::string\n"
 		"\n"
 		"\n"
 		"Exports the WorldModel to a JSON string ready for use in Three.js.  \n"
 		"\n"
 		""},
-	 { "ThreeJSGetTransforms", _wrap_ThreeJSGetTransforms, METH_O, "\n"
-		"ThreeJSGetTransforms(WorldModel arg1) -> std::string\n"
+	 { "threejs_get_transforms", _wrap_threejs_get_transforms, METH_O, "\n"
+		"threejs_get_transforms(WorldModel arg1) -> std::string\n"
 		"\n"
 		"\n"
 		"Exports the WorldModel to a JSON string ready for use in Three.js.  \n"
 		"\n"
 		""},
-	 { "setFrictionConeApproximationEdges", _wrap_setFrictionConeApproximationEdges, METH_O, "\n"
-		"setFrictionConeApproximationEdges(int numEdges)\n"
+	 { "set_friction_cone_approximation_edges", _wrap_set_friction_cone_approximation_edges, METH_O, "\n"
+		"set_friction_cone_approximation_edges(int numEdges)\n"
 		"\n"
 		"\n"
 		"Globally sets the number of edges used in the friction cone approximation. The\n"
 		"default value is 4.  \n"
 		"\n"
 		""},
-	 { "forceClosure", _wrap_forceClosure, METH_VARARGS, "\n"
-		"forceClosure(doubleMatrix contacts) -> bool\n"
-		"forceClosure(doubleMatrix contactPositions, doubleMatrix frictionCones) -> bool\n"
+	 { "force_closure", _wrap_force_closure, METH_VARARGS, "\n"
+		"force_closure(double * contacts, int m, int n) -> bool\n"
+		"force_closure(doubleMatrix contactPositions, doubleMatrix frictionCones) -> bool\n"
 		"\n"
 		"\n"
 		"Returns true if the list of contact points has force closure.  \n"
@@ -65373,9 +70330,9 @@ static PyMethodDef SwigMethods[] = {
 		"         per-contact.  \n"
 		"\n"
 		""},
-	 { "forceClosure2D", _wrap_forceClosure2D, METH_VARARGS, "\n"
-		"forceClosure2D(doubleMatrix contacts) -> bool\n"
-		"forceClosure2D(doubleMatrix contactPositions, doubleMatrix frictionCones) -> bool\n"
+	 { "force_closure_2d", _wrap_force_closure_2d, METH_VARARGS, "\n"
+		"force_closure_2d(double * contacts, int m, int n) -> bool\n"
+		"force_closure_2d(doubleMatrix contactPositions, doubleMatrix frictionCones) -> bool\n"
 		"\n"
 		"\n"
 		"Returns true if the list of 2D contact points has force closure.  \n"
@@ -65405,9 +70362,9 @@ static PyMethodDef SwigMethods[] = {
 		"         per-contact.  \n"
 		"\n"
 		""},
-	 { "comEquilibrium", _wrap_comEquilibrium, METH_VARARGS, "\n"
-		"comEquilibrium(doubleMatrix contacts, doubleVector fext, PyObject * com) -> PyObject\n"
-		"comEquilibrium(doubleMatrix contactPositions, doubleMatrix frictionCones, doubleVector fext, PyObject * com) -> PyObject *\n"
+	 { "com_equilibrium", _wrap_com_equilibrium, METH_VARARGS, "\n"
+		"com_equilibrium(double * contacts, int m, int n, doubleVector fext, PyObject * com) -> PyObject\n"
+		"com_equilibrium(doubleMatrix contactPositions, doubleMatrix frictionCones, doubleVector fext, PyObject * com) -> PyObject *\n"
 		"\n"
 		"\n"
 		"Tests whether the given COM com is stable for the given contacts and the given\n"
@@ -65436,17 +70393,17 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (bool, None, or list): if com is given, and there are feasible\n"
-		"        equilibrium forces, this returns a list of 3 tuples giving\n"
-		"        equilibrium forces at each of the contacts. None is returned if\n"
-		"        no such forces exist.  \n"
+		"    bool, None, or list: if com is given, and there are feasible\n"
+		"    equilibrium forces, this returns a list of 3 tuples giving\n"
+		"    equilibrium forces at each of the contacts. None is returned if\n"
+		"    no such forces exist.  \n"
 		"\n"
-		"        If com = None, the result is True or False.  \n"
+		"    If com = None, the result is True or False.  \n"
 		"\n"
 		""},
-	 { "comEquilibrium2D", _wrap_comEquilibrium2D, METH_VARARGS, "\n"
-		"comEquilibrium2D(doubleMatrix contacts, doubleVector fext, PyObject * com) -> PyObject\n"
-		"comEquilibrium2D(doubleMatrix contactPositions, doubleMatrix frictionCones, doubleVector fext, PyObject * com) -> PyObject *\n"
+	 { "com_equilibrium_2d", _wrap_com_equilibrium_2d, METH_VARARGS, "\n"
+		"com_equilibrium_2d(double * contacts, int m, int n, doubleVector fext, PyObject * com) -> PyObject\n"
+		"com_equilibrium_2d(doubleMatrix contactPositions, doubleMatrix frictionCones, doubleVector fext, PyObject * com) -> PyObject *\n"
 		"\n"
 		"\n"
 		"Tests whether the given COM com is stable for the given contacts and the given\n"
@@ -65478,17 +70435,17 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (bool, None, or list): if com is given, and there are feasible\n"
-		"        equilibrium forces, this returns a list of 2-tuples giving\n"
-		"        equilibrium forces at each of the contacts. None is returned if\n"
-		"        no such forces exist.\n"
+		"    bool, None, or list: if com is given, and there are feasible\n"
+		"    equilibrium forces, this returns a list of 2-tuples giving\n"
+		"    equilibrium forces at each of the contacts. None is returned if\n"
+		"    no such forces exist.\n"
 		"\n"
-		"        If com = None, the result is True or False.  \n"
+		"    If com = None, the result is True or False.  \n"
 		"\n"
 		""},
-	 { "supportPolygon", _wrap_supportPolygon, METH_VARARGS, "\n"
-		"supportPolygon(doubleMatrix contacts) -> PyObject\n"
-		"supportPolygon(doubleMatrix contactPositions, doubleMatrix frictionCones) -> PyObject *\n"
+	 { "support_polygon", _wrap_support_polygon, METH_VARARGS, "\n"
+		"support_polygon(double * contacts, int m, int n) -> PyObject\n"
+		"support_polygon(doubleMatrix contactPositions, doubleMatrix frictionCones) -> PyObject *\n"
 		"\n"
 		"\n"
 		"Calculates the support polygon for a given set of contacts and a downward\n"
@@ -65519,23 +70476,23 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (list of 3-tuples): The sorted plane boundaries of the support\n"
-		"        polygon. The format of a plane is (nx,ny,ofs) where (nx,ny) are the\n"
-		"        outward facing normals, and ofs is the offset from 0.  In other words\n"
-		"        to test stability of a com with x-y coordinates [x,y], you can test\n"
-		"        whether dot([nx,ny],[x,y]) <= ofs  for all planes.\n"
+		"    list of 3-tuples: The sorted plane boundaries of the support\n"
+		"    polygon. The format of a plane is (nx,ny,ofs) where (nx,ny) are the\n"
+		"    outward facing normals, and ofs is the offset from 0.  In other words\n"
+		"    to test stability of a com with x-y coordinates [x,y], you can test\n"
+		"    whether dot([nx,ny],[x,y]) <= ofs  for all planes.\n"
 		"\n"
-		"        Hint: with numpy, you can do::\n"
+		"    Hint: with numpy, you can do::\n"
 		"\n"
-		"            Ab = np.array(supportPolygon(args))\n"
-		"            A=Ab[:,0:2]\n"
-		"            b=Ab[:,2]\n"
-		"            myComEquilibrium = lambda x: np.all(np.dot(A,x)<=b)  \n"
+		"        Ab = np.array(supportPolygon(args))\n"
+		"        A=Ab[:,0:2]\n"
+		"        b=Ab[:,2]\n"
+		"        myComEquilibrium = lambda x: np.all(np.dot(A,x)<=b)  \n"
 		"\n"
 		""},
-	 { "supportPolygon2D", _wrap_supportPolygon2D, METH_VARARGS, "\n"
-		"supportPolygon2D(doubleMatrix contacts) -> PyObject\n"
-		"supportPolygon2D(doubleMatrix contacts, doubleMatrix frictionCones) -> PyObject *\n"
+	 { "support_polygon_2d", _wrap_support_polygon_2d, METH_VARARGS, "\n"
+		"support_polygon_2d(double * contacts, int m, int n) -> PyObject\n"
+		"support_polygon_2d(doubleMatrix contacts, doubleMatrix frictionCones) -> PyObject *\n"
 		"\n"
 		"\n"
 		"Calculates the support polygon (interval) for a given set of contacts and a\n"
@@ -65555,7 +70512,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"    contactPositions (list of 2-float lists or tuples): the list of contact\n"
 		"        point positions.\n"
-		"     frictionCones (list of lists): The i'th element in this list has length\n"
+		"    frictionCones (list of lists): The i'th element in this list has length\n"
 		"         k*3 (for some integer k), and gives the contact force constraints\n"
 		"         (ax,ay,b) where ax*fx+ay*fy <= b limits the contact force (fx,fy)\n"
 		"         at the i'th contact. Each of the k 3-tuples is laid out sequentially\n"
@@ -65563,13 +70520,13 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (2-tuple): gives the min/max extents of the support polygon.\n"
-		"        If the support interval is empty, (inf,inf) is returned.  \n"
+		"    2-tuple: gives the min/max extents of the support polygon.\n"
+		"    If the support interval is empty, (inf,inf) is returned.  \n"
 		"\n"
 		""},
-	 { "equilibriumTorques", _wrap_equilibriumTorques, METH_VARARGS, "\n"
-		"equilibriumTorques(RobotModel robot, doubleMatrix contacts, intVector links, doubleVector fext, double norm=0) -> PyObject\n"
-		"equilibriumTorques(RobotModel robot, doubleMatrix contacts, intVector links, doubleVector fext, doubleVector internalTorques, double norm=0) -> PyObject\n"
+	 { "equilibrium_torques", _wrap_equilibrium_torques, METH_VARARGS, "\n"
+		"equilibrium_torques(RobotModel robot, double * contacts, int m, int n, intVector links, doubleVector fext, double norm=0) -> PyObject\n"
+		"equilibrium_torques(RobotModel robot, double * contacts, int m, int n, intVector links, doubleVector fext, doubleVector internalTorques, double norm=0) -> PyObject\n"
 		"\n"
 		"\n"
 		"Solves for the torques / forces that keep the robot balanced against gravity.  \n"
@@ -65587,7 +70544,7 @@ static PyMethodDef SwigMethods[] = {
 		"Args:  \n"
 		"\n"
 		"    robot (RobotModel): the robot, posed in its current configuration\n"
-		"    contacts (list of N 7-lists): a list of contact points, given as 7-lists\n"
+		"    contacts (ndarray): an N x 7 array of contact points, each given as 7-lists\n"
 		"        [x,y,z,nx,ny,nz,kFriction]\n"
 		"    links (list of N ints): a list of the links on which those contact points\n"
 		"        lie\n"
@@ -65608,10 +70565,10 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    (pair of lists, optional): a pair (torque,force) if a solution exists,\n"
-		"         giving valid joint torques t and frictional contact forces (f1,...,fn).\n"
+		"    pair of lists, optional: a pair (torque,force) if a solution exists,\n"
+		"    giving valid joint torques t and frictional contact forces (f1,...,fn).\n"
 		"\n"
-		"         None is returned if no solution exists.  \n"
+		"    None is returned if no solution exists.  \n"
 		"\n"
 		""},
 	 { NULL, NULL, 0, NULL }
@@ -65626,6 +70583,12 @@ static PyMethodDef SwigMethods_proxydocs[] = {
 
 static void *_p_doubleArrayTo_p_double(void *x, int *SWIGUNUSEDPARM(newmemory)) {
     return (void *)((double *)  ((doubleArray *) x));
+}
+static void *_p_p_doubleArrayTo_p_p_double(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((double **)  ((doubleArray **) x));
+}
+static void *_p_p_intArrayTo_p_p_int(void *x, int *SWIGUNUSEDPARM(newmemory)) {
+    return (void *)((int **)  ((intArray **) x));
 }
 static void *_p_floatArrayTo_p_float(void *x, int *SWIGUNUSEDPARM(newmemory)) {
     return (void *)((float *)  ((floatArray *) x));
@@ -65662,7 +70625,6 @@ static swig_type_info _swigt__p_Appearance = {"_p_Appearance", "Appearance *", 0
 static swig_type_info _swigt__p_BoxPoser = {"_p_BoxPoser", "BoxPoser *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_ContactParameters = {"_p_ContactParameters", "ContactParameters *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_ContactQueryResult = {"_p_ContactQueryResult", "ContactQueryResult *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_ControlledRobotSimulator = {"_p_ControlledRobotSimulator", "ControlledRobotSimulator *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_ConvexHull = {"_p_ConvexHull", "ConvexHull *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_DistanceQueryResult = {"_p_DistanceQueryResult", "DistanceQueryResult *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_DistanceQuerySettings = {"_p_DistanceQuerySettings", "DistanceQuerySettings *", 0, 0, (void*)0, 0};
@@ -65673,26 +70635,28 @@ static swig_type_info _swigt__p_Geometry3D = {"_p_Geometry3D", "Geometry3D *", 0
 static swig_type_info _swigt__p_IKGoal = {"_p_IKGoal", "IKGoal *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_IKObjective = {"_p_IKObjective", "IKObjective *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_IKSolver = {"_p_IKSolver", "IKSolver *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_Klampt__ODEGeometry = {"_p_Klampt__ODEGeometry", "Klampt::ODEGeometry *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_Klampt__RigidObjectModel = {"_p_Klampt__RigidObjectModel", "Klampt::RigidObjectModel *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_Klampt__RobotModel = {"_p_Klampt__RobotModel", "Klampt::RobotModel *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_Klampt__SensorBase = {"_p_Klampt__SensorBase", "Klampt::SensorBase *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_Klampt__SimRobotController = {"_p_Klampt__SimRobotController", "Klampt::SimRobotController *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_Klampt__Simulator = {"_p_Klampt__Simulator", "Klampt::Simulator *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_Klampt__TerrainModel = {"_p_Klampt__TerrainModel", "Klampt::TerrainModel *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_Mass = {"_p_Mass", "Mass *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_ODEGeometry = {"_p_ODEGeometry", "ODEGeometry *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_ObjectPoser = {"_p_ObjectPoser", "ObjectPoser *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_PointCloud = {"_p_PointCloud", "PointCloud *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_PointPoser = {"_p_PointPoser", "PointPoser *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_RigidObject = {"_p_RigidObject", "RigidObject *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_RigidObjectModel = {"_p_RigidObjectModel", "RigidObjectModel *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_Robot = {"_p_Robot", "Robot *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_RobotModel = {"_p_RobotModel", "RobotModel *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_RobotModelDriver = {"_p_RobotModelDriver", "RobotModelDriver *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_RobotModelLink = {"_p_RobotModelLink", "RobotModelLink *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_RobotPoser = {"_p_RobotPoser", "RobotPoser *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_SensorBase = {"_p_SensorBase", "SensorBase *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_SimBody = {"_p_SimBody", "SimBody *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_SimJoint = {"_p_SimJoint", "SimJoint *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_SimRobotController = {"_p_SimRobotController", "SimRobotController *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_SimRobotSensor = {"_p_SimRobotSensor", "SimRobotSensor *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_Simulator = {"_p_Simulator", "Simulator *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_SpherePoser = {"_p_SpherePoser", "SpherePoser *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_Terrain = {"_p_Terrain", "Terrain *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_TerrainModel = {"_p_TerrainModel", "TerrainModel *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_TransformPoser = {"_p_TransformPoser", "TransformPoser *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_TriangleMesh = {"_p_TriangleMesh", "TriangleMesh *", 0, 0, (void*)0, 0};
@@ -65701,7 +70665,6 @@ static swig_type_info _swigt__p_VolumeGrid = {"_p_VolumeGrid", "VolumeGrid *", 0
 static swig_type_info _swigt__p_Widget = {"_p_Widget", "Widget *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_WidgetSet = {"_p_WidgetSet", "WidgetSet *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_WorldModel = {"_p_WorldModel", "WorldModel *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_WorldSimulation = {"_p_WorldSimulation", "WorldSimulation *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p__object = {"_p__object", "_object *|PyObject *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_allocator_type = {"_p_allocator_type", "allocator_type *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_char = {"_p_char", "char *", 0, 0, (void*)0, 0};
@@ -65717,6 +70680,10 @@ static swig_type_info _swigt__p_intArray = {"_p_intArray", "intArray *", 0, 0, (
 static swig_type_info _swigt__p_key_type = {"_p_key_type", "key_type *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_mapped_type = {"_p_mapped_type", "mapped_type *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_p__object = {"_p_p__object", "_object **|PyObject **", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_p_double = {"_p_p_double", "double **", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_p_doubleArray = {"_p_p_doubleArray", 0, 0, 0, 0, 0};
+static swig_type_info _swigt__p_p_int = {"_p_p_int", "int **", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_p_intArray = {"_p_p_intArray", 0, 0, 0, 0, 0};
 static swig_type_info _swigt__p_size_type = {"_p_size_type", "size_type *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__allocatorT_double_t = {"_p_std__allocatorT_double_t", "std::vector< double >::allocator_type *|std::allocator< double > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__allocatorT_float_t = {"_p_std__allocatorT_float_t", "std::vector< float >::allocator_type *|std::allocator< float > *", 0, 0, (void*)0, 0};
@@ -65734,8 +70701,8 @@ static swig_type_info _swigt__p_std__vectorT_float_std__allocatorT_float_t_t = {
 static swig_type_info _swigt__p_std__vectorT_int_std__allocatorT_int_t_t = {"_p_std__vectorT_int_std__allocatorT_int_t_t", "std::vector< int,std::allocator< int > > *|std::vector< int > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__vectorT_std__string_std__allocatorT_std__string_t_t = {"_p_std__vectorT_std__string_std__allocatorT_std__string_t_t", "std::vector< std::string,std::allocator< std::string > > *|std::vector< std::string > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t = {"_p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t", "std::vector< std::vector< double > > *|std::vector< std::vector< double,std::allocator< double > >,std::allocator< std::vector< double,std::allocator< double > > > > *|std::vector< std::vector< double,std::allocator< double > > > *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_std__vectorT_unsigned_char_std__allocatorT_unsigned_char_t_t = {"_p_std__vectorT_unsigned_char_std__allocatorT_unsigned_char_t_t", "std::vector< unsigned char,std::allocator< unsigned char > > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_swig__SwigPyIterator = {"_p_swig__SwigPyIterator", "swig::SwigPyIterator *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_unsigned_int = {"_p_unsigned_int", "unsigned int *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_value_type = {"_p_value_type", "value_type *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_void = {"_p_void", "void *", 0, 0, (void*)0, 0};
 
@@ -65745,7 +70712,6 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_BoxPoser,
   &_swigt__p_ContactParameters,
   &_swigt__p_ContactQueryResult,
-  &_swigt__p_ControlledRobotSimulator,
   &_swigt__p_ConvexHull,
   &_swigt__p_DistanceQueryResult,
   &_swigt__p_DistanceQuerySettings,
@@ -65756,26 +70722,28 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_IKGoal,
   &_swigt__p_IKObjective,
   &_swigt__p_IKSolver,
+  &_swigt__p_Klampt__ODEGeometry,
+  &_swigt__p_Klampt__RigidObjectModel,
+  &_swigt__p_Klampt__RobotModel,
+  &_swigt__p_Klampt__SensorBase,
+  &_swigt__p_Klampt__SimRobotController,
+  &_swigt__p_Klampt__Simulator,
+  &_swigt__p_Klampt__TerrainModel,
   &_swigt__p_Mass,
-  &_swigt__p_ODEGeometry,
   &_swigt__p_ObjectPoser,
   &_swigt__p_PointCloud,
   &_swigt__p_PointPoser,
-  &_swigt__p_RigidObject,
   &_swigt__p_RigidObjectModel,
-  &_swigt__p_Robot,
   &_swigt__p_RobotModel,
   &_swigt__p_RobotModelDriver,
   &_swigt__p_RobotModelLink,
   &_swigt__p_RobotPoser,
-  &_swigt__p_SensorBase,
   &_swigt__p_SimBody,
   &_swigt__p_SimJoint,
   &_swigt__p_SimRobotController,
   &_swigt__p_SimRobotSensor,
   &_swigt__p_Simulator,
   &_swigt__p_SpherePoser,
-  &_swigt__p_Terrain,
   &_swigt__p_TerrainModel,
   &_swigt__p_TransformPoser,
   &_swigt__p_TriangleMesh,
@@ -65784,7 +70752,6 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_Widget,
   &_swigt__p_WidgetSet,
   &_swigt__p_WorldModel,
-  &_swigt__p_WorldSimulation,
   &_swigt__p__object,
   &_swigt__p_allocator_type,
   &_swigt__p_char,
@@ -65800,6 +70767,10 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_key_type,
   &_swigt__p_mapped_type,
   &_swigt__p_p__object,
+  &_swigt__p_p_double,
+  &_swigt__p_p_doubleArray,
+  &_swigt__p_p_int,
+  &_swigt__p_p_intArray,
   &_swigt__p_size_type,
   &_swigt__p_std__allocatorT_double_t,
   &_swigt__p_std__allocatorT_float_t,
@@ -65817,8 +70788,8 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_std__vectorT_int_std__allocatorT_int_t_t,
   &_swigt__p_std__vectorT_std__string_std__allocatorT_std__string_t_t,
   &_swigt__p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t,
-  &_swigt__p_std__vectorT_unsigned_char_std__allocatorT_unsigned_char_t_t,
   &_swigt__p_swig__SwigPyIterator,
+  &_swigt__p_unsigned_int,
   &_swigt__p_value_type,
   &_swigt__p_void,
 };
@@ -65828,7 +70799,6 @@ static swig_cast_info _swigc__p_Appearance[] = {  {&_swigt__p_Appearance, 0, 0, 
 static swig_cast_info _swigc__p_BoxPoser[] = {  {&_swigt__p_BoxPoser, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ContactParameters[] = {  {&_swigt__p_ContactParameters, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ContactQueryResult[] = {  {&_swigt__p_ContactQueryResult, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_ControlledRobotSimulator[] = {  {&_swigt__p_ControlledRobotSimulator, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ConvexHull[] = {  {&_swigt__p_ConvexHull, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_DistanceQueryResult[] = {  {&_swigt__p_DistanceQueryResult, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_DistanceQuerySettings[] = {  {&_swigt__p_DistanceQuerySettings, 0, 0, 0},{0, 0, 0, 0}};
@@ -65839,26 +70809,28 @@ static swig_cast_info _swigc__p_Geometry3D[] = {  {&_swigt__p_Geometry3D, 0, 0, 
 static swig_cast_info _swigc__p_IKGoal[] = {  {&_swigt__p_IKGoal, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_IKObjective[] = {  {&_swigt__p_IKObjective, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_IKSolver[] = {  {&_swigt__p_IKSolver, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_Klampt__ODEGeometry[] = {  {&_swigt__p_Klampt__ODEGeometry, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_Klampt__RigidObjectModel[] = {  {&_swigt__p_Klampt__RigidObjectModel, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_Klampt__RobotModel[] = {  {&_swigt__p_Klampt__RobotModel, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_Klampt__SensorBase[] = {  {&_swigt__p_Klampt__SensorBase, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_Klampt__SimRobotController[] = {  {&_swigt__p_Klampt__SimRobotController, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_Klampt__Simulator[] = {  {&_swigt__p_Klampt__Simulator, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_Klampt__TerrainModel[] = {  {&_swigt__p_Klampt__TerrainModel, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Mass[] = {  {&_swigt__p_Mass, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_ODEGeometry[] = {  {&_swigt__p_ODEGeometry, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ObjectPoser[] = {  {&_swigt__p_ObjectPoser, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_PointCloud[] = {  {&_swigt__p_PointCloud, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_PointPoser[] = {  {&_swigt__p_PointPoser, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_RigidObject[] = {  {&_swigt__p_RigidObject, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_RigidObjectModel[] = {  {&_swigt__p_RigidObjectModel, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_Robot[] = {  {&_swigt__p_Robot, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_RobotModel[] = {  {&_swigt__p_RobotModel, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_RobotModelDriver[] = {  {&_swigt__p_RobotModelDriver, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_RobotModelLink[] = {  {&_swigt__p_RobotModelLink, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_RobotPoser[] = {  {&_swigt__p_RobotPoser, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_SensorBase[] = {  {&_swigt__p_SensorBase, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_SimBody[] = {  {&_swigt__p_SimBody, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_SimJoint[] = {  {&_swigt__p_SimJoint, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_SimRobotController[] = {  {&_swigt__p_SimRobotController, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_SimRobotSensor[] = {  {&_swigt__p_SimRobotSensor, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Simulator[] = {  {&_swigt__p_Simulator, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_SpherePoser[] = {  {&_swigt__p_SpherePoser, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_Terrain[] = {  {&_swigt__p_Terrain, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_TerrainModel[] = {  {&_swigt__p_TerrainModel, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_TransformPoser[] = {  {&_swigt__p_TransformPoser, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_TriangleMesh[] = {  {&_swigt__p_TriangleMesh, 0, 0, 0},{0, 0, 0, 0}};
@@ -65867,7 +70839,6 @@ static swig_cast_info _swigc__p_VolumeGrid[] = {  {&_swigt__p_VolumeGrid, 0, 0, 
 static swig_cast_info _swigc__p_Widget[] = {  {&_swigt__p_AABBPoser, _p_AABBPoserTo_p_Widget, 0, 0},  {&_swigt__p_SpherePoser, _p_SpherePoserTo_p_Widget, 0, 0},  {&_swigt__p_ObjectPoser, _p_ObjectPoserTo_p_Widget, 0, 0},  {&_swigt__p_RobotPoser, _p_RobotPoserTo_p_Widget, 0, 0},  {&_swigt__p_PointPoser, _p_PointPoserTo_p_Widget, 0, 0},  {&_swigt__p_TransformPoser, _p_TransformPoserTo_p_Widget, 0, 0},  {&_swigt__p_BoxPoser, _p_BoxPoserTo_p_Widget, 0, 0},  {&_swigt__p_WidgetSet, _p_WidgetSetTo_p_Widget, 0, 0},  {&_swigt__p_Widget, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_WidgetSet[] = {  {&_swigt__p_WidgetSet, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_WorldModel[] = {  {&_swigt__p_WorldModel, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_WorldSimulation[] = {  {&_swigt__p_WorldSimulation, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p__object[] = {  {&_swigt__p__object, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_allocator_type[] = {  {&_swigt__p_allocator_type, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_char[] = {  {&_swigt__p_char, 0, 0, 0},{0, 0, 0, 0}};
@@ -65883,6 +70854,10 @@ static swig_cast_info _swigc__p_intArray[] = {  {&_swigt__p_intArray, 0, 0, 0},{
 static swig_cast_info _swigc__p_key_type[] = {  {&_swigt__p_key_type, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_mapped_type[] = {  {&_swigt__p_mapped_type, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_p__object[] = {  {&_swigt__p_p__object, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_p_doubleArray[] = {{&_swigt__p_p_doubleArray, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_p_double[] = {  {&_swigt__p_p_doubleArray, _p_p_doubleArrayTo_p_p_double, 0, 0},  {&_swigt__p_p_double, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_p_intArray[] = {{&_swigt__p_p_intArray, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_p_int[] = {  {&_swigt__p_p_intArray, _p_p_intArrayTo_p_p_int, 0, 0},  {&_swigt__p_p_int, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_size_type[] = {  {&_swigt__p_size_type, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__allocatorT_double_t[] = {  {&_swigt__p_std__allocatorT_double_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__allocatorT_float_t[] = {  {&_swigt__p_std__allocatorT_float_t, 0, 0, 0},{0, 0, 0, 0}};
@@ -65900,8 +70875,8 @@ static swig_cast_info _swigc__p_std__vectorT_float_std__allocatorT_float_t_t[] =
 static swig_cast_info _swigc__p_std__vectorT_int_std__allocatorT_int_t_t[] = {  {&_swigt__p_std__vectorT_int_std__allocatorT_int_t_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorT_std__string_std__allocatorT_std__string_t_t[] = {  {&_swigt__p_std__vectorT_std__string_std__allocatorT_std__string_t_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t[] = {  {&_swigt__p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_std__vectorT_unsigned_char_std__allocatorT_unsigned_char_t_t[] = {  {&_swigt__p_std__vectorT_unsigned_char_std__allocatorT_unsigned_char_t_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_swig__SwigPyIterator[] = {  {&_swigt__p_swig__SwigPyIterator, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_unsigned_int[] = {  {&_swigt__p_unsigned_int, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_value_type[] = {  {&_swigt__p_value_type, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_void[] = {  {&_swigt__p_void, 0, 0, 0},{0, 0, 0, 0}};
 
@@ -65911,7 +70886,6 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_BoxPoser,
   _swigc__p_ContactParameters,
   _swigc__p_ContactQueryResult,
-  _swigc__p_ControlledRobotSimulator,
   _swigc__p_ConvexHull,
   _swigc__p_DistanceQueryResult,
   _swigc__p_DistanceQuerySettings,
@@ -65922,26 +70896,28 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_IKGoal,
   _swigc__p_IKObjective,
   _swigc__p_IKSolver,
+  _swigc__p_Klampt__ODEGeometry,
+  _swigc__p_Klampt__RigidObjectModel,
+  _swigc__p_Klampt__RobotModel,
+  _swigc__p_Klampt__SensorBase,
+  _swigc__p_Klampt__SimRobotController,
+  _swigc__p_Klampt__Simulator,
+  _swigc__p_Klampt__TerrainModel,
   _swigc__p_Mass,
-  _swigc__p_ODEGeometry,
   _swigc__p_ObjectPoser,
   _swigc__p_PointCloud,
   _swigc__p_PointPoser,
-  _swigc__p_RigidObject,
   _swigc__p_RigidObjectModel,
-  _swigc__p_Robot,
   _swigc__p_RobotModel,
   _swigc__p_RobotModelDriver,
   _swigc__p_RobotModelLink,
   _swigc__p_RobotPoser,
-  _swigc__p_SensorBase,
   _swigc__p_SimBody,
   _swigc__p_SimJoint,
   _swigc__p_SimRobotController,
   _swigc__p_SimRobotSensor,
   _swigc__p_Simulator,
   _swigc__p_SpherePoser,
-  _swigc__p_Terrain,
   _swigc__p_TerrainModel,
   _swigc__p_TransformPoser,
   _swigc__p_TriangleMesh,
@@ -65950,7 +70926,6 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_Widget,
   _swigc__p_WidgetSet,
   _swigc__p_WorldModel,
-  _swigc__p_WorldSimulation,
   _swigc__p__object,
   _swigc__p_allocator_type,
   _swigc__p_char,
@@ -65966,6 +70941,10 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_key_type,
   _swigc__p_mapped_type,
   _swigc__p_p__object,
+  _swigc__p_p_double,
+  _swigc__p_p_doubleArray,
+  _swigc__p_p_int,
+  _swigc__p_p_intArray,
   _swigc__p_size_type,
   _swigc__p_std__allocatorT_double_t,
   _swigc__p_std__allocatorT_float_t,
@@ -65983,8 +70962,8 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_std__vectorT_int_std__allocatorT_int_t_t,
   _swigc__p_std__vectorT_std__string_std__allocatorT_std__string_t_t,
   _swigc__p_std__vectorT_std__vectorT_double_std__allocatorT_double_t_t_std__allocatorT_std__vectorT_double_std__allocatorT_double_t_t_t_t,
-  _swigc__p_std__vectorT_unsigned_char_std__allocatorT_unsigned_char_t_t,
   _swigc__p_swig__SwigPyIterator,
+  _swigc__p_unsigned_int,
   _swigc__p_value_type,
   _swigc__p_void,
 };
@@ -66721,6 +71700,9 @@ SWIG_init(void) {
 #endif
   
   SWIG_InstallConstants(d,swig_const_table);
+  
+  
+  import_array();
   
   
   // thread safe initialization

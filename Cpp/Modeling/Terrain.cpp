@@ -9,20 +9,22 @@
 #include "IO/ROS.h"
 #include "View/Texturizer.h"
 
+namespace Klampt {
+
 //defined in XmlWorld.cpp
 string ResolveFileReference(const string& path,const string& fn);
 string MakeURLLocal(const string& url,const char* url_resolution_path="klampt_downloads");
 
-void Terrain::InitCollisions()
+void TerrainModel::InitCollisions()
 {
   Timer timer;
   geometry->InitCollisionData();
   double t = timer.ElapsedTime();
   if(t > 0.2) 
-    printf("Initialized terrain %s collision data structures in time %gs\n",geomFile.c_str(),t);
+    printf("Initialized TerrainModel %s collision data structures in time %gs\n",geomFile.c_str(),t);
 }
 
-bool Terrain::Load(const char* fn)
+bool TerrainModel::Load(const char* fn)
 {
   const char* ext=FileExtension(fn);
   if(ext && 0==strcmp(ext,"env")) {
@@ -33,7 +35,7 @@ bool Terrain::Load(const char* fn)
       return false;
     }
     if(f.count("mesh")==0) {
-      fprintf(stderr,"Terrain file doesn't contain a mesh file\n");
+      fprintf(stderr,"TerrainModel file doesn't contain a mesh file\n");
       return false;
     }
     if(!f.CheckSize("mesh",1,fn)) return false;
@@ -52,7 +54,7 @@ bool Terrain::Load(const char* fn)
         kFriction = values;
       }
       else {
-        fprintf(stderr,"Terrain file doesn't contain the right number of friction values\n");
+        fprintf(stderr,"TerrainModel file doesn't contain the right number of friction values\n");
         return false;
       }
     }
@@ -62,18 +64,18 @@ bool Terrain::Load(const char* fn)
   }
   else {
     if(!LoadGeometry(fn)) return false;
-    //printf("Terrain %s: Setting uniform friction 0.5\n",fn);
+    //printf("TerrainModel %s: Setting uniform friction 0.5\n",fn);
     SetUniformFriction(0.5);
     return true;
   }
   return false;
 }
 
-bool Terrain::LoadGeometry(const char* fn)
+bool TerrainModel::LoadGeometry(const char* fn)
 {
   geomFile = fn;
   if(geometry.Load(geomFile)) {
-    if(!geometry.Appearance()->tex1D && !geometry.Appearance()->tex2D) {
+    if(geometry->type == Geometry::AnyGeometry3D::TriangleMesh && !geometry.Appearance()->tex1D && !geometry.Appearance()->tex2D) {
       geometry.Appearance()->faceColor.set(0.8f,0.6f,0.2f);
       geometry.Appearance()->texWrap = true;
       geometry.Appearance()->shininess = 0;
@@ -86,7 +88,7 @@ bool Terrain::LoadGeometry(const char* fn)
   return false;
 }
 
-bool Terrain::Save(const char* fn)
+bool TerrainModel::Save(const char* fn)
 {
   ofstream out(fn);
   if(!out) return false;
@@ -110,16 +112,18 @@ bool Terrain::Save(const char* fn)
   return true;
 }
 
-void Terrain::DrawGL()
+void TerrainModel::DrawGL()
 {
   if(!geometry) return;
 
   geometry.DrawGL();
 }
 
-void Terrain::DrawGLOpaque(bool opaque)
+void TerrainModel::DrawGLOpaque(bool opaque)
 {
   if(!geometry) return;
 
   geometry.DrawGLOpaque(opaque);
 }
+
+}//namespace Klampt

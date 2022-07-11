@@ -11,6 +11,8 @@ using namespace std;
 //Turn this on to debug geometry caching
 #define CACHE_DEBUG 0
 
+namespace Klampt {
+
 //defined in XmlWorld.cpp
 string ResolveFileReference(const string& path,const string& fn);
 string MakeURLLocal(const string& url,const char* url_resolution_path="klampt_downloads");
@@ -503,3 +505,5 @@ bool ManagedGeometry::DynamicGeometryUpdate()
 
 
 GeometryManager ManagedGeometry::manager;
+
+} //namespace Klampt

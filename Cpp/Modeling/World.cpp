@@ -6,26 +6,28 @@
 #include <KrisLibrary/meshing/IO.h>
 #include "IO/XmlWorld.h"
 
-RobotWorld::RobotWorld()
+namespace Klampt {
+
+WorldModel::WorldModel()
 {
   background.set(0.4f,0.4f,1,0);
 }
 
-bool RobotWorld::LoadXML(const char* fn)
+bool WorldModel::LoadXML(const char* fn)
 {
   XmlWorld xmlWorld;
   if(!xmlWorld.Load(fn)) {
-    printf("RobotWorld::LoadXML: Error loading world file %s\n",fn);
+    printf("WorldModel::LoadXML: Error loading world file %s\n",fn);
     return false;
   }
   if(!xmlWorld.GetWorld(*this)) {
-    printf("RobotWorld::LoadXML: Error extracting world data from %s\n",fn);
+    printf("WorldModel::LoadXML: Error extracting world data from %s\n",fn);
     return false;
   }
   return true;
 }
 
-bool RobotWorld::SaveXML(const char* fn,const char* elementDir)
+bool WorldModel::SaveXML(const char* fn,const char* elementDir)
 {
   XmlWorld xmlWorld;
   if(elementDir)
@@ -34,7 +36,7 @@ bool RobotWorld::SaveXML(const char* fn,const char* elementDir)
     return xmlWorld.Save(*this,fn);
 }
 
-int RobotWorld::NumIDs() const
+int WorldModel::NumIDs() const
 {
   size_t n=terrains.size()+rigidObjects.size()+robots.size();
   for(size_t i=0;i<robots.size();i++)
@@ -42,7 +44,7 @@ int RobotWorld::NumIDs() const
   return n;
 }
 
-int RobotWorld::GetID(const string& name,int link) const
+int WorldModel::GetID(const string& name,int link) const
 {
   for(size_t i=0;i<terrains.size();i++)
     if(terrains[i]->name == name)
@@ -58,7 +60,7 @@ int RobotWorld::GetID(const string& name,int link) const
   return -1;
 }
 
-string RobotWorld::GetName(int id) const
+string WorldModel::GetName(int id) const
 {
   int i = IsRigidObject(id);
   if(i >= 0) return rigidObjects[i]->name;
@@ -71,7 +73,7 @@ string RobotWorld::GetName(int id) const
   return "";
 }
 
-int RobotWorld::IsRobot(int id) const
+int WorldModel::IsRobot(int id) const
 {
   if(id >= (int)(rigidObjects.size()+terrains.size())) {
     id -= (int)(rigidObjects.size()+terrains.size());
@@ -87,7 +89,7 @@ int RobotWorld::IsRobot(int id) const
   }
 }
 
-pair<int,int> RobotWorld::IsRobotLink(int id) const
+pair<int,int> WorldModel::IsRobotLink(int id) const
 {
   if(id >= (int)(rigidObjects.size()+terrains.size())) {
     id -= (int)(rigidObjects.size()+terrains.size());
@@ -106,18 +108,18 @@ pair<int,int> RobotWorld::IsRobotLink(int id) const
   }
 }
 
-int RobotWorld::IsTerrain(int id) const
+int WorldModel::IsTerrain(int id) const
 {
   if(id >= 0 && id < (int)terrains.size()) return id;
   return -1;
 }
 
-int RobotWorld::IsRigidObject(int id) const
+int WorldModel::IsRigidObject(int id) const
 {
   if(id >= (int)terrains.size() && id < (int)(terrains.size()+rigidObjects.size())) return id-(int)terrains.size();
   return -1;
 }
-int RobotWorld::RobotID(int index) const
+int WorldModel::RobotID(int index) const
 {
   int id=(int)(terrains.size()+rigidObjects.size());
   for(int i=0;i<index;i++)
@@ -125,7 +127,7 @@ int RobotWorld::RobotID(int index) const
   return id;
 }
 
-int RobotWorld::RobotLinkID(int index,int link) const
+int WorldModel::RobotLinkID(int index,int link) const
 {
   int id=(int)(terrains.size()+rigidObjects.size());
   for(int i=0;i<index;i++)
@@ -133,17 +135,17 @@ int RobotWorld::RobotLinkID(int index,int link) const
   return id+1+link;
 }
 
-int RobotWorld::TerrainID(int index) const
+int WorldModel::TerrainID(int index) const
 {
   return index;
 }
 
-int RobotWorld::RigidObjectID(int index) const
+int WorldModel::RigidObjectID(int index) const
 {
   return index+(int)terrains.size();
 }
 
-RobotWorld::GeometryPtr RobotWorld::GetGeometry(int id)
+WorldModel::GeometryPtr WorldModel::GetGeometry(int id)
 {
   int terrain = IsTerrain(id);
   if(terrain >= 0)
@@ -155,11 +157,11 @@ RobotWorld::GeometryPtr RobotWorld::GetGeometry(int id)
   if(robotLink.first >= 0) {
     return robots[robotLink.first]->geometry[robotLink.second];
   }
-  fprintf(stderr,"RobotWorld::GetGeometry: Invalid ID: %d\n",id);
+  fprintf(stderr,"WorldModel::GetGeometry: Invalid ID: %d\n",id);
   return NULL;
 }
 
-RobotWorld::AppearancePtr RobotWorld::GetAppearance(int id)
+WorldModel::AppearancePtr WorldModel::GetAppearance(int id)
 {
   int terrain = IsTerrain(id);
   if(terrain >= 0)
@@ -171,11 +173,11 @@ RobotWorld::AppearancePtr RobotWorld::GetAppearance(int id)
   if(robotLink.first >= 0) {
     return robots[robotLink.first]->geomManagers[robotLink.second].Appearance();
   }
-  fprintf(stderr,"RobotWorld::GetAppearance: Invalid ID: %d\n",id);
+  fprintf(stderr,"WorldModel::GetAppearance: Invalid ID: %d\n",id);
   return NULL;
 }
 
-RigidTransform RobotWorld::GetTransform(int id) const
+RigidTransform WorldModel::GetTransform(int id) const
 {
   RigidTransform T;
   int terrain = IsTerrain(id);
@@ -194,7 +196,7 @@ RigidTransform RobotWorld::GetTransform(int id) const
   return RigidTransform();
 }
 
-void RobotWorld::SetTransform(int id,const RigidTransform& T)
+void WorldModel::SetTransform(int id,const RigidTransform& T)
 {
   int terrain = IsTerrain(id);
   if(terrain >= 0) {
@@ -208,7 +210,7 @@ void RobotWorld::SetTransform(int id,const RigidTransform& T)
   }
   int robot = IsRobot(id);
   if(robot >= 0) {
-    if(robots[robot]->joints[0].type == RobotJoint::Floating) 
+    if(robots[robot]->joints[0].type == RobotModelJoint::Floating) 
       robots[robot]->SetJointByTransform(0,5,T);
     else 
       robots[robot]->links[0].T0_Parent = T;
@@ -217,7 +219,7 @@ void RobotWorld::SetTransform(int id,const RigidTransform& T)
   }
   pair<int,int> robotLink = IsRobotLink(id);
   if(robotLink.first >= 0) {
-    if(robots[robotLink.first]->joints[0].type == RobotJoint::Floating) {
+    if(robots[robotLink.first]->joints[0].type == RobotModelJoint::Floating) {
       if(robotLink.second != 5) FatalError("SetTransform: cannot set transforms of arbitrary robot links");
       robots[robotLink.first]->SetJointByTransform(0,robotLink.second,T);
     }
@@ -227,7 +229,7 @@ void RobotWorld::SetTransform(int id,const RigidTransform& T)
   FatalError("SetTransform: Invalid ID: %d\n",id);
 }
 
-void RobotWorld::InitCollisions()
+void WorldModel::InitCollisions()
 {
   for(size_t j=0;j<robots.size();j++) 
     robots[j]->InitCollisions();
@@ -237,7 +239,7 @@ void RobotWorld::InitCollisions()
     terrains[j]->InitCollisions();
 }
 
-void RobotWorld::UpdateGeometry()
+void WorldModel::UpdateGeometry()
 {
   for(size_t i=0;i<robots.size();i++) {
     robots[i]->UpdateGeometry();
@@ -247,7 +249,7 @@ void RobotWorld::UpdateGeometry()
   }
 }
 
-void RobotWorld::SetGLLights()
+void WorldModel::SetGLLights()
 {
   for(size_t i=0;i<lights.size();i++) 
     lights[i].setCurrentGL(i);
@@ -261,7 +263,7 @@ void RobotWorld::SetGLLights()
     */
 }
 
-void RobotWorld::DrawGL()
+void WorldModel::DrawGL()
 {
   for(size_t i=0;i<robots.size();i++)
     robotViews[i].DrawOpaque(true);
@@ -277,10 +279,10 @@ void RobotWorld::DrawGL()
     rigidObjects[i]->DrawGLOpaque(false);
 }
 
-int RobotWorld::LoadRobot(const string& fn)
+int WorldModel::LoadRobot(const string& fn)
 {
-  Robot* robot = new Robot;
-  printf("RobotWorld::LoadRobot: %s\n",fn.c_str());
+  RobotModel* robot = new RobotModel;
+  printf("WorldModel::LoadRobot: %s\n",fn.c_str());
   if(!robot->Load(fn.c_str())) {
     delete robot;
     return -1;
@@ -295,7 +297,7 @@ int RobotWorld::LoadRobot(const string& fn)
   return i;
 }
 
-int RobotWorld::AddRobot(const string& name,Robot* robot)
+int WorldModel::AddRobot(const string& name,RobotModel* robot)
 {
   robots.resize(robots.size()+1);
   robots.back().reset(robot);
@@ -307,7 +309,7 @@ int RobotWorld::AddRobot(const string& name,Robot* robot)
   return (int)robots.size()-1;
 }
 
-void RobotWorld::DeleteRobot(const string& name)
+void WorldModel::DeleteRobot(const string& name)
 {
   for(size_t i=0;i<robots.size();i++) {
     if(robots[i]->name == name) {
@@ -318,14 +320,14 @@ void RobotWorld::DeleteRobot(const string& name)
   }
 }
 
-Robot* RobotWorld::GetRobot(const string& name)
+RobotModel* WorldModel::GetRobot(const string& name)
 {
   for(size_t i=0;i<robots.size();i++) 
     if(robots[i]->name == name) return robots[i].get();
   return NULL;
 }
 
-ViewRobot* RobotWorld::GetRobotView(const string& name)
+ViewRobot* WorldModel::GetRobotView(const string& name)
 {
   for(size_t i=0;i<robots.size();i++) 
     if(robots[i]->name == name) return &robotViews[i];
@@ -335,9 +337,9 @@ ViewRobot* RobotWorld::GetRobotView(const string& name)
 
 
 
-int RobotWorld::LoadTerrain(const string& fn)
+int WorldModel::LoadTerrain(const string& fn)
 {
-  Terrain* t = new Terrain;
+  TerrainModel* t = new TerrainModel;
   if(!t->Load(fn.c_str())) {
     delete t;
     return -1;
@@ -354,7 +356,7 @@ int RobotWorld::LoadTerrain(const string& fn)
   return i;
 }
 
-int RobotWorld::AddTerrain(const string& name,Terrain* t)
+int WorldModel::AddTerrain(const string& name,TerrainModel* t)
 {
   terrains.resize(terrains.size()+1);
   terrains.back().reset(t);
@@ -362,7 +364,7 @@ int RobotWorld::AddTerrain(const string& name,Terrain* t)
   return (int)terrains.size()-1;
 }
 
-void RobotWorld::DeleteTerrain(const string& name)
+void WorldModel::DeleteTerrain(const string& name)
 {
   for(size_t i=0;i<terrains.size();i++) {
     if(terrains[i]->name == name) {
@@ -372,7 +374,7 @@ void RobotWorld::DeleteTerrain(const string& name)
   }  
 }
 
-Terrain* RobotWorld::GetTerrain(const string& name)
+TerrainModel* WorldModel::GetTerrain(const string& name)
 {
   for(size_t i=0;i<terrains.size();i++) 
     if(terrains[i]->name == name) return terrains[i].get();
@@ -382,9 +384,9 @@ Terrain* RobotWorld::GetTerrain(const string& name)
 
 
 
-int RobotWorld::LoadRigidObject(const string& fn)
+int WorldModel::LoadRigidObject(const string& fn)
 {
-  RigidObject* t = new RigidObject;
+  RigidObjectModel* t = new RigidObjectModel;
   if(!t->Load(fn.c_str())) {
     delete t;
     return -1;
@@ -399,7 +401,7 @@ int RobotWorld::LoadRigidObject(const string& fn)
   return i;
 }
 
-int RobotWorld::AddRigidObject(const string& name,RigidObject* t)
+int WorldModel::AddRigidObject(const string& name,RigidObjectModel* t)
 {
   if(t) t->name = name;
   rigidObjects.resize(rigidObjects.size()+1);
@@ -407,7 +409,7 @@ int RobotWorld::AddRigidObject(const string& name,RigidObject* t)
   return (int)rigidObjects.size()-1;
 }
 
-void RobotWorld::DeleteRigidObject(const string& name)
+void WorldModel::DeleteRigidObject(const string& name)
 {
   for(size_t i=0;i<rigidObjects.size();i++) {
     if(rigidObjects[i]->name == name) {
@@ -417,7 +419,7 @@ void RobotWorld::DeleteRigidObject(const string& name)
   }  
 }
 
-RigidObject* RobotWorld::GetRigidObject(const string& name)
+RigidObjectModel* WorldModel::GetRigidObject(const string& name)
 {
   for(size_t i=0;i<rigidObjects.size();i++) 
     if(rigidObjects[i]->name == name) return rigidObjects[i].get();
@@ -426,7 +428,7 @@ RigidObject* RobotWorld::GetRigidObject(const string& name)
 
 
 
-int RobotWorld::RayCast(const Ray3D& r,Vector3& worldpt)
+int WorldModel::RayCast(const Ray3D& r,Vector3& worldpt)
 {
   for(size_t j=0;j<robots.size();j++) 
     robots[j]->InitCollisions();
@@ -438,7 +440,7 @@ int RobotWorld::RayCast(const Ray3D& r,Vector3& worldpt)
   Real closestDist = Inf;
   Vector3 closestPoint;
   for(size_t j=0;j<robots.size();j++) {
-    Robot* robot = robots[j].get();
+    RobotModel* robot = robots[j].get();
     robot->UpdateGeometry();
     for(size_t i=0;i<robot->links.size();i++) {
       if(robot->IsGeometryEmpty(i)) continue;
@@ -453,7 +455,7 @@ int RobotWorld::RayCast(const Ray3D& r,Vector3& worldpt)
     }
   }
   for(size_t j=0;j<rigidObjects.size();j++) {
-    RigidObject* obj = rigidObjects[j].get();
+    RigidObjectModel* obj = rigidObjects[j].get();
     obj->geometry->SetTransform(obj->T);
     Real dist;
     if(obj->geometry->RayCast(r,&dist)) {
@@ -465,7 +467,7 @@ int RobotWorld::RayCast(const Ray3D& r,Vector3& worldpt)
     }
   }
   for(size_t j=0;j<terrains.size();j++) {
-    Terrain* ter = terrains[j].get();
+    TerrainModel* ter = terrains[j].get();
     Real dist;
     if(ter->geometry->RayCast(r,&dist)) {
       if(dist < closestDist) {
@@ -479,7 +481,7 @@ int RobotWorld::RayCast(const Ray3D& r,Vector3& worldpt)
   return closestBody;
 }
 
-int RobotWorld::RayCastIgnore(const Ray3D& r,const vector<int>& ignoreIDList,Vector3& worldpt)
+int WorldModel::RayCastIgnore(const Ray3D& r,const vector<int>& ignoreIDList,Vector3& worldpt)
 {
   vector<bool> ignoreIDs(NumIDs(),false);
   for(auto i:ignoreIDList)
@@ -504,7 +506,7 @@ int RobotWorld::RayCastIgnore(const Ray3D& r,const vector<int>& ignoreIDList,Vec
   Vector3 closestPoint;
   for(size_t j=0;j<robots.size();j++) {
     if(ignoreIDs[RobotID((int)j)]) continue;
-    Robot* robot = robots[j].get();
+    RobotModel* robot = robots[j].get();
     robot->UpdateGeometry();
     idBase = RobotLinkID((int)j,0);
     for(size_t i=0;i<robot->links.size();i++) {
@@ -523,7 +525,7 @@ int RobotWorld::RayCastIgnore(const Ray3D& r,const vector<int>& ignoreIDList,Vec
   idBase = RigidObjectID(0);
   for(size_t j=0;j<rigidObjects.size();j++) {
     if(ignoreIDs[idBase+(int)j]) continue;
-    RigidObject* obj = rigidObjects[j].get();
+    RigidObjectModel* obj = rigidObjects[j].get();
     obj->geometry->SetTransform(obj->T);
     Real dist;
     if(obj->geometry->RayCast(r,&dist)) {
@@ -537,7 +539,7 @@ int RobotWorld::RayCastIgnore(const Ray3D& r,const vector<int>& ignoreIDList,Vec
   idBase = TerrainID(0);
   for(size_t j=0;j<terrains.size();j++) {
     if(ignoreIDs[idBase+(int)j]) continue;
-    Terrain* ter = terrains[j].get();
+    TerrainModel* ter = terrains[j].get();
     Real dist;
     if(ter->geometry->RayCast(r,&dist)) {
       if(dist < closestDist) {
@@ -551,7 +553,7 @@ int RobotWorld::RayCastIgnore(const Ray3D& r,const vector<int>& ignoreIDList,Vec
   return closestBody;
 }
 
-int RobotWorld::RayCastSelected(const Ray3D& r,const vector<int>& selectIDList,Vector3& worldpt)
+int WorldModel::RayCastSelected(const Ray3D& r,const vector<int>& selectIDList,Vector3& worldpt)
 {
   vector<bool> ignoreIDs(NumIDs(),true);
   for(auto i:selectIDList)
@@ -576,7 +578,7 @@ int RobotWorld::RayCastSelected(const Ray3D& r,const vector<int>& selectIDList,V
   Vector3 closestPoint;
   for(size_t j=0;j<robots.size();j++) {
     if(ignoreIDs[RobotID((int)j)]) continue;
-    Robot* robot = robots[j].get();
+    RobotModel* robot = robots[j].get();
     robot->UpdateGeometry();
     idBase = RobotLinkID((int)j,0);
     for(size_t i=0;i<robot->links.size();i++) {
@@ -595,7 +597,7 @@ int RobotWorld::RayCastSelected(const Ray3D& r,const vector<int>& selectIDList,V
   idBase = RigidObjectID(0);
   for(size_t j=0;j<rigidObjects.size();j++) {
     if(ignoreIDs[idBase+(int)j]) continue;
-    RigidObject* obj = rigidObjects[j].get();
+    RigidObjectModel* obj = rigidObjects[j].get();
     obj->geometry->SetTransform(obj->T);
     Real dist;
     if(obj->geometry->RayCast(r,&dist)) {
@@ -609,7 +611,7 @@ int RobotWorld::RayCastSelected(const Ray3D& r,const vector<int>& selectIDList,V
   idBase = TerrainID(0);
   for(size_t j=0;j<terrains.size();j++) {
     if(ignoreIDs[idBase+(int)j]) continue;
-    Terrain* ter = terrains[j].get();
+    TerrainModel* ter = terrains[j].get();
     Real dist;
     if(ter->geometry->RayCast(r,&dist)) {
       if(dist < closestDist) {
@@ -623,7 +625,7 @@ int RobotWorld::RayCastSelected(const Ray3D& r,const vector<int>& selectIDList,V
   return closestBody;
 }
 
-Robot* RobotWorld::RayCastRobot(const Ray3D& r,int& body,Vector3& localpt)
+RobotModel* WorldModel::RayCastRobot(const Ray3D& r,int& body,Vector3& localpt)
 {
   //doing it this way rather than dynamic initialization gives better 
   //debug printing info
@@ -631,13 +633,13 @@ Robot* RobotWorld::RayCastRobot(const Ray3D& r,int& body,Vector3& localpt)
     robots[j]->InitCollisions();
   }
 
-  Robot* closestRobot=NULL;
+  RobotModel* closestRobot=NULL;
   Real closestDist = Inf;
   Vector3 closestPoint;
   int closestBody = -1;
   Vector3 worldpt;
   for(size_t j=0;j<robots.size();j++) {
-    Robot* robot = robots[j].get();
+    RobotModel* robot = robots[j].get();
     robot->UpdateGeometry();
     for(size_t i=0;i<robot->links.size();i++) {
       if(robot->IsGeometryEmpty(i)) continue;
@@ -658,7 +660,7 @@ Robot* RobotWorld::RayCastRobot(const Ray3D& r,int& body,Vector3& localpt)
   return closestRobot;
 }
 
-RigidObject* RobotWorld::RayCastObject(const Ray3D& r,Vector3& localpt)
+RigidObjectModel* WorldModel::RayCastObject(const Ray3D& r,Vector3& localpt)
 {
   //doing it this way rather than dynamic initialization gives better 
   //debug printing info
@@ -666,12 +668,12 @@ RigidObject* RobotWorld::RayCastObject(const Ray3D& r,Vector3& localpt)
     rigidObjects[j]->InitCollisions();
   }
 
-  RigidObject* closest=NULL;
+  RigidObjectModel* closest=NULL;
   Real closestDist = Inf;
   Vector3 closestPoint;
   Vector3 worldpt;
   for(size_t j=0;j<rigidObjects.size();j++) {
-    RigidObject* obj = rigidObjects[j].get();
+    RigidObjectModel* obj = rigidObjects[j].get();
     obj->geometry->SetTransform(obj->T);
     Real dist;
     if(obj->geometry->RayCast(r,&dist)) {
@@ -687,34 +689,34 @@ RigidObject* RobotWorld::RayCastObject(const Ray3D& r,Vector3& localpt)
   return closest;
 }
 
-void CopyWorld(const RobotWorld& a,RobotWorld& b)
+void WorldModel::Copy(const WorldModel& a)
 {
-  b.camera=a.camera;
-  b.viewport=a.viewport;
-  b.lights=a.lights;
+  this->camera=a.camera;
+  this->viewport=a.viewport;
+  this->lights=a.lights;
 
-  b.robots.resize(a.robots.size());
-  b.robotViews.resize(a.robots.size());
-  b.terrains.resize(a.terrains.size());
-  b.rigidObjects.resize(a.rigidObjects.size());
-  for(size_t i=0;i<b.robots.size();i++) {
-    b.robots[i] = make_shared<Robot>();
-    *b.robots[i] = *a.robots[i];
-    b.robotViews[i] = a.robotViews[i];
-    b.robotViews[i].robot = b.robots[i].get();
+  this->robots.resize(a.robots.size());
+  this->robotViews.resize(a.robots.size());
+  this->terrains.resize(a.terrains.size());
+  this->rigidObjects.resize(a.rigidObjects.size());
+  for(size_t i=0;i<this->robots.size();i++) {
+    this->robots[i] = make_shared<RobotModel>();
+    *this->robots[i] = *a.robots[i];
+    this->robotViews[i] = a.robotViews[i];
+    this->robotViews[i].robot = this->robots[i].get();
   }
-  for(size_t i=0;i<b.terrains.size();i++) {
-    b.terrains[i] = make_shared<Terrain>();
-    *b.terrains[i] = *a.terrains[i];
+  for(size_t i=0;i<this->terrains.size();i++) {
+    this->terrains[i] = make_shared<TerrainModel>();
+    *this->terrains[i] = *a.terrains[i];
   }
-  for(size_t i=0;i<b.rigidObjects.size();i++) {
-    b.rigidObjects[i] = make_shared<RigidObject>();
-    *b.rigidObjects[i] = *a.rigidObjects[i];
+  for(size_t i=0;i<this->rigidObjects.size();i++) {
+    this->rigidObjects[i] = make_shared<RigidObjectModel>();
+    *this->rigidObjects[i] = *a.rigidObjects[i];
   }
 
 }
 
-int RobotWorld::LoadElement(const string& sfn)
+int WorldModel::LoadElement(const string& sfn)
 {
   const char* fn = sfn.c_str();
   const char* ext=FileExtension(fn);
@@ -747,12 +749,12 @@ int RobotWorld::LoadElement(const string& sfn)
     return TerrainID(res);
   }
   else {
-    printf("RobotWorld::Load: Unknown file extension %s on file %s\n",ext,fn);
+    printf("WorldModel::Load: Unknown file extension %s on file %s\n",ext,fn);
     return -1;
   }
 }
 
-bool RobotWorld::CanLoadElementExt(const char* ext) const
+bool WorldModel::CanLoadElementExt(const char* ext) const
 {
   if(!ext) return false;
   if(0==strcmp(ext,"rob") || 0==strcmp(ext,"urdf")) {
@@ -766,3 +768,5 @@ bool RobotWorld::CanLoadElementExt(const char* ext) const
   }
   return false;
 }
+
+} //namespace Klampt

@@ -15,6 +15,8 @@
 using namespace Math3D;
 using namespace Optimization;
 
+namespace Klampt {
+
 #define SLP_SOLVE_ITERS 100
 
 //use the new polynomial bounding technique.  Turning this to 0 uses the old interval
@@ -2605,7 +2607,7 @@ bool OptimizeTimeScaling(const GeneralizedCubicBezierSpline& path,
 
 bool TimeScaledBezierCurve::OptimizeTimeScaling(const Vector& vmin,const Vector& vmax,const Vector& amin,const Vector& amax)
 {
-  return ::OptimizeTimeScaling(path,vmin,vmax,amin,amax,timeScaling);
+  return Klampt::OptimizeTimeScaling(path,vmin,vmax,amin,amax,timeScaling);
 }
 
 void TimeScaledBezierCurve::GetPiecewiseLinear(std::vector<Real>& times,std::vector<Config>& milestones) const
@@ -2805,7 +2807,7 @@ void TimeScaledBezierCurve::Plot(const char* fn,const Vector& vmin,const Vector&
 
 
 
-CustomTimeScaling::CustomTimeScaling(Robot& robot)
+CustomTimeScaling::CustomTimeScaling(RobotModel& robot)
   :cspace(robot),saveConstraintNames(false),computeLagrangeMultipliers(false)
 {
 }
@@ -3021,7 +3023,7 @@ void CustomTimeScaling::SetStartStop()
 
 void CustomTimeScaling::SetDefaultBounds()
 {
-  Robot& robot = cspace.robot;
+  RobotModel& robot = cspace.robot;
   const Vector& vmax=robot.velMax, &vmin=robot.velMin;
   const Vector& amax=robot.accMax;
   int d=xs[0].n;
@@ -3096,3 +3098,5 @@ void CustomTimeScaling::PrintActiveConstraints(ostream& out)
       out<<paramDivs[i+1]<<": "<<"vmax"<<endl;
   }
 }
+
+} //namespace Klampt

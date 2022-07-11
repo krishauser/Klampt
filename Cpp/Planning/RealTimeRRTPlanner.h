@@ -4,6 +4,8 @@
 #include "RealTimePlanner.h"
 #include <KrisLibrary/planning/MotionPlanner.h>
 
+namespace Klampt {
+
 /** @brief Dynamic RRT planner -- not recently tested
  */
 class DynamicRRTPlanner : public DynamicMotionPlannerBase
@@ -95,5 +97,7 @@ public:
   unique_ptr<Node> root;
   vector<Node*> nodes;
 };
+
+} //namespace Klampt
 
 #endif

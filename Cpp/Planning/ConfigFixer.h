@@ -3,6 +3,8 @@
 
 #include <KrisLibrary/planning/CSpace.h>
 
+namespace Klampt {
+
 /** @brief A class for "fixing" a configuration by sampling a feasible
  * configuration near it. 
  *
@@ -20,5 +22,7 @@ class ConfigFixer
   Real d0,dmax;  //radii to sample from: initial, maximum
   Real dRate;    //stop if rate of shrinking towards q decreases past this rate
 };
+
+} //namespace Klampt
 
 #endif

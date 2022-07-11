@@ -3,12 +3,12 @@
 
 #include <QMainWindow>
 #include <QDir>
-
 #include "Modeling/World.h"
 #include "Interface/RobotTestGUI.h"
 #include "qrobottestgui.h"
-
 #include "collisionoutput.h"
+
+using namespace Klampt;
 
 namespace Ui {
 class MainWindow;
@@ -27,7 +27,7 @@ public:
     ~MainWindow();
     QDir directory;
     QString filename;
-    RobotWorld world;
+    WorldModel world;
     shared_ptr<RobotTestBackend> backend;
     shared_ptr<QRobotTestGUI> gui;
     int mode;

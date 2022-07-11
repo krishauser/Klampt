@@ -1,7 +1,10 @@
-#include "ControlledSimulator.h"
+#include "SimRobotController.h"
 #include "Sensing/JointSensors.h"
+#include "Sensing/Common_Internal.h"
 #include <KrisLibrary/math/angle.h>
-DEFINE_LOGGER(ControlledRobotSimulator)
+DEFINE_LOGGER(SimRobotController)
+
+namespace Klampt {
 
 //Set these values to 0 to get all warnings
 
@@ -12,13 +15,13 @@ const static double gTorqueLimitWarningThreshold = Inf;
 const static double gJointLimitWarningThreshold = Inf;
 
 
-ControlledRobotSimulator::ControlledRobotSimulator()
+SimRobotController::SimRobotController()
   :robot(NULL),oderobot(NULL),controller(NULL)
 {
   controlTimeStep = 0.01;
 }
 
-void ControlledRobotSimulator::Init(Robot* _robot,ODERobot* _oderobot,RobotController* _controller)
+void SimRobotController::Init(RobotModel* _robot,ODERobot* _oderobot,RobotController* _controller)
 {
   robot=_robot;
   oderobot=_oderobot;
@@ -35,18 +38,18 @@ void ControlledRobotSimulator::Init(Robot* _robot,ODERobot* _oderobot,RobotContr
 }
 
 
-void ControlledRobotSimulator::GetCommandedConfig(Config& q)
+void SimRobotController::GetCommandedConfig(Config& q)
 {
   Assert(command.actuators.size() == robot->drivers.size());
   robot->q.set(0.0);
   bool warned=false;
   for(size_t i=0;i<command.actuators.size();i++) {
-    RobotJointDriver& d=robot->drivers[i];
+    RobotModelDriver& d=robot->drivers[i];
     if(command.actuators[i].mode == ActuatorCommand::PID)
       robot->SetDriverValue(i,command.actuators[i].qdes);
     else {
       if(!warned)
-        LOG4CXX_ERROR(GET_LOGGER(ControlledRobotSimulator),"ControlledRobotSimulator::GetCommandedConfig: Can't get commanded config for non-PID drivers");
+        LOG4CXX_ERROR(GET_LOGGER(SimRobotController),"SimRobotController::GetCommandedConfig: Can't get commanded config for non-PID drivers");
       warned = true;
       //robot->SetDriverValue(i,0.0);
     }
@@ -54,18 +57,18 @@ void ControlledRobotSimulator::GetCommandedConfig(Config& q)
   q = robot->q;
 }
 
-void ControlledRobotSimulator::GetCommandedVelocity(Config& dq)
+void SimRobotController::GetCommandedVelocity(Config& dq)
 {
   Assert(command.actuators.size() == robot->drivers.size());
   robot->dq.set(0.0);
   bool warned=false;
   for(size_t i=0;i<command.actuators.size();i++) {
-    RobotJointDriver& d=robot->drivers[i];
+    RobotModelDriver& d=robot->drivers[i];
     if(command.actuators[i].mode == ActuatorCommand::PID)
       robot->SetDriverVelocity(i,command.actuators[i].dqdes);
     else {
       if(!warned){
-        LOG4CXX_ERROR(GET_LOGGER(ControlledRobotSimulator),"ControlledRobotSimulator::GetCommandedVelocity: Can't get commanded velocity for non-PID drivers");
+        LOG4CXX_ERROR(GET_LOGGER(SimRobotController),"SimRobotController::GetCommandedVelocity: Can't get commanded velocity for non-PID drivers");
       }
       warned = true;
       //robot->SetDriverVelocity(i,0.0);
@@ -74,11 +77,11 @@ void ControlledRobotSimulator::GetCommandedVelocity(Config& dq)
   dq = robot->dq;
 }
 
-void ControlledRobotSimulator::GetSensedConfig(Config& q)
+void SimRobotController::GetSensedConfig(Config& q)
 {
   JointPositionSensor* s = sensors.GetTypedSensor<JointPositionSensor>();
   if(s==NULL){
-        LOG4CXX_ERROR(GET_LOGGER(ControlledRobotSimulator),"ControlledRobotSimulator::GetSensedConfig: Warning, robot has no joint position sensor");
+        LOG4CXX_ERROR(GET_LOGGER(SimRobotController),"SimRobotController::GetSensedConfig: Warning, robot has no joint position sensor");
   }
   else {
     //resize to the correct size
@@ -93,11 +96,11 @@ void ControlledRobotSimulator::GetSensedConfig(Config& q)
   }
 }
 
-void ControlledRobotSimulator::GetSensedVelocity(Config& dq)
+void SimRobotController::GetSensedVelocity(Config& dq)
 {
   JointVelocitySensor* s=sensors.GetTypedSensor<JointVelocitySensor>();
   if(s==NULL){
-    LOG4CXX_ERROR(GET_LOGGER(ControlledRobotSimulator),"ControlledRobotSimulator::GetSensedVelocity: Warning, robot has no joint velocity sensor");
+    LOG4CXX_ERROR(GET_LOGGER(SimRobotController),"SimRobotController::GetSensedVelocity: Warning, robot has no joint velocity sensor");
   }
   else {
     //resize to the correct size
@@ -112,24 +115,24 @@ void ControlledRobotSimulator::GetSensedVelocity(Config& dq)
   }
 }
 
-void ControlledRobotSimulator::GetSimulatedConfig(Config& q)
+void SimRobotController::GetSimulatedConfig(Config& q)
 {
   oderobot->GetConfig(q);
 }
 
-void ControlledRobotSimulator::GetSimulatedVelocity(Config& dq)
+void SimRobotController::GetSimulatedVelocity(Config& dq)
 {
   oderobot->GetVelocities(dq);
 }
 
-void ControlledRobotSimulator::GetLinkTorques(Vector& t) const
+void SimRobotController::GetLinkTorques(Vector& t) const
 {
   Vector tact(robot->drivers.size());
   t.resize(robot->links.size());
   GetActuatorTorques(tact);
   for(size_t i=0;i<robot->drivers.size();i++)
     switch(robot->drivers[i].type) {
-      case RobotJointDriver::Affine:
+      case RobotModelDriver::Affine:
       {
         for (size_t j=0;j<robot->drivers[i].linkIndices.size();j++)
           t[robot->drivers[i].linkIndices[j]] = tact[i]*robot->drivers[i].affScaling[j];
@@ -143,18 +146,18 @@ void ControlledRobotSimulator::GetLinkTorques(Vector& t) const
     }
 }
 
-void ControlledRobotSimulator::GetActuatorTorques(Vector& t) const
+void SimRobotController::GetActuatorTorques(Vector& t) const
 {
   if(t.empty()) t.resize(robot->drivers.size());
   if(t.n != (int)robot->drivers.size()) {
-    LOG4CXX_WARN(GET_LOGGER(ControlledRobotSimulator),"ControlledRobotSimulator::GetActuatorTorques: Warning, vector isn't sized to the number of drivers "<<robot->drivers.size()<<" (got "<<t.n);
+    LOG4CXX_WARN(GET_LOGGER(SimRobotController),"SimRobotController::GetActuatorTorques: Warning, vector isn't sized to the number of drivers "<<robot->drivers.size()<<" (got "<<t.n);
     if(t.n == (int)robot->links.size())
-      LOG4CXX_WARN(GET_LOGGER(ControlledRobotSimulator),"  (Did you mean GetLinkTorques()?");
+      LOG4CXX_WARN(GET_LOGGER(SimRobotController),"  (Did you mean GetLinkTorques()?");
   }
   Assert(command.actuators.size() == robot->drivers.size());
   t.resize(command.actuators.size());
   for(size_t i=0;i<command.actuators.size();i++) {
-    const RobotJointDriver& d=robot->drivers[i];
+    const RobotModelDriver& d=robot->drivers[i];
     Real q=oderobot->GetDriverValue(i);
     Real dq=oderobot->GetDriverVelocity(i);
     int link = d.linkIndices[0];
@@ -167,14 +170,14 @@ void ControlledRobotSimulator::GetActuatorTorques(Vector& t) const
     q -= TwoPi;
     }
     if(q < robot->qMin(link)-gJointLimitWarningThreshold || q > robot->qMax(link)+gJointLimitWarningThreshold) {
-      printf("Warning: joint angle %s out of bounds\n",robot->linkNames[link].c_str());
-      printf("q=%g, qmin=%g, qmax=%g (deg)\n",RtoD(q),RtoD(robot->qMin(link)),RtoD(robot->qMax(link)));
+      LOG4CXX_WARN(GET_LOGGER(SimRobotController),"Warning: joint angle "<<robot->linkNames[link].c_str()<<" out of bounds");
+      LOG4CXX_WARN(GET_LOGGER(SimRobotController),"(q="<<RtoD(q)<<", qmin="<<RtoD(robot->qMin(link))<<", qmax="<<RtoD(robot->qMax(link))<<" (deg)");
       //getchar();
     }
     const ActuatorCommand& cmd=command.actuators[i];
     switch(cmd.mode) {
     case ActuatorCommand::OFF:
-      printf("Warning: actuator off?\n");
+      LOG4CXX_WARN(GET_LOGGER(SimRobotController),"Warning: actuator off?");
       t(i) = 0;
       break;
     case ActuatorCommand::TORQUE:
@@ -205,7 +208,7 @@ void ControlledRobotSimulator::GetActuatorTorques(Vector& t) const
   }
 }
 
-void ControlledRobotSimulator::Step(Real dt,WorldSimulation* sim)
+void SimRobotController::Step(Real dt,Simulator* sim)
 {
   Real endOfTimeStep = curTime + dt;
 
@@ -216,14 +219,16 @@ void ControlledRobotSimulator::Step(Real dt,WorldSimulation* sim)
     nextSenseTime.resize(sensors.sensors.size(),curTime);
   }
   for(size_t i=0;i<sensors.sensors.size();i++) {
+    if(!sensors.sensors[i]->enabled)
+      continue;
+      
     Real delay = 0;
     if(sensors.sensors[i]->rate == 0)
       delay = controlTimeStep;
     else
       delay = 1.0/sensors.sensors[i]->rate;
     if(delay < dt) {
-      printf("Sensor %s set to rate higher than internal simulation time step\n",sensors.sensors[i]->name.c_str());
-      printf("  ... Limiting sensor rate to %f\n",1.0/dt);
+      LOG4CXX_WARN(GET_LOGGER(SimRobotController),"Sensor "<<sensors.sensors[i]->name<<" set to rate higher than internal simulation time step, limiting to "<<1.0/dt);
       sensors.sensors[i]->rate = 1.0/dt;
       //todo: handle numerical errors in inversion...
       delay = dt;
@@ -252,17 +257,17 @@ void ControlledRobotSimulator::Step(Real dt,WorldSimulation* sim)
     GetActuatorTorques(t);
     Assert(command.actuators.size() == robot->drivers.size());
     for(size_t i=0;i<command.actuators.size();i++) {
-      RobotJointDriver& d=robot->drivers[i];
+      RobotModelDriver& d=robot->drivers[i];
       ActuatorCommand& cmd=command.actuators[i];
       if(cmd.mode == ActuatorCommand::LOCKED_VELOCITY) {
         //TODO: clamp to braking velocitiy?
         oderobot->SetDriverFixedVelocity(i,cmd.desiredVelocity,cmd.torque);
       }
       else {
-	if(d.type == RobotJointDriver::Normal || d.type == RobotJointDriver::Translation || d.type == RobotJointDriver::Rotation) {
+	if(d.type == RobotModelDriver::Normal || d.type == RobotModelDriver::Translation || d.type == RobotModelDriver::Rotation) {
 	  oderobot->AddDriverTorque(i,t(i));
 	}
-	else if(d.type == RobotJointDriver::Affine) {
+	else if(d.type == RobotModelDriver::Affine) {
 	  //figure out how the drive mechanism affects torques on the links
 	  Real q=cmd.qdes;
 	  Real dq=cmd.dqdes;
@@ -316,33 +321,57 @@ void ControlledRobotSimulator::Step(Real dt,WorldSimulation* sim)
   curTime = endOfTimeStep;
 }
 
-void ControlledRobotSimulator::UpdateRobot()
+void SimRobotController::UpdateRobot()
 {
   oderobot->GetConfig(robot->q);
   oderobot->GetVelocities(robot->dq);
   robot->UpdateFrames();
 }
 
-bool ControlledRobotSimulator::ReadState(File& f)
+bool SimRobotController::ReadState(File& f)
 {
-  if(!ReadFile(f,curTime)) return false;
-  if(!ReadFile(f,nextControlTime)) return false;
-  if(!ReadFile(f,command)) return false;
-  if(!sensors.ReadState(f)) return false;
+  if(!ReadFile(f,curTime)) {
+    LOG4CXX_ERROR(GET_LOGGER(SimRobotController),"SimRobotController::ReadState: Unable to read curTime");
+    return false;
+  }
+  if(!ReadFile(f,nextControlTime)) {
+    LOG4CXX_ERROR(GET_LOGGER(SimRobotController),"SimRobotController::ReadState: Unable to read nextControlTime");
+    return false;
+  }
+  if(!ReadFile(f,command)) {
+    LOG4CXX_ERROR(GET_LOGGER(SimRobotController),"SimRobotController::ReadState: Unable to read command");
+    return false;
+  }
+  if(!sensors.ReadState(f)) {
+    LOG4CXX_ERROR(GET_LOGGER(SimRobotController),"SimRobotController::ReadState: Unable to read sensors");
+    return false;
+  }
   if(controller) {
-    if(!controller->ReadState(f)) return false;
+    File cfile;
+    if(!ReadFile(f,cfile)) {
+      LOG4CXX_ERROR(GET_LOGGER(SimRobotController),"Unable to read controller file");
+      return false;
+    }
+    if(!controller->ReadState(cfile)) {
+      LOG4CXX_ERROR(GET_LOGGER(SimRobotController),"Unable to read controller");
+      return false;
+    }
   }
   return true;
 }
 
-bool ControlledRobotSimulator::WriteState(File& f) const
+bool SimRobotController::WriteState(File& f) const
 {
   if(!WriteFile(f,curTime)) return false;
   if(!WriteFile(f,nextControlTime)) return false;
   if(!WriteFile(f,command)) return false;
   if(!sensors.WriteState(f)) return false;
   if(controller) {
-    if(!controller->WriteState(f)) return false;
+    File cfile; cfile.OpenData();
+    if(!controller->WriteState(cfile)) return false;
+    if(!WriteFile(f,cfile)) return false;
   }
   return true;
 }
+
+} // namespace Klampt

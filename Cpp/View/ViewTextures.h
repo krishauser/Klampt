@@ -5,7 +5,9 @@
 #include <KrisLibrary/image/image.h>
 #include <map>
 #include <string>
-using namespace std;
+
+namespace Klampt {
+    using namespace std;
 
 class ViewTextures
 {
@@ -18,5 +20,7 @@ class ViewTextures
   static map<string,shared_ptr<Image> > images;
   static map<string,GLDraw::GLTextureObject> textureObjects;
 };
+
+} //namespace Klampt
 
 #endif

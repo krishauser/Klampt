@@ -4,11 +4,11 @@ Running Klamp't apps
 Klamp't comes with a few utility programs that are installed into your Python/Scripts folder.
 
 - ``klampt_browser``: a program for browsing through and editing resources.
+- ``klampt_control``: a program for controlling robots and debugging Robot Interface Layer controllers.
 - ``klampt_path``: a command-line utility for modifying paths.
+- ``klampt_resource``: a utility program for modifying resources and generating thumbnails.
 - ``klampt_sim``: an imitation of the SimTest program. 
   An entry point to fast prototyping of controllers using the Python API.
-- ``klampt_thumbnails``: a utility program for generating thumbnails of
-  worlds, robots, objects, and resources.
 
 klampt\_browser
 ---------------
@@ -44,6 +44,52 @@ has been set up as the reference world, selecting the
 .. image:: _static/images/klampt_browser3.png
 
 
+klampt\_control
+---------------
+
+``klampt_control`` allows you to operate robots in real time, to debug implementations
+of Robot Interface Layer (RIL) controllers, and launch RIL controllers in server or client
+mode.
+
+A controller script is a Python file or module that contains a function
+``make(RobotModel) -> RobotInterfaceBase``.  We recommend including such a script
+in a :class:`~klampt.model.robotinfo.RobotInfo` JSON file, which specifies
+the controller, model, parts, and end effectors::
+
+   klampt_control Klampt-examples/robotinfo/ur5/ur5_sim.py
+
+.. image:: _static/images/klampt_control.png
+
+Alternatively, the script may be specified directly on
+the command line along with the associated robot or world model.  The following
+launches an interface to control a physical UR5 robot::
+
+   klampt_control Klampt-examples/robotinfo/ur5/controller/ur5_ril.py Klampt-examples/data/robots/ur5.rob
+
+The default kinematic simulation interface is specified with ``klampt.control.simrobotcontroller``,
+so the following controls a virtual UR5::
+
+   klampt_control klampt.control.simrobotcontroller Klampt-examples/data/robots/ur5.rob
+
+Similarly, you can just include the ``--sim`` flag::
+
+   klampt_control --sim Klampt-examples/data/robots/ur5.rob
+
+To launch a controller as an XML-RPC server, you can simply pass the ``--server`` flag::
+
+   klampt_control --server 0.0.0.0:7881 Klampt-examples/robotinfo/ur5/ur5_sim.rob
+
+To run the ``klampt_control`` GUI in client mode, run::
+
+   klampt_control --client http://localhost:7881 
+
+If you are not running on the same machine or do not have the same directory structure, you
+will need to specify the robot file as well::
+
+   klampt_control --client http://[SERVER_IP]:7881 Klampt-examples/robotinfo/ur5/ur5_sim.rob
+
+
+
 klampt\_path
 ------------
 
@@ -61,13 +107,22 @@ in the experimental Controller API.  The following image shows the output from::
 
 .. image:: _static/images/klampt_sim.png
 
-klampt\_thumbnails
+klampt\_resource
 -------------------
 
-``klampt_thumbnails`` generates a folder of thumbnail PNGs given a folder containing Klampt
-resources.  This is most useful when you have programmatically generated many worlds, configurations,
-or motions.
+``klampt_resource --robot=INPUT_ROBOT --transfer=TARGET_ROBOT INPUT_FOLDER [OUTPUT_FOLDER]`` 
+converts all compatible resources from one robot to another.  The robots must share link names.
+Applicable resource types are:
+``Config (.config)``, ``Configs (.configs)``, ``Trajectory (.path, .traj)``, ``MultiPath (.xml)``,
+``IKObjective (.ikgoal)``, ``Hold (.hold)``, ``Grasp (.grasp)``.
 
+``klampt_resource --thumbnails --world=WORLD INPUT_FOLDER [OUTPUT_FOLDER]`` generates a folder of 
+thumbnail PNGs given a folder containing Klampt resources.  This is useful when you have 
+programmatically generated many  worlds, configurations, or motions. 
+
+``klampt_resource --convert=TYPE INPUT [OUTPUT]`` converts a resource from one type to another.
+Currently only supports TYPE "json".  See ``klampt_path`` for conversions of path / trajectory
+types.
 
 Example files
 -------------
@@ -119,18 +174,23 @@ of programming Klamp't applications in Python.
 
 Demos:
 
+-  ``exercise_joints.py``: moves between all of a robot's joint
+   extrema. Useful for debugging robot models.
 -  ``gl_vis.py``: a simple visualization of a simulation using a
    visualization plugin.
 -  ``gl_vis_widgets.py``: a plugin with widgets for visual editing,
    and demonstrating custom GUI menu actions.
--  ``kbdrive.py``: drive a simulated robot around using the keyboard.
+-  ``kbdrive.py``: drive a simulated or real robot around using the keyboard.
    The first 10 joints can be driven via a positive velocity with the
    top row of keys 1,2,...,0 and a negative velocity with the second row
    of keys q,w,...,p.
+-  ``mouse_capture.py``: shows how to capture mouse clicks in the
+   visualizer.
 -  ``path_test.py``: tests the :meth:`~klampt.model.trajectory.path_to_trajectory`
    function with various options.
 -  ``planning_test.py``: performs tests of the motion planning module,
    with various options.
+-  ``pose.py``: utility for visual posing of a simulated or real robot.
 -  ``resource_demo.py``: demonstrates various functions of the
    `klampt.io.resource <Manual-Resources.html>`__ module.
 -  ``robotiq.py``: modeling and simulating the RobotiQ 3-finger
@@ -145,17 +205,6 @@ Demos:
    :meth:`~klampt.model.trajectory.execute_trajectory` function.
 -  ``vis_template.py``: demonstrates several functions of the vis
    module.
+-  ``workspace_test.py``: demonstrates usage of the workspace calculation
+   utilities.
 
-Utility programs:
-
--  ``make_planar_rob.py``: makes a canonical planar robot.
--  ``config_to_driver_trajectory.py``: converts a linear path from
-   configuration space (# of DOF) to driver space (# of actuators).
--  ``driver_to_config_trajectory.py``: converts a linear path from
-   driver space (# of actuators) to configuration space (# of DOF).
--  ``multipath_to_timed_multipath.py``: simple script to convert a
-   :class:`~klampt.model.multipath.MultiPath` to a timed MultiPath. Parameters at the top of the script
-   govern the speed of the trajectory.
--  ``tri2off.py``: converts old-style .tri files to .off files.
--  ``robot_to_mesh.py``: converts a robot at a given pose to a static
-   mesh file.

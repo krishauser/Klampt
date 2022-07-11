@@ -9,12 +9,12 @@ struct _object;
 typedef _object PyObject;
 
 /// Sets the random seed used by the motion planner
-void setRandomSeed(int seed);
+void set_random_seed(int seed);
 
 /// Loads planner values from a JSON string
-void setPlanJSONString(const char* string);
+void set_plan_json_string(const char* string);
 /// Saves planner values to a JSON string
-std::string getPlanJSONString();
+std::string get_plan_json_string();
 
 /** @brief Sets the planner type.
  *
@@ -30,9 +30,9 @@ std::string getPlanJSONString();
  * - fmm: the fast marching method algorithm for resolution-complete optimal motion planning
  * - fmm*: an anytime fast marching method algorithm for optimal motion planning
  */
-void setPlanType(const char* type);
+void set_plan_type(const char* type);
 
-void setPlanSetting(const char* setting,double value);
+void set_plan_setting(const char* setting,double value);
 /** @brief Sets a numeric or string-valued setting for the planner.
  *
  * Valid numeric values are:
@@ -67,13 +67,16 @@ void setPlanSetting(const char* setting,double value);
  *   "{timeLimit:X}".  If you are using an optimizing planner, e.g.,
  *   shortcutting, you should set foundSolution:0.
  */
-void setPlanSetting(const char* setting,const char* value);
+void set_plan_setting(const char* setting,const char* value);
 
 ///Performs cleanup of all created spaces and planners
 void destroy();
 
-/** @brief A raw interface for a configuration space.  Note: the native
- * Python CSpace interface class in cspace.py is easier to use.
+/** @brief A raw interface for a configuration space.  
+ * 
+ * ..note::
+ * 
+ *     The native Python CSpace interface class in cspace.py is easier to use.
  *
  * You can either set a single feasibility test function using setFeasibility()
  * or add several feasibility tests, all of which need to be satisfied, using

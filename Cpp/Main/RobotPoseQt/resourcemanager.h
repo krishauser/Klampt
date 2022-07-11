@@ -2,9 +2,10 @@
 #define RESOURCE_MANGER_H
 
 
-#include <Modeling/Resources.h>
+#include <Klampt/Modeling/Resources.h>
 
 using namespace std;
+using namespace Klampt;
 
 /** @brief Allows a resource to be expanded into component resources,
  * edited, and then backed up.

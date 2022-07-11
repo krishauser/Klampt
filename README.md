@@ -64,7 +64,7 @@ Installation instructions are also available for
 Klamp't works best when it is installed on your local machine, but it can also be run online through your web browser using Google Colab or Binder (or any other Jupyterhub server).
 
 - Google Colab [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/gist/krishauser/1a518571493d2582f8bda908d9db02fb/klamptcolab.ipynb)
-- Binder [![Open in Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/krishauser/Klampt-examples/binder?filepath=Jupyter%2FBasicKlamptDemo.ipynb)
+- Binder [![Open in Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/krishauser/Klampt-examples/binder?labpath=Jupyter)
 
 Note that the UI functionality is drastically limited compared to a local installation.
 
@@ -86,11 +86,39 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 
 ## Version history
 
-**Devel** (2/22/2021)
+**Devel** (5/31/2022)
 -   Fixed bug in simulation of affine joints when the joint angle can go negative. Also, internal affine transmission coupling is simulated in a fashion that's sensitive to the driver's PID constants.
 -   Minor performance improvements to IK; API for getting subset of Jacobian columns.
 -   Python API: substantial performance improvements to camera image retrieval (camera_to_images).
 -   Python API: new calls for getting subset of Jacobian columns.
+-   IK solver now has a minimization mode and a prioritized solve mode.
+
+**0.9** (1/15/2022)
+-   Python API: type hints are available throughout the SWIG interface and in many native Python functions.
+-   Python API: direct Numpy interface speeds up large data copies. Tests indicate ~6x speedup (45ms->7.5ms) for getting a simulated sensor image (``SimRobotSensor.getMeasurements()``), ~80x speedup (160ms->2ms) for converting images to point clouds (``PointCloud.setDepthImage/setRGBDImages``), and 20x speedup (200ms->10ms) for converting a Numpy array to a point cloud (tested on 640x480 images).
+-   Python API: global functions and many classes in the the ``klampt.vis`` module now conform to PEP8 naming conventions.  Old non-conformant functions produce a ``DeprecationWarning`` and will be removed in the future.  (Run your code with `python -W all` to see these warnings.) 
+-   Python API: major updates to the Klampt control package, including the new `klampt_control` utility that lets you control your robots in real time. **(API-breaking change)**
+-   Python API: standardization of robot semantic information under a `RobotInfo` class in `klampt.model.robotinfo`.  Supported by ``klampt_control`` and ``klampt_sim``. Future planners and system integration utilities will use this structure.
+-   Python API: ``klampt_resource`` script added which allows transfer and conversions of resources from the command line.  ``klampt_thumbnails`` has been removed since all thumbnail functionality has been moved into ``klampt_resource``.
+-   Python API: new system integration utilities, such as calibration (`klampt.model.calibrate`) and workspace calculation (`klampt.model.workspace`).
+-   Python API: textures on Appearances now fully supported.
+-   C++ API: Everything added to the ``Klampt`` namespace. **(API-breaking change!)**
+-   C++ API: Main modeling classes renamed to align with Python API, e.g. Robot->RobotModel, RobotWorld->WorldModel, WorldSimulation->Simulator, etc. **(API-breaking change!)**
+-   Some geometries support slicing and ROI (region of interest) calculations.  Slicing takes a slice of a geometry with a plane, and ROI calculations determine a region of interest of the geometry.  Meshes and point clouds are supported.
+-   Polygon and ConvexHull geometries now support ray casting.
+-   Projection-mapping for Appearances now supported.
+
+**master** (6/1/2021)
+Note: If you have a `pip` installed Klampt, you may get these updates by cloning the Git repo, then run `cd Klampt/Python; python patch_a_pip_install.py`. This provides all of the Python API updates listed below without needing to build from source.
+
+-   Fixed bug saving/restoring simulation states.
+-   Python API: fixed bug with setBackgroundImage(None)
+
+
+**0.8.7** (5/25/2021)
+-   Fixed bug in simulation of affine joints when the joint angle can go negative. Also, internal affine transmission coupling is simulated in a fashion that's sensitive to the driver's PID constants.
+-   URDF import can now import multiple collision and visual geometries.
+>>>>>>> master
 -   Python API: Workaround for Mac OSX Big Sur dropping support for OpenGL when importing PyOpenGL.
 -   Python API: bug fixes for motion planning with affine drivers.
 -   Python API: Added a function `klampt.model.types.transfer()` which transfers objects from one robot to another.

@@ -10,6 +10,8 @@
 #include <KrisLibrary/utils/threadutils.h>
 #include <KrisLibrary/Timer.h>
 
+namespace Klampt {
+
 class MotionQueueInterface;
 
 /** @brief A base class for a motion planner that generates dynamic paths.
@@ -28,7 +30,7 @@ class DynamicMotionPlannerBase
 
   DynamicMotionPlannerBase();
   virtual ~DynamicMotionPlannerBase();
-  virtual void Init(CSpace* space,Robot* robot,WorldPlannerSettings* settings);
+  virtual void Init(CSpace* space,RobotModel* robot,WorldPlannerSettings* settings);
   virtual void SetGoal(shared_ptr<PlannerObjectiveBase> newgoal);
   virtual void SetTime(Real tstart);
   virtual void SetDefaultLimits();
@@ -92,7 +94,7 @@ class DynamicMotionPlannerBase
   ///returns the terminal cost for a path ending at q at time tEnd
   Real EvaluateTerminalCost(const Config& q,Real tEnd);
 
-  Robot* robot;
+  RobotModel* robot;
   WorldPlannerSettings* settings;
   CSpace* cspace;
   //objective function
@@ -330,5 +332,7 @@ class RealTimePlanningThread
   shared_ptr<RealTimePlanner> planner;
   Thread thread;
 };
+
+} // namespace Klampt
 
 #endif

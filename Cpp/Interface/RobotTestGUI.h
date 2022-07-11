@@ -7,8 +7,10 @@
 #include "Sensing/Sensor.h"
 #include "GLUIGUI.h"
 #include <fstream>
-using namespace Math3D;
-using namespace GLDraw;
+
+namespace Klampt {
+  using namespace Math3D;
+  using namespace GLDraw;
 
 /** @brief RobotTest program.
  *
@@ -50,7 +52,7 @@ using namespace GLDraw;
 class RobotTestBackend : public WorldGUIBackend
 {
 public:
-  Robot* robot;
+  RobotModel* robot;
   //internal state
   int cur_link,cur_driver;
   vector<bool> self_colliding;
@@ -68,7 +70,7 @@ public:
 
   vector<GLDisplayList> originalDisplayLists,expandedDisplayLists;
 
-  RobotTestBackend(RobotWorld* world);
+  RobotTestBackend(WorldModel* world);
   virtual void Start();
   void UpdateConfig();
   virtual void RenderWorld();
@@ -84,6 +86,8 @@ public:
   void SetDrawExpanded(int value);
 };
 
+} // namespace Klampt
+
 #if HAVE_GLUI
 
 #if defined (__APPLE__) || defined (MACOSX)
@@ -92,11 +96,13 @@ public:
 #include <GL/glui.h>
 #endif //__APPLE__ || MACOSX
 
+namespace Klampt {
+
 class GLUIRobotTestGUI : public GLUIGUI
 {
  public:
-  RobotWorld* world;
-  Robot* robot;
+  WorldModel* world;
+  RobotModel* robot;
   //GUI state
   GLUI* glui;
   GLUI_Spinner* link_spinner, *link_value_spinner;
@@ -107,11 +113,16 @@ class GLUIRobotTestGUI : public GLUIGUI
   GLUI_StaticText* driver_info;
   int cur_link,cur_driver;
 
-  GLUIRobotTestGUI(GenericBackendBase* backend,RobotWorld* world,int w=800,int h=600);
+  GLUIRobotTestGUI(GenericBackendBase* backend,WorldModel* world,int w=800,int h=600);
   virtual bool Initialize();
   virtual void Handle_Control(int id);
   virtual bool OnCommand(const string& cmd,const string& args);
   void UpdateGUI();
 };
+
+} // namespace Klampt
+
 #endif //HAVE_GLUI
+
+
 #endif //ROBOTTESTGUI

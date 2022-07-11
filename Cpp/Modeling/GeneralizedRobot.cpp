@@ -2,6 +2,8 @@
 #include "Interpolate.h"
 #include <KrisLibrary/math3d/interpolate.h>
 
+namespace Klampt {
+
 void ConfigToTransform(const Vector& q,RigidTransform& T)
 {
   T.t.set(q[0],q[1],q[2]);
@@ -18,7 +20,7 @@ void TransformToConfig(const RigidTransform& T,Vector& q)
   ea.get(q[3],q[4],q[5]);
 }
 
-void ObjectToRobot(const RigidObject& object,Robot& robot)
+void ObjectToRobot(const RigidObjectModel& object,RobotModel& robot)
 {
   robot.InitializeRigidObject();
   robot.torqueMax.setZero();
@@ -35,7 +37,7 @@ void ObjectToRobot(const RigidObject& object,Robot& robot)
   TransformToConfig(object.T,robot.q);
   robot.accMax.resize(6,Inf);
   robot.joints.resize(1);
-  robot.joints[0].type = RobotJoint::Floating;
+  robot.joints[0].type = RobotModelJoint::Floating;
   robot.joints[0].linkIndex = 5;
   robot.joints[0].baseIndex = -1;
   robot.drivers.resize(0);
@@ -49,10 +51,10 @@ void ObjectToRobot(const RigidObject& object,Robot& robot)
   robot.driverNames.resize(0);
 }
 
-GeneralizedRobot::GeneralizedRobot()
+GeneralizedRobotModel::GeneralizedRobotModel()
 {}
 
-GeneralizedRobot::GeneralizedRobot(RobotWorld& world)
+GeneralizedRobotModel::GeneralizedRobotModel(WorldModel& world)
 {
   for(size_t i=0;i<world.robots.size();i++)
     Add(world.robots[i].get(),world.robots[i]->name.c_str());
@@ -60,13 +62,13 @@ GeneralizedRobot::GeneralizedRobot(RobotWorld& world)
     Add(world.rigidObjects[i].get(),world.rigidObjects[i]->name.c_str());
 }
 
-int GeneralizedRobot::NumDof() const
+int GeneralizedRobotModel::NumDof() const
 {
   if(elements.empty()) return 0;
   return (--elements.end())->second.indexEnd;
 }
 
-int GeneralizedRobot::Add(Robot* robot,const char* name)
+int GeneralizedRobotModel::Add(RobotModel* robot,const char* name)
 {
   Element e;
   e.robot = robot;
@@ -86,7 +88,7 @@ int GeneralizedRobot::Add(Robot* robot,const char* name)
   return lastid+1;
 }
 
-int GeneralizedRobot::Add(RigidObject* object,const char* name)
+int GeneralizedRobotModel::Add(RigidObjectModel* object,const char* name)
 {
   Element e;
   e.robot = NULL;
@@ -106,7 +108,7 @@ int GeneralizedRobot::Add(RigidObject* object,const char* name)
   return lastid+1;
 }
 
-void GeneralizedRobot::Remove(int id)
+void GeneralizedRobotModel::Remove(int id)
 {
   Assert(elements.count(id) != 0);
   int diff = elements[id].indexEnd - elements[id].indexStart;
@@ -117,7 +119,7 @@ void GeneralizedRobot::Remove(int id)
   }
 }
 
-int GeneralizedRobot::ID(const char* name) const
+int GeneralizedRobotModel::ID(const char* name) const
 {
   for(map<int,Element>::const_iterator i=elements.begin();i!=elements.end();i++) 
     if(i->second.name == name)
@@ -126,7 +128,7 @@ int GeneralizedRobot::ID(const char* name) const
 }
 
 
-int GeneralizedRobot::ID(Robot* robot) const
+int GeneralizedRobotModel::ID(RobotModel* robot) const
 {
   for(map<int,Element>::const_iterator i=elements.begin();i!=elements.end();i++) 
     if(i->second.robot == robot)
@@ -134,7 +136,7 @@ int GeneralizedRobot::ID(Robot* robot) const
   return -1;
 }
 
-int GeneralizedRobot::ID(RigidObject* object) const
+int GeneralizedRobotModel::ID(RigidObjectModel* object) const
 {
   for(map<int,Element>::const_iterator i=elements.begin();i!=elements.end();i++) 
     if(i->second.object == object)
@@ -142,7 +144,7 @@ int GeneralizedRobot::ID(RigidObject* object) const
   return -1;
 }
 
-int GeneralizedRobot::DofToID(int index) const
+int GeneralizedRobotModel::DofToID(int index) const
 {
   for(map<int,Element>::const_iterator i=elements.begin();i!=elements.end();i++) {
     if(index >= i->second.indexStart && index < i->second.indexEnd) 
@@ -151,7 +153,7 @@ int GeneralizedRobot::DofToID(int index) const
   return -1;
 }
 
-string GeneralizedRobot::DofName(int index) const
+string GeneralizedRobotModel::DofName(int index) const
 {
   static const char* dofnames[6] = {"x","y","z","rz","ry","rx"};
   for(map<int,Element>::const_iterator i=elements.begin();i!=elements.end();i++) {
@@ -173,12 +175,12 @@ string GeneralizedRobot::DofName(int index) const
   return "invalid";
 }
 
-pair<int,int> GeneralizedRobot::Dofs(int id) const
+pair<int,int> GeneralizedRobotModel::Dofs(int id) const
 {
   return pair<int,int>(elements.find(id)->second.indexStart,elements.find(id)->second.indexEnd);
 }
 
-void GeneralizedRobot::SetConfig(const Config& q)
+void GeneralizedRobotModel::SetConfig(const Config& q)
 {
   Assert(q.n == NumDof());
   for(map<int,Element>::const_iterator i=elements.begin();i!=elements.end();i++) {
@@ -193,7 +195,7 @@ void GeneralizedRobot::SetConfig(const Config& q)
   }
 }
 
-void GeneralizedRobot::SetVelocity(const Vector& v)
+void GeneralizedRobotModel::SetVelocity(const Vector& v)
 {
   Assert(v.n == NumDof());
   for(map<int,Element>::const_iterator i=elements.begin();i!=elements.end();i++) {
@@ -208,7 +210,7 @@ void GeneralizedRobot::SetVelocity(const Vector& v)
   }
 }
 
-void GeneralizedRobot::GetConfig(Config& q) const
+void GeneralizedRobotModel::GetConfig(Config& q) const
 {
   q.resize(NumDof());
   for(map<int,Element>::const_iterator i=elements.begin();i!=elements.end();i++) {
@@ -224,7 +226,7 @@ void GeneralizedRobot::GetConfig(Config& q) const
   }
 }
 
-void GeneralizedRobot::GetVelocity(Vector& v) const
+void GeneralizedRobotModel::GetVelocity(Vector& v) const
 {
   v.resize(NumDof());
   for(map<int,Element>::const_iterator i=elements.begin();i!=elements.end();i++) {
@@ -239,7 +241,7 @@ void GeneralizedRobot::GetVelocity(Vector& v) const
   }
 }
 
-void GeneralizedRobot::SplitRefs(const Config& q,vector<Config>& qsplit) const
+void GeneralizedRobotModel::SplitRefs(const Config& q,vector<Config>& qsplit) const
 {
   Assert(q.n == NumDof());
   qsplit.resize(elements.size());
@@ -251,7 +253,7 @@ void GeneralizedRobot::SplitRefs(const Config& q,vector<Config>& qsplit) const
 }
 
 
-void GeneralizedRobot::Split(const Config& q,vector<Config>& qsplit) const
+void GeneralizedRobotModel::Split(const Config& q,vector<Config>& qsplit) const
 {
   Assert(q.n == NumDof());
   qsplit.resize(elements.size());
@@ -264,7 +266,7 @@ void GeneralizedRobot::Split(const Config& q,vector<Config>& qsplit) const
   }
 }
 
-void GeneralizedRobot::Join(const vector<Config>& qsplit,Config& q) const
+void GeneralizedRobotModel::Join(const vector<Config>& qsplit,Config& q) const
 {
   int cnt = 0;
   for(size_t i=0;i<qsplit.size();i++) cnt += qsplit[i].n;
@@ -276,7 +278,7 @@ void GeneralizedRobot::Join(const vector<Config>& qsplit,Config& q) const
   }
 }
 
-void GeneralizedRobot::Interpolate(const Config& a,const Config& b,Real u,Config& out) const
+void GeneralizedRobotModel::Interpolate(const Config& a,const Config& b,Real u,Config& out) const
 {
   Assert(a.n == NumDof());
   Assert(b.n == NumDof());
@@ -286,7 +288,7 @@ void GeneralizedRobot::Interpolate(const Config& a,const Config& b,Real u,Config
     asub.setRef(a,i->second.indexStart,1,i->second.indexEnd-i->second.indexStart);
     bsub.setRef(b,i->second.indexStart,1,i->second.indexEnd-i->second.indexStart);
     if(i->second.robot) {
-      ::Interpolate(*i->second.robot,asub,bsub,u,osub);
+      Klampt::Interpolate(*i->second.robot,asub,bsub,u,osub);
     }
     else {
       RigidTransform Ta,Tb,Tout;
@@ -298,23 +300,23 @@ void GeneralizedRobot::Interpolate(const Config& a,const Config& b,Real u,Config
     out.copySubVector(i->second.indexStart,osub);
   }
 }
-void GeneralizedRobot::InterpolateVelocity(const Config& a,const Config& b,Real u,Vector& dq) const
+void GeneralizedRobotModel::InterpolateVelocity(const Config& a,const Config& b,Real u,Vector& dq) const
 {
   FatalError("TODO");
 }
 
-void GeneralizedRobot::Integrate(const Config& q,const Vector& dq,Config& out) const
+void GeneralizedRobotModel::Integrate(const Config& q,const Vector& dq,Config& out) const
 {
   FatalError("TODO");
 }
 
-Real GeneralizedRobot::Distance(const Config& a,const Config& b,Real floatingRotationWeight) const
+Real GeneralizedRobotModel::Distance(const Config& a,const Config& b,Real floatingRotationWeight) const
 {
   FatalError("TODO");
   return 0;
 }
 
-void GeneralizedRobot::GetJointLimits(Config& qmin,Config& qmax) const
+void GeneralizedRobotModel::GetJointLimits(Config& qmin,Config& qmax) const
 {
   qmin.resize(NumDof());
   qmax.resize(NumDof());
@@ -335,7 +337,7 @@ void GeneralizedRobot::GetJointLimits(Config& qmin,Config& qmax) const
   }
 }
 
-Vector3 GeneralizedRobot::GetCOM() const
+Vector3 GeneralizedRobotModel::GetCOM() const
 {
   Vector3 momentSum(0.0);
   Real massSum=0;
@@ -352,16 +354,16 @@ Vector3 GeneralizedRobot::GetCOM() const
   return momentSum*(1.0/massSum);
 }
 
-void GeneralizedRobot::GetMegaRobot(Robot& robot) const
+void GeneralizedRobotModel::GetMegaRobot(RobotModel& robot) const
 {
   vector<string> prefix;
-  vector<Robot*> robotsAndObjects;
-  list<Robot> convertedObjects;
+  vector<RobotModel*> robotsAndObjects;
+  list<RobotModel> convertedObjects;
   for(map<int,Element>::const_iterator i=elements.begin();i!=elements.end();i++) {
     if(i->second.robot)
       robotsAndObjects.push_back(i->second.robot);
     else {
-      convertedObjects.push_back(Robot());
+      convertedObjects.push_back(RobotModel());
       ObjectToRobot(*i->second.object,convertedObjects.back());
       robotsAndObjects.push_back(&convertedObjects.back());
     }
@@ -382,3 +384,5 @@ void GeneralizedRobot::GetMegaRobot(Robot& robot) const
     nl += robotsAndObjects[i]->links.size();
   }
 }
+
+} // namespace Klampt

@@ -50,10 +50,12 @@ Common "gotchas"
 General
 -------
 
--  Ask questions and report issues/bugs. This will help us make
-   improvements to Klamp't. If you write a piece of code that you think
+-  `Ask questions on Gitq <https://gitq.com/krishauser/Klampt>`__ and
+   `report issues/bugs on Github <https://github.com/krishauser/Klampt/issues>`__.
+   This will help us make improvements to Klamp't.
+-  If you write a piece of code that you think
    will be useful to others, consider making it a contribution to the
-   library.
+   library!
 -  Practice *self-documenting code*. Name files, functions, classes, and
    variables descriptively. Comment as you go.
 -  Use *visual debugging* to debug your algorithms. :func:`klampt.vis.debug`
@@ -84,8 +86,7 @@ Missing features include:
 -  Some contact processing algorithms
 -  Robot reachability bound determination
 -  Advanced force/torque balance solvers
--  Advanced motion planners (optimal planning with custom objective
-   functions, kinodynamic planning, etc)
+-  Advanced motion planners (kinodynamic planning, minimum constraint removal, etc)
 -  Direct access to a robot's trajectory queue.
 
 

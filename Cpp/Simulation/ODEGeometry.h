@@ -5,8 +5,10 @@
 #include <KrisLibrary/geometry/AnyGeometry.h>
 #include <ode/common.h>
 #include <ode/collision_trimesh.h>
-using namespace Math3D;
-using namespace Geometry;
+
+namespace Klampt {
+  using namespace Math3D;
+  using namespace Geometry;
 
 /** @ingroup Simulation
  * @brief An ODE collision geometry.
@@ -65,5 +67,7 @@ class ODEGeometry
   ODESurfaceProperties surface;
   bool geometrySelfAllocated;
 };
+
+} //namespace Klampt
 
 #endif

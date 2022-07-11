@@ -14,9 +14,14 @@ intersection for a ray and a group of objects.
 
 from ..robotsim import *
 from ..math import vectorops,se3
+from typing import Union,Optional,List,Tuple,Sequence,Callable,Iterator
+from .typing import Vector,Vector3,Matrix3,RigidTransform
 
+BBType = Tuple[Vector3,Vector3]
+CollidableType = Union[RobotModel,RobotModelLink,RigidObjectModel,TerrainModel]
+WorldBodyType = Union[RobotModelLink,RigidObjectModel,TerrainModel]
 
-def bb_create(*ptlist):
+def bb_create(*ptlist: Vector3) -> BBType:
     """Creates a bounding box from an optional set of points. If no points
     are provided, creates an empty bounding box."""
     if len(ptlist) == 0:
@@ -29,31 +34,34 @@ def bb_create(*ptlist):
             bmax = [max(a,b) for (a,b) in zip(bmax,x)]
         return bmin,bmax
 
-def bb_empty(bb):
+def bb_empty(bb: BBType) -> bool:
     """Returns True if the bounding box is empty"""
     return any((a > b) for (a,b) in zip(bb[0],bb[1]))
 
-def bb_intersect(a,b):
+def bb_intersect(a: BBType, b: BBType) -> bool:
     """Returns true if the bounding boxes (a[0]->a[1]) and (b[0]->b[1]) intersect"""
     amin,amax=a
     bmin,bmax=b
     return not any(q < u or v < p for (p,q,u,v) in zip(amin,amax,bmin,bmax))
 
-def bb_contains(bb,x):
+def bb_contains(bb: BBType, x: Vector3) -> bool:
     """Returns true if x is inside the bounding box bb"""
     return not any(v < p or v > q for (p,q,v) in zip(bb[0],bb[1],x))
 
-def bb_intersection(*bbs):
+def bb_intersection(*bbs: BBType):
     """Returns the bounding box representing the intersection the given bboxes.
     The result may be empty."""
     return [max(x) for x in zip(*[b[0] for b in bbs])],[min(x) for x in zip(*[b[1] for b in bbs])]
 
-def bb_union(*bbs):
+def bb_union(*bbs: BBType):
     """Returns the smallest bounding box containing the given bboxes"""
     return [min(x) for x in zip(*[b[0] for b in bbs])],[max(x) for x in zip(*[b[1] for b in bbs])]
 
 
-def self_collision_iter(geomlist,pairs='all'):
+def self_collision_iter(
+        geomlist: Sequence[Geometry3D],
+        pairs: Union[str,Callable[[int,int],bool],List[Tuple[int,int]]] = 'all'
+    ) -> Iterator[Tuple[int,int]]:
     """Performs efficient self collision testing for a list of geometries.
 
     Args:
@@ -68,7 +76,7 @@ def self_collision_iter(geomlist,pairs='all'):
     Uses a quick bounding box reject test.
 
     Returns:
-        iterator over tuple: Iterator over colliding pairs (i,j) where i and
+        Iterator over colliding pairs (i,j) where i and
         j are indices into geomlist.
     """
     #bblist = [g.getBB() for g in geomlist]
@@ -96,7 +104,11 @@ def self_collision_iter(geomlist,pairs='all'):
                 yield (i,j)
     return
 
-def group_collision_iter(geomlist1,geomlist2,pairs='all'):
+def group_collision_iter(
+        geomlist1: Sequence[Geometry3D],
+        geomlist2: Sequence[Geometry3D],
+        pairs: Union[str,Callable[[int,int],bool],List[Tuple[int,int]]] = 'all'
+    ) -> Iterator[Tuple[int,int]]:
     """Tests whether two sets of geometries collide.
 
     Args:
@@ -112,7 +124,7 @@ def group_collision_iter(geomlist1,geomlist2,pairs='all'):
     Uses a quick bounding box reject test.
 
     Returns:
-        iterator over tuple: Iterator over colliding pairs (i,j) where i is
+        Iterator over colliding pairs (i,j) where i is
         an index into geomlist1 and j is an index into geomlist.
     """
     if len(geomlist1) == 0 or len(geomlist2) == 0: return
@@ -144,7 +156,12 @@ def group_collision_iter(geomlist1,geomlist2,pairs='all'):
                 yield (i,j)
 
 
-def group_subset_collision_iter(geomlist,alist,blist,pairs='all'):
+def group_subset_collision_iter(
+        geomlist: Sequence[Geometry3D],
+        alist: Sequence[int],
+        blist: Sequence[int],
+        pairs='all'
+    ) -> Iterator[Tuple[int,int]]:
     """Tests whether two subsets of geometries collide.  Can be slightly faster
     than `group_collision_iter` if `alist` and `blist` overlap.
 
@@ -163,7 +180,7 @@ def group_subset_collision_iter(geomlist,alist,blist,pairs='all'):
     Uses a quick bounding box reject test.
 
     Returns:
-        iterator over tuple: Iterator over colliding pairs (i,j) where i is
+        Iterator over colliding pairs (i,j) where i is
         an index into alist and j is an index into glist.
     """
     if len(alist) == 0 or len(blist) == 0: return
@@ -199,15 +216,19 @@ def group_subset_collision_iter(geomlist,alist,blist,pairs='all'):
                 yield (i,j)
 
 
-def ray_cast(geomlist,s,d):
+def ray_cast(
+        geomlist: Sequence[Geometry3D],
+        s: Vector3,
+        d: Vector3
+    ) -> Tuple[int,Vector3]:
     """Finds the first collision among the geometries in geomlist with the
     ray at source s and direction d. 
 
     Returns:
-        tuple: A pair (index,point) if a collision is found, where:
+        A pair (index,point) if a collision is found, where:
 
-            * index is the index of the geometry in geomlist
-            * point is the collision point in world coordinates.
+        * index is the index of the geometry in geomlist
+        * point is the collision point in world coordinates.
     
         Returns None if no collision is found.
     """
@@ -245,7 +266,7 @@ class WorldCollider:
 
     """
     
-    def __init__(self,world,ignore=[]):
+    def __init__(self, world: WorldModel, ignore=[]):
         """Args:
             world (WorldModel): the world to use
             ignore (list, optional): a list of items to pass to ignoreCollision
@@ -340,11 +361,11 @@ class WorldCollider:
         for i in ignore:
             self.ignoreCollision(i)
                 
-    def _getGeomIndex(self,object):
+    def _getGeomIndex(self,object) -> int:
         """Finds the geomList index corresponding to an object
 
         Returns:
-            int: the index into self.geomList describing the object
+            The index into self.geomList describing the object
         """
         assert isinstance(object,(RobotModel,RobotModelLink,RigidObjectModel,TerrainModel))
         for i,(o,g) in enumerate(self.geomList):
@@ -355,7 +376,7 @@ class WorldCollider:
         return None
 
 
-    def ignoreCollision(self,ign):
+    def ignoreCollision(self, ign: Union[WorldBodyType,Tuple[WorldBodyType,WorldBodyType]] ) -> None:
         """Permanently removes an object or a pair of objects from
         consideration.
 
@@ -382,7 +403,7 @@ class WorldCollider:
                 self.mask[i].discard(geom)
             self.mask[geom]=set()
 
-    def isCollisionEnabled(self,obj_or_pair):
+    def isCollisionEnabled(self, obj_or_pair: Union[WorldBodyType,Tuple[CollidableType,WorldBodyType]] ) -> bool:
         """Returns true if the object or pair of objects are considered for
         collision.
 
@@ -405,7 +426,11 @@ class WorldCollider:
                 return False
             return len(self.mask[geom]) > 0
 
-    def collisionTests(self,filter1=None,filter2=None,bb_reject=True):
+    def collisionTests(self,
+            filter1: Optional[Callable[[WorldBodyType],bool]] = None,
+            filter2: Optional[Callable[[WorldBodyType],bool]] = None,
+            bb_reject: bool = True
+        ) -> Iterator[Tuple[Tuple[WorldBodyType,Geometry3D],Tuple[WorldBodyType,Geometry3D]]]:
         """Returns an iterator over potential colliding pairs, which
         should be tested for collisions. 
 
@@ -432,13 +457,12 @@ class WorldCollider:
         are interpreted
 
         Returns:
-            iterator of tuple: Iterates over
-            ((object1,geom1),(object2,geom2)) pairs indicating which objects
-            should be tested for collision. They have type:
+            Iterates over ``((object1,geom1),(object2,geom2))`` pairs indicating 
+            which objects should be tested for collision. They have type:
 
-                - object1, object2: a RobotModelLink, RigidObjectModel, or
-                  TerrainModel
-                - geom1, geom2: Geometry3D corresponding to those objects.
+            - object1, object2: a RobotModelLink, RigidObjectModel, or
+                TerrainModel
+            - geom1, geom2: Geometry3D corresponding to those objects.
 
         """
         res = []
@@ -474,7 +498,10 @@ class WorldCollider:
                     elif f2 and filter1(self.geomList[objIndex][0]):
                         yield (self.geomList[objIndex],g)
 
-    def collisions(self,filter1=None,filter2=None):
+    def collisions(self,
+            filter1: Optional[Callable[[WorldBodyType],bool]] = None,
+            filter2: Optional[Callable[[WorldBodyType],bool]] = None,
+        ) -> Iterator[Tuple[Tuple[WorldBodyType,Geometry3D],Tuple[WorldBodyType,Geometry3D]]]:
         """Returns an iterator over the colliding pairs of objects,
         optionally that satisfies the filter(s).
 
@@ -501,7 +528,9 @@ class WorldCollider:
             if g0[1].collides(g1[1]):
                 yield (g0[0],g1[0])
 
-    def robotSelfCollisions(self,robot=None):
+    def robotSelfCollisions(self,
+            robot: Union[RobotModel,int,None] = None
+        ) -> Iterator[Tuple[RobotModelLink,RobotModelLink]]:
         """Yields an iterator over robot self collisions.
 
         Args:
@@ -510,8 +539,8 @@ class WorldCollider:
             collisions for that robot are tested
 
         Returns:
-            iterator over tuple: Iterates over colliding
-            (RobotModelLink,RobotModelLink) pairs.
+            Iterates over colliding
+            ``(RobotModelLink,RobotModelLink)`` pairs.
         """
         if isinstance(robot,RobotModel):
             robot = robot.index
@@ -530,7 +559,10 @@ class WorldCollider:
                 if self.geomList[i][1].collides(self.geomList[j][1]):
                     yield (self.geomList[i][0],self.geomList[j][0])
        
-    def robotObjectCollisions(self,robot,object=None):
+    def robotObjectCollisions(self,
+            robot: Union[RobotModel,int],
+            object: Union[RigidObjectModel,int,None] = None
+        ) -> Iterator[Tuple[RobotModelLink,RigidObjectModel]]:
         """Yields an iterator over robot-object collision pairs.
 
         Args:
@@ -539,7 +571,7 @@ class WorldCollider:
                 test, or None to all objects.
 
         Returns:
-            iterator over tuple: Iterates over colliding
+            Iterates over colliding
             (RobotModelLink,RigidObjectModel) pairs.
         """
         if isinstance(robot,RobotModel):
@@ -562,7 +594,10 @@ class WorldCollider:
             if self.geomList[oindex][1].collides(self.geomList[i][1]):
                 yield (self.geomList[i][0],self.geomList[oindex][0])
 
-    def robotTerrainCollisions(self,robot,terrain=None):
+    def robotTerrainCollisions(self,
+            robot: Union[RobotModel,int],
+            terrain: Union[TerrainModel,int,None] = None
+        ) -> Iterator[Tuple[RobotModelLink,TerrainModel]]:
         """Yields an iterator over robot-terrain collision pairs.
 
         Args:
@@ -571,7 +606,7 @@ class WorldCollider:
                 test, or None to all terrains.
 
         Returns:
-            iterator over tuple: Iterates over colliding
+            Iterates over colliding
             (RobotModelLink,TerrainModel) pairs.
         """
         if isinstance(robot,RobotModel):
@@ -594,7 +629,10 @@ class WorldCollider:
             if self.geomList[tindex][1].collides(self.geomList[i][1]):
                 yield (self.geomList[i][0],self.geomList[tindex][0])
 
-    def objectTerrainCollisions(self,object,terrain=None):
+    def objectTerrainCollisions(self,
+            object: Union[RigidObjectModel,int],
+            terrain: Union[TerrainModel,int,None] = None
+        ) -> Iterator[Tuple[RigidObjectModel,TerrainModel]]:
         """Yields an iterator over object-terrain collision pairs.
 
         Args:
@@ -603,7 +641,7 @@ class WorldCollider:
                 test, or None to all terrains.
 
         Returns:
-            iterator over tuple: Iterates over colliding
+            Iterates over colliding
             (RigidObjectModel,TerrainModel) pairs.
         """
         if isinstance(object,RigidObjectModel):
@@ -625,16 +663,19 @@ class WorldCollider:
             yield (self.geomList[oindex][0],self.geomList[tindex][0])
         return
 
-    def objectObjectCollisions(self,object,object2):
+    def objectObjectCollisions(self,
+            object: Union[RigidObjectModel,int],
+            object2: Union[RigidObjectModel,int,None]
+        ) -> Iterator[Tuple[RigidObjectModel,RigidObjectModel]]:
         """Yields an iterator over object-terrain collision pairs.
 
         Args:
             object (RigidObjectModel or int): the object to test
-            terrain (TerrainModel or int, optional): the terrain to
-                test, or None to all terrains.
+            object2 (RigidObjectModel or int, optional): the terrain to
+                test, or None to all objects.
 
         Returns:
-            iterator over tuple: Iterates over colliding
+            Iterates over colliding
             (RigidObjectModel,TerrainModel) pairs.
         """
         if isinstance(object,RigidObjectModel):
@@ -656,7 +697,11 @@ class WorldCollider:
             yield (self.geomList[oindex][0],self.geomList[oindex2][0])
         return
 
-    def rayCast(self,s,d,indices=None):
+    def rayCast(self,
+            s: Vector3,
+            d: Vector3,
+            indices: Optional[List[int]]=None
+        ) -> Union[None,Tuple[WorldBodyType,Vector3]]:
         """Finds the first collision between a ray and objects in the world.
 
         Args:
@@ -666,7 +711,7 @@ class WorldCollider:
                 geometries in geomList to test.
 
         Returns:
-            tuple: The (object,point) pair or None if no collision is found.
+            The (object,point) pair or None if no collision is found.
         """
         res = None
         dmin = 1e300
@@ -679,7 +724,11 @@ class WorldCollider:
                     dmin,res = dist,(g[0],pt)
         return res
                 
-    def rayCastRobot(self,robot,s,d):
+    def rayCastRobot(self,
+            robot: Union[RobotModel,int],
+            s: Vector3,
+            d: Vector3
+        ) -> Union[None,Tuple[RobotModelLink,Vector3]]:
         """Finds the first collision between a ray and a robot.
 
         Args:
@@ -688,7 +737,7 @@ class WorldCollider:
             d (list of 3 floats): the ray direction
 
         Returns:
-            tuple: The (object,point) pair or None if no collision is found.
+            The (object,point) pair or None if no collision is found.
         """
         if isinstance(robot,RobotModel):
             try:

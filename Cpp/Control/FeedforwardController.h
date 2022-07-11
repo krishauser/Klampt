@@ -5,6 +5,8 @@
 #include <Klampt/Sensing/StateEstimator.h>
 #include <KrisLibrary/robotics/Wrench.h>
 
+namespace Klampt {
+
 /** @ingroup Control
  * @brief A class that adds a feedforward torque to the basic
  * control.  The necessary feedforward torque is estimated assuming the
@@ -22,7 +24,7 @@
 class FeedforwardController : public RobotController
 {
  public:
-  FeedforwardController(Robot& robot,shared_ptr<RobotController> base);
+  FeedforwardController(RobotModel& robot,shared_ptr<RobotController> base);
   virtual ~FeedforwardController() {}
   virtual const char* Type() const { return "FeedforwardController"; }
   virtual void Update(Real dt);
@@ -52,5 +54,6 @@ class FeedforwardController : public RobotController
   vector<Wrench> wrenches;
 };
 
+} // namespace Klampt
 
 #endif

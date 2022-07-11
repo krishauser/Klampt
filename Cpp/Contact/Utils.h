@@ -3,8 +3,11 @@
 
 #include <KrisLibrary/robotics/Contact.h>
 #include <KrisLibrary/robotics/RobotWithGeometry.h>
-class RobotWorld;
 #include "Stance.h"
+
+namespace Klampt {
+
+class WorldModel;
 
 /** @addtogroup Contact */
 /** @{ */
@@ -41,7 +44,7 @@ void GetFlatStance(RobotWithGeometry& robot,Real tol,Stance& s,Real kFriction=0)
  * All contacts are given zero friction and in the local frame of the robot's
  * links.
  */
-void GetNearbyContacts(RobotWithGeometry& robot,RobotWorld& world,Real tol,ContactFormation& contacts);
+void GetNearbyContacts(RobotWithGeometry& robot,WorldModel& world,Real tol,ContactFormation& contacts);
 
 
 /** @brief Produces a list of contacts for all points on the link within tol of
@@ -50,7 +53,7 @@ void GetNearbyContacts(RobotWithGeometry& robot,RobotWorld& world,Real tol,Conta
  * tol is the tolerance with which minimum-distance points are generated.
  * All contacts are given zero friction and in the local frame of the link.
  */
-void GetNearbyContacts(RobotWithGeometry& robot,int link,RobotWorld& world,Real tol,vector<ContactPoint>& contacts);
+void GetNearbyContacts(RobotWithGeometry& robot,int link,WorldModel& world,Real tol,vector<ContactPoint>& contacts);
 
 
 /** @brief For a set of local contacts on a link, returns a hold for the given robot.
@@ -82,8 +85,8 @@ void CHContacts(vector<ContactPoint>& cp,Real ntol,Real xtol);
  */
 int ClosestContact(const ContactPoint& p,const Meshing::TriMesh& mesh,ContactPoint& closest,Real normalScale=0.1);
 
-
-
 /** @} */
+
+} //namespace Klampt
 
 #endif

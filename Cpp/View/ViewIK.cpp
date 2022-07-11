@@ -2,6 +2,7 @@
 #include <KrisLibrary/robotics/Rotation.h>
 #include <KrisLibrary/GLdraw/drawextra.h>
 using namespace GLDraw;
+using namespace Klampt;
 
 ViewIKGoal::ViewIKGoal()
 {
@@ -11,7 +12,7 @@ ViewIKGoal::ViewIKGoal()
 }
 
 //draws lines to the desired location
-void ViewIKGoal::Draw(const IKGoal& goal,Robot& robot)
+void ViewIKGoal::Draw(const IKGoal& goal,RobotModel& robot)
 {
   Vector3 wp1 = robot.links[goal.link].T_World*goal.localPosition;
   Vector3 wp2 = goal.endPosition;

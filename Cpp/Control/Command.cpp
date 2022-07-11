@@ -2,6 +2,7 @@
 #include <KrisLibrary/math/angle.h>
 #include <KrisLibrary/File.h>
 #include <KrisLibrary/errors.h>
+using namespace Klampt;
 
 ActuatorCommand::ActuatorCommand()
   :mode(OFF),revolute(false),measureAngleAbsolute(true),

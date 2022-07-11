@@ -34,7 +34,7 @@ Examples:
 
 """
 
-from klampt import ThreeJSGetScene,ThreeJSGetTransforms
+from klampt import threejs_get_scene,threejs_get_transforms
 from klampt.math import vectorops,so3,se3
 from klampt.model import types
 from klampt.model.trajectory import Trajectory,RobotTrajectory,SE3Trajectory
@@ -69,7 +69,7 @@ class KlamptWidget(widgets.DOMWidget):
         _camera (Dict): the incoming camera JSON message from the frontend (private)
         camera (Dict): the outgoing camera JSON message (private)
         drawn (Int): the incoming drawn message from the frontend (private)
-        events (Dict): incoming events from the frontend (private)
+        events (List): incoming events from the frontend (private)
         world (WorldModel): the WorldModel isinstance
         _extras (dict): a dict mapping extra item names to (type,threejs_items) pairs
         _rpc_calls (list): a list of pending RPC calls between beginRpc() and endRpc()
@@ -80,8 +80,8 @@ class KlamptWidget(widgets.DOMWidget):
     _view_name = Unicode('KlamptView').tag(sync=True)
     _model_module = Unicode('klampt-jupyter-widget').tag(sync=True)
     _view_module = Unicode('klampt-jupyter-widget').tag(sync=True)
-    _model_module_version = Unicode('0.1.1').tag(sync=True)
-    _view_module_version = Unicode('0.1.1').tag(sync=True)
+    _model_module_version = Unicode('0.1.2').tag(sync=True)
+    _view_module_version = Unicode('0.1.2').tag(sync=True)
     width = Int(800).tag(sync=True)
     height = Int(600).tag(sync=True)
     scene = Dict().tag(sync=True)
@@ -115,14 +115,14 @@ class KlamptWidget(widgets.DOMWidget):
         self._extras = dict()
         self._aggregating_rpc = 0
         self._rpc_calls = []
-        s = ThreeJSGetScene(self.world)
+        s = threejs_get_scene(self.world)
         self.scene = json.loads(s)
 
     def update(self):
         """Updates the view with changes to the world.  Unlike setWorld(), this only pushes the geometry
         transforms, so it's much faster."""
         if self.world:
-            s = ThreeJSGetTransforms(self.world)
+            s = threejs_get_transforms(self.world)
             self.transforms = json.loads(s)
 
     def clear(self):
@@ -173,7 +173,7 @@ class KlamptWidget(widgets.DOMWidget):
         """
         if type == 'auto':
             try:
-                candidates = types.objectToTypes(item,self.world)
+                candidates = types.object_to_types(item,self.world)
             except Exception:
                 raise ValueError("Invalid item, not a known Klamp't type")
             if isinstance(candidates,(list,tuple)):
@@ -240,7 +240,7 @@ class KlamptWidget(widgets.DOMWidget):
                 #it's a set of configurations
                 rindex = item.robot.index
                 names = []
-                for i,q in enumerate(item):
+                for i,q in enumerate(item.milestones):
                     iname = name+'_'+str(i)
                     self.addGhost(iname,rindex)
                     self.setGhostConfig(q,iname,rindex)
@@ -289,7 +289,7 @@ class KlamptWidget(widgets.DOMWidget):
             if name != 'world' or self.world is not None:
                 warnings.warn("KlamptWidget.add: only one world is supported, and should be added as world")
             self.world = item
-            s = ThreeJSGetScene(self.world)
+            s = threejs_get_scene(self.world)
             self.scene = json.loads(s)
         else:
             raise ValueError("KlamptWidget can't handle objects of type "+type+" yet")

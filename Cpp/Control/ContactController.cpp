@@ -7,9 +7,9 @@
 #define TORQUE_CONTROL_ONLY 0
 #define NO_VELOCITY_FEEDBACK 0
 
+using namespace Klampt;
 
-
-ContactJointTrackingController::ContactJointTrackingController(Robot& robot,const SmartPointer<JointTrackingController>& _base)
+ContactJointTrackingController::ContactJointTrackingController(RobotModel& robot,const SmartPointer<JointTrackingController>& _base)
   :RobotController(robot),base(_base),opSpaceController(robot)
 {
   opSpaceController.jointTasks.resize(1);
@@ -162,7 +162,7 @@ void ContactJointTrackingController::Update(Real dt)
   //change torque commands to feedforward torques
   for(size_t i=0;i<robot.drivers.size();i++) {
     Real feedforwardTorque = command->actuators[i].torque;
-    if(robot.drivers[i].type == RobotJointDriver::Normal) {
+    if(robot.drivers[i].type == RobotModelDriver::Normal) {
       command->actuators[i].SetPID(qdes(robot.drivers[i].linkIndices[0]),dqdes(robot.drivers[i].linkIndices[0]),command->actuators[i].iterm);
     }
     else {

@@ -4,7 +4,7 @@
 #include <KrisLibrary/utils/AnyCollection.h>
 #include <Main/motorcalibrate.h>
 #include "showtext.h"
-
+using namespace Klampt;
 
 Dialog::Dialog(QWidget *parent) :
     QDialog(parent),
@@ -23,7 +23,7 @@ Dialog::~Dialog()
 int Dialog::LoadRobot(){
     robotFilename = f.getOpenFileName(0,"Open Robot","","*.rob *.urdf");
     if(!robotFilename.isEmpty()){
-        Robot r;
+        RobotModel r;
         r.Load(robotFilename.toStdString().c_str());
         ui->lbl_robot->setText(QFileInfo(robotFilename).baseName());
         for(int i=0;i<r.links.size();i++){

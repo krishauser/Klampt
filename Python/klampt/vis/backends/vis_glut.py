@@ -169,7 +169,7 @@ class GLUTWindowManager(_ThreadedWindowManager):
         if plugin is None:
             plugin = GLVisualizationPlugin()
         if isinstance(self._frontend,glcommon.GLMultiViewportProgram):
-            self._frontend.addView(plugin)
+            self._frontend.add_view(plugin)
             if hasattr(plugin,'scene') and isinstance(plugin.scene,VisualizationScene):
                 self._frontend.scene = plugin.scene
         else:
@@ -181,8 +181,8 @@ class GLUTWindowManager(_ThreadedWindowManager):
             if self.current_window is not None:
                 if self.windows[self.current_window].glwindow is not None:
                     multiProgram.window = self.windows[self.current_window].glwindow
-            multiProgram.addView(self._frontend)
-            multiProgram.addView(plugin)
+            multiProgram.add_view(self._frontend)
+            multiProgram.add_view(plugin)
             multiProgram.name = self.window_title
             self._frontend = multiProgram
             multiProgram.scene = self._frontend
@@ -530,9 +530,12 @@ class GLUTMultiWindowVisualizationFrontend(glcommon.GLMultiViewportProgram):
         self.hidden = False
         self.inSubwindow = False
     def addView(self,view):
+        warnings.warn("addView will be deprecated in favor of add_view in a future version of Klampt",DeprecationWarning)
+        self.add_view(view)
+    def add_view(self,view):
         if isinstance(view,(GLUTVisualizationFrontend,GLUTMultiWindowVisualizationFrontend)):
             view.inSubwindow = True
-        glcommon.GLMultiViewportProgram.addView(self,view)
+        glcommon.GLMultiViewportProgram.add_view(self,view)
     def display_screen(self):
         glcommon.GLMultiViewportProgram.display_screen(self)
         if not self.inSubwindow:

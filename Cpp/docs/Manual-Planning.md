@@ -79,8 +79,8 @@ Example code is given in Klampt-examples/Cpp/plandemo.cpp (the application can b
 
 The general way to plan a path connecting configurations `qstart` and `qgoal` is as follows:
 
-1. Initialize a `WorldPlannerSettings` object for a `RobotWorld` with the `InitializeDefault` method.
-2. Create a `SingleRobotCSpace` (Klampt/Planning/RobotCSpace.h) with the RobotWorld, the index of the robot (typically 0), and the initialized `WorldPlannerSettings` object.
+1. Initialize a `WorldPlannerSettings` object for a `WorldModel` with the `InitializeDefault` method.
+2. Create a `SingleRobotCSpace` (Klampt/Planning/RobotCSpace.h) with the WorldModel, the index of the robot (typically 0), and the initialized `WorldPlannerSettings` object.
 3. Then, a `MotionPlannerFactory` (KrisLibrary/planning/AnyMotionPlanner.h) should be initialized with your desired planning algorithm. The "any" setting will choose an algorithm automatically.
 4. Construct a `MotionPlanningInterface*` with the `Create()` method. Call `AddConfig(qstart)` and `AddConfig(qgoal)` on this object.
 5. Call `PlanMore(N)` to plan for `N` iterations, or call `PlanMore()` until a time limit is reached. Terminate when `IsConnected(0,1)` returns true, and call `GetPath(0,1,path)` to retrieve the path.
@@ -91,6 +91,7 @@ Example code is as follows.
 ```cpp
 #include <Klampt/Planning/RobotCSpace.h>
 #include <KrisLibrary/planning/AnyMotionPlanner.h>
+using namespace Klampt;
 
 //TODO: setup world
 WorldPlannerSettings settings;

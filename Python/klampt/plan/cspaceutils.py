@@ -7,6 +7,7 @@ from ..math import vectorops
 from .cspace import CSpace,MotionPlan
 import warnings
 import itertools
+import random
 
 def default_sampleneighborhood(c,r):
     return [ci + random.uniform(-r,r) for ci in c]
@@ -51,22 +52,22 @@ class CompositeCSpace(CSpace):
         if any(hasattr(s,'sampleneighborhood') for s in spaces):
             for s in self.spaces:
                 if not hasattr(s,'sampleneighborhood'):
-                    s.sampleneighborhood = defaultsampleneighborhood
+                    s.sampleneighborhood = default_sampleneighborhood
             self.sampleneighborhood = sampleneighborhood
         if any(hasattr(s,'visible') for s in spaces):
             for s in self.spaces:
                 if not hasattr(s,'visible'):
-                    s.visible = defaultvisible
+                    s.visible = default_visible
             self.visible = visible
         if any(hasattr(s,'distance') for s in spaces):
             for s in self.spaces:
                 if not hasattr(s,'distance'):
-                    s.distance = defaultdistance
+                    s.distance = default_distance
             self.distance = distance
         if any(hasattr(s,'interpolate') for s in spaces):
             for s in self.spaces:
                 if not hasattr(s,'interpolate'):
-                    s.interpolate = defaultinterpolate
+                    s.interpolate = default_interpolate
             self.interpolate = interpolate
 
         #TODO: should add feasibility tests for subspaces -- this will allow the planning module to optimize

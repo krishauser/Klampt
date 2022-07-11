@@ -2,7 +2,7 @@
 set -e
 
 cd /Klampt/Cpp/Dependencies/KrisLibrary; git checkout master; git pull; make -j 8
-cd /Klampt; git pull; git checkout 0.8.6; git pull; make -j 8 Klampt
+cd /Klampt; git pull; git checkout 0.8.7; git pull; make -j 8 Klampt
 cp /Klampt/Python/setup.py /io/wheelhouse
 
 # Compile wheels

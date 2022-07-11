@@ -2,6 +2,7 @@
 #include <KrisLibrary/GLdraw/GL.h>
 #include <KrisLibrary/GLdraw/drawextra.h>
 using namespace GLDraw;
+using namespace Klampt;
 
 ViewPolytope::ViewPolytope()
   :poly(NULL),wireframe(false),h(0)

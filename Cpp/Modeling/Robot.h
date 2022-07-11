@@ -5,12 +5,16 @@
 #include <KrisLibrary/utils/PropertyMap.h>
 #include "ManagedGeometry.h"
 
-using namespace std;
+//forward declaration
+class RobotIKFunction;
+
+namespace Klampt {
+  using namespace std;
 
 /** @ingroup Modeling 
  * @brief Additional joint properties 
  */
-struct RobotJoint
+struct RobotModelJoint
 {
   /** Types:
     - Weld: completely fixed to the parent
@@ -38,7 +42,7 @@ struct RobotJoint
 /** @ingroup Modeling 
  * @brief Determines the effects of an actuator on the robot configuration.
  */
-struct RobotJointDriver
+struct RobotModelDriver
 {
   /** Types
   - Normal: normal 
@@ -73,10 +77,10 @@ struct RobotJointDriver
  * @brief The main robot type used in RobotSim.
  *
  * Inherits its main functionality from RobotWithGeometry, but adds extra
- * saving and loading to .rob files, and contains RobotJoint and
- * RobotJointDriver information.
+ * saving and loading to .rob files, and contains RobotModelJoint and
+ * RobotModelDriver information.
  */
-class Robot : public RobotWithGeometry
+class RobotModel : public RobotWithGeometry
 {
 public:
   virtual std::string LinkName(int i) const;
@@ -94,15 +98,15 @@ public:
   //adds a geometry to the geometry of the given link
   void Mount(int link,const Geometry::AnyGeometry3D& geom,const RigidTransform& T);
   //adds a subchain as descendents of a given link
-  void Mount(int link,const Robot& subchain,const RigidTransform& T,const char* prefix=NULL);
+  void Mount(int link,const RobotModel& subchain,const RigidTransform& T,const char* prefix=NULL);
   ///Creates this into a mega-robot from several other robots
-  void Merge(const std::vector<Robot*>& robots);
+  void Merge(const std::vector<RobotModel*>& robots);
   ///The reduced robot is a robot for which all fixed DOFs are eliminated; this
   ///helps with Newton-Euler solving.  dofMap maps robot DOFs to reduced dofs, with
   ///-1 indicating the dof is eliminated.
   ///
   ///Note: all links fixed to the environment no longer have any geometry attached
-  void Reduce(Robot& reducedRobot,vector<int>& dofMap);
+  void Reduce(RobotModel& reducedRobot,vector<int>& dofMap);
 
   bool DoesJointAffect(int joint,int dof) const;
   void GetJointIndices(int joint,vector<int>& indices) const;
@@ -130,12 +134,16 @@ public:
   ///It is used by exact collision checkers, and is uninitialized by default.
   void ComputeLipschitzMatrix();
 
+  ///Configures an IK solver to respect driver constraints.  Only works for
+  ///Affine constraints at the moment.
+  void ConfigureDriverConstraints(RobotIKFunction& f);
+
   string name;
   vector<string> geomFiles;   ///< geometry file names (used in saving)
   vector<ManagedGeometry> geomManagers; ///< geometry loaders (speeds up loading)
   Vector accMax;   ///< conservative acceleration limits, used by DynamicPath
-  vector<RobotJoint> joints;
-  vector<RobotJointDriver> drivers;
+  vector<RobotModelJoint> joints;
+  vector<RobotModelDriver> drivers;
   vector<string> linkNames;
   vector<string> driverNames;
 
@@ -153,5 +161,7 @@ public:
   ///for some utility programs.
   static bool disableGeometryLoading;
 };
+
+} //namespace Klampt
 
 #endif

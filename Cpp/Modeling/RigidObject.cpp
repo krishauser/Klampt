@@ -12,12 +12,13 @@
 #include <fstream>
 using namespace Math3D;
 using namespace std;
+namespace Klampt {
 
 //defined in XmlWorld.cpp
 string ResolveFileReference(const string& path,const string& fn);
 string MakeURLLocal(const string& url,const char* url_resolution_path="klampt_downloads");
 
-RigidObject::RigidObject()
+RigidObjectModel::RigidObjectModel()
 {
   T.setIdentity();
   w.setZero();
@@ -31,7 +32,7 @@ RigidObject::RigidObject()
 }
 
 
-bool RigidObject::Load(const char* fn)
+bool RigidObjectModel::Load(const char* fn)
 {
   string localpath = MakeURLLocal(fn);
   const char* ext=FileExtension(fn);
@@ -236,7 +237,7 @@ bool RigidObject::Load(const char* fn)
   }
 }
 
-bool RigidObject::LoadGeometry(const char* fn)
+bool RigidObjectModel::LoadGeometry(const char* fn)
 {
   geomFile = fn;
   //default appearance options
@@ -249,7 +250,7 @@ bool RigidObject::LoadGeometry(const char* fn)
   return false;
 }
 
-bool RigidObject::Save(const char* fn)
+bool RigidObjectModel::Save(const char* fn)
 {
   ofstream out(fn);
   if(!out) return false;
@@ -270,14 +271,14 @@ bool RigidObject::Save(const char* fn)
   return true;
 }
 
-void RigidObject::SetMassFromGeometry(Real totalMass,Real surfaceFraction)
+void RigidObjectModel::SetMassFromGeometry(Real totalMass,Real surfaceFraction)
 {
   mass = totalMass;
   com = CenterOfMass(*geometry,surfaceFraction);
   inertia = Inertia(*geometry,com,mass,surfaceFraction);
 }
 
-void RigidObject::SetMassFromBB(Real totalMass)
+void RigidObjectModel::SetMassFromBB(Real totalMass)
 {
   AABB3D bb=geometry->GetAABB();
   mass = totalMass;
@@ -285,7 +286,7 @@ void RigidObject::SetMassFromBB(Real totalMass)
   BoxInertiaMatrix(bb.bmax.x-bb.bmin.x,bb.bmax.y-bb.bmin.y,bb.bmax.z-bb.bmin.z,mass,inertia);
 }
 
-void RigidObject::InitCollisions()
+void RigidObjectModel::InitCollisions()
 {
   Timer timer;
   geometry->InitCollisionData();
@@ -294,12 +295,12 @@ void RigidObject::InitCollisions()
     printf("Initialized rigid object %s collision data structures in time %gs\n",geomFile.c_str(),t);
 }
 
-void RigidObject::UpdateGeometry()
+void RigidObjectModel::UpdateGeometry()
 {
   geometry->SetTransform(T);
 }
 
-void RigidObject::DrawGL()
+void RigidObjectModel::DrawGL()
 {
   if(!geometry) return;
 
@@ -313,7 +314,7 @@ void RigidObject::DrawGL()
   glEnable(GL_CULL_FACE);
 }
 
-void RigidObject::DrawGLOpaque(bool opaque)
+void RigidObjectModel::DrawGLOpaque(bool opaque)
 {
   if(!geometry) return;
 
@@ -326,3 +327,5 @@ void RigidObject::DrawGLOpaque(bool opaque)
   glPopMatrix();
   glEnable(GL_CULL_FACE);
 }
+
+} //namespace Klampt

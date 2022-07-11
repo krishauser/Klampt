@@ -12,6 +12,8 @@
 #include <collisionoutput.h>
 #include <resourcemanager.h>
 
+using namespace Klampt;
+
 namespace Ui {
 class MainWindow;
 }
@@ -27,7 +29,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    RobotWorld world;
+    WorldModel world;
     shared_ptr<QRobotPoseGUI> gui;
     shared_ptr<RobotPoseBackend> backend;
     shared_ptr<ResourceManager> manager;

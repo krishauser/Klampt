@@ -10,6 +10,7 @@ using namespace std;
 
 DECLARE_LOGGER(ODESimulator)
 
+namespace Klampt {
 
 static bool gCustomGeometryMeshesIntersect = false;
 
@@ -131,3 +132,5 @@ void ClearCustomGeometryCollisionReliableFlag()
 {
   gCustomGeometryMeshesIntersect = false;
 }
+
+} //namespace Klampt

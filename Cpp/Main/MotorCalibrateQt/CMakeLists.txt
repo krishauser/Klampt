@@ -1,5 +1,5 @@
 # Make the MotorCalibrate Qt program
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6.4)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6.4...3.20)
 PROJECT(MotorCalibrate)
 
 #Building from within Main/[AppName] folder
@@ -19,7 +19,6 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 ##### Qt Specific stuff ####
 # Configure Qt
 IF(USE_QT5_APPS)
-  cmake_policy(SET CMP0053 OLD)
   FIND_PACKAGE(Qt5 COMPONENTS Widgets Gui)
   include_directories(${Qt5Widgets_INCLUDE_DIRS} ${Qt5Gui_INCLUDE_DIRS})
   add_definitions(${Qt5Widgets_DEFINITIONS} ${Qt5Gui_DEFINITIONS})  

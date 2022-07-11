@@ -13,7 +13,7 @@
 #include <Klampt/Sensing/JointSensors.h>
 #include <Klampt/Sensing/VisualSensors.h>
 #include <Klampt/Planning/RobotCSpace.h>
-#include <Klampt/Simulation/WorldSimulation.h>
+#include <Klampt/Simulation/Simulator.h>
 #include <Klampt/Modeling/Interpolate.h>
 #include <Klampt/Modeling/Mass.h>
 #include <Klampt/Planning/RobotCSpace.h>
@@ -37,6 +37,7 @@
 #include <Klampt/View/RobotPoseWidget.h>
 #include <KrisLibrary/utils/AnyCollection.h>
 #include <KrisLibrary/utils/stringutils.h>
+#include <KrisLibrary/Timer.h>
 #include <ode/ode.h>
 #include "pyerr.h"
 #include "pyconvert.h"
@@ -45,23 +46,32 @@
 #ifndef WIN32
 #include <unistd.h>
 #endif //WIN32
+using namespace Geometry;
+
+inline void MakeNumpyArray(double** out,int* m,int* n,int _m,int _n,Matrix& ref)
+{
+  *m = _m;
+  *n = _n;
+  *out = (double*)malloc(_m*_n*sizeof(double));
+  ref.setRef(*out,_m*_n,0,_n,1,_m,_n);
+}
 
 /***************************  GLOBALS: REFERENCING TO KLAMPT C++ CODE ***************************************/
 
 /// Internally used.
 struct WorldData
 {
-  RobotWorld* world;
+  Klampt::WorldModel* world;
   bool worldExternal;
-  XmlWorld xmlWorld;
+  Klampt::XmlWorld xmlWorld;
   int refCount;
-  vector<shared_ptr<RobotSensors> > robotSensors;
+  vector<shared_ptr<Klampt::RobotSensors> > robotSensors;
 };
 
 /// Internally used.
 struct SimData
 {
-  WorldSimulation sim;
+  Klampt::Simulator sim;
 };
 
 
@@ -86,7 +96,7 @@ static bool gEnableCollisionInitialization = false;
 
 static int gStabilityNumFCEdges = 4;
 
-int createWorld(RobotWorld* ptr=NULL)
+int createWorld(Klampt::WorldModel* ptr=NULL)
 {
   if(worldDeleteList.empty()) {
     worlds.push_back(make_shared<WorldData>());
@@ -95,7 +105,7 @@ int createWorld(RobotWorld* ptr=NULL)
       worlds.back()->worldExternal = true;
     }
     else {
-      worlds.back()->world = new RobotWorld;
+      worlds.back()->world = new Klampt::WorldModel;
       worlds.back()->worldExternal = false;
     }
     worlds.back()->refCount = 1;
@@ -110,7 +120,7 @@ int createWorld(RobotWorld* ptr=NULL)
       worlds[index]->worldExternal = true;
     }
     else {
-      worlds[index]->world = new RobotWorld;
+      worlds[index]->world = new Klampt::WorldModel;
       worlds[index]->worldExternal = false;
     }
     worlds[index]->refCount = 1;
@@ -234,10 +244,10 @@ void destroy()
   worldDeleteList.clear();
   sims.resize(0);
   worlds.resize(0);
-  ManagedGeometry::manager.Clear();
+  Klampt::ManagedGeometry::manager.Clear();
 }
 
-void setRandomSeed(int seed)
+void set_random_seed(int seed)
 {
   Math::Srand(seed);
 }
@@ -245,7 +255,7 @@ void setRandomSeed(int seed)
 
 /***************************  GEOMETRY CODE ***************************************/
 
-ManagedGeometry& GetManagedGeometry(RobotWorld& world,int id)
+Klampt::ManagedGeometry& GetManagedGeometry(Klampt::WorldModel& world,int id)
 {
   if(id < 0) {
     fprintf(stderr,"GetManagedGeometry(): Invalid ID: %d\n",id);
@@ -266,11 +276,11 @@ ManagedGeometry& GetManagedGeometry(RobotWorld& world,int id)
 }
 
 
-class ManualOverrideController : public RobotController
+class ManualOverrideController : public Klampt::RobotController
 {
  public:
-  ManualOverrideController(Robot& robot,const shared_ptr<RobotController>& _base)
-    :RobotController(robot),base(_base),override(false)
+  ManualOverrideController(Klampt::RobotModel& robot,const shared_ptr<Klampt::RobotController>& _base)
+    :Klampt::RobotController(robot),base(_base),override(false)
   {}
   virtual const char* Type() const { return "ManualOverrideController"; }
   virtual void Update(Real dt);
@@ -286,7 +296,7 @@ class ManualOverrideController : public RobotController
   virtual vector<string> Commands() const { return base->Commands(); }
   virtual bool SendCommand(const string& name,const string& str) { return base->SendCommand(name,str); }
 
-  shared_ptr<RobotController> base;
+  shared_ptr<Klampt::RobotController> base;
   bool override;
 };
 
@@ -303,8 +313,8 @@ bool ManualOverrideController::ReadState(File& f)
     }
     return true;
   }
-  if(!RobotController::ReadState(f)) {
-    printf("Unable to read RobotController\n");
+  if(!Klampt::RobotController::ReadState(f)) {
+    printf("Unable to read Klampt::RobotController\n");
     return false;
   }
   return true;
@@ -314,7 +324,7 @@ bool ManualOverrideController::WriteState(File& f) const
 {
   if(!WriteFile(f,override)) return false;
   if(!override) return base->WriteState(f);
-  return RobotController::WriteState(f);
+  return Klampt::RobotController::WriteState(f);
 }
 
 void ManualOverrideController::Update(Real dt)
@@ -329,39 +339,39 @@ void ManualOverrideController::Update(Real dt)
   else {
     //keep existing commands
   }
-  RobotController::Update(dt);
+  Klampt::RobotController::Update(dt);
 }
 
 
 typedef ManualOverrideController MyController;
-inline shared_ptr<MyController> MakeController(Robot* robot)
+inline shared_ptr<MyController> MakeController(Klampt::RobotModel* robot)
 {
   ManualOverrideController* lc=new ManualOverrideController(*robot,MakeDefaultController(robot));
   return shared_ptr<MyController>(lc);
 }
-inline PolynomialPathController* GetPathController(RobotController* controller)
+inline Klampt::PolynomialPathController* GetPathController(Klampt::RobotController* controller)
 {
   MyController* mc=dynamic_cast<MyController*>(controller);
   if(!mc) {
     throw PyException("Not using the default manual override controller");
   }
-  LoggingController* lc=dynamic_cast<LoggingController*>(mc->base.get());
+  Klampt::LoggingController* lc=dynamic_cast<Klampt::LoggingController*>(mc->base.get());
   if(!lc) {
     throw PyException("Not using the default robot controller");
   }
-  FeedforwardController* ffc=dynamic_cast<FeedforwardController*>(lc->base.get());
-  PolynomialPathController* pc=dynamic_cast<PolynomialPathController*>(ffc->base.get());
+  Klampt::FeedforwardController* ffc=dynamic_cast<Klampt::FeedforwardController*>(lc->base.get());
+  Klampt::PolynomialPathController* pc=dynamic_cast<Klampt::PolynomialPathController*>(ffc->base.get());
   return pc;
 }
-inline PolynomialMotionQueue* GetMotionQueue(RobotController* controller)
+inline Klampt::PolynomialMotionQueue* GetMotionQueue(Klampt::RobotController* controller)
 {
   return GetPathController(controller);
 }
 
 
-void GetMesh(const Geometry::AnyCollisionGeometry3D& geom,TriangleMesh& tmesh)
+void GetMesh(const AnyCollisionGeometry3D& geom,TriangleMesh& tmesh)
 {
-  Assert(geom.type == Geometry::AnyGeometry3D::TriangleMesh);
+  Assert(geom.type == AnyGeometry3D::TriangleMesh);
   const Meshing::TriMesh& mesh = geom.AsTriangleMesh();
   tmesh.indices.resize(mesh.tris.size()*3);
   tmesh.vertices.resize(mesh.verts.size()*3);
@@ -375,23 +385,23 @@ void GetMesh(const Geometry::AnyCollisionGeometry3D& geom,TriangleMesh& tmesh)
   }
 }
 
-void GetMesh(const TriangleMesh& tmesh,Geometry::AnyCollisionGeometry3D& geom)
+void GetMesh(const TriangleMesh& tmesh,AnyCollisionGeometry3D& geom)
 {
-  Meshing::TriMesh mesh;
+  geom = Meshing::TriMesh();
+  Meshing::TriMesh& mesh = geom.AsTriangleMesh();
   mesh.tris.resize(tmesh.indices.size()/3);
   mesh.verts.resize(tmesh.vertices.size()/3);
   for(size_t i=0;i<mesh.tris.size();i++)
     mesh.tris[i].set(tmesh.indices[i*3],tmesh.indices[i*3+1],tmesh.indices[i*3+2]);
   for(size_t i=0;i<mesh.verts.size();i++)
     mesh.verts[i].set(tmesh.vertices[i*3],tmesh.vertices[i*3+1],tmesh.vertices[i*3+2]);
-  geom = mesh;
   geom.ClearCollisionData();
 }
 
 
-void GetPointCloud(const Geometry::AnyCollisionGeometry3D& geom,PointCloud& pc)
+void GetPointCloud(const AnyCollisionGeometry3D& geom,PointCloud& pc)
 {
-  Assert(geom.type == Geometry::AnyGeometry3D::PointCloud);
+  Assert(geom.type == AnyGeometry3D::PointCloud);
   const Meshing::PointCloud3D& gpc = geom.AsPointCloud();
   pc.vertices.resize(gpc.points.size()*3);
   pc.propertyNames = gpc.propertyNames;
@@ -409,12 +419,18 @@ void GetPointCloud(const Geometry::AnyCollisionGeometry3D& geom,PointCloud& pc)
   pc.settings = gpc.settings;
 }
 
-void GetPointCloud(const PointCloud& pc,Geometry::AnyCollisionGeometry3D& geom)
+void GetPointCloud(const PointCloud& pc,AnyCollisionGeometry3D& geom)
 {
-  Meshing::PointCloud3D gpc;
+  geom = Meshing::PointCloud3D();
+  Meshing::PointCloud3D& gpc = geom.AsPointCloud();
+  gpc.settings = pc.settings;
   gpc.points.resize(pc.vertices.size()/3);
-  for(size_t i=0;i<gpc.points.size();i++)
-    gpc.points[i].set(pc.vertices[i*3],pc.vertices[i*3+1],pc.vertices[i*3+2]);
+  int k=0;
+  //const double* v=&pc.vertices[0];
+  //for(size_t i=0;i<gpc.points.size();i++,k+=3)
+  //  gpc.points[i].set(v[k],v[k+1],v[k+2]);
+  assert(sizeof(Vector3) == sizeof(double)*3);
+  memcpy(&gpc.points[0],&pc.vertices[0],sizeof(double)*3*gpc.points.size());
   gpc.propertyNames = pc.propertyNames;
   if(pc.propertyNames.size() > 0) {
     if(pc.properties.size() != gpc.points.size()*pc.propertyNames.size()) {
@@ -422,20 +438,26 @@ void GetPointCloud(const PointCloud& pc,Geometry::AnyCollisionGeometry3D& geom)
       throw PyException("GetPointCloud: Invalid number of properties in PointCloud");
     }
     gpc.properties.resize(pc.properties.size() / pc.propertyNames.size());
-    for(size_t i=0;i<gpc.properties.size();i++) {
-      gpc.properties[i].resize(pc.propertyNames.size());
-      gpc.properties[i].copy(&pc.properties[i*pc.propertyNames.size()]);
+    gpc.properties[0].resize(pc.properties.size());
+    //gpc.properties[0].copy(&pc.properties[0]);
+    memcpy(&gpc.properties[0][0],&pc.properties[0],sizeof(double)*pc.properties.size());
+    
+    int m=(int)pc.propertyNames.size();
+    int k=0;
+    for(size_t i=1;i<gpc.properties.size();i++,k+=m) {
+      //gpc.properties[i].resize(pc.propertyNames.size());
+      //gpc.properties[i].copy(&pc.properties[i*pc.propertyNames.size()]);
+      //if(i != 0)
+        gpc.properties[i].setRef(gpc.properties[0],k,1,m);
     }
+    gpc.properties[0].n = m;
   }
-  gpc.settings = pc.settings;
-  //printf("Copying PointCloud to geometry, %d points\n",(int)gpc.points.size());
-  geom = gpc;
   geom.ClearCollisionData();
 }
 
-void GetVolumeGrid(const Geometry::AnyCollisionGeometry3D& geom,VolumeGrid& grid)
+void GetVolumeGrid(const AnyCollisionGeometry3D& geom,VolumeGrid& grid)
 {
-  Assert(geom.type == Geometry::AnyGeometry3D::ImplicitSurface);
+  Assert(geom.type == AnyGeometry3D::ImplicitSurface);
   const Meshing::VolumeGrid& gvg = geom.AsImplicitSurface();
   grid.dims.resize(3);
   grid.dims[0] = gvg.value.m;
@@ -455,9 +477,10 @@ void GetVolumeGrid(const Geometry::AnyCollisionGeometry3D& geom,VolumeGrid& grid
   }
 }
 
-void GetVolumeGrid(const VolumeGrid& grid,Geometry::AnyCollisionGeometry3D& geom)
+void GetVolumeGrid(const VolumeGrid& grid,AnyCollisionGeometry3D& geom)
 {
-  Meshing::VolumeGrid gvg;
+  geom = Meshing::VolumeGrid();
+  Meshing::VolumeGrid& gvg = geom.AsImplicitSurface();
   Assert(grid.dims.size()==3);
   Assert(grid.bbox.size()==6);
   gvg.Resize(grid.dims[0],grid.dims[1],grid.dims[2]);
@@ -468,7 +491,6 @@ void GetVolumeGrid(const VolumeGrid& grid,Geometry::AnyCollisionGeometry3D& geom
   for(Array3D<Real>::iterator i=gvg.value.begin();i!=gvg.value.end();++i,k++) {
     *i = grid.values[k];
   }
-  geom = gvg;
   geom.ClearCollisionData();
 }
 
@@ -641,6 +663,16 @@ bool Geometry3D::isStandalone()
 
 Geometry3D Geometry3D::clone()
 {
+  static bool warned = false;
+  if(!warned) {
+    fprintf(stderr,"Warning: Geometry3D.clone will be deprecated. Use copy instead\n");
+    warned = true;
+  }
+  return copy();
+}
+
+Geometry3D Geometry3D::copy()
+{
   Geometry3D res;
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   shared_ptr<AnyCollisionGeometry3D>& resgeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(res.geomPtr);
@@ -654,9 +686,9 @@ void Geometry3D::set(const Geometry3D& g)
 {
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   const shared_ptr<AnyCollisionGeometry3D>& ggeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(g.geomPtr);
-  ManagedGeometry* mgeom = NULL;
+  Klampt::ManagedGeometry* mgeom = NULL;
   if(!isStandalone()) {
-    RobotWorld& world = *worlds[this->world]->world;
+    Klampt::WorldModel& world = *worlds[this->world]->world;
     mgeom = &GetManagedGeometry(world,id);
   }
   if(geom == NULL) {
@@ -739,13 +771,13 @@ ConvexHull Geometry3D::getConvexHull()
 {
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
   if(!geom) return ConvexHull();
-  Assert(geom->type == Geometry::AnyGeometry3D::ConvexHull);
-  if(geom->type != Geometry::AnyGeometry3D::ConvexHull) {
+  Assert(geom->type == AnyGeometry3D::ConvexHull);
+  if(geom->type != AnyGeometry3D::ConvexHull) {
     ConvexHull chull;
     return chull;
   }
-  const Geometry::ConvexHull3D& hull = geom->AsConvexHull();
-  if(hull.type != Geometry::ConvexHull3D::Polytope) {
+  const ConvexHull3D& hull = geom->AsConvexHull();
+  if(hull.type != ConvexHull3D::Polytope) {
     throw PyException("Can't get ConvexHull object from ConvexHull groups");
   }
   const auto& pts = hull.AsPolytope();
@@ -757,9 +789,9 @@ ConvexHull Geometry3D::getConvexHull()
 void Geometry3D::setTriangleMesh(const TriangleMesh& mesh)
 {
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
-  ManagedGeometry* mgeom = NULL;
+  Klampt::ManagedGeometry* mgeom = NULL;
   if(!isStandalone()) {
-    RobotWorld& world = *worlds[this->world]->world;
+    Klampt::WorldModel& world = *worlds[this->world]->world;
     mgeom = &GetManagedGeometry(world,id);
   }
   if(geom == NULL) {
@@ -779,9 +811,9 @@ void Geometry3D::setTriangleMesh(const TriangleMesh& mesh)
 void Geometry3D::setGroup()
 {
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
-  ManagedGeometry* mgeom = NULL;
+  Klampt::ManagedGeometry* mgeom = NULL;
   if(!isStandalone()) {
-    RobotWorld& world = *worlds[this->world]->world;
+    Klampt::WorldModel& world = *worlds[this->world]->world;
     mgeom = &GetManagedGeometry(world,id);
   }
   if(geom == NULL) {
@@ -790,7 +822,7 @@ void Geometry3D::setGroup()
     else
       geom = make_shared<AnyCollisionGeometry3D>();
   }
-  *geom = AnyCollisionGeometry3D(vector<Geometry::AnyGeometry3D>());
+  *geom = AnyCollisionGeometry3D(vector<AnyGeometry3D>());
   geom->ReinitCollisionData();
 }
 
@@ -903,9 +935,9 @@ VolumeGrid Geometry3D::getVolumeGrid()
 void Geometry3D::setPointCloud(const PointCloud& pc)
 {
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
-  ManagedGeometry* mgeom = NULL;
+  Klampt::ManagedGeometry* mgeom = NULL;
   if(!isStandalone()) {
-    RobotWorld& world = *worlds[this->world]->world;
+    Klampt::WorldModel& world = *worlds[this->world]->world;
     mgeom = &GetManagedGeometry(world,id);
   }
   if(geom == NULL) {
@@ -930,9 +962,9 @@ void Geometry3D::setPointCloud(const PointCloud& pc)
 void Geometry3D::setVolumeGrid(const VolumeGrid& vg)
 {
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
-  ManagedGeometry* mgeom = NULL;
+  Klampt::ManagedGeometry* mgeom = NULL;
   if(!isStandalone()) {
-    RobotWorld& world = *worlds[this->world]->world;
+    Klampt::WorldModel& world = *worlds[this->world]->world;
     mgeom = &GetManagedGeometry(world,id);
   }
   if(geom == NULL) {
@@ -957,9 +989,9 @@ void Geometry3D::setVolumeGrid(const VolumeGrid& vg)
 void Geometry3D::setConvexHull(const ConvexHull& hull)
 {
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
-  ManagedGeometry* mgeom = NULL;
+  Klampt::ManagedGeometry* mgeom = NULL;
   if(!isStandalone()) {
-    RobotWorld& world = *worlds[this->world]->world;
+    Klampt::WorldModel& world = *worlds[this->world]->world;
     mgeom = &GetManagedGeometry(world,id);
   }
   if(geom == NULL) {
@@ -992,9 +1024,9 @@ void Geometry3D::setConvexHullGroup(const Geometry3D& geom1, const Geometry3D & 
   shared_ptr<AnyCollisionGeometry3D>& ingeom2 = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geom2.geomPtr);
   Assert(ingeom2->type == AnyGeometry3D::ConvexHull);
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
-  ManagedGeometry* mgeom = NULL;
+  Klampt::ManagedGeometry* mgeom = NULL;
   if(!isStandalone()) {
-    RobotWorld& world = *worlds[this->world]->world;
+    Klampt::WorldModel& world = *worlds[this->world]->world;
     mgeom = &GetManagedGeometry(world,id);
   }
   if(geom == NULL) {
@@ -1009,7 +1041,7 @@ void Geometry3D::setConvexHullGroup(const Geometry3D& geom1, const Geometry3D & 
   RigidTransform T2 = ingeom2->GetTransform();
   RigidTransform TRel;
   TRel.mulInverseA(T1,T2);
-  Geometry::ConvexHull3D hull;
+  ConvexHull3D hull;
   hull.SetHull(ingeom1->AsConvexHull(), ingeom2->AsConvexHull());
   *geom = AnyCollisionGeometry3D(hull);
   geom->InitCollisionData();
@@ -1026,9 +1058,9 @@ void Geometry3D::setConvexHullGroup(const Geometry3D& geom1, const Geometry3D & 
 void Geometry3D::setGeometricPrimitive(const GeometricPrimitive& prim)
 {
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);  
-  ManagedGeometry* mgeom = NULL;
+  Klampt::ManagedGeometry* mgeom = NULL;
   if(!isStandalone()) {
-    RobotWorld& world = *worlds[this->world]->world;
+    Klampt::WorldModel& world = *worlds[this->world]->world;
     mgeom = &GetManagedGeometry(world,id);
   }
   if(geom == NULL) {
@@ -1070,11 +1102,11 @@ bool Geometry3D::loadFile(const char* fn)
     assert(id >= 0);
     //use the manager, this will automatically figure out caching and
     //appearance stuff
-    RobotWorld& world = *worlds[this->world]->world;
-    ManagedGeometry* mgeom = NULL;
+    Klampt::WorldModel& world = *worlds[this->world]->world;
+    Klampt::ManagedGeometry* mgeom = NULL;
     mgeom = &GetManagedGeometry(world,id);
     if(mgeom->Load(fn)) {
-      geom = shared_ptr<Geometry::AnyCollisionGeometry3D>(*mgeom);
+      geom = shared_ptr<AnyCollisionGeometry3D>(*mgeom);
       return true;
     }
     return false;
@@ -1119,11 +1151,7 @@ void Geometry3D::scale(double s)
 
 void Geometry3D::scale(double sx,double sy,double sz)
 {
-  Matrix3 R;
-  R.setZero();
-  R(0,0) = sx;
-  R(1,1) = sy;
-  R(2,2) = sz;
+  double R[9]={sx,0,0,0,sy,0,0,0,sz};
   const double t[3]={0,0,0};
   transform(R,t);
 }
@@ -1136,8 +1164,7 @@ void Geometry3D::rotate(const double R[9])
 
 void Geometry3D::translate(const double t[3])
 {
-  Matrix3 R;
-  R.setIdentity();
+  const double R[9]={1,0,0,0,1,0,0,0,1};
   transform(R,t);
 }
 
@@ -1153,8 +1180,8 @@ void Geometry3D::transform(const double R[9],const double t[3])
   }
   else {
     //update the display list / cache
-    RobotWorld& world=*worlds[this->world]->world;
-    ManagedGeometry* mgeom = &GetManagedGeometry(world,id);
+    Klampt::WorldModel& world=*worlds[this->world]->world;
+    Klampt::ManagedGeometry* mgeom = &GetManagedGeometry(world,id);
     mgeom->TransformGeometry(Matrix4(T));
     //mgeom->OnGeometryChange();
     //mgeom->RemoveFromCache();
@@ -1231,14 +1258,14 @@ Geometry3D Geometry3D::convert(const char* destype,double param)
     if(!geom->Remesh(param,*resgeom)) {
       stringstream ss;
       ss<<"Cannot perform the geometry remeshiing "<<geom->TypeName()<<" at res "<<param;
-      throw PyException(ss.str().c_str());
+      throw PyException(ss.str());
     }
     return res;
   }
   if(!geom->Convert(destype2,*resgeom,param)) {
     stringstream ss;
     ss<<"Cannot perform the geometry conversion "<<geom->TypeName()<<" -> "<<destype;
-    throw PyException(ss.str().c_str());
+    throw PyException(ss.str());
   }
   return res;
 }
@@ -1444,18 +1471,65 @@ void Geometry3D::support(const double dir[3], double out[3])
   res.get(out);
 }
 
+
+Geometry3D Geometry3D::slice(const double R[9],const double t[3],double tol)
+{
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  if(!geom) throw PyException("Geometry3D is empty, cannot slice");
+  if(geom->type == AnyGeometry3D::PointCloud && tol == 0)
+     throw PyException("Geometry3D is a point cloud and tolerance is 0, slice will get no points");
+  
+  Geometry3D res;
+  shared_ptr<AnyCollisionGeometry3D>& resgeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(res.geomPtr);
+  resgeom = make_shared<AnyCollisionGeometry3D>();
+  RigidTransform T;
+  T.R.set(R);
+  T.t.set(t);
+  if(!geom->Slice(T,*resgeom,tol))
+    throw PyException("Slice is not supported for that type of geometry");
+  return res;
+}
+
+Geometry3D Geometry3D::roi(const char* query,const double bmin[3],const double bmax[3])
+{
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  if(!geom) throw PyException("Geometry3D is empty, cannot perform ROI");
+  Geometry3D res;
+  shared_ptr<AnyCollisionGeometry3D>& resgeom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(res.geomPtr);
+  resgeom = make_shared<AnyCollisionGeometry3D>();
+  int flag=0;
+  if(query[0]=='~') {
+    flag |= ExtractROIFlagInvert;
+    query = &query[1];
+  }
+  if(0==strcmp(query,"intersect")) flag|=ExtractROIFlagIntersection;
+  else if(0==strcmp(query,"within")) flag|=ExtractROIFlagWithin;
+  else if(0==strcmp(query,"touching")) flag|=ExtractROIFlagTouching;
+  else
+    throw PyException("Invalid query, must be intersect, within, or touching");
+  AABB3D bb;
+  bb.bmin.set(bmin);
+  bb.bmax.set(bmax);
+  if(!geom->ExtractROI(bb,*resgeom,flag))
+    throw PyException("ROI is not supported for that type of geometry");
+  return res;
+}
+
 //KH: note: pointer gymnastics necessary to allow appearances to refer to temporary appearances as well as references to world, while also
 //exposing an opaque pointer in appearance.h
 
-//defined in Cpp/Modeling/ManagedGeometry.cpp
-void SetupDefaultAppearance(GLDraw::GeometryAppearance& app);
+//defined in Cpp/Modeling/Klampt::ManagedGeometry.cpp
+
+namespace Klampt {
+  void SetupDefaultAppearance(GLDraw::GeometryAppearance& app);
+}
 
 Appearance::Appearance()
   :world(-1),id(-1),appearancePtr(NULL)
 {
   auto ptr = new shared_ptr<GLDraw::GeometryAppearance>;
   ptr->reset(new GLDraw::GeometryAppearance());
-  SetupDefaultAppearance(**ptr);
+  Klampt::SetupDefaultAppearance(**ptr);
   appearancePtr = ptr;
 }
 
@@ -1490,7 +1564,7 @@ void Appearance::refresh(bool deep)
   shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
   if(!app) return;
   if(!isStandalone()) {
-    ManagedGeometry& geom = GetManagedGeometry(*worlds[this->world]->world,id);
+    Klampt::ManagedGeometry& geom = GetManagedGeometry(*worlds[this->world]->world,id);
     if(geom.IsDynamicGeometry()) {
       if(geom.DynamicGeometryUpdate()) return;
       return;
@@ -1525,8 +1599,8 @@ void Appearance::set(const Appearance& g)
 
   if(!isStandalone()) {
     //need to detach from other geometries that might be sharing this appearance
-    RobotWorld& world=*worlds[this->world]->world;
-    ManagedGeometry& geom = GetManagedGeometry(world,id);
+    Klampt::WorldModel& world=*worlds[this->world]->world;
+    Klampt::ManagedGeometry& geom = GetManagedGeometry(world,id);
     if(geom.IsAppearanceShared()) {
       geom.SetUniqueAppearance();
       app = geom.Appearance();
@@ -1562,8 +1636,8 @@ void Appearance::setDraw(bool draw)
   shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
   if(!app) return;
   if(!isStandalone()) {
-    RobotWorld& world=*worlds[this->world]->world;
-    ManagedGeometry& geom = GetManagedGeometry(world,id);
+    Klampt::WorldModel& world=*worlds[this->world]->world;
+    Klampt::ManagedGeometry& geom = GetManagedGeometry(world,id);
     if(geom.IsAppearanceShared()) {
       geom.SetUniqueAppearance();
       app = geom.Appearance();
@@ -1585,8 +1659,8 @@ void Appearance::setDraw(int feature,bool draw)
   shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
   if(!app) return;
   if(!isStandalone()) {
-    RobotWorld& world=*worlds[this->world]->world;
-    ManagedGeometry& geom = GetManagedGeometry(world,id);
+    Klampt::WorldModel& world=*worlds[this->world]->world;
+    Klampt::ManagedGeometry& geom = GetManagedGeometry(world,id);
     if(geom.IsAppearanceShared()) {
       geom.SetUniqueAppearance();
       app = geom.Appearance();
@@ -1625,8 +1699,8 @@ void Appearance::setColor(float r,float g,float b,float a)
   shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
   if(!app) return;
   if(!isStandalone()) {
-    RobotWorld& world=*worlds[this->world]->world;
-    ManagedGeometry& geom = GetManagedGeometry(world,id);
+    Klampt::WorldModel& world=*worlds[this->world]->world;
+    Klampt::ManagedGeometry& geom = GetManagedGeometry(world,id);
     if(geom.IsAppearanceShared()) {
       geom.SetUniqueAppearance();
       app = geom.Appearance();
@@ -1640,8 +1714,8 @@ void Appearance::setShininess(float shininess,float strength)
   shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
   if(!app) return;
   if(!isStandalone()) {
-    RobotWorld& world=*worlds[this->world]->world;
-    ManagedGeometry& geom = GetManagedGeometry(world,id);
+    Klampt::WorldModel& world=*worlds[this->world]->world;
+    Klampt::ManagedGeometry& geom = GetManagedGeometry(world,id);
     if(geom.IsAppearanceShared()) {
       geom.SetUniqueAppearance();
       app = geom.Appearance();
@@ -1664,8 +1738,8 @@ void Appearance::setColor(int feature,float r,float g,float b,float a)
   shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
   if(!app) return;
   if(!isStandalone()) {
-    RobotWorld& world=*worlds[this->world]->world;
-    ManagedGeometry& geom = GetManagedGeometry(world,id);
+    Klampt::WorldModel& world=*worlds[this->world]->world;
+    Klampt::ManagedGeometry& geom = GetManagedGeometry(world,id);
     if(geom.IsAppearanceShared()) {
       geom.SetUniqueAppearance();
       app = geom.Appearance();
@@ -1736,31 +1810,27 @@ void Appearance::getColor(int feature,float out[4])
   }
   for(int i=0;i<4;i++) out[i] = c.rgba[i];
 }
-void Appearance::setColors(int feature,const std::vector<float>& colors,bool alpha)
+void Appearance::setColors(int feature,float* colors,int m,int n)
 {
   shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
   if(!app) throw PyException("Invalid appearance");
-  size_t nchannels = 3;
-  if(alpha) nchannels = 4;
-  if(colors.size()%nchannels != 0) 
-    throw PyException("An invalid number of color channels is specified, must be a multiple of 3 or 4 (depending on value of alpha)");
-  size_t n = colors.size()/nchannels;
+  if(n != 3 && n != 4) throw PyException("Color array must have size N x 3 or N x 4");
   switch(feature) {
   case VERTICES:
     {
-      app->vertexColors.resize(n,app->vertexColor);
-      for(size_t i=0;i<n;i++) {
-        for(size_t k=0;k<nchannels;k++)
-          app->vertexColors[i].rgba[k] = colors[i*nchannels+k];
+      app->vertexColors.resize(m,app->vertexColor);
+      for(int i=0;i<m;i++) {
+        for(int k=0;k<n;k++)
+          app->vertexColors[i].rgba[k] = colors[i*n+k];
       }
     }
     break;
   case FACES:
     {
-      app->faceColors.resize(n,app->faceColor);
-      for(size_t i=0;i<n;i++) {
-        for(size_t k=0;k<nchannels;k++)
-          app->faceColors[i].rgba[k] = colors[i*nchannels+k];
+      app->faceColors.resize(m,app->faceColor);
+      for(int i=0;i<m;i++) {
+        for(int k=0;k<n;k++)
+          app->faceColors[i].rgba[k] = colors[i*n+k];
       }
     }
     break;
@@ -1840,19 +1910,218 @@ void Appearance::getElementColor(int feature,int element,float out[4])
     throw PyException("Invalid feature, can only do per-element colors for VERTICES or FACES");
   }
 }
-void Appearance::setTexture1D(int w,const char* format,const std::vector<unsigned char>& bytes)
+
+Image::PixelFormat StringToImageFormat(const char* format)
 {
-  throw PyException("Python API for textures not implemented yet");
+  if(0==strcmp(format,"rgb8")) {
+    return Image::R8G8B8;
+  }
+  else if(0==strcmp(format,"bgr8")) {
+    return Image::B8G8R8;
+  }
+  else if(0==strcmp(format,"rgba8")) {
+    return Image::R8G8B8A8;
+  }
+  else if(0==strcmp(format,"bgra8")) {
+    return Image::B8G8R8A8;
+  }
+  else if(0==strcmp(format,"l8")) {
+    return Image::A8;
+  }
+  else
+    throw PyException("Invalid format string, must be rgb8, bgr8, rgba8, bgr8, or l8");
+  return Image::None;
 }
 
-void Appearance::setTexture2D(int w,int h,const char* format,const std::vector<unsigned char>& bytes,bool topdown)
+void Appearance::setTexture1D_b(const char* format,unsigned char* bytes,int m)
 {
- throw PyException("Python API for textures not implemented yet");
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) throw PyException("Invalid appearance");
+  app->tex1D.reset();
+  app->tex2D.reset();
+  app->textureObject.cleanup();
+  if(strlen(format)==0) {
+    return;
+  }
+  app->tex1D = make_shared<Image>();
+  Image::PixelFormat fmt = StringToImageFormat(format);
+  int bpp = Image::pixelFormatSize(fmt);
+  app->tex1D->initialize(1,m/bpp,fmt);
+  memcpy(app->tex1D->data,bytes,m);
 }
 
-void Appearance::setTexcoords(const std::vector<double>& uvs)
+void Appearance::setTexture1D_i(const char* format,unsigned int* bytes,int m)
 {
-  throw PyException("Python API for textures not implemented yet");
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) throw PyException("Invalid appearance");
+  app->tex1D.reset();
+  app->tex2D.reset();
+  app->textureObject.cleanup();
+  if(strlen(format)==0) {
+    return;
+  }
+  app->tex1D = make_shared<Image>();
+  Image::PixelFormat fmt = StringToImageFormat(format);
+  int bpp = Image::pixelFormatSize(fmt);
+  if(bpp != 4) throw PyException("Provided uint32 type to texture, but not a 32-bit format");
+  app->tex1D->initialize(1,m,fmt);
+  memcpy(app->tex1D->data,bytes,m*sizeof(unsigned int));
+}
+
+void Appearance::setTexture1D_channels(const char* format,unsigned char* bytes,int m,int n)
+{
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) throw PyException("Invalid appearance");
+  app->tex1D.reset();
+  app->tex2D.reset();
+  app->textureObject.cleanup();
+  if(strlen(format)==0) {
+    return;
+  }
+  app->tex1D = make_shared<Image>();
+  Image::PixelFormat fmt = StringToImageFormat(format);
+  int bpp = Image::pixelFormatSize(fmt);
+  if(bpp != n) {
+    stringstream ss;
+    ss<<"Provided "<<n<<"channels to texture, but format is a "<<bpp<<"-byte format";
+    throw PyException(ss.str());
+  }
+  app->tex1D->initialize(1,m,fmt);
+  memcpy(app->tex1D->data,bytes,m*n);
+}
+
+void Appearance::setTexture2D_b(const char* format,unsigned char* bytes,int m,int n,bool topdown)
+{
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) throw PyException("Invalid appearance");
+  app->tex1D.reset();
+  app->tex2D.reset();
+  app->textureObject.cleanup();
+  if(strlen(format)==0) {
+    return;
+  }
+  app->tex2D = make_shared<Image>();
+  Image::PixelFormat fmt = StringToImageFormat(format);
+  int bpp = Image::pixelFormatSize(fmt);
+  if(bpp != 1) throw PyException("Provided uint8 type to texture, but not an 8-bit format");
+  app->tex2D->initialize(n,m,fmt);
+  if(topdown) {
+    memcpy(app->tex2D->data,bytes,m*n);
+  }
+  else {
+    int stride = n;
+    for(int i=0;i<m;i++) {
+      int iflip = m-1-i;
+      memcpy(&app->tex2D->data[iflip*stride],&bytes[i*stride],stride);
+    }
+  }
+}
+
+void Appearance::setTexture2D_i(const char* format,unsigned int* bytes,int m,int n,bool topdown)
+{
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) throw PyException("Invalid appearance");
+  app->tex1D.reset();
+  app->tex2D.reset();
+  app->textureObject.cleanup();
+  if(strlen(format)==0) {
+    return;
+  }
+  app->tex2D = make_shared<Image>();
+  Image::PixelFormat fmt = StringToImageFormat(format);
+  int bpp = Image::pixelFormatSize(fmt);
+  if(bpp != 4) throw PyException("Provided uint32 type to texture, but not a 32-bit format");
+  app->tex2D->initialize(n,m,fmt);
+  if(topdown) {
+    memcpy(app->tex2D->data,bytes,m*n*sizeof(unsigned int));
+  }
+  else {
+    int stride = n*sizeof(unsigned int);
+    for(int i=0;i<m;i++) {
+      int iflip = m-1-i;
+      memcpy(&app->tex2D->data[iflip*stride],&bytes[i*stride],stride);
+    }
+  }
+}
+
+void Appearance::setTexture2D_channels(const char* format,unsigned char* bytes,int m,int n,int p,bool topdown)
+{
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) throw PyException("Invalid appearance");
+  app->tex1D.reset();
+  app->tex2D.reset();
+  app->textureObject.cleanup();
+  if(strlen(format)==0) {
+    return;
+  }
+  app->tex2D = make_shared<Image>();
+  Image::PixelFormat fmt = StringToImageFormat(format);
+  int bpp = Image::pixelFormatSize(fmt);
+  if(bpp != p) {
+    stringstream ss;
+    ss<<"Provided "<<p<<"channels to texture, but format is a "<<bpp<<"-byte format";
+    throw PyException(ss.str());
+  }
+  app->tex2D->initialize(n,m,fmt);
+  if(topdown) {
+    memcpy(app->tex2D->data,bytes,m*n*p);
+  }
+  else {
+    int stride = n*p;
+    for(int i=0;i<m;i++) {
+      int iflip = m-1-i;
+      memcpy(&app->tex2D->data[iflip*stride],&bytes[i*stride],stride);
+    }
+  }
+}
+
+void Appearance::setTexcoords1D(double* np_array,int m)
+{
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) throw PyException("Invalid appearance");
+  app->texcoords.resize(m);
+  for(int i=0;i<m;i++)
+    app->texcoords[i].x = np_array[i];
+}
+
+void Appearance::setTexcoords2D(double* np_array2,int m,int n)
+{
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) throw PyException("Invalid appearance");
+  if(n != 2) throw PyException("Must provide exactly 2 columns");
+  app->texcoords.resize(m);
+  for(int i=0;i<m;i++) {
+    app->texcoords[i].x = np_array2[i*2];
+    app->texcoords[i].y = np_array2[i*2+1];
+  }
+}
+
+void Appearance::setTexgen(double* np_array2,int m,int n,bool worldcoordinates)
+{
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) throw PyException("Invalid appearance");
+  if(m==0) {
+    app->texgen.resize(0);
+    return;
+  }
+  if(n != 4) throw PyException("Texgen array must have exactly 4 columns");
+  if(worldcoordinates) {
+    RigidTransform Tident; Tident.setIdentity();
+    app->texgenEyeTransform = make_shared<RigidTransform>(Tident);
+  }
+  else {
+    app->texgenEyeTransform.reset();
+  }
+  app->texgen.resize(m);
+  for(int i=0;i<m;i++)
+    app->texgen[i].set(&np_array2[i*4]);
+}
+
+void Appearance::setTexWrap(bool wrap)
+{
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) throw PyException("Invalid appearance");
+  app->texWrap = wrap;
 }
 
 void Appearance::setPointSize(float size)
@@ -1860,8 +2129,8 @@ void Appearance::setPointSize(float size)
   shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
   if(!app) return;
   if(!isStandalone()) {
-    RobotWorld& world=*worlds[this->world]->world;
-    ManagedGeometry& geom = GetManagedGeometry(world,id);
+    Klampt::WorldModel& world=*worlds[this->world]->world;
+    Klampt::ManagedGeometry& geom = GetManagedGeometry(world,id);
     if(geom.IsAppearanceShared()) {
       geom.SetUniqueAppearance();
       app = geom.Appearance();
@@ -1875,8 +2144,8 @@ void Appearance::setCreaseAngle(float creaseAngleRads)
   shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
   if(!app) return;
   if(!isStandalone()) {
-    RobotWorld& world=*worlds[this->world]->world;
-    ManagedGeometry& geom = GetManagedGeometry(world,id);
+    Klampt::WorldModel& world=*worlds[this->world]->world;
+    Klampt::ManagedGeometry& geom = GetManagedGeometry(world,id);
     if(geom.IsAppearanceShared()) {
       geom.SetUniqueAppearance();
       app = geom.Appearance();
@@ -1890,8 +2159,8 @@ void Appearance::setSilhouette(float radius,float r,float g,float b,float a)
   shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
   if(!app) return;
   if(!isStandalone()) {
-    RobotWorld& world=*worlds[this->world]->world;
-    ManagedGeometry& geom = GetManagedGeometry(world,id);
+    Klampt::WorldModel& world=*worlds[this->world]->world;
+    Klampt::ManagedGeometry& geom = GetManagedGeometry(world,id);
     if(geom.IsAppearanceShared()) {
       geom.SetUniqueAppearance();
       app = geom.Appearance();
@@ -1919,7 +2188,7 @@ void Appearance::drawWorldGL(Geometry3D& g)
   if(!geom) return;
   if(!app) {
     app = make_shared<GLDraw::GeometryAppearance>();
-    SetupDefaultAppearance(*app);
+    Klampt::SetupDefaultAppearance(*app);
   }
   if(app->geom) {
     if(app->geom != geom.get()) {
@@ -1944,7 +2213,7 @@ void Appearance::drawGL(Geometry3D& g)
   if(!geom) return;
   if(!app) {
     app = make_shared<GLDraw::GeometryAppearance>();
-    SetupDefaultAppearance(*app);
+    Klampt::SetupDefaultAppearance(*app);
   }
   if(app->geom) {
     if(app->geom != geom.get()) {
@@ -1999,6 +2268,47 @@ void copy(const Matrix& mat,vector<vector<double> >& v)
 TriangleMesh::TriangleMesh()
 {}
 
+void TriangleMesh::getVertices(double** np_view2, int* m, int* n)
+{
+  if(vertices.empty()) {
+    *np_view2 = 0;
+    *m = 0;
+    *n = 0;
+    return;
+  }
+  *np_view2 = &vertices[0];
+  *m = vertices.size()/3;
+  *n = 3;
+}
+
+void TriangleMesh::setVertices(double* np_array2, int m, int n)
+{
+  if(n != 3) throw PyException("Vertex array must be nx3");
+  vertices.resize(m*n);
+  copy(np_array2,np_array2+m*n,&vertices[0]);
+}
+
+void TriangleMesh::getIndices(int** np_view2, int* m, int* n)
+{
+  if(indices.empty()) {
+    *np_view2 = 0;
+    *m = 0;
+    *n = 0;
+    return;
+  }
+  *np_view2 = &indices[0];
+  *m = indices.size()/3;
+  *n = 3;
+}
+
+void TriangleMesh::setIndices(int* np_array2, int m, int n)
+{
+  if(n != 3) throw PyException("Index array must be nx3");
+  indices.resize(m*n);
+  copy(np_array2,np_array2+m*n,&indices[0]);
+}
+
+
 void TriangleMesh::translate(const double t[3])
 {
   for(size_t i=0;i<vertices.size();i+=3) {
@@ -2028,6 +2338,27 @@ int ConvexHull::numPoints() const
 {
   return points.size()/3;
 }
+
+void ConvexHull::getPoints(double** np_view2, int* m, int* n)
+{
+  if(points.empty()) {
+    *np_view2 = 0;
+    *m = 0;
+    *n = 0;
+    return;
+  }
+  *np_view2 = &points[0];
+  *m = points.size()/3;
+  *n = 3;
+}
+
+void ConvexHull::setPoints(double* np_array2, int m, int n)
+{
+  if(n != 3) throw PyException("Vertex array must be nx3");
+  points.resize(m*n);
+  copy(np_array2,np_array2+m*n,&points[0]);
+}
+
 
 void ConvexHull::addPoint(const double pt[3])
 {
@@ -2075,13 +2406,32 @@ PointCloud::PointCloud()
 {}
 int PointCloud::numPoints() const { return vertices.size()/3; }
 int PointCloud::numProperties() const { return propertyNames.size(); }
-void PointCloud::setPoints(int num,const vector<double>& plist)
+void PointCloud::setPoints(double* parray,int m,int n)
 {
+  if(n!=3) throw PyException("Array must be size nx3");
+  int num = m;
+  bool resized = ((int)vertices.size() != num*3);
   vertices.resize(num*3);
-  assert(plist.size() >= num+3);
-  copy(plist.begin(),plist.begin()+num*3,&vertices[0]);
-  properties.resize(num*propertyNames.size());
-  fill(properties.begin(),properties.end(),0.0);
+  copy(parray,parray+num*3,&vertices[0]);
+  if(resized) {
+    properties.resize(num*propertyNames.size());
+    fill(properties.begin(),properties.end(),0.0);
+  }
+  else {
+    properties.resize(num*propertyNames.size(),0.0);
+  }
+}
+void PointCloud::getPoints(double** pview,int* m,int *n)
+{
+  if(vertices.size()==0) {
+    *m=0;
+    *n=0;
+    *pview=NULL;
+    return;
+  }
+  *m = vertices.size()/3;
+  *n = 3;
+  *pview = &vertices[0];
 }
 
 int PointCloud::addPoint(const double p[3])
@@ -2117,16 +2467,18 @@ void PointCloud::addProperty(const std::string& pname)
 {
   int n = numPoints();
   vector<double> values(n,0.0);
-  addProperty(pname,values);
+  addProperty(pname,&values[0],n);
 }
 
-void PointCloud::addProperty(const std::string& pname,const std::vector<double> & values)
+void PointCloud::addProperty(const std::string& pname,double* values,int numvals)
 {
   int n = numPoints();
-  if(int(values.size()) != n) {
-    throw PyException("Invalid size of properties list, must have size #points");
+  if(numvals != n) {
+    stringstream ss;
+    ss<<"Invalid size "<<numvals<<" of properties list, must have size #points = "<<n;
+    throw PyException(ss.str());
   }
-  assert(values.size() == n);
+  assert(numvals == n);
   size_t m=propertyNames.size();
   assert(properties.size() == n*m);
   propertyNames.push_back(pname);
@@ -2143,25 +2495,80 @@ void PointCloud::addProperty(const std::string& pname,const std::vector<double> 
   assert(properties.size() == (n*(m+1)));
 }
 
-void PointCloud::setProperties(const vector<double>& vproperties)
+void PointCloud::setProperties(double* np_array2, int m, int n)
 {
-  int n = numPoints();
-  size_t m=propertyNames.size();
-  if(vproperties.size() < n*m) {
-    throw PyException("Invalid size of properties list, must have size at least #points * #properties");
+  int npt = numPoints();
+  size_t nprop=propertyNames.size();
+
+  if(m != npt) {
+    throw PyException("Invalid size of properties array, must have #points rows");
   }
-  if(properties.size() != n*m) {
-    throw PyException("Internal error, properties doesn't contain #points * #properties items?"); 
+  if((int)nprop != n) {
+    propertyNames.resize(n);
+    properties.resize(m*n);
+    for(int i=(int)nprop;i<n;i++) {
+      stringstream ss;
+      ss<<"Property "<<i;
+      propertyNames[i] = ss.str();
+    }
   }
-  copy(vproperties.begin(),vproperties.begin()+m*n,properties.begin());
+  //if(n != nprop) {
+  //  throw PyException("Invalid size of properties array, must have #properties columns");
+  //}
+
+  copy(np_array2,np_array2+m*n,properties.begin());
 }
 
-void PointCloud::setProperties(int pindex,const vector<double>& vproperties)
+void PointCloud::setPointsAndProperties(double* np_array2, int m,int n)
+{
+  if(m==0) {
+    vertices.resize(0);
+    properties.resize(0);
+    propertyNames.resize(0);
+    return;
+  }
+  if(n < 3)
+    throw PyException("Invalid size of array, must have >= 3 dimensions");
+
+  size_t nprop=propertyNames.size();
+  if((int)nprop != n-3) {
+    propertyNames.resize(n-3);
+    for(int i=(int)nprop;i<n-3;i++) {
+      stringstream ss;
+      ss<<"Property "<<i;
+      propertyNames[i] = ss.str();
+    }
+  }
+  vertices.resize(m*3);
+  properties.resize(m*(n-3));
+  if(n==3)
+    copy(np_array2,np_array2+m*3,&vertices[0]);
+  else {
+    int kv=0;
+    int kp=0;
+    int k=0;
+    for(int i=0;i<m;i++,k+=n,kv+=3,kp+=(n-3)) {
+      for(int j=0;j<3;j++) vertices[kv+j]=np_array2[k+j];
+      for(int j=0;j<n-3;j++) properties[kp+j]=np_array2[k+3+j];
+    }
+  }
+  
+}
+ 
+void PointCloud::getAllProperties(double** np_view2, int* m, int* n)
+{
+  *m = numPoints();
+  *n = (int)propertyNames.size();
+  *np_view2 = (double*)malloc(properties.size()*sizeof(double));
+  copy(properties.begin(),properties.end(),*np_view2);
+}
+
+void PointCloud::setProperties(int pindex,double* vproperties,int numvals)
 {
   if(pindex < 0 || pindex >= (int)propertyNames.size())
     throw PyException("Invalid property index"); 
   int n = numPoints();
-  if((int)vproperties.size() < n) {
+  if(numvals != n) {
     throw PyException("Invalid size of properties vector, needs to have size #points"); 
   }
   size_t k=pindex;
@@ -2213,18 +2620,19 @@ double PointCloud::getProperty(int index,const std::string& pname) const
   return getProperty(index,pindex);
 }
 
-void PointCloud::getProperties(int pindex,std::vector<double>& out) const
+void PointCloud::getProperties(int pindex,double** out, int* m) const
 {
   if(pindex < 0 || pindex >= (int)propertyNames.size())
     throw PyException("Invalid property index");  
   int n=numPoints();
-  out.resize(n);
+  *m = n;
+  *out = (double*)malloc(n*sizeof(double));
   size_t k=pindex;
   for(int i=0;i<n;i++,k+=propertyNames.size())
-    out[i] = properties[k];
+    (*out)[i] = properties[k];
 }
 
-void PointCloud::getProperties(const std::string& pname,std::vector<double>& out) const
+void PointCloud::getProperties(const std::string& pname,double** out,int* m) const
 {
   int pindex = -1;
   for(size_t i=0;i<propertyNames.size();i++)
@@ -2234,7 +2642,7 @@ void PointCloud::getProperties(const std::string& pname,std::vector<double>& out
     }
   if(pindex < 0)
     throw PyException("Invalid property name");  
-  return getProperties(pindex,out); 
+  return getProperties(pindex,out,m); 
 }
 
 void PointCloud::join(const PointCloud& pc)
@@ -2320,6 +2728,285 @@ void PointCloud::transform(const double R[9],const double t[3])
   }
 }
 
+void PointCloud::setDepthImage_d(const double intrinsics[4],double* np_depth2,int m,int n,double depth_scale)
+{
+  double fx=intrinsics[0],fy=intrinsics[1],cx=intrinsics[2],cy=intrinsics[3];
+  if(fx <= 0 || fy <= 0) throw PyException("Invalid intrinsics values");
+  settings.clear();
+  { stringstream ss; ss<<n; settings["width"] = ss.str(); }
+  { stringstream ss; ss<<m; settings["height"] = ss.str(); }
+  { settings["viewpoint"] = "0 0 0 1 0 0 0"; }
+  double invfx = 1.0/fx;
+  double invfy = 1.0/fy;
+  propertyNames.resize(0);
+  properties.resize(0);
+
+  vertices.resize(m*n*3);
+  int k=0;
+  for(int i=0;i<m;i++) {
+    double y=(i-cy)*invfy;
+    for(int j=0;j<n;j++,k++) {
+      double x=(j-cx)*invfx;
+      double z=np_depth2[k]*depth_scale;
+      vertices[k*3] = x*z;
+      vertices[k*3+1] = y*z;
+      vertices[k*3+2] = z;
+    }
+  }
+}
+
+void PointCloud::setDepthImage_f(const double intrinsics[4],float* np_depth2,int m,int n,double depth_scale)
+{
+  double fx=intrinsics[0],fy=intrinsics[1],cx=intrinsics[2],cy=intrinsics[3];
+  if(fx <= 0 || fy <= 0) throw PyException("Invalid intrinsics values");
+  settings.clear();
+  { stringstream ss; ss<<n; settings["width"] = ss.str(); }
+  { stringstream ss; ss<<m; settings["height"] = ss.str(); }
+  { settings["viewpoint"] = "0 0 0 1 0 0 0"; }
+  double invfx = 1.0/fx;
+  double invfy = 1.0/fy;
+  propertyNames.resize(0);
+  properties.resize(0);
+
+  vertices.resize(m*n*3);
+  int k=0;
+  for(int i=0;i<m;i++) {
+    double y=(i-cy)*invfy;
+    for(int j=0;j<n;j++,k++) {
+      double x=(j-cx)*invfx;
+      double z=np_depth2[k]*depth_scale;
+      vertices[k*3] = x*z;
+      vertices[k*3+1] = y*z;
+      vertices[k*3+2] = z;
+    }
+  }
+}
+
+void PointCloud::setDepthImage_s(const double intrinsics[4],unsigned short* np_depth2,int m,int n,double depth_scale)
+{
+  double fx=intrinsics[0],fy=intrinsics[1],cx=intrinsics[2],cy=intrinsics[3];
+  if(fx <= 0 || fy <= 0) throw PyException("Invalid intrinsics values");
+  settings.clear();
+  { stringstream ss; ss<<n; settings["width"] = ss.str(); }
+  { stringstream ss; ss<<m; settings["height"] = ss.str(); }
+  { settings["viewpoint"] = "0 0 0 1 0 0 0"; }
+  double invfx = 1.0/fx;
+  double invfy = 1.0/fy;
+  propertyNames.resize(0);
+  properties.resize(0);
+
+  vertices.resize(m*n*3);
+  int k=0;
+  for(int i=0;i<m;i++) {
+    double y=(i-cy)*invfy;
+    for(int j=0;j<n;j++,k++) {
+      double x=(j-cx)*invfx;
+      double z=np_depth2[k]*depth_scale;
+      vertices[k*3] = x*z;
+      vertices[k*3+1] = y*z;
+      vertices[k*3+2] = z;
+    }
+  }
+}
+
+void PointCloud::setRGBDImages_i_d(const double intrinsics[4],unsigned int* np_array2,int m,int n,double* np_depth2,int m2,int n2,double depth_scale)
+{
+  if(m != m2 || n != n2) throw PyException("Non-matching image sizes");
+  double fx=intrinsics[0],fy=intrinsics[1],cx=intrinsics[2],cy=intrinsics[3];
+  if(fx <= 0 || fy <= 0) throw PyException("Invalid intrinsics values");
+  settings.clear();
+  { stringstream ss; ss<<n; settings["width"] = ss.str(); }
+  { stringstream ss; ss<<m; settings["height"] = ss.str(); }
+  { settings["viewpoint"] = "0 0 0 1 0 0 0"; }
+  double invfx = 1.0/fx;
+  double invfy = 1.0/fy;
+  propertyNames.resize(1);
+  propertyNames[0] = "rgb";
+  properties.resize(m*n);
+  for(int i=0;i<m*n;i++)
+    properties[i] = Real(np_array2[i]);  //encode uint as double
+
+  vertices.resize(m*n*3);
+  int k=0;
+  for(int i=0;i<m;i++) {
+    double y=(i-cy)*invfy;
+    for(int j=0;j<n;j++,k++) {
+      double x=(j-cx)*invfx;
+      double z=np_depth2[k]*depth_scale;
+      vertices[k*3] = x*z;
+      vertices[k*3+1] = y*z;
+      vertices[k*3+2] = z;
+    }
+  }
+}
+
+void PointCloud::setRGBDImages_i_f(const double intrinsics[4],unsigned int* np_array2,int m,int n,float* np_depth2,int m2,int n2,double depth_scale)
+{
+  if(m != m2 || n != n2) throw PyException("Non-matching image sizes");
+  double fx=intrinsics[0],fy=intrinsics[1],cx=intrinsics[2],cy=intrinsics[3];
+  if(fx <= 0 || fy <= 0) throw PyException("Invalid intrinsics values");
+  settings.clear();
+  { stringstream ss; ss<<n; settings["width"] = ss.str(); }
+  { stringstream ss; ss<<m; settings["height"] = ss.str(); }
+  { settings["viewpoint"] = "0 0 0 1 0 0 0"; }
+  double invfx = 1.0/fx;
+  double invfy = 1.0/fy;
+  propertyNames.resize(1);
+  propertyNames[0] = "rgb";
+  properties.resize(m*n);
+  for(int i=0;i<m*n;i++)
+    properties[i] = Real(np_array2[i]);  //encode uint as double
+
+  vertices.resize(m*n*3);
+  int k=0;
+  for(int i=0;i<m;i++) {
+    double y=(i-cy)*invfy;
+    for(int j=0;j<n;j++,k++) {
+      double x=(j-cx)*invfx;
+      double z=np_depth2[k]*depth_scale;
+      vertices[k*3] = x*z;
+      vertices[k*3+1] = y*z;
+      vertices[k*3+2] = z;
+    }
+  }
+}
+
+void PointCloud::setRGBDImages_i_s(const double intrinsics[4],unsigned int* np_array2,int m,int n,unsigned short* np_depth2,int m2,int n2,double depth_scale)
+{
+  if(m != m2 || n != n2) throw PyException("Non-matching image sizes");
+  double fx=intrinsics[0],fy=intrinsics[1],cx=intrinsics[2],cy=intrinsics[3];
+  if(fx <= 0 || fy <= 0) throw PyException("Invalid intrinsics values");
+  settings.clear();
+  { stringstream ss; ss<<n; settings["width"] = ss.str(); }
+  { stringstream ss; ss<<m; settings["height"] = ss.str(); }
+  { settings["viewpoint"] = "0 0 0 1 0 0 0"; }
+  double invfx = 1.0/fx;
+  double invfy = 1.0/fy;
+  propertyNames.resize(1);
+  propertyNames[0] = "rgb";
+  properties.resize(m*n);
+  for(int i=0;i<m*n;i++)
+    properties[i] = Real(np_array2[i]);  //encode uint as double
+
+  vertices.resize(m*n*3);
+  int k=0;
+  for(int i=0;i<m;i++) {
+    double y=(i-cy)*invfy;
+    for(int j=0;j<n;j++,k++) {
+      double x=(j-cx)*invfx;
+      double z=np_depth2[k]*depth_scale;
+      vertices[k*3] = x*z;
+      vertices[k*3+1] = y*z;
+      vertices[k*3+2] = z;
+    }
+  }
+}
+
+void PointCloud::setRGBDImages_b_d(const double intrinsics[4],unsigned char* np_array3,int m,int n,int p,double* np_depth2,int m2,int n2,double depth_scale)
+{
+  if(p != 3) throw PyException("Need 3 color channels");
+  if(m != m2 || n != n2) throw PyException("Non-matching image sizes");
+  double fx=intrinsics[0],fy=intrinsics[1],cx=intrinsics[2],cy=intrinsics[3];
+  if(fx <= 0 || fy <= 0) throw PyException("Invalid intrinsics values");
+  settings.clear();
+  { stringstream ss; ss<<n; settings["width"] = ss.str(); }
+  { stringstream ss; ss<<m; settings["height"] = ss.str(); }
+  { settings["viewpoint"] = "0 0 0 1 0 0 0"; }
+  double invfx = 1.0/fx;
+  double invfy = 1.0/fy;
+  propertyNames.resize(1);
+  propertyNames[0] = "rgb";
+  properties.resize(m*n);
+  int j=0;
+  for(int i=0;i<m*n;i++,j+=3) {
+    unsigned int rgb = (((unsigned int)np_array3[j])<<16) | (((unsigned int)np_array3[j+1])<<8) | (np_array3[j+2]);
+    properties[i] = Real(rgb);  //encode uint as double
+  }
+
+  vertices.resize(m*n*3);
+  int k=0;
+  for(int i=0;i<m;i++) {
+    double y=(i-cy)*invfy;
+    for(int j=0;j<n;j++,k++) {
+      double x=(j-cx)*invfx;
+      double z=np_depth2[k]*depth_scale;
+      vertices[k*3] = x*z;
+      vertices[k*3+1] = y*z;
+      vertices[k*3+2] = z;
+    }
+  }
+}
+
+void PointCloud::setRGBDImages_b_f(const double intrinsics[4],unsigned char* np_array3,int m,int n,int p,float* np_depth2,int m2,int n2,double depth_scale)
+{
+  if(p != 3) throw PyException("Need 3 color channels");
+  if(m != m2 || n != n2) throw PyException("Non-matching image sizes");
+  double fx=intrinsics[0],fy=intrinsics[1],cx=intrinsics[2],cy=intrinsics[3];
+  if(fx <= 0 || fy <= 0) throw PyException("Invalid intrinsics values");
+  settings.clear();
+  { stringstream ss; ss<<n; settings["width"] = ss.str(); }
+  { stringstream ss; ss<<m; settings["height"] = ss.str(); }
+  { settings["viewpoint"] = "0 0 0 1 0 0 0"; }
+  double invfx = 1.0/fx;
+  double invfy = 1.0/fy;
+  propertyNames.resize(1);
+  propertyNames[0] = "rgb";
+  properties.resize(m*n);
+  int j=0;
+  for(int i=0;i<m*n;i++,j+=3) {
+    unsigned int rgb = (((unsigned int)np_array3[j])<<16) | (((unsigned int)np_array3[j+1])<<8) | (np_array3[j+2]);
+    properties[i] = Real(rgb);  //encode uint as double
+  }
+
+  vertices.resize(m*n*3);
+  int k=0;
+  for(int i=0;i<m;i++) {
+    double y=(i-cy)*invfy;
+    for(int j=0;j<n;j++,k++) {
+      double x=(j-cx)*invfx;
+      double z=np_depth2[k]*depth_scale;
+      vertices[k*3] = x*z;
+      vertices[k*3+1] = y*z;
+      vertices[k*3+2] = z;
+    }
+  }
+}
+
+void PointCloud::setRGBDImages_b_s(const double intrinsics[4],unsigned char* np_array3,int m,int n,int p,unsigned short* np_depth2,int m2,int n2,double depth_scale)
+{
+  if(p != 3) throw PyException("Need 3 color channels");
+  if(m != m2 || n != n2) throw PyException("Non-matching image sizes");
+  double fx=intrinsics[0],fy=intrinsics[1],cx=intrinsics[2],cy=intrinsics[3];
+  if(fx <= 0 || fy <= 0) throw PyException("Invalid intrinsics values");
+  settings.clear();
+  { stringstream ss; ss<<n; settings["width"] = ss.str(); }
+  { stringstream ss; ss<<m; settings["height"] = ss.str(); }
+  { settings["viewpoint"] = "0 0 0 1 0 0 0"; }
+  double invfx = 1.0/fx;
+  double invfy = 1.0/fy;
+  propertyNames.resize(1);
+  propertyNames[0] = "rgb";
+  properties.resize(m*n);
+  int j=0;
+  for(int i=0;i<m*n;i++,j+=3) {
+    unsigned int rgb = (((unsigned int)np_array3[j])<<16) | (((unsigned int)np_array3[j+1])<<8) | (np_array3[j+2]);
+    properties[i] = Real(rgb);  //encode uint as double
+  }
+
+  vertices.resize(m*n*3);
+  int k=0;
+  for(int i=0;i<m;i++) {
+    double y=(i-cy)*invfy;
+    for(int j=0;j<n;j++,k++) {
+      double x=(j-cx)*invfx;
+      double z=np_depth2[k]*depth_scale;
+      vertices[k*3] = x*z;
+      vertices[k*3+1] = y*z;
+      vertices[k*3+2] = z;
+    }
+  }
+}
+
 
 VolumeGrid::VolumeGrid()
 {}
@@ -2376,6 +3063,21 @@ void VolumeGrid::shift(double dv)
     *i += dv;
 }
 
+void VolumeGrid::getValues(double** out, int* m, int* n, int* p)
+{
+  if(dims.empty()) throw PyException("VolumeGrid was not initialized yet");
+  *m = dims[0];
+  *n = dims[1];
+  *p = dims[2];
+  *out = &values[0];
+}
+
+void VolumeGrid::setValues(double* in, int m, int n, int p)
+{
+  resize(m,n,p);
+  copy(in,in+m*n*p,&values[0]);
+}
+
 
 
 
@@ -2410,7 +3112,7 @@ WorldModel::WorldModel(const char* fn)
   if(!loadFile(fn)) {
     stringstream ss;
     ss << "Error loading world XML file " << fn;
-    throw PyException(ss.str().c_str());
+    throw PyException(ss.str());
   }
 }
 
@@ -2420,9 +3122,9 @@ WorldModel::WorldModel(const WorldModel& w)
   refWorld(index);
 }
 
-WorldModel::WorldModel(void* ptrRobotWorld)
+WorldModel::WorldModel(void* ptr)
 {
-  index = createWorld((RobotWorld*)ptrRobotWorld);
+  index = createWorld((Klampt::WorldModel*)ptr);
 }
 
 
@@ -2438,21 +3140,21 @@ const WorldModel& WorldModel::operator = (const WorldModel& w)
 WorldModel WorldModel::copy()
 {
   WorldModel res;
-  RobotWorld& myworld = *worlds[index]->world;
-  RobotWorld& otherworld = *worlds[res.index]->world;
+  Klampt::WorldModel& myworld = *worlds[index]->world;
+  Klampt::WorldModel& otherworld = *worlds[res.index]->world;
   otherworld = myworld;
   //world occupants -- copy everything but geometry
   for(size_t i=0;i<otherworld.robots.size();i++) {
-    otherworld.robots[i] = make_shared<Robot>();
+    otherworld.robots[i] = make_shared<Klampt::RobotModel>();
     *otherworld.robots[i] = *myworld.robots[i];
     otherworld.robotViews[i].robot = otherworld.robots[i].get();
   }
   for(size_t i=0;i<otherworld.terrains.size();i++) {
-    otherworld.terrains[i] = make_shared<Terrain>();
+    otherworld.terrains[i] = make_shared<Klampt::TerrainModel>();
     *otherworld.terrains[i] = *myworld.terrains[i];
   }
   for(size_t i=0;i<otherworld.rigidObjects.size();i++) {
-    otherworld.rigidObjects[i] = make_shared<RigidObject>();
+    otherworld.rigidObjects[i] = make_shared<Klampt::RigidObjectModel>();
     *otherworld.rigidObjects[i] = *myworld.rigidObjects[i];
   }
   return res;
@@ -2473,13 +3175,13 @@ bool WorldModel::loadFile(const char* fn)
 
 bool WorldModel::saveFile(const char* fn,const char* elementPath)
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   return world.SaveXML(fn,elementPath);
 }
 
 bool WorldModel::readFile(const char* fn)
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
 
   const char* ext=FileExtension(fn);
   if(0==strcmp(ext,"rob") || 0==strcmp(ext,"urdf")) {
@@ -2548,31 +3250,31 @@ bool WorldModel::readFile(const char* fn)
 
 int WorldModel::numRobots()
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   return world.robots.size();
 }
 
 int WorldModel::numRobotLinks(int robot)
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   return world.robots[robot]->links.size();
 }
 
 int WorldModel::numRigidObjects()
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   return world.rigidObjects.size();
 }
 
 int WorldModel::numTerrains()
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   return world.terrains.size();
 }
 
 int WorldModel::numIDs()
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   return world.NumIDs();
 }
 
@@ -2589,7 +3291,7 @@ RobotModel WorldModel::robot(int robot)
 
 RobotModel WorldModel::robot(const char* robot)
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   RobotModel r;
   r.world = index;
   for(size_t i=0;i<world.robots.size();i++)
@@ -2646,7 +3348,7 @@ RigidObjectModel WorldModel::rigidObject(int object)
 
 RigidObjectModel WorldModel::rigidObject(const char* object)
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   RigidObjectModel obj;
   obj.world = index;
   for(size_t i=0;i<world.rigidObjects.size();i++)
@@ -2675,7 +3377,7 @@ TerrainModel WorldModel::terrain(const char* terrain)
 {
   TerrainModel t;
   t.world = index;
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   for(size_t i=0;i<world.terrains.size();i++)
     if(world.terrains[i]->name == terrain) {
       t.index = (int)i;
@@ -2687,22 +3389,22 @@ TerrainModel WorldModel::terrain(const char* terrain)
 
 RobotModel WorldModel::makeRobot(const char* name)
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   RobotModel robot;
   robot.world = index;
   robot.index = (int)world.robots.size();
-  world.AddRobot(name,new Robot());
+  world.AddRobot(name,new Klampt::RobotModel());
   robot.robot = world.robots.back().get();
   return robot;
 }
 
 RigidObjectModel WorldModel::makeRigidObject(const char* name)
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   RigidObjectModel object;
   object.world = index;
   object.index = (int)world.rigidObjects.size();
-  world.AddRigidObject(name,new RigidObject());
+  world.AddRigidObject(name,new Klampt::RigidObjectModel());
   object.object = world.rigidObjects.back().get();
   object.object->geometry.CreateEmpty();
   return object;
@@ -2710,11 +3412,11 @@ RigidObjectModel WorldModel::makeRigidObject(const char* name)
 
 TerrainModel WorldModel::makeTerrain(const char* name)
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   TerrainModel terrain;
   terrain.world = index;
   terrain.index = world.terrains.size();
-  world.AddTerrain(name,new Terrain());
+  world.AddTerrain(name,new Klampt::TerrainModel());
   terrain.terrain = world.terrains.back().get();
   terrain.terrain->geometry.CreateEmpty();
   return terrain;
@@ -2722,7 +3424,7 @@ TerrainModel WorldModel::makeTerrain(const char* name)
 
 RobotModel WorldModel::loadRobot(const char* fn)
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   int oindex=world.LoadRobot(fn);
   if(oindex < 0) return RobotModel();
   RobotModel robot;
@@ -2737,7 +3439,7 @@ RobotModel WorldModel::loadRobot(const char* fn)
 
 RigidObjectModel WorldModel::loadRigidObject(const char* fn)
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   int oindex=world.LoadRigidObject(fn);
   if(oindex < 0) return RigidObjectModel();
   RigidObjectModel obj;
@@ -2752,7 +3454,7 @@ RigidObjectModel WorldModel::loadRigidObject(const char* fn)
 
 TerrainModel WorldModel::loadTerrain(const char* fn)
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   int oindex=world.LoadTerrain(fn);
   if(oindex < 0) return TerrainModel();
   TerrainModel obj;
@@ -2765,7 +3467,7 @@ TerrainModel WorldModel::loadTerrain(const char* fn)
 
 int WorldModel::loadElement(const char* fn)
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   int id = world.LoadElement(fn);
   return id;
 }
@@ -2774,8 +3476,8 @@ RobotModel WorldModel::add(const char* name,const RobotModel& robot)
 {
   if(robot.robot == NULL)
     throw PyException("add(RobotModel): robot refers to NULL object");
-  RobotWorld& world = *worlds[index]->world;
-  world.AddRobot(name,new Robot());
+  Klampt::WorldModel& world = *worlds[index]->world;
+  world.AddRobot(name,new Klampt::RobotModel());
   *world.robots.back() = *robot.robot;
   return this->robot((int)world.robots.size()-1);
 }
@@ -2784,8 +3486,8 @@ RigidObjectModel WorldModel::add(const char* name,const RigidObjectModel& obj)
 {
   if(obj.object == NULL)
     throw PyException("add(RigidObjectModel): obj refers to NULL object");
-  RobotWorld& world = *worlds[index]->world;
-  world.AddRigidObject(name,new RigidObject());
+  Klampt::WorldModel& world = *worlds[index]->world;
+  world.AddRigidObject(name,new Klampt::RigidObjectModel());
   *world.rigidObjects.back() = *obj.object;
   return this->rigidObject((int)world.rigidObjects.size()-1);
 }
@@ -2794,8 +3496,8 @@ TerrainModel WorldModel::add(const char* name,const TerrainModel& terrain)
 {
   if(terrain.terrain == NULL)
     throw PyException("add(TerrianModel): terrain refers to NULL object");
-  RobotWorld& world = *worlds[index]->world;
-  world.AddTerrain(name,new Terrain());
+  Klampt::WorldModel& world = *worlds[index]->world;
+  world.AddTerrain(name,new Klampt::TerrainModel());
   *world.terrains.back() = *terrain.terrain;
   return this->terrain((int)world.terrains.size()-1);
 }
@@ -2804,7 +3506,7 @@ void WorldModel::remove(const RobotModel& obj)
 {
   if(obj.world != index) 
     throw PyException("Robot does not belong to this world");
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   if(obj.index < 0 || obj.index >= (int)world.robots.size())
     throw PyException("Invalid robot index");
   world.robots.erase(world.robots.begin()+obj.index);
@@ -2814,7 +3516,7 @@ void WorldModel::remove(const RigidObjectModel& obj)
 {
   if(obj.world != index) 
     throw PyException("Rigid object does not belong to this world");
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   if(obj.index < 0 || obj.index >= (int)world.rigidObjects.size())
     throw PyException("Invalid rigid object index");
   world.rigidObjects.erase(world.rigidObjects.begin()+obj.index);
@@ -2824,7 +3526,7 @@ void WorldModel::remove(const TerrainModel& obj)
 {
   if(obj.world != index) 
     throw PyException("Terrain does not belong to this world");
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   if(obj.index < 0 || obj.index >= (int)world.terrains.size())
     throw PyException("Invalid terrain index");
   world.terrains.erase(world.terrains.begin()+obj.index);
@@ -2833,13 +3535,13 @@ void WorldModel::remove(const TerrainModel& obj)
 
 void WorldModel::drawGL()
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   world.DrawGL();
 }
 
 void WorldModel::enableGeometryLoading(bool enabled)
 {
-  Robot::disableGeometryLoading = !enabled;
+  Klampt::RobotModel::disableGeometryLoading = !enabled;
 }
 
 void WorldModel::enableInitCollisions(bool enabled)
@@ -2854,13 +3556,13 @@ void WorldModel::enableInitCollisions(bool enabled)
 
 std::string WorldModel::getName(int id)
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   return world.GetName(id);
 }
 
 Geometry3D WorldModel::geometry(int id)
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   if(world.IsTerrain(id)>=0 || world.IsRigidObject(id)>=0 || world.IsRobotLink(id).first>=0) {
     Geometry3D geom;
     geom.world = index;
@@ -2876,7 +3578,7 @@ Geometry3D WorldModel::geometry(int id)
 
 Appearance WorldModel::appearance(int id)
 {
-  RobotWorld& world = *worlds[index]->world;
+  Klampt::WorldModel& world = *worlds[index]->world;
   if(world.IsTerrain(id)>=0 || world.IsRigidObject(id)>=0 || world.IsRobotLink(id).first>=0) {
     Appearance geom;
     geom.world = index;
@@ -2947,7 +3649,7 @@ RobotModelLink RobotModelLink::parent()
 
 void RobotModelLink::setParent(int p)
 {
-  if(p < 0 || p >= (int)robotPtr->links.size())
+  if(p < -1 || p >= (int)robotPtr->links.size())
     throw PyException("Invalid parent index");
   if(index < 0)
     throw PyException("RobotModelLink is invalid");
@@ -2969,7 +3671,7 @@ void RobotModelLink::setParent(const RobotModelLink& link)
 int RobotModelLink::getID() const
 {
   if(index < 0) return -1;
-  RobotWorld& world = *worlds[this->world]->world;
+  Klampt::WorldModel& world = *worlds[this->world]->world;
   return world.RobotLinkID(robotIndex,index);
 }
 
@@ -3003,8 +3705,8 @@ Mass::Mass()
 void Mass::estimate(const Geometry3D& g,double mass,double surfaceFraction)
 {
   shared_ptr<AnyCollisionGeometry3D>* gp = reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(g.geomPtr);
-  Vector3 com = CenterOfMass(**gp,surfaceFraction);
-  Matrix3 H = Inertia(**gp,com,mass,surfaceFraction);
+  Vector3 com = Klampt::CenterOfMass(**gp,surfaceFraction);
+  Matrix3 H = Klampt::Inertia(**gp,com,mass,surfaceFraction);
   this->mass = mass;
   com.get(&this->com[0]);
   this->inertia.resize(9);
@@ -3169,58 +3871,66 @@ void RobotModelLink::setPrismatic(bool prismatic)
   link.type = (prismatic ? RobotLink3D::Prismatic : RobotLink3D::Revolute);
 }
 
-void RobotModelLink::getJacobian(const double p[3],vector<vector<double> >& J)
+void RobotModelLink::getJacobian(const double p[3],double** np_out2,int* m,int* n)
 {
   if(index < 0)
     throw PyException("RobotModelLink is invalid");
+
   Matrix Jmat;
+  MakeNumpyArray(np_out2,m,n,6,int(robotPtr->links.size()),Jmat);
   robotPtr->GetFullJacobian(Vector3(p),index,Jmat);
-  copy(Jmat,J);
 }
 
-void RobotModelLink::getJacobian2(const double p[3],const vector<int>& links,vector<vector<double> >& J)
+void RobotModelLink::getJacobianCols(const double p[3],const vector<int>& links,double** np_out2,int* m,int* n)
 {
   if(index < 0)
     throw PyException("RobotModelLink is invalid");
   Matrix Jmat;
+  MakeNumpyArray(np_out2,m,n,6,int(links.size()),Jmat);
   robotPtr->GetFullJacobian(Vector3(p),index,links,Jmat);
-  copy(Jmat,J);
 }
 
-void RobotModelLink::getPositionJacobian(const double p[3],vector<vector<double> >& J)
+void RobotModelLink::getPositionJacobian(const double p[3],double** np_out2,int* m,int* n)
 {
   if(index < 0)
     throw PyException("RobotModelLink is invalid");
   Matrix Jmat;
+  MakeNumpyArray(np_out2,m,n,3,int(robotPtr->links.size()),Jmat);
   robotPtr->GetPositionJacobian(Vector3(p),index,Jmat);
-  copy(Jmat,J);
 }
 
-void RobotModelLink::getPositionJacobian2(const double p[3],const vector<int>& links,vector<vector<double> >& J)
+void RobotModelLink::getPositionJacobianCols(const double p[3],const vector<int>& links,double** np_out2,int* m,int* n)
 {
   if(index < 0)
     throw PyException("RobotModelLink is invalid");
   Matrix Jmat;
+  MakeNumpyArray(np_out2,m,n,3,int(links.size()),Jmat);
   robotPtr->GetPositionJacobian(Vector3(p),index,links,Jmat);
-  copy(Jmat,J);
 }
 
 
-void RobotModelLink::getOrientationJacobian(vector<vector<double> >& J)
+void RobotModelLink::getOrientationJacobian(double** np_out2,int* m,int* n)
 {
   if(index < 0)
     throw PyException("RobotModelLink is invalid");
   Matrix Jmat;
-  robotPtr->GetOrientationJacobian(index,Jmat);
-  copy(Jmat,J);
+  MakeNumpyArray(np_out2,m,n,3,int(robotPtr->links.size()),Jmat);
+  Jmat.setZero();
+  int j=index;
+  while(j!=-1) {
+    Vector3 w;
+    robotPtr->links[j].GetOrientationJacobian(w);
+    Jmat(0,j)=w.x; Jmat(1,j)=w.y; Jmat(2,j)=w.z;
+    j=robotPtr->parents[j];
+  }
 }
 
-void RobotModelLink::getOrientationJacobian2(const vector<int>& links,vector<vector<double> >& J)
+void RobotModelLink::getOrientationJacobianCols(const vector<int>& links,double** np_out2,int* m,int* n)
 {
   if(index < 0)
     throw PyException("RobotModelLink is invalid");
   Matrix Jmat;
-  Jmat.resize(3,links.size(),Zero);
+  MakeNumpyArray(np_out2,m,n,3,int(links.size()),Jmat);
   map<int,int> linkmap;
   int minlink = links[0];
   for(size_t i=0;i<links.size();i++) {
@@ -3240,7 +3950,6 @@ void RobotModelLink::getOrientationJacobian2(const vector<int>& links,vector<vec
     if(j < minlink)
       break;
   }
-  copy(Jmat,J);
 }
 
 void RobotModelLink::getVelocity(double out[3])
@@ -3308,37 +4017,46 @@ void RobotModelLink::getAngularAcceleration(const std::vector<double>& ddq,doubl
   dw.get(out);
 }
 
-void RobotModelLink::getPositionHessian(const double p[3],std::vector<std::vector<double> >& out,std::vector<std::vector<double> >& out2,std::vector<std::vector<double> >& out3)
+void RobotModelLink::getPositionHessian(const double plocal[3],double** out,int* m, int* n, int* p)
 {
   if(index < 0)
     throw PyException("RobotModelLink is invalid");
+
+  *m = 3;
+  *n = (int)robotPtr->links.size();
+  *p = *n;
+  *out = (double*)malloc(3*(*n)*(*p)*sizeof(double));
   Matrix Hx,Hy,Hz;
+  Hx.setRef(*out,(*n)*(*p),0,*p,1,*n,*p);
+  Hy.setRef(*out + (*n)*(*p),(*n)*(*p),0,*p,1,*n,*p);
+  Hz.setRef(*out + 2*(*n)*(*p),(*n)*(*p),0,*p,1,*n,*p);
   Matrix* H[3] = {&Hx,&Hy,&Hz};
-  robotPtr->GetPositionHessian(Vector3(p),index,H);
-  copy(Hx,out);
-  copy(Hy,out2);
-  copy(Hz,out3);
+  robotPtr->GetPositionHessian(Vector3(plocal),index,H);
 }
 
-void RobotModelLink::getOrientationHessian(std::vector<std::vector<double> >& out,std::vector<std::vector<double> >& out2,std::vector<std::vector<double> >& out3)
+void RobotModelLink::getOrientationHessian(double** out,int* m, int* n, int* p)
 {
   if(index < 0)
     throw PyException("RobotModelLink is invalid");
   Matrix Hx,Hy,Hz;
   Matrix* H[3] = {&Hx,&Hy,&Hz};
   Matrix Hwx,Hwy,Hwz;
+  *m = 3;
+  *n = (int)robotPtr->links.size();
+  *p = *n;
+  *out = (double*)malloc(3*(*n)*(*p)*sizeof(double));
+  Hwx.setRef(*out,(*n)*(*p),0,*p,1,*n,*p);
+  Hwy.setRef(*out + (*n)*(*p),(*n)*(*p),0,*p,1,*n,*p);
+  Hwz.setRef(*out + 2*(*n)*(*p),(*n)*(*p),0,*p,1,*n,*p);
   Matrix* Hw[3] = {&Hwx,&Hwy,&Hwz};
   robotPtr->GetJacobianDeriv(Vector3(0.0),index,Hw,H);
-  copy(Hwx,out);
-  copy(Hwy,out2);
-  copy(Hwz,out3);
 }
 
 void RobotModelLink::drawLocalGL(bool keepAppearance)
 {
   if(index < 0)
     throw PyException("RobotModelLink is invalid");
-  RobotWorld& world = *worlds[this->world]->world;
+  Klampt::WorldModel& world = *worlds[this->world]->world;
   if(keepAppearance) {
     world.robotViews[robotIndex].DrawLink_Local(index);
   }
@@ -3376,7 +4094,6 @@ const char* RobotModelDriver::getName() const
   return robotPtr->driverNames[index].c_str();
 }
 
-/*
 void RobotModelDriver::setName(const char* name)
 {
   if(index < 0) {
@@ -3384,18 +4101,16 @@ void RobotModelDriver::setName(const char* name)
   }
   robotPtr->driverNames[index] = name;
 }
-*/
-
 
 const char* RobotModelDriver::getType()
 {
   if(index < 0) return "";
   switch(robotPtr->drivers[index].type) {
-  case RobotJointDriver::Normal: return "normal";
-  case RobotJointDriver::Affine: return "affine";
-  case RobotJointDriver::Translation: return "translation";
-  case RobotJointDriver::Rotation: return "rotation";
-  case RobotJointDriver::Custom: return "custom";
+  case Klampt::RobotModelDriver::Normal: return "normal";
+  case Klampt::RobotModelDriver::Affine: return "affine";
+  case Klampt::RobotModelDriver::Translation: return "translation";
+  case Klampt::RobotModelDriver::Rotation: return "rotation";
+  case Klampt::RobotModelDriver::Custom: return "custom";
   default: return "error";
   }
 }
@@ -3425,25 +4140,70 @@ void RobotModelDriver::getAffineCoeffs(std::vector<double>& scale,std::vector<do
 
 void RobotModelDriver::setValue(double val)
 {
+  if(index < 0 || index >= (int)robotPtr->drivers.size()) {
+    throw PyException("Invalid driver index");
+  }
   robotPtr->SetDriverValue(index,val);
 }
 
 double RobotModelDriver::getValue()
 {
+  if(index < 0 || index >= (int)robotPtr->drivers.size()) {
+    throw PyException("Invalid driver index");
+  }
   return robotPtr->GetDriverValue(index);
 }
 void RobotModelDriver::setVelocity(double val)
 {
+  if(index < 0 || index >= (int)robotPtr->drivers.size()) {
+    throw PyException("Invalid driver index");
+  }
   robotPtr->SetDriverVelocity(index,val);
 }
 
 double RobotModelDriver::getVelocity()
 {
+  if(index < 0 || index >= (int)robotPtr->drivers.size()) {
+    throw PyException("Invalid driver index");
+  }
   return robotPtr->GetDriverVelocity(index);
 }
 
+void RobotModelDriver::getLimits(double out[2])
+{
+  if(index < 0 || index >= (int)robotPtr->drivers.size()) {
+    throw PyException("Invalid driver index");
+  }
+  out[0] = robotPtr->drivers[index].qmin;
+  out[1] = robotPtr->drivers[index].qmax;
+}
 
+void RobotModelDriver::getVelocityLimits(double out[2])
+{
+  if(index < 0 || index >= (int)robotPtr->drivers.size()) {
+    throw PyException("Invalid driver index");
+  }
+  out[0] = robotPtr->drivers[index].vmin;
+  out[1] = robotPtr->drivers[index].vmax;
+}
 
+void RobotModelDriver::getAccelerationLimits(double out[2])
+{
+  if(index < 0 || index >= (int)robotPtr->drivers.size()) {
+    throw PyException("Invalid driver index");
+  }
+  out[0] = robotPtr->drivers[index].amin;
+  out[1] = robotPtr->drivers[index].amax;
+}
+
+void RobotModelDriver::getTorqueLimits(double out[2])
+{
+  if(index < 0 || index >= (int)robotPtr->drivers.size()) {
+    throw PyException("Invalid driver index");
+  }
+  out[0] = robotPtr->drivers[index].tmin;
+  out[1] = robotPtr->drivers[index].tmax;
+}
 
 RobotModel::RobotModel()
   :world(-1),index(-1),robot(NULL),dirty_dynamics(true)
@@ -3473,14 +4233,14 @@ bool RobotModel::saveFile(const char* fn,const char* geometryPrefix)
 const char* RobotModel::getName() const
 {
   if(!robot) throw PyException("RobotModel is empty");
-  RobotWorld& world = *worlds[this->world]->world;
+  Klampt::WorldModel& world = *worlds[this->world]->world;
   return world.robots[index]->name.c_str();
 }
 
 void RobotModel::setName(const char* name)
 {
   if(!robot) throw PyException("RobotModel is empty");
-  RobotWorld& world = *worlds[this->world]->world;
+  Klampt::WorldModel& world = *worlds[this->world]->world;
   world.robots[index]->name = name;
 }
 
@@ -3488,7 +4248,7 @@ void RobotModel::setName(const char* name)
 int RobotModel::getID() const
 {
   if(!robot) return -1;
-  RobotWorld& world = *worlds[this->world]->world;
+  Klampt::WorldModel& world = *worlds[this->world]->world;
   return world.RobotID(index);
 }
 
@@ -3565,12 +4325,12 @@ const char* RobotModel::getJointType(int dofIndex)
   for(size_t i=0;i<robot->joints.size();i++) {
     if(robot->DoesJointAffect((int)i,dofIndex)) {
       switch(robot->joints[i].type) {
-      case RobotJoint::Weld: return "weld";
-      case RobotJoint::Normal: return "normal";
-      case RobotJoint::Spin: return "spin";
-      case RobotJoint::Floating: return "floating";
-      case RobotJoint::FloatingPlanar: return "floatingplanar";
-      case RobotJoint::BallAndSocket: return "ballandsocket";
+      case Klampt::RobotModelJoint::Weld: return "weld";
+      case Klampt::RobotModelJoint::Normal: return "normal";
+      case Klampt::RobotModelJoint::Spin: return "spin";
+      case Klampt::RobotModelJoint::Floating: return "floating";
+      case Klampt::RobotModelJoint::FloatingPlanar: return "floatingplanar";
+      case Klampt::RobotModelJoint::BallAndSocket: return "ballandsocket";
       default:
         return "invalid joint type?";
       }
@@ -3729,7 +4489,7 @@ void RobotModel::setDOFPosition(int i,double qi)
     throw PyException("Invalid joint index");
   }
   robot->q(i) = qi;
-  robot->UpdateFrames();
+  robot->UpdateDownstreamFrames(i);
 }
 
 void RobotModel::setDOFPosition(const char* name,double qi)
@@ -3739,7 +4499,7 @@ void RobotModel::setDOFPosition(const char* name,double qi)
   for(size_t i=0;i<robot->linkNames.size();i++)
     if(sname == robot->linkNames[i]) {
       robot->q(i) = qi;
-      robot->UpdateFrames();
+      robot->UpdateDownstreamFrames(i);
       return;
     }
   throw PyException("Invalid link name");
@@ -3835,20 +4595,9 @@ bool RobotModel::selfCollides()
 void RobotModel::randomizeConfig(double unboundedStdDeviation)
 {
   if(!robot) throw PyException("RobotModel is empty");
-  RobotCSpace space(*robot);
+  Klampt::RobotCSpace space(*robot);
+  space.unboundedStdDeviation = unboundedStdDeviation;
   space.Sample(robot->q);
-  for(size_t i=0;i<robot->joints.size();i++)
-    if(robot->joints[i].type == RobotJoint::Floating) {
-      int base = robot->joints[i].baseIndex;
-      robot->q[base] *= unboundedStdDeviation;
-      robot->q[base+1] *= unboundedStdDeviation;
-      robot->q[base+2] *= unboundedStdDeviation;
-    }
-    else if(robot->joints[i].type == RobotJoint::FloatingPlanar) {
-      int base = robot->joints[i].baseIndex;
-      robot->q[base] *= unboundedStdDeviation;
-      robot->q[base+1] *= unboundedStdDeviation;
-    }
   robot->UpdateFrames();
   robot->UpdateGeometry();
 }
@@ -3905,7 +4654,7 @@ void RobotModel::drawGL(bool keepAppearance)
 {
   if(!robot) throw PyException("RobotModel is empty");
   if(!worlds[this->world]) throw PyException("RobotModel is associated with a deleted world");
-  RobotWorld& world = *worlds[this->world]->world;
+  Klampt::WorldModel& world = *worlds[this->world]->world;
   if(keepAppearance) {
     world.robotViews[index].Draw();
   }
@@ -3930,16 +4679,16 @@ void RobotModel::getComVelocity(double out[3])
   dcm.get(out);
 }
 
-void RobotModel::getComJacobian(std::vector<std::vector<double> >& out)
+void RobotModel::getComJacobian(double** out,int* m,int* n)
 {
   if(!robot) throw PyException("RobotModel is empty");
   Matrix J;
+  MakeNumpyArray(out,m,n,3,(int)robot->links.size(),J);
   robot->GetCOMJacobian(J);
-  copy(J,out);
 }
 
 
-void RobotModel::getComJacobian2(const std::vector<int>& links,std::vector<std::vector<double> >& out)
+void RobotModel::getComJacobianCols(const std::vector<int>& links,double** out,int* m,int* n)
 {
   if(!robot) throw PyException("RobotModel is empty");
   throw PyException("NOT IMPLEMENTED YET");
@@ -3968,22 +4717,22 @@ double RobotModel::getKineticEnergy()
   return robot->GetKineticEnergy();
 }
 
-void RobotModel::getTotalInertia(std::vector<std::vector<double> >& out)
+void RobotModel::getTotalInertia(double** np_out2,int* m,int* n)
 {
-  if(!robot) throw PyException("RobotModel is empty");
+  Matrix Htemp;
+  MakeNumpyArray(np_out2,m,n,3,3,Htemp);
   Matrix3 H = robot->GetTotalInertia();
-  out.resize(3);
   for(int i=0;i<3;i++) {
-    out[i].resize(3);
     for(int j=0;j<3;j++) 
-      out[i][j] = H(i,j);
+      Htemp(i,j) = H(i,j);
   }
 }
 
-void RobotModel::getMassMatrix(std::vector<std::vector<double> >& B)
+void RobotModel::getMassMatrix(double** B,int* m,int* n)
 {
   if(!robot) throw PyException("RobotModel is empty");
   Matrix Bmat;
+  MakeNumpyArray(B,m,n,(int)robot->links.size(),(int)robot->links.size(),Bmat);
   /*
   if(dirty_dynamics) {
     robot->UpdateDynamics();
@@ -3993,13 +4742,13 @@ void RobotModel::getMassMatrix(std::vector<std::vector<double> >& B)
   */
   NewtonEulerSolver ne(*robot);
   ne.CalcKineticEnergyMatrix(Bmat);
-  copy(Bmat,B);
 }
 
-void RobotModel::getMassMatrixInv(std::vector<std::vector<double> >& Binv)
+void RobotModel::getMassMatrixInv(double** Binv,int* m,int* n)
 {
   if(!robot) throw PyException("RobotModel is empty");
   Matrix Bmatinv;
+  MakeNumpyArray(Binv,m,n,(int)robot->links.size(),(int)robot->links.size(),Bmatinv);
   /*
   if(dirty_dynamics) {
     robot->UpdateDynamics();
@@ -4013,40 +4762,39 @@ void RobotModel::getMassMatrixInv(std::vector<std::vector<double> >& Binv)
   */
   NewtonEulerSolver ne(*robot);
   ne.CalcKineticEnergyMatrixInverse(Bmatinv);
-  copy(Bmatinv,Binv);
 }
 
-void RobotModel::getMassMatrixDeriv(int i,std::vector<std::vector<double> >& out)
+void RobotModel::getMassMatrixDeriv(int i,double** dB,int* m,int* n)
 {
   if(!robot) throw PyException("RobotModel is empty");
   Matrix Bmat;
+  MakeNumpyArray(dB,m,n,(int)robot->links.size(),(int)robot->links.size(),Bmat);
   if(dirty_dynamics) {
     robot->UpdateDynamics();
     dirty_dynamics = false;
   }
   robot->GetKineticEnergyMatrixDeriv(i,Bmat);
-  copy(Bmat,out);
 }
 
-void RobotModel::getMassMatrixTimeDeriv(std::vector<std::vector<double> >& out)
+void RobotModel::getMassMatrixTimeDeriv(double** dB,int* m,int* n)
 {
   if(!robot) throw PyException("RobotModel is empty");
   Matrix Bmat;
+  MakeNumpyArray(dB,m,n,(int)robot->links.size(),(int)robot->links.size(),Bmat);
   if(dirty_dynamics) {
     robot->UpdateDynamics();
     dirty_dynamics = false;
   }
   robot->GetKineticEnergyMatrixTimeDeriv(Bmat);
-  copy(Bmat,out);
 }
 
-void RobotModel::getCoriolisForceMatrix(std::vector<std::vector<double> >& C)
+void RobotModel::getCoriolisForceMatrix(double** C,int* m,int* n)
 {
   if(!robot) throw PyException("RobotModel is empty");
   Matrix Cmat;
+  MakeNumpyArray(C,m,n,(int)robot->links.size(),(int)robot->links.size(),Cmat);
   robot->UpdateDynamics();
   robot->GetCoriolisForceMatrix(Cmat);
-  copy(Cmat,C);
 }
 
 void RobotModel::getCoriolisForces(std::vector<double>& C)
@@ -4139,10 +4887,10 @@ SimRobotSensor RobotModel::sensor(int sensorIndex)
   if(index >= (int)worldData->robotSensors.size())
     worldData->robotSensors.resize(index+1);
   if(!worldData->robotSensors[index]) {
-    worldData->robotSensors[index].reset(new RobotSensors);
+    worldData->robotSensors[index].reset(new Klampt::RobotSensors);
     worldData->robotSensors[index]->MakeDefault(robot);
   }
-  RobotSensors* sensors = worldData->robotSensors[index].get();
+  Klampt::RobotSensors* sensors = worldData->robotSensors[index].get();
   Assert(sensors != NULL);
   if(sensorIndex < 0 || sensorIndex >= (int)sensors->sensors.size()) 
     return SimRobotSensor(*this,NULL);
@@ -4156,17 +4904,43 @@ SimRobotSensor RobotModel::sensor(const char* name)
   if(index >= (int)worldData->robotSensors.size())
     worldData->robotSensors.resize(index+1);
   if(!worldData->robotSensors[index]) {
-    worldData->robotSensors[index].reset(new RobotSensors);
+    worldData->robotSensors[index].reset(new Klampt::RobotSensors);
     worldData->robotSensors[index]->MakeDefault(robot);
   }
-  RobotSensors* sensors = worldData->robotSensors[index].get();
+  Klampt::RobotSensors* sensors = worldData->robotSensors[index].get();
   Assert(sensors != NULL);
-  shared_ptr<SensorBase> sensor = sensors->GetNamedSensor(name);
+  shared_ptr<Klampt::SensorBase> sensor = sensors->GetNamedSensor(name);
   if(sensor==NULL) {
-    fprintf(stderr,"Warning, sensor %s does not exist\n",name);
+    fprintf(stderr,"RobotModel::sensor(): Warning, sensor %s does not exist\n",name);
   }
   return SimRobotSensor(*this,sensor.get());
 }
+
+SimRobotSensor RobotModel::addSensor(const char* name,const char* type)
+{
+  if(!robot) throw PyException("RobotModel is empty");
+  shared_ptr<WorldData> worldData = worlds[world];
+  if(index >= (int)worldData->robotSensors.size())
+    worldData->robotSensors.resize(index+1);
+  if(!worldData->robotSensors[index]) {
+    worldData->robotSensors[index].reset(new Klampt::RobotSensors);
+    worldData->robotSensors[index]->MakeDefault(robot);
+  }
+  Klampt::RobotSensors* sensors = worldData->robotSensors[index].get();
+  Assert(sensors != NULL);
+  if(sensors->GetNamedSensor(name)) {
+    throw PyException("Sensor name already exists");
+  }
+  shared_ptr<Klampt::SensorBase> newsensor = sensors->CreateByType(type);
+  if(!newsensor) {
+    throw PyException("Invalid sensor type");
+  }
+  newsensor->name = name;
+  worldData->robotSensors[index]->sensors.push_back(newsensor);
+  return SimRobotSensor(*this,worldData->robotSensors[index]->sensors.back().get());
+}
+
+
 
 RigidObjectModel::RigidObjectModel()
   :world(-1),index(-1),object(NULL)
@@ -4193,7 +4967,7 @@ const char* RigidObjectModel::getName() const
 {
   if(!object) return "";
   if(!worlds[this->world]) throw PyException("RigidObjectModel is associated with a deleted world");
-  RobotWorld& world = *worlds[this->world]->world;
+  Klampt::WorldModel& world = *worlds[this->world]->world;
   return world.rigidObjects[index]->name.c_str();
 }
 
@@ -4201,7 +4975,7 @@ void RigidObjectModel::setName(const char* name)
 {
   if(!object) throw PyException("RigidObjectModel is invalid");
   if(!worlds[this->world]) throw PyException("RigidObjectModel is associated with a deleted world");
-  RobotWorld& world = *worlds[this->world]->world;
+  Klampt::WorldModel& world = *worlds[this->world]->world;
   world.rigidObjects[index]->name = name;
 }
 
@@ -4209,7 +4983,7 @@ int RigidObjectModel::getID() const
 {
   if(!object) throw PyException("RigidObjectModel is invalid");
   if(!worlds[this->world]) throw PyException("RigidObjectModel is associated with a deleted world");
-  RobotWorld& world = *worlds[this->world]->world;
+  Klampt::WorldModel& world = *worlds[this->world]->world;
   return world.RigidObjectID(index);
 }
 
@@ -4239,7 +5013,7 @@ Mass RigidObjectModel::getMass()
 {
   if(!object) throw PyException("RigidObjectModel is invalid");
   Mass mass;
-  RigidObject* obj=object;
+  Klampt::RigidObjectModel* obj=object;
   mass.mass = obj->mass;
   mass.com.resize(3);
   mass.inertia.resize(9);
@@ -4257,7 +5031,7 @@ void RigidObjectModel::setMass(const Mass& mass)
   if(mass.inertia.size()!=9 && mass.inertia.size()!=3) {
     throw PyException("Mass inertia does not have length 3 or 9");
   }
-  RigidObject* obj=object;
+  Klampt::RigidObjectModel* obj=object;
   obj->mass = mass.mass;
   obj->com.set(&mass.com[0]);
   if(mass.inertia.size()==3) {
@@ -4275,7 +5049,7 @@ ContactParameters RigidObjectModel::getContactParameters()
 {
   if(!object) throw PyException("RigidObjectModel is invalid");
   ContactParameters params;
-  RigidObject* obj=object;
+  Klampt::RigidObjectModel* obj=object;
   params.kFriction = obj->kFriction;
   params.kRestitution = obj->kRestitution;
   params.kStiffness = obj->kStiffness;
@@ -4286,7 +5060,7 @@ ContactParameters RigidObjectModel::getContactParameters()
 void RigidObjectModel::setContactParameters(const ContactParameters& params)
 {
   if(!object) throw PyException("RigidObjectModel is invalid");
-  RigidObject* obj=object;
+  Klampt::RigidObjectModel* obj=object;
   obj->kFriction = params.kFriction;
   obj->kRestitution = params.kRestitution;
   obj->kStiffness = params.kStiffness;
@@ -4296,7 +5070,7 @@ void RigidObjectModel::setContactParameters(const ContactParameters& params)
 void RigidObjectModel::getTransform(double R[9],double t[3])
 {
   if(!object) throw PyException("RigidObjectModel is invalid");
-  RigidObject* obj=object;
+  Klampt::RigidObjectModel* obj=object;
   obj->T.R.get(R);
   obj->T.t.get(t);
 }
@@ -4304,7 +5078,7 @@ void RigidObjectModel::getTransform(double R[9],double t[3])
 void RigidObjectModel::setTransform(const double R[9],const double t[3])
 {
   if(!object) throw PyException("RigidObjectModel is invalid");
-  RigidObject* obj=object;
+  Klampt::RigidObjectModel* obj=object;
   obj->T.R.set(R);
   obj->T.t.set(t);
   obj->geometry->SetTransform(obj->T);
@@ -4313,7 +5087,7 @@ void RigidObjectModel::setTransform(const double R[9],const double t[3])
 void RigidObjectModel::getVelocity(double out[3],double out2[3])
 {
   if(!object) throw PyException("RigidObjectModel is invalid");
-  RigidObject* obj=object;
+  Klampt::RigidObjectModel* obj=object;
   obj->w.get(out);
   obj->v.get(out2);
 }
@@ -4321,7 +5095,7 @@ void RigidObjectModel::getVelocity(double out[3],double out2[3])
 void RigidObjectModel::setVelocity(const double angularVelocity[3],const double velocity[3])
 {
   if(!object) throw PyException("RigidObjectModel is invalid");
-  RigidObject* obj=object;
+  Klampt::RigidObjectModel* obj=object;
   obj->w.set(angularVelocity);
   obj->v.set(velocity);
 }
@@ -4330,7 +5104,7 @@ void RigidObjectModel::drawGL(bool keepAppearance)
 {
   if(!object) throw PyException("RigidObjectModel is invalid");
   if(!worlds[this->world]) throw PyException("RigidObjectModel is associated with a deleted world");
-  RobotWorld& world = *worlds[this->world]->world;
+  Klampt::WorldModel& world = *worlds[this->world]->world;
   if(keepAppearance) {
     world.rigidObjects[index]->DrawGL();
   }
@@ -4371,7 +5145,7 @@ const char* TerrainModel::getName() const
 {
   if(!terrain) throw PyException("TerrainModel is invalid");
   if(!worlds[this->world]) throw PyException("TerrainModel is associated with a deleted world");
-  RobotWorld& world = *worlds[this->world]->world;
+  Klampt::WorldModel& world = *worlds[this->world]->world;
   return world.terrains[index]->name.c_str();
 }
 
@@ -4379,7 +5153,7 @@ void TerrainModel::setName(const char* name)
 {
   if(!terrain) throw PyException("TerrainModel is invalid");
   if(!worlds[this->world]) throw PyException("TerrainModel is associated with a deleted world");
-  RobotWorld& world = *worlds[this->world]->world;
+  Klampt::WorldModel& world = *worlds[this->world]->world;
   world.terrains[index]->name = name;
 }
 
@@ -4388,7 +5162,7 @@ int TerrainModel::getID() const
 {
   if(!terrain) throw PyException("TerrainModel is invalid");
   if(!worlds[this->world]) throw PyException("TerrainModel is associated with a deleted world");
-  RobotWorld& world = *worlds[this->world]->world;
+  Klampt::WorldModel& world = *worlds[this->world]->world;
   return world.TerrainID(index);
 }
 
@@ -4425,7 +5199,7 @@ void TerrainModel::drawGL(bool keepAppearance)
 {
   if(!terrain) throw PyException("TerrainModel is invalid");
   if(!worlds[this->world]) throw PyException("TerrainModel is associated with a deleted world");
-  RobotWorld& world = *worlds[this->world]->world;
+  Klampt::WorldModel& world = *worlds[this->world]->world;
   if(keepAppearance) {
     world.terrains[index]->DrawGL();
   }
@@ -4463,13 +5237,13 @@ Simulator::Simulator(const WorldModel& model)
 
   //initialize simulation
   printf("Initializing simulation...\n");
-  RobotWorld& rworld=*worlds[model.index]->world;
+  Klampt::WorldModel& rworld=*worlds[model.index]->world;
   sim->Init(&rworld);
 
   //setup controllers
   sim->robotControllers.resize(rworld.robots.size());
   for(size_t i=0;i<sim->robotControllers.size();i++) {
-    Robot* robot=rworld.robots[i].get();
+    Klampt::RobotModel* robot=rworld.robots[i].get();
     sim->SetController(i,MakeController(robot));
 
     sim->controlSimulators[i].sensors.MakeDefault(robot);
@@ -4481,7 +5255,7 @@ Simulator::Simulator(const WorldModel& model)
   TiXmlElement* e=worlds[world.index]->xmlWorld.GetElement("simulation");
   if(e) {
     printf("Reading simulation settings...\n");
-    XmlSimulationSettings s(e);
+    Klampt::XmlSimulationSettings s(e);
     if(!s.GetSettings(*sim)) {
       fprintf(stderr,"Warning, simulation settings not read correctly\n");
     }
@@ -4532,7 +5306,7 @@ void Simulator::setState(const string& str)
 
 void Simulator::checkObjectOverlap(std::vector<int>& out,std::vector<int>& out2)
 {
-  vector<pair<ODEObjectID,ODEObjectID> > overlaps;
+  vector<pair<Klampt::ODEObjectID,Klampt::ODEObjectID> > overlaps;
   sim->odesim.CheckObjectOverlap(overlaps);
   out.resize(overlaps.size());
   out2.resize(overlaps.size());
@@ -4619,42 +5393,46 @@ void Simulator::contactTorque(int aid,int bid,double res[3])
 }
 
 
-void Simulator::getContacts(int aid,int bid,std::vector<std::vector<double> >& out)
+void Simulator::getContacts(int aid,int bid,double** out,int* m,int* n)
 {
-  ODEContactList* c=sim->GetContactList(aid,bid);
+  Klampt::ODEContactList* c=sim->GetContactList(aid,bid);
   if(!c) {
-    out.resize(0);
+    *out = NULL;
+    *m = 0;
+    *n = 0;
     return;
   }
-  out.resize(c->points.size());
+  Matrix temp;
+  MakeNumpyArray(out,m,n,c->points.size(),7,temp);
   for(size_t i=0;i<c->points.size();i++) {
-    out[i].resize(7);
-    c->points[i].x.get(out[i][0],out[i][1],out[i][2]);
-    c->points[i].n.get(out[i][3],out[i][4],out[i][5]);
-    out[i][6] = c->points[i].kFriction;
+    c->points[i].x.get(temp(i,0),temp(i,1),temp(i,2));
+    c->points[i].n.get(temp(i,3),temp(i,4),temp(i,5));
+    temp(i,6) = c->points[i].kFriction;
     if(bid < aid) {
-      out[i][3] = -out[i][3];
-      out[i][4] = -out[i][4];
-      out[i][5] = -out[i][5];
+      temp(i,3) = -temp(i,3);
+      temp(i,4) = -temp(i,4);
+      temp(i,5) = -temp(i,5);
     }
   }
 }
 
-void Simulator::getContactForces(int aid,int bid,std::vector<std::vector<double> >& out)
+void Simulator::getContactForces(int aid,int bid,double** out,int* m,int* n)
 {
-  ODEContactList* c=sim->GetContactList(aid,bid);
+  Klampt::ODEContactList* c=sim->GetContactList(aid,bid);
   if(!c) {
-    out.resize(0);
+    *out = NULL;
+    *m = 0;
+    *n = 0;
     return;
   }
-  out.resize(c->forces.size());
+  Matrix temp;
+  MakeNumpyArray(out,m,n,c->forces.size(),3,temp);
   for(size_t i=0;i<c->forces.size();i++) {
-    out[i].resize(3);
-    c->forces[i].get(out[i][0],out[i][1],out[i][2]);
+    c->forces[i].get(temp(i,0),temp(i,1),temp(i,2));
     if(bid < aid) {
-      out[i][0] = -out[i][0];
-      out[i][1] = -out[i][1];
-      out[i][2] = -out[i][2];
+      temp(i,0) = -temp(i,0);
+      temp(i,1) = -temp(i,1);
+      temp(i,2) = -temp(i,2);
     }
   }
 }
@@ -4687,9 +5465,9 @@ void Simulator::enableContactFeedback(int obj1,int obj2)
 void Simulator::enableContactFeedbackAll()
 {
   //setup feedback
-  RobotWorld& rworld=*worlds[world.index]->world;
+  Klampt::WorldModel& rworld=*worlds[world.index]->world;
   //world-object
-  const ODESimulatorSettings& settings = sim->odesim.GetSettings();
+  const Klampt::ODESimulatorSettings& settings = sim->odesim.GetSettings();
   if(settings.rigidObjectCollisions) {
     for(size_t i=0;i<rworld.rigidObjects.size();i++) {
       int objid = rworld.RigidObjectID(i);
@@ -4763,7 +5541,7 @@ std::vector<std::string> Simulator::settings()
 
 std::string Simulator::getSetting(const std::string& name)
 {
-  ODESimulatorSettings& settings = sim->odesim.GetSettings();
+  Klampt::ODESimulatorSettings& settings = sim->odesim.GetSettings();
   stringstream ss;
   if(name == "gravity") ss << Vector3(settings.gravity);
   else if(name == "simStep") ss << sim->simStep;
@@ -4788,7 +5566,7 @@ std::string Simulator::getSetting(const std::string& name)
 
 void Simulator::setSetting(const std::string& name,const std::string& value)
 {
-  ODESimulatorSettings& settings = sim->odesim.GetSettings();
+  Klampt::ODESimulatorSettings& settings = sim->odesim.GetSettings();
   stringstream ss(value);
   if(name == "gravity") { Vector3 g; ss >> g; sim->odesim.SetGravity(g); }
   else if(name == "simStep") ss >> sim->simStep;
@@ -4871,7 +5649,7 @@ bool SimBody::isDynamicsEnabled()
 void SimBody::applyWrench(const double f[3],const double t[3])
 {
   if(!body) return;
-  sim->sim->hooks.push_back(make_shared<WrenchHook>(body,Vector3(f),Vector3(t)));
+  sim->sim->hooks.push_back(make_shared<Klampt::WrenchHook>(body,Vector3(f),Vector3(t)));
   sim->sim->hooks.back()->autokill = true;
   //dBodyAddForce(body,f[0],f[1],f[2]);
   //dBodyAddTorque(body,t[0],t[1],t[2]);
@@ -4880,7 +5658,7 @@ void SimBody::applyWrench(const double f[3],const double t[3])
 void SimBody::applyForceAtPoint(const double f[3],const double pworld[3])
 {
   if(!body) return;
-  sim->sim->hooks.push_back(make_shared<ForceHook>(body,Vector3(pworld),Vector3(f)));
+  sim->sim->hooks.push_back(make_shared<Klampt::ForceHook>(body,Vector3(pworld),Vector3(f)));
   sim->sim->hooks.back()->autokill = true;
   //dBodyAddForceAtPos(body,f[0],f[1],f[2],pworld[0],pworld[1],pworld[2]);
 }
@@ -4888,7 +5666,7 @@ void SimBody::applyForceAtPoint(const double f[3],const double pworld[3])
 void SimBody::applyForceAtLocalPoint(const double f[3],const double plocal[3])
 {
   if(!body) return;
-  sim->sim->hooks.push_back(make_shared<LocalForceHook>(body,Vector3(plocal),Vector3(f)));
+  sim->sim->hooks.push_back(make_shared<Klampt::LocalForceHook>(body,Vector3(plocal),Vector3(f)));
   sim->sim->hooks.back()->autokill = true;
   //dBodyAddForceAtRelPos(body,f[0],f[1],f[2],plocal[0],plocal[1],plocal[2]);
 }
@@ -4898,7 +5676,7 @@ void SimBody::setVelocity(const double w[3],const double v[3])
   if(!body) return;
   dBodySetLinearVel(body,v[0],v[1],v[2]);
   dBodySetAngularVel(body,w[1],w[1],w[2]);
-  ODEObjectID id = sim->sim->WorldToODEID(objectID);
+  Klampt::ODEObjectID id = sim->sim->WorldToODEID(objectID);
   sim->sim->odesim.DisableInstabilityCorrection(id);
 }
 
@@ -4945,7 +5723,7 @@ void SimBody::getTransform(double out[9],double out2[3])
 
 void SimBody::setObjectTransform(const double R[9],const double t[3])
 {
-  ODEObjectID id = sim->sim->WorldToODEID(objectID);
+  Klampt::ODEObjectID id = sim->sim->WorldToODEID(objectID);
   if(id.IsRigidObject()) sim->sim->odesim.object(id.index)->SetTransform(RigidTransform(Matrix3(R),Vector3(t)));
   else if(id.IsRobot()) sim->sim->odesim.robot(id.index)->SetLinkTransform(id.bodyIndex,RigidTransform(Matrix3(R),Vector3(t)));
   else setTransform(R,t);
@@ -4953,7 +5731,7 @@ void SimBody::setObjectTransform(const double R[9],const double t[3])
 
 void SimBody::getObjectTransform(double out[9],double out2[3])
 {
-  ODEObjectID id = sim->sim->WorldToODEID(objectID);
+  Klampt::ODEObjectID id = sim->sim->WorldToODEID(objectID);
   if(id.IsRigidObject()) {
     RigidTransform T;
     sim->sim->odesim.object(id.index)->GetTransform(T);
@@ -4994,7 +5772,7 @@ ContactParameters SimBody::getSurface()
     res.kFriction=res.kRestitution=res.kStiffness=res.kDamping=0;
   }
   else {
-    ODESurfaceProperties* params = &geometry->surf();
+    Klampt::ODESurfaceProperties* params = &geometry->surf();
     res.kFriction=params->kFriction;
     res.kRestitution=params->kRestitution;
     res.kStiffness=params->kStiffness;
@@ -5006,7 +5784,7 @@ ContactParameters SimBody::getSurface()
 void SimBody::setSurface(const ContactParameters& res)
 {
   if(!geometry) return;
-  ODESurfaceProperties* params = &geometry->surf();
+  Klampt::ODESurfaceProperties* params = &geometry->surf();
   params->kFriction=res.kFriction;
   params->kRestitution=res.kRestitution;
   params->kStiffness=res.kStiffness;
@@ -5178,7 +5956,7 @@ SimBody Simulator::body(const TerrainModel& terrain)
 
 void Simulator::getJointForces(const RobotModelLink& link,double out[6])
 {
-  ODERobot* oderobot = sim->odesim.robot(link.robotIndex);
+  Klampt::ODERobot* oderobot = sim->odesim.robot(link.robotIndex);
   dJointFeedback fb = oderobot->feedback(link.index);
   Vector3 fw(fb.f1[0],fb.f1[1],fb.f1[2]);
   RigidTransform T;
@@ -5243,8 +6021,8 @@ void SimRobotController::getCommandedVelocity(vector<double>& dq)
 void SimRobotController::getCommandedTorque(std::vector<double>& t)
 {
   if(!controller) throw PyException("Invalid SimRobotController");
-  RobotMotorCommand& command = controller->command;
-  //Robot* robot=sim->sim->controlSimulators[index];
+  Klampt::RobotMotorCommand& command = controller->command;
+  //Klampt::RobotModel* robot=sim->sim->controlSimulators[index];
   t.resize(command.actuators.size());
   for(size_t i=0;i<command.actuators.size();i++) 
     t[i] = command.actuators[i].torque;
@@ -5275,7 +6053,7 @@ void SimRobotController::getSensedVelocity(vector<double>& dq)
 void SimRobotController::getSensedTorque(std::vector<double>& t)
 {
   if(!controller) throw PyException("Invalid SimRobotController");
-  DriverTorqueSensor* s = controller->sensors.GetTypedSensor<DriverTorqueSensor>();
+  Klampt::DriverTorqueSensor* s = controller->sensors.GetTypedSensor<Klampt::DriverTorqueSensor>();
   if(s==NULL){
       throw PyException("Robot has no torque sensor");
   }
@@ -5292,26 +6070,11 @@ void SimRobotController::getSensedTorque(std::vector<double>& t)
   }
 }
 
-SimRobotSensor::SimRobotSensor(const RobotModel& _robot,SensorBase* _sensor)
+SimRobotSensor::SimRobotSensor(const RobotModel& _robot,Klampt::SensorBase* _sensor)
   :robotModel(_robot),sensor(_sensor)
 {}
 
-SimRobotSensor::SimRobotSensor(SimRobotController& _controller,const char* name,const char* type)
-  :sensor(NULL)
-{
-  robotModel = _controller.model();
-  shared_ptr<SensorBase> newsensor = _controller.controller->sensors.CreateByType(type);
-  if(!newsensor) {
-    throw PyException("Invalid sensor type specified");
-  }
-  if(_controller.controller->sensors.GetNamedSensor(name)) {
-    throw PyException("Sensor name already exists");
-  }
-  newsensor->name = name;
-  _controller.controller->sensors.sensors.push_back(newsensor);
-  _controller.controller->nextSenseTime.push_back(_controller.controller->curTime);
-  sensor = _controller.controller->sensors.sensors.back().get();
-}
+
 
 RobotModel SimRobotSensor::robot()
 {
@@ -5337,11 +6100,18 @@ std::vector<std::string> SimRobotSensor::measurementNames()
   return res;
 }
 
-void SimRobotSensor::getMeasurements(std::vector<double>& out)
+void SimRobotSensor::getMeasurements(double** out,int* m)
 {
-  out.resize(0);
-  if(!sensor) return;
-  sensor->GetMeasurements(out);
+  if(!sensor) {
+    *out = NULL;
+    *m = 0;
+    return;
+  }
+  vector<double> vout;
+  sensor->GetMeasurements(vout);
+  *m = (int)vout.size();
+  *out = (double*)malloc((*m)*sizeof(double));
+  copy(vout.begin(),vout.end(),*out);
 }
 
 void SimRobotSensor::getMeasurementsBytes(char* buf,size_t size)
@@ -5396,15 +6166,118 @@ void SimRobotSensor::setSetting(const std::string& name,const std::string& val)
   if(!sensor->SetSetting(name,val)) throw PyException("Setting "+name+" not supported or value not formatted correctly");
 }
 
-void SimRobotSensor::drawGL()
+bool SimRobotSensor::getEnabled()
 {
-  vector<double> measurements;
-  drawGL(measurements);
+  if(!sensor) return false;
+  string enabled;
+  if(!sensor->GetSetting("enabled",enabled)) return false;
+  if(enabled=="0") return false;
+  else return true;
 }
 
-void SimRobotSensor::drawGL(const std::vector<double>& measurements)
+void SimRobotSensor::setEnabled(bool enabled)
 {
   if(!sensor) return;
+  if(enabled) sensor->SetSetting("enabled","1");
+  else sensor->SetSetting("enabled","0");
+}
+
+RobotModelLink SimRobotSensor::getLink()
+{
+  if(!sensor) return RobotModelLink();
+  std::string val;
+  if(!sensor->GetSetting("link",val)) {
+    throw PyException("Sensor doesn't have link attribute");
+  }
+  stringstream ss(val);
+  int index;
+  ss>>index;
+  if(!ss)
+    return robotModel.link(val.c_str());
+  else
+    return robotModel.link(index);
+}
+
+void SimRobotSensor::setLink(const RobotModelLink& link)
+{
+  setLink(link.index);
+}
+
+void SimRobotSensor::setLink(int link)
+{
+  if(!sensor) return;
+  string temp;
+  if(!sensor->GetSetting("link",temp)) 
+    throw PyException("Sensor doesn't have link attribute");
+  stringstream ss;
+  ss<<link;
+  sensor->SetSetting("link",ss.str());
+}
+
+void SimRobotSensor::getTransform(double out[9],double out2[3])
+{
+  if(!sensor) return;
+  RigidTransform T;
+  string val;
+  if(!sensor->GetSetting("Tsensor",val)) 
+    throw PyException("Sensor doesn't have Tsensor attribute");
+  stringstream ss(val);
+  ss >> T;
+  if(!ss) {
+    stringstream ss2;
+    ss2<<"Error parsing Tsensor attribute: "<<val;
+    throw PyException(ss2.str().c_str());
+  }
+  T.R.get(out);
+  T.t.get(out2);
+}
+
+void SimRobotSensor::getTransformWorld(double out[9],double out2[3])
+{
+  if(!sensor) return;
+  RigidTransform Tlocal,Tlink;
+  double R[9],t[3];
+  getTransform(R,t);
+  Tlocal.R.set(R);
+  Tlocal.t.set(t);
+  RobotModelLink link=getLink();
+  if(link.index < 0) Tlink.setIdentity();
+  else {
+    link.getTransform(R,t);
+    Tlink.R.set(R);
+    Tlink.t.set(t);
+  }
+  RigidTransform Tworld=Tlink*Tlocal;
+  Tworld.R.get(out);
+  Tworld.t.get(out2);
+}
+
+void SimRobotSensor::setTransform(const double R[9],const double t[3])
+{
+  if(!sensor) return;
+  string temp;
+  if(!sensor->GetSetting("Tsensor",temp)) 
+    throw PyException("Sensor doesn't have Tsensor attribute");
+  RigidTransform T;
+  T.R.set(R);
+  T.t.set(t);
+  stringstream ss;
+  ss<<T;
+  sensor->SetSetting("Tsensor",ss.str());
+}
+
+void SimRobotSensor::drawGL()
+{
+  if(!sensor) return;
+  vector<double> measurements;
+  sensor->DrawGL(*robotModel.robot,measurements);
+}
+
+void SimRobotSensor::drawGL(double* np_array,int m)
+{
+  if(!sensor) return;
+  std::vector<double> measurements(m);
+  copy(np_array,np_array+m,&measurements[0]);
   sensor->DrawGL(*robotModel.robot,measurements);
 }
 
@@ -5432,7 +6305,7 @@ void SimRobotSensor::kinematicReset()
 SimRobotSensor SimRobotController::sensor(int sensorIndex)
 {
   if(!controller) throw PyException("Invalid SimRobotController");
-  RobotSensors& sensors = controller->sensors;
+  Klampt::RobotSensors& sensors = controller->sensors;
   if(sensorIndex < 0 || sensorIndex >= (int)sensors.sensors.size()) 
     return SimRobotSensor(RobotModel(),NULL);
   return SimRobotSensor(model(),sensors.sensors[sensorIndex].get());
@@ -5441,12 +6314,27 @@ SimRobotSensor SimRobotController::sensor(int sensorIndex)
 SimRobotSensor SimRobotController::sensor(const char* name)
 {
   if(!controller) throw PyException("Invalid SimRobotController");
-  RobotSensors& sensors = controller->sensors;
-  shared_ptr<SensorBase> sensor = sensors.GetNamedSensor(name);
+  Klampt::RobotSensors& sensors = controller->sensors;
+  shared_ptr<Klampt::SensorBase> sensor = sensors.GetNamedSensor(name);
   if(sensor==NULL) {
     fprintf(stderr,"Warning, sensor %s does not exist\n",name);
   }
   return SimRobotSensor(model(),sensor.get());
+}
+
+SimRobotSensor SimRobotController::addSensor(const char* name,const char* type)
+{
+  shared_ptr<Klampt::SensorBase> newsensor = controller->sensors.CreateByType(type);
+  if(!newsensor) {
+    throw PyException("Invalid sensor type specified");
+  }
+  if(controller->sensors.GetNamedSensor(name)) {
+    throw PyException("Sensor name already exists");
+  }
+  newsensor->name = name;
+  controller->sensors.sensors.push_back(newsensor);
+  controller->nextSenseTime.push_back(controller->curTime);
+  return SimRobotSensor(model(),controller->sensors.sensors.back().get());
 }
 
 std::vector<std::string> SimRobotController::commands()
@@ -5458,7 +6346,7 @@ std::vector<std::string> SimRobotController::commands()
 void SimRobotController::setManualMode(bool enabled)
 {
   if(!controller) throw PyException("Invalid SimRobotController");
-  RobotController* c=sim->sim->robotControllers[index].get();
+  Klampt::RobotController* c=sim->sim->robotControllers[index].get();
   MyController* mc=reinterpret_cast<MyController*>(c);
   if(mc)
     mc->override = enabled;
@@ -5472,8 +6360,8 @@ std::string SimRobotController::getControlType()
 {
   if(!controller) throw PyException("Invalid SimRobotController");
   std::vector<int> res;
-  typedef std::vector<ActuatorCommand>::iterator it_ac;
-  RobotMotorCommand& command = controller->command;
+  typedef std::vector<Klampt::ActuatorCommand>::iterator it_ac;
+  Klampt::RobotMotorCommand& command = controller->command;
   int mode = -1;
   for(it_ac it = command.actuators.begin();
             it != command.actuators.end();
@@ -5484,13 +6372,13 @@ std::string SimRobotController::getControlType()
           mode = -2;
   switch(mode)
   {
-  case ActuatorCommand::OFF:
+  case Klampt::ActuatorCommand::OFF:
       return "off";
-  case ActuatorCommand::TORQUE:
+  case Klampt::ActuatorCommand::TORQUE:
       return "torque";
-  case ActuatorCommand::PID:
+  case Klampt::ActuatorCommand::PID:
       return "PID";
-  case ActuatorCommand::LOCKED_VELOCITY:
+  case Klampt::ActuatorCommand::LOCKED_VELOCITY:
       return "locked_velocity";
   default:
       return "unknown";
@@ -5525,9 +6413,9 @@ bool SimRobotController::setSetting(const std::string& name,const std::string& v
   return controller->controller->SetSetting(name,val);
 }
 
-void EnablePathControl(RobotController* c)
+void EnablePathControl(Klampt::RobotController* c)
 {
-  PolynomialPathController* pc = GetPathController(c);
+  Klampt::PolynomialPathController* pc = GetPathController(c);
   MyController* mc=dynamic_cast<MyController*>(c);
   if(pc->path.elements.empty() || mc->override) {
     Config q;
@@ -5604,7 +6492,7 @@ void SimRobotController::setLinear(const std::vector<double>& q,double dt)
     throw PyException("Invalid size of configuration");
   }
   EnablePathControl(sim->sim->robotControllers[index].get());
-  PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
+  Klampt::PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
   mq->Cut(0);
   mq->AppendLinear(Vector(q),dt);
 }
@@ -5617,7 +6505,7 @@ void SimRobotController::setCubic(const std::vector<double>& q,const std::vector
     throw PyException("Invalid size of velocity");
   }
   EnablePathControl(sim->sim->robotControllers[index].get());
-  PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
+  Klampt::PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
   mq->Cut(0);
   mq->AppendCubic(Vector(q),Vector(v),dt);
 }
@@ -5627,7 +6515,7 @@ void SimRobotController::addLinear(const std::vector<double>& q,double dt)
     throw PyException("Invalid size of configuration");
   }
   EnablePathControl(sim->sim->robotControllers[index].get());
-  PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
+  Klampt::PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
   mq->AppendLinear(Vector(q),dt);
 }
 
@@ -5640,7 +6528,7 @@ void SimRobotController::addCubic(const std::vector<double>& q,const std::vector
     throw PyException("Invalid size of velocity");
   }
   EnablePathControl(sim->sim->robotControllers[index].get());
-  PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
+  Klampt::PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
   mq->AppendCubic(Vector(q),Vector(v),dt);
 }
 
@@ -5669,7 +6557,7 @@ void SimRobotController::setVelocity(const vector<double>& dq,double dt)
     throw PyException("Negative dt");
   }
   EnablePathControl(sim->sim->robotControllers[index].get());
-  PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
+  Klampt::PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
   Config qv(controller->robot->links.size(),&dq[0]);
   stringstream ss;
   ss<<mq->CurTime()+dt<<"\t"<<qv;
@@ -5678,21 +6566,21 @@ void SimRobotController::setVelocity(const vector<double>& dq,double dt)
 
 double SimRobotController::remainingTime() const
 {
-  PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
+  Klampt::PolynomialMotionQueue* mq = GetMotionQueue(controller->controller);
   return mq->TimeRemaining();
 }
 
 
 void SimRobotController::setTorque(const std::vector<double>& t)
 {
-  RobotMotorCommand& command = controller->command;
+  Klampt::RobotMotorCommand& command = controller->command;
   if(t.size() != command.actuators.size()) {
     throw PyException("Invalid command size, must be equal to driver size");
   }
   for(size_t i=0;i<command.actuators.size();i++) {
     command.actuators[i].SetTorque(t[i]);
   }
-  RobotController* c=sim->sim->robotControllers[index].get();
+  Klampt::RobotController* c=sim->sim->robotControllers[index].get();
   MyController* mc=dynamic_cast<MyController*>(c);
   if(!mc) {
     throw PyException("Not using the default manual override controller");
@@ -5702,8 +6590,8 @@ void SimRobotController::setTorque(const std::vector<double>& t)
 
 void SimRobotController::setPIDCommand(const std::vector<double>& qdes,const std::vector<double>& dqdes)
 {
-  RobotMotorCommand& command = controller->command;
-  Robot* robot=controller->robot;
+  Klampt::RobotMotorCommand& command = controller->command;
+  Klampt::RobotModel* robot=controller->robot;
   if(qdes.size() != command.actuators.size() || dqdes.size() != command.actuators.size()) {
     if(qdes.size() != robot->links.size() || dqdes.size() != robot->links.size())
       throw PyException("Invalid command sizes");
@@ -5720,7 +6608,7 @@ void SimRobotController::setPIDCommand(const std::vector<double>& qdes,const std
       command.actuators[i].SetPID(qdes[i],dqdes[i],command.actuators[i].iterm);
     }
   }
-  RobotController* c=sim->sim->robotControllers[index].get();
+  Klampt::RobotController* c=sim->sim->robotControllers[index].get();
   MyController* mc=dynamic_cast<MyController*>(c);
   if(!mc) {
     throw PyException("Not using the default manual override controller");
@@ -5731,8 +6619,8 @@ void SimRobotController::setPIDCommand(const std::vector<double>& qdes,const std
 void SimRobotController::setPIDCommand(const std::vector<double>& qdes,const std::vector<double>& dqdes,const std::vector<double>& tfeedforward)
 {
   setPIDCommand(qdes,dqdes);
-  RobotMotorCommand& command = controller->command;
-  //Robot* robot=sim->sim->controlSimulators[index];
+  Klampt::RobotMotorCommand& command = controller->command;
+  //Klampt::RobotModel* robot=sim->sim->controlSimulators[index];
   if(tfeedforward.size() != command.actuators.size())
      throw PyException("Invalid command sizes");
   for(size_t i=0;i<command.actuators.size();i++) {
@@ -5744,7 +6632,7 @@ void SimRobotController::setPIDCommand(const std::vector<double>& qdes,const std
 
 void SimRobotController::setPIDGains(const std::vector<double>& kP,const std::vector<double>& kI,const std::vector<double>& kD)
 {
-  RobotMotorCommand& command = controller->command;
+  Klampt::RobotMotorCommand& command = controller->command;
   if(kP.size() != command.actuators.size() || kI.size() != command.actuators.size() || kD.size() != command.actuators.size()) {
     throw PyException("Invalid gain sizes");
   }
@@ -5757,7 +6645,7 @@ void SimRobotController::setPIDGains(const std::vector<double>& kP,const std::ve
 
 void SimRobotController::getPIDGains(std::vector<double>& kPout,std::vector<double>& kIout,std::vector<double>& kDout)
 {
-  RobotMotorCommand& command = controller->command;
+  Klampt::RobotMotorCommand& command = controller->command;
   int size = command.actuators.size();
   kPout.resize(size, 0.0);
   kIout.resize(size, 0.0);
@@ -6049,17 +6937,34 @@ void TransformPoser::enableRotation(bool enable)
   tw->enableRotation = enable;
 }
 
+void TransformPoser::enableTranslationAxes(bool x,bool y,bool z)
+{
+  GLDraw::TransformWidget* tw=dynamic_cast<GLDraw::TransformWidget*>(widgets[index].widget.get());
+  tw->enableTranslationAxes[0] = x;
+  tw->enableTranslationAxes[1] = y;
+  tw->enableTranslationAxes[2] = z;
+}
+
+void TransformPoser::enableRotationAxes(bool x,bool y,bool z)
+{
+  GLDraw::TransformWidget* tw=dynamic_cast<GLDraw::TransformWidget*>(widgets[index].widget.get());
+  tw->enableRotationAxes[0] = x;
+  tw->enableRotationAxes[1] = y;
+  tw->enableRotationAxes[2] = z;
+  tw->enableOuterRingRotation = (x && y && z);
+}
+
 ObjectPoser::ObjectPoser(RigidObjectModel& object)
   :Widget()
 {
-  RobotWorld& world = *worlds[object.world]->world;
-  RigidObject* obj = world.rigidObjects[object.index].get();
-  widgets[index].widget = make_shared<RigidObjectPoseWidget>(obj);
+  Klampt::WorldModel& world = *worlds[object.world]->world;
+  Klampt::RigidObjectModel* obj = world.rigidObjects[object.index].get();
+  widgets[index].widget = make_shared<Klampt::RigidObjectPoseWidget>(obj);
 }
 
 void ObjectPoser::set(const double R[9],const double t[3])
 {
-  RigidObjectPoseWidget* tw=dynamic_cast<RigidObjectPoseWidget*>(widgets[index].widget.get());
+  Klampt::RigidObjectPoseWidget* tw=dynamic_cast<Klampt::RigidObjectPoseWidget*>(widgets[index].widget.get());
   RigidTransform T;
   T.R.set(R);
   T.t.set(t);
@@ -6068,7 +6973,7 @@ void ObjectPoser::set(const double R[9],const double t[3])
 
 void ObjectPoser::get(double out[9],double out2[3])
 {
-  RigidObjectPoseWidget* tw=dynamic_cast<RigidObjectPoseWidget*>(widgets[index].widget.get());
+  Klampt::RigidObjectPoseWidget* tw=dynamic_cast<Klampt::RigidObjectPoseWidget*>(widgets[index].widget.get());
   RigidTransform T = tw->Pose();
   T.R.get(out);
   T.t.get(out2);
@@ -6077,44 +6982,44 @@ void ObjectPoser::get(double out[9],double out2[3])
 RobotPoser::RobotPoser(RobotModel& robot)
 {
   Assert(worlds[robot.world]->world != NULL);
-  RobotWorld& world = *worlds[robot.world]->world;
+  Klampt::WorldModel& world = *worlds[robot.world]->world;
   Assert(robot.index >= 0 && robot.index < world.robots.size());
-  Robot* rob = world.robots[robot.index].get();
-  ViewRobot* view = &world.robotViews[robot.index];
+  Klampt::RobotModel* rob = world.robots[robot.index].get();
+  Klampt::ViewRobot* view = &world.robotViews[robot.index];
   Assert(rob != NULL);
   Assert(view != NULL);
-  widgets[index].widget = make_shared<RobotPoseWidget>(rob,view);
+  widgets[index].widget = make_shared<Klampt::RobotPoseWidget>(rob,view);
 }
 
 void RobotPoser::setActiveDofs(const std::vector<int>& dofs)
 {
-  RobotPoseWidget* tw=dynamic_cast<RobotPoseWidget*>(widgets[index].widget.get());
+  Klampt::RobotPoseWidget* tw=dynamic_cast<Klampt::RobotPoseWidget*>(widgets[index].widget.get());
   tw->SetActiveDofs(dofs);
 }
 
 void RobotPoser::set(const std::vector<double>& q)
 {
-  RobotPoseWidget* tw=dynamic_cast<RobotPoseWidget*>(widgets[index].widget.get());
+  Klampt::RobotPoseWidget* tw=dynamic_cast<Klampt::RobotPoseWidget*>(widgets[index].widget.get());
   tw->SetPose(Config(q));
 }
 
 void RobotPoser::get(std::vector<double>& out)
 {
-  RobotPoseWidget* tw=dynamic_cast<RobotPoseWidget*>(widgets[index].widget.get());
+  Klampt::RobotPoseWidget* tw=dynamic_cast<Klampt::RobotPoseWidget*>(widgets[index].widget.get());
   out.resize(tw->Pose().size());
   tw->Pose().getCopy(&out[0]);
 }
 
 void RobotPoser::getConditioned(const std::vector<double>& qref,std::vector<double>& out)
 {
-  RobotPoseWidget* tw=dynamic_cast<RobotPoseWidget*>(widgets[index].widget.get());
+  Klampt::RobotPoseWidget* tw=dynamic_cast<Klampt::RobotPoseWidget*>(widgets[index].widget.get());
   out.resize(tw->Pose().size());
   tw->Pose_Conditioned(Config(qref)).getCopy(&out[0]);
 }
 
 void RobotPoser::addIKConstraint(const IKObjective& obj)
 {
-  RobotPoseWidget* tw=dynamic_cast<RobotPoseWidget*>(widgets[index].widget.get());
+  Klampt::RobotPoseWidget* tw=dynamic_cast<Klampt::RobotPoseWidget*>(widgets[index].widget.get());
   tw->ikPoser.ClearLink(obj.goal.link);
   tw->ikPoser.Add(obj.goal);
   tw->ikPoser.Enable(&tw->ikPoser.poseWidgets.back(),false);
@@ -6122,7 +7027,7 @@ void RobotPoser::addIKConstraint(const IKObjective& obj)
 
 void RobotPoser::clearIKConstraints()
 {
-  RobotPoseWidget* tw=dynamic_cast<RobotPoseWidget*>(widgets[index].widget.get());
+  Klampt::RobotPoseWidget* tw=dynamic_cast<Klampt::RobotPoseWidget*>(widgets[index].widget.get());
   tw->ikPoser.poseGoals.clear();
   tw->ikPoser.poseWidgets.clear();
 }
@@ -6241,33 +7146,34 @@ void BoxPoser::getDims(double out[3])
 
 /***************************  STABILITY TESTING CODE ***************************************/
 
-void setFrictionConeApproximationEdges(int numEdges)
+void set_friction_cone_approximation_edges(int numEdges)
 {
   if(numEdges < 3) throw PyException("Invalid number of friction cone approximation edges, must be at least 3");
   gStabilityNumFCEdges = numEdges;
 }
 
-void Convert(const std::vector<std::vector<double > >& contacts,vector<ContactPoint>& cps)
+void Convert(const double* contacts,int m,int n,vector<ContactPoint>& cps)
 {
-  cps.resize(contacts.size());
-  for(size_t i=0;i<contacts.size();i++) {
-    if(contacts[i].size() != 7) throw PyException("Invalid size of contact point, must be in the format (x,y,z,nx,ny,nz,kFriction)");
-    if(contacts[i][6] < 0) throw PyException("Invalid contact point, negative friction coefficient");
-    cps[i].x.set(contacts[i][0],contacts[i][1],contacts[i][2]);
-    cps[i].n.set(contacts[i][3],contacts[i][4],contacts[i][5]);
-    cps[i].kFriction = contacts[i][6];
+  if(n != 7)  throw PyException("Invalid size of contact point, must be in the format (x,y,z,nx,ny,nz,kFriction)");
+  cps.resize(m);
+  for(int i=0;i<m;i+=n) {
+    if(contacts[i+6] < 0) throw PyException("Invalid contact point, negative friction coefficient");
+    cps[i].x.set(contacts[i+0],contacts[i+1],contacts[i+2]);
+    cps[i].n.set(contacts[i+3],contacts[i+4],contacts[i+5]);
+    if(!FuzzyEquals(cps[i].n.normSquared(),1.0,1e-5)) throw PyException("Invalid contact point, non-unit normal");
+    cps[i].kFriction = contacts[i+6];
   }
 }
 
-void Convert(const std::vector<std::vector<double > >& contacts,vector<ContactPoint2D>& cps)
+void Convert(const double* contacts,int m,int n,vector<ContactPoint2D>& cps)
 {
-  cps.resize(contacts.size());
-  for(size_t i=0;i<contacts.size();i++) {
-    if(contacts[i].size() != 4) throw PyException("Invalid size of contact point, must be in the format (x,y,angle,kFriction)");
-    if(contacts[i][3] < 0) throw PyException("Invalid contact point, negative friction coefficient");
-    cps[i].x.set(contacts[i][0],contacts[i][1]);
-    cps[i].n.set(Cos(contacts[i][2]),Sin(contacts[i][2]));
-    cps[i].kFriction = contacts[i][3];
+  if(n != 4) throw PyException("Invalid size of contact point, must be in the format (x,y,angle,kFriction)");
+  cps.resize(m);
+  for(int i=0;i<m;i+=n) {
+    if(contacts[i+3] < 0) throw PyException("Invalid contact point, negative friction coefficient");
+    cps[i].x.set(contacts[i+0],contacts[i+1]);
+    cps[i].n.set(Cos(contacts[i+2]),Sin(contacts[i+2]));
+    cps[i].kFriction = contacts[i+3];
   }
 }
 
@@ -6310,28 +7216,28 @@ void Convert(const std::vector<std::vector<double > >& contactPositions,const st
   }
 }
 
-bool forceClosure(const std::vector<std::vector<double > >& contacts)
+bool force_closure(double* contacts,int m,int n)
 {
   vector<ContactPoint> cps;
-  Convert(contacts,cps);
+  Convert(contacts,m,n,cps);
   return TestForceClosure(cps,gStabilityNumFCEdges);
 }
 
-bool forceClosure(const std::vector<std::vector<double> >& contactPositions,const std::vector<std::vector<double > >& frictionCones)
+bool force_closure(const std::vector<std::vector<double> >& contactPositions,const std::vector<std::vector<double > >& frictionCones)
 {
   vector<CustomContactPoint> cps;
   Convert(contactPositions,frictionCones,cps);
   return TestForceClosure(cps);
 }
 
-bool forceClosure2D(const std::vector<std::vector<double > >& contacts)
+bool force_closure_2d(double* contacts,int m,int n)
 {
   vector<ContactPoint2D> cps;
-  Convert(contacts,cps);
+  Convert(contacts,m,n,cps);
   return TestForceClosure(cps);
 }
 
-bool forceClosure2D(const std::vector<std::vector<double > >& contactPositions,const std::vector<std::vector<double> >& frictionCones)
+bool force_closure_2d(const std::vector<std::vector<double > >& contactPositions,const std::vector<std::vector<double> >& frictionCones)
 {
   vector<CustomContactPoint2D> cps;
   Convert(contactPositions,frictionCones,cps);
@@ -6385,11 +7291,11 @@ PyObject* ToPy2(const vector<Vector2>& x)
 }
 
 
-PyObject* comEquilibrium(const std::vector<std::vector<double> >& contacts,const vector<double>& fext,PyObject* com)
+PyObject* com_equilibrium(double* contacts,int m,int n,const vector<double>& fext,PyObject* com)
 {
   if(fext.size() != 3) throw PyException("Invalid external force, must be a 3-list");
   vector<ContactPoint> cps;
-  Convert(contacts,cps);
+  Convert(contacts,m,n,cps);
   if(com == Py_None) {
     //test all 
     bool res=TestAnyCOMEquilibrium(cps,Vector3(fext[0],fext[1],fext[2]),gStabilityNumFCEdges);
@@ -6407,7 +7313,7 @@ PyObject* comEquilibrium(const std::vector<std::vector<double> >& contacts,const
   Py_RETURN_NONE;
 }
 
-PyObject* comEquilibrium(const std::vector<std::vector<double> >& contactPositions,const std::vector<std::vector<double> >& frictionCones,const vector<double>& fext,PyObject* com)
+PyObject* com_equilibrium(const std::vector<std::vector<double> >& contactPositions,const std::vector<std::vector<double> >& frictionCones,const vector<double>& fext,PyObject* com)
 {
   if(fext.size() != 3) throw PyException("Invalid external force, must be a 3-list");
   vector<CustomContactPoint> cps;
@@ -6430,11 +7336,11 @@ PyObject* comEquilibrium(const std::vector<std::vector<double> >& contactPositio
 }
 
 
-PyObject* comEquilibrium2D(const std::vector<std::vector<double> >& contacts,const vector<double>& fext,PyObject* com)
+PyObject* com_equilibrium_2d(double* contacts,int m,int n,const vector<double>& fext,PyObject* com)
 {
   if(fext.size() != 2) throw PyException("Invalid external force, must be a 2-list");
   vector<ContactPoint2D> cps;
-  Convert(contacts,cps);
+  Convert(contacts,m,n,cps);
   if(com == Py_None) {
     //test all 
     bool res=TestAnyCOMEquilibrium(cps,Vector2(fext[0],fext[1]));
@@ -6452,7 +7358,7 @@ PyObject* comEquilibrium2D(const std::vector<std::vector<double> >& contacts,con
   Py_RETURN_NONE;
 }
 
-PyObject* comEquilibrium2D(const std::vector<std::vector<double> >& contactPositions,const std::vector<std::vector<double> >& frictionCones,const vector<double>& fext,PyObject* com)
+PyObject* com_equilibrium_2d(const std::vector<std::vector<double> >& contactPositions,const std::vector<std::vector<double> >& frictionCones,const vector<double>& fext,PyObject* com)
 {
   if(fext.size() != 2) throw PyException("Invalid external force, must be a 2-list");
   vector<CustomContactPoint2D> cps;
@@ -6475,10 +7381,10 @@ PyObject* comEquilibrium2D(const std::vector<std::vector<double> >& contactPosit
 }
 
 
-PyObject* supportPolygon(const std::vector<std::vector<double> >& contacts)
+PyObject* support_polygon(double* contacts,int m,int n)
 {
   vector<ContactPoint> cps;
-  Convert(contacts,cps);
+  Convert(contacts,m,n,cps);
   SupportPolygon sp;
   if(!sp.Set(cps,Vector3(0,0,-1),gStabilityNumFCEdges)) throw PyException("Numerical problem calculating support polygon?");
   if(sp.vertices.empty()) {
@@ -6506,7 +7412,7 @@ PyObject* supportPolygon(const std::vector<std::vector<double> >& contacts)
 /// The format of a plane is (nx,ny,ofs) where (nx,ny) are the outward facing normals, and
 /// ofs is the offset from 0.  In other words to test stability of a com [x,y], you can test
 /// whether dot([nx,ny],[x,y]) <= ofs  for all planes.
-PyObject* supportPolygon(const std::vector<std::vector<double> >& contactPositions,const std::vector<std::vector<double> >& frictionCones)
+PyObject* support_polygon(const std::vector<std::vector<double> >& contactPositions,const std::vector<std::vector<double> >& frictionCones)
 {
   vector<CustomContactPoint> cps;
   Convert(contactPositions,frictionCones,cps);
@@ -6533,17 +7439,17 @@ PyObject* supportPolygon(const std::vector<std::vector<double> >& contactPositio
 /// 
 /// The return value is a 2-tuple giving the min / max extents of the support polygon.
 /// If they are both infinite, the support polygon is empty.
-PyObject* supportPolygon2D(const std::vector<std::vector<double> >& contacts)
+PyObject* support_polygon_2d(double* contacts,int m,int n)
 {
   throw PyException("2D support polygons not implemented yet");
 }
 
-PyObject* supportPolygon2D(const std::vector<std::vector<double> >& contacts,const std::vector<std::vector<double> >& frictionCones)
+PyObject* support_polygon_2d(const std::vector<std::vector<double> >& contacts,const std::vector<std::vector<double> >& frictionCones)
 {
   throw PyException("2D support polygons not implemented yet");
 }
 
-PyObject* equilibriumTorques(const RobotModel& robot,const std::vector<std::vector<double> >& contacts,const std::vector<int>& links,const std::vector<double>& fext,const std::vector<double>& internalTorques,double norm)
+PyObject* equilibrium_torques(const RobotModel& robot,double* contacts,int m,int n,const std::vector<int>& links,const std::vector<double>& fext,const std::vector<double>& internalTorques,double norm)
 {
   if(robot.robot == NULL) throw PyException("Called with empty robot");
   if(fext.size() != 3) throw PyException("Invalid external force, must be a 3-list");
@@ -6553,7 +7459,7 @@ PyObject* equilibriumTorques(const RobotModel& robot,const std::vector<std::vect
   }
   vector<ContactPoint> cps;
   CustomContactFormation formation;
-  Convert(contacts,cps);
+  Convert(contacts,m,n,cps);
   formation.links = links;
   formation.contacts.resize(cps.size());
   for(size_t i=0;i<cps.size();i++)
@@ -6571,10 +7477,10 @@ PyObject* equilibriumTorques(const RobotModel& robot,const std::vector<std::vect
   return Py_BuildValue("(NN)",ToPy(ts.t),ToPy(ts.f));
 }
 
-PyObject* equilibriumTorques(const RobotModel& robot,const std::vector<std::vector<double> >& contacts,const std::vector<int>& links,const vector<double>& fext,double norm)
+PyObject* equilibrium_torques(const RobotModel& robot,double* contacts,int m,int n,const std::vector<int>& links,const vector<double>& fext,double norm)
 {
   vector<double> internalTorques;
-  return ::equilibriumTorques(robot,contacts,links,fext,internalTorques,norm);
+  return ::equilibrium_torques(robot,contacts,m,n,links,fext,internalTorques,norm);
 }
 
 
@@ -6582,7 +7488,7 @@ PyObject* equilibriumTorques(const RobotModel& robot,const std::vector<std::vect
 
 /*************************** IO CODE ***************************************/
 
-bool SubscribeToStream(Geometry3D& g,const char* protocol,const char* name,const char* type)
+bool subscribe_to_stream(Geometry3D& g,const char* protocol,const char* name,const char* type)
 {
   shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(g.geomPtr);
   if(0==strcmp(protocol,"ros")) {
@@ -6590,16 +7496,16 @@ bool SubscribeToStream(Geometry3D& g,const char* protocol,const char* name,const
       type = "PointCloud";
     if(0 == strcmp(type,"PointCloud")) {
       if(!g.isStandalone()) {
-  RobotWorld& world=*worlds[g.world]->world;
+  Klampt::WorldModel& world=*worlds[g.world]->world;
   GetManagedGeometry(world,g.id).RemoveFromCache();
   return GetManagedGeometry(world,g.id).Load((string("ros:PointCloud2//")+string(name)).c_str());
       }
-      printf("Warning, attaching to a ROS stream without a ManagedGeometry.\n");
+      printf("Warning, attaching to a ROS stream without a Klampt::ManagedGeometry.\n");
       printf("You will not be able to automatically get updates from ROS.\n");
       if(!geom) 
         geom.reset(new AnyCollisionGeometry3D());
       (*geom) = AnyCollisionGeometry3D(Meshing::PointCloud3D());
-      return ROSSubscribePointCloud(geom->AsPointCloud(),name);
+      return Klampt::ROSSubscribePointCloud(geom->AsPointCloud(),name);
       //TODO: update ROS, update the appearance every time the point cloud changes
     }
     else {
@@ -6613,10 +7519,10 @@ bool SubscribeToStream(Geometry3D& g,const char* protocol,const char* name,const
   }
 }
 
-bool DetachFromStream(const char* protocol,const char* name)
+bool detach_from_stream(const char* protocol,const char* name)
 {
   if(0==strcmp(protocol,"ros")) {
-    return ROSDetach(name);
+    return Klampt::ROSDetach(name);
   }
   else {
     throw PyException("DetachFromStream: Unsupported protocol argument");
@@ -6624,17 +7530,17 @@ bool DetachFromStream(const char* protocol,const char* name)
   }
 }
 
-bool ProcessStreams(const char* protocol)
+bool process_streams(const char* protocol)
 {
-  if((0==strcmp(protocol,"all")&&ROSInitialized()) || 0==strcmp(protocol,"ros"))
-    if(ROSSubscribeUpdate()) return true;
+  if((0==strcmp(protocol,"all")&&Klampt::ROSInitialized()) || 0==strcmp(protocol,"ros"))
+    if(Klampt::ROSSubscribeUpdate()) return true;
   return false;
 }
 
-bool WaitForStream(const char* protocol,const char* name,double timeout)
+bool wait_for_stream(const char* protocol,const char* name,double timeout)
 {
   if(0==strcmp(protocol,"ros")) {
-    return ROSWaitForUpdate(name,timeout);
+    return Klampt::ROSWaitForUpdate(name,timeout);
   }
   return false;
 }
@@ -6647,26 +7553,26 @@ bool PublishToStream(const Geometry3D& g,const char* protocol,const char* name,c
 */
 
 ///Exports the WorldModel to a JSON string ready for use in Three.js
-std::string ThreeJSGetScene(const WorldModel& w)
+std::string threejs_get_scene(const WorldModel& w)
 {
   if(w.index < 0) return "{}";
-  RobotWorld& world = *worlds[w.index]->world;
+  Klampt::WorldModel& world = *worlds[w.index]->world;
 
   AnyCollection obj;
-  ThreeJSExport(world,obj);
+  Klampt::ThreeJSExport(world,obj);
   std::ostringstream stream;
   stream<<obj;
   return stream.str();
 }
 
 ///Exports the WorldModel to a JSON string ready for use in Three.js
-std::string ThreeJSGetTransforms(const WorldModel& w)
+std::string threejs_get_transforms(const WorldModel& w)
 {
   if(w.index < 0) return "{}";
-   RobotWorld& world = *worlds[w.index]->world;
+   Klampt::WorldModel& world = *worlds[w.index]->world;
 
    AnyCollection obj;
-   ThreeJSExportTransforms(world,obj);
+   Klampt::ThreeJSExportTransforms(world,obj);
    std::ostringstream stream;
    stream<<obj;
    return stream.str();

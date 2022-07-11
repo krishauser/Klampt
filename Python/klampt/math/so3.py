@@ -17,39 +17,52 @@ convenient interface with C code.
 
 import math
 from . import vectorops
+from typing import Tuple,Callable
+from ..model.typing import Rotation,Matrix3,Vector3
 
-def __str__(R):
+def __str__(R : Rotation) -> str:
     """Converts a rotation to a string."""
     return '\n'.join([' '.join([str(ri) for ri in r]) for r in matrix(R)])
 
-def identity():
-    """Returns the identity rotation"""
+def identity() -> Rotation:
+    """Returns the identity rotation."""
     return [1.,0.,0.,0.,1.,0.,0.,0.,1.]
 
-def inv(R):
-    """Inverts the rotation"""
+def inv(R : Rotation) -> Rotation:
+    """Inverts the rotation."""
     Rinv = [R[0],R[3],R[6],R[1],R[4],R[7],R[2],R[5],R[8]]
     return Rinv
 
-def apply(R,point):
-    """Applies the rotation to a point"""
+def apply(R : Rotation, point : Vector3) -> Vector3:
+    """Applies the rotation to a point."""
     return (R[0]*point[0]+R[3]*point[1]+R[6]*point[2],
             R[1]*point[0]+R[4]*point[1]+R[7]*point[2],
             R[2]*point[0]+R[5]*point[1]+R[8]*point[2])
 
-def matrix(R):
-    """Returns the 3x3 rotation matrix corresponding to R"""
+def matrix(R : Rotation) -> Matrix3:
+    """Returns the 3x3 rotation matrix corresponding to R."""
     return [[R[0],R[3],R[6]],
             [R[1],R[4],R[7]],
             [R[2],R[5],R[8]]]
 
-def from_matrix(mat):
-    """Returns an R corresponding to the 3x3 rotation matrix mat"""
+def from_matrix(mat : Matrix3) -> Rotation:
+    """Returns a rotation R corresponding to the 3x3 rotation matrix mat."""
     R = [mat[0][0],mat[1][0],mat[2][0],mat[0][1],mat[1][1],mat[2][1],mat[0][2],mat[1][2],mat[2][2]]
     return R
 
-def mul(R1,R2):
+def ndarray(R : Rotation) -> "ndarray":
+    """Returns the 3x3 numpy rotation matrix corresponding to R."""
+    import numpy
+    return numpy.array(matrix(R))
+
+def from_ndarray(mat : "ndarray") -> Rotation:
+    """Returns a rotation R corresponding to the 3x3 rotation matrix mat."""
+    return mat.T.flatten().tolist()
+
+def mul(R1 : Rotation, R2 : Rotation) -> Rotation:
     """Multiplies two rotations."""
+    if len(R1) != 9: raise ValueError("R1 is not a rotation matrix")
+    if len(R2) != 9: raise ValueError("R2 is not a rotation matrix (did you mean to use apply())?")
     m1=matrix(R1)
     m2T=matrix(inv(R2))
     mres = matrix(identity())
@@ -59,16 +72,16 @@ def mul(R1,R2):
     R = from_matrix(mres)
     return R
 
-def trace(R):
+def trace(R : Rotation) -> float:
     """Computes the trace of the rotation matrix."""
     return R[0]+R[4]+R[8]
 
-def angle(R):
+def angle(R : Rotation) -> float:
     """Returns absolute deviation of R from identity"""
     ctheta = (trace(R) - 1.0)*0.5
     return math.acos(max(min(ctheta,1.0),-1.0))
 
-def rpy(R):
+def rpy(R : Rotation) -> Vector3:
     """Converts a rotation matrix to a roll,pitch,yaw angle triple.
     The result is given in radians."""
     sign = lambda x: 1 if x > 0 else (-1 if x < 0 else 0)
@@ -102,7 +115,7 @@ def rpy(R):
             a = math.pi - a;
     return c,b,a
     
-def from_rpy(rollpitchyaw):
+def from_rpy(rollpitchyaw : Vector3) -> Rotation:
     """Converts from roll,pitch,yaw angle triple to a rotation
     matrix.  The triple is given in radians.  The x axis is "roll",
     y is "pitch", and z is "yaw".
@@ -111,7 +124,7 @@ def from_rpy(rollpitchyaw):
     Rx,Ry,Rz = from_axis_angle(((1,0,0),roll)),from_axis_angle(((0,1,0),pitch)),from_axis_angle(((0,0,1),yaw))
     return mul(Rz,mul(Ry,Rx))
 
-def rotation_vector(R):
+def rotation_vector(R : Rotation) -> Vector3:
     """Returns the rotation vector w (exponential map) representation of R such
     that e^[w] = R.  Equivalent to axis-angle representation with
     w/||w||=axis, ||w||=angle."""
@@ -174,17 +187,17 @@ def rotation_vector(R):
         scale = theta/math.sin(theta)
     return vectorops.mul(deskew(R),scale)
 
-def axis_angle(R):
+def axis_angle(R : Rotation) -> Tuple:
     """Returns the (axis,angle) pair representing R"""
     m = rotation_vector(R)
     return (vectorops.unit(m),vectorops.norm(m))
 
-def from_axis_angle(aa):
+def from_axis_angle(aa : Tuple) -> Rotation:
     """Converts an axis-angle representation (axis,angle) to a 3D rotation
     matrix."""
     return rotation(aa[0],aa[1])
 
-def from_rotation_vector(w):
+def from_rotation_vector(w : Vector3) -> Rotation:
     """Converts a rotation vector representation w to a 3D rotation matrix."""
     length = vectorops.norm(w)
     if length < 1e-7: return identity()
@@ -194,7 +207,7 @@ def from_rotation_vector(w):
 moment = rotation_vector
 from_moment = from_rotation_vector
 
-def from_quaternion(q):
+def from_quaternion(q : Tuple) -> Rotation:
     """Given a unit quaternion (w,x,y,z), produce the corresponding rotation
     matrix."""
     w,x,y,z = q
@@ -214,7 +227,7 @@ def from_quaternion(q):
     a33 = 1.0 - (xx + yy)
     return [a11,a21,a31,a12,a22,a32,a13,a23,a33]
 
-def quaternion(R):
+def quaternion(R : Rotation) -> Tuple:
     """Given a Klamp't rotation representation, produces the corresponding
     unit quaternion (w,x,y,z)."""
     tr = trace(R) + 1.0;
@@ -250,28 +263,31 @@ def quaternion(R):
             s = 0.5 / s;
             q[3] = (M[k][j] - M[j][k]) * s;
             q[j] = (M[i][j] + M[j][i]) * s;
-            q[k] = (M[i][k] + M[i][k]) * s;
+            q[k] = (M[i][k] + M[k][i]) * s;
         w,x,y,z = q[3],q[0],q[1],q[2]
         return vectorops.unit([w,x,y,z])
     
-def distance(R1,R2):
+def distance(R1 : Rotation, R2 : Rotation) -> float:
     """Returns the absolute angle one would need to rotate in order to get
     from R1 to R2"""
     R = mul(R1,inv(R2))
     return angle(R)
 
-def error(R1,R2):
+def error(R1 : Rotation, R2 : Rotation) -> float:
     """Returns a 3D "difference vector" that describes how far R1 is from R2.
     More precisely, this is the (local) Lie derivative, which is the rotation 
     vector representation of R1*R2^T.
 
-    Fun fact: this is related to the derivative of interpolate(R2,R1,u) at u=0
-    by d/du interpolate(R2,R1,0) = mul(error(R1,R2),R2).
+    Fun fact: the error w=error(R1,R2) is related to the derivative of
+    interpolate(R2,R1,u) at u=0 by
+    d/du interpolate(R2,R1,0) = mul(cross_product(w),R2).
+    
+    You can also recover R1 from w via R1 = mul(from_moment(w),R2).
     """
     R = mul(R1,inv(R2))
     return moment(R)
 
-def cross_product(w):
+def cross_product(w : Vector3) -> Rotation:
     """Returns the cross product matrix associated with w.
 
     The matrix [w]R is the derivative of the matrix R as it rotates about
@@ -279,17 +295,17 @@ def cross_product(w):
     """
     return [0.,w[2],-w[1],  -w[2],0.,w[0],  w[1],-w[0],0.]
 
-def diag(R):
+def diag(R : Rotation) -> Vector3:
     """Returns the diagonal of the 3x3 matrix reprsenting the so3 element R."""
     return [R[0],R[4],R[8]]
 
-def deskew(R):
+def deskew(R : Rotation) -> Vector3:
     """If R is a (flattened) cross-product matrix of the 3-vector w, this will
     return w.  Otherwise, it will return a representation w of (R-R^T)/2 (off
     diagonals of R) such that (R-R^T)/2 = cross_product(w). """
     return [0.5*(R[5]-R[7]),0.5*(R[6]-R[2]),0.5*(R[1]-R[3])]
 
-def rotation(axis,angle):
+def rotation(axis : Vector3, angle: float) -> Rotation:
     """Given a unit axis and an angle in radians, returns the rotation
     matrix."""
     cm = math.cos(angle)
@@ -305,7 +321,7 @@ def rotation(axis,angle):
     R[8] += cm
     return R
 
-def canonical(v):
+def canonical(v : Vector3) -> Rotation:
     """Given a unit vector v, finds R that defines a basis [x,y,z] such that
     x = v and y and z are orthogonal"""
     if abs(vectorops.normSquared(v) - 1.0) > 1e-4:
@@ -330,8 +346,9 @@ def canonical(v):
     R[8]= x + scale*y*y;
     return R
 
-def align(a,b):
-    """Returns a rotation that aligns the vector a to align with the vector b."""
+def align(a : Vector3, b : Vector3) -> Rotation:
+    """Returns a minimal-angle rotation that aligns the vector a to align with
+    the vector b. Both a and b must be nonzero."""
     an = vectorops.norm(a)
     bn = vectorops.norm(b)
     if abs(an) < 1e-5 or abs(bn) < 1e-5:
@@ -351,26 +368,7 @@ def align(a,b):
     vhat2 = mul(vhat,vhat)
     return vectorops.madd(vectorops.add(identity(),vhat),vhat2,1.0/(1.0+c))
 
-def vector_rotation(v1,v2):
-    """Finds the minimal-angle matrix that rotates v1 to v2.  v1 and v2
-    are assumed to be nonzero"""
-    a1 = vectorops.unit(v1)
-    a2 = vectorops.unit(v2)
-    cp = vectorops.cross(a1,a2)
-    dp = vectorops.dot(a1,a2)
-    if abs(vectorops.norm(cp)) < 1e-4:
-        if dp < 0:
-            R0 = canonical(a1)
-            #return a rotation 180 degrees about the canonical y axis
-            return rotation(R0[3:6],math.pi)
-        else:
-            return identity()
-    else:
-        angle = math.acos(max(min(dp,1.0),-1.0))
-        axis = vectorops.mul(cp,1.0/vectorops.norm(cp))
-        return rotation(axis,angle)
-
-def interpolate(R1,R2,u):
+def interpolate(R1 : Rotation, R2 : Rotation, u : float) -> Rotation:
     """Interpolate linearly between the two rotations R1 and R2. """
     R = mul(inv(R1),R2)
     m = moment(R)
@@ -379,7 +377,7 @@ def interpolate(R1,R2,u):
     axis = vectorops.div(m,angle)
     return mul(R1,rotation(axis,angle*u))
 
-def interpolator(R1,R2):
+def interpolator(R1 : Rotation, R2 : Rotation) -> Callable:
     """Returns a function of one parameter u that interpolates linearly
     between the two rotations R1 and R2. After f(u) is constructed, calling
     f(u) is about 2x faster than calling interpolate(R1,R2,u)."""
@@ -394,12 +392,12 @@ def interpolator(R1,R2):
         return mul(R1,rotation(axis,angle*u))
     return f
 
-def det(R):
+def det(R : Rotation) -> float:
     """Returns the determinant of the 3x3 matrix R"""
     m = matrix(R)
     return m[0][0]*m[1][1]*m[2][2]+m[0][1]*m[1][2]*m[2][0]+m[0][2]*m[1][0]*m[2][1]-m[0][0]*m[1][2]*m[2][1]-m[0][1]*m[1][0]*m[2][2]-m[0][2]*m[1][1]*m[2][0]
 
-def is_rotation(R,tol=1e-5):
+def is_rotation(R : Rotation, tol=1e-5) -> bool:
     """Returns true if R is a rotation matrix, i.e. is orthogonal to the given tolerance and has + determinant"""
     RRt = mul(R,inv(R))
     err = vectorops.sub(RRt,identity())
@@ -409,7 +407,7 @@ def is_rotation(R,tol=1e-5):
         return False
     return True
 
-def sample():
+def sample() -> Rotation:
     """Returns a uniformly distributed rotation matrix."""
     import random
     q = [random.gauss(0,1),random.gauss(0,1),random.gauss(0,1),random.gauss(0,1)]

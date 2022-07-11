@@ -5,7 +5,7 @@ from ..model import collide
 from ..robotsim import IKObjective
 import warnings
 
-def preferredPlanOptions(robot,movingSubset=None,optimizing=False):
+def preferred_plan_options(robot,movingSubset=None,optimizing=False):
     """Returns some options that might be good for your given robot, and
     whether you want a feasible or just an optimal plan.
 
@@ -18,7 +18,7 @@ def preferredPlanOptions(robot,movingSubset=None,optimizing=False):
         return { 'type':"sbl", 'perturbationRadius':0.5, 'randomizeFrequency':1000, 'shortcut':1 }
 
 
-def makeSpace(world,robot,
+def make_space(world,robot,
               edgeCheckResolution=1e-2,
               extraConstraints=[],
               equalityConstraints=[],
@@ -148,7 +148,7 @@ def makeSpace(world,robot,
     space.setup()
     return space
 
-def planToConfig(world,robot,target,
+def plan_to_config(world,robot,target,
                  edgeCheckResolution=1e-2,
                  extraConstraints=[],
                  equalityConstraints=[],
@@ -220,7 +220,7 @@ def planToConfig(world,robot,target,
                 if q0[i] != target[i]:
                     raise ValueError("Error: target configuration value differs from start configuration along a fixed DOF: %s (link %d): %g vs %g"%(robot.link(i).getName(),i,q0[i],target[i]))
     
-    space = makeSpace(world=world,robot=robot,
+    space = make_space(world=world,robot=robot,
                       edgeCheckResolution=edgeCheckResolution,
                       extraConstraints=extraConstraints,
                       equalityConstraints=equalityConstraints,
@@ -239,13 +239,29 @@ def planToConfig(world,robot,target,
         if space.cspace==None: space.setup()
         sfailures = space.cspace.feasibilityFailures(plan.space.project(q0))
         gfailures = space.cspace.feasibilityFailures(plan.space.project(target))
-        warnings.warn("Start configuration fails {}".format(sfailures))
-        warnings.warn("Goal configuration fails {}".format(gfailures))
+        if sfailures:
+            warnings.warn("Start configuration fails {}".format(sfailures))
+            if 'self collision' in sfailures:
+                robot.setConfig(q0)
+                for i in range(robot.numLinks()):
+                    for j in range(i):
+                        if robot.selfCollisionEnabled(i,j):
+                            if robot.link(i).geometry().collides(robot.link(j).geometry()):
+                                print("  Links {} and {} collide".format(robot.link(i).getName(),robot.link(j).getName()))
+        if gfailures:
+            warnings.warn("Goal configuration fails {}".format(gfailures))
+            if 'self collision' in gfailures:
+                robot.setConfig(target)
+                for i in range(robot.numLinks()):
+                    for j in range(i):
+                        if robot.selfCollisionEnabled(i,j):
+                            if robot.link(i).geometry().collides(robot.link(j).geometry()):
+                                print("  Links {} and {} collide".format(robot.link(i).getName(),robot.link(j).getName()))
         return None
     return plan
 
 
-def planToSet(world,robot,target,
+def plan_to_set(world,robot,target,
               edgeCheckResolution=1e-2,
               extraConstraints=[],
               equalityConstraints=[],
@@ -312,7 +328,7 @@ def planToSet(world,robot,target,
     else:
         subset = movingSubset
 
-    space = makeSpace(world=world,robot=robot,
+    space = make_space(world=world,robot=robot,
                       edgeCheckResolution=edgeCheckResolution,
                       extraConstraints=extraConstraints,
                       equalityConstraints=equalityConstraints,
@@ -323,7 +339,7 @@ def planToSet(world,robot,target,
     if hasattr(space,'lift'):  #the planning takes place in a space of lower dimension than #links
         plan = EmbeddedMotionPlan(space,q0,**planOptions)
     else:
-        plan = MotionPlan(space,q0,**planOptions)
+        plan = MotionPlan(space,**planOptions)
 
     #convert target to a (test,sample) pair if it's a cspace
     if isinstance(target,CSpace):
@@ -344,7 +360,7 @@ def planToSet(world,robot,target,
         raise
     return plan
 
-def planToCartesianObjective(world,robot,iktargets,iktolerance=1e-3,
+def plan_to_cartesian_objective(world,robot,iktargets,iktolerance=1e-3,
                              extraConstraints=[],
                              equalityConstraints=[],
                              equalityTolerance=1e-3,
@@ -355,7 +371,7 @@ def planToCartesianObjective(world,robot,iktargets,iktolerance=1e-3,
     Plans a path to reach one or more IK targets.
 
     Args:
-        world (WorldModel): same as planToConfig
+        world (WorldModel): same as plan_to_config
         iktargets (list of :class:`IKObjective`): a list of IKObjective
             instances (see the ik module)
         iktolerance (float): a tolerance to which the ik objectives must be
@@ -371,7 +387,7 @@ def planToCartesianObjective(world,robot,iktargets,iktolerance=1e-3,
     """
     #TODO: only subselect those links that are affected by the IK target
     goalset = robotcspace.ClosedLoopRobotCSpace(robot,iktargets,None)
-    return planToSet(world,robot,goalset,
+    return plan_to_set(world,robot,goalset,
                      extraConstraints=extraConstraints,
                      equalityConstraints=equalityConstraints,
                      equalityTolerance=equalityTolerance,
@@ -384,7 +400,7 @@ class _WizardGUI:
         self.world = None
         self.movingObject = None
         self.cspace = None
-        self.plannerSettings = preferredPlanOptions(None)
+        self.plannerSettings = preferred_plan_options(None)
         self.startConfig = None
         self.goalConfig = None
         self.goalIKTargets = None
@@ -414,7 +430,7 @@ class _WizardGUI:
         if self.goalConfig is not None:
             goal = self.goalConfig
         elif self.goalIKTargets is not None:
-            goal = robotcspace.ClosedLoopRobotCSpace(robot,self.goalIKTargets,None)
+            goal = robotcspace.ClosedLoopRobotCSpace(self.movingObject,self.goalIKTargets,None)
         elif self.goalSetSampler is not None:
             goal = (self.goalSetTest,self.goalSetSampler)
         elif self.goalSetTest is not None:
@@ -461,6 +477,7 @@ def wizard(world_or_space_or_plan,moving_object=None,
         MotionPlan: a properly configured MotionPlan object that can be called
         to get a motion plan. (see :meth:`MotionPlan.planMore`).
     """
+    from klampt import WorldModel,RobotModel,RigidObjectModel
     gui = _WizardGUI()
     if isinstance(world_or_space_or_plan,WorldModel):
         gui.world = world_or_space_or_plan
@@ -473,7 +490,7 @@ def wizard(world_or_space_or_plan,moving_object=None,
                 moving_object = gui.world.robot(0)
         if not isinstance(moving_object,(RobotModel,RigidObjectModel)):
             raise TypeError("Invalid type of moving_object")
-        gui.cspace = makeSpace(gui.world,moving_object)
+        gui.cspace = make_space(gui.world,moving_object)
     elif isinstance(world_or_space_or_plan,CSpace):
         gui.cspace = world_or_space_or_plan
     elif isinstance(world_or_space_or_plan,MotionPlan):
@@ -495,3 +512,19 @@ def wizard(world_or_space_or_plan,moving_object=None,
             assert callable(goal)
             gui.goalSetTest = goal
         #TODO: parse IK targets
+
+def _deprecated_func(oldName,newName):
+    import sys
+    mod = sys.modules[__name__]
+    f = getattr(mod,newName)
+    def depf(*args,**kwargs):
+        warnings.warn("{} will be deprecated in favor of {} in a future version of Klampt".format(oldName,newName),DeprecationWarning)
+        return f(*args,**kwargs)
+    depf.__doc__ = 'Deprecated in a future version of Klampt. Use {} instead'.format(newName)
+    setattr(mod,oldName,depf)
+
+_deprecated_func('preferredPlanOptions','preferred_plan_options')
+_deprecated_func('makeSpace','make_space')
+_deprecated_func('planToConfig','plan_to_config')
+_deprecated_func('planToSet','plan_to_set')
+_deprecated_func('planToCartesianObjective','plan_to_cartesian_objective')

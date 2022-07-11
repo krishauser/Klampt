@@ -2,6 +2,7 @@
 #include <KrisLibrary/GLdraw/drawextra.h>
 #include <KrisLibrary/Timer.h>
 using namespace GLDraw;
+using namespace Klampt;
 
 const static GLColor grey(0.5,0.5,0.5);
 const static GLColor red(1,0,0);
@@ -77,7 +78,7 @@ void GLCheckeredSphere::Draw()
 }
 
 
-ViewRobot::ViewRobot(Robot* _robot)
+ViewRobot::ViewRobot(RobotModel* _robot)
   :robot(_robot)
 {
 }
@@ -86,7 +87,7 @@ ViewRobot::~ViewRobot()
 {
 }
 
-void ViewRobot::Draw(Robot* _robot) 
+void ViewRobot::Draw(RobotModel* _robot) 
 {
   robot = _robot;
   if(!robot) return;
@@ -111,6 +112,25 @@ void ViewRobot::SetColor(int link,const GLColor& c)
   }
 }
 
+void ViewRobot::SetTintColors(const GLColor& c,Real fraction)
+{
+  if(robot) {
+    for(size_t i=0;i<robot->links.size();i++) {
+      GLDraw::GeometryAppearance& a = Appearance(i);
+      a.SetTintColor(c,fraction);
+    }
+  }
+}
+
+void ViewRobot::SetTintColor(int link,const GLColor& c,Real fraction)
+{
+  if(robot) {
+    GLDraw::GeometryAppearance& a = Appearance(link);
+    a.SetTintColor(c,fraction);
+  }
+}
+
+/*
 void ViewRobot::BlendColors(const GLColor& c,Real fraction)
 {
   if(robot) {
@@ -132,6 +152,7 @@ void ViewRobot::BlendColor(int link,const GLColor& c,Real fraction)
     a.ModulateColor(c,fraction);
   }
 }
+*/
 
 void ViewRobot::SetGrey() { SetColors(grey); }
 

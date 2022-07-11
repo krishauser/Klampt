@@ -1,8 +1,9 @@
 #include "Interface/RobotTestGUI.h"
+using namespace Klampt;
 
 int main(int argc,const char** argv)
 {
-  RobotWorld world;
+  WorldModel world;
   RobotTestBackend backend(&world);
   if(!backend.LoadCommandLine(argc,argv)) {
     return 1;

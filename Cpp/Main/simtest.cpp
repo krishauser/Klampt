@@ -1,8 +1,10 @@
 #include "Interface/SimTestGUI.h"
 #include <stdio.h>
+using namespace Klampt;
+
 int main(int argc,const char** argv)
 {
-  RobotWorld world;
+  WorldModel world;
   SimTestBackend backend(&world);
   if(!backend.LoadAndInitSim(argc,argv)) {
     return 1;

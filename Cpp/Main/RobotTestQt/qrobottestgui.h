@@ -9,7 +9,7 @@ class QRobotTestGUI : public QKlamptGUIBase
 {
     Q_OBJECT
 public:
-  explicit QRobotTestGUI(QKlamptDisplay* display,GenericBackendBase* _backend);
+  explicit QRobotTestGUI(QKlamptDisplay* display,GenericBackendBase* _backend,RobotModel* robot);
     virtual ~QRobotTestGUI();
     void SetDriver(int index);
     void SetLink(int index);
@@ -18,6 +18,7 @@ public:
     virtual bool OnCommand(const string &cmd, const string &args);
     void UpdateGUI();
 
+    RobotModel* robot;
     CollisionOutput* col_out;
     QString opened_file;
 

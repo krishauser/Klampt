@@ -5,6 +5,8 @@
 #include <KrisLibrary/camera/viewport.h>
 #include <KrisLibrary/math3d/primitives.h>
 
+namespace Klampt {
+
 /** @brief Draws a camera in the OpenGL world.
  *
  * If drawIcon = true (default), draws a little icon for the camera
@@ -26,5 +28,6 @@ public:
     GLDraw::GLColor iconColor,frustumColor;
 };
 
+} //namespace Klampt
 
 #endif

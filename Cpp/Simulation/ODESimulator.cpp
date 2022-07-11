@@ -20,8 +20,10 @@
 
 DEFINE_LOGGER(ODESimulator)
 
-#define TEST_READ_WRITE_STATE 0
+#define TEST_READ_WRITE_STATE 1
 #define DO_TIMING 0
+
+namespace Klampt {
 
 const static size_t gMaxKMeansSize = 5000;
 const static size_t gMaxHClusterSize = 2000;
@@ -290,7 +292,7 @@ ODESimulator::~ODESimulator()
   dWorldDestroy(worldID);
 }
 
-void ODESimulator::AddTerrain(Terrain& terr)
+void ODESimulator::AddTerrain(TerrainModel& terr)
 {
   terrains.push_back(&terr);
   terrainGeoms.resize(terrainGeoms.size()+1);
@@ -307,7 +309,7 @@ void ODESimulator::AddTerrain(Terrain& terr)
   dGeomSetCollideBits(terrainGeoms.back()->geom(),0xffffffff ^ 0x1);
 }
 
-void ODESimulator::AddRobot(Robot& robot)
+void ODESimulator::AddRobot(RobotModel& robot)
 {
   robots.push_back(new ODERobot(robot));
   //For some reason, self collisions don't work with hash spaces
@@ -326,7 +328,7 @@ void ODESimulator::AddRobot(Robot& robot)
     }
 }
 
-void ODESimulator::AddObject(RigidObject& object)
+void ODESimulator::AddObject(RigidObjectModel& object)
 {
   objects.push_back(new ODERigidObject(object));
   objects.back()->Create(worldID,envSpaceID,settings.boundaryLayerCollisions);
@@ -461,7 +463,7 @@ void PrintStatus(ODESimulator* sim,const CollisionPair& collpair,const char* pre
 void PrintStatus(ODESimulator* sim,const vector<CollisionPair >& concernedObjects,const char* predescription="Concerned objects",const char* postdescription="have")
 {
   for(size_t i=0;i<concernedObjects.size();i++) {
-    ::PrintStatus(sim,concernedObjects[i],predescription,postdescription);
+    Klampt::PrintStatus(sim,concernedObjects[i],predescription,postdescription);
   }
 }
 
@@ -2229,3 +2231,5 @@ void ODEJoint::GetConstraintForces(Vector3& f1,Vector3& t1,Vector3& f2,Vector3& 
   f2.set(feedback.f2[0],feedback.f2[1],feedback.f2[2]);
   t2.set(feedback.t2[0],feedback.t2[1],feedback.t2[2]);
 }
+
+} //namespace Klampt

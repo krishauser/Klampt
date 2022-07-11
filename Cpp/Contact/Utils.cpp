@@ -9,8 +9,9 @@ using namespace Meshing;
 
 #include <ode/common.h>
 #include <ode/collision.h>
-#include "Modeling/World.h"
+#include <Klampt/Modeling/World.h>
 
+namespace Klampt {
 
 //Produces a list of contacts as though the robot were standing on a plane.
 //tol is the tolerance with which minimum-distance points are generated.
@@ -198,7 +199,7 @@ void GetFlatStance(RobotWithGeometry& robot,Real tol,Stance& s,Real kFriction)
 }
 
 
-void GetNearbyContacts(RobotWithGeometry& robot,RobotWorld& world,Real tol,ContactFormation& contacts)
+void GetNearbyContacts(RobotWithGeometry& robot,WorldModel& world,Real tol,ContactFormation& contacts)
 {
   contacts.links.resize(0);
   contacts.contacts.resize(0);
@@ -214,7 +215,7 @@ void GetNearbyContacts(RobotWithGeometry& robot,RobotWorld& world,Real tol,Conta
 }
 
 
-void GetNearbyContacts(RobotWithGeometry& robot,int link,RobotWorld& world,Real tol,vector<ContactPoint>& contacts)
+void GetNearbyContacts(RobotWithGeometry& robot,int link,WorldModel& world,Real tol,vector<ContactPoint>& contacts)
 {
   contacts.resize(0);
   if(robot.IsGeometryEmpty(link)) {
@@ -536,3 +537,5 @@ int ClosestContact(const ContactPoint& p,const Meshing::TriMesh& mesh,ContactPoi
   }
   return closest;
 }
+
+} //namespace Klampt

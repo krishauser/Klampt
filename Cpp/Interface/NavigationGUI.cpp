@@ -7,7 +7,7 @@
 #include <string>
 #include <fstream>
 using namespace GLDraw;
-
+using namespace Klampt;
 
 #if HAVE_GLUT
 

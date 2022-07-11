@@ -12,7 +12,7 @@ from .glviewport import GLViewport
 from ..math import so3,se3,vectorops
 import math
 import time
-
+import warnings
 
 class GLProgramAction:
     def __init__(self,hook,short_text,key,description=None):
@@ -288,8 +288,10 @@ class GLNavigationProgram(GLProgram):
     def set_view(self,v):
         """Sets the viewport to a tuple previously returned by get_view(),
         e.g. a prior view that was saved to file."""
+        if v.h != self.view.h or v.w != self.view.w:
+            #minimize possible flickering?
+            self.reshape(self.view.w,self.view.h)
         self.view = v
-        self.reshape(self.view.w,self.view.h)
     
     def prepare_GL(self):
         """Prepares for OpenGL rendering with the current modelview matrix
@@ -388,6 +390,15 @@ class GLPluginProgram(GLRealtimeProgram):
         GLRealtimeProgram.__init__(self,name)
         self.plugins = []
     def setPlugin(self,plugin):
+        warnings.warn("setPlugin will be deprecated in favor of set_plugin in a future version of Klampt",DeprecationWarning)
+        return self.set_plugin(plugin)
+    def pushPlugin(self,plugin):
+        warnings.warn("pushPlugin will be deprecated in favor of push_plugin in a future version of Klampt",DeprecationWarning)
+        return self.push_plugin(plugin)
+    def popPlugin(self):
+        warnings.warn("popPlugin will be deprecated in favor of pop_plugin in a future version of Klampt",DeprecationWarning)
+        return self.pop_plugin()
+    def set_plugin(self,plugin):
         #first, detatch existing plugins
         import copy
         for p in self.plugins:
@@ -396,8 +407,8 @@ class GLPluginProgram(GLRealtimeProgram):
         #now just set this plugin
         self.plugins = []
         if plugin:
-            self.pushPlugin(plugin)
-    def pushPlugin(self,plugin):
+            self.push_plugin(plugin)
+    def push_plugin(self,plugin):
         self.plugins.append(plugin)
         plugin.window = self.window
         if self.window:
@@ -410,7 +421,7 @@ class GLPluginProgram(GLRealtimeProgram):
             self.view = plugin.view
         else:
             plugin.view = self.view
-    def popPlugin(self):
+    def pop_plugin(self):
         import copy
         if len(self.plugins)==0: return None
         res = self.plugins[-1]

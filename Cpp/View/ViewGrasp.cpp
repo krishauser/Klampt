@@ -3,6 +3,7 @@
 #include <KrisLibrary/GLdraw/drawextra.h>
 #include <KrisLibrary/GLdraw/GL.h>
 using namespace GLDraw;
+using namespace Klampt;
 
 ViewGrasp::ViewGrasp()
   :viewRobot(NULL)
@@ -29,7 +30,7 @@ void ViewGrasp::Draw(const Grasp& g)
     }
     for(size_t i=0;i<g.fixedDofs.size();i++) {
       viewRobot->robot->q[g.fixedDofs[i]] = g.fixedValues[i];
-      viewRobot->robot->UpdateSelectedFrames(g.fixedDofs[i],g.fixedDofs[i]);
+      viewRobot->robot->UpdateUpstreamFrames(g.fixedDofs[i],g.fixedDofs[i]);
     }
     for(size_t i=0;i<g.fixedDofs.size();i++) 
       viewRobot->DrawLink_World(g.fixedDofs[i]);

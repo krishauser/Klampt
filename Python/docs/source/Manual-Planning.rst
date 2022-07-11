@@ -237,7 +237,7 @@ the ``.settings`` files in the Klampt-examples project
 `Klampt-examples/Cpp/PlanDemo <https://github.com/krishauser/Klampt-examples/tree/master/Cpp/PlanDemo>`__.
 
 For a complete description of the accepted options, see the
-`motionplanning.setPlanSetting <klampt.plan.motionplanning#setPlanSetting>`__
+`motionplanning.setPlanSetting <klampt.plan.motionplanning#klampt.plan.motionplanning.setPlanSetting>`__
 documentation
 
 API summary

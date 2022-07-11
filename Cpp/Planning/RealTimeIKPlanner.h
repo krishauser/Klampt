@@ -4,6 +4,8 @@
 #include "RealTimePlanner.h"
 #include <KrisLibrary/robotics/IK.h>
 
+namespace Klampt {
+
 /** @brief A planner that uses numerical inverse kinematics to reach the
  * goal.  The goal must be of CartesianObjective or IKObjective type, or
  * a composite of several such objectives. (see PlannerObjectives.h)
@@ -50,5 +52,7 @@ public:
   //temporary state
   int iteration;
 };
+
+} //namespace Klampt
 
 #endif

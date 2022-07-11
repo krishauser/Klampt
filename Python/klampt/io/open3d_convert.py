@@ -24,9 +24,7 @@ def to_open3d(obj):
     """
     if isinstance(obj,PointCloud):
         pc = open3d.geometry.PointCloud()
-        for i in range(obj.numPoints()):
-            k = i*3
-            pc.points.append((obj.vertices[k],obj.vertices[k+1],obj.vertices[k+2]))
+        pc.points = open3d.utility.Vector3dVector(obj.getPoints())
         #TODO: other properties
         colors = geometry.point_cloud_colors(obj,('r','g','b'))
         if colors is not None:
@@ -35,12 +33,8 @@ def to_open3d(obj):
         return pc
     elif isinstance(obj,TriangleMesh):
         m = open3d.geometry.TriangleMesh()
-        for i in range(len(obj.vertices)//3):
-            k = i*3
-            m.vertices.append((obj.vertices[k],obj.vertices[k+1],obj.vertices[k+2]))
-        for i in range(len(obj.indices)//3):
-            k = i*3
-            m.triangles.append((obj.indices[k],obj.indices[k+1],obj.indices[k+2]))
+        m.vertices = open3d.utility.Vector3dVector(obj.getVertices())
+        m.triangles = open3d.utility.Vector3iVector(obj.getIndices())
         return m
     elif isinstance(obj,VolumeGrid):
         import numpy as np
@@ -51,7 +45,7 @@ def to_open3d(obj):
         cz = (obj.bbox[5]-obj.bbox[2])/obj.dims[2]
         voxel_size = pow(cx*cy*cz,1.0/3.0)
         
-        values = np.array(obj.values)
+        values = obj.getValues()
         vrange = np.min(values),np.min(values)
         if vrange[0] < 0 or vrange[1] > 1:
             #treat as SDF
@@ -81,30 +75,27 @@ def from_open3d(obj):
     """Converts open3d geometry to a Klamp't geometry.
     """
     if isinstance(obj,open3d.geometry.PointCloud):
+        import numpy as np
         pc = PointCloud()
-        for p in obj.points:
-            pc.vertices.append(p[0])
-            pc.vertices.append(p[1])
-            pc.vertices.append(p[2])
+        pc.setPoints(np.asarray(obj.points))
         if obj.has_colors():
-            geometry.point_cloud_set_colors(pc,obj.colors,('r','g','b'),'rgb')
+            geometry.point_cloud_set_colors(pc,np.asarray(obj.colors).T,('r','g','b'),'rgb')
         #TODO: other properties
         return pc
     elif isinstance(obj,open3d.geometry.TriangleMesh):
+        import numpy as np
         m = TriangleMesh()
-        for p in obj.vertices:
-            m.vertices.append(p[0])
-            m.vertices.append(p[1])
-            m.vertices.append(p[2])
-        for i in obj.triangles:
-            m.indices.append(int(i[0]))
-            m.indices.append(int(i[1]))
-            m.indices.append(int(i[2]))
+        m.setVertices(np.asarray(obj.vertices))
+        m.setIndices(np.asarray(obj.triangles))
         return m
     elif isinstance(obj,open3d.geometry.VoxelGrid):
         grid = VolumeGrid()
         import numpy as np
-        occupied = np.array(obj.voxels,dtype=np.int32)
+        if hasattr(obj, 'voxels'):
+            # open3d <= 0.9.0
+            occupied = np.array(obj.voxels,dtype=np.int32)
+        else:
+            occupied = np.array([v.grid_index for v in obj.get_voxels()],dtype=np.int32)
         imin = np.min(occupied,axis=0)
         imax = np.max(occupied,axis=0)
         assert imin.shape == (3,)
@@ -120,8 +111,6 @@ def from_open3d(obj):
         grid.dims.append(imax[0]-imin[0]+3)
         grid.dims.append(imax[1]-imin[1]+3)
         grid.dims.append(imax[2]-imin[2]+3)
-        grid.values.resize(grid.dims[0]*grid.dims[1]*grid.dims[2],-1.0)
-        for cell in occupied:
-            grid.set(int(cell[0]-imin[0]+1),int(cell[1]-imin[1]+1),int(cell[2]-imin[2]+1),1.0)
+        grid.setValues(occupied.astype(float))
         return grid
     raise TypeError("Invalid type")

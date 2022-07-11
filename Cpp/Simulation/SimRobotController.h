@@ -4,22 +4,24 @@
 #include <Klampt/Control/Controller.h>
 #include "ODERobot.h"
 
-class WorldSimulation;
+namespace Klampt {
+
+  class Simulator;
 
 /** @ingroup Simulation
  * @brief A class containing information about an ODE-simulated and
  * controlled robot.
  *
  * Performs the controller update and sensor simulation for each robot in
- * the WorldSimulation class.  Most of these functions won't need to be
+ * the Simulator class.  Most of these functions won't need to be
  * modified or used except by GUIs to examine the simulator/control state.
  */
-class ControlledRobotSimulator
+class SimRobotController
 {
  public:
-  ControlledRobotSimulator();
-  void Init(Robot* robot,ODERobot* oderobot,RobotController* controller=NULL);
-  void Step(Real dt,WorldSimulation* sim);
+  SimRobotController();
+  void Init(RobotModel* robot,ODERobot* oderobot,RobotController* controller=NULL);
+  void Step(Real dt,Simulator* sim);
   void UpdateRobot();
 
   void GetCommandedConfig(Config& q);
@@ -38,7 +40,7 @@ class ControlledRobotSimulator
   bool WriteState(File& f) const;
 
   //settings
-  Robot* robot;
+  RobotModel* robot;
   ODERobot* oderobot;
   RobotController* controller;
   Real controlTimeStep;
@@ -50,5 +52,7 @@ class ControlledRobotSimulator
   RobotSensors sensors;
   vector<Real> nextSenseTime;
 };
+
+} // namespace Klampt
 
 #endif

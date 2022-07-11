@@ -1,15 +1,16 @@
 #include "Interface/WorldViewProgram.h"
 #include "Modeling/GeneralizedRobot.h"
+using namespace Klampt;
 
 int main(int argc,const char** argv)
 {
-  RobotWorld world;
+  WorldModel world;
   if(!LoadWorldCommandLine(world,argc,argv)) {
     printf("Error loading arguments\n");
     return 1;
   }
-  GeneralizedRobot grobot(world);
-  Robot out;
+  GeneralizedRobotModel grobot(world);
+  RobotModel out;
   grobot.GetMegaRobot(out);
   printf("Saving to merged.rob, geometry to merged/...\n");
   for(size_t i=0;i<out.geomFiles.size();i++) {

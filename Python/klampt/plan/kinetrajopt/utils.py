@@ -145,7 +145,7 @@ class MaskedRobot(object):
         return self.robot.link(int(self.index[num]))
 
     def link(self, num):
-        return self.robot.link(num)
+        return self.robot.link(int(num))
 
 
 class MaskedTerrain(object):

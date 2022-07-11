@@ -4,9 +4,10 @@
 #include <QDialog>
 #include <QFormLayout>
 
-#include <Sensing/Sensor.h>
+#include <Klampt/Sensing/Sensor.h>
 
 using namespace std;
+using namespace Klampt;
 namespace Ui {
 class LogOptions;
 }

@@ -7,9 +7,11 @@
 #include <KrisLibrary/planning/GeneralizedBezierCurve.h>
 #include <KrisLibrary/utils/PropertyMap.h>
 #include <KrisLibrary/math/vector.h>
-using namespace std;
 
 class TiXmlElement;
+
+namespace Klampt {
+  using namespace std;
 
 /** @ingroup Modeling
  * @brief A very general multi-section path container.
@@ -132,5 +134,7 @@ class MultiPath
 };
 
 ostream& operator << (ostream& out,const MultiPath& path);
+
+} //namespace Klampt
 
 #endif

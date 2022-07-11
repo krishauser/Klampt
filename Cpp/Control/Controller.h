@@ -7,6 +7,8 @@
 #include <KrisLibrary/File.h>
 #include <map>
 
+namespace Klampt {
+
 /** @ingroup Control
  * @brief A base class for a robot controller.  The base class does nothing.
  *
@@ -27,7 +29,7 @@
 class RobotController
 {
 public:
-  RobotController(Robot& robot);
+  RobotController(RobotModel& robot);
   virtual ~RobotController() {}
   //subclasses fill these out
   virtual const char* Type() const { return "RobotController"; }
@@ -54,7 +56,7 @@ public:
   bool GetSensedConfig(Config& q);
   bool GetSensedVelocity(Config& dq);
 
-  Robot& robot;
+  RobotModel& robot;
   Real time;
   Real nominalTimeStep;   ///< a "desired" time step, by default 0, which acts as a hint to the simulator.  Note that it doesn't have to abide the hint.
 
@@ -65,7 +67,7 @@ public:
 ///Makes a default controller used in all the Klamp't simulation apps.
 ///First, reads from the file given by robot->properties["controller"].
 ///If this fails, makes a Logging, Feedforward, PolynomialPath controller.
-shared_ptr<RobotController> MakeDefaultController(Robot* robot);
+shared_ptr<RobotController> MakeDefaultController(RobotModel* robot);
 
 /** @ingroup Control
  * @brief A class to simplify the loading of different controllers at run time.
@@ -78,14 +80,14 @@ shared_ptr<RobotController> MakeDefaultController(Robot* robot);
 class RobotControllerFactory
 {
  public:
-  static void RegisterDefault(Robot& robot);
+  static void RegisterDefault(RobotModel& robot);
   static void Register(RobotController* controller);
   static void Register(const char* name,RobotController* controller);
   static shared_ptr<RobotController> CreateByName(const char* name);
-  static shared_ptr<RobotController> CreateByName(const char* name,Robot& robot);
-  static shared_ptr<RobotController> Load(const char* fn,Robot& robot);
+  static shared_ptr<RobotController> CreateByName(const char* name,RobotModel& robot);
+  static shared_ptr<RobotController> Load(const char* fn,RobotModel& robot);
   static bool Save(RobotController* controller,const char* fn);
-  static shared_ptr<RobotController> Load(TiXmlElement* in,Robot& robot);
+  static shared_ptr<RobotController> Load(TiXmlElement* in,RobotModel& robot);
   static bool Save(RobotController* controller,TiXmlElement* out);
 
   static std::map<std::string,shared_ptr<RobotController> > controllers;
@@ -112,5 +114,6 @@ class RobotControllerFactory
     return bool(ss);              \
   }
 
+} //namespace Klampt
 
 #endif

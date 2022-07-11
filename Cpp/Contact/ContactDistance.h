@@ -3,6 +3,8 @@
 
 #include "ContactFeatureMapping.h"
 
+namespace Klampt {
+
 struct ContactDistanceMetric
 {
   ContactDistanceMetric();
@@ -11,5 +13,7 @@ struct ContactDistanceMetric
 
   Real normalWeight,angleWeight,wheelRollWeight,fixedWheelWeight;
 };
+
+} //namespace Klampt
 
 #endif

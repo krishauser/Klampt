@@ -8,8 +8,8 @@ Can load/save objects using the general purpose loader/saver functions
 'load(type,fileName)' and 'save(x,type,fileName)'.  The load functions also
 support URLs
 
-Json serialization/deserialization are handled using the :func:`toJson` and
-:func:`fromJson` functions.
+Json serialization/deserialization are handled using the :func:`to_json` and
+:func:`from_json` functions.
 
 Module summary
 ==============
@@ -22,45 +22,45 @@ High level interface
     read
     load
     save
-    toJson
-    fromJson
-    extensionToTypes
-    typeToExtensions
-    unsupportedJsonTypes
-    filenameToTypes
-    filenameToType
+    to_json
+    from_json
+    EXTENSION_TO_TYPES
+    TYPE_TO_EXTENSIONS
+    UNSUPPORTED_JSON_TYPES
+    filename_to_types
+    filename_to_type
 
 Implementation
 --------------
 
 .. autosummary::
-    readVector
-    writeVector
-    readVectorRaw
-    writeVectorRaw
-    readVectorList
-    writeVectorList
-    readMatrix
-    writeMatrix
-    readMatrix3
-    writeMatrix3
-    readIntArray
-    readStringArray
-    readSo3
-    writeSo3
-    readSe3
-    writeSe3
-    readIKObjective
-    writeIKObjective
-    readContactPoint
-    writeContactPoint
-    readHold
-    writeHold
-    loadWorldModel
-    loadGeometry3D
-    loadTrajectory
-    loadMultiPath
-    loadDynamicXML
+    read_Vector
+    write_Vector
+    read_Vector_raw
+    write_Vector_raw
+    read_VectorList
+    write_VectorList
+    read_Matrix
+    write_Matrix
+    read_Matrix3
+    write_Matrix3
+    read_IntArray
+    read_StringArray
+    read_so3
+    write_so3
+    read_se3
+    write_se3
+    read_IKObjective
+    write_IKObjective
+    read_ContactPoint
+    write_ContactPoint
+    read_Hold
+    write_Hold
+    load_WorldModel
+    load_Geometry3D
+    load_Trajectory
+    load_MultiPath
+    load_dynamic_xml
 
 """
 from ..robotsim import *
@@ -71,7 +71,7 @@ from ..model import types
 import os
 import warnings
 
-extensionToTypes = {'.config':['Config'],
+EXTENSION_TO_TYPES = {'.config':['Config'],
                    '.configs':['Configs'],
                    '.tri':['Geometry3D','TriangleMesh'],
                    '.off':['Geometry3D','TriangleMesh'],
@@ -98,31 +98,32 @@ extensionToTypes = {'.config':['Config'],
                    }
 """dict mapping file extensions to lists of compatible Klampt types."""
 
-unsupportedJsonTypes = ['Geometry3D','TriangleMesh','PointCloud','GeometricPrimitive','VolumeGrid',
+UNSUPPORTED_JSON_TYPES = ['Geometry3D','TriangleMesh','PointCloud','GeometricPrimitive','VolumeGrid',
     'RobotModel','RigidObjectModel','TerrainModel','WorldModel']
 """List of Klampt types that cannot currently be exported to JSON"""
 
-typeToExtensions = dict()
+TYPE_TO_EXTENSIONS = dict()
 """dict mapping Klamp't types to lists of compatible file extensions."""
-for (k,v) in list(extensionToTypes.items()):
+for (k,v) in list(EXTENSION_TO_TYPES.items()):
     for t in v:
-        if t in typeToExtensions:
-            typeToExtensions[t].append(k)
+        if t in TYPE_TO_EXTENSIONS:
+            TYPE_TO_EXTENSIONS[t].append(k)
         else:
-            typeToExtensions[t] = [k]
+            TYPE_TO_EXTENSIONS[t] = [k]
 
 
-def filenameToTypes(name):
+def filename_to_types(name):
     """Returns the Klampt types possibly represented by the given filename's
     extension.
     """
     fileName, fileExtension = os.path.splitext(name)
-    if fileExtension in extensionToTypes:
-        return extensionToTypes[fileExtension]
+    fileExtension = fileExtension.lower()
+    if fileExtension in EXTENSION_TO_TYPES:
+        return EXTENSION_TO_TYPES[fileExtension]
     else:
         raise RuntimeError("Cannot determine type of object from filename "+name)
 
-def filenameToType(name):
+def filename_to_type(name):
     """Returns one Klampt type represented by the given filename's
     extension.
 
@@ -130,30 +131,31 @@ def filenameToType(name):
     returned because the type will need to be determined after parsing the
     file.
 
-    If the type is ambiguous (like .obj), the first type in extensionToTypes is
-    returned.
+    If the type is ambiguous (like .obj), the first type in EXTENSION_TO_TYPES
+    is returned.
 
     Returns:
         str: The Klamp't type
     """
     fileName, fileExtension = os.path.splitext(name)
+    fileExtension = fileExtension.lower()
     if fileExtension == '.xml':
         return 'xml'  #dynamic loading
     elif fileExtension == '.json':
         return 'json'  #dynamic loading
-    elif fileExtension in extensionToTypes:
-        ftypes = extensionToTypes[fileExtension]
+    elif fileExtension in EXTENSION_TO_TYPES:
+        ftypes = EXTENSION_TO_TYPES[fileExtension]
         if len(ftypes) > 1 and fileExtension not in ['.path'] and (ftypes[0] != 'Geometry3D' and len(ftypes) > 2):
-            warnings.warn("loader.filenameToType(): filename {} is ambiguous, matches types {}".format(name,', '.join(ftypes)))
+            warnings.warn("loader.filename_to_type(): filename {} is ambiguous, matches types {}".format(name,', '.join(ftypes)))
         return ftypes[0]
     else:
         raise RuntimeError("Cannot determine type of object from filename "+name)
 
-def writeVector(q):
+def write_Vector(q):
     """Writes a vector to a string in the length-prepended format 'n v1 ... vn'"""
     return str(len(q))+'\t'+' '.join(str(v) for v in q)
 
-def readVector(text):
+def read_Vector(text):
     """Reads a length-prepended vector from a string 'n v1 ... vn'"""
     items = text.split()
     if len(items) == 0:
@@ -162,22 +164,22 @@ def readVector(text):
         raise ValueError("Invalid number of items")
     return [float(v) for v in items[1:]]
 
-def writeVectorRaw(x):
+def write_Vector_raw(x):
     """Writes a vector to a string in the raw format 'v1 ... vn'"""
     return ' '.join(str(xi) for xi in x)
 
-def readVectorRaw(text):
+def read_Vector_raw(text):
     """Reads a vector from a raw string 'v1 ... vn'"""
     items = text.split()
     return [float(v) for v in items]
 
 
-def writeVectorList(x):
+def write_VectorList(x):
     """Writes a list of vectors to string"""
-    return '\n'.join(writeVector(xi) for xi in x)
+    return '\n'.join(write_Vector(xi) for xi in x)
 
 
-def readVectorList(text):
+def read_VectorList(text):
     """Reads a list of endline-separated vectors from a string"""
     items = text.split()
     vectors = []
@@ -189,16 +191,16 @@ def readVectorList(text):
     return vectors
 
 
-def writeMatrix(x):
+def write_Matrix(x):
     """Writes a matrix to a string in the format
     m n
     x11 x12 ... x1n
     ...
     xm1 xm2 ... xmn
     """
-    return '\n'.join([str(len(x))+' '+str(len(x[0]))]+[writeVectorRaw(xi) for xi in x])
+    return '\n'.join([str(len(x))+' '+str(len(x[0]))]+[write_Vector_raw(xi) for xi in x])
 
-def readMatrix(text):
+def read_Matrix(text):
     """Reads a matrix from a string in the format
     m n
     x11 x12 ... x1n
@@ -217,13 +219,13 @@ def readMatrix(text):
         k += n
     return x
 
-def writeSo3(x):
+def write_so3(x):
     """Writes an so3 element, i.e., rotation matrix, to string in the same
     format as written to by Klampt C++ bindings (row major)."""
     assert len(x)==9,"Argument must be an so3 element"
     return '\t'.join([' '.join([str(mij) for mij in mi ]) for mi in so3.matrix(x)])
 
-def readSo3(text):
+def read_so3(text):
     """Reads an so3 element, i.e., rotation matrix, from string in the same
     format as written to by Klampt C++ bindings (row major)."""
     items = text.split()
@@ -231,13 +233,13 @@ def readSo3(text):
     return so3.inv([float(v) for v in items])
 
 
-def writeSe3(x):
+def write_se3(x):
     """Writes an se3 element, i.e., rigid transformation, to string in the
     same format as written to by Klampt C++ bindings (row major R, followed by
     t)."""
-    return writeSo3(x[0])+'\t'+writeVectorRaw(x[1])
+    return write_so3(x[0])+'\t'+write_Vector_raw(x[1])
 
-def readSe3(text):
+def read_se3(text):
     """Reads an se3 element, i.e., rigid transformation, to string in the
     same format as written to by Klampt C++ bindings (row major R, followed by
     t)."""
@@ -245,30 +247,30 @@ def readSe3(text):
     if len(items) != 12: raise ValueError("Invalid element of SE3, must have 12 elements")
     return (so3.inv([float(v) for v in items[:9]]),[float(v) for v in items[9:]])
 
-def writeMatrix3(x):
+def write_Matrix3(x):
     """Writes a 3x3 matrix to a string"""
-    return writeSo3(so3.from_matrix(x))
+    return write_so3(so3.from_matrix(x))
 
-def readMatrix3(text):
+def read_Matrix3(text):
     """Reads a 3x3 matrix from a string"""
-    return so3.matrix(readSo3(text))
+    return so3.matrix(read_so3(text))
 
-def writeContactPoint(cp):
+def write_ContactPoint(cp):
     """Writes a contact point's members x,n,kFriction"""
     return ' '.join(str(v) for v in cp.tolist())
 
-def readContactPoint(text):
+def read_ContactPoint(text):
     """Reads a contact point from a string 'x1 x2 x3 n1 n2 n3 kFriction'"""
     items = text.split()
     if len(items)!=7:
         raise ValueError("Invalid number of items, should be 7")
     return ContactPoint([float(v) for v in items[0:3]],[float(v) for v in items[3:6]],float(items[6]))
 
-def writeContactPoint(cp):
+def write_ContactPoint(cp):
     """Writes a contact point to a string 'x1 x2 x3 n1 n2 n3 kFriction'"""
     return ' '.join([str(v) for v in list(cp.x)+list(cp.n)+[cp.kFriction]]) 
     
-def readIKObjective(text):
+def read_IKObjective(text):
     """Reads an IKObjective from a string in the Klamp't native format
     
     ``link destLink posConstraintType [pos constraint items] ...
@@ -385,12 +387,12 @@ def readIKObjective(text):
         raise NotImplementedError("Two-axis rotational constraints not supported")
     return obj
 
-def writeIKObjective(obj):
+def write_IKObjective(obj):
     return obj.saveString()
 
-def readHold(text):
+def read_Hold(text):
     """Loads a Hold from a string"""
-    lines = parseLines(text)
+    lines = parse_lines(text)
     if lines[0] != 'begin hold':
         raise ValueError('Invalid hold begin text')
     if lines[-1] != 'end':
@@ -411,7 +413,7 @@ def readHold(text):
         elif items[0] == 'contacts':
             ind = 2
             while ind < len(items):
-                h.contacts.append(readContactPoint(' '.join(items[ind:ind+7])))
+                h.contacts.append(read_ContactPoint(' '.join(items[ind:ind+7])))
                 ind += 7
         elif items[0] == "position":
             posLocal = [float(v) for v in items[2:5]]
@@ -445,12 +447,12 @@ def readHold(text):
         h.setupIKConstraint(localPos0,rotWorld)
     return h
        
-def writeHold(h):
+def write_Hold(h):
     """Writes a Hold to a string"""
     text = "begin hold\n"
     text += "  link = "+str(h.link)+"\n"
     text += "  contacts = ";
-    text += " \\\n    ".join([writeContactPoint(c) for c in h.contacts])
+    text += " \\\n    ".join([write_ContactPoint(c) for c in h.contacts])
     text += "\n"
     localPos, worldPos = h.ikConstraint.getPosition()
     text += "  position = "+" ".join(str(v) for v in localPos)+"  \\\n"
@@ -467,30 +469,30 @@ def writeHold(h):
     text += "end"
     return text
 
-def writeGeometricPrimitive(g):
+def write_GeometricPrimitive(g):
     return g.saveString()
 
-def readGeometricPrimitive(text):
+def read_GeometricPrimitive(text):
     g = GeometricPrimitive()
     if not g.loadString(text):
         raise RuntimeError("Error reading GeometricPrimitive from string")
     return g
 
-def readIntArray(text):
+def read_IntArray(text):
     """Reads a length-prepended vector from a string 'n v1 ... vn'"""
     items = text.split()
     if int(items[0])+1 != len(items):
         raise ValueError("Invalid number of items")
     return [int(v) for v in items[1:]]
 
-def readStringArray(text):
+def read_StringArray(text):
     """Reads a length-prepended vector from a string 'n v1 ... vn'"""
     items = text.split()
     if int(items[0])+1 != len(items):
         raise ValueError("Invalid number of items")
     return items[1:]
 
-def parseLines(text):
+def parse_lines(text):
     """Returns a list of lines from the given text.  Understands end-of-line escapes '\\n'"""
     lines = text.strip().split('\n')
     esclines = []
@@ -511,61 +513,37 @@ def parseLines(text):
 
 
 
-readers = {'Config':readVector,
-           'Vector':readVector,
-           'Configs':readVectorList,
-           'Vector3':readVectorRaw,
-           'Matrix':readMatrix,
-           'Matrix3':readMatrix3,
-           'Rotation':readSo3,
-           'RigidTransform':readSe3,
-           'IKObjective':readIKObjective,
-           'IKGoal':readIKObjective,
-           'Hold':readHold,
-           'GeometricPrimitive':readGeometricPrimitive,
-           'IntArray':readIntArray,
-           'StringArray':readStringArray,
+readers = {'Config':read_Vector,
+           'Vector':read_Vector,
+           'Configs':read_VectorList,
+           'Vector3':read_Vector_raw,
+           'Matrix':read_Matrix,
+           'Matrix3':read_Matrix3,
+           'Rotation':read_so3,
+           'RigidTransform':read_se3,
+           'IKObjective':read_IKObjective,
+           'IKGoal':read_IKObjective,
+           'Hold':read_Hold,
+           'GeometricPrimitive':read_GeometricPrimitive,
+           'IntArray':read_IntArray,
+           'StringArray':read_StringArray,
            }
 
-writers = {'Config':writeVector,
-           'Vector':writeVector,
-           'Configs':writeVectorList,
-           'Vector3':writeVectorRaw,
-           'Matrix':writeMatrix,
-           'Matrix3':writeMatrix3,
-           'Rotation':writeSo3,
-           'RigidTransform':writeSe3,
-           'IKObjective':writeIKObjective,
-           'IKGoal':writeIKObjective,
-           'Hold':writeHold,
-           'GeometricPrimitive':writeGeometricPrimitive,
-           'IntArray':writeVector,
-           'StringArray':writeVector,
+writers = {'Config':write_Vector,
+           'Vector':write_Vector,
+           'Configs':write_VectorList,
+           'Vector3':write_Vector_raw,
+           'Matrix':write_Matrix,
+           'Matrix3':write_Matrix3,
+           'Rotation':write_so3,
+           'RigidTransform':write_se3,
+           'IKObjective':write_IKObjective,
+           'IKGoal':write_IKObjective,
+           'Hold':write_Hold,
+           'GeometricPrimitive':write_GeometricPrimitive,
+           'IntArray':write_Vector,
+           'StringArray':write_Vector,
            }
-
-def autoType(obj,validTypes):
-    """Returns a type string for the Klamp't object obj, restricted
-    to the set of validTypes.  If there are multiple interpretations,
-    the first type in objectToTypes that matches a valid type is
-    returned.
-
-    Args:
-        obj: A Klamp't-compatible object
-        validTypes: a set or dict of possible valid types
-
-    Returns:
-        str or None: The type of the object, or None if no valid type
-        was found
-    """
-    otypes = types.objectToTypes(obj)
-    if isinstance(otypes,list):
-        for otype in otypes:
-            if otype in validTypes:
-                return otype
-        return None
-    else:
-        #only one type
-        return otypes
 
 def write(obj,type):
     """General-purpose write of an arbitrary Klampt object to a str.
@@ -580,12 +558,12 @@ def write(obj,type):
     """
     global writers
     if type == 'auto':
-        type = autoType(obj,writers)
+        type = types.object_to_type(obj,writers)
         if type is None:
             raise ValueError("Can't determine a writable type for object of type "+obj.__class__.__name__)
     elif type == 'json':
         import json
-        return json.dumps(toJson(obj))
+        return json.dumps(to_json(obj))
     if type not in writers:
         raise ValueError("Writing of objects of type "+type+" not supported")
     return writers[type](obj)
@@ -606,51 +584,51 @@ def read(type,text):
     if type == 'json':
         import json
         jsonobj = json.loads(text)
-        return fromJson(jsonobj)
+        return from_json(jsonobj)
     if type not in readers:
         raise ValueError("Reading of objects of type "+type+" not supported")
     return readers[type](text)
 
-def loadWorldModel(fn):
+def load_WorldModel(fn):
     w = WorldModel()
     if not w.loadFile(fn):
         raise IOError("Error reading WorldModel from "+fn)
     return w
 
-def loadGeometry3D(fn):
+def load_Geometry3D(fn):
     g = Geometry3D()
     if not g.loadFile(fn):
         raise IOError("Error reading Geometry3D from "+fn)
     return g
 
-def loadTrajectory(fn):
+def load_Trajectory(fn):
     value = Trajectory()
     value.load(fn)
     return value
 
-def loadMultiPath(fn):
+def load_MultiPath(fn):
     from ..model import multipath
     value = multipath.MultiPath()
     value.load(fn)
     return value
 
-def loadDynamicXML(fn):
+def load_dynamic_xml(fn):
     #XML types may only be a WorldModel or MultiPath
     value = WorldModel()
     res = value.readFile(fn)
     if res:
         return value
     try:
-        return loadMultiPath(fn)
+        return load_MultiPath(fn)
     except Exception as e:
         raise
 
-loaders = {'Trajectory':loadTrajectory,
-           'LinearPath':loadTrajectory,
-           'MultiPath':loadMultiPath,
-           'Geometry3D':loadGeometry3D,
-           'WorldModel':loadWorldModel,
-           'xml':loadDynamicXML
+loaders = {'Trajectory':load_Trajectory,
+           'LinearPath':load_Trajectory,
+           'MultiPath':load_MultiPath,
+           'Geometry3D':load_Geometry3D,
+           'WorldModel':load_WorldModel,
+           'xml':load_dynamic_xml
            }
 
 savers = {'Trajectory':lambda x,fn:x.save(fn),
@@ -681,13 +659,13 @@ def save(obj,type,fn):
 
     if type == 'auto':
         savers_and_writers = list(savers.keys()) + list(writers.keys())
-        type = autoType(obj,savers_and_writers)
+        type = types.object_to_type(obj,savers_and_writers)
         if type is None:
             raise ValueError("Can't determine a savable type for object of type "+obj.__class__.__name__)
     elif type == 'json':
         import json
         with open(fn,'w') as f:
-            json.dump(toJson(obj),f)
+            json.dump(to_json(obj),f)
         return True
     if type in savers:
         return savers[type](obj,fn)
@@ -715,7 +693,7 @@ def load(type,fn):
         Klamp't object
     """
     if type == 'auto':
-        type = filenameToType(fn)
+        type = filename_to_type(fn)
     
     global loaders,readers
     cppurl = False
@@ -763,7 +741,7 @@ def load(type,fn):
 
 
 
-def toJson(obj,type='auto'):
+def to_json(obj,type='auto'):
     """Converts from a Klamp't object to a JSON-compatible structure.
 
     The resulting structure can be converted to a JSON string using 
@@ -881,17 +859,17 @@ def toJson(obj,type='auto'):
         data = None
         gtype = obj.type()
         if gtype == 'GeometricPrimitive':
-            data = toJson(obj.getGeometricPrimitive(),gtype)
+            data = to_json(obj.getGeometricPrimitive(),gtype)
         elif gtype == 'TriangleMesh':
-            data = toJson(obj.getTriangleMesh(),gtype)
+            data = to_json(obj.getTriangleMesh(),gtype)
         elif gtype == 'PointCloud':
-            data = toJson(obj.getPointCloud(),gtype)
+            data = to_json(obj.getPointCloud(),gtype)
         elif gtype == 'ConvexHull':
-            data = toJson(obj.getConvexHull(),gtype)
+            data = to_json(obj.getConvexHull(),gtype)
         elif gtype == 'VolumeGrid':
-            data = toJson(obj.getVolumeGrid(),gtype)
+            data = to_json(obj.getVolumeGrid(),gtype)
         elif gtype == 'Group':
-            data = [toJson(obj.getElement(i)) for i in range(obj.numElements())]
+            data = [to_json(obj.getElement(i)) for i in range(obj.numElements())]
         return {'type':type,'datatype':gtype,'data':data}
     elif type in writers:
         return {'type':type,'data':write(obj,type)}
@@ -899,7 +877,7 @@ def toJson(obj,type='auto'):
         raise ValueError("Unknown or unsupported type "+type)
 
 
-def fromJson(jsonobj,type='auto'):
+def from_json(jsonobj,type='auto'):
     """Converts from a JSON structure to a Klamp't object of the appropriate
     type. 
 
@@ -910,7 +888,7 @@ def fromJson(jsonobj,type='auto'):
     world entities.
 
     Args:
-        jsonobj: A JSON structure (i.e., one coming from :func:`toJson`)
+        jsonobj: A JSON structure (i.e., one coming from :func:`to_json`)
         type (str, optional): the type of the object (see
             :mod:`~klampt.model.types`) If 'auto' (default), the type of the
             object is inferred automatically.
@@ -994,8 +972,8 @@ def fromJson(jsonobj,type='auto'):
         elif rotConstraint == 'fixed':
             obj = IKObjective()
             R = so3.from_moment(endRotation)
-            t = vectorops.sub(endPosition,so3.apply(R,localPosition))
-            obj.setFixedTransform(link,R,t)
+            obj.setFixedPosConstraint(localPosition,endPosition)
+            obj.setFixedRotConstraint(R)
             return obj
         else:
             raise ValueError("Invalid IK rotation constraint "+rotConstraint)
@@ -1053,8 +1031,58 @@ def fromJson(jsonobj,type='auto'):
         gtype = jsonobj['datatype']
         if gtype == '':
             return Geometry3D()
-        return Geometry3D(fromJson(jsonobj['data'],gtype))
+        return Geometry3D(from_json(jsonobj['data'],gtype))
     elif type in readers:
         return read(type,jsonobj["data"])
     else:
         raise ValueError("Unknown or unsupported type "+type)
+
+def _deprecated_func(oldName,newName):
+    import sys
+    mod = sys.modules[__name__]
+    f = getattr(mod,newName)
+    def depf(*args,**kwargs):
+        warnings.warn("{} will be deprecated in favor of {} in a future version of Klampt".format(oldName,newName),DeprecationWarning)
+        return f(*args,**kwargs)
+    depf.__doc__ = 'Deprecated in a future version of Klampt. Use {} instead'.format(newName)
+    setattr(mod,oldName,depf)
+
+_deprecated_func("filenameToType","filename_to_type")
+_deprecated_func("filenameToTypes","filename_to_type")
+_deprecated_func("toJson","to_json")
+_deprecated_func("fromJson","from_json")
+
+from collections import UserDict, UserList
+class _DeprecatedDict(dict):
+    def __init__(self,oldname,newname,*args,**kwargs):
+        UserDict.__init__(self,*args,**kwargs)
+        self._oldname = oldname
+        self._newname = newname
+        self._warned = False
+    def __getitem__(self,key):
+        if not self._warned:
+            self._warned = True
+            warnings.warn("{} will be deprecated in favor of {} in a future version of Klampt".format(self._oldname,self._newname),DeprecationWarning)
+        return UserDict.__getitem__(self,key)
+
+class _DeprecatedList(UserList):
+    def __init__(self,oldname,newname,*args,**kwargs):
+        UserList.__init__(self,*args,**kwargs)
+        self._oldname = oldname
+        self._newname = newname
+        self._warned = False
+    def __getitem__(self,key):
+        if not self._warned:
+            self._warned = True
+            warnings.warn("{} will be deprecated in favor of {} in a future version of Klampt".format(self._oldname,self._newname),DeprecationWarning)
+        return UserList.__getitem__(self,key)
+    def __contains__(self,key):
+        if not self._warned:
+            self._warned = True
+            warnings.warn("{} will be deprecated in favor of {} in a future version of Klampt".format(self._oldname,self._newname),DeprecationWarning)
+        return UserList.__contains__(self,key)
+
+
+extensionToTypes = _DeprecatedDict("extensionToTypes","EXTENSION_TO_TYPES",EXTENSION_TO_TYPES)
+typeToExtensions = _DeprecatedDict("typeToExtensions","TYPE_TO_EXTENSIONS",TYPE_TO_EXTENSIONS)
+unsupportedJsonTypes = _DeprecatedList("unsupportedJsonTypes","UNSUPPORTED_JSON_TYPES",UNSUPPORTED_JSON_TYPES)

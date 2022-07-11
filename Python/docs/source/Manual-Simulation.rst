@@ -130,7 +130,7 @@ API summary
 
 To create and manage a simulation:
 
--  ``sim = Simulator(world): creates a simulator for a given``\ WorldModel\`
+-  ``sim = Simulator(world)``: creates a simulator for a given ``WorldModel``
    (note: cannot modify the number of entities in the world at this
    point, undefined behavior will occur if you do!)
 -  ``sim.getWorld()``: retrieves the simulation’s WorldModel
@@ -433,9 +433,9 @@ defines the world. The world contains a one-link robot with an actuator.
 
 Each simulation is initialized from some initial conditions that will be
 sampled at random, but we need to specify which parts of the world are
-actually sampled. We use the `map <klampt.model.map.html>`__ module
+actually sampled. We use the `access <klampt.model.access.html>`__ module
 which can set and get named values in a world or simulation.
-Please refer to the `map module documentation  <klampt.model.map.html>`__
+Please refer to the `access module documentation  <klampt.model.access.html>`__
 to learn more about how to use it.
 
 We begin by defining a zero-argument sampling function that will sample

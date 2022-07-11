@@ -6,6 +6,7 @@
 	#include "interpolate.h"
 %}
 
+%include "std_string.i"
 %include "std_vector.i"
 %include "std_string.i"
 	
@@ -162,9 +163,36 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 
 %apply std::vector<std::vector<double> >& out { std::vector<std::vector<double> >& out3 };
 
-
 %feature("autodoc","1");
 %include "docs/docs.i"
 
 %include "motionplanning.h"
 %include "interpolate.h"
+
+%pythoncode {
+    import warnings
+
+    def _deprecated_func(oldName,newName):
+        import sys
+        mod = sys.modules[__name__]
+        f = getattr(mod,newName)
+        def depf(*args,**kwargs):
+            warnings.warn("{} will be deprecated in favor of {} in a future version of Klampt".format(oldName,newName),DeprecationWarning)
+            return f(*args,**kwargs)
+        depf.__doc__ = 'Deprecated in a future version of Klampt. Use {} instead'.format(newName)
+        setattr(mod,oldName,depf)
+
+    _deprecated_func('setRandomSeed','set_random_seed')
+    _deprecated_func('setPlanJSONString','set_plan_json_string')
+    _deprecated_func('getPlanJSONString','get_plan_json_string')
+    _deprecated_func('setPlanType','set_plan_type')
+    _deprecated_func('setPlanSetting','set_plan_setting')
+    _deprecated_func('interpolate1DMinTime','interpolate_1d_min_time')
+    _deprecated_func('interpolate1DMinAccel','interpolate_1d_min_accel')
+    _deprecated_func('interpolateNDMinTime','interpolate_nd_min_time')
+    _deprecated_func('interpolateNDMinAccel','interpolate_1d_min_accel')
+    _deprecated_func('interpolateNDMinTimeLinear','interpolate_nd_min_time_linear')
+    _deprecated_func('combineNDCubic','combine_nd_cubic')
+
+
+}

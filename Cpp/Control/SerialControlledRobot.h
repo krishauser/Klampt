@@ -4,6 +4,8 @@
 #include "ControlledRobot.h"
 #include <KrisLibrary/utils/AsyncIO.h>
 
+namespace Klampt {
+
 /** @brief A Klamp't controlled robot that communicates to a robot (either
  * real or virtual) using the Klamp't controller serialization mechanism.
  * Acts as a client connecting to the given host.
@@ -17,7 +19,7 @@ class SerialControlledRobot : public ControlledRobot
   SerialControlledRobot(const char* host,double timeout=Inf);
   virtual ~SerialControlledRobot();
   ///call this first before calling Run
-  virtual bool Init(Robot* robot,RobotController* controller);
+  virtual bool Init(RobotModel* robot,RobotController* controller);
   ///Call to process a single message
   bool Process(double timeout);
   ///This call will run the controller forever and never terminate unless
@@ -38,5 +40,7 @@ class SerialControlledRobot : public ControlledRobot
   bool stopFlag;
   Mutex* controllerMutex;
 };
+
+} //namespace Klampt
 
 #endif

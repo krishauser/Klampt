@@ -2,10 +2,12 @@
 #define SIM_VIEW_PROGRAM
 
 #include "WorldViewProgram.h"
-#include <Klampt/Simulation/WorldSimulation.h>
+#include <Klampt/Simulation/Simulator.h>
 #include <Klampt/Control/PathController.h>
 
 #if HAVE_GLUT || HAVE_GLUI
+
+namespace Klampt {
 
 //For a simulation set up with SimViewProgram, this retrieves the PolynomialMotionQueue for the controller
 PolynomialMotionQueue* GetMotionQueue(RobotController* rc);
@@ -20,7 +22,7 @@ PolynomialMotionQueue* GetMotionQueue(RobotController* rc);
 class SimViewProgram : public WorldViewProgram
 {
 public:
-  SimViewProgram(RobotWorld* world);
+  SimViewProgram(WorldModel* world);
 
   ///Loads from a world XML file
   bool LoadAndInitSim(const char* xmlFile);
@@ -62,9 +64,11 @@ public:
   void DoLogging(const char* fn="simtest_log.csv");
 
   int simulate;
-  WorldSimulation sim;
+  Simulator sim;
   string initialState;
 };
+
+} // namespace Klampt
 
 #endif //HAVE_GLUT || HAVE_GLUI
 

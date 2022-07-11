@@ -21,6 +21,10 @@ try:
 except ImportError:
     import __builtin__
 
+from typing import Sequence,Tuple,Iterator
+from klampt.model.typing import IntArray,Config,Vector,Vector3,Matrix3,Point,Rotation,RigidTransform
+
+
 def _swig_repr(self):
     try:
         strthis = "proxy of " + self.this.__repr__()
@@ -64,7 +68,7 @@ class _SwigNonDynamicMeta(type):
 
 
 
-def setFTolerance(tolf):
+def setFTolerance(tolf: float) ->None:
     r"""
     Sets the termination threshold for the change in f.  
 
@@ -73,7 +77,7 @@ def setFTolerance(tolf):
     """
     return _rootfind.setFTolerance(tolf)
 
-def setXTolerance(tolx):
+def setXTolerance(tolx: float) ->None:
     r"""
     Sets the termination threshold for the change in x.  
 
@@ -82,7 +86,7 @@ def setXTolerance(tolx):
     """
     return _rootfind.setXTolerance(tolx)
 
-def setVectorField(pVFObj):
+def setVectorField(pVFObj: object) ->int:
     r"""
     Sets the vector field object.  
 
@@ -99,7 +103,7 @@ def setVectorField(pVFObj):
     """
     return _rootfind.setVectorField(pVFObj)
 
-def findRoots(startVals, iter):
+def findRoots(startVals: object, iter: int) ->object:
     r"""
     Performs unconstrained root finding for up to iter iterations  
 
@@ -124,7 +128,7 @@ def findRoots(startVals, iter):
     """
     return _rootfind.findRoots(startVals, iter)
 
-def findRootsBounded(startVals, boundVals, iter):
+def findRootsBounded(startVals: object, boundVals: object, iter: int) ->object:
     r"""
     Same as findRoots, but with given bounds (xmin,xmax)  
 
@@ -132,12 +136,10 @@ def findRootsBounded(startVals, boundVals, iter):
         startVals (:obj:`object`)
         boundVals (:obj:`object`)
         iter (int)
-    Returns:
-        :obj:`object`:
     """
     return _rootfind.findRootsBounded(startVals, boundVals, iter)
 
-def destroy():
+def destroy() ->None:
     r"""
     destroys internal data structures  
 

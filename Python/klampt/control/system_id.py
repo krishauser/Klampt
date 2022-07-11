@@ -132,7 +132,7 @@ class OnlineLeastSquares:
         """Changes the regularization term (and maintains the solution).
         Cost is O(n^3) """
         self.AtA *= self.scale
-        self.AtA += (regularizationLambda-self.regularizationLambda)*np.eye(n)
+        self.AtA += (regularizationLambda-self.regularizationLambda)*np.eye(self.n)
         self.AtA /= self.scale
         try:
             self.AtAinv = np.linalg.inv(self.AtA)

@@ -7,17 +7,20 @@
 #include <memory>
 #include <string>
 #include <typeinfo>
-using namespace std;
+
+class TiXmlElement;
+
+namespace Klampt {
+  using namespace std;
 
 /** @defgroup Sensing
  * Sensor configuration and simulation.
  */
 
-class Robot;
-class RobotWorld;
-class ControlledRobotSimulator;
-class WorldSimulation;
-class TiXmlElement;
+class RobotModel;
+class WorldModel;
+class SimRobotController;
+class Simulator;
 
 /** @ingroup Sensing
  * @brief A sensor base class.  A SensorBase should allow a Controller to 
@@ -32,6 +35,7 @@ class TiXmlElement;
  * Default settings:
  * - rate: the number of time per second this should be called, in Hz.  If 0,
  *   the sensor is updated every time the controller is called (default)
+ * - enabled: whether the sensor provides data. True by default.
  *
  * FOR IMPLEMENTERS: at a minimum, you must overload the Type(),
  * MeasurementNames and Get/SetMeasurements methods.  (Note: it is important
@@ -55,9 +59,9 @@ class SensorBase
   virtual ~SensorBase() {}
   virtual const char* Type() const { return "SensorBase"; }
   ///Called whenever the sensor is updated from the simulaton
-  virtual void Simulate(ControlledRobotSimulator* robot,WorldSimulation* sim) {}
+  virtual void Simulate(SimRobotController* robot,Simulator* sim) {}
   ///Updates the sensor for a kinematic world.  Useful for non-simulation debugging.
-  virtual void SimulateKinematic(Robot& robot,RobotWorld& world) {}
+  virtual void SimulateKinematic(RobotModel& robot,WorldModel& world) {}
   ///Advances to the next time step with duration dt elapsed
   virtual void Advance(double dt) {}
   ///Should be overridden if the sensor is stateful to reset to an initial state
@@ -85,10 +89,11 @@ class SensorBase
   virtual bool SetSetting(const string& name,const string& str);
   ///If the sensor can be drawn, draw the sensor on the robot's current configuration,
   ///using these measurements, using OpenGL calls.
-  virtual void DrawGL(const Robot& robot,const vector<double>& measurements) {}
+  virtual void DrawGL(const RobotModel& robot,const vector<double>& measurements) {}
 
   string name;
   double rate;
+  bool enabled;
 };
 
 
@@ -106,7 +111,7 @@ class SensorBase
 class RobotSensors
 {
  public:
-  void MakeDefault(Robot* robot);
+  void MakeDefault(RobotModel* robot);
   bool LoadSettings(const char* fn);
   bool SaveSettings(const char* fn);
   bool LoadSettings(TiXmlElement* in);
@@ -131,8 +136,10 @@ template <class T>
 void RobotSensors::GetTypedSensors(vector<T*>& _sensors)
 {
   _sensors.resize(0);
-  for(size_t i=0;i<sensors.size();i++)
-    if(typeid(T) == typeid(*sensors[i])) _sensors.push_back(dynamic_cast<T*>(sensors[i].get()));
+  for(size_t i=0;i<sensors.size();i++) {
+    const SensorBase& s = *sensors[i];
+    if(typeid(T) == typeid(s)) _sensors.push_back(dynamic_cast<T*>(sensors[i].get()));
+  }
 }
 
 
@@ -140,7 +147,8 @@ template <class T>
 T* RobotSensors::GetTypedSensor(int index)
 {
   for(size_t i=0;i<sensors.size();i++) {
-    if(typeid(T) == typeid(*sensors[i])) {
+    const SensorBase& s = *sensors[i];
+    if(typeid(T) == typeid(s)) {
       if(index==0) return dynamic_cast<T*>(sensors[i].get());
       index--;
     }
@@ -224,5 +232,7 @@ T* RobotSensors::GetTypedSensor(int index)
     } \
     return true;              \
   }
+
+} //namespace Klampt
 
 #endif

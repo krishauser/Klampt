@@ -3,17 +3,20 @@ simualted robot.  Defines a variety of RobotInterfaceBase interfaces that work
 with Klamp't simulations.
 
 For each of the classes in this module, if you provide the simulator argument
-then this will automatically update your simulation upon each startStep() /
+then this will automatically update your simulation upon each beginStep() /
 endStep() pair.  Otherwise, you will have to step the simulation manually.
 """
 
 from .robotinterface import RobotInterfaceBase
 from klampt.model.robotinfo import RobotInfo
+from klampt.model import robotinfo
 from klampt import RobotModel,Simulator,SimRobotController
 import functools
+import warnings
 
 class _SimControlInterface(RobotInterfaceBase):
     def __init__(self,sim_controller,simulator=None,robotInfo=None):
+        RobotInterfaceBase.__init__(self,name=self.__class__.__name__)
         assert isinstance(sim_controller,SimRobotController)
         self.sim_controller = sim_controller
         self.robot = sim_controller.model()
@@ -26,7 +29,11 @@ class _SimControlInterface(RobotInterfaceBase):
         self.robotInfo = robotInfo
         if robotInfo is not None:
             assert isinstance(robotInfo,RobotInfo)
-        RobotInterfaceBase.__init__(self,name=self.__class__.__name__)
+            if robotInfo.modelFile is not None:
+                self.properties['klamptModelFile'] = robotInfo.modelFile
+    
+    def klamptModel(self):
+        return self.robot
 
     def initialize(self):
         self._status = 'ok'
@@ -40,8 +47,8 @@ class _SimControlInterface(RobotInterfaceBase):
         if self.robotInfo is None:
             return RobotInterfaceBase.parts(self)
         res = {None:list(range(self.numJoints()))}
-        for (k,v) in self.robotInfo.parts:
-            res[k] = self.robotInfo.toIndices(v)
+        for k in self.robotInfo.parts:
+            res[k] = self.robotInfo.partDriverIndices(k)
         return res
 
     def controlRate(self):
@@ -80,7 +87,7 @@ class _SimControlInterface(RobotInterfaceBase):
             if self.simulator.getStatus() >= Simulator.STATUS_UNSTABLE:
                 self._status = self.simulator.getStatusString()
 
-    def status(self):
+    def status(self,joint_idx=None):
         return self._status
 
 
@@ -149,8 +156,7 @@ class SimMoveToControlInterface(_SimControlInterface):
     def commandedPosition(self):
         return self.configFromKlampt(self.sim_controller.getCommandedConfig())
 
-    def isMoving(self,part=None,joint_idx=None):
-        assert part is None
+    def isMoving(self,joint_idx=None):
         return self.sim_controller.remainingTime() > 0
 
 
@@ -171,7 +177,8 @@ class SimFullControlInterface(_SimControlInterface):
     def setVelocity(self,v,ttl=None):
         if ttl is None:
             ttl = 0.1
-        self.sim_controller.setVelocity(v,ttl)
+        v_config = self.velocityToKlampt(v)  #only accepts velocities of #links
+        self.sim_controller.setVelocity(v_config,ttl)
 
     def setTorque(self,t,ttl=None):
         if ttl is not None:
@@ -215,8 +222,7 @@ class SimFullControlInterface(_SimControlInterface):
         assert speed == 1.0,"Can't accept non-max speed commands yet"
         self.sim_controller.setMilestone(self.configToKlampt(q))
 
-    def isMoving(self,part=None,joint_idx=None):
-        assert part is None
+    def isMoving(self,joint_idx=None):
         return self.sim_controller.remainingTime() > 0
         
     def sensedPosition(self):
@@ -255,12 +261,15 @@ class KinematicSimControlInterface(RobotInterfaceBase):
     the status of the interface to non-'ok' error codes.
     """
     def __init__(self,robot,robotInfo=None):
+        RobotInterfaceBase.__init__(self,name=self.__class__.__name__)
         assert isinstance(robot,RobotModel)
         self.robot = robot
         self._status = 'ok'
         self.robotInfo = robotInfo
         if robotInfo is not None:
             assert isinstance(robotInfo,RobotInfo)
+            if robotInfo.modelFile is not None:
+                self.properties['klamptModelFile'] = robotInfo.modelFile
         q0 = robot.getConfig()
         self.q = self.configFromKlampt(robot.getConfig())
         qmin,qmax = robot.getJointLimits()
@@ -273,7 +282,6 @@ class KinematicSimControlInterface(RobotInterfaceBase):
                         qmin[l],qmax[l] = qmax[l],qmin[l]
         self.qmin,self.qmax = self.configFromKlampt(qmin),self.configFromKlampt(qmax)
         robot.setConfig(q0)
-        RobotInterfaceBase.__init__(self,name=self.__class__.__name__)
 
     def klamptModel(self):
         return self.robot
@@ -283,8 +291,8 @@ class KinematicSimControlInterface(RobotInterfaceBase):
         if self.robotInfo is None:
             return RobotInterfaceBase.parts(self)
         res = {None:list(range(self.numJoints()))}
-        for (k,v) in self.robotInfo.parts:
-            res[k] = self.robotInfo.toIndices(v)
+        for k in self.robotInfo.parts:
+            res[k] = self.robotInfo.partDriverIndices(k)
         return res
 
     def controlRate(self):
@@ -313,7 +321,7 @@ class KinematicSimControlInterface(RobotInterfaceBase):
     def endStep(self):
         pass
 
-    def status(self):
+    def status(self,joint_idx=None):
         return self._status
 
     def setPosition(self,q):
@@ -321,14 +329,16 @@ class KinematicSimControlInterface(RobotInterfaceBase):
             return
         if len(q) != len(self.q):
             raise ValueError("Invalid position command")
-        self.q = q
         if any(v < a or v > b for (v,a,b) in zip(q,self.qmin,self.qmax)):
             for i,(v,a,b) in enumerate(zip(q,self.qmin,self.qmax)):
                 if v < a or v > b:
                     self._status = 'joint %d limit violation: %f <= %f <= %f'%(i,a,v,b)
-        self.robot.setConfig(self.configToKlampt(self.q))
+                    return
+        self.robot.setConfig(self.configToKlampt(q))
         if self.robot.selfCollides():
             self._status = 'self collision'
+            return
+        self.q = q
         
     def reset(self):
         self._status = 'ok'
@@ -339,3 +349,28 @@ class KinematicSimControlInterface(RobotInterfaceBase):
     
     def commandedPosition(self):
         return self.q
+
+
+def make(robotModel : RobotModel):
+    """Makes a default KinematicSimControlInterface for the robot. This module
+    can be referenced using 'klampt.control.simrobotinterface', e.g. as an 
+    argument to the ``klampt_control`` app.
+    """
+    try:
+        ri = robotinfo.RobotInfo.get(robotModel.getName())
+    except KeyError:
+        ri = None
+    if ri is not None and ri.parts:
+        from .robotinterfaceutils import OmniRobotInterface
+        res = OmniRobotInterface(robotModel)
+        sim_interface = KinematicSimControlInterface(robotModel)
+        res.addPhysicalPart('robot',sim_interface,sim_interface.indices())
+        #set up parts
+        for (name,indices) in ri.parts.items():
+            driver_indices = ri.toDriverIndices(indices)
+            res.addVirtualPart(name,driver_indices)
+            print('klampt.control.simrobotinterface: adding virtual part "{}", indices {}'.format(name,driver_indices))
+        return res
+    else:
+        from .robotinterfaceutils import RobotInterfaceCompleter
+        return RobotInterfaceCompleter(KinematicSimControlInterface(robotModel,ri))

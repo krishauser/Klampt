@@ -46,7 +46,7 @@ Everything evaluates to a scalar or 1D array
 ============================================
 
 An important note is that all arguments to functions, return values, and
-variable  assignments must either be scalars or 1D numpy arrays.
+variable assignments must either be scalars or 1D numpy arrays.
 
 Derivatives of a function are always of shape (size(f(x)),size(x)).
 
@@ -54,6 +54,10 @@ If you are creating your own function that can accept either scalars or
 vectors, the ad._size() and ad._scalar() functions are your friends. The size
 of a scalar is 1.
 
+.. note::
+    Arrays should be float type! Weird results can result if you, for example
+    initialize your arrays with ints, e.g., np.array([0,0,0])
+    
 
 Expression DAG and performance
 ================================
@@ -2236,8 +2240,9 @@ class _ADCond(ADFunctionInterface):
         else:
             assert len(pred)==len(trueval)
             assert len(pred)==len(falseval)
+            true_inds = np.where(pred > 0)[0]
             res = falseval.copy()
-            res[pred>0]=trueval[pred>0]
+            res[true_inds]=trueval[true_inds]
             return res
 
     def jvp(self,arg,darg,pred,trueval,falseval):
@@ -2250,7 +2255,8 @@ class _ADCond(ADFunctionInterface):
                 return 0
             else:
                 res = np.zeros(trueval.shape)
-                res[pred > 0] = darg[pred > 0]
+                true_inds = np.where(pred > 0)[0]
+                res[true_inds] = darg[true_inds]
         else:
             if _scalar(pred):
                 if pred > 0:
@@ -2258,7 +2264,8 @@ class _ADCond(ADFunctionInterface):
                 return darg
             else:
                 res = darg.copy()
-                res[pred > 0] = 0
+                true_inds = np.where(pred > 0)[0]
+                res[true_inds] = 0
                 return res
 
 

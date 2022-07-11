@@ -16,9 +16,12 @@
 #include <KrisLibrary/GLdraw/GLUTString.h>
 #include <fstream>
 
+using namespace Klampt;
 
 typedef LoggingController MyController;
 typedef PolynomialPathController MyMilestoneController;
+
+namespace Klampt {
 
 PolynomialMotionQueue* GetMotionQueue(RobotController* rc)
 {
@@ -37,7 +40,9 @@ PolynomialMotionQueue* GetMotionQueue(RobotController* rc)
   return c;
 }
 
-SimViewProgram::SimViewProgram(RobotWorld* world)
+} //namespace Klampt
+
+SimViewProgram::SimViewProgram(WorldModel* world)
   :WorldViewProgram(world),simulate(0)
 {}
 
@@ -49,7 +54,7 @@ void SimViewProgram::InitSim()
 
     sim.robotControllers.resize(world->robots.size());
     for(size_t i=0;i<sim.robotControllers.size();i++) {    
-      Robot* robot=world->robots[i].get();
+      RobotModel* robot=world->robots[i].get();
       sim.SetController(i,MakeDefaultController(robot)); 
       sim.controlSimulators[i].sensors.MakeDefault(robot);
     }
@@ -264,7 +269,7 @@ void SimViewProgram::RenderWorld()
           color[1]=0;
           color[2]=0;
         }
-        world->robotViews[i].BlendColor(j,GLColor(color),amount);
+        world->robotViews[i].SetTintColor(j,GLColor(color),amount);
       }
       world->robotViews[i].DrawLink_World(j);
     }
@@ -286,7 +291,7 @@ void SimViewProgram::DrawContacts(Real pointSize, Real fscale, Real nscale)
   glEnable(GL_POINT_SMOOTH);
   glDisable(GL_DEPTH_TEST);
   glPointSize(pointSize);
-  for (WorldSimulation::ContactFeedbackMap::iterator i = sim.contactFeedback.begin(); i != sim.contactFeedback.end(); i++) {
+  for (Simulator::ContactFeedbackMap::iterator i = sim.contactFeedback.begin(); i != sim.contactFeedback.end(); i++) {
     ODEContactList* c = sim.odesim.GetContactFeedback(i->first.first,
                                                       i->first.second);
     Assert(c != NULL);
@@ -317,7 +322,7 @@ void SimViewProgram::DrawWrenches(Real fscale)
 {
   glEnable(GL_LIGHTING);
   glDisable(GL_DEPTH_TEST);
-  for (WorldSimulation::ContactFeedbackMap::iterator i = sim.contactFeedback.begin(); i != sim.contactFeedback.end(); i++) {
+  for (Simulator::ContactFeedbackMap::iterator i = sim.contactFeedback.begin(); i != sim.contactFeedback.end(); i++) {
     ODEContactList* c = sim.odesim.GetContactFeedback(i->first.first,
                                                       i->first.second);
     Assert(c != NULL);

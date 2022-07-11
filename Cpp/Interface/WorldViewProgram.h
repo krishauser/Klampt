@@ -5,8 +5,6 @@
 #include <KrisLibrary/GLdraw/GL.h>
 #include <KrisLibrary/GLdraw/Widget.h>
 #include <KrisLibrary/math3d/Ray3D.h>
-using namespace Math3D;
-using namespace GLDraw;
 
 #if HAVE_GLUI
 
@@ -43,9 +41,11 @@ using namespace GLDraw;
 
 #endif //HAVE_GLUI
 
+namespace Klampt {
+  using namespace Math3D;
+  using namespace GLDraw;
 
-bool LoadWorldCommandLine(RobotWorld& world,int argc, const char** argv);
-
+bool LoadWorldCommandLine(WorldModel& world,int argc, const char** argv);
 
 
 #if HAVE_GLUI || HAVE_GLUT
@@ -59,15 +59,15 @@ bool LoadWorldCommandLine(RobotWorld& world,int argc, const char** argv);
 class WorldViewProgram : public GLScreenshotProgram<BASE_PROGRAM>
 {
 public:
-  WorldViewProgram(RobotWorld* world);
+  WorldViewProgram(WorldModel* world);
   virtual ~WorldViewProgram() {}
 
   bool LoadCommandLine(int argc,const char** argv);
   virtual bool Initialize();
   virtual void SetWorldLights();
   void ClickRay(int x,int y,Ray3D& r) const;
-  Robot* ClickRobot(const Ray3D& r,int& body,Vector3& localpt) const;
-  RigidObject* ClickObject(const Ray3D& r,Vector3& localpt) const;
+  RobotModel* ClickRobot(const Ray3D& r,int& body,Vector3& localpt) const;
+  RigidObjectModel* ClickObject(const Ray3D& r,Vector3& localpt) const;
   virtual void RefreshIdle();
   virtual void RenderWorld();
   virtual void DoFreeDrag(int dx,int dy,int button);
@@ -75,7 +75,7 @@ public:
   virtual void DoAltDrag(int dx,int dy,int button);
   virtual void DoShiftDrag(int dx,int dy,int button);
 
-  RobotWorld* world;
+  WorldModel* world;
 };
 
 #endif // HAVE_GLUI || HAVE_GLUT
@@ -86,7 +86,7 @@ public:
 class WorldViewWidget : public Widget
 {
 public:
-  WorldViewWidget(RobotWorld* world);
+  WorldViewWidget(WorldModel* world);
   virtual bool Hover(int x, int y, Camera::Viewport& viewport, double& distance);
   //these currently don't do anything, but can be overloaded to do something with the current robot
   virtual bool BeginDrag(int x, int y, Camera::Viewport& viewport, double& distance);
@@ -95,12 +95,14 @@ public:
 
   virtual void DrawGL(Camera::Viewport& viewport);
 
-  RobotWorld* world;
+  WorldModel* world;
   //click information
-  Robot* clickedRobot;
-  RigidObject* clickedObject;
+  RobotModel* clickedRobot;
+  RigidObjectModel* clickedObject;
   int body;
   Vector3 localpt;
 };
+
+} // namespace Klampt
 
 #endif

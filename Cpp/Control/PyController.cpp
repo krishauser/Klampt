@@ -1,6 +1,8 @@
 #include "PyController.h"
 #include <KrisLibrary/errors.h>
 
+namespace Klampt {
+
 #if HAVE_PYTHON
 
 PyObject* PyListFromVector(const Vector& x) {
@@ -39,7 +41,7 @@ Vector PyListToVector(PyObject* list)
 }
 
 
-PyController::PyController(Robot& robot)
+PyController::PyController(RobotModel& robot)
   :RobotController(robot)
 {
   module = updateFunc = resetFunc = getStateFunc = setStateFunc = getSettingsFunc = setSettingsFunc = NULL;
@@ -405,7 +407,7 @@ bool PyController::SendCommand(const string& name,const string& str)
 
 #else
 
-PyController::PyController(Robot& robot)
+PyController::PyController(RobotModel& robot)
   :RobotController(robot)
 {
   fprintf(stderr,"Python not enabled, cannot instantiate PyControllers\n");
@@ -460,5 +462,6 @@ bool PyController::SendCommand(const string& name,const string& str)
   return RobotController::SendCommand(name,str);
 }
 
+} //namespace Klampt
 
 #endif

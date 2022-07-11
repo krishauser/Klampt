@@ -17,14 +17,14 @@ from PyQt5 import QtWidgets
 world_item_extensions = set(['.obj','.rob','.urdf','.env'])
 robot_override_types = ['Config','Configs']
 animation_types = ['Trajectory','LinearPath','MultiPath']
-create_types = resource.visualEditTypes()[:-1]
+create_types = resource.visual_edit_types()[:-1]
 
 def save(obj,fn):
     if hasattr(obj,'saveFile'):
         return obj.saveFile(fn)
     if hasattr(obj,'save'):
         return obj.save(fn)
-    type = loader.filenameToType(fn)
+    type = loader.filename_to_type(fn)
     return loader.save(obj,type,fn)
 
 MAX_VIS_ITEMS = 1000
@@ -99,7 +99,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
         # Add filters
         filters = []
         print("ALLOWABLE FILE EXTENSIONS")
-        for k,v in loader.extensionToTypes.items():
+        for k,v in loader.EXTENSION_TO_TYPES.items():
             filters.append("*"+k)
             print(" ",k)
         filters.append("*.xml")
@@ -386,7 +386,8 @@ class ResourceBrowser(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.warning(self.splitter,"Creation not available","Unable to create item of type "+type+", did you remember to add items to the reference world?")
             return
         if obj is not None and save:
-            fn = resource.save(obj,type,directory='')
+            cur_file_path = self.model.filePath(self.view.rootIndex())
+            fn = resource.save(obj,type,directory=cur_file_path)
             if fn is not None:
                 self.loadedItem(fn,obj)
                 #TODO: should we add to selection in tree view?
@@ -422,7 +423,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
                 todel.append(name)
             elif isinstance(s,Geometry3D):
                 t = self.world.makeTerrain(name)
-                t.geometry().set(s.clone())
+                t.geometry().set(s.copy())
                 todel.append(name)
         for name in todel:
             self.remove(name)
@@ -496,7 +497,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
             self.loadedItem(fn,obj)
             return True
         try:
-            type = loader.filenameToType(fn)
+            type = loader.filename_to_type(fn)
         except RuntimeError:
             if warn:
                 QtWidgets.QMessageBox.warning(self.splitter,"Invalid item","Could not load file "+fn+" as a known Klamp't type")

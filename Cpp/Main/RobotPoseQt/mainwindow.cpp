@@ -45,7 +45,7 @@ void MainWindow::Initialize(int argc,const char** argv)
     connect(ui->spn_link,SIGNAL(valueChanged(double)),gui.get(),SLOT(SetLinkValue(double)));
 
     if(!world.robots.empty()) {
-      Robot* rob=world.robots[0].get();
+      RobotModel* rob=world.robots[0].get();
 
       //fill GUI info
       for(int i=0;i<rob->linkNames.size();i++)
@@ -154,10 +154,11 @@ void MainWindow::SetDriver(int index){
 //this information is shared via pointer, not message passing
 void MainWindow::UpdateDriverParameters(){
     if(world.robots.empty()) return;
-    Robot* rob=world.robots[0].get();
+    if(gui->driver_index < 0) return;
+    RobotModel* rob=world.robots[0].get();
     bool oldState = ui->spn_driver->blockSignals(true);
 #define NUM(x) QString::number(x)
-  RobotJointDriver dr=rob->drivers[gui->driver_index];
+  RobotModelDriver dr=rob->drivers[gui->driver_index];
   QString driver_info=QString("V [%1 %2], T [%3,%4], PID %5,%6,%7").arg( \
         NUM(dr.vmin),NUM(dr.vmax),NUM(dr.tmin),NUM(dr.tmax),NUM(dr.servoP),NUM(dr.servoI),NUM(dr.servoD));
   ui->lbl_driver_info->setText(driver_info);
@@ -177,7 +178,8 @@ void MainWindow::SetLink(int index){
 
 void MainWindow::UpdateLinkValue(){
     if(world.robots.empty()) return;
-    Robot* rob=world.robots[0].get();
+    if(gui->link_index < 0) return;
+    RobotModel* rob=world.robots[0].get();
     bool oldState = ui->spn_link->blockSignals(true);
     ui->spn_link->setValue(rob->q[gui->link_index]);
     UpdateLinkSlider(rob->q[gui->link_index]);
@@ -186,7 +188,8 @@ void MainWindow::UpdateLinkValue(){
 
 void MainWindow::UpdateDriverValue(){
     if(world.robots.empty()) return;
-    Robot* rob=world.robots[0].get();
+    if(gui->driver_index < 0) return;
+    RobotModel* rob=world.robots[0].get();
     bool oldState = ui->spn_driver->blockSignals(true);
     ui->spn_driver->setValue(rob->GetDriverValue(gui->driver_index));
     UpdateDriverSlider(rob->GetDriverValue(gui->driver_index));
@@ -212,7 +215,8 @@ void MainWindow::UpdateDriverSlider(double value){
 //this information is shared via pointer, not message passing
 void MainWindow::UpdateLinkParameters(){
     if(world.robots.empty()) return;
-    Robot* rob=world.robots[0].get();
+    if(gui->link_index < 0) return;
+    RobotModel* rob=world.robots[0].get();
 #define NUM(x) QString::number(x)
   QString link_info=QString("[%1 %2], T [%3,%4]").arg(NUM(rob->velMin(gui->link_index)),NUM(rob->velMax(gui->link_index)),NUM(-rob->torqueMax(gui->link_index)),NUM(rob->torqueMax(gui->link_index)));
   ui->lbl_link_info->setText(link_info);

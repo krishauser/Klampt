@@ -5,6 +5,7 @@
 using namespace Math;
 using namespace Math3D;
 using namespace GLDraw;
+using namespace Klampt;
 
 ViewCamera::ViewCamera()
 :drawIcon(true),drawIconWireframe(false),iconSize(0.05),

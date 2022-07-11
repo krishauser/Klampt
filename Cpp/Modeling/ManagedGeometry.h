@@ -1,11 +1,13 @@
-#ifndef MODELING_MANAGED_GEOMETRY_H
-#define MODELING_MANAGED_GEOMETRY_H
+#ifndef KLAMPT_MODELING_MANAGED_GEOMETRY_H
+#define KLAMPT_MODELING_MANAGED_GEOMETRY_H
 
 #include <KrisLibrary/geometry/AnyGeometry.h>
 #include <KrisLibrary/GLdraw/GeometryAppearance.h>
 #include <memory>
 #include <map>
 #include <string>
+
+namespace Klampt {
 
 class GeometryManager;
 
@@ -151,5 +153,7 @@ public:
   };
   std::map<std::string,GeometryList> cache;
 };
+
+} //namespace Klampt
 
 #endif

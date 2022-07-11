@@ -30,7 +30,7 @@ Imported into the main ``klampt`` package.
     ~klampt.TerrainModel
     ~klampt.Mass
     ~klampt.ContactParameters
-    ~klampt.setRandomSeed
+    ~klampt.set_random_seed
     ~klampt.destroy
 
 Modeling geometries
@@ -60,7 +60,6 @@ Imported into the main ``klampt`` package.
     ~klampt.IKSolver
     ~klampt.GeneralizedIKObjective
     ~klampt.GeneralizedIKSolver
-    ~klampt.SampleTransform
 
 Simulation
 -------------------
@@ -80,14 +79,14 @@ Equilibrium testing
 See also the aliases in the `klampt.model.contact <klampt.model.contact.html>`__ module.
 
 .. autosummary::
-    ~klampt.robotsim.comEquilibrium
-    ~klampt.robotsim.comEquilibrium2D
-    ~klampt.robotsim.equilibriumTorques
-    ~klampt.robotsim.forceClosure
-    ~klampt.robotsim.forceClosure2D
-    ~klampt.robotsim.setFrictionConeApproximationEdges
-    ~klampt.robotsim.supportPolygon
-    ~klampt.robotsim.supportPolygon2D
+    ~klampt.robotsim.com_equilibrium
+    ~klampt.robotsim.com_equilibrium_2d
+    ~klampt.robotsim.equilibrium_torques
+    ~klampt.robotsim.force_closure
+    ~klampt.robotsim.force_closure_2d
+    ~klampt.robotsim.set_friction_cone_approximation_edges
+    ~klampt.robotsim.support_polygon
+    ~klampt.robotsim.support_polygon_2d
 
 Input/Output
 -------------
@@ -95,12 +94,12 @@ Input/Output
 Imported into the ``klampt.io`` package
 
 .. autosummary::
-    ~klampt.io.SubscribeToStream
-    ~klampt.io.DetachFromStream
-    ~klampt.io.ProcessStreams
-    ~klampt.io.WaitForStream
-    ~klampt.io.ThreeJSGetScene
-    ~klampt.io.ThreeJSGetTransforms
+    ~klampt.io.subscribe_to_stream
+    ~klampt.io.detach_from_stream
+    ~klampt.io.process_streams
+    ~klampt.io.wait_for_stream
+    ~klampt.io.threejs_get_scene
+    ~klampt.io.threejs_get_transforms
 
 Visualization
 --------------
@@ -126,25 +125,23 @@ Module contents
     :show-inheritance:
     :exclude-members: doubleArray, doubleVector, floatArray, floatVector, intArray, intVector, stringArray, stringVector, doubleMatrix
 
-.. autofunction:: klampt.robotsim.setRandomSeed
+.. autofunction:: klampt.robotsim.set_random_seed
 
-.. autofunction:: klampt.robotsim.SampleTransform
+.. autofunction:: klampt.robotsim.com_equilibrium
 
-.. autofunction:: klampt.robotsim.comEquilibrium
+.. autofunction:: klampt.robotsim.com_equilibrium_2d
 
-.. autofunction:: klampt.robotsim.comEquilibrium2D
+.. autofunction:: klampt.robotsim.equilibrium_torques
 
-.. autofunction:: klampt.robotsim.equilibriumTorques
+.. autofunction:: klampt.robotsim.force_closure
 
-.. autofunction:: klampt.robotsim.forceClosure
+.. autofunction:: klampt.robotsim.force_closure_2d
 
-.. autofunction:: klampt.robotsim.forceClosure2D
+.. autofunction:: klampt.robotsim.set_friction_cone_approximation_edges
 
-.. autofunction:: klampt.robotsim.setFrictionConeApproximationEdges
+.. autofunction:: klampt.robotsim.support_polygon
 
-.. autofunction:: klampt.robotsim.supportPolygon
-
-.. autofunction:: klampt.robotsim.supportPolygon2D
+.. autofunction:: klampt.robotsim.support_polygon_2d
 
 .. autoclass:: klampt.robotsim.Widget
 

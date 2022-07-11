@@ -8,6 +8,8 @@
 
 DECLARE_LOGGER(XmlParser);
 
+namespace Klampt {
+
 ///defined in XmlODE.cpp
 int SafeQueryFloat(TiXmlElement* e,const char* attr,double& out);
 
@@ -189,7 +191,7 @@ XmlRobot::XmlRobot(TiXmlElement* _element,string _path)
   :e(_element),path(_path)
 {}
 
-bool XmlRobot::GetRobot(Robot& robot)
+bool XmlRobot::GetRobot(RobotModel& robot)
 {
   const char* fn = e->Attribute("file");
   if(!fn) {
@@ -262,7 +264,7 @@ XmlRigidObject::XmlRigidObject(TiXmlElement* _element,string _path)
   :e(_element),path(_path)
 {}
 
-bool XmlRigidObject::GetRigidObject(RigidObject& obj)
+bool XmlRigidObject::GetRigidObject(RigidObjectModel& obj)
 {
   obj.T.setIdentity();
   obj.mass=1.0;
@@ -343,7 +345,7 @@ XmlTerrain::XmlTerrain(TiXmlElement* _element,string _path)
   :e(_element),path(_path)
 {}
 
-bool XmlTerrain::GetTerrain(Terrain& env)
+bool XmlTerrain::GetTerrain(TerrainModel& env)
 {
   const char* fn = e->Attribute("file");
   if(!fn) {
@@ -526,7 +528,7 @@ class XmlAppearance
     }
     return true;
   }
-  bool Get(Terrain& terrain)
+  bool Get(TerrainModel& terrain)
   {
     terrain.geometry.SetUniqueAppearance();
     terrain.geometry.Appearance()->faceColor.set(0.8f,0.6f,0.2f);
@@ -537,7 +539,7 @@ class XmlAppearance
     tex.Set(terrain.geometry);
     return Get(terrain.geometry);
   }
-  bool Get(Robot& robot) {
+  bool Get(RobotModel& robot) {
     const char* link = e->Attribute("link");
     if(link == NULL) {
       //apply to all geometries
@@ -613,7 +615,7 @@ bool XmlWorld::Load(TiXmlElement* e,string _path)
   return true;
 }
 
-bool XmlWorld::GetWorld(RobotWorld& world)
+bool XmlWorld::GetWorld(WorldModel& world)
 {
   if(!elem) return false;
   string robot="robot";
@@ -637,9 +639,9 @@ bool XmlWorld::GetWorld(RobotWorld& world)
   e = GetElement(goal);
   goalCount = 0;
   while(e) {
-          if(e->QueryValueAttribute("position",&goals[goalCount])==TIXML_SUCCESS)
-                  goalCount++;
-          e=e->NextSiblingElement(goal);
+    if(e->QueryValueAttribute("position",&goals[goalCount])==TIXML_SUCCESS)
+            goalCount++;
+    e=e->NextSiblingElement(goal);
   }
   //parse robots
   e = GetElement(robot);
@@ -647,7 +649,7 @@ bool XmlWorld::GetWorld(RobotWorld& world)
     const char* name = e->Attribute("name");
     string sname = "Robot";
     if(name) sname=name;
-    Robot* r = new Robot;
+    RobotModel* r = new RobotModel;
     if(!XmlRobot(e,path).GetRobot(*r)) {
       LOG4CXX_ERROR(GET_LOGGER(XmlParser),"XmlWorld: Unable to load robot "<<sname);
       delete r;
@@ -679,7 +681,7 @@ bool XmlWorld::GetWorld(RobotWorld& world)
     const char* name = e->Attribute("name");
     string sname = "Object";
     if(name) sname=name;
-    RigidObject* o = new RigidObject;
+    RigidObjectModel* o = new RigidObjectModel;
     if(!XmlRigidObject(e,path).GetRigidObject(*o)) {
       LOG4CXX_ERROR(GET_LOGGER(XmlParser),"XmlWorld: Unable to load rigid object "<<sname);
       delete o;
@@ -700,7 +702,7 @@ bool XmlWorld::GetWorld(RobotWorld& world)
   while(e) {
     const char* name = e->Attribute("name");
     string sname = "Terrain";
-    Terrain* t = new Terrain;
+    TerrainModel* t = new TerrainModel;
     if(!XmlTerrain(e,path).GetTerrain(*t)) {
       LOG4CXX_WARN(GET_LOGGER(XmlParser),"XmlWorld: Unable to load terrain "<<sname);
       delete t;
@@ -795,7 +797,7 @@ const char* DefaultFileExtension(const Geometry::AnyCollisionGeometry3D& geom)
     return ".unknown";
 }
 
-bool XmlWorld::Save(RobotWorld& world,const string& fn,string itempath)
+bool XmlWorld::Save(WorldModel& world,const string& fn,string itempath)
 {
   string filepath = GetFilePath(fn);
   string filename = GetFileName(fn);
@@ -983,3 +985,5 @@ bool XmlWorld::Save(RobotWorld& world,const string& fn,string itempath)
     LOG4CXX_WARN(GET_LOGGER(XmlParser),"World::Save(): warning: geometry files may not be saved properly");
   return true; 
 }
+
+} //namespace Klampt
