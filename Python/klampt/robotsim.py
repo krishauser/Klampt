@@ -2066,7 +2066,7 @@ class Geometry3D(object):
 
 
         Args:
-            arg2 (:class:`~klampt.PointCloud` or :class:`~klampt.TriangleMesh` or :class:`~klampt.VolumeGrid` or :class:`~klampt.ConvexHull` or :class:`~klampt.Geometry3D` or :class:`~klampt.GeometricPrimitive`, optional): 
+            arg2 (:class:`~klampt.Geometry3D` or :class:`~klampt.VolumeGrid` or :class:`~klampt.PointCloud` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.TriangleMesh` or :class:`~klampt.ConvexHull`, optional): 
         """
         _robotsim.Geometry3D_swiginit(self, _robotsim.new_Geometry3D(*args))
     __swig_destroy__ = _robotsim.delete_Geometry3D
@@ -5912,7 +5912,7 @@ class WorldModel(object):
 
 
         Args:
-            robot (int or str): 
+            robot (str or int): 
             index (int, optional): 
             name (str, optional): 
 
@@ -6049,8 +6049,7 @@ class WorldModel(object):
             terrain (:class:`~klampt.TerrainModel`, optional): 
 
         Returns:
-
-            (:class:`~klampt.RigidObjectModel` or :class:`~klampt.TerrainModel` or :class:`~klampt.RobotModel`):
+            (:class:`~klampt.TerrainModel` or :class:`~klampt.RigidObjectModel` or :class:`~klampt.RobotModel`):
         """
         return _robotsim.WorldModel_add(self, *args)
 
@@ -6830,7 +6829,7 @@ class GeneralizedIKObjective(object):
 
 
         Args:
-            obj (:class:`~klampt.RigidObjectModel` or :obj:`GeneralizedIKObjective`, optional): 
+            obj (:obj:`GeneralizedIKObjective` or :class:`~klampt.RigidObjectModel`, optional): 
             link (:class:`~klampt.RobotModelLink`, optional): 
             link2 (:class:`~klampt.RobotModelLink`, optional): 
             obj2 (:class:`~klampt.RigidObjectModel`, optional): 
@@ -7002,7 +7001,7 @@ class SimRobotSensor(object):
 
     To use get/setSetting, you will need to know the sensor attribute names and
     types as described in `the Klampt sensor documentation
-    <https://github.com/krishauser/Klampt/blob/master/Documentation/Manual-
+    <https://github.com/krishauser/Klampt/blob/master/Cpp/docs/Manual-
     Control.md#sensors>`_ (same as in the world or sensor XML file). Common settings
     include:  
 
@@ -7121,7 +7120,7 @@ class SimRobotSensor(object):
 
 
         Args:
-            link (int or :class:`~klampt.RobotModelLink`): 
+            link (:class:`~klampt.RobotModelLink` or int): 
         """
         return _robotsim.SimRobotSensor_setLink(self, *args)
 
