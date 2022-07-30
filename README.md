@@ -86,8 +86,10 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 
 ## Version history
 
-**Master** (5/31/2022)
+**Master** (7/31/2022)
 -   IK solver now has a minimization mode and a prioritized solve mode.
+-   Fixed problem with custom textures being unloaded after a mesh is transformed.
+-   Python API: Fixed bugs with vis module picker.  Also, appearances can now have a tint set to match the C++ API.
 
 **0.9** (1/15/2022)
 -   Python API: type hints are available throughout the SWIG interface and in many native Python functions.
