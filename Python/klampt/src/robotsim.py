@@ -2949,6 +2949,37 @@ class Appearance(object):
         """
         return _robotsim.Appearance_setColors(self, feature, np_array2)
 
+    def setTintColor(self, color: "float const [4]", strength: "float") -> "void":
+        r"""
+        setTintColor(Appearance self, float const [4] color, float strength)
+
+
+        Sets a temporary tint color that modulates the appearance of the object. This
+        works with both flat colors and per-vertex / per-face colors.  
+
+        """
+        return _robotsim.Appearance_setTintColor(self, color, strength)
+
+    def getTintColor(self) -> "void":
+        r"""
+        getTintColor(Appearance self)
+
+
+        Retrieves the tint color.  
+
+        """
+        return _robotsim.Appearance_getTintColor(self)
+
+    def getTintStrength(self) -> "float":
+        r"""
+        getTintStrength(Appearance self) -> float
+
+
+        Retrieves the tint strength.  
+
+        """
+        return _robotsim.Appearance_getTintStrength(self)
+
     def setShininess(self, shininess: "float", strength: "float"=-1) -> "void":
         r"""
         setShininess(Appearance self, float shininess, float strength=-1)

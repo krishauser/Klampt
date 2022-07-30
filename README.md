@@ -86,12 +86,16 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 
 ## Version history
 
-**Devel** (5/31/2022)
+**Devel** (7/31/2022)
 -   Fixed bug in simulation of affine joints when the joint angle can go negative. Also, internal affine transmission coupling is simulated in a fashion that's sensitive to the driver's PID constants.
 -   Minor performance improvements to IK; API for getting subset of Jacobian columns.
 -   Python API: substantial performance improvements to camera image retrieval (camera_to_images).
 -   Python API: new calls for getting subset of Jacobian columns.
+
+**Master** (7/31/2022)
 -   IK solver now has a minimization mode and a prioritized solve mode.
+-   Fixed problem with custom textures being unloaded after a mesh is transformed.
+-   Python API: Fixed bugs with vis module picker.  Also, appearances can now have a tint set to match the C++ API.
 
 **0.9** (1/15/2022)
 -   Python API: type hints are available throughout the SWIG interface and in many native Python functions.

@@ -29240,6 +29240,148 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Appearance_setTintColor(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
+  float *arg2 ;
+  float arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  float temp2[4] ;
+  float val3 ;
+  int ecode3 = 0 ;
+  PyObject *swig_obj[3] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Appearance_setTintColor", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_setTintColor" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  {
+    if (!convert_farray(swig_obj[1],temp2,4)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  ecode3 = SWIG_AsVal_float(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Appearance_setTintColor" "', argument " "3"" of type '" "float""'");
+  } 
+  arg3 = static_cast< float >(val3);
+  {
+    try {
+      (arg1)->setTintColor((float const (*))arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_getTintColor(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
+  float *arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  float temp2[4] ;
+  PyObject *swig_obj[1] ;
+  
+  {
+    arg2 = &temp2[0];
+  }
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_getTintColor" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  {
+    try {
+      (arg1)->getTintColor(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_farray_obj(arg2,4);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_getTintStrength(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  float result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_getTintStrength" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  {
+    try {
+      result = (float)(arg1)->getTintStrength();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_float(static_cast< float >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_Appearance_setShininess__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
   PyObject *resultobj = 0;
   Appearance *arg1 = (Appearance *) 0 ;
@@ -66296,6 +66438,28 @@ static PyMethodDef SwigMethods[] = {
 		"If n == 3, each row is an rgb value.  \n"
 		"\n"
 		"Only supports feature=VERTICES and feature=FACES  \n"
+		"\n"
+		""},
+	 { "Appearance_setTintColor", _wrap_Appearance_setTintColor, METH_VARARGS, "\n"
+		"Appearance_setTintColor(Appearance self, float const [4] color, float strength)\n"
+		"\n"
+		"\n"
+		"Sets a temporary tint color that modulates the appearance of the object. This\n"
+		"works with both flat colors and per-vertex / per-face colors.  \n"
+		"\n"
+		""},
+	 { "Appearance_getTintColor", _wrap_Appearance_getTintColor, METH_O, "\n"
+		"Appearance_getTintColor(Appearance self)\n"
+		"\n"
+		"\n"
+		"Retrieves the tint color.  \n"
+		"\n"
+		""},
+	 { "Appearance_getTintStrength", _wrap_Appearance_getTintStrength, METH_O, "\n"
+		"Appearance_getTintStrength(Appearance self) -> float\n"
+		"\n"
+		"\n"
+		"Retrieves the tint strength.  \n"
 		"\n"
 		""},
 	 { "Appearance_setShininess", _wrap_Appearance_setShininess, METH_VARARGS, "\n"

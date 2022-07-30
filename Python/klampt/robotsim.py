@@ -2912,6 +2912,31 @@ class Appearance(object):
         """
         return _robotsim.Appearance_setColors(self, feature, np_array2)
 
+    def setTintColor(self, color:  "float const [4]", strength: float) ->None:
+        r"""
+        Sets a temporary tint color that modulates the appearance of the object. This
+        works with both flat colors and per-vertex / per-face colors.  
+
+        Args:
+            color (:obj:`float [4]`)
+            strength (float)
+        """
+        return _robotsim.Appearance_setTintColor(self, color, strength)
+
+    def getTintColor(self) ->None:
+        r"""
+        Retrieves the tint color.  
+
+        """
+        return _robotsim.Appearance_getTintColor(self)
+
+    def getTintStrength(self) ->float:
+        r"""
+        Retrieves the tint strength.  
+
+        """
+        return _robotsim.Appearance_getTintStrength(self)
+
     def setShininess(self, shininess: float, strength: float=-1) ->None:
         r"""
         Sets the specular highlight shininess and strength. To turn off, use
@@ -5887,7 +5912,7 @@ class WorldModel(object):
 
 
         Args:
-            robot (str or int): 
+            robot (int or str): 
             index (int, optional): 
             name (str, optional): 
 
@@ -6024,7 +6049,8 @@ class WorldModel(object):
             terrain (:class:`~klampt.TerrainModel`, optional): 
 
         Returns:
-            (:class:`~klampt.TerrainModel` or :class:`~klampt.RigidObjectModel` or :class:`~klampt.RobotModel`):
+
+            (:class:`~klampt.RigidObjectModel` or :class:`~klampt.TerrainModel` or :class:`~klampt.RobotModel`):
         """
         return _robotsim.WorldModel_add(self, *args)
 
@@ -6804,7 +6830,7 @@ class GeneralizedIKObjective(object):
 
 
         Args:
-            obj (:obj:`GeneralizedIKObjective` or :class:`~klampt.RigidObjectModel`, optional): 
+            obj (:class:`~klampt.RigidObjectModel` or :obj:`GeneralizedIKObjective`, optional): 
             link (:class:`~klampt.RobotModelLink`, optional): 
             link2 (:class:`~klampt.RobotModelLink`, optional): 
             obj2 (:class:`~klampt.RigidObjectModel`, optional): 
@@ -7095,7 +7121,7 @@ class SimRobotSensor(object):
 
 
         Args:
-            link (:class:`~klampt.RobotModelLink` or int): 
+            link (int or :class:`~klampt.RobotModelLink`): 
         """
         return _robotsim.SimRobotSensor_setLink(self, *args)
 
@@ -8256,7 +8282,7 @@ class Simulator(object):
 
 
         Args:
-            robot (:class:`~klampt.RobotModel` or int): 
+            robot (int or :class:`~klampt.RobotModel`): 
 
         Returns:
             :class:`~klampt.SimRobotController`:

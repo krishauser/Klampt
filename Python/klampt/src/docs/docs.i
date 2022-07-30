@@ -39,7 +39,14 @@ as possible.
 C++ includes: appearance.h
 ";
 
+
+%feature("docstring") Appearance::getTintColor "
+
+Retrieves the tint color.  
+";
+
 %feature("docstring") Appearance::drawWorldGL "
+>>>>>>> master
 
 Draws the given geometry with this appearance. NOTE: for best performance, an
 appearance should only be drawn with a single geometry. Otherwise, the OpenGL
@@ -101,6 +108,17 @@ valid format strings.
 
 The array is given in top to bottom order if `topdown==True`. Otherwise, it is
 given in order bottom to top.  
+";
+
+%feature("docstring") Appearance::getTintStrength "
+
+Retrieves the tint strength.  
+";
+
+%feature("docstring") Appearance::setTintColor "
+
+Sets a temporary tint color that modulates the appearance of the object. This
+works with both flat colors and per-vertex / per-face colors.  
 ";
 
 %feature("docstring") Appearance::isStandalone "

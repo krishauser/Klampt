@@ -585,6 +585,8 @@ will follow the simulation time rather than wall clock time.
 
 
 import threading
+
+from numpy import ptp
 from ..robotsim import *
 from ..math import vectorops,so3,se3
 from . import gldraw
@@ -1840,8 +1842,8 @@ def followCamera(target,translate=True,rotate=False,center=False) -> None:
       were fixed to the object.
 
     Args:
-        target (str, Trajectory, or None): the target that is to be followed.
-            If this is None, the camera no longer follows anything.
+        target (str, SimRobotSensor, Trajectory, or None): the target that is
+            to be followed. If None, the camera stops following anything.
         translate (bool, optional): whether the camera should follow using
             translation.
         rotate (bool, optional): whether the camera should follow using
@@ -3403,7 +3405,8 @@ class VisAppearance:
         elif hasattr(self.item,'geometry') and callable(self.item.geometry):
             geom = self.item.geometry()
         #TODO: ray cast other items like points, transforms, trajectories
-        if geom is None: return None
+        if geom is None:
+            return None
         margin = geom.getCollisionMargin()
         if geom.type() == 'PointCloud':
             geom.setCollisionMargin(tolerance)
@@ -3422,6 +3425,43 @@ class VisAppearance:
                 except ValueError as e:
                     raise ValueError("Invalid sub-path specified "+str(path)+" at "+str(e))
         raise ValueError("Invalid sub-item specified "+str(path[0]))
+
+    def highlight(self,color):
+        """Turn on/off a temporary highlight.  color can be a (r,g,b,strength)
+        tuple or None.
+        """
+        item = self.item
+        if hasattr(item,'appearance'):
+            self.customAppearance = item.appearance().clone()
+            if color is None:
+                self.customAppearance.setTintColor((1,1,1,1),0)
+                #self.useDefaultAppearance = True
+                #item.appearance().set(self.customAppearance)
+            else:
+                r,g,b,a = color
+                self.customAppearance.setTintColor((r,g,b,1),a)
+                self.useDefaultAppearance = False
+            self.markChanged(False,True)
+        elif 'color' in self.attributes:
+            if hasattr(self,'oldAppearance'):
+                basecolor = self.oldAppearance
+            else:
+                basecolor = self.attributes['color']
+                if basecolor is None:
+                    basecolor = [0.5,0.5,0.5,1]
+                self.oldAppearance = basecolor
+            if color is None:
+                self.attributes['color'] = basecolor
+            else:
+                r,g,b,a = color
+                newcolor = vectorops.interpolate(basecolor,[r,g,b,1],a)
+                self.attributes['color'] = newcolor
+        else:
+            #TODO: tint other objects that don't have appearance or color?
+            pass
+        for (k,app) in self.subAppearances.items():
+            app.highlight(color)
+
 
     def make_editor(self,world=None):
         if self.editor is not None:
@@ -3961,6 +4001,8 @@ class VisualizationScene:
         with _globalLock:
             item = self.getItem(name)
             item.useDefaultAppearance = True
+            if hasattr(self,'oldAppearance'):
+                item.appearance().set(self.oldAppearance)
             item.markChanged(config=False,appearance=True)
             self.doRefresh = True
 
@@ -4197,7 +4239,7 @@ class VisualizationScene:
         data = [(None,None),float('inf')]  #closest and closest distance
         def doclick(name,visappearance,data=data):
             item = visappearance.item
-            if filter is not None or filter(name,item):
+            if filter is None or filter(name,item):
                 if len(visappearance.subAppearances) != 0:
                     for sname,app in visappearance.subAppearances.items():
                         doclick(sname,app)
