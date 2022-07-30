@@ -45,7 +45,7 @@ klampt.control.blocks.filters module
 klampt.control.blocks.state_machine module
 -------------------------------------------
 
-.. automodule:: klampt.control.blocks.filters
+.. automodule:: klampt.control.blocks.state_machine
     :autosummary:
     :members:
     :undoc-members:
@@ -54,7 +54,7 @@ klampt.control.blocks.state_machine module
 klampt.control.blocks.trajectory_tracking module
 ------------------------------------------------
 
-.. automodule:: klampt.control.blocks.filters
+.. automodule:: klampt.control.blocks.trajectory_tracking
     :autosummary:
     :members:
     :undoc-members:

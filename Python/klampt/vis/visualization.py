@@ -1,5 +1,5 @@
 """Klamp't visualization routines.  See
-`vistemplate.py in Klampt-examples <https://github.com/krishauser/Klampt-examples/Python/demos/vistemplate.py>`_
+`vistemplate.py in Klampt-examples <https://github.com/krishauser/Klampt-examples/blob/master/Python3/demos/vis_template.py>`_
 for an example of how to run this module.
 
 OVERVIEW
