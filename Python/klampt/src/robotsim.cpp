@@ -1837,6 +1837,24 @@ void Appearance::setColors(int feature,float* colors,int m,int n)
     throw PyException("Invalid feature, can only do per-element colors for VERTICES or FACES");
   }
 }
+void Appearance::setTintColor(const float color[4],float strength)
+{
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) throw PyException("Invalid appearance");
+  app->SetTintColor(GLDraw::GLColor(color),strength);
+}
+void Appearance::getTintColor(float out[4])
+{
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) throw PyException("Invalid appearance");
+  for(int i=0;i<4;i++) out[i]=app->tintColor.rgba[i];
+}
+float Appearance::getTintStrength()
+{
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) throw PyException("Invalid appearance");
+  return app->tintStrength;
+}
 void Appearance::setElementColor(int feature,int element,float r,float g,float b,float a)
 {
   shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);

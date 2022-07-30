@@ -2066,7 +2066,7 @@ class Geometry3D(object):
 
 
         Args:
-            arg2 (:class:`~klampt.TriangleMesh` or :class:`~klampt.ConvexHull` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.Geometry3D` or :class:`~klampt.VolumeGrid` or :class:`~klampt.PointCloud`, optional): 
+            arg2 (:class:`~klampt.PointCloud` or :class:`~klampt.TriangleMesh` or :class:`~klampt.ConvexHull` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.Geometry3D` or :class:`~klampt.VolumeGrid`, optional): 
         """
         _robotsim.Geometry3D_swiginit(self, _robotsim.new_Geometry3D(*args))
     __swig_destroy__ = _robotsim.delete_Geometry3D
@@ -2911,6 +2911,31 @@ class Appearance(object):
 
         """
         return _robotsim.Appearance_setColors(self, feature, np_array2)
+
+    def setTintColor(self, color:  "float const [4]", strength: float) ->None:
+        r"""
+        Sets a temporary tint color that modulates the appearance of the object. This
+        works with both flat colors and per-vertex / per-face colors.  
+
+        Args:
+            color (:obj:`float [4]`)
+            strength (float)
+        """
+        return _robotsim.Appearance_setTintColor(self, color, strength)
+
+    def getTintColor(self) ->None:
+        r"""
+        Retrieves the tint color.  
+
+        """
+        return _robotsim.Appearance_getTintColor(self)
+
+    def getTintStrength(self) ->float:
+        r"""
+        Retrieves the tint strength.  
+
+        """
+        return _robotsim.Appearance_getTintStrength(self)
 
     def setShininess(self, shininess: float, strength: float=-1) ->None:
         r"""
@@ -5809,7 +5834,7 @@ class WorldModel(object):
 
 
         Args:
-            robot (str or int): 
+            robot (int or str): 
             index (int, optional): 
             name (str, optional): 
 
@@ -5946,7 +5971,7 @@ class WorldModel(object):
             terrain (:class:`~klampt.TerrainModel`, optional): 
 
         Returns:
-            (:class:`~klampt.RobotModel` or :class:`~klampt.TerrainModel` or :class:`~klampt.RigidObjectModel`):
+            (:class:`~klampt.RigidObjectModel` or :class:`~klampt.TerrainModel` or :class:`~klampt.RobotModel`):
         """
         return _robotsim.WorldModel_add(self, *args)
 
@@ -6726,7 +6751,7 @@ class GeneralizedIKObjective(object):
 
 
         Args:
-            obj (:obj:`GeneralizedIKObjective` or :class:`~klampt.RigidObjectModel`, optional): 
+            obj (:class:`~klampt.RigidObjectModel` or :obj:`GeneralizedIKObjective`, optional): 
             link (:class:`~klampt.RobotModelLink`, optional): 
             link2 (:class:`~klampt.RobotModelLink`, optional): 
             obj2 (:class:`~klampt.RigidObjectModel`, optional): 
@@ -7017,7 +7042,7 @@ class SimRobotSensor(object):
 
 
         Args:
-            link (:class:`~klampt.RobotModelLink` or int): 
+            link (int or :class:`~klampt.RobotModelLink`): 
         """
         return _robotsim.SimRobotSensor_setLink(self, *args)
 
@@ -8178,7 +8203,7 @@ class Simulator(object):
 
 
         Args:
-            robot (:class:`~klampt.RobotModel` or int): 
+            robot (int or :class:`~klampt.RobotModel`): 
 
         Returns:
             :class:`~klampt.SimRobotController`:
