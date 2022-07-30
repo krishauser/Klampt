@@ -421,23 +421,11 @@ class SubRobotModelLink:
     def setParent(self,p):
         self._link.setParent(self._robot.tofull(p))
     def getJacobian(self,p):
-        try:
-            #new API entry
-            return self._link.getJacobian2(p,self._robot._links)
-        except AttributeError:
-            return self._robot.fromfull(self._link.getJacobian(p))    
+        return self._link.getJacobianCols(p,self._robot._links)
     def getPositionJacobian(self,p):
-        try:
-            #new API entry
-            return self._link.getPositionJacobian2(p,self._robot._links)
-        except AttributeError:
-            return self._robot.fromfull(self._link.getPositionJacobian(p))    
+        return self._link.getPositionJacobianCols(p,self._robot._links)
     def getOrientationJacobian(self):
-        try:
-            #new API entry
-            return self._link.getOrientationJacobian2(self._robot._links)
-        except AttributeError:
-            return self._robot.fromfull(self._link.getOrientationJacobian())
+        return self._link.getOrientationJacobianCols(self._robot._links)
         
 
 
