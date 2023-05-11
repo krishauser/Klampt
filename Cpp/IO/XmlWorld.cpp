@@ -551,7 +551,7 @@ class XmlAppearance
     }
     int linkindex = robot.LinkIndex(link);
     if(linkindex < 0) {
-      stringstream ss;
+      stringstream ss(link);
       if(ss>>linkindex) {
         if(linkindex < 0 || linkindex >= (int)robot.links.size()) {
           LOG4CXX_ERROR(GET_LOGGER(XmlParser),"XmlWorld: Warning, invalid robot link specified "<<link);
@@ -563,6 +563,7 @@ class XmlAppearance
         return false;
       }
     }
+    printf("Getting link %s: index %d\n",link,linkindex);
     return Get(robot.geomManagers[linkindex]);
   }
 
