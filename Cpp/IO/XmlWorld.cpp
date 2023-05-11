@@ -563,7 +563,6 @@ class XmlAppearance
         return false;
       }
     }
-    printf("Getting link %s: index %d\n",link,linkindex);
     return Get(robot.geomManagers[linkindex]);
   }
 
