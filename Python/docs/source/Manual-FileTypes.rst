@@ -86,6 +86,16 @@ schema.
          Format: ``N q1 ... qN`` where N is the number of DOF in the
          robot.
 
+      *Children*
+
+      -  ``<display>`` or ``<appearance>`` (optional): configures the OpenGL display of the
+         robot or any of its links.
+
+         *Attributes*
+
+         -  ``link`` (int or string): the name or index of the link. If not present, all links are colored as desired. 
+         - All other attributes: see ``<rigidObject><display>``
+
    -  ``<rigidObject>``: adds a rigid object to the world. If the
       ``file`` attribute is not given, then the ``geometry`` child must
       be specified. Note: rotation attributes are applied in sequence.
