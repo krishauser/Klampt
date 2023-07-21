@@ -17,9 +17,9 @@ unpack-deps:
 	cd KrisLibrary
 	tar xvzf ode-0.14.tar.gz
 	tar xvzf glui-2.36.tgz
-	tar xvzf glew-2.0.0.tgz
+	tar xvzf glew-2.1.0.tgz
 
-deps: dep-tinyxml dep-glew dep-glui dep-ode dep-KrisLibrary
+deps: dep-tinyxml dep-glew dep-ode dep-KrisLibrary
 
 dep-KrisLibrary:
 	cd KrisLibrary; cmake .
@@ -33,8 +33,8 @@ dep-glew:
 	echo "skipping glew for Mac build"
 else
 dep-glew:
-	cd glew-2.0.0; make
-	cd glew-2.0.0; sudo make install
+	cd glew-2.1.0; make
+	cd glew-2.1.0; sudo make install
 	echo "/usr/lib64" | sudo tee /etc/ld.so.conf.d/GLEW.conf
 	sudo ldconfig
 endif
