@@ -7263,7 +7263,7 @@ class SimRobotSensor(object):
 
     To use get/setSetting, you will need to know the sensor attribute names and
     types as described in `the Klampt sensor documentation
-    <https://github.com/krishauser/Klampt/blob/master/Documentation/Manual-
+    <https://github.com/krishauser/Klampt/blob/master/Cpp/docs/Manual-
     Control.md#sensors>`_ (same as in the world or sensor XML file). Common settings
     include:  
 
