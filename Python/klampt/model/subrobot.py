@@ -9,6 +9,7 @@ the place of RobotModel.
 from ..robotsim import *
 from .collide import self_collision_iter
 import warnings
+import numpy as np
 from typing import Union,List,Sequence,Tuple
 from .typing import Config,Vector,Vector3,RigidTransform
 
@@ -33,7 +34,7 @@ class SubRobotModel:
         """
         assert isinstance(robot,(RobotModel,SubRobotModel)),"SubRobotModel constructor must be given a RobotModel or SubRobotModel as first argument"
         self._robot = robot
-        self._links = links[:]     #type : List[int]
+        self._links = [ robot.link(i).index for i in links ]     #type : List[int]
         self._drivers = None       #type : List[RobotModelDriver]
         self.index = robot.index
         self.world = robot.world
@@ -46,61 +47,95 @@ class SubRobotModel:
         for i,l in enumerate(self._links):
             if isinstance(l,str):
                 self._links[i] = robot.link(l).getIndex()
+
         self._inv_links = dict((l,i) for (i,l) in enumerate(self._links))
 
-    def tofull(self,object,reference=None):
+    def tofull(self,obj,reference=None):
         """Converts the given index, link, configuration, velocity, or
         trajectory of a sub robot to the corresponding object of the full
         robot. 
 
         Args:
-            object: an integer index, configuration, velocity, matrix, list of 
+            obj: an integer index, configuration, velocity, matrix, list of 
                 configurations, or Trajectory.
-            reference (list, optional): describes the reference 
+            reference (list or array, optional): describes the reference 
                 object that this should fill in for the indices not in this
                 sub-robot. By default, uses the robot's current configuration.
 
         Returns:
             The corresponding object mapped to the full robot.
         """
-        if isinstance(object,int):
-            return self._links[object]
-        elif isinstance(object,SubRobotModelLink):
-            return object._link
-        elif isinstance(object,(list,tuple)):
-            if hasattr(object[0],'__iter__'):
+        if isinstance(obj,int):
+            return self._links[obj]
+        elif isinstance(obj,SubRobotModelLink):
+            return obj._link
+        elif isinstance(obj,np.ndarray): #numpy array, could be 1d or 2d
+            if len(obj.shape)==1:
+                if reference == None:
+                    res = np.array(self._robot.getConfig())
+                elif not hasattr(reference,'__iter__'):
+                    #fill with number
+                    if isinstance(reference,(float,int)):
+                        res = np.repeat(reference,self._robot.numLinks())
+                    else:
+                        raise ValueError("Invalid reference object")
+                else:
+                    res = np.array(reference)
+                res[self._links] = obj
+                return res
+            elif len(obj.shape)==2:
+                if reference == None:
+                    res = np.array([self._robot.getConfig()]*len(obj))
+                elif not hasattr(reference,'__iter__'):
+                    if isinstance(reference,(float,int)): #fill with number
+                        res = np.full((len(obj),self._robot.numLinks()),reference)
+                    else:
+                        raise ValueError("Invalid reference object")
+                elif not hasattr(reference[0],'__iter__'):
+                    #could be a single configuration, repeat it
+                    if len(reference) != self._robot.numLinks():
+                        raise ValueError("Invalid size of reference object")
+                    res = np.repeat(reference,len(obj))
+                else:
+                    res = np.array(reference)
+                res[:,self._links] = obj
+                return res
+            else:
+                raise ValueError("Invalid dimensions of Numpy array object")
+        elif isinstance(obj,(list,tuple)):
+            if hasattr(obj[0],'__iter__'):
                 #treat this as a list of configuration-like objects
                 res = []
                 if reference is not None:
-                    if len(reference) != len(object):
+                    if len(reference) != len(obj): #could be a single configuration
                         if not hasattr(reference[0],'__iter__'):
-                            reference = [reference]*len(object)
+                            reference = [reference]*len(obj)
                         else:
                             raise ValueError("Invalid size of reference object")
                 else:
-                    reference = [None]*len(object)
-                for i,row in enumerate(object):
+                    reference = [None]*len(obj)
+                for i,row in enumerate(obj):
                     assert len(row) == len(self._links)
                     res.append(self.tofull(row,reference=reference[i]))
                 return res
             else:
-                assert len(object) == len(self._links)
+                assert len(obj) == len(self._links)
                 if reference is None:
                     res = self._robot.getConfig()
                 else:
                     res = [v for v in reference]
-                for l,v in zip(self._links,object):
+                for l,v in zip(self._links,obj):
                     res[l] = v
                 return res
         else:
             from .trajectory import Trajectory,HermiteTrajectory
-            if isinstance(object,Trajectory):
-                if isinstance(object,HermiteTrajectory):
+            if isinstance(obj,Trajectory):
+                if isinstance(obj,HermiteTrajectory):
                     raise NotImplementedError("Can't lift hermite trajectories to full robots yet")
-                newmilestones = self.tofull(object.milestones,reference=reference)
-                return object.constructor(object.times,newmilestones)
+                newmilestones = self.tofull(obj.milestones,reference=reference)
+                return obj.constructor()(obj.times,newmilestones)
             else:
-                raise ValueError("Invalid object type, not an integer, configuration, or Trajectory")
+                raise ValueError("Invalid obj type ({}, type {}), not an integer, configuration, or Trajectory".format(obj,type(obj)))
 
     def fromfull(self,object):
         """Converts the given index, configuration, velocity, or trajectory of
@@ -121,6 +156,13 @@ class SubRobotModel:
             return self._inv_links.get(object,None)
         elif isinstance(object,RobotModelLink):
             return SubRobotModelLink(object,self)
+        elif isinstance(object,np.ndarray): #numpy array, could be 1d or 2d
+            if len(object.shape)==1:
+                return object[self._links]
+            elif len(object.shape)==2:
+                return object[:,self._links]
+            else:
+                raise ValueError("Invalid dimensions of Numpy array object")
         elif isinstance(object,(list,tuple)):
             if hasattr(object[0],'__iter__'):
                 #treat this like a list of configurations
@@ -133,6 +175,7 @@ class SubRobotModel:
                 #treat as a configuration 
                 assert len(object) == self._robot.numLinks(),'Object needs to be a configuration of length {}'.format(self._robot.numLinks())
                 return [object[i] for i in self._links]
+        
         else:
             from .trajectory import Trajectory,HermiteTrajectory
             if isinstance(object,Trajectory):
@@ -156,9 +199,8 @@ class SubRobotModel:
         self._drivers = []
         for i in range(self._robot.numDrivers()):
             d = self._robot.driver(i)
-            for l in d.getAffectedLinks():
-                if l in self._links:
-                    self._drivers.append(d)
+            if any((l in self._links) for l in d.getAffectedLinks()):
+                self._drivers.append(d)
 
     def numDrivers(self) -> int:
         if self._drivers is None:
@@ -170,8 +212,8 @@ class SubRobotModel:
             self._computeDrivers()
         if index < 0 or index >= len(self._drivers):
             raise ValueError("Invalid driver index, must be between {} and {}".format(0,len(self._drivers)-1))
-        dindex = self._drivers[index]
-        return SubRobotModelDriver(self._robot.driver(index),self)
+        dindex = self._drivers[index].index
+        return SubRobotModelDriver(self._robot.driver(dindex),self)
   
     def getConfig(self) -> Config:
         q = self._robot.getConfig()
@@ -361,9 +403,9 @@ class SubRobotModel:
         raise NotImplementedError("Can't reduce a sub-robot")
     def mount(self,link,subRobot,R,t):
         self._robot.mount(self.tofull(link),subRobot,R,t)
-    def sensor(self,index):
-        """Returns the SimSensorModel corresponding to index. Note however that
-        you can't set the "link" setting according to this SubRobotModel.
+    def sensor(self,index) -> 'SimRobotSensor':
+        """Returns the SimRobotSensor corresponding to index. Note however that
+        you shouldn't set the "link" setting according to this SubRobotModel.
 
         Args:
             index (int or str)
@@ -371,7 +413,7 @@ class SubRobotModel:
         if isinstance(index,str):
             return self._robot.sensor(index)
         else:
-            return self._robot.sensor(self.tofull(index))
+            return self._robot.sensor(index)
 
 
 class SubRobotModelLink:
@@ -420,11 +462,11 @@ class SubRobotModelLink:
     def setParent(self,p):
         self._link.setParent(self._robot.tofull(p))
     def getJacobian(self,p):
-        self._robot.fromfull(self._link.getJacobian(p))
+        return self._robot.fromfull(self._link.getJacobian(p))
     def getPositionJacobian(self,p):
-        self._robot.fromfull(self._link.getPositionJacobian(p))
+        return self._robot.fromfull(self._link.getPositionJacobian(p))
     def getOrientationJacobian(self):
-        self._robot.fromfull(self._link.getOrientationJacobian())
+        return self._robot.fromfull(self._link.getOrientationJacobian())
 
 
 class SubRobotModelDriver:

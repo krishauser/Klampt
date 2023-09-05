@@ -29,7 +29,7 @@ basic_types = {'int','float','str','bytes','bool'}
 typing_inject_location = 'import __builtin__'
 typing_header = """
 from typing import Sequence,Tuple,Iterator
-from klampt.model.typing import IntArray,Vector,Vector3,Point,Rotation
+from klampt.model.typing import IntArray,Config,Vector,Vector3,Matrix3,Point,Rotation,RigidTransform
 """
 
 #conversions from SWIG docstrings to RST docstrings
@@ -50,6 +50,7 @@ to_python_types = {
     'double [3]': "list of 3 floats",
     'double const [9]': "list of 9 floats (so3 element)",
     'double [9]': "list of 9 floats (so3 element)",
+    'float const [4]':'list of 4 wfloats',
     'std::vector< unsigned char,std::allocator< unsigned char > > const':'bytes',
     'std::vector<(float,std::allocator<(float)>)>':'list of floats',
     'std::vector<(double,std::allocator<(double)>)>':'list of floats',
@@ -114,6 +115,7 @@ to_python_type_hints = {
     "double [3]" : 'Point',
     "double const [9]" : 'Rotation',
     "double const [3]" : 'Point',
+    'float const [4]':'Sequence[float]',
     "double [4]" : "Sequence[float]",
     "double [16]" : "Sequence[float]",
     "std::vector< double > &, std::vector< double > &, std::vector< double > &": "Tuple[Vector,Vector,Vector]",

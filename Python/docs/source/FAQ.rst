@@ -67,7 +67,7 @@ routes:
    `control <Manual-Control.html>`__ functionality
 #. Medium-level `trajectory representation <Manual-Paths.html>`__, execution
    tools (:meth:`klampt.model.trajectory.path_to_trajectory`, :meth:`klampt.model.trajectory.execute_trajectory`)
-   and `inverse kinematics <Manual-IK.html>`__ and `Cartesian path execution <klampt.model.cartesian_path.html>`__.
+   and `inverse kinematics <Manual-IK.html>`__ and `Cartesian path execution <klampt.model.cartesian_trajectory.html>`__.
 #. High-level `motion planning <Manual-Planning.html>`__ tools.
 
 
@@ -179,5 +179,5 @@ for instructions and examples.
 
 To implement a state machine, a controller should manually maintain and
 simulate its behavior in its feedback loop. A framework for such
-controllers is the ``StateMachineController`` class in
-`Python/control/controller.py <../Python/control/controller.py>`__.
+controllers is the ``StateMachineBlock`` class in
+`klampt.control.blocks.state_machine <klampt.control.blocks.html#module-0>`__.

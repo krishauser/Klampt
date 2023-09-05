@@ -84,6 +84,13 @@ class Appearance
   ///
   ///Only supports feature=VERTICES and feature=FACES
   void setColors(int feature,float* np_array2, int m, int n);
+  ///Sets a temporary tint color that modulates the appearance of the object.
+  ///This works with both flat colors and per-vertex / per-face colors.
+  void setTintColor(const float color[4],float strength);
+  ///Retrieves the tint color
+  void getTintColor(float out[4]);
+  ///Retrieves the tint strength
+  float getTintStrength();
   ///Sets the specular highlight shininess and strength.  To turn off, use
   ///``setShininess(0)``.  The specular strength can be set via the second argument.
   ///``setShininess(20,0.1)``.  Note that this changes the specular color

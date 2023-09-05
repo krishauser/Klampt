@@ -53,7 +53,7 @@ using namespace std;
  * (ContactSensor and ForceTorqueSensor) return 0's in kinematic simulation.
  *
  * To use get/setSetting, you will need to know the sensor attribute names
- * and types as described in `the Klampt sensor documentation <https://github.com/krishauser/Klampt/blob/master/Documentation/Manual-Control.md#sensors>`_
+ * and types as described in `the Klampt sensor documentation <https://github.com/krishauser/Klampt/blob/master/Cpp/docs/Manual-Control.md#sensors>`_
  * (same as in the world or sensor XML file). Common settings include:
  * 
  * - rate (float): how frequently the sensor is simulated

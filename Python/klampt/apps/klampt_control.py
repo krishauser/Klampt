@@ -1344,8 +1344,8 @@ def main():
         g_plugin.gui = weakref.proxy(gui)
         g_gui = gui
         dw = QtWidgets.QDesktopWidget()
-        x=dw.width()*0.8
-        y=dw.height()*0.8
+        x=int(dw.width()*0.8)
+        y=int(dw.height()*0.8)
         gui.resize(x,y)
         return gui
     vis.customUI(makefunc)

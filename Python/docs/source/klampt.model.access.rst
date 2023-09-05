@@ -15,7 +15,7 @@ instead of
 
    world.robot(0).link(4).getTransform().
 
-Most notably used in the `klampt.sim.batch <klampt.sim.batch.html>`__ module.
+Most notably used in the `klampt.sim.batch <klampt.sim.html#module-klampt.sim.batch>`__ module.
 
 
 

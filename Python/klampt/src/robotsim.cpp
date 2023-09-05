@@ -442,7 +442,7 @@ void GetPointCloud(const PointCloud& pc,AnyCollisionGeometry3D& geom)
     memcpy(&gpc.properties[0][0],&pc.properties[0],sizeof(double)*pc.properties.size());
     
     int m=(int)pc.propertyNames.size();
-    int k=0;
+    int k=m;
     for(size_t i=1;i<gpc.properties.size();i++,k+=m) {
       //gpc.properties[i].resize(pc.propertyNames.size());
       //gpc.properties[i].copy(&pc.properties[i*pc.propertyNames.size()]);
@@ -1836,6 +1836,24 @@ void Appearance::setColors(int feature,float* colors,int m,int n)
   default:
     throw PyException("Invalid feature, can only do per-element colors for VERTICES or FACES");
   }
+}
+void Appearance::setTintColor(const float color[4],float strength)
+{
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) throw PyException("Invalid appearance");
+  app->SetTintColor(GLDraw::GLColor(color),strength);
+}
+void Appearance::getTintColor(float out[4])
+{
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) throw PyException("Invalid appearance");
+  for(int i=0;i<4;i++) out[i]=app->tintColor.rgba[i];
+}
+float Appearance::getTintStrength()
+{
+  shared_ptr<GLDraw::GeometryAppearance>& app = *reinterpret_cast<shared_ptr<GLDraw::GeometryAppearance>*>(appearancePtr);
+  if(!app) throw PyException("Invalid appearance");
+  return app->tintStrength;
 }
 void Appearance::setElementColor(int feature,int element,float r,float g,float b,float a)
 {

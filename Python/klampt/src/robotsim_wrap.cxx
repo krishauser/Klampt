@@ -29240,6 +29240,148 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Appearance_setTintColor(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
+  float *arg2 ;
+  float arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  float temp2[4] ;
+  float val3 ;
+  int ecode3 = 0 ;
+  PyObject *swig_obj[3] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "Appearance_setTintColor", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_setTintColor" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  {
+    if (!convert_farray(swig_obj[1],temp2,4)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  ecode3 = SWIG_AsVal_float(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "Appearance_setTintColor" "', argument " "3"" of type '" "float""'");
+  } 
+  arg3 = static_cast< float >(val3);
+  {
+    try {
+      (arg1)->setTintColor((float const (*))arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_getTintColor(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
+  float *arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  float temp2[4] ;
+  PyObject *swig_obj[1] ;
+  
+  {
+    arg2 = &temp2[0];
+  }
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_getTintColor" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  {
+    try {
+      (arg1)->getTintColor(arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_farray_obj(arg2,4);
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Appearance_getTintStrength(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  Appearance *arg1 = (Appearance *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  float result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_Appearance, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Appearance_getTintStrength" "', argument " "1"" of type '" "Appearance *""'"); 
+  }
+  arg1 = reinterpret_cast< Appearance * >(argp1);
+  {
+    try {
+      result = (float)(arg1)->getTintStrength();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_float(static_cast< float >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_Appearance_setShininess__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
   PyObject *resultobj = 0;
   Appearance *arg1 = (Appearance *) 0 ;
@@ -50628,6 +50770,102 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_IKSolver_addSecondary(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  IKSolver *arg1 = (IKSolver *) 0 ;
+  IKObjective *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "IKSolver_addSecondary", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_IKSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKSolver_addSecondary" "', argument " "1"" of type '" "IKSolver *""'"); 
+  }
+  arg1 = reinterpret_cast< IKSolver * >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2, SWIGTYPE_p_IKObjective,  0  | 0);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "IKSolver_addSecondary" "', argument " "2"" of type '" "IKObjective const &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "IKSolver_addSecondary" "', argument " "2"" of type '" "IKObjective const &""'"); 
+  }
+  arg2 = reinterpret_cast< IKObjective * >(argp2);
+  {
+    try {
+      (arg1)->addSecondary((IKObjective const &)*arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IKSolver_setSecondary(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  IKSolver *arg1 = (IKSolver *) 0 ;
+  int arg2 ;
+  IKObjective *arg3 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  PyObject *swig_obj[3] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "IKSolver_setSecondary", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_IKSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKSolver_setSecondary" "', argument " "1"" of type '" "IKSolver *""'"); 
+  }
+  arg1 = reinterpret_cast< IKSolver * >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "IKSolver_setSecondary" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3, SWIGTYPE_p_IKObjective,  0  | 0);
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "IKSolver_setSecondary" "', argument " "3"" of type '" "IKObjective const &""'"); 
+  }
+  if (!argp3) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "IKSolver_setSecondary" "', argument " "3"" of type '" "IKObjective const &""'"); 
+  }
+  arg3 = reinterpret_cast< IKObjective * >(argp3);
+  {
+    try {
+      (arg1)->setSecondary(arg2,(IKObjective const &)*arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_IKSolver_clear(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   IKSolver *arg1 = (IKSolver *) 0 ;
@@ -51332,6 +51570,64 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_IKSolver_getSecondaryResidual(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  IKSolver *arg1 = (IKSolver *) 0 ;
+  std::vector< double,std::allocator< double > > *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  std::vector< double > temp2 ;
+  PyObject *swig_obj[1] ;
+  
+  {
+    arg2 = &temp2;
+  }
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_IKSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKSolver_getSecondaryResidual" "', argument " "1"" of type '" "IKSolver *""'"); 
+  }
+  arg1 = reinterpret_cast< IKSolver * >(argp1);
+  {
+    try {
+      (arg1)->getSecondaryResidual(*arg2);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    PyObject *o, *o2, *o3;
+    o = convert_darray_obj(&(*arg2)[0],(int)arg2->size());
+    if ((!resultobj) || (resultobj == Py_None)) {
+      resultobj = o;
+    } else {
+      if (!PyTuple_Check(resultobj)) {
+        PyObject *o2 = resultobj;
+        resultobj = PyTuple_New(1);
+        PyTuple_SetItem(resultobj,0,o2);
+      }
+      o3 = PyTuple_New(1);
+      PyTuple_SetItem(o3,0,o);
+      o2 = resultobj;
+      resultobj = PySequence_Concat(o2,o3);
+      Py_DECREF(o2);
+      Py_DECREF(o3);
+    }
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_IKSolver_solve(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   IKSolver *arg1 = (IKSolver *) 0 ;
@@ -51364,6 +51660,118 @@ SWIGINTERN PyObject *_wrap_IKSolver_solve(PyObject *SWIGUNUSEDPARM(self), PyObje
   return resultobj;
 fail:
   return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IKSolver_minimize__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  IKSolver *arg1 = (IKSolver *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  bool result;
+  
+  if ((nobjs < 1) || (nobjs > 1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_IKSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKSolver_minimize" "', argument " "1"" of type '" "IKSolver *""'"); 
+  }
+  arg1 = reinterpret_cast< IKSolver * >(argp1);
+  {
+    try {
+      result = (bool)(arg1)->minimize();
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IKSolver_minimize__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  IKSolver *arg1 = (IKSolver *) 0 ;
+  PyObject *arg2 = (PyObject *) 0 ;
+  PyObject *arg3 = (PyObject *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  bool result;
+  
+  if ((nobjs < 3) || (nobjs > 3)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_IKSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKSolver_minimize" "', argument " "1"" of type '" "IKSolver *""'"); 
+  }
+  arg1 = reinterpret_cast< IKSolver * >(argp1);
+  arg2 = swig_obj[1];
+  arg3 = swig_obj[2];
+  {
+    try {
+      result = (bool)(arg1)->minimize(arg2,arg3);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_From_bool(static_cast< bool >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IKSolver_minimize(PyObject *self, PyObject *args) {
+  Py_ssize_t argc;
+  PyObject *argv[4] = {
+    0
+  };
+  
+  if (!(argc = SWIG_Python_UnpackTuple(args, "IKSolver_minimize", 0, 3, argv))) SWIG_fail;
+  --argc;
+  if (argc == 1) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_IKSolver, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      return _wrap_IKSolver_minimize__SWIG_0(self, argc, argv);
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_IKSolver, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      _v = (argv[1] != 0);
+      if (_v) {
+        _v = (argv[2] != 0);
+        if (_v) {
+          return _wrap_IKSolver_minimize__SWIG_1(self, argc, argv);
+        }
+      }
+    }
+  }
+  
+fail:
+  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'IKSolver_minimize'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    IKSolver::minimize()\n"
+    "    IKSolver::minimize(PyObject *,PyObject *)\n");
+  return 0;
 }
 
 
@@ -51533,6 +51941,58 @@ SWIGINTERN PyObject *_wrap_IKSolver_objectives_get(PyObject *SWIGUNUSEDPARM(self
   }
   arg1 = reinterpret_cast< IKSolver * >(argp1);
   result = (std::vector< IKObjective,std::allocator< IKObjective > > *)& ((arg1)->objectives);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_IKObjective_std__allocatorT_IKObjective_t_t, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IKSolver_secondary_objectives_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  IKSolver *arg1 = (IKSolver *) 0 ;
+  std::vector< IKObjective,std::allocator< IKObjective > > *arg2 = (std::vector< IKObjective,std::allocator< IKObjective > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "IKSolver_secondary_objectives_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_IKSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKSolver_secondary_objectives_set" "', argument " "1"" of type '" "IKSolver *""'"); 
+  }
+  arg1 = reinterpret_cast< IKSolver * >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_std__vectorT_IKObjective_std__allocatorT_IKObjective_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "IKSolver_secondary_objectives_set" "', argument " "2"" of type '" "std::vector< IKObjective,std::allocator< IKObjective > > *""'"); 
+  }
+  arg2 = reinterpret_cast< std::vector< IKObjective,std::allocator< IKObjective > > * >(argp2);
+  if (arg1) (arg1)->secondary_objectives = *arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_IKSolver_secondary_objectives_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  IKSolver *arg1 = (IKSolver *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  std::vector< IKObjective,std::allocator< IKObjective > > *result = 0 ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_IKSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "IKSolver_secondary_objectives_get" "', argument " "1"" of type '" "IKSolver *""'"); 
+  }
+  arg1 = reinterpret_cast< IKSolver * >(argp1);
+  result = (std::vector< IKObjective,std::allocator< IKObjective > > *)& ((arg1)->secondary_objectives);
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_IKObjective_std__allocatorT_IKObjective_t_t, 0 |  0 );
   return resultobj;
 fail:
@@ -64422,7 +64882,12 @@ static PyMethodDef SwigMethods[] = {
 		"TriangleMesh_getVertices(TriangleMesh self)\n"
 		"\n"
 		"\n"
-		"Retrieves a view of the vertices as an nx3 Numpy array.  \n"
+		"Retrieves an array view of the vertices.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    ndarray: an nx3 Numpy array. Setting elements of this array will\n"
+		"    change the vertices.  \n"
 		"\n"
 		""},
 	 { "TriangleMesh_setVertices", _wrap_TriangleMesh_setVertices, METH_VARARGS, "\n"
@@ -64436,7 +64901,12 @@ static PyMethodDef SwigMethods[] = {
 		"TriangleMesh_getIndices(TriangleMesh self)\n"
 		"\n"
 		"\n"
-		"Retrieves a view of the vertices as an mx3 Numpy array.  \n"
+		"Retrieves an array view of the triangle indices.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    ndarray: an mx3 Numpy array of int32 type. Setting elements of this\n"
+		"    array will change the indices.  \n"
 		"\n"
 		""},
 	 { "TriangleMesh_setIndices", _wrap_TriangleMesh_setIndices, METH_VARARGS, "\n"
@@ -64483,7 +64953,12 @@ static PyMethodDef SwigMethods[] = {
 		"ConvexHull_getPoints(ConvexHull self)\n"
 		"\n"
 		"\n"
-		"Retrieves a view of the points as an nx3 Numpy array.  \n"
+		"Retrieves a view of the points.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    ndarray: an nx3 Numpy array. Setting elements of this array will\n"
+		"    change the points.  \n"
 		"\n"
 		""},
 	 { "ConvexHull_setPoints", _wrap_ConvexHull_setPoints, METH_VARARGS, "\n"
@@ -64549,7 +65024,12 @@ static PyMethodDef SwigMethods[] = {
 		"PointCloud_getPoints(PointCloud self)\n"
 		"\n"
 		"\n"
-		"Returns a view of the points as an nx3 Numpy array.  \n"
+		"Returns a view of the points.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    ndarray: an nx3 Numpy array. Setting elements of this array will\n"
+		"    change the points.  \n"
 		"\n"
 		""},
 	 { "PointCloud_setPoints", _wrap_PointCloud_setPoints, METH_VARARGS, "\n"
@@ -64629,12 +65109,21 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns property named pindex of all points as an array.  \n"
 		"\n"
+		"Returns:  \n"
+		"\n"
+		"    ndarray: an n-D Numpy array.  \n"
+		"\n"
 		""},
 	 { "PointCloud_getAllProperties", _wrap_PointCloud_getAllProperties, METH_O, "\n"
 		"PointCloud_getAllProperties(PointCloud self)\n"
 		"\n"
 		"\n"
-		"Returns all the properties as an nxp array.  \n"
+		"Returns all the properties of all points as an array view.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    ndarray: an nxk Numpy array. Setting elements of this array will\n"
+		"    change the vertices.  \n"
 		"\n"
 		""},
 	 { "PointCloud_translate", _wrap_PointCloud_translate, METH_VARARGS, "\n"
@@ -64839,10 +65328,14 @@ static PyMethodDef SwigMethods[] = {
 		"VolumeGrid_set(VolumeGrid self, int i, int j, int k, double value)\n"
 		"\n"
 		"\n"
+		"Sets a specific element of a cell.  \n"
+		"\n"
 		""},
 	 { "VolumeGrid_get", _wrap_VolumeGrid_get, METH_VARARGS, "\n"
 		"VolumeGrid_get(VolumeGrid self, int i, int j, int k) -> double\n"
 		"\n"
+		"\n"
+		"Gets a specific element of a cell.  \n"
 		"\n"
 		""},
 	 { "VolumeGrid_shift", _wrap_VolumeGrid_shift, METH_VARARGS, "\n"
@@ -64860,6 +65353,8 @@ static PyMethodDef SwigMethods[] = {
 	 { "VolumeGrid_setValues", _wrap_VolumeGrid_setValues, METH_VARARGS, "\n"
 		"VolumeGrid_setValues(VolumeGrid self, double * np_array3)\n"
 		"\n"
+		"\n"
+		"Sets the values to a 3D numpy array.  \n"
 		"\n"
 		""},
 	 { "VolumeGrid_bbox_set", _wrap_VolumeGrid_bbox_set, METH_VARARGS, "VolumeGrid_bbox_set(VolumeGrid self, doubleVector bbox)"},
@@ -65599,6 +66094,28 @@ static PyMethodDef SwigMethods[] = {
 		"If n == 3, each row is an rgb value.  \n"
 		"\n"
 		"Only supports feature=VERTICES and feature=FACES  \n"
+		"\n"
+		""},
+	 { "Appearance_setTintColor", _wrap_Appearance_setTintColor, METH_VARARGS, "\n"
+		"Appearance_setTintColor(Appearance self, float const [4] color, float strength)\n"
+		"\n"
+		"\n"
+		"Sets a temporary tint color that modulates the appearance of the object. This\n"
+		"works with both flat colors and per-vertex / per-face colors.  \n"
+		"\n"
+		""},
+	 { "Appearance_getTintColor", _wrap_Appearance_getTintColor, METH_O, "\n"
+		"Appearance_getTintColor(Appearance self)\n"
+		"\n"
+		"\n"
+		"Retrieves the tint color.  \n"
+		"\n"
+		""},
+	 { "Appearance_getTintStrength", _wrap_Appearance_getTintStrength, METH_O, "\n"
+		"Appearance_getTintStrength(Appearance self) -> float\n"
+		"\n"
+		"\n"
+		"Retrieves the tint strength.  \n"
 		"\n"
 		""},
 	 { "Appearance_setShininess", _wrap_Appearance_setShininess, METH_VARARGS, "\n"
@@ -67089,10 +67606,16 @@ static PyMethodDef SwigMethods[] = {
 		"Computes the inverse dynamics. Uses Recursive Newton Euler solver and takes O(n)\n"
 		"time.  \n"
 		"\n"
+		"Specifically, solves for :math:`\\tau` in the (partial) dynamics equation:  \n"
+		"\n"
+		".. math::  \n"
+		"\n"
+		"    `B(q) \\ddot{q} + C(q,@dot {q}) = \\tau`  \n"
+		"\n"
 		".. note::  \n"
 		"\n"
-		"    Does not include gravity term G(q).  getGravityForces(g) will need\n"
-		"    to be added to the result.  \n"
+		"    Does not include gravity term G(q).  getGravityForces(g) will\n"
+		"    need to be added to the result.  \n"
 		"\n"
 		"Returns:  \n"
 		"\n"
@@ -67104,12 +67627,19 @@ static PyMethodDef SwigMethods[] = {
 		"RobotModel_accelFromTorques(RobotModel self, doubleVector t)\n"
 		"\n"
 		"\n"
-		"Computes the foward dynamics (using Recursive Newton Euler solver)  \n"
+		"Computes the foward dynamics. Uses Recursive Newton Euler solver and takes O(n)\n"
+		"time.  \n"
+		"\n"
+		"Specifically, solves for :math:`\\ddot{q}` in the (partial) dynamics equation:  \n"
+		"\n"
+		".. math::  \n"
+		"\n"
+		"    `B(q) \\ddot{q} + C(q,@dot {q}) = \\tau`  \n"
 		"\n"
 		".. note::  \n"
 		"\n"
-		"    Does not include gravity term G(q).  getGravityForces(g) will need\n"
-		"    to be subtracted from the argument t.  \n"
+		"    Does not include gravity term G(q).  getGravityForces(g) will\n"
+		"    need to be subtracted from the argument t.  \n"
 		"\n"
 		"Returns:  \n"
 		"\n"
@@ -67126,8 +67656,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    list of floats: The n-element configuration that is u fraction of\n"
-		"    the way from a to b  \n"
+		"    The n-element configuration that is u fraction of the way from a to b.  \n"
 		"\n"
 		""},
 	 { "RobotModel_distance", _wrap_RobotModel_distance, METH_VARARGS, "\n"
@@ -67395,7 +67924,7 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"Returns:  \n"
 		"\n"
-		"    tuple: a pair of 3-lists (w,v) where w is the angular velocity\n"
+		"    A pair of 3-lists (w,v) where w is the angular velocity\n"
 		"    vector and v is the translational velocity vector (both in world\n"
 		"    coordinates)  \n"
 		"\n"
@@ -68054,6 +68583,20 @@ static PyMethodDef SwigMethods[] = {
 		"Assigns an existing objective added by add.  \n"
 		"\n"
 		""},
+	 { "IKSolver_addSecondary", _wrap_IKSolver_addSecondary, METH_VARARGS, "\n"
+		"IKSolver_addSecondary(IKSolver self, IKObjective objective)\n"
+		"\n"
+		"\n"
+		"Adds a new objective to the secondary objectives list.  \n"
+		"\n"
+		""},
+	 { "IKSolver_setSecondary", _wrap_IKSolver_setSecondary, METH_VARARGS, "\n"
+		"IKSolver_setSecondary(IKSolver self, int i, IKObjective objective)\n"
+		"\n"
+		"\n"
+		"Assigns an existing objective added by addsecondary.  \n"
+		"\n"
+		""},
 	 { "IKSolver_clear", _wrap_IKSolver_clear, METH_O, "\n"
 		"IKSolver_clear(IKSolver self)\n"
 		"\n"
@@ -68156,6 +68699,14 @@ static PyMethodDef SwigMethods[] = {
 		"with respect to the active Dofs.  \n"
 		"\n"
 		""},
+	 { "IKSolver_getSecondaryResidual", _wrap_IKSolver_getSecondaryResidual, METH_O, "\n"
+		"IKSolver_getSecondaryResidual(IKSolver self)\n"
+		"\n"
+		"\n"
+		"Returns the vector describing the error of the secondary objective at the\n"
+		"current configuration.  \n"
+		"\n"
+		""},
 	 { "IKSolver_solve", _wrap_IKSolver_solve, METH_O, "\n"
 		"IKSolver_solve(IKSolver self) -> bool\n"
 		"\n"
@@ -68163,16 +68714,58 @@ static PyMethodDef SwigMethods[] = {
 		"Tries to find a configuration that satifies all simultaneous objectives up to\n"
 		"the desired tolerance.  \n"
 		"\n"
+		"All of the primary and the secondary objectives are solved simultaneously.  \n"
+		"\n"
 		"Returns:  \n"
 		"\n"
 		"    True if x converged.  \n"
+		"\n"
+		""},
+	 { "IKSolver_minimize", _wrap_IKSolver_minimize, METH_VARARGS, "\n"
+		"IKSolver_minimize(IKSolver self) -> bool\n"
+		"IKSolver_minimize(IKSolver self, PyObject * secondary_objective, PyObject * secondary_objective_grad) -> bool\n"
+		"\n"
+		"\n"
+		"Tries to find a configuration that satifies all simultaneous objectives up to\n"
+		"the desired tolerance or minimizes the residual.  \n"
+		"\n"
+		"The relation to `:func:solve` is that `solve` uses a root-finding method that\n"
+		"tries indirectly to minimize the residual, but it may stall out when the\n"
+		"objectives are infeasible.  \n"
+		"\n"
+		"If secondary objectives are specified, this tries to minimize them once the\n"
+		"primary objectives are satisfied, i.e., it will minimize on the solution\n"
+		"manifold of the primary constraints.  \n"
+		"\n"
+		"There are two flavors of secondary objectives. If no arguments are given, then\n"
+		"any constraints added via `addSecondary` will have their residuals minimized.  \n"
+		"\n"
+		"If the user provides a pair of functions `(f,grad)`, then a custom objective is\n"
+		"specified. Here, `f(q)` is the secondary objective to minimize and `grad(q)` its\n"
+		"gradient. This will override the secondary objectives added via `addSecondary`.\n"
+		"Specifically, q is a function of all robot DOFs, and `grad(q)` should return a\n"
+		"list or tuple of length `len(q)``.  \n"
+		"\n"
+		".. note::  \n"
+		"\n"
+		"    The minimization will occur only over the current active DOFs, which will\n"
+		"    include default active DOFs for secondary objectives.  \n"
+		"\n"
+		"Arguments: secondary_objective (callable): a function `f(q)->float` that should\n"
+		"be minimized. secondary_objective_grad (callable): a function\n"
+		"`grad(q)->`sequence of length `len(q)` giving the gradient of `f` at `q`.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    True if x converged on the primary objectives.  \n"
 		"\n"
 		""},
 	 { "IKSolver_lastSolveIters", _wrap_IKSolver_lastSolveIters, METH_O, "\n"
 		"IKSolver_lastSolveIters(IKSolver self) -> int\n"
 		"\n"
 		"\n"
-		"Returns the number of Newton-Raphson iterations used in the last solve() call.  \n"
+		"Returns the number of Newton-Raphson iterations used in the last solve() call or\n"
+		"the number of Quasi-Newton iterations used in the last minimize() call.  \n"
 		"\n"
 		""},
 	 { "IKSolver_sampleInitial", _wrap_IKSolver_sampleInitial, METH_O, "\n"
@@ -68187,6 +68780,8 @@ static PyMethodDef SwigMethods[] = {
 	 { "IKSolver_robot_get", _wrap_IKSolver_robot_get, METH_O, "IKSolver_robot_get(IKSolver self) -> RobotModel"},
 	 { "IKSolver_objectives_set", _wrap_IKSolver_objectives_set, METH_VARARGS, "IKSolver_objectives_set(IKSolver self, std::vector< IKObjective,std::allocator< IKObjective > > * objectives)"},
 	 { "IKSolver_objectives_get", _wrap_IKSolver_objectives_get, METH_O, "IKSolver_objectives_get(IKSolver self) -> std::vector< IKObjective,std::allocator< IKObjective > > *"},
+	 { "IKSolver_secondary_objectives_set", _wrap_IKSolver_secondary_objectives_set, METH_VARARGS, "IKSolver_secondary_objectives_set(IKSolver self, std::vector< IKObjective,std::allocator< IKObjective > > * secondary_objectives)"},
+	 { "IKSolver_secondary_objectives_get", _wrap_IKSolver_secondary_objectives_get, METH_O, "IKSolver_secondary_objectives_get(IKSolver self) -> std::vector< IKObjective,std::allocator< IKObjective > > *"},
 	 { "IKSolver_tol_set", _wrap_IKSolver_tol_set, METH_VARARGS, "IKSolver_tol_set(IKSolver self, double tol)"},
 	 { "IKSolver_tol_get", _wrap_IKSolver_tol_get, METH_O, "IKSolver_tol_get(IKSolver self) -> double"},
 	 { "IKSolver_maxIters_set", _wrap_IKSolver_maxIters_set, METH_VARARGS, "IKSolver_maxIters_set(IKSolver self, int maxIters)"},

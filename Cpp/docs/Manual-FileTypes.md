@@ -57,6 +57,11 @@ Structure: an XML v1.0 file, containing robots, rigid objects, and terrains, as 
         - `name` (string, optional, default "Robot"): a string to be used as an identifier.
         - `file` (string): the Robot (.rob) file to be loaded. May be relative path, absolute path, or URL.
         - `config` (`Config`, optional): an initial configuration. Format: `N q1 ... qN` where N is the number of DOF in the robot.
+        - _Children_
+         - `<display>` or `<appearance>` (optional): configures the visualization of the object.  Default color is gray with silhouettes.
+         - _Attributes_ 
+           - `link` (int or string): the name or index of the link. If not present, all links are colored as desired. 
+           - All other attributes: see `<rigidObject><display>`
     - `<rigidObject>`: adds a rigid object to the world. If the `file` attribute is not given, then the `geometry` child must be specified. Note: rotation attributes are applied in sequence.
       - _Attributes_
         - `file` (string, optional): the Rigid object (.obj) file to be loaded. May be relative path, absolute path, or URL.

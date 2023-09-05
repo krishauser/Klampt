@@ -52,8 +52,9 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
         self.click_callback = None
         self.hover_callback = None
         self.click_filter = None
-        self.hover_highlight_color = (1,1,0,0.5)
+        self.hover_highlight_color = (1.0,1.0,0.0,0.5)
         self.click_tolerance = 0.01
+        self.hover_item = None
 
     def initialize(self):
         #keep or refresh display lists?
@@ -327,13 +328,16 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
         global _globalLock
         _globalLock.acquire()
         glcommon.GLWidgetPlugin.mousefunc(self,button,state,x,y)
-        if button == 0 and state == 0:
+        if button == 2 and state == 0:  #click using right mouse button
             if self.click_callback is not None:
                 cb = self.click_callback
                 self.click_callback = None
                 self.hover_callback = None
                 (item,pt) = self.rayCast(x,y,self.click_filter,self.click_tolerance)
-                cb(item.name,item.item,pt)
+                if item is not None:
+                    cb(item.name,item.item,pt)
+                else:
+                    cb(None,None,None)
                 if self.hover_item is not None:
                     self.hover_item.highlight(None)
                 self.hover_item = None
@@ -344,12 +348,12 @@ class GLVisualizationPlugin(glcommon.GLWidgetPlugin,VisualizationScene):
         glcommon.GLWidgetPlugin.motionfunc(self,x,y,dx,dy)
         if self.hover_callback is not None:
             (item,pt) = self.rayCast(x,y,self.click_filter,self.click_tolerance)
-            self.hover_callback(item.name,item.item,pt)
             if self.hover_item is not None:
-                if item is None:
+                if self.hover_item is not item:
                     self.hover_item.highlight(None)
-                else:
-                    self.hover_item.highlight(self.hover_highlight_color)
+            if item is not None:
+                self.hover_callback(item.name,item.item,pt)
+                item.highlight(self.hover_highlight_color)
             self.hover_item = item
         _globalLock.release()
     def eventfunc(self,type,args=""):

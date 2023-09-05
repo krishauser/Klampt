@@ -80,8 +80,8 @@ class KlamptWidget(widgets.DOMWidget):
     _view_name = Unicode('KlamptView').tag(sync=True)
     _model_module = Unicode('klampt-jupyter-widget').tag(sync=True)
     _view_module = Unicode('klampt-jupyter-widget').tag(sync=True)
-    _model_module_version = Unicode('0.1.1').tag(sync=True)
-    _view_module_version = Unicode('0.1.1').tag(sync=True)
+    _model_module_version = Unicode('0.1.2').tag(sync=True)
+    _view_module_version = Unicode('0.1.2').tag(sync=True)
     width = Int(800).tag(sync=True)
     height = Int(600).tag(sync=True)
     scene = Dict().tag(sync=True)
@@ -240,7 +240,7 @@ class KlamptWidget(widgets.DOMWidget):
                 #it's a set of configurations
                 rindex = item.robot.index
                 names = []
-                for i,q in enumerate(item):
+                for i,q in enumerate(item.milestones):
                     iname = name+'_'+str(i)
                     self.addGhost(iname,rindex)
                     self.setGhostConfig(q,iname,rindex)

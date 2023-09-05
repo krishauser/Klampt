@@ -192,6 +192,7 @@ bool ManagedGeometry::LoadNoCache(const string& filename)
       return false;
     }
     appearance->Set(*geometry);
+    geometry->appearanceData = AnyValue();  //clear appearance data loaded from file
     return true;
   }
   if(0==strncmp(fn,"ros:PointCloud2//",17)) {
@@ -249,6 +250,7 @@ bool ManagedGeometry::LoadNoCache(const string& filename)
       else {
         appearance->Set(*geometry);
       }
+      geometry->appearanceData = AnyValue();  //clear appearance data loaded from file
       return true;
     }
     else {
@@ -411,8 +413,10 @@ void ManagedGeometry::TransformGeometry(const Math3D::Matrix4& xform)
 void ManagedGeometry::OnGeometryChange()
 {
   //may need to refresh appearance?
-  if(geometry && appearance)
+  if(geometry && appearance) {
      appearance->Set(*geometry);
+     geometry->appearanceData = AnyValue();  //clear appearance data loaded from file
+  }
 }
 
 ManagedGeometry::AppearancePtr ManagedGeometry::Appearance() const
@@ -470,8 +474,10 @@ void ManagedGeometry::DrawGL()
   if(!geometry) return;
   Assert(appearance->geom != NULL);
   //Assert(appearance->geom == geometry.get());
-  if(appearance->geom == NULL)
+  if(appearance->geom == NULL) {
     appearance->Set(*geometry);
+    geometry->appearanceData = AnyValue();  //clear appearance data loaded from file
+  }
   appearance->DrawGL();
 }
 
@@ -480,8 +486,10 @@ void ManagedGeometry::DrawGLOpaque(bool opaque)
   if(!geometry) return;
   Assert(appearance->geom != NULL);
   //Assert(appearance->geom == geometry.get());
-  if(appearance->geom == NULL)
+  if(appearance->geom == NULL) {
     appearance->Set(*geometry);
+    geometry->appearanceData = AnyValue();  //clear appearance data loaded from file
+  }
   GLDraw::GeometryAppearance::Element e = (opaque ? GLDraw::GeometryAppearance::ALL_OPAQUE : GLDraw::GeometryAppearance::ALL_TRANSPARENT);
   appearance->DrawGL(e);
 }

@@ -1,5 +1,5 @@
 """Klamp't visualization routines.  See
-`vistemplate.py in Klampt-examples <https://github.com/krishauser/Klampt-examples/Python/demos/vistemplate.py>`_
+`vistemplate.py in Klampt-examples <https://github.com/krishauser/Klampt-examples/blob/master/Python3/demos/vis_template.py>`_
 for an example of how to run this module.
 
 OVERVIEW
@@ -511,10 +511,16 @@ User Interaction
 - :func:`pick`: asks the user to click on an item in the scene. 
 - :func:`addAction`: adds a keyboard shortcut (GLUT) / menu items (Qt) /
   buttons (IPython).
-- :func:`addButton`: adds a button to the view.
-- :func:`addSelect`: adds a selection dropdown or listbox.
-- :func:`addInput`: adds a string, integer, or float input box.
-- :func:`addWidget`: adds a widget(s) from a JSON description.
+- :func:`addButton`: adds a button to the GUI.
+- :func:`addCheckbox`: adds a checkbox to the GUI.
+- :func:`addSelect`: adds a selection dropdown or listbox to the GUI.
+- :func:`addInput`: adds a string, integer, or float input box to the GUI.
+- :func:`addSlider`: adds a slider to the GUI.
+- :func:`addWidget`: adds a widget(s) to the GUI from a JSON description.
+- :func:`setGUI`: Sets the GUI from a JSON description.
+- :func:`bindWidget`: Binds GUI feedback to a callback function.
+- :func:`removeWidget`: Removes a widget from the GUI.
+- :func:`getWidgetState`: Gets the state of a widget from the GUI.
 
 Global appearance / camera control functions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -579,6 +585,8 @@ will follow the simulation time rather than wall clock time.
 
 
 import threading
+
+from numpy import ptp
 from ..robotsim import *
 from ..math import vectorops,so3,se3
 from . import gldraw
@@ -891,8 +899,10 @@ def nativeWindow():
     return _window_manager.frontend()
 
 def scene() -> "VisualizationScene":
-    """Returns the active window data used by the backend.  The result will be
-    a subclass of :class:`VisualizationScene`.
+    """Returns the active scene used by the backend.  The result will be
+    a subclass of :class:`VisualizationScene`.  In some backends, there
+    will be exactly one window per scene, but in others (split screen)
+    there may be multiple windows per scene.
     """
     global _window_manager
     if _window_manager is None:
@@ -1350,6 +1360,166 @@ def pick(click_callback : Callable, hover_callback : Callable=None,
     """
     scene().pick(click_callback,hover_callback,highlight_color,filter,tolerance)
 
+def addButton(text : str, callback : Callable = None, id : str = None, icon=None, iconformat=None, style=None) -> str:
+    """Adds a button to the GUI. 
+
+    Arguments:
+        text (str): the label
+        callback (callable): a callback that is invoked when the button is
+          clicked.
+        id (str, optional): if given, the id used for removing the widget and
+          retrieving state
+        icon (str): Base64 encoded icon
+        iconformat (str): MIME type of encoded icon
+        style (dict): the HTML style of the button
+    """
+    widget = {'text':text,'type':'button'}
+    if id is not None:
+        widget['id'] = id
+    else:
+        widget['id'] = text
+    if icon is not None:
+        widget['icon'] = icon #TODO: encode
+    if iconformat is not None:
+        widget['iconformat'] = iconformat #TODO: encode
+    if style is not None:
+        widget['style'] = style
+    nativeWindow().addWidget(widget)
+    if callback is not None:
+        scene().bindWidget(widget['id'],callback)
+    return widget['id']
+
+def addCheckbox(text : str, callback : Callable=None, checked=False, id=None, icon=None, iconformat=None, style=None) -> str:
+    """Adds a checkbox  to the GUI. 
+
+    Arguments:
+        text (str): the label
+        callback (callable): a callback that is invoked when the button is
+          clicked.
+        checked (bool): whether the checkbox should be checked.
+        id (str, optional): if given, the id used for removing the widget and
+          retrieving state
+        icon (str): Base64 encoded icon
+        iconformat (str): MIME type of encoded icon
+        style (dict): the HTML style of the button
+    """
+    widget = {'text':text,'type':'checkbox'}
+    if id is not None:
+        widget['id'] = id
+    else:
+        widget['id'] = text
+    if checked:
+        widget['state'] = 'checked'
+    else:
+      widget['state'] = ''
+    if icon is not None:
+        widget['icon'] = icon #TODO: encode
+    if iconformat is not None:
+        widget['iconformat'] = iconformat #TODO: encode
+    if style is not None:
+        widget['style'] = style
+    nativeWindow().addWidget(widget)
+    if callback is not None:
+        scene().bindWidget(widget['id'],callback)
+    return widget['id']
+
+def addSelect(text : str, options : List[str], callback : Callable=None, selection=None, id=None, multiple=False, style=None) -> str:
+    """Adds a selection widget to the GUI. 
+
+    Arguments:
+        text (str): the label displayed next to the selection
+        options (list of str): the list of options in the box.
+        callback (callable): a callback that is invoked when the selection is changed.
+        selection (str or list of str): the selection
+        id (str, optional): if given, the id used for removing the widget and
+          retrieving state
+        multiple (bool): whether multiple items can be selected.
+        style (dict): the HTML style of the button
+    """
+    widget = {'text':text,'type':'select','options':options}
+    if id is not None:
+        widget['id'] = id
+    else:
+        widget['id'] = text
+    if state is not None:
+        if isinstance(state,str):
+            state=[state]
+        widget['state'] = state
+    else:
+      widget['state'] = []
+    if style is not None:
+        widget['style'] = style
+    nativeWindow().addWidget(widget)
+    if callback is not None:
+        scene().bindWidget(widget['id'],callback)
+    return widget['id']
+
+def addInput(text: str, value : Union[str,int,float], callback : Callable=None, id=None, min:Union[int,float]=None, max:Union[int,float]=None, style=None) -> str:
+    """Adds a text or numeric input to the GUI. 
+
+    Arguments:
+        text (str): the label displayed next to the item.
+        value (str, int, or float): the value to edit.
+        callback (callable): a callback that is invoked when the selection is changed.
+        selection (str or list of str): the selection
+        id (str, optional): if given, the id used for removing the widget and
+          retrieving state
+        min (int,float): minimum value allowed
+        max (int,float): maximum value allowed
+        style (dict): the HTML style of the button
+    """
+    if isinstance(value,(int,float)):
+        widget = {'text':text,'type':'number','state':value}
+        if isinstance(value,float):
+            widget['step'] = 'any'
+        else:
+            widget['step'] = 1
+        if min is not None:
+            widget['min'] = min
+        if max is not None:
+            widget['max'] = max
+    else:
+        widget = {'text':text,'type':'text','state':value}
+    if id is not None:
+        widget['id'] = id
+    else:
+        widget['id'] = text
+    if style is not None:
+        widget['style'] = style
+    nativeWindow().addWidget(widget)
+    if callback is not None:
+        scene().bindWidget(widget['id'],callback)
+    return widget['id']
+
+def addWidget(widget : dict):
+    """Adds a widget to the GUI"""
+    if 'id' not in widget:
+        raise ValueError("Object needs id field")
+    if 'type' not in widget:
+        raise ValueError("Object needs type field")
+    nativeWindow().addWidget(widget)
+
+def setGUI(menu : dict) -> None:
+    """Replaces a whole GUI with the JSONGUI object."""
+    nativeWindow().setGUI(menu)
+
+def bindWidget(id : str, callback : Callable) -> None:
+    """Provides a callback function that is triggered when the named GUI widget
+    is interacted with.
+    """
+    nativeWindow().bindWidget(id,callback)
+
+def removeWidget(id : str) -> None:
+    """Removes a widget by id.
+    """
+    nativeWindow().removeWidget(id)
+
+def getWidgetState(id : str) -> Union[str,int,float,List[str]]:
+    """Returns the widget state by id.
+    """
+    return nativeWindow().getWidgetState(id)
+
+
 def setAppearance(name : ItemPath, appearance : Appearance) -> None:
     """Changes the Appearance of an item, for an item that uses the Appearance
     item to draw (config, geometry, robots, rigid bodies).
@@ -1498,7 +1668,7 @@ def _getBounds(object):
 
 
 def autoFitViewport(viewport : Viewport, objects : Sequence, zoom=True,rotate=True) -> None: 
-    from ..model.sensing import fit_plane_centroid
+    from ..model.geometry import fit_plane_centroid
     ofs = sum([_getOffsets(o) for o in objects],[])
     pts = sum([_getBounds(o) for o in objects],[])
     #print("Bounding box",bb,"center",center)
@@ -1672,8 +1842,8 @@ def followCamera(target,translate=True,rotate=False,center=False) -> None:
       were fixed to the object.
 
     Args:
-        target (str, Trajectory, or None): the target that is to be followed.
-            If this is None, the camera no longer follows anything.
+        target (str, SimRobotSensor, Trajectory, or None): the target that is
+            to be followed. If None, the camera stops following anything.
         translate (bool, optional): whether the camera should follow using
             translation.
         rotate (bool, optional): whether the camera should follow using
@@ -3235,7 +3405,8 @@ class VisAppearance:
         elif hasattr(self.item,'geometry') and callable(self.item.geometry):
             geom = self.item.geometry()
         #TODO: ray cast other items like points, transforms, trajectories
-        if geom is None: return None
+        if geom is None:
+            return None
         margin = geom.getCollisionMargin()
         if geom.type() == 'PointCloud':
             geom.setCollisionMargin(tolerance)
@@ -3254,6 +3425,43 @@ class VisAppearance:
                 except ValueError as e:
                     raise ValueError("Invalid sub-path specified "+str(path)+" at "+str(e))
         raise ValueError("Invalid sub-item specified "+str(path[0]))
+
+    def highlight(self,color):
+        """Turn on/off a temporary highlight.  color can be a (r,g,b,strength)
+        tuple or None.
+        """
+        item = self.item
+        if hasattr(item,'appearance'):
+            self.customAppearance = item.appearance().clone()
+            if color is None:
+                self.customAppearance.setTintColor((1,1,1,1),0)
+                #self.useDefaultAppearance = True
+                #item.appearance().set(self.customAppearance)
+            else:
+                r,g,b,a = color
+                self.customAppearance.setTintColor((r,g,b,1),a)
+                self.useDefaultAppearance = False
+            self.markChanged(False,True)
+        elif 'color' in self.attributes:
+            if hasattr(self,'oldAppearance'):
+                basecolor = self.oldAppearance
+            else:
+                basecolor = self.attributes['color']
+                if basecolor is None:
+                    basecolor = [0.5,0.5,0.5,1]
+                self.oldAppearance = basecolor
+            if color is None:
+                self.attributes['color'] = basecolor
+            else:
+                r,g,b,a = color
+                newcolor = vectorops.interpolate(basecolor,[r,g,b,1],a)
+                self.attributes['color'] = newcolor
+        else:
+            #TODO: tint other objects that don't have appearance or color?
+            pass
+        for (k,app) in self.subAppearances.items():
+            app.highlight(color)
+
 
     def make_editor(self,world=None):
         if self.editor is not None:
@@ -3793,6 +4001,8 @@ class VisualizationScene:
         with _globalLock:
             item = self.getItem(name)
             item.useDefaultAppearance = True
+            if hasattr(self,'oldAppearance'):
+                item.appearance().set(self.oldAppearance)
             item.markChanged(config=False,appearance=True)
             self.doRefresh = True
 
@@ -3889,19 +4099,19 @@ class VisualizationScene:
                 self.setViewport(vp)
 
     def edit(self,name,doedit=True):
-        raise NotImplementedError("Needs to be implemented by subclass")
+        raise NotImplementedError("Editing not implemented by {}".format(self.__class__.__name__))
     
     def pick(self,click_callback,hover_callback,highlight_color,filter,tolerance):
-        raise NotImplementedError("Needs to be implemented by subclass")
+        raise NotImplementedError("Picking not implemented by {}".format(self.__class__.__name__))
 
     def getViewport(self):
-        raise NotImplementedError("Needs to be implemented by subclass")
+        raise NotImplementedError("Viewport ops not implemented by {}".format(self.__class__.__name__))
 
     def setViewport(self,viewport):
-        raise NotImplementedError("Needs to be implemented by subclass")
+        raise NotImplementedError("Viewport ops not implemented by {}".format(self.__class__.__name__))
 
     def setBackgroundColor(self,r,g,b,a=1): 
-        raise NotImplementedError("Needs to be implemented by subclass")
+        raise NotImplementedError("Background color changing not implemented by {}".format(self.__class__.__name__))
 
     def renderGL(self,view):
         """Renders the scene in OpenGL"""
@@ -4029,7 +4239,7 @@ class VisualizationScene:
         data = [(None,None),float('inf')]  #closest and closest distance
         def doclick(name,visappearance,data=data):
             item = visappearance.item
-            if filter is not None or filter(name,item):
+            if filter is None or filter(name,item):
                 if len(visappearance.subAppearances) != 0:
                     for sname,app in visappearance.subAppearances.items():
                         doclick(sname,app)

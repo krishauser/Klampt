@@ -365,7 +365,7 @@ class Group:
         self.points[name] = res
         return res
     def addDirection(self,name,coordinates=[0,0,0],frame='root'):
-        if name in self.direction:
+        if name in self.directions:
             raise ValueError("Direction "+name+" already exists")
         res = self.direction(coordinates,frame)
         res._name = name

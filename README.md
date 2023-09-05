@@ -86,6 +86,13 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 
 ## Version history
 
+**0.9.1** (7/21/2023)
+-   Removed GLUI dependency in default build mode.
+-   Updated GLEW to 2.1.0.
+-   IK solver now has a minimization mode and a prioritized solve mode.
+-   Fixed problem with custom textures being unloaded after a mesh is transformed.
+-   Python API: Fixed bugs with vis module picker.  Also, appearances can now have a tint set to match the C++ API.  Bug fixes in coordinates module.
+
 **0.9** (1/15/2022)
 -   Python API: type hints are available throughout the SWIG interface and in many native Python functions.
 -   Python API: direct Numpy interface speeds up large data copies. Tests indicate ~6x speedup (45ms->7.5ms) for getting a simulated sensor image (``SimRobotSensor.getMeasurements()``), ~80x speedup (160ms->2ms) for converting images to point clouds (``PointCloud.setDepthImage/setRGBDImages``), and 20x speedup (200ms->10ms) for converting a Numpy array to a point cloud (tested on 640x480 images).

@@ -56,7 +56,7 @@ A controller script is a Python file or module that contains a function
 in a :class:`~klampt.model.robotinfo.RobotInfo` JSON file, which specifies
 the controller, model, parts, and end effectors::
 
-   klampt_control Klampt-examples/robotinfo/ur5_sim.py
+   klampt_control Klampt-examples/robotinfo/ur5/ur5_sim.py
 
 .. image:: _static/images/klampt_control.png
 
@@ -64,7 +64,7 @@ Alternatively, the script may be specified directly on
 the command line along with the associated robot or world model.  The following
 launches an interface to control a physical UR5 robot::
 
-   klampt_control Klampt-examples/robotinfo/controllers/ur5/ur5_ril.py Klampt-examples/data/robots/ur5.rob
+   klampt_control Klampt-examples/robotinfo/ur5/controller/ur5_ril.py Klampt-examples/data/robots/ur5.rob
 
 The default kinematic simulation interface is specified with ``klampt.control.simrobotcontroller``,
 so the following controls a virtual UR5::
@@ -77,7 +77,7 @@ Similarly, you can just include the ``--sim`` flag::
 
 To launch a controller as an XML-RPC server, you can simply pass the ``--server`` flag::
 
-   klampt_control --server 0.0.0.0:7881 Klampt-examples/robotinfo/ur5_sim.rob
+   klampt_control --server 0.0.0.0:7881 Klampt-examples/robotinfo/ur5/ur5_sim.rob
 
 To run the ``klampt_control`` GUI in client mode, run::
 
@@ -86,7 +86,7 @@ To run the ``klampt_control`` GUI in client mode, run::
 If you are not running on the same machine or do not have the same directory structure, you
 will need to specify the robot file as well::
 
-   klampt_control --client http://[SERVER_IP]:7881 Klampt-examples/robotinfo/ur5_sim.rob
+   klampt_control --client http://[SERVER_IP]:7881 Klampt-examples/robotinfo/ur5/ur5_sim.rob
 
 
 

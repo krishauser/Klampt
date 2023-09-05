@@ -14,7 +14,7 @@ from ..math.geodesic import *
 import warnings
 from ..robotsim import RobotModel,RobotModelLink
 from .subrobot import SubRobotModel
-from typing import Optional,Union,Sequence,List,Tuple,Callable
+from typing import Iterable,Optional,Union,Sequence,List,Tuple,Callable
 from .typing import Vector3,Vector,Rotation,RigidTransform
 MetricType = Callable[[Vector,Vector],float]
 
@@ -310,7 +310,13 @@ class Trajectory:
 
     def split(self, time: float) -> Tuple['Trajectory','Trajectory']:
         """Returns a pair of trajectories obtained from splitting this
-        one at the given time"""
+        one at the given time.
+
+        Returns:
+            A pair (prefix,suffix) satisfying prefix.endTime()==time,
+            suffix.startTime()==time, and
+            prefix.milestones[-1]==suffix.milestones[0]
+        """
         if time <= self.times[0]:
             #split before start of trajectory
             return self.constructor()([time],[self.milestones[0]]),self.constructor()([time]+self.times,[self.milestones[0]]+self.milestones)
@@ -412,19 +418,23 @@ class Trajectory:
         """
         return self.discretize_state(dt)
 
-    def remesh(self, newtimes: List[float], tol: float=1e-6) -> Tuple['Trajectory',List[int]]:
-        """Returns a path that has milestones at the times given in newtimes, as well
-        as the current milestone times.  Return value is (path,newtimeidx) where
-        path is the remeshed path, and newtimeidx is a list of time indices for which
-        path.times[newtimeidx[i]] = newtimes[i].
+    def remesh(self, newtimes: Iterable[float], tol: float=1e-6) -> Tuple['Trajectory',List[int]]:
+        """Returns a path that has milestones at the times given in newtimes,
+        as well as the current milestone times. 
 
-        newtimes is an iterable over floats.  It does not need to be sorted. 
-
-        tol is a parameter specifying how closely the returned path must interpolate
-        the original path.  Old milestones will be dropped if they are not needed to follow
-        the path within this tolerance.
+        Args:
+            newtimes: an iterable over floats.  It does not need to be sorted. 
+            tol (float, optional): a parameter specifying how closely the
+                returned path must interpolate the original path.  Old
+                milestones will be dropped if they are not needed to follow the
+                path within this tolerance.
 
         The end behavior is assumed to be 'halt'.
+
+        Returns:
+            A tuple (path,newtimeidx) where path is the remeshed path, and
+            newtimeidx is a list of time indices satisfying
+            ``path.times[newtimeidx[i]] = newtimes[i]``.
         """
         sorter = [(t,-1-i) for (i,t) in enumerate(self.times)]  + [(t,i) for (i,t) in enumerate(newtimes)]
         sorter = sorted(sorter)
@@ -485,7 +495,7 @@ class Trajectory:
         return (res,resindices)
 
     def extractDofs(self,dofs:List[int]) -> 'Trajectory':
-        """Returns a trajectory just over the given DOFs.
+        """Extracts a trajectory just over the given DOFs.
 
         Args:
             dofs (list of int): the indices to extract.
@@ -569,9 +579,13 @@ class RobotTrajectory(Trajectory):
             link: Union[int,str,RobotModelLink],
             discretization: Optional[List[float]] = None
         ) -> 'SE3Trajectory':
-        """Returns the SE3Trajectory corresponding to the link's pose along the robot's
-        trajectory.  If discretization = None, only the milestones are extracted.
-        Otherwise, the piecewise linear approximation at dt = discretization is used.
+        """Computes the link's trajectory as the robot follows this trajectory.
+        If discretization = None, only the milestones are extracted. Otherwise,
+        the piecewise linear approximation at dt = discretization is used.
+
+        Returns:
+            The SE3Trajectory for the link's origin approximating its path
+            as the robot executes this trajectory.
         """
         if discretization != None:
             return self.discretize(discretization).getLinkTrajectory(link)
@@ -593,7 +607,7 @@ class RobotTrajectory(Trajectory):
             if len(m) != self.robot.numLinks():
                 raise ValueError("Invalid length of milestone: {} != {}".format(len(m),self.robot.numLinks()))
     def extractDofs(self, dofs: List[Union[int,str]]) -> 'RobotTrajectory':
-        """Returns a RobotTrajectory just over the given DOFs.
+        """Extracts a RobotTrajectory just over the given DOFs.
 
         Args:
             dofs (list of int or str): the indices to extract
@@ -660,26 +674,30 @@ class SO3Trajectory(GeodesicTrajectory):
     def __init__(self, times: Optional[List[float]] = None, milestones: Optional[List[Vector]] = None):
         GeodesicTrajectory.__init__(self,SO3Space(),times,milestones)
     def deriv_angvel(self, t: float,endBehavior: str = 'halt') -> Vector3:
-        """Returns the derivative at t, in angular velocity form"""
+        """Returns the derivative at t, in angular velocity form."""
         cw = GeodesicTrajectory.deriv(self,t,endBehavior)
         return so3.deskew(cw)
     def preTransform(self,R: Rotation) -> None:
         """Premultiplies every rotation in here by the so3 element
         R. In other words, if R rotates a local frame F to frame F',
         this method converts this SO3Trajectory from coordinates in F
-        to coordinates in F'"""
+        to coordinates in F'. """
         for i,m in enumerate(self.milestones):
             self.milestones[i] = so3.mul(R,m)
     def postTransform(self,R: Rotation) -> None:
         """Postmultiplies every rotation in here by the se3 element
         R. In other words, if R rotates a local frame F to frame F',
         this method converts this SO3Trajectory from describing how F'
-        rotates to how F rotates."""
+        rotates to how F rotates. """
         for i,m in enumerate(self.milestones):
             self.milestones[i] = so3.mul(m,R)
     def getPointTrajectory(self, localPt: Vector3) -> Trajectory:
-        """Returns a Trajectory describing the movement of the point localPt
-        attached to this rotating frame. """
+        """Returns a Trajectory approximating the movement of a point localPt
+        attached to this rotating frame.
+        
+        To improve the accuracy of this approximation, first discretize this
+        trajectory at a finer discretization.
+        """
         return Trajectory(self.times,[so3.apply(m,localPt) for m in self.milestones])
     def checkValid(self):
         Trajectory.checkValid(self)
@@ -692,14 +710,15 @@ class SO3Trajectory(GeodesicTrajectory):
 
 class SE3Trajectory(GeodesicTrajectory):
     """A trajectory that performs interpolation in SE3.  Each milestone (state)
-    is a 12-D flattened :mod:`klampt.math.se3` element (i.e., the concatenation of
-    R + t for an (R,t) pair)."""
+    is a 12-D flattened :mod:`klampt.math.se3` element (i.e., the concatenation
+    of R + t for an (R,t) pair).
+    
+    Constructor can take either a list of SE3 elements or 12-element vectors.
+    """
     def __init__(self,
             times: Optional[List[float]] = None,
             milestones: Optional[Union[List[Vector],List[RigidTransform]]] = None
         ):
-        """Constructor can take either a list of SE3 elements or
-        12-element vectors."""
         if milestones is not None and len(milestones) > 0 and len(milestones[0])==2:
             GeodesicTrajectory.__init__(self,SE3Space(),times,[m[0]+m[1] for m in milestones])
         else:
@@ -717,8 +736,7 @@ class SE3Trajectory(GeodesicTrajectory):
         res = self.eval_state(t,endBehavior)
         return self.to_se3(res)
     def deriv(self, t: float, endBehavior: str = 'halt') -> RigidTransform:
-        """Returns the derivative as the derivatives of an SE3
-        element"""
+        """Returns the derivative as the derivatives of an SE3 element"""
         res = self.deriv_state(t,endBehavior)
         return self.to_se3(res)
     def deriv_screw(self, t:float, endBehavior: str = 'halt') -> Tuple[Vector3,Vector3]:
@@ -747,8 +765,12 @@ class SE3Trajectory(GeodesicTrajectory):
         trajectory."""
         return SO3Trajectory(self.times,[m[:9] for m in self.milestones])
     def getPositionTrajectory(self, localPt: Optional[Vector3] = None) -> Trajectory:
-        """Returns a Trajectory describing the movement of the given
-        local point localPt (or the origin, if none is provided)."""
+        """Returns a Trajectory approximating the movement of the given
+        local point localPt (or the origin, if none is provided).
+
+        To improve the accuracy of this approximation, first discretize this
+        trajectory at a finer discretization.
+        """
         if localPt is None:
             return Trajectory(self.times,[m[9:] for m in self.milestones])
         else:
@@ -756,7 +778,7 @@ class SE3Trajectory(GeodesicTrajectory):
     def checkValid(self):
         Trajectory.checkValid(self)
         for m in self.milestones:
-            if len(m) != 9:
+            if len(m) != 12:
                 raise ValueError("Invalid length of milestone: {} != 12".format(len(m)))
     def extractDofs(self, dofs: List[int]) -> Trajectory:
         if list(dofs) == list(range(9)):
@@ -1055,7 +1077,7 @@ class HermiteTrajectory(Trajectory):
                 raise ValueError("Milestone length isn't even?: {} != {}".format(len(m)))
 
     def extractDofs(self,dofs) -> 'HermiteTrajectory':
-        """Returns a trajectory just over the given DOFs.
+        """Extracts a trajectory just over the given DOFs.
 
         Args:
             dofs (list of int): the (primary) indices to extract. Each entry

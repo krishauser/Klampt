@@ -1,6 +1,8 @@
 klampt.control.blocks package
 =============================
 
+Defines a set of generic “system blocks” that are repeatedly-updating processes. These can implement filters, estimators, read from sensor drivers, or output commands to a simulated or real robot.
+
 .. autosummary::
     ~klampt.control.blocks.core
     ~klampt.control.blocks.robotcontroller
@@ -8,18 +10,10 @@ klampt.control.blocks package
     ~klampt.control.blocks.filters
     ~klampt.control.blocks.state_machine
     ~klampt.control.blocks.trajectory_tracking
-    
+
 
 .. Submodules
 .. ----------
-
-klampt.control.blocks.core module
-----------------------------------
-
-.. automodule:: klampt.control.blocks.core
-    :members:
-    :undoc-members:
-    :show-inheritance:
 
 klampt.control.blocks.robotcontroller module
 ---------------------------------------------
@@ -51,7 +45,7 @@ klampt.control.blocks.filters module
 klampt.control.blocks.state_machine module
 -------------------------------------------
 
-.. automodule:: klampt.control.blocks.filters
+.. automodule:: klampt.control.blocks.state_machine
     :autosummary:
     :members:
     :undoc-members:
@@ -60,7 +54,7 @@ klampt.control.blocks.state_machine module
 klampt.control.blocks.trajectory_tracking module
 ------------------------------------------------
 
-.. automodule:: klampt.control.blocks.filters
+.. automodule:: klampt.control.blocks.trajectory_tracking
     :autosummary:
     :members:
     :undoc-members:

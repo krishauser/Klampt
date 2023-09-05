@@ -3,11 +3,11 @@ klampt.sim package
 
 This package has helper classes for running simulations.  The core functionality is in the klampt.robotsim C++ module, in particular the `Simulator <klampt.robotsim.html#simulation>`_ class.
 
-The `batch <klampt.sim.batch.html>`_ module allows multiple similar simulations to be run relatively easily.
+The `batch <#module-klampt.sim.batch>`_ module allows multiple similar simulations to be run relatively easily.
 
-The `settle <klampt.sim.settle.html>`_ module lets you easily create piles of objects that are stable.
+The `settle <#module-klampt.sim.settle>`_ module lets you easily create piles of objects that are stable.
 
-The `simulation <klampt.sim.simulation.html>`_ and `simlog <klampt.sim.simlog.html>`_ modules let you log, replay, and modify the behavior of simulations more reliably than manually modifying Simulator loops.
+The `simulation <#module-klampt.sim.simulation>`_ and `simlog <#module-klampt.sim.simlog>`_ modules let you log, replay, and modify the behavior of simulations more reliably than manually modifying Simulator loops.
 
 .. Submodules
 .. ----------

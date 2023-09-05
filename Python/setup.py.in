@@ -111,6 +111,14 @@ rssourcefiles = commonfiles + ['robotsim.cpp','robotik.cpp','robotsim_wrap.cxx']
 mpsourcefiles = commonfiles + ['motionplanning.cpp','motionplanning_wrap.cxx']
 rfsourcefiles = commonfiles + ['rootfind.cpp','pyvectorfield.cpp','rootfind_wrap.cxx']
 
+#get oldest numpy version compatible with build
+if sys.version_info[0]==3 and sys.version_info[1]==5:
+    numpy_oldest_acceptable_version = '1.18.5'
+elif sys.version_info[0]==3 and sys.version_info[1]==6:
+    numpy_oldest_acceptable_version = '1.19.5'
+else:
+    numpy_oldest_acceptable_version = '1.20.0'
+
 
 setup(name='Klampt',
       version='@KLAMPT_VERSION@.post2',
@@ -172,7 +180,7 @@ setup(name='Klampt',
       ],
       install_requires=[
         'PyOpenGL',
-        'numpy>=1.20.1'
+        'numpy>='+numpy_oldest_acceptable_version
       ],
      )
 
