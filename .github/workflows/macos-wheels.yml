@@ -12,7 +12,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macOS-10.15]
+        os: [macos-11]
 
     steps:
       - uses: actions/checkout@v2
@@ -23,19 +23,19 @@ jobs:
       - name: Build dependencies
         run: bash make_deps_macos.sh
         env:
-          MACOSX_DEPLOYMENT_TARGET: 10.9
+          MACOSX_DEPLOYMENT_TARGET: 11.0
           LDFLAGS: -framework OpenGL
       
       - name: Check universal build
         run: python check_mac_universal.py
 
       - name: Install cibuildwheel
-        run: python -m pip install cibuildwheel==2.3.1
+        run: python -m pip install cibuildwheel==2.15.0
       
       - name: Build wheels                                                                                                                                          
         run: python -m cibuildwheel --output-dir wheelhouse
         env:
-          MACOSX_DEPLOYMENT_TARGET: 10.9
+          MACOSX_DEPLOYMENT_TARGET: 11.0
           CIBW_ARCHS_MACOS: universal2
           LDFLAGS: -framework OpenGL
 
