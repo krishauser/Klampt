@@ -36,9 +36,13 @@ More information can be found on the Klamp't website (http://klampt.org)
 - Works on several platforms:
     - \*nux environments
     - Windows
-    - MacOS
+    - MacOS up to 10.14 (Mohave)
     - Google Colab
-    
+
+Note: newer versions of MacOS (11+) dropped OpenGL 2.0 support, so Klampt will not build. We're currently looking for alternative cross-platform graphics engines.
+
+Note: We are encountering problems with Ubuntu 22.04 and Python 3.10+ causing an OpenGL library to throw an exception. We're looking into fixes for this problem.
+
 (Please let us know if you are able to compile on other platforms in order to help us support them in the future.)
 
 
