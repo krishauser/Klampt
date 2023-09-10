@@ -31,9 +31,7 @@ def read_resource_contents(package,filename):
     try:
         import importlib
         ref = importlib.resources.files(package) / filename
-        with importlib.resources.as_file(ref) as f:
-            result = ''.join(f.readlines())
-        return result
+        return importlib.resources.read_text(ref)
     except ImportError:
         import pkg_resources
         fn = pkg_resources.resource_filename(package,filename)
