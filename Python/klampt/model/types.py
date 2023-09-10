@@ -16,6 +16,11 @@ _knownTypes = set(['Value','Vector2','Vector3','Matrix3','Point','Rotation','Rig
                 'TriangleMesh','PointCloud','VolumeGrid','GeometricPrimitive','ConvexHull','Geometry3D',
                 'WorldModel','RobotModel','RigidObjectModel','TerrainModel'])
 
+_vectorLikeTypes = set(['Vector2','Vector3','Matrix3','Point','Rotation','Vector','Config'])
+_arrayLikeTypes = set(['Vector2','Vector3','Matrix3','Point','Rotation','RigidTransform','Vector','Config','IntArray','StringArray','Configs'])
+_pathLikeTypes = set(['Configs','Trajectory','LinearPath','MultiPath','SE3Trajectory','SO3Trajectory'])
+_geometryTypes = set(['TriangleMesh','PointCloud','VolumeGrid','GeometricPrimitive','ConvexHull','Geometry3D'])
+
 def known_types():
     """Returns a set of all known Klampt types"""
     global _knownTypes
@@ -231,6 +236,170 @@ def make(type,object=None):
     else:
         raise ValueError("Can't make a Klamp't object of type %s"%(type,))
     return None
+
+
+def info(object,world=None) -> dict:
+    """Returns a dictionary containing metadata for the object. At a minimum,
+    the "type" key will be filled in with the object's type, or None if
+    the Klampt type is unknown.
+    """
+    res = {}
+    try:
+        otypes = object_to_types(object,world)
+    except Exception:
+        res["type"] = None
+        return res
+    otype = otypes
+    if isinstance(otypes,list):
+        otype = otypes[0]
+        res["possible types"] = otypes
+    res["type"] = otype
+    if otype == "Configs":
+        res["items"] = len(object)
+        if len(object) > 0:
+            res["dofs"] = len(object[0])
+    elif otype in _arrayLikeTypes:
+        res["items"] = len(object)
+    elif otype in ["LinearPath","Trajectory","SO3Trajectory","SE3Trajectory"]:
+        res["items"] = len(object.times)
+        res["duration"] = object.duration()
+        res["start time"] = object.startTime()
+        res["end time"] = object.endTime()
+        res["length"] = object.length()
+        if len(object.milestones) > 0:
+            res["dofs"] = len(object.milestones[0])
+    elif otype == "IKGoal":
+        res["link"]=object.link()
+        if object.destLink() >= 0:
+            res["destination link"] = object.destLink()
+        else:
+            res["destination link"] = None
+        res["position dimensions constrained"] = object.numPosDims()
+        res["rotation dimensions constrained"] = object.numRotDims()
+    elif otype == "TriangleMesh":
+        res["vertices"] = len(object.vertices)//3
+        res["triangles"] = len(object.indices)//3
+        bmin,bmax = Geometry3D(object).getBBTight()
+        res["lower bound"] = bmin
+        res["upper bound"] = bmax
+    elif otype == "PointCloud":
+        res["points"] = object.numPoints()
+        res["properties"] = object.numProperties()
+        bmin,bmax = Geometry3D(object).getBBTight()
+        res["lower bound"] = bmin
+        res["upper bound"] = bmax
+    elif otype == "VolumeGrid":
+        res["dims"] = [object.dims[0],object.dims[1],object.dims[2]]
+        if len(object.values) > 0:
+            res["minimum value"] = min(object.values)
+            res["maximum value"] = max(object.values)
+        res["lower bound"] = [object.bbox[0],object.bbox[1],object.bbox[2]]
+        res["upper bound"] = [object.bbox[3],object.bbox[4],object.bbox[5]]
+    elif otype == "Geometry3D":
+        res["geometry type"] = object.type()
+        res["#elements"] = object.numElements()
+        bmin,bmax = object.getBBTight()
+        res["lower bound"] = bmin
+        res["upper bound"] = bmax
+        if object.type() == "Group":
+            res["elements"] = [info(object.getElement(i)) for i in range(object.numElements())]
+    elif otype == 'WorldModel':
+        res["#robots"] = object.numRobots()
+        res["#rigid objects"] = object.numRigidObjects()
+        res["#terrains"] = object.numTerrains()
+        if object.numRobots():
+            res["robots"] = [info(object.robot(i)) for i in range(object.numRobots())]
+        if object.numRigidObjects():
+            res["rigid objects"] = [info(object.rigidObject(i)) for i in range(object.numRigidObjects())]
+        if object.numTerrains():
+            res["terrains"] = [info(object.terrain(i)) for i in range(object.numTerrains())]
+    elif otype == 'RobotModel':
+        res["name"] = object.getName()
+        res["#links"] = object.numLinks()
+        res["#drivers"] = object.numDrivers()
+        links = [{} for i in range(object.numLinks())]
+        for i in range(object.numLinks()):
+            links[i]["joint type"] = ("P" if object.link(i).isPrismatic() else "R")
+            links[i]["name"] = object.link(i).name
+            if not object.link(i).geometry().empty():
+                links[i]["geometry"] = info(object.link(i).geometry())
+        res["links"] = links
+    elif otype in ['RigidObjectModel','TerrainModel']:
+        res["name"] = object.getName()
+        if not object.geometry().empty():
+            res["geometry"] = info(object.geometry())
+    return res
+
+
+def convert(object,dest_type):
+    """Converts an object to a semi-equivalent destination type.
+    
+    Only works for path-like objects (Configs, Trajectory, MultiPath,
+    [X]Trajectory) and geometry objects.
+
+    Object data may be referenced in the result.
+    """
+    global _pathLikeTypes,_geometryTypes, _vectorLikeTypes
+    otype = object_to_type(object)
+    if otype == dest_type:
+        return object
+    source_path_like = (otype in _pathLikeTypes)
+    dest_path_like = (dest_type in _pathLikeTypes)
+    source_geometry = (otype in _geometryTypes)
+    dest_geometry = (dest_type in _geometryTypes)
+    if otype in ["Config","Vector2","Vector3","Vector"] and dest_path_like:
+        #make singleton
+        dest = make(dest_type,object)
+        if isinstance(dest,list):
+            dest.append(object)
+        elif dest_type=="MultiPath":
+            dest.setTrajectory([object])
+        else:
+            dest.times.append(0.0)
+            dest.milestones.append(object)
+        return dest
+    if source_path_like and dest_type in _vectorLikeTypes:
+        #see if singleton can be extracted
+        if otype=='Configs' and len(object)==1:
+            return object[1]
+        elif otype=='MultiPath':
+            if len(object.sections)==1 and len(object.sections[0].configs)==1:
+                return object.sections[0].configs[0]
+        elif len(object.milestones)==1:
+            return object.milestones[1]
+        raise ValueError("Can't convert a path-like object with more than one milestone to a milestone type")
+    if source_path_like and dest_path_like:
+        #path to path
+        if otype == 'MultiPath':
+            object = object.getTrajectory()
+            otype = 'Trajectory'
+        
+        if otype == "Configs":
+            dest = make(dest_type)
+            if dest_type == 'MultiPath':
+                dest.setTrajectory(object)
+            else:
+                dest.times = list(range(len(object)))
+                dest.milestones = object[:]
+            return dest
+        if dest_type == "Configs":
+            return object.milestones[:]
+        else:
+            dest = make(dest_type)
+            if dest_type == 'MultiPath':
+                dest.setTrajectory(object)
+            else:
+                dest.times = object.times[:]
+                dest.milestones = object.miltesones[:]
+            return dest
+    if source_geometry and dest_geometry:
+        #geometry to geometry
+        if not isinstance(object,Geometry3D):
+            object = Geometry3D(object)
+        if dest_type == "Geometry3D":
+            return object
+        return object.convert(dest_type)
+    raise ValueError("Invalid conversion {} -> {}".format(otype,dest_type))
 
 
 def transfer(object,source_robot,target_robot,link_map=None):
