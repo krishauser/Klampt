@@ -182,9 +182,9 @@ if((NOT WIN32) AND KLAMPT_COMPILE_TESTS)
   add_subdirectory(tests)
 endif()
 
-IF(PYTHON)
-  install(CODE "execute_process(COMMAND \"cd Python; ${PYTHON} setup.py install\")" COMPONENT python)
-ENDIF(PYTHON)
+IF(PYTHON3)
+  install(CODE "execute_process(COMMAND \"cd Python; ${PYTHON3} -m pip install .\")" COMPONENT python)
+ENDIF(PYTHON3)
 
 
 # Needs to be last statement:
@@ -199,7 +199,7 @@ MESSAGE (STATUS "  Possible values for [appname]:")
 FOREACH(app ${APPS})
 	MESSAGE (STATUS "    " ${app})
 ENDFOREACH()
-MESSAGE (STATUS "Compile Python API using: make python")
+MESSAGE (STATUS "Compile and install Python API using: make python")
 MESSAGE (STATUS "Compile API-documentation using: make docs\n")
 MESSAGE (STATUS "Compile Python API-documentation using: make python-docs\n")
 MESSAGE (STATUS "Install using: make install")
