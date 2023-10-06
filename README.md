@@ -90,12 +90,14 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 
 ## Version history
 
-**0.9.1** (7/21/2023)
+**0.9.1** (10/6/2023)
 -   Removed GLUI dependency in default build mode.
 -   Updated GLEW to 2.1.0.
 -   IK solver now has a minimization mode and a prioritized solve mode.
 -   Fixed problem with custom textures being unloaded after a mesh is transformed.
--   Python API: Fixed bugs with vis module picker.  Also, appearances can now have a tint set to match the C++ API.  Bug fixes in coordinates module.
+-   Python API: Fixed bugs with vis module picker.  Also, appearances can now have a tint set to match the C++ API.  
+-   Python API: Bug fixes and type hints in coordinates module.
+-   Python API: Bug fix with cost evaluation in EmbeddedCSpace working on the embedded vectors (e.g., causing problems with outputs from makePlan)
 
 **0.9** (1/15/2022)
 -   Python API: type hints are available throughout the SWIG interface and in many native Python functions.
