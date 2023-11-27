@@ -36,9 +36,13 @@ More information can be found on the Klamp't website (http://klampt.org)
 - Works on several platforms:
     - \*nux environments
     - Windows
-    - MacOS
+    - MacOS up to 10.14 (Mohave)
     - Google Colab
-    
+
+Note: newer versions of MacOS (11+) dropped OpenGL 2.0 support, so Klampt will not build. We're currently looking for alternative cross-platform graphics engines.
+
+Note: We are encountering problems with Ubuntu 22.04 and Python 3.10+ causing an OpenGL library to throw an exception. We're looking into fixes for this problem.
+
 (Please let us know if you are able to compile on other platforms in order to help us support them in the future.)
 
 
@@ -86,12 +90,18 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 
 ## Version history
 
-**0.9.1** (7/21/2023)
+**0.9.1** (10/6/2023)
 -   Removed GLUI dependency in default build mode.
 -   Updated GLEW to 2.1.0.
 -   IK solver now has a minimization mode and a prioritized solve mode.
 -   Fixed problem with custom textures being unloaded after a mesh is transformed.
--   Python API: Fixed bugs with vis module picker.  Also, appearances can now have a tint set to match the C++ API.  Bug fixes in coordinates module.
+-   Python API: Added `types.convert` generic utility function.
+-   Python API: Fixed bugs with vis module picker.  Also, appearances can now have a tint set to match the C++ API.  
+-   Python API: Bug fixes and type hints in coordinates module.
+-   Python API: Bug fix with cost evaluation in EmbeddedCSpace working on the embedded vectors (e.g., causing problems with outputs from makePlan)
+-   Python API: Removed ``klampt_path`` app and added functionality to ``klampt_resource`` app instead. 
+-   Python API: Switch from deprecated `pkg_resources` to `importlib` for IO to resource files. 
+-   Python API: Docs now instruct users to use ``pip install .`` rather than deprecated Setuptools.
 
 **0.9** (1/15/2022)
 -   Python API: type hints are available throughout the SWIG interface and in many native Python functions.

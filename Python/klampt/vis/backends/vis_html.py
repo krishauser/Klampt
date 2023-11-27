@@ -4,7 +4,6 @@ from ...io.html import HTMLSharePath
 from IPython.display import display,HTML
 from ...robotsim import WorldModel
 import warnings
-import pkg_resources
 import math
 import time
 
@@ -19,7 +18,7 @@ _PAGE_TEMPLATE = """<!DOCTYPE html>
    </body>
 </html>"""
 
-_VIS_HTML_BOILERPLATE = pkg_resources.resource_filename('klampt','data/vis_html_boilerplate.html')
+_VIS_HTML_BOILERPLATE = 'data/vis_html_boilerplate.html'
 
 class HTMLVisualizationScene(VisualizationScene):
     """Handles the conversion between vis calls and the html output."""

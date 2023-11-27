@@ -18,8 +18,7 @@ machine:
 
 -  CMake (version >= 2.6)
 -  GLPK, the GNU Linear Programming Kit
--  Python, if you wish to build the Python bindings (compatible with
-   Python 2.7 and 3.x).
+-  Python, if you wish to build the Python bindings.
 -  (recommended) Assimp, if you wish to load STL, DAE and other geometry
    file formats. (Only OBJ and OFF are natively supported in Klampt.)
 -  (recommended) Qt5, if you wish to use nicer GUIs for the core
@@ -37,8 +36,12 @@ has step by step instructions, but if you get stuck, perhaps the below
 instructions may help.
 
 **Building dependencies.** First, the dependencies must be downloaded
-and built. GLPK must first be installed in your library path. Change
-into the Klampt/Cpp/Dependencies folder and unpack KrisLibrary, TinyXML,
+and built. On Ubuntu systems, try:
+
+.. code:: sh
+   sudo apt-get install cmake libglpk-dev libassimp-dev qt5-default libpython-dev
+
+Then, change into the Klampt/Cpp/Dependencies folder and unpack KrisLibrary, TinyXML,
 and ODE using the command 'make unpack-deps'. After configuring the
 dependencies as described below, they can be built using the command
 'make deps'.
@@ -69,9 +72,11 @@ Klamp't makefiles.
 RobotPose. Typing 'make [target]' will build the target.
 
 **Building Python bindings.** Once the Klamp't static library is built,
-the Python bindings in Klampt/Python/klampt can be built using "make
-python". To install the klampt module into your Python package, type
-"make python-install".
+the Python bindings in Klampt/Python/klampt can be built and installed into
+your current Python environment using ``make
+python``.  Or, to use another version of Python, you can change directory into
+Klampt/Python and use ``python3.x -m pip install .`` where ``python3.x`` is the
+specific Python executable that you want to use.
 
 IMPORTANT: You must set up Python to be able to find the shared library
 files for external dependencies. Otherwise, you will get errors

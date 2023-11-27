@@ -4,12 +4,15 @@ saving multipaths from xml files.
 
 from ..model.contact import Hold
 from ..math import vectorops
+from . import trajectory
 import xml.etree.ElementTree as ET
 from xml.sax.saxutils import escape
 from xml.dom import minidom
 import math
 import bisect
 import warnings
+from typing import Union,List,Optional,Tuple
+from .typing import Vector
 
 class MultiPath:
     """A sophisticated path representation that allows timed/untimed paths, attached
@@ -56,42 +59,42 @@ class MultiPath:
                 that this section is required to meet.
         """
         def __init__(self):
-            self.settings = {}
-            self.configs = []
-            self.velocities = None
-            self.times = None
-            self.holds = []
-            self.holdIndices = []
-            self.ikObjectives = []
+            self.settings = {}  # dict
+            self.configs = []   # List[Vector]
+            self.velocities = None  #Optional[List[Vector]]
+            self.times = None       #Optional[List[Vector]]
+            self.holds = []         #list
+            self.holdIndices = []   #list
+            self.ikObjectives = []  #list
 
     def __init__(self):
-        self.sections = []
-        self.settings = {}
-        self.holdSet = dict()
+        self.sections = []    #List[MultiPath.Section]
+        self.settings = {}    #dict
+        self.holdSet = dict() #dict
 
-    def numSections(self):
+    def numSections(self) -> int:
         return len(self.sections)
 
-    def startConfig(self):
+    def startConfig(self) -> Vector:
         return self.sections[0].configs[0]
 
-    def endConfig(self):
+    def endConfig(self) -> Vector:
         return self.sections[-1].configs[-1]
 
-    def startTime(self):
+    def startTime(self) -> float:
         if len(self.sections)==0 or self.sections[0].times==None: return 0
         return self.sections[0].times[0]
 
-    def endTime(self):
+    def endTime(self) -> float:
         """Returns the final time parameter"""
         if len(self.sections)==0: return 0
         if self.sections[-1].times==None: return sum(len(s.configs)-1 for s in self.sections)
         return self.sections[-1].times[-1]
 
-    def duration(self):
+    def duration(self) -> float:
         return self.endTime()-self.startTime()
 
-    def hasTiming(self):
+    def hasTiming(self) -> bool:
         """Returns true if the multipath is timed"""
         return self.sections[0].times is not None
 
@@ -117,7 +120,7 @@ class MultiPath:
                     raise ValueError("Section "+str(i)+" has 0 or 1 configuration, timing may be messed up")
         return True
 
-    def isContinuous(self):
+    def isContinuous(self) -> bool:
         """Returns true if all the sections are continuous (i.e., the last config of each
         section matches the start config of the next)."""
         for i in range(len(self.sections)-1):
@@ -125,7 +128,7 @@ class MultiPath:
                 return False
         return True
 
-    def getSectionTiming(self,section):
+    def getSectionTiming(self,section) -> Tuple[float,float]:
         """Returns a pair (tstart,tend) giving the timing of the section"""
         assert section >= 0 and section < len(self.sections)
         if self.hasTiming():
@@ -409,7 +412,24 @@ class MultiPath:
         if u==0: return self.sections[s].milestones[i]
         return vectorops.interpolate(self.sections[s].milestones[i],self.sections[s].milestones[i+1],u)
 
-    def getTrajectory(self,robot=None,eps=None):
+    def setTrajectory(self,trajectory: Union[trajectory.Trajectory,List]):
+        """Set this MultiPath to a single-section trajectory. If trajectory
+        is a HermiteTrajectory, velocities will be extracted.
+        """
+        self.holdSet = {}
+        self.settings = {'program':'setTrajectory'}
+        self.sections = [MultiPath.Section()]
+        if isinstance(trajectory,trajectory.Trajectory):
+            self.sections[0].times = trajectory.times
+            self.sections[0].configs = trajectory.milestones
+            if isinstance(trajectory,trajectory.HermiteTrajectory):
+                n = len(trajectory.milestones[0])//2
+                self.sections[0].configs = [v[:n] for v in trajectory.milestones]
+                self.sections[0].velocities = [v[n:] for v in trajectory.milestones]
+        else:
+            self.sections[0].configs = trajectory
+
+    def getTrajectory(self,robot=None,eps=None) -> trajectory.Trajectory:
         """Returns a trajectory representation of this MultiPath.  If robot is provided, then a RobotTrajectory
         is returned.  Otherwise, if velocity information is given, then a HermiteTrajectory is returned.
         Otherwise, a Trajectory is returned.
@@ -417,7 +437,6 @@ class MultiPath:
         If robot and eps is given, then the IK constraints along the trajectory are solved and the path is
         discretized at resolution eps.
         """
-        from . import trajectory
         res = trajectory.Trajectory()
         if robot is not None:
             res = trajectory.RobotTrajectory(robot)
