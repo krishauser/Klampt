@@ -16,20 +16,26 @@ repair-wheel-command = [
 before-all = ["yum clean all",
               "yum install -y glpk glpk-devel mesa-libGLU-devel git",
               "pip install cmake",
-              "git checkout cibuildwheel",
-              "cd ../Cpp/Dependencies",
+              "git clone https://github.com/krishauser/Klampt.git",
+              "pushd Klampt/Cpp/Dependencies",
               "make unpack-deps",
               "git clone https://github.com/assimp/assimp.git",
-              "cd assimp",
-              "cmake . && make -j 8 && make install",
-              "cd ..",
-              "cd glew-2.0.0",
+              "pushd assimp",
+              "cmake -DASSIMP_BUILD_TESTS=OFF . && make -j 8 && make install",
+              "popd",
+              "pushd glew-2.1.0",
               "make -j && make install",
-              "cd ..",
+              "popd",
               "make dep-tinyxml && make dep-ode",
-              "cd KrisLibrary",
-              "git checkout devel",
+              "pushd KrisLibrary",
               "cmake . -DC11_ENABLED=ON -DUSE_GLUT=OFF -DUSE_GLUI=OFF  && make -j",
-              "cd ../../../",
+              "popd",
+              "popd",
+              "pushd Klampt",
               "cmake . && make -j Klampt",
-              "cd Python"]
+              "popd"]
+
+repair-wheel-command = "auditwheel repair --exclude libGLX.so.0 --exclude libGLdispatch.so.0 -w {dest_dir} {wheel}"
+
+#skip all PyPy versions due to problems with Numpy include
+skip = "pp*"
