@@ -1,14 +1,10 @@
 #!/bin/bash
 set -e
 
-yum install -y git gcc glpk glpk-devel mesa-libGLU-devel
-
-cd io/cmake-2.8.12
-./bootstrap; make -j 8; make install
-cd /
+yum install -y git gcc glpk glpk-devel mesa-libGLU-devel cmake3
 
 git clone https://github.com/assimp/assimp.git
-cd assimp; cmake .; make -j 8; make install
+cd assimp; cmake -DASSIMP_BUILD_TESTS=OFF .; make -j 8; make install
 
 cd /
 git clone https://github.com/krishauser/Klampt
@@ -16,7 +12,7 @@ cd /Klampt; git checkout master
 
 cd /Klampt/Cpp/Dependencies; make unpack-deps
 #take out the sudo call
-cd glew-2.0.0; make -j 8; make install
+cd glew-2.1.0; make -j 8; make install
 cd ..
 make dep-tinyxml
 make dep-ode
