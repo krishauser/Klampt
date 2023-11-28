@@ -33,16 +33,17 @@ jobs:
       - name: Check universal build
         run: python check_mac_universal.py
 
-      - name: Install cibuildwheel
-        run: python -m pip install cibuildwheel==2.15.0
-      
-      - name: Build wheels                                                                                                                                          
-        run: python -m cibuildwheel --output-dir wheelhouse
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.16.2
+        with:
+          package-dir: Python
+          output-dir: wheelhouse
+          config-file: "{package}/pyproject.toml"
         env:
           MACOSX_DEPLOYMENT_TARGET: 11.0
           CIBW_ARCHS_MACOS: universal2
           LDFLAGS: -framework OpenGL
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           path: Python/wheelhouse/*.whl
