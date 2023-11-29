@@ -15,7 +15,7 @@ SET(TEMPOUTPUT CMakeFiles)
 FILE(GLOB DEPS klampt/src/*.h klampt/src/*.cpp klampt/*.py)
 SET(DEPS ${DEPS} ${KLAMPT_LIBRARIES} Klampt)
 
-IF(PYTHON OR PYTHON3 OR PYTHON2)
+IF(PYTHON3)
 
   MESSAGE(STATUS "Configuring Python/setup.py from Python/setup.py.in")
   configure_file(setup.py.in setup.py)
@@ -26,7 +26,7 @@ IF(PYTHON OR PYTHON3 OR PYTHON2)
   add_custom_command(
     OUTPUT ${OUTPUT}/python_timestamp
     COMMAND rm -rf build/
-    COMMAND ${PYTHON3} setup.py build_ext
+    COMMAND ${PYTHON3} -m pip install .
     COMMAND ${CMAKE_COMMAND} -E touch ${TEMPOUTPUT}/python_timestamp
     DEPENDS ${DEPS}
   )
@@ -36,27 +36,7 @@ IF(PYTHON OR PYTHON3 OR PYTHON2)
     COMMAND ${CMAKE_COMMAND} -E touch ${TEMPOUTPUT}/python_docs_timestamp
     DEPENDS ${DEPS}
   )
-  add_custom_command(
-    OUTPUT ${OUTPUT}/python_install_timestamp
-    COMMAND ${PYTHON3} setup.py install
-    COMMAND ${CMAKE_COMMAND} -E touch ${TEMPOUTPUT}/python_install_timestamp
-    DEPENDS ${DEPS}
-  )
   add_custom_target(python ALL DEPENDS ${OUTPUT}/python_timestamp)
   add_custom_target(python-docs DEPENDS ${OUTPUT}/python_docs_timestamp)
-  add_custom_target(python-install DEPENDS ${OUTPUT}/python_install_timestamp python)
 
-  add_custom_command(
-    OUTPUT ${OUTPUT}/python2_timestamp
-    COMMAND ${PYTHON2} setup.py build_ext
-    COMMAND ${CMAKE_COMMAND} -E touch ${TEMPOUTPUT}/python2_timestamp
-  )
-  add_custom_command(
-    OUTPUT ${OUTPUT}/python2_install_timestamp
-    COMMAND ${PYTHON2} setup.py install
-    COMMAND ${CMAKE_COMMAND} -E touch ${TEMPOUTPUT}/python2_install_timestamp
-    DEPENDS ${DEPS}
-  )
-  add_custom_target(python2 DEPENDS ${OUTPUT}/python2_timestamp)
-  add_custom_target(python2-install DEPENDS ${OUTPUT}/python2_install_timestamp python2)
-ENDIF(PYTHON OR PYTHON3 OR PYTHON2)
+ENDIF(PYTHON3)

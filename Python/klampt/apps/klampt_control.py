@@ -14,7 +14,7 @@ import time
 import sys
 import os
 import weakref
-import pkg_resources
+import io
 
 from klampt.control.robotinterfaceutils import StepContext,klamptCartesianPosition
 
@@ -26,6 +26,20 @@ from PyQt5 import QtWidgets
 from PyQt5 import uic
 from OpenGL import GL
 
+
+def resolve_resource_file(package,file):
+    try:
+        import importlib.resources
+        ref = importlib.resources.files(package) / file
+        return io.StringIO(importlib.resources.read_text(ref))
+    except ImportError:
+        try:
+            import importlib_resources
+            ref = importlib_resources.files(package) / file
+            return io.StringIO(importlib_resources.read_text(ref))
+        except ImportError:
+            import pkg_resources
+            return pkg_resources.resource_filename(package,file)
 
 class ControllerStepContext:
     def __init__(self,gui):
@@ -322,8 +336,8 @@ class ControllerGUI(QtWidgets.QMainWindow):
         # Splitter to show 2 views in same widget
         self.splitter = QtWidgets.QSplitter()
         self.panel = QtWidgets.QWidget()
-        ui_filename = pkg_resources.resource_filename('klampt','data/klampt_control.ui')
-        uic.loadUi(ui_filename, self.panel)
+        ui_file = resolve_resource_file('klampt','data/klampt_control.ui')
+        uic.loadUi(ui_file, self.panel)
         self.glwidget.setFixedSize(QtWidgets.QWIDGETSIZE_MAX,QtWidgets.QWIDGETSIZE_MAX)
         self.glwidget.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding,QtWidgets.QSizePolicy.Expanding))
         self.glwidget.adjustSize()
@@ -467,8 +481,8 @@ class ControllerGUI(QtWidgets.QMainWindow):
         for i in range(nj):
             j = indices[i]
             jointWidget = QtWidgets.QWidget()
-            ui_filename = pkg_resources.resource_filename('klampt','data/joint_edit.ui')
-            uic.loadUi(ui_filename, jointWidget)
+            ui_file = resolve_resource_file('klampt','data/joint_edit.ui')
+            uic.loadUi(ui_file, jointWidget)
             if math.isinf(qmin[j]):
                 self.addError("Infinite joint limit on joint {}".format(self.controller.jointName(j)))
                 if math.isinf(qmax[j]):
@@ -1344,8 +1358,8 @@ def main():
         g_plugin.gui = weakref.proxy(gui)
         g_gui = gui
         dw = QtWidgets.QDesktopWidget()
-        x=dw.width()*0.8
-        y=dw.height()*0.8
+        x=int(dw.width()*0.8)
+        y=int(dw.height()*0.8)
         gui.resize(x,y)
         return gui
     vis.customUI(makefunc)

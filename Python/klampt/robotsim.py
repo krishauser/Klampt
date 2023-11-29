@@ -2912,13 +2912,13 @@ class Appearance(object):
         """
         return _robotsim.Appearance_setColors(self, feature, np_array2)
 
-    def setTintColor(self, color:  "float const [4]", strength: float) ->None:
+    def setTintColor(self, color: Sequence[float], strength: float) ->None:
         r"""
         Sets a temporary tint color that modulates the appearance of the object. This
         works with both flat colors and per-vertex / per-face colors.  
 
         Args:
-            color (:obj:`float [4]`)
+            color (:obj:`list of 4 wfloats`)
             strength (float)
         """
         return _robotsim.Appearance_setTintColor(self, color, strength)
@@ -6049,7 +6049,7 @@ class WorldModel(object):
             terrain (:class:`~klampt.TerrainModel`, optional): 
 
         Returns:
-            (:class:`~klampt.TerrainModel` or :class:`~klampt.RigidObjectModel` or :class:`~klampt.RobotModel`):
+            (:class:`~klampt.TerrainModel` or :class:`~klampt.RobotModel` or :class:`~klampt.RigidObjectModel`):
         """
         return _robotsim.WorldModel_add(self, *args)
 
@@ -8281,7 +8281,7 @@ class Simulator(object):
 
 
         Args:
-            robot (int or :class:`~klampt.RobotModel`): 
+            robot (:class:`~klampt.RobotModel` or int): 
 
         Returns:
             :class:`~klampt.SimRobotController`:

@@ -5,7 +5,6 @@ from klampt import *
 from klampt.model import trajectory
 from klampt import robotsim
 import json
-import pkg_resources
 
 _title_id = '__TITLE__'
 _scene_id = '__SCENE_JSON__'
@@ -28,6 +27,23 @@ def make_fixed_precision(obj,digits):
             obj[i] = make_fixed_precision(v,digits)
     return obj
 
+def read_resource_contents(package,filename):
+    try:
+        import importlib.resources
+        ref = importlib.resources.files(package) / filename
+        return importlib.resources.read_text(ref)
+    except ImportError:
+        try:
+            import importlib_resources
+            ref = importlib_resources.files(package) / filename
+            return importlib_resources.read_text(ref)
+        except ImportError:
+            import pkg_resources
+            fn = pkg_resources.resource_filename(package,filename)
+            with open(fn,'r') as f:
+                result = ''.join(f.readlines())
+            return result
+    
 class HTMLSharePath:
     """An exporter that converts scenes / animations to shareable HTML files.
 
@@ -59,16 +75,16 @@ class HTMLSharePath:
         """
         self.name = name
         if boilerplate == 'auto':
-            boilerplate = pkg_resources.resource_filename('klampt','data/share_path_boilerplate.html')
-        f = open(boilerplate,'r')
-        self.boilerplate_file = ''.join(f.readlines())
-        f.close()
+            boilerplate = 'data/share_path_boilerplate.html'
+        self.boilerplate_file = read_resource_contents('klampt',boilerplate)
+ 
         if libraries == 'static':
-            self.klampt_frontend_load_script = pkg_resources.resource_filename('klampt','data/klampt_frontend_load_static.js')
+            load_script_filename = 'data/klampt_frontend_load_static.js'
         else:
             if libraries != 'dynamic':
                 raise ValueError("The libraries argument must either be 'static' or 'dynamic'")
-            self.klampt_frontend_load_script = pkg_resources.resource_filename('klampt','data/klampt_frontend_load_dynamic.js')
+            load_script_filename = 'data/klampt_frontend_load_dynamic.js'
+        self.klampt_load_script = read_resource_contents('klampt',load_script_filename)
         if any(v not in self.boilerplate_file for v in [_scene_id,_path_id,_rpc_id,_compressed_id,_dt_id,_frontend_load_id]):
             raise RuntimeError("Boilerplate file does not contain the right tags")
         self.fn = filename
@@ -151,10 +167,7 @@ class HTMLSharePath:
         data = data.replace(_rpc_id,json.dumps(self.rpc))
         data = data.replace(_compressed_id,'true')
         data = data.replace(_dt_id,str(self.dt))
-        f = open(self.klampt_frontend_load_script,'r')
-        load_script = ''.join(f.readlines())
-        f.close()
-        data = data.replace(_frontend_load_id,load_script)
+        data = data.replace(_frontend_load_id,self.klampt_load_script)
         if self.fn is None:
             return data
         else:

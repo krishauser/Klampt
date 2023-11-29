@@ -6,42 +6,31 @@ up a command line window and call::
 
     pip install klampt
 
-As of writing, pip packages are available for Linux (Python 2.7, 3.5,
-3.6, 3.7), Windows (Python 2.7, 3.5, 3.6, and 3.7, 32- and 64-bit), and
+As of writing, pip packages are available for Linux (Python 3.5-3.10),
+Windows (Python 2.7, 3.5-3.10, 32- and 64-bit), and
 Mac OSX 10.9 and higher (Python 2.7, 3.5, 3.6, and 3.7). These are built
 with Assimp (mesh loading) and GLEW (OpenGL supported rendering of
 camera images). They **do not** have ROS or OMPL support, and if you
-want those you will need to build from source.
+want those you will need to build from source.  As of 2022 we have stopped
+supporting Python 2.x, although older versions of Klampt (0.8 and earlier)
+are still available on pip for older platforms.
 
 You should also obtain:
 
 -  PyOpenGL for visualization. Try ``pip install PyOpenGL``.
 -  PyQt5 is highly recommended for resource editing and improved
-   visualization. Try ``pip install PyQt5``. (For Python 2.x users,
-   PyQt4 is also supported.  See note below.)
+   visualization. Try ``pip install PyQt5``. 
 
 To enable all features, you may also obtain the following optional packages:
 
 -  PyQtGraph lets you customize PyQt visualizations through the GUI.
    Try ``pip install pyqtgraph``.
 -  Python Imaging Library (PIL) is required for saving screenshots to
-   disk.
+   disk. Try ``pip install pillow``.
 -  ffmpeg is needed to save movies.
 -  cvxpy is needed to use the :mod:`klampt.plan.kinetrajopt` module. 
    If you are interested in collision-free trajectory optimization, try
    ``pip install cvxpy``.
-
-.. note::
-
-    With Python 2.x on most platforms, PyQt5 can't be installed through pip,
-    so you will need to use PyQt4 instead. (You could try building PyQt5 from
-    source, but it's a tedious process.)
-
-    Python 2.7 Windows users will want to install the `correct PyQt4 binaries from
-    here <https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyqt4>`__
-
-    At some point PyQt4 will be deprecated, so eventually we will be migrating
-    Klamp't to use Python 3.x by default.
 
 
 Klampt-examples
@@ -54,32 +43,26 @@ install, e.g.,:
 
     git clone https://github.com/krishauser/Klampt-examples
     cd Klampt-examples/Python3/demos
-    python kbdrive.py ../../data/tx90roll.xml
+    python3 kbdrive.py ../../data/tx90roll.xml
 
 Most of the examples in this manual require Klampt-examples to be downloaded to your computer.
-
-.. note::
-
-    All the examples in this manual are written assuming you are using Python 3.x.  If you are using Python 2.x,
-    you will need to replace any references to `Klampt-examples/Python3` with `Klampt-examples/Python2`.
-
-    Moreover, if you have both Python 3.x and 2.x installed, but Klamp't is only installed with one version,
-    then all of the calls to `python` in the examples in this manual should be replaced with calls to either
-    `python3` or `python2`, whichever is appropriate.
 
 
 Troubleshooting
 ---------------
 
 If you have multiple versions of Python installed on your machine,
-you will need to be aware of which version is currently referred to by `pip` and `python` commands.  You
-may need to use `python3`, `python2`, `pip3`, or `pip2` to get the right version.  You may consider using a
-`virtual environment <https://docs.python-guide.org/dev/virtualenvs/>`__ to help manage
-currently active version.
+you will need to be aware of which version is currently referred to by the `python` command.  You
+may need to use `python3` or `python3.7` to get the right version. Instead of using `pip`, you should
+use `python -m pip` where `python` is replaced by your desired version.  Also, in a multi-user
+environment you should be consistent with your use of `python -m pip` (per-user install) vs 
+`sudo python -m pip` (system-wide install) when installing Klampt and its dependencies.
+You may consider using a `virtual environment <https://docs.python-guide.org/dev/virtualenvs/>`__ to help manage
+currently active version.  
 
 
 You may get errors importing the \_robotsim module when calling
-``import klampt``. This usually means some dependency DLL is missing on
+``import klampt``. This usually means some dependency Shared Object / DLL is missing on
 your system. If this occurs, `please file an issue
 report <https://github.com/krishauser/Klampt/issues>`__ and we will get
 on it. If you are using Windows, please use the
@@ -98,7 +81,7 @@ Simply enter
 
       git pull https://github.com/krishauser/Klampt-jupyter-extension
       cd Klampt-jupyter-extension
-      sudo make install
+      pip install .
 
 and the next time you run Jupyter notebooks, you can use the functionality of the
 :mod:`klampt.vis.ipython` module to display interactive 3D displays
@@ -147,7 +130,7 @@ configure your environment to build from source, you can use the
 
 .. code:: sh
 
-    pip install --upgrade klampt
+    python -m pip install --upgrade klampt
     git clone --depth 1 https://github.com/krishauser/Klampt
     cd Klampt/Python
     python patch_a_pip_install.py

@@ -540,4 +540,19 @@ class EmbeddedMotionPlan (MotionPlan):
         """Lifts the motion planner's lower-dimensional roadmap back to the ambient space"""
         V,E = MotionPlan.getRoadmap(self)
         return [self.space.lift(v) for v in V],E
+       
+    def setCostFunction(self, edgeCost=None, terminalCost=None):
+        """Sets edge / terminal costs from functions in the ambient space"""
+        if edgeCost:
+            projectedEdgeCost = lambda a,b:edgeCost(self.space.lift(a),self.space.lift(b))
+        else:
+            projectedEdgeCost = None
+        if terminalCost:
+            projectedTerminalCost = lambda a:terminalCost(self.space.lift(a))
+        else:
+            projectedTerminalCost = None
+        MotionPlan.setCostFunction(self,projectedEdgeCost,projectedTerminalCost)
 
+    def pathCost(self,p):
+        """Calculates the cost of a path in the ambient space."""
+        return MotionPlan.pathCost(self,[self.space.project(x) for x in p])

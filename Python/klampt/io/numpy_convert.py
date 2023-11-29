@@ -189,8 +189,8 @@ def from_numpy(obj,type='auto',template=None):
             for i in range(len(template.propertyNames)):
                 res.propertyNames[i] = template.propertyNames[i]
         else:
-            for i in range(numproperties):
-                res.propertyNames.append('property %d'%(i+1))
+            #properties are already indicated with setPointsAndProperties
+            pass
         #if len(res.propertyNames) > 0:
         #    res.properties.resize(len(res.propertyNames)*points.shape[0])
         #if obj.shape[1] >= 3:

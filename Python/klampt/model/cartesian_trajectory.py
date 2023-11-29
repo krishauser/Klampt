@@ -186,7 +186,7 @@ def cartesian_interpolate_linear(
         res.times.append(t+1e-7)
         res.milestones.append(robot.getConfig())
         t = res.times[-1]
-    paramStallTolerance = 0.01*solver.getTolerance() / config.distance(constraints,a,b)
+    paramStallTolerance = 0.01*solver.getTolerance() / max(config.distance(constraints,a,b),0.01)
     stepsize = 0.1
     while t < 1:
         tookstep = False
@@ -865,6 +865,8 @@ def cartesian_bump(
     if not hasattr(bump_paths,'__iter__'):
         bump_paths = [bump_paths]
     assert len(constraints) == len(bump_paths),"Must specify one bump per constraint"
+    if delta <= 0:
+        raise ValueError("Invalid delta, must be positive")
     if maxDeviation != None:
         assert len(maxDeviation) == robot.numLinks()
     for c in constraints:
