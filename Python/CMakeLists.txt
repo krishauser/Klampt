@@ -5,6 +5,7 @@ if(NOT KLAMPT_ROOT)
   SET (KLAMPT_ROOT ${PROJECT_SOURCE_DIR}/.. )
 endif( )
 
+# If this was run from /Klampt/ rather than /Klampt/Python, then KLAMPT_LIBRARY will be set
 if(NOT KLAMPT_LIBRARY)
   # version (e.g. for packaging)
   set(KLAMPT_MAJOR_VERSION 0)
@@ -17,14 +18,10 @@ if(NOT KLAMPT_LIBRARY)
   if(NOT KLAMPT_LIBRARY)
     message(FATAL_ERROR "Klampt library not found in ${KLAMPT_ROOT}")
   endif()
+  MESSAGE(STATUS "Klampt library found at ${KLAMPT_LIBRARY}")
+  MESSAGE(STATUS "Klampt link libraries: ${KLAMPT_LIBRARIES}")
 endif()
 
-MESSAGE(STATUS "Klampt library found at ${KLAMPT_LIBRARY}")
-MESSAGE(STATUS "Klampt link libraries: ${KLAMPT_LIBRARIES}")
-
-if ("${KLAMPT_LIBRARY}" STREQUAL "")
-  message(FATAL_ERROR "Klampt could not be found?")
-endif()
 
 #KLAMPT_ABSOLUTE_LIBRARIES needed in setup.py.in
 get_filename_component(KLAMPT_ABSOLUTE_LIBRARIES ${KLAMPT_LIBRARY} ABSOLUTE)
