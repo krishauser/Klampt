@@ -18,19 +18,19 @@ make unpack-deps
 # popd
 git clone https://github.com/assimp/assimp.git
 pushd assimp
-cmake . -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
+cmake . -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -DASSIMP_BUILD_TESTS=OFF 
 make -j 
 make install
 popd
 pushd tinyxml
 make lib ARCHS="${ARCHFLAGS} -std=gnu++11"
 popd
-pushd ode-0.14;
+pushd ode-0.14
 X_EXTRA_LIBS=-lX11 CFLAGS="-fPIC ${ARCHFLAGS}" CXXFLAGS="-fPIC ${ARCHFLAGS} -std=gnu++11" ./configure --with-trimesh=none --disable-demos --enable-double-precision
 make
 popd
 pushd KrisLibrary
-git checkout devel
+git checkout 
 cmake . -DC11_ENABLED=ON -DUSE_GLUT=OFF -DUSE_GLUI=OFF -DUSE_GLEW=OFF -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
 make -j
 popd
