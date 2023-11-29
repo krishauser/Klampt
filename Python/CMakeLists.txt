@@ -1,17 +1,23 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6.4...3.20)
 PROJECT( KlamptPython )
 
-# version (e.g. for packaging)
-set(KLAMPT_MAJOR_VERSION 0)
-set(KLAMPT_MINOR_VERSION 9)
-set(KLAMPT_PATCH_VERSION 1)
-set(KLAMPT_VERSION ${KLAMPT_MAJOR_VERSION}.${KLAMPT_MINOR_VERSION}.${KLAMPT_PATCH_VERSION})
-
 if(NOT KLAMPT_ROOT)
   SET (KLAMPT_ROOT ${PROJECT_SOURCE_DIR}/.. )
 endif( )
-SET (CMAKE_MODULE_PATH "${KLAMPT_ROOT}/CMakeModules")
-find_package(Klampt)
+
+if(NOT KLAMPT_LIBRARY)
+  # version (e.g. for packaging)
+  set(KLAMPT_MAJOR_VERSION 0)
+  set(KLAMPT_MINOR_VERSION 9)
+  set(KLAMPT_PATCH_VERSION 1)
+  set(KLAMPT_VERSION ${KLAMPT_MAJOR_VERSION}.${KLAMPT_MINOR_VERSION}.${KLAMPT_PATCH_VERSION})
+
+  SET (CMAKE_MODULE_PATH "${KLAMPT_ROOT}/CMakeModules")
+  find_package(Klampt)
+  if(NOT KLAMPT_LIBRARY)
+    message(FATAL_ERROR "Klampt library not found in ${KLAMPT_ROOT}")
+  endif()
+endif()
 
 MESSAGE(STATUS "Klampt library found at ${KLAMPT_LIBRARY}")
 MESSAGE(STATUS "Klampt link libraries: ${KLAMPT_LIBRARIES}")
