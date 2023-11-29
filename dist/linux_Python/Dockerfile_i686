@@ -1,10 +1,11 @@
 FROM quay.io/pypa/manylinux2014_i686
 RUN linux32 uname -m
 
-RUN linux32 yum install -y git gcc glpk glpk-devel mesa-libGLU-devel cmake3
+RUN linux32 yum install -y git gcc glpk-devel mesa-libGLU-devel
+RUN pip install cmake
 
 RUN git clone https://github.com/assimp/assimp.git
-RUN cd assimp; git checkout 7916f87; linux32 cmake3 -DASSIMP_BUILD_TESTS=OFF . ; linux32 make -j 8; linux32 make install
+RUN cd assimp; git checkout 7916f87; linux32 cmake -DASSIMP_BUILD_TESTS=OFF . ; linux32 make -j 8; linux32 make install
 
 
 RUN git clone https://github.com/krishauser/Klampt
@@ -15,8 +16,8 @@ RUN cd /Klampt/Cpp/Dependencies; linux32 make unpack-deps
 RUN cd /Klampt/Cpp/Dependencies; cd glew-2.1.0; linux32 make -j 8; linux32 make install
 RUN cd /Klampt/Cpp/Dependencies; linux32 make dep-tinyxml
 RUN cd /Klampt/Cpp/Dependencies; linux32 make dep-ode
-RUN cd /Klampt/Cpp/Dependencies/KrisLibrary; linux32 cmake3 . -DC11_ENABLED=ON; linux32 make -j 8
+RUN cd /Klampt/Cpp/Dependencies/KrisLibrary; linux32 cmake . -DC11_ENABLED=ON; linux32 make -j 8
 
-RUN cd /Klampt; linux32 cmake3 .; linux32 make -j 8 Klampt
+RUN cd /Klampt; linux32 cmake .; linux32 make -j 8 Klampt
 
 
