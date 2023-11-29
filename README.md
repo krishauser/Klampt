@@ -93,6 +93,7 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 **0.9.1** (10/30/2023)
 -   Removed GLUI dependency in default build mode.
 -   Updated GLEW to 2.1.0.
+-   Builds for Linux Python 3.10+ are now working again.  (Mac OS 11+ support is still TBD.)
 -   IK solver now has a minimization mode and a prioritized solve mode.
 -   Fixed problem with custom textures being unloaded after a mesh is transformed.
 -   Fixed bug in simulation of affine joints when the joint angle can go negative. Also, internal affine transmission coupling is simulated in a fashion that's sensitive to the driver's PID constants.
