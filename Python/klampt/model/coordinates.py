@@ -14,6 +14,7 @@ Advanced users might create their own ``Manager``, or swap top-level managers
 in/out using :meth:`setManager`.
 """
 
+from __future__ import annotations
 from ..math import so3,se3,vectorops
 from ..robotsim import IKObjective, RobotModelLink,RigidObjectModel,SimRobotController
 from . import ik
@@ -130,10 +131,10 @@ class Transform:
 class Point:
     """Represents a point in 3D space.  It is attached to a frame, so if the
     frame is changed then its world coordinates will also change."""
-    def __init__(self,localCoordinates : Vector3 = [0,0,0], frame : Frame = None):
+    def __init__(self,localCoordinates : Vector3 = [0,0,0], frame : Frame = None, name:str=None):
         if frame is not None: 
             assert isinstance(frame,Frame)
-        self._name = None
+        self._name = name
         self._localCoordinates = localCoordinates
         self._frame = frame
     def localCoordinates(self) -> Vector3:
@@ -147,17 +148,17 @@ class Point:
     def frame(self) -> Frame:
         """Returns the frame to which this Point is attached"""
         return self._frame
-    def toWorld(self) -> 'Point':
+    def toWorld(self) -> Point:
         """Returns a Point representing the same point in space, but
         in the world reference frame"""
-        return Point(self.worldCoordinates(),None)
+        return Point(self.worldCoordinates(),None,name=self._name)
     def to(self,newframe) -> Point:
         """Returns a Point representing the same point in space, but
         in a different reference frame"""
         if newframe == None or newframe=='world':
             return self.toWorld()
         newlocal = se3.apply(se3.inv(newframe.worldCoordinates()),self.worldCoordinates())
-        return Point(newlocal,newframe)
+        return Point(newlocal,newframe,self._name)
     def localOffset(self,dir) -> None:
         """Offsets this point by a vector in local coordinates"""
         self._localCoordinates = vectorops.add(self._localCoordinates,dir)
@@ -167,16 +168,34 @@ class Point:
             self._localCoordinates = vectorops.add(self._localCoordinates,dir)
         else:
             self._localCoordinates = vectorops.add(so3.apply(so3.inv(self._frame.worldCoordinates()[0]),self._localCoordinates),dir)
+    def __sub__(self, other : Point) -> Direction:
+        if not isinstance(other,Point):
+            raise ValueError("Can only take the difference between Points")
+        if other._frame is not self._frame:
+            return self - other.to(self._frame)
+        name = None
+        if self._name is not None and other._name is not None:
+            name = self._name+'-'+other._name
+        return Direction(vectorops.sub(self._localCoordinates,other._localCoordinates),self._frame,name=name)
+    def __add__(self, other : Direction) -> Point:
+        if not isinstance(other,Direction):
+            raise ValueError("Can only add a Direction to a Point")
+        if other._frame is not self._frame:
+            return self + other.to(self._frame)
+        name = None
+        if self._name is not None and other._name is not None:
+            name = self._name+'-'+other._name
+        return Point(vectorops.add(self._localCoordinates,other._localCoordinates),self._frame,name=name)
 
 
 class Direction:
     """Represents a directional quantity in 3D space.  It is attached to a
     frame, so if the frame is rotated then its world coordinates will also
     change."""
-    def __init__(self, localCoordinates : Vector3 = [0,0,0], frame : Frame = None):
+    def __init__(self, localCoordinates : Vector3 = [0,0,0], frame : Frame = None, name : str = None):
         if frame is not None: 
             assert isinstance(frame,Frame)
-        self._name = None
+        self._name = name
         self._localCoordinates = localCoordinates
         self._frame = frame
     def localCoordinates(self) -> Vector3:
@@ -187,11 +206,11 @@ class Direction:
         return so3.apply(self._frame.worldCoordinates()[0],self._localCoordinates)
     def frame(self) -> Frame:
         return self._frame
-    def toWorld(self) -> 'Direction':
+    def toWorld(self) -> Direction:
         """Returns a Direction representing the same direction in space, but
         in the world reference frame"""
         return Direction(self.worldCoordinates(),None)
-    def to(self,newframe) -> 'Direction':
+    def to(self,newframe) -> Direction:
         """Returns a Direction representing the same direction in space, but
         in a different reference frame"""
         if newframe == None or newframe=='world':
@@ -210,6 +229,39 @@ class Direction:
             self._localCoordinates = vectorops.add(self._localCoordinates,dir)
         else:
             self._localCoordinates = vectorops.add(so3.apply(so3.inv(self._frame.worldCoordinates()[0]),self._localCoordinates),dir)
+    def __sub__(self, other : Direction) -> Direction:
+        if not isinstance(other,Direction):
+            raise ValueError("Can only take the difference between Directions")
+        if other._frame is not self._frame:
+            return self - other.to(self._frame)
+        name = None
+        if self._name is not None and other._name is not None:
+            name = self._name+'-'+other._name
+        return Direction(vectorops.sub(self._localCoordinates,other._localCoordinates),self._frame,name=name)
+    def __add__(self, other : Union[Direction,Point]) -> Point:
+        if not isinstance(other,(Direction,Point)):
+            raise ValueError("Can only add a Direction to a Point or Direction")
+        if other._frame is not self._frame:
+            return self + other.to(self._frame)
+        name = None
+        if self._name is not None and other._name is not None:
+            name = self._name+'-'+other._name
+        if isinstance(other,Point):
+            return Point(vectorops.add(self._localCoordinates,other._localCoordinates),self._frame,name=name)
+        else:
+            return Direction(vectorops.add(self._localCoordinates,other._localCoordinates),self._frame,name=name)
+    def __mul__(self, scale : float) -> Direction:
+        if not isinstance(scale,(int,float)):
+            raise ValueError("Can only scale Direction by number")
+        name = None
+        if self._name is not None:
+            if self._name.endswith('_scaled'):
+                name = self._name
+            else:
+                name = self._name+'_scaled'
+        return Direction(vectorops.mul(self._localCoordinates,scale),self._frame,name=name)
+    def __div__(self, scale : float) -> Direction:
+        return self * (1.0/scale)
 
 
 class Group:
