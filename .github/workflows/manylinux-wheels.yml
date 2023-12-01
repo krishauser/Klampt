@@ -1,6 +1,6 @@
 name: Build Python wheels on Manylinux 
 
-on: [push, pull_request]
+on: [push, pull_request, workflow_dispatch]
 
 defaults:
   run:
@@ -12,17 +12,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [linux]
+        os: [ubuntu-20.04]
 
     steps:
-      - uses: actions/checkout@v3
-
-      # Used to host cibuildwheel
-      - uses: actions/setup-python@v4
-
-      #dependency building is in pyproject.toml
-      #- name: Build dependencies
-      #  run: bash make_deps_manylinux.sh
+      - uses: actions/checkout@v4
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.16.2
