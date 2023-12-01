@@ -1,6 +1,13 @@
 name: Build Python wheels on Manylinux 
 
-on: [push, pull_request, workflow_dispatch]
+on: 
+  - push:
+      paths-ignore:
+        - '.github/actions/macos-wheels.yml'
+        - 'Python/make_deps_macos.sh'
+        - 'Python/check_mac_universal.py'
+  - pull_request
+  - workflow_dispatch
 
 defaults:
   run:
