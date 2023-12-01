@@ -72,8 +72,12 @@ SET(KLAMPT_LIBRARIES ${KLAMPT_LIBRARIES} CACHE STRING "Klamp't link libraries" F
 
 #add Klamp't onto KLAMPT_LIBRARIES, add Klampt/include onto KLAMPT_INCLUDE_DIRS
 SET(KLAMPT_LIBRARIES Klampt ${KLAMPT_LIBRARIES})
-SET(KLAMPT_LIBRARY $<TARGET_FILE:Klampt>)
-MESSAGE("Klampt library will be saved to ${KLAMPT_LIBRARY}")
+#set KLAMPT_LIBRARY for the Python/CMakeLists.txt include
+IF(WIN32)
+	SET(KLAMPT_LIBRARY ${CMAKE_BINARY_DIR}/lib/Release/Klampt.lib)
+ELSE(WIN32)
+	SET(KLAMPT_LIBRARY "${CMAKE_BINARY_DIR}/lib/libKlampt.a")
+ENDIF(WIN32)
 
 #helper function
 FUNCTION(PREPEND var prefix)
@@ -92,8 +96,8 @@ IF(WIN32)
   SET(KLAMPT_EXTRA_DLLS_ABS ${KLAMPT_EXTRA_DLLS_ABS} CACHE STRING "Extra DLLs for windows build")
   install(FILES ${KLAMPT_EXTRA_DLLS_ABS} DESTINATION bin COMPONENT apps)
 ELSE(WIN32)
-	#install to /opt/klampt-X.Y.Z
-    SET(CMAKE_INSTALL_PREFIX "/opt/klampt-${KLAMPT_MAJOR_VERSION}.${KLAMPT_MINOR_VERSION}.${KLAMPT_PATCH_VERSION}" CACHE INTERNAL "Prefix prepended to install directories" FORCE)
+  #install to /opt/klampt-X.Y.Z
+  SET(CMAKE_INSTALL_PREFIX "/opt/klampt-${KLAMPT_MAJOR_VERSION}.${KLAMPT_MINOR_VERSION}.${KLAMPT_PATCH_VERSION}" CACHE INTERNAL "Prefix prepended to install directories" FORCE)
 ENDIF(WIN32)
 
 ####### Copy headers from Cpp/* to include/Klampt/* #######
