@@ -21,7 +21,7 @@ jobs:
         if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3
 
-      # Used to host cibuildwheel
+      # Used in `make_deps_macos.sh` in line `pip install cmake` and `check_mac_universal.py`
       - uses: actions/setup-python@v4
 
       - name: Build dependencies
