@@ -31,12 +31,12 @@ def resolve_resource_file(package,file):
     try:
         import importlib.resources
         ref = importlib.resources.files(package) / file
-        return io.StringIO(importlib.resources.read_text(ref))
+        return io.StringIO(importlib.resources.read_text(package,ref))
     except ImportError:
         try:
             import importlib_resources
             ref = importlib_resources.files(package) / file
-            return io.StringIO(importlib_resources.read_text(ref))
+            return io.StringIO(importlib_resources.read_text(package,ref))
         except ImportError:
             import pkg_resources
             return pkg_resources.resource_filename(package,file)

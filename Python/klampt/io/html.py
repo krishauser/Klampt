@@ -31,12 +31,12 @@ def read_resource_contents(package,filename):
     try:
         import importlib.resources
         ref = importlib.resources.files(package) / filename
-        return importlib.resources.read_text(ref)
+        return importlib.resources.read_text(package,ref)
     except ImportError:
         try:
             import importlib_resources
             ref = importlib_resources.files(package) / filename
-            return importlib_resources.read_text(ref)
+            return importlib_resources.read_text(v,ref)
         except ImportError:
             import pkg_resources
             fn = pkg_resources.resource_filename(package,filename)
