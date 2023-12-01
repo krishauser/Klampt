@@ -15,21 +15,26 @@ It has not been determined whether using the functions in this module
 with rospy interferes with those bindings.
 """
 
-import rospy
-
-from std_msgs.msg import Float32MultiArray
-from geometry_msgs.msg import Vector3,Point,Quaternion,Pose,Transform,PoseStamped,WrenchStamped
-from trajectory_msgs.msg import JointTrajectory
-from shape_msgs.msg import Mesh
-from nav_msgs.msg import Path
-from sensor_msgs.msg import JointState
-from sensor_msgs.msg import PointCloud2
-from sensor_msgs.msg import Image
-from sensor_msgs.msg import CameraInfo
-from sensor_msgs.msg import LaserScan
 from klampt.math import so3,se3
 import math
 import warnings
+try:
+    import rospy
+
+    from std_msgs.msg import Float32MultiArray
+    from geometry_msgs.msg import Vector3,Point,Quaternion,Pose,Transform,PoseStamped,WrenchStamped
+    from trajectory_msgs.msg import JointTrajectory
+    from shape_msgs.msg import Mesh
+    from nav_msgs.msg import Path
+    from sensor_msgs.msg import JointState
+    from sensor_msgs.msg import PointCloud2
+    from sensor_msgs.msg import Image
+    from sensor_msgs.msg import CameraInfo
+    from sensor_msgs.msg import LaserScan
+    ROSPY_AVAILABLE = True
+except ImportError:
+    warnings.warn("Unable to import rospy. Please install rospy to use the Klampt-ROS IO functions.")
+    ROSPY_AVAILABLE = False
 
 def from_Vector3(ros_v):
     """From ROS Vector3 to Klamp't point"""
@@ -768,99 +773,100 @@ def toMsg(klampt_obj,*args,**kwargs):
     """General conversion from Klamp't objects to corresponding ROS messages."""
     return _to_converter(klampt_obj)(klampt_obj,*args,**kwargs)
 
-class KlamptROSPublisher(rospy.Publisher):
-    def __init__(self,converter,*args,**kwargs):
-        """You shouldn't need to use this explicitly. Use :meth:`publisher` or
-        :meth:`object_publisher` instead.
-        """
-        self.converter=converter
-        self.seq_no = 0
-        rospy.Publisher.__init__(self,*args,**kwargs)
+if ROSPY_AVAILABLE:
+    class KlamptROSPublisher(rospy.Publisher):
+        def __init__(self,converter,*args,**kwargs):
+            """You shouldn't need to use this explicitly. Use :meth:`publisher` or
+            :meth:`object_publisher` instead.
+            """
+            self.converter=converter
+            self.seq_no = 0
+            rospy.Publisher.__init__(self,*args,**kwargs)
 
-    def publish(self,klampt_obj,header=None):
-        """Publishes a Klamp't object to the advertised topic.
+        def publish(self,klampt_obj,header=None):
+            """Publishes a Klamp't object to the advertised topic.
 
-        Args:
-            klampt_obj: A Klamp't object of the appropriate type
-            header (Header, optional): a ROS header that overrides the
-                default which stamps with the current time.
-        """
-        self.seq_no += 1
-        rosobj = self.converter(klampt_obj)
-        if hasattr(rosobj,'header'):
-            if header is not None:
-                rosobj.header = header
-            else:
-                now = rospy.Time.now()
-                rosobj.header.seq = self.seq_no
-                if rosobj.header.stamp == 0:
-                    rosobj.header.stamp = now
-                if len(rosobj.header.frame_id)==0:
-                    rosobj.header.frame_id = '0'
-        rospy.Publisher.publish(self,rosobj)
+            Args:
+                klampt_obj: A Klamp't object of the appropriate type
+                header (Header, optional): a ROS header that overrides the
+                    default which stamps with the current time.
+            """
+            self.seq_no += 1
+            rosobj = self.converter(klampt_obj)
+            if hasattr(rosobj,'header'):
+                if header is not None:
+                    rosobj.header = header
+                else:
+                    now = rospy.Time.now()
+                    rosobj.header.seq = self.seq_no
+                    if rosobj.header.stamp == 0:
+                        rosobj.header.stamp = now
+                    if len(rosobj.header.frame_id)==0:
+                        rosobj.header.frame_id = '0'
+            rospy.Publisher.publish(self,rosobj)
 
-class KlamptROSCameraPublisher:
-    def __init__(self,topic,frame_id,frame_prefix,*args,**kwargs):
-        """You shouldn't need to use this explicitly. Use 
-        :meth:`object_publisher` instead.
-        """
-        self.topic = topic
-        self.frame_prefix = frame_prefix
-        self.frame_id = frame_id
-        self.rgbpubinfo = None
-        self.rgbpub = None
-        self.dpubinfo = None
-        self.dpub = None
-        self.pubargs = args
-        self.pubkwargs = kwargs
-        self.num_msgs = 0
+    class KlamptROSCameraPublisher:
+        def __init__(self,topic,frame_id,frame_prefix,*args,**kwargs):
+            """You shouldn't need to use this explicitly. Use 
+            :meth:`object_publisher` instead.
+            """
+            self.topic = topic
+            self.frame_prefix = frame_prefix
+            self.frame_id = frame_id
+            self.rgbpubinfo = None
+            self.rgbpub = None
+            self.dpubinfo = None
+            self.dpub = None
+            self.pubargs = args
+            self.pubkwargs = kwargs
+            self.num_msgs = 0
 
-    def publish(self,camera):
-        """Publishes a Klamp't camera data to the topics:
+        def publish(self,camera):
+            """Publishes a Klamp't camera data to the topics:
 
-        - [topic]/rgb/camera_info
-        - [topic]/rgb/image_rect_color
-        - [topic]/depth_registered/camera_info
-        - [topic]/depth_registered/image_rect
+            - [topic]/rgb/camera_info
+            - [topic]/rgb/image_rect_color
+            - [topic]/depth_registered/camera_info
+            - [topic]/depth_registered/image_rect
 
-        Args:
-            camera (SimRobotSensor): an updated sensor of 'CameraSensor' type.
-        """
-        
-        assert camera.type() == 'CameraSensor'
-        if self.frame_id is None:
-            frame = ""
-            if self.frame_prefix is not None:
-                frame = self.frame_prefix + '/'
-            frame = frame + camera.robot.getName()
-            link = int(camera.getSetting("link"))
-            frame += '/' + camera.robot.link(link).getName()
-            self.frame_id = frame
-
-        msgs = to_SensorMsg(camera,frame=self.frame_id)
-        if len(msgs) <= 1:
-            #no measurements
-            return
-        self.num_msgs += 1
-        for i in range(1,len(msgs)):
-            msgs[i].header.stamp = rospy.Time.now()
-            msgs[i].header.seq = self.num_msgs
-        
-        offset = 1
-        if int(camera.getSetting('rgb')):
-            if self.rgbpub is None:
-                self.rgbpubinfo = rospy.Publisher(self.topic+'/rgb/camera_info',CameraInfo,*self.pubargs,**self.pubkwargs)
-                self.rgbpub = rospy.Publisher(self.topic+'/rgb/image_rect_color',Image,*self.pubargs,**self.pubkwargs)
-            self.rgbpubinfo.publish(msgs[0])
-            self.rgbpub.publish(msgs[1])
-            offset = 2
-        if int(camera.getSetting('depth')):
-            if self.dpub is None:
-                self.dpubinfo = rospy.Publisher(self.topic+'/depth_registered/camera_info',CameraInfo,*self.pubargs,**self.pubkwargs)
-                self.dpub = rospy.Publisher(self.topic+'/depth_registered/image_rect',Image,*self.pubargs,**self.pubkwargs)
-            self.dpubinfo.publish(msgs[0])
-            self.dpub.publish(msgs[offset])
+            Args:
+                camera (SimRobotSensor): an updated sensor of 'CameraSensor' type.
+            """
             
+            assert camera.type() == 'CameraSensor'
+            if self.frame_id is None:
+                frame = ""
+                if self.frame_prefix is not None:
+                    frame = self.frame_prefix + '/'
+                frame = frame + camera.robot.getName()
+                link = int(camera.getSetting("link"))
+                frame += '/' + camera.robot.link(link).getName()
+                self.frame_id = frame
+
+            msgs = to_SensorMsg(camera,frame=self.frame_id)
+            if len(msgs) <= 1:
+                #no measurements
+                return
+            self.num_msgs += 1
+            for i in range(1,len(msgs)):
+                msgs[i].header.stamp = rospy.Time.now()
+                msgs[i].header.seq = self.num_msgs
+            
+            offset = 1
+            if int(camera.getSetting('rgb')):
+                if self.rgbpub is None:
+                    self.rgbpubinfo = rospy.Publisher(self.topic+'/rgb/camera_info',CameraInfo,*self.pubargs,**self.pubkwargs)
+                    self.rgbpub = rospy.Publisher(self.topic+'/rgb/image_rect_color',Image,*self.pubargs,**self.pubkwargs)
+                self.rgbpubinfo.publish(msgs[0])
+                self.rgbpub.publish(msgs[1])
+                offset = 2
+            if int(camera.getSetting('depth')):
+                if self.dpub is None:
+                    self.dpubinfo = rospy.Publisher(self.topic+'/depth_registered/camera_info',CameraInfo,*self.pubargs,**self.pubkwargs)
+                    self.dpub = rospy.Publisher(self.topic+'/depth_registered/image_rect',Image,*self.pubargs,**self.pubkwargs)
+                self.dpubinfo.publish(msgs[0])
+                self.dpub.publish(msgs[offset])
+                
 
 def publisher_SimRobotSensor(topic,klampt_sensor,convert_kwargs=None,**kwargs):
     stype = klampt_sensor.type()

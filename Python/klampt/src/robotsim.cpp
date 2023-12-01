@@ -11,6 +11,7 @@
 #include <Klampt/Control/FeedforwardController.h>
 #include <Klampt/Control/LoggingController.h>
 #include <Klampt/Sensing/JointSensors.h>
+#include <Klampt/Sensing/VisualSensors.h>
 #include <Klampt/Planning/RobotCSpace.h>
 #include <Klampt/Simulation/Simulator.h>
 #include <Klampt/Modeling/Interpolate.h>
@@ -3898,6 +3899,15 @@ void RobotModelLink::getJacobian(const double p[3],double** np_out2,int* m,int* 
   robotPtr->GetFullJacobian(Vector3(p),index,Jmat);
 }
 
+void RobotModelLink::getJacobianCols(const double p[3],const vector<int>& links,double** np_out2,int* m,int* n)
+{
+  if(index < 0)
+    throw PyException("RobotModelLink is invalid");
+  Matrix Jmat;
+  MakeNumpyArray(np_out2,m,n,6,int(links.size()),Jmat);
+  robotPtr->GetFullJacobian(Vector3(p),index,links,Jmat);
+}
+
 void RobotModelLink::getPositionJacobian(const double p[3],double** np_out2,int* m,int* n)
 {
   if(index < 0)
@@ -3906,6 +3916,16 @@ void RobotModelLink::getPositionJacobian(const double p[3],double** np_out2,int*
   MakeNumpyArray(np_out2,m,n,3,int(robotPtr->links.size()),Jmat);
   robotPtr->GetPositionJacobian(Vector3(p),index,Jmat);
 }
+
+void RobotModelLink::getPositionJacobianCols(const double p[3],const vector<int>& links,double** np_out2,int* m,int* n)
+{
+  if(index < 0)
+    throw PyException("RobotModelLink is invalid");
+  Matrix Jmat;
+  MakeNumpyArray(np_out2,m,n,3,int(links.size()),Jmat);
+  robotPtr->GetPositionJacobian(Vector3(p),index,links,Jmat);
+}
+
 
 void RobotModelLink::getOrientationJacobian(double** np_out2,int* m,int* n)
 {
@@ -3920,6 +3940,33 @@ void RobotModelLink::getOrientationJacobian(double** np_out2,int* m,int* n)
     robotPtr->links[j].GetOrientationJacobian(w);
     Jmat(0,j)=w.x; Jmat(1,j)=w.y; Jmat(2,j)=w.z;
     j=robotPtr->parents[j];
+  }
+}
+
+void RobotModelLink::getOrientationJacobianCols(const vector<int>& links,double** np_out2,int* m,int* n)
+{
+  if(index < 0)
+    throw PyException("RobotModelLink is invalid");
+  Matrix Jmat;
+  MakeNumpyArray(np_out2,m,n,3,int(links.size()),Jmat);
+  map<int,int> linkmap;
+  int minlink = links[0];
+  for(size_t i=0;i<links.size();i++) {
+    linkmap[links[i]] = (int)i;
+    if(links[i] < minlink)
+      minlink = links[i];
+  }
+  int j=index;
+  while(j!=-1) {
+    if(linkmap.count(j)) {
+      int col=linkmap[j];
+      Vector3 w;
+      robotPtr->GetOrientationJacobian(index,j,w);
+      Jmat(0,col)=w.x; Jmat(1,col)=w.y; Jmat(2,col)=w.z;
+    }
+    j=robotPtr->parents[j];
+    if(j < minlink)
+      break;
   }
 }
 
@@ -4656,6 +4703,14 @@ void RobotModel::getComJacobian(double** out,int* m,int* n)
   Matrix J;
   MakeNumpyArray(out,m,n,3,(int)robot->links.size(),J);
   robot->GetCOMJacobian(J);
+}
+
+void RobotModel::getComJacobianCols(const std::vector<int>& links,double** out,int* m,int* n)
+{
+  if(!robot) throw PyException("RobotModel is empty");
+  Matrix J;
+  MakeNumpyArray(out,m,n,3,(int)links.size(),J);
+  robot->GetCOMJacobian(links,J);
 }
 
 void RobotModel::getLinearMomentum(double out[3])

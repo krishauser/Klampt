@@ -38206,6 +38206,268 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_RobotModelLink_getJacobianCols(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelLink *arg1 = (RobotModelLink *) 0 ;
+  double *arg2 ;
+  std::vector< int,std::allocator< int > > *arg3 = 0 ;
+  double **arg4 = (double **) 0 ;
+  int *arg5 = (int *) 0 ;
+  int *arg6 = (int *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  int res3 = SWIG_OLDOBJ ;
+  double *data_temp4 = NULL ;
+  int dim1_temp4 ;
+  int dim2_temp4 ;
+  PyObject *swig_obj[3] ;
+  
+  {
+    arg4 = &data_temp4;
+    arg5 = &dim1_temp4;
+    arg6 = &dim2_temp4;
+  }
+  if (!SWIG_Python_UnpackTuple(args, "RobotModelLink_getJacobianCols", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_RobotModelLink, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelLink_getJacobianCols" "', argument " "1"" of type '" "RobotModelLink *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelLink * >(argp1);
+  {
+    if (!convert_darray(swig_obj[1],temp2,3)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    std::vector< int,std::allocator< int > > *ptr = (std::vector< int,std::allocator< int > > *)0;
+    res3 = swig::asptr(swig_obj[2], &ptr);
+    if (!SWIG_IsOK(res3)) {
+      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "RobotModelLink_getJacobianCols" "', argument " "3"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "RobotModelLink_getJacobianCols" "', argument " "3"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
+    }
+    arg3 = ptr;
+  }
+  {
+    try {
+      (arg1)->getJacobianCols((double const (*))arg2,(std::vector< int,std::allocator< int > > const &)*arg3,arg4,arg5,arg6);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    npy_intp dims[2] = {
+      *arg5, *arg6 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, (void*)(*arg4));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg4), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg4), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
+  }
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  return resultobj;
+fail:
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModelLink_getPositionJacobianCols(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelLink *arg1 = (RobotModelLink *) 0 ;
+  double *arg2 ;
+  std::vector< int,std::allocator< int > > *arg3 = 0 ;
+  double **arg4 = (double **) 0 ;
+  int *arg5 = (int *) 0 ;
+  int *arg6 = (int *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double temp2[3] ;
+  int res3 = SWIG_OLDOBJ ;
+  double *data_temp4 = NULL ;
+  int dim1_temp4 ;
+  int dim2_temp4 ;
+  PyObject *swig_obj[3] ;
+  
+  {
+    arg4 = &data_temp4;
+    arg5 = &dim1_temp4;
+    arg6 = &dim2_temp4;
+  }
+  if (!SWIG_Python_UnpackTuple(args, "RobotModelLink_getPositionJacobianCols", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_RobotModelLink, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelLink_getPositionJacobianCols" "', argument " "1"" of type '" "RobotModelLink *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelLink * >(argp1);
+  {
+    if (!convert_darray(swig_obj[1],temp2,3)) {
+      return NULL;
+    }
+    arg2 = &temp2[0];
+  }
+  {
+    std::vector< int,std::allocator< int > > *ptr = (std::vector< int,std::allocator< int > > *)0;
+    res3 = swig::asptr(swig_obj[2], &ptr);
+    if (!SWIG_IsOK(res3)) {
+      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "RobotModelLink_getPositionJacobianCols" "', argument " "3"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "RobotModelLink_getPositionJacobianCols" "', argument " "3"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
+    }
+    arg3 = ptr;
+  }
+  {
+    try {
+      (arg1)->getPositionJacobianCols((double const (*))arg2,(std::vector< int,std::allocator< int > > const &)*arg3,arg4,arg5,arg6);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    npy_intp dims[2] = {
+      *arg5, *arg6 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, (void*)(*arg4));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg4), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg4), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
+  }
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  return resultobj;
+fail:
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModelLink_getOrientationJacobianCols(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModelLink *arg1 = (RobotModelLink *) 0 ;
+  std::vector< int,std::allocator< int > > *arg2 = 0 ;
+  double **arg3 = (double **) 0 ;
+  int *arg4 = (int *) 0 ;
+  int *arg5 = (int *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  double *data_temp3 = NULL ;
+  int dim1_temp3 ;
+  int dim2_temp3 ;
+  PyObject *swig_obj[2] ;
+  
+  {
+    arg3 = &data_temp3;
+    arg4 = &dim1_temp3;
+    arg5 = &dim2_temp3;
+  }
+  if (!SWIG_Python_UnpackTuple(args, "RobotModelLink_getOrientationJacobianCols", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_RobotModelLink, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModelLink_getOrientationJacobianCols" "', argument " "1"" of type '" "RobotModelLink *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModelLink * >(argp1);
+  {
+    std::vector< int,std::allocator< int > > *ptr = (std::vector< int,std::allocator< int > > *)0;
+    res2 = swig::asptr(swig_obj[1], &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "RobotModelLink_getOrientationJacobianCols" "', argument " "2"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "RobotModelLink_getOrientationJacobianCols" "', argument " "2"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
+    }
+    arg2 = ptr;
+  }
+  {
+    try {
+      (arg1)->getOrientationJacobianCols((std::vector< int,std::allocator< int > > const &)*arg2,arg3,arg4,arg5);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    npy_intp dims[2] = {
+      *arg4, *arg5 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, (void*)(*arg3));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg3), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg3), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
+  }
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return resultobj;
+fail:
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_RobotModelLink_getAcceleration(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   RobotModelLink *arg1 = (RobotModelLink *) 0 ;
@@ -41983,6 +42245,88 @@ SWIGINTERN PyObject *_wrap_RobotModel_getComJacobian(PyObject *SWIGUNUSEDPARM(se
   }
   return resultobj;
 fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_RobotModel_getComJacobianCols(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  RobotModel *arg1 = (RobotModel *) 0 ;
+  std::vector< int,std::allocator< int > > *arg2 = 0 ;
+  double **arg3 = (double **) 0 ;
+  int *arg4 = (int *) 0 ;
+  int *arg5 = (int *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  double *data_temp3 = NULL ;
+  int dim1_temp3 ;
+  int dim2_temp3 ;
+  PyObject *swig_obj[2] ;
+  
+  {
+    arg3 = &data_temp3;
+    arg4 = &dim1_temp3;
+    arg5 = &dim2_temp3;
+  }
+  if (!SWIG_Python_UnpackTuple(args, "RobotModel_getComJacobianCols", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_RobotModel, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RobotModel_getComJacobianCols" "', argument " "1"" of type '" "RobotModel *""'"); 
+  }
+  arg1 = reinterpret_cast< RobotModel * >(argp1);
+  {
+    std::vector< int,std::allocator< int > > *ptr = (std::vector< int,std::allocator< int > > *)0;
+    res2 = swig::asptr(swig_obj[1], &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "RobotModel_getComJacobianCols" "', argument " "2"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "RobotModel_getComJacobianCols" "', argument " "2"" of type '" "std::vector< int,std::allocator< int > > const &""'"); 
+    }
+    arg2 = ptr;
+  }
+  {
+    try {
+      (arg1)->getComJacobianCols((std::vector< int,std::allocator< int > > const &)*arg2,arg3,arg4,arg5);
+    }
+    catch(PyException& e) {
+      e.setPyErr();
+      return NULL;
+    }
+    catch(std::exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, const_cast<char*>(e.what()));
+      return NULL;
+    }
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    npy_intp dims[2] = {
+      *arg4, *arg5 
+    };
+    PyObject* obj = PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, (void*)(*arg3));
+    PyArrayObject* array = (PyArrayObject*) obj;
+    
+    if (!array) SWIG_fail;
+    
+#ifdef SWIGPY_USE_CAPSULE
+    PyObject* cap = PyCapsule_New((void*)(*arg3), SWIGPY_CAPSULE_NAME, free_cap);
+#else
+    PyObject* cap = PyCObject_FromVoidPtr((void*)(*arg3), free);
+#endif
+    
+#if NPY_API_VERSION < 0x00000007
+    PyArray_BASE(array) = cap;
+#else
+    PyArray_SetBaseObject(array,cap);
+#endif
+    
+    resultobj = SWIG_Python_AppendOutput(resultobj,obj);
+  }
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  return resultobj;
+fail:
+  if (SWIG_IsNewObj(res2)) delete arg2;
   return NULL;
 }
 
@@ -67032,6 +67376,56 @@ static PyMethodDef SwigMethods[] = {
 		"    ndarray:: the 3xn orientation Jacobian matrix of the link.  \n"
 		"\n"
 		""},
+	 { "RobotModelLink_getJacobianCols", _wrap_RobotModelLink_getJacobianCols, METH_VARARGS, "\n"
+		"RobotModelLink_getJacobianCols(RobotModelLink self, double const [3] plocal, intVector links)\n"
+		"\n"
+		"\n"
+		"Returns the jacobian of a point on this link w.r.t. specified entries of the\n"
+		"robot's configuration q given by `links`.  \n"
+		"\n"
+		"The orientation jacobian is given in the first 3 rows, and is stacked on the\n"
+		"position jacobian, which is given in the last 3 rows.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    ndarray: the 6xlen(links) Jacobian matrix of the\n"
+		"    point given by local coordinates plocal.  \n"
+		"\n"
+		""},
+	 { "RobotModelLink_getPositionJacobianCols", _wrap_RobotModelLink_getPositionJacobianCols, METH_VARARGS, "\n"
+		"RobotModelLink_getPositionJacobianCols(RobotModelLink self, double const [3] plocal, intVector links)\n"
+		"\n"
+		"\n"
+		"Returns the position jacobian of a point on this link w.r.t. specified entries\n"
+		"of the robot's configuration q given by `links`.  \n"
+		"\n"
+		"This matrix J gives the point's velocity (in world coordinates) via\n"
+		"np.dot(J,dqlinks), where dqlinks are the joint velocities of the links in\n"
+		"`links`  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    ndarray: the 3xlen(links) position Jacobian matrix of the\n"
+		"    point given by local coordinates plocal.  \n"
+		"\n"
+		""},
+	 { "RobotModelLink_getOrientationJacobianCols", _wrap_RobotModelLink_getOrientationJacobianCols, METH_VARARGS, "\n"
+		"RobotModelLink_getOrientationJacobianCols(RobotModelLink self, intVector links)\n"
+		"\n"
+		"\n"
+		"Returns the orientation jacobian this link w.r.t. specified entries of the\n"
+		"robot's configuration q given by `links`.  \n"
+		"\n"
+		"This matrix J gives the point's angular velocity (in world coordinates) via\n"
+		"np.dot(J,dqlinks), where dqlinks are the joint velocities of the links in\n"
+		"`links`  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    ndarray: the 3xlen(links) orientation Jacobian matrix of the\n"
+		"    link.  \n"
+		"\n"
+		""},
 	 { "RobotModelLink_getAcceleration", _wrap_RobotModelLink_getAcceleration, METH_VARARGS, "\n"
 		"RobotModelLink_getAcceleration(RobotModelLink self, doubleVector ddq)\n"
 		"\n"
@@ -67493,6 +67887,20 @@ static PyMethodDef SwigMethods[] = {
 		"\n"
 		"    ndarray: a 3xn matrix J such that np.dot(J,dq) gives the\n"
 		"    COM velocity at the currene configuration  \n"
+		"\n"
+		""},
+	 { "RobotModel_getComJacobianCols", _wrap_RobotModel_getComJacobianCols, METH_VARARGS, "\n"
+		"RobotModel_getComJacobianCols(RobotModel self, intVector links)\n"
+		"\n"
+		"\n"
+		"Returns the Jacobian matrix of the current center of mass w.r.t. some links of\n"
+		"the robot.  \n"
+		"\n"
+		"Returns:  \n"
+		"\n"
+		"    ndarray: a 3xlen(links) matrix J such that np.dot(J,dqlinks)\n"
+		"    gives the COM velocity at the current configuration, and dqlinks\n"
+		"    is the array of velocities of the links given by `links`  \n"
 		"\n"
 		""},
 	 { "RobotModel_getLinearMomentum", _wrap_RobotModel_getLinearMomentum, METH_O, "\n"

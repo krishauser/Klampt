@@ -90,11 +90,16 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 
 ## Version history
 
-**0.9.1** (10/6/2023)
+**0.9.1** (10/30/2023)
 -   Removed GLUI dependency in default build mode.
 -   Updated GLEW to 2.1.0.
+-   Builds for Linux Python 3.10+ are now working again.  (Mac OS 11+ support is still TBD.)
 -   IK solver now has a minimization mode and a prioritized solve mode.
 -   Fixed problem with custom textures being unloaded after a mesh is transformed.
+-   Fixed bug in simulation of affine joints when the joint angle can go negative. Also, internal affine transmission coupling is simulated in a fashion that's sensitive to the driver's PID constants.
+-   Minor performance improvements to IK; API for getting subset of Jacobian columns.
+-   Python API: substantial performance improvements to camera image retrieval (camera_to_images).
+-   Python API: new calls for getting subset of Jacobian columns.
 -   Python API: Added `types.convert` generic utility function.
 -   Python API: Fixed bugs with vis module picker.  Also, appearances can now have a tint set to match the C++ API.  
 -   Python API: Bug fixes and type hints in coordinates module.
@@ -128,6 +133,7 @@ Note: If you have a `pip` installed Klampt, you may get these updates by cloning
 **0.8.7** (5/25/2021)
 -   Fixed bug in simulation of affine joints when the joint angle can go negative. Also, internal affine transmission coupling is simulated in a fashion that's sensitive to the driver's PID constants.
 -   URDF import can now import multiple collision and visual geometries.
+>>>>>>> master
 -   Python API: Workaround for Mac OSX Big Sur dropping support for OpenGL when importing PyOpenGL.
 -   Python API: bug fixes for motion planning with affine drivers.
 -   Python API: Added a function `klampt.model.types.transfer()` which transfers objects from one robot to another.

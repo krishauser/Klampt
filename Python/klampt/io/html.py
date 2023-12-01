@@ -31,12 +31,12 @@ def read_resource_contents(package,filename):
     try:
         import importlib.resources
         ref = importlib.resources.files(package) / filename
-        return importlib.resources.read_text(ref)
-    except ImportError:
+        return ref.read_text()
+    except (ImportError,AttributeError): #Python 3.9 introduces the files() object and raises an exception on Python 3.8
         try:
             import importlib_resources
             ref = importlib_resources.files(package) / filename
-            return importlib_resources.read_text(ref)
+            return ref.read_text()
         except ImportError:
             import pkg_resources
             fn = pkg_resources.resource_filename(package,filename)

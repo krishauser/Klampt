@@ -39,6 +39,7 @@ instructions may help.
 and built. On Ubuntu systems, try:
 
 .. code:: sh
+
    sudo apt-get install cmake libglpk-dev libassimp-dev qt5-default libpython-dev
 
 Then, change into the Klampt/Cpp/Dependencies folder and unpack KrisLibrary, TinyXML,

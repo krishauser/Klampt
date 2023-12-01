@@ -1,10 +1,14 @@
+SWIG=swig
+#SWIG=/usr/local/bin/swig
+PYTHON=python3
+
 .PHONY: docs swig clean
 
 default: docs cpp-docs swig
 
 cpp-docs: 
 	cd src; doxygen doxygen.conf
-	cd src; python doxy2swig.py -w 80 docs/xml/index.xml docs/docs.i
+	cd src; $(PYTHON) doxy2swig.py -w 80 docs/xml/index.xml docs/docs.i
 
 docs:
 	doxygen doxygen.conf

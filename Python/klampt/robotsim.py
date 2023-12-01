@@ -2066,7 +2066,7 @@ class Geometry3D(object):
 
 
         Args:
-            arg2 (:class:`~klampt.ConvexHull` or :class:`~klampt.PointCloud` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.Geometry3D` or :class:`~klampt.VolumeGrid` or :class:`~klampt.TriangleMesh`, optional): 
+            arg2 (:class:`~klampt.Geometry3D` or :class:`~klampt.VolumeGrid` or :class:`~klampt.PointCloud` or :class:`~klampt.GeometricPrimitive` or :class:`~klampt.TriangleMesh` or :class:`~klampt.ConvexHull`, optional): 
         """
         _robotsim.Geometry3D_swiginit(self, _robotsim.new_Geometry3D(*args))
     __swig_destroy__ = _robotsim.delete_Geometry3D
@@ -4324,6 +4324,67 @@ class RobotModelLink(object):
         """
         return _robotsim.RobotModelLink_getOrientationJacobian(self)
 
+    def getJacobianCols(self, plocal: Point, links: IntArray) ->None:
+        r"""
+        Returns the jacobian of a point on this link w.r.t. specified entries of the
+        robot's configuration q given by `links`.  
+
+        Args:
+            plocal (:obj:`list of 3 floats`)
+            links (:obj:`list of int`)
+
+        The orientation jacobian is given in the first 3 rows, and is stacked on the
+        position jacobian, which is given in the last 3 rows.  
+
+        Returns:  
+
+            ndarray: the 6xlen(links) Jacobian matrix of the
+            point given by local coordinates plocal.  
+
+        """
+        return _robotsim.RobotModelLink_getJacobianCols(self, plocal, links)
+
+    def getPositionJacobianCols(self, plocal: Point, links: IntArray) ->None:
+        r"""
+        Returns the position jacobian of a point on this link w.r.t. specified entries
+        of the robot's configuration q given by `links`.  
+
+        Args:
+            plocal (:obj:`list of 3 floats`)
+            links (:obj:`list of int`)
+
+        This matrix J gives the point's velocity (in world coordinates) via
+        np.dot(J,dqlinks), where dqlinks are the joint velocities of the links in
+        `links`  
+
+        Returns:  
+
+            ndarray: the 3xlen(links) position Jacobian matrix of the
+            point given by local coordinates plocal.  
+
+        """
+        return _robotsim.RobotModelLink_getPositionJacobianCols(self, plocal, links)
+
+    def getOrientationJacobianCols(self, links: IntArray) ->None:
+        r"""
+        Returns the orientation jacobian this link w.r.t. specified entries of the
+        robot's configuration q given by `links`.  
+
+        Args:
+            links (:obj:`list of int`)
+
+        This matrix J gives the point's angular velocity (in world coordinates) via
+        np.dot(J,dqlinks), where dqlinks are the joint velocities of the links in
+        `links`  
+
+        Returns:  
+
+            ndarray: the 3xlen(links) orientation Jacobian matrix of the
+            link.  
+
+        """
+        return _robotsim.RobotModelLink_getOrientationJacobianCols(self, links)
+
     def getAcceleration(self, ddq: Vector) ->None:
         r"""
         Computes the acceleration of the link origin given the robot's current joint
@@ -4972,6 +5033,23 @@ class RobotModel(object):
 
         """
         return _robotsim.RobotModel_getComJacobian(self)
+
+    def getComJacobianCols(self, links: IntArray) ->None:
+        r"""
+        Returns the Jacobian matrix of the current center of mass w.r.t. some links of
+        the robot.  
+
+        Args:
+            links (:obj:`list of int`)
+
+        Returns:  
+
+            ndarray: a 3xlen(links) matrix J such that np.dot(J,dqlinks)
+            gives the COM velocity at the current configuration, and dqlinks
+            is the array of velocities of the links given by `links`  
+
+        """
+        return _robotsim.RobotModel_getComJacobianCols(self, links)
 
     def getLinearMomentum(self) ->None:
         r"""

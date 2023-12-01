@@ -11,11 +11,16 @@ topic '/[robot_name]/joint_state'.  It also acts as a ROS clock server.
 """
 
 from .. import robotinterface
-import rospy
-from klampt.model.trajectory import Trajectory,HermiteTrajectory
-from trajectory_msgs.msg import JointTrajectory,JointTrajectoryPoint
-from sensor_msgs.msg import JointState
+import warnings
 
+try:
+    import rospy
+    from klampt.model.trajectory import Trajectory,HermiteTrajectory
+    from trajectory_msgs.msg import JointTrajectory,JointTrajectoryPoint
+    from sensor_msgs.msg import JointState
+
+except ImportError:
+    warnings.warn("Unable to import rospy. Please install rospy to use Klampt's RosRobotInterface.")
 
 class RosRobotInterface(robotinterface.RobotInterfaceBase):
     """Implements a Klampt Robot Interface Layer for a ROS controlled

@@ -241,8 +241,8 @@ class RobotModelLink
   ///Computes the total jacobian of a point on this link w.r.t. the robot's
   ///configuration q.
   ///
-  /// The orientation jacobian is given in the first 3 rows, and is stacked
-  /// on the position jacobian, which is given in the last 3 rows.
+  ///The orientation jacobian is given in the first 3 rows, and is stacked
+  ///on the position jacobian, which is given in the last 3 rows.
   ///
   ///Returns:
   /// 
@@ -273,6 +273,45 @@ class RobotModelLink
   ///    ndarray:: the 3xn orientation Jacobian matrix of the link.  
   ///     
   void getOrientationJacobian(double** np_out2,int* m,int* n);
+  ///Returns the jacobian of a point on this link  w.r.t. specified entries of 
+  ///the robot's configuration q given by `links`.
+  ///
+  ///The orientation jacobian is given in the first 3 rows, and is stacked
+  ///on the position jacobian, which is given in the last 3 rows.
+  ///
+  ///Returns:
+  ///
+  ///    ndarray: the 6xlen(links) Jacobian matrix of the
+  ///    point given by local coordinates plocal. 
+  ///
+  void getJacobianCols(const double plocal[3],const std::vector<int>& links,double** np_out2,int* m,int* n);
+  ///Returns the position jacobian of a point on this link  w.r.t. specified entries of 
+  ///the robot's configuration q given by `links`.
+  ///
+  ///This matrix J gives the point's velocity (in world coordinates) via
+  ///np.dot(J,dqlinks), where dqlinks are the joint velocities of the links
+  ///in `links`
+  ///
+  ///Returns:
+  ///
+  ///    ndarray: the 3xlen(links) position Jacobian matrix of the
+  ///    point given by local coordinates plocal. 
+  ///
+  void getPositionJacobianCols(const double plocal[3],const std::vector<int>& links,double** np_out2,int* m,int* n);
+  ///Returns the orientation jacobian this link  w.r.t. specified entries of 
+  ///the robot's configuration q given by `links`.
+  ///
+  ///This matrix J gives the point's angular velocity (in world coordinates) via
+  ///np.dot(J,dqlinks), where dqlinks are the joint velocities of the links
+  ///in `links`
+  ///
+  ///Returns:
+  ///
+  ///    ndarray: the 3xlen(links) orientation Jacobian matrix of the
+  ///    link.
+  ///
+  void getOrientationJacobianCols(const std::vector<int>& links,double** np_out2,int* m,int* n);
+
   ///Computes the acceleration of the link origin given the robot's current
   ///joint configuration and velocities, and the joint accelerations ddq.
   ///
@@ -554,6 +593,15 @@ class RobotModel
   ///    COM velocity at the currene configuration
   /// 
   void getComJacobian(double** np_out2,int* m,int* n);
+  ///Returns the Jacobian matrix of the current center of mass w.r.t. some
+  ///links of the robot
+  ///
+  ///Returns:
+  ///
+  ///    ndarray: a 3xlen(links) matrix J such that np.dot(J,dqlinks)
+  ///    gives the COM velocity at the current configuration, and dqlinks
+  ///    is the array of velocities of the links given by `links`
+  void getComJacobianCols(const std::vector<int>& links,double** np_out2,int* m,int* n);
   ///Computes the 3D linear momentum vector
   void getLinearMomentum(double out[3]);
   ///Computes the 3D angular momentum vector

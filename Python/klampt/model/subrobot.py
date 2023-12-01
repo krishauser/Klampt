@@ -462,11 +462,11 @@ class SubRobotModelLink:
     def setParent(self,p):
         self._link.setParent(self._robot.tofull(p))
     def getJacobian(self,p):
-        return self._robot.fromfull(self._link.getJacobian(p))
+        return self._link.getJacobianCols(p,self._robot._links)
     def getPositionJacobian(self,p):
-        return self._robot.fromfull(self._link.getPositionJacobian(p))
+        return self._link.getPositionJacobianCols(p,self._robot._links)
     def getOrientationJacobian(self):
-        return self._robot.fromfull(self._link.getOrientationJacobian())
+        return self._link.getOrientationJacobianCols(self._robot._links)
 
 
 class SubRobotModelDriver:

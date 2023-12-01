@@ -985,6 +985,43 @@ def visible(camera : Union[SimRobotSensor,GLViewport], object, full=True, robot=
     return visible(camera,object.getBB(),full,robot)
 
 
+def laser_to_points(sensor, robot=None, scan=None):
+    """Converts laser readings to a PointCloud.
+
+    Args:
+        sensor (SimRobotSensor): the sensor
+        robot (RobotModel, optional): the robot, placed in its current
+            configuration.  If given, the result is in world coordinates.
+        scan (list of float, optional): the results from
+            sensor.getMeasurements(). Otherwise, sensor.getMeasurements()
+            is called
+    
+    Returns:
+        PointCloud: the point cloud.  Given in world coordinates if robot!=None
+        or in link-local coordinates if robot=None.
+    
+    Note: only works with planar laser scanners, for now.
+    """
+    link_pose = get_sensor_xform(sensor,robot)
+    if scan is None:
+        scan = sensor.getMeasurements()
+
+    angle_range = float(sensor.getSetting("xSweepMagnitude"))
+
+    points = []
+    for i in range(len(scan)):
+        u = float(i)/float(len(scan)+1)
+        # If period = 0, measurement sweeps over range of [-magnitude,magnitude]
+        angle = so2.interpolate(-angle_range, angle_range, u)
+        pt = [math.cos(angle)*scan[i], math.sin(angle)*scan[i],0]
+        pt = so3.apply(link_pose, pt)
+        points += pt
+
+    rv = PointCloud()
+    rv.setPoints(len(scan),points)
+    return rv
+
+
 def projection_map_texture(vp : Union[SimRobotSensor,GLViewport],
                            app : Appearance,
                            robot : RobotModel = None):

@@ -31,12 +31,12 @@ def resolve_resource_file(package,file):
     try:
         import importlib.resources
         ref = importlib.resources.files(package) / file
-        return io.StringIO(importlib.resources.read_text(ref))
-    except ImportError:
+        return ref
+    except (ImportError,AttributeError): #Python 3.9 introduces the files() object and raises an exception on Python 3.8
         try:
             import importlib_resources
             ref = importlib_resources.files(package) / file
-            return io.StringIO(importlib_resources.read_text(ref))
+            return ref
         except ImportError:
             import pkg_resources
             return pkg_resources.resource_filename(package,file)
