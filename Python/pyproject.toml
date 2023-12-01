@@ -42,10 +42,11 @@ before-all = ["yum clean all",
 repair-wheel-command = "auditwheel repair --exclude libGLX.so.0 --exclude libGLdispatch.so.0 -w {dest_dir} {wheel}"
 
 #skip all PyPy versions due to problems with Numpy include
-skip = "pp*"
-#skip = "cp*"
+#skip = ["pp*","*musllinux*"]
+skip = "*musllinux*"
 
-#archs = ["x86_64"]
+archs = ["x86_64"]
 #i686 doesn't work due to missing GLPK
 #archs = ["i686"]
-archs = ["aarch64"]
+#aarch64 doesn't work due to missing GLPK
+#archs = ["aarch64"]
