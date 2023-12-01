@@ -465,9 +465,48 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
      config = property(getConfig,setConfig)
      velocity = property(getVelocity,setVelocity)
 
+	 def sensors(self) -> list[SimRobotSensor]:
+		 """Returns a list of the sensors on the robot"""
+		 index = 0
+		 res = []
+		 while self.sensor(index).name() != '':
+			 res.append(self.sensor(index))
+			 index+=1
+		 return res
 }
 }
 
+%extend SimRobotSensor { 
+%pythoncode {
+     enabled = property(getEnabled, setEnabled)
+     link = property(getLink, setLink)
+     transform = property(getTransform,setTransform)
+     measurements = property(getMeasurements)
+
+	 def sensors(self) -> list[SimRobotSensor]:
+		 """Returns a list of the sensors on the robot"""
+		 index = 0
+		 res = []
+		 while self.sensor(index).name() != '':
+			 res.append(self.sensor(index))
+			 index+=1
+		 return res
+}
+}
+
+
+%extend SimRobotController { 
+%pythoncode {
+	 def sensors(self) -> list[SimRobotSensor]:
+		 """Returns a list of the sensors on the robot"""
+		 index = 0
+		 res = []
+		 while self.sensor(index).name() != '':
+			 res.append(self.sensor(index))
+			 index+=1
+		 return res
+}
+}
 
 %extend VolumeGrid { 
 %pythoncode {
