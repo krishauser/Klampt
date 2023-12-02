@@ -9,6 +9,8 @@
 IF(NOT KLAMPT_ROOT)
   MESSAGE("KLAMPT_ROOT not defined, setting to .")
   SET(KLAMPT_ROOT .)
+ELSE()
+  MESSAGE("KLAMPT_ROOT set to ${KLAMPT_ROOT}")
 ENDIF( )
 
 SET(KLAMPT_CPP_ROOT ${KLAMPT_ROOT}/Cpp)
@@ -16,7 +18,9 @@ SET(KLAMPT_PYTHON_ROOT ${KLAMPT_ROOT}/Python)
 SET(KLAMPT_DEPENDENCIES "${KLAMPT_CPP_ROOT}/Dependencies" CACHE PATH "Klamp't C++ dependency folder" FORCE)
 
 #pick up stuff from KrisLibrary/CMakeModules
-list(APPEND CMAKE_MODULE_PATH ${KLAMPT_CPP_ROOT}/Dependencies/KrisLibrary/CMakeModules)
+list(APPEND CMAKE_MODULE_PATH ${KLAMPT_DEPENDENCIES}/KrisLibrary/CMakeModules)
+
+MESSAGE("Looking for Klampt dependencies in ${KLAMPT_DEPENDENCIES}")
 
 IF(WIN32)
   SET(KRISLIBRARY_ROOT ${KLAMPT_DEPENDENCIES} CACHE PATH "KrisLibrary parent directory" FORCE)

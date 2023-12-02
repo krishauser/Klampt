@@ -205,7 +205,7 @@ that ROS has been detected.
 Basic message conversions
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The :meth:`~klampt.io.ros.toMsg` and :meth:`~klampt.io.ros.fromMsg` functions convert
+The :func:`~klampt.io.ros.toMsg` and :func:`~klampt.io.ros.fromMsg` functions convert
 back and forth between ROS and Klampt types.  You can then pass data between your
 ROS subscribers to Klampt and from Klampt to your ROS publishers.
 
@@ -213,18 +213,18 @@ ROS subscribers to Klampt and from Klampt to your ROS publishers.
 Automatic interface
 ~~~~~~~~~~~~~~~~~~~~~
 
-:meth:`~klampt.io.ros.publisher` and :meth:`~klampt.io.ros.object_publisher` create
+:func:`~klampt.io.ros.publisher` and :func:`~klampt.io.ros.object_publisher` create
 an object that publishes a Klampt object to an appropriate ROS topic.  For some
 objects, like camera sensors, multiple ROS subtopics will be published under the
 given topic.  (The only difference is that the first takes in a type string while the
 second takes in a Klampt object)
 
-:meth:`~klampt.io.ros.subscriber` and :meth:`~klampt.io.ros.object_subscriber` are
+:func:`~klampt.io.ros.subscriber` and :func:`~klampt.io.ros.object_subscriber` are
 similar, but they accept a callback that is called whenever the ROS subscriber receives
 a message.  This message is converted to an appropriate Klamp't type before passing to
 your callback function.
 
-:meth:`~klampt.io.ros.broadcast_tf` and :meth:`~klampt.io.ros.listen_tf` can be used to
+:func:`~klampt.io.ros.broadcast_tf` and :func:`~klampt.io.ros.listen_tf` can be used to
 synchronize transforms between ROS and Klampt.
 
 
@@ -233,7 +233,7 @@ Live ROS geometry updates
 
 Using :class:`~klampt.Geometry3D`, you can directly subscribe to a ROS topic containing
 ``PointCloud2`` messages.
-This is accomplished via the :meth:`~klampt.io.SubscribeToStream` method, which
+This is accomplished via the :func:`~klampt.io.SubscribeToStream` method, which
 takes as arguments the protocol (currently only "ros" protocol is
 supported) and the name of the ROS topic to subscribe to. For an
 example, create a new file called "pointCloudFromROS.py" and copy the

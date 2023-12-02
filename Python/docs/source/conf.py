@@ -20,7 +20,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'Klampt Python API'
-copyright = '2021, Intelligent Motion Lab'
+copyright = '2023, Intelligent Motion Lab'
 author = 'Kris Hauser'
 
 from klampt import __version__
