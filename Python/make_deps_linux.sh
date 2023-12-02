@@ -1,3 +1,5 @@
+#assumed to run in a Docker container only containing Python directory
+
 set -e  #error if any step fails
 
 yum clean all
@@ -32,3 +34,5 @@ make -j Pack
 bin/Pack
 popd
 
+#update Python CMakeList from git pull'ed Klampt
+cmake . -DKLAMPT_ROOT=Klampt
