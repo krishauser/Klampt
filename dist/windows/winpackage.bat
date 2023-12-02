@@ -5,9 +5,9 @@
 :: (assumes the zip command line tool is available.  See GnuWin32 zip.)
 
 :: configuration variables
-SET klamptversion=0.9.0
+SET klamptversion=0.9.1
 :: dependency libraries may be kept back to a prior version
-SET klamptdepversion=0.9.0
+SET klamptdepversion=0.9.1
 ::    this is used for Python build (VS 2015)
 SET VS90COMNTOOLS=%VS140COMNTOOLS%
 SET PYTHON35_32=D:\Python35-32\python.exe
