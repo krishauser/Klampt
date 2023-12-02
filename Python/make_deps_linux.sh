@@ -1,4 +1,5 @@
-#assumed to run in a Docker container only containing Python directory
+#assumed to run in a Docker container containing Klampt directory
+##assumed to run in a Docker container only containing Python directory
 
 set -e  #error if any step fails
 
@@ -6,9 +7,10 @@ yum clean all
 yum install -y glpk glpk-devel mesa-libGLU-devel git
 pip install cmake
 
-git clone https://github.com/krishauser/Klampt.git
+#git clone https://github.com/krishauser/Klampt.git
 
-pushd Klampt/Cpp/Dependencies
+#pushd Klampt/Cpp/Dependencies
+pushd Cpp/Dependencies
 make unpack-deps
 git clone https://github.com/assimp/assimp.git
 
@@ -28,11 +30,14 @@ popd
 
 popd
 
-pushd Klampt
+#pushd Klampt
 cmake . && make -j Klampt
 make -j Pack
 bin/Pack
-popd
+#popd
+
+#echo "Working directory for cmake . call:"
+#pwd
 
 #update Python CMakeList from git pull'ed Klampt
-cmake -DKLAMPT_ROOT=Klampt -DKLAMPT_DEPENDENCIES=Klampt/Cpp/Dependencies .
+#cmake -DKLAMPT_ROOT=Klampt -DKLAMPT_DEPENDENCIES=Klampt/Cpp/Dependencies Python
