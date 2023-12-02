@@ -13,7 +13,7 @@ make unpack-deps
 git clone https://github.com/assimp/assimp.git
 
 pushd assimp
-cmake -DASSIMP_BUILD_TESTS=OFF . && make -j 8 && make install
+cmake -DASSIMP_BUILD_TESTS=OFF . && make -j && make install
 popd
 
 pushd glew-2.1.0
@@ -35,4 +35,4 @@ bin/Pack
 popd
 
 #update Python CMakeList from git pull'ed Klampt
-cmake . -DKLAMPT_ROOT=Klampt
+cmake -DKLAMPT_ROOT=Klampt -DKRISLIBRARY_ROOT=Klampt/Cpp/Dependencies .
