@@ -41,6 +41,9 @@ jobs:
           config-file: "{package}/pyproject.toml"
         env:
           CIBW_ARCHS: ${{ matrix.cibw_archs }}
+          CIBW_SKIP: "*musllinux*"
+          #This has to be here rather than a separate build step since the Linux cibuildwheel launches Docker containers
+          CIBW_BEFORE_ALL: "Python/make_deps_linux.sh"
 
       - uses: actions/upload-artifact@v3
         with:

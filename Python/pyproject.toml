@@ -13,16 +13,4 @@ repair-wheel-command = [
 ]
 
 [tool.cibuildwheel.linux]
-before-all = ["./make_deps_linux.sh"]
-
 repair-wheel-command = "auditwheel repair --exclude libGLX.so.0 --exclude libGLdispatch.so.0 -w {dest_dir} {wheel}"
-
-#skip all PyPy versions due to problems with Numpy include
-#skip = ["pp*","*musllinux*"]
-skip = "*musllinux*"
-
-archs = ["x86_64"]
-#i686 doesn't work due to missing GLPK
-#archs = ["i686"]
-#aarch64 doesn't work due to missing GLPK
-#archs = ["aarch64"]
