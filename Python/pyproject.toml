@@ -13,31 +13,7 @@ repair-wheel-command = [
 ]
 
 [tool.cibuildwheel.linux]
-before-all = ["yum clean all",
-              "yum install -y glpk glpk-devel mesa-libGLU-devel git",
-              "pip install cmake",
-              "git clone https://github.com/krishauser/Klampt.git",
-              "pushd Klampt/Cpp/Dependencies",
-              "make unpack-deps",
-              "git clone https://github.com/assimp/assimp.git",
-              "pushd assimp",
-              "cmake -DASSIMP_BUILD_TESTS=OFF . && make -j 8 && make install",
-              "popd",
-              "pushd glew-2.1.0",
-              "make -j && make install",
-              "popd",
-              "make dep-tinyxml && make dep-ode",
-              "pushd KrisLibrary",
-              "cmake . -DC11_ENABLED=ON -DUSE_GLUT=OFF -DUSE_GLUI=OFF  && make -j",
-              "popd",
-              "popd",
-              "pushd Klampt",
-              "cmake . && make -j Klampt",
-              "popd",
-              "rm -rf build || true",
-              "rm -rf CMakeFiles || true",
-              "rm -f CMakeCache.txt || true",
-              "cmake -DKLAMPT_ROOT=./Klampt ."]
+before-all = ["./make_deps_linux.sh"]
 
 repair-wheel-command = "auditwheel repair --exclude libGLX.so.0 --exclude libGLdispatch.so.0 -w {dest_dir} {wheel}"
 
