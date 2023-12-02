@@ -35,4 +35,4 @@ bin/Pack
 popd
 
 #update Python CMakeList from git pull'ed Klampt
-cmake -DKLAMPT_ROOT=Klampt -DKRISLIBRARY_ROOT=Klampt/Cpp/Dependencies .
+cmake -DKLAMPT_ROOT=Klampt -DKLAMPT_DEPENDENCIES=Klampt/Cpp/Dependencies .
