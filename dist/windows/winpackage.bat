@@ -24,8 +24,11 @@ SET PYTHON310_32=D:\Python310-32\python.exe
 SET PYTHON310_64=D:\Python310\python.exe
 SET PYTHON311_32=D:\Python311-32\python.exe
 SET PYTHON311_64=D:\Python311\python.exe
-SET PYTHON_32_VERSIONS=%PYTHON35_32% %PYTHON36_32% %PYTHON37_32% %PYTHON38_32% %PYTHON39_32% %PYTHON310_32% %PYTHON311_32%
-SET PYTHON_64_VERSIONS=%PYTHON35_64% %PYTHON36_64% %PYTHON37_64% %PYTHON38_64% %PYTHON39_64% %PYTHON310_64% %PYTHON311_64%
+SET PYTHON312_32=D:\Python312-32\python.exe
+SET PYTHON312_64=D:\Python312\python.exe
+SET PYTHON_32_VERSIONS=%PYTHON35_32% %PYTHON36_32% %PYTHON37_32% %PYTHON38_32% %PYTHON39_32% %PYTHON310_32% %PYTHON311_32% %PYTHON312_32%
+SET PYTHON_64_VERSIONS=%PYTHON35_64% %PYTHON36_64% %PYTHON37_64% %PYTHON38_64% %PYTHON39_64% %PYTHON310_64% %PYTHON311_64% %PYTHON312_64%
+
 
 for %%P in (%PYTHON_32_VERSIONS%) do (
   %%P --version
@@ -47,7 +50,7 @@ popd
 :: 32 bit build
 SET buildfolder=msvc
 
-:: build KrisLibrary, both release and debug and copy into Cpp/Dependencies directory
+:: build 32-bit KrisLibrary, both release and debug and copy into Cpp/Dependencies directory
 pushd Cpp\Dependencies\KrisLibrary
 devenv %buildfolder%\KrisLibrary.sln /build Release
 if %errorlevel% neq 0 exit /b %errorlevel%
@@ -57,7 +60,7 @@ copy /Y %buildfolder%\lib\Release\KrisLibrary.lib ..\
 copy /Y %buildfolder%\lib\Debug\KrisLibraryd.lib ..\
 popd
 
-:: build Klamp't
+:: build 32-bit Klamp't
 devenv %buildfolder%\Klampt.sln /build Release
 :: (python doesnt build right here...) if %errorlevel% neq 0 exit /b %errorlevel%
 devenv %buildfolder%\Klampt.sln /build Release /project PACKAGE
@@ -65,23 +68,23 @@ devenv %buildfolder%\Klampt.sln /build Release /project PACKAGE
 
 SET errorlevel=0
 
-:: build Klamp't Python bindings
+:: build 32-bit Klamp't Python bindings
 copy /y %buildfolder%\Python\setup.py Python\
 pushd Python
 for %%P in (%PYTHON_32_VERSIONS%) do (
-    %%P setup.py build_ext
+    %%P -m pip wheel --no-deps -w dist
     if %errorlevel% neq 0 exit /b %errorlevel%
-    %%P setup.py install
-    if %errorlevel% neq 0 exit /b %errorlevel%
-    %%P setup.py bdist_wheel
+    %%P -m pip install
     if %errorlevel% neq 0 exit /b %errorlevel%
   )
 popd
 
+
+
 :: 64 bit build
 SET buildfolder=msvc64
 
-:: build KrisLibrary, both release and debug and copy into Cpp/Dependencies directory
+:: build 64-bit KrisLibrary, both release and debug and copy into Cpp/Dependencies directory
 pushd Cpp\Dependencies\KrisLibrary
 devenv %buildfolder%\KrisLibrary.sln /build Release
 if %errorlevel% neq 0 exit /b %errorlevel%
@@ -91,22 +94,20 @@ copy /Y %buildfolder%\lib\Release\KrisLibrary.lib ..\x64
 copy /Y %buildfolder%\lib\Debug\KrisLibraryd.lib ..\x64
 popd
 
-:: build Klampt
-:: Qt5 doesn't have a 64-bit build, don't build apps
+:: build 64-bit Klampt
+:: Qt5 doesn't have a 64-bit build, only build lib, don't build apps
 devenv %buildfolder%\Klampt.sln /build Release /project Klampt
 :: (python doesnt build right here...) if %errorlevel% neq 0 exit /b %errorlevel%
 :: devenv %buildfolder%\Klampt.sln /build Release /project PACKAGE
 :: (python doesnt build right here...) if %errorlevel% neq 0 exit /b %errorlevel%
 
-:: build Klamp't Python bindings
+:: build 64-bit Klamp't Python bindings
 copy /y %buildfolder%\Python\setup.py Python\
 pushd Python
 for %%P in (%PYTHON_64_VERSIONS%) do (
-    %%P setup.py build_ext
+    %%P -m pip wheel --no-deps -w dist
     if %errorlevel% neq 0 exit /b %errorlevel%
-    %%P setup.py install
-    if %errorlevel% neq 0 exit /b %errorlevel%
-    %%P setup.py bdist_wheel
+    %%P -m pip install
     if %errorlevel% neq 0 exit /b %errorlevel%
   )
 popd
