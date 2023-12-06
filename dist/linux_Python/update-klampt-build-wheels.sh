@@ -13,7 +13,7 @@ done
 
 # Bundle external shared libraries into the wheels
 for whl in /wheelhouse/Klampt*.whl; do
-    auditwheel repair --exclude libGLX.so.0 --exclude libGLdispatch.so.0 "$whl" -w /io/wheelhouse/
+    auditwheel repair --exclude libGLX.so.0 --exclude libGLdispatch.so.0 --exclude libOpenGL.so.0 "$whl" -w /io/wheelhouse/
 done
 
 # Install packages and test
