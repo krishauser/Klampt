@@ -13,4 +13,4 @@ repair-wheel-command = [
 ]
 
 [tool.cibuildwheel.linux]
-repair-wheel-command = "auditwheel repair --exclude libGLX.so.0 --exclude libGLdispatch.so.0 -w {dest_dir} {wheel}"
+repair-wheel-command = "auditwheel repair --exclude libGLX.so.0 --exclude libGLdispatch.so.0 --exclude libOpenGL.so.0 -w {dest_dir} {wheel}"
