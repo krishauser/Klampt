@@ -217,7 +217,7 @@ def camera_to_images(camera : SimRobotSensor, image_format='numpy',color_format=
 
 
 def image_to_points(depth,color,xfov,yfov=None,depth_scale=None,depth_range=None,color_format='auto',points_format='numpy',all_points=False):
-    """Given a depth and optionally color image, returns a point cloud
+    r"""Given a depth and optionally color image, returns a point cloud
     representing the depth or RGB-D scene.
 
     Optimal performance is obtained with ``points_format='PointCloud'`` or
