@@ -3226,12 +3226,12 @@ class Appearance(object):
         """
         import numpy
         array = numpy.asarray(array)
-        if array.shape == 1:
+        if len(array.shape) == 1:
             if array.dtype == numpy.uint8:
                 return self.setTexture1D_b(format,array)
             else:
                 return self.setTexture1D_i(format,array)
-        elif array.shape == 2:
+        elif len(array.shape) == 2:
             return self.setTexture1D_channels(format,array)
         else:
             raise ValueError("Can only pass a 1D or 2D array to setTexture1D")
@@ -3265,12 +3265,12 @@ class Appearance(object):
 
         import numpy
         array = numpy.asarray(array)
-        if array.shape == 2:
+        if len(array.shape) == 2:
             if array.dtype == numpy.uint8:
                 return self.setTexture2D_b(format,array)
             else:
                 return self.setTexture2D_i(format,array)
-        elif array.shape == 3:
+        elif len(array.shape) == 3:
             return self.setTexture2D_channels(format,array)
         else:
             raise ValueError("Can only pass a 2D or 3D array to setTexture2D")
