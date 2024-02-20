@@ -210,7 +210,6 @@ class KineTrajOpt:
         tr_size = self.config.trust_box_size
         taup, taum = self.config.taus
         ctol = self.config.cnt_tolerance
-        N = theta0.shape[0]
         cost_cache = None
         collision_cache = None
         is_feasible = False
@@ -231,7 +230,7 @@ class KineTrajOpt:
                 self.logs.append((point_collisions, sweep_collisions))
                 if self.config.verbose:
                     print('qp has %d point and %d sweep'%(len(point_collisions),len(sweep_collisions)))
-                self.build_qp(point_collisions, sweep_collisions, N, cur_sol, mu, d_safe)
+                self.build_qp(point_collisions, sweep_collisions, cur_sol, mu, d_safe)
                 goto15 = False
                 trk = 0
                 while tr_size > self.config.min_trust_box_size:
@@ -388,7 +387,7 @@ class KineTrajOpt:
             raise QPException
         return prob_cache.value, x_cache.value
 
-    def build_qp(self, point_collisions, sweep_collisions, N, theta0, mu, d_safe):
+    def build_qp(self, point_collisions, sweep_collisions, theta0, mu, d_safe):
         """Create the qp problem to be solved.
         
         point_collisions is an Iterable of JointObjectInfo storing all point collision

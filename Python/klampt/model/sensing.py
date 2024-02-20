@@ -89,13 +89,13 @@ def get_sensor_xform(sensor : SimRobotSensor, robot : RobotModel = None) -> Rigi
         return sensor.getTransform()
     else:
         return sensor.getTransformWorld()
-    s = sensor.getSetting("Tsensor")
-    Tsensor = loader.read_se3(s)
-    if robot is not None:
-        link = int(sensor.getSetting("link"))
-        if link >= 0:
-            return se3.mul(robot.link(link).getTransform(),Tsensor)
-    return Tsensor
+    # s = sensor.getSetting("Tsensor")
+    # Tsensor = loader.read_se3(s)
+    # if robot is not None:
+    #     link = int(sensor.getSetting("link"))
+    #     if link >= 0:
+    #         return se3.mul(robot.link(link).getTransform(),Tsensor)
+    # return Tsensor
 
 
 def set_sensor_xform(sensor : SimRobotSensor, T : RigidTransform, link : RobotModelLink = None):
@@ -572,7 +572,6 @@ def camera_to_points(camera : SimRobotSensor,
         return res
     else:
         raise ValueError("Invalid points_format "+points_format)
-    return None
 
 
 def camera_to_points_world(camera : SimRobotSensor,

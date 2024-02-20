@@ -51,7 +51,7 @@ def _sympy_summation(args,sargs):
         assert hasattr(vcrange,'__iter__')
         if len(vcrange) == 0:
             return sympy.Sum(sexpr,(svar,0,1))
-        if not all(isinstance(v) for v in vcrange):
+        if not all(isinstance(v,int) for v in vcrange):
             raise ValueError("Unable to perform summation of non-integer range")
         for i,v in enumerate(vcrange):
             if v != vcrange[0] + i:
@@ -257,9 +257,9 @@ class SympyFunctionAdaptor(Function):
             if nargs == 1:
                 argnames = ['x']
             elif nargs <= 3:
-                argnames = [['x','y','z'][i] for i in len(nargs)]
+                argnames = [['x','y','z'][i] for i in range(len(nargs))]
             else:
-                argnames = ['arg'+str(i+1) for i in len(nargs)]
+                argnames = ['arg'+str(i+1) for i in range(len(nargs))]
         Function.__init__(self,name,func,argnames)
 
         self.deriv = [None]*len(argnames)

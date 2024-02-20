@@ -405,16 +405,14 @@ class SubRobotModel:
         self._robot.mount(self.tofull(link),subRobot,R,t)
     def sensor(self,index) -> 'SimRobotSensor':
         """Returns the SimRobotSensor corresponding to index. Note however that
-        you shouldn't set the "link" setting according to this SubRobotModel.
+        you shouldn't set the sensor's "link" setting according to this
+        SubRobotModel.
 
         Args:
             index (int or str)
         """
-        if isinstance(index,str):
-            return self._robot.sensor(index)
-        else:
-            return self._robot.sensor(index)
-
+        return self._robot.sensor(index)
+        
 
 class SubRobotModelLink:
     """A helper that lets you treat links of a subrobot just like a normal

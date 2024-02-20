@@ -278,13 +278,13 @@ class RobotInfo:
         try:
             res = mod.make(sim,robotIndex)
         except Exception as e:
-            raise RuntimeError("Error running make(sim,robotIndex) for module {}: {}"%(mod.__name__,str(e)))
+            raise RuntimeError("Error running make(sim,robotIndex) for module {}: {}".format(mod.__name__,str(e)))
         try:
             controller,emulators = res
             for e in emulators:
                 pass
         except Exception:
-            raise RuntimeError("Result of make(sim,robotIndex) for module {} is not a pair (controller,emulators)"%(mod.__name__,))
+            raise RuntimeError("Result of make(sim,robotIndex) for module {} is not a pair (controller,emulators)".format(mod.__name__,))
         sim.setController(robotIndex,controller)
         for e in emulators:
             sim.addEmulator(robotIndex,e)

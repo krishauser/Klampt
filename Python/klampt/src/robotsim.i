@@ -404,6 +404,7 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 %apply (unsigned char* IN_ARRAY2,int DIM1,int DIM2) {(unsigned char* np_array2, int m, int n)};
 %apply (unsigned char* IN_ARRAY3,int DIM1,int DIM2,int DIM3) {(unsigned char* np_array3, int m, int n,int p)};
 %apply (unsigned short* IN_ARRAY2,int DIM1,int DIM2) {(unsigned short* np_array2, int m, int n)};
+%apply (unsigned int* IN_ARRAY1,int DIM1) {(unsigned int* np_array, int m)};
 %apply (unsigned int* IN_ARRAY2,int DIM1,int DIM2) {(unsigned int* np_array2, int m, int n)};
 %apply (int* IN_ARRAY2,int DIM1,int DIM2) {(int* np_array2, int m, int n)};
 %apply (int** ARGOUTVIEW_ARRAY2,int* DIM1,int* DIM2) {(int** np_view2,int* m, int *n)};

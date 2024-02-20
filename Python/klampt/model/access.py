@@ -409,7 +409,7 @@ class _index_name_map:
     def __iter__(self):
         for i in self.objects:
             yield i
-    def __setitem__(self,index):
+    def __setitem__(self,index,value):
         raise AttributeError("Cannot set in a map()'ed named list")
 
 class _SimObjectCentricBody:

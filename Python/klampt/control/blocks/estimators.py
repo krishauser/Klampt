@@ -18,7 +18,7 @@ class Differentiator(Block):
             dx = [0]*len(x)
         else:
             if self.robot==None:
-                dx = vectorops.div(self.robot.sub(x,self.xlast),dt)
+                dx = vectorops.div(vectorops.sub(x,self.xlast),dt)
             else:
                 assert(len(self.xlast)==len(x))
                 dx = vectorops.div(self.robot.interpolate_deriv(self.xlast,x),dt)

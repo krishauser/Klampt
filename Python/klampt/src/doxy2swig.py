@@ -720,7 +720,7 @@ class Doxy2SWIG:
         data = self.extract_text(first['definition'])
         self.add_text('\n')
         self.add_text(['/* where did this entry come from??? */', '\n'])
-        self.add_text('%feature("docstring") %s "\n%s' % (data, data))
+        self.add_text('%%feature("docstring") %s "\n%s' % (data, data))
 
         for n in node.childNodes:
             if n not in list(first.values()):

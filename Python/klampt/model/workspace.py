@@ -457,7 +457,8 @@ def compute_workspace_field(link : RobotModelLink,
                             load_type : str = None,
                             gravity : Vector3 = (0,0,-9.8),
                             self_collision : bool = True,
-                            feasibility_test : Callable = None) -> VolumeGrid:
+                            feasibility_test : Callable = None,
+                            default_value = 0.0) -> VolumeGrid:
     """Compute a scalar field over the reachable workspace of a point on a 
     robot's end effector. Has several options to ensure various feasibility 
     conditions. Ensures that the robot does not collide with itself, optionally
@@ -493,6 +494,7 @@ def compute_workspace_field(link : RobotModelLink,
         feasibility_test (callable, list, or dict): a function
             feasible(q)->bool that tests whether the configuration is feasible.
             If a list, a list of callables. If a dict, a map of str->callable.
+        default_value (float, optional): the default value of the field.
 
     Returns:
         The grid of reached points.
@@ -576,7 +578,8 @@ def compute_workspace_field(link : RobotModelLink,
                 points.append(target)
                 values.append(value_fn())
 
-        res = VolumeGrid(points,dimensions=vg_temp.dims,bounds=(bmin,bmax),value=value)
+        #TODO: this is not correct and is incorrect syntax
+        res = compute_field_grid(points,values,resolution=cellsize,bounds=(bmin,bmax),initial_value=value)
     else:
         vg_temp,points1,configs1 = _naive_workspace_occupancy(robot,link,point_local,Nsamples,
                 resolution,dimensions,overall_feasibility_test)
@@ -586,7 +589,7 @@ def compute_workspace_field(link : RobotModelLink,
             if overall_feasibility_test():
                 points.append(p)
                 values.append(value_fn())
-        res = compute_field_grid(points,values,resolution,dimensions,value=value)
+        res = compute_field_grid(points,values,resolution,dimensions,initial_value=default_value)
 
     #restore original limits
     robot.setJointLimits(qmin_orig,qmax_orig)

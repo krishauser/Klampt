@@ -222,8 +222,10 @@ class StepContext:
         except Exception as e:
             if self.ignore:
                 import traceback
+                import sys        
+                _, _, tb = sys.exc_info()
                 self._beginStep_exception = e
-                self._beginStep_traceback = traceback.extract_tb()
+                self._beginStep_traceback = traceback.extract_tb(tb)
                 self.numExceptions += 1
             else:
                 raise
@@ -250,9 +252,11 @@ class StepContext:
             self.numExceptions += 1
             if self.ignore:
                 import traceback
+                import sys        
+                _, _, tb = sys.exc_info()
                 print("Exception during {}.endStep()".format(str(self.interface)))
                 print("  Value:", e)
-                print("  Traceback:", traceback.extract_tb())
+                print("  Traceback:", traceback.extract_tb(tb))
             else:
                 raise
         if self.ignore:
@@ -4397,7 +4401,7 @@ class RobotInterfaceEmulator:
                 if skip: continue
 
                 args = [input_variables[v] for v in inputs]
-                results = self._runFilter(k,filter,args)
+                results = self._runFilter(indices,k,filter,args)
                 for k,r in enumerate(outputs,results):
                     if k in self.virtualSensorMeasurements:
                         self.virtualSensorMeasurements[k] = (self.curClock,r)

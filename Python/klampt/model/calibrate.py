@@ -796,7 +796,7 @@ class RobotExtrinsicCalibration:
         for res,obs in zip(residuals,self.observations):
             if obs.error is None:
                 ll += -vectorops.normSquared(res)*0.5 - len(res)*log2pi
-            elif hasattr(obs.error):
+            elif hasattr(obs.error,'__iter__'):
                 ll += -vectorops.normSquared(vectorops.div(res,obs.error))*0.5 - len(res)*log2pi - sum(math.log(e) for e in obs.error)
             else:
                 ll += -vectorops.normSquared(vectorops.div(res,obs.error))*0.5 - len(res)*(log2pi+math.log(obs.error))

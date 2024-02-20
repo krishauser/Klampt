@@ -2592,7 +2592,7 @@ class Expression(object):
             context (Context or dict, optional): a map of variable names to
                 constant values.
         """
-        return self._deriv(var,context)
+        return self._deriv(var,context,0)
     def _deriv(self,var,context,rows):
         """Internally used deriv"""
         return 0
@@ -2721,7 +2721,7 @@ class Expression(object):
                     return (False,_TraverseException(e,node,'pre-traverse '+cacheas,sys.exc_info()[2]))
                 if not descend:
                     if _DEBUG_TRAVERSE and cacheas in _DEBUG_TRAVERSE_ITEMS:
-                        print("Not descending under %s, caching as %s and returning value"%(str(node),cacheas,value))
+                        print("Not descending under %s, caching as %s and returning value"%(str(node),cacheas))
                     node._cache[cacheas] = value
                     return (cont,value)
             cvals = []
@@ -2740,7 +2740,7 @@ class Expression(object):
                             return False,value
                         if not ccont:
                             if _DEBUG_TRAVERSE and cacheas in _DEBUG_TRAVERSE_ITEMS:
-                                print("Not continuing under %s, caching as %s and returning value"%(str(node),cacheas,value))
+                                print("Not continuing under %s, caching as %s and returning value"%(str(node),cacheas))
                             node._cache[cacheas] = value
                             return (False,value)
                         cvals.append(value)
@@ -3195,7 +3195,6 @@ class OperatorExpression(Expression):
             print("  expression",self)
             print("  Cached value",self._cache['eval'])
             raise ValueError()
-            input()
         res = self._eval(context)
         self._clearCache('eval')
         return res
@@ -3956,7 +3955,7 @@ class OperatorExpression(Expression):
             return OperatorExpression(expr.functionInfo,newargs,expr.op)
         else:
             return expr
-        return None
+        
     def _postsimplify(self,depth,mydepth=0):
         if 'simplified' in self._cache:
             if _DEBUG_SIMPLIFY:
@@ -6612,7 +6611,7 @@ def _weightedsum_simplifier(*args):
         if wconst != 1:
             notone = True
         else:
-            notone = True
+            notone = False
         if is_zero(w):
             continue
         if is_zero(v):

@@ -509,7 +509,7 @@ class Trajectory:
         for d in dofs:
             if abs(d) >= n:
                 raise ValueError("Invalid dof")
-        return self.constructor([t for t in self.times],[[m[j] for j in dofs] for m in self.milestones])
+        return self.constructor()([t for t in self.times],[[m[j] for j in dofs] for m in self.milestones])
 
     def stackDofs(self, trajs: List['Trajectory'], strict: bool = True) -> None:
         """Stacks the degrees of freedom of multiple trajectories together.
@@ -1074,7 +1074,7 @@ class HermiteTrajectory(Trajectory):
         Trajectory.checkValid(self)
         for m in self.milestones:
             if len(m)%2 != 0:
-                raise ValueError("Milestone length isn't even?: {} != {}".format(len(m)))
+                raise ValueError("Milestone length isn't even?: {}".format(len(m)))
 
     def extractDofs(self,dofs) -> 'HermiteTrajectory':
         """Extracts a trajectory just over the given DOFs.
@@ -1092,7 +1092,7 @@ class HermiteTrajectory(Trajectory):
         for d in dofs:
             if abs(d) >= n:
                 raise ValueError("Invalid dof")
-        return self.constructor([t for t in self.times],[[m[j] for j in dofs] + [m[n+j] for j in dofs] for m in self.milestones])
+        return self.constructor()([t for t in self.times],[[m[j] for j in dofs] + [m[n+j] for j in dofs] for m in self.milestones])
 
     def stackDofs(self,trajs,strict=True) -> None:
         """Stacks the degrees of freedom of multiple trajectories together.

@@ -235,7 +235,6 @@ def make(type,object=None):
         raise ValueError("Can't make an independent robot, rigid object, or terrain")
     else:
         raise ValueError("Can't make a Klamp't object of type %s"%(type,))
-    return None
 
 
 def info(object,world=None) -> dict:
