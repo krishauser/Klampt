@@ -1,4 +1,5 @@
 #include "qklamptguibase.h"
+#include <GL/gl.h>
 
 QKlamptGUIBase::QKlamptGUIBase(QKlamptDisplay* _display,GenericBackendBase *_backend) :
   QtGUIBase(_backend), display(_display)
@@ -47,6 +48,7 @@ bool QKlamptGUIBase::OnDrawText(double x, double y, double z, const std::string 
 {
   QFont font;
   font.setPointSize(height);
+  glPixelStorei(GL_UNPACK_ALIGNMENT, 4);   // Needed for correct rendering?
   display->renderText(x, y, z, QString(text.c_str()), font);
   return true;
 }
@@ -55,6 +57,7 @@ bool QKlamptGUIBase::OnDrawText(int x, int y, const std::string &text, int heigh
 {
   QFont font;
   font.setPointSize(height);
+  glPixelStorei(GL_UNPACK_ALIGNMENT, 4);   // Needed for correct rendering?
   display->renderText(x, y, QString(text.c_str()), font);
   return true;
 }
