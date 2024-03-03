@@ -20,8 +20,8 @@ jobs:
         include:
           - os: ubuntu-latest
             cibw_archs: "native" 
-          #- os: ubuntu-latest
-          #  cibw_archs: "aarch64"
+          - os: ubuntu-latest
+            cibw_archs: "aarch64"
 
     steps:
     
