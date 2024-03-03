@@ -4,7 +4,9 @@ on:
   push:
     paths-ignore:
       - '.github/actions/manylinux-wheels.yml'
+      - '.github/actions/manylinux-aarch64-wheels.yml'
       - 'Python/make_deps_linux.sh'
+      - 'Python/make_deps_linux_aarch64.sh'
 
 defaults:
   run:

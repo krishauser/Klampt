@@ -4,9 +4,9 @@ on:
   push:
     paths-ignore:
       - '.github/actions/macos-wheels.yml'
-      - '.github/actions/manylinux-aarch64-wheels.yml'
+      - '.github/actions/manylinux-wheels.yml'
       - 'Python/make_deps_macos.sh'
-      - 'Python/make_deps_linux_aarch64.sh'
+      - 'Python/make_deps_linux.sh'
       - 'Python/check_mac_universal.py'
   
 defaults:
@@ -15,19 +15,24 @@ defaults:
 
 jobs:
   build_wheels:
-    name: Build Python wheels on ${{ matrix.os }}
+    name: Build Python Aarch64 wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
           - os: ubuntu-latest
-            cibw_archs: "native" 
+            cibw_archs: "aarch64"
 
     steps:
+    
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+        with:
+          platforms: arm64
           
       - uses: actions/checkout@v4
 
-      - name: Build wheels
+      - name: Build wheels 
         uses: pypa/cibuildwheel@v2.16.2
         with:
           package-dir: Python
@@ -37,7 +42,7 @@ jobs:
           CIBW_ARCHS: ${{ matrix.cibw_archs }}
           CIBW_SKIP: "*musllinux*"
           #This has to be here rather than a separate build step since the Linux cibuildwheel launches Docker containers
-          CIBW_BEFORE_ALL: "Python/make_deps_linux.sh"
+          CIBW_BEFORE_ALL: "Python/make_deps_linux_aarch64.sh"
 
       - uses: actions/upload-artifact@v3
         with:
