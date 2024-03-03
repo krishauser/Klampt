@@ -523,7 +523,6 @@ class GeomGeomDistance(ADFunctionInterface):
                 return vectorops.dot(disp,so3.apply(dR,ngeom_loc)) + vectorops.dot(self.eval_res.grad1,vectorops.add(so3.apply(dR,pgeom_loc),dt))
             else:
                 return np.dot(self.eval_res.grad1,darg)
-        raise NotImplementedError() 
 
 
 class GeomRayCast(ADFunctionInterface):

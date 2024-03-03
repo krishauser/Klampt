@@ -404,6 +404,7 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 %apply (unsigned char* IN_ARRAY2,int DIM1,int DIM2) {(unsigned char* np_array2, int m, int n)};
 %apply (unsigned char* IN_ARRAY3,int DIM1,int DIM2,int DIM3) {(unsigned char* np_array3, int m, int n,int p)};
 %apply (unsigned short* IN_ARRAY2,int DIM1,int DIM2) {(unsigned short* np_array2, int m, int n)};
+%apply (unsigned int* IN_ARRAY1,int DIM1) {(unsigned int* np_array, int m)};
 %apply (unsigned int* IN_ARRAY2,int DIM1,int DIM2) {(unsigned int* np_array2, int m, int n)};
 %apply (int* IN_ARRAY2,int DIM1,int DIM2) {(int* np_array2, int m, int n)};
 %apply (int** ARGOUTVIEW_ARRAY2,int* DIM1,int* DIM2) {(int** np_view2,int* m, int *n)};
@@ -522,12 +523,12 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
         """
         import numpy
         array = numpy.asarray(array)
-        if array.shape == 1:
+        if len(array.shape) == 1:
             if array.dtype == numpy.uint8:
                 return self.setTexture1D_b(format,array)
             else:
                 return self.setTexture1D_i(format,array)
-        elif array.shape == 2:
+        elif len(array.shape) == 2:
             return self.setTexture1D_channels(format,array)
         else:
             raise ValueError("Can only pass a 1D or 2D array to setTexture1D")
@@ -561,12 +562,12 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
         
         import numpy
         array = numpy.asarray(array)
-        if array.shape == 2:
+        if len(array.shape) == 2:
             if array.dtype == numpy.uint8:
                 return self.setTexture2D_b(format,array)
             else:
                 return self.setTexture2D_i(format,array)
-        elif array.shape == 3:
+        elif len(array.shape) == 3:
             return self.setTexture2D_channels(format,array)
         else:
             raise ValueError("Can only pass a 2D or 3D array to setTexture2D")

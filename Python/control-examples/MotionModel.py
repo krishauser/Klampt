@@ -69,7 +69,7 @@ class NaiveMotionModel(MotionModel):
         return u
     def linearization(self,q,dq):
         return (sparse.eye(len(dq),len(dq)),np.zeros((len(dq),)))
-    def getInverse():
+    def getInverse(self):
         return NaiveMotionModel(self.outname,self.inname)
 
 
@@ -181,7 +181,7 @@ class RobotDynamicsMotionModel(MotionModel):
         self.gravity = gravity
         MotionModel.__init__(self)
     
-    def externalForces(self,q,dq):
+    def externalForces(self):
         """Subclasses can override this to generate other external forces besides
         gravity.  Assumes the robot model is updated"""
         return -np.array(self.robotModel.getGravityForces(self.gravity))
@@ -234,9 +234,8 @@ class AdaptiveMotionModel(MotionModel):
         assert (inname == 'velocity')
         self.sysids = None
     def init(self,n,dt=0):
-        self.sysids = [LinearSystemID(2,1) for i in xrange(n)]
+        self.sysids = [LinearSystemID(2,1) for i in range(n)]
         for i,s in enumerate(self.sysids):
-            dt = 0
             #default motion model: basic integrator of velocity cmds
             s.setModelPrior(np.array([[1,dt],[0,0]]),np.array([[0],[1]]),np.zeros(2),10)
     def eval(self,q,dq,u):
@@ -260,7 +259,7 @@ class AdaptiveMotionModel(MotionModel):
         n= len(q)
         if self.sysids == None:
             self.init(n)
-        for i in xrange(n):
+        for i in range(n):
             #TODO: add discount as a parameter?
             self.sysids[i].discount(0.1,'hyperbolic')
             self.sysids[i].add([q[i],dq[i]],[u[i]],[qnext[i],dqnext[i]])
@@ -283,7 +282,7 @@ class GravityCompensationAdaptiveMotionModel(MotionModel):
         self.gravity = (0,0,-9.8)
         self.estimators = None
     def init(self,n,dt=0):
-        self.estimators = [OnlineLeastSquares(4) for i in xrange(n)]
+        self.estimators = [OnlineLeastSquares(4) for i in range(n)]
         for i,e in enumerate(self.estimators):
             #default motion model: dq = 0.8*dq + 0.2*dqcmd
             e.setPrior([0.8,0.3,0,0],1)
@@ -350,7 +349,7 @@ class FreeBaseAdaptiveMotionModel(AdaptiveMotionModel):
         AdaptiveMotionModel.init(self,n,dt)
         #baseSysID takes base rotations, joint velocities, joint commands, and constant offset
         numJoints = len(self.relevantDofs) if self.relevantDofs != None else n-6
-        self.baseSysID = [OnlineLeastSquares(3+numJoints+numJoints+1) for i in xrange(6)]
+        self.baseSysID = [OnlineLeastSquares(3+numJoints+numJoints+1) for i in range(6)]
     def getQDofs(self,q):
         return q[3:6]
     def getDqDofs(self,dq):
@@ -368,7 +367,7 @@ class FreeBaseAdaptiveMotionModel(AdaptiveMotionModel):
         v = AdaptiveMotionModel.eval(self,q,dq,u)
         n = len(q)
         xbase = np.hstack((self.getQDofs(q),self.getDqDofs(dq),self.getUDofs(u),[1.0]))
-        for i in xrange(6):
+        for i in range(6):
             v[i] = self.baseSysID[i].x.dot(xbase)
         return v
     def linearization(self,q,dq):
@@ -376,7 +375,7 @@ class FreeBaseAdaptiveMotionModel(AdaptiveMotionModel):
         #now fill in top right corner of A, first 6 rows of b
         n = len(q)
         numJoints = len(self.relevantDofs) if self.relevantDofs != None else n-6
-        for i in xrange(6):
+        for i in range(6):
             A[i,i]=0
             coeffs = self.baseSysID[i].x
             #unpack
@@ -396,7 +395,7 @@ class FreeBaseAdaptiveMotionModel(AdaptiveMotionModel):
         AdaptiveMotionModel.add(self,q,dq,u,qnext,dqnext)
         n = len(q)
         xbase = np.hstack((self.getQDofs(q),self.getDqDofs(dq),self.getUDofs(u),[1.0]))
-        for i in xrange(6):
+        for i in range(6):
             if self.baseSysID[i].count > 10:
                 self.baseSysID[i].discount(0.1,'hyperbolic')
             self.baseSysID[i].add(xbase,dq[i])

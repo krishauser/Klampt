@@ -158,9 +158,9 @@
         animationIndex = 0;
       if(ind > animationIndex) {
         //move rpcs forward
-        for(i = animationIndex+1;i<=ind;i++) {
+        for(let i = animationIndex+1;i<=ind;i++) {
           if(rpcs[i]) {
-            for(j=0;j<rpcs[i].length;j++)
+            for(let j=0;j<rpcs[i].length;j++)
               klampt_frontend.rpc(rpcs[i][j]);
           }
         }
@@ -168,9 +168,9 @@
       else {
         klampt_frontend.rpc({type:'clear_extras'});
         klampt_frontend.rpc({type:'add_text',name:'time_display',text:"Time "+(animationTime*0.001).toFixed(2),x:5,y:5});
-        for(i = 0;i<=ind;i++) {
+        for(let i = 0;i<=ind;i++) {
           if(rpcs[i]) {
-            for(j=0;j<rpcs[i].length;j++)
+            for(let j=0;j<rpcs[i].length;j++)
               klampt_frontend.rpc(rpcs[i][j]);
           }
         }

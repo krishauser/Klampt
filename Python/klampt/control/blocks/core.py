@@ -83,7 +83,7 @@ class Block(object):
         if self._name is None:
             return self.__class__.__name__
         else:
-            return "{}({})"%(self._name,self.__class__.__name__)
+            return "%s(%s)"%(self._name,self.__class__.__name__)
 
     def _process(self):
         """Called internally"""

@@ -420,6 +420,7 @@ class QtGLWindow(QGLWidget):
 
         font = QtGui.QFont()
         font.setPixelSize(size)
+        glPixelStorei(GL_UNPACK_ALIGNMENT,4)   # Needed for correct font rendering?
         if len(point) == 2:
             self.renderText(point[0],point[1],0,text,font)
         else:

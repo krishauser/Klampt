@@ -285,9 +285,8 @@ def fixed_rotation_objective(
 
 def objects(objectives):
     """Returns a list of all objects touched by the given objective(s).
-    Not currently implemented."""
+    TODO: Not currently implemented."""
     raise NotImplementedError()
-    pass
 
 
 class SubRobotIKSolver(IKSolver):

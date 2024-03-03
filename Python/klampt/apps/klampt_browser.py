@@ -690,8 +690,8 @@ where the items are world, robot, terrain, object, or geometry files.
         browser = ResourceBrowser(gl_backend)
         g_browser = browser
         dw = QtWidgets.QDesktopWidget()
-        x=dw.width()*0.8
-        y=dw.height()*0.8
+        x=int(dw.width()*0.8)
+        y=int(dw.height()*0.8)
         browser.setFixedSize(x,y)
         for fn in sys.argv[1:]:
             res = browser.world.readFile(fn)
