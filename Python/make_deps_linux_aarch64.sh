@@ -23,7 +23,8 @@ make unpack-deps
 git clone https://github.com/assimp/assimp.git
 
 pushd assimp
-cmake -DASSIMP_BUILD_TESTS=OFF . && make -j && make install
+cmake -DASSIMP_BUILD_TESTS=OFF . && make 
+make install
 popd
 
 pushd glew-2.1.0
