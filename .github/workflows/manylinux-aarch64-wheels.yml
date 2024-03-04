@@ -1,4 +1,4 @@
-name: Build Python wheels on Manylinux 
+name: Build Python Aarch64 wheels on Manylinux 
 
 on: 
   push:
