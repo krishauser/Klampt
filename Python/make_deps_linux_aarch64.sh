@@ -3,6 +3,9 @@
 
 set -e  #error if any step fails
 
+uname -m
+cd blah
+
 yum clean all
 yum install -y mesa-libGLU-devel git
 pip install cmake
