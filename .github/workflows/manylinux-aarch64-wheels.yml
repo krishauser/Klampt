@@ -8,7 +8,7 @@ on:
       - 'Python/make_deps_macos.sh'
       - 'Python/make_deps_linux.sh'
       - 'Python/check_mac_universal.py'
-  
+
 defaults:
   run:
     working-directory: Python
