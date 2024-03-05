@@ -11,7 +11,7 @@ pip install cmake
 git clone https://github.com/firedrakeproject/glpk.git
 pushd glpk
 ./configure --disable-shared
-make CFLAGS=-O3
+make CFLAGS='-fPIC -O3'
 make install
 popd
 
@@ -28,7 +28,7 @@ make install
 popd
 
 pushd glew-2.1.0
-make -j && make install
+make && make install
 popd
 
 make dep-tinyxml && make dep-ode
