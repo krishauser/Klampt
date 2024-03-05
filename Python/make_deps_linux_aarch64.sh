@@ -42,7 +42,7 @@ popd
 #pushd Klampt
 cmake . && make Klampt
 make Pack
-bin/Pack
+#bin/Pack  #somehow libGLEW.so.2.1 is not found
 #popd
 
 #echo "Working directory for cmake . call:"
