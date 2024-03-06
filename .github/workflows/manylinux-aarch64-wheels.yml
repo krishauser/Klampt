@@ -3,8 +3,8 @@ name: Build Python Aarch64 wheels on Manylinux
 on: 
   push:
     paths-ignore:
-      - '.github/actions/macos-wheels.yml'
-      - '.github/actions/manylinux-wheels.yml'
+      - '.github/workflows/macos-wheels.yml'
+      - '.github/workflows/manylinux-wheels.yml'
       - 'Python/make_deps_macos.sh'
       - 'Python/make_deps_linux.sh'
       - 'Python/check_mac_universal.py'
