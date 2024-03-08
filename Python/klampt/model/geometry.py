@@ -20,6 +20,9 @@ Working with point clouds
 The :func:`fit_plane`, :func:`fit_plane3`, and :class:`PlaneFitter` class help
 with plane estimation.
 
+The :func:`align_points` and :func:`align_points_rotation` functions
+solve for point cloud alignment.
+
 :func:`point_cloud_simplify` simplifies a PointCloud.
 
 :func:`point_cloud_colors` and :func:`point_cloud_set_colors` sets / gets 
@@ -40,7 +43,7 @@ import math
 from .create import primitives
 from ..math import vectorops,so3,se3
 from typing import Union, Tuple, Sequence
-from .typing import Vector3
+from .typing import Vector3, Rotation, RigidTransform
 import numpy as np
 
 _has_scipy = False
@@ -337,6 +340,84 @@ def fit_plane_centroid(points : Sequence[Vector3]) -> Tuple[Vector3,Vector3]:
         raise ValueError("Point set is degenerate")
     normal = Vt[2,:]
     return centroid.tolist(),normal.tolist()
+
+
+
+
+def align_points_rotation(apts,bpts) -> Rotation:
+    """Computes a 3x3 rotation matrix that rotates the points apts to
+    minimize the distance to bpts.
+
+    apts and bpts can either be a list of 3-vectors, nx3 numpy array,
+    or a PointCloud.
+
+    Returns:
+        Rotation: the klampt.so3 element that minimizes the sum of
+        squared errors ||R*ai-bi||^2.
+    """
+    if isinstance(apts, PointCloud):
+        apts = apts.getPoints()
+    if isinstance(bpts, PointCloud):
+        bpts = bpts.getPoints()
+    assert len(apts)==len(bpts)
+
+    C = np.dot(np.asarray(apts).T,np.asarray(bpts))
+    #let A=[a1 ... an]^t, B=[b1 ... bn]^t
+    #solve for min sum of squares of E=ARt-B
+    #let C=AtB
+    #solution is given by CCt = RtCtCR
+
+    #Solve C^tR = R^tC with SVD CC^t = R^tC^tCR
+    #CtRX = RtCX
+    #C = RCtR
+    #Ct = RtCRt
+    #=> CCt = RCtCRt
+    #solve SVD of C and Ct (giving eigenvectors of CCt and CtC
+    #C = UWVt => Ct=VWUt
+    #=> UWUt = RVWVtRt
+    #=> U=RV => R=UVt
+    (U,W,Vt) = np.linalg.svd(C)
+
+    R = np.dot(U,Vt)
+    if np.linalg.det(R) < 0:
+        #it's a mirror. flip the zero 
+        #svd.sortSVs();
+        if abs(W[2]) > 1e-2:
+            raise RuntimeError("point_fit_rotation_3d: Uhh... what do we do?  SVD of rotation doesn't have a zero singular value")
+        #negate the last column of V
+        Vt[2,:] *= -1
+        R = np.dot(U,Vt)
+        assert np.linalg.det(R) > 0
+    return R.flatten().tolist()
+
+
+def align_points(apts,bpts) -> RigidTransform:
+    """Finds a 3D rigid transform that maps the list of points apts to the
+    list of points bpts. 
+    
+    apts and bpts can either be a list of 3-vectors, nx3 numpy array,
+    or a PointCloud.
+
+    Returns:
+        RigidTransform: the klampt.se3 element that minimizes the sum of
+        squared errors ||T*ai-bi||^2.
+    """
+    if isinstance(apts, PointCloud):
+        apts = apts.getPoints()
+    if isinstance(bpts, PointCloud):
+        bpts = bpts.getPoints()
+    assert len(apts)==len(bpts)
+    apts = np.asarray(apts)
+    bpts = np.asarray(bpts)
+    ca = np.average(apts,axis=0)
+    cb = np.average(bpts,axis=0)
+    arel = apts - ca
+    brel = bpts - cb
+    R = align_points_rotation(arel,brel)
+    #R minimizes sum_{i=1,...,n} ||R(ai-ca) - (bi-cb)||^2
+    t = cb - so3.apply(R,ca)
+    return (R,t.tolist())
+
 
 
 def _color_format_from_uint8_channels(format,r,g,b,a=None):
