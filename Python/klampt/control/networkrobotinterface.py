@@ -262,7 +262,7 @@ Usage
 
     Args:
         interface (RobotInterfaceBase): the interface to serve
-        ip (str): the IP address (usually '128.0.0.1' or 'localhost')
+        ip (str): the IP address (usually '127.0.0.1' or 'localhost')
         port (int): the port of the listening socket. 7881 is used by default.
     
     """
@@ -325,9 +325,10 @@ class XMLRPCRobotInterfaceClient(ClientRobotInterfaceBase):
     
     Args:
         addr (str): the IP address of the server, including port. 
-            Localhost port 7881 is used by default.
+            Localhost port 7881 is used by default.  (note that on Windows,
+            using localhost is extremely slow, so we use 127.0.0.1 instead)
     """
-    def __init__(self,addr='http://localhost:7881'):
+    def __init__(self,addr='http://127.0.0.1:7881'):
         ClientRobotInterfaceBase.__init__(self)
         self.addr = addr
         self.context_mgr = None     #type: ServerProxy
