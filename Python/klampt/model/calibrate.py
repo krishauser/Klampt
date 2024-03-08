@@ -9,12 +9,27 @@ from klampt.io import resource
 from klampt.model.trajectory import RobotTrajectory
 import math
 from klampt.control.robotinterface import RobotInterfaceBase
+from klampt.control.utils import TimedLooper
 from klampt.model import sensing
 from typing import Optional,Union,Sequence,List,Tuple,Dict,Any,Callable
 from .typing import Vector2,Vector3,RigidTransform,Vector
 import random
 
 Key = Union[int,str]
+
+def robot_sensors(robot : RobotModel, type = None):
+    """Returns all sensors on the robot of the given type."""
+    res = []
+    sindex = 0
+    while True:
+        s = robot.sensor(sindex)
+        if s.name() == '':
+            break
+        if type is None or s.type() == type:
+            res.append(s)
+        sindex += 1
+    return res
+
 
 class PointMarker:
     """A physical point marker that can be detected in an image.
@@ -54,9 +69,26 @@ class TransformMarker:
         self.local_features = ([] if local_features is None else local_features)  # type: List[Vector3]
         self.variable = True                        # type: bool
 
+    @staticmethod
+    def chessboard(nrows,ncols,square_size,link=None):
+        """Creates a chessboard marker with the given number of rows and
+        columns, and the given square size.
+        
+        The origin is at (0,0) and the feature points go left to right,
+        bottom to top (row-major).  I.e., feature 0 is (0,0,0), feature 1 is
+        (square_size,0,0), feature 2 is (2*square_size,0,0), etc.
+        """
+        m = TransformMarker(link=link)
+        m.size = square_size
+        m.local_features = []
+        for j in range(ncols):
+            for i in range(nrows):
+                m.local_features.append([i*square_size,j*square_size,0])
+        return m
+
 
 class CameraInfo:
-    """Stores info for a camera in a calibration.
+    """Stores info for a camera during calibration.
 
     Attributes:
         link (int or str, optional): link on which this is located. None means
@@ -122,26 +154,48 @@ class RobotExtrinsicCalibration:
     """Stores a calibration dataset and helps perform extrinsic (hand-eye)
     calibration.
 
-    Usage for a world-attached camera, Aruco marker on end effector::
+    Examples
+    ------------
+    
+    Usage for a world-attached camera, OpenCV to read images, and Aruco marker
+    on end effector::
 
+        world = WorldModel()
+        world.loadElement("myrobot.urdf")  #load the robot model here
+        
         calib = RobotExtrinsicCalibration()
-        calib.robot = #set the robot model here
-        calib.cameras[0] = CameraInfo(link=None,intrinsics=intrinsics)
+        calib.robot = world.robot(0)
+        ee_link = calib.robot.numLinks()-1
+        tag_id = 0
+        #setup the camera mounted link and intrinsics here. If you are using transform
+        #markers, then the intrinsics are not necessary
+        calib.cameras[0] = CameraInfo(link=None,intrinsics={}) 
         ee_link = # set the ee link index or name here
         calib.markers[tag_id] = TransformMarker(ee_link)
 
-        calib.visualize()         #this will show a visualization of the markers and camera
+        calib.visualize(world)         #this will show a visualization of the markers and camera
 
-        calib.editTrajectory()    #this will pop up an editing window
+        calib.editTrajectory(world)    #this will pop up an editing window
 
-        controller = MyRobotInterface()  #setup the robot controller here
+        #setup the robot controller here. Should be a subclass of RobotInterfaceBase
+        controller = MyRobotInterface()  
         controller.initialize()
-
+        
+        #set up the OpenCV capture.  For other sensors, you will use a different
+        #function to capture the image.
+        cam_port = 0
+        cam = cv2.VideoCapture(cam_port) 
+        
         def take_camera_picture():
-            #TODO: take the picture from the camera here
+            #take the picture from the camera here
+            result, image = cam.read()
+            if not result:
+                raise RuntimeError("Error reading from camera")
             return image
 
-        #TODO: setup aruco_detector... see Aruco documentation for more details
+        #TODO: setup aruco_detector...you will need to setup intrinsic parameters
+        #in cam_params.yml and marker parameters in my_markers.dict.  See Aruco
+        #documentation for more details.
         camparam = aruco.CameraParameters()
         camparam.readFromXMLFile('cam_params.yml')
         detector = aruco.MarkerDetector()
@@ -158,19 +212,56 @@ class RobotExtrinsicCalibration:
                 results.append((marker.id,Tmarker))
             return results
 
-        #if you just want to run detection on the pictures offline, use
-        #take_camera_picture = None and detect_aruco_marker = None
+        #this will run the calibration sequence
         calib.executeTrajectory(controller,take_camera_picture,detect_aruco_marker)
 
         calib.editCalibration()     #visual editing of initial guesses
-        calib.calibrate()  #optimize the calibration
+        calib.optimize()            #optimize the calibration
         calib.save('my_calibration.json')
     
-    To use reprojection error instead::
+        #clean up OpenCV camera
+        cam.release()
+        
+    To use PixelObservations and optimize reprojection error, you will need to
+    provide intrinsics.  For example, to use chessboard detection::
     
         intrinsics = {'fx':fx,'fy':fy,'cx':cx,'cy':cy}  #intrinsics are needed if you are using pixels
+        calib.cameras[0] = CameraInfo(link=None,intrinsics=intrinsics) 
+
+        ...
+        nrows, ncols = 7, 5     #number of rows and columns on the chessboard
+        square_size = 0.05      #5cm
+        calib.markers[tag_id] = TransformMarker.chessboard(ee_link, nrows, ncols, square_size)
+        def detect_chessboard_marker(image):
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)  #assuming BGR images
+            flags = cv2.CALIB_CB_ADAPTIVE_THRESH + cv2.CALIB_CB_NORMALIZE_IMAGE + cv2.CALIB_CB_FAST_CHECK
+            ret, corners = cv2.findChessboardCorners(gray, (width,height), flags)
+            # If found, refine and add object points
+            if ret == True:
+                #subpixel detection termination criteria
+                criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
+                corners2 = cv2.cornerSubPix(gray,corners, (11,11), (-1,-1), criteria)
+                #camera_id and frame_id are filled in for you
+                return [PixelObservation(c,None,None,tag_id,feature_id) for feature_id,c in enumerate(corners2)]
+            else:
+                return []
         
+        ...
+        calib.executeTrajectory(controller,take_camera_picture,detect_chessboard_marker)
     
+        
+    To calibrate an eye-in-hand setup, just give the link of the camera and set
+    the marker link to None::
+
+        calib.cameras[0] = CameraInfo(link=ee_link,intrinsics={}) 
+        calib.markers[tag_id] = TransformMarker(None)
+    
+    You do not have to integrate everything all at once. If you just want to
+    run detection on the pictures offline, pass None as `detect_fn` to
+    :meth:`executeTrajectory`.  Once the images are taken, you can run the
+    detector and add the observations manually using :meth:`addDetection`.
+
+
     If you want to load a set of configurations and marker transforms from
     disk manually::
 
@@ -191,12 +282,14 @@ class RobotExtrinsicCalibration:
         calib.calibration()  #optimize the calibration
         calib.save('my_calibration.json')
 
+        
     To visualize the calibration::
 
         ... do calib robot and marker setup ...
         calib.load('my_calibration.json')
         calib.visualize()
     
+        
     To fix the marker transform during optimization, e.g. at local coordinates
     [x,y,z]::
 
@@ -212,9 +305,9 @@ class RobotExtrinsicCalibration:
         self.world = None                 # type: Optional[WorldModel]
         self.trajectory = None            # type: Optional[RobotTrajectory]
         self.cameras = dict()             # type: Dict[Key,CameraInfo]
-        self.camera_constraints = dict()  #TODO: for bundle adjustment
+        self.camera_constraints = dict()  # TODO: could be used for bundle adjustment, e.g. calibrated stereo baselines. Not implemented yet.
         self.markers = dict()             # type: Dict[Key,Union[PointMarker,TransformMarker]]
-        self.frames = []
+        self.frames = []                  # type: List[Optional[Image]]
         self.frame_camera_ids = []        # type: List[Key]
         self.configurations = []          # type: List[Vector]
         self.observations = []            # type: List[Union[PointObservation,TransformObservation,PixelObservation]]
@@ -230,16 +323,11 @@ class RobotExtrinsicCalibration:
         self.cameras = dict()
         simsensors = []
         if sensors is None or sensors=='all':
-            sindex = 0
-            while True:
-                s = self.robot.sensor(sindex)
-                if s.name() == '':
-                    break
-                if s.type() == 'CameraSensor':
-                    simsensors.append(s)
-                    if sensors is None:
-                        break
-                sindex += 1
+            simsensors = robot_sensors(self.robot,'CameraSensor')
+            if len(simsensors) == 0:
+                raise ValueError("No camera sensors found")
+            if sensors is None:
+                simsensors = [simsensors[0]]
         else:
             if not isinstance(sensors,(list,tuple)):
                 sensors = [sensors]
@@ -281,14 +369,30 @@ class RobotExtrinsicCalibration:
     def executeTrajectory(self,
                         controller : RobotInterfaceBase,
                         traj : RobotTrajectory,
-                        camera_fn : Callable,
+                        camera_fn : Union[Callable,Dict[Key,Callable]],
                         detect_fn : Callable=None,
                         speed=1.0,
                         wait=0.0) -> None:
         """Executes a trajectory on a controller, optionally taking images 
         along the way.
 
-        TODO: specify times to actually stop.
+        Args:
+            controller (RobotInterfaceBase): the robot controller. Assumed
+                initialized.
+            traj (RobotTrajectory): the trajectory to execute.  We will take a
+                picture at each milestone.
+            camera_fn (callable or dict of callabls): a function `camera_fn()`
+                which returns an image.  The result will be stored in
+                self.frames.
+                
+                Can also be a dictionary of camera_id -> camera_fn.
+            detect_fn (callable): if given, a function `detect_fn(frame)` which
+                returns a list of detected observations.  see :meth:`addFrame`
+                for more details.
+            speed (float, optional): the speed at which to execute the
+                trajectory.
+            wait (float, optional): the time to wait after each milestone. An
+                image will be taken in the middle of the waiting period.
         """
         import time
         def wait_for_move():
@@ -302,7 +406,7 @@ class RobotExtrinsicCalibration:
         for i in range(len(traj.milestones)):
             print("Moving to milestone",i)
             controller.beginStep()
-            controller.moveToPosition(traj.milestones[0],speed)
+            controller.moveToPosition(self.robot.configToDrivers(traj.milestones[0]),speed)
             controller.endStep()
             wait_for_move()
 
@@ -314,17 +418,14 @@ class RobotExtrinsicCalibration:
                 if isinstance(camera_fn,dict):
                     for (k,fn) in camera_fn.items():
                         image = fn()
-                        self.add_frame(image,controller.sensedPosition(),camera_id=k,detect_fn=detect_fn)
+                        self.addFrame(image,self.robot.configFromDrivers(controller.sensedPosition()),camera_id=k,detect_fn=detect_fn)
                 else:
                     image = camera_fn()
-                    self.add_frame(image,controller.sensedPosition(),detect_fn=detect_fn)
+                    self.addFrame(image,self.robot.configFromDrivers(controller.sensedPosition()),detect_fn=detect_fn)
             time.sleep(wait*0.5)
-
-    def visualize(self, world : WorldModel=None, edit=False) -> None:
-        """Pops up a visualization window showing the calibration setup.
-        """
+    
+    def _visualization_setup(self, world : WorldModel) -> None:
         from klampt import vis
-        from klampt.model import sensing
         if world is None:
             if self.world is not None:
                 world = self.world
@@ -334,42 +435,57 @@ class RobotExtrinsicCalibration:
                 world = WorldModel()
                 world.add('temp',self.robot)
         vis.add('world',world)
-        camera_widgets = dict()
-        marker_widgets = dict()
         sensors = dict()
+        simsensors = robot_sensors(self.robot,'CameraSensor')
         for i,c in self.cameras.items():
-            try:
+            s = None
+            if isinstance(i,int):
+                if i < len(simsensors):
+                    s = simsensors[i]
+            else:
                 s = self.robot.sensor(i)
                 if s.name()=='':
-                    raise ValueError()
-            except Exception:
+                    s = None
+            if s is None:
                 #create a new camera on the robot
                 s = self.robot.addSensor(str(i),'CameraSensor')
                 sensing.intrinsics_to_camera(c.intrinsics,s,'json')
                 s.setSetting('zmin','0.1')
                 s.setSetting('zmax','10')
                 s.setSetting('link',str(_linkIndex(c.link,self.robot)))
-                sensing.set_sensor_xform(s,c.local_coordinates)
+                if c.local_coordinates is not None:
+                    sensing.set_sensor_xform(s,c.local_coordinates)
             #for k in s.settings():
             #    print(k,s.getSetting(k))
             sensors[i] = s
             vis.add('Camera_widget {}'.format(i),s)
             vis.add('Camera {}'.format(i),sensing.get_sensor_xform(s,self.robot))
-            if edit:
-                camera_widgets[i] = vis.edit('Camera {}'.format(i))
         for i,m in self.markers.items():
             if isinstance(m,PointMarker):
                 coords = _worldPosition(m.link,self.robot,m.local_coordinates)
                 vis.add('Marker {}'.format(i),coords,size=m.size)
-                if edit:
-                    marker_widgets[i] = vis.edit('Marker {}'.format(i))
             else:
                 coords = _worldTransform(m.link,self.robot,m.local_coordinates)
                 vis.add('Marker {}'.format(i),coords,length=m.size)
-                if edit:
-                    marker_widgets[i] = vis.edit('Marker {}'.format(i))
+                if m.local_features is not None:
+                    for j,f in enumerate(m.local_features):
+                        fw = se3.apply(coords,f)
+                        vis.add('Marker {} feature {}'.format(i,j),fw,size=4,color=(1,0.5,0,1.0),hide_label=True)
 
+    def visualize(self, world : WorldModel=None, edit=False) -> None:
+        """Pops up a visualization window showing the calibration setup.
+        """
+        from klampt import vis
         import time
+        self._visualization_setup(world)
+        camera_widgets = dict()
+        marker_widgets = dict()
+        if edit:
+            for i,c in self.cameras.items():
+                camera_widgets[i] = vis.edit('Camera {}'.format(i))
+            for i,m in self.markers.items():
+                marker_widgets[i] = vis.edit('Marker {}'.format(i))
+
         vis.add('calibration_configs',self.configurations,color=(0,1,0,0.3))
         vis.show()
         re_read_cameras = []
@@ -400,6 +516,10 @@ class RobotExtrinsicCalibration:
                 else:
                     Tm = (Tm[:9],Tm[9:])
                     m.local_coordinates = _localTransform(m.link,self.robot,Tm)
+                    if m.local_features is not None:
+                        for j,f in enumerate(m.local_features):
+                            fw = se3.apply(Tm,f)
+                            vis.setItemConfig('Marker {} feature {}'.format(i,j),fw)
             re_read_cameras = []
             for k,mw in marker_widgets.items():
                 if mw.hasFocus():
@@ -412,6 +532,57 @@ class RobotExtrinsicCalibration:
                         m.local_coordinates = _localTransform(m.link,self.robot,Tm)
                     re_read_markers.append(k)
             time.sleep(0.05)
+
+    def manualCapture(self,
+                        controller : RobotInterfaceBase,
+                        camera_fn : Union[Callable,Dict[Key,Callable]],
+                        detect_fn : Callable=None,
+                        world : WorldModel=None) -> None:
+        """Creates a visualization to help manually capture images.  Assumes
+        that the robot is driven by an external source, e.g., a joystick,
+        teaching pendant, or klampt_control interface.
+
+        Args:
+            controller (RobotInterfaceBase): the robot controller. Assumed
+                initialized.
+            camera_fn (callable or dict of callabls): a function `camera_fn()`
+                which returns an image.  The result will be stored in
+                self.frames.
+                
+                Can also be a dictionary of camera_id -> camera_fn.
+            detect_fn (callable): if given, a function `detect_fn(frame)` which
+                returns a list of detected observations.  see :meth:`addFrame`
+                for more details.
+            world (WorldModel): the world model to visualize the movement.
+        """
+        from klampt import vis
+        import time
+
+        self._visualization_setup(world)
+
+        def capture_frame():
+            print("Taking picture")
+            if isinstance(camera_fn,dict):
+                for (k,fn) in camera_fn.items():
+                    image = fn()
+                    self.addFrame(image,self.robot.configFromDrivers(controller.sensedPosition()),camera_id=k,detect_fn=detect_fn)
+            else:
+                image = camera_fn()
+                self.addFrame(image,self.robot.configFromDrivers(controller.sensedPosition()),detect_fn=detect_fn)
+        def quit():
+            vis.show(False)
+        vis.addAction(capture_frame,'Capture frame',' ',description='Captures a frame from the camera')
+        vis.addAction(quit,'Quit','q',description='Exits manual capture mode')
+
+        vis.show()
+        
+        looper = TimedLooper(0.1)
+        while vis.shown() and looper:
+            controller.beginStep()
+            vis.lock()
+            self.robot.setConfig(self.robot.configFromDrivers(controller.sensedPosition()))
+            vis.unlock()
+            controller.endStep()
 
     def editCalibration(self, world : WorldModel = None) -> None:
         for i,c in self.cameras.items():
@@ -531,7 +702,7 @@ class RobotExtrinsicCalibration:
             marker_link_transform = _linkTransform(marker_link,self.robot)
             self.observations[-1].hand_eye_transform = se3.mul(se3.inv(camera_link_transform),marker_link_transform)
         return self.observations[-1]
-    
+
     def cameraTransforms(self,world=False) -> Dict[Key,RigidTransform]:
         """Returns a dict of camera transforms, in either world or link-
         local coordinates.  World coordinates use the robot's current
@@ -666,7 +837,6 @@ class RobotExtrinsicCalibration:
                     obs.append(PixelObservation(pixel,o.camera_id,o.frame_id,o.marker_id,o.feature_id))
                 elif isinstance(o,PointObservation):
                     #point
-                    feature = o.feature_id
                     xyz = se3.apply(Tm_c,marker.local_features[o.feature_id])
                     _add_noise(xyz,o.error)
                     obs.append(PointObservation(xyz,o.camera_id,o.frame_id,o.marker_id,o.feature_id))
@@ -796,7 +966,7 @@ class RobotExtrinsicCalibration:
         for res,obs in zip(residuals,self.observations):
             if obs.error is None:
                 ll += -vectorops.normSquared(res)*0.5 - len(res)*log2pi
-            elif hasattr(obs.error,'__iter__'):
+            elif hasattr(obs.error):
                 ll += -vectorops.normSquared(vectorops.div(res,obs.error))*0.5 - len(res)*log2pi - sum(math.log(e) for e in obs.error)
             else:
                 ll += -vectorops.normSquared(vectorops.div(res,obs.error))*0.5 - len(res)*(log2pi+math.log(obs.error))
@@ -932,7 +1102,7 @@ class RobotExtrinsicCalibration:
             sensing.set_sensor_xform(s,c.local_coordinates)
 
     def save(self,fn) -> None:
-        """Saves to a JSON file on disk. 
+        """Saves all calibration info (except images) to a JSON file on disk. 
         
         .. warning::
 
