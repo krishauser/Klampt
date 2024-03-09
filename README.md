@@ -6,24 +6,26 @@
 
 Klamp't (Kris' Locomotion and Manipulation Planning Toolbox) is an open-source, cross-platform software package for robot modeling, simulating, planning, optimization, and visualization. It aims to provide an accessible, wide range of programming tools for learning robotics, analyzing robots, developing algorithms, and prototyping intelligent behaviors. It has particular strengths in robot manipulation and locomotion.
 
-Historically, it began development at Indiana University since 2009 primarily as a research platform. Beginning in 2013 it has been used in education at Indiana University and Duke University. Since then, it has been adopted by other labs around the world.
+Historically, it began development at Indiana University since 2009 primarily as a research platform.  Since then, it has been adopted in classes and other labs around the world.
 
 More information can be found on the Klamp't website (http://klampt.org)
 
-- [Features](#features)
-- [Installation](#installation)
-- [Documentation](#documentation)
-- [Version history](#version-history)
-- [Who uses Klamp't?](#who-uses-klampt)
-- [Comparison to related packages](#comparison-to-related-packages)
-- [Contributors](#contributors)
+- [Klamp't ](#klampt-)
+  - [Features](#features)
+  - [Installation](#installation)
+  - [Documentation](#documentation)
+  - [Reporting bugs and getting help](#reporting-bugs-and-getting-help)
+  - [Version history](#version-history)
+  - [Who uses Klamp't?](#who-uses-klampt)
+  - [Comparison to related packages](#comparison-to-related-packages)
+  - [Contributors](#contributors)
 
 
 ## Features
 
 - Unified C++ and Python package for robot modeling, kinematics, dynamics, control, motion planning, simulation, and visualization.
 - Supports legged and fixed-based robots.
-- Interoperable with [Robot Operating System](http://ros.org) (ROS) and [Open Motion Planning Library](https://ompl.kavrakilab.org/) (OMPL).
+- Interoperable with [Robot Operating System](http://ros.org) (ROS 1) and [Open Motion Planning Library](https://ompl.kavrakilab.org/) (OMPL).
 - Many sampling-based motion planners implemented.
 - Fast trajectory optimization routines.
 - Real-time motion planning routines.
@@ -34,14 +36,12 @@ More information can be found on the Klamp't website (http://klampt.org)
 - Simulation of PID controlled, torque controlled, and velocity controlled motors.
 - Simulation of various sensors including cameras, depth sensors, laser range finders, gyroscopes, force/torque sensors, and accelerometers.
 - Works on several platforms:
-    - \*nux environments
+    - \*nux environments (x86_64, i646, Aarch64)
     - Windows
-    - MacOS up to 10.14 (Mohave)
+    - MacOS up to 11+
     - Google Colab
 
-Note: newer versions of MacOS (11+) dropped OpenGL 2.0 support, so Klampt will not build. We're currently looking for alternative cross-platform graphics engines.
-
-Note: We are encountering problems with Ubuntu 22.04 and Python 3.10+ causing an OpenGL library to throw an exception. We're looking into fixes for this problem.
+Note: newer versions of MacOS (11+) dropped OpenGL 2.0 support, so Klampt may not build. We're currently looking for alternative cross-platform graphics engines.
 
 (Please let us know if you are able to compile on other platforms in order to help us support them in the future.)
 
@@ -90,6 +90,13 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 
 ## Version history
 
+**master** (3/8/2024)
+Note: If you have a `pip` installed Klampt, you may get these updates by cloning the Git repo, then run `cd Klampt/Python; python patch_a_pip_install.py`. This provides all of the Python API updates listed below without needing to build from source.
+
+-   Python API: Improved calibration routines in `klampt.model.calibrate`.
+-   Python API: Added surface sampling and vertex normals to `klampt.model.geometry`.
+-   Python API: Added visibility fraction determination to `klampt.model.sensing`.
+
 **0.9.1** (10/30/2023)
 -   Removed GLUI dependency in default build mode.
 -   Updated GLEW to 2.1.0.
@@ -117,17 +124,13 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 -   Python API: ``klampt_resource`` script added which allows transfer and conversions of resources from the command line.  ``klampt_thumbnails`` has been removed since all thumbnail functionality has been moved into ``klampt_resource``.
 -   Python API: new system integration utilities, such as calibration (`klampt.model.calibrate`) and workspace calculation (`klampt.model.workspace`).
 -   Python API: textures on Appearances now fully supported.
+-   Python API: fixed bug with setBackgroundImage(None)
 -   C++ API: Everything added to the ``Klampt`` namespace. **(API-breaking change!)**
 -   C++ API: Main modeling classes renamed to align with Python API, e.g. Robot->RobotModel, RobotWorld->WorldModel, WorldSimulation->Simulator, etc. **(API-breaking change!)**
+-   Fixed bug saving/restoring simulation states.
 -   Some geometries support slicing and ROI (region of interest) calculations.  Slicing takes a slice of a geometry with a plane, and ROI calculations determine a region of interest of the geometry.  Meshes and point clouds are supported.
 -   Polygon and ConvexHull geometries now support ray casting.
 -   Projection-mapping for Appearances now supported.
-
-**master** (6/1/2021)
-Note: If you have a `pip` installed Klampt, you may get these updates by cloning the Git repo, then run `cd Klampt/Python; python patch_a_pip_install.py`. This provides all of the Python API updates listed below without needing to build from source.
-
--   Fixed bug saving/restoring simulation states.
--   Python API: fixed bug with setBackgroundImage(None)
 
 
 **0.8.7** (5/25/2021)
@@ -154,7 +157,7 @@ Note: If you have a `pip` installed Klampt, you may get these updates by cloning
 -   Python API: More thorough bounds checking in core C++ interface.
 -   Python API: Used Pylance to squash lots of small bugs in infrequently used branches of the code.
 
-**0.8.5  Bugfix version** (12/7/2020)
+**0.8.5** (12/7/2020)
 -   Fixed a few bad bugs in the pip release (klampt_browser crash; resource editor crash; HTML output with no animation; HTML output with custom entities).
 -   More thorough integration of custom joints into the simulation, including reading from XML world files (see [Klampt-examples/data/simulation_test_worlds/jointtest.xml](https://github.com/krishauser/Klampt-examples/blob/master/data/simulation_test_worlds/jointtest.xml).
 -   XML world files' simulation tags can now refer to named robots, rigid objects, and terrains.
