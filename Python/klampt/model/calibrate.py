@@ -1114,6 +1114,8 @@ class RobotExtrinsicCalibration:
         if isinstance(fn,str):
             with open(fn,'w') as f:
                 return self.save(f)
+        
+        fp = fn
         import json
         jsonobj = {}
         if self.robot is not None:
@@ -1124,7 +1126,7 @@ class RobotExtrinsicCalibration:
         jsonobj['markers'] = dict((k,_MarkerIO.toJson(m)) for k,m in self.markers.items())
         jsonobj['configurations'] = self.configurations
         jsonobj['observations'] = [_ObservationIO.toJson(c) for c in self.observations]
-        json.dump(jsonobj)
+        json.dump(jsonobj, fp)
 
     def load(self,fn) -> None:
         """Loads from a JSON file on disk.
@@ -1135,8 +1137,9 @@ class RobotExtrinsicCalibration:
         if isinstance(fn,str):
             with open(fn,'r') as f:
                 return self.load(f)
+        fp = fn
         import json
-        jsonobj = json.load(fn)
+        jsonobj = json.load(fp)
         if 'robot' in jsonobj:
             robotname = jsonobj['robot']
             if self.robot is not None:
