@@ -3487,7 +3487,7 @@ class VisAppearance:
             res = ObjectPoser(item)
         elif isinstance(item,(list,tuple)):
             #determine if it's a rotation, transform, or point
-            itype = objectToVisType(item,None)
+            itype = objectToVisType(item,world)
             if itype == 'Vector3':
                 res = PointPoser()
                 res.set(item)
