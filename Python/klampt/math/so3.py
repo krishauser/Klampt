@@ -17,7 +17,7 @@ convenient interface with C code.
 
 import math
 from . import vectorops
-from typing import Tuple,Callable
+from typing import Tuple,List,Callable
 from ..model.typing import Rotation,Matrix3,Vector3
 
 def __str__(R : Rotation) -> str:
@@ -273,7 +273,7 @@ def distance(R1 : Rotation, R2 : Rotation) -> float:
     R = mul(R1,inv(R2))
     return angle(R)
 
-def error(R1 : Rotation, R2 : Rotation) -> float:
+def error(R1 : Rotation, R2 : Rotation) -> List[float]:
     """Returns a 3D "difference vector" that describes how far R1 is from R2.
     More precisely, this is the (local) Lie derivative, which is the rotation 
     vector representation of R1*R2^T.
