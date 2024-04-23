@@ -435,7 +435,6 @@ class RobotExtrinsicCalibration:
                 world = WorldModel()
                 world.add('temp',self.robot)
         vis.add('world',world)
-        sensors = dict()
         simsensors = robot_sensors(self.robot,'CameraSensor')
         for i,c in self.cameras.items():
             s = None
@@ -457,7 +456,6 @@ class RobotExtrinsicCalibration:
                     sensing.set_sensor_xform(s,c.local_coordinates)
             #for k in s.settings():
             #    print(k,s.getSetting(k))
-            sensors[i] = s
             vis.add('Camera_widget {}'.format(i),s)
             vis.add('Camera {}'.format(i),sensing.get_sensor_xform(s,self.robot))
         for i,m in self.markers.items():
@@ -478,6 +476,9 @@ class RobotExtrinsicCalibration:
         from klampt import vis
         import time
         self._visualization_setup(world)
+        sensors = dict()
+        for i,c in self.cameras.items():
+            sensors[i] = self.robot.sensor(i)
         camera_widgets = dict()
         marker_widgets = dict()
         if edit:
