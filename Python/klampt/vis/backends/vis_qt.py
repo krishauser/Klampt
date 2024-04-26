@@ -315,7 +315,7 @@ class QtWindowManager(_ThreadedWindowManager):
             self._start_app_thread()
 
     def shown(self):
-        return (self.vis_thread_running and self.current_window is not None and self.windows[self.current_window].mode in ['shown','dialog'] or self.windows[self.current_window].guidata is not None)
+        return (self.vis_thread_running and self.current_window is not None and (self.windows[self.current_window].mode in ['shown','dialog'] or self.windows[self.current_window].guidata is not None))
 
     def hide(self):
         if self.current_window is None:
