@@ -5169,7 +5169,11 @@ class RobotInterfaceEmulator:
             self.klamptModel.setConfig(self.klamptModel.configFromDrivers(q))
             return self.klamptModel.link(indices).getTransform()
         try:
-            c = self.cartesianInterfaces[tuple(indices)]
+            try:
+                c = self.cartesianInterfaces[tuple(indices)]
+            except KeyError:
+                c = _CartesianEmulatorData(self.klamptModel,indices)
+                self.cartesianInterfaces[tuple(indices)] = c
             return c.cartesianPosition(q,frame)
         except KeyError:
             raise ValueError("Invalid Cartesian index set for emulator: no command currently set")
