@@ -5172,7 +5172,7 @@ class RobotInterfaceEmulator:
             c = self.cartesianInterfaces[tuple(indices)]
             return c.cartesianPosition(q,frame)
         except KeyError:
-            raise ValueError("Invalid Cartesian index set for emulator: no command currently set")
+            raise ValueError("Cartesian control not enabled for joint {}. Try setToolCoordinates(ee_coords_local)".format(indices[-1]))
 
     def cartesianVelocity(self,indices,q,dq,frame):
         """
@@ -5203,7 +5203,7 @@ class RobotInterfaceEmulator:
             c = self.cartesianInterfaces[tuple(indices)]
             return c.cartesianVelocity(q,dq,frame)
         except KeyError:
-            raise ValueError("Invalid Cartesian index set for emulator: no command currently set")
+            raise ValueError("Cartesian control not enabled for joint {}. Try setToolCoordinates(ee_coords_local)".format(indices[-1]))
 
     def cartesianForce(self,indices,q,t,frame):
         assert len(q) == len(self.jointData),"cartesianForce: must use full-body configuration, {} != {}".format(len(q),len(self.jointData))
@@ -5216,7 +5216,7 @@ class RobotInterfaceEmulator:
             c = self.cartesianInterfaces[tuple(indices)]
             return c.cartesianForce(q,t,frame)
         except KeyError:
-            raise ValueError("Invalid Cartesian index set for emulator: no command currently set")
+            raise ValueError("Cartesian control not enabled for joint {}. Try setToolCoordinates(ee_coords_local)".format(indices[-1]))
 
     def printStatus(self):
         joint_control = [True]*len(self.jointData)
