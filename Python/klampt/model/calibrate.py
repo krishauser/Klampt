@@ -507,7 +507,12 @@ class RobotExtrinsicCalibration:
                     Tc = (Tc[:9],Tc[9:])
                     c = self.cameras[k]
                     c.local_coordinates = _localTransform(c.link,self.robot,Tc)
-                    sensing.set_sensor_xform(sensors[k],c.local_coordinates)
+                    try:
+                        sensing.set_sensor_xform(sensors[k],c.local_coordinates)
+                    except Exception:
+                        print("Error setting sensor transform. Does your camera name shadow a non-camera sensor in the RobotModel?")
+                        print("   Camera",k,"sensor type",sensors[k].type())
+                        continue
                     re_read_cameras.append(k)
             for k in re_read_markers: #make sure to get released configuration
                 Tm = vis.getItemConfig('Marker {}'.format(k))
@@ -1153,6 +1158,22 @@ class RobotExtrinsicCalibration:
         self.configurations = jsonobj['configurations']
         self.markers = dict((k,_MarkerIO.fromJson(c)) for k,c in jsonobj['markers'].items())
         self.observations = [_ObservationIO.fromJson(c) for c in jsonobj['observations']]
+
+    def saveFrames(self, dirname : str, pattern : str = 'frame{:04d}.png') -> None:
+        """Saves all frames to a directory of images.  Requires Python
+        Imaging Library.
+        
+        Args:
+            dirname (str): the directory to save to.
+            pattern (str, optional): the pattern to save frames to. Can
+                include a single integer format specifier.
+        """
+        import os
+        from PIL import Image
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
+        for i,f in enumerate(self.frames):
+            Image.fromarray(f).save(os.path.join(dirname,pattern.format(i)))
 
 
 def _linkIndex(link,robot):
