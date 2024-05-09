@@ -6,7 +6,7 @@
 
 Klamp't (Kris' Locomotion and Manipulation Planning Toolbox) is an open-source, cross-platform software package for robot modeling, simulating, planning, optimization, and visualization. It aims to provide an accessible, wide range of programming tools for learning robotics, analyzing robots, developing algorithms, and prototyping intelligent behaviors. It has particular strengths in robot manipulation and locomotion.
 
-Historically, it began development at Indiana University since 2009 primarily as a research platform.  Since then, it has been adopted in classes and other labs around the world.
+Historically, it began development at Indiana University since 2009 primarily as a research platform.  Since then, it has been adopted in education and research labs around the world.
 
 More information can be found on the Klamp't website (http://klampt.org)
 
@@ -24,22 +24,25 @@ More information can be found on the Klamp't website (http://klampt.org)
 ## Features
 
 - Unified C++ and Python package for robot modeling, kinematics, dynamics, control, motion planning, simulation, and visualization.
-- Supports legged and fixed-based robots.
 - Interoperable with [Robot Operating System](http://ros.org) (ROS 1) and [Open Motion Planning Library](https://ompl.kavrakilab.org/) (OMPL).
-- Many sampling-based motion planners implemented.
+- Stable file formats and tooling to save, load, and visualize robots (URDF), meshes, configurations, trajectories, poses, and more. 
+- Built-in conversions to and from Numpy, JSON, ROS 1, Open3D, trimesh, PyTorch, and Sympy objects (in the Python API).
+- Many geometry types implemented, including meshes, point clouds, signed distance functions, occupancy grids, geometric primitives, and convex polytopes.  Collision, distance, and ray-casting queries are available between most pairs of geometry types.
+- Many sampling-based motion planners implemented (RRT, EST, SBL, RRT*, Lazy-RRG*, Lazy-PRM*, and more).
 - Fast trajectory optimization routines.
 - Real-time motion planning routines.
-- Forward and inverse kinematics, forward and inverse dynamics
-- Contact mechanics computations (force closure, support polygons, stability of rigid bodies and actuated robots)
+- Forward and inverse kinematics, forward and inverse dynamics.
+- Contact mechanics computations (force closure, support polygons, stability of rigid bodies and actuated robots).
 - Planning models are fully decoupled from simulation models. This helps simulate uncertainty and modeling errors.
-- Robust rigid body simulation with triangle mesh / triangle mesh collisions.
+- Robust rigid body simulation supporting triangle-soup and point cloud collisions.  No need to create convex decompositions!
 - Simulation of PID controlled, torque controlled, and velocity controlled motors.
 - Simulation of various sensors including cameras, depth sensors, laser range finders, gyroscopes, force/torque sensors, and accelerometers.
 - Works on several platforms:
-    - \*nux environments (x86_64, i646, Aarch64)
+    - \*nux environments (x86_64, i686, Aarch64)
     - Windows
     - MacOS up to 11+
     - Google Colab
+
 
 Note: newer versions of MacOS (11+) dropped OpenGL 2.0 support, so Klampt may not build. We're currently looking for alternative cross-platform graphics engines.
 
@@ -96,6 +99,7 @@ Note: If you have a `pip` installed Klampt, you may get these updates by cloning
 -   Python API: Improved calibration routines in `klampt.model.calibrate`.
 -   Python API: Added surface sampling and vertex normals to `klampt.model.geometry`.
 -   Python API: Added visibility fraction determination to `klampt.model.sensing`.
+-   Python API: Added conversions of meshes to/from the ``trimesh`` library in `klampt.io.trimesh_convert`.
 -   Python API: Fixed bug in SO3/SE3 Hermite velocity interpolation.  Now using extrinsic angular velocity representation as tangent vectors.
 
 **0.9.1** (10/30/2023)
