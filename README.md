@@ -84,7 +84,7 @@ API documentation is available here
 
 ## Reporting bugs and getting help
 
-If you identify a programming bug or issue, please raise them on this Github site.
+If you identify a programming bug or issue, please [raise them on this Github site](https://github.com/krishauser/Klampt/issues).
 If you have general questions installing or programming with Klamp't, please ask them on the Klamp't forum, which
 is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/krishauser/Klampt). 
 
