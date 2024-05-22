@@ -1292,7 +1292,7 @@ class GeodesicHermiteTrajectory(Trajectory):
             e0 = self.geodesic.interpolate(d0,d1,u2)
             e1 = self.geodesic.interpolate(d1,d2,u2)
             f2 = self.geodesic.interpolate(e0,e1,u2)
-            v = vectorops.mul(self.geodesic.difference(f2,f),1.0/eps)
+            v = vectorops.mul(self.geodesic.difference(f2,f),1.0/(dt*eps))
         return f + v
     def difference_state(self,a,b,u,dt):
         raise NotImplementedError("Can't do derivatives of Bezier geodesic yet")

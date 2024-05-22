@@ -21,7 +21,7 @@ class GeodesicSpace:
     def difference(self,a,b):
         """For Lie groups, returns a difference vector that, when integrated
         would get to a from b.  In Cartesian spaces it is a-b.  In other spaces,
-        it should be d/du interpolate(b,a,u) at u=0."""
+        it should be related to d/du interpolate(b,a,u) at u=0."""
         return vectorops.sub(a,b)
     def integrate(self,x,d):
         """For Lie groups, returns the point that would be arrived at via
@@ -115,6 +115,12 @@ class SO2Space(GeodesicSpace):
 class SO3Space(GeodesicSpace):
     """The space of 3D rotations SO(3).  The representation is 9 entries of the
     rotation matrix, laid out in column-major form, like the math.so3 module.
+
+    The difference is the cross product matrix of the angular velocity vector.
+    Note that this is the extrinsic angular velocity, i.e., angular velocity
+    expressed in the world frame of the reference rotation.  The integrate
+    method integrates the angular velocity in the local frame to produce a new
+    rotation matrix.
     """
     def intrinsicDimension(self):
         return 3
@@ -126,16 +132,24 @@ class SO3Space(GeodesicSpace):
         return so3.interpolate(a,b,u)
     def difference(self,a,b):
         w = so3.error(a,b)
-        return so3.mul(so3.cross_product(w),b)
+        return so3.cross_product(so3.apply(b,w))
+        #for matrix derivative representation
+        #return so3.mul(so3.cross_product(w),b)
     def integrate(self,x,d):
-        wcross = so3.mul(d,so3.inv(x))
-        w = so3.deskew(wcross)
+        wcross = d
+        w = so3.apply(so3.inv(x),so3.deskew(wcross))
         return so3.mul(so3.from_moment(w),x)
+        #for matrix derivative representation
+        #wcross = so3.mul(d,so3.inv(x))
 
 
 class SE3Space(GeodesicSpace):
     """The space of 3D rigid transforms SE(3).  The representation is 9 entries
     of SO(3) + 3 entries of translation.
+
+    The difference is a 12 element vector, the first 9 being the intrinsic
+    angular velocity (see :class:`SO3Space`), and the last 3 being the linear
+    velocity.
     """
     def intrinsicDimension(self):
         return 6
@@ -153,15 +167,18 @@ class SE3Space(GeodesicSpace):
     def difference(self,a,b):
         Rb,tb = self.to_se3(b)
         w = se3.error(self.to_se3(a),self.to_se3(b))
-        return so3.mul(Rb,so3.cross_product(w[:3]))+w[3:]
+        return so3.cross_product(so3.apply(Rb,w[:3]))+w[3:]
+        #for matrix derivative representation
+        #return so3.mul(Rb,so3.cross_product(w[:3]))+w[3:]
     def integrate(self,x,d):
         assert len(x) == 12
-        Rx,rx = self.to_se3(x)
-        w = so3.deskew(so3.mul(so3.inv(Rx),d[:9]))
+        #for matrix derivative representation
+        Rx,tx = self.to_se3(x)
+        #w = so3.deskew(so3.mul(so3.inv(Rx),d[:9]))
+        w = so3.apply(so3.inv(Rx),so3.deskew(d[:9]))
         v = d[9:]
         wR = so3.from_moment(w)
         assert len(wR) == 9
-        Tx = self.to_se3(x)
-        R = so3.mul(Tx[0],wR)
-        t = vectorops.add(Tx[1],v)
+        R = so3.mul(Rx,wR)
+        t = vectorops.add(tx,v)
         return R + t
