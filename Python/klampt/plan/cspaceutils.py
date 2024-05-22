@@ -8,6 +8,9 @@ from .cspace import CSpace,MotionPlan
 import warnings
 import itertools
 import random
+from ..model.typing import Config
+from ..robotsim import RobotModel
+from typing import Optional,List,Union
 
 def default_sampleneighborhood(c,r):
     return [ci + random.uniform(-r,r) for ci in c]
@@ -21,7 +24,7 @@ def default_distance(a,b):
 def default_interpolate(a,b,u):
     return vectorops.interpolate(a,b,u)
 
-def make_default(space):
+def make_default(space : CSpace):
     """Helper: makes a space's callbacks perform the default Cartesian space
     operations."""
     space.sampleneighborhood = default_sampleneighborhood
@@ -35,7 +38,7 @@ class CompositeCSpace(CSpace):
     """A cartesian product of multiple spaces, given as a list upon
     construction.  The feasible method can be overloaded to include
     interaction tests."""
-    def __init__(self,spaces):
+    def __init__(self,spaces : List[CSpace]):
         CSpace.__init__(self)
         self.spaces = spaces
 
@@ -132,7 +135,7 @@ class EmbeddedCSpace(CSpace):
         xinit (list, optional): the initial configuration in the ambient space
             (by default, 0 vector)
     """
-    def __init__(self,ambientspace,subset,xinit=None):
+    def __init__(self, ambientspace : CSpace, subset : List[int], xinit : Optional[Config] = None):
         CSpace.__init__(self)
         self.ambientspace = ambientspace
         n = len(ambientspace.sample())
@@ -230,7 +233,7 @@ class AffineEmbeddedCSpace(CSpace):
         b (list, optional): the offset in the ambient space (by default, the
             0 vector)
     """
-    def __init__(self,ambientspace,A,b=None):
+    def __init__(self,ambientspace : CSpace, A, b=None):
         CSpace.__init__(self)
         self.ambientspace = ambientspace
         n = len(ambientspace.sample())
@@ -314,7 +317,7 @@ class AffineEmbeddedCSpace(CSpace):
         print("AffineEmbeddedCSpace projects from dimension",self.m,"to",self.n)
 
     @staticmethod
-    def fromRobotDrivers(robot,ambientspace,drivers=None):
+    def fromRobotDrivers(robot : RobotModel, ambientspace : CSpace,drivers=None):
         """Creates an AffineEmbeddedCSpace for a robot's drivers.  
 
         Args:
@@ -492,7 +495,7 @@ class EmbeddedMotionPlan (MotionPlan):
     Used for planning in robots with frozen DOFs (EmbeddedCSpace) or
     "affine" drivers (AffineEmbeddedCSpace).
     """
-    def __init__(self,space,q0,type=None,**options):
+    def __init__(self,space : Union[EmbeddedCSpace,AffineEmbeddedCSpace], q0 : Config, type=None,**options):
         if not isinstance(space,(EmbeddedCSpace,AffineEmbeddedCSpace)):
             if not hasattr(space,'project') or not hasattr(space,'lift'):
                 raise ValueError("space argument must have the project and lift methods")
