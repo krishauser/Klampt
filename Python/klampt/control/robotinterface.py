@@ -658,7 +658,7 @@ class RobotInterfaceBase(object):
             speed: float=1.0
         ) -> None:
         """Sets a move-to position command.  The trajectory that the robot will
-        take on should be extractable through getMoveToTrajectory(q).
+        take on should be extractable through queuedTrajectory().
 
         Args:
             q (list of floats): A list of floats giving the desired 
