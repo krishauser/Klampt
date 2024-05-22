@@ -839,8 +839,8 @@ def intrinsics_to_camera(data, camera : SimRobotSensor, format='opencv'):
         raise ValueError("Invalid format, only opencv, numpy, ros, and json are supported")
     w = int(cx*2)
     h = int(cy*2)
-    xfov = math.atan(fx/(w*2))*2
-    yfov = math.atan(fy/(h*2))*2
+    xfov = math.atan(w/(fx*2))*2
+    yfov = math.atan(h/(fy*2))*2
     camera.setSetting('xres',str(w))
     camera.setSetting('yres',str(h))
     camera.setSetting('xfov',str(xfov))

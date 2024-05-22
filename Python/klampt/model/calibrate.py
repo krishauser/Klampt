@@ -360,7 +360,7 @@ class RobotExtrinsicCalibration:
                 world.add('temp',self.robot)
         if self.trajectory is None and len(self.configurations) > 0:
             self.trajectory = RobotTrajectory(self.robot, list(range(len(self.configurations))), self.configurations)
-        save,newtraj = resource.edit(name,self.trajectory, 'Trajectory', world=world, doedit=True)
+        save,newtraj = resource.edit(name,self.trajectory, 'Trajectory', world=world)
         if save:
             self.trajectory = newtraj
             return newtraj
@@ -487,7 +487,8 @@ class RobotExtrinsicCalibration:
             for i,m in self.markers.items():
                 marker_widgets[i] = vis.edit('Marker {}'.format(i))
 
-        vis.add('calibration_configs',self.configurations,color=(0,1,0,0.3))
+        if len(self.configurations) > 0:
+            vis.add('calibration_configs',self.configurations,color=(0,1,0,0.3))
         vis.show()
         re_read_cameras = []
         re_read_markers = []
@@ -507,7 +508,12 @@ class RobotExtrinsicCalibration:
                     Tc = (Tc[:9],Tc[9:])
                     c = self.cameras[k]
                     c.local_coordinates = _localTransform(c.link,self.robot,Tc)
-                    sensing.set_sensor_xform(sensors[k],c.local_coordinates)
+                    try:
+                        sensing.set_sensor_xform(sensors[k],c.local_coordinates)
+                    except Exception:
+                        print("Error setting sensor transform. Does your camera name shadow a non-camera sensor in the RobotModel?")
+                        print("   Camera",k,"sensor type",sensors[k].type())
+                        continue
                     re_read_cameras.append(k)
             for k in re_read_markers: #make sure to get released configuration
                 Tm = vis.getItemConfig('Marker {}'.format(k))
@@ -636,6 +642,8 @@ class RobotExtrinsicCalibration:
                     det.frame_id = frame_id
                     self.robot.setConfig(q)
                     camera_link = self.cameras[camera_id].link
+                    if det.marker_id not in self.markers:
+                        print("Uh... invalid marker?",det.marker_id,list(self.markers.keys()))
                     marker_link = self.markers[det.marker_id].link
                     camera_link_transform = _linkTransform(camera_link,self.robot)
                     marker_link_transform = _linkTransform(marker_link,self.robot)
@@ -1014,17 +1022,17 @@ class RobotExtrinsicCalibration:
             camera_transforms = dict()
             for k,c in self.cameras.items():
                 if c.variable:
-                    camera_transforms[k] =(so3.from_moment(x[i:i+3]),x[i+3:i+6])
+                    camera_transforms[k] =(so3.from_moment(x[i:i+3]),x[i+3:i+6].tolist())
                     i += 6
                 else:
                     camera_transforms[k] = c.local_coordinates
             marker_transforms = dict()
             for k,m in self.markers.items():
                 if isinstance(m,TransformMarker):
-                    marker_transforms[k] = (so3.from_moment(x[i:i+3]),x[i+3:i+6])
+                    marker_transforms[k] = (so3.from_moment(x[i:i+3]),x[i+3:i+6].tolist())
                     i+=6
                 else:
-                    marker_transforms[k] = x[i:i+3]
+                    marker_transforms[k] = x[i:i+3].tolist()
                     i+=3
             return camera_transforms,marker_transforms
         def error_fn(x):
@@ -1127,7 +1135,7 @@ class RobotExtrinsicCalibration:
         jsonobj['markers'] = dict((k,_MarkerIO.toJson(m)) for k,m in self.markers.items())
         jsonobj['configurations'] = self.configurations
         jsonobj['observations'] = [_ObservationIO.toJson(c) for c in self.observations]
-        json.dump(jsonobj, fp)
+        json.dump(jsonobj, fp, indent = 4)
 
     def load(self,fn) -> None:
         """Loads from a JSON file on disk.
@@ -1153,6 +1161,43 @@ class RobotExtrinsicCalibration:
         self.configurations = jsonobj['configurations']
         self.markers = dict((k,_MarkerIO.fromJson(c)) for k,c in jsonobj['markers'].items())
         self.observations = [_ObservationIO.fromJson(c) for c in jsonobj['observations']]
+        integer_cameras = {}
+        for k,v in self.cameras.items():
+            try:
+                k = int(k)
+                integer_cameras[k] = v
+            except Exception:
+                pass
+        for k,v in integer_cameras.items():
+            self.cameras[k] = v
+            del self.cameras[str(k)]
+        integer_markers = {}
+        for k,v in self.markers.items():
+            try:
+                k = int(k)
+                integer_markers[k] = v
+            except Exception:
+                pass
+        for k,v in integer_markers.items():
+            self.markers[k] = v
+            del self.markers[str(k)]
+
+
+    def saveFrames(self, dirname : str, pattern : str = 'frame{:04d}.png') -> None:
+        """Saves all frames to a directory of images.  Requires Python
+        Imaging Library.
+        
+        Args:
+            dirname (str): the directory to save to.
+            pattern (str, optional): the pattern to save frames to. Can
+                include a single integer format specifier.
+        """
+        import os
+        from PIL import Image
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
+        for i,f in enumerate(self.frames):
+            Image.fromarray(f).save(os.path.join(dirname,pattern.format(i)))
 
 
 def _linkIndex(link,robot):
@@ -1221,7 +1266,7 @@ class _MarkerIO:
 
 class _CameraIO:
     @staticmethod
-    def toJson(obj):
+    def toJson(obj:CameraInfo):
         return {'link':obj.link,'intrinsics':obj.intrinsics,'local_coordinates':obj.local_coordinates,'variable':obj.variable}
 
     @staticmethod
@@ -1235,9 +1280,9 @@ class _ObservationIO:
     @staticmethod
     def toJson(obj):
         if isinstance(obj,PixelObservation):
-            return {'type':'Pixel','value':obj.value,'camera_id':obj.camera_id,'frame_id':obj.frame_id,'marker_id':obj.marker_id,'feature_id':obj['feature_id']}
+            return {'type':'Pixel','value':obj.value,'camera_id':obj.camera_id,'frame_id':obj.frame_id,'marker_id':obj.marker_id,'feature_id':obj.feature_id}
         elif isinstance(obj,PointObservation):
-            return {'type':'Point','value':obj.value,'camera_id':obj.camera_id,'frame_id':obj.frame_id,'marker_id':obj.marker_id,'feature_id':obj['feature_id']}
+            return {'type':'Point','value':obj.value,'camera_id':obj.camera_id,'frame_id':obj.frame_id,'marker_id':obj.marker_id,'feature_id':obj.feature_id}
         else:
             return {'type':'Transform','value':obj.value,'camera_id':obj.camera_id,'frame_id':obj.frame_id,'marker_id':obj.marker_id}
 
