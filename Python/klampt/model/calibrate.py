@@ -487,7 +487,8 @@ class RobotExtrinsicCalibration:
             for i,m in self.markers.items():
                 marker_widgets[i] = vis.edit('Marker {}'.format(i))
 
-        vis.add('calibration_configs',self.configurations,color=(0,1,0,0.3))
+        if len(self.configurations) > 0:
+            vis.add('calibration_configs',self.configurations,color=(0,1,0,0.3))
         vis.show()
         re_read_cameras = []
         re_read_markers = []
