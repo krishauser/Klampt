@@ -154,12 +154,13 @@ class ControllerGLPlugin(GLWidgetPlugin):
             R = ee.getTransform()[0] 
             self.cartesianGoalPoser.set(R,t)
     
-    def setTargetPose(self,Ttgt, q0 = None, activeLinks = None):
+    def setTargetPose(self,Ttgt, q0 = None, activeLinks = None, cartesianLink = None):
         """Sets the target pose and update the IK.
         
         If Ttgt = None, gets the target from the goal poser.
         """
         if not self.cartesianControlEnabled: return
+        assert activeLinks is not None
         if Ttgt is None:
             Ttgt = self.cartesianGoalPoser.get()
         else:
@@ -170,7 +171,9 @@ class ControllerGLPlugin(GLWidgetPlugin):
         link_origin_transform = vectorops.sub(Ttgt[1],so3.apply(Ttgt[0],tool_coordinates))
 
         robot = self.world.robot(0)
-        obj = ik.objective(robot.link(activeLinks[-1]),R=Ttgt[0],t=link_origin_transform)
+        if cartesianLink is None:
+            cartesianLink = activeLinks[-1]
+        obj = ik.objective(robot.link(cartesianLink),R=Ttgt[0],t=link_origin_transform)
         solver = ik.solver(obj)
         if activeLinks is not None:
             solver.setActiveDofs(activeLinks)
@@ -538,7 +541,10 @@ class ControllerGUI(QtWidgets.QMainWindow):
             with ControllerStepContext(self):
                 tool = active.getToolCoordinates()
             cartesianEnabled = True
-            cartesianLink = self.robot.driver(self.controller.indices(self.activePart)[-1]).getAffectedLink()
+            if 'klamptModelCartesianLink' in self.controller.properties:
+                cartesianLink = self.controller.properties['klamptModelCartesianLink']
+            else:
+                cartesianLink = self.robot.driver(self.controller.indices(self.activePart)[-1]).getAffectedLink()
         except NotImplementedError as e:
             #may need to force tool coordinates on the item
             if self.selectedEndEffector is not None:
@@ -668,7 +674,8 @@ class ControllerGUI(QtWidgets.QMainWindow):
                     q0 = self.controller.configToKlampt(self.controller.commandedPosition())
                     activeIndices = self.controller.indices(self.activePart)
                     activeLinks = sum([self.robot.driver(i).getAffectedLinks() for i in activeIndices],[])
-                    self.plugin.setTargetPose(None,q0,activeLinks)
+                    cartesianLink = self.activeController.properties.get('klamptModelCartesianLink',None)
+                    self.plugin.setTargetPose(None,q0,activeLinks,cartesianLink)
                     # Tgoal = self.plugin.cartesianGoalPoser.get()
                     # q0 = self.controller.configToKlampt(self.controller.commandedPosition())
                     # activeIndices = self.controller.indices(self.activePart)
@@ -950,7 +957,10 @@ class ControllerGUI(QtWidgets.QMainWindow):
     
     def setEndEffectorToolCoordinates(self,eename):
         ee = self.robotinfo.endEffectors[eename]
-        last_link = self.robot.driver(self.activeController.indices()[-1]).getAffectedLink()
+        if 'klamptModelCartesianLink' in self.activeController.properties:
+            last_link = self.controller.properties['klamptModelCartesianLink']
+        else:
+            last_link = self.robot.driver(self.activeController.indices()[-1]).getAffectedLink()
         obj = ee.ikObjective   # type: IKObjective
         if obj is None:
             local = [0,0,0]
