@@ -313,7 +313,7 @@ class RobotExtrinsicCalibration:
         self.observations = []            # type: List[Union[PointObservation,TransformObservation,PixelObservation]]
 
     def cameraFromRobot(self,sensors=None) -> None:
-        """Sets up the camera(s) from the robot model. 
+        """Sets up the camera(s) to calibrate from the robot model. 
         
         Args:
             sensors (str, int, list of str, or list of int, optional):
