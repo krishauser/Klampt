@@ -307,6 +307,12 @@ class QtGLWindow(QGLWidget):
         self.modifierList = toModifierList(e.modifiers())
         self.lastx,self.lasty = x,y
         self.program.mousefunc(toGlutButton(e.button()),GLUT_UP,x,y)
+    def wheelEvent(self,e):
+        x,y = e.pos().x(),e.pos().y()
+        numDegrees = e.angleDelta() / 8
+        self.modifierList = toModifierList(e.modifiers())
+        self.lastx,self.lasty = x,y
+        self.program.mousewheelfunc(numDegrees.x(),numDegrees.y(),x,y)
     def keyPressEvent(self,e):
         if e.isAutoRepeat():
             return

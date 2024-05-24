@@ -281,6 +281,16 @@ class GLMultiViewportProgram(GLProgram):
         if self.activeView != None:
             return True if self.views[self.activeView].motionfunc(x,y,dx,dy) else False
         return False
+    def mousewheelfunc(self,dhorizontal,dvertical,x,y):
+        if self.broadcast:
+            for p in self.views:
+                p.mousewheelfunc(dhorizontal,dvertical,x,y)
+            return True
+        if not self.dragging:
+            self.update_active(x,y)
+        if self.activeView != None:
+            return True if self.views[self.activeView].mousewheelfunc(dhorizontal,dvertical,x,y) else False
+        return False
     def idlefunc(self):
         for p in self.views:
             p.idlefunc()
