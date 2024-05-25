@@ -2077,7 +2077,7 @@ void Appearance::setTexture2D_channels(const char* format,unsigned char* bytes,i
   int bpp = Image::pixelFormatSize(fmt);
   if(bpp != p) {
     stringstream ss;
-    ss<<"Provided "<<p<<"channels to texture, but format is a "<<bpp<<"-byte format";
+    ss<<"Provided "<<p<<" channels to texture, but format is a "<<bpp<<"-byte format";
     throw PyException(ss.str());
   }
   app->tex2D->initialize(n,m,fmt);
