@@ -62,6 +62,30 @@ def to_trimesh(geom : Union[TriangleMesh,Geometry3D,WorldModel], appearance:Opti
     else:
         raise ValueError("Invalid input type")
 
+def _set_texture(a : Appearance, img):
+    mode = img.mode
+    if mode == 'P':
+        img = img.convert('RGB')
+        _set_texture(a,img)
+        return
+    img = np.array(img)
+    #print("IMAGE",img.shape)
+    #print("IMAGE MODE",mesh.visual.material.baseColorTexture.mode)
+    if len(img.shape) == 3:
+        if mode == 'RGB':
+            a.setTexture2D('rgb8',img)
+        elif mode == 'RGBA':
+            a.setTexture2D('rgba8',img)
+        elif mode.startswith('L'):
+            a.setTexture2D('l8',img[:,:,0])
+        else:
+            print("from_trimesh: Can't handle texture mode",mode)
+    elif len(img.shape) == 2:
+        if mode == 'L':
+            a.setTexture2D('l8',img)
+        else:
+            print("from_trimesh: Can't handle texture mode",mode)
+
 def from_trimesh(mesh : Union[trimesh.Trimesh,trimesh.Scene],flatten=False) -> Union[Tuple[TriangleMesh,Appearance],WorldModel]:
     """Converts a Trimesh object to a Klampt TriangleMesh, or a Trimesh Scene
     to a WorldModel. 
@@ -104,24 +128,7 @@ def from_trimesh(mesh : Union[trimesh.Trimesh,trimesh.Scene],flatten=False) -> U
                     #print("Shininess",mesh.visual.material.metallicFactor,mesh.visual.material.roughnessFactor)
                     a.setShininess(mesh.visual.material.metallicFactor,mesh.visual.material.roughnessFactor)
                 if mesh.visual.material.baseColorTexture is not None:
-                    mode = mesh.visual.material.baseColorTexture.mode
-                    img = np.array(mesh.visual.material.baseColorTexture)
-                    #print("IMAGE",img.shape)
-                    #print("IMAGE MODE",mesh.visual.material.baseColorTexture.mode)
-                    if len(img.shape) == 3:
-                        if mode == 'RGB':
-                            a.setTexture2D('rgb8',img)
-                        elif mode == 'RGBA':
-                            a.setTexture2D('rgba8',img)
-                        elif mode.startswith('L'):
-                            a.setTexture2D('l8',img[:,:,0])
-                        else:
-                            print("from_trimesh: Can't handle texture mode",mode)
-                    elif len(img.shape) == 2:
-                        if mode == 'L':
-                            a.setTexture2D('l8',img)
-                        else:
-                            print("from_trimesh: Can't handle texture mode",mode)
+                    _set_texture(a,mesh.visual.material.baseColorTexture)
                     a.setTexcoords2D(mesh.visual.uv)
             elif isinstance(mesh.visual.material,trimesh.visual.material.SimpleMaterial):
                 a = Appearance()
@@ -137,24 +144,7 @@ def from_trimesh(mesh : Union[trimesh.Trimesh,trimesh.Scene],flatten=False) -> U
                         c.append(1)
                     a.setColor(Appearance.SPECULAR,*c)
                 if mesh.visual.material.image is not None:
-                    img = np.array(mesh.visual.material.image)
-                    mode = mesh.visual.material.image.mode
-                    #print("IMAGE",img.shape)
-                    #print("IMAGE MODE",mesh.visual.material.baseColorTexture.mode)
-                    if len(img.shape) == 3:
-                        if mode == 'RGB':
-                            a.setTexture2D('rgb8',img)
-                        elif mode == 'RGBA':
-                            a.setTexture2D('rgba8',img)
-                        elif mode.startswith('L'):
-                            a.setTexture2D('l8',img[:,:,0])
-                        else:
-                            print("from_trimesh: Can't handle texture mode",mode)
-                    elif len(img.shape) == 2:
-                        if mode == 'L':
-                            a.setTexture2D('l8',img)
-                        else:
-                            print("from_trimesh: Can't handle texture mode",mode)
+                    _set_texture(a,mesh.visual.material.image)
                     a.setTexcoords2D(mesh.visual.uv)
             else:
                 print("from_trimesh: Can't handle material type",mesh.visual.material.__class__.__name__)
