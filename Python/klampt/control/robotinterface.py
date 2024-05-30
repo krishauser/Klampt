@@ -325,6 +325,8 @@ class RobotInterfaceBase(object):
             joint_idx: Optional[int] = None
         ) -> List[int]:
         """Helper: returns a list of indices for the given part / joint index"""
+        if len(self.parts())==0:
+            print("Warning: no parts defined for controller",self.__class__.__name__)
         plist = self.parts()[part]
         if joint_idx is None:
             return plist

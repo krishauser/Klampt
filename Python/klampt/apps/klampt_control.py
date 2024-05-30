@@ -375,21 +375,6 @@ class ControllerGUI(QtWidgets.QMainWindow):
             self.partList.setEnabled(False)
             self.partList.setToolTip("parts() method not implemented")
         self.partList.currentIndexChanged.connect(self.onPartChange)
-        
-        #find map from parts to RobotInfo's end effectors
-        self.partsToEEs = {}
-        self.unmatchedEEs = []
-        try:
-            eesToParts,self.unmatchedEEs = robotinfo.configureControllerEndEffectors(controller)
-            for ee,part in eesToParts.items():
-                if part not in self.partsToEEs:
-                    self.partsToEEs[part] = []
-                self.partsToEEs[part].append(ee)
-        except NotImplementedError as e:
-            #setToolCoordinates must have failed
-            self.addException("setToolCoordinates",e)
-            pass
-
 
         #top region
         self.partList.currentIndexChanged.connect(self.onPartChange)
@@ -442,10 +427,25 @@ class ControllerGUI(QtWidgets.QMainWindow):
         self.splitter.addWidget(self.glwidget)
         self.splitter.setSizes([100,640])
 
+        #find map from parts to RobotInfo's end effectors
+        self.partsToEEs = {}
+        self.unmatchedEEs = []
+        for part in controller.parts():
+            self.partsToEEs[part] = []
+        try:
+            eesToParts,self.unmatchedEEs = robotinfo.configureControllerEndEffectors(controller)
+            for ee,part in eesToParts.items():
+                self.partsToEEs[part].append(ee)
+        except NotImplementedError as e:
+            #setToolCoordinates must have failed
+            self.addException("setToolCoordinates",e)
+            pass
+
         self.updateActiveController(None,controller)
         for ee in self.unmatchedEEs:
             self.addError("End effector {} in RobotInfo does not match a part".format(ee))
-    
+   
+
     def onTabChange(self,index):
         if index == 3:
             #presets
@@ -1339,6 +1339,10 @@ def main():
             port = 7881
         controller = info.controller()
         server = XMLRPCRobotInterfaceServer(controller,addr,int(port))
+        if not server.initialize():
+            print("Error starting up controller, quitting")
+            exit(1)
+        info.configureControllerEndEffectors(controller)
         print("Beginning Robot Interface Layer server for controller",controller)
         print("Press Ctrl+C to exit...")
         server.serve()

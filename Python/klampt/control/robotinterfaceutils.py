@@ -1045,6 +1045,8 @@ class _RobotInterfaceStatefulBase(RobotInterfaceBase):
 
     def parts(self):
         if self._structure.parts is None: raise NotImplementedError()
+        if len(self._structure.parts)==0:
+            raise RuntimeError("parts() queried but the state was not updated yet")
         return self._structure.parts
     
     def partInterface(self,part,joint_idx=None):
@@ -1346,9 +1348,9 @@ class _RobotInterfaceStatefulBase(RobotInterfaceBase):
 
     def sensedCartesianPosition(self,frame='world'):
         toolCoordinates = self.getToolCoordinates()
-        if toolCoordinates is None: raise NotImplementedError("Cartesian control not available")
+        if toolCoordinates is None: raise NotImplementedError("Cartesian control not available -- tool coordinates are None")
         if self._state.cartesianState is None or self._state.cartesianState.sensedPosition is None:
-            raise NotImplementedError("Cartesian control not available")
+            raise NotImplementedError("Cartesian control not available -- cartesian state is not read")
         if frame=='base': return copy.copy(self._state.cartesianState.sensedPosition)
         elif frame == 'tool': return se3.identity()
         elif frame == 'end effector': return (so3.identity(),copy.copy(toolCoordinates))
@@ -1359,9 +1361,9 @@ class _RobotInterfaceStatefulBase(RobotInterfaceBase):
 
     def sensedCartesianVelocity(self,frame='world'):
         toolCoordinates = self.getToolCoordinates()
-        if toolCoordinates is None: raise NotImplementedError("Cartesian control not available")
+        if toolCoordinates is None: raise NotImplementedError("Cartesian control not available -- tool coordinates are None")
         if self._state.cartesianState is None or self._state.cartesianState.sensedVelocity is None:
-            raise NotImplementedError("Cartesian control not available")
+            raise NotImplementedError("Cartesian control not available -- cartesian state is not read")
         wtool_base,vtool_base = self._state.cartesianState.sensedVelocity
         Ttool_base = self._state.cartesianState.sensedPosition
         if frame=='base': return copy.copy(self._state.cartesianState.sensedVelocity)
@@ -1391,9 +1393,9 @@ class _RobotInterfaceStatefulBase(RobotInterfaceBase):
 
     def sensedCartesianForce(self,frame='world'):
         toolCoordinates = self.getToolCoordinates()
-        if toolCoordinates is None: raise NotImplementedError("Cartesian control not available")
+        if toolCoordinates is None: raise NotImplementedError("Cartesian control not available -- tool coordinates are None")
         if self._state.cartesianState is None or self._state.cartesianState.sensedForce is None:
-            raise NotImplementedError("Cartesian control not available")
+            raise NotImplementedError("Cartesian control not available -- cartesian state is not read")
         ttool_base,ftool_base = self._state.cartesianState.sensedForce
         Ttool_base = self._state.cartesianState.sensedPosition
         if frame=='base': return copy.copy(self._state.cartesianState.sensedForce)
@@ -1418,9 +1420,9 @@ class _RobotInterfaceStatefulBase(RobotInterfaceBase):
 
     def commandedCartesianPosition(self,frame='world'):
         toolCoordinates = self.getToolCoordinates()
-        if toolCoordinates is None: raise NotImplementedError("Cartesian control not available")
+        if toolCoordinates is None: raise NotImplementedError("Cartesian control not available -- tool coordinates are None")
         if self._state.cartesianState is None or self._state.cartesianState.commandedPosition is None:
-            raise NotImplementedError("Cartesian control not available")
+            raise NotImplementedError("Cartesian control not available -- cartesian state is not read")
         if frame=='base': return copy.copy(self._state.cartesianState.commandedPosition)
         elif frame == 'tool': return se3.identity()
         elif frame == 'end effector': return (so3.identity(),toolCoordinates)
@@ -1432,9 +1434,9 @@ class _RobotInterfaceStatefulBase(RobotInterfaceBase):
 
     def commandedCartesianVelocity(self,frame='world'):
         toolCoordinates = self.getToolCoordinates()
-        if toolCoordinates is None: raise NotImplementedError("Cartesian control not available")
+        if toolCoordinates is None: raise NotImplementedError("Cartesian control not available -- tool coordinates are None")
         if self._state.cartesianState is None or self._state.cartesianState.commandedVelocity is None:
-            raise NotImplementedError("Cartesian control not available")
+            raise NotImplementedError("Cartesian control not available -- cartesian state is not read")
         wtool_base,vtool_base = self._state.cartesianState.commandedVelocity
         Ttool_base = self._state.cartesianState.commandedPosition
         if frame=='base': return copy.copy(self._state.cartesianState.commandedVelocity)
@@ -1464,9 +1466,9 @@ class _RobotInterfaceStatefulBase(RobotInterfaceBase):
 
     def commandedCartesianForce(self,frame='world'):
         toolCoordinates = self.getToolCoordinates()
-        if toolCoordinates is None: raise NotImplementedError("Cartesian control not available")
+        if toolCoordinates is None: raise NotImplementedError("Cartesian control not available -- tool coordinates are None")
         if self._state.cartesianState is None or self._state.cartesianState.commandedForce is None:
-            raise NotImplementedError("Cartesian control not available")
+            raise NotImplementedError("Cartesian control not available -- cartesian state is not read")
         ttool_base,ftool_base = self._state.cartesianState.commandedForce
         Ttool_base = self._state.cartesianState.commandedPosition
         if frame=='base': return copy.copy(self._state.cartesianState.commandedForce)
@@ -1491,9 +1493,9 @@ class _RobotInterfaceStatefulBase(RobotInterfaceBase):
 
     def destinationCartesianPosition(self,frame='world'):
         toolCoordinates = self.getToolCoordinates()
-        if toolCoordinates is None: raise NotImplementedError("Cartesian control not available")
+        if toolCoordinates is None: raise NotImplementedError("Cartesian control not available -- tool coordinates are None")
         if self._state.cartesianState is None or self._state.cartesianState.destinationPosition is None:
-            raise NotImplementedError("Cartesian control not available")
+            raise NotImplementedError("Cartesian control not available -- cartesian state is not read")
         if frame=='base': return copy.copy(self._state.cartesianState.destinationPosition)
         elif frame == 'tool': return se3.identity()
         elif frame == 'end effector': return (so3.identity(),toolCoordinates)
@@ -1504,9 +1506,9 @@ class _RobotInterfaceStatefulBase(RobotInterfaceBase):
 
     def destinationCartesianVelocity(self,frame='world'):
         toolCoordinates = self.getToolCoordinates()
-        if toolCoordinates is None: raise NotImplementedError("Cartesian control not available")
+        if toolCoordinates is None: raise NotImplementedError("Cartesian control not available -- tool coordinates are None")
         if self._state.cartesianState is None or self._state.cartesianState.destinationVelocity is None:
-            raise NotImplementedError("Cartesian control not available")
+            raise NotImplementedError("Cartesian control not available -- cartesian state is not read")
         wtool_base,vtool_base = self._state.cartesianState.destinationVelocity
         Ttool_base = self._state.cartesianState.destinationPosition
         if frame=='base': return copy.copy(self._state.cartesianState.destinationVelocity)
@@ -2499,7 +2501,7 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
 
     To enable Cartesian sensing and control, call setToolCoordinates() on the
     controller or a part.
-    
+
     .. note::
         The base interface's klamptModel() method must be implemented for
         Cartesian control and acceleration-bounded control to work properly.
@@ -2537,7 +2539,7 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
         return self._base.numJoints(part)
 
     def parts(self):
-        if self._parts is None: #pre-initialization
+        if len(self._parts)==0: #pre-initialization
             return self._base.parts()
         return self._parts
 
