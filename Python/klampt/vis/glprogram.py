@@ -129,6 +129,11 @@ class GLProgram:
     def mousefunc(self,button,state,x,y):
         """Called when the mouse is clicked.  May be overridden."""
         return False
+    def mousewheelfunc(self, dhorizontal, dvertical, x, y):
+        """Called when the wheel is scrolled.  Most wheels have dhorizontal=0.
+        x and y are the position of the mouse when the wheel is scrolled.
+        May be overridden."""
+        return False
     
     def displayfunc(self):
         """All OpenGL calls go here.  May be overridden, although you
@@ -340,6 +345,10 @@ class GLNavigationProgram(GLProgram):
             return True
         return False
 
+    def mousewheelfunc(self,dhorizontal,dvertical,x,y):
+        self.view.camera.dist *= math.exp(dvertical*0.01)
+        self.refresh()
+        return True
 
 class GLRealtimeProgram(GLNavigationProgram):
     """A GLNavigationProgram that refreshes the screen at a given frame rate.

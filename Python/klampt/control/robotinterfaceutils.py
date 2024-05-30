@@ -134,7 +134,6 @@ from .robotinterface import RobotInterfaceBase
 from ..math import vectorops,so2,so3,se3,spline
 from ..plan import motionplanning
 from ..model.trajectory import Trajectory,HermiteTrajectory
-from ..model.robotinfo import RobotInfo
 from ..robotsim import WorldModel,RobotModel
 from ..model.subrobot import SubRobotModel
 from .cartesian_drive import CartesianDriveSolver
@@ -371,7 +370,7 @@ class _Struct:
 
 class _RobotInterfaceStructure(_Struct):
     """Constant information over the life of an interface."""
-    DO_NOT_SERIALIZE = ["robotModel"]
+    DO_NOT_SERIALIZE = ["klamptModel"]
 
     def __init__(self):
         self.controlRate = None            #type: float
@@ -2026,7 +2025,7 @@ class OmniRobotInterface(_RobotInterfaceStatefulBase):
 
         """
         #need to limit to hardware values
-        hw_qmin,hw_qmax = self.properties.get('joint_limits',(None,None))
+        hw_qmin,hw_qmax = self.properties.get('jointLimits',(None,None))
         self._emulator.setJointLimits(self.indices(),qmin,qmax,op,hw_qmin,hw_qmax)
     
     def setPartJointLimits(self, part : str, qmin='auto', qmax='auto', op='clamp'):
@@ -2045,7 +2044,7 @@ class OmniRobotInterface(_RobotInterfaceStatefulBase):
         """
         indices = self.indices(part)
         #need to limit to hardware values
-        hw_qmin,hw_qmax = self.properties.get('joint_limits',(None,None))
+        hw_qmin,hw_qmax = self.properties.get('jointLimits',(None,None))
         if hw_qmin is not None:
             hw_qmin = [hw_qmin[i] for i in indices]
             hw_qmax = [hw_qmax[i] for i in indices]
@@ -2498,6 +2497,9 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
           commands, and tracking errors)
         - E-stopping and soft stopping requiring reset.
 
+    To enable Cartesian sensing and control, call setToolCoordinates() on the
+    controller or a part.
+    
     .. note::
         The base interface's klamptModel() method must be implemented for
         Cartesian control and acceleration-bounded control to work properly.
@@ -2764,7 +2766,7 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
 
         """
         #need to limit to hardware values
-        hw_qmin,hw_qmax = self.properties.get('joint_limits',(None,None))
+        hw_qmin,hw_qmax = self.properties.get('jointLimits',(None,None))
         self._emulator.setJointLimits(self._indices,qmin,qmax,op,hw_qmin,hw_qmax)
     
     def setCollisionFilter(self, world : WorldModel=None, op = 'warn'):
@@ -2868,8 +2870,10 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
             qs[i] = self._emulator.commandFilter(self._indices,'positionCommand',q)
             vs[i] = self._emulator.commandFilter(self._indices,'velocityCommand',vs[i])
         self._emulator.setPiecewiseCubic(self._indices,ts,qs,vs,relative)
-
+    
     def setToolCoordinates(self,xtool_local):
+        if tuple(self._indices) not in self._emulator.cartesianInterfaces:
+            self._emulator.enableCartesianControl(self._indices, self.properties.get('klamptModelCartesianLink',None))
         self._emulator.setToolCoordinates(self._indices,xtool_local)
 
     def getToolCoordinates(self):
@@ -3285,7 +3289,9 @@ def klamptCartesianPosition(model : RobotModel,
                             q: Vector,
                             part_indices : List[int],
                             tool_coordinates : Vector3,
-                            frame :str) -> RigidTransform:
+                            tool_link_index : int,
+                            frame :str,
+                            base_link_index : Optional[int] = None) -> RigidTransform:
     """Helper for implementers: an implementation of cartesianPosition
     that uses the Klampt model.
 
@@ -3305,12 +3311,12 @@ def klamptCartesianPosition(model : RobotModel,
         if i > part_indices[-1]: break
         model.driver(i).setValue(v)
     model.setConfig(model.getConfig())
-    ee_index = model.driver(part_indices[-1]).getAffectedLink()
-    ee_xform = model.link(ee_index).getTransform()
+    ee_xform = model.link(tool_link_index).getTransform()
     tool_xform = ee_xform[0],se3.apply(ee_xform,tool_coordinates)
     if frame == 'base':
-        first_link_index = model.driver(part_indices[0]).getAffectedLink()
-        base_link_index = model.link(first_link_index).getParent()
+        if base_link_index is None:
+            first_link_index = model.driver(part_indices[0]).getAffectedLink()
+            base_link_index = model.link(first_link_index).getParent()
         if base_link_index < 0:
             return tool_xform
         base_xform = model.link(base_link_index).getTransform()
@@ -3325,7 +3331,9 @@ def klamptCartesianVelocity(model : RobotModel,
                             dq : Vector,
                             part_indices : Sequence[int],
                             tool_coordinates : Vector3,
-                            frame : str) -> Tuple[Vector3,Vector3]:
+                            tool_link_index : int,
+                            frame : str,
+                            base_link_index : Optional[int] = None) -> Tuple[Vector3,Vector3]:
     """Helper for implementers: an implementation of cartesianVelocity
     that uses the Klampt model.
 
@@ -3346,13 +3354,13 @@ def klamptCartesianVelocity(model : RobotModel,
         else:
             model.driver(i).setVelocity(dq[i])
     model.setConfig(model.getConfig())
-    ee_index = model.driver(part_indices[-1]).getAffectedLink()
-    ee = model.link(ee_index)
+    ee = model.link(tool_link_index)
     v = ee.getPointVelocity(tool_coordinates)
     w = ee.getAngularVelocity()
     if frame == 'base':
-        first_link_index = model.driver(part_indices[0]).getAffectedLink()
-        base_link_index = model.link(first_link_index).getParent()
+        if base_link_index is None:
+            first_link_index = model.driver(part_indices[0]).getAffectedLink()
+            base_link_index = model.link(first_link_index).getParent()
         if base_link_index < 0: return (w,v)
         Tbase = model.link(base_link_index).getTransform()
         Rworld_base = so3.inv(Tbase[0])
@@ -3372,7 +3380,9 @@ def klamptCartesianForce(model : RobotModel,
                          t: Vector,
                          part_indices : List[int],
                          tool_coordinates : Vector3,
-                         frame : str):
+                         tool_link_index : int,
+                         frame : str,
+                         base_link_index : Optional[int] = None):
     """Helper for implementers: an implementation of cartesianForce
     that uses the Klampt model.
 
@@ -3389,16 +3399,16 @@ def klamptCartesianForce(model : RobotModel,
         if i > part_indices[-1]: break
         model.driver(i).setValue(v)
     model.setConfig(model.getConfig())
-    ee_index = model.driver(part_indices[-1]).getAffectedLink()
-    ee = model.link(ee_index)
+    ee = model.link(tool_link_index)
     J = ee.getJacobian(tool_coordinates)
     wrench = np.dot(J,model.velocityFromDrivers(t))
     torque,force = wrench[:3].tolist(),wrench[3:].tolist()
     if frame == 'world':
         return (torque,force)
     elif frame == 'base':
-        first_link_index = model.driver(part_indices[0]).getAffectedLink()
-        base_link_index = model.link(first_link_index).getParent()
+        if base_link_index is None:
+            first_link_index = model.driver(part_indices[0]).getAffectedLink()
+            base_link_index = model.link(first_link_index).getParent()
         if base_link_index < 0: return (torque,force)
         Tbase = model.link(base_link_index).getTransform()
         Rworld_base = so3.inv(Tbase[0])
@@ -3976,13 +3986,15 @@ class _JointInterfaceEmulatorData:
 
 
 class _CartesianEmulatorData:
-    def __init__(self,robot,indices):
+    def __init__(self,robot : RobotModel, indices : List[Union[int,str]], robotModelLink : Optional[Union[int,str]] = None):
         self.robot = robot
         self.indices = indices
         self.robotIndices = [robot.driver(i).getAffectedLink() for i in indices]
         self.driver = CartesianDriveSolver(robot)
         assert indices[-1] == max(indices),"Indices must be in sorted order"
-        self.eeLink = robot.link(self.robotIndices[-1])
+        if robotModelLink is None:
+            robotModelLink = self.robotIndices[-1]
+        self.eeLink = robot.link(robotModelLink)
         self.toolCoordinates = [0,0,0]
         self.t = None
         self.active = False
@@ -4003,7 +4015,7 @@ class _CartesianEmulatorData:
             raise NotImplementedError("TODO: Can only handle world frame, for now")
         qorig = self.robot.getConfig()
         if not self.active:
-            self.driver.start(qorig,self.robotIndices[-1],endEffectorPositions=self.toolCoordinates)
+            self.driver.start(qorig,self.eeLink.index,endEffectorPositions=self.toolCoordinates)
         goal = self.driver.ikGoals[0]
         if len(xparams) == 3:
             #point-to-point constraint
@@ -4037,7 +4049,7 @@ class _CartesianEmulatorData:
         qcur = self.robot.getConfig()
 
         if not self.active or self.mode != 'setCartesianVelocity':
-            self.driver.start(qcur,self.robotIndices[-1],endEffectorPositions=self.toolCoordinates)
+            self.driver.start(qcur,self.eeLink.index,endEffectorPositions=self.toolCoordinates)
             self.active = True
             self.mode = 'setCartesianVelocity'
 
@@ -4072,7 +4084,7 @@ class _CartesianEmulatorData:
         qcur = self.robot.getConfig()
 
         if not self.active or self.mode != 'moveToCartesianPositionLinear':
-            self.driver.start(qcur,self.robotIndices[-1],endEffectorPositions=self.toolCoordinates)
+            self.driver.start(qcur,self.eeLink.index,endEffectorPositions=self.toolCoordinates)
             self.active = True
             self.mode = 'moveToCartesianPositionLinear'
         if speed is None:
@@ -4129,17 +4141,17 @@ class _CartesianEmulatorData:
 
     def cartesianPosition(self,q,frame='world'):
         assert len(q) == self.robot.numDrivers()
-        return klamptCartesianPosition(self.robot,q,self.indices,self.toolCoordinates,frame)
+        return klamptCartesianPosition(self.robot,q,self.indices,self.toolCoordinates,self.eeLink.index,frame)
         
     def cartesianVelocity(self,q,dq,frame='world'):
         assert len(q) == self.robot.numDrivers()
         assert len(dq) == self.robot.numDrivers()
-        return klamptCartesianVelocity(self.robot,q,dq,self.indices,self.toolCoordinates,frame)
+        return klamptCartesianVelocity(self.robot,q,dq,self.indices,self.toolCoordinates,self.eeLink.index,frame)
 
     def cartesianForce(self,q,t,frame='world'):
         assert len(q) == self.robot.numDrivers()
         assert len(t) == self.robot.numDrivers()
-        return klamptCartesianForce(self.robot,q,t,self.indices,self.toolCoordinates,frame)
+        return klamptCartesianForce(self.robot,q,t,self.indices,self.toolCoordinates,self.eeLink.index,frame)
 
 
 class RobotInterfaceEmulator:
@@ -4257,7 +4269,6 @@ class RobotInterfaceEmulator:
             else:
                 j.commandedTorque = 0
         
-    
     def advanceClock(self,newClock,rate):
         if self.numUpdates < 0:
             raise RuntimeError("Need to call initialize before advanceClock")
@@ -5060,6 +5071,18 @@ class RobotInterfaceEmulator:
 
     def destinationTime(self):
         return max(j.destinationTime(self.curClock) for j in self.jointData)
+
+    def enableCartesianControl(self, indices : List[int], robot_model_link : Optional[Union[int,str]] = None):
+        """Enables cartesian control for the given indices.  If
+        robot_model_link is provided, then the end effector frame is given on
+        this link.  Usually, it is assumed to be 
+        `robot.drivers(indices[-1]).getAffectedLink()`.
+        """
+        if tuple(indices) in self.cartesianInterfaces:
+            warnings.warn("Cartesian control already enabled on indices {}".format(indices))
+            return
+        c = _CartesianEmulatorData(self.klamptModel,indices,robot_model_link)
+        self.cartesianInterfaces[tuple(indices)] = c
 
     def setToolCoordinates(self,indices,xtool_local):
         try:

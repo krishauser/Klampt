@@ -82,6 +82,7 @@ class GLUTWindow:
         glutMotionFunc (glutsafe(self._motionfunc,update_modifiers=False))
         glutPassiveMotionFunc (glutsafe(self._motionfunc,update_modifiers=False))
         glutMouseFunc (glutsafe(self._mousefunc,update_modifiers=True))
+        glutMouseWheelFunc(glutsafe(self._mousewheelfunc,update_modifiers=True))
         glutDisplayFunc (glutsafe(self._displayfunc))
         glutIdleFunc(glutsafe(program.idlefunc))
         if bool(glutCloseFunc):
@@ -209,6 +210,12 @@ class GLUTWindow:
     def _mousefunc(self,button,state,x,y):
         """Internal use"""
         self.program.mousefunc(button,state,x,y)
+        self.lastx = x
+        self.lasty = y
+    
+    def _mousewheelfunc(self,wheel,direction,x,y):
+        """Internal use"""
+        self.program.mousewheelfunc(0,direction,x,y)
         self.lastx = x
         self.lasty = y
 

@@ -847,7 +847,7 @@ def merge(*items) -> Geometry3D:
     xforms = []
     tri_meshes = []
     point_clouds = []
-    for item in enumerate(items):
+    for item in items:
         if isinstance(item,TriangleMesh):
             xforms.append(se3.identity())
             tri_meshes.append(item)
@@ -859,6 +859,8 @@ def merge(*items) -> Geometry3D:
         geom = item
         if hasattr(item,'geometry') and callable(item.geometry):
             geom = item.geometry()
+        if len(items) == 1:
+            return geom
         if isinstance(geom,Geometry3D):
             xforms.append(geom.getCurrentTransform())
             if item.type() == 'TriangleMesh':
@@ -867,12 +869,16 @@ def merge(*items) -> Geometry3D:
                 point_clouds.append(geom.getPointCloud())
             else:
                 tri_meshes.append(geom.convert('TriangleMesh'))
+        else:
+            raise ValueError("Can't merge item of type "+str(type(item)))
+    #print("Merging",len(point_clouds),"point clouds and",len(tri_meshes),"triangle meshes")
     if len(point_clouds) != 0:
         if len(tri_meshes) != 0:
             raise ValueError("Can't pass mixed PointCloud and TriangleMesh types")
         all_points = []
-        for pc in point_clouds:
-            all_points.append(numpy_convert.to_numpy(pc,'PointCloud'))
+        for xform,pc in point_clouds:
+            iverts = numpy_convert.to_numpy(pc,'PointCloud')
+            all_points.append(np.dot(np.hstack(iverts,np.ones((len(iverts),1))),se3.ndarray(xform).T))
         if not all(pc.shape[1]==all_points[0].shape[1] for pc in all_points):
             raise ValueError("Mismatch in PointCloud # of properties, can't merge")
         points = np.vstack(all_points)
@@ -884,7 +890,7 @@ def merge(*items) -> Geometry3D:
         nverts = 0
         for xform,tm in zip(xforms,tri_meshes):
             (iverts,itris) = numpy_convert.to_numpy(tm,'TriangleMesh')
-            verts.append(np.dot(np.hstack((iverts,np.ones((len(iverts),1)))),xform.T)[:,:3])
+            verts.append(np.dot(np.hstack((iverts,np.ones((len(iverts),1)))),se3.ndarray(xform).T)[:,:3])
             tris.append(itris+nverts)
             nverts += len(iverts)
         verts = np.vstack(verts)

@@ -2510,7 +2510,7 @@ def _default_attributes(item,type=None):
             except Exception as e:
                 if hasattr(item,'drawGL'):
                     #assume it's a SimRobotSensor, Appearance, or SubRobotModel
-                    return
+                    return {}
                 warnings.warn(str(e))
                 warnings.warn("Unsupported object type {} of type {}".format(item,item.__class__.__name__))
                 return
@@ -2547,6 +2547,8 @@ class VisAppearance:
         self.animationStartTime = 0
         self.animationSpeed = 1.0
         self.attributes = _default_attributes(item,type)
+        if self.attributes is None:
+            print("Couldn't determine type of item",name)
         if not isinstance(self.attributes,_CascadingDict):
             self.attributes = _CascadingDict(self.attributes)
         if 'hide_label' not in self.attributes:

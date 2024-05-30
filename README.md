@@ -87,7 +87,7 @@ API documentation is available here
 
 ## Reporting bugs and getting help
 
-If you identify a programming bug or issue, please raise them on this Github site.
+If you identify a programming bug or issue, please [raise them on this Github site](https://github.com/krishauser/Klampt/issues).
 If you have general questions installing or programming with Klamp't, please ask them on the Klamp't forum, which
 is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/krishauser/Klampt). 
 
@@ -101,6 +101,7 @@ Note: If you have a `pip` installed Klampt, you may get these updates by cloning
 -   Python API: Added visibility fraction determination to `klampt.model.sensing`.
 -   Python API: Added conversions of meshes to/from the ``trimesh`` library in `klampt.io.trimesh_convert`.
 -   Python API: Fixed bug in SO3/SE3 Hermite velocity interpolation.  Now using extrinsic angular velocity representation as tangent vectors.
+-   Python API: Mouse wheel events can now be captured in visualization (Qt and GLUT backends).
 
 **0.9.1** (10/30/2023)
 -   Removed GLUI dependency in default build mode.

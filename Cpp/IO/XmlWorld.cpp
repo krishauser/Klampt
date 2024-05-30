@@ -960,7 +960,7 @@ bool XmlWorld::Save(WorldModel& world,const string& fn,string itempath)
     fprintf(out,"  <robot name=\"%s\" file=\"%s\" >\n",world.robots[i]->name.c_str(),(relpath+robotFileNames[i]).c_str());
     for(size_t j=0;j<world.robots[i]->links.size();j++) {
       if(!world.robots[i]->IsGeometryEmpty(j))
-        WriteAppearance(world.robots[i]->geomManagers[j],out,4,world.robots[i]->linkNames[i].c_str());
+        WriteAppearance(world.robots[i]->geomManagers[j],out,4,world.robots[i]->linkNames[j].c_str());
     }
     fprintf(out,"  </robot>\n");
   }

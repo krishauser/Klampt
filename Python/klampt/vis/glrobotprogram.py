@@ -232,5 +232,10 @@ class GLSimulationPlugin(GLWorldPlugin):
     def motionfunc(self,x,y,dx,dy):
         return GLPluginInterface.motionfunc(self,x,y,dx,dy)
 
+    def mousewheelfunc(self,dhorizontal,dvertical,x,y):
+        return GLPluginInterface.mousewheelfunc(self,dhorizontal,dvertical,x,y)
+
+
+
 
 

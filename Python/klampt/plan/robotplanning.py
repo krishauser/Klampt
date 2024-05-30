@@ -2,10 +2,12 @@ from .cspace import *
 from .cspaceutils import EmbeddedCSpace,AffineEmbeddedCSpace,EmbeddedMotionPlan
 from . import robotcspace
 from ..model import collide
-from ..robotsim import IKObjective
+from ..robotsim import IKObjective,RobotModel,WorldModel
+from ..model.typing import Config,Vector,Vector3
+from typing import List,Union,Optional,Callable
 import warnings
 
-def preferred_plan_options(robot,movingSubset=None,optimizing=False):
+def preferred_plan_options(robot : RobotModel, movingSubset=None, optimizing=False):
     """Returns some options that might be good for your given robot, and
     whether you want a feasible or just an optimal plan.
 
@@ -18,13 +20,13 @@ def preferred_plan_options(robot,movingSubset=None,optimizing=False):
         return { 'type':"sbl", 'perturbationRadius':0.5, 'randomizeFrequency':1000, 'shortcut':1 }
 
 
-def make_space(world,robot,
-              edgeCheckResolution=1e-2,
-              extraConstraints=[],
-              equalityConstraints=[],
-              equalityTolerance=1e-3,
+def make_space(world : WorldModel, robot : RobotModel,
+              edgeCheckResolution : float = 1e-2,
+              extraConstraints : List[Callable]= [],
+              equalityConstraints : List[Union[Callable,IKObjective]]=[],
+              equalityTolerance : float = 1e-3,
               ignoreCollisions=[],
-              movingSubset=None):
+              movingSubset : Optional[Union[str,List[int]]]=None):
     """Creates a standard CSpace instance for the robot moving in the given world.
 
     Args:
@@ -148,13 +150,13 @@ def make_space(world,robot,
     space.setup()
     return space
 
-def plan_to_config(world,robot,target,
-                 edgeCheckResolution=1e-2,
-                 extraConstraints=[],
-                 equalityConstraints=[],
-                 equalityTolerance=1e-3,
+def plan_to_config(world : WorldModel, robot : RobotModel, target : Config,
+                 edgeCheckResolution : float = 1e-2,
+                 extraConstraints : List[Callable]= [],
+                 equalityConstraints : List[Union[Callable,IKObjective]]=[],
+                 equalityTolerance : float = 1e-3,
                  ignoreCollisions=[],
-                 movingSubset='auto',
+                 movingSubset : Optional[Union[str,List[int]]] = 'auto',
                  verbose=True,
                  **planOptions):
     """Creates a MotionPlan object that can be called to solve a standard motion
@@ -261,13 +263,13 @@ def plan_to_config(world,robot,target,
     return plan
 
 
-def plan_to_set(world,robot,target,
-              edgeCheckResolution=1e-2,
-              extraConstraints=[],
-              equalityConstraints=[],
-              equalityTolerance=1e-3,
+def plan_to_set(world : WorldModel, robot : RobotModel, target : Union[Callable,CSpace],
+              edgeCheckResolution : float =1e-2,
+              extraConstraints : List[Callable]= [],
+              equalityConstraints : List[Union[Callable,IKObjective]]=[],
+              equalityTolerance : float = 1e-3,
               ignoreCollisions=[],
-              movingSubset=None,
+              movingSubset : Optional[Union[str,List[int]]] = None,
               **planOptions):
     """
     Creates a MotionPlan object that can be called to solve a standard motion
@@ -360,12 +362,13 @@ def plan_to_set(world,robot,target,
         raise
     return plan
 
-def plan_to_cartesian_objective(world,robot,iktargets,iktolerance=1e-3,
-                             extraConstraints=[],
-                             equalityConstraints=[],
-                             equalityTolerance=1e-3,
+def plan_to_cartesian_objective(world : WorldModel, robot : RobotModel, iktargets : List[IKObjective], iktolerance : float = 1e-3,
+                             edgeCheckResolution : float = 1e-2,
+                             extraConstraints : List[Callable]= [],
+                             equalityConstraints : List[Union[Callable,IKObjective]]=[],
+                             equalityTolerance : float = 1e-3,
                              ignoreCollisions=[],
-                             movingSubset=None,
+                             movingSubset : Optional[Union[str,List[int]]] = None,
                              **planOptions):
     """
     Plans a path to reach one or more IK targets.
@@ -387,7 +390,9 @@ def plan_to_cartesian_objective(world,robot,iktargets,iktolerance=1e-3,
     """
     #TODO: only subselect those links that are affected by the IK target
     goalset = robotcspace.ClosedLoopRobotCSpace(robot,iktargets,None)
+    goalset.tol = iktolerance
     return plan_to_set(world,robot,goalset,
+                     edgeCheckResolution=edgeCheckResolution,
                      extraConstraints=extraConstraints,
                      equalityConstraints=equalityConstraints,
                      equalityTolerance=equalityTolerance,

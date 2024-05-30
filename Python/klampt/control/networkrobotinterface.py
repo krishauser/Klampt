@@ -330,6 +330,8 @@ class XMLRPCRobotInterfaceClient(ClientRobotInterfaceBase):
     """
     def __init__(self,addr='http://127.0.0.1:7881'):
         ClientRobotInterfaceBase.__init__(self)
+        if not addr.startswith('http'):
+            addr = 'http://'+addr
         self.addr = addr
         self.context_mgr = None     #type: ServerProxy
         self.s = None               #type: ServerProxy
