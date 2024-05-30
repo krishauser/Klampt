@@ -791,7 +791,8 @@ def intrinsics_to_camera(data, camera : SimRobotSensor, format='opencv'):
     all distortions are dropped.
 
     Args:
-        data: the file or data to set. Interpretation varies depending on format.
+        data: the filename or data to set. Interpretation varies depending on
+            the format.
         camera (SimRobotSensor): the viewport will be output to this sensor
         format (str): either 'opencv', 'numpy', 'ros', or 'json'
 
@@ -799,6 +800,7 @@ def intrinsics_to_camera(data, camera : SimRobotSensor, format='opencv'):
     assert isinstance(camera,SimRobotSensor),"Must provide a SimRobotSensor instance"
     assert camera.type() == 'CameraSensor',"Must provide a camera sensor instance"
     if isinstance(data,str):
+        #it's a filename
         with open(data,'r') as f:
             if format == 'opencv':
                 raise NotImplementedError("TODO: read from OpenCV calibrations")
