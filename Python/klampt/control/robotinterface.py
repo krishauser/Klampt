@@ -227,24 +227,26 @@ class RobotInterfaceBase(object):
     Attributes:
         properties (dict): a dict from string key to property value. Properties
             are application-dependent and constant through the life of the
-            interface. Examples may include:
+            interface. Examples include:
 
             * 'name' (str): the name of the robot
             * 'version' (str): a version of this interface
             * 'simulated' (bool): whether the "robot" is simulated vs physical
             * 'klamptModelFile' (str): the file name of the Klamp't model file.
+            * 'klamptModelCartesianLink' (int): the link index of the end
+                effector in the Klamp't model.
             * 'asynchronous' (bool): if True, beginStep/endStep are not needed to
               communicate with the robot.  Networked controllers are often
               asynchronous.
             * 'complete' (bool): if True, all methods are implemented.
             * 'part' (bool): if True, this is not a top-level interface.
-            * 'joint_limits' (pair of Vector): the hardware joint limits, not
+            * 'jointLimits' (pair of Vector): the hardware joint limits, not
               overridable by software limits.
-            * 'velocity_limits' (pair of Vector): the hardware velocity limits, not
+            * 'velocityLimits' (pair of Vector): the hardware velocity limits, not
               overridable by software limits.
-            * 'acceleration_limits' (pair of Vector): the hardware accel limits,
+            * 'accelerationLimits' (pair of Vector): the hardware accel limits,
               not overridable by software limits.
-            * 'torque_limits' (pair of Vector): the hardware torque limits,
+            * 'torqueLimits' (pair of Vector): the hardware torque limits,
               not overridable by software limits.
 
     """

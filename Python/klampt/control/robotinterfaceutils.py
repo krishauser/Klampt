@@ -134,7 +134,6 @@ from .robotinterface import RobotInterfaceBase
 from ..math import vectorops,so2,so3,se3,spline
 from ..plan import motionplanning
 from ..model.trajectory import Trajectory,HermiteTrajectory
-from ..model.robotinfo import RobotInfo
 from ..robotsim import WorldModel,RobotModel
 from ..model.subrobot import SubRobotModel
 from .cartesian_drive import CartesianDriveSolver
@@ -2026,7 +2025,7 @@ class OmniRobotInterface(_RobotInterfaceStatefulBase):
 
         """
         #need to limit to hardware values
-        hw_qmin,hw_qmax = self.properties.get('joint_limits',(None,None))
+        hw_qmin,hw_qmax = self.properties.get('jointLimits',(None,None))
         self._emulator.setJointLimits(self.indices(),qmin,qmax,op,hw_qmin,hw_qmax)
     
     def setPartJointLimits(self, part : str, qmin='auto', qmax='auto', op='clamp'):
@@ -2045,7 +2044,7 @@ class OmniRobotInterface(_RobotInterfaceStatefulBase):
         """
         indices = self.indices(part)
         #need to limit to hardware values
-        hw_qmin,hw_qmax = self.properties.get('joint_limits',(None,None))
+        hw_qmin,hw_qmax = self.properties.get('jointLimits',(None,None))
         if hw_qmin is not None:
             hw_qmin = [hw_qmin[i] for i in indices]
             hw_qmax = [hw_qmax[i] for i in indices]
@@ -2498,6 +2497,9 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
           commands, and tracking errors)
         - E-stopping and soft stopping requiring reset.
 
+    To enable Cartesian sensing and control, call setToolCoordinates() on the
+    controller or a part.
+    
     .. note::
         The base interface's klamptModel() method must be implemented for
         Cartesian control and acceleration-bounded control to work properly.
@@ -2764,7 +2766,7 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
 
         """
         #need to limit to hardware values
-        hw_qmin,hw_qmax = self.properties.get('joint_limits',(None,None))
+        hw_qmin,hw_qmax = self.properties.get('jointLimits',(None,None))
         self._emulator.setJointLimits(self._indices,qmin,qmax,op,hw_qmin,hw_qmax)
     
     def setCollisionFilter(self, world : WorldModel=None, op = 'warn'):
@@ -2868,13 +2870,10 @@ class RobotInterfaceCompleter(RobotInterfaceBase):
             qs[i] = self._emulator.commandFilter(self._indices,'positionCommand',q)
             vs[i] = self._emulator.commandFilter(self._indices,'velocityCommand',vs[i])
         self._emulator.setPiecewiseCubic(self._indices,ts,qs,vs,relative)
-
-    def enableCartesianControl(self, robot_model_link : Optional[Union[int,str]] = None):
-        self._emulator.enableCartesianControl(self._indices, robot_model_link)
-        if robot_model_link is not None:
-            self.properties['klamptModelCartesianLink'] = robot_model_link
-
+    
     def setToolCoordinates(self,xtool_local):
+        if tuple(self._indices) not in self._emulator.cartesianInterfaces:
+            self._emulator.enableCartesianControl(self._indices, self.properties.get('klamptModelCartesianLink',None))
         self._emulator.setToolCoordinates(self._indices,xtool_local)
 
     def getToolCoordinates(self):
