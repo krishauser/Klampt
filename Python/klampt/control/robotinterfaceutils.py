@@ -1692,6 +1692,7 @@ class _RobotInterfaceStatefulWrapper(_RobotInterfaceStatefulBase):
         self._state.rate = self._try('controlRate',())
         self._state.clock = self._try('clock',())
         self._state.status = self._try('status',())
+        self._state.isMoving = self._try('isMoving',())
         self._state.sensedPosition = self._try('sensedPosition',(),self._state.sensedPosition)
         self._state.sensedVelocity = self._try('sensedVelocity',(),self._state.sensedVelocity)
         self._state.sensedTorque = self._try('sensedTorque',(),self._state.sensedTorque)
