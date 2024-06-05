@@ -48,6 +48,8 @@ class ClientRobotInterfaceBase(_RobotInterfaceStatefulBase):
     def partInterface(self,part,joint_idx=None):
         if joint_idx is not None:
             raise NotImplementedError("TODO: part interfaces for individual joint indices")
+        if part is None:
+            return self
         return self._partInterfaces[part]
 
     def initialize(self):
@@ -283,8 +285,9 @@ Usage
         print(err)
 
     def serve(self):
-        if not ServerRobotInterfaceBase.initialize(self): 
-            raise RuntimeError("RobotInterface of type {} could not be initialized".format(self.interface))
+        if not self._base_initialized:
+            if not ServerRobotInterfaceBase.initialize(self): 
+                raise RuntimeError("RobotInterface of type {} could not be initialized".format(self.interface))
         self.startController()
         self.server.serve_forever()
     

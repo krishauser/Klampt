@@ -82,7 +82,9 @@ class TimedLooper:
         tnow = time.time()
         if self._tlast is None:
             self._tstart = tnow
-            self._tnext = tnow + self.dt
+            self._tnext = tnow
+            self._tlast = tnow
+            return True
         else:
             elapsed_time = tnow - self._tnext
             if elapsed_time > self.dt:
