@@ -37,7 +37,7 @@ The following commands will install Klamp't onto your system from source.  This 
 1. Make sure you have CMake, GLPK, and Qt5 on your system. On systems with apt-get, the following command will do the trick:
 
     ```
-    sudo apt-get install g++ cmake git libglpk-dev python3-dev libxmu-dev libxi-dev qt5-default
+    sudo apt-get install g++ cmake git libglpk-dev python3-dev libxmu-dev libxi-dev qtbase5-dev 
     ```
 
 2. (recommended) Download and install Assimp using the following command line:

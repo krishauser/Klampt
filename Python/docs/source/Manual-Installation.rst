@@ -17,7 +17,7 @@ are still available on pip for older platforms.
 
 You should also obtain:
 
--  For Linux platforms, an OpenGL installation for your graphics card.  If you do not have a graphics card (e.g., are running a bare Docker container), you can install the Mesa software renderer. Try ``sudo apt-get install libgl1-mesa-dev``.
+-  For Linux platforms, an OpenGL installation for your graphics card.  If you do not have a graphics card (e.g., are running a bare Docker container), you can install the Mesa software renderer. You may try ``sudo apt-get install sudo apt install libopengl0`` (if you have a graphics card) or ``sudo apt-get install libgl1-mesa-dev`` (if you have no graphics card). 
 -  PyOpenGL for visualization. Try ``pip install PyOpenGL``.
 -  PyQt5 is highly recommended for resource editing and improved
    visualization. Try ``pip install PyQt5``. 
