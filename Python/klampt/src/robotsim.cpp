@@ -499,7 +499,7 @@ void UpdateRobotSensorsProperty(int world,int robot)
 {
   shared_ptr<WorldData> worldData = worlds[world];
   if(robot >= (int)worldData->robotSensors.size()) return;  //no change
-  Klampt::RobotSensors* sensors = worldData->robotSensors[robot].get()
+  Klampt::RobotSensors* sensors = worldData->robotSensors[robot].get();
   Assert(sensors != NULL);
   TiXmlDocument doc;
   sensors->SaveSettings(doc.RootElement());
