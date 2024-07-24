@@ -79,7 +79,7 @@ def from_open3d(obj):
         pc = PointCloud()
         pc.setPoints(np.asarray(obj.points))
         if obj.has_colors():
-            geometry.point_cloud_set_colors(pc,np.asarray(obj.colors).T,('r','g','b'),'rgb')
+            geometry.point_cloud_set_colors(pc,np.asarray(obj.colors),('r','g','b'),'rgb')
         #TODO: other properties
         return pc
     elif isinstance(obj,open3d.geometry.TriangleMesh):
