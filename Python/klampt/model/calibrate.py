@@ -406,7 +406,7 @@ class RobotExtrinsicCalibration:
         for i in range(len(traj.milestones)):
             print("Moving to milestone",i)
             controller.beginStep()
-            controller.moveToPosition(self.robot.configToDrivers(traj.milestones[0]),speed)
+            controller.moveToPosition(self.robot.configToDrivers(traj.milestones[i]),speed)
             controller.endStep()
             wait_for_move()
 
