@@ -173,7 +173,7 @@ void QKlamptDisplay::mouseReleaseEvent(QMouseEvent *e){
 
 void QKlamptDisplay::wheelEvent(QWheelEvent *e){
   if(gui == NULL) return;
-  gui->SendMouseWheel(e->delta());
+  gui->SendMouseWheel(e->angleDelta().y());
 }
 
 void QKlamptDisplay::enterEvent(QEvent *){

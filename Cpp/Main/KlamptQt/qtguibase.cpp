@@ -41,7 +41,7 @@ void QtGUIBase::SendMouseRelease(QMouseEvent *e){
 }
 
 void QtGUIBase::SendMouseWheel(QWheelEvent *e){
-    GenericGUIBase::SendMouseWheel(e->delta());
+    GenericGUIBase::SendMouseWheel(e->angleDelta().y());
 }
 
 void QtGUIBase::SendKeyDown(QKeyEvent *e){

@@ -7,8 +7,6 @@ using namespace Klampt;
 
 #define SPIN_BOX_MAX_SCALE 10.0
 
-string toStdString(const QString& s);
-
 DriverEdit::DriverEdit(WorldModel* _world,Simulator* _sim,QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DriverEdit),
@@ -195,5 +193,5 @@ void DriverEdit::SaveSettings()
     if(robot==NULL) return;
     QString filename = QFileDialog::getSaveFileName(0, "Modified robot file", QString(), "Robot (*.rob *.urdf);;All Files (*)");
     if (filename.isNull()) return;
-    robot->Save(toStdString(filename).c_str());
+    robot->Save(filename.toStdString().c_str());
 }
