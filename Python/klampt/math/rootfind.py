@@ -95,9 +95,8 @@ def setVectorField(pVFObj: object) ->int:
 
     Returns:  
 
-        status (int): 0 if pVFObj = NULL, 1 otherwise.  
-
-    See vectorfield.py for an abstract base class that can be overridden to produce
+        status (int): 0 if pVFObj = NULL, 1 otherwise.
+     See vectorfield.py for an abstract base class that can be overridden to produce
     one of these objects.  
 
     """
@@ -123,7 +122,8 @@ def findRoots(startVals: object, iter: int) ->object:
                 - 4: maximum iterations reached
                 - 5: numerical error occurred
 
-            and x is the final point and n is the number of iterations used  
+            and x is the final point and n is the number of iterations used
+
 
     """
     return _rootfind.findRoots(startVals, iter)

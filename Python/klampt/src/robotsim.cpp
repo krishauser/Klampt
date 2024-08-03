@@ -1529,6 +1529,41 @@ Geometry3D Geometry3D::roi(const char* query,const double bmin[3],const double b
   return res;
 }
 
+void Geometry3D::merge(const Geometry3D& other,const char* representation,double threshold)
+{
+  shared_ptr<AnyCollisionGeometry3D>& geom = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(geomPtr);
+  shared_ptr<AnyCollisionGeometry3D>& geom2 = *reinterpret_cast<shared_ptr<AnyCollisionGeometry3D>*>(other.geomPtr);
+  if(!geom) throw PyException("Geometry3D.contacts: Geometry is empty");
+  if(!geom2) throw PyException("Geometry3D.contacts: Other geometry is empty");
+  if(geom->type == AnyGeometry3D::ImplicitSurface) {
+    if(0==strcmp(representation,"occupancy")) {
+      geom->type = AnyGeometry3D::OccupancyGrid;
+      bool res = geom->Merge(*geom2,threshold);
+      geom->type = AnyGeometry3D::ImplicitSurface;
+      if(!res)
+        throw PyException("Merge is not supported for that type of geometry");
+    }
+    else {
+      if(0==strcmp(representation,"tsdf") && threshold==0) {
+        //determine threshold from existing TSDF values
+        const Meshing::VolumeGrid& grid = geom->AsImplicitSurface();
+        IntTriple vdims = grid.value.size();
+        int n = vdims.a*vdims.b*vdims.c;
+        threshold = max(*std::max_element(grid.value.getData(),grid.value.getData()+n),-*std::min_element(grid.value.getData(),grid.value.getData()+n));
+      }
+      bool res = geom->Merge(*geom2,threshold);
+      if(!res)
+        throw PyException("Merge is not supported for that type of geometry");
+    }
+  }
+  else if(geom->type == geom2->type) {
+    bool res = geom->Merge(*geom2,threshold);
+    if(!res)
+      throw PyException("Merge is not supported for that type of geometry");
+  }
+  else throw PyException("Unable to compute merge of unlike types (except for VolumeGrid)");
+}
+
 //KH: note: pointer gymnastics necessary to allow appearances to refer to temporary appearances as well as references to world, while also
 //exposing an opaque pointer in appearance.h
 

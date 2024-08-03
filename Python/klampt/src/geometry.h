@@ -870,6 +870,20 @@ class Geometry3D
   ///- TriangleMesh
   ///
   Geometry3D roi(const char* query,const double bmin[3],const double bmax[3]);
+  ///Merges another geometry into this geometry.  The result is stored
+  ///inplace and the type of the result is the same as this geometry.  This can be used
+  ///to calculate the union of PointClouds, TriangleMeshes, ConvexPolytopes, and
+  ///VolumeGrids. 
+  ///
+  ///VolumeGrid merges preserve the domain of the current volume grid.  They can also
+  ///be merged with GeometricPrimitives, PointClouds, TriangleMeshes, and
+  ///ConvexPolytopes, in which case the output is either an occupancy grid, signed
+  ///distance field (SDF), or TSDF (TSDF) according to the `representation` argument.
+  ///Valid values are "auto" (="sdf"), "occupancy", "sdf", and "tsdf".
+  ///
+  ///In the TSDF case, the truncation value is either `threshold`, or if `threshold`=0,
+  ///the current range of the existing TSDF is used. 
+  void merge(const Geometry3D& other,const char* representation="auto",double threshold=0);
 
   int world;
   int id;

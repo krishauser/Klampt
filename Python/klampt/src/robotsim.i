@@ -486,7 +486,7 @@ static PyObject* convert_dmatrix_obj(const std::vector<std::vector<double> >& ma
 }
 
 %extend Geometry3D {
-%pythoncode {
+%pythoncode {        
     def __reduce__(self):
         from klampt.io import loader
         jsonobj = loader.to_json(self,'Geometry3D')
