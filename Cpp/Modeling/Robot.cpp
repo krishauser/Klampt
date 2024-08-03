@@ -1883,7 +1883,7 @@ void RobotModel::Mount(int link, const Geometry::AnyGeometry3D& mesh,
       geomManagers.resize(geometry.size());
     }
     geomManagers[link].CreateEmpty();
-    geomManagers[link]->Merge(mergeMeshes);
+    geomManagers[link]->Union(mergeMeshes);
     geometry[link] = geomManagers[link];
     geomManagers[link].Appearance()->Set(*geometry[link]);
   }
