@@ -93,9 +93,11 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 
 ## Version history
 
-**master** (5/9/2024)
+**master** (8/1/2024)
 Note: If you have a `pip` installed Klampt, you may get these updates by cloning the Git repo, then run `cd Klampt/Python; python patch_a_pip_install.py`. This provides all of the Python API updates listed below without needing to build from source.
 
+-   C++ API: Renamed `Merge` to `Union` for all geometries. Added `Merge` function that merges a single geometry.
+-   Python API: Added Geometry3D `merge` function that can be used for SDF fusion.
 -   Python API: Improved calibration routines in `klampt.model.calibrate`.
 -   Python API: Added surface sampling and vertex normals to `klampt.model.geometry`.
 -   Python API: Added visibility fraction determination to `klampt.model.sensing`.
