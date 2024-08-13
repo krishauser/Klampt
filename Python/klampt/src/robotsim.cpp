@@ -43,6 +43,7 @@
 #include "pyconvert.h"
 #include "robotik.h"
 #include <fstream>
+#include <tinyxml.h>
 #ifndef WIN32
 #include <unistd.h>
 #endif //WIN32
@@ -492,6 +493,19 @@ void GetVolumeGrid(const VolumeGrid& grid,AnyCollisionGeometry3D& geom)
     *i = grid.values[k];
   }
   geom.ClearCollisionData();
+}
+
+void UpdateRobotSensorsProperty(int world,int robot)
+{
+  shared_ptr<WorldData> worldData = worlds[world];
+  if(robot >= (int)worldData->robotSensors.size()) return;  //no change
+  Klampt::RobotSensors* sensors = worldData->robotSensors[robot].get();
+  Assert(sensors != NULL);
+  TiXmlDocument doc;
+  sensors->SaveSettings(doc.RootElement());
+  stringstream ss;
+  ss<<doc;
+  worldData->world->robots[robot]->properties.set("sensors",ss.str());
 }
 
 GeometricPrimitive::GeometricPrimitive()
@@ -2077,7 +2091,7 @@ void Appearance::setTexture2D_channels(const char* format,unsigned char* bytes,i
   int bpp = Image::pixelFormatSize(fmt);
   if(bpp != p) {
     stringstream ss;
-    ss<<"Provided "<<p<<"channels to texture, but format is a "<<bpp<<"-byte format";
+    ss<<"Provided "<<p<<" channels to texture, but format is a "<<bpp<<"-byte format";
     throw PyException(ss.str());
   }
   app->tex2D->initialize(n,m,fmt);
@@ -3194,6 +3208,9 @@ bool WorldModel::loadFile(const char* fn)
 bool WorldModel::saveFile(const char* fn,const char* elementPath)
 {
   Klampt::WorldModel& world = *worlds[index]->world;
+  //write any robot sensors to the robot properties
+  for(size_t i=0;i<world.robots.size();i++) 
+    UpdateRobotSensorsProperty(index,i);
   return world.SaveXML(fn,elementPath);
 }
 
@@ -4236,6 +4253,8 @@ bool RobotModel::loadFile(const char* fn)
 bool RobotModel::saveFile(const char* fn,const char* geometryPrefix)
 {
   if(!robot) throw PyException("RobotModel is empty");
+  //update the robot.properties with any updated sensors
+  UpdateRobotSensorsProperty(world,index);
   if(!robot->Save(fn)) return false;
   if(geometryPrefix) {
     for(size_t i=0;i<robot->links.size();i++) {

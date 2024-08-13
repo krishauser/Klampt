@@ -26,7 +26,7 @@ class GLVisualizationFrontend(glcommon.GLPluginProgram):
     def __init__(self):
         glcommon.GLPluginProgram.__init__(self)
         self.scene = GLVisualizationPlugin()
-        self.setPlugin(self.scene)
+        self.set_plugin(self.scene)
         self.scene.program = weakref.proxy(self)
         self.rendered = False
 

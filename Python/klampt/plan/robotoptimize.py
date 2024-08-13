@@ -1,6 +1,6 @@
 from ..model import ik,types,config
 from ..math import vectorops
-from ..robotsim import IKSolver,IKObjective
+from ..robotsim import IKSolver,IKObjective,RobotModelLink
 from ..io import loader
 import time
 import random

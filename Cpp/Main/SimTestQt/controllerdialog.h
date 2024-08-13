@@ -24,7 +24,7 @@ class ControllerDialog : public QDialog
     
 public:
   explicit ControllerDialog(Simulator* sim=NULL,QWidget *parent = 0);
-    ~ControllerDialog();
+    virtual ~ControllerDialog();
 
     Simulator* sim;
     WorldModel* world;

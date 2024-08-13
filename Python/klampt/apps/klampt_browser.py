@@ -117,6 +117,7 @@ class ResourceBrowser(QtWidgets.QMainWindow):
         self.view.setModel(self.model)
         #nicer size for columns
         self.view.header().resizeSection(0, 200)
+        self.view.header().setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
         self.view.header().resizeSection(1, 75)
         self.view.header().resizeSection(2, 75)
         self.view.header().resizeSection(3, 150)

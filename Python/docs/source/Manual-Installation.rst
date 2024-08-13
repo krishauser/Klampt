@@ -6,9 +6,9 @@ up a command line window and call::
 
     pip install klampt
 
-As of writing, pip packages are available for Linux (Python 3.5-3.10),
-Windows (Python 2.7, 3.5-3.10, 32- and 64-bit), and
-Mac OSX 10.9 and higher (Python 2.7, 3.5, 3.6, and 3.7). These are built
+As of writing, pip packages are available for Linux (CPython 3.6-3.12, PyPy 3.7-3.10, x86_64 architecture),
+Windows (Python 3.5-3.12, 32- and 64-bit), and
+Mac OSX 11  (Python 3.8-3.12). These are built
 with Assimp (mesh loading) and GLEW (OpenGL supported rendering of
 camera images). They **do not** have ROS or OMPL support, and if you
 want those you will need to build from source.  As of 2022 we have stopped
@@ -17,6 +17,7 @@ are still available on pip for older platforms.
 
 You should also obtain:
 
+-  For Linux platforms, an OpenGL installation for your graphics card.  If you do not have a graphics card (e.g., are running a bare Docker container), you can install the Mesa software renderer. You may try ``sudo apt-get install sudo apt install libopengl0`` (if you have a graphics card) or ``sudo apt-get install libgl1-mesa-dev`` (if you have no graphics card). 
 -  PyOpenGL for visualization. Try ``pip install PyOpenGL``.
 -  PyQt5 is highly recommended for resource editing and improved
    visualization. Try ``pip install PyQt5``. 

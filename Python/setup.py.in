@@ -121,7 +121,7 @@ else:
 
 
 setup(name='Klampt',
-      version='@KLAMPT_VERSION@.post6',
+      version='@KLAMPT_VERSION@',
       description="Python API to Klamp't, a package for robot modeling, simulating, planning, optimization, and visualization",
       author='Kris Hauser',
       author_email='hauser.kris@gmail.com',
@@ -180,7 +180,7 @@ setup(name='Klampt',
       ],
       install_requires=[
         'PyOpenGL',
-        'numpy>='+numpy_oldest_acceptable_version
+        'numpy>='+numpy_oldest_acceptable_version,
       ],
      )
 

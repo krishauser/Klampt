@@ -5,7 +5,6 @@
 #include <iostream>
 //#include <boost/foreach.hpp>
 
-string toStdString(const QString& s);
 
 ControllerDialog::ControllerDialog(Simulator* _sim,QWidget *parent) :
   QDialog(parent),sim(_sim),world(_sim ? _sim->world : NULL),
@@ -65,8 +64,8 @@ void ControllerDialog::Refresh(){
 
 void ControllerDialog::OnCellEdited(QTableWidgetItem* item) {
     if(refreshing) return;
-    string key= toStdString(ui->tableWidget->verticalHeaderItem(item->row())->text());
-    settings[key]= toStdString(item->text());
+    string key= ui->tableWidget->verticalHeaderItem(item->row())->text().toStdString();
+    settings[key]= item->text().toStdString();
     int robot = ui->cmb_robot->itemData(ui->cmb_robot->currentIndex()).toInt();
     emit SendControllerSetting(robot,key,settings[key]);    
 }
@@ -75,7 +74,7 @@ void ControllerDialog::OnSendCommand()
 {
   int robot = ui->cmb_robot->itemData(ui->cmb_robot->currentIndex()).toInt();
   if(ui->lineEdit->text().isEmpty()) ui->lineEdit->setFocus();
-  else emit ControllerCommand(robot, toStdString(ui->comboBox->currentText()), toStdString(ui->lineEdit->text()));
+  else emit ControllerCommand(robot, ui->comboBox->currentText().toStdString(), ui->lineEdit->text().toStdString());
 }
 
 

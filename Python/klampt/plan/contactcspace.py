@@ -27,7 +27,7 @@ class StanceCSpace(ClosedLoopRobotCSpace):
             is 0.
 
     """
-    def __init__(self,robot,holds,collider=None,world=None,checkTorqueLimits=False):
+    def __init__(self,robot : RobotModel, holds,collider=None,world=None,checkTorqueLimits=False):
         if collider is None and world is not None:
             ignoreCollisions = [robot.link(h.link) for h in holds]
             collider = collide.WorldCollider(world,ignore=ignoreCollisions)

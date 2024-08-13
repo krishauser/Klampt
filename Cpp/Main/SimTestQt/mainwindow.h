@@ -22,7 +22,7 @@ class MainWindow : public QMainWindow
     
 public:
     explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
+    virtual ~MainWindow();
     QSettings* ini;
     WorldModel world;
     shared_ptr<SimTestBackend> backend;

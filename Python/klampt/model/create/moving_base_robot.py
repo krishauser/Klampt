@@ -7,9 +7,10 @@ in order to make the controller stable.
 
 import os
 from klampt.math import vectorops,so3
+from klampt import WorldModel,RobotModel,SimRobotController
+from ..typing import RigidTransform,Matrix3,Vector3
 
-
-def make(robotfile,world,tempname="temp.rob",debug=False):
+def make(robotfile : str, world : WorldModel, tempname : str="temp.rob", debug=False) -> RobotModel:
 	"""Converts the given fixed-base robot file into a moving base robot
 	and loads it into the given world.
 
@@ -88,11 +89,13 @@ mount 5 "%s" 1 0 0   0 1 0   0 0 1   0 0 0 as "%s"
 	for i in range(robot.numLinks()):
 		m = robot.link(i).getMass()
 		inertia += (vectorops.normSquared(m.com)*m.mass + max(m.inertia))
-	tmax = robot.getTorqueMax()
+	tmin,tmax = robot.getTorqueLimits()
+	tmin[0] = tmin[1] = tmin[2] = -mass*9.8*5
+	tmin[3] = tmin[4] = tmin[5] = -inertia*9.8*5
 	tmax[0] = tmax[1] = tmax[2] = mass*9.8*5
 	tmax[3] = tmax[4] = tmax[5] = inertia*9.8*5
 	robot.setName("moving-base["+robotname+"]")
-	robot.setTorqueMax(tmax)
+	robot.setTorqueLimits(tmin,tmax)
 	if debug:
 		robot.saveFile(tempname)
 	else:
@@ -100,12 +103,12 @@ mount 5 "%s" 1 0 0   0 1 0   0 0 1   0 0 0 as "%s"
 	return robot
 
 
-def get_xform(robot):
+def get_xform(robot : RobotModel) -> RigidTransform:
 	"""For a moving base robot model, returns the current base rotation
 	matrix R and translation t."""
 	return robot.link(5).getTransform()
 
-def set_xform(robot,R,t):
+def set_xform(robot : RobotModel, R : Matrix3, t : Vector3) -> None:
 	"""For a moving base robot model, set the current base rotation
 	matrix R and translation t.  (Note: if you are controlling a robot
 	during simulation, use send_moving_base_xform_command)
@@ -119,7 +122,7 @@ def set_xform(robot,R,t):
 	q[5]=roll
 	robot.setConfig(q)
 
-def send_xform_linear(controller,R,t,dt):
+def send_xform_linear(controller : SimRobotController, R : Matrix3, t : Vector3, dt : float) -> None:
 	"""For a moving base robot model, send a command to move to the
 	rotation matrix R and translation t using linear interpolation
 	over the duration dt.
@@ -136,7 +139,7 @@ def send_xform_linear(controller,R,t,dt):
 	q[5]=roll
 	controller.setLinear(q,dt)
 
-def send_xform_PID(controller,R,t):
+def send_xform_PID(controller : SimRobotController, R : Matrix3, t : Vector3) -> None:
 	"""For a moving base robot model, send a command to move to the
 	rotation matrix R and translation t by setting the PID setpoint
 

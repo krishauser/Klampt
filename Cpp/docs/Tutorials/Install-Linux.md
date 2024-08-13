@@ -12,7 +12,7 @@ Time: 10-30 minutes
 
 ## Prebuilt Python libraries
 
-For Python 2.7, 3.4, 3.5, 3.6, and 3.7, you should be able to simply run
+For Python 3.5-3.12 on i686, x86_64, and arm64 machines, you should be able to simply run
 
 - `pip install klampt`
 
@@ -34,10 +34,10 @@ Compiled binary packages are not available for Klampt 0.8.0+.
 
 The following commands will install Klamp't onto your system from source.  This will ensure that you have the latest updates.
 
-1. Make sure you have CMake, GLPK, and Qt5 (or Qt4) on your system. On systems with apt-get, the following command will do the trick:
+1. Make sure you have CMake, GLPK, and Qt5 on your system. On systems with apt-get, the following command will do the trick:
 
     ```
-    sudo apt-get install g++ cmake git libglpk-dev python3-dev libxmu-dev libxi-dev qt5-default
+    sudo apt-get install g++ cmake git libglpk-dev python3-dev libxmu-dev libxi-dev qtbase5-dev 
     ```
 
 2. (recommended) Download and install Assimp using the following command line:

@@ -1,9 +1,11 @@
 import klampt.math.autodiff.ad as ad
-import torch,numpy as np
+import torch
+import numpy as np
+from typing import Union
 
 class TorchModuleFunction(ad.ADFunctionInterface):
     """Converts a PyTorch function to a Klamp't autodiff function class."""
-    def __init__(self,module):
+    def __init__(self,module : torch.Module):
         self.module=module
         self._eval_params=[]
         torch.set_default_dtype(torch.float64)
@@ -133,14 +135,14 @@ class ADModule(torch.autograd.Function):
         torch.autograd.gradcheck(ADModule.apply,tuple([func,terminals]+params),eps=h,atol=atol,rtol=rtol,raise_exception=True)
 
 
-def torch_to_ad(module,args):
+def torch_to_ad(module : torch.Module, args : tuple) -> ad.ADFunctionCall:
     """Converts a PyTorch function applied to args (list of scalars or numpy
     arrays) to a Klamp't autodiff function call on those arguments."""
     wrapper=TorchModuleFunction(module)
     return wrapper(*args)
 
 
-def ad_to_torch(func,terminals=None):
+def ad_to_torch(func : Union[ad.ADFunctionCall,ad.ADFunctionInterface],terminals=None) -> torch.autograd.Function:
     """Converts a Klamp't autodiff function call or function instance to a
     PyTorch Function.  If terminals is provided, this is the list of arguments
     that PyTorch will expect.  Otherwise, the variables in the expression

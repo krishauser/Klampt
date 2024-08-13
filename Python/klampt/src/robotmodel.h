@@ -350,13 +350,15 @@ class RobotModelLink
   ///    corresponding respectively, to the (x,y,z) components of the Hessian.
   /// 
   void getPositionHessian(const double plocal[3],double** np_out3,int* m,int* n,int* p);
-  ///Computes the Hessians of each orientation component of the link w.r.t the
-  ///robot's configuration q.  
+  ///Computes the pseudo-Hessians of each orientation component of the link 
+  ///w.r.t the robot's configuration q.  The pseudo-Hessian is the derivative
+  ///of the angular velocity of this link w.r.t. the joint velocities.
   ///
   ///Returns:
   /// 
   ///    ndarray: a 3xnxn array with each of the elements in the first axis
-  ///    corresponding, respectively, to the (wx,wy,wz) components of the Hessian.
+  ///    corresponding, respectively, to the (wx,wy,wz) components of the 
+  ///    pseudo-Hessian.
   /// 
   void getOrientationHessian(double** np_out3,int* m,int* n,int* p);
   ///Draws the link's geometry in its local frame.  If keepAppearance=true, the

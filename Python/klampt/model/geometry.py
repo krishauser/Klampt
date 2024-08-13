@@ -20,6 +20,10 @@ Working with point clouds
 The :func:`fit_plane`, :func:`fit_plane3`, and :class:`PlaneFitter` class help
 with plane estimation.
 
+The :func:`align_points` and :func:`align_points_rotation` functions
+solve for point cloud alignment.
+.. versionadded:: 0.9.2
+
 :func:`point_cloud_simplify` simplifies a PointCloud.
 
 :func:`point_cloud_colors` and :func:`point_cloud_set_colors` sets / gets 
@@ -33,14 +37,20 @@ unified geometries.
 
 :func:`triangle_normals` computes triangle normals for a TriangleMesh.
 
+:func:`vertex_normals` computes vertex normals for a TriangleMesh.
+.. versionadded:: 0.9.2
+
+:func:`sample_surface` samples points on the surface of a Geometry3D.
+.. versionadded:: 0.9.2
+
 """
 
 from ..robotsim import Geometry3D,PointCloud,TriangleMesh
 import math
 from .create import primitives
 from ..math import vectorops,so3,se3
-from typing import Union, Tuple, Sequence
-from .typing import Vector3
+from typing import Union, Tuple, Sequence, List
+from .typing import Vector3, Rotation, RigidTransform
 import numpy as np
 
 _has_scipy = False
@@ -337,6 +347,84 @@ def fit_plane_centroid(points : Sequence[Vector3]) -> Tuple[Vector3,Vector3]:
         raise ValueError("Point set is degenerate")
     normal = Vt[2,:]
     return centroid.tolist(),normal.tolist()
+
+
+
+
+def align_points_rotation(apts,bpts) -> Rotation:
+    """Computes a 3x3 rotation matrix that rotates the points apts to
+    minimize the distance to bpts.
+
+    apts and bpts can either be a list of 3-vectors, nx3 numpy array,
+    or a PointCloud.
+
+    Returns:
+        Rotation: the klampt.so3 element that minimizes the sum of
+        squared errors ||R*ai-bi||^2.
+    """
+    if isinstance(apts, PointCloud):
+        apts = apts.getPoints()
+    if isinstance(bpts, PointCloud):
+        bpts = bpts.getPoints()
+    assert len(apts)==len(bpts)
+
+    C = np.dot(np.asarray(apts).T,np.asarray(bpts))
+    #let A=[a1 ... an]^t, B=[b1 ... bn]^t
+    #solve for min sum of squares of E=ARt-B
+    #let C=AtB
+    #solution is given by CCt = RtCtCR
+
+    #Solve C^tR = R^tC with SVD CC^t = R^tC^tCR
+    #CtRX = RtCX
+    #C = RCtR
+    #Ct = RtCRt
+    #=> CCt = RCtCRt
+    #solve SVD of C and Ct (giving eigenvectors of CCt and CtC
+    #C = UWVt => Ct=VWUt
+    #=> UWUt = RVWVtRt
+    #=> U=RV => R=UVt
+    (U,W,Vt) = np.linalg.svd(C)
+
+    R = np.dot(U,Vt)
+    if np.linalg.det(R) < 0:
+        #it's a mirror. flip the zero 
+        #svd.sortSVs();
+        if abs(W[2]) > 1e-2:
+            raise RuntimeError("point_fit_rotation_3d: Uhh... what do we do?  SVD of rotation doesn't have a zero singular value")
+        #negate the last column of V
+        Vt[2,:] *= -1
+        R = np.dot(U,Vt)
+        assert np.linalg.det(R) > 0
+    return R.flatten().tolist()
+
+
+def align_points(apts,bpts) -> RigidTransform:
+    """Finds a 3D rigid transform that maps the list of points apts to the
+    list of points bpts. 
+    
+    apts and bpts can either be a list of 3-vectors, nx3 numpy array,
+    or a PointCloud.
+
+    Returns:
+        RigidTransform: the klampt.se3 element that minimizes the sum of
+        squared errors ||T*ai-bi||^2.
+    """
+    if isinstance(apts, PointCloud):
+        apts = apts.getPoints()
+    if isinstance(bpts, PointCloud):
+        bpts = bpts.getPoints()
+    assert len(apts)==len(bpts)
+    apts = np.asarray(apts)
+    bpts = np.asarray(bpts)
+    ca = np.average(apts,axis=0)
+    cb = np.average(bpts,axis=0)
+    arel = apts - ca
+    brel = bpts - cb
+    R = align_points_rotation(arel,brel)
+    #R minimizes sum_{i=1,...,n} ||R(ai-ca) - (bi-cb)||^2
+    t = cb - so3.apply(R,ca)
+    return (R,t.tolist())
+
 
 
 def _color_format_from_uint8_channels(format,r,g,b,a=None):
@@ -680,8 +768,8 @@ def point_cloud_set_colors(pc : PointCloud, colors, color_format='rgb',pc_proper
 
 def triangle_normals(trimesh : Union[TriangleMesh,Geometry3D]) -> np.ndarray:
     """
-    Returns a list or numpy array of (outward) triangle normals for the
-    triangle mesh defined by vertices verts and triangles tris.
+    Returns a list or numpy array of (outward) triangle normals for a
+    triangle mesh.
     
     Args:
         trimesh (TriangleMesh or Geometry3D)
@@ -693,10 +781,8 @@ def triangle_normals(trimesh : Union[TriangleMesh,Geometry3D]) -> np.ndarray:
         assert trimesh.type() == 'TriangleMesh',"Must provide a TriangleMesh to triangle_normals"
         trimesh = trimesh.getTriangleMesh()
     assert isinstance(trimesh,TriangleMesh),"Must provide a TriangleMesh to triangle_normals"
-
-    from ..io import numpy_convert
-
-    verts,tris = numpy_convert.to_numpy(trimesh)
+    verts=trimesh.getVertices()
+    tris=trimesh.getIndices()
     #normals = np.zeros(tris.shape)
     dba = verts[tris[:,1]]-verts[tris[:,0]]
     dca = verts[tris[:,2]]-verts[tris[:,0]]
@@ -704,6 +790,43 @@ def triangle_normals(trimesh : Union[TriangleMesh,Geometry3D]) -> np.ndarray:
     norms = np.linalg.norm(n,axis=1)[:, np.newaxis]
     n = np.divide(n,norms,where=norms!=0)
     return n
+
+def vertex_normals(trimesh : Union[TriangleMesh,Geometry3D], area_weighted=True) -> np.ndarray:
+    """
+    Returns a list or numpy array of (outward) vertex normals for a
+    triangle mesh.
+    
+    Args:
+        trimesh (TriangleMesh or Geometry3D)
+        area_weighted (bool): whether to compute area-weighted average or
+            simple average.
+
+    Returns:
+        An N x 3 matrix of triangle normals with N the number of vertices.
+    """
+    if isinstance(trimesh,Geometry3D):
+        assert trimesh.type() == 'TriangleMesh',"Must provide a TriangleMesh to vertex_normals"
+        trimesh = trimesh.getTriangleMesh()
+    assert isinstance(trimesh,TriangleMesh),"Must provide a TriangleMesh to vertex_normals"
+    verts=trimesh.getVertices()
+    tris=trimesh.getIndices()
+    dba = verts[tris[:,1]]-verts[tris[:,0]]
+    dca = verts[tris[:,2]]-verts[tris[:,0]]
+    n = np.cross(dba,dca)
+    normals = [np.zeros(3) for i in range(len(verts))]
+    if area_weighted:
+        for i,t in enumerate(tris):
+            for j in range(3):
+                normals[t[j]] += n[i]
+    else:
+        norms = np.linalg.norm(n,axis=1)[:, np.newaxis]
+        n = np.divide(n,norms,where=norms!=0)
+        for i,t in enumerate(tris):
+            for j in range(3):
+                normals[t[j]] += n[i]
+    normals = np.array(normals)
+    norms = np.linalg.norm(normals,axis=1)[:, np.newaxis]
+    return np.divide(normals,norms,where=norms!=0)
 
 
 def merge(*items) -> Geometry3D:
@@ -724,7 +847,7 @@ def merge(*items) -> Geometry3D:
     xforms = []
     tri_meshes = []
     point_clouds = []
-    for item in enumerate(items):
+    for item in items:
         if isinstance(item,TriangleMesh):
             xforms.append(se3.identity())
             tri_meshes.append(item)
@@ -736,6 +859,8 @@ def merge(*items) -> Geometry3D:
         geom = item
         if hasattr(item,'geometry') and callable(item.geometry):
             geom = item.geometry()
+        if len(items) == 1:
+            return geom
         if isinstance(geom,Geometry3D):
             xforms.append(geom.getCurrentTransform())
             if item.type() == 'TriangleMesh':
@@ -744,12 +869,16 @@ def merge(*items) -> Geometry3D:
                 point_clouds.append(geom.getPointCloud())
             else:
                 tri_meshes.append(geom.convert('TriangleMesh'))
+        else:
+            raise ValueError("Can't merge item of type "+str(type(item)))
+    #print("Merging",len(point_clouds),"point clouds and",len(tri_meshes),"triangle meshes")
     if len(point_clouds) != 0:
         if len(tri_meshes) != 0:
             raise ValueError("Can't pass mixed PointCloud and TriangleMesh types")
         all_points = []
-        for pc in point_clouds:
-            all_points.append(numpy_convert.to_numpy(pc,'PointCloud'))
+        for xform,pc in point_clouds:
+            iverts = numpy_convert.to_numpy(pc,'PointCloud')
+            all_points.append(np.dot(np.hstack(iverts,np.ones((len(iverts),1))),se3.ndarray(xform).T))
         if not all(pc.shape[1]==all_points[0].shape[1] for pc in all_points):
             raise ValueError("Mismatch in PointCloud # of properties, can't merge")
         points = np.vstack(all_points)
@@ -761,7 +890,7 @@ def merge(*items) -> Geometry3D:
         nverts = 0
         for xform,tm in zip(xforms,tri_meshes):
             (iverts,itris) = numpy_convert.to_numpy(tm,'TriangleMesh')
-            verts.append(np.dot(np.hstack((iverts,np.ones((len(iverts),1)))),xform.T)[:,:3])
+            verts.append(np.dot(np.hstack((iverts,np.ones((len(iverts),1)))),se3.ndarray(xform).T)[:,:3])
             tris.append(itris+nverts)
             nverts += len(iverts)
         verts = np.vstack(verts)
@@ -774,3 +903,117 @@ def merge(*items) -> Geometry3D:
         return merged_geom
     else:
         return Geometry3D()
+
+
+def sample_surface(geom : Geometry3D,
+                   num_samples=None,
+                   local=True,
+                   want_elements=False,
+                   want_normals=False) -> np.ndarray:
+    """Samples the surface of a geometry uniformly at random.
+
+    If local=True, points are returned in the local coordinate frame.
+    Otherwise, the object's current transform is applied.
+
+    If want_elements=True, then the indices of the elements (i.e., triangles
+    or point indices) are returned the result column 3.  This only makes sense
+    for TriangleMesh and PointCloud types.
+
+    If want_normals=True, then the normals at each point are returned in the
+    result columns [3:6] (if want_elements=False) or [4:7] if
+    (want_elements=True).
+    
+    If num_samples = None, then all vertices of the representation will be
+    returned.  This cannot be None for spheres.
+    """
+    points = None
+    elements = None
+    normals = None
+    if geom.type() == 'TriangleMesh':
+        tm = geom.getTriangleMesh()
+        verts = tm.getVertices()
+        tris = tm.getIndices()
+        if num_samples is None:
+            points = verts
+            if want_elements:
+                vindices = [-1] * len(verts)
+                for i,t in enumerate(tris):
+                    for j in t:
+                        vindices[j] = i
+                elements = vindices
+            if want_normals:
+                normals = vertex_normals(geom)
+        else:
+            #need to sample the surface
+            dba = verts[tris[:,1]]-verts[tris[:,0]]
+            dca = verts[tris[:,2]]-verts[tris[:,0]]
+            trinormals = np.cross(dba,dca)
+            norms = np.linalg.norm(trinormals,axis=1)
+            sample = np.random.choice(len(tris),num_samples,p=norms/np.sum(norms))
+            uv = np.random.rand(num_samples,2)
+            points = []
+            normals = []
+            for i,elem in enumerate(sample):
+                a,b,c = tris[elem]
+                va = verts[a]
+                vb = verts[b]
+                vc = verts[c]
+                u,v = uv[i]
+                if u+v > 1:
+                    v2 = (1-u)
+                    u2 = (1-v)
+                    u,v = u2,v2
+                pt = va*(1-u-v) + vb*u + vc*v
+                n = trinormals[elem]/norms[elem]
+                points.append(pt)
+                normals.append(n)
+            elements = sample
+    elif geom.type() == 'PointCloud':
+        allPoints = geom.getPointCloud().getPoints()
+        if num_samples is None:
+            points = allPoints
+            if want_elements:
+                elements = list(range(len(allPoints)))
+            if want_normals:
+                normals = point_cloud_normals(geom)
+        else:
+            sample = np.random.choice(len(allPoints),num_samples)
+            points = [allPoints[i] for i in sample]
+            elements = sample
+            if want_normals:
+                allNormals = point_cloud_normals(geom,sample)
+                normals = [allNormals[i] for i in sample]
+    elif geom.type() in ['VolumeGrid','ConvexHull']:
+        return sample_surface(geom.convert('TriangleMesh'),num_samples,local,want_elements,want_normals)
+    elif geom.type() == 'GeometricPrimitive':
+        prim = geom.getGeometricPrimitive()
+        if prim.type() == 'Sphere':
+            c = prim.properties[0],prim.properties[1],prim.properties[2]
+            r = prim.properties[3]
+            if num_samples is None:
+                raise ValueError("Cannot sample a sphere without providing a number of samples")
+            points = []
+            pts = np.random.normal(size=(num_samples,3))
+            pts /= np.linalg.norm(pts,axis=1)[:,np.newaxis]
+            normals = pts
+            points = pts * r + c
+        else:
+            return sample_surface(geom.convert('TriangleMesh'),num_samples,local,want_elements,want_normals)
+        if want_elements:
+            elements = [-1]*len(points)
+    else:
+        raise ValueError("Unable to sample surface of geometry type "+geom.type())
+    if not local:
+        R,t = geom.getCurrentTransform()
+        points = np.asarray(points).dot(so3.ndarray(R).T) + np.asarray(t)
+        if want_normals:
+            normals = np.asarray(normals).dot(so3.ndarray(R).T)
+    items = [points]
+    if want_elements:
+        items.append(np.asarray(elements)[:,np.newaxis])
+    if want_normals:
+        items.append(normals)
+    if len(items)==1:
+        return items[0]
+    return np.hstack(items)
+        

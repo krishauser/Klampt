@@ -18,7 +18,7 @@ class DriverEdit : public QDialog
     
 public:
     explicit DriverEdit(WorldModel* _world,Simulator* _sim=NULL,QWidget *parent=0);
-    ~DriverEdit();
+    virtual ~DriverEdit();
 
     void SetRobot(RobotModel *robot_);
     void SetDriver(int _driver);

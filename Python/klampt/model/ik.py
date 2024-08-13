@@ -65,7 +65,7 @@ klampt.robotsim.IKSolver)
 """
 
 from ..robotsim import *
-from ..math import so3,se3
+from ..math import so3,se3,vectorops
 from .subrobot import SubRobotModel
 from typing import Union,Optional,List,Sequence,Callable
 from .typing import IntArray,Vector,Vector3,Rotation,RigidTransform
@@ -85,11 +85,14 @@ def objective(
     1. If `local` and `world` are provided, then this objective asks to match 
        the local point (s) on the body to the world point(s).
     2. If `R` and `t` are provided, then the objective is set to specify the
-       transform of the body.
+       transform of the body.  (In this mode,` local` can be set to a 3-vector
+       to match the point on the body to the world point `t` rather than the
+       origin).
 
-    If `ref` is given, then this is the target frame; otherwise it's the world
-    frame.  In mode 1, the world points are bound to this frame; in mode 2,
-    the transformation from body to ref is specified as (R,t).
+    If `ref` is None, the target frame is the world frame, otherwise, it
+    specifies a target frame bound to a movable object.  In mode 1, the world
+    points are bound to this frame; in mode 2, the transformation from body to
+    ref is specified as (R,t).
 
     Args:
         body (RobotModelLink or RigidObjectModel): the link that should be
@@ -105,7 +108,7 @@ def objective(
         R (so3 element; list of 9 floats, optional): the rotation that the
             link should take on.
         t (3-vector, optional): the translation that the link's origin
-        should take on.
+            should take on.
 
     Returns:
         An IK objective describing the constraint.
@@ -163,6 +166,11 @@ def objective(
                 else:
                     obj.setFixedPoint(body.index,local,world)
         elif (R is not None) and (t is not None):
+            if local is not None:
+                if len(local) != 3 or hasattr(local[0],'__iter__'):
+                    raise ValueError("If local is provided with R,t arguments, it must be a 3-vector")
+                #it's a local reference point
+                t = vectorops.sub(t,so3.apply(R,local))
             if ref:
                 obj.setRelativeTransform(body.index,ref.index,R,t)
             else:
@@ -186,12 +194,11 @@ def fixed_objective(
     - If local and world are not provided, the entire link is
       constrained. 
 
-    - If only local is provided, these points are fixed
-      to their current positions in space.  
+    - If only local is provided, these points are fixed to their current
+      positions in space.  
 
-    - If only world is provided,
-      the points on the link with the given world position are constrained in
-      place.
+    - If only world is provided, the points on the link with the given world
+      position are constrained in place.
 
     Args:
         link (RobotModelLink): the link that should be constrained.

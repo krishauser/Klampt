@@ -14,7 +14,7 @@ Time: 10-30 minutes
 
 # Prebuilt Python libraries
 
-For Mac OSX (Mavericks) 10.9 and above, and Python 2.7, 3.5, 3.6 and 3.7, you should be able to simply run
+For Mac OSX (Mavericks) 10.9 and above, and Python 2.7, or 3.5-3.12, you should be able to simply run
 
 - `pip install klampt`
 
