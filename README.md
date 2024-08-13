@@ -93,9 +93,13 @@ is available on GitQ: [https://gitq.com/krishauser/Klampt](https://gitq.com/kris
 
 ## Version history
 
-**master** (5/9/2024)
-Note: If you have a `pip` installed Klampt, you may get these updates by cloning the Git repo, then run `cd Klampt/Python; python patch_a_pip_install.py`. This provides all of the Python API updates listed below without needing to build from source.
+**master** (8/13/2024)
 
+Note: If you have a `pip` installed Klampt at version `0.9.2`, you may get the latest updates by cloning the Git repo, then run `cd Klampt/Python; python patch_a_pip_install.py`. This provides all of the Python API updates listed below without needing to build from source.
+
+**0.9.2** (8/13/2024)
+
+-   Python API: pip packages now built with Numpy 2+.
 -   Python API: Improved calibration routines in `klampt.model.calibrate`.
 -   Python API: Added surface sampling and vertex normals to `klampt.model.geometry`.
 -   Python API: Added visibility fraction determination to `klampt.model.sensing`.
