@@ -21,14 +21,14 @@ jobs:
         os: [macos-13]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup tmate session
         if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3
 
       # Used in `make_deps_macos.sh` in line `pip install cmake` and `check_mac_universal.py`
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
 
       - name: Build dependencies
         run: bash make_deps_macos.sh

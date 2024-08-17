@@ -3,7 +3,7 @@ set -e  #error if any step fails
 brew uninstall --ignore-dependencies pkg-config
 pip install cmake
 
-ARCHFLAGS="-arch x86_64 -arch arm64 -isysroot $(xcrun --sdk macosx --show-sdk-path) -mmacosx-version-min=10.9 -DGL_SILENCE_DEPRECATION"
+ARCHFLAGS="-arch x86_64 -arch arm64 -isysroot $(xcrun --sdk macosx --show-sdk-path) -mmacosx-version-min=10.9"
 
 pushd ../Cpp/Dependencies
 make unpack-deps
@@ -38,7 +38,7 @@ popd
 
 pushd ..
 cmake . -DUSE_GLUT=OFF -DUSE_GLUI=OFF -DUSE_GLEW=OFF -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
-make -j Klampt
+make -j Klampt -DGL_SILENCE_DEPRECATION
 echo "Building Pack..."
 make -j Pack
 echo "Testing Pack..."
