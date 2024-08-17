@@ -18,7 +18,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-11]
+        os: [macos-13]
 
     steps:
       - uses: actions/checkout@v3
@@ -33,7 +33,7 @@ jobs:
       - name: Build dependencies
         run: bash make_deps_macos.sh
         env:
-          MACOSX_DEPLOYMENT_TARGET: 11.0
+          MACOSX_DEPLOYMENT_TARGET: 13.0
           LDFLAGS: -framework OpenGL
       
       - name: Check universal build
@@ -46,7 +46,7 @@ jobs:
           output-dir: wheelhouse
           config-file: "{package}/pyproject.toml"
         env:
-          MACOSX_DEPLOYMENT_TARGET: 11.0
+          MACOSX_DEPLOYMENT_TARGET: 13.0
           CIBW_ARCHS_MACOS: universal2
           LDFLAGS: -framework OpenGL
 
