@@ -39,6 +39,8 @@ popd
 pushd ..
 cmake . -DUSE_GLUT=OFF -DUSE_GLUI=OFF -DUSE_GLEW=OFF -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
 make -j Klampt
+echo "Building Pack..."
 make -j Pack
+echo "Testing Pack..."
 bin/Pack
 popd
