@@ -3,7 +3,7 @@ set -e  #error if any step fails
 brew uninstall --ignore-dependencies pkg-config
 pip install cmake
 
-ARCHFLAGS="-arch x86_64 -arch arm64 -isysroot $(xcrun --sdk macosx --show-sdk-path) -mmacosx-version-min=10.9 "
+ARCHFLAGS="-arch x86_64 -arch arm64 -isysroot $(xcrun --sdk macosx --show-sdk-path) -mmacosx-version-min=10.9 -DGL_SILENCE_DEPRECATION"
 
 pushd ../Cpp/Dependencies
 make unpack-deps
