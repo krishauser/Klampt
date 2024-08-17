@@ -93,10 +93,11 @@ all: ${OUTPUT}
 # Source files
 #****************************************************************************
 
-SRCS := tinyxml.cpp tinyxmlparser.cpp xmltest.cpp tinyxmlerror.cpp tinystr.cpp
+LIBSRCS := tinyxml.cpp tinyxmlparser.cpp tinyxmlerror.cpp tinystr.cpp
 
-# Add on the sources for libraries
-SRCS := ${SRCS}
+SRCS := $(LIBSRCS) xmltest.cpp 
+
+LIBOBJS := $(addsuffix .o,$(basename ${LIBSRCS}))
 
 OBJS := $(addsuffix .o,$(basename ${SRCS}))
 
@@ -127,8 +128,8 @@ clean:
 depend:
 	#makedepend ${INCS} ${SRCS}
 
-lib: ${OBJS}
-	${AR} libtinyxml.a ${OBJS}
+lib: ${LIBOBJS}
+	${AR} libtinyxml.a ${LIBOBJS}
 	${RANLIB} libtinyxml.a
 
 tinyxml.o: tinyxml.h tinystr.h
