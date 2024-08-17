@@ -1970,7 +1970,7 @@ bool ParabolicRampND::SolveMinTimeLinear(const Vector& amax,const Vector& vmax)
     if(vmax[i]==0 || amax[i]==0) {
       if(!FuzzyEquals(x0[i],x1[i],CheckEpsilonX)) {
 	if(gVerbose >= 1) {
-	  PARABOLIC_RAMP_PERROR("index %d vmax = %g, amax = %g, X0 != X1 (%g != %g)\n",i,vmax[i],amax[i],x0[i],x1[i]);
+	  PARABOLIC_RAMP_PERROR("index %d vmax = %g, amax = %g, X0 != X1 (%g != %g)\n",(int)i,vmax[i],amax[i],x0[i],x1[i]);
 	  abort();
 	}
 	return false;
@@ -2077,14 +2077,14 @@ bool ParabolicRampND::SolveMinTime(const Vector& amax,const Vector& vmax)
     if(vmax[i]==0 || amax[i]==0) {
       if(!FuzzyEquals(x0[i],x1[i],CheckEpsilonX)) {
 	if(gVerbose >= 1) {
-	  PARABOLIC_RAMP_PERROR("index %d vmax = %g, amax = %g, X0 != X1 (%g != %g)\n",i,vmax[i],amax[i],x0[i],x1[i]);
+	  PARABOLIC_RAMP_PERROR("index %d vmax = %g, amax = %g, X0 != X1 (%g != %g)\n",(int)i,vmax[i],amax[i],x0[i],x1[i]);
 	  abort();
 	}
 	return false;
       }
       if(!FuzzyEquals(dx0[i],dx1[i],CheckEpsilonV)) {
 	if(gVerbose >= 1) {
-	  PARABOLIC_RAMP_PERROR("index %d vmax = %g, amax = %g, DX0 != DX1 (%g != %g)\n",i,vmax[i],amax[i],dx0[i],dx1[i]);
+	  PARABOLIC_RAMP_PERROR("index %d vmax = %g, amax = %g, DX0 != DX1 (%g != %g)\n",(int)i,vmax[i],amax[i],dx0[i],dx1[i]);
 	  abort();
 	}
 	return false;
@@ -2205,14 +2205,14 @@ bool ParabolicRampND::SolveMinAccelLinear(const Vector& vmax,Real time)
     if(vmax[i]==0) {
       if(!FuzzyEquals(x0[i],x1[i],CheckEpsilonX)) {
 	if(gVerbose >= 1) {
-	  PARABOLIC_RAMP_PERROR("index %d vmax = %g, X0 != X1 (%g != %g)\n",i,vmax[i],x0[i],x1[i]);
+	  PARABOLIC_RAMP_PERROR("index %d vmax = %g, X0 != X1 (%g != %g)\n",(int)i,vmax[i],x0[i],x1[i]);
 	  abort();
 	}
 	return false;
       }
       if(!FuzzyEquals(dx0[i],dx1[i],CheckEpsilonV)) {
 	if(gVerbose >= 1) {
-	  PARABOLIC_RAMP_PERROR("index %d vmax = %g, DX0 != DX1 (%g != %g)\n",i,vmax[i],dx0[i],dx1[i]);
+	  PARABOLIC_RAMP_PERROR("index %d vmax = %g, DX0 != DX1 (%g != %g)\n",(int)i,vmax[i],dx0[i],dx1[i]);
 	  abort();
 	}
 	return false;
@@ -2440,23 +2440,23 @@ bool ParabolicRampND::IsValid() const
       return false;
     }
     if(!FuzzyEquals(ramps[i].ttotal,endTime,CheckEpsilonT)) {
-      if(gVerbose >= 1) PARABOLIC_RAMP_PERROR("ParabolicRampND::IsValid(): element %d has different end time %g != %g\n",i,ramps[i].ttotal,endTime);
+      if(gVerbose >= 1) PARABOLIC_RAMP_PERROR("ParabolicRampND::IsValid(): element %d has different end time %g != %g\n",(int)i,ramps[i].ttotal,endTime);
       return false;
     }
     if(!FuzzyEquals(ramps[i].x0,x0[i],CheckEpsilonX)) {
-      if(gVerbose >= 1) PARABOLIC_RAMP_PERROR("ParabolicRampND::IsValid(): element %d has different x0 %g != %g\n",i,ramps[i].x0,x0[i]);
+      if(gVerbose >= 1) PARABOLIC_RAMP_PERROR("ParabolicRampND::IsValid(): element %d has different x0 %g != %g\n",(int)i,ramps[i].x0,x0[i]);
       return false;
     }
     if(!FuzzyEquals(ramps[i].x1,x1[i],CheckEpsilonX)) {
-      if(gVerbose >= 1) PARABOLIC_RAMP_PERROR("ParabolicRampND::IsValid(): element %d has different x1 %g != %g\n",i,ramps[i].x1,x1[i]);
+      if(gVerbose >= 1) PARABOLIC_RAMP_PERROR("ParabolicRampND::IsValid(): element %d has different x1 %g != %g\n",(int)i,ramps[i].x1,x1[i]);
       return false;
     }
     if(!FuzzyEquals(ramps[i].dx0,dx0[i],CheckEpsilonV)) {
-      if(gVerbose >= 1) PARABOLIC_RAMP_PERROR("ParabolicRampND::IsValid(): element %d has different dx0 %g != %g\n",i,ramps[i].dx0,dx0[i]);
+      if(gVerbose >= 1) PARABOLIC_RAMP_PERROR("ParabolicRampND::IsValid(): element %d has different dx0 %g != %g\n",(int)i,ramps[i].dx0,dx0[i]);
       return false;
     }
     if(!FuzzyEquals(ramps[i].dx1,dx1[i],CheckEpsilonV)) {
-      if(gVerbose >= 1) PARABOLIC_RAMP_PERROR("ParabolicRampND::IsValid(): element %d has different dx1 %g != %g\n",i,ramps[i].dx1,dx1[i]);
+      if(gVerbose >= 1) PARABOLIC_RAMP_PERROR("ParabolicRampND::IsValid(): element %d has different dx1 %g != %g\n",(int)i,ramps[i].dx1,dx1[i]);
       return false;
     }
   }
@@ -2716,7 +2716,7 @@ bool SolveMinAccelBounded(Real x0,Real v0,Real x1,Real v1,Real endTime,Real vmax
 	if(gVerbose >= 1) 
 	  PARABOLIC_RAMP_PERROR("SolveMinAccelBounded: Warning, path exceeds bounds?\n");
 	if(gVerbose >= 2) 
-	  PARABOLIC_RAMP_PERROR("  ramp[%d] bounds %g %g, limits %g %g\n",i,bmin,bmax,xmin,xmax);
+	  PARABOLIC_RAMP_PERROR("  ramp[%d] bounds %g %g, limits %g %g\n",(int)i,bmin,bmax,xmin,xmax);
 	if(gErrorGetchar) DoGetchar();
 	return false;
       }
@@ -2762,11 +2762,11 @@ Real SolveMinTimeBounded(const Vector& x0,const Vector& v0,const Vector& x1,cons
   PARABOLIC_RAMP_ASSERT(x0.size() == vmax.size());
   for(size_t i=0;i<x0.size();i++) {
     if(x0[i] < xmin[i] || x0[i] > xmax[i]) {
-      printf("Warning, start component %d=%g out of range [%g,%g]\n",i,x0[i],xmin[i],xmax[i]);
+      printf("Warning, start component %d=%g out of range [%g,%g]\n",(int)i,x0[i],xmin[i],xmax[i]);
       return -1;
     }
     if(x1[i] < xmin[i] || x1[i] > xmax[i]) {
-      printf("Warning, goal component %d=%g out of range [%g,%g]\n",i,x1[i],xmin[i],xmax[i]);
+      printf("Warning, goal component %d=%g out of range [%g,%g]\n",(int)i,x1[i],xmin[i],xmax[i]);
       return -1;
     }
     PARABOLIC_RAMP_ASSERT(x0[i] >= xmin[i] && x0[i] <= xmax[i]);
@@ -2785,14 +2785,14 @@ Real SolveMinTimeBounded(const Vector& x0,const Vector& v0,const Vector& x1,cons
     if(vmax[i]==0 || amax[i]==0) {
       if(!FuzzyEquals(x0[i],x1[i],CheckEpsilonX)) {
 	if(gVerbose >= 1) {
-	  PARABOLIC_RAMP_PERROR("index %d vmax = %g, amax = %g, X0 != X1 (%g != %g)\n",i,vmax[i],amax[i],x0[i],x1[i]);
+	  PARABOLIC_RAMP_PERROR("index %d vmax = %g, amax = %g, X0 != X1 (%g != %g)\n",(int)i,vmax[i],amax[i],x0[i],x1[i]);
 	  abort();
 	}
 	return -1;
       }
       if(!FuzzyEquals(v0[i],v1[i],CheckEpsilonV)) {
 	if(gVerbose >= 1) {
-	  PARABOLIC_RAMP_PERROR("index %d vmax = %g, amax = %g, DX0 != DX1 (%g != %g)\n",i,vmax[i],amax[i],v0[i],v1[i]);
+	  PARABOLIC_RAMP_PERROR("index %d vmax = %g, amax = %g, DX0 != DX1 (%g != %g)\n",(int)i,vmax[i],amax[i],v0[i],v1[i]);
 	  abort();
 	}
 	return -1;
@@ -2803,14 +2803,14 @@ Real SolveMinTimeBounded(const Vector& x0,const Vector& v0,const Vector& x1,cons
     }
     if(!ramps[i][0].SolveMinTime(amax[i],vmax[i])) {
       if(gVerbose >= 1) 
-	PARABOLIC_RAMP_PERROR("Ramp index %d failed: vmax = %g, amax = %g, (%g,%g) -> (%g,%g)\n",i,vmax[i],amax[i],x0[i],v0[i],x1[i],v1[i]);
+	PARABOLIC_RAMP_PERROR("Ramp index %d failed: vmax = %g, amax = %g, (%g,%g) -> (%g,%g)\n",(int)i,vmax[i],amax[i],x0[i],v0[i],x1[i],v1[i]);
       return -1;
     }
     Real bmin,bmax;
     ramps[i][0].Bounds(bmin,bmax);
     if(bmin < xmin[i] || bmax > xmax[i]) {
       if(gVerbose >= 1) 
-	PARABOLIC_RAMP_PERROR("Ramp %d exceeds bounds: [%g,%g] not in [%g,%g]\n",i,bmin,bmax,xmin[i],xmax[i]);  
+	PARABOLIC_RAMP_PERROR("Ramp %d exceeds bounds: [%g,%g] not in [%g,%g]\n",(int)i,bmin,bmax,xmin[i],xmax[i]);  
       return -1;
     }
     if(ramps[i][0].ttotal > endTime) endTime = ramps[i][0].ttotal;
@@ -2882,7 +2882,7 @@ Real SolveMinTimeBounded(const Vector& x0,const Vector& v0,const Vector& x1,cons
 	ramps[i][0].Bounds(bmin,bmax);
 	if(bmin < xmin[i] || bmax > xmax[i]) {
 	  //printf("Couldn't solve min-time with lower bound while staying in bounds\n");
-	  if(gVerbose >= 1) PARABOLIC_RAMP_PERROR("Braking path %d exceeds bounds: [%g,%g] not in [%g,%g]\n",i,bmin,bmax,xmin[i],xmax[i]);  
+	  if(gVerbose >= 1) PARABOLIC_RAMP_PERROR("Braking path %d exceeds bounds: [%g,%g] not in [%g,%g]\n",(int)i,bmin,bmax,xmin[i],xmax[i]);  
 	  //DoGetchar();
 	  return -1;
 	}
@@ -2935,7 +2935,7 @@ bool SolveMinAccelBounded(const Vector& x0,const Vector& v0,const Vector& x1,con
     //now solve minimum acceleration within bounds
     if(!SolveMinAccelBounded(x0[i],v0[i],x1[i],v1[i],endTime,vmax[i],xmin[i],xmax[i],ramps[i])) {
       if(gVerbose >= 1) 
-	PARABOLIC_RAMP_PERROR("Failed solving bounded min accel for joint %d\n",i);
+	PARABOLIC_RAMP_PERROR("Failed solving bounded min accel for joint %d\n",(int)i);
       return false;
     }
   }
@@ -3092,19 +3092,19 @@ void CombineRamps(const std::vector<std::vector<ParabolicRamp1D> >& ramps,std::v
   }
   for(size_t i=0;i<ramps.size();i++) {
     if(!FuzzyEquals(ramps[i].front().x0,ndramps.front().x0[i],CheckEpsilonX)) {
-      PARABOLIC_RAMP_PERROR("CombineRamps: Error: %d start %g != %g\n",i,ramps[i].front().x0,ndramps.front().x0[i]);
+      PARABOLIC_RAMP_PERROR("CombineRamps: Error: %d start %g != %g\n",(int)i,ramps[i].front().x0,ndramps.front().x0[i]);
       if(gErrorGetchar) DoGetchar();
     }
     if(!FuzzyEquals(ramps[i].front().dx0,ndramps.front().dx0[i],CheckEpsilonV)) {
-      PARABOLIC_RAMP_PERROR("CombineRamps: Error: %d start %g != %g\n",i,ramps[i].front().dx0,ndramps.front().dx0[i]);
+      PARABOLIC_RAMP_PERROR("CombineRamps: Error: %d start %g != %g\n",(int)i,ramps[i].front().dx0,ndramps.front().dx0[i]);
       if(gErrorGetchar) DoGetchar();
     }
     if(!FuzzyEquals(ramps[i].back().x1,ndramps.back().x1[i],CheckEpsilonX)) {
-      PARABOLIC_RAMP_PERROR("CombineRamps: Error: %d back %g != %g\n",i,ramps[i].back().x1,ndramps.back().x1[i]);
+      PARABOLIC_RAMP_PERROR("CombineRamps: Error: %d back %g != %g\n",(int)i,ramps[i].back().x1,ndramps.back().x1[i]);
       if(gErrorGetchar) DoGetchar();
     }
     if(!FuzzyEquals(ramps[i].back().dx1,ndramps.back().dx1[i],CheckEpsilonV)) {
-      PARABOLIC_RAMP_PERROR("CombineRamps: Error: %d back %g != %g\n",i,ramps[i].back().dx1,ndramps.back().dx1[i]);
+      PARABOLIC_RAMP_PERROR("CombineRamps: Error: %d back %g != %g\n",(int)i,ramps[i].back().dx1,ndramps.back().dx1[i]);
       if(gErrorGetchar) DoGetchar();
     }
     ndramps.front().x0[i] = ndramps.front().ramps[i].x0 = ramps[i].front().x0;
